@@ -10,7 +10,7 @@
     nvidiaPersistenced = true;
     open = false; # Use proprietary drivers for better Wayland compatibility
     nvidiaSettings = false;
-    package = config.boot.kernelPackages.nvidiaPackages.stable; # Use stable instead of beta
+    package = config.boot.kernelPackages.nvidiaPackages.beta; # Use beta for cutting edge support
   };
 
   hardware.nvidia.prime = {
@@ -58,11 +58,18 @@
     kernelParams = [
       "nvidia-drm.modeset=1" # Required for Wayland
       "nvidia.NVreg_PreserveVideoMemoryAllocations=1" # Helps with suspend/resume
+      "nvidia.NVreg_TemporaryFilePath=/tmp" # Fix for temp file issues
     ];
 
     # Early load NVIDIA modules
     initrd.kernelModules = ["nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm"];
   };
+
+  # Create proper device nodes for NVIDIA
+  services.udev.extraRules = ''
+    KERNEL=="nvidia_uvm", GROUP="video", MODE="0664"
+    KERNEL=="nvidia*", GROUP="video", MODE="0664"
+  '';
 
   # Remove global Firefox/Chromium configs to avoid conflicts
   # These will be handled in individual user configurations

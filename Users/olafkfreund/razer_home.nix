@@ -111,13 +111,12 @@ in {
     theme = lib.removePrefix "gruvbox-" vars.theme.scheme;
   };
 
-  # Chrome with NVIDIA proprietary driver support for Razer host
-  programs.chromium.commandLineArgs = lib.mkForce [
-    "--enable-features=UseOzonePlatform,VaapiVideoDecoder"
-    "--ozone-platform=wayland"
-    "--ignore-gpu-blocklist"
-    "--enable-gpu-rasterization"
-    "--enable-zero-copy"
-    "--disable-gpu-driver-bug-workarounds"
-  ];
+  # Chrome with GPU completely disabled for stability
+  programs.chromium = {
+    commandLineArgs = lib.mkForce [
+      "--enable-features=UseOzonePlatform"
+      "--ozone-platform=wayland"
+      "--disable-gpu"
+    ];
+  };
 }
