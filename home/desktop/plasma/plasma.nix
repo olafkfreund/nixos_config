@@ -1,0 +1,51 @@
+{ pkgs, ... }: {
+
+home.packages = with pkgs; [
+  kde-gruvbox
+  catppuccin-kde
+  kde-rounded-corners
+  libsForQt5.kdecoration
+  libsForQt5.kdeconnect-kde
+  libsForQt5.bismuth
+  libsForQt5.xdg-desktop-portal-kde
+  libsForQt5.gwenview
+  libsForQt5.dolphin-plugins
+  libsForQt5.ffmpegthumbs
+  libsForQt5.kdegraphics-thumbnailers
+  libsForQt5.kio
+  libsForQt5.kio-extras
+  libsForQt5.qtwayland
+  libsForQt5.krfb
+  libsForQt5.qtstyleplugins
+  libsForQt5.discover
+  libsForQt5.qmltermwidget
+	plasma-theme-switcher
+	utterly-round-plasma-style
+	utterly-nord-plasma
+	nordic
+  libreoffice-qt
+  pywal
+  wpgtk
+  latte-dock
+  polychromatic
+  ungoogled-chromium
+  onedrive
+  onedrivegui
+  quaternion
+  qt6.qtmultimedia
+  libsForQt5.qt5.qtmultimedia
+  libsForQt5.qt5.qtgraphicaleffects
+  qt6.qtquick3d
+  qt6.qtquicktimeline
+  libsForQt5.qt5.qtquickcontrols
+  qt6.qtquick3dphysics
+  libsForQt5.qt5.qtquickcontrols2
+  qt6.qtquickeffectmaker
+  libsForQt5.sddm-kcm
+  libsForQt5.phonon-backend-gstreamer
+  libsForQt5.kaccounts-integration
+  libsForQt5.kaccounts-providers
+  libsForQt5.packagekit-qt
+  libportal-qt5
+  ];
+}
