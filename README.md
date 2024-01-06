@@ -2,6 +2,10 @@
 My private nixos_config
 Screensthot:
 ![Alt text](./doc/image.png)
+![Alt text](./doc/image2.png)
+![Alt text](./doc/image3.png)
+![Alt text](./doc/image4.png)
+![Alt text](./doc/image5.png)
 
 Step 1:
 Install basic git
