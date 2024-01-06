@@ -1,0 +1,8 @@
+[General]
+ColorScheme=GruvboxColors
+
+[Icons]
+Theme=Gruvbox
+
+[KDE]
+widgetStyle=Breeze
