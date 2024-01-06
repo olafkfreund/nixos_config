@@ -62,5 +62,6 @@ home.packages = with pkgs; [
   zellij
   hollywood
   pass
+  navi
   ];
 }

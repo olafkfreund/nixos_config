@@ -1,5 +1,5 @@
 {
-  description = "Olaf's flake for work-lx with Home Manager enabled";
+  description = "Flake with  Home Manager enabled";
 
   nixConfig = {
     experimental-features = [ "nix-command" "flakes" ];
@@ -34,13 +34,9 @@
 
 
   outputs = inputs@{
-    self, nixpkgs, nixpkgs-stable, nixpkgs-f2k, alacritty-theme, nur, hyprland, spicetify-nix, stylix, home-manager, ... }: 
-  let username = "olafkfreund";
-      machine = "razer";
-  in
-    {
+    self, nixpkgs, nixpkgs-stable, nixpkgs-f2k, alacritty-theme, nur, hyprland, spicetify-nix, stylix, home-manager, ... }: {
     nixosConfigurations = {
-      "${machine}" = nixpkgs.lib.nixosSystem {
+      work-lx = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {
           inherit inputs;
@@ -65,7 +61,36 @@
               inherit nixpkgs-f2k;
               inherit alacritty-theme;
             };        
-            home-manager.users."${username}" = import ./home.nix;
+            home-manager.users.olafkfreund = import ./Users/olafkfreund/home.nix;
+          }
+        ];
+      };
+      razer = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {
+          inherit inputs;
+          inherit (inputs) stylix;
+          };
+        modules = [
+          ./configuration.nix
+          nur.nixosModules.nur
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = {
+              inherit inputs;
+              inherit nixpkgs;
+              inherit spicetify-nix;
+              inherit hyprland;
+              inherit home-manager;
+              inherit nixpkgs-stable;
+              inherit self;
+              inherit stylix;
+              inherit nixpkgs-f2k;
+              inherit alacritty-theme;
+            };        
+            home-manager.users.olafkfreund = import ./Users/olafkfreund/home.nix;
           }
         ];
       };
