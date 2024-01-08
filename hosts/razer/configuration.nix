@@ -17,8 +17,7 @@
 
 		# Main HW
     # ---------------------------------------------
-			../../core/gpu/nvidia/nvidia.nix
-    	../../core/openGL/default.nix
+			./nvidia.nix
 
 		# VIRT
     # ---------------------------------------------

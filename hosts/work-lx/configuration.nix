@@ -16,8 +16,7 @@
 			../../core/laptop-related/autorandr.nix
 		# Main HW
     # ---------------------------------------------
-			../../core/gpu/nvidia/nvidia.nix
-    	../../core/openGL/default.nix
+			./nvidia.nix
 		# VIRT
     # ---------------------------------------------
 			../../core/virt/virt.nix
@@ -38,23 +37,6 @@
 			"networkmanager" 
 			"wheel" 
 			"docker"
-			"adbusers"
-			"audio"
-			"corectrl"
-			"disk"
-			"input"
-			"lp"
-			"mongodb"
-			"mysql"
-			"network"
-			"networkmanager"
-			"postgres"
-			"power"
-			"scanner"
-			"sound"
-			"systemd-journal"
-			"users"
-			"video"
 	  ];
 		packages = with pkgs; [
 			kate

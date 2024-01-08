@@ -48,7 +48,6 @@ environment = {
       virtualglLib
       vulkan-loader
       vulkan-tools
-      pciutils
     ];
   }; 
 }
