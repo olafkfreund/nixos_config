@@ -1,6 +1,7 @@
 { pkgs, ... }: {
 
 home.packages = with pkgs; [
+  rnix-lsp
   #vscode-fhs
   #vscode-extension-github-copilot
   #vscode-extension-github-copilot-chat

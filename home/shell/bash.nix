@@ -16,8 +16,8 @@ programs.bash = {
   # TODO add your cusotm bashrc here
   bashrcExtra = ''
    	export PATH="$PATH:$HOME/bin:$HOME/.local/bin:$HOME/go/bin"
-    export OPENAI_API_KEY=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
-    export OPENAI_KEY=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
+    export OPENAI_API_KEY=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
+    export OPENAI_KEY=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
     export PATH="$PATH:/home/olafkfreund/.spicetify"
     export PATH="$PATH:/home/olafkfreund/.cargo/bin"
     export PATH="$PATH:/home/olafkfreund/go/bin"
