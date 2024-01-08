@@ -62,7 +62,7 @@
               inherit nixpkgs-f2k;
               inherit alacritty-theme;
             };        
-            home-manager.users.olafkfreund = import ./Users/olafkfreund/home.nix;
+            home-manager.users.olafkfreund = import ./Users/olafkfreund/razer_home.nix;
           }
         ];
       };
@@ -91,7 +91,7 @@
               inherit nixpkgs-f2k;
               inherit alacritty-theme;
             };        
-            home-manager.users.olafkfreund = import ./Users/olafkfreund/home.nix;
+            home-manager.users.olafkfreund = import ./Users/olafkfreund/work-lx_home.nix;
           }
         ];
       };

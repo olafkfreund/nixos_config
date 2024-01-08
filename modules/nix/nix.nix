@@ -19,9 +19,7 @@ nix = {
   '';
 };
 
-nix = {
-  trustedUsers = [ "root" "olafkfreund" ];
-};
+nix.settings.trusted-users = [ "root" "olafkfreund" ];
 
 # Allow unfree packages
 nixpkgs.config.allowUnfree = true;
