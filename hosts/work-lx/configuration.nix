@@ -59,10 +59,6 @@
     sqlite
     z3
   ];
-  programs.git = {
-  enable = true;
-  userName = "Olaf K-Freund";
-  userEmail = "olaf.lokekn@gmail.com";
   };
   security.sudo.wheelNeedsPassword = false;
   networking.firewall.enable = false;
