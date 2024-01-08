@@ -1,0 +1,44 @@
+{ pkgs, config, ... }: {
+
+home.packages = with pkgs; [
+  hyprland-protocols
+  xdg-desktop-portal-hyprland
+  hyprshot
+  rofi-wayland
+  rofi-vpn
+  rofi-emoji
+  rofi-bluetooth
+  rofi-screenshot
+  rofi-pulse-select
+  libsForQt5.plasma-wayland-protocols
+  libsForQt5.qt5.qtquickcontrols
+  libsForQt5.qt5.qtquickcontrols2
+  libsForQt5.qt5.qtgraphicaleffects
+  swww
+  swaylock-effects
+  wlogout
+  grimblast
+  slurp
+  swappy
+  cliphist
+  libsForQt5.polkit-kde-agent
+  xdg-desktop-portal-hyprland
+  parallel
+  imagemagick
+  libsForQt5.qt5.qtimageformats
+  qt6.qtimageformats
+  libsForQt5.ffmpegthumbs
+  libsForQt5.kde-cli-tools
+  brightnessctl
+  pavucontrol
+  pamixer
+  nwg-look
+  libsForQt5.qtstyleplugin-kvantum
+  themechanger
+  libsForQt5.qt5ct
+  libsForQt5.ark
+  pokemonsay
+  krabby
+  zsh-powerlevel10k
+  ];
+}

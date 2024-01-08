@@ -45,7 +45,7 @@ in
     
     # KDE config
     # ---------------------------------------------
-    ./modules/services/xserver/default.nix
+    ./modules/services/xserver/xserver.nix
     
   ];
 

@@ -1,5 +1,5 @@
 {
-  description = "Flake with  Home Manager enabled";
+  description = "Olaf's flake for work-lx with Home Manager enabled";
 
   nixConfig = {
     experimental-features = [ "nix-command" "flakes" ];
@@ -34,9 +34,10 @@
 
 
   outputs = inputs@{
-    self, nixpkgs, nixpkgs-stable, nixpkgs-f2k, alacritty-theme, nur, hyprland, spicetify-nix, stylix, home-manager, ... }: {
+    self, nixpkgs, nixpkgs-stable, nixpkgs-f2k, alacritty-theme, nur, hyprland, spicetify-nix, stylix, home-manager, ... }: 
+    {
     nixosConfigurations = {
-      work-lx = nixpkgs.lib.nixosSystem {
+      razer = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {
           inherit inputs;
@@ -65,7 +66,7 @@
           }
         ];
       };
-      razer = nixpkgs.lib.nixosSystem {
+      work-lx = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {
           inherit inputs;
