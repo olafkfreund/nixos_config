@@ -35,7 +35,7 @@ programs.starship = {
         };
 
         hostname = {
-          format = "[$hostname]($style)";
+          format = "[$ssh_symbol](bold blue) on [$hostname]($style)";
           ssh_only = false;
           style = "bold green";
         };
