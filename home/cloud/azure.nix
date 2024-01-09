@@ -7,5 +7,7 @@
     azure-storage-azcopy
     kubelogin
     powershell
+    sqlcmd
+    blobfuse
    ];
 }
