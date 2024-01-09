@@ -1,8 +1,8 @@
 { pkgs, ... }: {
 
 home.packages = with pkgs; [
-  go 
-  gopls 
-  gore
+  lua
+  stylua
+  sumneko-lua-language-server
   ];
 }
