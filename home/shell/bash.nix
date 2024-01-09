@@ -16,8 +16,8 @@ programs.bash = {
   # TODO add your cusotm bashrc here
   bashrcExtra = ''
    	export PATH="$PATH:$HOME/bin:$HOME/.local/bin:$HOME/go/bin"
-    export OPENAI_API_KEY=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
-    export OPENAI_KEY=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
+    # export OPENAI_API_KEY=
+    # export OPENAI_KEY=
     export PATH="$PATH:/home/olafkfreund/.spicetify"
     export PATH="$PATH:/home/olafkfreund/.cargo/bin"
     export PATH="$PATH:/home/olafkfreund/go/bin"
@@ -25,6 +25,7 @@ programs.bash = {
     export PATH="$HOME/.config/rofi/scripts:$PATH"
     export PATH="$HOME/.npm-global/bin:$PATH"
     export TERM=xterm
+    source $HOME/.openai.sh
   '';
 
 # set some aliases, feel free to add more or remove some
