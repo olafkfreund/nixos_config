@@ -9,7 +9,6 @@
     aws-mfa
     aws-vault
     aws-rotate-key
-    bash-my-aws
     terraforming
     aws-iam-authenticator
     eksctl

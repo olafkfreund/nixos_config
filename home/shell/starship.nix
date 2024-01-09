@@ -15,7 +15,7 @@ programs.starship = {
         azure = {
         format = "on [$symbol($subscription)]($style)";
         symbol = "󰠅 ";
-        style = "blue bold"
+        style = "blue bold";
         };
 
         azure.subscription_aliases = {
@@ -24,7 +24,7 @@ programs.starship = {
 
         container = {
           format = "[$symbol \[$name\]]($style) ";
-          symbol = "📦 "
+          symbol = "📦 ";
         };
 
         username = {
@@ -32,7 +32,6 @@ programs.starship = {
           style_root = "black bold";
           format = "user: [$user]($style) ";
           show_always = true;
-          style_user = "bold cyan";
         };
 
         hostname = {
@@ -58,25 +57,19 @@ programs.starship = {
           style = "bold blue";
         };
 
-        character = {
-          error_symbol = "[λ](bold red)";
-          success_symbol = "[λ](bold green)";
-        };
-
         fill = {
           symbol = " ";
           disabled = false;
         };
 
         docker_context = {
-          format = "via [🐋 $context](blue bold)"
+          format = "via [🐋 $context](blue bold)";
         };
 
         git_branch = {
           symbol = "🌱 ";
           truncation_length = "4";
           truncation_symbol = "''";
-          ignore_branches = "['master', 'main']";
         };
 
         git_commit = {
@@ -112,13 +105,6 @@ programs.starship = {
 
         helm = {
           format = "via [⎈ $version](bold white) ";
-        };
-
-        hostname = {
-          ssh_only = false;
-          format = "[$ssh_symbol](bold blue) on [$hostname](bold red) ";
-          trim_at = ".companyname.com";
-          disabled = false;
         };
 
         kubernetes = {
@@ -191,10 +177,8 @@ programs.starship = {
         memory_usage.symbol = "memory ";
         meson.symbol = "meson ";
         nim.symbol = "nim ";
-        nix_shell.symbol = "nix ";
         ocaml.symbol = "ml ";
         opa.symbol = "opa ";
-        aws.symbol = "  ";
         conda.symbol = " ";
         dart.symbol = " ";
         # directory.read_only = " ";
@@ -202,7 +186,6 @@ programs.starship = {
         elixir.symbol = " ";
         elm.symbol = " ";
         gcloud.symbol = " ";
-        git_branch.symbol = " ";
         golang.symbol = " ";
         hg_branch.symbol = " ";
         java.symbol = " ";
@@ -222,6 +205,4 @@ programs.starship = {
         # terraform.symbol = "行";
       };
     };
-};
-
 }
