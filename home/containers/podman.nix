@@ -5,11 +5,12 @@
     podman-tui
     podman-desktop
     podman
+    pods
    ];
   virtualisation = {
     podman = {
     enable = true;
-    #dockerCompat = true;
+    dockerCompat = true;
     defaultNetwork.settings.dns_enabled = true;
     };
   };

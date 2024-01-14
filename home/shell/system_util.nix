@@ -62,5 +62,41 @@ home.packages = with pkgs; [
   zellij
   hollywood
   pass
+  mutt
+  mutt-ics
+  mutt-wizard
+  python311Packages.imaplib2
+  notmuch
+  lieer
+  neomutt
+  goobook
+  urlscan
+  direnv
+  w3m
+  feh
+  libnotify
+  html2text
+  isync
+  msmtp
+  python311Packages.vobject
+  python311Packages.icalendar
+  python311Packages.pytz
+  python311Packages.tzlocal
+  openldap
+  abook
+  gcalcli
+  pandoc
+  davmail
+  dmenu-wayland
+  gnupg
+  sshx
+  browsh
+  peaclock
+  cbonsai
+  asciiquarium-transparent
+  globe-cli
+  pipes-rs
+  spotify-player
+  sptlrx
   ];
 }

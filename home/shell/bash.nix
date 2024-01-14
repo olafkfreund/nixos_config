@@ -36,15 +36,21 @@ programs.bash = {
 	  top = "btm";
 	  vim = "lvim";
 	  ls = "eza --header --git --classify --long --binary --group --time-style=long-iso --links --all --all --group-directories-first --sort=name --icons";
-		cat = "bat --theme=gruvbox-dark";
+		la = "eza --all --icons";
+    cat = "bat --theme=gruvbox-dark";
 	  mdless = "glow";
 	  gita = "git add --all";
 	  gitm = "git commit -m";
 	  gitp = "git push";
 	  gitc = "git checkout";
 	  icat = "kitty +kitten icat";
+    nri = "sudo nixos-rebuild switch --impure";
+    nr = "sudo nixos-rebuild switch";
+    fu = "sudo nix flake update";
+    ow = "zellij --layout .config/zellij/layouts/work.kdl";
+    slack = "slack --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer";
+    # slack = "slack --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer --disable-gpu"; # for nvidia  
 	  dbe = "distrobox enter";
-	  gcal = "gcalcli --client-id=333593472146-2ptqh0oqbc82jvrda1idu1qu5v70lmsi.apps.googleusercontent.com --client-secret=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 calm";
 	  ask = "chatgpt --model gpt-4 -p";
 	  obsidian = "obsidian --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
 	  cbuae-uat = "export HTTPS_PROXY=http://localhost:55556 KUBECONFIG=$HOME/.kube/kubeconfig_uat";

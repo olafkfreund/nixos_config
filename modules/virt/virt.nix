@@ -1,17 +1,5 @@
 { config, lib, pkgs, ... }:  with lib; {
 
-  virtualisation = {
-    podman = {
-      enable = true;
-      #dockerCompat = true;
-      defaultNetwork.settings.dns_enabled = true;
-    };
-  };
-  virtualisation.docker.enable = true;
-  virtualisation.docker.rootless = {
-    enable = true;
-    setSocketVariable = true;
-  };
   #---------------------------------------------------------------------
   # Manage the virtualisation services : Libvirt stuff
   #---------------------------------------------------------------------
@@ -38,10 +26,6 @@
   virtualisation.lxd.enable = true; 
 
   environment.systemPackages = with pkgs; [
-    podman-compose
-    podman-tui
-    podman
-    pods
     quickemu
     OVMFFull
     gnome.adwaita-icon-theme
