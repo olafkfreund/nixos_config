@@ -24,33 +24,36 @@
     nix-colors.url = "github:misterio77/nix-colors";
     spicetify-nix.url = "github:the-argus/spicetify-nix";
     hyprland.url = "github:hyprwm/Hyprland";
-    stylix.url = "github:danth/stylix";
     hyprpicker.url = "github:hyprwm/hyprpicker";
     hypr-contrib.url = "github:hyprwm/contrib";
     nixpkgs-f2k.url = "github:moni-dz/nixpkgs-f2k";
-    alacritty-theme.url = "github:alexghr/alacritty-theme.nix";
     nur.url = "github:nix-community/NUR";
+    kde2nix.url = "github:nix-community/kde2nix";
   };
 
 
   outputs = inputs@{
-    self, nixpkgs, nixpkgs-stable, nixpkgs-f2k, alacritty-theme, nur, hyprland, spicetify-nix, stylix, home-manager, ... }: 
+    self, nixpkgs, nixpkgs-stable, nixpkgs-f2k, nur, kde2nix, hyprland, spicetify-nix, home-manager, ... }: 
     {
     nixosConfigurations = {
       razer = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {
           inherit inputs;
-          inherit (inputs) stylix;
           };
         modules = [
           ./configuration.nix
+          kde2nix.nixosModules.plasma6
           nur.nixosModules.nur
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = {
+              pkgs-stable = import nixpkgs-stable {
+              system = "x86_64-linux";
+              config.allowUnfree = true;
+              };
               inherit inputs;
               inherit nixpkgs;
               inherit spicetify-nix;
@@ -58,9 +61,7 @@
               inherit home-manager;
               inherit nixpkgs-stable;
               inherit self;
-              inherit stylix;
               inherit nixpkgs-f2k;
-              inherit alacritty-theme;
             };        
             home-manager.users.olafkfreund = import ./Users/olafkfreund/razer_home.nix;
           }
@@ -70,16 +71,20 @@
         system = "x86_64-linux";
         specialArgs = {
           inherit inputs;
-          inherit (inputs) stylix;
-          };
+        };
         modules = [
           ./configuration.nix
           nur.nixosModules.nur
+          kde2nix.nixosModules.plasma6
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = {
+              pkgs-stable = import nixpkgs-stable {
+              system = "x86_64-linux";
+              config.allowUnfree = true;
+              };
               inherit inputs;
               inherit nixpkgs;
               inherit spicetify-nix;
@@ -87,9 +92,7 @@
               inherit home-manager;
               inherit nixpkgs-stable;
               inherit self;
-              inherit stylix;
               inherit nixpkgs-f2k;
-              inherit alacritty-theme;
             };        
             home-manager.users.olafkfreund = import ./Users/olafkfreund/work-lx_home.nix;
           }

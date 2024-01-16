@@ -1,7 +1,10 @@
 { pkgs, ... }: {
   environment.systemPackages = with pkgs; [
     docker-compose
-    nvidia-docker
+    docker
+    docui
+    docker-gc
+    lazydocker
    ];
 
   #Docker config

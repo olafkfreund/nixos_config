@@ -49,6 +49,7 @@ programs.bash = {
     fu = "sudo nix flake update";
     ow = "zellij --layout .config/zellij/layouts/work.kdl";
     slack = "slack --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer";
+    code = "code --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
     # slack = "slack --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer --disable-gpu"; # for nvidia  
 	  dbe = "distrobox enter";
 	  ask = "chatgpt --model gpt-4 -p";

@@ -98,5 +98,6 @@ home.packages = with pkgs; [
   pipes-rs
   spotify-player
   sptlrx
+  gitui
   ];
 }
