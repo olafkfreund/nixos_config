@@ -13,7 +13,7 @@ services.xserver.displayManager.xserverArgs = [
 ];
 services.xserver.displayManager.sddm.enableHidpi = true;
 services.xserver.desktopManager.plasma6.enable = true;
-services.xserver.desktopManager.plasma6.useQtScaling = true;
+services.xserver.desktopManager.plasma5.useQtScaling = true;
 services.xserver.videoDrivers = [ "nvidia" ]; 
 
 environment.systemPackages = let themes = pkgs.callPackage ./sddm-themes.nix {}; in [ 
