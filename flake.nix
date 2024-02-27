@@ -5,8 +5,16 @@
     experimental-features = [ "nix-command" "flakes" ];
     substituters = [
       "https://cache.nixos.org/"
+      "https://cuda-maintainers.cachix.org"
+      "https://hyprland.cachix.org"
+      "https://devenv.cachix.org"
     ];
-
+    trusted-public-keys = [
+        "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+        "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+        "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
+        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      ];
     extra-substituters = [
       # Nix community's cache server
       "https://nix-community.cachix.org"
@@ -19,21 +27,21 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11";
+    nix-colors.url = "github:misterio77/nix-colors";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    nix-colors.url = "github:misterio77/nix-colors";
+    #nix-colors.url = "github:misterio77/nix-colors";
     spicetify-nix.url = "github:the-argus/spicetify-nix";
     hyprland.url = "github:hyprwm/Hyprland";
     hyprpicker.url = "github:hyprwm/hyprpicker";
     hypr-contrib.url = "github:hyprwm/contrib";
     nixpkgs-f2k.url = "github:moni-dz/nixpkgs-f2k";
     nur.url = "github:nix-community/NUR";
-    kde2nix.url = "github:nix-community/kde2nix";
   };
 
 
   outputs = inputs@{
-    self, nixpkgs, nixpkgs-stable, nixpkgs-f2k, nur, kde2nix, hyprland, spicetify-nix, home-manager, ... }: 
+    self, nixpkgs, nixpkgs-stable, nur, nixpkgs-f2k, hyprland, nix-colors, spicetify-nix, home-manager, ... }: 
     {
     nixosConfigurations = {
       razer = nixpkgs.lib.nixosSystem {
@@ -43,7 +51,6 @@
           };
         modules = [
           ./configuration.nix
-          kde2nix.nixosModules.plasma6
           nur.nixosModules.nur
           home-manager.nixosModules.home-manager
           {
@@ -58,10 +65,11 @@
               inherit nixpkgs;
               inherit spicetify-nix;
               inherit hyprland;
+              inherit nixpkgs-f2k;
               inherit home-manager;
               inherit nixpkgs-stable;
+              inherit nix-colors;
               inherit self;
-              inherit nixpkgs-f2k;
             };        
             home-manager.users.olafkfreund = import ./Users/olafkfreund/razer_home.nix;
           }
@@ -75,8 +83,8 @@
         modules = [
           ./configuration.nix
           nur.nixosModules.nur
-          kde2nix.nixosModules.plasma6
           home-manager.nixosModules.home-manager
+          # inputs.nix-colors.homeManagerModules.default
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
@@ -88,11 +96,12 @@
               inherit inputs;
               inherit nixpkgs;
               inherit spicetify-nix;
+              inherit nixpkgs-f2k;
               inherit hyprland;
+              inherit nix-colors;
               inherit home-manager;
               inherit nixpkgs-stable;
               inherit self;
-              inherit nixpkgs-f2k;
             };        
             home-manager.users.olafkfreund = import ./Users/olafkfreund/work-lx_home.nix;
           }

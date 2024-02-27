@@ -14,7 +14,7 @@ with colors; {
 
       local wezterm = require 'wezterm'
 
-      local warn_about_missing_glyphs=false
+      local warn_about_missing_glyphs = false 
 
       local pad = 1
 
@@ -50,6 +50,7 @@ with colors; {
           inactive_titlebar_bg = '#3c3836'
         },
         hide_tab_bar_if_only_one_tab = true,
+        warn_about_missing_glyphs = false,
         enable_wayland = auto,
         initial_cols = 100,
         initial_rows = 40,

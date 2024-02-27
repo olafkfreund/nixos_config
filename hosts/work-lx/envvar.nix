@@ -9,5 +9,7 @@ environment.sessionVariables = {
     MOZ_ENABLE_WAYLAND = "1";
     GBM_BACKEND = "nvidia-drm";
     __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+    CORDA_ARTIFACTORY_USERNAME = "olaf.freund@r3.com";
+    CORDA_ARTIFACTORY_PASSWORD = "AKCpBrw56m6sceapUZ2abMA6ZA2CH7MxNDbYgMYwmJTdG4jLfhLFjXVu2qcT8jFP7rEcXjdYM";
     };
 }

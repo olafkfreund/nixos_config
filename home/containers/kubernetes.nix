@@ -8,5 +8,6 @@
     kubernetes-helm
 	  kubecolor
 	  k9s
+    minikube
   ];
 }

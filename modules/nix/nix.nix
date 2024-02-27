@@ -20,6 +20,11 @@ nix = {
 };
 
 nix.settings.trusted-users = [ "root" "olafkfreund" ];
+nix.settings.http-connections = 50;
+nix.settings.warn-dirty = false;
+nix.settings.log-lines = 50;
+nix.settings.sandbox = "relaxed";
+nix.settings.auto-optimise-store = true;
 
 # Allow unfree packages
 nixpkgs.config.allowUnfree = true;
@@ -34,5 +39,6 @@ environment.systemPackages = with pkgs; [
   nixos-generators
   nix-zsh-completions
   nix-bash-completions
+  nix-output-monitor
   ];
 }

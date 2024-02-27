@@ -13,6 +13,8 @@
         ../../modules/default.nix
         ../../home/containers/default.nix
         ../../modules/default.nix
+        ../../modules/hardware/openrazer.nix
+        ../../modules/services/cron/cron.nix
         ../../home/containers/default.nix
         ../../modules/services/thinkpad/thinkpad.nix
         ./nvidia.nix
@@ -27,7 +29,7 @@
   users.users.olafkfreund = {
     isNormalUser = true;
     description = "Olaf K-Freund";
-    extraGroups = [ "networkmanager" "wheel" "docker" ];
+    extraGroups = [ "networkmanager" "openrazer" "wheel" "docker" "podman"];
     packages = with pkgs; [
       kate
       kitty
@@ -59,9 +61,7 @@
     sqlite
     z3
   ];
-  };
   security.sudo.wheelNeedsPassword = false;
   networking.firewall.enable = false;
-  system.stateVersion = "23.11"; # Did you read the comment?
-
+  system.stateVersion = "24.05"; # Did you read the comment?
 }

@@ -1,0 +1,15 @@
+{ pkgs, pkgs-stable, ... }: {
+
+home.packages = with pkgs; [
+  lavat #lava lamp
+  browsh #text based browser
+  peaclock #clock
+  cbonsai #bonsai tree
+  asciiquarium-transparent #aquarium
+  globe-cli #globe
+  pipes-rs #pipes
+  cowsay #cowsay
+  socat #socat
+  thefuck #Magnificent app which corrects your previous console command
+  ];
+}

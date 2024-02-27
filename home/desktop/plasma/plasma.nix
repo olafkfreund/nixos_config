@@ -3,7 +3,7 @@
 home.packages = with pkgs; [
   kde-gruvbox
   catppuccin-kde
-  kde-rounded-corners
+  #kde-rounded-corners
   libsForQt5.kdecoration
   libsForQt5.kdeconnect-kde
   libsForQt5.bismuth
@@ -47,5 +47,6 @@ home.packages = with pkgs; [
   libsForQt5.kaccounts-providers
   libsForQt5.packagekit-qt
   libportal-qt5
+  xwaylandvideobridge
   ];
 }

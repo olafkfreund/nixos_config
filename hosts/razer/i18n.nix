@@ -18,6 +18,6 @@ console.keyMap = "uk";
 
 services.xserver = {
   layout = "gb";
-  xkbVariant = "";
+  xkb.variant = "";
 };
 }

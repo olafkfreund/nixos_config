@@ -9,16 +9,6 @@
     enable = true;
     xdgOpenUsePortal = true;
 
-    lxqt = {
-      enable = false;
-      styles = with pkgs;
-        with libsForQt5; [
-          qtstyleplugin-kvantum
-          catppuccin-kvantum
-          breeze-qt5
-          qtcurve
-        ];
-    };
 
     # Turn Wayland off
     wlr = {
@@ -28,9 +18,10 @@
 
     extraPortals = with pkgs; [
       xdg-desktop-portal-gtk
-      # xdg-desktop-portal-hyprland
+      xdg-desktop-portal-hyprland
       xdg-desktop-portal-kde
       xdg-desktop-portal-wlr
+      xdg-desktop-portal-cosmic
     ];
 
   };

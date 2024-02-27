@@ -1,16 +1,16 @@
 {pkgs, ...}: {
   imports = [
     ./plasma/plasma.nix
-    #./gnome.nix
-    #./awesome/awsome.nix
-    #./qtile/qtile.nix
-    #./sway/sway.nix
-    #./bspwm/bspwm.nix
-    #./wallpaper.nix
-    #./hyprland/hyprl_config.nix
-    #./hyprland/hyprland.nix
+    ./cosmic/cosmic.nix
+    ./scripts.nix
+    ./dunst/default.nix
+    ./hyprland/default.nix
+    #./swaylock/default.nix
+    ./waybar/default.nix
     ./com.nix
     ./terminals/default.nix
+    ./rofi/rofi.nix
+    #./theme/default.nix
   ];
 
   home.packages = with pkgs; [

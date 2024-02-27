@@ -1,7 +1,7 @@
 { ... }: {
   imports = [
-    #./docker.nix
-    ./podman.nix
+    ./docker.nix
+    #./podman.nix
     ./kubernetes.nix
   ];
 }

@@ -1,8 +1,5 @@
 { config, lib, pkgs, ... }:  with lib; {
 
-  #---------------------------------------------------------------------
-  # Manage the virtualisation services : Libvirt stuff
-  #---------------------------------------------------------------------
   virtualisation = {
     libvirtd = {
       enable = true;
@@ -24,6 +21,9 @@
   services.spice-vdagentd.enable = true;
   systemd.services.libvirtd.restartIfChanged = false;
   virtualisation.lxd.enable = true; 
+  boot.kernelParams = [
+    "cgroup_enable=cpuset" "cgroup_memory=1" "cgroup_enable=memory"
+  ];
 
   environment.systemPackages = with pkgs; [
     quickemu
@@ -42,6 +42,7 @@
     win-spice
     win-virtio
     virtualbox
+    quickgui
 
   ];
 

@@ -1,7 +1,7 @@
 { inputs, lib, config, pkgs, nixpkgs, ... }: {
 
 imports =[
-   inputs.nix-colors.homeManagerModules.default
+   #inputs.nix-colors.homeManagerModules.default
     (../../home/default.nix)
     (../../home/cloud/default.nix)
     (../../home/development/default.nix)
@@ -11,7 +11,7 @@ imports =[
     (./private.nix)
 ];
 
-colorScheme = inputs.nix-colors.colorSchemes.gruvbox-dark-medium;
+#colorScheme = inputs.nix-colors.colorSchemes.gruvbox-dark-medium;
 
 home.username = "olafkfreund";
 home.homeDirectory = "/home/olafkfreund";

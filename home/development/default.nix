@@ -10,5 +10,7 @@
     ./lua.nix
     ./nix.nix
     ./shell.nix
+    ./devbox.nix
+    ./nodejs.nix
 ];
 }
