@@ -8,12 +8,14 @@
       "https://cuda-maintainers.cachix.org"
       "https://hyprland.cachix.org"
       "https://devenv.cachix.org"
+      "https://cosmic.cachix.org/"
     ];
     trusted-public-keys = [
         "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
         "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
         "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
       ];
     extra-substituters = [
       # Nix community's cache server
@@ -30,6 +32,10 @@
     nix-colors.url = "github:misterio77/nix-colors";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    nixos-cosmic = {
+      url = "github:lilyinstarlight/nixos-cosmic";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     #nix-colors.url = "github:misterio77/nix-colors";
     spicetify-nix.url = "github:the-argus/spicetify-nix";
     hyprland.url = "github:hyprwm/Hyprland";
@@ -41,7 +47,7 @@
 
 
   outputs = inputs@{
-    self, nixpkgs, nixpkgs-stable, nur, nixpkgs-f2k, hyprland, nix-colors, spicetify-nix, home-manager, ... }: 
+    self, nixpkgs, nixpkgs-stable, nur, nixos-cosmic, nixpkgs-f2k, hyprland, nix-colors, spicetify-nix, home-manager, ... }: 
     {
     nixosConfigurations = {
       razer = nixpkgs.lib.nixosSystem {
@@ -53,6 +59,7 @@
           ./configuration.nix
           nur.nixosModules.nur
           home-manager.nixosModules.home-manager
+          nixos-cosmic.nixosModules.default
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
@@ -84,6 +91,7 @@
           ./configuration.nix
           nur.nixosModules.nur
           home-manager.nixosModules.home-manager
+          nixos-cosmic.nixosModules.default
           # inputs.nix-colors.homeManagerModules.default
           {
             home-manager.useGlobalPkgs = true;
