@@ -12,8 +12,9 @@ in
 #Nvidia
 hardware.nvidia = {
   modesetting.enable = true;
-  powerManagement.enable = true;
-  nvidiaPersistenced = true;
+  powerManagement.enable = false;
+  powerManagement.finegrained = false;
+  nvidiaPersistenced = false;
   open = false;
   nvidiaSettings = true;
   package = config.boot.kernelPackages.nvidiaPackages.beta;
@@ -21,6 +22,7 @@ hardware.nvidia = {
 
 hardware.nvidia.prime = {
   sync.enable = true;
+  offload.enable = false; 
   intelBusId = "PCI:0:2:0";
   nvidiaBusId = "PCI:1:0:0";
   };

@@ -12,9 +12,9 @@
     enableGhostscriptFonts = true;
 
     packages = with pkgs; [
-      (nerdfonts.override {
-        fonts = [ "FiraCode" "SourceCodePro" "UbuntuMono" ];
-      })
+      # (nerdfonts.override {
+      #   fonts = [ "FiraCode" "SourceCodePro" "UbuntuMono" ];
+      # })
 
       # (nerdfonts.override {fonts = ["Iosevka" "JetBrainsMono"];})
       # gg-sans

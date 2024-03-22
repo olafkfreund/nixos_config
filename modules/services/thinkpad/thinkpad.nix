@@ -5,4 +5,7 @@ services.tp-auto-kbbl = {
 services.thinkfan = {
   enable = true;
   };
+services.fwupd = {
+  enable = true;
+  };
 }

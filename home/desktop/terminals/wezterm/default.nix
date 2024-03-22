@@ -1,11 +1,7 @@
-{ pkgs, colors, nixpkgs-f2k, ... }:
-
-with colors; {
+{ pkgs, config, nixpkgs-f2k, ... }:{
+  
   programs.wezterm = {
     enable = true;
-    # colorSchemes = import ./colors.nix {
-    #   inherit colors;
-    # };
     package = nixpkgs-f2k.packages.${pkgs.system}.wezterm-git;
     extraConfig = ''
       -- +----------------------------+
@@ -19,13 +15,13 @@ with colors; {
       local pad = 1
 
       local font_normal = {
-        family = 'FiraCode Nerd Font',
+        family = 'Jetbrains Mono Nerd Font',
         weight = 'Regular',
         italic = false
       }
 
       local font_italic = {
-        family = 'VictorMono Nerd Font',
+        family = 'Jetbrains Mono Nerd Font',
         weight = 'DemiBold',
         italic = true
       }
@@ -39,6 +35,7 @@ with colors; {
 
       return {
         -- Window, layout
+        window_background_opacity = 0.8,
         window_padding = {
           left = pad,
           right = pad,
@@ -46,10 +43,11 @@ with colors; {
           bottom = pad
         },
         window_frame = {
-          active_titlebar_bg = '#3c3836',
-          inactive_titlebar_bg = '#3c3836'
+          active_titlebar_bg = '#${config.colorScheme.palette.base04}',
+          inactive_titlebar_bg = '#${config.colorScheme.palette.base00}'
         },
         hide_tab_bar_if_only_one_tab = true,
+        use_fancy_tab_bar = true,
         warn_about_missing_glyphs = false,
         enable_wayland = auto,
         initial_cols = 100,
@@ -57,7 +55,7 @@ with colors; {
 
         -- Fonts
         font = load_font(font_normal),
-        font_size = 12,
+        font_size = 14,
         font_rules = {
           {
             italic = true,
@@ -69,34 +67,34 @@ with colors; {
         color_scheme = 'gruvbox',
         color_schemes = {
           gruvbox = {
-            foreground = '#ebdbb2',
-            background = '#282828',
-            cursor_bg = '#928374',
-            cursor_border = '#ebdbb2',
-            cursor_fg = '#282828',
-            selection_bg = '#ebdbb2',
-            selection_fg = '#3c3836',
+            foreground = '#${config.colorScheme.palette.base06}',
+            background = '#${config.colorScheme.palette.base00}',
+            cursor_bg = '#${config.colorScheme.palette.base07}',
+            cursor_border = '#${config.colorScheme.palette.base06}',
+            cursor_fg = '#${config.colorScheme.palette.base00}',
+            selection_bg = '#${config.colorScheme.palette.base02}',
+            selection_fg = '#${config.colorScheme.palette.base01}',
 
             ansi = {
-              '#282828', -- black
-              '#cc241d', -- red
-              '#98971a', -- green
-              '#d79921', -- yellow
-              '#458588', -- blue
-              '#b16286', -- purple
-              '#689d6a', -- aqua
-              '#ebdbb2'  -- white
+              '#${config.colorScheme.palette.base00}', -- black
+              '#${config.colorScheme.palette.base08}', -- red
+              '#${config.colorScheme.palette.base0B}', -- green
+              '#${config.colorScheme.palette.base0A}', -- yellow
+              '#${config.colorScheme.palette.base0D}', -- blue
+              '#${config.colorScheme.palette.base0E}', -- purple
+              '#${config.colorScheme.palette.base0C}', -- aqua
+              '#${config.colorScheme.palette.base06}'  -- white
             },
 
             brights = {
-              '#928374', -- black
-              '#fb4934', -- red
-              '#b8bb26', -- green
-              '#fabd2f', -- yellow
-              '#83a598', -- blue
-              '#d3869b', -- purple
-              '#8ec07c', -- aqua
-              '#fbf1c7'  -- white
+              '#${config.colorScheme.palette.base00}', -- black
+              '#${config.colorScheme.palette.base08}', -- red
+              '#${config.colorScheme.palette.base0B}', -- green
+              '#${config.colorScheme.palette.base0A}', -- yellow
+              '#${config.colorScheme.palette.base0D}', -- blue
+              '#${config.colorScheme.palette.base0E}', -- purple
+              '#${config.colorScheme.palette.base0C}', -- aqua
+              '#${config.colorScheme.palette.base06}'  -- white
             }
           }
         },

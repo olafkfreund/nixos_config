@@ -5,6 +5,15 @@
   ...
 }:
 {
+  imports = [
+    ./hypr_dep.nix
+    ./hyprlock.nix
+    ./hypridle.nix
+    ./scripts/packages.nix
+    #./scripts/themechange.nix
+    #./hycov.nix
+  ];
+  
   # hyprpaper
   home = {
     file = {
@@ -13,261 +22,393 @@
 
     # make stuff work on wayland
     sessionVariables = {
-      QT_QPA_PLATFORM = "wayland";
       SDL_VIDEODRIVER = "wayland";
       XDG_SESSION_TYPE = "wayland";
+      XDG_CURRENT_DESKTOP = "Hyprland";
+      XDG_SESSION_DESKTOP = "Hyprland";
+      CLUTTER_BACKEND = "wayland";
+
     };
   };
   wayland.windowManager.hyprland = {
     enable = true;
-    settings = {
-      monitor = ",preferred,auto,auto";
-      env = [
-        "WLR_DRM_NO_ATOMIC,1"
-        "QT_WAYLAND_DISABLE_WINDOWDECORATION,1"
-        "QT_AUTO_SCREEN_SCALE_FACTOR,1"
-        "QT_QPA_PLATFORM,wayland;xcb"
-        "WLR_NO_HARDWARE_CURSORS,1" # supposed to help with mouse screen sharing
-      ];
-      general = {
-        # See https://wiki.hyprland.org/Configuring/Variables/ for more
-        gaps_in = 5;
-        gaps_out = 10;
-        border_size = 2;
-        # "col.active_border" = "rgba(33ccffee) rgba(00ff99ee) 45deg";
-        # "col.inactive_border" = "rgba(595959aa)";
-        "col.active_border" = "rgba(ea6962ff) rgba(7daea3ff) 45deg";
-        "col.inactive_border" = "rgba(89b48255) rgba(ea696255) 135deg";
+    systemd.enable= true;
+    # enableNvidiaPatches = true;
+    extraConfig = ''
+      # Globals #
+      #Work R3
+      monitor=DP-3,3440x1440@100,0x0,1,mirror,DP-3
+      #home
+      monitor=DP-6,2560x1440@100,0x0,1,mirror,DP-6
+      #aptop
+      monitor=eDP-1,1920x1200@60,0x0,1,mirror,eDP-1
+      monitor=,preferred,auto, 1
+      #wsbind=1,eDP-1
 
-        layout = "dwindle";
+      xwayland {
+        force_zero_scaling = true
+      }
 
-        # Please see https://wiki.hyprland.org/Configuring/Tearing/ before you turn this on
-        allow_tearing = true;
-      };
-      input = {
-        kb_layout = "gb";
-        follow_mouse = 1;
-      };
-      decoration = {
-        # See https://wiki.hyprland.org/Configuring/Variables/ for more
 
-        rounding = 10;
+      exec-once = hyprctl setcursor Bibata-Modern-Ice 1
+      exec-once = gnome-keyring-daemon --start --components=secrets
+      exec-once = polkit-kde-authentication-agent-1
+      exec-once = polkit-agent-helper-1
+      exec-once = dbus-update-activation-environment --systemd --all WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+      exec-once = dbus-update-activation-environment --systemd --all # for XDPH
+      exec-once = systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP # for XDPH
+      #exec-once = ~/.config/hypr/xdg-portal-hyprland
+      exec-once = gsettings set org.gnome.desktop.interface cursor-theme "Bibata-Modern-Ice"
+      exec-once = gsettings set org.gnome.desktop.interface icon-theme "Gruvbox-Plus-Dark" 
+      exec-once = gsettings set org.gnome.desktop.interface gtk-theme "Gruvbox-Dark-BL-LB"
 
-        blur = {
-          enabled = false;
-          size = 3;
-          passes = 1;
-        };
+      exec-once=waybar
+      exec-once=dunst
+      exec-once=kdeconnect-cli 
+      exec-once=playerctld daemon
+      exec-once=$HOME/.config/hypr/scripts/start_wall
+      exec-once=hypridle
+      exec-once=nm-applet --indicator
+      exec-once=blueman-applet
+      
+      exec-once = wl-clipboard-history -t
+      exec-once = wl-paste --type text --watch cliphist store #Stores only text data
+      exec-once = wl-paste --type image --watch cliphist store #Stores only image data when imaged copied
+      
+      exec-once = [workspace 8 silent] spotify
+      exec-once = [workspace 1 silent] microsoft-edge
+      exec-once = [workspace 1 silent] kitty
+      exec-once = [workspace magic silent] kitty -e sh -c "ow"
+      exec-once = [workspace 6 silent] thunderbird
 
-        drop_shadow = false;
-        shadow_range = 4;
-        shadow_render_power = 3;
-        "col.shadow" = "rgba(1a1a1aee)";
-      };
 
-      misc = {
-        disable_autoreload = true;
-        # force_default_wallpaper = 0; # Set to 0 to disable the anime mascot wallpapers
-        disable_hyprland_logo = true;
-        focus_on_activate = true;
-        vfr = true;
-        vrr = 1;
-      };
-      animations = {
-        enabled = "yes";
+      # Env variables
+      env = EDITOR="lvim";
+      env = BROWSER="google-chrome-stable";
+      env = TERMINAL="kitty";
+      env = GDK_BACKEND,wayland,x11
+      env = SDL_VIDEODRIVER,wayland
+      env = CLUTTER_BACKEND,wayland
+      env = XDG_CURRENT_DESKTOP,Hyprland
+      env = XDG_SESSION_TYPE,wayland
+      env = XDG_SESSION_DESKTOP,Hyprland
+      #env = XDG_CURRENT_DESKTOP,GNOME
+      env = XCURSOR_THEME,Bibata-Modern-Ice
+      env = XCURSOR_SIZE,16
+      env = GTK_THEME,Gruvbox-Dark-B-LB
+      env = QT_QPA_PLATFORM, wayland
+      env = QT_WAYLAND_DISABLE_WINDOWDECORATION, 1
+      env = QT_AUTO_SCREEN_SCALE_FACTOR, 1
+      env = MOZ_ENABLE_WAYLAND, 1
+      
 
-        # Some default animations, see https://wiki.hyprland.org/Configuring/Animations/ for more
 
-        bezier = "myBezier, 0.05, 0.9, 0.1, 1.05";
+      input {
+          kb_layout=gb
+          kb_variant=
+          kb_model=
+          kb_options=
+          kb_rules=
+          follow_mouse=1
+          touchpad {
+            natural_scroll=no
+          }
+      }
 
-        animation = [
-          "windows, 1, 7, myBezier"
-          "windowsOut, 1, 7, default, popin 80%"
-          "border, 1, 10, default"
-          "borderangle, 1, 8, default"
-          "fade, 1, 7, default"
-          "workspaces, 1, 6, default"
-        ];
-      };
+      misc {
+        enable_swallow=true
+        swallow_regex =^(kitty)$
+        layers_hog_keyboard_focus=true
+        vfr=true
+        vrr=0
+        animate_mouse_windowdragging=true
+        mouse_move_focuses_monitor = true
 
-      dwindle = {
-        # See https://wiki.hyprland.org/Configuring/Dwindle-Layout/ for more
-        pseudotile = "yes"; # master switch for pseudotiling. Enabling is bound to mainMod + P in the keybinds section below
-        force_split = 2;
-        preserve_split = "yes"; # you probably want this
-      };
+      }
 
-      master = {
-        # See https://wiki.hyprland.org/Configuring/Master-Layout/ for more
-        new_is_master = true;
-      };
+      general {
+          sensitivity=1.0 # for mouse cursor
+          gaps_in=4 
+          gaps_out=8
+          border_size=2
+          no_border_on_floating=0
+          col.active_border = rgba(${config.colorScheme.palette.base05}FF) rgba(${config.colorScheme.palette.base05}FF) 45deg
+          col.inactive_border = rgba(${config.colorScheme.palette.base00}11) rgba(${config.colorScheme.palette.base00}11) 45deg
+          apply_sens_to_raw=0
+          resize_on_border=true
+          layout = dwindle
+      }
 
-      gestures = {
-        # See https://wiki.hyprland.org/Configuring/Variables/ for more
-        workspace_swipe = "on";
-        workspace_swipe_distance = 200;
-      };
+      decoration {
+          blur {
+            enabled = yes
+            special = true
+            size = 6
+            passes = 3
+            new_optimizations = true
+            ignore_opacity = true
+            xray = false
+          }
 
-      "device:tpps/2-ibm-trackpoint" = {
-        sensitivity = 1.0; # -1.0 - 1.0, 0 means no modification.
-      };
+          layerrule = blur, waybar
+          layerrule = ignorezero, waybar
+          layerrule = blur, notifications 
+          layerrule = ignorezero, notifications 
+          layerrule = blur, logout_dialog
+          windowrule = stayfocused, rofi
+          windowrule = animation popin 75%, rofi
+          windowrule = stayfocused, emote 
+          windowrule = animation popin 95%, emote
 
-      binds = {
-        allow_workspace_cycles = true;
-      };
 
-      xwayland = {
-        force_zero_scaling = true;
-      };
+          rounding=14
+          drop_shadow=1
+          shadow_ignore_window=true
+          shadow_offset=7 7
+          shadow_range=15
+          shadow_render_power=4
+          shadow_scale=0.99
+          col.shadow=rgba(000000BB)
+          dim_inactive=true
+          dim_strength=0.1
+          active_opacity= 0.92
+          inactive_opacity= 0.76
+      }
 
-      "$mainMod" = "SUPER";
-      bind = [
-        "$mainMod SHIFT, return, exec, wezterm"
-        "$mainMod SHIFT, C, killactive, "
-        "$mainMod SHIFT, Q, exit, "
-        "$mainMod, E, exec, lf"
-        "$mainMod, P, exec, rofi -show drun -show-icons"
-        "$mainMod, R, pseudo," # dwindle
-        "$mainMod SHIFT, J, togglesplit," # dwindle
-        ", xf86audioraisevolume, exec, wpctl set-volume -l 1.0 @DEFAULT_SINK@ 5%+"
-        ", xf86audiolowervolume, exec, wpctl set-volume -l 1.0 @DEFAULT_SINK@ 5%-"
-        ", xf86audiomute, exec, wpctl set-mute @DEFAULT_SINK@ toggle"
-        ", xf86audiomicmute, exec, wpctl set-mute @DEFAULT_SOURCE@ toggle"
-        ", xf86monbrightnessup, exec, ${pkgs.light}/bin/light -A 1"
-        ", xf86monbrightnessdown, exec, ${pkgs.light}/bin/light -U 1"
-        # Move focus with mainMod + arrow keys
-        # "$mainMod, K, cyclenext, prev"
-        "$mainMod, J, cyclenext,"
 
-        # Switch workspaces with mainMod + [0-9]
-        "$mainMod, 1, workspace, 1"
-        "$mainMod, 2, workspace, 2"
-        "$mainMod, 3, workspace, 3"
-        "$mainMod, 4, workspace, 4"
-        "$mainMod, 5, workspace, 5"
-        "$mainMod, 6, workspace, 6"
-        "$mainMod, 7, workspace, 7"
-        "$mainMod, 8, workspace, 8"
-        "$mainMod, 9, workspace, 9"
-        "$mainMod, 0, workspace, 10"
-        "$mainMod, F1, workspace, 11"
-        "$mainMod, F2, workspace, 12"
-        "$mainMod, F3, workspace, 13"
-        "$mainMod, F4, workspace, 14"
 
-        # Move active window to a workspace with mainMod + SHIFT + [0-9]
-        "$mainMod SHIFT, 1, movetoworkspacesilent, 1"
-        "$mainMod SHIFT, 2, movetoworkspacesilent, 2"
-        "$mainMod SHIFT, 3, movetoworkspacesilent, 3"
-        "$mainMod SHIFT, 4, movetoworkspacesilent, 4"
-        "$mainMod SHIFT, 5, movetoworkspacesilent, 5"
-        "$mainMod SHIFT, 6, movetoworkspacesilent, 6"
-        "$mainMod SHIFT, 7, movetoworkspacesilent, 7"
-        "$mainMod SHIFT, 8, movetoworkspacesilent, 8"
-        "$mainMod SHIFT, 9, movetoworkspacesilent, 9"
-        "$mainMod SHIFT, 0, movetoworkspacesilent, 10"
-        "$mainMod SHIFT, F1, movetoworkspacesilent, 11"
-        "$mainMod SHIFT, F2, movetoworkspacesilent, 12"
-        "$mainMod SHIFT, F3, movetoworkspacesilent, 13"
-        "$mainMod SHIFT, F4, movetoworkspacesilent, 14"
+      animations {
+          enabled=true
 
-        # Example special workspace (scratchpad)
-        "$mainMod, S, togglespecialworkspace, magic"
-        "$mainMod SHIFT, S, movetoworkspace, special:magic"
+          bezier = linear, 0, 0, 1, 1
+          bezier = md3_standard, 0.2, 0, 0, 1
+          bezier = md3_decel, 0.05, 0.7, 0.1, 1
+          bezier = md3_accel, 0.3, 0, 0.8, 0.15
+          bezier = overshot, 0.05, 0.9, 0.1, 1.1
+          bezier = crazyshot, 0.1, 1.5, 0.76, 0.92 
+          bezier = hyprnostretch, 0.05, 0.9, 0.1, 1.0
+          bezier = fluent_decel, 0.1, 1, 0, 1
+          bezier = easeInOutCirc, 0.85, 0, 0.15, 1
+          bezier = easeOutCirc, 0, 0.55, 0.45, 1
+          bezier = easeOutExpo, 0.16, 1, 0.3, 1
+          bezier = drag, 0.2, 1, 0.2, 1
+          bezier = pop, 0.1, 0.8, 0.2, 1
+          bezier = liner, 1, 1, 1, 1
+          
+          animation=windows,1,3,default,slide
+          animation=windowsMove,1,3,overshot
+          animation=windowsOut,1,3,default,popin
+          animation=border,1,1,default
+          animation=fadeIn,1,5,default 
+          animation=fadeOut,1,5,default
+          animation=fadeSwitch,1,10,default
+          #animation=workspaces,1,3.8,overshot,slidevert
+          animation=border, 1, 10, overshot
+          animation=borderangle, 1, 50, overshot, loop
+      }
 
-        # Scroll through existing workspaces with mainMod + scroll
-        "$mainMod, mouse_down, workspace, e+1"
-        "$mainMod, mouse_up, workspace, e-1"
+      dwindle {
+          pseudotile = true
+          force_split = 2 
+          preserve_split = true
+          no_gaps_when_only = false
+      }
 
-        # my shit
-        "$mainMod, Tab, workspace, previous"
-        "$mainMod SHIFT, space, togglefloating, "
-        "$mainMod, F, fullscreen, 0"
-        "$mainMod SHIFT, F, fakefullscreen, "
-        "$mainMod, return, swapnext, "
-        "$mainMod, H, splitratio, -0.2"
-        "$mainMod, L, splitratio, +0.2"
 
-        ''$mainMod, Print, exec, ${pkgs.grim}/bin/grim -l 4 -g "`${pkgs.slurp}/bin/slurp -w 0`" - | ${pkgs.wl-clipboard}/bin/wl-copy -t image/png && wl-paste > ~/Pictures/screenshots/screenshot-$(date +%a-%d-%b-%H-%M-%S).png | dunstify "Screenshot of the region taken" -t 1000''
-        ''SHIFT, Print, exec, ${pkgs.grim}/bin/grim -l 8 -g "`${pkgs.slurp}/bin/slurp -w 0`" - | ${pkgs.swappy}/bin/swappy -f - ''
 
-        #gamemode
-        "$mainMod, G, exec, gamemode"
+      gestures {
+          workspace_swipe=yes
+          workspace_swipe_fingers=3
+      }
 
-        # wallpaper
-        "$mainMod, W, exec, chpaper"
+      # Window rules #
+      windowrulev2 = suppressevent maximize, class:.* # You'll probably like this.
+      windowrulev2 = workspace 8, class:^(Spotify)$
+      windowrulev2 = workspace 5, class:^(Code)$
+      windowrulev2 = float,class:^(pavucontrol)$
+      windowrulev2 = float,class:^(blueman-manager)$
+      windowrulev2 = float,class:^(nm-applet)$
+      windowrulev2 = float,class:^(nm-connection-editor)$
+      
 
-        # swaylock
-        "$mainMod CTRL, L, exec, swaylock"
+      windowrulev2 = opacity 0.80 0.80,class:^(kitty)$
+      windowrulev2 = opacity 0.80 0.80,class:^(Code)$
+      windowrulev2 = opacity 0.80 0.80,class:^(Code)$
 
-        # poweroff
-        "$mainMod CTRL WIN, Delete, exec, poweroff"
+      # Allow screen tearing for reduced input latency on some games.
+      windowrulev2 = immediate, class:^(cs2)$
+      windowrulev2 = immediate, class:^(steam_app_0)$
+      windowrulev2 = immediate, class:^(steam_app_1)$
+      windowrulev2 = immediate, class:^(steam_app_2)$
+      windowrulev2 = immediate, class:^(.*)(.exe)$
 
-        "SUPER, D, exec, hyprctl keyword monitor HDMI-A-2,preferred,auto,auto,mirror,eDP-1"
-        "SUPER, E, exec, hyprctl keyword monitor HDMI-A-2,preferred,auto,auto"
+      windowrule = float,system_monitor
+      #windowrule=size 1570 840,system_monitor
+      windowrule = center,system_monitor
+      windowrule = float, polkit-agent-helper-1
+      windowrule = float, xdg-desktop-portal-gtk
+      windowrule = float,^(org.gnome.Nautilus)$
+      windowrule = float, title:^(Open File)$
+      windowrule = float, title:^(Open Folder)$
+      windowrule = float, title:^(update-sys)
+      windowrule = workspace special:hidden, Spotify
 
-        # clipman
-        ''SUPER, V, exec, ${pkgs.clipman}/bin/clipman pick -t rofi --tool-args="-theme gruvbox-dark"''
+    
+      # System binds #
+      $mainMod = SUPER
 
-        # rofi-powermenu
-        ''$mainMod, Delete, exec, rofi-powermenu''
+      bindm = $mainMod, mouse:272, movewindow
+      bindm = $mainMod, mouse:273, resizewindow
 
-        # cmus controls
-        ''SUPER, Z, exec, cmus-remote --prev''
-        ''SUPER, B, exec, cmus-remote --next''
-        ''SUPER, C, exec, cmus-remote --pause''
+      bind = , Print, exec, screenshootin
+      bind = , XF86MonBrightnessUp, exec, brightnessctl set 30+
+      bind = , XF86MonBrightnessDown, exec, brightnessctl set 30-
+      bind = , XF86AudioRaiseVolume, exec, amixer set Master 5%+
+      bind = , XF86AudioLowerVolume, exec, amixer set Master 5%-
+      bind = , XF86AudioMute, exec, amixer set Master toggle
+      
 
-        # wezterm in special
-        "$mainMod, K, togglespecialworkspace, wezterm"
-        # telegram special
-        "$mainMod, T, togglespecialworkspace, telegram"
-        # cmus special
-        "$mainMod, C, togglespecialworkspace, spotify_player"
+      bind = $mainMod, E, exec, [float]kitty --hold sh -c yazi
+      bind = $mainMod ALT, T, exec, kitty 
+      
+      bind = $mainMod, space, exec, ~/.config/rofi/launchers/type-2/launcher.sh
+      bind = $mainMod, RETURN, exec, [float]kitty
+      
+      bind = $mainMod, N, exec, dunstctl history-pop
+      bind = $mainMod SHIFT, N, exec, dunstctl close-all
+      
+      bind = $mainMod, P, pin
+      #bind = $mainMod SHIFT, P, unpin
+      
+      bind = $mainMod, H, movetoworkspace, special:hidden
+      bind = $mainMod SHIFT, H, togglespecialworkspace, hidden
 
-        # toggle waybar visibility
-        "$mainMod, B, exec, pkill -SIGUSR1 waybar"
+      bind = $mainMod, K, exec, hyprctl kill
+      bind = $mainMod CTRL, K, exec, list-hypr-bindings 
+      bind = $mainMod, M, exec, $HOME/.config/rofi/applets/bin/powermenu.sh 
+      
+      # Special workspace (scratchpad)
+      bind = $mainMod, S, togglespecialworkspace, magic
+      bind = $mainMod SHIFT, S, movetoworkspace, special:magic
+      
+      bind = , Insert, exec, $HOME/.config/rofi/applets/bin/clipboard.sh
 
-        # rfkill stuff
-        ", XF86WLAN, exec, rfkill toggle wlan"
-        ", XF86Bluetooth, exec, rfkill toggle bluetooth"
-      ];
+      bind = $mainMod, L, exec, hyprlock
+      bind = $mainMod, left, movefocus, l
+      bind = $mainMod, right, movefocus, r
+      bind = $mainMod, up, movefocus, u
+      bind = $mainMod, down, movefocus, d
 
-      bindm = [
-        # Move/resize windows with mainMod + LMB/RMB and dragging
-        "$mainMod, mouse:272, movewindow"
-        "$mainMod, mouse:273, resizewindow"
-      ];
+      # Mediaplayer (spotify without SHIFT) binds and general volume control
+      bind = $mainMod, Z, exec, playerctl -p spotify previous
+      bind = $mainMod SHIFT, Z, exec, playerctl previous
 
-      bindl = [
-        # lock on lid switch closed or open or somth idk it works.
-        ", switch:on:Lid Switch, exec, swaylock"
-      ];
+      bind = $mainMod, X, exec, playerctl -p spotify next
+      bind = $mainMod SHIFT, X, exec, playerctl next
+      
+      bind = $mainMod, C, exec, playerctl -p spotify play-pause
+      bind = $mainMod SHIFT, C, exec, playerctl play-pause
+      
+      binde = $mainMod, V, exec, playerctl -p spotify volume 0.02-
+      binde = $mainMod SHIFT, V, exec, pamixer -d 2
+      
+      binde = $mainMod, B, exec, playerctl -p spotify volume 0.02+
+      binde = $mainMod SHIFT, B, exec, pamixer -i 2
+      
+      bind = $mainMod, SLASH, exec, pamixer -t
 
-      workspace = [
-        "special:kitty, on-created-empty:wezterm"
-        "special:telegram, on-created-empty:telegram-desktop"
-        "special:spotify, on-created-empty:wezterm spotify_player"
-      ];
+      # General window options
+      bind = $mainMod, W, killactive 
+      bind = $mainMod, F, fullscreen, 1 #maximize window
+      bind = $mainMod SHIFT, F, fullscreen, 0 #true fullscreen
+      bind = $mainMod, Q, togglefloating
+      bind = $mainMod, Y, exec, hyprctl keyword general:layout "dwindle" #switch to dwindle layout on fly
+      bind = $mainMod, U, exec, hyprctl keyword general:layout "master" #switch to master layout on fly
 
-      exec-once = [
-        "chpaper"
-        "waybar"
-        "[workspace 2 silent] wezterm"
-        "[workspace 9 silent] keepassxc"
-        "wl-paste -t text --watch ${pkgs.clipman}/bin/clipman store --no-persist"
-      ];
+      # Master layout control
+      bind = $mainMod SHIFT, U, layoutmsg, orientationcycle
+      bind = $mainMod, I, layoutmsg, cyclenext
+      bind = $mainMod SHIFT, I, layoutmsg, cycleprev
+      bind = $mainMod, O, layoutmsg, swapwithmaster master
+      bind = $mainMod SHIFT, O, layoutmsg, focusmaster auto
+      bind = $mainMod, BRACKETLEFT, layoutmsg, rollnext
+      bind = $mainMod, BRACKETRIGHT, layoutmsg, rollprev
 
-      # window rules
-      windowrulev2 = [
-         # telegram media viewer
-        "float, title:^(Media viewer)$"
-        # open stuff in specific workspaces
-        "workspace 2 silent, class:(firefox)"
-        "workspace 7 silent, class:(vlc)"
-        "workspace 8 silent, class:(org.pwmt.zathura)"
-        "workspace 9 silent, class:(org.keepassxc.KeePassXC)"
-        "workspace 13 silent, class:(org.qbittorrent.qBittorrent)"
-      ];
-    };
+      # Dwindle layout control
+      bind = $mainMod, P, pseudo
+      
+      # Move active window to a workspace with mainMod + SHIFT + [0-9]
+      bind = $mainMod SHIFT, 1, movetoworkspace, 1
+      bind = $mainMod SHIFT, 2, movetoworkspace, 2
+      bind = $mainMod SHIFT, 3, movetoworkspace, 3
+      bind = $mainMod SHIFT, 4, movetoworkspace, 4
+      bind = $mainMod SHIFT, 5, movetoworkspace, 5
+      bind = $mainMod SHIFT, 6, movetoworkspace, 6
+      bind = $mainMod SHIFT, 7, movetoworkspace, 7
+      bind = $mainMod SHIFT, 8, movetoworkspace, 8
+      bind = $mainMod SHIFT, 9, movetoworkspace, 9
+      bind = $mainMod SHIFT, 0, movetoworkspace, 10
+
+      bind = $mainMod SHIFT,left,movewindow,l
+      bind = $mainMod SHIFT,right,movewindow,r
+      bind = $mainMod SHIFT,up,movewindow,u
+      bind = $mainMod SHIFT,down,movewindow,d
+
+      bind = $mainMod_SHIFT,h,movewindow,l
+      bind = $mainMod_SHIFT,l,movewindow,r
+      bind = $mainMod_SHIFT,k,movewindow,u
+      bind = $mainMod_SHIFT,j,movewindow,d
+
+      # Resize windows
+      binde = $mainMod_ALT, right, resizeactive, 30 0
+      binde = $mainMod_ALT, left, resizeactive, -30 0
+      binde = $mainMod_ALT, up, resizeactive, 0 -30
+      binde = $mainMod_ALT, down, resizeactive, 0 30
+
+      
+      # Switch workspaces with mainMod + [0-9]
+      bind = $mainMod, 1, workspace, 1
+      bind = $mainMod, 2, workspace, 2
+      bind = $mainMod, 3, workspace, 3
+      bind = $mainMod, 4, workspace, 4
+      bind = $mainMod, 5, workspace, 5
+      bind = $mainMod, 6, workspace, 6
+      bind = $mainMod, 7, workspace, 7
+      bind = $mainMod, 8, workspace, 8
+      bind = $mainMod, 9, workspace, 9
+      bind = $mainMod, 0, workspace, 10
+
+      # Scroll through existing workspaces with mainMod + scroll
+      bind = $mainMod, mouse_down, workspace, e-1
+      bind = $mainMod, mouse_up, workspace, e+1
+      
+      # Waybar
+      bind = $mainMod, B, exec, pkill -SIGUSR1 waybar
+      bind = $mainMod SHIF, B, exec, pkill -SIGUSR2 waybar 
+      
+      # Switch workspaces relative to the active workspace with mainMod + CTRL + [←→]
+      bind = $mainMod CTRL, right, workspace, r+1 
+      bind = $mainMod CTRL, left, workspace, r-1
+      
+      # move to the first empty workspace instantly with mainMod + CTRL + [↓]
+      bind = $mainMod CTRL, down, workspace, empty 
+      bind = $mainMod,g,togglegroup
+      bind = ALT, TAB, exec, ~/.config/hypr/scripts/tab_floating_windows
+      bind = $mainMod,tab,changegroupactive
+      
+      # trigger when the switch is turning off
+      bindl = , switch:off:Lid Switch,exec,hyprctl keyword monitor "eDP-1, 1920x1200, 0x0, 1"
+      # trigger when the switch is turning on
+      bindl = , switch:on:Lid Switch,exec,hyprctl keyword monitor "eDP-1, disable"
+
+      # bindl=,switch:Lid Switch,exec,~/.config/hypr/scripts/lock
+      # bindl=,switch:Lid Switch,exec,systemctl suspend
+      
+
+      
+      blurls=rofi
+      blurls=waybar
+      blurls=gtk-layer-shell
+    '';
   };
 }

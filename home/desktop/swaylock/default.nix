@@ -8,7 +8,7 @@
   programs.swaylock = {
     enable = true;
     settings = {
-      image = "$HOME/Pictures/wallpapers/gruvbox/pc_gruvbox_nologo.png";
+      image = "$HOME/Pictures/wallpapers/gruvbox/hypr/pc_gruvbox_nologo.png";
       color = "504945";
       inside-color = "89b482";
       font = "JetBrainsMono Nerd Font Medium";

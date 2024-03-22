@@ -1,12 +1,3 @@
-# putting this here cuz i dont know where else to put it
-# base08 - red
-# base09 - orange
-# base0A - yellow
-# base0B - green
-# base0C - aqua/cyan
-# base0D - blue
-# base0E - purple
-# base0F - brown
 {
   inputs,
   pkgs,
@@ -22,42 +13,56 @@
   gtk = {
     enable = true;
     theme = {
-      package = pkgs.gruvbox-dark-gtk;
-      name = "gruvbox-dark";
+      name = "Gruvbox-Dark-B-LB";
     };
     cursorTheme.name = "Bibata-Modern-Classic";
     iconTheme = {
-      package = pkgs.gruvbox-dark-icons-gtk;
-      name = "gruvbox-dark";
+      name = "Gruvbox-Plus-Dark";
     };
     font = {
-      name = "JetBrainsMono Nerd Font Medium";
-      size = 9;
+      name = "Noto Sans";
+      size = 10;
     };
-    gtk3 = {
-      extraConfig = {
-        Settings = ''
-          gtk-application-prefer-dark-theme=1
-        '';
-      };
+    gtk3.extraConfig = {
+      Settings = ''
+        gtk-application-prefer-dark-theme=true
+        gtk-cursor-theme-size=24
+        gtk-decoration-layout=icon:minimize,maximize,close
+        gtk-enable-animations=true
+        gtk-modules=colorreload-gtk-module:window-decorations-gtk-module
+        gtk-primary-button-warps-slider=false
+        gtk-xft-dpi=98304
+      '';
     };
 
-    gtk4 = {
-      extraConfig = {
-        Settings = ''
-          gtk-application-prefer-dark-theme=1
-        '';
-      };
+    gtk4.extraConfig = {
+      Settings = ''
+        gtk-application-prefer-dark-theme=true
+        gtk-cursor-theme-size=24
+        gtk-decoration-layout=icon:minimize,maximize,close
+        gtk-enable-animations=true
+        gtk-modules=colorreload-gtk-module:window-decorations-gtk-module
+        gtk-primary-button-warps-slider=false
+        gtk-xft-dpi=98304
+      '';
     };
-    gtk2.configLocation = "${config.xdg.configHome}/gtk-2.0/gtkrc";
   };
 
   qt = {
     enable = true;
-    platformTheme = "gtk3";
+    platformTheme = "gnome";
     style = {
       name = "adwaita-dark";
-      package = pkgs.adwaita-qt;
+      package = pkgs.adwaita-qt6;
     };
+  };
+  xdg.configFile = {
+    "gtk-4.0/assets".source = "/home/olafkfreund/.themes/Gruvbox-Dark-B-LB/gtk-4.0/assets";
+    "gtk-4.0/gtk.css".source = "/home/olafkfreund/.themes/Gruvbox-Dark-B-LB/gtk-4.0/gtk.css";
+    "gtk-4.0/gtk-dark.css".source = "/home/olafkfreund/.themes/Gruvbox-Dark-B-LB/gtk-4.0/gtk-dark.css";
+    "gtk-3.0/assets".source = "/home/olafkfreund/.themes/Gruvbox-Dark-B-LB/gtk-3.0/assets";
+    "gtk-3.0/gtk.css".source = "/home/olafkfreund/.themes/Gruvbox-Dark-B-LB/gtk-3.0/gtk.css";
+    "gtk-3.0/gtk-dark.css".source = "/home/olafkfreund/.themes/Gruvbox-Dark-B-LB/gtk-3.0/gtk-dark.css";
+    "gtk-2.0/.gtkrc-2.0".source = "/home/olafkfreund/.themes/Gruvbox-Dark-B-LB/gtk-2.0/gtkrc.hidpi";
   };
 }

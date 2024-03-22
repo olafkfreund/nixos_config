@@ -5,6 +5,7 @@
     deadnix #Find and remove unused code in .nix source files
     nixpkgs-fmt #Nix code formatter for nixpkgs
     nixpkgs-lint
+    nix-update
     nix-doc
     nix-bash-completions
     nix-zsh-completions

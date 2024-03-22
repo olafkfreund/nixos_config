@@ -1,293 +1,517 @@
 { inputs
 , pkgs
+, pkgs-stable
 , config
-, nix-colors
+, self
+, lib
 , ...
 }:{
   programs.waybar = {
     enable = true;
+    package = pkgs-stable.waybar;
     settings = {
       mainBar = {
-        layer = "top";
-        position = "top";
-        height = 30;
-        spacing = 4;
+        "layer" = "top";
+        "position" = "top";
+        "height" = 0;
+        #"width" = 1800;
+        "margin-bottom" = 5;
+        "spacing" = 0;
+        "fixed-center" = true;
+        "exclusive" = true;
+        "passthrough" = false;
+        "mode" = "dock";
+        "reload_style_on_change" = true;
+        "gtk-layer-shell" = true;
 
-        modules-left = [ "custom/nixoslogo" "temperature" "hyprland/workspaces" "hyprland/submap" "custom/cmus" ];
-        modules-center = [ "idle_inhibitor" "clock" ];
-        modules-right = [ "pulseaudio" "network" "backlight" "disk" "battery#bat0" "battery#bat1" "tray" ];
+        "modules-left" = [ "hyprland/workspaces" "hyprland/window"];
+        "modules-right" = [
+          "idle_inhibitor"
+          "memory"
+          "cpu"
+          "battery"
+          "pulseaudio"
+          "pulseaudio#microphone"
+          "network"
+          "backlight"
+          "custom/monitor"
+          "custom/cycle_wall"
+          "hyprland/language"
+          "tray"
+        ];
+        "modules-center" = [ "clock" "group/group-power" ];
 
-        "custom/cmus" = {
-          format = "󰎆  {}";
-          max-length = 30;
-          interval = 5;
-          exec = ''cmus-remote -C "format_print '%t'"''; # %a artist - %t title
-          exec-if = "pgrep cmus";
-          on-click-right = "cmus-remote -n"; # next
-          on-click-middle = "cmus-remote -u"; # toggle pause
-          on-click = "cmus-remote -r"; # prev
-          on-scroll-up = "cmus-remote -k +1";
-          on-scroll-down = "cmus-remote -k -1";
-          escape = true; # handle markup entities
-          tooltip = false;
+        "custom/cycle_wall" = {
+          "format" = " ";
+          "on-click" = "~/.config/hypr/scripts/wall";
+          "tooltip" = true;
+          "tooltip-format" = "Change wallpaper";
         };
-
-        "custom/nixoslogo" = {
-          format = " 󱄅 ";
-          tooltip = false;
-          on-click = "rofi -show drun";
-          on-click-right = "rofi-powermenu";
-          on-click-middle = "chpaper";
-        };
-
-        keyboard-state = {
-          numlock = true;
-          capslock = true;
-          format = "{name} {icon}";
-          format-icons = {
-            locked = "";
-            unlocked = "";
+        "idle_inhibitor" = {
+          "format" = "{icon}";
+          "format-icons" = {
+          "activated" = "󰥔";
+          "deactivated" = "";
           };
         };
+        "cava"= {
+            "framerate" = 30;
+            "autosens" = 0;
+            "sensitivity" = 120;
+            "bars" = 14;
+            "lower_cutoff_freq" = 50;
+            "higher_cutoff_freq" = 10000;
+            "method" = "pulse";
+            "source" = "auto";
+            "stereo" = true;
+            "reverse" = false;
+            "bar_delimiter" = 0;
+            "monstercat" = false;
+            "waves" = false;
+            "noise_reduction" = 0.77;
+            "input_delay" = 2;
+            "format-icons" = ["▁" "▂" "▃" "▄" "▅" "▆" "▇" "█" ];
+            "actions" = {
+              "on-click-right" = "kitty -e cava";
+                      };
+        };
+        "group/group-power" = {
+          orientation = "inherit";
+          drawer = {
+            transition-duration = 500;
+            transition-left-to-right = false;
+        };
+        modules = [
+          "custom/power"
+          "custom/quit"
+          "custom/lock"
+          "custom/reboot"
+        ];
+      };
+
+        "custom/quit" = {
+          format = "󰗼";
+          on-click = "${pkgs.hyprland}/bin/hyprctl dispatch exit";
+          tooltip = false;
+        };
+
+       "custom/lock" = {
+          format = "󰍁";
+          on-click = "${lib.getExe pkgs.hyprlock}";
+          tooltip = false;
+        };
+
+        "custom/reboot" = {
+          format = "󰜉";
+          on-click = "${pkgs.systemd}/bin/systemctl reboot";
+          tooltip = false;
+        };
+
+        "custom/power" = {
+          format = "";
+          on-click = "${pkgs.systemd}/bin/systemctl poweroff";
+          tooltip = false;
+        };
+
+        "custom/monitor" = {
+          format = "";
+          on-click = "${pkgs.wdisplays}/bin/wdisplays";
+          tooltip = false;
+        };
+
         "hyprland/workspaces" = {
-          format = "{icon}";
-          on-scroll-up = "hyprctl dispatch workspace e+1";
-          on-scroll-down = "hyprctl dispatch workspace e-1";
-          on-click = "activate";
-        };
-        idle_inhibitor = {
-          format = "{icon}";
-          format-icons = {
-            activated = "";
-            deactivated = "";
+	        "format" = "{icon}";
+          "on-click" = "active";
+          "on-scroll-up" = "hyprctl dispatch workspace e-1";
+          "on-scroll-down" = "hyprctl dispatch workspace e+1";
+          "max-length" = 45;
+          "persistent-workspaces" = {
+            "1" = [];
+            "2" = [];
+            "3" = [];
+            "4" = [];
+            "5" = [];
+            "6" = [];
+            "7" = [];
+            "8" = [];
+            "9" = [];
+            "10" = [];
+            
           };
+	        "format-icons" = {
+          "1" = "";
+          "2" = "";
+          "3" = "󰙀";
+          "4" = "";
+          "5" = "";
+          "6" = "";
+          "7" = "";
+          "8" = "󰓇";
+          "9" = "";
+          "10" = "";
+		      "active" = "";
+		      "default" = "";
+          "urgent" = "";
+          "magic" = "󰐃";
+          "hidden" = "󰐃";
+          };
+	      };
+        "hyprland/window" = {
+          "format" = " {}";
+          "separate-outputs" = true;
         };
-        temperature = {
-          # "thermal-zone" = 2;
-          "hwmon-path" = "/sys/class/hwmon/hwmon6/temp1_input";
-          critical-threshold = 80;
-          # format-critical = "{temperatureC}°C {icon}";
-          format = "{temperatureC}°C";
-          # format-icons = ["" "" ""];
+        "tray" = {
+          "icon-size" = 21;
+          "spacing" = 4;
+          "show-passive-items" = true;
+          "max-length" = 20;
+          "min-length" = 10;
         };
-        tray = {
-          spacing = 10;
+        "hyprland/language" = {
+          "format" = " {}";
+          "format-en" = "Gb";
+          "format-nb" = "No";
+          "max-length" = 5;
+          "min-length" = 5;
+          "keyboard-name" = "at-translated-set-2-keyboard";
+          "on-click-right" = "~/.config/rofi/applets/bin/clipboard.sh";
         };
-        clock = {
-          interval = 60;
-          format = "   {:%H:%M}";
-          tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt> ";
-          # format-alt = "{:%Y-%m-%d}";
-          format-alt = "{:%a, %b %d, %Y (%R)}";
-          "calendar" = {
-            "mode" = "year";
-            "mode-mon-col" = 3;
-            "weeks-pos" = "";
-            "on-click-right" = "mode";
-            "format" = {
-              "months" = "<span color='#7daea3'><b>{}</b></span>";
-              "days" = "<span color='#2a2827'><b>{}</b></span>";
-              "weeks" = "<span color='#d8a657'><b>W{}</b></span>";
-              "weekdays" = "<span color='#bd6f3e'><b>{}</b></span>";
-              "today" = "<span color='#ea6962'><b><u>{}</u></b></span>";
+            "clock" = {
+            "format" = "{:%H:%M}  ";
+            "max-lenght" = 25;
+            "min-length" = 6;
+            "format-alt" = "{:%A, %B %d, %Y (%R)}  ";
+            "tooltip-format" = "<tt><small>{calendar}</small></tt>";
+            "calendar" = {
+                "mode" = "year";
+                "mode-mon-col" = 3;
+                "weeks-pos" = "right";
+                "on-scroll" = 1;
+                "on-click-right" = "mode";
+                "format" = {
+                    "months" = "<span color='#${config.colorScheme.palette.base06}'><b>{}</b></span>";
+                    "days" =   "<span color='#${config.colorScheme.palette.base06}'><b>{}</b></span>";
+                    "weeks" =  "<span color='#${config.colorScheme.palette.base09}'><b>W{}</b></span>";
+                    "weekdays" = "<span color='#${config.colorScheme.palette.base05}'><b>{}</b></span>";
+                    "today" =   "<span color='#${config.colorScheme.palette.base08}'><b><u>{}</u></b></span>";
+                    };
+              };
+            "actions" =  {
+                        "on-click-right" = "mode";
+                        "on-click-forward" = "tz_up";
+                        "on-click-backward" = "tz_down";
+                        "on-scroll-up" = "shift_up";
+                        "on-scroll-down" = "shift_down";
+                      };
             };
+        "cpu" = {
+          "interval" = 1;
+          "format" = "󰍛 {usage}%";
+          "format-icons" = ["▁" "▂" "▃" "▄" "▅" "▆" "▇" "█"];
+          "on-click" = "kitty --class system_monitor -e btm";
+          "max-lenght" = 25;
+          "min-length" = 6;
+        };
+        "memory" = {
+          "format" = "󰾆 {percentage}%";
+          "interval" = 1;
+          "on-click" = "kitty --class system_monitor -e btm";
+          "max-lenght" = 25;
+          "min-length" = 6;
+        };
+        "backlight" = {
+          "format" = "{icon}{percent}%";
+          "format-icons" = [" " " " " " " " " " " " " " " " " "];
+          "on-scroll-up" = "brightnessctl set 30+";
+          "on-scroll-down" = "brightnessctl set 30-";
+          "max-lenght" = 25;
+          "min-length" = 6;
+        };
+        "battery" = {
+          "states" = {
+            "good" = 80;
+            "warning" = 30;
+            "critical" = 20;
           };
-          "actions" = {
-            "on-click-right" = "mode";
-            # "on-scroll-up" = "shift_up";
-            # "on-scroll-down" = "shift_down";
+          "format" = "{icon} {capacity}%";
+          "format-charging" = " {capacity}%";
+          "format-plugged" = " {capacity}%";
+          "format-alt" = "{time} {icon}";
+          "format-icons" = ["󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
+        };
+        "network" = {
+          "format-wifi" = "󰤨 {essid}";
+          "format-ethernet" = "󱘖 Wired";
+          "tooltip-format" = "󱘖 {ipaddr}  {bandwidthUpBytes}  {bandwidthDownBytes}";
+          "format-linked" = "󱘖 {ifname} (No IP)";
+          "format-disconnected" = " Disconnected";
+          "format-alt" = "󰤨 {signalStrength}%";
+          "on-click" = "networkmanager_dmenu";
+        };
+        "bluetooth" = {
+          "format" = "";
+          "format-disabled" = ""; # an empty format will hide the module
+          "format-connected" = " {num_connections}";
+          "tooltip-format" = " {device_alias}";
+          "tooltip-format-connected" = "{device_enumerate}";
+          "tooltip-format-enumerate-connected" = " {device_alias}";
+        };
+        "disk" = {
+          "interval" = 30;
+          "format" = "󰋊 {percentage_used}%";
+          "path" = "/";
+          "tooltip" = true;
+          "tooltip-format" = "HDD - {used} used out of {total} on {path} ({percentage_used}%)";
+          "on-click" = "kitty --class system_monitor -e ncdu --color dark";
+        };
+        "pulseaudio" = {
+          "format" = "{icon} {volume}";
+          "format-muted" = "婢";
+          "on-click" = "pavucontrol -t 3";
+          "tooltip-format" = "{icon} {desc} // {volume}%";
+          "scroll-step" = 5;
+          "format-icons" = {
+            "headphone" = "";
+            "hands-free" = "";
+            "headset" = "";
+            "phone" = "";
+            "portable" = "";
+            "car" = "";
+            "default" = ["" "" ""];
+            }; 
           };
+          "custom/playerctl" = {
+            "format" = "{icon}  <span>{}</span>";
+            "return-type" = "json";
+            "exec"=  "playerctl -p spotify metadata -f '{\"text\": \"{{markup_escape(title)}} - {{markup_escape(artist)}} {{ duration(position) }}/{{ duration(mpris:length) }}\", \"tooltip\": \"{{markup_escape(title)}} - {{markup_escape(artist)}}  {{ duration(position) }}/{{ duration(mpris:length) }}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' -F";
+            "tooltip" = false;
+            "on-click-middle" = "playerctl -p spotify previous";
+            "on-click" = "playerctl -p spotify play-pause";
+            "on-click-right" = "playerctl -p spotify next";
+            "on-scroll-up" = "playerctl -p spotify volume 0.02+";
+            "on-scroll-down" = "playerctl -p spotify volume 0.02-";
+            "format-icons" = {
+                "Paused" = "";
+                "Playing" = "";
+            };
         };
-        disk = {
-          format = "{free} 󰋊";
-          path = "/";
-          format-alt = "{used} 󱁋";
-        };
-        backlight = {
-          format = "{percent}% {icon}";
-          on-scroll-up = "light -A 1";
-          on-scroll-down = "light -U 1";
-          # format-icons = [ "" "" "" "" "" "" "" "" "" ];
-          format-icons = [ "󰃞" "󰃞" "󰃟" "󰃟" "󰃟" "󰃠" "󰃠" "󰃠" "󰃠" ];
-        };
-        "battery#bat0" = {
-          adapter = "AC";
-          bat = "BAT0";
-          states = {
-            warning = 30;
-            critical = 10;
+         "pulseaudio#microphone" = {
+           "format" = "{format_source}";
+           "format-source" = "";
+           "format-source-muted" = "";
+           "on-click" = "pavucontrol -t 4";
+           "tooltip-format" = "{format_source} {source_desc} // {source_volume}%";
+           "scroll-step" = 5;
           };
-          format = "{capacity}% {icon}";
-          format-charging = "{capacity}% ";
-          format-plugged = "{capacity}% ";
-          format-alt = "{time} {icon}";
-          format-icons = [ "" "" "" "" "" ];
-        };
-        "battery#bat1" = {
-          bat = "BAT1";
-          states = {
-            good = 95;
-            warning = 30;
-            critical = 15;
-          };
-          format = "{capacity}% {icon}";
-          format-charging = "{capacity}% ";
-          format-plugged = "{capacity}% ";
-          format-alt = "{time} {icon}";
-          format-icons = [ "" "" "" "" "" ];
-        };
-        network = {
-          format-wifi = "{essid} ({signalStrength}%) 󰤨";
-          format-ethernet = "{ipaddr}/{cidr} ";
-          tooltip-format = "<span color='#7daea3'>{ifname} via {gwaddr} </span>";
-          format-linked = "{ifname} (No IP) ";
-          format-disconnected = "Disconnected ⚠";
-          format-alt = "{ifname}: {ipaddr}/{cidr}";
-        };
-        pulseaudio = {
-          states = {
-            high = 80;
-          };
-          format = "{volume}% {icon} {format_source}";
-          format-bluetooth = "{volume}% {icon} {format_source}";
-          format-bluetooth-muted = "󰝟 {icon} {format_source}";
-          format-muted = "󰝟 {format_source}";
-          format-source = "{volume}% ";
-          format-source-muted = "";
-          format-icons = {
-            headphone = "󰋋";
-            hands-free = "";
-            headset = "";
-            phone = "";
-            portable = "";
-            car = "";
-            default = [ "󰕿" "󰖀" "󰕾" ];
-          };
-        };
       };
     };
 
     style = ''
       * {
-        border: none;
-        font-family: JetBrainsMono, Font Awesome, Roboto, Arial, sans-serif;
-        font-size: 12px;
-        color: #fbf1c7;
-        border-radius: 20px;
-      }
-
-      window {
-        font-weight: bold;
-      }
-
-      window#waybar {
-        background: rgba(0, 0, 0, 0);
-      }
-
-      /*-----module groups----*/
-      .modules-right {
-        background-color: @theme_base_color;
-        color: @theme_text_color;
-        margin: 4px 10px 0 0;
-      }
-      .modules-center {
-        background-color: @theme_base_color;
-        color: @theme_text_color;
-        margin: 4px 120px 0 0;
-      }
-      .modules-left {
-        margin: 4px 0 0 10px;
-        background-color: @theme_base_color;
-        color: @theme_text_color;
-      }
-      /*-----modules indv----*/
-        #workspaces button {
-          padding: 1px 5px;
-          /*background-color: transparent;*/
+        font-family: 'JetBrainsMono Nerd Font';
+        font-size: 15px;
+        /* font-weight: bold; */
+        border-radius: 0px;
+        margin: 0;
         }
+
+        window#waybar {
+          background-color: #${config.colorScheme.palette.base00};
+          border-radius: 10px;
+          padding-top: 0px;
+          margin-top: 0;
+        }
+
+        .modules-right {
+          font-size: 15px;
+          background-color: #${config.colorScheme.palette.base00};
+          border-radius: 10px;
+          padding: 5px 10px;
+          margin-top: 5px;
+          margin-bottom: 5px;
+          margin-right: 0.1rem;
+        }
+
+        .modules-left {
+          font-size: 15px;
+          margin-left: 10px;
+          background-color: #${config.colorScheme.palette.base00};
+          margin-top: 5px;
+          margin-bottom: 5px;
+          padding: 1px 0px;
+          border-radius: 10px;
+        }
+
+        .modules-center {
+          font-size: 15px;
+          margin-left: 10px;
+          background-color: #${config.colorScheme.palette.base00};
+          margin-top: 5px;
+          margin-bottom: 5px;
+          padding: 5px 10px;
+          border-radius: 10px;
+        }
+
+        tooltip {
+          background: #${config.colorScheme.palette.base00};
+          border-radius: 10px;
+        }
+
+        tooltip label {
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base00};
+          border-radius: 10px;
+        }
+
+        tooltip * {
+          border-radius: 10px;
+        }
+
+        #workspaces {
+          margin: 1px;
+          margin-right: 0.3rem;
+          margin-left: 0.3rem;
+        }
+
+        #workspaces button {
+          margin: 1px;
+          color: #${config.colorScheme.palette.base06};
+          font-weight: bolder;
+          font-style: normal;
+          margin: 0.2rem 0.2rem;
+          border-radius: 20px;
+        }
+
         #workspaces button:hover {
           box-shadow: inherit;
-          background-color: #7daea3;
-        }
-        #custom-nixoslogo button:hover {
-          box-shadow: inherit;
-          background-color: #7daea3;
-        }
-
-        #workspaces button.focused {
-          background-color: #e78a4e;
-          color: @theme_base_color;
-          box-shadow: inset 0 -3px #ffffff;
+          text-shadow: inherit;
+          background-color: #${config.colorScheme.palette.base06};
+          color: #${config.colorScheme.palette.base00};
+          border-radius: 10px;
         }
 
-        #custom-cmus {
-          background-color: #d8a657;
-          color: @theme_base_color;
-        }
-
-        #network {
-          background-color: #7daea3;
-          color: @theme_base_color;
+        #workspaces button.active {
+          color: #${config.colorScheme.palette.base06};
+          background-color: rgba(125, 174, 163, 0.9);
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
+          transition: all 0.1s ease-in-out;
+          border-radius: 10px;
         }
 
         #clock {
-          background-color: #2a2827;
-          color: @theme_base_color;
+          color: #${config.colorScheme.palette.base06};
+        }
+
+        #custom-power {
+          font-size: 17px;
+          margin: 10px;
+          color: #${config.colorScheme.palette.base06};
+          padding: 0 0.1em 0 0.1em;
+        }
+
+        #custom-monitor {
+          font-size: 17px;
+          margin: 10px;
+          color: #${config.colorScheme.palette.base06};
+          padding: 0 0.1em 0 0.1em;
+        }
+        
+        #custom-quit, #custom-lock, #custom-reboot {
+          font-size: 17px;
+          color: #${config.colorScheme.palette.base06};
+          margin: 10px;
+          padding: 0 0.1em 0 0.1em;
+        }
+
+        #custom-updates {
+          padding-left: 1rem;
+        }
+
+        #custom-spotify {
+          padding: 0 0 0 1.5em;
+          border-radius: 10 0 0 10;
+        }
+        #memory {
+          color: #${config.colorScheme.palette.base06};
+          padding: 0 0.3em 0 0.5em;
+          border-radius: 10 0 0 10;
+        }
+
+        #pulseaudio {
+          margin: 0;
+          padding: 0 0.5em 0 0.4em;
+          color: #${config.colorScheme.palette.base06};
+        }
+
+        #backlight {
+          margin: 0;
+          padding: 0 0.5em 0 0.4em;
+          color: #${config.colorScheme.palette.base06};
+        }
+
+        #cpu {
+          margin: 0;
+          padding: 0 0.1em 0 0.1em;
+          color: #${config.colorScheme.palette.base06};
+        }
+
+        #network {
+          margin: 0;
+          padding: 0 0.4em 0 0.5em;
+          color: #${config.colorScheme.palette.base06};
+        }
+
+        #custom-cycle_wall {
+          margin: 0;
+          padding: 0 0.5em;
+          color: #${config.colorScheme.palette.base06};
+        }
+        
+        #idle_inhibitor {
+          margin: 0;
+          padding: 0 0.5em;
+          color: #fe8019;
+        }
+
+        #language {
+          margin: 0;
+          padding: 0 0.1em;
+          color: #${config.colorScheme.palette.base06};
+        }
+
+        #tray {
+          margin: 0;
+          padding-right: 10px;
+          color: #${config.colorScheme.palette.base06};
+          border-radius: 0 10 10 0;
+        }
+
+        #battery {
+          margin: 0;
+          padding: 0 0.5em 0 0.8em;
+          color: #${config.colorScheme.palette.base06};
         }
 
         #disk {
-          background-color: #d3869b;
-          color: @theme_base_color;
+          margin: 0;
+          padding: 0 0.1em 0 0.1em;
+          color:  #${config.colorScheme.palette.base06};
         }
 
-        #temperature {
-          background-color: #e78a4e;
-          color: @theme_base_color;
+        #cava {
+          margin: 0;
+          padding: 0 0.1em 0 0.1em;
+          color:  #${config.colorScheme.palette.base06};
         }
 
-        #custom-nixoslogo {
-          padding: 0 0 0 5px;
-        }
-
-        #clock,
-        #backlight,
-        #disk,
-        #battery,
-        #cpu,
-        #memory,
-        #temperature,
-        #network,
-        #pulseaudio,
-        /*#custom-nixoslogo,*/
-        #custom-cmus,
-        #tray,
-        #idle_inhibitor {
-          padding: 0 10px 0 10px;
-        }
-
-
-        /*-----Indicators----*/
-        #idle_inhibitor.activated {
-          color: #2a2827;
-        }
-        #pulseaudio.muted {
-          color: #ea6962;
-        }
-        #pulseaudio:not(.high) {
-          color: #e78a4e;
-        }
-        #battery.charging {
-          color: #d8a657;
-        }
-        #battery.warning:not(.charging) {
-          color: #d8a657;
-        }
-        #battery.critical:not(.charging) {
-          color: #2a2827;
-          background-color: #ea6962;
-        }
-        #clock.calendar {
-          font-size: 8px;
+        #window {
+          color: #${config.colorScheme.palette.base06};
+          margin-left: 1rem;
+          margin-right: 1rem;
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
+          transition: all 0.1s ease-in-out;
+          border-radius: 0px;
+          font-size: 15px;
         }
     '';
   };

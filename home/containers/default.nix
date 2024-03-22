@@ -1,7 +1,6 @@
-{ ... }: {
-  imports = [
-    ./docker.nix
-    #./podman.nix
-    ./kubernetes.nix
+{ pkgs, ... }: {
+
+home.packages = with pkgs; [
+  distrobox # A minimal Linux distribution.
   ];
 }

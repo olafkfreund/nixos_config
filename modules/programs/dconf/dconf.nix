@@ -1,4 +1,7 @@
 
 { self, config, pkgs, ... }: {
-programs.dconf.enable = true;
+
+programs.dconf = {
+    enable = true;
+  };
 }

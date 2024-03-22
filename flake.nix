@@ -29,25 +29,59 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11";
+    
     nix-colors.url = "github:misterio77/nix-colors";
+    
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
     nixos-cosmic = {
       url = "github:lilyinstarlight/nixos-cosmic";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    #nix-colors.url = "github:misterio77/nix-colors";
+    
     spicetify-nix.url = "github:the-argus/spicetify-nix";
+    
     hyprland.url = "github:hyprwm/Hyprland";
+    hyprland.inputs.nixpkgs.follows = "nixpkgs";
+
+    hyprland-plugins = {
+    url = "github:hyprwm/hyprland-plugins";
+    inputs.hyprland.follows = "hyprland";
+    };
+
     hyprpicker.url = "github:hyprwm/hyprpicker";
-    hypr-contrib.url = "github:hyprwm/contrib";
+    hyprpicker.inputs.nixpkgs.follows = "nixpkgs";
+    
+    hyprland-contrib.url = "github:hyprwm/contrib";
+    hyprland-contrib.inputs.nixpkgs.follows = "nixpkgs";
+    
+    agenix.url = "github:ryantm/agenix";
+    agenix.inputs.nixpkgs.follows = "nixpkgs";
+    
     nixpkgs-f2k.url = "github:moni-dz/nixpkgs-f2k";
+    
     nur.url = "github:nix-community/NUR";
+
+    hycov={
+      url = "github:DreamMaoMao/hycov";
+      inputs.hyprland.follows = "hyprland";
+    };
+    
+    hyprlock = {
+      url = "github:hyprwm/hyprlock";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    
+    hypridle = {
+      url = "github:hyprwm/hypridle";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
 
-  outputs = inputs@{
-    self, nixpkgs, nixpkgs-stable, nur, nixos-cosmic, nixpkgs-f2k, hyprland, nix-colors, spicetify-nix, home-manager, ... }: 
+  outputs = {
+    self, nixpkgs, nixpkgs-stable, hyprlock, hypridle, nur, hyprland-plugins, nixos-cosmic, nixpkgs-f2k, hyprland, nix-colors, spicetify-nix, home-manager, ... } @inputs : 
     {
     nixosConfigurations = {
       razer = nixpkgs.lib.nixosSystem {
@@ -79,6 +113,10 @@
               inherit self;
             };        
             home-manager.users.olafkfreund = import ./Users/olafkfreund/razer_home.nix;
+            home-manager.sharedModules = [
+              hyprlock.homeManagerModules.hyprlock
+              hypridle.homeManagerModules.hypridle
+	            ];
           }
         ];
       };
@@ -106,6 +144,8 @@
               inherit spicetify-nix;
               inherit nixpkgs-f2k;
               inherit hyprland;
+              inherit hypridle;
+              inherit hyprlock;
               inherit nix-colors;
               inherit home-manager;
               inherit nixpkgs-stable;

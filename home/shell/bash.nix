@@ -9,6 +9,7 @@
     bash-completion
   ];
 
+programs.zoxide.enableBashIntegration = true;
 
 programs.bash = {
   enable = true;
@@ -30,6 +31,7 @@ programs.bash = {
     export CORDA_ARTIFACTORY_PASSWORD="AKCpBrw56m6sceapUZ2abMA6ZA2CH7MxNDbYgMYwmJTdG4jLfhLFjXVu2qcT8jFP7rEcXjdYM"
     source $HOME/.openai.sh
     eval "$(direnv hook bash)"
+    eval "$(atuin init bash)"
     #export DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock
   '';
 
@@ -49,8 +51,11 @@ programs.bash = {
 	  gitp = "git push";
 	  gitc = "git checkout";
 	  icat = "kitty +kitten icat";
+    neofetch = "neofetch --iterm2 ~/Pictures/1_d2RiMW4zoHLUK-751E38gQ.png --size 200";
     nri = "sudo nixos-rebuild switch --impure";
     nr = "sudo nixos-rebuild switch";
+    today = "curl -s https://wttr.in/London?1";
+    wttr = "curl -s https://wttr.in/London?0";
     fu = "sudo nix flake update";
     code = "code --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
 	  dbe = "distrobox enter";
