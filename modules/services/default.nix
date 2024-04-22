@@ -17,6 +17,7 @@
     ./cron/cron.nix
     ./atuin/default.nix
     ./logind/default.nix
+    ./auto-cpufreq/default.nix
   ];
 
 

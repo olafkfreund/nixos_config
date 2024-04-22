@@ -2,7 +2,7 @@
   
   programs.zellij = {
     enable = true;
-    enableBashIntegration = true;
+    enableBashIntegration = false;
     package = pkgs.zellij;
   };
 
@@ -163,8 +163,6 @@
                 bind "Alt k" "Alt Up" { MoveFocus "Up"; }
                 bind "Alt =" "Alt +" { Resize "Increase"; }
                 bind "Alt -" { Resize "Decrease"; }
-                bind "Alt [" { PreviousSwapLayout; }
-                bind "Alt ]" { NextSwapLayout; }
             }
             shared_except "normal" "locked" {
                 bind "Enter" "Esc" { SwitchToMode "Normal"; }

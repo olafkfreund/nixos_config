@@ -16,6 +16,8 @@ environment.sessionVariables = {
     XDG_CONFIG_HOME = "$HOME/.config";
     XDG_DATA_HOME   = "$HOME/.local/share";
     XDG_STATE_HOME  = "$HOME/.local/state";
+    GDK_SCALE = "2";
+    GDK_DPI_SCALE = "0.5";
 
     # Not officially in the specification
     XDG_BIN_HOME    = "$HOME/.local/bin";

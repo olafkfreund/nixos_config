@@ -8,5 +8,7 @@ home.packages = with pkgs; [
   wlroots
   wlr-randr
   wdisplays
+  wf-recorder
+  wl-screenrec
   ];
 }

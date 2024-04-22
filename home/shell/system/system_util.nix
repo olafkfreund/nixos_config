@@ -4,6 +4,7 @@ home.packages = with pkgs; [
   
   mtr
   iperf3
+  bc
   dnsutils
   ldns
   nmap
@@ -55,6 +56,12 @@ home.packages = with pkgs; [
   networkmanager
   networkmanagerapplet
   networkmanager_dmenu
+  gpg-tui
+  gpgme
+  #pass-wayland
+  keychain
+  netscanner
+  gawk
 
   ];
 }

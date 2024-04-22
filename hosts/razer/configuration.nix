@@ -22,6 +22,7 @@
       kitty
       neovim
       vim
+      polychromatic
       ];
     };
   networking.firewall.enable = false;

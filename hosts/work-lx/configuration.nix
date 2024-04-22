@@ -69,6 +69,7 @@
     devbox # faster nix-shells
     shellify # faster nix-shells
     github-desktop
+    polychromatic
   ];
   #
 

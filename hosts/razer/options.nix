@@ -5,7 +5,7 @@
 let
   # THINGS YOU NEED TO CHANGE
   username = "olafkfreund";
-  hostname = "work-lx";
+  hostname = "razer";
   userHome = "/home/${username}";
   flakeDir = "${userHome}/zaneyos";
   waybarStyle = "simplebar"; # simplebar, slickbar, or default
@@ -30,10 +30,10 @@ in {
   clock24h = false;
   theLocale = "en_US.UTF-8";
   theKBDLayout = "us";
-  theSecondKBDLayout = "de";
+  theSecondKBDLayout = "uk";
   theKBDVariant = "";
   theLCVariables = "en_US.UTF-8";
-  theTimezone = "America/Chicago";
+  theTimezone = "Europe/London";
   theShell = "bash"; # Possible options: bash, zsh
   theKernel = "latest"; # Possible options: default, latest, lqx, xanmod, zen
   sdl-videodriver = "x11"; # Either x11 or wayland ONLY. Games might require x11 set here
@@ -65,9 +65,6 @@ in {
   flatpak = false;
   enableZeroAD = true;
 
-  # Enable Support For
-  # Logitech Devices
-  logitech = true;
 
   # Enable Terminals
   # If You Disable All You Get Kitty

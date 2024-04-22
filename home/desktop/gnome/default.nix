@@ -11,5 +11,7 @@
     gnome.gnome-tweaks
     gnomeExtensions.gsconnect
     gnomeExtensions.user-themes
+    gnomeExtensions.appindicator
+    gimp
   ];
 }

@@ -25,13 +25,19 @@
     };
     gtk3.extraConfig = {
       Settings = ''
-        gtk-application-prefer-dark-theme=true
-        gtk-cursor-theme-size=24
-        gtk-decoration-layout=icon:minimize,maximize,close
-        gtk-enable-animations=true
-        gtk-modules=colorreload-gtk-module:window-decorations-gtk-module
-        gtk-primary-button-warps-slider=false
-        gtk-xft-dpi=98304
+        # gtk-cursor-theme-size=24
+        # gtk-toolbar-style=GTK_TOOLBAR_ICONS
+        # gtk-toolbar-icon-size=GTK_ICON_SIZE_LARGE_TOOLBAR
+        # gtk-button-images=0
+        # gtk-menu-images=0
+        # gtk-enable-event-sounds=1
+        # gtk-enable-input-feedback-sounds=0
+        # gtk-xft-antialias=1
+        # gtk-xft-hinting=1
+        # gtk-xft-hintstyle=hintslight
+        # gtk-xft-rgba=rgb
+        gtk-application-prefer-dark-theme=1
+
       '';
     };
 
@@ -39,11 +45,6 @@
       Settings = ''
         gtk-application-prefer-dark-theme=true
         gtk-cursor-theme-size=24
-        gtk-decoration-layout=icon:minimize,maximize,close
-        gtk-enable-animations=true
-        gtk-modules=colorreload-gtk-module:window-decorations-gtk-module
-        gtk-primary-button-warps-slider=false
-        gtk-xft-dpi=98304
       '';
     };
   };

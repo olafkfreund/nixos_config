@@ -4,6 +4,17 @@
   config,
   ...
 }:
+let 
+    animations.fast = true;
+    animations.moving = false;
+    animations.high = false;
+    decoration.rounding.more.blur = false;
+    decoration.rounding.all.blur = false;
+    decoration.no.rounding.blur = false;
+    gaps-big-no-border = false;
+    gaps-big-border = false;
+
+in 
 {
   imports = [
     ./hypr_dep.nix
@@ -30,19 +41,20 @@
 
     };
   };
+  
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable= true;
     # enableNvidiaPatches = true;
     extraConfig = ''
       # Globals #
+      #laptop
+      monitor=eDP-1,1920x1200@60,0x0,1
       #Work R3
-      monitor=DP-3,3440x1440@100,0x0,1,mirror,DP-3
+      monitor=DP-3,3440x1440@100,1920x0,1
       #home
-      monitor=DP-6,2560x1440@100,0x0,1,mirror,DP-6
-      #aptop
-      monitor=eDP-1,1920x1200@60,0x0,1,mirror,eDP-1
-      monitor=,preferred,auto, 1
+      monitor=DP-6,2560x1440@120,1920x0,1
+      #monitor=,preferred,auto, 1
       #wsbind=1,eDP-1
 
       xwayland {
@@ -66,7 +78,8 @@
       exec-once=dunst
       exec-once=kdeconnect-cli 
       exec-once=playerctld daemon
-      exec-once=$HOME/.config/hypr/scripts/start_wall
+      #exec-once=$HOME/.config/hypr/scripts/start_wall
+      exec-once=swww-daemon
       exec-once=hypridle
       exec-once=nm-applet --indicator
       exec-once=blueman-applet
@@ -86,20 +99,28 @@
       env = EDITOR="lvim";
       env = BROWSER="google-chrome-stable";
       env = TERMINAL="kitty";
-      env = GDK_BACKEND,wayland,x11
+      
       env = SDL_VIDEODRIVER,wayland
       env = CLUTTER_BACKEND,wayland
       env = XDG_CURRENT_DESKTOP,Hyprland
       env = XDG_SESSION_TYPE,wayland
       env = XDG_SESSION_DESKTOP,Hyprland
-      #env = XDG_CURRENT_DESKTOP,GNOME
       env = XCURSOR_THEME,Bibata-Modern-Ice
       env = XCURSOR_SIZE,16
+      #GTK
+      env = GDK_BACKEND,wayland,x11
       env = GTK_THEME,Gruvbox-Dark-B-LB
+      env = GDK_DPI_SCALE,1
+      #QT
       env = QT_QPA_PLATFORM, wayland
       env = QT_WAYLAND_DISABLE_WINDOWDECORATION, 1
       env = QT_AUTO_SCREEN_SCALE_FACTOR, 1
+      #Firefox & Thunderbird
       env = MOZ_ENABLE_WAYLAND, 1
+      #Nvidia
+      env = GBM_BACKEND,nvidia-drm
+      env = WLR_DRM_NO_ATOMIC,1
+      env = LIBVA_DRIVER_NAME,nvidia
       
 
 
@@ -128,9 +149,19 @@
 
       general {
           sensitivity=1.0 # for mouse cursor
+          ${if gaps-big-no-border == true then ''
+          gaps_in = 20
+          gaps_out = 40
+          border_size = 0
+          '' else if gaps-big-border == true then ''
+          gaps_in = 10
+          gaps_out = 14
+          border_size = 0
+          '' else ''
           gaps_in=4 
           gaps_out=8
           border_size=2
+          ''}
           no_border_on_floating=0
           col.active_border = rgba(${config.colorScheme.palette.base05}FF) rgba(${config.colorScheme.palette.base05}FF) 45deg
           col.inactive_border = rgba(${config.colorScheme.palette.base00}11) rgba(${config.colorScheme.palette.base00}11) 45deg
@@ -139,47 +170,124 @@
           layout = dwindle
       }
 
+      ${if decoration.rounding.more.blur == true then ''
       decoration {
-          blur {
-            enabled = yes
-            special = true
-            size = 6
-            passes = 3
-            new_optimizations = true
+        rounding = 0
+        blur {
+            enabled = true
+            size = 12
+            passes = 6
+            new_optimizations = on
             ignore_opacity = true
-            xray = false
-          }
+            xray = true
+            # blurls = waybar
+        }
+        active_opacity = 1.0
+        inactive_opacity = 0.6
+        fullscreen_opacity = 1.0
 
-          layerrule = blur, waybar
-          layerrule = ignorezero, waybar
-          layerrule = blur, notifications 
-          layerrule = ignorezero, notifications 
-          layerrule = blur, logout_dialog
-          windowrule = stayfocused, rofi
-          windowrule = animation popin 75%, rofi
-          windowrule = stayfocused, emote 
-          windowrule = animation popin 95%, emote
-
-
-          rounding=14
-          drop_shadow=1
-          shadow_ignore_window=true
-          shadow_offset=7 7
-          shadow_range=15
-          shadow_render_power=4
-          shadow_scale=0.99
-          col.shadow=rgba(000000BB)
-          dim_inactive=true
-          dim_strength=0.1
-          active_opacity= 0.92
-          inactive_opacity= 0.76
+        drop_shadow = true
+        shadow_range = 30
+        shadow_render_power = 3
+        col.shadow = 0x66000000
       }
+      '' else if decoration.rounding.all.blur == true then ''
+      decoration {
+    rounding = 10
+    blur {
+        enabled = true
+        size = 12
+        passes = 4
+        new_optimizations = on
+        ignore_opacity = true
+        xray = true
+        blurls = waybar
+    }
+    active_opacity = 0.9
+    inactive_opacity = 0.6
+    fullscreen_opacity = 0.9
 
+    drop_shadow = true
+    shadow_range = 30
+    shadow_render_power = 3
+    col.shadow = 0x66000000
+    }
+    '' else if decoration.no.rounding.blur == true then ''
+    decoration {
+    rounding = 0
+    blur {
+        enabled = true
+        size = 6
+        passes = 2
+        new_optimizations = on
+        ignore_opacity = true
+        xray = true
+        # blurls = waybar
+    }
+    active_opacity = 1.0
+    inactive_opacity = 0.8
+    fullscreen_opacity = 1.0
 
+    drop_shadow = true
+    shadow_range = 30
+    shadow_render_power = 3
+    col.shadow = 0x66000000
+    }
+    '' else ''
+    decoration {
+        blur {
+          enabled = yes
+          special = true
+          size = 6
+          passes = 3
+          new_optimizations = true
+          ignore_opacity = true
+          xray = false
+        }
+    layerrule = blur, waybar
+    layerrule = ignorezero, waybar
+    layerrule = blur, notifications 
+    layerrule = ignorezero, notifications 
+    layerrule = blur, logout_dialog
+    windowrule = stayfocused, rofi
+    windowrule = animation popin 75%, rofi
+    windowrule = stayfocused, emote 
+    windowrule = animation popin 95%, emote
+    rounding=14
+    drop_shadow=1
+    shadow_ignore_window=true
+    shadow_offset=7 7
+    shadow_range=15
+    shadow_render_power=4
+    shadow_scale=0.99
+    col.shadow=rgba(000000BB)
+    dim_inactive=true
+    dim_strength=0.1
+    active_opacity= 0.92
+    inactive_opacity= 0.76
+    }
+    ''}
 
       animations {
           enabled=true
-
+          ${if animations.fast == true then ''
+          bezier = linear, 0, 0, 1, 1
+          bezier = md3_standard, 0.2, 0, 0, 1
+          bezier = md3_decel, 0.05, 0.7, 0.1, 1
+          bezier = md3_accel, 0.3, 0, 0.8, 0.15
+          bezier = overshot, 0.05, 0.9, 0.1, 1.1
+          bezier = crazyshot, 0.1, 1.5, 0.76, 0.92 
+          bezier = hyprnostretch, 0.05, 0.9, 0.1, 1.0
+          bezier = fluent_decel, 0.1, 1, 0, 1
+          bezier = easeInOutCirc, 0.85, 0, 0.15, 1
+          bezier = easeOutCirc, 0, 0.55, 0.45, 1
+          bezier = easeOutExpo, 0.16, 1, 0.3, 1
+          animation = windows, 1, 3, md3_decel, popin 60%
+          animation = border, 1, 10, default
+          animation = fade, 1, 2.5, md3_decel
+          animation = workspaces, 1, 3.5, easeOutExpo, slide
+          animation = specialWorkspace, 1, 3, md3_decel, slidevert
+          '' else if animations.moving == true then ''
           bezier = linear, 0, 0, 1, 1
           bezier = md3_standard, 0.2, 0, 0, 1
           bezier = md3_decel, 0.05, 0.7, 0.1, 1
@@ -194,7 +302,20 @@
           bezier = drag, 0.2, 1, 0.2, 1
           bezier = pop, 0.1, 0.8, 0.2, 1
           bezier = liner, 1, 1, 1, 1
-          
+          '' else if animations.high == true then ''
+          bezier = wind, 0.05, 0.9, 0.1, 1.05
+          bezier = winIn, 0.1, 1.1, 0.1, 1.1
+          bezier = winOut, 0.3, -0.3, 0, 1
+          bezier = liner, 1, 1, 1, 1
+          animation = windows, 1, 6, wind, slide
+          animation = windowsIn, 1, 6, winIn, slide
+          animation = windowsOut, 1, 5, winOut, slide
+          animation = windowsMove, 1, 5, wind, slide
+          animation = border, 1, 1, liner
+          animation = borderangle, 1, 30, liner, loop
+          animation = fade, 1, 10, default
+          animation = workspaces, 1, 5, wind
+          '' else ''
           animation=windows,1,3,default,slide
           animation=windowsMove,1,3,overshot
           animation=windowsOut,1,3,default,popin
@@ -205,6 +326,7 @@
           #animation=workspaces,1,3.8,overshot,slidevert
           animation=border, 1, 10, overshot
           animation=borderangle, 1, 50, overshot, loop
+          ''}
       }
 
       dwindle {
@@ -222,7 +344,8 @@
       }
 
       # Window rules #
-      windowrulev2 = suppressevent maximize, class:.* # You'll probably like this.
+      windowrule = tile,^(Microsoft-edge)$
+      windowrulev2 = suppressevent maximize, class:.*
       windowrulev2 = workspace 8, class:^(Spotify)$
       windowrulev2 = workspace 5, class:^(Code)$
       windowrulev2 = float,class:^(pavucontrol)$
@@ -267,7 +390,7 @@
       bind = , XF86AudioLowerVolume, exec, amixer set Master 5%-
       bind = , XF86AudioMute, exec, amixer set Master toggle
       
-
+      #Kitty
       bind = $mainMod, E, exec, [float]kitty --hold sh -c yazi
       bind = $mainMod ALT, T, exec, kitty 
       
@@ -277,6 +400,9 @@
       bind = $mainMod, N, exec, dunstctl history-pop
       bind = $mainMod SHIFT, N, exec, dunstctl close-all
       
+      bind = CTRL, print, exec, grim -g \"$(slurp)\" - | wl-copy
+      bind = ALT, print, exec, grim -g \"$(slurp)\" - | swappy -f -
+
       bind = $mainMod, P, pin
       #bind = $mainMod SHIFT, P, unpin
       
@@ -285,7 +411,7 @@
 
       bind = $mainMod, K, exec, hyprctl kill
       bind = $mainMod CTRL, K, exec, list-hypr-bindings 
-      bind = $mainMod, M, exec, $HOME/.config/rofi/applets/bin/powermenu.sh 
+      bind = $mainMod, M, exec, list-hypr-bindings 
       
       # Special workspace (scratchpad)
       bind = $mainMod, S, togglespecialworkspace, magic
@@ -401,11 +527,8 @@
       # trigger when the switch is turning on
       bindl = , switch:on:Lid Switch,exec,hyprctl keyword monitor "eDP-1, disable"
 
-      # bindl=,switch:Lid Switch,exec,~/.config/hypr/scripts/lock
-      # bindl=,switch:Lid Switch,exec,systemctl suspend
-      
-
-      
+  
+          
       blurls=rofi
       blurls=waybar
       blurls=gtk-layer-shell

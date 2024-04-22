@@ -35,7 +35,7 @@
         markup = "full";
         origin = "top-right";
         offset = "10x10";
-        format = "<b>%s</b>\n%b";
+        format = "<b>%s</b>''\n%b";
         alignment = "left";
         show_age_threshold = 60;
         word_wrap = true;
@@ -90,7 +90,7 @@
         appname = "network";
         new_icon = "network";
         summary = "*";
-        format = "<span size='x-large' weight='bold'>%s</span>\n<span font_desc='Cooper Hewitt,Iosevka Nerd Font 12'>%b</span>";
+        format = "<span size='x-large' weight='bold'>%s</span>''\n<span font_desc='Cooper Hewitt,Iosevka Nerd Font 12'>%b</span>";
       };
       NetworkManager_Applet = {
         appname = "NetworkManager Applet";

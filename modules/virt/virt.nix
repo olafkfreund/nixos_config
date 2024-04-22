@@ -43,6 +43,8 @@
     win-virtio
     virtualbox
     quickgui
+    quickemu
+    quickgui
 
   ];
 

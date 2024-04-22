@@ -11,5 +11,8 @@
     nix-zsh-completions
     nixos-container
     nixos-generators #A utility for Nixpkgs contributors to check Nixpkgs for common errors
+    nh
+    nvd
+    nix-output-monitor
   ];
 }

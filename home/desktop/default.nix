@@ -17,6 +17,8 @@
      ./neofetch/default.nix
      ./gnome/default.nix
      ./wlr/default.nix
+     ./gaming/default.nix
+     ./sound/default.nix
   ];
 
   home.packages = with pkgs; [

@@ -14,7 +14,7 @@ home.packages = with pkgs; [
   # libsForQt5.kdegraphics-thumbnailers
   # libsForQt5.kio
   # libsForQt5.kio-extras
-  # libsForQt5.qtwayland
+  libsForQt5.qtwayland
   # libsForQt5.krfb
   # libsForQt5.qtstyleplugins
   # libsForQt5.discover
@@ -35,7 +35,7 @@ home.packages = with pkgs; [
   # kdePackages.kcmutils
   # kdePackages.kgpg
   # kdePackages.krfb
-  # kdePackages.ksvg
+  kdePackages.ksvg
   # kdePackages.waylib
   # kdePackages.wayqt
   # kdePackages.wayland-protocols
