@@ -2,7 +2,7 @@
   
   programs.wezterm = {
     enable = true;
-    package = nixpkgs-f2k.packages.${pkgs.system}.wezterm-git;
+    # package = nixpkgs-f2k.packages.${pkgs.system}.wezterm-git;
     extraConfig = ''
       -- +----------------------------+
       -- | WezTerm Configuration file |
@@ -16,7 +16,7 @@
 
       local font_normal = {
         family = 'Jetbrains Mono Nerd Font',
-        weight = 'Regular',
+        weight = 'Normal',
         italic = false
       }
 

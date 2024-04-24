@@ -17,7 +17,7 @@ services.xserver = {
   videoDrivers = [ "nvidia" ]; 
 };  
 services = {
-  displayManager.sddm.enable = true;
+  displayManager.sddm.enable = false;
   displayManager.sddm.wayland.enable = true;
   displayManager.sddm.theme = "astronaut";
   displayManager.sddm.enableHidpi = true;
@@ -25,7 +25,7 @@ services = {
 
 ##Cosmic
 #services.displayManager.cosmic-greeter.enable = true;
-services.desktopManager.cosmic.enable = true;
+#services.desktopManager.cosmic.enable = true;
 
 environment.systemPackages = let themes = pkgs.callPackage ./sddm-themes.nix {}; in [ 
   pkgs.sddm-kcm

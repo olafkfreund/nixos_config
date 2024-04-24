@@ -6,5 +6,7 @@ home.packages = with pkgs; [
     shfmt
     ncurses
     cmakeCurses
+    upbound
+    crossplane-cli
   ];
 }

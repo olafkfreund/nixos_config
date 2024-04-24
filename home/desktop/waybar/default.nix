@@ -17,8 +17,8 @@
         #"width" = 1800;
         "margin-top" = 10;
         "margin-bottom" = 3;
-        "margin-left" = 10;
-        "margin-right" = 10;
+        "margin-left" = 200;
+        "margin-right" = 200;
         "spacing" = 3;
         "fixed-center" = false;
         "exclusive" = true;
@@ -176,7 +176,6 @@
             transition-left-to-right = false;
           };
           modules = [
-            "hyprland/language"
             "custom/cycle_wall"
             "custom/monitor"
           ];
@@ -200,10 +199,10 @@
           "on-click-right" = "~/.config/rofi/applets/bin/clipboard.sh";
         };
             "clock" = {
-            "format" = "{:%H:%M}  ";
+            "format" = "{:%H:%M}";
             "max-lenght" = 25;
             "min-length" = 6;
-            "format-alt" = "{:%A, %B %d, %Y (%R)}  ";
+            "format-alt" = "{:%A, %B %d, %Y (%R)}";
             "tooltip-format" = "<tt><small>{calendar}</small></tt>";
             "calendar" = {
                 "mode" = "year";
@@ -341,8 +340,9 @@
 
         window#waybar {
           background-color: #${config.colorScheme.palette.base00};
-          border-radius: 0px;
-          padding-top: 0px;
+          border-radius: 6px;
+          /* padding-top: 0px; */
+          border: 2px solid rgba(29, 32, 33, 0.5);
           margin-top: 0;
         }
 

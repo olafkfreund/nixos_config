@@ -62,6 +62,17 @@ home.packages = with pkgs; [
   keychain
   netscanner
   gawk
-
+  cups
+  ghostscript
+  # sane-backends
+  dbus
+  libjpeg
+  hplipWithPlugin 
+  avahi
+  sane-airscan
+  xsane
+  simple-scan
+  libtool
+  system-config-printer
   ];
 }

@@ -14,9 +14,10 @@ in
   };
   hardware.sane = {
     enable = true;
-    extraBackends = [pkgs.sane-airscan];
+    extraBackends = [pkgs.hplipWithPlugin];
     disabledDefaultBackends = ["escl"];
   };
+  services.printing.drivers = [ pkgs.hplipWithPlugin ];
   programs.system-config-printer.enable = true;
   users.users.${username}.extraGroups = ["scanner" "lp"];
 }

@@ -2,7 +2,7 @@
 
 home.packages = with pkgs; [
   cargo
-  #cargo-ui
-  #cargo-update
+  cargo-ui
+  cargo-update
   ];
 }

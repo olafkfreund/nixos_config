@@ -94,6 +94,7 @@
           nur.nixosModules.nur
           home-manager.nixosModules.home-manager
           nixos-cosmic.nixosModules.default
+          inputs.nix-colors.homeManagerModules.default
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;

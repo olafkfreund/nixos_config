@@ -74,15 +74,17 @@ in
       exec-once = gsettings set org.gnome.desktop.interface icon-theme "Gruvbox-Plus-Dark" 
       exec-once = gsettings set org.gnome.desktop.interface gtk-theme "Gruvbox-Dark-BL-LB"
 
-      exec-once=waybar
-      exec-once=dunst
-      exec-once=kdeconnect-cli 
-      exec-once=playerctld daemon
-      #exec-once=$HOME/.config/hypr/scripts/start_wall
-      exec-once=swww-daemon
-      exec-once=hypridle
-      exec-once=nm-applet --indicator
-      exec-once=blueman-applet
+      exec-once = waybar
+      exec-once = swayosd-server
+      exec-once = sudo swayosd-libinput-backend
+      exec-once = dunst
+      exec-once = kdeconnect-cli 
+      exec-once = playerctld daemon
+      #exec-once = $HOME/.config/hypr/scripts/start_wall
+      exec-once = swww-daemon
+      exec-once = hypridle
+      exec-once = nm-applet --indicator
+      exec-once = blueman-applet
       
       exec-once = wl-clipboard-history -t
       exec-once = wl-paste --type text --watch cliphist store #Stores only text data
@@ -90,9 +92,13 @@ in
       
       exec-once = [workspace 8 silent] spotify
       exec-once = [workspace 1 silent] microsoft-edge
-      exec-once = [workspace 1 silent] kitty
-      exec-once = [workspace magic silent] kitty -e sh -c "ow"
-      exec-once = [workspace 6 silent] thunderbird
+      exec-once = [workspace 2 silent] kitty
+      exec-once = [workspace 9 silent] google-chrome-stable
+      exec-once = [workspace 9 silent] 1password
+      exec-once = [workspace 6 silent] obsidian
+      exec-once = [workspace 3 silent] code
+      # exec-once = [workspace magic silent] kitty -e sh -c "ow"
+      exec-once = [workspace 5 silent] thunderbird
 
 
       # Env variables
@@ -163,8 +169,8 @@ in
           border_size=2
           ''}
           no_border_on_floating=0
-          col.active_border = rgba(${config.colorScheme.palette.base05}FF) rgba(${config.colorScheme.palette.base05}FF) 45deg
-          col.inactive_border = rgba(${config.colorScheme.palette.base00}11) rgba(${config.colorScheme.palette.base00}11) 45deg
+          # col.active_border = rgba(${config.colorScheme.palette.base05}FF) rgba(${config.colorScheme.palette.base05}FF) 45deg
+          # col.inactive_border = rgba(${config.colorScheme.palette.base00}11) rgba(${config.colorScheme.palette.base00}11) 45deg
           apply_sens_to_raw=0
           resize_on_border=true
           layout = dwindle
@@ -370,10 +376,10 @@ in
       windowrule = center,system_monitor
       windowrule = float, polkit-agent-helper-1
       windowrule = float, xdg-desktop-portal-gtk
-      windowrule = float,^(org.gnome.Nautilus)$
-      windowrule = float, title:^(Open File)$
-      windowrule = float, title:^(Open Folder)$
-      windowrule = float, title:^(update-sys)
+      # windowrule = float,^(org.gnome.Nautilus)$
+      # windowrule = float, title:^(Open File)$
+      # windowrule = float, title:^(Open Folder)$
+      # windowrule = float, title:^(update-sys)
       windowrule = workspace special:hidden, Spotify
 
     
@@ -389,6 +395,23 @@ in
       bind = , XF86AudioRaiseVolume, exec, amixer set Master 5%+
       bind = , XF86AudioLowerVolume, exec, amixer set Master 5%-
       bind = , XF86AudioMute, exec, amixer set Master toggle
+
+      #OSD window
+      bind=, XF86AudioRaiseVolume, exec, swayosd-client --output-volume=raise
+      bind=, XF86AudioLowerVolume, exec, swayosd-client --output-volume=lower
+      bind=, XF86AudioMute, exec, swayosd-client --output-volume mute-toggle
+      bind=, release Caps_Lock, exec, swayosd-client --caps-lock
+      
+      bind=, XF86AudioMute, exec, swayosd-client --output-volume mute-toggle
+      bind=, XF86AudioMicMute, exec, swayosd-client --input-volume mute-toggle
+      bind=, XF86AudioRaiseVolume, exec, swayosd-client --output-volume 15
+      bind=, XF86AudioLowerVolume, exec, swayosd-client --output-volume -15
+      bind=, XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise --max-volume 120
+      bind=, XF86AudioLowerVolume, exec, swayosd-client --output-volume lower --max-volume 120
+      bind=, XF86MonBrightnessUp, exec, swayosd-client --brightness raise
+      bind=, XF86MonBrightnessDown, exec, swayosd-client --brightness lower
+      bind=, XF86MonBrightnessUp,  exec, swayosd-client --brightness +10
+      bind=, XF86MonBrightnessDown, exec, swayosd-client --brightness -10
       
       #Kitty
       bind = $mainMod, E, exec, [float]kitty --hold sh -c yazi

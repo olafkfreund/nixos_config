@@ -18,5 +18,6 @@ home.packages = with pkgs; [
   element-desktop
   imagemagick
   fractal
+  telegram-desktop
   ];
 }

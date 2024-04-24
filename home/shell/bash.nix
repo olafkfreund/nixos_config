@@ -37,7 +37,7 @@ programs.bash = {
 
 # set some aliases, feel free to add more or remove some
   shellAliases = {
-    cp = "cp -riv";
+    cp = "cp -rv";
     mkdir = "mkdir -vp";
     mv = "mv -iv";
 	  top = "btm";
@@ -52,15 +52,16 @@ programs.bash = {
 	  gitc = "git checkout";
 	  icat = "kitty +kitten icat";
     neofetch = "neofetch --iterm2 ~/Pictures/1_d2RiMW4zoHLUK-751E38gQ.png --size 200";
-    nri = "sudo nixos-rebuild switch --impure";
-    nr = "sudo nixos-rebuild switch";
+    nri = "sudo nixos-rebuild switch --impure|& nom";
+    nr = "sudo nixos-rebuild switch|& nom";
     today = "curl -s https://wttr.in/London?1";
     wttr = "curl -s https://wttr.in/London?0";
-    fu = "sudo nix flake update";
+    fu = "sudo nix flake update|& nom";
     code = "code --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
 	  dbe = "distrobox enter";
 	  ask = "chatgpt --model gpt-4 -p";
 	  obsidian = "obsidian --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
+    google-chrome-stable = "google-chrome-stable --ozone-platform=wayland";
     #Work only
     slack = "slack --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer";
     ow = "zellij --layout ~/.config/zellij/layouts/work.kdl";

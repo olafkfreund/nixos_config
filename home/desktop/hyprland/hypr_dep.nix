@@ -11,6 +11,7 @@ home.packages = with pkgs; [
   swayidle
   swaylock
   swaybg
+  
   swappy
   hyprnome
   hyprshot

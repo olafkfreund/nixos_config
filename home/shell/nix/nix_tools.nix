@@ -14,5 +14,6 @@
     nh
     nvd
     nix-output-monitor
+    nixd
   ];
 }
