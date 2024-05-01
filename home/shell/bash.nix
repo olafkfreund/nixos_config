@@ -21,14 +21,11 @@ programs.bash = {
     export PATH="$PATH:/home/olafkfreund/.spicetify"
     export PATH="$PATH:/home/olafkfreund/.cargo/bin"
     export PATH="$PATH:/home/olafkfreund/go/bin"
-    #export IN_API_KEY=90e5bc5705184498af1de989c7beac7e
     export PATH="$HOME/.config/rofi/scripts:$PATH"
     export PATH="$HOME/.npm-global/bin:$PATH"
     export TERM=xterm
     export EDITOR=lvim
     export VISUAL=lvim
-    export CORDA_ARTIFACTORY_USERNAME="olaf.freund@r3.com"
-    export CORDA_ARTIFACTORY_PASSWORD="AKCpBrw56m6sceapUZ2abMA6ZA2CH7MxNDbYgMYwmJTdG4jLfhLFjXVu2qcT8jFP7rEcXjdYM"
     source $HOME/.openai.sh
     eval "$(direnv hook bash)"
     eval "$(atuin init bash)"

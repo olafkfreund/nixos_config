@@ -68,7 +68,7 @@
           orientation = "inherit";
           drawer = {
             transition-duration = 500;
-            transition-left-to-right = false;
+            transition-left-to-right = true;
         };
         modules = [
           "custom/power"
@@ -79,25 +79,25 @@
       };
 
         "custom/quit" = {
-          format = "󰗼";
+          format = "󰗼 ";
           on-click = "${pkgs.hyprland}/bin/hyprctl dispatch exit";
           tooltip = false;
         };
 
        "custom/lock" = {
-          format = "󰍁";
+          format = "󰍁 ";
           on-click = "${lib.getExe pkgs.hyprlock}";
           tooltip = false;
         };
 
         "custom/reboot" = {
-          format = "󰜉";
+          format = "󰜉 ";
           on-click = "${pkgs.systemd}/bin/systemctl reboot";
           tooltip = false;
         };
 
         "custom/power" = {
-          format = "";
+          format = " ";
           on-click = "${pkgs.systemd}/bin/systemctl poweroff";
           tooltip = false;
         };

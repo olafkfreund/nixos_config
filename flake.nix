@@ -41,6 +41,9 @@
     };
     
     spicetify-nix.url = "github:the-argus/spicetify-nix";
+
+    nixvim.url = "github:nix-community/nixvim";
+    nixvim.inputs.nixpkgs.follows = "nixpkgs";
     
     hyprland.url = "github:hyprwm/Hyprland";
     hyprland.inputs.nixpkgs.follows = "nixpkgs";
