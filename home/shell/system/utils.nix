@@ -10,5 +10,6 @@
       mpv
       sox
       yad
+      appimage-run
   ];
 }

@@ -13,6 +13,22 @@
     ];
   networking.networkmanager.enable = true;
   networking.hostName = "razer";
+  networking = {
+    useDHCP = false;
+    useNetworkd = true;
+  };
+
+  systemd.network = {
+    networks = {
+      "wlp3s0" = {
+        name = "wlp3s0";
+        DHCP = "ipv4";
+        networkConfig = {
+          MulticastDNS = true;
+        };
+      };
+    };
+  };
   users.users.olafkfreund = {
     isNormalUser = true;
     description = "Olaf K-Freund";

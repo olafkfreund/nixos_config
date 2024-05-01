@@ -93,7 +93,7 @@ in
       exec-once = [workspace 8 silent] spotify
       exec-once = [workspace 1 silent] microsoft-edge
       exec-once = [workspace 2 silent] kitty
-      exec-once = [workspace 9 silent] google-chrome-stable
+      exec-once = [workspace 9 silent] google-chrome
       exec-once = [workspace 9 silent] 1password
       exec-once = [workspace 6 silent] obsidian
       exec-once = [workspace 3 silent] code
@@ -169,8 +169,8 @@ in
           border_size=2
           ''}
           no_border_on_floating=0
-          # col.active_border = rgba(${config.colorScheme.palette.base05}FF) rgba(${config.colorScheme.palette.base05}FF) 45deg
-          # col.inactive_border = rgba(${config.colorScheme.palette.base00}11) rgba(${config.colorScheme.palette.base00}11) 45deg
+          col.active_border = rgba(${config.colorScheme.palette.base05}FF) rgba(${config.colorScheme.palette.base05}FF) 45deg
+          col.inactive_border = rgba(${config.colorScheme.palette.base00}11) rgba(${config.colorScheme.palette.base00}11) 45deg
           apply_sens_to_raw=0
           resize_on_border=true
           layout = dwindle
@@ -395,6 +395,8 @@ in
       bind = , XF86AudioRaiseVolume, exec, amixer set Master 5%+
       bind = , XF86AudioLowerVolume, exec, amixer set Master 5%-
       bind = , XF86AudioMute, exec, amixer set Master toggle
+      bind = $mainMod, F3, exec, brightnessctl -d *::kbd_backlight set +33%
+      bind = $mainMod, F2, exec, brightnessctl -d *::kbd_backlight set 33%-"
 
       #OSD window
       bind=, XF86AudioRaiseVolume, exec, swayosd-client --output-volume=raise
@@ -406,8 +408,8 @@ in
       bind=, XF86AudioMicMute, exec, swayosd-client --input-volume mute-toggle
       bind=, XF86AudioRaiseVolume, exec, swayosd-client --output-volume 15
       bind=, XF86AudioLowerVolume, exec, swayosd-client --output-volume -15
-      bind=, XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise --max-volume 120
-      bind=, XF86AudioLowerVolume, exec, swayosd-client --output-volume lower --max-volume 120
+      # bind=, XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise --max-volume 120
+      # bind=, XF86AudioLowerVolume, exec, swayosd-client --output-volume lower --max-volume 120
       bind=, XF86MonBrightnessUp, exec, swayosd-client --brightness raise
       bind=, XF86MonBrightnessDown, exec, swayosd-client --brightness lower
       bind=, XF86MonBrightnessUp,  exec, swayosd-client --brightness +10

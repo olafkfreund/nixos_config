@@ -74,5 +74,6 @@ home.packages = with pkgs; [
   simple-scan
   libtool
   system-config-printer
+  keylight-controller-mschneider82
   ];
 }

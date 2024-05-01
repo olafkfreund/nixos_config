@@ -9,5 +9,10 @@
 	  kubecolor
 	  k9s
     minikube
+    kind
+    kops
+    kubectx
+    k8sgpt
+    kubetail
   ];
 }

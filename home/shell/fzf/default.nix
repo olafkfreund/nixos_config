@@ -4,11 +4,11 @@
         enable = true;
         enableBashIntegration = false;
         colors = {
-            fg = "#ebdbb2";
-            bg = "#282828";
+            fg = "#${config.colorScheme.palette.base05}";
+            bg = "#${config.colorScheme.palette.base00}";
             hl = "#fabd2f";
-            "fg+" = "#ebdbb2";
-            "bg+" = "#3c3836";
+            "fg+" = "#${config.colorScheme.palette.base05}";
+            "bg+" = "#${config.colorScheme.palette.base00}";
             "hl+" = "#fabd2f";
             info = "#83a598";
             prompt = "#bdae93";

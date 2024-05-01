@@ -15,6 +15,10 @@
 
     };
     spiceUSBRedirection.enable = true;
+
+    containerd = {
+      enable = true;
+    };
   };
 
   environment.sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];

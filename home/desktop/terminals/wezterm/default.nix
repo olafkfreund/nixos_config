@@ -1,8 +1,8 @@
-{ pkgs, config, nixpkgs-f2k, ... }:{
+{ pkgs, config, ... }:{
   
   programs.wezterm = {
     enable = true;
-    # package = nixpkgs-f2k.packages.${pkgs.system}.wezterm-git;
+    package = pkgs.wezterm;
     extraConfig = ''
       -- +----------------------------+
       -- | WezTerm Configuration file |
@@ -15,13 +15,13 @@
       local pad = 1
 
       local font_normal = {
-        family = 'Jetbrains Mono Nerd Font',
-        weight = 'Normal',
-        italic = false
+      family = 'FiraCode Nerd Font',
+      weight = 'Regular',
+      italic = false
       }
 
       local font_italic = {
-        family = 'Jetbrains Mono Nerd Font',
+        family = 'VictorMono Nerd Font',
         weight = 'DemiBold',
         italic = true
       }
@@ -49,7 +49,7 @@
         hide_tab_bar_if_only_one_tab = true,
         use_fancy_tab_bar = true,
         warn_about_missing_glyphs = false,
-        enable_wayland = auto,
+        enable_wayland = false,
         initial_cols = 100,
         initial_rows = 40,
 

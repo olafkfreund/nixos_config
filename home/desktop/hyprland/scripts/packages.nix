@@ -9,5 +9,6 @@
     (import ./start_wall.nix { inherit pkgs; })
     (import ./wallpaper_picker.nix { inherit pkgs; })
     (import ./wall.nix { inherit pkgs; })
+    (import ./dunst.nix { inherit pkgs; })
   ];
 }

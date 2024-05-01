@@ -17,6 +17,29 @@
   networking.hostName = "work-lx"; # Define your hostname.
   networking.networkmanager.enable = true;
   networking.firewall.enable = false;
+  networking = {
+    useDHCP = false;
+    useNetworkd = true;
+  };
+
+  systemd.network = {
+    networks = {
+      "wlp0s20f3" = {
+        name = "wlp0s20f3";
+        DHCP = "ipv4";
+        networkConfig = {
+          MulticastDNS = true;
+        };
+      };
+      "enp86s0u1u4u5" = {
+        name = "enp86s0u1u4u5";
+        DHCP = "ipv4";
+        networkConfig = {
+          MulticastDNS = true;
+        };
+      };
+    };
+  };
   
   
 

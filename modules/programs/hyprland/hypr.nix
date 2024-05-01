@@ -1,9 +1,10 @@
-{ inputs, lib, config, pkgs, ... }:{
+{ inputs, lib, config, pkgs-stable, pkgs, ... }:{
 
 
 # Enable hyprland
 programs.hyprland = {
   enable = true;
+  package = pkgs.hyprland;
   #enableNvidiaPatches = true;
   xwayland.enable = true;
   };

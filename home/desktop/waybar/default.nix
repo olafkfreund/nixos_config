@@ -1,14 +1,7 @@
-{ inputs
-, pkgs
-, pkgs-stable
-, config
-, self
-, lib
-, ...
-}:{
+{ inputs, pkgs, config, self, lib, ...}: {
   programs.waybar = {
     enable = true;
-    package = pkgs-stable.waybar;
+    package = pkgs.waybar;
     settings = {
       mainBar = {
         "layer" = "top";
@@ -17,8 +10,8 @@
         #"width" = 1800;
         "margin-top" = 10;
         "margin-bottom" = 3;
-        "margin-left" = 200;
-        "margin-right" = 200;
+        "margin-left" = 400;
+        "margin-right" = 400;
         "spacing" = 3;
         "fixed-center" = false;
         "exclusive" = true;
@@ -27,14 +20,14 @@
         "reload_style_on_change" = true;
         "gtk-layer-shell" = true;
 
-        "modules-left" = [ "hyprland/workspaces" ];
+        "modules-left" = ["custom/startmenu" "hyprland/workspaces"];
         "modules-right" = [
           "group/monitor"
           "pulseaudio"
           "pulseaudio#microphone"
           "group/computer"
           "idle_inhibitor"
-        ];
+          ];
         "modules-center" = [ "clock" "group/group-power" ];
 
         "custom/cycle_wall" = {
@@ -69,7 +62,7 @@
             "format-icons" = ["▁" "▂" "▃" "▄" "▅" "▆" "▇" "█" ];
             "actions" = {
               "on-click-right" = "kitty -e cava";
-                      };
+            };
         };
         "group/group-power" = {
           orientation = "inherit";
@@ -114,6 +107,11 @@
           on-click = "${pkgs.wdisplays}/bin/wdisplays";
           tooltip = false;
         };
+        "custom/startmenu" = {
+          tooltip = false;
+          format = " ";
+          on-click = "sleep 0.1 && ~/.config/rofi/launchers/type-2/launcher.sh";
+        };
 
         "hyprland/workspaces" = {
 	        "format" = "{icon}";
@@ -132,25 +130,24 @@
             "8" = [];
             "9" = [];
             "10" = [];
-            
           };
 	        "format-icons" = {
-          "1" = "";
-          "2" = "";
-          "3" = "󰙀";
-          "4" = "";
-          "5" = "";
-          "6" = "";
-          "7" = "";
-          "8" = "󰓇";
-          "9" = "";
-          "10" = "";
-		      "active" = "";
-		      "default" = "";
-          "urgent" = "";
-          "magic" = "󰐃";
-          "hidden" = "󰐃";
-          "secret" = "󰐃";
+            "1" = " ";
+            "2" = " ";
+            "3" = " ";
+            "4" = " ";
+            "5" = " ";
+            "6" = " ";
+            "7" = " ";
+            "8" = " ";
+            "9" = " ";
+            "10" = " ";
+            "active" = " ";
+            "default" = " ";
+            "urgent" = " ";
+            "magic" = "󰐃 ";
+            "hidden" = "󰐃 ";
+            "secret" = "󰐃 ";
           };
 	      };
         "group/monitor" = {
@@ -185,9 +182,14 @@
           "separate-outputs" = true;
         };
         "tray" = {
-          #"icon-size" = 16;
-          "spacing" = 4;
+          "spacing" = 12;
           "show-passive-items" = true;
+        };
+        "custom/dunst" = {
+          return-type = "json";
+          exec = "dunst-waybar";
+          on-click = "dunstctl set-paused toggle";
+          restart-interval = 1;
         };
         "hyprland/language" = {
           "format" = " {}";
@@ -320,7 +322,7 @@
          "pulseaudio#microphone" = {
            "format" = "{format_source}";
            "format-source" = "";
-           "format-source-muted" = "";
+           "format-source-muted" = " ";
            "on-click" = "pavucontrol -t 4";
            "tooltip-format" = "{format_source} {source_desc} // {source_volume}%";
            "scroll-step" = 5;
@@ -373,7 +375,7 @@
           margin-top: 0px;
           margin-bottom: 0px;
           padding: 5px 10px;
-          border-radius: 0px;
+          border-radius: 10px;
         }
 
         tooltip {
@@ -392,15 +394,15 @@
         }
 
         #workspaces {
-          margin: 1px;
+          margin: 0px;
           margin-right: 0.3px;
           margin-left: 0.3px;
         }
 
         #workspaces button {
-          margin: 1px;
+          margin: 0px;
           color: #${config.colorScheme.palette.base06};
-          font-weight: bolder;
+          font-weight: normal;
           font-style: normal;
           margin: 0.2px 0.2px;
           border-radius: 0px;
@@ -410,120 +412,150 @@
           box-shadow: inherit;
           text-shadow: inherit;
           background-color: #${config.colorScheme.palette.base06};
-          color: #${config.colorScheme.palette.base00};
+          color: #${config.colorScheme.palette.base09};
           border-radius: 0px;
         }
 
         #workspaces button.active {
-          color: #${config.colorScheme.palette.base06};
-          background-color: rgba(125, 174, 163, 0.9);
+          color: #${config.colorScheme.palette.base09};
+          background-color: #${config.colorScheme.palette.base0D};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
+          transition: all 0.1s ease-in-out;
+          border-radius: 0px;
+        }
+
+        #workspaces button.urgent {
+          color: #${config.colorScheme.palette.base08};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           transition: all 0.1s ease-in-out;
           border-radius: 0px;
         }
 
         #clock {
+          font-size: 20px;
+          font-weight: bolder;
+          font-style: normal;
+          margin: 0px;
+          margin-right: 0.3px;
+          margin-left: 0.3px;
           color: #${config.colorScheme.palette.base06};
+        }
+
+        #custom-startmenu {
+          font-size: 20px;
+          font-weight: bolder;
+          font-style: normal;
+          margin: 0px;
+          margin-right: 0.3px;
+          margin-left: 0.3px;
+          color: #${config.colorScheme.palette.base0D};
         }
 
         #custom-power {
           font-size: 15px;
-          margin: 10px;
-          color: #${config.colorScheme.palette.base06};
-          padding: 0 0.1px 0 0.1px;
+          font-weight: bolder;
+          font-style: normal;
+          padding: 0 5px;
+          color: #${config.colorScheme.palette.base0D};
         }
 
         #custom-monitor {
           font-size: 15px;
-          margin: 10px;
-          color: #${config.colorScheme.palette.base06};
-          padding: 0 0.1px 0 0.1px;
+          font-weight: bolder;
+          font-style: normal;
+          padding: 0 5px;
+          color: #${config.colorScheme.palette.base0D};
         }
         
         #custom-quit, #custom-lock, #custom-reboot {
-          font-size: 15px;
-          color: #${config.colorScheme.palette.base06};
-          margin: 10px;
-          padding: 0 0.1px 0 0.1px;
-        }
-
-        #custom-updates {
-          padding-left: 1px;
+          font-size: 20px;
+          font-weight: bolder;
+          font-style: normal;
+          padding: 0 5px;
+          color: #${config.colorScheme.palette.base0A};
         }
 
         #custom-spotify {
-          padding: 0 0 0 1.5px;
-          border-radius: 10 0 0 10;
+          padding: 0 5px;
         }
         #memory {
-          color: #${config.colorScheme.palette.base06};
-          padding: 0 0.3em 0 0.5px;
-          border-radius: 10 0 0 10;
+          color: #${config.colorScheme.palette.base09};
+          padding: 0 5px;
         }
 
         #pulseaudio {
-          margin: 0;
-          padding: 0 0.5em 0 0.4em;
-          color: #${config.colorScheme.palette.base06};
+          padding: 0 5px;
+          color: #${config.colorScheme.palette.base0D};
+        }
+
+        #pulseaudio#microphone {
+          padding: 0 5px;
+          color: #${config.colorScheme.palette.base0D};
+        }
+
+        #pulseaudio.muted {
+          padding: 0 5px;
+          color: #${config.colorScheme.palette.base08};
         }
 
         #backlight {
-          margin: 0;
-          padding: 0 0.5em 0 0.4em;
-          color: #${config.colorScheme.palette.base06};
+          padding: 0 0.5px 0 0.4em;
+          color: #${config.colorScheme.palette.base09};
         }
 
         #cpu {
-          margin: 0;
-          padding: 0 0.1px 0 0.1px;
-          color: #${config.colorScheme.palette.base06};
+          padding: 0 5px;
+          color: #${config.colorScheme.palette.base09};
         }
 
         #network {
-          margin: 0;
-          padding: 0 0.4em 0 0.5px;
-          color: #${config.colorScheme.palette.base06};
+          padding: 0 5px;
+          color: #${config.colorScheme.palette.base0D};
         }
 
         #custom-cycle_wall {
-          margin: 0;
-          padding: 0 0.5px;
-          color: #${config.colorScheme.palette.base06};
+          padding: 0 5px;
+          color: #${config.colorScheme.palette.base0D};
         }
         
         #idle_inhibitor {
-          margin: 0;
-          padding: 0 0.4em 0 0.5px;
-          color: #${config.colorScheme.palette.base06};
+          padding: 0 5px; 
+          font-size: 20px;
+          font-weight: bolder;
+          font-style: normal;
+          color: #${config.colorScheme.palette.base0D};
+        }
+
+        #idle_inhibitor.activated {
+          padding: 0 5px;
+          font-size: 20px;
+          font-weight: bolder;
+          font-style: normal;
+          color: #${config.colorScheme.palette.base0D};
         }
 
         #language {
           margin: 0;
-          padding: 0 0.4em 0 0.5px;
+          padding: 0 0.4px 0 0.5px;
           color: #${config.colorScheme.palette.base06};
         }
 
         #tray {
-          margin: 0;
-          padding-right: 10px;
+          padding: 0 5px;
           color: #${config.colorScheme.palette.base06};
-          border-radius: 0 10 10 0;
         }
 
         #battery {
-          margin: 0;
-          padding: 0 0.5em 0 0.8em;
-          color: #${config.colorScheme.palette.base06};
+          padding: 0 0.5px 0 0.8px;
+          color: #${config.colorScheme.palette.base09};
         }
 
         #disk {
-          margin: 0;
           padding: 0 0.1px 0 0.1px;
-          color:  #${config.colorScheme.palette.base06};
+          color:  #${config.colorScheme.palette.base09};
         }
 
         #cava {
-          margin: 0;
           padding: 0 0.1px 0 0.1px;
           color:  #${config.colorScheme.palette.base06};
         }

@@ -62,6 +62,7 @@ programs.bash = {
 	  ask = "chatgpt --model gpt-4 -p";
 	  obsidian = "obsidian --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
     google-chrome-stable = "google-chrome-stable --ozone-platform=wayland";
+    microsoft-edge-stable = "microsoft-edge-stable --ozone-platform=wayland";
     #Work only
     slack = "slack --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer";
     ow = "zellij --layout ~/.config/zellij/layouts/work.kdl";
