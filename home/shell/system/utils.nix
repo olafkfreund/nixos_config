@@ -11,5 +11,7 @@
       sox
       yad
       appimage-run
+      fftw
+      iniparser
   ];
 }

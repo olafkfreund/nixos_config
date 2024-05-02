@@ -75,5 +75,6 @@ home.packages = with pkgs; [
   libtool
   system-config-printer
   keylight-controller-mschneider82
+  bottom
   ];
 }

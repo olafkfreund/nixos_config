@@ -22,13 +22,14 @@
 
         "modules-left" = ["custom/startmenu" "hyprland/workspaces"];
         "modules-right" = [
+          "cava"
           "group/monitor"
           "pulseaudio"
           "pulseaudio#microphone"
           "group/computer"
           "idle_inhibitor"
           ];
-        "modules-center" = [ "clock" "group/group-power" ];
+       "modules-center" = [ "clock" "group/group-power" ];
 
         "custom/cycle_wall" = {
           "format" = " ";
@@ -39,15 +40,15 @@
         "idle_inhibitor" = {
           "format" = "{icon}";
           "format-icons" = {
-            "activated" = "󰥔";
-            "deactivated" = "";
+            "deactivated" = "  ";
+            "activated" = "  ";
           };
         };
         "cava"= {
             "framerate" = 30;
             "autosens" = 0;
             "sensitivity" = 120;
-            "bars" = 14;
+            "bars" = 10;
             "lower_cutoff_freq" = 50;
             "higher_cutoff_freq" = 10000;
             "method" = "pulse";
@@ -61,7 +62,7 @@
             "input_delay" = 2;
             "format-icons" = ["▁" "▂" "▃" "▄" "▅" "▆" "▇" "█" ];
             "actions" = {
-              "on-click-right" = "kitty -e cava";
+              "on-click-right" = "mode";
             };
         };
         "group/group-power" = {
@@ -103,7 +104,7 @@
         };
 
         "custom/monitor" = {
-          format = "";
+          format = " ";
           on-click = "${pkgs.wdisplays}/bin/wdisplays";
           tooltip = false;
         };
@@ -132,22 +133,22 @@
             "10" = [];
           };
 	        "format-icons" = {
-            "1" = " ";
-            "2" = " ";
-            "3" = " ";
-            "4" = " ";
-            "5" = " ";
-            "6" = " ";
-            "7" = " ";
-            "8" = " ";
-            "9" = " ";
-            "10" = " ";
+            "1" = "󰇩 ";
+            "2" = "󰨞 ";
+            "3" = " ";
+            "4" = " ";
+            "5" = " ";
+            "6" = "";
+            "7" = " ";
+            "8" = " ";
+            "9" = " ";
+            "10" = "󰭹";
             "active" = " ";
             "default" = " ";
             "urgent" = " ";
-            "magic" = "󰐃 ";
+            "magic" = "󱡄 ";
             "hidden" = "󰐃 ";
-            "secret" = "󰐃 ";
+            "secret" = " ";
           };
 	      };
         "group/monitor" = {
@@ -187,7 +188,7 @@
         };
         "custom/dunst" = {
           return-type = "json";
-          exec = "dunst-waybar";
+          exec = "~/.config/waybar/scripts/dunst.sh";
           on-click = "dunstctl set-paused toggle";
           restart-interval = 1;
         };
@@ -343,7 +344,6 @@
         window#waybar {
           background-color: #${config.colorScheme.palette.base00};
           border-radius: 6px;
-          /* padding-top: 0px; */
           border: 2px solid rgba(29, 32, 33, 0.5);
           margin-top: 0;
         }
@@ -351,31 +351,19 @@
         .modules-right {
           font-size: 15px;
           background-color: #${config.colorScheme.palette.base00};
-          border-radius: 0px;
-          padding: 5px 10px;
-          margin-top: 0px;
-          margin-bottom: 0px;
-          margin-right: 0.1px;
+          padding: 0 5px;
         }
 
         .modules-left {
           font-size: 15px;
-          margin-left: 10px;
           background-color: #${config.colorScheme.palette.base00};
-          margin-top: 0px;
-          margin-bottom: 0px;
-          padding: 1px 0px;
-          border-radius: 0px;
+          padding: 0 5px;
         }
 
         .modules-center {
           font-size: 15px;
-          margin-left: 10px;
           background-color: #${config.colorScheme.palette.base00};
-          margin-top: 0px;
-          margin-bottom: 0px;
-          padding: 5px 10px;
-          border-radius: 10px;
+          padding: 0 5px;
         }
 
         tooltip {
@@ -394,18 +382,13 @@
         }
 
         #workspaces {
-          margin: 0px;
-          margin-right: 0.3px;
-          margin-left: 0.3px;
+          padding: 0 5px;
         }
 
         #workspaces button {
-          margin: 0px;
           color: #${config.colorScheme.palette.base06};
           font-weight: normal;
           font-style: normal;
-          margin: 0.2px 0.2px;
-          border-radius: 0px;
         }
 
         #workspaces button:hover {
@@ -413,7 +396,6 @@
           text-shadow: inherit;
           background-color: #${config.colorScheme.palette.base06};
           color: #${config.colorScheme.palette.base09};
-          border-radius: 0px;
         }
 
         #workspaces button.active {
@@ -421,16 +403,20 @@
           background-color: #${config.colorScheme.palette.base0D};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           transition: all 0.1s ease-in-out;
-          border-radius: 0px;
         }
 
         #workspaces button.urgent {
           color: #${config.colorScheme.palette.base08};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           transition: all 0.1s ease-in-out;
-          border-radius: 0px;
         }
 
+        #workspaces button.urgent {
+          color: #${config.colorScheme.palette.base08};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
+          transition: all 0.1s ease-in-out;
+        }
+        
         #clock {
           font-size: 20px;
           font-weight: bolder;
@@ -464,7 +450,7 @@
           font-weight: bolder;
           font-style: normal;
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base0D};
+          color: #${config.colorScheme.palette.base06};
         }
         
         #custom-quit, #custom-lock, #custom-reboot {
@@ -472,25 +458,25 @@
           font-weight: bolder;
           font-style: normal;
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base0A};
+          color: #${config.colorScheme.palette.base0D};
         }
 
         #custom-spotify {
           padding: 0 5px;
         }
         #memory {
-          color: #${config.colorScheme.palette.base09};
+          color: #${config.colorScheme.palette.base0E};
           padding: 0 5px;
         }
 
         #pulseaudio {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base0D};
+          color: #${config.colorScheme.palette.base0A};
         }
 
         #pulseaudio#microphone {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base0D};
+          color: #${config.colorScheme.palette.base0A};
         }
 
         #pulseaudio.muted {
@@ -499,28 +485,28 @@
         }
 
         #backlight {
-          padding: 0 0.5px 0 0.4em;
+          padding: 0 5px;
           color: #${config.colorScheme.palette.base09};
         }
 
         #cpu {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base09};
+          color: #${config.colorScheme.palette.base0E};
         }
 
         #network {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base0D};
+          color: #${config.colorScheme.palette.base0E};
         }
 
         #custom-cycle_wall {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base0D};
+          color: #${config.colorScheme.palette.base0B};
         }
         
         #idle_inhibitor {
           padding: 0 5px; 
-          font-size: 20px;
+          font-size: 15px;
           font-weight: bolder;
           font-style: normal;
           color: #${config.colorScheme.palette.base0D};
@@ -528,7 +514,7 @@
 
         #idle_inhibitor.activated {
           padding: 0 5px;
-          font-size: 20px;
+          font-size: 15px;
           font-weight: bolder;
           font-style: normal;
           color: #${config.colorScheme.palette.base0D};
@@ -547,12 +533,12 @@
 
         #battery {
           padding: 0 0.5px 0 0.8px;
-          color: #${config.colorScheme.palette.base09};
+          color: #${config.colorScheme.palette.base0E};
         }
 
         #disk {
           padding: 0 0.1px 0 0.1px;
-          color:  #${config.colorScheme.palette.base09};
+          color:  #${config.colorScheme.palette.base0E};
         }
 
         #cava {
