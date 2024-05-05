@@ -14,5 +14,7 @@ programs.hyprland = {
 programs.firefox = {
   enable = true;
   };
-
+programs.wshowkeys = {
+  enable = true;
+  };
 }

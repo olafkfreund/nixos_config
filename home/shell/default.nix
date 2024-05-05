@@ -23,5 +23,6 @@
     ./zellij/default.nix
     ./bat/default.nix
     ./lunarvim/default.nix
+    ./vim/default.nix
 ];
 }

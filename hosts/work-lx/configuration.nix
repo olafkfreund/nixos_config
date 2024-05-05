@@ -4,6 +4,7 @@
     imports =
       [ 
         ./hardware-configuration.nix
+        ./screens.nix
         ./boot.nix
         ./power.nix
         ./nvidia.nix

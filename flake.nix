@@ -84,7 +84,7 @@
 
 
   outputs = {
-    self, nixpkgs, nixpkgs-stable, hyprlock, hypridle, nur, hyprland-plugins, nixos-cosmic, nixpkgs-f2k, hyprland, nix-colors, spicetify-nix, home-manager, ... } @inputs : 
+    self, nixpkgs, nixpkgs-stable, hyprlock, hypridle, hycov, nur, hyprland-plugins, nixos-cosmic, nixpkgs-f2k, hyprland, nix-colors, spicetify-nix, home-manager, ... } @inputs : 
     {
     nixosConfigurations = {
       razer = nixpkgs.lib.nixosSystem {
@@ -110,6 +110,7 @@
               inherit nixpkgs;
               inherit spicetify-nix;
               inherit hyprland;
+              inherit hycov;
               inherit nixpkgs-f2k;
               inherit home-manager;
               inherit nixpkgs-stable;
@@ -148,6 +149,7 @@
               inherit spicetify-nix;
               inherit nixpkgs-f2k;
               inherit hyprland;
+              inherit hycov;
               inherit hypridle;
               inherit hyprlock;
               inherit nix-colors;

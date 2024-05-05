@@ -1,9 +1,5 @@
 {
-  inputs,
-  pkgs,
-  config,
-  ...
-}:
+  inputs, hycov, vars, pkgs, config, ... }:
 let 
     animations.fast = true;
     animations.moving = false;
@@ -45,13 +41,16 @@ in
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable= true;
+    # plugins = [
+    #   # inputs.hyprland-plugins.packages.${pkgs.system}.hyprexpo
+    #   #hycov.packages.${pkgs.system}.hycov
+    # ];
     # enableNvidiaPatches = true;
     extraConfig = ''
-      # Globals #
       #laptop
-      monitor=eDP-1,1920x1200@60,0x0,1
+      monitor = ${(if vars.hostName == "work-lx" then "eDP-1,1920x1200@60,0x0,1" else  "eDP-1,1920x1080@60,0x0,1")}
       #Work R3
-      monitor=DP-3,3440x1440@100,1920x0,1
+      monitor = ${(if vars.hostName == "work-lx" then "DP-3,3440x1440@100,1920x0,1" else ",preferred,auto, 1" )}
       #home
       monitor=DP-6,2560x1440@120,1920x0,1
       #monitor=,preferred,auto, 1
@@ -90,14 +89,13 @@ in
       exec-once = wl-paste --type text --watch cliphist store #Stores only text data
       exec-once = wl-paste --type image --watch cliphist store #Stores only image data when imaged copied
       
-      exec-once = [workspace 8 silent] spotify
+      exec-once = [workspace 7 silent] spotify
       exec-once = [workspace 1 silent] microsoft-edge
       exec-once = [workspace 2 silent] kitty
       exec-once = [workspace 9 silent] google-chrome
-      exec-once = [workspace 9 silent] 1password
+      exec-once = [workspace 8 silent] 1password
       exec-once = [workspace 6 silent] obsidian
-      exec-once = [workspace 3 silent] code
-      # exec-once = [workspace magic silent] kitty -e sh -c "ow"
+      exec-once = [workspace 2 silent] code
       exec-once = [workspace 5 silent] thunderbird
 
 
@@ -117,8 +115,9 @@ in
       env = GDK_BACKEND,wayland,x11
       env = GTK_THEME,Gruvbox-Dark-B-LB
       env = GDK_DPI_SCALE,1
+      env = GDK_SCALE,1
       #QT
-      env = QT_QPA_PLATFORM, wayland
+      env = QT_QPA_PLATFORM,wayland
       env = QT_WAYLAND_DISABLE_WINDOWDECORATION, 1
       env = QT_AUTO_SCREEN_SCALE_FACTOR, 1
       #Firefox & Thunderbird
@@ -348,14 +347,50 @@ in
           workspace_swipe=yes
           workspace_swipe_fingers=3
       }
+      # plugin {
+      #     hycov {
+      #       overview_gappo = 60 #gaps width from screen
+      #       overview_gappi = 24 #gaps width from clients
+      #       hotarea_size = 10 #hotarea size in bottom left,10x10
+      #       enable_hotarea = 1 # enable mouse cursor hotarea
+      #     },
+      #     hyprexpo {
+      #       columns = 3
+      #       gap_size = 5
+      #       bg_col = rgb(111111)
+      #       workspace_method = center current # [center/first] [workspace] e.g. first 1 or center m+1
+      #       enable_gesture = true # laptop touchpad, 4 fingers
+      #       gesture_distance = 300 # how far is the "max"
+      #       gesture_positive = true # positive = swipe down. Negative = swipe up.
+      #     }
+      # }
 
       # Window rules #
-      windowrule = tile,^(Microsoft-edge)$
-      windowrulev2 = suppressevent maximize, class:.*
-      windowrulev2 = workspace 8, class:^(Spotify)$
-      windowrulev2 = workspace 5, class:^(Code)$
-      windowrulev2 = float,class:^(pavucontrol)$
-      windowrulev2 = float,class:^(blueman-manager)$
+      # Rofi
+      windowrulev2 = stayfocused, class:(rofi)
+      # Obsidian
+      windowrulev2 = workspace 6, class:(obsidian)
+      #Google Chrome
+      windowrulev2 = workspace 6, class:(google-chrome-.*)
+
+      windowrulev2 = workspace 7, class:^(Spotify .*)$
+
+      windowrulev2 = opacity 0.80 0.80,class:(code.*)
+      windowrulev2 = opacity 0.80 0.80,class:(code.*)
+      windowrulev2 = workspace 2, class:(code.*)
+
+      windowrulev2 = workspace 1, class:^(Edge)$
+      #Pavucontrol
+      windowrulev2 = float, class:(pavucontrol)
+      windowrulev2 = size 1220 630, class:(pavucontrol)
+      windowrulev2 = center, class:(pavucontrol)
+      # Telegram
+      windowrulev2 = workspace 4, class:(org.telegram.desktop)
+      windowrulev2 = size 970 480, class:(org.telegram.desktop), title:(Choose Files)
+      windowrulev2 = center, class:(org.telegram.desktop), title:(Choose Files) 
+      
+      windowrulev2 = float, class:(blueman-manager)
+      windowrulev2 = center, class:(blueman-manager)
       windowrulev2 = float,class:^(nm-applet)$
       windowrulev2 = float,class:^(nm-connection-editor)$
       
@@ -371,21 +406,29 @@ in
       windowrulev2 = immediate, class:^(steam_app_2)$
       windowrulev2 = immediate, class:^(.*)(.exe)$
 
+      windowrulev2 = float, class:(xdg-desktop-portal-gtk)
+      windowrulev2 = size 1345 720, class:(xdg-desktop-portal-gtk)
+      windowrulev2 = center, class:(xdg-desktop-portal-gtk)
+      
       windowrule = float,system_monitor
       #windowrule=size 1570 840,system_monitor
       windowrule = center,system_monitor
       windowrule = float, polkit-agent-helper-1
-      windowrule = float, xdg-desktop-portal-gtk
-      # windowrule = float,^(org.gnome.Nautilus)$
-      # windowrule = float, title:^(Open File)$
-      # windowrule = float, title:^(Open Folder)$
-      # windowrule = float, title:^(update-sys)
-      windowrule = workspace special:hidden, Spotify
 
     
       # System binds #
       $mainMod = SUPER
-
+      
+      #Hyprexpo
+      # bind = $mainMod ALT, hyprexpo:expo, toggle # can be: toggle, off/disable or on/enable
+       
+      # #Hypcov
+      # bind = ALT,tab,hycov:toggleoverview
+      # bind=ALT,left,hycov:movefocus,l
+      # bind=ALT,right,hycov:movefocus,r
+      # bind=ALT,up,hycov:movefocus,u
+      # bind=ALT,down,hycov:movefocus,d
+       
       bindm = $mainMod, mouse:272, movewindow
       bindm = $mainMod, mouse:273, resizewindow
 
@@ -557,6 +600,8 @@ in
       blurls=rofi
       blurls=waybar
       blurls=gtk-layer-shell
+      blurls = notifications
+      blurls = swayosd
     '';
   };
 }
