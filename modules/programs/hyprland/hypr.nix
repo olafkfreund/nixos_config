@@ -17,4 +17,7 @@ programs.firefox = {
 programs.wshowkeys = {
   enable = true;
   };
+programs.nix-ld = {
+  enable = true;
+  };
 }

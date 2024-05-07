@@ -6,5 +6,6 @@
      terraform
      terraformer 
      terraform-docs
+     tftui
   ];
 }

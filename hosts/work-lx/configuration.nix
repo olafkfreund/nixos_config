@@ -48,7 +48,7 @@
   users.users.olafkfreund = {
     isNormalUser = true;
     description = "Olaf K-Freund";
-    extraGroups = [ "networkmanager" "openrazer" "wheel" "docker" "podman" "video" "scanner" "lp"];
+    extraGroups = [ "networkmanager" "openrazer" "wheel" "docker" "podman" "video" "scanner" "dialout" "lp"];
     packages = with pkgs; [
       kate
       kitty

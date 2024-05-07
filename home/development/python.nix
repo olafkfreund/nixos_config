@@ -10,5 +10,6 @@ home.packages = with pkgs; [
   python311Packages.material-color-utilities
   python311Packages.numpy
   python311Packages.pyyaml
+  calcure
   ];
 }

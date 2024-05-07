@@ -92,7 +92,7 @@ in
       exec-once = [workspace 7 silent] spotify
       exec-once = [workspace 1 silent] microsoft-edge
       exec-once = [workspace 2 silent] kitty
-      exec-once = [workspace 9 silent] google-chrome
+      exec-once = [workspace 9 silent] google-chrome-stable
       exec-once = [workspace 8 silent] 1password
       exec-once = [workspace 6 silent] obsidian
       exec-once = [workspace 2 silent] code
