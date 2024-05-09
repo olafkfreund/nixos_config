@@ -28,6 +28,7 @@ programs.bash = {
     export VISUAL=lvim
     source $HOME/.openai.sh
     eval "$(direnv hook bash)"
+    eval "$(starship init bash)"
     eval "$(atuin init bash)"
     #export DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock
   '';

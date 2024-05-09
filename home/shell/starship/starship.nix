@@ -4,7 +4,7 @@
 programs.starship = {
   enable = true;
   # custom settings
-  enableBashIntegration = true;
+  enableBashIntegration = false;
   settings = {
         add_newline = true;
         format = let
