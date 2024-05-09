@@ -449,8 +449,8 @@ in
       
       bind=, XF86AudioMute, exec, swayosd-client --output-volume mute-toggle
       bind=, XF86AudioMicMute, exec, swayosd-client --input-volume mute-toggle
-      bind=, XF86AudioRaiseVolume, exec, swayosd-client --output-volume 15
-      bind=, XF86AudioLowerVolume, exec, swayosd-client --output-volume -15
+      bind=, XF86AudioRaiseVolume, exec, swayosd-client --output-volume 5
+      bind=, XF86AudioLowerVolume, exec, swayosd-client --output-volume -5
       # bind=, XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise --max-volume 120
       # bind=, XF86AudioLowerVolume, exec, swayosd-client --output-volume lower --max-volume 120
       bind=, XF86MonBrightnessUp, exec, swayosd-client --brightness raise

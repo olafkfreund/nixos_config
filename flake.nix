@@ -119,10 +119,7 @@
               inherit self;
             };        
             home-manager.users.olafkfreund = import ./Users/olafkfreund/razer_home.nix;
-            home-manager.sharedModules = [
-              hyprlock.homeManagerModules.hyprlock
-              hypridle.homeManagerModules.hypridle
-	            ];
+            home-manager.sharedModules = [];
           }
         ];
       };
@@ -159,6 +156,8 @@
               inherit self;
             };        
             home-manager.users.olafkfreund = import ./Users/olafkfreund/work-lx_home.nix;
+            home-manager.sharedModules = [
+              ];
           }
         ];
       };

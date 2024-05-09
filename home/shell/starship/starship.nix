@@ -6,6 +6,7 @@ programs.starship = {
   # custom settings
   enableBashIntegration = true;
   settings = {
+        add_newline = true;
         format = let
           git = "$git_branch$git_commit$git_state$git_status";
         in ''

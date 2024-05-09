@@ -6,5 +6,6 @@ home.packages = with pkgs; [
   tgpt
 	github-copilot-cli
   yai
+  shell-gpt
   ];
 }
