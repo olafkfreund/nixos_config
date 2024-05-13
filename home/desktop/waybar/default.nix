@@ -587,7 +587,7 @@
         #custom-arrow6 {
           color: #${config.colorScheme.palette.base0A};
           background-color: #${config.colorScheme.palette.base08};
-          font-size: 20px;
+          font-size: 25px;
         }
 
         #backlight {
