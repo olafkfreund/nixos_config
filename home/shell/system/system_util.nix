@@ -76,5 +76,6 @@ home.packages = with pkgs; [
   system-config-printer
   keylight-controller-mschneider82
   bottom
+  sof-firmware
   ];
 }

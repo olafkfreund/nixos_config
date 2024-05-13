@@ -20,9 +20,8 @@
         "reload_style_on_change" = true;
         "gtk-layer-shell" = true;
 
-        "modules-left" = ["custom/startmenu" "hyprland/workspaces"];
+        "modules-left" = ["custom/startmenu" "hyprland/workspaces" "cava" ];
         "modules-right" = [
-          "cava"
           "group/monitor"
           "pulseaudio"
           "pulseaudio#microphone"
@@ -30,7 +29,7 @@
           "idle_inhibitor"
           "tray"
           ];
-       "modules-center" = [ "clock" "group/group-power" ];
+       "modules-center" = [ "clock" ];
 
         "custom/cycle_wall" = {
           "format" = " ";
@@ -41,8 +40,8 @@
         "idle_inhibitor" = {
           "format" = "{icon}";
           "format-icons" = {
-            "deactivated" = "  ";
-            "activated" = "  ";
+            "deactivated" = "󰒲  ";
+            "activated" = "󰒳  ";
           };
         };
         "cava"= {
@@ -267,9 +266,9 @@
         };
         "network" = {
           "format-wifi" = "󰤨 {essid}";
-          "format-ethernet" = "󱘖 Wired";
-          "tooltip-format" = "󱘖 {ipaddr}  {bandwidthUpBytes}  {bandwidthDownBytes}";
-          "format-linked" = "󱘖 {ifname} (No IP)";
+          "format-ethernet" = "󰈀 ";
+          "tooltip-format" = "󰈀 {ipaddr}  {bandwidthUpBytes}  {bandwidthDownBytes}";
+          "format-linked" = "󰈀 {ifname} (No IP)";
           "format-disconnected" = " Disconnected";
           "format-alt" = "󰤨 {signalStrength}%";
           "on-click" = "networkmanager_dmenu";
@@ -407,6 +406,11 @@
         }
 
         #workspaces button.urgent {
+          color: #${config.colorScheme.palette.base08};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
+          transition: all 0.1s ease-in-out;
+        }
+        #workspaces button.secret {
           color: #${config.colorScheme.palette.base08};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           transition: all 0.1s ease-in-out;
