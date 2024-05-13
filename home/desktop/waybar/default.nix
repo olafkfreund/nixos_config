@@ -10,9 +10,9 @@
         #"width" = 1800;
         "margin-top" = 10;
         "margin-bottom" = 3;
-        "margin-left" = 400;
-        "margin-right" = 400;
-        "spacing" = 3;
+        "margin-left" = 100;
+        "margin-right" = 100;
+        "spacing" = 0;
         "fixed-center" = false;
         "exclusive" = true;
         "passthrough" = false;
@@ -20,16 +20,21 @@
         "reload_style_on_change" = true;
         "gtk-layer-shell" = true;
 
-        "modules-left" = ["custom/startmenu" "hyprland/workspaces" "cava" ];
+        "modules-left" = ["custom/startmenu" "custom/arrow11" "hyprland/workspaces" "custom/arrow10" ];
         "modules-right" = [
+          "custom/arrow5"
           "group/monitor"
+          "custom/arrow6"
           "pulseaudio"
           "pulseaudio#microphone"
+          "custom/arrow7"
           "group/computer"
+          "custom/arrow9"
           "idle_inhibitor"
-          "tray"
+          "custom/arrow4"
+          "clock"
           ];
-       "modules-center" = [ "clock" ];
+       "modules-center" = [ "cava" ];
 
         "custom/cycle_wall" = {
           "format" = " ";
@@ -48,12 +53,12 @@
             "framerate" = 30;
             "autosens" = 0;
             "sensitivity" = 120;
-            "bars" = 6;
+            "bars" = 30;
             "lower_cutoff_freq" = 50;
             "higher_cutoff_freq" = 10000;
             "method" = "pipewire";
             "source" = "auto";
-            "stereo" = false;
+            "stereo" = true;
             "reverse" = false;
             "bar_delimiter" = 0;
             "monstercat" = false;
@@ -143,7 +148,7 @@
             "8" = " ";
             "9" = " ";
             "10" = "󰭹";
-            "active" = " ";
+            # "active" = " ";
             "default" = " ";
             "urgent" = " ";
             "magic" = "󱡄 ";
@@ -328,67 +333,129 @@
            "tooltip-format" = "{format_source} {source_desc} // {source_volume}%";
            "scroll-step" = 5;
           };
+
+          "custom/arrow1" = {
+	       	"format" = "";
+		      "tooltip"= false;
+	        };
+
+        	"custom/arrow2" = {
+		      "format"= "";
+		      "tooltip"= false;
+	        };
+
+	        "custom/arrow3" =  {
+		      "format"= "";
+		      "tooltip"= false;
+	        };
+
+          "custom/arrow4" = {
+		      "format"= "";
+		      "tooltip"= false;
+	        };
+
+	        "custom/arrow5" = {
+		      "format" = "";
+		      "tooltip" = false;
+	        };
+
+          "custom/arrow6" = {
+		      "format" = "";
+		      "tooltip" = false;
+	        };
+
+	        "custom/arrow7" = {
+		      "format" = "";
+		      "tooltip" = false;
+	        };
+
+	        "custom/arrow8" = {
+          "format" = "";
+          "tooltip" = false;
+          };
+
+          "custom/arrow9" = {
+          "format" = "";
+          "tooltip" = false;
+          };
+
+          "custom/arrow10" = {
+          "format" = "";
+          "tooltip" = false;
+          };
+
+          "custom/arrow11" = {
+          "format" = "";
+          "tooltip" = false;
+          };
       };
     };
 
     style = ''
       * {
-        font-family: 'JetBrainsMono Nerd Font';
-        font-size: 15px;
-        /* font-weight: bold; */
-        border-radius: 0px;
-        margin: 1px;
-        min-height: 0px;
+        font-family: 'JetBrainsMono';
+        font-size: 20px;
+        border: none;
+        border-radius: 0;
+        margin: 0;
+        margin-right: 0;
+        margin-left: 0;
         }
 
         window#waybar {
           background-color: #${config.colorScheme.palette.base00};
-          border-radius: 6px;
-          border: 2px solid rgba(29, 32, 33, 0.5);
-          margin-top: 0;
+          font-size: 20px;
         }
 
         .modules-right {
-          font-size: 15px;
+          font-size: 20px;
           background-color: #${config.colorScheme.palette.base00};
-          padding: 0 5px;
         }
 
         .modules-left {
-          font-size: 15px;
-          background-color: #${config.colorScheme.palette.base00};
-          padding: 0 5px;
+          font-size: 20px;
+          
         }
 
         .modules-center {
-          font-size: 15px;
+          font-size: 20px;
           background-color: #${config.colorScheme.palette.base00};
-          padding: 0 5px;
         }
 
         tooltip {
           background: #${config.colorScheme.palette.base00};
-          border-radius: 0px;
+          font-size: 20px;
         }
 
         tooltip label {
           color: #${config.colorScheme.palette.base06};
           background-color: #${config.colorScheme.palette.base00};
-          border-radius: 0px;
         }
 
         tooltip * {
-          border-radius: 0px;
         }
 
         #workspaces {
-          padding: 0 5px;
+          padding: 0 0px;
+          background-color: #${config.colorScheme.palette.base0D};
+          font-size: 20px;
         }
 
         #workspaces button {
-          color: #${config.colorScheme.palette.base06};
+          color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base0D};
           font-weight: normal;
           font-style: normal;
+          font-size: 20px;
+        }
+        
+        #custom-arrow10 {
+          font-size: 25px;
+          border-radius: 0;
+          border: none;
+          color: #${config.colorScheme.palette.base0D};
+          background-color: #${config.colorScheme.palette.base00};
+          
         }
 
         #workspaces button:hover {
@@ -426,43 +493,67 @@
           font-size: 20px;
           font-weight: bolder;
           font-style: normal;
-          margin: 0px;
-          margin-right: 0.3px;
-          margin-left: 0.3px;
+          color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base06};
+        }
+        #custom-arrow4 {
+          font-size: 25px;
           color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base0E};
+          
         }
 
         #custom-startmenu {
           font-size: 20px;
           font-weight: bolder;
           font-style: normal;
-          margin: 0px;
-          margin-right: 0.3px;
-          margin-left: 0.3px;
           color: #${config.colorScheme.palette.base0D};
+          background-color: #${config.colorScheme.palette.base00};
+        }
+
+        #custom-arrow11 {
+          font-size: 25px;
+          border-radius: 0;
+          border: none;
+          color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base0D};
+          
         }
 
         #custom-power {
-          font-size: 15px;
+          font-size: 20px;
           font-weight: bolder;
           font-style: normal;
-          padding: 0 5px;
           color: #${config.colorScheme.palette.base0D};
         }
 
         #custom-monitor {
-          font-size: 15px;
+          font-size: 20px;
           font-weight: bolder;
           font-style: normal;
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base06};
+          color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base0B};
+        }
+
+        #custom-arrow5 {
+          font-size: 25px;
+          color: #${config.colorScheme.palette.base08};
+          background-color: #${config.colorScheme.palette.base00};
+          
+        }
+
+        #custom-arrow7 {
+          font-size: 25px;
+          color: #${config.colorScheme.palette.base0B};
+          background-color: #${config.colorScheme.palette.base0A};
+          
         }
         
         #custom-quit, #custom-lock, #custom-reboot {
           font-size: 20px;
           font-weight: bolder;
           font-style: normal;
-          padding: 0 5px;
           color: #${config.colorScheme.palette.base0D};
         }
 
@@ -470,23 +561,33 @@
           padding: 0 5px;
         }
         #memory {
-          color: #${config.colorScheme.palette.base0E};
+          color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base08};
           padding: 0 5px;
         }
 
         #pulseaudio {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base0A};
+          color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base0A};
         }
 
         #pulseaudio#microphone {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base0A};
+          color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base0A};
         }
 
         #pulseaudio.muted {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base08};
+          color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base0A};
+        }
+
+        #custom-arrow6 {
+          color: #${config.colorScheme.palette.base0A};
+          background-color: #${config.colorScheme.palette.base08};
+          font-size: 20px;
         }
 
         #backlight {
@@ -496,38 +597,47 @@
 
         #cpu {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base0E};
+          color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base08};
         }
 
         #network {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base0E};
+          color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base08};
         }
 
         #custom-cycle_wall {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base0B};
+          color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base0B};
         }
         
         #idle_inhibitor {
           padding: 0 5px; 
-          font-size: 15px;
           font-weight: bolder;
           font-style: normal;
-          color: #${config.colorScheme.palette.base0D};
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base0E};
         }
 
         #idle_inhibitor.activated {
           padding: 0 5px;
-          font-size: 15px;
+          font-size: 20px;
           font-weight: bolder;
           font-style: normal;
-          color: #${config.colorScheme.palette.base0D};
+          color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base0E};
+        }
+
+        #custom-arrow9 {
+          font-size: 25px;
+          color: #${config.colorScheme.palette.base0E};
+          background-color: #${config.colorScheme.palette.base0B};
+          
         }
 
         #language {
-          margin: 0;
-          padding: 0 0.4px 0 0.5px;
           color: #${config.colorScheme.palette.base06};
         }
 
@@ -538,27 +648,26 @@
 
         #battery {
           padding: 0 0.5px 0 0.8px;
-          color: #${config.colorScheme.palette.base0E};
+          color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base08};
         }
 
         #disk {
           padding: 0 0.1px 0 0.1px;
-          color:  #${config.colorScheme.palette.base0E};
+          color:  #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base08};
         }
 
         #cava {
           padding: 0 0.1px 0 0.1px;
-          color:  #${config.colorScheme.palette.base06};
+          color:  #${config.colorScheme.palette.base09};
         }
 
         #window {
           color: #${config.colorScheme.palette.base06};
-          margin-left: 1px;
-          margin-right: 1px;
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           transition: all 0.1s ease-in-out;
-          border-radius: 0px;
-          font-size: 15px;
+          font-size: 20px;
         }
     '';
   };
