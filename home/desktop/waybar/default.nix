@@ -20,7 +20,17 @@
         "reload_style_on_change" = true;
         "gtk-layer-shell" = true;
 
-        "modules-left" = ["custom/startmenu" "custom/arrow11" "hyprland/workspaces" "custom/arrow10" ];
+        "modules-left" = [
+        "custom/startmenu" 
+        "custom/arrow11" 
+        "hyprland/workspaces" 
+        "custom/arrow10" 
+        "hyprland/window" 
+        "custom/arrow12"
+        "custom/playerctl"
+        "custom/arrow13"
+        ];
+        
         "modules-right" = [
           "custom/arrow5"
           "group/monitor"
@@ -33,8 +43,10 @@
           "idle_inhibitor"
           "custom/arrow4"
           "clock"
+          "custom/arrow3"
+          "group/tray"
           ];
-       "modules-center" = [ "cava" ];
+       "modules-center" = [ ];
 
         "custom/cycle_wall" = {
           "format" = " ";
@@ -45,8 +57,8 @@
         "idle_inhibitor" = {
           "format" = "{icon}";
           "format-icons" = {
-            "deactivated" = "󰒲  ";
-            "activated" = "󰒳  ";
+            "deactivated" = "󰒲 ";
+            "activated" = "󰒳 ";
           };
         };
         "cava"= {
@@ -70,17 +82,15 @@
               "on-click-right" = "mode";
             };
         };
-        "group/group-power" = {
+        "group/tray" = {
           orientation = "inherit";
           drawer = {
             transition-duration = 500;
-            transition-left-to-right = true;
+            transition-left-to-right = false;
         };
         modules = [
-          "custom/power"
-          "custom/quit"
-          "custom/lock"
-          "custom/reboot"
+          "custom/tray"
+          "tray"
         ];
       };
 
@@ -119,8 +129,15 @@
           on-click = "sleep 0.1 && ~/.config/rofi/launchers/type-2/launcher.sh";
         };
 
+        "custom/tray" = {
+          tooltip = false;
+          format = "󱊖 ";
+          on-click = "";
+        };
+
         "hyprland/workspaces" = {
 	        "format" = "{icon}";
+          "show-special" = true;
           "on-click" = "active";
           "on-scroll-up" = "${pkgs.hyprland}/bin/hyprctl dispatch workspace e-1";
           "on-scroll-down" = "${pkgs.hyprland}/bin/hyprctl dispatch workspace e+1";
@@ -183,20 +200,31 @@
             "custom/monitor"
           ];
         };
+        
         "hyprland/window" = {
-          "format" = " {}";
+          "format" = "{}";
           "separate-outputs" = true;
+          "rewrite" = {
+            "(.*) Edge" = " ";
+            "(.*) Slack" = " ";
+            "(.*) Mozilla Thunderbird" = " ";
+            "(.*) bash" = "󱆃";
+            "(.*) - NVIM" = " ";
+          };
         };
+        
         "tray" = {
           "spacing" = 12;
           "show-passive-items" = true;
         };
+        
         "custom/dunst" = {
           return-type = "json";
           exec = "~/.config/waybar/scripts/dunst.sh";
           on-click = "dunstctl set-paused toggle";
           restart-interval = 1;
         };
+        
         "hyprland/language" = {
           "format" = " {}";
           "format-en" = "Gb";
@@ -263,9 +291,9 @@
             "warning" = 30;
             "critical" = 20;
           };
-          "format" = "{icon} {capacity}%";
-          "format-charging" = " {capacity}%";
-          "format-plugged" = " {capacity}%";
+          "format" = "{icon}{capacity}%";
+          "format-charging" = " {capacity}% ";
+          "format-plugged" = " {capacity}% ";
           "format-alt" = "{time} {icon}";
           "format-icons" = ["󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
         };
@@ -276,11 +304,11 @@
           "format-linked" = "󰈀 {ifname} (No IP)";
           "format-disconnected" = " Disconnected";
           "format-alt" = "󰤨 {signalStrength}%";
-          "on-click" = "networkmanager_dmenu";
+          "on-click" = "nm-connection-editor";
         };
         "bluetooth" = {
-          "format" = "";
-          "format-disabled" = ""; # an empty format will hide the module
+          "format" = "{icon}" ;
+          "format-disabled" = "󰂲 "; # an empty format will hide the module
           "format-connected" = " {num_connections}";
           "tooltip-format" = " {device_alias}";
           "tooltip-format-connected" = "{device_enumerate}";
@@ -288,18 +316,19 @@
         };
         "disk" = {
           "interval" = 30;
-          "format" = "󰋊 {percentage_used}%";
+          "format" = "󰋊 {percentage_used}% ";
           "path" = "/";
           "tooltip" = true;
           "tooltip-format" = "HDD - {used} used out of {total} on {path} ({percentage_used}%)";
           "on-click" = "kitty --class system_monitor -e ncdu --color dark";
         };
         "pulseaudio" = {
-          "format" = "{icon} {volume}";
+          "format" = "{icon} {volume}% ";
+          "format-bluetooth" = "{volume}% {icon} ";
           "format-muted" = "婢";
           "on-click" = "pavucontrol -t 3";
           "tooltip-format" = "{icon} {desc} // {volume}%";
-          "scroll-step" = 5;
+          "scroll-step" = 1;
           "format-icons" = {
             "headphone" = "";
             "hands-free" = "";
@@ -307,7 +336,9 @@
             "phone" = "";
             "portable" = "";
             "car" = "";
-            "default" = ["" "" ""];
+            "default" = " ";
+            "speaker" = " ";
+            "hifi" = " ";
             }; 
           };
           "custom/playerctl" = {
@@ -380,11 +411,31 @@
           };
 
           "custom/arrow10" = {
-          "format" = "";
+          "format" = "";   
           "tooltip" = false;
           };
 
           "custom/arrow11" = {
+          "format" = "";
+          "tooltip" = false;
+          };
+
+          "custom/arrow12" = {
+          "format" = "";
+          "tooltip" = false;
+          };
+
+          "custom/arrow13" = {
+          "format" = "";
+          "tooltip" = false;
+          };
+
+          "custom/arrow14" = {
+          "format" = "";
+          "tooltip" = false;
+          };
+
+          "custom/arrow15" = {
           "format" = "";
           "tooltip" = false;
           };
@@ -444,6 +495,7 @@
         #workspaces button {
           color: #${config.colorScheme.palette.base00};
           background-color: #${config.colorScheme.palette.base0D};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           font-weight: normal;
           font-style: normal;
           font-size: 20px;
@@ -454,7 +506,7 @@
           border-radius: 0;
           border: none;
           color: #${config.colorScheme.palette.base0D};
-          background-color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base03};
           
         }
 
@@ -493,12 +545,13 @@
           font-size: 20px;
           font-weight: bolder;
           font-style: normal;
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base04};
         }
         #custom-arrow4 {
           font-size: 25px;
-          color: #${config.colorScheme.palette.base06};
+          color: #${config.colorScheme.palette.base04};
           background-color: #${config.colorScheme.palette.base0E};
           
         }
@@ -531,6 +584,7 @@
           font-size: 20px;
           font-weight: bolder;
           font-style: normal;
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           padding: 0 5px;
           color: #${config.colorScheme.palette.base00};
           background-color: #${config.colorScheme.palette.base0B};
@@ -563,6 +617,7 @@
         #memory {
           color: #${config.colorScheme.palette.base00};
           background-color: #${config.colorScheme.palette.base08};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           padding: 0 5px;
         }
 
@@ -570,18 +625,21 @@
           padding: 0 5px;
           color: #${config.colorScheme.palette.base00};
           background-color: #${config.colorScheme.palette.base0A};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #pulseaudio#microphone {
           padding: 0 5px;
           color: #${config.colorScheme.palette.base00};
           background-color: #${config.colorScheme.palette.base0A};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #pulseaudio.muted {
           padding: 0 5px;
           color: #${config.colorScheme.palette.base00};
           background-color: #${config.colorScheme.palette.base0A};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #custom-arrow6 {
@@ -599,26 +657,30 @@
           padding: 0 5px;
           color: #${config.colorScheme.palette.base00};
           background-color: #${config.colorScheme.palette.base08};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #network {
           padding: 0 5px;
           color: #${config.colorScheme.palette.base00};
           background-color: #${config.colorScheme.palette.base08};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #custom-cycle_wall {
           padding: 0 5px;
           color: #${config.colorScheme.palette.base00};
           background-color: #${config.colorScheme.palette.base0B};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
         
         #idle_inhibitor {
           padding: 0 5px; 
           font-weight: bolder;
           font-style: normal;
-          color: #${config.colorScheme.palette.base06};
+          color: #${config.colorScheme.palette.base00};
           background-color: #${config.colorScheme.palette.base0E};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #idle_inhibitor.activated {
@@ -628,6 +690,7 @@
           font-style: normal;
           color: #${config.colorScheme.palette.base00};
           background-color: #${config.colorScheme.palette.base0E};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #custom-arrow9 {
@@ -643,31 +706,70 @@
 
         #tray {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base06};
+          font-weight: bolder;
+          font-style: normal;
+          color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base09};
+          
+        }
+
+        #custom-arrow3 {
+          font-size: 25px;
+          color: #${config.colorScheme.palette.base09};
+          background-color: #${config.colorScheme.palette.base04};
+          
         }
 
         #battery {
           padding: 0 0.5px 0 0.8px;
           color: #${config.colorScheme.palette.base00};
           background-color: #${config.colorScheme.palette.base08};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #disk {
           padding: 0 0.1px 0 0.1px;
           color:  #${config.colorScheme.palette.base00};
           background-color: #${config.colorScheme.palette.base08};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #cava {
           padding: 0 0.1px 0 0.1px;
-          color:  #${config.colorScheme.palette.base09};
+          color:  #${config.colorScheme.palette.base03};
         }
 
         #window {
-          color: #${config.colorScheme.palette.base06};
+          color: #${config.colorScheme.palette.base05};
+          background-color: #${config.colorScheme.palette.base03};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           transition: all 0.1s ease-in-out;
-          font-size: 20px;
+          font-size: 25px;
+        }
+
+        #custom-arrow12 {
+          font-size: 25px;
+          color: #${config.colorScheme.palette.base03};
+          background-color: #${config.colorScheme.palette.base0F};
+        }
+
+        #custom-playerctl {
+          padding: 0 5px;
+          color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base0F};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
+        }
+
+        #custom-arrow13 {
+          font-size: 25px;
+          color: #${config.colorScheme.palette.base0F};
+          background-color: #${config.colorScheme.palette.base00};
+        }
+
+        #custom-arrow14 {
+          font-size: 25px;
+          color: #${config.colorScheme.palette.base0F};
+          background-color: #${config.colorScheme.palette.base00};
         }
     '';
   };
