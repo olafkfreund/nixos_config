@@ -1,9 +1,5 @@
 {
-<<<<<<< HEAD
   inputs, hycov, hyprspace, vars, pkgs, config, ... }:
-=======
-  inputs, hycov, vars, pkgs, config, ... }:
->>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
 let 
     animations.fast = true;
     animations.moving = false;
@@ -22,10 +18,6 @@ in
     ./hypridle.nix
     ./scripts/packages.nix
     #./scripts/themechange.nix
-<<<<<<< HEAD
-=======
-    #./hycov.nix
->>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
   ];
   
   # hyprpaper
@@ -48,7 +40,6 @@ in
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable= true;
-<<<<<<< HEAD
     plugins = [
       #inputs.hyprspace.packages.${pkgs.system}.Hyprspace
       #hycov.packages.${pkgs.system}.hycov
@@ -59,20 +50,6 @@ in
       monitor = eDP-1,1920x1080@100,0x0,1
       #home
       monitor = DP-6,2560x1440@120,1920x0,1
-=======
-    # plugins = [
-    #   # inputs.hyprland-plugins.packages.${pkgs.system}.hyprexpo
-    #   #hycov.packages.${pkgs.system}.hycov
-    # ];
-    # enableNvidiaPatches = true;
-    extraConfig = ''
-      #laptop
-      monitor = ${(if vars.hostName == "work-lx" then "eDP-1,1920x1200@60,0x0,1" else  "eDP-1,1920x1080@60,0x0,1")}
-      #Work R3
-      monitor = ${(if vars.hostName == "work-lx" then "DP-3,3440x1440@100,1920x0,1" else ",preferred,auto, 1" )}
-      #home
-      monitor=DP-6,2560x1440@120,1920x0,1
->>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
       #monitor=,preferred,auto, 1
       #wsbind=1,eDP-1
 
@@ -121,11 +98,7 @@ in
 
       # Env variables
       env = EDITOR="lvim";
-<<<<<<< HEAD
       env = BROWSER="microsoft-edge-stable";
-=======
-      env = BROWSER="google-chrome-stable";
->>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
       env = TERMINAL="kitty";
       
       env = SDL_VIDEODRIVER,wayland
@@ -615,11 +588,7 @@ in
       bind = $mainMod,tab,changegroupactive
       
       # trigger when the switch is turning off
-<<<<<<< HEAD
       bindl = , switch:off:Lid Switch,exec,hyprctl keyword monitor "eDP-1, 1920x1080, 0x0, 1"
-=======
-      bindl = , switch:off:Lid Switch,exec,hyprctl keyword monitor "eDP-1, 1920x1200, 0x0, 1"
->>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
       # trigger when the switch is turning on
       bindl = , switch:on:Lid Switch,exec,hyprctl keyword monitor "eDP-1, disable"
 

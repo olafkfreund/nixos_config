@@ -30,13 +30,10 @@ programs.bash = {
     eval "$(direnv hook bash)"
     eval "$(starship init bash)"
     eval "$(atuin init bash)"
-<<<<<<< HEAD
     if command -v fzf-share >/dev/null; then
       source "$(fzf-share)/key-bindings.bash"
       source "$(fzf-share)/completion.bash"
     fi
-=======
->>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
     #export DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock
   '';
 

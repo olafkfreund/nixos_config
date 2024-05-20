@@ -34,11 +34,7 @@
 
       hide_window_decorations = true;
 
-<<<<<<< HEAD
       # background_opacity = "0.85";
-=======
-      background_opacity = "0.85";
->>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
       dynamic_background_opacity = true;
 
       sync_to_monitor = true;

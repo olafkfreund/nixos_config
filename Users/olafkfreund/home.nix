@@ -6,7 +6,7 @@ imports =[
   
 ];
 
-colorScheme = inputs.nix-colors.colorSchemes.gruvbox-dark-medium;
+colorScheme = inputs.nix-colors.colorSchemes.gruvbox-dark-hard;
 
 home.username = "olafkfreund";
 home.homeDirectory = "/home/olafkfreund";

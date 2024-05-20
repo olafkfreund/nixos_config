@@ -19,11 +19,7 @@
         progress_bar_frame_width = 3;
         progress_bar_min_width = 460;
         progress_bar_max_width = 480;
-<<<<<<< HEAD
         # highlight = "#79dcaa";
-=======
-        highlight = "#79dcaa";
->>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
         indicate_hidden = true;
         shrink = true;
         transparency = 5;
@@ -34,11 +30,7 @@
         frame_color = "#${config.colorScheme.palette.base06}";
         sort = true;
         idle_threshold = 0;
-<<<<<<< HEAD
         # font = "JetBrains Mono Nerd Font 13";
-=======
-        font = "JetBrains Mono Nerd Font 13";
->>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
         line_height = 2;
         markup = "full";
         origin = "top-right";
@@ -74,7 +66,6 @@
 
       urgency_normal = {
         timeout = 6;
-<<<<<<< HEAD
         # background = "#${config.colorScheme.palette.base00}";
         # frame_color = "#${config.colorScheme.palette.base07}";
         # foreground = "#${config.colorScheme.palette.base06}";
@@ -90,23 +81,6 @@
         # background = "#${config.colorScheme.palette.base00}";
         # frame_color = "#${config.colorScheme.palette.base07}";
         # foreground = "#${config.colorScheme.palette.base06}";
-=======
-        background = "#${config.colorScheme.palette.base00}";
-        frame_color = "#${config.colorScheme.palette.base07}";
-        foreground = "#${config.colorScheme.palette.base06}";
-      };
-      urgency_low = {
-        timeout = 2;
-        background = "#${config.colorScheme.palette.base00}";
-        frame_color = "#${config.colorScheme.palette.base07}";
-        foreground = "#${config.colorScheme.palette.base06}";
-      };
-      urgency_critical = {
-        timeout = 30;
-        background = "#${config.colorScheme.palette.base00}";
-        frame_color = "#${config.colorScheme.palette.base07}";
-        foreground = "#${config.colorScheme.palette.base06}";
->>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
       };
       fullscreen_show_critical = {
         msg_urgency = "critical";

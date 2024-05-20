@@ -9,11 +9,7 @@
       enabled = false;
       };
       manager = {
-<<<<<<< HEAD
         show_hidden = true;
-=======
-        show_hidden = false;
->>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
         sort_by = "modified";
         sort_dir_first = true;
         sort_reverse = true;
@@ -55,8 +51,4 @@
       };
     };
   };
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d

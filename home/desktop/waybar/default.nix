@@ -161,7 +161,6 @@
             "3" = " ";
             "4" = " ";
             "5" = " ";
-<<<<<<< HEAD
             "6" = " ";
             "7" = " ";
             "8" = " ";
@@ -171,17 +170,6 @@
             "default" = " ";
             "urgent" = " ";
             "magic" = " ";
-=======
-            "6" = "";
-            "7" = " ";
-            "8" = " ";
-            "9" = " ";
-            "10" = "󰭹";
-            # "active" = " ";
-            "default" = " ";
-            "urgent" = " ";
-            "magic" = "󱡄 ";
->>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
             "hidden" = "󰐃 ";
             "secret" = " ";
           };
@@ -216,7 +204,6 @@
           format = "{}";
           separate-outputs = true;
           rewrite = {
-<<<<<<< HEAD
             "(.*) Edge" = "  Edge";
             "(.*) Google Chrome" = "  Chrome";
             "(.*) Slack" = " Slack";
@@ -228,14 +215,6 @@
             "(.*) Alacritty" = "  Terminal";
             "~/(.*)" = "  Terminal";
             "Zellij (.*)" = " Zellij";
-=======
-            "(.*) Edge" = " ";
-            "(.*) Slack" = " ";
-            "(.*) Mozilla Thunderbird" = " ";
-            "(.*) bash" = "󰆍 ";
-            "(.*) Teams" = "󰊻 ";
-            "(.*) - NVIM" = " ";
->>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
           };
         };
         
@@ -341,11 +320,7 @@
           tooltip-format = " {device_alias}";
           tooltip-format-connected = "{device_enumerate}";
           tooltip-format-enumerate-connected = " {device_alias}";
-<<<<<<< HEAD
           on-click = "kitty -e bluetuith --color dark";
-=======
-          on-click = "blueman-manager";
->>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
         };
         "disk" = {
           interval = 30;
