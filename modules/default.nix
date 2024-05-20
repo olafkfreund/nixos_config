@@ -2,20 +2,19 @@
   imports = [
     ./nix/nix.nix
     ./fonts/fonts.nix
-    ./programs/hyprland/hypr.nix
-    ./programs/1password/1password.nix
-    ./programs/steam/steam.nix
-    ./programs/gnupg/gnupg.nix
-    ./programs/dconf/dconf.nix
-    ./services/mtr/mtr.nix
-    ./services/printing/print.nix
-    ./services/flatpak/flatpak.nix
-    ./services/xserver/xdg-portal.nix
-    ./services/xserver/xserver.nix
-    ./services/bluetooth/bluetooth.nix
-    ./services/sound/sound.nix
-    ./services/openssh/openssh.nix
-    ./virt/virt.nix
+    ./programs/default.nix
+    ./services/default.nix
+    ./security/default.nix
+    ./virt/default.nix
+    ./system-tweaks/storage-tweaks/SSD/SSD-tweak.nix
+    ./system-tweaks/kernel-tweaks/32GB-SYSTEM/32GB-SYSTEM.nix
+    ./laptop-related/autorandr.nix
+    ./laptop-related/earlyoom.nix
+    ./laptop-related/zram.nix
+    ./hardware/openrazer.nix
+    ./pkgs/default.nix
+    ./overlays/default.nix
+
   ];
 
 

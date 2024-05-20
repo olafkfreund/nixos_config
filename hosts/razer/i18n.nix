@@ -17,7 +17,7 @@ i18n.extraLocaleSettings = {
 console.keyMap = "uk";
 
 services.xserver = {
-  layout = "gb";
+  xkb.layout = "gb";
   xkb.variant = "";
 };
 }

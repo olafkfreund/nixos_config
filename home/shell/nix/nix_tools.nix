@@ -5,10 +5,15 @@
     deadnix #Find and remove unused code in .nix source files
     nixpkgs-fmt #Nix code formatter for nixpkgs
     nixpkgs-lint
+    nix-update
     nix-doc
     nix-bash-completions
     nix-zsh-completions
     nixos-container
     nixos-generators #A utility for Nixpkgs contributors to check Nixpkgs for common errors
+    nh
+    nvd
+    nix-output-monitor
+    nixd
   ];
 }

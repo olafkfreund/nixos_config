@@ -9,6 +9,7 @@
     bash-completion
   ];
 
+programs.zoxide.enableBashIntegration = true;
 
 programs.bash = {
   enable = true;
@@ -20,22 +21,25 @@ programs.bash = {
     export PATH="$PATH:/home/olafkfreund/.spicetify"
     export PATH="$PATH:/home/olafkfreund/.cargo/bin"
     export PATH="$PATH:/home/olafkfreund/go/bin"
-    #export IN_API_KEY=90e5bc5705184498af1de989c7beac7e
     export PATH="$HOME/.config/rofi/scripts:$PATH"
     export PATH="$HOME/.npm-global/bin:$PATH"
     export TERM=xterm
     export EDITOR=lvim
     export VISUAL=lvim
-    export CORDA_ARTIFACTORY_USERNAME="olaf.freund@r3.com"
-    export CORDA_ARTIFACTORY_PASSWORD="AKCpBrw56m6sceapUZ2abMA6ZA2CH7MxNDbYgMYwmJTdG4jLfhLFjXVu2qcT8jFP7rEcXjdYM"
     source $HOME/.openai.sh
     eval "$(direnv hook bash)"
+    eval "$(starship init bash)"
+    eval "$(atuin init bash)"
+    if command -v fzf-share >/dev/null; then
+      source "$(fzf-share)/key-bindings.bash"
+      source "$(fzf-share)/completion.bash"
+    fi
     #export DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock
   '';
 
 # set some aliases, feel free to add more or remove some
   shellAliases = {
-    cp = "cp -riv";
+    cp = "cp -rv";
     mkdir = "mkdir -vp";
     mv = "mv -iv";
 	  top = "btm";
@@ -49,13 +53,18 @@ programs.bash = {
 	  gitp = "git push";
 	  gitc = "git checkout";
 	  icat = "kitty +kitten icat";
-    nri = "sudo nixos-rebuild switch --impure";
-    nr = "sudo nixos-rebuild switch";
-    fu = "sudo nix flake update";
+    neofetch = "neofetch --iterm2 ~/Pictures/1_d2RiMW4zoHLUK-751E38gQ.png --size 200";
+    nri = "sudo nixos-rebuild switch --impure|& nom";
+    nr = "sudo nixos-rebuild switch|& nom";
+    today = "curl -s https://wttr.in/London?1";
+    wttr = "curl -s https://wttr.in/London?0";
+    fu = "sudo nix flake update|& nom";
     code = "code --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
 	  dbe = "distrobox enter";
 	  ask = "chatgpt --model gpt-4 -p";
 	  obsidian = "obsidian --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
+    google-chrome-stable = "google-chrome-stable --ozone-platform=wayland";
+    microsoft-edge-stable = "microsoft-edge-stable --ozone-platform=wayland";
     #Work only
     slack = "slack --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer";
     ow = "zellij --layout ~/.config/zellij/layouts/work.kdl";

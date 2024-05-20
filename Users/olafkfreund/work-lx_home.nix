@@ -1,17 +1,13 @@
 { inputs, lib, config, pkgs, nixpkgs, ... }: {
 
 imports =[
-   #inputs.nix-colors.homeManagerModules.default
+   inputs.nix-colors.homeManagerModules.default
+   inputs.hyprland.homeManagerModules.default
     (../../home/default.nix)
-    (../../home/cloud/default.nix)
-    (../../home/development/default.nix)
-    (../../home/media/music.nix)
-    (../../home/media/spice_themes.nix)
-    (../../home/browsers/default.nix)
     (./r3.nix)
 ];
 
-#colorScheme = inputs.nix-colors.colorSchemes.gruvbox-dark-medium;
+colorScheme = inputs.nix-colors.colorSchemes.gruvbox-dark-medium;
 
 home.username = "olafkfreund";
 home.homeDirectory = "/home/olafkfreund";

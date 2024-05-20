@@ -1,18 +1,15 @@
-{ stdenv, fetchFromGitHub }:
-{
-  sddm-sugar-dark = stdenv.mkDerivation rec {
-    pname = "sddm-sugar-dark-theme";
-    version = "1.2";
-    dontBuild = true;
-    installPhase = ''
-      mkdir -p $out/share/sddm/themes
-      cp -aR $src $out/share/sddm/themes/sugar-dark
-    '';
-    src = fetchFromGitHub {
-      owner = "MarianArlt";
-      repo = "sddm-sugar-dark";
-      rev = "v${version}";
-      sha256 = "0gx0am7vq1ywaw2rm1p015x90b75ccqxnb1sz3wy8yjl27v82yhb";
-    };
-  };
+{ pkgs, ... }: {
+  environment.systemPackages = with pkgs; [
+    qt6.qtmultimedia
+    libsForQt5.qt5.qtmultimedia
+    libsForQt5.qt5.qtgraphicaleffects
+    qt6.qtquick3d
+    qt6.qtquicktimeline
+    libsForQt5.qt5.qtquickcontrols
+    qt6.qtquick3dphysics
+    libsForQt5.qt5.qtquickcontrols2
+    qt6.qtquickeffectmaker
+    libsForQt5.sddm-kcm
+    libsForQt5.phonon-backend-gstreamer
+  ];
 }

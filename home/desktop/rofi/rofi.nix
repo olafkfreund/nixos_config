@@ -5,23 +5,39 @@
 }: {
   home.file = {
     ".config/rofi/rofi-powermenu-gruvbox-config.rasi".source = ../config/rofi/rofi-powermenu-gruvbox-config.rasi;
-    ".config/rofi/rofi-launcher-gruvbox-config.rasi".source = ../config/rofi/rofi-launcher-gruvbox-config.rasi;
+    ".config/rofi/rofi.rasi".source = ../config/rofi/rofi.rasi;
     ".config/rofi/gruvbox.rasi".source = ../config/rofi/gruvbox.rasi;
   };
   programs.rofi = {
     enable = true;
     package = pkgs.rofi-wayland;
-    font = "JetBrainsMono Nerd Font Medium 8";
-    theme = ../config/rofi/rofi-launcher-gruvbox-config.rasi;
+    # font = "JetBrains Mono Nerd Font 16px";
+    # theme = ../config/rofi/rofi.rasi;
     extraConfig = {
       bw = 1;
-      # border = "10px solid";
-      border-radius = "10px solid";
-      scrollbar = false;
+      modi ="drun,window,filebrowser,run";
       show-icons = true;
-      display-drun = "  ";
+      terminal = "kitty";
+      display-drun = " ";
+      display-run = " ";
+      display-filebrowser = " ";
+      display-window = " ";
       drun-display-format = "{name}";
+      window-format = "{w}{c}";
+      display-emoji = "🔎 ";
       icon-theme = "gruvbox-dark";
     };
   };
+  home.packages = with pkgs; [
+  
+  rofi-wayland
+  rofimoji
+  rofi-emoji
+  rofi-power-menu
+  rofi-top
+  rofi-systemd
+  rofi-bluetooth
+  rofi-screenshot
+  rofi-file-browser
+  ];
 }

@@ -1,52 +1,74 @@
 { pkgs, ... }: {
 
 home.packages = with pkgs; [
-  kde-gruvbox
-  catppuccin-kde
-  #kde-rounded-corners
-  libsForQt5.kdecoration
-  libsForQt5.kdeconnect-kde
-  libsForQt5.bismuth
-  libsForQt5.xdg-desktop-portal-kde
-  libsForQt5.gwenview
-  libsForQt5.dolphin-plugins
-  libsForQt5.ffmpegthumbs
-  libsForQt5.kdegraphics-thumbnailers
-  libsForQt5.kio
-  libsForQt5.kio-extras
+ 
+  #KDE5
+  #kde-gruvbox
+  # libsForQt5.kdecoration
+  # libsForQt5.kdeconnect-kde
+  # #libsForQt5.bismuth
+  # libsForQt5.xdg-desktop-portal-kde
+  # libsForQt5.gwenview
+  # libsForQt5.dolphin-plugins
+  # libsForQt5.ffmpegthumbs
+  # libsForQt5.kdegraphics-thumbnailers
+  # libsForQt5.kio
+  # libsForQt5.kio-extras
   libsForQt5.qtwayland
-  libsForQt5.krfb
-  libsForQt5.qtstyleplugins
-  libsForQt5.discover
-  libsForQt5.qmltermwidget
-	plasma-theme-switcher
-	utterly-round-plasma-style
-	utterly-nord-plasma
-	nordic
+  # libsForQt5.krfb
+  # libsForQt5.qtstyleplugins
+  # libsForQt5.discover
+  # libsForQt5.qmltermwidget
+  # libsForQt5.sddm-kcm
+  # libsForQt5.phonon-backend-gstreamer
+  #libsForQt5.kaccounts-integration
+  #libsForQt5.kaccounts-providers
+  #libsForQt5.packagekit-qt
+  #libsForQt5.qt5.qtsvg
+  #libportal-qt5
+  #libsForQt5.qt5.qtmultimedia
+  #libsForQt5.qt5.qtgraphicaleffects
+  #libsForQt5.qt5.qtquickcontrols2
+  #libsForQt5.qt5.qtquickcontrols
+  #KDE6
+  # kdePackages.wayqt
+  # kdePackages.kcmutils
+  # kdePackages.kgpg
+  # kdePackages.krfb
+  kdePackages.ksvg
+  # kdePackages.waylib
+  # kdePackages.wayqt
+  # kdePackages.wayland-protocols
+  # kdePackages.syntax-highlighting
+  # kdePackages.qwlroots
+  # kdePackages.okular
+  # kdePackages.neochat
+  # kdePackages.polkit-kde-agent-1
+  # kdePackages.syntax-highlighting
+  # kdePackages.polkit-kde-agent-1
+  # kdePackages.sddm
+  # kdePackages.sddm-kcm
+  # kdePackages.kdeconnect-kde
+  # kdePackages.kpackage
+  # kdePackages.plasma-wayland-protocols
+  # nixos-bgrt-plymouth
+  # kdePackages.qgpgme
+  # # kdePackages.qt6ct
+  # # kdePackages.qt6gtk2
+  # kdePackages.plymouth-kcm
+  # kdePackages.plasmatube
+  # kdePackages.audiotube
+  # kdePackages.breeze
+  # # kdePackages.breeze-gtk
+  # # kdePackages.breeze-grub
+  # kdePackages.breeze-plymouth
+  #Other
   libreoffice-qt
   pywal
   wpgtk
-  latte-dock
   polychromatic
   ungoogled-chromium
-  onedrive
-  onedrivegui
   quaternion
-  qt6.qtmultimedia
-  libsForQt5.qt5.qtmultimedia
-  libsForQt5.qt5.qtgraphicaleffects
-  qt6.qtquick3d
-  qt6.qtquicktimeline
-  libsForQt5.qt5.qtquickcontrols
-  qt6.qtquick3dphysics
-  libsForQt5.qt5.qtquickcontrols2
-  qt6.qtquickeffectmaker
-  libsForQt5.sddm-kcm
-  libsForQt5.phonon-backend-gstreamer
-  libsForQt5.kaccounts-integration
-  libsForQt5.kaccounts-providers
-  libsForQt5.packagekit-qt
-  libportal-qt5
   xwaylandvideobridge
   ];
 }

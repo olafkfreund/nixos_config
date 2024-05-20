@@ -1,6 +1,7 @@
 { pkgs, ... }: {
   home.packages = with pkgs; [
-    ansible_2_14
+    ansible
     ansible-lint
+    ansible-navigator
   ];
 }

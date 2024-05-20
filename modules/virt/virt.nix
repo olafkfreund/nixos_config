@@ -15,6 +15,10 @@
 
     };
     spiceUSBRedirection.enable = true;
+
+    containerd = {
+      enable = true;
+    };
   };
 
   environment.sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
@@ -42,6 +46,8 @@
     win-spice
     win-virtio
     virtualbox
+    quickgui
+    quickemu
     quickgui
 
   ];

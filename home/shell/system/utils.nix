@@ -1,12 +1,22 @@
 { pkgs, config, ... }: {
 
   home.packages = with pkgs; [
-      hyprpaper
-      swaybg
+            
       nodePackages.neovim
 	    vimPlugins.nix-develop-nvim
-	    github-copilot-cli
+	    # github-copilot-cli
       figlet
       gum
+      mpv
+      sox
+      yad
+      appimage-run
+      fftw
+      iniparser
+      openapi-tui
+      fast-ssh
+      lazycli
+      systemctl-tui
+      bluetuith
   ];
 }

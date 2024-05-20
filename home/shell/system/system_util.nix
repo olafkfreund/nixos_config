@@ -4,6 +4,7 @@ home.packages = with pkgs; [
   
   mtr
   iperf3
+  bc
   dnsutils
   ldns
   nmap
@@ -32,9 +33,51 @@ home.packages = with pkgs; [
   w3m
   dmenu-wayland
   qtpass
-  plasma-pass
+  # plasma-pass
   rofi-pass
   wofi-pass
   qjournalctl
+  fwupd
+  android-tools
+  scrcpy
+  libusb1
+  acpi
+  bluez-tools
+  brightnessctl
+  mpc-cli
+  alsa-utils
+  pamixer
+  playerctl
+  brightnessctl
+  pavucontrol
+  pulseaudio
+  ncdu
+  wireplumber
+  networkmanager
+  networkmanagerapplet
+  networkmanager_dmenu
+  gpg-tui
+  gpgme
+  #pass-wayland
+  keychain
+  netscanner
+  gawk
+  cups
+  ghostscript
+  # sane-backends
+  dbus
+  libjpeg
+  hplipWithPlugin 
+  avahi
+  sane-airscan
+  xsane
+  simple-scan
+  libtool
+  system-config-printer
+  keylight-controller-mschneider82
+  bottom
+  sof-firmware
+  openssl
+  libsixel
   ];
 }

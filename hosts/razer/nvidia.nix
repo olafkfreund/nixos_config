@@ -16,11 +16,14 @@ hardware.nvidia = {
   nvidiaPersistenced = true;
   open = false;
   nvidiaSettings = true;
-  package = config.boot.kernelPackages.nvidiaPackages.beta;
+  package = config.boot.kernelPackages.nvidiaPackages.stable;
 };
+
+# boot.kernelParams = [ "module_blacklist=i915" ];
 
 hardware.nvidia.prime = {
   sync.enable = true;
+  offload.enable = false; 
   intelBusId = "PCI:0:2:0";
   nvidiaBusId = "PCI:1:0:0";
   };

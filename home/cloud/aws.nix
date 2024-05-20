@@ -1,5 +1,5 @@
-{ pkgs, ... }: {
-  home.packages = with pkgs; [
+{ pkgs, pkgs-stable, ... }: {
+  home.packages = with pkgs-stable; [
     # aws
     awscli2
     awsrm

@@ -29,25 +29,82 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11";
+    
     nix-colors.url = "github:misterio77/nix-colors";
+    
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
     nixos-cosmic = {
       url = "github:lilyinstarlight/nixos-cosmic";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    #nix-colors.url = "github:misterio77/nix-colors";
+    
     spicetify-nix.url = "github:the-argus/spicetify-nix";
-    hyprland.url = "github:hyprwm/Hyprland";
+
+    hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
+    #hyprland.url = "github:hyprwm/Hyprland";
+    hyprland.inputs.nixpkgs.follows = "nixpkgs";
+
+    hyprland-plugins = {
+    url = "github:hyprwm/hyprland-plugins";
+    inputs.hyprland.follows = "hyprland";
+    };
+
     hyprpicker.url = "github:hyprwm/hyprpicker";
-    hypr-contrib.url = "github:hyprwm/contrib";
+    hyprpicker.inputs.nixpkgs.follows = "nixpkgs";
+    
+    hyprland-contrib.url = "github:hyprwm/contrib";
+    hyprland-contrib.inputs.nixpkgs.follows = "nixpkgs";
+    
+    agenix.url = "github:ryantm/agenix";
+    agenix.inputs.nixpkgs.follows = "nixpkgs";
+    
     nixpkgs-f2k.url = "github:moni-dz/nixpkgs-f2k";
+    
     nur.url = "github:nix-community/NUR";
+
+    hycov={
+      url = "github:DreamMaoMao/hycov";
+      inputs.hyprland.follows = "hyprland";
+    };
+    
+    hyprlock = {
+      url = "github:hyprwm/hyprlock";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    
+    hypridle = {
+      url = "github:hyprwm/hypridle";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    hyprspace = {
+      url = "github:KZDKM/Hyprspace";
+      inputs.hyprland.follows = "hyprland";
+    };  
+    stylix.url ="github:danth/stylix";
+
   };
 
 
-  outputs = inputs@{
-    self, nixpkgs, nixpkgs-stable, nur, nixos-cosmic, nixpkgs-f2k, hyprland, nix-colors, spicetify-nix, home-manager, ... }: 
+  outputs = {
+      self, 
+      nixpkgs, 
+      nixpkgs-stable, 
+      hyprlock, 
+      hyprspace, 
+      hypridle, 
+      hycov, 
+      nur, 
+      hyprland-plugins, 
+      nixos-cosmic, 
+      nixpkgs-f2k, 
+      hyprland, 
+      nix-colors, 
+      spicetify-nix, 
+      home-manager,
+      stylix,
+      ... }@inputs : 
     {
     nixosConfigurations = {
       razer = nixpkgs.lib.nixosSystem {
@@ -60,6 +117,8 @@
           nur.nixosModules.nur
           home-manager.nixosModules.home-manager
           nixos-cosmic.nixosModules.default
+          inputs.nix-colors.homeManagerModules.default
+          inputs.stylix.nixosModules.stylix
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
@@ -72,6 +131,9 @@
               inherit nixpkgs;
               inherit spicetify-nix;
               inherit hyprland;
+              inherit hycov;
+              inherit stylix;
+              inherit hyprspace;
               inherit nixpkgs-f2k;
               inherit home-manager;
               inherit nixpkgs-stable;
@@ -79,39 +141,7 @@
               inherit self;
             };        
             home-manager.users.olafkfreund = import ./Users/olafkfreund/razer_home.nix;
-          }
-        ];
-      };
-      work-lx = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = {
-          inherit inputs;
-        };
-        modules = [
-          ./configuration.nix
-          nur.nixosModules.nur
-          home-manager.nixosModules.home-manager
-          nixos-cosmic.nixosModules.default
-          # inputs.nix-colors.homeManagerModules.default
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.extraSpecialArgs = {
-              pkgs-stable = import nixpkgs-stable {
-              system = "x86_64-linux";
-              config.allowUnfree = true;
-              };
-              inherit inputs;
-              inherit nixpkgs;
-              inherit spicetify-nix;
-              inherit nixpkgs-f2k;
-              inherit hyprland;
-              inherit nix-colors;
-              inherit home-manager;
-              inherit nixpkgs-stable;
-              inherit self;
-            };        
-            home-manager.users.olafkfreund = import ./Users/olafkfreund/work-lx_home.nix;
+            home-manager.sharedModules = [];
           }
         ];
       };

@@ -1,5 +1,5 @@
 
-{ self, config, pkgs, ... }: {
+{ self, config, pkgs, lib, ... }: {
 
 nix.gc = {
   automatic = true;
@@ -9,7 +9,7 @@ nix.gc = {
 
 system.autoUpgrade = {
   enable = true;
-  channel = "https://nixos.org/channels/nixos-23.11";
+  channel = "https://nixos.org/channels/nixos-24.05";
 };
 
 nix = {
@@ -30,7 +30,14 @@ nix.settings.auto-optimise-store = true;
 nixpkgs.config.allowUnfree = true;
 nixpkgs.config.allowInsecure = true;
 nixpkgs.config.joypixels.acceptLicense = true;
-nixpkgs.config.permittedInsecurePackages = [ "electron-25.9.0" ];
+nixpkgs.config.allowUnfreePredicate = pkg:
+    builtins.elem (lib.getName pkg) [
+      "slack-4.36.140"
+    ];
+nixpkgs.config.permittedInsecurePackages = [ 
+  "electron-25.9.0"
+  "nix-2.15.3"
+];
 
 
 environment.systemPackages = with pkgs; [

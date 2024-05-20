@@ -1,38 +1,79 @@
-{ self, config, pkgs, ... }:
+{ self, lib, config, pkgs, ... }:
 
 {
   imports =
     [ 
       ./hardware-configuration.nix
+      ./screens.nix
+      ./power.nix
       ./boot.nix
-      ../../modules/system-tweaks/storage-tweaks/SSD/SSD-tweak.nix
-      ../../modules/system-tweaks/kernel-tweaks/32GB-SYSTEM/32GB-SYSTEM.nix
-      ../../modules/laptop-related/autorandr.nix
-      ../../modules/laptop-related/earlyoom.nix
-      ../../modules/laptop-related/zram.nix
-      ../../modules/hardware/openrazer.nix
-      ../../modules/default.nix
-      ../../home/containers/default.nix
       ./nvidia.nix
       ./i18n.nix
       ./hosts.nix
       ./envvar.nix
+      ../../modules/default.nix
     ];
   networking.networkmanager.enable = true;
-  networking.hostName = "razer"; # Define your hostname.
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+  networking.hostName = "razer";
+  networking = {
+    useDHCP = false;
+    useNetworkd = true;
+  };
+
+  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
+  
+  stylix.image = ./gruvbox-rainbow-nix.png;
+
+  stylix.fonts = {
+    monospace = {
+      package = pkgs.nerdfonts.override {fonts = ["JetBrainsMono"];};
+      name = "JetBrainsMono Nerd Font Mono";
+    };
+    sansSerif = {
+      package = pkgs.dejavu_fonts;
+      name = "DejaVu Sans";
+    };
+    serif = {
+      package = pkgs.dejavu_fonts;
+      name = "DejaVu Serif";
+    };
+  };
+  stylix.fonts.sizes = {
+    applications = 12;
+    terminal = 16;
+    desktop = 12;
+    popups = 12;
+  };
+
+  stylix.opacity = {
+    applications = 1.0;
+    terminal = 0.7;
+    desktop = 1.0;
+    popups = 1.0;
+  };
+
+ systemd.network = {
+    networks = {
+      "wlp3s0" = {
+        name = "wlp3s0";
+        DHCP = "ipv4";
+        networkConfig = {
+          MulticastDNS = true;
+        };
+      };
+    };
+  };
   users.users.olafkfreund = {
     isNormalUser = true;
     description = "Olaf K-Freund";
-    extraGroups = [ "networkmanager" "wheel" "docker" ];
+    extraGroups = [ "networkmanager" "openrazer" "wheel" "docker" "video" "scanner" "lp"];
     packages = with pkgs; [
       kate
       kitty
-      neovim
       vim
+      polychromatic
       ];
     };
-  security.sudo.wheelNeedsPassword = false;
   networking.firewall.enable = false;
   system.stateVersion = "23.11"; # Did you read the comment?
 }

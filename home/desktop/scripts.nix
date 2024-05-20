@@ -1,4 +1,6 @@
-{pkgs, ...}: let
+{pkgs, config, libs, inputs, ...}: 
+
+let
   wallpaper_path = "$HOME/Pictures/wallpapers/gruvbox/";
 in {
   home = {
