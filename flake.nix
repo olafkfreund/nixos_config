@@ -42,6 +42,12 @@
     
     spicetify-nix.url = "github:the-argus/spicetify-nix";
 
+<<<<<<< HEAD
+=======
+    nixvim.url = "github:nix-community/nixvim";
+    nixvim.inputs.nixpkgs.follows = "nixpkgs";
+    
+>>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
     hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
     #hyprland.url = "github:hyprwm/Hyprland";
     hyprland.inputs.nixpkgs.follows = "nixpkgs";
@@ -78,16 +84,20 @@
       url = "github:hyprwm/hypridle";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+<<<<<<< HEAD
     hyprspace = {
       url = "github:KZDKM/Hyprspace";
       inputs.hyprland.follows = "hyprland";
     };  
     stylix.url ="github:danth/stylix";
 
+=======
+>>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
   };
 
 
   outputs = {
+<<<<<<< HEAD
       self, 
       nixpkgs, 
       nixpkgs-stable, 
@@ -105,6 +115,9 @@
       home-manager,
       stylix,
       ... }@inputs : 
+=======
+    self, nixpkgs, nixpkgs-stable, hyprlock, hypridle, hycov, nur, hyprland-plugins, nixos-cosmic, nixpkgs-f2k, hyprland, nix-colors, spicetify-nix, home-manager, ... } @inputs : 
+>>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
     {
     nixosConfigurations = {
       razer = nixpkgs.lib.nixosSystem {
@@ -118,7 +131,10 @@
           home-manager.nixosModules.home-manager
           nixos-cosmic.nixosModules.default
           inputs.nix-colors.homeManagerModules.default
+<<<<<<< HEAD
           inputs.stylix.nixosModules.stylix
+=======
+>>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
@@ -132,8 +148,11 @@
               inherit spicetify-nix;
               inherit hyprland;
               inherit hycov;
+<<<<<<< HEAD
               inherit stylix;
               inherit hyprspace;
+=======
+>>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
               inherit nixpkgs-f2k;
               inherit home-manager;
               inherit nixpkgs-stable;
@@ -142,6 +161,47 @@
             };        
             home-manager.users.olafkfreund = import ./Users/olafkfreund/razer_home.nix;
             home-manager.sharedModules = [];
+<<<<<<< HEAD
+=======
+          }
+        ];
+      };
+      work-lx = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {
+          inherit inputs;
+        };
+        modules = [
+          ./configuration.nix
+          nur.nixosModules.nur
+          home-manager.nixosModules.home-manager
+          nixos-cosmic.nixosModules.default
+          inputs.nix-colors.homeManagerModules.default
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = {
+              pkgs-stable = import nixpkgs-stable {
+              system = "x86_64-linux";
+              config.allowUnfree = true;
+              };
+              inherit inputs;
+              inherit nixpkgs;
+              inherit spicetify-nix;
+              inherit nixpkgs-f2k;
+              inherit hyprland;
+              inherit hycov;
+              inherit hypridle;
+              inherit hyprlock;
+              inherit nix-colors;
+              inherit home-manager;
+              inherit nixpkgs-stable;
+              inherit self;
+            };        
+            home-manager.users.olafkfreund = import ./Users/olafkfreund/work-lx_home.nix;
+            home-manager.sharedModules = [
+              ];
+>>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
           }
         ];
       };

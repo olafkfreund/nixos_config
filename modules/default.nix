@@ -13,7 +13,10 @@
     ./laptop-related/zram.nix
     ./hardware/openrazer.nix
     ./pkgs/default.nix
+<<<<<<< HEAD
     ./overlays/default.nix
+=======
+>>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
 
   ];
 

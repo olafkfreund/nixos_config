@@ -1,8 +1,12 @@
 { self, config, pkgs, ... }: {
+
 services.tp-auto-kbbl = {
-  enable = true;
+  enable = false;
   };
 services.thinkfan = {
+  enable = true;
+  };
+services.fwupd = {
   enable = true;
   };
 }

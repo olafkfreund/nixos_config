@@ -15,7 +15,11 @@
   home-manager.users.olafkfreund = {
   dconf = {
     enable = true;
+<<<<<<< HEAD
     # settings."org/gnome/desktop/interface".color-scheme = "prefer-dark";
+=======
+    settings."org/gnome/desktop/interface".color-scheme = "prefer-dark";
+>>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
     };
   };
 }

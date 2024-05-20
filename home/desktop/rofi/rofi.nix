@@ -11,8 +11,13 @@
   programs.rofi = {
     enable = true;
     package = pkgs.rofi-wayland;
+<<<<<<< HEAD
     # font = "JetBrains Mono Nerd Font 16px";
     # theme = ../config/rofi/rofi.rasi;
+=======
+    font = "JetBrains Mono Nerd Font 16px";
+    theme = ../config/rofi/rofi.rasi;
+>>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
     extraConfig = {
       bw = 1;
       modi ="drun,window,filebrowser,run";

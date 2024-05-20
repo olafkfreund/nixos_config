@@ -77,7 +77,10 @@ home.packages = with pkgs; [
   keylight-controller-mschneider82
   bottom
   sof-firmware
+<<<<<<< HEAD
   openssl
   libsixel
+=======
+>>>>>>> 6f826e2188d86f7d0c76929d56e6cedb6863fd9d
   ];
 }
