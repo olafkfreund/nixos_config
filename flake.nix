@@ -122,6 +122,7 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
             home-manager.extraSpecialArgs = {
               pkgs-stable = import nixpkgs-stable {
               system = "x86_64-linux";
@@ -141,7 +142,9 @@
               inherit self;
             };        
             home-manager.users.olafkfreund = import ./Users/olafkfreund/razer_home.nix;
-            home-manager.sharedModules = [];
+            home-manager.sharedModules = [{
+              stylix.targets.waybar.enable = false;
+            }];
           }
         ];
       };

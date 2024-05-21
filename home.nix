@@ -1,7 +1,8 @@
-{ inputs, lib, config, pkgs, nix-colors, nixpkgs, ... }: {
+{ inputs, lib, config, pkgs, stylix, nix-colors, nixpkgs, ... }: {
 
 imports =[
   nix-colors.homeManagerModules.default
+  stylix.homeManagerModules.stylix
   (./home/default.nix)
   (./home/cloud/default.nix)
   (./home/development/default.nix)

@@ -9,7 +9,6 @@ home.packages = with pkgs; [
   teams-for-linux
   thunderbird
   discord
-  betterbird
   obsidian
   zathura
   dbeaver

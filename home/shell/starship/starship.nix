@@ -29,6 +29,19 @@ programs.starship = {
           symbol = "📦 ";
         };
 
+        os = {
+          format = "on [($name )]($style)";
+          style = "bold blue";
+          disabled = false;
+        };
+
+        env_var = {
+          variable = "CONTAINER_ID";
+          symbol = "📦 ";
+          style = "bold red";
+          format = "running on: [$env_value]($style)";
+        };
+
         username = {
           style_user = "white bold";
           style_root = "black bold";

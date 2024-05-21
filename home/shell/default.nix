@@ -24,5 +24,6 @@
     ./bat/default.nix
     ./lunarvim/default.nix
     ./vim/default.nix
+    ./tmux/default.nix
 ];
 }

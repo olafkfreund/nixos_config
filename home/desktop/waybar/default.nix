@@ -126,7 +126,7 @@
         };
         "custom/startmenu" = {
           tooltip = false;
-          format = " ";
+          format = "  ";
           on-click = "sleep 0.1 && ~/.config/rofi/launchers/type-2/launcher.sh";
         };
 
@@ -332,7 +332,7 @@
         };
         "pulseaudio" = {
           format = "{icon} {volume}% ";
-          format-bluetooth = "{volume}% {icon} ";
+          format-bluetooth = "{volume}% {icon} ";
           format-muted = "婢";
           on-click = "pavucontrol -t 3";
           tooltip-format = "{icon} {desc} // {volume}%";
@@ -469,27 +469,22 @@
 
         window#waybar {
           background-color: #${config.colorScheme.palette.base00};
-          font-size: 20px;
         }
 
         .modules-right {
-          font-size: 20px;
           background-color: #${config.colorScheme.palette.base00};
         }
 
         .modules-left {
-          font-size: 20px;
           
         }
 
         .modules-center {
-          font-size: 20px;
           background-color: #${config.colorScheme.palette.base00};
         }
 
         tooltip {
           background: #${config.colorScheme.palette.base00};
-          font-size: 20px;
         }
 
         tooltip label {
@@ -503,7 +498,6 @@
         #workspaces {
           padding: 0 0px;
           background-color: #${config.colorScheme.palette.base0D};
-          font-size: 20px;
         }
 
         #workspaces button {
@@ -512,7 +506,6 @@
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           font-weight: normal;
           font-style: normal;
-          font-size: 20px;
         }
         
         #custom-arrow10 {
@@ -526,6 +519,7 @@
 
         #workspaces button:hover {
           box-shadow: inherit;
+          font-weight: bolder;
           text-shadow: inherit;
           color: #${config.colorScheme.palette.base04};
         }
@@ -533,29 +527,33 @@
         #workspaces button.active {
           color: #${config.colorScheme.palette.base09};
           background-color: #${config.colorScheme.palette.base0D};
+          font-weight: bolder;
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           transition: all 0.1s ease-in-out;
         }
 
         #workspaces button.urgent {
           color: #${config.colorScheme.palette.base08};
+          font-weight: bolder;
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           transition: all 0.1s ease-in-out;
         }
         #workspaces button.secret {
           color: #${config.colorScheme.palette.base08};
+          font-style: normal;
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           transition: all 0.1s ease-in-out;
         }
 
         #workspaces button.urgent {
           color: #${config.colorScheme.palette.base08};
+          font-weight: bolder;
+          font-style: normal;
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           transition: all 0.1s ease-in-out;
         }
         
         #clock {
-          font-size: 20px;
           font-weight: bolder;
           font-style: normal;
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
@@ -570,7 +568,7 @@
         }
 
         #custom-startmenu {
-          font-size: 20px;
+          font-size: 25px;
           font-weight: bolder;
           font-style: normal;
           color: #${config.colorScheme.palette.base0D};
@@ -587,14 +585,12 @@
         }
 
         #custom-power {
-          font-size: 20px;
           font-weight: bolder;
           font-style: normal;
           color: #${config.colorScheme.palette.base0D};
         }
 
         #custom-monitor {
-          font-size: 20px;
           font-weight: bolder;
           font-style: normal;
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
@@ -618,7 +614,6 @@
         }
         
         #custom-quit, #custom-lock, #custom-reboot {
-          font-size: 20px;
           font-weight: bolder;
           font-style: normal;
           color: #${config.colorScheme.palette.base0D};
@@ -704,7 +699,6 @@
 
         #idle_inhibitor.activated {
           padding: 0 5px;
-          font-size: 20px;
           font-weight: bolder;
           font-style: normal;
           color: #${config.colorScheme.palette.base00};
