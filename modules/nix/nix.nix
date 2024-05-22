@@ -38,6 +38,12 @@ nixpkgs.config.permittedInsecurePackages = [
   "electron-25.9.0"
   "nix-2.15.3"
 ];
+programs.nix-index = {
+    enable = true;
+    package = pkgs.nix-index;
+    enableBashIntegration = false;
+    enableZshIntegration = false;
+};
 
 
 environment.systemPackages = with pkgs; [

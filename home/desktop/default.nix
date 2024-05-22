@@ -18,7 +18,7 @@
      ./wlr/default.nix
      ./gaming/default.nix
      ./sound/default.nix
-     ./mail/default.nix
+     #./mail/default.nix
   ];
 
   home.packages = with pkgs; [

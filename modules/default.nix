@@ -14,6 +14,7 @@
     ./hardware/openrazer.nix
     ./pkgs/default.nix
     ./overlays/default.nix
+    ./system-scripts/default.nix
 
   ];
 

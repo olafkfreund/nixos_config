@@ -10,5 +10,7 @@
     (import ./wallpaper_picker.nix { inherit pkgs; })
     (import ./wall.nix { inherit pkgs; })
     (import ./dunst.nix { inherit pkgs; })
+    (import ./info-tailscale.nix { inherit pkgs; })
+    (import ./choose_vpn_config.nix { inherit pkgs; })
   ];
 }

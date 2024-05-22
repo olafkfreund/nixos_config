@@ -58,8 +58,8 @@
         "idle_inhibitor" = {
           format = "{icon}";
           format-icons = {
-            deactivated = "󰒲 ";
-            activated = "󰒳 ";
+            activated = "󱐋";
+            deactivated = "󰤄";
           };
         };
         "cava"= {
@@ -196,7 +196,9 @@
           };
           modules = [
             "custom/cycle_wall"
+            "custom/dunst"
             "custom/monitor"
+            "custom/tailscale"
           ];
         };
         
@@ -224,9 +226,14 @@
         };
         
         "custom/dunst" = {
-          return-type = "json";
-          exec = "~/.config/waybar/scripts/dunst.sh";
+          exec = "dunst-waybar";
           on-click = "dunstctl set-paused toggle";
+          restart-interval = 1;
+        };
+
+        "custom/tailscale" = {
+          exec = "info-tailscale";
+          on-click = "choose_vpn_config";
           restart-interval = 1;
         };
         
@@ -283,7 +290,7 @@
           min-length = 6;
         };
         "backlight" = {
-          format = "{icon}{percent}%";
+          format = "{icon} {percent}% ";
           format-icons = [" " " " " " " " " " " " " " " " " "];
           on-scroll-up = "brightnessctl set 30+";
           on-scroll-down = "brightnessctl set 30-";
@@ -296,7 +303,7 @@
             warning = 30;
             critical = 20;
           };
-          format = "{icon}{capacity}%";
+          format = "{icon} {capacity}% ";
           format-charging = " {capacity}% ";
           format-plugged = " {capacity}% ";
           format-alt = "{time} {icon}";
@@ -348,13 +355,13 @@
           "custom/playerctl" = {
             format = "{icon}  <span>{}</span>";
             return-type = "json";
-            exec=  "${pkgs.playerctl}/bin/playerctl -p spotify metadata -f '{\"text\": \"{{markup_escape(title)}} - {{markup_escape(artist)}} {{ duration(position) }}/{{ duration(mpris:length) }}\", \"tooltip\": \"{{markup_escape(title)}} - {{markup_escape(artist)}}  {{ duration(position) }}/{{ duration(mpris:length) }}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' -F";
+            exec=  "${pkgs.playerctl}/bin/playerctl  metadata -f '{\"text\": \"{{markup_escape(title)}} - {{markup_escape(artist)}} {{ duration(position) }}/{{ duration(mpris:length) }}\", \"tooltip\": \"{{markup_escape(title)}} - {{markup_escape(artist)}}  {{ duration(position) }}/{{ duration(mpris:length) }}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' -F";
             tooltip = false;
-            on-click-middle = "${pkgs.playerctl}/bin/playerctl -p spotify previous";
-            on-click = "${pkgs.playerctl}/bin/playerctl -p spotify play-pause";
-            on-click-right = "${pkgs.playerctl}/bin/playerctl -p spotify next";
-            on-scroll-up = "${pkgs.playerctl}/bin/playerctl -p spotify volume 0.02+";
-            on-scroll-down = "${pkgs.playerctl}/bin/playerctl -p spotify volume 0.02-";
+            on-click-middle = "${pkgs.playerctl}/bin/playerctl previous";
+            on-click = "${pkgs.playerctl}/bin/playerctl play-pause";
+            on-click-right = "${pkgs.playerctl}/bin/playerctl  next";
+            on-scroll-up = "${pkgs.playerctl}/bin/playerctl volume 0.02+";
+            on-scroll-down = "${pkgs.playerctl}/bin/playerctl volume 0.02-";
             format-icons = {
                 Paused = "";
                 Playing = "";
@@ -682,6 +689,20 @@
         }
 
         #custom-cycle_wall {
+          padding: 0 5px;
+          color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base0B};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
+        }
+
+        #custom-tailscale {
+          padding: 0 5px;
+          color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base0B};
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
+        }
+
+        #custom-dunst {
           padding: 0 5px;
           color: #${config.colorScheme.palette.base00};
           background-color: #${config.colorScheme.palette.base0B};

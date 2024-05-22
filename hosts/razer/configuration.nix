@@ -39,14 +39,14 @@
      };
   };
   stylix.fonts.sizes = {
-    applications = 15;
+    applications = 12;
     terminal = 16;
     desktop = 12;
     popups = 12;
   };
 
   stylix.opacity = {
-    applications = 1.0;
+    applications = 0.8;
     terminal = 0.7;
     desktop = 1.0;
     popups = 1.0;
@@ -68,12 +68,10 @@
     description = "Olaf K-Freund";
     extraGroups = [ "networkmanager" "openrazer" "wheel" "docker" "video" "scanner" "lp"];
     packages = with pkgs; [
-      kate
       kitty
       vim
-      polychromatic
       ];
     };
   networking.firewall.enable = false;
-  system.stateVersion = "23.11"; # Did you read the comment?
+  system.stateVersion = "24.05"; # Did you read the comment?
 }

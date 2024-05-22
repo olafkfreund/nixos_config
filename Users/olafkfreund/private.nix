@@ -6,12 +6,16 @@
     gitui
     git-credential-oauth
     git-credential-manager
-    git-credential-1password
     lazygit
     onefetch
   ];
   programs.git = {
     enable = true;
+    aliases = {
+      ci = "commit";
+      co = "checkout";
+      s = "status";
+    };
     userName = "Olaf K-Freund";
     userEmail = lib.mkForce "olaf.loken@gmail.com";
     extraConfig.init.defaultBranch = "main";

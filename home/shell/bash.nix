@@ -58,20 +58,16 @@ programs.bash = {
     nr = "sudo nixos-rebuild switch|& nom";
     today = "curl -s https://wttr.in/London?1";
     wttr = "curl -s https://wttr.in/London?0";
-    fu = "sudo nix flake update|& nom";
+    fu = "sudo nix flake update";
     code = "code --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
 	  dbe = "distrobox enter";
+	  debian = "distrobox enter debian";
 	  ask = "chatgpt --model gpt-4 -p";
 	  obsidian = "obsidian --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
     google-chrome-stable = "google-chrome-stable --ozone-platform=wayland";
     microsoft-edge-stable = "microsoft-edge-stable --ozone-platform=wayland";
-    #Work only
     slack = "slack --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer";
     ow = "zellij --layout ~/.config/zellij/layouts/work.kdl";
-    cbuae-login = "chromium --proxy-server=socks5://localhost:55553";
-	  cbuae-uat = "export HTTPS_PROXY=http://localhost:55556 KUBECONFIG=$HOME/.kube/cbuae-mvp-uat-cce-cluster";
-	  cbuae-dev = "export HTTPS_PROXY=http://localhost:55556 KUBECONFIG=$HOME/.kube/cbuae-mvp-dev-cce-cluster";
-	  cbuae-prod = "export HTTPS_PROXY=http://localhost:55556 KUBECONFIG=$HOME/.kube/cbuae-mvp-prod-cce-cluster";
   };
 };
 

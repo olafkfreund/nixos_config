@@ -1,4 +1,4 @@
-{config, lib, pkgs, ...}:
+{config, pkgs, ...}:
 let
   nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
     export __NV_PRIME_RENDER_OFFLOAD=1
@@ -16,7 +16,7 @@ hardware.nvidia = {
   nvidiaPersistenced = true;
   open = false;
   nvidiaSettings = true;
-  package = config.boot.kernelPackages.nvidiaPackages.stable;
+  package = config.boot.kernelPackages.nvidiaPackages.beta;
 };
 
 # boot.kernelParams = [ "module_blacklist=i915" ];

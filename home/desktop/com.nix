@@ -11,7 +11,7 @@ home.packages = with pkgs; [
   discord
   obsidian
   zathura
-  dbeaver
+  dbeaver-bin
   postgresql
   caprine-bin
   element-desktop

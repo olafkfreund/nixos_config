@@ -21,15 +21,17 @@ stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yam
   stylix.fonts.sizes = {
     applications = 12;
     terminal = 16;
-    desktop = 12;
-    popups = 12;
+    desktop = 10;
+    popups = 10;
   };
 
   stylix.opacity = {
-    applications = 1.0;
+    applications = 0.8;
     terminal = 0.7;
     desktop = 1.0;
     popups = 1.0;
   };
+  
+  stylix.targets.chromium.enable = false;
 
 }

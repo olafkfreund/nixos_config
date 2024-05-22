@@ -49,7 +49,7 @@ in
       #laptop
       monitor = eDP-1,1920x1080@100,0x0,1
       #home
-      monitor = DP-6,2560x1440@120,1920x0,1
+      monitor = DP-3,2560x1440@100,1920x0,1
       #monitor=,preferred,auto, 1
       #wsbind=1,eDP-1
 
@@ -98,7 +98,7 @@ in
 
       # Env variables
       env = EDITOR="lvim";
-      env = BROWSER="microsoft-edge-stable";
+      env = BROWSER="google-chrome-stable";
       env = TERMINAL="kitty";
       
       env = SDL_VIDEODRIVER,wayland
@@ -109,16 +109,17 @@ in
       env = XCURSOR_THEME,Bibata-Modern-Ice
       env = XCURSOR_SIZE,16
       #GTK
-      env = GDK_BACKEND,wayland,x11
+      env = GDK_BACKEND,wayland
       env = GTK_THEME,Gruvbox-Dark-B-LB
-      env = GDK_DPI_SCALE,1
-      env = GDK_SCALE,1
+      # env = GDK_DPI_SCALE,1
+      # env = GDK_SCALE,1
       #QT
       env = QT_QPA_PLATFORM,wayland
-      env = QT_WAYLAND_DISABLE_WINDOWDECORATION, 1
-      env = QT_AUTO_SCREEN_SCALE_FACTOR, 1
+      env = QT_WAYLAND_DISABLE_WINDOWDECORATION,1
+      env = QT_AUTO_SCREEN_SCALE_FACTOR,1
+      env = QT_ENABLE_HIGHDPI_SCALING,1
       #Firefox & Thunderbird
-      env = MOZ_ENABLE_WAYLAND, 1
+      env = MOZ_ENABLE_WAYLAND,1
       #Nvidia
       env = GBM_BACKEND,nvidia-drm
       env = WLR_DRM_NO_ATOMIC,1

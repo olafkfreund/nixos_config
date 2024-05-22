@@ -16,7 +16,7 @@
   system.activationScripts.binbash = {
     deps = [ "binsh" ];
     text = ''
-         ln -s /bin/sh /bin/bash
+         ln -sf /bin/sh /bin/bash
     '';
   };
 }
