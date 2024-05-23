@@ -63,10 +63,16 @@
       };
     };
   };
+  
+  users.defaultUserShell = pkgs.zsh;
+  environment.shells = with pkgs; [ zsh ];
+  programs.zsh.enable = true;
+  
   users.users.olafkfreund = {
     isNormalUser = true;
     description = "Olaf K-Freund";
     extraGroups = [ "networkmanager" "openrazer" "wheel" "docker" "video" "scanner" "lp"];
+    shell = pkgs.zsh;
     packages = with pkgs; [
       kitty
       vim

@@ -1,9 +1,13 @@
-{ pkgs, config, inputs, ...}: {
+{ pkgs, ...}: {
   
   programs.zellij = {
     enable = true;
     enableBashIntegration = false;
+    enableZshIntegration = false;
     package = pkgs.zellij;
+    settings = {
+      default-shell = "zsh";
+    };
   };
 
   # home.file.".config/zellij/config.kdl".text = ''

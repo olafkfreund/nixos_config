@@ -52,7 +52,7 @@ programs.bash = {
 	  gitm = "git commit -m";
 	  gitp = "git push";
 	  gitc = "git checkout";
-	  icat = "kitty +kitten icat";
+	  #icat = "kitty +kitten icat";
     neofetch = "neofetch --iterm2 ~/Pictures/1_d2RiMW4zoHLUK-751E38gQ.png --size 200";
     nri = "sudo nixos-rebuild switch --impure|& nom";
     nr = "sudo nixos-rebuild switch|& nom";
@@ -67,7 +67,6 @@ programs.bash = {
     google-chrome-stable = "google-chrome-stable --ozone-platform=wayland";
     microsoft-edge-stable = "microsoft-edge-stable --ozone-platform=wayland";
     slack = "slack --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer";
-    ow = "zellij --layout ~/.config/zellij/layouts/work.kdl";
   };
 };
 

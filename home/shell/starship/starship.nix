@@ -5,12 +5,13 @@ programs.starship = {
   enable = true;
   # custom settings
   enableBashIntegration = false;
+  enableZshIntegration = true;
   settings = {
         add_newline = true;
         format = let
           git = "$git_branch$git_commit$git_state$git_status";
         in ''
-          $username[@](purple)$hostname $directory (${git}) ($cmd_duration) $fill ($nix_shell)
+          [|](green)$time[|](green)$shell[|](green)$username[@](purple)$hostname $directory (${git}) ($cmd_duration) $fill ($nix_shell)
           $character
         '';
       # custom prompt
@@ -29,6 +30,9 @@ programs.starship = {
           symbol = "📦 ";
         };
 
+        time = {
+          disabled = false;
+        };
         os = {
           format = "on [($name )]($style)";
           style = "bold blue";
@@ -63,6 +67,16 @@ programs.starship = {
         cmd_duration = {
           format = "took [$duration]($style)";
           style = "bold yellow";
+        };
+        # ~/.config/starship.toml
+
+        shell = {
+        zsh_indicator = "#zsh";
+        bash_indicator = "#bash";
+        powershell_indicator = "_";
+        unknown_indicator = "mystery shell";
+        style = "yellow bold";
+        disabled = false;
         };
 
         nix_shell = {

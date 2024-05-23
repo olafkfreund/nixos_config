@@ -1,25 +1,28 @@
-{ pkgs, config, lib, ... }: {
+{ config, ... }: {
 
     programs.fzf = {
         enable = true;
         enableBashIntegration = true;
-        defaultOptions = [ "--height 33%" "--no-separator" "--reverse" ];
-        defaultCommand = "fd --no-ignore-parent --one-file-system --type file";
-        #fileWidgetCommand = defaultCommand;
-        changeDirWidgetCommand = "fd --no-ignore-parent --one-file-system --type directory";
+        enableZshIntegration = true;
+        defaultOptions = ["--height 40% --layout reverse --info inline --border --color 'border:#fe8019'" ];
+        defaultCommand = "fd --type f";
+        fileWidgetCommand = "fd --type f";
+        changeDirWidgetCommand = "fd --type f";
+        changeDirWidgetOptions = ["--preview 'bat --color=always {}' --preview-window '~3' --height 40% --layout reverse --info inline --border --color 'border:#fe8019'"];
         colors = {
             fg = "#${config.colorScheme.palette.base05}";
             bg = "#${config.colorScheme.palette.base00}";
-            hl = "#fabd2f";
+            hl = "#${config.colorScheme.palette.base0A}";
             "fg+" = "#${config.colorScheme.palette.base05}";
             "bg+" = "#${config.colorScheme.palette.base00}";
-            "hl+" = "#fabd2f";
-            info = "#83a598";
-            prompt = "#bdae93";
-            spinner = "#fabd2f";
-            pointer = "#83a598";
-            marker = "#fe8019";
-            header = "#665c54";
+            "hl+" = "#${config.colorScheme.palette.base0A}";
+            info = "#${config.colorScheme.palette.base0C}";
+            prompt = "#${config.colorScheme.palette.base0D}";
+            spinner = "#${config.colorScheme.palette.base05}";
+            pointer = "#${config.colorScheme.palette.base0C}";
+            marker = "#${config.colorScheme.palette.base0E}";
+            header = "#${config.colorScheme.palette.base04}";
+            border = "#${config.colorScheme.palette.base09}";
         };
     };
 }

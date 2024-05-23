@@ -18,5 +18,8 @@
       lazycli
       systemctl-tui
       bluetuith
+      fzf-obc
+      youtube-tui
+      tmux-xpanes
   ];
 }

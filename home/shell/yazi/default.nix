@@ -4,6 +4,7 @@
     enable = true;
     package = pkgs-stable.yazi;
     enableBashIntegration = true;
+    enableZshIntegration = true;
     settings = {
       log = {
       enabled = false;
