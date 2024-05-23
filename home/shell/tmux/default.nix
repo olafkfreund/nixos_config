@@ -23,6 +23,10 @@
     extraConfig = "
       run-shell '${pkgs.tmuxPlugins.gruvbox}/share/tmux-plugins/gruvbox/gruvbox-tpm.tmux'
       set -g @tmux-gruvbox 'dark'
+      #Set terminal
+      set-option -g default-terminal 'screen-254color'
+      set-option -g terminal-overrides ',xterm-256color:RGB'
+
       #Image preview
       set -g allow-passthrough on
       set -ga update-environment TERM

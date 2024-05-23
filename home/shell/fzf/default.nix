@@ -4,11 +4,30 @@
         enable = true;
         enableBashIntegration = true;
         enableZshIntegration = true;
-        defaultOptions = ["--height 40% --layout reverse --info inline --border --color 'border:#fe8019'" ];
+        defaultOptions = [
+         "--preview 'fzf-preview {}' 
+          --preview-window '50%:hidden' 
+          --height 40%
+          --bind 'ctrl-/:toggle-preview'
+          --bind 'enter:become(lvim {+})'
+          --layout reverse 
+          --info inline 
+          --border 
+          --color 'border:#fe8019'" 
+        ];
         defaultCommand = "fd --type f";
         fileWidgetCommand = "fd --type f";
         changeDirWidgetCommand = "fd --type f";
-        changeDirWidgetOptions = ["--preview 'bat --color=always {}' --preview-window '~3' --height 40% --layout reverse --info inline --border --color 'border:#fe8019'"];
+        changeDirWidgetOptions = [
+          "--preview 'fzf-preview {}' 
+          --preview-window '50%:hidden' 
+          --height 40%
+          --bind 'ctrl-/:toggle-preview'
+          --bind 'enter:become(lvim {+})'
+          --layout reverse 
+          --info inline 
+          --border 
+          --color 'border:#fe8019'"];
         colors = {
             fg = "#${config.colorScheme.palette.base05}";
             bg = "#${config.colorScheme.palette.base00}";

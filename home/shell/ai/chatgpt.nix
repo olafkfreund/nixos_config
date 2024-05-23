@@ -7,5 +7,7 @@ home.packages = with pkgs; [
 	github-copilot-cli
   yai
   shell-gpt
+  ollama
+  oterm
   ];
 }

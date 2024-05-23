@@ -20,9 +20,11 @@
     useNetworkd = true;
   };
 
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
+  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
   
   stylix.image = ./gruvbox-rainbow-nix.png;
+  #Exclude Browser.. just make more sence
+  stylix.targets.chromium.enable = false;
   
   stylix.fonts = {
     monospace = {
@@ -47,7 +49,7 @@
 
   stylix.opacity = {
     applications = 0.8;
-    terminal = 0.7;
+    terminal = 1.0;
     desktop = 1.0;
     popups = 1.0;
   };

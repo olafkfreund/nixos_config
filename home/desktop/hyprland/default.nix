@@ -393,9 +393,9 @@ in
       windowrulev2 = float,class:^(nm-connection-editor)$
       
 
-      windowrulev2 = opacity 0.80 0.80,class:^(kitty)$
-      windowrulev2 = opacity 0.80 0.80,class:^(Code)$
-      windowrulev2 = opacity 0.80 0.80,class:^(Code)$
+      # windowrulev2 = opacity 0.80 0.80,class:^(kitty)$
+      # windowrulev2 = opacity 0.80 0.80,class:^(Code)$
+      # windowrulev2 = opacity 0.80 0.80,class:^(Code)$
 
       # Allow screen tearing for reduced input latency on some games.
       windowrulev2 = immediate, class:^(cs2)$

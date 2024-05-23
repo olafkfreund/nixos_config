@@ -79,5 +79,6 @@ home.packages = with pkgs; [
   sof-firmware
   openssl
   libsixel
+  fd
   ];
 }

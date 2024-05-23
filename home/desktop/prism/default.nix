@@ -1,5 +1,4 @@
 {
-  pkgs,
   inputs,
   config,
   ...
@@ -13,6 +12,6 @@
     wallpapers = ./wallpapers;
     outPath = ".local/share/wallpapers";
 
-    colorscheme = config.colorscheme or "gruvbox-dark";
+    colorscheme = config.colorscheme or "gruvbox-medium";
   };
 }
