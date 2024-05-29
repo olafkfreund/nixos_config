@@ -2,40 +2,26 @@
 
 home.packages = with pkgs; [
  
-  #KDE5
-  #kde-gruvbox
-  # libsForQt5.kdecoration
-  # libsForQt5.kdeconnect-kde
-  # #libsForQt5.bismuth
-  # libsForQt5.xdg-desktop-portal-kde
-  # libsForQt5.gwenview
-  # libsForQt5.dolphin-plugins
-  # libsForQt5.ffmpegthumbs
-  # libsForQt5.kdegraphics-thumbnailers
-  # libsForQt5.kio
-  # libsForQt5.kio-extras
   libsForQt5.qtwayland
-  # libsForQt5.krfb
-  # libsForQt5.qtstyleplugins
-  # libsForQt5.discover
-  # libsForQt5.qmltermwidget
-  # libsForQt5.sddm-kcm
-  # libsForQt5.phonon-backend-gstreamer
-  #libsForQt5.kaccounts-integration
-  #libsForQt5.kaccounts-providers
-  #libsForQt5.packagekit-qt
-  #libsForQt5.qt5.qtsvg
-  #libportal-qt5
-  #libsForQt5.qt5.qtmultimedia
-  #libsForQt5.qt5.qtgraphicaleffects
-  #libsForQt5.qt5.qtquickcontrols2
-  #libsForQt5.qt5.qtquickcontrols
+  kdePackages.xdg-desktop-portal-kde
+  # kdePackages.dolphin
+  # kdePackages.dolphin-plugins
+  # kdePackages.kio-gdrive
+  # kdePackages.kio-extras
+  # kdePackages.kio
+  kdePackages.wayland
+  kdePackages.wayland-protocols
+  kdePackages.qtwayland
+  kdePackages.kdeconnect-kde
+  kdePackages.polkit-kde-agent-1
+  kdePackages.qt6ct
+  kdePackages.qt6gtk2
   #KDE6
   # kdePackages.wayqt
   # kdePackages.kcmutils
   # kdePackages.kgpg
   # kdePackages.krfb
-  kdePackages.ksvg
+  # kdePackages.ksvg
   # kdePackages.waylib
   # kdePackages.wayqt
   # kdePackages.wayland-protocols

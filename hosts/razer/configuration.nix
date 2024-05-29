@@ -67,8 +67,12 @@
   };
   
   users.defaultUserShell = pkgs.zsh;
+  
   environment.shells = with pkgs; [ zsh ];
+  
   programs.zsh.enable = true;
+
+  environment.sessionVariables.NIXOS_OZONE_WL = "1"; 
   
   users.users.olafkfreund = {
     isNormalUser = true;

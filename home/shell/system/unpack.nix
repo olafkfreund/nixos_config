@@ -10,6 +10,7 @@ home.packages = with pkgs; [
   bzip2
   xz
   zip
+  archiver
   ];
 }
 

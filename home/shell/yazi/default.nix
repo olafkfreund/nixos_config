@@ -1,8 +1,8 @@
-{ pkgs, pkgs-stable, home-manager, config, lib, ... }: {
+{ pkgs, ... }: {
 
   programs.yazi = {
     enable = true;
-    package = pkgs-stable.yazi;
+    package = pkgs.yazi;
     enableBashIntegration = true;
     enableZshIntegration = true;
     settings = {
@@ -24,15 +24,17 @@
         ];
         previewers = [
           # Code
-          { mime = "text/*";                 exec = "code"; }
-          { mime = "*/xml";                  exec = "code"; }
-          { mime = "*/javascript";           exec = "code"; }
-          { mime = "*/x-wine-extension-ini"; exec = "code"; }
+          { mime = "text/*";                 exec = "lvim"; }
+          { mime = "*/xml";                  exec = "lvim"; }
+          { mime = "*/yaml";                 exec = "lvim"; }
+          { mime = "*/javascript";           exec = "lvim"; }
+          { mime = "*/x-wine-extension-ini"; exec = "lvim"; }
+          { mime = "*/tf";                   exec = "lvim"; }
           # JSON
           { mime = "application/json"; exec = "json"; }
           # Image
           # { mime = "image/vnd.djvu"; exec = "noop"; }
-          # { mime = "image/*";        exec = "image"; }
+          { mime = "image/*";        exec = "feh"; }
           # Video
           { mime = "video/*"; exec = "video"; }
           # PDF

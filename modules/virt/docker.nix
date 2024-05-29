@@ -12,15 +12,23 @@
    ];
 
   #Docker config
-  virtualisation.docker.enable = true;
-  virtualisation.docker.enableNvidia = true;
-  users.users.olafkfreund.extraGroups = [ "docker" ];
-  virtualisation.docker.rootless = {
-    enable = false;
-    setSocketVariable = false;
-
+  virtualisation.docker = {
+   enable = true;
+   enableNvidia = true;
+   rootless = {
+     enable = false;
+     setSocketVariable = false;
+     };
+   enableOnBoot = true;
   };
-  virtualisation.docker.enableOnBoot = true;
+  
+  users.users.olafkfreund.extraGroups = [ "docker" ];
+  # virtualisation.docker.rootless = {
+  #   enable = false;
+  #   setSocketVariable = false;
+
+  # };
+  # virtualisation.docker.enableOnBoot = true;
   systemd.enableUnifiedCgroupHierarchy = false;
   programs = {
     };

@@ -19,6 +19,7 @@
     ./logind/default.nix
     ./auto-cpufreq/default.nix
     ./greetd/greetd.nix
+    ./ollama/default.nix
   ];
 
 

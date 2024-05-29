@@ -1,7 +1,7 @@
 let
   browser = [ "google-chrome.desktop" ];
-  archiveManager = [ "org.gnome.FileRoller.desktop" ];
-  imageViewer = [ "org.gnome.Loupe.desktop" ];
+  archiveManager = [ "archive" ];
+  imageViewer = [ "feh" ];
 in
 {
   # XDG MIME types

@@ -1,5 +1,5 @@
 {
-  inputs, hycov, hyprspace, vars, pkgs, config, ... }:
+  inputs, hycov, hyprspace, hyprexpo, hyprland-virtual-desktops, vars, pkgs, config, ... }:
 let 
     animations.fast = true;
     animations.moving = false;
@@ -41,7 +41,9 @@ in
     enable = true;
     systemd.enable= true;
     plugins = [
-      #inputs.hyprspace.packages.${pkgs.system}.Hyprspace
+      # hyprland-virtual-desktops.packages.${pkgs.system}.virtual-desktops
+      #inputs.hyprland-plugins.packages.${pkgs.system}.hyprexpo
+      # inputs.hyprspace.packages.${pkgs.system}.Hyprspace
       #hycov.packages.${pkgs.system}.hycov
     ];
     # enableNvidiaPatches = true;
@@ -49,7 +51,8 @@ in
       #laptop
       monitor = eDP-1,1920x1080@100,0x0,1
       #home
-      monitor = DP-3,2560x1440@100,1920x0,1
+      monitor = DP-3,2560x1440@100,0x0,1
+      monitor = DP-1,2560x1440@100,2560x0,1
       #monitor=,preferred,auto, 1
       #wsbind=1,eDP-1
 
@@ -61,6 +64,7 @@ in
       exec-once = hyprctl setcursor Bibata-Modern-Ice 1
       exec-once = gnome-keyring-daemon --start --components=secrets
       exec-once = polkit-kde-authentication-agent-1
+      exec-once = kdeconnectd
       exec-once = polkit-agent-helper-1
       exec-once = dbus-update-activation-environment --systemd --all WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
       exec-once = dbus-update-activation-environment --systemd --all # for XDPH
@@ -86,13 +90,13 @@ in
       exec-once = wl-paste --type text --watch cliphist store #Stores only text data
       exec-once = wl-paste --type image --watch cliphist store #Stores only image data when imaged copied
       
-      exec-once = [workspace 7 silent] spotify
-      exec-once = [workspace 1 silent] microsoft-edge
+      exec-once = [workspace special:spotify] spotify
+      # exec-once = [workspace 1 silent] microsoft-edge
       exec-once = [workspace 2 silent] kitty
       exec-once = [workspace 9 silent] google-chrome-stable
       exec-once = [workspace 8 silent] 1password
       exec-once = [workspace 6 silent] obsidian
-      exec-once = [workspace 2 silent] code
+      # exec-once = [workspace 2 silent] code
       exec-once = [workspace 5 silent] thunderbird
 
 
@@ -123,7 +127,10 @@ in
       #Nvidia
       env = GBM_BACKEND,nvidia-drm
       env = WLR_DRM_NO_ATOMIC,1
+      # env = WLR_DRM_DEVICES,$HOME/.config/hypr/extnvidia:$HOME/.config/hypr/intnvidia 
       env = LIBVA_DRIVER_NAME,nvidia
+      #NIXOS
+      env = NIXOS_WAYLAND,1
       
 
 
@@ -371,7 +378,7 @@ in
       #Google Chrome
       windowrulev2 = workspace 6, class:(google-chrome-.*)
 
-      windowrulev2 = workspace 7, class:^(Spotify .*)$
+      windowrulev2 = workspace special:spotify, class:^(Spotify)$
 
       windowrulev2 = opacity 0.80 0.80,class:(code.*)
       windowrulev2 = opacity 0.80 0.80,class:(code.*)
@@ -426,6 +433,8 @@ in
       # bind=ALT,right,hycov:movefocus,r
       # bind=ALT,up,hycov:movefocus,u
       # bind=ALT,down,hycov:movefocus,d
+      #Hyprspace
+      # bind = Control_TAB, overview:toggle
        
       bindm = $mainMod, mouse:272, movewindow
       bindm = $mainMod, mouse:273, resizewindow
@@ -509,6 +518,9 @@ in
       
       bind = $mainMod, SLASH, exec, pamixer -t
 
+      #Spotify
+      bind = Control_SHIFT, M, togglespecialworkspace, spotify
+
       # General window options
       bind = $mainMod, W, killactive 
       bind = $mainMod, F, fullscreen, 1 #maximize window
@@ -557,6 +569,8 @@ in
       binde = $mainMod_ALT, up, resizeactive, 0 -30
       binde = $mainMod_ALT, down, resizeactive, 0 30
 
+      #ATL-TAB
+      bind = ALT, TAB, exec, ~/.config/rofi/launchers/type-2/launcher-alttab.sh
       
       # Switch workspaces with mainMod + [0-9]
       bind = $mainMod, 1, workspace, 1
@@ -585,7 +599,7 @@ in
       # move to the first empty workspace instantly with mainMod + CTRL + [↓]
       bind = $mainMod CTRL, down, workspace, empty 
       bind = $mainMod,g,togglegroup
-      bind = ALT, TAB, exec, ~/.config/hypr/scripts/tab_floating_windows
+      # bind = ALT, TAB, exec, ~/.config/hypr/scripts/tab_floating_windows
       bind = $mainMod,tab,changegroupactive
       
       # trigger when the switch is turning off

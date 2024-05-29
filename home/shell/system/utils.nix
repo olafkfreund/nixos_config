@@ -1,4 +1,4 @@
-{ pkgs, config, ... }: {
+{ pkgs, ... }: {
 
   home.packages = with pkgs; [
             
@@ -21,5 +21,6 @@
       fzf-obc
       youtube-tui
       tmux-xpanes
+      mapscii
   ];
 }

@@ -42,8 +42,8 @@
     
     spicetify-nix.url = "github:the-argus/spicetify-nix";
 
-    hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
-    #hyprland.url = "github:hyprwm/Hyprland";
+    hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1&ref=refs/tags/v0.40.0";
+    # hyprland.url = "github:hyprwm/Hyprland";
     hyprland.inputs.nixpkgs.follows = "nixpkgs";
 
     hyprland-plugins = {
@@ -82,6 +82,11 @@
       url = "github:KZDKM/Hyprspace";
       inputs.hyprland.follows = "hyprland";
     };  
+    hyprland-virtual-desktops = {
+      url = "github:levnikmyskin/hyprland-virtual-desktops";
+      inputs.hyprland.follows = "hyprland";
+    };
+
     stylix.url ="github:danth/stylix";
 
     nix-index-database.url = "github:nix-community/nix-index-database";
@@ -96,7 +101,8 @@
       nixpkgs-stable, 
       hyprlock, 
       hyprspace, 
-      hypridle, 
+      hypridle,
+      hyprland-virtual-desktops,
       hycov, 
       nur, 
       hyprland-plugins, 
@@ -141,6 +147,7 @@
               inherit stylix;
               inherit nix-index-database;
               inherit hyprspace;
+              inherit hyprland-virtual-desktops;
               inherit nixpkgs-f2k;
               inherit home-manager;
               inherit nixpkgs-stable;

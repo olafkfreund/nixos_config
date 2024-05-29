@@ -5,12 +5,10 @@
 programs.hyprland = {
   enable = true;
   package = pkgs.hyprland;
-  #enableNvidiaPatches = true;
-  xwayland.enable = true;
-  };
-# programs.hyprland.xwayland = {
-#   enable = true;
-# };
+  xwayland = {
+    enable = true;
+    };
+};
 programs.firefox = {
   enable = true;
   };
@@ -22,5 +20,9 @@ programs.nix-ld = {
   libraries = with pkgs; [
       stdenv.cc.cc
     ];
+  };
+programs.kdeconnect = {
+  enable = true;
+  package = pkgs.kdePackages.kdeconnect-kde;
   };
 }

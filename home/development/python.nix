@@ -10,6 +10,9 @@ home.packages = with pkgs; [
   python311Packages.material-color-utilities
   python311Packages.numpy
   python311Packages.pyyaml
+  python311Packages.google-generativeai
+  python311Packages.google
+  python311Packages.google-auth
   calcure
   ];
 }

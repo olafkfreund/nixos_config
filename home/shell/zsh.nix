@@ -60,6 +60,7 @@ programs.zsh = {
     mv = "mv -iv";
 	  top = "btm";
 	  vim = "lvim";
+	  nvim = "lvim";
 	  ls = "eza --header --git --classify --long --binary --group --time-style=long-iso --links --all --all --group-directories-first --sort=name --icons";
 	  la = "eza --all --icons";
 		cat = "bat --theme=gruvbox-dark";
@@ -82,7 +83,7 @@ programs.zsh = {
 	  obsidian = "obsidian --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
     google-chrome-stable = "google-chrome-stable --ozone-platform=wayland";
     microsoft-edge-stable = "microsoft-edge-stable --ozone-platform=wayland";
-    slack = "slack --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer";
+    # slack = "slack --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer";
     };
   };
 

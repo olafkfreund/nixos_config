@@ -18,5 +18,6 @@ home.packages = with pkgs; [
   imagemagick
   fractal
   telegram-desktop
+  whatsapp-for-linux
   ];
 }

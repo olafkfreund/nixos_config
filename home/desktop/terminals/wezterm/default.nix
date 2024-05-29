@@ -1,8 +1,8 @@
-{ pkgs, config, ... }:{
+{ pkgs-stable, config, ... }:{
   
   programs.wezterm = {
     enable = true;
-    package = pkgs.wezterm;
+    package = pkgs-stable.wezterm;
     enableBashIntegration = true;
     enableZshIntegration = true;
     extraConfig = ''

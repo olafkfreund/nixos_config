@@ -156,15 +156,15 @@
             "10" = [];
           };
 	        "format-icons" = {
-            "1" = "󰇩 ";
+            "1" = " ";
             "2" = "󰨞 ";
             "3" = " ";
             "4" = " ";
             "5" = " ";
             "6" = " ";
-            "7" = " ";
+            "7" = "󰖣 ";
             "8" = " ";
-            "9" = " ";
+            "9" = " ";
             "10" = "󰭹 ";
             # "active" = " ";
             "default" = " ";
@@ -172,6 +172,7 @@
             "magic" = " ";
             "hidden" = "󰐃 ";
             "secret" = " ";
+            "spotify" = " ";
           };
 	      };
         "group/monitor" = {
@@ -546,6 +547,12 @@
           transition: all 0.1s ease-in-out;
         }
         #workspaces button.secret {
+          color: #${config.colorScheme.palette.base08};
+          font-style: normal;
+          text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
+          transition: all 0.1s ease-in-out;
+        }
+        #workspaces button.spotify {
           color: #${config.colorScheme.palette.base08};
           font-style: normal;
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);

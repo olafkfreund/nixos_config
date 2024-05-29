@@ -10,7 +10,7 @@
      ./com.nix
      ./terminals/default.nix
      ./rofi/rofi.nix
-     #./theme/default.nix
+     ./theme/default.nix
      ./com.nix
      ./terminals.nix
      ./neofetch/default.nix

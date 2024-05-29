@@ -9,5 +9,6 @@ home.packages = with pkgs; [
   shell-gpt
   ollama
   oterm
+  aichat
   ];
 }
