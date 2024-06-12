@@ -1,5 +1,4 @@
-{
-  inputs, hycov, hyprspace, hyprexpo, hyprland-virtual-desktops, vars, pkgs, config, ... }:
+{ inputs, hycov, hyprspace, hyprexpo, hyprland-virtual-desktops, vars, pkgs, config, ... }:
 let 
     animations.fast = true;
     animations.moving = false;
@@ -28,11 +27,22 @@ in
 
     # make stuff work on wayland
     sessionVariables = {
+      NIXOS_OZONE_WL = "1";
       SDL_VIDEODRIVER = "wayland";
       XDG_SESSION_TYPE = "wayland";
       XDG_CURRENT_DESKTOP = "Hyprland";
       XDG_SESSION_DESKTOP = "Hyprland";
       CLUTTER_BACKEND = "wayland";
+	    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+	    LIBVA_DRIVER_NAME = "nvidia";
+	    # WLR_RENDERER = "vulkan";
+	    __NV_PRIME_RENDER_OFFLOAD="1";
+	    GTK_USE_PORTAL = "1";
+	    NIXOS_XDG_OPEN_USE_PORTAL = "0";
+	    XDG_CACHE_HOME = "\${HOME}/.cache";
+	    XDG_CONFIG_HOME = "\${HOME}/.config";
+	    XDG_BIN_HOME = "\${HOME}/.local/bin";
+	    XDG_DATA_HOME = "\${HOME}/.local/share";
 
     };
   };
@@ -41,9 +51,9 @@ in
     enable = true;
     systemd.enable= true;
     plugins = [
-      # hyprland-virtual-desktops.packages.${pkgs.system}.virtual-desktops
+      #hyprland-virtual-desktops.packages.${pkgs.system}.virtual-desktops
       #inputs.hyprland-plugins.packages.${pkgs.system}.hyprexpo
-      # inputs.hyprspace.packages.${pkgs.system}.Hyprspace
+      #inputs.hyprspace.packages.${pkgs.system}.Hyprspace
       #hycov.packages.${pkgs.system}.hycov
     ];
     # enableNvidiaPatches = true;
@@ -51,9 +61,8 @@ in
       #laptop
       monitor = eDP-1,1920x1080@100,0x0,1
       #home
-      monitor = DP-3,2560x1440@100,0x0,1
-      monitor = DP-1,2560x1440@100,2560x0,1
-      #monitor=,preferred,auto, 1
+      #monitor = DP-3,2560x1440@100,0x0,1
+      monitor=,preferred,auto, 1
       #wsbind=1,eDP-1
 
       xwayland {
@@ -65,6 +74,7 @@ in
       exec-once = gnome-keyring-daemon --start --components=secrets
       exec-once = polkit-kde-authentication-agent-1
       exec-once = kdeconnectd
+      exec-once = kdeconnect-indicator
       exec-once = polkit-agent-helper-1
       exec-once = dbus-update-activation-environment --systemd --all WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
       exec-once = dbus-update-activation-environment --systemd --all # for XDPH
@@ -92,12 +102,14 @@ in
       
       exec-once = [workspace special:spotify] spotify
       # exec-once = [workspace 1 silent] microsoft-edge
-      exec-once = [workspace 2 silent] kitty
-      exec-once = [workspace 9 silent] google-chrome-stable
+      exec-once = [workspace 1 silent] kitty
+      exec-once = [workspace 1 silent] google-chrome-stable
       exec-once = [workspace 8 silent] 1password
+      exec-once = [workspace 10 silent] element-desktop
       exec-once = [workspace 6 silent] obsidian
-      # exec-once = [workspace 2 silent] code
-      exec-once = [workspace 5 silent] thunderbird
+      exec-once = [workspace 2 silent] code
+      exec-once = [workspace 2 silent] slack
+      # exec-once = [workspace 5 silent] thunderbird
 
 
       # Env variables
@@ -380,8 +392,8 @@ in
 
       windowrulev2 = workspace special:spotify, class:^(Spotify)$
 
-      windowrulev2 = opacity 0.80 0.80,class:(code.*)
-      windowrulev2 = opacity 0.80 0.80,class:(code.*)
+      # windowrulev2 = opacity 0.80 0.80,class:(code.*)
+      # windowrulev2 = opacity 0.80 0.80,class:(code.*)
       windowrulev2 = workspace 2, class:(code.*)
 
       windowrulev2 = workspace 1, class:^(Edge)$
@@ -390,7 +402,7 @@ in
       windowrulev2 = size 1220 630, class:(pavucontrol)
       windowrulev2 = center, class:(pavucontrol)
       # Telegram
-      windowrulev2 = workspace 4, class:(org.telegram.desktop)
+      windowrulev2 = workspace 8, class:(org.telegram.desktop)
       windowrulev2 = size 970 480, class:(org.telegram.desktop), title:(Choose Files)
       windowrulev2 = center, class:(org.telegram.desktop), title:(Choose Files) 
       
@@ -571,6 +583,7 @@ in
 
       #ATL-TAB
       bind = ALT, TAB, exec, ~/.config/rofi/launchers/type-2/launcher-alttab.sh
+      # bind = $mainMod, TAB, cyclenext,
       
       # Switch workspaces with mainMod + [0-9]
       bind = $mainMod, 1, workspace, 1

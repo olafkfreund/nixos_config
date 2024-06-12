@@ -85,7 +85,7 @@
         appname = "network";
         new_icon = "network";
         summary = "*";
-        format = "<span size='x-large' weight='bold'>%s</span>''\n<span font_desc='Cooper Hewitt,Iosevka Nerd Font 12'>%b</span>";
+        format = "<span size='x-large' weight='bold'>%s</span>''\n<span font_desc='Cooper Hewitt,Iosevka Nerd Font 14'>%b</span>";
       };
       NetworkManager_Applet = {
         appname = "NetworkManager Applet";

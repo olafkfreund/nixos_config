@@ -8,6 +8,7 @@
     lazydocker
     nvidia-container-toolkit
     nvidia-docker
+    arion
 
    ];
 

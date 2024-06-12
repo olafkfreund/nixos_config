@@ -92,13 +92,15 @@
     nix-index-database.url = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
 
+    ags.url = "github:Aylur/ags";
+
   };
 
 
   outputs = {
       self, 
       nixpkgs, 
-      nixpkgs-stable, 
+      nixpkgs-stable,
       hyprlock, 
       hyprspace, 
       hypridle,
@@ -109,7 +111,8 @@
       nixos-cosmic, 
       nixpkgs-f2k, 
       hyprland, 
-      nix-colors, 
+      nix-colors,
+      ags,
       spicetify-nix, 
       home-manager,
       stylix,
@@ -123,7 +126,7 @@
           inherit inputs;
           };
         modules = [
-          ./configuration.nix
+          ./hosts/razer/configuration.nix
           nur.nixosModules.nur
           home-manager.nixosModules.home-manager
           nixos-cosmic.nixosModules.default
@@ -144,6 +147,7 @@
               inherit spicetify-nix;
               inherit hyprland;
               inherit hycov;
+              inherit ags;
               inherit stylix;
               inherit nix-index-database;
               inherit hyprspace;

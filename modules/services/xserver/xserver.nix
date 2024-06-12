@@ -9,7 +9,7 @@ services.xserver = {
   enable = true;
   #displayManager.defaultSession = "plasmawayland";
   #displayManager.defaultSession = "plasma";
-  desktopManager.gnome.enable = false;
+  desktopManager.gnome.enable = true;
   displayManager.xserverArgs = [
     "-nolisten tcp" 
     "-dpi 96"

@@ -13,5 +13,8 @@ home.packages = with pkgs; [
   #thefuck #Magnificent app which corrects your previous console command
   pomodoro #A simple CLI pomodoro timer using desktop notifications written in Rust
   tomato-c
+  charasay
+  fortune
+  lolcat
   ];
 }

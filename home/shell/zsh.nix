@@ -7,11 +7,14 @@
     zsh-fzf-tab
     zsh-f-sy-h
     zsh-nix-shell
+    zsh-autopair
+    zsh-edit
     zsh-clipboard
     zsh-autocomplete
     zsh-syntax-highlighting
     nix-zsh-completions
     zsh-autosuggestions
+    any-nix-shell
   ];
 
 programs.zsh = {
@@ -25,6 +28,8 @@ programs.zsh = {
     source ${pkgs.zsh-autocomplete}/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh
     source ${pkgs.zsh-nix-shell}/share/zsh-nix-shell/nix-shell.plugin.zsh
     source ${pkgs.zsh-f-sy-h}/share/zsh/site-functions/F-Sy-H.plugin.zsh
+    source ${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+    source ${pkgs.nix-zsh-completions}/share/zsh/plugins/nix/nix-zsh-completions.plugin.zsh
     # Completion styling
     zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
     zstyle ':completion:*' list-colors "''${(s.:.)LS_COLORS}"
@@ -33,6 +38,10 @@ programs.zsh = {
     zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
     source ~/.openai.sh
     eval "$(atuin init zsh)"
+    '';
+
+  envExtra = ''
+    export TERM=xterm-256color
   '';
 
   oh-my-zsh = {

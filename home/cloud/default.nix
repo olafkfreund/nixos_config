@@ -4,5 +4,6 @@
     ./azure.nix
     ./terraform.nix
     ./cloud-tools.nix
+    ./google.nix
 ];
 }

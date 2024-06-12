@@ -12,32 +12,25 @@
     enableGhostscriptFonts = true;
 
     packages = with pkgs; [
-      # (nerdfonts.override {
-      #   fonts = [ "FiraCode" "SourceCodePro" "UbuntuMono" ];
-      # })
-
-      # (nerdfonts.override {fonts = ["Iosevka" "JetBrainsMono"];})
-      # gg-sans
-
-      comfortaa
-      comic-neue
+      # comfortaa
+      # comic-neue
       corefonts
       dejavu_fonts
       fira
       fira-code
       fira-go
       font-awesome
-      hackgen-nf-font
-      inconsolata
-      inter
-      iosevka-bin
+      # hackgen-nf-font
+      # inconsolata
+      # inter
+      # iosevka-bin
       jetbrains-mono
-      jost
-      joypixels
-      lato
-      lexend
-      liberation_ttf
-      line-awesome
+      # jost
+      # joypixels
+      # lato
+      # lexend
+      # liberation_ttf
+      # line-awesome
       material-design-icons
       material-icons
       nerd-font-patcher
@@ -45,17 +38,16 @@
       noto-fonts
       noto-fonts-cjk
       noto-fonts-emoji
-      roboto
-      source-han-sans
-      source-sans
-      source-serif
-      twemoji-color-font
+      # roboto
+      # source-han-sans
+      # source-sans
+      # source-serif
+      # twemoji-color-font
       ubuntu_font_family
-      work-sans
-      roboto-mono
-      victor-mono
-      openmoji-color
-      font-awesome
+      # work-sans
+      # roboto-mono
+      # victor-mono
+      # openmoji-color
 
     ];
 

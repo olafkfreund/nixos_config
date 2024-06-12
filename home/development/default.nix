@@ -13,6 +13,6 @@
     ./devbox.nix
     ./nodejs.nix
     ./github.nix
-    ./nvim.nix
+    # ./nvim.nix
 ];
 }

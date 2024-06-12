@@ -467,7 +467,7 @@
     style = ''
       * {
         font-family: 'Jetbrains Mono Nerd Font';
-        font-size: 20px;
+        font-size: 15px;
         border: none;
         border-radius: 0;
         margin: 0;
@@ -476,11 +476,11 @@
         }
 
         window#waybar {
-          background-color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base01};
         }
 
         .modules-right {
-          background-color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base01};
         }
 
         .modules-left {
@@ -488,16 +488,16 @@
         }
 
         .modules-center {
-          background-color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base01};
         }
 
         tooltip {
-          background: #${config.colorScheme.palette.base00};
+          background: #${config.colorScheme.palette.base01};
         }
 
         tooltip label {
           color: #${config.colorScheme.palette.base06};
-          background-color: #${config.colorScheme.palette.base00};
+          background-color: #${config.colorScheme.palette.base01};
         }
 
         tooltip * {
@@ -505,22 +505,22 @@
 
         #workspaces {
           padding: 0 0px;
-          background-color: #${config.colorScheme.palette.base0D};
+          background-color: #${config.colorScheme.palette.base02};
         }
 
         #workspaces button {
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0D};
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base02};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           font-weight: normal;
           font-style: normal;
         }
         
         #custom-arrow10 {
-          font-size: 25px;
+          font-size: 20px;
           border-radius: 0;
           border: none;
-          color: #${config.colorScheme.palette.base0D};
+          color: #${config.colorScheme.palette.base02};
           background-color: #${config.colorScheme.palette.base03};
           
         }
@@ -534,7 +534,7 @@
 
         #workspaces button.active {
           color: #${config.colorScheme.palette.base09};
-          background-color: #${config.colorScheme.palette.base0D};
+          background-color: #${config.colorScheme.palette.base02};
           font-weight: bolder;
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           transition: all 0.1s ease-in-out;
@@ -575,26 +575,26 @@
           background-color: #${config.colorScheme.palette.base04};
         }
         #custom-arrow4 {
-          font-size: 25px;
+          font-size: 20px;
           color: #${config.colorScheme.palette.base04};
-          background-color: #${config.colorScheme.palette.base0E};
+          background-color: #${config.colorScheme.palette.base02};
           
         }
 
         #custom-startmenu {
-          font-size: 25px;
+          font-size: 15px;
           font-weight: bolder;
           font-style: normal;
-          color: #${config.colorScheme.palette.base0D};
-          background-color: #${config.colorScheme.palette.base00};
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base01};
         }
 
         #custom-arrow11 {
-          font-size: 25px;
+          font-size: 20px;
           border-radius: 0;
           border: none;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0D};
+          color: #${config.colorScheme.palette.base01};
+          background-color: #${config.colorScheme.palette.base02};
           
         }
 
@@ -609,21 +609,21 @@
           font-style: normal;
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0B};
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base03};
         }
 
         #custom-arrow5 {
-          font-size: 25px;
-          color: #${config.colorScheme.palette.base08};
+          font-size: 20px;
+          color: #${config.colorScheme.palette.base01};
           background-color: #${config.colorScheme.palette.base02};
           
         }
 
         #custom-arrow7 {
-          font-size: 25px;
-          color: #${config.colorScheme.palette.base0B};
-          background-color: #${config.colorScheme.palette.base0A};
+          font-size: 20px;
+          color: #${config.colorScheme.palette.base03};
+          background-color: #${config.colorScheme.palette.base02};
           
         }
         
@@ -637,82 +637,82 @@
           padding: 0 5px;
         }
         #memory {
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base08};
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base01};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           padding: 0 5px;
         }
 
         #pulseaudio {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0A};
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base02};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #pulseaudio#microphone {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0A};
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base02};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #pulseaudio.muted {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0A};
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base02};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #custom-arrow6 {
-          color: #${config.colorScheme.palette.base0A};
-          background-color: #${config.colorScheme.palette.base08};
-          font-size: 25px;
+          color: #${config.colorScheme.palette.base02};
+          background-color: #${config.colorScheme.palette.base01};
+          font-size: 20px;
         }
 
         #backlight {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base09};
+          color: #${config.colorScheme.palette.base02};
         }
 
         #cpu {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base08};
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base01};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #network {
           padding: 0 5px;
           color: #${config.colorScheme.palette.base05};
-          background-color: #${config.colorScheme.palette.base01};
+          background-color: #${config.colorScheme.palette.base02};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #custom-arrow17 {
-          font-size: 25px;
-          color: #${config.colorScheme.palette.base01};
-          background-color: #${config.colorScheme.palette.base00};
+          font-size: 20px;
+          color: #${config.colorScheme.palette.base02};
+          background-color: #${config.colorScheme.palette.base01};
         }
 
         #custom-cycle_wall {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0B};
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base03};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #custom-tailscale {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0B};
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base03};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #custom-dunst {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0B};
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base03};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
         
@@ -720,8 +720,8 @@
           padding: 0 5px; 
           font-weight: bolder;
           font-style: normal;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0E};
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base02};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
@@ -729,15 +729,15 @@
           padding: 0 5px;
           font-weight: bolder;
           font-style: normal;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0E};
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base02};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #custom-arrow9 {
-          font-size: 25px;
-          color: #${config.colorScheme.palette.base0E};
-          background-color: #${config.colorScheme.palette.base0B};
+          font-size: 20px;
+          color: #${config.colorScheme.palette.base02};
+          background-color: #${config.colorScheme.palette.base03};
           
         }
 
@@ -750,29 +750,29 @@
           font-weight: bolder;
           font-style: normal;
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base09};
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base02};
           
         }
 
         #custom-arrow3 {
-          font-size: 25px;
-          color: #${config.colorScheme.palette.base09};
+          font-size: 20px;
+          color: #${config.colorScheme.palette.base02};
           background-color: #${config.colorScheme.palette.base04};
           
         }
 
         #battery {
           padding: 0 0.5px 0 0.8px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base08};
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base01};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #disk {
           padding: 0 0.1px 0 0.1px;
-          color:  #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base08};
+          color:  #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base01};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
@@ -787,33 +787,33 @@
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           transition: all 0.1s ease-in-out;
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
-          font-size: 25px;
+          font-size: 15px;
           padding: 0 5px;
         }
 
         #custom-arrow12 {
-          font-size: 25px;
+          font-size: 20px;
           color: #${config.colorScheme.palette.base03};
-          background-color: #${config.colorScheme.palette.base0F};
+          background-color: #${config.colorScheme.palette.base04};
         }
 
         #custom-playerctl {
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0F};
+          color: #${config.colorScheme.palette.base01};
+          background-color: #${config.colorScheme.palette.base04};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
 
         #custom-arrow13 {
-          font-size: 25px;
-          color: #${config.colorScheme.palette.base0F};
-          background-color: #${config.colorScheme.palette.base00};
+          font-size: 20px;
+          color: #${config.colorScheme.palette.base04};
+          background-color: #${config.colorScheme.palette.base01};
         }
 
         #custom-arrow14 {
-          font-size: 25px;
-          color: #${config.colorScheme.palette.base0F};
-          background-color: #${config.colorScheme.palette.base00};
+          font-size: 20px;
+          color: #${config.colorScheme.palette.base02};
+          background-color: #${config.colorScheme.palette.base02};
         }
 
         #bluetooth {
@@ -824,9 +824,9 @@
         }
 
         #custom-arrow16 {
-          font-size: 25px;
+          font-size: 20px;
           color: #${config.colorScheme.palette.base02};
-          background-color: #${config.colorScheme.palette.base01};
+          background-color: #${config.colorScheme.palette.base02};
         }
     '';
   };

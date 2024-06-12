@@ -80,5 +80,13 @@ home.packages = with pkgs; [
   openssl
   libsixel
   fd
+  s-tui
+  viddy
+  curlie
+  entr
+  erdtree
+  choose
+  tailspin
+  nitch
   ];
 }

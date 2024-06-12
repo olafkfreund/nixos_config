@@ -42,9 +42,9 @@
   };
   stylix.fonts.sizes = {
     applications = 12;
-    terminal = 16;
+    terminal = 14;
     desktop = 12;
-    popups = 12;
+    popups = 14;
   };
 
   stylix.opacity = {
@@ -85,5 +85,5 @@
       ];
     };
   networking.firewall.enable = false;
-  system.stateVersion = "24.05"; # Did you read the comment?
+  system.stateVersion = "24.11"; # Did you read the comment?
 }

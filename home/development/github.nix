@@ -8,5 +8,6 @@ home.packages = with pkgs; [
     gh-copilot
     gh-notify
     ghfetch
+    gh-dash
   ];
 }

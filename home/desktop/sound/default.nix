@@ -5,5 +5,7 @@
     gxmatcheq-lv2
     easyeffects
     jamesdsp
+    # fcast-client
+    # fcast-receiver
   ];
 }

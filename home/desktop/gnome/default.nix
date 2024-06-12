@@ -9,7 +9,10 @@
     gnome-extension-manager
     gnome.gnome-themes-extra
     gnome.gnome-tweaks
-    gnomeExtensions.gsconnect
+    gnome.gnome-control-center
+    # gnomeExtensions.gsconnect
+    gnomeExtensions.gtile
+    gnomeExtensions.gmeet
     gnomeExtensions.user-themes
     gnomeExtensions.appindicator
     gimp

@@ -11,6 +11,7 @@
   services = {
     udev = {
       enable = true;
+      packages = with pkgs; [ gnome.gnome-settings-daemon ];
 
       # enable high precision timers if they exist && set I/O scheduler to NONE for ssd/nvme
       # autosuspend USB devices && autosuspend PCI devices

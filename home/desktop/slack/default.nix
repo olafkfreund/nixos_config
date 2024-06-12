@@ -13,5 +13,9 @@ let
 
 in
 {
+  xdg.mimeApps.defaultApplications = {
+    "x-scheme-handler/slack" = "slack.desktop";
+  };
+
   environment.systemPackages = [ slack ];
 }

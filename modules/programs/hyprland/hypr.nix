@@ -21,8 +21,8 @@ programs.nix-ld = {
       stdenv.cc.cc
     ];
   };
-programs.kdeconnect = {
-  enable = true;
-  package = pkgs.kdePackages.kdeconnect-kde;
-  };
+# programs.kdeconnect = {
+#   enable = true;
+#   package = pkgs.kdePackages.kdeconnect-kde;
+#   };
 }

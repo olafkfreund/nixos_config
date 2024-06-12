@@ -53,5 +53,14 @@ environment.systemPackages = with pkgs; [
   nix-zsh-completions
   nix-bash-completions
   nix-output-monitor
+  statix
+  deadnix
+  alejandra
+  home-manager
+  git
+  sops
+  ssh-to-age
+  gnupg
+  age
   ];
 }

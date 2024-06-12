@@ -18,14 +18,18 @@
       tmuxPlugins.tilish
       tmuxPlugins.sidebar
       tmuxPlugins.gruvbox
+      tmuxPlugins.tilish
       #tmuxPlugins.sensible
     ];
     extraConfig = "
       run-shell '${pkgs.tmuxPlugins.gruvbox}/share/tmux-plugins/gruvbox/gruvbox-tpm.tmux'
       set -g @tmux-gruvbox 'dark'
-      #Set terminal
-      set-option -g default-terminal 'screen-254color'
-      set-option -g terminal-overrides ',xterm-256color:RGB'
+      set -g default-terminal 'xterm-256color'
+      # set-option -g terminal-overrides 'xterm-256color:RGB'
+      set -s escape-time 0
+      set -g base-index 1
+      # set -g @tilish-easymode 'on'
+      set -g @tilish-navigator 'on'
 
       #Image preview
       set -g allow-passthrough on

@@ -37,5 +37,6 @@
       github-desktop
       swayosd
       hplip
+      v4l-utils
     ];
   }

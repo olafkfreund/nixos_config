@@ -24,5 +24,7 @@ home.packages = with pkgs; [
   betterlockscreen
   onlyoffice-bin_latest
   watershot
+  xdg-utils
+  glib
   ];
 }
