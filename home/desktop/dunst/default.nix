@@ -1,4 +1,4 @@
-{ config, ... }:{
+{ config, ... }: {
   services.dunst = {
     enable = true;
     settings = {
@@ -25,7 +25,7 @@
         frame_color = "#${config.colorScheme.palette.base06}";
         sort = true;
         idle_threshold = 0;
-        # font = "JetBrains Mono Nerd Font 13";
+        font = "JetBrains Mono Nerd Font 13";
         line_height = 2;
         markup = "full";
         origin = "top-right";
@@ -45,12 +45,12 @@
         enable_recursive_icon_lookup = true;
         sticky_history = true;
         history_length = 20;
-        browser = "firefox";
+        browser = "google-chrome-stable";
         always_run_script = true;
         title = "Dunst";
         class = "Dunst";
         corner_radius = 10;
-        icon_corner_radius= 5;
+        icon_corner_radius = 5;
         notification_limit = 5;
         mouse_left_click = "close_current";
         mouse_middle_click = "do_action";
@@ -61,21 +61,21 @@
 
       urgency_normal = {
         timeout = 6;
-        # background = "#${config.colorScheme.palette.base00}";
-        # frame_color = "#${config.colorScheme.palette.base07}";
-        # foreground = "#${config.colorScheme.palette.base06}";
+        background = "#${config.colorScheme.palette.base00}";
+        frame_color = "#${config.colorScheme.palette.base07}";
+        foreground = "#${config.colorScheme.palette.base06}";
       };
       urgency_low = {
         timeout = 2;
-        # background = "#${config.colorScheme.palette.base00}";
-        # frame_color = "#${config.colorScheme.palette.base07}";
-        # foreground = "#${config.colorScheme.palette.base06}";
+        background = "#${config.colorScheme.palette.base00}";
+        frame_color = "#${config.colorScheme.palette.base07}";
+        foreground = "#${config.colorScheme.palette.base06}";
       };
       urgency_critical = {
         timeout = 30;
-        # background = "#${config.colorScheme.palette.base00}";
-        # frame_color = "#${config.colorScheme.palette.base07}";
-        # foreground = "#${config.colorScheme.palette.base06}";
+        background = "#${config.colorScheme.palette.base00}";
+        frame_color = "#${config.colorScheme.palette.base07}";
+        foreground = "#${config.colorScheme.palette.base06}";
       };
       fullscreen_show_critical = {
         msg_urgency = "critical";

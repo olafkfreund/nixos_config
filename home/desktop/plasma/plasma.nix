@@ -15,7 +15,7 @@ home.packages = with pkgs; [
   pywal
   wpgtk
   polychromatic
-  ungoogled-chromium
+  # ungoogled-chromium
   quaternion
   xwaylandvideobridge
   ];

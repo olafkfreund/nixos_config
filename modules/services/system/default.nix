@@ -12,6 +12,9 @@
   services.thermald = {
     enable = true;
   };
+  services.hardware.bolt = {
+    enable = true; 
+  };
 
   system.activationScripts.binbash = {
     deps = [ "binsh" ];

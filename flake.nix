@@ -11,12 +11,12 @@
       "https://cosmic.cachix.org/"
     ];
     trusted-public-keys = [
-        "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
-        "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
-        "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
-        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
-      ];
+      "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+      "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+      "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
+    ];
     extra-substituters = [
       # Nix community's cache server
       "https://nix-community.cachix.org"
@@ -29,9 +29,9 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11";
-    
+
     nix-colors.url = "github:misterio77/nix-colors";
-    
+
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -39,41 +39,45 @@
       url = "github:lilyinstarlight/nixos-cosmic";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     spicetify-nix.url = "github:the-argus/spicetify-nix";
 
-    hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1&ref=refs/tags/v0.40.0";
-    # hyprland.url = "github:hyprwm/Hyprland";
+    #hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1&ref=refs/tags/v0.40.0";
+    hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1&ref=refs/tags/v0.41.0";
+    #hyprland.url = "github:hyprwm/Hyprland";
     hyprland.inputs.nixpkgs.follows = "nixpkgs";
 
     hyprland-plugins = {
-    url = "github:hyprwm/hyprland-plugins";
-    inputs.hyprland.follows = "hyprland";
+      url = "github:hyprwm/hyprland-plugins";
+      inputs.hyprland.follows = "hyprland";
     };
 
     hyprpicker.url = "github:hyprwm/hyprpicker";
     hyprpicker.inputs.nixpkgs.follows = "nixpkgs";
-    
+
+    nix-ld.url = "github:Mic92/nix-ld";
+    nix-ld.inputs.nixpkgs.follows = "nixpkgs";
+
     hyprland-contrib.url = "github:hyprwm/contrib";
     hyprland-contrib.inputs.nixpkgs.follows = "nixpkgs";
-    
+
     agenix.url = "github:ryantm/agenix";
     agenix.inputs.nixpkgs.follows = "nixpkgs";
-    
+
     nixpkgs-f2k.url = "github:moni-dz/nixpkgs-f2k";
-    
+
     nur.url = "github:nix-community/NUR";
 
-    hycov={
+    hycov = {
       url = "github:DreamMaoMao/hycov";
       inputs.hyprland.follows = "hyprland";
     };
-    
+
     hyprlock = {
       url = "github:hyprwm/hyprlock";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     hypridle = {
       url = "github:hyprwm/hypridle";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -81,90 +85,94 @@
     hyprspace = {
       url = "github:KZDKM/Hyprspace";
       inputs.hyprland.follows = "hyprland";
-    };  
+    };
     hyprland-virtual-desktops = {
       url = "github:levnikmyskin/hyprland-virtual-desktops";
       inputs.hyprland.follows = "hyprland";
     };
 
-    stylix.url ="github:danth/stylix";
+    stylix.url = "github:danth/stylix";
 
     nix-index-database.url = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
 
     ags.url = "github:Aylur/ags";
-
   };
 
-
-  outputs = {
-      self, 
-      nixpkgs, 
-      nixpkgs-stable,
-      hyprlock, 
-      hyprspace, 
-      hypridle,
-      hyprland-virtual-desktops,
-      hycov, 
-      nur, 
-      hyprland-plugins, 
-      nixos-cosmic, 
-      nixpkgs-f2k, 
-      hyprland, 
-      nix-colors,
-      ags,
-      spicetify-nix, 
-      home-manager,
-      stylix,
-      nix-index-database,
-      ... }@inputs : 
-    {
-    nixosConfigurations = {
-      razer = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = {
-          inherit inputs;
+  outputs =
+    { self
+    , nixpkgs
+    , nixpkgs-stable
+    , hyprlock
+    , hyprspace
+    , hypridle
+    , hyprland-virtual-desktops
+    , hycov
+    , nur
+    , hyprland-plugins
+    , nixos-cosmic
+    , nixpkgs-f2k
+    , hyprland
+    , nix-colors
+    , ags
+    , nix-ld
+    , spicetify-nix
+    , home-manager
+    , stylix
+    , nix-index-database
+    , ...
+    } @ inputs: {
+      nixosConfigurations = {
+        razer = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          specialArgs = {
+            inherit inputs;
           };
-        modules = [
-          ./hosts/razer/configuration.nix
-          nur.nixosModules.nur
-          home-manager.nixosModules.home-manager
-          nixos-cosmic.nixosModules.default
-          inputs.nix-colors.homeManagerModules.default
-          inputs.stylix.nixosModules.stylix
-          nix-index-database.nixosModules.nix-index
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = {
-              pkgs-stable = import nixpkgs-stable {
-              system = "x86_64-linux";
-              config.allowUnfree = true;
+          modules = [
+            ./hosts/razer/configuration.nix
+            nur.nixosModules.nur
+            home-manager.nixosModules.home-manager
+            nixos-cosmic.nixosModules.default
+            inputs.nix-colors.homeManagerModules.default
+            inputs.stylix.nixosModules.stylix
+            inputs.nix-ld.nixosModules.nix-ld
+            nix-index-database.nixosModules.nix-index
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.backupFileExtension = "backup";
+              home-manager.extraSpecialArgs = {
+                pkgs-stable = import nixpkgs-stable {
+                  system = "x86_64-linux";
+                  config.allowUnfree = true;
+                };
+                inherit inputs;
+                inherit nixpkgs;
+                inherit spicetify-nix;
+                inherit hyprland;
+                inherit hycov;
+                inherit ags;
+                inherit stylix;
+                inherit nix-index-database;
+                inherit hyprspace;
+                inherit hyprland-virtual-desktops;
+                inherit nixpkgs-f2k;
+                inherit home-manager;
+                inherit nixpkgs-stable;
+                inherit nix-colors;
+                inherit self;
               };
-              inherit inputs;
-              inherit nixpkgs;
-              inherit spicetify-nix;
-              inherit hyprland;
-              inherit hycov;
-              inherit ags;
-              inherit stylix;
-              inherit nix-index-database;
-              inherit hyprspace;
-              inherit hyprland-virtual-desktops;
-              inherit nixpkgs-f2k;
-              inherit home-manager;
-              inherit nixpkgs-stable;
-              inherit nix-colors;
-              inherit self;
-            };        
-            home-manager.users.olafkfreund = import ./Users/olafkfreund/razer_home.nix;
-            home-manager.sharedModules = [{
-              stylix.targets.waybar.enable = false;
-            }];
-          }
-        ];
+              home-manager.users.olafkfreund = import ./Users/olafkfreund/razer_home.nix;
+              home-manager.sharedModules = [
+                {
+                  stylix.targets.waybar.enable = false;
+                  stylix.targets.dunst.enable = false;
+
+                }
+              ];
+            }
+          ];
+        };
       };
     };
-  };
 }

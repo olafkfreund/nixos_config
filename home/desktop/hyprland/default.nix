@@ -1,15 +1,23 @@
-{ inputs, hycov, hyprspace, hyprexpo, hyprland-virtual-desktops, vars, pkgs, config, ... }:
-let 
-    animations.fast = true;
-    animations.moving = false;
-    animations.high = false;
-    decoration.rounding.more.blur = false;
-    decoration.rounding.all.blur = false;
-    decoration.no.rounding.blur = false;
-    gaps-big-no-border = false;
-    gaps-big-border = false;
-
-in 
+{ inputs
+, hycov
+, hyprspace
+, hyprexpo
+, hyprland-virtual-desktops
+, vars
+, pkgs
+, config
+, ...
+}:
+let
+  animations.fast = true;
+  animations.moving = false;
+  animations.high = false;
+  decoration.rounding.more.blur = false;
+  decoration.rounding.all.blur = false;
+  decoration.no.rounding.blur = false;
+  gaps-big-no-border = false;
+  gaps-big-border = false;
+in
 {
   imports = [
     ./hypr_dep.nix
@@ -18,7 +26,7 @@ in
     ./scripts/packages.nix
     #./scripts/themechange.nix
   ];
-  
+
   # hyprpaper
   home = {
     file = {
@@ -33,36 +41,43 @@ in
       XDG_CURRENT_DESKTOP = "Hyprland";
       XDG_SESSION_DESKTOP = "Hyprland";
       CLUTTER_BACKEND = "wayland";
-	    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-	    LIBVA_DRIVER_NAME = "nvidia";
-	    # WLR_RENDERER = "vulkan";
-	    __NV_PRIME_RENDER_OFFLOAD="1";
-	    GTK_USE_PORTAL = "1";
-	    NIXOS_XDG_OPEN_USE_PORTAL = "0";
-	    XDG_CACHE_HOME = "\${HOME}/.cache";
-	    XDG_CONFIG_HOME = "\${HOME}/.config";
-	    XDG_BIN_HOME = "\${HOME}/.local/bin";
-	    XDG_DATA_HOME = "\${HOME}/.local/share";
-
+      __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+      LIBVA_DRIVER_NAME = "nvidia";
+      # WLR_RENDERER = "vulkan";
+      __NV_PRIME_RENDER_OFFLOAD = "1";
+      GTK_USE_PORTAL = "1";
+      NIXOS_XDG_OPEN_USE_PORTAL = "0";
+      XDG_CACHE_HOME = "\${HOME}/.cache";
+      XDG_CONFIG_HOME = "\${HOME}/.config";
+      XDG_BIN_HOME = "\${HOME}/.local/bin";
+      XDG_DATA_HOME = "\${HOME}/.local/share";
     };
   };
-  
+
   wayland.windowManager.hyprland = {
     enable = true;
-    systemd.enable= true;
+    systemd.enable = true;
+    systemd = {
+      variables = [ "--all" ];
+      extraCommands = [
+        "systemctl --user stop graphical-session.target"
+        "systemctl --user start hyprland-session.target"
+      ];
+    };
+    xwayland.enable = true;
     plugins = [
       #hyprland-virtual-desktops.packages.${pkgs.system}.virtual-desktops
-      #inputs.hyprland-plugins.packages.${pkgs.system}.hyprexpo
+      # inputs.hyprland-plugins.packages.${pkgs.system}.hyprexpo
       #inputs.hyprspace.packages.${pkgs.system}.Hyprspace
-      #hycov.packages.${pkgs.system}.hycov
+      # hycov.packages.${pkgs.system}.hycov
     ];
     # enableNvidiaPatches = true;
     extraConfig = ''
       #laptop
       monitor = eDP-1,1920x1080@100,0x0,1
       #home
-      #monitor = DP-3,2560x1440@100,0x0,1
-      monitor=,preferred,auto, 1
+      monitor = DP-3,2560x1440@100,0x0,1,bitdepth,10
+      #monitor=,preferred,auto, 1
       #wsbind=1,eDP-1
 
       xwayland {
@@ -81,31 +96,31 @@ in
       exec-once = systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP # for XDPH
       #exec-once = ~/.config/hypr/xdg-portal-hyprland
       exec-once = gsettings set org.gnome.desktop.interface cursor-theme "Bibata-Modern-Ice"
-      exec-once = gsettings set org.gnome.desktop.interface icon-theme "Gruvbox-Plus-Dark" 
+      exec-once = gsettings set org.gnome.desktop.interface icon-theme "Gruvbox-Plus-Dark"
       exec-once = gsettings set org.gnome.desktop.interface gtk-theme "Gruvbox-Dark-BL-LB"
 
       exec-once = waybar
       exec-once = swayosd-server
       exec-once = sudo swayosd-libinput-backend
       exec-once = dunst
-      exec-once = kdeconnect-cli 
+      exec-once = kdeconnect-cli
       exec-once = playerctld daemon
       #exec-once = $HOME/.config/hypr/scripts/start_wall
       exec-once = swww-daemon
       exec-once = hypridle
       exec-once = nm-applet --indicator
       exec-once = blueman-applet
-      
+
       exec-once = wl-clipboard-history -t
       exec-once = wl-paste --type text --watch cliphist store #Stores only text data
       exec-once = wl-paste --type image --watch cliphist store #Stores only image data when imaged copied
-      
+
       exec-once = [workspace special:spotify] spotify
       # exec-once = [workspace 1 silent] microsoft-edge
       exec-once = [workspace 1 silent] kitty
       exec-once = [workspace 1 silent] google-chrome-stable
       exec-once = [workspace 8 silent] 1password
-      exec-once = [workspace 10 silent] element-desktop
+      # exec-once = [workspace 10 silent] element-desktop
       exec-once = [workspace 6 silent] obsidian
       exec-once = [workspace 2 silent] code
       exec-once = [workspace 2 silent] slack
@@ -116,7 +131,7 @@ in
       env = EDITOR="lvim";
       env = BROWSER="google-chrome-stable";
       env = TERMINAL="kitty";
-      
+
       env = SDL_VIDEODRIVER,wayland
       env = CLUTTER_BACKEND,wayland
       env = XDG_CURRENT_DESKTOP,Hyprland
@@ -139,11 +154,11 @@ in
       #Nvidia
       env = GBM_BACKEND,nvidia-drm
       env = WLR_DRM_NO_ATOMIC,1
-      # env = WLR_DRM_DEVICES,$HOME/.config/hypr/extnvidia:$HOME/.config/hypr/intnvidia 
+      # env = WLR_DRM_DEVICES,$HOME/.config/hypr/extnvidia:$HOME/.config/hypr/intnvidia
       env = LIBVA_DRIVER_NAME,nvidia
       #NIXOS
       env = NIXOS_WAYLAND,1
-      
+
 
 
       input {
@@ -171,19 +186,25 @@ in
 
       general {
           sensitivity=1.0 # for mouse cursor
-          ${if gaps-big-no-border == true then ''
+          ${
+        if gaps-big-no-border == true
+        then ''
           gaps_in = 20
           gaps_out = 40
           border_size = 0
-          '' else if gaps-big-border == true then ''
+        ''
+        else if gaps-big-border == true
+        then ''
           gaps_in = 10
           gaps_out = 14
           border_size = 0
-          '' else ''
-          gaps_in=4 
+        ''
+        else ''
+          gaps_in=4
           gaps_out=8
           border_size=2
-          ''}
+        ''
+      }
           no_border_on_floating=0
           col.active_border = rgba(${config.colorScheme.palette.base05}FF) rgba(${config.colorScheme.palette.base05}FF) 45deg
           col.inactive_border = rgba(${config.colorScheme.palette.base00}11) rgba(${config.colorScheme.palette.base00}11) 45deg
@@ -192,113 +213,123 @@ in
           layout = dwindle
       }
 
-      ${if decoration.rounding.more.blur == true then ''
-      decoration {
-        rounding = 0
-        blur {
-            enabled = true
-            size = 12
-            passes = 6
-            new_optimizations = on
-            ignore_opacity = true
-            xray = true
-            # blurls = waybar
-        }
-        active_opacity = 1.0
-        inactive_opacity = 0.6
-        fullscreen_opacity = 1.0
+      ${
+        if decoration.rounding.more.blur == true
+        then ''
+          decoration {
+            rounding = 0
+            blur {
+                enabled = true
+                size = 12
+                passes = 6
+                new_optimizations = on
+                ignore_opacity = true
+                xray = true
+                # blurls = waybar
+            }
+            active_opacity = 1.0
+            inactive_opacity = 0.6
+            fullscreen_opacity = 1.0
 
-        drop_shadow = true
-        shadow_range = 30
-        shadow_render_power = 3
-        col.shadow = 0x66000000
+            drop_shadow = true
+            shadow_range = 30
+            shadow_render_power = 3
+            col.shadow = 0x66000000
+          }
+        ''
+        else if decoration.rounding.all.blur == true
+        then ''
+            decoration {
+          rounding = 10
+          blur {
+              enabled = true
+              size = 12
+              passes = 4
+              new_optimizations = on
+              ignore_opacity = true
+              xray = true
+              blurls = waybar
+          }
+          active_opacity = 0.9
+          inactive_opacity = 0.6
+          fullscreen_opacity = 0.9
+
+          drop_shadow = true
+          shadow_range = 30
+          shadow_render_power = 3
+          col.shadow = 0x66000000
+          }
+        ''
+        else if decoration.no.rounding.blur == true
+        then ''
+          decoration {
+          rounding = 0
+          blur {
+              enabled = true
+              size = 6
+              passes = 2
+              new_optimizations = on
+              ignore_opacity = true
+              xray = true
+              # blurls = waybar
+          }
+          active_opacity = 1.0
+          inactive_opacity = 0.8
+          fullscreen_opacity = 1.0
+
+          drop_shadow = true
+          shadow_range = 30
+          shadow_render_power = 3
+          col.shadow = 0x66000000
+          }
+        ''
+        else ''
+          decoration {
+              blur {
+                enabled = yes
+                special = true
+                size = 6
+                passes = 3
+                new_optimizations = true
+                ignore_opacity = true
+                xray = false
+              }
+          layerrule = blur, waybar
+          layerrule = ignorezero, waybar
+          layerrule = blur, notifications
+          layerrule = ignorezero, notifications
+          layerrule = blur, logout_dialog
+          windowrule = stayfocused, rofi
+          windowrule = animation popin 75%, rofi
+          windowrule = stayfocused, emote
+          windowrule = animation popin 95%, emote
+          rounding=14
+          drop_shadow=1
+          shadow_ignore_window=true
+          shadow_offset=7 7
+          shadow_range=15
+          shadow_render_power=4
+          shadow_scale=0.99
+          col.shadow=rgba(000000BB)
+          dim_inactive=true
+          dim_strength=0.1
+          active_opacity= 0.92
+          inactive_opacity= 0.76
+          }
+        ''
       }
-      '' else if decoration.rounding.all.blur == true then ''
-      decoration {
-    rounding = 10
-    blur {
-        enabled = true
-        size = 12
-        passes = 4
-        new_optimizations = on
-        ignore_opacity = true
-        xray = true
-        blurls = waybar
-    }
-    active_opacity = 0.9
-    inactive_opacity = 0.6
-    fullscreen_opacity = 0.9
-
-    drop_shadow = true
-    shadow_range = 30
-    shadow_render_power = 3
-    col.shadow = 0x66000000
-    }
-    '' else if decoration.no.rounding.blur == true then ''
-    decoration {
-    rounding = 0
-    blur {
-        enabled = true
-        size = 6
-        passes = 2
-        new_optimizations = on
-        ignore_opacity = true
-        xray = true
-        # blurls = waybar
-    }
-    active_opacity = 1.0
-    inactive_opacity = 0.8
-    fullscreen_opacity = 1.0
-
-    drop_shadow = true
-    shadow_range = 30
-    shadow_render_power = 3
-    col.shadow = 0x66000000
-    }
-    '' else ''
-    decoration {
-        blur {
-          enabled = yes
-          special = true
-          size = 6
-          passes = 3
-          new_optimizations = true
-          ignore_opacity = true
-          xray = false
-        }
-    layerrule = blur, waybar
-    layerrule = ignorezero, waybar
-    layerrule = blur, notifications 
-    layerrule = ignorezero, notifications 
-    layerrule = blur, logout_dialog
-    windowrule = stayfocused, rofi
-    windowrule = animation popin 75%, rofi
-    windowrule = stayfocused, emote 
-    windowrule = animation popin 95%, emote
-    rounding=14
-    drop_shadow=1
-    shadow_ignore_window=true
-    shadow_offset=7 7
-    shadow_range=15
-    shadow_render_power=4
-    shadow_scale=0.99
-    col.shadow=rgba(000000BB)
-    dim_inactive=true
-    dim_strength=0.1
-    active_opacity= 0.92
-    inactive_opacity= 0.76
-    }
-    ''}
 
       animations {
           enabled=true
-          ${if animations.fast == true then ''
+          ${
+        if animations.fast == true
+        then ''
           bezier = linear, 0, 0, 1, 1
           bezier = md3_standard, 0.2, 0, 0, 1
           bezier = md3_decel, 0.05, 0.7, 0.1, 1
           bezier = md3_accel, 0.3, 0, 0.8, 0.15
           bezier = overshot, 0.05, 0.9, 0.1, 1.1
-          bezier = crazyshot, 0.1, 1.5, 0.76, 0.92 
+          bezier = crazyshot, 0.1, 1.5, 0.76, 0.92
           bezier = hyprnostretch, 0.05, 0.9, 0.1, 1.0
           bezier = fluent_decel, 0.1, 1, 0, 1
           bezier = easeInOutCirc, 0.85, 0, 0.15, 1
@@ -309,13 +340,15 @@ in
           animation = fade, 1, 2.5, md3_decel
           animation = workspaces, 1, 3.5, easeOutExpo, slide
           animation = specialWorkspace, 1, 3, md3_decel, slidevert
-          '' else if animations.moving == true then ''
+        ''
+        else if animations.moving == true
+        then ''
           bezier = linear, 0, 0, 1, 1
           bezier = md3_standard, 0.2, 0, 0, 1
           bezier = md3_decel, 0.05, 0.7, 0.1, 1
           bezier = md3_accel, 0.3, 0, 0.8, 0.15
           bezier = overshot, 0.05, 0.9, 0.1, 1.1
-          bezier = crazyshot, 0.1, 1.5, 0.76, 0.92 
+          bezier = crazyshot, 0.1, 1.5, 0.76, 0.92
           bezier = hyprnostretch, 0.05, 0.9, 0.1, 1.0
           bezier = fluent_decel, 0.1, 1, 0, 1
           bezier = easeInOutCirc, 0.85, 0, 0.15, 1
@@ -324,7 +357,9 @@ in
           bezier = drag, 0.2, 1, 0.2, 1
           bezier = pop, 0.1, 0.8, 0.2, 1
           bezier = liner, 1, 1, 1, 1
-          '' else if animations.high == true then ''
+        ''
+        else if animations.high == true
+        then ''
           bezier = wind, 0.05, 0.9, 0.1, 1.05
           bezier = winIn, 0.1, 1.1, 0.1, 1.1
           bezier = winOut, 0.3, -0.3, 0, 1
@@ -337,23 +372,25 @@ in
           animation = borderangle, 1, 30, liner, loop
           animation = fade, 1, 10, default
           animation = workspaces, 1, 5, wind
-          '' else ''
+        ''
+        else ''
           animation=windows,1,3,default,slide
           animation=windowsMove,1,3,overshot
           animation=windowsOut,1,3,default,popin
           animation=border,1,1,default
-          animation=fadeIn,1,5,default 
+          animation=fadeIn,1,5,default
           animation=fadeOut,1,5,default
           animation=fadeSwitch,1,10,default
           #animation=workspaces,1,3.8,overshot,slidevert
           animation=border, 1, 10, overshot
           animation=borderangle, 1, 50, overshot, loop
-          ''}
+        ''
+      }
       }
 
       dwindle {
           pseudotile = true
-          force_split = 2 
+          force_split = 2
           preserve_split = true
           no_gaps_when_only = false
       }
@@ -371,16 +408,16 @@ in
       #       hotarea_size = 10 #hotarea size in bottom left,10x10
       #       enable_hotarea = 1 # enable mouse cursor hotarea
       #     },
-      #     hyprexpo {
-      #       columns = 3
-      #       gap_size = 5
-      #       bg_col = rgb(111111)
-      #       workspace_method = center current # [center/first] [workspace] e.g. first 1 or center m+1
-      #       enable_gesture = true # laptop touchpad, 4 fingers
-      #       gesture_distance = 300 # how far is the "max"
-      #       gesture_positive = true # positive = swipe down. Negative = swipe up.
-      #     }
-      # }
+       #     hyprexpo {
+       #       columns = 3
+       #       gap_size = 5
+       #       bg_col = rgb(111111)
+       #       workspace_method = center current # [center/first] [workspace] e.g. first 1 or center m+1
+       #       enable_gesture = true # laptop touchpad, 4 fingers
+       #       gesture_distance = 300 # how far is the "max"
+       #       gesture_positive = true # positive = swipe down. Negative = swipe up.
+       #     }
+       # }
 
       # Window rules #
       # Rofi
@@ -404,13 +441,13 @@ in
       # Telegram
       windowrulev2 = workspace 8, class:(org.telegram.desktop)
       windowrulev2 = size 970 480, class:(org.telegram.desktop), title:(Choose Files)
-      windowrulev2 = center, class:(org.telegram.desktop), title:(Choose Files) 
-      
+      windowrulev2 = center, class:(org.telegram.desktop), title:(Choose Files)
+
       windowrulev2 = float, class:(blueman-manager)
       windowrulev2 = center, class:(blueman-manager)
       windowrulev2 = float,class:^(nm-applet)$
       windowrulev2 = float,class:^(nm-connection-editor)$
-      
+
 
       # windowrulev2 = opacity 0.80 0.80,class:^(kitty)$
       # windowrulev2 = opacity 0.80 0.80,class:^(Code)$
@@ -426,19 +463,25 @@ in
       windowrulev2 = float, class:(xdg-desktop-portal-gtk)
       windowrulev2 = size 1345 720, class:(xdg-desktop-portal-gtk)
       windowrulev2 = center, class:(xdg-desktop-portal-gtk)
-      
+
       windowrule = float,system_monitor
       #windowrule=size 1570 840,system_monitor
       windowrule = center,system_monitor
       windowrule = float, polkit-agent-helper-1
+      #Xwayland hack
+      windowrulev2 = opacity 0.0 override,class:^(xwaylandvideobridge)$
+      windowrulev2 = noanim,class:^(xwaylandvideobridge)$
+      windowrulev2 = noinitialfocus,class:^(xwaylandvideobridge)$
+      windowrulev2 = maxsize 1 1,class:^(xwaylandvideobridge)$
+      windowrulev2 = noblur,class:^(xwaylandvideobridge)$
 
-    
+
       # System binds #
       $mainMod = SUPER
-      
+
       #Hyprexpo
       # bind = $mainMod ALT, hyprexpo:expo, toggle # can be: toggle, off/disable or on/enable
-       
+
       # #Hypcov
       # bind = ALT,tab,hycov:toggleoverview
       # bind=ALT,left,hycov:movefocus,l
@@ -446,8 +489,8 @@ in
       # bind=ALT,up,hycov:movefocus,u
       # bind=ALT,down,hycov:movefocus,d
       #Hyprspace
-      # bind = Control_TAB, overview:toggle
-       
+      #bind = $mainMod, tab, overview:toggle
+
       bindm = $mainMod, mouse:272, movewindow
       bindm = $mainMod, mouse:273, resizewindow
 
@@ -465,7 +508,7 @@ in
       bind=, XF86AudioLowerVolume, exec, swayosd-client --output-volume=lower
       bind=, XF86AudioMute, exec, swayosd-client --output-volume mute-toggle
       bind=, release Caps_Lock, exec, swayosd-client --caps-lock
-      
+
       bind=, XF86AudioMute, exec, swayosd-client --output-volume mute-toggle
       bind=, XF86AudioMicMute, exec, swayosd-client --input-volume mute-toggle
       bind=, XF86AudioRaiseVolume, exec, swayosd-client --output-volume 5
@@ -476,34 +519,34 @@ in
       bind=, XF86MonBrightnessDown, exec, swayosd-client --brightness lower
       bind=, XF86MonBrightnessUp,  exec, swayosd-client --brightness +10
       bind=, XF86MonBrightnessDown, exec, swayosd-client --brightness -10
-      
+
       #Kitty
       bind = $mainMod, E, exec, [float]kitty --hold sh -c yazi
-      bind = $mainMod ALT, T, exec, kitty 
-      
+      bind = $mainMod ALT, T, exec, kitty
+
       bind = $mainMod, space, exec, ~/.config/rofi/launchers/type-2/launcher.sh
       bind = $mainMod, RETURN, exec, [float]kitty
-      
+
       bind = $mainMod, N, exec, dunstctl history-pop
       bind = $mainMod SHIFT, N, exec, dunstctl close-all
-      
+
       bind = CTRL, print, exec, grim -g \"$(slurp)\" - | wl-copy
       bind = ALT, print, exec, grim -g \"$(slurp)\" - | swappy -f -
 
       bind = $mainMod, P, pin
       #bind = $mainMod SHIFT, P, unpin
-      
+
       bind = $mainMod, H, movetoworkspace, special:hidden
       bind = $mainMod SHIFT, H, togglespecialworkspace, hidden
 
       bind = $mainMod, K, exec, hyprctl kill
-      bind = $mainMod CTRL, K, exec, list-hypr-bindings 
-      bind = $mainMod, M, exec, list-hypr-bindings 
-      
+      bind = $mainMod CTRL, K, exec, list-hypr-bindings
+      bind = $mainMod, M, exec, list-hypr-bindings
+
       # Special workspace (scratchpad)
       bind = $mainMod, S, togglespecialworkspace, magic
       bind = $mainMod SHIFT, S, movetoworkspace, special:magic
-      
+
       bind = , Insert, exec, $HOME/.config/rofi/applets/bin/clipboard.sh
 
       bind = $mainMod, L, exec, hyprlock
@@ -518,23 +561,23 @@ in
 
       bind = $mainMod, X, exec, playerctl -p spotify next
       bind = $mainMod SHIFT, X, exec, playerctl next
-      
+
       bind = $mainMod, C, exec, playerctl -p spotify play-pause
       bind = $mainMod SHIFT, C, exec, playerctl play-pause
-      
+
       binde = $mainMod, V, exec, playerctl -p spotify volume 0.02-
       binde = $mainMod SHIFT, V, exec, pamixer -d 2
-      
+
       binde = $mainMod, B, exec, playerctl -p spotify volume 0.02+
       binde = $mainMod SHIFT, B, exec, pamixer -i 2
-      
+
       bind = $mainMod, SLASH, exec, pamixer -t
 
       #Spotify
       bind = Control_SHIFT, M, togglespecialworkspace, spotify
 
       # General window options
-      bind = $mainMod, W, killactive 
+      bind = $mainMod, W, killactive
       bind = $mainMod, F, fullscreen, 1 #maximize window
       bind = $mainMod SHIFT, F, fullscreen, 0 #true fullscreen
       bind = $mainMod, Q, togglefloating
@@ -552,7 +595,7 @@ in
 
       # Dwindle layout control
       bind = $mainMod, P, pseudo
-      
+
       # Move active window to a workspace with mainMod + SHIFT + [0-9]
       bind = $mainMod SHIFT, 1, movetoworkspace, 1
       bind = $mainMod SHIFT, 2, movetoworkspace, 2
@@ -584,7 +627,7 @@ in
       #ATL-TAB
       bind = ALT, TAB, exec, ~/.config/rofi/launchers/type-2/launcher-alttab.sh
       # bind = $mainMod, TAB, cyclenext,
-      
+
       # Switch workspaces with mainMod + [0-9]
       bind = $mainMod, 1, workspace, 1
       bind = $mainMod, 2, workspace, 2
@@ -600,28 +643,28 @@ in
       # Scroll through existing workspaces with mainMod + scroll
       bind = $mainMod, mouse_down, workspace, e-1
       bind = $mainMod, mouse_up, workspace, e+1
-      
+
       # Waybar
       bind = $mainMod, B, exec, pkill -SIGUSR1 waybar
-      bind = $mainMod SHIF, B, exec, pkill -SIGUSR2 waybar 
-      
+      bind = $mainMod SHIF, B, exec, pkill -SIGUSR2 waybar
+
       # Switch workspaces relative to the active workspace with mainMod + CTRL + [←→]
-      bind = $mainMod CTRL, right, workspace, r+1 
+      bind = $mainMod CTRL, right, workspace, r+1
       bind = $mainMod CTRL, left, workspace, r-1
-      
+
       # move to the first empty workspace instantly with mainMod + CTRL + [↓]
-      bind = $mainMod CTRL, down, workspace, empty 
+      bind = $mainMod CTRL, down, workspace, empty
       bind = $mainMod,g,togglegroup
       # bind = ALT, TAB, exec, ~/.config/hypr/scripts/tab_floating_windows
       bind = $mainMod,tab,changegroupactive
-      
+
       # trigger when the switch is turning off
       bindl = , switch:off:Lid Switch,exec,hyprctl keyword monitor "eDP-1, 1920x1080, 0x0, 1"
       # trigger when the switch is turning on
       bindl = , switch:on:Lid Switch,exec,hyprctl keyword monitor "eDP-1, disable"
 
-  
-          
+
+
       blurls=rofi
       blurls=waybar
       blurls=gtk-layer-shell

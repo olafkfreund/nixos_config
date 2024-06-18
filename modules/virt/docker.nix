@@ -9,6 +9,7 @@
     nvidia-container-toolkit
     nvidia-docker
     arion
+    nvidia-container-toolkit
 
    ];
 

@@ -2,7 +2,7 @@
 
 {
   imports =
-    [ 
+    [
       ./hardware-configuration.nix
       ./screens.nix
       ./power.nix
@@ -21,29 +21,29 @@
   };
 
   stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
-  
+
   stylix.image = ./gruvbox-rainbow-nix.png;
   #Exclude Browser.. just make more sence
   stylix.targets.chromium.enable = false;
-  
+
   stylix.fonts = {
     monospace = {
-      package = pkgs.nerdfonts.override {fonts = ["JetBrainsMono"];};
+      package = pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; };
       name = "JetBrainsMono Nerd Font Mono";
     };
-     sansSerif = {
-       package = pkgs.dejavu_fonts;
-       name = "DejaVu Sans";
-     };
-     serif = {
-       package = pkgs.dejavu_fonts;
-       name = "DejaVu Serif";
-     };
+    sansSerif = {
+      package = pkgs.dejavu_fonts;
+      name = "DejaVu Sans";
+    };
+    serif = {
+      package = pkgs.dejavu_fonts;
+      name = "DejaVu Serif";
+    };
   };
   stylix.fonts.sizes = {
-    applications = 12;
+    applications = 14;
     terminal = 14;
-    desktop = 12;
+    desktop = 14;
     popups = 14;
   };
 
@@ -54,7 +54,7 @@
     popups = 1.0;
   };
 
- systemd.network = {
+  systemd.network = {
     networks = {
       "wlp3s0" = {
         name = "wlp3s0";
@@ -65,25 +65,29 @@
       };
     };
   };
-  
+
   users.defaultUserShell = pkgs.zsh;
-  
+
   environment.shells = with pkgs; [ zsh ];
-  
+
   programs.zsh.enable = true;
 
-  environment.sessionVariables.NIXOS_OZONE_WL = "1"; 
-  
+  environment.sessionVariables = {
+    NIXOS_OZONE_WL = "1";
+    FLAKE = "/home/olafkfreund/.config/nixos";
+  };
+
   users.users.olafkfreund = {
     isNormalUser = true;
     description = "Olaf K-Freund";
-    extraGroups = [ "networkmanager" "openrazer" "wheel" "docker" "video" "scanner" "lp"];
+    extraGroups = [ "networkmanager" "openrazer" "wheel" "docker" "video" "scanner" "lp" "lxd" "incus-admin" ];
     shell = pkgs.zsh;
     packages = with pkgs; [
       kitty
       vim
-      ];
-    };
+    ];
+  };
   networking.firewall.enable = false;
+  networking.nftables.enable = true;
   system.stateVersion = "24.11"; # Did you read the comment?
 }

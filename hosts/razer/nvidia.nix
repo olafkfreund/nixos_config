@@ -1,4 +1,4 @@
-{config, pkgs, ...}:
+{ config, pkgs, ... }:
 let
   nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
     export __NV_PRIME_RENDER_OFFLOAD=1
@@ -9,39 +9,39 @@ let
   '';
 in
 {
-#Nvidia
-hardware.nvidia = {
-  modesetting.enable = true;
-  powerManagement.enable = true;
-  nvidiaPersistenced = true;
-  open = false;
-  nvidiaSettings = true;
-  package = config.boot.kernelPackages.nvidiaPackages.beta;
-};
-
-# boot.kernelParams = [ "module_blacklist=i915" ];
-
-hardware.nvidia.prime = {
-  sync.enable = true;
-  offload.enable = false; 
-  intelBusId = "PCI:0:2:0";
-  nvidiaBusId = "PCI:1:0:0";
+  #Nvidia
+  hardware.nvidia = {
+    modesetting.enable = true;
+    powerManagement.enable = true;
+    nvidiaPersistenced = true;
+    open = false;
+    nvidiaSettings = true;
+    package = config.boot.kernelPackages.nvidiaPackages.production;
   };
 
-hardware.opengl = { 
-   enable = true; 
-   driSupport = true; 
-   driSupport32Bit = true;
-   extraPackages = with pkgs; [
-        intel-media-driver # LIBVA_DRIVER_NAME=iHD
-        vaapiIntel # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
-        vaapiVdpau
-        libvdpau-va-gl
-        vulkan-validation-layers
-      ]; 
-}; 
+  # boot.kernelParams = [ "module_blacklist=i915" ];
 
-environment = {
+  hardware.nvidia.prime = {
+    sync.enable = true;
+    offload.enable = false;
+    intelBusId = "PCI:0:2:0";
+    nvidiaBusId = "PCI:1:0:0";
+  };
+
+  hardware.opengl = {
+    enable = true;
+    driSupport = true;
+    driSupport32Bit = true;
+    extraPackages = with pkgs; [
+      intel-media-driver # LIBVA_DRIVER_NAME=iHD
+      vaapiIntel # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
+      vaapiVdpau
+      libvdpau-va-gl
+      vulkan-validation-layers
+    ];
+  };
+
+  environment = {
     systemPackages = with pkgs; [
       nvidia-offload
       libva
@@ -52,5 +52,5 @@ environment = {
       vulkan-loader
       vulkan-tools
     ];
-  }; 
+  };
 }

@@ -1,6 +1,6 @@
-{ config, pkgs, lib, ... }:
-
-{
+{ pkgs
+, ...
+}: {
   # ------------------------------------------
   # XDG Desktop Portal integration
   # ------------------------------------------
@@ -9,14 +9,13 @@
     enable = true;
     xdgOpenUsePortal = true;
     # wlr.enable = true;
-    extraPortals = [ 
+    extraPortals = [
       pkgs.xdg-desktop-portal
       pkgs.xdg-desktop-portal-hyprland
     ];
-    configPackages = [ 
+    configPackages = [
       pkgs.xdg-desktop-portal-hyprland
       pkgs.xdg-desktop-portal
     ];
   };
-
 }

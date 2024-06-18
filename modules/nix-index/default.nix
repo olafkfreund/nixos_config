@@ -1,13 +1,14 @@
-{
-  pkgs,
-  lib,
-  ...
+{ pkgs
+, lib
+, ...
 }: {
   programs.nix-index.enable = true;
+  programs.nix-index-database.comma.enable = true;
 
   systemd.user.services.nix-index-database-sync = {
-    Unit.Description = "fetch mic92/nix-index-database";
-    Service = {
+    enable = true;
+    description = "fetch mic92/nix-index-database";
+    serviceConfig = {
       Type = "oneshot";
       ExecStart = lib.getExe (
         pkgs.writeShellApplication {
@@ -30,11 +31,12 @@
     };
   };
   systemd.user.timers.nix-index-database-sync = {
-    Unit.Description = "Automatic github:mic92/nix-index-database fetching";
-    Timer = {
+    enable = true;
+    description = "Automatic github:mic92/nix-index-database fetching";
+    timerConfig = {
       OnBootSec = "10m";
       OnUnitActiveSec = "24h";
     };
-    Install.WantedBy = ["timers.target"];
+    wantedBy = [ "timers.target" ];
   };
 }

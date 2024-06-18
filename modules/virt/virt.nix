@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:  with lib; {
+{ config, lib, pkgs, ... }: with lib; {
 
   virtualisation = {
     libvirtd = {
@@ -19,18 +19,23 @@
     containerd = {
       enable = true;
     };
+    incus = {
+      enable = true;
+    };
   };
+  virtualisation.incus.ui.enable = true;
 
   environment.sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
   services.spice-vdagentd.enable = true;
   systemd.services.libvirtd.restartIfChanged = false;
-  virtualisation.lxd.enable = true; 
+  virtualisation.lxd.enable = false;
   boot.kernelParams = [
-    "cgroup_enable=cpuset" "cgroup_memory=1" "cgroup_enable=memory"
+    "cgroup_enable=cpuset"
+    "cgroup_memory=1"
+    "cgroup_enable=memory"
   ];
 
   environment.systemPackages = with pkgs; [
-    quickemu
     OVMFFull
     gnome.adwaita-icon-theme
     kvmtool
@@ -49,6 +54,7 @@
     quickgui
     quickemu
     quickgui
+    btrfs-progs
 
   ];
 

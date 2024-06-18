@@ -1,4 +1,4 @@
-{ inputs, pkgs, config, self, lib, ...}: {
+{ inputs, pkgs, config, self, lib, ... }: {
   programs.waybar = {
     enable = true;
     package = pkgs.waybar;
@@ -18,16 +18,16 @@
         "gtk-layer-shell" = true;
 
         "modules-left" = [
-          "custom/startmenu" 
-          "custom/arrow11" 
-          "hyprland/workspaces" 
-          "custom/arrow10" 
-          "hyprland/window" 
+          "custom/startmenu"
+          "custom/arrow11"
+          "hyprland/workspaces"
+          "custom/arrow10"
+          "hyprland/window"
           "custom/arrow12"
           "custom/playerctl"
           "custom/arrow13"
         ];
-        
+
         "modules-right" = [
           "custom/arrow17"
           "network"
@@ -46,8 +46,8 @@
           "clock"
           "custom/arrow3"
           "group/tray"
-          ];
-       "modules-center" = [ ];
+        ];
+        "modules-center" = [ ];
 
         "custom/cycle_wall" = {
           format = " ";
@@ -62,38 +62,38 @@
             deactivated = "󰤄";
           };
         };
-        "cava"= {
-            framerate = 30;
-            autosens = 0;
-            sensitivity = 120;
-            bars = 30;
-            lower_cutoff_freq = 50;
-            higher_cutoff_freq = 10000;
-            method = "pipewire";
-            source = "auto";
-            stereo = true;
-            reverse = false;
-            bar_delimiter = 0;
-            monstercat = false;
-            waves = false;
-            noise_reduction = 0.77;
-            input_delay = 2;
-            format-icons = ["▁" "▂" "▃" "▄" "▅" "▆" "▇" "█" ];
-            actions = {
-              on-click-right = "mode";
-            };
+        "cava" = {
+          framerate = 30;
+          autosens = 0;
+          sensitivity = 120;
+          bars = 30;
+          lower_cutoff_freq = 50;
+          higher_cutoff_freq = 10000;
+          method = "pipewire";
+          source = "auto";
+          stereo = true;
+          reverse = false;
+          bar_delimiter = 0;
+          monstercat = false;
+          waves = false;
+          noise_reduction = 0.77;
+          input_delay = 2;
+          format-icons = [ "▁" "▂" "▃" "▄" "▅" "▆" "▇" "█" ];
+          actions = {
+            on-click-right = "mode";
+          };
         };
         "group/tray" = {
           orientation = "inherit";
           drawer = {
             transition-duration = 500;
             transition-left-to-right = false;
+          };
+          modules = [
+            "custom/tray"
+            "tray"
+          ];
         };
-        modules = [
-          "custom/tray"
-          "tray"
-        ];
-      };
 
         "custom/quit" = {
           format = "󰗼 ";
@@ -101,7 +101,7 @@
           tooltip = false;
         };
 
-       "custom/lock" = {
+        "custom/lock" = {
           format = "󰍁 ";
           on-click = "${lib.getExe pkgs.hyprlock}";
           tooltip = false;
@@ -137,25 +137,25 @@
         };
 
         "hyprland/workspaces" = {
-	        format = "{icon}";
+          format = "{icon}";
           show-special = true;
           on-click = "active";
           on-scroll-up = "${pkgs.hyprland}/bin/hyprctl dispatch workspace e-1";
           on-scroll-down = "${pkgs.hyprland}/bin/hyprctl dispatch workspace e+1";
           max-length = 45;
           persistent-workspaces = {
-            "1" = [];
-            "2" = [];
-            "3" = [];
-            "4" = [];
-            "5" = [];
-            "6" = [];
-            "7" = [];
-            "8" = [];
-            "9" = [];
-            "10" = [];
+            "1" = [ ];
+            "2" = [ ];
+            "3" = [ ];
+            "4" = [ ];
+            "5" = [ ];
+            "6" = [ ];
+            "7" = [ ];
+            "8" = [ ];
+            "9" = [ ];
+            "10" = [ ];
           };
-	        "format-icons" = {
+          "format-icons" = {
             "1" = " ";
             "2" = "󰨞 ";
             "3" = " ";
@@ -174,7 +174,7 @@
             "secret" = " ";
             "spotify" = " ";
           };
-	      };
+        };
         "group/monitor" = {
           orientation = "inherit";
           drawer = {
@@ -202,7 +202,7 @@
             "custom/tailscale"
           ];
         };
-        
+
         "hyprland/window" = {
           format = "{}";
           separate-outputs = true;
@@ -220,12 +220,12 @@
             "Zellij (.*)" = " Zellij";
           };
         };
-        
+
         "tray" = {
           spacing = 12;
           show-passive-items = true;
         };
-        
+
         "custom/dunst" = {
           exec = "dunst-waybar";
           on-click = "dunstctl set-paused toggle";
@@ -237,7 +237,7 @@
           on-click = "choose_vpn_config";
           restart-interval = 1;
         };
-        
+
         "hyprland/language" = {
           format = " {}";
           format-en = "Gb";
@@ -254,31 +254,31 @@
           format-alt = "{:%A, %B %d, %Y (%R)}";
           tooltip-format = "<tt><small>{calendar}</small></tt>";
           calendar = {
-              mode = "year";
-              mode-mon-col = 3;
-              weeks-pos = "right";
-              on-scroll = 1;
-              on-click-right = "mode";
-              format = {
-                  months = "<span color='#${config.colorScheme.palette.base06}'><b>{}</b></span>";
-                  days =   "<span color='#${config.colorScheme.palette.base06}'><b>{}</b></span>";
-                  weeks =  "<span color='#${config.colorScheme.palette.base09}'><b>W{}</b></span>";
-                  weekdays = "<span color='#${config.colorScheme.palette.base05}'><b>{}</b></span>";
-                  today =   "<span color='#${config.colorScheme.palette.base08}'><b><u>{}</u></b></span>";
-                  };
+            mode = "year";
+            mode-mon-col = 3;
+            weeks-pos = "right";
+            on-scroll = 1;
+            on-click-right = "mode";
+            format = {
+              months = "<span color='#${config.colorScheme.palette.base06}'><b>{}</b></span>";
+              days = "<span color='#${config.colorScheme.palette.base06}'><b>{}</b></span>";
+              weeks = "<span color='#${config.colorScheme.palette.base09}'><b>W{}</b></span>";
+              weekdays = "<span color='#${config.colorScheme.palette.base05}'><b>{}</b></span>";
+              today = "<span color='#${config.colorScheme.palette.base08}'><b><u>{}</u></b></span>";
             };
-          actions =  {
-                      on-click-right = "mode";
-                      on-click-forward = "tz_up";
-                      on-click-backward = "tz_down";
-                      on-scroll-up = "shift_up";
-                      on-scroll-down = "shift_down";
-                    };
+          };
+          actions = {
+            on-click-right = "mode";
+            on-click-forward = "tz_up";
+            on-click-backward = "tz_down";
+            on-scroll-up = "shift_up";
+            on-scroll-down = "shift_down";
+          };
         };
         "cpu" = {
           interval = 1;
           format = "󰍛 {usage}%";
-          format-icons = ["▁" "▂" "▃" "▄" "▅" "▆" "▇" "█"];
+          format-icons = [ "▁" "▂" "▃" "▄" "▅" "▆" "▇" "█" ];
           on-click = "kitty --class system_monitor -e btm";
           max-lenght = 25;
           min-length = 6;
@@ -292,7 +292,7 @@
         };
         "backlight" = {
           format = "{icon} {percent}% ";
-          format-icons = [" " " " " " " " " " " " " " " " " "];
+          format-icons = [ " " " " " " " " " " " " " " " " " " ];
           on-scroll-up = "brightnessctl set 30+";
           on-scroll-down = "brightnessctl set 30-";
           max-lenght = 25;
@@ -308,7 +308,7 @@
           format-charging = " {capacity}% ";
           format-plugged = " {capacity}% ";
           format-alt = "{time} {icon}";
-          format-icons = ["󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
+          format-icons = [ "󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
         };
         "network" = {
           format-wifi = "󰤨 {essid}";
@@ -320,7 +320,7 @@
           on-click = "nm-connection-editor";
         };
         "bluetooth" = {
-          format = "{icon}" ;
+          format = "{icon}";
           format-on = " ";
           format-off = "󰂲 ";
           format-disabled = "󰂲 "; # an empty format will hide the module
@@ -345,122 +345,122 @@
           on-click = "pavucontrol -t 3";
           tooltip-format = "{icon} {desc} // {volume}%";
           scroll-step = 1;
-            format-icons = {
+          format-icons = {
             car = "";
             default = [ "" " " " " ];
             headphones = "";
             headset = "";
-            };
           };
-
-          "custom/playerctl" = {
-            format = "{icon}  <span>{}</span>";
-            return-type = "json";
-            exec=  "${pkgs.playerctl}/bin/playerctl  metadata -f '{\"text\": \"{{markup_escape(title)}} - {{markup_escape(artist)}} {{ duration(position) }}/{{ duration(mpris:length) }}\", \"tooltip\": \"{{markup_escape(title)}} - {{markup_escape(artist)}}  {{ duration(position) }}/{{ duration(mpris:length) }}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' -F";
-            tooltip = false;
-            on-click-middle = "${pkgs.playerctl}/bin/playerctl previous";
-            on-click = "${pkgs.playerctl}/bin/playerctl play-pause";
-            on-click-right = "${pkgs.playerctl}/bin/playerctl  next";
-            on-scroll-up = "${pkgs.playerctl}/bin/playerctl volume 0.02+";
-            on-scroll-down = "${pkgs.playerctl}/bin/playerctl volume 0.02-";
-            format-icons = {
-                Paused = "";
-                Playing = "";
-            };
         };
-         "pulseaudio#microphone" = {
-           format = "{format_source}";
-           format-source = "";
-           format-source-muted = " ";
-           on-click = "pavucontrol -t 4";
-           tooltip-format = "{format_source} {source_desc} // {source_volume}%";
-           scroll-step = 5;
-          };
 
-          "custom/arrow1" = {
-	       	format = "";
-		      tooltip = false;
-	        };
-
-        	"custom/arrow2" = {
-		      format= "";
-		      tooltip= false;
-	        };
-
-	        "custom/arrow3" =  {
-		      format= "";
-		      tooltip= false;
-	        };
-
-          "custom/arrow4" = {
-		      format= "";
-		      tooltip= false;
-	        };
-
-	        "custom/arrow5" = {
-		      format = "";
-		      tooltip = false;
-	        };
-
-          "custom/arrow6" = {
-		      format = "";
-		      tooltip = false;
-	        };
-
-	        "custom/arrow7" = {
-		      format = "";
-		      tooltip = false;
-	        };
-
-	        "custom/arrow8" = {
-          format = "";
+        "custom/playerctl" = {
+          format = "{icon}  <span>{}</span>";
+          return-type = "json";
+          exec = "${pkgs.playerctl}/bin/playerctl  metadata -f '{\"text\": \"{{markup_escape(title)}} - {{markup_escape(artist)}} {{ duration(position) }}/{{ duration(mpris:length) }}\", \"tooltip\": \"{{markup_escape(title)}} - {{markup_escape(artist)}}  {{ duration(position) }}/{{ duration(mpris:length) }}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' -F";
           tooltip = false;
+          on-click-middle = "${pkgs.playerctl}/bin/playerctl previous";
+          on-click = "${pkgs.playerctl}/bin/playerctl play-pause";
+          on-click-right = "${pkgs.playerctl}/bin/playerctl  next";
+          on-scroll-up = "${pkgs.playerctl}/bin/playerctl volume 0.02+";
+          on-scroll-down = "${pkgs.playerctl}/bin/playerctl volume 0.02-";
+          format-icons = {
+            Paused = "";
+            Playing = "";
           };
+        };
+        "pulseaudio#microphone" = {
+          format = "{format_source}";
+          format-source = "";
+          format-source-muted = " ";
+          on-click = "pavucontrol -t 4";
+          tooltip-format = "{format_source} {source_desc} // {source_volume}%";
+          scroll-step = 5;
+        };
 
-          "custom/arrow9" = {
-          format = "";
+        "custom/arrow1" = {
+          format = "";
           tooltip = false;
-          };
+        };
 
-          "custom/arrow10" = {
-          format = "";   
+        "custom/arrow2" = {
+          format = "";
           tooltip = false;
-          };
+        };
 
-          "custom/arrow11" = {
-          format = "";
+        "custom/arrow3" = {
+          format = "";
           tooltip = false;
-          };
+        };
 
-          "custom/arrow12" = {
-          format = "";
+        "custom/arrow4" = {
+          format = "";
           tooltip = false;
-          };
+        };
 
-          "custom/arrow13" = {
-          format = "";
+        "custom/arrow5" = {
+          format = "";
           tooltip = false;
-          };
+        };
 
-          "custom/arrow14" = {
-          format = "";
+        "custom/arrow6" = {
+          format = "";
           tooltip = false;
-          };
+        };
 
-          "custom/arrow15" = {
-          format = "";
+        "custom/arrow7" = {
+          format = "";
           tooltip = false;
-          };
+        };
 
-          "custom/arrow16" = {
-          format = "";
+        "custom/arrow8" = {
+          format = "";
           tooltip = false;
-          };
+        };
 
-          "custom/arrow17" = {
-          format = "";
+        "custom/arrow9" = {
+          format = "";
           tooltip = false;
-          };
+        };
+
+        "custom/arrow10" = {
+          format = "";
+          tooltip = false;
+        };
+
+        "custom/arrow11" = {
+          format = "";
+          tooltip = false;
+        };
+
+        "custom/arrow12" = {
+          format = "";
+          tooltip = false;
+        };
+
+        "custom/arrow13" = {
+          format = "";
+          tooltip = false;
+        };
+
+        "custom/arrow14" = {
+          format = "";
+          tooltip = false;
+        };
+
+        "custom/arrow15" = {
+          format = "";
+          tooltip = false;
+        };
+
+        "custom/arrow16" = {
+          format = "";
+          tooltip = false;
+        };
+
+        "custom/arrow17" = {
+          format = "";
+          tooltip = false;
+        };
       };
     };
 
@@ -517,7 +517,7 @@
         }
         
         #custom-arrow10 {
-          font-size: 20px;
+          font-size: 25px;
           border-radius: 0;
           border: none;
           color: #${config.colorScheme.palette.base02};
@@ -575,7 +575,7 @@
           background-color: #${config.colorScheme.palette.base04};
         }
         #custom-arrow4 {
-          font-size: 20px;
+          font-size: 25px;
           color: #${config.colorScheme.palette.base04};
           background-color: #${config.colorScheme.palette.base02};
           
@@ -590,7 +590,7 @@
         }
 
         #custom-arrow11 {
-          font-size: 20px;
+          font-size: 25px;
           border-radius: 0;
           border: none;
           color: #${config.colorScheme.palette.base01};
@@ -614,14 +614,14 @@
         }
 
         #custom-arrow5 {
-          font-size: 20px;
+          font-size: 25px;
           color: #${config.colorScheme.palette.base01};
           background-color: #${config.colorScheme.palette.base02};
           
         }
 
         #custom-arrow7 {
-          font-size: 20px;
+          font-size: 25px;
           color: #${config.colorScheme.palette.base03};
           background-color: #${config.colorScheme.palette.base02};
           
@@ -667,7 +667,7 @@
         #custom-arrow6 {
           color: #${config.colorScheme.palette.base02};
           background-color: #${config.colorScheme.palette.base01};
-          font-size: 20px;
+          font-size: 25px;
         }
 
         #backlight {
@@ -690,7 +690,7 @@
         }
 
         #custom-arrow17 {
-          font-size: 20px;
+          font-size: 25px;
           color: #${config.colorScheme.palette.base02};
           background-color: #${config.colorScheme.palette.base01};
         }
@@ -735,7 +735,7 @@
         }
 
         #custom-arrow9 {
-          font-size: 20px;
+          font-size: 25px;
           color: #${config.colorScheme.palette.base02};
           background-color: #${config.colorScheme.palette.base03};
           
@@ -756,7 +756,7 @@
         }
 
         #custom-arrow3 {
-          font-size: 20px;
+          font-size: 25px;
           color: #${config.colorScheme.palette.base02};
           background-color: #${config.colorScheme.palette.base04};
           
@@ -792,7 +792,7 @@
         }
 
         #custom-arrow12 {
-          font-size: 20px;
+          font-size: 25px;
           color: #${config.colorScheme.palette.base03};
           background-color: #${config.colorScheme.palette.base04};
         }
@@ -805,13 +805,13 @@
         }
 
         #custom-arrow13 {
-          font-size: 20px;
+          font-size: 25px;
           color: #${config.colorScheme.palette.base04};
           background-color: #${config.colorScheme.palette.base01};
         }
 
         #custom-arrow14 {
-          font-size: 20px;
+          font-size: 25px;
           color: #${config.colorScheme.palette.base02};
           background-color: #${config.colorScheme.palette.base02};
         }
@@ -824,7 +824,7 @@
         }
 
         #custom-arrow16 {
-          font-size: 20px;
+          font-size: 25px;
           color: #${config.colorScheme.palette.base02};
           background-color: #${config.colorScheme.palette.base02};
         }

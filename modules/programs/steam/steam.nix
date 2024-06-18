@@ -1,4 +1,5 @@
-{ self, config, pkgs, ... }: {
+{ ...
+}: {
   #Steam
   hardware.steam-hardware.enable = true;
 
@@ -7,7 +8,7 @@
     remotePlay.openFirewall = true;
     dedicatedServer.openFirewall = true;
   };
-  
+
   programs.gamemode = {
     enable = true;
     enableRenice = true;
@@ -15,12 +16,14 @@
 
   # Workaround https://github.com/NixOS/nixpkgs/issues/45492
   systemd.extraConfig = "DefaultLimitNOFILE=1048576";
-  security.pam.loginLimits = [{
-    domain = "*";
-    type = "hard";
-    item = "nofile";
-    value = "1048576";
-  }];
+  security.pam.loginLimits = [
+    {
+      domain = "*";
+      type = "hard";
+      item = "nofile";
+      value = "1048576";
+    }
+  ];
 
   # Helps some windows games running under Proton.
   boot.kernel.sysctl = {
