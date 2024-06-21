@@ -1,8 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
 sleep 1
-killall xdg-desktop-portal-hyprland
-killall xdg-desktop-portal-wlr
-killall xdg-desktop-portal
-/usr/libexec/xdg-desktop-portal-hyprland &
-sleep 2
-/usr/lib/xdg-desktop-portal &
+systemctl --user import-environment PATH
+systemctl --user restart xdg-desktop-portal.service
+

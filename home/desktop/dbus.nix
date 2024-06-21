@@ -1,12 +1,13 @@
-{ config, pkgs, ... }:
-
-{
+{ config
+, pkgs
+, ...
+}: {
   services.dbus = {
     enable = true;
-    packages = [ pkgs.dconf ];
-  };
-
-  programs.dconf = {
-    enable = true;
+    packages = with pkgs; [
+      dconf
+      gnome2.GConf
+    ];
   };
 }
+

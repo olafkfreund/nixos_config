@@ -1,11 +1,4 @@
-{ inputs
-, hycov
-, hyprspace
-, hyprexpo
-, hyprland-virtual-desktops
-, vars
-, pkgs
-, config
+{ config
 , ...
 }:
 let
@@ -36,7 +29,7 @@ in
     # make stuff work on wayland
     sessionVariables = {
       NIXOS_OZONE_WL = "1";
-      SDL_VIDEODRIVER = "wayland";
+      # SDL_VIDEODRIVER = "wayland";
       XDG_SESSION_TYPE = "wayland";
       XDG_CURRENT_DESKTOP = "Hyprland";
       XDG_SESSION_DESKTOP = "Hyprland";
@@ -46,6 +39,8 @@ in
       # WLR_RENDERER = "vulkan";
       __NV_PRIME_RENDER_OFFLOAD = "1";
       GTK_USE_PORTAL = "1";
+      GDK_BACKEND = "wayland, x11";
+      SDL_VIDEODRIVER = "x11";
       NIXOS_XDG_OPEN_USE_PORTAL = "0";
       XDG_CACHE_HOME = "\${HOME}/.cache";
       XDG_CONFIG_HOME = "\${HOME}/.config";
@@ -90,12 +85,11 @@ in
       exec-once = polkit-kde-authentication-agent-1
       exec-once = kdeconnectd
       exec-once = kdeconnect-indicator
+      exec-once = dbus-update-activation-environment --systemd --all
+      exec-once = systemctl --user import-environment PATH QT_QPA_PLATFORMTHEME WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+      exec-once = systemctl --user import-environment PATH && systemctl --user restart xdg-desktop-portal.service
       exec-once = polkit-agent-helper-1
-      exec-once = dbus-update-activation-environment --systemd --all WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
-      exec-once = dbus-update-activation-environment --systemd --all # for XDPH
-      exec-once = systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP # for XDPH
-      #exec-once = ~/.config/hypr/xdg-portal-hyprland
-      exec-once = gsettings set org.gnome.desktop.interface cursor-theme "Bibata-Modern-Ice"
+      exec-once = gsettings set org.gnome.desktop.interface ursor-theme "Bibata-Modern-Ice"
       exec-once = gsettings set org.gnome.desktop.interface icon-theme "Gruvbox-Plus-Dark"
       exec-once = gsettings set org.gnome.desktop.interface gtk-theme "Gruvbox-Dark-BL-LB"
 
@@ -105,7 +99,6 @@ in
       exec-once = dunst
       exec-once = kdeconnect-cli
       exec-once = playerctld daemon
-      #exec-once = $HOME/.config/hypr/scripts/start_wall
       exec-once = swww-daemon
       exec-once = hypridle
       exec-once = nm-applet --indicator
@@ -132,32 +125,37 @@ in
       env = BROWSER="google-chrome-stable";
       env = TERMINAL="kitty";
 
-      env = SDL_VIDEODRIVER,wayland
-      env = CLUTTER_BACKEND,wayland
-      env = XDG_CURRENT_DESKTOP,Hyprland
-      env = XDG_SESSION_TYPE,wayland
-      env = XDG_SESSION_DESKTOP,Hyprland
-      env = XCURSOR_THEME,Bibata-Modern-Ice
-      env = XCURSOR_SIZE,16
+      env = SDL_VIDEODRIVER, x11 
+      env = CLUTTER_BACKEND, wayland
+      env = XDG_CURRENT_DESKTOP, Hyprland
+      env = XDG_SESSION_TYPE, wayland
+      env = XDG_SESSION_DESKTOP, Hyprland
+      env = XCURSOR_THEME, Bibata-Modern-Ice
+      env = XCURSOR_SIZE, 16
+      
       #GTK
-      env = GDK_BACKEND,wayland
+      env = GDK_BACKEND, wayland
       env = GTK_THEME,Gruvbox-Dark-B-LB
       # env = GDK_DPI_SCALE,1
       # env = GDK_SCALE,1
+      
       #QT
-      env = QT_QPA_PLATFORM,wayland
-      env = QT_WAYLAND_DISABLE_WINDOWDECORATION,1
-      env = QT_AUTO_SCREEN_SCALE_FACTOR,1
-      env = QT_ENABLE_HIGHDPI_SCALING,1
+      env = QT_QPA_PLATFORM, wayland
+      env = QT_WAYLAND_DISABLE_WINDOWDECORATION, 1
+      env = QT_AUTO_SCREEN_SCALE_FACTOR, 1
+      env = QT_ENABLE_HIGHDPI_SCALING, 1
+      
       #Firefox & Thunderbird
-      env = MOZ_ENABLE_WAYLAND,1
+      env = MOZ_ENABLE_WAYLAND, 1
+      
       #Nvidia
-      env = GBM_BACKEND,nvidia-drm
-      env = WLR_DRM_NO_ATOMIC,1
-      # env = WLR_DRM_DEVICES,$HOME/.config/hypr/extnvidia:$HOME/.config/hypr/intnvidia
-      env = LIBVA_DRIVER_NAME,nvidia
+      env = GBM_BACKEND, nvidia-drm
+      env = WLR_DRM_NO_ATOMIC, 1
+      env = LIBVA_DRIVER_NAME, nvidia
+      
       #NIXOS
-      env = NIXOS_WAYLAND,1
+      env = NIXOS_WAYLAND, 1
+      env = NIXOS_OZONE_WL, 1
 
 
 

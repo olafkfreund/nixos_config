@@ -25,6 +25,7 @@
     ./kdeconnect/default.nix
     ./cloud-sync/default.nix
     ./slack/default.nix
+    ./obs/default.nix
   ];
 
   home.packages = with pkgs; [

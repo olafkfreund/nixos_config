@@ -1,16 +1,19 @@
-{ lib, pkgs, ... }:
+{ pkgs
+, ...
+}:
 let
-  tmux-gruvbox = pkgs.tmuxPlugins.mkTmuxPlugin
-    {
-      pluginName = "tmux-gruvbox";
-      version = "unstable-2024-06-17";
-      src = pkgs.fetchFromGitHub {
-        owner = "z3z1ma";
-        repo = "tmux-gruvbox";
-        rev = "master";
-        sha256 = "sha256-wBhOKM85aOcV4jD7wdyB/zXKDdhODE5k1iud+cm6Wk0=";
+  tmux-gruvbox =
+    pkgs.tmuxPlugins.mkTmuxPlugin
+      {
+        pluginName = "tmux-gruvbox";
+        version = "unstable-2024-06-17";
+        src = pkgs.fetchFromGitHub {
+          owner = "z3z1ma";
+          repo = "tmux-gruvbox";
+          rev = "master";
+          sha256 = "sha256-wBhOKM85aOcV4jD7wdyB/zXKDdhODE5k1iud+cm6Wk0=";
+        };
       };
-    };
 in
 {
   programs.tmux = {
@@ -47,7 +50,7 @@ in
           set -g @gruvbox_status_right_separator_inverse "no"
           set -g @gruvbox_status_fill "icon"
           set -g @gruvbox_status_connect_separator "no"
-          set -g @gruvbox_directory_text "#{pane_current_path}" 
+          set -g @gruvbox_directory_text "#{pane_current_path}"
         '';
       }
       # {
@@ -101,7 +104,7 @@ in
       set-option -g terminal-overrides ',xterm-256color:RGB'
       set-option -g status-position top
       run-shell /nix/store/axbjwfniyk3jibnnr855fsbwg0wr0wd7-tmuxplugin-tmux-gruvbox-unstable-2024-06-17/share/tmux-plugins/tmux-gruvbox/gruvbox.tmux
-      
+
       set -s escape-time 0
       set -g base-index 1
 
@@ -119,7 +122,7 @@ in
 
       # Vim style pane selection
       bind h select-pane -L
-      bind j select-pane -D 
+      bind j select-pane -D
       bind k select-pane -U
       bind l select-pane -R
 

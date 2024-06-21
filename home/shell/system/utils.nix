@@ -22,5 +22,6 @@
       youtube-tui
       tmux-xpanes
       mapscii
+      tdf
   ];
 }

@@ -1,5 +1,5 @@
-{ pkgs-stable, ...}: {
-home.packages = with pkgs-stable; [
-  dooit
+{ pkgs-stable, ... }: {
+  home.packages = with pkgs-stable; [
+    dooit
   ];
 }

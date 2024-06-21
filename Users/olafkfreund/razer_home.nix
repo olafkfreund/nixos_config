@@ -1,11 +1,12 @@
-{ inputs, lib, config, pkgs, nixpkgs, stylix, ... }: {
-
+{ inputs
+, ...
+}: {
   imports = [
     inputs.nix-colors.homeManagerModules.default
     inputs.ags.homeManagerModules.default
 
-    (../../home/default.nix)
-    (./private.nix)
+    ../../home/default.nix
+    ./private.nix
   ];
 
   colorScheme = inputs.nix-colors.colorSchemes.gruvbox-dark-medium;

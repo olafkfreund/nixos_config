@@ -1,37 +1,38 @@
-{ self, lib, config, pkgs, ... }: {
-
-stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
-  
-  stylix.image = ./gruvbox-rainbow-nix.png;
-
-  stylix.fonts = {
-    monospace = {
-      package = pkgs.nerdfonts.override {fonts = ["JetBrainsMono"];};
-      name = "JetBrainsMono Nerd Font Mono";
+{ pkgs
+, ...
+}: {
+  stylix = {
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+    image = ./gruvbox-rainbow-nix.png;
+    polarity = "dark";
+    targets = {
+      chromium.enable = false;
     };
-    sansSerif = {
-      package = pkgs.dejavu_fonts;
-      name = "DejaVu Sans";
+    fonts = {
+      monospace = {
+        package = pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; };
+        name = "JetBrainsMono Nerd Font Mono";
+      };
+      sansSerif = {
+        package = pkgs.dejavu_fonts;
+        name = "DejaVu Sans";
+      };
+      serif = {
+        package = pkgs.dejavu_fonts;
+        name = "DejaVu Serif";
+      };
+      sizes = {
+        applications = 14;
+        terminal = 14;
+        desktop = 14;
+        popups = 14;
+      };
     };
-    serif = {
-      package = pkgs.dejavu_fonts;
-      name = "DejaVu Serif";
+    opacity = {
+      applications = 0.8;
+      terminal = 1.0;
+      desktop = 1.0;
+      popups = 1.0;
     };
   };
-  stylix.fonts.sizes = {
-    applications = 12;
-    terminal = 16;
-    desktop = 10;
-    popups = 10;
-  };
-
-  stylix.opacity = {
-    applications = 0.8;
-    terminal = 0.7;
-    desktop = 1.0;
-    popups = 1.0;
-  };
-  
-  stylix.targets.chromium.enable = false;
-
 }

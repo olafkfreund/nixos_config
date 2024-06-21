@@ -68,6 +68,9 @@
 
     nur.url = "github:nix-community/NUR";
 
+    nix-snapd.url = "github:io12/nix-snapd";
+    nix-snapd.inputs.nixpkgs.follows = "nixpkgs";
+
     hycov = {
       url = "github:DreamMaoMao/hycov";
       inputs.hyprland.follows = "hyprland";
@@ -116,6 +119,7 @@
     , nix-colors
     , ags
     , nix-ld
+    , nix-snapd
     , spicetify-nix
     , home-manager
     , stylix
@@ -136,6 +140,7 @@
             inputs.nix-colors.homeManagerModules.default
             inputs.stylix.nixosModules.stylix
             inputs.nix-ld.nixosModules.nix-ld
+            inputs.nix-snapd.nixosModules.default
             nix-index-database.nixosModules.nix-index
             {
               home-manager.useGlobalPkgs = true;
@@ -160,6 +165,7 @@
                 inherit home-manager;
                 inherit nixpkgs-stable;
                 inherit nix-colors;
+                inherit nix-snapd;
                 inherit self;
               };
               home-manager.users.olafkfreund = import ./Users/olafkfreund/razer_home.nix;

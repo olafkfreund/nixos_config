@@ -1,4 +1,9 @@
-{ inputs, pkgs, config, self, lib, ... }: {
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}: {
   programs.waybar = {
     enable = true;
     package = pkgs.waybar;
@@ -47,7 +52,7 @@
           "custom/arrow3"
           "group/tray"
         ];
-        "modules-center" = [ ];
+        "modules-center" = [];
 
         "custom/cycle_wall" = {
           format = " ";
@@ -78,7 +83,7 @@
           waves = false;
           noise_reduction = 0.77;
           input_delay = 2;
-          format-icons = [ "▁" "▂" "▃" "▄" "▅" "▆" "▇" "█" ];
+          format-icons = ["▁" "▂" "▃" "▄" "▅" "▆" "▇" "█"];
           actions = {
             on-click-right = "mode";
           };
@@ -144,16 +149,16 @@
           on-scroll-down = "${pkgs.hyprland}/bin/hyprctl dispatch workspace e+1";
           max-length = 45;
           persistent-workspaces = {
-            "1" = [ ];
-            "2" = [ ];
-            "3" = [ ];
-            "4" = [ ];
-            "5" = [ ];
-            "6" = [ ];
-            "7" = [ ];
-            "8" = [ ];
-            "9" = [ ];
-            "10" = [ ];
+            "1" = [];
+            "2" = [];
+            "3" = [];
+            "4" = [];
+            "5" = [];
+            "6" = [];
+            "7" = [];
+            "8" = [];
+            "9" = [];
+            "10" = [];
           };
           "format-icons" = {
             "1" = " ";
@@ -278,7 +283,7 @@
         "cpu" = {
           interval = 1;
           format = "󰍛 {usage}%";
-          format-icons = [ "▁" "▂" "▃" "▄" "▅" "▆" "▇" "█" ];
+          format-icons = ["▁" "▂" "▃" "▄" "▅" "▆" "▇" "█"];
           on-click = "kitty --class system_monitor -e btm";
           max-lenght = 25;
           min-length = 6;
@@ -292,7 +297,7 @@
         };
         "backlight" = {
           format = "{icon} {percent}% ";
-          format-icons = [ " " " " " " " " " " " " " " " " " " ];
+          format-icons = [" " " " " " " " " " " " " " " " " "];
           on-scroll-up = "brightnessctl set 30+";
           on-scroll-down = "brightnessctl set 30-";
           max-lenght = 25;
@@ -308,7 +313,7 @@
           format-charging = " {capacity}% ";
           format-plugged = " {capacity}% ";
           format-alt = "{time} {icon}";
-          format-icons = [ "󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
+          format-icons = ["󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
         };
         "network" = {
           format-wifi = "󰤨 {essid}";
@@ -347,7 +352,7 @@
           scroll-step = 1;
           format-icons = {
             car = "";
-            default = [ "" " " " " ];
+            default = ["" " " " "];
             headphones = "";
             headset = "";
           };
@@ -484,7 +489,7 @@
         }
 
         .modules-left {
-          
+
         }
 
         .modules-center {
@@ -515,14 +520,14 @@
           font-weight: normal;
           font-style: normal;
         }
-        
+
         #custom-arrow10 {
           font-size: 25px;
           border-radius: 0;
           border: none;
           color: #${config.colorScheme.palette.base02};
           background-color: #${config.colorScheme.palette.base03};
-          
+
         }
 
         #workspaces button:hover {
@@ -566,7 +571,7 @@
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           transition: all 0.1s ease-in-out;
         }
-        
+
         #clock {
           font-weight: bolder;
           font-style: normal;
@@ -578,7 +583,7 @@
           font-size: 25px;
           color: #${config.colorScheme.palette.base04};
           background-color: #${config.colorScheme.palette.base02};
-          
+
         }
 
         #custom-startmenu {
@@ -595,7 +600,7 @@
           border: none;
           color: #${config.colorScheme.palette.base01};
           background-color: #${config.colorScheme.palette.base02};
-          
+
         }
 
         #custom-power {
@@ -617,16 +622,16 @@
           font-size: 25px;
           color: #${config.colorScheme.palette.base01};
           background-color: #${config.colorScheme.palette.base02};
-          
+
         }
 
         #custom-arrow7 {
           font-size: 25px;
           color: #${config.colorScheme.palette.base03};
           background-color: #${config.colorScheme.palette.base02};
-          
+
         }
-        
+
         #custom-quit, #custom-lock, #custom-reboot {
           font-weight: bolder;
           font-style: normal;
@@ -715,9 +720,9 @@
           background-color: #${config.colorScheme.palette.base03};
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
         }
-        
+
         #idle_inhibitor {
-          padding: 0 5px; 
+          padding: 0 5px;
           font-weight: bolder;
           font-style: normal;
           color: #${config.colorScheme.palette.base06};
@@ -738,7 +743,7 @@
           font-size: 25px;
           color: #${config.colorScheme.palette.base02};
           background-color: #${config.colorScheme.palette.base03};
-          
+
         }
 
         #language {
@@ -752,14 +757,14 @@
           text-shadow: 0 0 5px rgba(0, 0, 0, 0.818);
           color: #${config.colorScheme.palette.base06};
           background-color: #${config.colorScheme.palette.base02};
-          
+
         }
 
         #custom-arrow3 {
           font-size: 25px;
           color: #${config.colorScheme.palette.base02};
           background-color: #${config.colorScheme.palette.base04};
-          
+
         }
 
         #battery {

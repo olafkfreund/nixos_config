@@ -1,5 +1,5 @@
-{ config, pkgs, ... }:
-
-{ networking.extraHosts = ''
+{ ...
+}: {
+  networking.extraHosts = ''
   '';
 }

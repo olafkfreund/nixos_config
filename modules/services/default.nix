@@ -1,4 +1,4 @@
-{...}: {
+{ ... }: {
   imports = [
     ./mtr/mtr.nix
     ./printing/print.nix
@@ -20,6 +20,9 @@
     ./auto-cpufreq/default.nix
     ./greetd/greetd.nix
     ./ollama/default.nix
+    ./sysprof/default.nix
+    ./libinput/default.nix
+    ./snapd/default.nix
   ];
 
 

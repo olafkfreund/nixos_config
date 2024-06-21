@@ -207,7 +207,9 @@
       top = "btm";
       ls = "eza --header --git --classify --long --binary --group --time-style=long-iso --links --all --all --group-directories-first --sort=name --icons";
       la = "eza --all --icons";
+      tree = "eza --all --icons --tree --sort=name";
       cat = "bat --theme=gruvbox-dark";
+      cl = "clear";
       mdless = "glow";
       gita = "git add --all";
       gitm = "git commit -m";
@@ -215,9 +217,10 @@
       gitc = "git checkout";
       zellij = "zellij options --default-shell=zsh";
       neofetch = "neofetch --kitty ~/Pictures/wallpapers/Sexy_retro/ --size 300 --crop_mode fill";
-      nh = "nh os switch --update";
-      today = "curl -s https://wttr.in/London?1";
-      wttr = "curl -s https://wttr.in/London?0";
+      nhu = "nh os switch --update";
+      nhs = "nh os switch ";
+      today = "curl -s https://wttr.in/London";
+      # wttr = "curl -s https://wttr.in/London?0";
       code = "code --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
       dbe = "distrobox enter";
       debian = "distrobox enter debian";
@@ -225,7 +228,6 @@
       obsidian = "obsidian --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
       google-chrome-stable = "google-chrome-stable --ozone-platform=wayland";
       microsoft-edge-stable = "microsoft-edge-stable --ozone-platform=wayland";
-      # slack = "slack --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer";
     };
   };
 }

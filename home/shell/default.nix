@@ -1,4 +1,4 @@
-{...}: {
+{ ... }: {
   imports = [
     ./spell/spell.nix
     ./ai/chatgpt.nix
@@ -26,5 +26,6 @@
     ./vim/default.nix
     ./tmux/default.nix
     ./translate-shell/default.nix
-];
+    ./xdg/default.nix
+  ];
 }

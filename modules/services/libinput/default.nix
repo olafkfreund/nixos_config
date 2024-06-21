@@ -1,6 +1,5 @@
 { ... }: {
-
-  programs.dconf = {
+  services.libinput = {
     enable = true;
   };
 }

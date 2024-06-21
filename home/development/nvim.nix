@@ -70,6 +70,8 @@ in
         requests
         gpsoauth
         flit-core
+        google-generativeai
+        google
         gkeepapi
       ];
   };
