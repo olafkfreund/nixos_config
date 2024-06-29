@@ -32,21 +32,36 @@ in
       tmuxPlugins.urlview
       tmuxPlugins.tmux-fzf
       tmuxPlugins.tilish
+      tmuxPlugins.maildir-counter
+      # tmuxp
       {
         plugin = tmux-gruvbox;
         extraConfig = ''
+          set -g @gruvbox_window_status_icon_enable "yes"
+          set -g @gruvbox_icon_window_last "󰖰"
+          set -g @gruvbox_icon_window_current "󰖯"
+          set -g @gruvbox_icon_window_zoom "󰁌"
+          set -g @gruvbox_icon_window_mark "󰃀"
+          set -g @gruvbox_icon_window_silent "󰂛"
+          set -g @gruvbox_icon_window_activity "󰖲"
+          set -g @gruvbox_icon_window_bell "󰂞"
+
           set -g @gruvbox_flavour 'dark'
           set -g @gruvbox_window_left_separator ""
           set -g @gruvbox_window_right_separator " "
           set -g @gruvbox_window_middle_separator " █"
           set -g @gruvbox_window_number_position "right"
+          
           set -g @gruvbox_window_default_fill "number"
           set -g @gruvbox_window_default_text "#W"
+          
           set -g @gruvbox_window_current_fill "number"
           set -g @gruvbox_window_current_text "#W"
-          set -g @gruvbox_status_modules_right "directory user host session"
-          set -g @gruvbox_status_left_separator  " "
-          set -g @gruvbox_status_right_separator ""
+          
+          # set -g @gruvbox_status_modules_right "directory user host session"
+          # set -g @gruvbox_status_left_separator  " "
+          # set -g @gruvbox_status_right_separator ""
+          
           set -g @gruvbox_status_right_separator_inverse "no"
           set -g @gruvbox_status_fill "icon"
           set -g @gruvbox_status_connect_separator "no"
@@ -63,14 +78,6 @@ in
         plugin = tmuxPlugins.tilish;
         extraConfig = ''
           set -g @tilish-navigator 'on'
-        '';
-      }
-      {
-        plugin = tmuxPlugins.weather;
-        extraConfig = ''
-          set-option -g status-right '#{weather}'
-          set-option -g @tmux-weather-location "London"
-          set-option -g @tmux-weather-unit 'm'
         '';
       }
       {

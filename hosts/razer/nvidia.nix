@@ -19,7 +19,7 @@ in
     nvidiaPersistenced = true;
     open = false;
     nvidiaSettings = true;
-    package = config.boot.kernelPackages.nvidiaPackages.production;
+    package = config.boot.kernelPackages.nvidiaPackages.beta;
   };
 
   # boot.kernelParams = [ "module_blacklist=i915" ];
@@ -33,7 +33,6 @@ in
 
   hardware.opengl = {
     enable = true;
-    driSupport = true;
     driSupport32Bit = true;
     extraPackages = with pkgs; [
       intel-media-driver # LIBVA_DRIVER_NAME=iHD

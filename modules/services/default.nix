@@ -23,6 +23,8 @@
     ./sysprof/default.nix
     ./libinput/default.nix
     ./snapd/default.nix
+    ./mandb/default.nix
+    ./razer-laptop-control/default.nix
   ];
 
 

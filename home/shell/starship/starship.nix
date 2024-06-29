@@ -14,7 +14,7 @@
         "$os"
         "$hostname"
         "[ ](fg:color_fg0 bg:color_bg3)"
-        "[ ](bold fg:color_bg1 bg:color_orange)"
+        "[ 󰒋 ](bold fg:color_bg0 bg:color_orange)"
         "[ ](fg:color_orange bg:color_bg3)"
         "$username"
         "$directory"
@@ -27,13 +27,16 @@
         "$git_branch"
         "$git_commit"
         "$git_status"
-        "$time"
+        # "$time"
+        "$line_break"
+        "$character"
       ];
       palette = "gruvbox_dark";
 
       palettes.gruvbox_dark = {
         color_fg0 = "#fbf1c7";
         color_bg1 = "#3c3836";
+        color_bg0 = "#282828";
         color_bg3 = "#665c54";
         color_blue = "#83a598";
         color_aqua = "#689d6a";
@@ -44,7 +47,7 @@
         color_yellow = "#d79921";
       };
       azure = {
-        format = "[ ](fg:color_bg3)[ $symbol($subscription)]($style)[ ](bg:color_bg1)[  ](fg:color_bg1 bg:color_blue)[ ](fg:color_blue)";
+        format = "[ ](fg:color_bg3)[ $symbol($subscription)]($style)[ ](bg:color_bg0)[  ](fg:color_bg0 bg:color_blue)[ ](fg:color_blue)";
         symbol = "󰠅 ";
         style = "bg:color_bg3 fg:color_fg0";
       };
@@ -62,7 +65,7 @@
       time = {
         disabled = false;
         style = "fg:color_fg0 bg:color_bg3";
-        format = "[](fg:color_orange)[ ](bold fg:color_bg1 bg:color_orange)[ $time]($style)[](fg:color_bg3)";
+        format = "[](fg:color_orange)[ ](bold fg:color_bg0 bg:color_orange)[ $time]($style)[](fg:color_bg3)";
       };
       os = {
         format = "[$symbol]($style)";
@@ -93,7 +96,7 @@
       username = {
         style_user = "bg:color_bg3 fg:color_fg0";
         style_root = "bg:color_bg3 fg:color_fg0";
-        format = "[$user ]($style)[ ](bold fg:color_bg1 bg:color_blue)[](fg:color_blue bg:color_bg3)";
+        format = "[$user ]($style)[ ](bold fg:color_bg0 bg:color_blue)[](fg:color_blue bg:color_bg3)";
         show_always = true;
       };
 
@@ -104,14 +107,16 @@
       };
 
       directory = {
-        format = "[ $path]($style)([$read_only]($read_only_style))[ ](bg:color_bg3)[ ](bold bg:color_green fg:color_bg1)[](fg:color_green bg:color_bg3)";
+        format = "[ $path]($style)([$read_only]($read_only_style))[ ](bg:color_bg3)[ ](bold bg:color_green fg:color_bg0)[](fg:color_green bg:color_bg3)";
         style = "fg:color_fg0 bg:color_bg3";
+        home_symbol = " ~";
+        read_only = "󰉐 ";
         truncation_length = 8;
         truncation_symbol = "…/";
       };
 
       cmd_duration = {
-        format = "[ ](bg:color_bg3)[  ](fg:color_bg1 bg:color_purple)[ ](fg:color_purple)";
+        format = "[ ](bg:color_bg3)[  ](fg:color_bg0 bg:color_purple)[ ](fg:color_purple)";
         style = "fg:color_fg0 bg:color_bg3";
       };
 
@@ -122,7 +127,7 @@
         unknown_indicator = "mystery shell";
         style = "fg:color_fg0 bg:color_bg3";
         disabled = false;
-        format = "[$indicator ]($style)[ ](fg:color_bg1 bg:color_yellow)[](fg:color_yellow)";
+        format = "[$indicator ]($style)[ ](fg:color_bg0 bg:color_yellow)[](fg:color_yellow)";
       };
 
       nix_shell = {
@@ -143,7 +148,7 @@
 
       git_branch = {
         symbol = "🌱 ";
-        format = "[ ](fg:color_purple)[ ](bg:color_purple fg:color_bg1)[$symbol$branch(:$remote_branch)]($style)";
+        format = "[ ](fg:color_purple)[ ](bg:color_purple fg:color_bg0)[$symbol$branch(:$remote_branch)]($style)";
         style = "fg:color_fg0 bg:color_bg3";
         truncation_symbol = "...";
       };
@@ -214,7 +219,7 @@
       };
 
       aws = {
-        format = "[ ](fg:color_blue)[  ](bg:color_blue fg:color_bg1)[ $symbol ($profile)(\($region\)) ]($style)[ ](fg:color_bg3)";
+        format = "[ ](fg:color_blue)[  ](bg:color_blue fg:color_bg0)[ $symbol ($profile)(\($region\)) ]($style)[ ](fg:color_bg3)";
         style = "bg:color_bg3 fg:color_fg0";
         symbol = "󰸏";
       };
@@ -225,12 +230,16 @@
       };
 
       character = {
-        success_symbol = "[](bold green)";
-        error_symbol = "[](bold red)";
-        vimcmd_symbol = "[](bold purple)";
-        vimcmd_replace_symbol = "[](bold green)";
-        vimcmd_replace_one_symbol = "[](bold green)";
-        vimcmd_visual_symbol = "[](bold yellow)";
+        success_symbol = "[ 󱞩 ](bold green)";
+        error_symbol = "[ 󱞩 ](bold red)";
+        vimcmd_symbol = "[ ](bold purple)";
+        vimcmd_replace_symbol = "[ ](bold green)";
+        vimcmd_replace_one_symbol = "[ ](bold green)";
+        vimcmd_visual_symbol = "[ ](bold yellow)";
+      };
+
+      line_break = {
+        disabled = false;
       };
 
       bun.symbol = "bun ";
@@ -243,7 +252,7 @@
       # dart.symbol = "dart ";
       deno.symbol = "deno ";
       dotnet.symbol = ".NET ";
-      directory.read_only = " ro";
+      # directory.read_only = " ro";
       # elixir.symbol = "exs ";
       # elm.symbol = "elm ";
       # golang.symbol = "go ";

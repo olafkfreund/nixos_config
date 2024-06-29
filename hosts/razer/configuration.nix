@@ -21,8 +21,10 @@
 
   stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
 
-  stylix.image = ./gruvbox-rainbow-nix.png;
+  stylix.image = ./003.png;
+  stylix.enable = true;
   stylix.polarity = "dark";
+  stylix.autoEnable = true;
 
   #Exclude Browser.. just make more sence
   stylix.targets.chromium.enable = false;
@@ -49,7 +51,7 @@
   };
 
   stylix.opacity = {
-    applications = 0.8;
+    applications = 1.0;
     terminal = 1.0;
     desktop = 1.0;
     popups = 1.0;

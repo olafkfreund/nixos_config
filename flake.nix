@@ -28,7 +28,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.05";
 
     nix-colors.url = "github:misterio77/nix-colors";
 
@@ -42,8 +42,8 @@
 
     spicetify-nix.url = "github:the-argus/spicetify-nix";
 
-    #hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1&ref=refs/tags/v0.40.0";
-    hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1&ref=refs/tags/v0.41.0";
+    hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
+    #hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1&ref=refs/tags/v0.41.0";
     #hyprland.url = "github:hyprwm/Hyprland";
     hyprland.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -96,8 +96,15 @@
 
     stylix.url = "github:danth/stylix";
 
+    razer-laptop-control.url = "github:Razer-Linux/razer-laptop-control-no-dkms";
+
     nix-index-database.url = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+
+    browser-previews = {
+      url = "github:nix-community/browser-previews";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     ags.url = "github:Aylur/ags";
   };
@@ -114,10 +121,12 @@
     , nur
     , hyprland-plugins
     , nixos-cosmic
+    , razer-laptop-control
     , nixpkgs-f2k
     , hyprland
     , nix-colors
     , ags
+    , browser-previews
     , nix-ld
     , nix-snapd
     , spicetify-nix
@@ -141,6 +150,7 @@
             inputs.stylix.nixosModules.stylix
             inputs.nix-ld.nixosModules.nix-ld
             inputs.nix-snapd.nixosModules.default
+            inputs.razer-laptop-control.nixosModules.default
             nix-index-database.nixosModules.nix-index
             {
               home-manager.useGlobalPkgs = true;
@@ -157,12 +167,14 @@
                 inherit hyprland;
                 inherit hycov;
                 inherit ags;
+                inherit razer-laptop-control;
                 inherit stylix;
                 inherit nix-index-database;
                 inherit hyprspace;
                 inherit hyprland-virtual-desktops;
                 inherit nixpkgs-f2k;
                 inherit home-manager;
+                inherit browser-previews;
                 inherit nixpkgs-stable;
                 inherit nix-colors;
                 inherit nix-snapd;
@@ -172,6 +184,9 @@
               home-manager.sharedModules = [
                 {
                   stylix.targets.waybar.enable = false;
+                  stylix.targets.yazi.enable = false;
+                  stylix.targets.vim.enable = false;
+                  stylix.targets.vscode.enable = false;
                   stylix.targets.dunst.enable = false;
 
                 }

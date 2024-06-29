@@ -1,10 +1,12 @@
 { config
+, inputs
+, pkgs
 , ...
 }:
 let
   animations.fast = true;
-  animations.moving = false;
-  animations.high = false;
+  animations.moving = true;
+  animations.high = true;
   decoration.rounding.more.blur = false;
   decoration.rounding.all.blur = false;
   decoration.no.rounding.blur = false;
@@ -22,30 +24,30 @@ in
 
   # hyprpaper
   home = {
-    file = {
-      ".config/hypr/hyprpaper.conf".source = ../config/hypr/hyprpaper.conf;
-    };
+    # file = {
+    #   ".config/hypr/hyprpaper.conf".source = ../config/hypr/hyprpaper.conf;
+    # };
 
     # make stuff work on wayland
     sessionVariables = {
-      NIXOS_OZONE_WL = "1";
-      # SDL_VIDEODRIVER = "wayland";
-      XDG_SESSION_TYPE = "wayland";
-      XDG_CURRENT_DESKTOP = "Hyprland";
-      XDG_SESSION_DESKTOP = "Hyprland";
-      CLUTTER_BACKEND = "wayland";
-      __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-      LIBVA_DRIVER_NAME = "nvidia";
-      # WLR_RENDERER = "vulkan";
-      __NV_PRIME_RENDER_OFFLOAD = "1";
-      GTK_USE_PORTAL = "1";
-      GDK_BACKEND = "wayland, x11";
-      SDL_VIDEODRIVER = "x11";
-      NIXOS_XDG_OPEN_USE_PORTAL = "0";
       XDG_CACHE_HOME = "\${HOME}/.cache";
       XDG_CONFIG_HOME = "\${HOME}/.config";
       XDG_BIN_HOME = "\${HOME}/.local/bin";
       XDG_DATA_HOME = "\${HOME}/.local/share";
+      # SDL_VIDEODRIVER = "wayland";
+      # XDG_CURRENT_DESKTOP = "Hyprland";
+      # XDG_SESSION_TYPE = "wayland";
+      # XDG_SESSION_DESKTOP = "Hyprland";
+      # ELECTRON_OZONE_PLATFORM_HINT = "wayland";
+      # OZONE_PLATFORM = "wayland";
+      # CLUTTER_BACKEND = "wayland";
+      # GDK_BACKEND = "wayland,x11,*";
+      MOZ_ENABLE_WAYLAND = "1";
+      # GBM_BACKEND = "nvidia-drm";
+      # LIBVA_DRIVER_NAME = "nvidia";
+      # NVD_BACKEND = "direct";
+      NIXOS_WAYLAND = "1";
+      NIXOS_OZONE_WL = "1";
     };
   };
 
@@ -53,7 +55,7 @@ in
     enable = true;
     systemd.enable = true;
     systemd = {
-      variables = [ "--all" ];
+      variables = ["--all"];
       extraCommands = [
         "systemctl --user stop graphical-session.target"
         "systemctl --user start hyprland-session.target"
@@ -62,16 +64,16 @@ in
     xwayland.enable = true;
     plugins = [
       #hyprland-virtual-desktops.packages.${pkgs.system}.virtual-desktops
-      # inputs.hyprland-plugins.packages.${pkgs.system}.hyprexpo
+      #inputs.hyprland-plugins.packages.${pkgs.system}.hyprexpo
       #inputs.hyprspace.packages.${pkgs.system}.Hyprspace
       # hycov.packages.${pkgs.system}.hycov
     ];
-    # enableNvidiaPatches = true;
     extraConfig = ''
       #laptop
       monitor = eDP-1,1920x1080@100,0x0,1
       #home
-      monitor = DP-3,2560x1440@100,0x0,1,bitdepth,10
+      # monitor = HDMI-A-1,3840x2160@60,0x0,1,bitdepth,10
+      monitor = HDMI-A-1,3840x2160@60,0x0,1.5,bitdepth,10
       #monitor=,preferred,auto, 1
       #wsbind=1,eDP-1
 
@@ -86,8 +88,7 @@ in
       exec-once = kdeconnectd
       exec-once = kdeconnect-indicator
       exec-once = dbus-update-activation-environment --systemd --all
-      exec-once = systemctl --user import-environment PATH QT_QPA_PLATFORMTHEME WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
-      exec-once = systemctl --user import-environment PATH && systemctl --user restart xdg-desktop-portal.service
+      exec-once = systemctl --user import-environment PATH WAYLAND_DISPLAY XDG_CURRENT_DESKTOP & systemctl --user restart xdg-desktop-portal.service
       exec-once = polkit-agent-helper-1
       exec-once = gsettings set org.gnome.desktop.interface ursor-theme "Bibata-Modern-Ice"
       exec-once = gsettings set org.gnome.desktop.interface icon-theme "Gruvbox-Plus-Dark"
@@ -99,7 +100,7 @@ in
       exec-once = dunst
       exec-once = kdeconnect-cli
       exec-once = playerctld daemon
-      exec-once = swww-daemon
+      exec-once = swww-daemon && sleep 0.5 && swww img ~/Pictures/wallpapers/gruvbox/hypr/003.png --transition-type simple
       exec-once = hypridle
       exec-once = nm-applet --indicator
       exec-once = blueman-applet
@@ -109,38 +110,39 @@ in
       exec-once = wl-paste --type image --watch cliphist store #Stores only image data when imaged copied
 
       exec-once = [workspace special:spotify] spotify
-      # exec-once = [workspace 1 silent] microsoft-edge
       exec-once = [workspace 1 silent] kitty
       exec-once = [workspace 1 silent] google-chrome-stable
       exec-once = [workspace 8 silent] 1password
-      # exec-once = [workspace 10 silent] element-desktop
       exec-once = [workspace 6 silent] obsidian
       exec-once = [workspace 2 silent] code
       exec-once = [workspace 2 silent] slack
-      # exec-once = [workspace 5 silent] thunderbird
 
 
       # Env variables
-      env = EDITOR="lvim";
+      env = EDITOR="nvim";
       env = BROWSER="google-chrome-stable";
       env = TERMINAL="kitty";
 
-      env = SDL_VIDEODRIVER, x11 
-      env = CLUTTER_BACKEND, wayland
-      env = XDG_CURRENT_DESKTOP, Hyprland
-      env = XDG_SESSION_TYPE, wayland
-      env = XDG_SESSION_DESKTOP, Hyprland
-      env = XCURSOR_THEME, Bibata-Modern-Ice
-      env = XCURSOR_SIZE, 16
-      
+      env = SDL_VIDEODRIVER,wayland
+      env = XDG_CURRENT_DESKTOP,Hyprland
+      env = XDG_SESSION_TYPE,wayland
+      env = XDG_SESSION_DESKTOP,Hyprland
+
+      env = XCURSOR_THEME,Bibata-Modern-Ice
+      env = XCURSOR_SIZE,16
+
+      env = ELECTRON_OZONE_PLATFORM_HINT,wayland
+      env = OZONE_PLATFORM,wayland
+      env = CLUTTER_BACKEND,wayland
+
       #GTK
-      env = GDK_BACKEND, wayland
+      env = GDK_BACKEND,wayland,x11,*
       env = GTK_THEME,Gruvbox-Dark-B-LB
       # env = GDK_DPI_SCALE,1
       # env = GDK_SCALE,1
       
       #QT
-      env = QT_QPA_PLATFORM, wayland
+      env = QT_QPA_PLATFORM,wayland
       env = QT_WAYLAND_DISABLE_WINDOWDECORATION, 1
       env = QT_AUTO_SCREEN_SCALE_FACTOR, 1
       env = QT_ENABLE_HIGHDPI_SCALING, 1
@@ -149,9 +151,14 @@ in
       env = MOZ_ENABLE_WAYLAND, 1
       
       #Nvidia
-      env = GBM_BACKEND, nvidia-drm
-      env = WLR_DRM_NO_ATOMIC, 1
-      env = LIBVA_DRIVER_NAME, nvidia
+      # env = GBM_BACKEND,nvidia-drm
+      # env = LIBVA_DRIVER_NAME,nvidia
+      # env = WLR_RENDERER,vulkan
+      # put everything onto nvidia card
+      # env = __NV_PRIME_RENDER_OFFLOAD, 1
+      # env = __NV_PRIME_RENDER_OFFLOAD_PROVIDER, NVIDIA-G0
+      # env = __GLX_VENDOR_LIBRARY_NAME, nvidia
+      # env = __VK_LAYER_NV_optimus, NVIDIA_only
       
       #NIXOS
       env = NIXOS_WAYLAND, 1
@@ -248,7 +255,7 @@ in
               xray = true
               blurls = waybar
           }
-          active_opacity = 0.9
+          active_opacity = 1
           inactive_opacity = 0.6
           fullscreen_opacity = 0.9
 
@@ -379,7 +386,6 @@ in
           animation=fadeIn,1,5,default
           animation=fadeOut,1,5,default
           animation=fadeSwitch,1,10,default
-          #animation=workspaces,1,3.8,overshot,slidevert
           animation=border, 1, 10, overshot
           animation=borderangle, 1, 50, overshot, loop
         ''
@@ -420,22 +426,21 @@ in
       # Window rules #
       # Rofi
       windowrulev2 = stayfocused, class:(rofi)
+      
       # Obsidian
       windowrulev2 = workspace 6, class:(obsidian)
+      
       #Google Chrome
       windowrulev2 = workspace 6, class:(google-chrome-.*)
-
       windowrulev2 = workspace special:spotify, class:^(Spotify)$
-
-      # windowrulev2 = opacity 0.80 0.80,class:(code.*)
-      # windowrulev2 = opacity 0.80 0.80,class:(code.*)
       windowrulev2 = workspace 2, class:(code.*)
-
       windowrulev2 = workspace 1, class:^(Edge)$
+      
       #Pavucontrol
       windowrulev2 = float, class:(pavucontrol)
       windowrulev2 = size 1220 630, class:(pavucontrol)
       windowrulev2 = center, class:(pavucontrol)
+      
       # Telegram
       windowrulev2 = workspace 8, class:(org.telegram.desktop)
       windowrulev2 = size 970 480, class:(org.telegram.desktop), title:(Choose Files)
@@ -446,26 +451,16 @@ in
       windowrulev2 = float,class:^(nm-applet)$
       windowrulev2 = float,class:^(nm-connection-editor)$
 
-
-      # windowrulev2 = opacity 0.80 0.80,class:^(kitty)$
-      # windowrulev2 = opacity 0.80 0.80,class:^(Code)$
-      # windowrulev2 = opacity 0.80 0.80,class:^(Code)$
-
       # Allow screen tearing for reduced input latency on some games.
       windowrulev2 = immediate, class:^(cs2)$
       windowrulev2 = immediate, class:^(steam_app_0)$
       windowrulev2 = immediate, class:^(steam_app_1)$
       windowrulev2 = immediate, class:^(steam_app_2)$
       windowrulev2 = immediate, class:^(.*)(.exe)$
-
       windowrulev2 = float, class:(xdg-desktop-portal-gtk)
       windowrulev2 = size 1345 720, class:(xdg-desktop-portal-gtk)
       windowrulev2 = center, class:(xdg-desktop-portal-gtk)
-
-      windowrule = float,system_monitor
-      #windowrule=size 1570 840,system_monitor
-      windowrule = center,system_monitor
-      windowrule = float, polkit-agent-helper-1
+      
       #Xwayland hack
       windowrulev2 = opacity 0.0 override,class:^(xwaylandvideobridge)$
       windowrulev2 = noanim,class:^(xwaylandvideobridge)$
@@ -661,11 +656,9 @@ in
       # trigger when the switch is turning on
       bindl = , switch:on:Lid Switch,exec,hyprctl keyword monitor "eDP-1, disable"
 
-
-
-      blurls=rofi
-      blurls=waybar
-      blurls=gtk-layer-shell
+      blurls = rofi
+      blurls = waybar
+      blurls = gtk-layer-shell
       blurls = notifications
       blurls = swayosd
     '';

@@ -17,6 +17,8 @@ home.packages = with pkgs; [
   abook
   gcalcli
   davmail
+  lynx
+  lbdb
   python311Packages.vobject
   python311Packages.icalendar
   python311Packages.pytz

@@ -1,0 +1,34 @@
+### /etc/netplan/01-netcfg.yaml
+# This file describes the network interfaces available on your system
+# For more information, see netplan(5).
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth0:
+      dhcp4: no
+      addresses:
+        - 10.237.170.15/24
+      routes: 
+        - to: default
+          via: 10.237.170.1
+      nameservers:
+        search:
+          - "incus"
+        addresses:
+          - 127.0.1.53
+          - 8.8.8.8
+    et10:
+      dhcp4: no
+      addresses:
+        - 10.39.108.117/24
+      routes: 
+        - to: default
+          via: 10.39.108.1
+          metric: 200
+      nameservers:
+        search:
+          - "incus"
+        addresses:
+          - 127.0.1.53
+          - 8.8.8.8

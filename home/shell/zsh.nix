@@ -102,6 +102,10 @@
       # Home/End
       bindkey "^[[OH" beginning-of-line
       bindkey "^[[OF" end-of-line
+      bind c-left         beginning-of-line
+      bind c-right        end-of-line
+      bind home           beginning-of-buffer
+      bind end            end-of-buffer
 
       # open commands in $EDITOR with C-e
       autoload -z edit-command-line
