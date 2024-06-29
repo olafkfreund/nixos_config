@@ -1,15 +1,14 @@
-# nixos_config
+# Nixos configuration
 
-My private nixos_config
-Screensthot:
+My private Nixos configuration
+
+Screenshot:
+
 ![Alt text](./doc/image.png)
 ![Alt text](./doc/image2.png)
 ![Alt text](./doc/image3.png)
 
-Step 1:
-Install basic git
-
-Step 2: Install git
+Step 1: Install git
 
 ```shell
 nix-env -iA nixos.git
@@ -28,7 +27,9 @@ cd nixos_config
 ```
 
 Step 5:
-Copy the contents of the cloned "nixos" folder to /etc/nixos or your nixos dir ( ~/.config/nixos )
+Copy the contents of the cloned "nixos" folder
+to /etc/nixos or your nixos dir this is mine: ~/.config/nixos
+
 Note: This will exclude the hidden .git folder
 
 ```shell
