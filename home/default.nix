@@ -15,5 +15,6 @@
     ./browsers/default.nix
     ./containers/default.nix
     ./files.nix
+    ./media/spotify-player.nix
 ];
 }

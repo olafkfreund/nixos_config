@@ -73,7 +73,7 @@ in
       monitor = eDP-1,1920x1080@100,0x0,1
       #home
       # monitor = HDMI-A-1,3840x2160@60,0x0,1,bitdepth,10
-      monitor = HDMI-A-1,3840x2160@60,0x0,1.5,bitdepth,10
+      monitor = HDMI-A-1,3840x2160@120,0x0,1.5,bitdepth,10
       #monitor=,preferred,auto, 1
       #wsbind=1,eDP-1
 
@@ -101,6 +101,7 @@ in
       exec-once = kdeconnect-cli
       exec-once = playerctld daemon
       exec-once = swww-daemon && sleep 0.5 && swww img ~/Pictures/wallpapers/gruvbox/hypr/003.png --transition-type simple
+      exec-once = start_wall
       exec-once = hypridle
       exec-once = nm-applet --indicator
       exec-once = blueman-applet
@@ -110,12 +111,15 @@ in
       exec-once = wl-paste --type image --watch cliphist store #Stores only image data when imaged copied
 
       exec-once = [workspace special:spotify] spotify
-      exec-once = [workspace 1 silent] kitty
       exec-once = [workspace 1 silent] google-chrome-stable
-      exec-once = [workspace 8 silent] 1password
+      exec-once = [workspace 2 silent] firefox
+      exec-once = [workspace 3 silent] kitty -d ~/config/nixos --hold sh -c nvim
+      exec-once = [workspace 3 silent] kitty --hold sh -c tmux
+      exec-once = [workspace 4 silent] slack
+      exec-once = [workspace 5 silent] ferdium
       exec-once = [workspace 6 silent] obsidian
-      exec-once = [workspace 2 silent] code
-      exec-once = [workspace 2 silent] slack
+      exec-once = [workspace 7 silent] code
+      exec-once = [workspace 8 silent] 1password
 
 
       # Env variables
@@ -304,8 +308,6 @@ in
           layerrule = blur, notifications
           layerrule = ignorezero, notifications
           layerrule = blur, logout_dialog
-          windowrule = stayfocused, rofi
-          windowrule = animation popin 75%, rofi
           windowrule = stayfocused, emote
           windowrule = animation popin 95%, emote
           rounding=14
@@ -424,24 +426,30 @@ in
        # }
 
       # Window rules #
+      windowrule = workspace current,title:MainPicker
+      windowrule = workspace current,.blueman-manager-wrapped
+      windowrule = workspace current,xdg-desktop-portal-gtk
+      windowrule = workspace current,thunderbird
+      
       # Rofi
-      windowrulev2 = stayfocused, class:(rofi)
+      windowrulev2 = forceinput, class:(Rofi)$
       
       # Obsidian
       windowrulev2 = workspace 6, class:(obsidian)
       
       #Google Chrome
-      windowrulev2 = workspace 6, class:(google-chrome-.*)
+      windowrulev2 = workspace 1, class:(google-chrome-.*)
       windowrulev2 = workspace special:spotify, class:^(Spotify)$
+      windowrulev2 = float,size 900 500,title:^(Choose Files)
       windowrulev2 = workspace 2, class:(code.*)
-      windowrulev2 = workspace 1, class:^(Edge)$
+      windowrulev2 = workspace 4, class:^(Edge)$
       
       #Pavucontrol
       windowrulev2 = float, class:(pavucontrol)
-      windowrulev2 = size 1220 630, class:(pavucontrol)
+      windowrulev2 = size 1000 1000, class:(pavucontrol)
       windowrulev2 = center, class:(pavucontrol)
       
-      # Telegram
+      #Telegram
       windowrulev2 = workspace 8, class:(org.telegram.desktop)
       windowrulev2 = size 970 480, class:(org.telegram.desktop), title:(Choose Files)
       windowrulev2 = center, class:(org.telegram.desktop), title:(Choose Files)
@@ -468,6 +476,11 @@ in
       windowrulev2 = maxsize 1 1,class:^(xwaylandvideobridge)$
       windowrulev2 = noblur,class:^(xwaylandvideobridge)$
 
+      # Xdg
+      windowrulev2 = float, class:^(xdg-desktop-portal-gtk)$
+      windowrulev2 = size 900 500, class:^(xdg-desktop-portal-gtk)$
+      windowrulev2 = dimaround, class:^(xdg-desktop-portal-gtk)$
+      windowrulev2 = center, class:^(xdg-desktop-portal-gtk)$
 
       # System binds #
       $mainMod = SUPER

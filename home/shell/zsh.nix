@@ -100,12 +100,20 @@
       bindkey "^H" backward-kill-word
 
       # Home/End
-      bindkey "^[[OH" beginning-of-line
-      bindkey "^[[OF" end-of-line
-      bind c-left         beginning-of-line
-      bind c-right        end-of-line
-      bind home           beginning-of-buffer
-      bind end            end-of-buffer
+      bindkey '^[[3~' delete-char                     # Key Del
+      bindkey '^[[5~' beginning-of-buffer-or-history  # Key Page Up
+      bindkey '^[[6~' end-of-buffer-or-history        # Key Page Down
+      bindkey '^[[1;3D' backward-word                 # Key Alt + Left
+      bindkey '^[[1;3C' forward-word                  # Key Alt + Right
+      bindkey '^[[H' beginning-of-line                # Key Home
+      bindkey '^[[F' end-of-line                      # Key end-of-line
+
+      # bindkey "^[[OH" beginning-of-line
+      # bindkey "^[[OF" end-of-line
+      # bind c-left         beginning-of-line
+      # bind c-right        end-of-line
+      # bind home           beginning-of-buffer
+      # bind end            end-of-buffer
 
       # open commands in $EDITOR with C-e
       autoload -z edit-command-line

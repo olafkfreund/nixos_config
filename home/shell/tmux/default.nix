@@ -107,7 +107,7 @@ in
     ];
     extraConfig = ''
       # run-shell '${pkgs.tmuxPlugins.gruvbox}/share/tmux-plugins/gruvbox/gruvbox-tpm.tmux'
-      set-option -g default-terminal 'screen-256color'
+      set-option -g default-terminal 'tmux-256color'
       set-option -g terminal-overrides ',xterm-256color:RGB'
       set-option -g status-position top
       run-shell /nix/store/axbjwfniyk3jibnnr855fsbwg0wr0wd7-tmuxplugin-tmux-gruvbox-unstable-2024-06-17/share/tmux-plugins/tmux-gruvbox/gruvbox.tmux

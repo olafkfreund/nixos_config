@@ -7,7 +7,7 @@
     plexamp # Plex
     vlc # video player
     cava # audio visualizer
-    spotify-player # Spotify
+    # spotify-player # Spotify
     sptlrx # Spotify Lyrics
 
   ];

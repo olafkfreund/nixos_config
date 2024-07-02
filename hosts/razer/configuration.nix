@@ -86,7 +86,6 @@
     extraGroups = [ "networkmanager" "openrazer" "wheel" "docker" "video" "scanner" "lp" "lxd" "incus-admin" ];
     shell = pkgs.zsh;
     packages = with pkgs; [
-      kitty
       vim
     ];
   };

@@ -1,5 +1,9 @@
-{ config, pkgs, ... }:
 {
+  config,
+  pks,
+  pkgs-stable,
+  ...
+}: {
   xdg.mimeApps = {
     associations.added = {
       "x-scheme-handler/terminal" = "kitty.desktop";
@@ -11,7 +15,7 @@
 
   programs.kitty = {
     enable = true;
-    package = pkgs.kitty;
+    package = pkgs-stable.kitty;
 
     #Kitty theme
     theme = "Gruvbox Material Dark Hard";
@@ -39,7 +43,7 @@
       window_margin_width = 8;
       window_margin_height = 6;
       term = "kitty";
-      placement_strategy ="center";
+      placement_strategy = "center";
 
       hide_window_decorations = true;
 
@@ -48,8 +52,8 @@
 
       sync_to_monitor = true;
       mouse_hide_wait = 20;
-      cursor_shape = "beam";
-      cursor_blink_interval = 1;
+    cursor_shape = "beam";
+    cursor_blink_interval = 1;
       cursor_stop_blinking_after = 15;
 
       #Scrollback pager
