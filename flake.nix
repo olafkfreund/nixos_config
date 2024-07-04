@@ -130,12 +130,10 @@
     { self
     , nixpkgs
     , nixpkgs-stable
-    #, hyprspace
     , nur
     , nixos-cosmic
     , razer-laptop-control
     , nixpkgs-f2k
-    #, hyprland
     , nix-colors
     , ags
     , browser-previews
@@ -176,13 +174,11 @@
                 inherit inputs;
                 inherit nixpkgs;
                 inherit spicetify-nix;
-                #inherit hyprland;
                 inherit ags;
                 inherit nix-ld;
                 inherit razer-laptop-control;
                 inherit stylix;
                 inherit nix-index-database;
-                #inherit hyprspace;
                 inherit nixpkgs-f2k;
                 inherit home-manager;
                 inherit browser-previews;
