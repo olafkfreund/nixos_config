@@ -9,6 +9,7 @@
     cava # audio visualizer
     # spotify-player # Spotify
     sptlrx # Spotify Lyrics
+    castero # Podcasts
 
   ];
 
