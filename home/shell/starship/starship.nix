@@ -111,7 +111,7 @@
         style = "fg:color_fg0 bg:color_bg3";
         home_symbol = " ~";
         read_only = "󰉐 ";
-        truncation_length = 8;
+        truncation_length = 2;
         truncation_symbol = "…/";
       };
 
