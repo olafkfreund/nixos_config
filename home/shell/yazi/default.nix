@@ -24,19 +24,19 @@
         ];
         previewers = [
           # Code
-          { mime = "text/*";                 exec = "lvim"; }
-          { mime = "*/xml";                  exec = "lvim"; }
-          { mime = "*/yaml";                 exec = "lvim"; }
-          { mime = "*/javascript";           exec = "lvim"; }
-          { mime = "*/x-wine-extension-ini"; exec = "lvim"; }
-          { mime = "*/tf";                   exec = "lvim"; }
+          { mime = "text/*";                 exec = "nvim"; }
+          { mime = "*/xml";                  exec = "nvim"; }
+          { mime = "*/yaml";                 exec = "nvim"; }
+          { mime = "*/javascript";           exec = "nvim"; }
+          { mime = "*/x-wine-extension-ini"; exec = "nvim"; }
+          { mime = "*/tf";                   exec = "nvim"; }
           # JSON
-          { mime = "application/json"; exec = "json"; }
+          { mime = "application/json"; exec = "nvim"; }
           # Image
           # { mime = "image/vnd.djvu"; exec = "noop"; }
           { mime = "image/*";        exec = "feh"; }
           # Video
-          { mime = "video/*"; exec = "video"; }
+          { mime = "video/*"; exec = "vlc"; }
           # PDF
           { mime = "application/pdf"; exec = "pdf"; }
           # Archive

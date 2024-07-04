@@ -4,7 +4,7 @@ pkgs.writeShellScriptBin "tmux-sessionizer" ''
   if [[ $# -eq 1 ]]; then
     selected=$1
   else
-      selected=$(cd ~/Source/GitHub/ ~/Documents/ ~/.config/nixos ~/.config -mindepth 1 -maxdepth 1 -type d | fzf)
+      selected=$(fd . ~/Source/GitHub/ ~/Documents/ ~/.config/nixos --min-depth 1 --max-depth 2 --type d | fzf)
   fi
 
   if [[ -z $selected ]]; then

@@ -1,9 +1,9 @@
-{ config
-, inputs
-, pkgs
-, ...
-}:
-let
+{
+  config,
+  inputs,
+  pkgs,
+  ...
+}: let
   animations.fast = true;
   animations.moving = true;
   animations.high = true;
@@ -12,8 +12,7 @@ let
   decoration.no.rounding.blur = false;
   gaps-big-no-border = false;
   gaps-big-border = false;
-in
-{
+in {
   imports = [
     ./hypr_dep.nix
     ./hyprlock.nix
@@ -63,10 +62,10 @@ in
     };
     xwayland.enable = true;
     plugins = [
-      #hyprland-virtual-desktops.packages.${pkgs.system}.virtual-desktops
-      #inputs.hyprland-plugins.packages.${pkgs.system}.hyprexpo
-      #inputs.hyprspace.packages.${pkgs.system}.Hyprspace
-      # hycov.packages.${pkgs.system}.hycov
+      # pkgs.hyprlandPlugins.hyprbars
+      pkgs.hyprlandPlugins.hyprexpo
+      pkgs.hyprlandPlugins.csgo-vulkan-fix
+      #pkgs.hyprlandPlugins.borders-plus-plus
     ];
     extraConfig = ''
       #laptop
@@ -100,7 +99,7 @@ in
       exec-once = dunst
       exec-once = kdeconnect-cli
       exec-once = playerctld daemon
-      exec-once = swww-daemon && sleep 0.5 && swww img ~/Pictures/wallpapers/gruvbox/hypr/003.png --transition-type simple
+      exec-once = pkill swww-daemon && swww-daemon
       exec-once = start_wall
       exec-once = hypridle
       exec-once = nm-applet --indicator
@@ -113,7 +112,7 @@ in
       exec-once = [workspace special:spotify] spotify
       exec-once = [workspace 1 silent] google-chrome-stable
       exec-once = [workspace 2 silent] firefox
-      exec-once = [workspace 3 silent] kitty -d ~/config/nixos --hold sh -c nvim
+      exec-once = [workspace 3 silent] kitty -d "~/config/nixos" --hold sh -c nvim
       exec-once = [workspace 3 silent] kitty --hold sh -c tmux
       exec-once = [workspace 4 silent] slack
       exec-once = [workspace 5 silent] ferdium
@@ -144,16 +143,16 @@ in
       env = GTK_THEME,Gruvbox-Dark-B-LB
       # env = GDK_DPI_SCALE,1
       # env = GDK_SCALE,1
-      
+
       #QT
       env = QT_QPA_PLATFORM,wayland
       env = QT_WAYLAND_DISABLE_WINDOWDECORATION, 1
       env = QT_AUTO_SCREEN_SCALE_FACTOR, 1
       env = QT_ENABLE_HIGHDPI_SCALING, 1
-      
+
       #Firefox & Thunderbird
       env = MOZ_ENABLE_WAYLAND, 1
-      
+
       #Nvidia
       # env = GBM_BACKEND,nvidia-drm
       # env = LIBVA_DRIVER_NAME,nvidia
@@ -163,7 +162,7 @@ in
       # env = __NV_PRIME_RENDER_OFFLOAD_PROVIDER, NVIDIA-G0
       # env = __GLX_VENDOR_LIBRARY_NAME, nvidia
       # env = __VK_LAYER_NV_optimus, NVIDIA_only
-      
+
       #NIXOS
       env = NIXOS_WAYLAND, 1
       env = NIXOS_OZONE_WL, 1
@@ -407,48 +406,48 @@ in
           workspace_swipe=yes
           workspace_swipe_fingers=3
       }
-      # plugin {
+       plugin {
       #     hycov {
       #       overview_gappo = 60 #gaps width from screen
       #       overview_gappi = 24 #gaps width from clients
       #       hotarea_size = 10 #hotarea size in bottom left,10x10
       #       enable_hotarea = 1 # enable mouse cursor hotarea
       #     },
-       #     hyprexpo {
-       #       columns = 3
-       #       gap_size = 5
-       #       bg_col = rgb(111111)
-       #       workspace_method = center current # [center/first] [workspace] e.g. first 1 or center m+1
-       #       enable_gesture = true # laptop touchpad, 4 fingers
-       #       gesture_distance = 300 # how far is the "max"
-       #       gesture_positive = true # positive = swipe down. Negative = swipe up.
-       #     }
-       # }
+           hyprexpo {
+             columns = 3
+             gap_size = 5
+             bg_col = rgb(111111)
+             workspace_method = center current # [center/first] [workspace] e.g. first 1 or center m+1
+             enable_gesture = true # laptop touchpad, 4 fingers
+             gesture_distance = 300 # how far is the "max"
+             gesture_positive = true # positive = swipe down. Negative = swipe up.
+           }
+       }
 
       # Window rules #
       windowrule = workspace current,title:MainPicker
       windowrule = workspace current,.blueman-manager-wrapped
       windowrule = workspace current,xdg-desktop-portal-gtk
       windowrule = workspace current,thunderbird
-      
+
       # Rofi
       windowrulev2 = forceinput, class:(Rofi)$
-      
+
       # Obsidian
       windowrulev2 = workspace 6, class:(obsidian)
-      
+
       #Google Chrome
       windowrulev2 = workspace 1, class:(google-chrome-.*)
       windowrulev2 = workspace special:spotify, class:^(Spotify)$
       windowrulev2 = float,size 900 500,title:^(Choose Files)
       windowrulev2 = workspace 2, class:(code.*)
       windowrulev2 = workspace 4, class:^(Edge)$
-      
+
       #Pavucontrol
       windowrulev2 = float, class:(pavucontrol)
       windowrulev2 = size 1000 1000, class:(pavucontrol)
       windowrulev2 = center, class:(pavucontrol)
-      
+
       #Telegram
       windowrulev2 = workspace 8, class:(org.telegram.desktop)
       windowrulev2 = size 970 480, class:(org.telegram.desktop), title:(Choose Files)
@@ -468,7 +467,7 @@ in
       windowrulev2 = float, class:(xdg-desktop-portal-gtk)
       windowrulev2 = size 1345 720, class:(xdg-desktop-portal-gtk)
       windowrulev2 = center, class:(xdg-desktop-portal-gtk)
-      
+
       #Xwayland hack
       windowrulev2 = opacity 0.0 override,class:^(xwaylandvideobridge)$
       windowrulev2 = noanim,class:^(xwaylandvideobridge)$
@@ -486,7 +485,7 @@ in
       $mainMod = SUPER
 
       #Hyprexpo
-      # bind = $mainMod ALT, hyprexpo:expo, toggle # can be: toggle, off/disable or on/enable
+      bind = ALT, TAB, hyprexpo:expo, toggle # can be: toggle, off/disable or on/enable
 
       # #Hypcov
       # bind = ALT,tab,hycov:toggleoverview
@@ -631,7 +630,7 @@ in
       binde = $mainMod_ALT, down, resizeactive, 0 30
 
       #ATL-TAB
-      bind = ALT, TAB, exec, ~/.config/rofi/launchers/type-2/launcher-alttab.sh
+      #bind = ALT, TAB, exec, ~/.config/rofi/launchers/type-2/launcher-alttab.sh
       # bind = $mainMod, TAB, cyclenext,
 
       # Switch workspaces with mainMod + [0-9]

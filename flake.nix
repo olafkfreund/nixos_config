@@ -30,10 +30,14 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.05";
 
-    nix-colors.url = "github:misterio77/nix-colors";
+    nix-colors ={ 
+      url = "github:misterio77/nix-colors";
+    };
 
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     sops-nix = {
      url = "github:mic92/sops-nix";
@@ -46,90 +50,92 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    spicetify-nix.url = "github:the-argus/spicetify-nix";
-
-    hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
-    #hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1&ref=refs/tags/v0.41.0";
-    #hyprland.url = "github:hyprwm/Hyprland";
-    hyprland.inputs.nixpkgs.follows = "nixpkgs";
-
-    hyprland-plugins = {
-      url = "github:hyprwm/hyprland-plugins";
-      inputs.hyprland.follows = "hyprland";
+    spicetify-nix = {
+      url = "github:the-argus/spicetify-nix";
     };
 
-    hyprpicker.url = "github:hyprwm/hyprpicker";
-    hyprpicker.inputs.nixpkgs.follows = "nixpkgs";
+    # hyprland = {
+    #   url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
+    #   #hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1&ref=refs/tags/v0.41.0";
+    #   #hyprland.url = "github:hyprwm/Hyprland";
+    # };
 
-    nix-ld.url = "github:Mic92/nix-ld";
-    nix-ld.inputs.nixpkgs.follows = "nixpkgs";
+    # hyprland-plugins = {
+    #   url = "github:hyprwm/hyprland-plugins";
+    #   inputs.hyprland.follows = "hyprland";
+    # };
 
-    hyprland-contrib.url = "github:hyprwm/contrib";
-    hyprland-contrib.inputs.nixpkgs.follows = "nixpkgs";
 
-    agenix.url = "github:ryantm/agenix";
-    agenix.inputs.nixpkgs.follows = "nixpkgs";
+    #   inputs.hyprland.follows = "hyprland";
+    # };
 
-    nixpkgs-f2k.url = "github:moni-dz/nixpkgs-f2k";
-
-    nur.url = "github:nix-community/NUR";
-
-    nix-snapd.url = "github:io12/nix-snapd";
-    nix-snapd.inputs.nixpkgs.follows = "nixpkgs";
-
-    hycov = {
-      url = "github:DreamMaoMao/hycov";
-      inputs.hyprland.follows = "hyprland";
-    };
-
-    hyprlock = {
-      url = "github:hyprwm/hyprlock";
+    nix-ld = {
+      url = "github:Mic92/nix-ld";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    hypridle = {
-      url = "github:hyprwm/hypridle";
+    # hyprland-contrib = {
+    #   url = "github:hyprwm/contrib";
+    #   inputs.hyprland.follows = "hyprland";
+    # };
+
+    agenix = {
+      url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    hyprspace = {
-      url = "github:KZDKM/Hyprspace";
-      inputs.hyprland.follows = "hyprland";
-    };
-    hyprland-virtual-desktops = {
-      url = "github:levnikmyskin/hyprland-virtual-desktops";
-      inputs.hyprland.follows = "hyprland";
+
+    nixpkgs-f2k = {
+      url = "github:moni-dz/nixpkgs-f2k";
     };
 
-    stylix.url = "github:danth/stylix";
+    nur ={
+      url = "github:nix-community/NUR";
+    };
 
-    razer-laptop-control.url = "github:Razer-Linux/razer-laptop-control-no-dkms";
+    nix-snapd = {
+      url = "github:io12/nix-snapd";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    
+    # hyprspace = {
+    #   url = "github:KZDKM/Hyprspace";
+    #   inputs.hyprland.follows = "hyprland";
+    # };
 
-    nix-index-database.url = "github:nix-community/nix-index-database";
-    nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+    stylix = {
+      url = "github:danth/stylix";
+    };
+
+    razer-laptop-control = {
+      url = "github:Razer-Linux/razer-laptop-control-no-dkms";
+    };
+
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     browser-previews = {
       url = "github:nix-community/browser-previews";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    ags.url = "github:Aylur/ags";
+    ags ={
+      url = "github:Aylur/ags";
+    };
+
   };
 
   outputs =
     { self
     , nixpkgs
     , nixpkgs-stable
-    , hyprlock
-    , hyprspace
-    , hypridle
-    , hyprland-virtual-desktops
-    , hycov
+    #, hyprspace
     , nur
-    , hyprland-plugins
     , nixos-cosmic
     , razer-laptop-control
     , nixpkgs-f2k
-    , hyprland
+    #, hyprland
     , nix-colors
     , ags
     , browser-previews
@@ -170,14 +176,13 @@
                 inherit inputs;
                 inherit nixpkgs;
                 inherit spicetify-nix;
-                inherit hyprland;
-                inherit hycov;
+                #inherit hyprland;
                 inherit ags;
+                inherit nix-ld;
                 inherit razer-laptop-control;
                 inherit stylix;
                 inherit nix-index-database;
-                inherit hyprspace;
-                inherit hyprland-virtual-desktops;
+                #inherit hyprspace;
                 inherit nixpkgs-f2k;
                 inherit home-manager;
                 inherit browser-previews;

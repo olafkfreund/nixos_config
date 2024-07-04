@@ -13,5 +13,6 @@
     (import ./choose_vpn_config.nix {inherit pkgs;})
     (import ./weather.nix {inherit pkgs;})
     (import ./album_art.nix {inherit pkgs;})
+    (import ./monitor.nix {inherit pkgs;})
   ];
 }

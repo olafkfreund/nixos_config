@@ -3,8 +3,7 @@
   pkgs,
   imports,
   ...
-}: 
-let
+}: let
   spotify-player = pkgs.callPackage ./spotify-player-pkgs.nix {};
 in {
   disabledModules = ["programs/spotify-player.nix"];
@@ -28,9 +27,9 @@ in {
       liked_icon = " ";
       border_type = "Hidden";
       progress_bar_type = "Rectangle";
-      cover_img_scale = 1;
-      cover_img_length = 12;
-      cover_img_width = 5;
+      cover_img_scale = 3;
+      # cover_img_length = 12;
+      # cover_img_width = 5;
       player_event_hook_command.command = pkgs.writeShellScript "waybarHook" ''
         sleep 1
         curl "$(playerctl -p spotify_player metadata mpris:artUrl)" > /tmp/cover.jpg

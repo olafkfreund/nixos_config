@@ -15,7 +15,7 @@ pkgs.writeShellScriptBin "wallpaper_picker" ''
       fi
 
 
-  physical_monitor_size=27
+  physical_monitor_size=55
   monitor_res=$(hyprctl monitors |grep -A2 Monitor |head -n 2 |awk '{print $1}' | grep -oE '^[0-9]+')
   dotsperinch=$(echo "scale=2; $monitor_res / $physical_monitor_size" | bc | xargs printf "%.0f")
   monitor_res=$(( $monitor_res * $physical_monitor_size / $dotsperinch ))

@@ -19,7 +19,7 @@
     };
     autosuggestion.enable = true;
 
-    plugins = with pkgs; [
+    plugins = [
       {
         name = "zsh-fzf-tab";
         src = pkgs.zsh-fzf-tab;
@@ -32,7 +32,7 @@
       }
       {
         name = "zsh-nix-shell";
-        src = zsh-nix-shell;
+        src = pkgs.zsh-nix-shell;
         file = "share/zsh-nix-shell/nix-shell.plugin.zsh";
       }
       {
@@ -100,20 +100,22 @@
       bindkey "^H" backward-kill-word
 
       # Home/End
-      bindkey '^[[3~' delete-char                     # Key Del
-      bindkey '^[[5~' beginning-of-buffer-or-history  # Key Page Up
-      bindkey '^[[6~' end-of-buffer-or-history        # Key Page Down
-      bindkey '^[[1;3D' backward-word                 # Key Alt + Left
-      bindkey '^[[1;3C' forward-word                  # Key Alt + Right
-      bindkey '^[[H' beginning-of-line                # Key Home
-      bindkey '^[[F' end-of-line                      # Key end-of-line
+      # bindkey '^[[3~' delete-char                     # Key Del
+      # bindkey '^[[5~' beginning-of-buffer-or-history  # Key Page Up
+      # bindkey '^[[6~' end-of-buffer-or-history        # Key Page Down
+      # bindkey '^[[1;3D' backward-word                 # Key Alt + Left
+      # bindkey '^[[1;3C' forward-word                  # Key Alt + Right
+      # bindkey '^[[H' beginning-of-line                # Key Home
+      # bindkey '^[[F' end-of-line                      # Key end-of-line
 
-      # bindkey "^[[OH" beginning-of-line
-      # bindkey "^[[OF" end-of-line
-      # bind c-left         beginning-of-line
-      # bind c-right        end-of-line
-      # bind home           beginning-of-buffer
-      # bind end            end-of-buffer
+      bindkey "^[[OH" beginning-of-line
+      bindkey "^[[OF" end-of-line
+      bind c-left         beginning-of-line
+      bind c-right        end-of-line
+      bind home           beginning-of-buffer
+      bind end            end-of-buffer
+      
+      bindkey -s ^f "tmux-sessionizer\n"
 
       # open commands in $EDITOR with C-e
       autoload -z edit-command-line
@@ -183,6 +185,12 @@
     '';
 
     initExtra = ''
+      if test -n "$KITTY_INSTALLATION_DIR"; then
+          export KITTY_SHELL_INTEGRATION="enabled"
+          autoload -Uz -- "$KITTY_INSTALLATION_DIR"/shell-integration/zsh/kitty-integration
+          kitty-integration
+          unfunction kitty-integration
+      fi
       source ~/.openai.sh
       #Python virtualenv
       source ~/.env/bin/activate

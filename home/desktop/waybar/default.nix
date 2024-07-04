@@ -48,12 +48,13 @@
 
         "modules-center" = [
           "custom/spotify"
+          "image/albumart"
           "custom/playerctl"
         ];
 
         "image/albumart" = {
           exec = "album_art";
-          path = "/tmp/cover.jpeg";
+          path = "/tmp/cover.jpg";
           size = 20;
           interval = 5;
         };
@@ -711,13 +712,12 @@
           border-right: 1px solid #${config.colorScheme.palette.base00};
         }
 
-        #image.albumart {
+        #image {
           color: #${config.colorScheme.palette.base00};
           background-color: #${config.colorScheme.palette.base06};
-          border-left: 1px solid #${config.colorScheme.palette.base00};
           border-top: 1px solid #${config.colorScheme.palette.base00};
           border-bottom: 1px solid #${config.colorScheme.palette.base00};
-          border-radius: 10px 0px 0px 10px;
+          border-radius: 0px 0px 0px 0px;
           margin: 0 0 0 2px;
           padding: 5px;
         }

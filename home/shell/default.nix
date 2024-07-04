@@ -1,5 +1,6 @@
 { ... }: {
   imports = [
+    ./scripts.nix
     ./spell/spell.nix
     ./ai/chatgpt.nix
     ./ssh/ssh.nix
