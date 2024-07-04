@@ -10,6 +10,7 @@
     # spotify-player # Spotify
     sptlrx # Spotify Lyrics
     castero # Podcasts
+    gnome-podcasts # Podcasts
 
   ];
 
