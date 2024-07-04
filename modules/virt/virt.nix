@@ -41,6 +41,7 @@
     kvmtool
     libvirt
     qemu
+    multipass
     spice
     spice-gtk
     spice-protocol
