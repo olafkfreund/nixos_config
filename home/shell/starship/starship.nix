@@ -181,7 +181,7 @@
         untracked = " 🤷";
         stashed = " 📦";
         modified = " 📝";
-        staged = "[++\($count\)](green)";
+        staged = "[++\($count\)](fg:color_fg0 bg:color_bg3)";
         renamed = " 👅";
         deleted = " 🗑";
         format = "[[($all_status$ahead_behind) ](fg:color_fg0 bg:color_bg3)]($style)[ ](fg:color_bg3)";
@@ -189,7 +189,7 @@
       };
 
       helm = {
-        format = "via [⎈ $version](bold white) ";
+        format = "via [⎈ $version](fg:color_fg0 bg:color_bg3) ";
       };
 
       kubernetes = {
