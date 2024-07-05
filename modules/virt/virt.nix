@@ -37,7 +37,6 @@
 
   environment.systemPackages = with pkgs; [
     OVMFFull
-    gnome.adwaita-icon-theme
     kvmtool
     libvirt
     qemu
