@@ -11,6 +11,7 @@
     sptlrx # Spotify Lyrics
     castero # Podcasts
     gnome-podcasts # Podcasts
+    hypnotix
 
   ];
 

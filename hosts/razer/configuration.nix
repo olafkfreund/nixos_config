@@ -87,8 +87,11 @@
     shell = pkgs.zsh;
     packages = with pkgs; [
       vim
+      wally-cli
     ];
   };
+  hardware.keyboard.zsa.enable = true;
+
   networking.firewall.enable = false;
   networking.nftables.enable = true;
   networking.timeServers = [ "pool.ntp.org" ];
