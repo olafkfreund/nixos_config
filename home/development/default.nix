@@ -14,5 +14,6 @@
     ./nodejs.nix
     ./github.nix
     ./nvim.nix
+    ./emacs.nix
 ];
 }
