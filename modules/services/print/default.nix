@@ -1,8 +1,10 @@
-{ pkgs, ... }:
-let
-  username = "olafkfreund";
-in
 {
+  pkgs,
+  pkgs-stable,
+  ...
+}: let
+  username = "olafkfreund";
+in {
   services = {
     printing.enable = true;
     avahi = {
@@ -22,10 +24,10 @@ in
   };
   hardware.sane = {
     enable = true;
-    extraBackends = [pkgs.hplipWithPlugin];
+    extraBackends = [pkgs-stable.hplip];
     disabledDefaultBackends = ["escl"];
   };
-  services.printing.drivers = [ pkgs.hplipWithPlugin ];
+  services.printing.drivers = [pkgs-stable.hplip];
   programs.system-config-printer.enable = true;
   users.users.${username}.extraGroups = ["scanner" "lp"];
 }

@@ -67,7 +67,7 @@ home.packages = with pkgs; [
   # sane-backends
   dbus
   libjpeg
-  hplipWithPlugin 
+    #hplipWithPlugin 
   avahi
   sane-airscan
   xsane

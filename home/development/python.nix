@@ -17,6 +17,5 @@
     python311Packages.pycairo
     python311Packages.pillow
     python311Packages.requests
-    calcure
   ];
 }

@@ -36,7 +36,6 @@
     shellify # faster nix-shells
     github-desktop
     swayosd
-    hplip
     v4l-utils
     sops
   ];

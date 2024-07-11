@@ -6,6 +6,8 @@
     podman-desktop
     podman
     pods
+    libceph
+    ceph
    ];
   virtualisation = {
     podman = {

@@ -1,17 +1,17 @@
 { pkgs, pkgs-stable, ... }: {
 
-  home.packages = with pkgs; [
+  home.packages = [
     #spotify
-    spicetify-cli
-    ncspot # Spotify
-    plexamp # Plex
-    vlc # video player
-    cava # audio visualizer
+    pkgs.spicetify-cli
+    pkgs.ncspot # Spotify
+    pkgs.plexamp # Plex
+    pkgs.vlc # video player
+    pkgs.cava # audio visualizer
     # spotify-player # Spotify
-    sptlrx # Spotify Lyrics
-    castero # Podcasts
-    gnome-podcasts # Podcasts
-    hypnotix
+    pkgs.sptlrx # Spotify Lyrics
+    pkgs-stable.castero # Podcasts
+    pkgs.gnome-podcasts # Podcasts
+    pkgs.hypnotix
 
   ];
 

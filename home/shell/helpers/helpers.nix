@@ -12,7 +12,7 @@
     nerdfonts #fonts
     wtf #terminal dashboard
     starship #prompt replacement
-    neofetch #os printout
+    #neofetch #os printout
     fastfetch # like neofetch only faster
     #zoxide #A fast cd command that learns your habits
     less #

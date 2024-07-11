@@ -1,6 +1,6 @@
 { inputs, pkgs, config, pkgs-stable, ... }: {
 
-  home.packages = with pkgs; [
+  home.packages = with pkgs-stable; [
     azure-cli
     azure-storage-azcopy
     kubelogin

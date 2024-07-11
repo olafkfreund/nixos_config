@@ -1,5 +1,8 @@
-{ config, lib, pkgs, ... }: with lib; {
-
+{
+  pkgs,
+  pkgs-stable,
+  ...
+}: {
   virtualisation = {
     libvirtd = {
       enable = true;
@@ -8,11 +11,10 @@
       qemu = {
         swtpm.enable = true;
         ovmf.enable = true;
-        ovmf.packages = [ pkgs.OVMFFull.fd ];
-        package = pkgs.qemu_kvm;
+        ovmf.packages = [pkgs.OVMFFull.fd];
+        package = pkgs.qemu;
         runAsRoot = false;
       };
-
     };
     spiceUSBRedirection.enable = true;
 
@@ -20,12 +22,13 @@
       enable = true;
     };
     incus = {
+      package = pkgs.incus;
       enable = true;
     };
   };
   virtualisation.incus.ui.enable = true;
 
-  environment.sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
+  environment.sessionVariables.LIBVIRT_DEFAULT_URI = ["qemu:///system"];
   services.spice-vdagentd.enable = true;
   systemd.services.libvirtd.restartIfChanged = false;
   virtualisation.lxd.enable = false;
@@ -37,9 +40,10 @@
 
   environment.systemPackages = with pkgs; [
     OVMFFull
+    ceph
     kvmtool
     libvirt
-    qemu
+    #qemu
     multipass
     spice
     spice-gtk
@@ -51,12 +55,9 @@
     win-spice
     win-virtio
     virtualbox
-    quickgui
-    quickemu
-    quickgui
+    #quickgui
+    #quickemu
+    #quickgui
     btrfs-progs
-
   ];
-
 }
-
