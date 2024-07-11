@@ -15,5 +15,6 @@
     ./github.nix
     ./nvim.nix
     ./emacs.nix
+    ./zed.nix
 ];
 }

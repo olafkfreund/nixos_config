@@ -112,12 +112,10 @@ in {
       exec-once = [workspace special:spotify] spotify
       exec-once = [workspace 1 silent] google-chrome-stable
       exec-once = [workspace 2 silent] firefox
-      exec-once = [workspace 3 silent] kitty -d "~/config/nixos" --hold sh -c nvim
-      exec-once = [workspace 3 silent] kitty --hold sh -c tmux
+      exec-once = [workspace 3 silent] foot
       exec-once = [workspace 4 silent] slack
       exec-once = [workspace 5 silent] ferdium
       exec-once = [workspace 6 silent] obsidian
-      exec-once = [workspace 7 silent] code
       exec-once = [workspace 8 silent] 1password
 
 
