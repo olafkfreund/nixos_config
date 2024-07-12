@@ -1,6 +1,6 @@
 { self, config, pkgs, ... }: {
   services.auto-cpufreq = {
-    enable = true;
+    enable = false;
     settings = {
       battery = {
          governor = "powersave";
