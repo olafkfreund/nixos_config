@@ -5,6 +5,7 @@
     docui
     docker-gc
     lazydocker
+    earthly
    ];
 
   #Docker config

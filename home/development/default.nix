@@ -16,5 +16,6 @@
     ./nvim.nix
     ./emacs.nix
     ./zed.nix
+    ./containers.nix
 ];
 }
