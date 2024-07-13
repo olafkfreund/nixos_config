@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{pkgs, ...}: {
   home.packages = with pkgs; [
     # slack
     teams-for-linux
@@ -15,5 +15,6 @@
     telegram-desktop
     whatsapp-for-linux
     ferdium
+    zoom
   ];
 }

@@ -100,7 +100,7 @@ in {
       exec-once = kdeconnect-cli
       exec-once = playerctld daemon
       exec-once = pkill swww-daemon && swww-daemon
-      exec-once = start_wall
+      # exec-once = start_wall
       exec-once = hypridle
       exec-once = nm-applet --indicator
       exec-once = blueman-applet
@@ -122,7 +122,7 @@ in {
       # Env variables
       env = EDITOR="nvim";
       env = BROWSER="google-chrome-stable";
-      env = TERMINAL="kitty";
+      env = TERMINAL="foot";
 
       env = SDL_VIDEODRIVER,wayland
       env = XDG_CURRENT_DESKTOP,Hyprland

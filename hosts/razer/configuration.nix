@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}: {
+{pkgs, ...}: {
   imports = [
     ./hardware-configuration.nix
     ./screens.nix
@@ -31,7 +29,7 @@
 
   stylix.fonts = {
     monospace = {
-      package = pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; };
+      package = pkgs.nerdfonts.override {fonts = ["JetBrainsMono"];};
       name = "JetBrainsMono Nerd Font Mono";
     };
     sansSerif = {
@@ -44,10 +42,10 @@
     };
   };
   stylix.fonts.sizes = {
-    applications = 14;
-    terminal = 14;
-    desktop = 14;
-    popups = 14;
+    applications = 12;
+    terminal = 12;
+    desktop = 12;
+    popups = 12;
   };
 
   stylix.opacity = {
@@ -71,7 +69,7 @@
 
   users.defaultUserShell = pkgs.zsh;
 
-  environment.shells = with pkgs; [ zsh ];
+  environment.shells = with pkgs; [zsh];
 
   programs.zsh.enable = true;
 
@@ -83,7 +81,7 @@
   users.users.olafkfreund = {
     isNormalUser = true;
     description = "Olaf K-Freund";
-    extraGroups = [ "networkmanager" "openrazer" "wheel" "docker" "video" "scanner" "lp" "lxd" "incus-admin" ];
+    extraGroups = ["networkmanager" "openrazer" "wheel" "docker" "video" "scanner" "lp" "lxd" "incus-admin"];
     shell = pkgs.zsh;
     packages = with pkgs; [
       vim
@@ -94,6 +92,6 @@
 
   networking.firewall.enable = false;
   networking.nftables.enable = true;
-  networking.timeServers = [ "pool.ntp.org" ];
+  networking.timeServers = ["pool.ntp.org"];
   system.stateVersion = "24.11";
 }
