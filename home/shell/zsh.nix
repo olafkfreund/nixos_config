@@ -248,6 +248,7 @@
       obsidian = "obsidian --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
       google-chrome-stable = "google-chrome-stable --ozone-platform=wayland";
       microsoft-edge-stable = "microsoft-edge-stable --ozone-platform=wayland";
+      wezterm = "wezterm start --always-new-process";
     };
   };
 }

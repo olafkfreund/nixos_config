@@ -5,12 +5,12 @@
   ...
 }: let
   animations.fast = true;
-  animations.moving = true;
-  animations.high = true;
+  animations.moving = false;
+  animations.high = false;
   decoration.rounding.more.blur = false;
   decoration.rounding.all.blur = false;
-  decoration.no.rounding.blur = false;
-  gaps-big-no-border = false;
+  decoration.no.rounding.blur = true;
+  gaps-big-no-border = true;
   gaps-big-border = false;
 in {
   imports = [
@@ -195,8 +195,8 @@ in {
           ${
         if gaps-big-no-border == true
         then ''
-          gaps_in = 20
-          gaps_out = 40
+          gaps_in = 2
+          gaps_out = 4
           border_size = 0
         ''
         else if gaps-big-border == true
