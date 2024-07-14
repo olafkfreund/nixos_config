@@ -231,7 +231,6 @@ in {
                 new_optimizations = on
                 ignore_opacity = true
                 xray = true
-                # blurls = waybar
             }
             active_opacity = 1.0
             inactive_opacity = 0.6
@@ -254,7 +253,6 @@ in {
               new_optimizations = on
               ignore_opacity = true
               xray = true
-              blurls = waybar
           }
           active_opacity = 1
           inactive_opacity = 0.6
@@ -277,7 +275,6 @@ in {
               new_optimizations = on
               ignore_opacity = true
               xray = true
-              # blurls = waybar
           }
           active_opacity = 1.0
           inactive_opacity = 0.8
@@ -300,8 +297,8 @@ in {
                 ignore_opacity = true
                 xray = false
               }
-          layerrule = blur, waybar
-          layerrule = ignorezero, waybar
+          # layerrule = blur, waybar
+          # layerrule = ignorezero, waybar
           layerrule = blur, notifications
           layerrule = ignorezero, notifications
           layerrule = blur, logout_dialog
@@ -667,7 +664,7 @@ in {
       bindl = , switch:on:Lid Switch,exec,hyprctl keyword monitor "eDP-1, disable"
 
       blurls = rofi
-      blurls = waybar
+      # blurls = waybar
       blurls = gtk-layer-shell
       blurls = notifications
       blurls = swayosd
