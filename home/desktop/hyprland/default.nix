@@ -608,21 +608,16 @@ in {
       bind = $mainMod SHIFT, 9, movetoworkspace, 9
       bind = $mainMod SHIFT, 0, movetoworkspace, 10
 
-      bind = $mainMod SHIFT,left,movewindow,l
-      bind = $mainMod SHIFT,right,movewindow,r
-      bind = $mainMod SHIFT,up,movewindow,u
-      bind = $mainMod SHIFT,down,movewindow,d
-
       bind = $mainMod_SHIFT,h,movewindow,l
       bind = $mainMod_SHIFT,l,movewindow,r
       bind = $mainMod_SHIFT,k,movewindow,u
       bind = $mainMod_SHIFT,j,movewindow,d
 
       # Resize windows
-      binde = $mainMod_ALT, right, resizeactive, 30 0
-      binde = $mainMod_ALT, left, resizeactive, -30 0
-      binde = $mainMod_ALT, up, resizeactive, 0 -30
-      binde = $mainMod_ALT, down, resizeactive, 0 30
+      binde = $mainMod_CTRL, h, resizeactive, 30 0
+      binde = $mainMod_CTRL, l, resizeactive, -30 0
+      binde = $mainMod_CTRL, k, resizeactive, 0 -30
+      binde = $mainMod_CTRL, j, resizeactive, 0 30
 
       #ATL-TAB
       #bind = ALT, TAB, exec, ~/.config/rofi/launchers/type-2/launcher-alttab.sh
