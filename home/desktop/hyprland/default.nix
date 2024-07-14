@@ -621,8 +621,8 @@ in {
       bind = $mainMod_SHIFT,j,movewindow,d
 
       # Resize windows
-      binde = $mainMod_CTRL, h, resizeactive, 30 0
-      binde = $mainMod_CTRL, l, resizeactive, -30 0
+      binde = $mainMod_CTRL, l, resizeactive, 30 0
+      binde = $mainMod_CTRL, h, resizeactive, -30 0
       binde = $mainMod_CTRL, k, resizeactive, 0 -30
       binde = $mainMod_CTRL, j, resizeactive, 0 30
 
