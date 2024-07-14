@@ -525,7 +525,7 @@ in {
 
       #Kitty
       bind = $mainMod, E, exec, [float]kitty --hold sh -c yazi
-      bind = $mainMod ALT, T, exec, kitty
+      bind = $mainMod ALT, T, exec, wezterm start --always-new-session
 
       bind = $mainMod, space, exec, ~/.config/rofi/launchers/type-2/launcher.sh
       bind = $mainMod, RETURN, exec, [float]kitty
