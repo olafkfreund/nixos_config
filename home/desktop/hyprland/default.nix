@@ -65,6 +65,7 @@ in {
       # pkgs.hyprlandPlugins.hyprbars
       pkgs.hyprlandPlugins.hyprexpo
       pkgs.hyprlandPlugins.csgo-vulkan-fix
+      pkgs.hyprlandPlugins.hycov
       #pkgs.hyprlandPlugins.borders-plus-plus
     ];
     extraConfig = ''
@@ -117,8 +118,10 @@ in {
       exec-once = [workspace 5 silent] ferdium
       exec-once = [workspace 6 silent] obsidian
       exec-once = [workspace 8 silent] 1password
-
-
+      exec-once = [workspace 3 silent] wezterm start --always-new-process
+      exec-once = $keybinds = $(hyprkeys -bjl | jq '.Binds | map(.Bind + " -> " + .Dispatcher + ", " + .Command)'[] -r)
+      exec-once = $execs = $(hyprkeys -aj | jq '.AutoStart | map("[" + .ExecType + "] " + .Command)'[] -r)
+      
       # Env variables
       env = EDITOR="nvim";
       env = BROWSER="google-chrome-stable";
@@ -482,6 +485,12 @@ in {
       #Hyprexpo
       bind = ALT, TAB, hyprexpo:expo, toggle # can be: toggle, off/disable or on/enable
 
+      $keybinds = $(hyprkeys -bjl | jq '.Binds | map(.Bind + " -> " + .Dispatcher + ", " + .Command)'[] -r)
+      $execs = $(hyprkeys -aj | jq '.AutoStart | map("[" + .ExecType + "] " + .Command)'[] -r)
+
+      bind = $mainMod, backspace, exec, rofi -dmenu -p "Keybinds" <<< $keybinds
+      bind = $mainMod SHIFT, backspace, exec, rofi -dmenu -p "Startup Programs" <<< $execs
+      
       # #Hypcov
       # bind = ALT,tab,hycov:toggleoverview
       # bind=ALT,left,hycov:movefocus,l
@@ -513,8 +522,8 @@ in {
       bind=, XF86AudioMicMute, exec, swayosd-client --input-volume mute-toggle
       bind=, XF86AudioRaiseVolume, exec, swayosd-client --output-volume 5
       bind=, XF86AudioLowerVolume, exec, swayosd-client --output-volume -5
-      # bind=, XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise --max-volume 120
-      # bind=, XF86AudioLowerVolume, exec, swayosd-client --output-volume lower --max-volume 120
+      bind=, XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise --max-volume 120
+      bind=, XF86AudioLowerVolume, exec, swayosd-client --output-volume lower --max-volume 120
       bind=, XF86MonBrightnessUp, exec, swayosd-client --brightness raise
       bind=, XF86MonBrightnessDown, exec, swayosd-client --brightness lower
       bind=, XF86MonBrightnessUp,  exec, swayosd-client --brightness +10
@@ -522,7 +531,7 @@ in {
 
       #Kitty
       bind = $mainMod, E, exec, [float]kitty --hold sh -c yazi
-      bind = $mainMod, T, exec, wezterm start --always-new-process
+      bind = $mainMod, T, exec, wezterm
 
       bind = $mainMod, space, exec, ~/.config/rofi/launchers/type-2/launcher.sh
       bind = $mainMod, RETURN, exec, [float]kitty
@@ -536,12 +545,10 @@ in {
       bind = $mainMod, P, pin
       #bind = $mainMod SHIFT, P, unpin
 
-      bind = $mainMod, H, movetoworkspace, special:hidden
-      bind = $mainMod SHIFT, H, togglespecialworkspace, hidden
+      bind = $mainMod ALT, H, movetoworkspace, special:hidden
+      bind = $mainMod ALT, H, togglespecialworkspace, hidden
 
       bind = $mainMod, K, exec, hyprctl kill
-      bind = $mainMod CTRL, K, exec, list-hypr-bindings
-      bind = $mainMod, M, exec, list-hypr-bindings
 
       # Special workspace (scratchpad)
       bind = $mainMod, S, togglespecialworkspace, magic
@@ -549,11 +556,11 @@ in {
 
       bind = , Insert, exec, $HOME/.config/rofi/applets/bin/clipboard.sh
 
-      bind = $mainMod, L, exec, hyprlock
-      bind = $mainMod, left, movefocus, l
-      bind = $mainMod, right, movefocus, r
-      bind = $mainMod, up, movefocus, u
-      bind = $mainMod, down, movefocus, d
+      bind = $mainMod ALT, L, exec, hyprlock
+      bind = $mainMod, h, movefocus, l
+      bind = $mainMod, l, movefocus, r
+      bind = $mainMod, k, movefocus, u
+      bind = $mainMod, j, movefocus, d
 
       # Mediaplayer (spotify without SHIFT) binds and general volume control
       bind = $mainMod, Z, exec, playerctl -p spotify previous
@@ -620,7 +627,6 @@ in {
       binde = $mainMod_CTRL, j, resizeactive, 0 30
 
       #ATL-TAB
-      #bind = ALT, TAB, exec, ~/.config/rofi/launchers/type-2/launcher-alttab.sh
       # bind = $mainMod, TAB, cyclenext,
 
       # Switch workspaces with mainMod + [0-9]
@@ -641,7 +647,6 @@ in {
 
       # Waybar
       bind = $mainMod, B, exec, pkill -SIGUSR1 waybar
-      bind = $mainMod SHIF, B, exec, pkill -SIGUSR2 waybar
 
       # Switch workspaces relative to the active workspace with mainMod + CTRL + [←→]
       bind = $mainMod CTRL, right, workspace, r+1
@@ -650,7 +655,6 @@ in {
       # move to the first empty workspace instantly with mainMod + CTRL + [↓]
       bind = $mainMod CTRL, down, workspace, empty
       bind = $mainMod,g,togglegroup
-      # bind = ALT, TAB, exec, ~/.config/hypr/scripts/tab_floating_windows
       bind = $mainMod,tab,changegroupactive
 
       # trigger when the switch is turning off
