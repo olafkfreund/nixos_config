@@ -1,5 +1,10 @@
-{ inputs, pkgs, config, pkgs-stable, ... }: {
-
+{
+  inputs,
+  pkgs,
+  config,
+  pkgs-stable,
+  ...
+}: {
   home.packages = with pkgs-stable; [
     azure-cli
     azure-storage-azcopy
@@ -61,5 +66,10 @@
     python311Packages.setuptools
     python311Packages.msrestazure
     python311Packages.virtualenv
-   ];
+    # azure extensions
+    azure-cli-extensions.fzf # fuzzy finder
+    azure-cli-extensions.k8s-extension # k8s extensions
+    azure-cli-extensions.terraform # terraform
+    azure-cli-extensions.bastion
+  ];
 }
