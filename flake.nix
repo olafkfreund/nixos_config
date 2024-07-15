@@ -69,10 +69,11 @@
     #   inputs.hyprland.follows = "hyprland";
     # };
 
-    nix-ld = {
-      url = "github:Mic92/nix-ld";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    
+    # nix-ld = {
+    #   url = "github:Mic92/nix-ld";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
 
     # hyprland-contrib = {
     #   url = "github:hyprwm/contrib";
@@ -137,7 +138,7 @@
     , nix-colors
     , ags
     , browser-previews
-    , nix-ld
+    # , nix-ld
     , nix-snapd
     , spicetify-nix
     , home-manager
@@ -158,7 +159,7 @@
             nixos-cosmic.nixosModules.default
             inputs.nix-colors.homeManagerModules.default
             inputs.stylix.nixosModules.stylix
-            inputs.nix-ld.nixosModules.nix-ld
+            # inputs.nix-ld.nixosModules.nix-ld
             inputs.nix-snapd.nixosModules.default
             inputs.razer-laptop-control.nixosModules.default
             nix-index-database.nixosModules.nix-index
@@ -175,7 +176,7 @@
                 inherit nixpkgs;
                 inherit spicetify-nix;
                 inherit ags;
-                inherit nix-ld;
+                # inherit nix-ld;
                 inherit razer-laptop-control;
                 inherit stylix;
                 inherit nix-index-database;
