@@ -22,7 +22,9 @@
     zplug = {
       enable = true;
       plugins = [
-        {name = "loiccoyle/zsh-github-copilot";}
+        {
+          name = "loiccoyle/zsh-github-copilot";
+        }
       ];
     };
     plugins = [
@@ -113,7 +115,10 @@
       # bindkey '^[[1;3C' forward-word                  # Key Alt + Right
       # bindkey '^[[H' beginning-of-line                # Key Home
       # bindkey '^[[F' end-of-line                      # Key end-of-line
-
+      
+      bindkey '^[|' zsh_gh_copilot_explain  # bind Alt+shift+\ to explain
+      bindkey '^[\' zsh_gh_copilot_suggest  # bind Alt+\ to suggest
+      
       bindkey "^[[OH" beginning-of-line
       bindkey "^[[OF" end-of-line
       bind c-left         beginning-of-line
