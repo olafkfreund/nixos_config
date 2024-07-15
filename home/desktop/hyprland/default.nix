@@ -100,7 +100,8 @@ in {
       exec-once = dunst
       exec-once = kdeconnect-cli
       exec-once = playerctld daemon
-      exec-once = pkill swww-daemon && swww-daemon
+      exec-once = swww init
+      exec-once = swww-daemon --format xrgb
       # exec-once = start_wall
       exec-once = hypridle
       exec-once = nm-applet --indicator
