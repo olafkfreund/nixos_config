@@ -18,7 +18,13 @@
       enable = true;
     };
     autosuggestion.enable = true;
-
+    
+    zplug = {
+      enable = true;
+      plugins = [
+        {name = "loiccoyle/zsh-github-copilot";}
+      ];
+    };
     plugins = [
       {
         name = "zsh-fzf-tab";
