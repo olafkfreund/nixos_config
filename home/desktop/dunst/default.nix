@@ -1,4 +1,8 @@
-{ config, ... }: {
+{
+  config,
+  pkgs,
+  ...
+}: {
   services.dunst = {
     enable = true;
     settings = {
@@ -42,10 +46,12 @@
         max_icon_size = 86;
         min_icon_size = 32;
         icon_theme = "Papirus";
+        icon_path = "/usr/share/icons/gnome/16x16/status/:/usr/share/icons/gnome/16x16/devices/";
         enable_recursive_icon_lookup = true;
         sticky_history = true;
         history_length = 20;
-        browser = "google-chrome-stable";
+        browser = "${pkgs.xdg-utils}/bin/xdg-open";
+        dmenu = "/usr/bin/dmenu -p dunst:";
         always_run_script = true;
         title = "Dunst";
         class = "Dunst";
