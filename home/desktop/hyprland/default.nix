@@ -65,7 +65,7 @@ in {
       # pkgs.hyprlandPlugins.hyprbars
       pkgs.hyprlandPlugins.hyprexpo
       pkgs.hyprlandPlugins.csgo-vulkan-fix
-      pkgs.hyprlandPlugins.hycov
+      # pkgs.hyprlandPlugins.hycov
       #pkgs.hyprlandPlugins.borders-plus-plus
     ];
     extraConfig = ''
