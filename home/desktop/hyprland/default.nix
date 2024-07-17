@@ -73,7 +73,7 @@ in {
       monitor = eDP-1,1920x1080@100,0x0,1
       #home
       # monitor = HDMI-A-1,3840x2160@60,0x0,1,bitdepth,10
-      monitor = HDMI-A-1,3840x2160@120,0x0,1.5,bitdepth,10
+      monitor = HDMI-A-1,3840x2160@120,0x0,1,bitdepth,10
       #monitor=,preferred,auto, 1
       #wsbind=1,eDP-1
 
@@ -486,11 +486,8 @@ in {
       #Hyprexpo
       bind = ALT, TAB, hyprexpo:expo, toggle # can be: toggle, off/disable or on/enable
 
-      $keybinds = $(hyprkeys -bjl | jq '.Binds | map(.Bind + " -> " + .Dispatcher + ", " + .Command)'[] -r)
-      $execs = $(hyprkeys -aj | jq '.AutoStart | map("[" + .ExecType + "] " + .Command)'[] -r)
-
-      bind = $mainMod, backspace, exec, rofi -dmenu -p "Keybinds" <<< $keybinds
-      bind = $mainMod SHIFT, backspace, exec, rofi -dmenu -p "Startup Programs" <<< $execs
+      bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh
+      bind = $mainMod SHIFT, backspace, exec, ~/.config/rofi/launchers/type-2/hypr_exec.sh
       
       # #Hypcov
       # bind = ALT,tab,hycov:toggleoverview

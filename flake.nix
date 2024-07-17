@@ -1,8 +1,8 @@
 {
-  description = "Olaf's flake for work-lx with Home Manager enabled";
+  description = "Olaf's flake with Home Manager enabled";
 
   nixConfig = {
-    experimental-features = [ "nix-command" "flakes" ];
+    experimental-features = ["nix-command" "flakes"];
     substituters = [
       "https://cache.nixos.org/"
       "https://cuda-maintainers.cachix.org"
@@ -30,7 +30,7 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.05";
 
-    nix-colors ={ 
+    nix-colors = {
       url = "github:misterio77/nix-colors";
     };
 
@@ -40,10 +40,9 @@
     };
 
     sops-nix = {
-     url = "github:mic92/sops-nix";
-     inputs.nixpkgs.follows ="nixpkgs";
+      url = "github:mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
-
 
     nixos-cosmic = {
       url = "github:lilyinstarlight/nixos-cosmic";
@@ -55,32 +54,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # hyprland = {
-    #   url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
-    #   #hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1&ref=refs/tags/v0.41.0";
-    #   #hyprland.url = "github:hyprwm/Hyprland";
-    # };
-
-    # hyprland-plugins = {
-    #   url = "github:hyprwm/hyprland-plugins";
-    #   inputs.hyprland.follows = "hyprland";
-    # };
-
-
-    #   inputs.hyprland.follows = "hyprland";
-    # };
-
-    
-    # nix-ld = {
-    #   url = "github:Mic92/nix-ld";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
-    # hyprland-contrib = {
-    #   url = "github:hyprwm/contrib";
-    #   inputs.hyprland.follows = "hyprland";
-    # };
-
     agenix = {
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -90,7 +63,7 @@
       url = "github:moni-dz/nixpkgs-f2k";
     };
 
-    nur ={
+    nur = {
       url = "github:nix-community/NUR";
     };
 
@@ -98,11 +71,6 @@
       url = "github:io12/nix-snapd";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
-    # hyprspace = {
-    #   url = "github:KZDKM/Hyprspace";
-    #   inputs.hyprland.follows = "hyprland";
-    # };
 
     stylix = {
       url = "github:danth/stylix";
@@ -122,87 +90,166 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    ags ={
+    ags = {
       url = "github:Aylur/ags";
     };
-
   };
 
-  outputs =
-    { self
-    , nixpkgs
-    , nixpkgs-stable
-    , nur
-    , nixos-cosmic
-    , razer-laptop-control
-    , nixpkgs-f2k
-    , nix-colors
-    , ags
-    , browser-previews
-    # , nix-ld
-    , nix-snapd
-    , spicetify-nix
-    , home-manager
-    , stylix
-    , nix-index-database
-    , ...
-    } @ inputs: {
-      nixosConfigurations = {
-        razer = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          specialArgs = {
-            inherit inputs;
-          };
-          modules = [
-            ./hosts/razer/configuration.nix
-            nur.nixosModules.nur
-            home-manager.nixosModules.home-manager
-            nixos-cosmic.nixosModules.default
-            inputs.nix-colors.homeManagerModules.default
-            inputs.stylix.nixosModules.stylix
-            # inputs.nix-ld.nixosModules.nix-ld
-            inputs.nix-snapd.nixosModules.default
-            inputs.razer-laptop-control.nixosModules.default
-            nix-index-database.nixosModules.nix-index
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.backupFileExtension = "backup";
-              home-manager.extraSpecialArgs = {
-                pkgs-stable = import nixpkgs-stable {
-                  system = "x86_64-linux";
-                  config.allowUnfree = true;
-                };
-                inherit inputs;
-                inherit nixpkgs;
-                inherit spicetify-nix;
-                inherit ags;
-                # inherit nix-ld;
-                inherit razer-laptop-control;
-                inherit stylix;
-                inherit nix-index-database;
-                inherit nixpkgs-f2k;
-                inherit home-manager;
-                inherit browser-previews;
-                inherit nixpkgs-stable;
-                inherit nix-colors;
-                inherit nix-snapd;
-                inherit self;
-              };
-              home-manager.users.olafkfreund = import ./Users/olafkfreund/razer_home.nix;
-              home-manager.sharedModules = [
-                {
-                  stylix.targets.waybar.enable = false;
-                  stylix.targets.yazi.enable = false;
-                  stylix.targets.vim.enable = false;
-                  stylix.targets.vscode.enable = false;
-                  stylix.targets.dunst.enable = false;
-
-                }
-              ];
-            }
-          ];
+  outputs = {
+    self,
+    nixpkgs,
+    nixpkgs-stable,
+    nur,
+    nixos-cosmic,
+    razer-laptop-control,
+    nixpkgs-f2k,
+    nix-colors,
+    ags,
+    browser-previews,
+    nix-snapd,
+    spicetify-nix,
+    home-manager,
+    stylix,
+    nix-index-database,
+    ...
+  } @ inputs: {
+    nixosConfigurations = {
+      razer = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {
+          inherit inputs;
         };
+        modules = [
+          ./hosts/razer/configuration.nix
+          nur.nixosModules.nur
+          home-manager.nixosModules.home-manager
+          nixos-cosmic.nixosModules.default
+          inputs.nix-colors.homeManagerModules.default
+          inputs.stylix.nixosModules.stylix
+          inputs.nix-snapd.nixosModules.default
+          inputs.razer-laptop-control.nixosModules.default
+          nix-index-database.nixosModules.nix-index
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
+            home-manager.extraSpecialArgs = {
+              pkgs-stable = import nixpkgs-stable {
+                system = "x86_64-linux";
+                config.allowUnfree = true;
+              };
+              inherit inputs;
+              inherit nixpkgs;
+              inherit spicetify-nix;
+              inherit ags;
+              inherit razer-laptop-control;
+              inherit stylix;
+              inherit nix-index-database;
+              inherit nixpkgs-f2k;
+              inherit home-manager;
+              inherit browser-previews;
+              inherit nixpkgs-stable;
+              inherit nix-colors;
+              inherit nix-snapd;
+              inherit self;
+            };
+            home-manager.users.olafkfreund = import ./Users/olafkfreund/razer_home.nix;
+            home-manager.sharedModules = [
+              {
+                stylix.targets.waybar.enable = false;
+                stylix.targets.yazi.enable = false;
+                stylix.targets.vim.enable = false;
+                stylix.targets.vscode.enable = false;
+                stylix.targets.dunst.enable = false;
+              }
+            ];
+          }
+        ];
+      };
+      g3 = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {
+          inherit inputs;
+        };
+        modules = [
+          ./hosts/g3/configuration.nix
+          nur.nixosModules.nur
+          home-manager.nixosModules.home-manager
+          inputs.nix-colors.homeManagerModules.default
+          inputs.stylix.nixosModules.stylix
+          inputs.nix-snapd.nixosModules.default
+          nix-index-database.nixosModules.nix-index
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
+            home-manager.extraSpecialArgs = {
+              pkgs-stable = import nixpkgs-stable {
+                system = "x86_64-linux";
+                config.allowUnfree = true;
+              };
+              inherit inputs;
+              inherit nixpkgs;
+              inherit stylix;
+              inherit nix-index-database;
+              inherit nixpkgs-f2k;
+              inherit home-manager;
+              inherit nixpkgs-stable;
+              inherit nix-colors;
+              inherit nix-snapd;
+              inherit self;
+            };
+            home-manager.users.olafkfreund = import ./Users/olafkfreund/g3_home.nix;
+            home-manager.sharedModules = [
+              {
+                stylix.targets.vim.enable = false;
+              }
+            ];
+          }
+        ];
+      dex5550 = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {
+          inherit inputs;
+        };
+        modules = [
+          ./hosts/dex5550/configuration.nix
+          nur.nixosModules.nur
+          home-manager.nixosModules.home-manager
+          inputs.nix-colors.homeManagerModules.default
+          inputs.stylix.nixosModules.stylix
+          inputs.nix-snapd.nixosModules.default
+          nix-index-database.nixosModules.nix-index
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
+            home-manager.extraSpecialArgs = {
+              pkgs-stable = import nixpkgs-stable {
+                system = "x86_64-linux";
+                config.allowUnfree = true;
+              };
+              inherit inputs;
+              inherit nixpkgs;
+              inherit stylix;
+              inherit nix-index-database;
+              inherit nixpkgs-f2k;
+              inherit home-manager;
+              inherit nixpkgs-stable;
+              inherit nix-colors;
+              inherit nix-snapd;
+              inherit self;
+            };
+            home-manager.users.olafkfreund = import ./Users/olafkfreund/dex5550_home.nix;
+            home-manager.sharedModules = [
+              {
+                stylix.targets.vim.enable = false;
+              }
+            ];
+          }
+        ];
+      };
       };
     };
+  };
 }
