@@ -74,6 +74,7 @@ in {
       #home
       # monitor = HDMI-A-1,3840x2160@60,0x0,1,bitdepth,10
       monitor = HDMI-A-1,3840x2160@120,0x0,1,bitdepth,10
+      monitor = DP-3,3840x2160@120,0x0,1,bitdepth,10
       #monitor=,preferred,auto, 1
       #wsbind=1,eDP-1
 
@@ -122,7 +123,7 @@ in {
       exec-once = [workspace 3 silent] wezterm start --always-new-process
       exec-once = $keybinds = $(hyprkeys -bjl | jq '.Binds | map(.Bind + " -> " + .Dispatcher + ", " + .Command)'[] -r)
       exec-once = $execs = $(hyprkeys -aj | jq '.AutoStart | map("[" + .ExecType + "] " + .Command)'[] -r)
-      
+
       # Env variables
       env = EDITOR="nvim";
       env = BROWSER="google-chrome-stable";
@@ -488,7 +489,7 @@ in {
 
       bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh
       bind = $mainMod SHIFT, backspace, exec, ~/.config/rofi/launchers/type-2/hypr_exec.sh
-      
+
       # #Hypcov
       # bind = ALT,tab,hycov:toggleoverview
       # bind=ALT,left,hycov:movefocus,l
