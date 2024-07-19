@@ -5,6 +5,7 @@
     ./boot.nix
     ./i18n.nix
     ./stylix.nix
+    ./greetd.nix
     ../../modules/default.nix
   ];
   networking.networkmanager.enable = true;

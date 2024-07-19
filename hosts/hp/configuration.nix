@@ -6,6 +6,7 @@
     ./nvidia.nix
     ./i18n.nix
     ./envvar.nix
+    ./greetd.nix
     ../../modules/default.nix
   ];
   networking.networkmanager.enable = true;

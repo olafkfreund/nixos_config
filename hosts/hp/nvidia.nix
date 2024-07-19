@@ -20,16 +20,6 @@ in {
     nvidiaSettings = true;
     package = config.boot.kernelPackages.nvidiaPackages.beta;
   };
-
-  # boot.kernelParams = [ "module_blacklist=i915" ];
-
-  hardware.nvidia.prime = {
-    sync.enable = true;
-    offload.enable = false;
-    intelBusId = "PCI:0:2:0";
-    nvidiaBusId = "PCI:1:0:0";
-  };
-
   hardware.opengl = {
     enable = true;
     driSupport32Bit = true;
@@ -41,7 +31,6 @@ in {
       vulkan-validation-layers
     ];
   };
-
   environment = {
     systemPackages = with pkgs; [
       libva

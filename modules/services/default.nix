@@ -18,7 +18,7 @@
     ./atuin/default.nix
     ./logind/default.nix
     ./auto-cpufreq/default.nix
-    ./greetd/greetd.nix
+    # ./greetd/greetd.nix
     ./ollama/default.nix
     ./sysprof/default.nix
     ./libinput/default.nix

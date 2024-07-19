@@ -43,6 +43,19 @@ static const char *fonts[]          = {"Iosevka:style:medium:size=12" ,"JetBrain
 // theme
 #include "themes/gruvchad.h"
 
+static const char *const autostart[] = {
+  "xset", "s", "off", NULL,
+  "xset", "s", "noblank", NULL,
+  "xset", "-dpms", NULL,
+  "dbus-update-activation-environment", "--systemd", "--all", NULL,
+  "flameshot", NULL,
+  "dunst", NULL,
+  "foot", NULL,"
+  "picom", "--animations", "-b", NULL,
+  "sh", "-c", "feh --randomize --bg-fill /home/olafkfreund/Pictures/wallpapers/gruvbox/hypr/*", NULL,
+  "slstatus", NULL,
+  NULL /* terminate */
+};
 static const char *colors[][3]      = {
     /*                     fg       bg      border */
     [SchemeNorm]       = { gray3,   black,  gray2 },
@@ -136,9 +149,9 @@ static const Layout layouts[] = {
 static const Key keys[] = {
   /* modifier                         key         function        argument */
   // brightness and audio 
-  {0,                       XF86XK_AudioLowerVolume, spawn, {.v = downvol}},
-	{0,                       XF86XK_AudioMute, spawn, {.v = mutevol }},
-	{0,                       XF86XK_AudioRaiseVolume, spawn, {.v = upvol}},
+  {0,       XF86XK_AudioLowerVolume, spawn, {.v = downvol}},
+	{0,       XF86XK_AudioMute, spawn, {.v = mutevol }},
+	{0,       XF86XK_AudioRaiseVolume, spawn, {.v = upvol}},
 	{0,				XF86XK_MonBrightnessUp,		spawn,	{.v = light_up}},
 	{0,				XF86XK_MonBrightnessDown,	spawn,	{.v = light_down}},
 
