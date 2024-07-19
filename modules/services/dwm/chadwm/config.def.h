@@ -36,7 +36,7 @@ static const char *light_down[] = {"light", "-U", "5", NULL};
 static const int new_window_attach_on_end = 0; /*  1 means the new window will attach on the end; 0 means the new window will attach on the front,default is front */
 #define ICONSIZE 19   /* icon size */
 #define ICONSPACING 8 /* space between icon and title */
-#define TERMINAL "foot"
+#define TERMINAL "kitty"
 
 static const char *fonts[]          = {"Iosevka:style:medium:size=12" ,"JetBrainsMono Nerd Font Mono:style:medium:size=19" };
 
@@ -50,7 +50,7 @@ static const char *const autostart[] = {
   "dbus-update-activation-environment", "--systemd", "--all", NULL,
   "flameshot", NULL,
   "dunst", NULL,
-  "foot", NULL,
+  "kitty", NULL,
   "picom", "--animations", "-b", NULL,
   "sh", "-c", "feh --randomize --bg-fill /home/olafkfreund/Pictures/wallpapers/gruvbox/hypr/*", NULL,
   "slstatus", NULL,
@@ -78,7 +78,7 @@ static const char *colors[][3]      = {
 /* tagging */
 static char *tags[] = {"", "", "", "", ""};
 
-static const char* menu[] = { "bash", "-c", "~/.config/rofi/launchers/type-2/launcher.sh", NULL };
+static const char* menu[] = { "sh", "-c", "/home/olafkfreund/.config/rofi/launchers/type-2/launcher.sh", NULL };
 
 static const Launcher launchers[] = {
     /* command     name to display */
@@ -161,8 +161,8 @@ static const Key keys[] = {
     {MODKEY,                            XK_u,       spawn,
         SHCMD("maim --select | xclip -selection clipboard -t image/png")},
 
-    { MODKEY,                           XK_c,       spawn,          SHCMD("~/.config/rofi/launchers/type-2/launcher.sh" TERMINAL) },
-    { MODKEY,                           XK_Return,  spawn,          SHCMD("foot")},
+    { MODKEY,                           XK_c,       spawn,          SHCMD("/home/olafkfreund/.config/rofi/launchers/type-2/launcher.sh" TERMINAL) },
+    { MODKEY,                           XK_Return,  spawn,          SHCMD("kitty")},
 
     // toggle stuff
     { MODKEY,                           XK_b,       spawn,          SHCMD ("xdg-open https://")}, // open default browser

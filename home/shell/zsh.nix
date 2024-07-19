@@ -252,13 +252,11 @@
       nhs = "nh os switch ";
       today = "curl -s https://wttr.in/London";
       # wttr = "curl -s https://wttr.in/London?0";
-      code = "code --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
+      # code = "code --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
       dbe = "distrobox enter";
       debian = "distrobox enter debian";
       ask = "chatgpt --model gpt-4 -p";
-      obsidian = "obsidian --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
-      google-chrome-stable = "google-chrome-stable --ozone-platform=wayland";
-      microsoft-edge-stable = "microsoft-edge-stable --ozone-platform=wayland";
+      # obsidian = "obsidian --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
       wezterm = "wezterm start --always-new-process";
     };
   };

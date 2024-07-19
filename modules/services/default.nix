@@ -5,7 +5,7 @@
     ./flatpak/flatpak.nix
     ./xserver/xdg-portal.nix
     ./xserver/xdg.nix
-    ./xserver/xserver.nix
+    # ./xserver/xserver.nix
     ./bluetooth/bluetooth.nix
     ./sound/sound.nix
     ./openssh/openssh.nix

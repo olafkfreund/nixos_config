@@ -12,6 +12,18 @@
     ./greetd.nix
     ../../modules/default.nix
   ];
+  
+  services.xserver = {
+    enable = true;
+    desktopManager.gnome.enable = true;
+    displayManager.xserverArgs = [
+      "-nolisten tcp"
+      "-dpi 96"
+    ];
+    videoDrivers = [ "nvidia" ];
+  };
+
+
   networking.networkmanager.enable = true;
   networking.hostName = "razer";
   networking = {

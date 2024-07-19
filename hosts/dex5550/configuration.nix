@@ -8,6 +8,18 @@
     ./greetd.nix
     ../../modules/default.nix
   ];
+  services.xserver = {
+    enable = true;
+    desktopManager.gnome.enable = true;
+    displayManager.xserverArgs = [
+      "-nolisten tcp"
+      "-dpi 96"
+    ];
+  };
+
+
+
+
   networking.networkmanager.enable = true;
   networking.hostName = "dex5550";
   networking = {

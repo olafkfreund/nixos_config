@@ -419,7 +419,9 @@
           font-weight: bolder;
           font-style: normal;
           color: #${config.colorScheme.palette.base07};
-          background-color: transparent;
+          background-color: #${config.colorScheme.palette.base01};
+          border-radius: 5px;
+          border-color: #${config.colorScheme.palette.base00};
           margin: 2px 2px 2px 2px;
         }
         
@@ -427,11 +429,12 @@
           box-shadow: inherit;
           font-weight: bolder;
           text-shadow: inherit;
-          color: #${config.colorScheme.palette.base0D};
+          background-color: #${config.colorScheme.palette.base0D};
         }
 
         #workspaces button.active {
-          color: #${config.colorScheme.palette.base09};
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base09};
           font-weight: bolder;
           transition: all 0.1s ease-in-out;
         }
@@ -454,6 +457,8 @@
           font-style: normal;
           font-weight: bolder;
           transition: all 0.1s ease-in-out;
+          border-color: #${config.colorScheme.palette.base00};
+          border-radius: 5px;
           margin: 2 2px; 
           padding: 5px;
         }
