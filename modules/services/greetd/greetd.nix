@@ -5,7 +5,7 @@
 }: {
   # greetd display manager
   services.greetd = let
-    session = {
+    session_hypr = {
       command = "${lib.getExe config.programs.hyprland.package}";
       user = "olafkfreund";
     };
@@ -13,12 +13,16 @@
       command = "${lib.getExe config.programs.sway.package}";
       user = "olafkfreund";
     };
+    session_dwm = {
+      command = "startx dwm-run";
+      user = "olafkfreund";
+    };
   in {
     enable = true;
     settings = {
       terminal.vt = 1;
-      default_session = session;
-      initial_session = session;
+      default_session = session_hypr;
+      initial_session = session_hypr;
     };
   };
 

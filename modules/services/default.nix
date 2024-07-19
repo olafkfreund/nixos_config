@@ -26,6 +26,7 @@
     ./mandb/default.nix
     ./razer-laptop-control/default.nix
     ./appimage/default.nix
+    ./dwm/default.nix
   ];
 
 

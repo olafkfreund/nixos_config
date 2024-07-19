@@ -161,6 +161,7 @@
                 stylix.targets.vim.enable = false;
                 stylix.targets.vscode.enable = false;
                 stylix.targets.dunst.enable = false;
+                stylix.targets.rofi.enable = false;
               }
             ];
           }
