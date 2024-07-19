@@ -8,6 +8,7 @@
     ./i18n.nix
     ./hosts.nix
     ./envvar.nix
+    ./razer-laptop.nix
     ../../modules/default.nix
   ];
   networking.networkmanager.enable = true;

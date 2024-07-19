@@ -19,7 +19,6 @@
     ./sound/default.nix
     #./mail/default.nix
     ./office/default.nix
-    ./ags/default.nix
     ./webcam/default.nix
     ./obsidian/default.nix
     ./kdeconnect/default.nix

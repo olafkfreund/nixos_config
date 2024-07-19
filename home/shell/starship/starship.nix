@@ -21,8 +21,6 @@
         "$shell"
         # "($cmd_duration)"
         "$fill"
-        "($azure)"
-        "($aws)"
         "($nix_shell)"
         "$git_branch"
         "$git_commit"

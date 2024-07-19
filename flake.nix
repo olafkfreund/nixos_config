@@ -208,13 +208,14 @@
             ];
           }
         ];
-      dex5550 = nixpkgs.lib.nixosSystem {
+      };
+      dex = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {
           inherit inputs;
         };
         modules = [
-          ./hosts/dex5550/configuration.nix
+          ./hosts/dex/configuration.nix
           nur.nixosModules.nur
           home-manager.nixosModules.home-manager
           inputs.nix-colors.homeManagerModules.default
@@ -249,7 +250,51 @@
             ];
           }
         ];
-      };
+      };    
+      hp = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {
+          inherit inputs;
+        };
+        modules = [
+          ./hosts/hp/configuration.nix
+          nur.nixosModules.nur
+          home-manager.nixosModules.home-manager
+          inputs.nix-colors.homeManagerModules.default
+          inputs.stylix.nixosModules.stylix
+          inputs.nix-snapd.nixosModules.default
+          nix-index-database.nixosModules.nix-index
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
+            home-manager.extraSpecialArgs = {
+              pkgs-stable = import nixpkgs-stable {
+                system = "x86_64-linux";
+                config.allowUnfree = true;
+              };
+              inherit inputs;
+              inherit nixpkgs;
+              inherit spicetify-nix;
+              inherit ags;
+              inherit stylix;
+              inherit nix-index-database;
+              inherit nixpkgs-f2k;
+              inherit home-manager;
+              inherit browser-previews;
+              inherit nixpkgs-stable;
+              inherit nix-colors;
+              inherit nix-snapd;
+              inherit self;
+            };
+            home-manager.users.olafkfreund = import ./Users/olafkfreund/hp_home.nix;
+            home-manager.sharedModules = [
+              {
+                stylix.targets.vim.enable = false;
+              }
+            ];
+          }
+        ];
       };
     };
   };
