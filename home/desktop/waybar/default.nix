@@ -31,14 +31,14 @@
         ];
 
         "modules-right" = [
-          "custom/weathericons"
+          # "custom/weathericons"
           "custom/weather"
           "network#icons"
           "network"
           "battery#icons"
           "battery"
-          # "bluetooth#icons"
-          # "bluetooth"
+          "bluetooth#icons"
+          "bluetooth"
           "pulseaudio#icons"
           "pulseaudio"
           "pulseaudio#microphoneicons"
@@ -66,19 +66,19 @@
         };
 
         "custom/settings" = {
-          format = " ";
+          format = " |";
           tooltip = false;
         };
 
         "custom/cycle_wall" = {
-          format = " ";
+          format = "󰸉 |";
           on-click = "wallpaper_picker";
           tooltip = true;
           tooltip-format = "Change wallpaper";
         };
 
         "idle_inhibitor#icons" = {
-          format = "{icon}";
+          format = "| {icon}";
           format-icons = {
             activated = "󱐋";
             deactivated = "󰤄";
@@ -86,7 +86,7 @@
         };
 
         "idle_inhibitor" = {
-          format = "{icon}";
+          format = "{icon} |";
           format-icons = {
             activated = "on";
             deactivated = "off";
@@ -105,7 +105,7 @@
         };
 
         "custom/monitor" = {
-          format = " ";
+          format = "󰹑 |";
           on-click = "${pkgs.wdisplays}/bin/wdisplays";
           tooltip = false;
         };
@@ -212,10 +212,10 @@
         };
 
         clock = {
-          format = "{:%H:%M}";
+          format = "{:%H:%M} |";
           max-lenght = 25;
           min-length = 6;
-          format-alt = "{:%A, %B %d, %Y (%R)}";
+          format-alt = "{:%A, %B %d, %Y (%R)} |";
           tooltip-format = "<tt><small>{calendar}</small></tt>";
           calendar = {
             mode = "month";
@@ -225,11 +225,11 @@
             on-scroll = 1;
             on-click-right = "mode";
             format = {
-              months = "<span color='#${config.colorScheme.palette.base06}'><b>{}</b></span>";
-              days = "<span color='#${config.colorScheme.palette.base06}'><b>{}</b></span>";
-              weeks = "<span color='#${config.colorScheme.palette.base09}'><b>W{}</b></span>";
+              months = "<span color='#${config.colorScheme.palette.base05}'><b>{}</b></span>";
+              days = "<span color='#${config.colorScheme.palette.base05}'><b>{}</b></span>";
+              weeks = "<span color='#${config.colorScheme.palette.base05}'><b>W{}</b></span>";
               weekdays = "<span color='#${config.colorScheme.palette.base05}'><b>{}</b></span>";
-              today = "<span color='#${config.colorScheme.palette.base0B}'><b><u>{}</u></b></span>";
+              today = "<span color='#${config.colorScheme.palette.base05}'><b><u>{}</u></b></span>";
             };
           };
           actions = {
@@ -247,48 +247,48 @@
             warning = 30;
             critical = 20;
           };
-          format = " {capacity}% ";
-          format-charging = " {capacity}% ";
-          format-plugged = " {capacity}% ";
-          format-alt = "{time} ";
+          format = "{capacity}% |";
+          format-charging = "{capacity}% |";
+          format-plugged = "{capacity}% |";
+          format-alt = "{time} |";
         };
 
         "battery#icons" = {
           format = "{icon}";
-          format-charging = " ";
-          format-plugged = " ";
+          format-charging = "";
+          format-plugged = "";
           format-icons = [ "󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
         };
 
         "network#icons" = {
-          format-wifi = "󰖩 ";
-          format-ethernet = "󰈀 ";
-          tooltip-format = "󰈀 ";
-          format-linked = "󰈀 ";
-          format-disconnected = " ";
-          format-alt = "󰖩 ";
+          format-wifi = "󰖩";
+          format-ethernet = "󰈀";
+          tooltip-format = "󰈀";
+          format-linked = "󰈀";
+          format-disconnected = "";
+          format-alt = "󰖩";
         };
 
         "network" = {
-          format-wifi = "{essid}";
-          format-ethernet = "{ipaddr}";
+          format-wifi = "{essid} |";
+          format-ethernet = "{ipaddr} |";
           tooltip-format = "{ipaddr}  {bandwidthUpBytes}  {bandwidthDownBytes}";
           format-linked = "{ifname} (No IP)";
           format-disconnected = "Disconnected";
-          format-alt = "{signalStrength}%";
+          format-alt = "{signalStrength}% |";
           on-click = "nm-connection-editor";
         };
 
         "bluetooth#icons" = {
           format = "{icon}";
-          format-on = " ";
-          format-off = "󰂲 ";
-          format-disabled = "󰂲 "; # an empty format will hide the module
+          format-on = "";
+          format-off = "󰂲";
+          format-disabled = "󰂲"; # an empty format will hide the module
           format-connected = " {num_connections}";
         };
 
         "bluetooth" = {
-          format = "{status}";
+          format = "{status}|";
           format-connected = "{num_connections}";
           tooltip-format = "{device_alias}";
           tooltip-format-connected = "{device_enumerate}";
@@ -297,7 +297,7 @@
         };
         "pulseaudio#icons" = {
           format = "{icon}";
-          format-bluetooth = "{icon} ";
+          format-bluetooth = "{icon}";
           format-muted = "婢";
           on-click = "pavucontrol -t 3";
           tooltip-format = "{icon} {desc} // {volume}%";
@@ -311,8 +311,8 @@
         };
 
         "pulseaudio" = {
-          format = "{volume}% ";
-          format-bluetooth = "{volume}% ";
+          format = "{volume}% |";
+          format-bluetooth = "{volume}%|";
           format-muted = "婢";
           format-icons = {
             car = "";
@@ -323,13 +323,13 @@
         };
 
         "custom/weathericons" = {
-          format = " ";
+          format = " ";
           tooltip = false;
         };
         "custom/weather" = {
           exec = "weather London";
           return-type = "json";
-          format = "{}";
+          format = "{} |";
           tooltip = true;
           interval = 3600;
         };
@@ -340,7 +340,7 @@
         };
 
         "custom/playerctl" = {
-          format = "{icon}  <span>{}</span>";
+          format = "{icon}  <span>{}</span>|";
           return-type = "json";
           max-length = 30;
           exec = "${pkgs.playerctl}/bin/playerctl -p spotify metadata -f '{\"text\": \"{{markup_escape(title)}} - {{markup_escape(artist)}} {{ duration(position) }}/{{ duration(mpris:length) }}\", \"tooltip\": \"{{markup_escape(title)}} - {{markup_escape(artist)}}  {{ duration(position) }}/{{ duration(mpris:length) }}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' -F";
@@ -363,7 +363,7 @@
         };
 
         "pulseaudio#microphone" = {
-          format-source = "{volume}%";
+          format-source = "{volume}% |";
           on-click = "pavucontrol -t 4";
           tooltip-format = "{format_source} {source_desc} // {source_volume}%";
           scroll-step = 5;
@@ -400,12 +400,12 @@
         }
 
         tooltip {
-          background: #${config.colorScheme.palette.base01};
+         background-color: transparent;
         }
 
         tooltip label {
-          color: #${config.colorScheme.palette.base06};
-          background-color: #${config.colorScheme.palette.base01};
+          color: #${config.colorScheme.palette.base05};
+          background-color: transparent;
         }
 
         tooltip * {
@@ -424,9 +424,7 @@
         }
         
         #workspaces button:hover {
-          box-shadow: inherit;
           font-weight: bolder;
-          text-shadow: inherit;
           color: #${config.colorScheme.palette.base0D};
         }
 
@@ -450,7 +448,7 @@
 
         #workspaces button.spotify {
           color: #${config.colorScheme.palette.base0B};
-          background-color: #${config.colorScheme.palette.base06};
+          background-color: transparent;
           font-style: normal;
           font-weight: bolder;
           transition: all 0.1s ease-in-out;
@@ -463,55 +461,33 @@
           font-weight: bolder;
           margin: 0 0 0 2px;
           padding: 5px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0A};
-          border-radius: 10px 0px 0px 10px;
-          border-left: 1px solid #${config.colorScheme.palette.base00};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
+          color: #${config.colorScheme.palette.base05};
         }
 
         #custom-weather {
           margin: 0 2 0 0px;
           padding: 5px;
-          color: #${config.colorScheme.palette.base07};
-          background-color: #${config.colorScheme.palette.base01};
-          border-radius: 0px 10px 10px 0px;
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
-          border-right: 1px solid #${config.colorScheme.palette.base00};
+          background-color: transparent;
+          color: #${config.colorScheme.palette.base05};
         }
         
         #custom-cal {
           margin: 0 0 0 5px; 
           padding: 5px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0B};
-          border-radius: 10px 0px 0px 10px;
-          border-left: 1px solid #${config.colorScheme.palette.base00};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
+          color: #${config.colorScheme.palette.base05};
         }
 
         #clock {
           font-weight: bolder;
           font-style: normal;
-          color: #${config.colorScheme.palette.base07};
-          background-color: #${config.colorScheme.palette.base01};
+          color: #${config.colorScheme.palette.base05};
           margin: 0 5 0 0px;
-          border-radius: 0px 10px 10px 0px;
-          border-right: 1px solid #${config.colorScheme.palette.base00};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
         }
 
        #custom-startmenu {
           font-weight: bolder;
           font-style: normal;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0D};
-          border-color: #${config.colorScheme.palette.base00};
-          border-radius: 5px;
+          color: #${config.colorScheme.palette.base05};
           margin: 2 2px; 
           padding: 5px;
         }
@@ -520,77 +496,49 @@
           font-weight: bolder;
           font-style: normal;
           padding: 0 5px;
-          color: #${config.colorScheme.palette.base07};
-          background-color: #${config.colorScheme.palette.base01};
-          border-top: 5px solid #${config.colorScheme.palette.base00};
-          border-bottom: 5px solid #${config.colorScheme.palette.base00};
-          border-radius: 5px;
+          color: #${config.colorScheme.palette.base05};
         }
 
         #pulseaudio.icons {
           border: none;
           padding: 5px;
           margin: 0 0 0 0px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0C};
-          border-radius: 10px 0px 0px 10px;
-          border-left: 1px solid #${config.colorScheme.palette.base00};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
+          color: #${config.colorScheme.palette.base05};
         }
 
         #pulseaudio {
           border: none;
           padding: 5px;
           margin: 0 0 0 0px;
-          color: #${config.colorScheme.palette.base07};
-          background-color: #${config.colorScheme.palette.base01};
-          border-radius: 0px 10px 10px 0px;
-          border-right: 1px solid #${config.colorScheme.palette.base00};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
+          color: #${config.colorScheme.palette.base05};
         }
 
         #pulseaudio.microphoneicons {
           padding: 5px;
           border: none;
           margin: 0 0 0 5px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0A};
-          border-radius: 10px 0px 0px 10px;
-          border-left: 1px solid #${config.colorScheme.palette.base00};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
+          color: #${config.colorScheme.palette.base05};
         }
 
         #pulseaudio.microphone {
           padding: 5px;
           border: none;
           margin: 0 2 0 0px;
-          color: #${config.colorScheme.palette.base07};
-          background-color: #${config.colorScheme.palette.base01};
-          border-radius: 0px 10px 10px 0px;
-          border-right: 1px solid #${config.colorScheme.palette.base00};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
+          color: #${config.colorScheme.palette.base05};
         }
 
         #pulseaudio.muted {
           padding: 5px;
           border: none;
           margin: 0 2 0 0px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base06};
-          border-radius: 0px 10px 10px 0px;
+          color: #${config.colorScheme.palette.base05};
         }
 
         #network.icons  {
           margin: 0 0 0 2px;
           border: none;
           padding: 5px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0E};
-          border-radius: 10px 0px 0px 10px;
+          color: #${config.colorScheme.palette.base05};
         }
 
         #network {
@@ -598,48 +546,27 @@
           border: none;
           padding: 5px;
           color: #${config.colorScheme.palette.base05};
-          background-color: #${config.colorScheme.palette.base01};
-          border-radius: 0px 10px 10px 0px;
-          border-right: 1px solid #${config.colorScheme.palette.base00};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
         }
 
         #custom-cycle_wall {
           padding: 0 5px;
           color: #${config.colorScheme.palette.base05};
-          background-color: #${config.colorScheme.palette.base01};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
         }
 
         #custom-tailscale {
           padding: 0 5px;
           color: #${config.colorScheme.palette.base05};
-          background-color: #${config.colorScheme.palette.base01};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
-          border-right: 1px solid #${config.colorScheme.palette.base00};
         }
 
         #custom-dunst {
           padding: 0 5px;
           color: #${config.colorScheme.palette.base05};
-          background-color: #${config.colorScheme.palette.base01};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
         }
 
         #custom-settings {
           padding: 0 5px;
           margin: 0 5 0 5px;
           color: #${config.colorScheme.palette.base05};
-          background-color: #${config.colorScheme.palette.base01};
-          border-radius: 10px;
-          border-left: 1px solid #${config.colorScheme.palette.base00};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
-          border-right: 1px solid #${config.colorScheme.palette.base00};
         }
         #idle_inhibitor.icons {
           padding: 5px;
@@ -647,9 +574,7 @@
           margin: 0 0 0 2px;
           font-weight: bolder;
           font-style: normal;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base08};
-          border-radius: 10px 0px 0px 10px;
+          color: #${config.colorScheme.palette.base05};
         }
 
         #idle_inhibitor {
@@ -659,87 +584,51 @@
           font-weight: bolder;
           font-style: normal;
           color: #${config.colorScheme.palette.base05};
-          background-color: #${config.colorScheme.palette.base01};
-          border-radius: 0px 10px 10px 0px;
-          border-right: 1px solid #${config.colorScheme.palette.base00};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
         }
 
         #tray {
           padding: 0 5px;
           font-weight: bolder;
           font-style: normal;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0D};
-          border-radius: 10px;
-          border-left: 1px solid #${config.colorScheme.palette.base00};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
-          border-right: 1px solid #${config.colorScheme.palette.base00};
+          color: #${config.colorScheme.palette.base05};
         }
 
         #battery.icons {
-          padding: 0 10px;
+          padding: 0 5px;
           border: none;
           margin: 0 0 0 2px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0F};
-          border-radius: 10px 0px 0px 10px;
+          color: #${config.colorScheme.palette.base05};
         }
         #battery {
-          padding: 0 10px;
+          padding: 0 5px;
           border: none;
           margin: 0 2 0 0px;
           color: #${config.colorScheme.palette.base05};
-          background-color: #${config.colorScheme.palette.base01};
-          border-radius: 0px 10px 10px 0px;
-          border-right: 1px solid #${config.colorScheme.palette.base00};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
         }
 
         #window {
           color: #${config.colorScheme.palette.base05};
-          background-color: #${config.colorScheme.palette.base01};
-          border-radius: 10px;
-          border-color: #${config.colorScheme.palette.base05};
           transition: all 0.1s ease-in-out;
           margin: 0 2 0 2px;
           padding: 0 10px;
-          border-left: 1px solid #${config.colorScheme.palette.base00};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
-          border-right: 1px solid #${config.colorScheme.palette.base00};
         }
 
         #image {
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base06};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
-          border-radius: 0px 0px 0px 0px;
+          color: #${config.colorScheme.palette.base05};
           margin: 0 0 0 2px;
           padding: 5px;
         }
 
         #custom-spotify {
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0B};
-          border-radius: 10px 0px 0px 10px;
+          color: #${config.colorScheme.palette.base05};
           margin: 0 0 0 2px;
           padding: 5px;
         }
         #custom-playerctl {
           color: #${config.colorScheme.palette.base05};
-          background-color: #${config.colorScheme.palette.base01};
-          border-radius: 0px 10px 10px 0px;
           transition: all 0.1s ease-in-out;
           margin: 0 2 0 0px;
           padding: 5px;
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
-          border-right: 1px solid #${config.colorScheme.palette.base00};
 
         }
 
@@ -747,20 +636,13 @@
           padding: 5px;
           border: none;
           margin: 0 0 0 2px;
-          color: #${config.colorScheme.palette.base00};
-          background-color: #${config.colorScheme.palette.base0D};
-          border-radius: 10px 0px 0px 10px;
+          color: #${config.colorScheme.palette.base05};
         }
         #bluetooth {
           padding: 5px;
           border: none;
           margin: 0 2 0 0px;
           color: #${config.colorScheme.palette.base05};
-          background-color: #${config.colorScheme.palette.base01};
-          border-radius: 0px 10px 10px 0px;
-          border-right: 1px solid #${config.colorScheme.palette.base00};
-          border-top: 1px solid #${config.colorScheme.palette.base00};
-          border-bottom: 1px solid #${config.colorScheme.palette.base00};
         }
     '';
   };

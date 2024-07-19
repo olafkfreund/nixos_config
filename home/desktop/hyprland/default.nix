@@ -201,7 +201,7 @@ in {
         if gaps-big-no-border == true
         then ''
           gaps_in = 2
-          gaps_out = 4
+          gaps_out = 2
           border_size = 0
         ''
         else if gaps-big-border == true
@@ -282,7 +282,7 @@ in {
               xray = true
           }
           active_opacity = 1.0
-          inactive_opacity = 0.8
+          inactive_opacity = 1.0
           fullscreen_opacity = 1.0
 
           drop_shadow = true
@@ -490,24 +490,15 @@ in {
       bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh
       bind = $mainMod SHIFT, backspace, exec, ~/.config/rofi/launchers/type-2/hypr_exec.sh
 
-      # #Hypcov
-      # bind = ALT,tab,hycov:toggleoverview
-      # bind=ALT,left,hycov:movefocus,l
-      # bind=ALT,right,hycov:movefocus,r
-      # bind=ALT,up,hycov:movefocus,u
-      # bind=ALT,down,hycov:movefocus,d
-      #Hyprspace
-      #bind = $mainMod, tab, overview:toggle
-
       bindm = $mainMod, mouse:272, movewindow
       bindm = $mainMod, mouse:273, resizewindow
 
-      bind = , Print, exec, screenshootin
-      bind = , XF86MonBrightnessUp, exec, brightnessctl set 30+
-      bind = , XF86MonBrightnessDown, exec, brightnessctl set 30-
-      bind = , XF86AudioRaiseVolume, exec, amixer set Master 5%+
-      bind = , XF86AudioLowerVolume, exec, amixer set Master 5%-
-      bind = , XF86AudioMute, exec, amixer set Master toggle
+      bind = ,Print, exec, screenshootin
+      bind = ,XF86MonBrightnessUp, exec, brightnessctl set 30+
+      bind = ,XF86MonBrightnessDown, exec, brightnessctl set 30-
+      bind = ,XF86AudioRaiseVolume, exec, amixer set Master 5%+
+      bind = ,XF86AudioLowerVolume, exec, amixer set Master 5%-
+      bind = ,XF86AudioMute, exec, amixer set Master toggle
       bind = $mainMod, F3, exec, brightnessctl -d *::kbd_backlight set +33%
       bind = $mainMod, F2, exec, brightnessctl -d *::kbd_backlight set 33%-"
 
@@ -529,11 +520,11 @@ in {
       bind=, XF86MonBrightnessDown, exec, swayosd-client --brightness -10
 
       #Kitty
-      bind = $mainMod, E, exec, [float]kitty --hold sh -c yazi
-      bind = $mainMod, T, exec, wezterm
+      bind = $mainMod, E, exec, kitty --hold sh -c yazi
+      bind = $mainMod, T, exec, kitty
 
       bind = $mainMod, space, exec, ~/.config/rofi/launchers/type-2/launcher.sh
-      bind = $mainMod, RETURN, exec, [float]kitty
+      bind = $mainMod, RETURN, exec, kitty
 
       bind = $mainMod, N, exec, dunstctl history-pop
       bind = $mainMod SHIFT, N, exec, dunstctl close-all
@@ -564,19 +555,14 @@ in {
       # Mediaplayer (spotify without SHIFT) binds and general volume control
       bind = $mainMod, Z, exec, playerctl -p spotify previous
       bind = $mainMod SHIFT, Z, exec, playerctl previous
-
       bind = $mainMod, X, exec, playerctl -p spotify next
       bind = $mainMod SHIFT, X, exec, playerctl next
-
       bind = $mainMod, C, exec, playerctl -p spotify play-pause
       bind = $mainMod SHIFT, C, exec, playerctl play-pause
-
       binde = $mainMod, V, exec, playerctl -p spotify volume 0.02-
       binde = $mainMod SHIFT, V, exec, pamixer -d 2
-
       binde = $mainMod, B, exec, playerctl -p spotify volume 0.02+
       binde = $mainMod SHIFT, B, exec, pamixer -i 2
-
       bind = $mainMod, SLASH, exec, pamixer -t
 
       #Spotify
@@ -625,9 +611,6 @@ in {
       binde = $mainMod_CTRL, k, resizeactive, 0 -30
       binde = $mainMod_CTRL, j, resizeactive, 0 30
 
-      #ATL-TAB
-      # bind = $mainMod, TAB, cyclenext,
-
       # Switch workspaces with mainMod + [0-9]
       bind = $mainMod, 1, workspace, 1
       bind = $mainMod, 2, workspace, 2
@@ -648,8 +631,8 @@ in {
       bind = $mainMod, B, exec, pkill -SIGUSR1 waybar
 
       # Switch workspaces relative to the active workspace with mainMod + CTRL + [←→]
-      bind = $mainMod CTRL, right, workspace, r+1
-      bind = $mainMod CTRL, left, workspace, r-1
+      bind = $mainMod CTRL, l, workspace, r+1
+      bind = $mainMod CTRL, h, workspace, r-1
 
       # move to the first empty workspace instantly with mainMod + CTRL + [↓]
       bind = $mainMod CTRL, down, workspace, empty
@@ -661,9 +644,9 @@ in {
       # trigger when the switch is turning on
       bindl = , switch:on:Lid Switch,exec,hyprctl keyword monitor "eDP-1, disable"
 
-      blurls = rofi
+      # blurls = rofi
       # blurls = waybar
-      blurls = gtk-layer-shell
+      # blurls = gtk-layer-shell
       blurls = notifications
       blurls = swayosd
     '';
