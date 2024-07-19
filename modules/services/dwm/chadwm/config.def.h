@@ -50,7 +50,7 @@ static const char *const autostart[] = {
   "dbus-update-activation-environment", "--systemd", "--all", NULL,
   "flameshot", NULL,
   "dunst", NULL,
-  "foot", NULL,"
+  "foot", NULL,
   "picom", "--animations", "-b", NULL,
   "sh", "-c", "feh --randomize --bg-fill /home/olafkfreund/Pictures/wallpapers/gruvbox/hypr/*", NULL,
   "slstatus", NULL,

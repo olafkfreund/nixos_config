@@ -215,7 +215,7 @@
           inherit inputs;
         };
         modules = [
-          ./hosts/dex/configuration.nix
+          ./hosts/dex5550/configuration.nix
           nur.nixosModules.nur
           home-manager.nixosModules.home-manager
           inputs.nix-colors.homeManagerModules.default
