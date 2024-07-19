@@ -290,6 +290,11 @@
             home-manager.users.olafkfreund = import ./Users/olafkfreund/hp_home.nix;
             home-manager.sharedModules = [
               {
+                stylix.targets.waybar.enable = false;
+                stylix.targets.yazi.enable = false;
+                stylix.targets.vscode.enable = false;
+                stylix.targets.dunst.enable = false;
+                stylix.targets.rofi.enable = false;
                 stylix.targets.vim.enable = false;
               }
             ];
