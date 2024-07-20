@@ -6,7 +6,7 @@
     inputs.ags.homeManagerModules.default
     inputs.spicetify-nix.homeManagerModules.default
 
-    ../../home/default.nix
+    ../../home/desktop.nix
     ./private.nix
   ];
 

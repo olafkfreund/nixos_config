@@ -4,7 +4,7 @@
     inputs.spicetify-nix.homeManagerModules.default
     inputs.nix-colors.homeManagerModules.default
 
-    ../../home/default.nix
+    ../../home/servers.nix
     ./private.nix
   ];
 

@@ -7,5 +7,6 @@ home.packages = with pkgs; [
     cmakeCurses
     upbound
     crossplane-cli
+    just
   ];
 }
