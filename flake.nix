@@ -209,6 +209,57 @@
           }
         ];
       };
+      lms = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {
+          inherit inputs;
+        };
+        modules = [
+          ./hosts/lms/configuration.nix
+          nur.nixosModules.nur
+          home-manager.nixosModules.home-manager
+          inputs.nix-colors.homeManagerModules.default
+          inputs.stylix.nixosModules.stylix
+          inputs.nix-snapd.nixosModules.default
+          nix-index-database.nixosModules.nix-index
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
+            home-manager.extraSpecialArgs = {
+              pkgs-stable = import nixpkgs-stable {
+                system = "x86_64-linux";
+                config.allowUnfree = true;
+              };
+              inherit inputs;
+              inherit nixpkgs;
+              inherit spicetify-nix;
+              inherit ags;
+              inherit razer-laptop-control;
+              inherit stylix;
+              inherit nix-index-database;
+              inherit nixpkgs-f2k;
+              inherit home-manager;
+              inherit browser-previews;
+              inherit nixpkgs-stable;
+              inherit nix-colors;
+              inherit nix-snapd;
+              inherit self;
+            };
+            home-manager.users.olafkfreund = import ./Users/olafkfreund/lms_home.nix;
+            home-manager.sharedModules = [
+              {
+                stylix.targets.waybar.enable = false;
+                stylix.targets.yazi.enable = false;
+                stylix.targets.vim.enable = false;
+                stylix.targets.vscode.enable = false;
+                stylix.targets.dunst.enable = false;
+                stylix.targets.rofi.enable = false;
+              }
+            ];
+          }
+        ];
+      };    
       dex5550 = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {
