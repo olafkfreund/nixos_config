@@ -11,6 +11,7 @@
     ./razer-laptop.nix
     ./greetd.nix
     ../../modules/default.nix
+    ../../modules/laptops.nix
   ];
   
   services.xserver = {

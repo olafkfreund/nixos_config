@@ -7,6 +7,7 @@
     ./stylix.nix
     ./greetd.nix
     ../../modules/default.nix
+    ../../modules/system-tweaks/kernel-tweaks/32GB-SYSTEM/32GB-SYSTEM.nix
   ];
   networking.networkmanager.enable = true;
   networking.hostName = "lms";
