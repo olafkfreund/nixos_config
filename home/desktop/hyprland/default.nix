@@ -62,19 +62,16 @@ in {
     };
     xwayland.enable = true;
     plugins = [
-      # pkgs.hyprlandPlugins.hyprbars
       pkgs.hyprlandPlugins.hyprexpo
       pkgs.hyprlandPlugins.csgo-vulkan-fix
-      # pkgs.hyprlandPlugins.hycov
-      #pkgs.hyprlandPlugins.borders-plus-plus
     ];
     extraConfig = ''
       #laptop
       monitor = eDP-1,1920x1080@100,0x0,1
       #home
       # monitor = HDMI-A-1,3840x2160@60,0x0,1,bitdepth,10
-      monitor = HDMI-A-1,3840x2160@120,0x0,1,bitdepth,10
-      monitor = DP-3,3840x2160@120,0x0,1,bitdepth,10
+      monitor = HDMI-A-1,3840x2160@120,0x0,1
+      monitor = DP-3,3840x2160@120,0x0,1
       #monitor=,preferred,auto, 1
       #wsbind=1,eDP-1
 
@@ -200,9 +197,9 @@ in {
           ${
         if gaps-big-no-border == true
         then ''
-          gaps_in = 2
-          gaps_out = 2
-          border_size = 0
+          gaps_in = 1
+          gaps_out = 1
+          border_size = 1
         ''
         else if gaps-big-border == true
         then ''
@@ -274,7 +271,7 @@ in {
           decoration {
           rounding = 0
           blur {
-              enabled = true
+              enabled = false
               size = 6
               passes = 2
               new_optimizations = on
@@ -289,6 +286,7 @@ in {
           shadow_range = 30
           shadow_render_power = 3
           col.shadow = 0x66000000
+
           }
         ''
         else ''
@@ -302,13 +300,6 @@ in {
                 ignore_opacity = true
                 xray = false
               }
-          # layerrule = blur, waybar
-          # layerrule = ignorezero, waybar
-          layerrule = blur, notifications
-          layerrule = ignorezero, notifications
-          layerrule = blur, logout_dialog
-          windowrule = stayfocused, emote
-          windowrule = animation popin 95%, emote
           rounding=14
           drop_shadow=1
           shadow_ignore_window=true
@@ -318,7 +309,7 @@ in {
           shadow_scale=0.99
           col.shadow=rgba(000000BB)
           dim_inactive=true
-          dim_strength=0.1
+          dim_strength=0.9
           active_opacity= 0.92
           inactive_opacity= 0.76
           }
@@ -486,73 +477,53 @@ in {
 
       #Hyprexpo
       bind = ALT, TAB, hyprexpo:expo, toggle # can be: toggle, off/disable or on/enable
-
       bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh
       bind = $mainMod SHIFT, backspace, exec, ~/.config/rofi/launchers/type-2/hypr_exec.sh
-
       bindm = $mainMod, mouse:272, movewindow
       bindm = $mainMod, mouse:273, resizewindow
-
-      bind = ,Print, exec, screenshootin
+      bind = $mainMod, F3, exec, brightnessctl -d *::kbd_backlight set +33%
+      bind = $mainMod, F2, exec, brightnessctl -d *::kbd_backlight set 33%-"
+      bind = , XF86AudioRaiseVolume, exec, swayosd-client --output-volume=raise
+      bind = , XF86AudioLowerVolume, exec, swayosd-client --output-volume=lower
+      bind = , XF86AudioMute, exec, swayosd-client --output-volume mute-toggle
       bind = ,XF86MonBrightnessUp, exec, brightnessctl set 30+
       bind = ,XF86MonBrightnessDown, exec, brightnessctl set 30-
       bind = ,XF86AudioRaiseVolume, exec, amixer set Master 5%+
       bind = ,XF86AudioLowerVolume, exec, amixer set Master 5%-
       bind = ,XF86AudioMute, exec, amixer set Master toggle
-      bind = $mainMod, F3, exec, brightnessctl -d *::kbd_backlight set +33%
-      bind = $mainMod, F2, exec, brightnessctl -d *::kbd_backlight set 33%-"
-
-      #OSD window
-      bind=, XF86AudioRaiseVolume, exec, swayosd-client --output-volume=raise
-      bind=, XF86AudioLowerVolume, exec, swayosd-client --output-volume=lower
-      bind=, XF86AudioMute, exec, swayosd-client --output-volume mute-toggle
-      bind=, release Caps_Lock, exec, swayosd-client --caps-lock
-
-      bind=, XF86AudioMute, exec, swayosd-client --output-volume mute-toggle
-      bind=, XF86AudioMicMute, exec, swayosd-client --input-volume mute-toggle
-      bind=, XF86AudioRaiseVolume, exec, swayosd-client --output-volume 5
-      bind=, XF86AudioLowerVolume, exec, swayosd-client --output-volume -5
-      bind=, XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise --max-volume 120
-      bind=, XF86AudioLowerVolume, exec, swayosd-client --output-volume lower --max-volume 120
-      bind=, XF86MonBrightnessUp, exec, swayosd-client --brightness raise
-      bind=, XF86MonBrightnessDown, exec, swayosd-client --brightness lower
-      bind=, XF86MonBrightnessUp,  exec, swayosd-client --brightness +10
-      bind=, XF86MonBrightnessDown, exec, swayosd-client --brightness -10
-
-      #Kitty
+      bind = , XF86AudioMute, exec, swayosd-client --output-volume mute-toggle
+      bind = , XF86AudioMicMute, exec, swayosd-client --input-volume mute-toggle
+      bind = , XF86AudioRaiseVolume, exec, swayosd-client --output-volume 5
+      bind = , XF86AudioLowerVolume, exec, swayosd-client --output-volume -5
+      bind = , XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise --max-volume 120
+      bind = , XF86AudioLowerVolume, exec, swayosd-client --output-volume lower --max-volume 120
+      bind = , XF86MonBrightnessUp, exec, swayosd-client --brightness raise
+      bind = , XF86MonBrightnessDown, exec, swayosd-client --brightness lower
+      bind = , XF86MonBrightnessUp,  exec, swayosd-client --brightness +10
+      bind = , XF86MonBrightnessDown, exec, swayosd-client --brightness -10
+      bind = , release Caps_Lock, exec, swayosd-client --caps-lock
       bind = $mainMod, E, exec, kitty --hold sh -c yazi
       bind = $mainMod, T, exec, kitty
-
+      bind = $mainMod, M, exec, ~/.config/rofi/applets/bin/monitors.sh
       bind = $mainMod, space, exec, ~/.config/rofi/launchers/type-2/launcher.sh
       bind = $mainMod, RETURN, exec, kitty
-
       bind = $mainMod, N, exec, dunstctl history-pop
       bind = $mainMod SHIFT, N, exec, dunstctl close-all
-
-      bind = CTRL, print, exec, grim -g \"$(slurp)\" - | wl-copy
-      bind = ALT, print, exec, grim -g \"$(slurp)\" - | swappy -f -
-
+      bind = ALT CTRL, P, exec, grim -g \"$(slurp)\" - | wl-copy
+      bind = SHIFT ALT, P, exec, grim -g \"$(slurp)\" - | swappy -f -
       bind = $mainMod, P, pin
-      #bind = $mainMod SHIFT, P, unpin
-
+      # bind = $mainMod SHIFT, P, unpin
       bind = $mainMod ALT, H, movetoworkspace, special:hidden
       bind = $mainMod ALT, H, togglespecialworkspace, hidden
-
       bind = $mainMod, K, exec, hyprctl kill
-
-      # Special workspace (scratchpad)
       bind = $mainMod, S, togglespecialworkspace, magic
       bind = $mainMod SHIFT, S, movetoworkspace, special:magic
-
-      bind = , Insert, exec, $HOME/.config/rofi/applets/bin/clipboard.sh
-
+      bind = $mainMod SHIFT, I, exec, $HOME/.config/rofi/applets/bin/clipboard.sh
       bind = $mainMod ALT, L, exec, hyprlock
       bind = $mainMod, h, movefocus, l
       bind = $mainMod, l, movefocus, r
       bind = $mainMod, k, movefocus, u
       bind = $mainMod, j, movefocus, d
-
-      # Mediaplayer (spotify without SHIFT) binds and general volume control
       bind = $mainMod, Z, exec, playerctl -p spotify previous
       bind = $mainMod SHIFT, Z, exec, playerctl previous
       bind = $mainMod, X, exec, playerctl -p spotify next
@@ -564,19 +535,13 @@ in {
       binde = $mainMod, B, exec, playerctl -p spotify volume 0.02+
       binde = $mainMod SHIFT, B, exec, pamixer -i 2
       bind = $mainMod, SLASH, exec, pamixer -t
-
-      #Spotify
       bind = Control_SHIFT, M, togglespecialworkspace, spotify
-
-      # General window options
       bind = $mainMod, W, killactive
       bind = $mainMod, F, fullscreen, 1 #maximize window
       bind = $mainMod SHIFT, F, fullscreen, 0 #true fullscreen
       bind = $mainMod, Q, togglefloating
       bind = $mainMod, Y, exec, hyprctl keyword general:layout "dwindle" #switch to dwindle layout on fly
       bind = $mainMod, U, exec, hyprctl keyword general:layout "master" #switch to master layout on fly
-
-      # Master layout control
       bind = $mainMod SHIFT, U, layoutmsg, orientationcycle
       bind = $mainMod, I, layoutmsg, cyclenext
       bind = $mainMod SHIFT, I, layoutmsg, cycleprev
@@ -584,11 +549,7 @@ in {
       bind = $mainMod SHIFT, O, layoutmsg, focusmaster auto
       bind = $mainMod, BRACKETLEFT, layoutmsg, rollnext
       bind = $mainMod, BRACKETRIGHT, layoutmsg, rollprev
-
-      # Dwindle layout control
-      bind = $mainMod, P, pseudo
-
-      # Move active window to a workspace with mainMod + SHIFT + [0-9]
+      bind = $mainMod CTRL, P, pseudo
       bind = $mainMod SHIFT, 1, movetoworkspace, 1
       bind = $mainMod SHIFT, 2, movetoworkspace, 2
       bind = $mainMod SHIFT, 3, movetoworkspace, 3
@@ -599,19 +560,14 @@ in {
       bind = $mainMod SHIFT, 8, movetoworkspace, 8
       bind = $mainMod SHIFT, 9, movetoworkspace, 9
       bind = $mainMod SHIFT, 0, movetoworkspace, 10
-
-      bind = $mainMod_SHIFT,h,movewindow,l
-      bind = $mainMod_SHIFT,l,movewindow,r
-      bind = $mainMod_SHIFT,k,movewindow,u
-      bind = $mainMod_SHIFT,j,movewindow,d
-
-      # Resize windows
+      bind = $mainMod_SHIFT, h,movewindow,l
+      bind = $mainMod_SHIFT, l,movewindow,r
+      bind = $mainMod_SHIFT, k,movewindow,u
+      bind = $mainMod_SHIFT, j,movewindow,d
       binde = $mainMod_CTRL, l, resizeactive, 30 0
       binde = $mainMod_CTRL, h, resizeactive, -30 0
       binde = $mainMod_CTRL, k, resizeactive, 0 -30
       binde = $mainMod_CTRL, j, resizeactive, 0 30
-
-      # Switch workspaces with mainMod + [0-9]
       bind = $mainMod, 1, workspace, 1
       bind = $mainMod, 2, workspace, 2
       bind = $mainMod, 3, workspace, 3
@@ -622,31 +578,15 @@ in {
       bind = $mainMod, 8, workspace, 8
       bind = $mainMod, 9, workspace, 9
       bind = $mainMod, 0, workspace, 10
-
-      # Scroll through existing workspaces with mainMod + scroll
       bind = $mainMod, mouse_down, workspace, e-1
       bind = $mainMod, mouse_up, workspace, e+1
-
-      # Waybar
       bind = $mainMod, B, exec, pkill -SIGUSR1 waybar
-
-      # Switch workspaces relative to the active workspace with mainMod + CTRL + [←→]
       bind = $mainMod CTRL, l, workspace, r+1
       bind = $mainMod CTRL, h, workspace, r-1
-
-      # move to the first empty workspace instantly with mainMod + CTRL + [↓]
-      bind = $mainMod CTRL, down, workspace, empty
       bind = $mainMod,g,togglegroup
       bind = $mainMod,tab,changegroupactive
-
-      # trigger when the switch is turning off
       bindl = , switch:off:Lid Switch,exec,hyprctl keyword monitor "eDP-1, 1920x1080, 0x0, 1"
-      # trigger when the switch is turning on
       bindl = , switch:on:Lid Switch,exec,hyprctl keyword monitor "eDP-1, disable"
-
-      # blurls = rofi
-      # blurls = waybar
-      # blurls = gtk-layer-shell
       blurls = notifications
       blurls = swayosd
     '';

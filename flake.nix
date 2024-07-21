@@ -112,12 +112,17 @@
     stylix,
     nix-index-database,
     ...
-  } @ inputs: {
+  } @ inputs: 
+  let
+    username = "olafkfreund";
+  in  
+    {
     nixosConfigurations = {
       razer = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {
           inherit inputs;
+          inherit username;  
         };
         modules = [
           ./hosts/razer/configuration.nix
@@ -153,7 +158,7 @@
               inherit nix-snapd;
               inherit self;
             };
-            home-manager.users.olafkfreund = import ./Users/olafkfreund/razer_home.nix;
+            home-manager.users.${username} = import ./Users/${username}/razer_home.nix;
             home-manager.sharedModules = [
               {
                 stylix.targets.waybar.enable = false;
@@ -171,6 +176,7 @@
         system = "x86_64-linux";
         specialArgs = {
           inherit inputs;
+          inherit username;
         };
         modules = [
           ./hosts/g3/configuration.nix
@@ -200,7 +206,7 @@
               inherit nix-snapd;
               inherit self;
             };
-            home-manager.users.olafkfreund = import ./Users/olafkfreund/g3_home.nix;
+            home-manager.users.${username} = import ./Users/${username}/g3_home.nix;
             home-manager.sharedModules = [
               {
                 stylix.targets.vim.enable = false;
@@ -213,6 +219,7 @@
         system = "x86_64-linux";
         specialArgs = {
           inherit inputs;
+          inherit username;
         };
         modules = [
           ./hosts/lms/configuration.nix
@@ -246,7 +253,7 @@
               inherit nix-snapd;
               inherit self;
             };
-            home-manager.users.olafkfreund = import ./Users/olafkfreund/lms_home.nix;
+            home-manager.users.${username} = import ./Users/${username}/lms_home.nix;
             home-manager.sharedModules = [
               {
                 stylix.targets.waybar.enable = false;
@@ -264,6 +271,7 @@
         system = "x86_64-linux";
         specialArgs = {
           inherit inputs;
+          inherit username;
         };
         modules = [
           ./hosts/dex5550/configuration.nix
@@ -297,7 +305,7 @@
               inherit nix-snapd;
               inherit self;
             };
-            home-manager.users.olafkfreund = import ./Users/olafkfreund/dex5550_home.nix;
+            home-manager.users.${username} = import ./Users/${username}/dex5550_home.nix;
             home-manager.sharedModules = [
               {
                 stylix.targets.waybar.enable = false;
@@ -315,6 +323,7 @@
         system = "x86_64-linux";
         specialArgs = {
           inherit inputs;
+          inherit username;
         };
         modules = [
           ./hosts/hp/configuration.nix
@@ -347,7 +356,7 @@
               inherit nix-snapd;
               inherit self;
             };
-            home-manager.users.olafkfreund = import ./Users/olafkfreund/hp_home.nix;
+            home-manager.users.${username} = import ./Users/${username}/hp_home.nix;
             home-manager.sharedModules = [
               {
                 stylix.targets.waybar.enable = false;
