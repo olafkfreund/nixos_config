@@ -49,11 +49,11 @@
 
       # background_opacity = "0.85";
       dynamic_background_opacity = true;
-
+      copy_on_select = true;
       sync_to_monitor = true;
       mouse_hide_wait = 20;
-    cursor_shape = "beam";
-    cursor_blink_interval = 1;
+      cursor_shape = "beam";
+      cursor_blink_interval = 1;
       cursor_stop_blinking_after = 15;
 
       #Scrollback pager
@@ -105,6 +105,13 @@
       inactive_tab_background #${config.colorScheme.palette.base08}
       inactive_tab_font_style bold
       tab_bar_background #${config.colorScheme.palette.base00}
+      mouse_map left press ungrabbed mouse_selection normal
+      mouse_map left doublepress ungrabbed mouse_selection word
+      mouse_map left triplepress ungrabbed mouse_selection line 
+      mouse_map right press ungrabbed mouse_paste
+      mouse_map middle release ungrabbed paste_from_selection
+      mouse_map shift+middle release ungrabbed,grabbed paste_selection
+      mouse_map shift+middle press grabbed discard_event
     '';
   };
 }
