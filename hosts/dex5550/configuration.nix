@@ -6,6 +6,7 @@
     ./i18n.nix
     ./stylix.nix
     ./greetd.nix
+    ./intel.nix
     ../../modules/default.nix
     ../../modules/system-tweaks/kernel-tweaks/32GB-SYSTEM/32GB-SYSTEM.nix
   ];
