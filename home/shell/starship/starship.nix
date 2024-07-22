@@ -19,6 +19,8 @@
         "$username"
         "$directory"
         "$shell"
+        "$sudo"
+        "$cmd_duration"
         # "($cmd_duration)"
         "$fill"
         "($nix_shell)"
@@ -95,12 +97,16 @@
         style_user = "bg:color_bg3 fg:color_fg0";
         style_root = "bg:color_bg3 fg:color_fg0";
         format = "[$user ]($style)[ ](bold fg:color_bg0 bg:color_blue)[](fg:color_blue bg:color_bg3)";
-        show_always = true;
+        show_always = false;
+        aliases = {
+          olafkfreun = "olaf";
+        };
       };
 
       hostname = {
         format = "[$ssh_symbol]($style)[$hostname ]($style)";
-        ssh_only = false;
+        ssh_only = true;
+        detect_env_vars = [''!TMUX''];
         style = "fg:color_fg0 bg:color_bg3";
       };
 
@@ -114,8 +120,11 @@
       };
 
       cmd_duration = {
+        min_time = 500;
+        show_milliseconds = false;
         format = "[ ](bg:color_bg3)[  ](fg:color_bg0 bg:color_purple)[ ](fg:color_purple)";
         style = "fg:color_fg0 bg:color_bg3";
+        disabled = true;
       };
 
       shell = {
@@ -130,7 +139,7 @@
 
       nix_shell = {
         format = "[](fg:color_fg0 bg:color_bg3)[($name \\(develop\\) <- )$symbol]($style)[](fg:color_yellow)";
-        impure_msg = "";
+        impure_msg = "devbox";
         symbol = "  ";
         style = "bg:color_fg0 fg:color_bg3";
       };
@@ -145,7 +154,7 @@
       };
 
       git_branch = {
-        symbol = "🌱 ";
+        symbol = " ";
         format = "[ ](fg:color_purple)[ ](bg:color_purple fg:color_bg0)[$symbol$branch(:$remote_branch)]($style)";
         style = "fg:color_fg0 bg:color_bg3";
         truncation_symbol = "...";
@@ -207,9 +216,11 @@
       };
 
       sudo = {
-        style = "bold green";
-        symbol = "👩‍💻 ";
-        disabled = false;
+        style = "fg:color_fg0 bg:color_bg3";
+        symbol = "🧙  ";
+        disabled = true;
+        format = "[ $symbol ](bg:color_bg3)[  ](fg:color_bg0 bg:color_purple)[ ](fg:color_purple)";
+
       };
 
       terraform = {
