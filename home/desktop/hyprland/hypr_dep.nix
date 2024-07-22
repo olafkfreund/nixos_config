@@ -2,8 +2,6 @@
   home.packages = with pkgs; [
     eww
     swww
-    # waypaper
-    # wl-clipboard
     cliphist
     grim
     slurp
@@ -21,7 +19,6 @@
     emote
     python311Packages.requests
     betterlockscreen
-    onlyoffice-bin_latest
     watershot
     xdg-utils
     glib

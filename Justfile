@@ -22,8 +22,8 @@ hp:
 lms:
     nixos-rebuild switch --flake .#lms --target-host lms --build-host lms --use-remote-sudo --show-trace
 
-dx5550:
-    nixos-rebuild switch --flake .#dx5550 --target-host dx5550 --build-host hp --use-remote-sudo --show-trace
+dex5550:
+    nixos-rebuild switch --flake .#dex5550 --target-host dex5550 --build-host dex5550 --use-remote-sudo --show-trace
 
 
 
