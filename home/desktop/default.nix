@@ -25,6 +25,8 @@
     ./cloud-sync/default.nix
     ./slack/default.nix
     ./obs/default.nix
+    ./wldash/default.nix
+    ./osd/default.nix
   ];
 
   home.packages = with pkgs; [

@@ -48,7 +48,7 @@ in
 
           set -g @gruvbox_flavour 'dark'
           set -g @gruvbox_window_left_separator ""
-          set -g @gruvbox_window_right_separator " "
+          set -g @gruvbox_window_right_separator ""
           set -g @gruvbox_window_middle_separator " █"
           set -g @gruvbox_window_number_position "right"
           
@@ -58,9 +58,9 @@ in
           set -g @gruvbox_window_current_fill "number"
           set -g @gruvbox_window_current_text "#W"
           
-          # set -g @gruvbox_status_modules_right "directory user host session"
-          # set -g @gruvbox_status_left_separator  " "
-          # set -g @gruvbox_status_right_separator ""
+          set -g @gruvbox_status_modules_right "application"
+          set -g @gruvbox_status_left_separator  " "
+          set -g @gruvbox_status_right_separator ""
           
           set -g @gruvbox_status_right_separator_inverse "no"
           set -g @gruvbox_status_fill "icon"
@@ -106,11 +106,11 @@ in
       tmuxPlugins.sensible
     ];
     extraConfig = ''
-      # run-shell '${pkgs.tmuxPlugins.gruvbox}/share/tmux-plugins/gruvbox/gruvbox-tpm.tmux'
+       # run-shell '${pkgs.tmuxPlugins.gruvbox}/share/tmux-plugins/gruvbox/gruvbox-tpm.tmux'
       set-option -g default-terminal 'tmux-256color'
       set-option -g terminal-overrides ',xterm-256color:RGB'
       set-option -g status-position top
-      run-shell /nix/store/axbjwfniyk3jibnnr855fsbwg0wr0wd7-tmuxplugin-tmux-gruvbox-unstable-2024-06-17/share/tmux-plugins/tmux-gruvbox/gruvbox.tmux
+      run-shell /nix/store/sgv8csnv0r97mny6ihici85jdx009m30-tmuxplugin-tmux-gruvbox-unstable-2024-06-17/share/tmux-plugins/tmux-gruvbox/gruvbox.tmux
 
       set -s escape-time 0
       set -g base-index 1

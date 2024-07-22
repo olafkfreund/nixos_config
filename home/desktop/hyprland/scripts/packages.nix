@@ -14,5 +14,6 @@
     (import ./weather.nix {inherit pkgs;})
     (import ./album_art.nix {inherit pkgs;})
     (import ./monitor.nix {inherit pkgs;})
+    (import ./websearch.nix {inherit pkgs;})
   ];
 }

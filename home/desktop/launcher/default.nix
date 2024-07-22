@@ -4,6 +4,7 @@
     packages = with pkgs; [
       rofi
       rofi-wayland
+      yofi
     ];
   };
 }
