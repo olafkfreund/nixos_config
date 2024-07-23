@@ -2,6 +2,8 @@
   config,
   inputs,
   pkgs,
+  host,
+  username,
   ...
 }: let
   animations.fast = true;
@@ -12,41 +14,36 @@
   decoration.no.rounding.blur = true;
   gaps-big-no-border = true;
   gaps-big-border = false;
+  inherit
+    (
+      import ../../../hosts/${host}/variables.nix
+    )
+    laptop_monitor
+    external_monitor
+    ;
 in {
   imports = [
     ./hypr_dep.nix
     ./hyprlock.nix
     ./hypridle.nix
     ./scripts/packages.nix
-    #./scripts/themechange.nix
   ];
 
   # hyprpaper
   home = {
-    # file = {
-    #   ".config/hypr/hyprpaper.conf".source = ../config/hypr/hyprpaper.conf;
-    # };
+  # file = {
+  #   ".config/hypr/hyprpaper.conf".source = ../config/hypr/hyprpaper.conf;
+  # };
 
-    # make stuff work on wayland
-    sessionVariables = {
-      XDG_CACHE_HOME = "\${HOME}/.cache";
-      XDG_CONFIG_HOME = "\${HOME}/.config";
-      XDG_BIN_HOME = "\${HOME}/.local/bin";
-      XDG_DATA_HOME = "\${HOME}/.local/share";
-      # SDL_VIDEODRIVER = "wayland";
-      # XDG_CURRENT_DESKTOP = "Hyprland";
-      # XDG_SESSION_TYPE = "wayland";
-      # XDG_SESSION_DESKTOP = "Hyprland";
-      # ELECTRON_OZONE_PLATFORM_HINT = "wayland";
-      # OZONE_PLATFORM = "wayland";
-      # CLUTTER_BACKEND = "wayland";
-      # GDK_BACKEND = "wayland,x11,*";
-      MOZ_ENABLE_WAYLAND = "1";
-      # GBM_BACKEND = "nvidia-drm";
-      # LIBVA_DRIVER_NAME = "nvidia";
-      # NVD_BACKEND = "direct";
-      NIXOS_WAYLAND = "1";
-      NIXOS_OZONE_WL = "1";
+  # make stuff work on wayland
+  sessionVariables = {
+    XDG_CACHE_HOME = "\${HOME}/.cache";
+    XDG_CONFIG_HOME = "\${HOME}/.config";
+    XDG_BIN_HOME = "\${HOME}/.local/bin";
+    XDG_DATA_HOME = "\${HOME}/.local/share";
+    MOZ_ENABLE_WAYLAND = "1";
+    NIXOS_WAYLAND = "1";
+    NIXOS_OZONE_WL = "1";
     };
   };
 
@@ -67,13 +64,16 @@ in {
     ];
     extraConfig = ''
       #laptop
-      monitor = eDP-1,1920x1080@100,0x0,1
+      #monitor = eDP-1,1920x1080@100,0x0,1
       #home
       # monitor = HDMI-A-1,3840x2160@60,0x0,1,bitdepth,10
-      monitor = HDMI-A-1,3840x2160@120,0x0,1
-      monitor = DP-3,3840x2160@120,0x0,1
+      #monitor = HDMI-A-1,3840x2160@120,0x0,1
+      #monitor = DP-3,3840x2160@120,0x0,1
       #monitor=,preferred,auto, 1
       #wsbind=1,eDP-1
+
+      ${laptop_monitor}
+      ${external_monitor}
 
       xwayland {
         force_zero_scaling = true
@@ -92,15 +92,13 @@ in {
       exec-once = gsettings set org.gnome.desktop.interface icon-theme "Gruvbox-Plus-Dark"
       exec-once = gsettings set org.gnome.desktop.interface gtk-theme "Gruvbox-Dark-BL-LB"
 
-      exec-once = waybar
+      exec-once = killall -q waybar;sleep .5 && waybar
       exec-once = swayosd-server
       exec-once = sudo swayosd-libinput-backend
-      exec-once = dunst
+      exec-once = killall dunst;sleep .5 && dunst
       exec-once = kdeconnect-cli
       exec-once = playerctld daemon
-      exec-once = swww init
-      exec-once = pkill swww-daemon && swww-daemon --format xrgb
-      # exec-once = start_wall
+      exec-once = killall swww-daemon;sleep .5& swww-daemon --format xrgb
       exec-once = hypridle
       exec-once = nm-applet --indicator
       exec-once = blueman-applet
@@ -166,6 +164,8 @@ in {
       #NIXOS
       env = NIXOS_WAYLAND, 1
       env = NIXOS_OZONE_WL, 1
+      # Electron
+      # ELECTRON_OZONE_PLATFORM_HINT = "wayland";
 
 
 
@@ -509,8 +509,7 @@ in {
       bind = $mainMod, RETURN, exec, kitty
       bind = $mainMod, N, exec, dunstctl history-pop
       bind = $mainMod SHIFT, N, exec, dunstctl close-all
-      bind = ALT CTRL, P, exec, grim -g \"$(slurp)\" - | swappy -f -
-      bind = SHIFT ALT, P, exec, grim -g \"$(slurp)\" - | swappy -f -
+      bind = SHIFT ALT, P, exec, screenshotin
       bind = $mainMod, P, pin
       # bind = $mainMod SHIFT, P, unpin
       bind = $mainMod ALT, H, movetoworkspace, special:hidden

@@ -258,6 +258,7 @@
       ask = "chatgpt --model gpt-4 -p";
       # obsidian = "obsidian --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
       wezterm = "wezterm start --always-new-process";
+      sgrabb = "screenshotin";
     };
   };
 }

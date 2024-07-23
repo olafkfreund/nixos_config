@@ -120,9 +120,14 @@
     nixosConfigurations = {
       razer = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = {
+        specialArgs = 
+            let
+              host = "razer";
+            in 
+         {
           inherit inputs;
           inherit username;  
+          inherit host;
         };
         modules = [
           ./hosts/razer/configuration.nix
@@ -138,11 +143,16 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = {
+            home-manager.extraSpecialArgs = 
+                let
+                  host = "razer";
+                in
+             {
               pkgs-stable = import nixpkgs-stable {
                 system = "x86_64-linux";
                 config.allowUnfree = true;
               };
+              inherit host;
               inherit inputs;
               inherit nixpkgs;
               inherit spicetify-nix;
@@ -174,9 +184,13 @@
       };
       g3 = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = {
+        specialArgs = 
+            let
+              host = "g3";
+            in {
           inherit inputs;
           inherit username;
+          inherit host;
         };
         modules = [
           ./hosts/g3/configuration.nix
@@ -190,7 +204,10 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = {
+            home-manager.extraSpecialArgs = 
+                let
+                  host = "g3";
+                in {
               pkgs-stable = import nixpkgs-stable {
                 system = "x86_64-linux";
                 config.allowUnfree = true;
@@ -205,6 +222,7 @@
               inherit nix-colors;
               inherit nix-snapd;
               inherit self;
+              inherit host;
             };
             home-manager.users.${username} = import ./Users/${username}/g3_home.nix;
             home-manager.sharedModules = [
@@ -217,7 +235,10 @@
       };
       lms = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = {
+        specialArgs = 
+            let
+              host = "lms";
+            in {
           inherit inputs;
           inherit username;
         };
@@ -233,7 +254,10 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = {
+            home-manager.extraSpecialArgs = 
+                let
+                  host = "lms";
+                in {
               pkgs-stable = import nixpkgs-stable {
                 system = "x86_64-linux";
                 config.allowUnfree = true;
@@ -252,6 +276,7 @@
               inherit nix-colors;
               inherit nix-snapd;
               inherit self;
+              inherit host;
             };
             home-manager.users.${username} = import ./Users/${username}/lms_home.nix;
             home-manager.sharedModules = [
@@ -269,9 +294,13 @@
       };    
       dex5550 = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = {
+        specialArgs = 
+            let
+              host = "dex5550";
+            in {
           inherit inputs;
           inherit username;
+          inherit host;    
         };
         modules = [
           ./hosts/dex5550/configuration.nix
@@ -285,7 +314,10 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = {
+            home-manager.extraSpecialArgs = 
+                let
+                  host = "dex5550";
+                in {
               pkgs-stable = import nixpkgs-stable {
                 system = "x86_64-linux";
                 config.allowUnfree = true;
@@ -304,6 +336,7 @@
               inherit nix-colors;
               inherit nix-snapd;
               inherit self;
+              inherit host;
             };
             home-manager.users.${username} = import ./Users/${username}/dex5550_home.nix;
             home-manager.sharedModules = [
@@ -321,9 +354,13 @@
       };    
       hp = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = {
+        specialArgs = 
+            let
+              host = "hp";
+            in {
           inherit inputs;
           inherit username;
+          inherit host;
         };
         modules = [
           ./hosts/hp/configuration.nix
@@ -337,7 +374,10 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = {
+            home-manager.extraSpecialArgs = 
+                let
+                  host = "hp";
+                in {
               pkgs-stable = import nixpkgs-stable {
                 system = "x86_64-linux";
                 config.allowUnfree = true;
@@ -355,6 +395,7 @@
               inherit nix-colors;
               inherit nix-snapd;
               inherit self;
+              inherit host;    
             };
             home-manager.users.${username} = import ./Users/${username}/hp_home.nix;
             home-manager.sharedModules = [

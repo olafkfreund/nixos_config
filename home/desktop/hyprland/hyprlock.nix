@@ -13,6 +13,19 @@
         vibrancy = 0.1600
         vibrancy_darkness = 0.0
     }
+
+    image = [
+        {
+            path = /home/olafkfreund/Pictures/PXL_20221014_102401611.PORTRAIT~3.jpg
+            size = 150
+            border_size = 4
+            border_color = "rgb(40, 40, 40)"
+            rounding = -1
+            position = 0, 200
+            halign = center
+            valign = center
+        }
+    ]
     
     input-field {
         monitor = 
@@ -25,13 +38,11 @@
         inner_color = rgb(40, 40 ,40)
         font_color = rgb(235, 219, 178)
         fade_on_empty = false
-        placeholder_text = <i>Password...</i> # Text rendered in the input box when it's empty.
+        placeholder_text = "Password..."
         hide_input = false
         position = 0, 50
         check_color = rgb(235, 219, 178)
         fail_color = rgb(254,128, 25)
-        fail_text = <i>$FAIL <b>($ATTEMPTS)</b></i> # can be set to empty
-        fail_transition = 300 # transition time in ms between normal outer_color and fail_color
         halign = center
         valign = bottom
     }

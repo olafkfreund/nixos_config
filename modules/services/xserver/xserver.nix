@@ -1,5 +1,6 @@
-{ ...
-}: {
+{gpu, ...}: let
+  inherit (import ../../../hosts/${host}/variables.nix) gpu;
+in {
   services.xserver = {
     enable = true;
     desktopManager.gnome.enable = true;
@@ -7,6 +8,6 @@
       "-nolisten tcp"
       "-dpi 96"
     ];
-    videoDrivers = [ "nvidia" ];
+    videoDrivers = ["${gpu}"];
   };
 }
