@@ -14,6 +14,11 @@
       command = "${lib.getExe config.programs.sway.package}";
       user = "${username}";
     };
+    session_dwm = {
+      command= "startx && dwm_run";
+      user = "${username}";
+    };
+
   in {
     enable = true;
     settings = {

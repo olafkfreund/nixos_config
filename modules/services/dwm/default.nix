@@ -5,7 +5,7 @@
   nixpkgs.overlays = [
     (final: prev: {
       dwm = prev.dwm.overrideAttrs (old: {
-        src = ./chadwm;
+        src = ./dwm-6.5;
         buildInputs = old.buildInputs ++ [pkgs.imlib2];
       });
     })
@@ -15,15 +15,21 @@
     xorg.xsetroot
     slstatus
     gnumake
+    dwmblocks
+    dmenu
+    slock
     xorg.libX11.dev
     xorg.libXft
     xorg.libXinerama
     xorg.xinit
     xorg.xrdb
     xorg.xset
+    xorg.xcbutil
+    xorg.libX11.dev
     xorg.xbacklight
     xorg.xrandr
     sx
+    st
     light
     libgcc
     dash

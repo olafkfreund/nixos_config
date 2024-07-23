@@ -19,7 +19,7 @@ in
   programs.tmux = {
     enable = true;
     clock24 = true;
-    shortcut = "q";
+    shortcut = "b";
     aggressiveResize = true;
     baseIndex = 1;
     newSession = true;
