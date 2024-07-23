@@ -509,7 +509,7 @@ in {
       bind = $mainMod, RETURN, exec, kitty
       bind = $mainMod, N, exec, dunstctl history-pop
       bind = $mainMod SHIFT, N, exec, dunstctl close-all
-      bind = ALT CTRL, P, exec, grim -g \"$(slurp)\" - | wl-copy
+      bind = ALT CTRL, P, exec, grim -g \"$(slurp)\" - | swappy -f -
       bind = SHIFT ALT, P, exec, grim -g \"$(slurp)\" - | swappy -f -
       bind = $mainMod, P, pin
       # bind = $mainMod SHIFT, P, unpin
