@@ -32,7 +32,7 @@ in {
       # cover_img_width = 5;
       player_event_hook_command.command = pkgs.writeShellScript "waybarHook" ''
         sleep 1
-        curl "$(playerctl -p spotify_player metadata mpris:artUrl)" > /tmp/cover.jpg
+        curl "$(playerctl -p spotify_player metadata mpris:artUrl)" > /tmp/cover.jpeg
         pkill -RTMIN+8 waybar
       '';
       device = {

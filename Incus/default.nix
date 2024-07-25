@@ -6,6 +6,7 @@
         config = {
           "ipv4.address" = "10.237.170.1/24";
           "ipv4.nat" = "true";
+         "core.https_address" = ":8443"; 
         };
         name = "incusbr0";
         type = "bridge";
