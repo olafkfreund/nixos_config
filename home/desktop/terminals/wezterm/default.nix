@@ -7,7 +7,7 @@
     extraConfig = ''
       return {
         hide_tab_bar_if_only_one_tab = true,
-        color_scheme = 'Gruvbox dark, hard (base16)',
+        color_scheme = 'Gruvbox dark, medium (base16)',
         keys = {
           {
             key = "LeftArrow",
