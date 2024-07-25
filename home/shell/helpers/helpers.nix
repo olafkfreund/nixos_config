@@ -30,8 +30,15 @@
     cheat #cheatsheet
     #yazi #file manager
     ffmpegthumbnailer #thumbnailer
-    macchina
-    slides
+    macchina #file manager
+    slides #markdown presentation
+    tldr #cheatsheet
+    khal #calendar
+    newsboat #rss reader
+    buku #bookmark manager
+    desktop-file-utils #desktop file manager
+    xdg-utils #desktop file manager
+    xdg-user-dirs #desktop file manager
   ];
 }
 

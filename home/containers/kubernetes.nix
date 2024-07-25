@@ -9,5 +9,6 @@
 	  kubecolor
 	  k9s
     minikube
+    werf
   ];
 }

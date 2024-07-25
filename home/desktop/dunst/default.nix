@@ -26,7 +26,7 @@
         padding = 10;
         horizontal_padding = 10;
         frame_width = 0;
-        frame_color = "#${config.colorScheme.palette.base06}";
+        frame_color = "#${config.colorScheme.palette.base05}";
         sort = true;
         idle_threshold = 0;
         font = "JetBrains Mono Nerd Font 13";
@@ -34,7 +34,7 @@
         markup = "full";
         origin = "top-right";
         offset = "10x10";
-        format = "<b>%s</b>''\n%b";
+        # format = "<b>%s</b>''\n%b";
         alignment = "left";
         show_age_threshold = 60;
         word_wrap = true;

@@ -15,6 +15,11 @@
     ./wldash/default.nix
     ./osd/default.nix
   ];
+  home.packages = with pkgs; [
+    remmina
+    freerdp
+  ];
+
   # GitHub CLI tool
   programs.gh = {
     enable = true;

@@ -22,16 +22,16 @@
         "gtk-layer-shell" = true;
 
         "modules-left" = [
-          # "hyprland/workspaces"
-          # "hyprland/window"
-          "custom/spotify"
+          "hyprland/workspaces"
+          "hyprland/window"
+          # "custom/spotify"
           # "image/albumart"
-          "custom/playerctl"
+          # "custom/playerctl"
 
         ];
 
         "modules-right" = [
-          # "custom/weathericons"
+          "custom/nix-updates"
           "custom/weather"
           "network#icons"
           "network"
@@ -51,18 +51,18 @@
         ];
 
         "modules-center" = [
-          "hyprland/workspaces"
-          "hyprland/window"
-          # "custom/spotify"
-          # "image/albumart"
-          # "custom/playerctl"
+          # "hyprland/workspaces"
+          # "hyprland/window"
+          "image"
+          "custom/playerctl"
         ];
 
-        "image/albumart" = {
+        "image" = {
           exec = "album_art";
-          path = "/tmp/cover.jpg";
+          path = "/tmp/cover.jpeg";
           size = 20;
           interval = 5;
+          on-click = "wezterm start -- bash -c spotify_player";
         };
 
         "custom/settings" = {
@@ -136,22 +136,22 @@
             "10" = [ ];
           };
           "format-icons" = {
-            "1" = "1";
-            "2" = "2";
-            "3" = "3";
-            "4" = "4";
-            "5" = "5";
-            "6" = "6";
-            "7" = "7";
-            "8" = "8";
-            "9" = "9";
-            "10" = "10";
-            # "active" = " ";
-            "default" = "";
-            "urgent" = "";
-            "magic" = "";
-            "hidden" = "󰐃";
-            "secret" = "";
+            "1" = " ";
+            "2" = " ";
+            "3" = " ";
+            "4" = " ";
+            "5" = " ";
+            "6" = " ";
+            "7" = " ";
+            "8" = " ";
+            "9" = " ";
+            "10" = " ";
+            "active" = " ";
+            "default" = " ";
+            "urgent" = " ";
+            "magic" = " ";
+            "hidden" = "󰐃 ";
+            "secret" = " ";
             "spotify" = " ";
           };
         };
@@ -293,7 +293,7 @@
           tooltip-format = "{device_alias}";
           tooltip-format-connected = "{device_enumerate}";
           tooltip-format-enumerate-connected = "{device_alias}";
-          on-click = "kitty -e bluetuith --color dark";
+          on-click = "wezterm start -- bash -c bluetuith --color dark";
         };
         "pulseaudio#icons" = {
           format = "{icon}";
@@ -373,6 +373,18 @@
           format = " ";
           tooltip = false;
         };
+       "custom/nix-updates" = {
+          "exec" = "update-checker";
+          "on-click" = "update-checker && notify-send 'The system has been updated'";
+          "interval" = 3600;
+          "tooltip" = true;
+          "return-type" = "json";
+          "format" = "{} {icon} |";
+          "format-icons" = {
+              "has-updates" = " ";
+              "updated" = " ";
+          };
+        };
       };
     };
 
@@ -425,11 +437,11 @@
         
         #workspaces button:hover {
           font-weight: bolder;
-          color: #${config.colorScheme.palette.base0D};
+          color: #${config.colorScheme.palette.base09};
         }
 
         #workspaces button.active {
-          color: #${config.colorScheme.palette.base09};
+          color: #${config.colorScheme.palette.base05};
           font-weight: bolder;
           transition: all 0.1s ease-in-out;
         }
@@ -478,6 +490,13 @@
         }
 
         #clock {
+          font-weight: bolder;
+          font-style: normal;
+          color: #${config.colorScheme.palette.base05};
+          margin: 0 5 0 0px;
+        }
+        
+        #custom-nix-updates {
           font-weight: bolder;
           font-style: normal;
           color: #${config.colorScheme.palette.base05};

@@ -27,7 +27,7 @@ in {
       liked_icon = " ";
       border_type = "Hidden";
       progress_bar_type = "Rectangle";
-      cover_img_scale = 3;
+      cover_img_scale = 1;
       # cover_img_length = 12;
       # cover_img_width = 5;
       player_event_hook_command.command = pkgs.writeShellScript "waybarHook" ''

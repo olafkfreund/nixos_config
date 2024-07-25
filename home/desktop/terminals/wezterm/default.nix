@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}: {
+{pkgs, ...}: {
   programs.wezterm = {
     enable = true;
     package = pkgs.wezterm;
@@ -32,12 +30,12 @@
             action = wezterm.action { ScrollByLine = -1 }
           },
           {
-            key = "h",
+            key = "_",
             mods = "CTRL | SHIFT",
             action = wezterm.action.SplitHorizontal { domain = "CurrentPaneDomain" },
           },
           {
-            key = "v",
+            key = "|",
             mods = "CTRL | ALT",
             action = wezterm.action.SplitVertical { domain = "CurrentPaneDomain" },
           },

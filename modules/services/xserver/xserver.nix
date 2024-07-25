@@ -9,5 +9,6 @@ in {
       "-dpi 96"
     ];
     videoDrivers = ["${gpu}"];
+    updateDbusEnvironment = true;
   };
 }

@@ -477,12 +477,6 @@ in {
 
       #Hyprexpo
       bind = ALT, TAB, hyprexpo:expo, toggle # can be: toggle, off/disable or on/enable
-      bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh
-      bind = $mainMod SHIFT, backspace, exec, ~/.config/rofi/launchers/type-2/hypr_exec.sh
-      bindm = $mainMod, mouse:272, movewindow
-      bindm = $mainMod, mouse:273, resizewindow
-      bind = $mainMod, F3, exec, brightnessctl -d *::kbd_backlight set +33%
-      bind = $mainMod, F2, exec, brightnessctl -d *::kbd_backlight set 33%-"
       bind = , XF86AudioRaiseVolume, exec, swayosd-client --output-volume=raise
       bind = , XF86AudioLowerVolume, exec, swayosd-client --output-volume=lower
       bind = , XF86AudioMute, exec, swayosd-client --output-volume mute-toggle
@@ -502,53 +496,78 @@ in {
       bind = , XF86MonBrightnessUp,  exec, swayosd-client --brightness +10
       bind = , XF86MonBrightnessDown, exec, swayosd-client --brightness -10
       bind = , release Caps_Lock, exec, swayosd-client --caps-lock
-      bind = $mainMod, E, exec, kitty --hold sh -c yazi
-      bind = $mainMod, T, exec, kitty
+      
+      bind = $mainMod, F3, exec, brightnessctl -d *::kbd_backlight set +33%
+      bind = $mainMod, F2, exec, brightnessctl -d *::kbd_backlight set 33%-"
+      
+      bindm = $mainMod, mouse:272, movewindow
+      bindm = $mainMod, mouse:273, resizewindow
+      bind = $mainMod, E, exec, wezterm start -- bash -c yazi
+      bind = $mainMod, T, exec, wezterm start
       bind = $mainMod, M, exec, ~/.config/rofi/applets/bin/monitors.sh
-      bind = $mainMod, space, exec, ~/.config/rofi/launchers/type-2/launcher.sh
-      bind = $mainMod, RETURN, exec, kitty
-      bind = $mainMod, N, exec, dunstctl history-pop
-      bind = $mainMod SHIFT, N, exec, dunstctl close-all
-      bind = SHIFT ALT, P, exec, screenshotin
       bind = $mainMod, P, pin
-      # bind = $mainMod SHIFT, P, unpin
-      bind = $mainMod ALT, H, movetoworkspace, special:hidden
-      bind = $mainMod ALT, H, togglespecialworkspace, hidden
+      bind = $mainMod, K&K, exec, kitty
       bind = $mainMod, K, exec, hyprctl kill
+      # binds = $mainMod CTRL, S&U, exec, wezterm start -- bash -c system-tui
+      # binds = $mainMod CTRL, L&G, exec, wezterm start -- bash -c lazygit
+      # binds = $mainMod CTRL, K&9, exec, wezterm start -- bash -c k9s
       bind = $mainMod, S, togglespecialworkspace, magic
-      bind = $mainMod SHIFT, S, movetoworkspace, special:magic
-      bind = $mainMod SHIFT, I, exec, $HOME/.config/rofi/applets/bin/clipboard.sh
-      bind = $mainMod ALT, L, exec, hyprlock
+      bind = $mainMod, Z, exec, playerctl -p spotify previous
+      bind = $mainMod, X, exec, playerctl -p spotify next
+      bind = $mainMod, C, exec, playerctl -p spotify play-pause
+      binde = $mainMod, V, exec, playerctl -p spotify volume 0.02-
+      bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh
+      binde = $mainMod, B, exec, playerctl -p spotify volume 0.02+
+      bind = $mainMod, W, killactive
+      bind = $mainMod, F&T, exec, foot
+      bind = $mainMod, F, fullscreen, 1 #maximize window
+      bind = $mainMod, Q, togglefloating
+      bind = $mainMod, Y, exec, hyprctl keyword general:layout "dwindle" #switch to dwindle layout on fly
+      bind = $mainMod, U, exec, hyprctl keyword general:layout "master" #switch to master layout on fly
+      bind = $mainMod, I, layoutmsg, cyclenext
+      bind = $mainMod, O, layoutmsg, swapwithmaster master
+      bind = $mainMod, N, exec, dunstctl history-pop
+      bind = $mainMod, RETURN, exec, [float] wezterm start
+      bind = $mainMod, space, exec, ~/.config/rofi/launchers/type-2/launcher.sh
       bind = $mainMod, h, movefocus, l
       bind = $mainMod, l, movefocus, r
       bind = $mainMod, k, movefocus, u
       bind = $mainMod, j, movefocus, d
-      bind = $mainMod, Z, exec, playerctl -p spotify previous
-      bind = $mainMod SHIFT, Z, exec, playerctl previous
-      bind = $mainMod, X, exec, playerctl -p spotify next
-      bind = $mainMod SHIFT, X, exec, playerctl next
-      bind = $mainMod, C, exec, playerctl -p spotify play-pause
-      bind = $mainMod SHIFT, C, exec, playerctl play-pause
-      binde = $mainMod, V, exec, playerctl -p spotify volume 0.02-
-      binde = $mainMod SHIFT, V, exec, pamixer -d 2
-      binde = $mainMod, B, exec, playerctl -p spotify volume 0.02+
-      binde = $mainMod SHIFT, B, exec, pamixer -i 2
-      bind = $mainMod, SLASH, exec, pamixer -t
-      bind = Control_SHIFT, M, togglespecialworkspace, spotify
-      bind = $mainMod, W, killactive
-      bind = $mainMod, F, fullscreen, 1 #maximize window
-      bind = $mainMod SHIFT, F, fullscreen, 0 #true fullscreen
-      bind = $mainMod, Q, togglefloating
-      bind = $mainMod, Y, exec, hyprctl keyword general:layout "dwindle" #switch to dwindle layout on fly
-      bind = $mainMod, U, exec, hyprctl keyword general:layout "master" #switch to master layout on fly
-      bind = $mainMod SHIFT, U, layoutmsg, orientationcycle
-      bind = $mainMod, I, layoutmsg, cyclenext
-      bind = $mainMod SHIFT, I, layoutmsg, cycleprev
-      bind = $mainMod, O, layoutmsg, swapwithmaster master
-      bind = $mainMod SHIFT, O, layoutmsg, focusmaster auto
+      bind = $mainMod, 1, workspace, 1
+      bind = $mainMod, 2, workspace, 2
+      bind = $mainMod, 3, workspace, 3
+      bind = $mainMod, 4, workspace, 4
+      bind = $mainMod, 5, workspace, 5
+      bind = $mainMod, 6, workspace, 6
+      bind = $mainMod, 7, workspace, 7
+      bind = $mainMod, 8, workspace, 8
+      bind = $mainMod, 9, workspace, 9
+      bind = $mainMod, 0, workspace, 10
       bind = $mainMod, BRACKETLEFT, layoutmsg, rollnext
       bind = $mainMod, BRACKETRIGHT, layoutmsg, rollprev
-      bind = $mainMod CTRL, P, pseudo
+      bind = $mainMod, mouse_down, workspace, e-1
+      bind = $mainMod, mouse_up, workspace, e+1
+      bind = $mainMod,g,togglegroup
+      bind = $mainMod,tab,changegroupactive
+      bind = $mainMod, SLASH, exec, pamixer -t
+      
+      bind = $mainMod ALT, H, movetoworkspace, special:hidden
+      bind = $mainMod ALT, H, togglespecialworkspace, hidden
+      bind = $mainMod ALT, L, exec, hyprlock
+      
+      bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh
+      bind = $mainMod SHIFT, N, exec, dunstctl close-all
+      bind = $mainMod SHIFT, S, movetoworkspace, special:magic
+      bind = $mainMod SHIFT, I, exec, $HOME/.config/rofi/applets/bin/clipboard.sh
+      bind = $mainMod SHIFT, Z, exec, playerctl previous
+      bind = $mainMod SHIFT, X, exec, playerctl next
+      bind = $mainMod SHIFT, C, exec, playerctl play-pause
+      binde = $mainMod SHIFT, V, exec, pamixer -d 2
+      binde = $mainMod SHIFT, B, exec, pamixer -i 2
+      bind = $mainMod SHIFT, F, fullscreen, 0 #true fullscreen
+      bind = $mainMod SHIFT, U, layoutmsg, orientationcycle
+      bind = $mainMod SHIFT, I, layoutmsg, cycleprev
+      bind = $mainMod SHIFT, O, layoutmsg, focusmaster auto
       bind = $mainMod SHIFT, 1, movetoworkspace, 1
       bind = $mainMod SHIFT, 2, movetoworkspace, 2
       bind = $mainMod SHIFT, 3, movetoworkspace, 3
@@ -563,29 +582,22 @@ in {
       bind = $mainMod_SHIFT, l,movewindow,r
       bind = $mainMod_SHIFT, k,movewindow,u
       bind = $mainMod_SHIFT, j,movewindow,d
+
       binde = $mainMod_CTRL, l, resizeactive, 30 0
       binde = $mainMod_CTRL, h, resizeactive, -30 0
       binde = $mainMod_CTRL, k, resizeactive, 0 -30
       binde = $mainMod_CTRL, j, resizeactive, 0 30
-      bind = $mainMod, 1, workspace, 1
-      bind = $mainMod, 2, workspace, 2
-      bind = $mainMod, 3, workspace, 3
-      bind = $mainMod, 4, workspace, 4
-      bind = $mainMod, 5, workspace, 5
-      bind = $mainMod, 6, workspace, 6
-      bind = $mainMod, 7, workspace, 7
-      bind = $mainMod, 8, workspace, 8
-      bind = $mainMod, 9, workspace, 9
-      bind = $mainMod, 0, workspace, 10
-      bind = $mainMod, mouse_down, workspace, e-1
-      bind = $mainMod, mouse_up, workspace, e+1
-      bind = $mainMod, B, exec, pkill -SIGUSR1 waybar
+      bind = $mainMod CTRL, P, pseudo
       bind = $mainMod CTRL, l, workspace, r+1
       bind = $mainMod CTRL, h, workspace, r-1
-      bind = $mainMod,g,togglegroup
-      bind = $mainMod,tab,changegroupactive
+      bind = $mainMod CTRL SHIFT, B, exec, pkill -SIGUSR1 waybar
+
+      bind = SHIFT ALT, P, exec, screenshotin
+      bind = Control_SHIFT, M, togglespecialworkspace, spotify
+      
       bindl = , switch:off:Lid Switch,exec,hyprctl keyword monitor "eDP-1, 1920x1080, 0x0, 1"
       bindl = , switch:on:Lid Switch,exec,hyprctl keyword monitor "eDP-1, disable"
+
       blurls = notifications
       blurls = swayosd
     '';

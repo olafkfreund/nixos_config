@@ -4,7 +4,7 @@
 
     background {
         monitor =
-        path = /home/olafkfreund/Pictures/wallpapers/gruvbox/hypr/out.png
+        path = /home/olafkfreund/Pictures/wallpapers/gruvbox/hypr/fly_agaric_mushroom_fall_foliage_117318_1920x1080.jpg
         blur_size = 7
         blur_passes = 3 # 0 disables blurring
         noise = 0.0117
@@ -14,10 +14,9 @@
         vibrancy_darkness = 0.0
     }
 
-    image = [
-        {
+    image {
             path = /home/olafkfreund/Pictures/PXL_20221014_102401611.PORTRAIT~3.jpg
-            size = 150
+            size = 350
             border_size = 4
             border_color = "rgb(40, 40, 40)"
             rounding = -1
@@ -25,7 +24,6 @@
             halign = center
             valign = center
         }
-    ]
     
     input-field {
         monitor = 
