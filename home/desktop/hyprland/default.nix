@@ -61,14 +61,9 @@ in {
     plugins = [
       pkgs.hyprlandPlugins.hyprexpo
       pkgs.hyprlandPlugins.csgo-vulkan-fix
+      pkgs.hyprlandPlugins.hyprfocus
     ];
     extraConfig = ''
-      #laptop
-      #monitor = eDP-1,1920x1080@100,0x0,1
-      #home
-      # monitor = HDMI-A-1,3840x2160@60,0x0,1,bitdepth,10
-      #monitor = HDMI-A-1,3840x2160@120,0x0,1
-      #monitor = DP-3,3840x2160@120,0x0,1
       #monitor=,preferred,auto, 1
       #wsbind=1,eDP-1
 
@@ -199,7 +194,7 @@ in {
         then ''
           gaps_in = 1
           gaps_out = 1
-          border_size = 1
+          border_size = 0
         ''
         else if gaps-big-border == true
         then ''
@@ -398,12 +393,6 @@ in {
           workspace_swipe_fingers=3
       }
        plugin {
-      #     hycov {
-      #       overview_gappo = 60 #gaps width from screen
-      #       overview_gappi = 24 #gaps width from clients
-      #       hotarea_size = 10 #hotarea size in bottom left,10x10
-      #       enable_hotarea = 1 # enable mouse cursor hotarea
-      #     },
            hyprexpo {
              columns = 3
              gap_size = 5
@@ -412,6 +401,35 @@ in {
              enable_gesture = true # laptop touchpad, 4 fingers
              gesture_distance = 300 # how far is the "max"
              gesture_positive = true # positive = swipe down. Negative = swipe up.
+           }
+           hyprfocus {
+              enabled = yes
+              animate_floating = yes
+              animate_workspacechange = yes
+              focus_animation = shrink
+              # Beziers for focus animations
+              bezier = bezIn, 0.5,0.0,1.0,0.5
+              bezier = bezOut, 0.0,0.5,0.5,1.0
+              bezier = overshot, 0.05, 0.9, 0.1, 1.05
+              bezier = smoothOut, 0.36, 0, 0.66, -0.56
+              bezier = smoothIn, 0.25, 1, 0.5, 1
+              bezier = realsmooth, 0.28,0.29,.69,1.08
+              # Flash settings
+              flash {
+                  flash_opacity = 0.95
+                  in_bezier = realsmooth
+                  in_speed = 0.5
+                  out_bezier = realsmooth
+                  out_speed = 3
+              }
+              # Shrink settings
+              shrink {
+                  shrink_percentage = 0.9975
+                  in_bezier = realsmooth
+                  in_speed = 1
+                  out_bezier = realsmooth
+                  out_speed = 1
+              }
            }
        }
 
