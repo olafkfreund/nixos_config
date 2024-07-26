@@ -32,6 +32,7 @@
   home.packages = with pkgs; [
     remmina
     freerdp
+
   ];
 
   # GitHub CLI tool

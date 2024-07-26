@@ -6,7 +6,7 @@
     pkgs.terraform
     pkgs.terraformer
     pkgs.terraform-docs
-    pkgs.tftui
+    # pkgs.tftui
     pkgs.terraform-providers.digitalocean
     pkgs.terraform-providers.oci
     pkgs.terraform-providers.ssh

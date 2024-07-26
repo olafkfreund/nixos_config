@@ -15,6 +15,7 @@
     LC_TIME = "en_GB.UTF-8";
   };
   console.keyMap = "uk";
+  console.font = "DejaVuSansMono 12";
 
   services.xserver = {
     xkb.layout = "gb";
