@@ -606,8 +606,8 @@ in {
       binde = $mainMod_CTRL, k, resizeactive, 0 -30
       binde = $mainMod_CTRL, j, resizeactive, 0 30
       bind = $mainMod CTRL, P, pseudo
-      bind = $mainMod CTRL, l, workspace, r+1
-      bind = $mainMod CTRL, h, workspace, r-1
+      bind = $mainMod SPACE, l, workspace, r+1
+      bind = $mainMod SPACE, h, workspace, r-1
       bind = $mainMod CTRL SHIFT, B, exec, pkill -SIGUSR1 waybar
 
       bind = SHIFT ALT, P, exec, screenshotin
