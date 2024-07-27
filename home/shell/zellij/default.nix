@@ -1,5 +1,7 @@
-{ pkgs, lib,...}: {
-  
+{ pkgs, lib, ...}: {
+
+  imports = [ ./default_layout.nix ];
+
   programs.zellij = {
     enable = true;
     enableBashIntegration = false;
@@ -25,5 +27,8 @@
   home.shellAliases = {
     zj = "zellij";
   };
+  home.packages = with pkgs; [
+    zjstatus
+  ];
 }
 

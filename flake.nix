@@ -93,6 +93,10 @@
     ags = {
       url = "github:Aylur/ags";
     };
+
+    zjstatus = {
+          url = "github:dj95/zjstatus";
+    };
   };
 
   outputs = {
@@ -111,6 +115,7 @@
     home-manager,
     stylix,
     nix-index-database,
+    zjstatus,
     ...
   } @ inputs: 
   let
@@ -139,6 +144,13 @@
           inputs.nix-snapd.nixosModules.default
           inputs.razer-laptop-control.nixosModules.default
           nix-index-database.nixosModules.nix-index
+          ./home/shell/zellij/zjstatus.nix
+            # { nixpkgs.overlays = with inputs; [
+            #     (final: prev: {
+            #       zjstatus = zjstatus.packages.${prev.system}.default;
+            #     })
+            #   ];
+            # }
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
@@ -153,6 +165,7 @@
                 config.allowUnfree = true;
               };
               inherit host;
+              inherit zjstatus;
               inherit inputs;
               inherit nixpkgs;
               inherit spicetify-nix;
@@ -194,6 +207,7 @@
         };
         modules = [
           ./hosts/g3/configuration.nix
+          ./home/shell/zellij/zjstatus.nix
           nur.nixosModules.nur
           home-manager.nixosModules.home-manager
           inputs.nix-colors.homeManagerModules.default
@@ -214,6 +228,7 @@
               };
               inherit inputs;
               inherit nixpkgs;
+              inherit zjstatus;
               inherit stylix;
               inherit nix-index-database;
               inherit nixpkgs-f2k;
@@ -264,6 +279,7 @@
               };
               inherit inputs;
               inherit nixpkgs;
+              inherit zjstatus;
               inherit spicetify-nix;
               inherit ags;
               inherit razer-laptop-control;
@@ -304,6 +320,7 @@
         };
         modules = [
           ./hosts/dex5550/configuration.nix
+          ./home/shell/zellij/zjstatus.nix
           nur.nixosModules.nur
           home-manager.nixosModules.home-manager
           inputs.nix-colors.homeManagerModules.default
@@ -324,6 +341,7 @@
               };
               inherit inputs;
               inherit nixpkgs;
+              inherit zjstatus;
               inherit spicetify-nix;
               inherit ags;
               inherit razer-laptop-control;
@@ -364,6 +382,7 @@
         };
         modules = [
           ./hosts/hp/configuration.nix
+          ./home/shell/zellij/zjstatus.nix
           nur.nixosModules.nur
           home-manager.nixosModules.home-manager
           inputs.nix-colors.homeManagerModules.default
@@ -384,6 +403,7 @@
               };
               inherit inputs;
               inherit nixpkgs;
+              inherit zjstatus;
               inherit spicetify-nix;
               inherit ags;
               inherit stylix;
