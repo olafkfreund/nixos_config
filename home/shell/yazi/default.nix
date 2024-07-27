@@ -54,4 +54,13 @@
       };
     };
   };
+  home.packages = with pkgs; [
+        imagemagick
+        ffmpegthumbnailer
+        fontpreview
+        unar
+        poppler
+        unar
+      ];
+
 }

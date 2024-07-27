@@ -27,14 +27,13 @@ in {
       liked_icon = " ";
       border_type = "Hidden";
       progress_bar_type = "Rectangle";
-      cover_img_scale = 1;
+      cover_img_scale = 2;
       # cover_img_length = 12;
       # cover_img_width = 5;
-      player_event_hook_command.command = pkgs.writeShellScript "waybarHook" ''
-        sleep 1
-        curl "$(playerctl -p spotify_player metadata mpris:artUrl)" > /tmp/cover.jpeg
-        pkill -RTMIN+8 waybar
-      '';
+      # player_event_hook_command = { 
+      #   command = "album_art"; 
+      #   args = ["-b" "c" "-d"];
+      # };
       device = {
         name = "spotify-player";
         device_type = "speaker";

@@ -24,5 +24,6 @@
     glib
     hyprkeys
     nwg-displays
+    kanshi
   ];
 }

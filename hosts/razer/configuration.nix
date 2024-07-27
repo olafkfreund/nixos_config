@@ -104,7 +104,7 @@
     ];
   };
   hardware.keyboard.zsa.enable = true;
-
+  services.playerctld.enable = true;
   networking.firewall.enable = false;
   networking.nftables.enable = true;
   networking.timeServers = ["pool.ntp.org"];
