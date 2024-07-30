@@ -9,7 +9,7 @@
     settings = {
       mainBar = {
         "layer" = "top";
-        "position" = "top";
+        "position" = "bottom"; #"top";
         "margin-top" = 10;
         "margin-bottom" = 3;
         "margin-left" = 20;
@@ -391,7 +391,7 @@
         }
 
         window#waybar {
-          background-color: transparent;
+          background-color: #${config.colorScheme.palette.base00};
         }
 
         .modules-right {

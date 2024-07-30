@@ -14,7 +14,7 @@
     ./nodejs.nix
     ./github.nix
     ./nvim.nix
-    ./emacs.nix
+    # ./emacs.nix
     ./zed.nix
     ./containers.nix
 ];

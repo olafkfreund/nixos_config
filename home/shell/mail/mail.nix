@@ -16,8 +16,6 @@ home.packages = with pkgs; [
   openldap
   abook
   gcalcli
-  davmail
-  lynx
   lbdb
   python311Packages.vobject
   python311Packages.icalendar
