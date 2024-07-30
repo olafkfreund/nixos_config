@@ -2,6 +2,7 @@
   config,
   lib,
   username,
+  pkgs,
   ...
 }: {
   # greetd display manager
@@ -14,6 +15,11 @@
       command = "${lib.getExe config.programs.sway.package}";
       user = "${username}";
     };
+    session_dwm = {
+      command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd dwm";
+      user = "${username}";
+    };
+
   in {
     enable = true;
     settings = {

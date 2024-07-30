@@ -42,7 +42,7 @@ in {
     XDG_BIN_HOME = "\${HOME}/.local/bin";
     XDG_DATA_HOME = "\${HOME}/.local/share";
     MOZ_ENABLE_WAYLAND = "1";
-    NIXOS_WAYLAND = "1";
+    # NIXOS_WAYLAND = "1";
     NIXOS_OZONE_WL = "1";
     };
   };
@@ -93,7 +93,7 @@ in {
       exec-once = killall dunst;sleep .5 && dunst
       exec-once = kdeconnect-cli
       exec-once = playerctld daemon
-      exec-once = killall swww-daemon;sleep .5& swww-daemon --format xrgb
+      exec-once = killall swww;sleep .5& swww-daemon --format xrgb
       exec-once = hypridle
       exec-once = nm-applet --indicator
       exec-once = blueman-applet
@@ -119,7 +119,7 @@ in {
       env = BROWSER="google-chrome-stable";
       env = TERMINAL="foot";
 
-      env = SDL_VIDEODRIVER,wayland
+      env = SDL_VIDEODRIVER, x11
       env = XDG_CURRENT_DESKTOP,Hyprland
       env = XDG_SESSION_TYPE,wayland
       env = XDG_SESSION_DESKTOP,Hyprland
@@ -127,8 +127,8 @@ in {
       env = XCURSOR_THEME,Bibata-Modern-Ice
       env = XCURSOR_SIZE,16
 
-      env = ELECTRON_OZONE_PLATFORM_HINT,wayland
-      env = OZONE_PLATFORM,wayland
+      # env = ELECTRON_OZONE_PLATFORM_HINT,wayland
+      # env = OZONE_PLATFORM,wayland
       env = CLUTTER_BACKEND,wayland
 
       #GTK
@@ -449,7 +449,7 @@ in {
       windowrulev2 = workspace 1, class:(google-chrome-.*)
       windowrulev2 = workspace special:spotify, class:^(Spotify)$
       windowrulev2 = float,size 900 500,title:^(Choose Files)
-      windowrulev2 = workspace 2, class:(code.*)
+      # windowrulev2 = workspace 2, class:(code.*)
       windowrulev2 = workspace 4, class:^(Edge)$
 
       #Pavucontrol

@@ -52,14 +52,9 @@
       today = "curl -s https://wttr.in/London?1";
       wttr = "curl -s https://wttr.in/London?0";
       fu = "sudo nix flake update";
-      code = "code --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
       dbe = "distrobox enter";
       debian = "distrobox enter debian";
       ask = "chatgpt --model gpt-4 -p";
-      obsidian = "obsidian --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
-      google-chrome-stable = "google-chrome-stable --ozone-platform=wayland";
-      microsoft-edge-stable = "microsoft-edge-stable --ozone-platform=wayland";
-      slack = "slack --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer";
     };
   };
 }
