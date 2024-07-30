@@ -5,14 +5,11 @@
   nixpkgs.overlays = [
     (final: prev: {
       dwm = prev.dwm.overrideAttrs (old: {
-        src = ./dwm-6.5;
+        src = ./dwm;
         buildInputs = old.buildInputs ++ [pkgs.imlib2];
       });
-      dmenu = prev.dmenu.overrideAttrs (old: {
-        sjrc = ./dmenu-5.3;
-      });
-      slock = prev.slock.overrideAttrs (old: {
-        src = ./slock-1.5;
+      dwmblocks = prev.dwmblocks.overrideAttrs (old: {
+        src = ./dwmblocks;
         buildInputs = old.buildInputs ++ [
           pkgs.imlib2 
           pkgs.xorg.libX11.dev 
@@ -21,18 +18,6 @@
           pkgs.xorg.libXinerama
           pkgs.harfbuzzFull
         ];
-      });
-      st = prev.st.overrideAttrs (old: {
-        src = ./st-0.9.2;
-        buildInputs = old.buildInputs ++ [
-          pkgs.imlib2 
-          pkgs.xorg.libX11.dev 
-          pkgs.xorg.libXext
-          pkgs.xorg.libXft
-          pkgs.xorg.libXinerama
-          pkgs.harfbuzzFull
-        ];
-
       });
     })
   ];

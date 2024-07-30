@@ -47,7 +47,7 @@ static const int colorfultag              = 1;        /* 0 means use SchemeSel f
 /*-------------------------------------------fonts---------------------------------------------*/
 
 static const char  font[]                       = "Iosevka:size=10";
-static const char *fonts[]                      = { font, "Noto Sans CJK JP:style=bold:size=12", "Symbols Nerd Font:size=12", };
+static const char *fonts[]                      = { font, "JetBrainsMono Nerd Font Mono:style:medium:size=19", "Symbols Nerd Font:size=12", };
 static const char dmenufont[]                   = "Iosevka:size=10";
 
 /*-------------------------------------------color definitions---------------------------------------------*/
@@ -117,14 +117,14 @@ typedef struct {
        const char *name;
        const void *cmd;
 } Sp;
-const char *spcmd1[] = {"st", "-n", "spterm", NULL };
+const char *spcmd1[] = {"wezterm", "start", "--", "bash", "-c", "spotify_client", NULL };
 const char *spcmd2[] = {"st", "-n", "spfm", "-e", "ranger", NULL };
 const char *spcmd3[] = {"st", "-n", "spmusic", "-e", "ncmpcpp", NULL };
 const char *spcmd4[] = {"qutebrowser", "--qt-arg", "name", "spbr", NULL };
 
 static Sp scratchpads[] = {
        /* name           cmd  */
-       {"spterm",       spcmd1},
+       {"wezterm",       spcmd1},
        {"spfm",         spcmd2},
        {"spmusic",      spcmd3},
        {"spbr",         spcmd4},
@@ -137,7 +137,7 @@ static const XPoint stickyicon[]    = { {0,0}, {4,0}, {4,8}, {2,6}, {0,8}, {0,0}
 static const XPoint stickyiconbb    = {4,8};	/* defines the bottom right corner of the polygon's bounding box (speeds up scaling) */
 
 /* tagging */
-static const char *tags[]              = { "一", "二", "三", "四", "五", "六", "七", "八", "九" };
+static const char *tags[]              = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 static const char *tagsalt[]           = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 static const int momentaryalttags      = 0;    /* 1 means alttags will show only when key is held down*/
 static const unsigned int ulinepad     = 5;    /* horizontal padding between the underline and tag */
@@ -161,10 +161,10 @@ static const Rule rules[] = {
 	{ "Gimp",     NULL,        NULL,           0,           1,         0,          0,          NULL,                     -1 },
 	{ "firefox",  NULL,        NULL,           1 << 2,      0,         0,         -1,          NULL,                     -1 },
 	{ "St",       NULL,        NULL,           0,           0,         1,          0,          NULL,                     -1 },
-        { NULL,       "spterm",    NULL,           SPTAG(0),    1,         0,          0,          "50% 30% 1200W 600H",     -1 },
-        { NULL,       "spfm",      NULL,           SPTAG(1),    1,         0,          0,	   "50% 30% 1200W 600H",     -1 },
-        { NULL,       "spmusic",   NULL,           SPTAG(2),    1,         0,          0,	   "50% 30% 1200W 600H",     -1 },
-        { NULL,       "spbr",      NULL,           SPTAG(3),    1,         0,          0,          "50% 30% 1200W 600H",     -1 },
+  { NULL,       "wezterm",   NULL,           SPTAG(0),    1,         0,          0,          "50% 30% 1200W 600H",     -1 },
+  { NULL,       "spfm",      NULL,           SPTAG(1),    1,         0,          0,	   "50% 30% 1200W 600H",     -1 },
+  { NULL,       "spmusic",   NULL,           SPTAG(2),    1,         0,          0,	   "50% 30% 1200W 600H",     -1 },
+  { NULL,       "spbr",      NULL,           SPTAG(3),    1,         0,          0,          "50% 30% 1200W 600H",     -1 },
 	{ NULL,       NULL,        "Event Tester", 0,           0,         0,          1,          NULL,                     -1 }, /* xev */
 
 };
@@ -312,18 +312,18 @@ static const Key keys[] = {
 /*---------------------------stacker & tag keys-----------------------------*/
 	STACKKEYS(MODKEY,                          		   focus)
 	STACKKEYS(MODKEY|ShiftMask,                		   push)
-        TAGKEYS(                        XK_1,                      0)
-        TAGKEYS(                        XK_2,                      1)
-        TAGKEYS(                        XK_3,                      2)
-        TAGKEYS(                        XK_4,                      3)
-        TAGKEYS(                        XK_5,                      4)
-        TAGKEYS(                        XK_6,                      5)
-        TAGKEYS(                        XK_7,                      6)
-        TAGKEYS(                        XK_8,                      7)
+  TAGKEYS(                        XK_1,                      0)
+  TAGKEYS(                        XK_2,                      1)
+  TAGKEYS(                        XK_3,                      2)
+  TAGKEYS(                        XK_4,                      3)
+  TAGKEYS(                        XK_5,                      4)
+  TAGKEYS(                        XK_6,                      5)
+  TAGKEYS(                        XK_7,                      6)
+  TAGKEYS(                        XK_8,                      7)
 	TAGKEYS(                        XK_9,                      8)
 /*--------------------------end of stacker & tagkeys--------------------------*/
 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
-        { MODKEY|Mod1Mask,              XK_x,      spawn,          {.v = pmenucmd } },
+  { MODKEY|Mod1Mask,              XK_x,      spawn,          {.v = pmenucmd } },
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
 	{ MODKEY,			XK_e,      spawn,          {.v = emojicmd } },
 	{ MODKEY|ControlMask,		XK_t,      spawn,          {.v = torrentcmd } },
@@ -369,10 +369,10 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
 	{ MODKEY|ShiftMask,             XK_f,      togglefullscr,  {0} },
 	{ MODKEY,                       XK_s,      togglesticky,   {0} },
-        { MODKEY,                       XK_y,      togglescratch,  {.ui = 0 } },
-        { MODKEY,                       XK_u,      togglescratch,  {.ui = 1 } },
-        { MODKEY|ShiftMask,             XK_m,      togglescratch,  {.ui = 2 } },
-        { MODKEY|ShiftMask,             XK_b,      togglescratch,  {.ui = 3 } },
+  { MODKEY,                       XK_y,      togglescratch,  {.ui = 0 } },
+  { MODKEY,                       XK_u,      togglescratch,  {.ui = 1 } },
+  { MODKEY|ShiftMask,             XK_m,      togglescratch,  {.ui = 2 } },
+  { MODKEY|ShiftMask,             XK_b,      togglescratch,  {.ui = 3 } },
 	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
 	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },
 	{ MODKEY,                       XK_comma,  focusmon,       {.i = -1 } },
@@ -387,9 +387,9 @@ static const Key keys[] = {
 	{ 0,         XF86XK_AudioRaiseVolume,	   spawn,	   {.v = vol_up } },
 	{ 0,         XF86XK_AudioLowerVolume,	   spawn,	   {.v = vol_down } },
 	{ 0,         XF86XK_AudioMicMute,	   spawn,	   {.v = mic_mute } },
-        { 0,         XF86XK_MonBrightnessUp,       spawn,          {.v = light_up } },
-        { 0,         XF86XK_MonBrightnessDown,     spawn,          {.v = light_down } }, 
-        /*----------------------------managing float pos---------------------------------*/
+  { 0,         XF86XK_MonBrightnessUp,       spawn,          {.v = light_up } },
+  { 0,         XF86XK_MonBrightnessDown,     spawn,          {.v = light_down } }, 
+  /*----------------------------managing float pos---------------------------------*/
  	/* Client position is limited to monitor window area */
  	{ Mod3Mask,                     XK_u,      floatpos,       {.v = "-26x -26y" } }, // ↖
  	{ Mod3Mask,                     XK_i,      floatpos,       {.v = "  0x -26y" } }, // ↑
@@ -440,9 +440,9 @@ static const Button buttons[] = {
 	{ ClkStatusText,        0,              Button1,        sigstatusbar,   {.i = 1} },
 	{ ClkStatusText,        0,              Button2,        sigstatusbar,   {.i = 2} },
 	{ ClkStatusText,        0,              Button3,        sigstatusbar,   {.i = 3} },
-        { ClkStatusText,        0,              Button4,        sigstatusbar,   {.i = 4} },
-        { ClkStatusText,        0,              Button5,        sigstatusbar,   {.i = 5} },
-        { ClkStatusText,        ShiftMask,      Button1,        sigstatusbar,   {.i = 6} },
+  { ClkStatusText,        0,              Button4,        sigstatusbar,   {.i = 4} },
+  { ClkStatusText,        0,              Button5,        sigstatusbar,   {.i = 5} },
+  { ClkStatusText,        ShiftMask,      Button1,        sigstatusbar,   {.i = 6} },
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
 	{ ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },
@@ -450,6 +450,6 @@ static const Button buttons[] = {
 	{ ClkTagBar,            0,              Button3,        toggleview,     {0} },
 	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
 	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
-        { ClkTagBar,            0,              Button4,        shiftview,      {.i = -1} },
-        { ClkTagBar,            0,              Button5,        shiftview,      {.i = 1} },
+  { ClkTagBar,            0,              Button4,        shiftview,      {.i = -1} },
+  { ClkTagBar,            0,              Button5,        shiftview,      {.i = 1} },
 };
