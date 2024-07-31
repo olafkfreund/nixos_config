@@ -1,4 +1,3 @@
-
 { pkgs, ... }:
 
 pkgs.writeShellScriptBin "dwm-run" ''

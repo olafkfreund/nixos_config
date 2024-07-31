@@ -1,11 +1,49 @@
 {pkgs, ...}: {
-  services.xserver.displayManager.startx.enable = true;
+  # services.xserver.displayManager.startx.enable = true;
   services.xserver.windowManager.dwm.enable = true;
+  services.xserver.excludePackages = with pkgs; [
+    xterm
+  ];
   nixpkgs.overlays = [
     (final: prev: {
       dwm = prev.dwm.overrideAttrs (old: {
-        src = ./dwm-titus;
+        src = ./dwm-6.5;
         buildInputs = old.buildInputs ++ [pkgs.imlib2];
+      });
+      dmenu = prev.dmenu.overrideAttrs (old: {
+        src = ./dmenu-5.3;
+        buildInputs = old.buildInputs ++ [
+          pkgs.imlib2 
+          pkgs.xorg.libX11.dev 
+          pkgs.xorg.libXext
+          pkgs.xorg.libXft
+          pkgs.xorg.libXinerama
+          pkgs.harfbuzzFull
+        ];
+
+      });
+      slock = prev.slock.overrideAttrs (old: {
+        src = ./slock-1.5;
+        buildInputs = old.buildInputs ++ [
+          pkgs.imlib2 
+          pkgs.xorg.libX11.dev 
+          pkgs.xorg.libXext
+          pkgs.xorg.libXft
+          pkgs.xorg.libXinerama
+          pkgs.harfbuzzFull
+        ];
+      });
+      st = prev.st.overrideAttrs (old: {
+        src = ./st-0.9.2;
+        buildInputs = old.buildInputs ++ [
+          pkgs.imlib2 
+          pkgs.xorg.libX11.dev 
+          pkgs.xorg.libXext
+          pkgs.xorg.libXft
+          pkgs.xorg.libXinerama
+          pkgs.harfbuzzFull
+        ];
+
       });
     })
   ];
@@ -27,6 +65,7 @@
     xorg.libX11.dev
     xorg.xbacklight
     xorg.xrandr
+    picom
     sx
     st
     light
@@ -35,6 +74,5 @@
     dash
     autorandr
     harfbuzzFull
-    picom
   ];
 }
