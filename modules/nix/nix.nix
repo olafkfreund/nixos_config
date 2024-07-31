@@ -1,11 +1,11 @@
 
 { self, config, pkgs, lib, ... }: {
 
-nix.gc = {
-  automatic = true;
-  dates = "weekly";
-  options = "--delete-older-than 2d";
-};
+# nix.gc = {
+#   automatic = true;
+#   dates = "weekly";
+#   options = "--delete-older-than 30d";
+# };
 
 system.autoUpgrade = {
   enable = true;

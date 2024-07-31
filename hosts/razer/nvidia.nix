@@ -33,23 +33,23 @@ in {
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
-    extraPackages = with pkgs; [
-      intel-media-driver # LIBVA_DRIVER_NAME=iHD
-      vaapiIntel # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
-      vaapiVdpau
-      libvdpau-va-gl
-      vulkan-validation-layers
-    ];
+    # extraPackages = with pkgs; [
+    #   intel-media-driver # LIBVA_DRIVER_NAME=iHD
+    #   vaapiIntel # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
+    #   vaapiVdpau
+    #   libvdpau-va-gl
+    #   vulkan-validation-layers
+    # ];
   };
 
   environment = {
     systemPackages = with pkgs; [
-      libva
-      libva-utils
+      # libva
+      # libva-utils
       glxinfo
-      clinfo
-      virtualglLib
-      vulkan-loader
+      # clinfo
+      # virtualglLib
+      # vulkan-loader
       vulkan-tools
     ];
   };

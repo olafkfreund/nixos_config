@@ -1,23 +1,11 @@
 {pkgs, ...}: {
   services.xserver.displayManager.startx.enable = true;
   services.xserver.windowManager.dwm.enable = true;
-  services.picom.enable = true;
   nixpkgs.overlays = [
     (final: prev: {
       dwm = prev.dwm.overrideAttrs (old: {
-        src = ./dwm;
+        src = ./dwm-titus;
         buildInputs = old.buildInputs ++ [pkgs.imlib2];
-      });
-      dwmblocks = prev.dwmblocks.overrideAttrs (old: {
-        src = ./dwmblocks;
-        buildInputs = old.buildInputs ++ [
-          pkgs.imlib2 
-          pkgs.xorg.libX11.dev 
-          pkgs.xorg.libXext
-          pkgs.xorg.libXft
-          pkgs.xorg.libXinerama
-          pkgs.harfbuzzFull
-        ];
       });
     })
   ];
@@ -47,5 +35,6 @@
     dash
     autorandr
     harfbuzzFull
+    picom
   ];
 }

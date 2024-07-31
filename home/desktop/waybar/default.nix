@@ -22,11 +22,10 @@
         "gtk-layer-shell" = true;
 
         "modules-left" = [
-          "hyprland/workspaces"
-          "hyprland/window"
-          # "custom/spotify"
-          # "image/albumart"
-          # "custom/playerctl"
+          # "hyprland/workspaces"
+          # "hyprland/window"
+          "image"
+          "custom/playerctl"
 
         ];
 
@@ -51,10 +50,10 @@
         ];
 
         "modules-center" = [
-          # "hyprland/workspaces"
-          # "hyprland/window"
-          "image"
-          "custom/playerctl"
+          "hyprland/workspaces"
+          "hyprland/window"
+          # "image"
+          # "custom/playerctl"
         ];
 
         "image" = {
@@ -62,7 +61,7 @@
           path = "/tmp/cover.jpeg";
           size = 20;
           interval = 5;
-          on-click = "wezterm start -- bash -c spotify_player";
+          on-click = "wezterm start --always-new-process -- bash -c spotify_player";
         };
 
         "custom/settings" = {
