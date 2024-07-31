@@ -5,12 +5,12 @@
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelParams = [ "mitigations=off" ];
+  boot.kernelParams = [ "mitigations=off" "systemd.unified_cgroup_hierarchy=0" "SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1"];
   # boot.extraModprobeConfig = ''
   #    SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1 
   #    systemd.unified_cgroup_hierarchy=0 
   # '';
-  boot.kernelPackages = pkgs.linuxPackages;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.plymouth.enable = false;
 
   # This is for OBS Virtual Cam Support - v4l2loopback setup

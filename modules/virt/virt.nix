@@ -32,11 +32,11 @@
   services.spice-vdagentd.enable = true;
   systemd.services.libvirtd.restartIfChanged = false;
   virtualisation.lxd.enable = false;
-  # boot.kernelParams = [
-  #   "cgroup_enable=cpuset"
-  #   "cgroup_memory=1"
-  #   "cgroup_enable=memory"
-  # ];
+  boot.kernelParams = [
+    "cgroup_enable=cpuset"
+    "cgroup_memory=1"
+    "cgroup_enable=memory"
+  ];
 
   environment.systemPackages = with pkgs; [
     OVMFFull

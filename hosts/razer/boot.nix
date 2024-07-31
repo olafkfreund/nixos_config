@@ -7,7 +7,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelParams = [ "module_blacklist=nouveau" ];
   boot.kernelPackages = pkgs.linuxPackages;
-  boot.plymouth.enable = true;
+  boot.plymouth.enable = false;
 
   # This is for OBS Virtual Cam Support - v4l2loopback setup
   # boot.kernelPackages = pkgs.linuxPackages_default;
