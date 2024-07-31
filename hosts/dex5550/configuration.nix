@@ -19,12 +19,8 @@
     ];
   };
 
-systemd.services.NetworkManager-wait-online = {
-  serviceConfig = {
-    ExecStart = [ "" "${pkgs.networkmanager}/bin/nm-online -q" ];
-  };
-};
-
+  systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
+  systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
 
   networking.networkmanager.enable = true;
   networking.hostName = "dex5550";
