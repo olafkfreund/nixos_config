@@ -19,7 +19,11 @@
     ];
   };
 
-
+systemd.services.NetworkManager-wait-online = {
+  serviceConfig = {
+    ExecStart = [ "" "${pkgs.networkmanager}/bin/nm-online -q" ];
+  };
+};
 
 
   networking.networkmanager.enable = true;
@@ -40,6 +44,14 @@
           MulticastDNS = true;
         };
       };
+      "wlp2s0" = {
+        name = "wlp2s0";
+        DHCP = "ipv4";
+        networkConfig = {
+          MulticastDNS = true;
+        };
+      };
+
     };
   };
 
