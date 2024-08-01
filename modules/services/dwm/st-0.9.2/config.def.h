@@ -125,7 +125,7 @@ char *termname = "st-256color";
 unsigned int tabspaces = 8;
 
 /* bg opacity */
-float alpha = 0.95;
+float alpha = 1;
 float alpha_def;
 
 /* Terminal colors (16 first used in escape sequence) */
@@ -226,7 +226,7 @@ ResourcePref resources[] = {
                 { "borderpx",     INTEGER, &borderpx },
                 { "cwscale",      FLOAT,   &cwscale },
                 { "chscale",      FLOAT,   &chscale },
-		{ "alpha",        FLOAT,   &alpha },
+		            { "alpha",        FLOAT,   &alpha },
 };
 
 
@@ -284,12 +284,12 @@ static Shortcut shortcuts[] = {
 	{ ShiftMask,            XK_Page_Down,   kscrolldown,    {.i = -1} },
 	{ MODKEY,		XK_j,		kscrollup,      {.i = -2} },
 	{ MODKEY,               XK_k,           kscrolldown,    {.i = -2} }, 
-        { MODKEY,               XK_a,           chgalpha,       {.f = -1} }, /* Decrease opacity */
-        { MODKEY,               XK_d,           chgalpha,       {.f = +1} }, /* Increase opacity */
-        { MODKEY,               XK_s,           chgalpha,       {.f =  0} }, /* Reset opacity */
-        { MODKEY,               XK_l,           externalpipe,   {.v = openurlcmd } },
-        { MODKEY,               XK_y,           externalpipe,   {.v = copyurlcmd } },
-        { MODKEY,               XK_o,           externalpipe,   {.v = copyoutput } },
+  { MODKEY,               XK_a,           chgalpha,       {.f = -1} }, /* Decrease opacity */
+  { MODKEY,               XK_d,           chgalpha,       {.f = +1} }, /* Increase opacity */
+  { MODKEY,               XK_s,           chgalpha,       {.f =  0} }, /* Reset opacity */
+  { MODKEY,               XK_l,           externalpipe,   {.v = openurlcmd } },
+  { MODKEY,               XK_y,           externalpipe,   {.v = copyurlcmd } },
+  { MODKEY,               XK_o,           externalpipe,   {.v = copyoutput } },
 };
 
 /*

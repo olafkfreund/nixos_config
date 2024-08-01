@@ -145,12 +145,6 @@
           inputs.razer-laptop-control.nixosModules.default
           nix-index-database.nixosModules.nix-index
           ./home/shell/zellij/zjstatus.nix
-            # { nixpkgs.overlays = with inputs; [
-            #     (final: prev: {
-            #       zjstatus = zjstatus.packages.${prev.system}.default;
-            #     })
-            #   ];
-            # }
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
@@ -190,6 +184,7 @@
                 stylix.targets.vscode.enable = false;
                 stylix.targets.dunst.enable = false;
                 stylix.targets.rofi.enable = false;
+                stylix.targets.xresources.enable = false;
               }
             ];
           }
@@ -256,6 +251,7 @@
             in {
           inherit inputs;
           inherit username;
+          inherit host;    
         };
         modules = [
           ./hosts/lms/configuration.nix

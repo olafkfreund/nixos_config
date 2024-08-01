@@ -16,8 +16,8 @@
       user = "${username}";
     };
     session_dwm = {
-      command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd dwm";
-      user = "${username}";
+      command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd startx";
+      user = "greeter";
     };
 
   in {

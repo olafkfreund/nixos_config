@@ -135,7 +135,7 @@ static const XPoint stickyicon[]    = { {0,0}, {4,0}, {4,8}, {2,6}, {0,8}, {0,0}
 static const XPoint stickyiconbb    = {4,8};	/* defines the bottom right corner of the polygon's bounding box (speeds up scaling) */
 
 /* tagging */
-static const char *tags[]              = { "一", "二", "三", "四", "五", "六", "七", "八", "九" };
+static const char *tags[]              = { "󰬺", "󰬻", "󰬼", "󰬽", "󰬾", "󰬿", "󰭀", "󰭁", "󰭂" };
 static const char *tagsalt[]           = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 static const int momentaryalttags      = 0;    /* 1 means alttags will show only when key is held down*/
 static const unsigned int ulinepad     = 5;    /* horizontal padding between the underline and tag */

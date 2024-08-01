@@ -15,4 +15,8 @@ else
 fi
 # Activate dbus variables
 dbus-update-activation-environment --all
-dbus-launch ssh-agent dwm
+dbus-launch ssh-agent
+exec dwm &
+exec slstatus &
+exec kitty &
+exec picom &

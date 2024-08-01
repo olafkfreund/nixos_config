@@ -1,9 +1,6 @@
 {pkgs, ...}: {
   # services.xserver.displayManager.startx.enable = true;
   services.xserver.windowManager.dwm.enable = true;
-  services.xserver.excludePackages = with pkgs; [
-    xterm
-  ];
   nixpkgs.overlays = [
     (final: prev: {
       dwm = prev.dwm.overrideAttrs (old: {
@@ -43,10 +40,22 @@
           pkgs.xorg.libXinerama
           pkgs.harfbuzzFull
         ];
-
       });
+      slstatus = prev.slstatus.overrideAttrs (old: {
+        src = ./slstatus-1.0;
+        buildInputs = old.buildInputs ++ [
+          pkgs.imlib2 
+          pkgs.xorg.libX11.dev 
+          pkgs.xorg.libXext
+          pkgs.xorg.libXft
+          pkgs.xorg.libXinerama
+          pkgs.harfbuzzFull
+        ];
+      });
+
     })
   ];
+
   environment.systemPackages = with pkgs; [
     imlib2Full
     xorg.xsetroot
