@@ -11,7 +11,8 @@
     gtkUsePortal = true;
     config = {
       common = {
-        default = "*";
+        default = "gtk";
+        # "org.freedesktop.impl.portal.Overlay" = "hyprland
         "org.freedesktop.impl.portal.Screencast" = "hyprland";
         "org.freedesktop.impl.portal.Screenshot" = "hyprland";
       };

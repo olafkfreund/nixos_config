@@ -52,11 +52,24 @@
           pkgs.harfbuzzFull
         ];
       });
+      dwmblocks = prev.dwmblocks.overrideAttrs (old: {
+        src = ./dwmblocks;
+        buildInputs = old.buildInputs ++ [
+          pkgs.imlib2 
+          pkgs.xorg.libX11.dev 
+          pkgs.xorg.libXext
+          pkgs.xorg.libXft
+          pkgs.xorg.libXinerama
+          pkgs.harfbuzzFull
+        ];
+      });
 
     })
   ];
 
   environment.systemPackages = with pkgs; [
+    (import ./statusbar/sb-clock.nix { inherit pkgs; })
+    (import ./statusbar/sb-battery.nix { inherit pkgs; })
     imlib2Full
     xorg.xsetroot
     slstatus

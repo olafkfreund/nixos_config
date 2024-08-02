@@ -91,8 +91,11 @@
   programs.zsh.enable = true;
 
   environment.sessionVariables = {
-    NIXOS_OZONE_WL = "1";
     FLAKE = "/home/olafkfreund/.config/nixos";
+      GBM_BACKEND = "nvidia-drm";
+       __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+       NVD_BACKEND = "direct";
+
   };
 
   users.users.olafkfreund = {

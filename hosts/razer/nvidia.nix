@@ -44,6 +44,7 @@ in {
 
   environment = {
     systemPackages = with pkgs; [
+      nvidia-vaapi-driver
       # libva
       # libva-utils
       glxinfo

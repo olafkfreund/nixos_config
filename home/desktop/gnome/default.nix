@@ -8,7 +8,7 @@
     gsettings-desktop-schemas
     gnome-extension-manager
     gnome-themes-extra
-    gnome-tweaks
+    # gnome-tweaks
     gnome.gnome-control-center
     # gnomeExtensions.gsconnect
     gnomeExtensions.gtile

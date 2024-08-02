@@ -36,8 +36,10 @@
   ];
   home.file.".xprofile".source = ../../modules/services/dwm/x11/xprofile;
   home.file.".xinitrc".source = ../../modules/services/dwm/x11/xinitrc;
-  # home.file.".Xresources".source = ../../modules/services/dwm/x11/xresources;
-
+  home.file.".Xresources_dwm" = {
+    enable = true;
+    source = ../../modules/services/dwm/x11/xresources;
+  };
 
   # GitHub CLI tool
   programs.gh = {

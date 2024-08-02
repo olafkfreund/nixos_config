@@ -18,14 +18,13 @@
     ./atuin/default.nix
     ./logind/default.nix
     ./auto-cpufreq/default.nix
-    # ./greetd/greetd.nix
-    ./ollama/default.nix
+    # ./ollama/default.nix
     ./sysprof/default.nix
     ./libinput/default.nix
     ./snapd/default.nix
     ./mandb/default.nix
     ./appimage/default.nix
-    ./dwm/default.nix
+    # ./dwm/default.nix
   ];
 
 

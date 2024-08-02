@@ -4,7 +4,7 @@
 
 /*-------------------------------------------borders & snap---------------------------------------------*/
 
-static unsigned int borderpx  	  	  = 1;        /* border pixel of windows */
+static unsigned int borderpx  	  	  = 3;        /* border pixel of windows */
 static unsigned int fborderpx 	  	  = 5;        /* border pixel of floating windows */
 static unsigned int snap      	  	  = 32;       /* snap pixel */
 
@@ -21,7 +21,7 @@ static const int showsystray        	  = 1;        /* 0 means no systray */
 static unsigned int gappih    	  	  = 20;       /* horiz inner gap between windows */
 static unsigned int gappiv    	  	  = 10;       /* vert inner gap between windows */
 static unsigned int gappoh    	  	  = 10;       /* horiz outer gap between windows and screen edge */
-static unsigned int gappov    	  	  = 30;       /*vert outer gap between windows and screen edge */
+static unsigned int gappov    	  	  = 30;       /* vert outer gap between windows and screen edge */
 static int smartgaps          	  	  = 0;        /* 1 means no outer gap when there is only one window */
 static int swallowfloating    	  	  = 0;        /* 1 means swallow floating windows by default */
 
@@ -52,9 +52,9 @@ static const char dmenufont[]                   = "Iosevka:size=10";
 
 /*-------------------------------------------color definitions---------------------------------------------*/
 
-static char normbgcolor[]           	  = "#282828";
+static char normbgcolor[]           	  = "#1d2021";
 static char normbordercolor[]       	  = "#458588";
-static char normfgcolor[]           	  = "#ebdbb2";
+static char normfgcolor[]           	  = "#d5c4a1";
 static char selfgcolor[]            	  = "#ebdbb2";
 static char selbordercolor[]        	  = "#d65d0e";
 static char selbgcolor[]            	  = "#8ec07c";
@@ -118,14 +118,16 @@ typedef struct {
        const void *cmd;
 } Sp;
 const char *spcmd1[] = {"st", "-n", "spterm", NULL };
-const char *spcmd2[] = {"st", "-n", "spfm", "-e", "yazi", NULL };
-const char *spcmd3[] = {"st", "-n", "spmusic", "-e", "spotify_client", NULL };
+const char *spcmd2[] = {"st", "-n", "spfm", "-e", "ranger", NULL };
+const char *spcmd3[] = {"st", "-n", "spmusic", "-e", "ncmpcpp", NULL };
+const char *spcmd4[] = {"qutebrowser", "--qt-arg", "name", "spbr", NULL };
 
 static Sp scratchpads[] = {
        /* name           cmd  */
        {"spterm",       spcmd1},
        {"spfm",         spcmd2},
        {"spmusic",      spcmd3},
+       {"spbr",         spcmd4},
 };
 
 
@@ -135,7 +137,7 @@ static const XPoint stickyicon[]    = { {0,0}, {4,0}, {4,8}, {2,6}, {0,8}, {0,0}
 static const XPoint stickyiconbb    = {4,8};	/* defines the bottom right corner of the polygon's bounding box (speeds up scaling) */
 
 /* tagging */
-static const char *tags[]              = { "󰬺", "󰬻", "󰬼", "󰬽", "󰬾", "󰬿", "󰭀", "󰭁", "󰭂" };
+static const char *tags[]              = { "一", "二", "三", "四", "五", "六", "七", "八", "九" };
 static const char *tagsalt[]           = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 static const int momentaryalttags      = 0;    /* 1 means alttags will show only when key is held down*/
 static const unsigned int ulinepad     = 5;    /* horizontal padding between the underline and tag */
@@ -162,6 +164,7 @@ static const Rule rules[] = {
   { NULL,       "spterm",    NULL,           SPTAG(0),    1,         0,          0,          "50% 30% 1200W 600H",     -1 },
   { NULL,       "spfm",      NULL,           SPTAG(1),    1,         0,          0,	   "50% 30% 1200W 600H",     -1 },
   { NULL,       "spmusic",   NULL,           SPTAG(2),    1,         0,          0,	   "50% 30% 1200W 600H",     -1 },
+  { NULL,       "spbr",      NULL,           SPTAG(3),    1,         0,          0,          "50% 30% 1200W 600H",     -1 },
 	{ NULL,       NULL,        "Event Tester", 0,           0,         0,          1,          NULL,                     -1 }, /* xev */
 
 };
@@ -203,12 +206,12 @@ static const Layout layouts[] = {
  * Xresources preferences to load at startup
  */
 ResourcePref resources[] = {
-		{ "color0",		          STRING,	 &normbordercolor },
-		{ "color10",		        STRING,	 &selbordercolor },
-		{ "color0",		          STRING,	 &normbgcolor },
-		{ "color4",		          STRING,	 &normfgcolor },
-		{ "color15",		        STRING,	 &selfgcolor },
-		{ "color6",		          STRING,	 &selbgcolor },
+		{ "color0",		STRING,	 &normbordercolor },
+		{ "color10",		STRING,	 &selbordercolor },
+		{ "color0",		STRING,	 &normbgcolor },
+		{ "color4",		STRING,	 &normfgcolor },
+		{ "color15",		STRING,	 &selfgcolor },
+		{ "color6",		STRING,	 &selbgcolor },
 		{ "color0",             STRING,  &termcol0 },
 		{ "color1",             STRING,  &termcol1 },
 		{ "color2",             STRING,  &termcol2 },
@@ -225,24 +228,24 @@ ResourcePref resources[] = {
 		{ "color13",            STRING,  &termcol13 },
 		{ "color14",            STRING,  &termcol14 },
 		{ "color15",            STRING,  &termcol15 },
-		{ "borderpx",		        INTEGER, &borderpx },
+		{ "borderpx",		INTEGER, &borderpx },
 		{ "fborderpx",          INTEGER, &fborderpx },
-		{ "snap",		            INTEGER, &snap },
-		{ "showbar",		        INTEGER, &showbar },
-		{ "topbar",		          INTEGER, &topbar },
+		{ "snap",		INTEGER, &snap },
+		{ "showbar",		INTEGER, &showbar },
+		{ "topbar",		INTEGER, &topbar },
 		{ "vertpad",            INTEGER, &vertpad },
 		{ "sidepad",            INTEGER, &sidepad },
 		{ "horizpadbar",        INTEGER, &horizpadbar },
 		{ "vertpadbar",         INTEGER, &vertpadbar },
-		{ "nmaster",		        INTEGER, &nmaster },
-		{ "resizehints",	      INTEGER, &resizehints },
-		{ "mfact",		          FLOAT,	 &mfact },
-		{ "gappih",		          INTEGER, &gappih },
-		{ "gappiv",		          INTEGER, &gappiv },
-		{ "gappoh",		          INTEGER, &gappoh },
-		{ "gappov",		          INTEGER, &gappov },
-		{ "swallowfloating",	  INTEGER, &swallowfloating },
-		{ "smartgaps",		      INTEGER, &smartgaps },
+		{ "nmaster",		INTEGER, &nmaster },
+		{ "resizehints",	INTEGER, &resizehints },
+		{ "mfact",		FLOAT,	 &mfact },
+		{ "gappih",		INTEGER, &gappih },
+		{ "gappiv",		INTEGER, &gappiv },
+		{ "gappoh",		INTEGER, &gappoh },
+		{ "gappov",		INTEGER, &gappov },
+		{ "swallowfloating",	INTEGER, &swallowfloating },
+		{ "smartgaps",		INTEGER, &smartgaps },
 };
 
 
@@ -322,9 +325,9 @@ static const Key keys[] = {
 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
   { MODKEY|Mod1Mask,              XK_x,      spawn,          {.v = pmenucmd } },
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
-	{ MODKEY,			                  XK_e,      spawn,          {.v = emojicmd } },
-	{ MODKEY|ControlMask,		        XK_t,      spawn,          {.v = torrentcmd } },
-	{ MODKEY|ControlMask,		        XK_s,      spawn,          {.v = sscmd } },
+	{ MODKEY,			XK_e,      spawn,          {.v = emojicmd } },
+	{ MODKEY|ControlMask,		XK_t,      spawn,          {.v = torrentcmd } },
+	{ MODKEY|ControlMask,		XK_s,      spawn,          {.v = sscmd } },
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
 	{ MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },
@@ -355,11 +358,11 @@ static const Key keys[] = {
 	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
 	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
-	{ MODKEY,			                  XK_Up,	   shiftview,	   { .i = -1 } },
-	{ MODKEY|ShiftMask,		          XK_Up,	   shifttag,	   { .i = -1 } },
-	{ MODKEY,			                  XK_Down,   shiftview,	   { .i = +1 } },
-	{ MODKEY|ShiftMask,		          XK_Down,   shifttag,	   { .i = +1 } },
-	{ MODKEY|ControlMask,		        XK_comma,  cyclelayout,    { .i = -1 } },
+	{ MODKEY,			XK_Up,	   shiftview,	   { .i = -1 } },
+	{ MODKEY|ShiftMask,		XK_Up,	   shifttag,	   { .i = -1 } },
+	{ MODKEY,			XK_Down,   shiftview,	   { .i = +1 } },
+	{ MODKEY|ShiftMask,		XK_Down,   shifttag,	   { .i = +1 } },
+	{ MODKEY|ControlMask,		XK_comma,  cyclelayout,    { .i = -1 } },
 	{ MODKEY|ControlMask,           XK_period, cyclelayout,    { .i = +1 } },
 	{ MODKEY,                       XK_space,  setlayout,      {0} },
 	{ MODKEY,                       XK_n,      togglealttag,   {0} },
@@ -386,7 +389,7 @@ static const Key keys[] = {
 	{ 0,         XF86XK_AudioMicMute,	   spawn,	   {.v = mic_mute } },
   { 0,         XF86XK_MonBrightnessUp,       spawn,          {.v = light_up } },
   { 0,         XF86XK_MonBrightnessDown,     spawn,          {.v = light_down } }, 
-  /*----------------------------managing float pos---------------------------------*/
+        /*----------------------------managing float pos---------------------------------*/
  	/* Client position is limited to monitor window area */
  	{ Mod3Mask,                     XK_u,      floatpos,       {.v = "-26x -26y" } }, // ↖
  	{ Mod3Mask,                     XK_i,      floatpos,       {.v = "  0x -26y" } }, // ↑

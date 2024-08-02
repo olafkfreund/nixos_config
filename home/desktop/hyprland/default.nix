@@ -73,7 +73,8 @@ in {
       exec-once = kdeconnectd
       exec-once = kdeconnect-indicator
       exec-once = dbus-update-activation-environment --systemd --all
-      exec-once = systemctl --user import-environment PATH WAYLAND_DISPLAY XDG_CURRENT_DESKTOP & systemctl --user restart xdg-desktop-portal.service
+      exec-once = systemctl --user import-environment PATH WAYLAND_DISPLAY XDG_CURRENT_DESKTOP 
+      exec-once = sleep 1 && systemctl --user restart xdg-desktop-portal.service
       exec-once = polkit-agent-helper-1
       exec-once = gsettings set org.gnome.desktop.interface ursor-theme "Bibata-Modern-Ice"
       exec-once = gsettings set org.gnome.desktop.interface icon-theme "Gruvbox-Plus-Dark"
@@ -130,16 +131,16 @@ in {
       env = MOZ_ENABLE_WAYLAND, 1
       #Nvidia
       # env = GBM_BACKEND,nvidia-drm
-      # env = LIBVA_DRIVER_NAME,nvidia
-      # env = WLR_RENDERER,vulkan
       # put everything onto nvidia card
       # env = __NV_PRIME_RENDER_OFFLOAD, 1
       # env = __NV_PRIME_RENDER_OFFLOAD_PROVIDER, NVIDIA-G0
-      # env = __GLX_VENDOR_LIBRARY_NAME, nvidia
-      # env = __VK_LAYER_NV_optimus, NVIDIA_only
+      # env = __GLX_VENDOR_LIBRARY_NAME,nvidia
+      # env = NVD_BACKEND,direct
       #NIXOS
       env = NIXOS_WAYLAND, 1
       env = NIXOS_OZONE_WL, 1
+      env = ELECTRON_OZONE_PLATFORM_HINT, auto
+
 
 
 
@@ -439,6 +440,8 @@ in {
       bind = $mainMod_SHIFT, l,movewindow,r
       bind = $mainMod_SHIFT, k,movewindow,u
       bind = $mainMod_SHIFT, j,movewindow,d
+      bind = $mainMod_SHIFT, CTRL, centerwindow,none
+
 
       binde = $mainMod_CTRL, l, resizeactive, 30 0
       binde = $mainMod_CTRL, h, resizeactive, -30 0
