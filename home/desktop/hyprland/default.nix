@@ -108,10 +108,10 @@ in {
       exec-once = $execs = $(hyprkeys -aj | jq '.AutoStart | map("[" + .ExecType + "] " + .Command)'[] -r)
 
       # Env variables
-      env = EDITOR="nvim";
-      env = BROWSER="google-chrome-stable";
-      env = TERMINAL="foot";
-
+      env = EDITOR="nvim"
+      env = BROWSER="google-chrome-stable"
+      env = TERMINAL="foot"
+      env = KITTY_DISABLE_WAYLAND,0
       env = SDL_VIDEODRIVER, x11
       env = XDG_CURRENT_DESKTOP,Hyprland
       env = XDG_SESSION_TYPE,wayland
@@ -367,7 +367,7 @@ in {
       binds = $mainMod CTRL, K&9, exec, foot k9s
       bind = $mainMod, S, togglespecialworkspace, magic
       bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh
-      binde = $mainMod, B, exec, playerctl -p spotify volume 0.02+
+      # binde = $mainMod, B, exec, playerctl -p spotify volume 0.02+
       bind = $mainMod, W, killactive
       bind = $mainMod, F&T, exec, foot
       bind = $mainMod, F, fullscreen, 1 #maximize window

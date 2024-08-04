@@ -8,7 +8,7 @@
   xdg.portal = {
     enable = true;
     xdgOpenUsePortal = true;
-    gtkUsePortal = true;
+     # gtkUsePortal = true;
     config = {
       common = {
         default = "gtk";

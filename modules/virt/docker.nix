@@ -15,14 +15,13 @@
   #Docker config
   virtualisation.docker = {
     enable = true;
-    enableNvidia = true;
     rootless = {
       enable = false;
       setSocketVariable = false;
     };
     enableOnBoot = true;
   };
-
+  hardware.nvidia-container-toolkit.enable = true;
   users.users.olafkfreund.extraGroups = ["docker"];
   # virtualisation.docker.rootless = {
   #   enable = false;
@@ -30,7 +29,7 @@
 
   # };
   # virtualisation.docker.enableOnBoot = true;
-  systemd.enableUnifiedCgroupHierarchy = false;
+  # systemd.enableUnifiedCgroupHierarchy = false;
   programs = {
   };
 }
