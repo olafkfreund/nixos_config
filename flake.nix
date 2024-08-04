@@ -209,6 +209,7 @@
           inputs.stylix.nixosModules.stylix
           inputs.nix-snapd.nixosModules.default
           nix-index-database.nixosModules.nix-index
+          ./home/shell/zellij/zjstatus.nix
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
@@ -261,6 +262,7 @@
           inputs.stylix.nixosModules.stylix
           inputs.nix-snapd.nixosModules.default
           nix-index-database.nixosModules.nix-index
+          ./home/shell/zellij/zjstatus.nix
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;

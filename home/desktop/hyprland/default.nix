@@ -4,6 +4,7 @@
   pkgs,
   host,
   username,
+  lib,
   ...
 }: let
   inherit
@@ -91,17 +92,17 @@ in {
       exec-once = nm-applet --indicator
       exec-once = blueman-applet
 
-      exec-once = wl-clipboard-history -t
+      # exec-once = wl-clipboard-history -t
       exec-once = wl-paste --type text --watch cliphist store #Stores only text data
       exec-once = wl-paste --type image --watch cliphist store #Stores only image data when imaged copied
 
-      exec-once = [workspace special:spotify] spotify
+      # exec-once = [workspace special:spotify] spotify
       exec-once = [workspace 1 silent] google-chrome-stable
-      exec-once = [workspace 2 silent] firefox
+      # exec-once = [workspace 2 silent] firefox
       exec-once = [workspace 3 silent] foot
-      exec-once = [workspace 4 silent] slack
-      exec-once = [workspace 5 silent] ferdium
-      exec-once = [workspace 8 silent] 1password
+      # exec-once = [workspace 4 silent] slack
+      exec-once = [workspace 2 silent] ferdium
+      # exec-once = [workspace 8 silent] 1password
       exec-once = [workspace 3 silent] wezterm start --always-new-process
       exec-once = $keybinds = $(hyprkeys -bjl | jq '.Binds | map(.Bind + " -> " + .Dispatcher + ", " + .Command)'[] -r)
       exec-once = $execs = $(hyprkeys -aj | jq '.AutoStart | map("[" + .ExecType + "] " + .Command)'[] -r)
@@ -162,16 +163,21 @@ in {
         initial_workspace_tracking = 0
         mouse_move_enables_dpms = true
         key_press_enables_dpms = false
+        animate_manual_resizes = true
+        middle_click_paste = true
 
       }
 
       general {
           sensitivity = 1.0
-          gaps_in = 1
-          gaps_out = 1
-          border_size = 1
-          layout = dwindle
+          gaps_in = 2
+          gaps_out = 2
+          border_size = 2
+          layout = master
           resize_on_border = true
+          col.active_border = rgb(${config.colorScheme.palette.base05})
+          col.inactive_border = rgb(${config.colorScheme.palette.base09})
+
       }
       
       decoration {
@@ -351,19 +357,15 @@ in {
       bindm = $mainMod, mouse:272, movewindow
       bindm = $mainMod, mouse:273, resizewindow
       bind = $mainMod, E, exec, wezterm start -- bash -c yazi
-      bind = $mainMod, T, exec, wezterm start
-      bind = $mainMod, M, exec, ~/.config/rofi/applets/bin/monitors.sh
+      bind = $mainMod, T, exec, foot
+      bind = $mainMod, M, exec, bash -c ~/.config/rofi/applets/bin/monitors.sh
       bind = $mainMod, P, pin
       binds = $mainMod, K&K, exec, kitty
       bind = $mainMod, K, exec, hyprctl kill
-      # binds = $mainMod CTRL, S&U, exec, wezterm start -- bash -c system-tui
-      # binds = $mainMod CTRL, L&G, exec, wezterm start -- bash -c lazygit
-      # binds = $mainMod CTRL, K&9, exec, wezterm start -- bash -c k9s
+      binds = $mainMod CTRL, S&U, exec, foot systemctl-tui
+      binds = $mainMod CTRL, L&G, exec, foot lazygit
+      binds = $mainMod CTRL, K&9, exec, foot k9s
       bind = $mainMod, S, togglespecialworkspace, magic
-      bind = $mainMod, Z, exec, playerctl -p spotify previous
-      bind = $mainMod, X, exec, playerctl -p spotify next
-      bind = $mainMod, C, exec, playerctl -p spotify play-pause
-      binde = $mainMod, V, exec, playerctl -p spotify volume 0.02-
       bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh
       binde = $mainMod, B, exec, playerctl -p spotify volume 0.02+
       bind = $mainMod, W, killactive
@@ -413,9 +415,6 @@ in {
       bind = $mainMod SHIFT, S, movetoworkspace, special:magic
       bind = $mainMod SHIFT, I, exec, $HOME/.config/rofi/applets/bin/clipboard.sh
 
-      bind = $mainMod SHIFT, Z, exec, playerctl previous
-      bind = $mainMod SHIFT, X, exec, playerctl next
-      bind = $mainMod SHIFT, C, exec, playerctl play-pause
       binde = $mainMod SHIFT, V, exec, pamixer -d 2
       binde = $mainMod SHIFT, B, exec, pamixer -i 2
 
@@ -440,7 +439,7 @@ in {
       bind = $mainMod_SHIFT, l,movewindow,r
       bind = $mainMod_SHIFT, k,movewindow,u
       bind = $mainMod_SHIFT, j,movewindow,d
-      bind = $mainMod_SHIFT, CTRL, centerwindow,none
+      bind = $mainMod_SHIFT, c,centerwindow,none
 
 
       binde = $mainMod_CTRL, l, resizeactive, 30 0

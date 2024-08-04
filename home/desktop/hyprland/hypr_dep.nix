@@ -25,5 +25,7 @@
     hyprkeys
     nwg-displays
     kanshi
+    wl-clipboard
+    wl-screenrec
   ];
 }

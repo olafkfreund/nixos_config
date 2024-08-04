@@ -67,6 +67,38 @@
     })
   ];
 
+    # services.autorandr.enable = true;
+    #
+    # programs.autorandr = {
+    #   enable = true;
+    #
+    #   profiles = {
+    #     "non-nix" = {
+    #       fingerprint = {
+    #         DP-2 = "EDID here";
+    #         HDMI-A-1 = "EDID here";
+    #       };
+    #       config = {
+    #         DP-2 = {
+    #           enable = true;
+    #           crtc = 1;
+    #           position = "0x0";
+    #           mode = "2560x1600";
+    #           rate = "165.00";
+    #         };
+    #         HDMI-A-1 = {
+    #           enable = true;
+    #           crtc = 0;
+    #           position = "2560x0";
+    #           primary = true;
+    #           rate = "74.97";
+    #           mode = "2560x1440";
+    #         };
+    #       };
+    #     };
+    #   };
+    # };
+
   environment.systemPackages = with pkgs; [
     (import ./statusbar/sb-clock.nix { inherit pkgs; })
     (import ./statusbar/sb-battery.nix { inherit pkgs; })

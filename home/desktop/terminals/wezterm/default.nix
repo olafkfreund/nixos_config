@@ -39,6 +39,21 @@
             mods = "CTRL | ALT",
             action = wezterm.action.SplitVertical { domain = "CurrentPaneDomain" },
           },
+          { 
+            key = "V", 
+            mods = "CTRL", 
+            action = wezterm.action.PasteFrom "Clipboard" 
+          },
+          { 
+            key = "V", 
+            mods = "CTRL", 
+            action = wezterm.action.PasteFrom "PrimarySelection" 
+          },
+          {
+              key = "C",
+              mods = "CTRL",
+              action = wezterm.action.CopyTo "ClipboardAndPrimarySelection",
+          },
         }
        }
     '';
