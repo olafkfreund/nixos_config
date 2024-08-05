@@ -13,7 +13,7 @@
     ./com.nix
     ./terminals.nix
     ./neofetch/default.nix
-    ./gnome/default.nix
+    # ./gnome/default.nix
     ./wlr/default.nix
     ./gaming/default.nix
     ./sound/default.nix
