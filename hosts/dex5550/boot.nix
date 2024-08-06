@@ -12,7 +12,7 @@
   #    systemd.unified_cgroup_hierarchy=0 
   # '';
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.plymouth.enable = false;
+  boot.plymouth.enable = true;
 
   # This is for OBS Virtual Cam Support - v4l2loopback setup
   # boot.kernelPackages = pkgs.linuxPackages_default;
