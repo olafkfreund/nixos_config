@@ -260,6 +260,7 @@
           home-manager.nixosModules.home-manager
           inputs.nix-colors.homeManagerModules.default
           inputs.stylix.nixosModules.stylix
+          nixos-cosmic.nixosModules.default
           inputs.nix-snapd.nixosModules.default
           nix-index-database.nixosModules.nix-index
           ./home/shell/zellij/zjstatus.nix
