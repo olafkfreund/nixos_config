@@ -5,20 +5,21 @@
     ./boot.nix
     ./i18n.nix
     ./stylix.nix
-    ./greetd.nix
+    # ./greetd.nix
     ./intel.nix
     ../../modules/default.nix
     ../../modules/system-tweaks/kernel-tweaks/32GB-SYSTEM/32GB-SYSTEM.nix
   ];
   services.xserver = {
     enable = true;
-    desktopManager.gnome.enable = true;
     displayManager.xserverArgs = [
       "-nolisten tcp"
       "-dpi 96"
     ];
   };
-
+  services.desktopManager.cosmic.enable = true;
+  services.displayManager.cosmic-greeter.enable = true;
+  
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
   systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
 

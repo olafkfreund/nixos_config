@@ -16,5 +16,6 @@
     whatsapp-for-linux
     ferdium
     zoom
+    immersed-vr
   ];
 }

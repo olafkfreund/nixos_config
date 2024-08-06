@@ -19,7 +19,7 @@
     ./auto-cpufreq/default.nix
     # ./ollama/default.nix
     ./sysprof/default.nix
-    ./libinput/default.nix
+    # ./libinput/default.nix
     ./snapd/default.nix
     ./mandb/default.nix
     ./appimage/default.nix

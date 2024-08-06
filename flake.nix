@@ -321,6 +321,7 @@
           ./home/shell/zellij/zjstatus.nix
           nur.nixosModules.nur
           home-manager.nixosModules.home-manager
+          nixos-cosmic.nixosModules.default
           inputs.nix-colors.homeManagerModules.default
           inputs.stylix.nixosModules.stylix
           inputs.nix-snapd.nixosModules.default
