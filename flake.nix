@@ -185,6 +185,7 @@
                 stylix.targets.dunst.enable = false;
                 stylix.targets.rofi.enable = false;
                 stylix.targets.xresources.enable = false;
+                stylix.targets.neovim.enable = false;
               }
             ];
           }

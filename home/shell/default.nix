@@ -28,5 +28,7 @@
     ./tmux/default.nix
     ./translate-shell/default.nix
     ./xdg/default.nix
+    ./lazyvim/default.nix
+
   ];
 }
