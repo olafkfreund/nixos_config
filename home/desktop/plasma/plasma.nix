@@ -13,6 +13,6 @@ home.packages = with pkgs; [
   polychromatic
   # ungoogled-chromium
   quaternion
-  xwaylandvideobridge
+  # xwaylandvideobridge
   ];
 }
