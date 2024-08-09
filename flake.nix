@@ -148,7 +148,7 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.backupFileExtension = "backup";
+            home-manager.backupFileExtension = "bck";
             home-manager.extraSpecialArgs = 
                 let
                   host = "razer";

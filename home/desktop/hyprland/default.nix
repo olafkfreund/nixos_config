@@ -118,6 +118,11 @@ in {
       env = XCURSOR_THEME,Bibata-Modern-Ice
       env = XCURSOR_SIZE,16
       env = CLUTTER_BACKEND,wayland
+      env = WLR_DRM_NO_ATOMIC,1
+      env = WLR_NO_HARDWARE_CURSORS,1
+      env = LIBVA_DRIVER_NAME,nvidia
+      env = EGL_PLATFORM,wayland
+
       #GTK
       env = GDK_BACKEND,wayland,x11
       env = GTK_THEME,Gruvbox-Dark-B-LB
