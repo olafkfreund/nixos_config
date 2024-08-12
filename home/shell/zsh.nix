@@ -217,7 +217,6 @@
       plugins = [
         "sudo"
         "1password"
-        "adb"
         "azure"
         "aws"
         "direnv"

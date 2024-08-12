@@ -87,10 +87,10 @@ in {
       exec-once = killall dunst;sleep .5 && dunst
       exec-once = kdeconnect-cli
       exec-once = playerctld daemon
-      exec-once = killall swww;sleep .5 && swww-daemon
+      exec-once = killall swww-daemon; sleep .5 && swww-daemon
       exec-once = hypridle
-      exec-once = nm-applet --indicator
-      exec-once = blueman-applet
+      # exec-once = nm-applet --indicator
+      # exec-once = blueman-applet
 
       # exec-once = wl-clipboard-history -t
       exec-once = wl-paste --type text --watch cliphist store #Stores only text data
@@ -116,7 +116,8 @@ in {
       env = XDG_CURRENT_DESKTOP,Hyprland
       env = XDG_SESSION_TYPE,wayland
       env = XCURSOR_THEME,Bibata-Modern-Ice
-      env = XCURSOR_SIZE,16
+      env = XCURSOR_SIZE,24
+      env = HYPRCURSOR_SIZE,24:w
       env = CLUTTER_BACKEND,wayland
       env = WLR_DRM_NO_ATOMIC,1
       env = WLR_NO_HARDWARE_CURSORS,1
@@ -228,6 +229,14 @@ in {
           no_gaps_when_only = false
       }
 
+      master {
+          no_gaps_when_only = false
+          always_center_master = true
+          smart_resizing = true
+          new_status = master
+          orientation = right
+      }
+
       gestures {
           workspace_swipe=yes
           workspace_swipe_fingers=3
@@ -273,6 +282,17 @@ in {
               }
            }
        }
+      # Workspace rules #
+      workspace = 1,monitor:HDMI-A-1
+      workspace = 2,monitor:HDMI-A-1
+      workspace = 3,monitor:HDMI-A-1
+      workspace = 4,monitor:HDMI-A-1
+      workspace = 5,monitor:HDMI-A-1
+      workspace = 6,monitor:eDP-1
+      workspace = 7,monitor:eDP-1
+      workspace = 8,monitor:eDP-1
+      workspace = 9,monitor:eDP-1
+      workspace = 10,monitor:eDP-1
 
       # Window rules #
       windowrule = workspace current,title:MainPicker
@@ -290,7 +310,6 @@ in {
       windowrulev2 = workspace 1, class:(google-chrome-.*)
       windowrulev2 = workspace special:spotify, class:^(Spotify)$
       windowrulev2 = float,size 900 500,title:^(Choose Files)
-      # windowrulev2 = workspace 2, class:(code.*)
       windowrulev2 = workspace 4, class:^(Edge)$
 
       #Pavucontrol
@@ -345,7 +364,7 @@ in {
       bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh
       bind = $mainMod, RETURN, exec, [float] wezterm start
       bind = $mainMod, space, exec, ~/.config/rofi/launchers/type-2/launcher.sh
-      bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh 
+      # bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh 
       bind = $mainMod SHIFT, P, exec, $HOME/.config/rofi/applets/bin/screenshot.sh
       bind = $mainMod SHIFT, I, exec, $HOME/.config/rofi/applets/bin/clipboard.sh
       bind = $mainMod, SLASH, exec, pamixer -t

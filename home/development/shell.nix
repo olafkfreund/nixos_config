@@ -8,5 +8,7 @@ home.packages = with pkgs; [
     upbound
     crossplane-cli
     just
+    atac
+    termshark
   ];
 }

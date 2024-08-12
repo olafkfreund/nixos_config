@@ -27,5 +27,6 @@
     kanshi
     wl-clipboard
     wl-screenrec
+    hyprcursor
   ];
 }

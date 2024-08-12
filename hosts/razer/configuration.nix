@@ -9,7 +9,7 @@
     ./hosts.nix
     ./envvar.nix
     ./razer-laptop.nix
-    # ./greetd.nix
+    ./greetd.nix
     ../../modules/default.nix
     ../../modules/laptops.nix
   ];
@@ -23,8 +23,8 @@
     ];
     videoDrivers = [ "nvidia" ];
   };
-  services.desktopManager.cosmic.enable = true;
-  services.displayManager.cosmic-greeter.enable = true;
+  # services.desktopManager.cosmic.enable = true;
+  # services.displayManager.cosmic-greeter.enable = true;
 
 
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
@@ -39,7 +39,7 @@
 
   stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
 
-  stylix.image = ./003.png;
+  stylix.image = ./gruv-abstract-maze.png;
   stylix.enable = true;
   stylix.polarity = "dark";
   stylix.autoEnable = true;

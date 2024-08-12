@@ -10,6 +10,8 @@
       droidcam-obs
       input-overlay
       advanced-scene-switcher
+      obs-source-switcher
+      obs-move-transition
     ];
   };
 }

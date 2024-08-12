@@ -10,10 +10,10 @@
       mainBar = {
         "layer" = "top";
         "position" = "bottom"; #"top";
-        "margin-top" = 10;
-        "margin-bottom" = 3;
-        "margin-left" = 20;
-        "margin-right" = 20;
+        "margin-top" = 0;
+        "margin-bottom" = 0;
+        "margin-left" = 0;
+        "margin-right" = 0;
         "spacing" = 0;
         "fixed-center" = true;
         "exclusive" = true;
@@ -119,29 +119,55 @@
           format = "{icon}";
           show-special = true;
           on-click = "active";
+          active-only = false;
           on-scroll-up = "${pkgs.hyprland}/bin/hyprctl dispatch workspace e-1";
           on-scroll-down = "${pkgs.hyprland}/bin/hyprctl dispatch workspace e+1";
           max-length = 45;
           persistent-workspaces = {
-            "1" = [ ];
-            "2" = [ ];
-            "3" = [ ];
-            "4" = [ ];
-            "5" = [ ];
+            "1" = [
+              "HDMI-A-1"
+            ];
+            "2" = [
+              "HDMI-A-1"
+            ];
+            "3" = [
+              "HDMI-A-1"
+            ];
+            "4" = [
+              "HDMI-A-1"
+            ];
+            "5" = [
+              "HDMI-A-1"
+            ];
+            "6" = [
+              "eDP-1"
+            ];
+            "7" = [
+              "eDP-1"
+            ];
+            "8" = [
+              "eDP-1"
+            ];
+            "9" = [
+              "eDP-1"
+            ];
+            "10" = [
+              "eDP-1"
+            ];
           };
           "format-icons" = {
-            "1" = "󰲠 ";
-            "2" = "󰲢 ";
-            "3" = "󰲤 ";
-            "4" = "󰲦 ";
-            "5" = "󰲨 ";
-            "6" = "󰲪 ";
-            "7" = "󰲬 ";
-            "8" = "󰲮 ";
-            "9" = "󰲰 ";
-            "10" = "󰿬 ";
+            "1" = "󰼏 ";
+            "2" = "󰼐 ";
+            "3" = "󰼑 ";
+            "4" = "󰼒 ";
+            "5" = "󰼓 ";
+            "6" = "󰎤 ";
+            "7" = "󰎧 ";
+            "8" = "󰎪 ";
+            "9" = "󰎭 ";
+            "10" = "󰎱 ";
             "active" = "󰻂 ";
-            "default" = " ";
+            # "default" = " ";
             "urgent" = " ";
             "magic" = "󱐡 ";
             "hidden" = " ";
