@@ -5,7 +5,7 @@
 {
   services = {
 
-    autorandr.enable = true;
+    autorandr.enable = false;
     udev.extraRules = ''
       ACTION=="change", SUBSYSTEM=="drm", RUN+="${pkgs.autorandr}/bin/autorandr -c"'';
 
