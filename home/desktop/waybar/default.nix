@@ -22,38 +22,39 @@
         "gtk-layer-shell" = true;
 
         "modules-left" = [
-          # "hyprland/workspaces"
+          "hyprland/workspaces"
           # "hyprland/window"
-          "image"
-          "custom/playerctl"
+          # "image"
+          # "custom/playerctl"
 
         ];
 
         "modules-right" = [
           "custom/nix-updates"
           "custom/weather"
-          "network#icons"
-          "network"
-          "battery#icons"
-          "battery"
-          "bluetooth#icons"
-          "bluetooth"
-          "pulseaudio#icons"
-          "pulseaudio"
-          "pulseaudio#microphoneicons"
-          "pulseaudio#microphone"
-          "idle_inhibitor#icons"
-          "idle_inhibitor"
+          # "network#icons"
+          # "network"
+          # "battery#icons"
+          # "battery"
+          # "bluetooth#icons"
+          # "bluetooth"
+          # "pulseaudio#icons"
+          # "pulseaudio"
+          # "pulseaudio#microphoneicons"
+          # "pulseaudio#microphone"
+          # "idle_inhibitor#icons"
+          # "idle_inhibitor"
+          "group/system"
           "custom/cal"
           "clock"
           "group/computer"
         ];
 
         "modules-center" = [
-          "hyprland/workspaces"
+          # "hyprland/workspaces"
           "hyprland/window"
-          # "image"
-          # "custom/playerctl"
+          "image"
+          "custom/playerctl"
         ];
 
         "image" = {
@@ -116,13 +117,27 @@
         };
 
         "hyprland/workspaces" = {
-          format = "{icon}";
+          format = "{icon}: {windows}";
           show-special = true;
           on-click = "active";
           active-only = false;
           on-scroll-up = "${pkgs.hyprland}/bin/hyprctl dispatch workspace e-1";
           on-scroll-down = "${pkgs.hyprland}/bin/hyprctl dispatch workspace e+1";
           max-length = 45;
+          window-rewrite = {
+            "class<edge>" = " ";
+            "class<google-chrome>" = " ";
+            "class<slack>" = " ";
+            "class<thunderbird>" = "  ";
+            "class<org.wezfurlong.wezterm>" = "󰆍 ";
+            "class<org.gnome.Nautilus>" = " ";
+            "class<ferdium>" = "󱐏 ";
+            "class<foot>" = "󰆍 ";
+            "title<Spotify Premium>" = " ";
+            "nvim" = " ";
+            "Alacritty" = " ";
+            "title<tmux>" = " ";
+          };
           persistent-workspaces = {
             "1" = [
               "HDMI-A-1"
@@ -154,6 +169,9 @@
             "10" = [
               "eDP-1"
             ];
+            "spotify" = [
+              "*"
+            ];
           };
           "format-icons" = {
             "1" = "󰼏 ";
@@ -167,7 +185,7 @@
             "9" = "󰎭 ";
             "10" = "󰎱 ";
             "active" = "󰻂 ";
-            # "default" = " ";
+            "default" = " ";
             "urgent" = " ";
             "magic" = "󱐡 ";
             "hidden" = " ";
@@ -190,28 +208,32 @@
             "custom/tailscale"
           ];
         };
+        
+        "group/system" = {
+          orientation = "inherit";
+          drawer = {
+            transition-duration = 500;
+            transition-left-to-right = true;
+          };
+          modules = [
+            "network#icons"
+            "network"
+            "battery#icons"
+            "battery"
+            "bluetooth#icons"
+            "bluetooth"
+            "pulseaudio#icons"
+            "pulseaudio"
+            "pulseaudio#microphoneicons"
+            "pulseaudio#microphone"
+          ];
+        };
 
         "hyprland/window" = {
           icon = true;
           rewrite = {
             ".+" = "";
           };
-          # format = "{}";
-          # separate-outputs = true;
-          # rewrite = {
-          #   "(.*) Edge" = "   Edge ";
-          #   "(.*) Google Chrome" = "  Chrome ";
-          #   "(.*) Slack" = "  Slack";
-          #   "(.*) Mozilla Thunderbird" = "  ";
-          #   "(.*) bash" = " 󰆍 Kitty ";
-          #   "(.*) zsh" = " 󰆍 Kitty ";
-          #   "(.*) Teams" = " 󰊻 Teams ";
-          #   "Spotify (.*)" = "  Spotify ";
-          #   "(.*) nvim" = "  Nvim ";
-          #   "(.*) Alacritty" = "   Terminal ";
-          #   "~/(.*)" = "   Terminal ";
-          #   "(.*) Zellij" = "  Zellij ";
-          # };
         };
 
         "tray" = {
@@ -363,7 +385,7 @@
           format = "{icon}  <span>{}</span>|";
           return-type = "json";
           max-length = 30;
-          exec = "${pkgs.playerctl}/bin/playerctl -p spotify_player metadata -f '{\"text\": \"{{markup_escape(title)}} - {{markup_escape(artist)}} {{ duration(position) }}/{{ duration(mpris:length) }}\", \"tooltip\": \"{{markup_escape(title)}} - {{markup_escape(artist)}}  {{ duration(position) }}/{{ duration(mpris:length) }}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' && album_art -F";
+          exec = "${pkgs.playerctl}/bin/playerctl -p spotify_player metadata -f '{\"text\": \"{{markup_escape(title)}} - {{markup_escape(artist)}}\", \"tooltip\": \"{{markup_escape(title)}} - {{markup_escape(artist)}}  {{ duration(position) }}/{{ duration(mpris:length) }}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' && album_art -F";
           interval = 5;
           tooltip = false;
           on-click-middle = "${pkgs.playerctl}/bin/playerctl -p spotify_player previous";

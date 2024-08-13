@@ -75,6 +75,11 @@
     popups = 1.0;
   };
 
+  stylix.cursor = {
+    name = "Bibata-Modern-Ice";
+    size = 26;
+  };
+
   systemd.network = {
     networks = {
       "wlp3s0" = {

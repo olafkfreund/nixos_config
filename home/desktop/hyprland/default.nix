@@ -68,7 +68,7 @@ in {
       }
 
 
-      exec-once = hyprctl setcursor Bibata-Modern-Ice 1
+      exec-once = hyprctl setcursor Bibata-Modern-Ice 24
       exec-once = gnome-keyring-daemon --start --components=secrets
       exec-once = polkit-kde-authentication-agent-1
       exec-once = kdeconnectd
@@ -97,13 +97,13 @@ in {
       exec-once = wl-paste --type image --watch cliphist store #Stores only image data when imaged copied
 
       # exec-once = [workspace special:spotify] spotify
-      exec-once = [workspace 1 silent] google-chrome-stable
+      # exec-once = [workspace 1 silent] google-chrome-stable
       # exec-once = [workspace 2 silent] firefox
-      exec-once = [workspace 3 silent] foot
+      # exec-once = [workspace 3 silent] foot
       # exec-once = [workspace 4 silent] slack
-      exec-once = [workspace 2 silent] ferdium
+      # exec-once = [workspace 2 silent] ferdium
       # exec-once = [workspace 8 silent] 1password
-      exec-once = [workspace 3 silent] wezterm start --always-new-process
+      # exec-once = [workspace 3 silent] wezterm start --always-new-process
       exec-once = $keybinds = $(hyprkeys -bjl | jq '.Binds | map(.Bind + " -> " + .Dispatcher + ", " + .Command)'[] -r)
       exec-once = $execs = $(hyprkeys -aj | jq '.AutoStart | map("[" + .ExecType + "] " + .Command)'[] -r)
 
@@ -117,7 +117,7 @@ in {
       env = XDG_SESSION_TYPE,wayland
       env = XCURSOR_THEME,Bibata-Modern-Ice
       env = XCURSOR_SIZE,24
-      env = HYPRCURSOR_SIZE,24:w
+      env = HYPRCURSOR_SIZE,24
       env = CLUTTER_BACKEND,wayland
       env = WLR_DRM_NO_ATOMIC,1
       env = WLR_NO_HARDWARE_CURSORS,1

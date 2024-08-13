@@ -204,7 +204,7 @@
       fi
       source ~/.openai.sh
       #Python virtualenv
-      source ~/.env/bin/activate
+      # source ~/.env/bin/activate
       eval "$(atuin init zsh)"
     '';
 
