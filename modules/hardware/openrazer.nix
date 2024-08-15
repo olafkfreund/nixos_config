@@ -8,8 +8,8 @@
     polychromatic
     gobject-introspection
     wrapGAppsHook3 
-    python311Packages.wrapPython
-    python311Packages.openrazer-daemon
+    python312Packages.wrapPython
+    python312Packages.openrazer-daemon
   ];
   
 }

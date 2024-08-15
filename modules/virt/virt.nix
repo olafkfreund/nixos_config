@@ -40,7 +40,7 @@
 
   environment.systemPackages = with pkgs; [
     OVMFFull
-    ceph
+    # ceph
     kvmtool
     libvirt
     #qemu

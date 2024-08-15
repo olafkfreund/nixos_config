@@ -8,7 +8,7 @@
     extraPackages = with pkgs.bat-extras; [
       prettybat
       batman
-      batdiff
+      # batdiff
     ];
   };
 }

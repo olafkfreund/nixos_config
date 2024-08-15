@@ -17,7 +17,7 @@
     hypridle
     hyprpaper
     emote
-    python311Packages.requests
+    python312Packages.requests
     betterlockscreen
     watershot
     xdg-utils

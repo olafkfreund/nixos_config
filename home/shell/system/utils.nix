@@ -20,6 +20,7 @@
     bluetuith
     fzf-obc
     youtube-tui
+    # ytfzf
     tmux-xpanes
     mapscii
     tdf

@@ -301,7 +301,7 @@ in {
       windowrule = workspace current,thunderbird
 
       # Rofi
-      windowrulev2 = forceinput, class:(Rofi)$
+      # windowrulev2 = forceinput, class:(Rofi)$
 
       # Obsidian
       windowrulev2 = workspace 6, class:(obsidian)

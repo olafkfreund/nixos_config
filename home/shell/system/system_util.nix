@@ -48,6 +48,7 @@ home.packages = with pkgs; [
   alsa-utils
   pamixer
   playerctl
+  getent
   brightnessctl
   pavucontrol
   pulseaudio
@@ -88,5 +89,9 @@ home.packages = with pkgs; [
   choose
   tailspin
   nitch
+  pet
+  entr
+  # taskwarrior3
+  taskwarrior-tui
   ];
 }

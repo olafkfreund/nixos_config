@@ -13,7 +13,7 @@
     enable = true;
     # package = pkgs.gitAndTools.gitFull;
     lfs.enable = true;
-    delta.enable = true;
+    delta.enable = false;
     aliases = {
       a = "add";
       af = "!git add $(git ls-files -m -o --exclude-standard | sk -m)";

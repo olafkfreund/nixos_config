@@ -1,10 +1,10 @@
 { self, config, pkgs, ... }: {
   services.auto-cpufreq = {
-    enable = false;
+    enable = true;
     settings = {
       battery = {
          governor = "powersave";
-         turbo = "never";
+         turbo = "auto";
       };
       charger = {
          governor = "performance";

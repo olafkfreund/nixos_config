@@ -1,12 +1,12 @@
-{ pkgs, ... }: {
+{ pkgs, pkgs-stable, ... }: {
 
-home.packages = with pkgs; [
-  cargo
-  cargo-ui
-  cargo-update
-  slumber
-  openapi-tui
-  clipse
-  systemctl-tui
+home.packages = [
+  pkgs-stable.cargo
+  pkgs-stable.cargo-ui
+  pkgs-stable.cargo-update
+  pkgs.slumber
+  pkgs.openapi-tui
+  pkgs.clipse
+  pkgs.systemctl-tui
   ];
 }

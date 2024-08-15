@@ -23,15 +23,16 @@
 
         "modules-left" = [
           "hyprland/workspaces"
-          # "hyprland/window"
+          "hyprland/window"
           # "image"
           # "custom/playerctl"
 
         ];
 
         "modules-right" = [
+          "privacy"
           "custom/nix-updates"
-          "custom/weather"
+          # "custom/weather"
           # "network#icons"
           # "network"
           # "battery#icons"
@@ -52,7 +53,8 @@
 
         "modules-center" = [
           # "hyprland/workspaces"
-          "hyprland/window"
+          # "hyprland/window"
+          "custom/weather"
           "image"
           "custom/playerctl"
         ];
@@ -66,7 +68,7 @@
         };
 
         "custom/settings" = {
-          format = " |";
+          format = " ";
           tooltip = false;
         };
 
@@ -78,7 +80,7 @@
         };
 
         "idle_inhibitor#icons" = {
-          format = "| {icon}";
+          format = " {icon}";
           format-icons = {
             activated = "󱐋";
             deactivated = "󰤄";
@@ -86,7 +88,7 @@
         };
 
         "idle_inhibitor" = {
-          format = "{icon} |";
+          format = "{icon} ";
           format-icons = {
             activated = "on";
             deactivated = "off";
@@ -105,7 +107,7 @@
         };
 
         "custom/monitor" = {
-          format = "󰹑 |";
+          format = "󰹑 ";
           on-click = "${pkgs.wdisplays}/bin/wdisplays";
           tooltip = false;
         };
@@ -129,12 +131,15 @@
             "class<google-chrome>" = " ";
             "class<slack>" = " ";
             "class<thunderbird>" = "  ";
+            "class<kitty>" = " ";
+            "class<Alacritty>" = " ";
+            "class<1Password>" = " ";
             "class<org.wezfurlong.wezterm>" = "󰆍 ";
             "class<org.gnome.Nautilus>" = " ";
             "class<ferdium>" = "󱐏 ";
             "class<foot>" = "󰆍 ";
             "title<Spotify Premium>" = " ";
-            "nvim" = " ";
+            "tilte<nvim>" = " ";
             "Alacritty" = " ";
             "title<tmux>" = " ";
           };
@@ -218,8 +223,10 @@
           modules = [
             "network#icons"
             "network"
+            "temperature"
             "battery#icons"
             "battery"
+            "power-profiles-daemon"
             "bluetooth#icons"
             "bluetooth"
             "pulseaudio#icons"
@@ -254,10 +261,10 @@
         };
 
         clock = {
-          format = "{:%H:%M} |";
+          format = "{:%H:%M} ";
           max-lenght = 25;
           min-length = 6;
-          format-alt = "{:%A, %B %d, %Y (%R)} |";
+          format-alt = "{:%A, %B %d, %Y (%R)} ";
           tooltip-format = "<tt><small>{calendar}</small></tt>";
           calendar = {
             mode = "month";
@@ -289,10 +296,10 @@
             warning = 30;
             critical = 20;
           };
-          format = "{capacity}% |";
-          format-charging = "{capacity}% |";
-          format-plugged = "{capacity}% |";
-          format-alt = "{time} |";
+          format = "{capacity}% ";
+          format-charging = "{capacity}% ";
+          format-plugged = "{capacity}% ";
+          format-alt = "{time} ";
         };
 
         "battery#icons" = {
@@ -303,21 +310,21 @@
         };
 
         "network#icons" = {
-          format-wifi = "󰖩";
-          format-ethernet = "󰈀";
-          tooltip-format = "󰈀";
-          format-linked = "󰈀";
+          format-wifi = "󰖩 ";
+          format-ethernet = "󰈀 ";
+          tooltip-format = "󰈀 ";
+          format-linked = "󰈀 ";
           format-disconnected = "";
-          format-alt = "󰖩";
+          format-alt = "󰖩 ";
         };
 
         "network" = {
-          format-wifi = "{essid} |";
-          format-ethernet = "{ipaddr} |";
+          format-wifi = "{essid} ";
+          format-ethernet = "{ipaddr} ";
           tooltip-format = "{ipaddr}  {bandwidthUpBytes}  {bandwidthDownBytes}";
           format-linked = "{ifname} (No IP)";
           format-disconnected = "Disconnected";
-          format-alt = "{signalStrength}% |";
+          format-alt = "{signalStrength}% ";
           on-click = "nm-connection-editor";
         };
 
@@ -330,7 +337,7 @@
         };
 
         "bluetooth" = {
-          format = "{status}|";
+          format = "{status}";
           format-connected = "{num_connections}";
           tooltip-format = "{device_alias}";
           tooltip-format-connected = "{device_enumerate}";
@@ -353,8 +360,8 @@
         };
 
         "pulseaudio" = {
-          format = "{volume}% |";
-          format-bluetooth = "{volume}%|";
+          format = "{volume}% ";
+          format-bluetooth = "{volume}%";
           format-muted = "婢";
           format-icons = {
             car = "";
@@ -371,7 +378,7 @@
         "custom/weather" = {
           exec = "weather London";
           return-type = "json";
-          format = "{} |";
+          format = "{} ";
           tooltip = true;
           interval = 3600;
         };
@@ -381,8 +388,51 @@
           tooltip = false;
         };
 
+        "temperature" = {
+          hwmon = "/sys/devices/virtual/thermal/thermal_zone1/hwmon3/temp1_input";
+          format = "{temperature}°C ";
+          tooltip-format = "{temperature}°C ";
+          interval = 10;
+        };
+
+        "privacy" = {
+          icon-spacing = 4;
+          icon-size = 18;
+          transition-duration = 250;
+          modules = [
+              {
+                type = "screenshare";
+                tooltip = true;
+                tooltip-icon-size = 24;
+              }
+              {
+                type = "audio-in";
+                tooltip = true;
+                tooltip-icon-size = 24;
+              }
+              {
+                type = "audio-out";
+                tooltip = true;
+                tooltip-icon-size = 24;
+              }
+
+          ];
+        };
+
+        "power-profiles-daemon" = {
+          "format" = "{icon}   {profile}";
+          "tooltip-format" = "Power profile: {profile}\nDriver: {driver}";
+          "tooltip" = true;
+          "format-icons" = {
+            "default" = "";
+            "performance" = "";
+            "balanced" = "";
+            "power-saver" = "";
+          };
+        };
+        
         "custom/playerctl" = {
-          format = "{icon}  <span>{}</span>|";
+          format = "{icon}  <span>{}</span>";
           return-type = "json";
           max-length = 30;
           exec = "${pkgs.playerctl}/bin/playerctl -p spotify_player metadata -f '{\"text\": \"{{markup_escape(title)}} - {{markup_escape(artist)}}\", \"tooltip\": \"{{markup_escape(title)}} - {{markup_escape(artist)}}  {{ duration(position) }}/{{ duration(mpris:length) }}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' && album_art -F";
@@ -406,7 +456,7 @@
         };
 
         "pulseaudio#microphone" = {
-          format-source = "{volume}% |";
+          format-source = "{volume}% ";
           on-click = "pavucontrol -t 4";
           tooltip-format = "{format_source} {source_desc} // {source_volume}%";
           scroll-step = 5;
@@ -422,7 +472,7 @@
           "interval" = 3600;
           "tooltip" = true;
           "return-type" = "json";
-          "format" = "{} {icon} |";
+          "format" = "{} {icon} ";
           "format-icons" = {
               "has-updates" = " ";
               "updated" = " ";
@@ -539,6 +589,34 @@
           margin: 0 5 0 0px;
         }
         
+        #temperature {
+          font-weight: bolder;
+          font-style: normal;
+          color: #${config.colorScheme.palette.base05};
+          margin: 0 5 0 0px;
+        }
+        
+        #privacy {
+          font-weight: bolder;
+          font-style: normal;
+          color: #${config.colorScheme.palette.base05};
+          margin: 0 5 0 0px;
+        }
+
+        #privacy-item {
+          font-weight: bolder;
+          font-style: normal;
+          color: #${config.colorScheme.palette.base05};
+          margin: 0 5 0 0px;
+        }
+
+        #power-profiles-daemon {
+          font-weight: bolder;
+          font-style: normal;
+          color: #${config.colorScheme.palette.base05};
+          margin: 0 5 0 0px;
+        }
+
         #custom-nix-updates {
           font-weight: bolder;
           font-style: normal;

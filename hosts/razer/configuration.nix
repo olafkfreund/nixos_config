@@ -16,7 +16,7 @@
   
   services.xserver = {
     enable = true;
-    desktopManager.gnome.enable = true;
+    desktopManager.gnome.enable = false;
     displayManager.xserverArgs = [
       "-nolisten tcp"
       "-dpi 96"

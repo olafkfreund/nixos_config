@@ -17,10 +17,10 @@ home.packages = with pkgs; [
   abook
   gcalcli
   lbdb
-  python311Packages.vobject
-  python311Packages.icalendar
-  python311Packages.pytz
-  python311Packages.tzlocal
-  python311Packages.imaplib2
+  python312Packages.vobject
+  python312Packages.icalendar
+  python312Packages.pytz
+  python312Packages.tzlocal
+  python312Packages.imaplib2
   ];
 }
