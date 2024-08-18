@@ -23,26 +23,12 @@
 
         "modules-left" = [
           "hyprland/workspaces"
-          "hyprland/window"
-          # "image"
-          # "custom/playerctl"
+          # "hyprland/window"
 
         ];
 
         "modules-right" = [
-          "privacy"
           "custom/nix-updates"
-          # "custom/weather"
-          # "network#icons"
-          # "network"
-          # "battery#icons"
-          # "battery"
-          # "bluetooth#icons"
-          # "bluetooth"
-          # "pulseaudio#icons"
-          # "pulseaudio"
-          # "pulseaudio#microphoneicons"
-          # "pulseaudio#microphone"
           "idle_inhibitor#icons"
           "idle_inhibitor"
           "group/system"
@@ -53,34 +39,24 @@
 
         "modules-center" = [
           # "hyprland/workspaces"
-          # "hyprland/window"
-          "custom/weather"
-          "image"
-          "custom/playerctl"
+          "hyprland/window"
+          # "custom/weather"
         ];
 
-        "image" = {
-          exec = "album_art";
-          path = "/tmp/cover.jpeg";
-          size = 20;
-          interval = 5;
-          on-click = "wezterm start --always-new-process -- bash -c spotify_player";
-        };
-
         "custom/settings" = {
-          format = " ";
+          format = " ";
           tooltip = false;
         };
 
         "custom/cycle_wall" = {
-          format = "󰸉 |";
-          on-click = "wallpaper_picker";
+          format = "󰸉 ";
+          on-click = "waypaper";
           tooltip = true;
           tooltip-format = "Change wallpaper";
         };
 
         "idle_inhibitor#icons" = {
-          format = " {icon}";
+          format = "{icon} ";
           format-icons = {
             activated = "󱐋";
             deactivated = "󰤄";
@@ -114,7 +90,7 @@
 
         "custom/tray" = {
           tooltip = false;
-          format = "󱊖 ";
+          format = "󱊔 ";
           on-click = "";
         };
 
@@ -224,6 +200,7 @@
             "network#icons"
             "network"
             "temperature"
+            "custom/weather"
             "battery#icons"
             "battery"
             "power-profiles-daemon"
@@ -342,7 +319,7 @@
           tooltip-format = "{device_alias}";
           tooltip-format-connected = "{device_enumerate}";
           tooltip-format-enumerate-connected = "{device_alias}";
-          on-click = "wezterm start -- bash -c bluetuith --color dark";
+          on-click = "foot bluetuith --color dark";
         };
         "pulseaudio#icons" = {
           format = "{icon}";
@@ -383,11 +360,6 @@
           interval = 3600;
         };
 
-        "custom/spotify" = {
-          format = " ";
-          tooltip = false;
-        };
-
         "temperature" = {
           hwmon = "/sys/devices/virtual/thermal/thermal_zone1/hwmon3/temp1_input";
           format = "{temperature}°C ";
@@ -395,32 +367,8 @@
           interval = 10;
         };
 
-        "privacy" = {
-          icon-spacing = 4;
-          icon-size = 18;
-          transition-duration = 250;
-          modules = [
-              {
-                type = "screenshare";
-                tooltip = true;
-                tooltip-icon-size = 24;
-              }
-              {
-                type = "audio-in";
-                tooltip = true;
-                tooltip-icon-size = 24;
-              }
-              {
-                type = "audio-out";
-                tooltip = true;
-                tooltip-icon-size = 24;
-              }
-
-          ];
-        };
-
         "power-profiles-daemon" = {
-          "format" = "{icon}   {profile}";
+          "format" = "{icon} {profile}";
           "tooltip-format" = "Power profile: {profile}\nDriver: {driver}";
           "tooltip" = true;
           "format-icons" = {
@@ -428,24 +376,6 @@
             "performance" = "";
             "balanced" = "";
             "power-saver" = "";
-          };
-        };
-        
-        "custom/playerctl" = {
-          format = "{icon}  <span>{}</span>";
-          return-type = "json";
-          max-length = 30;
-          exec = "${pkgs.playerctl}/bin/playerctl -p spotify_player metadata -f '{\"text\": \"{{markup_escape(title)}} - {{markup_escape(artist)}}\", \"tooltip\": \"{{markup_escape(title)}} - {{markup_escape(artist)}}  {{ duration(position) }}/{{ duration(mpris:length) }}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' && album_art -F";
-          interval = 5;
-          tooltip = false;
-          on-click-middle = "${pkgs.playerctl}/bin/playerctl -p spotify_player previous";
-          on-click = "${pkgs.playerctl}/bin/playerctl -p spotify_player play-pause";
-          on-click-right = "${pkgs.playerctl}/bin/playerctl -p spotify_player next";
-          on-scroll-up = "${pkgs.playerctl}/bin/playerctl -p spotify_player volume 0.02+";
-          on-scroll-down = "${pkgs.playerctl}/bin/playerctl -p spotify_player volume 0.02-";
-          format-icons = {
-            Paused = "";
-            Playing = "";
           };
         };
 

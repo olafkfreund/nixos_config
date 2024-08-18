@@ -293,6 +293,16 @@ in {
       workspace = 8,monitor:eDP-1
       workspace = 9,monitor:eDP-1
       workspace = 10,monitor:eDP-1
+      
+      #Terminal rules
+      windowrulev2 = float, class:(alacritty)
+      windowrulev2 = size 1000 1000, class:(alacritty)
+      windowrulev2 = float, class:(kitty)
+      windowrulev2 = size 1000 1000, class:(kitty)
+      windowrulev2 = float, class:(foot)
+      windowrulev2 = size 1000 1000, class:(foot)
+      windowrulev2 = float, class:(wezterm)
+      windowrulev2 = size 1000 1000, class:(wezterm)
 
       # Window rules #
       windowrule = workspace current,title:MainPicker
@@ -358,13 +368,12 @@ in {
 
       #Apps
       bind = $mainMod, E, exec, foot yazi
-      bind = $mainMod, T, exec, [float] foot
+      bind = $mainMod, T, exec, foot
       bind = $mainMod, M, exec, monitors
       bind = $mainMod, K, exec, hyprctl kill
       bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh
-      bind = $mainMod, RETURN, exec, [float] wezterm start
-      bind = $mainMod, space, exec, ~/.config/rofi/launchers/type-2/launcher.sh
-      # bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh 
+      bind = $mainMod, RETURN, exec, wezterm start
+      bind = $mainMod, space, exec, ~/.config/rofi/launchers/type-7/launcher.sh
       bind = $mainMod SHIFT, P, exec, $HOME/.config/rofi/applets/bin/screenshot.sh
       bind = $mainMod SHIFT, I, exec, $HOME/.config/rofi/applets/bin/clipboard.sh
       bind = $mainMod, SLASH, exec, pamixer -t

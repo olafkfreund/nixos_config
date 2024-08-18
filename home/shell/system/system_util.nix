@@ -93,5 +93,10 @@ home.packages = with pkgs; [
   entr
   # taskwarrior3
   taskwarrior-tui
+  rusti-cal
+  rmpc
+  mpd
+  mpdris2
+  mpd-notification
   ];
 }

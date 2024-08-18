@@ -6,8 +6,6 @@
     polkit
     libsForQt5.polkit-kde-agent
     libsForQt5.qt5.qtgraphicaleffects
-    # sddm-themes.sugar-dark
-    # sddm-themes.astronaut
 
     wget
     git

@@ -20,6 +20,21 @@
   };
   services.thermald.enable = true;
   services.upower.enable = true;
+  services.power-profiles-daemon.enable = true;
+  services.auto-cpufreq = {
+    enable = false;
+    settings = {
+      battery = {
+         governor = "powersave";
+         turbo = "auto";
+      };
+      charger = {
+         governor = "performance";
+         turbo = "auto";
+      };
+    };
+  };
+
 
   systemd = {
     targets = {

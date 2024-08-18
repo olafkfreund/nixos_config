@@ -13,11 +13,9 @@
     ./com.nix
     ./terminals.nix
     ./neofetch/default.nix
-    # ./gnome/default.nix
     ./wlr/default.nix
     ./gaming/default.nix
     ./sound/default.nix
-    #./mail/default.nix
     ./office/default.nix
     ./webcam/default.nix
     ./obsidian/default.nix
@@ -27,6 +25,7 @@
     ./obs/default.nix
     ./wldash/default.nix
     ./osd/default.nix
+    ./flameshot/default.nix
   ];
 
   home.packages = with pkgs; [

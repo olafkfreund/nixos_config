@@ -12,11 +12,10 @@
     ./systemd/default.nix
     ./tailscale/default.nix
     ./system/default.nix
-    ./power/default.nix
+    # ./power/default.nix
     ./cron/cron.nix
     ./atuin/default.nix
     ./logind/default.nix
-    ./auto-cpufreq/default.nix
     # ./ollama/default.nix
     ./sysprof/default.nix
     # ./libinput/default.nix

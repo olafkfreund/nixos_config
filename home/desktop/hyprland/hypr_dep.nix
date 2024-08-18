@@ -8,7 +8,7 @@
     swayidle
     swaylock
     swaybg
-
+    wf-recorder
     swappy
     hyprnome
     hyprshot
