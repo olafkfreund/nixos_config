@@ -44,10 +44,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixos-cosmic = {
-      url = "github:lilyinstarlight/nixos-cosmic";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # nixos-cosmic = {
+    #   url = "github:lilyinstarlight/nixos-cosmic";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
 
     spicetify-nix = {
       url = "github:Gerg-L/spicetify-nix";
@@ -104,7 +104,7 @@
     nixpkgs,
     nixpkgs-stable,
     nur,
-    nixos-cosmic,
+    # nixos-cosmic,
     razer-laptop-control,
     nixpkgs-f2k,
     nix-colors,
@@ -138,7 +138,7 @@
           ./hosts/razer/configuration.nix
           nur.nixosModules.nur
           home-manager.nixosModules.home-manager
-          nixos-cosmic.nixosModules.default
+          # nixos-cosmic.nixosModules.default
           inputs.nix-colors.homeManagerModules.default
           inputs.stylix.nixosModules.stylix
           inputs.nix-snapd.nixosModules.default
@@ -261,7 +261,7 @@
           home-manager.nixosModules.home-manager
           inputs.nix-colors.homeManagerModules.default
           inputs.stylix.nixosModules.stylix
-          nixos-cosmic.nixosModules.default
+          # nixos-cosmic.nixosModules.default
           inputs.nix-snapd.nixosModules.default
           nix-index-database.nixosModules.nix-index
           ./home/shell/zellij/zjstatus.nix
@@ -323,7 +323,7 @@
           ./home/shell/zellij/zjstatus.nix
           nur.nixosModules.nur
           home-manager.nixosModules.home-manager
-          nixos-cosmic.nixosModules.default
+          # nixos-cosmic.nixosModules.default
           inputs.nix-colors.homeManagerModules.default
           inputs.stylix.nixosModules.stylix
           inputs.nix-snapd.nixosModules.default

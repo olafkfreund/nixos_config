@@ -24,16 +24,16 @@
       ];
       videoDrivers = [ "nvidia" ];
     };
-    desktopManager = {
-      cosmic = {
-        enable = false;
-      };
-    };
-    displayManager = {
-      cosmic-greeter = {
-        enable = false;
-      };
-    };
+    # desktopManager = {
+    #   cosmic = {
+    #     enable = false;
+    #   };
+    # };
+    # displayManager = {
+    #   cosmic-greeter = {
+    #     enable = false;
+    #   };
+    # };
   };
   # services.desktopManager.cosmic.enable = true;
   # services.displayManager.cosmic-greeter.enable = true;
@@ -118,7 +118,7 @@
     NVD_BACKEND = "direct";
 
   };
-
+  
   users.users.olafkfreund = {
     isNormalUser = true;
     description = "Olaf K-Freund";

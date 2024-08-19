@@ -4,7 +4,6 @@
     podman-tui
     podman-desktop
     podman
-    pods
    ];
   virtualisation = {
     podman = {

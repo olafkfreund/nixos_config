@@ -17,5 +17,6 @@
     # ./emacs.nix
     ./zed.nix
     ./containers.nix
+    ./distrobox.nix
 ];
 }
