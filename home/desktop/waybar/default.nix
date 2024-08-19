@@ -28,7 +28,6 @@
         ];
 
         "modules-right" = [
-          "custom/nix-updates"
           "idle_inhibitor#icons"
           "idle_inhibitor"
           "group/system"
@@ -56,7 +55,7 @@
         };
 
         "idle_inhibitor#icons" = {
-          format = "{icon} ";
+          format = "{icon}";
           format-icons = {
             activated = "󱐋";
             deactivated = "󰤄";
@@ -199,6 +198,7 @@
           modules = [
             "network#icons"
             "network"
+            "custom/nix-updates"
             "temperature"
             "custom/weather"
             "battery#icons"

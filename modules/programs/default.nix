@@ -8,6 +8,6 @@
     ./nix-ld/default.nix
     ./firefox/default.nix
     ./wshowkeys/default.nix
-    ./thunar/default.nix
+    # ./thunar/default.nix
   ];
 }

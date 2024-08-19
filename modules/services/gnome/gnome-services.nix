@@ -1,7 +1,5 @@
 {pkgs, ...}: {
-  
   services = {
-    # needed for GNOME services outside of GNOME Desktop
     dbus.packages = with pkgs; [
       gcr
       gnome.gnome-settings-daemon
@@ -11,11 +9,23 @@
 
     gvfs.enable = true;
   };
-
-  home-manager.users.olafkfreund = {
-  dconf = {
-    enable = true;
-    # settings."org/gnome/desktop/interface".color-scheme = "prefer-dark";
-    };
-  };
+  environment.gnome.excludePackages =
+    (with pkgs; [
+      gnome-photos
+      gnome-tour
+      gnome-terminal
+      gedit # text editor
+      epiphany # web browser
+      geary # email reader
+      evince # document viewer
+      totem # video player
+    ])
+    ++ (with pkgs.gnome; [
+      gnome-music
+      gnome-characters
+      tali # poker game
+      iagno # go game
+      hitori # sudoku game
+      atomix # puzzle game
+    ]);
 }

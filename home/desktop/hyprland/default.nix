@@ -331,6 +331,11 @@ in {
       windowrulev2 = workspace 8, class:(org.telegram.desktop)
       windowrulev2 = size 970 480, class:(org.telegram.desktop), title:(Choose Files)
       windowrulev2 = center, class:(org.telegram.desktop), title:(Choose Files)
+      
+      #Gnome
+      windowrulev2 = float, class:(org.gnome.*)
+      windowrulev2 = size 1000 1000, class:(org.gnome.*)
+      windowrulev2 = center, class:(org.gnome.*)
 
       windowrulev2 = float, class:(blueman-manager)
       windowrulev2 = center, class:(blueman-manager)

@@ -26,6 +26,7 @@
     ./wldash/default.nix
     ./osd/default.nix
     ./flameshot/default.nix
+    ./gnome/default.nix
   ];
 
   home.packages = with pkgs; [
@@ -33,12 +34,12 @@
     freerdp
 
   ];
-  home.file.".xprofile".source = ../../modules/services/dwm/x11/xprofile;
-  home.file.".xinitrc".source = ../../modules/services/dwm/x11/xinitrc;
-  home.file.".Xresources_dwm" = {
-    enable = true;
-    source = ../../modules/services/dwm/x11/xresources;
-  };
+  # home.file.".xprofile".source = ../../modules/services/dwm/x11/xprofile;
+  # home.file.".xinitrc".source = ../../modules/services/dwm/x11/xinitrc;
+  # home.file.".Xresources_dwm" = {
+  #   enable = true;
+  #   source = ../../modules/services/dwm/x11/xresources;
+  # };
 
   # GitHub CLI tool
   programs.gh = {

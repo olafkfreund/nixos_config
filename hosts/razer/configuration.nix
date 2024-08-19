@@ -14,14 +14,26 @@
     ../../modules/laptops.nix
   ];
   
-  services.xserver = {
-    enable = true;
-    desktopManager.gnome.enable = false;
-    displayManager.xserverArgs = [
-      "-nolisten tcp"
-      "-dpi 96"
-    ];
-    videoDrivers = [ "nvidia" ];
+  services = {
+    xserver = {
+      enable = true;
+      desktopManager.gnome.enable = true;
+      displayManager.xserverArgs = [
+        "-nolisten tcp"
+        "-dpi 96"
+      ];
+      videoDrivers = [ "nvidia" ];
+    };
+    desktopManager = {
+      cosmic = {
+        enable = false;
+      };
+    };
+    displayManager = {
+      cosmic-greeter = {
+        enable = false;
+      };
+    };
   };
   # services.desktopManager.cosmic.enable = true;
   # services.displayManager.cosmic-greeter.enable = true;
@@ -61,6 +73,7 @@
       name = "DejaVu Serif";
     };
   };
+
   stylix.fonts.sizes = {
     applications = 12;
     terminal = 12;
@@ -100,9 +113,9 @@
 
   environment.sessionVariables = {
     FLAKE = "/home/olafkfreund/.config/nixos";
-      GBM_BACKEND = "nvidia-drm";
-       __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-       NVD_BACKEND = "direct";
+    GBM_BACKEND = "nvidia-drm";
+    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+    NVD_BACKEND = "direct";
 
   };
 
@@ -116,10 +129,12 @@
       wally-cli
     ];
   };
-  hardware.keyboard.zsa.enable = true;
+
   services.playerctld.enable = true;
+
   networking.firewall.enable = false;
   networking.nftables.enable = true;
   networking.timeServers = ["pool.ntp.org"];
+
   system.stateVersion = "24.11";
 }
