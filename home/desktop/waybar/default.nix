@@ -34,6 +34,7 @@
           "custom/cal"
           "clock"
           "group/computer"
+          "tray"
         ];
 
         "modules-center" = [
@@ -117,6 +118,9 @@
             "tilte<nvim>" = " ";
             "Alacritty" = " ";
             "title<tmux>" = " ";
+            "class<code-url-handler>" = "󰨞 ";
+            "class<Podman Desktop>" = " ";
+
           };
           persistent-workspaces = {
             "1" = [
@@ -221,7 +225,7 @@
         };
 
         "tray" = {
-          spacing = 12;
+          spacing = 5;
           show-passive-items = true;
         };
 

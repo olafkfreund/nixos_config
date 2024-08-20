@@ -8,7 +8,7 @@
     ./i18n.nix
     ./hosts.nix
     ./envvar.nix
-    ./razer-laptop.nix
+    # ./razer-laptop.nix
     ./greetd.nix
     ../../modules/default.nix
     ../../modules/laptops.nix
@@ -122,7 +122,7 @@
   users.users.olafkfreund = {
     isNormalUser = true;
     description = "Olaf K-Freund";
-    extraGroups = ["networkmanager" "openrazer" "wheel" "docker" "video" "scanner" "lp" "lxd" "incus-admin"];
+    extraGroups = ["networkmanager" "openrazer" "wheel" "docker" "podman" "video" "scanner" "lp" "lxd" "incus-admin"];
     shell = pkgs.zsh;
     packages = with pkgs; [
       vim

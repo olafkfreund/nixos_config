@@ -1,37 +1,33 @@
 { pkgs, ... }: {
 
+  # Enable the Ollama service, which is a tool for generating text based on input
+  # It uses a machine learning model to generate responses
   services.ollama = {
+
+    # Enable the Ollama service
     enable = true;
+
+    # The Ollama package to use
     package = pkgs.ollama;
+
+    # The type of hardware acceleration to use. We're using CUDA for our GPU
     acceleration = "cuda";
+
+    # The models to load. These are the specific models that Ollama will use to generate responses
+    loadModels = [ "deepseek-coder-v2" "llama3.1" ];
+
+    # The user that the Ollama service will run as
+    user = "ollama";
   };
-  users.users.ollama = {
-    name = "ollama";
-    description = "Ollama User";
-    isSystemUser = true;
-    group = "ollama";
-  };
 
-  users.groups.ollama = { };
+  # Enable the Next.js Ollama LLM UI service, which is a web UI for the Ollama service
+  services.nextjs-ollama-llm-ui = {
 
-  systemd.services.ollama = {
-    description = "Ollama Service";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" ];
+    # Enable the service
+    enable = true;
 
-    environment = {
-      OLLAMA_HOST = "0.0.0.0:11434";
-      OLLAMA_ORIGINS = "http://localhost:8080";
-      HOME = "/var/lib/ollama";
-    };
-
-    serviceConfig = {
-      Type = "simple";
-      ExecStart = "${pkgs.ollama}/bin/ollama serve";
-      User = "ollama";
-      Group = "ollama";
-      Restart = "always";
-      KillMode = "process";
-    };
+    # The package to use for the service
+    package = pkgs.nextjs-ollama-llm-ui;
+    
   };
 }

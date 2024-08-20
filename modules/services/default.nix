@@ -16,7 +16,7 @@
     ./cron/cron.nix
     ./atuin/default.nix
     ./logind/default.nix
-    # ./ollama/default.nix
+    ./ollama/default.nix
     ./sysprof/default.nix
     # ./libinput/default.nix
     ./snapd/default.nix
