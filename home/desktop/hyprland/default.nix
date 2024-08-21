@@ -21,13 +21,7 @@ in {
     ./hypridle.nix
     ./scripts/packages.nix
   ];
-
-  # hyprpaper
-  home = {
-    # file = {
-    #   ".config/hypr/hyprpaper.conf".source = ../config/hypr/hyprpaper.conf;
-    # };
-
+home = {
     # make stuff work on wayland
     sessionVariables = {
       XDG_CACHE_HOME = "\${HOME}/.cache";
@@ -68,88 +62,106 @@ in {
       }
 
 
+      # Set cursor theme
       exec-once = hyprctl setcursor Bibata-Modern-Ice 24
+
+      # Start GNOME Keyring for secure storage of passwords and keys
       exec-once = gnome-keyring-daemon --start --components=secrets
+
+      # Launch authentication agent for privilege escalation dialogs
       exec-once = polkit-kde-authentication-agent-1
+
+      # Start KDE Connect daemon and indicator for device integration
       exec-once = kdeconnectd
       exec-once = kdeconnect-indicator
+
+      # Update environment variables for proper Wayland integration
       exec-once = dbus-update-activation-environment --systemd --all
       exec-once = systemctl --user import-environment PATH WAYLAND_DISPLAY XDG_CURRENT_DESKTOP 
+
+      # Restart XDG desktop portal for proper functionality
       exec-once = sleep 1 && systemctl --user restart xdg-desktop-portal.service
+
+      # Start polkit agent helper
       exec-once = polkit-agent-helper-1
-      exec-once = gsettings set org.gnome.desktop.interface ursor-theme "Bibata-Modern-Ice"
+
+      # Set GNOME desktop interface settings
+      exec-once = gsettings set org.gnome.desktop.interface cursor-theme "Bibata-Modern-Ice"
       exec-once = gsettings set org.gnome.desktop.interface icon-theme "Gruvbox-Plus-Dark"
       exec-once = gsettings set org.gnome.desktop.interface gtk-theme "Gruvbox-Dark-BL-LB"
 
+      # Launch Waybar (top bar)
       exec-once = killall -q waybar;sleep .5 && waybar
+
+      # Start SwayOSD for on-screen display notifications
       exec-once = swayosd-server
       exec-once = sudo swayosd-libinput-backend
+
+      # Launch notification daemon (Dunst)
       exec-once = killall dunst;sleep .5 && dunst
+
+      # Start KDE Connect CLI
       exec-once = kdeconnect-cli
+
+      # Launch playerctl daemon for media player control
       exec-once = playerctld daemon
+
+      # Start wallpaper daemon (swww)
       exec-once = killall swww-daemon; sleep .5 && swww-daemon
+
+      # Launch idle daemon
       exec-once = hypridle
-      # exec-once = nm-applet --indicator
-      # exec-once = blueman-applet
 
-      # exec-once = wl-clipboard-history -t
-      exec-once = wl-paste --type text --watch cliphist store #Stores only text data
-      exec-once = wl-paste --type image --watch cliphist store #Stores only image data when imaged copied
+      # Set up clipboard history
+      exec-once = wl-paste --type text --watch cliphist store # Store text data
+      exec-once = wl-paste --type image --watch cliphist store # Store image data
 
-      # exec-once = [workspace special:spotify] spotify
-      # exec-once = [workspace 1 silent] google-chrome-stable
-      # exec-once = [workspace 2 silent] firefox
-      # exec-once = [workspace 3 silent] foot
-      # exec-once = [workspace 4 silent] slack
-      # exec-once = [workspace 2 silent] ferdium
-      # exec-once = [workspace 8 silent] 1password
-      # exec-once = [workspace 3 silent] wezterm start --always-new-process
+      # Generate keybinds and exec commands for reference
       exec-once = $keybinds = $(hyprkeys -bjl | jq '.Binds | map(.Bind + " -> " + .Dispatcher + ", " + .Command)'[] -r)
       exec-once = $execs = $(hyprkeys -aj | jq '.AutoStart | map("[" + .ExecType + "] " + .Command)'[] -r)
 
-      # Env variables
-      env = EDITOR="nvim"
-      env = BROWSER="google-chrome-stable"
-      env = TERMINAL="foot"
-      env = KITTY_DISABLE_WAYLAND,0
-      env = SDL_VIDEODRIVER, x11
-      env = XDG_CURRENT_DESKTOP,Hyprland
-      env = XDG_SESSION_TYPE,wayland
-      env = XCURSOR_THEME,Bibata-Modern-Ice
-      env = XCURSOR_SIZE,24
-      env = HYPRCURSOR_SIZE,24
-      env = CLUTTER_BACKEND,wayland
-      env = WLR_DRM_NO_ATOMIC,1
-      env = WLR_NO_HARDWARE_CURSORS,1
-      env = LIBVA_DRIVER_NAME,nvidia
-      env = EGL_PLATFORM,wayland
+     # Environment variables for Hyprland configuration
 
-      #GTK
-      env = GDK_BACKEND,wayland,x11
-      env = GTK_THEME,Gruvbox-Dark-B-LB
-      # env = GDK_DPI_SCALE,1
-      # env = GDK_SCALE,1
-      #QT
-      env = QT_QPA_PLATFORM,wayland
-      env = QT_WAYLAND_DISABLE_WINDOWDECORATION, 1
-      env = QT_AUTO_SCREEN_SCALE_FACTOR, 1
-      env = QT_ENABLE_HIGHDPI_SCALING, 1
-      #Firefox & Thunderbird
-      env = MOZ_ENABLE_WAYLAND, 1
-      #Nvidia
-      # env = GBM_BACKEND,nvidia-drm
-      # put everything onto nvidia card
-      # env = __NV_PRIME_RENDER_OFFLOAD, 1
-      # env = __NV_PRIME_RENDER_OFFLOAD_PROVIDER, NVIDIA-G0
-      # env = __GLX_VENDOR_LIBRARY_NAME,nvidia
-      # env = NVD_BACKEND,direct
-      #NIXOS
-      env = NIXOS_WAYLAND, 1
-      env = NIXOS_OZONE_WL, 1
-      env = ELECTRON_OZONE_PLATFORM_HINT, auto
+      # General system settings
+      env = EDITOR,"nvim"                    # Set default text editor to Neovim
+      env = BROWSER,"google-chrome-stable"   # Set default web browser to Google Chrome
+      env = TERMINAL,"foot"                  # Set default terminal emulator to Foot
 
+      # Wayland-specific settings
+      env = KITTY_DISABLE_WAYLAND,0          # Enable Wayland support for Kitty terminal
+      env = XDG_CURRENT_DESKTOP,Hyprland     # Set current desktop environment to Hyprland
+      env = XDG_SESSION_TYPE,wayland         # Set session type to Wayland
+      env = CLUTTER_BACKEND,wayland          # Use Wayland backend for Clutter
+      env = EGL_PLATFORM,wayland             # Set EGL platform to Wayland
 
+      # Cursor settings
+      env = XCURSOR_THEME,Bibata-Modern-Ice  # Set cursor theme
+      env = XCURSOR_SIZE,24                  # Set X cursor size
+      env = HYPRCURSOR_SIZE,24               # Set Hyprland cursor size
 
+      # Graphics and display settings
+      env = SDL_VIDEODRIVER,x11              # Use X11 video driver for SDL
+      env = WLR_DRM_NO_ATOMIC,1              # Disable atomic mode setting for wlroots
+      env = WLR_NO_HARDWARE_CURSORS,1        # Disable hardware cursors
+      env = LIBVA_DRIVER_NAME,nvidia         # Set VAAPI driver to NVIDIA
+
+      # GTK settings
+      env = GDK_BACKEND,wayland,x11          # Set GTK backend to Wayland, fallback to X11
+      env = GTK_THEME,Gruvbox-Dark-B-LB      # Set GTK theme
+
+      # Qt settings
+      env = QT_QPA_PLATFORM,wayland          # Set Qt platform to Wayland
+      env = QT_WAYLAND_DISABLE_WINDOWDECORATION,1  # Disable window decorations in Qt Wayland
+      env = QT_AUTO_SCREEN_SCALE_FACTOR,1    # Enable automatic screen scaling for Qt
+      env = QT_ENABLE_HIGHDPI_SCALING,1      # Enable high DPI scaling for Qt
+
+      # Firefox and Thunderbird settings
+      env = MOZ_ENABLE_WAYLAND,1             # Enable Wayland support for Mozilla applications
+
+      # NixOS-specific settings
+      env = NIXOS_WAYLAND,1                  # Enable Wayland support in NixOS
+      env = NIXOS_OZONE_WL,1                 # Enable Ozone Wayland support in NixOS
+      env = ELECTRON_OZONE_PLATFORM_HINT,auto  # Set Electron to automatically choose between Wayland and X11
 
       input {
           kb_layout=gb

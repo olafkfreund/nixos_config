@@ -44,10 +44,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # nixos-cosmic = {
-    #   url = "github:lilyinstarlight/nixos-cosmic";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
+    nixos-cosmic = {
+      url = "github:lilyinstarlight/nixos-cosmic";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     spicetify-nix = {
       url = "github:Gerg-L/spicetify-nix";
@@ -95,343 +95,65 @@
     };
 
     zjstatus = {
-          url = "github:dj95/zjstatus";
+      url = "github:dj95/zjstatus";
     };
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    nixpkgs-stable,
-    nur,
-    # nixos-cosmic,
-    razer-laptop-control,
-    nixpkgs-f2k,
-    nix-colors,
-    ags,
-    browser-previews,
-    nix-snapd,
-    spicetify-nix,
-    home-manager,
-    stylix,
-    nix-index-database,
-    zjstatus,
-    ...
-  } @ inputs: 
+  outputs = { self, nixpkgs, nixpkgs-stable, nur, razer-laptop-control, nixpkgs-f2k, nix-colors, ags, browser-previews, nix-snapd, spicetify-nix, home-manager, stylix, nix-index-database, zjstatus, ... } @ inputs:
   let
     username = "olafkfreund";
-  in  
-    {
+
+    makeNixosSystem = host: {
+      system = "x86_64-linux";
+      specialArgs = {
+        inherit inputs username host;
+      };
+      modules = [
+        ./hosts/${host}/configuration.nix
+        nur.nixosModules.nur
+        home-manager.nixosModules.home-manager
+        inputs.nix-colors.homeManagerModules.default
+        inputs.stylix.nixosModules.stylix
+        inputs.nix-snapd.nixosModules.default
+        nix-index-database.nixosModules.nix-index
+        ./home/shell/zellij/zjstatus.nix
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.backupFileExtension = "backup";
+          home-manager.extraSpecialArgs = {
+            pkgs-stable = import nixpkgs-stable {
+              system = "x86_64-linux";
+              config.allowUnfree = true;
+            };
+            inherit inputs nixpkgs zjstatus spicetify-nix ags razer-laptop-control stylix nix-index-database nixpkgs-f2k home-manager browser-previews nixpkgs-stable nix-colors nix-snapd self host;
+          };
+          home-manager.users.${username} = import ./Users/${username}/${host}_home.nix;
+          home-manager.sharedModules = [
+            {
+              stylix.targets = {
+                waybar.enable = false;
+                yazi.enable = false;
+                vim.enable = false;
+                vscode.enable = false;
+                dunst.enable = false;
+                rofi.enable = false;
+                xresources.enable = false;
+                neovim.enable = false;
+              };
+            }
+          ];
+        }
+      ];
+    };
+  in
+  {
     nixosConfigurations = {
-      razer = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = 
-            let
-              host = "razer";
-            in 
-         {
-          inherit inputs;
-          inherit username;  
-          inherit host;
-        };
-        modules = [
-          ./hosts/razer/configuration.nix
-          nur.nixosModules.nur
-          home-manager.nixosModules.home-manager
-          # nixos-cosmic.nixosModules.default
-          inputs.nix-colors.homeManagerModules.default
-          inputs.stylix.nixosModules.stylix
-          inputs.nix-snapd.nixosModules.default
-          inputs.razer-laptop-control.nixosModules.default
-          nix-index-database.nixosModules.nix-index
-          ./home/shell/zellij/zjstatus.nix
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.backupFileExtension = "bck";
-            home-manager.extraSpecialArgs = 
-                let
-                  host = "razer";
-                in
-             {
-              pkgs-stable = import nixpkgs-stable {
-                system = "x86_64-linux";
-                config.allowUnfree = true;
-              };
-              inherit host;
-              inherit zjstatus;
-              inherit inputs;
-              inherit nixpkgs;
-              inherit spicetify-nix;
-              inherit ags;
-              inherit razer-laptop-control;
-              inherit stylix;
-              inherit nix-index-database;
-              inherit nixpkgs-f2k;
-              inherit home-manager;
-              inherit browser-previews;
-              inherit nixpkgs-stable;
-              inherit nix-colors;
-              inherit nix-snapd;
-              inherit self;
-            };
-            home-manager.users.${username} = import ./Users/${username}/razer_home.nix;
-            home-manager.sharedModules = [
-              {
-                stylix.targets.waybar.enable = false;
-                stylix.targets.yazi.enable = false;
-                stylix.targets.vim.enable = false;
-                stylix.targets.vscode.enable = false;
-                stylix.targets.dunst.enable = false;
-                stylix.targets.rofi.enable = false;
-                stylix.targets.xresources.enable = false;
-                stylix.targets.neovim.enable = false;
-              }
-            ];
-          }
-        ];
-      };
-      g3 = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = 
-            let
-              host = "g3";
-            in {
-          inherit inputs;
-          inherit username;
-          inherit host;
-        };
-        modules = [
-          ./hosts/g3/configuration.nix
-          ./home/shell/zellij/zjstatus.nix
-          nur.nixosModules.nur
-          home-manager.nixosModules.home-manager
-          inputs.nix-colors.homeManagerModules.default
-          inputs.stylix.nixosModules.stylix
-          inputs.nix-snapd.nixosModules.default
-          nix-index-database.nixosModules.nix-index
-          ./home/shell/zellij/zjstatus.nix
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = 
-                let
-                  host = "g3";
-                in {
-              pkgs-stable = import nixpkgs-stable {
-                system = "x86_64-linux";
-                config.allowUnfree = true;
-              };
-              inherit inputs;
-              inherit nixpkgs;
-              inherit zjstatus;
-              inherit stylix;
-              inherit nix-index-database;
-              inherit nixpkgs-f2k;
-              inherit home-manager;
-              inherit nixpkgs-stable;
-              inherit nix-colors;
-              inherit nix-snapd;
-              inherit self;
-              inherit host;
-            };
-            home-manager.users.${username} = import ./Users/${username}/g3_home.nix;
-            home-manager.sharedModules = [
-              {
-                stylix.targets.vim.enable = false;
-              }
-            ];
-          }
-        ];
-      };
-      lms = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = 
-            let
-              host = "lms";
-            in {
-          inherit inputs;
-          inherit username;
-          inherit host;    
-        };
-        modules = [
-          ./hosts/lms/configuration.nix
-          nur.nixosModules.nur
-          home-manager.nixosModules.home-manager
-          inputs.nix-colors.homeManagerModules.default
-          inputs.stylix.nixosModules.stylix
-          # nixos-cosmic.nixosModules.default
-          inputs.nix-snapd.nixosModules.default
-          nix-index-database.nixosModules.nix-index
-          ./home/shell/zellij/zjstatus.nix
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = 
-                let
-                  host = "lms";
-                in {
-              pkgs-stable = import nixpkgs-stable {
-                system = "x86_64-linux";
-                config.allowUnfree = true;
-              };
-              inherit inputs;
-              inherit nixpkgs;
-              inherit zjstatus;
-              inherit spicetify-nix;
-              inherit ags;
-              inherit razer-laptop-control;
-              inherit stylix;
-              inherit nix-index-database;
-              inherit nixpkgs-f2k;
-              inherit home-manager;
-              inherit browser-previews;
-              inherit nixpkgs-stable;
-              inherit nix-colors;
-              inherit nix-snapd;
-              inherit self;
-              inherit host;
-            };
-            home-manager.users.${username} = import ./Users/${username}/lms_home.nix;
-            home-manager.sharedModules = [
-              {
-                stylix.targets.waybar.enable = false;
-                stylix.targets.yazi.enable = false;
-                stylix.targets.vim.enable = false;
-                stylix.targets.vscode.enable = false;
-                stylix.targets.dunst.enable = false;
-                stylix.targets.rofi.enable = false;
-              }
-            ];
-          }
-        ];
-      };    
-      dex5550 = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = 
-            let
-              host = "dex5550";
-            in {
-          inherit inputs;
-          inherit username;
-          inherit host;    
-        };
-        modules = [
-          ./hosts/dex5550/configuration.nix
-          ./home/shell/zellij/zjstatus.nix
-          nur.nixosModules.nur
-          home-manager.nixosModules.home-manager
-          # nixos-cosmic.nixosModules.default
-          inputs.nix-colors.homeManagerModules.default
-          inputs.stylix.nixosModules.stylix
-          inputs.nix-snapd.nixosModules.default
-          nix-index-database.nixosModules.nix-index
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = 
-                let
-                  host = "dex5550";
-                in {
-              pkgs-stable = import nixpkgs-stable {
-                system = "x86_64-linux";
-                config.allowUnfree = true;
-              };
-              inherit inputs;
-              inherit nixpkgs;
-              inherit zjstatus;
-              inherit spicetify-nix;
-              inherit ags;
-              inherit razer-laptop-control;
-              inherit stylix;
-              inherit nix-index-database;
-              inherit nixpkgs-f2k;
-              inherit home-manager;
-              inherit browser-previews;
-              inherit nixpkgs-stable;
-              inherit nix-colors;
-              inherit nix-snapd;
-              inherit self;
-              inherit host;
-            };
-            home-manager.users.${username} = import ./Users/${username}/dex5550_home.nix;
-            home-manager.sharedModules = [
-              {
-                stylix.targets.waybar.enable = false;
-                stylix.targets.yazi.enable = false;
-                stylix.targets.vim.enable = false;
-                stylix.targets.vscode.enable = false;
-                stylix.targets.dunst.enable = false;
-                stylix.targets.rofi.enable = false;
-              }
-            ];
-          }
-        ];
-      };    
-      hp = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = 
-            let
-              host = "hp";
-            in {
-          inherit inputs;
-          inherit username;
-          inherit host;
-        };
-        modules = [
-          ./hosts/hp/configuration.nix
-          ./home/shell/zellij/zjstatus.nix
-          nur.nixosModules.nur
-          home-manager.nixosModules.home-manager
-          inputs.nix-colors.homeManagerModules.default
-          inputs.stylix.nixosModules.stylix
-          inputs.nix-snapd.nixosModules.default
-          nix-index-database.nixosModules.nix-index
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = 
-                let
-                  host = "hp";
-                in {
-              pkgs-stable = import nixpkgs-stable {
-                system = "x86_64-linux";
-                config.allowUnfree = true;
-              };
-              inherit inputs;
-              inherit nixpkgs;
-              inherit zjstatus;
-              inherit spicetify-nix;
-              inherit ags;
-              inherit stylix;
-              inherit nix-index-database;
-              inherit nixpkgs-f2k;
-              inherit home-manager;
-              inherit browser-previews;
-              inherit nixpkgs-stable;
-              inherit nix-colors;
-              inherit nix-snapd;
-              inherit self;
-              inherit host;    
-            };
-            home-manager.users.${username} = import ./Users/${username}/hp_home.nix;
-            home-manager.sharedModules = [
-              {
-                stylix.targets.waybar.enable = false;
-                stylix.targets.yazi.enable = false;
-                stylix.targets.vscode.enable = false;
-                stylix.targets.dunst.enable = false;
-                stylix.targets.rofi.enable = false;
-                stylix.targets.vim.enable = false;
-              }
-            ];
-          }
-        ];
-      };
+      razer = nixpkgs.lib.nixosSystem (makeNixosSystem "razer");
+      g3 = nixpkgs.lib.nixosSystem (makeNixosSystem "g3");
+      lms = nixpkgs.lib.nixosSystem (makeNixosSystem "lms");
+      dex5550 = nixpkgs.lib.nixosSystem (makeNixosSystem "dex5550");
+      hp = nixpkgs.lib.nixosSystem (makeNixosSystem "hp");
     };
   };
 }

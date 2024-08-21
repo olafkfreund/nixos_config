@@ -39,8 +39,20 @@
   # services.displayManager.cosmic-greeter.enable = true;
 
 
-  systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
-  systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
+  # Disable network wait services to improve boot time
+  systemd.services = {
+    NetworkManager-wait-online = {
+      enable = lib.mkForce false;
+      wantedBy = lib.mkForce [];
+    };
+    systemd-networkd-wait-online = {
+      enable = lib.mkForce false;
+      wantedBy = lib.mkForce [];
+    };
+  };
+
+  # Set a timeout for network-online.target to prevent long delays
+  systemd.network.wait-online.timeout = 10;
   
   networking.networkmanager.enable = true;
   networking.hostName = "razer";
@@ -49,56 +61,70 @@
     useNetworkd = true;
   };
 
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+  # Stylix theming
+  stylix = {
+    enable = true;
+    polarity = "dark";
+    autoEnable = true;
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+    image = ./gruv-abstract-maze.png;
 
-  stylix.image = ./gruv-abstract-maze.png;
-  stylix.enable = true;
-  stylix.polarity = "dark";
-  stylix.autoEnable = true;
-
-  #Exclude Browser.. just make more sence
-  stylix.targets.chromium.enable = false;
-
-  stylix.fonts = {
-    monospace = {
-      package = pkgs.nerdfonts.override {fonts = ["JetBrainsMono"];};
-      name = "JetBrainsMono Nerd Font Mono";
+    # Font configuration
+    fonts = {
+      monospace = {
+        package = pkgs.nerdfonts.override { fonts = ["JetBrainsMono"]; };
+        name = "JetBrainsMono Nerd Font Mono";
+      };
+      sansSerif = {
+        package = pkgs.dejavu_fonts;
+        name = "DejaVu Sans";
+      };
+      serif = {
+        package = pkgs.dejavu_fonts;
+        name = "DejaVu Serif";
+      };
     };
-    sansSerif = {
-      package = pkgs.dejavu_fonts;
-      name = "DejaVu Sans";
+
+    # Font sizes (adjust as needed)
+    fonts.sizes = {
+      applications = 12;
+      terminal = 13;  # Slightly larger for better readability in terminal
+      desktop = 12;
+      popups = 11;    # Slightly smaller for popups
     };
-    serif = {
-      package = pkgs.dejavu_fonts;
-      name = "DejaVu Serif";
+
+    # Opacity settings
+    opacity = {
+      applications = 1.0;
+      terminal = 0.95;  # Slight transparency for terminal
+      desktop = 1.0;
+      popups = 0.98;    # Slight transparency for popups
     };
+
+    # Cursor settings
+    cursor = {
+      name = "Bibata-Modern-Ice";
+      size = 26;
+    };
+
+    # Exclude specific targets
+    targets.chromium.enable = false;  # Exclude browser theming
   };
 
-  stylix.fonts.sizes = {
-    applications = 12;
-    terminal = 12;
-    desktop = 12;
-    popups = 12;
-  };
-
-  stylix.opacity = {
-    applications = 1.0;
-    terminal = 1.0;
-    desktop = 1.0;
-    popups = 1.0;
-  };
-
-  stylix.cursor = {
-    name = "Bibata-Modern-Ice";
-    size = 26;
-  };
-
+  # Network configuration
   systemd.network = {
     networks = {
-      "wlp3s0" = {
-        name = "wlp3s0";
-        DHCP = "ipv4";
+      "20-wired" = {
+        matchConfig.Name = "en*";
         networkConfig = {
+          DHCP = "yes";
+          MulticastDNS = true;
+        };
+      };
+      "25-wireless" = {
+        matchConfig.Name = "wl*";
+        networkConfig = {
+          DHCP = "yes";
           MulticastDNS = true;
         };
       };

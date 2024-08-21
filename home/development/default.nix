@@ -1,5 +1,4 @@
-
-{...}: {
+{pkgs, ...}: {
   imports = [
     ./cargo.nix
     ./python.nix
@@ -18,5 +17,8 @@
     ./zed.nix
     ./containers.nix
     ./distrobox.nix
-];
+  ];
+  home.packages = [
+    (import ./cursor-code.nix { inherit pkgs;})
+  ];
 }

@@ -15,7 +15,7 @@
     telegram-desktop
     whatsapp-for-linux
     ferdium
-    zoom
+    zoom-us
     libcamera
   ];
 }

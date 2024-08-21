@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}: {
+{pkgs, ...}: {
   programs.obs-studio = {
     enable = true;
     plugins = with pkgs.obs-studio-plugins; [
@@ -12,6 +10,12 @@
       advanced-scene-switcher
       obs-source-switcher
       obs-move-transition
+      obs-vkcapture
+      obs-gstreamer
+      obs-vaapi
+      obs-source-record
+      obs-shaderfilter
+      obs-gradient-source
     ];
   };
 }

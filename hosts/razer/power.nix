@@ -1,5 +1,4 @@
-{ ...
-}: {
+{pkgs, ...}: {
   services.tlp = {
     enable = false;
     settings = {
@@ -25,16 +24,22 @@
     enable = false;
     settings = {
       battery = {
-         governor = "powersave";
-         turbo = "auto";
+        governor = "powersave";
+        turbo = "auto";
       };
       charger = {
-         governor = "performance";
-         turbo = "auto";
+        governor = "performance";
+        turbo = "auto";
       };
     };
   };
 
+  environment.systemPackages = with pkgs; [
+    cpupower-gui
+    powertop # only use it to check current power usage
+    psensor
+    lm_sensors
+  ];
 
   systemd = {
     targets = {
