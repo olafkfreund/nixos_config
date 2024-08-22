@@ -75,7 +75,9 @@
     stylix = {
       url = "github:danth/stylix";
     };
-
+    
+    zen-browser.url = "github:MarceColl/zen-browser-flake";
+    
     razer-laptop-control = {
       url = "github:Razer-Linux/razer-laptop-control-no-dkms";
     };
@@ -99,8 +101,26 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, nur, razer-laptop-control, nixpkgs-f2k, nix-colors, ags, browser-previews, nix-snapd, spicetify-nix, home-manager, stylix, nix-index-database, zjstatus, ... } @ inputs:
-  let
+  outputs = {
+    self,
+    nixpkgs,
+    nixpkgs-stable,
+    nur,
+    agenix,
+    razer-laptop-control,
+    nixpkgs-f2k,
+    nix-colors,
+    ags,
+    browser-previews,
+    nix-snapd,
+    zen-browser, 
+    spicetify-nix,
+    home-manager,
+    stylix,
+    nix-index-database,
+    zjstatus,
+    ...
+  } @ inputs: let
     username = "olafkfreund";
 
     makeNixosSystem = host: {
@@ -115,6 +135,7 @@
         inputs.nix-colors.homeManagerModules.default
         inputs.stylix.nixosModules.stylix
         inputs.nix-snapd.nixosModules.default
+        inputs.agenix.nixosModules.default
         nix-index-database.nixosModules.nix-index
         ./home/shell/zellij/zjstatus.nix
         {
@@ -126,7 +147,7 @@
               system = "x86_64-linux";
               config.allowUnfree = true;
             };
-            inherit inputs nixpkgs zjstatus spicetify-nix ags razer-laptop-control stylix nix-index-database nixpkgs-f2k home-manager browser-previews nixpkgs-stable nix-colors nix-snapd self host;
+            inherit inputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control stylix nix-index-database nixpkgs-f2k home-manager browser-previews nixpkgs-stable nix-colors nix-snapd host;
           };
           home-manager.users.${username} = import ./Users/${username}/${host}_home.nix;
           home-manager.sharedModules = [
@@ -146,8 +167,7 @@
         }
       ];
     };
-  in
-  {
+  in {
     nixosConfigurations = {
       razer = nixpkgs.lib.nixosSystem (makeNixosSystem "razer");
       g3 = nixpkgs.lib.nixosSystem (makeNixosSystem "g3");

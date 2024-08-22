@@ -47,7 +47,7 @@ home = {
     xwayland.enable = true;
     plugins = [
       pkgs.hyprlandPlugins.hyprexpo
-      pkgs.hyprlandPlugins.csgo-vulkan-fix
+      # pkgs.hyprlandPlugins.csgo-vulkan-fix
       pkgs.hyprlandPlugins.hyprfocus
     ];
     extraConfig = ''
@@ -68,19 +68,21 @@ home = {
       # Start GNOME Keyring for secure storage of passwords and keys
       exec-once = gnome-keyring-daemon --start --components=secrets
 
+      # exec-once = systemctl --user start graphical-session.target
+
       # Launch authentication agent for privilege escalation dialogs
-      exec-once = polkit-kde-authentication-agent-1
+      exec-once = sleep 10 & polkit-kde-authentication-agent-1
 
       # Start KDE Connect daemon and indicator for device integration
       exec-once = kdeconnectd
-      exec-once = kdeconnect-indicator
+      # exec-once = kdeconnect-indicator
 
       # Update environment variables for proper Wayland integration
       exec-once = dbus-update-activation-environment --systemd --all
       exec-once = systemctl --user import-environment PATH WAYLAND_DISPLAY XDG_CURRENT_DESKTOP 
 
       # Restart XDG desktop portal for proper functionality
-      exec-once = sleep 1 && systemctl --user restart xdg-desktop-portal.service
+      exec-once = sleep 10 && systemctl --user restart xdg-desktop-portal.service
 
       # Start polkit agent helper
       exec-once = polkit-agent-helper-1
@@ -91,14 +93,14 @@ home = {
       exec-once = gsettings set org.gnome.desktop.interface gtk-theme "Gruvbox-Dark-BL-LB"
 
       # Launch Waybar (top bar)
-      exec-once = killall -q waybar;sleep .5 && waybar
+      exec-once = killall -q waybar;sleep .5 & waybar
 
       # Start SwayOSD for on-screen display notifications
       exec-once = swayosd-server
       exec-once = sudo swayosd-libinput-backend
 
       # Launch notification daemon (Dunst)
-      exec-once = killall dunst;sleep .5 && dunst
+      exec-once = killall dunst;sleep .5 & dunst
 
       # Start KDE Connect CLI
       exec-once = kdeconnect-cli
@@ -107,7 +109,7 @@ home = {
       exec-once = playerctld daemon
 
       # Start wallpaper daemon (swww)
-      exec-once = killall swww-daemon; sleep .5 && swww-daemon
+      exec-once = killall swww-daemon; sleep .5 & swww-daemon
 
       # Launch idle daemon
       exec-once = hypridle
@@ -140,10 +142,18 @@ home = {
       env = HYPRCURSOR_SIZE,24               # Set Hyprland cursor size
 
       # Graphics and display settings
-      env = SDL_VIDEODRIVER,x11              # Use X11 video driver for SDL
+      env = SDL_VIDEODRIVER,wayland          # Use wyaland video driver for SDL
       env = WLR_DRM_NO_ATOMIC,1              # Disable atomic mode setting for wlroots
       env = WLR_NO_HARDWARE_CURSORS,1        # Disable hardware cursors
       env = LIBVA_DRIVER_NAME,nvidia         # Set VAAPI driver to NVIDIA
+      # env = WLR_RENDERER,vulkan              # Use Vulkan for wlroots rendering
+      env = __GLX_VENDOR_LIBRARY_NAME,nvidia  # Set GLX vendor library to NVIDIA
+      env = __GL_VRR_ALLOWED,1               # Enable VRR for NVIDIA
+      env = __GL_GSYNC_ALLOWED,1             # Enable GSync for NVIDIA
+      # env = NVD_BACKEND,direct               # Set NVIDIA Vulkan Direct backend
+      env = __VK_LAYER_NV_optimus,NVIDIA_only     # Enable NVIDIA Optimus
+      env = __NV_PRIME_RENDER_OFFLOAD,1      # Enable NVIDIA Prime Render __NV_PRIME_RENDER_OFFLOAD
+
 
       # GTK settings
       env = GDK_BACKEND,wayland,x11          # Set GTK backend to Wayland, fallback to X11
@@ -326,10 +336,10 @@ home = {
       # windowrulev2 = forceinput, class:(Rofi)$
 
       # Obsidian
-      windowrulev2 = workspace 6, class:(obsidian)
+      windowrulev2 = float, class:(obsidian)
 
       #Google Chrome
-      windowrulev2 = workspace 1, class:(google-chrome-.*)
+      windowrulev2 = workspace 2, class:(google-chrome)
       windowrulev2 = workspace special:spotify, class:^(Spotify)$
       windowrulev2 = float,size 900 500,title:^(Choose Files)
       windowrulev2 = workspace 4, class:^(Edge)$
@@ -384,10 +394,10 @@ home = {
       bind = ALT, TAB, hyprexpo:expo, toggle # can be: toggle, off/disable or on/enable
 
       #Apps
-      bind = $mainMod, E, exec, foot yazi
+      bind = $mainMod, E, exec, [float]foot yazi
       bind = $mainMod, T, exec, foot
       bind = $mainMod, M, exec, monitors
-      bind = $mainMod, K, exec, hyprctl kill
+      # bind = $mainMod, K, exec, hyprctl kill
       bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh
       bind = $mainMod, RETURN, exec, wezterm start
       bind = $mainMod, space, exec, ~/.config/rofi/launchers/type-7/launcher.sh
@@ -428,7 +438,7 @@ home = {
       bind = $mainMod, W, killactive
       bind = $mainMod, F, fullscreen, 1 #maximize window
       
-      bind = $mainMod, Q, togglefloating
+      bind = $mainMod, F, togglefloating
       bind = $mainMod, Y, exec, hyprctl keyword general:layout "dwindle"
       bind = $mainMod, U, exec, hyprctl keyword general:layout "master"
       bind = $mainMod, I, layoutmsg, cyclenext

@@ -21,13 +21,13 @@
   };
 
   # Enable the Next.js Ollama LLM UI service, which is a web UI for the Ollama service
-  services.nextjs-ollama-llm-ui = {
-
-    # Enable the service
+  services.open-webui = {
     enable = true;
-
-    # The package to use for the service
-    package = pkgs.nextjs-ollama-llm-ui;
-    
+    package = pkgs.open-webui;
+    environment = 
+      {
+        OLLAMA_API_BASE_URL = "http://127.0.0.1:11434";
+        WEBUI_AUTH = "False";
+      };
   };
 }

@@ -5,7 +5,7 @@
     package = pkgs.pulseaudioFull;
   };
 
-  security.rtkit.enable = true;
+  security.rtkit.enable = false;
 
   services.pipewire = {
     enable = true;

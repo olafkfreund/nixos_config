@@ -1,4 +1,10 @@
-{pkgs, lib, ...}: {
+{
+  pkgs,
+  lib,
+  inputs,
+  config,
+  ...
+}: {
   imports = [
     ./hardware-configuration.nix
     ./screens.nix
@@ -13,7 +19,7 @@
     ../../modules/default.nix
     ../../modules/laptops.nix
   ];
-  
+
   services = {
     xserver = {
       enable = true;
@@ -22,7 +28,7 @@
         "-nolisten tcp"
         "-dpi 96"
       ];
-      videoDrivers = [ "nvidia" ];
+      videoDrivers = ["nvidia"];
     };
     # desktopManager = {
     #   cosmic = {
@@ -35,9 +41,9 @@
     #   };
     # };
   };
-  # services.desktopManager.cosmic.enable = true;
-  # services.displayManager.cosmic-greeter.enable = true;
-
+  environment.systemPackages = [
+    inputs.zen-browser.packages."${pkgs.system}".default
+  ];
 
   # Disable network wait services to improve boot time
   systemd.services = {
@@ -53,7 +59,7 @@
 
   # Set a timeout for network-online.target to prevent long delays
   systemd.network.wait-online.timeout = 10;
-  
+
   networking.networkmanager.enable = true;
   networking.hostName = "razer";
   networking = {
@@ -72,7 +78,7 @@
     # Font configuration
     fonts = {
       monospace = {
-        package = pkgs.nerdfonts.override { fonts = ["JetBrainsMono"]; };
+        package = pkgs.nerdfonts.override {fonts = ["JetBrainsMono"];};
         name = "JetBrainsMono Nerd Font Mono";
       };
       sansSerif = {
@@ -88,17 +94,17 @@
     # Font sizes (adjust as needed)
     fonts.sizes = {
       applications = 12;
-      terminal = 13;  # Slightly larger for better readability in terminal
+      terminal = 13; # Slightly larger for better readability in terminal
       desktop = 12;
-      popups = 11;    # Slightly smaller for popups
+      popups = 11; # Slightly smaller for popups
     };
 
     # Opacity settings
     opacity = {
       applications = 1.0;
-      terminal = 0.95;  # Slight transparency for terminal
+      terminal = 0.95; # Slight transparency for terminal
       desktop = 1.0;
-      popups = 0.98;    # Slight transparency for popups
+      popups = 0.98; # Slight transparency for popups
     };
 
     # Cursor settings
@@ -108,7 +114,7 @@
     };
 
     # Exclude specific targets
-    targets.chromium.enable = false;  # Exclude browser theming
+    targets.chromium.enable = false; # Exclude browser theming
   };
 
   # Network configuration
@@ -142,9 +148,8 @@
     GBM_BACKEND = "nvidia-drm";
     __GLX_VENDOR_LIBRARY_NAME = "nvidia";
     NVD_BACKEND = "direct";
-
   };
-  
+
   users.users.olafkfreund = {
     isNormalUser = true;
     description = "Olaf K-Freund";

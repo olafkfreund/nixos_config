@@ -1,18 +1,18 @@
 { ...
 }: {
   #Steam
-  hardware.steam-hardware.enable = true;
+  hardware.steam-hardware.enable = false;
 
   programs.steam = {
-    enable = true;
+    enable = false; # true;
     remotePlay.openFirewall = true;
     dedicatedServer.openFirewall = true;
   };
 
-  programs.gamemode = {
-    enable = true;
-    enableRenice = true;
-  };
+  # programs.gamemode = {
+  #   enable = true;
+  #   enableRenice = true;
+  # };
 
   # Workaround https://github.com/NixOS/nixpkgs/issues/45492
   systemd.extraConfig = "DefaultLimitNOFILE=1048576";
