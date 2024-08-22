@@ -37,13 +37,13 @@ home = {
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable = true;
-    systemd = {
-      variables = ["--all"];
-      extraCommands = [
-        "systemctl --user stop graphical-session.target"
-        "systemctl --user start hyprland-session.target"
-      ];
-    };
+    # systemd = {
+    #   variables = ["--all"];
+    #   extraCommands = [
+    #     "systemctl --user stop graphical-session.target"
+    #     "systemctl --user start hyprland-session.target"
+    #   ];
+    # };
     xwayland.enable = true;
     plugins = [
       pkgs.hyprlandPlugins.hyprexpo

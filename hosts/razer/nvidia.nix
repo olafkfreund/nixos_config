@@ -14,11 +14,11 @@
     package = config.boot.kernelPackages.nvidiaPackages.beta;
   };
 
-  # boot.kernelParams = [ "module_blacklist=i915" ];
+   boot.kernelParams = [ "module_blacklist=i915" ];
 
   hardware.nvidia.prime = {
-    sync.enable = false;
-    offload.enable = true;
+    sync.enable = true;
+    offload.enable = false;
     intelBusId = "PCI:0:2:0";
     nvidiaBusId = "PCI:1:0:0";
   };
@@ -28,7 +28,7 @@
     enable32Bit = true;
      extraPackages = with pkgs; [
        intel-media-driver # LIBVA_DRIVER_NAME=iHD
-       vaapiIntel # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
+       # vaapiIntel # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
        vaapiVdpau
        libvdpau-va-gl
        vulkan-validation-layers
