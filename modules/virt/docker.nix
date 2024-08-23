@@ -6,7 +6,6 @@
     docker-gc
     nerdctl
     lazydocker
-    nvidia-container-toolkit
     nvidia-docker
     arion
     nvidia-container-toolkit
@@ -26,10 +25,7 @@
   # virtualisation.docker.rootless = {
   #   enable = false;
   #   setSocketVariable = false;
-
   # };
   # virtualisation.docker.enableOnBoot = true;
   # systemd.enableUnifiedCgroupHierarchy = false;
-  programs = {
-  };
 }

@@ -98,5 +98,6 @@ home.packages = with pkgs; [
   mpd
   mpdris2
   mpd-notification
+  gptfdisk
   ];
 }

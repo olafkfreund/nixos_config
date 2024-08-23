@@ -21,17 +21,11 @@
     containerd = {
       enable = true;
     };
-    incus = {
-      package = pkgs.incus;
-      enable = true;
-    };
   };
-  virtualisation.incus.ui.enable = true;
 
   environment.sessionVariables.LIBVIRT_DEFAULT_URI = ["qemu:///system"];
   services.spice-vdagentd.enable = true;
   systemd.services.libvirtd.restartIfChanged = false;
-  virtualisation.lxd.enable = false;
   boot.kernelParams = [
     "cgroup_enable=cpuset"
     "cgroup_memory=1"
