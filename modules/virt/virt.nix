@@ -43,6 +43,7 @@
     spice-gtk
     spice-protocol
     spice-vdagent
+    spice-autorandr
     swtpm
     virt-manager
     virt-viewer

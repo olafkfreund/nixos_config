@@ -2,6 +2,7 @@
 
   hardware.openrazer.enable = true;
   hardware.openrazer.users = [ "olafkfreund" ];
+  hardware.openrazer.batteryNotifier.enable = false;
 
   environment.systemPackages = with pkgs; [
     razergenie

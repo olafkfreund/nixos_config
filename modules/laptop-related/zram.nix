@@ -8,8 +8,4 @@
   #---------------------------------------------------------------------
   zramSwap.enable = true;
   zramSwap.memoryPercent = 35;
-
-  # 32GB
-  #zramSwap.memoryMax = 34359738368;
-
 }
