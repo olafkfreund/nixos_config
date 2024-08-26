@@ -1,12 +1,12 @@
 {pkgs, lib, ...}: {
   imports = [
-    ./hardware-configuration.nix
-    ./power.nix
-    ./boot.nix
-    ./i18n.nix
-    ./stylix.nix
-    ./greetd.nix
-    ./intel.nix
+    ./nixos/hardware-configuration.nix
+    ./nixos/power.nix
+    ./nixos/boot.nix
+    ./nixos/i18n.nix
+    ./themes/stylix.nix
+    ./nixos/greetd.nix
+    ./nixos/intel.nix
     ../../modules/default.nix
     ../../modules/system-tweaks/kernel-tweaks/32GB-SYSTEM/32GB-SYSTEM.nix
   ];
@@ -17,9 +17,6 @@
       "-dpi 96"
     ];
   };
-  # services.desktopManager.cosmic.enable = true;
-  # services.displayManager.cosmic-greeter.enable = true;
-  #
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
   systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
 
@@ -74,6 +71,10 @@
     ];
   };
   hardware.keyboard.zsa.enable = true;
+ 
+  services.ollama.acceleration = "rocm";
+  
+  hardware.nvidia-container-toolkit.enable = false;
 
   networking.firewall.enable = false;
   networking.nftables.enable = true;

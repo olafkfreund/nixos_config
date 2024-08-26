@@ -1,7 +1,7 @@
 {pkgs, ...}: {
   stylix = {
     base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
-    image = ./003.png;
+    image = ./gruv-abstract-maze.png;
     polarity = "dark";
     targets = {
       chromium.enable = false;

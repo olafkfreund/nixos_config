@@ -20,7 +20,7 @@
     };
     enableOnBoot = true;
   };
-  hardware.nvidia-container-toolkit.enable = true;
+  # hardware.nvidia-container-toolkit.enable = true;
   users.users.olafkfreund.extraGroups = ["docker"];
   # virtualisation.docker.rootless = {
   #   enable = false;

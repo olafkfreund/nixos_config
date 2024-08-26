@@ -34,10 +34,8 @@
 
   environment.systemPackages = with pkgs; [
     OVMFFull
-    # ceph
     kvmtool
     libvirt
-    #qemu
     multipass
     spice
     spice-gtk
@@ -50,9 +48,6 @@
     win-spice
     win-virtio
     virtualbox
-    #quickgui
-    #quickemu
-    #quickgui
     btrfs-progs
   ];
 }

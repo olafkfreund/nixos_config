@@ -6,16 +6,16 @@
   ...
 }: {
   imports = [
-    ./hardware-configuration.nix
-    ./screens.nix
-    ./power.nix
-    ./boot.nix
-    ./nvidia.nix
-    ./i18n.nix
-    ./hosts.nix
-    ./envvar.nix
-    # ./razer-laptop.nix
-    ./greetd.nix
+    ./nixos/hardware-configuration.nix
+    ./nixos/screens.nix
+    ./nixos/power.nix
+    ./nixos/boot.nix
+    ./nixos/nvidia.nix
+    ./nixos/i18n.nix
+    ./nixos/hosts.nix
+    ./nixos/envvar.nix
+    ./nixos/greetd.nix
+    ./themes/stylix.nix
     ../../modules/default.nix
     ../../modules/laptops.nix
   ];
@@ -30,16 +30,6 @@
       ];
       videoDrivers = ["nvidia"];
     };
-    # desktopManager = {
-    #   cosmic = {
-    #     enable = false;
-    #   };
-    # };
-    # displayManager = {
-    #   cosmic-greeter = {
-    #     enable = false;
-    #   };
-    # };
   };
   environment.systemPackages = [
     inputs.zen-browser.packages."${pkgs.system}".default
@@ -65,56 +55,6 @@
   networking = {
     useDHCP = false;
     useNetworkd = true;
-  };
-
-  # Stylix theming
-  stylix = {
-    enable = true;
-    polarity = "dark";
-    autoEnable = true;
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
-    image = ./gruv-abstract-maze.png;
-
-    # Font configuration
-    fonts = {
-      monospace = {
-        package = pkgs.nerdfonts.override {fonts = ["JetBrainsMono"];};
-        name = "JetBrainsMono Nerd Font Mono";
-      };
-      sansSerif = {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Sans";
-      };
-      serif = {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Serif";
-      };
-    };
-
-    # Font sizes (adjust as needed)
-    fonts.sizes = {
-      applications = 12;
-      terminal = 13; # Slightly larger for better readability in terminal
-      desktop = 12;
-      popups = 11; # Slightly smaller for popups
-    };
-
-    # Opacity settings
-    opacity = {
-      applications = 1.0;
-      terminal = 0.95; # Slight transparency for terminal
-      desktop = 1.0;
-      popups = 0.98; # Slight transparency for popups
-    };
-
-    # Cursor settings
-    cursor = {
-      name = "Bibata-Modern-Ice";
-      size = 26;
-    };
-
-    # Exclude specific targets
-    targets.chromium.enable = false; # Exclude browser theming
   };
 
   # Network configuration
@@ -162,7 +102,11 @@
   };
 
   services.playerctld.enable = true;
-
+  
+  services.ollama.acceleration = "cuda";
+  
+  hardware.nvidia-container-toolkit.enable = true;
+  
   networking.firewall.enable = false;
   networking.nftables.enable = true;
   networking.timeServers = ["pool.ntp.org"];

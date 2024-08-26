@@ -11,7 +11,7 @@
     package = pkgs.ollama;
 
     # The type of hardware acceleration to use. We're using CUDA for our GPU
-    acceleration = "cuda";
+    # acceleration = "cuda";
 
     # The models to load. These are the specific models that Ollama will use to generate responses
     loadModels = [ "deepseek-coder-v2" "llama3.1" ];
