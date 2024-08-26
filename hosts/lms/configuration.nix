@@ -1,14 +1,14 @@
 {pkgs, lib, ...}: {
   imports = [
-    ./hardware-configuration.nix
-    ./power.nix
-    ./boot.nix
-    ./i18n.nix
-    ./stylix.nix
-    # ./greetd.nix
+    ./nixos/hardware-configuration.nix
+    ./nixos/power.nix
+    ./nixos/boot.nix
+    ./nixos/i18n.nix
+    ./themes/stylix.nix
+    ./nixos/greetd.nix
     ../../modules/server.nix
     ../../modules/system-tweaks/kernel-tweaks/32GB-SYSTEM/32GB-SYSTEM.nix
-    ./intel.nix
+    ./nixos/intel.nix
   ];
   networking.networkmanager.enable = true;
   networking.hostName = "lms";
@@ -65,6 +65,10 @@
     ];
   };
   hardware.keyboard.zsa.enable = true;
+  
+  services.ollama.acceleration = "rocm";
+  
+  hardware.nvidia-container-toolkit.enable = false;
 
   networking.firewall.enable = false;
   networking.nftables.enable = true;

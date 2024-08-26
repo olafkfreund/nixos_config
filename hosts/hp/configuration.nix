@@ -1,6 +1,6 @@
 {pkgs, lib, ...}: {
   imports = [
-    ./nixos//hardware-configuration.nix
+    ./nixos/hardware-configuration.nix
     ./nixos/power.nix
     ./nixos/boot.nix
     ./nixos/nvidia.nix
