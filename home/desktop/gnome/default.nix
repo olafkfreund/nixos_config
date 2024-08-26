@@ -2,6 +2,8 @@
 
   home.packages = with pkgs; [
     gnome-themes-extra
+    nautilus
+    nautilus-open-any-terminal
     libadwaita
     adwaita-icon-theme
     gsettings-desktop-schemas

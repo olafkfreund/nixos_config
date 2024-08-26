@@ -14,7 +14,7 @@
     package = config.boot.kernelPackages.nvidiaPackages.beta;
   };
 
-   boot.kernelParams = [ "module_blacklist=i915" ];
+   # boot.kernelParams = [ "module_blacklist=i915" ];
 
   hardware.nvidia.prime = {
     sync.enable = true;

@@ -1,7 +1,7 @@
 { pkgs, ... }: {
   imports = [
     ./plasma/plasma.nix
-    ./scripts.nix
+    # ./scripts.nix
     ./dunst/default.nix
     ./hyprland/default.nix
     ./swaylock/default.nix

@@ -109,7 +109,7 @@ home = {
       exec-once = playerctld daemon
 
       # Start wallpaper daemon (swww)
-      exec-once = killall swww-daemon; sleep .5 & swww-daemon
+      # exec-once = killall swww-daemon; sleep .5 & swww-daemon
 
       # Launch idle daemon
       exec-once = hypridle
