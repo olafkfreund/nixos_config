@@ -13,6 +13,7 @@
     ./system-scripts/default.nix
     ./nix-index/default.nix
     ./containers/default.nix
+    ./cloud/default.nix
 
   ];
 

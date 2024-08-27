@@ -7,7 +7,6 @@
     ./containers/default.nix
     ./VPN/tailscale.nix
     ./development/default.nix
-    ./browsers/default.nix
     ./containers/default.nix
     ./files.nix
   ];

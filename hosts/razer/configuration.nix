@@ -1,8 +1,10 @@
 {
   pkgs,
+  pkgs-stable,
   lib,
   inputs,
   config,
+  options,
   ...
 }: {
   imports = [
@@ -18,7 +20,29 @@
     ./themes/stylix.nix
     ../../modules/default.nix
     ../../modules/laptops.nix
+    ../../modules/development/default.nix
   ];
+  
+  aws.packages.enable = true;
+  azure.packages.enable = true;
+  cloud-tools.packages.enable = true;
+  google.packages.enable = true;
+  k8s.packages.enable = true;
+  # openshift.packages.enable = true;
+  terraform.packages.enable = true;
+
+  # Development tools
+  ansible.development.enable = true;
+  cargo.development.enable = true;
+  github.development.enable = true;
+  go.development.enable = true;
+  java.development.enable = true;
+  lua.development.enable = true;
+  nix.development.enable = true;
+  shell.development.enable = true;
+  devshell.development.enable = true;
+  python.development.enable = true;
+  nodejs.development.enable = true;
 
   services = {
     xserver = {
