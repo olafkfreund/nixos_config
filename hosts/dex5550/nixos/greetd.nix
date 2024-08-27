@@ -2,7 +2,6 @@
   config,
   lib,
   username,
-  pkgs,
   ...
 }: {
   # greetd display manager
@@ -15,17 +14,13 @@
       command = "${lib.getExe config.programs.sway.package}";
       user = "${username}";
     };
-    session_dwm = {
-      command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd startx";
-      user = "greeter";
-    };
 
   in {
     enable = true;
     settings = {
       terminal.vt = 1;
-      default_session = session_hypr;
-      initial_session = session_hypr;
+      default_session = session_sway;
+      initial_session = session_sway;
     };
   };
 

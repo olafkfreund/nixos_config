@@ -20,5 +20,6 @@
   ];
   home.packages = [
     (import ./cursor-code.nix { inherit pkgs;})
+    pkgs.distrobox-tui
   ];
 }

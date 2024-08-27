@@ -16,6 +16,7 @@
       obs-source-record
       obs-shaderfilter
       obs-gradient-source
+      obs-ndi
     ];
   };
 }

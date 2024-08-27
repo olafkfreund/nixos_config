@@ -1,7 +1,6 @@
 { pkgs, ... }: {
   imports = [
     ./plasma/plasma.nix
-    # ./scripts.nix
     ./dunst/default.nix
     ./hyprland/default.nix
     ./swaylock/default.nix
@@ -27,6 +26,7 @@
     ./osd/default.nix
     ./flameshot/default.nix
     ./gnome/default.nix
+    ./remote/default.nix
   ];
 
   home.packages = with pkgs; [

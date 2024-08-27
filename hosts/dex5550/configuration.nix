@@ -7,6 +7,7 @@
     ./themes/stylix.nix
     ./nixos/greetd.nix
     ./nixos/intel.nix
+    ../../home/desktop/sway/default.nix
     ../../modules/default.nix
     ../../modules/system-tweaks/kernel-tweaks/32GB-SYSTEM/32GB-SYSTEM.nix
   ];
