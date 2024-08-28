@@ -14,6 +14,10 @@
     ./nix-index/default.nix
     ./containers/default.nix
     ./cloud/default.nix
+    ./ssh/ssh.nix
+    ./system-utils/utils.nix
+    ./system-utils/unpack.nix
+    ./system-utils/system_util.nix
 
   ];
 

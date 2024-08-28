@@ -3,16 +3,15 @@
     ./scripts.nix
     ./spell/spell.nix
     ./ai/chatgpt.nix
-    ./ssh/ssh.nix
-    ./system/system_util.nix
+    # ./system/system_util.nix
     ./stable_release_shell.nix
     ./lf/lf.nix
     ./bash.nix
     ./zsh.nix
     ./fish.nix
     ./starship/starship.nix
-    ./system/utils.nix
-    ./system/unpack.nix
+    # ./system/utils.nix
+    # ./system/unpack.nix
     ./helpers/helpers.nix
     ./mail/mail.nix
     ./funny/funny.nix
@@ -26,7 +25,6 @@
     ./vim/default.nix
     ./tmux/default.nix
     ./translate-shell/default.nix
-    # ./xdg/default.nix
     ./lazyvim/default.nix
 
   ];

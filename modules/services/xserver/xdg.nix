@@ -7,5 +7,6 @@
     xdg-utils
     xdg-user-dirs
     xdg-launch
+    desktop-file-utils
   ];
 }
