@@ -44,6 +44,9 @@
   python.development.enable = true;
   nodejs.development.enable = true;
 
+  # Git tools
+  programs.lazygit.enable = lib.mkForce true; 
+
   services = {
     xserver = {
       enable = true;

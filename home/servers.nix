@@ -2,7 +2,7 @@
   imports = [
     ./browsers/default.nix
     ./desktop/default-servers.nix
-    ./git/git.nix
+    ./git/github.nix
     ./shell/default.nix
     ./containers/default.nix
     ./VPN/tailscale.nix

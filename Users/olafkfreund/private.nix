@@ -6,7 +6,6 @@
     gitui
     git-credential-oauth
     git-credential-manager
-    lazygit
     onefetch
   ];
   programs.git = {

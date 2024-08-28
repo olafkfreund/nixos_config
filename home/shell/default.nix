@@ -16,7 +16,6 @@
     ./helpers/helpers.nix
     ./mail/mail.nix
     ./funny/funny.nix
-    ./nix/nix_tools.nix
     ./fzf/default.nix
     ./direnv/default.nix
     ./yazi/default.nix
@@ -27,7 +26,7 @@
     ./vim/default.nix
     ./tmux/default.nix
     ./translate-shell/default.nix
-    ./xdg/default.nix
+    # ./xdg/default.nix
     ./lazyvim/default.nix
 
   ];

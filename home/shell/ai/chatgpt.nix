@@ -1,4 +1,4 @@
-{ lib, config, pkgs, pkgs-stable, ... }: {
+{ lib, config, pkgs, ... }: {
 
 home.packages = [
   pkgs.chatgpt-cli
@@ -7,8 +7,6 @@ home.packages = [
 	pkgs.github-copilot-cli
   pkgs.yai
   pkgs.shell-gpt
-  # pkgs-stable.ollama
-  # oterm
   pkgs.aichat
   ];
 }

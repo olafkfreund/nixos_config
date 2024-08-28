@@ -68,12 +68,6 @@ in
           set -g @gruvbox_directory_text "#{pane_current_path}"
         '';
       }
-      # {
-      #   plugin = tmuxPlugins.gruvbox;
-      #   extraConfig = ''
-      #     set -g @tmux-gruvbox 'dark'
-      #   '';
-      # }
       {
         plugin = tmuxPlugins.tilish;
         extraConfig = ''

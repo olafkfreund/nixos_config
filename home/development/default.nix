@@ -6,7 +6,6 @@
     ./zed.nix
     ./containers.nix
     ./distrobox.nix
-    # ./github.nix
   ];
   home.packages = [
     (import ./cursor-code.nix { inherit pkgs;})

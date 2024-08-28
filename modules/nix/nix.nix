@@ -50,19 +50,7 @@ programs.nix-index = {
 
 environment.systemPackages = with pkgs; [
  	wget
-  nixos-container
-  nixos-generators
-  nix-zsh-completions
-  nix-bash-completions
-  nix-output-monitor
-  statix
-  deadnix
-  alejandra
   home-manager
-  git
-  sops
-  ssh-to-age
   gnupg
-  age
   ];
 }
