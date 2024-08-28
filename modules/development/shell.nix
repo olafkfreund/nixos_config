@@ -10,7 +10,7 @@ in {
   options.shell.development = {
     enable = mkEnableOption "Enable Shell development environment";
     packages = mkOption {
-      type = with types; listOf string;
+      type = with types; listOf str;
       default = [];
       description = "Packages to install for Shell development";
     };

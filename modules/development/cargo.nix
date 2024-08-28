@@ -10,7 +10,7 @@ in {
   options.cargo.development = {
     enable = mkEnableOption "Enable Cargo development environment";
     packages = mkOption {
-      type = with types; listOf string;
+      type = with types; listOf str;
       default = [];
       description = "Packages to install for Cargo development";
     };

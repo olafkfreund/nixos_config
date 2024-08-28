@@ -10,7 +10,7 @@ in {
   options.java.development = {
     enable = mkEnableOption "Enable Java development environment";
     packages = mkOption {
-      type = with types; listOf string;
+      type = with types; listOf str;
       default = [];
       description = "Packages to install for Java development";
     };

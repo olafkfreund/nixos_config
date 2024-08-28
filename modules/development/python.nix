@@ -5,7 +5,7 @@ in {
   options.python.development = {
     enable = mkEnableOption "Enable Python development environment";
     packages = mkOption {
-      type = with types; listOf string;
+      type = with types; listOf str;
       default = [];
       description = "Packages to install for Python development";
     };

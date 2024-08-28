@@ -10,7 +10,7 @@ in {
   options.nodejs.development = {
     enable = mkEnableOption "Enable Node development environment";
     packages = mkOption {
-      type = with types; listOf string;
+      type = with types; listOf str;
       default = [];
       description = "Packages to install for Node development";
     };

@@ -10,7 +10,7 @@ in {
   options.nix.development = {
     enable = mkEnableOption "Enable Nix development environment";
     packages = mkOption {
-      type = with types; listOf string;
+      type = with types; listOf str;
       default = [
         # nix-init
         # nix-melt

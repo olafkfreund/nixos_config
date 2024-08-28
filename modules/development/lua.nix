@@ -5,7 +5,7 @@ in {
   options.lua.development = {
     enable = mkEnableOption "Enable Lua development environment";
     packages = mkOption {
-      type = with types; listOf string;
+      type = with types; listOf str;
       default = [];
       description = "Packages to install for Lua development";
     };
