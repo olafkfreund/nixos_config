@@ -87,11 +87,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    browser-previews = {
-      url = "github:nix-community/browser-previews";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     ags = {
       url = "github:Aylur/ags";
     };
@@ -111,7 +106,6 @@
     nixpkgs-f2k,
     nix-colors,
     ags,
-    browser-previews,
     nix-snapd,
     zen-browser, 
     spicetify-nix,
@@ -147,7 +141,7 @@
               system = "x86_64-linux";
               config.allowUnfree = true;
             };
-            inherit inputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control stylix nix-index-database nixpkgs-f2k home-manager browser-previews nixpkgs-stable nix-colors nix-snapd host;
+            inherit inputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control stylix nix-index-database nixpkgs-f2k home-manager nixpkgs-stable nix-colors nix-snapd host;
           };
           home-manager.users.${username} = import ./Users/${username}/${host}_home.nix;
           home-manager.sharedModules = [

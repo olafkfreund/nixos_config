@@ -106,13 +106,14 @@
             "class<edge>" = " ";
             "class<google-chrome>" = " ";
             "class<slack>" = "󰒱 ";
-            "class<thunderbird>" = "  ";
+            "class<thunderbird>" = " ";
             "class<kitty>" = " ";
             "class<Alacritty>" = " ";
             "class<1Password>" = "󰌾 ";
             "class<org.wezfurlong.wezterm>" = "󰆍 ";
             "class<org.gnome.Nautilus>" = " ";
             "class<ferdium>" = "󱐏 ";
+            "class<firefox>" = " ";
             "class<foot>" = "󰆍 ";
             "title<Spotify Premium>" = " ";
             "tilte<nvim>" = " ";
