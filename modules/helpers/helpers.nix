@@ -1,6 +1,6 @@
 { pkgs, ... }: {
 
-  home.packages = with pkgs; [
+  environment.systemPackages = with pkgs; [
     ripgrep #grep replacement
     aria2 #download manager
     glow #markdown preview

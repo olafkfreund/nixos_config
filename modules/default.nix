@@ -18,6 +18,10 @@
     ./system-utils/utils.nix
     ./system-utils/unpack.nix
     ./system-utils/system_util.nix
+    ./ai/chatgpt.nix
+    ./funny/funny.nix
+    ./spell/spell.nix
+    ./helpers/helpers.nix
 
   ];
 

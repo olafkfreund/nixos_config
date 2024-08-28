@@ -1,6 +1,6 @@
 { pkgs, config, lib, ... }: {
 
-home.packages = with pkgs; [
+environment.systemPackages = with pkgs; [
   aspellDicts.uk
   aspellDicts.pl
   aspellDicts.en

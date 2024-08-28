@@ -1,6 +1,6 @@
 { lib, config, pkgs, ... }: {
 
-home.packages = [
+environment.systemPackages = [
   pkgs.chatgpt-cli
   pkgs.rPackages.chatgpt
   pkgs.tgpt

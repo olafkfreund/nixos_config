@@ -1,6 +1,6 @@
 { pkgs, pkgs-stable, ... }: {
 
-home.packages = with pkgs; [
+environment.systemPackages = with pkgs; [
   lavat #lava lamp
   browsh #text based browser
   peaclock #clock
