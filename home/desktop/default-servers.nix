@@ -2,7 +2,6 @@
   imports = [
     # ./scripts.nix
     ./terminals/default.nix
-    ./terminals.nix
     ./cloud-sync/default.nix
   ];
 

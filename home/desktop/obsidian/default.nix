@@ -1,6 +1,7 @@
-{ pkgs-stable, ... }:
+{ pkgs, ... }:
  {
-    home.packages = with pkgs-stable; [
-      # obsidian
+    home.packages = with pkgs; [
+      obsidian
+      obsidian-export
       ];
 }

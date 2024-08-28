@@ -10,23 +10,16 @@
     ./rofi/rofi.nix
     ./theme/default.nix
     ./com.nix
-    ./terminals.nix
     ./neofetch/default.nix
-    ./wlr/default.nix
     ./gaming/default.nix
     ./sound/default.nix
     ./office/default.nix
-    ./webcam/default.nix
     ./obsidian/default.nix
     ./kdeconnect/default.nix
-    ./cloud-sync/default.nix
     ./slack/default.nix
     ./obs/default.nix
-    ./wldash/default.nix
-    ./osd/default.nix
     ./flameshot/default.nix
     ./gnome/default.nix
-    ./remote/default.nix
   ];
 
   home.packages = with pkgs; [

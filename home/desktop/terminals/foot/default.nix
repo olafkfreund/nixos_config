@@ -4,9 +4,7 @@ programs.foot = {
   package = pkgs.foot;
   settings = {
     main = {
-        # font = "JetBrainsMono Nerdfont:size=14:line-height=16px";
         pad = "12x12";
-        # dpi-aware = "yes";
         term = "xterm-256color";
     };
     colors = {

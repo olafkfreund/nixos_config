@@ -8,6 +8,10 @@
     adwaita-icon-theme
     gsettings-desktop-schemas
     gnome-extension-manager
+    gnome-calendar
+    gnome-contacts
+    gnome-weather
+    gnome-online-accounts
     gnome-themes-extra
     gnome-tweaks
     gnome.gnome-control-center

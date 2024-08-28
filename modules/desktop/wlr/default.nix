@@ -1,7 +1,6 @@
 { pkgs, ... }: {
 
-home.packages = with pkgs; [
-  
+environment.systemPackages = with pkgs; [
   waypaper
   wl-clipboard
   wlogout

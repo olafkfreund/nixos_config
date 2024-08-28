@@ -22,6 +22,12 @@
     ./funny/funny.nix
     ./spell/spell.nix
     ./helpers/helpers.nix
+    ./webcam/default.nix
+    ./desktop/wlr/default.nix
+    ./desktop/remote/default.nix
+    ./desktop/wldash/default.nix
+    ./desktop/cloud-sync/default.nix
+    ./desktop/vnc/default.nix
 
   ];
 
