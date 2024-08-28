@@ -14,12 +14,10 @@
     ./gaming/default.nix
     ./sound/default.nix
     ./office/default.nix
-    ./obsidian/default.nix
     ./kdeconnect/default.nix
     ./slack/default.nix
     ./obs/default.nix
     ./flameshot/default.nix
-    ./gnome/default.nix
   ];
 
   home.packages = with pkgs; [

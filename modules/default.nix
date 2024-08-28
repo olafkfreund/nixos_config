@@ -28,6 +28,7 @@
     ./desktop/wldash/default.nix
     ./desktop/cloud-sync/default.nix
     ./desktop/vnc/default.nix
+    ./obsidian/default.nix
 
   ];
 

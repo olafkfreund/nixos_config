@@ -46,6 +46,8 @@
 
   # Git tools
   programs.lazygit.enable = lib.mkForce true; 
+  programs.thunderbird.enable = lib.mkForce true;
+  programs.obsidian.enable = lib.mkForce true;
 
   services = {
     xserver = {

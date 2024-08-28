@@ -114,6 +114,7 @@
             "class<org.gnome.Nautilus>" = " ";
             "class<ferdium>" = "󱐏 ";
             "class<firefox>" = " ";
+            "class<cursor-url-handler>" = "󰨞 ";
             "class<foot>" = "󰆍 ";
             "title<Spotify Premium>" = " ";
             "tilte<nvim>" = " ";

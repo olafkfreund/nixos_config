@@ -6,6 +6,7 @@ programs.foot = {
     main = {
         pad = "12x12";
         term = "xterm-256color";
+        selection-target = "clipboard";
     };
     colors = {
       foreground = "${config.colorScheme.palette.base06}";
