@@ -1,13 +1,27 @@
 {
+  inputs,
+  config,
+  lib,
   pkgs,
   ...
-}: {
-  virtualisation = {
-    incus = {
-      package = pkgs.incus;
-      enable = true;
+}: 
+with lib; let
+  cfg = config.services.incus;
+in {
+  options.services.incus = {
+    enable = mkEnableOption {
+      default = false;
+      description = "Enable the Incus service.";
     };
   };
-  virtualisation.incus.ui.enable = true;
+  config = mkIf cfg.enable {
+    virtualisation = {
+      incus = {
+        package = pkgs.incus;
+        enable = true;
+      };
+    };
+    virtualisation.incus.ui.enable = true;
+  };
 }
 

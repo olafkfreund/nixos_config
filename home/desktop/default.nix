@@ -1,6 +1,13 @@
-{ pkgs, ... }: {
+{
+  inputs,
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   imports = [
     ./plasma/plasma.nix
+    ./ags/default.nix
     ./dunst/default.nix
     ./hyprland/default.nix
     ./swaylock/default.nix
@@ -13,7 +20,6 @@
     ./neofetch/default.nix
     ./gaming/default.nix
     ./sound/default.nix
-    ./office/default.nix
     ./kdeconnect/default.nix
     ./slack/default.nix
     ./obs/default.nix
@@ -23,7 +29,6 @@
   home.packages = with pkgs; [
     remmina
     freerdp
-
   ];
   # home.file.".xprofile".source = ../../modules/services/dwm/x11/xprofile;
   # home.file.".xinitrc".source = ../../modules/services/dwm/x11/xinitrc;

@@ -45,9 +45,20 @@
   nodejs.development.enable = true;
 
   # Git tools
-  programs.lazygit.enable = lib.mkForce true; 
+  programs.lazygit.enable = lib.mkForce true;
   programs.thunderbird.enable = lib.mkForce true;
   programs.obsidian.enable = lib.mkForce true;
+  programs.office.enable = lib.mkForce true;
+  programs.webcam.enable = lib.mkForce true;
+  
+  # Virtualization tools
+  services.docker.enable = lib.mkForce true;
+  services.incus.enable = lib.mkForce true;
+  services.podman.enable = lib.mkForce true;
+  services.spice.enable = lib.mkForce true;
+  services.libvirt.enable = lib.mkForce true;
+
+
 
   services = {
     xserver = {

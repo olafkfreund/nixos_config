@@ -1,19 +1,31 @@
 {
+  inputs,
+  config,
+  lib,
   pkgs,
   ...
-}: {
-  virtualisation = {
-    spiceUSBRedirection.enable = true;
+}: 
+with lib; let
+  cfg = config.services.spice;
+in {
+  options.services.spice = {
+    enable = mkEnableOption {
+      default = false;
+      description = "Enable the SPICE protocol server.";
+    };
   };
-
-  services.spice-vdagentd.enable = true;
-
-  environment.systemPackages = with pkgs; [
-    spice
-    spice-gtk
-    spice-protocol
-    spice-vdagent
-    swtpm
-  ];
+  config = mkIf cfg.enable {
+    virtualisation = {
+      spiceUSBRedirection.enable = true;
+    };
+    services.spice-vdagentd.enable = true;
+    environment.systemPackages = with pkgs; [
+      spice
+      spice-gtk
+      spice-protocol
+      spice-vdagent
+      swtpm
+    ];
+  };  
 }
 

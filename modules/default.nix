@@ -8,6 +8,7 @@
     ./virt/default.nix
     ./virt/spice.nix
     ./virt/incus.nix
+    ./virt/podman.nix
     ./pkgs/default.nix
     ./overlays/default.nix
     ./system-scripts/default.nix
@@ -29,6 +30,7 @@
     ./desktop/cloud-sync/default.nix
     ./desktop/vnc/default.nix
     ./obsidian/default.nix
+    ./office/default.nix
 
   ];
 

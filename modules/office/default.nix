@@ -1,23 +1,23 @@
 {
   inputs,
-  pkgs,
   config,
   lib,
+  pkgs,
   ...
-}:
+}: 
 with lib; let
-  cfg = config.programs.webcam;
+  cfg = config.programs.office;
 in {
-  options.programs.webcam = {
+  options.programs.office = {
     enable = mkEnableOption {
       default = false;
-      description = "Webcam";
+      description = "Office suite";
     };
   };
   config = mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
-      droidcam
-      adb-sync
+      freeoffice
+      onlyoffice-bin_latest
     ];
   };
 }
