@@ -338,6 +338,7 @@ home = {
       windowrulev2 = float, class:(obsidian)
 
       #thunderbird
+      windowrulev2 = float,class:(thunderbird)
       windowrulev2 = float,class:^(thunderbird)$,title:^(.*)(Reminder)(.*)$
       windowrulev2 = float,class:^(thunderbird)$,title:^(.*)(Write)(.*)$
 

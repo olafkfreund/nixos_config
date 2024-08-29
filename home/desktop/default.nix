@@ -11,6 +11,7 @@
     ./dunst/default.nix
     ./hyprland/default.nix
     ./swaylock/default.nix
+    ./sway/default.nix
     ./waybar/default.nix
     ./com.nix
     ./terminals/default.nix
@@ -24,6 +25,7 @@
     ./slack/default.nix
     ./obs/default.nix
     ./flameshot/default.nix
+    ./zathura/default.nix
   ];
 
   home.packages = with pkgs; [

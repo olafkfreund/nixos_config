@@ -36,6 +36,7 @@ nixpkgs.config.allowUnfreePredicate = pkg:
     ];
 nixpkgs.config.permittedInsecurePackages = [ 
   "electron-25.9.0"
+  "electron-29.4.6"
   "nix-2.15.3"
   "jitsi-meet-1.0.8043"
   "olm-3.2.16"

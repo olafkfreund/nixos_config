@@ -1,10 +1,24 @@
-{pkgs, inputs, ...}: {
-  home.packages = with pkgs; [
-    # (google-chrome.override {
-    # commandLineArgs = [
-    #   "--enable-features=UseOzonePlatform"
-    #   "--ozone-platform=wayland"
-    # ];
-    google-chrome
-  ];
+{
+  pkgs,
+  inputs,
+  config,
+  lib,
+  ...
+}: 
+with lib; let
+  cfg = config.browsers.chrome;
+in {
+  options.browsers.chrome = {
+    enable = mkEnableOption {
+      default = false;
+      description = "Enable Google Chrome";
+    };
+  };
+  config = mkIf cfg.enable {
+    programs.chromium = {
+      enable = true;
+      package = pkgs.google-chrome;
+      commandLineArgs = ["--enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu"];
+    };
+  };  
 }

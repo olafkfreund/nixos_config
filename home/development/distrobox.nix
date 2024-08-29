@@ -1,14 +1,7 @@
 { pkgs, config, ... }: 
 
-# {
-
-# home.packages = with pkgs; [
-#   distrobox # A minimal Linux distribution.
-#   ];
-# }
 with builtins; let
   mkHome = box: ".local/share/distrobox/${box}";
-
   boxes = {
     fedora = {
       home = mkHome "Fedora";

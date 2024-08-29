@@ -6,9 +6,6 @@
     ./zed.nix
     ./containers.nix
     ./distrobox.nix
-  ];
-  home.packages = [
-    (import ./cursor-code.nix { inherit pkgs;})
-    pkgs.distrobox-tui
+    ./cursor-code.nix
   ];
 }
