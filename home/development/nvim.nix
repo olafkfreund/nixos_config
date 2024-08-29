@@ -23,6 +23,11 @@ in {
       vimdiffAlias = true;
       withPython3 = true;
       withRuby = true;
+      extraPackages = with pkgs; [
+        codeium
+        neovide
+        nixd
+      ];
     };
   };
 }

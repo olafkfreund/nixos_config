@@ -13,9 +13,7 @@
     ./zellij/default.nix
     ./bat/default.nix
     ./lunarvim/default.nix
-    ./vim/default.nix
     ./tmux/default.nix
-    ./translate-shell/default.nix
     ./lazyvim/default.nix
 
   ];

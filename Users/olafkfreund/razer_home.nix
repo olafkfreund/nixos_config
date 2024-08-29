@@ -54,4 +54,12 @@
   cli.bat.enable = lib.mkForce true;
   cli.direnv.enable = true;
   cli.fzf.enable = true;
+  cli.lf.enable = lib.mkForce true;
+  cli.starship.enable = lib.mkForce true;
+  cli.yazi.enable = lib.mkForce true;
+  cli.zoxide.enable = lib.mkForce true;
+
+  # Multiplexers
+  multiplexer.tmux.enable = lib.mkForce true;
+  multiplexer.zellij.enable = lib.mkForce true;
 }
