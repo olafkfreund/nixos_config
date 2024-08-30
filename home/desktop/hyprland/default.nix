@@ -327,7 +327,7 @@ home = {
 
       #thunderbird
       windowrulev2 = float,class:(thunderbird)
-      windowrulev2 = float,class:^(thunderbird)$,title:^(.*)(Reminder)(.*)$
+      windowrulev2 = size 500 500,float,class:^(thunderbird)$,title:^(.*)(Reminder)(.*)$
       windowrulev2 = float,class:^(thunderbird)$,title:^(.*)(Write)(.*)$
 
       #Google Chrome
