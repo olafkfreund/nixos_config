@@ -22,32 +22,20 @@ in {
     ./scripts/packages.nix
   ];
 home = {
-    # make stuff work on wayland
     sessionVariables = {
       XDG_CACHE_HOME = "\${HOME}/.cache";
       XDG_CONFIG_HOME = "\${HOME}/.config";
       XDG_BIN_HOME = "\${HOME}/.local/bin";
       XDG_DATA_HOME = "\${HOME}/.local/share";
-      # MOZ_ENABLE_WAYLAND = "1";
-      # NIXOS_WAYLAND = "1";
-      # NIXOS_OZONE_WL = "1";
     };
   };
 
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable = true;
-    # systemd = {
-    #   variables = ["--all"];
-    #   extraCommands = [
-    #     "systemctl --user stop graphical-session.target"
-    #     "systemctl --user start hyprland-session.target"
-    #   ];
-    # };
     xwayland.enable = true;
     plugins = [
       pkgs.hyprlandPlugins.hyprexpo
-      # pkgs.hyprlandPlugins.csgo-vulkan-fix
       pkgs.hyprlandPlugins.hyprfocus
     ];
     extraConfig = ''

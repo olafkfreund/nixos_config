@@ -1,7 +1,7 @@
 { ... }: {
   imports = [
     ./mtr/mtr.nix
-    ./printing/print.nix
+    ./print/default.nix
     ./flatpak/flatpak.nix
     ./xserver/xdg-portal.nix
     ./xserver/xdg.nix

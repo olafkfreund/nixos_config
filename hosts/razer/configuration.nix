@@ -62,6 +62,15 @@
   security.onepassword.enable = lib.mkForce true;
   security.gnupg.enable = lib.mkForce true;
 
+  # VPN
+  vpn.tailscale.enable = lib.mkForce true;
+
+  # AI 
+  ai.ollama.enable = lib.mkForce true;
+
+  # Printing
+  services.print.enable = lib.mkForce true;
+
 
 
   services = {

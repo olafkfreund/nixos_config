@@ -44,6 +44,11 @@
 
   # Browsers
   browsers.chrome.enable = lib.mkForce true;
+  browsers.firefox.enable = lib.mkForce true;
+  browsers.edge.enable = lib.mkForce true;
+  browsers.brave.enable = lib.mkForce true;
+  browsers.opera.enable = lib.mkForce true;
+
 
   # Editors
   editor.cursor.enable = lib.mkForce true;
