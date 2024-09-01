@@ -2,7 +2,7 @@
   imports = [
     ./vscode.nix
     ./nvim.nix
-    # ./emacs.nix
+    ./emacs.nix
     ./zed.nix
     ./containers.nix
     ./distrobox.nix

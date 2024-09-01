@@ -128,19 +128,19 @@
           };
           persistent-workspaces = {
             "1" = [
-              "HDMI-A-1"
+              "DP-1"
             ];
             "2" = [
-              "HDMI-A-1"
+              "DP-1"
             ];
             "3" = [
-              "HDMI-A-1"
+              "DP-1"
             ];
             "4" = [
-              "HDMI-A-1"
+              "DP-1"
             ];
             "5" = [
-              "HDMI-A-1"
+              "DP-1"
             ];
             "11" = [
               "eDP-1"

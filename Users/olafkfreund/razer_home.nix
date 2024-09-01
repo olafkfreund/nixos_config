@@ -64,6 +64,7 @@
   cli.yazi.enable = lib.mkForce true;
   cli.zoxide.enable = lib.mkForce true;
   cli.versioncontrol.gh.enable = lib.mkForce true;
+  cli.markdown.enable = lib.mkForce true;
 
 
   # Multiplexers

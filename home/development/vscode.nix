@@ -4,8 +4,8 @@
   lib,
   pkgs,
   ...
-}: 
-with lib; let 
+}:
+with lib; let
   cfg = config.editor.vscode;
 in {
   options.editor.vscode = {
@@ -15,10 +15,19 @@ in {
     };
   };
   config = mkIf cfg.enable {
-    programs.vscode = {
-      enable = true;
-      enableExtensionUpdateCheck = true;
-      package = pkgs.vscode;
+    home.packages = with pkgs; [alejandra deadnix statix];
+
+    programs.vscode.extensions = with pkgs; [
+      vscode-extensions.bbenoist.nix
+      vscode-extensions.kamadorueda.alejandra
+    ];
+
+    programs.vscode.userSettings."[nix]" = {
+      "editor.defaultFormatter" = "kamadorueda.alejandra";
+      "editor.formatOnSave" = true;
+    };
+    programs.vscode.userSettings = {
+      "alejandra.program" = "alejandra";
     };
   };
 }

@@ -15,6 +15,8 @@
     ./lunarvim/default.nix
     ./tmux/default.nix
     ./lazyvim/default.nix
+    ./markdown/default.nix
+    ./gh/default.nix
 
   ];
 }

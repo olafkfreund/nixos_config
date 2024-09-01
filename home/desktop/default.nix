@@ -25,7 +25,7 @@
     ./kooha/default.nix
     ./zathura/default.nix
     ./remotedesktop/default.nix
-    ./gh/default.nix
+    # ./gh/default.nix
   ];
 
   home.packages = with pkgs; [

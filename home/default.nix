@@ -2,7 +2,6 @@
   imports = [
     ./browsers/default.nix
     ./desktop/default.nix
-    ./git/github.nix
     ./games/steam.nix
     ./shell/default.nix
     ./media/music.nix

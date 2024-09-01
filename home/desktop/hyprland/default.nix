@@ -292,11 +292,11 @@ home = {
            }
        }
       # Workspace rules #
-      workspace = 1,monitor:HDMI-A-1,default:true
-      workspace = 2,monitor:HDMI-A-1
-      workspace = 3,monitor:HDMI-A-1
-      workspace = 4,monitor:HDMI-A-1
-      workspace = 5,monitor:HDMI-A-1
+      workspace = 1,monitor:DP-1,default:true
+      workspace = 2,monitor:DP-1
+      workspace = 3,monitor:DP-1
+      workspace = 4,monitor:DP-1
+      workspace = 5,monitor:DP-1
       workspace = 6,monitor:eDP-1,default:true
       workspace = 7,monitor:eDP-1
       workspace = 8,monitor:eDP-1
@@ -340,6 +340,15 @@ home = {
       windowrulev2 = float, class:(pavucontrol)
       windowrulev2 = size 1000 1000, class:(pavucontrol)
       windowrulev2 = center, class:(pavucontrol)
+
+      #Moonlight
+      windowrulev2 = size 1000 1000, float, class:(com.moonlight_stream.Moonlight)
+
+      #Camera 
+      windowrulev2 = size 500 500, fload, class:(hu.irl.cameractrls)
+
+      #Zen 
+      windowrulev2 = size 1000 1000, float, class:(zen.aplha)$,title:^(.*)(Save)(.*)$
 
       #Telegram
       windowrulev2 = workspace 8, class:(org.telegram.desktop)

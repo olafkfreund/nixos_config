@@ -57,6 +57,7 @@
   services.podman.enable = lib.mkForce true;
   services.spice.enable = lib.mkForce true;
   services.libvirt.enable = lib.mkForce true;
+  services.sunshine.enable = lib.mkForce true;
   
   # Password management
   security.onepassword.enable = lib.mkForce true;
