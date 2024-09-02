@@ -25,23 +25,6 @@ in {
         hyprctl reload
       '')
 
-      (pkgs.writeShellScriptBin "chpaper" ''
-        if [[ "`hyprctl hyprpaper`" == *"Couldn't connect to"* ]]; then
-          pkill swaybg
-          hyprpaper &
-          sleep 1
-        fi
-        WAL_PATH="${wallpaper_path}"
-        WALLPAPER="$(ls $WAL_PATH| sed -n "$((RANDOM%$(ls $WAL_PATH| wc -l)+1))p")"
-        hyprctl hyprpaper preload $WAL_PATH/$WALLPAPER
-        hyprctl hyprpaper wallpaper "eDP-1,`echo $WAL_PATH/$WALLPAPER`"
-        hyprctl hyprpaper unload all
-        if [[ "`hyprctl hyprpaper`" == *"Couldn't connect to"* ]]; then
-          pkill swaybg
-          swaybg -i $WAL_PATH/$WALLPAPER &
-        fi
-      '')
-
       (pkgs.writeShellScriptBin "rofi-powermenu" ''
         rofi_command="rofi -theme $HOME/.config/rofi/rofi-powermenu-gruvbox-config.rasi"
 

@@ -94,7 +94,7 @@
     zjstatus = {
       url = "github:dj95/zjstatus";
     };
-  };
+  };  
 
   outputs = {
     self,
@@ -116,11 +116,11 @@
     ...
   } @ inputs: let
     username = "olafkfreund";
-
-    makeNixosSystem = host: {
+     inherit (self) outputs; 
+     makeNixosSystem = host: {
       system = "x86_64-linux";
       specialArgs = {
-        inherit inputs username host;
+        inherit inputs outputs username host;
       };
       modules = [
         ./hosts/${host}/configuration.nix
@@ -141,13 +141,14 @@
               system = "x86_64-linux";
               config.allowUnfree = true;
             };
-            inherit inputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control stylix nix-index-database nixpkgs-f2k home-manager nixpkgs-stable nix-colors nix-snapd host;
+            inherit inputs outputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control stylix nix-index-database nixpkgs-f2k home-manager nixpkgs-stable nix-colors nix-snapd host;
           };
           home-manager.users.${username} = import ./Users/${username}/${host}_home.nix;
           home-manager.sharedModules = [
             {
               stylix.targets = {
                 waybar.enable = false;
+                hyprland.enable = false;
                 yazi.enable = false;
                 vim.enable = false;
                 vscode.enable = false;

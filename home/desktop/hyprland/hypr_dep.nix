@@ -15,7 +15,6 @@
     hyprdim
     hyprlock
     hypridle
-    hyprpaper
     emote
     python312Packages.requests
     betterlockscreen

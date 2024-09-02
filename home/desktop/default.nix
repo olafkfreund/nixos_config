@@ -39,8 +39,8 @@
   #   source = ../../modules/services/dwm/x11/xresources;
   # };
 
-  # GitHub CLI tool
-  programs.gh = {
-    enable = true;
-  };
+  # # GitHub CLI tool
+  # programs.gh = {
+  #   enable = true;
+  # };
 }
