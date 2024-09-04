@@ -8,5 +8,6 @@ environment.systemPackages = [
   pkgs.yai
   pkgs.shell-gpt
   pkgs.aichat
+  pkgs.gorilla-cli
   ];
 }

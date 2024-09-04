@@ -120,7 +120,11 @@
      makeNixosSystem = host: {
       system = "x86_64-linux";
       specialArgs = {
-        inherit inputs outputs username host;
+        pkgs-stable = import nixpkgs-stable {
+          system = "x86_64-linux";
+          config.allowUnfree = true;
+        };
+        inherit inputs username host;
       };
       modules = [
         ./hosts/${host}/configuration.nix
@@ -141,7 +145,7 @@
               system = "x86_64-linux";
               config.allowUnfree = true;
             };
-            inherit inputs outputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control stylix nix-index-database nixpkgs-f2k home-manager nixpkgs-stable nix-colors nix-snapd host;
+            inherit inputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control stylix nix-index-database nixpkgs-f2k home-manager nixpkgs-stable nix-colors nix-snapd host;
           };
           home-manager.users.${username} = import ./Users/${username}/${host}_home.nix;
           home-manager.sharedModules = [

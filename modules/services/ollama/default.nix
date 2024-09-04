@@ -2,6 +2,8 @@
   config,
   lib,
   pkgs,
+  pkgs-stable,
+  options,
   ...
 }: 
 with lib; let 
@@ -16,6 +18,7 @@ in {
   config = mkIf cfg.enable {
     services.ollama = {
       enable = true;
+      acceleration = "cuda";
       package = pkgs.ollama;
       loadModels = ["deepseek-coder-v2" "llama3.1"];
       user = "ollama";
@@ -23,7 +26,9 @@ in {
 
     services.open-webui = {
       enable = true;
-      package = pkgs.open-webui;
+      host = "0.0.0.0";
+      port = 8080;
+      package = pkgs-stable.open-webui;
       environment = {
         OLLAMA_API_BASE_URL = "http://127.0.0.1:11434";
         WEBUI_AUTH = "False";
