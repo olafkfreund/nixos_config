@@ -152,7 +152,7 @@
             {
               stylix.targets = {
                 waybar.enable = false;
-                hyprland.enable = false;
+                # hyprland.enable = false;
                 yazi.enable = false;
                 vim.enable = false;
                 vscode.enable = false;

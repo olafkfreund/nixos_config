@@ -1,5 +1,4 @@
 { pkgs, ... }:
-
 {
   boot.plymouth.enable = true;
   boot.plymouth.theme = "nixos-bgrt";

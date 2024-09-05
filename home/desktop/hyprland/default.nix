@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   pkgs,
   host,
   username,
@@ -229,19 +228,6 @@ home = {
           bezier = drag, 0.2, 1, 0.2, 1
           bezier = pop, 0.1, 0.8, 0.2, 1
           bezier = liner, 1, 1, 1, 1
-          #
-          # bezier = wind, 0.05, 0.9, 0.1, 1.05
-          # bezier = winIn, 0.1, 1.1, 0.1, 1.1
-          # bezier = winOut, 0.3, -0.3, 0, 1
-          # bezier = liner, 1, 1, 1, 1
-          # animation = windows, 1, 1, wind, slide
-          # animation = windowsIn, 1, 1, winIn, slide
-          # animation = windowsOut, 1, 2, winOut, slide
-          # animation = windowsMove, 1, 2, wind, slide
-          # animation = border, 1, 1, liner
-          # animation = borderangle, 1, 100, liner, loop
-          # animation = fade, 1, 9, default
-          # animation = workspaces, 1, 2, wind
       }
 
       dwindle {

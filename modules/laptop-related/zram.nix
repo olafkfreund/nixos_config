@@ -1,11 +1,4 @@
-{ config, ... }:
-
-{
-
-  #---------------------------------------------------------------------
-  # Enable memory compression for (32GB) system
-  # Faster processing and less SSD usage
-  #---------------------------------------------------------------------
+{config, ...}: {
   zramSwap.enable = true;
   zramSwap.memoryPercent = 35;
 }

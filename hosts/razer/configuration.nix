@@ -1,10 +1,8 @@
 {
   pkgs,
-  pkgs-stable,
   lib,
   inputs,
-  config,
-  options,
+  username,
   ...
 }: {
   imports = [
@@ -21,6 +19,7 @@
     ../../modules/default.nix
     ../../modules/laptops.nix
     ../../modules/development/default.nix
+    ../../modules/system-tweaks/kernel-tweaks/64GB-SYSTEM/64gb-system.nix
   ];
   
   aws.packages.enable = true;
@@ -144,7 +143,7 @@
     NVD_BACKEND = "direct";
   };
 
-  users.users.olafkfreund = {
+  users.users.${username} = {
     isNormalUser = true;
     description = "Olaf K-Freund";
     extraGroups = ["networkmanager" "openrazer" "wheel" "docker" "podman" "video" "scanner" "lp" "lxd" "incus-admin"];
@@ -166,25 +165,25 @@
   networking.timeServers = ["pool.ntp.org"];
 
   system.stateVersion = "24.11";
-  nixpkgs.overlays = [
-    (final: prev:
-    {
-      xdg-desktop-portal-hyprland = prev.xdg-desktop-portal-hyprland.overrideAttrs (old: {
-        patches = (old.patches or []) ++ [
-          (prev.fetchpatch {
-          url = "https://github.com/hyprwm/xdg-desktop-portal-hyprland/commit/5555f467f68ce7cdf1060991c24263073b95e9da.patch";
-          hash = "sha256-yNkg7GCXDPJdsE7M6J98YylnRxQWpcM5N3olix7Oc1A="; 
-          })
-          (prev.fetchpatch {
-            url = "https://github.com/hyprwm/xdg-desktop-portal-hyprland/commit/0dd9af698b9386bcf25d3ea9f5017eca721831c1.patch";
-          hash = "sha256-Y6eWASHoMXVN2rYJ1rs0jy2qP81/qbHsZU+6b7XNBBg=";
-          })
-          (prev.fetchpatch {
-            url = "https://github.com/hyprwm/xdg-desktop-portal-hyprland/commit/2425e8f541525fa7409d9f26a8ffaf92a3767251.patch";
-            hash = "sha256-6dCg/U/SIjtvo07Z3tn0Hn8Xwx72nwVz6Q2cFnObonU=";
-          })
-        ];
-      });
-    })
-  ];
+  # nixpkgs.overlays = [
+  #   (final: prev:
+  #   {
+  #     xdg-desktop-portal-hyprland = prev.xdg-desktop-portal-hyprland.overrideAttrs (old: {
+  #       patches = (old.patches or []) ++ [
+  #         (prev.fetchpatch {
+  #         url = "https://github.com/hyprwm/xdg-desktop-portal-hyprland/commit/5555f467f68ce7cdf1060991c24263073b95e9da.patch";
+  #         hash = "sha256-yNkg7GCXDPJdsE7M6J98YylnRxQWpcM5N3olix7Oc1A="; 
+  #         })
+  #         (prev.fetchpatch {
+  #           url = "https://github.com/hyprwm/xdg-desktop-portal-hyprland/commit/0dd9af698b9386bcf25d3ea9f5017eca721831c1.patch";
+  #         hash = "sha256-Y6eWASHoMXVN2rYJ1rs0jy2qP81/qbHsZU+6b7XNBBg=";
+  #         })
+  #         (prev.fetchpatch {
+  #           url = "https://github.com/hyprwm/xdg-desktop-portal-hyprland/commit/2425e8f541525fa7409d9f26a8ffaf92a3767251.patch";
+  #           hash = "sha256-6dCg/U/SIjtvo07Z3tn0Hn8Xwx72nwVz6Q2cFnObonU=";
+  #         })
+  #       ];
+  #     });
+  #   })
+  # ];
 }

@@ -1,11 +1,7 @@
 { config,  ... }:
 
-# Control how and when data is written from memory to disk, which can have an impact on system performance and responsiveness.
-# useful for optimizing memory usage, disk writeback behavior, network settings, and other low-level kernel behaviors.
-
 {
   boot.kernel.sysctl = {
-
     #---------------------------------------------------------------------
     #   Network and memory-related optimizationss for 64GB
     #---------------------------------------------------------------------
@@ -30,6 +26,5 @@
     "fs.inotify.max_user_watches" = 65536;      # sets the maximum number of file system watches, enhancing file system monitoring capabilities.       Default: 8192  TWEAKED: 524288
     "kernel.panic" = 5;                         # Reboot after 5 seconds on kernel panic                                                               Default: 0
     "kernel.pid_max" = 131072;                  # allows a large number of processes and threads to be managed                                         Default: 32768 TWEAKED: 4194304
-
   };
 }

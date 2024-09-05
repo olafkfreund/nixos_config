@@ -17,6 +17,8 @@ in {
   config = mkIf cfg.enable {
     home.packages = with pkgs; [alejandra deadnix statix];
 
+    programs.vscode.enable = true;
+
     programs.vscode.extensions = with pkgs; [
       vscode-extensions.bbenoist.nix
       vscode-extensions.kamadorueda.alejandra

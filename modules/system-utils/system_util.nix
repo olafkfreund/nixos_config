@@ -14,7 +14,6 @@ environment.systemPackages = with pkgs; [
   gnused
   gawk
   zstd
-  gnupg
   btop
   iotop
   iftop
@@ -33,7 +32,6 @@ environment.systemPackages = with pkgs; [
   dmenu-wayland
   qtpass
   rofi-pass
-  wofi-pass
   qjournalctl
   fwupd
   android-tools
@@ -55,28 +53,24 @@ environment.systemPackages = with pkgs; [
   networkmanager
   networkmanagerapplet
   networkmanager_dmenu
-  gpg-tui
-  gpgme
   keychain
   netscanner
-  gawk
-  cups
-  ghostscript
+  # gawk
+  # cups
+  # ghostscript
   dbus
   libjpeg
   avahi
-  sane-airscan
-  xsane
-  simple-scan
+  # sane-airscan
+  # simple-scan
   libtool
-  system-config-printer
+  # system-config-printer
   keylight-controller-mschneider82
   bottom
   sof-firmware
   openssl
   libsixel
   fd
-  s-tui
   viddy
   curlie
   entr

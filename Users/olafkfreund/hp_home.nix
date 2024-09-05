@@ -1,5 +1,7 @@
-{ inputs
-, ...
+{
+  inputs,
+  lib,
+  ...
 }: {
   imports = [
     inputs.nix-colors.homeManagerModules.default
@@ -20,4 +22,49 @@
 
   home.stateVersion = "24.11";
   programs.home-manager.enable = true;
+
+  programs.obs.enable = lib.mkForce false;
+  programs.kdeconnect.enable = lib.mkForce false;
+  programs.slack.enable = lib.mkForce false;
+  # Terminals
+  alacritty.enable = lib.mkForce false;
+  foot.enable = lib.mkForce true;
+  wezterm.enable = lib.mkForce false;
+  kitty.enable = lib.mkForce false;
+
+  # Wayland apps
+  desktop.zathura.enable = lib.mkForce true;
+  desktop.dunst.enable = lib.mkForce true;
+  desktop.rofi.enable = lib.mkForce true;
+  swaylock.enable = lib.mkForce false;
+  desktop.screenshots.flameshot.enable = lib.mkForce false;
+  desktop.screenshots.kooha.enable = lib.mkForce false;
+  desktop.remotedesktop.enable = lib.mkForce false;
+
+  # Browsers
+  browsers.chrome.enable = lib.mkForce true;
+  browsers.firefox.enable = lib.mkForce false;
+  browsers.edge.enable = lib.mkForce false;
+  browsers.brave.enable = lib.mkForce false;
+  browsers.opera.enable = lib.mkForce false;
+
+  # Editors
+  editor.cursor.enable = lib.mkForce false;
+  editor.neovim.enable = lib.mkForce true;
+  editor.vscode.enable = lib.mkForce false;
+
+  # Shell tools
+  cli.bat.enable = lib.mkForce true;
+  cli.direnv.enable = true;
+  cli.fzf.enable = true;
+  cli.lf.enable = lib.mkForce true;
+  cli.starship.enable = lib.mkForce true;
+  cli.yazi.enable = lib.mkForce true;
+  cli.zoxide.enable = lib.mkForce true;
+  cli.versioncontrol.gh.enable = lib.mkForce true;
+  cli.markdown.enable = lib.mkForce true;
+
+  # Multiplexers
+  multiplexer.tmux.enable = lib.mkForce true;
+  multiplexer.zellij.enable = lib.mkForce true;
 }

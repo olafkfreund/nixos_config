@@ -1,7 +1,5 @@
 {
-  config,
   lib,
-  pkgs,
   ...
 }: {
   aws.packages.enable = true;

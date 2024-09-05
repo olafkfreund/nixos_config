@@ -40,5 +40,15 @@ in {
     services.printing.drivers = [pkgs.hplip];
     programs.system-config-printer.enable = true;
     users.users.${username}.extraGroups = ["scanner" "lp"];
+    environment.systemPackages = [
+      pkgs.hplip
+      pkgs.xsane
+      pkgs.sane-airscan
+      pkgs.simple-scan
+      pkgs.system-config-printer
+      pkgs.ghostscript
+      pkgs.cups
+      pkgs.gawk
+    ];
   };
 }

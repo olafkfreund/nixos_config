@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 with lib; let
@@ -17,5 +18,10 @@ in {
       enable = true;
       enableSSHSupport = true;
     };
+    environment.systemPackages = [ 
+      pkgs.gpg-tui
+      pkgs.gpgme
+      pkgs.gnupg
+    ];
   };
 }

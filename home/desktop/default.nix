@@ -8,7 +8,7 @@
     ./dunst/default.nix
     ./hyprland/default.nix
     ./swaylock/default.nix
-    ./sway/default.nix
+    # ./sway/default.nix
     ./waybar/default.nix
     ./com.nix
     ./terminals/default.nix

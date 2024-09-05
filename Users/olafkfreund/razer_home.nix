@@ -33,7 +33,7 @@
   kitty.enable = lib.mkForce true;
 
   # Wayland apps
-  desktop.sway.enable = lib.mkForce false;
+  # desktop.sway.enable = lib.mkForce false;
   desktop.zathura.enable = lib.mkForce true;
   desktop.dunst.enable = lib.mkForce true;
   desktop.rofi.enable = lib.mkForce true;

@@ -11,6 +11,55 @@
     ../../modules/server.nix
     ../../modules/system-tweaks/kernel-tweaks/32GB-SYSTEM/32GB-SYSTEM.nix
   ];
+
+  aws.packages.enable = false;
+  azure.packages.enable = false;
+  cloud-tools.packages.enable = false;
+  google.packages.enable = false;
+  k8s.packages.enable = true;
+  # openshift.packages.enable = true;
+  terraform.packages.enable = false;
+
+  # Development tools
+  ansible.development.enable = false;
+  cargo.development.enable = false;
+  github.development.enable = true;
+  go.development.enable = true;
+  java.development.enable = false;
+  lua.development.enable = true;
+  nix.development.enable = true;
+  shell.development.enable = true;
+  devshell.development.enable = true;
+  python.development.enable = true;
+  nodejs.development.enable = true;
+
+  # Git tools
+  programs.lazygit.enable = lib.mkForce true;
+  programs.thunderbird.enable = lib.mkForce false;
+  programs.obsidian.enable = lib.mkForce false;
+  programs.office.enable = lib.mkForce false;
+  programs.webcam.enable = lib.mkForce false;
+  
+  # Virtualization tools
+  services.docker.enable = lib.mkForce true;
+  services.incus.enable = lib.mkForce false;
+  services.podman.enable = lib.mkForce true;
+  services.spice.enable = lib.mkForce true;
+  services.libvirt.enable = lib.mkForce true;
+  services.sunshine.enable = lib.mkForce true;
+  
+  # Password management
+  security.onepassword.enable = lib.mkForce false;
+  security.gnupg.enable = lib.mkForce true;
+
+  # VPN
+  vpn.tailscale.enable = lib.mkForce true;
+
+  # AI 
+  ai.ollama.enable = lib.mkForce false;
+
+  # Printing
+  services.print.enable = lib.mkForce false;
   
   services.xserver = {
     enable = true;
@@ -19,6 +68,30 @@
       "-dpi 96"
     ];
     videoDrivers = [ "nvidia" ];
+  };
+
+  programs.sway = {
+    enable = true;
+    wrapperFeatures.gtk = true; # so that gtk works properly
+    extraPackages = with pkgs; [
+      swaylock
+      swayidle
+      wl-clipboard
+      wf-recorder
+      grim
+      slurp
+      foot
+      dmenu # Dmenu is the default in the config but i recommend wofi since its wayl
+    ];
+    extraSessionCommands = ''
+      export SDL_VIDEODRIVER=wayland
+      export QT_QPA_PLATFORM=wayland
+      export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
+      export _JAVA_AWT_WM_NONREPARENTING=1
+      export MOZ_ENABLE_WAYLAND=1
+      export WLR_BACKENDS="headless,libinput"
+      export WLR_LIBINPUT_NO_DEVICES="1"
+    '';
   };
 
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;

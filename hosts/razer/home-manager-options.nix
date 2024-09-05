@@ -1,14 +1,12 @@
 {
-  config,
   lib,
-  pkgs,
   ...
 }: {
   programs.obs.enable = lib.mkForce true;
   programs.kdeconnect.enable = lib.mkForce true;
   programs.slack.enable = lib.mkForce true;
   # Terminals
-  alacritty.enable = lib.mkForce true;
+  # alacritty.enable = lib.mkForce true;
   foot.enable = lib.mkForce true;
   wezterm.enable = lib.mkForce true;
   kitty.enable = lib.mkForce true;
