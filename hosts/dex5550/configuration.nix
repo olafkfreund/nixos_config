@@ -101,10 +101,18 @@
         export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
         export _JAVA_AWT_WM_NONREPARENTING=1
         export WAYLAND_DISPLAY="headless,libinput"
-        export XDG_SESSION_TYPE=wayland
         export MOZ_ENABLE_WAYLAND=1
+        export WLR_LIBINPUT_NO_DEVICES=1
       '';
     };
+
+  security.wrappers.sunshine = {
+        owner = "root";
+        group = "root";
+        capabilities = "cap_sys_admin+p";
+        source = "${pkgs.sunshine}/bin/sunshine";
+    };
+
   systemd.network = {
     networks = {
       "enp1s0" = {
