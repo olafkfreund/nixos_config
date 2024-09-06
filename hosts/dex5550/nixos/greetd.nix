@@ -8,11 +8,11 @@
   services.greetd = let
     session_hypr = {
       command = "${lib.getExe config.programs.hyprland.package}";
-      user = "${username}";
+      user = "olafkfreund";
     };
     session_sway = {
       command = "${lib.getExe config.programs.sway.package}";
-      user = "${username}";
+      user = "olafkfreund";
     };
 
   in {
