@@ -13,6 +13,7 @@
     ./config/binds.nix
     ./config/input.nix
     ./config/rules.nix
+    ./config/autostart.nix
     ./config/plugins.nix
     ./config/monitors.nix
     ./config/settings.nix

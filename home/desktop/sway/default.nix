@@ -15,14 +15,20 @@ in {
   config = mkIf cfg.enable {
     wayland.windowManager.sway = {
       enable = true;
-      # extrasessionCommands = ''
-      #   export WLR_BACKENDS="headless,libinput"
-      #   export WLR_LIBINPUT_NO_DEVICES="1"
-      # '';
+      xwayland = true;
+      wrapperFeatures.gtk = true;
+      systemd = {
+        enable = true;
+        xdgAutostart = true;
+      };
+      extraSessionCommands = ''
+        '';
       config = {
         terminal = "foot";
         startup = [
-          {command = "foot";}
+          { command = "foot"; }
+          { command = "wayvnc 0.0.0.0"; }
+          { command = "waybar"; }
         ];
       };
     };
