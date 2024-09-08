@@ -28,9 +28,9 @@
         ];
 
         "modules-right" = [
+          "group/system"
           "idle_inhibitor#icons"
           "idle_inhibitor"
-          "group/system"
           "custom/cal"
           "clock"
           "group/computer"
@@ -45,6 +45,11 @@
 
         "custom/settings" = {
           format = " ";
+          tooltip = false;
+        };
+
+        "custom/info" = {
+          format = " 󰐖 ";
           tooltip = false;
         };
 
@@ -213,6 +218,7 @@
             transition-left-to-right = true;
           };
           modules = [
+            "custom/info"
             "network#icons"
             "network"
             "custom/nix-updates"
@@ -304,9 +310,9 @@
         };
 
         "network#icons" = {
-          format-wifi = "󰖩 ";
           format-ethernet = "󰈀 ";
           tooltip-format = "󰈀 ";
+          format-wifi = "󰖩 ";
           format-linked = "󰈀 ";
           format-disconnected = "";
           format-alt = "󰖩 ";
@@ -481,7 +487,7 @@
         }
 
         #workspaces button.active {
-          color: #${config.colorScheme.palette.base05};
+          color: #${config.colorScheme.palette.base0A};
           font-weight: bolder;
           transition: all 0.1s ease-in-out;
         }
@@ -651,6 +657,11 @@
         }
 
         #custom-settings {
+          padding: 0 5px;
+          margin: 0 5 0 5px;
+          color: #${config.colorScheme.palette.base05};
+        }
+        #custom-info {
           padding: 0 5px;
           margin: 0 5 0 5px;
           color: #${config.colorScheme.palette.base05};

@@ -75,9 +75,9 @@
     stylix = {
       url = "github:danth/stylix";
     };
-    
+
     zen-browser.url = "github:MarceColl/zen-browser-flake";
-    
+
     razer-laptop-control = {
       url = "github:Razer-Linux/razer-laptop-control-no-dkms";
     };
@@ -94,7 +94,7 @@
     zjstatus = {
       url = "github:dj95/zjstatus";
     };
-  };  
+  };
 
   outputs = {
     self,
@@ -107,7 +107,7 @@
     nix-colors,
     ags,
     nix-snapd,
-    zen-browser, 
+    zen-browser,
     spicetify-nix,
     home-manager,
     stylix,
@@ -116,8 +116,7 @@
     ...
   } @ inputs: let
     username = "olafkfreund";
-     inherit (self) outputs; 
-     makeNixosSystem = host: {
+    makeNixosSystem = host: {
       system = "x86_64-linux";
       specialArgs = {
         pkgs-stable = import nixpkgs-stable {

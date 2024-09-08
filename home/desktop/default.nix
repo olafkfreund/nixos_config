@@ -6,7 +6,7 @@
     ./plasma/plasma.nix
     ./ags/default.nix
     ./dunst/default.nix
-    ./hyprland/default.nix
+    ./hyprland/hyprland.nix
     ./swaylock/default.nix
     # ./sway/default.nix
     ./waybar/default.nix

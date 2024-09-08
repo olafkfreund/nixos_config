@@ -318,8 +318,8 @@ home = {
       windowrulev2 = size 1000 1000, class:(alacritty)
       windowrulev2 = float, class:(kitty)
       windowrulev2 = size 1000 1000, class:(kitty)
-      windowrulev2 = float, class:(foot)
-      windowrulev2 = size 1000 1000, class:(foot)
+      # windowrulev2 = float, class:(foot)
+      # windowrulev2 = size 1000 1000, class:(foot)
       windowrulev2 = float, class:(wezterm)
       windowrulev2 = size 1000 1000, class:(wezterm)
 
@@ -337,11 +337,11 @@ home = {
 
       #thunderbird
       windowrulev2 = float,class:(thunderbird)
-      windowrulev2 = size 500 500,float,class:^(thunderbird)$,title:^(.*)(Reminder)(.*)$
+      windowrulev2 = size 1000 1000,float,class:^(thunderbird)$,title:^(.*)(Reminder)(.*)$
       windowrulev2 = float,class:^(thunderbird)$,title:^(.*)(Write)(.*)$
 
       #Google Chrome
-      windowrulev2 = workspace 2, class:(google-chrome)
+      windowrulev2 = workspace 2, float, class:(google-chrome)
       windowrulev2 = workspace special:spotify, class:^(Spotify)$
       windowrulev2 = float,size 900 500,title:^(Choose Files)
       windowrulev2 = workspace 4, class:^(Edge)$

@@ -9,5 +9,6 @@ environment.systemPackages = [
   pkgs.shell-gpt
   pkgs.aichat
   pkgs.gorilla-cli
+  # pkgs.tabby
   ];
 }

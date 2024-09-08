@@ -2,7 +2,7 @@
   services = {
     dbus.packages = with pkgs; [
       gcr
-      gnome.gnome-settings-daemon
+      gnome-settings-daemon
     ];
 
     gnome = {
@@ -27,7 +27,7 @@
     gnome-online-accounts
     gnome-themes-extra
     gnome-tweaks
-    gnome.gnome-control-center
+    gnome-control-center
     gnomeExtensions.gtile
     gnomeExtensions.gmeet
     gnomeExtensions.user-themes
