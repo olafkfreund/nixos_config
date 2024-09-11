@@ -479,36 +479,43 @@
 
         #workspaces button {
           color: #${config.colorScheme.palette.base07};
-          background-color: #${config.colorScheme.palette.base00};
+          background-color: transparent;
           margin: 2px 2px 2px 2px;
+          opacity: 1;
         }
         
         #workspaces button:hover {
           color: #${config.colorScheme.palette.base09};
-          background-color: #${config.colorScheme.palette.base00};
+          background-color: transparent;
           animation: tb_hover 20s ease-in-out 1;
           transition: all 0.3s cubic-bezier(.55,-0.68,.48,1.682);
+          opacity: 1;
         }
 
         #workspaces button.active {
           color: #${config.colorScheme.palette.base0A};
-          background-color: #${config.colorScheme.palette.base00};
+          background-color: transparent;
           animation: tb_hover 20s ease-in-out 1;
           transition: all 0.1s ease-in-out;
+          opacity: 1;
         }
 
         #workspaces button.urgent {
           color: #${config.colorScheme.palette.base08};
+          background-color: transparent;
           transition: all 0.1s ease-in-out;
           animation: tb_hover 20s ease-in-out 1;
+          opacity: 1;
         }
 
         #workspaces button.secret {
           color: #${config.colorScheme.palette.base08};
+          background-color: transparent;
           transition: all 0.1s ease-in-out;
           animation: tb_hover 20s ease-in-out 1;
           min-height: 15px;
           font-size: 17px;
+          opacity: 1;
         }
 
         #workspaces button.spotify {
@@ -518,6 +525,7 @@
           animation: tb_hover 20s ease-in-out 1;
           margin: 2 2px; 
           padding: 5px;
+          opacity: 1;
         }
 
         #custom-weathericons {

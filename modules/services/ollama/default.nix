@@ -18,7 +18,7 @@ in {
   config = mkIf cfg.enable {
     services.ollama = {
       enable = true;
-      # acceleration = "cuda";
+      acceleration = "cuda";
       package = pkgs.ollama-cuda;
       loadModels = ["deepseek-coder-v2" "llama3.1"];
       user = "ollama";
