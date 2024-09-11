@@ -6,6 +6,7 @@
   home.packages = [
     # slack
     pkgs-stable.teams-for-linux
+    pkgs.birdtray
     pkgs.thunderbird
     pkgs.discord
     # obsidian
@@ -21,4 +22,18 @@
     pkgs.zoom-us
     pkgs.libcamera
   ];
+  xdg.mime.enable = true;
+  xdg.mimeApps.enable = true;
+  xdg.desktopEntries = {
+    obsidian = {
+      name = "Obsidian :)";
+      # Fix for gpu issues
+      exec = "obsidian --disable-gpu %u";
+      categories = ["Office"];
+      comment = "Knowledge base";
+      icon = "obsidian";
+      mimeType = ["x-scheme-handler/obsidian"];
+      type = "Application";
+    };
+  };
 }

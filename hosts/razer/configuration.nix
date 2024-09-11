@@ -156,7 +156,7 @@
 
   services.playerctld.enable = true;
   
-  services.ollama.acceleration = "cuda";
+  # services.ollama.acceleration = "cuda";
   
   hardware.nvidia-container-toolkit.enable = true;
   

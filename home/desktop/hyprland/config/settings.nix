@@ -15,7 +15,7 @@
     }
 
     general {
-        sensitivity = 1.0
+        # sensitivity = 1.0
         gaps_in = 2
         gaps_out = 2
         border_size = 2

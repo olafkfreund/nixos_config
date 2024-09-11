@@ -20,6 +20,9 @@
     # Obsidian
     windowrulev2 = float, class:(obsidian)
 
+    #Slack
+    windowrulev2 = workspace special:slack, float, class:^(Slack)
+
     #thunderbird
     windowrulev2 = float,class:(thunderbird)
     windowrulev2 = size 1000 1000,float,class:^(thunderbird)$,title:^(.*)(Reminder)(.*)$

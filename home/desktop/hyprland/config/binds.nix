@@ -11,7 +11,7 @@
       #Apps
       bind = $mainMod, E, exec, [float]foot yazi
       bind = $mainMod, T, exec, foot
-      bind = $mainMod, M, exec, monitors
+      bind = $mainMod CTRL, M, exec, monitors
       bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh
       bind = $mainMod, RETURN, exec, wezterm start
       bind = $mainMod, space, exec, ~/.config/rofi/launchers/type-7/launcher.sh
@@ -49,6 +49,7 @@
       bindm = $mainMod, mouse:273, resizewindow
 
       bind = $mainMod, S, togglespecialworkspace, magic
+      bind = $mainMod, M, togglespecialworkspace, mail
       bind = $mainMod, W, killactive
       bind = $mainMod, F, fullscreen, 1 #maximize window
       
@@ -91,6 +92,7 @@
       bind = $mainMod ALT, H, togglespecialworkspace, hidden
       bind = $mainMod ALT, L, exec, hyprlock
 
+      bind = $mainMod SHIFT, M, movetoworkspace, special:mail
       bind = $mainMod SHIFT, S, movetoworkspace, special:magic
 
       binde = $mainMod SHIFT, V, exec, pamixer -d 2

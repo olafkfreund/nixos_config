@@ -10,6 +10,7 @@
       mainBar = {
         "layer" = "top";
         "position" = "bottom"; #"top";
+        "mod" = "dock";
         "margin-top" = 0;
         "margin-bottom" = 0;
         "margin-left" = 0;
@@ -22,14 +23,14 @@
         "gtk-layer-shell" = true;
 
         "modules-left" = [
-          "hyprland/workspaces"
-          # "hyprland/window"
+          # "hyprland/workspaces"
+          "hyprland/window"
 
         ];
 
         "modules-right" = [
           "group/system"
-          "idle_inhibitor#icons"
+          # "idle_inhibitor#icons"
           "idle_inhibitor"
           "custom/cal"
           "clock"
@@ -38,8 +39,8 @@
         ];
 
         "modules-center" = [
-          # "hyprland/workspaces"
-          "hyprland/window"
+          "hyprland/workspaces"
+          # "hyprland/window"
           # "custom/weather"
         ];
 
@@ -51,6 +52,21 @@
         "custom/info" = {
           format = " 󰐖 ";
           tooltip = false;
+        };
+
+        "memory" = {
+          interval = 1;
+          rotate = 270;
+          format = "{icon}";
+          format-icons = ["󰝦" "󰪞" "󰪟" "󰪠" "󰪡" "󰪢" "󰪣" "󰪤" "󰪥"];
+          max-length = 10;
+        };
+
+        "cpu" = {
+            interval = 1;
+            format = "{icon}";
+            rotate = 270;
+            format-icons = ["󰝦" "󰪞" "󰪟" "󰪠" "󰪡" "󰪢" "󰪣" "󰪤" "󰪥"];
         };
 
         "custom/cycle_wall" = {
@@ -71,8 +87,8 @@
         "idle_inhibitor" = {
           format = "{icon} ";
           format-icons = {
-            activated = "on";
-            deactivated = "off";
+            activated =  "󰥔";
+            deactivated = "";
           };
         };
         "group/tray" = {
@@ -100,7 +116,8 @@
         };
 
         "hyprland/workspaces" = {
-          format = "{icon}: {windows}";
+          # format = "{icon}: {windows}";
+          format = "{icon}";
           show-special = true;
           on-click = "active";
           active-only = false;
@@ -167,30 +184,15 @@
             ];
           };
           "format-icons" = {
-            "1" = "󰼏 ";
-            "2" = "󰼐 ";
-            "3" = "󰼑 ";
-            "4" = "󰼒 ";
-            "5" = "󰼓 ";
-            "6" = "󰼔 ";
-            "7" = "󰼕 ";
-            "8" = "󰼖 ";
-            "9" = "󰼗 ";
-            "10" = "󰿪 ";
-            "11" = "󰬺 ";
-            "12" = "󰬻 ";
-            "13" = "󰬼 ";
-            "14" = "󰬽 ";
-            "15" = "󰬾 ";
-            "16" = "󰬿 ";
-            "17" = "󰭀 ";
-            "18" = "󰭁 ";
-            "19" = "󰭂 ";
-            "active" = "󰻂 ";
-            "default" = " ";
+            "default" = " ";
+	          "active" = " ";
+            # "active" = "󰻂 ";
+            # "default" = " ";
             "urgent" = " ";
-            "magic" = "󱐡 ";
+            "magic" = "󰟵 ";
+            "mail" = " ";
             "hidden" = " ";
+            "slack" = " ";
             "secret" = " ";
             "spotify" = " ";
           };
@@ -238,6 +240,7 @@
 
         "hyprland/window" = {
           icon = true;
+          separate-outputs = true;
           rewrite = {
             ".+" = "";
           };
@@ -438,6 +441,7 @@
       * {
         font-family: 'Jetbrains Mono Nerd Font';
         font-size: 15px;
+        font-weight: bolder;
         }
 
         window#waybar {
@@ -474,49 +478,49 @@
         }
 
         #workspaces button {
-          font-weight: bolder;
-          font-style: normal;
           color: #${config.colorScheme.palette.base07};
-          background-color: transparent;
+          background-color: #${config.colorScheme.palette.base00};
           margin: 2px 2px 2px 2px;
         }
         
         #workspaces button:hover {
-          font-weight: bolder;
           color: #${config.colorScheme.palette.base09};
+          background-color: #${config.colorScheme.palette.base00};
+          animation: tb_hover 20s ease-in-out 1;
+          transition: all 0.3s cubic-bezier(.55,-0.68,.48,1.682);
         }
 
         #workspaces button.active {
           color: #${config.colorScheme.palette.base0A};
-          font-weight: bolder;
+          background-color: #${config.colorScheme.palette.base00};
+          animation: tb_hover 20s ease-in-out 1;
           transition: all 0.1s ease-in-out;
         }
 
         #workspaces button.urgent {
           color: #${config.colorScheme.palette.base08};
-          font-weight: bolder;
           transition: all 0.1s ease-in-out;
+          animation: tb_hover 20s ease-in-out 1;
         }
 
         #workspaces button.secret {
           color: #${config.colorScheme.palette.base08};
-          font-style: normal;
           transition: all 0.1s ease-in-out;
+          animation: tb_hover 20s ease-in-out 1;
+          min-height: 15px;
+          font-size: 17px;
         }
 
         #workspaces button.spotify {
           color: #${config.colorScheme.palette.base0B};
           background-color: transparent;
-          font-style: normal;
-          font-weight: bolder;
           transition: all 0.1s ease-in-out;
+          animation: tb_hover 20s ease-in-out 1;
           margin: 2 2px; 
           padding: 5px;
         }
 
         #custom-weathericons {
-          font-style: normal;
-          font-weight: bolder;
           margin: 0 0 0 2px;
           padding: 5px;
           color: #${config.colorScheme.palette.base05};
@@ -536,58 +540,42 @@
         }
 
         #clock {
-          font-weight: bolder;
-          font-style: normal;
           color: #${config.colorScheme.palette.base05};
           margin: 0 5 0 0px;
         }
         
         #temperature {
-          font-weight: bolder;
-          font-style: normal;
           color: #${config.colorScheme.palette.base05};
           margin: 0 5 0 0px;
         }
         
         #privacy {
-          font-weight: bolder;
-          font-style: normal;
           color: #${config.colorScheme.palette.base05};
           margin: 0 5 0 0px;
         }
 
         #privacy-item {
-          font-weight: bolder;
-          font-style: normal;
           color: #${config.colorScheme.palette.base05};
           margin: 0 5 0 0px;
         }
 
         #power-profiles-daemon {
-          font-weight: bolder;
-          font-style: normal;
           color: #${config.colorScheme.palette.base05};
           margin: 0 5 0 0px;
         }
 
         #custom-nix-updates {
-          font-weight: bolder;
-          font-style: normal;
           color: #${config.colorScheme.palette.base05};
           margin: 0 5 0 0px;
         }
 
        #custom-startmenu {
-          font-weight: bolder;
-          font-style: normal;
           color: #${config.colorScheme.palette.base05};
           margin: 2 2px; 
           padding: 5px;
         }
 
         #custom-monitor {
-          font-weight: bolder;
-          font-style: normal;
           padding: 0 5px;
           color: #${config.colorScheme.palette.base05};
         }
@@ -670,8 +658,6 @@
           padding: 5px;
           border: none;
           margin: 0 0 0 2px;
-          font-weight: bolder;
-          font-style: normal;
           color: #${config.colorScheme.palette.base05};
         }
 
@@ -679,15 +665,11 @@
           padding: 5px;
           border: none;
           margin: 0 2 0 0px;
-          font-weight: bolder;
-          font-style: normal;
           color: #${config.colorScheme.palette.base05};
         }
 
         #tray {
           padding: 0 5px;
-          font-weight: bolder;
-          font-style: normal;
           color: #${config.colorScheme.palette.base05};
         }
 

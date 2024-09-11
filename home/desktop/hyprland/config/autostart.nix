@@ -10,7 +10,7 @@
       # exec-once = systemctl --user start graphical-session.target
 
       # Launch authentication agent for privilege escalation dialogs
-      exec-once = sleep 10 & polkit-kde-authentication-agent-1
+      # exec-once = sleep 10 & polkit-kde-authentication-agent-1
 
       # Start KDE Connect daemon and indicator for device integration
       exec-once = kdeconnectd
