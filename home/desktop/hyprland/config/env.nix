@@ -28,6 +28,7 @@
       env = LIBVA_DRIVER_NAME,nvidia         # Set VAAPI driver to NVIDIA
       env = __GLX_VENDOR_LIBRARY_NAME,nvidia  # Set GLX vendor library to NVIDIA
       env = __GL_GSYNC_ALLOWED,1             # Enable GSync for NVIDIA
+      env = NVD_BACKEND,direct               # Enable direct mode for NVIDIA
 
 
       # GTK settings
