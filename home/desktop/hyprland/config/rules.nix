@@ -23,6 +23,9 @@
     #Slack
     windowrulev2 = workspace special:slack, float, class:^(Slack)
 
+    #Tmux
+    windowrulev2 = workspace special:tmux, float, title:^(tmux-sratch)
+
     #thunderbird
     windowrulev2 = float,class:(thunderbird)
     windowrulev2 = size 1000 1000,float,class:^(thunderbird)$,title:^(.*)(Reminder)(.*)$

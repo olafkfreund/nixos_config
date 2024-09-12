@@ -155,7 +155,7 @@
   };
 
   services.playerctld.enable = true;
-  
+  services.fwupd.enable = true;
   services.ollama.acceleration = "cuda";
   
   hardware.nvidia-container-toolkit.enable = true;

@@ -182,6 +182,15 @@
             "spotify" = [
               "*"
             ];
+            "mail" = [
+              "*"
+            ];
+            "tmux" = [
+              "*"
+            ];
+            "slack" = [
+              "*"
+            ];
           };
           "format-icons" = {
             "default" = " ";
@@ -191,6 +200,7 @@
             "urgent" = " ";
             "magic" = "󰟵 ";
             "mail" = " ";
+            "tmux" = " ";
             "hidden" = " ";
             "slack" = " ";
             "secret" = " ";
