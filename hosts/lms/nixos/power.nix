@@ -19,7 +19,6 @@
   environment.systemPackages = with pkgs; [
     cpupower-gui
     powertop # only use it to check current power usage
-    psensor
     lm_sensors
   ];
 

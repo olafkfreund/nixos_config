@@ -23,7 +23,12 @@ in {
         obs-pipewire-audio-capture
         droidcam-obs
         input-overlay
-        advanced-scene-switcher
+        # advanced-scene-switcher
+        obs-source-record
+        obs-livesplit-one
+        looking-glass-obs
+        obs-vintage-filter
+        obs-command-source
         obs-source-switcher
         obs-move-transition
         obs-vkcapture

@@ -114,7 +114,7 @@ in {
         set-option -g default-terminal 'tmux-256color'
         set-option -g terminal-overrides ',xterm-256color:RGB'
         set-option -g status-position top
-        run-shell /nix/store/a592jk2gm9mgwyif61mdxqi317f54iiy-tmuxplugin-tmux-gruvbox-unstable-2024-06-17/share/tmux-plugins/tmux-gruvbox/gruvbox.tmux
+        run-shell /nix/store/m69nv0k6a04dzz3rya5nifdi8gr3s1a4-tmuxplugin-tmux-gruvbox-unstable-2024-06-17/share/tmux-plugins/tmux-gruvbox/gruvbox.tmux
 
         set -s escape-time 0
         set -g base-index 1

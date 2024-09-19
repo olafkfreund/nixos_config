@@ -17,7 +17,13 @@ in {
     programs.chromium = {
       enable = true;
       package = pkgs.google-chrome;
-      commandLineArgs = ["--enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu"];
+        commandLineArgs = ["--enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu"];
+      # commandLineArgs = [
+      #   "--enable-features=UseOzonePlatform"
+      #   "--ozone-platform=wayland"
+      #   "--gtk-version=4"
+      #   "--enable-wayland-ime"
+      # ];
     };
   };  
 }

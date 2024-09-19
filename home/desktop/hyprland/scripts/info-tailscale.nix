@@ -1,8 +1,8 @@
 { pkgs, ... }:
 
 pkgs.writeShellScriptBin "info-tailscale" ''
-  ICON_ACTIVE=""
-  ICON_INACTIVE=""
+  ICON_ACTIVE="[  ]"
+  ICON_INACTIVE="[  ]"
 
   status=$(curl --silent --fail --unix-socket /var/run/tailscale/tailscaled.sock http://local-tailscaled.sock/localapi/v0/status)
 
