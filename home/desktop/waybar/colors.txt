@@ -14,3 +14,13 @@ base0C: "#8ec07c" # aqua/cyan
 base0D: "#83a598" # blue
 base0E: "#d3869b" # purple
 base0F: "#d65d0e" # brown
+
+
+$button -> #689d6a;
+$button-bottom -> #518554;
+$button-active -> #7db37e;
+$button-bottom-active -> #659a68;
+$button-hover -> #8ec07c;
+$button-bottom-hover -> #76a765;
+$button-foreground -> #282828;
+

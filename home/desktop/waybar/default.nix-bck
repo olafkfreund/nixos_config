@@ -141,8 +141,8 @@
             "9" = "9";
             "10" = "10";
             # "active" = " ";
-            # "default" = "";
-            # "urgent" = "";
+            "default" = "";
+            "urgent" = "";
             "magic" = "";
             "hidden" = "󰐃";
             "secret" = "";
@@ -410,32 +410,27 @@
         }
 
         #workspaces button {
-          all: unset;
-          border: none;
-          border-bottom: 8px solid #518554;
+          font-weight: bolder;
+          font-style: normal;
+          color: #${config.colorScheme.palette.base07};
+          background-color: #${config.colorScheme.palette.base01};
           border-radius: 5px;
-          margin-left: 4px;
-          margin-bottom: 2px;
-          font-family: JetBrainsMono Nerd Font, sans-sherif;
-          font-weight: bold;
-          font-size: 12px;
-          padding-left: 13px;
-          padding-right: 13px;
-          transition: transform 0.1s ease-in-out;
-          color: #282828;
-          background-color: #689d6a;
+          border-color: #${config.colorScheme.palette.base00};
+          margin: 2px 2px 2px 2px;
         }
         
         #workspaces button:hover {
-          background: inherit;
-          background-color: #8ec07c;
-          border-bottom: 8px solid #76a765;
+          box-shadow: inherit;
+          font-weight: bolder;
+          text-shadow: inherit;
+          background-color: #${config.colorScheme.palette.base0D};
         }
 
         #workspaces button.active {
-        background: inherit;
-        background-color: #7db37e;
-        border-bottom: 8px solid  #659a68;
+          color: #${config.colorScheme.palette.base06};
+          background-color: #${config.colorScheme.palette.base09};
+          font-weight: bolder;
+          transition: all 0.1s ease-in-out;
         }
 
         #workspaces button.urgent {

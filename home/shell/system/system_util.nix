@@ -88,5 +88,8 @@ home.packages = with pkgs; [
   choose
   tailspin
   nitch
+  termshark
+  portal
+  age
   ];
 }
