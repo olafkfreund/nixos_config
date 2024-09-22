@@ -1,7 +1,8 @@
-{ pkgs
-, config
-, lib
-, ...
+{
+  pkgs,
+  config,
+  lib,
+  ...
 }: {
   programs.waybar = {
     enable = true;
@@ -25,7 +26,6 @@
         "modules-left" = [
           "hyprland/workspaces"
           "hyprland/window"
-
         ];
 
         "modules-right" = [
@@ -56,8 +56,8 @@
         };
 
         "cpu" = {
-            interval = 1;
-            format = "   {}% ";
+          interval = 1;
+          format = "   {}% ";
         };
 
         "custom/cycle_wall" = {
@@ -72,7 +72,7 @@
             deactivated = "󰤄 ";
           };
         };
-        
+
         "custom/monitor" = {
           format = " 󱋆 ";
           on-click = "${pkgs.wdisplays}/bin/wdisplays";
@@ -131,17 +131,6 @@
             ];
           };
           "format-icons" = {
-<<<<<<< HEAD
-            "default" = " ";
-	          "active" = " ";
-            "urgent" = " ";
-            "magic" = "󰟵 ";
-            "mail" = " ";
-            "tmux" = " ";
-            "hidden" = " ";
-            "slack" = " ";
-            "secret" = " ";
-=======
             "1" = "1";
             "2" = "2";
             "3" = "3";
@@ -158,7 +147,6 @@
             "magic" = "";
             "hidden" = "󰐃";
             "secret" = "";
->>>>>>> main
             "spotify" = " ";
           };
         };
@@ -203,7 +191,7 @@
           format-charging = " {capacity}% 󰂄 ";
           format-plugged = " {capacity}%  ";
           format-alt = "{time} ";
-          format-icons = [ "󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
+          format-icons = ["󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
         };
 
         "network" = {
@@ -235,7 +223,7 @@
           scroll-step = 1;
           format-icons = {
             car = "";
-            default = [ "" " " " " ];
+            default = ["" " " " "];
             headphones = "";
             headset = "";
           };
@@ -247,7 +235,7 @@
           format-muted = "婢";
           format-icons = {
             car = "";
-            default = [ "" " " " " ];
+            default = ["" " " " "];
             headphones = "";
             headset = "";
           };
@@ -298,7 +286,7 @@
           tooltip = false;
         };
 
-       "custom/nix-updates" = {
+        "custom/nix-updates" = {
           "exec" = "update-checker";
           "on-click" = "update-checker && notify-send 'The system has been updated'";
           "interval" = 3600;
@@ -306,8 +294,8 @@
           "return-type" = "json";
           "format" = "{icon} {} ";
           "format-icons" = {
-              "has-updates" = " ";
-              "updated" = " ";
+            "has-updates" = " ";
+            "updated" = " ";
           };
         };
       };
@@ -353,24 +341,6 @@
         }
 
         #workspaces button {
-<<<<<<< HEAD
-          color: #${config.colorScheme.palette.base07};
-          background-color: transparent;
-          margin: 2px 2px 2px 2px;
-          opacity: 1;
-        }
-        
-        #workspaces button:hover {
-          color: #${config.colorScheme.palette.base09};
-          background-color: transparent;
-          opacity: 1;
-        }
-
-        #workspaces button.active {
-          color: #${config.colorScheme.palette.base0A};
-          background-color: transparent;
-          opacity: 1;
-=======
           all: unset;
           border: none;
           border-bottom: 8px solid #518554;
@@ -386,7 +356,7 @@
           color: #282828;
           background-color: #689d6a;
         }
-        
+
         #workspaces button:hover {
           background: inherit;
           background-color: #8ec07c;
@@ -397,7 +367,6 @@
         background: inherit;
         background-color: #7db37e;
         border-bottom: 8px solid  #659a68;
->>>>>>> main
         }
 
         #workspaces button.urgent {
@@ -417,7 +386,7 @@
         #workspaces button.spotify {
           color: #${config.colorScheme.palette.base0B};
           background-color: transparent;
-          margin: 2 2px; 
+          margin: 2 2px;
           padding: 5px;
           opacity: 1;
         }
@@ -430,7 +399,7 @@
           background-color: transparent;
           color: #${config.colorScheme.palette.base05};
         }
-        
+
         #custom-cal {
           color: #${config.colorScheme.palette.base05};
         }
@@ -438,11 +407,11 @@
         #clock {
           color: #${config.colorScheme.palette.base05};
         }
-        
+
         #temperature {
           color: #${config.colorScheme.palette.base05};
         }
-        
+
         #privacy {
           color: #${config.colorScheme.palette.base05};
         }
@@ -530,15 +499,15 @@
         #battery {
           color: #${config.colorScheme.palette.base05};
         }
-        
+
         #cpu {
           color: #${config.colorScheme.palette.base05};
         }
-        
+
         #memory {
           color: #${config.colorScheme.palette.base05};
         }
-        
+
         #window {
           border-radius: 20px;
           padding-left: 10px;
