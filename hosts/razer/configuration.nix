@@ -52,7 +52,7 @@
   
   # Virtualization tools
   services.docker.enable = lib.mkForce true;
-  services.incus.enable = lib.mkForce true;
+  services.incus.enable = lib.mkForce false;
   services.podman.enable = lib.mkForce true;
   services.spice.enable = lib.mkForce true;
   services.libvirt.enable = lib.mkForce true;

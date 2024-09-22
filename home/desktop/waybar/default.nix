@@ -9,7 +9,7 @@
     settings = {
       mainBar = {
         "layer" = "top";
-        "position" = "top"; #"top";
+        "position" = "top";
         "mod" = "dock";
         "margin-top" = 0;
         "margin-bottom" = 0;
@@ -29,6 +29,7 @@
         ];
 
         "modules-right" = [
+          "temperature"
           "cpu"
           "memory"
           "network"
@@ -39,21 +40,13 @@
           "pulseaudio"
           "pulseaudio#microphoneicons"
           "pulseaudio#microphone"
-          "custom/cal"
           "clock"
-          # "custom/monitor"
-          # "custom/cycle_wall"
-          # "custom/dunst"
-          # "tray"
+          "tray"
         ];
 
         "modules-center" = [
-          # "hyprland/workspaces"
-          # "hyprland/window"
-          # "custom/nix-updates"
           "idle_inhibitor"
           "custom/weather"
-          # "custom/tailscale"
         ];
 
         "memory" = {
@@ -175,9 +168,10 @@
         };
 
         clock = {
-          format = "{:%H:%M} ";
+          format = "  {:%a %d-%m 󰥔 :%H:%M} ";
           max-lenght = 25;
           interval = 60;
+          on-click = "gnome-calendar";
         };
 
         "battery" = {
@@ -186,7 +180,7 @@
             warning = 30;
             critical = 20;
           };
-          format = " {icon} {capacity}% ";
+          format = " {icon} ";
           format-charging = " {capacity}% 󰂄 ";
           format-plugged = " {capacity}%  ";
           format-alt = "{time} ";
@@ -195,11 +189,11 @@
 
         "network" = {
           format = "{ifname} {ipaddr} ";
-          format-wifi = " 󰖩  {essid} ";
-          format-ethernet = " 󰈀  {ipaddr} ";
+          format-wifi = " 󰖩 ";
+          format-ethernet = " 󰈀 ";
           tooltip-format = "{ipaddr}  {bandwidthUpBytes}  {bandwidthDownBytes}";
           format-linked = "{ifname} (No IP)";
-          format-disconnected = " 󰌙  Disconnected ";
+          format-disconnected = " 󰌙 ";
           format-alt = "{signalStrength}% ";
           on-click = "nmtui";
         };
@@ -249,7 +243,7 @@
         };
 
         "temperature" = {
-          hwmon-path = "/sys/devices/virtual/thermal/thermal_zone1/hwmon3/temp1_input";
+          hwmon-path = "/sys/devices/virtual/thermal/thermal_zone1/hwmon6/temp1_input";
           format = "{temperature}°C  | ";
           tooltip-format = "{temperature}°C ";
           interval = 10;
@@ -303,7 +297,7 @@
     style = ''
       * {
         font-family: 'Jetbrains Mono Nerd Font';
-        font-size: 15px;
+        font-size: 12px;
         font-weight: bolder;
         }
 
@@ -367,8 +361,8 @@
         #workspaces button.secret {
           color: #${config.colorScheme.palette.base08};
           background-color: transparent;
-          min-height: 15px;
-          font-size: 17px;
+          min-height: 12px;
+          font-size: 12px;
           opacity: 1;
         }
 
@@ -423,8 +417,6 @@
 
         #custom-monitor {
           color: #${config.colorScheme.palette.base05};
-          padding-right: 5px;
-          font-weight: bolder;
         }
 
         #pulseaudio.icons {
@@ -457,8 +449,6 @@
 
         #custom-cycle_wall {
           color: #${config.colorScheme.palette.base05};
-          padding-right: 5px;
-          font-weight: bolder;
         }
 
         #custom-tailscale {
@@ -467,8 +457,6 @@
 
         #custom-dunst {
           color: #${config.colorScheme.palette.base05};
-          padding-right: 5px;
-          font-weight: bolder;
         }
 
         #custom-settings {

@@ -7,7 +7,7 @@
     polarity = "dark";
     autoEnable = true;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
-    image = ./gruv-abstract-maze.png;
+    image = ./wallhaven-2yqzd9.jpg;
 
     # Font configuration
     fonts = {

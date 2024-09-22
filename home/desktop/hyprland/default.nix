@@ -58,7 +58,7 @@ home = {
       # exec-once = systemctl --user start graphical-session.target
 
       # Launch authentication agent for privilege escalation dialogs
-      exec-once = sleep 10 & polkit-kde-authentication-agent-1
+      # exec-once = sleep 10 & polkit-kde-authentication-agent-1
 
       # Start KDE Connect daemon and indicator for device integration
       exec-once = kdeconnectd
@@ -76,8 +76,8 @@ home = {
 
       # Set GNOME desktop interface settings
       exec-once = gsettings set org.gnome.desktop.interface cursor-theme "Bibata-Modern-Ice"
-      exec-once = gsettings set org.gnome.desktop.interface icon-theme "Gruvbox-Plus-Dark"
-      exec-once = gsettings set org.gnome.desktop.interface gtk-theme "Gruvbox-Dark-BL-LB"
+      exec-once = gsettings set org.gnome.desktop.interface icon-theme "Gruvbox-Material-Dark"
+      exec-once = gsettings set org.gnome.desktop.interface gtk-theme "Gruvbox-Material-Dark"
 
       # Launch Waybar (top bar)
       exec-once = killall -q waybar;sleep .5 & waybar

@@ -34,5 +34,9 @@ in {
         WEBUI_AUTH = "False";
       };
     };
+    environment.systemPackages = with pkgs; [
+      alpaca
+      oterm
+    ];
   };
 }

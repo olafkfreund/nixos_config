@@ -57,6 +57,8 @@ in {
       win-virtio
       virtualbox
       btrfs-progs
+      quickemu
+      # quickgui
     ];
   };
 }

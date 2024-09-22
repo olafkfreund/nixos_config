@@ -152,7 +152,7 @@
               stylix.targets = {
                 waybar.enable = false;
                 yazi.enable = false;
-                vim.enable = false;
+                # vim.enable = false;
                 vscode.enable = false;
                 dunst.enable = false;
                 rofi.enable = false;
