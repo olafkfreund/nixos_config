@@ -131,6 +131,7 @@
             ];
           };
           "format-icons" = {
+<<<<<<< HEAD
             "default" = " ";
 	          "active" = " ";
             "urgent" = " ";
@@ -140,6 +141,24 @@
             "hidden" = " ";
             "slack" = " ";
             "secret" = " ";
+=======
+            "1" = "1";
+            "2" = "2";
+            "3" = "3";
+            "4" = "4";
+            "5" = "5";
+            "6" = "6";
+            "7" = "7";
+            "8" = "8";
+            "9" = "9";
+            "10" = "10";
+            # "active" = " ";
+            # "default" = "";
+            # "urgent" = "";
+            "magic" = "";
+            "hidden" = "󰐃";
+            "secret" = "";
+>>>>>>> main
             "spotify" = " ";
           };
         };
@@ -334,6 +353,7 @@
         }
 
         #workspaces button {
+<<<<<<< HEAD
           color: #${config.colorScheme.palette.base07};
           background-color: transparent;
           margin: 2px 2px 2px 2px;
@@ -350,6 +370,34 @@
           color: #${config.colorScheme.palette.base0A};
           background-color: transparent;
           opacity: 1;
+=======
+          all: unset;
+          border: none;
+          border-bottom: 8px solid #518554;
+          border-radius: 5px;
+          margin-left: 4px;
+          margin-bottom: 2px;
+          font-family: JetBrainsMono Nerd Font, sans-sherif;
+          font-weight: bold;
+          font-size: 12px;
+          padding-left: 13px;
+          padding-right: 13px;
+          transition: transform 0.1s ease-in-out;
+          color: #282828;
+          background-color: #689d6a;
+        }
+        
+        #workspaces button:hover {
+          background: inherit;
+          background-color: #8ec07c;
+          border-bottom: 8px solid #76a765;
+        }
+
+        #workspaces button.active {
+        background: inherit;
+        background-color: #7db37e;
+        border-bottom: 8px solid  #659a68;
+>>>>>>> main
         }
 
         #workspaces button.urgent {
