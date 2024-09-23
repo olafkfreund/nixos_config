@@ -30,18 +30,15 @@
 
         "modules-right" = [
           "temperature"
-          "cpu"
-          "memory"
           "network"
           "battery"
-          "power-profiles-daemon"
           "bluetooth"
-          "pulseaudio#icons"
+          "power-profiles-daemon"
+          "cpu"
+          "memory"
           "pulseaudio"
-          "pulseaudio#microphoneicons"
           "pulseaudio#microphone"
           "clock"
-          "tray"
         ];
 
         "modules-center" = [
@@ -51,13 +48,13 @@
 
         "memory" = {
           interval = 10;
-          format = "   {used:0.1f}G/{total:0.1f}G ";
+          format = "   {}% ";
           max-length = 20;
         };
 
         "cpu" = {
           interval = 1;
-          format = "   {}% ";
+          format = "   {usage}% ";
         };
 
         "custom/cycle_wall" = {
@@ -87,36 +84,36 @@
           on-scroll-down = "${pkgs.hyprland}/bin/hyprctl dispatch workspace e+1";
           max-length = 45;
           persistent-workspaces = {
-            "1" = [
-              "DP-1"
-            ];
-            "2" = [
-              "DP-1"
-            ];
-            "3" = [
-              "DP-1"
-            ];
-            "4" = [
-              "DP-1"
-            ];
-            "5" = [
-              "DP-1"
-            ];
-            "11" = [
-              "eDP-1"
-            ];
-            "12" = [
-              "eDP-1"
-            ];
-            "13" = [
-              "eDP-1"
-            ];
-            "14" = [
-              "eDP-1"
-            ];
-            "15" = [
-              "eDP-1"
-            ];
+            # "1" = [
+            #   "DP-1"
+            # ];
+            # "2" = [
+            #   "DP-1"
+            # ];
+            # "3" = [
+            #   "DP-1"
+            # ];
+            # "4" = [
+            #   "DP-1"
+            # ];
+            # "5" = [
+            #   "DP-1"
+            # ];
+            # "11" = [
+            #   "eDP-1"
+            # ];
+            # "12" = [
+            #   "eDP-1"
+            # ];
+            # "13" = [
+            #   "eDP-1"
+            # ];
+            # "14" = [
+            #   "eDP-1"
+            # ];
+            # "15" = [
+            #   "eDP-1"
+            # ];
             "spotify" = [
               "*"
             ];
@@ -141,13 +138,13 @@
             "8" = "8";
             "9" = "9";
             "10" = "10";
-            # "active" = " ";
-            # "default" = "";
-            # "urgent" = "";
-            "magic" = "";
+            "magic" = "󱕴";
             "hidden" = "󰐃";
-            "secret" = "";
+            "secret" = "󱕴";
             "spotify" = " ";
+            "slack" = " ";
+            "mail" = " ";
+            "tmux" = " ";
           };
         };
 
@@ -175,7 +172,9 @@
         };
 
         clock = {
-          format = "  {:%a %d-%m 󰥔 :%H:%M} ";
+          format = "  {:%a %d-%m %H:%M} ";
+          tooltip = true;
+          format-alt = "{:%A, %B %d, %Y}";
           max-lenght = 25;
           interval = 60;
           on-click = "gnome-calendar";
@@ -208,31 +207,19 @@
         "bluetooth" = {
           format = " 󰂯 ";
           format-on = " 󰂯 ";
-          format-off = " 󰂲 ";
+          format-off = "";
           format-disabled = ""; # an empty format will hide the module
           format-connected = "  {num_connections} ";
-          on-click = "foot bluetuith --color dark";
-        };
-
-        "pulseaudio#icons" = {
-          format = " {icon} ";
-          format-bluetooth = "{icon}";
-          format-muted = "婢";
-          on-click = "pavucontrol -t 3";
-          tooltip-format = "{icon} {desc} // {volume}%";
-          scroll-step = 1;
-          format-icons = {
-            car = "";
-            default = ["" " " " "];
-            headphones = "";
-            headset = "";
-          };
+          on-click = "bluetuith --color dark";
         };
 
         "pulseaudio" = {
-          format = "{volume}% ";
-          format-bluetooth = "{volume}% ";
+          format = " {icon} {volume}% ";
+          format-bluetooth = " {icon} {volume}% ";
           format-muted = "婢";
+          on-click = "pavucontrol -t 3";
+          tooltip-format = " {icon} {desc} // {volume}%";
+          scroll-step = 1;
           format-icons = {
             car = "";
             default = ["" " " " "];
@@ -250,32 +237,27 @@
         };
 
         "temperature" = {
-          hwmon-path = "/sys/devices/virtual/thermal/thermal_zone1/hwmon6/temp1_input";
-          format = "{temperature}°C  | ";
+          format = "{temperature}°C   ";
           tooltip-format = "{temperature}°C ";
           interval = 10;
         };
 
         "power-profiles-daemon" = {
-          "format" = " {icon} ";
-          "tooltip-format" = "Power profile: {profile}\nDriver: {driver}";
-          "tooltip" = true;
-          "format-icons" = {
-            "default" = "";
-            "performance" = "";
-            "balanced" = "";
-            "power-saver" = "";
+          format = " {icon} ";
+          tooltip-format = "Power profile: {profile}\nDriver: {driver}";
+          tooltip = true;
+          format-icons = {
+            default = " ";
+            performance = " ";
+            balanced = " ";
+            power-saver = " ";
           };
         };
 
-        "pulseaudio#microphoneicons" = {
-          format = " {format_source} ";
-          format-source = "";
-          format-source-muted = " ";
-        };
-
         "pulseaudio#microphone" = {
-          format-source = "{volume}% ";
+          format = " {icon} {format_source} ";
+          format-source = " {volume}% ";
+          format-source-muted = " ";
           on-click = "pavucontrol -t 4";
           tooltip-format = "{format_source} {source_desc} // {source_volume}%";
           scroll-step = 5;
@@ -303,7 +285,7 @@
 
     style = ''
       * {
-        font-family: 'Jetbrains Mono Nerd Font';
+        font-family: 'JetBrainsMono Nerd Font FontAwesome Roboto Helvetica Arial sans-serif';
         font-size: 12px;
         font-weight: bolder;
         }
@@ -369,28 +351,6 @@
         border-bottom: 8px solid  #659a68;
         }
 
-        #workspaces button.urgent {
-          color: #${config.colorScheme.palette.base08};
-          background-color: transparent;
-          opacity: 1;
-        }
-
-        #workspaces button.secret {
-          color: #${config.colorScheme.palette.base08};
-          background-color: transparent;
-          min-height: 12px;
-          font-size: 12px;
-          opacity: 1;
-        }
-
-        #workspaces button.spotify {
-          color: #${config.colorScheme.palette.base0B};
-          background-color: transparent;
-          margin: 2 2px;
-          padding: 5px;
-          opacity: 1;
-        }
-
         #custom-weathericons {
           color: #${config.colorScheme.palette.base05};
         }
@@ -405,7 +365,15 @@
         }
 
         #clock {
-          color: #${config.colorScheme.palette.base05};
+          background-color: #98971a;
+          color: #282828;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 12px;
+          font-weight: bold;
+          border: none;
+          border-bottom: 8px solid #828200;
+          border-radius: 5px;
+          margin-bottom: 2px;
         }
 
         #temperature {
@@ -421,7 +389,15 @@
         }
 
         #power-profiles-daemon {
-          color: #${config.colorScheme.palette.base05};
+          background-color: #8ec07c;
+          color: #282828;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 12px;
+          font-weight: bold;
+          border: none;
+          border-bottom: 8px solid #689d6a;
+          border-radius: 5px;
+          margin-bottom: 2px;
         }
 
         #custom-nix-updates {
@@ -436,24 +412,40 @@
           color: #${config.colorScheme.palette.base05};
         }
 
-        #pulseaudio.icons {
-          color: #${config.colorScheme.palette.base05};
-        }
-
         #pulseaudio {
-          color: #${config.colorScheme.palette.base05};
-        }
-
-        #pulseaudio.microphoneicons {
-          color: #${config.colorScheme.palette.base05};
+          background-color: #f2b13c;
+          color: #282828;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 12px;
+          font-weight: bold;
+          border: none;
+          border-bottom: 8px solid  #d79921;
+          border-radius: 5px;
+          margin-bottom: 2px;
         }
 
         #pulseaudio.microphone {
-          color: #${config.colorScheme.palette.base05};
+          background-color: #f2b13c;
+          color: #282828;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 12px;
+          font-weight: bold;
+          border: none;
+          border-bottom: 8px solid  #d79921;
+          border-radius: 5px;
+          margin-bottom: 2px;
         }
 
         #pulseaudio.muted {
-          color: #${config.colorScheme.palette.base08};
+          background-color: #f2b13c;
+          color: #e23c2c;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 12px;
+          font-weight: bold;
+          border: none;
+          border-bottom: 8px solid  #d79921;
+          border-radius: 5px;
+          margin-bottom: 2px;
         }
 
         #network.icons  {
@@ -461,7 +453,15 @@
         }
 
         #network {
-          color: #${config.colorScheme.palette.base05};
+          background-color: #98bbad;
+          color: #282828;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 12px;
+          font-weight: bold;
+          border: none;
+          border-bottom: 8px solid  #80a295;
+          border-radius: 5px;
+          margin-bottom: 2px;
         }
 
         #custom-cycle_wall {
@@ -492,28 +492,79 @@
           color: #${config.colorScheme.palette.base05};
         }
 
-        #tray {
+        #idle_inhibitor.activated {
           color: #${config.colorScheme.palette.base05};
+        }
+
+        #tray {
+          background-color: #ec7024;
+          color: #282828;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 12px;
+          font-weight: bold;
+          border: none;
+          border-bottom: 8px solid #d05806;
+          border-radius: 5px;
+          margin-bottom: 2px;
+        }
+
+        #tray > .passive {
+            -gtk-icon-effect: dim;
+        }
+
+        #tray > .needs-attention {
+            -gtk-icon-effect: highlight;
+            background-color: #eb4d4b;
         }
 
         #battery {
-          color: #${config.colorScheme.palette.base05};
+          background-color: #5d9da0;
+          color: #282828;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 12px;
+          font-weight: bold;
+          border: none;
+          border-bottom: 8px solid  #458588;
+          border-radius: 5px;
+          margin-bottom: 2px;
         }
 
         #cpu {
-          color: #${config.colorScheme.palette.base05};
+          background-color:  #689d6a;
+          color: #282828;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 12px;
+          font-weight: bold;
+          border: none;
+          border-bottom: 8px solid  #518554;
+          border-radius: 5px;
+          margin-bottom: 2px;
         }
 
         #memory {
-          color: #${config.colorScheme.palette.base05};
+          background-color:  #c8779b;
+          color: #282828;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 12px;
+          font-weight: bold;
+          border: none;
+          border-bottom: 8px solid#b16286;
+          border-radius: 5px;
+          margin-bottom: 2px;
         }
 
         #window {
-          border-radius: 20px;
+          background-color: #303030;
+          color: #ebdbb2;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 12px;
+          font-weight: bold;
+          border: none;
+          border-bottom: 8px solid #252c32;
+          border-radius: 5px;
+          margin-bottom: 2px;
           padding-left: 10px;
           padding-right: 10px;
-          color: #${config.colorScheme.palette.base09};
-          transition: all 0.1s ease-in-out;
         }
 
         #image {
@@ -537,7 +588,15 @@
         }
 
         #bluetooth {
-          color: #${config.colorScheme.palette.base05};
+          background-color: #ec7024;
+          color: #282828;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 12px;
+          font-weight: bold;
+          border: none;
+          border-bottom: 8px solid #d05806;
+          border-radius: 5px;
+          margin-bottom: 2px;
         }
     '';
   };

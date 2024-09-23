@@ -1,4 +1,4 @@
-{ config, ... }: {
+{config, ...}: {
   wayland.windowManager.hyprland.extraConfig = ''
     xwayland {
       force_zero_scaling = true
@@ -21,8 +21,8 @@
         border_size = 2
         layout = master
         resize_on_border = true
-        col.active_border = rgb(${config.colorScheme.palette.base05})
-        col.inactive_border = rgb(${config.colorScheme.palette.base09})
+        col.active_border = rgb(689d6a)
+        col.inactive_border = rgb(ebdbb2)
     }
 
     decoration {
