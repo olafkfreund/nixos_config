@@ -28,7 +28,7 @@
 
     #thunderbird
     windowrulev2 = float,class:(thunderbird)
-    windowrulev2 = size 1000 1000,float,class:^(thunderbird)$,title:^(.*)(Reminder)(.*)$
+    windowrulev2 = size 70% 70%,float,class:^(thunderbird)$,title:^(.*)(Reminder)(.*)$
     windowrulev2 = float,class:^(thunderbird)$,title:^(.*)(Write)(.*)$
 
     #Google Chrome
@@ -43,13 +43,13 @@
     windowrulev2 = center, class:(pavucontrol)
 
     #Moonlight
-    windowrulev2 = size 1000 1000, float, class:(com.moonlight_stream.Moonlight)
+    windowrulev2 = size 50% 50%, float, class:(com.moonlight_stream.Moonlight)
 
     #Camera
     windowrulev2 = size 500 500, fload, class:(hu.irl.cameractrls)
 
     #Zen
-    windowrulev2 = size 1000 1000, float, class:(zen.aplha)$,title:^(.*)(Save)(.*)$
+    windowrulev2 = size 70% 70%, float, class:(zen.aplha)$,title:^(.*)(Save)(.*)$
 
     #Telegram
     windowrulev2 = workspace 8, class:(org.telegram.desktop)

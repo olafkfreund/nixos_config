@@ -30,6 +30,10 @@ in {
     };
     programs.vscode.userSettings = {
       "alejandra.program" = "alejandra";
+      "codeium.enableConfig" = {
+        "*" = true;
+        "nix" = true;
+      };
     };
   };
 }

@@ -1,7 +1,4 @@
-{
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   imports = [
     ./plasma/plasma.nix
     ./ags/default.nix
@@ -25,6 +22,7 @@
     ./kooha/default.nix
     ./zathura/default.nix
     ./remotedesktop/default.nix
+    ./swaync/default.nix
     # ./gh/default.nix
   ];
 

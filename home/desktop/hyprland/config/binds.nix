@@ -13,10 +13,10 @@
       bind = $mainMod, T, exec, foot
       bind = $mainMod CTRL, M, exec, monitors
       bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh
-      bind = $mainMod, RETURN, exec, wezterm start
-      bind = $mainMod, space, exec, ~/.config/rofi/launchers/type-7/launcher.sh
+      bind = $mainMod, RETURN, exec, [float]foot
+      bind = $mainMod, space, exec, rofi -show drun
       bind = $mainMod SHIFT, P, exec, $HOME/.config/rofi/applets/bin/screenshot.sh
-      bind = $mainMod SHIFT, I, exec, $HOME/.config/rofi/applets/bin/clipboard.sh
+      bind = $mainMod SHIFT, I, exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy
       bind = $mainMod, SLASH, exec, pamixer -t
       bind = $mainMod, N, exec, dunstctl history-pop
       bind = $mainMod SHIFT, N, exec, dunstctl close-all
