@@ -1,5 +1,5 @@
 {pkgs, ...}:
-pkgs.writeShellScriptBin "info-tailscale" ''
+pkgs.writeShellScriptBin "screenshoot" ''
   slurp_select_area="slurp -d -b '#ebdbb244' -c '#323232FF' -B '#323232FF' -F 'JetBrains Mono Nerd Font' -w '1'"
   # Theme Elements
   prompt='Screenshot'
@@ -38,13 +38,12 @@ pkgs.writeShellScriptBin "info-tailscale" ''
   	local before="$1"
   	after=$(ls "$dir" -1q | wc -l)
   	echo "$after"
-  	notify_cmd_shot = 'notify-send -u low -i'
+  	notify_cmd_shot='notify-send -u low -i gnome-screenshot Rofishot --replace=699'
   	if [ "$after" -gt "$before" ]; then
-  		${notify_cmd_shot} "Screenshot Saved."
+  		''${notify_cmd_shot} "Screenshot Saved."
   	else
-  		${notify_cmd_shot} "Screenshot Not Saved."
+  		''${notify_cmd_shot} "Screenshot Not Saved."
   	fi
-
   }
 
   # Grab window wayland
@@ -61,7 +60,7 @@ pkgs.writeShellScriptBin "info-tailscale" ''
   # countdown
   countdown() {
   	for sec in $(seq "$1" -1 1); do
-  		notify-send -u low "Taking shot in : $sec"
+  		notify-send -t 1000 --replace=699 "Taking shot in : $sec"
   		sleep 1
   	done
   }
@@ -69,7 +68,6 @@ pkgs.writeShellScriptBin "info-tailscale" ''
   # take shots
   shotnow() {
   	grim -g "$(slurp -o)" - | swappy -f - && notify_view "$1"
-
   }
 
   shot5() {
@@ -111,7 +109,7 @@ pkgs.writeShellScriptBin "info-tailscale" ''
 
   # Actions
   chosen="$(run_rofi)"
-  case ${chosen} in
+  case ''${chosen} in
   $option_1)
   	run_cmd --opt1
   	;;
@@ -127,5 +125,5 @@ pkgs.writeShellScriptBin "info-tailscale" ''
   $option_5)
   	run_cmd --opt5
   	;;
-  e
+  esac
 ''

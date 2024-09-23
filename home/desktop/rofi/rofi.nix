@@ -87,6 +87,18 @@ with lib; let
          border-color: #191c1d;
      }
 
+     mesg {
+         padding: 12px;
+         margin: 10px 5px 10px 5px;
+         background-color: #1f2223;
+         text-color: #689d6a;
+         vertical-align: 0.5;
+         horizontal-align: 0.5;
+         border-radius: 5px;
+         border: 0px 0px 8px 8px;
+         border-color: #191c1d;
+     }
+
      element-icon {
          size: 25px;
          background-color: #00000000;
@@ -171,6 +183,10 @@ in {
       rofi-bluetooth
       rofi-screenshot
       rofi-file-browser
+      rofi-calc
+      rofi-mpd
+      rofi-obsidian
+      todofi-sh
     ];
   };
 }

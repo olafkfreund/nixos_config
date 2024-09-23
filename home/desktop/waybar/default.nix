@@ -40,6 +40,7 @@
           "pulseaudio"
           "pulseaudio#microphone"
           "custom/weather"
+          "custom/powermenu"
         ];
 
         "modules-center" = [
@@ -156,6 +157,12 @@
           format-plugged = " {capacity}%  ";
           format-alt = "{time} ";
           format-icons = ["󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
+        };
+
+        "custom/powermenu" = {
+          format = " ";
+          on-click = "pmenu";
+          tooltip = false;
         };
 
         "network" = {
@@ -543,6 +550,21 @@
           border-left: 8px solid#b16286;
           border-radius: 5px;
           margin-bottom: 2px;
+        }
+
+        #custom-powermenu {
+          background-color: #e23c2c;
+          color: #282828;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 12px;
+          font-weight: bold;
+          border: none;
+          border-bottom: 8px solid #cc241d;
+          border-radius: 5px;
+          margin-bottom: 2px;
+          margin-right: 4px;
+          padding-left: 14px;
+          padding-right: 7px;
         }
 
         #window {

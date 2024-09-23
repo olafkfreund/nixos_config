@@ -9,5 +9,8 @@
     (import ./weather.nix {inherit pkgs;})
     (import ./monitor.nix {inherit pkgs;})
     (import ./update-checker.nix {inherit pkgs;})
+    (import ./screenshoot.nix {inherit pkgs;})
+    (import ./volume.nix {inherit pkgs;})
+    (import ./powermenu.nix {inherit pkgs;})
   ];
 }
