@@ -158,6 +158,8 @@
                 rofi.enable = false;
                 xresources.enable = false;
                 neovim.enable = false;
+                hyprpaper.enable = false;
+                hyprland.enable = false;
               };
             }
           ];

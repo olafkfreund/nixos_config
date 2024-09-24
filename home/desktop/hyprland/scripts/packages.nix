@@ -12,5 +12,6 @@
     (import ./screenshoot.nix {inherit pkgs;})
     (import ./volume.nix {inherit pkgs;})
     (import ./powermenu.nix {inherit pkgs;})
+    (import ./hyprkeys.nix {inherit pkgs;})
   ];
 }

@@ -12,14 +12,14 @@
       bind = $mainMod, E, exec, [float]foot yazi
       bind = $mainMod, T, exec, foot
       bind = $mainMod CTRL, M, exec, monitors
-      bind = $mainMod, backspace, exec, ~/.config/rofi/launchers/type-2/hyprkeys.sh
+      bind = $mainMod, backspace, exec, rofi-hyprkeys
       bind = $mainMod, RETURN, exec, [float]foot
       bind = $mainMod, space, exec, rofi -show drun
       bind = $mainMod SHIFT, P, exec, screenshot
       bind = $mainMod SHIFT, I, exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy
       bind = $mainMod, SLASH, exec, pamixer -t
-      bind = $mainMod, N, exec, dunstctl history-pop
-      bind = $mainMod SHIFT, N, exec, dunstctl close-all
+      bind = $mainMod, N, exec, swaync-client --toggle-panel
+      bind = $mainMod SHIFT, N, exec, swaync-client --close-all
 
       bind = , XF86AudioRaiseVolume, exec, swayosd-client --output-volume=raise
       bind = , XF86AudioLowerVolume, exec, swayosd-client --output-volume=lower

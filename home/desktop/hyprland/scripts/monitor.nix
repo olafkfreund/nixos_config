@@ -7,6 +7,7 @@ pkgs.writeShellScriptBin "monitors" ''
   # Options
   option_1="󰌢 Laptop Monitor"
   option_2="󰍹 External Monitor"
+  option_4="󰍹 Display Configuration"
   option_3="󰍺 Dual Monitors"
 
   # Rofi CMD
@@ -18,7 +19,7 @@ pkgs.writeShellScriptBin "monitors" ''
 
   # Pass variables to rofi dmenu
   run_rofi() {
-    echo -e "$option_1\n$option_2\n$option_3" | rofi_cmd
+    echo -e "$option_1\n$option_2\n$option_3\n$option_4" | rofi_cmd
   }
 
   # Execute Command
@@ -33,6 +34,8 @@ pkgs.writeShellScriptBin "monitors" ''
     elif [[ "$1" == '--opt3' ]]; then
       wlr-randr --output eDP-1 --on
       wlr-randr --output HDMI-A-1 --on
+    elif [[ "$1" == '--opt4' ]]; then
+      wdisplays
     fi
   }
 
@@ -47,6 +50,9 @@ pkgs.writeShellScriptBin "monitors" ''
       ;;
     $option_3)
       run_cmd --opt3
+      ;;
+    $option_4)
+      run_cmd --opt4
       ;;
   esac
 ''
