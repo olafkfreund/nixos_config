@@ -21,7 +21,7 @@
     ../../modules/development/default.nix
     ../../modules/system-tweaks/kernel-tweaks/64GB-SYSTEM/64gb-system.nix
   ];
-  
+
   aws.packages.enable = true;
   azure.packages.enable = true;
   cloud-tools.packages.enable = true;
@@ -49,7 +49,7 @@
   programs.obsidian.enable = lib.mkForce true;
   programs.office.enable = lib.mkForce true;
   programs.webcam.enable = lib.mkForce true;
-  
+
   # Virtualization tools
   services.docker.enable = lib.mkForce true;
   services.incus.enable = lib.mkForce false;
@@ -57,7 +57,7 @@
   services.spice.enable = lib.mkForce true;
   services.libvirt.enable = lib.mkForce true;
   services.sunshine.enable = lib.mkForce true;
-  
+
   # Password management
   security.onepassword.enable = lib.mkForce true;
   security.gnupg.enable = lib.mkForce true;
@@ -65,13 +65,14 @@
   # VPN
   vpn.tailscale.enable = lib.mkForce true;
 
-  # AI 
+  # AI
   ai.ollama.enable = lib.mkForce true;
 
   # Printing
   services.print.enable = lib.mkForce true;
 
-
+  # security
+  security.intune-portal.enable = lib.mkForce true;
 
   services = {
     xserver = {
@@ -157,12 +158,13 @@
   services.playerctld.enable = true;
   services.fwupd.enable = true;
   services.ollama.acceleration = "cuda";
-  
+
   hardware.nvidia-container-toolkit.enable = true;
-  
+
   networking.firewall.enable = false;
   networking.nftables.enable = true;
   networking.timeServers = ["pool.ntp.org"];
 
   system.stateVersion = "24.11";
+  
 }

@@ -13,5 +13,7 @@
     (import ./volume.nix {inherit pkgs;})
     (import ./powermenu.nix {inherit pkgs;})
     (import ./hyprkeys.nix {inherit pkgs;})
+    (import ./time.nix {inherit pkgs;})
+    (import ./notify_count.nix {inherit pkgs;})
   ];
 }

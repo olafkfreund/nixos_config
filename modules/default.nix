@@ -31,6 +31,7 @@
     ./desktop/vnc/default.nix
     ./obsidian/default.nix
     ./office/default.nix
+    ./intune-portal/default.nix
 
   ];
 

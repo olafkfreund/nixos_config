@@ -27,7 +27,7 @@
     windowrulev2 = workspace special:tmux, float, title:^(tmux-sratch)
 
     #thunderbird
-    windowrulev2 = float,class:(thunderbird)
+    windowrulev2 = size 70% 70%,float,class:(thunderbird)
     windowrulev2 = size 70% 70%,float,class:^(thunderbird)$,title:^(.*)(Reminder)(.*)$
     windowrulev2 = float,class:^(thunderbird)$,title:^(.*)(Write)(.*)$
 
@@ -35,6 +35,7 @@
     windowrulev2 = workspace 2, float, class:(google-chrome)
     windowrulev2 = workspace special:spotify, class:^(Spotify)$
     windowrulev2 = float,size 900 500,title:^(Choose Files)
+    windowrulev2 = float,size 900 500,title:^(Sign in)
     windowrulev2 = workspace 4, class:^(Edge)$
 
     #Pavucontrol

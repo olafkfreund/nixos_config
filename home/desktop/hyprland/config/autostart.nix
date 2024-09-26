@@ -8,6 +8,8 @@
     # Set cursor theme
     exec-once = hyprctl setcursor Bibata-Modern-Ice 24
 
+    # swww wallpaper
+    exec-once = swww init & sleep 0.1 & swww img /home/olafkfreund/Pictures/wallhaven-2yqzd9.jpg --transition-type center
     # Start GNOME Keyring for secure storage of passwords and keys
     exec-once = gnome-keyring-daemon --start --components=secrets
 
@@ -58,7 +60,7 @@
     exec-once = wl-paste --type image --watch cliphist store # Store image data
 
     # Generate keybinds and exec commands for reference
-    exec-once = $keybinds = $(hyprkeys -bjl | jq '.Binds | map(.Bind + " -> " + .Dispatcher + ", " + .Command)'[] -r)
-    exec-once = $execs = $(hyprkeys -aj | jq '.AutoStart | map("[" + .ExecType + "] " + .Command)'[] -r)
+    # exec-once = $keybinds = $(hyprkeys -bjl | jq '.Binds | map(.Bind + " -> " + .Dispatcher + ", " + .Command)'[] -r)
+    # exec-once = $execs = $(hyprkeys -aj | jq '.AutoStart | map("[" + .ExecType + "] " + .Command)'[] -r)
   '';
 }

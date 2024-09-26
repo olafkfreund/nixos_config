@@ -38,6 +38,7 @@ in {
       pkgs.nvd
       pkgs.nix-output-monitor
       pkgs.nixd
+      pkgs.nix-search-cli
       pkgs.nix-zsh-completions
       pkgs.nix-bash-completions
       pkgs.nix-output-monitor
