@@ -7,26 +7,33 @@
     windowrulev2 = size 1000 1000, class:(kitty)
     windowrulev2 = float, class:(wezterm)
     windowrulev2 = size 1000 1000, class:(wezterm)
+    windowrulev2 = float, class:(foot)
+    windowrulev2 = size 1000 1000, class:(foot)
+    windowrule = animation slide left, class:^(foot)$
+
 
     # Window rules #
     windowrule = workspace current,title:MainPicker
     windowrule = workspace current,.blueman-manager-wrapped
     windowrule = workspace current,xdg-desktop-portal-gtk
-    windowrule = workspace current,thunderbird
 
     # Rofi
     # windowrulev2 = forceinput, class:(Rofi)$
+    windowrule = animation bounce, ^(rofi)$
 
     # Obsidian
     windowrulev2 = float, class:(obsidian)
 
     #Slack
     windowrulev2 = workspace special:slack, float, class:^(Slack)
+    windowrulev2 = workspace special:slack, size 50% 50%, float, tilte:^(Huddle)
 
     #Tmux
     windowrulev2 = workspace special:tmux, float, title:^(tmux-sratch)
 
     #thunderbird
+    windowrulev2 = workspace special:mail, class:^(thunderbird)$
+    windowrule = animation slide left, ^(thunderbird)$
     windowrulev2 = size 70% 70%,float,class:(thunderbird)
     windowrulev2 = size 70% 70%,float,class:^(thunderbird)$,title:^(.*)(Reminder)(.*)$
     windowrulev2 = float,class:^(thunderbird)$,title:^(.*)(Write)(.*)$
@@ -61,6 +68,9 @@
     windowrulev2 = float, class:(org.gnome.*)
     windowrulev2 = size 1000 1000, class:(org.gnome.*)
     windowrulev2 = center, class:(org.gnome.*)
+    windowrule = animation slide up`, ^(org.gnome.Calendar)$
+    windowrule = size 400 500,^(org.gnome.Calendar)$
+    windowrulev2 = move 480 45, class:^(org.gnome.Calendar)$
 
     windowrulev2 = float, class:(blueman-manager)
     windowrulev2 = center, class:(blueman-manager)

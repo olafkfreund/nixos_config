@@ -1,5 +1,5 @@
 let
-  browser = [ "google-chrome.desktop" ];
+  browser = [ "google-chrome-stable" ];
   archiveManager = [ "archive" ];
   imageViewer = [ "feh" ];
 in
@@ -20,13 +20,13 @@ in
     "x-scheme-handler/https" = browser;
     "x-scheme-handler/unknown" = browser;
 
-    "audio/*" = [ "mpv.desktop" ];
-    "video/*" = [ "mpv.dekstop" ];
-    "image/*" = [ "org.gnome.Loupe.desktop" ];
+    "audio/*" = [ "mpv" ];
+    "video/*" = [ "mpv" ];
+    "image/*" = [ "feh" ];
 
     "application/json" = browser;
 
-    "application/pdf" = [ "org.pwmt.zathura.desktop.desktop" ];
+    "application/pdf" = [ "zathura" ];
 
     # Archives / compressed files
     "application/x-7z-compressed" = archiveManager;

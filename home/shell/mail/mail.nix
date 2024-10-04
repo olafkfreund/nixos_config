@@ -1,7 +1,6 @@
 { pkgs, pkgs-stable, ... }: {
 
 home.packages = with pkgs; [
-  mutt
   mutt-ics
   mutt-wizard
   notmuch

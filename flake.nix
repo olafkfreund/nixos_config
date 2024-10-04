@@ -160,6 +160,7 @@
                 neovim.enable = false;
                 hyprpaper.enable = false;
                 hyprland.enable = false;
+                spicetify.enable = false;
               };
             }
           ];

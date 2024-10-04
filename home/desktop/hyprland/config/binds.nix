@@ -14,6 +14,8 @@
        bind = $mainMod, E, exec, [float]foot yazi
        bind = $mainMod, T, exec, foot
        bind = $mainMod CTRL, M, exec, monitors
+       bind = $mainMod CTRL, Y, exec, [float]foot yai
+       bind = $mainMod CTRL, M, exec, monitors
        bind = $mainMod, backspace, exec, rofi-hyprkeys
        bind = $mainMod, RETURN, exec,[float; size 50% 50%; center]foot
        bind = $mainMod, space, exec, rofi -show drun

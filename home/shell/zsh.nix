@@ -210,6 +210,7 @@
 
     envExtra = ''
       export TERM=xterm-256color
+      export BROWSER=google-chrome-stable
     '';
 
     oh-my-zsh = {

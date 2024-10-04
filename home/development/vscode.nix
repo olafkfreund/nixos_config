@@ -22,7 +22,6 @@ in {
     programs.vscode.extensions = with pkgs; [
       vscode-extensions.bbenoist.nix
       vscode-extensions.kamadorueda.alejandra
-      vscode-extensions.vscodevim.vim
       vscode-extensions.tailscale.vscode-tailscale
       vscode-extensions.skellock.just
       vscode-extensions.redhat.vscode-yaml

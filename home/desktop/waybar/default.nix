@@ -29,18 +29,17 @@
         ];
 
         "modules-right" = [
-          "idle_inhibitor"
           "network"
-          "battery"
           "bluetooth"
           "custom/swaync"
           "power-profiles-daemon"
           "cpu"
           "memory"
+          "idle_inhibitor"
           "pulseaudio"
           "pulseaudio#microphone"
+          "battery"
           "custom/weather"
-          "tray"
           "custom/powermenu"
         ];
 
@@ -168,8 +167,8 @@
 
         "network" = {
           format = "{ifname} {ipaddr} ";
-          format-wifi = " 󰖩 ";
-          format-ethernet = " 󰈀 ";
+          format-wifi = "󰖩 ";
+          format-ethernet = "󰈀 ";
           tooltip-format = "{ipaddr}  {bandwidthUpBytes}  {bandwidthDownBytes}";
           format-linked = "{ifname} (No IP)";
           format-disconnected = " 󰌙 ";
@@ -419,14 +418,14 @@
         }
 
         #power-profiles-daemon {
-          background-color: #8ec07c;
+          background-color:  #689d6a;
           color: #282828;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 14px;
           font-weight: bold;
           border: none;
-          border-bottom: 8px solid #689d6a;
-          border-left: 6px solid #689d6a;
+          border-bottom: 8px solid  #518554;
+          border-left: 6px solid  #518554;
           border-radius: 5px;
           margin-bottom: 2px;
         }
@@ -471,16 +470,19 @@
         }
 
         #network {
-          background-color: #98bbad;
-          color: #282828;
+          background-color: #ec7024;
+          color:  #282828;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 14px;
           font-weight: bold;
           border: none;
-          border-bottom: 8px solid  #80a295;
-          border-left: 6px solid  #80a295;
+          border-bottom: 8px solid #d05806;
+          border-left: 6px solid #d05806;
           border-radius: 5px;
           margin-bottom: 2px;
+          padding-left: 12px;
+          padding-right: 9px;
+          
         }
 
         #idle_inhibitor {
@@ -558,14 +560,14 @@
         }
 
         #memory {
-          background-color:  #c8779b;
+          background-color:  #689d6a;
           color: #282828;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 14px;
           font-weight: bold;
           border: none;
-          border-bottom: 8px solid#b16286;
-          border-left: 6px solid#b16286;
+          border-bottom: 8px solid  #518554;
+          border-left: 6px solid  #518554;
           border-radius: 5px;
           margin-bottom: 2px;
         }
