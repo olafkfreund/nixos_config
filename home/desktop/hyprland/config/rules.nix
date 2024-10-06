@@ -26,7 +26,7 @@
 
     #Slack
     windowrulev2 = workspace special:slack, float, class:^(Slack)
-    windowrulev2 = workspace special:slack, size 50% 50%, float, tilte:^(Huddle)
+    windowrulev2 = workspace special:slack,size 50% 50%,float,class:^(Slack),tilte:^(Huddle)
 
     #Tmux
     windowrulev2 = workspace special:tmux, float, title:^(tmux-sratch)

@@ -12,6 +12,7 @@
     pkgs-stable.castero # Podcasts
     pkgs.gnome-podcasts # Podcasts
     pkgs.hypnotix
+    pkgs.parabolic
 
   ];
 

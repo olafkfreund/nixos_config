@@ -22,5 +22,6 @@
     mapscii
     tdf
     nb
+    hugo
   ];
 }
