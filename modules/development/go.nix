@@ -16,7 +16,7 @@ in {
       pkgs.go
       pkgs.gopls
       pkgs.gore
-      pkgs.go-task
+      # pkgs.go-task
       pkgs.timoni
     ] ++ cfg.packages;
   };

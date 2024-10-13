@@ -12,14 +12,14 @@ in
   programs.mpv = {
     scripts = with pkgs.mpvScripts; [
       # from nixpkgs
-      cutter # cut and automatically concat videos
+      # cutter # cut and automatically concat videos
       mpris # MPRIS plugin
-      thumbnail # OSC seekbar thumbnails
-      thumbfast # on-the-fly thumbnailer
-      sponsorblock # skip sponsored segments
-      uosc # proximity UI
-      quality-menu # ytdl-format quality menu
-      seekTo # seek to specific pos.
+      # thumbnail # OSC seekbar thumbnails
+      # thumbfast # on-the-fly thumbnailer
+      # sponsorblock # skip sponsored segments
+      # uosc # proximity UI
+      # quality-menu # ytdl-format quality menu
+      # seekTo # seek to specific pos.
 
       # from nyxpkgs
       # inputs'.nyxpkgs.packages.mpv-history # save a history of played files with timestamps

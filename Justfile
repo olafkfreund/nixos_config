@@ -25,5 +25,8 @@ lms:
 dex5550:
     nixos-rebuild switch --flake .#dex5550 --target-host dex5550 --build-host dex5550 --use-remote-sudo
 
+p510:
+    nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --use-remote-sudo
+
 
 

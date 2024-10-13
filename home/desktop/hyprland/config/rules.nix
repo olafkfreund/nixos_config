@@ -34,7 +34,7 @@
     #thunderbird
     windowrulev2 = workspace special:mail, class:^(thunderbird)$
     windowrule = animation slide left, ^(thunderbird)$
-    windowrulev2 = size 70% 70%,float,class:(thunderbird)
+    windowrulev2 = size 70% 70%,float,class:(thunderbird)$
     windowrulev2 = size 70% 70%,float,class:^(thunderbird)$,title:^(.*)(Reminder)(.*)$
     windowrulev2 = float,class:^(thunderbird)$,title:^(.*)(Write)(.*)$
 

@@ -36,7 +36,7 @@ in {
       pkgs.terraform-providers.openstack
       pkgs.terraform-providers.kubernetes
       pkgs.terraform-providers.digitalocean
-      pkgs.checkov
+      # pkgs.checkov
       pkgs.terrascan
       pkgs.terranix # terrafrom by nix
     ];
