@@ -161,6 +161,7 @@
                 hyprpaper.enable = false;
                 hyprland.enable = false;
                 spicetify.enable = false;
+                sway.enable = true;
               };
             }
           ];

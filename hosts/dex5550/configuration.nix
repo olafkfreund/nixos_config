@@ -17,37 +17,37 @@
     ../../modules/system-tweaks/kernel-tweaks/32GB-SYSTEM/32GB-SYSTEM.nix
   ];
 
-  aws.packages.enable = true;
-  azure.packages.enable = true;
-  cloud-tools.packages.enable = true;
-  google.packages.enable = true;
-  k8s.packages.enable = true;
+  aws.packages.enable = lib.mkForce false;
+  azure.packages.enable = lib.mkForce false;
+  cloud-tools.packages.enable = lib.mkForce false;
+  google.packages.enable = lib.mkForce false;
+  k8s.packages.enable = lib.mkForce false;
   # openshift.packages.enable = true;
-  terraform.packages.enable = true;
+  terraform.packages.enable = lib.mkForce false;
 
   # Development tools
-  ansible.development.enable = true;
-  cargo.development.enable = true;
-  github.development.enable = true;
-  go.development.enable = true;
-  java.development.enable = true;
-  lua.development.enable = true;
-  nix.development.enable = true;
-  shell.development.enable = true;
-  devshell.development.enable = true;
-  python.development.enable = true;
-  nodejs.development.enable = true;
+  ansible.development.enable = lib.mkForce false;
+  cargo.development.enable = lib.mkForce true;
+  github.development.enable = lib.mkForce true;
+  go.development.enable = lib.mkForce true;
+  java.development.enable = lib.mkForce false;
+  lua.development.enable = lib.mkForce true;
+  nix.development.enable = lib.mkForce true;
+  shell.development.enable = lib.mkForce true;
+  devshell.development.enable = lib.mkForce true;
+  python.development.enable = lib.mkForce true;
+  nodejs.development.enable = lib.mkForce true;
 
   # Git tools
   programs.lazygit.enable = lib.mkForce true;
-  programs.thunderbird.enable = lib.mkForce true;
-  programs.obsidian.enable = lib.mkForce true;
-  programs.office.enable = lib.mkForce true;
+  programs.thunderbird.enable = lib.mkForce false;
+  programs.obsidian.enable = lib.mkForce false;
+  programs.office.enable = lib.mkForce false;
   programs.webcam.enable = lib.mkForce true;
 
   # Virtualization tools
   services.docker.enable = lib.mkForce true;
-  services.incus.enable = lib.mkForce true;
+  services.incus.enable = lib.mkForce false;
   services.podman.enable = lib.mkForce true;
   services.spice.enable = lib.mkForce true;
   services.libvirt.enable = lib.mkForce true;
@@ -64,7 +64,7 @@
   ai.ollama.enable = lib.mkForce false;
 
   # Printing
-  services.print.enable = lib.mkForce true;
+  services.print.enable = lib.mkForce false;
 
   services.xserver = {
     enable = true;

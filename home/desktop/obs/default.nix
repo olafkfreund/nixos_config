@@ -3,6 +3,7 @@
   config,
   lib,
   pkgs,
+  pkgs-stable,
   ...
 }: 
 with lib; let
@@ -17,7 +18,7 @@ in {
   config = mkIf cfg.enable {
     programs.obs-studio = {
       enable = true;
-      plugins = with pkgs.obs-studio-plugins; [
+      plugins = with pkgs-stable.obs-studio-plugins; [
         wlrobs
         obs-backgroundremoval
         obs-pipewire-audio-capture

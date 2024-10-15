@@ -8,7 +8,9 @@
     inputs.ags.homeManagerModules.default
     inputs.spicetify-nix.homeManagerModules.default
 
-    ../../home/servers.nix
+    ../../home/desktop.nix
+    ../../hosts/hp/nixos/hypr_override.nix
+    ../../home/desktop/sway/default.nix
     ./private.nix
   ];
 
@@ -41,7 +43,7 @@
 
   # Wayland apps
   desktop.zathura.enable = lib.mkForce true;
-  desktop.dunst.enable = lib.mkForce true;
+  desktop.dunst.enable = lib.mkForce false;
   desktop.rofi.enable = lib.mkForce true;
   swaylock.enable = lib.mkForce false;
   desktop.screenshots.flameshot.enable = lib.mkForce false;

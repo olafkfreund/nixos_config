@@ -1,5 +1,4 @@
-{ ...
-}: {
+{pkgs, ...}: {
   time.timeZone = "Europe/London";
 
   i18n.defaultLocale = "en_GB.UTF-8";
@@ -15,7 +14,7 @@
     LC_TIME = "en_GB.UTF-8";
   };
   console.keyMap = "uk";
-  console.font = "DejaVuSansMono 12";
+  console.font = "${pkgs.terminus_font}/share/consolefonts/ter-u28n.psf.gz";
   services.xserver = {
     xkb.layout = "gb";
     xkb.variant = "";

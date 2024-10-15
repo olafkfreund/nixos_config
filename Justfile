@@ -14,19 +14,19 @@ gc:
     sudo nix-collect-garbage --delete-old
 
 g3:
-    nixos-rebuild switch --flake .#g3 --target-host g3 --build-host g3 --use-remote-sudo 
+    nixos-rebuild switch --flake .#g3 --target-host g3 --build-host g3 --use-remote-sudo --impure
 
 hp:
-    nixos-rebuild switch --flake .#hp --target-host hp --build-host hp --use-remote-sudo 
+    nixos-rebuild switch --flake .#hp --target-host hp --build-host hp --use-remote-sudo --impure 
 
 lms:
-    nixos-rebuild switch --flake .#lms --target-host lms --build-host lms --use-remote-sudo
+    nixos-rebuild switch --flake .#lms --target-host lms --build-host lms --use-remote-sudo --impure
 
 dex5550:
-    nixos-rebuild switch --flake .#dex5550 --target-host dex5550 --build-host dex5550 --use-remote-sudo
+    nixos-rebuild switch --flake .#dex5550 --target-host dex5550 --build-host dex5550 --use-remote-sudo --impure
 
 p510:
-    nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --use-remote-sudo
+    nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --use-remote-sudo --impure
 
 
 

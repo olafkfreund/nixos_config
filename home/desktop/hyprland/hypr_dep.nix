@@ -1,31 +1,31 @@
-{pkgs, ...}: {
-  home.packages = with pkgs; [
-    eww
-    swww
-    cliphist
-    grim
-    slurp
-    swayidle
-    swaylock
-    swaybg
-    wf-recorder
-    swappy
-    hyprnome
-    hyprshot
-    hyprdim
-    hyprlock
-    hypridle
-    emote
-    python312Packages.requests
-    betterlockscreen
-    watershot
-    xdg-utils
-    glib
-    hyprkeys
-    nwg-displays
-    kanshi
-    wl-clipboard
-    wl-screenrec
-    hyprcursor
+{pkgs, pkgs-stable, ...}: {
+  home.packages = [
+    pkgs.eww
+    pkgs.swww
+    pkgs-stable.cliphist
+    pkgs.grim
+    pkgs.slurp
+    pkgs.swayidle
+    pkgs.swaylock
+    pkgs.swaybg
+    pkgs.wf-recorder
+    pkgs.swappy
+    pkgs.hyprnome
+    pkgs.hyprshot
+    pkgs.hyprdim
+    pkgs.hyprlock
+    pkgs.hypridle
+    pkgs.emote
+    pkgs.python312Packages.requests
+    pkgs.betterlockscreen
+    pkgs.watershot
+    pkgs.xdg-utils
+    pkgs.glib
+    pkgs.hyprkeys
+    pkgs.nwg-displays
+    pkgs.kanshi
+    pkgs.wl-clipboard
+    pkgs.wl-screenrec
+    pkgs.hyprcursor
   ];
 }

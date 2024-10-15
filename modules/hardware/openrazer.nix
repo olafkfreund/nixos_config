@@ -6,7 +6,6 @@
 
   environment.systemPackages = with pkgs; [
     razergenie
-    polychromatic
     gobject-introspection
     wrapGAppsHook3 
     python312Packages.wrapPython

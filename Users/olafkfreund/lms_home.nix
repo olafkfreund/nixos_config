@@ -8,6 +8,8 @@
     inputs.spicetify-nix.homeManagerModules.default
 
     ../../home/desktop.nix
+    ../../hosts/lms/nixos/hypr_override.nix
+    ../../home/desktop/sway/default.nix
     ./private.nix
   ];
 

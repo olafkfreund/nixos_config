@@ -1,6 +1,6 @@
-{ inputs, config, lib, pkgs, ... }: {
+{ inputs, config, lib, pkgs-stable, ... }: {
 
-environment.systemPackages = with pkgs; [
+environment.systemPackages = with pkgs-stable; [
  
   kdePackages.xdg-desktop-portal-kde
   kdePackages.polkit-kde-agent-1

@@ -33,19 +33,19 @@
   home.stateVersion = "24.11";
   programs.home-manager.enable = true;
 
-  programs.obs.enable = lib.mkForce true;
-  programs.kdeconnect.enable = lib.mkForce true;
-  programs.slack.enable = lib.mkForce true;
+  programs.obs.enable = lib.mkForce false;
+  programs.kdeconnect.enable = lib.mkForce false;
+  programs.slack.enable = lib.mkForce false;
   # Terminals
-  alacritty.enable = lib.mkForce true;
+  alacritty.enable = lib.mkForce false;
   foot.enable = lib.mkForce true;
-  wezterm.enable = lib.mkForce true;
-  kitty.enable = lib.mkForce true;
+  wezterm.enable = lib.mkForce false;
+  kitty.enable = lib.mkForce false;
 
   # Wayland apps
   desktop.zathura.enable = lib.mkForce true;
   desktop.sway.enable = lib.mkForce true;
-  desktop.dunst.enable = lib.mkForce true;
+  desktop.dunst.enable = lib.mkForce false;
   desktop.rofi.enable = lib.mkForce true;
   swaylock.enable = lib.mkForce false;
   desktop.screenshots.flameshot.enable = lib.mkForce true;
@@ -55,14 +55,14 @@
   # Browsers
   browsers.chrome.enable = lib.mkForce true;
   browsers.firefox.enable = lib.mkForce true;
-  browsers.edge.enable = lib.mkForce true;
-  browsers.brave.enable = lib.mkForce true;
-  browsers.opera.enable = lib.mkForce true;
+  browsers.edge.enable = lib.mkForce false;
+  browsers.brave.enable = lib.mkForce false;
+  browsers.opera.enable = lib.mkForce false;
 
   # Editors
-  editor.cursor.enable = lib.mkForce true;
+  editor.cursor.enable = lib.mkForce false;
   editor.neovim.enable = lib.mkForce true;
-  editor.vscode.enable = lib.mkForce true;
+  editor.vscode.enable = lib.mkForce false;
 
   # Shell tools
   cli.bat.enable = lib.mkForce true;
