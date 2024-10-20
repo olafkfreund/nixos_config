@@ -44,7 +44,7 @@ in {
       OVMFFull
       kvmtool
       libvirt
-      multipass
+      # multipass
       spice
       spice-gtk
       spice-protocol

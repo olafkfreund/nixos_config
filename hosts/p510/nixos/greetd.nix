@@ -10,7 +10,7 @@
       user = "olafkfreund";
     };
     session_sway = {
-      command = "${lib.getExe config.programs.sway.package}";
+      command = "${lib.getExe config.programs.sway.package} --unsupported-gpu";
       user = "olafkfreund";
     };
     session_dwm = {

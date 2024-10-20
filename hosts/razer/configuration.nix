@@ -164,6 +164,8 @@
   networking.firewall.enable = false;
   networking.nftables.enable = true;
   networking.timeServers = ["pool.ntp.org"];
+  
+  nixpkgs.config.permittedInsecurePackages = [ "olm-3.2.16" ];
 
   system.stateVersion = "24.11";
   

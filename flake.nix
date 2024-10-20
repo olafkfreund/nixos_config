@@ -9,6 +9,7 @@
       "https://hyprland.cachix.org"
       "https://devenv.cachix.org"
       "https://cosmic.cachix.org/"
+      "https://cache.saumon.network/proxmox-nixos"
     ];
     trusted-public-keys = [
       "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
@@ -16,6 +17,7 @@
       "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
+      "proxmox-nixos:nveXDuVVhFDRFx8Dn19f1WDEaNRJjPrF2CPD2D+m1ys="
     ];
     extra-substituters = [
       # Nix community's cache server
@@ -94,6 +96,11 @@
     zjstatus = {
       url = "github:dj95/zjstatus";
     };
+
+    proxmox-nixos = {
+      url = "github:SaumonNet/proxmox-nixos";
+    };
+
   };
 
   outputs = {
@@ -113,6 +120,7 @@
     stylix,
     nix-index-database,
     zjstatus,
+    proxmox-nixos,
     ...
   } @ inputs: let
     username = "olafkfreund";
@@ -128,6 +136,10 @@
       modules = [
         ./hosts/${host}/configuration.nix
         nur.nixosModules.nur
+        proxmox-nixos.nixosModules.proxmox-ve
+        ({ system, ... }: {
+            nixpkgs.overlays = [ proxmox-nixos.overlays.x86_64-linux ];
+        })
         home-manager.nixosModules.home-manager
         inputs.nix-colors.homeManagerModules.default
         inputs.stylix.nixosModules.stylix
@@ -144,7 +156,7 @@
               system = "x86_64-linux";
               config.allowUnfree = true;
             };
-            inherit inputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control stylix nix-index-database nixpkgs-f2k home-manager nixpkgs-stable nix-colors nix-snapd host;
+            inherit inputs nixpkgs zen-browser proxmox-nixos zjstatus spicetify-nix ags agenix razer-laptop-control stylix nix-index-database nixpkgs-f2k home-manager nixpkgs-stable nix-colors nix-snapd host;
           };
           home-manager.users.${username} = import ./Users/${username}/${host}_home.nix;
           home-manager.sharedModules = [
@@ -171,10 +183,10 @@
   in {
     nixosConfigurations = {
       razer = nixpkgs.lib.nixosSystem (makeNixosSystem "razer");
-      g3 = nixpkgs.lib.nixosSystem (makeNixosSystem "g3");
+      # g3 = nixpkgs.lib.nixosSystem (makeNixosSystem "g3");
       lms = nixpkgs.lib.nixosSystem (makeNixosSystem "lms");
       dex5550 = nixpkgs.lib.nixosSystem (makeNixosSystem "dex5550");
-      hp = nixpkgs.lib.nixosSystem (makeNixosSystem "hp");
+      # hp = nixpkgs.lib.nixosSystem (makeNixosSystem "hp");
       p510 = nixpkgs.lib.nixosSystem (makeNixosSystem "p510");
     };
   };

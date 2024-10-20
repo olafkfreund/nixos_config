@@ -42,6 +42,7 @@
 
   # Wayland apps
   desktop.zathura.enable = lib.mkForce true;
+  desktop.sway.enable = lib.mkForce true;
   desktop.dunst.enable = lib.mkForce true;
   desktop.rofi.enable = lib.mkForce true;
   swaylock.enable = lib.mkForce false;
