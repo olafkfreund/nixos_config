@@ -95,7 +95,28 @@ return {
       servers = {
         -- tsserver will be automatically installed with mason and loaded with lspconfig
         tsserver = {},
-      },
+        nixd = {
+          cmd = { "nixd", },
+          settings = {
+            nixd = {
+              nixpkgs = {
+                expr = "import <nixpkgs> { }",
+              },
+              formatting = {
+                command = { "nixfmt" },
+              },
+              options = {
+                nixos = {
+                  expr = '(builtins.getFlake "/home/olafkfreund/.config/nixos").nixosConfigurations.razer.options',
+                },
+                home_manager = {
+                  expr = '(builtins.getFlake "/home/olafkfreund/.config/nixos").homeConfigurations.razer.options',
+                },
+              },
+            },
+          },  
+        },
+      },  
       -- you can do any additional lsp server setup here
       -- return true if you don't want this server to be setup with lspconfig
       ---@type table<string, fun(server:string, opts:_.lspconfig.options):boolean?>

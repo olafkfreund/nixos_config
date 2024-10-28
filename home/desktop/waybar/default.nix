@@ -37,14 +37,15 @@
           "memory"
           "idle_inhibitor"
           "pulseaudio"
-          "pulseaudio#microphone"
+          # "pulseaudio#microphone"
           "battery"
-          "custom/weather"
+          "clock"
+          # "custom/weather"
           "custom/powermenu"
         ];
 
         "modules-center" = [
-          "clock"
+          # "clock"
         ];
 
         "memory" = {
@@ -390,14 +391,14 @@
         }
 
         #clock {
-          background-color: #98971a;
+          background-color: #5d9da0;
           color: #282828;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 14px;
           font-weight: bold;
           border: none;
-          border-bottom: 8px solid #828200;
-          border-left: 6px solid #828200;
+          border-bottom: 8px solid #458588;
+          border-left: 6px solid #458588;
           border-radius: 5px;
           margin-bottom: 2px;
         }

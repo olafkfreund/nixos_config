@@ -20,6 +20,7 @@ in {
       sqlcmd
       blobfuse
       rsync
+      dotnetCorePackages.sdk_9_0
       #Python packages needed by ansible
       python312Packages.azure-mgmt-authorization
       python312Packages.azure-mgmt-apimanagement

@@ -66,8 +66,8 @@ in {
           focused =
             unfocused
             // {
-              childBorder = "#282828";
-              border = "#282828";
+              childBorder = "#8ec07c";
+              border = "#8ec07c";
               background = "#282828";
               text = "#ebdbb2";
             };
@@ -146,7 +146,7 @@ in {
           }
           {
             block = "disk_space";
-            path = "/";
+            path = "/home";
             info_type = "available";
             interval = 60;
             warning = 20.0;
@@ -164,7 +164,7 @@ in {
             theme = "gruvbox-dark";
             overrides = {
               idle_bg = "#504945";
-              idle_fg = "#ebdbb2";
+              idle_fg = "#8ec07c";
             };
           };
         };

@@ -1,7 +1,4 @@
-{ pkgs, ... }:
-
-{
-
+{pkgs, ...}: {
   #---------------------------------------------------------------------
   # Custom fonts - Chris Titus && wimpysworld
   #---------------------------------------------------------------------
@@ -36,7 +33,7 @@
       nerd-font-patcher
       nerdfonts
       noto-fonts
-      noto-fonts-cjk
+      noto-fonts-cjk-sans
       noto-fonts-emoji
       # roboto
       # source-han-sans
@@ -48,11 +45,10 @@
       # roboto-mono
       # victor-mono
       # openmoji-color
-
     ];
 
     #---------------------------------------------------------------------
-    # Enable a basic set of fonts providing several font styles and 
+    # Enable a basic set of fonts providing several font styles and
     # families and reasonable coverage of Unicode.
     #---------------------------------------------------------------------
 
@@ -65,10 +61,10 @@
       useEmbeddedBitmaps = true;
 
       defaultFonts = {
-        emoji = [ "Joypixels" "Noto Color Emoji" ];
-        monospace = [ "FiraCode Nerd Font Mono" "SauceCodePro Nerd Font Mono" ];
-        sansSerif = [ "Work Sans" "Fira Sans" "FiraGO" ];
-        serif = [ "Source Serif" ];
+        emoji = ["Joypixels" "Noto Color Emoji"];
+        monospace = ["FiraCode Nerd Font Mono" "SauceCodePro Nerd Font Mono"];
+        sansSerif = ["Work Sans" "Fira Sans" "FiraGO"];
+        serif = ["Source Serif"];
       };
 
       hinting = {
@@ -81,8 +77,6 @@
         lcdfilter = "light";
         rgba = "rgb";
       };
-
     };
   };
-
 }

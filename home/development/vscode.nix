@@ -58,6 +58,25 @@ in {
       "editor.formatOnType" = true;
     };
     programs.vscode.userSettings = {
+      "window.menuBarVisibility" = "toggle";
+      # "workbench.sideBar.location" = "right";
+      "nix.serverPath" = "nixd";
+      "nix.enableLanguageServer" = true;
+      "nix.serverSettings" = {
+        "nixd" = {
+          "formatting" = {
+            "command" = ["alejandra"];
+          };
+          "options" = {
+            "nixos" = {
+              "expr" = "(builtins.getFlake \"/home/olafkfreund/.config/nixos\").nixosConfigurations.razer.options";
+            };
+            "home_manager" = {
+              "expr" = "(builtins.getFlake \"/home/olafkfreund/.config/nixos\").homeConfigurations.razer.options";
+            };
+          };
+        };
+      };
       "workbench.colorTheme" = "Gruvbox Minor Dark Medium";
       "alejandra.program" = "alejandra";
       "redhat.telemetry.enabled" = false;

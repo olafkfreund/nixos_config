@@ -22,7 +22,7 @@ in {
         style = "numbers,changes";
       };
       extraPackages = with pkgs.bat-extras; [
-        prettybat
+        # prettybat
         batman
         # batdiff
       ];
