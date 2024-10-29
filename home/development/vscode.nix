@@ -10,7 +10,7 @@ with lib; let
 in {
   options.editor.vscode = {
     enable = mkEnableOption {
-      default = false;
+      default = true;
       description = "vscode";
     };
   };

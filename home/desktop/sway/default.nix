@@ -26,13 +26,50 @@ in {
         output HEADLESS-1 pos 0 0 res 2560x1440
       '';
       extraSessionCommands = ''
+        export SDL_VIDEODRIVER=wayland
+        export QT_QPA_PLATFORM=wayland
+        export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
+        export _JAVA_AWT_WM_NONREPARENTING="1"
+        export MOZ_ENABLE_WAYLAND="1"
+        # export WLR_BACKENDS="headless,libinput"
+        # export WLR_LIBINPUT_NO_DEVICES="1"
+        export GTK_THEME=Gruvbox-Dark-B-LB      # Set GTK theme
+        export GDK_BACKEND="wayland,x11"
+        export QT_QPA_PLATFORM=wayland          # Set Qt platform to Wayland
+        export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"  # Disable window decorations in Qt Wayland
+        export QT_AUTO_SCREEN_SCALE_FACTOR="1"    # Enable automatic screen scaling for Qt
+        export QT_ENABLE_HIGHDPI_SCALING="1"      # Enable high DPI scaling for QT
+        # NixOS-specific settings
+        export NIXOS_WAYLAND="1"                 # Enable Wayland support in NixOS
+        export NIXOS_OZONE_W="1"                 # Enable Ozone Wayland support in NixOS
+        export ELECTRON_OZONE_PLATFORM_HINT=auto  # Set Electron to automatically choose between Wayland and X11
       '';
       config = {
+        # modifier = "Mod4";
+        bars = [
+          {command = "\${pkgs.waybar}/bin/waybar";}
+        ];
         terminal = "foot";
+        menu = "rofi -show drun";
         startup = [
           {command = "foot";}
           {command = "wayvnc 0.0.0.0";}
-          # {command = "waybar";}
+          {
+            command = "systemctl --user restart waybar";
+            always = true;
+          }
+          {command = "gsettings set org.gnome.desktop.interface cursor-theme 'Bibata-Modern-Ice'";}
+          {command = "gsettings set org.gnome.desktop.interface icon-theme 'Gruvbox-Material-Dark'";}
+          {command = "gsettings set org.gnome.desktop.interface gtk-theme 'Gruvbox-Material-Dark'";}
+          {command = "gnome-keyring-daemon --start --components=secrets";}
+          {command = "wl-paste --type text --watch cliphist store";}
+          {command = "wl-paste --type image --watch cliphist store";}
+          {command = "kdeconnectd";}
+          {command = "playerctld daemon";}
+          {command = "polkit-agent-helper-1";}
+          {command = ''$keybinds = $(hyprkeys -bjl | jq '.Binds | map(.Bind + " -> " + .Dispatcher + ", " + .Command)'[] -r)'';}
+          {command = ''$execs = $(hyprkeys -aj | jq '.AutoStart | map("[" + .ExecType + "] " + .Command)'[] -r)'';}
+          {command = "swww-daemon init & sleep 0.1 & swww img /home/olafkfreund/Pictures/wallpapers/gruvbox/hypr/gruv-portal-cake.png --transition-type center";}
         ];
         # output = {
         #   "*".bg = "/home/olafkfreund/Pictures/wallpapers/gruvbox/hypr/gruv-portal-cake.png fill";
@@ -75,98 +112,6 @@ in {
         window = {
           border = 2;
           titlebar = false;
-        };
-        bars = [
-          {
-            fonts = {
-              names = ["JetBrainsMono Nerd Font"];
-              size = 10.5;
-            };
-            colors = {
-              background = "#504945";
-              statusline = "#282828";
-              separator = "#282828";
-              focusedWorkspace = {
-                border = "#282828";
-                background = "#282828";
-                text = "#ebdbb2";
-              };
-
-              inactiveWorkspace = {
-                border = "#504945";
-                background = "#504945";
-                text = "#ebdbb2";
-              };
-
-              urgentWorkspace = {
-                border = "#504945";
-                background = "#504945";
-                text = "#fb4934";
-              };
-
-              bindingMode = {
-                border = "#8ec07c";
-                background = "#8ec07c";
-                text = "#ebdbb2";
-              };
-            };
-            mode = "dock";
-            position = "top";
-            trayOutput = "none";
-            statusCommand = "${pkgs.i3status-rust}/bin/i3status-rs ~/.config/i3status-rust/config-top.toml";
-          }
-        ];
-      };
-    };
-    programs.i3status-rust = {
-      enable = true;
-      bars.top = {
-        blocks = [
-          {
-            block = "custom";
-            command = "cat /etc/hostname";
-            interval = "once";
-          }
-          {
-            block = "custom";
-            command = "whoami";
-            interval = "once";
-          }
-          {
-            block = "cpu";
-            interval = 1;
-          }
-          {
-            block = "load";
-            format = " $icon $1m ";
-            interval = 1;
-          }
-          {
-            block = "memory";
-          }
-          {
-            block = "disk_space";
-            path = "/home";
-            info_type = "available";
-            interval = 60;
-            warning = 20.0;
-            alert = 10.0;
-          }
-          {
-            block = "time";
-            interval = 60;
-            format = " $timestamp.datetime(f:'%a %d/%m %R') ";
-          }
-        ];
-
-        settings = {
-          theme = {
-            theme = "gruvbox-dark";
-            overrides = {
-              idle_bg = "#504945";
-              idle_fg = "#8ec07c";
-            };
-          };
         };
       };
     };

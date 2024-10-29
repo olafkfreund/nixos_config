@@ -1,10 +1,7 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}: {
+{...}: {
   wayland.windowManager.hyprland.extraConfig = ''
+    #Start VNC server
+    exec-once = wayvnc 0.0.0.0
     # Set cursor theme
     exec-once = hyprctl setcursor Bibata-Modern-Ice 24
 
@@ -44,7 +41,7 @@
     exec-once = sudo swayosd-libinput-backend
 
     # Launch notification daemon (Dunst)
-    exec-once = killall dunst;sleep .5 & dunst
+    #exec-once = killall dunst;sleep .5 & dunst
 
     # Start KDE Connect CLI
     exec-once = kdeconnect-cli

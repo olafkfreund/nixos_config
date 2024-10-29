@@ -12,6 +12,7 @@
     ../../home/desktop.nix
     ../../hosts/dex5550/nixos/hypr_override.nix
     ../../home/desktop/sway/default.nix
+    ../../home/desktop/sway/swayosd.nix
     ./private.nix
   ];
 
@@ -23,13 +24,13 @@
     "$HOME/.local/bin"
   ];
   home = {
-      sessionVariables = {
-        XDG_CACHE_HOME = "\${HOME}/.cache";
-        XDG_CONFIG_HOME = "\${HOME}/.config";
-        XDG_BIN_HOME = "\${HOME}/.local/bin";
-        XDG_DATA_HOME = "\${HOME}/.local/share";
-      };
+    sessionVariables = {
+      XDG_CACHE_HOME = "\${HOME}/.cache";
+      XDG_CONFIG_HOME = "\${HOME}/.config";
+      XDG_BIN_HOME = "\${HOME}/.local/bin";
+      XDG_DATA_HOME = "\${HOME}/.local/share";
     };
+  };
   home.stateVersion = "24.11";
   programs.home-manager.enable = true;
 
@@ -78,4 +79,10 @@
   # Multiplexers
   multiplexer.tmux.enable = lib.mkForce true;
   multiplexer.zellij.enable = lib.mkForce true;
+
+  wayland.windowManager.sway = {
+    extraConfig = ''
+      output HEADLESS-1 pos 0 0 res 3840x2160
+    '';
+  };
 }

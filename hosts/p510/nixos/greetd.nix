@@ -13,10 +13,6 @@
       command = "${lib.getExe config.programs.sway.package} --unsupported-gpu";
       user = "olafkfreund";
     };
-    session_dwm = {
-      command = "startx $HOME/.config/chadwm/scripts/run.sh";
-      user = "olafkfreund";
-    };
   in {
     enable = true;
     settings = {

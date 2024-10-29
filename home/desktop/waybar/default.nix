@@ -26,6 +26,9 @@
         "modules-left" = [
           "hyprland/workspaces"
           "hyprland/window"
+          "sway/workspaces"
+          "sway/mode"
+          "sway/scratchpad"
         ];
 
         "modules-right" = [
@@ -78,6 +81,49 @@
         };
 
         "hyprland/workspaces" = {
+          format = "{icon}";
+          show-special = true;
+          on-click = "active";
+          active-only = false;
+          on-scroll-up = "${pkgs.hyprland}/bin/hyprctl dispatch workspace e-1";
+          on-scroll-down = "${pkgs.hyprland}/bin/hyprctl dispatch workspace e+1";
+          max-length = 45;
+          persistent-workspaces = {
+            "spotify" = [
+              "*"
+            ];
+            "mail" = [
+              "*"
+            ];
+            "tmux" = [
+              "*"
+            ];
+            "slack" = [
+              "*"
+            ];
+          };
+          "format-icons" = {
+            "1" = "1";
+            "2" = "2";
+            "3" = "3";
+            "4" = "4";
+            "5" = "5";
+            "6" = "6";
+            "7" = "7";
+            "8" = "8";
+            "9" = "9";
+            "10" = "10";
+            "magic" = "󱕴";
+            "hidden" = "󰐃";
+            "secret" = "󱕴";
+            "spotify" = " ";
+            "slack" = " ";
+            "mail" = " ";
+            "tmux" = " ";
+          };
+        };
+
+        "sway/workspaces" = {
           format = "{icon}";
           show-special = true;
           on-click = "active";
@@ -230,7 +276,7 @@
         "sway/mode" = {
           format = "<span style=\"italic\">{}</span>";
         };
-        
+
         "sway/scratchpad" = {
           format = "{icon} {count}";
           show-empty = false;
@@ -239,9 +285,9 @@
           tooltip-format = "{app}: {title}";
         };
 
-        "wlr/workspaces" = {
-          on-click = "activate";
-        };
+        # "wlr/workspaces" = {
+        #   on-click = "activate";
+        # };
 
         "custom/swaync" = {
           format = " ";
@@ -348,8 +394,8 @@
         #workspaces button {
           all: unset;
           border: none;
-          border-bottom: 8px solid #518554;
-          border-left: 6px solid #518554;
+          border-bottom: 4px solid #518554;
+          border-left: 4px solid #518554;
           border-radius: 5px;
           margin-left: 4px;
           margin-bottom: 2px;
@@ -366,161 +412,127 @@
         #workspaces button:hover {
           background: inherit;
           background-color: #8ec07c;
-          border-bottom: 8px solid #76a765;
-          border-left: 6px solid #76a765;
+          border-bottom: 4px solid #76a765;
+          border-left: 4px solid #76a765;
         }
 
         #workspaces button.active {
           background: inherit;
-          background-color: #7db37e;
-          border-bottom: 8px solid  #659a68;
-          border-left: 6px solid  #659a68;
+          background-color: #689d6a;
+          border-bottom: 4px solid #518554;
+          border-left: 4px solid #518554;
         }
 
         #custom-weather {
-          background-color:  #5d9da0;
-          color: #282828;
+          color: #ebdbb2;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 15px;
           font-weight: bold;
-          border: none;
-          border-bottom: 8px solid #458588;
-          border-left: 6px solid #458588;
           border-radius: 5px;
           margin-bottom: 2px;
         }
 
         #clock {
-          background-color: #5d9da0;
-          color: #282828;
-          font-family: JetBrainsMono Nerd Font, monospace;
-          font-size: 14px;
-          font-weight: bold;
-          border: none;
-          border-bottom: 8px solid #458588;
-          border-left: 6px solid #458588;
-          border-radius: 5px;
-          margin-bottom: 2px;
-        }
-
-        #custom-swaync {
-          background-color: #ec7024;
-          color:  #282828;
-          font-family: JetBrainsMono Nerd Font, monospace;
-          font-size: 14px;
-          font-weight: bold;
-          border: none;
-          border-bottom: 8px solid #d05806;
-          border-left: 6px solid #d05806;
-          border-radius: 5px;
-          margin-bottom: 2px;
-          padding-left: 12px;
-          padding-right: 9px;
-        }
-
-        #power-profiles-daemon {
-          background-color:  #689d6a;
-          color: #282828;
-          font-family: JetBrainsMono Nerd Font, monospace;
-          font-size: 14px;
-          font-weight: bold;
-          border: none;
-          border-bottom: 8px solid  #518554;
-          border-left: 6px solid  #518554;
-          border-radius: 5px;
-          margin-bottom: 2px;
-        }
-
-        #pulseaudio {
-          background-color: #f2b13c;
-          color: #282828;
-          font-family: JetBrainsMono Nerd Font, monospace;
-          font-size: 14px;
-          font-weight: bold;
-          border: none;
-          border-bottom: 8px solid  #d79921;
-          border-left: 6px solid  #d79921;
-          border-radius: 5px;
-          margin-bottom: 2px;
-        }
-
-        #pulseaudio.microphone {
-          background-color: #f2b13c;
-          color: #282828;
-          font-family: JetBrainsMono Nerd Font, monospace;
-          font-size: 14px;
-          font-weight: bold;
-          border: none;
-          border-bottom: 8px solid  #d79921;
-          border-left: 6px solid  #d79921;
-          border-radius: 5px;
-          margin-bottom: 2px;
-        }
-
-        #pulseaudio.muted {
-          background-color: #f2b13c;
-          color: #e23c2c;
-          font-family: JetBrainsMono Nerd Font, monospace;
-          font-size: 14px;
-          font-weight: bold;
-          border: none;
-          border-bottom: 8px solid  #d79921;
-          border-left: 6px solid  #d79921;
-          border-radius: 5px;
-          margin-bottom: 2px;
-        }
-
-        #network {
-          background-color: #ec7024;
-          color:  #282828;
-          font-family: JetBrainsMono Nerd Font, monospace;
-          font-size: 14px;
-          font-weight: bold;
-          border: none;
-          border-bottom: 8px solid #d05806;
-          border-left: 6px solid #d05806;
-          border-radius: 5px;
-          margin-bottom: 2px;
-          padding-left: 12px;
-          padding-right: 9px;
-          
-        }
-
-        #idle_inhibitor {
-          background-color: #f2b13c;
           color: #ebdbb2;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 14px;
           font-weight: bold;
           border: none;
-          border-bottom: 8px solid #d79921;
-          border-left: 6px solid #d79921;
+          border-radius: 5px;
+          margin-bottom: 2px;
+        }
+
+        #custom-swaync {
+          color:  #ebdbb2;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 14px;
+          font-weight: bold;
+          border: none;
+          border-radius: 5px;
+          margin-bottom: 2px;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+
+        #power-profiles-daemon {
+          color: #ebdbb2;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 14px;
+          font-weight: bold;
+          border: none;
+          border-radius: 5px;
+          margin-bottom: 2px;
+        }
+
+        #pulseaudio {
+          color: #ebdbb2;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 14px;
+          font-weight: bold;
+          border: none;
+          border-radius: 5px;
+          margin-bottom: 2px;
+        }
+
+        #pulseaudio.microphone {
+          color: #ebdbb2;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 14px;
+          font-weight: bold;
+          border: none;
+          border-radius: 5px;
+          margin-bottom: 2px;
+        }
+
+        #pulseaudio.muted {
+          color: #e23c2c;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 14px;
+          font-weight: bold;
+          border: none;
+          border-radius: 5px;
+          margin-bottom: 2px;
+        }
+
+        #network {
+          color:  #ebdbb2;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 14px;
+          font-weight: bold;
+          border: none;
+          border-radius: 5px;
+          margin-bottom: 2px;
+          padding-left: 5px;
+          padding-right: 5px;
+
+        }
+
+        #idle_inhibitor {
+          color: #ebdbb2;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 14px;
+          font-weight: bold;
+          border: none;
           border-radius: 5px;
           margin-bottom: 2px;
         }
 
         #idle_inhibitor.activated {
-          background-color: #f2b13c;
-          color: #282828;
+          color: #ebdbb2;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 14px;
           font-weight: bold;
           border: none;
-          border-bottom: 8px solid #d79921;
-          border-left: 6px solid #d79921;
           border-radius: 5px;
           margin-bottom: 2px;
         }
 
         #tray {
-          background-color: #ec7024;
-          color: #282828;
+          color: #ebdbb2;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 14px;
           font-weight: bold;
           border: none;
-          border-bottom: 8px solid #d05806;
-          border-left: 6px solid #d05806;
           border-radius: 5px;
           margin-bottom: 2px;
         }
@@ -535,53 +547,44 @@
         }
 
         #battery {
-          background-color: #5d9da0;
-          color: #282828;
+          color: #ebdbb2;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 14px;
           font-weight: bold;
           border: none;
-          border-bottom: 8px solid  #458588;
-          border-left: 6px solid  #458588;
           border-radius: 5px;
           margin-bottom: 2px;
         }
 
         #cpu {
-          background-color:  #689d6a;
-          color: #282828;
+          color: #ebdbb2;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 14px;
           font-weight: bold;
           border: none;
-          border-bottom: 8px solid  #518554;
-          border-left: 6px solid  #518554;
           border-radius: 5px;
           margin-bottom: 2px;
         }
 
         #memory {
-          background-color:  #689d6a;
-          color: #282828;
+          color: #ebdbb2;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 14px;
           font-weight: bold;
           border: none;
-          border-bottom: 8px solid  #518554;
-          border-left: 6px solid  #518554;
           border-radius: 5px;
           margin-bottom: 2px;
         }
 
         #custom-powermenu {
-          background-color: #e23c2c;
+          background-color: #689d6a;
           color: #282828;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 14px;
           font-weight: bold;
           border: none;
-          border-bottom: 8px solid #cc241d;
-          border-bottom: 6px solid #cc241d;
+          border-bottom: 4px solid #518554;
+          border-left: 4px solid #518554;
           border-radius: 5px;
           margin-bottom: 2px;
           margin-right: 4px;
@@ -605,14 +608,11 @@
         }
 
         #bluetooth {
-          background-color: #ec7024;
           color: #282828;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 14px;
           font-weight: bold;
           border: none;
-          border-bottom: 8px solid #d05806;
-          border-left: 6px solid #d05806;
           border-radius: 5px;
           margin-bottom: 2px;
         }

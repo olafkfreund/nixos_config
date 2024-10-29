@@ -11,6 +11,7 @@
     ../../home/default.nix
     ../../hosts/p510/nixos/hypr_override.nix
     ../../home/desktop/sway/default.nix
+    ../../home/desktop/sway/swayosd.nix
     ./private.nix
   ];
 
@@ -79,4 +80,11 @@
   # Multiplexers
   multiplexer.tmux.enable = lib.mkForce true;
   multiplexer.zellij.enable = lib.mkForce true;
+
+  wayland.windowManager.sway = {
+    extraConfig = ''
+      output HEADLESS-1 pos 0 0 res 3840x2160
+      output HDMI-A-1 pos 0 0 res 3840x2160
+    '';
+  };
 }

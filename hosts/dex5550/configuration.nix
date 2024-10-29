@@ -84,34 +84,34 @@
     useNetworkd = true;
   };
   programs.sway = {
-      enable = true;
-      xwayland.enable = true;
-      wrapperFeatures.gtk = true; # so that gtk works properly
-      extraPackages = with pkgs; [
-        wl-clipboard
-        wf-recorder
-        grim
-        slurp
-        dmenu # Dmenu is the default in the config but i recommend wofi since its wayland native
-        foot
-      ];
-      extraSessionCommands = ''
-        export SDL_VIDEODRIVER=wayland
-        export QT_QPA_PLATFORM=wayland
-        export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
-        export _JAVA_AWT_WM_NONREPARENTING=1
-        export WLR_BACKENDS="headless,libinput"
-        # export WLR_LIBINPUT_NO_DEVICES=1
-        export MOZ_ENABLE_WAYLAND=1
-      '';
-    };
+    enable = true;
+    xwayland.enable = true;
+    wrapperFeatures.gtk = true; # so that gtk works properly
+    extraPackages = with pkgs; [
+      wl-clipboard
+      wf-recorder
+      grim
+      slurp
+      dmenu # Dmenu is the default in the config but i recommend wofi since its wayland native
+      foot
+    ];
+    extraSessionCommands = ''
+      export SDL_VIDEODRIVER=wayland
+      export QT_QPA_PLATFORM=wayland
+      export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
+      export _JAVA_AWT_WM_NONREPARENTING=1
+      export WLR_BACKENDS="headless,libinput"
+      # export WLR_LIBINPUT_NO_DEVICES=1
+      export MOZ_ENABLE_WAYLAND=1
+    '';
+  };
 
   security.wrappers.sunshine = {
-        owner = "root";
-        group = "root";
-        capabilities = "cap_sys_admin+p";
-        source = "${pkgs.sunshine}/bin/sunshine";
-    };
+    owner = "root";
+    group = "root";
+    capabilities = "cap_sys_admin+p";
+    source = "${pkgs.sunshine}/bin/sunshine";
+  };
 
   systemd.network = {
     networks = {

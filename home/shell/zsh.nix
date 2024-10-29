@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}: {
+{pkgs, ...}: {
   home.packages = with pkgs; [
     zsh
     oh-my-zsh
@@ -18,7 +16,7 @@
       enable = true;
     };
     autosuggestion.enable = true;
-    
+
     zplug = {
       enable = true;
       plugins = [
@@ -115,17 +113,17 @@
       # bindkey '^[[1;3C' forward-word                  # Key Alt + Right
       # bindkey '^[[H' beginning-of-line                # Key Home
       # bindkey '^[[F' end-of-line                      # Key end-of-line
-      
+
       bindkey '^[|' zsh_gh_copilot_explain  # bind Alt+shift+\ to explain
       bindkey '^[\' zsh_gh_copilot_suggest  # bind Alt+\ to suggest
-      
+
       bindkey "^[[OH" beginning-of-line
       bindkey "^[[OF" end-of-line
       bind c-left         beginning-of-line
       bind c-right        end-of-line
       bind home           beginning-of-buffer
       bind end            end-of-buffer
-      
+
       bindkey -s ^f "tmux-sessionizer\n"
 
       # open commands in $EDITOR with C-e
@@ -249,7 +247,7 @@
       zellij = "zellij options --default-shell=zsh";
       neofetch = "neofetch --kitty ~/Pictures/wallpapers/Sexy_retro/ --size 300 --crop_mode fill";
       nhu = "nh os switch --update";
-      nhs = "nh os switch ";
+      nhs = "nh os switch -- --impure";
       today = "curl -s https://wttr.in/London";
       # wttr = "curl -s https://wttr.in/London?0";
       # code = "code --enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu";
