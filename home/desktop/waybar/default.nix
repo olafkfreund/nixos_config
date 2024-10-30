@@ -128,22 +128,12 @@
           show-special = true;
           on-click = "active";
           active-only = false;
-          on-scroll-up = "${pkgs.hyprland}/bin/hyprctl dispatch workspace e-1";
-          on-scroll-down = "${pkgs.hyprland}/bin/hyprctl dispatch workspace e+1";
-          max-length = 45;
           persistent-workspaces = {
-            "spotify" = [
-              "*"
-            ];
-            "mail" = [
-              "*"
-            ];
-            "tmux" = [
-              "*"
-            ];
-            "slack" = [
-              "*"
-            ];
+            "11" = [];
+            "12" = [];
+            "13" = [];
+            "14" = [];
+            "15" = [];
           };
           "format-icons" = {
             "1" = "1";
@@ -156,13 +146,12 @@
             "8" = "8";
             "9" = "9";
             "10" = "10";
-            "magic" = "󱕴";
-            "hidden" = "󰐃";
-            "secret" = "󱕴";
-            "spotify" = " ";
-            "slack" = " ";
-            "mail" = " ";
-            "tmux" = " ";
+            "11" = "󱕴";
+            "16" = "󰐃";
+            "12" = " ";
+            "13" = " ";
+            "14" = " ";
+            "15" = " ";
           };
         };
 
@@ -274,7 +263,8 @@
         };
 
         "sway/mode" = {
-          format = "<span style=\"italic\">{}</span>";
+          format = "{}";
+          max-length = 50;
         };
 
         "sway/scratchpad" = {
@@ -335,7 +325,6 @@
 
         window#waybar {
           background-color: #1f2223;
-          border-bottom: 8px solid #191c1d;
           color:  #ebdbb2;
           transition-property: background-color;
           transition-duration: .5s;
@@ -608,7 +597,7 @@
         }
 
         #bluetooth {
-          color: #282828;
+          color: #ebdbb2;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 14px;
           font-weight: bold;

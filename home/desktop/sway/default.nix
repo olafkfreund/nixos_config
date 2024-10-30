@@ -24,6 +24,9 @@ in {
       };
       extraConfig = ''
         output HEADLESS-1 pos 0 0 res 2560x1440
+        input * {
+          xkb_layout "gb"
+        }
       '';
       extraSessionCommands = ''
         export SDL_VIDEODRIVER=wayland
@@ -39,13 +42,12 @@ in {
         export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"  # Disable window decorations in Qt Wayland
         export QT_AUTO_SCREEN_SCALE_FACTOR="1"    # Enable automatic screen scaling for Qt
         export QT_ENABLE_HIGHDPI_SCALING="1"      # Enable high DPI scaling for QT
-        # NixOS-specific settings
         export NIXOS_WAYLAND="1"                 # Enable Wayland support in NixOS
         export NIXOS_OZONE_W="1"                 # Enable Ozone Wayland support in NixOS
-        export ELECTRON_OZONE_PLATFORM_HINT=auto  # Set Electron to automatically choose between Wayland and X11
+        export ELECTRON_OZONE_PLATFORM_HINT=wayland  # Set Electron to automatically choose between Wayland and X11
       '';
       config = {
-        # modifier = "Mod4";
+        modifier = "Mod4";
         bars = [
           {command = "\${pkgs.waybar}/bin/waybar";}
         ];
@@ -67,19 +69,21 @@ in {
           {command = "kdeconnectd";}
           {command = "playerctld daemon";}
           {command = "polkit-agent-helper-1";}
-          {command = ''$keybinds = $(hyprkeys -bjl | jq '.Binds | map(.Bind + " -> " + .Dispatcher + ", " + .Command)'[] -r)'';}
-          {command = ''$execs = $(hyprkeys -aj | jq '.AutoStart | map("[" + .ExecType + "] " + .Command)'[] -r)'';}
-          {command = "swww-daemon init & sleep 0.1 & swww img /home/olafkfreund/Pictures/wallpapers/gruvbox/hypr/gruv-portal-cake.png --transition-type center";}
+          {command = "swww-daemon";}
         ];
         # output = {
         #   "*".bg = "/home/olafkfreund/Pictures/wallpapers/gruvbox/hypr/gruv-portal-cake.png fill";
         #   "*".scale = "1";
         # };
-
+        assigns = {
+          "13" = [{app_id = "Slack";}];
+          "14" = [{app_id = "thunderbird";}];
+          "12" = [{app_id = "Spotify";}];
+        };
         focus = {followMouse = "always";};
         gaps = {
-          inner = 5;
-          outer = 5;
+          inner = 2;
+          outer = 2;
           smartGaps = true;
           smartBorders = "on";
         };

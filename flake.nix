@@ -96,11 +96,6 @@
     zjstatus = {
       url = "github:dj95/zjstatus";
     };
-
-    proxmox-nixos = {
-      url = "github:SaumonNet/proxmox-nixos";
-    };
-
   };
 
   outputs = {
@@ -120,7 +115,6 @@
     stylix,
     nix-index-database,
     zjstatus,
-    proxmox-nixos,
     ...
   } @ inputs: let
     username = "olafkfreund";
@@ -136,10 +130,6 @@
       modules = [
         ./hosts/${host}/configuration.nix
         nur.nixosModules.nur
-        proxmox-nixos.nixosModules.proxmox-ve
-        ({ system, ... }: {
-            nixpkgs.overlays = [ proxmox-nixos.overlays.x86_64-linux ];
-        })
         home-manager.nixosModules.home-manager
         inputs.nix-colors.homeManagerModules.default
         inputs.stylix.nixosModules.stylix
@@ -156,7 +146,7 @@
               system = "x86_64-linux";
               config.allowUnfree = true;
             };
-            inherit inputs nixpkgs zen-browser proxmox-nixos zjstatus spicetify-nix ags agenix razer-laptop-control stylix nix-index-database nixpkgs-f2k home-manager nixpkgs-stable nix-colors nix-snapd host;
+            inherit inputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control stylix nix-index-database nixpkgs-f2k home-manager nixpkgs-stable nix-colors nix-snapd host;
           };
           home-manager.users.${username} = import ./Users/${username}/${host}_home.nix;
           home-manager.sharedModules = [
@@ -173,7 +163,7 @@
                 hyprpaper.enable = false;
                 hyprland.enable = false;
                 spicetify.enable = false;
-                sway.enable = true;
+                sway.enable = false;
               };
             }
           ];

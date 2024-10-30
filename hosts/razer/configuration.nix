@@ -130,6 +130,12 @@
       };
     };
   };
+  # programs.sway = {
+  #   extraSessionCommands = ''
+  #     export WLR_RENDERER=vulkan
+  #     export WLR_DRM_DEVICES=/dev/dri/card2
+  #   '';
+  # };
 
   users.defaultUserShell = pkgs.zsh;
 
@@ -164,9 +170,8 @@
   networking.firewall.enable = false;
   networking.nftables.enable = true;
   networking.timeServers = ["pool.ntp.org"];
-  
-  nixpkgs.config.permittedInsecurePackages = [ "olm-3.2.16" ];
+
+  nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16"];
 
   system.stateVersion = "24.11";
-  
 }

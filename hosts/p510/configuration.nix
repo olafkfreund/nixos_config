@@ -15,7 +15,7 @@
     ../../modules/server.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
-    ../../modules/system-tweaks/kernel-tweaks/32GB-SYSTEM/32GB-SYSTEM.nix
+    ../../modules/system-tweaks/kernel-tweaks/64GB-SYSTEM/64gb-system.nix
   ];
 
   aws.packages.enable = lib.mkForce false;
@@ -62,7 +62,7 @@
   vpn.tailscale.enable = lib.mkForce true;
 
   # AI
-  ai.ollama.enable = lib.mkForce false;
+  ai.ollama.enable = lib.mkForce true;
 
   # Printing
   services.print.enable = lib.mkForce false;
@@ -82,8 +82,11 @@
     extraPackages = with pkgs; [
       swaylock
       swayidle
+      swaycons
       wl-clipboard
       wf-recorder
+      wlr-which-key
+      wlr-randr
       grim
       slurp
       foot
@@ -95,6 +98,8 @@
       export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
       export _JAVA_AWT_WM_NONREPARENTING=1
       export MOZ_ENABLE_WAYLAND=1
+      export WLR_RENDERER=vulkan
+      export WLR_DRM_DEVICES=/dev/dri/card1
       # export WLR_BACKENDS="headless,libinput"
       # export WLR_LIBINPUT_NO_DEVICES="1"
     '';
@@ -131,6 +136,10 @@
 
   users.defaultUserShell = pkgs.zsh;
 
+  qt.enable = true;
+  qt.platformTheme = "gtk2";
+  qt.style = "gtk2";
+
   environment.shells = with pkgs; [zsh];
 
   programs.zsh.enable = true;
@@ -153,6 +162,8 @@
   hardware.keyboard.zsa.enable = true;
 
   services.ollama.acceleration = "cuda";
+
+  nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16"];
 
   hardware.nvidia-container-toolkit.enable = true;
 

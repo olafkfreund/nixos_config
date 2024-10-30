@@ -23,12 +23,11 @@
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
-    # extraPackages = with pkgs; [
-    #   intel-media-driver # LIBVA_DRIVER_NAME=iHD
-    #   vaapiVdpau
-    #   libvdpau-va-gl
-    #   vulkan-validation-layers
-    # ];
+    extraPackages = with pkgs; [
+      vulkan-validation-layers
+      libva-vdpau-driver
+      nvidia-vaapi-driver
+    ];
   };
 
   environment = {

@@ -9,6 +9,8 @@
     inputs.spicetify-nix.homeManagerModules.default
 
     ../../home/default.nix
+    ../../home/desktop/sway/default.nix
+    ../../home/desktop/sway/swayosd.nix
     ./private.nix
   ];
 
@@ -44,8 +46,9 @@
   desktop.zathura.enable = lib.mkForce true;
   desktop.dunst.enable = lib.mkForce false;
   desktop.swaync.enable = lib.mkForce true;
+  desktop.sway.enable = lib.mkForce true;
   desktop.rofi.enable = lib.mkForce true;
-  swaylock.enable = lib.mkForce false;
+  swaylock.enable = lib.mkForce true;
   desktop.screenshots.flameshot.enable = lib.mkForce true;
   desktop.screenshots.kooha.enable = lib.mkForce true;
   desktop.remotedesktop.enable = lib.mkForce true;
@@ -55,7 +58,7 @@
   browsers.firefox.enable = lib.mkForce true;
   browsers.edge.enable = lib.mkForce true;
   browsers.brave.enable = lib.mkForce true;
-  browsers.opera.enable = lib.mkForce true;
+  browsers.opera.enable = lib.mkForce false;
 
   # Editors
   editor.cursor.enable = lib.mkForce true;

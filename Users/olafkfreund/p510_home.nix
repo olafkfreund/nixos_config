@@ -49,7 +49,7 @@
   desktop.dunst.enable = lib.mkForce false;
   desktop.swaync.enable = lib.mkForce true;
   desktop.rofi.enable = lib.mkForce true;
-  swaylock.enable = lib.mkForce false;
+  swaylock.enable = lib.mkForce true;
   desktop.screenshots.flameshot.enable = lib.mkForce true;
   desktop.screenshots.kooha.enable = lib.mkForce true;
   desktop.remotedesktop.enable = lib.mkForce true;
@@ -84,7 +84,7 @@
   wayland.windowManager.sway = {
     extraConfig = ''
       output HEADLESS-1 pos 0 0 res 3840x2160
-      output HDMI-A-1 pos 0 0 res 3840x2160
+      output DP-4 pos 0 0 res 3840x2160
     '';
   };
 }
