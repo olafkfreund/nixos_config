@@ -1,6 +1,11 @@
-{ pkgs, ... }: {
-home.packages = with pkgs; [
-  moonlight-qt
-  looking-glass-client
+{
+  pkgs,
+  pkgs-stable,
+  ...
+}: {
+  home.packages = with pkgs; [
+    moonlight-qt
+    # moonlight-embedded
+    looking-glass-client
   ];
 }

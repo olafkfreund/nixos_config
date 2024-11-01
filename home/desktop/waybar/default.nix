@@ -29,6 +29,7 @@
           "sway/workspaces"
           "sway/mode"
           "sway/scratchpad"
+          "hyprland/submap"
         ];
 
         "modules-right" = [
@@ -73,6 +74,12 @@
             activated = "󱐋 ";
             deactivated = "󰤄 ";
           };
+        };
+
+        "hyprland/submap" = {
+          format = "{}";
+          max-length = 8;
+          tooltip = false;
         };
 
         "custom/monitor" = {

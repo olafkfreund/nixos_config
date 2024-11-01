@@ -82,7 +82,9 @@
 
   wayland.windowManager.sway = {
     extraConfig = ''
-      output HEADLESS-1 pos 0 0 res 3840x2160
+      # output HEADLESS-1 pos 0 0 res 3840x2160
+      # output HDMI-0 pos 0 0 res 3840x2160
+      output DP-1 pos 0 0 res 3840x2160
     '';
   };
 }
