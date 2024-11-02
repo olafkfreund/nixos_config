@@ -86,7 +86,7 @@
       # output HEADLESS-1 pos 0 0 res 3840x2160
       # output HDMI-0 pos 0 0 res 3840x2160
       output DP-2 pos 0 0 res 3840x2160
-      output DP-4 pos 0 0 res 3840x2160
+      # output DP-4 pos 0 0 res 3840x2160
     '';
   };
 }

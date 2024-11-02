@@ -32,14 +32,14 @@
 
   environment = {
     systemPackages = with pkgs; [
-      nvidia-vaapi-driver
+      # nvidia-vaapi-driver
       libva
       libva-utils
-      glxinfo
-      clinfo
-      virtualglLib
-      vulkan-loader
-      vulkan-tools
+      # glxinfo
+      # clinfo
+      # virtualglLib
+      # vulkan-loader
+      # vulkan-tools
     ];
   };
 }
