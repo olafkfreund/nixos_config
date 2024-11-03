@@ -89,5 +89,6 @@
     mpdris2
     mpd-notification
     gptfdisk
+    icu
   ];
 }

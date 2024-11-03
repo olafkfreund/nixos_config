@@ -47,7 +47,7 @@ in {
       vscode-extensions.continue.continue
       vscode-extensions.bierner.markdown-preview-github-styles
       vscode-extensions.bierner.markdown-emoji
-      vscode-extensions.asvetliakov.vscode-neovim
+      # vscode-extensions.asvetliakov.vscode-neovim
       vscode-extensions.arrterian.nix-env-selector
     ];
 
@@ -61,6 +61,9 @@ in {
       "window.menuBarVisibility" = "toggle";
       # "workbench.sideBar.location" = "right";
       "nix.serverPath" = "nixd";
+      "gopls" = {
+        "ui.semanticTokens" = true;
+      };
       "nix.enableLanguageServer" = true;
       "nix.serverSettings" = {
         "nixd" = {
@@ -78,6 +81,7 @@ in {
         };
       };
       "workbench.colorTheme" = "Gruvbox Minor Dark Medium";
+      "workbench.iconTheme" = "gruvbox-material-icon-theme";
       "genieai.enableConversationHistory" = true;
       "alejandra.program" = "alejandra";
       "redhat.telemetry.enabled" = false;
