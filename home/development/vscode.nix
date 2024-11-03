@@ -78,6 +78,7 @@ in {
         };
       };
       "workbench.colorTheme" = "Gruvbox Minor Dark Medium";
+      "genieai.enableConversationHistory" = true;
       "alejandra.program" = "alejandra";
       "redhat.telemetry.enabled" = false;
       "extensions.experimental.affinity" = {

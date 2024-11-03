@@ -5,7 +5,7 @@
   pkgs,
   pkgs-stable,
   ...
-}: 
+}:
 with lib; let
   cfg = config.programs.obs;
 in {

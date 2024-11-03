@@ -1,4 +1,8 @@
-{pkgs, lib, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   imports = [
     ./nixos/hardware-configuration.nix
     ./nixos/power.nix
@@ -15,7 +19,7 @@
   ];
 
   aws.packages.enable = lib.mkForce false;
-  azure.packages.enable =lib.mkForce false;
+  azure.packages.enable = lib.mkForce false;
   cloud-tools.packages.enable = lib.mkForce false;
   google.packages.enable = lib.mkForce false;
   k8s.packages.enable = lib.mkForce true;
@@ -41,7 +45,7 @@
   programs.obsidian.enable = lib.mkForce false;
   programs.office.enable = lib.mkForce false;
   programs.webcam.enable = lib.mkForce false;
-  
+
   # Virtualization tools
   services.docker.enable = lib.mkForce true;
   services.incus.enable = lib.mkForce false;
@@ -49,7 +53,7 @@
   services.spice.enable = lib.mkForce true;
   services.libvirt.enable = lib.mkForce true;
   services.sunshine.enable = lib.mkForce true;
-  
+
   # Password management
   security.onepassword.enable = lib.mkForce false;
   security.gnupg.enable = lib.mkForce true;
@@ -57,19 +61,19 @@
   # VPN
   vpn.tailscale.enable = lib.mkForce true;
 
-  # AI 
+  # AI
   ai.ollama.enable = lib.mkForce false;
 
   # Printing
   services.print.enable = lib.mkForce false;
-  
+
   services.xserver = {
     enable = true;
     displayManager.xserverArgs = [
       "-nolisten tcp"
       "-dpi 96"
     ];
-    videoDrivers = [ "nvidia" ];
+    videoDrivers = ["nvidia"];
   };
 
   programs.sway = {
@@ -79,7 +83,6 @@
       swaylock
       swayidle
       wl-clipboard
-      wf-recorder
       grim
       slurp
       foot
@@ -97,17 +100,16 @@
       export WLR_LIBINPUT_NO_DEVICES="1"
     '';
   };
-  
+
   security.wrappers.sunshine = {
-        owner = "root";
-        group = "root";
-        capabilities = "cap_sys_admin+p";
-        source = "${pkgs.sunshine}/bin/sunshine";
+    owner = "root";
+    group = "root";
+    capabilities = "cap_sys_admin+p";
+    source = "${pkgs.sunshine}/bin/sunshine";
   };
-  
+
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
   systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
-
 
   networking.networkmanager.enable = true;
   networking.hostName = "hp";
@@ -150,9 +152,9 @@
     ];
   };
   hardware.keyboard.zsa.enable = true;
-  
+
   services.ollama.acceleration = "cuda";
-  
+
   hardware.nvidia-container-toolkit.enable = true;
 
   networking.firewall.enable = false;

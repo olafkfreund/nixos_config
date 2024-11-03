@@ -1,6 +1,10 @@
-{ pkgs, ... }: {
+{
+  pkgs,
+  pkgs-stable,
+  ...
+}: {
   environment.systemPackages = [
     pkgs.waypipe
-    pkgs.wayvnc
+    pkgs-stable.wayvnc
   ];
 }

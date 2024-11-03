@@ -3,8 +3,9 @@
   home,
   lib,
   pkgs,
+  pkgs-stable,
   ...
-}: 
+}:
 with lib; let
   cfg = config.cli.yazi;
 in {
@@ -17,7 +18,7 @@ in {
   config = mkIf cfg.enable {
     programs.yazi = {
       enable = true;
-      package = pkgs.yazi;
+      package = pkgs-stable.yazi;
       enableBashIntegration = true;
       enableZshIntegration = true;
       settings = {
@@ -144,7 +145,6 @@ in {
       fontpreview
       unar
       poppler
-      unar
     ];
   };
 }

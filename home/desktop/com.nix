@@ -5,14 +5,14 @@
 }: {
   home.packages = [
     # slack
-    pkgs-stable.teams-for-linux
+    pkgs.teams-for-linux
     pkgs.birdtray
     pkgs.thunderbird
     pkgs.discord
     # obsidian
     pkgs.dbeaver-bin
     pkgs.postgresql
-    pkgs.caprine-bin
+    pkgs-stable.caprine-bin
     pkgs.element-desktop
     pkgs.imagemagick
     pkgs.fractal

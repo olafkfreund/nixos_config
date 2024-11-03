@@ -17,7 +17,7 @@ in {
   config = mkIf cfg.enable {
     programs.wezterm = {
       enable = true;
-      package = pkgs-stable.wezterm;
+      package = pkgs.wezterm;
       enableBashIntegration = true;
       enableZshIntegration = true;
       extraConfig = ''

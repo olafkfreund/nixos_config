@@ -1,7 +1,7 @@
 {
   config,
   lib,
-  pkgs-stable,
+  pkgs,
   ...
 }:
 with lib; let
@@ -25,7 +25,7 @@ in {
 
     programs.kitty = {
       enable = true;
-      package = pkgs-stable.kitty;
+      package = pkgs.kitty;
       #Kitty theme
       # theme = "Gruvbox Material Dark Hard";
       shellIntegration = {

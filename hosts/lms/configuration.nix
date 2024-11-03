@@ -1,4 +1,10 @@
-{ pkgs, lib, inputs, username, ...}: {
+{
+  pkgs,
+  lib,
+  inputs,
+  username,
+  ...
+}: {
   imports = [
     ./nixos/hardware-configuration.nix
     ./nixos/power.nix
@@ -40,7 +46,7 @@
   programs.obsidian.enable = lib.mkForce false;
   programs.office.enable = lib.mkForce false;
   programs.webcam.enable = lib.mkForce false;
-  
+
   # Virtualization tools
   services.docker.enable = lib.mkForce true;
   services.incus.enable = lib.mkForce false;
@@ -48,7 +54,7 @@
   services.spice.enable = lib.mkForce true;
   services.libvirt.enable = lib.mkForce true;
   services.sunshine.enable = lib.mkForce true;
-  
+
   # Password management
   security.onepassword.enable = lib.mkForce true;
   security.gnupg.enable = lib.mkForce true;
@@ -56,7 +62,7 @@
   # VPN
   vpn.tailscale.enable = lib.mkForce true;
 
-  # AI 
+  # AI
   ai.ollama.enable = lib.mkForce false;
 
   # Printing
@@ -77,15 +83,14 @@
       "-dpi 96"
     ];
   };
-  
- programs.sway = {
+
+  programs.sway = {
     enable = true;
     wrapperFeatures.gtk = true; # so that gtk works properly
     extraPackages = with pkgs; [
       swaylock
       swayidle
       wl-clipboard
-      wf-recorder
       grim
       slurp
       foot
@@ -103,10 +108,10 @@
   };
 
   security.wrappers.sunshine = {
-        owner = "root";
-        group = "root";
-        capabilities = "cap_sys_admin+p";
-        source = "${pkgs.sunshine}/bin/sunshine";
+    owner = "root";
+    group = "root";
+    capabilities = "cap_sys_admin+p";
+    source = "${pkgs.sunshine}/bin/sunshine";
   };
 
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
@@ -146,9 +151,9 @@
     ];
   };
   hardware.keyboard.zsa.enable = true;
-  
+
   services.ollama.acceleration = "";
-  
+
   hardware.nvidia-container-toolkit.enable = false;
 
   networking.firewall.enable = false;

@@ -1,4 +1,8 @@
-{pkgs, pkgs-stable, ...}: {
+{
+  pkgs,
+  pkgs-stable,
+  ...
+}: {
   home.packages = [
     pkgs.eww
     pkgs.swww
@@ -8,7 +12,7 @@
     pkgs.swayidle
     pkgs.swaylock
     pkgs.swaybg
-    pkgs.wf-recorder
+    pkgs-stable.wf-recorder
     pkgs.swappy
     pkgs.hyprnome
     pkgs.hyprshot
@@ -25,7 +29,7 @@
     pkgs.nwg-displays
     pkgs.kanshi
     pkgs.wl-clipboard
-    pkgs.wl-screenrec
+    pkgs-stable.wl-screenrec
     pkgs.hyprcursor
   ];
 }

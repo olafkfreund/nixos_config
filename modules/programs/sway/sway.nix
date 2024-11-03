@@ -12,7 +12,6 @@
       swayidle
       swaycons
       wl-clipboard
-      wf-recorder
       wlr-which-key
       wlr-randr
       grim

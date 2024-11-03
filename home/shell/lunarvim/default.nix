@@ -1,5 +1,9 @@
-{ pkgs, pkgs-stable, ...}: {
-  home.packages = with pkgs-stable; [
+{
+  pkgs,
+  pkgs-stable,
+  ...
+}: {
+  home.packages = with pkgs; [
     lunarvim
   ];
 }

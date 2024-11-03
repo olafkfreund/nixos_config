@@ -5,8 +5,8 @@
   pkgs-stable,
   options,
   ...
-}: 
-with lib; let 
+}:
+with lib; let
   cfg = config.ai.ollama;
 in {
   options.ai.ollama = {
@@ -34,9 +34,8 @@ in {
         WEBUI_AUTH = "False";
       };
     };
-    environment.systemPackages = with pkgs; [
-      alpaca
-      oterm
+    environment.systemPackages = [
+      pkgs.alpaca
     ];
   };
 }
