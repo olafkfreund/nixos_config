@@ -31,5 +31,6 @@
     pkgs.wl-clipboard
     pkgs-stable.wl-screenrec
     pkgs.hyprcursor
+    # pkgs.hyprgui
   ];
 }

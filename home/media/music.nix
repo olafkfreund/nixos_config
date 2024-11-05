@@ -1,5 +1,8 @@
-{ pkgs, pkgs-stable, ... }: {
-
+{
+  pkgs,
+  pkgs-stable,
+  ...
+}: {
   home.packages = [
     #spotify
     pkgs.spicetify-cli
@@ -13,7 +16,6 @@
     pkgs.gnome-podcasts # Podcasts
     pkgs.hypnotix
     pkgs.parabolic
-
+    pkgs.musicpod
   ];
-
 }
