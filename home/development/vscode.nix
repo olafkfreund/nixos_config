@@ -80,11 +80,12 @@ in {
           };
         };
       };
-      "workbench.colorTheme" = "Gruvbox Minor Dark Medium";
-      "workbench.iconTheme" = "gruvbox-material-icon-theme";
+      "workbench.colorTheme" = "Gruvbox Material Dark";
+      "workbench.iconTheme" = "gruvbox-icon-theme";
       "genieai.enableConversationHistory" = true;
       "alejandra.program" = "alejandra";
       "redhat.telemetry.enabled" = false;
+      "disable-hardware-acceleration" = true;
       "extensions.experimental.affinity" = {
         "asvetliakov.vscode-neovim" = 1;
       };

@@ -3,20 +3,20 @@
   lib,
   pkgs,
   ...
-}: 
-with lib; let 
+}:
+with lib; let
   cfg = config.browsers.edge;
 in {
   options.browsers.edge = {
     enable = mkEnableOption {
-      default = false; 
+      default = false;
       description = "Microsoft Edge";
     };
   };
   config = mkIf cfg.enable {
-  home.packages = with pkgs; [
+    home.packages = with pkgs; [
       microsoft-edge
-      microsoft-edge-dev
+      # microsoft-edge-dev
     ];
   };
 }
