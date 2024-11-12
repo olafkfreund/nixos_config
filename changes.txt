@@ -1,4 +1,1 @@
-trace: warning: The option `services.xserver.displayManager.sddm.wayland.enable' defined in `/nix/store/s37m96qrhy23z6c49jzd1x7g04a6jl0w-source/modules/services/xserver/xserver.nix' has been renamed to `services.displayManager.sddm.wayland.enable'.
-trace: warning: The option `services.xserver.displayManager.sddm.theme' defined in `/nix/store/s37m96qrhy23z6c49jzd1x7g04a6jl0w-source/modules/services/xserver/xserver.nix' has been renamed to `services.displayManager.sddm.theme'.
-trace: warning: The option `services.xserver.displayManager.sddm.enableHidpi' defined in `/nix/store/s37m96qrhy23z6c49jzd1x7g04a6jl0w-source/modules/services/xserver/xserver.nix' has been renamed to `services.displayManager.sddm.enableHidpi'.
-trace: warning: The option `services.xserver.displayManager.sddm.enable' defined in `/nix/store/s37m96qrhy23z6c49jzd1x7g04a6jl0w-source/modules/services/xserver/xserver.nix' has been renamed to `services.displayManager.sddm.enable'.
+Nothing here yet.

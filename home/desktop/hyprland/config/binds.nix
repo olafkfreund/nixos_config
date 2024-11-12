@@ -133,8 +133,8 @@
        bind = , escape, submap, reset #reset mode
        submap = reset
 
-       bind = $mainMod SPACE, l, workspace, r+1
-       bind = $mainMod SPACE, h, workspace, r-1
+       bind = $mainMod CTRL, l, workspace, r+1
+       bind = $mainMod CTRL, h, workspace, r-1
        bind = $mainMod CTRL SHIFT, B, exec, pkill -SIGUSR1 waybar
 
        bind = Control_SHIFT, M, togglespecialworkspace, spotify

@@ -82,10 +82,18 @@ in {
       };
       "workbench.colorTheme" = "Gruvbox Material Dark";
       "workbench.iconTheme" = "gruvbox-icon-theme";
+      "workbench.externalBrowser" = "google-chrome-stable";
       "genieai.enableConversationHistory" = true;
+      "editor.minimap.enabled" = false;
+      "[javascript]" = {
+        "editor.defaultFormatter" = "vscode.typescript-language-features";
+      };
       "alejandra.program" = "alejandra";
       "redhat.telemetry.enabled" = false;
-      "disable-hardware-acceleration" = true;
+      "[yaml]" = {
+        "editor.defaultFormatter" = "redhat.vscode-yaml";
+      };
+      "terminal.integrated.gpuAcceleration" = "off";
       "extensions.experimental.affinity" = {
         "asvetliakov.vscode-neovim" = 1;
       };
