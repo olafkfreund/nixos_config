@@ -37,10 +37,10 @@
         active_opacity = 1.0
         inactive_opacity = 1.0
         fullscreen_opacity = 1.0
-        drop_shadow = true
-        shadow_range = 30
-        shadow_render_power = 3
-        col.shadow = 0x66000000
+        # drop_shadow = true
+        # shadow_range = 30
+        # shadow_render_power = 3
+        # col.shadow = 0x66000000
     }
 
     animations {
@@ -65,11 +65,11 @@
         pseudotile = true
         force_split = 2
         preserve_split = true
-        no_gaps_when_only = false
+        # no_gaps_when_only = false
     }
 
     master {
-        no_gaps_when_only = false
+        # no_gaps_when_only = false
         always_center_master = true
         smart_resizing = true
         new_status = master
