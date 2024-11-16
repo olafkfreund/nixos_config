@@ -31,6 +31,9 @@
     #Tmux
     windowrulev2 = workspace special:tmux, float, title:^(tmux-sratch)
 
+    #Spotify
+    windowrulev2 = workspace special:spotify, float, class:^(spotify)
+
     #thunderbird
     windowrulev2 = workspace special:mail, class:^(thunderbird)$
     windowrule = animation slide left, ^(thunderbird)$

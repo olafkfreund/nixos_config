@@ -54,6 +54,7 @@
 
        bind = $mainMod, S, togglespecialworkspace, magic
        bind = $mainMod, M, togglespecialworkspace, mail
+       bind = $mainMod CTRL, S, togglespecialworkspace, spotify
        bind = $mainMod, W, killactive
        bind = $mainMod, F, fullscreen, 1 #maximize window
 
@@ -97,6 +98,7 @@
        bind = $mainMod ALT, L, exec, hyprlock
 
        bind = $mainMod SHIFT, M, movetoworkspace, special:mail
+       bind = $mainMod CRTL SHIFT, S, movetoworkspace, special:spotify
        bind = $mainMod SHIFT, S, movetoworkspace, special:magic
 
        binde = $mainMod SHIFT, V, exec, pamixer -d 2

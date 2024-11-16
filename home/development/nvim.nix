@@ -25,7 +25,7 @@ in {
       withRuby = true;
       extraPackages = with pkgs; [
         codeium
-        neovide
+        # neovide
         nixd
       ];
     };
