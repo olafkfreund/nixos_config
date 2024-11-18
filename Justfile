@@ -27,6 +27,7 @@ dex5550:
 
 p510:
     nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --use-remote-sudo --impure
+    
 razer:
     nixos-rebuild switch --flake .#razer --target-host razer --build-host razer --use-remote-sudo --impure
 
