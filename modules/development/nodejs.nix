@@ -16,8 +16,10 @@ in {
     };
   };
   config = mkIf cfg.enable {
-    environment.systemPackages = [
-      pkgs.nodejs_22
-    ] ++ cfg.packages;
+    environment.systemPackages =
+      [
+        pkgs.nodejs_23
+      ]
+      ++ cfg.packages;
   };
 }
