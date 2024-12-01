@@ -39,7 +39,7 @@
 
     home-manager = {
       url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
     sops-nix = {
@@ -103,6 +103,7 @@
     self,
     nixpkgs,
     nixpkgs-stable,
+    nixpkgs-unstable,
     nur,
     agenix,
     razer-laptop-control,
@@ -123,6 +124,10 @@
       system = "x86_64-linux";
       specialArgs = {
         pkgs-stable = import nixpkgs-stable {
+          system = "x86_64-linux";
+          config.allowUnfree = true;
+        };
+        pkgs-unstable = import nixpkgs-stable {
           system = "x86_64-linux";
           config.allowUnfree = true;
         };
@@ -147,7 +152,11 @@
               system = "x86_64-linux";
               config.allowUnfree = true;
             };
-            inherit inputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control stylix nix-index-database nixpkgs-f2k home-manager nixpkgs-stable nix-colors nix-snapd host;
+            pkgs-unstable = import nixpkgs-stable {
+              system = "x86_64-linux";
+              config.allowUnfree = true;
+            };
+            inherit inputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control stylix nix-index-database nixpkgs-f2k home-manager nixpkgs-stable nixpkgs-unstable nix-colors nix-snapd host;
           };
           home-manager.users.${username} = import ./Users/${username}/${host}_home.nix;
           home-manager.sharedModules = [
