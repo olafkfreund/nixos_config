@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}: {
+{pkgs, ...}: {
   stylix = {
     base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
     image = ./gruvbox-rainbow-nix.png;
@@ -10,7 +8,9 @@
     };
     fonts = {
       monospace = {
-        package = pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; };
+        # A change is comming for the next release of NixOS
+        # package = pkgs.nerd-fonts.jetbrains-mono;
+        package = pkgs.nerdfonts.override {fonts = ["JetBrainsMono"];};
         name = "JetBrainsMono Nerd Font Mono";
       };
       sansSerif = {

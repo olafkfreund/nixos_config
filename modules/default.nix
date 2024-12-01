@@ -1,4 +1,4 @@
-{ ... }: {
+{...}: {
   imports = [
     ./nix/nix.nix
     ./fonts/fonts.nix
@@ -31,9 +31,6 @@
     ./desktop/vnc/default.nix
     ./obsidian/default.nix
     ./office/default.nix
-    ./intune-portal/default.nix
-
+    # ./intune-portal/default.nix
   ];
-
-
 }

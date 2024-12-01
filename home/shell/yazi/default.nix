@@ -18,7 +18,7 @@ in {
   config = mkIf cfg.enable {
     programs.yazi = {
       enable = true;
-      package = pkgs-stable.yazi;
+      package = pkgs.yazi;
       enableBashIntegration = true;
       enableZshIntegration = true;
       settings = {

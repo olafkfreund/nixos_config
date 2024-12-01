@@ -10,6 +10,8 @@
     # Font configuration
     fonts = {
       monospace = {
+        # A change is comming for the next release of NixOS
+        # package = pkgs.nerd-fonts.jetbrains-mono;
         package = pkgs.nerdfonts.override {fonts = ["JetBrainsMono"];};
         name = "JetBrainsMono Nerd Font Mono";
       };

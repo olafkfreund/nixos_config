@@ -6,13 +6,13 @@
   home.packages = [
     pkgs.eww
     pkgs.swww
-    pkgs-stable.cliphist
+    pkgs.cliphist
     pkgs.grim
     pkgs.slurp
     pkgs.swayidle
     pkgs.swaylock
     pkgs.swaybg
-    pkgs-stable.wf-recorder
+    pkgs.wf-recorder
     pkgs.swappy
     pkgs.hyprnome
     pkgs.hyprshot
@@ -29,7 +29,7 @@
     pkgs.nwg-displays
     pkgs.kanshi
     pkgs.wl-clipboard
-    pkgs-stable.wl-screenrec
+    pkgs.wl-screenrec
     pkgs.hyprcursor
     # pkgs.hyprgui
   ];

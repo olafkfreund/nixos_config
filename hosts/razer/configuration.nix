@@ -71,8 +71,8 @@
   # Printing
   services.print.enable = lib.mkForce true;
 
-  # security
-  security.intune-portal.enable = lib.mkForce true;
+  # # security
+  # security.intune-portal.enable = lib.mkForce false;
 
   services = {
     xserver = {

@@ -1,12 +1,11 @@
-{ pkgs, ... }: {
-
+{pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     ripgrep #grep replacement
     aria2 #download manager
     glow #markdown preview
     eza #replace ls
     topgrade #update all
-    nerdfonts #fonts
+    # nerd-fonts.jetbrains-mono #fonts
     wtf #terminal dashboard
     fastfetch # like neofetch only faster
     less #
@@ -29,4 +28,3 @@
     buku #bookmark manager
   ];
 }
-

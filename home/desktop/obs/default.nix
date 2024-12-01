@@ -18,7 +18,7 @@ in {
   config = mkIf cfg.enable {
     programs.obs-studio = {
       enable = true;
-      plugins = with pkgs-stable.obs-studio-plugins; [
+      plugins = with pkgs.obs-studio-plugins; [
         wlrobs
         obs-backgroundremoval
         obs-pipewire-audio-capture
@@ -38,7 +38,7 @@ in {
         obs-source-record
         obs-shaderfilter
         obs-gradient-source
-        obs-ndi
+        # obs-ndi
       ];
     };
   };

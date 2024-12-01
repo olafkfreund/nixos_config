@@ -31,6 +31,10 @@
       material-design-icons
       material-icons
       nerd-font-patcher
+      # A change is comming for the next release of NixOS
+      # nerd-fonts.jetbrains-mono
+      # nerd-fonts.iosevka
+      # nerd-fonts.fira-mono
       nerdfonts
       noto-fonts
       noto-fonts-cjk-sans

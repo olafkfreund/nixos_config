@@ -4,6 +4,6 @@
   ...
 }: {
   environment.systemPackages = [
-    pkgs-stable.wayvnc
+    pkgs.wayvnc
   ];
 }

@@ -12,7 +12,7 @@
     # obsidian
     pkgs.dbeaver-bin
     pkgs.postgresql
-    pkgs-stable.caprine-bin
+    pkgs.caprine-bin
     pkgs.element-desktop
     pkgs.imagemagick
     pkgs.fractal

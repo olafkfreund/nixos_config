@@ -10,6 +10,6 @@
     pkgs.wlroots
     pkgs.wlr-randr
     pkgs.wdisplays
-    pkgs-stable.wl-screenrec
+    pkgs.wl-screenrec
   ];
 }

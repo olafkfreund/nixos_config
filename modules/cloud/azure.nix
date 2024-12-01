@@ -12,7 +12,7 @@ in {
     enable = mkEnableOption "Enable Azure packages";
   };
   config = mkIf cfg.enable {
-    environment.systemPackages = with pkgs-stable; [
+    environment.systemPackages = with pkgs; [
       azure-cli
       azure-storage-azcopy
       kubelogin
