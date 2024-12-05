@@ -129,7 +129,7 @@
           system = "x86_64-linux";
           config.allowUnfree = true;
         };
-        pkgs-unstable = import nixpkgs-stable {
+        pkgs-unstable = import nixpkgs-unstable {
           system = "x86_64-linux";
           config.allowUnfree = true;
         };
@@ -154,7 +154,7 @@
               system = "x86_64-linux";
               config.allowUnfree = true;
             };
-            pkgs-unstable = import nixpkgs-stable {
+            pkgs-unstable = import nixpkgs-unstable {
               system = "x86_64-linux";
               config.allowUnfree = true;
             };
@@ -176,6 +176,7 @@
                 hyprland.enable = false;
                 spicetify.enable = false;
                 sway.enable = false;
+                swaync.enable = false;
               };
             }
           ];

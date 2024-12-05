@@ -19,9 +19,9 @@ in {
     home.packages = with pkgs; [alejandra deadnix statix];
 
     programs.vscode.enable = true;
-    programs.vscode.package = pkgs.vscode;
+    programs.vscode.package = pkgs-unstable.vscode;
 
-    programs.vscode.extensions = with pkgs; [
+    programs.vscode.extensions = with pkgs-unstable; [
       vscode-extensions.bbenoist.nix
       vscode-extensions.kamadorueda.alejandra
       vscode-extensions.tailscale.vscode-tailscale
