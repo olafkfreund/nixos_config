@@ -1,10 +1,11 @@
 {
   pkgs,
   pkgs-stable,
+  pkgs-unstable,
   ...
 }: {
   home.packages = [
-    #spotify
+    # pkgs.spotify
     pkgs.spicetify-cli
     pkgs.ncspot # Spotify
     pkgs.plexamp # Plex
