@@ -137,7 +137,7 @@
       };
       modules = [
         ./hosts/${host}/configuration.nix
-        nur.nixosModules.nur
+        nur.modules.nixos.default
         home-manager.nixosModules.home-manager
         inputs.nix-colors.homeManagerModules.default
         inputs.stylix.nixosModules.stylix
