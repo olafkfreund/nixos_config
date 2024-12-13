@@ -1,6 +1,6 @@
 {pkgs, ...}: {
   environment.systemPackages = with pkgs; [
-    nodePackages.neovim
+    # nodePackages.neovim
     vimPlugins.nix-develop-nvim
     figlet
     gum

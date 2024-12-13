@@ -1,5 +1,4 @@
-{ ...
-}: {
+{...}: {
   home-manager.extraSpecialArgs = {
     vars = {
       hostName = "razer";

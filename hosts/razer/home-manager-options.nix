@@ -1,7 +1,4 @@
-{
-  lib,
-  ...
-}: {
+{lib, ...}: {
   programs.obs.enable = lib.mkForce true;
   programs.kdeconnect.enable = lib.mkForce true;
   programs.slack.enable = lib.mkForce true;
@@ -28,7 +25,7 @@
 
   # Editors
   editor.cursor.enable = lib.mkForce true;
-  editor.neovim.enable = lib.mkForce true;
+  # editor.neovim.enable = lib.mkForce true;
   editor.vscode.enable = lib.mkForce true;
 
   # Shell tools

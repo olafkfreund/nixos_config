@@ -325,7 +325,7 @@
 
     style = ''
       * {
-        font-family: 'JetBrainsMono Nerd Font FontAwesome Roboto Helvetica Arial sans-serif';
+        font-family: 'JetBrainsMono';
         font-size: 14px;
         font-weight: bolder;
         }
@@ -367,7 +367,7 @@
 
         tooltip label {
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono;
           font-size: 16px;
           padding-left: 5px;
           padding-right: 5px;
@@ -395,7 +395,7 @@
           border-radius: 5px;
           margin-left: 4px;
           margin-bottom: 2px;
-          font-family: JetBrainsMono Nerd Font, sans-sherif;
+          font-family: JetBrainsMono;
           font-weight: bold;
           font-size: 14px;
           padding-left: 13px;
@@ -421,7 +421,7 @@
 
         #custom-weather {
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono;
           font-size: 15px;
           font-weight: bold;
           border-radius: 5px;
