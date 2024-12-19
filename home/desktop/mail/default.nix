@@ -1,8 +1,11 @@
-{ pkgs, ... }: {
-  
-  home.packages = with pkgs; [
+{
+  pkgs,
+  pkgs-unstable,
+  ...
+}: {
+  home.packages = with pkgs-unstable; [
     birdtray
-    thunderbird
+    thunderbird-latest
   ];
 
   programs.thunderbird = {

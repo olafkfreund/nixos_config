@@ -1,13 +1,13 @@
 {
   pkgs,
-  pkgs-stable,
+  pkgs-unstable,
   ...
 }: {
   home.packages = [
     # slack
     pkgs.teams-for-linux
     pkgs.birdtray
-    pkgs.thunderbird
+    pkgs-unstable.thunderbird-latest
     pkgs.discord
     # obsidian
     pkgs.dbeaver-bin
