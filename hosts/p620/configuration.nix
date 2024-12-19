@@ -15,7 +15,6 @@
     ./nixos/hosts.nix
     ./nixos/envvar.nix
     ./nixos/greetd.nix
-    ./nixos/env.nix
     ./themes/stylix.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
@@ -81,7 +80,6 @@
         "-nolisten tcp"
         "-dpi 96"
       ];
-      videoDrivers = ["nvidia"];
     };
   };
   environment.systemPackages = [
@@ -159,10 +157,7 @@
 
   services.playerctld.enable = true;
   services.fwupd.enable = true;
-  services.ollama.acceleration = "rocm";
-
-  hardware.nvidia-container-toolkit.enable = true;
-
+  services.ollama.acceleration = lib.mkForce "rocm";
   networking.firewall.enable = false;
   networking.nftables.enable = true;
   networking.timeServers = ["pool.ntp.org"];

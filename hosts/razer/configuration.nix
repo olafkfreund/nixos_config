@@ -14,7 +14,6 @@
     ./nixos/i18n.nix
     ./nixos/hosts.nix
     ./nixos/envvar.nix
-    ./nixos/env.nix
     ./nixos/greetd.nix
     ./themes/stylix.nix
     ../../modules/default.nix

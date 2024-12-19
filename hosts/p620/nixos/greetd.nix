@@ -12,7 +12,7 @@
       user = "${username}";
     };
     session_sway = {
-      command = "${lib.getExe config.programs.sway.package} --unsupported-gpu";
+      command = "${lib.getExe config.programs.sway.package}";
       user = "${username}";
     };
   in {

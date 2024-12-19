@@ -11,6 +11,7 @@
     ../../home/default.nix
     ../../home/desktop/sway/default.nix
     ../../home/desktop/sway/swayosd.nix
+    ../../hosts/p620/nixos/env.nix
     ./private.nix
   ];
 
