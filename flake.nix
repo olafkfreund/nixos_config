@@ -33,7 +33,7 @@
     #Did not have time to clean everything up
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.11";
     #
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
     nix-colors = {
       url = "github:misterio77/nix-colors";
