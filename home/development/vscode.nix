@@ -51,6 +51,7 @@ in {
       vscode-extensions.bierner.markdown-emoji
       # vscode-extensions.asvetliakov.vscode-neovim
       vscode-extensions.arrterian.nix-env-selector
+      vscode-extensions.sainnhe.gruvbox-material
     ];
 
     programs.vscode.userSettings."[nix]" = {
