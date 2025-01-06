@@ -12,6 +12,7 @@
     ./nixos/envvar.nix
     ./nixos/greetd.nix
     ./themes/stylix.nix
+    ./nixos/plex.nix
     ../../modules/server.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
