@@ -22,6 +22,10 @@
     { device = "/dev/disk/by-uuid/3a8affa2-0104-4938-90ef-1549b15af520";
       fsType = "ext4";
     };
+  fileSystems."/mnt" =
+    { device = "/dev/disk/by-uuid/79b604d0-03d8-4ccd-8fe3-701bc01a2429";
+      fsType = "ext4";
+    };
 
   fileSystems."/boot" =
     { device = "/dev/disk/by-uuid/F499-7F00";
