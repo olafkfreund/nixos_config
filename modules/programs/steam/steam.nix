@@ -1,12 +1,21 @@
-{ ...
-}: {
+{...}: {
   #Steam
-  hardware.steam-hardware.enable = false;
+  hardware.steam-hardware.enable = true;
 
   programs.steam = {
-    enable = false; # true;
+    enable = true; # true;
     remotePlay.openFirewall = true;
     dedicatedServer.openFirewall = true;
+    extraComponents = with pkgs; [
+      steam-runtime
+      steam-tui
+      proton-ge-bin
+      protonplus
+      protonup-qt
+      lutris
+      cartridges
+      heroic
+    ];
   };
 
   # programs.gamemode = {
@@ -30,5 +39,5 @@
     "vm.max_map_count" = 2147483642;
   };
 
-  environment.sessionVariables = { WINEDEBUG = "-all"; };
+  environment.sessionVariables = {WINEDEBUG = "-all";};
 }
