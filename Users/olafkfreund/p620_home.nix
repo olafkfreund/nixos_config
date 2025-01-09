@@ -9,6 +9,7 @@
     inputs.spicetify-nix.homeManagerModules.default
 
     ../../home/default.nix
+    ../../home/games/steam.nix
     ../../home/desktop/sway/default.nix
     ../../home/desktop/sway/swayosd.nix
     ../../hosts/p620/nixos/env.nix
