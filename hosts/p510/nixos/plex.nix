@@ -17,12 +17,12 @@
     dataDir = "/mnt/media/radarr";
     package = pkgs-unstable.radarr;
   };
-  # services.sonarr = {
-  #   enable = true;
-  #   user = "olafkfreund";
-  #   dataDir = "/mnt/media/sonarr";
-  #   package = pkgs-unstable.sonarr;
-  # };
+  services.sonarr = {
+    enable = true;
+    user = "olafkfreund";
+    dataDir = "/mnt/media/sonarr";
+    package = pkgs-unstable.sonarr;
+  };
   services.tautulli = {
     enable = true;
     user = "olafkfreund";
@@ -56,6 +56,6 @@
   };
   services.nfs.server.enable = true;
   services.nfs.server.exports = ''
-    /export         *(rw,fsid=0,no_subtree_check)
+    /mnt/media         *(rw,fsid=0,no_subtree_check)
   '';
 }

@@ -10,6 +10,7 @@
       vulkan-validation-layers
       libva-vdpau-driver
       amdvlk
+      rocmPackages.clr.icd
     ];
   };
 
@@ -19,8 +20,8 @@
       libva-utils
       driversi686Linux.amdvlk
       lact
-      # glxinfo
-      # clinfo
+      glxinfo
+      clinfo
       # virtualglLib
       # vulkan-loader
       # vulkan-tools

@@ -164,7 +164,10 @@
   services.playerctld.enable = true;
   services.fwupd.enable = true;
   services.ollama.acceleration = "cuda";
-
+  services.nfs.server.enable = true;
+  services.nfs.server.exports = ''
+    /extdisk         192.168.1.*(rw,fsid=0,no_subtree_check)
+  '';
   hardware.nvidia-container-toolkit.enable = true;
 
   networking.firewall.enable = false;

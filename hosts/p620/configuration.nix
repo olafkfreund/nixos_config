@@ -82,6 +82,7 @@
       ];
     };
   };
+  services.xserver.videoDrivers = ["amdgpu"];
   environment.systemPackages = [
     inputs.zen-browser.packages."${pkgs.system}".default
   ];
@@ -154,10 +155,16 @@
       wally-cli
     ];
   };
-
+  services.nfs.server.enable = true;
+  services.nfs.server.exports = ''
+    /mnt/data         *(rw,fsid=0,no_subtree_check)
+  '';
   services.playerctld.enable = true;
   services.fwupd.enable = true;
   services.ollama.acceleration = lib.mkForce "rocm";
+  services.ollama.package = lib.mkForce pkgs.ollama-rocm;
+  services.ollama.rocmOverrideGfx = lib.mkForce "11.0.0";
+  services.ollama.environmentVariables.HCC_AMDGPU_TARGET = lib.mkForce "gfx1100";
   networking.firewall.enable = false;
   networking.nftables.enable = true;
   networking.timeServers = ["pool.ntp.org"];
