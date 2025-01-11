@@ -3,6 +3,7 @@
   lib,
   inputs,
   username,
+  pkgs-unstable,
   ...
 }: {
   imports = [
@@ -159,10 +160,15 @@
   services.nfs.server.exports = ''
     /mnt/data         *(rw,fsid=0,no_subtree_check)
   '';
+  fileSystems."/mnt/media" = {
+    device = "192.168.1.127:/mnt/media";
+    fsType = "nfs";
+    options = ["x-systemd.automount" "noauto"];
+  };
   services.playerctld.enable = true;
   services.fwupd.enable = true;
   services.ollama.acceleration = lib.mkForce "rocm";
-  services.ollama.package = lib.mkForce pkgs.ollama-rocm;
+  services.ollama.package = lib.mkForce pkgs-unstable.ollama-rocm;
   services.ollama.rocmOverrideGfx = lib.mkForce "11.0.0";
   services.ollama.environmentVariables.HCC_AMDGPU_TARGET = lib.mkForce "gfx1100";
   networking.firewall.enable = false;

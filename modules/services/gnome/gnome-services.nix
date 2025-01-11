@@ -28,6 +28,7 @@
     gnome-themes-extra
     gnome-tweaks
     gnome-control-center
+    gnome-boxes
     gnomeExtensions.gtile
     gnomeExtensions.gmeet
     gnomeExtensions.user-themes
@@ -37,5 +38,4 @@
     cameractrls-gtk4
     # alpaca
   ];
-
 }

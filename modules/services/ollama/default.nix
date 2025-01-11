@@ -3,6 +3,7 @@
   lib,
   pkgs,
   pkgs-stable,
+  pkgs-unstable,
   options,
   ...
 }:
@@ -35,7 +36,7 @@ in {
       };
     };
     environment.systemPackages = [
-      pkgs.alpaca
+      pkgs-unstable.alpaca
     ];
   };
 }

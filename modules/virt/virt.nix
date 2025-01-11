@@ -4,7 +4,7 @@
   lib,
   pkgs,
   ...
-}: 
+}:
 with lib; let
   cfg = config.services.libvirt;
 in {
@@ -58,6 +58,7 @@ in {
       virtualbox
       btrfs-progs
       quickemu
+      vmware-workstation
       # quickgui
     ];
   };
