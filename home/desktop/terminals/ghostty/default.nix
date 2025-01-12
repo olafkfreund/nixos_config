@@ -13,23 +13,10 @@ in {
       description = "ghostty";
     };
   };
-  # config = mkIf cfg.enable {
-  #   xdg.mimeApps = {
-  #     associations.added = {
-  #       "x-scheme-handler/terminal" = "ghostty.desktop";
-  #     };
-  #     defaultApplications = {
-  #       "x-scheme-handler/terminal" = "ghostty.desktop";
-  #     };
-  #   };
-
+  config = {
     programs.ghostty = {
       enable = true;
       package = pkgs.ghostty;
-      shellIntegration = {
-        enableZshIntegration = true;
-        enableBashIntegration = true;
-      };
     };
   };
 }
