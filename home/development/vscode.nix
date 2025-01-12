@@ -25,6 +25,8 @@ in {
       vscode-extensions.bbenoist.nix
       vscode-extensions.kamadorueda.alejandra
       vscode-extensions.tailscale.vscode-tailscale
+      vscode-extensions.jnoortheen.nix-ide
+      vscode-extensions.golang.go
       vscode-extensions.skellock.just
       vscode-extensions.redhat.vscode-yaml
       vscode-extensions.redhat.vscode-xml
@@ -100,10 +102,10 @@ in {
       "extensions.experimental.affinity" = {
         "asvetliakov.vscode-neovim" = 1;
       };
-      "codeium.enableConfig" = {
-        "*" = true;
-        "nix" = true;
-      };
+      # "codeium.enableConfig" = {
+      #   "*" = true;
+      #   "nix" = true;
+      # };
     };
   };
 }
