@@ -21,15 +21,15 @@
   ];
 
   aws.packages.enable = lib.mkForce false;
-  azure.packages.enable = lib.mkForce true;
+  azure.packages.enable = lib.mkForce false;
   cloud-tools.packages.enable = lib.mkForce false;
   google.packages.enable = lib.mkForce false;
-  k8s.packages.enable = lib.mkForce true;
+  k8s.packages.enable = lib.mkForce false;
   # openshift.packages.enable = true;
-  terraform.packages.enable = lib.mkForce true;
+  terraform.packages.enable = lib.mkForce false;
 
   # Development tools
-  ansible.development.enable = lib.mkForce true;
+  ansible.development.enable = lib.mkForce false;
   cargo.development.enable = lib.mkForce true;
   github.development.enable = lib.mkForce true;
   go.development.enable = lib.mkForce true;
@@ -44,8 +44,8 @@
   # Git tools
   programs.lazygit.enable = lib.mkForce true;
   programs.thunderbird.enable = lib.mkForce false;
-  programs.obsidian.enable = lib.mkForce true;
-  programs.office.enable = lib.mkForce true;
+  programs.obsidian.enable = lib.mkForce false;
+  programs.office.enable = lib.mkForce false;
   programs.webcam.enable = lib.mkForce true;
 
   # Virtualization tools
