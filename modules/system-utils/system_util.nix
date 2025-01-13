@@ -90,5 +90,9 @@
     mpd-notification
     gptfdisk
     icu
+    spotdl
+    music-player
+    termusic
+    tauon
   ];
 }

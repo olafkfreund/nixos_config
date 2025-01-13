@@ -12,6 +12,8 @@
     ./nixos/envvar.nix
     ./nixos/greetd.nix
     ./nixos/hosts.nix
+    ./nixos/mpd.nix
+    ./nixos/hosts.nix
     ./themes/stylix.nix
     ./nixos/plex.nix
     ../../modules/server.nix
