@@ -3,6 +3,7 @@
   config,
   lib,
   pkgs,
+  pkgs-unstable,
   ...
 }:
 with lib; let
@@ -40,25 +41,25 @@ in {
       "cgroup_memory=1"
       "cgroup_enable=memory"
     ];
-    environment.systemPackages = with pkgs; [
-      OVMFFull
-      kvmtool
-      libvirt
+    environment.systemPackages = [
+      pkgs.OVMFFull
+      pkgs.kvmtool
+      pkgs.libvirt
       # multipass
-      spice
-      spice-gtk
-      spice-protocol
-      spice-vdagent
-      spice-autorandr
-      swtpm
-      virt-manager
-      virt-viewer
-      win-spice
-      win-virtio
-      virtualbox
-      btrfs-progs
-      quickemu
-      vmware-workstation
+      pkgs.spice
+      pkgs.spice-gtk
+      pkgs.spice-protocol
+      pkgs.spice-vdagent
+      pkgs.spice-autorandr
+      pkgs.swtpm
+      pkgs.virt-manager
+      pkgs.virt-viewer
+      pkgs.win-spice
+      pkgs.win-virtio
+      pkgs.virtualbox
+      pkgs.btrfs-progs
+      pkgs.quickemu
+      # pkgs-unstable.vmware-workstation
       # quickgui
     ];
   };
