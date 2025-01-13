@@ -61,6 +61,7 @@
       package = pkgs-unstable.transmission_4;
       settings = {
         trash-original-torrent-files = true;
+        rpc-bind-address = "0.0.0.0";
       };
     };
 

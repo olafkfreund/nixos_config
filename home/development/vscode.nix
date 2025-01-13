@@ -66,9 +66,9 @@ in {
       "window.menuBarVisibility" = "toggle";
       # "workbench.sideBar.location" = "right";
       "nix.serverPath" = "nixd";
-      "gopls" = {
-        "ui.semanticTokens" = true;
-      };
+      # "gopls" = {
+      #   "ui.semanticTokens" = true;
+      # };
       "nix.enableLanguageServer" = true;
       "nix.serverSettings" = {
         "nixd" = {
@@ -94,7 +94,7 @@ in {
         "editor.defaultFormatter" = "vscode.typescript-language-features";
       };
       "alejandra.program" = "alejandra";
-      "redhat.telemetry.enabled" = false;
+      # "redhat.telemetry.enabled" = false;
       "[yaml]" = {
         "editor.defaultFormatter" = "redhat.vscode-yaml";
       };
