@@ -16,7 +16,7 @@
     ./nixos/hosts.nix
     ./nixos/envvar.nix
     ./nixos/greetd.nix
-    ./nixos/mdp.nix
+    ./nixos/mpd.nix
     ./themes/stylix.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
