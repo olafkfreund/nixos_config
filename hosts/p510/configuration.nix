@@ -19,7 +19,6 @@
     ../../modules/server.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
-    ../../modules/system-tweaks/kernel-tweaks/64GB-SYSTEM/64gb-system.nix
   ];
 
   aws.packages.enable = lib.mkForce false;
