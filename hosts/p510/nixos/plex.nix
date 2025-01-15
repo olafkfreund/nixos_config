@@ -1,4 +1,8 @@
-{pkgs-unstable, ...}: {
+{
+  pkgs-unstable,
+  config,
+  ...
+}: {
   services = {
     plex = {
       enable = true;
@@ -58,10 +62,19 @@
     transmission = {
       enable = true;
       user = "olafkfreund";
+      # group = "users";
+      home = "/mnt/media/transmission";
       package = pkgs-unstable.transmission_4;
+      downloadDirPermissions = "0775";
       settings = {
         trash-original-torrent-files = true;
         rpc-bind-address = "0.0.0.0";
+        rpc-whitelist = "127.0.0.1,192.168.1.97";
+        watch-dir-enabled = true;
+        watch-dir = "${config.services.transmission.home}/watchdir";
+        download-dir = "/mnt/media/Media/Audiobooks/Downloads";
+        incomplete-dir-enabled = true;
+        incomplete-dir = "/mnt/media/Media/Audiobooks/incomplete";
       };
     };
 

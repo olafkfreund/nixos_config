@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  pkgs-stable,
   pkgs-unstable,
   options,
   ...
@@ -19,8 +18,8 @@ in {
   config = mkIf cfg.enable {
     services.ollama = {
       enable = true;
-      acceleration = "cuda";
-      package = pkgs.ollama-cuda;
+      acceleration = "rocm";
+      package = pkgs-unstable.ollama-rocm;
       loadModels = ["deepseek-coder-v2" "llama3.1"];
       user = "ollama";
     };
@@ -29,7 +28,7 @@ in {
       enable = true;
       host = "0.0.0.0";
       port = 8080;
-      package = pkgs.open-webui;
+      package = pkgs-unstable.open-webui;
       environment = {
         OLLAMA_API_BASE_URL = "http://127.0.0.1:11434";
         WEBUI_AUTH = "False";

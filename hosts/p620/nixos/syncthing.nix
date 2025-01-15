@@ -8,17 +8,17 @@
   services.syncthing = {
     settings = {
       devices = {
-        "device1" = {id = "DEVICE-ID-GOES-HERE";};
-        "device2" = {id = "DEVICE-ID-GOES-HERE";};
+        "razer" = {id = "DEVICE-ID-GOES-HERE";};
+        "p620" = {id = "DEVICE-ID-GOES-HERE";};
       };
       folders = {
         "Documents" = {
-          path = "/home/myusername/Documents";
-          devices = ["device1" "device2"];
+          path = "/home/olafkfreund/Documents";
+          devices = ["razer" "p620"];
         };
-        "Example" = {
-          path = "/home/myusername/Example";
-          devices = ["device1"];
+        "Source" = {
+          path = "/home/olafkfreund/Source";
+          devices = ["razer" "p620"]; # This folder is shared with both devices.
           # By default, Syncthing doesn't sync file permissions. This line enables it for this folder.
           ignorePerms = false;
         };
