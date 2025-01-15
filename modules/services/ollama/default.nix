@@ -18,8 +18,9 @@ in {
   config = mkIf cfg.enable {
     services.ollama = {
       enable = true;
-      acceleration = "rocm";
-      package = pkgs-unstable.ollama-rocm;
+      acceleration = "cuda";
+      host = "0.0.0.0";
+      package = pkgs-unstable.ollama-cuda;
       loadModels = ["deepseek-coder-v2" "llama3.1"];
       user = "ollama";
     };

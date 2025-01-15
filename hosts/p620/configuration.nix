@@ -87,6 +87,31 @@
   services.xserver.videoDrivers = ["amdgpu"];
   environment.systemPackages = [
     inputs.zen-browser.packages."${pkgs.system}".default
+    pkgs.rocmPackages.rocm-core
+    pkgs.rocmPackages.hip-common
+    pkgs.rocmPackages.rccl
+    pkgs.rocmPackages.rocrand
+    pkgs.rocmPackages.rocblas
+    pkgs.rocmPackages.rocfft
+    pkgs.rocmPackages.rocsparse
+    pkgs.rocmPackages.hipsparse
+    pkgs.rocmPackages.rocthrust
+    pkgs.rocmPackages.rocprim
+    pkgs.rocmPackages.hipcub
+    pkgs.rocmPackages.roctracer
+    pkgs.rocmPackages.rocfft
+    pkgs.rocmPackages.rocsolver
+    pkgs.rocmPackages.hipfft
+    pkgs.rocmPackages.hipsolver
+    pkgs.rocmPackages.hipblas
+    pkgs.rocmPackages.rocminfo
+    pkgs.rocmPackages.rocm-cmake
+    pkgs.rocmPackages.rocm-smi
+    pkgs.rocmPackages.rocm-thunk
+    pkgs.rocmPackages.rocm-comgr
+    pkgs.rocmPackages.rocm-device-libs
+    pkgs.rocmPackages.rocm-runtime
+    pkgs.rocmPackages.hipify
   ];
 
   # Disable network wait services to improve boot time
