@@ -81,4 +81,15 @@
   # Multiplexers
   multiplexer.tmux.enable = lib.mkForce true;
   multiplexer.zellij.enable = lib.mkForce true;
+  programs.chromium.commandLineArgs = lib.mkForce [
+    "--enable-features=UseOzonePlatform"
+    "--ozone-platform=wayland"
+    # "--use-gl=egl"
+    "--enable-unsafe-webgpu"
+    "--ignore-gpu-blocklist"
+    "--enable-gpu-rasterization"
+    # "--use-gl=angel"
+    # "--use-angle=vulkan"
+    "--enable-features=VaapiVideoDecoder,VaapiIgnoreDriverChecks,Vulkan,DefaultANGLEVulkan,VulkanFromANGLE"
+  ];
 }

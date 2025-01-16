@@ -197,6 +197,7 @@
   services.ollama.package = lib.mkForce pkgs-unstable.ollama-rocm;
   services.ollama.rocmOverrideGfx = lib.mkForce "11.0.0";
   services.ollama.environmentVariables.HCC_AMDGPU_TARGET = lib.mkForce "gfx1100";
+  services.ollama.environmentVariables.OLLAMA_LLM_LIBRARY = lib.mkForce "rocm_v6";
   networking.firewall.enable = false;
   networking.nftables.enable = true;
   networking.timeServers = ["pool.ntp.org"];

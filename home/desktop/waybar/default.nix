@@ -24,7 +24,6 @@
         "gtk-layer-shell" = true;
 
         "modules-left" = [
-          "hyprland/workspaces"
           "hyprland/window"
           "sway/workspaces"
           "sway/mode"
@@ -49,7 +48,7 @@
         ];
 
         "modules-center" = [
-          # "clock"
+          "hyprland/workspaces"
         ];
 
         "memory" = {
@@ -102,7 +101,7 @@
             "mail" = [
               "*"
             ];
-            "tmux" = [
+            "scratchpad" = [
               "*"
             ];
             "slack" = [
@@ -126,7 +125,7 @@
             "spotify" = " ";
             "slack" = " ";
             "mail" = " ";
-            "tmux" = " ";
+            "scratchpad" = " ";
           };
         };
 
@@ -390,8 +389,8 @@
         #workspaces button {
           all: unset;
           border: none;
-          border-bottom: 4px solid #518554;
-          border-left: 4px solid #518554;
+          border-bottom: 4px solid #ebdbb2;
+          border-left: 4px solid #ebdbb2;
           border-radius: 5px;
           margin-left: 4px;
           margin-bottom: 2px;
@@ -401,22 +400,22 @@
           padding-left: 13px;
           padding-right: 13px;
           transition: transform 0.1s ease-in-out;
-          color: #282828;
-          background-color: #689d6a;
+          color: #ebdbb2;
+          background-color: #1f2223;
         }
 
         #workspaces button:hover {
           background: inherit;
-          background-color: #8ec07c;
-          border-bottom: 4px solid #76a765;
-          border-left: 4px solid #76a765;
+          background-color: #689d6a;
+          border-bottom: 4px solid #ebdbb2;
+          border-left: 4px solid #ebdbb2;
         }
 
         #workspaces button.active {
           background: inherit;
           background-color: #689d6a;
-          border-bottom: 4px solid #518554;
-          border-left: 4px solid #518554;
+          border-bottom: 4px solid #ebdbb2;
+          border-left: 4px solid #ebdbb2;
         }
 
         #custom-weather {
@@ -573,14 +572,14 @@
         }
 
         #custom-powermenu {
-          background-color: #689d6a;
-          color: #282828;
+          background-color: #1f2223;
+          color: #ebdbb2;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 14px;
           font-weight: bold;
           border: none;
-          border-bottom: 4px solid #518554;
-          border-left: 4px solid #518554;
+          border-bottom: 4px solid #ebdbb2;
+          border-left: 4px solid #ebdbb2;
           border-radius: 5px;
           margin-bottom: 2px;
           margin-right: 4px;

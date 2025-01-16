@@ -3,7 +3,7 @@
   config,
   lib,
   ...
-}: 
+}:
 with lib; let
   cfg = config.browsers.chrome;
 in {
@@ -17,7 +17,7 @@ in {
     programs.chromium = {
       enable = true;
       package = pkgs.google-chrome;
-        commandLineArgs = ["--enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu"];
+      commandLineArgs = ["--enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu"];
       # commandLineArgs = [
       #   "--enable-features=UseOzonePlatform"
       #   "--ozone-platform=wayland"
@@ -25,5 +25,5 @@ in {
       #   "--enable-wayland-ime"
       # ];
     };
-  };  
+  };
 }

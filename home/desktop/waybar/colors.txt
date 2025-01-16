@@ -24,3 +24,6 @@ $button-hover -> #8ec07c;
 $button-bottom-hover -> #76a765;
 $button-foreground -> #282828;
 
+#83a598
+#8ec07c
+#458588

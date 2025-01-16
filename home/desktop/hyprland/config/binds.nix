@@ -12,7 +12,7 @@
 
        #Apps
        bind = $mainMod, E, exec, [float]foot yazi
-       bind = $mainMod, T, exec, foot
+       #bind = $mainMod, T, exec, foot
        bind = $mainMod CTRL, M, exec, monitors
        bind = $mainMod CTRL, Y, exec, [float]foot yai
        bind = $mainMod CTRL, M, exec, monitors
@@ -54,6 +54,7 @@
 
        bind = $mainMod, S, togglespecialworkspace, magic
        bind = $mainMod, M, togglespecialworkspace, mail
+       bind = $mainMod, T, togglespecialworkspace, scratchpad
        bind = $mainMod CTRL, S, togglespecialworkspace, spotify
        bind = $mainMod, W, killactive
        bind = $mainMod, F, fullscreen, 1 #maximize window
