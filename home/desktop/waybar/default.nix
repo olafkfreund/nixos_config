@@ -594,8 +594,8 @@
           font-size: 14px;
           font-weight: bold;
           border: none;
-          border-bottom: 8px solid #252c32;
-          border-left: 6px solid #252c32;
+          border-bottom: 4px solid #ebdbb2;
+          border-left: 4px solid #ebdbb2;
           border-radius: 5px;
           margin-bottom: 2px;
           padding-left: 10px;

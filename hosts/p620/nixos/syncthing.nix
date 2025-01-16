@@ -8,8 +8,8 @@
   services.syncthing = {
     settings = {
       devices = {
-        "razer" = {id = "DEVICE-ID-GOES-HERE";};
-        "p620" = {id = "DEVICE-ID-GOES-HERE";};
+        "razer" = {id = "AKXAO57-DE2Z5DX-XE5DL6Y-MAIZTX7-ZKECOW6-LK23BXJ-NRUM6MU-VKGE2QQ";};
+        "p620" = {id = " 22QAEJN-ITC3XKD-V6VS34N-EJL4ZOP-FRXTX2N-VSZBZJU-QYTDAWV-3QSENQK";};
       };
       folders = {
         "Documents" = {
