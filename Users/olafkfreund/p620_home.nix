@@ -85,11 +85,12 @@
     "--enable-features=UseOzonePlatform"
     "--ozone-platform=wayland"
     # "--use-gl=egl"
-    "--enable-unsafe-webgpu"
-    "--ignore-gpu-blocklist"
-    "--enable-gpu-rasterization"
+    # "--enable-unsafe-webgpu"
+    # "--ignore-gpu-blocklist"
+    # "--enable-gpu-rasterization"
     # "--use-gl=angel"
-    # "--use-angle=vulkan"
-    "--enable-features=VaapiVideoDecoder,VaapiIgnoreDriverChecks,Vulkan,DefaultANGLEVulkan,VulkanFromANGLE"
+    "--use-angle=vulkan"
+    "--enable-features=Vulkan,VulkanFromANGLE,DefaultANGLEVulkan,VaapiIgnoreDriverChecks,VaapiVideoDecoder,UseMultiPlaneFormatForHardwareVideo,VaapiVideoEncoder"
+    # "--enable-features=enableVulkan"
   ];
 }
