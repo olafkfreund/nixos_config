@@ -26,8 +26,13 @@
     device = "/dev/disk/by-uuid/3a8affa2-0104-4938-90ef-1549b15af520";
     fsType = "ext4";
   };
-  fileSystems."/mnt/media" = {
+  fileSystems."/mnt/img_pool" = {
     device = "/dev/disk/by-uuid/79b604d0-03d8-4ccd-8fe3-701bc01a2429";
+    fsType = "ext4";
+  };
+
+  fileSystems."/mnt/media" = {
+    device = "/dev/disk/by-uuid/2e494e29-92be-41c3-a6db-8a908f1f2a60";
     fsType = "ext4";
   };
 

@@ -25,9 +25,9 @@
 
         "modules-left" = [
           "hyprland/window"
-          "sway/workspaces"
-          "sway/mode"
-          "sway/scratchpad"
+          # "sway/workspaces"
+          # "sway/mode"
+          # "sway/scratchpad"
           "hyprland/submap"
         ];
 
@@ -49,6 +49,9 @@
 
         "modules-center" = [
           "hyprland/workspaces"
+          "sway/workspaces"
+          "sway/scratchpad"
+          "sway/mode"
         ];
 
         "memory" = {
