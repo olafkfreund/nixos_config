@@ -75,6 +75,7 @@ with lib; let
          margin: 27px 5px -13px 5px;
          background-color: #00000000;
          columns: 1;
+         lines: 15;
      }
 
      element {
@@ -120,7 +121,7 @@ with lib; let
          padding: 12px;
          margin: 10px 5px 10px 5px;
          background-color: #1f2223;
-         text-color: #689d6a;
+         text-color: #ebdbb2;
          vertical-align: 0.5;
          horizontal-align: 0.5;
          border-radius: 5px;
@@ -154,7 +155,7 @@ in {
       package = pkgs.rofi-wayland;
       extraConfig = {
         modi = "run,ssh,filebrowser,keys,combi,drun,window";
-        lines = 5;
+        lines = 15;
         font = "JetBrains Mono Nerd Font Bold 14";
         show-icons = true;
         terminal = "foot";
