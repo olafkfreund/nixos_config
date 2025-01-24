@@ -17,6 +17,12 @@ in {
     programs.ghostty = {
       enable = true;
       package = pkgs.ghostty;
+      settings = {
+        theme = "GruvboxDark";
+        font-size = 15;
+        confirm-close-surface = false;
+        window-decoration = false;
+      };
     };
   };
 }

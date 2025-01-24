@@ -98,7 +98,8 @@ in {
       "[yaml]" = {
         "editor.defaultFormatter" = "redhat.vscode-yaml";
       };
-      "terminal.integrated.gpuAcceleration" = "off";
+      # "terminal.integrated.gpuAcceleration" = "off";
+      "geminicodeassist.codeGenerationPaneViewEnabled" = true;
       "extensions.experimental.affinity" = {
         "asvetliakov.vscode-neovim" = 1;
       };

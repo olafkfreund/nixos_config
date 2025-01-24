@@ -163,7 +163,7 @@
 
   services.ollama.acceleration = "cuda";
 
-  nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16"];
+  nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16" "dotnet-sdk-6.0.428"];
 
   hardware.nvidia-container-toolkit.enable = true;
 
