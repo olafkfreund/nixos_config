@@ -87,31 +87,32 @@
   services.xserver.videoDrivers = ["amdgpu"];
   environment.systemPackages = [
     inputs.zen-browser.packages."${pkgs.system}".default
-    pkgs.rocmPackages.rocm-core
-    pkgs.rocmPackages.hip-common
-    pkgs.rocmPackages.rccl
-    pkgs.rocmPackages.rocrand
-    pkgs.rocmPackages.rocblas
-    pkgs.rocmPackages.rocfft
-    pkgs.rocmPackages.rocsparse
-    pkgs.rocmPackages.hipsparse
-    pkgs.rocmPackages.rocthrust
-    pkgs.rocmPackages.rocprim
-    pkgs.rocmPackages.hipcub
-    pkgs.rocmPackages.roctracer
-    pkgs.rocmPackages.rocfft
-    pkgs.rocmPackages.rocsolver
-    pkgs.rocmPackages.hipfft
-    pkgs.rocmPackages.hipsolver
-    pkgs.rocmPackages.hipblas
-    pkgs.rocmPackages.rocminfo
-    pkgs.rocmPackages.rocm-cmake
-    pkgs.rocmPackages.rocm-smi
-    pkgs.rocmPackages.rocm-thunk
-    pkgs.rocmPackages.rocm-comgr
-    pkgs.rocmPackages.rocm-device-libs
-    pkgs.rocmPackages.rocm-runtime
-    pkgs.rocmPackages.hipify
+    # pkgs-unstable.rocmPackages.rocm-core
+    # pkgs-unstable.rocmPackages.hip-common
+    # pkgs-unstable.rocmPackages.rccl
+    # # pkgs-unstable.rocmPackages.rocrand
+    # # pkgs-unstable.rocmPackages.rocblas
+    # # pkgs-unstable.rocmPackages.rocfft
+    # # pkgs-unstable.rocmPackages.rocsparse
+    # # pkgs-unstable.rocmPackages.hipsparse
+    # pkgs-unstable.rocmPackages.rocthrust
+    # pkgs-unstable.rocmPackages.rocprim
+    # pkgs-unstable.rocmPackages.hipcub
+    # # pkgs-unstable.rocmPackages.roctracer
+    # # pkgs-unstable.rocmPackages.rocfft
+    # # pkgs-unstable.rocmPackages.rocsolver
+    # # pkgs-unstable.rocmPackages.hipfft
+    # # pkgs-unstable.rocmPackages.hipsolver
+    # # pkgs-unstable.rocmPackages.hipblas
+    # pkgs-unstable.rocmPackages.rocminfo
+    # pkgs-unstable.rocmPackages.rocm-cmake
+    # pkgs-unstable.rocmPackages.rocm-smi
+    # pkgs-unstable.rocmPackages.rocm-thunk
+    # pkgs-unstable.rocmPackages.rocm-comgr
+    # pkgs-unstable.rocmPackages.rocm-device-libs
+    # pkgs-unstable.rocmPackages.rocm-runtime
+    # pkgs-unstable.rocmPackages.hipify
+    # pkgs-unstable.rocmPackages.llvm.libcxx
   ];
 
   # Disable network wait services to improve boot time
@@ -194,28 +195,13 @@
   services.playerctld.enable = true;
   services.fwupd.enable = true;
   services.ollama.acceleration = lib.mkForce "rocm";
-  services.ollama.package = lib.mkForce pkgs-unstable.ollama-rocm;
+  services.ollama.package = lib.mkForce pkgs.ollama-rocm;
   services.ollama.rocmOverrideGfx = lib.mkForce "11.0.0";
   services.ollama.environmentVariables.HCC_AMDGPU_TARGET = lib.mkForce "gfx1100";
   services.ollama.environmentVariables.OLLAMA_LLM_LIBRARY = lib.mkForce "rocm_v6";
   networking.firewall.enable = false;
   networking.nftables.enable = true;
   networking.timeServers = ["pool.ntp.org"];
-
   nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16"];
-
   system.stateVersion = "24.11";
-
-  nixpkgs.overlays = [
-    (self: super: {
-      rocm-llvm-libcxx = super.rocm-llvm-libcxx.overrideAttrs (oldAttrs: rec {
-        patches =
-          oldAttrs.patches
-          or []
-          ++ [
-            /home/olafkfreund/.config/nixos/patches/rocm-llvm-libcxx-6.0.2.patch
-          ];
-      });
-    })
-  ];
 }
