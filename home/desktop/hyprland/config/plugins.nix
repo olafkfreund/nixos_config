@@ -1,6 +1,14 @@
 {...}: {
   wayland.windowManager.hyprland.extraConfig = ''
     plugin {
+      hyprbars {
+        bar_height = 20
+        bar_color = rgb(ebdbb2)
+        bar_title_enabled = true
+        bar_text_align = left
+        col.text = rgb(282828)
+        bar_part_of_window = true
+      }
       hyprexpo {
         columns = 3
         gap_size = 5

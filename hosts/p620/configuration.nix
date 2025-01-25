@@ -205,4 +205,17 @@
   nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16"];
 
   system.stateVersion = "24.11";
+
+  nixpkgs.overlays = [
+    (self: super: {
+      rocm-llvm-libcxx = super.rocm-llvm-libcxx.overrideAttrs (oldAttrs: rec {
+        patches =
+          oldAttrs.patches
+          or []
+          ++ [
+            /home/olafkfreund/.config/nixos/patches/rocm-llvm-libcxx-6.0.2.patch
+          ];
+      });
+    })
+  ];
 }

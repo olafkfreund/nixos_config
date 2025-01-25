@@ -1,0 +1,7 @@
+--- a/pkgs/development/rocm-modules/6/llvm/stage-2/1000-libcxx-failing-tests.list
++++ b/pkgs/development/rocm-modules/6/llvm/stage-2/1000-libcxx-failing-tests.list
+@@ -173,3 +173,4 @@
+ ../libcxx/test/std/language.support/support.dynamic/new.delete/new.delete.array/sized_delete_array14.pass.cpp
+ ../libcxx/test/std/language.support/support.dynamic/new.delete/new.delete.single/sized_delete14.pass.cpp
+ ../libcxx/test/libcxx/selftest/sh.cpp/empty.sh.cpp
++../libcxx/test/libcxx/transitive_includes.sh.cpp

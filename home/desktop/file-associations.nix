@@ -1,32 +1,32 @@
 let
-  browser = [ "google-chrome-stable" ];
-  archiveManager = [ "archive" ];
-  imageViewer = [ "feh" ];
-in
-{
+  google-chrome.desktop = ["google-chrome-stable"];
+  archiveManager = ["archive"];
+  feh.desktop = ["feh"];
+in {
   # XDG MIME types
   associations = {
-    "application/x-extension-htm" = browser;
-    "application/x-extension-html" = browser;
-    "application/x-extension-shtml" = browser;
-    "application/x-extension-xht" = browser;
-    "application/x-extension-xhtml" = browser;
-    "application/xhtml+xml" = browser;
-    "text/html" = browser;
-    "x-scheme-handler/about" = browser;
-    "x-scheme-handler/chrome" = browser;
-    "x-scheme-handler/ftp" = browser;
-    "x-scheme-handler/http" = browser;
-    "x-scheme-handler/https" = browser;
-    "x-scheme-handler/unknown" = browser;
+    "application/x-extension-htm" = google-chrome.desktop;
+    "application/x-extension-html" = google-chrome.desktop;
+    "application/x-extension-shtml" = google-chrome.desktop;
+    "application/x-extension-xht" = google-chrome.desktop;
+    "application/x-extension-xhtml" = google-chrome.desktop;
+    "application/xhtml+xml" = google-chrome.desktop;
+    "text/html" = google-chrome.desktop;
+    "x-scheme-handler/about" = google-chrome.desktop;
+    "x-scheme-handler/chrome" = google-chrome.desktop;
+    "x-scheme-handler/ftp" = google-chrome.desktop;
+    "x-scheme-handler/http" = google-chrome.desktop;
+    "x-scheme-handler/https" = google-chrome.desktop;
+    "x-scheme-handler/unknown" = google-chrome.desktop;
+    "x-scheme-handler/mailto" = thunderbird.desktop;
 
-    "audio/*" = [ "mpv" ];
-    "video/*" = [ "mpv" ];
-    "image/*" = [ "feh" ];
+    "audio/*" = ["mpv"];
+    "video/*" = ["mpv"];
+    "image/*" = ["feh"];
 
-    "application/json" = browser;
+    "application/json" = google-chrome.desktop;
 
-    "application/pdf" = [ "zathura" ];
+    "application/pdf" = ["zathura"];
 
     # Archives / compressed files
     "application/x-7z-compressed" = archiveManager;
@@ -53,27 +53,27 @@ in
     "application/vnd.rar" = archiveManager;
 
     # Images
-    "image/jpeg" = imageViewer;
-    "image/png" = imageViewer;
-    "image/gif" = imageViewer;
-    "image/webp" = imageViewer;
-    "image/tiff" = imageViewer;
-    "image/x-tga" = imageViewer;
-    "image/vnd-ms.dds" = imageViewer;
-    "image/x-dds" = imageViewer;
-    "image/bmp" = imageViewer;
-    "image/vnd.microsoft.icon" = imageViewer;
-    "image/vnd.radiance" = imageViewer;
-    "image/x-exr" = imageViewer;
-    "image/x-portable-bitmap" = imageViewer;
-    "image/x-portable-graymap" = imageViewer;
-    "image/x-portable-pixmap" = imageViewer;
-    "image/x-portable-anymap" = imageViewer;
-    "image/x-qoi" = imageViewer;
-    "image/svg+xml" = imageViewer;
-    "image/svg+xml-compressed" = imageViewer;
-    "image/avif" = imageViewer;
-    "image/heic" = imageViewer;
-    "image/jxl" = imageViewer;
+    "image/jpeg" = feh.desktop;
+    "image/png" = feh.desktop;
+    "image/gif" = feh.desktop;
+    "image/webp" = feh.desktop;
+    "image/tiff" = feh.desktop;
+    "image/x-tga" = feh.desktop;
+    "image/vnd-ms.dds" = feh.desktop;
+    "image/x-dds" = feh.desktop;
+    "image/bmp" = feh.desktop;
+    "image/vnd.microsoft.icon" = feh.desktop;
+    "image/vnd.radiance" = feh.desktop;
+    "image/x-exr" = feh.desktop;
+    "image/x-portable-bitmap" = feh.desktop;
+    "image/x-portable-graymap" = feh.desktop;
+    "image/x-portable-pixmap" = feh.desktop;
+    "image/x-portable-anymap" = feh.desktop;
+    "image/x-qoi" = feh.desktop;
+    "image/svg+xml" = feh.desktop;
+    "image/svg+xml-compressed" = feh.desktop;
+    "image/avif" = feh.desktop;
+    "image/heic" = feh.desktop;
+    "image/jxl" = feh.desktop;
   };
 }

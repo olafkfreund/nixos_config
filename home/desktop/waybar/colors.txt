@@ -27,3 +27,4 @@ $button-foreground -> #282828;
 #83a598
 #8ec07c
 #458588
+#ebdbb2

@@ -100,6 +100,7 @@ in {
       };
       # "terminal.integrated.gpuAcceleration" = "off";
       "geminicodeassist.codeGenerationPaneViewEnabled" = true;
+      "geminicodeassist.project" = "freundcloud";
       "extensions.experimental.affinity" = {
         "asvetliakov.vscode-neovim" = 1;
       };

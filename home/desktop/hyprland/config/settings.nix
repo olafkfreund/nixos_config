@@ -21,7 +21,8 @@
         border_size = 2
         layout = master
         resize_on_border = true
-        col.active_border = rgb(689d6a)
+        # col.active_border = rgb(689d6a)
+        col.active_border = rgb(ebdbb2)
         col.inactive_border = rgb(ebdbb2)
     }
 
@@ -34,13 +35,17 @@
           new_optimizations = on
           ignore_opacity = off
       }
-        active_opacity = 1.0
-        inactive_opacity = 1.0
-        fullscreen_opacity = 1.0
-        # drop_shadow = true
-        # shadow_range = 30
-        # shadow_render_power = 3
-        # col.shadow = 0x66000000
+      shadow {
+          enabled = false
+          range = 30
+          render_power = 3
+          offset = 0 40
+          # color = 0x66000000
+          color = rgb(ebdbb2)
+      }
+      active_opacity = 1.0
+      inactive_opacity = 1.0
+      fullscreen_opacity = 1.0
     }
 
     animations {

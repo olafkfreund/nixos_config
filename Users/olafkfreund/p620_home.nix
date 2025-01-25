@@ -89,8 +89,8 @@
     # "--ignore-gpu-blocklist"
     # "--enable-gpu-rasterization"
     # "--use-gl=angel"
-    "--use-angle=vulkan"
-    "--enable-features=Vulkan,VulkanFromANGLE,DefaultANGLEVulkan,VaapiIgnoreDriverChecks,VaapiVideoDecoder,UseMultiPlaneFormatForHardwareVideo,VaapiVideoEncoder"
+    # "--use-angle=vulkan"
+    # "--enable-features=Vulkan,VulkanFromANGLE,DefaultANGLEVulkan,VaapiIgnoreDriverChecks,VaapiVideoDecoder,UseMultiPlaneFormatForHardwareVideo,VaapiVideoEncoder"
     # "--enable-features=enableVulkan"
   ];
 }

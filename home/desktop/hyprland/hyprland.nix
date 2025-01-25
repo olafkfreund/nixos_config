@@ -28,6 +28,7 @@
     plugins = [
       pkgs.hyprlandPlugins.hyprexpo
       pkgs.hyprlandPlugins.hyprfocus
+      pkgs.hyprlandPlugins.hyprbars
     ];
   };
 }
