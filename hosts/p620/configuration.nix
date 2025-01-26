@@ -112,7 +112,7 @@
     # pkgs-unstable.rocmPackages.rocm-device-libs
     # pkgs-unstable.rocmPackages.rocm-runtime
     # pkgs-unstable.rocmPackages.hipify
-    # pkgs-unstable.rocmPackages.llvm.libcxx
+    pkgs-unstable.rocmPackages.llvm.libcxx
   ];
 
   # Disable network wait services to improve boot time

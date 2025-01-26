@@ -10,7 +10,7 @@
     settings = {
       mainBar = {
         "layer" = "top";
-        "position" = "top";
+        "position" = "bottom";
         "mod" = "dock";
         "margin-top" = 0;
         "margin-bottom" = 0;
@@ -24,16 +24,18 @@
         "gtk-layer-shell" = true;
 
         "modules-left" = [
-          "hyprland/window"
+          # "hyprland/window"
           # "sway/workspaces"
           # "sway/mode"
           # "sway/scratchpad"
+          "clock"
           "hyprland/submap"
+          # "temperature"
         ];
 
         "modules-right" = [
           "network"
-          "bluetooth"
+          # "bluetooth"
           "custom/swaync"
           "power-profiles-daemon"
           "cpu"
@@ -42,9 +44,9 @@
           "pulseaudio"
           # "pulseaudio#microphone"
           "battery"
-          "clock"
+          # "clock"
           # "custom/weather"
-          "custom/powermenu"
+          # "custom/powermenu"
         ];
 
         "modules-center" = [
@@ -184,11 +186,11 @@
         clock = {
           format = "  {:%a %d-%m %H:%M} ";
           tooltip = true;
-          format-alt = "{:%A, %B %d, %Y}";
+          # format-alt = "{:%A, %B %d, %Y}";
           max-lenght = 25;
           interval = 60;
           on-click = "gnome-calendar";
-          on-left-click = "notify-send \"Date / Time\" \"󰃭 $(date \"+%a %h %d\")   $(date \"+%I:%M %p\")\"";
+          # on-left-click = "notify-send \"Date / Time\" \"󰃭 $(date \"+%a %h %d\")   $(date \"+%I:%M %p\")\"";
         };
 
         "battery" = {
@@ -333,7 +335,7 @@
         }
 
         window#waybar {
-          background-color: #1f2223;
+          background-color: transparent;
           color:  #ebdbb2;
           transition-property: background-color;
           transition-duration: .5s;
