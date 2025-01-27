@@ -20,7 +20,7 @@ in {
       settings = {
         "$schema" = "/etc/xdg/swaync/configSchema.json";
         "positionX" = "right";
-        "positionY" = "top";
+        "positionY" = "bottom";
         "layer" = "overlay";
         "control-center-layer" = "top";
         "layer-shell" = true;
@@ -314,7 +314,8 @@ in {
           text-shadow: none;
           background-color: #689d6a;
           border: none;
-          border-bottom: 8px solid #518554;
+          border-bottom: 8px solid #ebdbb2;
+          border-left: 4px solid #ebdbb2;
           box-shadow: none;
           border-radius: 5px;
           padding-left: 15px;
