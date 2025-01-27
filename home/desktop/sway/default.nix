@@ -97,11 +97,7 @@ in {
             background = "#504945";
             childBorder = "#fe8019";
             indicator = "#504945";
-            titlebar = {
-              background = "#504945";
-              text = "#ebdbb2";
-              border = "#fe8019";
-          };
+            titlebar =  "#504945";
           focusedInactive = unfocused;
           urgent =
             unfocused
@@ -109,11 +105,7 @@ in {
               text = "#ebdbb2";
               border = "#fb4934";
               childBorder = "#fb4934";
-              titlebar = {
-                background = "#fb4934";
-                text = "#ebdbb2";
-                border = "#fb4934";
-              };
+              titlebar = "#fb4934";
             };
           focused =
             unfocused
@@ -122,11 +114,7 @@ in {
               border = "#8ec07c";
               background = "#282828";
               text = "#ebdbb2";
-              titlebar = {
-                background = "#282828";
-                text = "#ebdbb2";
-                border = "#8ec07c";
-              };
+              titlebar = "#282828";
             };
         };
         window = {
