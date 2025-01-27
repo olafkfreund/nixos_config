@@ -97,7 +97,8 @@ in {
             background = "#504945";
             childBorder = "#fe8019";
             indicator = "#504945";
-            titlebar =  "#504945";
+            titlebar = "#504945";
+          };
           focusedInactive = unfocused;
           urgent =
             unfocused
