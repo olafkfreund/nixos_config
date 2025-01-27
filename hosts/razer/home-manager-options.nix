@@ -1,7 +1,4 @@
-{
-  lib,
-  ...
-}: {
+{lib, ...}: {
   programs.obs.enable = lib.mkForce true;
   programs.kdeconnect.enable = lib.mkForce true;
   programs.slack.enable = lib.mkForce true;
@@ -22,7 +19,7 @@
   # Browsers
   browsers.chrome.enable = lib.mkForce true;
   browsers.firefox.enable = lib.mkForce true;
-  browsers.edge.enable = lib.mkForce true;
+  browsers.edge.enable = lib.mkForce false;
   browsers.brave.enable = lib.mkForce true;
   browsers.opera.enable = lib.mkForce true;
 
