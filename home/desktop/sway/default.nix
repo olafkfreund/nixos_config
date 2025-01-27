@@ -111,7 +111,7 @@ in {
             // {
               childBorder = "#8ec07c";
               border = "#8ec07c";
-              background = "#282828";
+              background = "#504945";
               text = "#ebdbb2";
             };
         };
