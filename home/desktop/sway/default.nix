@@ -97,7 +97,6 @@ in {
             background = "#504945";
             childBorder = "#fe8019";
             indicator = "#504945";
-            titlebar = "#504945";
           };
           focusedInactive = unfocused;
           urgent =
@@ -106,7 +105,6 @@ in {
               text = "#ebdbb2";
               border = "#fb4934";
               childBorder = "#fb4934";
-              titlebar = "#fb4934";
             };
           focused =
             unfocused
@@ -115,7 +113,6 @@ in {
               border = "#8ec07c";
               background = "#282828";
               text = "#ebdbb2";
-              titlebar = "#282828";
             };
         };
         window = {
