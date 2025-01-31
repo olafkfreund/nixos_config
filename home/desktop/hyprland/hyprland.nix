@@ -3,6 +3,7 @@
   lib,
   config,
   pkgs,
+  pkgs-unstable,
   ...
 }: {
   imports = [
@@ -25,6 +26,7 @@
     enable = true;
     systemd.enable = true;
     xwayland.enable = true;
+    package = pkgs.hyprland;
     plugins = [
       pkgs.hyprlandPlugins.hyprexpo
       pkgs.hyprlandPlugins.hyprfocus
