@@ -35,7 +35,7 @@
 
   programs.obs.enable = lib.mkForce true;
   programs.kdeconnect.enable = lib.mkForce true;
-  programs.slack.enable = lib.mkForce true;
+  programs.slack.enable = lib.mkForce false;
   # Terminals
   alacritty.enable = lib.mkForce true;
   foot.enable = lib.mkForce true;
@@ -57,14 +57,14 @@
   # Browsers
   browsers.chrome.enable = lib.mkForce true;
   browsers.firefox.enable = lib.mkForce true;
-  browsers.edge.enable = lib.mkForce true;
-  browsers.brave.enable = lib.mkForce true;
-  browsers.opera.enable = lib.mkForce true;
+  browsers.edge.enable = lib.mkForce false;
+  browsers.brave.enable = lib.mkForce false;
+  browsers.opera.enable = lib.mkForce false;
 
   # Editors
-  editor.cursor.enable = lib.mkForce true;
+  editor.cursor.enable = lib.mkForce false;
   editor.neovim.enable = lib.mkForce true;
-  editor.vscode.enable = lib.mkForce true;
+  editor.vscode.enable = lib.mkForce false;
 
   # Shell tools
   cli.bat.enable = lib.mkForce true;
