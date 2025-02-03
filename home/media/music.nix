@@ -5,7 +5,7 @@
   ...
 }: {
   home.packages = [
-    # pkgs.spotify
+    pkgs.spotify
     pkgs.spicetify-cli
     pkgs.ncspot # Spotify
     pkgs.plexamp # Plex

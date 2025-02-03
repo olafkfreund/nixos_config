@@ -6,7 +6,7 @@
     ./shell/default.nix
     ./development/default.nix
     ./media/music.nix
-    ./media/spice_themes.nix
+    # ./media/spice_themes.nix
     ./files.nix
   ];
 }
