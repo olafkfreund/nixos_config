@@ -101,20 +101,6 @@
           on-scroll-up = "${pkgs.hyprland}/bin/hyprctl dispatch workspace e-1";
           on-scroll-down = "${pkgs.hyprland}/bin/hyprctl dispatch workspace e+1";
           max-length = 45;
-          persistent-workspaces = {
-            "spotify" = [
-              "*"
-            ];
-            "mail" = [
-              "*"
-            ];
-            "scratchpad" = [
-              "*"
-            ];
-            "slack" = [
-              "*"
-            ];
-          };
           "format-icons" = {
             "1" = "1";
             "2" = "2";
@@ -141,13 +127,6 @@
           show-special = true;
           on-click = "active";
           active-only = false;
-          persistent-workspaces = {
-            "11" = [];
-            "12" = [];
-            "13" = [];
-            "14" = [];
-            "15" = [];
-          };
           "format-icons" = {
             "1" = "1";
             "2" = "2";

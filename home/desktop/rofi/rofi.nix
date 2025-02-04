@@ -27,7 +27,7 @@ with lib; let
          location: west;
          anchor: west;
          border: 0px;
-         border-radius: 10px;
+         border-radius: 0 10px 10px 0;
          border: 0px 0px 0px 0px;
          border-color: #ebdbb2;
          background-color: #282828;
