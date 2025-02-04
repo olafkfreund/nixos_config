@@ -99,7 +99,7 @@ in {
 
         .notification-row:focus,
         .notification-row:hover {
-          background: #1d2021;
+          background: #282828;
         }
 
         .notification {
@@ -136,7 +136,7 @@ in {
         }
 
         .close-button {
-          background: #3c3836;
+          background: #282828;
           color: #ebdbb2;
           text-shadow: none;
           padding: 0;
@@ -160,7 +160,7 @@ in {
           padding: 4px;
           margin: 0;
           box-shadow: none;
-          background-color: #1d2021;
+          background-color: #282828;
           border: none;
           border-bottom: 1px solid @sep-color;
           color: #ebdbb2;
@@ -179,12 +179,12 @@ in {
 
         .notification-default-action:hover {
           -gtk-icon-effect: none;
-          background: #1d2021;
+          background: #282828;
         }
 
         .notification-action:hover {
           -gtk-icon-effect: none;
-          background: #3c3836;
+          background: #282828;
         }
 
         .notification-default-action {
@@ -217,7 +217,7 @@ in {
           margin-top: 8px;
         }
         .inline-reply-entry {
-          background: #1d2021;
+          background: #282828;
           color: #ebdbb2;
           caret-color: #ebdbb2;
           border: 1px solid #689d6a;
@@ -225,7 +225,7 @@ in {
         }
         .inline-reply-button {
           margin-left: 4px;
-          background: #1d2021;
+          background: #282828;
           border: 1px solid #689d6a;
           border-radius: 12px;
           color: #ebdbb2;
@@ -236,7 +236,7 @@ in {
           border: 1px solid transparent;
         }
         .inline-reply-button:hover {
-          background: #1d2021;
+          background: #282828;
         }
 
         .image {
@@ -274,7 +274,7 @@ in {
         }
 
         .control-center {
-          background: #1d2021;
+          background: #282828;
           padding-bottom: 25px;
           padding-top: 5px;
           padding-left: 10px;
@@ -310,12 +310,12 @@ in {
         .widget-title > button {
           font-size: 20px;
           font-weight: bold;
-          color: #282828;
+          color: #ebdbb2;
           text-shadow: none;
-          background-color: #689d6a;
+          background-color: #282828;
           border: none;
-          border-bottom: 8px solid #ebdbb2;
-          border-left: 4px solid #ebdbb2;
+          border-bottom: 8px solid #504945;
+          border-left: 4px solid #504945;
           box-shadow: none;
           border-radius: 5px;
           padding-left: 15px;
@@ -324,8 +324,9 @@ in {
           padding-bottom: 5px;
         }
         .widget-title > button:hover {
-          background-color: #8ec07c;
+          background-color: #282828;
           border-bottom: 8px solid  #76a765;
+          border-left: 4px solid #76a765;
         }
 
         /* DND widget */
@@ -337,7 +338,7 @@ in {
         .widget-dnd > switch {
           font-size: initial;
           border-radius: 100px;
-          background: #3c3836;
+          background: #282828;
           border: none;
           box-shadow: none;
           color: transparent;
@@ -385,16 +386,16 @@ in {
           padding: 8px;
           margin: 8px;
           border-radius: 12px;
-          background-color: #1d2021;
+          background-color: #282828;
         }
 
         .widget-buttons-grid>flowbox>flowboxchild>button{
-          background: #1d2021;
+          background: #282828;
           border-radius: 12px;
         }
 
         .widget-buttons-grid>flowbox>flowboxchild>button:hover {
-          background: #1d2021;
+          background: #282828;
         }
 
         /* Menubar widget */
@@ -404,7 +405,7 @@ in {
         }
 
         .AnyName {
-          background-color: #1d2021;
+          background-color: #282828;
           padding: 8px;
           margin: 8px;
           border-radius: 10px;
@@ -416,7 +417,7 @@ in {
         }
 
         .AnyName>button:hover {
-          background-color: #1d2021;
+          background-color: #282828;
         }
 
         .topbar-buttons>button { /* Name defined in config after # */
@@ -427,7 +428,7 @@ in {
         /* Volume widget */
 
         .widget-volume {
-          background-color: #1d2021;
+          background-color: #282828;
           padding: 8px;
           margin: 8px;
           border-radius: 12px;
@@ -439,7 +440,7 @@ in {
         }
 
         .per-app-volume {
-          background-color: #1d2021;
+          background-color: #282828;
           padding: 4px 8px 8px 8px;
           margin: 0px 8px 8px 8px;
           border-radius: 12px
@@ -447,7 +448,7 @@ in {
 
         /* Backlight widget */
         .widget-backlight {
-          background-color: #1d2021;
+          background-color: #282828;
           padding: 8px;
           margin: 8px;
           border-radius: 12px;
@@ -462,13 +463,13 @@ in {
           font-size: initial;
           color: #ebdbb2;
           text-shadow: none;
-          background: #1d2021;
-          border: 1px solid #689d6a;
+          background: #282828;
+          border: 1px solid #bdae93;
           box-shadow: none;
           border-radius: 12px;
         }
         .widget-inhibitors > button:hover {
-          background: #1d2021;
+          background: #282828;
         }
       '';
     };

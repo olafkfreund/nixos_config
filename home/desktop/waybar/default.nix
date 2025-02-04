@@ -12,10 +12,10 @@
         "layer" = "top";
         "position" = "bottom";
         "mod" = "dock";
-        "margin-top" = 0;
-        "margin-bottom" = 0;
-        "margin-left" = 0;
-        "margin-right" = 0;
+        "margin-top" = 2;
+        "margin-bottom" = 2;
+        "margin-left" = 2;
+        "margin-right" = 2;
         "spacing" = 4;
         "fixed-center" = true;
         "exclusive" = true;
@@ -24,47 +24,49 @@
         "gtk-layer-shell" = true;
 
         "modules-left" = [
-          # "hyprland/window"
-          # "sway/workspaces"
-          # "sway/mode"
-          # "sway/scratchpad"
-          "clock"
+          "hyprland/workspaces"
+          "sway/workspaces"
+          "sway/scratchpad"
+          "sway/mode"
           "hyprland/submap"
           # "temperature"
         ];
 
         "modules-right" = [
-          "network"
+          "cpu"
+          "memory"
+          "pulseaudio"
+          "pulseaudio#microphone"
           # "bluetooth"
           "custom/swaync"
           "power-profiles-daemon"
-          "cpu"
-          "memory"
+          "network"
           "idle_inhibitor"
-          "pulseaudio"
-          # "pulseaudio#microphone"
           "battery"
-          # "clock"
+          "clock"
           # "custom/weather"
           # "custom/powermenu"
         ];
 
         "modules-center" = [
-          "hyprland/workspaces"
-          "sway/workspaces"
-          "sway/scratchpad"
-          "sway/mode"
+          # "hyprland/workspaces"
+          # "sway/workspaces"
+          # "sway/scratchpad"
+          # "sway/mode"
         ];
 
         "memory" = {
-          interval = 10;
-          format = "   {}% ";
+          interval = 1;
+          format = "{icon}";
+          format-icons = ["▁▁" "▂▂" "▃▃" "▄▄" "▅▅" "▆▆" "▇▇" "██"];
           max-length = 20;
         };
 
         "cpu" = {
           interval = 1;
-          format = "   {usage}% ";
+          format = "{icon}";
+          format-icons = ["▁▁" "▂▂" "▃▃" "▄▄" "▅▅" "▆▆" "▇▇" "██"];
+          max-length = 20;
         };
 
         "custom/cycle_wall" = {
@@ -185,7 +187,7 @@
 
         clock = {
           format = "  {:%a %d-%m %H:%M} ";
-          tooltip = true;
+          tooltip = false;
           # format-alt = "{:%A, %B %d, %Y}";
           max-lenght = 25;
           interval = 60;
@@ -291,11 +293,25 @@
         # };
 
         "custom/swaync" = {
-          format = " ";
+          tooltip = false;
+          format = "{icon}";
+          format-icons = {
+            "notification" = "󰅸";
+            "none" = "󰂜";
+            "dnd-notification" = "󰅸";
+            "dnd-none" = "󱏨";
+            "inhibited-notification" = "󰅸";
+            "inhibited-none" = "󰂜";
+            "dnd-inhibited-notification" = "󰅸";
+            "dnd-inhibited-none" = "󱏨";
+          };
+          return-type = "json";
+          exec-if = "which swaync-client";
+          exec = "swaync-client -swb";
           on-click = "${pkgs.swaynotificationcenter}/bin/swaync-client -t";
           on-click-right = "${pkgs.swaynotificationcenter}/bin/swaync-client -C";
           on-click-middle = "notify_count";
-          tooltip = false;
+          escape = true;
         };
 
         "pulseaudio#microphone" = {
@@ -335,7 +351,7 @@
         }
 
         window#waybar {
-          background-color: transparent;
+          background-color: #282828;
           color:  #ebdbb2;
           transition-property: background-color;
           transition-duration: .5s;
@@ -354,10 +370,10 @@
         }
 
         tooltip {
-          background-color: #1f2223;
+          background-color: #282828;
           border: none;
-          border-bottom: 8px solid #191c1d;
-          border-left: 6px solid #191c1d;
+          border-bottom: 4px solid #ebdbb2;
+          border-left: 4px solid #ebdbb2;
           border-radius: 5px;
         }
 
@@ -396,28 +412,33 @@
           border: none;
           border-bottom: 4px solid #ebdbb2;
           border-left: 4px solid #ebdbb2;
+          border-top: 1px solid #ebdbb2;
+          border-right: 1px solid #ebdbb2;
           border-radius: 5px;
           margin-left: 4px;
           margin-bottom: 2px;
+          margin-top: 2px;
           font-family: JetBrainsMono Nerd Font, sans-sherif;
           font-weight: bold;
           font-size: 14px;
+          padding-top: 4px;
+          padding-bottom: 4px;
           padding-left: 13px;
           padding-right: 13px;
           transition: transform 0.1s ease-in-out;
           color: #ebdbb2;
-          background-color: #1f2223;
+          background-color: #282828;
         }
 
         #workspaces button:hover {
-          background: inherit;
+          color: #282828;
           background-color: #689d6a;
           border-bottom: 4px solid #ebdbb2;
           border-left: 4px solid #ebdbb2;
         }
 
         #workspaces button.active {
-          background: inherit;
+          color: #282828;
           background-color: #689d6a;
           border-bottom: 4px solid #ebdbb2;
           border-left: 4px solid #ebdbb2;
@@ -508,7 +529,7 @@
         }
 
         #idle_inhibitor {
-          color: #ebdbb2;
+          color: #fabd2f;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 14px;
           font-weight: bold;
@@ -559,7 +580,7 @@
         #cpu {
           color: #ebdbb2;
           font-family: JetBrainsMono Nerd Font, monospace;
-          font-size: 14px;
+          font-size: 15px;
           font-weight: bold;
           border: none;
           border-radius: 5px;
@@ -569,7 +590,7 @@
         #memory {
           color: #ebdbb2;
           font-family: JetBrainsMono Nerd Font, monospace;
-          font-size: 14px;
+          font-size: 15px;
           font-weight: bold;
           border: none;
           border-radius: 5px;
@@ -577,7 +598,7 @@
         }
 
         #custom-powermenu {
-          background-color: #1f2223;
+          background-color: #282828;
           color: #ebdbb2;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 14px;
