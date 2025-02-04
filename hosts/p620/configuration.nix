@@ -132,6 +132,10 @@
 
   networking.networkmanager.enable = true;
   networking.hostName = "p620";
+  networking.nameservers = [
+    "1.1.1.1"
+    "8.8.8.8"
+  ];
   networking = {
     useDHCP = false;
     useNetworkd = true;
