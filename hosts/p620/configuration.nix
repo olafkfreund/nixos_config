@@ -22,26 +22,27 @@
     ../../modules/development/default.nix
   ];
 
-  aws.packages.enable = true;
-  azure.packages.enable = true;
-  cloud-tools.packages.enable = true;
-  google.packages.enable = true;
-  k8s.packages.enable = true;
+  aws.packages.enable = lib.mkForce true;
+  azure.packages.enable = lib.mkForce true;
+  cloud-tools.packages.enable = lib.mkForce true;
+  steampipe.packages.enable = lib.mkForce true;
+  google.packages.enable = lib.mkForce true;
+  k8s.packages.enable = lib.mkForce true;
   # openshift.packages.enable = true;
-  terraform.packages.enable = true;
+  terraform.packages.enable = lib.mkForce true;
 
   # Development tools
-  ansible.development.enable = true;
-  cargo.development.enable = true;
-  github.development.enable = true;
-  go.development.enable = true;
-  java.development.enable = true;
-  lua.development.enable = true;
-  nix.development.enable = true;
-  shell.development.enable = true;
-  devshell.development.enable = true;
-  python.development.enable = true;
-  nodejs.development.enable = true;
+  ansible.development.enable = lib.mkForce true;
+  cargo.development.enable = lib.mkForce true;
+  github.development.enable = lib.mkForce true;
+  go.development.enable = lib.mkForce true;
+  java.development.enable = lib.mkForce true;
+  lua.development.enable = lib.mkForce true;
+  nix.development.enable = lib.mkForce true;
+  shell.development.enable = lib.mkForce true;
+  devshell.development.enable = lib.mkForce true;
+  python.development.enable = lib.mkForce true;
+  nodejs.development.enable = lib.mkForce true;
 
   # Git tools
   programs.lazygit.enable = lib.mkForce true;

@@ -24,6 +24,7 @@
   aws.packages.enable = lib.mkForce false;
   azure.packages.enable = lib.mkForce false;
   cloud-tools.packages.enable = lib.mkForce false;
+  steampipe.packages.enable = lib.mkForce false;
   google.packages.enable = lib.mkForce false;
   k8s.packages.enable = lib.mkForce false;
   # openshift.packages.enable = true;

@@ -18,7 +18,6 @@ in {
       pkgs.remmina
       pkgs.freerdp
       pkgs.rustdesk
-      pkgs.rustdesk-server
     ];
   };
 }
