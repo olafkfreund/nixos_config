@@ -18,7 +18,7 @@
        bind = $mainMod CTRL, M, exec, monitors
        bind = $mainMod, backspace, exec, rofi-hyprkeys
        bind = $mainMod, RETURN, exec,[float; size 50% 50%; center]foot
-       bind = $mainMod, space, exec, rofi -show drun
+       bind = $mainMod, space, exec, pkill rofi || rofi -show drun
        bind = $mainMod SHIFT, P, exec, screenshoot
        bind = $mainMod SHIFT, I, exec, cliphist list | rofi -dmenu  -p "Clipboard History" | cliphist decode | wl-copy
        bind = $mainMod, SLASH, exec, pamixer -t
