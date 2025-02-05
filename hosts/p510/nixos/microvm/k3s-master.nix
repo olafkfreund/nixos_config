@@ -33,8 +33,8 @@ in {
     ];
     volumes = [
       {
-        mountPoint = "/mnt/img_pool";
-        image = "k3sserver.img";
+        mountPoint = "/var";
+        image = "var.img";
         size = 2048;
       }
     ];
