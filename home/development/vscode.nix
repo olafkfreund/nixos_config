@@ -104,10 +104,10 @@ in {
       "extensions.experimental.affinity" = {
         "asvetliakov.vscode-neovim" = 1;
       };
-      # "codeium.enableConfig" = {
-      #   "*" = true;
-      #   "nix" = true;
-      # };
+      "codeium.enableConfig" = {
+        "*" = true;
+        "nix" = true;
+      };
     };
   };
 }

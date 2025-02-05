@@ -128,6 +128,12 @@
   };
 
   systemd.network = {
+    netdevs."br0" = {
+      netdevConfig = {
+        Name = "br0";
+        Kind = "bridge";
+      };
+    };
     networks = {
       "eno1" = {
         name = "eno1";
@@ -135,6 +141,22 @@
         networkConfig = {
           MulticastDNS = true;
         };
+      };
+      "10-lan" = {
+        matchConfig.Name = ["eno1" "vm-*"];
+        networkConfig = {
+          Bridge = "br0";
+        };
+      };
+      "10-lan-bridge" = {
+        matchConfig.Name = "br0";
+        networkConfig = {
+          Address = ["192.168.1.201/24"];
+          Gateway = "192.168.1.254";
+          DNS = ["8.8.8.8" "8.8.4.4"];
+          IPv6AcceptRA = false;
+        };
+        linkConfig.RequiredForOnline = "routable";
       };
     };
   };
