@@ -151,6 +151,7 @@
         inputs.agenix.nixosModules.default
         nix-index-database.nixosModules.nix-index
         microvm.nixosModules.host
+        microvm.nixosModules.microvm
         ./home/shell/zellij/zjstatus.nix
         {
           home-manager.useGlobalPkgs = true;
