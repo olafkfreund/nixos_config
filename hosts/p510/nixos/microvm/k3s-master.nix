@@ -69,7 +69,7 @@ in {
     };
   };
   networking.firewall.enable = false;
-  networking.hostName = hostname;
+  # networking.hostName = hostname;
   nix.enable = true;
   nix.settings = {
     extra-experimental-features = ["nix-command" "flakes"];
