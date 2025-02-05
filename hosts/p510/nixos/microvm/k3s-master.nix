@@ -13,8 +13,10 @@
 in {
   # Enable microvm
   microvm = {
-    enable = true;
+    # enable = true;
     hypervisor = "qemu";
+    mem = 8192;
+    vcpu = 4;
     interfaces = [
       {
         type = "tap";
