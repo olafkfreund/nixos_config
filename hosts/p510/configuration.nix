@@ -16,6 +16,7 @@
     ./nixos/hosts.nix
     ./themes/stylix.nix
     ./nixos/plex.nix
+    ./nixos/microvm/k3s-master.nix
     ../../modules/server.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
