@@ -18,7 +18,8 @@
     self,
     nixpkgs,
     microvm,
-  }: let
+    ...
+  } @ inputs: let
     system = "x86_64-linux";
     username = "k3suser";
     k3sToken = "7j2hK6sVjkzN5sE8sF+pQyXlJd3w8bX0y5ZvX7K9KAo="; # Replace with your generated token
@@ -32,6 +33,12 @@
     nixosConfigurations = {
       k3s-master = nixpkgs.lib.nixosSystem {
         inherit system;
+        specialArgs = {
+          pkgs = import nixpkgs {
+            system = "x86_64-linux";
+            config.allowUnfree = true;
+          };
+        };
         modules = [
           microvm.nixosModules.microvm
           {
@@ -63,15 +70,24 @@
 
             nix.settings.trusted-users = ["root" username];
 
-            environment.systemPackages = with pkgs; [
-              kubectl
-              k3s
-              vim
-            ];
+            system.stateVersion = "25.05";
+
+            # environment.systemPackages = with nixpkgs; [
+            #   pkgs.vim
+            #   pkgs.k3s
+            #   pkgs.kubectl
+            # ];
 
             environment.etc."k3s-token".text = k3sToken;
 
             microvm = {
+              interfaces = [
+                {
+                  type = "user";
+                  id = "k3s-master";
+                  mac = "00:00:00:00:00:02";
+                }
+              ];
               volumes = [
                 {
                   mountPoint = "/var";
@@ -95,7 +111,13 @@
       };
 
       k3s-agent = nixpkgs.lib.nixosSystem {
-        inherit system;
+        inherit inputs system;
+        specialArgs = {
+          pkgs = import nixpkgs {
+            system = "x86_64-linux";
+            config.allowUnfree = true;
+          };
+        };
         modules = [
           microvm.nixosModules.microvm
           {
@@ -122,15 +144,23 @@
 
             nix.settings.trusted-users = ["root" username];
 
-            environment.systemPackages = with pkgs; [
-              kubectl
-              k3s
-              vim
-            ];
+            system.stateVersion = "25.05";
+            # environment.systemPackages = with nixpkgs; [
+            #   pkgs.vim
+            #   pkgs.k3s
+            #   pkgs.kubectl
+            # ];
 
             environment.etc."k3s-token".text = k3sToken;
 
             microvm = {
+              interfaces = [
+                {
+                  type = "user";
+                  id = "k3s-master";
+                  mac = "00:00:00:00:00:02";
+                }
+              ];
               volumes = [
                 {
                   mountPoint = "/var";
