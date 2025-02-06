@@ -139,11 +139,11 @@ in {
     };
   };
   config = mkIf cfg.enable {
-    home.file = {
-      ".config/rofi/rofi-powermenu-gruvbox-config.rasi".source = ../config/rofi/rofi-powermenu-gruvbox-config.rasi;
-      ".config/rofi/rofi.rasi".source = ../config/rofi/rofi.rasi;
-      ".config/rofi/gruvbox.rasi".source = ../config/rofi/gruvbox.rasi;
-    };
+    # home.file = {
+    #   ".config/rofi/rofi-powermenu-gruvbox-config.rasi".source = ../config/rofi/rofi-powermenu-gruvbox-config.rasi;
+    #   ".config/rofi/rofi.rasi".source = ../config/rofi/rofi.rasi;
+    #   ".config/rofi/gruvbox.rasi".source = ../config/rofi/gruvbox.rasi;
+    # };
     programs.rofi = {
       enable = true;
       package = pkgs.rofi-wayland;
