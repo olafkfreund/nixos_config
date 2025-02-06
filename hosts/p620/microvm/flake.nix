@@ -83,7 +83,7 @@
             microvm = {
               interfaces = [
                 {
-                  type = "user";
+                  type = "tap";
                   id = "k3s-master";
                   mac = "00:00:00:00:00:02";
                 }
@@ -156,8 +156,8 @@
             microvm = {
               interfaces = [
                 {
-                  type = "user";
-                  id = "k3s-master";
+                  type = "tap";
+                  id = "k3s-agent";
                   mac = "00:00:00:00:00:02";
                 }
               ];
