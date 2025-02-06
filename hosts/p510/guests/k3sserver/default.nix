@@ -47,12 +47,14 @@ in {
     enable = true;
     role = "server";
     extraFlags = toString [
+      ''--write-kubeconfig-mode "0644"''
       "--disable-cloud-controller"
       "--disable=traefik"
       "--disable=servicelb"
       "--disable=local-storage"
     ];
     token = k3sToken;
+    clusterInit = true;
   };
   environment.systemPackages = with pkgs; [
     kubectl

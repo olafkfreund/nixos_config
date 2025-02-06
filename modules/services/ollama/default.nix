@@ -21,7 +21,10 @@ in {
       acceleration = "cuda";
       host = "0.0.0.0";
       package = pkgs-unstable.ollama-cuda;
-      loadModels = ["deepseek-r1:1.5b" "llama3.1"];
+      loadModels = [
+        "deepseek-r1:14b"
+        "deepseek-coder-v2"
+      ];
       user = "ollama";
     };
 
