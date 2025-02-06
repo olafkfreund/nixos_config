@@ -33,11 +33,6 @@
     nixosConfigurations = {
       k3s-master = nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = {
-          pkgs = import nixpkgs {
-            system = "x86_64-linux";
-            config.allowUnfree = true;
-          };
         };
         modules = [
           microvm.nixosModules.microvm
@@ -112,11 +107,6 @@
 
       k3s-agent = nixpkgs.lib.nixosSystem {
         inherit inputs system;
-        specialArgs = {
-          pkgs = import nixpkgs {
-            system = "x86_64-linux";
-            config.allowUnfree = true;
-          };
         };
         modules = [
           microvm.nixosModules.microvm
