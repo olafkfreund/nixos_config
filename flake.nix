@@ -49,11 +49,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    microvm = {
-      url = "github:astro/microvm.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # nixos-cosmic = {
     #   url = "github:lilyinstarlight/nixos-cosmic";
     #   inputs.nixpkgs.follows = "nixpkgs";
@@ -122,7 +117,6 @@
     spicetify-nix,
     home-manager,
     stylix,
-    microvm,
     nix-index-database,
     zjstatus,
     ...
@@ -150,7 +144,6 @@
         inputs.nix-snapd.nixosModules.default
         inputs.agenix.nixosModules.default
         nix-index-database.nixosModules.nix-index
-        microvm.nixosModules.host
         ./home/shell/zellij/zjstatus.nix
         {
           home-manager.useGlobalPkgs = true;
@@ -165,7 +158,7 @@
               system = "x86_64-linux";
               config.allowUnfree = true;
             };
-            inherit inputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control microvm stylix nix-index-database nixpkgs-f2k home-manager nixpkgs-stable nixpkgs-unstable nix-colors nix-snapd host;
+            inherit inputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control stylix nix-index-database nixpkgs-f2k home-manager nixpkgs-stable nixpkgs-unstable nix-colors nix-snapd host;
           };
           home-manager.users.${username} = import ./Users/${username}/${host}_home.nix;
           home-manager.sharedModules = [

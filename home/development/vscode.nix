@@ -77,10 +77,10 @@ in {
           };
           "options" = {
             "nixos" = {
-              "expr" = "(builtins.getFlake \"/home/olafkfreund/.config/nixos\").nixosConfigurations.razer.options";
+              "expr" = "(builtins.getFlake \"/home/olafkfreund/.config/nixos\").nixosConfigurations.p620.options";
             };
             "home_manager" = {
-              "expr" = "(builtins.getFlake \"/home/olafkfreund/.config/nixos\").homeConfigurations.razer.options";
+              "expr" = "(builtins.getFlake \"/home/olafkfreund/.config/nixos\").homeConfigurations.p620.options";
             };
           };
         };

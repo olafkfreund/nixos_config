@@ -5,7 +5,7 @@
   ...
 }: {
   imports = [
-    inputs.microvm.nixosModules.host
+    # inputs.microvm.nixosModules.host
 
     ./nixos/hardware-configuration.nix
     ./nixos/power.nix
@@ -132,12 +132,12 @@
   };
 
   systemd.network = {
-    netdevs."br0" = {
-      netdevConfig = {
-        Name = "br0";
-        Kind = "bridge";
-      };
-    };
+    # netdevs."br0" = {
+    #   netdevConfig = {
+    #     Name = "br0";
+    #     Kind = "bridge";
+    #   };
+    # };
     networks = {
       "eno1" = {
         name = "eno1";
@@ -146,22 +146,22 @@
           MulticastDNS = true;
         };
       };
-      "10-lan" = {
-        matchConfig.Name = ["eno1" "vm-*"];
-        networkConfig = {
-          Bridge = "br0";
-        };
-      };
-      "10-lan-bridge" = {
-        matchConfig.Name = "br0";
-        networkConfig = {
-          Address = ["192.168.1.201/24"];
-          Gateway = "192.168.1.254";
-          DNS = ["8.8.8.8" "8.8.4.4"];
-          IPv6AcceptRA = false;
-        };
-        linkConfig.RequiredForOnline = "routable";
-      };
+      # "10-lan" = {
+      #   matchConfig.Name = ["eno1" "vm-*"];
+      #   networkConfig = {
+      #     Bridge = "br0";
+      #   };
+      # };
+      # "10-lan-bridge" = {
+      #   matchConfig.Name = "br0";
+      #   networkConfig = {
+      #     Address = ["192.168.1.201/24"];
+      #     Gateway = "192.168.1.254";
+      #     DNS = ["8.8.8.8" "8.8.4.4"];
+      #     IPv6AcceptRA = false;
+      #   };
+      #   linkConfig.RequiredForOnline = "routable";
+      # };
     };
   };
 
@@ -199,9 +199,9 @@
   networking.timeServers = ["pool.ntp.org"];
   system.stateVersion = "24.11";
 
-  microvm.vms = {
-    k3sserver = {
-      config = ./nixos/microvm/k3s-master.nix;
-    };
-  };
+  # microvm.vms = {
+  #   k3sserver = {
+  #     config = ./nixos/microvm/k3s-master.nix;
+  #   };
+  # };
 }
