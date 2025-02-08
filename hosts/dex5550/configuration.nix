@@ -119,6 +119,12 @@
   };
 
   systemd.network = {
+    netdevs."br0" = {
+      netdevConfig = {
+        Name = "br0";
+        Kind = "bridge";
+      };
+    };
     networks = {
       "enp1s0" = {
         name = "enp1s0";
@@ -133,6 +139,22 @@
         networkConfig = {
           MulticastDNS = true;
         };
+      };
+      "10-lan" = {
+        matchConfig.Name = ["enp1s0" "vm-*"];
+        networkConfig = {
+          Bridge = "br0";
+        };
+      };
+      "10-lan-bridge" = {
+        matchConfig.Name = "br0";
+        networkConfig = {
+          Address = ["192.168.1.222/24"];
+          Gateway = "192.168.1.254";
+          DNS = ["8.8.8.8" "8.8.4.4"];
+          IPv6AcceptRA = false;
+        };
+        linkConfig.RequiredForOnline = "routable";
       };
     };
   };
@@ -160,7 +182,7 @@
   };
   hardware.keyboard.zsa.enable = true;
 
-  services.ollama.acceleration = "rocm";
+  services.ollama.acceleration = "cpu";
 
   hardware.nvidia-container-toolkit.enable = false;
 

@@ -35,6 +35,7 @@
         "modules-right" = [
           "cpu"
           "memory"
+          "temperature"
           "pulseaudio"
           "pulseaudio#microphone"
           # "bluetooth"
@@ -237,8 +238,9 @@
         };
 
         "temperature" = {
-          format = "{temperature}°C   ";
-          tooltip-format = "{temperature}°C ";
+          format = "{temperatureC}°C   ";
+          hwmon-path = " /sys/devices/pci0000:00/0000:00:18.3/hwmon/hwmon2/temp1_input";
+          tooltip-format = "{temperatureC}°C ";
           interval = 10;
         };
 
