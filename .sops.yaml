@@ -1,0 +1,11 @@
+keys:
+  - &user:
+    - &olafkfreund age1twypjj94hwjeaf96kef0vfx9adg9uwucg4yjqe536fmexk3scsxq20yh6w
+  - hosts:
+    - &p620 age162wg9dxx63vx5czdh8uc9hw0u0qttj0sf22q0ea7tf7lh9gtpuys8atd8a
+creation_rules::
+  - path_regex: secrets.yaml$
+    key_groups:
+    - age:
+        - *olafkfreund
+        - *p620

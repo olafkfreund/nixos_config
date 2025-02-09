@@ -20,7 +20,7 @@ in {
       settings = {
         "$schema" = "/etc/xdg/swaync/configSchema.json";
         "positionX" = "right";
-        "positionY" = "bottom";
+        "positionY" = "top";
         "layer" = "overlay";
         "control-center-layer" = "top";
         "layer-shell" = true;
