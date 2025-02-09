@@ -16,6 +16,7 @@
     ../../modules/server.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
+    ./microvm.nix
   ];
 
   aws.packages.enable = lib.mkForce false;
@@ -131,10 +132,28 @@
         DHCP = "ipv4";
         networkConfig = {
           MulticastDNS = true;
+          Address = ["192.168.1.246/24"];
+          Gateway = "192.168.1.254";
+          DNS = ["8.8.8.8" "8.8.4.4"];
+          IPv6AcceptRA = false;
+        };
+      };
+      "enp8s0f0" = {
+        name = "enp8s0f0";
+        DHCP = "ipv4";
+        networkConfig = {
+          MulticastDNS = true;
+        };
+      };
+      "enp8s0f1" = {
+        name = "enp8s0f1";
+        DHCP = "ipv4";
+        networkConfig = {
+          MulticastDNS = true;
         };
       };
       "10-lan" = {
-        matchConfig.Name = ["eno1" "vm-*"];
+        matchConfig.Name = ["enp8s*" "vm-*"];
         networkConfig = {
           Bridge = "br0";
         };

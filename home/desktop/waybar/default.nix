@@ -78,8 +78,8 @@
         "idle_inhibitor" = {
           format = " {icon}";
           format-icons = {
-            activated = "󰅶";
-            deactivated = "󰾪";
+            activated = "󰅶 ";
+            deactivated = "󰾪 ";
           };
         };
 
@@ -561,7 +561,7 @@
         #cpu {
           color: #ebdbb2;
           font-family: JetBrainsMono Nerd Font, monospace;
-          font-size: 15px;
+          font-size: 14px;
           font-weight: bold;
           border: none;
           border-radius: 5px;
@@ -571,7 +571,7 @@
         #memory {
           color: #ebdbb2;
           font-family: JetBrainsMono Nerd Font, monospace;
-          font-size: 15px;
+          font-size: 14px;
           font-weight: bold;
           border: none;
           border-radius: 5px;
