@@ -197,10 +197,4 @@
   networking.nftables.enable = true;
   networking.timeServers = ["pool.ntp.org"];
   system.stateVersion = "24.11";
-
-  # microvm.vms = {
-  #   k3sserver = {
-  #     config = ./nixos/microvm/k3s-master.nix;
-  #   };
-  # };
 }

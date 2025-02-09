@@ -45,13 +45,8 @@ in {
 
   services.k3s = {
     enable = true;
-    role = "server";
-    extraFlags = toString [
-      "--disable-cloud-controller"
-      "--disable=traefik"
-      "--disable=servicelb"
-      "--disable=local-storage"
-    ];
+    role = "agent";
+    serverUrl = "https://k3sserver.local:6443";
     token = k3sToken;
   };
   environment.systemPackages = with pkgs; [
@@ -63,7 +58,7 @@ in {
   users.users.${username} = {
     isNormalUser = true;
     extraGroups = ["wheel"]; # Enable 'sudo' for the user.
-    initialPassword = "changeme";
+    initialHashedPassword = "$y$j9T$BG0c0RpL47BPIrgHJsNV.0$bbU2swVEq7wfL2NfKZXqs4gKD7LwDAMr7au1JlrEec1";
     openssh.authorizedKeys = [
       "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCMqMzUgRe2K350QBbQXbJFxVomsQbiIEw/ePUzjbyALklt5gMyo/yxbCWaKV1zeL4baR/vS5WOp9jytxceGFDaoJ7/O8yL4F2jj96Q5BKQOAz3NW/+Hmj/EemTOvVJWB1LQ+V7KgCbkxv6Zc
        UwL5a5+2QoujQNL5yVL3ZrIXv6LuKg8w8wykl57zDcJGgYsF+05oChswAmTFXI7hR5MdQgMGNM/eN78VZjSKJYGgeujoJg4BPQ6VE/qfIcJaPmuiiJBs0MDYIB8pKeSImXCDqYWEL6dZkSyro8HHHMAzFk1YP+pNIWVi8l3F+ajEFrEpTYKvds
