@@ -14,8 +14,7 @@
     ./themes/stylix.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
-    ../../modules/system-tweaks/kernel-tweaks/32GB-SYSTEM/32GB-SYSTEM.nix
-    ./services/default.nix
+    # ./services/default.nix
   ];
 
   aws.packages.enable = lib.mkForce false;
@@ -119,6 +118,12 @@
   };
 
   systemd.network = {
+    netdevs."br0" = {
+      netdevConfig = {
+        Name = "br0";
+        Kind = "bridge";
+      };
+    };
     networks = {
       "eno1" = {
         name = "eno1";
@@ -127,15 +132,28 @@
           MulticastDNS = true;
         };
       };
+      "10-lan" = {
+        matchConfig.Name = ["eno1" "vm-*"];
+        networkConfig = {
+          Bridge = "br0";
+        };
+      };
+      "10-lan-bridge" = {
+        matchConfig.Name = "br0";
+        networkConfig = {
+          Address = ["192.168.1.83/24"];
+          Gateway = "192.168.1.254";
+          DNS = ["8.8.8.8" "8.8.4.4"];
+          IPv6AcceptRA = false;
+        };
+        linkConfig.RequiredForOnline = "routable";
+      };
     };
   };
 
   users.defaultUserShell = pkgs.zsh;
-
   environment.shells = with pkgs; [zsh];
-
   programs.zsh.enable = true;
-
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     FLAKE = "/home/olafkfreund/.config/nixos";
@@ -152,11 +170,8 @@
     ];
   };
   hardware.keyboard.zsa.enable = true;
-
   services.ollama.acceleration = "cuda";
-
   hardware.nvidia-container-toolkit.enable = true;
-
   networking.firewall.enable = false;
   networking.nftables.enable = true;
   networking.timeServers = ["pool.ntp.org"];
