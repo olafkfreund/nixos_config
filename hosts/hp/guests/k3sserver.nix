@@ -1,17 +1,8 @@
 {
-  config,
-  lib,
   pkgs,
   inputs,
   ...
-}: let
-  # Define variables here
-  username = "olafkfreund";
-  hostname = "k3sserver";
-  k3sToken = "7j2hK6sVjkzN5sE8sF+pQyXlJd3w8bX0y5ZvX7K9KAo=";
-  mac = "02:00:00:00:00:01";
-  ip = "192.168.1.202/24";
-in {
+}: {
   imports = [
     inputs.microvm.nixosModules.microvm
   ];
@@ -26,7 +17,7 @@ in {
       {
         type = "tap";
         id = "k3sserver";
-        mac = mac;
+        mac = "02:00:00:00:00:01";
       }
     ];
     shares = [
@@ -45,8 +36,6 @@ in {
     ];
   };
 
-  # Basic system configuration
-  boot.isContainer = true;
   system.stateVersion = "24.11";
 
   # Enable K3s
@@ -57,34 +46,31 @@ in {
       "--disable-cloud-controller"
       "--disable=traefik"
     ];
-    token = k3sToken;
+    token = "7j2hK6sVjkzN5sE8sF+pQyXlJd3w8bX0y5ZvX7K9KAo=";
   };
 
   # Networking
   systemd.network.enable = true;
-  services.resolved.enable = false;
-  systemd.network.networks."20-lan" = {
-    matchConfig.Type = "ether";
-    networkConfig = {
-      Address = [ip];
-      Gateway = "192.168.1.254";
-      DNS = ["8.8.8.8" "8.8.4.4"];
-      IPv6AcceptRA = false;
-      DHCP = "no";
-    };
+  networking.defaultGateway.address = "192.168.1.254";
+  networking.interfaces = {
+    eth0.ipv4.addresses = [
+      {
+        address = "192.168.1.201";
+        prefixLength = 24;
+      }
+    ];
   };
   networking.firewall.enable = false;
-  # networking.hostName = hostname;
+  networking.hostName = "k3sserver";
   nix.enable = true;
   nix.settings = {
     extra-experimental-features = ["nix-command" "flakes"];
-    trusted-users = ["root" username];
+    trusted-users = ["root" "olofkfreund"];
   };
   security.sudo = {
     enable = true;
     wheelNeedsPassword = false;
   };
-  services.getty.autologinUser = username;
   services.openssh = {
     enable = true;
     settings = {
@@ -92,7 +78,7 @@ in {
       PasswordAuthentication = "yes";
     };
   };
-  users.users.${username} = {
+  users.users.olafkfreund = {
     isNormalUser = true;
     extraGroups = ["wheel"]; # Enable 'sudo' for the user.
     initialPassword = "changeme";
