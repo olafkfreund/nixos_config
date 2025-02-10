@@ -3,7 +3,6 @@
   lib,
   pkgs,
   inputs,
-  # microvm,
   ...
 }: let
   # Define variables here
@@ -20,12 +19,13 @@ in {
   microvm = {
     # enable = true;
     hypervisor = "qemu";
+    socket = "control.socket";
     mem = 8192;
     vcpu = 4;
     interfaces = [
       {
         type = "tap";
-        id = hostname;
+        id = "k3sserver";
         mac = mac;
       }
     ];
@@ -87,7 +87,10 @@ in {
   services.getty.autologinUser = username;
   services.openssh = {
     enable = true;
-    permitRootLogin = "yes";
+    settings = {
+      PermitRootLogin = "yes";
+      PasswordAuthentication = "yes";
+    };
   };
   users.users.${username} = {
     isNormalUser = true;
