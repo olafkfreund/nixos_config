@@ -148,7 +148,6 @@
         inputs.stylix.nixosModules.stylix
         inputs.nix-snapd.nixosModules.default
         inputs.agenix.nixosModules.default
-        microvm.nixosModules.host
         nix-index-database.nixosModules.nix-index
         ./home/shell/zellij/zjstatus.nix
         {
