@@ -16,7 +16,7 @@
     ../../modules/server.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
-    ./guests/k3sserver.nix
+    # ./guests/k3sserver.nix
   ];
 
   aws.packages.enable = lib.mkForce false;
