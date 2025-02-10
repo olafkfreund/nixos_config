@@ -53,11 +53,6 @@
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
-    microvm = {
-      url = github:astro/microvm.nix;
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     spicetify-nix = {
       url = "github:Gerg-L/spicetify-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -121,7 +116,6 @@
     spicetify-nix,
     home-manager,
     stylix,
-    microvm,
     nix-index-database,
     zjstatus,
     ...
