@@ -193,7 +193,7 @@
       # g3 = nixpkgs.lib.nixosSystem (makeNixosSystem "g3");
       lms = nixpkgs.lib.nixosSystem (makeNixosSystem "lms");
       dex5550 = nixpkgs.lib.nixosSystem (makeNixosSystem "dex5550");
-      hp = nixpkgs.lib.nixosSystem (makeNixosSystem "hp");
+      hp = nixpkgs.lib.nixosSystem (makeNixosSystem "hp" // {modules = [(inputs.microvm.nixosModules.host)] ++ makeNixosSystem "hp".modules;});
       p510 = nixpkgs.lib.nixosSystem (makeNixosSystem "p510");
       p620 = nixpkgs.lib.nixosSystem (makeNixosSystem "p620");
     };

@@ -1,9 +1,12 @@
 {
   pkgs,
   lib,
+  inputs,
   ...
 }: {
   imports = [
+    inputs.microvm.nixosModules.host
+
     ./nixos/hardware-configuration.nix
     ./nixos/power.nix
     ./nixos/boot.nix

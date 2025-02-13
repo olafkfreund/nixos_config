@@ -51,14 +51,16 @@
 
   # Networking
   systemd.network.enable = true;
-  networking.defaultGateway.address = "192.168.1.254";
-  networking.interfaces = {
-    eth0.ipv4.addresses = [
-      {
-        address = "192.168.1.201";
-        prefixLength = 24;
-      }
-    ];
+  systemd.network.networks."20-tap" = {
+    matchConfig.Type = "ether";
+    matchConfig.MACAddress = "5E:6D:F8:D1:E8:AA";
+    networkConfig = {
+      Address = ["192.168.1.201/24"];
+      Gateway = "192.168.1.254";
+      DNS = ["8.8.8.8" "8.8.4.4"];
+      IPv6AcceptRA = true;
+      DHCP = "no";
+    };
   };
   networking.firewall.enable = false;
   networking.hostName = "k3sserver";
