@@ -6,9 +6,9 @@
   ...
 }:
 with lib; let
-  cfg = config.programs.streamcontroller;
+  cfg = config.program.streamcontroller;
 in {
-  options.programs.streamcontroller = {
+  options.program.streamcontroller = {
     enable = mkEnableOption {
       description = "Enable Streamcontroller";
       default = false;

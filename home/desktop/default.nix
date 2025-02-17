@@ -23,7 +23,6 @@
     ./zathura/default.nix
     ./remotedesktop/default.nix
     ./swaync/default.nix
-    ./stream_deck/default.nix
     # ./gh/default.nix
   ];
 

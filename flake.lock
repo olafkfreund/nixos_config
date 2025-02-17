@@ -914,11 +914,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1739801297,
-        "narHash": "sha256-IrV+zmMp//MpdkVILKoJPWu8CbI5kAzcsoOP13gY5gk=",
+        "lastModified": 1739804139,
+        "narHash": "sha256-XjM0o6K3E0HAOou2NWyeDy1SZuKQafIOEGMSYnfbRFc=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "4ac88b6e59e614f3b6cbf730decda8f786f84e68",
+        "rev": "781ae51ede60bf3207d6a78084f76037fe6bfbe2",
         "type": "github"
       },
       "original": {
