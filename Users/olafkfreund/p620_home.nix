@@ -37,6 +37,7 @@
   programs.obs.enable = lib.mkForce true;
   programs.kdeconnect.enable = lib.mkForce true;
   programs.slack.enable = lib.mkForce true;
+  programs.streamdeck.enable = lib.mkForce true;
   # Terminals
   alacritty.enable = lib.mkForce true;
   foot.enable = lib.mkForce true;

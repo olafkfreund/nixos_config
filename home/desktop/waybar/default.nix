@@ -38,7 +38,7 @@
           "temperature"
           "pulseaudio"
           "pulseaudio#microphone"
-          # "bluetooth"
+          "bluetooth"
           "custom/swaync"
           "power-profiles-daemon"
           "network"

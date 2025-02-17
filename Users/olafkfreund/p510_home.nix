@@ -34,6 +34,7 @@
   programs.home-manager.enable = true;
 
   programs.obs.enable = lib.mkForce true;
+  programs.streamdeck.enable = lib.mkForce false;
   programs.kdeconnect.enable = lib.mkForce true;
   programs.slack.enable = lib.mkForce false;
   # Terminals
@@ -79,7 +80,7 @@
 
   # Multiplexers
   multiplexer.tmux.enable = lib.mkForce true;
-  multiplexer.zellij.enable = lib.mkForce true;
+  multiplexer.zellij.enable = lib.mkForce false;
 
   wayland.windowManager.sway = {
     extraConfig = ''
