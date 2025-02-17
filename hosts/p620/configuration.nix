@@ -63,6 +63,9 @@
   security.onepassword.enable = lib.mkForce true;
   security.gnupg.enable = lib.mkForce true;
 
+  # Productivity tools
+  programs.streamcontroller.enable = lib.mkForce true;
+
   # VPN
   vpn.tailscale.enable = lib.mkForce true;
 

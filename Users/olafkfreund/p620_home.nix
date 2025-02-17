@@ -35,7 +35,6 @@
   programs.home-manager.enable = true;
 
   programs.obs.enable = lib.mkForce true;
-  programs.streamcontroller.enable = lib.mkForce true;
   programs.kdeconnect.enable = lib.mkForce true;
   programs.slack.enable = lib.mkForce true;
   # Terminals
