@@ -16,7 +16,7 @@
     pkgs.element-desktop
     pkgs.imagemagick
     pkgs.fractal
-    pkgs.telegram-desktop
+    # pkgs.telegram-desktop
     pkgs.whatsapp-for-linux
     pkgs.ferdium
     pkgs.zoom-us
