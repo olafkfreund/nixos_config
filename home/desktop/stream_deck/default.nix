@@ -5,7 +5,7 @@
   ...
 }:
 with lib; let
-  cfg = config.programs.streamdeck.enable;
+  cfg = config.programs.streamcontroller.enable;
 in {
   config = mkIf cfg {
     programs.streamcontroller = {
