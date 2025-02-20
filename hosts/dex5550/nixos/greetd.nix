@@ -14,13 +14,12 @@
       command = "${lib.getExe config.programs.sway.package}";
       user = "olafkfreund";
     };
-
   in {
     enable = true;
     settings = {
       terminal.vt = 1;
-      default_session = session_sway;
-      initial_session = session_sway;
+      default_session = session_hypr;
+      initial_session = session_hypr;
     };
   };
 

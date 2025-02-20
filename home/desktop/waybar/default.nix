@@ -33,41 +33,51 @@
         ];
 
         "modules-right" = [
+          # "clock"
+          "network"
           "cpu"
           "memory"
           "temperature"
           "pulseaudio"
           "pulseaudio#microphone"
           "bluetooth"
-          "custom/swaync"
+          # "custom/swaync"
           "power-profiles-daemon"
-          "network"
+          # "network"
           "idle_inhibitor"
           "battery"
-          "clock"
+          # "tray"
+          # "clock"
+          "custom/swaync"
           # "custom/weather"
           # "custom/powermenu"
         ];
 
         "modules-center" = [
-          # "hyprland/workspaces"
+          "clock"
           # "sway/workspaces"
           # "sway/scratchpad"
           # "sway/mode"
         ];
 
         "memory" = {
-          interval = 1;
-          format = "{icon}";
-          format-icons = ["▁▁" "▂▂" "▃▃" "▄▄" "▅▅" "▆▆" "▇▇" "██"];
-          max-length = 20;
+          format = "<span foreground='#8ec07c'>󰟜 </span>{}% ";
+          format-alt = "<span foreground='#8ec07c'>󰟜 </span> {used} GiB"; # 
+          interval = 2;
+          on-click-right = "hyprctl dispatch exec '[float; center; size 950 650] foot --override font_size=14 --title float_kitty btop'";
+          states = {
+            warning = 80;
+          };
         };
 
         "cpu" = {
-          interval = 1;
-          format = "{icon}";
-          format-icons = ["▁▁" "▂▂" "▃▃" "▄▄" "▅▅" "▆▆" "▇▇" "██"];
-          max-length = 20;
+          format = "<span foreground='#689d6a'> </span> {usage}% ";
+          format-alt = "<span foreground='#689d6a'> </span> {avg_frequency} GHz";
+          interval = 2;
+          on-click-right = "hyprctl dispatch exec '[float; center; size 950 650] foot --override font_size=14 --title float_kitty btop'";
+          states = {
+            warning = 95;
+          };
         };
 
         "custom/cycle_wall" = {
@@ -76,11 +86,12 @@
         };
 
         "idle_inhibitor" = {
-          format = " {icon}";
+          format = " {icon} ";
           format-icons = {
             activated = "󰅶 ";
             deactivated = "󰾪 ";
           };
+          start-activated = true;
         };
 
         "hyprland/submap" = {
@@ -103,23 +114,23 @@
           on-scroll-down = "${pkgs.hyprland}/bin/hyprctl dispatch workspace e+1";
           max-length = 45;
           "format-icons" = {
-            "1" = "1";
-            "2" = "2";
-            "3" = "3";
-            "4" = "4";
-            "5" = "5";
-            "6" = "6";
-            "7" = "7";
-            "8" = "8";
-            "9" = "9";
-            "10" = "10";
-            "magic" = "󱕴";
-            "hidden" = "󰐃";
-            "secret" = "󱕴";
-            "spotify" = " ";
-            "slack" = " ";
-            "mail" = " ";
-            "scratchpad" = " ";
+            "1" = "<span foreground='#fe8019'>1</span>";
+            "2" = "<span foreground='#fb4934'>2</span>";
+            "3" = "<span foreground='#fabd2f'>3</span>";
+            "4" = "<span foreground='#b8bb26'>4</span>";
+            "5" = "<span foreground='#8ec07c'>5</span>";
+            "6" = "<span foreground='#83a598'>6</span>";
+            "7" = "<span foreground='#d3869b'>7</span>";
+            "8" = "<span foreground='#d65d0e'>8</span>";
+            "9" = "<span foreground='#fe8019'>9</span>";
+            "10" = "<span foreground='#fe8019'>10</span>";
+            "magic" = "<span foreground='#fabd2f'>󱕴 </span>";
+            "hidden" = "<span foreground='#8ec07c'>󰐃 </span>";
+            "secret" = "<span foreground='#fabd2f'>󱕴 </span>";
+            "spotify" = "<span foreground='#518554'> </span>";
+            "slack" = "<span foreground='#fe8019'> </span>";
+            "mail" = "<span foreground='#83a598'> </span>";
+            "scratchpad" = "<span foreground='#d3869b'> </span>";
           };
         };
 
@@ -155,8 +166,8 @@
         };
 
         "tray" = {
-          spacing = 5;
-          show-passive-items = true;
+          spacing = 10;
+          show-passive-items = false;
         };
 
         "custom/tailscale" = {
@@ -166,26 +177,38 @@
         };
 
         clock = {
-          format = "  {:%a %d-%m %H:%M} ";
-          tooltip = false;
-          # format-alt = "{:%A, %B %d, %Y}";
-          max-lenght = 25;
-          interval = 60;
+          calendar = {
+            format = {
+              today = "<span color='#98971A'><b>{}</b></span>";
+            };
+          };
+          format = "  {:%H:%M}";
+          tooltip = "true";
+          tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
+          format-alt = "  {:%d/%m}";
           on-click = "gnome-calendar";
           # on-left-click = "notify-send \"Date / Time\" \"󰃭 $(date \"+%a %h %d\")   $(date \"+%I:%M %p\")\"";
         };
 
         "battery" = {
+          format = "<span foreground='#fabd2f'>{icon}</span> {capacity}%";
+          format-icons = [
+            " "
+            " "
+            " "
+            " "
+            " "
+          ];
+          format-charging = "<span foreground='#fabd2f'> </span>{capacity}%";
+          format-full = "<span foreground='#fabd2f'> </span>{capacity}%";
+          format-warning = "<span foreground='#fabd2f'> </span>{capacity}%";
+          interval = 5;
           states = {
-            good = 80;
-            warning = 30;
-            critical = 20;
+            warning = 20;
           };
-          format = " {icon} ";
-          format-charging = " {capacity}% 󰂄 ";
-          format-plugged = " {capacity}%  ";
-          format-alt = "{time} ";
-          format-icons = ["󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
+          format-time = "{H}h{M}m";
+          tooltip = true;
+          tooltip-format = "{time}";
         };
 
         "custom/powermenu" = {
@@ -196,28 +219,28 @@
 
         "network" = {
           format = "{ifname} {ipaddr} ";
-          format-wifi = "󰖩 ";
-          format-ethernet = "󰈀 ";
+          format-wifi = "<span foreground='#B16286'>󰖩 </span>";
+          format-ethernet = "<span foreground='#B16286'>󰈀 </span>{ifname} ";
           tooltip-format = "{ipaddr}  {bandwidthUpBytes}  {bandwidthDownBytes}";
           format-linked = "{ifname} (No IP)";
-          format-disconnected = " 󰌙 ";
+          format-disconnected = "<span foreground='#fb4934'> 󰌙 </span>";
           format-alt = "{signalStrength}% ";
           on-click = "${pkgs.networkmanager}/bin/nmtui";
         };
 
         "bluetooth" = {
-          format = " 󰂯 ";
-          format-on = " 󰂯 ";
+          format = "<span foreground='#fabd2f'> 󰂯 </span>{status}";
+          format-on = "<span foreground='#fabd2f'> 󰂯 </span>{status}";
           format-off = "";
           format-disabled = ""; # an empty format will hide the module
-          format-connected = "  {num_connections} ";
+          format-connected = "<span foreground='#fabd2f'>  </span>{num_connections} ";
           on-click = "${pkgs.bluetuith}/bin/bluetuith --color dark";
         };
 
         "pulseaudio" = {
-          format = " {icon} {volume}% ";
-          format-bluetooth = " {icon} {volume}% ";
-          format-muted = "婢";
+          format = "<span foreground='#83a598'> {icon} </span>{volume}%";
+          format-bluetooth = "<span foreground='#83a598'> {icon} </span>{volume}% ";
+          format-muted = "<span foreground='#83a598'> </span> {volume}%";
           on-click = "pavucontrol -t 3";
           tooltip-format = " {icon} {desc} // {volume}%";
           scroll-step = 1;
@@ -238,8 +261,9 @@
         };
 
         "temperature" = {
-          format = "{temperatureC}°C   ";
-          hwmon-path = " /sys/devices/pci0000:00/0000:00:18.3/hwmon/hwmon2/temp1_input";
+          format = "<span foreground='#fe8019'> {icon}</span> {temperatureC}°C ";
+          format-icons = ["" "" "" "" "" "󰸁"];
+          hwmon-path = "/sys/devices/pci0000:00/0000:00:18.3/hwmon/hwmon2/temp1_input";
           tooltip-format = "{temperatureC}°C ";
           interval = 10;
         };
@@ -250,9 +274,9 @@
           tooltip = true;
           format-icons = {
             default = " ";
-            performance = " ";
-            balanced = " ";
-            power-saver = " ";
+            performance = "<span foreground='#fb4934'> </span>";
+            balanced = "<span foreground='#8ec07c'> </span>";
+            power-saver = "<span foreground='#689d6a'> </span>";
           };
         };
 
@@ -275,16 +299,16 @@
 
         "custom/swaync" = {
           tooltip = false;
-          format = "{icon}";
+          format = "{icon} ";
           format-icons = {
-            "notification" = "󰅸";
-            "none" = "󰂜";
-            "dnd-notification" = "󰅸";
-            "dnd-none" = "󱏨";
-            "inhibited-notification" = "󰅸";
-            "inhibited-none" = "󰂜";
-            "dnd-inhibited-notification" = "󰅸";
-            "dnd-inhibited-none" = "󱏨";
+            notification = "<span foreground='red'><sup></sup></span>";
+            none = "";
+            dnd-notification = "<span foreground='red'><sup></sup></span>";
+            dnd-none = "";
+            inhibited-notification = "<span foreground='red'><sup></sup></span>";
+            inhibited-none = "";
+            dnd-inhibited-notification = "<span foreground='red'><sup></sup></span>";
+            dnd-inhibited-none = "";
           };
           return-type = "json";
           exec-if = "which swaync-client";
@@ -297,8 +321,8 @@
 
         "pulseaudio#microphone" = {
           format = " {icon} {format_source} ";
-          format-source = " {volume}% ";
-          format-source-muted = " ";
+          format-source = "<span foreground='#83a598'> </span>{volume}%";
+          format-source-muted = "<span foreground='#83a598'> </span>";
           on-click = "${pkgs.pavucontrol}/bin/pavucontrol -t 4";
           tooltip-format = "{format_source} {source_desc} // {source_volume}%";
           scroll-step = 5;
@@ -412,17 +436,19 @@
         }
 
         #workspaces button:hover {
-          color: #282828;
-          background-color: #689d6a;
-          border-bottom: 4px solid #ebdbb2;
-          border-left: 4px solid #ebdbb2;
+          color: #ebdbb2;
+          border-bottom: 4px solid #665c54;
+          border-left: 4px solid #665c54;
+          border-top: 1px solid #665c54;
+          border-right: 1px solid #665c54;
         }
 
         #workspaces button.active {
-          color: #282828;
-          background-color: #689d6a;
-          border-bottom: 4px solid #ebdbb2;
-          border-left: 4px solid #ebdbb2;
+          color: #ebdbb2;
+          border-bottom: 4px solid #665c54;
+          border-left: 4px solid #665c54;
+          border-top: 1px solid #665c54;
+          border-right: 1px solid #665c54;
         }
 
         #custom-weather {
@@ -530,6 +556,26 @@
         }
 
         #tray {
+          color: #ebdbb2;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 14px;
+          font-weight: bold;
+          border: none;
+          border-radius: 5px;
+          margin-bottom: 2px;
+        }
+
+        #tray {
+          color: #ebdbb2;
+          font-family: JetBrainsMono Nerd Font, monospace;
+          font-size: 14px;
+          font-weight: bold;
+          border: none;
+          border-radius: 5px;
+          margin-bottom: 2px;
+        }
+
+        #tray > .active {
           color: #ebdbb2;
           font-family: JetBrainsMono Nerd Font, monospace;
           font-size: 14px;

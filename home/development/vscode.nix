@@ -64,11 +64,7 @@ in {
     };
     programs.vscode.userSettings = {
       "window.menuBarVisibility" = "toggle";
-      # "workbench.sideBar.location" = "right";
       "nix.serverPath" = "nixd";
-      # "gopls" = {
-      #   "ui.semanticTokens" = true;
-      # };
       "nix.enableLanguageServer" = true;
       "nix.serverSettings" = {
         "nixd" = {
@@ -94,13 +90,12 @@ in {
         "editor.defaultFormatter" = "vscode.typescript-language-features";
       };
       "alejandra.program" = "alejandra";
-      # "redhat.telemetry.enabled" = false;
       "[yaml]" = {
         "editor.defaultFormatter" = "redhat.vscode-yaml";
       };
-      # "terminal.integrated.gpuAcceleration" = "off";
       "geminicodeassist.codeGenerationPaneViewEnabled" = true;
       "geminicodeassist.project" = "freundcloud";
+      "cloudcode.duetAI.project" = "freundcloud";
       "extensions.experimental.affinity" = {
         "asvetliakov.vscode-neovim" = 1;
       };
