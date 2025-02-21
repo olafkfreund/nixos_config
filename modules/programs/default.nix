@@ -9,6 +9,7 @@
     ./nix-ld/default.nix
     ./firefox/default.nix
     ./wshowkeys/default.nix
+    ./droidcam/default.nix
     # ./streamcontroller/default.nix
     # ./thunar/default.nix
   ];

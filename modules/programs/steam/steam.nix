@@ -1,4 +1,4 @@
-{...}: {
+{pkgs, ...}: {
   #Steam
   hardware.steam-hardware.enable = true;
 

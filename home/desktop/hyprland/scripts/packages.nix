@@ -15,5 +15,6 @@
     (import ./hyprkeys.nix {inherit pkgs;})
     (import ./time.nix {inherit pkgs;})
     (import ./notify_count.nix {inherit pkgs;})
+    (import ./cpustats.nix {inherit pkgs;})
   ];
 }

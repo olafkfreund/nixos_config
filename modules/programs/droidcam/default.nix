@@ -3,6 +3,7 @@
   config,
   lib,
   pkgs,
+  username,
   ...
 }:
 with lib; let
@@ -20,7 +21,7 @@ in {
     environment.shellAliases = {
       webcam = "droidcam-cli -size=1920x1080 4747";
     };
-    home-manager.users.${config.az-username} = {
+    home-manager.users.${username} = {
       xdg.desktopEntries = {
         droidcam = {
           name = "Droidcam";
