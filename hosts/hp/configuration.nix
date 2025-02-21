@@ -23,6 +23,7 @@
   ];
 
   aws.packages.enable = lib.mkForce false;
+  media.droidcam.enable = lib.mkForce true;
   azure.packages.enable = lib.mkForce false;
   cloud-tools.packages.enable = lib.mkForce false;
   google.packages.enable = lib.mkForce false;

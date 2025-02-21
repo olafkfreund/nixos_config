@@ -21,7 +21,7 @@
     ../../modules/default.nix
     ../../modules/development/default.nix
   ];
-
+  media.droidcam.enable = lib.mkForce true;
   aws.packages.enable = lib.mkForce true;
   azure.packages.enable = lib.mkForce true;
   cloud-tools.packages.enable = lib.mkForce true;
