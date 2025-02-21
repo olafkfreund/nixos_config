@@ -27,6 +27,7 @@
       lact
       glxinfo
       clinfo
+      rocmPackages_5.rocm-smi
       # virtualglLib
       # vulkan-loader
       # vulkan-tools
