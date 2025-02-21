@@ -76,22 +76,24 @@ pkgs.writeShellScriptBin "sysstats" ''
           print "└───────────────────────────────────┘"
         }'
       elif command -v rocm-smi &>/dev/null; then
-        rocm-smi --showproductname --showbusy --showmemoryusage | awk '
+        rocm-smi --showproductname --showgpuuse --showmemoryinfo | awk '
         BEGIN {
           print "┌──────────── AMD GPU Stats ───────────┐"
         }
         NR==2 {
           product_name = $2
         }
-        NR==3 {
-          load = $2
+        /GPU use/ {
+          gsub("GPU use: |%", "", $0)
+          load = $0
         }
-        NR==4 {
-          memory_usage = $2
-          gsub("\[|MiB|\]", "", memory_usage)
-          split(memory_usage, mem_arr, "/")
-          used_mem = mem_arr[1]
-          total_mem = mem_arr[2]
+        /Memory total/ {
+          gsub("Memory total: |\[|MiB|\]", "", $0)
+          total_mem = $0
+        }
+        /Memory used/ {
+          gsub("Memory used: |\[|MiB|\]", "", $0)
+          used_mem = $0
           printf "│ 󰢮 GPU │ Load: %3d%% Mem: %4d/%4d MB │\n", load, used_mem, total_mem
         }
         END {
