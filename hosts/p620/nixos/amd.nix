@@ -11,6 +11,7 @@
       libva-vdpau-driver
       amdvlk
       rocmPackages.clr.icd
+      rocmPackages_5.rocm-smi
     ];
   };
 

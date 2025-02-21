@@ -1,30 +1,33 @@
 {pkgs, ...}:
 pkgs.writeShellScriptBin "cpustats" ''
   mpstat -P ALL 1 1 | awk '
-    BEGIN {
-        # Define CPU symbols
-        symbols["CPU"] = " "
-        symbols["all"] = "∑"
-    }
-    {
-        if (NR > 3) {  # Skip header lines
-            # Get CPU identifier
-            cpu = $2
-            # Get CPU utilization
-            usr = $3
-            sys = $5
+  BEGIN {
+      # Define CPU symbols
+      symbols["CPU"] = ""
+      symbols["all"] = "∑"
+  }
+  {
+      if (NR > 3) {  # Skip header lines
+          # Get CPU identifier
+          cpu = $2
+          # Get CPU utilization
+          usr = $3
+          sys = $5
+          idle = $12
 
-            # Add appropriate symbol
-            if (cpu == "all") {
-                symbol = symbols["all"]
-            } else {
-                symbol = symbols["CPU"]
-            }
+          # Only show CPUs with activity
+          if (idle < 99.99 || cpu == "all") {
+              # Add appropriate symbol
+              if (cpu == "all") {
+                  symbol = symbols["all"]
+              } else {
+                  symbol = symbols["CPU"]
+              }
 
-            # Format and print with colors and symbols
-            printf "%s CPU%-3s | User: \033[33m%6.2f%%\033[0m | Sys: \033[36m%6.2f%%\033[0m | Idle: \033[32m%6.2f%%\033[0m\n",
-                symbol, cpu, usr, sys
-        }
-    }
+              # Format and print with symbols (without idle)
+              printf "%s CPU%-3s\nUser: %6.2f%%\nSys:  %6.2f%%\n--------------\n",
+                  symbol, cpu, usr, sys
+          }
+      }
   }'
 ''

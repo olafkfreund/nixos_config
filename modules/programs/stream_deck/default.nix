@@ -3,6 +3,7 @@
   config,
   lib,
   pkgs,
+  pkgs-unstable,
   ...
 }:
 with lib; let
@@ -17,7 +18,7 @@ in {
   config = mkIf cfg.enable {
     programs.streamcontroller = {
       enable = true;
-      package = pkgs.streamcontroller;
+      package = pkgs-unstable.streamcontroller;
     };
   };
 }

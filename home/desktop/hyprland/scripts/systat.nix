@@ -52,16 +52,42 @@ pkgs.writeShellScriptBin "sysstats" ''
   }
 
   get_gpu_stats() {
-    nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total --format=csv,noheader,nounits 2>/dev/null | awk -F',' '
-    BEGIN {
-      print "┌──────────── GPU Stats ───────────┐"
-    }
-    {
-      printf "│ 󰢮 GPU │ Load: %3d%% Mem: %4d/%4d MB │\n", $1, $2, $3
-    }
-    END {
-      print "└───────────────────────────────────┘"
-    }'
+    if command -v nvidia-smi &>/dev/null; then
+      nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total --format=csv,noheader,nounits 2>/dev/null | awk -F',' '
+      BEGIN {
+        print "┌──────────── NVidia GPU Stats ───────────┐"
+      }
+      {
+        printf "│ 󰢮 GPU │ Load: %3d%% Mem: %4d/%4d MB │\n", $1, $2, $3
+      }
+      END {
+        print "└───────────────────────────────────┘"
+      }'
+    elif command -v rocm-smi &>/dev/null; then
+      rocm-smi --showproductname --showbusy --showmemoryusage | awk '
+      BEGIN {
+        print "┌──────────── AMD GPU Stats ───────────┐"
+      }
+      NR==2 {
+        product_name = $2
+      }
+      NR==3 {
+        load = $2
+      }
+      NR==4 {
+        memory_usage = $2
+        gsub("\[|MiB|\]", "", memory_usage)
+        split(memory_usage, mem_arr, "/")
+        used_mem = mem_arr[1]
+        total_mem = mem_arr[2]
+        printf "│ 󰢮 GPU │ Load: %3d%% Mem: %4d/%4d MB │\n", load, used_mem, total_mem
+      }
+      END {
+        print "└───────────────────────────────────┘"
+      }'
+    else
+      echo "No supported GPU detected."
+    fi
   }
 
   # Print all stats
