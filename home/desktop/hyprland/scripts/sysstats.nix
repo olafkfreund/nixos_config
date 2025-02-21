@@ -84,7 +84,7 @@ pkgs.writeShellScriptBin "sysstats" ''
           product_name = $2
         }
         /Memory usage/ {
-          gsub("Memory usage: |\[|MiB|\]", "", $0)
+          gsub("Memory usage: |\\\[|MiB|\\\]", "", $0)
           split($0, mem_arr, "/")
           used_mem = mem_arr[1]
           total_mem = mem_arr[2]
