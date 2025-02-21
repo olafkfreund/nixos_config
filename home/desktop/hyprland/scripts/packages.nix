@@ -16,5 +16,6 @@
     (import ./time.nix {inherit pkgs;})
     (import ./notify_count.nix {inherit pkgs;})
     (import ./cpustats.nix {inherit pkgs;})
+    (import ./systats.nix {inherit pkgs;})
   ];
 }
