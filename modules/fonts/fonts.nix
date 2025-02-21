@@ -9,46 +9,21 @@
     enableGhostscriptFonts = true;
 
     packages = with pkgs; [
-      # comfortaa
-      # comic-neue
       corefonts
       dejavu_fonts
       fira
       fira-code
       fira-go
       font-awesome
-      # hackgen-nf-font
-      # inconsolata
-      # inter
-      # iosevka-bin
       jetbrains-mono
-      # jost
-      # joypixels
-      # lato
-      # lexend
-      # liberation_ttf
-      # line-awesome
       material-design-icons
       material-icons
       nerd-font-patcher
-      # A change is comming for the next release of NixOS
-      # nerd-fonts.jetbrains-mono
-      # nerd-fonts.iosevka
-      # nerd-fonts.fira-mono
       nerdfonts
       noto-fonts
       noto-fonts-cjk-sans
       noto-fonts-emoji
-      # roboto
-      # source-han-sans
-      # source-sans
-      # source-serif
-      # twemoji-color-font
       ubuntu_font_family
-      # work-sans
-      # roboto-mono
-      # victor-mono
-      # openmoji-color
     ];
 
     #---------------------------------------------------------------------

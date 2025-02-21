@@ -42,12 +42,6 @@ in {
         scrolling.history = 10000;
         selection.save_to_clipboard = true;
         terminal.osc52 = "CopyPaste";
-        mouse_bindings = [
-          {
-            mouse = "Right";
-            action = "Paste";
-          }
-        ];
       };
     };
   };

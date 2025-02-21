@@ -184,7 +184,7 @@
   users.users.${username} = {
     isNormalUser = true;
     description = "Olaf K-Freund";
-    extraGroups = ["networkmanager" "openrazer" "wheel" "docker" "podman" "video" "scanner" "lp" "lxd" "incus-admin"];
+    extraGroups = ["networkmanager" "openrazer" "wheel" "docker" "podman" "video" "scanner" "lp" "dialout" "lxd" "incus-admin"];
     shell = pkgs.zsh;
     packages = with pkgs; [
       vim
@@ -200,6 +200,7 @@
     fsType = "nfs";
     options = ["x-systemd.automount" "noauto"];
   };
+  hardware.flipperzero.enable = true;
   services.playerctld.enable = true;
   services.fwupd.enable = true;
   services.ollama.acceleration = lib.mkForce "rocm";

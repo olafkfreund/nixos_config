@@ -23,6 +23,7 @@
     ./zathura/default.nix
     ./remotedesktop/default.nix
     ./swaync/default.nix
+    ./evince/default.nix
     # ./gh/default.nix
   ];
 

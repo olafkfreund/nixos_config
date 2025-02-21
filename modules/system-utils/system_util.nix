@@ -94,5 +94,6 @@
     music-player
     termusic
     tauon
+    qflipper
   ];
 }

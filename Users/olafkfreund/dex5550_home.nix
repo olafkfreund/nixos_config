@@ -35,6 +35,7 @@
   programs.home-manager.enable = true;
 
   programs.obs.enable = lib.mkForce false;
+  programs.evince.enable = lib.mkForce true;
   programs.kdeconnect.enable = lib.mkForce false;
   programs.slack.enable = lib.mkForce false;
   # Terminals

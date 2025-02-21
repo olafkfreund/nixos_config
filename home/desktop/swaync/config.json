@@ -1,6 +1,6 @@
 {
     "positionX": "right",
-    "positionY": "top",
+    "positionY": "bottom",
     "layer": "overlay",
     "layer-shell": "true",
     "cssPriority": "application",

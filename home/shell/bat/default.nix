@@ -4,8 +4,8 @@
   lib,
   pkgs,
   ...
-}: 
-with lib; let 
+}:
+with lib; let
   cfg = config.cli.bat;
 in {
   options.cli.bat = {
@@ -22,9 +22,9 @@ in {
         style = "numbers,changes";
       };
       extraPackages = with pkgs.bat-extras; [
-        # prettybat
         batman
-        # batdiff
+        batpipe
+        batgrep
       ];
     };
   };
