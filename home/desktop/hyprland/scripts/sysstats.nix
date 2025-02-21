@@ -75,35 +75,34 @@ pkgs.writeShellScriptBin "sysstats" ''
         END {
           print "└───────────────────────────────────┘"
         }'
-      elif command -v rocm-smi &>/dev/null && command -v radeontop &>/dev/null; then
-        # Get product name
-        product_name=$($(which rocm-smi) --showproductname | awk 'NR==2{print $2}')
-
-        # Get GPU usage and memory info from radeontop
-        radeontop -l 1 -d | awk '
+      elif command -v rocm-smi &>/dev/null; then
+        rocm-smi --showproductname --showmemuse --showtemp --showpower | awk '
         BEGIN {
           print "┌──────────── AMD GPU Stats ───────────┐"
         }
-        NR==3 {
-          load = $2
-          gsub("%", "", load)
+        NR==2 {
+          product_name = $2
         }
-        NR==4 {
-          used_mem_kb = $3
-          gsub("K", "", used_mem_kb)
-          used_mem_mb = used_mem_kb / 1024
-
-          total_mem_kb = $6
-          gsub("K", "", total_mem_kb)
-          total_mem_mb = total_mem_kb / 1024
-
-          printf "│ 󰢮 GPU │ Load: %3d%% Mem: %4d/%4d MB │\n", load, used_mem_mb, total_mem_mb
+        /Memory usage/ {
+          gsub("Memory usage: |\[|MiB|\]", "", $0)
+          split($0, mem_arr, "/")
+          used_mem = mem_arr[1]
+          total_mem = mem_arr[2]
+        }
+        /Temperature/ {
+          gsub("Temperature: |C", "", $0)
+          temp = $0
+        }
+        /Average GPU Power/ {
+          gsub("Average GPU Power: |W", "", $0)
+          power = $0
+          printf "│ 󰢮 GPU │ Mem: %4d/%4d MB Temp: %3sC Power: %4sW │\n", used_mem, total_mem, temp, power
         }
         END {
           print "└───────────────────────────────────┘"
         }'
       else
-        echo "No supported GPU or radeontop detected."
+        echo "No supported GPU detected."
       fi
     fi
   }
