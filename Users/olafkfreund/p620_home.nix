@@ -42,7 +42,7 @@
   alacritty.enable = lib.mkForce true;
   foot.enable = lib.mkForce true;
   wezterm.enable = lib.mkForce true;
-  kitty.enable = lib.mkForce false;
+  kitty.enable = lib.mkForce true;
 
   # Wayland apps
   # desktop.sway.enable = lib.mkForce false;
