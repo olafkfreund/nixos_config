@@ -80,26 +80,18 @@ pkgs.writeShellScriptBin "sysstats" ''
         BEGIN {
           print "┌──────────── AMD GPU Stats ───────────┐"
         }
-        NR==2 {
-          product_name = $2
+        /Temperature \(Sensor edge\)/ {
+          gsub(/[^0-9.]/, "", $NF)
+          temp = $NF
         }
-        /Memory usage/ {
-          gsub("Memory usage: ", "", $0)
-          gsub("MiB", "", $0)
-          gsub("\\[", "", $0)
-          gsub("\\]", "", $0)
-          split($0, mem_arr, "/")
-          used_mem = mem_arr[1]
-          total_mem = mem_arr[2]
+        /Average Graphics Package Power/ {
+          gsub(/[^0-9.]/, "", $NF)
+          power = $NF
         }
-        /Temperature/ {
-          gsub("Temperature: |C", "", $0)
-          temp = $0
-        }
-        /Average GPU Power/ {
-          gsub("Average GPU Power: |W", "", $0)
-          power = $0
-          printf "│ 󰢮 GPU │ Mem: %4d/%4d MB Temp: %3sC Power: %4sW │\n", used_mem, total_mem, temp, power
+        /GPU memory use \(%\)/ {
+          gsub(/[^0-9.]/, "", $NF)
+          mem_use = $NF
+          printf "│ 󰢮 GPU │ Use: %3s%% Temp: %sC Power: %sW │\n", mem_use, temp, power
         }
         END {
           print "└───────────────────────────────────┘"
