@@ -17,5 +17,6 @@
     (import ./notify_count.nix {inherit pkgs;})
     (import ./cpustats.nix {inherit pkgs;})
     (import ./sysstats.nix {inherit pkgs;})
+    (import ./connections.nix {inherit pkgs;})
   ];
 }
