@@ -85,7 +85,7 @@
       url = "github:danth/stylix/release-24.11";
     };
 
-    zen-browser.url = "github:MarceColl/zen-browser-flake";
+    zen-browser.url = "github:0xc000022070/zen-browser-flake";
 
     razer-laptop-control = {
       url = "github:Razer-Linux/razer-laptop-control-no-dkms";
