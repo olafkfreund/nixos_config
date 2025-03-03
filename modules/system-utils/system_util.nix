@@ -95,5 +95,7 @@
     termusic
     tauon
     qflipper
+    chatterino2
+    twitch-tui
   ];
 }

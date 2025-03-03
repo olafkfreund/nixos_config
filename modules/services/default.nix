@@ -1,4 +1,4 @@
-{ ... }: {
+{...}: {
   imports = [
     ./mtr/mtr.nix
     ./print/default.nix
@@ -19,11 +19,9 @@
     ./ollama/default.nix
     ./sysprof/default.nix
     # ./libinput/default.nix
-    ./snapd/default.nix
+    #./snapd/default.nix
     ./mandb/default.nix
     ./appimage/default.nix
     # ./dwm/default.nix
   ];
-
-
 }
