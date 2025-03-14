@@ -117,7 +117,10 @@
     # pkgs-unstable.rocmPackages.rocm-runtime
     # pkgs-unstable.rocmPackages.hipify
     pkgs-unstable.rocmPackages.llvm.libcxx
+    pkgs-unstable.via
   ];
+  services.udev.packages = [pkgs-unstable.via];
+  hardware.keyboard.qmk.enable = true;
 
   # Disable network wait services to improve boot time
   systemd.services = {
