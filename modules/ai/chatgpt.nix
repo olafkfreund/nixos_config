@@ -8,8 +8,5 @@
     pkgs.shell-gpt
     pkgs.aichat
     pkgs.gorilla-cli
-    pkgs.msty
-    pkgs.aider-chat-env
-    # pkgs.tabby
   ];
 }

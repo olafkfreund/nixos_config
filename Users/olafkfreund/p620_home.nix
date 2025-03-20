@@ -1,6 +1,7 @@
 {
   inputs,
   lib,
+  pkgs,
   ...
 }: {
   imports = [
@@ -32,6 +33,11 @@
     };
   };
   home.stateVersion = "24.11";
+
+  home.packages = with pkgs; [
+    # msty
+    # aider-chat-env
+  ];
   programs.home-manager.enable = true;
 
   programs.obs.enable = lib.mkForce true;
