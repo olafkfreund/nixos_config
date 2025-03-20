@@ -20,6 +20,7 @@
     ./system-utils/unpack.nix
     ./system-utils/system_util.nix
     ./ai/chatgpt.nix
+    ./ai/default.nix
     ./funny/funny.nix
     ./spell/spell.nix
     ./helpers/helpers.nix
