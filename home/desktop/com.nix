@@ -23,7 +23,16 @@
     pkgs.libcamera
   ];
   xdg.mime.enable = true;
-  xdg.mimeApps.enable = true;
+  xdg.mimeApps = {
+    enable = true;
+    defaultApplications = {
+      "text/html" = "google-chrome.desktop";
+      "x-scheme-handler/http" = "google-chrome.desktop";
+      "x-scheme-handler/https" = "google-chrome.desktop";
+      "x-scheme-handler/about" = "google-chrome.desktop";
+      "x-scheme-handler/unknown" = "google-chrome.desktop";
+    };
+  };
   xdg.desktopEntries = {
     obsidian = {
       name = "Obsidian :)";
@@ -33,6 +42,15 @@
       comment = "Knowledge base";
       icon = "obsidian";
       mimeType = ["x-scheme-handler/obsidian"];
+      type = "Application";
+    };
+    google-chrome = {
+      name = "google-chrome";
+      exec = "google-chrome-stable %U";
+      categories = ["Network"];
+      comment = "Web Browser";
+      icon = "google-chrome";
+      mimeType = ["x-scheme-handler/http" "x-scheme-handler/https"];
       type = "Application";
     };
   };
