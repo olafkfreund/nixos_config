@@ -31,6 +31,10 @@
       rocmPackages.rocm-smi
       rocmPackages.rocminfo
       rocmPackages.rocm-runtime
+      rocmPackages.rpp-hip
+      rocmPackages.rpp-cpu
+      rocmPackages.clr
+      rocmPackages.hip-common
       radeontop
       # virtualglLib
       # vulkan-loader

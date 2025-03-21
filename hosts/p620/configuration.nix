@@ -20,6 +20,7 @@
     ./themes/stylix.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
+    ../../modules/services/tabby/default.nix
   ];
   media.droidcam.enable = lib.mkForce true;
   aws.packages.enable = lib.mkForce true;
