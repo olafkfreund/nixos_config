@@ -22,5 +22,10 @@
     tdf
     nb
     hugo
+    # rPackages.rgr
+    serie
+    rainfrog
+    netscanner
+    atac
   ];
 }
