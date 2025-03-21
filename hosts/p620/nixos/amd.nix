@@ -28,6 +28,9 @@
       glxinfo
       clinfo
       rocmPackages_5.rocm-smi
+      rocmPackages.rocm-smi
+      rocmPackages.rocminfo
+      rocmPackages.rocm-runtime
       radeontop
       # virtualglLib
       # vulkan-loader
