@@ -2,7 +2,11 @@
   services.tabby = {
     enable = true;
     package = pkgs-unstable.tabby;
-    model = "TabbyML/DeepSeek-Coder-V2-Lite";
+    model = "TabbyML/DeepseekCoder-6.7B";
     acceleration = "rocm";
+    indexInterval = "5hours";
   };
+  environment.systemPackages = with pkgs-unstable; [
+    tabby-agent
+  ];
 }

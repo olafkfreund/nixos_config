@@ -33,6 +33,7 @@
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.11";
     #
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
     nix-colors = {
       url = "github:misterio77/nix-colors";

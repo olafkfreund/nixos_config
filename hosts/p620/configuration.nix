@@ -20,7 +20,7 @@
     ./themes/stylix.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
-    ../../modules/services/tabby/default.nix
+    # ../../modules/services/tabby/default.nix
   ];
   media.droidcam.enable = lib.mkForce true;
   aws.packages.enable = lib.mkForce true;
@@ -208,10 +208,12 @@
   services.playerctld.enable = true;
   services.fwupd.enable = true;
   services.ollama.acceleration = lib.mkForce "rocm";
-  services.ollama.package = lib.mkForce pkgs.ollama-rocm;
+  services.ollama.package = lib.mkForce pkgs-unstable.ollama-rocm;
   services.ollama.rocmOverrideGfx = lib.mkForce "11.0.0";
   services.ollama.environmentVariables.HCC_AMDGPU_TARGET = lib.mkForce "gfx1100";
-  services.ollama.environmentVariables.OLLAMA_LLM_LIBRARY = lib.mkForce "rocm_v6";
+  services.ollama.environmentVariables.ROC_ENABLE_PRE_VEGA = lib.mkForce "1";
+  services.ollama.environmentVariables.HSA_OVERRIDE_GFX_VERSION = lib.mkForce "11.0.0";
+  # services.ollama.environmentVariables.OLLAMA_LLM_LIBRARY = lib.mkForce "rocm_v6";
   networking.firewall.enable = false;
   networking.nftables.enable = true;
   networking.timeServers = ["pool.ntp.org"];
