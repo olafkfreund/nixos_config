@@ -30,10 +30,17 @@
       rocmPackages_5.rocm-smi
       rocmPackages.rocm-smi
       rocmPackages.rocminfo
+      rocmPackages.rocsolver
+      rocmPackages.rocsparse
       rocmPackages.rocm-runtime
       rocmPackages.rpp-hip
       rocmPackages.rpp-cpu
       rocmPackages.clr
+      rocmPackages.clr.icd
+      rocmPackages.rocm-cmake
+      rocmPackages.rocm-device-libs
+      rocmPackages.hipblas
+      rocmPackages.rocblas
       rocmPackages.hip-common
       radeontop
       # virtualglLib
@@ -41,8 +48,12 @@
       # vulkan-tools
     ];
   };
+
   systemd = {
     packages = with pkgs; [lact];
     services.lactd.wantedBy = ["multi-user.target"];
+    tmpfiles.rules = [
+      "L+    /opt/rocm   -    -    -     -    ${pkgs.rocmPackages.clr}"
+    ];
   };
 }

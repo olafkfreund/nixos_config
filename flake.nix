@@ -49,6 +49,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nixcord = {
+      url = "github:kaylorben/nixcord";
+    };
+
     # nixos-cosmic = {
     #   url = "github:lilyinstarlight/nixos-cosmic";
     #   inputs.nixpkgs.follows = "nixpkgs";
@@ -116,6 +120,7 @@
     razer-laptop-control,
     nixpkgs-f2k,
     nix-colors,
+    nixcord,
     ags,
     nix-snapd,
     zen-browser,
@@ -163,7 +168,7 @@
               system = "x86_64-linux";
               config.allowUnfree = true;
             };
-            inherit inputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control stylix nix-index-database nixpkgs-f2k home-manager nixpkgs-stable nixpkgs-unstable nix-colors nix-snapd host;
+            inherit inputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control nixcord stylix nix-index-database nixpkgs-f2k home-manager nixpkgs-stable nixpkgs-unstable nix-colors nix-snapd host;
           };
           home-manager.users.${username} = import ./Users/${username}/${host}_home.nix;
           home-manager.sharedModules = [
