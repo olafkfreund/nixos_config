@@ -5,7 +5,6 @@
 }: {
   programs.nixcord = {
     enable = true; # enable Nixcord. Also installs discord package
-    quickCss = "some CSS"; # quickCSS file
     config = {
       useQuickCss = false; # use out quickCSS
       themeLinks = [

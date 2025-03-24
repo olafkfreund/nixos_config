@@ -6,12 +6,14 @@
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
+    extraPackages32 = with pkgs; [
+      driversi686Linux.amdvlk
+    ];
     extraPackages = with pkgs; [
       vulkan-validation-layers
       libva-vdpau-driver
       amdvlk
       rocmPackages.clr.icd
-      rocmPackages_5.rocm-smi
     ];
   };
 
@@ -27,7 +29,6 @@
       lact
       glxinfo
       clinfo
-      rocmPackages_5.rocm-smi
       rocmPackages.rocm-smi
       rocmPackages.rocminfo
       rocmPackages.rocsolver
@@ -44,8 +45,8 @@
       rocmPackages.hip-common
       radeontop
       # virtualglLib
-      # vulkan-loader
-      # vulkan-tools
+      vulkan-loader
+      vulkan-tools
     ];
   };
 
@@ -56,4 +57,6 @@
       "L+    /opt/rocm   -    -    -     -    ${pkgs.rocmPackages.clr}"
     ];
   };
+  # # Force radv
+  # environment.variables.AMD_VULKAN_ICD = "RADV";
 }
