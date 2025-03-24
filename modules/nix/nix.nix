@@ -16,7 +16,7 @@
     channel = "https://nixos.org/channels/nixos-24.11";
   };
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = ["nix-command" "flakes"];
   nix.settings.trusted-users = ["root" "olafkfreund"];
   nix.settings.http-connections = 50;
   nix.settings.warn-dirty = false;

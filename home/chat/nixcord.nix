@@ -1,6 +1,4 @@
 {
-  pkgs,
-  pkgs-unstable,
   ...
 }: {
   programs.nixcord = {
@@ -8,7 +6,6 @@
     config = {
       useQuickCss = false; # use out quickCSS
       themeLinks = [
-        # or use an online theme
         "https://refact0r.github.io/system24/theme/gruvbox-material.theme.css"
       ];
       frameless = true; # set some Vencord options
@@ -19,8 +16,6 @@
       };
     };
     extraConfig = {
-      # Some extra JSON config here
-      # ...
     };
   };
 }

@@ -138,10 +138,12 @@
         pkgs-stable = import nixpkgs-stable {
           system = "x86_64-linux";
           config.allowUnfree = true;
+          config.allowInsecure = true;
         };
         pkgs-unstable = import nixpkgs-unstable {
           system = "x86_64-linux";
           config.allowUnfree = true;
+          config.allowInsecure = true;
         };
         inherit inputs username host;
       };
@@ -163,10 +165,12 @@
             pkgs-stable = import nixpkgs-stable {
               system = "x86_64-linux";
               config.allowUnfree = true;
+              condfig.allowInsecure = true;
             };
             pkgs-unstable = import nixpkgs-unstable {
               system = "x86_64-linux";
               config.allowUnfree = true;
+              config.allowInsecure = true;
             };
             inherit inputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control nixcord stylix nix-index-database nixpkgs-f2k home-manager nixpkgs-stable nixpkgs-unstable nix-colors nix-snapd host;
           };
