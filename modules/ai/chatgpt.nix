@@ -1,12 +1,13 @@
-{pkgs, ...}: {
+{pkgs, pkgs-unstable, ...}: {
   environment.systemPackages = [
-    pkgs.chatgpt-cli
+    pkgs-unstable.chatgpt-cli
     pkgs.rPackages.chatgpt
-    pkgs.tgpt
+    pkgs-unstable.tgpt
     pkgs.github-copilot-cli
-    pkgs.yai
-    pkgs.shell-gpt
-    pkgs.aichat
-    pkgs.gorilla-cli
+    pkgs-unstable.yai
+    pkgs-unstable.shell-gpt
+    pkgs-unstable.aichat
+    pkgs-unstable.gorilla-cli
+    pkgs-unstable.oterm
   ];
 }
