@@ -159,7 +159,7 @@
   users.users.${username} = {
     isNormalUser = true;
     description = "Olaf K-Freund";
-    extraGroups = ["networkmanager" "openrazer" "wheel" "docker" "podman" "video" "scanner" "lp" "lxd" "incus-admin"];
+    extraGroups = ["networkmanager" "openrazer" "libvirtd" "wheel" "docker" "podman" "video" "scanner" "lp" "lxd" "incus-admin"];
     shell = pkgs.zsh;
     packages = with pkgs; [
       vim

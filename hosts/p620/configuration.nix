@@ -94,7 +94,10 @@
     inputs.zen-browser.packages."${pkgs.system}".default
     pkgs-unstable.rocmPackages.llvm.libcxx
     pkgs-unstable.via
+    pkgs-unstable.looking-glass-client
+    pkgs-unstable.scream
   ];
+
   services.udev.packages = [pkgs-unstable.via];
   hardware.keyboard.qmk.enable = true;
 
@@ -143,12 +146,17 @@
       };
     };
   };
-  # programs.sway = {
-  #   extraSessionCommands = ''
-  #     export WLR_RENDERER=vulkan
-  #     export WLR_DRM_DEVICES=/dev/dri/card2
-  #   '';
-  # };
+
+  systemd.user.services.scream-ivshmem = {
+    enable = true;
+    description = "Scream IVSHMEM";
+    serviceConfig = {
+      ExecStart = "${pkgs-unstable.scream}/bin/scream-ivshmem-pulse /dev/shm/scream";
+      Restart = "always";
+    };
+    wantedBy = ["multi-user.target"];
+    requires = ["pulseaudio.service"];
+  };
 
   users.defaultUserShell = pkgs.zsh;
 
@@ -163,7 +171,7 @@
   users.users.${username} = {
     isNormalUser = true;
     description = "Olaf K-Freund";
-    extraGroups = ["networkmanager" "openrazer" "wheel" "docker" "podman" "video" "scanner" "lp" "dialout" "lxd" "incus-admin"];
+    extraGroups = ["networkmanager" "openrazer" "libvirtd" "wheel" "docker" "podman" "video" "scanner" "lp" "dialout" "lxd" "incus-admin"];
     shell = pkgs.zsh;
     packages = with pkgs; [
       vim
