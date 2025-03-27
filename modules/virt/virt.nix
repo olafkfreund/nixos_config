@@ -24,7 +24,7 @@ in {
           swtpm.enable = true;
           ovmf.enable = true;
           ovmf.packages = [pkgs.OVMFFull.fd];
-          package = pkgs.qemu;
+          package = pkgs-unstable.qemu;
           runAsRoot = false;
         };
       };
@@ -35,6 +35,7 @@ in {
     };
     environment.sessionVariables.LIBVIRT_DEFAULT_URI = ["qemu:///system"];
     services.spice-vdagentd.enable = true;
+    systemd.tmpfiles.rules = ["L+ /var/lib/qemu/firmware - - - - ${pkgs-unstable.qemu}/share/qemu/firmware"];
     systemd.services.libvirtd.restartIfChanged = false;
     boot.kernelParams = [
       "cgroup_enable=cpuset"
@@ -42,23 +43,23 @@ in {
       "cgroup_enable=memory"
     ];
     environment.systemPackages = [
-      pkgs.OVMFFull
-      pkgs.kvmtool
-      pkgs.libvirt
+      pkgs-unstable.OVMFFull
+      pkgs-unstable.kvmtool
+      pkgs-unstable.libvirt
       # multipass
-      pkgs.spice
-      pkgs.spice-gtk
-      pkgs.spice-protocol
-      pkgs.spice-vdagent
-      pkgs.spice-autorandr
-      pkgs.swtpm
-      pkgs.virt-manager
-      pkgs.virt-viewer
-      pkgs.win-spice
-      pkgs.win-virtio
-      pkgs.virtualbox
-      pkgs.btrfs-progs
-      pkgs.quickemu
+      pkgs-unstable.spice
+      pkgs-unstable.spice-gtk
+      pkgs-unstable.spice-protocol
+      pkgs-unstable.spice-vdagent
+      pkgs-unstable.spice-autorandr
+      pkgs-unstable.swtpm
+      pkgs-unstable.virt-manager
+      pkgs-unstable.virt-viewer
+      pkgs-unstable.win-spice
+      pkgs-unstable.win-virtio
+      pkgs-unstable.virtualbox
+      pkgs-unstable.btrfs-progs
+      pkgs-unstable.quickemu
       # pkgs-unstable.vmware-workstation
       # quickgui
     ];

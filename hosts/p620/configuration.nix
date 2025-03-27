@@ -92,31 +92,6 @@
   services.xserver.videoDrivers = ["amdgpu"];
   environment.systemPackages = [
     inputs.zen-browser.packages."${pkgs.system}".default
-    # pkgs-unstable.rocmPackages.rocm-core
-    # pkgs-unstable.rocmPackages.hip-common
-    # pkgs-unstable.rocmPackages.rccl
-    # # pkgs-unstable.rocmPackages.rocrand
-    # # pkgs-unstable.rocmPackages.rocblas
-    # # pkgs-unstable.rocmPackages.rocfft
-    # # pkgs-unstable.rocmPackages.rocsparse
-    # # pkgs-unstable.rocmPackages.hipsparse
-    # pkgs-unstable.rocmPackages.rocthrust
-    # pkgs-unstable.rocmPackages.rocprim
-    # pkgs-unstable.rocmPackages.hipcub
-    # # pkgs-unstable.rocmPackages.roctracer
-    # # pkgs-unstable.rocmPackages.rocfft
-    # # pkgs-unstable.rocmPackages.rocsolver
-    # # pkgs-unstable.rocmPackages.hipfft
-    # # pkgs-unstable.rocmPackages.hipsolver
-    # # pkgs-unstable.rocmPackages.hipblas
-    # pkgs-unstable.rocmPackages.rocminfo
-    # pkgs-unstable.rocmPackages.rocm-cmake
-    # pkgs-unstable.rocmPackages.rocm-smi
-    # pkgs-unstable.rocmPackages.rocm-thunk
-    # pkgs-unstable.rocmPackages.rocm-comgr
-    # pkgs-unstable.rocmPackages.rocm-device-libs
-    # pkgs-unstable.rocmPackages.rocm-runtime
-    # pkgs-unstable.rocmPackages.hipify
     pkgs-unstable.rocmPackages.llvm.libcxx
     pkgs-unstable.via
   ];
@@ -208,7 +183,7 @@
   services.playerctld.enable = true;
   services.fwupd.enable = true;
   services.ollama.acceleration = lib.mkForce "rocm";
-  # services.ollama.package = lib.mkForce pkgs-unstable.ollama-rocm;
+  # Xs4monly4e!!services.ollama.package = lib.mkForce pkgs-unstable.ollama-rocm;
   services.ollama.rocmOverrideGfx = lib.mkForce "11.0.0";
   services.ollama.environmentVariables.HCC_AMDGPU_TARGET = lib.mkForce "gfx1100";
   services.ollama.environmentVariables.ROC_ENABLE_PRE_VEGA = lib.mkForce "1";
