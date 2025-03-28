@@ -99,6 +99,9 @@
   ];
 
   services.udev.packages = [pkgs-unstable.via];
+  services.udev.extraRules = ''
+    SUBSYSTEM=="video4linux", KERNEL=="video[0-9]*", ATTR{index}=="0", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="0892", RUN+="/usr/bin/v4l2-ctl -d $devnode --set-ctrl=zoom_absolute=170"
+  '';
   hardware.keyboard.qmk.enable = true;
 
   # Disable network wait services to improve boot time
