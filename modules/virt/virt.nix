@@ -46,7 +46,7 @@ in {
       pkgs-unstable.OVMFFull
       pkgs-unstable.kvmtool
       pkgs-unstable.libvirt
-      # multipass
+      pkgs-unstable.multipass
       pkgs-unstable.spice
       pkgs-unstable.spice-gtk
       pkgs-unstable.spice-protocol
@@ -61,7 +61,7 @@ in {
       pkgs-unstable.btrfs-progs
       pkgs-unstable.quickemu
       # pkgs-unstable.vmware-workstation
-      # quickgui
+      pkgs-unstable.quickgui
     ];
   };
 }
