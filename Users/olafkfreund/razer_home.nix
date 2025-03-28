@@ -7,6 +7,7 @@
     inputs.nix-colors.homeManagerModules.default
     inputs.ags.homeManagerModules.default
     inputs.spicetify-nix.homeManagerModules.default
+    inputs.nixcord.homeManagerModules.nixcord
 
     ../../home/default.nix
     ../../home/desktop/sway/default.nix
