@@ -8,7 +8,12 @@
       plugins = {
         hideAttachments.enable = true; # Enable a Vencord plugin
         blurNSFW.enable = true;
-        plainFolderIcons = true; # Enable another Vencord plugin
+        fakeNitro.enable = true;
+        fakeNitro.enableStickerBypass = true;
+        customRPC.enable = true;
+        betterSettings.enable = true;
+        betterFolders.enable = true;
+        # plainFolderIcons = true; # Enable another Vencord plugin
       };
     };
     extraConfig = {

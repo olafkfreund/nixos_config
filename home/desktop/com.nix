@@ -8,7 +8,7 @@
     pkgs.teams-for-linux
     pkgs.birdtray
     pkgs-unstable.thunderbird-latest
-    pkgs.discord
+    # pkgs.discord
     # obsidian
     pkgs.dbeaver-bin
     pkgs.postgresql
