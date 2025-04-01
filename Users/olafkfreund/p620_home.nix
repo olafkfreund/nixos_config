@@ -14,7 +14,7 @@
     ../../home/games/steam.nix
     ../../home/desktop/sway/default.nix
     ../../home/desktop/sway/swayosd.nix
-    ../../home/chat/nixcord.nix
+    # ../../home/chat/nixcord.nix
     ../../hosts/p620/nixos/env.nix
     ./private.nix
   ];

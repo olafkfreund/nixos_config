@@ -12,7 +12,7 @@
     ../../home/default.nix
     ../../home/desktop/sway/default.nix
     ../../home/desktop/sway/swayosd.nix
-    ../../home/chat/nixcord.nix
+    # ../../home/chat/nixcord.nix
     ../../hosts/razer/nixos/env.nix
     ./private.nix
   ];

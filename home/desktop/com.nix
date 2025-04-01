@@ -16,6 +16,7 @@
     pkgs.element-desktop
     pkgs.imagemagick
     pkgs.fractal
+    pkgs-unstable.vesktop
     # pkgs.telegram-desktop
     pkgs.whatsapp-for-linux
     pkgs.ferdium

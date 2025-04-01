@@ -99,9 +99,22 @@
   ];
 
   services.udev.packages = [pkgs-unstable.via];
-  # services.udev.extraRules = ''
-  #   SUBSYSTEM=="video4linux", KERNEL=="video[0-9]*", ATTR{index}=="0", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="0892", RUN+="/usr/bin/v4l2-ctl -d $devnode --set-ctrl=zoom_absolute=170"
-  # '';
+  services.udev.extraRules = builtins.concatStringsSep "\n" [
+    /*
+    Set the webcam driver's light power frequency compensation setting to the European frequency.
+
+    See: https://unix.stackexchange.com/a/581939
+
+    Note that v4l-utils pulls in a lot of stuff including wayland as dependencies.
+    */
+    ''ACTION=="add", SUBSYSTEM=="video4linux", DRIVERS=="uvcvideo", RUN+="${pkgs.v4l-utils}/bin/v4l2-ctl --set-ctrl=power_line_frequency=1"''
+    /*
+    Allow access to hidraw devices for WebHID
+
+    See: https://wiki.archlinux.org/title/Keyboard_input#Configuration_of_VIA_compatible_keyboards
+    */
+    ''KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0660", TAG+="uaccess"''
+  ];
   hardware.keyboard.qmk.enable = true;
 
   # Disable network wait services to improve boot time
