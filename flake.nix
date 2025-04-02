@@ -59,7 +59,7 @@
     # };
 
     microvm = {
-      url = github:astro/microvm.nix;
+      url = "github:astro/microvm.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

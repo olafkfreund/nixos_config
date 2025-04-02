@@ -1,12 +1,13 @@
 {
   pkgs,
+  pkgs-unstable,
   config,
   lib,
   ...
 }: {
   programs.waybar = {
     enable = true;
-    package = pkgs.waybar;
+    package = pkgs-unstable.waybar;
     settings = {
       mainBar = {
         "layer" = "top";

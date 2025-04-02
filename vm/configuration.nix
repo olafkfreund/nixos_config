@@ -9,11 +9,6 @@
     ./disko-config.nix
   ];
 
-  # boot.loader.grub = {
-  #   enable = true;
-  #   device = "/dev/vda";
-  # };
-
   # Enable X server and Plasma 6 desktop environment
   # services.xserver.enable = true;
   services.desktopManager.plasma6.enable = true;

@@ -29,7 +29,7 @@
     package = pkgs.hyprland;
     plugins = [
       pkgs.hyprlandPlugins.hyprexpo
-      pkgs.hyprlandPlugins.hyprfocus
+      # pkgs.hyprlandPlugins.hyprfocus
       pkgs.hyprlandPlugins.hyprbars
     ];
   };
