@@ -19,6 +19,10 @@ return {
         ollama = {
           endpoint = "http://localhost:11434/v1/chat/completions",
         },
+        googleai = {
+          endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{{model}}:streamGenerateContent?key={{secret}}",
+          secret = os.getenv("GOOGLEAI_API_KEY"),
+        },
       },
       agents = {
         {

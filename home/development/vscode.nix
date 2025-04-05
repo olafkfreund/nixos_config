@@ -48,7 +48,7 @@ in {
       vscode-extensions.formulahendry.auto-close-tag
       vscode-extensions.file-icons.file-icons
       vscode-extensions.donjayamanne.githistory
-      vscode-extensions.continue.continue
+      # vscode-extensions.continue.continue
       vscode-extensions.bierner.markdown-preview-github-styles
       vscode-extensions.bierner.markdown-emoji
       # vscode-extensions.asvetliakov.vscode-neovim
