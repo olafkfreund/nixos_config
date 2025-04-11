@@ -7,8 +7,8 @@
 in {
   programs.spicetify = {
     enable = true;
-    theme = spicePkgs.themes.dribbblish;
-    colorScheme = "gruvbox-material-dark";
+    theme = spicePkgs.themes.onepunch;
+    colorScheme = "dark";
     enabledCustomApps = with spicePkgs.apps; [
       reddit
       lyricsPlus

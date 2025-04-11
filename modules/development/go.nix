@@ -1,4 +1,10 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  pkgs-unstable,
+  ...
+}:
 with lib; let
   cfg = config.go.development;
 in {
@@ -12,12 +18,14 @@ in {
     };
   };
   config = mkIf cfg.enable {
-    environment.systemPackages = [
-      pkgs.go
-      pkgs.gopls
-      pkgs.gore
-      # pkgs.go-task
-      pkgs.timoni
-    ] ++ cfg.packages;
+    environment.systemPackages =
+      [
+        pkgs-unstable.go
+        pkgs-unstable.gopls
+        pkgs-unstable.gore
+        pkgs-unstable.go-task
+        pkgs-unstable.timoni
+      ]
+      ++ cfg.packages;
   };
 }
