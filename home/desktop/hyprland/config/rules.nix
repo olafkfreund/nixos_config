@@ -33,7 +33,7 @@
     windowrulev2 = workspace special:slack,size 50% 50%,float,class:^(Slack),tilte:^(Huddle)
 
     #Discord
-    windowrulev3 = workspace special:discord, float, class:^(vesktop)
+    windowrulev2 = workspace special:discord, float, class:^(vesktop)
     windowrulev2 = workspace special:discord, size 50% 50%, float, class:^(vesktop)
 
     #Tmux
