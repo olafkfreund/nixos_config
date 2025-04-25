@@ -8,13 +8,12 @@
     inputs.nix-colors.homeManagerModules.default
     inputs.ags.homeManagerModules.default
     inputs.spicetify-nix.homeManagerModules.default
-    inputs.nixcord.homeManagerModules.nixcord
+    inputs.nixcord.homeModules.nixcord
 
     ../../home/default.nix
     ../../home/games/steam.nix
     ../../home/desktop/sway/default.nix
     ../../home/desktop/sway/swayosd.nix
-    # ../../home/chat/nixcord.nix
     ../../hosts/p620/nixos/env.nix
     ./private.nix
   ];

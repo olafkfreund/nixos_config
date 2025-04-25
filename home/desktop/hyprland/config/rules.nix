@@ -21,12 +21,20 @@
     # windowrulev2 = forceinput, class:(Rofi)$
     windowrule = animation bounce, ^(rofi)$
 
+    #Virtual MachineManager
+    windowrulev2 = float, class:(.virt-manager-wrapped)
+    windowrulev2 = size 1000 1000, class:(.virt-manager-wrapped)
+
     # Obsidian
     windowrulev2 = float, class:(obsidian)
 
     #Slack
     windowrulev2 = workspace special:slack, float, class:^(Slack)
     windowrulev2 = workspace special:slack,size 50% 50%,float,class:^(Slack),tilte:^(Huddle)
+
+    #Discord
+    windowrulev3 = workspace special:discord, float, class:^(vesktop)
+    windowrulev2 = workspace special:discord, size 50% 50%, float, class:^(vesktop)
 
     #Tmux
     windowrulev2 = workspace special:tmux, float, title:^(tmux-sratch)

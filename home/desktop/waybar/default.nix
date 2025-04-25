@@ -1,8 +1,6 @@
 {
   pkgs,
   pkgs-unstable,
-  config,
-  lib,
   ...
 }: {
   programs.waybar = {
@@ -130,6 +128,7 @@
             "secret" = "<span foreground='#fabd2f'>󱕴 </span>";
             "spotify" = "<span foreground='#518554'> </span>";
             "slack" = "<span foreground='#fe8019'> </span>";
+            "discord" = "<span foreground='#8ec07c'> </span>";
             "mail" = "<span foreground='#83a598'> </span>";
             "scratchpad" = "<span foreground='#d3869b'> </span>";
           };
