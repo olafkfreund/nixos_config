@@ -25,6 +25,8 @@ in {
       vscode-extensions.bbenoist.nix
       vscode-extensions.kamadorueda.alejandra
       vscode-extensions.tailscale.vscode-tailscale
+      # vscode-marketplace.jeff-hykin.better-csv-syntax
+      # vscode-marketplace.jeff-hykin.polacode-2019
       vscode-extensions.jnoortheen.nix-ide
       vscode-extensions.golang.go
       vscode-extensions.skellock.just
