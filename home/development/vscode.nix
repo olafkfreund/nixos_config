@@ -98,9 +98,9 @@ in {
       "geminicodeassist.codeGenerationPaneViewEnabled" = true;
       "geminicodeassist.project" = "freundcloud";
       "cloudcode.duetAI.project" = "freundcloud";
-      "extensions.experimental.affinity" = {
-        "asvetliakov.vscode-neovim" = 1;
-      };
+      # "extensions.experimental.affinity" = {
+      #   "asvetliakov.vscode-neovim" = 1;
+      # };
       "codeium.enableConfig" = {
         "*" = true;
         "nix" = true;
