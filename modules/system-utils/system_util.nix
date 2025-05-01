@@ -1,6 +1,7 @@
 {
   pkgs,
   pkgs-stable,
+  inputs,
   ...
 }: {
   environment.systemPackages = with pkgs; [
@@ -97,5 +98,7 @@
     qflipper
     chatterino2
     twitch-tui
+    inputs.iwmenu.packages.${pkgs.system}.default
+    inputs.bzmenu.packages.${pkgs.system}.default
   ];
 }
