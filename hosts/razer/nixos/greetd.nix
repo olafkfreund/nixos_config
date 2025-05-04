@@ -11,10 +11,6 @@
       command = "${lib.getExe config.programs.hyprland.package}";
       user = "${username}";
     };
-    session_sway = {
-      command = "${lib.getExe config.programs.sway.package} --unsupported-gpu";
-      user = "${username}";
-    };
   in {
     enable = true;
     settings = {

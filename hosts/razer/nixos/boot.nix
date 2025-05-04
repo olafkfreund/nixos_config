@@ -12,6 +12,9 @@
   boot.kernelPackages = pkgs.linuxPackages_6_12;
   boot.plymouth.enable = true;
   boot.kernel.sysctl."vm.nr_hugepages" = 1024;
+  boot.kernel.sysctl = {
+    "vm.max_map_count" = 1048576; # Helps with memory-mapped files for large models
+  };
   # This is for OBS Virtual Cam Support - v4l2loopback setup
   # boot.kernelPackages = pkgs.linuxPackages_default;
   boot.kernelModules = ["v4l2loopback"];

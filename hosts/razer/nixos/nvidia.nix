@@ -24,9 +24,19 @@
     enable = true;
     enable32Bit = true;
     extraPackages = with pkgs; [
+      # Vulkan support
       vulkan-validation-layers
+      vulkan-loader
+      vulkan-tools
+
+      # Video acceleration
       libva-vdpau-driver
       nvidia-vaapi-driver
+      vaapiVdpau
+
+      # CUDA support
+      cudaPackages.cudatoolkit
+      cudaPackages.cudnn
     ];
   };
 
@@ -35,6 +45,7 @@
       # nvidia-vaapi-driver
       libva
       libva-utils
+      nvtop
       # glxinfo
       # clinfo
       # virtualglLib
@@ -42,4 +53,23 @@
       # vulkan-tools
     ];
   };
+  # Kernel parameters for better NVIDIA performance and stability
+  boot = {
+    kernelParams = [
+      "nvidia-drm.modeset=1" # Required for Wayland
+      "nvidia.NVreg_PreserveVideoMemoryAllocations=1" # Helps with suspend/resume
+    ];
+
+    # Early load NVIDIA modules
+    initrd.kernelModules = ["nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm"];
+  };
+
+  # Enable hardware acceleration for Firefox and Chromium
+  programs = {
+    firefox.enableHardwareAcceleration = true;
+    chromium.enableVaapi = true;
+  };
+
+  # Docker NVIDIA support (uncomment if you use Docker with CUDA)
+  virtualisation.docker.enableNvidia = true;
 }

@@ -15,9 +15,19 @@
     enable = true;
     enable32Bit = true;
     extraPackages = with pkgs; [
+      # Vulkan support
       vulkan-validation-layers
+      vulkan-loader
+      vulkan-tools
+
+      # Video acceleration
       libva-vdpau-driver
       nvidia-vaapi-driver
+      vaapiVdpau
+
+      # CUDA support
+      cudaPackages.cudatoolkit
+      cudaPackages.cudnn
     ];
   };
   environment = {
