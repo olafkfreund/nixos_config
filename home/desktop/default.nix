@@ -24,7 +24,7 @@
     ./remotedesktop/default.nix
     ./swaync/default.nix
     ./evince/default.nix
-    # ./lanmouse/default.nix
+    ./lanmouse/default.nix
     # ./gh/default.nix
   ];
 

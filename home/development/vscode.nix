@@ -107,7 +107,7 @@ in {
         };
       };
       "workbench.colorTheme" = "Gruvbox Material Dark";
-      "workbench.iconTheme" = "gruvbox-icon-theme";
+      "workbench.iconTheme" = "file-icons-colourless";
       "workbench.externalBrowser" = "google-chrome-stable";
       "genieai.enableConversationHistory" = true;
       "alejandra.program" = "alejandra";
