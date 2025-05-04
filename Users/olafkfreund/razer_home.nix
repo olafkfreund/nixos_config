@@ -44,9 +44,6 @@
   wezterm.enable = lib.mkForce true;
   kitty.enable = lib.mkForce false;
 
-  #Mouse and keyboard sharing
-  lanmouse.enable = lib.mkForce true;
-
   # Wayland apps
   # desktop.sway.enable = lib.mkForce false;
   desktop.zathura.enable = lib.mkForce true;
