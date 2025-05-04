@@ -134,7 +134,7 @@ in {
       "git.pruneOnFetch" = true;
       "git.openRepositoryInParentFolders" = "always";
       "git.showPushSuccessNotification" = true;
-      "git.enableCommitSigning" = true;
+      "git.enableCommitSigning" = false;
       "diffEditor.ignoreTrimWhitespace" = false;
     };
   };
