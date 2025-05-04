@@ -24,6 +24,16 @@
       noto-fonts-cjk-sans
       noto-fonts-emoji
       ubuntu_font_family
+      dejavu_fonts
+      # jetbrains-mono
+      noto-fonts
+      noto-fonts-lgc-plus
+      texlivePackages.hebrew-fonts
+      noto-fonts-emoji
+      # font-awesome
+      powerline-fonts
+      powerline-symbols
+      # (nerdfonts.override { fonts = [ "NerdFontsSymbolsOnly" ]; })
     ];
 
     #---------------------------------------------------------------------
@@ -38,24 +48,48 @@
       antialias = true;
       cache32Bit = true;
       useEmbeddedBitmaps = true;
+      localConf = ''
+        <?xml version="1.0"?>
+        <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+        <fontconfig>
+            <alias binding="weak">
+                <family>monospace</family>
+                <prefer>
+                    <family>emoji</family>
+                </prefer>
+            </alias>
+            <alias binding="weak">
+                <family>sans-serif</family>
+                <prefer>
+                    <family>emoji</family>
+                </prefer>
+            </alias>
+            <alias binding="weak">
+                <family>serif</family>
+                <prefer>
+                    <family>emoji</family>
+                </prefer>
+            </alias>
+        </fontconfig>
+      '';
 
-      defaultFonts = {
-        emoji = ["Joypixels" "Noto Color Emoji"];
-        monospace = ["FiraCode Nerd Font Mono" "SauceCodePro Nerd Font Mono"];
-        sansSerif = ["Work Sans" "Fira Sans" "FiraGO"];
-        serif = ["Source Serif"];
-      };
+      # defaultFonts = {
+      #   emoji = ["Joypixels" "Noto Color Emoji"];
+      #   monospace = ["FiraCode Nerd Font Mono" "SauceCodePro Nerd Font Mono"];
+      #   sansSerif = ["Work Sans" "Fira Sans" "FiraGO"];
+      #   serif = ["Source Serif"];
+      # };
 
-      hinting = {
-        autohint = false;
-        enable = true;
-        style = "slight";
-      };
+      # hinting = {
+      #   autohint = false;
+      #   enable = true;
+      #   style = "slight";
+      # };
 
-      subpixel = {
-        lcdfilter = "light";
-        rgba = "rgb";
-      };
+      # subpixel = {
+      #   lcdfilter = "light";
+      #   rgba = "rgb";
+      # };
     };
   };
 }

@@ -9,25 +9,38 @@
     8002
   ];
 
-  # Enable docker-nvidia
+  # Enable nvidia support for podman
   hardware.opengl.driSupport32Bit = true;
-  virtualisation.docker = {
+  virtualisation.podman = {
+    enable = true;
     enableNvidia = true;
   };
 
   system.activationScripts.mkFauxpilotNet = ''
-    ${pkgs.docker}/bin/docker network create fauxpilot &2>/dev/null || true
+    if ! ${pkgs.podman}/bin/podman network exists fauxpilot; then
+      echo "Creating 'fauxpilot' network for Podman..."
+      ${pkgs.podman}/bin/podman network create fauxpilot
+    else
+      echo "'fauxpilot' network already exists. Continuing..."
+    fi
   '';
 
   system.activationScripts.buildFauxpilot = ''
     mkdir -p /opt/fauxpilot/
-    [[ -d /opt/fauxpilot/src ]] || ${pkgs.git}/bin/git clone https://github.com/fauxpilot/fauxpilot.git /opt/fauxpilot/src
-    ${pkgs.git}/bin/git -C /opt/fauxpilot/src pull origin main
-    ${pkgs.docker}/bin/docker build -t local/heywoodlh/fauxpilot:latest /opt/fauxpilot/src -f /opt/fauxpilot/src/triton.Dockerfile
+    if [[ ! -d /opt/fauxpilot/src ]]; then
+      echo "Cloning fauxpilot repository..."
+      ${pkgs.git}/bin/git clone https://github.com/fauxpilot/fauxpilot.git /opt/fauxpilot/src
+    else
+      echo "Updating fauxpilot repository..."
+      ${pkgs.git}/bin/git -C /opt/fauxpilot/src pull origin main
+    fi
+
+    echo "Building fauxpilot image..."
+    ${pkgs.podman}/bin/podman build -t local/heywoodlh/fauxpilot:latest /opt/fauxpilot/src -f /opt/fauxpilot/src/triton.Dockerfile
   '';
 
   virtualisation.oci-containers = {
-    backend = "docker";
+    backend = "podman";
     containers = {
       fauxpilot = {
         image = "local/heywoodlh/fauxpilot:latest";
@@ -42,9 +55,8 @@
         ];
         dependsOn = ["copilot-proxy"];
         extraOptions = [
-          "--runtime=nvidia"
           "--network=fauxpilot"
-          "--gpus=all"
+          "--device=nvidia.com/gpu=all"
         ];
         cmd = [
           "mpirun"

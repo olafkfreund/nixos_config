@@ -53,6 +53,10 @@
       url = "github:kaylorben/nixcord";
     };
 
+    # lan-mouse = {
+    #   url = "github:feschber/lan-mouse";
+    # };
+
     bzmenu = {
       url = "github:e-tho/bzmenu";
     };

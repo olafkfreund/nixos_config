@@ -9,14 +9,6 @@
       command = "${lib.getExe config.programs.hyprland.package}";
       user = "olafkfreund";
     };
-    session_sway = {
-      command = "${lib.getExe config.programs.sway.package}";
-      user = "olafkfreund";
-    };
-    session_dwm = {
-      command = "startx dwm-run";
-      user = "olafkfreund";
-    };
   in {
     enable = true;
     settings = {

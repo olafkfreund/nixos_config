@@ -8,11 +8,23 @@
   ];
 
   system.activationScripts.mkCoderNet = ''
-    ${pkgs.docker}/bin/docker network create coder &2>/dev/null || true
+    if ! ${pkgs.podman}/bin/podman network exists coder; then
+      echo "Creating 'coder' network for Podman..."
+      ${pkgs.podman}/bin/podman network create coder
+    else
+      echo "'coder' network already exists. Continuing..."
+    fi
+  '';
+
+  # Ensure directories exist
+  system.activationScripts.mkCoderDirs = ''
+    mkdir -p /opt/coder/db /opt/coder/kube
+    chmod 755 /opt/coder
+    chmod 700 /opt/coder/db /opt/coder/kube
   '';
 
   virtualisation.oci-containers = {
-    backend = "docker";
+    backend = "podman";
     containers = {
       coder = {
         image = "ghcr.io/coder/coder:v0.24.0";
@@ -28,7 +40,7 @@
           "--network=coder"
         ];
         environmentFiles = [
-          /opt/coder/environment
+          "/opt/coder/environment"
         ];
         dependsOn = ["coder-db"];
       };
@@ -39,7 +51,7 @@
           "--network=coder"
         ];
         environmentFiles = [
-          /opt/coder/environment
+          "/opt/coder/environment"
         ];
         volumes = [
           "/opt/coder/db:/var/lib/postgresql/data"

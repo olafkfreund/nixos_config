@@ -1,25 +1,28 @@
 {pkgs, ...}: {
   stylix = {
+    enable = true;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
-    image = ./003.png;
+    # image = ./003.png;
     polarity = "dark";
     targets = {
       chromium.enable = false;
     };
     fonts = {
+      emoji = {
+        name = "Noto Color Emoji";
+        package = pkgs.noto-fonts-color-emoji;
+      };
       monospace = {
-        # A change is comming for the next release of NixOS
-        # package = pkgs.nerd-fonts.jetbrains-mono;
-        package = pkgs.nerdfonts.override {fonts = ["JetBrainsMono"];};
-        name = "JetBrainsMono Nerd Font Mono";
+        name = "JetBrains Mono";
+        package = pkgs.jetbrains-mono;
       };
       sansSerif = {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Sans";
+        name = "Noto Sans";
+        package = pkgs.noto-fonts;
       };
       serif = {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Serif";
+        name = "Noto Serif";
+        package = pkgs.noto-fonts;
       };
       sizes = {
         applications = 14;

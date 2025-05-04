@@ -20,13 +20,11 @@ in {
 
     programs.vscode.enable = true;
     programs.vscode.package = pkgs-unstable.vscode;
-
     programs.vscode.extensions = with pkgs-unstable; [
       vscode-extensions.bbenoist.nix
       vscode-extensions.kamadorueda.alejandra
+      vscode-extensions.mkhl.direnv
       vscode-extensions.tailscale.vscode-tailscale
-      # vscode-marketplace.jeff-hykin.better-csv-syntax
-      # vscode-marketplace.jeff-hykin.polacode-2019
       vscode-extensions.jnoortheen.nix-ide
       vscode-extensions.golang.go
       vscode-extensions.skellock.just
@@ -50,24 +48,45 @@ in {
       vscode-extensions.formulahendry.auto-close-tag
       vscode-extensions.file-icons.file-icons
       vscode-extensions.donjayamanne.githistory
-      # vscode-extensions.continue.continue
       vscode-extensions.bierner.markdown-preview-github-styles
       vscode-extensions.bierner.markdown-emoji
-      # vscode-extensions.asvetliakov.vscode-neovim
       vscode-extensions.arrterian.nix-env-selector
       vscode-extensions.sainnhe.gruvbox-material
     ];
 
-    programs.vscode.userSettings."[nix]" = {
-      "editor.defaultFormatter" = "kamadorueda.alejandra";
-      "editor.formatOnPaste" = true;
-      "editor.formatOnSave" = true;
-      "editor.formatOnType" = true;
-    };
     programs.vscode.userSettings = {
+      # Nix-specific settings
+      "[nix]" = {
+        "editor.defaultFormatter" = "kamadorueda.alejandra";
+        "editor.formatOnPaste" = true;
+        "editor.formatOnSave" = true;
+        "editor.formatOnType" = true;
+      };
+
+      # JavaScript settings
+      "[javascript]" = {
+        "editor.defaultFormatter" = "vscode.typescript-language-features";
+      };
+
+      # YAML settings
+      "[yaml]" = {
+        "editor.defaultFormatter" = "redhat.vscode-yaml";
+      };
+
+      # General settings
       "window.menuBarVisibility" = "toggle";
+      "editor.minimap.enabled" = false;
       "nix.serverPath" = "nixd";
       "nix.enableLanguageServer" = true;
+      "nix.formatterWidth" = 100;
+      "nix.editor.tabSize" = 2;
+      "nix.diagnostics" = {
+        "ignored" = [];
+        "excluded" = [];
+      };
+      "nix.env" = {
+        "NIX_PATH" = "nixpkgs=channel:nixos-unstable";
+      };
       "nix.serverSettings" = {
         "nixd" = {
           "formatting" = {
@@ -81,30 +100,42 @@ in {
               "expr" = "(builtins.getFlake \"/home/olafkfreund/.config/nixos\").homeConfigurations.p620.options";
             };
           };
+          eval = {
+            "depth" = 2;
+            "workers" = 10;
+          };
         };
       };
       "workbench.colorTheme" = "Gruvbox Material Dark";
       "workbench.iconTheme" = "gruvbox-icon-theme";
       "workbench.externalBrowser" = "google-chrome-stable";
       "genieai.enableConversationHistory" = true;
-      "editor.minimap.enabled" = false;
-      "[javascript]" = {
-        "editor.defaultFormatter" = "vscode.typescript-language-features";
-      };
       "alejandra.program" = "alejandra";
-      "[yaml]" = {
-        "editor.defaultFormatter" = "redhat.vscode-yaml";
-      };
       "geminicodeassist.codeGenerationPaneViewEnabled" = true;
       "geminicodeassist.project" = "freundcloud";
-      "cloudcode.duetAI.project" = "freundcloud";
-      # "extensions.experimental.affinity" = {
-      #   "asvetliakov.vscode-neovim" = 1;
-      # };
+      "geminicodeassist.enableChat" = true;
+      "geminicodeassist.language" = "en";
+      "geminicodeassist.region" = "us-central1";
+      "geminicodeassist.enableCodeCompletions" = true;
+      "geminicodeassist.enableExplainCode" = true;
+      "geminicodeassist.chatWindow.isVisible" = true;
+      "geminicodeassist.chatWindow.position" = "right";
+      "geminicodeassist.modelName" = "gemini-2.5-pro";
       "codeium.enableConfig" = {
         "*" = true;
         "nix" = true;
       };
+
+      #Git settings
+      "git.enableSmartCommit" = true;
+      "git.confirmSync" = false;
+      "git.autofetch" = true;
+      "git.fetchOnPull" = true;
+      "git.pruneOnFetch" = true;
+      "git.openRepositoryInParentFolders" = "always";
+      "git.showPushSuccessNotification" = true;
+      "git.enableCommitSigning" = true;
+      "diffEditor.ignoreTrimWhitespace" = false;
     };
   };
 }

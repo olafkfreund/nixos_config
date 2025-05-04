@@ -19,10 +19,37 @@ in {
       package = pkgs.foot;
       settings = {
         main = {
+          # Terminal configuration
           pad = "12x12";
           term = "xterm-256color";
           selection-target = "clipboard";
+          shell = "${pkgs.zsh}/bin/zsh";
         };
+        # Mouse bindings
+        mouse-bindings = {
+          primary-paste = "BTN_MIDDLE";
+          select-begin = "BTN_LEFT";
+          select-begin-block = "Control+BTN_LEFT";
+          select-word = "BTN_LEFT-2";
+          select-word-whitespace = "Control+BTN_LEFT-2";
+        };
+        key-bindings = {
+          # Custom key bindings
+          scrollback-up-page = "Shift+Page_Up";
+          scrollback-down-page = "Shift+Page_Down";
+          clipboard-copy = "Control+Shift+c XF86Copy";
+          clipboard-paste = "Control+Shift+v XF86Paste";
+          font-increase = "Control+plus Control+equal Control+KP_Add";
+          font-decrease = "Control+minus Control+KP_Subtract";
+          font-reset = "Control+0 Control+KP_0";
+        };
+
+        search-bindings = {
+          cancel = "Control+g Control+c Escape";
+          find-prev = "Control+r";
+          find-next = "Control+s";
+        };
+        # Color scheme
         colors = {
           foreground = "${config.colorScheme.palette.base06}";
           background = "${config.colorScheme.palette.base00}";
@@ -32,18 +59,19 @@ in {
           regular2 = "${config.colorScheme.palette.base0B}";
           regular3 = "${config.colorScheme.palette.base09}";
           regular4 = "${config.colorScheme.palette.base0D}";
-          regular5 = "${config.colorScheme.palette.base0D}";
+          regular5 = "${config.colorScheme.palette.base0E}";
           regular6 = "${config.colorScheme.palette.base0C}";
           regular7 = "${config.colorScheme.palette.base06}";
 
-          bright0 = "393a4d"; # bright black
-          bright1 = "e95678"; # bright red
-          bright2 = "29d398"; # bright green
-          bright3 = "efb993"; # bright yellow
-          bright4 = "26bbd9";
-          bright5 = "b072d1"; # bright magenta
-          bright6 = "59e3e3"; # bright cyan
-          bright7 = "d9e0ee"; # bright white
+          # Bright colors (color palette 8-15)
+          bright0 = "${config.colorScheme.palette.base01}"; # bright black
+          bright1 = "${config.colorScheme.palette.base08}"; # bright red
+          bright2 = "${config.colorScheme.palette.base0B}"; # bright green
+          bright3 = "${config.colorScheme.palette.base09}"; # bright yellow
+          bright4 = "${config.colorScheme.palette.base0D}"; # bright blue
+          bright5 = "${config.colorScheme.palette.base0E}"; # bright magenta
+          bright6 = "${config.colorScheme.palette.base0C}"; # bright cyan
+          bright7 = "${config.colorScheme.palette.base07}"; # bright white
         };
       };
     };

@@ -1,6 +1,9 @@
 {...}: {
   wayland.windowManager.hyprland.extraConfig = ''
-    #Terminal rules
+    # =============================================================================
+    # TERMINAL EMULATOR RULES
+    # =============================================================================
+    # Set all terminal emulators to float with consistent sizing
     windowrulev2 = float, class:(alacritty)
     windowrulev2 = size 1000 1000, class:(alacritty)
     windowrulev2 = float, class:(kitty)
@@ -11,104 +14,188 @@
     windowrulev2 = size 1000 1000, class:(foot)
     windowrule = animation slide left, class:^(foot)$
 
-
-    # Window rules #
+    # =============================================================================
+    # SYSTEM UTILITY RULES
+    # =============================================================================
+    # Keep system utilities in current workspace
     windowrule = workspace current,title:MainPicker
     windowrule = workspace current,.blueman-manager-wrapped
     windowrule = workspace current,xdg-desktop-portal-gtk
 
-    # Rofi
-    # windowrulev2 = forceinput, class:(Rofi)$
-    windowrule = animation bounce, ^(rofi)$
+    # Bluetooth manager
+    windowrulev2 = float, class:(blueman-manager)
+    windowrulev2 = center, class:(blueman-manager)
 
-    #Virtual MachineManager
-    windowrulev2 = float, class:(.virt-manager-wrapped)
-    windowrulev2 = size 1000 1000, class:(.virt-manager-wrapped)
+    # Network utilities
+    windowrulev2 = float,class:^(nm-applet)$
+    windowrulev2 = float,class:^(nm-connection-editor)$
 
-    # Obsidian
-    windowrulev2 = float, class:(obsidian)
-
-    #Slack
-    windowrulev2 = workspace special:slack, float, class:^(Slack)
-    windowrulev2 = workspace special:slack,size 50% 50%,float,class:^(Slack),tilte:^(Huddle)
-
-    #Discord
-    windowrulev2 = workspace special:discord, float, class:^(vesktop)
-    windowrulev2 = workspace special:discord, size 50% 50%, float, class:^(vesktop)
-
-    #Tmux
-    windowrulev2 = workspace special:tmux, float, title:^(tmux-sratch)
-
-    #Spotify
-    windowrulev2 = workspace special:spotify, float, class:^(spotify)
-
-    #thunderbird
-    windowrulev2 = workspace special:mail, class:^(thunderbird)$
-    windowrule = animation slide left, ^(thunderbird)$
-    windowrulev2 = size 70% 70%,float,class:(thunderbird)$
-    windowrulev2 = size 70% 70%,float,class:^(thunderbird)$,title:^(.*)(Reminder)(.*)$
-    windowrulev2 = float,class:^(thunderbird)$,title:^(.*)(Write)(.*)$
-
-    #Google Chrome
-    windowrulev2 = workspace 2, float, class:(google-chrome)
-    windowrulev2 = workspace special:spotify, class:^(Spotify)$
-    windowrulev2 = float,size 900 500,title:^(Choose Files)
-    windowrulev2 = float,size 900 500,title:^(Sign in)
-    windowrulev2 = workspace 4, class:^(Edge)$
-
-    #Pavucontrol
+    # Sound control
     windowrulev2 = float, class:(pavucontrol)
     windowrulev2 = size 1000 1000, class:(pavucontrol)
     windowrulev2 = center, class:(pavucontrol)
 
-    #Moonlight
-    windowrulev2 = size 50% 50%, float, class:(com.moonlight_stream.Moonlight)
+    # XDG portal
+    windowrulev2 = float, class:^(xdg-desktop-portal-gtk)$
+    windowrulev2 = size 900 500, class:^(xdg-desktop-portal-gtk)$
+    windowrulev2 = dimaround, class:^(xdg-desktop-portal-gtk)$
+    windowrulev2 = center, class:^(xdg-desktop-portal-gtk)$
 
-    #Camera
-    windowrulev2 = size 500 500, fload, class:(hu.irl.cameractrls)
+    # =============================================================================
+    # APPLICATION LAUNCHERS
+    # =============================================================================
+    # Rofi - application launcher
+    windowrule = animation bounce, ^(rofi)$
 
-    #Zen
-    windowrulev2 = size 70% 70%, float, class:(zen.aplha)$,title:^(.*)(Save)(.*)$
+    # =============================================================================
+    # PRODUCTIVITY APPLICATIONS
+    # =============================================================================
+    # Obsidian note-taking app
+    windowrulev2 = float, class:(obsidian)
 
-    #Telegram
+    # =============================================================================
+    # THUNDERBIRD EMAIL CLIENT
+    # =============================================================================
+    # Main window - assign to mail workspace
+    windowrulev2 = workspace special:mail, class:^(thunderbird)$
+    windowrule = animation slide left, ^(thunderbird)$
+
+    # Make all thunderbird windows float by default
+    windowrulev2 = float, class:^(thunderbird)$
+
+    # Size the main window appropriately (70%)
+    windowrulev2 = size 70% 70%, class:^(thunderbird)$, title:^(Mozilla Thunderbird)$
+
+    # Handle all common dialog types
+    windowrulev2 = float, class:^(thunderbird)$, title:^(.*)(Reminder)(.*)$
+    windowrulev2 = float, class:^(thunderbird)$, title:^(.*)(Write)(.*)$
+    windowrulev2 = float, class:^(thunderbird)$, title:^(.*)(Compose)(.*)$
+    windowrulev2 = float, class:^(thunderbird)$, title:^(.*)(Calendar)(.*)$
+    windowrulev2 = float, class:^(thunderbird)$, title:^(.*)(Event)(.*)$
+    windowrulev2 = float, class:^(thunderbird)$, title:^(.*)(Properties)(.*)$
+    windowrulev2 = float, class:^(thunderbird)$, title:^(.*)(Preferences)(.*)$
+    windowrulev2 = float, class:^(thunderbird)$, title:^(.*)(Settings)(.*)$
+    windowrulev2 = float, class:^(thunderbird)$, title:^(.*)(Add-ons)(.*)$
+    windowrulev2 = float, class:^(thunderbird)$, title:^(.*)(About)(.*)$
+    windowrulev2 = float, class:^(thunderbird)$, title:^(.*)(Quick Filter)(.*)$
+
+    # Size for common popups (centered, 60% size)
+    windowrulev2 = size 60% 60%, class:^(thunderbird)$, title:^(.*)(Write)(.*)$
+    windowrulev2 = size 60% 60%, class:^(thunderbird)$, title:^(.*)(Compose)(.*)$
+    windowrulev2 = center, class:^(thunderbird)$, title:^(.*)(Write)(.*)$
+    windowrulev2 = center, class:^(thunderbird)$, title:^(.*)(Compose)(.*)$
+
+    # Handle smaller dialogs (centered, 50% size)
+    windowrulev2 = size 50% 50%, class:^(thunderbird)$, title:^(.*)(Reminder)(.*)$
+    windowrulev2 = size 50% 50%, class:^(thunderbird)$, title:^(.*)(Properties)(.*)$
+    windowrulev2 = size 50% 50%, class:^(thunderbird)$, title:^(.*)(Event)(.*)$
+    windowrulev2 = center, class:^(thunderbird)$, title:^(.*)(Reminder)(.*)$
+    windowrulev2 = center, class:^(thunderbird)$, title:^(.*)(Properties)(.*)$
+    windowrulev2 = center, class:^(thunderbird)$, title:^(.*)(Event)(.*)$
+
+    # Very small dialogs (40% size)
+    windowrulev2 = size 40% 40%, class:^(thunderbird)$, title:^(.*)(About)(.*)$
+    windowrulev2 = center, class:^(thunderbird)$, title:^(.*)(About)(.*)$
+
+    # =============================================================================
+    # WEB BROWSERS AND COMMUNICATION
+    # =============================================================================
+    # Google Chrome
+    windowrulev2 = workspace 2, float, class:(google-chrome)
+
+    # Common dialog boxes
+    windowrulev2 = float,size 900 500,title:^(Choose Files)
+    windowrulev2 = float,size 900 500,title:^(Sign in)
+
+    # Microsoft Edge
+    windowrulev2 = workspace 4, class:^(Edge)$
+
+    # Slack communication platform
+    windowrulev2 = workspace special:slack, float, class:^(Slack)
+    windowrulev2 = workspace special:slack,size 50% 50%,float,class:^(Slack),title:^(Huddle)
+
+    # Discord communication platform
+    windowrulev2 = workspace special:discord, float, class:^(vesktop)
+    windowrulev2 = workspace special:discord, size 50% 50%, float, class:^(vesktop)
+
+    # Telegram messaging
     windowrulev2 = workspace 8, class:(org.telegram.desktop)
     windowrulev2 = size 970 480, class:(org.telegram.desktop), title:(Choose Files)
     windowrulev2 = center, class:(org.telegram.desktop), title:(Choose Files)
 
-    #Gnome
+    # =============================================================================
+    # DEVELOPMENT TOOLS
+    # =============================================================================
+    # Tmux terminal multiplexer
+    windowrulev2 = workspace special:tmux, float, title:^(tmux-sratch)
+
+    # =============================================================================
+    # ENTERTAINMENT APPLICATIONS
+    # =============================================================================
+    # Spotify music player
+    windowrulev2 = workspace special:spotify, float, class:^(spotify)
+    windowrulev2 = workspace special:spotify, class:^(Spotify)$
+
+    # Moonlight game streaming
+    windowrulev2 = size 50% 50%, float, class:(com.moonlight_stream.Moonlight)
+
+    # =============================================================================
+    # VIRTUALIZATION
+    # =============================================================================
+    # Virtual Machine Manager
+    windowrulev2 = float, class:(.virt-manager-wrapped)
+    windowrulev2 = size 1000 1000, class:(.virt-manager-wrapped)
+
+    # =============================================================================
+    # SYSTEM APPLICATIONS
+    # =============================================================================
+    # GNOME applications
     windowrulev2 = float, class:(org.gnome.*)
     windowrulev2 = size 1000 1000, class:(org.gnome.*)
     windowrulev2 = center, class:(org.gnome.*)
-    windowrule = animation slide up`, ^(org.gnome.Calendar)$
+
+    # GNOME Calendar - specific positioning
+    windowrule = animation slide up, ^(org.gnome.Calendar)$
     windowrule = size 400 500,^(org.gnome.Calendar)$
     windowrulev2 = move 480 45, class:^(org.gnome.Calendar)$
 
-    windowrulev2 = float, class:(blueman-manager)
-    windowrulev2 = center, class:(blueman-manager)
-    windowrulev2 = float,class:^(nm-applet)$
-    windowrulev2 = float,class:^(nm-connection-editor)$
+    # Camera controls
+    windowrulev2 = size 500 500, float, class:(hu.irl.cameractrls)  # Fixed typo: fload -> float
 
-    # Allow screen tearing for reduced input latency on some games.
+    # Zen applications
+    windowrulev2 = size 70% 70%, float, class:(zen.aplha)$,title:^(.*)(Save)(.*)$  # Note: possible typo in 'aplha'
+
+    # =============================================================================
+    # GAMING OPTIMIZATIONS
+    # =============================================================================
+    # Allow screen tearing for reduced input latency on games
     windowrulev2 = immediate, class:^(cs2)$
     windowrulev2 = immediate, class:^(steam_app_0)$
     windowrulev2 = immediate, class:^(steam_app_1)$
     windowrulev2 = immediate, class:^(steam_app_2)$
     windowrulev2 = immediate, class:^(.*)(.exe)$
-    windowrulev2 = float, class:(xdg-desktop-portal-gtk)
-    windowrulev2 = size 1345 720, class:(xdg-desktop-portal-gtk)
-    windowrulev2 = center, class:(xdg-desktop-portal-gtk)
 
-    #Xwayland hack
+    # =============================================================================
+    # SCREEN SHARING / RECORDING
+    # =============================================================================
+    # XWayland video bridge for screen sharing compatibility
     windowrulev2 = opacity 0.0 override,class:^(xwaylandvideobridge)$
     windowrulev2 = noanim,class:^(xwaylandvideobridge)$
     windowrulev2 = noinitialfocus,class:^(xwaylandvideobridge)$
     windowrulev2 = maxsize 1 1,class:^(xwaylandvideobridge)$
     windowrulev2 = noblur,class:^(xwaylandvideobridge)$
 
-    # Xdg
-    windowrulev2 = float, class:^(xdg-desktop-portal-gtk)$
-    windowrulev2 = size 900 500, class:^(xdg-desktop-portal-gtk)$
-    windowrulev2 = dimaround, class:^(xdg-desktop-portal-gtk)$
-    windowrulev2 = center, class:^(xdg-desktop-portal-gtk)$
+    # =============================================================================
+    # SCREEN CAPTURE AND EDITING
+    # =============================================================================
+    # Flameshot screenshot tool
+    windowrulev2 = float, class:^(flameshot)$
+    windowrulev2 = pin, class:^(flameshot)$
+    windowrulev2 = move 0 0, title:^(flameshot)$
+    windowrulev2 = suppressevent fullscreen, class:^(flameshot)$
+
+    # OBS Studio for screen recording and streaming
+    windowrulev2 = float, class:^(com.obsproject.Studio)$
+    windowrulev2 = workspace 4, class:^(com.obsproject.Studio)$
   '';
 }

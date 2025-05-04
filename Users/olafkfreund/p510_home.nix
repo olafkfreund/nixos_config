@@ -66,6 +66,7 @@
   editor.cursor.enable = lib.mkForce false;
   editor.neovim.enable = lib.mkForce true;
   editor.vscode.enable = lib.mkForce false;
+  editor.zed-editor.enable = lib.mkForce false;
 
   # Shell tools
   cli.bat.enable = lib.mkForce true;

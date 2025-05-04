@@ -1,8 +1,4 @@
-{
-  pkgs,
-  pkgs-stable,
-  ...
-}: {
+{pkgs, ...}: {
   home.packages = [
     pkgs.eww
     pkgs.swww
@@ -19,7 +15,6 @@
     pkgs.hyprdim
     pkgs.hyprlock
     pkgs.hypridle
-    pkgs.emote
     pkgs.python312Packages.requests
     pkgs.betterlockscreen
     pkgs.watershot

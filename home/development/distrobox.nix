@@ -1,17 +1,20 @@
-{ pkgs, config, ... }: 
-
+{
+  pkgs,
+  config,
+  ...
+}:
 with builtins; let
   mkHome = box: ".local/share/distrobox/${box}";
   boxes = {
     fedora = {
       home = mkHome "Fedora";
       alias = "fedora";
-      img = "quay.io/fedora/fedora:rawhide";
+      img = "quay.io/fedora/fedora:42";
     };
     ubuntu = {
       home = mkHome "Ubuntu";
       alias = "ubuntu";
-      img = "docker.io/library/ubuntu:22.04";
+      img = "docker.io/library/ubuntu:25.04";
     };
     debian = {
       home = mkHome "Debian";

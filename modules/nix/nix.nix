@@ -23,6 +23,9 @@
   nix.settings.log-lines = 50;
   nix.settings.sandbox = "relaxed";
   nix.settings.auto-optimise-store = true;
+  nix.settings.max-jobs = "auto";
+  nix.settings.cores = 0;
+  # nix.settings.parallel-builds = 10;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;

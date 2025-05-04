@@ -10,35 +10,30 @@ with lib; let
   cfg = config.programs.obs;
 in {
   options.programs.obs = {
-    enable = mkEnableOption {
-      default = false;
-      description = "obs-studio";
-    };
+    enable = mkEnableOption "OBS Studio for screen recording and streaming";
   };
+
   config = mkIf cfg.enable {
     programs.obs-studio = {
       enable = true;
       plugins = with pkgs.obs-studio-plugins; [
-        wlrobs
-        obs-backgroundremoval
-        obs-pipewire-audio-capture
-        droidcam-obs
-        input-overlay
-        # advanced-scene-switcher
-        obs-source-record
-        obs-livesplit-one
-        looking-glass-obs
-        obs-vintage-filter
-        obs-command-source
-        obs-source-switcher
-        obs-move-transition
-        obs-vkcapture
-        obs-gstreamer
-        obs-vaapi
-        obs-source-record
-        obs-shaderfilter
-        obs-gradient-source
-        # obs-ndi
+        wlrobs # Wayland window capture
+        obs-backgroundremoval # Virtual background effects
+        obs-pipewire-audio-capture # Audio capture for Pipewire
+        droidcam-obs # Use Android phone as camera
+        input-overlay # Show keyboard/mouse inputs
+        obs-source-record # Record individual sources
+        obs-livesplit-one # Speedrunning timer integration
+        looking-glass-obs # Low-latency VM window capture
+        obs-vintage-filter # Vintage video effects
+        obs-command-source # Run shell commands from OBS
+        obs-source-switcher # Automatic source switching
+        obs-move-transition # Smooth transitions between scenes
+        obs-vkcapture # Vulkan/OpenGL game capture
+        obs-gstreamer # GStreamer integration
+        obs-vaapi # Hardware acceleration support
+        obs-shaderfilter # Custom shader effects
+        obs-gradient-source # Gradient backgrounds
       ];
     };
   };
