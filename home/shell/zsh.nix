@@ -185,12 +185,14 @@
       zstyle ':completion:files' sort false
 
       # fzf-tab
-      zstyle ':fzf-tab:complete:*:*' fzf-preview 'preview $realpath'
+      zstyle ':fzf-tab:*' use-fzf-default-opts yes
+      zstyle ':fzf-tab:complete:*:*' fzf-preview 'eza --icons  -a --group-directories-first -1 --color=always $realpath'
       zstyle ':fzf-tab:complete:kill:argument-rest' fzf-preview 'ps --pid=$word -o cmd --no-headers -w -w'
       zstyle ':fzf-tab:complete:kill:argument-rest' fzf-flags '--preview-window=down:3:wrap'
       zstyle ':fzf-tab:*' fzf-command fzf
       zstyle ':fzf-tab:*' fzf-pad 4
       zstyle ':fzf-tab:*' fzf-min-height 100
+      zstyle ':fzf-tab:*' switch-group ',' '.'
     '';
 
     initExtra = ''

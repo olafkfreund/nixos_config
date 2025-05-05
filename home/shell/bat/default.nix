@@ -20,6 +20,7 @@ in {
       config = {
         # theme = "gruvbox-dark";
         style = "numbers,changes";
+        pager = "less -FR";
       };
       extraPackages = with pkgs.bat-extras; [
         batman
