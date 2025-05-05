@@ -65,7 +65,7 @@
     # Additional performance tweaks
     "kernel.nmi_watchdog" = 0; # Disable NMI watchdog to reduce CPU overhead
     "kernel.randomize_va_space" = 2; # Full ASLR for better security
-    "vm.max_map_count" = 2147483647; # Much larger - for applications using many memory mappings
+    "vm.max_map_count" = lib.mkForce 2147483647; # Much larger - for applications using many memory mappings
 
     # Large memory workload optimizations
     "kernel.sched_migration_cost_ns" = 5000000; # Keep threads on the same CPU longer
