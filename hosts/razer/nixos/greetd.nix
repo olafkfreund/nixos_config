@@ -76,6 +76,6 @@
   # Console configuration
   console = {
     earlySetup = true; # Setup console early for faster boot
-    keyMap = "gb"; # Set keyboard layout
+    keyMap = "uk"; # Set keyboard layout
   };
 }
