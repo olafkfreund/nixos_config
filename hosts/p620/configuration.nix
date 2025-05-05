@@ -20,6 +20,7 @@
     ./themes/stylix.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
+    ../../modules/system-tweaks/kernel-tweaks/226GB-SYSTEM/226gb-system.nix
     # ../../modules/services/tabby/default.nix
   ];
   media.droidcam.enable = lib.mkForce true;
@@ -207,7 +208,7 @@
   services.playerctld.enable = true;
   services.fwupd.enable = true;
   services.ollama.acceleration = lib.mkForce "rocm";
-  # Xs4monly4e!!services.ollama.package = lib.mkForce pkgs-unstable.ollama-rocm;
+  # services.ollama.package = lib.mkForce pkgs-unstable.ollama-rocm;
   services.ollama.rocmOverrideGfx = lib.mkForce "11.0.0";
   services.ollama.environmentVariables.HCC_AMDGPU_TARGET = lib.mkForce "gfx1100";
   services.ollama.environmentVariables.ROC_ENABLE_PRE_VEGA = lib.mkForce "1";
