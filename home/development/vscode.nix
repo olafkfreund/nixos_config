@@ -1,5 +1,4 @@
 {
-  inputs,
   config,
   lib,
   pkgs,
@@ -106,6 +105,28 @@ in {
           };
         };
       };
+
+      # Context7 MCP configuration
+      "mcp" = {
+        "servers" = {
+          "Context7" = {
+            "type" = "stdio";
+            "command" = "npx";
+            "args" = [
+              "-y"
+              "@upstash/context7-mcp@latest"
+            ];
+          };
+        };
+      };
+
+      # GitHub Copilot chat instructions
+      "github.copilot.chat.codeGeneration.instructions" = [
+        {
+          "text" = "When answering questions about frameworks, libraries, or APIs, use Context7 to retrieve current documentation rather than relying on training data.";
+        }
+      ];
+
       "workbench.colorTheme" = "Gruvbox Material Dark";
       "workbench.iconTheme" = "file-icons-colourless";
       "workbench.externalBrowser" = "google-chrome-stable";
