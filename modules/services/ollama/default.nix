@@ -1,9 +1,7 @@
 {
   config,
   lib,
-  pkgs,
   pkgs-unstable,
-  options,
   ...
 }:
 with lib; let
@@ -18,18 +16,17 @@ in {
   config = mkIf cfg.enable {
     services.ollama = {
       enable = true;
+      package = pkgs-unstable.ollama;
       acceleration = "cuda";
       host = "0.0.0.0";
       loadModels = [
-        "deepseek-r1:14b"
-        "deepseek-coder-v2"
-        "qwen2.5-coder:3.5b"
+        "mistral-small3.1"
       ];
       user = "ollama";
     };
 
     services.open-webui = {
-      enable = false;
+      enable = true;
       host = "0.0.0.0";
       port = 8080;
       package = pkgs-unstable.open-webui;

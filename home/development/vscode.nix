@@ -51,6 +51,8 @@ in {
       vscode-extensions.bierner.markdown-emoji
       vscode-extensions.arrterian.nix-env-selector
       vscode-extensions.sainnhe.gruvbox-material
+      # The extensions below are currently commented out because they're not available in nixpkgs
+      # vscode-extensions.codeium.codeium
     ];
 
     programs.vscode.userSettings = {
@@ -118,6 +120,7 @@ in {
             ];
           };
         };
+        "enabled" = true;
       };
 
       # GitHub Copilot chat instructions
@@ -129,7 +132,7 @@ in {
 
       "workbench.colorTheme" = "Gruvbox Material Dark";
       "workbench.iconTheme" = "file-icons-colourless";
-      "workbench.externalBrowser" = "google-chrome-stable";
+      "workbench.browser.preferredBrowser" = "chrome";
       "genieai.enableConversationHistory" = true;
       "alejandra.program" = "alejandra";
       "geminicodeassist.codeGenerationPaneViewEnabled" = true;
@@ -147,7 +150,7 @@ in {
         "nix" = true;
       };
 
-      #Git settings
+      # Git settings
       "git.enableSmartCommit" = true;
       "git.confirmSync" = false;
       "git.autofetch" = true;
