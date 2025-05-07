@@ -248,7 +248,7 @@
       gitc = "git checkout";
       zellij = "zellij options --default-shell=zsh";
       neofetch = "neofetch --kitty ~/Pictures/wallpapers/Sexy_retro/ --size 300 --crop_mode fill";
-      nhu = "nh os switch --update";
+      nhu = "nh os switch --update -- --accept-flake-config";
       nhs = "nh os switch -- --impure --accept-flake-config";
       today = "curl -s https://wttr.in/London";
       # wttr = "curl -s https://wttr.in/London?0";
