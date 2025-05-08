@@ -143,7 +143,7 @@ in {
       package = pkgs-unstable.rofi-wayland;
 
       extraConfig = {
-        modi = "drun,run,filebrowser,websearch";
+        modi = "drun,run,filebrowser";
         lines = 10;
         font = "JetBrains Mono Nerd Font Bold 14";
         show-icons = true;

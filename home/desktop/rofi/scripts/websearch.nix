@@ -56,8 +56,8 @@
       # URL-encode the query
       url=$(echo "$url" | sed 's/ /%20/g')
 
-      # Open in the default browser
-      xdg-open "$url" &>/dev/null &
+      # Open in the default browser using the proper NixOS path
+      ${lib.getExe pkgs.xdg-utils} open "$url" &>/dev/null &
       exit 0
     }
 
