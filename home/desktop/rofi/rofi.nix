@@ -17,9 +17,14 @@ with lib; let
       gruvbox-border: #504945;
       gruvbox-green: #689d6a;
       transparent: #00000000;
+      gruvbox-purple: #b16286;
+      gruvbox-blue: #83a598;
+      gruvbox-orange: #fe8019;
+      gruvbox-red: #fb4934;
 
       font: "JetBrains Mono Nerd Font Bold 14";
       background-color: @transparent;
+      text-color: @gruvbox-fg;
     }
 
     element-text {
@@ -34,26 +39,31 @@ with lib; let
 
     mode-switcher {
       background-color: @transparent;
+      text-color: @gruvbox-fg;
     }
 
     window {
-      height: 60%;
-      width: 30%;
+      height: 40%;
+      width: 60%;
       location: center;
       anchor: center;
       border-radius: 10px;
-      border: 0px;
+      border: 2px;
+      border-color: @gruvbox-fg;
       background-color: @gruvbox-bg;
+      text-color: @gruvbox-fg;
       padding: 4px 8px;
     }
 
     mainbox {
       background-color: @transparent;
+      text-color: @gruvbox-fg;
     }
 
     inputbar {
       children: [prompt, entry];
       background-color: @transparent;
+      text-color: @gruvbox-fg;
       border-radius: 5px;
       padding: 2px;
       margin: 0px -5px -4px -5px;
@@ -80,6 +90,7 @@ with lib; let
       border: 0px;
       margin: 27px 5px -13px 5px;
       background-color: @transparent;
+      text-color: @gruvbox-fg;
       columns: 2;
       lines: 10;
       dynamic: true;
@@ -103,9 +114,9 @@ with lib; let
 
     element selected {
       background-color: @gruvbox-bg;
-      text-color: @gruvbox-yellow;
-      border: 1px;
-      border-color: @gruvbox-yellow;
+      text-color: @gruvbox-green;
+      border: 2px;
+      border-color: @gruvbox-orange;
     }
 
     mode-switcher {
@@ -119,21 +130,20 @@ with lib; let
       text-color: @gruvbox-fg;
       vertical-align: 0.5;
       horizontal-align: 0.5;
-      border-radius: 5px;
-      border: 1px 1px 6px 6px;
-      border-color: @gruvbox-border;
+
     }
 
     button selected {
       background-color: @gruvbox-bg;
       text-color: @gruvbox-yellow;
-      border-color: @gruvbox-border;
     }
 
     scrollbar {
       width: 4px;
       handle-width: 8px;
       handle-color: @gruvbox-border;
+      background-color: @gruvbox-bg;
+      text-color: @gruvbox-fg;
     }
   '';
 in {
@@ -147,7 +157,7 @@ in {
       package = pkgs-unstable.rofi-wayland;
 
       extraConfig = {
-        modi = "drun,run,window,ssh,filebrowser,keys,calc";
+        modi = "drun,run,filebrowser";
         lines = 10;
         font = "JetBrains Mono Nerd Font Bold 14";
         show-icons = true;
@@ -164,11 +174,7 @@ in {
         # Display labels
         display-drun = " 󰀘 Apps";
         display-run = " 󱄅 Command";
-        display-filebrowser = " Files";
-        display-window = "   Window";
-        display-ssh = " 󰣀  SSH";
-        display-keys = " 󱕴 Keys";
-        display-calc = "  Calculator";
+        display-filebrowser = " Files";
 
         # Performance options
         sort = true;
