@@ -13,45 +13,28 @@ in {
       default = false;
       description = "Enable Walker launcher";
     };
-    
+
     runAsService = mkOption {
       type = types.bool;
       default = true;
       description = "Whether to run Walker as a background service for faster startup";
     };
-    
-    style = mkOption {
-      type = types.nullOr types.str;
-      default = null;
-      description = "Custom CSS styling for Walker";
-      example = ''
-        * {
-          color: #dcd7ba;
-        }
-      '';
-    };
-    
-    config = mkOption {
-      type = types.attrs;
-      default = {};
-      description = "Configuration options for Walker";
-      example = {
+  };
+
+  config = mkIf cfg.enable {
+    programs.walker = {
+      enable = true;
+      inherit (cfg) runAsService;
+      # Configuration options for Walker
+      config = {
         search.placeholder = "Search...";
         ui.fullscreen = true;
         list.height = 200;
         websearch.prefix = "?";
         switcher.prefix = "/";
       };
-    };
-  };
-  
-  config = mkIf cfg.enable {
-    programs.walker = {
-      enable = true;
-      inherit (cfg) runAsService config;
-      
-      # Default Gruvbox-styled configuration if user doesn't provide custom styling
-      style = if cfg.style == null then ''
+      # Default Gruvbox-styled configuration
+      style = ''
         /* Gruvbox Dark Theme for Walker */
         * {
           font-family: "JetBrainsMono Nerd Font";
@@ -150,17 +133,17 @@ in {
         scrollbar slider:hover {
           background-color: #665c54;
         }
-      '' else cfg.style;
+      '';
     };
-    
+
     # Add auto-start for Hyprland if runAsService is enabled
     wayland.windowManager.hyprland.extraConfig = mkIf (cfg.runAsService && config.wayland.windowManager.hyprland.enable) ''
       exec-once=walker --gapplication-service
     '';
-    
+
     # Add auto-start for Sway if runAsService is enabled
     wayland.windowManager.sway.config.startup = mkIf (cfg.runAsService && config.wayland.windowManager.sway.enable) [
-      { command = "walker --gapplication-service"; }
+      {command = "walker --gapplication-service";}
     ];
   };
 }

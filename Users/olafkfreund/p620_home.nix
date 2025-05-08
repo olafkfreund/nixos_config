@@ -112,14 +112,5 @@
 
   desktop.walker = {
     enable = true;
-
-    # Optional custom configuration
-    config = {
-      search.placeholder = "Search...";
-      ui.fullscreen = true;
-      list.height = 300;
-      websearch.prefix = "?";
-      switcher.prefix = "/";
-    };
   };
 }
