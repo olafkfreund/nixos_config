@@ -1,8 +1,4 @@
-{
-  config,
-  pkgs,
-  ...
-}: {
+{...}: {
   wayland.windowManager.hyprland.extraConfig = ''
     # System binds
     $mainMod = SUPER
@@ -42,7 +38,6 @@
     bind = $mainMod, M, togglespecialworkspace, mail
     bind = $mainMod, T, togglespecialworkspace, scratchpad
     bind = Control_SHIFT, M, togglespecialworkspace, spotify
-    bind = $mainMod ALT, H, togglespecialworkspace, hidden
 
     # Moving windows to workspaces
     bind = $mainMod SHIFT, 1, movetoworkspace, 1
@@ -55,9 +50,7 @@
     bind = $mainMod SHIFT, 8, movetoworkspace, 8
     bind = $mainMod SHIFT, 9, movetoworkspace, 9
     bind = $mainMod SHIFT, 0, movetoworkspace, 10
-    bind = $mainMod SHIFT, M, movetoworkspace, special:mail
-    bind = $mainMod SHIFT, S, movetoworkspace, special:magic
-    bind = $mainMod ALT, H, movetoworkspace, special:hidden
+
 
     # Moving windows within workspace
     bind = $mainMod SHIFT, h, movewindow, l
@@ -95,11 +88,11 @@
 
     # System controls
     bind = $mainMod SHIFT, P, exec, screenshoot
+    bind = $mainMod SHIFT, S, exec, rwebsearch
     bind = $mainMod SHIFT, I, exec, cliphist list | rofi -dmenu -p "Clipboard History" | cliphist decode | wl-copy
     bind = $mainMod, N, exec, swaync-client --toggle-panel
     bind = $mainMod SHIFT, N, exec, swaync-client --close-all
     bind = $mainMod ALT, L, exec, hyprlock
-    bind = $mainMod CTRL SHIFT, B, exec, pkill -SIGUSR1 waybar
 
     # Volume controls (consolidated)
     bind = $mainMod, SLASH, exec, pamixer -t

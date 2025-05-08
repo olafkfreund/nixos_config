@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-
+{pkgs, ...}:
 pkgs.writeShellScriptBin "info-tailscale" ''
   ICON_ACTIVE="[  ]"
   ICON_INACTIVE="[  ]"

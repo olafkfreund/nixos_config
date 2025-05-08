@@ -8,9 +8,6 @@
 with lib; let
   cfg = config.desktop.rofi;
 
-  # Import our custom web search script
-  websearch = import ./scripts/websearch.nix {inherit lib pkgs;};
-
   # Extract theme to separate variable for better maintainability
   gruvboxTheme = builtins.toFile "rofi-theme.rasi" ''
     /* Global Properties */
@@ -143,7 +140,7 @@ in {
       package = pkgs-unstable.rofi-wayland;
 
       extraConfig = {
-        modi = "drun,run,filebrowser";
+        modi = "drun,run,filebrowser,websearch:rwebsearch";
         lines = 10;
         font = "JetBrains Mono Nerd Font Bold 14";
         show-icons = true;
@@ -161,7 +158,7 @@ in {
         display-drun = " 󰀘 Apps";
         display-run = " 󱄅 Command";
         display-filebrowser = " Files";
-        display-websearch = " 󰖟 Search";
+        # display-websearch = " 󰖟 Search";
 
         # Performance options
         sort = true;
@@ -190,35 +187,21 @@ in {
     };
 
     # Import our custom script
-    home.packages = with pkgs-unstable; [
-      # Core plugins
-      rofi-calc
-      websearch.rofi-websearch
-
-      # System utilities
-      rofi-power-menu
-      rofi-bluetooth
-      rofi-systemd
-
-      # Media and files
-      rofi-mpd
-      rofi-file-browser
-
-      # Messaging/social
-      rofimoji
-      rofi-emoji
-
-      # Productivity
-      rofi-screenshot
-      rofi-obsidian
-      todofi-sh
-
-      # System monitoring
-      rofi-top
+    home.packages = [
+      #Rofi scripts
+      (import ./scripts/websearch.nix {inherit pkgs;})
     ];
 
-    # Create launcher scripts for common rofi use cases
+    # Create launcher scripts for common rofi use cases and for websearch
     home.file = {
+      ".local/bin/rwebsearch-launcher" = {
+        text = ''
+          #!/bin/sh
+          rwebsearch
+        '';
+        executable = true;
+      };
+
       ".local/bin/rofi-power" = {
         text = ''
           #!/bin/sh
@@ -231,14 +214,6 @@ in {
         text = ''
           #!/bin/sh
           ${pkgs-unstable.rofi-bluetooth}/bin/rofi-bluetooth
-        '';
-        executable = true;
-      };
-
-      ".local/bin/rofi-websearch" = {
-        text = ''
-          #!/bin/sh
-          rofi -show websearch -modi websearch:${websearch.rofi-websearch}/bin/rofi-websearch
         '';
         executable = true;
       };

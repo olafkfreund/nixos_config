@@ -51,5 +51,13 @@
     # Log available keybinds and commands (moved to end to avoid startup delays)
     exec-once = $keybinds = $(hyprkeys -bjl | jq '.Binds | map(.Bind + " -> " + .Dispatcher + ", " + .Command)'[] -r)
     exec-once = $execs = $(hyprkeys -aj | jq '.AutoStart | map("[" + .ExecType + "] " + .Command)'[] -r)
+
+    #Start the usal applications
+    exec-once = foot --title "Terminal" --exec "zsh"
+    exec-once = vesktop
+    exec-once = spotify
+    exec-once = thunderbird
+    exec=once = google-chrome-stable
+    exec=once = 1password-store
   '';
 }
