@@ -145,6 +145,16 @@
     ...
   } @ inputs: let
     username = "olafkfreund";
+
+    # Import custom packages
+    overlays = [
+      (final: prev: {
+        customPkgs = import ./pkgs {
+          pkgs = final;
+        };
+      })
+    ];
+
     makeNixosSystem = host: {
       system = "x86_64-linux";
       specialArgs = {
@@ -161,6 +171,8 @@
         inherit inputs username host;
       };
       modules = [
+        # Add the overlays to modules
+        {nixpkgs.overlays = overlays;}
         ./hosts/${host}/configuration.nix
         nur.modules.nixos.default
         home-manager.nixosModules.home-manager
@@ -189,6 +201,8 @@
           };
           home-manager.users.${username} = import ./Users/${username}/${host}_home.nix;
           home-manager.sharedModules = [
+            # Add the overlays to home-manager modules as well
+            {nixpkgs.overlays = overlays;}
             {
               stylix.targets = {
                 waybar.enable = false;

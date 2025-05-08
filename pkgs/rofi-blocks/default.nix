@@ -7,6 +7,8 @@
   ninja,
   rofi,
   json-glib,
+  cairo,
+  glib,
 }:
 stdenv.mkDerivation rec {
   pname = "rofi-blocks";
@@ -28,6 +30,19 @@ stdenv.mkDerivation rec {
   buildInputs = [
     rofi
     json-glib
+    cairo
+    glib # This includes gmodule
+  ];
+
+  # Patch the meson.build file to install to our own lib/rofi directory
+  # instead of trying to write to the immutable Nix store
+  patches = [
+    ./meson-install-dir.patch
+  ];
+  
+  # This ensures the plugin is installed to our package's lib directory
+  mesonFlags = [
+    "--libdir=${placeholder "out"}/lib"
   ];
 
   meta = with lib; {
