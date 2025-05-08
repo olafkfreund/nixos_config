@@ -87,7 +87,7 @@
   # Environment variables for better AMD compatibility
   environment.variables = {
     # Uncomment if you want to force RADV (Mesa Vulkan driver)
-    # AMD_VULKAN_ICD = "RADV";
+    AMD_VULKAN_ICD = "RADV";
 
     # ROCm environment variables for better compatibility
     # HSA_OVERRIDE_GFX_VERSION = "10.3.0";

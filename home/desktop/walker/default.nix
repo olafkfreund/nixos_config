@@ -1,5 +1,6 @@
 {
   pkgs,
+  pkgs-unstable,
   config,
   lib,
   inputs,
@@ -24,23 +25,46 @@ in {
   config = mkIf cfg.enable {
     programs.walker = {
       enable = true;
+      package = pkgs-unstable.walker;
       inherit (cfg) runAsService;
 
       # Configuration options for Walker
       config = {
         search.placeholder = "Search...";
-        ui.fullscreen = false;
+        ui = {
+          fullscreen = false;
+          background_opacity = 0.0;
+          overlay = false;
+          transparent = true;
+          border_radius = 8;
+        };
+        as_window = true;
         list = {
-          height = 400;
+          height = 800;
           width = 800;
         };
+        hotreload_theme = true;
+        builtins.windows.weight = 100;
+        builtins.clipboard = {
+          prefix = ''"'';
+          always_put_new_on_top = true;
+        };
+        activation_mode.disabled = true;
+        ignore_mouse = true;
         websearch.prefix = "?";
         switcher.prefix = "/";
+        theme = "gruvbox";
 
         # Enable and configure Walker modules
         modules = {
           # Core modules
-          applications.enable = true;
+          applications = {
+            enable = true;
+            # Filter out desktop entries with empty exec lines
+            filter = "true"; # Default filter
+            fuzzy = true; # Enable fuzzy matching
+            show_icons = true; # Show application icons
+          };
           calculator.enable = true;
           runner.enable = true;
           clipboard = {
@@ -135,190 +159,222 @@ in {
       {command = "walker --gapplication-service";}
     ];
 
-    # Add a custom theme file for Gruvbox Light
+    # Add a custom theme file for Gruvbox
     xdg.configFile."walker/themes/gruvbox.css".text = ''
-        /* Define Gruvbox dark color scheme variables */
-        @define-color bg_h #1d2021;     /* hard dark background */
-        @define-color bg #282828;       /* dark background */
-        @define-color bg_s #32302f;     /* soft dark background */
-        @define-color bg1 #3c3836;      /* dark bg1 */
-        @define-color bg2 #504945;      /* dark bg2 */
-        @define-color bg3 #665c54;      /* dark bg3 */
-        @define-color bg4 #7c6f64;      /* dark bg4 */
-        @define-color fg #ebdbb2;       /* dark fg */
-        @define-color fg0 #fbf1c7;      /* dark fg0 */
-        @define-color fg1 #ebdbb2;      /* dark fg1 */
-        @define-color fg2 #d5c4a1;      /* dark fg2 */
-        @define-color fg3 #bdae93;      /* dark fg3 */
-        @define-color fg4 #a89984;      /* dark fg4 */
+      /* Define Gruvbox dark color scheme variables */
+      @define-color bg_h #1d2021;     /* hard dark background */
+      @define-color bg #282828;       /* dark background */
+      @define-color bg_s #32302f;     /* soft dark background */
+      @define-color bg1 #3c3836;      /* dark bg1 */
+      @define-color bg2 #504945;      /* dark bg2 */
+      @define-color bg3 #665c54;      /* dark bg3 */
+      @define-color bg4 #7c6f64;      /* dark bg4 */
+      @define-color fg #ebdbb2;       /* dark fg */
+      @define-color fg0 #fbf1c7;      /* dark fg0 */
+      @define-color fg1 #ebdbb2;      /* dark fg1 */
+      @define-color fg2 #d5c4a1;      /* dark fg2 */
+      @define-color fg3 #bdae93;      /* dark fg3 */
+      @define-color fg4 #a89984;      /* dark fg4 */
 
-        /* Gruvbox accent colors */
-        @define-color red #cc241d;
-        @define-color green #98971a;
-        @define-color yellow #d79921;
-        @define-color blue #458588;
-        @define-color purple #b16286;
-        @define-color aqua #689d6a;
-        @define-color orange #d65d0e;
+      /* Gruvbox accent colors */
+      @define-color red #cc241d;
+      @define-color green #98971a;
+      @define-color yellow #d79921;
+      @define-color blue #458588;
+      @define-color purple #b16286;
+      @define-color aqua #689d6a;
+      @define-color orange #d65d0e;
 
-        /* Shadow color */
-        @define-color shadow rgba(0, 0, 0, 0.3);
+      /* Bright Gruvbox accent colors */
+      @define-color bright_red #fb4934;
+      @define-color bright_green #b8bb26;
+      @define-color bright_yellow #fabd2f;
+      @define-color bright_blue #83a598;
+      @define-color bright_purple #d3869b;
+      @define-color bright_aqua #8ec07c;
+      @define-color bright_orange #fe8019;
 
-        /* Global styles */
-        * {
-          font-family: "JetBrainsMono Nerd Font";
-          font-size: 14px;
-          background-clip: border-box;
-        }
+      /* General theme variables */
+      @define-color foreground @fg;
+      @define-color background @bg;
+      @define-color color1 @bright_aqua;
+      @define-color shadow rgba(0, 0, 0, 0.3);
 
-        #window,
-        #box,
-        #aiScroll,
-        #aiList,
-        #search,
-        #password,
-        #input,
-        #prompt,
-        #clear,
-        #typeahead,
-        #list,
-        child,
-        scrollbar,
-        slider,
-        #item,
-        #text,
-        #label,
-        #bar,
-        #sub,
-        #activationlabel {
-          all: unset;
-        }
+      /* Global styles */
+      * {
+        font-family: "JetBrainsMono Nerd Font";
+        font-size: 14px;
+        background-clip: border-box;
+      }
 
-        #cfgerr {
-          background: rgba(255, 0, 0, 0.4);
-          margin-top: 20px;
-          padding: 8px;
-          font-size: 1.2em;
-        }
+      #window,
+      #box,
+      #aiScroll,
+      #aiList,
+      #search,
+      #password,
+      #input,
+      #prompt,
+      #clear,
+      #typeahead,
+      #list,
+      child,
+      scrollbar,
+      slider,
+      #item,
+      #text,
+      #label,
+      #bar,
+      #sub,
+      #activationlabel {
+        all: unset;
+      }
 
-        #window {
-          color: @bg;
-        }
+      #cfgerr {
+        background: rgba(255, 0, 0, 0.4);
+        margin-top: 20px;
+        padding: 8px;
+        font-size: 1.2em;
+      }
 
-        #box {
-          border-radius: 2px;
-          background: @bg1;
-          padding: 32px;
-          border: 1px solid lighter(@bg1);
-          box-shadow:
-            0 19px 38px rgba(0, 0, 0, 0.3),
-            0 15px 12px rgba(0, 0, 0, 0.22);
-        }
+      window {
+        background-color: transparent;
+      }
 
-        #search {
-          box-shadow:
-            0 1px 3px rgba(0, 0, 0, 0.1),
-            0 1px 2px rgba(0, 0, 0, 0.22);
-          background: lighter(@bg1);
-          padding: 8px;
-        }
+      #window {
+        color: @fg;
+        background-color: transparent;
+      }
 
-        #prompt {
-          margin-left: 4px;
-          margin-right: 12px;
-          color: @fg4;
-          opacity: 0.2;
-        }
+      overlay {
+        background-color: transparent !important;
+        background: transparent !important;
+        opacity: 0 !important;
+      }
 
-        #clear {
-          color: @fg4;
-          opacity: 0.8;
-        }
+      #box {
+        border-radius: 8px;
+        background: @bg1;
+        padding: 32px;
+        border: 1px solid @bg2;
+        box-shadow:
+          0 19px 38px rgba(0, 0, 0, 0.3),
+          0 15px 12px rgba(0, 0, 0, 0.22);
+        margin: 0 auto;
+      }
 
-        #password,
-        #input,
-        #typeahead {
-          border-radius: 2px;
-        }
+      #search {
+        box-shadow:
+          0 1px 3px rgba(0, 0, 0, 0.1),
+          0 1px 2px rgba(0, 0, 0, 0.22);
+        background: @bg2;
+        padding: 8px;
+      }
 
-        #input {
-          background: none;
-        }
+      #prompt {
+        margin-left: 4px;
+        margin-right: 12px;
+        color: @fg4;
+        opacity: 0.2;
+      }
 
-        #password {
-        }
+      #clear {
+        color: @fg4;
+        opacity: 0.8;
+      }
 
-        #spinner {
-          padding: 8px;
-        }
+      #password,
+      #input,
+      #typeahead {
+        border-radius: 2px;
+      }
 
-        #typeahead {
-          color: @fg4;
-          opacity: 0.8;
-        }
+      #input {
+        background: none;
+        color: @fg1;
+      }
 
-        #input placeholder {
-          opacity: 0.5;
-        }
+      #password {
+        color: @fg1;
+      }
 
-        #list {
-        }
+      #spinner {
+        padding: 8px;
+      }
 
-        child {
-          padding: 8px;
-          border-radius: 2px;
-        }
+      #typeahead {
+        color: @fg4;
+        opacity: 0.8;
+      }
 
-        child:selected,
-        child:hover {
-          background: @orange;
-        }
+      #input placeholder {
+        opacity: 0.5;
+      }
 
-        #item {
-        }
+      #list {
+        background: transparent;
+      }
 
-        #icon {
-          margin-right: 8px;
-        }
+      child {
+        padding: 8px;
+        border-radius: 2px;
+      }
 
-        #text {
-          font-weight: 500;
-          color: @fg4;
-        }
+      child:selected,
+      child:hover {
+        background: @orange;
+      }
 
-        #label {
-          font-weight: 500;
-        }
+      #item {
+        color: @fg1;
+      }
 
-        #sub {
-          opacity: 0.5;
-          font-size: 0.8em;
-        }
+      #icon {
+        margin-right: 8px;
+      }
 
-        #activationlabel {
-        }
+      #text {
+        font-weight: 500;
+        color: @fg4;
+      }
 
-        #bar {
-        }
+      #label {
+        font-weight: 500;
+      }
 
-        .barentry {
-        }
+      #sub {
+        opacity: 0.5;
+        font-size: 0.8em;
+      }
 
-        .activation #activationlabel {
-        }
+      #activationlabel {
+        color: @fg1;
+      }
 
-        .activation #text,
-        .activation #icon,
-        .activation #search {
-          opacity: 0.5;
-        }
+      #bar {
+        background: transparent;
+      }
 
-        .aiItem {
-          padding: 10px;
-          border-radius: 2px;
-          color: @fg4;
-          background: @bg1;
-        }
+      .barentry {
+        color: @fg1;
+      }
+
+      .activation #activationlabel {
+        color: @fg1;
+      }
+
+      .activation #text,
+      .activation #icon,
+      .activation #search {
+        opacity: 0.5;
+      }
+
+      .aiItem {
+        padding: 10px;
+        border-radius: 2px;
+        color: @fg4;
+        background: @bg1;
+      }
 
       .aiItem.user {
         padding-left: 0;
@@ -326,7 +382,7 @@ in {
       }
 
       .aiItem.assistant {
-        background: lighter(@bg1);
+        background: @bg2;
       }
     '';
   };
