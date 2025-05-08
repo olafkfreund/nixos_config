@@ -33,12 +33,8 @@ in {
         search.placeholder = "Search...";
         ui = {
           fullscreen = false;
-          background_opacity = 0.0;
-          overlay = false;
-          transparent = true;
-          border_radius = 8;
         };
-        as_window = true;
+        as_window = false;
         list = {
           height = 800;
           width = 800;

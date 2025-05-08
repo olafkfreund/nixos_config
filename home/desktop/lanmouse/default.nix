@@ -7,6 +7,11 @@
     # systemd = false;
     # package = inputs.lan-mouse.packages.${pkgs.stdenv.hostPlatform.system}.default
     # Optional configuration in nix syntax, see config.toml for available options
-    # settings = { };
+    settings = {
+      client = {
+        side = "right";
+        connect = "razer";
+      };
+    };
   };
 }

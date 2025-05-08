@@ -136,8 +136,16 @@
     windowrulev2 = workspace special:spotify, float, class:^(spotify)
     windowrulev2 = workspace special:spotify, class:^(Spotify)$
 
-    # Moonlight game streaming
-    windowrulev2 = size 50% 50%, float, class:(com.moonlight_stream.Moonlight)
+    # =============================================================================
+    # PASSWORD MANAGEMENT
+    # =============================================================================
+    # 1Password password manager
+    windowrulev2 = workspace special:magic, float, class:^(1Password)$
+    windowrulev2 = workspace special:magic, float, class:^(org.1password.1password)$
+    # Handle 1Password dialogs
+    windowrulev2 = float, class:^(1Password)$, title:^(.*)(Preferences)(.*)$
+    windowrulev2 = center, class:^(1Password)$, title:^(.*)(Preferences)(.*)$
+    windowrulev2 = size 50% 50%, class:^(1Password)$, title:^(.*)(Preferences)(.*)$
 
     # =============================================================================
     # VIRTUALIZATION

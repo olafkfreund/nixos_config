@@ -13,138 +13,120 @@ with lib; let
     /* Global Properties */
     * {
       gruvbox-bg: #282828;
+      gruvbox-bg-light: #3c3836;
       gruvbox-fg: #ebdbb2;
       gruvbox-yellow: #fabd2f;
       gruvbox-border: #504945;
       gruvbox-green: #689d6a;
       transparent: #00000000;
-      gruvbox-purple: #b16286;
-      gruvbox-blue: #83a598;
       gruvbox-orange: #fe8019;
-      gruvbox-red: #fb4934;
 
-      font: "JetBrains Mono Nerd Font Bold 14";
+      font: "JetBrains Mono Nerd Font 13";
       background-color: @transparent;
       text-color: @gruvbox-fg;
     }
 
-    element-text {
+    element-text, element-icon {
       background-color: @transparent;
       text-color: inherit;
-    }
-
-    element-text selected {
-      background-color: @transparent;
-      text-color: inherit;
-    }
-
-    mode-switcher {
-      background-color: @transparent;
-      text-color: @gruvbox-fg;
     }
 
     window {
-      height: 40%;
-      width: 60%;
-      location: center;
-      anchor: center;
-      border-radius: 10px;
-      border: 2px;
-      border-color: @gruvbox-fg;
+      width: 50%;
       background-color: @gruvbox-bg;
-      text-color: @gruvbox-fg;
-      padding: 4px 8px;
+      border: 1px;
+      border-color: @gruvbox-border;
+      border-radius: 6px;
+      padding: 12px;
     }
 
     mainbox {
       background-color: @transparent;
-      text-color: @gruvbox-fg;
+      spacing: 12px;
     }
 
     inputbar {
       children: [prompt, entry];
-      background-color: @transparent;
-      text-color: @gruvbox-fg;
-      border-radius: 5px;
-      padding: 2px;
-      margin: 0px -5px -4px -5px;
+      background-color: @gruvbox-bg;
+      border-radius: 6px;
+      padding: 4px 8px;
+      margin: 0 0 8px 0;
     }
 
     prompt {
-      background-color: @gruvbox-bg;
-      padding: 12px;
-      margin: 8px 8px 0px 8px;
-      text-color: @gruvbox-fg;
+      background-color: @transparent;
+      padding: 6px;
+      text-color: @gruvbox-orange;
     }
 
     entry {
-      padding: 12px;
-      margin: 8px 8px 0px 8px;
+      padding: 6px;
       text-color: @gruvbox-fg;
-      background-color: @gruvbox-bg;
-      border-radius: 5px;
-      border: 1px;
-      border-color: @gruvbox-border;
+      background-color: @transparent;
+      placeholder: "Search...";
     }
 
     listview {
-      border: 0px;
-      margin: 27px 5px -13px 5px;
       background-color: @transparent;
-      text-color: @gruvbox-fg;
-      columns: 2;
-      lines: 10;
+      cycle: false;
       dynamic: true;
+      layout: vertical;
+      spacing: 6px;
+      margin: 0;
+      columns: 1;
+      lines: 10;
       fixed-height: false;
-      scrollbar: true;
     }
 
     element {
-      padding: 12px;
-      background-color: @gruvbox-bg;
-      text-color: @gruvbox-fg;
-      margin: 0px 0px 8px 0px;
-      border-radius: 5px;
+      padding: 8px;
+      spacing: 8px;
+      background-color: @transparent;
+      border-radius: 4px;
     }
 
-    element-icon {
-      size: 25px;
+    element normal.normal {
       background-color: @transparent;
-      padding: 0px 10px 0px 0px;
+    }
+
+    element alternate.normal {
+      background-color: @transparent;
     }
 
     element selected {
-      background-color: @gruvbox-bg;
+      background-color: @gruvbox-bg-light;
       text-color: @gruvbox-green;
-      border: 2px;
-      border-color: @gruvbox-orange;
+    }
+
+    element-icon {
+      size: 18px;
+      padding: 0 8px 0 0;
     }
 
     mode-switcher {
-      spacing: 0;
+      spacing: 6px;
+      background-color: @gruvbox-bg;
+      border-radius: 4px;
+      padding: 4px;
     }
 
     button {
-      padding: 12px;
-      margin: 10px 5px;
-      background-color: @gruvbox-bg;
+      padding: 6px 12px;
+      background-color: @transparent;
       text-color: @gruvbox-fg;
-      vertical-align: 0.5;
-      horizontal-align: 0.5;
-
+      border-radius: 4px;
     }
 
     button selected {
-      background-color: @gruvbox-bg;
+      background-color: @gruvbox-bg-light;
       text-color: @gruvbox-yellow;
     }
 
     scrollbar {
       width: 4px;
-      handle-width: 8px;
+      handle-width: 4px;
       handle-color: @gruvbox-border;
       background-color: @gruvbox-bg;
-      text-color: @gruvbox-fg;
     }
   '';
 in {

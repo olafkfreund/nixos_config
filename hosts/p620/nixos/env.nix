@@ -8,7 +8,7 @@
     env = TERMINAL,foot                  # Set default terminal emulator to Foot
 
     # Wayland-specific settings
-    env = KITTY_DISABLE_WAYLAND,0          # Enable Wayland support for Kitty terminal
+    env = KITTY_DISABLE_WAYLAND,1          # Enable Wayland support for Kitty terminal
     env = XDG_CURRENT_DESKTOP,Hyprland     # Set current desktop environment to Hyprland
     env = XDG_SESSION_TYPE,wayland         # Set session type to Wayland
     env = CLUTTER_BACKEND,wayland          # Use Wayland backend for Clutter
@@ -23,7 +23,7 @@
     env = SDL_VIDEODRIVER,wayland          # Use wyaland video driver for SDL
 
     # GTK settings
-    env = GDK_BACKEND,wayland,x11          # Set GTK backend to Wayland, fallback to X11
+    env = GDK_BACKEND,wayland          # Set GTK backend to Wayland, fallback to X11
     env = GTK_THEME,Gruvbox-Dark-B-LB      # Set GTK theme
 
     # Qt settings

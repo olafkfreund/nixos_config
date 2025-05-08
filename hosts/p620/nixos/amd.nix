@@ -22,7 +22,7 @@
     opencl.enable = true;
     amdvlk = {
       enable = true;
-      supportExperimental.enable = true;
+      supportExperimental.enable = false;
     };
     # Load firmware early in the boot process for better stability
     # loadInInitrd = true;

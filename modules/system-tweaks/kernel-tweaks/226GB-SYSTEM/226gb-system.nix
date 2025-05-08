@@ -75,12 +75,12 @@
   # Aggressive transparent hugepage settings for large memory systems
   boot.kernelParams = [
     "transparent_hugepage=always"
-    "default_hugepagesz=2M"
-    "hugepagesz=1G"
-    "hugepages=128" # Allocate 128GB of 1GB hugepages (56% of RAM)
-    "hugepagesz=2M"
-    "hugepages=8192" # Additional 16GB of 2MB hugepages
-    "numa_balancing=enable" # Enable NUMA balancing
+    # "default_hugepagesz=2M"
+    # "hugepagesz=1G"
+    # "hugepages=128" # Allocate 128GB of 1GB hugepages (56% of RAM)
+    # "hugepagesz=2M"
+    # "hugepages=8192" # Additional 16GB of 2MB hugepages
+    # "numa_balancing=enable" # Enable NUMA balancing
     "processor.max_cstate=1" # Reduce latency from CPU sleep states
   ];
 
