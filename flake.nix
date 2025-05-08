@@ -150,6 +150,7 @@
     bzmenu,
     iwmenu,
     zjstatus,
+    walker,
     ...
   } @ inputs: let
     username = "olafkfreund";
@@ -205,7 +206,7 @@
               config.allowUnfree = true;
               config.allowInsecure = true;
             };
-            inherit inputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control nixcord stylix nix-index-database nixpkgs-f2k bzmenu iwmenu home-manager nixpkgs-stable nixpkgs-unstable nix-colors nix-snapd host;
+            inherit inputs nixpkgs zen-browser zjstatus spicetify-nix ags agenix razer-laptop-control walker nixcord stylix nix-index-database nixpkgs-f2k bzmenu iwmenu home-manager nixpkgs-stable nixpkgs-unstable nix-colors nix-snapd host;
           };
           home-manager.users.${username} = import ./Users/${username}/${host}_home.nix;
           home-manager.sharedModules = [
