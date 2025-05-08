@@ -27,5 +27,6 @@
     rainfrog
     netscanner
     atac
+    ddgr
   ];
 }

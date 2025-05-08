@@ -37,7 +37,7 @@
   home.stateVersion = "24.11";
 
   home.packages = [
-    pkgs.customPkgs.rofi-blocks
+    # pkgs.customPkgs.rofi-blocks
     # pkgs.msty
     # pkgs.aider-chat-env
   ];

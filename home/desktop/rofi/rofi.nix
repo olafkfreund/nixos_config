@@ -202,7 +202,7 @@ in {
       ];
     };
 
-    # Install additional Rofi plugins but organize them better
+    # Import our custom script
     home.packages = with pkgs-unstable; [
       # Core plugins
       rofi-calc
@@ -227,6 +227,12 @@ in {
 
       # System monitoring
       rofi-top
+      
+      # Web search
+      (import ./rofi-ddgr.nix { inherit pkgs; })
+      
+      # Make sure ddgr is installed
+      pkgs.ddgr
     ];
 
     # Create launcher scripts for common rofi use cases
@@ -243,6 +249,14 @@ in {
         text = ''
           #!/bin/sh
           ${pkgs-unstable.rofi-bluetooth}/bin/rofi-bluetooth
+        '';
+        executable = true;
+      };
+      
+      ".local/bin/rofi-search" = {
+        text = ''
+          #!/bin/sh
+          ${(import ./rofi-ddgr.nix { inherit pkgs; })}/bin/rofi-ddgr
         '';
         executable = true;
       };
