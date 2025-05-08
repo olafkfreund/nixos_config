@@ -39,6 +39,8 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
+    flake-utils.url = "github:numtide/flake-utils";
+
     nix-colors = {
       url = "github:misterio77/nix-colors";
     };
@@ -46,6 +48,12 @@
     home-manager = {
       url = "github:nix-community/home-manager/release-24.11";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    claude-desktop = {
+      url = "github:k3d3/claude-desktop-linux-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
     };
 
     sops-nix = {

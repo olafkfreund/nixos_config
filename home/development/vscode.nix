@@ -132,7 +132,7 @@ in {
 
       "workbench.colorTheme" = "Gruvbox Material Dark";
       "workbench.iconTheme" = "file-icons-colourless";
-      "workbench.browser.preferredBrowser" = "chrome";
+      "workbench.browser.preferredBrowser" = "google-chrome-stable";
       "genieai.enableConversationHistory" = true;
       "alejandra.program" = "alejandra";
       "geminicodeassist.codeGenerationPaneViewEnabled" = true;

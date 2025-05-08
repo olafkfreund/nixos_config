@@ -74,11 +74,11 @@
       bezier = overshot, 0.05, 0.9, 0.1, 1.1
       bezier = hyprnostretch, 0.05, 0.9, 0.1, 1.0
 
-      # Animation assignments (optimized for performance)
-      animation = windows, 1, 3, md3_decel, slide
-      animation = border, 1, 10, default
-      animation = fade, 1, 2, default
-      animation = workspaces, 1, 4, md3_decel
+      # Animation assignments (slowed down)
+      animation = windows, 1, 5, md3_decel, slide    # Increased from 3 to 5
+      animation = border, 1, 14, default             # Increased from 10 to 14
+      animation = fade, 1, 4, default                # Increased from 2 to 4
+      animation = workspaces, 1, 6, md3_decel        # Increased from 4 to 6
     }
 
     # Dwindle layout settings
