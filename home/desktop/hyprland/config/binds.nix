@@ -35,6 +35,7 @@
     bind = $mainMod, RETURN, exec, [float; size 50% 50%; center]foot
     bind = $mainMod, space, exec, pkill rofi || rofi -show drun
     bind = $mainMod, backspace, exec, rofi-hyprkeys
+    bind = $mainMod SHIFT, S, exec, search_web
     bind = $mainMod CTRL, Y, exec, [float]foot yai
     bind = $mainMod CTRL, M, exec, monitors
 

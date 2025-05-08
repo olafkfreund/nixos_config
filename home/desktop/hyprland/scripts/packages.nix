@@ -18,5 +18,6 @@
     (import ./cpustats.nix {inherit pkgs;})
     (import ./sysstats.nix {inherit pkgs;})
     (import ./connections.nix {inherit pkgs;})
+    (import ./search_web.nix {inherit pkgs;})
   ];
 }
