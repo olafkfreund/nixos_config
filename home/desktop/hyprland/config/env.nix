@@ -12,6 +12,10 @@
     env = XDG_SESSION_TYPE,wayland         # Set session type to Wayland
     env = XDG_SESSION_DESKTOP,Hyprland     # Set session desktop to Hyprland
 
+    # Disable XDG toplevel icon protocol warning
+    env = WAYLAND_DEBUG,suppress           # Suppress non-critical Wayland warnings
+    env = NO_XDG_ICON_WARNING,1            # Custom variable to suppress icon warnings
+
     # Ensure proper Wayland integration
     env = CLUTTER_BACKEND,wayland          # Use Wayland backend for Clutter
     env = EGL_PLATFORM,wayland             # Set EGL platform to Wayland

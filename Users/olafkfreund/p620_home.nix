@@ -10,6 +10,7 @@
     inputs.ags.homeManagerModules.default
     inputs.spicetify-nix.homeManagerModules.default
     inputs.nixcord.homeModules.nixcord
+    inputs.walker.homeManagerModules.default
 
     ../../home/default.nix
     ../../home/games/steam.nix
@@ -108,4 +109,17 @@
     # "--enable-features=Vulkan,VulkanFromANGLE,DefaultANGLEVulkan,VaapiIgnoreDriverChecks,VaapiVideoDecoder,UseMultiPlaneFormatForHardwareVideo,VaapiVideoEncoder"
     # "--enable-features=enableVulkan"
   ];
+
+  desktop.walker = {
+    enable = true;
+
+    # Optional custom configuration
+    config = {
+      search.placeholder = "Search...";
+      ui.fullscreen = true;
+      list.height = 300;
+      websearch.prefix = "?";
+      switcher.prefix = "/";
+    };
+  };
 }

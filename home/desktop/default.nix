@@ -25,6 +25,7 @@
     ./swaync/default.nix
     ./evince/default.nix
     ./lanmouse/default.nix
+    ./walker/default.nix
     # ./gh/default.nix
   ];
 

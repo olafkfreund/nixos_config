@@ -10,6 +10,8 @@
       "https://devenv.cachix.org"
       "https://cosmic.cachix.org/"
       "https://cache.saumon.network/proxmox-nixos"
+      "https://walker-git.cachix.org"
+      "https://walker.cachix.org"
     ];
     trusted-public-keys = [
       "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
@@ -17,6 +19,8 @@
       "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
+      "walker-git.cachix.org-1:vmC0ocfPWh0S/vRAQGtChuiZBTAe4wiKDeyyXM0/7pM="
+      "walker.cachix.org-1:fG8q+uAaMqhsMxWjwvk0IMb4mFPFLqHjuvfwQxE4oJM="
     ];
     extra-substituters = [
       # Nix community's cache server
@@ -63,6 +67,10 @@
 
     iwmenu = {
       url = "github:e-tho/iwmenu";
+    };
+
+    walker = {
+      url = "github:abenz1267/walker";
     };
 
     # nixos-cosmic = {

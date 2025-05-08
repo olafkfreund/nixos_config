@@ -44,13 +44,13 @@ in {
         input_delay = 1;
         repaint_delay = 7;
         window_margin_width = 8;
-        window_margin_height = 6;
         term = "xterm-kitty";
         placement_strategy = "center";
         hide_window_decorations = true;
+        # background_opacity = 1.0;
         dynamic_background_opacity = true;
         copy_on_select = true;
-        show_hyperlinks = true;
+        url_style = "curly";
         sync_to_monitor = true;
         mouse_hide_wait = 20;
         cursor_shape = "beam";
@@ -75,7 +75,6 @@ in {
         symbol_map U+2600-U+26FF Noto Color Emoji
 
         # URL handling
-        url_style curly
         detect_urls yes
         open_url_with default
       '';

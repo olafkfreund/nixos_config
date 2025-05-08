@@ -8,10 +8,12 @@
     inputs.ags.homeManagerModules.default
     inputs.spicetify-nix.homeManagerModules.default
     inputs.nixcord.homeModules.nixcord
+    inputs.walker.homeManagerModules.default
 
     ../../home/default.nix
     ../../home/desktop/sway/default.nix
     ../../home/desktop/sway/swayosd.nix
+    ../../home/games/steam.nix
     ../../hosts/razer/nixos/env.nix
     ./private.nix
   ];
@@ -83,4 +85,17 @@
   # Multiplexers
   multiplexer.tmux.enable = lib.mkForce true;
   multiplexer.zellij.enable = lib.mkForce true;
+
+  desktop.walker = {
+    enable = true;
+
+    # Optional custom configuration
+    config = {
+      search.placeholder = "Search...";
+      ui.fullscreen = true;
+      list.height = 300;
+      websearch.prefix = "?";
+      switcher.prefix = "/";
+    };
+  };
 }

@@ -1,8 +1,12 @@
 {pkgs, ...}: {
   wayland.windowManager.hyprland.extraConfig = ''
     # Core system services and environment
-    exec-once = systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
-    exec-once = dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+    exec-once = systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE WAYLAND_DEBUG NO_XDG_ICON_WARNING NIXOS_OZONE_WL
+    exec-once = dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE WAYLAND_DEBUG NO_XDG_ICON_WARNING NIXOS_OZONE_WL
+
+    # Restart XDG Portal early to ensure proper protocol handling
+    exec-once = systemctl --user stop xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
+    exec-once = sleep 1 && systemctl --user start xdg-desktop-portal xdg-desktop-portal-hyprland
 
     # Start essential background services
     exec-once = gnome-keyring-daemon --start --components=secrets

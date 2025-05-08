@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  pkgs-unstable,
+  ...
+}: {
   home.packages = [
     pkgs.eww
     pkgs.swww
@@ -26,6 +30,7 @@
     pkgs.wl-clipboard
     pkgs.wl-screenrec
     pkgs.hyprcursor
+    pkgs-unstable.sherlock-launcher
     # pkgs.hyprgui
   ];
 }
