@@ -8,6 +8,9 @@
 with lib; let
   cfg = config.desktop.rofi;
 
+  # Import our custom web search script
+  websearch = import ./scripts/websearch.nix {inherit lib pkgs;};
+
   # Extract theme to separate variable for better maintainability
   gruvboxTheme = builtins.toFile "rofi-theme.rasi" ''
     /* Global Properties */
@@ -140,7 +143,7 @@ in {
       package = pkgs-unstable.rofi-wayland;
 
       extraConfig = {
-        modi = "drun,run,filebrowser";
+        modi = "drun,run,filebrowser,websearch";
         lines = 10;
         font = "JetBrains Mono Nerd Font Bold 14";
         show-icons = true;
@@ -158,6 +161,7 @@ in {
         display-drun = " 󰀘 Apps";
         display-run = " 󱄅 Command";
         display-filebrowser = " Files";
+        display-websearch = " 󰖟 Search";
 
         # Performance options
         sort = true;
@@ -189,6 +193,7 @@ in {
     home.packages = with pkgs-unstable; [
       # Core plugins
       rofi-calc
+      websearch.rofi-websearch
 
       # System utilities
       rofi-power-menu
@@ -226,6 +231,14 @@ in {
         text = ''
           #!/bin/sh
           ${pkgs-unstable.rofi-bluetooth}/bin/rofi-bluetooth
+        '';
+        executable = true;
+      };
+
+      ".local/bin/rofi-websearch" = {
+        text = ''
+          #!/bin/sh
+          rofi -show websearch -modi websearch:${websearch.rofi-websearch}/bin/rofi-websearch
         '';
         executable = true;
       };
