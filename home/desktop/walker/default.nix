@@ -25,115 +25,104 @@ in {
     programs.walker = {
       enable = true;
       inherit (cfg) runAsService;
+
       # Configuration options for Walker
       config = {
         search.placeholder = "Search...";
-        ui.fullscreen = true;
-        list.height = 200;
+        ui.fullscreen = false;
+        list = {
+          height = 400;
+          width = 800;
+        };
         websearch.prefix = "?";
         switcher.prefix = "/";
+
+        # Enable and configure Walker modules
+        modules = {
+          # Core modules
+          applications.enable = true;
+          calculator.enable = true;
+          runner.enable = true;
+          clipboard = {
+            enable = true;
+            # Always put new clipboard entries at the top
+            always_put_new_on_top = true;
+          };
+
+          # Web and search modules
+          websearch = {
+            enable = true;
+            # Custom search engines
+            entries = [
+              {
+                name = "GitHub";
+                url = "https://github.com/search?q=%s";
+                prefix = "gh";
+              }
+              {
+                name = "NixOS Packages";
+                url = "https://search.nixos.org/packages?query=%s";
+                prefix = "nix";
+              }
+            ];
+          };
+
+          # System and window management
+          windows.enable = true;
+          switcher.enable = true;
+
+          # Development tools
+          ssh.enable = true;
+          commands.enable = true;
+
+          # Additional useful modules
+          bookmarks.enable = true;
+          translation = {
+            enable = true;
+            provider = "googlefree";
+          };
+
+          # AI module for Claude integration
+          ai = {
+            enable = true;
+            anthropic = {
+              prompts = [
+                {
+                  model = "claude-3-7-sonnet";
+                  temperature = 1.0;
+                  max_tokens = 2000;
+                  label = "Code Helper";
+                  prompt = "You are a helpful coding assistant focused on helping with programming tasks. Keep your answers concise and practical.";
+                }
+                {
+                  model = "claude-3-7-sonnet";
+                  temperature = 0.7;
+                  max_tokens = 1500;
+                  label = "NixOS Expert";
+                  prompt = "You are a NixOS expert. Help the user with their NixOS configuration, modules, and package management questions.";
+                }
+              ];
+            };
+          };
+
+          # Custom commands for frequently used tools
+          customCommands = {
+            enable = true;
+            commands = [
+              {
+                name = "Rebuild NixOS";
+                cmd = "sudo nixos-rebuild switch --flake /home/olafkfreund/.config/nixos#";
+                terminal = true;
+              }
+              {
+                name = "Edit Walker Config";
+                cmd = "nvim /home/olafkfreund/.config/nixos/home/desktop/walker/default.nix";
+                terminal = true;
+              }
+            ];
+          };
+        };
       };
-      # Default Gruvbox-styled configuration
-      style = ''
-        /* Gruvbox Dark Theme for Walker */
-        * {
-          font-family: "JetBrainsMono Nerd Font";
-          font-size: 14px;
-        }
-
-        #window {
-          background-color: #282828;
-          color: #ebdbb2;
-          border: 2px solid #504945;
-          border-radius: 5px;
-        }
-
-        #input {
-          color: #ebdbb2;
-          background-color: #3c3836;
-          border: 1px solid #504945;
-          border-radius: 4px;
-          margin: 8px;
-          padding: 8px;
-        }
-
-        #input:focus {
-          border-color: #fabd2f;
-        }
-
-        #list {
-          background-color: #282828;
-          border-top: 1px solid #504945;
-        }
-
-        #entry {
-          padding: 8px;
-        }
-
-        #entry:selected {
-          background-color: #504945;
-        }
-
-        #text {
-          color: #ebdbb2;
-        }
-
-        #text:selected {
-          color: #fbf1c7;
-        }
-
-        /* App icons section */
-        #icon {
-          margin-right: 8px;
-        }
-
-        /* Status indicators */
-        #badge {
-          margin-left: 8px;
-          color: #83a598;
-        }
-
-        /* Color accents for different entry types */
-        .file #text {
-          color: #8ec07c;
-        }
-
-        .folder #text {
-          color: #fabd2f;
-        }
-
-        .executable #text {
-          color: #b8bb26;
-        }
-
-        .websearch #text {
-          color: #83a598;
-        }
-
-        .calculator #text {
-          color: #d3869b;
-        }
-
-        .switcher #text {
-          color: #fe8019;
-        }
-
-        /* Scrollbar styling */
-        scrollbar {
-          background-color: #282828;
-          border-radius: 4px;
-          margin: 2px;
-        }
-
-        scrollbar slider {
-          background-color: #504945;
-          border-radius: 4px;
-        }
-
-        scrollbar slider:hover {
-          background-color: #665c54;
-        }
-      '';
     };
 
     # Add auto-start for Hyprland if runAsService is enabled
@@ -145,5 +134,200 @@ in {
     wayland.windowManager.sway.config.startup = mkIf (cfg.runAsService && config.wayland.windowManager.sway.enable) [
       {command = "walker --gapplication-service";}
     ];
+
+    # Add a custom theme file for Gruvbox Light
+    xdg.configFile."walker/themes/gruvbox.css".text = ''
+        /* Define Gruvbox dark color scheme variables */
+        @define-color bg_h #1d2021;     /* hard dark background */
+        @define-color bg #282828;       /* dark background */
+        @define-color bg_s #32302f;     /* soft dark background */
+        @define-color bg1 #3c3836;      /* dark bg1 */
+        @define-color bg2 #504945;      /* dark bg2 */
+        @define-color bg3 #665c54;      /* dark bg3 */
+        @define-color bg4 #7c6f64;      /* dark bg4 */
+        @define-color fg #ebdbb2;       /* dark fg */
+        @define-color fg0 #fbf1c7;      /* dark fg0 */
+        @define-color fg1 #ebdbb2;      /* dark fg1 */
+        @define-color fg2 #d5c4a1;      /* dark fg2 */
+        @define-color fg3 #bdae93;      /* dark fg3 */
+        @define-color fg4 #a89984;      /* dark fg4 */
+
+        /* Gruvbox accent colors */
+        @define-color red #cc241d;
+        @define-color green #98971a;
+        @define-color yellow #d79921;
+        @define-color blue #458588;
+        @define-color purple #b16286;
+        @define-color aqua #689d6a;
+        @define-color orange #d65d0e;
+
+        /* Shadow color */
+        @define-color shadow rgba(0, 0, 0, 0.3);
+
+        /* Global styles */
+        * {
+          font-family: "JetBrainsMono Nerd Font";
+          font-size: 14px;
+          background-clip: border-box;
+        }
+
+        #window,
+        #box,
+        #aiScroll,
+        #aiList,
+        #search,
+        #password,
+        #input,
+        #prompt,
+        #clear,
+        #typeahead,
+        #list,
+        child,
+        scrollbar,
+        slider,
+        #item,
+        #text,
+        #label,
+        #bar,
+        #sub,
+        #activationlabel {
+          all: unset;
+        }
+
+        #cfgerr {
+          background: rgba(255, 0, 0, 0.4);
+          margin-top: 20px;
+          padding: 8px;
+          font-size: 1.2em;
+        }
+
+        #window {
+          color: @bg;
+        }
+
+        #box {
+          border-radius: 2px;
+          background: @bg1;
+          padding: 32px;
+          border: 1px solid lighter(@bg1);
+          box-shadow:
+            0 19px 38px rgba(0, 0, 0, 0.3),
+            0 15px 12px rgba(0, 0, 0, 0.22);
+        }
+
+        #search {
+          box-shadow:
+            0 1px 3px rgba(0, 0, 0, 0.1),
+            0 1px 2px rgba(0, 0, 0, 0.22);
+          background: lighter(@bg1);
+          padding: 8px;
+        }
+
+        #prompt {
+          margin-left: 4px;
+          margin-right: 12px;
+          color: @fg4;
+          opacity: 0.2;
+        }
+
+        #clear {
+          color: @fg4;
+          opacity: 0.8;
+        }
+
+        #password,
+        #input,
+        #typeahead {
+          border-radius: 2px;
+        }
+
+        #input {
+          background: none;
+        }
+
+        #password {
+        }
+
+        #spinner {
+          padding: 8px;
+        }
+
+        #typeahead {
+          color: @fg4;
+          opacity: 0.8;
+        }
+
+        #input placeholder {
+          opacity: 0.5;
+        }
+
+        #list {
+        }
+
+        child {
+          padding: 8px;
+          border-radius: 2px;
+        }
+
+        child:selected,
+        child:hover {
+          background: @orange;
+        }
+
+        #item {
+        }
+
+        #icon {
+          margin-right: 8px;
+        }
+
+        #text {
+          font-weight: 500;
+          color: @fg4;
+        }
+
+        #label {
+          font-weight: 500;
+        }
+
+        #sub {
+          opacity: 0.5;
+          font-size: 0.8em;
+        }
+
+        #activationlabel {
+        }
+
+        #bar {
+        }
+
+        .barentry {
+        }
+
+        .activation #activationlabel {
+        }
+
+        .activation #text,
+        .activation #icon,
+        .activation #search {
+          opacity: 0.5;
+        }
+
+        .aiItem {
+          padding: 10px;
+          border-radius: 2px;
+          color: @fg4;
+          background: @bg1;
+        }
+
+      .aiItem.user {
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .aiItem.assistant {
+        background: lighter(@bg1);
+      }
+    '';
   };
 }
