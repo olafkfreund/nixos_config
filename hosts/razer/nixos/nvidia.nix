@@ -67,7 +67,14 @@
   # Enable hardware acceleration for Firefox and Chromium
   programs = {
     firefox.enableHardwareAcceleration = true;
-    chromium.enableVaapi = true;
+    chromium = {
+      enable = true;
+      extraOpts = {
+        "EnableVaapi" = true;
+        "VaapiVideoDecoder" = true;
+        "VaapiVideoEncoder" = true;
+      };
+    };
   };
 
   # Docker NVIDIA support (uncomment if you use Docker with CUDA)
