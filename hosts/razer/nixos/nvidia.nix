@@ -66,7 +66,14 @@
 
   # Enable hardware acceleration for Firefox and Chromium
   programs = {
-    firefox.enableHardwareAcceleration = true;
+    firefox = {
+      enable = true;
+      preferences = {
+        "media.hardware-video-decoding.enabled" = true;
+        "media.ffmpeg.vaapi.enabled" = true;
+        "gfx.webrender.all" = true;
+      };
+    };
     chromium = {
       enable = true;
       extraOpts = {
