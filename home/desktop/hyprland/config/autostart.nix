@@ -58,6 +58,6 @@
     exec-once = spotify
     exec-once = thunderbird
     exec=once = google-chrome-stable
-    exec=once = 1password-store
+    exec=once = 1password
   '';
 }

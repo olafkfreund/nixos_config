@@ -116,63 +116,31 @@
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
   systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
 
-  networking.networkmanager.enable = true;
-  networking.hostName = "hp";
+  # Set a timeout for network-online.target to prevent long delays
+  systemd.network.wait-online.timeout = 10;
+
+  # Network configuration - using systemd-networkd instead of NetworkManager
   networking = {
+    networkmanager.enable = false;
+    hostName = "hp";
+    nameservers = [
+      "8.8.8.8"
+      "8.8.4.4"
+    ];
     useDHCP = false;
     useNetworkd = true;
+    # Enable resolved for DNS resolution
+    useHostResolvConf = false;
   };
 
-  systemd.network = {
-    netdevs."br0" = {
-      netdevConfig = {
-        Name = "br0";
-        Kind = "bridge";
-      };
-    };
-    networks = {
-      "eno1" = {
-        name = "eno1";
-        DHCP = "ipv4";
-        networkConfig = {
-          MulticastDNS = true;
-          Address = ["192.168.1.246/24"];
-          Gateway = "192.168.1.254";
-          DNS = ["8.8.8.8" "8.8.4.4"];
-          IPv6AcceptRA = false;
-        };
-      };
-      "enp8s0f0" = {
-        name = "enp8s0f0";
-        DHCP = "ipv4";
-        networkConfig = {
-          MulticastDNS = true;
-        };
-      };
-      "enp8s0f1" = {
-        name = "enp8s0f1";
-        DHCP = "ipv4";
-        networkConfig = {
-          MulticastDNS = true;
-        };
-      };
-      "10-lan" = {
-        matchConfig.Name = ["enp8s*" "vm-*"];
-        networkConfig = {
-          Bridge = "br0";
-        };
-      };
-      "10-lan-bridge" = {
-        matchConfig.Name = "br0";
-        networkConfig = {
-          Address = ["192.168.1.83/24"];
-          Gateway = "192.168.1.254";
-          DNS = ["8.8.8.8" "8.8.4.4"];
-          IPv6AcceptRA = false;
-        };
-        linkConfig.RequiredForOnline = "routable";
-      };
-    };
+  # Enable systemd-resolved for DNS resolution with systemd-networkd
+  services.resolved = {
+    enable = true;
+    dnssec = "true";
+    fallbackDns = [
+      "8.8.8.8"
+      "8.8.4.4"
+    ];
   };
 
   users.defaultUserShell = pkgs.zsh;

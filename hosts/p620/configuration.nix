@@ -23,6 +23,17 @@
     ../../modules/system-tweaks/kernel-tweaks/226GB-SYSTEM/226gb-system.nix
     # ../../modules/services/tabby/default.nix
   ];
+
+  # Enable secure DNS with DNS over TLS
+  services.secure-dns = {
+    enable = false;
+    dnssec = "true";
+    fallbackProviders = [
+      "1.1.1.1#cloudflare-dns.com" # Cloudflare DNS
+      "8.8.8.8#dns.google" # Google DNS
+    ];
+  };
+
   media.droidcam.enable = lib.mkForce true;
   aws.packages.enable = lib.mkForce true;
   azure.packages.enable = lib.mkForce true;
@@ -134,32 +145,56 @@
   # Set a timeout for network-online.target to prevent long delays
   systemd.network.wait-online.timeout = 10;
 
-  networking.networkmanager.enable = true;
-  networking.hostName = "p620";
-  networking.nameservers = [
-    "1.1.1.1"
-    "8.8.8.8"
-  ];
+  # Network configuration - using systemd-networkd instead of NetworkManager
   networking = {
+    networkmanager.enable = false;
+    hostName = "p620";
+    nameservers = [
+      "1.1.1.1"
+      "8.8.8.8"
+    ];
     useDHCP = false;
     useNetworkd = true;
+    # Enable resolved for DNS resolution
+    useHostResolvConf = false;
   };
 
-  # Network configuration
+  # Enable systemd-resolved for DNS resolution with systemd-networkd
+  services.resolved = {
+    enable = true;
+    dnssec = "true";
+    fallbackDns = [
+      "1.1.1.1"
+      "8.8.8.8"
+    ];
+  };
+
+  # Configure systemd-networkd for your network interfaces
   systemd.network = {
+    enable = true;
     networks = {
       "20-wired" = {
         matchConfig.Name = "en*";
         networkConfig = {
-          DHCP = "yes";
           MulticastDNS = true;
+          DHCP = "ipv4";
+          IPv6AcceptRA = true;
+        };
+        # Higher priority for wired connection
+        dhcpV4Config = {
+          RouteMetric = 10;
         };
       };
       "25-wireless" = {
         matchConfig.Name = "wl*";
         networkConfig = {
-          DHCP = "yes";
           MulticastDNS = true;
+          DHCP = "ipv4";
+          IPv6AcceptRA = true;
+        };
+        # Lower priority for wireless
+        dhcpV4Config = {
+          RouteMetric = 20;
         };
       };
     };
@@ -190,7 +225,7 @@
   users.users.${username} = {
     isNormalUser = true;
     description = "Olaf K-Freund";
-    extraGroups = ["networkmanager" "openrazer" "libvirtd" "wheel" "docker" "podman" "video" "scanner" "lp" "dialout" "lxd" "incus-admin"];
+    extraGroups = ["openrazer" "libvirtd" "wheel" "docker" "podman" "video" "scanner" "lp" "dialout" "lxd" "incus-admin"];
     shell = pkgs.zsh;
     packages = with pkgs; [
       vim

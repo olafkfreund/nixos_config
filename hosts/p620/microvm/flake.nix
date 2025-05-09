@@ -33,7 +33,6 @@
     nixosConfigurations = {
       k3s-master = nixpkgs.lib.nixosSystem {
         inherit system;
-        };
         modules = [
           microvm.nixosModules.microvm
           {
@@ -106,8 +105,7 @@
       };
 
       k3s-agent = nixpkgs.lib.nixosSystem {
-        inherit inputs system;
-        };
+        inherit system;
         modules = [
           microvm.nixosModules.microvm
           {

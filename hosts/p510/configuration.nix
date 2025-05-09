@@ -130,10 +130,12 @@
     source = "${pkgs.sunshine}/bin/sunshine";
   };
 
+  # Disable NetworkManager services
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
   systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
 
-  networking.networkmanager.enable = true;
+  # Disable NetworkManager and enable systemd-networkd
+  networking.networkmanager.enable = false;
   networking.hostName = "p510";
   networking.nameservers = [
     "8.8.8.8"
@@ -142,15 +144,35 @@
   networking = {
     useDHCP = false;
     useNetworkd = true;
+    # Enable resolved for DNS resolution
+    useHostResolvConf = false;
   };
 
+  # Enable systemd-resolved for DNS resolution with systemd-networkd
+  services.resolved = {
+    enable = true;
+    dnssec = "true";
+    fallbackDns = [
+      "8.8.8.8"
+      "8.8.4.4"
+    ];
+  };
+
+  # Configure systemd-networkd for your network interfaces
   systemd.network = {
+    enable = true;
     networks = {
       "eno1" = {
         name = "eno1";
         DHCP = "ipv4";
         networkConfig = {
           MulticastDNS = true;
+          DHCP = "ipv4";
+          IPv6AcceptRA = true;
+        };
+        # Higher route metric to prioritize wired connection
+        dhcpV4Config = {
+          RouteMetric = 10;
         };
       };
       "wlp8s" = {
@@ -160,35 +182,37 @@
           MulticastDNS = true;
           IPv6AcceptRA = true;
         };
+        # Lower metric for wireless (higher priority number means lower priority)
+        dhcpV4Config = {
+          RouteMetric = 20;
+        };
       };
     };
   };
 
   users.defaultUserShell = pkgs.zsh;
-
   qt.enable = true;
   qt.platformTheme = "gtk2";
   qt.style = "gtk2";
-
   environment.shells = with pkgs; [zsh];
-
   programs.zsh.enable = true;
-
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     NH_FLAKE = "/home/olafkfreund/.config/nixos";
   };
 
+  # Remove networkmanager from user groups since we're not using it
   users.users.olafkfreund = {
     isNormalUser = true;
     description = "Olaf K-Freund";
-    extraGroups = ["networkmanager" "openrazer" "wheel" "docker" "video" "scanner" "lp" "lxd" "incus-admin"];
+    extraGroups = ["openrazer" "wheel" "docker" "video" "scanner" "lp" "lxd" "incus-admin"];
     shell = pkgs.zsh;
     packages = with pkgs; [
       vim
       wally-cli
     ];
   };
+
   hardware.keyboard.zsa.enable = true;
   services.ollama.acceleration = "cuda";
   nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16" "dotnet-sdk-6.0.428"];

@@ -25,7 +25,6 @@
   ];
 
   # Enable secure DNS with DNS over TLS
-  # Enable secure DNS with DNS over TLS
   services.secure-dns = {
     enable = true;
     dnssec = "true";
@@ -118,32 +117,56 @@
   # Set a timeout for network-online.target to prevent long delays
   systemd.network.wait-online.timeout = 10;
 
-  networking.networkmanager.enable = true;
-  networking.hostName = "razer";
-  networking.nameservers = [
-    "1.1.1.1"
-    "8.8.8.8"
-  ];
+  # Network configuration - using systemd-networkd instead of NetworkManager
   networking = {
+    networkmanager.enable = false;
+    hostName = "razer";
+    nameservers = [
+      "1.1.1.1"
+      "8.8.8.8"
+    ];
     useDHCP = false;
     useNetworkd = true;
+    # Enable resolved for DNS resolution
+    useHostResolvConf = false;
   };
 
-  # Network configuration
+  # Enable systemd-resolved for DNS resolution with systemd-networkd
+  services.resolved = {
+    enable = true;
+    dnssec = "true";
+    fallbackDns = [
+      "1.1.1.1"
+      "8.8.8.8"
+    ];
+  };
+
+  # Configure systemd-networkd for your network interfaces
   systemd.network = {
+    enable = true;
     networks = {
       "20-wired" = {
         matchConfig.Name = "en*";
         networkConfig = {
-          DHCP = "yes";
           MulticastDNS = true;
+          DHCP = "ipv4";
+          IPv6AcceptRA = true;
+        };
+        # Higher priority for wired connection
+        dhcpV4Config = {
+          RouteMetric = 10;
         };
       };
       "25-wireless" = {
         matchConfig.Name = "wl*";
         networkConfig = {
-          DHCP = "yes";
           MulticastDNS = true;
+          DHCP = "ipv4";
+          IPv6AcceptRA = true;
+        };
+        # Lower priority for wireless
+        dhcpV4Config = {
+          RouteMetric = 20;
         };
       };
     };

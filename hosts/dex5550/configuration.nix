@@ -78,12 +78,33 @@
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
   systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
 
-  networking.networkmanager.enable = true;
-  networking.hostName = "dex5550";
+  # Set a timeout for network-online.target to prevent long delays
+  systemd.network.wait-online.timeout = 10;
+
+  # Network configuration - using systemd-networkd instead of NetworkManager
   networking = {
+    networkmanager.enable = false;
+    hostName = "dex5550";
+    nameservers = [
+      "8.8.8.8"
+      "8.8.4.4"
+    ];
     useDHCP = false;
     useNetworkd = true;
+    # Enable resolved for DNS resolution
+    useHostResolvConf = false;
   };
+
+  # Enable systemd-resolved for DNS resolution with systemd-networkd
+  services.resolved = {
+    enable = true;
+    dnssec = "true";
+    fallbackDns = [
+      "8.8.8.8"
+      "8.8.4.4"
+    ];
+  };
+
   programs.sway = {
     enable = true;
     xwayland.enable = true;

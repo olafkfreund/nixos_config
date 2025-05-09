@@ -68,11 +68,48 @@
   # Printing
   services.print.enable = lib.mkForce true;
 
-  networking.networkmanager.enable = true;
-  networking.hostName = "lms";
+  systemd.network.wait-online.timeout = 10;
+
   networking = {
+    networkmanager.enable = false;
+    hostName = "lms";
+    nameservers = [
+      "8.8.8.8"
+      "8.8.4.4"
+    ];
     useDHCP = false;
     useNetworkd = true;
+    # Enable resolved for DNS resolution
+    useHostResolvConf = false;
+  };
+
+  # Enable systemd-resolved for DNS resolution with systemd-networkd
+  services.resolved = {
+    enable = true;
+    dnssec = "true";
+    fallbackDns = [
+      "8.8.8.8"
+      "8.8.4.4"
+    ];
+  };
+
+  # Configure systemd-networkd for your network interfaces
+  systemd.network = {
+    enable = true;
+    networks = {
+      "20-wired" = {
+        matchConfig.Name = "en*";
+        networkConfig = {
+          MulticastDNS = true;
+          DHCP = "ipv4";
+          IPv6AcceptRA = true;
+        };
+        # Higher priority for wired connection
+        dhcpV4Config = {
+          RouteMetric = 10;
+        };
+      };
+    };
   };
 
   services.xserver = {
@@ -116,18 +153,6 @@
 
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
   systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
-
-  systemd.network = {
-    networks = {
-      "eno1" = {
-        name = "eno1";
-        DHCP = "ipv4";
-        networkConfig = {
-          MulticastDNS = true;
-        };
-      };
-    };
-  };
 
   users.defaultUserShell = pkgs.zsh;
 
