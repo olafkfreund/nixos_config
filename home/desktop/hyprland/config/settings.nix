@@ -92,7 +92,7 @@
 
     # Master layout settings
     master {
-      always_center_master = true
+      # always_center_master = true
       smart_resizing = true
       new_status = master
       orientation = right
