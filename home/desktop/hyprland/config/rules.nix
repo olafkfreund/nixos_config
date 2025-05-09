@@ -18,28 +18,28 @@
     # SYSTEM UTILITY RULES
     # =============================================================================
     # Keep system utilities in current workspace
-    windowrule = workspace current,title:MainPicker
-    windowrule = workspace current,.blueman-manager-wrapped
-    windowrule = workspace current,xdg-desktop-portal-gtk
+    # windowrule = workspace current,title:MainPicker
+    # windowrule = workspace current,.blueman-manager-wrapped
+    # windowrule = workspace current,xdg-desktop-portal-gtk
 
-    # Bluetooth manager
-    windowrulev2 = float, class:(blueman-manager)
-    windowrulev2 = center, class:(blueman-manager)
+    # # Bluetooth manager
+    # windowrulev2 = float, class:(blueman-manager)
+    # windowrulev2 = center, class:(blueman-manager)
 
-    # Network utilities
-    windowrulev2 = float,class:^(nm-applet)$
-    windowrulev2 = float,class:^(nm-connection-editor)$
+    # # Network utilities
+    # windowrulev2 = float,class:^(nm-applet)$
+    # windowrulev2 = float,class:^(nm-connection-editor)$
 
-    # Sound control
-    windowrulev2 = float, class:(pavucontrol)
-    windowrulev2 = size 1000 1000, class:(pavucontrol)
-    windowrulev2 = center, class:(pavucontrol)
+    # # Sound control
+    # windowrulev2 = float, class:(pavucontrol)
+    # windowrulev2 = size 1000 1000, class:(pavucontrol)
+    # windowrulev2 = center, class:(pavucontrol)
 
-    # XDG portal
-    windowrulev2 = float, class:^(xdg-desktop-portal-gtk)$
-    windowrulev2 = size 900 500, class:^(xdg-desktop-portal-gtk)$
-    windowrulev2 = dimaround, class:^(xdg-desktop-portal-gtk)$
-    windowrulev2 = center, class:^(xdg-desktop-portal-gtk)$
+    # # XDG portal
+    # windowrulev2 = float, class:^(xdg-desktop-portal-gtk)$
+    # windowrulev2 = size 900 500, class:^(xdg-desktop-portal-gtk)$
+    # windowrulev2 = dimaround, class:^(xdg-desktop-portal-gtk)$
+    # windowrulev2 = center, class:^(xdg-desktop-portal-gtk)$
 
     # =============================================================================
     # APPLICATION LAUNCHERS
