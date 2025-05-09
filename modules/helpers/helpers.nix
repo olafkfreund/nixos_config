@@ -6,7 +6,7 @@
     eza #replace ls
     topgrade #update all
     # nerd-fonts.jetbrains-mono #fonts
-    wtf #terminal dashboard
+    wtfutil #terminal dashboard (previously named wtf)
     fastfetch # like neofetch only faster
     less #
     navi #cheatsheet

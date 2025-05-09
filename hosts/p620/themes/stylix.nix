@@ -10,9 +10,8 @@
     # Font configuration
     fonts = {
       monospace = {
-        # A change is comming for the next release of NixOS
-        # package = pkgs.nerd-fonts.jetbrains-mono;
-        package = pkgs.nerdfonts.override {fonts = ["JetBrainsMono"];};
+        # Updated to use the new nerd-fonts namespace format
+        package = pkgs.nerd-fonts.jetbrains-mono;
         name = "JetBrainsMono Nerd Font Mono";
       };
       sansSerif = {
@@ -44,6 +43,7 @@
     # Cursor settings
     cursor = {
       name = "Bibata-Modern-Ice";
+      package = pkgs.bibata-cursors; # You need to add this line
       size = 26;
     };
 
@@ -66,6 +66,6 @@
   # qt = {
   #   enable = true;
   #   style.name = "adwaita-dark";
-  #   platformTheme.name = "gtk3";
+  #   platformTheme.name = "adwaita";
   # };
 }

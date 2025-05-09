@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs-unstable,
   pkgs,
   ...
 }:
@@ -21,7 +20,7 @@ with lib; let
       transparent: #00000000;
       gruvbox-orange: #fe8019;
 
-      font: "JetBrains Mono Nerd Font 13";
+      font: "JetBrainsMono Nerd Font 13";
       background-color: @transparent;
       text-color: @gruvbox-fg;
     }
@@ -137,12 +136,12 @@ in {
   config = mkIf cfg.enable {
     programs.rofi = {
       enable = true;
-      package = pkgs-unstable.rofi-wayland;
+      package = pkgs.rofi-wayland;
 
       extraConfig = {
         modi = "drun,run,filebrowser,websearch:rwebsearch";
         lines = 10;
-        font = "JetBrains Mono Nerd Font Bold 14";
+        font = "JetBrainsMono Nerd Font 14";
         show-icons = true;
         terminal = "foot";
         drun-display-format = "{icon} {name}";
@@ -179,7 +178,7 @@ in {
 
       theme = gruvboxTheme;
 
-      plugins = with pkgs-unstable; [
+      plugins = with pkgs; [
         rofi-calc
         rofi-emoji
         rofi-file-browser
@@ -205,7 +204,7 @@ in {
       ".local/bin/rofi-power" = {
         text = ''
           #!/bin/sh
-          rofi -show power-menu -modi power-menu:${pkgs-unstable.rofi-power-menu}/bin/rofi-power-menu
+          rofi -show power-menu -modi power-menu:${pkgs.rofi-power-menu}/bin/rofi-power-menu
         '';
         executable = true;
       };
@@ -213,7 +212,7 @@ in {
       ".local/bin/rofi-bluetooth" = {
         text = ''
           #!/bin/sh
-          ${pkgs-unstable.rofi-bluetooth}/bin/rofi-bluetooth
+          ${pkgs.rofi-bluetooth}/bin/rofi-bluetooth
         '';
         executable = true;
       };

@@ -1,6 +1,6 @@
 {pkgs, ...}: {
   #---------------------------------------------------------------------
-  # Custom fonts - Chris Titus && wimpysworld
+  # Font configuration
   #---------------------------------------------------------------------
 
   fonts = {
@@ -18,22 +18,18 @@
       jetbrains-mono
       material-design-icons
       material-icons
-      nerd-font-patcher
-      nerdfonts
+      # Using specific nerd fonts instead of a global package
+      nerd-fonts.jetbrains-mono
+      nerd-fonts.fira-code
+      nerd-fonts.symbols-only # Fixed: use symbols-only instead of symbols
       noto-fonts
       noto-fonts-cjk-sans
       noto-fonts-emoji
       ubuntu_font_family
       dejavu_fonts
-      # jetbrains-mono
-      noto-fonts
       noto-fonts-lgc-plus
       texlivePackages.hebrew-fonts
-      noto-fonts-emoji
-      # font-awesome
-      powerline-fonts
       powerline-symbols
-      # (nerdfonts.override { fonts = [ "NerdFontsSymbolsOnly" ]; })
     ];
 
     #---------------------------------------------------------------------
@@ -55,41 +51,42 @@
             <alias binding="weak">
                 <family>monospace</family>
                 <prefer>
-                    <family>emoji</family>
+                    <family>JetBrainsMono Nerd Font</family>
+                    <family>JetBrainsMono Nerd Font Mono</family>
+                    <family>Noto Color Emoji</family>
+                    <family>Symbols Nerd Font</family>
                 </prefer>
             </alias>
             <alias binding="weak">
                 <family>sans-serif</family>
                 <prefer>
-                    <family>emoji</family>
+                    <family>Noto Sans</family>
+                    <family>Noto Color Emoji</family>
                 </prefer>
             </alias>
             <alias binding="weak">
                 <family>serif</family>
                 <prefer>
-                    <family>emoji</family>
+                    <family>Noto Serif</family>
+                    <family>Noto Color Emoji</family>
                 </prefer>
             </alias>
+
+            <!-- Force hint level for better appearance -->
+            <match target="font">
+                <edit name="hintstyle" mode="assign">
+                    <const>hintslight</const>
+                </edit>
+            </match>
+
+            <!-- Enable font antialiasing -->
+            <match target="pattern">
+                <edit name="antialias" mode="assign">
+                    <bool>true</bool>
+                </edit>
+            </match>
         </fontconfig>
       '';
-
-      # defaultFonts = {
-      #   emoji = ["Joypixels" "Noto Color Emoji"];
-      #   monospace = ["FiraCode Nerd Font Mono" "SauceCodePro Nerd Font Mono"];
-      #   sansSerif = ["Work Sans" "Fira Sans" "FiraGO"];
-      #   serif = ["Source Serif"];
-      # };
-
-      # hinting = {
-      #   autohint = false;
-      #   enable = true;
-      #   style = "slight";
-      # };
-
-      # subpixel = {
-      #   lcdfilter = "light";
-      #   rgba = "rgb";
-      # };
     };
   };
 }

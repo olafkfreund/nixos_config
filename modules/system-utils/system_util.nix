@@ -92,9 +92,8 @@
     gptfdisk
     icu
     spotdl
-    music-player
     termusic
-    tauon
+    # tauon
     qflipper
     chatterino2
     twitch-tui

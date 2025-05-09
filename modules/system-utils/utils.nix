@@ -18,7 +18,7 @@
     fzf-obc
     youtube-tui
     tmux-xpanes
-    mapscii
+    # mapscii
     tdf
     nb
     hugo

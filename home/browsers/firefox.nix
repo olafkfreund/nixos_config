@@ -20,5 +20,11 @@ in {
         package = pkgs.firefox;
       };
     };
+
+    # Add Firefox profile names for Stylix theming
+    stylix.targets.firefox = {
+      enable = true;
+      profileNames = ["default"]; # Add your actual profile name(s) here
+    };
   };
 }

@@ -180,7 +180,7 @@
 
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
-    FLAKE = "/home/olafkfreund/.config/nixos";
+    NH_FLAKE = "/home/olafkfreund/.config/nixos";
   };
 
   users.users.olafkfreund = {

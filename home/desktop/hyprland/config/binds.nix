@@ -4,7 +4,7 @@
     $mainMod = SUPER
 
     # Window/Workspace Navigation
-    bind = ALT, TAB, hyprexpo:expo, toggle
+    # bind = ALT, TAB, expo, toggle
     bind = $mainMod, h, movefocus, l
     bind = $mainMod, l, movefocus, r
     bind = $mainMod, k, movefocus, u

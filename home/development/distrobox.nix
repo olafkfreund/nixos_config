@@ -98,7 +98,7 @@ in {
     fi
   '';
 
-  programs.zsh.initExtra = ''
+  programs.zsh.initContent = ''
     if [[ -f "/run/.containerenv" ]]; then
       export PATH="${concatStringsSep ":" shPath}"
     fi

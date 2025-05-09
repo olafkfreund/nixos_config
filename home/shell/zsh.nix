@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   home.packages = with pkgs; [
     zsh
     oh-my-zsh
@@ -78,8 +82,19 @@
       }
     ];
 
-    initExtraBeforeCompInit = ''
+    initContent = lib.mkOrder 550 ''
       fpath+=(${pkgs.zsh-completions}/share/zsh/site-functions)
+
+      if test -n "$KITTY_INSTALLATION_DIR"; then
+          export KITTY_SHELL_INTEGRATION="enabled"
+          autoload -Uz -- "$KITTY_INSTALLATION_DIR"/shell-integration/zsh/kitty-integration
+          kitty-integration
+          unfunction kitty-integration
+      fi
+      source ~/.openai.sh
+      #Python virtualenv
+      # source ~/.env/bin/activate
+      eval "$(atuin init zsh)"
     '';
 
     completionInit = ''
@@ -193,19 +208,6 @@
       zstyle ':fzf-tab:*' fzf-pad 4
       zstyle ':fzf-tab:*' fzf-min-height 100
       zstyle ':fzf-tab:*' switch-group ',' '.'
-    '';
-
-    initExtra = ''
-      if test -n "$KITTY_INSTALLATION_DIR"; then
-          export KITTY_SHELL_INTEGRATION="enabled"
-          autoload -Uz -- "$KITTY_INSTALLATION_DIR"/shell-integration/zsh/kitty-integration
-          kitty-integration
-          unfunction kitty-integration
-      fi
-      source ~/.openai.sh
-      #Python virtualenv
-      # source ~/.env/bin/activate
-      eval "$(atuin init zsh)"
     '';
 
     envExtra = ''

@@ -15,6 +15,5 @@
     pywal
     wpgtk
     polychromatic
-    quaternion
   ];
 }

@@ -151,7 +151,7 @@
   programs.zsh.enable = true;
 
   environment.sessionVariables = {
-    FLAKE = "/home/olafkfreund/.config/nixos";
+    NH_FLAKE = "/home/olafkfreund/.config/nixos";
     GBM_BACKEND = "nvidia-drm";
     __GLX_VENDOR_LIBRARY_NAME = "nvidia";
     NVD_BACKEND = "direct";

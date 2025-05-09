@@ -159,7 +159,7 @@ in {
 
   # Audio support
   sound.enable = true;
-  hardware.pulseaudio.enable = true;
+  services.pulseaudio.enable = true;
 
   # Virtualization support
   virtualisation = {

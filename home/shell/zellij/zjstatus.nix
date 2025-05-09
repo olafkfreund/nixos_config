@@ -1,8 +1,8 @@
-{ inputs, nixpkgs, ...}:
 {
-  nixpkgs.overlays = with inputs; [
-    (final: prev: {
-      zjstatus = zjstatus.packages.${prev.system}.default;
-    })
-  ];
+  inputs,
+  nixpkgs,
+  ...
+}: {
+  # Note: This overlay should be applied at the system level instead of here
+  # since home-manager.useGlobalPkgs = true
 }

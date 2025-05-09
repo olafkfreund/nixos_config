@@ -1,11 +1,7 @@
-{
-  pkgs,
-  pkgs-unstable,
-  ...
-}: {
+{pkgs, ...}: {
   programs.waybar = {
     enable = true;
-    package = pkgs-unstable.waybar;
+    package = pkgs.waybar;
     settings = {
       mainBar = {
         "layer" = "top";
@@ -350,7 +346,7 @@
 
     style = ''
       * {
-        font-family: 'JetBrainsMono Nerd Font FontAwesome Roboto Helvetica Arial sans-serif';
+        font-family: "JetBrainsMono Nerd Font";
         font-size: 14px;
         font-weight: bolder;
         }
@@ -392,7 +388,7 @@
 
         tooltip label {
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 16px;
           padding-left: 5px;
           padding-right: 5px;
@@ -423,7 +419,7 @@
           margin-left: 4px;
           margin-bottom: 2px;
           margin-top: 2px;
-          font-family: JetBrainsMono Nerd Font, sans-sherif;
+          font-family: JetBrainsMono Nerd Font;
           font-weight: bold;
           font-size: 14px;
           padding-top: 4px;
@@ -453,7 +449,7 @@
 
         #custom-weather {
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 15px;
           font-weight: bold;
           border-radius: 5px;
@@ -462,7 +458,7 @@
 
         #clock {
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;
@@ -472,7 +468,7 @@
 
         #custom-swaync {
           color:  #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;
@@ -484,7 +480,7 @@
 
         #power-profiles-daemon {
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;
@@ -494,7 +490,7 @@
 
         #pulseaudio {
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;
@@ -504,7 +500,7 @@
 
         #pulseaudio.microphone {
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;
@@ -514,7 +510,7 @@
 
         #pulseaudio.muted {
           color: #e23c2c;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;
@@ -524,7 +520,7 @@
 
         #network {
           color:  #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;
@@ -537,7 +533,7 @@
 
         #idle_inhibitor {
           color: #fabd2f;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;
@@ -547,7 +543,7 @@
 
         #idle_inhibitor.activated {
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;
@@ -557,7 +553,7 @@
 
         #tray {
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;
@@ -567,7 +563,7 @@
 
         #tray {
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;
@@ -577,7 +573,7 @@
 
         #tray > .active {
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;
@@ -596,7 +592,7 @@
 
         #battery {
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;
@@ -606,7 +602,7 @@
 
         #cpu {
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;
@@ -616,7 +612,7 @@
 
         #memory {
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;
@@ -627,7 +623,7 @@
         #custom-powermenu {
           background-color: #282828;
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;
@@ -643,7 +639,7 @@
         #window {
           background-color: #303030;
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;
@@ -657,7 +653,7 @@
 
         #bluetooth {
           color: #ebdbb2;
-          font-family: JetBrainsMono Nerd Font, monospace;
+          font-family: JetBrainsMono Nerd Font;
           font-size: 14px;
           font-weight: bold;
           border: none;

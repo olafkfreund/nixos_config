@@ -10,40 +10,38 @@
     # Font configuration
     fonts = {
       monospace = {
-        # A change is comming for the next release of NixOS
-        # package = pkgs.nerd-fonts.jetbrains-mono;
-        package = pkgs.nerdfonts.override {fonts = ["JetBrainsMono"];};
-        name = "JetBrainsMono Nerd Font Mono";
+        # Use the specific nerd-fonts package to ensure proper icons
+        package = pkgs.nerd-fonts.jetbrains-mono;
+        name = "JetBrainsMono Nerd Font";
       };
       sansSerif = {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Sans";
+        package = pkgs.noto-fonts;
+        name = "Noto Sans";
       };
       serif = {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Serif";
+        package = pkgs.noto-fonts;
+        name = "Noto Serif";
       };
     };
 
-    # Font sizes (adjust as needed)
+    # Font sizes (adjusted for better readability)
     fonts.sizes = {
       applications = 12;
-      terminal = 13; # Slightly larger for better readability in terminal
+      terminal = 13;
       desktop = 12;
-      popups = 11; # Slightly smaller for popups
+      popups = 12;
     };
 
     # Opacity settings
     opacity = {
-      applications = 1.0;
-      terminal = 0.95; # Slight transparency for terminal
       desktop = 1.0;
-      popups = 0.98; # Slight transparency for popups
+      terminal = 0.95;
+      popups = 0.95;
     };
 
-    # Cursor settings
     cursor = {
       name = "Bibata-Modern-Ice";
+      package = pkgs.bibata-cursors; # You need to add this line
       size = 26;
     };
 

@@ -36,7 +36,7 @@
     #Did not have time to clean everything up
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.11";
     #
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
     flake-utils.url = "github:numtide/flake-utils";
@@ -46,13 +46,13 @@
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-24.11";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     claude-desktop = {
       url = "github:k3d3/claude-desktop-linux-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
       inputs.flake-utils.follows = "flake-utils";
     };
 
@@ -114,7 +114,7 @@
     };
 
     stylix = {
-      url = "github:danth/stylix/release-24.11";
+      url = "github:danth/stylix";
     };
 
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
@@ -170,6 +170,10 @@
           pkgs = final;
         };
       })
+      # Added zjstatus overlay at the system level
+      (final: prev: {
+        zjstatus = inputs.zjstatus.packages.${prev.system}.default;
+      })
     ];
 
     makeNixosSystem = host: {
@@ -218,8 +222,7 @@
           };
           home-manager.users.${username} = import ./Users/${username}/${host}_home.nix;
           home-manager.sharedModules = [
-            # Add the overlays to home-manager modules as well
-            {nixpkgs.overlays = overlays;}
+            # Remove the overlays from here since useGlobalPkgs is true
             {
               stylix.targets = {
                 waybar.enable = false;

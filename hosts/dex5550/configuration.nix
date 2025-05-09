@@ -168,7 +168,7 @@
 
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
-    FLAKE = "/home/${username}/.config/nixos";
+    NH_FLAKE = "/home/${username}/.config/nixos";
   };
 
   users.users.${username} = {

@@ -91,10 +91,10 @@ in {
         format_on_save = "on";
         vim_mode = true;
         load_direnv = "shell_hook";
-        theme = "Gruvbox Dark Soft";
-        buffer_font_family = "FiraCode Nerd Font";
-        ui_font_size = 16;
-        buffer_font_size = 16;
+        theme = lib.mkForce "Gruvbox Dark Soft";
+        # buffer_font_family = lib.mkForce "FiraCode Nerd Font";
+        # ui_font_size = lib.mkForce 16;
+        # buffer_font_size = 16;
       };
     };
   };

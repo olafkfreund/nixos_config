@@ -46,7 +46,7 @@ in {
           "$line_break"
           "$character"
         ];
-        palette = "gruvbox_dark";
+        palette = lib.mkForce "gruvbox_dark";
 
         palettes.gruvbox_dark = {
           color_fg0 = "#fbf1c7";

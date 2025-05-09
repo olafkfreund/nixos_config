@@ -183,7 +183,8 @@
   programs.zsh.enable = true;
 
   environment.sessionVariables = {
-    FLAKE = "/home/olafkfreund/.config/nixos";
+    NIXOS_OZONE_WL = "1";
+    NH_FLAKE = "/home/olafkfreund/.config/nixos";
   };
 
   users.users.${username} = {

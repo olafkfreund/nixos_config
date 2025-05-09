@@ -1,7 +1,7 @@
-{ pkgs, ...}: {
+{pkgs, ...}: {
   home.packages = with pkgs; [
     qpaeq
-    gxmatcheq-lv2
+    # gxmatcheq-lv2
     jamesdsp
     # fcast-client
     # fcast-receiver

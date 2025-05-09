@@ -8,9 +8,8 @@
     };
     fonts = {
       monospace = {
-        # A change is comming for the next release of NixOS
-        # package = pkgs.nerd-fonts.jetbrains-mono;
-        package = pkgs.nerdfonts.override {fonts = ["JetBrainsMono"];};
+        # Updated to use the new nerd-fonts namespace
+        package = pkgs.nerd-fonts.jetbrains-mono;
         name = "JetBrainsMono Nerd Font Mono";
       };
       sansSerif = {
