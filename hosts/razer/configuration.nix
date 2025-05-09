@@ -24,6 +24,17 @@
     # ../../modules/system-tweaks/storage-tweaks/SSD/SSD-tweak.nix
   ];
 
+  # Enable secure DNS with DNS over TLS
+  # Enable secure DNS with DNS over TLS
+  services.secure-dns = {
+    enable = true;
+    dnssec = "true";
+    fallbackProviders = [
+      "1.1.1.1#cloudflare-dns.com" # Cloudflare DNS
+      "8.8.8.8#dns.google" # Google DNS
+    ];
+  };
+
   aws.packages.enable = lib.mkForce true;
   azure.packages.enable = lib.mkForce true;
   cloud-tools.packages.enable = lib.mkForce true;

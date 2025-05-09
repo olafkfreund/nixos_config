@@ -22,6 +22,7 @@
     #./snapd/default.nix
     ./mandb/default.nix
     ./appimage/default.nix
+    ./dns/secure-dns.nix
     # ./dwm/default.nix
   ];
 }
