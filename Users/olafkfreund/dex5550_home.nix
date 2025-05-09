@@ -8,6 +8,7 @@
     inputs.nix-colors.homeManagerModules.default
     inputs.ags.homeManagerModules.default
     inputs.spicetify-nix.homeManagerModules.default
+    inputs.walker.homeManagerModules.default
 
     ../../home/desktop.nix
     ../../hosts/dex5550/nixos/hypr_override.nix
