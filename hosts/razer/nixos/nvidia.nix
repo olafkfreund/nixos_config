@@ -45,7 +45,7 @@
       # nvidia-vaapi-driver
       libva
       libva-utils
-      nvtop
+      # nvtop
       # glxinfo
       # clinfo
       # virtualglLib
