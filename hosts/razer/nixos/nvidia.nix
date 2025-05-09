@@ -84,6 +84,6 @@
     };
   };
 
-  # Docker NVIDIA support (uncomment if you use Docker with CUDA)
-  virtualisation.docker.enableNvidia = true;
+  # Docker NVIDIA support
+  hardware.nvidia-container-toolkit.enable = true;
 }
