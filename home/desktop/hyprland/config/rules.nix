@@ -12,40 +12,40 @@
     windowrulev2 = size 1000 1000, class:(wezterm)
     windowrulev2 = float, class:(foot)
     windowrulev2 = size 1000 1000, class:(foot)
-    windowrule = animation slide left, class:^(foot)$
+    windowrulev2 = animation slide left, class:^(foot)$
 
     # =============================================================================
     # SYSTEM UTILITY RULES
     # =============================================================================
     # Keep system utilities in current workspace
-    # windowrule = workspace current,title:MainPicker
-    # windowrule = workspace current,.blueman-manager-wrapped
-    # windowrule = workspace current,xdg-desktop-portal-gtk
+    windowrulev2 = workspace current, title:MainPicker
+    windowrulev2 = workspace current, class:.blueman-manager-wrapped
+    windowrulev2 = workspace current, class:xdg-desktop-portal-gtk
 
-    # # Bluetooth manager
-    # windowrulev2 = float, class:(blueman-manager)
-    # windowrulev2 = center, class:(blueman-manager)
+    # Bluetooth manager
+    windowrulev2 = float, class:(blueman-manager)
+    windowrulev2 = center, class:(blueman-manager)
 
-    # # Network utilities
-    # windowrulev2 = float,class:^(nm-applet)$
-    # windowrulev2 = float,class:^(nm-connection-editor)$
+    # Network utilities
+    windowrulev2 = float,class:^(nm-applet)$
+    windowrulev2 = float,class:^(nm-connection-editor)$
 
-    # # Sound control
-    # windowrulev2 = float, class:(pavucontrol)
-    # windowrulev2 = size 1000 1000, class:(pavucontrol)
-    # windowrulev2 = center, class:(pavucontrol)
+    # Sound control
+    windowrulev2 = float, class:(pavucontrol)
+    windowrulev2 = size 1000 1000, class:(pavucontrol)
+    windowrulev2 = center, class:(pavucontrol)
 
-    # # XDG portal
-    # windowrulev2 = float, class:^(xdg-desktop-portal-gtk)$
-    # windowrulev2 = size 900 500, class:^(xdg-desktop-portal-gtk)$
-    # windowrulev2 = dimaround, class:^(xdg-desktop-portal-gtk)$
-    # windowrulev2 = center, class:^(xdg-desktop-portal-gtk)$
+    # XDG portal
+    windowrulev2 = float, class:^(xdg-desktop-portal-gtk)$
+    windowrulev2 = size 900 500, class:^(xdg-desktop-portal-gtk)$
+    windowrulev2 = dimaround, class:^(xdg-desktop-portal-gtk)$
+    windowrulev2 = center, class:^(xdg-desktop-portal-gtk)$
 
     # =============================================================================
     # APPLICATION LAUNCHERS
     # =============================================================================
     # Rofi - application launcher
-    windowrule = animation bounce, ^(rofi)$
+    windowrulev2 = animation bounce, class:^(rofi)$
 
     # =============================================================================
     # PRODUCTIVITY APPLICATIONS
@@ -58,7 +58,7 @@
     # =============================================================================
     # Main window - assign to mail workspace
     windowrulev2 = workspace special:mail, class:^(thunderbird)$
-    windowrule = animation slide left, ^(thunderbird)$
+    windowrulev2 = animation slide left, class:^(thunderbird)$
 
     # Make all thunderbird windows float by default
     windowrulev2 = float, class:^(thunderbird)$
@@ -163,8 +163,8 @@
     windowrulev2 = center, class:(org.gnome.*)
 
     # GNOME Calendar - specific positioning
-    windowrule = animation slide up, ^(org.gnome.Calendar)$
-    windowrule = size 400 500,^(org.gnome.Calendar)$
+    windowrulev2 = animation slide up, class:^(org.gnome.Calendar)$
+    windowrulev2 = size 400 500, class:^(org.gnome.Calendar)$
     windowrulev2 = move 480 45, class:^(org.gnome.Calendar)$
 
     # Camera controls
