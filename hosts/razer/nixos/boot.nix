@@ -8,8 +8,8 @@
   boot.loader.efi.canTouchEfiVariables = true;
   # boot.kernelParams = [ "mitigations=off" "systemd.unified_cgroup_hierarchy=0" "SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1"];
   boot.kernelParams = ["module_blacklist=nouveau"];
-  # boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelPackages = pkgs.linuxPackages_6_12;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # boot.kernelPackages = pkgs.linuxPackages_6_12;
   boot.plymouth.enable = true;
   boot.kernel.sysctl."vm.nr_hugepages" = 1024;
   boot.kernel.sysctl = {
