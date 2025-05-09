@@ -170,8 +170,8 @@
 
   services.playerctld.enable = true;
   services.fwupd.enable = true;
+  # Use either CUDA or ROCm, but not a mix of both
   services.ollama.acceleration = "cuda";
-  services.ollama.package = lib.mkForce pkgs-unstable.ollama-rocm;
   services.nfs.server.enable = true;
   services.nfs.server.exports = ''
     /extdisk         192.168.1.*(rw,fsid=0,no_subtree_check)
