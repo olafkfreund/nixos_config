@@ -61,8 +61,8 @@
   #     gtk-application-prefer-dark-theme = 1;
   #   };
   # };
-  qt = {
-    enable = true;
-    platform = "adwita";
-  };
+  # qt = {
+  #   enable = true;
+  #   platform = "adwita";
+  # };
 }
