@@ -5,35 +5,20 @@
   pkgs,
   ...
 }: {
-  # greetd display manager with tuigreet frontend
   services.greetd = let
-    # Define available sessions
     session_hypr = {
       command = "${lib.getExe config.programs.hyprland.package}";
       user = "${username}";
     };
-
-    # Optional fallback session
-    session_gnome = {
-      command = "${pkgs.gnome.gnome-session}/bin/gnome-session";
+    session_sway = {
+      command = "${lib.getExe config.programs.sway.package} --unsupported-gpu";
       user = "${username}";
     };
-
-    # Define the actual greeter command with tuigreet
-    greetCommand = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd-shutdown ${pkgs.systemd}/bin/poweroff --cmd-reboot ${pkgs.systemd}/bin/reboot --remember --asterisks --greeting 'Welcome to NixOS' --width 60";
   in {
     enable = true;
-    restart = true; # Auto-restart on failure
-    vt = 2; # Use virtual terminal 2
     settings = {
-      terminal = {
-        vt = 1;
-        switch = true; # Allow switching VTs
-      };
-      default_session = {
-        command = greetCommand;
-        user = "greeter";
-      };
+      terminal.vt = 1;
+      default_session = session_hypr;
       initial_session = session_hypr;
     };
   };

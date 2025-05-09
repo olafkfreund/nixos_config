@@ -1,17 +1,18 @@
 {
   config,
   lib,
+  username,
   ...
 }: {
   # greetd display manager
   services.greetd = let
     session_hypr = {
       command = "${lib.getExe config.programs.hyprland.package}";
-      user = "olafkfreund";
+      user = "${username}";
     };
     session_sway = {
       command = "${lib.getExe config.programs.sway.package} --unsupported-gpu";
-      user = "olafkfreund";
+      user = "${username}";
     };
   in {
     enable = true;
