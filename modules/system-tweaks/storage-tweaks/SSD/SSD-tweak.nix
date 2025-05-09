@@ -41,15 +41,18 @@
   #---------------------------------------------------------------------
   # Mount options for SSDs
   #---------------------------------------------------------------------
-  fileSystems = lib.mkIf (config.fileSystems ? "/") {
-    "/" = lib.mkIf (config.fileSystems ? "/") {
-      options = lib.mkIf (config.fileSystems ? "/") (lib.mkBefore [
-        "noatime" # Disable access time updates
-        "nodiratime" # Disable directory access time updates
-        "discard" # Enable continuous TRIM (use with caution)
-      ]);
+  fileSystems = let
+    rootDevice = lib.hasAttr "/" config.fileSystems;
+  in
+    lib.mkIf rootDevice {
+      "/" = {
+        options = lib.mkBefore [
+          "noatime" # Disable access time updates
+          "nodiratime" # Disable directory access time updates
+          "discard" # Enable continuous TRIM (use with caution)
+        ];
+      };
     };
-  };
 
   #---------------------------------------------------------------------
   # I/O Scheduler settings
