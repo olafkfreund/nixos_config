@@ -34,9 +34,9 @@
       nvidia-vaapi-driver
       vaapiVdpau
 
-      # CUDA support
-      cudaPackages.cudatoolkit
-      cudaPackages.cudnn
+      # # CUDA support
+      # cudaPackages.cudatoolkit
+      # cudaPackages.cudnn
     ];
   };
 

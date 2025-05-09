@@ -26,8 +26,8 @@
       vaapiVdpau
 
       # CUDA support
-      cudaPackages.cudatoolkit
-      cudaPackages.cudnn
+      # cudaPackages.cudatoolkit
+      # cudaPackages.cudnn
     ];
   };
   environment = {
