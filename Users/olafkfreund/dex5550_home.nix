@@ -89,4 +89,7 @@
       output DP-1 pos 0 0 res 3840x2160
     '';
   };
+  desktop.walker = {
+    enable = true;
+  };
 }
