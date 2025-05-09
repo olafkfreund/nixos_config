@@ -1,8 +1,4 @@
-{
-  pkgs,
-  pkgs-stable,
-  ...
-}: {
+{pkgs, ...}: {
   home.packages = with pkgs; [
     kdePackages.xdg-desktop-portal-kde
     kdePackages.polkit-kde-agent-1

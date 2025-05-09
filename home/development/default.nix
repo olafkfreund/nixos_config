@@ -7,5 +7,6 @@
     # ./containers.nix
     ./distrobox.nix
     ./cursor-code.nix
+    ./windsurf.nix
   ];
 }

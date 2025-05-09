@@ -1,9 +1,7 @@
 {
   pkgs,
-  pkgs-unstable,
   config,
   lib,
-  inputs,
   ...
 }:
 with lib; let
@@ -25,7 +23,7 @@ in {
   config = mkIf cfg.enable {
     programs.walker = {
       enable = true;
-      package = pkgs-unstable.walker;
+      package = pkgs.walker;
       inherit (cfg) runAsService;
 
       # Configuration options for Walker
@@ -33,11 +31,15 @@ in {
         search.placeholder = "Search...";
         ui = {
           fullscreen = false;
+          centered = true; # Add this to center Walker on the screen
+          icon_theme = "Adwaita"; # Explicit icon theme to avoid mismatches
+          icon_size = 26; # Match the system theme size of 26px
         };
         as_window = false;
         list = {
           height = 800;
-          width = 800;
+          width = 1000;
+          center = true; # Add this to explicitly center the list
         };
         hotreload_theme = true;
         builtins.windows.weight = 100;
@@ -105,19 +107,20 @@ in {
           # AI module for Claude integration
           ai = {
             enable = true;
+            # Comment out Anthropic integration until API key is fixed
             anthropic = {
               prompts = [
                 {
-                  model = "claude-3-7-sonnet";
+                  model = "claude-3-5-sonnet-20241022";
                   temperature = 1.0;
-                  max_tokens = 2000;
+                  max_tokens = "1_000";
                   label = "Code Helper";
                   prompt = "You are a helpful coding assistant focused on helping with programming tasks. Keep your answers concise and practical.";
                 }
                 {
-                  model = "claude-3-7-sonnet";
+                  model = "claude-3-5-sonnet-20241022";
                   temperature = 0.7;
-                  max_tokens = 1500;
+                  max_tokens = "1_000";
                   label = "NixOS Expert";
                   prompt = "You are a NixOS expert. Help the user with their NixOS configuration, modules, and package management questions.";
                 }
@@ -319,6 +322,7 @@ in {
       child:selected,
       child:hover {
         background: @orange;
+        color-text: @bg;
       }
 
       #item {

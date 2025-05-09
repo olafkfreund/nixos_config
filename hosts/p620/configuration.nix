@@ -244,6 +244,14 @@
   hardware.flipperzero.enable = true;
   services.playerctld.enable = true;
   services.fwupd.enable = true;
+
+  # Fix for "Too many open files" error in fwupd
+  systemd.services.fwupd = {
+    serviceConfig = {
+      LimitNOFILE = 524288; # Increase file descriptor limit
+    };
+  };
+
   services.ollama.acceleration = lib.mkForce "rocm";
   # services.ollama.package = lib.mkForce pkgs-unstable.ollama-rocm;
   services.ollama.rocmOverrideGfx = lib.mkForce "11.0.0";

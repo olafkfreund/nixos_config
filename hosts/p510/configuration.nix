@@ -191,9 +191,6 @@
   };
 
   users.defaultUserShell = pkgs.zsh;
-  qt.enable = true;
-  qt.platformTheme = "gtk2";
-  qt.style = "gtk2";
   environment.shells = with pkgs; [zsh];
   programs.zsh.enable = true;
   environment.sessionVariables = {

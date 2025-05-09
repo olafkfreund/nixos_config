@@ -66,19 +66,19 @@
     animations {
       enabled = true
 
-      # Bezier curves for different animation types
+      # Bezier curves for different animation types - extremely slowed down
       bezier = linear, 0, 0, 1, 1
-      bezier = md3_standard, 0.2, 0, 0, 1
-      bezier = md3_decel, 0.05, 0.7, 0.1, 1
-      bezier = md3_accel, 0.3, 0, 0.8, 0.15
-      bezier = overshot, 0.05, 0.9, 0.1, 1.1
-      bezier = hyprnostretch, 0.05, 0.9, 0.1, 1.0
+      bezier = md3_standard, 0.05, 0, 0, 1
+      bezier = md3_decel, 0.03, 0.3, 0.05, 0.8
+      bezier = md3_accel, 0.1, 0, 0.4, 0.2
+      bezier = overshot, 0.03, 0.5, 0.1, 1.03
+      bezier = hyprnostretch, 0.03, 0.5, 0.1, 1.0
 
-      # Animation assignments (slowed down)
-      animation = windows, 1, 5, md3_decel, slide    # Increased from 3 to 5
-      animation = border, 1, 14, default             # Increased from 10 to 14
-      animation = fade, 1, 4, default                # Increased from 2 to 4
-      animation = workspaces, 1, 6, md3_decel        # Increased from 4 to 6
+      # Animation assignments (extremely slowed down)
+      animation = windows, 1, 25, md3_decel, slide
+      animation = border, 1, 30, default
+      animation = fade, 1, 15, default
+      animation = workspaces, 1, 20, md3_decel
     }
 
     # Dwindle layout settings
@@ -102,7 +102,7 @@
     gestures {
       workspace_swipe = true
       workspace_swipe_fingers = 3
-      workspace_swipe_distance = 200     # Decrease for faster swipes
+      workspace_swipe_distance = 300     # Decrease for faster swipes
       workspace_swipe_min_speed_to_force = 15
       workspace_swipe_cancel_ratio = 0.5
     }

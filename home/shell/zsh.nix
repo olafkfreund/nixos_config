@@ -1,8 +1,4 @@
-{
-  pkgs,
-  lib,
-  ...
-}: {
+{pkgs, ...}: {
   home.packages = with pkgs; [
     zsh
     oh-my-zsh
@@ -82,7 +78,7 @@
       }
     ];
 
-    initContent = lib.mkOrder 550 ''
+    initContent = ''
       fpath+=(${pkgs.zsh-completions}/share/zsh/site-functions)
 
       if test -n "$KITTY_INSTALLATION_DIR"; then
@@ -95,6 +91,21 @@
       #Python virtualenv
       # source ~/.env/bin/activate
       eval "$(atuin init zsh)"
+
+      # AIChat integration - send command to aichat
+      # Make sure zle is loaded
+      zmodload zsh/zle
+      _aichat_zsh() {
+          if [[ -n "$BUFFER" ]]; then
+              local _old=$BUFFER
+              BUFFER+="⌛"
+              zle -I && zle redisplay
+              BUFFER=$(aichat -e "$_old")
+              zle end-of-line
+          fi
+      }
+      zle -N _aichat_zsh
+      bindkey '\ee' _aichat_zsh
     '';
 
     completionInit = ''

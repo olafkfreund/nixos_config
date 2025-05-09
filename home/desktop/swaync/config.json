@@ -1,7 +1,7 @@
 {
   "$schema": "${pkgs.swaynotificationcenter}/etc/xdg/swaync/configSchema.json",
   "positionX": "right",
-  "positionY": "top",
+  "positionY": "bottom",
   "layer": "overlay",
   "layer-shell": true,
   "cssPriority": "application",
@@ -46,8 +46,8 @@
     "dnd",
     "menubar#actions",
     "volume",
-    "mpris",
-    "notifications"
+    "notifications",
+    "mpris"
   ],
   
   "widget-config": {

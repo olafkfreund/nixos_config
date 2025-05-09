@@ -82,6 +82,21 @@
   editor.neovim.enable = lib.mkForce true;
   editor.vscode.enable = lib.mkForce true;
   editor.zed-editor.enable = lib.mkForce true;
+  editor.windsurf.enable = true;
+
+  # Optional: Add additional packages to the Windsurf environment
+  editor.windsurf.extraPackages = with pkgs; [
+    # Add any packages you want available when using Windsurf
+    nixpkgs-fmt
+    rnix-lsp
+  ];
+
+  # Optional: Configure Windsurf settings
+  editor.windsurf.settings = {
+    # Add your Windsurf settings here as a Nix attribute set
+    theme = "gruvbox";
+    # Other settings according to Windsurf's configuration options
+  };
 
   # Shell tools
   cli.bat.enable = lib.mkForce true;

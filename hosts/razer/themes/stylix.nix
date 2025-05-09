@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   # Stylix theming
   stylix = {
     enable = true;
@@ -61,8 +65,8 @@
   #     gtk-application-prefer-dark-theme = 1;
   #   };
   # };
-  # qt = {
-  #   enable = true;
-  #   platform = "adwita";
-  # };
+  qt = {
+    enable = true;
+    platformTheme = lib.mkForce "gnome";
+  };
 }
