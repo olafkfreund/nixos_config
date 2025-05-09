@@ -85,7 +85,7 @@
       after = ["suspend.target" "hibernate.target" "hybrid-sleep.target"];
       script = ''
         # Reset USB devices if needed
-        ${pkgs.usb-utils}/bin/usb-devices > /dev/null
+        ${pkgs.usbutils}/bin/usb-devices > /dev/null
 
         # Reset audio if needed
         ${pkgs.pulseaudio}/bin/pactl suspend-sink @DEFAULT_SINK@ false
