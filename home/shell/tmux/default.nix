@@ -3,7 +3,8 @@
   lib,
   pkgs,
   ...
-}: with lib; let
+}:
+with lib; let
   cfg = config.multiplexer.tmux;
 
   tmux-gruvbox =
@@ -114,7 +115,7 @@ in {
         set-option -g default-terminal 'tmux-256color'
         set-option -g terminal-overrides ',xterm-256color:RGB'
         set-option -g status-position top
-        run-shell /nix/store/n9sy2msbfxrabjivd8b82fgb2bal1xkr-tmuxplugin-tmux-gruvbox-unstable-2024-06-17/share/tmux-plugins/tmux-gruvbo/gruvbox.tmux
+        run-shell "${tmux-gruvbox}/share/tmux-plugins/tmux-gruvbox/gruvbox.tmux"
 
         set -s escape-time 0
         set -g base-index 1
