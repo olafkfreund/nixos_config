@@ -126,8 +126,8 @@
   networking.networkmanager.enable = true;
   networking.hostName = "p510";
   networking.nameservers = [
-    "1.1.1.1"
     "8.8.8.8"
+    "8.8.4.4"
   ];
   networking = {
     useDHCP = false;
@@ -135,12 +135,6 @@
   };
 
   systemd.network = {
-    netdevs."br0" = {
-      netdevConfig = {
-        Name = "br0";
-        Kind = "bridge";
-      };
-    };
     networks = {
       "eno1" = {
         name = "eno1";
@@ -149,21 +143,13 @@
           MulticastDNS = true;
         };
       };
-      "10-lan" = {
-        matchConfig.Name = ["eno1" "vm-*"];
+      "wlp8s" = {
+        name = "wlp8s*";
+        DHCP = "ipv4";
         networkConfig = {
-          Bridge = "br0";
+          MulticastDNS = true;
+          IPv6AcceptRA = true;
         };
-      };
-      "10-lan-bridge" = {
-        matchConfig.Name = "br0";
-        networkConfig = {
-          Address = ["192.168.1.127/24"];
-          Gateway = "192.168.1.254";
-          DNS = ["8.8.8.8" "8.8.4.4"];
-          IPv6AcceptRA = false;
-        };
-        linkConfig.RequiredForOnline = "routable";
       };
     };
   };
