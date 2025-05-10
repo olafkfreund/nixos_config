@@ -48,7 +48,6 @@ in {
       exec = "vesktop-wayland %U";
       icon = "vesktop";
       comment = "Discord optimized for Wayland";
-      desktopName = "Discord (Wayland)";
       genericName = "Chat and Voice";
       categories = ["Network" "InstantMessaging"];
       mimeType = ["x-scheme-handler/discord"];

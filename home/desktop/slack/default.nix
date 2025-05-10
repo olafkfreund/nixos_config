@@ -46,7 +46,6 @@ in {
       exec = "slack-wayland %U";
       icon = "slack";
       comment = "Slack optimized for Wayland";
-      desktopName = "Slack (Wayland)";
       genericName = "Team Communication";
       categories = ["Network" "InstantMessaging"];
       mimeType = ["x-scheme-handler/slack"];
