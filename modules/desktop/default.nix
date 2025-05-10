@@ -7,7 +7,7 @@
   # Fix for Qt platform theme integration
   qt = {
     enable = true;
-    platformTheme = lib.mkForce "kde6"; # Valid value for platform theme integration
+    platformTheme = lib.mkForce "gnome"; # Valid value for platform theme integration
     style = lib.mkForce "adwaita"; # Force this value to override other definitions
   };
 
