@@ -7,18 +7,21 @@
   # Detect if KDE Plasma is enabled (this is a simplistic check)
   isPlasmaEnabled = config.desktop.plasma.enable or false;
 
-  # Set appropriate platformTheme based on desktop environment
-  platformTheme =
+  # Set appropriate platformTheme name based on desktop environment
+  platformThemeName =
     if isPlasmaEnabled
     then "kde"
-    else "adwaita";
+    else "gnome";
 
   # Use a dark theme by default
   styleName = "adwaita-dark";
   stylePackage = pkgs.adwaita-qt;
 in {
   qt = {
-    platformTheme = platformTheme;
+    # Configure platformTheme as a set with a name attribute
+    platformTheme = {
+      name = platformThemeName;
+    };
     style = {
       name = styleName;
       package = stylePackage;
@@ -41,8 +44,8 @@ in {
   ];
 
   # Add environment variables for better Qt application integration
-  home.sessionVariables = lib.mkIf (platformTheme == "adwaita") {
+  home.sessionVariables = lib.mkIf (platformThemeName == "gnome") {
     # Force Qt apps to use the GTK theme when using GNOME-based environments
-    QT_QPA_PLATFORMTHEME = "adwaita";
+    QT_QPA_PLATFORMTHEME = "gnome";
   };
 }
