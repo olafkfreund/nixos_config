@@ -9,13 +9,22 @@ with lib; let
   cfg = config.editor.vscode;
 in {
   options.editor.vscode = {
-    enable = mkEnableOption {
-      default = true;
-      description = "vscode";
-    };
+    enable = mkEnableOption "Visual Studio Code editor" // {default = true;};
   };
+
   config = mkIf cfg.enable {
-    home.packages = with pkgs; [alejandra deadnix statix];
+    home.packages = with pkgs; [
+      alejandra
+      deadnix
+      statix
+      # Add the SSH extension
+      vscode-extensions.ms-vscode-remote.remote-ssh
+    ];
+
+    home.sessionVariables = {
+      ELECTRON_OZONE_PLATFORM_HINT = "auto";
+      GDK_BACKEND = "wayland";
+    };
 
     programs.vscode = {
       enable = true;
@@ -57,6 +66,7 @@ in {
           vscode-extensions.sainnhe.gruvbox-material
           # The extensions below are currently commented out because they're not available in nixpkgs
           # vscode-extensions.codeium.codeium
+          # vscode-extensions.google.gemini-code
         ];
 
         userSettings = {
@@ -143,7 +153,7 @@ in {
           "workbench.list.smoothScrolling" = true;
           "terminal.integrated.gpuAcceleration" = "on";
           "update.mode" = "none"; # Managed by Nix
-          
+
           "workbench.colorTheme" = "Gruvbox Material Dark";
           "workbench.iconTheme" = "file-icons-colourless";
           "workbench.browser.preferredBrowser" = "google-chrome-stable";
@@ -174,8 +184,16 @@ in {
           "git.showPushSuccessNotification" = true;
           "git.enableCommitSigning" = false;
           "diffEditor.ignoreTrimWhitespace" = false;
+          "telemetry.telemetryLevel" = "off";
         };
       };
+    };
+    programs.vscode.mutableExtensionsDir = true; # Allow marketplace extensions
+
+    wayland.windowManager.hyprland.settings = {
+      layerrule = [
+        "animation slide top, code"
+      ];
     };
   };
 }

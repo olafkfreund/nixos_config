@@ -46,6 +46,6 @@ in {
   # Add environment variables for better Qt application integration
   home.sessionVariables = lib.mkIf (platformThemeName == "gnome") {
     # Force Qt apps to use the GTK theme when using GNOME-based environments
-    QT_QPA_PLATFORMTHEME = "adwaita";
+    QT_QPA_PLATFORMTHEME = "gnome";
   };
 }

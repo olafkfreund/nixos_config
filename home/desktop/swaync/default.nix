@@ -1,7 +1,14 @@
-{pkgs, ...}: let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
+  cfg = config.desktop.swaync;
   swayncConfig = {
     "$schema" = "${pkgs.swaynotificationcenter}/etc/xdg/swaync/configSchema.json";
-    positionX = "center";
+    positionX = "left";
     positionY = "top";
     control-center-margin-top = 10;
     control-center-margin-bottom = 10;
@@ -39,19 +46,29 @@
     };
   };
 in {
-  home = {
-    packages = [pkgs.swaynotificationcenter];
-    file = {
-      ".config/swaync/config.json".text = builtins.toJSON swayncConfig;
-      ".config/swaync/style.css".source = ./style.css;
+  options.desktop.swaync = {
+    enable = mkEnableOption {
+      default = false;
+      description = "Sway notification center";
     };
   };
 
-  wayland.windowManager.hyprland.settings = {
-    exec-once = ["swaync"];
-    layerrule = [
-      "animation slide top, swaync-control-center"
-      "animation slide top, swaync-notification-window"
-    ];
+  config = mkIf cfg.enable {
+    home = {
+      packages = [pkgs.swaynotificationcenter];
+    };
+
+    xdg.configFile = {
+      "swaync/config.json".text = builtins.toJSON swayncConfig;
+      "swaync/style.css".source = ./style.css;
+    };
+
+    wayland.windowManager.hyprland.settings = {
+      exec-once = ["swaync"];
+      layerrule = [
+        "animation slide top, swaync-control-center"
+        "animation slide top, swaync-notification-window"
+      ];
+    };
   };
 }
