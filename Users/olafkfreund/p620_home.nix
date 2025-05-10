@@ -65,6 +65,7 @@
   desktop.swaync.enable = lib.mkForce true;
   desktop.sway.enable = lib.mkForce true;
   desktop.rofi.enable = lib.mkForce true;
+  desktop.obsidian.enable = lib.mkForce true;
   swaylock.enable = lib.mkForce true;
   desktop.screenshots.flameshot.enable = lib.mkForce true;
   desktop.screenshots.kooha.enable = lib.mkForce true;

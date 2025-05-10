@@ -26,6 +26,7 @@
     ./evince/default.nix
     ./lanmouse/default.nix
     ./walker/default.nix
+    ./obsidian/default.nix
     # ./gh/default.nix
   ];
 
@@ -33,15 +34,4 @@
     remmina
     freerdp
   ];
-  # home.file.".xprofile".source = ../../modules/services/dwm/x11/xprofile;
-  # home.file.".xinitrc".source = ../../modules/services/dwm/x11/xinitrc;
-  # home.file.".Xresources_dwm" = {
-  #   enable = true;
-  #   source = ../../modules/services/dwm/x11/xresources;
-  # };
-
-  # # GitHub CLI tool
-  # programs.gh = {
-  #   enable = true;
-  # };
 }
