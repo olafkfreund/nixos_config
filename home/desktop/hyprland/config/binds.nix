@@ -88,7 +88,7 @@
 
     # System controls
     bind = $mainMod SHIFT, P, exec, screenshoot
-    bind = $mainMod SHIFT, S, exec, rwebsearch
+    bind = $mainMod SHIFT, S, exec, foot -e d
     bind = $mainMod SHIFT, I, exec, open-clip
     bind = $mainMod, N, exec, swaync-client --toggle-panel
     bind = $mainMod SHIFT, N, exec, swaync-client --close-all

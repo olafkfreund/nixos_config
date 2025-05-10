@@ -14,6 +14,10 @@
     windowrulev2 = size 1000 1000, class:(foot)
     windowrulev2 = animation slide left, class:^(foot)$
 
+    windowrulev2 = float, class:(web-search)
+    windowrulev2 = size 1000 1000, class:(web-search)
+    windowrulev2 = animation slide down, class:^(web-search)$
+
     # =============================================================================
     # SYSTEM UTILITY RULES
     # =============================================================================

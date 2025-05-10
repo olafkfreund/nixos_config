@@ -1,16 +1,17 @@
 {
-  config,
   lib,
   pkgs,
   ...
 }: {
-  # Fix for Qt platform theme integration
+  # Qt platform theme integration
   qt = {
     enable = true;
-    platformTheme = lib.mkForce "gnome"; # Valid value for platform theme integration
-    style = lib.mkForce "adwaita"; # Force this value to override other definitions
+    platformTheme = lib.mkForce "gnome";
   };
 
-  # Make sure the adwaita-qt package is installed
-  environment.systemPackages = [pkgs.adwaita-qt];
+  # Make sure the adwaita-qt packages are installed
+  environment.systemPackages = with pkgs; [
+    adwaita-qt
+    adwaita-qt6
+  ];
 }

@@ -132,8 +132,18 @@ in {
                   "@upstash/context7-mcp@latest"
                 ];
               };
+              "nixos" = {
+                "type" = "stdio";
+                "command" = "nix";
+                "args" = [
+                  "shell"
+                  "nixpkgs#uv"
+                  "--command"
+                  "uvx"
+                  "mcp-nixos@0.3.1"
+                ];
+              };
             };
-            "enabled" = true;
           };
 
           # GitHub Copilot chat instructions
@@ -152,7 +162,12 @@ in {
           "workbench.list.smoothScrolling" = true;
           "terminal.integrated.gpuAcceleration" = "on";
           "update.mode" = "none"; # Managed by Nix
-
+          "chat.mcp.enabled" = true;
+          "chat.agent.enabled" = true;
+          "chat.mcp.discovery.enabled" = true;
+          "github.copilot.chat.codesearch.enabled" = true;
+          "github.copilot.chat.scopeSelection" = true;
+          "github.copilot.chat.agent.thinkingTool" = true;
           "workbench.colorTheme" = "Gruvbox Material Dark";
           "workbench.iconTheme" = "file-icons-colourless";
           "workbench.browser.preferredBrowser" = "google-chrome-stable";
