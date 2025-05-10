@@ -1,7 +1,6 @@
 {
   inputs,
   lib,
-  username,
   ...
 }: {
   imports = [
@@ -67,6 +66,7 @@
   editor.neovim.enable = lib.mkForce true;
   editor.vscode.enable = lib.mkForce false;
   editor.zed-editor.enable = lib.mkForce false;
+  editor.windsurf.enable = lib.mkForce true;
 
   # Shell tools
   cli.bat.enable = lib.mkForce true;

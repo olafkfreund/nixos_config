@@ -149,10 +149,10 @@ in {
           "geminicodeassist.chatWindow.isVisible" = true;
           "geminicodeassist.chatWindow.position" = "right";
           "geminicodeassist.modelName" = "gemini-2.5-pro";
-          "codeium.enableConfig" = {
-            "*" = true;
-            "nix" = true;
-          };
+          # "codeium.enableConfig" = {
+          #   "*" = true;
+          #   "nix" = true;
+          # };
 
           # Git settings
           "git.enableSmartCommit" = true;

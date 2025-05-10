@@ -28,5 +28,6 @@
     netscanner
     atac
     ddgr
+    rusti-cal
   ];
 }

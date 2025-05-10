@@ -1,7 +1,6 @@
 {
   inputs,
   lib,
-  config,
   pkgs,
   ...
 }: {
@@ -88,7 +87,7 @@
   editor.windsurf.extraPackages = with pkgs; [
     # Add any packages you want available when using Windsurf
     nixpkgs-fmt
-    rnix-lsp
+    nil # Modern Nix Language Server (replacement for rnix-lsp)
   ];
 
   # Optional: Configure Windsurf settings
