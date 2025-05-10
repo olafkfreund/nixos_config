@@ -9,6 +9,7 @@ return {
       "hrsh7th/cmp-path",
       "hrsh7th/cmp-emoji",
       "chrisgrieser/cmp-nerdfont",
+      "zbirenbaum/copilot-cmp", -- Add explicit dependency
     },
     -- Not all LSP servers add brackets when completing a function.
     -- To better deal with this, LazyVim adds a custom option to cmp,
@@ -43,21 +44,28 @@ return {
           end,
         }),
         sources = cmp.config.sources({
-          { name = "nvim_lsp" },
-          { name = "copilot" },
-          { name = "codeium" },
-          { name = "emoji" },
-          { name = "nerdfont" },
-          { name = "path" },
+          { name = "copilot", group_index = 1, priority = 1000 }, -- Prioritize Copilot suggestions
+          { name = "nvim_lsp", group_index = 1 },
+          { name = "codeium", group_index = 1 },
+          { name = "emoji", group_index = 2 },
+          { name = "nerdfont", group_index = 2 },
+          { name = "path", group_index = 2 },
         }, {
-          { name = "buffer" },
+          { name = "buffer", group_index = 3 },
         }),
         formatting = {
-          format = function(_, item)
+          format = function(entry, item)
             local icons = require("lazyvim.config").icons.kinds
             if icons[item.kind] then
               item.kind = icons[item.kind] .. item.kind
             end
+            
+            -- Special formatting for Copilot suggestions
+            if entry.source.name == "copilot" then
+              item.kind = " Copilot"
+              item.kind_hl_group = "CmpItemKindCopilot"
+            end
+            
             return item
           end,
         },
@@ -66,7 +74,20 @@ return {
             hl_group = "CmpGhostText",
           },
         },
-        sorting = defaults.sorting,
+        sorting = {
+          -- Prioritize Copilot suggestions
+          comparators = {
+            cmp.config.compare.score, -- Score from LSP server/copilot
+            cmp.config.compare.offset,
+            cmp.config.compare.exact,
+            cmp.config.compare.recently_used,
+            cmp.config.compare.locality,
+            cmp.config.compare.kind,
+            cmp.config.compare.sort_text,
+            cmp.config.compare.length,
+            cmp.config.compare.order,
+          },
+        },
       }
     end,
     ---@param opts cmp.ConfigSchema | {auto_brackets?: string[]}

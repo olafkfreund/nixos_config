@@ -5,11 +5,34 @@ return {
     lazy = false,
     version = false, -- set this if you want to always pull the latest change
     opts = {
-      -- add any opts here
+      -- Enhanced options based on current documentation
+      mappings = {
+        ask = "<leader>aa",    -- Key to trigger the ask functionality
+        edit = "<leader>ae",   -- Key to edit prompt/response
+        refresh = "<leader>ar" -- Key to refresh the response
+      },
+      -- Using Copilot as the provider
+      provider = "copilot",
     },
     -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
     build = "make",
     -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
+    
+    -- You can use keys to define custom mappings if desired
+    keys = {
+      { "<leader>aa", function() require("avante.api").ask() end, desc = "Avante: Ask AI" },
+      { "<leader>ae", function() require("avante.api").edit() end, desc = "Avante: Edit" },
+      { "<leader>ar", function() require("avante.api").refresh() end, desc = "Avante: Refresh" },
+      -- Image paste shortcut that works both in normal buffers and Avante input
+      { "<leader>ip", function()
+          return vim.bo.filetype == "AvanteInput" and 
+            require("avante.clipboard").paste_image() or 
+            require("img-clip").paste_image()
+        end, 
+        desc = "Paste image (works in Avante too)"
+      },
+    },
+    
     dependencies = {
       "stevearc/dressing.nvim",
       "nvim-lua/plenary.nvim",

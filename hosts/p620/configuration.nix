@@ -84,7 +84,12 @@
   vpn.tailscale.enable = lib.mkForce true;
 
   # AI
-  ai.ollama.enable = lib.mkForce true;
+  ai.ollama = {
+    enable = true;
+    enableRag = true;
+    ragDirectory = "/home/olafkfreund/documents/rag-files"; # Directory to scan for RAG
+    allowBrokenPackages = false; # Set to false to avoid spaCy/llama-index build errors
+  };
 
   # Printing
   services.print.enable = lib.mkForce true;
