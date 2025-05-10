@@ -25,6 +25,7 @@
     ./spell/spell.nix
     ./helpers/helpers.nix
     ./webcam/default.nix
+    ./desktop/default.nix # Qt platform theme configuration
     ./desktop/wlr/default.nix
     ./desktop/remote/default.nix
     ./desktop/wldash/default.nix

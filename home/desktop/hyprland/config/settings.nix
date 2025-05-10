@@ -66,19 +66,23 @@
     animations {
       enabled = true
 
-      # Bezier curves for different animation types - extremely slowed down
+      # Bezier curves for different animation types - faster notifications
       bezier = linear, 0, 0, 1, 1
       bezier = md3_standard, 0.05, 0, 0, 1
       bezier = md3_decel, 0.03, 0.3, 0.05, 0.8
       bezier = md3_accel, 0.1, 0, 0.4, 0.2
       bezier = overshot, 0.03, 0.5, 0.1, 1.03
       bezier = hyprnostretch, 0.03, 0.5, 0.1, 1.0
+      bezier = snap, 0, 0.85, 0.15, 1.0 # New fast bezier for notifications
 
-      # Animation assignments (extremely slowed down)
+      # Animation assignments with faster fade for notifications
       animation = windows, 1, 25, md3_decel, slide
       animation = border, 1, 30, default
-      animation = fade, 1, 15, default
+      animation = fade, 1, 8, default # Reduced from 15 to 8 for faster fade in/out
       animation = workspaces, 1, 20, md3_decel
+
+      # Special animation just for notifications
+      animation = windowsOut, 1, 5, snap, slide # Makes closing windows (like notifications) faster
     }
 
     # Dwindle layout settings

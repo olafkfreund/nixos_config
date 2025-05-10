@@ -1,7 +1,6 @@
 {pkgs, ...}: {
   home.packages = [
-    # pkgs.spotify
-    # pkgs.spicetify-cli
+    # pkgs.spotify # Removing direct Spotify installation (provided by Spicetify)
     pkgs.ncspot # Spotify
     pkgs.plexamp # Plex
     pkgs.vlc # video player
@@ -13,5 +12,6 @@
     pkgs.hypnotix
     pkgs.parabolic
     pkgs.musicpod
+    pkgs.spicetify-cli
   ];
 }

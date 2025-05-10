@@ -4,15 +4,13 @@
   pkgs,
   ...
 }: {
-  # Fix for deprecated 'gnome' Qt platform theme
+  # Fix for Qt platform theme integration
   qt = {
     enable = true;
-    platformTheme = {
-      name = lib.mkForce "adwaita"; # Use the recommended value instead of deprecated 'gnome'
-    };
-    style = {
-      name = "adwaita";
-      package = pkgs.adwaita-qt;
-    };
+    platformTheme = lib.mkForce "kde6"; # Valid value for platform theme integration
+    style = lib.mkForce "adwaita"; # Force this value to override other definitions
   };
+
+  # Make sure the adwaita-qt package is installed
+  environment.systemPackages = [pkgs.adwaita-qt];
 }

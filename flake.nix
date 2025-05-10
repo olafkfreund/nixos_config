@@ -235,7 +235,7 @@
                 neovim.enable = false;
                 hyprpaper.enable = false;
                 hyprland.enable = false;
-                spicetify.enable = false;
+                spicetify.enable = false; # Allow spicetify theming
                 sway.enable = false;
                 swaync.enable = false;
               };

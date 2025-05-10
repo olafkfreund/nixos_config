@@ -1,23 +1,21 @@
 /* Define Gruvbox dark color scheme variables */
-@define-color shadow rgba(0, 0, 0, 0.3);
-@define-color bg_h #1d2021; /* hard dark background */
-@define-color bg #282828;   /* dark background */
-@define-color bg_s #32302f; /* soft dark background */
-@define-color bg0_h #1d2021; /* hard dark bg0 */
-@define-color bg0 #282828;   /* dark bg0 */
-@define-color bg0_s #32302f; /* soft dark bg0 */
-@define-color bg1 #3c3836;   /* dark bg1 */
-@define-color bg2 #504945;   /* dark bg2 */
-@define-color bg3 #665c54;   /* dark bg3 */
-@define-color bg4 #7c6f64;   /* dark bg4 */
-@define-color fg #ebdbb2;    /* dark fg */
-@define-color fg0 #fbf1c7;   /* dark fg0 */
-@define-color fg1 #ebdbb2;   /* dark fg1 */
-@define-color fg2 #d5c4a1;   /* dark fg2 */
-@define-color fg3 #bdae93;   /* dark fg3 */
-@define-color fg4 #a89984;   /* dark fg4 */
-
-/* Gruvbox accent colors */
+/* @define-color bg_h #1d2021;
+@define-color bg #282828;
+@define-color bg_s #32302f;
+@define-color mantle #282828;
+@define-color bg0_h #1d2021;
+@define-color bg0 #282828;
+@define-color bg0_s #32302f;
+@define-color bg1 #3c3836;
+@define-color bg2 #504945;
+@define-color bg3 #665c54;
+@define-color bg4 #7c6f64;
+@define-color fg #ebdbb2;
+@define-color fg0 #fbf1c7;
+@define-color fg1 #ebdbb2;
+@define-color fg2 #d5c4a1;
+@define-color fg3 #bdae93;
+@define-color fg4 #a89984;
 @define-color red #cc241d;
 @define-color green #98971a;
 @define-color yellow #d79921;
@@ -25,15 +23,8 @@
 @define-color purple #b16286;
 @define-color aqua #689d6a;
 @define-color orange #d65d0e;
-
-/* Gruvbox light colors - brighter versions */
-@define-color bright_red #fb4934;
-@define-color bright_green #b8bb26;
-@define-color bright_yellow #fabd2f;
-@define-color bright_blue #83a598;
-@define-color bright_purple #d3869b;
-@define-color bright_aqua #8ec07c;
-@define-color bright_orange #fe8019;
+@define-color cyan #83a598;
+@define-color magenta #d3869b; */
 
 /* Global styles */
 * {
@@ -42,15 +33,15 @@
 }
 
 label {
-    color: @fg;
+    color: #ebdbb2;
 }
 
 /* Notification styles */
 .notification {
-    border: 1px solid @bright_green;
-    box-shadow: 0px 2px 4px @shadow;
+    border: 1px solid #98971a;
+    box-shadow: 0px 2px 4px #282828;
     border-radius: 4px;
-    background: @bg0;
+    background: #282828;
 }
 
 .notification button {
@@ -62,25 +53,25 @@ label {
 }
 
 .notification button:hover {
-    background: @bg1;
+    background: #3c3836;
 }
 
 .notification-content {
-    min-height: 64px;
-    margin: 10px;
+    min-height: 128px;
+    margin: 5px;
     padding: 0px;
     border-radius: 0px;
-    background-color: @bg0;
+    background-color: #282828;
 }
 
 .close-button {
-    background: @bg_h;
-    color: @fg3;
+    background: #282828;
+    color: #bdae93;
 }
 
 .close-button:hover {
-    background: @bg_h;
-    color: @bright_red;
+    background: #282828;
+    color: #cc241d;
 }
 
 /* Action buttons */
@@ -103,12 +94,12 @@ label {
 .notification-action {
     border-radius: 0px;
     padding: 4px;  /* Increased from 2px for better touch targets */
-    color: @text;
+    color: #ebdbb2;
 }
 
 .notification-action:hover {
-    background: @surface0;
-    color: @subtext0;
+    background: #3c3836;
+    color: #a89984;
 }
 
 /* Add bottom border radius to eliminate clipping */
@@ -122,13 +113,13 @@ label {
 
 /* Notification content styling */
 .summary {
-    color: @text;
+    color: #ebdbb2;
     font-size: 16px;
     padding: 0px;
 }
 
 .time {
-    color: @subtext0;
+    color: #a89984;
     font-size: 12px;
     text-shadow: none;
     margin: 0px;
@@ -138,7 +129,7 @@ label {
 .body {
     font-size: 14px;
     font-weight: 500;
-    color: @subtext1;
+    color: #d5c4a1;
     text-shadow: none;
     margin: 0px;
 }
@@ -149,16 +140,16 @@ label {
 
 /* The "Notifications" and "Do Not Disturb" text widget */
 .top-action-title {
-    color: @text;
+    color: #ebdbb2;
     text-shadow: none;
 }
 
 /* Control center */
 .control-center {
-    background: @bg_h;
-    border: 2px solid @fg4;
+    background: #282828;
+    border: 2px solid #a89984;
     border-radius: 6px;
-    box-shadow: 0px 0px 4px @shadow;
+    box-shadow: 0px 0px 4px #a89984;
 }
 
 .blank-window {
@@ -166,7 +157,7 @@ label {
 }
 
 .control-center-list {
-    background: @crust;
+    background: #282828;
     min-height: 5px;
     border-top: none;
     border-radius: 0px 0px 4px 4px;
@@ -176,7 +167,7 @@ label {
 .control-center-list-placeholder,
 .notification-group-icon,
 .notification-group {
-    color: alpha(@theme_text_color, 0.50);
+    color: alpha(#ebdbb2, 0.50);
 }
 
 .notification-group {
@@ -189,7 +180,7 @@ label {
 
 .notification-group > box {
     all: unset;
-    background: @mantle;
+    background: #282828;
     padding: 8px;
     margin: 0px;
     border: none;
@@ -201,8 +192,8 @@ label {
 .notification-row {
     outline: none;
     transition: all 0.3s ease;
-    background: @bg1;
-    border: 1px solid @bg_h;
+    background: #3c3836;
+    border: 1px solid #282828;
     margin: 10px 5px 0px 5px;
     border-radius: 4px;
 }
@@ -249,13 +240,13 @@ label {
     font-weight: 700;
     padding: 7px 3px;
     margin-right: 10px;
-    background: @mantle;
-    color: @text;
+    background: #282828;
+    color: #ebdbb2;
     border-radius: 4px;
 }
 
 .widget-title > button:hover {
-    background: @base;
+    background: #3c3836;
 }
 
 /* Label widget */
@@ -263,7 +254,7 @@ label {
     margin: 0px;
     padding: 0px;
     min-height: 5px;
-    background: @mantle;
+    background: #282828;
     border-radius: 0px 0px 4px 4px;
     border-top: none;
 }
@@ -288,7 +279,7 @@ label {
 }
 
 .widget-menubar > box > box > button {
-    background: @mantle;
+    background: #3c3836;
     min-width: 85px;
     min-height: 50px;
     margin-right: 13px;
@@ -305,13 +296,13 @@ label {
 }
 
 .widget-menubar button:focus:hover {
-    background: @base;
+    background: #3c3836;
     box-shadow: none;
 }
 
 .widget-menubar > box > revealer > box {
     margin: 5px 10px;
-    background: @mantle;
+    background: #282828;
     border-radius: 4px;
 }
 
@@ -334,7 +325,7 @@ label {
     padding: 0px;
     margin: -5px 0px -10px 0px;
     border-radius: 4px;
-    background: @mantle;
+    background: #282828;
 }
 
 .widget-mpris > box > button:nth-child(1),
@@ -368,16 +359,16 @@ carouselindicatordots {
 }
 
 .widget-mpris-title {
-    color: @fg0;
+    color: #fbf1c7;
     font-weight: bold;
     font-size: 1.25rem;
-    text-shadow: 0px 0px 5px @shadow;
+    text-shadow: 0px 0px 5px #7c6f64;
 }
 
 .widget-mpris-subtitle {
-    color: @fg2;
+    color: #d5c4a1;
     font-size: 1rem;
-    text-shadow: 0px 0px 3px @shadow;
+    text-shadow: 0px 0px 3px #282828;
 }
 
 .widget-mpris-player {
@@ -399,17 +390,17 @@ carouselindicatordots {
 .widget-dnd > switch {
     font-size: initial;
     border-radius: 12px;
-    background: @bg1;
-    border: 1px solid @bright_green;
+    background: #3c3836;
+    border: 1px solid #98971a;
     box-shadow: none;
 }
 
 .widget-dnd > switch:checked {
-    background: @bg4;
+    background: #7c6f64;
 }
 
 .widget-dnd > switch slider {
-    background: @bright_green;
+    background: #98971a;
     border-radius: 12px;
 }
 
@@ -421,12 +412,12 @@ scale {
 
 scale trough {
     border-radius: 4px;
-    background: @bg1;
+    background: #3c3836;
 }
 
 scale highlight {
     border-radius: 5px;
-    background: @bright_green;
+    background: #98971a;
     min-height: 10px;
     margin-right: -5px;
 }
