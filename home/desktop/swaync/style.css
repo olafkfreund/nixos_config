@@ -1,93 +1,175 @@
+/* Define Gruvbox colors */
 * {
-    font-family: "JetBrainsMono Nerd Font";
-  }
-  
-  
-  .control-center {
-    background: alpha(#282828, 0.9);
-    border-radius: 16px;
-  }
-  
-  
-  .widget-buttons-grid {
-    font-size: 36px;
-    background: transparent;
-  }
-  .widget-buttons-grid>flowbox>flowboxchild>button {
-    padding: 6px 62px;
-    background: transparent;
-    border-radius: 8px;
-  }
-  .widget-buttons-grid>flowbox>flowboxchild>button:hover {
-    color: #282828;
-    background: #b8bb26;
-  }
-  .widget-buttons-grid>flowbox>flowboxchild:last-child {
-    border-left: 2px solid #989899;
-  }
-  .widget-buttons-grid>flowbox>flowboxchild:first-child {
-    border-right: 2px solid #989899;
-  }
-  
-  
-  .widget-dnd {
-    color: #989899;
-    background: transparent;
-    font-size: 24px;
-  }
-  .widget-dnd>switch {
-    background: #98971a;
-    border-radius: 16px;
-  }
-  .widget-dnd > switch:hover {
-    background: #b8bb26;
-  }
-  .widget-dnd>switch:checked {
-    background: #cc241d;
-  }
-  .widget-dnd > switch:checked:hover {
-    background: #fb4934;
-  }
-  
-  
-  .widget-title {
-    color: #989899;
-    font-size: 24px;
-    border-top: 2px solid #989899;
-    padding: 16px 0;
-  }
-  .widget-title button {
-    border-radius: 16px;
-    color: #383838;
-    background: #d79921;
-    padding: 0 16px;
-    font-size: 24px
-  }
-  .widget-title button:hover {
-    background: #fabd2f;
-  }
-  .widget-title button:active {
-    background: #cc241d;
-  }
-  
-  
-  .notification {
-    border: none;
-    box-shadow: none;
-    color: #989899;
-    opacity: 1;
-  }
-  
-  
-  .close-button {
-    border: none;
-    margin: 4px;
-    background: #9d0006;
-    color: #9d0006;
-  }
-  
-  
-  .control-center-list-placeholder {
-    color: #989899;
-    opacity: 1;
-  }
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 14px;
+}
+
+/* Main container */
+.control-center {
+  background: alpha(#282828, 0.95);
+  border: 1px solid #3c3836;
+  border-radius: 8px;
+}
+
+/* Notification styles */
+.notification {
+  background: alpha(#32302f, 0.95);
+  border: 1px solid #504945;
+  border-radius: 6px;
+  margin: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.notification-content {
+  padding: 10px;
+  background: transparent;
+}
+
+.notification-default-action,
+.notification-action {
+  padding: 4px;
+  margin: 0;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: #ebdbb2;
+}
+
+.notification-default-action:hover,
+.notification-action:hover {
+  background: alpha(#504945, 0.7);
+}
+
+.notification button:hover {
+  background: alpha(#504945, 0.7);
+}
+
+.close-button {
+  background: #cc241d;
+  color: #fbf1c7;
+  text-shadow: none;
+  padding: 0 4px;
+  border-radius: 4px;
+  margin: 4px;
+  box-shadow: none;
+  border: none;
+}
+
+.close-button:hover {
+  background: #fb4934;
+}
+
+/* Widgets styling */
+.widget-buttons-grid {
+  font-size: 20px;
+  background: transparent;
+  padding: 8px;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button {
+  background: alpha(#3c3836, 0.7);
+  color: #ebdbb2;
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin: 4px;
+  border: 1px solid #504945;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button:hover {
+  background: #504945;
+  color: #b8bb26;
+}
+
+.widget-dnd {
+  background: transparent;
+  padding: 8px;
+  font-size: 16px;
+  color: #ebdbb2;
+}
+
+.widget-dnd > switch {
+  background: #98971a;
+  border-radius: 16px;
+  border: 1px solid #b8bb26;
+}
+
+.widget-dnd > switch:checked {
+  background: #cc241d;
+}
+
+.widget-dnd > switch:hover {
+  background: #b8bb26;
+}
+
+.widget-dnd > switch:checked:hover {
+  background: #fb4934;
+}
+
+.widget-title {
+  color: #ebdbb2;
+  font-size: 16px;
+  padding: 8px;
+  background: transparent;
+  border-bottom: 1px solid #504945;
+}
+
+.widget-title > button {
+  background: #689d6a;
+  color: #282828;
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin: 0 4px;
+  border: none;
+}
+
+.widget-title > button:hover {
+  background: #8ec07c;
+}
+
+/* Notifications list */
+.notifications-list {
+  background: transparent;
+  padding: 8px;
+}
+
+.notification-row {
+  padding: 0;
+}
+
+.notification-row:hover {
+  background: alpha(#504945, 0.4);
+}
+
+/* Text styling */
+.summary {
+  color: #ebdbb2;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.time {
+  color: #928374;
+  font-size: 12px;
+}
+
+.body {
+  color: #d5c4a1;
+  font-size: 13px;
+}
+
+/* Scrollbar styling */
+scrollbar {
+  background: transparent;
+  border-radius: 4px;
+  min-width: 8px;
+}
+
+scrollbar slider {
+  background: alpha(#928374, 0.6);
+  border-radius: 4px;
+  min-width: 8px;
+}
+
+scrollbar slider:hover {
+  background: alpha(#928374, 0.8);
+}

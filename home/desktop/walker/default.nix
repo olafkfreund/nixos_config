@@ -195,7 +195,7 @@ in {
 
       /* General theme variables */
       @define-color foreground @fg;
-      @define-color background @bg;
+      @define-color background alpha(@bg, 0.95);
       @define-color color1 @bright_aqua;
       @define-color shadow rgba(0, 0, 0, 0.3);
 
@@ -208,181 +208,59 @@ in {
 
       #window,
       #box,
-      #aiScroll,
-      #aiList,
-      #search,
-      #password,
-      #input,
-      #prompt,
-      #clear,
-      #typeahead,
-      #list,
-      child,
-      scrollbar,
-      slider,
-      #item,
-      #text,
-      #label,
-      #bar,
-      #sub,
-      #activationlabel {
-        all: unset;
-      }
-
-      #cfgerr {
-        background: rgba(255, 0, 0, 0.4);
-        margin-top: 20px;
-        padding: 8px;
-        font-size: 1.2em;
-      }
-
-      window {
-        background-color: transparent;
-      }
-
-      #window {
-        color: @fg;
-        background-color: transparent;
-      }
-
-      overlay {
-        background-color: transparent !important;
-        background: transparent !important;
-        opacity: 0 !important;
-      }
-
-      #box {
+      #aiScroll {
+        background-color: @background;
+        color: @foreground;
+        border: 1px solid @bg3;
         border-radius: 8px;
-        background: @bg1;
-        padding: 32px;
-        border: 1px solid @bg2;
-        box-shadow:
-          0 19px 38px rgba(0, 0, 0, 0.3),
-          0 15px 12px rgba(0, 0, 0, 0.22);
-        margin: 0 auto;
-      }
-
-      #search {
-        box-shadow:
-          0 1px 3px rgba(0, 0, 0, 0.1),
-          0 1px 2px rgba(0, 0, 0, 0.22);
-        background: @bg2;
-        padding: 8px;
-      }
-
-      #prompt {
-        margin-left: 4px;
-        margin-right: 12px;
-        color: @fg4;
-        opacity: 0.2;
-      }
-
-      #clear {
-        color: @fg4;
-        opacity: 0.8;
-      }
-
-      #password,
-      #input,
-      #typeahead {
-        border-radius: 2px;
       }
 
       #input {
-        background: none;
-        color: @fg1;
-      }
-
-      #password {
-        color: @fg1;
-      }
-
-      #spinner {
+        background-color: alpha(@bg1, 0.7);
+        border: 1px solid @bg3;
+        border-radius: 6px;
+        color: @foreground;
+        margin: 8px;
         padding: 8px;
       }
 
-      #typeahead {
-        color: @fg4;
-        opacity: 0.8;
-      }
-
-      #input placeholder {
-        opacity: 0.5;
+      #input:focus {
+        border-color: @bright_aqua;
       }
 
       #list {
         background: transparent;
+        margin: 8px;
       }
 
-      child {
+      #entry {
         padding: 8px;
-        border-radius: 2px;
+        margin: 2px 8px;
+        border-radius: 6px;
       }
 
-      child:selected,
-      child:hover {
-        background: @orange;
-        color-text: @bg;
-      }
-
-      #item {
-        color: @fg1;
-      }
-
-      #icon {
-        margin-right: 8px;
+      #entry:selected {
+        background-color: alpha(@bg2, 0.7);
+        border: 1px solid @bright_aqua;
       }
 
       #text {
-        font-weight: 500;
-        color: @fg4;
+        color: @foreground;
       }
 
-      #label {
-        font-weight: 500;
+      #text:selected {
+        color: @bright_aqua;
       }
 
-      #sub {
-        opacity: 0.5;
-        font-size: 0.8em;
+      #scrollbar {
+        background-color: alpha(@bg1, 0.7);
+        border-radius: 6px;
+        margin: 5px;
       }
 
-      #activationlabel {
-        color: @fg1;
-      }
-
-      #bar {
-        background: transparent;
-      }
-
-      .barentry {
-        color: @fg1;
-      }
-
-      .activation #activationlabel {
-        color: @fg1;
-      }
-
-      .activation #text,
-      .activation #icon,
-      .activation #search {
-        opacity: 0.5;
-      }
-
-      .aiItem {
-        padding: 10px;
-        border-radius: 2px;
-        color: @fg4;
-        background: @bg1;
-      }
-
-      .aiItem.user {
-        padding-left: 0;
-        padding-right: 0;
-      }
-
-      .aiItem.assistant {
-        background: @bg2;
+      #scrollbar slider {
+        background-color: @bg4;
+        border-radius: 6px;
       }
     '';
   };
