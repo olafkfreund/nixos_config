@@ -17,5 +17,6 @@
     ./lazyvim/default.nix
     ./markdown/default.nix
     ./gh/default.nix
+    ./fastfetch/default.nix
   ];
 }

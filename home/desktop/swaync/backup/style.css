@@ -1,0 +1,437 @@
+/* Define Gruvbox dark color scheme variables */
+/* @define-color bg_h #1d2021;
+@define-color bg #282828;
+@define-color bg_s #32302f;
+@define-color mantle #282828;
+@define-color bg0_h #1d2021;
+@define-color bg0 #282828;
+@define-color bg0_s #32302f;
+@define-color bg1 #3c3836;
+@define-color bg2 #504945;
+@define-color bg3 #665c54;
+@define-color bg4 #7c6f64;
+@define-color fg #ebdbb2;
+@define-color fg0 #fbf1c7;
+@define-color fg1 #ebdbb2;
+@define-color fg2 #d5c4a1;
+@define-color fg3 #bdae93;
+@define-color fg4 #a89984;
+@define-color red #cc241d;
+@define-color green #98971a;
+@define-color yellow #d79921;
+@define-color blue #458588;
+@define-color purple #b16286;
+@define-color aqua #689d6a;
+@define-color orange #d65d0e;
+@define-color cyan #83a598;
+@define-color magenta #d3869b; */
+
+/* Global styles */
+* {
+    font-family: "JetBrainsMono Nerd Font";
+    background-clip: border-box;
+}
+
+label {
+    color: #ebdbb2;
+}
+
+/* Notification styles */
+.notification {
+    border: 1px solid #98971a;
+    box-shadow: 0px 2px 4px #282828;
+    border-radius: 4px;
+    background: #282828;
+}
+
+.notification button {
+    background: transparent;
+    border-radius: 0px;
+    border: none;
+    margin: 0px;
+    padding: 0px;
+}
+
+.notification button:hover {
+    background: #3c3836;
+}
+
+.notification-content {
+    min-height: 128px;
+    margin: 5px;
+    padding: 0px;
+    border-radius: 0px;
+    background-color: #282828;
+}
+
+.close-button {
+    background: #282828;
+    color: #bdae93;
+}
+
+.close-button:hover {
+    background: #282828;
+    color: #cc241d;
+}
+
+/* Action buttons */
+.notification-default-action,
+.notification-action {
+    background: transparent;
+    border: none;
+}
+
+.notification-default-action {
+    border-radius: 4px;
+}
+
+/* When alternative actions are visible */
+.notification-default-action:not(:only-child) {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+.notification-action {
+    border-radius: 0px;
+    padding: 4px;  /* Increased from 2px for better touch targets */
+    color: #ebdbb2;
+}
+
+.notification-action:hover {
+    background: #3c3836;
+    color: #a89984;
+}
+
+/* Add bottom border radius to eliminate clipping */
+.notification-action:first-child {
+    border-bottom-left-radius: 4px;
+}
+
+.notification-action:last-child {
+    border-bottom-right-radius: 4px;
+}
+
+/* Notification content styling */
+.summary {
+    color: #ebdbb2;
+    font-size: 16px;
+    padding: 0px;
+}
+
+.time {
+    color: #a89984;
+    font-size: 12px;
+    text-shadow: none;
+    margin: 0px;
+    padding: 2px 0px;
+}
+
+.body {
+    font-size: 14px;
+    font-weight: 500;
+    color: #d5c4a1;
+    text-shadow: none;
+    margin: 0px;
+}
+
+.body-image {
+    border-radius: 4px;
+}
+
+/* The "Notifications" and "Do Not Disturb" text widget */
+.top-action-title {
+    color: #ebdbb2;
+    text-shadow: none;
+}
+
+/* Control center */
+.control-center {
+    background: #282828;
+    border: 2px solid #a89984;
+    border-radius: 6px;
+    box-shadow: 0px 0px 4px #a89984;
+}
+
+.blank-window {
+    background: alpha(black, 0.2);
+}
+
+.control-center-list {
+    background: #282828;
+    min-height: 5px;
+    border-top: none;
+    border-radius: 0px 0px 4px 4px;
+}
+
+/* Notification groups */
+.control-center-list-placeholder,
+.notification-group-icon,
+.notification-group {
+    color: alpha(#ebdbb2, 0.50);
+}
+
+.notification-group {
+    all: unset;
+    border: none;
+    opacity: 0;
+    padding: 0px;
+    box-shadow: none;
+}
+
+.notification-group > box {
+    all: unset;
+    background: #282828;
+    padding: 8px;
+    margin: 0px;
+    border: none;
+    border-radius: 4px;
+    box-shadow: none;
+}
+
+/* Notification rows */
+.notification-row {
+    outline: none;
+    transition: all 0.3s ease;
+    background: #3c3836;
+    border: 1px solid #282828;
+    margin: 10px 5px 0px 5px;
+    border-radius: 4px;
+}
+
+.notification-row:focus,
+.notification-row:hover {
+    box-shadow: none;
+}
+
+.control-center-list > row,
+.control-center-list > row:focus,
+.control-center-list > row:hover {
+    background: transparent;
+    border: none;
+    margin: 0px;
+    padding: 5px 10px;
+}
+
+.control-center-list > row:last-child {
+    padding: 5px 10px 10px 10px;
+}
+
+/* Window behind control center */
+/* .blank-window {
+    background: transparent;
+} */
+
+/* Widget styles */
+.widget-title {
+    margin: 0px;
+    background: inherit;
+    border-radius: 4px 4px 0px 0px;
+    border-bottom: none;
+    padding-bottom: 20px;
+}
+
+.widget-title > label {
+    margin: 18px 10px;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.widget-title > button {
+    font-weight: 700;
+    padding: 7px 3px;
+    margin-right: 10px;
+    background: #282828;
+    color: #ebdbb2;
+    border-radius: 4px;
+}
+
+.widget-title > button:hover {
+    background: #3c3836;
+}
+
+/* Label widget */
+.widget-label {
+    margin: 0px;
+    padding: 0px;
+    min-height: 5px;
+    background: #282828;
+    border-radius: 0px 0px 4px 4px;
+    border-top: none;
+}
+
+.widget-label > label {
+    font-size: 0px;
+    font-weight: 400;
+}
+
+/* Menu widgets */
+.widget-menubar {
+    background: inherit;
+    border-top: none;
+    border-bottom: none;
+}
+
+.widget-menubar > box > box {
+    margin: 5px 10px;
+    min-height: 40px;
+    border-radius: 4px;
+    background: transparent;
+}
+
+.widget-menubar > box > box > button {
+    background: #3c3836;
+    min-width: 85px;
+    min-height: 50px;
+    margin-right: 13px;
+    font-size: 17px;
+    padding: 0px;
+}
+
+.widget-menubar > box > box > button:nth-child(4) {
+    margin-right: 0px;
+}
+
+.widget-menubar button:focus {
+    box-shadow: none;
+}
+
+.widget-menubar button:focus:hover {
+    background: #3c3836;
+    box-shadow: none;
+}
+
+.widget-menubar > box > revealer > box {
+    margin: 5px 10px;
+    background: #282828;
+    border-radius: 4px;
+}
+
+.widget-menubar > box > revealer > box > button {
+    background: transparent;
+    min-height: 50px;
+    padding: 0px;
+    margin: 5px;
+}
+
+/* MPRIS widget optimization */
+.widget-mpris {
+    padding: 10px;
+    padding-bottom: 35px;
+    padding-top: 35px;
+    margin-bottom: -33px;
+}
+
+.widget-mpris > box {
+    padding: 0px;
+    margin: -5px 0px -10px 0px;
+    border-radius: 4px;
+    background: #282828;
+}
+
+.widget-mpris > box > button:nth-child(1),
+.widget-mpris > box > button:nth-child(3) {
+    margin-bottom: 0px;
+    margin-left: -25px;
+    margin-right: -25px;
+    opacity: 0;
+}
+
+.widget-mpris-album-art {
+    all: unset;
+}
+
+/* Player button box */
+.widget-mpris > box > carousel > widget > box > box:nth-child(2) {
+    margin: 5px 0px -5px 90px;
+}
+
+/* Player buttons */
+.widget-mpris > box > carousel > widget > box > box:nth-child(2) > button {
+    border-radius: 4px;
+}
+
+.widget-mpris > box > carousel > widget > box > box:nth-child(2) > button:hover {
+    background: alpha(currentColor, 0.1);
+}
+
+carouselindicatordots {
+    opacity: 0;
+}
+
+.widget-mpris-title {
+    color: #fbf1c7;
+    font-weight: bold;
+    font-size: 1.25rem;
+    text-shadow: 0px 0px 5px #7c6f64;
+}
+
+.widget-mpris-subtitle {
+    color: #d5c4a1;
+    font-size: 1rem;
+    text-shadow: 0px 0px 3px #282828;
+}
+
+.widget-mpris-player {
+    border-radius: 0px;
+    margin: 0px;
+}
+
+.widget-mpris-player > box > image {
+    margin: 0px 0px -48px 0px;
+}
+
+/* DND widget */
+.widget-dnd {
+    margin: 8px;
+    font-size: 1.1rem;
+    padding-top: 20px;
+}
+
+.widget-dnd > switch {
+    font-size: initial;
+    border-radius: 12px;
+    background: #3c3836;
+    border: 1px solid #98971a;
+    box-shadow: none;
+}
+
+.widget-dnd > switch:checked {
+    background: #7c6f64;
+}
+
+.widget-dnd > switch slider {
+    background: #98971a;
+    border-radius: 12px;
+}
+
+/* Sliders */
+scale {
+    padding: 0px;
+    margin: 0px 10px;
+}
+
+scale trough {
+    border-radius: 4px;
+    background: #3c3836;
+}
+
+scale highlight {
+    border-radius: 5px;
+    background: #98971a;
+    min-height: 10px;
+    margin-right: -5px;
+}
+
+scale slider {
+    margin: -10px;
+    min-width: 10px;
+    min-height: 10px;
+    background: transparent;
+    box-shadow: none;
+    padding: 0px;
+}
+
+/* Reset overlay indicator */
+.right.overlay-indicator {
+    all: unset;
+}
