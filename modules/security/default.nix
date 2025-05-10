@@ -1,6 +1,9 @@
-{ ... }: {
-
+{...}: {
   security.sudo.wheelNeedsPassword = false;
+  # Fix for "no new privileges" flag error
+  security.sudo.execWheelOnly = true;
+  # This ensures sudo doesn't get the "no new privs" flag
+  security.unprivilegedUsernsClone = true;
   security.pam.services.hyprlock = {};
   security.pam.services.hyprland.enableGnomeKeyring = true;
   security.pam.services.swaylock = {};
@@ -22,5 +25,4 @@
       }
     })
   '';
-
 }
