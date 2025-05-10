@@ -1,6 +1,5 @@
 {
   pkgs,
-  pkgs-stable,
   config,
   lib,
   ...
@@ -159,13 +158,50 @@ in {
           },
         }
 
+        -- GPU acceleration settings
+        config.webgpu_power_preference = "HighPerformance"
+        config.animation_fps = 60
+
         -- Wayland-specific settings for Hyprland
         if wezterm.target_triple == 'x86_64-unknown-linux-gnu' then
           -- Detect Wayland
-          local wayland = os.getenv("WAYLAND_DISPLAY") ~= nil
+          local wayland = os.getenv("WAYLAND_DISPLAY") ~= nil or
+                          os.getenv("XDG_SESSION_TYPE") == "wayland" or
+                          os.getenv("NIXOS_WAYLAND") == "1"
 
           if wayland then
             config.enable_wayland = true
+
+            -- Wayland-specific optimizations
+            config.webgpu_preferred_adapter = config.webgpu_preferred_adapter or wezterm.default_webgpu_adapter()
+            config.front_end = "WebGpu"  -- Better performance on modern systems with Wayland
+            config.enable_wayland_ime = true  -- Improved input method support
+
+            -- Fix clipboard issues on Wayland
+            config.selection_word_boundary = " \t\n{}[]()\"'`,;:"
+
+            -- Use native Wayland decorations when available
+            config.window_decorations = "RESIZE"
+
+            -- DPI handling (let Wayland handle this)
+            config.adjust_window_size_when_changing_font_size = false
+            config.pane_focus_follows_mouse = false
+
+            -- Better integration with system theme
+            local success, result = pcall(function()
+              local handle = io.popen("gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null")
+              if handle then
+                local output = handle:read("*a")
+                handle:close()
+                return output:match("'(.-)'")
+              end
+              return nil
+            end)
+
+            local theme = success and result or nil
+            if theme and theme:match("Gruvbox") then
+              -- Already using Gruvbox, no need to change color scheme
+            end
           end
         end
 

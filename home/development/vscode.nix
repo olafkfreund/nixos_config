@@ -134,6 +134,16 @@ in {
             }
           ];
 
+          # Wayland optimization settings
+          "window.titleBarStyle" = "custom";
+          "window.customTitleBarVisibility" = "auto";
+          "window.nativeTabs" = false; # Native tabs don't work well with Wayland
+          "window.nativeFullScreen" = true;
+          "editor.smoothScrolling" = true;
+          "workbench.list.smoothScrolling" = true;
+          "terminal.integrated.gpuAcceleration" = "on";
+          "update.mode" = "none"; # Managed by Nix
+          
           "workbench.colorTheme" = "Gruvbox Material Dark";
           "workbench.iconTheme" = "file-icons-colourless";
           "workbench.browser.preferredBrowser" = "google-chrome-stable";

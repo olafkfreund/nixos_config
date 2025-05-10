@@ -17,13 +17,16 @@ in {
     programs.chromium = {
       enable = true;
       package = pkgs.google-chrome;
-      commandLineArgs = ["--enable-features=UseOzonePlatform --ozone-platform=wayland --disable-gpu"];
-      # commandLineArgs = [
-      #   "--enable-features=UseOzonePlatform"
-      #   "--ozone-platform=wayland"
-      #   "--gtk-version=4"
-      #   "--enable-wayland-ime"
-      # ];
+      commandLineArgs = [
+        "--enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer"
+        "--ozone-platform=wayland"
+        "--enable-wayland-ime"
+        "--enable-gpu-rasterization"
+        "--enable-zero-copy"
+        "--ignore-gpu-blocklist"
+        "--enable-hardware-overlays"
+        "--gtk-version=4"
+      ];
     };
   };
 }

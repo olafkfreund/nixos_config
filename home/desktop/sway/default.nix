@@ -44,7 +44,7 @@ in {
         export QT_AUTO_SCREEN_SCALE_FACTOR="1"    # Enable automatic screen scaling for Qt
         export QT_ENABLE_HIGHDPI_SCALING="1"      # Enable high DPI scaling for QT
         export NIXOS_WAYLAND="1"                 # Enable Wayland support in NixOS
-        export NIXOS_OZONE_W="1"                 # Enable Ozone Wayland support in NixOS
+        export NIXOS_OZONE_WL="1"                # Enable Ozone Wayland support in NixOS
         export ELECTRON_OZONE_PLATFORM_HINT=wayland  # Set Electron to automatically choose between Wayland and X11
       '';
       config = {

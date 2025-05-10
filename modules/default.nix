@@ -29,6 +29,7 @@
     ./desktop/wldash/default.nix
     ./desktop/cloud-sync/default.nix
     ./desktop/vnc/default.nix
+    ./desktop/electron-config.nix
     ./obsidian/default.nix
     ./office/default.nix
     # ./intune-portal/default.nix
