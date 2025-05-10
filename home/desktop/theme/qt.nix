@@ -11,20 +11,21 @@
   platformThemeName =
     if isPlasmaEnabled
     then "kde"
-    else "gnome";
+    else "qtct";
 in {
   qt = {
     enable = true;
-    platformTheme = lib.mkForce {
-      name = platformThemeName;
-      package =
+    platformTheme = {
+      name = lib.mkForce platformThemeName;
+      package = lib.mkForce (
         if isPlasmaEnabled
         then pkgs.libsForQt5.qtstyleplugin-kvantum
-        else pkgs.adwaita-qt;
+        else pkgs.qt6ct
+      );
     };
-    style = lib.mkForce {
-      name = "adwaita-dark";
-      package = pkgs.adwaita-qt;
+    style = {
+      name = lib.mkForce "adwaita-dark";
+      package = lib.mkForce pkgs.adwaita-qt;
     };
   };
 
@@ -34,11 +35,12 @@ in {
     qt6Packages.qtstyleplugin-kvantum
     adwaita-qt
     adwaita-qt6
+    qt6ct
   ];
 
   # Add environment variables for Qt application integration
   home.sessionVariables = lib.mkIf (!isPlasmaEnabled) {
-    # Use GNOME theme by default except in KDE Plasma
-    QT_QPA_PLATFORMTHEME = "gnome";
+    # Use qt6ct by default except in KDE Plasma
+    QT_QPA_PLATFORMTHEME = lib.mkForce "qtct";
   };
 }
