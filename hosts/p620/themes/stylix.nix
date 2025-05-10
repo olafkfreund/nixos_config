@@ -1,8 +1,4 @@
-{
-  pkgs,
-  lib,
-  ...
-}: {
+{pkgs, ...}: {
   # Stylix theming
   stylix = {
     enable = true;
@@ -47,7 +43,7 @@
     # Cursor settings
     cursor = {
       name = "Bibata-Modern-Ice";
-      package = pkgs.bibata-cursors; # You need to add this line
+      package = pkgs.bibata-cursors;
       size = 26;
     };
 
