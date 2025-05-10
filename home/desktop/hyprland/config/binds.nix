@@ -89,7 +89,7 @@
     # System controls
     bind = $mainMod SHIFT, P, exec, screenshoot
     bind = $mainMod SHIFT, S, exec, rwebsearch
-    bind = $mainMod SHIFT, I, exec, cliphist list | rofi -dmenu -p "Clipboard History" | cliphist decode | wl-copy
+    bind = $mainMod SHIFT, I, exec, open-clip
     bind = $mainMod, N, exec, swaync-client --toggle-panel
     bind = $mainMod SHIFT, N, exec, swaync-client --close-all
     bind = $mainMod ALT, L, exec, hyprlock

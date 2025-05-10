@@ -54,6 +54,7 @@
       # virtualglLib
       vulkan-loader
       vulkan-tools
+      microcode-amd
     ];
   };
 

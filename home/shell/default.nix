@@ -18,5 +18,6 @@
     ./markdown/default.nix
     ./gh/default.nix
     ./fastfetch/default.nix
+    ./clipse/default.nix
   ];
 }
