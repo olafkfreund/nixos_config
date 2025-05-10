@@ -43,7 +43,7 @@
     env = GDK_BACKEND,wayland,x11          # Set GTK backend to Wayland, fallback to X11
     env = GTK_THEME,Gruvbox-Dark-B-LB      # Set GTK theme
     env = QT_QPA_PLATFORM,wayland;xcb      # Set Qt platform to Wayland, fallback to X11
-    env = QT_QPA_PLATFORMTHEME,qt5ct       # Use qt5ct for Qt theming
+    env = QT_QPA_PLATFORMTHEME,adwaita     # Use adwaita for Qt theming
     env = QT_WAYLAND_DISABLE_WINDOWDECORATION,1  # Disable window decorations in Qt Wayland
     env = QT_AUTO_SCREEN_SCALE_FACTOR,1    # Enable automatic screen scaling for Qt
 
