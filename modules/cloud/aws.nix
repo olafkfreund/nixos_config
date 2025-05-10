@@ -24,7 +24,6 @@ in {
       aws-iam-authenticator
       eksctl
       istioctl
-      aws-vault
     ];
   };
 }

@@ -25,7 +25,6 @@
     gnome-contacts
     gnome-weather
     gnome-online-accounts
-    gnome-themes-extra
     gnome-tweaks
     gnome-control-center
     gnome-boxes

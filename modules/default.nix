@@ -1,5 +1,6 @@
 {...}: {
   imports = [
+    ./common/default.nix # Import our new common modules
     ./nix/nix.nix
     ./fonts/fonts.nix
     ./programs/default.nix

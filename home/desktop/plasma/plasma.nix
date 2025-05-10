@@ -1,15 +1,11 @@
-{pkgs, ...}: {
-  home.packages = with pkgs; [
-    kdePackages.xdg-desktop-portal-kde
-    kdePackages.polkit-kde-agent-1
-    kdePackages.qt6ct
-    kdePackages.qt6gtk2
-    libsForQt5.qt5.qtwayland
-    kdePackages.qtwayland
-    #Other
-    libreoffice-qt
-    pywal
-    wpgtk
-    polychromatic
-  ];
+{
+  pkgs,
+  lib,
+  ...
+}: let
+  plasmaModules = import ../../../modules/common/plasma-packages.nix {inherit lib pkgs;};
+in {
+  home.packages =
+    plasmaModules.plasmaCommonPackages
+    ++ plasmaModules.plasmaHomePackages;
 }

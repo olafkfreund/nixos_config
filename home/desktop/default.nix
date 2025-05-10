@@ -11,7 +11,6 @@
     ./terminals/default.nix
     ./rofi/rofi.nix
     ./theme/default.nix
-    ./com.nix
     ./neofetch/default.nix
     ./gaming/default.nix
     ./sound/default.nix
