@@ -17,8 +17,6 @@ in {
       alejandra
       deadnix
       statix
-      # Add the SSH extension
-      vscode-extensions.ms-vscode-remote.remote-ssh
     ];
 
     home.sessionVariables = {
@@ -46,6 +44,7 @@ in {
           vscode-extensions.pkief.material-product-icons
           vscode-extensions.pkief.material-icon-theme
           vscode-extensions.ms-vscode-remote.remote-containers
+          vscode-extensions.ms-vscode-remote.remote-ssh
           vscode-extensions.ms-kubernetes-tools.vscode-kubernetes-tools
           vscode-extensions.ms-azuretools.vscode-docker
           vscode-extensions.mads-hartmann.bash-ide-vscode
