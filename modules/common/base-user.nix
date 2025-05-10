@@ -9,7 +9,7 @@
     isNormalUser = true;
     description = "Olaf K-Freund";
     extraGroups = ["wheel" "video" "scanner" "lp"];
-    shell = pkgs.zsh;
+    shell = lib.mkDefault pkgs.zsh; # Changed to mkDefault to allow host configs to override
     packages = with pkgs; [vim wally-cli];
   };
 

@@ -17,56 +17,79 @@
     ../../modules/system-tweaks/kernel-tweaks/32GB-SYSTEM/32GB-SYSTEM.nix
   ];
 
-  aws.packages.enable = lib.mkForce false;
-  media.droidcam.enable = lib.mkForce true;
-  azure.packages.enable = lib.mkForce false;
-  cloud-tools.packages.enable = lib.mkForce false;
-  google.packages.enable = lib.mkForce false;
-  k8s.packages.enable = lib.mkForce false;
-  # openshift.packages.enable = true;
-  terraform.packages.enable = lib.mkForce false;
+  # Set hostname
+  networking.hostName = "dex5550";
 
-  # Development tools
-  ansible.development.enable = lib.mkForce false;
-  cargo.development.enable = lib.mkForce true;
-  github.development.enable = lib.mkForce true;
-  go.development.enable = lib.mkForce true;
-  java.development.enable = lib.mkForce false;
-  lua.development.enable = lib.mkForce true;
-  nix.development.enable = lib.mkForce true;
-  shell.development.enable = lib.mkForce true;
-  devshell.development.enable = lib.mkForce true;
-  python.development.enable = lib.mkForce true;
-  nodejs.development.enable = lib.mkForce true;
+  # Choose networking profile: "server", "desktop", or "minimal"
+  networking.profile = "server";
 
-  # Git tools
-  programs.lazygit.enable = lib.mkForce true;
-  programs.thunderbird.enable = lib.mkForce false;
-  programs.obsidian.enable = lib.mkForce false;
-  programs.office.enable = lib.mkForce false;
-  programs.webcam.enable = lib.mkForce true;
+  # Use the new features system instead of multiple lib.mkForce calls
+  features = {
+    development = {
+      enable = true;
+      ansible = false;
+      cargo = true;
+      github = true;
+      go = true;
+      java = false;
+      lua = true;
+      nix = true;
+      shell = true;
+      devshell = true;
+      python = true;
+      nodejs = true;
+    };
 
-  # Virtualization tools
-  services.docker.enable = lib.mkForce true;
-  services.incus.enable = lib.mkForce false;
-  services.podman.enable = lib.mkForce true;
-  services.spice.enable = lib.mkForce true;
-  services.libvirt.enable = lib.mkForce true;
-  services.sunshine.enable = lib.mkForce true;
+    virtualization = {
+      enable = true;
+      docker = true;
+      incus = false;
+      podman = true;
+      spice = true;
+      libvirt = true;
+      sunshine = true;
+    };
 
-  # Password management
-  security.onepassword.enable = lib.mkForce true;
-  security.gnupg.enable = lib.mkForce true;
+    cloud = {
+      enable = false;
+      aws = false;
+      azure = false;
+      google = false;
+      k8s = false;
+      terraform = false;
+    };
 
-  # VPN
-  vpn.tailscale.enable = lib.mkForce true;
+    security = {
+      enable = true;
+      onepassword = true;
+      gnupg = true;
+    };
 
-  # AI
-  ai.ollama.enable = lib.mkForce false;
+    networking = {
+      enable = true;
+      tailscale = true;
+    };
 
-  # Printing
-  services.print.enable = lib.mkForce false;
+    ai = {
+      enable = false;
+      ollama = false;
+    };
 
+    programs = {
+      lazygit = true;
+      thunderbird = false;
+      obsidian = false;
+      office = false;
+      webcam = true;
+      print = false;
+    };
+
+    media = {
+      droidcam = true;
+    };
+  };
+
+  # Specific service configurations
   services.xserver = {
     enable = true;
     desktopManager.gnome.enable = true;
@@ -75,40 +98,26 @@
       "-dpi 96"
     ];
   };
+
+  # Network-specific overrides that go beyond the network profile
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
   systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
-
-  # Set a timeout for network-online.target to prevent long delays
   systemd.network.wait-online.timeout = 10;
 
-  # Network configuration - using systemd-networkd instead of NetworkManager
-  networking = {
-    networkmanager.enable = false;
-    hostName = "dex5550";
-    nameservers = [
-      "8.8.8.8"
-      "8.8.4.4"
-    ];
-    useDHCP = false;
-    useNetworkd = true;
-    # Enable resolved for DNS resolution
-    useHostResolvConf = false;
-  };
+  # Since we're using the "server" networking profile, we only need to override specific settings
+  networking.nameservers = [
+    "8.8.8.8"
+    "8.8.4.4"
+  ];
+  # In case the networking profile doesn't apply all needed settings
+  networking.useNetworkd = lib.mkForce true;
+  networking.useHostResolvConf = false;
 
-  # Enable systemd-resolved for DNS resolution with systemd-networkd
-  services.resolved = {
-    enable = true;
-    dnssec = "true";
-    fallbackDns = [
-      "8.8.8.8"
-      "8.8.4.4"
-    ];
-  };
-
+  # Wayland configuration
   programs.sway = {
     enable = true;
     xwayland.enable = true;
-    wrapperFeatures.gtk = true; # so that gtk works properly
+    wrapperFeatures.gtk = true;
     extraPackages = with pkgs; [
       swaylock
       swayidle
@@ -119,7 +128,7 @@
       wlr-randr
       grim
       slurp
-      dmenu # Dmenu is the default in the config but i recommend wofi since its wayland native
+      dmenu
       foot
     ];
     extraSessionCommands = ''
@@ -127,12 +136,11 @@
       export QT_QPA_PLATFORM=wayland
       export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
       export _JAVA_AWT_WM_NONREPARENTING=1
-      # export WLR_BACKENDS="headless,libinput"
-      # export WLR_LIBINPUT_NO_DEVICES=1
       export MOZ_ENABLE_WAYLAND=1
     '';
   };
 
+  # Hardware-specific configurations
   security.wrappers.sunshine = {
     owner = "root";
     group = "root";
@@ -140,6 +148,7 @@
     source = "${pkgs.sunshine}/bin/sunshine";
   };
 
+  # Bridge network configuration
   systemd.network = {
     netdevs."br0" = {
       netdevConfig = {
@@ -181,35 +190,22 @@
     };
   };
 
-  users.defaultUserShell = pkgs.zsh;
-
-  environment.shells = with pkgs; [zsh];
-
-  programs.zsh.enable = true;
-
-  environment.sessionVariables = {
-    NIXOS_OZONE_WL = "1";
-    NH_FLAKE = "/home/${username}/.config/nixos";
-  };
-
+  # User-specific configuration
   users.users.${username} = {
     isNormalUser = true;
     description = "Olaf K-Freund";
-    extraGroups = ["networkmanager" "openrazer" "wheel" "docker" "podman" "video" "scanner" "lp" "lxd" "incus-admin"];
+    extraGroups = ["openrazer" "wheel" "docker" "podman" "video" "scanner" "lp" "lxd" "incus-admin"];
     shell = pkgs.zsh;
     packages = with pkgs; [
       vim
       wally-cli
     ];
   };
+
+  # Other hardware/service configurations
   hardware.keyboard.zsa.enable = true;
-
   services.ollama.acceleration = "cpu";
-
   hardware.nvidia-container-toolkit.enable = false;
 
-  networking.firewall.enable = false;
-  networking.nftables.enable = true;
-  networking.timeServers = ["pool.ntp.org"];
   system.stateVersion = "24.11";
 }

@@ -23,6 +23,78 @@
     ../../modules/development/default.nix
   ];
 
+  # Set hostname
+  networking.hostName = "p510";
+
+  # Choose networking profile: "desktop", "server", or "minimal"
+  networking.profile = "server";
+
+  # Use the new features system instead of multiple lib.mkForce calls
+  features = {
+    development = {
+      enable = true;
+      ansible = false;
+      cargo = true;
+      github = true;
+      go = true;
+      java = true;
+      lua = true;
+      nix = true;
+      shell = true;
+      devshell = true;
+      python = true;
+      nodejs = true;
+    };
+
+    virtualization = {
+      enable = true;
+      docker = true;
+      incus = false;
+      podman = true;
+      spice = true;
+      libvirt = true;
+      sunshine = true;
+    };
+
+    cloud = {
+      enable = true;
+      aws = false;
+      azure = false;
+      google = false;
+      k8s = false;
+      terraform = false;
+    };
+
+    security = {
+      enable = true;
+      onepassword = true;
+      gnupg = true;
+    };
+
+    networking = {
+      enable = true;
+      tailscale = true;
+    };
+
+    ai = {
+      enable = true;
+      ollama = true;
+    };
+
+    programs = {
+      lazygit = true;
+      thunderbird = false;
+      obsidian = false;
+      office = false;
+      webcam = true;
+      print = false;
+    };
+
+    media = {
+      droidcam = true;
+    };
+  };
+
   # Enable secure DNS with DNS over TLS
   services.secure-dns = {
     enable = true;
@@ -33,56 +105,11 @@
     ];
   };
 
-  aws.packages.enable = lib.mkForce false;
-  media.droidcam.enable = lib.mkForce true;
-  azure.packages.enable = lib.mkForce false;
-  cloud-tools.packages.enable = lib.mkForce false;
-  steampipe.packages.enable = lib.mkForce false;
-  google.packages.enable = lib.mkForce false;
-  k8s.packages.enable = lib.mkForce false;
-  # openshift.packages.enable = true;
-  terraform.packages.enable = lib.mkForce false;
-
-  # Development tools
-  ansible.development.enable = lib.mkForce false;
-  cargo.development.enable = lib.mkForce true;
-  github.development.enable = lib.mkForce true;
-  go.development.enable = lib.mkForce true;
-  java.development.enable = lib.mkForce true;
-  lua.development.enable = lib.mkForce true;
-  nix.development.enable = lib.mkForce true;
-  shell.development.enable = lib.mkForce true;
-  devshell.development.enable = lib.mkForce true;
-  python.development.enable = lib.mkForce true;
-  nodejs.development.enable = lib.mkForce true;
-
-  # Git tools
-  programs.lazygit.enable = lib.mkForce true;
-  programs.thunderbird.enable = lib.mkForce false;
-  programs.obsidian.enable = lib.mkForce false;
-  programs.office.enable = lib.mkForce false;
-  programs.webcam.enable = lib.mkForce true;
-
-  # Virtualization tools
-  services.docker.enable = lib.mkForce true;
-  services.incus.enable = lib.mkForce false;
-  services.podman.enable = lib.mkForce true;
-  services.spice.enable = lib.mkForce true;
-  services.libvirt.enable = lib.mkForce true;
-  services.sunshine.enable = lib.mkForce true;
-
-  # Password management
-  security.onepassword.enable = lib.mkForce true;
-  security.gnupg.enable = lib.mkForce true;
-
-  # VPN
-  vpn.tailscale.enable = lib.mkForce true;
-
-  # AI
-  ai.ollama.enable = lib.mkForce true;
-
-  # Printing
-  services.print.enable = lib.mkForce false;
+  # Specific service configurations
+  programs.streamdeck-ui = {
+    enable = true;
+    autoStart = true;
+  };
 
   services.xserver = {
     enable = true;
@@ -92,13 +119,10 @@
     ];
     videoDrivers = ["nvidia"];
   };
-  programs.streamdeck-ui = {
-    enable = true;
-    autoStart = true; # optional
-  };
+
   programs.sway = {
     enable = true;
-    wrapperFeatures.gtk = true; # so that gtk works properly
+    wrapperFeatures.gtk = true;
     extraPackages = with pkgs; [
       swaylock
       swayidle
@@ -109,7 +133,7 @@
       grim
       slurp
       foot
-      dmenu # Dmenu is the default in the config but i recommend wofi since its wayl
+      dmenu
     ];
     extraSessionCommands = ''
       export SDL_VIDEODRIVER=wayland
@@ -117,11 +141,10 @@
       export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
       export _JAVA_AWT_WM_NONREPARENTING=1
       export MOZ_ENABLE_WAYLAND=1
-      # export WLR_BACKENDS="headless,libinput"
-      # export WLR_LIBINPUT_NO_DEVICES="1"
     '';
   };
 
+  # Hardware-specific configurations
   security.wrappers.sunshine = {
     owner = "root";
     group = "root";
@@ -129,33 +152,18 @@
     source = "${pkgs.sunshine}/bin/sunshine";
   };
 
-  # Disable NetworkManager services
+  # Network-specific overrides that go beyond the network profile
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
   systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
 
-  # Disable NetworkManager and enable systemd-networkd
-  networking.networkmanager.enable = false;
-  networking.hostName = "p510";
+  # Since we're using the "server" networking profile, we only need to override specific settings
   networking.nameservers = [
     "8.8.8.8"
     "8.8.4.4"
   ];
-  networking = {
-    useDHCP = false;
-    useNetworkd = true;
-    # Enable resolved for DNS resolution
-    useHostResolvConf = false;
-  };
-
-  # Enable systemd-resolved for DNS resolution with systemd-networkd
-  services.resolved = {
-    enable = true;
-    dnssec = "true";
-    fallbackDns = [
-      "8.8.8.8"
-      "8.8.4.4"
-    ];
-  };
+  # In case the networking profile doesn't apply all needed settings
+  networking.useNetworkd = lib.mkForce true;
+  networking.useHostResolvConf = false;
 
   # Configure systemd-networkd for your network interfaces
   systemd.network = {
@@ -169,7 +177,6 @@
           DHCP = "ipv4";
           IPv6AcceptRA = true;
         };
-        # Higher route metric to prioritize wired connection
         dhcpV4Config = {
           RouteMetric = 10;
         };
@@ -181,7 +188,6 @@
           MulticastDNS = true;
           IPv6AcceptRA = true;
         };
-        # Lower metric for wireless (higher priority number means lower priority)
         dhcpV4Config = {
           RouteMetric = 20;
         };
@@ -189,15 +195,7 @@
     };
   };
 
-  users.defaultUserShell = pkgs.zsh;
-  environment.shells = with pkgs; [zsh];
-  programs.zsh.enable = true;
-  environment.sessionVariables = {
-    NIXOS_OZONE_WL = "1";
-    NH_FLAKE = "/home/olafkfreund/.config/nixos";
-  };
-
-  # Remove networkmanager from user groups since we're not using it
+  # User-specific configuration
   users.users.olafkfreund = {
     isNormalUser = true;
     description = "Olaf K-Freund";
@@ -209,12 +207,11 @@
     ];
   };
 
+  # NVIDIA specific configurations
   hardware.keyboard.zsa.enable = true;
   services.ollama.acceleration = "cuda";
-  nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16" "dotnet-sdk-6.0.428"];
   hardware.nvidia-container-toolkit.enable = true;
-  networking.firewall.enable = false;
-  networking.nftables.enable = true;
-  networking.timeServers = ["pool.ntp.org"];
+
+  nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16" "dotnet-sdk-6.0.428"];
   system.stateVersion = "24.11";
 }
