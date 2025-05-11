@@ -15,26 +15,11 @@ with lib; let
     control-center-margin-right = 10;
     control-center-margin-left = 10;
     widgets = [
-      "buttons-grid"
       "dnd"
       "title"
       "notifications"
     ];
     widget-config = {
-      buttons-grid.actions = [
-        {
-          label = "󰐥";
-          command = "systemctl poweroff";
-        }
-        {
-          label = "󰑐";
-          command = "systemctl reboot";
-        }
-        {
-          label = "󰌿";
-          command = "hyprlock";
-        }
-      ];
       dnd = {
         text = "Do not disturb";
       };
@@ -54,13 +39,16 @@ in {
   };
 
   config = mkIf cfg.enable {
+    # Enable the stylix target for swaync
+    stylix.targets.swaync.enable = true;
+
     home = {
       packages = [pkgs.swaynotificationcenter];
     };
 
     xdg.configFile = {
       "swaync/config.json".text = builtins.toJSON swayncConfig;
-      "swaync/style.css".source = ./style.css;
+      # "swaync/style.css".source = ./style.css;
     };
 
     wayland.windowManager.hyprland.settings = {

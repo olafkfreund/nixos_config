@@ -203,7 +203,6 @@
                     "hyprland"
                     "spicetify"
                     "sway"
-                    "swaync"
                   ]);
               }
             ];

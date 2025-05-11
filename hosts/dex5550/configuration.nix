@@ -21,8 +21,11 @@ in {
   # Set hostname from variables
   networking.hostName = vars.hostName;
 
-  # Choose networking profile: "server", "desktop", or "minimal"
-  networking.profile = "server";
+  # Choose networking profile: "desktop" for NetworkManager
+  networking.profile = "desktop";
+
+  # Use nameservers from variables
+  networking.nameservers = vars.nameservers;
 
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
@@ -100,18 +103,6 @@ in {
     ];
   };
 
-  # Network-specific overrides that go beyond the network profile
-  systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
-  systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
-  systemd.network.wait-online.timeout = 10;
-
-  # Use nameservers from variables
-  networking.nameservers = vars.nameservers;
-
-  # In case the networking profile doesn't apply all needed settings
-  networking.useNetworkd = lib.mkForce true;
-  networking.useHostResolvConf = false;
-
   # Wayland configuration
   programs.sway = {
     enable = true;
@@ -145,48 +136,6 @@ in {
     group = "root";
     capabilities = "cap_sys_admin+p";
     source = "${pkgs.sunshine}/bin/sunshine";
-  };
-
-  # Bridge network configuration
-  systemd.network = {
-    netdevs."br0" = {
-      netdevConfig = {
-        Name = "br0";
-        Kind = "bridge";
-      };
-    };
-    networks = {
-      "enp1s0" = {
-        name = "enp1s0";
-        DHCP = "ipv4";
-        networkConfig = {
-          MulticastDNS = true;
-        };
-      };
-      "wlp2s0" = {
-        name = "wlp2s0";
-        DHCP = "ipv4";
-        networkConfig = {
-          MulticastDNS = true;
-        };
-      };
-      "10-lan" = {
-        matchConfig.Name = ["enp1s0" "vm-*"];
-        networkConfig = {
-          Bridge = "br0";
-        };
-      };
-      "10-lan-bridge" = {
-        matchConfig.Name = "br0";
-        networkConfig = {
-          Address = ["192.168.1.222/24"];
-          Gateway = "192.168.1.254";
-          DNS = ["8.8.8.8" "8.8.4.4"];
-          IPv6AcceptRA = false;
-        };
-        linkConfig.RequiredForOnline = "routable";
-      };
-    };
   };
 
   # User-specific configuration from variables

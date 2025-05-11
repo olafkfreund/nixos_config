@@ -6,14 +6,14 @@
 
 /* Main container */
 .control-center {
-  background: alpha(#282828, 0.95);
+  background: #282828;
   border: 1px solid #3c3836;
   border-radius: 8px;
 }
 
 /* Notification styles */
 .notification {
-  background: alpha(#32302f, 0.95);
+  background: #32302f;
   border: 1px solid #504945;
   border-radius: 6px;
   margin: 6px;
@@ -37,11 +37,11 @@
 
 .notification-default-action:hover,
 .notification-action:hover {
-  background: alpha(#504945, 0.7);
+  background: #504945;
 }
 
 .notification button:hover {
-  background: alpha(#504945, 0.7);
+  background: #504945;
 }
 
 .close-button {
@@ -67,7 +67,7 @@
 }
 
 .widget-buttons-grid > flowbox > flowboxchild > button {
-  background: alpha(#3c3836, 0.7);
+  background: #3c3836;
   color: #ebdbb2;
   border-radius: 8px;
   padding: 8px 16px;
@@ -109,7 +109,7 @@
   color: #ebdbb2;
   font-size: 16px;
   padding: 8px;
-  background: transparent;
+  background: #282828;
   border-bottom: 1px solid #504945;
 }
 
@@ -128,7 +128,7 @@
 
 /* Notifications list */
 .notifications-list {
-  background: transparent;
+  background: #282828;
   padding: 8px;
 }
 
@@ -137,7 +137,7 @@
 }
 
 .notification-row:hover {
-  background: alpha(#504945, 0.4);
+  background: #504945;
 }
 
 /* Text styling */
@@ -159,17 +159,17 @@
 
 /* Scrollbar styling */
 scrollbar {
-  background: transparent;
+  background: #1d2021;
   border-radius: 4px;
   min-width: 8px;
 }
 
 scrollbar slider {
-  background: alpha(#928374, 0.6);
+  background: #928374;
   border-radius: 4px;
   min-width: 8px;
 }
 
 scrollbar slider:hover {
-  background: alpha(#928374, 0.8);
+  background: #a89984;
 }
