@@ -1,15 +1,17 @@
-{...}: {
+{...}: let
+  vars = import ../variables.nix;
+in {
   home-manager.extraSpecialArgs = {
     vars = {
-      hostName = "p620";
+      hostName = vars.hostName;
       class = "workstation";
       screen = {
-        name = "eDP-1";
-        ultrawide = false;
-        hidpi = false;
-        width = 1920;
-        height = 1080;
-        refresh = 60;
+        name = "HDMI-A-1";
+        ultrawide = true;
+        hidpi = true;
+        width = 3840;
+        height = 2160;
+        refresh = 120;
       };
     };
   };

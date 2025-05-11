@@ -2,10 +2,11 @@
   pkgs,
   lib,
   inputs,
-  username,
   pkgs-unstable,
   ...
-}: {
+}: let
+  vars = import ./variables.nix;
+in {
   imports = [
     ./nixos/hardware-configuration.nix
     ./nixos/screens.nix
@@ -23,8 +24,8 @@
     # ../../modules/system-tweaks/kernel-tweaks/226GB-SYSTEM/226gb-system.nix
   ];
 
-  # Set hostname
-  networking.hostName = "p620";
+  # Set hostname from variables
+  networking.hostName = vars.hostName;
 
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "server";
@@ -108,7 +109,7 @@
   # AI Ollama-specific configuration that goes beyond simple enabling
   ai.ollama = {
     enableRag = true;
-    ragDirectory = "/home/olafkfreund/documents/rag-files";
+    ragDirectory = "/home/${vars.username}/documents/rag-files";
     allowBrokenPackages = false;
   };
 
@@ -124,9 +125,9 @@
         "-nolisten tcp"
         "-dpi 96"
       ];
+      videoDrivers = ["${vars.gpu}gpu"]; # Correct way to set the video driver
     };
   };
-  services.xserver.videoDrivers = ["amdgpu"];
 
   # System packages
   environment.systemPackages = [
@@ -150,11 +151,9 @@
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
   systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
 
-  # Since we're using the "server" networking profile, we only need to override specific settings
-  networking.nameservers = [
-    "1.1.1.1"
-    "8.8.8.8"
-  ];
+  # Using nameservers from variables.nix
+  networking.nameservers = vars.nameservers;
+
   # In case the networking profile doesn't apply all needed settings
   networking.useNetworkd = lib.mkForce true;
 
@@ -200,11 +199,11 @@
     requires = ["pulseaudio.service"];
   };
 
-  # User-specific configuration
-  users.users.${username} = {
+  # User-specific configuration from variables
+  users.users.${vars.username} = {
     isNormalUser = true;
-    description = "Olaf K-Freund";
-    extraGroups = ["openrazer" "libvirtd" "wheel" "docker" "podman" "video" "scanner" "lp" "dialout" "lxd" "incus-admin"];
+    description = vars.fullName;
+    extraGroups = vars.userGroups;
     shell = pkgs.zsh;
     packages = with pkgs; [
       vim
@@ -213,10 +212,10 @@
   };
 
   # File systems and services
-  services.nfs.server.enable = true;
-  services.nfs.server.exports = ''
-    /mnt/data         *(rw,fsid=0,no_subtree_check)
-  '';
+  services.nfs.server = lib.mkIf vars.services.nfs.enable {
+    enable = true;
+    exports = vars.services.nfs.exports;
+  };
   fileSystems."/mnt/media" = {
     device = "192.168.1.127:/mnt/media";
     fsType = "nfs";
@@ -230,7 +229,7 @@
   systemd.services.fwupd.serviceConfig.LimitNOFILE = 524288;
 
   # Ollama specific configurations for AMD GPU
-  services.ollama.acceleration = lib.mkForce "rocm";
+  services.ollama.acceleration = lib.mkForce vars.acceleration;
   services.ollama.rocmOverrideGfx = lib.mkForce "11.0.0";
   services.ollama.environmentVariables.HCC_AMDGPU_TARGET = lib.mkForce "gfx1100";
   services.ollama.environmentVariables.ROC_ENABLE_PRE_VEGA = lib.mkForce "1";

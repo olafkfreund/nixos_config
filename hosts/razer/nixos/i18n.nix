@@ -15,10 +15,10 @@ in {
     LC_TELEPHONE = vars.locale;
     LC_TIME = vars.locale;
   };
-  console.keyMap = vars.keyboardLayout;
+  console.keyMap = vars.keyboardLayouts.console;
   console.font = "${pkgs.terminus_font}/share/consolefonts/ter-u28n.psf.gz";
   services.xserver = {
-    xkb.layout = vars.keyboardLayout;
+    xkb.layout = vars.keyboardLayouts.xserver;
     xkb.variant = "";
   };
 }

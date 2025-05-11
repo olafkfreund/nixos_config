@@ -43,7 +43,11 @@
   # Locale and time
   timezone = "Europe/London";
   locale = "en_GB.UTF-8";
-  keyboardLayout = "gb";
+  # Different settings for console and X server keyboard layouts
+  keyboardLayouts = {
+    console = "uk"; # For virtual console
+    xserver = "gb"; # For X server and Wayland
+  };
 
   # Theme settings
   theme = {

@@ -61,6 +61,6 @@
   # Console configuration
   console = {
     earlySetup = true; # Setup console early for faster boot
-    keyMap = "uk"; # Set keyboard layout
+    # keyMap definition removed to avoid conflict with i18n.nix
   };
 }
