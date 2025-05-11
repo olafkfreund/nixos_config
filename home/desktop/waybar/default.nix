@@ -182,8 +182,8 @@
           tooltip = "true";
           tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
           format-alt = "  {:%d/%m}";
-          on-click = "gnome-calendar";
-          # on-left-click = "notify-send \"Date / Time\" \"󰃭 $(date \"+%a %h %d\")   $(date \"+%I:%M %p\")\"";
+          on-click = "foot -e 'peaclock'";
+          on-left-click = "foot -e 'zsh -c thunderbird -calendar'";
         };
 
         "battery" = {
@@ -221,7 +221,7 @@
           format-linked = "{ifname} (No IP)";
           format-disconnected = "<span foreground='#fb4934'> 󰌙 </span>";
           format-alt = "{signalStrength}% ";
-          on-click = "${pkgs.networkmanager}/bin/nmtui";
+          on-click = "foot -e 'nmtui'";
         };
 
         "bluetooth" = {
@@ -230,7 +230,7 @@
           format-off = "";
           format-disabled = ""; # an empty format will hide the module
           format-connected = "<span foreground='#fabd2f'>  </span>{num_connections} ";
-          on-click = "${pkgs.bluetuith}/bin/bluetuith --color dark";
+          on-click = "foot -e 'bluetuith --color dark'";
         };
 
         "pulseaudio" = {
