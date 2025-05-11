@@ -1,7 +1,7 @@
 {
   config,
   lib,
-  pkgs-unstable,
+  pkgs,
   ...
 }:
 with lib; let
@@ -18,7 +18,8 @@ in {
   config = mkIf cfg.enable {
     environment.systemPackages =
       [
-        pkgs-unstable.nodejs_24
+        pkgs.nodejs_24
+        pkgs.pm2
       ]
       ++ cfg.packages;
   };
