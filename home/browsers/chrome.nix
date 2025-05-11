@@ -18,14 +18,25 @@ in {
       enable = true;
       package = pkgs.google-chrome;
       commandLineArgs = [
-        "--enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer"
+        "--enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer,VaapiVideoDecoder,VaapiVideoEncoder,VaapiIgnoreDriverChecks"
         "--ozone-platform=wayland"
         "--enable-wayland-ime"
         "--enable-gpu-rasterization"
         "--enable-zero-copy"
         "--ignore-gpu-blocklist"
         "--enable-hardware-overlays"
+        "--enable-accelerated-video-decode"
+        "--enable-accelerated-video-encode"
+        "--use-gl=egl"
+        "--force-dark-mode"
         "--gtk-version=4"
+      ];
+      extraPackages = [pkgs.chrome-gruvbox-theme];
+      extensions = [
+        {
+          id = "gruvbox-theme";
+          path = "${pkgs.chrome-gruvbox-theme}";
+        }
       ];
     };
   };

@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "Gruvbox Dark Theme",
+  "version": "1.0",
+  "theme": {
+    "colors": {
+      "frame": [40, 40, 40],
+      "frame_inactive": [40, 40, 40],
+      "toolbar": [40, 40, 40],
+      "tab_text": [235, 219, 178],
+      "tab_background_text": [168, 153, 132],
+      "bookmark_text": [235, 219, 178],
+      "ntp_background": [40, 40, 40],
+      "ntp_text": [235, 219, 178],
+      "ntp_link": [69, 133, 136],
+      "button_background": [60, 56, 54]
+    },
+    "tints": {
+      "buttons": [0.33, 0.5, 0.47],
+      "frame_inactive": [0.5, 0.5, 0.5]
+    },
+    "properties": {
+      "ntp_background_alignment": "center",
+      "ntp_background_repeat": "no-repeat"
+    }
+  }
+}

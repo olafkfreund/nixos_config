@@ -1,0 +1,103 @@
+/* Gruvbox Dark Theme for Chrome */
+:root {
+  /* Gruvbox Dark Colors */
+  --gruvbox-bg-h: #1d2021;
+  --gruvbox-bg: #282828;
+  --gruvbox-bg1: #3c3836;
+  --gruvbox-bg2: #504945;
+  --gruvbox-fg: #ebdbb2;
+  --gruvbox-fg1: #a89984;
+  --gruvbox-red: #cc241d;
+  --gruvbox-green: #98971a;
+  --gruvbox-yellow: #d79921;
+  --gruvbox-blue: #458588;
+  --gruvbox-purple: #b16286;
+  --gruvbox-aqua: #689d6a;
+  --gruvbox-orange: #d65d0e;
+}
+
+/* Main UI Elements */
+.browser-toolbar,
+.toolbar,
+.bookmark-bar,
+.tab-strip {
+  background-color: var(--gruvbox-bg) !important;
+  border: none !important;
+}
+
+/* Tabs */
+.tab {
+  background-color: var(--gruvbox-bg1) !important;
+  color: var(--gruvbox-fg1) !important;
+  border: none !important;
+  border-radius: 4px 4px 0 0 !important;
+  margin: 0 2px !important;
+}
+
+.tab.selected {
+  background-color: var(--gruvbox-bg) !important;
+  color: var(--gruvbox-fg) !important;
+}
+
+.tab:hover {
+  background-color: var(--gruvbox-bg2) !important;
+}
+
+/* URL Bar */
+#urlbar {
+  background-color: var(--gruvbox-bg1) !important;
+  color: var(--gruvbox-fg) !important;
+  border: 1px solid var(--gruvbox-bg2) !important;
+  border-radius: 4px !important;
+}
+
+/* Buttons */
+.toolbar-button {
+  color: var(--gruvbox-fg1) !important;
+  background: transparent !important;
+}
+
+.toolbar-button:hover {
+  background-color: var(--gruvbox-bg1) !important;
+}
+
+/* Bookmarks */
+.bookmark-item {
+  color: var(--gruvbox-fg1) !important;
+}
+
+.bookmark-item:hover {
+  background-color: var(--gruvbox-bg1) !important;
+}
+
+/* Context Menus */
+.menu {
+  background-color: var(--gruvbox-bg) !important;
+  border: 1px solid var(--gruvbox-bg2) !important;
+}
+
+.menu-item {
+  color: var(--gruvbox-fg) !important;
+}
+
+.menu-item:hover {
+  background-color: var(--gruvbox-bg1) !important;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gruvbox-bg) !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gruvbox-bg2) !important;
+  border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gruvbox-fg1) !important;
+}
