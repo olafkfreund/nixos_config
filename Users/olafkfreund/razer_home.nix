@@ -3,7 +3,9 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  vars = import ../../hosts/razer/variables.nix;
+in {
   imports = [
     # Import common modules
     ../common/default.nix
@@ -100,6 +102,6 @@
   ];
 
   editor.windsurf.settings = {
-    theme = "gruvbox";
+    theme = lib.removePrefix "gruvbox-" vars.theme.scheme;
   };
 }

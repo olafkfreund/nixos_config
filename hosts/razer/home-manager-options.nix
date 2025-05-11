@@ -1,43 +1,69 @@
-{lib, ...}: {
-  programs.obs.enable = lib.mkForce true;
-  programs.kdeconnect.enable = lib.mkForce true;
-  programs.slack.enable = lib.mkForce true;
-  # Terminals
-  # alacritty.enable = lib.mkForce true;
-  foot.enable = lib.mkForce true;
-  wezterm.enable = lib.mkForce true;
-  kitty.enable = lib.mkForce true;
+{
+  lib,
+  config,
+  ...
+}: let
+  vars = import ./variables.nix;
+in {
+  # Host-specific features configuration
+  # This replaces all the individual lib.mkForce calls with a unified approach
+  features = {
+    # Program features
+    programs = {
+      obs.enable = true;
+      kdeconnect.enable = true;
+      slack.enable = true;
+    };
 
-  # Wayland apps
-  desktop.sway.enable = lib.mkForce false;
-  desktop.zathura.enable = lib.mkForce true;
-  desktop.dunst.enable = lib.mkForce true;
-  desktop.rofi.enable = lib.mkForce true;
-  swaylock.enable = lib.mkForce false;
-  desktop.screenshots.flameshot.enable = lib.mkForce true;
+    # Terminal features
+    terminals = {
+      foot.enable = true;
+      wezterm.enable = true;
+      kitty.enable = true;
+      # alacritty.enable = false;
+    };
 
-  # Browsers
-  browsers.chrome.enable = lib.mkForce true;
-  browsers.firefox.enable = lib.mkForce true;
-  browsers.edge.enable = lib.mkForce false;
-  browsers.brave.enable = lib.mkForce true;
-  browsers.opera.enable = lib.mkForce true;
+    # Desktop environment features
+    desktop = {
+      sway.enable = false;
+      zathura.enable = true;
+      dunst.enable = true;
+      rofi.enable = true;
+      swaylock.enable = false;
+      screenshots.flameshot.enable = true;
+    };
 
-  # Editors
-  editor.cursor.enable = lib.mkForce true;
-  editor.neovim.enable = lib.mkForce true;
-  editor.vscode.enable = lib.mkForce true;
+    # Browser features
+    browsers = {
+      chrome.enable = true;
+      firefox.enable = true;
+      edge.enable = false;
+      brave.enable = true;
+      opera.enable = true;
+    };
 
-  # Shell tools
-  cli.bat.enable = lib.mkForce true;
-  cli.direnv.enable = true;
-  cli.fzf.enable = true;
-  cli.lf.enable = lib.mkForce true;
-  cli.starship.enable = lib.mkForce true;
-  cli.yazi.enable = lib.mkForce true;
-  cli.zoxide.enable = lib.mkForce true;
+    # Editor features
+    editors = {
+      cursor.enable = true;
+      neovim.enable = true;
+      vscode.enable = true;
+    };
 
-  # Multiplexers
-  multiplexer.tmux.enable = lib.mkForce true;
-  multiplexer.zellij.enable = lib.mkForce true;
+    # CLI tools features
+    cli = {
+      bat.enable = true;
+      direnv.enable = true;
+      fzf.enable = true;
+      lf.enable = true;
+      starship.enable = true;
+      yazi.enable = true;
+      zoxide.enable = true;
+    };
+
+    # Terminal multiplexer features
+    multiplexers = {
+      tmux.enable = true;
+      zellij.enable = true;
+    };
+  };
 }

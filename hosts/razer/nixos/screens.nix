@@ -1,8 +1,9 @@
-{ ...
-}: {
+{...}: let
+  vars = import ../variables.nix;
+in {
   home-manager.extraSpecialArgs = {
     vars = {
-      hostName = "razer";
+      hostName = vars.hostName;
       class = "laptop";
       screen = {
         name = "eDP-1";

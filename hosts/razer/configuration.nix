@@ -3,9 +3,10 @@
   pkgs-unstable,
   lib,
   inputs,
-  username,
   ...
-}: {
+}: let
+  vars = import ./variables.nix;
+in {
   imports = [
     ./nixos/hardware-configuration.nix
     ./nixos/screens.nix
@@ -24,8 +25,8 @@
     # ../../modules/system-tweaks/storage-tweaks/SSD/SSD-tweak.nix
   ];
 
-  # Set hostname
-  networking.hostName = "razer";
+  # Set hostname from variables
+  networking.hostName = vars.hostName;
 
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "desktop";
@@ -114,34 +115,30 @@
         "-nolisten tcp"
         "-dpi 96"
       ];
-      videoDrivers = ["nvidia"];
+      videoDrivers = [vars.gpu];
     };
   };
+
   environment.systemPackages = [
     inputs.zen-browser.packages."${pkgs.system}".default
   ];
 
-  # Use NetworkManager for this laptop (desktop profile uses NetworkManager by default)
-  # So we don't need to override anything here, just add specific configs if needed
-  networking.nameservers = [
-    "1.1.1.1"
-    "8.8.8.8"
-  ];
+  # Use variables for nameservers
+  networking.nameservers = vars.nameservers;
 
   # Disable network wait services to improve boot time regardless of network manager
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
 
-  environment.sessionVariables = {
-    NH_FLAKE = "/home/olafkfreund/.config/nixos";
-    GBM_BACKEND = "nvidia-drm";
-    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-    NVD_BACKEND = "direct";
-  };
+  environment.sessionVariables =
+    vars.environmentVariables
+    // {
+      NH_FLAKE = vars.paths.flakeDir;
+    };
 
-  users.users.${username} = {
+  users.users.${vars.username} = {
     isNormalUser = true;
-    description = "Olaf K-Freund";
-    extraGroups = ["networkmanager" "openrazer" "libvirtd" "wheel" "docker" "podman" "video" "scanner" "lp" "lxd" "incus-admin"];
+    description = vars.fullName;
+    extraGroups = vars.userGroups;
     shell = pkgs.zsh;
     packages = with pkgs; [
       vim
@@ -152,12 +149,12 @@
   # Hardware and service specific configurations
   services.playerctld.enable = true;
   services.fwupd.enable = true;
-  services.ollama.acceleration = "cuda";
-  services.nfs.server.enable = true;
-  services.nfs.server.exports = ''
-    /extdisk         192.168.1.*(rw,fsid=0,no_subtree_check)
-  '';
-  hardware.nvidia-container-toolkit.enable = true;
+  services.ollama.acceleration = vars.acceleration;
+  services.nfs.server = lib.mkIf vars.services.nfs.enable {
+    enable = true;
+    exports = vars.services.nfs.exports;
+  };
+  hardware.nvidia-container-toolkit.enable = vars.gpu == "nvidia";
 
   nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16"];
   system.stateVersion = "24.11";

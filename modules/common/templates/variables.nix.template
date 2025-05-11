@@ -1,0 +1,104 @@
+{
+  # User information
+  username = "olafkfreund";
+  fullName = "Olaf K-Freund";
+  gitUsername = "olaffreund";
+  gitEmail = "olaf.loken@gmail.com";
+  gitHubToken = "";
+  
+  # Display configuration
+  # Examples:
+  # laptop_monitor = "monitor = eDP-1,1920x1080@120,0x0,1";
+  # external_monitor = "monitor = HDMI-A-1,3840x2160@60,1920x0,1";
+  laptop_monitor = "";
+  external_monitor = "";
+  
+  # Hardware settings
+  # Options: "nvidia", "amd", "intel"
+  gpu = "intel";
+  
+  # For ollama: "cuda", "rocm", "cpu", ""
+  acceleration = "cpu";
+  
+  # System groups (default + host specific)
+  userGroups = [
+    "networkmanager" "wheel" "video" "scanner" "lp"
+  ];
+  
+  # Networking
+  hostName = "hostname"; # Replace with actual hostname
+  nameservers = [ "1.1.1.1" "8.8.8.8" ];
+  hostMappings = {
+    # Add IP to hostname mappings for your local network
+    # "192.168.1.127" = "hostname1";
+    # "192.168.1.96" = "hostname2";
+  };
+  
+  # Locale and time
+  timezone = "Europe/London";
+  locale = "en_GB.UTF-8";
+  keyboardLayout = "gb";
+  
+  # Theme settings
+  theme = {
+    scheme = "gruvbox-dark-medium"; # Base theme scheme
+    wallpaper = ./themes/wallpaper.jpg; # Path to wallpaper
+    cursor = {
+      name = "Bibata-Modern-Ice";
+      size = 24;
+    };
+    font = {
+      mono = "JetBrainsMono Nerd Font";
+      sans = "Noto Sans";
+      serif = "Noto Serif";
+      sizes = {
+        applications = 11;
+        terminal = 12;
+        desktop = 11;
+        popups = 11;
+      };
+    };
+    opacity = {
+      desktop = 1.0;
+      terminal = 0.95;
+      popups = 0.95;
+    };
+  };
+  
+  # Environment variables
+  # Common environment variables shared across the system
+  environmentVariables = {
+    MOZ_ENABLE_WAYLAND = "1";
+    NIXOS_WAYLAND = "1";
+    NIXOS_OZONE_WL = "1";
+    NIXPKGS_ALLOW_UNFREE = "1";
+    
+    # GPU-specific variables
+    # Uncomment and adjust based on your GPU
+    
+    # For NVIDIA:
+    # GBM_BACKEND = "nvidia-drm";
+    # __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+    # WLR_NO_HARDWARE_CURSORS = "1";
+    
+    # For Intel:
+    # LIBVA_DRIVER_NAME = "iHD";
+    
+    # For AMD:
+    # LIBVA_DRIVER_NAME = "radeonsi";
+  };
+  
+  # Service-specific configs
+  services = {
+    nfs = {
+      enable = false;
+      exports = "";
+    };
+  };
+  
+  # Shared paths
+  paths = {
+    flakeDir = "/home/olafkfreund/.config/nixos";
+    # Add other important paths for this host
+  };
+}

@@ -1,9 +1,12 @@
-{...}: {
-  networking.extraHosts = ''
-    192.168.1.127 p510
-    192.168.1.96  razer
-    192.168.1.97  p620
-    192.168.1.246 hp
-    192.168.1.222 dex5550
-  '';
+{...}: let
+  vars = import ../variables.nix;
+
+  # Convert the host mappings attrset to a string
+  # Format: "ip hostname"
+  hostsString = with builtins;
+    concatStringsSep "\n" (
+      attrValues (mapAttrs (ip: hostname: "${ip} ${hostname}") vars.hostMappings)
+    );
+in {
+  networking.extraHosts = hostsString;
 }
