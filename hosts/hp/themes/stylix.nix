@@ -1,37 +1,34 @@
-{pkgs, ...}: {
+{pkgs, ...}: let
+  vars = import ../variables.nix;
+in {
   stylix = {
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
-    image = ./gruvbox-rainbow-nix.png;
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/${vars.theme.scheme}.yaml";
+    image = vars.theme.wallpaper;
     polarity = "dark";
     targets = {
       chromium.enable = false;
     };
     fonts = {
       monospace = {
-        # Updated to use the new nerd-fonts namespace
+        # Use the specific nerd-fonts package to ensure proper icons
         package = pkgs.nerd-fonts.jetbrains-mono;
-        name = "JetBrainsMono Nerd Font Mono";
+        name = vars.theme.font.mono;
       };
       sansSerif = {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Sans";
+        package = pkgs.noto-fonts;
+        name = vars.theme.font.sans;
       };
       serif = {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Serif";
+        package = pkgs.noto-fonts;
+        name = vars.theme.font.serif;
       };
-      sizes = {
-        applications = 14;
-        terminal = 14;
-        desktop = 14;
-        popups = 14;
-      };
+      sizes = vars.theme.font.sizes;
     };
-    opacity = {
-      applications = 0.8;
-      terminal = 1.0;
-      desktop = 1.0;
-      popups = 1.0;
+    opacity = vars.theme.opacity;
+    cursor = {
+      name = vars.theme.cursor.name;
+      package = pkgs.bibata-cursors;
+      size = vars.theme.cursor.size;
     };
   };
 }

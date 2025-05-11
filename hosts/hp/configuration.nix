@@ -3,7 +3,9 @@
   lib,
   inputs,
   ...
-}: {
+}: let
+  vars = import ./variables.nix;
+in {
   imports = [
     inputs.microvm.nixosModules.host
 
@@ -78,7 +80,7 @@
       "-nolisten tcp"
       "-dpi 96"
     ];
-    videoDrivers = ["nvidia"];
+    videoDrivers = ["${vars.gpu}"];
   };
 
   programs.sway = {
@@ -122,11 +124,8 @@
   # Network configuration - using systemd-networkd instead of NetworkManager
   networking = {
     networkmanager.enable = false;
-    hostName = "hp";
-    nameservers = [
-      "8.8.8.8"
-      "8.8.4.4"
-    ];
+    hostName = vars.hostName;
+    nameservers = vars.nameservers;
     useDHCP = false;
     useNetworkd = true;
     # Enable resolved for DNS resolution
@@ -137,10 +136,7 @@
   services.resolved = {
     enable = true;
     dnssec = "true";
-    fallbackDns = [
-      "8.8.8.8"
-      "8.8.4.4"
-    ];
+    fallbackDns = vars.nameservers;
   };
 
   users.defaultUserShell = pkgs.zsh;
@@ -148,13 +144,13 @@
   programs.zsh.enable = true;
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
-    NH_FLAKE = "/home/olafkfreund/.config/nixos";
+    NH_FLAKE = vars.paths.flakeDir;
   };
 
-  users.users.olafkfreund = {
+  users.users.${vars.username} = {
     isNormalUser = true;
-    description = "Olaf K-Freund";
-    extraGroups = ["networkmanager" "openrazer" "wheel" "docker" "video" "scanner" "lp" "lxd" "incus-admin"];
+    description = vars.fullName;
+    extraGroups = vars.userGroups;
     shell = pkgs.zsh;
     packages = with pkgs; [
       vim
@@ -162,7 +158,7 @@
     ];
   };
   hardware.keyboard.zsa.enable = true;
-  services.ollama.acceleration = "cuda";
+  services.ollama.acceleration = vars.acceleration;
   hardware.nvidia-container-toolkit.enable = true;
   networking.firewall.enable = false;
   networking.nftables.enable = true;
