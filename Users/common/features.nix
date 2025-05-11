@@ -52,7 +52,6 @@ with lib; {
       evince = mkEnableOption "Enable Evince document viewer";
       kdeconnect = mkEnableOption "Enable KDE Connect";
       slack = mkEnableOption "Enable Slack";
-      discord = mkEnableOption "Enable Discord";
       lanmouse = mkEnableOption "Enable LAN Mouse";
     };
 

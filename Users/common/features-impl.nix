@@ -57,7 +57,6 @@ in {
       programs.evince.enable = cfg.desktop.evince;
       programs.kdeconnect.enable = cfg.desktop.kdeconnect;
       programs.slack.enable = cfg.desktop.slack;
-      programs.discord-wayland.enable = cfg.desktop.discord;
     })
 
     # CLI tool implementations

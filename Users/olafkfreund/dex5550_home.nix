@@ -1,6 +1,7 @@
 {
   inputs,
   lib,
+  pkgs,
   ...
 }: {
   imports = [
@@ -8,6 +9,7 @@
     ../common/default.nix
 
     # Host-specific imports
+    ../../home/default.nix
     ../../hosts/dex5550/nixos/hypr_override.nix
     ../../home/desktop/sway/default.nix
     ../../home/desktop/sway/swayosd.nix
@@ -61,8 +63,7 @@
       obs = false;
       evince = true;
       kdeconnect = false;
-      slack = false;
-      discord = false;
+      slack = true;
     };
 
     cli = {

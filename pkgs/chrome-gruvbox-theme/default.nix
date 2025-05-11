@@ -1,4 +1,7 @@
-{stdenv}:
+{
+  lib,
+  stdenv,
+}:
 stdenv.mkDerivation {
   name = "chrome-gruvbox-theme";
   version = "1.0.0";
@@ -12,7 +15,7 @@ stdenv.mkDerivation {
 
   meta = {
     description = "Gruvbox Dark theme for Chrome/Chromium";
-    license = stdenv.lib.licenses.mit;
-    platforms = stdenv.lib.platforms.all;
+    license = lib.licenses.mit;
+    platforms = lib.platforms.all;
   };
 }

@@ -1,6 +1,5 @@
 {...}: {
   imports = [
-    ./nixcord.nix
-    ./discord-wayland.nix
+    # nixcord.nix removed to fix configuration errors
   ];
 }

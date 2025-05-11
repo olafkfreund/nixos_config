@@ -63,7 +63,6 @@
       evince = true;
       kdeconnect = true;
       slack = false;
-      discord = false;
     };
 
     cli = {

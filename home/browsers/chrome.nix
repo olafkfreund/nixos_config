@@ -31,12 +31,8 @@ in {
         "--force-dark-mode"
         "--gtk-version=4"
       ];
-      extraPackages = [pkgs.chrome-gruvbox-theme];
       extensions = [
-        {
-          id = "gruvbox-theme";
-          path = "${pkgs.chrome-gruvbox-theme}";
-        }
+        {id = "eimadpbcbfnmbkopoojfekhnkhdbieeh";} # Dark Reader
       ];
     };
   };
