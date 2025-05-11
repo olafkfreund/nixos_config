@@ -1,22 +1,24 @@
-{pkgs, ...}: {
-  time.timeZone = "Europe/London";
+{pkgs, ...}: let
+  vars = import ../variables.nix;
+in {
+  time.timeZone = vars.timezone;
 
-  i18n.defaultLocale = "en_GB.UTF-8";
+  i18n.defaultLocale = vars.locale;
   i18n.extraLocaleSettings = {
-    LC_ADDRESS = "en_GB.UTF-8";
-    LC_IDENTIFICATION = "en_GB.UTF-8";
-    LC_MEASUREMENT = "en_GB.UTF-8";
-    LC_MONETARY = "en_GB.UTF-8";
-    LC_NAME = "en_GB.UTF-8";
-    LC_NUMERIC = "en_GB.UTF-8";
-    LC_PAPER = "en_GB.UTF-8";
-    LC_TELEPHONE = "en_GB.UTF-8";
-    LC_TIME = "en_GB.UTF-8";
+    LC_ADDRESS = vars.locale;
+    LC_IDENTIFICATION = vars.locale;
+    LC_MEASUREMENT = vars.locale;
+    LC_MONETARY = vars.locale;
+    LC_NAME = vars.locale;
+    LC_NUMERIC = vars.locale;
+    LC_PAPER = vars.locale;
+    LC_TELEPHONE = vars.locale;
+    LC_TIME = vars.locale;
   };
-  console.keyMap = "uk";
+  console.keyMap = vars.keyboardLayouts.console;
   console.font = "${pkgs.terminus_font}/share/consolefonts/ter-u28n.psf.gz";
   services.xserver = {
-    xkb.layout = "gb";
+    xkb.layout = vars.keyboardLayouts.xserver;
     xkb.variant = "";
   };
 }

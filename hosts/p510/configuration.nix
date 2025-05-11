@@ -3,7 +3,9 @@
   inputs,
   lib,
   ...
-}: {
+}: let
+  vars = import ./variables.nix;
+in {
   imports = [
     # inputs.microvm.nixosModules.host
 
@@ -16,6 +18,7 @@
     ./nixos/greetd.nix
     ./nixos/hosts.nix
     ./nixos/mpd.nix
+    ./nixos/screens.nix
     ./themes/stylix.nix
     ./nixos/plex.nix
     ../../modules/server.nix
@@ -23,8 +26,8 @@
     ../../modules/development/default.nix
   ];
 
-  # Set hostname
-  networking.hostName = "p510";
+  # Set hostname from variables
+  networking.hostName = vars.hostName;
 
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "server";
@@ -117,7 +120,7 @@
       "-nolisten tcp"
       "-dpi 96"
     ];
-    videoDrivers = ["nvidia"];
+    videoDrivers = ["${vars.gpu}"];
   };
 
   programs.sway = {
@@ -156,11 +159,9 @@
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
   systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
 
-  # Since we're using the "server" networking profile, we only need to override specific settings
-  networking.nameservers = [
-    "8.8.8.8"
-    "8.8.4.4"
-  ];
+  # Using nameservers from variables.nix
+  networking.nameservers = vars.nameservers;
+
   # In case the networking profile doesn't apply all needed settings
   networking.useNetworkd = lib.mkForce true;
   networking.useHostResolvConf = false;
@@ -195,11 +196,11 @@
     };
   };
 
-  # User-specific configuration
-  users.users.olafkfreund = {
+  # User-specific configuration from variables
+  users.users.${vars.username} = {
     isNormalUser = true;
-    description = "Olaf K-Freund";
-    extraGroups = ["openrazer" "wheel" "docker" "video" "scanner" "lp" "lxd" "incus-admin"];
+    description = vars.fullName;
+    extraGroups = vars.userGroups;
     shell = pkgs.zsh;
     packages = with pkgs; [
       vim
@@ -209,7 +210,7 @@
 
   # NVIDIA specific configurations
   hardware.keyboard.zsa.enable = true;
-  services.ollama.acceleration = "cuda";
+  services.ollama.acceleration = vars.acceleration;
   hardware.nvidia-container-toolkit.enable = true;
 
   nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16" "dotnet-sdk-6.0.428"];
