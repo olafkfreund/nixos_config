@@ -1,9 +1,10 @@
 {
   pkgs,
   lib,
-  username,
   ...
-}: {
+}: let
+  vars = import ./variables.nix;
+in {
   imports = [
     ./nixos/hardware-configuration.nix
     ./nixos/power.nix
@@ -17,8 +18,8 @@
     ../../modules/system-tweaks/kernel-tweaks/32GB-SYSTEM/32GB-SYSTEM.nix
   ];
 
-  # Set hostname
-  networking.hostName = "dex5550";
+  # Set hostname from variables
+  networking.hostName = vars.hostName;
 
   # Choose networking profile: "server", "desktop", or "minimal"
   networking.profile = "server";
@@ -104,11 +105,9 @@
   systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
   systemd.network.wait-online.timeout = 10;
 
-  # Since we're using the "server" networking profile, we only need to override specific settings
-  networking.nameservers = [
-    "8.8.8.8"
-    "8.8.4.4"
-  ];
+  # Use nameservers from variables
+  networking.nameservers = vars.nameservers;
+
   # In case the networking profile doesn't apply all needed settings
   networking.useNetworkd = lib.mkForce true;
   networking.useHostResolvConf = false;
@@ -190,11 +189,11 @@
     };
   };
 
-  # User-specific configuration
-  users.users.${username} = {
+  # User-specific configuration from variables
+  users.users.${vars.username} = {
     isNormalUser = true;
-    description = "Olaf K-Freund";
-    extraGroups = ["openrazer" "wheel" "docker" "podman" "video" "scanner" "lp" "lxd" "incus-admin"];
+    description = vars.fullName;
+    extraGroups = vars.userGroups;
     shell = pkgs.zsh;
     packages = with pkgs; [
       vim
@@ -204,7 +203,10 @@
 
   # Other hardware/service configurations
   hardware.keyboard.zsa.enable = true;
-  services.ollama.acceleration = "cpu";
+  services.ollama.acceleration =
+    if vars.acceleration != ""
+    then vars.acceleration
+    else "cpu";
   hardware.nvidia-container-toolkit.enable = false;
 
   system.stateVersion = "24.11";
