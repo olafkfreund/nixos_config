@@ -112,7 +112,11 @@
   };
 
   programs.chromium.commandLineArgs = lib.mkForce [
-    "--enable-features=UseOzonePlatform"
+    "--enable-features=UseOzonePlatform,VaapiVideoDecoder,VaapiVideoEncoder,CanvasOopRasterization"
     "--ozone-platform=wayland"
+    "--enable-gpu-rasterization"
+    "--enable-zero-copy"
+    "--ignore-gpu-blocklist"
+    "--enable-hardware-overlays"
   ];
 }
