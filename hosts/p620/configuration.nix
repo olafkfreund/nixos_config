@@ -22,6 +22,7 @@ in {
     ../../modules/default.nix
     ../../modules/development/default.nix
     # ../../modules/system-tweaks/kernel-tweaks/226GB-SYSTEM/226gb-system.nix
+    ../common/hyprland.nix
   ];
 
   # Set hostname from variables
@@ -114,26 +115,7 @@ in {
   };
 
   # Enable Hyprland system configuration
-  programs.hyprland = {
-    enable = true;
-    xwayland.enable = true;
-  };
-
-  # Proper XDG Portal setup for Hyprland
-  xdg.portal = {
-    enable = true;
-    extraPortals = [pkgs.xdg-desktop-portal-hyprland];
-    config = {
-      common = {
-        default = ["hyprland" "gtk"];
-      };
-      hyprland = {
-        default = ["hyprland" "gtk"];
-        "org.freedesktop.impl.portal.Secret" = ["gnome-keyring"];
-        "org.freedesktop.impl.portal.Screencast" = ["hyprland"];
-      };
-    };
-  };
+  modules.desktop.hyprland-uwsm.enable = true;
 
   # Productivity tools
   programs.streamcontroller.enable = lib.mkForce true;

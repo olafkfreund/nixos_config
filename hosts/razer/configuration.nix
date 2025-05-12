@@ -23,6 +23,7 @@ in {
     ../../modules/development/default.nix
     # ../../modules/system-tweaks/kernel-tweaks/64GB-SYSTEM/64gb-system.nix
     # ../../modules/system-tweaks/storage-tweaks/SSD/SSD-tweak.nix
+    ../common/hyprland.nix
   ];
 
   # Set hostname from variables

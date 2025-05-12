@@ -24,6 +24,7 @@ in {
     ../../modules/server.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
+    ../common/hyprland.nix
   ];
 
   # Set hostname from variables
