@@ -15,17 +15,17 @@ pkgs.writeShellScriptBin "mpris-album-art" ''
   fi
 
   # Get the active player
-  PLAYER=$(${pkgs.playerctl}/bin/playerctl -l | head -n 1)
+  PLAYER=$(${pkgs.playerctl}/bin/playerctl -p spotify | head -n 1)
   if [ -z "$PLAYER" ]; then
     echo "No active player found"
     exit 1
   fi
 
   # Get metadata
-  TITLE=$(${pkgs.playerctl}/bin/playerctl metadata title 2>/dev/null)
-  ARTIST=$(${pkgs.playerctl}/bin/playerctl metadata artist 2>/dev/null)
-  ALBUM=$(${pkgs.playerctl}/bin/playerctl metadata album 2>/dev/null)
-  ART_URL=$(${pkgs.playerctl}/bin/playerctl metadata mpris:artUrl 2>/dev/null)
+  TITLE=$(${pkgs.playerctl}/bin/playerctl -p spotify metadata title 2>/dev/null)
+  ARTIST=$(${pkgs.playerctl}/bin/playerctl -p spotify metadata artist 2>/dev/null)
+  ALBUM=$(${pkgs.playerctl}/bin/playerctl -p spotify metadata album 2>/dev/null)
+  ART_URL=$(${pkgs.playerctl}/bin/playerctl -p spotify metadata mpris:artUrl 2>/dev/null)
 
   echo "Now playing: $TITLE by $ARTIST"
   echo "Album: $ALBUM"

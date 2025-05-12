@@ -69,11 +69,13 @@
     # Main window - assign to mail workspace
     windowrulev2 = workspace special:mail, class:^(thunderbird)$
     windowrulev2 = animation slide bottom, class:^(thunderbird)$
+    # Make main Thunderbird window fullscreen
+    windowrulev2 = fullscreen, class:^(thunderbird)$, title:^(Mozilla Thunderbird)$
 
     # Make all thunderbird windows float by default
     windowrulev2 = float, class:^(thunderbird)$
 
-    # Size the main window appropriately (70%)
+    # Size the main window appropriately (70%) - will only apply when not fullscreen
     windowrulev2 = size 70% 70%, class:^(thunderbird)$, title:^(Mozilla Thunderbird)$
 
     # Handle all common dialog types

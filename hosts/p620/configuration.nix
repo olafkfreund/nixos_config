@@ -113,6 +113,28 @@ in {
     allowBrokenPackages = false;
   };
 
+  # Enable Hyprland system configuration
+  programs.hyprland = {
+    enable = true;
+    xwayland.enable = true;
+  };
+
+  # Proper XDG Portal setup for Hyprland
+  xdg.portal = {
+    enable = true;
+    extraPortals = [pkgs.xdg-desktop-portal-hyprland];
+    config = {
+      common = {
+        default = ["hyprland" "gtk"];
+      };
+      hyprland = {
+        default = ["hyprland" "gtk"];
+        "org.freedesktop.impl.portal.Secret" = ["gnome-keyring"];
+        "org.freedesktop.impl.portal.Screencast" = ["hyprland"];
+      };
+    };
+  };
+
   # Productivity tools
   programs.streamcontroller.enable = lib.mkForce true;
 
