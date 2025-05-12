@@ -22,7 +22,7 @@
 
   # Binary cache configuration for p620
   nix.settings.trusted-substituters = [
-    "http://p620:5000" # Use your p620's actual hostname or IP address here
+    "http://192.168.1.97:5000" # Use your p620's actual hostname or IP address here
   ];
   nix.settings.trusted-public-keys = [
     "p620-nix-serve:mZR6o5z5KcWeu4PVXgjHA7vb1sHQgRdWMKQt8x3a4rU="
