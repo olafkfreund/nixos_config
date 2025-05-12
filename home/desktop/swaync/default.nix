@@ -28,12 +28,12 @@ with lib; let
     fit-to-screen = true;
 
     # These settings control where notifications appear
-    notification-window-width = 300;
-    notification-window-height = 100;
-    notification-window-margin-left = 10;
-    notification-window-margin-right = 0;
-    notification-window-margin-bottom = 0;
-    notification-window-margin-top = 10;
+    # notification-window-width = 300;
+    # notification-window-height = 100;
+    # notification-window-margin-left = 10;
+    # notification-window-margin-right = 0;
+    # notification-window-margin-bottom = 0;
+    # notification-window-margin-top = 10;
     notification-window-positionX = "left";
     notification-window-positionY = "bottom";
 

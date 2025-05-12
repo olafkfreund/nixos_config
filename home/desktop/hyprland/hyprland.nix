@@ -47,7 +47,8 @@
     enable = true;
     systemd.enable = true;
     xwayland.enable = true;
-    package = pkgs.hyprland;
+    package = null;
+    portalPackage = null;
     plugins = [
       pkgs.hyprlandPlugins.hyprexpo
       pkgs.hyprlandPlugins.hyprbars
