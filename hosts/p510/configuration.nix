@@ -19,8 +19,9 @@ in {
     ./nixos/hosts.nix
     ./nixos/mpd.nix
     ./nixos/screens.nix
-    ./themes/stylix.nix
     ./nixos/plex.nix
+    ./nixos/monitoring.nix # Added monitoring configuration
+    ./themes/stylix.nix
     ../../modules/server.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
