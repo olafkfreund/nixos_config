@@ -58,6 +58,12 @@
       inputs.flake-utils.follows = "flake-utils";
     };
 
+    # Desktop environment
+    hyprland = {
+      url = "github:hyprwm/Hyprland";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Browser and media
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
@@ -110,6 +116,7 @@
     iwmenu,
     zjstatus,
     walker,
+    hyprland,
     ...
   } @ inputs: let
     username = "olafkfreund";

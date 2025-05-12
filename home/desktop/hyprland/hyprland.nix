@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  inputs,
+  ...
+}: {
   imports = [
     ./hypridle.nix
     ./hyprlock.nix
@@ -45,9 +49,12 @@
   ];
   wayland.windowManager.hyprland = {
     enable = true;
-    systemd.enable = true;
+    systemd = {
+      enable = true;
+      variables = ["--all"]; # Pass all environment variables to systemd services
+    };
     xwayland.enable = true;
-    package = null;
+    package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
     portalPackage = null;
     plugins = [
       pkgs.hyprlandPlugins.hyprexpo
