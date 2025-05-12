@@ -33,7 +33,7 @@
     bind = $mainMod CTRL, Y, exec, [float]foot yai
     bind = $mainMod CTRL, M, exec, monitors
     bind = $mainMod, C, exec, thunderbird -calendar
-    bind = $mainMod, A, exec, [float;notitle;size 40% 40%; bottom]kitty --class album-art --hold mpris-album-art
+    bind = $mainMod, A, exec, [float;notitle;size 400 400; bottom]kitty --class album-art --hold mpris-album-art
 
     # Special workspaces
     bind = $mainMod, S, togglespecialworkspace, magic
