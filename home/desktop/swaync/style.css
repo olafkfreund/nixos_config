@@ -8,40 +8,40 @@
 .control-center {
   background: #282828;
   border: 1px solid #3c3836;
-  border-radius: 8px;
+  border-radius: 0px; /* Remove rounded corners */
 }
 
 /* Notification styles */
 .notification {
-  background: #32302f;
-  border: 1px solid #504945;
-  border-radius: 6px;
+  background: #282828;
+  border: 1px solid #282828;
+  border-radius: 0px; /* Remove rounded corners */
   margin: 6px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: none; /* Remove shadow */
 }
 
 .notification-content {
   padding: 10px;
-  background: #504945;
+  background: #282828;
 }
 
 .notification-default-action,
 .notification-action {
   padding: 4px;
   margin: 0;
-  border-radius: 6px;
-  background: transparent;
+  border-radius: 0px; /* Remove rounded corners */
+  background: #282828; /* Change from transparent to solid */
   border: none;
   color: #ebdbb2;
 }
 
 .notification-default-action:hover,
 .notification-action:hover {
-  background: #504945;
+  background: #3c3836;
 }
 
 .notification button:hover {
-  background: #504945;
+  background: #3c3836;
 }
 
 .close-button {
@@ -49,7 +49,7 @@
   color: #fbf1c7;
   text-shadow: none;
   padding: 0 4px;
-  border-radius: 4px;
+  border-radius: 0px; /* Remove rounded corners */
   margin: 4px;
   box-shadow: none;
   border: none;
@@ -62,17 +62,17 @@
 /* Widgets styling */
 .widget-buttons-grid {
   font-size: 20px;
-  background: transparent;
+  background: #282828; /* Change from transparent to solid */
   padding: 8px;
 }
 
 .widget-buttons-grid > flowbox > flowboxchild > button {
   background: #3c3836;
   color: #ebdbb2;
-  border-radius: 8px;
+  border-radius: 0px; /* Remove rounded corners */
   padding: 8px 16px;
   margin: 4px;
-  border: 1px solid #504945;
+  border: 1px solid #282828;
 }
 
 .widget-buttons-grid > flowbox > flowboxchild > button:hover {
@@ -81,16 +81,17 @@
 }
 
 .widget-dnd {
-  background: transparent;
+  background: #282828; /* Change from transparent to solid */
   padding: 8px;
   font-size: 16px;
   color: #ebdbb2;
+  border-radius: 8px; /* Add rounded corners back to widget-dnd */
 }
 
 .widget-dnd > switch {
   background: #98971a;
-  border-radius: 16px;
-  border: 1px solid #b8bb26;
+  border-radius: 16px; /* Keep switch rounded */
+  border: 1px solid #98971a;
 }
 
 .widget-dnd > switch:checked {
@@ -110,16 +111,17 @@
   font-size: 16px;
   padding: 8px;
   background: #282828;
-  border-bottom: 1px solid #504945;
+  border-bottom: 1px solid #282828;
 }
 
 .widget-title > button {
   background: #689d6a;
   color: #282828;
-  border-radius: 6px;
+  border-radius: 0px; /* Remove rounded corners */
   padding: 4px 8px;
   margin: 0 4px;
   border: none;
+  font-size: 16px;
 }
 
 .widget-title > button:hover {
@@ -137,39 +139,114 @@
 }
 
 .notification-row:hover {
-  background: #504945;
+  background: #3c3836;
 }
 
 /* Text styling */
 .summary {
   color: #ebdbb2;
-  font-size: 14px;
+  font-size: 16px;  /* Increased from 14px */
   font-weight: bold;
 }
 
 .time {
   color: #928374;
-  font-size: 12px;
+  font-size: 14px;  /* Increased from 12px */
 }
 
 .body {
   color: #d5c4a1;
-  font-size: 13px;
+  font-size: 15px;  /* Increased from 13px */
 }
 
 /* Scrollbar styling */
 scrollbar {
   background: #1d2021;
-  border-radius: 4px;
+  border-radius: 0px; /* Remove rounded corners */
   min-width: 8px;
 }
 
 scrollbar slider {
   background: #928374;
-  border-radius: 4px;
+  border-radius: 0px; /* Remove rounded corners */
   min-width: 8px;
 }
 
 scrollbar slider:hover {
   background: #a89984;
+}
+
+/* MPRIS Widget Styling */
+.widget-mpris {
+  background: #282828;
+  padding: 8px;
+  margin: 6px;
+  border-radius: 0px;
+  border: none;
+}
+
+/* Album art styling */
+.widget-mpris-album-art {
+  min-width: 110px;
+  min-height: 110px;
+  margin-right: 8px;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 1px solid #282828;
+  border-radius: 0px; /* Remove rounded corners */
+  box-shadow: none; /* Remove shadow */
+  padding: 0;
+  margin-bottom: 4px;
+}
+
+/* Fix the album art container specifically */
+box.vertical box.horizontal widget-mpris-album-art {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+/* Player controls */
+.widget-mpris-player-name {
+  font-weight: bold;
+  color: #ebdbb2;
+}
+
+.widget-mpris-title {
+  font-weight: bold;
+  color: #ebdbb2;
+  font-size: 15px;
+}
+
+.widget-mpris-artist {
+  color: #d5c4a1;
+}
+
+/* Control button styling */
+.widget-mpris-button {
+  background: #3c3836;
+  border-radius: 0px; /* Remove rounded corners */
+  padding: 4px;
+  margin: 2px;
+  color: #ebdbb2;
+  border: none;
+}
+
+.widget-mpris-button:hover {
+  background: #504945;
+}
+
+/* Position bar */
+.widget-mpris-position {
+  margin-top: 4px;
+  background: #282828;
+  min-height: 8px;
+  border-radius: 0px; /* Remove rounded corners */
+}
+
+.widget-mpris-position-bar {
+  background: #98971a;
+  border-radius: 0px; /* Remove rounded corners */
+  min-height: 8px;
 }

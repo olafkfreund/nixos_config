@@ -209,5 +209,11 @@
     # OBS Studio for screen recording and streaming
     windowrulev2 = float, class:^(com.obsproject.Studio)$
     windowrulev2 = workspace 4, class:^(com.obsproject.Studio)$
+
+    # =============================================================================
+    # MISCELLANEOUS
+    # =============================================================================
+    # Fullscreen windows
+    windowrule = bordercolor rgba(FF0050FF),fullscreen:1
   '';
 }

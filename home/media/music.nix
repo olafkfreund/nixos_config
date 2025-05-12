@@ -13,5 +13,7 @@
     pkgs.parabolic
     pkgs.musicpod
     pkgs.spicetify-cli
+    pkgs.playerctl # Required dependency for our script
+    (pkgs.callPackage ../../pkgs/mpris-album-art {}) # Our album art script
   ];
 }
