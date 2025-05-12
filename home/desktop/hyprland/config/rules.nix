@@ -1,6 +1,12 @@
 {...}: {
   wayland.windowManager.hyprland.extraConfig = ''
     # =============================================================================
+    # GLOBAL SETTINGS
+    # =============================================================================
+    # Disable hyprbars titlebar for all windows
+    windowrulev2 = plugin:hyprbars:nobar, class:(album-art)
+
+    # =============================================================================
     # TERMINAL EMULATOR RULES
     # =============================================================================
     # Set all terminal emulators to float with consistent sizing

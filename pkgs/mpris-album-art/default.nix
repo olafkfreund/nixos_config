@@ -65,7 +65,14 @@ pkgs.writeShellScriptBin "mpris-album-art" ''
   # Display the image
   if command -v ${pkgs.kitty}/bin/kitty &>/dev/null && [ -n "$KITTY_WINDOW_ID" ]; then
     # If running in kitty terminal
-    ${pkgs.kitty}/bin/kitty +kitten icat "$OUTPUT_PATH"
+    ${pkgs.kitty}/bin/kitty +kitten icat --clear "$OUTPUT_PATH"
+    echo "-------------------------------------------"
+    echo "Album art displayed. Press any key to close window."
+    read -r -n 1 -s
+    ${pkgs.kitty}/bin/kitty +kitten icat --clear
+    # Kill the parent process (kitty terminal window)
+    # Find the parent process ID and kill it
+    kill -9 $(ps -o ppid= $$)
   elif command -v ${pkgs.libnotify}/bin/notify-send &>/dev/null; then
     # Fall back to notification with image
     ${pkgs.libnotify}/bin/notify-send -i "$OUTPUT_PATH" "Now Playing" "$TITLE by $ARTIST\n$ALBUM"

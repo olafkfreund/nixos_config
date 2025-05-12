@@ -109,10 +109,10 @@ in {
 
     wayland.windowManager.hyprland.settings = {
       exec-once = ["swaync"];
-      layerrule = [
-        "animation slide top, swaync-control-center"
-        "animation slide top, swaync-notification-window"
-      ];
+      # layerrule = [
+      #   "animation slide top, swaync-control-center"
+      #   "animation slide bottom, swaync-notification-window"
+      # ];
     };
   };
 }
