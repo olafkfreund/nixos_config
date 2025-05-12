@@ -12,10 +12,8 @@
     # Enable the Hyprland window manager itself
     programs.hyprland = {
       enable = true;
-      # Enable experimental features, including UWSM
-      package = null; # Using the Home Manager package instead
-      # Enable XWayland for compatibility
       xwayland.enable = true;
+      package = pkgs.hyprland;
     };
 
     # Enable the necessary services for UWSM
@@ -47,9 +45,6 @@
 
     # Set up necessary environment variables for UWSM
     environment.sessionVariables = {
-      NIXOS_OZONE_WL = "1";
-      WLR_NO_HARDWARE_CURSORS = "1";
-      XCURSOR_SIZE = "24";
       _JAVA_AWT_WM_NONREPARENTING = "1";
     };
 

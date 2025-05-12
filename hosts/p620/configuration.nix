@@ -239,6 +239,17 @@ in {
   services.ollama.environmentVariables.ROC_ENABLE_PRE_VEGA = lib.mkForce "1";
   services.ollama.environmentVariables.HSA_OVERRIDE_GFX_VERSION = lib.mkForce "11.0.0";
 
+  # Add nix-serve configuration before the system.stateVersion line
+  services.nix-serve = {
+    enable = true;
+    port = 5000; # Default port for nix-serve
+    secretKeyFile = "/etc/nix/secret-key"; # Path to the secret key file
+    openFirewall = true; # Automatically open the firewall port
+  };
+
+  # Ensure nix is configured to allow serving packages
+  nix.settings.allowed-users = ["nix-serve"];
+
   nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16"];
   system.stateVersion = "24.11";
 }

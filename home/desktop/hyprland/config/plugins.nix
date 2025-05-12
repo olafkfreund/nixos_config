@@ -3,17 +3,11 @@
     plugin {
       hyprbars {
         bar_height = 20
-        bar_color = rgb(282828)
+        bar_color = rgb(ebdbb2)
         bar_title_enabled = true
         bar_text_align = left
-        col.text = rgb(ebdbb2)
+        col.text = rgb(282828)
         bar_part_of_window = true
-        bar_text_font = "Jetbrains Mono";
-        hyprbars-button = [
-          "rgb(282828), 25, , hyprctl dispatch killactive, rgb(ebdbb2)"
-          "rgb(282828), 25, , hyprctl dispatch fullscreen, rgb(ebdbb2)"
-          "rgb(282828), 25, 󰕔, hyprctl dispatch togglefloating, rgb(ebdbb2)"
-        ];
       }
       hyprexpo {
         columns = 3

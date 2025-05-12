@@ -59,6 +59,7 @@
     plugins = [
       pkgs.hyprlandPlugins.hyprexpo
       pkgs.hyprlandPlugins.hyprbars
+      # pkgs.hyprlandPlugins.hyprfocus
     ];
   };
 }

@@ -19,7 +19,14 @@
   nix.settings.auto-optimise-store = true;
   nix.settings.max-jobs = "auto";
   nix.settings.cores = 0;
-  # nix.settings.parallel-builds = 10;
+
+  # Binary cache configuration for p620
+  nix.settings.trusted-substituters = [
+    "http://p620:5000" # Use your p620's actual hostname or IP address here
+  ];
+  nix.settings.trusted-public-keys = [
+    "p620-nix-serve:mZR6o5z5KcWeu4PVXgjHA7vb1sHQgRdWMKQt8x3a4rU="
+  ];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
