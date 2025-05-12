@@ -2,6 +2,7 @@
   imports = [
     ./common/default.nix # Import our new common modules
     ./nix/nix.nix
+    ./nix/flake-settings.nix # New module for flake settings
     ./fonts/fonts.nix
     ./programs/default.nix
     ./services/default.nix

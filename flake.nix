@@ -2,8 +2,6 @@
   description = "Olaf's flake with Home Manager enabled";
 
   nixConfig = {
-    experimental-features = ["nix-command" "flakes"];
-
     # Primary caches
     substituters = [
       "https://cache.nixos.org/"

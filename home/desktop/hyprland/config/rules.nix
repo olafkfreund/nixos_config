@@ -41,9 +41,9 @@
     windowrulev2 = float,class:^(nm-connection-editor)$
 
     # Sound control
-    windowrulev2 = float, class:(pavucontrol)
-    windowrulev2 = size 1000 1000, class:(pavucontrol)
-    windowrulev2 = center, class:(pavucontrol)
+    windowrulev2 = float, class:(org.pulseaudio.pavucontrol)
+    windowrulev2 = size 1000 1000, class:(org.pulseaudio.pavucontrol)
+    windowrulev2 = center, class:(org.pulseaudio.pavucontrol)
 
     # XDG portal
     windowrulev2 = float, class:^(xdg-desktop-portal-gtk)$
@@ -68,7 +68,7 @@
     # =============================================================================
     # Main window - assign to mail workspace
     windowrulev2 = workspace special:mail, class:^(thunderbird)$
-    windowrulev2 = animation slide left, class:^(thunderbird)$
+    windowrulev2 = animation slide bottom, class:^(thunderbird)$
 
     # Make all thunderbird windows float by default
     windowrulev2 = float, class:^(thunderbird)$
