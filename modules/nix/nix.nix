@@ -5,15 +5,9 @@
   lib,
   ...
 }: {
-  nix.gc = {
-    automatic = false;
-    dates = "weekly";
-    options = "--delete-older-than 30d";
-  };
-
   system.autoUpgrade = {
     enable = true;
-    channel = "https://nixos.org/channels/nixos-24.11";
+    channel = "https://nixos.org/channels/nixos-unstable";
   };
 
   nix.settings.experimental-features = ["nix-command" "flakes"];
