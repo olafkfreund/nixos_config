@@ -97,15 +97,16 @@ in {
           "nix.diagnostics" = {
             "ignored" = [];
             "excluded" = [
-              "${workspaceFolder}/.direnv/**"
-              "${workspaceFolder}/result/**"
-              "${workspaceFolder}/.git/**"
-              "${workspaceFolder}/node_modules/**"
+              ".direnv/**"
+              "result/**"
+              ".git/**"
+              "node_modules/**"
             ];
           };
           "nix.env" = {
             "NIX_PATH" = "nixpkgs=channel:nixos-unstable";
           };
+
           "nix.serverSettings" = {
             "nixd" = {
               "formatting" = {
@@ -118,10 +119,10 @@ in {
                 "offline" = true;
                 "nixos" = {
                   "expr" = "(builtins.getFlake (\"git+file://\" + toString /home/olafkfreund/.config/nixos)).nixosConfigurations.p620.options";
-                },
+                };
                 "home_manager" = {
                   "expr" = "(builtins.getFlake (\"git+file://\" + toString /home/olafkfreund/.config/nixos)).homeConfigurations.\"olafkfreund@p620\".options";
-                },
+                };
               };
               "diagnostics" = {
                 "enable" = true;
@@ -150,7 +151,7 @@ in {
                 "include" = ["**/*.nix"];
                 "exclude" = [
                   ".direnv/**"
-                  "result/**" 
+                  "result/**"
                   ".git/**"
                   "node_modules/**"
                 ];
