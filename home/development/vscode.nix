@@ -183,6 +183,7 @@ in {
           "geminicodeassist.chatWindow.isVisible" = true;
           "geminicodeassist.chatWindow.position" = "right";
           "geminicodeassist.modelName" = "gemini-2.5-pro";
+          "workbench.externalBrowser" = "google-chrome-stable";
           # "codeium.enableConfig" = {
           #   "*" = true;
           #   "nix" = true;
