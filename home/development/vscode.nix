@@ -153,6 +153,33 @@ in {
             }
           ];
 
+          # GitHub Copilot custom instructions configuration
+          "github.copilot.chat.customInstructions" = {
+            "instructions" = ''
+              # NixOS Development Guidelines for GitHub Copilot
+
+              - Use declarative configuration with NixOS modules
+              - Follow Nixpkgs contribution guidelines
+              - Maintain pure and reproducible builds
+              - Use flakes for dependency management
+              - Prefer functional programming patterns
+              - Use 2 spaces for indentation
+              - Use camelCase for variable and function names
+              - Group related options together
+              - Document options with description field
+              - Include example values in documentation
+              - Keep configurations pure and reproducible
+              - Use systemd service units when appropriate
+              - Follow least privilege principle
+              - Implement proper error handling
+              - Document breaking changes
+              - Handle upgrades gracefully'';
+            "context" = ''
+              I am working on a NixOS configuration using Home Manager and Flakes.
+              Please provide code that follows NixOS best practices and conventions.
+              Consider performance, security, and maintainability in all suggestions.'';
+          };
+
           # Wayland optimization settings
           "window.titleBarStyle" = "custom";
           "window.customTitleBarVisibility" = "auto";
