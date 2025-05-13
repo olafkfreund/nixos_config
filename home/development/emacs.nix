@@ -13,6 +13,7 @@
         gruvbox-theme
         doom-modeline
         all-the-icons
+        bufferbin
 
         # Start page and dashboard
         dashboard
@@ -20,32 +21,17 @@
         all-the-icons-dired
         projectile
 
-        # Evil mode and extensions
-        evil
-        evil-collection
-        evil-commentary
-        evil-surround
+        # File navigation and search
+        fzf
 
-        # Additional Evil packages
-        evil-anzu
-        evil-args
-        evil-escape
-        evil-exchange
-        evil-goggles
-        evil-indent-plus
-        evil-leader
-        evil-lion
-        evil-matchit
-        evil-mc
-        evil-multiedit
-        evil-nerd-commenter
-        evil-numbers
-        evil-org
-        evil-snipe
-        evil-textobj-entire
-        evil-visualstar
-        evil-terminal-cursor-changer
-        treemacs-evil
+        # Security and Secrets
+        sops
+        age
+        agenix
+        
+        # Additional Nix tools
+        nix-sandbox
+        nixos-options
 
         # LSP support
         lsp-mode
@@ -59,6 +45,8 @@
         magit
         projectile
         treemacs
+        treemacs-all-the-icons
+        treemacs-nerd-icons
         rainbow-delimiters
         which-key
         helpful
@@ -117,7 +105,6 @@
         # Email and communication
         mu4e
         mu4e-views
-        evil-mu4e
 
         # RSS reader
         elfeed
@@ -129,7 +116,6 @@
         org-bullets
         org-present
         org-download
-        org-evil
 
         # Writing and documentation
         olivetti
@@ -156,14 +142,13 @@
     };
 
     ".emacs.d/early-init.el".text = ''
-      ;; Prevent package.el from modifying this file
-      (setq package-enable-at-startup nil)
+            ;; Prevent package.el from modifying this file
+            (setq package-enable-at-startup nil)
 
-      ;; Set evil-want-keybinding to nil BEFORE evil is loaded
-      (setq evil-want-keybinding nil)
-
-      ;; Configure evil-want-integration early
-      (setq evil-want-integration t)
+            ;; Pre-declare org-evil-motion-mode variable to avoid "void variable" errors
+            (defvar org-evil-motion-mode nil
+              "Non-nil if Org-Evil-Motion mode is enabled.
+      Use the command `org-evil-motion-mode' to change this variable.")
     '';
 
     ".emacs.d/init.el".text = ''
@@ -206,11 +191,105 @@
       ;; Font setup
       (set-face-attribute 'default nil :height 110)
 
+      ;; Configuration for nix-sandbox - isolated Nix environments for Emacs
+      (use-package nix-sandbox
+        :config
+        ;; Set up Nix Sandbox to provide isolated compilation environments
+        (setq nix-sandbox-rc-directory "~/.config/nix-sandbox")
+        
+        ;; Enable flycheck integration with nix-sandbox
+        (with-eval-after-load 'flycheck
+          (setq flycheck-command-wrapper-function
+                (lambda (command) 
+                  (apply 'nix-sandbox-shell-command nix-sandbox-rc-directory command)))
+          
+          ;; Use sandbox environment for executables
+          (setq flycheck-executable-find
+                (lambda (cmd) 
+                  (nix-sandbox-executable-find nix-sandbox-rc-directory cmd))))
+        
+        ;; Key bindings for nix-sandbox
+        :bind (("C-c n s" . nix-sandbox-shell)
+               ("C-c n b" . nix-sandbox-compile)
+               ("C-c n r" . nix-sandbox-run-command)))
+
+      ;; Configuration for nixos-options - browse and insert NixOS options
+      (use-package nixos-options
+        :config
+        ;; Function to check when nixos-option should activate
+        (defun my/nixos-file-p ()
+          "Return non-nil if the current buffer is likely a NixOS configuration file."
+          (and buffer-file-name
+               (or (string-match-p "/\\(configuration\\|hardware\\|modules\\|packages\\)\\.nix$" buffer-file-name)
+                   (string-match-p "\\.nix$" buffer-file-name))))
+        
+        ;; Set up company backend for nixos-options
+        (with-eval-after-load 'company
+          (add-to-list 'company-backends '(company-nixos-options)))
+        
+        ;; Key bindings for nixos-options
+        :bind (:map nix-mode-map
+                    ("C-c C-o" . nixos-options-doc)
+                    ("C-c C-d" . nixos-options-doc-at-point)))
+
+      ;; FZF configuration - Fuzzy finder integration
+      (use-package fzf
+        :config
+        ;; Set FZF path (uses the system fzf via Nix)
+        (setq fzf/executable "fzf")
+
+        ;; Default directory to start in (projectile project root or default-directory)
+        (setq fzf/position-bottom t)
+        (setq fzf/window-height 15)
+
+        ;; Add args passed to fzf binary
+        (setq fzf/args "-x --color=16 --print-query --margin=1,0 --no-hscroll")
+
+        ;; Configure preview window
+        (setq fzf/args-for-preview "--preview 'bat --style=numbers --color=always --line-range :500 {}'")
+
+        ;; Set up key bindings for common operations
+        :bind
+        (("C-c f f" . fzf)               ;; Find files in current directory
+         ("C-c f d" . fzf-directory)     ;; Find files in specified directory
+         ("C-c f g" . fzf-grep)          ;; Grep in current directory
+         ("C-c f p" . fzf-git-files)     ;; Find files tracked by git
+         ("C-c f b" . fzf-switch-buffer) ;; Find and switch buffers
+         ("M-p" . fzf-projectile)))      ;; Find files in projectile project
+
+      ;; SOPS configuration for encrypted secrets
+      (use-package sops-el
+        :config
+        ;; Set default SOPS config file location
+        (setq sops-default-config-file "~/.sops.yaml")
+
+        ;; Enable automatic decryption for .sops.yaml files
+        (add-to-list 'auto-mode-alist '("\\.sops\\.ya?ml\\'" . sops-yaml-mode))
+        (add-to-list 'auto-mode-alist '("\\.sops\\.json\\'" . sops-json-mode))
+
+        ;; Enable automatic sops mode based on file content
+        (add-hook 'yaml-mode-hook 'sops-yaml-mode-maybe)
+        (add-hook 'json-mode-hook 'sops-json-mode-maybe)
+
+        ;; Configure SOPS with age encryption (if used)
+        (when (file-exists-p "~/.config/sops/age/keys.txt")
+          (setq sops-age-keyfile "~/.config/sops/age/keys.txt"))
+
+        ;; Configure with PGP (if used)
+        (when (executable-find "gpg")
+          (setq sops-use-gpg t))
+
+        ;; Key bindings for SOPS operations
+        :bind (:map sops-mode-map
+                    ("C-c C-s e" . sops-encrypt-buffer)
+                    ("C-c C-s d" . sops-decrypt-buffer)
+                    ("C-c C-s c" . sops-show-comment)))
+
       ;; Dashboard configuration
       (use-package dashboard
         :init
-        (setq dashboard-banner-logo-title "Welcome to Emacs")
-        (setq dashboard-startup-banner 'official)
+        (setq dashboard-banner-logo-title "Welcome to NixOS Emacs")
+        (setq dashboard-startup-banner "~/.emacs.d/nixos-banner.txt")
         (setq dashboard-center-content t)
         :config
         ;; Fix the all-the-icons dependency issue
@@ -227,17 +306,11 @@
 
       ;; Add NixOS config as a default project
       (use-package projectile
-        :after evil
         :config
         (projectile-mode +1)
 
         ;; Define key bindings for projectile
         (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-
-        ;; Only set evil keybindings if evil-normal-state-map is available
-        (with-eval-after-load 'evil
-          (when (and (featurep 'evil) (boundp 'evil-normal-state-map))
-            (define-key evil-normal-state-map (kbd "<leader> p") 'projectile-command-map)))
 
         ;; Set projectile completion system to use ivy
         (setq projectile-completion-system 'ivy)
@@ -251,10 +324,6 @@
             "Open NixOS configuration directory in projectile"
             (interactive)
             (projectile-switch-project-by-name "/home/olafkfreund/.config/nixos"))
-
-          ;; Add keybinding for quick access (only if evil-leader is available)
-          (with-eval-after-load 'evil-leader
-            (evil-leader/set-key "N" 'open-nixos-config))
 
           ;; Add custom project type for NixOS configurations
           (projectile-register-project-type 'nixos
@@ -278,44 +347,6 @@
         (doom-modeline-buffer-file-name-style 'relative-to-project)
         (doom-modeline-display-default-persp-name t)
         (doom-modeline-modal-icon t))
-
-      ;; Evil mode configuration
-      (use-package evil
-        :init
-        ;; evil-want-keybinding is set in early-init.el
-        (setq evil-vsplit-window-right t)
-        (setq evil-split-window-below t)
-        (setq evil-undo-system 'undo-redo)
-        :config
-        (evil-mode 1))
-
-      ;; Evil collection for better evil integration
-      (use-package evil-collection
-        :after evil
-        :config
-        (evil-collection-init))
-
-      ;; Evil leader for Vim-like leader key functionality
-      (use-package evil-leader
-        :after evil
-        :config
-        (global-evil-leader-mode)
-        (evil-leader/set-leader "<SPC>")
-        (evil-leader/set-key
-          "f" 'find-file
-          "b" 'switch-to-buffer
-          "k" 'kill-buffer
-          "g" 'magit-status
-          "p" 'projectile-command-map
-          "t" 'treemacs
-          "l" 'lsp-command-map
-          "d" 'dashboard-refresh-buffer
-          ;; Fix for key sequence error - separate keys with more distinct prefixes
-          "cc" 'copilot-chat-mode
-          "ca" 'copilot-chat-ask
-          "cg" 'copilot-chat-generate
-          "ce" 'copilot-chat-explain
-          "cx" 'copilot-chat-explain-inline)) ;; Changed from "ci" to "cx" to avoid conflict
 
       ;; Copilot Configuration
       (use-package copilot
@@ -342,56 +373,6 @@
         ;; Set up keybindings for copilot-chat
         (global-set-key (kbd "C-c C-c") 'copilot-chat-mode))
 
-      ;; Evil commentary for commenting code
-      (use-package evil-commentary
-        :after evil
-        :config
-        (evil-commentary-mode))
-
-      ;; Evil surround for delimiters manipulation
-      (use-package evil-surround
-        :after evil
-        :config
-        (global-evil-surround-mode 1))
-
-      ;; Evil matchit for jumping between matching tags/blocks
-      (use-package evil-matchit
-        :after evil
-        :config
-        (global-evil-matchit-mode 1))
-
-      ;; Evil numbers for incrementing/decrementing
-      (use-package evil-numbers
-        :after evil
-        :config
-        (define-key evil-normal-state-map (kbd "C-a") 'evil-numbers/inc-at-pt)
-        (define-key evil-normal-state-map (kbd "C-x") 'evil-numbers/dec-at-pt))
-
-      ;; Evil snipe for better 2-char searching
-      (use-package evil-snipe
-        :after evil
-        :config
-        (evil-snipe-mode 1)
-        (evil-snipe-override-mode 1))
-
-      ;; Evil multicursor support
-      (use-package evil-mc
-        :after evil
-        :config
-        (global-evil-mc-mode 1))
-
-      ;; Evil visualstar for searching visual selections
-      (use-package evil-visualstar
-        :after evil
-        :config
-        (global-evil-visualstar-mode))
-
-      ;; Evil terminal cursor changer for terminal mode
-      (use-package evil-terminal-cursor-changer
-        :after evil
-        :config
-        (unless (display-graphic-p)
-          (evil-terminal-cursor-changer-activate)))
 
       ;; LSP mode configuration
       (use-package lsp-mode
@@ -403,7 +384,6 @@
                (web-mode . lsp)
                (c-mode . lsp)
                (c++-mode . lsp)
-               (nix-mode . lsp)
                (terraform-mode . lsp))
         :commands lsp
         :config
@@ -414,11 +394,6 @@
         (setq lsp-headerline-breadcrumb-enable t)
         (setq lsp-modeline-diagnostics-enable t)
         ;; Language-specific LSP configurations
-        (lsp-register-client
-         (make-lsp-client :new-connection (lsp-stdio-connection '("nixd"))
-                          :major-modes '(nix-mode)
-                          :server-id 'nixd))
-
         (lsp-register-client
          (make-lsp-client :new-connection (lsp-stdio-connection '("terraform-ls" "serve"))
                           :major-modes '(terraform-mode)
@@ -450,9 +425,42 @@
       (use-package lsp-treemacs
         :after (lsp-mode treemacs))
 
-      ;; Treemacs evil integration
-      (use-package treemacs-evil
-        :after (treemacs evil))
+      ;; Treemacs configuration with icons
+      (use-package treemacs
+        :config
+        (setq treemacs-position 'left
+              treemacs-width 35
+              treemacs-indentation 2
+              treemacs-git-integration t
+              treemacs-collapse-dirs 3
+              treemacs-silent-refresh t
+              treemacs-change-root-without-asking t
+              treemacs-sorting 'alphabetic-asc
+              treemacs-show-hidden-files t
+              treemacs-persist-file (expand-file-name "treemacs-persist" user-emacs-directory))
+
+        :bind
+        (("C-c t t" . treemacs)
+         ("C-c t b" . treemacs-bookmark)
+         ("C-c t f" . treemacs-find-file)
+         ("C-c t p" . treemacs-projectile)))
+
+      ;; Treemacs all-the-icons integration
+      (use-package treemacs-all-the-icons
+        :if (display-graphic-p)
+        :after (treemacs all-the-icons)
+        :config
+        ;; Use all-the-icons as the default theme
+        (treemacs-load-theme "all-the-icons"))
+
+      ;; Treemacs nerd-icons integration
+      (use-package treemacs-nerd-icons
+        :if (display-graphic-p)
+        :after treemacs
+        :config
+        ;; Uncomment this line and comment out the all-the-icons theme if you prefer nerd icons
+        ;; (treemacs-load-theme "nerd-icons")
+        )
 
       ;; Company for autocompletion
       (use-package company
@@ -475,25 +483,64 @@
       (use-package flycheck
         :init (global-flycheck-mode))
 
-      ;; Nix mode configuration
+      ;; Nix mode configuration with performance optimizations
       (use-package nix-mode
         :mode "\\.nix\\'"
-        :hook (nix-mode . lsp-deferred)
+        ;; Remove automatic LSP connection to prevent hanging
+        ;; :hook (nix-mode . lsp-deferred)
         :config
-        (add-hook 'nix-mode-hook
-                  (lambda ()
-                    (setq-local indent-tabs-mode nil)
-                    (setq-local tab-width 2)
-                    (setq-local nix-indent-function 'nix-indent-line))))
+        ;; Performance optimizations for nix-mode
+        (setq blink-matching-delay 0.5) ;; Reduce blink matching delay
+        (setq font-lock-maximum-decoration 2) ;; Reduce font-lock decoration level
+        (setq jit-lock-defer-time 0.05) ;; Increase jit-lock defer time slightly
 
-      ;; Format Nix code on save with nixpkgs-fmt
+        ;; Large file optimizations
+        (defun my/nix-mode-setup ()
+          ;; Disable features that can cause hangs for large Nix files
+          (when (> (buffer-size) 100000)  ;; For files larger than ~100KB
+            (font-lock-mode -1)
+            (when (bound-and-true-p lsp-mode)
+              (lsp-disconnect)))
+
+          ;; Base nix-mode settings
+          (setq-local indent-tabs-mode nil)
+          (setq-local tab-width 2)
+          (setq-local nix-indent-function 'nix-indent-line)
+
+          ;; Manually enable LSP if desired via M-x lsp command
+          (local-set-key (kbd "C-c C-l") 'lsp))
+
+        (add-hook 'nix-mode-hook 'my/nix-mode-setup))
+
+      ;; Configure nixd as a more efficient LSP server for Nix
+      (with-eval-after-load 'lsp-mode
+        (lsp-register-client
+         (make-lsp-client
+          :new-connection (lsp-stdio-connection
+                           (lambda ()
+                             (if (executable-find "nixd")
+                                 '("nixd" "--log-file" "/tmp/nixd.log" "--log-level" "error")
+                               '("nixd"))))
+          :major-modes '(nix-mode)
+          :server-id 'nixd
+          :priority 1
+          ;; Set initialization options to reduce workload
+          :initialization-options '(:diagnostics (:enabled t)
+                                    :formatting (:enabled t)
+                                    :completion (:enable t)))))
+
+      ;; Format Nix code on save with nixpkgs-fmt (only when explicitly enabled)
       (use-package nixpkgs-fmt
         :if (executable-find "nixpkgs-fmt")
-        :hook (nix-mode . nixpkgs-fmt-on-save-mode))
+        :commands (nixpkgs-fmt nixpkgs-fmt-buffer nixpkgs-fmt-on-save-mode)
+        :init
+        ;; Don't enable formatting on save by default - can be enabled per project
+        ;; :hook (nix-mode . nixpkgs-fmt-on-save-mode)
+        )
 
-      ;; Nix prettify symbols mode
+      ;; Nix prettify symbols mode - keep disabled by default for performance
       (use-package nix-prettify-mode
-        :hook (nix-mode . nix-prettify-mode))
+        :commands nix-prettify-mode)
 
       ;; direnv integration for loading environment from .envrc files
       (use-package envrc
@@ -625,29 +672,23 @@
                   :match-func (lambda (msg)
                                 (when msg
                                   (string-prefix-p "/personal" (mu4e-message-field msg :maildir))))
-                  :vars '((user-mail-address . "personal@example.com")
+                  :vars '((user-mail-address . "olaf.loken@gmail.com")
                           (user-full-name . "Your Name")
                           (mu4e-sent-folder . "/personal/Sent")
                           (mu4e-drafts-folder . "/personal/Drafts")
                           (mu4e-trash-folder . "/personal/Trash")
+                          (mu4e-refile-folder . "/personal/Archive")))
+                ,(make-mu4e-context
+                  :name "Work"
                   :match-func (lambda (msg)
                                 (when msg
                                   (string-prefix-p "/work" (mu4e-message-field msg :maildir))))
-                  :vars '((user-mail-address . "work@example.com")
+                  :vars '((user-mail-address . "olaf@freundcloud.com")
                           (user-full-name . "Your Work Name")
                           (mu4e-sent-folder . "/work/Sent")
                           (mu4e-drafts-folder . "/work/Drafts")
                           (mu4e-trash-folder . "/work/Trash")
                           (mu4e-refile-folder . "/work/Archive"))))))
-
-      ;; Ensure mu4e is fully loaded before loading evil-mu4e
-      (use-package evil-mu4e
-        :after (evil mu4e)
-        :defer t
-        :config
-        ;; Ensure mu4e is fully initialized before configuring evil-mu4e
-        (with-eval-after-load 'mu4e
-          (require 'evil-mu4e)))
 
       ;; RSS Feed Reader with Elfeed
       (use-package elfeed
@@ -669,25 +710,6 @@
         (setq org-startup-with-inline-images t)
         (setq org-pretty-entities t)
         (setq org-hide-emphasis-markers t))
-
-      ;; Fix for org-evil
-      (use-package org-evil
-        :after (evil org)
-        :demand t  ;; Ensure it's loaded immediately after dependencies
-        :config
-        ;; Make sure org-evil is properly initialized before accessing its features
-        (require 'org-evil-core)
-        (require 'org-evil-motion)
-
-        ;; Define the mode variable if it doesn't exist
-        (unless (boundp 'org-evil-motion-mode)
-          (defvar org-evil-motion-mode nil
-            "Non-nil if Org-Evil-Motion mode is enabled.")
-          (make-variable-buffer-local 'org-evil-motion-mode))
-
-        ;; Ensure org-evil motion mode is properly initialized
-        (when (fboundp 'org-evil-motion-mode)
-          (add-hook 'org-mode-hook 'org-evil-motion-mode)))
 
       ;; Org-roam for networked note-taking
       (use-package org-roam
@@ -719,20 +741,32 @@
       (use-package rainbow-delimiters
         :hook (prog-mode . rainbow-delimiters-mode))
 
-      ;; Which-key for command assistance
+      ;; Which-key for command assistance - completely revised configuration
       (use-package which-key
+        ;; Initialize which-key earlier in the startup process
+        :demand t
+        :init
+        ;; Use these settings before loading which-key
+        (setq which-key-separator " → ")
+        (setq which-key-prefix-prefix "+")
+        (setq which-key-sort-order 'which-key-key-order-alpha)
+
+        ;; Show which-key earlier when pressing C-h
+        (setq which-key-show-early-on-C-h t)
+
         :config
-        ;; Configure which-key to display on the left side
-        (setq which-key-side-window-location 'left)
+        ;; Use right-bottom layout as per https://github.com/justbur/emacs-which-key
+        ;; Shows which-key on right if there's room, otherwise bottom
+        (which-key-setup-side-window-right-bottom)
 
-        ;; Set a smaller delay time for which-key to pop up (seconds)
-        (setq which-key-idle-delay 0.5)
+        ;; Set a shorter delay time for which-key to pop up (seconds)
+        (setq which-key-idle-delay 0.3)
+        (setq which-key-idle-secondary-delay 0.05)
 
-        ;; Maximum height of which-key popup (in % of frame height)
+        ;; Maximum height/width of which-key popup (in % of frame size)
         (setq which-key-side-window-max-height 0.33)
-
-        ;; Width of which-key popup (in % of frame width)
-        (setq which-key-side-window-max-width 0.33)
+        (setq which-key-allow-evil-operators t)
+        (setq which-key-show-operator-state-maps t)
 
         ;; Use standard prefix key replacement ("<f1>" → "F1")
         (setq which-key-replacement-alist
@@ -748,29 +782,8 @@
         (global-set-key (kbd "C-h b") 'which-key-show-top-level)
         (global-set-key (kbd "C-h m") 'which-key-show-major-mode)
 
-        ;; Enable which-key mode
-        (which-key-mode))
-
-      ;; Additional evil bindings for language-specific modes
-      (evil-define-key 'normal python-mode-map
-        (kbd "<leader>tt") 'python-pytest-function
-        (kbd "<leader>tf") 'python-pytest-file
-        (kbd "<leader>tp") 'python-pytest-project
-        (kbd "<leader>tr") 'python-pytest-repeat)
-
-      (evil-define-key 'normal go-mode-map
-        (kbd "<leader>tt") 'go-test-current-test
-        (kbd "<leader>tf") 'go-test-current-file
-        (kbd "<leader>tp") 'go-test-current-project)
-
-      (evil-define-key 'normal terraform-mode-map
-        (kbd "<leader>ti") 'terraform-init
-        (kbd "<leader>tp") 'terraform-plan
-        (kbd "<leader>ta") 'terraform-apply)
-
-      (evil-define-key 'normal markdown-mode-map
-        (kbd "<leader>tt") 'markdown-toc-generate-toc
-        (kbd "<leader>tp") 'grip-mode)
+        ;; Explicitly enable which-key mode
+        (which-key-mode 1))
     '';
 
     ".emacs.d/custom-vars.el".text = ''
@@ -785,6 +798,11 @@
     mu
     isync
     offlineimap
+    fzf # Required for Emacs fzf integration
+    bat # For fzf preview functionality
+    sops # Required for sops plugin
+    age # For age encryption
+    # agenix # For agenix secret management
 
     # Language servers and development tools
     nixd # Nix LSP server

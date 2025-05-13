@@ -45,6 +45,12 @@
     nix-colors.url = "github:misterio77/nix-colors";
     stylix.url = "github:danth/stylix";
 
+    # Editor
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Development and utilities
     sops-nix = {
       url = "github:mic92/sops-nix";
@@ -117,6 +123,7 @@
     zjstatus,
     walker,
     hyprland,
+    nixvim,
     ...
   } @ inputs: let
     username = "olafkfreund";
@@ -158,6 +165,7 @@
         inputs.agenix.nixosModules.default
         nix-index-database.nixosModules.nix-index
         ./home/shell/zellij/zjstatus.nix
+        inputs.nixvim.nixosModules.nixvim
         {
           home-manager = {
             useGlobalPkgs = true;
@@ -187,11 +195,13 @@
                 nixpkgs-unstable
                 nix-colors
                 nix-snapd
+                nixvim
                 host
                 ;
             };
             users.${username} = import ./Users/${username}/${host}_home.nix;
             sharedModules = [
+              inputs.nixvim.homeManagerModules.nixvim
               {
                 stylix.targets = builtins.listToAttrs (map (name: {
                     inherit name;
