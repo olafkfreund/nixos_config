@@ -1,4 +1,8 @@
 {pkgs, ...}: {
+  imports = [
+    ./claude-integration.nix
+  ];
+
   home.packages = with pkgs; [
     zsh
     oh-my-zsh
@@ -7,7 +11,18 @@
     zsh-autopair
     zsh-clipboard
     any-nix-shell
+    # claude-cli is now managed by the claude-integration module
   ];
+
+  # Enable Claude CLI integration
+  programs.claudeCLI = {
+    enable = true;
+    tempDir = "$HOME/.cache/claude-cli";
+    terminals = {
+      kitty = "${pkgs.kitty}/bin/kitty";
+      foot = "${pkgs.foot}/bin/foot";
+    };
+  };
 
   programs.zsh = {
     enable = true;
@@ -219,6 +234,11 @@
       zstyle ':fzf-tab:*' fzf-pad 4
       zstyle ':fzf-tab:*' fzf-min-height 100
       zstyle ':fzf-tab:*' switch-group ',' '.'
+    '';
+
+    # Remove the Claude integration code from initExtra as it's now managed by the module
+    initExtra = ''
+      # ...existing code...
     '';
 
     envExtra = ''

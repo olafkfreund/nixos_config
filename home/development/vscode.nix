@@ -243,6 +243,8 @@ in {
           "chat.mcp.enabled" = true;
           "chat.agent.enabled" = true;
           "chat.mcp.discovery.enabled" = true;
+          "chat.tools.autoApprove" = true;
+          "chat.agent.maxRequests" = 15;
           "github.copilot.chat.codesearch.enabled" = true;
           "github.copilot.chat.scopeSelection" = true;
           "github.copilot.chat.agent.thinkingTool" = true;
@@ -282,6 +284,51 @@ in {
       };
     };
     programs.vscode.mutableExtensionsDir = true; # Allow marketplace extensions
+
+    # Set up XDG file associations for VSCode
+    xdg.mimeApps = {
+      enable = true;
+      associations.added = {
+        "text/plain" = ["code.desktop"];
+        "text/markdown" = ["code.desktop"];
+        "application/json" = ["code.desktop"];
+        "application/x-yaml" = ["code.desktop"];
+        "text/x-python" = ["code.desktop"];
+        "text/x-csrc" = ["code.desktop"];
+        "text/x-c++src" = ["code.desktop"];
+        "text/x-chdr" = ["code.desktop"];
+        "text/x-c++hdr" = ["code.desktop"];
+        "text/x-shellscript" = ["code.desktop"];
+        "text/html" = ["code.desktop"];
+        "text/css" = ["code.desktop"];
+        "text/javascript" = ["code.desktop"];
+      };
+    };
+
+    # Custom VSCode desktop entry with Wayland optimizations
+    xdg.desktopEntries.code = {
+      name = "Visual Studio Code";
+      exec = "code --ozone-platform=wayland --enable-features=UseOzonePlatform,WaylandWindowDecorations %F";
+      categories = ["Development" "IDE"];
+      comment = "Code Editing. Optimized for Wayland.";
+      icon = "code";
+      mimeType = [
+        "text/plain"
+        "text/markdown"
+        "application/json"
+        "application/x-yaml"
+        "text/x-python"
+        "text/x-csrc"
+        "text/x-c++src"
+        "text/x-chdr"
+        "text/x-c++hdr"
+        "text/x-shellscript"
+        "text/html"
+        "text/css"
+        "text/javascript"
+      ];
+      type = "Application";
+    };
 
     wayland.windowManager.hyprland.settings = {
       layerrule = [
