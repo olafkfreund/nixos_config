@@ -7,7 +7,19 @@
 }: {
   system.autoUpgrade = {
     enable = true;
-    channel = "https://nixos.org/channels/nixos-unstable";
+    flags = [
+      "--no-write-lock-file"
+      "--show-trace"
+    ];
+    dates = "04:00";
+    randomizedDelaySec = "45min";
+    persistent = true;
+    allowReboot = false;
+    rebootWindow = {
+      lower = "01:00";
+      upper = "05:00";
+    };
+    flake = "github:olafkfreund/nixos-config";
   };
 
   nix.settings.experimental-features = ["nix-command" "flakes"];

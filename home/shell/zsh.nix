@@ -11,13 +11,13 @@
     zsh-autopair
     zsh-clipboard
     any-nix-shell
-    # claude-cli is now managed by the claude-integration module
+    # claude-code is now managed by the claude-integration module
   ];
 
-  # Enable Claude CLI integration
-  programs.claudeCLI = {
+  # Enable Claude Code integration
+  programs.claudeCode = {
     enable = true;
-    tempDir = "$HOME/.cache/claude-cli";
+    tempDir = "$HOME/.cache/claude-code";
     terminals = {
       kitty = "${pkgs.kitty}/bin/kitty";
       foot = "${pkgs.foot}/bin/foot";
@@ -234,11 +234,6 @@
       zstyle ':fzf-tab:*' fzf-pad 4
       zstyle ':fzf-tab:*' fzf-min-height 100
       zstyle ':fzf-tab:*' switch-group ',' '.'
-    '';
-
-    # Remove the Claude integration code from initExtra as it's now managed by the module
-    initExtra = ''
-      # ...existing code...
     '';
 
     envExtra = ''
