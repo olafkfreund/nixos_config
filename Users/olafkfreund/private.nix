@@ -1,6 +1,7 @@
-{ pkgs
-, lib
-, ...
+{
+  pkgs,
+  lib,
+  ...
 }: {
   home.packages = with pkgs; [
     gitui
@@ -66,6 +67,20 @@
       "*.swp"
       "*result*"
       ".direnv"
+      "node_modules"
+    ];
+  };
+
+  # Enable nixd for improved Nix language server support
+  development.nixd = {
+    enable = true;
+    offlineMode = true;
+    formatterCommand = ["alejandra"];
+    diagnosticsIgnored = [];
+    diagnosticsExcluded = [
+      "\\.direnv"
+      "result"
+      "\\.git"
       "node_modules"
     ];
   };

@@ -96,7 +96,7 @@ return {
         -- tsserver will be automatically installed with mason and loaded with lspconfig
         tsserver = {},
         nixd = {
-          cmd = { "nixd", },
+          cmd = { "nixd" },
           settings = {
             nixd = {
               nixpkgs = {
@@ -104,17 +104,46 @@ return {
               },
               formatting = {
                 command = { "nixfmt" },
+                timeout_ms = 5000, -- Increase timeout for formatting larger files
               },
               options = {
                 nixos = {
-                  expr = '(builtins.getFlake "/home/olafkfreund/.config/nixos").nixosConfigurations.razer.options',
+                  expr = '(builtins.getFlake ("git+file://" + toString ./.)).nixosConfigurations.p620.options',
                 },
                 home_manager = {
-                  expr = '(builtins.getFlake "/home/olafkfreund/.config/nixos").homeConfigurations.razer.options',
+                  expr = '(builtins.getFlake ("git+file://" + toString ./.)).homeConfigurations."olafkfreund@p620".options',
+                },
+                target = ["all"], -- Target all available options
+                enable = true,
+                offline = true, -- Work in offline mode when internet is unavailable
+              },
+              diagnostics = {
+                enable = true,
+                ignored = [], -- Specific diagnostic codes to ignore
+                excluded = [], -- Files/paths to exclude from diagnostics
+              },
+              eval = {
+                depth = 2, -- Evaluation depth for better performance
+                workers = 3, -- Limit workers for stability
+                trace = {
+                  server = "off",
+                  evaluation = "off",
                 },
               },
+              completion = {
+                enable = true,
+                priority = 10,
+              },
+              path = {
+                include = ["${workspaceFolder}/**/*.nix"], -- Include all Nix files in workspace
+                exclude = {
+                  "${workspaceFolder}/.direnv/**",
+                  "${workspaceFolder}/result/**", 
+                  "${workspaceFolder}/.git/**"
+                }, -- Exclude build artifacts and git files
+              },
             },
-          },  
+          },
         },
       },  
       -- you can do any additional lsp server setup here

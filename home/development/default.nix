@@ -8,5 +8,6 @@
     ./distrobox.nix
     ./cursor-code.nix
     ./windsurf.nix
+    ./nixd.nix
   ];
 }
