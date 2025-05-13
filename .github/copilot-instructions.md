@@ -53,6 +53,13 @@ options.myModule = {
 };
 ```
 
+### Package Verification
+- Always verify package names exist before using them in configurations
+- Use the nixos-mcp server for package verification when available
+- Alternatively, use `nix-env -f '<nixpkgs>' -qaP` to list and verify available packages
+- Check packages against the current version of nixpkgs being used
+- Prefer using the exact attribute path (e.g., `pkgs.python3Packages.requests` instead of just `requests`)
+
 ### Service Configuration
 - Use systemd service units when appropriate
 - Handle service dependencies explicitly
