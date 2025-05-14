@@ -84,7 +84,7 @@
     ELECTRON_OZONE_PLATFORM_HINT = "auto";
     KITTY_DISABLE_WAYLAND = "0";
     # AMD-specific variables instead of NVIDIA ones
-    LIBVA_DRIVER_NAME = "radeonsi";
+    # LIBVA_DRIVER_NAME = "radeonsi";
   };
 
   # Service-specific configs

@@ -96,6 +96,84 @@ systemd.services.myService = {
 };
 ```
 
+## Host-Specific Configurations
+
+Our configuration manages several distinct hosts, each with unique hardware specifications that require tailored configurations:
+
+### P620 Workstation
+- **CPU**: AMD processor
+- **GPU**: AMD graphics card
+- **Use Case**: High-performance workstation
+- **Special Considerations**:
+  - Use AMD-specific drivers (`amdgpu`)
+  - Enable ROCm for GPU computation when needed
+  - Configure for optimal thermal management under heavy workloads
+
+### Razer Laptop
+- **CPU**: Intel processor
+- **GPU**: NVIDIA graphics card
+- **Use Case**: Mobile development platform
+- **Special Considerations**:
+  - Power management optimizations for battery life
+  - Include laptop-specific modules (backlight, touchpad, etc.)
+  - Configure hybrid graphics (NVIDIA Optimus)
+  - Implement thermal throttling protection
+
+### P510 Workstation
+- **CPU**: Intel Xeon processor
+- **GPU**: NVIDIA graphics card
+- **Use Case**: Server/workstation hybrid
+- **Special Considerations**:
+  - Configure for ECC memory if available
+  - Optimize for parallel workloads
+  - Use NVIDIA proprietary drivers for CUDA support
+
+### DEX5550 SFF System
+- **CPU**: Intel processor (smaller form factor)
+- **GPU**: Intel integrated graphics
+- **Use Case**: Compact desktop/HTPC
+- **Special Considerations**:
+  - Intel graphics drivers and acceleration
+  - Lower power consumption optimizations
+  - Silent cooling profile when possible
+  - Hardware video decoding support
+
+### Host-Specific Module Pattern
+```nix
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
+  # Host-specific imports
+  imports = lib.optional (config.networking.hostName == "p620") ./hosts/p620;
+
+  # Conditional configuration based on hostname
+  config = lib.mkMerge [
+    (lib.mkIf (config.networking.hostName == "razer") {
+      # Razer-specific configuration
+      hardware.nvidia.prime = {
+        offload.enable = true;
+        intelBusId = "PCI:0:2:0";
+        nvidiaBusId = "PCI:1:0:0";
+      };
+    })
+    
+    (lib.mkIf (config.networking.hostName == "dex5550") {
+      # DEX5550-specific configuration
+      hardware.opengl = {
+        enable = true;
+        extraPackages = with pkgs; [
+          intel-media-driver
+          vaapiIntel
+        ];
+      };
+    })
+  ];
+}
+```
+
 ## Testing and Validation
 
 - Test configurations with `nixos-rebuild build`

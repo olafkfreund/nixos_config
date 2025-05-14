@@ -1,118 +1,229 @@
-# Fixing net::ERR_NETWORK_CHANGED Errors in NixOS
+# Network Stability Guide
 
-This guide explains the solution for the `net::ERR_NETWORK_CHANGED` error that commonly affects Electron applications.
+This guide explains the comprehensive network stability improvements implemented in this NixOS configuration to prevent `net::ERR_NETWORK_CHANGED` errors in Electron applications.
 
-## Understanding the Error
+## Overview
 
-The `net::ERR_NETWORK_CHANGED` error occurs when:
+The network stability solution consists of several integrated components:
 
-1. Your Electron application initiates a network request
-2. During that request, your network connection changes in some way
-3. Chromium (which powers Electron) detects this change and aborts the request
+1. **Network Stability Module** - Core module with stability enhancement options
+2. **Network Monitoring Service** - Monitors network interfaces and connections
+3. **Network Stability Helper** - Provides active mitigation for network changes
+4. **Electron Application Enhancements** - Environment variables for better network handling
 
-This error is especially common in environments with multiple network interfaces (wired/wireless), VPNs like Tailscale, or unstable connections.
+## Configuration Options
 
-## Implemented Solution
+### Basic Usage
 
-Our NixOS configuration now includes a comprehensive solution to address this error through several complementary modules:
+Enable network stability in your host configuration:
 
-### Network Stability Framework
+```nix
+{
+  services.network-stability = {
+    enable = true;
+  };
+}
+```
 
-A set of modules has been implemented to solve this issue:
+### Full Configuration
 
-- **Stable Connection Management**: Adds delays before switching network interfaces to prevent rapid switching
-- **Enhanced DNS Resolution**: Configures DNS to be more resilient during network transitions
-- **TCP/IP Stack Optimization**: Kernel parameters tuned for connection stability
-- **Electron Application Patching**: Special configuration for Electron apps to better handle network changes
-- **Tailscale Enhancement**: Improved Tailscale VPN configuration that doesn't disrupt connections
-- **Network Monitoring**: Tools to track and diagnose network stability issues
+```nix
+{
+  services.network-stability = {
+    enable = true;
+    
+    # Monitoring configuration
+    monitoring = {
+      enable = true;        # Enable monitoring service
+      interval = 30;        # Check interval in seconds
+    };
+    
+    # Secure DNS configuration
+    secureDns = {
+      enable = true;
+      providers = [
+        "1.1.1.1#cloudflare-dns.com"
+        "8.8.8.8#dns.google"
+      ];
+    };
+    
+    # Tailscale integration
+    tailscale = {
+      enhance = true;
+      acceptDns = false;    # Don't let Tailscale manage DNS
+    };
+    
+    # Electron application improvements
+    electron = {
+      improve = true; 
+    };
+    
+    # Connection stability settings
+    connectionStability = {
+      enable = true;
+      switchDelayMs = 5000;  # Delay before switching interfaces
+    };
+    
+    # Helper service configuration
+    helperService = {
+      enable = true;
+      startDelay = 5;        # Delay before starting
+      restartSec = 30;       # Restart interval on failure
+    };
+    
+    # Custom script path if needed
+    scriptPath = ./scripts/network-stability-helper.sh;
+  };
+}
+```
 
-### How to Enable the Solution
+## Environment Variables
 
-The solution can be enabled on any host by:
+For Electron applications, the following environment variables are set:
 
-1. Either importing the example configuration:
+| Variable | Value | Purpose |
+|----------|-------|---------|
+| `DISABLE_REQUEST_THROTTLING` | `1` | Prevents limiting concurrent requests |
+| `ELECTRON_FORCE_WINDOW_MENU_BAR` | `1` | Improves UI stability during network changes |
+| `CHROME_NET_TCP_SOCKET_CONNECT_TIMEOUT_MS` | `60000` | Increases connection timeouts to 60 seconds |
+| `CHROME_NET_TCP_SOCKET_CONNECT_ATTEMPT_DELAY_MS` | `2000` | Adds 2-second delay between connection attempts |
+
+## Monitoring and Troubleshooting
+
+### View Network Stability Logs
+
+```bash
+# View network monitoring logs
+journalctl -u network-monitoring -f
+
+# View network stability helper logs
+journalctl -u network-stability-helper -f
+
+# Check network event logs
+cat /var/log/network-monitoring/events.json
+```
+
+### Common Issues and Solutions
+
+#### Electron App Still Disconnecting
+
+If an application still shows `net::ERR_NETWORK_CHANGED` errors:
+
+1. Increase the connection delay:
    ```nix
-   imports = [
-     ../../modules/services/network-stability-example.nix
+   services.network-stability.connectionStability.switchDelayMs = 10000;
+   ```
+
+2. Add more DNS providers:
+   ```nix
+   services.network-stability.secureDns.providers = [
+     "1.1.1.1#cloudflare-dns.com"
+     "8.8.8.8#dns.google"
+     "9.9.9.9#dns.quad9.net"
    ];
    ```
 
-2. Or by directly enabling the network stability service:
+3. Launch the application with the helper script:
+   ```bash
+   electron-net-stable your-electron-app
+   ```
+
+#### Network Interface Switching Issues
+
+If experiencing problems with network interfaces switching too frequently:
+
+1. Add interface priority in NetworkManager:
    ```nix
-   services.network-stability.enable = true;
+   networking.networkmanager.connectionConfig = {
+     "connection.autoconnect-priority" = 10;  # Higher for preferred connections
+   };
    ```
 
-### Fine-tuning for Your System
-
-You can adjust parameters based on your specific system:
-
-```nix
-services.network-stability = {
-  enable = true;
-  
-  # Monitoring configuration
-  monitoring = {
-    enable = true;
-    interval = 30; # Seconds between checks
-  };
-  
-  # Connection stability settings
-  connectionStability = {
-    switchDelayMs = 5000; # Milliseconds to wait before switching networks
-  };
-  
-  # Other customizable parameters
-  secureDns.providers = [
-    "1.1.1.1#cloudflare-dns.com"
-    "8.8.8.8#dns.google"
-  ];
-  
-  tailscale.acceptDns = false;
-  electron.improve = true;
-};
-```
-
-## Troubleshooting
-
-If you're still experiencing the error after enabling the solution:
-
-1. Run the monitoring script to diagnose network issues:
-   ```bash
-   sudo network-monitor
-   ```
-
-2. Check logs for network changes:
-   ```bash
-   journalctl -u network-monitoring -f
-   ```
-
-3. Try increasing the `connectionStability.switchDelayMs` value to a higher setting.
-
-4. For specific Electron applications, you can launch them with enhanced stability:
-   ```bash
-   electron-wayland-launcher /path/to/app
+2. Adjust the TCP keepalive settings:
+   ```nix
+   boot.kernel.sysctl = {
+     "net.ipv4.tcp_keepalive_time" = 600;
+     "net.ipv4.tcp_keepalive_intvl" = 60;
+   };
    ```
 
 ## Technical Details
 
-The solution works by implementing the following strategies:
+### Network Monitoring
 
-- **Delay Network Transitions**: Add delay timers before interface switching
-- **DNS Redundancy**: Multiple DNS providers with DNS-over-TLS and caching
-- **Connection Persistence**: TCP keepalive and stability optimizations
-- **Electron Resilience**: Custom Electron flags for better network handling
-- **Proactive Monitoring**: Early detection of network changes
+The network monitoring service regularly checks:
 
-These solutions are designed to work together to prevent the underlying conditions that cause the `net::ERR_NETWORK_CHANGED` error.
+- Interface status changes
+- Default route changes
+- DNS resolution capability
+- Connection stability
 
-## Module Locations
+### Stability Helper
 
-- `/modules/services/network-stability.nix`: Main stability service
-- `/modules/services/dns/secure-dns.nix`: Enhanced DNS resolution
-- `/modules/services/network-monitoring.nix`: Network monitoring service
-- `/modules/common/networking.nix`: Enhanced networking module
-- `/modules/common/electron.nix`: Electron app improvements
-- `/modules/services/tailscale/default.nix`: Tailscale enhancements
+The helper service provides active mitigation:
 
-The implementation follows NixOS best practices with proper module structure, option documentation, and functional programming patterns.
+- Detects network transitions
+- Manages connection caching
+- Prevents rapid interface switching
+- Facilitates graceful handovers between connections
+
+### Integration with systemd-networkd
+
+For systems using systemd-networkd, these optimizations are applied:
+
+- Link configuration for better stability
+- Network configuration to handle carrier changes
+- Proper dependency ordering between services
+
+### Integration with NetworkManager
+
+For systems using NetworkManager, these optimizations are applied:
+
+- Connection ID stability across reboots
+- Increased device timeout settings
+- Enhanced mDNS resolution
+
+## Hardware-Specific Optimizations
+
+For optimal performance on specific hardware:
+
+### AMD Systems (e.g., p620)
+
+```nix
+boot.kernel.sysctl = lib.mkMerge [
+  # TCP optimizations for AMD
+  {
+    "net.ipv4.tcp_keepalive_time" = 600;
+    "net.ipv4.tcp_keepalive_intvl" = 60;
+    "net.ipv4.tcp_keepalive_probes" = 10;
+    "net.ipv4.tcp_fin_timeout" = 30;
+  }
+  # BBR congestion control works well with AMD
+  {
+    "net.core.default_qdisc" = "fq";
+    "net.ipv4.tcp_congestion_control" = "bbr";
+  }
+];
+```
+
+### Intel Systems
+
+```nix
+boot.kernel.sysctl = lib.mkMerge [
+  # TCP optimizations for Intel
+  {
+    "net.ipv4.tcp_keepalive_time" = 500;
+    "net.ipv4.tcp_keepalive_intvl" = 45;
+    "net.ipv4.tcp_keepalive_probes" = 8;
+  }
+  # CUBIC congestion control typically works well with Intel
+  {
+    "net.core.default_qdisc" = "fq";
+    "net.ipv4.tcp_congestion_control" = "cubic";
+  }
+];
+```
+
+## Further Customization
+
+The network stability modules are designed to be customizable. Refer to the module options for additional configuration possibilities beyond the defaults presented here.

@@ -30,6 +30,13 @@ in {
       description = "Hostname of exit node to use for internet traffic";
       example = "exit-node.example.com";
     };
+
+    preferredDERPs = mkOption {
+      type = with types; listOf str;
+      default = ["fra" "ams" "par" "lon"]; # Frankfurt, Amsterdam, Paris, London - for EU users
+      description = "List of preferred DERP region codes";
+      example = ["nyc" "chi" "sfo"]; # US-based regions
+    };
   };
 
   config = mkIf cfg.enable {
@@ -52,8 +59,12 @@ in {
           }"
           "--shields-up=false"
           "--netfilter-mode=${cfg.netfilterMode}"
+          # Add preferred DERP regions for better connection reliability
+          "--advertise-routes="
+          "--advertise-exit-node"
         ]
-        ++ lib.optional (cfg.exitNode != null) "--exit-node=${cfg.exitNode}";
+        ++ lib.optional (cfg.exitNode != null) "--exit-node=${cfg.exitNode}"
+        ++ map (region: "--derp-region=${region}") cfg.preferredDERPs;
     };
 
     # Enable IP forwarding for tailscale subnet routing
@@ -75,6 +86,8 @@ in {
       serviceConfig = {
         Restart = "on-failure";
         RestartSec = "10s";
+        # Add improved connection reliability options
+        # Environment = "TS_DEBUG_DERP=all";
       };
     };
 

@@ -17,23 +17,13 @@ in {
     programs.chromium = {
       enable = true;
       package = pkgs.google-chrome;
-      commandLineArgs = [
-        "--enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer,VaapiVideoDecoder,VaapiVideoEncoder,VaapiIgnoreDriverChecks"
-        "--ozone-platform=wayland"
-        "--enable-wayland-ime"
-        "--enable-gpu-rasterization"
-        "--enable-zero-copy"
-        "--ignore-gpu-blocklist"
-        "--enable-hardware-overlays"
-        "--enable-accelerated-video-decode"
-        "--enable-accelerated-video-encode"
-        "--use-gl=egl"
-        "--force-dark-mode"
-        "--gtk-version=4"
-      ];
-      extensions = [
-        {id = "eimadpbcbfnmbkopoojfekhnkhdbieeh";} # Dark Reader
-      ];
+      commandLineArgs = ["--enable-features=UseOzonePlatform --ozone-platform=wayland"];
+      # commandLineArgs = [
+      #   "--enable-features=UseOzonePlatform"
+      #   "--ozone-platform=wayland"
+      #   "--gtk-version=4"
+      #   "--enable-wayland-ime"
+      # ];
     };
   };
 }

@@ -22,6 +22,12 @@ in {
     home.sessionVariables = {
       ELECTRON_OZONE_PLATFORM_HINT = "auto";
       GDK_BACKEND = "wayland";
+      # Network stability enhancements
+      DISABLE_REQUEST_THROTTLING = "1";
+      ELECTRON_FORCE_WINDOW_MENU_BAR = "1";
+      # Increase connection pools and timeouts
+      CHROME_NET_TCP_SOCKET_CONNECT_TIMEOUT_MS = "60000";
+      CHROME_NET_TCP_SOCKET_CONNECT_ATTEMPT_DELAY_MS = "2000";
     };
 
     programs.vscode = {

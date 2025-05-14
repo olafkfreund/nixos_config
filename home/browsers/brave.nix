@@ -1,21 +1,37 @@
 {
+  pkgs,
   config,
   lib,
-  pkgs,
   ...
-}: 
-with lib; let 
+}:
+with lib; let
   cfg = config.browsers.brave;
 in {
   options.browsers.brave = {
-    enable = mkEnableOption {
-      default = false; 
-      description = "Brave browser";
-    };
+    enable = mkEnableOption "Brave browser";
   };
+
   config = mkIf cfg.enable {
-    home.packages = with pkgs; [
-      brave
-    ];
+    programs.chromium = {
+      enable = true;
+      package = pkgs.brave;
+      commandLineArgs = [
+        "--enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer,VaapiVideoDecoder,VaapiVideoEncoder,VaapiIgnoreDriverChecks"
+        "--ozone-platform=wayland"
+        "--enable-wayland-ime"
+        "--enable-gpu-rasterization"
+        "--enable-zero-copy"
+        "--ignore-gpu-blocklist"
+        "--enable-hardware-overlays"
+        "--enable-accelerated-video-decode"
+        "--enable-accelerated-video-encode"
+        "--use-gl=egl"
+        "--force-dark-mode"
+        "--gtk-version=4"
+      ];
+      extensions = [
+        {id = "eimadpbcbfnmbkopoojfekhnkhdbieeh";} # Dark Reader
+      ];
+    };
   };
 }
