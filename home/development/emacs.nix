@@ -1,5 +1,4 @@
 {
-  config,
   lib,
   pkgs,
   ...
@@ -28,7 +27,7 @@
         sops
         age
         agenix
-        
+
         # Additional Nix tools
         nix-sandbox
         nixos-options
@@ -196,18 +195,18 @@
         :config
         ;; Set up Nix Sandbox to provide isolated compilation environments
         (setq nix-sandbox-rc-directory "~/.config/nix-sandbox")
-        
+
         ;; Enable flycheck integration with nix-sandbox
         (with-eval-after-load 'flycheck
           (setq flycheck-command-wrapper-function
-                (lambda (command) 
+                (lambda (command)
                   (apply 'nix-sandbox-shell-command nix-sandbox-rc-directory command)))
-          
+
           ;; Use sandbox environment for executables
           (setq flycheck-executable-find
-                (lambda (cmd) 
+                (lambda (cmd)
                   (nix-sandbox-executable-find nix-sandbox-rc-directory cmd))))
-        
+
         ;; Key bindings for nix-sandbox
         :bind (("C-c n s" . nix-sandbox-shell)
                ("C-c n b" . nix-sandbox-compile)
@@ -222,11 +221,11 @@
           (and buffer-file-name
                (or (string-match-p "/\\(configuration\\|hardware\\|modules\\|packages\\)\\.nix$" buffer-file-name)
                    (string-match-p "\\.nix$" buffer-file-name))))
-        
+
         ;; Set up company backend for nixos-options
         (with-eval-after-load 'company
           (add-to-list 'company-backends '(company-nixos-options)))
-        
+
         ;; Key bindings for nixos-options
         :bind (:map nix-mode-map
                     ("C-c C-o" . nixos-options-doc)

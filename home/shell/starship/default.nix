@@ -1,5 +1,4 @@
 {
-  input,
   lib,
   config,
   ...
@@ -114,7 +113,7 @@ in {
           format = "[$user ]($style)[ ](bold fg:color_bg0 bg:color_blue)[](fg:color_blue bg:color_bg3)";
           show_always = false;
           aliases = {
-            olafkfreun = "olaf";
+            olafkfreund = "olaf";
           };
         };
 

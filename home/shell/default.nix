@@ -15,7 +15,6 @@
     # ./lunarvim/default.nix
     ./tmux/default.nix
     ./lazyvim/default.nix # Disabled as we've migrated to NixVim
-    # ./nixvim/default.nix
     ./markdown/default.nix
     ./gh/default.nix
     ./fastfetch/default.nix
