@@ -5,7 +5,7 @@
     ./bash.nix
     ./zsh.nix
     ./starship/default.nix
-    ./mail/mail.nix
+    ./mail/default.nix
     ./fzf/default.nix
     ./direnv/default.nix
     ./yazi/default.nix
@@ -14,7 +14,8 @@
     ./bat/default.nix
     # ./lunarvim/default.nix
     ./tmux/default.nix
-    ./lazyvim/default.nix
+    ./lazyvim/default.nix # Disabled as we've migrated to NixVim
+    ./nixvim/default.nix
     ./markdown/default.nix
     ./gh/default.nix
     ./fastfetch/default.nix

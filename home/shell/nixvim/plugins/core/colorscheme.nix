@@ -1,11 +1,9 @@
 {
-  config,
-  lib,
   pkgs,
+  lib,
   ...
 }: {
   programs.nixvim = {
-    # Setting up gruvbox theme (common in your configuration)
     colorschemes.gruvbox = {
       enable = true;
       settings = {
@@ -29,20 +27,11 @@
       };
     };
 
-    # Configuration for other themes if desired
-    extraConfigLua = ''
-      -- Set colorscheme with customizations
-      vim.opt.background = "dark"
-
-      -- Highlight customizations can be added here
-      vim.api.nvim_create_autocmd("ColorScheme", {
-        pattern = "*",
-        callback = function()
-          -- Custom highlight groups
-          vim.api.nvim_set_hl(0, "CmpItemKindCopilot", { fg = "#8ec07c" })
-          vim.api.nvim_set_hl(0, "CopilotSuggestion", { fg = "#665c54" })
-        end,
-      })
-    '';
+    highlight = {
+      Comment.fg = "#928374";
+      Comment.italic = true;
+      CmpItemKindCopilot.fg = "#8ec07c";
+      CopilotSuggestion.fg = "#665c54";
+    };
   };
 }

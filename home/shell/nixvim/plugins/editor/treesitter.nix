@@ -1,85 +1,90 @@
 {
-  config,
-  lib,
   pkgs,
+  lib,
   ...
 }: {
   programs.nixvim = {
-    plugins.treesitter = {
-      enable = true;
-
-      # Automatically install missing parsers
-      ensureInstalled = [
-        "bash"
-        "c"
-        "cmake"
-        "cpp"
-        "css"
-        "dockerfile"
-        "go"
-        "gomod"
-        "html"
-        "javascript"
-        "json"
-        "lua"
-        "make"
-        "markdown"
-        "markdown_inline"
-        "nix"
-        "python"
-        "regex"
-        "rust"
-        "toml"
-        "tsx"
-        "typescript"
-        "vim"
-        "yaml"
-      ];
-
-      # Install all maintained parsers
-      grammarPackages = pkgs.vimPlugins.nvim-treesitter.allGrammars;
-
-      incrementalSelection = {
+    plugins = {
+      treesitter = {
         enable = true;
-        keymaps = {
-          initSelection = "<C-space>";
-          nodeIncremental = "<C-space>";
-          nodeDecremental = "<bs>";
-          scopeIncremental = "<C-s>";
+        ensureInstalled = "all";
+
+        incrementalSelection = {
+          enable = true;
+          keymaps = {
+            initSelection = "<CR>";
+            nodeIncremental = "<CR>";
+            nodeDecremental = "<BS>";
+            scopeIncremental = "<TAB>";
+          };
+        };
+
+        indent = true;
+
+        folding = true;
+
+        nixvimInjections = true;
+      };
+
+      treesitter-refactor = {
+        enable = true;
+        highlightDefinitions = {
+          enable = true;
+          clearOnCursorMove = true;
+        };
+        navigation = {
+          enable = true;
+          keymaps = {
+            gotoDefinition = "gnd";
+            listDefinitions = "gnD";
+            listDefinitionsTab = "gO";
+            gotoPreviousUsage = "<A-*>";
+            gotoNextUsage = "<A-#>";
+          };
+        };
+        smartRename = {
+          enable = true;
+          keymaps = {
+            smartRename = "grr";
+          };
         };
       };
 
-      # Enable indentation support
-      indent = true;
-
-      # Enable folding with treesitter
-      folding = true;
-
-      # Additional modules
-      moduleConfig = {
-        highlight = {
+      treesitter-textobjects = {
+        enable = true;
+        select = {
           enable = true;
-          additionalVimRegexHighlighting = false;
+          lookahead = true;
+          keymaps = {
+            "af" = "@function.outer";
+            "if" = "@function.inner";
+            "ac" = "@class.outer";
+            "ic" = "@class.inner";
+            "aa" = "@parameter.outer";
+            "ia" = "@parameter.inner";
+          };
         };
-
-        autotag = {
+        move = {
           enable = true;
-        };
-
-        rainbow = {
-          enable = true;
-          extendedMode = true;
-          maxFileLines = 1000;
+          setJumps = true;
+          gotoNextStart = {
+            "]m" = "@function.outer";
+            "]]" = "@class.outer";
+          };
+          gotoNextEnd = {
+            "]M" = "@function.outer";
+            "][" = "@class.outer";
+          };
+          gotoPreviousStart = {
+            "[m" = "@function.outer";
+            "[[" = "@class.outer";
+          };
+          gotoPreviousEnd = {
+            "[M" = "@function.outer";
+            "[]" = "@class.outer";
+          };
         };
       };
-    };
-
-    # Configure treesitter context for showing code context
-    plugins.treesitter-context = {
-      enable = true;
-      maxLines = 3;
-      minWindowHeight = 20;
-      mode = "cursor";
     };
   };
 }

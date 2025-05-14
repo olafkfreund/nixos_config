@@ -1,38 +1,66 @@
 {
-  config,
-  lib,
   pkgs,
+  lib,
   ...
 }: {
   programs.nixvim = {
-    extraPlugins = with pkgs.vimPlugins; [
-      copilot-lua
-      copilot-cmp
-    ];
+    plugins = {
+      copilot-lua = {
+        enable = true;
+        suggestion = {
+          enabled = true;
+          autoTrigger = true;
+          keymap = {
+            accept = "<M-l>";
+            acceptWord = "<M-;>";
+            acceptLine = "<M-]>";
+            next = "<M-]>";
+            prev = "<M-[>";
+            dismiss = "<C-]>";
+          };
+        };
+        panel = {
+          enabled = true;
+          autoRefresh = true;
+          keymap = {
+            jumpPrev = "[[";
+            jumpNext = "]]";
+            accept = "<CR>";
+            refresh = "gr";
+            open = "<M-CR>";
+          };
+        };
+      };
+
+      copilot-cmp = {
+        enable = true;
+        event = ["InsertEnter" "LspAttach"];
+      };
+    };
 
     extraConfigLua = ''
-      -- Configure copilot
-      require("copilot").setup({
-        suggestion = { enabled = false },
-        panel = { enabled = false },
-      })
-
-      -- Configure copilot-cmp
-      require("copilot_cmp").setup({
-        method = "getCompletionsCycling",
-        formatters = {
-          label = require("copilot_cmp.format").format_label_text,
-          insert_text = require("copilot_cmp.format").format_insert_text,
-          preview = require("copilot_cmp.format").deindent,
-        },
-      })
-
-      -- Add custom highlight for Copilot suggestions
-      vim.api.nvim_create_autocmd("ColorScheme", {
-        pattern = "*",
-        callback = function()
-          vim.api.nvim_set_hl(0, "CmpItemKindCopilot", { fg = "#8ec07c" })
+      -- Copilot status in lualine
+      local function copilot_status()
+        local client = vim.lsp.get_active_clients({ name = "copilot" })[1]
+        if client == nil then
+          return ""
         end
+        if client.attached then
+          return " "
+        end
+        return ""
+      end
+
+      -- Add copilot status to lualine
+      require("lualine").setup({
+        sections = {
+          lualine_x = {
+            copilot_status,
+            "encoding",
+            "fileformat",
+            "filetype"
+          }
+        }
       })
     '';
   };

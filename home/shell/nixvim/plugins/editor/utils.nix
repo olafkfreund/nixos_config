@@ -1,44 +1,26 @@
 {
-  config,
-  lib,
   pkgs,
+  lib,
   ...
 }: {
-  imports = [
-    ./lualine.nix
-  ];
-
   programs.nixvim = {
     plugins = {
-      # Basic UI enhancements that don't need extensive configuration
-      dressing.enable = true;
-      noice = {
-        enable = true;
-        presets = {
-          bottom_search = true;
-          command_palette = true;
-          long_message_to_split = true;
-          lsp_doc_border = true;
-        };
-      };
-      notify = {
-        enable = true;
-        backgroundColour = "#000000";
-      };
-      nvim-web-devicons = {
-        enable = true;
-        defaultIcon = {
-          icon = "";
-          name = "Default";
-        };
-      };
+      # Better commenting
+      comment-nvim.enable = true;
+
+      # Add/change/delete surroundings
+      surround.enable = true;
+
+      # Better f/F/t/T motions
+      leap.enable = true;
+
+      # Start screen
       alpha = {
         enable = true;
-        iconsEnabled = true;
         layout = [
           {
             type = "padding";
-            val = 4;
+            val = 2;
           }
           {
             type = "text";
@@ -76,6 +58,34 @@
           }
         ];
       };
+
+      # Indentation guides
+      indent-blankline = {
+        enable = true;
+        indent = {
+          char = "│";
+        };
+        scope = {
+          enabled = true;
+          showStart = true;
+          showEnd = true;
+        };
+      };
+
+      # Shows pending keybinds
+      which-key.enable = true;
+
+      # Code folding
+      fold-preview.enable = true;
+
+      # Smooth scrolling
+      neoscroll.enable = true;
+
+      # Multiple cursors
+      multiple-cursors.enable = true;
+
+      # Better matchparen
+      matchparen-nvim.enable = true;
     };
   };
 }

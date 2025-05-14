@@ -4,157 +4,119 @@
   pkgs,
   ...
 }: {
-  programs.nixvim = {
-    plugins.lualine = {
-      enable = true;
+  config = {
+    programs.nixvim = {
+      plugins.lualine = {
+        enable = true;
+        theme = "gruvbox";
+        componentSeparators = {
+          left = "";
+          right = "";
+        };
+        sectionSeparators = {
+          left = "";
+          right = "";
+        };
+        globalstatus = true;
+        alwaysDivideMiddle = true;
 
-      globalstatus = true;
+        sections = {
+          lualine_a = [
+            {
+              name = "mode";
+            }
+          ];
 
-      componentSeparators = {
-        left = "";
-        right = "";
-      };
-
-      sectionSeparators = {
-        left = "";
-        right = "";
-      };
-
-      theme = "gruvbox";
-
-      sections = {
-        lualine_a = [
-          {
-            name = "mode";
-            extraConfig = {
-              padding = {
-                left = 1;
-                right = 1;
+          lualine_b = [
+            {
+              name = "branch";
+            }
+            {
+              name = "diff";
+              symbols = {
+                added = " ";
+                modified = " ";
+                removed = " ";
               };
-            };
-          }
-        ];
+            }
+          ];
 
-        lualine_b = [
-          {
-            name = "branch";
-            icon = "";
-          }
-          {
-            name = "diff";
-            symbolsNegative = " ";
-            symbolsPositive = " ";
-            symbolsPlaceholder = " ";
-            extraConfig = {
-              diff_color = {
-                added = {fg = "#98be65";};
-                modified = {fg = "#51afef";};
-                removed = {fg = "#ec5f67";};
+          lualine_c = [
+            {
+              name = "filename";
+              filetype_names = {
+                TelescopePrompt = "Telescope";
+                dashboard = "Dashboard";
+                packer = "Packer";
+                fzf = "FZF";
+                alpha = "Alpha";
               };
-            };
-          }
-        ];
-
-        lualine_c = [
-          {
-            name = "filename";
-            extraConfig = {
-              file_status = true;
-              path = 1; # Relative path
-              shorting_target = 40;
               symbols = {
                 modified = "  ";
                 readonly = " ";
                 unnamed = "[No Name]";
               };
-            };
-          }
-          {
-            name = "diagnostics";
-            extraConfig = {
-              sources = ["nvim_lsp"];
+            }
+            {
+              name = "diagnostics";
               symbols = {
                 error = " ";
                 warn = " ";
                 info = " ";
                 hint = " ";
               };
-            };
-          }
-        ];
+            }
+          ];
 
-        lualine_x = [
-          {
-            name = "filetype";
-            extraConfig = {
-              colored = true;
-              icon_only = false;
-            };
-          }
-          {
-            name = "encoding";
-          }
-          {
-            name = "fileformat";
-            extraConfig = {
-              symbols = {
-                unix = "LF";
-                dos = "CRLF";
-                mac = "CR";
-              };
-            };
-          }
-        ];
+          lualine_x = [
+            {
+              name = "encoding";
+            }
+            {
+              name = "fileformat";
+            }
+            {
+              name = "filetype";
+            }
+          ];
 
-        lualine_y = [
-          {
-            name = "progress";
-            extraConfig = {
-              padding = {
-                left = 1;
-                right = 1;
-              };
-            };
-          }
-        ];
+          lualine_y = [
+            {
+              name = "progress";
+            }
+          ];
 
-        lualine_z = [
-          {
-            name = "location";
-            extraConfig = {
-              padding = {
-                left = 1;
-                right = 1;
-              };
-            };
-          }
+          lualine_z = [
+            {
+              name = "location";
+            }
+          ];
+        };
+
+        inactiveSections = {
+          lualine_a = [];
+          lualine_b = [];
+          lualine_c = [
+            {
+              name = "filename";
+            }
+          ];
+          lualine_x = [
+            {
+              name = "location";
+            }
+          ];
+          lualine_y = [];
+          lualine_z = [];
+        };
+
+        extensions = [
+          "quickfix"
+          "fugitive"
+          "fzf"
+          "trouble"
         ];
       };
-
-      inactiveSections = {
-        lualine_a = [];
-        lualine_b = [];
-        lualine_c = [
-          {
-            name = "filename";
-            extraConfig = {
-              path = 1; # Relative path
-            };
-          }
-        ];
-        lualine_x = ["location"];
-        lualine_y = [];
-        lualine_z = [];
-      };
-
-      tabline = {};
-
-      extensions = [
-        "neo-tree"
-        "lazy"
-        "trouble"
-        "quickfix"
-      ];
     };
   };
 }

@@ -4,14 +4,19 @@
   pkgs,
   ...
 }: {
+  config = {
+    programs.nixvim.plugins = {
+      treesitter = {
+        enable = true;
+        ensureInstalled = "all";
+      };
+    };
+  };
+
   imports = [
     ./nix.nix
-    ./markdown.nix
-    ./terraform.nix
     ./python.nix
-    ./go.nix
-    ./just.nix
-    ./shell.nix
-    ./yaml.nix
+    ./rust.nix
+    ./typescript.nix
   ];
 }

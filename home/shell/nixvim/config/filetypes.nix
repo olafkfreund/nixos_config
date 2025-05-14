@@ -67,5 +67,102 @@
         };
       };
     };
+
+    filetype.enable = true;
+
+    globals = {
+      # Markdown settings
+      vim_markdown_folding_disabled = 1;
+      vim_markdown_frontmatter = 1;
+      vim_markdown_conceal = 0;
+      vim_markdown_fenced_languages = [
+        "nix"
+        "python"
+        "bash=sh"
+        "javascript"
+        "typescript"
+        "yaml"
+        "json"
+      ];
+
+      # Shell script settings
+      is_bash = 1;
+      no_bash_arrays = 1;
+
+      # Python settings
+      python_highlight_all = 1;
+    };
+
+    # Filetype-specific settings
+    extraConfigLua = ''
+      -- Function to set up buffer-local keymaps
+      local function buf_set_keymaps(bufnr, keymaps)
+        for mode, maps in pairs(keymaps) do
+          for key, cmd in pairs(maps) do
+            vim.api.nvim_buf_set_keymap(bufnr, mode, key, cmd, { noremap = true, silent = true })
+          end
+        end
+      end
+
+      -- Nix files
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "nix",
+        callback = function()
+          vim.opt_local.commentstring = "# %s"
+          vim.opt_local.tabstop = 2
+          vim.opt_local.shiftwidth = 2
+          vim.opt_local.expandtab = true
+        end
+      })
+
+      -- Markdown files
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "markdown",
+        callback = function()
+          vim.opt_local.spell = true
+          vim.opt_local.wrap = true
+          vim.opt_local.conceallevel = 0
+        end
+      })
+
+      -- YAML files
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = {"yaml", "yaml.docker-compose"},
+        callback = function()
+          vim.opt_local.tabstop = 2
+          vim.opt_local.shiftwidth = 2
+          vim.opt_local.expandtab = true
+        end
+      })
+
+      -- Shell scripts
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = {"sh", "bash", "zsh"},
+        callback = function()
+          vim.opt_local.tabstop = 2
+          vim.opt_local.shiftwidth = 2
+          vim.opt_local.expandtab = true
+        end
+      })
+
+      -- Git commit messages
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "gitcommit",
+        callback = function()
+          vim.opt_local.spell = true
+          vim.opt_local.textwidth = 72
+          vim.opt_local.colorcolumn = "72"
+        end
+      })
+
+      -- Help files
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "help",
+        callback = function()
+          -- Press q to close help window
+          vim.api.nvim_buf_set_keymap(0, "n", "q", ":q<CR>", { noremap = true, silent = true })
+        end
+      })
+    '';
   };
 }

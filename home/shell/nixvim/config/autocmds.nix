@@ -11,11 +11,7 @@
         event = "TextYankPost";
         pattern = "*";
         callback = {
-          __raw = ''
-            function()
-              vim.highlight.on_yank({ higroup = "IncSearch", timeout = 200 })
-            end
-          '';
+          __raw = ''function() vim.highlight.on_yank { timeout=200 } end'';
         };
       }
 
@@ -23,31 +19,14 @@
       {
         event = "VimResized";
         pattern = "*";
-        command = "tabdo wincmd =";
+        command = "wincmd =";
       }
 
       # Go to last location when opening a buffer
       {
         event = "BufReadPost";
         pattern = "*";
-        callback = {
-          __raw = ''
-            function()
-              local exclude = { "gitcommit", "gitrebase", "svn", "hgcommit" }
-              local buf = vim.api.nvim_get_current_buf()
-
-              if vim.tbl_contains(exclude, vim.bo[buf].filetype) then
-                return
-              end
-
-              local mark = vim.api.nvim_buf_get_mark(buf, '"')
-              local lcount = vim.api.nvim_buf_line_count(buf)
-              if mark[1] > 0 and mark[1] <= lcount then
-                pcall(vim.api.nvim_win_set_cursor, 0, mark)
-              end
-            end
-          '';
-        };
+        command = ''if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g`\"" | endif'';
       }
 
       # Auto toggle relative line numbers when in insert mode
@@ -78,18 +57,67 @@
       {
         event = "BufWritePre";
         pattern = "*";
-        callback = {
-          __raw = ''
-            function(evt)
-              if evt.match:match("^%w%w+://") then
-                return
-              end
-              local file = vim.loop.fs_realpath(evt.match) or evt.match
-              vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
-            end
-          '';
-        };
+        command = ''if '<afile>' !~ '^scp:' && !isdirectory(expand('<afile>:h')) | call mkdir(expand('<afile>:h'), 'p') | endif'';
+      }
+
+      # Auto format on save (if formatter available)
+      {
+        event = "BufWritePre";
+        pattern = "*";
+        command = "try | undojoin | Neoformat | catch /^Vim/ | endtry";
+      }
+
+      # Set indent size for specific filetypes
+      {
+        event = "FileType";
+        pattern = ["nix" "yaml" "json"];
+        command = "setlocal shiftwidth=2 tabstop=2";
+      }
+
+      # Start git commits in insert mode
+      {
+        event = "FileType";
+        pattern = "gitcommit,gitrebase";
+        command = "startinsert | 1";
+      }
+
+      # Remove trailing whitespace on save
+      {
+        event = "BufWritePre";
+        pattern = "*";
+        command = "%s/\\s\\+$//e";
+      }
+
+      # Auto reload file when changed externally
+      {
+        event = ["FocusGained" "BufEnter"];
+        pattern = "*";
+        command = "if mode() != 'c' | checktime | endif";
+      }
+
+      # Terminal settings
+      {
+        event = "TermOpen";
+        pattern = "*";
+        command = "setlocal nonumber norelativenumber signcolumn=no";
+      }
+
+      # Automatically enter insert mode in terminal
+      {
+        event = "BufEnter";
+        pattern = "term://*";
+        command = "startinsert";
       }
     ];
+
+    # File type detection
+    autoGroups = {
+      clarity_ft = {
+        clear = true;
+      };
+      yaml_ft = {
+        clear = true;
+      };
+    };
   };
 }
