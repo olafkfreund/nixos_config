@@ -26,6 +26,9 @@ in {
         pkgs.gh-notify
         pkgs.ghfetch
         pkgs.gh-dash
+        pkgs.gh-markdown-preview
+        pkgs.github-cli
+        pkgs.github-mcp-server
       ]
       ++ cfg.packages;
   };
