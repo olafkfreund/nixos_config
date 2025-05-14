@@ -86,7 +86,7 @@ in {
       };
     };
 
-    # Add helper service configuration options (new)
+    # Add helper service configuration options
     helperService = {
       enable = mkOption {
         type = types.bool;
@@ -100,6 +100,13 @@ in {
         default = 5;
         description = "Delay in seconds before starting the network stability service";
         example = 10;
+      };
+
+      restartSec = mkOption {
+        type = types.int;
+        default = 30;
+        description = "Time in seconds to wait before restarting the service on failure";
+        example = 60;
       };
     };
 
@@ -119,10 +126,10 @@ in {
       interfaceSwitchDelayMs = cfg.connectionStability.switchDelayMs;
     };
 
-    # Enable secure DNS if configured
+    # Enable secure DNS if configured - using mkDefault to allow host override
     services.secure-dns = mkIf cfg.secureDns.enable {
-      enable = true;
-      dnssec = "true";
+      enable = mkDefault true; # Use mkDefault to allow the host to override this
+      dnssec = mkDefault "true";
       fallbackProviders = cfg.secureDns.providers;
       useStubResolver = true;
     };
@@ -154,11 +161,12 @@ in {
         };
       };
 
-      # Add environment variables for network stability
+      # Add environment variables for network stability with mkDefault
+      # to allow host-specific overrides
       sessionVariables = {
-        DISABLE_REQUEST_THROTTLING = "1";
-        CHROME_NET_TCP_SOCKET_CONNECT_TIMEOUT_MS = "60000";
-        CHROME_NET_TCP_SOCKET_CONNECT_ATTEMPT_DELAY_MS = "2000";
+        DISABLE_REQUEST_THROTTLING = mkDefault "1";
+        CHROME_NET_TCP_SOCKET_CONNECT_TIMEOUT_MS = mkDefault "60000";
+        CHROME_NET_TCP_SOCKET_CONNECT_ATTEMPT_DELAY_MS = mkDefault "2000";
       };
     };
 
@@ -184,11 +192,8 @@ in {
       }
     ];
 
-    # Enable the network stability helper service if requested
-    systemd.services.network-stability-helper.enable = cfg.helperService.enable;
-
-    # Configure startDelay for the helper service
-    services.network-stability.startDelay = cfg.helperService.startDelay;
+    # We don't configure the service directly here anymore
+    # The network-stability-service.nix will handle this based on our options
 
     # Ensure the system waits for stable network before starting key services
     systemd.services.network-stability-wait = {

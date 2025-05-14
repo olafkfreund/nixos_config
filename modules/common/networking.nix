@@ -83,27 +83,39 @@ with lib; {
 
     # Fix for duplicate systemd.network: Only add link configuration enhancements,
     # don't override existing network configurations
-    (mkIf config.networking.stableConnection.enable {
-      # Enhanced network link configuration using proper merging
-      systemd.network.networks = mkIf config.systemd.network.enable (
-        let
-          enhanceNetworkConfig = name: settings: {
-            "${name}" = {
-              linkConfig = {
-                TransmitQueues = 1024;
-                ReceiveQueues = 1024;
-                TransmitQueueLength = 1000;
-              };
-            };
+    (mkIf (config.networking.stableConnection.enable && config.systemd.network.enable) {
+      # Directly define network configurations for wired and wireless interfaces
+      # without depending on existing values
+      systemd.network.networks = {
+        # Wired interface enhancement with valid systemd-networkd options
+        "20-wired" = {
+          linkConfig = {
+            # Valid stability-focused options
+            RequiredForOnline = "routable";
+            ActivationPolicy = "always-up";
+            MTUBytes = 1500;
           };
-        in
-          # Apply enhancements to wired and wireless interfaces if they exist in the config
-          recursiveUpdate
-          (optionalAttrs (config.systemd.network.networks ? "20-wired")
-            (enhanceNetworkConfig "20-wired" {}))
-          (optionalAttrs (config.systemd.network.networks ? "25-wireless")
-            (enhanceNetworkConfig "25-wireless" {}))
-      );
+          # Use networkConfig for options not available in linkConfig
+          networkConfig = {
+            ConfigureWithoutCarrier = true;
+            KeepConfiguration = "yes";
+          };
+        };
+
+        # Wireless interface enhancement
+        "25-wireless" = {
+          linkConfig = {
+            RequiredForOnline = "routable";
+            ActivationPolicy = "always-up";
+            MTUBytes = 1500;
+          };
+          # Use networkConfig for options not available in linkConfig
+          networkConfig = {
+            ConfigureWithoutCarrier = true;
+            KeepConfiguration = "yes";
+          };
+        };
+      };
 
       # Global network stabilization service to allow applications to wait for a stable connection
       systemd.user.services.network-stabilize = {

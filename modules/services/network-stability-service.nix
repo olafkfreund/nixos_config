@@ -6,40 +6,14 @@
 }:
 with lib; let
   cfg = config.services.network-stability;
-  scriptPath = "${config.services.network-stability.scriptPath}";
+
+  # Create a wrapped script with proper dependencies
+  stabilityScript = pkgs.writeShellScriptBin "network-stability-helper" (builtins.readFile (toString cfg.scriptPath));
 in {
-  options.services.network-stability = {
-    # Ensure our existing options from network-stability.nix remain compatible
-    enable = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Whether to enable the network stability service.";
-      example = true;
-    };
+  # This module doesn't declare options of its own
+  # It uses the options declared in network-stability.nix
 
-    scriptPath = mkOption {
-      type = types.path;
-      default = ../../../scripts/network-stability-helper.sh;
-      description = "Path to the network stability helper script.";
-      example = "/path/to/network-stability-helper.sh";
-    };
-
-    startDelay = mkOption {
-      type = types.int;
-      default = 5;
-      description = "Delay in seconds before starting the network stability service.";
-      example = 10;
-    };
-
-    restartSec = mkOption {
-      type = types.int;
-      default = 30;
-      description = "Time in seconds to wait before restarting the service on failure.";
-      example = 60;
-    };
-  };
-
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.helperService.enable) {
     # Create the systemd service
     systemd.services.network-stability-helper = {
       description = "Network Stability Helper Service";
@@ -48,12 +22,20 @@ in {
       wants = ["network-online.target"];
       after = ["network-online.target" "NetworkManager.service" "systemd-networkd.service"];
 
+      path = with pkgs; [
+        iproute2
+        inetutils
+        systemd
+        coreutils
+        gnugrep
+      ];
+
       serviceConfig = {
         Type = "simple";
-        ExecStartPre = "${pkgs.coreutils}/bin/sleep ${toString cfg.startDelay}";
-        ExecStart = "${pkgs.bash}/bin/bash ${scriptPath}";
+        ExecStartPre = "${pkgs.coreutils}/bin/sleep ${toString cfg.helperService.startDelay}";
+        ExecStart = "${stabilityScript}/bin/network-stability-helper";
         Restart = "on-failure";
-        RestartSec = "${toString cfg.restartSec}";
+        RestartSec = "${toString cfg.helperService.restartSec}";
 
         # Security hardening
         ProtectSystem = "strict";
@@ -68,6 +50,9 @@ in {
         MemoryMax = "150M";
       };
     };
+
+    # Make the helper script available in system path
+    environment.systemPackages = [stabilityScript];
 
     # Create a sync point for network stability events
     systemd.tmpfiles.rules = [

@@ -6,7 +6,7 @@
   pkgs,
   ...
 }: {
-  # Enable the comprehensive network stability service
+  # Enable the comprehensive network stability service with p620-specific settings
   services.network-stability = {
     enable = true;
 
@@ -42,6 +42,16 @@
       enable = true;
       switchDelayMs = 7000; # 7 second delay before switching networks
     };
+
+    # Helper service configuration
+    helperService = {
+      enable = true;
+      startDelay = 2; # Quicker startup on this powerful machine
+      restartSec = 15; # Faster restart on failure for this host
+    };
+
+    # Use the script from the standard location
+    scriptPath = ../../../scripts/network-stability-helper.sh;
   };
 
   # AMD-specific TCP optimizations - using lib.mkMerge to avoid conflicts
@@ -67,29 +77,20 @@
     }
   ];
 
-  # Instead of trying to configure electron-apps directly, we'll use environment settings
-  # to provide the network stability enhancements for Electron applications
+  # Additional Electron app improvements specific to p620
   environment = {
-    # Electron configuration for network stability
-    etc."electron-flags.conf" = {
-      text = ''
-        # Network stability enhancements for p620 host
-        --disable-background-networking=false
-        --force-fieldtrials="NetworkQualityEstimator/Enabled/"
-        --enable-features=NetworkServiceInProcess
-        --disable-gpu-process-crash-limit
-        --network-service-in-process
-      '';
-      mode = "0644";
-    };
+    # Add p620-specific flags to the electron flags config
+    etc."electron-flags.conf".text = lib.mkAfter ''
+      # P620-specific network optimizations
+      --disable-gpu-process-crash-limit
+      --network-service-in-process
+    '';
 
-    # Add environment variables for network stability
+    # Add environment variables specific to this hardware using mkForce
+    # to ensure they override the default values
     sessionVariables = {
-      DISABLE_REQUEST_THROTTLING = "1";
-      ELECTRON_FORCE_WINDOW_MENU_BAR = "1";
-      CHROME_NET_TCP_SOCKET_CONNECT_TIMEOUT_MS = "60000";
-      CHROME_NET_TCP_SOCKET_CONNECT_ATTEMPT_DELAY_MS = "2000";
-      ELECTRON_OZONE_PLATFORM_HINT = "auto"; # Let Electron choose the best platform
+      # Use higher timeouts for better stability on this hardware
+      CHROME_NET_TCP_SOCKET_CONNECT_TIMEOUT_MS = lib.mkForce "90000"; # Longer timeout for this host
     };
   };
 
