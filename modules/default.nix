@@ -36,5 +36,10 @@
     ./obsidian/default.nix
     ./office/default.nix
     # ./intune-portal/default.nix
+
+    # Network stability modules
+    ./services/dns/secure-dns.nix
+    ./services/network-monitoring.nix
+    ./services/network-stability.nix
   ];
 }

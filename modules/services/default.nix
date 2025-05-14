@@ -24,5 +24,9 @@
     ./appimage/default.nix
     ./dns/secure-dns.nix
     # ./dwm/default.nix
+
+    # Network stability modules
+    ./network-monitoring.nix
+    ./network-stability.nix
   ];
 }

@@ -8,16 +8,20 @@ with lib; let
   cfg = config.services.secure-dns;
 in {
   options.services.secure-dns = {
-    enable = mkEnableOption {
-      type = types.bool;
-      default = false;
-      description = "Enable DNS over TLS/HTTPS using systemd-resolved";
-    };
+    enable = mkEnableOption "Secure DNS with enhanced stability";
 
     dnssec = mkOption {
-      type = types.str;
+      type = types.enum ["true" "false" "allow-downgrade"];
       default = "true";
-      description = "Enable DNSSEC validation (true, false, or allow-downgrade)";
+      description = "Whether to enable DNSSEC validation";
+      example = "allow-downgrade";
+    };
+
+    useStubResolver = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Use systemd-resolved's stub resolver";
+      example = true;
     };
 
     fallbackProviders = mkOption {
@@ -26,24 +30,48 @@ in {
         "1.1.1.1#cloudflare-dns.com"
         "8.8.8.8#dns.google"
       ];
-      description = "Fallback DNS providers with TLS hostnames";
+      description = "List of fallback DNS providers to use";
+      example = ["9.9.9.9#dns.quad9.net"];
     };
 
-    useStubResolver = mkOption {
+    cacheSize = mkOption {
+      type = types.int;
+      default = 4096;
+      description = "Size of DNS cache in entries";
+      example = 8192;
+    };
+
+    dnsOverTls = mkOption {
       type = types.bool;
       default = true;
-      description = "Whether to point system nameservers to the systemd-resolved stub resolver";
+      description = "Whether to enable DNS-over-TLS";
+      example = true;
+    };
+
+    networkManagerIntegration = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Whether to integrate with NetworkManager";
+      example = true;
     };
   };
 
   config = mkIf cfg.enable {
+    # Enable systemd-resolved
     services.resolved = {
       enable = true;
       dnssec = cfg.dnssec;
       domains = ["~."]; # Use systemd-resolved for all domains
       fallbackDns = cfg.fallbackProviders;
       extraConfig = ''
-        DNSOverTLS=yes
+        DNSOverTLS=${
+          if cfg.dnsOverTls
+          then "yes"
+          else "no"
+        }
+        Cache=${toString cfg.cacheSize}
+        StaleRetentionSec=86400
+        ReadEtcHosts=yes
       '';
     };
 
@@ -52,7 +80,7 @@ in {
       nameservers = ["127.0.0.53"];
 
       # Ensure NetworkManager uses systemd-resolved if both are enabled
-      networkmanager = mkIf config.networking.networkmanager.enable {
+      networkmanager = mkIf (config.networking.networkmanager.enable && cfg.networkManagerIntegration) {
         dns = "systemd-resolved";
       };
     };
@@ -66,15 +94,45 @@ in {
           linkConfig.RequiredForOnline = "no";
           networkConfig = {
             DNS = ["127.0.0.53"];
-            DNSOverTLS = "yes";
+            DNSOverTLS =
+              if cfg.dnsOverTls
+              then "yes"
+              else "no";
+          };
+          dhcpV4Config = {
+            UseDNS = !cfg.useStubResolver;
           };
         };
       };
     };
 
-    environment.systemPackages = with pkgs; [
-      # Include useful tools for debugging
-      dnsutils
-    ];
+    # Ensure host resolv.conf is properly managed
+    environment.etc."resolv.conf".source =
+      mkIf cfg.useStubResolver
+      (mkForce "${config.services.resolved.package}/lib/systemd/resolv.conf");
+
+    # Add service to monitor DNS resolution stability
+    systemd.services.dns-stability-monitor = {
+      description = "Monitor DNS resolution stability";
+      after = ["network-online.target"];
+      wantedBy = ["multi-user.target"];
+      serviceConfig = {
+        Type = "simple";
+        ExecStart = pkgs.writeShellScript "dns-monitor" ''
+          #!/bin/sh
+          while true; do
+            # Check if DNS resolution is working
+            if ! ${pkgs.inetutils}/bin/host -W 2 cloudflare.com >/dev/null 2>&1; then
+              echo "DNS resolution failed, restarting systemd-resolved" | ${pkgs.systemd}/bin/systemd-cat -t dns-monitor -p warning
+              ${pkgs.systemd}/bin/systemctl restart systemd-resolved.service
+              sleep 10
+            fi
+            sleep 120
+          done
+        '';
+        Restart = "on-failure";
+        RestartSec = "30s";
+      };
+    };
   };
 }
