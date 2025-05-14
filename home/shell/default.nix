@@ -19,5 +19,6 @@
     ./gh/default.nix
     ./fastfetch/default.nix
     ./clipse/default.nix
+    ./nixvim/default.nix # Added NixVim configuration
   ];
 }
