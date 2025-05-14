@@ -109,13 +109,14 @@ in {
     # Ensure host resolv.conf is properly managed
     environment.etc."resolv.conf".source =
       mkIf cfg.useStubResolver
-      (mkForce "${config.services.resolved.package}/lib/systemd/resolv.conf");
+      (mkForce "${pkgs.systemd}/lib/systemd/resolv.conf");
 
     # Add service to monitor DNS resolution stability
     systemd.services.dns-stability-monitor = {
       description = "Monitor DNS resolution stability";
       after = ["network-online.target"];
       wantedBy = ["multi-user.target"];
+      wants = ["network-online.target"];
       serviceConfig = {
         Type = "simple";
         ExecStart = pkgs.writeShellScript "dns-monitor" ''

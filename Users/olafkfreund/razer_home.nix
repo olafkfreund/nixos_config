@@ -44,8 +44,8 @@ in {
       enable = true;
       chrome = true;
       firefox = true;
-      edge = true;
-      brave = true;
+      edge = false;
+      brave = false;
       opera = false;
     };
 
