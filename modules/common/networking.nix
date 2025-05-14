@@ -68,27 +68,7 @@ with lib; {
         '';
       };
 
-      # Enhanced network link configuration for systemd-networkd
-      systemd.network = mkIf config.networking.stableConnection.enable {
-        networks = {
-          "20-wired" = {
-            linkConfig = {
-              TransmitQueues = 1024;
-              ReceiveQueues = 1024;
-              TransmitQueueLength = 1000;
-            };
-          };
-          "25-wireless" = {
-            linkConfig = {
-              TransmitQueues = 1024;
-              ReceiveQueues = 1024;
-              TransmitQueueLength = 1000;
-            };
-          };
-        };
-      };
-
-      # Systemd network wait settings with better timeout
+      # Systemd network wait settings
       systemd.network.wait-online.timeout = 10;
       systemd.services.NetworkManager-wait-online.enable = mkForce false;
       systemd.services.systemd-networkd-wait-online.enable = mkForce false;
@@ -101,8 +81,31 @@ with lib; {
       networking.timeServers = ["pool.ntp.org"];
     })
 
-    # Global network stabilization service to allow applications to wait for a stable connection
+    # Fix for duplicate systemd.network: Only add link configuration enhancements,
+    # don't override existing network configurations
     (mkIf config.networking.stableConnection.enable {
+      # Enhanced network link configuration using proper merging
+      systemd.network.networks = mkIf config.systemd.network.enable (
+        let
+          enhanceNetworkConfig = name: settings: {
+            "${name}" = {
+              linkConfig = {
+                TransmitQueues = 1024;
+                ReceiveQueues = 1024;
+                TransmitQueueLength = 1000;
+              };
+            };
+          };
+        in
+          # Apply enhancements to wired and wireless interfaces if they exist in the config
+          recursiveUpdate
+          (optionalAttrs (config.systemd.network.networks ? "20-wired")
+            (enhanceNetworkConfig "20-wired" {}))
+          (optionalAttrs (config.systemd.network.networks ? "25-wireless")
+            (enhanceNetworkConfig "25-wireless" {}))
+      );
+
+      # Global network stabilization service to allow applications to wait for a stable connection
       systemd.user.services.network-stabilize = {
         description = "Wait for network to stabilize";
         wantedBy = ["default.target"];

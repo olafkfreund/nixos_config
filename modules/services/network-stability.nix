@@ -85,6 +85,31 @@ in {
         example = 3000;
       };
     };
+
+    # Add helper service configuration options (new)
+    helperService = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable the network stability helper service";
+        example = false;
+      };
+
+      startDelay = mkOption {
+        type = types.int;
+        default = 5;
+        description = "Delay in seconds before starting the network stability service";
+        example = 10;
+      };
+    };
+
+    # Script path option required by network-stability-service.nix
+    scriptPath = mkOption {
+      type = types.path;
+      default = ../../../scripts/network-stability-helper.sh;
+      description = "Path to the network stability helper script";
+      example = "/path/to/network-stability-helper.sh";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -108,33 +133,62 @@ in {
       monitorIntervalSeconds = cfg.monitoring.interval;
     };
 
-    # Enable enhanced Tailscale configuration if configured
-    vpn.tailscale = mkIf cfg.tailscale.enhance {
-      enable = config.vpn.tailscale.enable;
+    # Enable enhanced Tailscale configuration if configured and available
+    vpn.tailscale = mkIf (cfg.tailscale.enhance && hasAttrByPath ["vpn" "tailscale" "enable"] config && config.vpn.tailscale.enable) {
       acceptDns = cfg.tailscale.acceptDns;
       netfilterMode = "off";
     };
 
-    # Enable Electron network stability improvements if configured
-    electron-apps = mkIf cfg.electron.improve {
-      enable = config.electron-apps.enable;
-      networkStability = true;
+    # Add Electron network stability improvements directly through environment
+    environment = mkIf cfg.electron.improve {
+      # Create a global flags configuration file for Electron network stability
+      etc = {
+        "electron-flags.conf" = {
+          text = ''
+            # Network stability settings
+            --disable-background-networking=false
+            --force-fieldtrials="NetworkQualityEstimator/Enabled/"
+            --enable-features=NetworkServiceInProcess
+          '';
+          mode = "0644";
+        };
+      };
+
+      # Add environment variables for network stability
+      sessionVariables = {
+        DISABLE_REQUEST_THROTTLING = "1";
+        CHROME_NET_TCP_SOCKET_CONNECT_TIMEOUT_MS = "60000";
+        CHROME_NET_TCP_SOCKET_CONNECT_ATTEMPT_DELAY_MS = "2000";
+      };
     };
 
-    boot.kernel.sysctl = {
-      # Improve TCP connection handling
-      "net.ipv4.tcp_slow_start_after_idle" = 0;
-      "net.ipv4.tcp_fastopen" = 3;
+    # Properly merge sysctl settings with existing ones instead of potentially overriding them
+    boot.kernel.sysctl = mkMerge [
+      # TCP connection handling improvements
+      {
+        "net.ipv4.tcp_slow_start_after_idle" = 0;
+        "net.ipv4.tcp_fastopen" = 3;
+      }
 
       # More stable IPv4 networking
-      "net.ipv4.route.gc_timeout" = 300;
+      {
+        "net.ipv4.route.gc_timeout" = 300;
+      }
 
-      # Improve network buffer sizes
-      "net.core.rmem_max" = 16777216;
-      "net.core.wmem_max" = 16777216;
-      "net.core.rmem_default" = 1048576;
-      "net.core.wmem_default" = 1048576;
-    };
+      # Network buffer size improvements
+      {
+        "net.core.rmem_max" = 16777216;
+        "net.core.wmem_max" = 16777216;
+        "net.core.rmem_default" = 1048576;
+        "net.core.wmem_default" = 1048576;
+      }
+    ];
+
+    # Enable the network stability helper service if requested
+    systemd.services.network-stability-helper.enable = cfg.helperService.enable;
+
+    # Configure startDelay for the helper service
+    services.network-stability.startDelay = cfg.helperService.startDelay;
 
     # Ensure the system waits for stable network before starting key services
     systemd.services.network-stability-wait = {

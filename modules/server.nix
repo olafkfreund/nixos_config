@@ -1,4 +1,4 @@
-{ ... }: {
+{...}: {
   imports = [
     ./nix/nix.nix
     ./fonts/fonts.nix
@@ -9,11 +9,7 @@
     ./pkgs/default.nix
     ./overlays/default.nix
     ./system-scripts/default.nix
-    ./nix-index/default.nix
+    # ./nix-index/default.nix
     ./containers/default.nix
-
   ];
-
-
 }
-

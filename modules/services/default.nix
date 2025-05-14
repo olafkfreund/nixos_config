@@ -28,5 +28,6 @@
     # Network stability modules
     ./network-monitoring.nix
     ./network-stability.nix
+    ./network-stability-service.nix
   ];
 }

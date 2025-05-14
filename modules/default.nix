@@ -14,7 +14,7 @@
     ./pkgs/default.nix
     ./overlays/default.nix
     ./system-scripts/default.nix
-    ./nix-index/default.nix
+    # ./nix-index/default.nix
     ./containers/default.nix
     ./cloud/default.nix
     ./ssh/ssh.nix

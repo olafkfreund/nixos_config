@@ -44,31 +44,53 @@
     };
   };
 
-  # AMD-specific network optimizations
-  boot.kernel.sysctl = {
+  # AMD-specific TCP optimizations - using lib.mkMerge to avoid conflicts
+  boot.kernel.sysctl = lib.mkMerge [
     # TCP settings optimized for AMD architecture
-    "net.ipv4.tcp_keepalive_time" = 600;
-    "net.ipv4.tcp_keepalive_intvl" = 60;
-    "net.ipv4.tcp_keepalive_probes" = 10;
-    "net.ipv4.tcp_fin_timeout" = 30;
+    {
+      "net.ipv4.tcp_keepalive_time" = 600;
+      "net.ipv4.tcp_keepalive_intvl" = 60;
+      "net.ipv4.tcp_keepalive_probes" = 10;
+      "net.ipv4.tcp_fin_timeout" = 30;
+    }
 
     # BBR congestion control algorithm works well with AMD CPUs
-    "net.core.default_qdisc" = "fq";
-    "net.ipv4.tcp_congestion_control" = "bbr";
+    {
+      "net.core.default_qdisc" = "fq";
+      "net.ipv4.tcp_congestion_control" = "bbr";
+    }
 
-    # Increase network buffer sizes for better stability
-    "net.core.rmem_max" = 16777216;
-    "net.core.wmem_max" = 16777216;
-    "net.core.rmem_default" = 1048576;
-    "net.core.wmem_default" = 1048576;
-    "net.ipv4.tcp_rmem" = "4096 1048576 16777216";
-    "net.ipv4.tcp_wmem" = "4096 1048576 16777216";
-  };
+    # TCP tuning specific to AMD platforms
+    {
+      "net.ipv4.tcp_rmem" = "4096 1048576 16777216";
+      "net.ipv4.tcp_wmem" = "4096 1048576 16777216";
+    }
+  ];
 
-  # Configure electron-apps for this host
-  electron-apps = {
-    enable = true;
-    networkStability = true;
+  # Instead of trying to configure electron-apps directly, we'll use environment settings
+  # to provide the network stability enhancements for Electron applications
+  environment = {
+    # Electron configuration for network stability
+    etc."electron-flags.conf" = {
+      text = ''
+        # Network stability enhancements for p620 host
+        --disable-background-networking=false
+        --force-fieldtrials="NetworkQualityEstimator/Enabled/"
+        --enable-features=NetworkServiceInProcess
+        --disable-gpu-process-crash-limit
+        --network-service-in-process
+      '';
+      mode = "0644";
+    };
+
+    # Add environment variables for network stability
+    sessionVariables = {
+      DISABLE_REQUEST_THROTTLING = "1";
+      ELECTRON_FORCE_WINDOW_MENU_BAR = "1";
+      CHROME_NET_TCP_SOCKET_CONNECT_TIMEOUT_MS = "60000";
+      CHROME_NET_TCP_SOCKET_CONNECT_ATTEMPT_DELAY_MS = "2000";
+      ELECTRON_OZONE_PLATFORM_HINT = "auto"; # Let Electron choose the best platform
+    };
   };
 
   # Short sleep before network services to ensure hardware is ready
