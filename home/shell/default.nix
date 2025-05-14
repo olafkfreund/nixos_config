@@ -14,11 +14,10 @@
     ./bat/default.nix
     # ./lunarvim/default.nix
     ./tmux/default.nix
-    ./lazyvim/default.nix # Disabled as we've migrated to NixVim
+    ./lazyvim/default.nix
     ./markdown/default.nix
     ./gh/default.nix
     ./fastfetch/default.nix
     ./clipse/default.nix
-    ./nixvim/default.nix # Added NixVim configuration
   ];
 }
