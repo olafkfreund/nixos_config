@@ -56,7 +56,7 @@
     exec-once = foot --title "Terminal" --exec "zsh"
     exec-once = vesktop
     exec-once = spotify
-    exec-once = thunderbird --fullscreen
+    exec-once = thunderbird
     exec=once = google-chrome-stable
     exec=once = 1password
   '';

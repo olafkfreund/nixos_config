@@ -120,6 +120,7 @@
             "9" = "<span foreground='#fe8019'>9</span>";
             "10" = "<span foreground='#fe8019'>10</span>";
             "magic" = "<span foreground='#fabd2f'>󱕴 </span>";
+            "chrome" = "<span foreground='#458588'> </span>";
             "hidden" = "<span foreground='#8ec07c'>󰐃 </span>";
             "secret" = "<span foreground='#fabd2f'>󱕴 </span>";
             "spotify" = "<span foreground='#518554'> </span>";
@@ -308,7 +309,7 @@
           };
           return-type = "json";
           exec-if = "which swaync-client";
-          exec = "swaync-client -swb";
+          exec = "${pkgs.swaynotificationcenter}/bin/swaync-client -swb";
           on-click = "${pkgs.swaynotificationcenter}/bin/swaync-client -t";
           on-click-right = "${pkgs.swaynotificationcenter}/bin/swaync-client -C";
           on-click-middle = "notify_count";

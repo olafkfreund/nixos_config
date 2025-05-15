@@ -74,6 +74,13 @@
       package = pkgs-unstable.prowlarr;
     };
 
+    jackett = {
+      enable = true;
+      user = "olafkfreund";
+      dataDir = "/mnt/media/jackett";
+      package = pkgs-unstable.jackett;
+    };
+
     nfs.server = {
       enable = true;
       exports = ''
@@ -82,31 +89,9 @@
     };
   };
 
-  virtualisation.oci-containers = {
-    backend = "podman"; # You can use "docker" if preferred
-    containers = {
-      overseerr = {
-        image = "sctx/overseerr";
-        environment = {
-          LOG_LEVEL = "debug";
-          TZ = "Europe/London"; # Adjusted timezone to match your likely location
-          PORT = "5055";
-        };
-        ports = ["5055:5055"];
-        volumes = [
-          "/mnt/media/overseerr:/app/config"
-        ];
-        extraOptions = [
-          "--name=overseerr"
-          "--restart=unless-stopped"
-        ];
-      };
-    };
-  };
-
   systemd.tmpfiles.rules = [
-    "d /mnt/media/overseerr 0755 olafkfreund users -"
+    "d /mnt/media/jackett 0755 olafkfreund users -"
   ];
 
-  networking.firewall.allowedTCPPorts = [5055];
+  networking.firewall.allowedTCPPorts = [5055 9117];
 }

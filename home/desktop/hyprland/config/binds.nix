@@ -36,9 +36,12 @@
     bind = $mainMod, A, exec, [float;notitle;]kitty --class album-art --hold mpris-album-art
 
     # Special workspaces
-    bind = $mainMod, S, togglespecialworkspace, magic
+    bind = $mainMod 1, P, togglespecialworkspace, magic
+    bind = $mainMod, S, togglespecialworkspace, slack
+    bind = $mainMod, B, togglespecialworkspace, chrome
     bind = $mainMod, M, togglespecialworkspace, mail
     bind = $mainMod, T, togglespecialworkspace, scratchpad
+    bind = $mainMod, D, togglespecialworkspace, discord
     bind = Control_SHIFT, M, togglespecialworkspace, spotify
 
     # Moving windows to workspaces

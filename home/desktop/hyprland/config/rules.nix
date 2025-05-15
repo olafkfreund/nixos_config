@@ -73,7 +73,7 @@
     windowrulev2 = fullscreen, class:^(thunderbird)$, title:^(Mozilla Thunderbird)$
 
     # Make all thunderbird windows float by default
-    windowrulev2 = float, class:^(thunderbird)$
+    # windowrulev2 = float, class:^(thunderbird)$  # Disabled to allow fullscreen for main window
 
     # Size the main window appropriately (70%) - will only apply when not fullscreen
     windowrulev2 = size 70% 70%, class:^(thunderbird)$, title:^(Mozilla Thunderbird)$
@@ -113,7 +113,7 @@
     # WEB BROWSERS AND COMMUNICATION
     # =============================================================================
     # Google Chrome
-    windowrulev2 = workspace 2, float, class:(google-chrome)
+    windowrulev2 = workspace special:chrome, float, class:(google-chrome)
 
     # Common dialog boxes
     windowrulev2 = float,size 900 500,title:^(Choose Files)

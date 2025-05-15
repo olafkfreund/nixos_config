@@ -36,7 +36,7 @@ in {
 
       # Use the new profiles structure
       profiles.default = {
-        extensions = with pkgs-unstable; [
+        extensions = with pkgs; [
           vscode-extensions.bbenoist.nix
           vscode-extensions.kamadorueda.alejandra
           vscode-extensions.mkhl.direnv
@@ -69,6 +69,8 @@ in {
           vscode-extensions.bierner.markdown-emoji
           vscode-extensions.arrterian.nix-env-selector
           vscode-extensions.sainnhe.gruvbox-material
+          vscode-extensions.davidanson.vscode-markdownlint
+          vscode-extensions.eamodio.gitlens
           # The extensions below are currently commented out because they're not available in nixpkgs
           # vscode-extensions.codeium.codeium
           # vscode-extensions.google.gemini-code
@@ -200,6 +202,27 @@ in {
                   "mcp-nixos@0.3.1"
                 ];
               };
+              "@rawveg/ollama-mcp" = {
+                "command" = "npx";
+                "args" = [
+                  "-y"
+                  "@rawveg/ollama-mcp"
+                ];
+              };
+              "terraform-registry" = {
+                "command" = "npx";
+                "args" = [
+                  "-y"
+                  "terraform-mcp-server"
+                ];
+              };
+              "gcp" = {
+                "command" = "sh";
+                "args" = [
+                  "-c"
+                  "npx -y gcp-mcp"
+                ];
+              };
             };
           };
 
@@ -254,13 +277,14 @@ in {
           "github.copilot.chat.codesearch.enabled" = true;
           "github.copilot.chat.scopeSelection" = true;
           "github.copilot.chat.agent.thinkingTool" = true;
+          "githubPullRequests.notifications" = "pullRequests";
           "workbench.colorTheme" = "Gruvbox Material Dark";
           "workbench.iconTheme" = "file-icons-colourless";
           "workbench.browser.preferredBrowser" = "google-chrome-stable";
           "genieai.enableConversationHistory" = true;
           "alejandra.program" = "alejandra";
           "geminicodeassist.codeGenerationPaneViewEnabled" = true;
-          "geminicodeassist.project" = "freundcloud";
+          "geminicodeassist.project" = "gen-lang-client-0799345902";
           "geminicodeassist.enableChat" = true;
           "geminicodeassist.language" = "en";
           "geminicodeassist.region" = "us-central1";

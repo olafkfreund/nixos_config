@@ -243,4 +243,12 @@ Our configuration manages several distinct hosts, each with unique hardware spec
 - Document integration requirements
 - Handle upgrades gracefully
 
+## Home-Manager Configuration
+
+- Use Home-Manager for user-specific configurations
+- Define Home-Manager modules in `home.nix` or `default.nix`
+- Integrate Home-Manager with NixOS by enabling `programs.home-manager.enable`
+- Use flakes for managing Home-Manager dependencies
+- Document user-specific configurations for clarity
+
 Remember to maintain reproducibility and purity in all configurations. The goal is to create maintainable, reliable, and well-documented NixOS configurations.
