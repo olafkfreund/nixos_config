@@ -202,13 +202,6 @@ in {
                   "mcp-nixos@0.3.1"
                 ];
               };
-              "@rawveg/ollama-mcp" = {
-                "command" = "npx";
-                "args" = [
-                  "-y"
-                  "@rawveg/ollama-mcp"
-                ];
-              };
               "terraform-registry" = {
                 "command" = "npx";
                 "args" = [

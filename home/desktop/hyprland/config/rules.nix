@@ -70,7 +70,7 @@
     windowrulev2 = workspace special:mail, class:^(thunderbird)$
     windowrulev2 = animation slide bottom, class:^(thunderbird)$
     # Make main Thunderbird window fullscreen
-    windowrulev2 = fullscreen, class:^(thunderbird)$, title:^(Mozilla Thunderbird)$
+    windowrulev2 = float, class:^(thunderbird)$, title:^(Mozilla Thunderbird)$
 
     # Make all thunderbird windows float by default
     # windowrulev2 = float, class:^(thunderbird)$  # Disabled to allow fullscreen for main window
