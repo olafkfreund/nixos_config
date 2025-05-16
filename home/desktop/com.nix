@@ -1,8 +1,4 @@
-{
-  pkgs,
-  pkgs-unstable,
-  ...
-}: {
+{pkgs, ...}: {
   home.packages = [
     # slack
     pkgs.teams-for-linux
@@ -15,7 +11,7 @@
     pkgs.element-desktop
     pkgs.imagemagick
     pkgs.fractal
-    pkgs-unstable.vesktop
+    pkgs.vesktop
     # pkgs.telegram-desktop
     pkgs.whatsapp-for-linux
     pkgs.ferdium
