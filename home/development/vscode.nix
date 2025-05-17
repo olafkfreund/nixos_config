@@ -277,7 +277,7 @@ in {
           "genieai.enableConversationHistory" = true;
           "alejandra.program" = "alejandra";
           "geminicodeassist.codeGenerationPaneViewEnabled" = true;
-          "geminicodeassist.project" = "gen-lang-client-0799345902";
+          "geminicodeassist.project" = "gen-lang-client-0059434248";
           "geminicodeassist.enableChat" = true;
           "geminicodeassist.language" = "en";
           "geminicodeassist.region" = "us-central1";
