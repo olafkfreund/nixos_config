@@ -4,15 +4,6 @@
   pkgs,
   ...
 }: {
-  # Xeon E5-2698 v4 specific optimizations
-  nixpkgs.hostPlatform = {
-    system = "x86_64-linux";
-    gcc = {
-      arch = "broadwell"; # E5-2698 v4 is Broadwell architecture
-      tune = "broadwell"; # Optimize for Broadwell
-    };
-  };
-
   # CPU frequency scaling for Xeon workstation
   powerManagement = {
     enable = true;
@@ -35,7 +26,7 @@
     s-tui # Terminal UI for CPU monitoring
     i7z # Tool for monitoring Intel CPUs
     powertop # Power consumption monitoring
-    turbostat # Intel CPU power/frequency statistics
+    # turbostat # Intel CPU power/frequency statistics
   ];
 
   # Thermal management for Xeon

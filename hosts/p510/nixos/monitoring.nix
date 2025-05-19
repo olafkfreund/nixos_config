@@ -14,7 +14,7 @@
           domain = "p510";
           root_url = "http://p510:3000/";
         };
-        auth.anonymous.enabled = false;
+        auth.anonymous = false;
         security = {
           admin_user = "admin";
           admin_password = "$__file{/var/lib/grafana/password}";

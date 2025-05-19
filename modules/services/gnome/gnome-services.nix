@@ -7,7 +7,7 @@
 
     gnome = {
       gnome-keyring.enable = true;
-      core-utilities.enable = false;
+      core-apps.enable = false;
       games.enable = false;
       gnome-online-accounts.enable = true;
     };
