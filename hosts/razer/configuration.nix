@@ -17,6 +17,9 @@ in {
     ./nixos/hosts.nix
     ./nixos/envvar.nix
     ./nixos/greetd.nix
+    ./nixos/cpu.nix
+    ./nixos/laptop.nix
+    ./nixos/memory.nix
     ./themes/stylix.nix
     ../../modules/default.nix
     ../../modules/laptops.nix
@@ -96,6 +99,19 @@ in {
     media = {
       droidcam = true;
     };
+  };
+
+  # Nix build optimizations
+  nix = {
+    settings = {
+      max-jobs = lib.mkDefault 16; # i7-10875H has 8 cores/16 threads
+      cores = lib.mkDefault 16; # Use all threads
+      auto-optimise-store = true;
+    };
+    extraOptions = ''
+      keep-outputs = true
+      keep-derivations = true
+    '';
   };
 
   # Enable secure DNS with DNS over TLS

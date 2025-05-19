@@ -15,6 +15,8 @@ in {
     ./nixos/nvidia.nix
     ./nixos/i18n.nix
     ./nixos/envvar.nix
+    ./nixos/cpu.nix
+    ./nixos/memory.nix
     ./nixos/greetd.nix
     ./nixos/hosts.nix
     ./nixos/mpd.nix

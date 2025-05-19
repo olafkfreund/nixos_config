@@ -1,15 +1,34 @@
 {
   pkgs,
   config,
+  lib,
   ...
 }: {
-  # Bootloader.
-  boot.loader.systemd-boot.enable = true;
+  # Boot optimizations
+  boot.loader.systemd-boot = {
+    enable = true;
+    configurationLimit = 5; # Limit number of configurations
+    editor = false; # Disable bootloader editing for security
+  };
   boot.loader.efi.canTouchEfiVariables = true;
-  # boot.kernelParams = [ "mitigations=off" "systemd.unified_cgroup_hierarchy=0" "SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1"];
-  boot.kernelParams = ["module_blacklist=nouveau"];
+
+  # For Razer with i7-10875H
+  boot.kernelParams = [
+    "intel_pstate=active" # Use Intel P-state driver
+    "intel_idle.max_cstate=2" # Limit C-states for better responsiveness when needed
+    "i915.enable_fbc=1" # Enable framebuffer compression
+    "i915.enable_guc=2" # Enable graphics microcontroller
+    "nvme.noacpi=1" # Try if having NVMe issues
+    "pcie_aspm=default" # PCIe Active State Power Management
+  ];
+
+  # For improved boot time
+  boot.initrd.compressor = "zstd";
+  boot.initrd.compressorArgs = ["-19" "-T0"];
+
+  # Use latest kernel for newer hardware support
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  # boot.kernelPackages = pkgs.linuxPackages_6_12;
+
   boot.plymouth.enable = true;
   boot.kernel.sysctl."vm.nr_hugepages" = 1024;
   boot.kernel.sysctl = {

@@ -8,10 +8,6 @@
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.plymouth.enable = true;
-  boot.kernel.sysctl."vm.nr_hugepages" = 1024;
-  boot.kernel.sysctl = {
-    "vm.max_map_count" = 1048576; # Helps with memory-mapped files for large models
-  };
   # This is for OBS Virtual Cam Support - v4l2loopback setup
   # boot.kernelPackages = pkgs.linuxPackages_default;
   boot.kernelModules = ["v4l2loopback"];
@@ -25,7 +21,7 @@
     "vfio_iommu_type1"
     "vfio"
     "processor.max_cstate=1" # Prevent deep sleep states for better responsiveness
-    "rcu_nocbs=0-${toString (config.nix.settings.max-jobs - 1)}" # Optimize RCU callbacks
+    "rcu_nocbs=0-127" # Optimize RCU callbacks
     "numa_balancing=disable" # Can improve performance for some workloads
   ];
   boot.extraModulePackages = with config.boot.kernelPackages; [
