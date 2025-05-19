@@ -18,6 +18,9 @@ in {
     ./nixos/envvar.nix
     ./nixos/greetd.nix
     ./nixos/mpd.nix
+    ./nixos/cpu.nix
+    ./nixos/memory.nix
+    ./nixos/load.nix
     # ./nixos/network-stability.nix # Import the network stability module
     ./themes/stylix.nix
     ../../modules/default.nix

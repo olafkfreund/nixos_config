@@ -17,6 +17,7 @@
     pkgs.ferdium
     pkgs.zoom-us
     pkgs.libcamera
+    pkgs.nchat
   ];
   xdg.mime.enable = true;
   xdg.mimeApps = {

@@ -29,5 +29,8 @@
     atac
     ddgr
     rusti-cal
+    lazyjournal
+    lazysql
+    # nchat
   ];
 }

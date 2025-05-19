@@ -48,7 +48,7 @@ in {
         placement_strategy = "center";
         hide_window_decorations = true;
         # background_opacity = 1.0;
-        dynamic_background_opacity = true;
+        # dynamic_background_opacity = true;
         copy_on_select = true;
         url_style = "curly";
         sync_to_monitor = true;

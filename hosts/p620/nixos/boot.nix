@@ -17,7 +17,17 @@
   boot.kernelModules = ["v4l2loopback"];
   boot.initrd.kernelModules = ["amdgpu"];
   boot.blacklistedKernelModules = ["nvidia" "nouveau"];
-  boot.kernelParams = ["amdgpu.gpu_recovery=1" "amd_iommu=on" "vfio_virqfd" "vfio_pci" "vfio_iommu_type1" "vfio"];
+  boot.kernelParams = [
+    "amdgpu.gpu_recovery=1"
+    "amd_iommu=on"
+    "vfio_virqfd"
+    "vfio_pci"
+    "vfio_iommu_type1"
+    "vfio"
+    "processor.max_cstate=1" # Prevent deep sleep states for better responsiveness
+    "rcu_nocbs=0-${toString (config.nix.settings.max-jobs - 1)}" # Optimize RCU callbacks
+    "numa_balancing=disable" # Can improve performance for some workloads
+  ];
   boot.extraModulePackages = with config.boot.kernelPackages; [
     v4l2loopback
   ];
