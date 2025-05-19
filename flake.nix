@@ -232,7 +232,7 @@
     nixosConfigurations = {
       razer = nixpkgs.lib.nixosSystem (makeNixosSystem "razer");
       dex5550 = nixpkgs.lib.nixosSystem (makeNixosSystem "dex5550");
-      hp = nixpkgs.lib.nixosSystem (makeNixosSystem "hp");
+      # hp = nixpkgs.lib.nixosSystem (makeNixosSystem "hp");
       p510 = nixpkgs.lib.nixosSystem (makeNixosSystem "p510");
       p620 = nixpkgs.lib.nixosSystem (makeNixosSystem "p620");
     };

@@ -15,14 +15,16 @@
     "vm.max_map_count" = 262144; # For applications that use many memory mappings
   };
 
-  # Create a larger /tmp on tmpfs
-  boot.tmpOnTmpfs = true;
-  boot.tmpOnTmpfsSize = "16G"; # With 64GB RAM, can allocate more to tmpfs
+  # Create a larger /tmp on tmpfs - using updated option names
+  boot.tmp = {
+    useTmpfs = true; # Previously boot.tmpOnTmpfs
+    tmpfsSize = "16G"; # Previously boot.tmpOnTmpfsSize
+  };
 
   # Optional: zram for better memory management
   zramSwap = {
     enable = true;
     algorithm = "zstd";
-    memoryPercent = 25; # Use 25% of RAM for compressed swap
+    memoryPercent = lib.mkDefault 25; # Use 25% of RAM for compressed swap
   };
 }

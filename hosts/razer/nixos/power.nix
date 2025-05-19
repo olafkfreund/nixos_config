@@ -19,7 +19,7 @@
 
     # Power profiles management
     power-profiles-daemon = {
-      enable = true;
+      enable = false;
       # Set default profile (options: power-saver, balanced, performance)
       # The following line is commented out as the default is 'balanced'
       # extraConfig.defaults.default-profile = "balanced";

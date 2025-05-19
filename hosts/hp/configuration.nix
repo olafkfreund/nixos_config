@@ -128,7 +128,7 @@ in {
     hostName = vars.hostName;
     nameservers = vars.nameservers;
     useDHCP = false;
-    useNetworkd = true;
+    useNetworkd = lib.mkDefault true;
     # Enable resolved for DNS resolution
     useHostResolvConf = false;
   };

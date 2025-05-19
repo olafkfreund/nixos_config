@@ -46,7 +46,7 @@ in {
           vscode-extensions.skellock.just
           vscode-extensions.redhat.vscode-yaml
           vscode-extensions.redhat.vscode-xml
-          vscode-extensions.redhat.ansible
+          # vscode-extensions.redhat.ansible
           vscode-extensions.pkief.material-product-icons
           vscode-extensions.pkief.material-icon-theme
           vscode-extensions.ms-vscode-remote.remote-containers

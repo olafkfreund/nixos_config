@@ -4,10 +4,11 @@
   pkgs,
   ...
 }: {
-  # Trackpad and input device optimization
-  services.xserver.libinput = {
-    enable = true;
+  # Trackpad and input device optimization - using updated option names
+  services.libinput = {
+    enable = true; # Previously services.xserver.libinput.enable
     touchpad = {
+      # Previously services.xserver.libinput.touchpad
       accelProfile = "adaptive";
       accelSpeed = "0.5";
       naturalScrolling = true;
@@ -50,7 +51,7 @@
   # Razer-specific utilities
   hardware.openrazer = {
     enable = true;
-    users = ["olafkfreund"]; # Replace with your username
+    users = ["olafkfreund"]; # Adjust to your username
   };
 
   # Add Razer utilities
@@ -61,7 +62,7 @@
 
   # Support for closing lid
   services.logind = {
-    lidSwitch = "suspend";
+    lidSwitch = lib.mkDefault "suspend";
     lidSwitchExternalPower = "ignore";
   };
 }
