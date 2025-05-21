@@ -22,7 +22,7 @@ in {
     ./nixos/mpd.nix
     ./nixos/screens.nix
     ./nixos/plex.nix
-    ./nixos/monitoring.nix # Added monitoring configuration
+    # ./nixos/monitoring.nix # Added monitoring configuration
     ./themes/stylix.nix
     ../../modules/server.nix
     ../../modules/default.nix
