@@ -53,7 +53,7 @@
 
   boot.extraModulePackages = with config.boot.kernelPackages; [
     v4l2loopback
-    intel-thermald # Thermal management for Intel CPUs
+    # intel-thermald # Thermal management for Intel CPUs
   ];
 
   # Enable microcode updates
