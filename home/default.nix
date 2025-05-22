@@ -1,4 +1,4 @@
-{...}: {
+{pkgs, ...}: {
   imports = [
     ./browsers/default.nix
     ./desktop/default.nix
@@ -9,5 +9,11 @@
     ./media/spice_themes.nix
     ./files.nix
     ./chat/default.nix
+  ];
+
+  home.packages = [
+    (import ../development/claude-code/default.nix {
+      inherit (pkgs) lib buildNpmPackage fetchurl nodejs makeWrapper writeShellScriptBin;
+    })
   ];
 }
