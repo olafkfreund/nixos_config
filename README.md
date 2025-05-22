@@ -1,116 +1,70 @@
-# NixOS Configuration
+# NixOS Modular Configuration
 
-My personal NixOS configuration with Home Manager integration and multi-host support.
+This repository contains a modular, flake-based NixOS configuration with Home Manager integration and multi-host support. It is designed for reproducibility, maintainability, and easy onboarding for new users or contributors.
 
 ## System Overview
 
-This flake-based NixOS configuration provides:
+- **Multi-host support:** Each host has its own directory under `hosts/` with hardware-specific and system settings. Host-specific variables are managed in `variables.nix` files for consistency and easy updates.
+- **Modular structure:** System configuration is split into reusable modules under `modules/` (e.g., cloud, containers, desktop, development, security, services, virtualization, etc.).
+- **Home Manager integration:** User environments are managed declaratively in `home/` and imported per-host.
+- **Custom packages:** The `pkgs/` directory contains custom Nix packages and overlays not available in upstream nixpkgs.
+- **Theme and appearance:** Gruvbox-based themes and wallpapers are provided in `themes/` and integrated system-wide.
 
-- Multiple host configurations (razer, lms, dex5550, hp, p510, p620)
-- Home Manager integration for user environment management
-- Theme management with Stylix (Gruvbox theme)
-- Development environment setup (VS Code, Neovim, terminal tools)
-- Desktop environments and window managers
-- Various application configurations
+## Onboarding & Usage
 
-## Getting Started
+1. **Clone the repository:**
 
-### Prerequisites
+   ```sh
+   git clone <this-repo-url> ~/.config/nixos
+   cd ~/.config/nixos
+   ```
 
-- NixOS with flakes enabled
-- Git
+2. **Select or create your host directory:**
+   - Each host (machine) has a directory under `hosts/` (e.g., `hosts/p620/`, `hosts/razer/`).
+   - Copy an existing host as a template or create a new one. Set hardware-specific options in `variables.nix`.
+3. **Edit your configuration:**
+   - System-level modules are imported in `configuration.nix`.
+   - User-level (Home Manager) configs are in `home/` and imported per-host.
+   - Enable/disable features using the `features` attribute in your host config.
+4. **Build and switch:**
 
-### Installation
+   ```sh
+   sudo nixos-rebuild switch --flake .#<hostname>
+   # For home-manager only:
+   home-manager switch --flake .#<username>@<hostname>
+   ```
 
-1. Install git if not already available:
+5. **Update system:**
+   - Use the provided scripts in `scripts/` (e.g., `check-nixos-updates.sh`) to check for flake updates.
+   - Pull latest changes and run rebuild as above.
 
-```shell
-nix-env -iA nixos.git
-```
+## Key Concepts
 
-2. Clone the repository:
+- **variables.nix:** Each host has a `variables.nix` file for user, display, GPU, and other hardware-specific settings. This enables easy reuse and consistency.
+- **Feature flags:** The `features` attribute in host configs enables or disables groups of functionality (development tools, cloud, virtualization, etc.).
+- **Modular imports:** System and user configs are composed from many small, focused modules for maintainability.
+- **Custom overlays:** The `pkgs/` directory can override or extend upstream Nix packages.
+- **Declarative user environments:** Home Manager is used for all user-level configuration, including shells, editors, and desktop environments.
 
-```shell
-git clone git@github.com:olafkfreund/nixos_config.git
-```
+## Directory Structure
 
-3. Enter the cloned directory:
+- `hosts/` — Per-host system configuration (hardware, variables, options)
+- `modules/` — Reusable NixOS modules (cloud, containers, desktop, etc.)
+- `home/` — Home Manager user environment modules
+- `pkgs/` — Custom Nix packages and overlays
+- `themes/` — Theme files and wallpapers
+- `scripts/` — Utility scripts for system management
+- `Users/` — User-specific Home Manager configs
 
-```shell
-cd nixos_config
-```
+## Contributing
 
-4. Copy the contents to your NixOS configuration directory:
+- Follow the modular structure and use feature flags for new functionality.
+- Add new hosts by copying an existing host directory and updating `variables.nix`.
+- Document new modules and features in their respective `README.md` files.
+- See `.github/copilot-instructions.md` in each host for coding standards.
 
-```shell
-sudo rsync -av --exclude='.git' ./* ~/.config/nixos
-```
+## References
 
-5. Set appropriate permissions:
-
-```shell
-sudo chown -R $(whoami):$(id -gn) ~/.config/nixos
-```
-
-## Using This Flake
-
-### Rebuilding Your System
-
-To rebuild your system using this flake, run:
-
-```shell
-sudo nixos-rebuild switch --flake ~/.config/nixos#hostname
-```
-
-Replace `hostname` with one of the available configurations: razer, lms, dex5550, hp, p510, or p620.
-
-### Updating the Flake
-
-To update all flake inputs:
-
-```shell
-nix flake update ~/.config/nixos
-```
-
-To update a specific input:
-
-```shell
-nix flake lock --update-input nixpkgs ~/.config/nixos
-```
-
-## Configuration Structure
-
-- `flake.nix` - The main flake configuration with all inputs and outputs
-- `hosts/` - Host-specific configurations
-- `home/` - Home Manager configurations for user environment
-  - `browsers/` - Browser configurations (Brave, Chrome, Firefox, etc.)
-  - `chat/` - Messaging applications
-  - `desktop/` - Desktop environment settings
-  - `development/` - Development tools configuration
-  - `shell/` - Shell configurations (Bash, ZSH)
-- `modules/` - Modular system configurations
-- `themes/` - Theme configurations
-- `pkgs/` - Custom package definitions
-
-## Key Features
-
-- VS Code setup with Context7 MCP server integration
-- Neovim configuration
-- Multiple terminal emulator options
-- Browser configurations
-- Desktop environments (KDE Plasma, Hyprland, Sway)
-- Development tooling (containers, shells, editors)
-- Media applications
-- Gaming setup
-
-## Customization
-
-To customize for your own use:
-
-1. Modify the username in `flake.nix`
-2. Create or modify host configurations in the `hosts/` directory
-3. Adjust Home Manager configurations in `home/` and `Users/`
-
-## License
-
-See the LICENSE file for details.
+- [NixOS Manual](https://nixos.org/manual/nixos/stable/)
+- [Home Manager Manual](https://nix-community.github.io/home-manager/)
+- [Nixpkgs Contribution Guide](https://github.com/NixOS/nixpkgs/blob/master/CONTRIBUTING.md)
