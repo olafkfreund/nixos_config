@@ -31,6 +31,7 @@
     rusti-cal
     lazyjournal
     lazysql
+    clamav
     # nchat
   ];
 }

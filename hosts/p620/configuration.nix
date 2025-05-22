@@ -243,6 +243,10 @@ in {
   services.ollama.environmentVariables.ROC_ENABLE_PRE_VEGA = lib.mkForce "1";
   services.ollama.environmentVariables.HSA_OVERRIDE_GFX_VERSION = lib.mkForce "11.0.0";
 
+  services.clamav = {
+    daemon.enable = true; # Enable clamd (ClamAV daemon)
+    updater.enable = true; # Enable freshclam (virus database updater)
+  };
   # Add nix-serve configuration before the system.stateVersion line
   services.nix-serve = {
     enable = true;

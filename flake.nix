@@ -6,10 +6,12 @@
     substituters = [
       "https://cache.nixos.org/"
       "https://nix-community.cachix.org"
+      "http://192.168.1.97:5000"
     ];
     trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "p620-nix-serve:mZR6o5z5KcWeu4PVXgjHA7vb1sHQgRdWMKQt8x3a4rU="
     ];
 
     # Development and specific package caches

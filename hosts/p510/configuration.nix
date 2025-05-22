@@ -171,30 +171,19 @@ in {
   networking.useHostResolvConf = false;
 
   # Configure systemd-networkd for your network interfaces
+  # Ensure the interface name matches the output of `ip link` (e.g., eno1)
   systemd.network = {
     enable = true;
     networks = {
-      "eno1" = {
+      eno1 = {
         name = "eno1";
         DHCP = "ipv4";
         networkConfig = {
           MulticastDNS = true;
-          DHCP = "ipv4";
           IPv6AcceptRA = true;
         };
         dhcpV4Config = {
           RouteMetric = 10;
-        };
-      };
-      "wlp8s" = {
-        name = "wlp8s*";
-        DHCP = "ipv4";
-        networkConfig = {
-          MulticastDNS = true;
-          IPv6AcceptRA = true;
-        };
-        dhcpV4Config = {
-          RouteMetric = 20;
         };
       };
     };
