@@ -23,9 +23,9 @@
     makeCacheWritable = true;
 
     postPatch = ''
-      if [ -f "${./claude-code/package-lock.json}" ]; then
+      if [ -f "${./package-lock.json}" ]; then
         echo "Using vendored package-lock.json"
-        cp "${./claude-code/package-lock.json}" ./package-lock.json
+        cp "${./package-lock.json}" ./package-lock.json
       else
         echo "No vendored package-lock.json found, creating a minimal one"
         exit 1
@@ -75,7 +75,7 @@
 
     VERSION="$1"
     TEMP_DIR=$(mktemp -d)
-    LOCK_DIR="$PWD/packages/claude-code"
+    LOCK_DIR="$PWD/home/claude-code"
 
     echo "Creating $LOCK_DIR if it doesn't exist..."
     mkdir -p "$LOCK_DIR"

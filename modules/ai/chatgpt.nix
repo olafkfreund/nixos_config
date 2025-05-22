@@ -16,6 +16,6 @@
     pkgs.gpt-cli
     pkgs.chatmcp
     inputs.claude-desktop.packages.x86_64-linux.claude-desktop
-    pkgs.claude-code
+    # pkgs.claude-code
   ];
 }

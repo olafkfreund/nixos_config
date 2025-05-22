@@ -12,7 +12,7 @@
   ];
 
   home.packages = [
-    (import ../development/claude-code/default.nix {
+    (import ./development/claude-code/default.nix {
       inherit (pkgs) lib buildNpmPackage fetchurl nodejs makeWrapper writeShellScriptBin;
     })
   ];

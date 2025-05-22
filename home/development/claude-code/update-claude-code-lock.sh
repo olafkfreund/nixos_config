@@ -9,7 +9,7 @@
 
     VERSION="$1"
     TEMP_DIR=$(mktemp -d)
-    LOCK_DIR="$PWD/packages/claude-code"
+    LOCK_DIR="$PWD"
 
     echo "Creating $LOCK_DIR if it doesn't exist..."
     mkdir -p "$LOCK_DIR"
