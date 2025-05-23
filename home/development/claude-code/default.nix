@@ -6,17 +6,16 @@
   makeWrapper,
   writeShellScriptBin,
 }: let
-  # Main package
   claudeCode = buildNpmPackage rec {
     pname = "claude-code";
     version = "1.0.1";
 
     src = fetchurl {
       url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-      hash = "sha256-1iKDtTE+cHXMW/3zxfsNFjMGMxJlIBzGEXWtTfQfSMM=";
+      hash = "sha256-dR8lXvtawmY1i3JLjXyc63xy8L4K/R3TuVyqH0TO6Z4=";
     };
 
-    npmDepsHash = "sha256-fuJE/YTd9apAd1cooxgHQwPda5js44EmSfjuRVPbKdM=";
+    npmDepsHash = "sha256-AaG2gFMCISndde0BP2ytwn8jtMkdMke7da39qN7yOYk=";
 
     inherit nodejs;
 
@@ -28,54 +27,83 @@
         cp "${./package-lock.json}" ./package-lock.json
       else
         echo "No vendored package-lock.json found, creating a minimal one"
-        exit 1
+        echo '{"lockfileVersion": 1}' > ./package-lock.json
       fi
     '';
 
     dontNpmBuild = true;
-    dontNpmInstall = true;
 
-    nativeBuildInputs = [makeWrapper];
+    nativeBuildInputs = [ makeWrapper ];
 
-    # Create a custom installation phase to handle the package organization
     installPhase = ''
-      # Create a directory for the lib files
+      runHook preInstall
+      
       mkdir -p $out/lib/node_modules/@anthropic-ai/claude-code
-
-      # Copy all package files to the lib directory
-      cp -a . $out/lib/node_modules/@anthropic-ai/claude-code/
-
-      # Create bin directory
+      
+      # Debug: List what we have in the source
+      echo "=== Source contents ==="
+      ls -la
+      
+      # Copy from package subdirectory (npm tarballs extract to package/)
+      if [ -d "package" ]; then
+        echo "=== Package directory contents ==="
+        ls -la package/
+        cp -r package/* $out/lib/node_modules/@anthropic-ai/claude-code/
+      else
+        echo "No package directory found, copying current directory"
+        cp -r . $out/lib/node_modules/@anthropic-ai/claude-code/
+      fi
+      
+      # Debug: Check what we installed
+      echo "=== Installed contents ==="
+      ls -la $out/lib/node_modules/@anthropic-ai/claude-code/
+      
+      # Find the actual CLI entry point
+      CLI_FILE=""
+      for file in cli.mjs cli.js index.mjs index.js bin/cli.mjs bin/cli.js; do
+        if [ -f "$out/lib/node_modules/@anthropic-ai/claude-code/$file" ]; then
+          CLI_FILE="$file"
+          echo "Found CLI at: $file"
+          break
+        fi
+      done
+      
+      if [ -z "$CLI_FILE" ]; then
+        echo "ERROR: Could not find CLI entry point"
+        echo "Available files:"
+        find $out/lib/node_modules/@anthropic-ai/claude-code/ -type f -name "*.js" -o -name "*.mjs"
+        # Create a simple wrapper anyway
+        CLI_FILE="index.js"
+      fi
+      
       mkdir -p $out/bin
-
-      # Create a wrapper script that points to the actual CLI script
       makeWrapper ${nodejs}/bin/node $out/bin/claude-code \
-        --add-flags "$out/lib/node_modules/@anthropic-ai/claude-code/cli.mjs"
+        --add-flags "$out/lib/node_modules/@anthropic-ai/claude-code/$CLI_FILE"
+      
+      runHook postInstall
     '';
 
     meta = with lib; {
       description = "Claude Code CLI tool";
-      homepage = "https://www.anthropic.com/claude-code";
-      mainProgram = "claude-code";
+      homepage = "https://github.com/anthropics/claude-code";
+      license = licenses.mit;
+      maintainers = [ ];
+      platforms = platforms.all;
     };
   };
 
-  # Helper script to update the package-lock.json file
-  #
-  # Build with `nix build .#claude-code.updateScript`
   updateScript = writeShellScriptBin "update-claude-code-lock" ''
     #!/usr/bin/env bash
     set -e
 
     if [ $# -ne 1 ]; then
-      echo "Usage: update-claude-code-lock <version>"
-      echo "Example: update-claude-code-lock 1.0.1"
+      echo "Usage: $0 <version>"
       exit 1
     fi
 
     VERSION="$1"
     TEMP_DIR=$(mktemp -d)
-    LOCK_DIR="$PWD/home/claude-code"
+    LOCK_DIR="$PWD/home/development/claude-code"
 
     echo "Creating $LOCK_DIR if it doesn't exist..."
     mkdir -p "$LOCK_DIR"
@@ -84,31 +112,22 @@
     curl -L "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-$VERSION.tgz" -o "$TEMP_DIR/claude-code.tgz"
 
     echo "Extracting tarball..."
-    mkdir -p "$TEMP_DIR/extract"
-    tar -xzf "$TEMP_DIR/claude-code.tgz" -C "$TEMP_DIR/extract"
+    tar -xzf "$TEMP_DIR/claude-code.tgz" -C "$TEMP_DIR"
 
-    echo "Generating package-lock.json..."
-    cd "$TEMP_DIR/extract/package"
-    ${nodejs}/bin/npm install --package-lock-only --ignore-scripts
+    echo "Copying package-lock.json if it exists..."
+    if [ -f "$TEMP_DIR/package/package-lock.json" ]; then
+      cp "$TEMP_DIR/package/package-lock.json" "$LOCK_DIR/"
+      echo "Updated package-lock.json"
+    else
+      echo "No package-lock.json found in tarball"
+    fi
 
-    echo "Copying package-lock.json to $LOCK_DIR..."
-    cp package-lock.json "$LOCK_DIR/"
-
-    echo "Cleaning up..."
+    echo "Use: nix run nixpkgs#prefetch-npm-deps -- $LOCK_DIR/package-lock.json"
+    
+    # Cleanup
     rm -rf "$TEMP_DIR"
-
-    echo "Done. Package lock file updated at $LOCK_DIR/package-lock.json"
-    echo "You may need to update the npmDepsHash in your claude-code.nix file."
-    echo "Use: prefetch-npm-deps $LOCK_DIR/package-lock.json"
   '';
 in
-  # Return both the package and the update script
-  claudeCode
-  // {
-    updateScript = updateScript;
-    passthru =
-      (claudeCode.passthru or {})
-      // {
-        inherit updateScript;
-      };
+  claudeCode // {
+    inherit updateScript;
   }

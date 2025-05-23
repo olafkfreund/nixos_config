@@ -59,7 +59,7 @@
   };
 
   config = lib.mkIf config.programs.claudeCode.enable {
-    home.packages = [pkgs.claude-code];
+    # home.packages = [pkgs.claude-code];
 
     programs.zsh.initContent = let
       cfg = config.programs.claudeCode;

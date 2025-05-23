@@ -238,5 +238,11 @@
       p510 = nixpkgs.lib.nixosSystem (makeNixosSystem "p510");
       p620 = nixpkgs.lib.nixosSystem (makeNixosSystem "p620");
     };
+
+    packages.x86_64-linux = {
+      claude-code = import ./home/development/claude-code {
+        inherit (nixpkgs.legacyPackages.x86_64-linux) lib buildNpmPackage fetchurl nodejs makeWrapper writeShellScriptBin;
+      };
+    };
   };
 }

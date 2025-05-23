@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{ pkgs, inputs, ... }: {
   imports = [
     ./browsers/default.nix
     ./desktop/default.nix
@@ -12,8 +12,6 @@
   ];
 
   home.packages = [
-    (import ./development/claude-code/default.nix {
-      inherit (pkgs) lib buildNpmPackage fetchurl nodejs makeWrapper writeShellScriptBin;
-    })
+    inputs.self.packages.${pkgs.system}.claude-code
   ];
 }
