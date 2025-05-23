@@ -52,9 +52,9 @@
 
     model = lib.mkOption {
       type = lib.types.str;
-      default = "claude-3-5-sonnet-20240620";
+      default = "claude-4-sonnet-20250522";
       description = "Claude model to use for interactions";
-      example = "claude-3-opus-20240229";
+      example = "claude-4-opus-20250522";
     };
   };
 
