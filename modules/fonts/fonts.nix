@@ -21,7 +21,8 @@
       # Using specific nerd fonts instead of a global package
       nerd-fonts.jetbrains-mono
       nerd-fonts.fira-code
-      nerd-fonts.symbols-only # Fixed: use symbols-only instead of symbols
+      nerd-fonts.symbols-only
+      nerd-fonts.caskaydia-cove # Fixed: use symbols-only instead of symbols
       noto-fonts
       noto-fonts-cjk-sans
       noto-fonts-emoji
