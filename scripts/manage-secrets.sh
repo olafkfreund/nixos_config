@@ -1,19 +1,17 @@
 #!/usr/bin/env bash
 
 # NixOS Secrets Management Script
-# Usage: ./scripts/manage-secrets.sh [create|edit|rekey|list]
-
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NIXOS_DIR="$(dirname "$SCRIPT_DIR")"
 SECRETS_DIR="$NIXOS_DIR/secrets"
+SECRETS_CONFIG="$NIXOS_DIR/secrets.nix"
 
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
 NC='\033[0m'
 
 log() {
@@ -29,47 +27,46 @@ error() {
   exit 1
 }
 
-# Check if secrets.nix exists and has proper format
+# Check if secrets.nix exists
 check_secrets_config() {
-  if [[ ! -f "$SECRETS_DIR/secrets.nix" ]]; then
-    error "secrets.nix not found. Run '$0 init' first to create the configuration."
-  fi
-  
-  # Basic validation that secrets.nix has the expected structure
-  if ! grep -q "publicKeys" "$SECRETS_DIR/secrets.nix"; then
-    error "secrets.nix appears to be invalid. It should contain publicKeys definitions."
+  if [[ ! -f "$SECRETS_CONFIG" ]]; then
+    error "secrets.nix not found at $SECRETS_CONFIG. Run '$0 init' first."
   fi
 }
 
-# Alternative function to run agenix through nix run if not in PATH
+# Alternative function to run agenix
 run_agenix() {
   if command -v agenix &> /dev/null; then
+    cd "$NIXOS_DIR"  # Run from config root
     agenix "$@"
   else
     log "Running agenix through nix..."
+    cd "$NIXOS_DIR"
     nix run github:ryantm/agenix -- "$@"
   fi
 }
 
-# Initialize secrets directory and configuration
+# Check current secrets configuration
+check_current_config() {
+  if [[ -f "$SECRETS_CONFIG" ]]; then
+    log "Current secrets.nix configuration:"
+    echo ""
+    # Show the secret definitions (just the attribute names)
+    grep -E '^\s*".*\.age"\.publicKeys' "$SECRETS_CONFIG" | sed 's/.publicKeys.*//' | sed 's/^\s*/  /'
+    echo ""
+  fi
+}
+
+# Initialize secrets management
 init_secrets() {
   log "Initializing secrets management..."
   
   # Create secrets directory
   mkdir -p "$SECRETS_DIR"
   
-  # Create .gitkeep if it doesn't exist
-  if [[ ! -f "$SECRETS_DIR/.gitkeep" ]]; then
-    cat > "$SECRETS_DIR/.gitkeep" << 'EOF'
-# This file ensures the secrets directory is tracked by git
-# The actual .age files will be created when you run the setup script
-EOF
-    log "Created $SECRETS_DIR/.gitkeep"
-  fi
-  
-  # Create secrets.nix template if it doesn't exist
-  if [[ ! -f "$SECRETS_DIR/secrets.nix" ]]; then
-    cat > "$SECRETS_DIR/secrets.nix" << 'EOF'
+  # Create secrets.nix in the root directory (standard agenix location)
+  if [[ ! -f "$SECRETS_CONFIG" ]]; then
+    cat > "$SECRETS_CONFIG" << 'EOF'
 # This file defines which keys can decrypt which secrets
 # Run: agenix -e <secret-name>.age
 let
@@ -78,117 +75,140 @@ let
   olafkfreund = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... olafkfreund@nixos";
 
   # Host public keys - extract with: sudo cat /etc/ssh/ssh_host_ed25519_key.pub
-  # Replace these with your actual host keys
   p620 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... root@p620";
   razer = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... root@razer";
   p510 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... root@p510";
   dex5550 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... root@dex5550";
 
-  # Key groups for easier management
+  # Key groups
   allUsers = [ olafkfreund ];
   allHosts = [ p620 razer p510 dex5550 ];
   workstations = [ p620 razer ];
   servers = [ p510 dex5550 ];
 in
 {
-  # User secrets - accessible by user and their primary hosts
-  "user-password-olafkfreund.age".publicKeys = allUsers ++ allHosts;
-  "github-token.age".publicKeys = allUsers ++ workstations;
-  
-  # Host secrets - accessible by specific hosts
-  "ssh-host-ed25519-key.age".publicKeys = allUsers ++ allHosts;
-  "wifi-password.age".publicKeys = allUsers ++ [ razer ]; # Only laptop needs WiFi
-  
-  # Service secrets - accessible by relevant hosts
-  "docker-auth.age".publicKeys = allUsers ++ allHosts;
-  "postgres-password.age".publicKeys = allUsers ++ servers;
+  # Paths are relative to this file (project root)
+  # Make sure these match your actual .age file locations
+  "secrets/user-password-olafkfreund.age".publicKeys = allUsers ++ allHosts;
+  "secrets/github-token.age".publicKeys = allUsers ++ workstations;
+  "secrets/wifi-password.age".publicKeys = allUsers ++ [ razer ];
+  "secrets/docker-auth.age".publicKeys = allUsers ++ allHosts;
+  "secrets/postgres-password.age".publicKeys = allUsers ++ servers;
 }
 EOF
-    log "Created $SECRETS_DIR/secrets.nix template"
-    warn "Please update the public keys in $SECRETS_DIR/secrets.nix with your actual keys"
-    log "Run './scripts/get-keys.sh' to extract your current SSH keys"
+    log "Created $SECRETS_CONFIG"
   fi
   
   # Update .gitignore
   local gitignore="$NIXOS_DIR/.gitignore"
-  if ! grep -q "secrets/\*.age" "$gitignore" 2>/dev/null; then
+  if ! grep -q "secrets.nix" "$gitignore" 2>/dev/null; then
     cat >> "$gitignore" << 'EOF'
 
 # Secrets management
+secrets.nix
 secrets/*.age
 EOF
-    log "Updated .gitignore to exclude .age files"
+    log "Updated .gitignore"
   fi
   
-  log "Secrets management initialized successfully!"
+  log "Secrets management initialized!"
   log ""
   log "Next steps:"
   log "1. Run './scripts/get-keys.sh' to get your SSH public keys"
-  log "2. Update secrets/secrets.nix with the actual public keys"
+  log "2. Edit secrets.nix and replace the placeholder keys with real ones"
   log "3. Run './scripts/manage-secrets.sh rekey' to update existing secrets"
-}
-
-# Generate SSH keys if they don't exist
-setup_keys() {
-  local key_path="$HOME/.ssh/id_ed25519"
-  
-  if [[ ! -f "$key_path" ]]; then
-    log "Generating SSH key for secrets management..."
-    ssh-keygen -t ed25519 -f "$key_path" -N ""
-    log "SSH key generated at $key_path"
-  fi
-  
-  log "Running key extraction script..."
-  "$SCRIPT_DIR/get-keys.sh"
 }
 
 # Create a new secret
 create_secret() {
   local secret_name="$1"
-  
   check_secrets_config
   
-  if [[ -f "$SECRETS_DIR/$secret_name.age" ]]; then
+  # Add secrets/ prefix if not present
+  if [[ ! "$secret_name" == secrets/* ]]; then
+    secret_name="secrets/$secret_name"
+  fi
+  
+  if [[ -f "$NIXOS_DIR/$secret_name.age" ]]; then
     warn "Secret $secret_name already exists. Use 'edit' to modify it."
     return 1
   fi
   
   log "Creating secret: $secret_name"
-  cd "$SECRETS_DIR"
   run_agenix -e "$secret_name.age"
 }
 
 # Edit an existing secret
 edit_secret() {
   local secret_name="$1"
-  
   check_secrets_config
   
-  if [[ ! -f "$SECRETS_DIR/$secret_name.age" ]]; then
-    error "Secret $secret_name does not exist. Use 'create' first."
+  # Add secrets/ prefix if not present
+  if [[ ! "$secret_name" == secrets/* ]]; then
+    secret_name="secrets/$secret_name"
+  fi
+  
+  if [[ ! -f "$NIXOS_DIR/$secret_name.age" ]]; then
+    error "Secret $secret_name does not exist. Available secrets:"
+    list_secrets
+    return 1
   fi
   
   log "Editing secret: $secret_name"
-  cd "$SECRETS_DIR"
   run_agenix -e "$secret_name.age"
 }
 
-# Rekey all secrets (useful when keys change)
+# Rekey all secrets
 rekey_secrets() {
   check_secrets_config
-  
   log "Rekeying all secrets..."
-  cd "$SECRETS_DIR"
+  
+  # Show what secrets will be rekeyed
+  log "The following secrets will be rekeyed:"
+  list_secrets
+  
   run_agenix -r
+  
+  if [[ $? -eq 0 ]]; then
+    log "✅ All secrets successfully rekeyed!"
+  else
+    error "❌ Rekeying failed. Check your secrets.nix configuration."
+  fi
 }
 
 # List all secrets
 list_secrets() {
-  log "Available secrets:"
   if [[ -d "$SECRETS_DIR" ]]; then
-    find "$SECRETS_DIR" -name "*.age" -exec basename {} .age \; 2>/dev/null | sort || echo "No secrets found"
+    find "$SECRETS_DIR" -name "*.age" -type f | sed "s|$NIXOS_DIR/||" | sort
   else
-    warn "No secrets directory found. Run '$0 init' first."
+    warn "No secrets found"
+  fi
+}
+
+# Status check
+status() {
+  log "Secrets Management Status:"
+  echo ""
+  
+  # Check if secrets.nix exists
+  if [[ -f "$SECRETS_CONFIG" ]]; then
+    log "✅ secrets.nix configuration found"
+  else
+    warn "❌ secrets.nix not found"
+  fi
+  
+  # Check available secrets
+  local secret_count=$(find "$SECRETS_DIR" -name "*.age" 2>/dev/null | wc -l)
+  log "📁 Found $secret_count secret files"
+  
+  # Show current configuration
+  check_current_config
+  
+  # Check if agenix is available
+  if command -v agenix &> /dev/null; then
+    log "✅ agenix command available"
+  else
+    warn "⚠️  agenix not in PATH (will use nix run)"
   fi
 }
 
@@ -198,7 +218,7 @@ usage() {
   echo ""
   echo "Commands:"
   echo "  init               Initialize secrets management"
-  echo "  setup              Generate SSH keys and extract public keys"
+  echo "  status             Show current secrets status"
   echo "  create <name>      Create a new secret"
   echo "  edit <name>        Edit an existing secret"
   echo "  rekey              Rekey all secrets with current keys"
@@ -206,46 +226,28 @@ usage() {
   echo ""
   echo "Examples:"
   echo "  $0 init"
-  echo "  $0 setup"
+  echo "  $0 status"
   echo "  $0 create user-password-olafkfreund"
-  echo "  $0 edit github-token"
+  echo "  $0 edit user-password-olafkfreund"
   echo "  $0 list"
 }
 
-# Main script logic
+# Main logic
 main() {
   case "${1:-help}" in
-    init)
-      init_secrets
-      ;;
-    setup)
-      setup_keys
-      ;;
+    init) init_secrets ;;
+    status) status ;;
     create)
-      if [[ $# -lt 2 ]]; then
-        error "Secret name required. Usage: $0 create <secret-name>"
-      fi
+      [[ $# -lt 2 ]] && error "Secret name required"
       create_secret "$2"
       ;;
     edit)
-      if [[ $# -lt 2 ]]; then
-        error "Secret name required. Usage: $0 edit <secret-name>"
-      fi
+      [[ $# -lt 2 ]] && error "Secret name required"
       edit_secret "$2"
       ;;
-    rekey)
-      rekey_secrets
-      ;;
-    list)
-      list_secrets
-      ;;
-    help|--help|-h)
-      usage
-      ;;
-    *)
-      error "Unknown command: $1"
-      usage
-      ;;
+    rekey) rekey_secrets ;;
+    list) list_secrets ;;
+    *) usage ;;
   esac
 }
 

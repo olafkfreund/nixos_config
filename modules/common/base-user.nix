@@ -6,7 +6,7 @@
 }: {
   users.users.${username} = {
     isNormalUser = true;
-    description = "Olaf K-Freund";
+    description = lib.mkDefault "Olaf K-Freund";
     extraGroups = ["wheel" "video" "scanner" "lp"];
     shell = lib.mkDefault pkgs.zsh; # Changed to mkDefault to allow host configs to override
     packages = with pkgs; [vim wally-cli];

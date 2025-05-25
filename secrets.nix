@@ -16,15 +16,12 @@ let
   workstations = [p620 razer];
   servers = [p510 dex5550];
 in {
-  # User secrets - accessible by user and their primary hosts
-  "user-password-olafkfreund.age".publicKeys = allUsers ++ allHosts;
-  "github-token.age".publicKeys = allUsers ++ workstations;
-
-  # Host secrets - accessible by specific hosts
-  "ssh-host-ed25519-key.age".publicKeys = allUsers ++ allHosts;
-  "wifi-password.age".publicKeys = allUsers ++ [razer]; # Only laptop needs WiFi
-
-  # Service secrets - accessible by relevant hosts
-  "docker-auth.age".publicKeys = allUsers ++ allHosts;
-  "postgres-password.age".publicKeys = allUsers ++ servers;
+  "secrets/user-password-olafkfreund.age".publicKeys = allUsers ++ allHosts;
+  "secrets/github-token.age".publicKeys = allUsers ++ workstations;
+  "secrets/ssh-host-ed25519-key.age".publicKeys = allUsers ++ allHosts;
+  "secrets/wifi-password.age".publicKeys = allUsers ++ [razer];
+  "secrets/docker-auth.age".publicKeys = allUsers ++ allHosts;
+  "secrets/postgres-password.age".publicKeys = allUsers ++ servers;
+  "secrets/nextcloud-admin-password.age".publicKeys = allUsers ++ servers;
+  "secrets/smtp-password.age".publicKeys = allUsers ++ allHosts;
 }

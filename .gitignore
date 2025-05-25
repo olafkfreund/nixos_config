@@ -1,9 +1,5 @@
 themes/gruvbox-material-gtk/
 
-# Secrets management
-secrets/*.age
-secrets/secrets.nix
-
 # Build results
 result
 result-*
@@ -21,3 +17,7 @@ result-*
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Secrets management
+secrets.nix
+secrets/*.age

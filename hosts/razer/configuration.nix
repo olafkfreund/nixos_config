@@ -1,6 +1,6 @@
 {
   pkgs,
-  pkgs-unstable,
+  config,
   lib,
   inputs,
   hostUsers,
@@ -25,9 +25,9 @@ in {
     ../../modules/default.nix
     ../../modules/laptops.nix
     ../../modules/development/default.nix
-    # ../../modules/system-tweaks/kernel-tweaks/64GB-SYSTEM/64gb-system.nix
-    # ../../modules/system-tweaks/storage-tweaks/SSD/SSD-tweak.nix
     ../common/hyprland.nix
+    ../../modules/security/secrets.nix
+    ../../modules/containers/docker.nix
   ];
 
   # Set hostname from variables
@@ -160,16 +160,18 @@ in {
       NH_FLAKE = vars.paths.flakeDir;
     };
 
-  users.users.${vars.username} = {
+  users.users = lib.genAttrs hostUsers (username: {
     isNormalUser = true;
-    description = vars.fullName;
-    extraGroups = vars.userGroups;
+    description = "User ${username}";
+    extraGroups = ["wheel" "networkmanager"];
     shell = pkgs.zsh;
-    packages = with pkgs; [
-      vim
-      wally-cli
-    ];
-  };
+    # Only use secret-managed password if the secret exists
+    hashedPasswordFile =
+      lib.mkIf
+      (config.modules.security.secrets.enable
+        && builtins.hasAttr "user-password-${username}" config.age.secrets)
+      config.age.secrets."user-password-${username}".path;
+  });
 
   # Hardware and service specific configurations
   services.playerctld.enable = true;

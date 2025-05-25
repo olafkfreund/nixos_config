@@ -48,5 +48,15 @@ else
   echo ""
 fi
 
-log "Copy these keys to your secrets/secrets.nix file"
-log "Then run: ./scripts/manage-secrets.sh rekey"
+# Show which keys were used to encrypt the existing secret
+if [[ -f "secrets/user-password-olafkfreund.age" ]]; then
+  info "Keys that can decrypt the existing secret:"
+  # Extract recipient key fingerprints from the .age file
+  head -n 20 "secrets/user-password-olafkfreund.age" | grep "^->" | while read -r line; do
+    echo "  $line"
+  done
+  echo ""
+  warn "These keys must be included in your secrets.nix file"
+fi
+
+log "Update secrets.nix with these actual public keys"
