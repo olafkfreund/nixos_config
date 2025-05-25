@@ -5,6 +5,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NIXOS_DIR="$(dirname "$SCRIPT_DIR")"
+SECRETS_DIR="$NIXOS_DIR/secrets"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -20,6 +21,9 @@ warn() {
 
 log "Setting up secrets management for NixOS configuration..."
 
+# Create secrets directory immediately
+mkdir -p "$SECRETS_DIR"
+
 # Initialize secrets management
 "$SCRIPT_DIR/manage-secrets.sh" init
 
@@ -28,14 +32,16 @@ log "Setting up secrets management for NixOS configuration..."
 
 log "Secrets management setup complete!"
 log ""
-log "Next steps:"
-log "1. Update your host configuration to enable secrets:"
-log "   modules.security.secrets.enable = true;"
+log "Configuration is now ready to build. The secrets module will:"
+log "- Install agenix system-wide when enabled"
+log "- Only load secrets that actually exist"
+log "- Show warnings for missing secrets"
 log ""
-log "2. Apply the configuration:"
+log "Next steps:"
+log "1. Apply the configuration:"
 log "   sudo nixos-rebuild switch --flake .#<hostname>"
 log ""
-log "3. Update secrets/secrets.nix with the actual public keys shown above"
+log "2. Update secrets/secrets.nix with the actual public keys shown above"
 log ""
-log "4. Create your first secret:"
+log "3. Create your first secret:"
 log "   ./scripts/manage-secrets.sh create user-password-olafkfreund"
