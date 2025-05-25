@@ -1,1 +1,23 @@
 themes/gruvbox-material-gtk/
+
+# Secrets management
+secrets/*.age
+secrets/secrets.nix
+
+# Build results
+result
+result-*
+
+# Temporary files
+.tmp/
+*.tmp
+
+# Editor files
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+Thumbs.db

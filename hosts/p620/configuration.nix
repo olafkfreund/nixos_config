@@ -2,7 +2,6 @@
   pkgs,
   lib,
   inputs,
-  pkgs-unstable,
   hostUsers,
   ...
 }: let
@@ -22,12 +21,11 @@ in {
     ./nixos/cpu.nix
     ./nixos/memory.nix
     ./nixos/load.nix
-    # ./nixos/network-stability.nix # Import the network stability module
     ./themes/stylix.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
-    # ../../modules/system-tweaks/kernel-tweaks/226GB-SYSTEM/226gb-system.nix
     ../common/hyprland.nix
+    ../../modules/security/secrets.nix
   ];
 
   # Set hostname from variables
@@ -129,6 +127,13 @@ in {
     rootless = false;
   };
 
+  # Enable secrets management
+  modules.security.secrets = {
+    enable = true;
+    hostKeys = ["/etc/ssh/ssh_host_ed25519_key"];
+    userKeys = ["/home/${vars.username}/.ssh/id_ed25519"];
+  };
+
   # Productivity tools
   programs.streamcontroller.enable = lib.mkForce true;
 
@@ -148,14 +153,14 @@ in {
   # System packages
   environment.systemPackages = [
     inputs.zen-browser.packages."${pkgs.system}".default
-    pkgs-unstable.rocmPackages.llvm.libcxx
-    pkgs-unstable.via
-    pkgs-unstable.looking-glass-client
-    pkgs-unstable.scream
+    pkgs.rocmPackages.llvm.libcxx
+    pkgs.via
+    pkgs.looking-glass-client
+    pkgs.scream
   ];
 
   # Hardware-specific configurations
-  services.udev.packages = [pkgs-unstable.via];
+  services.udev.packages = [pkgs.via];
   services.udev.extraRules = builtins.concatStringsSep "\n" [
     ''ACTION=="add", SUBSYSTEM=="video4linux", DRIVERS=="uvcvideo", RUN+="${pkgs.v4l-utils}/bin/v4l2-ctl --set-ctrl=power_line_frequency=1"''
     ''KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0660", TAG+="uaccess"''
@@ -208,7 +213,7 @@ in {
     enable = true;
     description = "Scream IVSHMEM";
     serviceConfig = {
-      ExecStart = "${pkgs-unstable.scream}/bin/scream-ivshmem-pulse /dev/shm/scream";
+      ExecStart = "${pkgs.scream}/bin/scream-ivshmem-pulse /dev/shm/scream";
       Restart = "always";
     };
     wantedBy = ["multi-user.target"];
