@@ -14,7 +14,7 @@ in {
 
   config = mkIf cfg.enable {
     services.dunst = {
-      enable = true;
+      enable = false;
 
       settings = {
         global = {

@@ -1,252 +1,230 @@
-/* Define Gruvbox colors */
+@define-color cc-bg #32302f;
+@define-color noti-border-color #32302f;
+@define-color noti-bg #3c3836;
+@define-color noti-bg-darker #3c3836;
+@define-color noti-bg-hover rgb(27, 27, 43);
+@define-color noti-bg-focus rgba(27, 27, 27, 0.6);
+@define-color text-color #f9f5d7;
+@define-color text-color-disabled #bdae93;
+@define-color bg-selected #fabd2f;
+
 * {
-  font-family: "JetBrainsMono Nerd Font";
-  font-size: 14px;
+  font-family: "CaskaydiaCove Nerd Font";
+  font-weight: bold;
+  font-size: 16px
 }
 
-/* Main container */
-.control-center {
-  background: #282828;
-  border: 1px solid #3c3836;
-  border-radius: 0px; /* Remove rounded corners */
+.control-center .notification-row:focus,
+.control-center .notification-row:hover {
+  opacity: 1;
+  border-radius: 10px;
+  background: @noti-bg-darker
 }
 
-/* Notification styles */
+.notification-row {
+  outline: none;
+  margin: 20px;
+  padding: 0;
+}
+
 .notification {
-  background: #282828;
-  border: 1px solid #282828;
-  border-radius: 0px; /* Remove rounded corners */
-  margin: 6px;
-  box-shadow: none; /* Remove shadow */
+  background: transparent;
+  margin: 0px;
+  font-size: 18px;
 }
 
 .notification-content {
-  padding: 10px;
-  background: #282828;
+  background: @cc-bg;
+  padding: 7px;
+  border-radius: 10px;
+  border: 3px solid #61825A;
+  margin: 0;
 }
 
-.notification-default-action,
+.close-button {
+  background: #d79921;
+  color: @cc-bg;
+  text-shadow: none;
+  padding: 0;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-right: 5px;
+}
+
+.close-button:hover {
+  box-shadow: none;
+  border-radius: 10px;
+  background: #fabd2f;
+  transition: all .15s ease-in-out;
+  border: none
+}
+
 .notification-action {
-  padding: 4px;
-  margin: 0;
-  border-radius: 0px; /* Remove rounded corners */
-  background: #282828; /* Change from transparent to solid */
-  border: none;
   color: #ebdbb2;
+  border: 2px solid #85796f;
+  border-top: none;
+  border-radius: 0px;
+  background: #32302F;
 }
 
 .notification-default-action:hover,
 .notification-action:hover {
-  background: #3c3836;
-}
-
-.notification button:hover {
-  background: #3c3836;
-}
-
-.close-button {
-  background: #cc241d;
-  color: #fbf1c7;
-  text-shadow: none;
-  padding: 0 4px;
-  border-radius: 0px; /* Remove rounded corners */
-  margin: 4px;
-  box-shadow: none;
-  border: none;
-}
-
-.close-button:hover {
-  background: #fb4934;
-}
-
-/* Widgets styling */
-.widget-buttons-grid {
-  font-size: 20px;
-  background: #282828; /* Change from transparent to solid */
-  padding: 8px;
-}
-
-.widget-buttons-grid > flowbox > flowboxchild > button {
-  background: #3c3836;
   color: #ebdbb2;
-  border-radius: 0px; /* Remove rounded corners */
-  padding: 8px 16px;
-  margin: 4px;
-  border: 1px solid #282828;
+  background: #32302F;
 }
 
-.widget-buttons-grid > flowbox > flowboxchild > button:hover {
-  background: #504945;
-  color: #b8bb26;
-}
-
-.widget-dnd {
-  background: #282828; /* Change from transparent to solid */
-  padding: 8px;
-  font-size: 16px;
-  color: #ebdbb2;
-  border-radius: 8px; /* Add rounded corners back to widget-dnd */
-}
-
-.widget-dnd > switch {
-  background: #98971a;
-  border-radius: 16px; /* Keep switch rounded */
-  border: 1px solid #98971a;
-}
-
-.widget-dnd > switch:checked {
-  background: #cc241d;
-}
-
-.widget-dnd > switch:hover {
-  background: #b8bb26;
-}
-
-.widget-dnd > switch:checked:hover {
-  background: #fb4934;
-}
-
-.widget-title {
-  color: #ebdbb2;
-  font-size: 16px;
-  padding: 8px;
-  background: #282828;
-  border-bottom: 1px solid #282828;
-}
-
-.widget-title > button {
-  background: #689d6a;
-  color: #282828;
-  border-radius: 0px; /* Remove rounded corners */
-  padding: 4px 8px;
-  margin: 0 4px;
-  border: none;
-  font-size: 16px;
-}
-
-.widget-title > button:hover {
-  background: #8ec07c;
-}
-
-/* Notifications list */
-.notifications-list {
-  background: #282828;
-  padding: 8px;
-}
-
-.notification-row {
-  padding: 0;
-}
-
-.notification-row:hover {
-  background: #3c3836;
-}
-
-/* Text styling */
 .summary {
+  padding-top: 7px;
+  font-size: 16px;
   color: #ebdbb2;
-  font-size: 16px;  /* Increased from 14px */
-  font-weight: bold;
 }
 
 .time {
-  color: #928374;
-  font-size: 14px;  /* Increased from 12px */
+  font-size: 14px;
+  color: #d79921;
+  margin-right: 24px
 }
 
 .body {
-  color: #d5c4a1;
-  font-size: 15px;  /* Increased from 13px */
-}
-
-/* Scrollbar styling */
-scrollbar {
-  background: #1d2021;
-  border-radius: 0px; /* Remove rounded corners */
-  min-width: 8px;
-}
-
-scrollbar slider {
-  background: #928374;
-  border-radius: 0px; /* Remove rounded corners */
-  min-width: 8px;
-}
-
-scrollbar slider:hover {
-  background: #a89984;
-}
-
-/* MPRIS Widget Styling */
-.widget-mpris {
-  background: #282828;
-  padding: 8px;
-  margin: 6px;
-  border-radius: 0px;
-  border: none;
-}
-
-/* Album art styling */
-.widget-mpris-album-art {
-  min-width: 110px;
-  min-height: 110px;
-  margin-right: 8px;
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  border: 1px solid #282828;
-  border-radius: 0px; /* Remove rounded corners */
-  box-shadow: none; /* Remove shadow */
-  padding: 0;
-  margin-bottom: 4px;
-}
-
-/* Fix the album art container specifically */
-box.vertical box.horizontal widget-mpris-album-art {
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center center;
-}
-
-/* Player controls */
-.widget-mpris-player-name {
-  font-weight: bold;
+  font-size: 14px;
   color: #ebdbb2;
+}
+
+.control-center {
+  background: @cc-bg;
+  border: 2px solid #85796f;
+  border-radius: 10px;
+}
+
+.control-center-list {
+  background: transparent
+}
+
+.control-center-list-placeholder {
+  opacity: .5
+}
+
+.floating-notifications {
+  background: transparent
+}
+
+/* .blank-window { */
+/*   background: alpha(black, 0.1) */
+/* } */
+
+.widget-title {
+  color: #f9f5d7;
+  background: @noti-bg-darker;
+  padding: 5px 10px;
+  margin: 10px 10px 5px 10px;
+  font-size: 1.5rem;
+  border-radius: 5px;
+}
+
+.widget-title>button {
+  font-size: 1rem;
+  color: @text-color;
+  text-shadow: none;
+  background: @noti-bg;
+  box-shadow: none;
+  border-radius: 5px;
+}
+
+.widget-title>button:hover {
+  background: #d79921;
+  color: @cc-bg;
+}
+
+.widget-dnd {
+  background: @noti-bg-darker;
+  padding: 5px 10px;
+  margin: 5px 10px 10px 10px;
+  border-radius: 5px;
+  font-size: large;
+  color: #f2e5bc;
+}
+
+.widget-dnd>switch {
+  border-radius: 4px;
+  background: #665c54;
+}
+
+.widget-dnd>switch:checked {
+  background: #d79921;
+  border: 1px solid #d79921;
+}
+
+.widget-dnd>switch slider {
+  background: @cc-bg;
+  border-radius: 5px
+}
+
+.widget-dnd>switch:checked slider {
+  background: @cc-bg;
+  border-radius: 5px
+}
+
+.widget-label {
+  margin: 10px 10px 5px 10px;
+}
+
+.widget-label>label {
+  font-size: 1rem;
+  color: @text-color;
+}
+
+.widget-mpris {
+  color: @text-color;
+  background: @noti-bg-darker;
+  padding: 5px 10px 0px 0px;
+  margin: 5px 10px 5px 10px;
+  border-radius: 0px;
+}
+
+.widget-mpris > box > button {
+  border-radius: 5px;
+}
+
+.widget-mpris-player {
+  padding: 5px 10px;
+  margin: 10px
 }
 
 .widget-mpris-title {
-  font-weight: bold;
-  color: #ebdbb2;
-  font-size: 15px;
+  font-weight: 700;
+  font-size: 1.25rem
 }
 
-.widget-mpris-artist {
-  color: #d5c4a1;
+.widget-mpris-subtitle {
+  font-size: 1.1rem
 }
 
-/* Control button styling */
-.widget-mpris-button {
-  background: #3c3836;
-  border-radius: 0px; /* Remove rounded corners */
-  padding: 4px;
-  margin: 2px;
-  color: #ebdbb2;
+.widget-buttons-grid {
+  font-size: x-large;
+  padding: 5px;
+  margin: 5px 10px 10px 10px;
+  border-radius: 5px;
+  background: @noti-bg-darker;
+}
+
+.widget-buttons-grid>flowbox>flowboxchild>button {
+  margin: 3px;
+  background: @cc-bg;
+  border-radius: 5px;
+  color: @text-color
+}
+
+.widget-buttons-grid>flowbox>flowboxchild>button:hover {
+  background: #d79921;
+  color: @cc-bg;
+}
+
+.widget-menubar>box>.menu-button-bar>button {
   border: none;
+  background: transparent
 }
 
-.widget-mpris-button:hover {
-  background: #504945;
-}
-
-/* Position bar */
-.widget-mpris-position {
-  margin-top: 4px;
-  background: #282828;
-  min-height: 8px;
-  border-radius: 0px; /* Remove rounded corners */
-}
-
-.widget-mpris-position-bar {
-  background: #98971a;
-  border-radius: 0px; /* Remove rounded corners */
-  min-height: 8px;
+.topbar-buttons>button {
+  border: none;
+  background: transparent
 }
