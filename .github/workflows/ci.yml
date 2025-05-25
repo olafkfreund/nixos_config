@@ -1,0 +1,166 @@
+name: NixOS Configuration CI
+
+on:
+#   push:
+#     branches: [ main, develop ]
+#   pull_request:
+#     branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  check-configurations:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        host: [p620, razer, p510, dex5550]
+      fail-fast: false
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Install Nix
+      uses: cachix/install-nix-action@v23
+      with:
+        nix_path: nixpkgs=channel:nixos-unstable
+        extra_nix_config: |
+          experimental-features = nix-command flakes
+          accept-flake-config = true
+    
+    - name: Setup Cachix
+      uses: cachix/cachix-action@v12
+      with:
+        name: nix-community
+        # authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}' # Optional
+    
+    - name: Check flake
+      run: nix flake check --show-trace
+    
+    - name: Build ${{ matrix.host }} configuration
+      run: |
+        nix build .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel \
+          --show-trace --print-build-logs
+    
+    - name: Check Home Manager configurations
+      run: |
+        if nix eval .#homeConfigurations.olafkfreund@${{ matrix.host }} 2>/dev/null; then
+          nix build .#homeConfigurations.olafkfreund@${{ matrix.host }}.activationPackage \
+            --show-trace --print-build-logs
+        else
+          echo "⚠️ No Home Manager configuration for olafkfreund@${{ matrix.host }}"
+        fi
+
+  security-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Install Nix
+      uses: cachix/install-nix-action@v23
+      with:
+        extra_nix_config: |
+          experimental-features = nix-command flakes
+          accept-flake-config = true
+    
+    - name: Validate secrets structure
+      run: |
+        # Check that secrets.nix is properly formatted
+        if [ -f "secrets.nix" ]; then
+          echo "🔍 Validating secrets configuration..."
+          if nix eval .#nixosConfigurations.p620.config.age.secrets --json > /dev/null 2>&1; then
+            echo "✅ Secrets configuration is valid"
+          else
+            echo "❌ Secrets configuration has errors"
+            nix eval .#nixosConfigurations.p620.config.age.secrets --json
+            exit 1
+          fi
+        else
+          echo "⚠️ No secrets.nix found, skipping secrets validation"
+        fi
+    
+    - name: Security scan
+      run: |
+        echo "🔍 Scanning for security issues..."
+        
+        # Check for hardcoded passwords
+        if grep -r "password.*=" . --include="*.nix" --exclude-dir=".git" | grep -v "hashedPassword\|passwordFile\|secrets\|age\.secrets"; then
+          echo "❌ Potential hardcoded passwords found"
+          exit 1
+        else
+          echo "✅ No hardcoded passwords found"
+        fi
+        
+        # Check for hardcoded API keys
+        if grep -r "api.*key.*=" . --include="*.nix" --exclude-dir=".git" | grep -v "secretFile\|secrets\|age\.secrets"; then
+          echo "❌ Potential hardcoded API keys found"
+          exit 1
+        else
+          echo "✅ No hardcoded API keys found"
+        fi
+        
+        # Check for TODO/FIXME items
+        todo_count=$(grep -r "TODO\|FIXME" . --include="*.nix" --exclude-dir=".git" | wc -l)
+        echo "📝 Found $todo_count TODO/FIXME items"
+
+  documentation-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Check documentation completeness
+      run: |
+        echo "📚 Checking documentation..."
+        
+        # Check if README exists and has minimum content
+        if [ -f "README.md" ] && [ $(wc -l < README.md) -gt 50 ]; then
+          echo "✅ README.md is present and substantial"
+        else
+          echo "⚠️ README.md is missing or too short"
+        fi
+        
+        # Check for module documentation
+        module_count=$(find modules/ -name "*.nix" 2>/dev/null | wc -l)
+        doc_count=$(find modules/ -name "README.md" -o -name "*.md" 2>/dev/null | wc -l)
+        echo "📊 Found $module_count modules and $doc_count documentation files"
+        
+        # Check project plan exists
+        if [ -f "PROJECT_PLAN.md" ]; then
+          echo "✅ Project plan exists"
+        else
+          echo "⚠️ PROJECT_PLAN.md missing"
+        fi
+        
+        # Check secrets documentation
+        if [ -f "docs/SECRETS_MANAGEMENT.md" ]; then
+          echo "✅ Secrets management documentation exists"
+        else
+          echo "⚠️ Secrets management documentation missing"
+        fi
+
+  lint-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Install Nix
+      uses: cachix/install-nix-action@v23
+      with:
+        extra_nix_config: |
+          experimental-features = nix-command flakes
+    
+    - name: Nix formatting check
+      run: |
+        echo "🔍 Checking Nix code formatting..."
+        
+        # Check if nixpkgs-fmt is available and run it
+        if command -v nixpkgs-fmt >/dev/null 2>&1; then
+          find . -name "*.nix" -not -path "./.git/*" | xargs nixpkgs-fmt --check
+        else
+          echo "⚠️ nixpkgs-fmt not available, installing..."
+          nix shell nixpkgs#nixpkgs-fmt -c bash -c '
+            find . -name "*.nix" -not -path "./.git/*" | head -10 | xargs nixpkgs-fmt --check
+          '
+        fi
