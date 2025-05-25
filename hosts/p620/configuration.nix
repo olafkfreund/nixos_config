@@ -3,6 +3,7 @@
   lib,
   inputs,
   pkgs-unstable,
+  hostUsers,
   ...
 }: let
   vars = import ./variables.nix;
@@ -120,6 +121,13 @@ in {
 
   # Enable Hyprland system configuration
   modules.desktop.hyprland-uwsm.enable = true;
+
+  # Docker configuration
+  modules.containers.docker = {
+    enable = true;
+    users = hostUsers; # Use all users for this host
+    rootless = false;
+  };
 
   # Productivity tools
   programs.streamcontroller.enable = lib.mkForce true;

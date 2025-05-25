@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  hostUsers,
   ...
 }: let
   vars = import ./variables.nix;
@@ -137,6 +138,13 @@ in {
     group = "root";
     capabilities = "cap_sys_admin+p";
     source = "${pkgs.sunshine}/bin/sunshine";
+  };
+
+  # Docker configuration
+  modules.containers.docker = {
+    enable = true;
+    users = hostUsers; # Use all users for this host
+    rootless = false;
   };
 
   # User-specific configuration from variables

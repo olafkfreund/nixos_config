@@ -3,12 +3,13 @@
   pkgs-unstable,
   lib,
   inputs,
+  hostUsers,
   ...
 }: let
   vars = import ./variables.nix;
 in {
   imports = [
-    ./nixos/hardware-configuration.nix
+    ./nixos/hardware-configuration.nix # Docker configuration
     ./nixos/screens.nix
     ./nixos/power.nix
     ./nixos/boot.nix
@@ -134,6 +135,13 @@ in {
       ];
       videoDrivers = [vars.gpu];
     };
+  };
+
+  # Docker configuration
+  modules.containers.docker = {
+    enable = true;
+    users = hostUsers; # Use all users for this host
+    rootless = false;
   };
 
   environment.systemPackages = [

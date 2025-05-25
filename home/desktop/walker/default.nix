@@ -134,12 +134,12 @@ in {
             commands = [
               {
                 name = "Rebuild NixOS";
-                cmd = "sudo nixos-rebuild switch --flake /home/olafkfreund/.config/nixos#";
+                cmd = "sudo nixos-rebuild switch --flake /home/${config.home.username}/.config/nixos#";
                 terminal = true;
               }
               {
                 name = "Edit Walker Config";
-                cmd = "nvim /home/olafkfreund/.config/nixos/home/desktop/walker/default.nix";
+                cmd = "nvim /home/${config.home.username}/.config/nixos/home/desktop/walker/default.nix";
                 terminal = true;
               }
             ];

@@ -130,7 +130,33 @@
     nixvim,
     ...
   } @ inputs: let
-    username = "olafkfreund";
+    # Define users per host
+    hostUsers = {
+      p620 = ["olafkfreund"];
+      razer = ["olafkfreund"];
+      p510 = ["olafkfreund"];
+      dex5550 = ["olafkfreund"];
+    };
+
+    # Get primary user (first in the list) for backward compatibility
+    getPrimaryUser = host: builtins.head (hostUsers.${host} or ["olafkfreund"]);
+
+    # Get all users for a host
+    getHostUsers = host: hostUsers.${host} or ["olafkfreund"];
+
+    # Function to create Home Manager configuration
+    mkHomeConfiguration = system:
+      home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.${system};
+        extraSpecialArgs = {
+          inherit inputs;
+          username = "olafkfreund";
+        };
+        modules = [
+          ./Users/common/base-home.nix
+          # Additional modules can be added here
+        ];
+      };
 
     # Helper function for package imports
     mkPkgs = pkgs: {
@@ -151,12 +177,17 @@
       })
     ];
 
-    makeNixosSystem = host: {
+    makeNixosSystem = host: let
+      primaryUser = getPrimaryUser host;
+      allUsers = getHostUsers host;
+    in {
       system = "x86_64-linux";
       specialArgs = {
         pkgs-stable = import nixpkgs-stable (mkPkgs nixpkgs-stable);
         pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable);
-        inherit inputs username host;
+        inherit inputs host;
+        username = primaryUser; # Primary user for backward compatibility
+        hostUsers = allUsers; # All users for this host
       };
       modules = [
         {nixpkgs.overlays = overlays;}
@@ -202,8 +233,16 @@
                 nixvim
                 host
                 ;
+              username = primaryUser;
+              hostUsers = allUsers;
             };
-            users.${username} = import ./Users/${username}/${host}_home.nix;
+
+            # Configure home-manager for all users on this host
+            users = builtins.listToAttrs (map (user: {
+                name = user;
+                value = import ./Users/${user}/${host}_home.nix;
+              })
+              allUsers);
             sharedModules = [
               inputs.nixvim.homeManagerModules.nixvim
               {

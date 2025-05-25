@@ -2,6 +2,7 @@
   pkgs,
   inputs,
   lib,
+  hostUsers,
   ...
 }: let
   vars = import ./variables.nix;
@@ -9,7 +10,7 @@ in {
   imports = [
     # inputs.microvm.nixosModules.host
 
-    ./nixos/hardware-configuration.nix
+    ./nixos/hardware-configuration.nix # Docker configuration
     ./nixos/power.nix
     ./nixos/boot.nix
     ./nixos/nvidia.nix
@@ -157,6 +158,13 @@ in {
     group = "root";
     capabilities = "cap_sys_admin+p";
     source = "${pkgs.sunshine}/bin/sunshine";
+  };
+
+  # Docker configuration
+  modules.containers.docker = {
+    enable = true;
+    users = hostUsers; # Use all users for this host
+    rootless = false;
   };
 
   # Network-specific overrides that go beyond the network profile

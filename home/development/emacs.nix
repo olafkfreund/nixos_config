@@ -1,6 +1,7 @@
 {
   lib,
   pkgs,
+  config,
   ...
 }: {
   programs.emacs = {
@@ -315,14 +316,14 @@
         (setq projectile-completion-system 'ivy)
 
         ;; Add NixOS config directory as a known project
-        (when (file-directory-p "/home/olafkfreund/.config/nixos")
-          (setq projectile-project-search-path '("/home/olafkfreund/.config/nixos"))
+        (when (file-directory-p "/home/${config.home.username}/.config/nixos")
+          (setq projectile-project-search-path '("/home/${config.home.username}/.config/nixos"))
 
           ;; Add custom function to open NixOS config quickly
           (defun open-nixos-config ()
             "Open NixOS configuration directory in projectile"
             (interactive)
-            (projectile-switch-project-by-name "/home/olafkfreund/.config/nixos"))
+            (projectile-switch-project-by-name "/home/${config.home.username}/.config/nixos"))
 
           ;; Add custom project type for NixOS configurations
           (projectile-register-project-type 'nixos

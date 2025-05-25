@@ -72,10 +72,7 @@ in {
           {command = "polkit-agent-helper-1";}
           {command = "swww-daemon";}
         ];
-        # output = {
-        #   "*".bg = "/home/olafkfreund/Pictures/wallpapers/gruvbox/hypr/gruv-portal-cake.png fill";
-        #   "*".scale = "1";
-        # };
+
         assigns = {
           "13" = [{app_id = "Slack";}];
           "14" = [{app_id = "thunderbird";}];

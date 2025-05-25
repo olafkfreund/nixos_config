@@ -7,15 +7,11 @@
   services.greetd = let
     session_hypr = {
       command = "${lib.getExe config.programs.hyprland.package}";
-      user = "olafkfreund";
+      user = "${config.home.username}";
     };
     session_sway = {
       command = "${lib.getExe config.programs.sway.package}";
-      user = "olafkfreund";
-    };
-    session_dwm = {
-      command = "startx $HOME/.config/chadwm/scripts/run.sh";
-      user = "olafkfreund";
+      user = "${config.home.username}";
     };
   in {
     enable = true;

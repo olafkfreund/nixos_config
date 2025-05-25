@@ -2,11 +2,12 @@
   inputs,
   lib,
   pkgs ? {},
+  username ? "olafkfreund", # Default fallback
   ...
 }: {
   # Common configuration for all users
-  home.username = "olafkfreund";
-  home.homeDirectory = "/home/olafkfreund";
+  home.username = username;
+  home.homeDirectory = "/home/${username}";
   home.sessionPath = [
     "$HOME/.local/bin"
   ];
@@ -25,4 +26,36 @@
 
   # Set default Nix colorscheme
   colorScheme = inputs.nix-colors.colorSchemes.gruvbox-dark-medium;
+
+  # Common packages for all users
+  home.packages = with pkgs; [
+    # Essential utilities
+    coreutils
+    findutils
+    which
+    file
+
+    # Network tools
+    wget
+    curl
+
+    # Text processing
+    less
+    nano
+
+    # Archive tools
+    unzip
+    zip
+    gnutar
+    gzip
+  ];
+
+  # Common programs for all users
+  programs = {
+    # Enable direnv for development environments
+    direnv = {
+      enable = true;
+      nix-direnv.enable = true;
+    };
+  };
 }

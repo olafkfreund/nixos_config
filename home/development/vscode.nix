@@ -126,10 +126,10 @@ in {
                 "target" = ["all"];
                 "offline" = true;
                 "nixos" = {
-                  "expr" = "(builtins.getFlake (\"git+file://\" + toString /home/olafkfreund/.config/nixos)).nixosConfigurations.p620.options";
+                  "expr" = "(builtins.getFlake (\"git+file://\" + toString /home/${config.home.username}/.config/nixos)).nixosConfigurations.p620.options";
                 };
                 "home_manager" = {
-                  "expr" = "(builtins.getFlake (\"git+file://\" + toString /home/olafkfreund/.config/nixos)).homeConfigurations.\"olafkfreund@p620\".options";
+                  "expr" = "(builtins.getFlake (\"git+file://\" + toString /home/${config.home.username}/.config/nixos)).homeConfigurations.\"${config.home.username}@p620\".options";
                 };
               };
               "diagnostics" = {
