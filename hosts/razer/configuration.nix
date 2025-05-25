@@ -160,6 +160,13 @@ in {
       NH_FLAKE = vars.paths.flakeDir;
     };
 
+  # Enable secrets management
+  modules.security.secrets = {
+    enable = true;
+    hostKeys = ["/etc/ssh/ssh_host_ed25519_key"];
+    userKeys = ["/home/${vars.username}/.ssh/id_ed25519"];
+  };
+
   users.users = lib.genAttrs hostUsers (username: {
     isNormalUser = true;
     description = "User ${username}";
