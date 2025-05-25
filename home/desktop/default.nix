@@ -1,15 +1,15 @@
 {pkgs, ...}: {
   imports = [
-    ./plasma/plasma.nix
+    ./plasma/default.nix
     ./ags/default.nix
     ./dunst/default.nix
-    ./hyprland/hyprland.nix
+    ./hyprland/default.nix
     ./swaylock/default.nix
     # ./sway/default.nix
     ./waybar/default.nix
     ./com.nix
     ./terminals/default.nix
-    ./rofi/rofi.nix
+    ./rofi/default.nix
     ./theme/default.nix
     ./neofetch/default.nix
     ./gaming/default.nix
