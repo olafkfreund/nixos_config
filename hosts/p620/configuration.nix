@@ -28,6 +28,7 @@ in {
     ../common/hyprland.nix
     ../../modules/security/secrets.nix
     ../../modules/containers/docker.nix
+    ../../modules/scrcpy/default.nix
   ];
 
   # Set hostname from variables
@@ -101,6 +102,8 @@ in {
       droidcam = true;
     };
   };
+
+  scrcpyWifi.enable = true;
 
   # Enable secure DNS with DNS over TLS
   services.secure-dns = {
