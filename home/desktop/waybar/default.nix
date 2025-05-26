@@ -183,7 +183,7 @@
           tooltip = "true";
           tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
           format-alt = "  {:%d/%m}";
-          on-click = "foot -e 'peaclock'";
+          on-click = "weather-popup";
           on-left-click = "foot -e 'zsh -c thunderbird -calendar'";
         };
 

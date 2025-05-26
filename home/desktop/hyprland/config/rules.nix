@@ -223,5 +223,37 @@
     # =============================================================================
     # Fullscreen windows
     windowrule = bordercolor rgba(FF0050FF),fullscreen:1
+
+    # =============================================================================
+    # WEATHER POPUP RULES
+    # =============================================================================
+    # Core window behavior
+    windowrulev2 = float, title:^(Weather - London)$
+    windowrulev2 = center, title:^(Weather - London)$
+    windowrulev2 = size 900 700, title:^(Weather - London)$
+
+    # Visual enhancements
+    windowrulev2 = opacity 0.95, title:^(Weather - London)$
+    windowrulev2 = rounding 10, title:^(Weather - London)$
+
+    # Behavior - choose ONE workspace strategy
+    # Option 1: Keep on current workspace with pin
+    windowrulev2 = pin, title:^(Weather - London)$
+    windowrulev2 = stayfocused, title:^(Weather - London)$
+    windowrulev2 = dimaround, title:^(Weather - London)$
+
+    # Option 2: Use special workspace (comment out pin/stayfocused if using this)
+    # windowrulev2 = workspace special:weather, title:^(Weather - London)$
+
+    # Animation
+    windowrulev2 = animation slide, title:^(Weather - London)$
+
+    # Additional class-based rules for reliability
+    windowrulev2 = float, class:^(weather-popup)$
+    windowrulev2 = center, class:^(weather-popup)$
+    windowrulev2 = size 900 700, class:^(weather-popup)$
+    windowrulev2 = opacity 0.95, class:^(weather-popup)$
+    windowrulev2 = rounding 10, class:^(weather-popup)$
+    windowrulev2 = pin, class:^(weather-popup)$
   '';
 }

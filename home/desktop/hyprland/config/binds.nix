@@ -43,6 +43,8 @@
     bind = $mainMod, T, togglespecialworkspace, scratchpad
     bind = $mainMod, D, togglespecialworkspace, discord
     bind = Control_SHIFT, M, togglespecialworkspace, spotify
+    bind = $mainMod SHIFT, W, exec, weather-popup
+    bind = $mainMod, Escape, killactive, title:^(Weather - London)$
 
     # Moving windows to workspaces
     bind = $mainMod SHIFT, 1, movetoworkspace, 1
@@ -65,7 +67,7 @@
     bind = $mainMod SHIFT, c, centerwindow, none
 
     # Window management
-    bind = $mainMod, W, killactive
+    bind = $mainMod, Q, killactive
     bind = $mainMod, F, fullscreen, 1
     bind = $mainMod, F, togglefloating
     bind = $mainMod, P, pin

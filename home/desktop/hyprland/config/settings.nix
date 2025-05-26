@@ -74,6 +74,7 @@
       bezier = overshot, 0.03, 0.5, 0.1, 1.03
       bezier = hyprnostretch, 0.03, 0.5, 0.1, 1.0
       bezier = snap, 0, 0.85, 0.15, 1.0 # New fast bezier for notifications
+      bezier = weather, 0.25, 0.1, 0.25, 1
 
       # Animation assignments with faster fade for notifications
       animation = windows, 1, 25, md3_decel, slide
@@ -83,6 +84,7 @@
 
       # Special animation just for notifications
       animation = windowsOut, 1, 5, snap, slide # Makes closing windows (like notifications) faster
+      animation = specialWorkspace, 1, 6, weather, slidevert
     }
 
     # Dwindle layout settings

@@ -1,4 +1,8 @@
-{ pkgs, inputs, ... }: {
+{
+  pkgs,
+  inputs,
+  ...
+}: {
   imports = [
     ./browsers/default.nix
     ./desktop/default.nix
@@ -13,5 +17,6 @@
 
   home.packages = [
     inputs.self.packages.${pkgs.system}.claude-code
+    (pkgs.callPackage ../pkgs/weather-popup/default.nix {})
   ];
 }
