@@ -36,7 +36,7 @@
     bind = $mainMod, A, exec, [float;notitle;]kitty --class album-art --hold mpris-album-art
 
     # Special workspaces
-    bind = $mainMod 1, P, togglespecialworkspace, magic
+    bind = $mainMod, S, togglespecialworkspace, magic
     bind = $mainMod, S, togglespecialworkspace, slack
     bind = $mainMod, B, togglespecialworkspace, chrome
     bind = $mainMod, M, togglespecialworkspace, mail
@@ -70,7 +70,7 @@
     bind = $mainMod, Q, killactive
     bind = $mainMod, F, fullscreen, 1
     bind = $mainMod, F, togglefloating
-    bind = $mainMod, P, pin
+    bind = $mainMod ALT, P, pin
     bind = $mainMod, Y, exec, hyprctl keyword general:layout "dwindle"
     bind = $mainMod, U, exec, hyprctl keyword general:layout "master"
 
