@@ -2,7 +2,7 @@
   config,
   lib,
   pkgs,
-  pkgs-unstable,
+  # pkgs-unstable,
   ...
 }:
 with lib; let
@@ -32,7 +32,7 @@ in {
 
     programs.vscode = {
       enable = true;
-      package = pkgs-unstable.vscode;
+      package = pkgs.vscode;
 
       # Use the new profiles structure
       profiles.default = {
@@ -52,7 +52,7 @@ in {
           vscode-extensions.ms-vscode-remote.remote-containers
           vscode-extensions.ms-vscode-remote.remote-ssh
           vscode-extensions.ms-kubernetes-tools.vscode-kubernetes-tools
-          vscode-extensions.ms-azuretools.vscode-docker
+          # vscode-extensions.ms-azuretools.vscode-docker
           vscode-extensions.mads-hartmann.bash-ide-vscode
           vscode-extensions.jdinhlife.gruvbox
           vscode-extensions.hediet.vscode-drawio
