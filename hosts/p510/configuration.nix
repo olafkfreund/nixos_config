@@ -103,16 +103,6 @@ in {
     };
   };
 
-  # Enable secure DNS with DNS over TLS
-  services.secure-dns = {
-    enable = true;
-    dnssec = "true";
-    fallbackProviders = [
-      "1.1.1.1#cloudflare-dns.com" # Cloudflare DNS
-      "8.8.8.8#dns.google" # Google DNS
-    ];
-  };
-
   # Specific service configurations
   programs.streamdeck-ui = {
     enable = true;

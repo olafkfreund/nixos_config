@@ -39,5 +39,5 @@
   time.timeZone = "UTC";
 
   # Specify the system state version
-  system.stateVersion = "23.05";
+  system.stateVersion = "25.05";
 }

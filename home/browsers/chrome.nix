@@ -27,14 +27,36 @@ in {
       enable = true;
       package = pkgs.google-chrome;
       commandLineArgs = [
-        "--enable-features=UseOzonePlatform"
+        # Wayland support
+        "--enable-features=UseOzonePlatform,WaylandWindowDecorations"
         "--ozone-platform=wayland"
         "--enable-wayland-ime"
+
+        # Performance and stability
         "--disable-dev-shm-usage"
         "--force-device-scale-factor=1"
-        # Additional flags to help with GTK issues
-        "--gtk-version=4"
         "--no-sandbox"
+
+        # GTK and theming fixes
+        "--gtk-version=4"
+        "--force-dark-mode=false"
+
+        # Hardware acceleration
+        "--enable-hardware-acceleration"
+        "--ignore-gpu-blocklist"
+
+        # Wayland-specific fixes
+        "--enable-features=VaapiVideoDecoder"
+        "--disable-gpu-sandbox"
+
+        # Fix registration errors
+        "--disable-background-mode"
+        "--disable-background-timer-throttling"
+
+        # Reduce console noise
+        "--disable-logging"
+        "--silent"
+        "--log-level=3"
       ];
     };
   };
