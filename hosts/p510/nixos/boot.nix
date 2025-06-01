@@ -34,12 +34,12 @@
   # CPU Power Management
   boot.extraModprobeConfig = ''
     options intel_pstate no_hwp=1                # Disable hardware power management (better for workstation)
-    options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
+    # options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
   '';
 
   # Multi-core optimization
   boot.kernelModules = [
-    "v4l2loopback"
+    # "v4l2loopback"
     "kvm-intel" # Optimized KVM for Intel CPUs
     "intel_rapl" # Intel power monitoring
   ];
@@ -51,10 +51,10 @@
     "xhci_pci" # USB 3.0 support
   ];
 
-  boot.extraModulePackages = with config.boot.kernelPackages; [
-    v4l2loopback
-    # intel-thermald # Thermal management for Intel CPUs
-  ];
+  # boot.extraModulePackages = with config.boot.kernelPackages; [
+  #   v4l2loopback
+  #   # intel-thermald # Thermal management for Intel CPUs
+  # ];
 
   # Enable microcode updates
   hardware.cpu.intel.updateMicrocode = true;
