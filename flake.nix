@@ -144,20 +144,6 @@
     # Get all users for a host
     getHostUsers = host: hostUsers.${host} or ["olafkfreund"];
 
-    # Function to create Home Manager configuration
-    mkHomeConfiguration = system:
-      home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.${system};
-        extraSpecialArgs = {
-          inherit inputs;
-          username = "olafkfreund";
-        };
-        modules = [
-          ./Users/common/base-home.nix
-          # Additional modules can be added here
-        ];
-      };
-
     # Helper function for package imports
     mkPkgs = pkgs: {
       system = "x86_64-linux";

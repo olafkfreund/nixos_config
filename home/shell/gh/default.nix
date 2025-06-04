@@ -4,15 +4,15 @@
   config,
   lib,
   ...
-}: 
-with lib; let 
+}:
+with lib; let
   cfg = config.cli.versioncontrol.gh;
 in {
   options.cli.versioncontrol.gh = {
     enable = mkEnableOption {
       default = false;
       description = "Enable GH cli";
-     };
+    };
   };
   config = mkIf cfg.enable {
     programs.gh = {
@@ -21,7 +21,7 @@ in {
         gh-dash
         gh-markdown-preview
         gh-notify
-        github-copilot-cli # github copilot cli
+        gh-copilot # github copilot cli
         github-desktop # github desktop
         gh # github cli
         octofetch # github repository summary on your terminal

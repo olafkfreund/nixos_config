@@ -181,8 +181,8 @@
 
           # Create restic repository if it doesn't exist
           export RESTIC_REPOSITORY="${config.modules.system.backup.destinations.local.path}"
-          ${lib.optionalString (config.modules.system.backup.destinations.remote.passwordFile != null) ''
-            export RESTIC_PASSWORD_FILE="${config.modules.system.backup.destinations.remote.passwordFile}"
+          ${lib.optionalString (config.modules.system.backup.destinations.remote.hashedPasswordFile != null) ''
+            export RESTIC_PASSWORD_FILE="${config.modules.system.backup.destinations.remote.hashedPasswordFile}"
           ''}
 
           if ! restic snapshots >/dev/null 2>&1; then

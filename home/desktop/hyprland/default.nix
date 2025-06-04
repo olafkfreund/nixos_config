@@ -36,7 +36,6 @@
     pkgs.hypridle
     pkgs.python312Packages.requests
     pkgs.betterlockscreen
-    pkgs.watershot
     pkgs.xdg-utils
     pkgs.glib
     pkgs.hyprkeys

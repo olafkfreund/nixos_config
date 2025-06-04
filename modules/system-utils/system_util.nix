@@ -97,6 +97,7 @@
     qflipper
     chatterino2
     twitch-tui
+    deploy-rs
     inputs.iwmenu.packages.${pkgs.system}.default
     inputs.bzmenu.packages.${pkgs.system}.default
   ];
