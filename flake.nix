@@ -102,6 +102,7 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixai.url = "github:olafkfreund/nix-ai-help";
   };
 
   outputs = {
@@ -110,6 +111,7 @@
     nixpkgs-stable,
     nixpkgs-unstable,
     nur,
+    nixai,
     agenix,
     razer-laptop-control,
     nixpkgs-f2k,
@@ -187,6 +189,7 @@
         nix-index-database.nixosModules.nix-index
         ./home/shell/zellij/zjstatus.nix
         inputs.nixvim.nixosModules.nixvim
+        nixai.nixosModules.default
         {
           home-manager = {
             useGlobalPkgs = true;
@@ -231,6 +234,7 @@
               allUsers);
             sharedModules = [
               inputs.nixvim.homeManagerModules.nixvim
+              nixai.homeManagerModules.default
               {
                 stylix.targets = builtins.listToAttrs (map (name: {
                     inherit name;

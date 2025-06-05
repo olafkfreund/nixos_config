@@ -30,6 +30,11 @@ in {
     ../../modules/containers/docker.nix
     ../../modules/scrcpy/default.nix
   ];
+  #Nixai
+  services.nixai = {
+    enable = true;
+    mcp.enable = true;
+  };
 
   # Set hostname from variables
   networking.hostName = vars.hostName;

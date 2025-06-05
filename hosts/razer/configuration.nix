@@ -33,6 +33,12 @@ in {
   # Set hostname from variables
   networking.hostName = vars.hostName;
 
+  #Nixai
+  services.nixai = {
+    enable = true;
+    mcp.enable = true;
+  };
+
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "desktop";
 
