@@ -258,6 +258,7 @@ in {
           "window.customTitleBarVisibility" = "auto";
           "window.nativeTabs" = false; # Native tabs don't work well with Wayland
           "window.nativeFullScreen" = true;
+          "editor.renderWhitespace" = "all";
           "editor.smoothScrolling" = true;
           "workbench.list.smoothScrolling" = true;
           "terminal.integrated.gpuAcceleration" = "on";
