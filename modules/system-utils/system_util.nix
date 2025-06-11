@@ -98,6 +98,7 @@
     chatterino2
     twitch-tui
     deploy-rs
+    mkchromecast
     inputs.iwmenu.packages.${pkgs.system}.default
     inputs.bzmenu.packages.${pkgs.system}.default
   ];

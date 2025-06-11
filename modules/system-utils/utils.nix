@@ -16,7 +16,7 @@
     systemctl-tui
     bluetuith
     fzf-obc
-    youtube-tui
+    # youtube-tui
     tmux-xpanes
     # mapscii
     tdf
