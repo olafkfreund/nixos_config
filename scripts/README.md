@@ -1,8 +1,123 @@
 # NixOS Utility Scripts
 
-This directory contains utility scripts for managing and working with your NixOS system configuration.
+This directory contains utility scripts for managing, testing, and working with your NixOS system configuration.
 
-## Available Scripts
+## 🧪 Testing and Validation Scripts
+
+### validate-config.sh
+
+Comprehensive validation suite for NixOS configurations.
+
+**Usage:**
+```bash
+./validate-config.sh [OPTIONS]
+```
+
+**Options:**
+- `-h, --help`: Show help message
+- `-t, --timeout N`: Set timeout for tests (default: 300 seconds)
+- `-q, --quick`: Run quick validation (skip time-consuming tests)
+- `-v, --verbose`: Enable verbose output
+
+**Features:**
+- Tests flake validity and syntax
+- Validates all host configurations build
+- Tests Home Manager configurations
+- Verifies secrets decryption
+- Checks dependencies and structure
+- Generates comprehensive reports
+
+### ci-test.sh
+
+Automated CI/CD testing pipeline for continuous integration.
+
+**Usage:**
+```bash
+./ci-test.sh [OPTIONS]
+```
+
+**Options:**
+- `-j, --jobs N`: Number of parallel jobs (default: 4)
+- `-t, --timeout N`: Timeout per test in seconds (default: 600)
+- `-q, --quick`: Quick mode (reduced test coverage)
+- `-v, --verbose`: Verbose output
+
+**Environment Variables:**
+- `CI_SKIP_PERFORMANCE`: Skip performance regression tests
+- `CI_SKIP_HOME_MANAGER`: Skip Home Manager tests
+- `CI_HOSTS`: Override host list (comma-separated)
+
+**Features:**
+- Parallel test execution
+- Performance regression testing
+- Comprehensive reporting
+- Git integration
+- Artifact generation
+
+### test-modules.sh
+
+Test individual NixOS modules and their dependencies.
+
+**Usage:**
+```bash
+./test-modules.sh [modules|home|specific <path>|docs]
+```
+
+**Examples:**
+```bash
+./test-modules.sh modules           # Test all system modules
+./test-modules.sh home              # Test Home Manager modules
+./test-modules.sh specific ./modules/security/hardening.nix
+./test-modules.sh docs              # Check module documentation
+```
+
+**Features:**
+- Individual module testing
+- Dependency checking
+- Documentation validation
+- Minimal test configuration generation
+
+### performance-test.sh
+
+Performance benchmarking and optimization testing.
+
+**Usage:**
+```bash
+./performance-test.sh [build-times|memory|eval|parallel|cache|full]
+```
+
+**Test Types:**
+- `build-times`: Measure build times for all hosts
+- `memory`: Monitor memory usage during builds
+- `eval`: Test flake evaluation performance
+- `parallel`: Test parallel build efficiency
+- `cache`: Test cache hit rates and efficiency
+- `full`: Comprehensive performance suite
+
+**Features:**
+- Multi-run averaging
+- Memory monitoring
+- Cache efficiency analysis
+- Parallel build testing
+- Performance regression detection
+- Report generation
+
+### integration-test.sh
+
+Quick integration test for the testing framework itself.
+
+**Usage:**
+```bash
+./integration-test.sh
+```
+
+**Features:**
+- Validates all testing scripts
+- Checks Justfile syntax
+- Tests critical commands
+- Ensures framework integrity
+
+## 📦 System Management Scripts
 
 ### check-nixos-updates.sh
 
@@ -14,6 +129,7 @@ Checks for updates to your NixOS flake inputs and displays them in a table forma
 ```
 
 **Features:**
+
 - Creates a temporary copy of your configuration to check for updates
 - Shows a formatted table of all inputs with their current and latest versions
 - Color-coded output to easily identify changed versions
@@ -21,6 +137,7 @@ Checks for updates to your NixOS flake inputs and displays them in a table forma
 - Shows commands for how to apply updates
 
 **Example output:**
+
 ```
 Input                    Current        Latest         URL
 ======================== =============== =============== ==================================================
@@ -33,16 +150,19 @@ home-manager            17198719a393    495bc7322c84    github:nix-community/hom
 A utility for switching PCI devices between VFIO (for VM passthrough) and host drivers without rebooting.
 
 **Usage:**
+
 ```bash
 sudo ./toggle-vfio.sh <PCI_ADDRESS> <HOST_DRIVER> [to-host|to-vm]
 ```
 
 **Parameters:**
+
 - `PCI_ADDRESS`: The PCI address of the device (e.g., 0000:01:00.0)
 - `HOST_DRIVER`: The name of the host driver (e.g., amdgpu, nvidia, etc.)
 - `[to-host|to-vm]`: Optional direction, will toggle if not specified
 
 **Examples:**
+
 ```bash
 # Switch a GPU from VFIO to the host driver
 sudo ./toggle-vfio.sh 0000:01:00.0 amdgpu to-host
