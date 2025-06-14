@@ -84,11 +84,8 @@ in {
   };
 
   imports = [
-    ../modules/development/core.nix
-    ../modules/development/languages.nix
-    ../modules/development/editors.nix
-    ../modules/development/containers.nix
-    ../modules/development/databases.nix
+    ../modules/development/default.nix
+    ../modules/containers/default.nix
   ];
 
   config = lib.mkIf cfg.enable {

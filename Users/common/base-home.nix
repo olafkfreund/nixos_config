@@ -6,8 +6,8 @@
   ...
 }: {
   # Common configuration for all users
-  home.username = username;
-  home.homeDirectory = "/home/${username}";
+  home.username = lib.mkForce username;
+  home.homeDirectory = lib.mkForce "/home/${username}";
   home.sessionPath = [
     "$HOME/.local/bin"
   ];

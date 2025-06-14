@@ -96,16 +96,43 @@
         [
           # Core system configuration
           {
-            nixpkgs.overlays = overlays;
-            networking.hostName = hostname;
+            # Host options declarations
+            options.custom.host = {
+              name = nixpkgs.lib.mkOption {
+                type = nixpkgs.lib.types.str;
+                description = "The hostname of this system";
+              };
+
+              type = nixpkgs.lib.mkOption {
+                type = nixpkgs.lib.types.enum ["workstation" "laptop" "server" "htpc"];
+                description = "The type of host system";
+              };
+
+              users = nixpkgs.lib.mkOption {
+                type = nixpkgs.lib.types.listOf nixpkgs.lib.types.str;
+                default = [];
+                description = "List of users for this host";
+              };
+
+              hardwareProfile = nixpkgs.lib.mkOption {
+                type = nixpkgs.lib.types.nullOr nixpkgs.lib.types.str;
+                default = null;
+                description = "Hardware profile name for this host";
+              };
+            };
 
             # Enable our custom options system
-            custom = {
-              host = {
-                name = hostname;
-                type = hostType;
-                users = users;
-                hardwareProfile = hardwareProfile;
+            config = {
+              nixpkgs.overlays = overlays;
+              networking.hostName = hostname;
+
+              custom = {
+                host = {
+                  name = hostname;
+                  type = hostType;
+                  users = users;
+                  hardwareProfile = hardwareProfile;
+                };
               };
             };
           }
@@ -153,6 +180,7 @@
                 users);
 
               sharedModules = [
+                inputs.stylix.homeManagerModules.stylix
                 inputs.nixvim.homeManagerModules.nixvim or {}
                 inputs.nixai.homeManagerModules.default or {}
                 {

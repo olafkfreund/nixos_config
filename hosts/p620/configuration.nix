@@ -1,5 +1,4 @@
 {
-  config, # Add config to the function parameters
   pkgs,
   lib,
   inputs,
@@ -30,14 +29,21 @@ in {
     ../../modules/containers/docker.nix
     ../../modules/scrcpy/default.nix
   ];
-  #Nixai
+  #Nixai - temporarily disabled for testing
   services.nixai = {
-    enable = true;
-    mcp.enable = true;
+    enable = false;
+    mcp.enable = false;
   };
 
   # Set hostname from variables
   networking.hostName = vars.hostName;
+
+  # Enable core profiles
+  custom = {
+    base.enable = lib.mkForce true;
+    desktop.enable = lib.mkForce true;
+    development.enable = lib.mkForce true;
+  };
 
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "server";
@@ -134,19 +140,19 @@ in {
     userKeys = ["/home/${vars.username}/.ssh/id_ed25519"];
   };
 
-  # Create system users for all host users
-  users.users = lib.genAttrs hostUsers (username: {
-    isNormalUser = true;
-    description = "User ${username}";
-    extraGroups = ["wheel" "networkmanager"];
+  # Create system users for all host users - highest priority approach
+  users.users.olafkfreund = {
+    isNormalUser = lib.mkOverride 1 true;
+    description = lib.mkOverride 1 "Olaf K-Freund";
+    group = lib.mkOverride 1 "olafkfreund";
+    createHome = lib.mkOverride 1 true;
+    home = lib.mkOverride 1 "/home/olafkfreund";
+    extraGroups = ["wheel" "networkmanager" "docker" "video" "audio" "qemu-libvirtd" "libvirtd" "lp" "scanner"];
     shell = pkgs.zsh;
-    # Only use secret-managed password if the secret exists
-    hashedPasswordFile =
-      lib.mkIf
-      (config.modules.security.secrets.enable
-        && builtins.hasAttr "user-password-${username}" config.age.secrets)
-      config.age.secrets."user-password-${username}".path;
-  });
+  };
+
+  # Create corresponding groups for all users
+  users.groups.olafkfreund = {};
 
   # Remove duplicate user configuration - use the one above that handles all hostUsers
   # users.users.${vars.username} is now handled by the genAttrs above

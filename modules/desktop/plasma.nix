@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: {
-  options.modules.desktop.plasma = {
+  options.custom.desktop.plasma = {
     enable = lib.mkEnableOption "KDE Plasma desktop environment";
 
     version = lib.mkOption {
@@ -42,24 +42,24 @@
     };
   };
 
-  config = lib.mkIf config.modules.desktop.plasma.enable {
+  config = lib.mkIf config.custom.desktop.plasma.enable {
     # Enable KDE Plasma
     services.xserver = {
       enable = true;
-      desktopManager.plasma5.enable = lib.mkIf (config.modules.desktop.plasma.version == "5") true;
+      desktopManager.plasma5.enable = lib.mkIf (config.custom.desktop.plasma.version == "5") true;
     };
 
     services.displayManager.sddm = {
       enable = true;
-      wayland.enable = config.modules.desktop.plasma.wayland;
+      wayland.enable = config.custom.desktop.plasma.wayland;
     };
 
-    services.desktopManager.plasma6.enable = lib.mkIf (config.modules.desktop.plasma.version == "6") true;
+    services.desktopManager.plasma6.enable = lib.mkIf (config.custom.desktop.plasma.version == "6") true;
 
     # Install KDE applications
     environment.systemPackages =
-      lib.optionals config.modules.desktop.plasma.applications.enable
-      config.modules.desktop.plasma.applications.packages;
+      lib.optionals config.custom.desktop.plasma.applications.enable
+      config.custom.desktop.plasma.applications.packages;
 
     # Enable KDE Connect
     programs.kdeconnect.enable = true;

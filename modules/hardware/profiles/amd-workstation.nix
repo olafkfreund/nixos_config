@@ -3,15 +3,13 @@
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.custom.hardware;
-in {
-  config = lib.mkIf (cfg.profile or null == "amd-workstation") {
+}: {
+  # AMD Workstation Hardware Profile Configuration
+  config = {
     # Enable AMD GPU drivers
     hardware.opengl = {
       enable = true;
-      driSupport = true;
-      driSupport32Bit = true;
+      # driSupport is deprecated and removed
       extraPackages = with pkgs; [
         amdvlk
         rocm-opencl-icd
@@ -42,12 +40,5 @@ in {
 
     # Power management
     powerManagement.cpuFreqGovernor = "performance";
-
-    # Set hardware configuration
-    custom.hardware = {
-      cpu.vendor = "amd";
-      gpu.vendor = "amd";
-      performance.high = true;
-    };
   };
 }

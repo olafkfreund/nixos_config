@@ -132,145 +132,317 @@
     nixvim,
     ...
   } @ inputs: let
-    # Define users per host
-    hostUsers = {
-      p620 = ["olafkfreund"];
-      razer = ["olafkfreund"];
-      p510 = ["olafkfreund"];
-      dex5550 = ["olafkfreund"];
+    # Import our enhanced custom library with modern host builders
+    lib = import ./lib {
+      inherit inputs nixpkgs;
+      lib = nixpkgs.lib;
     };
 
-    # Get primary user (first in the list) for backward compatibility
-    getPrimaryUser = host: builtins.head (hostUsers.${host} or ["olafkfreund"]);
-
-    # Get all users for a host
-    getHostUsers = host: hostUsers.${host} or ["olafkfreund"];
-
-    # Helper function for package imports
-    mkPkgs = pkgs: {
-      system = "x86_64-linux";
-      config.allowUnfree = true;
-      config.allowInsecure = true;
-    };
-
-    # Import custom packages
+    # Enhanced overlays with performance optimizations
     overlays = [
+      # Custom packages overlay
       (final: prev: {
         customPkgs = import ./pkgs {
           pkgs = final;
         };
       })
+
+      # Input-specific overlays
       (final: prev: {
         zjstatus = inputs.zjstatus.packages.${prev.system}.default;
+        walker = inputs.walker.packages.${prev.system}.default;
+        zen-browser = inputs.zen-browser.packages.${prev.system}.default;
       })
+
+      # Performance overlays
+      nur.overlay
     ];
-
-    makeNixosSystem = host: let
-      primaryUser = getPrimaryUser host;
-      allUsers = getHostUsers host;
-    in {
-      system = "x86_64-linux";
-      specialArgs = {
-        pkgs-stable = import nixpkgs-stable (mkPkgs nixpkgs-stable);
-        pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable);
-        inherit inputs host;
-        username = primaryUser; # Primary user for backward compatibility
-        hostUsers = allUsers; # All users for this host
-      };
-      modules = [
-        {nixpkgs.overlays = overlays;}
-        ./hosts/${host}/configuration.nix
-        nur.modules.nixos.default
-        home-manager.nixosModules.home-manager
-        inputs.nix-colors.homeManagerModules.default
-        inputs.stylix.nixosModules.stylix
-        inputs.nix-snapd.nixosModules.default
-        inputs.agenix.nixosModules.default
-        nix-index-database.nixosModules.nix-index
-        ./home/shell/zellij/zjstatus.nix
-        inputs.nixvim.nixosModules.nixvim
-        nixai.nixosModules.default
-        {
-          home-manager = {
-            useGlobalPkgs = true;
-            useUserPackages = true;
-            backupFileExtension = "backup";
-            extraSpecialArgs = {
-              pkgs-stable = import nixpkgs-stable (mkPkgs nixpkgs-stable);
-              pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable);
-              inherit
-                inputs
-                nixpkgs
-                zen-browser
-                zjstatus
-                spicetify-nix
-                ags
-                agenix
-                razer-laptop-control
-                walker
-                nixcord
-                stylix
-                nix-index-database
-                nixpkgs-f2k
-                bzmenu
-                iwmenu
-                home-manager
-                nixpkgs-stable
-                nixpkgs-unstable
-                nix-colors
-                nix-snapd
-                nixvim
-                host
-                ;
-              username = primaryUser;
-              hostUsers = allUsers;
-            };
-
-            # Configure home-manager for all users on this host
-            users = builtins.listToAttrs (map (user: {
-                name = user;
-                value = import ./Users/${user}/${host}_home.nix;
-              })
-              allUsers);
-            sharedModules = [
-              inputs.nixvim.homeManagerModules.nixvim
-              nixai.homeManagerModules.default
-              {
-                stylix.targets = builtins.listToAttrs (map (name: {
-                    inherit name;
-                    value = {enable = false;};
-                  }) [
-                    "waybar"
-                    "yazi"
-                    "vscode"
-                    "dunst"
-                    "rofi"
-                    "xresources"
-                    "neovim"
-                    "hyprpaper"
-                    "hyprland"
-                    "spicetify"
-                    "sway"
-                    "qt"
-                  ]);
-              }
-            ];
-          };
-        }
-      ];
-    };
   in {
+    # Export our enhanced custom library for other flakes
+    lib = lib;
+
+    # Modern NixOS configurations using enhanced host builders
     nixosConfigurations = {
-      razer = nixpkgs.lib.nixosSystem (makeNixosSystem "razer");
-      dex5550 = nixpkgs.lib.nixosSystem (makeNixosSystem "dex5550");
-      # hp = nixpkgs.lib.nixosSystem (makeNixosSystem "hp");
-      p510 = nixpkgs.lib.nixosSystem (makeNixosSystem "p510");
-      p620 = nixpkgs.lib.nixosSystem (makeNixosSystem "p620");
+      # Primary Production Hosts
+      p620 = lib.mkHost {
+        hostname = "p620";
+        hostType = "workstation";
+        users = ["olafkfreund"];
+        hardwareProfile = "amd-workstation";
+        extraModules = [
+          # Development environment
+          ./modules/development/default.nix
+          ./modules/containers/docker.nix
+          ./modules/virtualization/qemu.nix
+        ];
+      };
+
+      razer = lib.mkHost {
+        hostname = "razer";
+        hostType = "laptop";
+        users = ["olafkfreund"];
+        hardwareProfile = "intel-laptop";
+        extraModules = [
+          # Laptop-specific features
+          ./modules/hardware/laptop.nix
+          ./modules/hardware/power-management.nix
+          razer-laptop-control.nixosModules.default
+        ];
+      };
+
+      p510 = lib.mkHost {
+        hostname = "p510";
+        hostType = "workstation";
+        users = ["olafkfreund"];
+        hardwareProfile = "nvidia-gaming";
+        extraModules = [
+          # Gaming optimizations
+          ./modules/gaming/steam.nix
+          ./modules/gaming/performance.nix
+          ./modules/virtualization/qemu.nix
+        ];
+      };
+
+      dex5550 = lib.mkHost {
+        hostname = "dex5550";
+        hostType = "htpc";
+        users = ["olafkfreund"];
+        hardwareProfile = "htpc-intel";
+        extraModules = [
+          # HTPC-specific features
+          ./modules/media/streaming.nix
+        ];
+      };
+
+      # Additional Infrastructure Hosts
+      hp = lib.mkHost {
+        hostname = "hp";
+        hostType = "workstation";
+        users = ["olafkfreund"];
+        hardwareProfile = "intel-workstation";
+        extraModules = [
+          ./modules/development/default.nix
+        ];
+      };
+
+      lms = lib.mkHost {
+        hostname = "lms";
+        hostType = "server";
+        users = ["olafkfreund"];
+        hardwareProfile = "server-intel";
+        extraModules = [
+          # Server-specific modules
+          ./modules/services/monitoring.nix
+          ./modules/security/hardening.nix
+        ];
+      };
+
+      pvm = lib.mkHost {
+        hostname = "pvm";
+        hostType = "workstation";
+        users = ["olafkfreund"];
+        hardwareProfile = "virtualization-host";
+        extraModules = [
+          # Virtualization host features
+          ./modules/virtualization/qemu.nix
+          ./modules/virtualization/kubernetes.nix
+          ./modules/containers/docker.nix
+        ];
+      };
     };
 
+    # Enhanced packages and applications
     packages.x86_64-linux = {
+      # Development packages
       claude-code = import ./home/development/claude-code {
         inherit (nixpkgs.legacyPackages.x86_64-linux) lib buildNpmPackage fetchurl nodejs makeWrapper writeShellScriptBin;
+      };
+    };
+
+    # Enhanced development shell with comprehensive tooling
+    devShells.x86_64-linux = {
+      default = nixpkgs.legacyPackages.x86_64-linux.mkShell {
+        buildInputs = with nixpkgs.legacyPackages.x86_64-linux; [
+          # Code formatting and linting
+          alejandra # Nix formatter
+          statix # Nix linter
+          deadnix # Dead code finder
+          nixpkgs-fmt # Alternative formatter
+
+          # Development tools
+          nix-tree # Dependency visualization
+          nix-output-monitor # Better build output
+          nixos-rebuild # System management
+          just # Command runner
+
+          # Documentation and validation
+          mdbook # Documentation building
+          shellcheck # Shell script linting
+
+          # Git integration
+          git
+          gh # GitHub CLI
+
+          # System tools
+          htop
+          neofetch
+        ];
+
+        shellHook = ''
+          echo "🎯 NixOS Configuration Development Environment"
+          echo "=============================================="
+          echo ""
+          echo "📋 Available Commands:"
+          echo "  just --list          # Show all available commands"
+          echo "  just validate        # Validate configuration"
+          echo "  just format          # Format all Nix files"
+          echo "  just lint            # Lint Nix code"
+          echo "  just safety-check    # Comprehensive safety analysis"
+          echo ""
+          echo "🏠 Available Hosts:"
+          echo "  Primary: p620 (AMD), razer (Intel laptop), p510 (NVIDIA), dex5550 (HTPC)"
+          echo "  Additional: hp, lms (server), pvm (virtualization)"
+          echo ""
+          echo "🚀 Quick Start:"
+          echo "  just dry-run HOSTNAME     # Preview changes"
+          echo "  just safety-check HOSTNAME # Full analysis"
+          echo "  just deploy-host HOSTNAME  # Apply configuration"
+          echo ""
+          echo "📚 Documentation: Check docs/ directory for guides"
+        '';
+      };
+
+      # Specialized shells for different tasks
+      docs = nixpkgs.legacyPackages.x86_64-linux.mkShell {
+        buildInputs = with nixpkgs.legacyPackages.x86_64-linux; [
+          mdbook
+          graphviz
+          plantuml
+        ];
+      };
+
+      validation = nixpkgs.legacyPackages.x86_64-linux.mkShell {
+        buildInputs = with nixpkgs.legacyPackages.x86_64-linux; [
+          alejandra
+          statix
+          deadnix
+          nixos-rebuild
+        ];
+      };
+    };
+
+    # Enhanced templates for creating new configurations
+    templates = {
+      minimal = {
+        path = ./templates/minimal;
+        description = "Minimal NixOS configuration with basic features";
+        welcomeText = ''
+          # Minimal NixOS Configuration Template
+
+          This template provides a basic NixOS configuration suitable for:
+          - Testing and development
+          - Minimal server deployments
+          - Learning NixOS fundamentals
+
+          ## Quick Start:
+          1. Edit flake.nix to add your hostname
+          2. Configure variables.nix with your settings
+          3. Run: nixos-rebuild switch --flake .#hostname
+        '';
+      };
+
+      workstation = {
+        path = ./templates/workstation;
+        description = "Full-featured workstation configuration";
+        welcomeText = ''
+          # Workstation NixOS Configuration Template
+
+          This template provides a comprehensive workstation setup with:
+          - Desktop environment (Hyprland/Plasma)
+          - Development tools and languages
+          - Gaming and media support
+          - Virtualization capabilities
+
+          ## Features Included:
+          - Modern window manager configurations
+          - Complete development environment
+          - Container and VM support
+          - Gaming optimizations
+          - Media production tools
+        '';
+      };
+
+      server = {
+        path = ./templates/server;
+        description = "Hardened server configuration template";
+        welcomeText = ''
+          # Server NixOS Configuration Template
+
+          This template provides a secure server configuration with:
+          - Security hardening
+          - Service monitoring
+          - Container orchestration
+          - Network optimization
+
+          ## Security Features:
+          - Minimal attack surface
+          - Automated security updates
+          - Intrusion detection
+          - Secure defaults
+        '';
+      };
+    };
+
+    # Default template for quick initialization
+    defaultTemplate = self.templates.minimal;
+
+    # Additional outputs for advanced use cases
+    homeConfigurations = let
+      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+    in {
+      # Standalone Home Manager configurations
+      "olafkfreund@standalone" = home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+        modules = [
+          ./Users/olafkfreund/home.nix
+          inputs.nixvim.homeManagerModules.nixvim
+          inputs.stylix.homeManagerModules.stylix
+        ];
+      };
+    };
+
+    # Formatter for the flake
+    formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.alejandra;
+
+    # Development overlays for other flakes to use
+    overlays = {
+      default = final: prev: {
+        customPkgs = import ./pkgs {pkgs = final;};
+      };
+
+      performance = final: prev: {
+        # Performance-optimized package variants
+      };
+    };
+
+    # Apps for direct execution
+    apps.x86_64-linux = {
+      validate = {
+        type = "app";
+        program = "${nixpkgs.legacyPackages.x86_64-linux.writeShellScript "validate" ''
+          exec ${./scripts/validate-config.sh}
+        ''}";
+      };
+
+      deploy = {
+        type = "app";
+        program = "${nixpkgs.legacyPackages.x86_64-linux.writeShellScript "deploy" ''
+          if [ $# -eq 0 ]; then
+            echo "Usage: nix run .#deploy -- HOSTNAME"
+            exit 1
+          fi
+          exec nixos-rebuild switch --flake .#$1
+        ''}";
       };
     };
   };

@@ -91,9 +91,17 @@ in {
         name = username;
         value = {
           isNormalUser = true;
+          group = username;
           extraGroups = ["wheel" "networkmanager"];
           shell = pkgs.zsh;
         };
+      })
+      cfg.users);
+
+    # Create corresponding groups for users
+    users.groups = builtins.listToAttrs (map (username: {
+        name = username;
+        value = {};
       })
       cfg.users);
 

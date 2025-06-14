@@ -34,20 +34,6 @@ in {
         description = "Theme name";
       };
     };
-
-    audio = {
-      enable = lib.mkOption {
-        type = lib.types.bool;
-        default = true;
-        description = "Enable audio support";
-      };
-
-      lowLatency = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Enable low-latency audio";
-      };
-    };
   };
 
   imports = [
@@ -61,6 +47,9 @@ in {
   config = lib.mkIf cfg.enable {
     # Enable base desktop services
     custom.base.enable = true;
+
+    # Enable audio support
+    custom.desktop.audio.enable = lib.mkDefault true;
 
     # XDG configuration
     xdg = {
@@ -78,15 +67,6 @@ in {
           ];
       };
       mime.enable = true;
-    };
-
-    # Audio configuration
-    services.pipewire = lib.mkIf cfg.audio.enable {
-      enable = true;
-      alsa.enable = true;
-      alsa.support32Bit = true;
-      pulse.enable = true;
-      jack.enable = cfg.audio.lowLatency;
     };
 
     # Hardware support
