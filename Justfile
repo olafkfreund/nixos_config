@@ -274,6 +274,74 @@ rollback-boot:
 emergency-rollback GEN:
     sudo nix-env --switch-generation {{GEN}} --profile /nix/var/nix/profiles/system && sudo /nix/var/nix/profiles/system/bin/switch-to-configuration switch
 
+# === SAFE TESTING & PREVIEW ===
+
+# Dry run - show what would change without applying
+dry-run HOST:
+    nixos-rebuild dry-run --flake .#{{HOST}}
+
+# Build and activate temporarily (reverts on reboot)
+test-run HOST:
+    sudo nixos-rebuild test --flake .#{{HOST}}
+
+# Show differences between current and new configuration
+diff HOST:
+    nixos-rebuild build --flake .#{{HOST}} && \
+    nix store diff-closures /run/current-system ./result
+
+# Compare configurations without building
+diff-config HOST:
+    nix eval --raw .#nixosConfigurations.{{HOST}}.config.system.build.toplevel.drvPath | \
+    xargs nix show-derivation | jq -r '.[].env | to_entries[] | select(.key | startswith("system")) | .value'
+
+# Build derivation and show what would be downloaded/built
+dry-build HOST:
+    nix build --dry-run .#nixosConfigurations.{{HOST}}.config.system.build.toplevel
+
+# Check what packages would be added/removed
+package-diff HOST:
+    @echo "Building new configuration..."
+    @nixos-rebuild build --flake .#{{HOST}} > /dev/null 2>&1
+    @echo "Comparing package differences..."
+    @echo "=== PACKAGES THAT WOULD BE ADDED ==="
+    @comm -13 <(nix-store -qR /run/current-system | sort) <(nix-store -qR ./result | sort) | head -20
+    @echo ""
+    @echo "=== PACKAGES THAT WOULD BE REMOVED ==="
+    @comm -23 <(nix-store -qR /run/current-system | sort) <(nix-store -qR ./result | sort) | head -20
+    @echo ""
+    @echo "Run 'just full-diff {{HOST}}' for complete analysis"
+
+# Comprehensive difference analysis
+full-diff HOST:
+    #!/usr/bin/env bash
+    echo "🔍 Building configuration for comparison..."
+    nixos-rebuild build --flake .#{{HOST}}
+    echo ""
+    echo "📊 STORAGE IMPACT:"
+    nix path-info -S ./result
+    echo ""
+    echo "🔄 CLOSURE DIFFERENCES:"
+    nix store diff-closures /run/current-system ./result
+    echo ""
+    echo "📦 DETAILED PACKAGE ANALYSIS:"
+    echo "Current system packages: $(nix-store -qR /run/current-system | wc -l)"
+    echo "New system packages: $(nix-store -qR ./result | wc -l)"
+
+# Preview systemd service changes
+services-diff HOST:
+    #!/usr/bin/env bash
+    echo "🔍 Building configuration..."
+    nixos-rebuild build --flake .#{{HOST}} > /dev/null 2>&1
+    echo ""
+    echo "🔄 SYSTEMD SERVICE CHANGES:"
+    echo "=== SERVICES THAT WOULD BE ADDED ==="
+    comm -13 <(systemctl list-unit-files --state=enabled --no-legend | cut -d' ' -f1 | sort) \
+             <(find ./result/etc/systemd/system -name "*.service" -exec basename {} \; 2>/dev/null | sort) | head -10
+    echo ""
+    echo "=== SERVICES THAT WOULD BE REMOVED ==="  
+    comm -23 <(systemctl list-unit-files --state=enabled --no-legend | cut -d' ' -f1 | sort) \
+             <(find ./result/etc/systemd/system -name "*.service" -exec basename {} \; 2>/dev/null | sort) | head -10
+
 # === COMPREHENSIVE COMMANDS ===
 
 # Full system validation and build test
@@ -300,5 +368,30 @@ maintain:
     just optimize
     just check-updates
     @echo "✨ Maintenance complete!"
+
+# Complete safety check workflow
+safety-check HOST:
+    @echo "🔍 COMPREHENSIVE SAFETY CHECK FOR {{HOST}}"
+    @echo "============================================="
+    @echo ""
+    @echo "1️⃣ Validating configuration syntax..."
+    just validate
+    @echo ""
+    @echo "2️⃣ Checking flake..."
+    just check
+    @echo ""
+    @echo "3️⃣ Analyzing what would change..."
+    just diff {{HOST}}
+    @echo ""
+    @echo "4️⃣ Checking package differences..."
+    just package-diff {{HOST}}
+    @echo ""
+    @echo "5️⃣ Checking service changes..."
+    just services-diff {{HOST}}
+    @echo ""
+    @echo "✅ SAFETY CHECK COMPLETE!"
+    @echo "Review the output above, then run:"
+    @echo "  • 'just test-run {{HOST}}' for temporary activation"
+    @echo "  • 'just deploy-host {{HOST}}' to apply permanently"
 
 
