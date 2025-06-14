@@ -2,6 +2,7 @@ let
   google-chrome.desktop = ["google-chrome-stable"];
   archiveManager = ["archive"];
   feh.desktop = ["feh"];
+  thunderbird.desktop = ["thunderbird"];
 in {
   # XDG MIME types
   associations = {

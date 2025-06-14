@@ -167,5 +167,7 @@ in {
     else "cpu";
   hardware.nvidia-container-toolkit.enable = false;
 
-  system.stateVersion = "24.11";
+  nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16" "python3.12-youtube-dl-2021.12.17"];
+
+  system.stateVersion = "25.11";
 }
