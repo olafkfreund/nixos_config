@@ -98,12 +98,14 @@ in {
   # Specific service configurations
   services.xserver = {
     enable = true;
-    desktopManager.gnome.enable = true;
     displayManager.xserverArgs = [
       "-nolisten tcp"
       "-dpi 96"
     ];
   };
+
+  # Desktop environment
+  services.desktopManager.gnome.enable = true;
 
   # Wayland configuration
   programs.sway = {

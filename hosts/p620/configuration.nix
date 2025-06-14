@@ -158,13 +158,15 @@ in {
   services = {
     xserver = {
       enable = true;
-      desktopManager.gnome.enable = true;
       displayManager.xserverArgs = [
         "-nolisten tcp"
         "-dpi 96"
       ];
       videoDrivers = ["${vars.gpu}gpu"]; # Correct way to set the video driver
     };
+
+    # Desktop environment
+    desktopManager.gnome.enable = true;
 
     # File systems and services
     nfs.server = lib.mkIf vars.services.nfs.enable {

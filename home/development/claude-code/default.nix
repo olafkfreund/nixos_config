@@ -8,11 +8,11 @@
 }: let
   claudeCode = buildNpmPackage rec {
     pname = "claude-code";
-    version = "1.0.1";
+    version = "1.0.24";
 
     src = fetchurl {
       url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-      hash = "sha256-dR8lXvtawmY1i3JLjXyc63xy8L4K/R3TuVyqH0TO6Z4=";
+      hash = "sha256-VXPrvA7yM7tpZ4wAbsMtTPL5TRMkNlqp6inLPiihI7I=";
     };
 
     npmDepsHash = "sha256-AaG2gFMCISndde0BP2ytwn8jtMkdMke7da39qN7yOYk=";
@@ -33,17 +33,17 @@
 
     dontNpmBuild = true;
 
-    nativeBuildInputs = [ makeWrapper ];
+    nativeBuildInputs = [makeWrapper];
 
     installPhase = ''
       runHook preInstall
-      
+
       mkdir -p $out/lib/node_modules/@anthropic-ai/claude-code
-      
+
       # Debug: List what we have in the source
       echo "=== Source contents ==="
       ls -la
-      
+
       # Copy from package subdirectory (npm tarballs extract to package/)
       if [ -d "package" ]; then
         echo "=== Package directory contents ==="
@@ -53,11 +53,11 @@
         echo "No package directory found, copying current directory"
         cp -r . $out/lib/node_modules/@anthropic-ai/claude-code/
       fi
-      
+
       # Debug: Check what we installed
       echo "=== Installed contents ==="
       ls -la $out/lib/node_modules/@anthropic-ai/claude-code/
-      
+
       # Find the actual CLI entry point
       CLI_FILE=""
       for file in cli.mjs cli.js index.mjs index.js bin/cli.mjs bin/cli.js; do
@@ -67,7 +67,7 @@
           break
         fi
       done
-      
+
       if [ -z "$CLI_FILE" ]; then
         echo "ERROR: Could not find CLI entry point"
         echo "Available files:"
@@ -75,11 +75,11 @@
         # Create a simple wrapper anyway
         CLI_FILE="index.js"
       fi
-      
+
       mkdir -p $out/bin
       makeWrapper ${nodejs}/bin/node $out/bin/claude-code \
         --add-flags "$out/lib/node_modules/@anthropic-ai/claude-code/$CLI_FILE"
-      
+
       runHook postInstall
     '';
 
@@ -87,7 +87,7 @@
       description = "Claude Code CLI tool";
       homepage = "https://github.com/anthropics/claude-code";
       license = licenses.mit;
-      maintainers = [ ];
+      maintainers = [];
       platforms = platforms.all;
     };
   };
@@ -123,11 +123,12 @@
     fi
 
     echo "Use: nix run nixpkgs#prefetch-npm-deps -- $LOCK_DIR/package-lock.json"
-    
+
     # Cleanup
     rm -rf "$TEMP_DIR"
   '';
 in
-  claudeCode // {
+  claudeCode
+  // {
     inherit updateScript;
   }

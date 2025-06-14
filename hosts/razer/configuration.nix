@@ -134,13 +134,15 @@ in {
   services = {
     xserver = {
       enable = true;
-      desktopManager.gnome.enable = true;
       displayManager.xserverArgs = [
         "-nolisten tcp"
         "-dpi 96"
       ];
       videoDrivers = [vars.gpu];
     };
+
+    # Desktop environment
+    desktopManager.gnome.enable = true;
   };
 
   # Docker configuration

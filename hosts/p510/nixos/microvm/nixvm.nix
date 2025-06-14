@@ -154,8 +154,10 @@ in {
   services.xserver = {
     enable = true;
     displayManager.gdm.enable = true;
-    desktopManager.gnome.enable = true;
   };
+
+  # Desktop environment
+  services.desktopManager.gnome.enable = true;
 
   # Audio support
   sound.enable = true;
