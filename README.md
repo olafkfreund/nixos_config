@@ -294,7 +294,7 @@ agenix -d secrets/user-password-username.age > /dev/null
 - [Host Setup Guide](docs/HOST_SETUP.md) - Adding and configuring new hosts  
 - [Module Development](docs/MODULE_DEVELOPMENT.md) - Creating custom modules
 - [Troubleshooting Guide](docs/TROUBLESHOOTING.md) - Common issues and solutions
-- [Project Plan](PROJECT_PLAN.md) - Development roadmap and completed features
+- [Project Plan](docs/PROJECT_PLAN.md) - Development roadmap and completed features
 
 ## 🤝 Contributing
 
