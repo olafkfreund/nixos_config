@@ -32,6 +32,8 @@
     lazyjournal
     lazysql
     clamav
+    yq
+    yq-go
     # nchat
   ];
 }
