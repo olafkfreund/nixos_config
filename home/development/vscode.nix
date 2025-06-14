@@ -7,6 +7,24 @@
 }:
 with lib; let
   cfg = config.editor.vscode;
+
+  # Custom extensions not available in nixpkgs
+  # Note: Uncomment and add proper sha256 hashes when needed
+  customExtensions = [
+    # Example: Uncomment and get hash using scripts/get-extension-hashes.sh
+    # (pkgs.vscode-utils.buildVscodeMarketplaceExtension {
+    #   mktplcRef = {
+    #     name = "geminicodeassist";
+    #     publisher = "google";
+    #     version = "2.36.0";
+    #     sha256 = "sha256-REPLACE_WITH_ACTUAL_HASH";
+    #   };
+    #   meta = {
+    #     description = "Google Gemini Code Assist for VS Code";
+    #     license = lib.licenses.unfree;
+    #   };
+    # })
+  ];
 in {
   options.editor.vscode = {
     enable = mkEnableOption "Visual Studio Code editor" // {default = true;};
@@ -36,45 +54,62 @@ in {
 
       # Use the new profiles structure
       profiles.default = {
-        extensions = with pkgs; [
-          vscode-extensions.bbenoist.nix
-          vscode-extensions.kamadorueda.alejandra
-          vscode-extensions.mkhl.direnv
-          vscode-extensions.tailscale.vscode-tailscale
-          vscode-extensions.jnoortheen.nix-ide
-          vscode-extensions.golang.go
-          vscode-extensions.skellock.just
-          vscode-extensions.redhat.vscode-yaml
-          vscode-extensions.redhat.vscode-xml
-          # vscode-extensions.redhat.ansible
-          vscode-extensions.pkief.material-product-icons
-          vscode-extensions.pkief.material-icon-theme
-          vscode-extensions.ms-vscode-remote.remote-containers
-          vscode-extensions.ms-vscode-remote.remote-ssh
-          vscode-extensions.ms-kubernetes-tools.vscode-kubernetes-tools
-          # vscode-extensions.ms-azuretools.vscode-docker
-          vscode-extensions.mads-hartmann.bash-ide-vscode
-          vscode-extensions.jdinhlife.gruvbox
-          vscode-extensions.hediet.vscode-drawio
-          vscode-extensions.hashicorp.terraform
-          vscode-extensions.github.vscode-pull-request-github
-          vscode-extensions.github.vscode-github-actions
-          vscode-extensions.github.copilot-chat
-          vscode-extensions.github.copilot
-          vscode-extensions.genieai.chatgpt-vscode
-          vscode-extensions.formulahendry.auto-close-tag
-          vscode-extensions.file-icons.file-icons
-          vscode-extensions.donjayamanne.githistory
-          vscode-extensions.bierner.markdown-preview-github-styles
-          vscode-extensions.bierner.markdown-emoji
-          vscode-extensions.arrterian.nix-env-selector
-          vscode-extensions.sainnhe.gruvbox-material
-          vscode-extensions.davidanson.vscode-markdownlint
-          vscode-extensions.eamodio.gitlens
-          # The extensions below are currently commented out because they're not available in nixpkgs
-          # vscode-extensions.codeium.codeium
-          # vscode-extensions.google.gemini-code
-        ];
+        extensions = with pkgs;
+          [
+            vscode-extensions.bbenoist.nix
+            vscode-extensions.kamadorueda.alejandra
+            vscode-extensions.mkhl.direnv
+            vscode-extensions.tailscale.vscode-tailscale
+            vscode-extensions.jnoortheen.nix-ide
+            vscode-extensions.golang.go
+            vscode-extensions.skellock.just
+            vscode-extensions.redhat.vscode-yaml
+            vscode-extensions.redhat.vscode-xml
+            # vscode-extensions.redhat.ansible
+            vscode-extensions.pkief.material-product-icons
+            vscode-extensions.pkief.material-icon-theme
+            vscode-extensions.ms-vscode-remote.remote-containers
+            vscode-extensions.ms-vscode-remote.remote-ssh
+            vscode-extensions.ms-kubernetes-tools.vscode-kubernetes-tools
+            # vscode-extensions.ms-azuretools.vscode-docker
+            vscode-extensions.mads-hartmann.bash-ide-vscode
+            vscode-extensions.jdinhlife.gruvbox
+            vscode-extensions.hediet.vscode-drawio
+            vscode-extensions.hashicorp.terraform
+            vscode-extensions.github.vscode-pull-request-github
+            vscode-extensions.github.vscode-github-actions
+            vscode-extensions.github.copilot-chat
+            vscode-extensions.github.copilot
+            vscode-extensions.genieai.chatgpt-vscode
+            vscode-extensions.formulahendry.auto-close-tag
+            vscode-extensions.file-icons.file-icons
+            vscode-extensions.donjayamanne.githistory
+            vscode-extensions.bierner.markdown-preview-github-styles
+            vscode-extensions.bierner.markdown-emoji
+            vscode-extensions.arrterian.nix-env-selector
+            vscode-extensions.sainnhe.gruvbox-material
+            vscode-extensions.davidanson.vscode-markdownlint
+            vscode-extensions.eamodio.gitlens
+
+            # Python support
+            vscode-extensions.ms-python.python
+            vscode-extensions.ms-python.debugpy
+            vscode-extensions.ms-python.vscode-pylance
+
+            # Additional useful extensions
+            vscode-extensions.esbenp.prettier-vscode # Prettier formatter
+            vscode-extensions.bradlc.vscode-tailwindcss # Tailwind CSS
+            vscode-extensions.rust-lang.rust-analyzer # Rust support
+            vscode-extensions.ms-vscode.cpptools # C++ support
+            vscode-extensions.ms-dotnettools.csharp # C# support
+
+            # Docker support (if available in nixpkgs)
+            # vscode-extensions.ms-azuretools.vscode-docker
+
+            # Add any missing extensions here by finding their nixpkgs equivalent
+            # Or use vscode-utils.buildVscodeMarketplaceExtension for unavailable ones
+          ]
+          ++ customExtensions;
 
         userSettings = {
           # Nix-specific settings
@@ -307,7 +342,7 @@ in {
         };
       };
     };
-    programs.vscode.mutableExtensionsDir = true; # Allow marketplace extensions
+    # programs.vscode.mutableExtensionsDir = true; # Disabled to prevent settings conflicts
 
     # Set up XDG file associations for VSCode
     xdg.mimeApps = {
