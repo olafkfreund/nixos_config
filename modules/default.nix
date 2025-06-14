@@ -16,6 +16,7 @@
     ./system-scripts/default.nix
     # ./nix-index/default.nix
     ./containers/default.nix
+    ./applications/default.nix # Application modules
     ./cloud/default.nix
     ./ssh/ssh.nix
     ./system-utils/utils.nix

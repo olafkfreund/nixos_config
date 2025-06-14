@@ -134,13 +134,14 @@ in {
   services = {
     xserver = {
       enable = true;
-      desktopManager.gnome.enable = true;
       displayManager.xserverArgs = [
         "-nolisten tcp"
         "-dpi 96"
       ];
       videoDrivers = [vars.gpu];
     };
+
+    desktopManager.gnome.enable = true;
   };
 
   # Docker configuration
@@ -197,5 +198,5 @@ in {
   hardware.nvidia-container-toolkit.enable = vars.gpu == "nvidia";
 
   nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16"];
-  system.stateVersion = "24.11";
+  system.stateVersion = "25.11";
 }

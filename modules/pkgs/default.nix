@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     adwaita-qt # For sddm to function properly
     bibata-cursors
@@ -8,7 +8,6 @@
     libsForQt5.qt5.qtgraphicaleffects
 
     wget
-    git
     curl
     file
     lsof
@@ -19,14 +18,11 @@
     tree
     unzip
     which
-    gcc
     gdb
-    go
     gnumake
     ispell
     aspell
     jq
-    sqlite
     z3
     # Development
     nil # Nix lsp

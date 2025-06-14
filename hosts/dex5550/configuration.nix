@@ -98,12 +98,13 @@ in {
   # Specific service configurations
   services.xserver = {
     enable = true;
-    desktopManager.gnome.enable = true;
     displayManager.xserverArgs = [
       "-nolisten tcp"
       "-dpi 96"
     ];
   };
+
+  services.desktopManager.gnome.enable = true;
 
   # Wayland configuration
   programs.sway = {
@@ -167,5 +168,5 @@ in {
     else "cpu";
   hardware.nvidia-container-toolkit.enable = false;
 
-  system.stateVersion = "24.11";
+  system.stateVersion = "25.11";
 }

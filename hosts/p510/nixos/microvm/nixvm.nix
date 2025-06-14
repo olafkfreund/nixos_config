@@ -154,8 +154,9 @@ in {
   services.xserver = {
     enable = true;
     displayManager.gdm.enable = true;
-    desktopManager.gnome.enable = true;
   };
+
+  services.desktopManager.gnome.enable = true;
 
   # Audio support
   sound.enable = true;
@@ -266,8 +267,8 @@ in {
   ];
 
   # Locale and time settings
-  i18n.defaultLocale = "en_US.UTF-8";
-  time.timeZone = "Europe/Berlin";
+  i18n.defaultLocale = "en_GB.UTF-8";
+  time.timeZone = "Europe/London";
 
   # Enable automatic updates
   system.autoUpgrade = {

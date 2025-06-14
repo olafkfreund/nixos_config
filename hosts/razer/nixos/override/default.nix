@@ -1,3 +1,4 @@
+{
   # nixpkgs.overlays = [
   #   (final: prev: {
   #     microsoft-identity-broker = super.microsoft-identity-broker.overrideAttrs (oldAttrs: {
@@ -8,3 +9,4 @@
   #     });
   #   })
   # ];
+}
