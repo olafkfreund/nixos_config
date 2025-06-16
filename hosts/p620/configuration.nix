@@ -258,7 +258,7 @@ in {
       "20-wired" = {
         matchConfig.Name = "en*";
         networkConfig = {
-          MulticastDNS = true;
+          MulticastDNS = false;
           DHCP = "ipv4";
           IPv6AcceptRA = true;
         };
@@ -270,7 +270,7 @@ in {
       "25-wireless" = {
         matchConfig.Name = "wl*";
         networkConfig = {
-          MulticastDNS = true;
+          MulticastDNS = false;
           DHCP = "ipv4";
           IPv6AcceptRA = true;
         };

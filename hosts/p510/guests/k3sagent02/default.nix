@@ -35,10 +35,10 @@ in {
     MulticastDNS=true
   '';
 
-  networking.extraHosts = ''
-    192.168.1.201 k3sserver.local
-    192.168.1.202 k3sagent01.local
-    192.168.1.203 k3sagent02.local
+  networking.extraHosts = ''    :q
+        192.168.1.201 k3sserver.local
+        192.168.1.202 k3sagent01.local
+        192.168.1.203 k3sagent02.local
   '';
 
   time.timeZone = "Europe/London";

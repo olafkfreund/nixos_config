@@ -177,7 +177,7 @@ in {
         name = "eno1";
         DHCP = "ipv4";
         networkConfig = {
-          MulticastDNS = true;
+          MulticastDNS = false;
           IPv6AcceptRA = true;
         };
         dhcpV4Config = {

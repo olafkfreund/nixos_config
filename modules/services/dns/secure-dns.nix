@@ -69,6 +69,7 @@ in {
           then "yes"
           else "no"
         }
+        MulticastDNS=no
         Cache=${toString cfg.cacheSize}
         StaleRetentionSec=86400
         ReadEtcHosts=yes

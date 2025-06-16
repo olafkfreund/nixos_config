@@ -65,6 +65,7 @@ with lib; {
         ];
         extraConfig = ''
           DNSOverTLS=yes
+          MulticastDNS=no
         '';
       };
 
