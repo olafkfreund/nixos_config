@@ -152,10 +152,6 @@ in {
     rootless = false;
   };
 
-  environment.systemPackages = [
-    inputs.zen-browser.packages."${pkgs.system}".default
-  ];
-
   # Use variables for nameservers
   networking.nameservers = vars.nameservers;
 

@@ -207,7 +207,6 @@ in {
 
   # System packages
   environment.systemPackages = with pkgs; [
-    inputs.zen-browser.packages."${pkgs.system}".default
     rocmPackages.llvm.libcxx
     via
     looking-glass-client
