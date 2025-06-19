@@ -99,6 +99,7 @@
     twitch-tui
     deploy-rs
     mkchromecast
+    #dfu-utils
     inputs.iwmenu.packages.${pkgs.system}.default
     inputs.bzmenu.packages.${pkgs.system}.default
   ];

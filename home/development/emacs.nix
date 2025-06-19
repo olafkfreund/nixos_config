@@ -815,7 +815,7 @@
     black # Python formatter
     python311Packages.isort # Python import sorting
     gopls # Go LSP server
-    gotools # Go tools (guru, etc.)
+    #gotools # Go tools (guru, etc.)
     golangci-lint # Go linter
     rust-analyzer # Rust LSP server
     haskell-language-server # Haskell LSP server
