@@ -75,7 +75,6 @@
     };
 
     # Browser and media
-    zen-browser.url = "github:0xc000022070/zen-browser-flake";
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
 
     # System utilities
@@ -119,7 +118,6 @@
     nixcord,
     ags,
     nix-snapd,
-    zen-browser,
     spicetify-nix,
     home-manager,
     stylix,
@@ -201,7 +199,6 @@
               inherit
                 inputs
                 nixpkgs
-                zen-browser
                 zjstatus
                 spicetify-nix
                 ags
