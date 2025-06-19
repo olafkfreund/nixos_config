@@ -27,7 +27,7 @@
   boot.initrd.compressorArgs = ["-19" "-T0"];
 
   # Use latest kernel for newer hardware support
-  boot.kernelPackages = pkgs.linuxPackages;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   boot.plymouth.enable = true;
   boot.kernel.sysctl."vm.nr_hugepages" = 1024;
