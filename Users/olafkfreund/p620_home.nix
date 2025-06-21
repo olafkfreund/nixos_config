@@ -9,7 +9,7 @@
     ../common/default.nix
 
     # Host-specific imports
-    inputs.nixcord.homeModules.nixcord
+    #inputs.nixcord.homeModules.nixcord
     ../../home/default.nix
     ../../home/games/steam.nix
     ../../home/desktop/sway/default.nix

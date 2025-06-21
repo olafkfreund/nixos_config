@@ -83,7 +83,7 @@
     microvm.url = "github:astro/microvm.nix";
 
     # Additional tools
-    nixcord.url = "github:kaylorben/nixcord";
+    #nixcord.url = "github:kaylorben/nixcord";
     lan-mouse.url = "github:feschber/lan-mouse";
     bzmenu.url = "github:e-tho/bzmenu";
     iwmenu.url = "github:e-tho/iwmenu";
@@ -115,7 +115,7 @@
     razer-laptop-control,
     nixpkgs-f2k,
     nix-colors,
-    nixcord,
+    #nixcord,
     ags,
     nix-snapd,
     spicetify-nix,
@@ -205,7 +205,7 @@
                 agenix
                 razer-laptop-control
                 walker
-                nixcord
+                #nixcord
                 stylix
                 nix-index-database
                 nixpkgs-f2k
