@@ -86,9 +86,9 @@
     entr
     rusti-cal
     rmpc
-    mpd
-    mpdris2
-    mpd-notification
+    # mpd
+    # mpdris2
+    # mpd-notification
     gptfdisk
     icu
     spotdl
@@ -98,7 +98,7 @@
     chatterino2
     twitch-tui
     deploy-rs
-    mkchromecast
+    #mkchromecast
     #dfu-utils
     inputs.iwmenu.packages.${pkgs.system}.default
     inputs.bzmenu.packages.${pkgs.system}.default

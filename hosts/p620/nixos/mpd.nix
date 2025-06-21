@@ -4,7 +4,7 @@
   ...
 }: {
   services.mpd = {
-    enable = true;
+    enable = false;
     musicDirectory = "/mnt/media/Media/Music";
     user = "olafkfreund";
     extraConfig = ''

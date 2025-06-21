@@ -18,7 +18,8 @@ in {
     ./nixos/hosts.nix
     ./nixos/envvar.nix
     ./nixos/greetd.nix
-    ./nixos/mpd.nix
+    # disable for now, will be re-enabled later
+    #./nixos/mpd.nix
     ./nixos/cpu.nix
     ./nixos/memory.nix
     ./nixos/load.nix

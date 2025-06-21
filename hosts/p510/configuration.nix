@@ -20,7 +20,7 @@ in {
     ./nixos/memory.nix
     ./nixos/greetd.nix
     ./nixos/hosts.nix
-    ./nixos/mpd.nix
+    #./nixos/mpd.nix
     ./nixos/screens.nix
     ./nixos/plex.nix
     # ./nixos/monitoring.nix # Added monitoring configuration
