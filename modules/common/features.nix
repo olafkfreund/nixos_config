@@ -55,6 +55,7 @@ with lib; {
     ai = {
       enable = mkEnableOption "Enable AI tools";
       ollama = mkEnableOption "Enable Ollama AI";
+      gemini-cli = mkEnableOption "Enable Google Gemini CLI";
     };
 
     programs = {

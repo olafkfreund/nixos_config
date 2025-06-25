@@ -92,6 +92,7 @@ in {
     ai = {
       enable = true;
       ollama = true;
+      gemini-cli = true;
     };
 
     programs = {

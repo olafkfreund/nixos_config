@@ -59,6 +59,7 @@ in {
     # AI tools
     (mkIf cfg.ai.enable {
       ai.ollama.enable = cfg.ai.ollama;
+      programs.gemini-cli.enable = cfg.ai.gemini-cli;
     })
 
     # Programs

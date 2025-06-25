@@ -22,6 +22,7 @@
     ./system-utils/unpack.nix
     ./system-utils/system_util.nix
     ./ai/chatgpt.nix
+    ./ai/gemini-cli.nix
     ./funny/funny.nix
     ./spell/spell.nix
     ./helpers/helpers.nix

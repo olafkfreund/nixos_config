@@ -269,6 +269,7 @@
       claude-code = import ./home/development/claude-code {
         inherit (nixpkgs.legacyPackages.x86_64-linux) lib buildNpmPackage fetchurl nodejs makeWrapper writeShellScriptBin;
       };
+      gemini-cli = nixpkgs.legacyPackages.x86_64-linux.callPackage ./pkgs/gemini-cli {};
     };
   };
 }
