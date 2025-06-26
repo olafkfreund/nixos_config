@@ -78,6 +78,7 @@ in {
       azure-cli-extensions.fzf # fuzzy finder
       azure-cli-extensions.k8s-extension # k8s extensions
       azure-cli-extensions.bastion
+      yamllint
     ];
   };
 }
