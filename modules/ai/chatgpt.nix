@@ -15,7 +15,7 @@
     pkgs.oterm
     pkgs.gpt-cli
     pkgs.chatmcp
-    inputs.claude-desktop.packages.x86_64-linux.claude-desktop
+    #inputs.claude-desktop.packages.x86_64-linux.claude-desktop
     pkgs.mcphost
     pkgs.codex
     # pkgs.claude-code
