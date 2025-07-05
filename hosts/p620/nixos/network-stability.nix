@@ -54,28 +54,20 @@
     scriptPath = ../../../scripts/network-stability-helper.sh;
   };
 
-  # AMD-specific TCP optimizations - using lib.mkMerge to avoid conflicts
-  boot.kernel.sysctl = lib.mkMerge [
+  # AMD-specific TCP optimizations (simplified from mkMerge pattern)
+  boot.kernel.sysctl = {
     # TCP settings optimized for AMD architecture
-    {
-      "net.ipv4.tcp_keepalive_time" = 600;
-      "net.ipv4.tcp_keepalive_intvl" = 60;
-      "net.ipv4.tcp_keepalive_probes" = 10;
-      "net.ipv4.tcp_fin_timeout" = 30;
-    }
-
+    "net.ipv4.tcp_keepalive_time" = 600;
+    "net.ipv4.tcp_keepalive_intvl" = 60;
+    "net.ipv4.tcp_keepalive_probes" = 10;
+    "net.ipv4.tcp_fin_timeout" = 30;
     # BBR congestion control algorithm works well with AMD CPUs
-    {
-      "net.core.default_qdisc" = "fq";
-      "net.ipv4.tcp_congestion_control" = "bbr";
-    }
-
+    "net.core.default_qdisc" = "fq";
+    "net.ipv4.tcp_congestion_control" = "bbr";
     # TCP tuning specific to AMD platforms
-    {
-      "net.ipv4.tcp_rmem" = "4096 1048576 16777216";
-      "net.ipv4.tcp_wmem" = "4096 1048576 16777216";
-    }
-  ];
+    "net.ipv4.tcp_rmem" = "4096 1048576 16777216";
+    "net.ipv4.tcp_wmem" = "4096 1048576 16777216";
+  };
 
   # Additional Electron app improvements specific to p620
   environment = {
@@ -94,15 +86,5 @@
     };
   };
 
-  # Short sleep before network services to ensure hardware is ready
-  systemd.services.network-hardware-wait = {
-    description = "Wait for network hardware initialization";
-    before = ["NetworkManager.service" "systemd-networkd.service"];
-    wantedBy = ["NetworkManager.service" "systemd-networkd.service"];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${pkgs.coreutils}/bin/sleep 2";
-      RemainAfterExit = true;
-    };
-  };
+  # Network wait is now handled by the consolidated service in network-stability module
 }

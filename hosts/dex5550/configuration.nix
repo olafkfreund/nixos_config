@@ -16,7 +16,6 @@ in {
     ./nixos/intel.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
-    ../../modules/system-tweaks/kernel-tweaks/32GB-SYSTEM/32GB-SYSTEM.nix
     ../common/hyprland.nix
   ];
 

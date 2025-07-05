@@ -1,8 +1,43 @@
 {
-  "enableAllProjectMcpServers": false,
   "permissions": {
     "allow": [
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(nix flake check:*)",
+      "Bash(rg:*)",
+      "Bash(just status:*)",
+      "Bash(chmod:*)",
+      "Bash(just efficiency-report)",
+      "Bash(just analyze-config:*)",
+      "Bash(just test-host:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(just test:*)",
+      "Bash(just migrate-host:*)",
+      "Bash(rm:*)",
+      "Bash(just validate-quick:*)",
+      "Bash(mv:*)",
+      "Bash(ln:*)",
+      "Bash(cp:*)",
+      "Bash(echo)",
+      "Bash(for host in p620 p510 hp samsung dex5550)",
+      "Bash(do rm hosts/$host/nixos/envvar.nix)",
+      "Bash(done)",
+      "Bash(do rm hosts/$host/nixos/hosts.nix)",
+      "Bash(for host in hp samsung dex5550)",
+      "Bash(do rm hosts/$host/nixos/screens.nix)",
+      "Bash(for host in razer p620 p510 hp samsung dex5550)",
+      "Bash(do cp hosts/common/envvar.nix hosts/$host/nixos/)",
+      "Bash(do cp:*)",
+      "Bash(just check-syntax:*)",
+      "Bash(nix-instantiate:*)",
+      "Bash(time nix flake check:*)",
+      "Bash(touch:*)",
+      "Bash(just validate-quality:*)",
+      "Bash(./scripts/validate-quality.sh:*)",
+      "Bash(timeout 60 nix flake check:*)",
+      "Bash(just validate)",
+      "Bash(git add:*)"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": false
 }

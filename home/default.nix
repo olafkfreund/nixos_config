@@ -12,7 +12,6 @@
     ./media/music.nix
     ./media/spice_themes.nix
     ./files.nix
-    ./chat/default.nix
   ];
 
   home.packages = [

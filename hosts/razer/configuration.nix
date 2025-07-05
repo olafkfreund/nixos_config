@@ -23,7 +23,6 @@ in {
     ./nixos/memory.nix
     ./themes/stylix.nix
     ../../modules/default.nix
-    ../../modules/laptops.nix
     ../../modules/development/default.nix
     ../common/hyprland.nix
     ../../modules/security/secrets.nix

@@ -2,12 +2,13 @@
   vars = import ../variables.nix;
 in {
   stylix = {
+    enable = true;
+    polarity = "dark";
+    autoEnable = true;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/${vars.theme.scheme}.yaml";
     image = vars.theme.wallpaper;
-    polarity = "dark";
-    targets = {
-      chromium.enable = false;
-    };
+
+    # Font configuration
     fonts = {
       monospace = {
         # Use the specific nerd-fonts package to ensure proper icons
@@ -22,13 +23,23 @@ in {
         package = pkgs.noto-fonts;
         name = vars.theme.font.serif;
       };
-      sizes = vars.theme.font.sizes;
     };
+
+    # Font sizes
+    fonts.sizes = vars.theme.font.sizes;
+
+    # Opacity settings
     opacity = vars.theme.opacity;
+
     cursor = {
       name = vars.theme.cursor.name;
       package = pkgs.bibata-cursors;
       size = vars.theme.cursor.size;
+    };
+
+    # Target-specific configuration
+    targets = {
+      chromium.enable = false; # Exclude browser theming
     };
   };
 }

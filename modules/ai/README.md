@@ -1,38 +1,55 @@
-# AI Tool Modules
+# AI and ChatGPT Tools Module
 
-This directory contains NixOS modules for AI-related tools and utilities.
+Provides a comprehensive collection of AI-powered command line tools and interfaces for enhanced productivity and development workflows.
 
-## Available Modules
+## Configuration Options
 
-- `chatgpt.nix` - OpenAI ChatGPT CLI integration
-- `ollama.nix` - Ollama for running local large language models
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enable` | boolean | `false` | Enable AI and ChatGPT tools module |
+| `packages.chatInterfaces` | boolean | `true` | Enable chat interfaces (ChatGPT CLI, TGPT, Shell-GPT) |
+| `packages.codeAssistants` | boolean | `true` | Enable code assistance tools (GitHub Copilot CLI, Aichat) |
+| `packages.terminalTools` | boolean | `true` | Enable terminal-based AI tools (OTerm, Gorilla CLI) |
+| `packages.mcpTools` | boolean | `false` | Enable Model Context Protocol tools |
+
+## Usage Examples
+
+### Basic Usage
+```nix
+modules.ai.chatgpt.enable = true;
+```
+
+### Selective Categories
+```nix
+modules.ai.chatgpt = {
+  enable = true;
+  packages = {
+    chatInterfaces = true;
+    codeAssistants = true;
+    terminalTools = false;
+    mcpTools = false;
+  };
+};
+```
 
 ## Features
 
-The AI modules provide:
-- Local language model support through Ollama
-- Command-line interface for ChatGPT
-- Optimization for running AI models on your hardware
+### Shell Aliases
+- `ai` → `shell-gpt` - Quick AI assistance
+- `chat` → `chatgpt-cli` - Direct ChatGPT access
+- `aicode` → `gh copilot suggest` - Code suggestions
+- `aiexplain` → `gh copilot explain` - Code explanations
 
-## Usage
+## Setup
 
-These modules can be enabled selectively in host configurations to provide AI capabilities:
-
-```nix
-{
-  ai.ollama.enable = true;
-  # Other AI-related modules
-}
+Set API keys in your environment:
+```bash
+export OPENAI_API_KEY="your-key"
+export ANTHROPIC_API_KEY="your-key"
 ```
 
-The ollama module supports different acceleration types (CUDA, ROCm, CPU) depending on your hardware. This can be configured in your host configuration:
-
-```nix
-{
-  services.ollama.acceleration = "cuda"; # For NVIDIA GPUs
-  # or
-  services.ollama.acceleration = "rocm"; # For AMD GPUs
-  # or
-  services.ollama.acceleration = "cpu"; # For CPU-only systems
-}
+For GitHub Copilot:
+```bash
+gh auth login
+gh extension install github/gh-copilot
 ```

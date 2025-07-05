@@ -8,14 +8,14 @@
 }: let
   claudeCode = buildNpmPackage rec {
     pname = "claude-code";
-    version = "1.0.24";
+    version = "1.0.43";
 
     src = fetchurl {
       url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-      hash = "sha256-VXPrvA7yM7tpZ4wAbsMtTPL5TRMkNlqp6inLPiihI7I=";
+      hash = "sha256-t8XunDJEt8jdShec4AtelTBmQ3KtWPMOgMxjxuMveRU=";
     };
 
-    npmDepsHash = "sha256-AaG2gFMCISndde0BP2ytwn8jtMkdMke7da39qN7yOYk=";
+    npmDepsHash = "sha256-i10rCnNSNlJKSamhF7zgh3FbjNwGi7Mpe8+hS3cSdFI=";
 
     inherit nodejs;
 

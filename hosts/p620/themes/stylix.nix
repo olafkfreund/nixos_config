@@ -1,7 +1,6 @@
 {pkgs, ...}: let
   vars = import ../variables.nix;
 in {
-  # Stylix theming
   stylix = {
     enable = true;
     polarity = "dark";
@@ -38,7 +37,9 @@ in {
       size = vars.theme.cursor.size;
     };
 
-    # Exclude specific targets
-    targets.chromium.enable = false; # Exclude browser theming
+    # Target-specific configuration
+    targets = {
+      chromium.enable = false; # Exclude browser theming
+    };
   };
 }

@@ -1,3 +1,5 @@
+# Network Configuration Module
+# Provides network profile management and stability enhancements
 {
   config,
   lib,

@@ -58,16 +58,8 @@ in {
           fi
         }
 
-        # Function to check DNS resolution
-        check_dns() {
-          for domain in "cloudflare.com" "google.com" "nixos.org"; do
-            if ! ${pkgs.inetutils}/bin/host -W 2 "$domain" >/dev/null 2>&1; then
-              log "DNS resolution failed for $domain"
-              return 1
-            fi
-          done
-          return 0
-        }
+        # DNS monitoring is now handled by network-stability module
+        # to provide centralized monitoring and recovery
 
         # Get current network information
         get_network_info() {
@@ -127,10 +119,7 @@ in {
               prev_routes="$current_routes"
             fi
 
-            # Check DNS resolution
-            if ! check_dns; then
-              log "DNS resolution issues detected"
-            fi
+            # DNS monitoring moved to network-stability module
 
             # Rotate logs if needed
             rotate_logs

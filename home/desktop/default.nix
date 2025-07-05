@@ -26,7 +26,6 @@
     ./lanmouse/default.nix
     ./walker/default.nix
     ./obsidian/default.nix
-    # ./gh/default.nix
   ];
 
   home.packages = with pkgs; [

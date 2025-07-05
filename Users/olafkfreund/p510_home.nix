@@ -46,7 +46,7 @@
 
     desktop = {
       enable = true;
-      sway = true;
+      sway = false;
       dunst = false;
       swaync = true;
       zathura = true;

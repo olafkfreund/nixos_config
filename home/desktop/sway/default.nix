@@ -85,7 +85,7 @@ in {
           smartGaps = true;
           smartBorders = "on";
         };
-        colors = rec {
+        colors = mkDefault (rec {
           background = "#504945";
           unfocused = {
             text = "#ebdbb2";
@@ -110,7 +110,7 @@ in {
               background = "#504945";
               text = "#ebdbb2";
             };
-        };
+        });
         window = {
           border = 2;
           titlebar = true;

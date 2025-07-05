@@ -83,7 +83,6 @@
     microvm.url = "github:astro/microvm.nix";
 
     # Additional tools
-    #nixcord.url = "github:kaylorben/nixcord";
     lan-mouse.url = "github:feschber/lan-mouse";
     bzmenu.url = "github:e-tho/bzmenu";
     iwmenu.url = "github:e-tho/iwmenu";
@@ -115,7 +114,6 @@
     razer-laptop-control,
     nixpkgs-f2k,
     nix-colors,
-    #nixcord,
     ags,
     nix-snapd,
     spicetify-nix,
@@ -133,6 +131,7 @@
     # Define users per host
     hostUsers = {
       p620 = ["olafkfreund"];
+      samsung = ["olafkfreund"];
       razer = ["olafkfreund"];
       p510 = ["olafkfreund"];
       dex5550 = ["olafkfreund"];
@@ -205,7 +204,6 @@
                 agenix
                 razer-laptop-control
                 walker
-                #nixcord
                 stylix
                 nix-index-database
                 nixpkgs-f2k
@@ -232,25 +230,6 @@
             sharedModules = [
               inputs.nixvim.homeManagerModules.nixvim
               nixai.homeManagerModules.default
-              {
-                stylix.targets = builtins.listToAttrs (map (name: {
-                    inherit name;
-                    value = {enable = false;};
-                  }) [
-                    "waybar"
-                    "yazi"
-                    "vscode"
-                    "dunst"
-                    "rofi"
-                    "xresources"
-                    "neovim"
-                    "hyprpaper"
-                    "hyprland"
-                    "spicetify"
-                    "sway"
-                    "qt"
-                  ]);
-              }
             ];
           };
         }
@@ -263,6 +242,7 @@
       # hp = nixpkgs.lib.nixosSystem (makeNixosSystem "hp");
       p510 = nixpkgs.lib.nixosSystem (makeNixosSystem "p510");
       p620 = nixpkgs.lib.nixosSystem (makeNixosSystem "p620");
+      samsung = nixpkgs.lib.nixosSystem (makeNixosSystem "samsung");
     };
 
     packages.x86_64-linux = {

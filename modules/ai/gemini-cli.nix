@@ -4,11 +4,11 @@
   pkgs,
   ...
 }: let
-  cfg = config.programs.gemini-cli;
+  cfg = config.modules.ai.gemini-cli;
   # Import our custom gemini-cli package
   geminiCliPkg = pkgs.callPackage ../../pkgs/gemini-cli {};
 in {
-  options.programs.gemini-cli = {
+  options.modules.ai.gemini-cli = {
     enable = lib.mkEnableOption "Google Gemini CLI - AI workflow tool";
 
     package = lib.mkOption {
@@ -44,7 +44,7 @@ in {
     # Optional shell integration
     environment.shellAliases = lib.mkIf cfg.enableShellIntegration {
       gemini = "gemini";
-      ai = "gemini"; # Convenient alias
+      ai = lib.mkDefault "gemini"; # Convenient alias with default priority
     };
 
     # Create a desktop entry for GUI environments

@@ -160,8 +160,6 @@ in {
   };
 
   config = mkIf cfg.enable {
-    # Disable stylix target for swaync
-    stylix.targets.swaync.enable = false;
 
     home.packages = with pkgs; [
       swaynotificationcenter

@@ -176,7 +176,7 @@ in {
         hover-select = true;
       };
 
-      theme = gruvboxTheme;
+      theme = mkDefault gruvboxTheme;
 
       plugins = with pkgs; [
         rofi-calc

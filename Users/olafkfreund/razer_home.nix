@@ -11,7 +11,6 @@ in {
     ../common/default.nix
 
     # Host-specific imports
-    #inputs.nixcord.homeModules.nixcord
     ../../home/default.nix
     ../../home/desktop/sway/default.nix
     ../../home/desktop/sway/swayosd.nix

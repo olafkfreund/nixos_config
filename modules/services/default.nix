@@ -12,22 +12,17 @@
     ./systemd/default.nix
     ./tailscale/default.nix
     ./system/default.nix
-    # ./power/default.nix
     ./cron/cron.nix
     ./atuin/default.nix
     ./logind/default.nix
     ./ollama/default.nix
     ./sysprof/default.nix
-    # ./libinput/default.nix
-    #./snapd/default.nix
     ./mandb/default.nix
     ./appimage/default.nix
     ./dns/secure-dns.nix
-    # ./dwm/default.nix
 
-    # Network stability modules
+    # Network stability modules (service merged into main module)
     ./network-monitoring.nix
     ./network-stability.nix
-    ./network-stability-service.nix
   ];
 }

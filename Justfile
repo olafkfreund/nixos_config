@@ -28,12 +28,29 @@ update-flake:
 # Run comprehensive validation suite
 validate:
     @echo "🧪 Running comprehensive validation..."
-    ./scripts/validate-config.sh
+    @echo "📋 Feature validation..."
+    nix eval .#lib.validateFeatures --json | jq '.isValid'
+    @echo "🔒 Security validation..."
+    nix eval .#lib.validateSecurity --json | jq '.hasErrors'
+    @echo "📝 Configuration syntax check..."
+    nix flake check --no-build
+    @echo "✅ All validations complete!"
 
 # Quick validation (faster, less comprehensive)
 validate-quick:
     @echo "⚡ Running quick validation..."
     ./scripts/validate-config.sh --quick
+
+# Quality validation - check documentation and patterns
+validate-quality:
+    @echo "📋 Running quality validation..."
+    ./scripts/validate-quality.sh
+
+# Full validation - includes quality checks
+validate-full:
+    @echo "🔍 Running full validation with quality checks..."
+    ./scripts/validate-config.sh
+    ./scripts/validate-quality.sh
 
 # Test all configurations build successfully
 test-all:
@@ -171,6 +188,11 @@ dex5550:
     just pre-deploy dex5550
     nixos-rebuild switch --flake .#dex5550 --target-host dex5550 --build-host dex5550 --use-remote-sudo --impure --accept-flake-config
 
+# Deploy to samsung system (Intel integrated)
+samsung:
+    just pre-deploy samsung
+    nixos-rebuild switch --flake .#samsung --target-host 192.168.1.92 --build-host 192.168.1.92 --use-remote-sudo --impure --accept-flake-config
+
 # =============================================================================
 # ARCHIVED/LEGACY HOSTS (FOR REFERENCE)
 # =============================================================================
@@ -191,12 +213,135 @@ pvm:
     nixos-rebuild switch --flake .#pvm --target-host pvm --build-host pvm --use-remote-sudo --impure --accept-flake-config
 
 # =============================================================================
-# MAINTENANCE AND UTILITIES  
+# MODERN CONFIGURATION MANAGEMENT
 # =============================================================================
+
+# Generate new host configuration from template
+create-host HOST TYPE="workstation" HARDWARE="intel":
+    @echo "🏗️  Creating new host configuration: {{HOST}}"
+    @mkdir -p hosts/{{HOST}}/nixos hosts/{{HOST}}/themes
+    @echo "Generating hardware configuration..."
+    nixos-generate-config --root /mnt --dir hosts/{{HOST}}/ || echo "Run this on target machine or provide hardware-configuration.nix manually"
+    @echo "Creating host variables from template..."
+    @cp templates/variables.nix.template hosts/{{HOST}}/variables.nix
+    @sed -i 's/HOSTNAME_PLACEHOLDER/{{HOST}}/g' hosts/{{HOST}}/variables.nix
+    @sed -i 's/TYPE_PLACEHOLDER/{{TYPE}}/g' hosts/{{HOST}}/variables.nix
+    @sed -i 's/HARDWARE_PLACEHOLDER/{{HARDWARE}}/g' hosts/{{HOST}}/variables.nix
+    @echo "Creating base configuration from template..."
+    @cp templates/configuration.nix.template hosts/{{HOST}}/configuration.nix
+    @echo "Creating stylix theme..."
+    @cp hosts/p620/themes/stylix.nix hosts/{{HOST}}/themes/stylix.nix
+    @echo "✅ Host {{HOST}} created! Edit hosts/{{HOST}}/variables.nix to customize"
+
+# Validate feature dependencies for a host
+validate-features HOST:
+    @echo "📋 Validating feature configuration for {{HOST}}..."
+    nix eval .#nixosConfigurations.{{HOST}}.config.featureValidation --json | jq 'if .isValid then "✅ Feature configuration is valid" else "❌ Feature validation failed" end'
+
+# Show configuration diff between current and new build
+diff HOST:
+    @echo "📊 Showing configuration diff for {{HOST}}..."
+    @current=$(readlink -f /run/current-system 2>/dev/null || echo "no-current") && new=$(nix build .#nixosConfigurations.{{HOST}}.config.system.build.toplevel --no-link --print-out-paths) && if [ "$current" != "no-current" ]; then nix store diff-closures $current $new; else echo "No current system configuration found"; fi
+
+# Analyze configuration size and dependencies
+analyze HOST:
+    @echo "📈 Analyzing configuration for {{HOST}}..."
+    @echo "🔍 Configuration size:"
+    nix path-info -rsSh .#nixosConfigurations.{{HOST}}.config.system.build.toplevel | tail -1
+    @echo "📦 Top 10 largest dependencies:"
+    nix path-info -rsSh .#nixosConfigurations.{{HOST}}.config.system.build.toplevel | sort -k2 -h | tail -10
+
+# Clean up old generations and garbage collect
+cleanup GENERATIONS="7":
+    @echo "🧹 Cleaning up old generations (keeping {{GENERATIONS}})..."
+    sudo nix-collect-garbage --delete-older-than {{GENERATIONS}}d
+    @echo "🧹 Optimizing nix store..."
+    nix store optimise
+
+# Export configuration documentation
+docs:
+    @echo "📚 Generating configuration documentation..."
+    @mkdir -p docs/generated
+    @echo "Extracting module options..."
+    nix eval .#nixosConfigurations.p620.options --json > docs/generated/options.json
+    @echo "Generating feature matrix..."
+    @echo "| Feature | Description | Dependencies | Conflicts |" > docs/generated/features.md
+    @echo "|---------|-------------|--------------|-----------|" >> docs/generated/features.md
+    nix eval .#lib.featureRegistry --json | jq -r 'to_entries[] | "| \(.key) | \(.value.description) | \(.value.dependencies | join(", ")) | \(.value.conflicts | join(", ")) |"' >> docs/generated/features.md
+    @echo "✅ Documentation generated in docs/generated/"
+
+# Show system health and status
+status:
+    @echo "🏥 System Health Status"
+    @echo "======================="
+    @echo "💾 Disk Usage:"
+    df -h / | tail -1
+    @echo "🧠 Memory Usage:"
+    free -h | grep Mem
+    @echo "📦 Nix Store Size:"
+    du -sh /nix/store 2>/dev/null || echo "Cannot access /nix/store"
+    @echo "🗂️  Generations Count:"
+    sudo nix-env --list-generations --profile /nix/var/nix/profiles/system | wc -l
+    @echo "⚡ Last Update:"
+    stat -c %y /run/current-system 2>/dev/null || echo "Unknown"
 
 # View system generation history
 history:
     nix profile history --profile /nix/var/nix/profiles/system
+
+# =============================================================================
+# CONFIGURATION OPTIMIZATION
+# =============================================================================
+
+# Analyze configuration for dead code and duplicates
+analyze-config:
+    @echo "🔍 Analyzing configuration for optimization opportunities..."
+    ./scripts/cleanup-dead-code.sh analysis
+
+# Clean up identified dead code (DESTRUCTIVE - use with caution)
+cleanup-dead-code:
+    @echo "⚠️  WARNING: This will modify your configuration files!"
+    ./scripts/cleanup-dead-code.sh clean
+
+# Migrate host to use shared configurations
+migrate-host HOST:
+    @echo "🚀 Migrating {{HOST}} to use shared configurations..."
+    @echo "Backing up current configuration..."
+    @cp -r hosts/{{HOST}} hosts/{{HOST}}.backup.$(date +%Y%m%d_%H%M%S)
+    @echo "Updating stylix configuration..."
+    @echo 'import ../../shared/themes/stylix-base.nix { inherit pkgs; vars = import ./variables.nix; }' > hosts/{{HOST}}/themes/stylix.nix
+    @echo "Updating hyprland VNC if present..."
+    @if [ -f "hosts/{{HOST}}/nixos/hypr_override.nix" ]; then \
+        echo 'import ../../shared/desktop/hypr-vnc.nix' > hosts/{{HOST}}/nixos/hypr_override.nix; \
+    fi
+    @echo "✅ Migration complete. Test with: just test-host {{HOST}}"
+
+# Show configuration efficiency metrics
+efficiency-report:
+    @echo "📊 Configuration Efficiency Report"
+    @echo "=================================="
+    @echo "📁 Total .nix files: $(find . -name '*.nix' | wc -l)"
+    @echo "📄 Default.nix files: $(find . -name 'default.nix' | wc -l)"
+    @echo "🔄 Potential duplicates:"
+    @find . -name "*.nix" -exec md5sum {} \; | sort | uniq -d -w32 | wc -l
+    @echo "💀 Commented code blocks:"
+    @rg -c "^\s*#" --type nix . | awk -F: '{sum += $2} END {print sum " lines"}'
+    @echo "🏗️  Feature flag usage:"
+    @rg -c "enable.*=.*true" --type nix . | awk -F: '{sum += $2} END {print sum " explicit enables"}'
+    @echo "📦 Host configurations: $(ls hosts/ | grep -v backup | wc -l)"
+    @echo "👤 User configurations: $(find Users/ -name "*_home.nix" | wc -l)"
+
+# Validate migration success
+validate-migration HOST:
+    @echo "✅ Validating migration for {{HOST}}..."
+    @echo "Testing build..."
+    just test-host {{HOST}}
+    @echo "Checking for shared module usage..."
+    @if grep -q "shared/" hosts/{{HOST}}/themes/stylix.nix 2>/dev/null; then \
+        echo "✅ Using shared stylix configuration"; \
+    else \
+        echo "❌ Not using shared stylix configuration"; \
+    fi
 
 # Open Nix REPL with nixpkgs
 repl:
@@ -214,11 +359,6 @@ gc-aggressive:
 optimize:
     sudo nix-store --optimize
 
-# Clean up and optimize everything
-cleanup:
-    just gc
-    just optimize
-    @echo "🧹 Cleanup complete!"
 
 # =============================================================================
 # MODULE AND COMPONENT TESTING
@@ -413,14 +553,6 @@ test-all-users:
         done; \
     done
 
-# Test configuration size and complexity metrics
-analyze-config:
-    @echo "📊 Analyzing configuration complexity..."
-    @echo "Total Nix files: $$(find . -name '*.nix' -not -path './result*' | wc -l)"
-    @echo "Lines of code: $$(find . -name '*.nix' -not -path './result*' -exec cat {} + | wc -l)"
-    @echo "Module count: $$(find modules -name '*.nix' -not -name 'default.nix' | wc -l)"
-    @echo "Host count: $$(ls -1 hosts/ | grep -v -E '^(README|archive|common|manual)' | wc -l)"
-    @echo "User count: $$(ls -1 Users/ | grep -v README | wc -l)"
 
 # Check for deprecated options
 check-deprecated:
@@ -466,27 +598,6 @@ restore BACKUP_PATH:
         echo "❌ Backup path not found: {{BACKUP_PATH}}"; \
     fi
 
-# Generate documentation
-docs:
-    @echo "📖 Generating documentation..."
-    @echo "# NixOS Configuration Documentation" > GENERATED_DOCS.md
-    @echo "" >> GENERATED_DOCS.md
-    @echo "Generated on: $$(date)" >> GENERATED_DOCS.md
-    @echo "" >> GENERATED_DOCS.md
-    @echo "## Available Hosts" >> GENERATED_DOCS.md
-    @for host in hosts/*/; do \
-        if [ -f "$$host/configuration.nix" ]; then \
-            host_name=$$(basename "$$host"); \
-            echo "- **$$host_name**" >> GENERATED_DOCS.md; \
-        fi; \
-    done
-    @echo "" >> GENERATED_DOCS.md
-    @echo "## Available Modules" >> GENERATED_DOCS.md
-    @find modules -name "*.nix" -not -name "default.nix" | sort | while read -r module; do \
-        module_name=$$(basename "$$module" .nix); \
-        echo "- $$module_name" >> GENERATED_DOCS.md; \
-    done
-    @echo "✅ Documentation generated: GENERATED_DOCS.md"
 
 # Interactive host selector for deployment
 deploy-interactive:

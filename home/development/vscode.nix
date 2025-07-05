@@ -307,7 +307,7 @@ in {
           "github.copilot.chat.scopeSelection" = true;
           "github.copilot.chat.agent.thinkingTool" = true;
           "githubPullRequests.notifications" = "pullRequests";
-          "workbench.colorTheme" = "Gruvbox Material Dark";
+          "workbench.colorTheme" = mkDefault "Gruvbox Material Dark";
           "workbench.iconTheme" = "file-icons-colourless";
           "workbench.browser.preferredBrowser" = "google-chrome-stable";
           "genieai.enableConversationHistory" = true;

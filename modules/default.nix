@@ -1,44 +1,56 @@
 {...}: {
+  # Revert to static imports to avoid infinite recursion
+  # Performance optimization through conditional imports requires
+  # a different architecture that doesn't create circular dependencies
   imports = [
-    ./common/default.nix # Import our new common modules
+    # Core modules - always loaded
+    ./common/default.nix
     ./nix/nix.nix
-    ./nix/flake-settings.nix # New module for flake settings
-    ./fonts/fonts.nix
-    ./programs/default.nix
+    ./nix/flake-settings.nix
     ./services/default.nix
     ./security/default.nix
+    ./pkgs/default.nix
+    ./overlays/default.nix
+    ./system-scripts/default.nix
+    
+    # System utilities - always useful
+    ./system-utils/utils.nix
+    ./system-utils/unpack.nix
+    ./system-utils/system_util.nix
+    ./ssh/ssh.nix
+    
+    # Development modules
+    ./ai/chatgpt.nix
+    ./ai/gemini-cli.nix
+    ./helpers/helpers.nix
+    
+    # Virtualization modules
     ./virt/default.nix
     ./virt/spice.nix
     ./virt/incus.nix
     ./virt/podman.nix
-    ./pkgs/default.nix
-    ./overlays/default.nix
-    ./system-scripts/default.nix
-    # ./nix-index/default.nix
     ./containers/default.nix
+    
+    # Cloud tools
     ./cloud/default.nix
-    ./ssh/ssh.nix
-    ./system-utils/utils.nix
-    ./system-utils/unpack.nix
-    ./system-utils/system_util.nix
-    ./ai/chatgpt.nix
-    ./ai/gemini-cli.nix
+    
+    # Desktop/program modules
+    ./programs/default.nix
+    ./fonts/fonts.nix
+    ./webcam/default.nix
+    ./obsidian/default.nix
+    ./office/default.nix
     ./funny/funny.nix
     ./spell/spell.nix
-    ./helpers/helpers.nix
-    ./webcam/default.nix
-    ./desktop/default.nix # Qt platform theme configuration
+    
+    # Desktop environment modules
+    ./desktop/default.nix
     ./desktop/wlr/default.nix
     ./desktop/remote/default.nix
-    ./desktop/wldash/default.nix
     ./desktop/cloud-sync/default.nix
     ./desktop/vnc/default.nix
     ./desktop/gtk/default.nix
-    # ./desktop/electron-config.nix
-    ./obsidian/default.nix
-    ./office/default.nix
-    # ./intune-portal/default.nix
-
+    
     # Network stability modules
     ./services/dns/secure-dns.nix
     ./services/network-monitoring.nix

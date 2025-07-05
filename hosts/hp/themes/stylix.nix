@@ -2,6 +2,8 @@
   vars = import ../variables.nix;
 in {
   stylix = {
+    enable = true;
+    autoEnable = true;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/${vars.theme.scheme}.yaml";
     image = vars.theme.wallpaper;
     polarity = "dark";

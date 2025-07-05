@@ -1,26 +1,42 @@
 {
   pkgs,
-  pkgs-stable,
   inputs,
   ...
 }: {
   environment.systemPackages = with pkgs; [
+    # Core utilities (from consolidated sets)
+    coreutils
+    findutils
+    gnugrep
+    gnused
+    gawk
+    which
+    tree
+    file
+    iproute2
+    inetutils
+    git
+    curl
+    wget
+    unzip
+    zip
+    
+    # Network utilities
     mtr
     iperf3
-    bc
     dnsutils
     ldns
     nmap
     ipcalc
-    file
-    which
-    tree
-    gnused
-    gawk
-    zstd
+    
+    # System monitoring
+    htop
     btop
     iotop
-    iftop
+    
+    # Additional system-specific packages
+    bc
+    zstd
     strace
     ltrace
     lsof
@@ -30,7 +46,6 @@
     pciutils
     usbutils
     ncurses
-    coreutils
     psmisc
     w3m
     dmenu-wayland
@@ -49,26 +64,18 @@
     pamixer
     playerctl
     getent
-    brightnessctl
     pavucontrol
     pulseaudio
-    ncdu
     wireplumber
     networkmanager
     networkmanagerapplet
     networkmanager_dmenu
     keychain
     netscanner
-    # gawk
-    # cups
-    # ghostscript
     dbus
     libjpeg
     avahi
-    # sane-airscan
-    # simple-scan
     libtool
-    # system-config-printer
     keylight-controller-mschneider82
     bottom
     sof-firmware
@@ -80,27 +87,21 @@
     entr
     erdtree
     choose
-    # tailspin
     nitch
     pet
-    entr
     rusti-cal
     rmpc
-    # mpd
-    # mpdris2
-    # mpd-notification
     gptfdisk
     icu
     spotdl
     termusic
-    # tauon
     qflipper
     chatterino2
     twitch-tui
     deploy-rs
-    #mkchromecast
-    #dfu-utils
+    
+    # External packages
     inputs.iwmenu.packages.${pkgs.system}.default
     inputs.bzmenu.packages.${pkgs.system}.default
-  ];
+    ];
 }

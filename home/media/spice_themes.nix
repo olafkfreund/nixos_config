@@ -1,20 +1,18 @@
 {
   inputs,
   pkgs,
+  lib,
   ...
 }: let
   spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.stdenv.system};
 in {
-  stylix.targets = {
-    spicetify.enable = false;
-  };
 
   programs.spicetify = {
     enable = true;
 
     # Switch from onepunch to Gruvbox theme
-    theme = spicePkgs.themes.onepunch;
-    colorScheme = "dark";
+    theme = lib.mkDefault spicePkgs.themes.onepunch;
+    colorScheme = lib.mkDefault "dark";
 
     # Spotify wayland configuration
     spotifyPackage = pkgs.spotify;

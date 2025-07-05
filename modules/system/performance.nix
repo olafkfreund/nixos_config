@@ -143,5 +143,33 @@
       MaxRetentionSec=1month
       ForwardToSyslog=no
     '';
+
+    # Validation
+    assertions = [
+      {
+        assertion = config.modules.system.performance.buildOptimization.maxJobs > 0;
+        message = "Build optimization max-jobs must be greater than 0";
+      }
+      {
+        assertion = config.modules.system.performance.buildOptimization.cores > 0;
+        message = "Build optimization cores must be greater than 0";
+      }
+      {
+        assertion = config.modules.system.performance.garbageCollection.enable -> (lib.hasInfix "d" config.modules.system.performance.garbageCollection.deleteOlderThan);
+        message = "Garbage collection deleteOlderThan must specify a time period (e.g., '30d', '7 days')";
+      }
+    ];
+
+    # Helpful warnings
+    warnings = [
+      (lib.mkIf (config.modules.system.performance.buildOptimization.maxJobs > 8) ''
+        Build max-jobs is set to ${toString config.modules.system.performance.buildOptimization.maxJobs}.
+        Very high values may cause system instability or excessive memory usage.
+      '')
+      (lib.mkIf (!config.modules.system.performance.garbageCollection.enable) ''
+        Garbage collection is disabled. The Nix store will grow indefinitely.
+        Consider enabling it to manage disk usage.
+      '')
+    ];
   };
 }

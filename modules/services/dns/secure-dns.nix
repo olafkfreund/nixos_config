@@ -112,29 +112,7 @@ in {
       mkIf cfg.useStubResolver
       (mkForce "${pkgs.systemd}/lib/systemd/resolv.conf");
 
-    # Add service to monitor DNS resolution stability
-    systemd.services.dns-stability-monitor = {
-      description = "Monitor DNS resolution stability";
-      after = ["network-online.target"];
-      wantedBy = ["multi-user.target"];
-      wants = ["network-online.target"];
-      serviceConfig = {
-        Type = "simple";
-        ExecStart = pkgs.writeShellScript "dns-monitor" ''
-          #!/bin/sh
-          while true; do
-            # Check if DNS resolution is working
-            if ! ${pkgs.inetutils}/bin/host -W 2 cloudflare.com >/dev/null 2>&1; then
-              echo "DNS resolution failed, restarting systemd-resolved" | ${pkgs.systemd}/bin/systemd-cat -t dns-monitor -p warning
-              ${pkgs.systemd}/bin/systemctl restart systemd-resolved.service
-              sleep 10
-            fi
-            sleep 120
-          done
-        '';
-        Restart = "on-failure";
-        RestartSec = "30s";
-      };
-    };
+    # DNS monitoring is now handled by the network-stability module
+    # to avoid duplication and provide centralized monitoring
   };
 }

@@ -7,7 +7,6 @@ home.packages = with pkgs; [
   steamtinkerlaunch
   proton-caller
   protontricks
-  protonup-qt
   steam-run
   lutris
   ];

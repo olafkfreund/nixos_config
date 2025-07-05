@@ -1,0 +1,30 @@
+{
+  hostName = "HOSTNAME_PLACEHOLDER";
+  hostType = "TYPE_PLACEHOLDER";
+  hardware = ["HARDWARE_PLACEHOLDER"];
+  users = ["olafkfreund"];
+  theme = {
+    scheme = "gruvbox-dark-medium";
+    wallpaper = ./themes/wallpaper.jpg;
+    font = {
+      mono = "JetBrainsMono Nerd Font";
+      sans = "Noto Sans";
+      serif = "Noto Serif";
+      sizes = {
+        desktop = 12;
+        applications = 11;
+        terminal = 13;
+        popups = 10;
+      };
+    };
+    opacity = {
+      desktop = 0.9;
+      terminal = 0.8;
+      popups = 0.9;
+    };
+    cursor = {
+      name = "Bibata-Modern-Ice";
+      size = 24;
+    };
+  };
+}

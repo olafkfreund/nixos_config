@@ -1,8 +1,8 @@
 { config, lib, pkgs, ... }:
 with lib; let
-  cfg = config.python.development;
+  cfg = config.modules.development.python;
 in {
-  options.python.development = {
+  options.modules.development.python = {
     enable = mkEnableOption "Enable Python development environment";
     packages = mkOption {
       type = with types; listOf str;
