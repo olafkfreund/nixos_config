@@ -13,6 +13,7 @@
     # Internal modules
     ./base-home.nix
     ./features.nix
-    ./features-impl.nix
+    # Temporarily disabled for isolated enhanced desktop test
+    # ./features-impl.nix
   ];
 }

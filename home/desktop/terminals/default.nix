@@ -130,7 +130,7 @@ in {
         term = "xterm-256color";
         selection-target = mkIf cfg.features.copyOnSelect "clipboard";
         shell = "${pkgs.zsh}/bin/zsh";
-        font = mkIf cfg.features.nerdFont "${fontConfig.name}:size=${toString fontConfig.size}";
+        font = mkDefault "${fontConfig.name}:size=${toString fontConfig.size}";
       };
       
       mouse-bindings = mkIf cfg.features.mouseSupport {
@@ -151,7 +151,7 @@ in {
         font-reset = commonKeybinds.fontReset;
       };
       
-      colors = {
+      colors = mkDefault {
         foreground = activeColors.foreground;
         background = activeColors.background;
         regular0 = activeColors.black;
@@ -192,16 +192,16 @@ in {
       # Appearance
       window_margin_width = 8;
       hide_window_decorations = true;
-      background_opacity = mkIf cfg.features.transparency 0.95;
+      background_opacity = mkDefault (if cfg.features.transparency then 0.95 else 1.0);
       
       # Font
-      font_family = mkIf cfg.features.nerdFont fontConfig.name;
-      font_size = fontConfig.size;
-      disable_ligatures = mkIf (!cfg.features.fontLigatures) "always";
+      font_family = mkDefault (if cfg.features.nerdFont then fontConfig.name else "monospace");
+      font_size = mkDefault fontConfig.size;
+      disable_ligatures = mkDefault (if cfg.features.fontLigatures then "never" else "always");
       
       # Behavior
-      copy_on_select = mkDefault (mkIf cfg.features.copyOnSelect "yes");
-      mouse_hide_wait = mkDefault (mkIf cfg.features.mouseSupport 20);
+      copy_on_select = mkDefault (if cfg.features.copyOnSelect then "yes" else "no");
+      mouse_hide_wait = mkDefault (if cfg.features.mouseSupport then 20 else -1);
       scrollback_lines = mkDefault cfg.features.scrollback;
       
       # Terminal
@@ -209,12 +209,12 @@ in {
       shell = "${pkgs.zsh}/bin/zsh";
       
       # URLs
-      detect_urls = mkIf cfg.features.urlDetection "yes";
+      detect_urls = mkDefault (if cfg.features.urlDetection then "yes" else "no");
       url_style = "curly";
       
       # Cursor
       cursor_shape = "beam";
-      cursor_blink_interval = mkIf cfg.features.animations 1;
+      cursor_blink_interval = mkDefault (if cfg.features.animations then 1 else 0);
       cursor_stop_blinking_after = 15;
       
       # Tabs
@@ -226,25 +226,25 @@ in {
       inactive_tab_font_style = "italic";
       
       # Colors
-      foreground = "#${activeColors.foreground}";
-      background = "#${activeColors.background}";
-      cursor = "#${activeColors.cursor}";
-      color0 = "#${activeColors.black}";
-      color1 = "#${activeColors.red}";
-      color2 = "#${activeColors.green}";
-      color3 = "#${activeColors.yellow}";
-      color4 = "#${activeColors.blue}";
-      color5 = "#${activeColors.magenta}";
-      color6 = "#${activeColors.cyan}";
-      color7 = "#${activeColors.white}";
-      color8 = "#${activeColors.bright_black}";
-      color9 = "#${activeColors.bright_red}";
-      color10 = "#${activeColors.bright_green}";
-      color11 = "#${activeColors.bright_yellow}";
-      color12 = "#${activeColors.bright_blue}";
-      color13 = "#${activeColors.bright_magenta}";
-      color14 = "#${activeColors.bright_cyan}";
-      color15 = "#${activeColors.bright_white}";
+      foreground = mkDefault "#${activeColors.foreground}";
+      background = mkDefault "#${activeColors.background}";
+      cursor = mkDefault "#${activeColors.cursor}";
+      color0 = mkDefault "#${activeColors.black}";
+      color1 = mkDefault "#${activeColors.red}";
+      color2 = mkDefault "#${activeColors.green}";
+      color3 = mkDefault "#${activeColors.yellow}";
+      color4 = mkDefault "#${activeColors.blue}";
+      color5 = mkDefault "#${activeColors.magenta}";
+      color6 = mkDefault "#${activeColors.cyan}";
+      color7 = mkDefault "#${activeColors.white}";
+      color8 = mkDefault "#${activeColors.bright_black}";
+      color9 = mkDefault "#${activeColors.bright_red}";
+      color10 = mkDefault "#${activeColors.bright_green}";
+      color11 = mkDefault "#${activeColors.bright_yellow}";
+      color12 = mkDefault "#${activeColors.bright_blue}";
+      color13 = mkDefault "#${activeColors.bright_magenta}";
+      color14 = mkDefault "#${activeColors.bright_cyan}";
+      color15 = mkDefault "#${activeColors.bright_white}";
     };
     
     keybindings = {
@@ -305,7 +305,7 @@ in {
       };
       
       # Font configuration
-      font = mkIf cfg.features.nerdFont {
+      font = mkDefault {
         normal = {
           family = fontConfig.name;
           style = "Regular";
@@ -322,7 +322,7 @@ in {
       };
       
       # Colors
-      colors = {
+      colors = mkDefault {
         primary = {
           background = "#${activeColors.background}";
           foreground = "#${activeColors.foreground}";

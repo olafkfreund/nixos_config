@@ -557,7 +557,7 @@ in {
   };
   
   # Additional packages
-  home.packages = with pkgs; mkIf cfg.core.enable [
+  home.packages = with pkgs; mkIf cfg.core.enable ([
     # SwayNC client for commands
     cfg.core.package
     
@@ -567,7 +567,7 @@ in {
     flameshot        # Screenshot tool
   ] ++ optionals cfg.actions.recording [
     obs-studio       # Recording tool
-  ];
+  ]);
   
   # Launcher scripts for common swaync actions
   home.file = mkMerge [
