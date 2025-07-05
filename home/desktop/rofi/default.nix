@@ -231,7 +231,13 @@ let
     optional cfg.modes.bluetooth "bluetooth:rofi-bluetooth";
   
 in {
-  programs.rofi = mkIf cfg.core.enable {
+  # Backward compatibility option structure
+  options.desktop.rofi = {
+    enable = mkEnableOption "Rofi application launcher with enhanced features";
+  };
+  
+  config = {
+    programs.rofi = mkIf (cfg.core.enable || config.desktop.rofi.enable) {
     enable = true;
     package = cfg.core.package;
 
@@ -296,11 +302,11 @@ in {
       optional cfg.modes.bluetooth rofi-bluetooth;
   };
 
-  # Enhanced launcher scripts
-  home.packages = with pkgs; [
-    # Web search script (from existing config)
-    (mkIf cfg.modes.websearch (import ./scripts/websearch.nix { inherit pkgs; }))
-  ] ++ optionals cfg.core.enable [
+    # Enhanced launcher scripts
+    home.packages = with pkgs; [
+      # Web search script (from existing config)
+      (mkIf cfg.modes.websearch (import ./scripts/websearch.nix { inherit pkgs; }))
+    ] ++ optionals (cfg.core.enable || config.desktop.rofi.enable) [
     # Additional rofi utilities
     rofi-systemd
   ];
@@ -386,8 +392,9 @@ in {
     })
   ];
 
-  # Ensure rofi can find plugins and scripts
-  home.sessionVariables = mkIf cfg.core.enable {
-    ROFI_PLUGIN_PATH = "${config.programs.rofi.package}/lib/rofi";
+    # Ensure rofi can find plugins and scripts
+    home.sessionVariables = mkIf (cfg.core.enable || config.desktop.rofi.enable) {
+      ROFI_PLUGIN_PATH = "${config.programs.rofi.package}/lib/rofi";
+    };
   };
 }

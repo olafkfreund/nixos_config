@@ -20,7 +20,7 @@ let
     terminals = {
       foot = true;           # Lightweight Wayland terminal
       kitty = true;          # GPU-accelerated terminal
-      alacritty = false;     # Cross-platform terminal
+      alacritty = true;      # Cross-platform terminal
       wezterm = false;       # Rust-based terminal
       ghostty = false;       # Fast terminal emulator
     };
@@ -101,8 +101,27 @@ let
   };
   
 in {
-  # Foot terminal configuration
-  programs.foot = mkIf cfg.terminals.foot {
+  # Backward compatibility options for individual terminals
+  options = {
+    alacritty.enable = mkEnableOption "Alacritty terminal (legacy compatibility)";
+    foot.enable = mkEnableOption "Foot terminal (legacy compatibility)"; 
+    kitty.enable = mkEnableOption "Kitty terminal (legacy compatibility)";
+    wezterm.enable = mkEnableOption "WezTerm terminal (legacy compatibility)";
+    ghostty.enable = mkEnableOption "Ghostty terminal (legacy compatibility)";
+  };
+  
+  config = mkMerge [
+    # Individual terminal configurations (for backward compatibility)
+    {
+      programs.alacritty.enable = mkIf config.alacritty.enable true;
+      programs.foot.enable = mkIf config.foot.enable true; 
+      programs.kitty.enable = mkIf config.kitty.enable true;
+    }
+    
+    # Enhanced unified configuration
+    {
+      # Foot terminal configuration
+      programs.foot = mkIf cfg.terminals.foot {
     enable = true;
     package = pkgs.foot;
     settings = {
@@ -264,18 +283,116 @@ in {
     };
   };
   
+  # Alacritty terminal configuration
+  programs.alacritty = mkIf cfg.terminals.alacritty {
+    enable = true;
+    package = pkgs.alacritty;
+    
+    settings = {
+      # Terminal configuration
+      shell = {
+        program = "${pkgs.zsh}/bin/zsh";
+      };
+      
+      # Window configuration
+      window = {
+        padding = {
+          x = 12;
+          y = 12;
+        };
+        opacity = mkIf cfg.features.transparency 0.95;
+        decorations = "none";
+      };
+      
+      # Font configuration
+      font = mkIf cfg.features.nerdFont {
+        normal = {
+          family = fontConfig.name;
+          style = "Regular";
+        };
+        bold = {
+          family = fontConfig.name;
+          style = "Bold";
+        };
+        italic = {
+          family = fontConfig.name;
+          style = "Italic";
+        };
+        size = fontConfig.size;
+      };
+      
+      # Colors
+      colors = {
+        primary = {
+          background = "#${activeColors.background}";
+          foreground = "#${activeColors.foreground}";
+        };
+        cursor = {
+          text = "#${activeColors.background}";
+          cursor = "#${activeColors.foreground}";
+        };
+        normal = {
+          black = "#${activeColors.black}";
+          red = "#${activeColors.red}";
+          green = "#${activeColors.green}";
+          yellow = "#${activeColors.yellow}";
+          blue = "#${activeColors.blue}";
+          magenta = "#${activeColors.magenta}";
+          cyan = "#${activeColors.cyan}";
+          white = "#${activeColors.white}";
+        };
+        bright = {
+          black = "#${activeColors.bright_black}";
+          red = "#${activeColors.bright_red}";
+          green = "#${activeColors.bright_green}";
+          yellow = "#${activeColors.bright_yellow}";
+          blue = "#${activeColors.bright_blue}";
+          magenta = "#${activeColors.bright_magenta}";
+          cyan = "#${activeColors.bright_cyan}";
+          white = "#${activeColors.bright_white}";
+        };
+      };
+      
+      # Scrolling
+      scrolling = {
+        history = cfg.features.scrollback;
+      };
+      
+      # Selection
+      selection = {
+        save_to_clipboard = cfg.features.copyOnSelect;
+      };
+      
+      # Mouse
+      mouse = mkIf cfg.features.mouseSupport {
+        hide_when_typing = true;
+      };
+      
+      # Keyboard bindings
+      keyboard.bindings = [
+        { key = "C"; mods = "Control|Shift"; action = "Copy"; }
+        { key = "V"; mods = "Control|Shift"; action = "Paste"; }
+        { key = "Plus"; mods = "Control|Shift"; action = "IncreaseFontSize"; }
+        { key = "Minus"; mods = "Control|Shift"; action = "DecreaseFontSize"; }
+        { key = "Backspace"; mods = "Control|Shift"; action = "ResetFontSize"; }
+      ];
+    };
+  };
+  
   # Set default terminal
   xdg.mimeApps = {
     associations.added = {
       "x-scheme-handler/terminal" = 
         if cfg.terminals.kitty then "kitty.desktop"
         else if cfg.terminals.foot then "foot.desktop"
+        else if cfg.terminals.alacritty then "Alacritty.desktop"
         else "foot.desktop";
     };
     defaultApplications = {
       "x-scheme-handler/terminal" = 
         if cfg.terminals.kitty then "kitty.desktop"
         else if cfg.terminals.foot then "foot.desktop"
+        else if cfg.terminals.alacritty then "Alacritty.desktop"
         else "foot.desktop";
     };
   };
@@ -297,5 +414,7 @@ in {
   ] ++ optionals cfg.features.nerdFont [
     # Nerd fonts
     nerd-fonts.jetbrains-mono
+  ];
+    }
   ];
 }
