@@ -25,6 +25,7 @@
     ./zathura/default.nix
     ./remotedesktop/default.nix
     ./swaync/default.nix
+    ./swaync/enhanced.nix      # Enhanced SwayNC with theming
     ./evince/default.nix
     ./lanmouse/default.nix
     ./walker/default.nix
