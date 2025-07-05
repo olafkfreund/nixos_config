@@ -36,7 +36,10 @@
       "Bash(./scripts/validate-quality.sh:*)",
       "Bash(timeout 60 nix flake check:*)",
       "Bash(just validate)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(ssh:*)"
     ]
   },
   "enableAllProjectMcpServers": false

@@ -1,144 +1,165 @@
-{...}: {
-  wayland.windowManager.hyprland.extraConfig = ''
-    # System binds
-    $mainMod = SUPER
+# Hyprland Keybinds Configuration
+# Converted to native Nix configuration for better type safety and maintainability
+{
+  config,
+  lib,
+  ...
+}:
+with lib; {
+  wayland.windowManager.hyprland.settings = {
+    # Define the main modifier key
+    "$mainMod" = "SUPER";
 
-    # Window/Workspace Navigation
-    # bind = ALT, TAB, expo, toggle
-    bind = $mainMod, h, movefocus, l
-    bind = $mainMod, l, movefocus, r
-    bind = $mainMod, k, movefocus, u
-    bind = $mainMod, j, movefocus, d
+    # Window and workspace navigation keybinds
+    bind = [
+      # Window focus movement (vim-style)
+      "$mainMod, h, movefocus, l"
+      "$mainMod, l, movefocus, r"
+      "$mainMod, k, movefocus, u"
+      "$mainMod, j, movefocus, d"
 
-    # Workspace switching
-    bind = $mainMod, 1, workspace, 1
-    bind = $mainMod, 2, workspace, 2
-    bind = $mainMod, 3, workspace, 3
-    bind = $mainMod, 4, workspace, 4
-    bind = $mainMod, 5, workspace, 5
-    bind = $mainMod, 6, workspace, 6
-    bind = $mainMod, 7, workspace, 7
-    bind = $mainMod, 8, workspace, 8
-    bind = $mainMod, 9, workspace, 9
-    bind = $mainMod, 0, workspace, 10
-    bind = $mainMod, mouse_down, workspace, e-1
-    bind = $mainMod, mouse_up, workspace, e+1
-    bind = $mainMod CTRL, l, workspace, r+1
-    bind = $mainMod CTRL, h, workspace, r-1
+      # Workspace switching (numbers 1-10)
+      "$mainMod, 1, workspace, 1"
+      "$mainMod, 2, workspace, 2"
+      "$mainMod, 3, workspace, 3"
+      "$mainMod, 4, workspace, 4"
+      "$mainMod, 5, workspace, 5"
+      "$mainMod, 6, workspace, 6"
+      "$mainMod, 7, workspace, 7"
+      "$mainMod, 8, workspace, 8"
+      "$mainMod, 9, workspace, 9"
+      "$mainMod, 0, workspace, 10"
+      
+      # Mouse wheel workspace switching
+      "$mainMod, mouse_down, workspace, e-1"
+      "$mainMod, mouse_up, workspace, e+1"
+      
+      # Relative workspace navigation
+      "$mainMod CTRL, l, workspace, r+1"
+      "$mainMod CTRL, h, workspace, r-1"
 
-    # Application launchers
-    bind = $mainMod, RETURN, exec, [float; size 50% 50%; center]foot
-    bind = $mainMod, space, exec, pkill rofi || rofi -show drun
-    bind = $mainMod, backspace, exec, rofi-hyprkeys
-    bind = $mainMod CTRL, Y, exec, [float]foot yai
-    bind = $mainMod CTRL, M, exec, monitors
-    bind = $mainMod, C, exec, thunderbird -calendar
-    bind = $mainMod, A, exec, [float;notitle;]kitty --class album-art --hold mpris-album-art
+      # Application launchers
+      "$mainMod, RETURN, exec, [float; size 50% 50%; center]foot"
+      "$mainMod, space, exec, pkill rofi || rofi -show drun"
+      "$mainMod, backspace, exec, rofi-hyprkeys"
+      "$mainMod CTRL, Y, exec, [float]foot yai"
+      "$mainMod CTRL, M, exec, monitors"
+      "$mainMod, C, exec, thunderbird -calendar"
+      "$mainMod, A, exec, [float;notitle;]kitty --class album-art --hold mpris-album-art"
 
-    # Special workspaces
-    bind = $mainMod, S, togglespecialworkspace, magic
-    bind = $mainMod, S, togglespecialworkspace, slack
-    bind = $mainMod, B, togglespecialworkspace, chrome
-    bind = $mainMod, M, togglespecialworkspace, mail
-    bind = $mainMod, T, togglespecialworkspace, scratchpad
-    bind = $mainMod, D, togglespecialworkspace, discord
-    bind = Control_SHIFT, M, togglespecialworkspace, spotify
-    bind = $mainMod SHIFT, W, exec, weather-popup
-    bind = $mainMod, Escape, killactive, title:^(Weather - London)$
+      # Special workspace toggles
+      "$mainMod, S, togglespecialworkspace, magic"
+      "$mainMod, B, togglespecialworkspace, chrome"
+      "$mainMod, M, togglespecialworkspace, mail"
+      "$mainMod, T, togglespecialworkspace, scratchpad"
+      "$mainMod, D, togglespecialworkspace, discord"
+      "Control_SHIFT, M, togglespecialworkspace, spotify"
+      
+      # Weather popup and utility binds
+      "$mainMod SHIFT, W, exec, weather-popup"
+      "$mainMod, Escape, killactive, title:^(Weather - London)$"
 
-    # Moving windows to workspaces
-    bind = $mainMod SHIFT, 1, movetoworkspace, 1
-    bind = $mainMod SHIFT, 2, movetoworkspace, 2
-    bind = $mainMod SHIFT, 3, movetoworkspace, 3
-    bind = $mainMod SHIFT, 4, movetoworkspace, 4
-    bind = $mainMod SHIFT, 5, movetoworkspace, 5
-    bind = $mainMod SHIFT, 6, movetoworkspace, 6
-    bind = $mainMod SHIFT, 7, movetoworkspace, 7
-    bind = $mainMod SHIFT, 8, movetoworkspace, 8
-    bind = $mainMod SHIFT, 9, movetoworkspace, 9
-    bind = $mainMod SHIFT, 0, movetoworkspace, 10
+      # Move windows to workspaces
+      "$mainMod SHIFT, 1, movetoworkspace, 1"
+      "$mainMod SHIFT, 2, movetoworkspace, 2"
+      "$mainMod SHIFT, 3, movetoworkspace, 3"
+      "$mainMod SHIFT, 4, movetoworkspace, 4"
+      "$mainMod SHIFT, 5, movetoworkspace, 5"
+      "$mainMod SHIFT, 6, movetoworkspace, 6"
+      "$mainMod SHIFT, 7, movetoworkspace, 7"
+      "$mainMod SHIFT, 8, movetoworkspace, 8"
+      "$mainMod SHIFT, 9, movetoworkspace, 9"
+      "$mainMod SHIFT, 0, movetoworkspace, 10"
 
+      # Move windows within workspace
+      "$mainMod SHIFT, h, movewindow, l"
+      "$mainMod SHIFT, l, movewindow, r"
+      "$mainMod SHIFT, k, movewindow, u"
+      "$mainMod SHIFT, j, movewindow, d"
+      "$mainMod SHIFT, c, centerwindow, none"
 
-    # Moving windows within workspace
-    bind = $mainMod SHIFT, h, movewindow, l
-    bind = $mainMod SHIFT, l, movewindow, r
-    bind = $mainMod SHIFT, k, movewindow, u
-    bind = $mainMod SHIFT, j, movewindow, d
-    bind = $mainMod SHIFT, c, centerwindow, none
+      # Window management
+      "$mainMod, Q, killactive"
+      "$mainMod, F, fullscreen, 1"
+      "$mainMod, F, togglefloating"
+      "$mainMod ALT, P, pin"
+      "$mainMod, Y, exec, hyprctl keyword general:layout \"dwindle\""
+      "$mainMod, U, exec, hyprctl keyword general:layout \"master\""
 
-    # Window management
-    bind = $mainMod, Q, killactive
-    bind = $mainMod, F, fullscreen, 1
-    bind = $mainMod, F, togglefloating
-    bind = $mainMod ALT, P, pin
-    bind = $mainMod, Y, exec, hyprctl keyword general:layout "dwindle"
-    bind = $mainMod, U, exec, hyprctl keyword general:layout "master"
+      # Layout management
+      "$mainMod, I, layoutmsg, cyclenext"
+      "$mainMod, O, layoutmsg, swapwithmaster master"
+      "$mainMod SHIFT, U, layoutmsg, orientationcycle"
+      "$mainMod SHIFT, I, layoutmsg, cycleprev"
+      "$mainMod SHIFT, O, layoutmsg, focusmaster auto"
+      "$mainMod, BRACKETLEFT, layoutmsg, rollnext"
+      "$mainMod, BRACKETRIGHT, layoutmsg, rollprev"
 
-    # Mouse bindings
-    bindm = $mainMod, mouse:272, movewindow
-    bindm = $mainMod, mouse:273, resizewindow
+      # Group management
+      "$mainMod, G, togglegroup"
+      "$mainMod SHIFT, G, moveoutofgroup"
+      "ALT, left, changegroupactive, b"
+      "ALT, right, changegroupactive, f"
 
-    # Layout management
-    bind = $mainMod, I, layoutmsg, cyclenext
-    bind = $mainMod, O, layoutmsg, swapwithmaster master
-    bind = $mainMod SHIFT, U, layoutmsg, orientationcycle
-    bind = $mainMod SHIFT, I, layoutmsg, cycleprev
-    bind = $mainMod SHIFT, O, layoutmsg, focusmaster auto
-    bind = $mainMod, BRACKETLEFT, layoutmsg, rollnext
-    bind = $mainMod, BRACKETRIGHT, layoutmsg, rollprev
+      # System controls
+      "$mainMod SHIFT, P, exec, screenshoot"
+      "$mainMod SHIFT, S, exec, foot -e d"
+      "$mainMod SHIFT, I, exec, open-clip"
+      "$mainMod, N, exec, swaync-client --toggle-panel"
+      "$mainMod SHIFT, N, exec, swaync-client --close-all"
+      "$mainMod ALT, L, exec, hyprlock"
 
-    # Group management
-    bind = $mainMod, G, togglegroup
-    bind = $mainMod SHIFT, G, moveoutofgroup
-    bind = ALT, left, changegroupactive, b
-    bind = ALT, right, changegroupactive, f
+      # Volume controls
+      "$mainMod, SLASH, exec, pamixer -t"
+      "$mainMod SHIFT, V, exec, pamixer -d 2"
+      "$mainMod SHIFT, B, exec, pamixer -i 2"
+      ", XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise --max-volume 120"
+      ", XF86AudioLowerVolume, exec, swayosd-client --output-volume lower --max-volume 120"
+      ", XF86AudioMute, exec, swayosd-client --output-volume mute-toggle"
+      ", XF86AudioMicMute, exec, swayosd-client --input-volume mute-toggle"
 
-    # System controls
-    bind = $mainMod SHIFT, P, exec, screenshoot
-    bind = $mainMod SHIFT, S, exec, foot -e d
-    bind = $mainMod SHIFT, I, exec, open-clip
-    bind = $mainMod, N, exec, swaync-client --toggle-panel
-    bind = $mainMod SHIFT, N, exec, swaync-client --close-all
-    bind = $mainMod ALT, L, exec, hyprlock
+      # Brightness controls
+      ", XF86MonBrightnessUp, exec, swayosd-client --brightness +10"
+      ", XF86MonBrightnessDown, exec, swayosd-client --brightness -10"
+      "$mainMod, F3, exec, brightnessctl -d *::kbd_backlight set +33%"
+      "$mainMod, F2, exec, brightnessctl -d *::kbd_backlight set 33%-"
 
-    # Volume controls (consolidated)
-    bind = $mainMod, SLASH, exec, pamixer -t
-    bind = $mainMod SHIFT, V, exec, pamixer -d 2
-    bind = $mainMod SHIFT, B, exec, pamixer -i 2
-    bind = , XF86AudioRaiseVolume, exec, swayosd-client --output-volume raise --max-volume 120
-    bind = , XF86AudioLowerVolume, exec, swayosd-client --output-volume lower --max-volume 120
-    bind = , XF86AudioMute, exec, swayosd-client --output-volume mute-toggle
-    bind = , XF86AudioMicMute, exec, swayosd-client --input-volume mute-toggle
+      # Capslock indicator
+      ", release Caps_Lock, exec, swayosd-client --caps-lock"
 
-    # Brightness controls (consolidated)
-    bind = , XF86MonBrightnessUp, exec, swayosd-client --brightness +10
-    bind = , XF86MonBrightnessDown, exec, swayosd-client --brightness -10
-    bind = $mainMod, F3, exec, brightnessctl -d *::kbd_backlight set +33%
-    bind = $mainMod, F2, exec, brightnessctl -d *::kbd_backlight set 33%-
+      # Screenshot bindings
+      ", Print, exec, flameshot gui --raw | wl-copy"
+      "SHIFT, Print, exec, flameshot gui --path ~/Pictures/screenshots"
+      
+      # Resize mode entry
+      "$mainMod, R, submap, resize"
+      ", escape, submap, reset"
+    ];
 
-    # Capslock indicator
-    bind = , release Caps_Lock, exec, swayosd-client --caps-lock
+    # Mouse bindings for window movement and resizing
+    bindm = [
+      "$mainMod, mouse:272, movewindow"
+      "$mainMod, mouse:273, resizewindow"
+    ];
 
-    # Lid switch actions
-    bindl = , switch:off:Lid Switch, exec, hyprctl keyword monitor "eDP-1, 1920x1080, 0x0, 1"
-    bindl = , switch:on:Lid Switch, exec, hyprctl keyword monitor "eDP-1, disable"
+    # Lid switch actions (laptop-specific)
+    bindl = [
+      ", switch:off:Lid Switch, exec, hyprctl keyword monitor \"eDP-1, 1920x1080, 0x0, 1\""
+      ", switch:on:Lid Switch, exec, hyprctl keyword monitor \"eDP-1, disable\""
+    ];
 
-    # Resize submap
-    bind = $mainMod, R, submap, resize
-    submap = resize
-    binde = $mainMod, l, resizeactive, 30 0
-    binde = $mainMod, h, resizeactive, -30 0
-    binde = $mainMod, k, resizeactive, 0 -30
-    binde = $mainMod, j, resizeactive, 0 30
-    bind = , escape, submap, reset
-    submap = reset
+    # Repeatable binds for resize mode
+    binde = [
+      "$mainMod, l, resizeactive, 30 0"
+      "$mainMod, h, resizeactive, -30 0"
+      "$mainMod, k, resizeactive, 0 -30"
+      "$mainMod, j, resizeactive, 0 30"
+    ];
 
-    # UI aesthetics
-    blurls = notifications
-    blurls = swayosd
-
-    # Screenshot bindings
-    bind = , Print, exec, flameshot gui --raw | wl-copy
-    bind = SHIFT, Print, exec, flameshot gui --path ~/Pictures/screenshots
-  '';
+    # Submap definitions for resize mode
+    submap = [
+      "resize"
+      "reset"
+    ];
+  };
 }
