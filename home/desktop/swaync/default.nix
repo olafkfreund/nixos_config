@@ -527,26 +527,20 @@ let
   '';
   
 in {
-  # Backward compatibility option structure  
-  options.desktop.swaync = {
-    enable = mkEnableOption "SwayNC notification center with enhanced features";
-  };
-  
-  config = {
-    # Enhanced SwayNC configuration
-    services.swaync = mkIf (cfg.core.enable || config.desktop.swaync.enable) {
+  # Enhanced SwayNC configuration
+  services.swaync = mkIf cfg.core.enable {
     enable = true;
     package = cfg.core.package;
   };
   
-    # Configuration files
-    xdg.configFile = mkIf (cfg.core.enable || config.desktop.swaync.enable) {
+  # Configuration files
+  xdg.configFile = mkIf cfg.core.enable {
     "swaync/config.json".text = builtins.toJSON (generateConfig activeColors);
     "swaync/style.css".text = generateCSS activeColors;
   };
   
-    # Hyprland integration
-    wayland.windowManager.hyprland.settings = mkIf ((cfg.core.enable || config.desktop.swaync.enable) && cfg.core.autostart) {
+  # Hyprland integration
+  wayland.windowManager.hyprland.settings = mkIf (cfg.core.enable && cfg.core.autostart) {
     exec-once = mkDefault [ "swaync" ];
     
     # Layer rules for animations
@@ -562,8 +556,8 @@ in {
     ];
   };
   
-    # Additional packages
-    home.packages = with pkgs; mkIf (cfg.core.enable || config.desktop.swaync.enable) [
+  # Additional packages
+  home.packages = with pkgs; mkIf cfg.core.enable [
     # SwayNC client for commands
     cfg.core.package
     
@@ -611,9 +605,8 @@ in {
     })
   ];
   
-    # Environment variables
-    home.sessionVariables = mkIf (cfg.core.enable || config.desktop.swaync.enable) {
-      SWAYNC_CONFIG_DIR = "${config.xdg.configHome}/swaync";
-    };
+  # Environment variables
+  home.sessionVariables = mkIf cfg.core.enable {
+    SWAYNC_CONFIG_DIR = "${config.xdg.configHome}/swaync";
   };
 }
