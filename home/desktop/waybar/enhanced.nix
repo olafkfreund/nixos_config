@@ -175,8 +175,9 @@ let
   '';
   
 in {
-  programs.waybar = {
-    enable = cfg.core.enable;
+  # Enhanced Waybar - disabled for now due to conflicts with existing config
+  # programs.waybar = {
+  #   enable = cfg.core.enable;
     package = pkgs.waybar;
     
     settings = {
@@ -185,7 +186,7 @@ in {
         layer = cfg.core.layer;
         position = cfg.core.position;
         mod = "dock";
-        margin = 2;
+        margin = "2";
         spacing = 4;
         fixed-center = true;
         exclusive = true;

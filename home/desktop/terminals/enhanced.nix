@@ -101,8 +101,8 @@ let
   };
   
 in {
-  # Foot terminal configuration
-  programs.foot = mkIf cfg.terminals.foot {
+  # Foot terminal configuration (enhanced version, only if original not enabled)
+  programs.foot = mkIf (cfg.terminals.foot && !(config.foot.enable or false)) {
     enable = true;
     package = pkgs.foot;
     settings = {
@@ -159,8 +159,8 @@ in {
     };
   };
   
-  # Kitty terminal configuration
-  programs.kitty = mkIf cfg.terminals.kitty {
+  # Kitty terminal configuration (enhanced version, only if original not enabled)
+  programs.kitty = mkIf (cfg.terminals.kitty && !(config.kitty.enable or false)) {
     enable = true;
     package = pkgs.kitty;
     
@@ -181,9 +181,9 @@ in {
       disable_ligatures = mkIf (!cfg.features.fontLigatures) "always";
       
       # Behavior
-      copy_on_select = mkIf cfg.features.copyOnSelect "yes";
-      mouse_hide_wait = mkIf cfg.features.mouseSupport 20;
-      scrollback_lines = cfg.features.scrollback;
+      copy_on_select = mkDefault (mkIf cfg.features.copyOnSelect "yes");
+      mouse_hide_wait = mkDefault (mkIf cfg.features.mouseSupport 20);
+      scrollback_lines = mkDefault cfg.features.scrollback;
       
       # Terminal
       term = "xterm-kitty";
@@ -243,19 +243,20 @@ in {
       "ctrl+shift+f" = "show_scrollback";
     };
     
-    extraConfig = mkIf cfg.features.nerdFont ''
-      # Nerd Font symbol mappings
-      symbol_map U+e000-U+e00a,U+ea60-U+ebeb,U+e0a0-U+e0c8,U+e0ca,U+e0cc-U+e0d4,U+e200-U+e2a9,U+e300-U+e3e3,U+e5fa-U+e6b1,U+e700-U+e7c5,U+f000-U+f2e0,U+f300-U+f372,U+f400-U+f532,U+f0001-U+f1af0 Symbols Nerd Font Mono
-      symbol_map U+2600-U+26FF Noto Color Emoji
-    '' + optionalString cfg.features.mouseSupport ''
-      
-      # Mouse mappings
-      mouse_map left press ungrabbed mouse_selection normal
-      mouse_map left doublepress ungrabbed mouse_selection word
-      mouse_map left triplepress ungrabbed mouse_selection line
-      mouse_map right press ungrabbed mouse_paste
-      mouse_map middle release ungrabbed paste_from_selection
-    '';
+    extraConfig = 
+      optionalString cfg.features.nerdFont ''
+        # Nerd Font symbol mappings
+        symbol_map U+e000-U+e00a,U+ea60-U+ebeb,U+e0a0-U+e0c8,U+e0ca,U+e0cc-U+e0d4,U+e200-U+e2a9,U+e300-U+e3e3,U+e5fa-U+e6b1,U+e700-U+e7c5,U+f000-U+f2e0,U+f300-U+f372,U+f400-U+f532,U+f0001-U+f1af0 Symbols Nerd Font Mono
+        symbol_map U+2600-U+26FF Noto Color Emoji
+      '' + optionalString cfg.features.mouseSupport ''
+        
+        # Mouse mappings
+        mouse_map left press ungrabbed mouse_selection normal
+        mouse_map left doublepress ungrabbed mouse_selection word
+        mouse_map left triplepress ungrabbed mouse_selection line
+        mouse_map right press ungrabbed mouse_paste
+        mouse_map middle release ungrabbed paste_from_selection
+      '';
     
     shellIntegration = mkIf cfg.features.shellIntegration {
       enableZshIntegration = true;
@@ -295,6 +296,6 @@ in {
     yazi          # Modern terminal file manager
   ] ++ optionals cfg.features.nerdFont [
     # Nerd fonts
-    (nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
+    nerd-fonts.jetbrains-mono
   ];
 }

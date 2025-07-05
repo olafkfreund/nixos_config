@@ -7,7 +7,7 @@
     ./swaylock/default.nix
     # ./sway/default.nix
     ./waybar/default.nix
-    ./waybar/enhanced.nix      # Enhanced Waybar with theming
+    # ./waybar/enhanced.nix      # Enhanced Waybar with theming (temporarily disabled)
     ./com.nix
     ./terminals/default.nix
     ./terminals/enhanced.nix   # Enhanced terminal configuration

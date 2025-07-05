@@ -286,7 +286,7 @@ in {
       run-command = "{cmd}";
     };
 
-    theme = generateTheme activeColors;
+    theme = mkDefault (generateTheme activeColors);
 
     plugins = with pkgs; 
       optional cfg.modes.calculator rofi-calc ++
