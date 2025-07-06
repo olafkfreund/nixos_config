@@ -20,7 +20,7 @@ in {
     programs.zellij = {
       enable = true;
       enableBashIntegration = false;
-      enableZshIntegration = true;  # Enable for better shell integration
+      enableZshIntegration = false;  # Disable auto-start
       package = pkgs.zellij;
       
       # Enhanced settings for modern development workflow
