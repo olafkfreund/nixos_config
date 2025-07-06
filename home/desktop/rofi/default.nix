@@ -7,70 +7,66 @@
 with lib; let
   cfg = config.desktop.rofi;
 
-  # Extract theme to separate variable for better maintainability
+  # Simple waybar-matching theme - no boxes or borders
   gruvboxTheme = builtins.toFile "rofi-theme.rasi" ''
-    /* Global Properties */
+    /* Simple theme matching waybar */
     * {
       gruvbox-bg: #282828;
-      gruvbox-bg-light: #3c3836;
       gruvbox-fg: #ebdbb2;
       gruvbox-yellow: #fabd2f;
-      gruvbox-border: #504945;
-      gruvbox-green: #689d6a;
       transparent: #00000000;
-      gruvbox-orange: #fe8019;
 
-      font: "JetBrainsMono Nerd Font 13";
-      background-color: @transparent;
+      font: "JetBrainsMono Nerd Font 14";
+      background-color: @gruvbox-bg;
       text-color: @gruvbox-fg;
     }
 
     element-text, element-icon {
-      background-color: @transparent;
+      background-color: inherit;
       text-color: inherit;
     }
 
     window {
       width: 50%;
       background-color: @gruvbox-bg;
-      border: 1px;
-      border-color: @gruvbox-border;
-      border-radius: 6px;
+      border: none;
+      border-radius: 0px;
       padding: 12px;
     }
 
     mainbox {
-      background-color: @transparent;
-      spacing: 12px;
+      background-color: @gruvbox-bg;
+      spacing: 8px;
     }
 
     inputbar {
       children: [prompt, entry];
       background-color: @gruvbox-bg;
-      border-radius: 6px;
-      padding: 4px 8px;
-      margin: 0 0 8px 0;
+      border: none;
+      border-radius: 0px;
+      padding: 8px;
+      margin: 0;
     }
 
     prompt {
-      background-color: @transparent;
-      padding: 6px;
-      text-color: @gruvbox-orange;
+      background-color: @gruvbox-bg;
+      padding: 0px 8px 0px 0px;
+      text-color: @gruvbox-yellow;
     }
 
     entry {
-      padding: 6px;
+      padding: 0px;
       text-color: @gruvbox-fg;
-      background-color: @transparent;
+      background-color: @gruvbox-bg;
       placeholder: "Search...";
     }
 
     listview {
-      background-color: @transparent;
+      background-color: @gruvbox-bg;
       cycle: false;
       dynamic: true;
       layout: vertical;
-      spacing: 6px;
+      spacing: 0px;
       margin: 0;
       columns: 1;
       lines: 10;
@@ -80,21 +76,22 @@ with lib; let
     element {
       padding: 8px;
       spacing: 8px;
-      background-color: @transparent;
-      border-radius: 4px;
+      background-color: @gruvbox-bg;
+      border: none;
+      border-radius: 0px;
     }
 
     element normal.normal {
-      background-color: @transparent;
+      background-color: @gruvbox-bg;
     }
 
     element alternate.normal {
-      background-color: @transparent;
+      background-color: @gruvbox-bg;
     }
 
     element selected {
-      background-color: @gruvbox-bg-light;
-      text-color: @gruvbox-green;
+      background-color: @gruvbox-bg;
+      text-color: @gruvbox-yellow;
     }
 
     element-icon {
@@ -103,28 +100,30 @@ with lib; let
     }
 
     mode-switcher {
-      spacing: 6px;
+      spacing: 0px;
       background-color: @gruvbox-bg;
-      border-radius: 4px;
-      padding: 4px;
+      border: none;
+      border-radius: 0px;
+      padding: 0px;
     }
 
     button {
-      padding: 6px 12px;
-      background-color: @transparent;
+      padding: 8px 12px;
+      background-color: @gruvbox-bg;
       text-color: @gruvbox-fg;
-      border-radius: 4px;
+      border: none;
+      border-radius: 0px;
     }
 
     button selected {
-      background-color: @gruvbox-bg-light;
+      background-color: @gruvbox-bg;
       text-color: @gruvbox-yellow;
     }
 
     scrollbar {
-      width: 4px;
-      handle-width: 4px;
-      handle-color: @gruvbox-border;
+      width: 0px;
+      handle-width: 0px;
+      handle-color: @transparent;
       background-color: @gruvbox-bg;
     }
   '';
