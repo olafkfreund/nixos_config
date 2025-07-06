@@ -268,96 +268,98 @@ let
     };
   };
   
-  # Generate CSS theme
+  # Generate CSS theme - flat design matching waybar/rofi
   generateCSS = colors: ''
-    /* Enhanced SwayNC Theme */
+    /* Flat SwayNC Theme - matching waybar and rofi */
     * {
       font-family: "JetBrainsMono Nerd Font";
       font-weight: normal;
-      transition: all 0.2s ease-in-out;
+      transition: none;
     }
     
     /* Main window */
     .control-center {
       background: ${colors.bg};
-      border: 2px solid ${colors.border};
-      border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      margin: 10px;
+      border: none;
+      border-radius: 0px;
+      box-shadow: none;
+      margin: 0px;
       padding: 0;
     }
     
     .control-center .widget-title {
-      background: ${colors.bg-dark};
+      background: ${colors.bg};
       color: ${colors.fg};
       font-size: 16px;
       font-weight: bold;
       padding: 12px;
-      border-radius: 12px 12px 0 0;
-      border-bottom: 1px solid ${colors.border};
+      border-radius: 0px;
+      border: none;
     }
     
     .control-center .widget-title button {
-      background: ${colors.accent};
-      color: ${colors.bg};
+      background: ${colors.bg};
+      color: ${colors.accent};
       border: none;
-      border-radius: 6px;
+      border-radius: 0px;
       padding: 4px 8px;
       font-size: 14px;
       font-weight: bold;
     }
     
     .control-center .widget-title button:hover {
-      background: ${colors.orange};
-      transform: scale(1.05);
+      background: ${colors.bg};
+      color: ${colors.accent};
     }
     
     /* Do Not Disturb */
     .control-center .widget-dnd {
-      background: ${colors.bg-light};
+      background: ${colors.bg};
       color: ${colors.fg};
       padding: 12px;
-      border-radius: 8px;
-      margin: 8px;
+      border-radius: 0px;
+      border: none;
+      margin: 0px;
     }
     
     .control-center .widget-dnd button {
-      background: ${colors.border};
+      background: ${colors.bg};
       color: ${colors.fg};
       border: none;
-      border-radius: 6px;
+      border-radius: 0px;
       padding: 8px 12px;
       font-weight: bold;
     }
     
     .control-center .widget-dnd button.enabled {
-      background: ${colors.red};
-      color: ${colors.bg};
+      background: ${colors.bg};
+      color: ${colors.accent};
     }
     
     /* Notifications */
     .notification {
-      background: ${colors.bg-light};
-      border: 1px solid ${colors.border};
-      border-radius: 8px;
-      margin: 4px 8px;
+      background: ${colors.bg};
+      border: none;
+      border-radius: 0px;
+      margin: 0px;
       padding: 0;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      box-shadow: none;
     }
     
     .notification .notification-content {
-      background: transparent;
+      background: ${colors.bg};
       color: ${colors.fg};
       padding: 12px;
     }
     
     .notification .notification-default-action {
-      background: transparent;
+      background: ${colors.bg};
       color: ${colors.fg};
     }
     
     .notification .notification-default-action:hover {
-      background: ${colors.border};
+      background: ${colors.bg};
+      color: ${colors.accent};
     }
     
     .notification .summary {
@@ -368,7 +370,7 @@ let
     }
     
     .notification .body {
-      color: ${colors.gray};
+      color: ${colors.fg};
       font-size: 12px;
     }
     
@@ -380,14 +382,15 @@ let
     
     /* MPRIS */
     .control-center .widget-mpris {
-      background: ${colors.bg-light};
-      border-radius: 8px;
-      margin: 8px;
+      background: ${colors.bg};
+      border-radius: 0px;
+      border: none;
+      margin: 0px;
       padding: 12px;
     }
     
     .control-center .widget-mpris .album-art {
-      border-radius: 6px;
+      border-radius: 0px;
       margin-right: 12px;
     }
     
@@ -398,57 +401,58 @@ let
     }
     
     .control-center .widget-mpris .artist {
-      color: ${colors.gray};
+      color: ${colors.fg};
       font-size: 12px;
     }
     
     .control-center .widget-mpris button {
-      background: ${colors.border};
+      background: ${colors.bg};
       color: ${colors.fg};
       border: none;
-      border-radius: 20px;
+      border-radius: 0px;
       width: 32px;
       height: 32px;
       margin: 2px;
     }
     
     .control-center .widget-mpris button:hover {
-      background: ${colors.accent};
-      color: ${colors.bg};
-      transform: scale(1.1);
+      background: ${colors.bg};
+      color: ${colors.accent};
     }
     
     /* Volume */
     .control-center .widget-volume {
-      background: ${colors.bg-light};
-      border-radius: 8px;
-      margin: 8px;
+      background: ${colors.bg};
+      border-radius: 0px;
+      border: none;
+      margin: 0px;
       padding: 12px;
     }
     
     .control-center .widget-volume .volume-slider {
-      background: ${colors.border};
-      border-radius: 4px;
+      background: ${colors.bg};
+      border-radius: 0px;
     }
     
     .control-center .widget-volume .volume-slider slider {
       background: ${colors.accent};
-      border-radius: 4px;
+      border-radius: 0px;
     }
     
     /* Buttons Grid */
     .control-center .widget-buttons-grid {
-      background: ${colors.bg-light};
-      border-radius: 8px;
-      margin: 8px;
+      background: ${colors.bg};
+      border-radius: 0px;
+      border: none;
+      margin: 0px;
       padding: 12px;
     }
     
     .control-center .widget-buttons-grid button {
-      background: ${colors.border};
+      background: ${colors.bg};
       color: ${colors.fg};
       border: none;
-      border-radius: 8px;
+      border-radius: 0px;
       width: 48px;
       height: 48px;
       margin: 4px;
@@ -457,77 +461,74 @@ let
     }
     
     .control-center .widget-buttons-grid button:hover {
-      background: ${colors.accent};
-      color: ${colors.bg};
-      transform: scale(1.05);
+      background: ${colors.bg};
+      color: ${colors.accent};
     }
     
     /* Notification window */
     .notification-window {
-      background: transparent;
+      background: ${colors.bg};
     }
     
     .floating-notifications .notification {
-      background: ${colors.transparent};
-      border: 2px solid ${colors.border};
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-      margin: 8px;
+      background: ${colors.bg};
+      border: none;
+      border-radius: 0px;
+      box-shadow: none;
+      margin: 0px;
       padding: 0;
-      backdrop-filter: blur(10px);
     }
     
     .floating-notifications .notification .notification-content {
-      background: transparent;
+      background: ${colors.bg};
       color: ${colors.fg};
       padding: 16px;
     }
     
     .floating-notifications .notification .close-button {
-      background: ${colors.red};
-      color: ${colors.bg};
+      background: ${colors.bg};
+      color: ${colors.accent};
       border: none;
-      border-radius: 50%;
+      border-radius: 0px;
       width: 24px;
       height: 24px;
       margin: 8px;
     }
     
     .floating-notifications .notification .close-button:hover {
-      background: ${colors.orange};
-      transform: scale(1.1);
+      background: ${colors.bg};
+      color: ${colors.accent};
     }
     
     /* Critical notifications */
     .notification.critical {
-      border-color: ${colors.red};
-      background: ${colors.red}20;
+      background: ${colors.bg};
     }
     
     .notification.critical .summary {
-      color: ${colors.red};
+      color: ${colors.accent};
     }
     
     /* Low priority notifications */
     .notification.low {
-      opacity: 0.8;
+      opacity: 1.0;
     }
     
     /* Scrollbars */
     scrollbar {
-      background: ${colors.bg-dark};
-      border-radius: 4px;
-      width: 8px;
+      background: ${colors.bg};
+      border-radius: 0px;
+      width: 0px;
     }
     
     scrollbar slider {
-      background: ${colors.border};
-      border-radius: 4px;
-      min-height: 20px;
+      background: ${colors.bg};
+      border-radius: 0px;
+      min-height: 0px;
     }
     
     scrollbar slider:hover {
-      background: ${colors.accent};
+      background: ${colors.bg};
     }
   '';
   
