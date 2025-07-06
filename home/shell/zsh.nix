@@ -335,6 +335,10 @@ with lib;
       gc = lib.mkForce "git commit -v";  # More verbose commits
       gl = lib.mkForce "git log --oneline --graph --decorate";  # Better git log
       
+      # NixOS management aliases
+      nhs = "nh os switch";
+      nhu = "nh home switch";
+      
       # Safe unique aliases
       reload = "exec zsh";
       weather = "curl -s https://wttr.in/London";
