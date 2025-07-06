@@ -109,25 +109,28 @@ in {
       '')
       
       (pkgs.writeScriptBin "api-keys-status" ''
-        #!/bin/sh
+        #!/bin/bash
         echo "API Keys Status:"
         echo "==============="
         
-        check_key() {
-          local name="$1"
-          local path="$2"
-          if [ -r "$path" ] && [ -s "$path" ]; then
-            echo "✅ $name: Available"
-          else
-            echo "❌ $name: Not available"
-          fi
-        }
+        # Check environment variables
+        [ -n "$OPENAI_API_KEY" ] && echo "✅ OpenAI: Available" || echo "❌ OpenAI: Not available"
+        [ -n "$GEMINI_API_KEY" ] && echo "✅ Gemini: Available" || echo "❌ Gemini: Not available" 
+        [ -n "$ANTHROPIC_API_KEY" ] && echo "✅ Anthropic: Available" || echo "❌ Anthropic: Not available"
+        [ -n "$LANGCHAIN_API_KEY" ] && echo "✅ LangChain: Available" || echo "❌ LangChain: Not available"
+        [ -n "$GITHUB_TOKEN" ] && echo "✅ GitHub Token: Available" || echo "❌ GitHub Token: Not available"
         
-        check_key "OpenAI" "${config.age.secrets.api-openai.path}"
-        check_key "Gemini" "${config.age.secrets.api-gemini.path}"
-        check_key "Anthropic" "${config.age.secrets.api-anthropic.path}"
-        check_key "LangChain" "${config.age.secrets.api-langchain.path}"
-        check_key "GitHub Token" "${config.age.secrets.api-github-token.path}"
+        echo ""
+        echo "Secret Files:"
+        echo "============="
+        
+        # Check secret files
+        find /run/agenix* -name "api-*" 2>/dev/null | while read file; do
+          if [ -r "$file" ] && [ -s "$file" ]; then
+            basename=$(basename "$file")
+            echo "✅ $basename: $file"
+          fi
+        done
       '')
     ];
 

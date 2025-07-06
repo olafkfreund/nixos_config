@@ -60,7 +60,12 @@
       "Bash(just p510)",
       "Bash(just:*)",
       "Bash(foot:*)",
-      "Bash(zellij:*)"
+      "Bash(zellij:*)",
+      "Bash(./scripts/encrypt-api-keys.sh:*)",
+      "Bash(./scripts/manual-encrypt.sh:*)",
+      "Bash(sudo nixos-rebuild:*)",
+      "Bash(api-keys-status)",
+      "Bash(sudo ls:*)"
     ]
   },
   "enableAllProjectMcpServers": false
