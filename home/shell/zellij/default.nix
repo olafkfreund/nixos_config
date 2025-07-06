@@ -52,7 +52,6 @@ in {
           "tab-bar" 
           "compact-bar"
           "session-manager"
-          "filepicker"
         ];
         
         # Performance and behavior optimizations
@@ -101,13 +100,13 @@ in {
               };
             };
             
-            # File manager (using filepicker instead)
-            "bind \"e\"" = {
-              LaunchOrFocusPlugin = {
-                file_to_open = "filepicker";
-                should_open_in_place = true;
-              };
-            };
+            # File manager (disabled - plugin not available)
+            # "bind \"e\"" = {
+            #   LaunchOrFocusPlugin = {
+            #     file_to_open = "filepicker";
+            #     should_open_in_place = true;
+            #   };
+            # };
           };
           
           # Enhanced scroll mode
