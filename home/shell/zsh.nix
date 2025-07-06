@@ -319,7 +319,6 @@ with lib;
         "history"      # History management
         "starship"     # Prompt integration
         "git"          # Git integration
-        "forgit"       # Interactive git
         "terraform"    # Infrastructure
         "aws"          # Cloud
         "azure"        # Cloud
@@ -352,7 +351,7 @@ with lib;
     zoxide = {
       enable = true;
       enableZshIntegration = true;
-      options = [ "--cmd cd" ];
+      options = [ "--cmd" "cd" ];
     };
     
     

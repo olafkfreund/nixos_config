@@ -50,7 +50,6 @@ in {
         plugins = [
           "status-bar"
           "tab-bar" 
-          "strider"
           "compact-bar"
           "session-manager"
           "filepicker"
@@ -102,10 +101,10 @@ in {
               };
             };
             
-            # File manager
+            # File manager (using filepicker instead)
             "bind \"e\"" = {
               LaunchOrFocusPlugin = {
-                file_to_open = "strider";
+                file_to_open = "filepicker";
                 should_open_in_place = true;
               };
             };
