@@ -412,7 +412,7 @@
         #workspaces button {
           all: unset;
           border: none;
-          border-radius: 5px;
+          border-radius: 0px;
           margin-left: 4px;
           margin-bottom: 2px;
           margin-top: 2px;
