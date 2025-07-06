@@ -149,7 +149,11 @@ with lib; {
 
     # Repeatable binds for resize mode
     binde = [
-      # Global resize bindings removed - now in submap
+      # Global resize shortcuts (with Super key)
+      "$mainMod, l, resizeactive, 30 0"
+      "$mainMod, h, resizeactive, -30 0"
+      "$mainMod, k, resizeactive, 0 -30"
+      "$mainMod, j, resizeactive, 0 30"
     ];
 
     # Submap definitions for resize mode
