@@ -275,6 +275,9 @@ let
       font-family: "JetBrainsMono Nerd Font";
       font-weight: normal;
       transition: none;
+      border: none;
+      outline: none;
+      box-shadow: none;
     }
     
     /* Main window */
@@ -468,6 +471,23 @@ let
     /* Notification window */
     .notification-window {
       background: ${colors.bg};
+      border: none;
+      outline: none;
+      box-shadow: none;
+    }
+    
+    /* Remove any possible window borders */
+    window {
+      border: none;
+      outline: none;
+      box-shadow: none;
+    }
+    
+    /* Remove borders from any containers */
+    .control-center-window {
+      border: none;
+      outline: none;
+      box-shadow: none;
     }
     
     .floating-notifications .notification {
