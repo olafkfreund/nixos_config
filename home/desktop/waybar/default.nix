@@ -430,12 +430,13 @@
 
         #workspaces button:hover {
           color: #fabd2f;
-          background-color: rgba(251, 189, 47, 0.1);
+          background-color: transparent;
         }
 
         #workspaces button.active {
           color: #fabd2f;
-          background-color: rgba(251, 189, 47, 0.2);
+          background-color: transparent;
+          border-bottom: 2px solid #ebdbb2;
         }
 
         #custom-weather {
