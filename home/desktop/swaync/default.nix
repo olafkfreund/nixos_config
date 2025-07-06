@@ -521,6 +521,49 @@ let
       color: ${colors.accent};
     }
     
+    /* Action buttons in notifications */
+    .notification .notification-action {
+      background: ${colors.bg};
+      color: ${colors.accent};
+      border: none;
+      border-radius: 0px;
+      padding: 4px 8px;
+      margin: 2px;
+      font-size: 11px;
+      font-weight: normal;
+      cursor: pointer;
+    }
+    
+    .notification .notification-action:hover {
+      background: ${colors.bg};
+      color: ${colors.accent};
+      text-decoration: underline;
+    }
+    
+    /* Action text in popup notifications */
+    .notification .actions {
+      background: ${colors.bg};
+      padding: 4px;
+    }
+    
+    .notification .actions button {
+      background: ${colors.bg};
+      color: ${colors.accent};
+      border: none;
+      border-radius: 0px;
+      padding: 2px 6px;
+      margin: 1px;
+      font-size: 10px;
+      font-weight: normal;
+      cursor: pointer;
+    }
+    
+    .notification .actions button:hover {
+      background: ${colors.bg};
+      color: ${colors.accent};
+      text-decoration: underline;
+    }
+    
     /* Critical notifications */
     .notification.critical {
       background: ${colors.bg};
