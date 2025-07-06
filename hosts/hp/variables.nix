@@ -51,7 +51,7 @@
   # Theme settings
   theme = {
     scheme = "gruvbox-dark-medium";
-    wallpaper = ./themes/003.png;
+    wallpaper = ./themes/orange-desert.jpg;
     cursor = {
       name = "Bibata-Modern-Ice";
       size = 26;

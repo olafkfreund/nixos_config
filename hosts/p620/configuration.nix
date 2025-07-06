@@ -28,6 +28,7 @@ in {
     ../../modules/development/default.nix
     ../common/hyprland.nix
     ../../modules/security/secrets.nix
+    ../../modules/secrets/api-keys.nix
     ../../modules/containers/docker.nix
     ../../modules/scrcpy/default.nix
   ];
@@ -83,6 +84,13 @@ in {
       enable = true;
       onepassword = true;
       gnupg = true;
+    };
+
+    # Enable encrypted API keys
+    secrets.apiKeys = {
+      enable = true;
+      enableEnvironmentVariables = true;
+      enableUserEnvironment = true;
     };
 
     networking = {

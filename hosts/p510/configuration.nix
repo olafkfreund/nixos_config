@@ -29,6 +29,7 @@ in {
     ../../modules/default.nix
     ../../modules/development/default.nix
     ../common/hyprland.nix
+    ../../modules/secrets/api-keys.nix
   ];
 
   # Set hostname from variables
@@ -102,6 +103,13 @@ in {
     media = {
       droidcam = true;
     };
+  };
+
+  # Enable encrypted API keys
+  secrets.apiKeys = {
+    enable = true;
+    enableEnvironmentVariables = true;
+    enableUserEnvironment = true;
   };
 
   # IDIOT-PROOF DNS CONFIGURATION: Prevent Tailscale from breaking DNS

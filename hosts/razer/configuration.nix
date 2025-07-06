@@ -26,6 +26,7 @@ in {
     ../../modules/development/default.nix
     ../common/hyprland.nix
     ../../modules/security/secrets.nix
+    ../../modules/secrets/api-keys.nix
     ../../modules/containers/docker.nix
   ];
 
@@ -106,6 +107,13 @@ in {
     media = {
       droidcam = true;
     };
+  };
+
+  # Enable encrypted API keys
+  secrets.apiKeys = {
+    enable = true;
+    enableEnvironmentVariables = true;
+    enableUserEnvironment = true;
   };
 
   # Nix build optimizations

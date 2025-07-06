@@ -16,7 +16,17 @@ let
   workstations = [p620 razer];
   servers = [p510 dex5550];
 in {
+  # User passwords
   "secrets/user-password-olafkfreund.age".publicKeys = allUsers ++ allHosts;
+  
+  # API Keys - Available on all hosts for development/AI tools
+  "secrets/api-openai.age".publicKeys = allUsers ++ allHosts;
+  "secrets/api-gemini.age".publicKeys = allUsers ++ allHosts;
+  "secrets/api-anthropic.age".publicKeys = allUsers ++ allHosts;
+  "secrets/api-langchain.age".publicKeys = allUsers ++ allHosts;
+  "secrets/api-github-token.age".publicKeys = allUsers ++ allHosts;
+  
+  # System secrets
   "secrets/github-token.age".publicKeys = allUsers ++ workstations;
   "secrets/ssh-host-ed25519-key.age".publicKeys = allUsers ++ allHosts;
   "secrets/wifi-password.age".publicKeys = allUsers ++ [razer];
