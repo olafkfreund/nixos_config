@@ -80,15 +80,15 @@ let
   
   # Common keybindings across terminals
   commonKeybinds = {
-    copy = "ctrl+shift+c";
-    paste = "ctrl+shift+v";
-    fontIncrease = "ctrl+shift+equal";
-    fontDecrease = "ctrl+shift+minus";
-    fontReset = "ctrl+shift+0";
-    newTab = "ctrl+shift+t";
-    closeTab = "ctrl+shift+q";
-    nextTab = "ctrl+shift+right";
-    prevTab = "ctrl+shift+left";
+    copy = "Control+Shift+c";
+    paste = "Control+Shift+v";
+    fontIncrease = "Control+Shift+equal";
+    fontDecrease = "Control+Shift+minus";
+    fontReset = "Control+Shift+0";
+    newTab = "Control+Shift+t";
+    closeTab = "Control+Shift+q";
+    nextTab = "Control+Shift+Right";
+    prevTab = "Control+Shift+Left";
   };
   
   # Font configuration
