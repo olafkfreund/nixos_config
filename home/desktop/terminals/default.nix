@@ -151,6 +151,12 @@ in {
         font-reset = commonKeybinds.fontReset;
       };
       
+      search-bindings = {
+        cancel = "Control+g Control+c Escape";
+        find-prev = "Control+r";
+        find-next = "Control+s";
+      };
+      
       colors = mkDefault {
         foreground = activeColors.foreground;
         background = activeColors.background;

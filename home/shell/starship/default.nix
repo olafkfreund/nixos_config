@@ -103,8 +103,8 @@ in {
         };
 
         username = {
-          style_user = "fg:color_fg0";
-          style_root = "fg:color_fg0";
+          style_user = "bold fg:color_green";
+          style_root = "bold fg:color_red";
           format = "$user ";
           show_always = false;
           aliases = {
@@ -116,14 +116,15 @@ in {
           format = "$ssh_symbol$hostname ";
           ssh_only = true;
           detect_env_vars = [''!TMUX''];
-          style = "fg:color_fg0";
+          style = "bold fg:color_purple";
         };
 
         directory = {
           format = "$path($read_only) ";
-          style = "fg:color_blue";
+          style = "bold fg:color_blue";
           home_symbol = "~";
           read_only = "󰉐";
+          read_only_style = "fg:color_red";
           truncation_length = 2;
           truncation_symbol = "…/";
         };
@@ -131,8 +132,8 @@ in {
         cmd_duration = {
           min_time = 1000; # Show for commands taking more than 1s
           show_milliseconds = true;
-          format = "took $duration ";
-          style = "fg:color_yellow";
+          format = "⏱ $duration ";
+          style = "bold fg:color_yellow";
           disabled = false; # Enable to show command duration
         };
 
@@ -141,7 +142,7 @@ in {
           bash_indicator = "bash";
           powershell_indicator = "pwsh";
           unknown_indicator = "shell";
-          style = "fg:color_fg0";
+          style = "fg:color_aqua";
           disabled = false;
           format = "$indicator ";
         };
@@ -150,7 +151,7 @@ in {
           format = "($name develop) $symbol";
           impure_msg = "devbox";
           symbol = "❄️";
-          style = "fg:color_blue";
+          style = "bold fg:color_blue";
         };
 
         fill = {
@@ -166,13 +167,13 @@ in {
         git_branch = {
           symbol = " ";
           format = "$symbol$branch(:$remote_branch) ";
-          style = "fg:color_purple";
+          style = "bold fg:color_purple";
           truncation_symbol = "...";
         };
 
         git_commit = {
           format = "$hash ";
-          style = "fg:color_fg0";
+          style = "fg:color_orange";
           only_detached = true;
           tag_symbol = "🏷";
         };
@@ -202,7 +203,7 @@ in {
           renamed = "»";
           deleted = "✘";
           format = "($all_status$ahead_behind) ";
-          style = "fg:color_red";
+          style = "bold fg:color_red";
         };
 
         helm = {
@@ -251,12 +252,12 @@ in {
         };
 
         character = {
-          success_symbol = "❯";
-          error_symbol = "❯";
-          vimcmd_symbol = "❮";
-          vimcmd_replace_symbol = "❮";
-          vimcmd_replace_one_symbol = "❮";
-          vimcmd_visual_symbol = "❮";
+          success_symbol = "[❯](bold green)";
+          error_symbol = "[❯](bold red)";
+          vimcmd_symbol = "[❮](bold purple)";
+          vimcmd_replace_symbol = "[❮](bold yellow)";
+          vimcmd_replace_one_symbol = "[❮](bold yellow)";
+          vimcmd_visual_symbol = "[❮](bold blue)";
         };
 
         line_break = {

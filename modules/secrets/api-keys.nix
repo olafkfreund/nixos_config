@@ -67,15 +67,8 @@ in {
       };
     };
 
-    # Export as system environment variables (available to all processes)
-    environment.variables = mkIf cfg.enableEnvironmentVariables {
-      OPENAI_API_KEY = "$(cat ${config.age.secrets.api-openai.path} 2>/dev/null || echo '')";
-      OPENAI_KEY = "$(cat ${config.age.secrets.api-openai.path} 2>/dev/null || echo '')"; # Duplicate for compatibility
-      GEMINI_API_KEY = "$(cat ${config.age.secrets.api-gemini.path} 2>/dev/null || echo '')";
-      ANTHROPIC_API_KEY = "$(cat ${config.age.secrets.api-anthropic.path} 2>/dev/null || echo '')";
-      LANGCHAIN_API_KEY = "$(cat ${config.age.secrets.api-langchain.path} 2>/dev/null || echo '')";
-      GITHUB_TOKEN = "$(cat ${config.age.secrets.api-github-token.path} 2>/dev/null || echo '')";
-    };
+    # Note: System environment variables removed - use shell initialization instead
+    # The load-api-keys script properly handles dynamic loading of API keys
 
     # Create utility scripts for API key management
     environment.systemPackages = [
