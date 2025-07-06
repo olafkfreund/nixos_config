@@ -17,12 +17,28 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Enable the service
-    services.swaync = {
-      enable = true;
-      package = cfg.package;
-    };
     home.packages = [ cfg.package ];
+
+    # Enable swaync service via systemd
+    systemd.user.services.swaync = {
+      Unit = {
+        Description = "SwayNC notification daemon";
+        After = [ "graphical-session-pre.target" ];
+        PartOf = [ "graphical-session.target" ];
+      };
+      
+      Service = {
+        Type = "simple";
+        ExecStart = "${cfg.package}/bin/swaync";
+        Restart = "on-failure";
+        RestartSec = 1;
+        TimeoutStopSec = 10;
+      };
+      
+      Install = {
+        WantedBy = [ "graphical-session.target" ];
+      };
+    };
 
     # SwayNC configuration
     xdg.configFile."swaync/config.json".text = builtins.toJSON {
@@ -132,27 +148,37 @@ in
       };
     };
 
-    # SwayNC CSS styling - flat design matching waybar/rofi exactly
+    # SwayNC CSS styling - completely flat design like rofi
     xdg.configFile."swaync/style.css".text = ''
       * {
         font-family: "JetBrainsMono Nerd Font";
         font-size: 14px;
         font-weight: normal;
         transition: none;
-        border: none;
-        border-radius: 0px;
-        outline: none;
-        box-shadow: none;
+        border: none !important;
+        border-radius: 0px !important;
+        outline: none !important;
+        box-shadow: none !important;
       }
       
-      /* Main control center - exact waybar match */
+      /* Main control center - completely flat like rofi */
       .control-center {
         background: #282828;
-        border: none;
-        border-radius: 0px;
-        box-shadow: none;
+        border: none !important;
+        border-radius: 0px !important;
+        box-shadow: none !important;
+        outline: none !important;
         margin: 0px;
         padding: 0;
+      }
+      
+      /* Remove any window decorations */
+      .control-center-window {
+        background: #282828;
+        border: none !important;
+        border-radius: 0px !important;
+        box-shadow: none !important;
+        outline: none !important;
       }
       
       /* Title widget */
@@ -424,13 +450,31 @@ in
         opacity: 1.0;
       }
       
-      /* Remove all window borders */
+      /* Remove all window borders and decorations - FORCE FLAT */
       .notification-window,
       .control-center-window,
-      window {
-        border: none;
-        outline: none;
-        box-shadow: none;
+      window,
+      .swaync-control-center,
+      .swaync-notification-window {
+        background: #282828;
+        border: none !important;
+        border-radius: 0px !important;
+        outline: none !important;
+        box-shadow: none !important;
+        -gtk-outline-radius: 0px !important;
+        -gtk-outline-width: 0px !important;
+      }
+      
+      /* Force remove any GTK window decorations */
+      window.swaync-control-center,
+      window.swaync-notification-window {
+        background: #282828;
+        border: none !important;
+        border-radius: 0px !important;
+        outline: none !important;
+        box-shadow: none !important;
+        -gtk-outline-radius: 0px !important;
+        -gtk-outline-width: 0px !important;
       }
       
       /* Scrollbars - hidden like rofi */
@@ -453,9 +497,7 @@ in
 
     # Hyprland integration
     wayland.windowManager.hyprland = mkIf config.wayland.windowManager.hyprland.enable {
-      settings = {
-        exec-once = [ "swaync" ];
-        
+      settings = {        
         bind = [
           "SUPER, N, exec, swaync-client -t -sw"
           "SUPER SHIFT, N, exec, swaync-client -d -sw"
