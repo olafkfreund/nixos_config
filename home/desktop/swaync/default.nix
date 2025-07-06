@@ -42,7 +42,7 @@ let
     
     # Control center features
     controlCenter = {
-      position = "right";      # Position: left, right, center
+      position = "left";       # Position: left, right, center
       margins = {
         top = 10;
         bottom = 10;
@@ -151,7 +151,7 @@ let
     
     # Window behavior
     fit-to-screen = cfg.performance.fitToScreen;
-    notification-window-positionX = cfg.controlCenter.position;
+    notification-window-positionX = "left";
     notification-window-positionY = "top";
     
     # Layer shell configuration
@@ -276,6 +276,7 @@ let
       font-weight: normal;
       transition: none;
       border: none;
+      border-radius: 0px;
       outline: none;
       box-shadow: none;
     }
@@ -581,7 +582,7 @@ in {
     
     # Layer rules for animations
     layerrule = mkDefault [
-      "animation slide right, swaync-control-center"
+      "animation slide left, swaync-control-center"
       "animation slide top, swaync-notification-window"
     ];
     
