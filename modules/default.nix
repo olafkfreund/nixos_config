@@ -55,5 +55,8 @@
     ./services/dns/secure-dns.nix
     ./services/network-monitoring.nix
     ./services/network-stability.nix
+    
+    # System optimization modules
+    ./system/fstrim-optimization.nix
   ];
 }

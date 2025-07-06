@@ -111,6 +111,12 @@ in {
     netfilterMode = "off"; # Safer default
   };
 
+  # BOOT PERFORMANCE: Prevent fstrim from blocking boot (saves 8+ minutes)
+  services.fstrim-optimization = {
+    enable = true;
+    preventBootBlocking = true;
+  };
+
   # Specific service configurations
   programs.streamdeck-ui = {
     enable = true;

@@ -15,13 +15,18 @@
 
 ### **Active Tasks**
 
+#### **✅ Completed This Sprint**
+- [x] **Establish performance baselines across all hosts** *(2025-01-06)*
+  - **Result**: Complete baseline documented in PERFORMANCE_BASELINE.md
+  - **Critical findings**: P510 disk 91%→86%, boot issues identified
+  - **Status**: Emergency P510 cleanup completed, 10GB freed
+
 #### **🔄 In Progress**
-- [ ] **Establish performance baselines across all hosts**
-  - **Assignee**: Next session
-  - **Priority**: HIGH
-  - **Estimated**: 2-3 hours
-  - **Dependencies**: None
-  - **Notes**: Need boot time, memory usage, and build performance data
+- [ ] **Fix fstrim boot blocking on P510/DEX5550**
+  - **Priority**: URGENT
+  - **Estimated**: 1 hour
+  - **Dependencies**: NixOS fstrim service configuration
+  - **Notes**: fstrim running at boot instead of timer-only, blocking 8+ minutes
 
 #### **📋 Ready to Start**
 - [ ] **Memory usage analysis per host**

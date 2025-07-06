@@ -56,7 +56,9 @@
       "Bash(alias reload)",
       "Bash(alias myip)",
       "Bash(starship config get:*)",
-      "Bash(tmux-sessionizer:*)"
+      "Bash(tmux-sessionizer:*)",
+      "Bash(just p510)",
+      "Bash(just:*)"
     ]
   },
   "enableAllProjectMcpServers": false
