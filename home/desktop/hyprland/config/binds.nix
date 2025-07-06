@@ -131,16 +131,8 @@ with lib; {
       ", Print, exec, flameshot gui --raw | wl-copy"
       "SHIFT, Print, exec, flameshot gui --path ~/Pictures/screenshots"
       
-      # Resize mode entry
-      "$mainMod, R, submap, resize"
-      
-      # Resize submap bindings
-      "resize, h, resizeactive, -30 0"
-      "resize, l, resizeactive, 30 0" 
-      "resize, k, resizeactive, 0 -30"
-      "resize, j, resizeactive, 0 30"
-      "resize, escape, submap, reset"
-      "resize, return, submap, reset"
+      # Note: Resize mode disabled due to submap parsing issues
+      # Use global resize shortcuts instead (Super + h/j/k/l)
     ];
 
     # Mouse bindings for window movement and resizing
@@ -163,5 +155,7 @@ with lib; {
       "$mainMod, k, resizeactive, 0 -30"
       "$mainMod, j, resizeactive, 0 30"
     ];
+
+    # Submap definitions removed due to parsing conflicts
   };
 }

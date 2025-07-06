@@ -65,7 +65,14 @@
       "Bash(./scripts/manual-encrypt.sh:*)",
       "Bash(sudo nixos-rebuild:*)",
       "Bash(api-keys-status)",
-      "Bash(sudo ls:*)"
+      "Bash(sudo ls:*)",
+      "Bash(env)",
+      "Bash(sudo find /run -name \"api-*\" -type f)",
+      "Bash(sudo cat /run/agenix.d/1/api-openai)",
+      "WebFetch(domain:wiki.hypr.land)",
+      "Bash(diff:*)",
+      "Bash(hyprctl:*)",
+      "Bash(journalctl:*)"
     ]
   },
   "enableAllProjectMcpServers": false
