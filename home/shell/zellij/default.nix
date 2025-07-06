@@ -46,12 +46,11 @@ in {
           };
         };
         
-        # Essential plugins for productivity
+        # Essential plugins for productivity (only basic ones that work)
         plugins = [
           "status-bar"
           "tab-bar" 
           "compact-bar"
-          "session-manager"
         ];
         
         # Performance and behavior optimizations
@@ -92,13 +91,13 @@ in {
             "bind \"z\"" = { ToggleFocusFullscreen = {}; };
             "bind \"r\"" = { SwitchToMode = "RenameTab"; };
             
-            # Session management
-            "bind \"s\"" = { 
-              LaunchOrFocusPlugin = {
-                file_to_open = "session-manager";
-                should_open_in_place = true;
-              };
-            };
+            # Session management (disabled - plugin not available)
+            # "bind \"s\"" = { 
+            #   LaunchOrFocusPlugin = {
+            #     file_to_open = "session-manager";
+            #     should_open_in_place = true;
+            #   };
+            # };
             
             # File manager (disabled - plugin not available)
             # "bind \"e\"" = {

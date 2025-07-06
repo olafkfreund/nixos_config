@@ -59,7 +59,8 @@
       "Bash(tmux-sessionizer:*)",
       "Bash(just p510)",
       "Bash(just:*)",
-      "Bash(foot:*)"
+      "Bash(foot:*)",
+      "Bash(zellij:*)"
     ]
   },
   "enableAllProjectMcpServers": false
