@@ -58,72 +58,34 @@ in {
         default_mode = "normal";
         mouse_mode = true;
         
-        # Enhanced keybindings for Vim-style navigation
+        # Basic keybindings - simplified to avoid parsing errors
         keybinds = {
           normal = {
-            # Pane management - Vim-style
+            # Basic pane management
             "bind \"h\"" = { MoveFocus = "Left"; };
             "bind \"j\"" = { MoveFocus = "Down"; };
             "bind \"k\"" = { MoveFocus = "Up"; };
             "bind \"l\"" = { MoveFocus = "Right"; };
             
-            # Pane resizing
-            "bind \"H\"" = { Resize = "Increase Left"; };
-            "bind \"J\"" = { Resize = "Increase Down"; };
-            "bind \"K\"" = { Resize = "Increase Up"; };
-            "bind \"L\"" = { Resize = "Increase Right"; };
-            
-            # Window/Tab management
+            # Basic tab management
             "bind \"t\"" = { NewTab = {}; };
             "bind \"x\"" = { CloseTab = {}; };
-            "bind \"1\"" = { GoToTab = 1; };
-            "bind \"2\"" = { GoToTab = 2; };
-            "bind \"3\"" = { GoToTab = 3; };
-            "bind \"4\"" = { GoToTab = 4; };
-            "bind \"5\"" = { GoToTab = 5; };
             
-            # Pane splitting
+            # Basic pane splitting
             "bind \"|\"" = { NewPane = "Right"; };
             "bind \"-\"" = { NewPane = "Down"; };
             
-            # Enhanced functionality
+            # Basic functionality
             "bind \"f\"" = { ToggleFloatingPanes = {}; };
             "bind \"z\"" = { ToggleFocusFullscreen = {}; };
-            "bind \"r\"" = { SwitchToMode = "RenameTab"; };
-            
-            # Session management (disabled - plugin not available)
-            # "bind \"s\"" = { 
-            #   LaunchOrFocusPlugin = {
-            #     file_to_open = "session-manager";
-            #     should_open_in_place = true;
-            #   };
-            # };
-            
-            # File manager (disabled - plugin not available)
-            # "bind \"e\"" = {
-            #   LaunchOrFocusPlugin = {
-            #     file_to_open = "filepicker";
-            #     should_open_in_place = true;
-            #   };
-            # };
           };
           
-          # Enhanced scroll mode
+          # Simplified scroll mode
           scroll = {
-            "bind \"h\"" = { MoveFocus = "Left"; };
             "bind \"j\"" = { ScrollDown = {}; };
             "bind \"k\"" = { ScrollUp = {}; };
-            "bind \"l\"" = { MoveFocus = "Right"; };
             "bind \"d\"" = { HalfPageScrollDown = {}; };
             "bind \"u\"" = { HalfPageScrollUp = {}; };
-            "bind \"Ctrl f\"" = { PageScrollDown = {}; };
-            "bind \"Ctrl b\"" = { PageScrollUp = {}; };
-          };
-          
-          # Copy mode enhancements
-          search = {
-            "bind \"n\"" = { Search = "down"; };
-            "bind \"N\"" = { Search = "up"; };
           };
         };
         
