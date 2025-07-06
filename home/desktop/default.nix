@@ -1,10 +1,11 @@
 {pkgs, ...}: {
   imports = [
-    # Enhanced desktop components only (isolated test)
+    # Enhanced desktop components (isolated test)
     ./waybar/default.nix
     ./terminals/default.nix  
     ./rofi/default.nix
     ./swaync/default.nix
+    ./applications/default.nix
     
     # Keep essential non-conflicting modules
     ./hyprland/default.nix
