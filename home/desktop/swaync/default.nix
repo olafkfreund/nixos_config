@@ -15,15 +15,14 @@ let
     then import ../../../hosts/${host}/variables.nix
     else {};
   
-  # Backward compatibility for features system
-  desktopCfg = config.desktop or {};
-  swayncCfg = desktopCfg.swaync or {};
+  # Check if swaync is enabled via features system
+  swayncEnabled = config.features.desktop.swaync or config.desktop.swaync.enable or false;
   
   # Feature flags for SwayNC
   cfg = {
     # Core features
     core = {
-      enable = swayncCfg.enable or true;
+      enable = swayncEnabled;
       package = pkgs.swaynotificationcenter;
       autostart = true;
     };
@@ -601,26 +600,26 @@ in {
   options.desktop.swaync = {
     enable = mkOption {
       type = bool;
-      default = true;
+      default = false;
       description = "Enable SwayNC notification center";
     };
   };
 
-  config = {
+  config = mkIf swayncEnabled {
     # Enhanced SwayNC configuration
-  services.swaync = mkIf cfg.core.enable {
-    enable = true;
-    package = cfg.core.package;
-  };
-  
-  # Configuration files
-  xdg.configFile = mkIf cfg.core.enable {
-    "swaync/config.json".text = builtins.toJSON (generateConfig activeColors);
-    "swaync/style.css".text = generateCSS activeColors;
-  };
-  
-  # Hyprland integration
-  wayland.windowManager.hyprland.settings = mkIf (cfg.core.enable && cfg.core.autostart) {
+    services.swaync = {
+      enable = true;
+      package = cfg.core.package;
+    };
+    
+    # Configuration files
+    xdg.configFile = {
+      "swaync/config.json".text = builtins.toJSON (generateConfig activeColors);
+      "swaync/style.css".text = generateCSS activeColors;
+    };
+    
+    # Hyprland integration
+    wayland.windowManager.hyprland.settings = mkIf cfg.core.autostart {
     exec-once = mkDefault [ "swaync" ];
     
     # Layer rules for animations
@@ -636,23 +635,22 @@ in {
     ];
   };
   
-  # Additional packages
-  home.packages = with pkgs; mkIf cfg.core.enable ([
-    # SwayNC client for commands
-    cfg.core.package
+    # Additional packages
+    home.packages = with pkgs; [
+      # SwayNC client for commands
+      cfg.core.package
+      
+      # Optional dependencies
+      libnotify        # For notify-send
+    ] ++ optionals cfg.actions.screenshot [
+      flameshot        # Screenshot tool
+    ] ++ optionals cfg.actions.recording [
+      obs-studio       # Recording tool
+    ];
     
-    # Optional dependencies
-    libnotify        # For notify-send
-  ] ++ optionals cfg.actions.screenshot [
-    flameshot        # Screenshot tool
-  ] ++ optionals cfg.actions.recording [
-    obs-studio       # Recording tool
-  ]);
-  
-  # Launcher scripts for common swaync actions
-  home.file = mkMerge [
-    # Toggle control center
-    (mkIf cfg.core.enable {
+    # Launcher scripts for common swaync actions
+    home.file = {
+      # Toggle control center
       ".local/bin/swaync-toggle" = {
         text = ''
           #!/bin/sh
@@ -660,10 +658,8 @@ in {
         '';
         executable = true;
       };
-    })
-    
-    # Dismiss all notifications
-    (mkIf cfg.core.enable {
+      
+      # Dismiss all notifications
       ".local/bin/swaync-dismiss" = {
         text = ''
           #!/bin/sh
@@ -671,10 +667,8 @@ in {
         '';
         executable = true;
       };
-    })
-    
-    # Send test notification
-    (mkIf cfg.core.enable {
+      
+      # Send test notification
       ".local/bin/swaync-test" = {
         text = ''
           #!/bin/sh
@@ -682,11 +676,10 @@ in {
         '';
         executable = true;
       };
-    })
-  ];
-  
+    };
+    
     # Environment variables
-    home.sessionVariables = mkIf cfg.core.enable {
+    home.sessionVariables = {
       SWAYNC_CONFIG_DIR = "${config.xdg.configHome}/swaync";
     };
   };
