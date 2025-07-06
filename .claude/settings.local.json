@@ -72,7 +72,8 @@
       "WebFetch(domain:wiki.hypr.land)",
       "Bash(diff:*)",
       "Bash(hyprctl:*)",
-      "Bash(journalctl:*)"
+      "Bash(journalctl:*)",
+      "Bash(sudo rmdir:*)"
     ]
   },
   "enableAllProjectMcpServers": false
