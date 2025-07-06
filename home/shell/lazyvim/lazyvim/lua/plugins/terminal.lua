@@ -61,7 +61,7 @@ return {
           return vim.o.columns * 0.4
         end
       end,
-      open_mapping = [[<c-\>]],
+      open_mapping = [[<c-t>]],
       hide_numbers = true,
       shade_filetypes = {},
       shade_terminals = true,

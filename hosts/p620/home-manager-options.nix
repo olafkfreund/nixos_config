@@ -42,5 +42,5 @@
 
   # Multiplexers
   multiplexer.tmux.enable = lib.mkForce true;
-  multiplexer.zellij.enable = lib.mkForce true;
+  multiplexer.zellij.enable = lib.mkForce false;
 }

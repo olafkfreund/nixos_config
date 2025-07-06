@@ -284,7 +284,12 @@ with lib;
 
     # Environment variables for enhanced shell experience
     envExtra = ''
-      export TERM=xterm-256color
+      # Set TERM appropriately based on terminal and multiplexer
+      if [[ "$TMUX" != "" ]]; then
+        export TERM=tmux-256color
+      else
+        export TERM=xterm-256color
+      fi
       export BROWSER="firefox"
       export EDITOR="nvim"
       export VISUAL="$EDITOR"

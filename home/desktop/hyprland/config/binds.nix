@@ -133,7 +133,6 @@ with lib; {
       
       # Resize mode entry
       "$mainMod, R, submap, resize"
-      ", escape, submap, reset"
     ];
 
     # Mouse bindings for window movement and resizing
@@ -150,16 +149,18 @@ with lib; {
 
     # Repeatable binds for resize mode
     binde = [
-      "$mainMod, l, resizeactive, 30 0"
-      "$mainMod, h, resizeactive, -30 0"
-      "$mainMod, k, resizeactive, 0 -30"
-      "$mainMod, j, resizeactive, 0 30"
+      # Global resize bindings removed - now in submap
     ];
 
     # Submap definitions for resize mode
     submap = [
-      "resize"
-      "reset"
+      # Resize mode bindings
+      "resize,h,resizeactive,-30 0"
+      "resize,l,resizeactive,30 0"
+      "resize,k,resizeactive,0 -30" 
+      "resize,j,resizeactive,0 30"
+      "resize,escape,submap,reset"
+      "resize,return,submap,reset"
     ];
   };
 }
