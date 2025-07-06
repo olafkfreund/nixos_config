@@ -66,8 +66,12 @@ in {
   security.onepassword.enable = lib.mkForce false;
   security.gnupg.enable = lib.mkForce true;
 
-  # VPN
-  vpn.tailscale.enable = lib.mkForce true;
+  # IDIOT-PROOF DNS CONFIGURATION: Prevent Tailscale from breaking DNS
+  vpn.tailscale = {
+    enable = lib.mkForce true;
+    acceptDns = lib.mkForce false; # NEVER let Tailscale touch DNS
+    netfilterMode = "off"; # Safer default
+  };
 
   # AI
   ai.ollama.enable = lib.mkForce false;

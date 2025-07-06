@@ -182,7 +182,7 @@ in {
     # System utilities
     tmux
     jq
-    yq
+    yq-go
   ];
 
   # Enable cgroups v2 for better container resource management

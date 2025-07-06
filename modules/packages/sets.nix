@@ -39,7 +39,7 @@
       direnv
       just
       jq
-      yq
+      yq-go
     ];
 
     # Language-specific sets

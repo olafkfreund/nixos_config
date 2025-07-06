@@ -17,9 +17,6 @@
     ./private.nix
   ];
 
-  # Temporarily disabled for isolated enhanced desktop test
-  # Enhanced configurations now work independently with built-in feature flags
-  /*
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     terminals = {
@@ -93,8 +90,14 @@
       enable = true;
       steam = true;
     };
+
+    development = {
+      enable = true;
+      languages = true;
+      workflow = true;
+      productivity = true;
+    };
   };
-  */
 
   home.packages = [
     # pkgs.customPkgs.rofi-blocks

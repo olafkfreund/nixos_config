@@ -88,6 +88,13 @@
       enable = false;
       steam = false;
     };
+
+    development = {
+      enable = true;
+      languages = true;
+      workflow = true;
+      productivity = true;
+    };
   };
 
   # Host-specific Sway configuration

@@ -107,6 +107,13 @@ in {
     };
   };
 
+  # IDIOT-PROOF DNS CONFIGURATION: Prevent Tailscale from breaking DNS
+  vpn.tailscale = {
+    enable = true;
+    acceptDns = lib.mkForce false; # NEVER let Tailscale touch DNS
+    netfilterMode = "off"; # Safer default
+  };
+
   # Nix build optimizations
   nix = {
     settings = {

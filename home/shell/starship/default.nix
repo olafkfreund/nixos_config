@@ -134,11 +134,11 @@ in {
         };
 
         cmd_duration = {
-          min_time = 500;
-          show_milliseconds = false;
+          min_time = 1000; # Show for commands taking more than 1s
+          show_milliseconds = true;
           format = "[ ](bg:color_bg3)[  ](fg:color_bg0 bg:color_purple)[ ](fg:color_purple)";
           style = "fg:color_fg0 bg:color_bg3";
-          disabled = true;
+          disabled = false; # Enable to show command duration
         };
 
         shell = {

@@ -39,7 +39,24 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(ssh:*)"
+      "Bash(ssh:*)",
+      "Bash(nhs)",
+      "Bash(systemctl:*)",
+      "Bash(cat:*)",
+      "Bash(rofi:*)",
+      "Bash(mkdir:*)",
+      "Bash(home-manager switch:*)",
+      "Bash(system-dashboard)",
+      "Bash(nix-collect-garbage:*)",
+      "Bash(echo $SHELL)",
+      "Bash(zsh:*)",
+      "Bash(source:*)",
+      "Bash(alias ezals)",
+      "Bash(alias aiexplain)",
+      "Bash(alias reload)",
+      "Bash(alias myip)",
+      "Bash(starship config get:*)",
+      "Bash(tmux-sessionizer:*)"
     ]
   },
   "enableAllProjectMcpServers": false

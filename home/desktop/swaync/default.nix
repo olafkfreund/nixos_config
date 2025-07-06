@@ -7,6 +7,7 @@
   ...
 }:
 with lib;
+with types;
 let
   # Import host-specific variables if available
   hostVars = 
@@ -14,11 +15,15 @@ let
     then import ../../../hosts/${host}/variables.nix
     else {};
   
+  # Backward compatibility for features system
+  desktopCfg = config.desktop or {};
+  swayncCfg = desktopCfg.swaync or {};
+  
   # Feature flags for SwayNC
   cfg = {
     # Core features
     core = {
-      enable = true;
+      enable = swayncCfg.enable or true;
       package = pkgs.swaynotificationcenter;
       autostart = true;
     };
@@ -527,7 +532,17 @@ let
   '';
   
 in {
-  # Enhanced SwayNC configuration
+  # Backward compatibility options for features system
+  options.desktop.swaync = {
+    enable = mkOption {
+      type = bool;
+      default = true;
+      description = "Enable SwayNC notification center";
+    };
+  };
+
+  config = {
+    # Enhanced SwayNC configuration
   services.swaync = mkIf cfg.core.enable {
     enable = true;
     package = cfg.core.package;
@@ -605,8 +620,9 @@ in {
     })
   ];
   
-  # Environment variables
-  home.sessionVariables = mkIf cfg.core.enable {
-    SWAYNC_CONFIG_DIR = "${config.xdg.configHome}/swaync";
+    # Environment variables
+    home.sessionVariables = mkIf cfg.core.enable {
+      SWAYNC_CONFIG_DIR = "${config.xdg.configHome}/swaync";
+    };
   };
 }

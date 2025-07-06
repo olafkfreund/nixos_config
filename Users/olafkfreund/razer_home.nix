@@ -92,6 +92,13 @@ in {
       enable = true;
       steam = true;
     };
+
+    development = {
+      enable = true;
+      languages = true;
+      workflow = true;
+      productivity = true;
+    };
   };
 
   # Host-specific Windsurf configuration

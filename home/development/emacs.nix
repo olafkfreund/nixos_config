@@ -813,7 +813,7 @@
     nodePackages.bash-language-server # Shell language server
     pyright # Python LSP server
     black # Python formatter
-    python311Packages.isort # Python import sorting
+    python313Packages.isort # Python import sorting
     gopls # Go LSP server
     #gotools # Go tools (guru, etc.)
     golangci-lint # Go linter

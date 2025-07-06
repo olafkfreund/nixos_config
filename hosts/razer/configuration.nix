@@ -121,7 +121,15 @@ in {
     '';
   };
 
-  # Enable secure DNS with DNS over TLS
+  # IDIOT-PROOF DNS CONFIGURATION: Prevent Tailscale from breaking DNS
+  # Force Tailscale to NEVER manage DNS to avoid conflicts
+  vpn.tailscale = {
+    enable = true;
+    acceptDns = lib.mkForce false; # NEVER let Tailscale touch DNS
+    netfilterMode = "off"; # Safer for laptops
+  };
+
+  # Keep secure DNS but ensure it doesn't conflict
   services.secure-dns = {
     enable = true;
     dnssec = "true";
@@ -155,8 +163,26 @@ in {
   # Use variables for nameservers
   networking.nameservers = vars.nameservers;
 
-  # Disable network wait services to improve boot time regardless of network manager
-  systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
+  # CRITICAL: DNS Resolution Fix for Tailscale
+  # Ensure proper service ordering to prevent DNS conflicts
+  systemd.services = {
+    # Disable network wait services to improve boot time
+    NetworkManager-wait-online.enable = lib.mkForce false;
+    
+    # Make sure Tailscale starts AFTER DNS is properly configured
+    tailscaled = {
+      after = [ "network.target" "NetworkManager.service" "systemd-resolved.service" ];
+      wants = [ "network.target" ];
+      requires = [ "network-online.target" ];
+      serviceConfig = {
+        Restart = "on-failure";
+        RestartSec = "10s";
+      };
+    };
+  };
+
+  # Additional DNS conflict prevention
+  networking.resolvconf.dnsExtensionMechanism = false;
 
   environment.sessionVariables =
     vars.environmentVariables

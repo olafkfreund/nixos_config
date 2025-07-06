@@ -82,5 +82,10 @@ in {
     (mkIf cfg.gaming.enable {
       # Import Steam config if enabled
     })
+
+    # Development implementations - packages and configurations only
+    (mkIf cfg.development.enable {
+      # Development modules are imported at the top level in imports.nix
+    })
   ];
 }

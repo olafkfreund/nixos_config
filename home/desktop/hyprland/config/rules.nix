@@ -1,11 +1,81 @@
-# Hyprland Window Rules Configuration
-# Converted to native Nix configuration for better type safety and maintainability
+# Enhanced Hyprland Window Rules Configuration
+# Converted to native Nix configuration with feature flags and smart defaults
 {
   config,
   lib,
+  host ? "default",
   ...
 }:
-with lib; {
+with lib; 
+let
+  # Import host-specific variables if available
+  hostVars = 
+    if builtins.pathExists ../../../../hosts/${host}/variables.nix
+    then import ../../../../hosts/${host}/variables.nix
+    else {};
+  
+  # Window management feature flags
+  cfg = {
+    # Terminal behavior
+    terminals = {
+      float = true;
+      size = { width = 1000; height = 1000; };
+      center = true;
+      animations = true;
+    };
+    
+    # Application workspace assignments
+    workspaces = {
+      useSpecialWorkspaces = true;
+      assignments = {
+        browsers = {
+          chrome = "special:chrome";
+          firefox = "special:firefox"; 
+          edge = 4;
+        };
+        communication = {
+          slack = "special:slack";
+          discord = "special:discord";
+          telegram = 8;
+          thunderbird = "special:mail";
+        };
+        development = {
+          vscode = 2;
+          tmux = "special:tmux";
+        };
+        media = {
+          spotify = "special:spotify";
+          obs = 4;
+        };
+        productivity = {
+          obsidian = 5;
+        };
+      };
+    };
+    
+    # System utility behaviors  
+    system = {
+      floatUtilities = true;
+      centerDialogs = true;
+      dimAround = true;
+    };
+    
+    # Gaming optimizations
+    gaming = {
+      immediateMode = true;
+      fullscreenBorders = true;
+    };
+  };
+  
+  # Helper functions for generating rules
+  mkRule = rule: conditions: "${rule}, ${conditions}";
+  mkFloat = conditions: mkRule "float" conditions;
+  mkSize = width: height: conditions: mkRule "size ${toString width} ${toString height}" conditions;
+  mkWorkspace = workspace: conditions: mkRule "workspace ${workspace}" conditions;
+  mkCenter = conditions: mkRule "center" conditions;
+  mkAnimation = anim: conditions: mkRule "animation ${anim}" conditions;
+
+in {
   wayland.windowManager.hyprland.settings = {
     # Window rules using the modern windowrulev2 format
     windowrulev2 = [

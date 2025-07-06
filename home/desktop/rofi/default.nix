@@ -7,6 +7,7 @@
   ...
 }:
 with lib;
+with types;
 let
   # Import host-specific variables if available
   hostVars = 
@@ -14,11 +15,15 @@ let
     then import ../../../hosts/${host}/variables.nix
     else {};
   
+  # Backward compatibility for features system
+  desktopCfg = config.desktop or {};
+  rofiCfg = desktopCfg.rofi or {};
+  
   # Feature flags for Rofi
   cfg = {
     # Core features
     core = {
-      enable = true;
+      enable = rofiCfg.enable or true;
       package = pkgs.rofi-wayland;  # Use Wayland version
     };
     
@@ -231,7 +236,17 @@ let
     optional cfg.modes.bluetooth "bluetooth:rofi-bluetooth";
   
 in {
-  programs.rofi = mkIf cfg.core.enable {
+  # Backward compatibility options for features system
+  options.desktop.rofi = {
+    enable = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Enable Rofi launcher";
+    };
+  };
+
+  config = {
+    programs.rofi = mkIf cfg.core.enable {
     enable = true;
     package = cfg.core.package;
 
@@ -386,8 +401,9 @@ in {
     })
   ];
 
-  # Ensure rofi can find plugins and scripts
-  home.sessionVariables = mkIf cfg.core.enable {
-    ROFI_PLUGIN_PATH = "${config.programs.rofi.package}/lib/rofi";
+    # Ensure rofi can find plugins and scripts
+    home.sessionVariables = mkIf cfg.core.enable {
+      ROFI_PLUGIN_PATH = "${config.programs.rofi.package}/lib/rofi";
+    };
   };
 }

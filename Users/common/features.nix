@@ -78,5 +78,12 @@ with lib; {
       enable = mkEnableOption "Enable gaming applications";
       steam = mkEnableOption "Enable Steam";
     };
+
+    development = {
+      enable = mkEnableOption "Enable development environment";
+      languages = mkEnableOption "Enable language support and tooling";
+      workflow = mkEnableOption "Enable development workflow tools";
+      productivity = mkEnableOption "Enable project management and productivity";
+    };
   };
 }
