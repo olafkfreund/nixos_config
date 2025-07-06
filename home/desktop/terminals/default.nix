@@ -84,7 +84,7 @@ let
     paste = "ctrl+shift+v";
     fontIncrease = "ctrl+shift+equal";
     fontDecrease = "ctrl+shift+minus";
-    fontReset = "ctrl+shift+backspace";
+    fontReset = "ctrl+shift+0";
     newTab = "ctrl+shift+t";
     closeTab = "ctrl+shift+q";
     nextTab = "ctrl+shift+right";
