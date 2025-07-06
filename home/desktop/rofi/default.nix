@@ -175,7 +175,7 @@ in {
         hover-select = true;
       };
 
-      theme = mkDefault gruvboxTheme;
+      theme = lib.mkForce gruvboxTheme;
 
       plugins = with pkgs; [
         rofi-calc
@@ -214,6 +214,189 @@ in {
           ${pkgs.rofi-bluetooth}/bin/rofi-bluetooth
         '';
         executable = true;
+      };
+
+      # Override the custom theme file with our flat design
+      ".local/share/rofi/themes/custom.rasi" = {
+        text = ''
+          /* Flat theme matching waybar - no boxes or borders */
+          * {
+              gruvbox-bg: #282828;
+              gruvbox-fg: #ebdbb2;
+              gruvbox-yellow: #fabd2f;
+              transparent: #00000000;
+
+              font: "JetBrainsMono Nerd Font 14";
+              background-color: @gruvbox-bg;
+              text-color: @gruvbox-fg;
+          }
+
+          element-text, element-icon {
+              background-color: inherit;
+              text-color: inherit;
+          }
+
+          window {
+              width: 50%;
+              background-color: @gruvbox-bg;
+              border: none;
+              border-radius: 0px;
+              padding: 12px;
+          }
+
+          mainbox {
+              background-color: @gruvbox-bg;
+              spacing: 8px;
+          }
+
+          inputbar {
+              children: [prompt, entry];
+              background-color: @gruvbox-bg;
+              border: none;
+              border-radius: 0px;
+              padding: 8px;
+              margin: 0;
+          }
+
+          prompt {
+              background-color: @gruvbox-bg;
+              padding: 0px 8px 0px 0px;
+              text-color: @gruvbox-yellow;
+          }
+
+          entry {
+              padding: 0px;
+              text-color: @gruvbox-fg;
+              background-color: @gruvbox-bg;
+              placeholder: "Search...";
+          }
+
+          listview {
+              background-color: @gruvbox-bg;
+              cycle: false;
+              dynamic: true;
+              layout: vertical;
+              spacing: 0px;
+              margin: 0;
+              columns: 1;
+              lines: 10;
+              fixed-height: false;
+              border: none;
+          }
+
+          element {
+              padding: 8px;
+              spacing: 8px;
+              background-color: @gruvbox-bg;
+              border: none;
+              border-radius: 0px;
+          }
+
+          element normal.normal {
+              background-color: @gruvbox-bg;
+              text-color: @gruvbox-fg;
+          }
+
+          element alternate.normal {
+              background-color: @gruvbox-bg;
+              text-color: @gruvbox-fg;
+          }
+
+          element selected.normal {
+              background-color: @gruvbox-bg;
+              text-color: @gruvbox-yellow;
+          }
+
+          element normal.active {
+              background-color: @gruvbox-bg;
+              text-color: @gruvbox-fg;
+          }
+
+          element selected.active {
+              background-color: @gruvbox-bg;
+              text-color: @gruvbox-yellow;
+          }
+
+          element normal.urgent {
+              background-color: @gruvbox-bg;
+              text-color: @gruvbox-fg;
+          }
+
+          element selected.urgent {
+              background-color: @gruvbox-bg;
+              text-color: @gruvbox-yellow;
+          }
+
+          element alternate.active {
+              background-color: @gruvbox-bg;
+              text-color: @gruvbox-fg;
+          }
+
+          element alternate.urgent {
+              background-color: @gruvbox-bg;
+              text-color: @gruvbox-fg;
+          }
+
+          element-icon {
+              size: 18px;
+              padding: 0 8px 0 0;
+              background-color: inherit;
+              text-color: inherit;
+          }
+
+          mode-switcher {
+              spacing: 0px;
+              background-color: @gruvbox-bg;
+              border: none;
+              border-radius: 0px;
+              padding: 0px;
+          }
+
+          button {
+              padding: 8px 12px;
+              background-color: @gruvbox-bg;
+              text-color: @gruvbox-fg;
+              border: none;
+              border-radius: 0px;
+          }
+
+          button selected {
+              background-color: @gruvbox-bg;
+              text-color: @gruvbox-yellow;
+          }
+
+          scrollbar {
+              width: 0px;
+              handle-width: 0px;
+              handle-color: @transparent;
+              background-color: @gruvbox-bg;
+          }
+
+          message {
+              background-color: @gruvbox-bg;
+              border: none;
+          }
+
+          textbox {
+              background-color: @gruvbox-bg;
+              text-color: @gruvbox-fg;
+          }
+
+          sidebar {
+              background-color: @gruvbox-bg;
+              border: none;
+          }
+
+          case-indicator {
+              background-color: @gruvbox-bg;
+              text-color: @gruvbox-fg;
+          }
+
+          textbox-prompt-colon {
+              background-color: @gruvbox-bg;
+              text-color: @gruvbox-yellow;
+          }
+        '';
       };
     };
   };
