@@ -86,13 +86,6 @@ in {
       gnupg = true;
     };
 
-    # Enable encrypted API keys
-    secrets.apiKeys = {
-      enable = true;
-      enableEnvironmentVariables = true;
-      enableUserEnvironment = true;
-    };
-
     networking = {
       enable = true;
       tailscale = true;
@@ -116,6 +109,13 @@ in {
     media = {
       droidcam = true;
     };
+  };
+
+  # Enable encrypted API keys
+  secrets.apiKeys = {
+    enable = true;
+    enableEnvironmentVariables = true;
+    enableUserEnvironment = true;
   };
 
   scrcpyWifi.enable = true;
