@@ -116,8 +116,8 @@ in {
             "bind \"l\"" = { MoveFocus = "Right"; };
             "bind \"d\"" = { HalfPageScrollDown = {}; };
             "bind \"u\"" = { HalfPageScrollUp = {}; };
-            "bind \"Ctrl-f\"" = { PageScrollDown = {}; };
-            "bind \"Ctrl-b\"" = { PageScrollUp = {}; };
+            "bind \"Ctrl+f\"" = { PageScrollDown = {}; };
+            "bind \"Ctrl+b\"" = { PageScrollUp = {}; };
           };
           
           # Copy mode enhancements
