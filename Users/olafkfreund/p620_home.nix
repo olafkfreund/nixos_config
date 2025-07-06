@@ -83,7 +83,7 @@
     multiplexers = {
       enable = true;
       tmux = true;
-      zellij = true;
+      zellij = false;
     };
 
     gaming = {
