@@ -77,7 +77,7 @@ in {
       GITHUB_TOKEN = "$(cat ${config.age.secrets.api-github-token.path} 2>/dev/null || echo '')";
     };
 
-    # Create a script for loading API keys in user sessions
+    # Create utility scripts for API key management
     environment.systemPackages = [
       (pkgs.writeScriptBin "load-api-keys" ''
         #!/bin/sh
@@ -106,6 +106,28 @@ in {
         fi
         
         echo "API keys loaded successfully"
+      '')
+      
+      (pkgs.writeScriptBin "api-keys-status" ''
+        #!/bin/sh
+        echo "API Keys Status:"
+        echo "==============="
+        
+        check_key() {
+          local name="$1"
+          local path="$2"
+          if [ -r "$path" ] && [ -s "$path" ]; then
+            echo "✅ $name: Available"
+          else
+            echo "❌ $name: Not available"
+          fi
+        }
+        
+        check_key "OpenAI" "${config.age.secrets.api-openai.path}"
+        check_key "Gemini" "${config.age.secrets.api-gemini.path}"
+        check_key "Anthropic" "${config.age.secrets.api-anthropic.path}"
+        check_key "LangChain" "${config.age.secrets.api-langchain.path}"
+        check_key "GitHub Token" "${config.age.secrets.api-github-token.path}"
       '')
     ];
 
@@ -146,30 +168,5 @@ in {
       '';
       deps = [ "agenix" ];
     };
-    
-    # Create a status script to check which keys are available
-    environment.systemPackages = [
-      (pkgs.writeScriptBin "api-keys-status" ''
-        #!/bin/sh
-        echo "API Keys Status:"
-        echo "==============="
-        
-        check_key() {
-          local name="$1"
-          local path="$2"
-          if [ -r "$path" ] && [ -s "$path" ]; then
-            echo "✅ $name: Available"
-          else
-            echo "❌ $name: Not available"
-          fi
-        }
-        
-        check_key "OpenAI" "${config.age.secrets.api-openai.path}"
-        check_key "Gemini" "${config.age.secrets.api-gemini.path}"
-        check_key "Anthropic" "${config.age.secrets.api-anthropic.path}"
-        check_key "LangChain" "${config.age.secrets.api-langchain.path}"
-        check_key "GitHub Token" "${config.age.secrets.api-github-token.path}"
-      '')
-    ];
   };
 }
