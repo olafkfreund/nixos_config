@@ -1,95 +1,28 @@
-# Enhanced Rofi Configuration with Theming and Feature Flags
 {
   config,
   lib,
   pkgs,
-  host ? "default",
   ...
 }:
-with lib;
-with types;
-let
-  # Import host-specific variables if available
-  hostVars = 
-    if builtins.pathExists ../../../hosts/${host}/variables.nix
-    then import ../../../hosts/${host}/variables.nix
-    else {};
-  
-  # Backward compatibility for features system
-  desktopCfg = config.desktop or {};
-  rofiCfg = desktopCfg.rofi or {};
-  
-  # Feature flags for Rofi
-  cfg = {
-    # Core features
-    core = {
-      enable = rofiCfg.enable or true;
-      package = pkgs.rofi-wayland;  # Use Wayland version
-    };
-    
-    # Available modes
-    modes = {
-      applications = true;      # drun mode
-      commands = true;          # run mode
-      files = true;            # file browser
-      calculator = true;        # calculator
-      emoji = true;            # emoji picker
-      websearch = true;         # web search
-      power = true;            # power menu
-      bluetooth = false;        # bluetooth menu
-    };
-    
-    # Visual features
-    visual = {
-      icons = true;
-      animations = true;
-      transparency = true;
-      sidebar = true;
-      thumbnails = true;
-    };
-    
-    # Performance features
-    performance = {
-      fuzzyMatching = true;
-      sorting = true;
-      caching = true;
-      lines = 10;
-    };
-  };
-  
-  # Color scheme definitions (matching other components)
-  colorSchemes = {
-    gruvbox-dark = {
-      bg = "#282828";
-      bg-light = "#3c3836";
-      fg = "#ebdbb2";
-      border = "#504945";
-      accent = "#fabd2f";
-      selected = "#689d6a";
-      orange = "#fe8019";
-      transparent = "#00000000";
-    };
-  };
-  
-  selectedTheme = hostVars.rofi.theme or "gruvbox-dark";
-  activeColors = colorSchemes.${selectedTheme} or colorSchemes.gruvbox-dark;
-  
-  # Generate theme file
-  generateTheme = colors: builtins.toFile "rofi-enhanced-theme.rasi" ''
-    /* Enhanced Rofi Theme */
+with lib; let
+  cfg = config.desktop.rofi;
+
+  # Extract theme to separate variable for better maintainability
+  gruvboxTheme = builtins.toFile "rofi-theme.rasi" ''
+    /* Global Properties */
     * {
-      bg: ${colors.bg};
-      bg-light: ${colors.bg-light};
-      fg: ${colors.fg};
-      border: ${colors.border};
-      accent: ${colors.accent};
-      selected: ${colors.selected};
-      orange: ${colors.orange};
-      transparent: ${colors.transparent};
+      gruvbox-bg: #282828;
+      gruvbox-bg-light: #3c3836;
+      gruvbox-fg: #ebdbb2;
+      gruvbox-yellow: #fabd2f;
+      gruvbox-border: #504945;
+      gruvbox-green: #689d6a;
+      transparent: #00000000;
+      gruvbox-orange: #fe8019;
 
       font: "JetBrainsMono Nerd Font 13";
       background-color: @transparent;
-      text-color: @fg;
+      text-color: @gruvbox-fg;
     }
 
     element-text, element-icon {
@@ -99,12 +32,11 @@ let
 
     window {
       width: 50%;
-      background-color: @bg;
+      background-color: @gruvbox-bg;
       border: 1px;
-      border-color: @border;
-      border-radius: 8px;
+      border-color: @gruvbox-border;
+      border-radius: 6px;
       padding: 12px;
-      ${optionalString cfg.visual.transparency "opacity: 0.98;"}
     }
 
     mainbox {
@@ -114,27 +46,23 @@ let
 
     inputbar {
       children: [prompt, entry];
-      background-color: @bg;
+      background-color: @gruvbox-bg;
       border-radius: 6px;
       padding: 4px 8px;
       margin: 0 0 8px 0;
-      border: 1px;
-      border-color: @border;
     }
 
     prompt {
       background-color: @transparent;
       padding: 6px;
-      text-color: @orange;
-      font-weight: bold;
+      text-color: @gruvbox-orange;
     }
 
     entry {
       padding: 6px;
-      text-color: @fg;
+      text-color: @gruvbox-fg;
       background-color: @transparent;
       placeholder: "Search...";
-      placeholder-color: @border;
     }
 
     listview {
@@ -142,20 +70,18 @@ let
       cycle: false;
       dynamic: true;
       layout: vertical;
-      spacing: 4px;
+      spacing: 6px;
       margin: 0;
       columns: 1;
-      lines: ${toString cfg.performance.lines};
+      lines: 10;
       fixed-height: false;
-      scrollbar: ${if cfg.visual.sidebar then "true" else "false"};
     }
 
     element {
       padding: 8px;
       spacing: 8px;
       background-color: @transparent;
-      border-radius: 6px;
-      ${optionalString cfg.visual.animations "transition: 200ms;"}
+      border-radius: 4px;
     }
 
     element normal.normal {
@@ -167,243 +93,129 @@ let
     }
 
     element selected {
-      background-color: @bg-light;
-      text-color: @selected;
-      border: 1px;
-      border-color: @selected;
+      background-color: @gruvbox-bg-light;
+      text-color: @gruvbox-green;
     }
 
     element-icon {
-      size: 20px;
+      size: 18px;
       padding: 0 8px 0 0;
     }
 
     mode-switcher {
       spacing: 6px;
-      background-color: @bg;
-      border-radius: 6px;
-      padding: 6px;
-      border: 1px;
-      border-color: @border;
+      background-color: @gruvbox-bg;
+      border-radius: 4px;
+      padding: 4px;
     }
 
     button {
-      padding: 8px 12px;
+      padding: 6px 12px;
       background-color: @transparent;
-      text-color: @fg;
+      text-color: @gruvbox-fg;
       border-radius: 4px;
     }
 
     button selected {
-      background-color: @bg-light;
-      text-color: @accent;
-      border: 1px;
-      border-color: @accent;
+      background-color: @gruvbox-bg-light;
+      text-color: @gruvbox-yellow;
     }
 
     scrollbar {
-      width: 6px;
-      handle-width: 6px;
-      handle-color: @border;
-      background-color: @bg;
-      border-radius: 3px;
-    }
-
-    message {
-      background-color: @bg-light;
-      border: 1px;
-      border-color: @border;
-      border-radius: 6px;
-      padding: 8px;
-      margin: 8px 0;
-    }
-
-    textbox {
-      text-color: @fg;
-      background-color: @transparent;
+      width: 4px;
+      handle-width: 4px;
+      handle-color: @gruvbox-border;
+      background-color: @gruvbox-bg;
     }
   '';
-  
-  # Available modes configuration
-  availableModes = 
-    optional cfg.modes.applications "drun" ++
-    optional cfg.modes.commands "run" ++
-    optional cfg.modes.files "filebrowser" ++
-    optional cfg.modes.calculator "calc" ++
-    optional cfg.modes.emoji "emoji" ++
-    optional cfg.modes.websearch "websearch:rwebsearch" ++
-    optional cfg.modes.power "power-menu:rofi-power-menu" ++
-    optional cfg.modes.bluetooth "bluetooth:rofi-bluetooth";
-  
 in {
-  # Backward compatibility options for features system
   options.desktop.rofi = {
-    enable = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Enable Rofi launcher";
-    };
+    enable = mkEnableOption "Rofi application launcher with Gruvbox theme";
   };
 
-  config = {
-    programs.rofi = mkIf cfg.core.enable {
-    enable = true;
-    package = cfg.core.package;
+  config = mkIf cfg.enable {
+    programs.rofi = {
+      enable = true;
+      package = pkgs.rofi-wayland;
 
-    extraConfig = {
-      # Available modes
-      modi = concatStringsSep "," availableModes;
-      
-      # Appearance
-      lines = cfg.performance.lines;
-      font = "JetBrainsMono Nerd Font 14";
-      show-icons = cfg.visual.icons;
-      icon-theme = "Papirus-Dark";
-      window-thumbnail = cfg.visual.thumbnails;
-      
-      # Terminal
-      terminal = "foot";
-      
-      # Display format
-      drun-display-format = if cfg.visual.icons then "{icon} {name}" else "{name}";
-      
-      # Layout
-      location = 0;
-      sidebar-mode = cfg.visual.sidebar;
-      hide-scrollbar = !cfg.visual.sidebar;
-      
-      # Performance
-      disable-history = !cfg.performance.caching;
-      sort = cfg.performance.sorting;
-      sorting-method = if cfg.performance.fuzzyMatching then "fzf" else "normal";
-      matching = if cfg.performance.fuzzyMatching then "fuzzy" else "normal";
-      cache-dir = mkIf cfg.performance.caching "~/.cache/rofi";
-      
-      # Display labels with icons
-      display-drun = " 󰀘 Apps";
-      display-run = " 󱄅 Run";
-      display-filebrowser = " 󰉋 Files";
-      display-calc = " 󰃬 Calc";
-      display-emoji = " 󰞅 Emoji";
-      display-websearch = " 󰖟 Search";
-      display-power-menu = " 󰐥 Power";
-      display-bluetooth = " 󰂯 Bluetooth";
-      
-      # Keybindings (vim-style)
-      kb-row-up = "Up,Control+k";
-      kb-row-down = "Down,Control+j";
-      kb-accept-entry = "Return";
-      kb-remove-to-eol = "";
-      hover-select = true;
-      
-      # Advanced features
-      run-shell-command = "{terminal} -e {cmd}";
-      run-command = "{cmd}";
+      extraConfig = {
+        modi = "drun,run,filebrowser,websearch:rwebsearch";
+        lines = 10;
+        font = "JetBrainsMono Nerd Font 14";
+        show-icons = true;
+        terminal = "foot";
+        drun-display-format = "{icon} {name}";
+        location = 0;
+        disable-history = false;
+        hide-scrollbar = false;
+        sidebar-mode = true;
+
+        # Better icon support
+        icon-theme = "Papirus-Dark";
+
+        # Display labels
+        display-drun = " 󰀘 Apps";
+        display-run = " 󱄅 Command";
+        display-filebrowser = " Files";
+        # display-websearch = " 󰖟 Search";
+
+        # Performance options
+        sort = true;
+        sorting-method = "fzf";
+        matching = "fuzzy";
+        cache-dir = "~/.cache/rofi";
+        window-thumbnail = true;
+
+        # Improved usability
+        kb-row-up = "Up,Control+k";
+        kb-row-down = "Down,Control+j";
+        kb-accept-entry = "Return";
+        kb-remove-to-eol = "";
+        # kb-mode-next = "Tab";
+        # kb-mode-previous = "ISO_Left_Tab";
+        hover-select = true;
+      };
+
+      theme = mkDefault gruvboxTheme;
+
+      plugins = with pkgs; [
+        rofi-calc
+        rofi-emoji
+        rofi-file-browser
+      ];
     };
 
-    theme = mkDefault (generateTheme activeColors);
+    # Import our custom script
+    home.packages = [
+      #Rofi scripts
+      (import ./scripts/websearch.nix {inherit pkgs;})
+    ];
 
-    plugins = with pkgs; 
-      optional cfg.modes.calculator rofi-calc ++
-      optional cfg.modes.emoji rofi-emoji ++
-      optional cfg.modes.files rofi-file-browser ++
-      optional cfg.modes.power rofi-power-menu ++
-      optional cfg.modes.bluetooth rofi-bluetooth;
-  };
-
-  # Enhanced launcher scripts
-  home.packages = with pkgs; [
-    # Web search script (from existing config)
-    (mkIf cfg.modes.websearch (import ./scripts/websearch.nix { inherit pkgs; }))
-  ] ++ optionals cfg.core.enable [
-    # Additional rofi utilities
-    rofi-systemd
-  ];
-
-  # Launcher scripts for different rofi modes
-  home.file = mkMerge [
-    # Web search launcher
-    (mkIf cfg.modes.websearch {
-      ".local/bin/rofi-websearch" = {
+    # Create launcher scripts for common rofi use cases and for websearch
+    home.file = {
+      ".local/bin/rwebsearch-launcher" = {
         text = ''
           #!/bin/sh
-          rofi -show websearch
+          rwebsearch
         '';
         executable = true;
       };
-    })
-    
-    # Power menu launcher
-    (mkIf cfg.modes.power {
+
       ".local/bin/rofi-power" = {
         text = ''
           #!/bin/sh
-          rofi -show power-menu
+          rofi -show power-menu -modi power-menu:${pkgs.rofi-power-menu}/bin/rofi-power-menu
         '';
         executable = true;
       };
-    })
-    
-    # Calculator launcher
-    (mkIf cfg.modes.calculator {
-      ".local/bin/rofi-calc" = {
-        text = ''
-          #!/bin/sh
-          rofi -show calc -modi calc -no-show-match -no-sort
-        '';
-        executable = true;
-      };
-    })
-    
-    # Emoji picker launcher
-    (mkIf cfg.modes.emoji {
-      ".local/bin/rofi-emoji" = {
-        text = ''
-          #!/bin/sh
-          rofi -show emoji -modi emoji
-        '';
-        executable = true;
-      };
-    })
-    
-    # File browser launcher
-    (mkIf cfg.modes.files {
-      ".local/bin/rofi-files" = {
-        text = ''
-          #!/bin/sh
-          rofi -show filebrowser -modi filebrowser
-        '';
-        executable = true;
-      };
-    })
-    
-    # Bluetooth launcher
-    (mkIf cfg.modes.bluetooth {
+
       ".local/bin/rofi-bluetooth" = {
         text = ''
           #!/bin/sh
-          rofi -show bluetooth
+          ${pkgs.rofi-bluetooth}/bin/rofi-bluetooth
         '';
         executable = true;
       };
-    })
-    
-    # Quick launcher with common modes
-    (mkIf cfg.core.enable {
-      ".local/bin/rofi-launcher" = {
-        text = ''
-          #!/bin/sh
-          # Quick launcher with the most common modes
-          rofi -show drun -modi drun,run${optionalString cfg.modes.files ",filebrowser"}${optionalString cfg.modes.calculator ",calc"}
-        '';
-        executable = true;
-      };
-    })
-  ];
-
-    # Ensure rofi can find plugins and scripts
-    home.sessionVariables = mkIf cfg.core.enable {
-      ROFI_PLUGIN_PATH = "${config.programs.rofi.package}/lib/rofi";
     };
   };
 }
