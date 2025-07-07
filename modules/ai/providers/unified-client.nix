@@ -446,12 +446,21 @@ in {
       unifiedAiScript
       providerSwitchScript
       pkgs.jq # Required for JSON parsing
+      # Add ai-chat as an alias to ai-cli for user convenience
+      (pkgs.writeShellScriptBin "ai-chat" ''
+        exec ${unifiedAiScript}/bin/ai-cli "$@"
+      '')
     ];
 
     # Enhanced shell integration
     programs.zsh.interactiveShellInit = mkAfter ''
       # Unified AI client functions
       ai() {
+        ai-cli "$@"
+      }
+      
+      # Chat alias for convenience 
+      chat() {
         ai-cli "$@"
       }
       
