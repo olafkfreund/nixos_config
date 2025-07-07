@@ -146,8 +146,6 @@ in {
     # Create monitoring data directories
     systemd.tmpfiles.rules = [
       "d /var/lib/monitoring 0755 monitoring monitoring -"
-      "d /var/lib/prometheus 0755 monitoring monitoring -"
-      "d /var/lib/grafana 0755 monitoring monitoring -"
       "d /var/log/monitoring 0755 monitoring monitoring -"
     ];
 

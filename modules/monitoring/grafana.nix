@@ -219,8 +219,10 @@ in {
       };
     };
 
-    # Create dashboard files
+    # Create dashboard files and directories
     systemd.tmpfiles.rules = [
+      # Ensure Grafana directories are owned by grafana user
+      "d /var/lib/grafana 0755 grafana grafana -"
       "d /var/lib/grafana/dashboards 0755 grafana grafana -"
       "d /var/lib/grafana/dashboards/nixos 0755 grafana grafana -"
       "d /var/lib/grafana/dashboards/hosts 0755 grafana grafana -"
@@ -231,13 +233,8 @@ in {
       "L+ /var/lib/grafana/dashboards/hosts/dex5550.json - - - - ${hostDashboard "dex5550" "Intel"}"
     ];
 
-    # Grafana service configuration
+    # Grafana service dependencies
     systemd.services.grafana = {
-      serviceConfig = {
-        User = "grafana";
-        Group = "grafana";
-      };
-      wantedBy = [ "multi-user.target" ];
       after = [ "network.target" "prometheus.service" ];
     };
 
