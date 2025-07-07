@@ -102,6 +102,17 @@ in {
             vscode-extensions.rust-lang.rust-analyzer # Rust support
             vscode-extensions.ms-vscode.cpptools # C++ support
             vscode-extensions.ms-dotnettools.csharp # C# support
+            vscode-extensions.ms-vscode.live-server # Live server
+            vscode-extensions.usernamehw.errorlens # Error lens for better error visibility
+            vscode-extensions.streetsidesoftware.code-spell-checker # Spell checker
+            # vscode-extensions.ms-vscode.vscode-json # JSON support - not available
+            vscode-extensions.yzhang.markdown-all-in-one # Better markdown support
+            vscode-extensions.christian-kohler.path-intellisense # Path autocomplete
+            vscode-extensions.oderwat.indent-rainbow # Indent visualization
+            vscode-extensions.gruntfuggly.todo-tree # TODO highlighting
+            vscode-extensions.vscode-icons-team.vscode-icons # Better icons
+            vscode-extensions.ms-vscode.hexeditor # Hex editor
+            # vscode-extensions.ms-ceintl.vscode-language-pack-en # English language pack - not available
 
             # Docker support (if available in nixpkgs)
             # vscode-extensions.ms-azuretools.vscode-docker
@@ -128,11 +139,77 @@ in {
           # YAML settings
           "[yaml]" = {
             "editor.defaultFormatter" = "redhat.vscode-yaml";
+            "editor.insertSpaces" = true;
+            "editor.tabSize" = 2;
+            "editor.autoIndent" = "advanced";
+          };
+
+          # Markdown settings
+          "[markdown]" = {
+            "editor.defaultFormatter" = "yzhang.markdown-all-in-one";
+            "editor.wordWrap" = "on";
+            "editor.quickSuggestions" = {
+              "comments" = "off";
+              "strings" = "off";
+              "other" = "off";
+            };
+          };
+
+          # JSON settings
+          "[json]" = {
+            "editor.defaultFormatter" = "ms-vscode.vscode-json";
+            "editor.tabSize" = 2;
+          };
+
+          # Python settings
+          "[python]" = {
+            "editor.defaultFormatter" = "ms-python.black-formatter";
+            "editor.formatOnSave" = true;
+            "editor.codeActionsOnSave" = {
+              "source.organizeImports" = "explicit";
+            };
+          };
+
+          # Go settings
+          "[go]" = {
+            "editor.formatOnSave" = true;
+            "editor.codeActionsOnSave" = {
+              "source.organizeImports" = "explicit";
+            };
+          };
+
+          # Rust settings
+          "[rust]" = {
+            "editor.defaultFormatter" = "rust-lang.rust-analyzer";
+            "editor.formatOnSave" = true;
           };
 
           # General settings
           "window.menuBarVisibility" = "toggle";
           "editor.minimap.enabled" = false;
+          "editor.bracketPairColorization.enabled" = true;
+          "editor.guides.bracketPairs" = "active";
+          "editor.linkedEditing" = true;
+          "editor.cursorBlinking" = "smooth";
+          "editor.cursorSmoothCaretAnimation" = "on";
+          "editor.fontLigatures" = true;
+          "editor.fontSize" = mkDefault 14;
+          "editor.fontFamily" = mkDefault "'JetBrainsMono Nerd Font', 'Droid Sans Mono', 'monospace'";
+          "editor.lineHeight" = 1.6;
+          "editor.letterSpacing" = 0.5;
+          "editor.tabSize" = 2;
+          "editor.insertSpaces" = true;
+          "editor.trimAutoWhitespace" = true;
+          "editor.detectIndentation" = true;
+          "editor.wordWrap" = "bounded";
+          "editor.wordWrapColumn" = 100;
+          "editor.rulers" = [80 100];
+          "editor.formatOnSave" = true;
+          "editor.formatOnPaste" = true;
+          "editor.codeActionsOnSave" = {
+            "source.organizeImports" = "explicit";
+            "source.fixAll" = "explicit";
+          };
           "nix.serverPath" = "nixd";
           "nix.enableLanguageServer" = true;
           "nix.formatterWidth" = 100;
@@ -309,8 +386,55 @@ in {
           "editor.renderWhitespace" = "all";
           "editor.smoothScrolling" = true;
           "workbench.list.smoothScrolling" = true;
+          # Terminal settings
           "terminal.integrated.gpuAcceleration" = "on";
+          "terminal.integrated.fontFamily" = "'JetBrainsMono Nerd Font'";
+          "terminal.integrated.fontSize" = mkDefault 13;
+          "terminal.integrated.lineHeight" = 1.2;
+          "terminal.integrated.cursorBlinking" = true;
+          "terminal.integrated.cursorStyle" = "line";
+          "terminal.integrated.scrollback" = 10000;
+          "terminal.integrated.shell.linux" = "${pkgs.zsh}/bin/zsh";
+          "terminal.integrated.defaultProfile.linux" = "zsh";
+          "terminal.integrated.profiles.linux" = {
+            "zsh" = {
+              "path" = "${pkgs.zsh}/bin/zsh";
+              "args" = ["-l"];
+            };
+            "bash" = {
+              "path" = "${pkgs.bash}/bin/bash";
+              "args" = ["-l"];
+            };
+          };
           "update.mode" = "none"; # Managed by Nix
+          
+          # Performance optimizations
+          "files.watcherExclude" = {
+            "**/node_modules/**" = true;
+            "**/target/**" = true;
+            "**/result/**" = true;
+            "**/.direnv/**" = true;
+            "**/.git/**" = true;
+            "**/dist/**" = true;
+            "**/build/**" = true;
+          };
+          "search.exclude" = {
+            "**/node_modules" = true;
+            "**/target" = true;
+            "**/result" = true;
+            "**/.direnv" = true;
+            "**/dist" = true;
+            "**/build" = true;
+          };
+          "files.exclude" = {
+            "**/.direnv" = true;
+            "**/result" = true;
+          };
+          "typescript.tsc.autoDetect" = "off";
+          "npm.autoDetect" = "off";
+          "gulp.autoDetect" = "off";
+          "jake.autoDetect" = "off";
+          "grunt.autoDetect" = "off";
           "chat.mcp.enabled" = true;
           "chat.agent.enabled" = true;
           "chat.mcp.discovery.enabled" = true;
@@ -320,9 +444,23 @@ in {
           "github.copilot.chat.scopeSelection" = true;
           "github.copilot.chat.agent.thinkingTool" = true;
           "githubPullRequests.notifications" = "pullRequests";
+          # Workbench settings
           "workbench.colorTheme" = mkDefault "Gruvbox Material Dark";
           "workbench.iconTheme" = "file-icons-colourless";
           "workbench.browser.preferredBrowser" = "google-chrome-stable";
+          "workbench.startupEditor" = "welcomePageInEmptyWorkbench";
+          "workbench.editor.tabCloseButton" = "right";
+          "workbench.editor.tabSizing" = "shrink";
+          "workbench.editor.limit.enabled" = true;
+          "workbench.editor.limit.value" = 10;
+          "workbench.editor.limit.perEditorGroup" = true;
+          "workbench.activityBar.location" = "top";
+          "workbench.tree.indent" = 20;
+          "workbench.tree.renderIndentGuides" = "always";
+          "workbench.sideBar.location" = "left";
+          "workbench.panel.defaultLocation" = "bottom";
+          "workbench.editor.enablePreview" = false;
+          "workbench.editor.enablePreviewFromQuickOpen" = false;
           "genieai.enableConversationHistory" = true;
           "alejandra.program" = "alejandra";
           "geminicodeassist.codeGenerationPaneViewEnabled" = true;
