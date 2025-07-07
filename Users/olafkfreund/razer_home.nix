@@ -111,10 +111,21 @@ in {
     theme = lib.removePrefix "gruvbox-" vars.theme.scheme;
   };
 
-  # Chrome with working incognito-like settings for NVIDIA/Wayland
+  # Chrome with NVIDIA hardware acceleration for Razer host
   programs.chromium.commandLineArgs = lib.mkForce [
-    "--enable-features=UseOzonePlatform"
+    "--enable-features=UseOzonePlatform,VaapiVideoDecoder"
     "--ozone-platform=wayland"
-    "--incognito"
+    "--enable-gpu-rasterization"
+    "--enable-zero-copy"
+    "--ignore-gpu-blocklist"
+    "--enable-gpu-compositing"
+    "--enable-accelerated-video-decode"
+    "--enable-accelerated-video-encode"
+    "--disable-software-rasterizer"
+    "--use-gl=desktop"
+    "--use-angle=gl"
+    "--enable-native-gpu-memory-buffers"
+    "--disable-gpu-sandbox"
+    "--disable-gpu-driver-bug-workarounds"
   ];
 }

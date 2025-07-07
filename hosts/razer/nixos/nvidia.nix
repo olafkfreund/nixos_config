@@ -8,9 +8,9 @@
     powerManagement.enable = true;
     powerManagement.finegrained = false;
     nvidiaPersistenced = true;
-    open = true;
+    open = false; # Use proprietary drivers for better Wayland compatibility
     nvidiaSettings = false;
-    package = config.boot.kernelPackages.nvidiaPackages.beta;
+    package = config.boot.kernelPackages.nvidiaPackages.stable; # Use stable instead of beta
   };
 
   hardware.nvidia.prime = {
@@ -64,25 +64,8 @@
     initrd.kernelModules = ["nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm"];
   };
 
-  # Enable hardware acceleration for Firefox and Chromium
-  programs = {
-    firefox = {
-      enable = true;
-      preferences = {
-        "media.hardware-video-decoding.enabled" = true;
-        "media.ffmpeg.vaapi.enabled" = true;
-        "gfx.webrender.all" = true;
-      };
-    };
-    chromium = {
-      enable = true;
-      extraOpts = {
-        "EnableVaapi" = true;
-        "VaapiVideoDecoder" = true;
-        "VaapiVideoEncoder" = true;
-      };
-    };
-  };
+  # Remove global Firefox/Chromium configs to avoid conflicts
+  # These will be handled in individual user configurations
 
   # Docker NVIDIA support
   hardware.nvidia-container-toolkit.enable = true;
