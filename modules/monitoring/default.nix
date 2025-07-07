@@ -62,7 +62,7 @@ in {
 
       grafanaPort = mkOption {
         type = types.int;
-        default = 3000;
+        default = 3001;
         description = "Grafana server port";
       };
 

@@ -73,7 +73,13 @@
       "Bash(diff:*)",
       "Bash(hyprctl:*)",
       "Bash(journalctl:*)",
-      "Bash(sudo rmdir:*)"
+      "Bash(sudo rmdir:*)",
+      "Bash(ping:*)",
+      "Bash(sudo systemctl status:*)",
+      "Bash(curl:*)",
+      "Bash(sudo netstat:*)",
+      "Bash(sudo ss:*)",
+      "Bash(sudo journalctl:*)"
     ]
   },
   "enableAllProjectMcpServers": false
