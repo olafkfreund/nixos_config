@@ -68,7 +68,15 @@ in {
   };
 
   config = mkIf cfg.enable {
-    environment.systemPackages = with pkgs; 
+    environment.systemPackages = with pkgs; let
+      # Fixed codex package with proper OpenSSL dependencies
+      codex-fixed = codex.overrideAttrs (oldAttrs: {
+        buildInputs = (oldAttrs.buildInputs or []) ++ [ openssl ];
+        nativeBuildInputs = (oldAttrs.nativeBuildInputs or []) ++ [ pkg-config ];
+        PKG_CONFIG_PATH = "${openssl.dev}/lib/pkgconfig";
+        OPENSSL_DIR = "${openssl.dev}";
+      });
+    in 
       # Chat interfaces
       optionals cfg.packages.chatInterfaces [
         chatgpt-cli          # OpenAI ChatGPT command line interface
@@ -83,7 +91,7 @@ in {
         gh-copilot          # GitHub Copilot CLI integration
         aichat              # AI chat with code assistance features
         gpt-cli             # General purpose GPT CLI
-        codex               # OpenAI Codex interface
+        codex-fixed         # OpenAI Codex interface with fixed OpenSSL deps
       ] ++
       
       # Terminal tools
