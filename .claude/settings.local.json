@@ -79,7 +79,8 @@
       "Bash(curl:*)",
       "Bash(sudo netstat:*)",
       "Bash(sudo ss:*)",
-      "Bash(sudo journalctl:*)"
+      "Bash(sudo journalctl:*)",
+      "Bash(sudo systemctl cat:*)"
     ]
   },
   "enableAllProjectMcpServers": false

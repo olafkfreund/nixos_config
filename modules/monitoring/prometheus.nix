@@ -170,12 +170,8 @@ in {
         }
       ]);
 
-      # External labels and remote configurations
+      # Additional configuration flags
       extraFlags = [
-        "--storage.tsdb.path=/var/lib/prometheus"
-        "--storage.tsdb.retention.time=${cfg.retention}"
-        "--web.console.templates=${pkgs.prometheus}/etc/prometheus/consoles"
-        "--web.console.libraries=${pkgs.prometheus}/etc/prometheus/console_libraries"
         "--web.enable-lifecycle"
         "--web.enable-admin-api"
       ];

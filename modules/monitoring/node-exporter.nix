@@ -37,7 +37,7 @@ with lib; let
         
         # Nix store size
         if [[ -d /nix/store ]]; then
-            local store_size=$(du -s /nix/store 2>/dev/null | awk '{print $1 * 1024}' || echo 0)
+            local store_size=$(du -s /nix/store 2>/dev/null | ${pkgs.gawk}/bin/awk '{print $1 * 1024}' || echo 0)
             output_metric "nixos_store_size_bytes" "$store_size" "Size of /nix/store in bytes"
         fi
         
@@ -46,7 +46,7 @@ with lib; let
         output_metric "nixos_generations_total" "$generations" "Total number of NixOS generations"
         
         # Current generation number
-        local current_gen=$(nix-env --list-generations 2>/dev/null | tail -1 | awk '{print $1}' || echo 0)
+        local current_gen=$(nix-env --list-generations 2>/dev/null | tail -1 | ${pkgs.gawk}/bin/awk '{print $1}' || echo 0)
         output_metric "nixos_generation_current" "$current_gen" "Current NixOS generation number"
         
         # System derivation count in store
@@ -85,7 +85,7 @@ with lib; let
     serve_metrics() {
         while true; do
             echo -e "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n$(generate_metrics)" | \
-            ${pkgs.netcat}/bin/nc -l -p "$PORT" -q 1
+            ${pkgs.netcat}/bin/nc -l -p "$PORT"
         done
     }
     
@@ -136,8 +136,8 @@ with lib; let
         # Service states
         while IFS= read -r line; do
             if [[ -n "$line" ]]; then
-                local unit=$(echo "$line" | awk '{print $1}')
-                local state=$(echo "$line" | awk '{print $4}')
+                local unit=$(echo "$line" | ${pkgs.gawk}/bin/awk '{print $1}')
+                local state=$(echo "$line" | ${pkgs.gawk}/bin/awk '{print $4}')
                 local state_value=0
                 
                 case "$state" in
@@ -168,7 +168,7 @@ with lib; let
     serve_metrics() {
         while true; do
             echo -e "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n$(generate_metrics)" | \
-            ${pkgs.netcat}/bin/nc -l -p "$PORT" -q 1
+            ${pkgs.netcat}/bin/nc -l -p "$PORT"
         done
     }
     
