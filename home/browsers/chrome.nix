@@ -29,9 +29,11 @@ in {
       package = pkgs.google-chrome;
       commandLineArgs = [
         # Wayland support
-        "--enable-features=UseOzonePlatform"
+        "--enable-features=UseOzonePlatform,VaapiVideoDecoder"
         "--ozone-platform=wayland"
-        "--disable-gpu"
+        # GPU acceleration (can be overridden by host-specific config)
+        "--enable-gpu-rasterization"
+        "--enable-zero-copy"
       ];
     };
   };

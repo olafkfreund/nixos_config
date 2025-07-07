@@ -113,8 +113,11 @@ in {
 
   # Fix Chrome GPU acceleration for NVIDIA hybrid graphics
   programs.chromium.commandLineArgs = lib.mkForce [
-    "--enable-features=UseOzonePlatform"
+    "--enable-features=UseOzonePlatform,VaapiVideoDecoder"
     "--ozone-platform=wayland"
-    "--disable-gpu"
+    "--enable-gpu-rasterization"
+    "--enable-zero-copy"
+    "--disable-gpu-sandbox"
+    "--ignore-gpu-blocklist"
   ];
 }

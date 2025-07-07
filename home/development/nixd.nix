@@ -63,9 +63,6 @@ in {
         };
 
         options = {
-          enable = true;
-          target = ["all"];
-          offline = cfg.offlineMode;
           nixos = {
             expr = "(builtins.getFlake (\"git+file://\" + toString ${cfg.flakeDir})).nixosConfigurations.${cfg.hostName}.options";
           };
