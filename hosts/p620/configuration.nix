@@ -118,6 +118,13 @@ in {
     enableUserEnvironment = true;
   };
 
+  # IDIOT-PROOF DNS CONFIGURATION: Prevent Tailscale from breaking DNS
+  vpn.tailscale = {
+    enable = true;
+    acceptDns = lib.mkForce false; # NEVER let Tailscale touch DNS
+    netfilterMode = "off"; # Safer for servers
+  };
+
   scrcpyWifi.enable = true;
 
   # AI Ollama-specific configuration that goes beyond simple enabling

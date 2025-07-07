@@ -70,7 +70,7 @@ in {
           else "no"
         }
         MulticastDNS=no
-        Cache=${toString cfg.cacheSize}
+        CacheFromLocalhost=no
         StaleRetentionSec=86400
         ReadEtcHosts=yes
       '';
@@ -107,10 +107,19 @@ in {
       };
     };
 
-    # Ensure host resolv.conf is properly managed
-    environment.etc."resolv.conf".source =
-      mkIf cfg.useStubResolver
-      (mkForce "${pkgs.systemd}/lib/systemd/resolv.conf");
+    # Force systemd-resolved to manage resolv.conf properly
+    environment.etc."resolv.conf".source = mkIf cfg.useStubResolver (mkForce "${pkgs.systemd}/lib/systemd/resolv.conf");
+    
+    # Ensure proper linking for systemd-resolved
+    systemd.services.systemd-resolved = {
+      wantedBy = ["multi-user.target"];
+      before = ["network.target"];
+      serviceConfig = {
+        # Ensure proper restart behavior
+        Restart = "always";
+        RestartSec = "10s";
+      };
+    };
 
     # DNS monitoring is now handled by the network-stability module
     # to avoid duplication and provide centralized monitoring
