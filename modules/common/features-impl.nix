@@ -51,6 +51,34 @@ in {
     ai.ollama.enable = mkIf cfg.ai.enable cfg.ai.ollama;
     modules.ai.gemini-cli.enable = mkIf cfg.ai.enable cfg.ai.gemini-cli;
     modules.ai.chatgpt.enable = mkIf cfg.ai.enable (cfg.ai.chatgpt or true);
+    
+    # Enhanced AI provider support
+    ai.providers = mkIf cfg.ai.providers.enable {
+      enable = true;
+      defaultProvider = cfg.ai.providers.defaultProvider;
+      enableFallback = cfg.ai.providers.enableFallback;
+      costOptimization = cfg.ai.providers.costOptimization;
+      
+      openai = {
+        enable = cfg.ai.providers.openai.enable;
+        priority = cfg.ai.providers.openai.priority;
+      };
+      
+      anthropic = {
+        enable = cfg.ai.providers.anthropic.enable;
+        priority = cfg.ai.providers.anthropic.priority;
+      };
+      
+      gemini = {
+        enable = cfg.ai.providers.gemini.enable;
+        priority = cfg.ai.providers.gemini.priority;
+      };
+      
+      ollama = {
+        enable = cfg.ai.providers.ollama.enable;
+        priority = cfg.ai.providers.ollama.priority;
+      };
+    };
 
     # Programs (conditional enables)
     programs.lazygit.enable = cfg.programs.lazygit;

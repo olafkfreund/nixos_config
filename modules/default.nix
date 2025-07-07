@@ -20,8 +20,7 @@
     ./ssh/ssh.nix
     
     # Development modules
-    ./ai/chatgpt.nix
-    ./ai/gemini-cli.nix
+    ./ai/default.nix
     ./helpers/helpers.nix
     
     # Virtualization modules

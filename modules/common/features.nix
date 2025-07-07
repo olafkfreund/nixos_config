@@ -56,6 +56,65 @@ with lib; {
       enable = mkEnableOption "Enable AI tools";
       ollama = mkEnableOption "Enable Ollama AI";
       gemini-cli = mkEnableOption "Enable Google Gemini CLI";
+      
+      # Enhanced AI provider support
+      providers = {
+        enable = mkEnableOption "Enable unified AI provider support";
+        
+        defaultProvider = mkOption {
+          type = types.enum ["openai" "anthropic" "gemini" "ollama"];
+          default = "openai";
+          description = "Default AI provider to use";
+        };
+        
+        enableFallback = mkOption {
+          type = types.bool;
+          default = true;
+          description = "Enable automatic fallback between providers";
+        };
+        
+        costOptimization = mkOption {
+          type = types.bool;
+          default = false;
+          description = "Enable cost-based provider selection";
+        };
+        
+        openai = {
+          enable = mkEnableOption "OpenAI provider";
+          priority = mkOption {
+            type = types.int;
+            default = 1;
+            description = "Provider priority (1 = highest)";
+          };
+        };
+        
+        anthropic = {
+          enable = mkEnableOption "Anthropic/Claude provider";
+          priority = mkOption {
+            type = types.int;
+            default = 2;
+            description = "Provider priority (1 = highest)";
+          };
+        };
+        
+        gemini = {
+          enable = mkEnableOption "Google Gemini provider";
+          priority = mkOption {
+            type = types.int;
+            default = 3;
+            description = "Provider priority (1 = highest)";
+          };
+        };
+        
+        ollama = {
+          enable = mkEnableOption "Ollama local provider";
+          priority = mkOption {
+            type = types.int;
+            default = 4;
+            description = "Provider priority (1 = highest)";
+          };
+        };
+      };
     };
 
     programs = {

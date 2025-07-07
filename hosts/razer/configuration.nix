@@ -93,6 +93,35 @@ in {
       enable = true;
       ollama = true;
       gemini-cli = true;
+      
+      # Enhanced unified AI provider support
+      providers = {
+        enable = true;
+        defaultProvider = "anthropic";  # Default to Claude for better reasoning
+        enableFallback = true;          # Auto-fallback on failures
+        costOptimization = false;       # Prioritize quality over cost
+        
+        # Provider configuration with priorities
+        openai = {
+          enable = true;
+          priority = 2;  # Secondary choice
+        };
+        
+        anthropic = {
+          enable = true;
+          priority = 1;  # Primary choice for reasoning tasks
+        };
+        
+        gemini = {
+          enable = true;
+          priority = 3;  # Good for vision and multimodal tasks
+        };
+        
+        ollama = {
+          enable = true;
+          priority = 4;  # Local fallback for privacy/offline use
+        };
+      };
     };
 
     programs = {

@@ -3,6 +3,12 @@
   inputs,
   ...
 }: {
+  imports = [
+    ./chatgpt.nix
+    ./gemini-cli.nix
+    ./providers/default.nix
+  ];
+
   environment.systemPackages = [
     pkgs.chatgpt-cli
     pkgs.rPackages.chatgpt
