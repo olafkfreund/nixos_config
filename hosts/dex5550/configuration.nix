@@ -93,6 +93,19 @@ in {
     media = {
       droidcam = true;
     };
+
+    # Monitoring configuration - DEX5550 as client
+    monitoring = {
+      enable = true;
+      mode = "client";  # Monitored by P620
+      serverHost = "p620";
+      
+      features = {
+        nodeExporter = true;
+        nixosMetrics = true;
+        alerting = false;  # Only server handles alerting
+      };
+    };
   };
 
   # Enable encrypted API keys
