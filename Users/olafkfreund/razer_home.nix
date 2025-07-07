@@ -111,13 +111,10 @@ in {
     theme = lib.removePrefix "gruvbox-" vars.theme.scheme;
   };
 
-  # Fix Chrome GPU acceleration for NVIDIA hybrid graphics
+  # Chrome with working incognito-like settings for NVIDIA/Wayland
   programs.chromium.commandLineArgs = lib.mkForce [
-    "--enable-features=UseOzonePlatform,VaapiVideoDecoder"
+    "--enable-features=UseOzonePlatform"
     "--ozone-platform=wayland"
-    "--enable-gpu-rasterization"
-    "--enable-zero-copy"
-    "--disable-gpu-sandbox"
-    "--ignore-gpu-blocklist"
+    "--incognito"
   ];
 }
