@@ -154,8 +154,8 @@ in {
         
         security = {
           admin_user = "admin";
-          admin_password = "$__file{/run/secrets/grafana-admin-password}";
-          secret_key = "$__file{/run/secrets/grafana-secret-key}";
+          admin_password = "nixos-admin";
+          secret_key = "nixos-monitoring-secret-key-change-in-production";
         };
         
         database = {
@@ -238,41 +238,6 @@ in {
       after = [ "network.target" "prometheus.service" ];
     };
 
-    # Create monitoring secrets if they don't exist
-    systemd.services.grafana-setup = {
-      description = "Setup Grafana secrets";
-      wantedBy = [ "multi-user.target" ];
-      before = [ "grafana.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-        RemainAfterExit = true;
-        ExecStart = pkgs.writeShellScript "grafana-setup" ''
-          echo "Setting up Grafana secrets..."
-          
-          # Create secrets directory if it doesn't exist
-          mkdir -p /run/secrets
-          
-          # Generate admin password if it doesn't exist
-          if [[ ! -f /run/secrets/grafana-admin-password ]]; then
-            echo "Creating Grafana admin password..."
-            echo "nixos-admin" > /run/secrets/grafana-admin-password
-            chmod 600 /run/secrets/grafana-admin-password
-            chown grafana:grafana /run/secrets/grafana-admin-password
-          fi
-          
-          # Generate secret key if it doesn't exist
-          if [[ ! -f /run/secrets/grafana-secret-key ]]; then
-            echo "Creating Grafana secret key..."
-            ${pkgs.openssl}/bin/openssl rand -hex 32 > /run/secrets/grafana-secret-key
-            chmod 600 /run/secrets/grafana-secret-key
-            chown grafana:grafana /run/secrets/grafana-secret-key
-          fi
-          
-          echo "Grafana secrets setup complete."
-        '';
-      };
-    };
 
     # Grafana CLI tools
     environment.systemPackages = with pkgs; [
