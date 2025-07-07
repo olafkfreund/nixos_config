@@ -163,7 +163,6 @@ in {
     environment.systemPackages = with pkgs; [
       prometheus
       grafana
-      alertmanager
       # Monitoring utilities
       htop
       iotop

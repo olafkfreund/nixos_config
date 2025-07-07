@@ -173,7 +173,7 @@ in {
           auto_assign_org_role = "Viewer";
         };
         
-        auth.anonymous = {
+        "auth.anonymous" = {
           enabled = false;
         };
       };

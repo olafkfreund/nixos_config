@@ -115,12 +115,8 @@ in {
       enable = true;
       mode = "server";  # P620 hosts Prometheus and Grafana
       serverHost = "p620";
-      retention = "90d";  # Long retention for historical analysis
-      scrapeInterval = "15s";
       
       features = {
-        prometheus = true;
-        grafana = true;
         nodeExporter = true;
         nixosMetrics = true;
         alerting = true;
