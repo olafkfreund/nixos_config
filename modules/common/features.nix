@@ -129,5 +129,29 @@ with lib; {
     media = {
       droidcam = mkEnableOption "Enable DroidCam";
     };
+
+    monitoring = {
+      enable = mkEnableOption "Enable monitoring and observability";
+      
+      mode = mkOption {
+        type = types.enum ["server" "client" "standalone"];
+        default = "client";
+        description = "Monitoring mode (server/client/standalone)";
+      };
+      
+      serverHost = mkOption {
+        type = types.str;
+        default = "p620";
+        description = "Monitoring server hostname";
+      };
+      
+      features = {
+        prometheus = mkEnableOption "Enable Prometheus metrics collection";
+        grafana = mkEnableOption "Enable Grafana dashboards";
+        nodeExporter = mkEnableOption "Enable node exporter";
+        nixosMetrics = mkEnableOption "Enable NixOS-specific metrics";
+        alerting = mkEnableOption "Enable alerting";
+      };
+    };
   };
 }

@@ -23,6 +23,9 @@
     ./ai/default.nix
     ./helpers/helpers.nix
     
+    # Monitoring modules
+    ./monitoring/default.nix
+    
     # Virtualization modules
     ./virt/default.nix
     ./virt/spice.nix
