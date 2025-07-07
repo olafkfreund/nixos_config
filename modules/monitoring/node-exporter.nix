@@ -81,12 +81,42 @@ with lib; let
         fi
     }
     
-    # Simple HTTP server
+    # Simple HTTP server using Python
     serve_metrics() {
-        while true; do
-            echo -e "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n$(generate_metrics)" | \
-            ${pkgs.netcat}/bin/nc -l -p "$PORT"
-        done
+        export -f generate_metrics output_metric
+        ${pkgs.python3}/bin/python3 -c "
+import http.server
+import socketserver
+import subprocess
+import os
+
+class MetricsHandler(http.server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/metrics':
+            try:
+                result = subprocess.run(['${pkgs.bash}/bin/bash', '-c', 'generate_metrics'], 
+                                      capture_output=True, text=True, 
+                                      env=dict(os.environ))
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/plain; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(result.stdout.encode())
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'text/plain')
+                self.end_headers()
+                self.wfile.write(f'Error: {str(e)}'.encode())
+        else:
+            self.send_response(404)
+            self.end_headers()
+    
+    def log_message(self, format, *args):
+        pass
+
+with socketserver.TCPServer(('0.0.0.0', $PORT), MetricsHandler) as httpd:
+    httpd.serve_forever()
+"
     }
     
     echo "Starting NixOS metrics exporter on port $PORT"
@@ -164,12 +194,42 @@ with lib; let
         output_metric "systemd_system_state" "$system_state_value" "Overall system state (1=running, 2=degraded, 3=starting, 4=stopping, 0=unknown)"
     }
     
-    # Simple HTTP server
+    # Simple HTTP server using Python
     serve_metrics() {
-        while true; do
-            echo -e "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n$(generate_metrics)" | \
-            ${pkgs.netcat}/bin/nc -l -p "$PORT"
-        done
+        export -f generate_metrics output_metric
+        ${pkgs.python3}/bin/python3 -c "
+import http.server
+import socketserver
+import subprocess
+import os
+
+class MetricsHandler(http.server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/metrics':
+            try:
+                result = subprocess.run(['${pkgs.bash}/bin/bash', '-c', 'generate_metrics'], 
+                                      capture_output=True, text=True,
+                                      env=dict(os.environ))
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/plain; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(result.stdout.encode())
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'text/plain')
+                self.end_headers()
+                self.wfile.write(f'Error: {str(e)}'.encode())
+        else:
+            self.send_response(404)
+            self.end_headers()
+    
+    def log_message(self, format, *args):
+        pass
+
+with socketserver.TCPServer(('0.0.0.0', $PORT), MetricsHandler) as httpd:
+    httpd.serve_forever()
+"
     }
     
     echo "Starting systemd metrics exporter on port $PORT"
