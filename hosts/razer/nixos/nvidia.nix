@@ -29,10 +29,10 @@
       vulkan-loader
       vulkan-tools
 
-      # Video acceleration
+      # Video acceleration - proper order matters
+      vaapiVdpau
       libva-vdpau-driver
       nvidia-vaapi-driver
-      vaapiVdpau
 
       # # CUDA support
       # cudaPackages.cudatoolkit

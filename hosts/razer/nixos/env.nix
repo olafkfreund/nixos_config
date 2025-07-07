@@ -8,5 +8,7 @@
     env = __GLX_VENDOR_LIBRARY_NAME,nvidia  # Set GLX vendor library to NVIDIA
     env = __GL_GSYNC_ALLOWED,1             # Enable GSync for NVIDIA
     env = NVD_BACKEND,direct               # Enable direct mode for NVIDIA
+    env = __NV_PRIME_RENDER_OFFLOAD,1      # Enable NVIDIA Prime render offload
+    env = __NV_PRIME_RENDER_OFFLOAD_PROVIDER,NVIDIA-G0  # Set NVIDIA as offload provider
   '';
 }
