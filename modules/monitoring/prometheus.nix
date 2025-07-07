@@ -181,16 +181,12 @@ in {
       ];
     };
 
-    # Prometheus service configuration
+    # Prometheus service configuration - use built-in prometheus user
     systemd.services.prometheus = {
       serviceConfig = {
-        User = "monitoring";
-        Group = "monitoring";
-        # Ensure data directory has correct permissions
-        ExecStartPre = pkgs.writeShellScript "prometheus-pre-start" ''
-          ${pkgs.coreutils}/bin/chown -R monitoring:monitoring /var/lib/prometheus
-          ${pkgs.coreutils}/bin/chmod -R 755 /var/lib/prometheus
-        '';
+        # Use built-in prometheus user/group from NixOS module
+        User = lib.mkForce "prometheus";
+        Group = lib.mkForce "prometheus";
       };
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" ];

@@ -59,15 +59,6 @@ in {
             webhook_configs = [{
               url = "http://localhost:9094/webhook/critical";
               send_resolved = true;
-              title = "CRITICAL: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}";
-              text = ''
-                {{ range .Alerts }}
-                Alert: {{ .Annotations.summary }}
-                Description: {{ .Annotations.description }}
-                Host: {{ .Labels.instance }}
-                Time: {{ .StartsAt }}
-                {{ end }}
-              '';
             }];
           }
           
@@ -76,7 +67,6 @@ in {
             webhook_configs = [{
               url = "http://localhost:9094/webhook/warning";
               send_resolved = true;
-              title = "WARNING: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}";
             }];
           }
         ];
