@@ -90,7 +90,7 @@ with lib; let
         title = "${hostname} Status";
         type = "stat";
         targets = [{
-          expr = "up{instance=\"${hostname}:9100\"}";
+          expr = "up{instance=\"${hostname}.home.freundcloud.com:9100\"}";
           legendFormat = "Status";
         }];
         gridPos = { h = 4; w = 6; x = 0; y = 0; };
@@ -108,7 +108,7 @@ with lib; let
         title = "Uptime";
         type = "stat";
         targets = [{
-          expr = "node_time_seconds{instance=\"${hostname}:9100\"} - node_boot_time_seconds{instance=\"${hostname}:9100\"}";
+          expr = "node_time_seconds{instance=\"${hostname}.home.freundcloud.com:9100\"} - node_boot_time_seconds{instance=\"${hostname}.home.freundcloud.com:9100\"}";
           legendFormat = "Uptime";
         }];
         gridPos = { h = 4; w = 6; x = 6; y = 0; };
@@ -123,7 +123,7 @@ with lib; let
         title = "CPU Usage";
         type = "timeseries";
         targets = [{
-          expr = "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",instance=\"${hostname}:9100\"}[5m])) * 100)";
+          expr = "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",instance=\"${hostname}.home.freundcloud.com:9100\"}[5m])) * 100)";
           legendFormat = "CPU %";
         }];
         gridPos = { h = 8; w = 12; x = 0; y = 4; };
@@ -133,7 +133,7 @@ with lib; let
         title = "Memory Usage";
         type = "timeseries";
         targets = [{
-          expr = "(1 - (node_memory_MemAvailable_bytes{instance=\"${hostname}:9100\"} / node_memory_MemTotal_bytes{instance=\"${hostname}:9100\"})) * 100";
+          expr = "(1 - (node_memory_MemAvailable_bytes{instance=\"${hostname}.home.freundcloud.com:9100\"} / node_memory_MemTotal_bytes{instance=\"${hostname}.home.freundcloud.com:9100\"})) * 100";
           legendFormat = "Memory %";
         }];
         gridPos = { h = 8; w = 12; x = 12; y = 4; };
@@ -143,7 +143,7 @@ with lib; let
         title = "Disk Usage";
         type = "bargauge";
         targets = [{
-          expr = "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\",instance=\"${hostname}:9100\"} / node_filesystem_size_bytes{fstype!=\"tmpfs\",instance=\"${hostname}:9100\"})) * 100";
+          expr = "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\",instance=\"${hostname}.home.freundcloud.com:9100\"} / node_filesystem_size_bytes{fstype!=\"tmpfs\",instance=\"${hostname}.home.freundcloud.com:9100\"})) * 100";
           legendFormat = "{{mountpoint}}";
         }];
         gridPos = { h = 8; w = 24; x = 0; y = 12; };
@@ -154,7 +154,7 @@ with lib; let
         title = "AMD GPU Usage";
         type = "timeseries";
         targets = [{
-          expr = "rocm_gpu_usage{instance=\"${hostname}:9100\"}";
+          expr = "rocm_gpu_usage{instance=\"${hostname}.home.freundcloud.com:9100\"}";
           legendFormat = "GPU {{device}}";
         }];
         gridPos = { h = 8; w = 12; x = 0; y = 20; };
@@ -165,7 +165,7 @@ with lib; let
         title = "NVIDIA GPU Usage";
         type = "timeseries";
         targets = [{
-          expr = "nvidia_gpu_utilization{instance=\"${hostname}:9100\"}";
+          expr = "nvidia_gpu_utilization{instance=\"${hostname}.home.freundcloud.com:9100\"}";
           legendFormat = "GPU {{device}}";
         }];
         gridPos = { h = 8; w = 12; x = 0; y = 20; };
@@ -190,7 +190,7 @@ with lib; let
         title = "Plex Service Status";
         type = "stat";
         targets = [{
-          expr = "systemd_unit_state{name=\"plex.service\",instance=\"p510:9102\"}";
+          expr = "systemd_unit_state{name=\"plex.service\",instance=\"p510.home.freundcloud.com:9102\"}";
           legendFormat = "Service State";
         }];
         gridPos = { h = 4; w = 6; x = 0; y = 0; };
@@ -208,7 +208,7 @@ with lib; let
         title = "Server CPU Usage";
         type = "timeseries";
         targets = [{
-          expr = "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",instance=\"p510:9100\"}[5m])) * 100)";
+          expr = "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",instance=\"p510.home.freundcloud.com:9100\"}[5m])) * 100)";
           legendFormat = "CPU %";
         }];
         gridPos = { h = 8; w = 12; x = 0; y = 4; };
@@ -218,7 +218,7 @@ with lib; let
         title = "Server Memory Usage";
         type = "timeseries";
         targets = [{
-          expr = "(1 - (node_memory_MemAvailable_bytes{instance=\"p510:9100\"} / node_memory_MemTotal_bytes{instance=\"p510:9100\"})) * 100";
+          expr = "(1 - (node_memory_MemAvailable_bytes{instance=\"p510.home.freundcloud.com:9100\"} / node_memory_MemTotal_bytes{instance=\"p510.home.freundcloud.com:9100\"})) * 100";
           legendFormat = "Memory %";
         }];
         gridPos = { h = 8; w = 12; x = 12; y = 4; };
@@ -228,7 +228,7 @@ with lib; let
         title = "Media Storage Usage";
         type = "bargauge";
         targets = [{
-          expr = "(1 - (node_filesystem_avail_bytes{mountpoint=\"/mnt/media\",instance=\"p510:9100\"} / node_filesystem_size_bytes{mountpoint=\"/mnt/media\",instance=\"p510:9100\"})) * 100";
+          expr = "(1 - (node_filesystem_avail_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"} / node_filesystem_size_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"})) * 100";
           legendFormat = "Media Storage";
         }];
         gridPos = { h = 6; w = 24; x = 0; y = 12; };
@@ -252,7 +252,7 @@ with lib; let
         title = "Sonarr Service Status";
         type = "stat";
         targets = [{
-          expr = "systemd_unit_state{name=\"sonarr.service\",instance=\"p510:9102\"}";
+          expr = "systemd_unit_state{name=\"sonarr.service\",instance=\"p510.home.freundcloud.com:9102\"}";
           legendFormat = "Service State";
         }];
         gridPos = { h = 4; w = 6; x = 0; y = 0; };
@@ -270,7 +270,7 @@ with lib; let
         title = "Downloads Directory Usage";
         type = "stat";
         targets = [{
-          expr = "node_filesystem_size_bytes{mountpoint=\"/mnt/media\",instance=\"p510:9100\"} - node_filesystem_avail_bytes{mountpoint=\"/mnt/media\",instance=\"p510:9100\"}";
+          expr = "node_filesystem_size_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"} - node_filesystem_avail_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"}";
           legendFormat = "Used Space";
         }];
         gridPos = { h = 4; w = 6; x = 6; y = 0; };
@@ -286,11 +286,11 @@ with lib; let
         type = "timeseries";
         targets = [
           {
-            expr = "rate(node_network_receive_bytes_total{device!=\"lo\",instance=\"p510:9100\"}[5m])";
+            expr = "rate(node_network_receive_bytes_total{device!=\"lo\",instance=\"p510.home.freundcloud.com:9100\"}[5m])";
             legendFormat = "Download";
           }
           {
-            expr = "rate(node_network_transmit_bytes_total{device!=\"lo\",instance=\"p510:9100\"}[5m])";
+            expr = "rate(node_network_transmit_bytes_total{device!=\"lo\",instance=\"p510.home.freundcloud.com:9100\"}[5m])";
             legendFormat = "Upload";
           }
         ];
@@ -315,7 +315,7 @@ with lib; let
         title = "Radarr Service Status";
         type = "stat";
         targets = [{
-          expr = "systemd_unit_state{name=\"radarr.service\",instance=\"p510:9102\"}";
+          expr = "systemd_unit_state{name=\"radarr.service\",instance=\"p510.home.freundcloud.com:9102\"}";
           legendFormat = "Service State";
         }];
         gridPos = { h = 4; w = 6; x = 0; y = 0; };
@@ -333,7 +333,7 @@ with lib; let
         title = "Movie Storage Usage";
         type = "stat";
         targets = [{
-          expr = "node_filesystem_size_bytes{mountpoint=\"/mnt/media\",instance=\"p510:9100\"} - node_filesystem_avail_bytes{mountpoint=\"/mnt/media\",instance=\"p510:9100\"}";
+          expr = "node_filesystem_size_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"} - node_filesystem_avail_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"}";
           legendFormat = "Used Space";
         }];
         gridPos = { h = 4; w = 6; x = 6; y = 0; };
@@ -349,11 +349,11 @@ with lib; let
         type = "timeseries";
         targets = [
           {
-            expr = "rate(node_disk_read_bytes_total{instance=\"p510:9100\"}[5m])";
+            expr = "rate(node_disk_read_bytes_total{instance=\"p510.home.freundcloud.com:9100\"}[5m])";
             legendFormat = "Read";
           }
           {
-            expr = "rate(node_disk_written_bytes_total{instance=\"p510:9100\"}[5m])";
+            expr = "rate(node_disk_written_bytes_total{instance=\"p510.home.freundcloud.com:9100\"}[5m])";
             legendFormat = "Write";
           }
         ];
@@ -378,7 +378,7 @@ with lib; let
         title = "Lidarr Service Status";
         type = "stat";
         targets = [{
-          expr = "systemd_unit_state{name=\"lidarr.service\",instance=\"p510:9102\"}";
+          expr = "systemd_unit_state{name=\"lidarr.service\",instance=\"p510.home.freundcloud.com:9102\"}";
           legendFormat = "Service State";
         }];
         gridPos = { h = 4; w = 6; x = 0; y = 0; };
@@ -396,7 +396,7 @@ with lib; let
         title = "Music Library Size";
         type = "stat";
         targets = [{
-          expr = "node_filesystem_size_bytes{mountpoint=\"/mnt/media\",instance=\"p510:9100\"} - node_filesystem_avail_bytes{mountpoint=\"/mnt/media\",instance=\"p510:9100\"}";
+          expr = "node_filesystem_size_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"} - node_filesystem_avail_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"}";
           legendFormat = "Used Space";
         }];
         gridPos = { h = 4; w = 6; x = 6; y = 0; };
@@ -412,15 +412,15 @@ with lib; let
         type = "timeseries";
         targets = [
           {
-            expr = "node_load1{instance=\"p510:9100\"}";
+            expr = "node_load1{instance=\"p510.home.freundcloud.com:9100\"}";
             legendFormat = "1m";
           }
           {
-            expr = "node_load5{instance=\"p510:9100\"}";
+            expr = "node_load5{instance=\"p510.home.freundcloud.com:9100\"}";
             legendFormat = "5m";
           }
           {
-            expr = "node_load15{instance=\"p510:9100\"}";
+            expr = "node_load15{instance=\"p510.home.freundcloud.com:9100\"}";
             legendFormat = "15m";
           }
         ];
@@ -445,7 +445,7 @@ with lib; let
         title = "Prowlarr Service Status";
         type = "stat";
         targets = [{
-          expr = "systemd_unit_state{name=\"prowlarr.service\",instance=\"p510:9102\"}";
+          expr = "systemd_unit_state{name=\"prowlarr.service\",instance=\"p510.home.freundcloud.com:9102\"}";
           legendFormat = "Service State";
         }];
         gridPos = { h = 4; w = 6; x = 0; y = 0; };
@@ -463,7 +463,7 @@ with lib; let
         title = "Indexer Management Load";
         type = "stat";
         targets = [{
-          expr = "node_load1{instance=\"p510:9100\"}";
+          expr = "node_load1{instance=\"p510.home.freundcloud.com:9100\"}";
           legendFormat = "System Load";
         }];
         gridPos = { h = 4; w = 6; x = 6; y = 0; };
@@ -480,11 +480,11 @@ with lib; let
         type = "timeseries";
         targets = [
           {
-            expr = "rate(node_network_receive_bytes_total{device!=\"lo\",instance=\"p510:9100\"}[5m])";
+            expr = "rate(node_network_receive_bytes_total{device!=\"lo\",instance=\"p510.home.freundcloud.com:9100\"}[5m])";
             legendFormat = "Download";
           }
           {
-            expr = "rate(node_network_transmit_bytes_total{device!=\"lo\",instance=\"p510:9100\"}[5m])";
+            expr = "rate(node_network_transmit_bytes_total{device!=\"lo\",instance=\"p510.home.freundcloud.com:9100\"}[5m])";
             legendFormat = "Upload";
           }
         ];
@@ -495,7 +495,7 @@ with lib; let
         title = "Memory Usage";
         type = "timeseries";
         targets = [{
-          expr = "(1 - (node_memory_MemAvailable_bytes{instance=\"p510:9100\"} / node_memory_MemTotal_bytes{instance=\"p510:9100\"})) * 100";
+          expr = "(1 - (node_memory_MemAvailable_bytes{instance=\"p510.home.freundcloud.com:9100\"} / node_memory_MemTotal_bytes{instance=\"p510.home.freundcloud.com:9100\"})) * 100";
           legendFormat = "Memory %";
         }];
         gridPos = { h = 8; w = 12; x = 12; y = 4; };
