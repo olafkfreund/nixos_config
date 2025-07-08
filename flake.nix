@@ -165,6 +165,8 @@
     makeNixosSystem = host: let
       primaryUser = getPrimaryUser host;
       allUsers = getHostUsers host;
+      # Only import stylix for desktop/workstation hosts, not servers
+      stylixModule = if host == "dex5550" then [] else [inputs.stylix.nixosModules.stylix];
     in {
       system = "x86_64-linux";
       specialArgs = {
@@ -180,13 +182,13 @@
         nur.modules.nixos.default
         home-manager.nixosModules.home-manager
         inputs.nix-colors.homeManagerModules.default
-        inputs.stylix.nixosModules.stylix
         inputs.nix-snapd.nixosModules.default
         inputs.agenix.nixosModules.default
         nix-index-database.nixosModules.nix-index
         ./home/shell/zellij/zjstatus.nix
         inputs.nixvim.nixosModules.nixvim
         nixai.nixosModules.default
+      ] ++ stylixModule ++ [
         {
           home-manager = {
             useGlobalPkgs = true;
@@ -204,7 +206,6 @@
                 agenix
                 razer-laptop-control
                 walker
-                stylix
                 nix-index-database
                 nixpkgs-f2k
                 bzmenu
@@ -217,6 +218,8 @@
                 nixvim
                 host
                 ;
+              # Only include stylix for non-server hosts
+              stylix = if host == "dex5550" then null else stylix;
               username = primaryUser;
               hostUsers = allUsers;
             };

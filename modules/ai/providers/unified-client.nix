@@ -190,8 +190,8 @@ with lib; let
             "openai")
                 if [[ -f "/run/agenix/api-openai" ]]; then
                     export OPENAI_API_KEY="$(cat /run/agenix/api-openai)"
-                    if command -v chatgpt-cli >/dev/null 2>&1; then
-                        timeout "$TIMEOUT" chatgpt-cli -m "$model" "$prompt"
+                    if command -v sgpt >/dev/null 2>&1; then
+                        timeout "$TIMEOUT" sgpt --model "$model" "$prompt"
                     else
                         log_error "OpenAI CLI tools not available"
                         return 1

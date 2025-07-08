@@ -14,16 +14,13 @@
   gpu = "modesetting";
   acceleration = ""; # For ollama - Default to empty for this machine
 
-  # System groups
+  # System groups - server optimized
   userGroups = [
     "networkmanager"
     "libvirtd"
     "wheel"
     "docker"
     "podman"
-    "video"
-    "scanner"
-    "lp"
     "lxd"
     "incus-admin"
   ];
@@ -48,41 +45,12 @@
     xserver = "gb"; # For X server and Wayland
   };
 
-  # Theme settings
-  theme = {
-    scheme = "gruvbox-dark-medium";
-    wallpaper = ./themes/orange-desert.jpg;
-    cursor = {
-      name = "Bibata-Modern-Ice";
-      size = 26;
-    };
-    font = {
-      mono = "JetBrainsMono Nerd Font";
-      sans = "Noto Sans";
-      serif = "Noto Serif";
-      sizes = {
-        applications = 12;
-        terminal = 13;
-        desktop = 12;
-        popups = 12;
-      };
-    };
-    opacity = {
-      desktop = 1.0;
-      terminal = 0.95;
-      popups = 0.95;
-    };
-  };
+  # No theme settings needed for server configuration
 
-  # Environment variables
+  # Environment variables - server optimized
   environmentVariables = {
-    MOZ_ENABLE_WAYLAND = "1";
-    NIXOS_WAYLAND = "1";
-    NIXOS_OZONE_WL = "1";
     NIXPKGS_ALLOW_INSECURE = "1";
     NIXPKGS_ALLOW_UNFREE = "1";
-    ELECTRON_OZONE_PLATFORM_HINT = "auto";
-    KITTY_DISABLE_WAYLAND = "0";
   };
 
   # Service-specific configs

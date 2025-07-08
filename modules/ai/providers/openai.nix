@@ -20,7 +20,6 @@ in {
     environment.systemPackages = with pkgs; [
       # Core OpenAI tools
       openai-whisper
-      chatgpt-cli
       shell-gpt
       # Enhanced CLI tools
       tgpt
@@ -42,9 +41,9 @@ in {
         if [[ -f "/run/secrets/api-openai" ]]; then
           export OPENAI_API_KEY="$(cat /run/secrets/api-openai)"
           if [[ -n "$prompt" ]]; then
-            chatgpt-cli -m "$model" "$prompt"
+            sgpt --model "$model" "$prompt"
           else
-            chatgpt-cli -m "$model"
+            sgpt --model "$model"
           fi
         else
           echo "OpenAI API key not found"

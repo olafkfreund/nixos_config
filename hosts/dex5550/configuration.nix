@@ -11,20 +11,16 @@ in {
     ./nixos/power.nix
     ./nixos/boot.nix
     ./nixos/i18n.nix
-    ./themes/stylix.nix
-    ./nixos/greetd.nix
-    ./nixos/intel.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
-    ../common/hyprland.nix
     ../../modules/secrets/api-keys.nix
   ];
 
   # Set hostname from variables
   networking.hostName = vars.hostName;
 
-  # Choose networking profile: "desktop" for NetworkManager
-  networking.profile = "desktop";
+  # Choose networking profile: "server" for server configuration
+  networking.profile = "server";
 
   # Configure AI providers directly - lightweight config for low-power system
   ai.providers = {
@@ -46,7 +42,7 @@ in {
   features = {
     development = {
       enable = true;
-      ansible = false;
+      ansible = true;   # Useful for server automation
       cargo = true;
       github = true;
       go = true;
@@ -54,7 +50,7 @@ in {
       lua = true;
       nix = true;
       shell = true;
-      devshell = false; # Temporarily disabled due to patch issue
+      devshell = false;
       python = true;
       nodejs = true;
     };
@@ -62,11 +58,11 @@ in {
     virtualization = {
       enable = true;
       docker = true;
-      incus = false;
+      incus = true;     # Enable for server containers
       podman = true;
-      spice = true;
-      libvirt = true;
-      sunshine = true;
+      spice = false;    # No GUI needed
+      libvirt = true;   # Keep for server VMs
+      sunshine = false; # No remote desktop needed
     };
 
     cloud = {
@@ -95,16 +91,16 @@ in {
     };
 
     programs = {
-      lazygit = true;
+      lazygit = true;      # CLI tool, useful for server
       thunderbird = false;
       obsidian = false;
       office = false;
-      webcam = true;
+      webcam = false;      # No camera needed on server
       print = false;
     };
 
     media = {
-      droidcam = true;
+      droidcam = false;    # No media capture on server
     };
 
     # Monitoring configuration - DEX5550 as client
@@ -141,52 +137,10 @@ in {
     preventBootBlocking = true;
   };
 
-  # Specific service configurations
-  services.xserver = {
-    enable = true;
-    displayManager.xserverArgs = [
-      "-nolisten tcp"
-      "-dpi 96"
-    ];
-  };
+  # Server configuration - no GUI services needed
+  services.xserver.enable = false;
 
-  # Desktop environment
-  services.desktopManager.gnome.enable = true;
-
-  # Wayland configuration
-  programs.sway = {
-    enable = true;
-    xwayland.enable = true;
-    wrapperFeatures.gtk = true;
-    extraPackages = with pkgs; [
-      swaylock
-      swayidle
-      swaycons
-      wl-clipboard
-      wf-recorder
-      wlr-which-key
-      wlr-randr
-      grim
-      slurp
-      dmenu
-      foot
-    ];
-    extraSessionCommands = ''
-      export SDL_VIDEODRIVER=wayland
-      export QT_QPA_PLATFORM=wayland
-      export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
-      export _JAVA_AWT_WM_NONREPARENTING=1
-      export MOZ_ENABLE_WAYLAND=1
-    '';
-  };
-
-  # Hardware-specific configurations
-  security.wrappers.sunshine = {
-    owner = "root";
-    group = "root";
-    capabilities = "cap_sys_admin+p";
-    source = "${pkgs.sunshine}/bin/sunshine";
-  };
+  # Server-specific configurations - no GUI hardware wrappers needed
 
   # Docker configuration
   modules.containers.docker = {
@@ -199,16 +153,28 @@ in {
   users.users.${vars.username} = {
     isNormalUser = true;
     description = vars.fullName;
-    extraGroups = vars.userGroups;
+    extraGroups = [
+      "networkmanager"
+      "libvirtd"
+      "wheel"
+      "docker"
+      "podman"
+      "lxd"
+      "incus-admin"
+    ];
     shell = pkgs.zsh;
     packages = with pkgs; [
       vim
-      wally-cli
+      htop
+      tmux
+      curl
+      wget
+      git
     ];
   };
 
-  # Other hardware/service configurations
-  hardware.keyboard.zsa.enable = true;
+  # Server hardware configurations
+  hardware.keyboard.zsa.enable = false; # No physical keyboard management needed
   services.ollama.acceleration =
     if vars.acceleration != ""
     then vars.acceleration
