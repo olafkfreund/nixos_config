@@ -38,6 +38,19 @@ in {
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "server";
 
+  # Configure AI providers directly
+  ai.providers = {
+    enable = true;
+    defaultProvider = "anthropic";
+    enableFallback = true;
+    
+    # Enable specific providers
+    openai.enable = true;
+    anthropic.enable = true;
+    gemini.enable = true;
+    ollama.enable = true;
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {

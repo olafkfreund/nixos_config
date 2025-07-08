@@ -26,6 +26,19 @@ in {
   # Choose networking profile: "desktop" for NetworkManager
   networking.profile = "desktop";
 
+  # Configure AI providers directly - lightweight config for low-power system
+  ai.providers = {
+    enable = true;
+    defaultProvider = "anthropic";
+    enableFallback = true;
+    
+    # Enable only cloud providers (no local Ollama to save resources)
+    openai.enable = true;
+    anthropic.enable = true;
+    gemini.enable = true;
+    ollama.enable = false;  # Disabled on low-power system
+  };
+
   # Use nameservers from variables
   networking.nameservers = vars.nameservers;
 
@@ -77,8 +90,8 @@ in {
     };
 
     ai = {
-      enable = false;
-      ollama = false;
+      enable = true;   # Enable AI tools but no local inference
+      ollama = false;  # Keep disabled - too resource intensive for SFF
     };
 
     programs = {
