@@ -241,12 +241,26 @@ in {
   # Disable systemd-resolved to avoid conflicts with BIND9
   services.resolved.enable = lib.mkForce false;
   
-  # BIND9 DNS Server - simplified configuration
+  # BIND9 DNS Server - configured for internal network access
   services.bind = {
     enable = true;
     listenOn = [ "192.168.1.222" "127.0.0.1" ];
     listenOnIpv6 = [ "none" ];
     forwarders = [ "1.1.1.1" "8.8.8.8" ];
+    
+    # Allow queries from internal network
+    extraConfig = ''
+      # Allow queries from internal network
+      acl "internal-network" {
+        127.0.0.0/8;
+        192.168.1.0/24;
+      };
+      
+      # Allow cache queries from internal network  
+      allow-query-cache { internal-network; };
+      allow-query { internal-network; };
+      allow-recursion { internal-network; };
+    '';
     
     zones."home.freundcloud.com" = {
       master = true;
