@@ -58,7 +58,7 @@ in {
     virtualization = {
       enable = true;
       docker = true;
-      incus = true;     # Enable for server containers
+      incus = false;    # Disabled due to nftables requirement
       podman = true;
       spice = false;    # No GUI needed
       libvirt = true;   # Keep for server VMs
@@ -103,16 +103,18 @@ in {
       droidcam = false;    # No media capture on server
     };
 
-    # Monitoring configuration - DEX5550 as client
+    # Monitoring configuration - DEX5550 as monitoring server
     monitoring = {
       enable = true;
-      mode = "client";  # Monitored by P620
-      serverHost = "p620";
+      mode = "server";  # Now the monitoring server for network
+      serverHost = "dex5550";
       
       features = {
-        nodeExporter = true;
-        nixosMetrics = true;
-        alerting = false;  # Only server handles alerting
+        prometheus = true;    # Prometheus server
+        grafana = true;       # Grafana dashboards
+        nodeExporter = true;  # Local node exporter
+        nixosMetrics = true;  # NixOS-specific metrics
+        alerting = true;      # Alertmanager
       };
     };
   };
@@ -137,8 +139,135 @@ in {
     preventBootBlocking = true;
   };
 
+  # Security services for management server
+  services.openssh = {
+    enable = true;
+    settings = {
+      # Harden SSH configuration
+      PermitRootLogin = "no";
+      PasswordAuthentication = false;
+      PubkeyAuthentication = true;
+      AuthenticationMethods = "publickey";
+      MaxAuthTries = 3;
+      ClientAliveInterval = 300;
+      ClientAliveCountMax = 2;
+      Compression = false;
+      TCPKeepAlive = false;
+      X11Forwarding = lib.mkForce false;
+      AllowTcpForwarding = "no";
+      AllowAgentForwarding = false;
+      AllowStreamLocalForwarding = false;
+      AuthorizedKeysFile = "/etc/ssh/authorized_keys.d/%u .ssh/authorized_keys .ssh/authorized_keys2";
+      
+      # Protocol and cipher hardening
+      Protocol = 2;
+      Ciphers = [
+        "chacha20-poly1305@openssh.com"
+        "aes256-gcm@openssh.com"
+        "aes128-gcm@openssh.com"
+        "aes256-ctr"
+        "aes192-ctr"
+        "aes128-ctr"
+      ];
+      KexAlgorithms = [
+        "curve25519-sha256@libssh.org"
+        "diffie-hellman-group16-sha512"
+        "diffie-hellman-group18-sha512"
+        "diffie-hellman-group14-sha256"
+      ];
+      Macs = [
+        "hmac-sha2-256-etm@openssh.com"
+        "hmac-sha2-512-etm@openssh.com"
+        "hmac-sha2-256"
+        "hmac-sha2-512"
+      ];
+    };
+    
+    # Only allow SSH from internal network initially
+    listenAddresses = [
+      { addr = "0.0.0.0"; port = 22; }
+    ];
+  };
+
+  # System hardening and additional security services
+  security.sudo.wheelNeedsPassword = lib.mkForce true;
+  security.protectKernelImage = true;
+  security.apparmor.enable = true;
+  security.auditd.enable = true;
+  
+  # Automatic security updates
+  system.autoUpgrade = {
+    enable = true;
+    allowReboot = false;  # Manual reboot for servers
+    dates = lib.mkForce "02:00";      # Run at 2 AM
+    randomizedDelaySec = "45min";
+    flake = lib.mkForce "github:olafkfreund/nixos_config";
+  };
+
   # Server configuration - no GUI services needed
   services.xserver.enable = false;
+
+  # Disable nftables to use iptables-based firewall
+  networking.nftables.enable = lib.mkForce false;
+  
+  # Comprehensive firewall configuration for management server
+  networking.firewall = {
+    enable = lib.mkForce true;
+    
+    # Default deny policy - only explicitly allowed ports are open
+    allowPing = true;
+    
+    # External access ports (will be secured by reverse proxy)
+    allowedTCPPorts = [
+      22   # SSH (will be rate limited)
+      53   # DNS (TCP)
+      80   # HTTP (redirect to HTTPS)
+      443  # HTTPS (reverse proxy)
+    ];
+    
+    allowedUDPPorts = [
+      53   # DNS (UDP)
+    ];
+    
+    # Internal network management ports (192.168.1.0/24 only)
+    interfaces."eno1" = {
+      allowedTCPPorts = [
+        3001  # Grafana
+        8080  # Pi-hole Web Interface
+        9090  # Prometheus
+        9093  # Alertmanager
+        9100  # Node Exporter
+        9101  # NixOS Exporter
+        9102  # Systemd Exporter
+      ];
+    };
+  };
+
+  # Fail2Ban configuration for additional SSH protection
+  services.fail2ban = {
+    enable = true;
+    maxretry = 3;
+    bantime = "1h";
+    bantime-increment = {
+      enable = true;
+      multipliers = "1 2 4 8 16 32 64";
+      maxtime = "168h"; # 1 week
+      overalljails = true;
+    };
+    
+    jails = {
+      # SSH protection
+      sshd = {
+        settings = {
+          enabled = true;
+          filter = "sshd";
+          maxretry = 3;
+          findtime = "10m";
+          bantime = "1h";
+        };
+      };
+    };
+  };
 
   # Server-specific configurations - no GUI hardware wrappers needed
 
@@ -160,7 +289,6 @@ in {
       "docker"
       "podman"
       "lxd"
-      "incus-admin"
     ];
     shell = pkgs.zsh;
     packages = with pkgs; [
@@ -170,7 +298,71 @@ in {
       curl
       wget
       git
+      # Security and monitoring tools
+      iotop
+      lsof
+      nettools
+      tcpdump
+      nmap
+      dig
+      whois
+      # Log analysis
+      jq
+      ripgrep
     ];
+  };
+
+  # Logging and monitoring for security
+  services.logrotate = {
+    enable = true;
+    settings = {
+      "/var/log/fail2ban.log" = {
+        frequency = "daily";
+        rotate = 7;
+        compress = true;
+        delaycompress = true;
+        missingok = true;
+        notifempty = true;
+      };
+      "/var/log/auth.log" = {
+        frequency = "daily";
+        rotate = 30;
+        compress = true;
+        delaycompress = true;
+        missingok = true;
+        notifempty = true;
+      };
+    };
+  };
+
+  # Kernel security hardening
+  boot.kernel.sysctl = {
+    # Network security
+    "net.ipv4.ip_forward" = lib.mkForce 0;
+    "net.ipv4.conf.all.send_redirects" = 0;
+    "net.ipv4.conf.default.send_redirects" = 0;
+    "net.ipv4.conf.all.accept_redirects" = 0;
+    "net.ipv4.conf.default.accept_redirects" = 0;
+    "net.ipv4.conf.all.accept_source_route" = 0;
+    "net.ipv4.conf.default.accept_source_route" = 0;
+    "net.ipv4.conf.all.log_martians" = 1;
+    "net.ipv4.conf.default.log_martians" = 1;
+    "net.ipv4.icmp_echo_ignore_broadcasts" = 1;
+    "net.ipv4.icmp_ignore_bogus_error_responses" = 1;
+    "net.ipv4.tcp_syncookies" = 1;
+    "net.ipv4.tcp_rfc1337" = 1;
+    
+    # Memory protection
+    "kernel.dmesg_restrict" = 1;
+    "kernel.kptr_restrict" = 2;
+    "kernel.yama.ptrace_scope" = 1;
+    "vm.mmap_rnd_bits" = 32;
+    "vm.mmap_rnd_compat_bits" = 16;
+    
+    # File system security
+    "fs.protected_hardlinks" = 1;
+    "fs.protected_symlinks" = 1;
+    "fs.suid_dumpable" = 0;
   };
 
   # Server hardware configurations
@@ -180,6 +372,291 @@ in {
     then vars.acceleration
     else "cpu";
   hardware.nvidia-container-toolkit.enable = false;
+
+  # Monitoring configuration handled by monitoring module
+
+  # Pi-hole DNS Server with Ad-blocking and Web Interface
+  # Using Docker since NixOS doesn't have native Pi-hole support
+  
+  # Pi-hole Docker container configuration
+  systemd.services.pihole-container = {
+    description = "Pi-hole DNS Ad-blocker Container";
+    after = [ "docker.service" "network.target" ];
+    wants = [ "docker.service" ];
+    wantedBy = [ "multi-user.target" ];
+    
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStartPre = [
+        # Ensure Pi-hole directories exist
+        "${pkgs.coreutils}/bin/mkdir -p /var/lib/pihole"
+        "${pkgs.coreutils}/bin/mkdir -p /etc/pihole"
+        
+        # Stop and remove existing container if it exists
+        "-${pkgs.docker}/bin/docker stop pihole"
+        "-${pkgs.docker}/bin/docker rm pihole"
+      ];
+      
+      ExecStart = ''
+        ${pkgs.docker}/bin/docker run -d \
+          --name pihole \
+          --restart unless-stopped \
+          -p 192.168.1.21:53:53/tcp \
+          -p 192.168.1.21:53:53/udp \
+          -p 192.168.1.21:8080:80/tcp \
+          -e TZ=UTC \
+          -e WEBPASSWORD=nixos-pihole \
+          -e SERVERIP=192.168.1.21 \
+          -e DNS1=1.1.1.1 \
+          -e DNS2=1.0.0.1 \
+          -e DNSMASQ_LISTENING=local \
+          -e PIHOLE_DNS_=1.1.1.1;1.0.0.1;8.8.8.8;8.8.4.4 \
+          -e VIRTUAL_HOST=pihole.home.freundcloud.com \
+          -e REV_SERVER=true \
+          -e REV_SERVER_DOMAIN=home.freundcloud.com \
+          -e REV_SERVER_TARGET=192.168.1.21 \
+          -e REV_SERVER_CIDR=192.168.1.0/24 \
+          -v /var/lib/pihole:/etc/pihole \
+          -v /etc/pihole:/etc/dnsmasq.d \
+          --dns=127.0.0.1 \
+          --hostname=pihole.home.freundcloud.com \
+          pihole/pihole:latest
+      '';
+      
+      ExecStop = "${pkgs.docker}/bin/docker stop pihole";
+    };
+  };
+  
+  # Custom DNS configuration file for Pi-hole
+  environment.etc."pihole/custom.list" = {
+    text = ''
+      # Custom DNS records for internal network
+      192.168.1.21 dex5550.home.freundcloud.com dex5550
+      192.168.1.10 p620.home.freundcloud.com p620
+      192.168.1.11 razer.home.freundcloud.com razer
+      192.168.1.12 p510.home.freundcloud.com p510
+      
+      # Service records
+      192.168.1.21 grafana.home.freundcloud.com
+      192.168.1.21 prometheus.home.freundcloud.com
+      192.168.1.21 alertmanager.home.freundcloud.com
+      192.168.1.21 pihole.home.freundcloud.com
+      192.168.1.21 dns.home.freundcloud.com
+      192.168.1.21 home.freundcloud.com
+    '';
+    mode = "0644";
+  };
+
+  # Traefik Reverse Proxy for external access
+  services.traefik = {
+    enable = true;
+    
+    # Static configuration
+    staticConfigOptions = {
+      # Entry points
+      entryPoints = {
+        web = {
+          address = ":80";
+          http.redirections.entrypoint = {
+            to = "websecure";
+            scheme = "https";
+            permanent = true;
+          };
+        };
+        websecure = {
+          address = ":443";
+        };
+      };
+      
+      # Certificate resolvers
+      certificatesResolvers = {
+        letsencrypt = {
+          acme = {
+            tlsChallenge = {};
+            email = "admin@freundcloud.com";
+            storage = "/var/lib/traefik/acme.json";
+            keyType = "EC256";
+          };
+        };
+      };
+      
+      # API and dashboard
+      api = {
+        dashboard = true;
+        insecure = false;  # Only accessible via HTTPS
+      };
+      
+      # Metrics for monitoring
+      metrics.prometheus.addEntryPointsLabels = true;
+      
+      # Logging
+      log = {
+        level = "INFO";
+        filePath = "/var/log/traefik/traefik.log";
+      };
+      accessLog = {
+        filePath = "/var/log/traefik/access.log";
+      };
+    };
+    
+    # Dynamic configuration via file
+    dynamicConfigOptions = {
+      http = {
+        # Routers for internal services
+        routers = {
+          # Grafana router
+          grafana = {
+            rule = "Host(`home.freundcloud.com`) && PathPrefix(`/grafana`)";
+            middlewares = [ "grafana-stripprefix" "secure-headers" ];
+            service = "grafana";
+            tls.certResolver = "letsencrypt";
+          };
+          
+          # Prometheus router
+          prometheus = {
+            rule = "Host(`home.freundcloud.com`) && PathPrefix(`/prometheus`)";
+            middlewares = [ "prometheus-stripprefix" "secure-headers" ];
+            service = "prometheus";
+            tls.certResolver = "letsencrypt";
+          };
+          
+          # Alertmanager router
+          alertmanager = {
+            rule = "Host(`home.freundcloud.com`) && PathPrefix(`/alertmanager`)";
+            middlewares = [ "alertmanager-stripprefix" "secure-headers" ];
+            service = "alertmanager";
+            tls.certResolver = "letsencrypt";
+          };
+          
+          # Pi-hole router
+          pihole = {
+            rule = "Host(`home.freundcloud.com`) && PathPrefix(`/pihole`)";
+            middlewares = [ "pihole-stripprefix" "secure-headers" ];
+            service = "pihole";
+            tls.certResolver = "letsencrypt";
+          };
+          
+          # Traefik dashboard router
+          dashboard = {
+            rule = "Host(`home.freundcloud.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))";
+            middlewares = [ "secure-headers" ];
+            service = "api@internal";
+            tls.certResolver = "letsencrypt";
+          };
+        };
+        
+        # Middlewares
+        middlewares = {
+          grafana-stripprefix = {
+            stripPrefix.prefixes = [ "/grafana" ];
+          };
+          prometheus-stripprefix = {
+            stripPrefix.prefixes = [ "/prometheus" ];
+          };
+          alertmanager-stripprefix = {
+            stripPrefix.prefixes = [ "/alertmanager" ];
+          };
+          pihole-stripprefix = {
+            stripPrefix.prefixes = [ "/pihole" ];
+          };
+          secure-headers = {
+            headers = {
+              customRequestHeaders = {
+                "X-Forwarded-Proto" = "https";
+              };
+              customResponseHeaders = {
+                "X-Frame-Options" = "DENY";
+                "X-Content-Type-Options" = "nosniff";
+                "Referrer-Policy" = "strict-origin-when-cross-origin";
+                "Strict-Transport-Security" = "max-age=31536000; includeSubDomains";
+              };
+            };
+          };
+        };
+        
+        # Services
+        services = {
+          grafana = {
+            loadBalancer.servers = [{
+              url = "http://127.0.0.1:3001";
+            }];
+          };
+          prometheus = {
+            loadBalancer.servers = [{
+              url = "http://127.0.0.1:9090";
+            }];
+          };
+          alertmanager = {
+            loadBalancer.servers = [{
+              url = "http://127.0.0.1:9093";
+            }];
+          };
+          pihole = {
+            loadBalancer.servers = [{
+              url = "http://192.168.1.21:8080";
+            }];
+          };
+        };
+      };
+    };
+  };
+
+  # Create log directories for Traefik
+  systemd.tmpfiles.rules = [
+    "d /var/log/traefik 0755 traefik traefik -"
+    "d /var/lib/traefik 0700 traefik traefik -"
+  ];
+
+  # Additional security services
+  environment.systemPackages = with pkgs; [
+    # DNS tools
+    bind          # DNS utilities (dig, nslookup, etc.)
+    dnsutils      # Additional DNS utilities
+    # Security analysis tools
+    chkrootkit
+    lynis
+    # Network monitoring
+    bandwhich
+    nethogs
+    iftop
+    # Process monitoring
+    pstree
+    tree
+  ];
+
+  # Periodic security scanning
+  systemd.services.security-scan = {
+    description = "Periodic security scan";
+    serviceConfig = {
+      Type = "oneshot";
+      User = "root";
+      ExecStart = pkgs.writeShellScript "security-scan" ''
+        echo "[$(date)] Starting security scan..."
+        
+        # Check for rootkits
+        ${pkgs.chkrootkit}/bin/chkrootkit -q || echo "chkrootkit found issues"
+        
+        # Run system audit
+        ${pkgs.lynis}/bin/lynis audit system --quick --quiet
+        
+        # Check open ports
+        ${pkgs.nettools}/bin/netstat -tuln > /var/log/security-scan-ports.log
+        
+        echo "[$(date)] Security scan completed"
+      '';
+    };
+  };
+
+  systemd.timers.security-scan = {
+    description = "Run security scan daily";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "daily";
+      Persistent = true;
+      RandomizedDelaySec = "1h";
+    };
+  };
 
   nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16" "python3.12-youtube-dl-2021.12.17"];
 

@@ -93,7 +93,13 @@
       "Bash(ai-chat:*)",
       "Bash(ai-cli:*)",
       "Bash(timeout:*)",
-      "Bash(./update-claude-code-lock.sh:*)"
+      "Bash(./update-claude-code-lock.sh:*)",
+      "Bash(nix-env:*)",
+      "Bash(nix search:*)",
+      "Bash(sgpt:*)",
+      "Bash(aichat:*)",
+      "Bash(hostname:*)",
+      "Bash(chatgpt --help)"
     ]
   },
   "enableAllProjectMcpServers": false
