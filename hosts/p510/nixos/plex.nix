@@ -67,12 +67,12 @@
       };
     };
 
-    # prowlarr = {
-    #   enable = true;
-    #   user = "olafkfreund";
-    #   dataDir = "/mnt/media/prowlarr";
-    #   package = pkgs-unstable.prowlarr;
-    # };
+    prowlarr = {
+      enable = true;
+      user = "olafkfreund";
+      dataDir = "/mnt/media/prowlarr";
+      package = pkgs-unstable.prowlarr;
+    };
 
     jackett = {
       enable = true;
@@ -91,7 +91,8 @@
 
   systemd.tmpfiles.rules = [
     "d /mnt/media/jackett 0755 olafkfreund users -"
+    "d /mnt/media/prowlarr 0755 olafkfreund users -"
   ];
 
-  networking.firewall.allowedTCPPorts = [5055 9117];
+  networking.firewall.allowedTCPPorts = [5055 9117 9696]; # Tautulli, Jackett, Prowlarr
 }
