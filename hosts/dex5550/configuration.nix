@@ -441,7 +441,7 @@ in {
           -v /var/lib/pihole:/etc/pihole \
           -v /etc/pihole:/etc/dnsmasq.d \
           --dns=1.1.1.1 \
-          --dns=1.0.0.1 \
+          --dns=8.8.8.8 \
           --hostname=pihole.home.freundcloud.com \
           pihole/pihole:latest
       '';
