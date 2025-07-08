@@ -105,7 +105,8 @@
       "Bash(rsync:*)",
       "Bash(nslookup:*)",
       "Bash(resolvectl:*)",
-      "Bash(sudo resolvectl:*)"
+      "Bash(sudo resolvectl:*)",
+      "Bash(sudo systemctl:*)"
     ]
   },
   "enableAllProjectMcpServers": false
