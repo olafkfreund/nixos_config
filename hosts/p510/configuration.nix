@@ -38,9 +38,10 @@ in {
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "server";
 
-  # Use DHCP-provided DNS servers
-  services.resolved.enable = true;
-  networking.nameservers = lib.mkForce [];  # Clear custom nameservers, use DHCP
+  # Use static DNS configuration for reliable internal resolution
+  services.resolved.enable = lib.mkForce false;
+  networking.nameservers = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
+  networking.search = [ "home.freundcloud.com" ];
 
   # Configure AI providers directly
   ai.providers = {
