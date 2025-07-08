@@ -19,7 +19,7 @@
     ./mandb/default.nix
     ./appimage/default.nix
     ./dns/secure-dns.nix
-    ./flaresolverr/default.nix
+    # ./flaresolverr/default.nix  # Commented out - NixOS has built-in FlareSolverr module
 
     # Network stability modules (service merged into main module)
     ./network-monitoring.nix
