@@ -82,7 +82,7 @@ in {
 
     networking = {
       enable = true;
-      tailscale = true;
+      tailscale = false;
     };
 
     ai = {
@@ -139,12 +139,6 @@ in {
     enableUserEnvironment = true;
   };
 
-  # IDIOT-PROOF DNS CONFIGURATION: Prevent Tailscale from breaking DNS
-  vpn.tailscale = {
-    enable = true;
-    acceptDns = lib.mkForce false; # NEVER let Tailscale touch DNS
-    netfilterMode = "off"; # Safer default
-  };
 
   # BOOT PERFORMANCE: Prevent fstrim from blocking boot (saves 3+ minutes)
   services.fstrim-optimization = {

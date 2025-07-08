@@ -45,7 +45,6 @@ in {
     security.gnupg.enable = mkIf cfg.security.enable cfg.security.gnupg;
 
     # Networking (conditional enables)
-    vpn.tailscale.enable = mkIf cfg.networking.enable cfg.networking.tailscale;
 
     # AI tools (conditional enables)
     ai.ollama.enable = mkIf cfg.ai.enable cfg.ai.ollama;

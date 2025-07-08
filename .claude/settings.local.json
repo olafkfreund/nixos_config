@@ -106,7 +106,9 @@
       "Bash(nslookup:*)",
       "Bash(resolvectl:*)",
       "Bash(sudo resolvectl:*)",
-      "Bash(sudo systemctl:*)"
+      "Bash(sudo systemctl:*)",
+      "Bash(claude mcp add:*)",
+      "Bash(claude-code mcp:*)"
     ]
   },
   "enableAllProjectMcpServers": false

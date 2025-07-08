@@ -10,7 +10,6 @@
     ./openssh/openssh.nix
     ./gnome/gnome-services.nix
     ./systemd/default.nix
-    ./tailscale/default.nix
     ./system/default.nix
     ./cron/cron.nix
     ./atuin/default.nix

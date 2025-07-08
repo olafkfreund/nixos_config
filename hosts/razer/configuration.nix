@@ -120,7 +120,7 @@ in {
 
     networking = {
       enable = true;
-      tailscale = true;
+      tailscale = false;
     };
 
     ai = {
@@ -176,13 +176,6 @@ in {
     '';
   };
 
-  # IDIOT-PROOF DNS CONFIGURATION: Prevent Tailscale from breaking DNS
-  # Force Tailscale to NEVER manage DNS to avoid conflicts
-  vpn.tailscale = {
-    enable = true;
-    acceptDns = lib.mkForce false; # NEVER let Tailscale touch DNS
-    netfilterMode = "off"; # Safer for laptops
-  };
 
   # Disable secure-dns to use dex5550 DNS server for internal domains
   services.secure-dns.enable = false;
@@ -217,16 +210,6 @@ in {
     # Disable network wait services to improve boot time
     NetworkManager-wait-online.enable = lib.mkForce false;
     
-    # Make sure Tailscale starts AFTER DNS is properly configured
-    tailscaled = {
-      after = [ "network.target" "NetworkManager.service" "systemd-resolved.service" ];
-      wants = [ "network.target" ];
-      requires = [ "network-online.target" ];
-      serviceConfig = {
-        Restart = "on-failure";
-        RestartSec = "10s";
-      };
-    };
   };
 
   # Use standard NetworkManager for laptop - useNetworkd already set above

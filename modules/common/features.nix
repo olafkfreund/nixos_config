@@ -49,7 +49,6 @@ with lib; {
 
     networking = {
       enable = mkEnableOption "Enable networking";
-      tailscale = mkEnableOption "Enable Tailscale VPN";
     };
 
     ai = {
