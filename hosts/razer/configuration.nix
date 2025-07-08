@@ -120,7 +120,6 @@ in {
 
     networking = {
       enable = true;
-      tailscale = false;
     };
 
     ai = {
