@@ -119,6 +119,16 @@ in {
     };
   };
 
+  # Custom Grafana configuration for sub-path serving
+  services.grafana = {
+    settings = {
+      server = {
+        root_url = lib.mkForce "https://home.freundcloud.com/grafana/";
+        serve_from_sub_path = lib.mkForce true;
+      };
+    };
+  };
+
   # Enable encrypted API keys
   secrets.apiKeys = {
     enable = true;
@@ -207,6 +217,17 @@ in {
   # Server configuration - no GUI services needed
   services.xserver.enable = false;
 
+  # Configure systemd-resolved to not conflict with Pi-hole
+  services.resolved = {
+    enable = true;
+    dnssec = "true";
+    domains = [ "~." ];
+    fallbackDns = [ "1.1.1.1" "1.0.0.1" "8.8.8.8" "8.8.4.4" ];
+    extraConfig = ''
+      DNSStubListener=no
+    '';
+  };
+
   # Disable nftables to use iptables-based firewall
   networking.nftables.enable = lib.mkForce false;
   
@@ -220,20 +241,20 @@ in {
     # External access ports (will be secured by reverse proxy)
     allowedTCPPorts = [
       22   # SSH (will be rate limited)
-      53   # DNS (TCP)
+      53   # DNS (TCP) - Pi-hole
       80   # HTTP (redirect to HTTPS)
       443  # HTTPS (reverse proxy)
     ];
     
     allowedUDPPorts = [
-      53   # DNS (UDP)
+      53   # DNS (UDP) - Pi-hole
     ];
     
     # Internal network management ports (192.168.1.0/24 only)
     interfaces."eno1" = {
       allowedTCPPorts = [
         3001  # Grafana
-        8080  # Pi-hole Web Interface
+        8081  # Pi-hole Web Interface
         9090  # Prometheus
         9093  # Alertmanager
         9100  # Node Exporter
@@ -402,24 +423,22 @@ in {
         ${pkgs.docker}/bin/docker run -d \
           --name pihole \
           --restart unless-stopped \
-          -p 192.168.1.21:53:53/tcp \
-          -p 192.168.1.21:53:53/udp \
-          -p 192.168.1.21:8080:80/tcp \
+          -p 53:53/tcp \
+          -p 53:53/udp \
+          -p 8081:80/tcp \
           -e TZ=UTC \
           -e WEBPASSWORD=nixos-pihole \
-          -e SERVERIP=192.168.1.21 \
-          -e DNS1=1.1.1.1 \
-          -e DNS2=1.0.0.1 \
-          -e DNSMASQ_LISTENING=local \
-          -e PIHOLE_DNS_=1.1.1.1;1.0.0.1;8.8.8.8;8.8.4.4 \
+          -e FTLCONF_LOCAL_IPV4=192.168.1.225 \
+          -e PIHOLE_DNS_="1.1.1.1;1.0.0.1" \
           -e VIRTUAL_HOST=pihole.home.freundcloud.com \
           -e REV_SERVER=true \
           -e REV_SERVER_DOMAIN=home.freundcloud.com \
-          -e REV_SERVER_TARGET=192.168.1.21 \
+          -e REV_SERVER_TARGET=192.168.1.225 \
           -e REV_SERVER_CIDR=192.168.1.0/24 \
           -v /var/lib/pihole:/etc/pihole \
           -v /etc/pihole:/etc/dnsmasq.d \
-          --dns=127.0.0.1 \
+          --dns=1.1.1.1 \
+          --dns=1.0.0.1 \
           --hostname=pihole.home.freundcloud.com \
           pihole/pihole:latest
       '';
@@ -432,18 +451,18 @@ in {
   environment.etc."pihole/custom.list" = {
     text = ''
       # Custom DNS records for internal network
-      192.168.1.21 dex5550.home.freundcloud.com dex5550
-      192.168.1.10 p620.home.freundcloud.com p620
-      192.168.1.11 razer.home.freundcloud.com razer
-      192.168.1.12 p510.home.freundcloud.com p510
+      192.168.1.225 dex5550.home.freundcloud.com dex5550
+      192.168.1.97 p620.home.freundcloud.com p620
+      192.168.1.96 razer.home.freundcloud.com razer
+      192.168.1.127 p510.home.freundcloud.com p510
       
-      # Service records
-      192.168.1.21 grafana.home.freundcloud.com
-      192.168.1.21 prometheus.home.freundcloud.com
-      192.168.1.21 alertmanager.home.freundcloud.com
-      192.168.1.21 pihole.home.freundcloud.com
-      192.168.1.21 dns.home.freundcloud.com
-      192.168.1.21 home.freundcloud.com
+      # Service records (all pointing to DEX5550)
+      192.168.1.225 grafana.home.freundcloud.com
+      192.168.1.225 prometheus.home.freundcloud.com
+      192.168.1.225 alertmanager.home.freundcloud.com
+      192.168.1.225 pihole.home.freundcloud.com
+      192.168.1.225 dns.home.freundcloud.com
+      192.168.1.225 home.freundcloud.com
     '';
     mode = "0644";
   };
@@ -594,7 +613,7 @@ in {
           };
           pihole = {
             loadBalancer.servers = [{
-              url = "http://192.168.1.21:8080";
+              url = "http://127.0.0.1:8081";
             }];
           };
         };
