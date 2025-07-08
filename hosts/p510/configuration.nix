@@ -231,6 +231,7 @@ in {
         networkConfig = {
           MulticastDNS = false;
           IPv6AcceptRA = true;
+          Domains = "home.freundcloud.com";  # Configure DNS domain for internal resolution
         };
         dhcpV4Config = {
           RouteMetric = 10;

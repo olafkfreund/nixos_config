@@ -43,7 +43,10 @@ in {
   networking.profile = "desktop";
 
   # Use DHCP-provided DNS servers - simplest approach
-  services.resolved.enable = true;
+  services.resolved = {
+    enable = true;
+    domains = [ "home.freundcloud.com" ];  # Configure DNS domain for internal resolution
+  };
   networking.nameservers = lib.mkForce [];  # Clear custom nameservers
   
   # Use NetworkManager for simple network management

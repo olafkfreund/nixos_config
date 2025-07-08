@@ -318,6 +318,7 @@ in {
           MulticastDNS = false;
           DHCP = "ipv4";
           IPv6AcceptRA = true;
+          Domains = "home.freundcloud.com";  # Configure DNS domain for internal resolution
         };
         # Higher priority for wired connection
         dhcpV4Config = {

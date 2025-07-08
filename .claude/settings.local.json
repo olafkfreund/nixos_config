@@ -103,7 +103,9 @@
       "Bash(scp:*)",
       "Bash(dig:*)",
       "Bash(rsync:*)",
-      "Bash(nslookup:*)"
+      "Bash(nslookup:*)",
+      "Bash(resolvectl:*)",
+      "Bash(sudo resolvectl:*)"
     ]
   },
   "enableAllProjectMcpServers": false
