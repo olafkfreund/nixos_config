@@ -167,6 +167,7 @@ in {
     enable = true;
     acceptDns = lib.mkForce false; # NEVER let Tailscale touch DNS
     netfilterMode = "off"; # Safer for servers
+    extraUpFlags = [ "--accept-dns=false" "--accept-routes=false" ];
   };
 
   scrcpyWifi.enable = true;
