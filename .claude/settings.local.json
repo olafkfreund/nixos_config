@@ -99,7 +99,10 @@
       "Bash(sgpt:*)",
       "Bash(aichat:*)",
       "Bash(hostname:*)",
-      "Bash(chatgpt --help)"
+      "Bash(chatgpt --help)",
+      "Bash(scp:*)",
+      "Bash(dig:*)",
+      "Bash(rsync:*)"
     ]
   },
   "enableAllProjectMcpServers": false
