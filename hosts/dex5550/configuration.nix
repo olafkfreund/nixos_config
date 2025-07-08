@@ -267,7 +267,7 @@ in {
       file = pkgs.writeText "home.freundcloud.com.zone" ''
         $TTL 86400
         @       IN      SOA     dex5550.home.freundcloud.com. admin.home.freundcloud.com. (
-                        2024010801      ; Serial
+                        2025070801      ; Serial - updated for razer IP change
                         3600            ; Refresh
                         1800            ; Retry
                         604800          ; Expire
@@ -280,7 +280,7 @@ in {
         @               IN      A       192.168.1.222
         dex5550         IN      A       192.168.1.222
         p620            IN      A       192.168.1.97
-        razer           IN      A       192.168.1.96
+        razer           IN      A       192.168.1.188
         p510            IN      A       192.168.1.127
         grafana         IN      A       192.168.1.222
         prometheus      IN      A       192.168.1.222
