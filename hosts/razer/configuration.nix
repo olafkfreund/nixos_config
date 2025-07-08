@@ -163,17 +163,8 @@ in {
     netfilterMode = "off"; # Safer for laptops
   };
 
-  # Keep secure DNS but ensure it doesn't conflict
-  services.secure-dns = {
-    enable = true;
-    dnssec = "true";
-    useStubResolver = true; # Ensure stub resolver is used
-    networkManagerIntegration = true; # Ensure NM integration
-    fallbackProviders = [
-      "1.1.1.1#cloudflare-dns.com" # Cloudflare DNS
-      "8.8.8.8#dns.google" # Google DNS
-    ];
-  };
+  # Disable secure-dns to use dex5550 DNS server for internal domains
+  services.secure-dns.enable = false;
 
   services = {
     xserver = {
