@@ -49,14 +49,14 @@ in {
   networking.networkmanager = {
     enable = true;
     dns = "default";  # Use NetworkManager's built-in DNS
-    # Configure search domains for internal resolution
-    extraConfig = ''
-      [main]
-      dns=default
-      
-      [global-dns-domain-home.freundcloud.com]
-      servers=192.168.1.222,1.1.1.1,8.8.8.8
-    '';
+    # Configure settings using new structured format
+    settings = {
+      main = {
+        dns = "default";
+      };
+      # Note: global DNS domain settings are not supported in structured format
+      # Will use networking.nameservers for DNS configuration instead
+    };
   };
   networking.useNetworkd = false;
   
