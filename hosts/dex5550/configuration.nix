@@ -239,20 +239,17 @@ in {
     # External access ports (will be secured by reverse proxy)
     allowedTCPPorts = [
       22   # SSH (will be rate limited)
-      53   # DNS (TCP) - Pi-hole
       80   # HTTP (redirect to HTTPS)
       443  # HTTPS (reverse proxy)
     ];
     
     allowedUDPPorts = [
-      53   # DNS (UDP) - Pi-hole
     ];
     
     # Internal network management ports (192.168.1.0/24 only)
     interfaces."eno1" = {
       allowedTCPPorts = [
         3001  # Grafana
-        8081  # Pi-hole Web Interface
         9090  # Prometheus
         9093  # Alertmanager
         9100  # Node Exporter
@@ -394,82 +391,6 @@ in {
 
   # Monitoring configuration handled by monitoring module
 
-  # Pi-hole DNS Server with Ad-blocking and Web Interface
-  # Using Docker since NixOS doesn't have native Pi-hole support
-  
-  # Pi-hole Docker container configuration
-  systemd.services.pihole-container = {
-    description = "Pi-hole DNS Ad-blocker Container";
-    after = [ "docker.service" "network.target" ];
-    wants = [ "docker.service" ];
-    wantedBy = [ "multi-user.target" ];
-    
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      Restart = "on-failure";
-      RestartSec = "30s";
-      ExecStartPre = [
-        # Ensure Pi-hole directories exist
-        "${pkgs.coreutils}/bin/mkdir -p /var/lib/pihole"
-        "${pkgs.coreutils}/bin/mkdir -p /etc/pihole"
-        
-        # Stop and remove existing container if it exists
-        "-${pkgs.docker}/bin/docker stop pihole"
-        "-${pkgs.docker}/bin/docker rm pihole"
-        
-        # Wait for Docker to be ready
-        "${pkgs.docker}/bin/docker info"
-      ];
-      
-      ExecStart = ''
-        ${pkgs.docker}/bin/docker run -d \
-          --name pihole \
-          --restart unless-stopped \
-          -p 53:53/tcp \
-          -p 53:53/udp \
-          -p 8081:80/tcp \
-          -e TZ=UTC \
-          -e WEBPASSWORD=nixos-pihole \
-          -e FTLCONF_LOCAL_IPV4=192.168.1.222 \
-          -e PIHOLE_DNS_="1.1.1.1;1.0.0.1" \
-          -e VIRTUAL_HOST=pihole.freundcloud.com \
-          -e REV_SERVER=true \
-          -e REV_SERVER_DOMAIN=home.freundcloud.com \
-          -e REV_SERVER_TARGET=192.168.1.222 \
-          -e REV_SERVER_CIDR=192.168.1.0/24 \
-          -v /var/lib/pihole:/etc/pihole \
-          -v /etc/pihole:/etc/dnsmasq.d \
-          --dns=1.1.1.1 \
-          --dns=8.8.8.8 \
-          --hostname=pihole.home.freundcloud.com \
-          pihole/pihole:latest
-      '';
-      
-      ExecStop = "${pkgs.docker}/bin/docker stop pihole";
-    };
-  };
-  
-  # Custom DNS configuration file for Pi-hole
-  environment.etc."pihole/custom.list" = {
-    text = ''
-      # Custom DNS records for internal network
-      192.168.1.222 dex5550.home.freundcloud.com dex5550
-      192.168.1.97 p620.home.freundcloud.com p620
-      192.168.1.96 razer.home.freundcloud.com razer
-      192.168.1.127 p510.home.freundcloud.com p510
-      
-      # Service records (all pointing to DEX5550)
-      192.168.1.222 grafana.home.freundcloud.com
-      192.168.1.222 prometheus.home.freundcloud.com
-      192.168.1.222 alertmanager.home.freundcloud.com
-      192.168.1.222 pihole.home.freundcloud.com
-      192.168.1.222 pihole.freundcloud.com
-      192.168.1.222 dns.home.freundcloud.com
-      192.168.1.222 home.freundcloud.com
-    '';
-    mode = "0644";
-  };
 
   # Traefik Reverse Proxy for external access
   services.traefik = {
@@ -552,13 +473,6 @@ in {
             tls.certResolver = "letsencrypt";
           };
           
-          # Pi-hole router - use subdomain instead of path
-          pihole = {
-            rule = "Host(`pihole.freundcloud.com`)";
-            middlewares = [ "secure-headers" ];
-            service = "pihole";
-            tls.certResolver = "letsencrypt";
-          };
           
           # Traefik dashboard router
           dashboard = {
@@ -610,11 +524,6 @@ in {
           alertmanager = {
             loadBalancer.servers = [{
               url = "http://127.0.0.1:9093";
-            }];
-          };
-          pihole = {
-            loadBalancer.servers = [{
-              url = "http://127.0.0.1:8081";
             }];
           };
         };
