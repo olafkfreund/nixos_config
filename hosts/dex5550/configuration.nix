@@ -119,12 +119,15 @@ in {
     };
   };
 
-  # Custom Grafana configuration for sub-path serving
+  # Custom Grafana configuration - use default root path
   services.grafana = {
     settings = {
       server = {
-        root_url = lib.mkForce "https://home.freundcloud.com/grafana/";
-        serve_from_sub_path = lib.mkForce true;
+        root_url = lib.mkForce "http://127.0.0.1:3001/";
+        serve_from_sub_path = lib.mkForce false;
+        domain = lib.mkForce "127.0.0.1";
+        http_port = lib.mkForce 3001;
+        protocol = lib.mkForce "http";
       };
     };
   };
