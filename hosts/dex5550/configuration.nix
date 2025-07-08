@@ -462,11 +462,11 @@ in {
 
   # Monitoring configuration handled by monitoring module
 
+
   # FreshRSS Service - Native NixOS RSS Feed Reader
   services.freshrss = {
     enable = true;
     baseUrl = "https://rss.home.freundcloud.com";
-    passwordFile = pkgs.writeText "freshrss-password" "nixos-admin";
     
     # Database configuration
     database = {
@@ -477,6 +477,11 @@ in {
     
     # Default user configuration
     defaultUser = "admin";
+    passwordFile = pkgs.writeText "freshrss-password" "nixos-admin";
+    
+    # Additional configuration options
+    authType = "form";
+    language = "en";
     
     # Extensions
     extensions = with pkgs.freshrss-extensions; [
@@ -642,10 +647,11 @@ in {
     };
   };
 
-  # Create log directories for Traefik
+  # Create log directories for Traefik and FreshRSS
   systemd.tmpfiles.rules = [
     "d /var/log/traefik 0755 traefik traefik -"
     "d /var/lib/traefik 0700 traefik traefik -"
+    "d /var/lib/freshrss 0755 freshrss freshrss -"
   ];
 
   # Additional security services
