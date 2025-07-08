@@ -430,48 +430,30 @@ in {
 
   # Monitoring configuration handled by monitoring module
 
-  # FreshRSS Service - RSS Feed Reader
-  systemd.services.freshrss-container = {
-    description = "FreshRSS RSS Feed Reader Container";
-    after = [ "docker.service" "network.target" ];
-    wants = [ "docker.service" ];
-    wantedBy = [ "multi-user.target" ];
+  # FreshRSS Service - Native NixOS RSS Feed Reader
+  services.freshrss = {
+    enable = true;
+    baseUrl = "https://rss.home.freundcloud.com";
+    passwordFile = pkgs.writeText "freshrss-password" "nixos-admin";
     
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      Restart = "on-failure";
-      RestartSec = "30s";
-      ExecStartPre = [
-        # Ensure FreshRSS directories exist
-        "${pkgs.coreutils}/bin/mkdir -p /var/lib/freshrss"
-        "${pkgs.coreutils}/bin/chown -R 33:33 /var/lib/freshrss"  # www-data user
-        
-        # Stop and remove existing container if it exists
-        "-${pkgs.docker}/bin/docker stop freshrss"
-        "-${pkgs.docker}/bin/docker rm freshrss"
-        
-        # Wait for Docker to be ready
-        "${pkgs.docker}/bin/docker info"
-      ];
-      
-      ExecStart = ''
-        ${pkgs.docker}/bin/docker run -d \
-          --name freshrss \
-          --restart unless-stopped \
-          -p 8082:80 \
-          -e TZ=Europe/London \
-          -e CRON_MIN=1,31 \
-          -e FRESHRSS_ENV=production \
-          -e FRESHRSS_INSTALL="--api-enabled --db-type sqlite --db-base freshrss --db-user freshrss --db-password freshrss --default-user admin" \
-          -e FRESHRSS_USER="--user admin --password nixos-admin --email admin@home.freundcloud.com --language en --timezone Europe/London" \
-          -v /var/lib/freshrss:/var/www/FreshRSS/data \
-          --hostname=rss.home.freundcloud.com \
-          freshrss/freshrss:latest
-      '';
-      
-      ExecStop = "${pkgs.docker}/bin/docker stop freshrss";
+    # Database configuration
+    database = {
+      type = "sqlite";
+      name = "freshrss";
+      tableprefix = "freshrss_";
     };
+    
+    # Default user configuration
+    defaultUser = "admin";
+    
+    # Extensions
+    extensions = with pkgs.freshrss-extensions; [
+      reading-time
+      youtube
+    ];
+    
+    # Virtual host configuration
+    virtualHost = "rss.home.freundcloud.com";
   };
 
 
