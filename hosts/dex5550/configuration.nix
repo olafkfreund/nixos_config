@@ -223,102 +223,43 @@ in {
   # Disable systemd-resolved to avoid conflicts with BIND9
   services.resolved.enable = lib.mkForce false;
   
-  # BIND9 DNS Server Configuration
+  # BIND9 DNS Server - simplified configuration
   services.bind = {
     enable = true;
     listenOn = [ "192.168.1.222" "127.0.0.1" ];
     listenOnIpv6 = [ "none" ];
-    
-    # Forward all non-local queries to upstream DNS
     forwarders = [ "1.1.1.1" "8.8.8.8" ];
     
-    zones = {
-      "freundcloud.com" = {
-        master = true;
-        file = pkgs.writeText "freundcloud.com.zone" ''
-          $TTL 86400
-          @       IN      SOA     dex5550.freundcloud.com. admin.freundcloud.com. (
-                          2024010801      ; Serial
-                          3600            ; Refresh
-                          1800            ; Retry
-                          604800          ; Expire
-                          86400 )         ; Minimum TTL
-          
-          ; Name servers
-          @       IN      NS      dex5550.freundcloud.com.
-          
-          ; A records for hosts
-          dex5550         IN      A       192.168.1.222
-          p620            IN      A       192.168.1.97
-          razer           IN      A       192.168.1.96
-          p510            IN      A       192.168.1.127
-          
-          ; Service records (all on dex5550)
-          home            IN      A       192.168.1.222
-          grafana         IN      CNAME   home
-          prometheus      IN      CNAME   home
-          alertmanager    IN      CNAME   home
-          
-          ; Wildcard for any other subdomains
-          *               IN      A       192.168.1.222
-        '';
-      };
-      
-      "home.freundcloud.com" = {
-        master = true;
-        file = pkgs.writeText "home.freundcloud.com.zone" ''
-          $TTL 86400
-          @       IN      SOA     dex5550.home.freundcloud.com. admin.home.freundcloud.com. (
-                          2024010801      ; Serial
-                          3600            ; Refresh
-                          1800            ; Retry
-                          604800          ; Expire
-                          86400 )         ; Minimum TTL
-          
-          ; Name servers
-          @       IN      NS      dex5550.home.freundcloud.com.
-          
-          ; A records for hosts
-          dex5550         IN      A       192.168.1.222
-          p620            IN      A       192.168.1.97
-          razer           IN      A       192.168.1.96
-          p510            IN      A       192.168.1.127
-          
-          ; Service records pointing to dex5550
-          @               IN      A       192.168.1.222
-          grafana         IN      A       192.168.1.222
-          prometheus      IN      A       192.168.1.222
-          alertmanager    IN      A       192.168.1.222
-        '';
-      };
-      
-      # Reverse DNS for 192.168.1.0/24
-      "1.168.192.in-addr.arpa" = {
-        master = true;
-        file = pkgs.writeText "1.168.192.in-addr.arpa.zone" ''
-          $TTL 86400
-          @       IN      SOA     dex5550.home.freundcloud.com. admin.home.freundcloud.com. (
-                          2024010801      ; Serial
-                          3600            ; Refresh
-                          1800            ; Retry
-                          604800          ; Expire
-                          86400 )         ; Minimum TTL
-          
-          ; Name servers
-          @       IN      NS      dex5550.home.freundcloud.com.
-          
-          ; PTR records for reverse lookups
-          222     IN      PTR     dex5550.home.freundcloud.com.
-          97      IN      PTR     p620.home.freundcloud.com.
-          96      IN      PTR     razer.home.freundcloud.com.
-          127     IN      PTR     p510.home.freundcloud.com.
-        '';
-      };
+    zones."home.freundcloud.com" = {
+      master = true;
+      file = pkgs.writeText "home.freundcloud.com.zone" ''
+        $TTL 86400
+        @       IN      SOA     dex5550.home.freundcloud.com. admin.home.freundcloud.com. (
+                        2024010801      ; Serial
+                        3600            ; Refresh
+                        1800            ; Retry
+                        604800          ; Expire
+                        86400 )         ; Minimum TTL
+        
+        ; Name servers
+        @       IN      NS      dex5550.home.freundcloud.com.
+        
+        ; A records for services and hosts
+        @               IN      A       192.168.1.222
+        dex5550         IN      A       192.168.1.222
+        p620            IN      A       192.168.1.97
+        razer           IN      A       192.168.1.96
+        p510            IN      A       192.168.1.127
+        grafana         IN      A       192.168.1.222
+        prometheus      IN      A       192.168.1.222
+        alertmanager    IN      A       192.168.1.222
+      '';
     };
   };
   
   # Use local DNS server
   networking.nameservers = [ "127.0.0.1" ];
+  
 
   # Disable nftables to use iptables-based firewall
   networking.nftables.enable = lib.mkForce false;
