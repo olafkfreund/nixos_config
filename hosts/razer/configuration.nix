@@ -216,8 +216,7 @@ in {
     };
   };
 
-  # Use standard NetworkManager for laptop
-  networking.useNetworkd = false;
+  # Use standard NetworkManager for laptop - useNetworkd already set above
   networking.useHostResolvConf = false;
 
   environment.sessionVariables =
