@@ -118,7 +118,7 @@ in {
         {
           job_name = "node-exporter";
           static_configs = [{
-            targets = map (host: "${host}:${toString cfg.network.nodeExporterPort}") cfg.hosts;
+            targets = map (host: "${host}.home.freundcloud.com:${toString cfg.network.nodeExporterPort}") cfg.hosts;
             labels = {
               service = "node-exporter";
               role = "system";
@@ -132,7 +132,7 @@ in {
         {
           job_name = "nixos-exporter";
           static_configs = [{
-            targets = map (host: "${host}:9101") cfg.hosts; # Custom NixOS exporter port
+            targets = map (host: "${host}.home.freundcloud.com:9101") cfg.hosts; # Custom NixOS exporter port
             labels = {
               service = "nixos-exporter";
               role = "nixos";
@@ -145,7 +145,7 @@ in {
         {
           job_name = "systemd-exporter";
           static_configs = [{
-            targets = map (host: "${host}:9102") cfg.hosts;
+            targets = map (host: "${host}.home.freundcloud.com:9102") cfg.hosts;
             labels = {
               service = "systemd-exporter";
               role = "services";
@@ -159,7 +159,7 @@ in {
         {
           job_name = "ollama-exporter";
           static_configs = [{
-            targets = map (host: "${host}:11434") (filter (host: host == "p620" || host == "razer") cfg.hosts);
+            targets = map (host: "${host}.home.freundcloud.com:11434") (filter (host: host == "p620" || host == "razer") cfg.hosts);
             labels = {
               service = "ollama";
               role = "ai";
