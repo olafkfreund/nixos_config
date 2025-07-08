@@ -69,7 +69,6 @@
 
     prowlarr = {
       enable = true;
-      user = "olafkfreund";
       dataDir = "/mnt/media/prowlarr";
       package = pkgs-unstable.prowlarr;
     };
