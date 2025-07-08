@@ -248,19 +248,11 @@ in {
     listenOnIpv6 = [ "none" ];
     forwarders = [ "1.1.1.1" "8.8.8.8" ];
     
-    # Allow queries from internal network
-    extraConfig = ''
-      acl "internal-network" {
-        127.0.0.0/8;
-        192.168.1.0/24;
-      };
-      
-      options {
-        allow-query-cache { internal-network; };
-        allow-query { internal-network; };
-        allow-recursion { internal-network; };
-      };
-    '';
+    # Simple configuration without ACLs
+    extraConfig = "";
+    
+    # Configure caching
+    cacheNetworks = [ "127.0.0.0/8" "192.168.1.0/24" ];
     
     zones."home.freundcloud.com" = {
       master = true;
