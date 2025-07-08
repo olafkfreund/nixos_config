@@ -221,7 +221,7 @@ in {
   services.xserver.enable = false;
 
   # Disable systemd-resolved completely to avoid port 53 conflicts with Pi-hole
-  services.resolved.enable = false;
+  services.resolved.enable = lib.mkForce false;
   
   # Use traditional resolv.conf instead
   networking.nameservers = [ "1.1.1.1" "1.0.0.1" ];
