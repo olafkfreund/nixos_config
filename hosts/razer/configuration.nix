@@ -42,16 +42,26 @@ in {
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "desktop";
 
-  # Use DHCP-provided DNS servers - simplest approach
-  services.resolved = {
-    enable = true;
-    domains = [ "home.freundcloud.com" ];  # Configure DNS domain for internal resolution
-  };
-  networking.nameservers = lib.mkForce [];  # Clear custom nameservers
+  # Use NetworkManager for DNS management - disable systemd-resolved
+  services.resolved.enable = lib.mkForce false;
   
   # Use NetworkManager for simple network management
-  networking.networkmanager.enable = true;
+  networking.networkmanager = {
+    enable = true;
+    dns = "default";  # Use NetworkManager's built-in DNS
+    # Configure search domains for internal resolution
+    extraConfig = ''
+      [main]
+      dns=default
+      
+      [global-dns-domain-home.freundcloud.com]
+      servers=192.168.1.222,1.1.1.1,8.8.8.8
+    '';
+  };
   networking.useNetworkd = false;
+  
+  # Set custom nameservers as fallback
+  networking.nameservers = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
 
   # Configure AI providers directly
   ai.providers = {
