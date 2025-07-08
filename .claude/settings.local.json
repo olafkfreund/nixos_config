@@ -108,7 +108,8 @@
       "Bash(sudo resolvectl:*)",
       "Bash(sudo systemctl:*)",
       "Bash(claude mcp add:*)",
-      "Bash(claude-code mcp:*)"
+      "Bash(claude-code mcp:*)",
+      "Bash(dotnet --info)"
     ]
   },
   "enableAllProjectMcpServers": false

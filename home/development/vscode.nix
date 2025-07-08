@@ -35,6 +35,7 @@ in {
       alejandra
       deadnix
       statix
+      icu # Required for .NET globalization support (MCP servers)
     ];
 
     home.sessionVariables = {
