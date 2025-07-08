@@ -220,16 +220,11 @@ in {
   # Server configuration - no GUI services needed
   services.xserver.enable = false;
 
-  # Configure systemd-resolved to not conflict with Pi-hole
-  services.resolved = {
-    enable = true;
-    dnssec = "true";
-    domains = [ "~." ];
-    fallbackDns = [ "1.1.1.1" "1.0.0.1" "8.8.8.8" "8.8.4.4" ];
-    extraConfig = ''
-      DNSStubListener=no
-    '';
-  };
+  # Disable systemd-resolved completely to avoid port 53 conflicts with Pi-hole
+  services.resolved.enable = false;
+  
+  # Use traditional resolv.conf instead
+  networking.nameservers = [ "1.1.1.1" "1.0.0.1" ];
 
   # Disable nftables to use iptables-based firewall
   networking.nftables.enable = lib.mkForce false;
@@ -412,6 +407,8 @@ in {
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      Restart = "on-failure";
+      RestartSec = "30s";
       ExecStartPre = [
         # Ensure Pi-hole directories exist
         "${pkgs.coreutils}/bin/mkdir -p /var/lib/pihole"
@@ -420,6 +417,9 @@ in {
         # Stop and remove existing container if it exists
         "-${pkgs.docker}/bin/docker stop pihole"
         "-${pkgs.docker}/bin/docker rm pihole"
+        
+        # Wait for Docker to be ready
+        "${pkgs.docker}/bin/docker info"
       ];
       
       ExecStart = ''
