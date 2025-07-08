@@ -9,11 +9,10 @@ with lib; let
   
   # Pre-configured NixOS dashboard
   nixosDashboard = pkgs.writeText "nixos-dashboard.json" (builtins.toJSON {
-    dashboard = {
-      id = null;
-      title = "NixOS System Overview";
-      tags = ["nixos" "system"];
-      timezone = "browser";
+    id = null;
+    title = "NixOS System Overview";
+    tags = ["nixos" "system"];
+    timezone = "browser";
       panels = [
         {
           id = 1;
@@ -72,71 +71,68 @@ with lib; let
           gridPos = { h = 8; w = 12; x = 12; y = 8; };
         }
       ];
-      time = {
-        from = "now-1h";
-        to = "now";
-      };
-      refresh = "30s";
+    time = {
+      from = "now-1h";
+      to = "now";
     };
+    refresh = "30s";
   });
 
   # Host-specific dashboard generator
   hostDashboard = hostname: hardware: pkgs.writeText "${hostname}-dashboard.json" (builtins.toJSON {
-    dashboard = {
-      id = null;
-      title = "${hostname} - ${hardware}";
-      tags = ["nixos" "host" hostname];
-      timezone = "browser";
-      panels = [
-        {
-          id = 1;
-          title = "${hostname} Status";
-          type = "stat";
-          targets = [{
-            expr = "up{instance=\"${hostname}:9100\"}";
-            legendFormat = "Status";
-          }];
-          gridPos = { h = 4; w = 6; x = 0; y = 0; };
-        }
-        {
-          id = 2;
-          title = "Uptime";
-          type = "stat";
-          targets = [{
-            expr = "node_time_seconds{instance=\"${hostname}:9100\"} - node_boot_time_seconds{instance=\"${hostname}:9100\"}";
-            legendFormat = "Uptime";
-          }];
-          gridPos = { h = 4; w = 6; x = 6; y = 0; };
-        }
-      ] ++ (if (hardware == "AMD") then [
-        {
-          id = 10;
-          title = "ROCm GPU Usage";
-          type = "timeseries";
-          targets = [{
-            expr = "rocm_gpu_usage{instance=\"${hostname}:9100\"}";
-            legendFormat = "GPU {{device}}";
-          }];
-          gridPos = { h = 8; w = 12; x = 0; y = 4; };
-        }
-      ] else if (hardware == "NVIDIA") then [
-        {
-          id = 11;
-          title = "NVIDIA GPU Usage";
-          type = "timeseries";
-          targets = [{
-            expr = "nvidia_gpu_utilization{instance=\"${hostname}:9100\"}";
-            legendFormat = "GPU {{device}}";
-          }];
-          gridPos = { h = 8; w = 12; x = 0; y = 4; };
-        }
-      ] else []);
-      time = {
-        from = "now-6h";
-        to = "now";
-      };
-      refresh = "30s";
+    id = null;
+    title = "${hostname} - ${hardware}";
+    tags = ["nixos" "host" hostname];
+    timezone = "browser";
+    panels = [
+      {
+        id = 1;
+        title = "${hostname} Status";
+        type = "stat";
+        targets = [{
+          expr = "up{instance=\"${hostname}:9100\"}";
+          legendFormat = "Status";
+        }];
+        gridPos = { h = 4; w = 6; x = 0; y = 0; };
+      }
+      {
+        id = 2;
+        title = "Uptime";
+        type = "stat";
+        targets = [{
+          expr = "node_time_seconds{instance=\"${hostname}:9100\"} - node_boot_time_seconds{instance=\"${hostname}:9100\"}";
+          legendFormat = "Uptime";
+        }];
+        gridPos = { h = 4; w = 6; x = 6; y = 0; };
+      }
+    ] ++ (if (hardware == "AMD") then [
+      {
+        id = 10;
+        title = "ROCm GPU Usage";
+        type = "timeseries";
+        targets = [{
+          expr = "rocm_gpu_usage{instance=\"${hostname}:9100\"}";
+          legendFormat = "GPU {{device}}";
+        }];
+        gridPos = { h = 8; w = 12; x = 0; y = 4; };
+      }
+    ] else if (hardware == "NVIDIA") then [
+      {
+        id = 11;
+        title = "NVIDIA GPU Usage";
+        type = "timeseries";
+        targets = [{
+          expr = "nvidia_gpu_utilization{instance=\"${hostname}:9100\"}";
+          legendFormat = "GPU {{device}}";
+        }];
+        gridPos = { h = 8; w = 12; x = 0; y = 4; };
+      }
+    ] else []);
+    time = {
+      from = "now-6h";
+      to = "now";
     };
+    refresh = "30s";
   });
 
 in {

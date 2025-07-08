@@ -80,7 +80,19 @@
       "Bash(sudo netstat:*)",
       "Bash(sudo ss:*)",
       "Bash(sudo journalctl:*)",
-      "Bash(sudo systemctl cat:*)"
+      "Bash(sudo systemctl cat:*)",
+      "Bash(grafana-status:*)",
+      "Bash(sudo systemctl restart:*)",
+      "Bash(grafana-dashboards:*)",
+      "Bash(prometheus-status:*)",
+      "Bash(ai-cli --help)",
+      "Bash(ai-cli --status)",
+      "Bash(readlink:*)",
+      "Bash(ai-cli -v \"Hello! What is 2+2?\")",
+      "Bash(ai-cli -p anthropic -v \"Hello! What is 2+2?\")",
+      "Bash(ai-chat:*)",
+      "Bash(ai-cli:*)",
+      "Bash(timeout:*)"
     ]
   },
   "enableAllProjectMcpServers": false

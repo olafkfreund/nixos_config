@@ -188,8 +188,8 @@ with lib; let
         
         case "$provider" in
             "openai")
-                if [[ -f "/run/secrets/api-openai" ]]; then
-                    export OPENAI_API_KEY="$(cat /run/secrets/api-openai)"
+                if [[ -f "/run/agenix/api-openai" ]]; then
+                    export OPENAI_API_KEY="$(cat /run/agenix/api-openai)"
                     if command -v chatgpt-cli >/dev/null 2>&1; then
                         timeout "$TIMEOUT" chatgpt-cli -m "$model" "$prompt"
                     else
@@ -202,8 +202,8 @@ with lib; let
                 fi
                 ;;
             "anthropic")
-                if [[ -f "/run/secrets/api-anthropic" ]]; then
-                    export ANTHROPIC_API_KEY="$(cat /run/secrets/api-anthropic)"
+                if [[ -f "/run/agenix/api-anthropic" ]]; then
+                    export ANTHROPIC_API_KEY="$(cat /run/agenix/api-anthropic)"
                     if command -v aichat >/dev/null 2>&1; then
                         timeout "$TIMEOUT" aichat --model "claude:$model" "$prompt"
                     else
@@ -216,8 +216,8 @@ with lib; let
                 fi
                 ;;
             "gemini")
-                if [[ -f "/run/secrets/api-gemini" ]]; then
-                    export GEMINI_API_KEY="$(cat /run/secrets/api-gemini)"
+                if [[ -f "/run/agenix/api-gemini" ]]; then
+                    export GEMINI_API_KEY="$(cat /run/agenix/api-gemini)"
                     if command -v gemini-cli >/dev/null 2>&1; then
                         timeout "$TIMEOUT" gemini-cli --model "$model" "$prompt"
                     elif command -v aichat >/dev/null 2>&1; then

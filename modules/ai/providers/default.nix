@@ -146,42 +146,45 @@ in {
       timeout = cfg.timeout;
       maxRetries = cfg.maxRetries;
       
-      providers = {
-        openai = mkIf cfg.openai.enable {
+      providers = lib.filterAttrs (name: value: value != null) {
+        openai = if cfg.openai.enable then {
           enabled = true;
           priority = cfg.openai.priority;
           models = cfg.openai.models;
           defaultModel = cfg.openai.defaultModel;
-          apiKeyFile = "/run/secrets/api-openai";
+          apiKeyFile = "/run/agenix/api-openai";
           baseUrl = "https://api.openai.com/v1";
-        };
+          requiresApiKey = true;
+        } else null;
         
-        anthropic = mkIf cfg.anthropic.enable {
+        anthropic = if cfg.anthropic.enable then {
           enabled = true;
           priority = cfg.anthropic.priority;
           models = cfg.anthropic.models;
           defaultModel = cfg.anthropic.defaultModel;
-          apiKeyFile = "/run/secrets/api-anthropic";
+          apiKeyFile = "/run/agenix/api-anthropic";
           baseUrl = "https://api.anthropic.com";
-        };
+          requiresApiKey = true;
+        } else null;
         
-        gemini = mkIf cfg.gemini.enable {
+        gemini = if cfg.gemini.enable then {
           enabled = true;
           priority = cfg.gemini.priority;
           models = cfg.gemini.models;
           defaultModel = cfg.gemini.defaultModel;
-          apiKeyFile = "/run/secrets/api-gemini";
+          apiKeyFile = "/run/agenix/api-gemini";
           baseUrl = "https://generativelanguage.googleapis.com/v1beta";
-        };
+          requiresApiKey = true;
+        } else null;
         
-        ollama = mkIf cfg.ollama.enable {
+        ollama = if cfg.ollama.enable then {
           enabled = true;
           priority = cfg.ollama.priority;
           models = cfg.ollama.models;
           defaultModel = cfg.ollama.defaultModel;
           baseUrl = "http://${cfg.ollama.host}";
           requiresApiKey = false;
-        };
+        } else null;
       };
     };
 

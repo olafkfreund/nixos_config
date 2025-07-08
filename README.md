@@ -78,6 +78,104 @@ nixos-config/
    just deploy
    ```
 
+## 🆕 Latest Updates (January 2025)
+
+### ✅ Phase 7: Monitoring & Observability (Completed)
+A comprehensive monitoring infrastructure has been deployed:
+
+**Core Services:**
+- **Prometheus** (port 9090): Metrics collection and storage with 30-day retention
+- **Grafana** (port 3001): Advanced dashboards and visualization
+- **Alertmanager** (port 9093): Intelligent alert management and routing
+- **Node Exporters** (port 9100): System-level metrics collection
+
+**Custom Exporters:**
+- **NixOS Exporter** (port 9101): Nix store, generations, and system-specific metrics
+- **Systemd Exporter** (port 9102): Service status and systemd unit monitoring
+
+**Available Dashboards:**
+- NixOS System Overview: Comprehensive system health and performance
+- Host-specific dashboards: Tailored monitoring for each system (p620-AMD, razer-NVIDIA, etc.)
+- Hardware-specific panels: GPU utilization, thermal monitoring, and performance metrics
+
+**Quick Access:**
+```bash
+# Check monitoring status
+grafana-status          # Service status and dashboard count
+prometheus-status       # Server metrics and target health
+node-exporter-status    # All exporter services status
+
+# Web interfaces
+# Grafana: http://p620:3001 (admin/nixos-admin)
+# Prometheus: http://p620:9090
+# Alertmanager: http://p620:9093
+```
+
+### ✅ Phase 9.1: Unified AI Provider System (Completed)
+A sophisticated multi-provider AI interface with automatic fallback:
+
+**Unified Commands:**
+```bash
+# Main AI interface
+ai-cli "your question"                    # Use default provider (Anthropic)
+ai-chat "your question"                   # Convenient alias
+ai-cli -p anthropic "specific question"   # Provider-specific queries
+ai-cli -p ollama "local question"         # Local AI inference
+
+# Provider management
+ai-cli --status                          # Show all provider status
+ai-cli --list-providers                  # List available providers
+ai-cli -p provider --list-models         # List models per provider
+
+# Advanced features
+ai-cli -f "question"                     # Enable automatic fallback
+ai-cli -c "question"                     # Cost-optimized provider selection
+ai-cli -v "question"                     # Verbose debugging output
+```
+
+**Supported Providers:**
+1. **Anthropic Claude** ✅ (Priority 2, Default)
+   - Models: claude-3-5-sonnet, claude-3-5-haiku, claude-3-opus
+   - Encrypted API key management via agenix
+
+2. **OpenAI** ✅ (Priority 1)
+   - Models: gpt-4o, gpt-4o-mini, gpt-3.5-turbo
+   - Full API integration with encrypted secrets
+
+3. **Google Gemini** ✅ (Priority 3)
+   - Models: gemini-1.5-pro, gemini-1.5-flash, gemini-2.0-flash-exp
+   - Native integration with Google APIs
+
+4. **Ollama Local** ✅ (Priority 4)
+   - Models: mistral-small3.1, llama3.2, custom models
+   - Local inference with ROCm GPU acceleration on P620
+
+**Shell Integration:**
+```bash
+# Convenient aliases available system-wide
+ai "question"              # Quick AI query
+chat "question"            # Alternative alias
+aii "question"             # Quick default provider
+aif "question"             # AI with fallback enabled
+aic "question"             # AI with cost optimization
+ai-status                  # Check provider status
+```
+
+**Features:**
+- **Intelligent Fallback**: Automatically tries alternative providers if one fails
+- **Cost Optimization**: Smart provider selection based on usage and cost
+- **Encrypted Secrets**: All API keys secured with agenix encryption
+- **Priority System**: Configurable provider ordering and selection
+- **Timeout Management**: Configurable request timeouts and retry logic
+- **Comprehensive Logging**: Debug modes for troubleshooting
+
+### 🔧 Key Fixes Applied
+1. **Grafana Dashboard Structure**: Fixed JSON generation for proper dashboard loading
+2. **Prometheus Port Conflicts**: Resolved Docker port 3000 conflict by moving Grafana to 3001
+3. **Custom Exporter Compatibility**: Replaced problematic netcat with Python HTTP servers
+4. **API Key Path Resolution**: Fixed secret paths to use correct agenix locations (`/run/agenix/api-*`)
+5. **Service Dependencies**: Optimized service startup order and dependency management
+
 ## 🔧 Using the Justfile
 
 The Justfile provides convenient commands for all operations. It's the primary interface for managing this configuration.
@@ -323,7 +421,8 @@ Users/username/
 
 The configuration includes 141+ optimized modules organized by function:
 
-- **`modules/ai/`** - AI tools (Ollama, ChatGPT CLI, Gemini CLI)
+- **`modules/ai/`** - Unified AI provider system with multi-provider support
+- **`modules/monitoring/`** - Comprehensive observability stack (Prometheus, Grafana, Alertmanager)
 - **`modules/desktop/`** - Desktop environment components and applications
 - **`modules/development/`** - Development tools, languages, and environments
 - **`modules/services/`** - System services, daemons, and network services
@@ -474,8 +573,31 @@ features = {
   ai = {
     enable = true;      # AI tools and services
     ollama = true;      # Local AI models
-    chatgpt = true;     # ChatGPT CLI tools
-    gemini-cli = true;  # Google Gemini CLI
+    
+    # Unified AI provider support
+    providers = {
+      enable = true;           # Enable unified AI provider system
+      defaultProvider = "anthropic";  # Default provider to use
+      enableFallback = true;   # Automatic fallback between providers
+      
+      # Individual provider support
+      openai.enable = true;    # OpenAI ChatGPT/GPT models
+      anthropic.enable = true; # Anthropic Claude models
+      gemini.enable = true;    # Google Gemini models
+      ollama.enable = true;    # Local Ollama models
+    };
+  };
+  
+  monitoring = {
+    enable = true;      # Monitoring and observability
+    mode = "server";    # server|client|standalone
+    serverHost = "p620"; # Monitoring server hostname
+    
+    features = {
+      nodeExporter = true;   # System metrics collection
+      nixosMetrics = true;   # NixOS-specific metrics
+      alerting = true;       # Alert management
+    };
   };
   
   security = {
@@ -876,13 +998,23 @@ This NixOS configuration represents a **production-ready, enterprise-grade** sys
 - **🔧 Advanced Feature Management** with granular control
 - **🚀 Multi-Host Architecture** supporting diverse hardware
 - **🔐 Comprehensive Secrets Management** with role-based access
+- **📊 Complete Monitoring Stack** with Prometheus, Grafana, and Alertmanager
+- **🤖 Unified AI Provider System** with multi-provider support and automatic fallback
 - **📋 Quality Validation Framework** ensuring code quality
 - **🛠️ Extensive Automation** through Justfile commands
 - **📚 Complete Documentation** with templates and guides
 - **⚡ Performance Optimization** across all system levels
+- **🔍 Comprehensive Observability** with custom NixOS and systemd metrics
+- **🧠 Intelligent AI Integration** supporting local and cloud-based AI models
 
-**Perfect for**: Development workstations, multi-user environments, enterprise deployments, and anyone seeking a maintainable, scalable NixOS configuration.
+**Perfect for**: Development workstations, AI/ML environments, multi-user enterprises, monitoring infrastructure, and anyone seeking a maintainable, scalable NixOS configuration with modern DevOps capabilities.
+
+**Latest Capabilities:**
+- **Real-time Monitoring**: Full observability stack with custom dashboards for each host
+- **AI-Powered Workflows**: Seamless integration with multiple AI providers and local models
+- **Automated Fallback**: Intelligent provider switching and cost optimization
+- **Hardware-Specific Optimization**: Tailored configurations for AMD ROCm, NVIDIA CUDA, and Intel integrated graphics
 
 ---
 
-*This configuration has undergone comprehensive optimization across 7 phases, eliminating technical debt, enhancing performance, and establishing production-ready quality standards.*
+*This configuration has undergone comprehensive optimization across 9+ phases, including advanced monitoring infrastructure and unified AI provider systems, eliminating technical debt, enhancing performance, and establishing production-ready quality standards for modern DevOps environments.*
