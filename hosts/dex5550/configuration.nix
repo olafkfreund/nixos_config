@@ -203,7 +203,25 @@ in {
   };
 
   # System hardening and additional security services
-  security.sudo.wheelNeedsPassword = lib.mkForce true;
+  security.sudo = {
+    wheelNeedsPassword = lib.mkForce true;
+    # Allow passwordless sudo for nixos-rebuild commands
+    extraRules = [
+      {
+        users = [ vars.username ];
+        commands = [
+          {
+            command = "/run/current-system/sw/bin/nixos-rebuild";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "/nix/store/*/bin/nixos-rebuild";
+            options = [ "NOPASSWD" ];
+          }
+        ];
+      }
+    ];
+  };
   security.protectKernelImage = true;
   security.apparmor.enable = true;
   security.auditd.enable = true;
