@@ -119,13 +119,13 @@ in {
     };
   };
 
-  # Custom Grafana configuration - use default root path
+  # Custom Grafana configuration - configured for sub-path with external proxy
   services.grafana = {
     settings = {
       server = {
-        root_url = lib.mkForce "http://127.0.0.1:3001/";
-        serve_from_sub_path = lib.mkForce false;
-        domain = lib.mkForce "127.0.0.1";
+        root_url = lib.mkForce "https://home.freundcloud.com/grafana/";
+        serve_from_sub_path = lib.mkForce true;
+        domain = lib.mkForce "home.freundcloud.com";
         http_port = lib.mkForce 3001;
         protocol = lib.mkForce "http";
       };
@@ -431,12 +431,12 @@ in {
           -p 8081:80/tcp \
           -e TZ=UTC \
           -e WEBPASSWORD=nixos-pihole \
-          -e FTLCONF_LOCAL_IPV4=192.168.1.225 \
+          -e FTLCONF_LOCAL_IPV4=192.168.1.222 \
           -e PIHOLE_DNS_="1.1.1.1;1.0.0.1" \
           -e VIRTUAL_HOST=pihole.home.freundcloud.com \
           -e REV_SERVER=true \
           -e REV_SERVER_DOMAIN=home.freundcloud.com \
-          -e REV_SERVER_TARGET=192.168.1.225 \
+          -e REV_SERVER_TARGET=192.168.1.222 \
           -e REV_SERVER_CIDR=192.168.1.0/24 \
           -v /var/lib/pihole:/etc/pihole \
           -v /etc/pihole:/etc/dnsmasq.d \
@@ -454,18 +454,18 @@ in {
   environment.etc."pihole/custom.list" = {
     text = ''
       # Custom DNS records for internal network
-      192.168.1.225 dex5550.home.freundcloud.com dex5550
+      192.168.1.222 dex5550.home.freundcloud.com dex5550
       192.168.1.97 p620.home.freundcloud.com p620
       192.168.1.96 razer.home.freundcloud.com razer
       192.168.1.127 p510.home.freundcloud.com p510
       
       # Service records (all pointing to DEX5550)
-      192.168.1.225 grafana.home.freundcloud.com
-      192.168.1.225 prometheus.home.freundcloud.com
-      192.168.1.225 alertmanager.home.freundcloud.com
-      192.168.1.225 pihole.home.freundcloud.com
-      192.168.1.225 dns.home.freundcloud.com
-      192.168.1.225 home.freundcloud.com
+      192.168.1.222 grafana.home.freundcloud.com
+      192.168.1.222 prometheus.home.freundcloud.com
+      192.168.1.222 alertmanager.home.freundcloud.com
+      192.168.1.222 pihole.home.freundcloud.com
+      192.168.1.222 dns.home.freundcloud.com
+      192.168.1.222 home.freundcloud.com
     '';
     mode = "0644";
   };
@@ -530,7 +530,7 @@ in {
           # Grafana router
           grafana = {
             rule = "Host(`home.freundcloud.com`) && PathPrefix(`/grafana`)";
-            middlewares = [ "grafana-stripprefix" "secure-headers" ];
+            middlewares = [ "secure-headers" ];
             service = "grafana";
             tls.certResolver = "letsencrypt";
           };
