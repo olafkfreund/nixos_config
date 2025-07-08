@@ -9,7 +9,7 @@
     nvidiaPersistenced = true;
     open = false;
     nvidiaSettings = true;
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    package = config.boot.kernelPackages.nvidiaPackages.latest;  # Use latest drivers to fix version mismatch
   };
   hardware.graphics = {
     enable = true;
