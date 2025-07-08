@@ -45,21 +45,6 @@ in {
       };
     };
 
-    tailscale = {
-      enhance = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Enable enhanced Tailscale configuration";
-        example = false;
-      };
-
-      acceptDns = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Whether Tailscale should manage DNS";
-        example = true;
-      };
-    };
 
     electron = {
       improve = mkOption {
@@ -177,11 +162,6 @@ in {
       };
     };
 
-    # Enable enhanced Tailscale configuration if configured and available
-    vpn.tailscale = mkIf (cfg.tailscale.enhance && hasAttrByPath ["vpn" "tailscale" "enable"] config && config.vpn.tailscale.enable) {
-      acceptDns = cfg.tailscale.acceptDns;
-      netfilterMode = "off";
-    };
 
     # Environment configuration for network stability
     environment = mkMerge [
