@@ -122,7 +122,7 @@ let
       range = if cfg.performance.shadows then (if hardware.gpu == "intel" then 20 else 30) else 0;
       render_power = if cfg.performance.shadows then (if hardware.gpu == "intel" then 2 else 3) else 1;
       offset = "0 40";
-      color = theme.colors.shadow_color;
+      color = mkDefault theme.colors.shadow_color;
       # Shadow quality based on hardware
       sharp = hardware.gpu == "nvidia";
     };
@@ -210,7 +210,7 @@ in {
       
       # Gaming and performance features
       allow_session_lock_restore = true;
-      background_color = "rgb(1d2021)";
+      background_color = mkDefault "rgb(1d2021)";
       splash_font_family = "JetBrainsMono Nerd Font";
       
       # Development workflow optimizations
@@ -257,10 +257,10 @@ in {
 
     # Group window configuration
     group = {
-      "col.border_active" = theme.colors.active_border;
-      "col.border_inactive" = theme.colors.inactive_border;
-      "col.border_locked_active" = "rgb(fe8019)";
-      "col.border_locked_inactive" = "rgb(d65d0e)";
+      "col.border_active" = mkDefault theme.colors.active_border;
+      "col.border_inactive" = mkDefault theme.colors.inactive_border;
+      "col.border_locked_active" = mkDefault "rgb(fe8019)";
+      "col.border_locked_inactive" = mkDefault "rgb(d65d0e)";
       
       groupbar = {
         enabled = true;
@@ -271,12 +271,12 @@ in {
         priority = 3;
         render_titles = true;
         scrolling = true;
-        text_color = "rgb(ebdbb2)";
+        text_color = mkDefault "rgb(ebdbb2)";
         
-        "col.active" = "rgb(83a598)";
-        "col.inactive" = "rgb(504945)";
-        "col.locked_active" = "rgb(fe8019)";
-        "col.locked_inactive" = "rgb(d65d0e)";
+        "col.active" = mkDefault "rgb(83a598)";
+        "col.inactive" = mkDefault "rgb(504945)";
+        "col.locked_active" = mkDefault "rgb(fe8019)";
+        "col.locked_inactive" = mkDefault "rgb(d65d0e)";
       };
     };
 

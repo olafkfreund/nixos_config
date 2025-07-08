@@ -89,11 +89,17 @@ let
     };
   };
   
+  # Helper function to safely convert workspace assignments to strings
+  workspaceToString = workspace: 
+    if builtins.isString workspace 
+    then workspace 
+    else toString workspace;
+  
   # Helper functions for generating rules
   mkRule = rule: conditions: "${rule}, ${conditions}";
   mkFloat = conditions: mkRule "float" conditions;
   mkSize = width: height: conditions: mkRule "size ${toString width} ${toString height}" conditions;
-  mkWorkspace = workspace: conditions: mkRule "workspace ${workspace}" conditions;
+  mkWorkspace = workspace: conditions: mkRule "workspace ${workspaceToString workspace}" conditions;
   mkCenter = conditions: mkRule "center" conditions;
   mkAnimation = anim: conditions: mkRule "animation ${anim}" conditions;
   
@@ -145,13 +151,13 @@ in {
       # TERMINAL EMULATOR RULES
       # =============================================================================
       # Terminal emulators - use configuration-based sizing and behavior
-    ] ++ lib.optionals cfg.terminals.float [
+    ] ++ lib.optionals cfg.terminals.float (lib.flatten [
       # Terminal emulators with smart sizing
       (mkMultiRule "float" ["class:(alacritty)" "class:(kitty)" "class:(wezterm)" "class:(foot)"])
       (mkMultiRule "size ${terminalSize.width} ${terminalSize.height}" ["class:(alacritty)" "class:(kitty)" "class:(wezterm)" "class:(foot)"])
-    ] ++ lib.optionals (cfg.terminals.center && cfg.terminals.float) [
+    ]) ++ lib.optionals (cfg.terminals.center && cfg.terminals.float) (lib.flatten [
       (mkMultiRule "center" ["class:(alacritty)" "class:(kitty)" "class:(wezterm)" "class:(foot)"])
-    ] ++ lib.optionals (cfg.terminals.animations && cfg.terminals.float) [
+    ]) ++ lib.optionals (cfg.terminals.animations && cfg.terminals.float) [
       "animation slide left, class:^(foot)$"
     ] ++ [
       # Web search utility
@@ -216,7 +222,7 @@ in {
       # PRODUCTIVITY APPLICATIONS
       # =============================================================================
       # Obsidian note-taking application
-      "workspace ${toString cfg.workspaces.assignments.productivity.obsidian}, class:(obsidian)"
+      "workspace ${workspaceToString cfg.workspaces.assignments.productivity.obsidian}, class:(obsidian)"
       "float, class:(obsidian), title:^(.*)(Settings)(.*)$"
       "float, class:(obsidian), title:^(.*)(Community plugins)(.*)$"
       "float, class:(obsidian), title:^(.*)(Hotkeys)(.*)$"
@@ -226,7 +232,7 @@ in {
       
       # Notion
       "float, class:^(notion)$"
-      "workspace ${toString cfg.workspaces.assignments.productivity.obsidian}, class:^(notion)$"
+      "workspace ${workspaceToString cfg.workspaces.assignments.productivity.obsidian}, class:^(notion)$"
     ] ++ (mkSmartFloat 80 "class:^(notion)$") ++ [
       
       # LibreOffice applications
@@ -309,27 +315,27 @@ in {
     ] ++ (mkSmartFloat 75 "class:^(discord)") ++ [
 
       # Telegram messaging
-      "workspace ${toString cfg.workspaces.assignments.communication.telegram}, class:(org.telegram.desktop)"
+      "workspace ${workspaceToString cfg.workspaces.assignments.communication.telegram}, class:(org.telegram.desktop)"
     ] ++ (mkSmartFloat 55 "class:(org.telegram.desktop), title:(Choose Files)") ++ [
       
       # WhatsApp
       "float, class:^(whatsapp)$"
-      "workspace ${toString cfg.workspaces.assignments.communication.telegram}, class:^(whatsapp)$"
+      "workspace ${workspaceToString cfg.workspaces.assignments.communication.telegram}, class:^(whatsapp)$"
     ] ++ (mkSmartFloat 70 "class:^(whatsapp)$") ++ [
       
       # Signal
       "float, class:^(signal)$"
-      "workspace ${toString cfg.workspaces.assignments.communication.telegram}, class:^(signal)$"
+      "workspace ${workspaceToString cfg.workspaces.assignments.communication.telegram}, class:^(signal)$"
     ] ++ (mkSmartFloat 65 "class:^(signal)$") ++ [
       
       # Microsoft Teams
       "float, class:^(teams)$"
-      "workspace ${toString cfg.workspaces.assignments.communication.slack}, class:^(teams)$"
+      "workspace ${workspaceToString cfg.workspaces.assignments.communication.slack}, class:^(teams)$"
     ] ++ (mkSmartFloat 80 "class:^(teams)$") ++ [
       
       # Zoom
       "float, class:^(zoom)$"
-      "workspace ${toString cfg.workspaces.assignments.communication.slack}, class:^(zoom)$"
+      "workspace ${workspaceToString cfg.workspaces.assignments.communication.slack}, class:^(zoom)$"
     ] ++ (mkSmartFloat 75 "class:^(zoom)$") ++ [
       "float, class:^(zoom)$, title:^(.*)(Settings)(.*)$"
     ] ++ (mkSmartFloat 60 "class:^(zoom)$, title:^(.*)(Settings)(.*)$") ++ [
@@ -338,9 +344,9 @@ in {
       # DEVELOPMENT TOOLS
       # =============================================================================
       # Visual Studio Code
-      "workspace ${toString cfg.workspaces.assignments.development.vscode}, class:^(code)$"
-      "workspace ${toString cfg.workspaces.assignments.development.vscode}, class:^(Code)$"
-      "workspace ${toString cfg.workspaces.assignments.development.vscode}, class:^(code-url-handler)$"
+      "workspace ${workspaceToString cfg.workspaces.assignments.development.vscode}, class:^(code)$"
+      "workspace ${workspaceToString cfg.workspaces.assignments.development.vscode}, class:^(Code)$"
+      "workspace ${workspaceToString cfg.workspaces.assignments.development.vscode}, class:^(code-url-handler)$"
       
       # VS Code dialogs and popups
     ] ++ (mkSmartFloat 60 "class:^(code)$, title:^(.*)(Settings)(.*)$") ++ [
@@ -349,29 +355,29 @@ in {
       
       # Development containers and Docker Desktop
       "float, class:^(Docker Desktop)$"
-      "workspace ${toString cfg.workspaces.assignments.development.vscode}, class:^(Docker Desktop)$"
+      "workspace ${workspaceToString cfg.workspaces.assignments.development.vscode}, class:^(Docker Desktop)$"
     ] ++ (mkSmartFloat 80 "class:^(Docker Desktop)$") ++ [
       
       # Git GUI applications
       "float, class:^(GitKraken)$"
-      "workspace ${toString cfg.workspaces.assignments.development.vscode}, class:^(GitKraken)$"
+      "workspace ${workspaceToString cfg.workspaces.assignments.development.vscode}, class:^(GitKraken)$"
     ] ++ (mkSmartFloat 85 "class:^(GitKraken)$") ++ [
       
       # Database tools
       "float, class:^(DBeaver)$"
-      "workspace ${toString cfg.workspaces.assignments.development.vscode}, class:^(DBeaver)$"
+      "workspace ${workspaceToString cfg.workspaces.assignments.development.vscode}, class:^(DBeaver)$"
     ] ++ (mkSmartFloat 80 "class:^(DBeaver)$") ++ [
       
       # Postman API testing
       "float, class:^(Postman)$"
-      "workspace ${toString cfg.workspaces.assignments.development.vscode}, class:^(Postman)$"
+      "workspace ${workspaceToString cfg.workspaces.assignments.development.vscode}, class:^(Postman)$"
     ] ++ (mkSmartFloat 75 "class:^(Postman)$") ++ [
       
       # Tmux scratchpad terminal
       "workspace special:tmux, float, title:^(tmux-sratch)"
       
       # Development terminal sessions
-      "workspace ${toString cfg.workspaces.assignments.development.vscode}, class:^(dev-terminal)$"
+      "workspace ${workspaceToString cfg.workspaces.assignments.development.vscode}, class:^(dev-terminal)$"
       "float, class:^(dev-terminal)$"
     ] ++ (mkSmartFloat 70 "class:^(dev-terminal)$") ++ [
 
