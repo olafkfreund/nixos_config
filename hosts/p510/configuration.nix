@@ -38,6 +38,10 @@ in {
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "server";
 
+  # Use DHCP-provided DNS servers
+  services.resolved.enable = true;
+  networking.nameservers = lib.mkForce [];  # Clear custom nameservers, use DHCP
+
   # Configure AI providers directly
   ai.providers = {
     enable = true;
@@ -209,8 +213,8 @@ in {
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
   systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
 
-  # Using nameservers from variables.nix
-  networking.nameservers = vars.nameservers;
+  # Use DHCP-provided DNS servers
+  # networking.nameservers = vars.nameservers; # Commented out to use DHCP
 
   # In case the networking profile doesn't apply all needed settings
   networking.useNetworkd = lib.mkForce true;

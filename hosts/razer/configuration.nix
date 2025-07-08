@@ -42,6 +42,14 @@ in {
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "desktop";
 
+  # Use DHCP-provided DNS servers - simplest approach
+  services.resolved.enable = true;
+  networking.nameservers = lib.mkForce [];  # Clear custom nameservers
+  
+  # Use NetworkManager for simple network management
+  networking.networkmanager.enable = true;
+  networking.useNetworkd = false;
+
   # Configure AI providers directly
   ai.providers = {
     enable = true;
@@ -187,8 +195,8 @@ in {
     rootless = false;
   };
 
-  # Use variables for nameservers
-  networking.nameservers = vars.nameservers;
+  # Use DHCP-provided DNS servers
+  # networking.nameservers = vars.nameservers; # Commented out to use DHCP
 
   # CRITICAL: DNS Resolution Fix for Tailscale
   # Ensure proper service ordering to prevent DNS conflicts
@@ -208,40 +216,9 @@ in {
     };
   };
 
-  # Additional DNS conflict prevention
-  networking.resolvconf.dnsExtensionMechanism = false;
-  
-  # FORCE systemd-resolved to manage resolv.conf properly
-  networking.useHostResolvConf = lib.mkForce false;
-  
-  # Ensure proper DNS resolution order
-  systemd.services.systemd-resolved = {
-    wantedBy = ["multi-user.target"];
-    before = ["network.target" "NetworkManager.service"];
-    serviceConfig = {
-      Restart = lib.mkForce "always";
-      RestartSec = lib.mkForce "5s";
-    };
-  };
-  
-  # Create a persistent resolv.conf link service
-  systemd.services.fix-resolv-conf = {
-    description = "Fix resolv.conf link to systemd-resolved";
-    after = ["systemd-resolved.service"];
-    wantedBy = ["multi-user.target"];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      ExecStart = pkgs.writeShellScript "fix-resolv-conf" ''
-        # Remove existing resolv.conf
-        rm -f /etc/resolv.conf
-        # Create proper symlink to systemd-resolved
-        ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
-        # Ensure systemd-resolved is using our configuration
-        systemctl restart systemd-resolved || true
-      '';
-    };
-  };
+  # Use standard NetworkManager for laptop
+  networking.useNetworkd = false;
+  networking.useHostResolvConf = false;
 
   environment.sessionVariables =
     vars.environmentVariables

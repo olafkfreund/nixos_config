@@ -44,6 +44,10 @@ in {
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "server";
 
+  # Use DHCP-provided DNS servers
+  services.resolved.enable = true;
+  networking.nameservers = lib.mkForce [];  # Clear custom nameservers, use DHCP
+
   # Configure AI providers directly
   ai.providers = {
     enable = true;
@@ -299,10 +303,8 @@ in {
     fwupd.serviceConfig.LimitNOFILE = 524288;
   };
 
-  # Using nameservers from variables.nix
+  # Use DHCP-provided DNS and standard networking
   networking = {
-    nameservers = vars.nameservers;
-    # In case the networking profile doesn't apply all needed settings
     useNetworkd = lib.mkForce true;
   };
 
