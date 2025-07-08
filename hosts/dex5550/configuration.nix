@@ -253,6 +253,7 @@ in {
         grafana         IN      A       192.168.1.222
         prometheus      IN      A       192.168.1.222
         alertmanager    IN      A       192.168.1.222
+        rss             IN      A       192.168.1.222
       '';
     };
   };
@@ -287,6 +288,7 @@ in {
     interfaces."eno1" = {
       allowedTCPPorts = [
         3001  # Grafana
+        8082  # FreshRSS
         9090  # Prometheus
         9093  # Alertmanager
         9100  # Node Exporter
@@ -428,6 +430,50 @@ in {
 
   # Monitoring configuration handled by monitoring module
 
+  # FreshRSS Service - RSS Feed Reader
+  systemd.services.freshrss-container = {
+    description = "FreshRSS RSS Feed Reader Container";
+    after = [ "docker.service" "network.target" ];
+    wants = [ "docker.service" ];
+    wantedBy = [ "multi-user.target" ];
+    
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      Restart = "on-failure";
+      RestartSec = "30s";
+      ExecStartPre = [
+        # Ensure FreshRSS directories exist
+        "${pkgs.coreutils}/bin/mkdir -p /var/lib/freshrss"
+        "${pkgs.coreutils}/bin/chown -R 33:33 /var/lib/freshrss"  # www-data user
+        
+        # Stop and remove existing container if it exists
+        "-${pkgs.docker}/bin/docker stop freshrss"
+        "-${pkgs.docker}/bin/docker rm freshrss"
+        
+        # Wait for Docker to be ready
+        "${pkgs.docker}/bin/docker info"
+      ];
+      
+      ExecStart = ''
+        ${pkgs.docker}/bin/docker run -d \
+          --name freshrss \
+          --restart unless-stopped \
+          -p 8082:80 \
+          -e TZ=Europe/London \
+          -e CRON_MIN=1,31 \
+          -e FRESHRSS_ENV=production \
+          -e FRESHRSS_INSTALL="--api-enabled --db-type sqlite --db-base freshrss --db-user freshrss --db-password freshrss --default-user admin" \
+          -e FRESHRSS_USER="--user admin --password nixos-admin --email admin@home.freundcloud.com --language en --timezone Europe/London" \
+          -v /var/lib/freshrss:/var/www/FreshRSS/data \
+          --hostname=rss.home.freundcloud.com \
+          freshrss/freshrss:latest
+      '';
+      
+      ExecStop = "${pkgs.docker}/bin/docker stop freshrss";
+    };
+  };
+
 
   # Traefik Reverse Proxy for external access
   services.traefik = {
@@ -511,6 +557,14 @@ in {
           };
           
           
+          # FreshRSS router
+          freshrss = {
+            rule = "Host(`rss.home.freundcloud.com`)";
+            middlewares = [ "secure-headers" ];
+            service = "freshrss";
+            tls.certResolver = "letsencrypt";
+          };
+          
           # Traefik dashboard router
           dashboard = {
             rule = "Host(`home.freundcloud.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))";
@@ -561,6 +615,11 @@ in {
           alertmanager = {
             loadBalancer.servers = [{
               url = "http://127.0.0.1:9093";
+            }];
+          };
+          freshrss = {
+            loadBalancer.servers = [{
+              url = "http://127.0.0.1:8082";
             }];
           };
         };
