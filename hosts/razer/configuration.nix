@@ -124,8 +124,8 @@ in {
     # Monitoring configuration - Razer as client
     monitoring = {
       enable = true;
-      mode = "client";  # Monitored by P620
-      serverHost = "p620";
+      mode = "client";  # Monitored by dex5550
+      serverHost = "dex5550";
       
       features = {
         nodeExporter = true;

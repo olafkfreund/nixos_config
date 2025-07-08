@@ -35,8 +35,8 @@ in {
     ollama.enable = false;  # Disabled on low-power system
   };
 
-  # Use nameservers from variables
-  networking.nameservers = vars.nameservers;
+  # Use nameservers from variables (commented out to avoid conflict)
+  # networking.nameservers = vars.nameservers;
 
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
