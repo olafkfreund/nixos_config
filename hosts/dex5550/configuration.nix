@@ -250,16 +250,16 @@ in {
     
     # Allow queries from internal network
     extraConfig = ''
-      # Allow queries from internal network
       acl "internal-network" {
         127.0.0.0/8;
         192.168.1.0/24;
       };
       
-      # Allow cache queries from internal network  
-      allow-query-cache { internal-network; };
-      allow-query { internal-network; };
-      allow-recursion { internal-network; };
+      options {
+        allow-query-cache { internal-network; };
+        allow-query { internal-network; };
+        allow-recursion { internal-network; };
+      };
     '';
     
     zones."home.freundcloud.com" = {
