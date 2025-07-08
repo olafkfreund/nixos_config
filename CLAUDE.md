@@ -167,6 +167,44 @@ just update-flake  # Update all flake inputs
 just update-input INPUT_NAME  # Update specific input
 ```
 
+### Hyprland Configuration (Phase 9.3 - Enhanced)
+The Hyprland window manager configuration has been significantly enhanced with comprehensive keybindings and advanced features:
+
+**Key Improvements:**
+- **Modern Window Navigation**: `ALT + TAB` cycling, `SUPER + TAB` for previous workspace
+- **Application Shortcuts**: `SUPER + E` (file manager), `SUPER + V` (clipboard), `SUPER + =` (calculator)
+- **Gaming Mode**: `SUPER + CTRL + G` to disable compositor effects for performance
+- **Media Controls**: Full hardware key support plus keyboard shortcuts for media control
+- **Development Workflow**: `SUPER + SHIFT + Return` (VS Code), enhanced terminal options
+- **System Controls**: Power management, network configuration, and system monitoring shortcuts
+
+**Configuration Files:**
+- Main binds: `home/desktop/hyprland/config/binds.nix`
+- Documentation: `docs/Hyprland_config.md`
+- System configuration: `hosts/common/hyprland.nix`
+
+**Essential Keybindings:**
+```bash
+# Window management
+ALT + TAB                    # Cycle through windows
+SUPER + TAB                  # Switch to previous workspace
+SUPER + h/j/k/l             # Move focus (vim-style)
+SUPER + SHIFT + h/j/k/l     # Move windows
+
+# Applications
+SUPER + E                   # File manager (thunar)
+SUPER + V                   # Clipboard manager (cliphist)
+SUPER + =                   # Calculator (qalc)
+SUPER + SHIFT + Escape      # System monitor (htop)
+SUPER + SHIFT + Return      # VS Code
+
+# System controls
+SUPER + L                   # Lock screen
+SUPER + CTRL + G            # Enable gaming mode
+SUPER + CTRL + ALT + G      # Disable gaming mode
+SUPER + SHIFT + End         # Suspend system
+```
+
 ### Enabling AI Providers on a Host
 To enable the unified AI provider system on a host:
 

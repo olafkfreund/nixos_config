@@ -80,6 +80,32 @@ nixos-config/
 
 ## 🆕 Latest Updates (January 2025)
 
+### ✅ Phase 9.3: Enhanced Hyprland Configuration (Completed)
+Advanced Hyprland window manager configuration with comprehensive keybindings:
+
+**High-Priority Enhancements:**
+- **Window Switching**: `ALT + TAB` and `ALT + SHIFT + TAB` for forward/backward window cycling
+- **Workspace Navigation**: `SUPER + TAB` for previous workspace (back-and-forth switching)
+- **Application Shortcuts**: `SUPER + E` (file manager), `SUPER + V` (clipboard manager), `SUPER + =` (calculator)
+- **System Monitoring**: `SUPER + SHIFT + Escape` for system monitor in floating window
+- **Quick Lock**: `SUPER + L` for immediate screen lock
+
+**Advanced Features:**
+- **Gaming Mode**: `SUPER + CTRL + G` to disable compositor effects for performance
+- **Media Controls**: Hardware keys and `SUPER + P` for play/pause, `SUPER + SHIFT + ,/.` for track navigation
+- **Window Opacity**: `SUPER + ALT + -/=/0` for transparency control (80%/90%/100%)
+- **Manual Tiling**: `SUPER + ALT + h/j/k/l` for preselected split directions
+- **Power Management**: `SUPER + SHIFT + End/Delete/Insert` for suspend/poweroff/reboot
+
+**Development Workflow:**
+- **Code Editor**: `SUPER + SHIFT + Return` for VS Code
+- **Terminal Options**: `SUPER + SHIFT + T` (large floating), `SUPER + CTRL + T` (tmux session)
+- **Network Management**: `SUPER + SHIFT + W` for network configuration TUI
+
+**Configuration Location:**
+- Main binds: `/home/olafkfreund/.config/nixos/home/desktop/hyprland/config/binds.nix`
+- Documentation: `/home/olafkfreund/.config/nixos/docs/Hyprland_config.md`
+
 ### ✅ Phase 7: Monitoring & Observability (Completed)
 A comprehensive monitoring infrastructure has been deployed:
 

@@ -4,7 +4,8 @@
     $mainMod = SUPER
 
     # Window/Workspace Navigation
-    # bind = ALT, TAB, expo, toggle
+    bind = ALT, TAB, cyclenext
+    bind = ALT SHIFT, TAB, cyclenext, prev
     bind = $mainMod, h, movefocus, l
     bind = $mainMod, l, movefocus, r
     bind = $mainMod, k, movefocus, u
@@ -25,15 +26,20 @@
     bind = $mainMod, mouse_up, workspace, e+1
     bind = $mainMod CTRL, l, workspace, r+1
     bind = $mainMod CTRL, h, workspace, r-1
+    bind = $mainMod, TAB, workspace, previous
 
     # Application launchers
     bind = $mainMod, RETURN, exec, [float; size 50% 50%; center]foot
     bind = $mainMod, space, exec, pkill rofi || rofi -show drun
     bind = $mainMod, backspace, exec, rofi-hyprkeys
     bind = $mainMod CTRL, Y, exec, [float]foot yai
-    bind = $mainMod CTRL, M, exec, monitors
+    bind = $mainMod CTRL, M, exec, wdisplays
     bind = $mainMod, C, exec, thunderbird -calendar
     bind = $mainMod, A, exec, [float;notitle;]kitty --class album-art --hold mpris-album-art
+    bind = $mainMod, E, exec, thunar
+    bind = $mainMod, V, exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy
+    bind = $mainMod, equal, exec, [float; size 40% 50%; center]foot qalc
+    bind = $mainMod SHIFT, Escape, exec, [float; size 60% 70%; center]foot htop
 
     # Special workspaces
     bind = $mainMod, S, togglespecialworkspace, magic
@@ -74,6 +80,17 @@
     bind = $mainMod, Y, exec, hyprctl keyword general:layout "dwindle"
     bind = $mainMod, U, exec, hyprctl keyword general:layout "master"
 
+    # Window opacity controls
+    bind = $mainMod ALT, equal, exec, hyprctl setprop active alpha 0.9
+    bind = $mainMod ALT, minus, exec, hyprctl setprop active alpha 0.8
+    bind = $mainMod ALT, 0, exec, hyprctl setprop active alpha 1.0
+
+    # Window splitting (manual tiling)
+    bind = $mainMod ALT, h, layoutmsg, preselect l
+    bind = $mainMod ALT, j, layoutmsg, preselect d
+    bind = $mainMod ALT, k, layoutmsg, preselect u
+    bind = $mainMod ALT, l, layoutmsg, preselect r
+
     # Mouse bindings
     bindm = $mainMod, mouse:272, movewindow
     bindm = $mainMod, mouse:273, resizewindow
@@ -100,6 +117,32 @@
     bind = $mainMod, N, exec, swaync-client --toggle-panel
     bind = $mainMod SHIFT, N, exec, swaync-client --close-all
     bind = $mainMod ALT, L, exec, hyprlock
+    bind = $mainMod, L, exec, hyprlock
+
+    # Gaming mode toggle (disables compositor effects for performance)
+    bind = $mainMod CTRL, G, exec, hyprctl keyword decoration:drop_shadow false && hyprctl keyword decoration:blur:enabled false && hyprctl keyword animations:enabled false && notify-send "Gaming Mode" "Enabled"
+    bind = $mainMod CTRL ALT, G, exec, hyprctl keyword decoration:drop_shadow true && hyprctl keyword decoration:blur:enabled true && hyprctl keyword animations:enabled true && notify-send "Gaming Mode" "Disabled"
+
+    # Media controls
+    bind = , XF86AudioPlay, exec, playerctl play-pause
+    bind = , XF86AudioNext, exec, playerctl next
+    bind = , XF86AudioPrev, exec, playerctl previous
+    bind = $mainMod, P, exec, playerctl play-pause
+    bind = $mainMod SHIFT, period, exec, playerctl next
+    bind = $mainMod SHIFT, comma, exec, playerctl previous
+
+    # Power management
+    bind = $mainMod SHIFT, End, exec, systemctl suspend
+    bind = $mainMod SHIFT, Delete, exec, systemctl poweroff
+    bind = $mainMod SHIFT, Insert, exec, systemctl reboot
+
+    # Development shortcuts
+    bind = $mainMod SHIFT, Return, exec, code
+    bind = $mainMod SHIFT, T, exec, [float; size 80% 80%; center]foot
+    bind = $mainMod CTRL, T, exec, [float; size 60% 40%; center]foot -e tmux
+
+    # Network management
+    bind = $mainMod SHIFT, W, exec, [float; size 50% 60%; center]foot nmtui
 
     # Volume controls (consolidated)
     bind = $mainMod, SLASH, exec, pamixer -t

@@ -32,16 +32,26 @@ let
           chrome = "special:chrome";
           firefox = "special:firefox"; 
           edge = 4;
+          zen = 4;
         };
         communication = {
           slack = "special:slack";
           discord = "special:discord";
           telegram = 8;
           thunderbird = "special:mail";
+          teams = "special:slack";
+          zoom = "special:slack";
+          whatsapp = 8;
+          signal = 8;
         };
         development = {
           vscode = 2;
+          code = 2;
           tmux = "special:tmux";
+          docker = 2;
+          gitkraken = 2;
+          dbeaver = 2;
+          postman = 2;
         };
         media = {
           spotify = "special:spotify";
@@ -49,6 +59,18 @@ let
         };
         productivity = {
           obsidian = 5;
+          notion = 5;
+          libreoffice = 5;
+        };
+        gaming = {
+          steam = 9;
+          lutris = 9;
+          heroic = 9;
+          bottles = 9;
+        };
+        system = {
+          "1password" = "special:magic";
+          "org.1password.1password" = "special:magic";
         };
       };
     };
@@ -74,11 +96,45 @@ let
   mkWorkspace = workspace: conditions: mkRule "workspace ${workspace}" conditions;
   mkCenter = conditions: mkRule "center" conditions;
   mkAnimation = anim: conditions: mkRule "animation ${anim}" conditions;
+  
+  # Smart sizing based on screen resolution (defaults to 1920x1080)
+  screenWidth = hostVars.screenWidth or 1920;
+  screenHeight = hostVars.screenHeight or 1080;
+  
+  # Responsive sizing functions
+  mkSmartSize = percentage: conditions: 
+    let
+      width = toString (screenWidth * percentage / 100);
+      height = toString (screenHeight * percentage / 100);
+    in mkRule "size ${width} ${height}" conditions;
+  
+  mkSmartFloat = percentage: conditions: [
+    (mkFloat conditions)
+    (mkSmartSize percentage conditions)
+    (mkCenter conditions)
+  ];
+  
+  # Terminal size calculation
+  terminalSize = {
+    width = toString cfg.terminals.size.width;
+    height = toString cfg.terminals.size.height;
+  };
+  
+  # Generate rules for multiple applications
+  mkMultiRule = rule: apps: map (app: "${rule}, ${app}") apps;
+  
+  # Generate workspace assignments
+  mkWorkspaceRules = assignments: 
+    lib.flatten (lib.mapAttrsToList (category: apps:
+      lib.mapAttrsToList (app: workspace: 
+        mkWorkspace workspace "class:^(${app})$"
+      ) apps
+    ) assignments);
 
 in {
   wayland.windowManager.hyprland.settings = {
     # Window rules using the modern windowrulev2 format
-    windowrulev2 = [
+    windowrulev2 = lib.flatten [
       # =============================================================================
       # GLOBAL SETTINGS
       # =============================================================================
@@ -88,20 +144,19 @@ in {
       # =============================================================================
       # TERMINAL EMULATOR RULES
       # =============================================================================
-      # Terminal emulators - consistent floating with 1000x1000 size
-      "float, class:(alacritty)"
-      "size 1000 1000, class:(alacritty)"
-      "float, class:(kitty)"
-      "size 1000 1000, class:(kitty)"
-      "float, class:(wezterm)"
-      "size 1000 1000, class:(wezterm)"
-      "float, class:(foot)"
-      "size 1000 1000, class:(foot)"
+      # Terminal emulators - use configuration-based sizing and behavior
+    ] ++ lib.optionals cfg.terminals.float [
+      # Terminal emulators with smart sizing
+      (mkMultiRule "float" ["class:(alacritty)" "class:(kitty)" "class:(wezterm)" "class:(foot)"])
+      (mkMultiRule "size ${terminalSize.width} ${terminalSize.height}" ["class:(alacritty)" "class:(kitty)" "class:(wezterm)" "class:(foot)"])
+    ] ++ lib.optionals (cfg.terminals.center && cfg.terminals.float) [
+      (mkMultiRule "center" ["class:(alacritty)" "class:(kitty)" "class:(wezterm)" "class:(foot)"])
+    ] ++ lib.optionals (cfg.terminals.animations && cfg.terminals.float) [
       "animation slide left, class:^(foot)$"
-      
+    ] ++ [
       # Web search utility
       "float, class:(web-search)"
-      "size 1000 1000, class:(web-search)"
+      "size ${terminalSize.width} ${terminalSize.height}, class:(web-search)"
       "animation slide down, class:^(web-search)$"
 
       # =============================================================================
@@ -115,21 +170,41 @@ in {
       # Bluetooth manager
       "float, class:(blueman-manager)"
       "center, class:(blueman-manager)"
+    ] ++ (mkSmartFloat 40 "class:(blueman-manager)") ++ [
 
       # Network utilities
       "float, class:^(nm-applet)$"
       "float, class:^(nm-connection-editor)$"
+    ] ++ (mkSmartFloat 50 "class:^(nm-connection-editor)$") ++ [
 
       # Sound control (PulseAudio Volume Control)
-      "float, class:(org.pulseaudio.pavucontrol)"
-      "size 1000 1000, class:(org.pulseaudio.pavucontrol)"
-      "center, class:(org.pulseaudio.pavucontrol)"
+    ] ++ (mkSmartFloat 60 "class:(org.pulseaudio.pavucontrol)") ++ [
 
       # XDG desktop portal
       "float, class:^(xdg-desktop-portal-gtk)$"
-      "size 900 500, class:^(xdg-desktop-portal-gtk)$"
       "dimaround, class:^(xdg-desktop-portal-gtk)$"
       "center, class:^(xdg-desktop-portal-gtk)$"
+    ] ++ (mkSmartFloat 45 "class:^(xdg-desktop-portal-gtk)$") ++ [
+      
+      # System monitors and task managers
+      "float, class:^(htop)$"
+      "float, class:^(btop)$"
+      "float, class:^(mission-center)$"
+      "float, class:^(gnome-system-monitor)$"
+    ] ++ (mkSmartFloat 70 "class:^(htop)$") ++ [
+    ] ++ (mkSmartFloat 70 "class:^(btop)$") ++ [
+    ] ++ (mkSmartFloat 75 "class:^(mission-center)$") ++ [
+    ] ++ (mkSmartFloat 70 "class:^(gnome-system-monitor)$") ++ [
+      
+      # File managers
+      "float, class:^(thunar)$, title:^(.*)(Properties)(.*)$"
+      "float, class:^(thunar)$, title:^(.*)(Preferences)(.*)$"
+      "float, class:^(nemo)$, title:^(.*)(Properties)(.*)$"
+      "float, class:^(nautilus)$, title:^(.*)(Properties)(.*)$"
+    ] ++ (mkSmartFloat 50 "class:^(thunar)$, title:^(.*)(Properties)(.*)$") ++ [
+    ] ++ (mkSmartFloat 55 "class:^(thunar)$, title:^(.*)(Preferences)(.*)$") ++ [
+    ] ++ (mkSmartFloat 50 "class:^(nemo)$, title:^(.*)(Properties)(.*)$") ++ [
+    ] ++ (mkSmartFloat 50 "class:^(nautilus)$, title:^(.*)(Properties)(.*)$") ++ [
 
       # =============================================================================
       # APPLICATION LAUNCHERS
@@ -141,7 +216,34 @@ in {
       # PRODUCTIVITY APPLICATIONS
       # =============================================================================
       # Obsidian note-taking application
-      "float, class:(obsidian)"
+      "workspace ${toString cfg.workspaces.assignments.productivity.obsidian}, class:(obsidian)"
+      "float, class:(obsidian), title:^(.*)(Settings)(.*)$"
+      "float, class:(obsidian), title:^(.*)(Community plugins)(.*)$"
+      "float, class:(obsidian), title:^(.*)(Hotkeys)(.*)$"
+    ] ++ (mkSmartFloat 60 "class:(obsidian), title:^(.*)(Settings)(.*)$") ++ [
+    ] ++ (mkSmartFloat 70 "class:(obsidian), title:^(.*)(Community plugins)(.*)$") ++ [
+    ] ++ (mkSmartFloat 65 "class:(obsidian), title:^(.*)(Hotkeys)(.*)$") ++ [
+      
+      # Notion
+      "float, class:^(notion)$"
+      "workspace ${toString cfg.workspaces.assignments.productivity.obsidian}, class:^(notion)$"
+    ] ++ (mkSmartFloat 80 "class:^(notion)$") ++ [
+      
+      # LibreOffice applications
+      "float, class:^(libreoffice)$, title:^(.*)(Options)(.*)$"
+      "float, class:^(libreoffice)$, title:^(.*)(Properties)(.*)$"
+      "float, class:^(libreoffice)$, title:^(.*)(Print)(.*)$"
+    ] ++ (mkSmartFloat 60 "class:^(libreoffice)$, title:^(.*)(Options)(.*)$") ++ [
+    ] ++ (mkSmartFloat 50 "class:^(libreoffice)$, title:^(.*)(Properties)(.*)$") ++ [
+    ] ++ (mkSmartFloat 55 "class:^(libreoffice)$, title:^(.*)(Print)(.*)$") ++ [
+      
+      # Calculator applications
+      "float, class:^(org.gnome.Calculator)$"
+      "float, class:^(galculator)$"
+      "float, class:^(qalculate)$"
+    ] ++ (mkSmartFloat 30 "class:^(org.gnome.Calculator)$") ++ [
+    ] ++ (mkSmartFloat 35 "class:^(galculator)$") ++ [
+    ] ++ (mkSmartFloat 40 "class:^(qalculate)$") ++ [
 
       # =============================================================================
       # THUNDERBIRD EMAIL CLIENT
@@ -202,18 +304,76 @@ in {
 
       # Discord communication (using Vesktop)
       "workspace special:discord, float, class:^(vesktop)"
-      "workspace special:discord, size 50% 50%, float, class:^(vesktop)"
+    ] ++ (mkSmartFloat 75 "class:^(vesktop)") ++ [
+      "workspace special:discord, float, class:^(discord)"
+    ] ++ (mkSmartFloat 75 "class:^(discord)") ++ [
 
       # Telegram messaging
-      "workspace 8, class:(org.telegram.desktop)"
-      "size 970 480, class:(org.telegram.desktop), title:(Choose Files)"
-      "center, class:(org.telegram.desktop), title:(Choose Files)"
+      "workspace ${toString cfg.workspaces.assignments.communication.telegram}, class:(org.telegram.desktop)"
+    ] ++ (mkSmartFloat 55 "class:(org.telegram.desktop), title:(Choose Files)") ++ [
+      
+      # WhatsApp
+      "float, class:^(whatsapp)$"
+      "workspace ${toString cfg.workspaces.assignments.communication.telegram}, class:^(whatsapp)$"
+    ] ++ (mkSmartFloat 70 "class:^(whatsapp)$") ++ [
+      
+      # Signal
+      "float, class:^(signal)$"
+      "workspace ${toString cfg.workspaces.assignments.communication.telegram}, class:^(signal)$"
+    ] ++ (mkSmartFloat 65 "class:^(signal)$") ++ [
+      
+      # Microsoft Teams
+      "float, class:^(teams)$"
+      "workspace ${toString cfg.workspaces.assignments.communication.slack}, class:^(teams)$"
+    ] ++ (mkSmartFloat 80 "class:^(teams)$") ++ [
+      
+      # Zoom
+      "float, class:^(zoom)$"
+      "workspace ${toString cfg.workspaces.assignments.communication.slack}, class:^(zoom)$"
+    ] ++ (mkSmartFloat 75 "class:^(zoom)$") ++ [
+      "float, class:^(zoom)$, title:^(.*)(Settings)(.*)$"
+    ] ++ (mkSmartFloat 60 "class:^(zoom)$, title:^(.*)(Settings)(.*)$") ++ [
 
       # =============================================================================
       # DEVELOPMENT TOOLS
       # =============================================================================
+      # Visual Studio Code
+      "workspace ${toString cfg.workspaces.assignments.development.vscode}, class:^(code)$"
+      "workspace ${toString cfg.workspaces.assignments.development.vscode}, class:^(Code)$"
+      "workspace ${toString cfg.workspaces.assignments.development.vscode}, class:^(code-url-handler)$"
+      
+      # VS Code dialogs and popups
+    ] ++ (mkSmartFloat 60 "class:^(code)$, title:^(.*)(Settings)(.*)$") ++ [
+    ] ++ (mkSmartFloat 70 "class:^(code)$, title:^(.*)(Extensions)(.*)$") ++ [
+    ] ++ (mkSmartFloat 50 "class:^(code)$, title:^(.*)(Quick Open)(.*)$") ++ [
+      
+      # Development containers and Docker Desktop
+      "float, class:^(Docker Desktop)$"
+      "workspace ${toString cfg.workspaces.assignments.development.vscode}, class:^(Docker Desktop)$"
+    ] ++ (mkSmartFloat 80 "class:^(Docker Desktop)$") ++ [
+      
+      # Git GUI applications
+      "float, class:^(GitKraken)$"
+      "workspace ${toString cfg.workspaces.assignments.development.vscode}, class:^(GitKraken)$"
+    ] ++ (mkSmartFloat 85 "class:^(GitKraken)$") ++ [
+      
+      # Database tools
+      "float, class:^(DBeaver)$"
+      "workspace ${toString cfg.workspaces.assignments.development.vscode}, class:^(DBeaver)$"
+    ] ++ (mkSmartFloat 80 "class:^(DBeaver)$") ++ [
+      
+      # Postman API testing
+      "float, class:^(Postman)$"
+      "workspace ${toString cfg.workspaces.assignments.development.vscode}, class:^(Postman)$"
+    ] ++ (mkSmartFloat 75 "class:^(Postman)$") ++ [
+      
       # Tmux scratchpad terminal
       "workspace special:tmux, float, title:^(tmux-sratch)"
+      
+      # Development terminal sessions
+      "workspace ${toString cfg.workspaces.assignments.development.vscode}, class:^(dev-terminal)$"
+      "float, class:^(dev-terminal)$"
+    ] ++ (mkSmartFloat 70 "class:^(dev-terminal)$") ++ [
 
       # =============================================================================
       # ENTERTAINMENT APPLICATIONS
@@ -261,12 +421,48 @@ in {
       # =============================================================================
       # GAMING OPTIMIZATIONS
       # =============================================================================
+    ] ++ lib.optionals cfg.gaming.immediateMode [
       # Enable immediate mode for games (reduced input latency)
       "immediate, class:^(cs2)$"
-      "immediate, class:^(steam_app_0)$"
-      "immediate, class:^(steam_app_1)$"
-      "immediate, class:^(steam_app_2)$"
+      "immediate, class:^(steam_app_).*$"
+      "immediate, class:^(steam_proton)$"
+      "immediate, class:^(lutris)$"
+      "immediate, class:^(heroic)$"
+      "immediate, class:^(bottles)$"
       "immediate, class:^(.*)(.exe)$"
+      "immediate, class:^(wine)$"
+      "immediate, class:^(Steam)$"
+      
+      # Disable compositor features for games
+      "noblur, class:^(steam_app_).*$"
+      "noblur, class:^(cs2)$"
+      "noblur, class:^(lutris)$"
+      "noblur, class:^(heroic)$"
+      
+      # Maximize gaming performance
+      "noborder, class:^(steam_app_).*$"
+      "noshadow, class:^(steam_app_).*$"
+      "noanim, class:^(steam_app_).*$"
+    ] ++ lib.optionals cfg.gaming.fullscreenBorders [
+      # Gaming fullscreen optimizations
+      "bordercolor rgba(FF0050FF), fullscreen:1"
+      "bordersize 2, fullscreen:1"
+    ] ++ [
+      
+      # Steam application
+      "float, class:^(Steam)$, title:^(.*)(Settings)(.*)$"
+      "float, class:^(Steam)$, title:^(.*)(Friends)(.*)$"
+      "float, class:^(Steam)$, title:^(.*)(Screenshot)(.*)$"
+    ] ++ (mkSmartFloat 70 "class:^(Steam)$, title:^(.*)(Settings)(.*)$") ++ [
+    ] ++ (mkSmartFloat 40 "class:^(Steam)$, title:^(.*)(Friends)(.*)$") ++ [
+      
+      # Gaming launchers
+      "float, class:^(lutris)$"
+      "float, class:^(heroic)$"
+      "float, class:^(bottles)$"
+    ] ++ (mkSmartFloat 60 "class:^(lutris)$") ++ [
+    ] ++ (mkSmartFloat 70 "class:^(heroic)$") ++ [
+    ] ++ (mkSmartFloat 65 "class:^(bottles)$") ++ [
 
       # =============================================================================
       # SCREEN SHARING / RECORDING
@@ -308,14 +504,42 @@ in {
       # Weather popup class-based rules for reliability
       "float, class:^(weather-popup)$"
       "center, class:^(weather-popup)$"
-      "size 900 700, class:^(weather-popup)$"
       "opacity 0.95, class:^(weather-popup)$"
       "rounding 10, class:^(weather-popup)$"
       "pin, class:^(weather-popup)$"
+    ] ++ (mkSmartFloat 45 "class:^(weather-popup)$") ++ [
+      
+      # =============================================================================
+      # WORKSPACE ASSIGNMENTS (Generated from Configuration)
+      # =============================================================================
+    ] ++ lib.optionals cfg.workspaces.useSpecialWorkspaces 
+      (mkWorkspaceRules cfg.workspaces.assignments) ++ [
+      
+      # =============================================================================
+      # ACCESSIBILITY AND SYSTEM UTILITIES
+      # =============================================================================
+      # Screen reader and accessibility tools
+      "float, class:^(orca)$"
+      "pin, class:^(orca)$"
+    ] ++ (mkSmartFloat 40 "class:^(orca)$") ++ [
+      
+      # System configuration tools
+      "float, class:^(gnome-control-center)$"
+      "float, class:^(systemsettings)$"
+    ] ++ (mkSmartFloat 70 "class:^(gnome-control-center)$") ++ [
+    ] ++ (mkSmartFloat 75 "class:^(systemsettings)$") ++ [
+      
+      # Package managers
+      "float, class:^(pamac)$"
+      "float, class:^(discover)$"
+      "float, class:^(gnome-software)$"
+    ] ++ (mkSmartFloat 80 "class:^(pamac)$") ++ [
+    ] ++ (mkSmartFloat 75 "class:^(discover)$") ++ [
+    ] ++ (mkSmartFloat 75 "class:^(gnome-software)$") ++ [
     ];
 
-    # Legacy window rules (older format)
-    windowrule = [
+    # Legacy window rules (minimal, for compatibility)
+    windowrule = lib.optionals cfg.gaming.fullscreenBorders [
       "bordercolor rgba(FF0050FF), fullscreen:1"
     ];
   };
