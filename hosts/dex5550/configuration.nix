@@ -433,7 +433,7 @@ in {
           -e WEBPASSWORD=nixos-pihole \
           -e FTLCONF_LOCAL_IPV4=192.168.1.222 \
           -e PIHOLE_DNS_="1.1.1.1;1.0.0.1" \
-          -e VIRTUAL_HOST=pihole.home.freundcloud.com \
+          -e VIRTUAL_HOST=pihole.freundcloud.com \
           -e REV_SERVER=true \
           -e REV_SERVER_DOMAIN=home.freundcloud.com \
           -e REV_SERVER_TARGET=192.168.1.222 \
@@ -464,6 +464,7 @@ in {
       192.168.1.222 prometheus.home.freundcloud.com
       192.168.1.222 alertmanager.home.freundcloud.com
       192.168.1.222 pihole.home.freundcloud.com
+      192.168.1.222 pihole.freundcloud.com
       192.168.1.222 dns.home.freundcloud.com
       192.168.1.222 home.freundcloud.com
     '';
@@ -551,10 +552,10 @@ in {
             tls.certResolver = "letsencrypt";
           };
           
-          # Pi-hole router
+          # Pi-hole router - use subdomain instead of path
           pihole = {
-            rule = "Host(`home.freundcloud.com`) && PathPrefix(`/pihole`)";
-            middlewares = [ "pihole-stripprefix" "secure-headers" ];
+            rule = "Host(`pihole.freundcloud.com`)";
+            middlewares = [ "secure-headers" ];
             service = "pihole";
             tls.certResolver = "letsencrypt";
           };
@@ -578,9 +579,6 @@ in {
           };
           alertmanager-stripprefix = {
             stripPrefix.prefixes = [ "/alertmanager" ];
-          };
-          pihole-stripprefix = {
-            stripPrefix.prefixes = [ "/pihole" ];
           };
           secure-headers = {
             headers = {
