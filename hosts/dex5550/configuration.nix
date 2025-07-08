@@ -470,8 +470,9 @@ in {
       youtube
     ];
     
-    # Virtual host configuration
+    # Virtual host configuration - use nginx webserver
     virtualHost = "rss.home.freundcloud.com";
+    webserver = "nginx";
   };
 
 
