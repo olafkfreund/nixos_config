@@ -92,7 +92,8 @@
       "Bash(ai-cli -p anthropic -v \"Hello! What is 2+2?\")",
       "Bash(ai-chat:*)",
       "Bash(ai-cli:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(./update-claude-code-lock.sh:*)"
     ]
   },
   "enableAllProjectMcpServers": false
