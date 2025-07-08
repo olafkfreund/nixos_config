@@ -254,7 +254,6 @@ in {
         "meminfo_numa"
         "mountstats"
         "network_route"
-        "ntp"
         "perf"
         "tcpstat"
         "wifi"
@@ -264,6 +263,7 @@ in {
       # Disable collectors that might be problematic
       disabledCollectors = [
         "textfile"  # We'll use custom exporters instead
+        "ntp"       # Disable NTP collector to avoid connection refused errors
       ];
     };
 
