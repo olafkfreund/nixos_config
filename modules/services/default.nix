@@ -19,6 +19,7 @@
     ./mandb/default.nix
     ./appimage/default.nix
     ./dns/secure-dns.nix
+    ./flaresolverr/default.nix
 
     # Network stability modules (service merged into main module)
     ./network-monitoring.nix

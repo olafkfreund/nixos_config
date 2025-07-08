@@ -22,6 +22,7 @@ in {
     ./nixos/hosts.nix
     ./nixos/screens.nix
     ./nixos/plex.nix
+    ./flaresolverr.nix
     ./themes/stylix.nix
     ../../modules/server.nix
     ../../modules/default.nix
