@@ -20,10 +20,8 @@ in {
     ./nixos/memory.nix
     ./nixos/greetd.nix
     ./nixos/hosts.nix
-    #./nixos/mpd.nix
     ./nixos/screens.nix
     ./nixos/plex.nix
-    # ./nixos/monitoring.nix # Added monitoring configuration
     ./themes/stylix.nix
     ../../modules/server.nix
     ../../modules/default.nix
@@ -164,29 +162,6 @@ in {
     videoDrivers = ["${vars.gpu}"];
   };
 
-  # programs.sway = {
-  #   enable = true;
-  #   wrapperFeatures.gtk = true;
-  #   extraPackages = with pkgs; [
-  #     swaylock
-  #     swayidle
-  #     swaycons
-  #     wl-clipboard
-  #     wlr-which-key
-  #     wlr-randr
-  #     grim
-  #     slurp
-  #     foot
-  #     dmenu
-  #   ];
-  #   extraSessionCommands = ''
-  #     export SDL_VIDEODRIVER=wayland
-  #     export QT_QPA_PLATFORM=wayland
-  #     export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
-  #     export _JAVA_AWT_WM_NONREPARENTING=1
-  #     export MOZ_ENABLE_WAYLAND=1
-  #   '';
-  # };
 
   # Hardware-specific configurations
   security.wrappers.sunshine = {

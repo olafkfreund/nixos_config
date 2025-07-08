@@ -51,7 +51,6 @@
     transmission = {
       enable = true;
       user = "olafkfreund";
-      # group = "users";
       home = "/mnt/media/transmission";
       package = pkgs-unstable.transmission_4;
       downloadDirPermissions = "0775";
