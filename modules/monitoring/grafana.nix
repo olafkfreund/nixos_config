@@ -536,7 +536,7 @@ with lib; let
         };
         datasource = {
           type = "loki";
-          uid = "loki";
+          uid = "P8E80F9AEF21F6940";
         };
       }
       {
@@ -560,7 +560,7 @@ with lib; let
         };
         datasource = {
           type = "loki";
-          uid = "loki";
+          uid = "P8E80F9AEF21F6940";
         };
       }
       {
@@ -584,7 +584,7 @@ with lib; let
         };
         datasource = {
           type = "loki";
-          uid = "loki";
+          uid = "P8E80F9AEF21F6940";
         };
       }
       {
@@ -598,7 +598,7 @@ with lib; let
         gridPos = { h = 8; w = 12; x = 0; y = 36; };
         datasource = {
           type = "loki";
-          uid = "loki";
+          uid = "P8E80F9AEF21F6940";
         };
       }
       {
@@ -612,7 +612,7 @@ with lib; let
         gridPos = { h = 8; w = 12; x = 12; y = 36; };
         datasource = {
           type = "loki";
-          uid = "loki";
+          uid = "P8E80F9AEF21F6940";
         };
       }
     ];
@@ -685,6 +685,7 @@ in {
             {
               name = "Loki";
               type = "loki";
+              uid = "P8E80F9AEF21F6940";
               access = "proxy";
               url = "http://localhost:${toString cfg.network.lokiPort}";
               isDefault = false;
