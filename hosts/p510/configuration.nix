@@ -79,6 +79,21 @@ in {
     };
   };
 
+  # Enable AI-powered memory optimization - CRITICAL for P510 with 79.6% disk usage
+  ai.memoryOptimization = {
+    enable = true;
+    autoOptimize = true;
+    nixStoreOptimization = true;
+    logRotation = true;
+    
+    thresholds = {
+      memoryWarning = 80;    # P510 is at 12.5%, normal threshold
+      memoryCritical = 90;   # Standard critical threshold
+      diskWarning = 75;      # P510 is at 79.6%, urgent threshold
+      diskCritical = 85;     # Prevent disk full - already close!
+    };
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {

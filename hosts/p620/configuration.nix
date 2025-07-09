@@ -92,6 +92,21 @@ in {
     };
   };
 
+  # Enable AI-powered memory optimization
+  ai.memoryOptimization = {
+    enable = true;
+    autoOptimize = true;
+    nixStoreOptimization = true;
+    logRotation = true;
+    
+    thresholds = {
+      memoryWarning = 75;    # P620 is at 22.8%, set lower threshold
+      memoryCritical = 85;   # Prevent memory exhaustion
+      diskWarning = 45;      # P620 root disk at 49.6%, set lower threshold
+      diskCritical = 55;     # Prevent disk full
+    };
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {

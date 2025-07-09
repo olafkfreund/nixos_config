@@ -8,6 +8,7 @@
     ./gemini-cli.nix
     ./providers/default.nix
     ./analysis/default.nix
+    ./memory-optimization.nix
   ];
 
   environment.systemPackages = [
