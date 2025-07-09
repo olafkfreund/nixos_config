@@ -12,6 +12,8 @@ in {
     ./grafana.nix
     ./node-exporter.nix
     ./alerting.nix
+    ./loki.nix
+    ./promtail.nix
   ];
 
   options.monitoring = {
@@ -38,6 +40,12 @@ in {
       type = types.str;
       default = "30d";
       description = "Data retention period for metrics";
+    };
+
+    logRetention = mkOption {
+      type = types.str;
+      default = "7d";
+      description = "Data retention period for logs";
     };
 
     scrapeInterval = mkOption {
@@ -76,6 +84,30 @@ in {
         type = types.int;
         default = 9093;
         description = "Alertmanager port";
+      };
+
+      lokiPort = mkOption {
+        type = types.int;
+        default = 3100;
+        description = "Loki server port";
+      };
+
+      lokiGrpcPort = mkOption {
+        type = types.int;
+        default = 9095;
+        description = "Loki gRPC port";
+      };
+
+      promtailPort = mkOption {
+        type = types.int;
+        default = 9080;
+        description = "Promtail server port";
+      };
+
+      promtailGrpcPort = mkOption {
+        type = types.int;
+        default = 9096;
+        description = "Promtail gRPC port";
       };
     };
 
@@ -116,6 +148,24 @@ in {
         default = true;
         description = "Enable alerting and notifications";
       };
+
+      logging = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable centralized logging with Loki";
+      };
+
+      prometheus = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable Prometheus metrics server";
+      };
+
+      grafana = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable Grafana dashboard server";
+      };
     };
   };
 
@@ -135,11 +185,21 @@ in {
           cfg.network.prometheusPort
           cfg.network.grafanaPort
           cfg.network.alertmanagerPort
+        ] ++ optionals cfg.features.logging [
+          cfg.network.lokiPort
+          cfg.network.lokiGrpcPort
         ];
       })
       
       (mkIf cfg.features.nodeExporter {
         allowedTCPPorts = [ cfg.network.nodeExporterPort ];
+      })
+      
+      (mkIf cfg.features.logging {
+        allowedTCPPorts = [
+          cfg.network.promtailPort
+          cfg.network.promtailGrpcPort
+        ];
       })
     ];
 
@@ -155,6 +215,7 @@ in {
       MONITORING_SERVER = cfg.serverHost;
       PROMETHEUS_URL = "http://${cfg.serverHost}:${toString cfg.network.prometheusPort}";
       GRAFANA_URL = "http://${cfg.serverHost}:${toString cfg.network.grafanaPort}";
+      LOKI_URL = "http://${cfg.serverHost}:${toString cfg.network.lokiPort}";
     };
 
     # Install monitoring CLI tools

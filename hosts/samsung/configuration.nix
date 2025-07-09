@@ -84,7 +84,6 @@ in {
 
     networking = {
       enable = true;
-      tailscale = true;
     };
 
     ai = {
@@ -108,10 +107,9 @@ in {
   };
 
   # IDIOT-PROOF DNS CONFIGURATION: Prevent Tailscale from breaking DNS
-  vpn.tailscale = {
+  services.tailscale = {
     enable = true;
-    acceptDns = lib.mkForce false; # NEVER let Tailscale touch DNS
-    netfilterMode = "off"; # Safer default
+    useRoutingFeatures = "none"; # Safer default
   };
 
   # Nix build optimizations

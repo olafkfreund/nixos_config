@@ -35,10 +35,11 @@ with lib; let
         echo "# NixOS System Metrics"
         echo "# Generated at $(date -Iseconds)"
         
-        # Nix store size
+        # Nix store size (use cached value or skip if taking too long)
         if [[ -d /nix/store ]]; then
-            local store_size=$(du -s /nix/store 2>/dev/null | ${pkgs.gawk}/bin/awk '{print $1 * 1024}' || echo 0)
-            output_metric "nixos_store_size_bytes" "$store_size" "Size of /nix/store in bytes"
+            # Use timeout to avoid hanging the exporter
+            local store_size=$(timeout 5 du -s /nix/store 2>/dev/null | ${pkgs.gawk}/bin/awk '{print $1 * 1024}' || echo 0)
+            output_metric "nixos_store_size_bytes" "$store_size" "Size of /nix/store in bytes (0 if calculation timed out)"
         fi
         
         # Number of generations
@@ -49,9 +50,9 @@ with lib; let
         local current_gen=$(nix-env --list-generations 2>/dev/null | tail -1 | ${pkgs.gawk}/bin/awk '{print $1}' || echo 0)
         output_metric "nixos_generation_current" "$current_gen" "Current NixOS generation number"
         
-        # System derivation count in store
-        local derivations=$(find /nix/store -name "*.drv" 2>/dev/null | wc -l || echo 0)
-        output_metric "nixos_store_derivations_total" "$derivations" "Number of derivations in Nix store"
+        # System derivation count in store (with timeout to avoid hanging)
+        local derivations=$(timeout 5 find /nix/store -name "*.drv" 2>/dev/null | wc -l || echo 0)
+        output_metric "nixos_store_derivations_total" "$derivations" "Number of derivations in Nix store (0 if calculation timed out)"
         
         # Nix daemon status
         local nix_daemon_status=0
@@ -66,9 +67,9 @@ with lib; let
             output_metric "nixos_last_rebuild_timestamp" "$creation_time" "Timestamp of last system rebuild"
         fi
         
-        # Garbage collection stats
-        local gc_roots=$(nix-store --gc --print-roots 2>/dev/null | wc -l || echo 0)
-        output_metric "nixos_gc_roots_total" "$gc_roots" "Number of garbage collection roots"
+        # Garbage collection stats (with timeout to avoid hanging)
+        local gc_roots=$(timeout 5 nix-store --gc --print-roots 2>/dev/null | wc -l || echo 0)
+        output_metric "nixos_gc_roots_total" "$gc_roots" "Number of garbage collection roots (0 if calculation timed out)"
         
         # Channel information
         local channel_count=$(nix-channel --list 2>/dev/null | wc -l || echo 0)

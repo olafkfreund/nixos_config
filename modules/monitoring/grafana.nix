@@ -508,6 +508,121 @@ with lib; let
     refresh = "30s";
   });
 
+  # Centralized Logs Dashboard
+  logsDashboard = pkgs.writeText "logs-dashboard.json" (builtins.toJSON {
+    id = null;
+    title = "Centralized Logs";
+    tags = ["logs" "loki" "system"];
+    timezone = "browser";
+    panels = [
+      {
+        id = 1;
+        title = "System Logs";
+        type = "logs";
+        targets = [{
+          expr = "{job=\"systemd-journal\"} |= \"\"";
+          refId = "A";
+        }];
+        gridPos = { h = 12; w = 24; x = 0; y = 0; };
+        options = {
+          showTime = true;
+          showLabels = true;
+          showCommonLabels = false;
+          wrapLogMessage = false;
+          prettifyLogMessage = false;
+          enableLogDetails = true;
+          dedupStrategy = "none";
+          sortOrder = "Descending";
+        };
+        datasource = {
+          type = "loki";
+          uid = "loki";
+        };
+      }
+      {
+        id = 2;
+        title = "Error Logs";
+        type = "logs";
+        targets = [{
+          expr = "{job=\"systemd-journal\"} |~ \"(?i)error|fail|exception|critical\"";
+          refId = "B";
+        }];
+        gridPos = { h = 12; w = 24; x = 0; y = 12; };
+        options = {
+          showTime = true;
+          showLabels = true;
+          showCommonLabels = false;
+          wrapLogMessage = false;
+          prettifyLogMessage = false;
+          enableLogDetails = true;
+          dedupStrategy = "none";
+          sortOrder = "Descending";
+        };
+        datasource = {
+          type = "loki";
+          uid = "loki";
+        };
+      }
+      {
+        id = 3;
+        title = "Application Logs";
+        type = "logs";
+        targets = [{
+          expr = "{job=\"application-logs\"} |= \"\"";
+          refId = "C";
+        }];
+        gridPos = { h = 12; w = 24; x = 0; y = 24; };
+        options = {
+          showTime = true;
+          showLabels = true;
+          showCommonLabels = false;
+          wrapLogMessage = false;
+          prettifyLogMessage = false;
+          enableLogDetails = true;
+          dedupStrategy = "none";
+          sortOrder = "Descending";
+        };
+        datasource = {
+          type = "loki";
+          uid = "loki";
+        };
+      }
+      {
+        id = 4;
+        title = "Log Volume by Host";
+        type = "timeseries";
+        targets = [{
+          expr = "sum by (host) (rate({job=\"systemd-journal\"}[5m]))";
+          refId = "D";
+        }];
+        gridPos = { h = 8; w = 12; x = 0; y = 36; };
+        datasource = {
+          type = "loki";
+          uid = "loki";
+        };
+      }
+      {
+        id = 5;
+        title = "Log Levels";
+        type = "piechart";
+        targets = [{
+          expr = "sum by (priority) (count_over_time({job=\"systemd-journal\"}[1h]))";
+          refId = "E";
+        }];
+        gridPos = { h = 8; w = 12; x = 12; y = 36; };
+        datasource = {
+          type = "loki";
+          uid = "loki";
+        };
+      }
+    ];
+    time = {
+      from = "now-1h";
+      to = "now";
+    };
+    refresh = "30s";
+  });
+
 in {
   config = mkIf (cfg.enable && (cfg.mode == "server" || cfg.mode == "standalone")) {
     services.grafana = {
@@ -566,6 +681,18 @@ in {
                 httpMethod = "POST";
               };
             }
+          ] ++ optionals cfg.features.logging [
+            {
+              name = "Loki";
+              type = "loki";
+              access = "proxy";
+              url = "http://localhost:${toString cfg.network.lokiPort}";
+              isDefault = false;
+              jsonData = {
+                maxLines = 1000;
+                timeout = "60s";
+              };
+            }
           ];
         };
 
@@ -596,6 +723,7 @@ in {
       "d /var/lib/grafana/dashboards/nixos 0755 grafana grafana -"
       "d /var/lib/grafana/dashboards/hosts 0755 grafana grafana -"
       "d /var/lib/grafana/dashboards/media 0755 grafana grafana -"
+      "d /var/lib/grafana/dashboards/logs 0755 grafana grafana -"
       
       # System and host dashboards
       "L+ /var/lib/grafana/dashboards/nixos/system-overview.json - - - - ${nixosDashboard}"
@@ -610,11 +738,15 @@ in {
       "L+ /var/lib/grafana/dashboards/media/radarr.json - - - - ${radarrDashboard}"
       "L+ /var/lib/grafana/dashboards/media/lidarr.json - - - - ${lidarrDashboard}"
       "L+ /var/lib/grafana/dashboards/media/prowlarr.json - - - - ${prowlarrDashboard}"
+      
+      # Logs dashboard
+    ] ++ optionals cfg.features.logging [
+      "L+ /var/lib/grafana/dashboards/logs/centralized-logs.json - - - - ${logsDashboard}"
     ];
 
     # Grafana service dependencies
     systemd.services.grafana = {
-      after = [ "network.target" "prometheus.service" ];
+      after = [ "network.target" "prometheus.service" ] ++ optionals cfg.features.logging [ "loki.service" ];
     };
 
 
