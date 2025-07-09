@@ -119,19 +119,19 @@ in {
     media = {
       droidcam = true;
     };
+  };
 
-    # Monitoring configuration - P510 as client
-    monitoring = {
-      enable = true;
-      mode = "client";  # Monitored by dex5550
-      serverHost = "dex5550";
-      
-      features = {
-        nodeExporter = true;
-        nixosMetrics = true;
-        alerting = false;  # Only server handles alerting
-        gpuMetrics = true;  # Enable NVIDIA GPU monitoring
-      };
+  # Monitoring configuration - P510 as client
+  monitoring = {
+    enable = true;
+    mode = "client";  # Monitored by dex5550
+    serverHost = "dex5550";
+    
+    features = {
+      nodeExporter = true;
+      nixosMetrics = true;
+      alerting = false;  # Only server handles alerting
+      gpuMetrics = true;  # Enable NVIDIA GPU monitoring
     };
   };
 

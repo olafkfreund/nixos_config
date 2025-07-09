@@ -116,6 +116,8 @@ in {
       nixosMetrics = true;  # NixOS-specific metrics
       alerting = true;      # Alertmanager
       logging = true;       # Loki log aggregation server
+      # Note: GPU metrics features are enabled for dashboard provisioning only
+      # The actual GPU exporter services run on hosts with GPUs (razer, p510, p620)
       gpuMetrics = true;    # Enable GPU dashboards for NVIDIA clients
       amdGpuMetrics = true; # Enable AMD GPU dashboards for AMD clients
     };
