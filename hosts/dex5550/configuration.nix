@@ -315,7 +315,6 @@ in {
     interfaces."eno1" = {
       allowedTCPPorts = [
         3001  # Grafana
-        8082  # FreshRSS
         9090  # Prometheus
         9093  # Alertmanager
         9100  # Node Exporter
@@ -458,36 +457,6 @@ in {
   # Monitoring configuration handled by monitoring module
 
 
-  # FreshRSS Service - Native NixOS RSS Feed Reader
-  services.freshrss = {
-    enable = true;
-    baseUrl = "https://rss.home.freundcloud.com";
-    
-    # Database configuration
-    database = {
-      type = "sqlite";
-      name = "freshrss";
-      tableprefix = "freshrss_";
-    };
-    
-    # Default user configuration
-    defaultUser = "admin";
-    passwordFile = pkgs.writeText "freshrss-password" "nixos-admin";
-    
-    # Additional configuration options
-    authType = "form";
-    language = "en";
-    
-    # Extensions
-    extensions = with pkgs.freshrss-extensions; [
-      reading-time
-      youtube
-    ];
-    
-    # Virtual host configuration - use nginx webserver
-    virtualHost = "rss.home.freundcloud.com";
-    webserver = "nginx";
-  };
 
 
   # Traefik Reverse Proxy for external access
@@ -572,14 +541,6 @@ in {
           };
           
           
-          # FreshRSS router
-          freshrss = {
-            rule = "Host(`rss.home.freundcloud.com`)";
-            middlewares = [ "secure-headers" ];
-            service = "freshrss";
-            tls.certResolver = "letsencrypt";
-          };
-          
           # Traefik dashboard router
           dashboard = {
             rule = "Host(`home.freundcloud.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))";
@@ -632,21 +593,15 @@ in {
               url = "http://127.0.0.1:9093";
             }];
           };
-          freshrss = {
-            loadBalancer.servers = [{
-              url = "http://127.0.0.1:8082";
-            }];
-          };
         };
       };
     };
   };
 
-  # Create log directories for Traefik and FreshRSS
+  # Create log directories for Traefik
   systemd.tmpfiles.rules = [
     "d /var/log/traefik 0755 traefik traefik -"
     "d /var/lib/traefik 0700 traefik traefik -"
-    "d /var/lib/freshrss 0755 freshrss freshrss -"
   ];
 
   # Additional security services
