@@ -172,6 +172,15 @@ in {
     trustedNetworks = ["192.168.1.0/24" "10.0.0.0/8"];
   };
 
+  # Enable production monitoring dashboard
+  ai.productionDashboard = {
+    enable = true;
+    grafanaUrl = "http://dex5550.home.freundcloud.com:3001";
+    prometheusUrl = "http://dex5550.home.freundcloud.com:9090";
+    enableAlerts = true;
+    refreshInterval = "30s";
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {

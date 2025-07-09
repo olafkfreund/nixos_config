@@ -19,6 +19,7 @@
     ./security-audit.nix
     ./system-validation.nix
     ./performance-optimization.nix
+    ./production-dashboard.nix
   ];
 
   environment.systemPackages = [
