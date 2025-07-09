@@ -11,6 +11,7 @@
     ./memory-optimization.nix
     ./grafana-dashboards.nix
     ./prometheus-alerts.nix
+    ./automated-remediation.nix
   ];
 
   environment.systemPackages = [

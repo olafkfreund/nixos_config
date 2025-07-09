@@ -94,6 +94,25 @@ in {
     };
   };
 
+  # Enable automated remediation - CRITICAL for P510 disk space management
+  ai.automatedRemediation = {
+    enable = true;
+    enableSelfHealing = true;  # Enable for P510 due to critical disk usage
+    safeMode = false;          # Disable safe mode for P510 - aggressive cleanup needed
+    
+    notifications = {
+      enable = true;
+      logFile = "/var/log/ai-analysis/remediation-p510.log";
+    };
+    
+    actions = {
+      diskCleanup = true;           # Critical - P510 at 79.6%
+      memoryOptimization = true;    # Preventive
+      serviceRestart = true;        # Enable for P510
+      configurationReset = false;   # Keep disabled for safety
+    };
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {

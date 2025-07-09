@@ -173,6 +173,25 @@ in {
   # Enable AI analysis Prometheus alerts
   ai.prometheusAlerts.enable = true;
 
+  # Enable automated remediation for monitoring server
+  ai.automatedRemediation = {
+    enable = true;
+    enableSelfHealing = true;   # Enable for monitoring server stability
+    safeMode = true;           # Safe mode for critical monitoring infrastructure
+    
+    notifications = {
+      enable = true;
+      logFile = "/var/log/ai-analysis/remediation-dex5550.log";
+    };
+    
+    actions = {
+      diskCleanup = true;           # Keep monitoring server healthy
+      memoryOptimization = true;    # Important for Grafana/Prometheus
+      serviceRestart = true;        # Critical for monitoring services
+      configurationReset = false;   # Keep disabled for safety
+    };
+  };
+
 
   # BOOT PERFORMANCE: Prevent fstrim from blocking boot (saves 3+ minutes)
   services.fstrim-optimization = {

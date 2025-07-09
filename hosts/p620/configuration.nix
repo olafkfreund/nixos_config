@@ -107,6 +107,25 @@ in {
     };
   };
 
+  # Enable automated remediation in safe mode for P620
+  ai.automatedRemediation = {
+    enable = true;
+    enableSelfHealing = false;  # Conservative for P620
+    safeMode = true;           # Safe mode for P620
+    
+    notifications = {
+      enable = true;
+      logFile = "/var/log/ai-analysis/remediation-p620.log";
+    };
+    
+    actions = {
+      diskCleanup = true;           # Preventive
+      memoryOptimization = true;    # P620 at 22.8% memory
+      serviceRestart = false;       # Disabled in safe mode
+      configurationReset = false;   # Keep disabled for safety
+    };
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {
