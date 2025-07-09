@@ -231,9 +231,9 @@ in {
     reportPath = "/mnt/data/load-test-reports";
   };
 
-  # Enable advanced alerting and notification system
+  # AI alerting moved to DEX5550 monitoring server
   ai.alerting = {
-    enable = true;
+    enable = false;  # Alerts handled by DEX5550
     enableEmail = true;
     enableSlack = false;        # Disable Slack for now
     enableSms = false;          # Disable SMS for now

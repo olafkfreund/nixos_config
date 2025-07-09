@@ -285,7 +285,7 @@ in {
           <h2>AI Infrastructure Alert</h2>
           <p><strong>Level:</strong> $level</p>
           <p><strong>Time:</strong> $(date)</p>
-          <p><strong>Host:</strong> $(hostname)</p>
+          <p><strong>Host:</strong> $(/run/current-system/sw/bin/hostname)</p>
           <hr>
           <p>$body</p>
           <hr>
@@ -326,7 +326,7 @@ in {
                   \"title\": \"$level Alert\",
                   \"text\": \"$message\",
                   \"fields\": [
-                    {\"title\": \"Host\", \"value\": \"$(hostname)\", \"short\": true},
+                    {\"title\": \"Host\", \"value\": \"$(/run/current-system/sw/bin/hostname)\", \"short\": true},
                     {\"title\": \"Time\", \"value\": \"$(date)\", \"short\": true}
                   ]
                 }]
@@ -363,7 +363,7 @@ in {
                   \"color\": $color_int,
                   \"fields\": [
                     {\"name\": \"Level\", \"value\": \"$level\", \"inline\": true},
-                    {\"name\": \"Host\", \"value\": \"$(hostname)\", \"inline\": true},
+                    {\"name\": \"Host\", \"value\": \"$(/run/current-system/sw/bin/hostname)\", \"inline\": true},
                     {\"name\": \"Time\", \"value\": \"$(date)\", \"inline\": true}
                   ]
                 }]
@@ -459,11 +459,11 @@ in {
           
           # Function to monitor system metrics
           monitor_system() {
-            local hostname=$(hostname)
+            local hostname=$(/run/current-system/sw/bin/hostname)
             local timestamp=$(date -Iseconds)
             
             # Check disk usage
-            local disk_usage=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+            local disk_usage=$(df / | tail -1 | /run/current-system/sw/bin/awk '{print $5}' | sed 's/%//')
             if [ "$disk_usage" -gt ${toString cfg.alertThresholds.diskUsage} ]; then
               process_alert "disk_usage_$hostname" "critical" \
                 "Critical Disk Usage on $hostname" \
@@ -471,7 +471,7 @@ in {
             fi
             
             # Check memory usage
-            local memory_usage=$(free | grep Mem | awk '{printf "%.0f", $3/$2 * 100.0}')
+            local memory_usage=$(/run/current-system/sw/bin/free | grep Mem | /run/current-system/sw/bin/awk '{printf "%.0f", $3/$2 * 100.0}')
             if [ "$memory_usage" -gt ${toString cfg.alertThresholds.memoryUsage} ]; then
               process_alert "memory_usage_$hostname" "critical" \
                 "Critical Memory Usage on $hostname" \
@@ -479,7 +479,7 @@ in {
             fi
             
             # Check CPU usage
-            local cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/%us,//' | cut -d. -f1)
+            local cpu_usage=$(/run/current-system/sw/bin/top -bn1 | grep "Cpu(s)" | /run/current-system/sw/bin/awk '{print $2}' | sed 's/%us,//' | cut -d. -f1)
             if [ "$cpu_usage" -gt ${toString cfg.alertThresholds.cpuUsage} ]; then
               process_alert "cpu_usage_$hostname" "warning" \
                 "High CPU Usage on $hostname" \
@@ -488,6 +488,7 @@ in {
             
             # Check AI service status
             local ai_services_failed=$(systemctl list-units --type=service --state=failed | grep -c "ai-" || echo 0)
+            ai_services_failed=$(echo "$ai_services_failed" | tr -d '\n' | tr -d ' ')
             if [ "$ai_services_failed" -gt 0 ]; then
               process_alert "ai_services_failed_$hostname" "critical" \
                 "AI Services Failed on $hostname" \
@@ -496,6 +497,7 @@ in {
             
             # Check SSH failed attempts
             local ssh_failed=$(journalctl -u sshd --since "5 minutes ago" | grep -c "Failed password" || echo 0)
+            ssh_failed=$(echo "$ssh_failed" | tr -d '\n' | tr -d ' ')
             if [ "$ssh_failed" -gt ${toString cfg.alertThresholds.sshFailedAttempts} ]; then
               process_alert "ssh_failed_$hostname" "critical" \
                 "High SSH Failed Attempts on $hostname" \
@@ -505,7 +507,7 @@ in {
           
           # Function to monitor AI provider performance
           monitor_ai_performance() {
-            local hostname=$(hostname)
+            local hostname=$(/run/current-system/sw/bin/hostname)
             
             if command -v ai-cli &>/dev/null; then
               for provider in anthropic ollama; do
@@ -531,7 +533,7 @@ in {
           
           # Function to monitor load test results
           monitor_load_tests() {
-            local hostname=$(hostname)
+            local hostname=$(/run/current-system/sw/bin/hostname)
             local latest_report=$(ls -t /var/lib/ai-analysis/load-test-reports/load_test_''${hostname}_*.json 2>/dev/null | head -1)
             
             if [ -n "$latest_report" ] && [ -f "$latest_report" ]; then
@@ -907,9 +909,9 @@ in {
         
         # Check current system metrics
         echo "Current System Metrics:"
-        echo "  Disk Usage: $(df / | tail -1 | awk '{print $5}')"
-        echo "  Memory Usage: $(free | grep Mem | awk '{printf "%.1f%%", $3/$2 * 100.0}')"
-        echo "  CPU Usage: $(top -bn1 | grep "Cpu(s)" | awk '{print $2}')"
+        echo "  Disk Usage: $(df / | tail -1 | /run/current-system/sw/bin/awk '{print $5}')"
+        echo "  Memory Usage: $(/run/current-system/sw/bin/free | grep Mem | /run/current-system/sw/bin/awk '{printf "%.1f%%", $3/$2 * 100.0}')"
+        echo "  CPU Usage: $(/run/current-system/sw/bin/top -bn1 | grep "Cpu(s)" | /run/current-system/sw/bin/awk '{print $2}')"
       '')
       
       (writeShellScriptBin "ai-alert-test" ''

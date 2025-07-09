@@ -170,17 +170,14 @@ check-syntax:
 
 # Deploy to razer laptop (Intel/NVIDIA)
 razer:
-    just pre-deploy razer
     nixos-rebuild switch --flake .#razer --target-host razer --build-host razer --use-remote-sudo --impure --accept-flake-config
 
 # Deploy to p620 workstation (AMD)
 p620:
-    just pre-deploy p620
     nixos-rebuild switch --flake .#p620 --target-host p620 --build-host p620 --use-remote-sudo --impure --accept-flake-config
 
 # Deploy to p510 workstation (Intel Xeon/NVIDIA)
 p510:
-    just pre-deploy p510
     nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --use-remote-sudo --impure --accept-flake-config
 
 # Deploy to dex5550 SFF system (Intel integrated)
@@ -189,7 +186,6 @@ dex5550:
 
 # Deploy to samsung system (Intel integrated)
 samsung:
-    just pre-deploy samsung
     nixos-rebuild switch --flake .#samsung --target-host 192.168.1.92 --build-host 192.168.1.92 --use-remote-sudo --impure --accept-flake-config
 
 # =============================================================================
