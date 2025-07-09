@@ -1,4 +1,7 @@
 {...}: {
+  imports = [
+    ./ssh-hardening.nix
+  ];
   security.sudo.wheelNeedsPassword = false;
   # Fix for "no new privileges" flag error
   security.sudo.execWheelOnly = true;
