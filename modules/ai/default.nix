@@ -20,6 +20,8 @@
     ./system-validation.nix
     ./performance-optimization.nix
     ./production-dashboard.nix
+    ./load-testing.nix
+    ./alerting-system.nix
   ];
 
   environment.systemPackages = [

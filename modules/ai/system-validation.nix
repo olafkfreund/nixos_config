@@ -65,9 +65,9 @@ in {
           exec 1> >(tee -a "$LOG_FILE")
           exec 2>&1
           
-          echo -e "$(date) ${BLUE}[INFO]${NC} Starting AI system validation for $HOSTNAME"
-          echo -e "$(date) ${BLUE}[INFO]${NC} Validation level: $VALIDATION_LEVEL"
-          echo -e "$(date) ${BLUE}[INFO]${NC} Load testing: $LOAD_TESTING"
+          echo -e "$(date) ''${BLUE}[INFO]''${NC} Starting AI system validation for $HOSTNAME"
+          echo -e "$(date) ''${BLUE}[INFO]''${NC} Validation level: $VALIDATION_LEVEL"
+          echo -e "$(date) ''${BLUE}[INFO]''${NC} Load testing: $LOAD_TESTING"
           
           # Initialize test results
           TOTAL_TESTS=0
@@ -86,8 +86,8 @@ in {
             
             ((TOTAL_TESTS++))
             
-            echo -e "$(date) ${BLUE}[TEST]${NC} Running: $test_name"
-            echo -e "$(date) ${BLUE}[INFO]${NC} $test_description"
+            echo -e "$(date) ''${BLUE}[TEST]''${NC} Running: $test_name"
+            echo -e "$(date) ''${BLUE}[INFO]''${NC} $test_description"
             
             local test_output
             local test_exit_code
@@ -103,30 +103,30 @@ in {
             if [ "$expected_result" = "success" ]; then
               if [ $test_exit_code -eq 0 ]; then
                 test_status="passed"
-                test_result_color="$GREEN"
+                test_result_color="''$GREEN"
                 ((PASSED_TESTS++))
               else
                 test_status="failed"
-                test_result_color="$RED"
+                test_result_color="''$RED"
                 ((FAILED_TESTS++))
               fi
             elif [ "$expected_result" = "failure" ]; then
               if [ $test_exit_code -ne 0 ]; then
                 test_status="passed"
-                test_result_color="$GREEN"
+                test_result_color="''$GREEN"
                 ((PASSED_TESTS++))
               else
                 test_status="failed"
-                test_result_color="$RED"
+                test_result_color="''$RED"
                 ((FAILED_TESTS++))
               fi
             elif [ "$expected_result" = "warning" ]; then
               test_status="warning"
-              test_result_color="$YELLOW"
+              test_result_color="''$YELLOW"
               ((WARNING_TESTS++))
             fi
             
-            echo -e "$(date) ${test_result_color}[$(echo "$test_status" | tr '[:lower:]' '[:upper:]')]${NC} $test_name"
+            echo -e "$(date) ''${test_result_color}[$(echo "$test_status" | tr '[:lower:]' '[:upper:]')]''${NC} $test_name"
             
             # Add to results
             local test_result='{
@@ -147,7 +147,7 @@ in {
           }
           
           # === BASIC VALIDATION TESTS ===
-          echo -e "$(date) ${BLUE}[INFO]${NC} === BASIC VALIDATION TESTS ==="
+          echo -e "$(date) ''${BLUE}[INFO]''${NC} === BASIC VALIDATION TESTS ==="
           
           # Test 1: AI Analysis Service Health
           run_test "ai_analysis_service" \
@@ -221,7 +221,7 @@ in {
           
           # === COMPREHENSIVE VALIDATION TESTS ===
           if [ "$VALIDATION_LEVEL" = "comprehensive" ] || [ "$VALIDATION_LEVEL" = "stress" ]; then
-            echo -e "$(date) ${BLUE}[INFO]${NC} === COMPREHENSIVE VALIDATION TESTS ==="
+            echo -e "$(date) ''${BLUE}[INFO]''${NC} === COMPREHENSIVE VALIDATION TESTS ==="
             
             # Test 11: AI Analysis Execution
             run_test "ai_analysis_execution" \
@@ -298,7 +298,7 @@ in {
           
           # === STRESS TESTING ===
           if [ "$VALIDATION_LEVEL" = "stress" ] && [ "$LOAD_TESTING" = "true" ]; then
-            echo -e "$(date) ${BLUE}[INFO]${NC} === STRESS TESTING ==="
+            echo -e "$(date) ''${BLUE}[INFO]''${NC} === STRESS TESTING ==="
             
             # Test 21: Concurrent AI Analysis
             run_test "concurrent_ai_analysis" \
@@ -323,7 +323,7 @@ in {
           fi
           
           # === VALIDATION SUMMARY ===
-          echo -e "$(date) ${BLUE}[INFO]${NC} === VALIDATION SUMMARY ==="
+          echo -e "$(date) ''${BLUE}[INFO]''${NC} === VALIDATION SUMMARY ==="
           
           # Calculate success rate
           SUCCESS_RATE=0
@@ -337,27 +337,27 @@ in {
           
           if [ "$SUCCESS_RATE" -ge 95 ]; then
             OVERALL_STATUS="excellent"
-            STATUS_COLOR="$GREEN"
+            STATUS_COLOR="''$GREEN"
           elif [ "$SUCCESS_RATE" -ge 85 ]; then
             OVERALL_STATUS="good"
-            STATUS_COLOR="$GREEN"
+            STATUS_COLOR="''$GREEN"
           elif [ "$SUCCESS_RATE" -ge 70 ]; then
             OVERALL_STATUS="acceptable"
-            STATUS_COLOR="$YELLOW"
+            STATUS_COLOR="''$YELLOW"
           elif [ "$SUCCESS_RATE" -ge 50 ]; then
             OVERALL_STATUS="concerning"
-            STATUS_COLOR="$YELLOW"
+            STATUS_COLOR="''$YELLOW"
           else
             OVERALL_STATUS="critical"
-            STATUS_COLOR="$RED"
+            STATUS_COLOR="''$RED"
           fi
           
-          echo -e "$(date) ${STATUS_COLOR}[SUMMARY]${NC} Overall Status: $OVERALL_STATUS"
-          echo -e "$(date) ${BLUE}[INFO]${NC} Total Tests: $TOTAL_TESTS"
-          echo -e "$(date) ${GREEN}[INFO]${NC} Passed: $PASSED_TESTS"
-          echo -e "$(date) ${RED}[INFO]${NC} Failed: $FAILED_TESTS"
-          echo -e "$(date) ${YELLOW}[INFO]${NC} Warnings: $WARNING_TESTS"
-          echo -e "$(date) ${BLUE}[INFO]${NC} Success Rate: $SUCCESS_RATE%"
+          echo -e "$(date) ''${STATUS_COLOR}[SUMMARY]''${NC} Overall Status: $OVERALL_STATUS"
+          echo -e "$(date) ''${BLUE}[INFO]''${NC} Total Tests: $TOTAL_TESTS"
+          echo -e "$(date) ''${GREEN}[INFO]''${NC} Passed: $PASSED_TESTS"
+          echo -e "$(date) ''${RED}[INFO]''${NC} Failed: $FAILED_TESTS"
+          echo -e "$(date) ''${YELLOW}[INFO]''${NC} Warnings: $WARNING_TESTS"
+          echo -e "$(date) ''${BLUE}[INFO]''${NC} Success Rate: $SUCCESS_RATE%"
           
           # Generate comprehensive report
           cat > "$REPORT_FILE" << EOF
@@ -397,7 +397,7 @@ in {
           }
           EOF
           
-          echo -e "$(date) ${BLUE}[INFO]${NC} Validation report saved to: $REPORT_FILE"
+          echo -e "$(date) ''${BLUE}[INFO]''${NC} Validation report saved to: $REPORT_FILE"
           
           # Alert on critical failures
           if [ "$FAILED_TESTS" -gt 3 ] || [ "$SUCCESS_RATE" -lt 50 ]; then
@@ -406,13 +406,13 @@ in {
           
           # Exit with appropriate code
           if [ "$FAILED_TESTS" -eq 0 ]; then
-            echo -e "$(date) ${GREEN}[SUCCESS]${NC} All tests passed successfully!"
+            echo -e "$(date) ''${GREEN}[SUCCESS]''${NC} All tests passed successfully!"
             exit 0
           elif [ "$SUCCESS_RATE" -ge 85 ]; then
-            echo -e "$(date) ${YELLOW}[WARNING]${NC} Some tests failed but system is operational"
+            echo -e "$(date) ''${YELLOW}[WARNING]''${NC} Some tests failed but system is operational"
             exit 1
           else
-            echo -e "$(date) ${RED}[FAILURE]${NC} Critical test failures detected"
+            echo -e "$(date) ''${RED}[FAILURE]''${NC} Critical test failures detected"
             exit 2
           fi
         '';

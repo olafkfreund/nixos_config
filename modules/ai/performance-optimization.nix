@@ -145,7 +145,7 @@ in {
               if timeout 30 ai-cli -p "$provider" "test response time" &>/dev/null; then
                 end_time=$(date +%s%3N)
                 response_time=$((end_time - start_time))
-                echo "[$(date)] $provider response time: ${response_time}ms"
+                echo "[$(date)] $provider response time: ''${response_time}ms"
                 
                 # Log performance metrics
                 echo "$(date -Iseconds),$provider,$response_time,success" >> /var/lib/ai-analysis/provider-performance.csv
@@ -426,10 +426,10 @@ in {
     # Performance optimization kernel parameters
     boot.kernel.sysctl = mkIf cfg.systemOptimization {
       # Memory management optimization
-      "vm.swappiness" = 10;
-      "vm.dirty_background_ratio" = 15;
-      "vm.dirty_ratio" = 30;
-      "vm.vfs_cache_pressure" = 50;
+      "vm.swappiness" = mkDefault 10;
+      "vm.dirty_background_ratio" = mkDefault 15;
+      "vm.dirty_ratio" = mkDefault 30;
+      "vm.vfs_cache_pressure" = mkDefault 50;
       
       # Network optimization
       "net.ipv4.tcp_window_scaling" = 1;

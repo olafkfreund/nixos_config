@@ -181,6 +181,139 @@ in {
     refreshInterval = "30s";
   };
 
+  # Enable load testing for AI services
+  ai.loadTesting = {
+    enable = true;
+    testDuration = "3m";
+    maxConcurrentUsers = 8;
+    testInterval = "weekly";
+    enableContinuousLoad = false;  # Disable continuous load testing for development system
+    
+    providers = ["anthropic" "ollama"];  # Test available providers
+    
+    testEndpoints = [
+      "http://localhost:9090/-/healthy"    # Prometheus
+      "http://localhost:3001/api/health"   # Grafana  
+      "http://localhost:11434/api/tags"    # Ollama
+    ];
+    
+    loadTestProfiles = {
+      light = {
+        users = 3;
+        duration = "1m";
+        rampUp = "20s";
+      };
+      moderate = {
+        users = 8;
+        duration = "3m";
+        rampUp = "40s";
+      };
+      heavy = {
+        users = 15;
+        duration = "5m";
+        rampUp = "1m";
+      };
+      stress = {
+        users = 25;
+        duration = "8m";
+        rampUp = "2m";
+      };
+    };
+    
+    alertThresholds = {
+      responseTime = 8000;      # 8 seconds for P620
+      errorRate = 10;           # 10% error rate acceptable for development
+      throughput = 5;           # 5 requests per second minimum
+      cpuUsage = 75;            # 75% CPU usage threshold
+      memoryUsage = 80;         # 80% memory usage threshold
+    };
+    
+    reportPath = "/mnt/data/load-test-reports";
+  };
+
+  # Enable advanced alerting and notification system
+  ai.alerting = {
+    enable = true;
+    enableEmail = true;
+    enableSlack = false;        # Disable Slack for now
+    enableSms = false;          # Disable SMS for now
+    enableDiscord = false;      # Disable Discord for now
+    
+    # Email configuration
+    smtpServer = "smtp.gmail.com";
+    smtpPort = 587;
+    fromEmail = "ai-alerts@freundcloud.com";
+    alertRecipients = ["admin@freundcloud.com"];
+    
+    # Alert thresholds (tuned for P620)
+    alertThresholds = {
+      diskUsage = 80;           # 80% disk usage for P620
+      memoryUsage = 85;         # 85% memory usage
+      cpuUsage = 80;            # 80% CPU usage
+      aiResponseTime = 8000;    # 8 seconds for P620
+      sshFailedAttempts = 15;   # 15 failed SSH attempts
+      serviceDowntime = 300;    # 5 minutes service downtime
+      loadTestFailures = 50;    # 50% load test failure rate
+    };
+    
+    # Alert level preferences
+    alertLevels = {
+      critical = {
+        email = true;
+        slack = false;
+        sms = false;
+        discord = false;
+      };
+      warning = {
+        email = true;
+        slack = false;
+        sms = false;
+        discord = false;
+      };
+      info = {
+        email = false;
+        slack = false;
+        sms = false;
+        discord = false;
+      };
+    };
+    
+    # Escalation rules
+    escalationRules = {
+      level1 = {
+        timeMinutes = 5;
+        recipients = ["admin@freundcloud.com"];
+        channels = ["email"];
+      };
+      level2 = {
+        timeMinutes = 15;
+        recipients = ["admin@freundcloud.com"];
+        channels = ["email"];
+      };
+      level3 = {
+        timeMinutes = 30;
+        recipients = ["admin@freundcloud.com"];
+        channels = ["email"];
+      };
+    };
+    
+    # Maintenance mode (disabled by default)
+    maintenanceMode = false;
+    
+    # Alert suppression rules
+    alertSuppressionRules = [
+      "health check"
+      "connection established"
+      "connection closed"
+      "router dispatching"
+      "body-parser"
+    ];
+    
+    # Notification settings
+    notificationRetries = 3;
+    notificationTimeout = 30;
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {

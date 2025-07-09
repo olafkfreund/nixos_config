@@ -265,18 +265,18 @@ in {
     # Kernel memory management tuning
     boot.kernel.sysctl = {
       # Reduce swappiness to prefer RAM over swap
-      "vm.swappiness" = 10;
+      "vm.swappiness" = mkDefault 10;
       
       # Increase cache pressure to free memory faster
-      "vm.vfs_cache_pressure" = 50;
+      "vm.vfs_cache_pressure" = mkDefault 50;
       
       # More aggressive memory overcommit
-      "vm.overcommit_memory" = 1;
-      "vm.overcommit_ratio" = 50;
+      "vm.overcommit_memory" = mkDefault 1;
+      "vm.overcommit_ratio" = mkDefault 50;
       
       # Dirty page management
-      "vm.dirty_background_ratio" = 5;
-      "vm.dirty_ratio" = 10;
+      "vm.dirty_background_ratio" = mkDefault 5;
+      "vm.dirty_ratio" = mkDefault 10;
     };
 
     # Create directories for logging
