@@ -15,7 +15,7 @@ in {
     ./loki.nix
     ./promtail.nix
     ./gpu-exporter.nix
-    # ./amd-gpu-exporter.nix  # Temporarily disabled until package build issues resolved
+    ./amd-gpu-exporter.nix
   ];
 
   options.monitoring = {
