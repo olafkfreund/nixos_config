@@ -192,6 +192,15 @@ in {
     };
   };
 
+  # Enable advanced security auditing for monitoring server
+  ai.securityAudit = {
+    enable = true;
+    auditLevel = "advanced";      # Advanced security audit for public-facing server
+    autoHardening = false;        # Manual review required for monitoring server
+    scheduleInterval = "daily";   # Daily security audits for public server
+    reportPath = "/var/lib/ai-analysis/security-reports";
+  };
+
 
   # BOOT PERFORMANCE: Prevent fstrim from blocking boot (saves 3+ minutes)
   services.fstrim-optimization = {

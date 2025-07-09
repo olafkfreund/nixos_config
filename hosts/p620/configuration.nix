@@ -134,6 +134,15 @@ in {
     reportPath = "/var/lib/ai-analysis/p620-storage-reports";
   };
 
+  # Enable security auditing for P620
+  ai.securityAudit = {
+    enable = true;
+    auditLevel = "comprehensive";  # Full security audit for P620
+    autoHardening = false;         # Manual review required
+    scheduleInterval = "weekly";   # Weekly security audits
+    reportPath = "/mnt/data/security-reports";
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {

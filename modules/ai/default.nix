@@ -16,6 +16,7 @@
     ./backup-strategy.nix
     ./storage-expansion.nix
     ./storage-migration.nix
+    ./security-audit.nix
   ];
 
   environment.systemPackages = [

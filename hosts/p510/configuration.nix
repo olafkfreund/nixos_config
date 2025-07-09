@@ -149,6 +149,15 @@ in {
     migrationMode = "preparation";   # Start with preparation mode for safety
   };
 
+  # Enable comprehensive security auditing for P510
+  ai.securityAudit = {
+    enable = true;
+    auditLevel = "comprehensive";  # Full security audit for P510
+    autoHardening = false;         # Manual review required for P510
+    scheduleInterval = "daily";    # Daily security audits
+    reportPath = "/mnt/img_pool/security-reports";
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {
