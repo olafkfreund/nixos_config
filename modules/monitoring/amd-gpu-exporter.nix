@@ -53,15 +53,15 @@ class AMDGPUMetrics:
             
         for line in output.split('\n'):
             if 'Temperature (Sensor edge)' in line:
-                match = re.search(r'(\d+\.?\d*)', line)
+                match = re.search(r':\s*(\d+\.?\d*)', line)
                 if match:
                     temps['edge'] = float(match.group(1))
             elif 'Temperature (Sensor junction)' in line:
-                match = re.search(r'(\d+\.?\d*)', line)
+                match = re.search(r':\s*(\d+\.?\d*)', line)
                 if match:
                     temps['junction'] = float(match.group(1))
             elif 'Temperature (Sensor memory)' in line:
-                match = re.search(r'(\d+\.?\d*)', line)
+                match = re.search(r':\s*(\d+\.?\d*)', line)
                 if match:
                     temps['memory'] = float(match.group(1))
         return temps
@@ -74,7 +74,7 @@ class AMDGPUMetrics:
             
         for line in output.split('\n'):
             if 'Average Graphics Package Power' in line:
-                match = re.search(r'(\d+\.?\d*)', line)
+                match = re.search(r':\s*(\d+\.?\d*)', line)
                 if match:
                     power['graphics_package'] = float(match.group(1))
         return power
@@ -87,7 +87,7 @@ class AMDGPUMetrics:
             
         for line in output.split('\n'):
             if 'GPU use (%)' in line:
-                match = re.search(r'(\d+)', line)
+                match = re.search(r':\s*(\d+)', line)
                 if match:
                     util['gpu'] = float(match.group(1))
         return util
@@ -100,11 +100,11 @@ class AMDGPUMetrics:
             
         for line in output.split('\n'):
             if 'GPU Memory Allocated (VRAM%)' in line:
-                match = re.search(r'(\d+)', line)
+                match = re.search(r':\s*(\d+)', line)
                 if match:
                     memory['vram_used_percent'] = float(match.group(1))
             elif 'GPU Memory Read/Write Activity (%)' in line:
-                match = re.search(r'(\d+)', line)
+                match = re.search(r':\s*(\d+)', line)
                 if match:
                     memory['activity_percent'] = float(match.group(1))
         return memory
