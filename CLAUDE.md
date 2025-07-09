@@ -129,6 +129,7 @@ Each user has configurations in `Users/username/` with host-specific home files 
 4. **Format code** with `just format` before committing
 5. **Validate** with `just validate` for comprehensive checks
 6. **Secrets** must be created through the management script, never hardcoded
+7. **MODULAR ARCHITECTURE**: All new services MUST be created in their own configuration files within `modules/` directory, NOT added directly to host `configuration.nix` files
 
 ## Hardware-Specific Considerations
 
@@ -147,11 +148,47 @@ Each user has configurations in `Users/username/` with host-specific home files 
 
 ## Common Development Tasks
 
-### Adding a new module
-1. Create module file in appropriate `modules/` subdirectory
-2. Follow existing module patterns with enable options
-3. Add to module imports in `modules/default.nix`
-4. Test with `just test-modules`
+### Adding a new service/module (REQUIRED PATTERN)
+1. **Create dedicated module file** in appropriate `modules/` subdirectory (e.g., `modules/services/myservice.nix`)
+2. **Follow existing module patterns** with enable options and feature flags:
+   ```nix
+   { config, lib, pkgs, ... }:
+   with lib; let
+     cfg = config.services.myservice;
+   in {
+     options.services.myservice = {
+       enable = mkEnableOption "MyService";
+       # ... other options
+     };
+     config = mkIf cfg.enable {
+       # Service configuration here
+     };
+   }
+   ```
+3. **Add to module imports** in `modules/default.nix` or appropriate category file
+4. **Enable via feature flags** in host configuration, NOT by adding service config directly
+5. **Test with** `just test-modules` and `just test-host HOST`
+
+### NEVER add services directly to configuration.nix
+- ❌ **Wrong**: Adding `services.myservice = { ... }` directly in `hosts/*/configuration.nix`
+- ✅ **Correct**: Create `modules/services/myservice.nix` and enable via feature flags
+- This maintains modularity, reusability, and clean architecture
+
+**Example - Adding a new service:**
+```bash
+# 1. Create module file
+echo '{ config, lib, pkgs, ... }: ...' > modules/services/myservice.nix
+
+# 2. Add to modules/default.nix imports
+# 3. Enable in host via features.myservice.enable = true;
+# 4. NOT: services.myservice = { ... } in configuration.nix
+```
+
+**Benefits of modular architecture:**
+- 🔄 **Reusable** across multiple hosts
+- 🧪 **Testable** in isolation
+- 🧹 **Clean** host configurations
+- 🔧 **Maintainable** and organized codebase
 
 ### Adding a new user
 1. Add username to host's `variables.nix` hostUsers
