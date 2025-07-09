@@ -101,20 +101,21 @@ in {
     media = {
       droidcam = false;    # No media capture on server
     };
+  };
 
-    # Monitoring configuration - DEX5550 as monitoring server
-    monitoring = {
-      enable = true;
-      mode = "server";  # Now the monitoring server for network
-      serverHost = "dex5550";
-      
-      features = {
-        prometheus = true;    # Prometheus server
-        grafana = true;       # Grafana dashboards
-        nodeExporter = true;  # Local node exporter
-        nixosMetrics = true;  # NixOS-specific metrics
-        alerting = true;      # Alertmanager
-      };
+  # Monitoring configuration - DEX5550 as monitoring server
+  monitoring = {
+    enable = true;
+    mode = "server";  # Now the monitoring server for network
+    serverHost = "dex5550";
+    
+    features = {
+      prometheus = true;    # Prometheus server
+      grafana = true;       # Grafana dashboards
+      nodeExporter = true;  # Local node exporter
+      nixosMetrics = true;  # NixOS-specific metrics
+      alerting = true;      # Alertmanager
+      logging = true;       # Loki log aggregation server
     };
   };
 

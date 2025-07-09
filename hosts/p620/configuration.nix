@@ -137,18 +137,21 @@ in {
     media = {
       droidcam = true;
     };
+  };
 
-    # Monitoring configuration - P620 as client, dex5550 is now server
-    monitoring = {
-      enable = true;
-      mode = "client";  # Send data to dex5550 monitoring server
-      serverHost = "dex5550";
-      
-      features = {
-        nodeExporter = true;
-        nixosMetrics = true;
-        alerting = false;  # Only server handles alerting
-      };
+  # Monitoring configuration - P620 as client, dex5550 is now server
+  monitoring = {
+    enable = true;
+    mode = "client";  # Send data to dex5550 monitoring server
+    serverHost = "dex5550";
+    
+    features = {
+      nodeExporter = true;
+      nixosMetrics = true;
+      alerting = false;  # Only server handles alerting
+      logging = true;   # Enable Promtail for log collection
+      prometheus = false;  # Only server runs Prometheus
+      grafana = false;     # Only server runs Grafana
     };
   };
 

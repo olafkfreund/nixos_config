@@ -75,7 +75,6 @@ with lib; let
     
     compactor = {
       working_directory = "/var/lib/loki/retention";
-      shared_store = "filesystem";
       compaction_interval = "10m";
       retention_enabled = true;
       retention_delete_delay = "2h";
@@ -96,7 +95,6 @@ with lib; let
       max_chunk_age = "1h";
       chunk_target_size = 1048576;
       chunk_retain_period = "30s";
-      max_transfer_retries = 0;
     };
     
     storage_config = {
@@ -104,7 +102,6 @@ with lib; let
         active_index_directory = "/var/lib/loki/boltdb-shipper-active";
         cache_location = "/var/lib/loki/boltdb-shipper-cache";
         cache_ttl = "24h";
-        shared_store = "filesystem";
       };
       
       filesystem = {
@@ -112,9 +109,6 @@ with lib; let
       };
     };
     
-    chunk_store_config = {
-      max_look_back_period = "0s";
-    };
     
     table_manager = {
       retention_deletes_enabled = true;
@@ -122,7 +116,7 @@ with lib; let
     };
   };
   
-  # Loki configuration file
+  # Minimal Loki configuration that works with current version
   lokiConfigFile = pkgs.writeText "loki.yaml" ''
     auth_enabled: false
     
@@ -153,16 +147,13 @@ with lib; let
     schema_config:
       configs:
         - from: 2020-10-24
-          store: boltdb-shipper
+          store: tsdb
           object_store: filesystem
-          schema: v11
+          schema: v13
           index:
             prefix: index_
             period: 24h
             
-    ruler:
-      alertmanager_url: http://localhost:${toString cfg.network.alertmanagerPort}
-      
     limits_config:
       retention_period: ${cfg.logRetention}
       ingestion_rate_mb: 4
@@ -170,15 +161,6 @@ with lib; let
       max_streams_per_user: 10000
       max_line_size: 256000
       max_entries_limit_per_query: 5000
-      max_query_parallelism: 32
-      
-    compactor:
-      working_directory: /var/lib/loki/retention
-      shared_store: filesystem
-      compaction_interval: 10m
-      retention_enabled: true
-      retention_delete_delay: 2h
-      retention_delete_worker_count: 150
       
     ingester:
       lifecycler:
@@ -191,23 +173,14 @@ with lib; let
       max_chunk_age: 1h
       chunk_target_size: 1048576
       chunk_retain_period: 30s
-      max_transfer_retries: 0
       
     storage_config:
-      boltdb_shipper:
-        active_index_directory: /var/lib/loki/boltdb-shipper-active
-        cache_location: /var/lib/loki/boltdb-shipper-cache
+      tsdb_shipper:
+        active_index_directory: /var/lib/loki/tsdb-shipper-active
+        cache_location: /var/lib/loki/tsdb-shipper-cache
         cache_ttl: 24h
-        shared_store: filesystem
       filesystem:
         directory: /var/lib/loki/chunks
-        
-    chunk_store_config:
-      max_look_back_period: 0s
-      
-    table_manager:
-      retention_deletes_enabled: true
-      retention_period: ${cfg.logRetention}
   '';
   
 in {
@@ -239,7 +212,7 @@ in {
       
       preStart = ''
         # Create necessary directories
-        mkdir -p /var/lib/loki/{chunks,rules,boltdb-shipper-active,boltdb-shipper-cache,retention}
+        mkdir -p /var/lib/loki/{chunks,rules,tsdb-shipper-active,tsdb-shipper-cache,retention}
         chown -R loki:loki /var/lib/loki
         chmod -R 755 /var/lib/loki
         
@@ -265,8 +238,8 @@ in {
       "d /var/lib/loki 0755 loki loki -"
       "d /var/lib/loki/chunks 0755 loki loki -"
       "d /var/lib/loki/rules 0755 loki loki -"
-      "d /var/lib/loki/boltdb-shipper-active 0755 loki loki -"
-      "d /var/lib/loki/boltdb-shipper-cache 0755 loki loki -"
+      "d /var/lib/loki/tsdb-shipper-active 0755 loki loki -"
+      "d /var/lib/loki/tsdb-shipper-cache 0755 loki loki -"
       "d /var/lib/loki/retention 0755 loki loki -"
       "d /var/log/loki 0755 loki loki -"
     ];
