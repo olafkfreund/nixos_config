@@ -17,6 +17,7 @@
     ./storage-expansion.nix
     ./storage-migration.nix
     ./security-audit.nix
+    ./system-validation.nix
   ];
 
   environment.systemPackages = [

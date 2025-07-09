@@ -143,6 +143,14 @@ in {
     reportPath = "/mnt/data/security-reports";
   };
 
+  # Enable comprehensive system validation for P620
+  ai.systemValidation = {
+    enable = true;
+    validationLevel = "comprehensive";  # Full validation testing
+    enableLoadTesting = false;          # Disable load testing for development system
+    testReportPath = "/mnt/data/validation-reports";
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {
