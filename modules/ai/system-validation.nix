@@ -82,7 +82,7 @@ in {
             local test_description="$2"
             local test_command="$3"
             local expected_result="$4"
-            local severity="${5:-medium}"
+            local severity="''${5:-medium}"
             
             ((TOTAL_TESTS++))
             

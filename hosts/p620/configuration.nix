@@ -151,6 +151,15 @@ in {
     testReportPath = "/mnt/data/validation-reports";
   };
 
+  # Enable AI performance optimization
+  ai.performanceOptimization = {
+    enable = true;
+    aiProviderOptimization = true;
+    cacheOptimization = true;
+    networkOptimization = true;
+    systemOptimization = true;
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {

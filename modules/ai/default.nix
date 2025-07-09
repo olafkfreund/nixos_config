@@ -18,6 +18,7 @@
     ./storage-migration.nix
     ./security-audit.nix
     ./system-validation.nix
+    ./performance-optimization.nix
   ];
 
   environment.systemPackages = [

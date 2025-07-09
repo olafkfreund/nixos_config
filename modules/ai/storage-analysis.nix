@@ -168,7 +168,7 @@ in {
                   "total_bytes": $size,
                   "used_bytes": $used,
                   "available_bytes": $avail,
-                  "usage_percent": "${pcent%\%}",
+                  "usage_percent": "''${pcent%\\%}",
                   "mount_point": "$target",
                   "total_human": "$(human_readable $size)",
                   "used_human": "$(human_readable $used)",

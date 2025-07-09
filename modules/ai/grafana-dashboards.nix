@@ -524,7 +524,7 @@ in {
       refresh = "5s";
       schemaVersion = 37;
       style = "dark";
-      tags = ["ai", "analysis", "monitoring"];
+      tags = ["ai" "analysis" "monitoring"];
       templating = {
         list = [];
       };
