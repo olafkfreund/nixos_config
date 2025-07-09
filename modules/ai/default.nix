@@ -9,6 +9,8 @@
     ./providers/default.nix
     ./analysis/default.nix
     ./memory-optimization.nix
+    ./grafana-dashboards.nix
+    ./prometheus-alerts.nix
   ];
 
   environment.systemPackages = [

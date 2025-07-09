@@ -167,6 +167,12 @@ in {
     enableUserEnvironment = true;
   };
 
+  # Enable AI analysis Grafana dashboards
+  ai.grafanaDashboards.enable = true;
+
+  # Enable AI analysis Prometheus alerts
+  ai.prometheusAlerts.enable = true;
+
 
   # BOOT PERFORMANCE: Prevent fstrim from blocking boot (saves 3+ minutes)
   services.fstrim-optimization = {
