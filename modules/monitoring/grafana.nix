@@ -635,7 +635,7 @@ with lib; let
         title = "GPU Utilization";
         type = "stat";
         targets = [{
-          expr = "nvidia_smi_utilization_gpu_ratio{instance=\"${hostname}:${toString cfg.network.gpuExporterPort}\"}";
+          expr = "nvidia_smi_utilization_gpu_ratio{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
           legendFormat = "GPU %";
           refId = "A";
         }];
@@ -660,7 +660,7 @@ with lib; let
         title = "GPU Memory Usage";
         type = "stat";
         targets = [{
-          expr = "nvidia_smi_memory_used_bytes{instance=\"${hostname}:${toString cfg.network.gpuExporterPort}\"} / nvidia_smi_memory_total_bytes{instance=\"${hostname}:${toString cfg.network.gpuExporterPort}\"} * 100";
+          expr = "nvidia_smi_memory_used_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"} / nvidia_smi_memory_total_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"} * 100";
           legendFormat = "Memory %";
           refId = "B";
         }];
@@ -685,7 +685,7 @@ with lib; let
         title = "GPU Temperature";
         type = "stat";
         targets = [{
-          expr = "nvidia_smi_temperature_gpu{instance=\"${hostname}:${toString cfg.network.gpuExporterPort}\"}";
+          expr = "nvidia_smi_temperature_gpu{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
           legendFormat = "Temperature °C";
           refId = "C";
         }];
@@ -708,7 +708,7 @@ with lib; let
         title = "GPU Utilization Over Time";
         type = "timeseries";
         targets = [{
-          expr = "nvidia_smi_utilization_gpu_ratio{instance=\"${hostname}:${toString cfg.network.gpuExporterPort}\"}";
+          expr = "nvidia_smi_utilization_gpu_ratio{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
           legendFormat = "GPU Utilization %";
           refId = "D";
         }];
@@ -727,12 +727,12 @@ with lib; let
         type = "timeseries";
         targets = [
           {
-            expr = "nvidia_smi_memory_used_bytes{instance=\"${hostname}:${toString cfg.network.gpuExporterPort}\"}";
+            expr = "nvidia_smi_memory_used_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
             legendFormat = "Memory Used";
             refId = "E";
           }
           {
-            expr = "nvidia_smi_memory_total_bytes{instance=\"${hostname}:${toString cfg.network.gpuExporterPort}\"}";
+            expr = "nvidia_smi_memory_total_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
             legendFormat = "Memory Total";
             refId = "F";
           }
@@ -749,7 +749,7 @@ with lib; let
         title = "GPU Power Usage";
         type = "timeseries";
         targets = [{
-          expr = "nvidia_smi_power_draw_watts{instance=\"${hostname}:${toString cfg.network.gpuExporterPort}\"}";
+          expr = "nvidia_smi_power_draw_watts{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
           legendFormat = "Power Draw W";
           refId = "G";
         }];
@@ -765,7 +765,7 @@ with lib; let
         title = "GPU Fan Speed";
         type = "timeseries";
         targets = [{
-          expr = "node_hwmon_fan_rpm{instance=\"${hostname}:9100\"}";
+          expr = "node_hwmon_fan_rpm{instance=\"${hostname}.home.freundcloud.com:9100\"}";
           legendFormat = "Fan Speed RPM";
           refId = "H";
         }];
@@ -796,7 +796,7 @@ with lib; let
         title = "GPU Utilization";
         type = "stat";
         targets = [{
-          expr = "amd_gpu_utilization_percent{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+          expr = "amd_gpu_utilization_percent{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
           legendFormat = "GPU %";
           refId = "A";
         }];
@@ -821,7 +821,7 @@ with lib; let
         title = "GPU Memory Usage";
         type = "stat";
         targets = [{
-          expr = "amd_gpu_memory_used_percent{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+          expr = "amd_gpu_memory_used_percent{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
           legendFormat = "Memory %";
           refId = "B";
         }];
@@ -846,7 +846,7 @@ with lib; let
         title = "GPU Temperature";
         type = "stat";
         targets = [{
-          expr = "amd_gpu_temperature_celsius{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+          expr = "amd_gpu_temperature_celsius{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
           legendFormat = "Temperature °C";
           refId = "C";
         }];
@@ -869,7 +869,7 @@ with lib; let
         title = "GPU Power Usage";
         type = "stat";
         targets = [{
-          expr = "amd_gpu_power_watts{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+          expr = "amd_gpu_power_watts{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
           legendFormat = "Power W";
           refId = "D";
         }];
@@ -893,12 +893,12 @@ with lib; let
         type = "timeseries";
         targets = [
           {
-            expr = "amd_gpu_sclk_mhz{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+            expr = "amd_gpu_sclk_mhz{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
             legendFormat = "SCLK MHz";
             refId = "E";
           }
           {
-            expr = "amd_gpu_mclk_mhz{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+            expr = "amd_gpu_mclk_mhz{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
             legendFormat = "MCLK MHz";
             refId = "F";
           }
@@ -918,7 +918,7 @@ with lib; let
         title = "GPU Utilization Over Time";
         type = "timeseries";
         targets = [{
-          expr = "amd_gpu_utilization_percent{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+          expr = "amd_gpu_utilization_percent{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
           legendFormat = "GPU Utilization %";
           refId = "G";
         }];
@@ -937,12 +937,12 @@ with lib; let
         type = "timeseries";
         targets = [
           {
-            expr = "amd_gpu_memory_used_bytes{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+            expr = "amd_gpu_memory_used_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
             legendFormat = "Memory Used";
             refId = "H";
           }
           {
-            expr = "amd_gpu_memory_total_bytes{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+            expr = "amd_gpu_memory_total_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
             legendFormat = "Memory Total";
             refId = "I";
           }
@@ -959,7 +959,7 @@ with lib; let
         title = "GPU Fan Speed";
         type = "timeseries";
         targets = [{
-          expr = "amd_gpu_fan_speed_rpm{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+          expr = "amd_gpu_fan_speed_rpm{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
           legendFormat = "Fan Speed RPM";
           refId = "J";
         }];
@@ -976,12 +976,12 @@ with lib; let
         type = "timeseries";
         targets = [
           {
-            expr = "amd_gpu_power_watts{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+            expr = "amd_gpu_power_watts{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
             legendFormat = "Power W";
             refId = "K";
           }
           {
-            expr = "amd_gpu_temperature_celsius{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+            expr = "amd_gpu_temperature_celsius{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
             legendFormat = "Temperature °C";
             refId = "L";
           }
