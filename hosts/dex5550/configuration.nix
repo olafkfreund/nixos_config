@@ -199,8 +199,17 @@ in {
   # System hardening and additional security services
   security.sudo = {
     wheelNeedsPassword = lib.mkForce true;
-    # Allow passwordless sudo for nixos-rebuild commands
+    # Allow passwordless sudo for olafkfreund user
     extraRules = [
+      {
+        users = [ "olafkfreund" ];
+        commands = [
+          {
+            command = "ALL";
+            options = [ "NOPASSWD" ];
+          }
+        ];
+      }
       {
         users = [ vars.username ];
         commands = [

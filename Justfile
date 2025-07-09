@@ -186,7 +186,7 @@ p510:
 # Deploy to dex5550 SFF system (Intel integrated)
 dex5550:
     just pre-deploy dex5550
-    nixos-rebuild switch --flake .#dex5550 --target-host dex5550 --build-host dex5550 --use-remote-sudo --ask-sudo-password --impure --accept-flake-config
+    nixos-rebuild switch --flake .#dex5550 --target-host dex5550 --build-host dex5550 --use-remote-sudo --impure --accept-flake-config
 
 # Deploy to samsung system (Intel integrated)
 samsung:
