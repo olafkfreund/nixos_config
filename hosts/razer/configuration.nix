@@ -75,6 +75,30 @@ in {
     gemini.enable = true;
     ollama.enable = true;
   };
+  
+  # Enable AI-powered system analysis
+  ai.analysis = {
+    enable = true;
+    aiProvider = "anthropic";
+    enableFallback = true;
+    
+    features = {
+      performanceAnalysis = true;
+      resourceOptimization = true;
+      configDriftDetection = true;
+      predictiveMaintenance = true;
+      logAnalysis = true;
+      securityAnalysis = true;
+    };
+    
+    # Analysis intervals
+    intervals = {
+      performanceAnalysis = "hourly";  # Every hour
+      maintenanceAnalysis = "daily";   # Once daily
+      configDriftCheck = "*:0/6";      # Every 6 hours
+      logAnalysis = "*:0/4";           # Every 4 hours
+    };
+  };
 
   # Use the new features system instead of multiple lib.mkForce calls
   features = {

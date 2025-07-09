@@ -77,10 +77,10 @@ in {
     
     # Analysis intervals
     intervals = {
-      performanceAnalysis = "2h";  # More frequent for testing
-      maintenanceAnalysis = "12h"; # More frequent for testing
-      configDriftCheck = "4h";     # More frequent for testing
-      logAnalysis = "2h";          # More frequent for testing
+      performanceAnalysis = "hourly";  # Every hour
+      maintenanceAnalysis = "daily";   # Once daily
+      configDriftCheck = "*:0/6";      # Every 6 hours
+      logAnalysis = "*:0/4";           # Every 4 hours
     };
     
     # Enable automation features

@@ -59,11 +59,55 @@ in {
     })
 
     (mkIf (cfg.enable && cfg.enableRag) {
-      # Vector database for RAG
-      services.chromadb = {
-        enable = true;
-        port = 8000;
-        host = "0.0.0.0";
+      # Vector database for RAG - Custom configuration to avoid --log-path issue
+      systemd.services.chromadb = {
+        description = "ChromaDB Vector Database";
+        after = [ "network.target" ];
+        wantedBy = [ "multi-user.target" ];
+        
+        serviceConfig = {
+          Type = "simple";
+          User = "chromadb";
+          Group = "chromadb";
+          ExecStart = "${pkgs.python3Packages.chromadb}/bin/chroma run --path /var/lib/chromadb --host 0.0.0.0 --port 8000";
+          Restart = "always";
+          RestartSec = "10";
+          
+          # Security hardening
+          NoNewPrivileges = true;
+          ProtectSystem = "strict";
+          ProtectHome = true;
+          PrivateTmp = true;
+          PrivateDevices = true;
+          ProtectKernelTunables = true;
+          ProtectKernelModules = true;
+          ProtectControlGroups = true;
+          
+          # Writable paths
+          ReadWritePaths = [
+            "/var/lib/chromadb"
+          ];
+          
+          # Resource limits
+          MemoryMax = "1G";
+          CPUQuota = "50%";
+        };
+        
+        preStart = ''
+          # Ensure the data directory exists and has correct permissions
+          mkdir -p /var/lib/chromadb
+          chown chromadb:chromadb /var/lib/chromadb
+        '';
+      };
+      
+      # Create chromadb user and group
+      users.groups.chromadb = {};
+      users.users.chromadb = {
+        isSystemUser = true;
+        group = "chromadb";
+        description = "ChromaDB service user";
+        home = "/var/lib/chromadb";
+        createHome = true;
       };
 
       # Skip broken packages regardless of allowBrokenPackages setting
@@ -87,7 +131,7 @@ in {
       systemd.tmpfiles.rules = [
         "d /var/lib/open-webui/rag 0755 nobody nobody - -"
         "d ${cfg.ragDirectory} 0755 ollama ollama - -"
-        "d /var/lib/chromadb 0755 nobody nobody - -"
+        "d /var/lib/chromadb 0755 chromadb chromadb - -"
       ];
 
       # Configure Open WebUI to support RAG with file scanning

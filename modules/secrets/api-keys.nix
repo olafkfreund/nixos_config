@@ -33,21 +33,21 @@ in {
     age.secrets = {
       api-openai = {
         file = ../../secrets/api-openai.age;
-        mode = "0600";
+        mode = "0640";
         owner = username;
         group = "users";
       };
       
       api-gemini = {
         file = ../../secrets/api-gemini.age;
-        mode = "0600";
+        mode = "0640";
         owner = username;
         group = "users";
       };
       
       api-anthropic = {
         file = ../../secrets/api-anthropic.age;
-        mode = "0600";
+        mode = "0640";
         owner = username;
         group = "users";
       };
