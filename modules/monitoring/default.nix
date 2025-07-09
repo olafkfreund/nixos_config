@@ -14,6 +14,7 @@ in {
     ./alerting.nix
     ./loki.nix
     ./promtail.nix
+    ./gpu-exporter.nix
   ];
 
   options.monitoring = {
@@ -109,6 +110,12 @@ in {
         default = 9096;
         description = "Promtail gRPC port";
       };
+
+      gpuExporterPort = mkOption {
+        type = types.int;
+        default = 9400;
+        description = "NVIDIA GPU exporter port";
+      };
     };
 
     # Feature toggles
@@ -165,6 +172,12 @@ in {
         type = types.bool;
         default = true;
         description = "Enable Grafana dashboard server";
+      };
+
+      gpuMetrics = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable NVIDIA GPU metrics collection";
       };
     };
   };

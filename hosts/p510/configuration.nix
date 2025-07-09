@@ -130,6 +130,7 @@ in {
         nodeExporter = true;
         nixosMetrics = true;
         alerting = false;  # Only server handles alerting
+        gpuMetrics = true;  # Enable NVIDIA GPU monitoring
       };
     };
   };

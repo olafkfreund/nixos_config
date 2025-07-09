@@ -116,6 +116,7 @@ in {
       nixosMetrics = true;  # NixOS-specific metrics
       alerting = true;      # Alertmanager
       logging = true;       # Loki log aggregation server
+      gpuMetrics = true;    # Enable GPU dashboards for NVIDIA clients
     };
   };
 

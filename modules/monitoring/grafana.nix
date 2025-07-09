@@ -623,6 +623,167 @@ with lib; let
     refresh = "30s";
   });
 
+  # GPU Dashboard for NVIDIA systems
+  gpuDashboard = hostname: pkgs.writeText "${hostname}-gpu-dashboard.json" (builtins.toJSON {
+    id = null;
+    title = "${hostname} - NVIDIA GPU";
+    tags = ["nvidia" "gpu" hostname];
+    timezone = "browser";
+    panels = [
+      {
+        id = 1;
+        title = "GPU Utilization";
+        type = "stat";
+        targets = [{
+          expr = "nvidia_gpu_utilization_gpu{instance=\"${hostname}:${toString cfg.network.gpuExporterPort}\"}";
+          legendFormat = "GPU %";
+          refId = "A";
+        }];
+        gridPos = { h = 8; w = 8; x = 0; y = 0; };
+        fieldConfig = {
+          defaults = {
+            unit = "percent";
+            max = 100;
+            min = 0;
+            thresholds = {
+              steps = [
+                { color = "green"; value = 0; }
+                { color = "yellow"; value = 50; }
+                { color = "red"; value = 80; }
+              ];
+            };
+          };
+        };
+      }
+      {
+        id = 2;
+        title = "GPU Memory Usage";
+        type = "stat";
+        targets = [{
+          expr = "nvidia_gpu_memory_used_bytes{instance=\"${hostname}:${toString cfg.network.gpuExporterPort}\"} / nvidia_gpu_memory_total_bytes{instance=\"${hostname}:${toString cfg.network.gpuExporterPort}\"} * 100";
+          legendFormat = "Memory %";
+          refId = "B";
+        }];
+        gridPos = { h = 8; w = 8; x = 8; y = 0; };
+        fieldConfig = {
+          defaults = {
+            unit = "percent";
+            max = 100;
+            min = 0;
+            thresholds = {
+              steps = [
+                { color = "green"; value = 0; }
+                { color = "yellow"; value = 70; }
+                { color = "red"; value = 85; }
+              ];
+            };
+          };
+        };
+      }
+      {
+        id = 3;
+        title = "GPU Temperature";
+        type = "stat";
+        targets = [{
+          expr = "nvidia_gpu_temperature_gpu{instance=\"${hostname}:${toString cfg.network.gpuExporterPort}\"}";
+          legendFormat = "Temperature °C";
+          refId = "C";
+        }];
+        gridPos = { h = 8; w = 8; x = 16; y = 0; };
+        fieldConfig = {
+          defaults = {
+            unit = "celsius";
+            thresholds = {
+              steps = [
+                { color = "green"; value = 0; }
+                { color = "yellow"; value = 70; }
+                { color = "red"; value = 85; }
+              ];
+            };
+          };
+        };
+      }
+      {
+        id = 4;
+        title = "GPU Utilization Over Time";
+        type = "timeseries";
+        targets = [{
+          expr = "nvidia_gpu_utilization_gpu{instance=\"${hostname}:${toString cfg.network.gpuExporterPort}\"}";
+          legendFormat = "GPU Utilization %";
+          refId = "D";
+        }];
+        gridPos = { h = 8; w = 12; x = 0; y = 8; };
+        fieldConfig = {
+          defaults = {
+            unit = "percent";
+            max = 100;
+            min = 0;
+          };
+        };
+      }
+      {
+        id = 5;
+        title = "GPU Memory Usage Over Time";
+        type = "timeseries";
+        targets = [
+          {
+            expr = "nvidia_gpu_memory_used_bytes{instance=\"${hostname}:${toString cfg.network.gpuExporterPort}\"}";
+            legendFormat = "Memory Used";
+            refId = "E";
+          }
+          {
+            expr = "nvidia_gpu_memory_total_bytes{instance=\"${hostname}:${toString cfg.network.gpuExporterPort}\"}";
+            legendFormat = "Memory Total";
+            refId = "F";
+          }
+        ];
+        gridPos = { h = 8; w = 12; x = 12; y = 8; };
+        fieldConfig = {
+          defaults = {
+            unit = "bytes";
+          };
+        };
+      }
+      {
+        id = 6;
+        title = "GPU Power Usage";
+        type = "timeseries";
+        targets = [{
+          expr = "nvidia_gpu_power_draw_watts{instance=\"${hostname}:${toString cfg.network.gpuExporterPort}\"}";
+          legendFormat = "Power Draw W";
+          refId = "G";
+        }];
+        gridPos = { h = 8; w = 12; x = 0; y = 16; };
+        fieldConfig = {
+          defaults = {
+            unit = "watt";
+          };
+        };
+      }
+      {
+        id = 7;
+        title = "GPU Fan Speed";
+        type = "timeseries";
+        targets = [{
+          expr = "nvidia_gpu_fan_speed_rpm{instance=\"${hostname}:${toString cfg.network.gpuExporterPort}\"}";
+          legendFormat = "Fan Speed RPM";
+          refId = "H";
+        }];
+        gridPos = { h = 8; w = 12; x = 12; y = 16; };
+        fieldConfig = {
+          defaults = {
+            unit = "rpm";
+          };
+        };
+      }
+    ];
+    time = {
+      from = "now-1h";
+      to = "now";
+    };
+    refresh = "30s";
+  });
+
 in {
   config = mkIf (cfg.enable && (cfg.mode == "server" || cfg.mode == "standalone")) {
     services.grafana = {
@@ -725,6 +886,7 @@ in {
       "d /var/lib/grafana/dashboards/hosts 0755 grafana grafana -"
       "d /var/lib/grafana/dashboards/media 0755 grafana grafana -"
       "d /var/lib/grafana/dashboards/logs 0755 grafana grafana -"
+      "d /var/lib/grafana/dashboards/gpu 0755 grafana grafana -"
       
       # System and host dashboards
       "L+ /var/lib/grafana/dashboards/nixos/system-overview.json - - - - ${nixosDashboard}"
@@ -743,6 +905,10 @@ in {
       # Logs dashboard
     ] ++ optionals cfg.features.logging [
       "L+ /var/lib/grafana/dashboards/logs/centralized-logs.json - - - - ${logsDashboard}"
+    ] ++ optionals cfg.features.gpuMetrics [
+      # GPU dashboards for NVIDIA systems
+      "L+ /var/lib/grafana/dashboards/gpu/razer-gpu.json - - - - ${gpuDashboard "razer"}"
+      "L+ /var/lib/grafana/dashboards/gpu/p510-gpu.json - - - - ${gpuDashboard "p510"}"
     ];
 
     # Grafana service dependencies
