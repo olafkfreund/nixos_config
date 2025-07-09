@@ -380,9 +380,7 @@ in {
       "ai-system" = "ai-analyze-system";
     };
     
-    programs.bash.shellAliases = mkIf config.programs.bash.enable {
-      "ai-analyze" = "ai-analyze-system";
-      "ai-system" = "ai-analyze-system";
-    };
+    # Note: programs.bash.enable has been removed in newer NixOS versions
+    # Shell aliases will be available in all shells via environment.systemPackages
   };
 }
