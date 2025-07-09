@@ -14,6 +14,8 @@
     ./automated-remediation.nix
     ./storage-analysis.nix
     ./backup-strategy.nix
+    ./storage-expansion.nix
+    ./storage-migration.nix
   ];
 
   environment.systemPackages = [

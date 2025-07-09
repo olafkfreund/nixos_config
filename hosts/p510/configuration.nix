@@ -135,6 +135,20 @@ in {
     };
   };
 
+  # Enable storage expansion analysis for P510 optimization
+  ai.storageExpansion = {
+    enable = true;
+    analysisMode = "expansion";  # Full expansion planning for P510
+    recommendationsPath = "/mnt/img_pool/storage-recommendations";
+  };
+
+  # Enable emergency storage migration for P510 critical situation
+  ai.storageMigration = {
+    enable = true;
+    targetVolume = "/mnt/img_pool";  # 938GB available, only 5.1% used
+    migrationMode = "preparation";   # Start with preparation mode for safety
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {
