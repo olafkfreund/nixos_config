@@ -117,7 +117,7 @@ in {
         AllowTcpForwarding = "yes";
         AllowAgentForwarding = "yes";
         GatewayPorts = "no";
-        X11Forwarding = false;
+        X11Forwarding = mkForce false;
         
         # Modern cryptography
         KexAlgorithms = [
@@ -137,24 +137,11 @@ in {
           "aes128-ctr"
         ];
         
-        Macs = [
+        MACs = [
           "hmac-sha2-256-etm@openssh.com"
           "hmac-sha2-512-etm@openssh.com"
           "hmac-sha2-256"
           "hmac-sha2-512"
-        ];
-        
-        # Host key algorithms
-        HostKeyAlgorithms = [
-          "rsa-sha2-512"
-          "rsa-sha2-256"
-          "ssh-ed25519"
-        ];
-        
-        PubkeyAcceptedAlgorithms = [
-          "rsa-sha2-512"
-          "rsa-sha2-256"
-          "ssh-ed25519"
         ];
       };
       
@@ -206,43 +193,14 @@ in {
       enable = true;
       maxretry = cfg.maxAuthTries;
       bantime = "1h";
-      bantime-increment = {
-        enable = true;
-        multipliers = "1 2 4 8 16 32 64";
-        maxtime = "168h"; # 1 week
-        overalljails = true;
-      };
       
       jails = {
-        ssh = {
+        ssh.settings = {
           enabled = true;
           filter = "sshd";
-          logpath = "/var/log/auth.log";
           maxretry = cfg.maxAuthTries;
           findtime = "10m";
           bantime = "1h";
-          action = ''
-            iptables-multiport[name=SSH, port="${toString cfg.listenPort}", protocol=tcp]
-            sendmail-whois[name=SSH, dest=root, sender=fail2ban@localhost]
-          '';
-        };
-        
-        ssh-ddos = {
-          enabled = true;
-          filter = "sshd-ddos";
-          logpath = "/var/log/auth.log";
-          maxretry = 2;
-          findtime = "2m";
-          bantime = "2h";
-        };
-        
-        ssh-aggressive = {
-          enabled = true;
-          filter = "sshd";
-          logpath = "/var/log/auth.log";
-          maxretry = 1;
-          findtime = "60s";
-          bantime = "24h";
         };
       };
     };
@@ -303,26 +261,28 @@ in {
     };
 
     # Enhanced logging for SSH events
-    services.rsyslog.extraConfig = ''
-      # SSH logging configuration
-      auth,authpriv.*          /var/log/auth.log
-      
-      # Separate SSH logs
-      if $programname == 'sshd' then /var/log/ssh.log
-      & stop
+    services.journald.extraConfig = ''
+      # Increase journal size for SSH logging
+      SystemMaxUse=1G
+      RuntimeMaxUse=256M
     '';
 
-    # Logrotate configuration for SSH logs
-    services.logrotate.settings.ssh = {
-      files = [ "/var/log/ssh.log" "/var/log/auth.log" ];
-      frequency = "daily";
-      rotate = 30;
-      compress = true;
-      delaycompress = true;
-      missingok = true;
-      notifempty = true;
-      create = "640 root root";
-      postrotate = "systemctl reload rsyslog.service";
+    # Journal logging configuration for SSH
+    systemd.services.ssh-journal-cleanup = {
+      description = "SSH Journal Cleanup";
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.systemd}/bin/journalctl --vacuum-time=30d --unit=sshd";
+      };
+    };
+    
+    systemd.timers.ssh-journal-cleanup = {
+      description = "SSH Journal Cleanup Timer";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "weekly";
+        Persistent = true;
+      };
     };
 
     # SSH monitoring and alerting
@@ -342,14 +302,12 @@ in {
           TIME_WINDOW=300  # 5 minutes
           
           # Count failed login attempts in the last 5 minutes
-          FAILED_ATTEMPTS=$(grep "Failed password" /var/log/auth.log | \
-                           awk -v threshold=$(date -d "5 minutes ago" "+%b %d %H:%M") \
-                           '$0 > threshold' | wc -l)
+          FAILED_ATTEMPTS=$(journalctl -u sshd --since="5 minutes ago" | \
+                           grep "Failed password" | wc -l)
           
           # Count successful logins in the last 5 minutes
-          SUCCESSFUL_LOGINS=$(grep "Accepted publickey\|Accepted password" /var/log/auth.log | \
-                             awk -v threshold=$(date -d "5 minutes ago" "+%b %d %H:%M") \
-                             '$0 > threshold' | wc -l)
+          SUCCESSFUL_LOGINS=$(journalctl -u sshd --since="5 minutes ago" | \
+                             grep -E "Accepted (publickey|password)" | wc -l)
           
           # Log current status
           echo "$(date): Failed attempts: $FAILED_ATTEMPTS, Successful logins: $SUCCESSFUL_LOGINS" >> "$LOG_FILE"
@@ -398,12 +356,12 @@ in {
         
         # Recent failed attempts
         echo "Recent Failed Login Attempts (last 24h):"
-        grep "Failed password" /var/log/auth.log | tail -10 || echo "No recent failed attempts"
+        journalctl -u sshd --since="24 hours ago" | grep "Failed password" | tail -10 || echo "No recent failed attempts"
         echo
         
         # Recent successful logins
         echo "Recent Successful Logins (last 24h):"
-        grep "Accepted" /var/log/auth.log | tail -10 || echo "No recent successful logins"
+        journalctl -u sshd --since="24 hours ago" | grep "Accepted" | tail -10 || echo "No recent successful logins"
         echo
         
         # Fail2ban status
@@ -558,8 +516,8 @@ in {
           done
           
           # Check for recent security events
-          FAILED_COUNT=$(grep -c "Failed password" /var/log/auth.log 2>/dev/null || echo 0)
-          echo "[$TIMESTAMP] Failed login attempts (total): $FAILED_COUNT" >> "$AUDIT_LOG"
+          FAILED_COUNT=$(journalctl -u sshd --since="24 hours ago" | grep -c "Failed password" || echo 0)
+          echo "[$TIMESTAMP] Failed login attempts (24h): $FAILED_COUNT" >> "$AUDIT_LOG"
           
           # Check fail2ban status
           if command -v fail2ban-client &> /dev/null; then

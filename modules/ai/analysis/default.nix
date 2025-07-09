@@ -1055,6 +1055,12 @@ in {
               cfg.outputPath
               "/var/log/ai-analysis"
             ];
+            
+            # Read-only paths for API keys and configuration
+            BindReadOnlyPaths = [
+              "/run/agenix"
+              "/etc/ai-providers.json"
+            ];
           };
         };
         
@@ -1098,6 +1104,12 @@ in {
             ReadWritePaths = [
               cfg.outputPath
               "/var/log/ai-analysis"
+            ];
+            
+            # Read-only paths for API keys and configuration
+            BindReadOnlyPaths = [
+              "/run/agenix"
+              "/etc/ai-providers.json"
             ];
           };
         };

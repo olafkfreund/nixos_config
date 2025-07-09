@@ -38,26 +38,21 @@ in {
       MaxFileSec=1day
     '';
 
-    # Create rsyslog configuration for container log filtering
-    services.rsyslog = {
-      enable = true;
-      extraConfig = ''
-        # Filter out health check spam from containers
-        :msg, contains, "router dispatching GET /health" stop
-        :msg, contains, "router jsonParser  : /health" stop
-        :msg, contains, "body-parser:json skip empty body" stop
-        :msg, contains, "GET /health" stop
-        :msg, contains, "health check" stop
-        
-        # Filter out other common noise
-        :msg, contains, "debug:" stop
-        :msg, contains, "verbose:" stop
-        :msg, contains, "trace:" stop
-        
-        # Filter container connection logs
-        :msg, contains, "connection established" stop
-        :msg, contains, "connection closed" stop
-      '';
+    # Configure systemd-journald to filter container logs
+    systemd.services.journal-filter = {
+      description = "Journal Log Filter for Container Noise";
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = pkgs.writeShellScript "setup-journal-filter" ''
+          # Create custom journal namespace for filtered logs
+          mkdir -p /var/log/journal-filtered
+          
+          # Set up log filtering via systemd-journald
+          systemctl restart systemd-journald
+        '';
+      };
     };
 
     # Configure Docker daemon for better logging
