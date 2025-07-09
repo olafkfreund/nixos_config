@@ -16,7 +16,7 @@ in {
         
         serviceConfig = {
           Type = "simple";
-          ExecStart = "${pkgs.prometheus-nvidia-gpu-exporter}/bin/nvidia_gpu_prometheus_exporter --web.listen-address=:${toString cfg.network.gpuExporterPort}";
+          ExecStart = "${pkgs.prometheus-nvidia-gpu-exporter}/bin/nvidia_gpu_exporter --web.listen-address=:${toString cfg.network.gpuExporterPort}";
           Restart = "on-failure";
           RestartSec = "5s";
           User = "nvidia-gpu-exporter";
@@ -45,6 +45,7 @@ in {
         environment = {
           NVIDIA_VISIBLE_DEVICES = "all";
           NVIDIA_DRIVER_CAPABILITIES = "compute,utility";
+          PATH = lib.mkForce "/run/current-system/sw/bin";
         };
       };
       
