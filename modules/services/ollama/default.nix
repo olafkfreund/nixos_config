@@ -93,11 +93,6 @@ in {
           CPUQuota = "50%";
         };
         
-        preStart = ''
-          # Ensure the data directory exists and has correct permissions
-          mkdir -p /var/lib/chromadb
-          chown chromadb:chromadb /var/lib/chromadb
-        '';
       };
       
       # Create chromadb user and group

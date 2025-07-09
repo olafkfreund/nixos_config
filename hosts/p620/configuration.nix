@@ -29,6 +29,7 @@ in {
     ../../modules/secrets/api-keys.nix
     ../../modules/containers/docker.nix
     ../../modules/scrcpy/default.nix
+    ../../modules/system/logging.nix
   ];
   #Nixai
   services.nixai = {
@@ -192,6 +193,20 @@ in {
     enable = true;
     enableEnvironmentVariables = true;
     enableUserEnvironment = true;
+  };
+
+  # Enable logging configuration for noise reduction
+  system.logging = {
+    enableFiltering = true;
+    filterRules = [
+      "router dispatching GET /health"
+      "router jsonParser  : /health"
+      "body-parser:json skip empty body"
+      "GET /health"
+      "health check"
+      "connection established"
+      "connection closed"
+    ];
   };
 
 
