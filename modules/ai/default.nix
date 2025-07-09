@@ -12,6 +12,8 @@
     ./grafana-dashboards.nix
     ./prometheus-alerts.nix
     ./automated-remediation.nix
+    ./storage-analysis.nix
+    ./backup-strategy.nix
   ];
 
   environment.systemPackages = [

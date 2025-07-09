@@ -126,6 +126,14 @@ in {
     };
   };
 
+  # Enable storage analysis for P620 in monitoring mode
+  ai.storageAnalysis = {
+    enable = true;
+    emergencyMode = false;     # P620 at acceptable 49.6% usage
+    analysisInterval = "daily"; # Daily monitoring for P620
+    reportPath = "/var/lib/ai-analysis/p620-storage-reports";
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {

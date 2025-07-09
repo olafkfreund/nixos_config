@@ -113,6 +113,28 @@ in {
     };
   };
 
+  # Enable emergency storage analysis for P510 critical disk situation
+  ai.storageAnalysis = {
+    enable = true;
+    emergencyMode = true;      # CRITICAL: P510 at 79.6% disk usage
+    analysisInterval = "*:0/30"; # Every 30 minutes for critical monitoring
+    reportPath = "/var/lib/ai-analysis/p510-storage-reports";
+  };
+
+  # Enable critical backup strategy for P510 before aggressive cleanup
+  ai.backupStrategy = {
+    enable = true;
+    criticalMode = true;       # Enable frequent backups for P510
+    backupPath = "/mnt/img_pool/backups"; # Use img_pool (only 5.1% used)
+    retentionDays = 7;         # Keep backups for 7 days due to space constraints
+    
+    remoteBackup = {
+      enable = true;
+      targetHost = "p620";      # Backup to P620 with more space
+      targetPath = "/mnt/data/p510-backups";
+    };
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {
