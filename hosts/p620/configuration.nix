@@ -59,6 +59,37 @@ in {
     gemini.enable = true;
     ollama.enable = true;
   };
+  
+  # Enable AI-powered system analysis
+  ai.analysis = {
+    enable = true;
+    aiProvider = "anthropic";
+    enableFallback = true;
+    
+    features = {
+      performanceAnalysis = true;
+      resourceOptimization = true;
+      configDriftDetection = true;
+      predictiveMaintenance = true;
+      logAnalysis = true;
+      securityAnalysis = true;
+    };
+    
+    # Analysis intervals
+    intervals = {
+      performanceAnalysis = "2h";  # More frequent for testing
+      maintenanceAnalysis = "12h"; # More frequent for testing
+      configDriftCheck = "4h";     # More frequent for testing
+      logAnalysis = "2h";          # More frequent for testing
+    };
+    
+    # Enable automation features
+    automation = {
+      autoApplyOptimizations = false;  # Keep disabled for safety
+      autoCorrectDrift = false;        # Keep disabled for safety
+      generateReports = true;
+    };
+  };
 
   # Use the new features system instead of multiple lib.mkForce calls
   features = {

@@ -7,6 +7,7 @@
     ./chatgpt.nix
     ./gemini-cli.nix
     ./providers/default.nix
+    ./analysis/default.nix
   ];
 
   environment.systemPackages = [
