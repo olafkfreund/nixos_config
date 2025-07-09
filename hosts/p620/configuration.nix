@@ -152,6 +152,7 @@ in {
       logging = true;   # Enable Promtail for log collection
       prometheus = false;  # Only server runs Prometheus
       grafana = false;     # Only server runs Grafana
+      amdGpuMetrics = true;  # Enable AMD GPU monitoring for P620
     };
   };
 

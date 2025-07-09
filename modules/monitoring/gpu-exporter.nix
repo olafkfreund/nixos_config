@@ -92,13 +92,23 @@ in {
     
     # Prometheus scrape configuration for GPU metrics
     services.prometheus = mkIf (cfg.mode == "server" || cfg.mode == "standalone") {
-      extraConfig = ''
-        - job_name: 'gpu-exporter'
-          static_configs:
-            - targets: ['razer:${toString cfg.network.gpuExporterPort}', 'p510:${toString cfg.network.gpuExporterPort}']
-          scrape_interval: ${cfg.scrapeInterval}
-          metrics_path: /metrics
-      '';
+      scrapeConfigs = [
+        {
+          job_name = "gpu-exporter";
+          static_configs = [{
+            targets = [
+              "razer.home.freundcloud.com:${toString cfg.network.gpuExporterPort}"
+              "p510.home.freundcloud.com:${toString cfg.network.gpuExporterPort}"
+            ];
+            labels = {
+              service = "gpu-exporter";
+              role = "gpu-metrics";
+            };
+          }];
+          scrape_interval = cfg.scrapeInterval;
+          metrics_path = "/metrics";
+        }
+      ];
     };
   };
 }

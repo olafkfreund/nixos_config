@@ -15,6 +15,7 @@ in {
     ./loki.nix
     ./promtail.nix
     ./gpu-exporter.nix
+    # ./amd-gpu-exporter.nix  # Temporarily disabled until package build issues resolved
   ];
 
   options.monitoring = {
@@ -116,6 +117,12 @@ in {
         default = 9400;
         description = "NVIDIA GPU exporter port";
       };
+
+      amdGpuExporterPort = mkOption {
+        type = types.int;
+        default = 9401;
+        description = "AMD GPU exporter port";
+      };
     };
 
     # Feature toggles
@@ -179,6 +186,12 @@ in {
         default = false;
         description = "Enable NVIDIA GPU metrics collection";
       };
+
+      amdGpuMetrics = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable AMD GPU metrics collection";
+      };
     };
   };
 
@@ -213,6 +226,14 @@ in {
           cfg.network.promtailPort
           cfg.network.promtailGrpcPort
         ];
+      })
+      
+      (mkIf cfg.features.gpuMetrics {
+        allowedTCPPorts = [ cfg.network.gpuExporterPort ];
+      })
+      
+      (mkIf cfg.features.amdGpuMetrics {
+        allowedTCPPorts = [ cfg.network.amdGpuExporterPort ];
       })
     ];
 

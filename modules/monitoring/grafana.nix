@@ -784,6 +784,223 @@ with lib; let
     refresh = "30s";
   });
 
+  # AMD GPU Dashboard
+  amdGpuDashboard = hostname: pkgs.writeText "${hostname}-amd-gpu-dashboard.json" (builtins.toJSON {
+    id = null;
+    title = "${hostname} - AMD GPU";
+    tags = ["amd" "gpu" "rocm" hostname];
+    timezone = "browser";
+    panels = [
+      {
+        id = 1;
+        title = "GPU Utilization";
+        type = "stat";
+        targets = [{
+          expr = "amd_gpu_utilization_percent{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+          legendFormat = "GPU %";
+          refId = "A";
+        }];
+        gridPos = { h = 8; w = 8; x = 0; y = 0; };
+        fieldConfig = {
+          defaults = {
+            unit = "percent";
+            max = 100;
+            min = 0;
+            thresholds = {
+              steps = [
+                { color = "green"; value = 0; }
+                { color = "yellow"; value = 50; }
+                { color = "red"; value = 80; }
+              ];
+            };
+          };
+        };
+      }
+      {
+        id = 2;
+        title = "GPU Memory Usage";
+        type = "stat";
+        targets = [{
+          expr = "amd_gpu_memory_used_percent{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+          legendFormat = "Memory %";
+          refId = "B";
+        }];
+        gridPos = { h = 8; w = 8; x = 8; y = 0; };
+        fieldConfig = {
+          defaults = {
+            unit = "percent";
+            max = 100;
+            min = 0;
+            thresholds = {
+              steps = [
+                { color = "green"; value = 0; }
+                { color = "yellow"; value = 70; }
+                { color = "red"; value = 85; }
+              ];
+            };
+          };
+        };
+      }
+      {
+        id = 3;
+        title = "GPU Temperature";
+        type = "stat";
+        targets = [{
+          expr = "amd_gpu_temperature_celsius{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+          legendFormat = "Temperature °C";
+          refId = "C";
+        }];
+        gridPos = { h = 8; w = 8; x = 16; y = 0; };
+        fieldConfig = {
+          defaults = {
+            unit = "celsius";
+            thresholds = {
+              steps = [
+                { color = "green"; value = 0; }
+                { color = "yellow"; value = 75; }
+                { color = "red"; value = 85; }
+              ];
+            };
+          };
+        };
+      }
+      {
+        id = 4;
+        title = "GPU Power Usage";
+        type = "stat";
+        targets = [{
+          expr = "amd_gpu_power_watts{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+          legendFormat = "Power W";
+          refId = "D";
+        }];
+        gridPos = { h = 8; w = 8; x = 0; y = 8; };
+        fieldConfig = {
+          defaults = {
+            unit = "watt";
+            thresholds = {
+              steps = [
+                { color = "green"; value = 0; }
+                { color = "yellow"; value = 200; }
+                { color = "red"; value = 250; }
+              ];
+            };
+          };
+        };
+      }
+      {
+        id = 5;
+        title = "GPU Clock Frequencies";
+        type = "timeseries";
+        targets = [
+          {
+            expr = "amd_gpu_sclk_mhz{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+            legendFormat = "SCLK MHz";
+            refId = "E";
+          }
+          {
+            expr = "amd_gpu_mclk_mhz{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+            legendFormat = "MCLK MHz";
+            refId = "F";
+          }
+        ];
+        gridPos = { h = 8; w = 16; x = 8; y = 8; };
+        fieldConfig = {
+          defaults = {
+            unit = "hertz";
+            custom = {
+              unitScale = true;
+            };
+          };
+        };
+      }
+      {
+        id = 6;
+        title = "GPU Utilization Over Time";
+        type = "timeseries";
+        targets = [{
+          expr = "amd_gpu_utilization_percent{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+          legendFormat = "GPU Utilization %";
+          refId = "G";
+        }];
+        gridPos = { h = 8; w = 12; x = 0; y = 16; };
+        fieldConfig = {
+          defaults = {
+            unit = "percent";
+            max = 100;
+            min = 0;
+          };
+        };
+      }
+      {
+        id = 7;
+        title = "GPU Memory Usage Over Time";
+        type = "timeseries";
+        targets = [
+          {
+            expr = "amd_gpu_memory_used_bytes{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+            legendFormat = "Memory Used";
+            refId = "H";
+          }
+          {
+            expr = "amd_gpu_memory_total_bytes{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+            legendFormat = "Memory Total";
+            refId = "I";
+          }
+        ];
+        gridPos = { h = 8; w = 12; x = 12; y = 16; };
+        fieldConfig = {
+          defaults = {
+            unit = "bytes";
+          };
+        };
+      }
+      {
+        id = 8;
+        title = "GPU Fan Speed";
+        type = "timeseries";
+        targets = [{
+          expr = "amd_gpu_fan_speed_rpm{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+          legendFormat = "Fan Speed RPM";
+          refId = "J";
+        }];
+        gridPos = { h = 8; w = 12; x = 0; y = 24; };
+        fieldConfig = {
+          defaults = {
+            unit = "rpm";
+          };
+        };
+      }
+      {
+        id = 9;
+        title = "GPU Power and Temperature";
+        type = "timeseries";
+        targets = [
+          {
+            expr = "amd_gpu_power_watts{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+            legendFormat = "Power W";
+            refId = "K";
+          }
+          {
+            expr = "amd_gpu_temperature_celsius{instance=\"${hostname}:${toString cfg.network.amdGpuExporterPort}\"}";
+            legendFormat = "Temperature °C";
+            refId = "L";
+          }
+        ];
+        gridPos = { h = 8; w = 12; x = 12; y = 24; };
+        fieldConfig = {
+          defaults = {
+            unit = "short";
+          };
+        };
+      }
+    ];
+    time = {
+      from = "now-1h";
+      to = "now";
+    };
+    refresh = "30s";
+  });
+
 in {
   config = mkIf (cfg.enable && (cfg.mode == "server" || cfg.mode == "standalone")) {
     services.grafana = {
@@ -909,6 +1126,9 @@ in {
       # GPU dashboards for NVIDIA systems
       "L+ /var/lib/grafana/dashboards/gpu/razer-gpu.json - - - - ${gpuDashboard "razer"}"
       "L+ /var/lib/grafana/dashboards/gpu/p510-gpu.json - - - - ${gpuDashboard "p510"}"
+    ] ++ optionals cfg.features.amdGpuMetrics [
+      # GPU dashboards for AMD systems
+      "L+ /var/lib/grafana/dashboards/gpu/p620-amd-gpu.json - - - - ${amdGpuDashboard "p620"}"
     ];
 
     # Grafana service dependencies

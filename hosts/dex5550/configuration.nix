@@ -117,6 +117,7 @@ in {
       alerting = true;      # Alertmanager
       logging = true;       # Loki log aggregation server
       gpuMetrics = true;    # Enable GPU dashboards for NVIDIA clients
+      amdGpuMetrics = true; # Enable AMD GPU dashboards for AMD clients
     };
   };
 

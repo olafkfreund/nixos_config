@@ -110,7 +110,11 @@
       "Bash(claude mcp add:*)",
       "Bash(claude-code mcp:*)",
       "Bash(dotnet --info)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(node-exporter-status)",
+      "Bash(sudo pkill:*)",
+      "Bash(promtail-status:*)",
+      "Bash(git rm:*)"
     ]
   },
   "enableAllProjectMcpServers": false
