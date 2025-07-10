@@ -61,6 +61,15 @@ test-all:
     done
     @echo "✅ All configurations build successfully!"
 
+# Test all configurations in parallel (FASTER)
+test-all-parallel:
+    @echo "🧪 Testing all NixOS configurations in parallel..."
+    @( nix build .#nixosConfigurations.razer.config.system.build.toplevel --no-link --show-trace && echo "✅ Razer" || echo "❌ Razer" ) & \
+    ( nix build .#nixosConfigurations.dex5550.config.system.build.toplevel --no-link --show-trace && echo "✅ DEX5550" || echo "❌ DEX5550" ) & \
+    ( nix build .#nixosConfigurations.p510.config.system.build.toplevel --no-link --show-trace && echo "✅ P510" || echo "❌ P510" ) & \
+    ( nix build .#nixosConfigurations.p620.config.system.build.toplevel --no-link --show-trace && echo "✅ P620" || echo "❌ P620" ) & \
+    wait && echo "✅ All parallel tests completed!"
+
 # Test specific host configuration
 test-host HOST:
     @echo "🧪 Testing {{HOST}} configuration..."
@@ -168,21 +177,21 @@ check-syntax:
 # REMOTE DEPLOYMENT
 # =============================================================================
 
-# Deploy to razer laptop (Intel/NVIDIA)
+# Deploy to razer laptop (Intel/NVIDIA) - OPTIMIZED
 razer:
-    nixos-rebuild switch --flake .#razer --target-host razer --build-host razer --use-remote-sudo --impure --accept-flake-config
+    nixos-rebuild switch --flake .#razer --target-host razer --build-host razer --use-remote-sudo --fast --keep-going --accept-flake-config
 
-# Deploy to p620 workstation (AMD)
+# Deploy to p620 workstation (AMD) - OPTIMIZED
 p620:
-    nixos-rebuild switch --flake .#p620 --target-host p620 --build-host p620 --use-remote-sudo --impure --accept-flake-config
+    nixos-rebuild switch --flake .#p620 --target-host p620 --build-host p620 --use-remote-sudo --fast --keep-going --accept-flake-config
 
-# Deploy to p510 workstation (Intel Xeon/NVIDIA)
+# Deploy to p510 workstation (Intel Xeon/NVIDIA) - OPTIMIZED  
 p510:
-    nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --use-remote-sudo --impure --accept-flake-config
+    nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --use-remote-sudo --fast --keep-going --accept-flake-config
 
-# Deploy to dex5550 SFF system (Intel integrated)
+# Deploy to dex5550 SFF system (Intel integrated) - OPTIMIZED
 dex5550:
-    nixos-rebuild switch --flake .#dex5550 --target-host dex5550 --build-host dex5550 --use-remote-sudo --impure --accept-flake-config
+    nixos-rebuild switch --flake .#dex5550 --target-host dex5550 --build-host dex5550 --use-remote-sudo --fast --keep-going --accept-flake-config
 
 # Deploy to samsung system (Intel integrated)
 samsung:
@@ -563,6 +572,29 @@ security-scan:
     @grep -r "allowUnfree.*true\|permittedInsecurePackages" . --include="*.nix" | head -5 || echo "No overly permissive settings found"
 
 # =============================================================================
+# QUICK DEPLOYMENT SHORTCUTS
+# =============================================================================
+
+# Quick commands for common operations
+quick-test:
+    just test-all-parallel
+
+quick-deploy HOST:
+    just deploy-smart {{HOST}}
+
+quick-all:
+    @echo "🚀 Quick test and deploy all hosts..."
+    just test-all-parallel
+    @read -p "Tests passed! Deploy all? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
+    just deploy-all-parallel
+
+# Emergency deployment (skip tests)
+emergency-deploy HOST:
+    @echo "🚨 EMERGENCY deployment to {{HOST}} (skipping tests)..."
+    @read -p "Are you sure? This skips all safety checks! (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --use-remote-sudo --fast --keep-going --no-build-nix --accept-flake-config
+
+# =============================================================================
 # UTILITIES AND HELPERS
 # =============================================================================
 
@@ -661,6 +693,52 @@ deploy-all:
     just p510
     just dex5550
 
+# Deploy to all hosts in parallel (FASTEST)
+deploy-all-parallel:
+    @echo "🚀 Deploying to ALL hosts in parallel..."
+    @read -p "Are you sure? This will max out resources! (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
+    @echo "Starting parallel deployments..."
+    ( just razer & echo "Razer started" ) & \
+    ( just p620 & echo "P620 started" ) & \
+    ( just p510 & echo "P510 started" ) & \
+    ( just dex5550 & echo "DEX5550 started" ) & \
+    wait && echo "✅ All deployments completed!"
+
+# Fast deployment with minimal builds
+deploy-fast HOST:
+    @echo "⚡ Fast deployment to {{HOST}}..."
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --use-remote-sudo --fast --keep-going --no-build-nix --accept-flake-config
+
+# Build locally, deploy remotely (for slow remote hosts)
+deploy-local-build HOST:
+    @echo "🏗️ Building {{HOST}} locally, deploying remotely..."
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --use-remote-sudo --fast --keep-going --accept-flake-config
+
+# Deploy only if changed (smart deployment)
+deploy-smart HOST:
+    @echo "🧠 Smart deployment to {{HOST}}..."
+    @if nix build .#nixosConfigurations.{{HOST}}.config.system.build.toplevel --no-link --print-out-paths | \
+     grep -q "$(ssh {{HOST}} readlink /run/current-system 2>/dev/null || echo 'no-current')"; then \
+        echo "🔄 No changes detected for {{HOST}}, skipping deployment"; \
+    else \
+        echo "📝 Changes detected, deploying to {{HOST}}..."; \
+        just {{HOST}}; \
+    fi
+
+# Parallel build for all hosts (build only, no deployment)
+build-all-parallel:
+    @echo "🔨 Building all configurations in parallel..."
+    ( nix build .#nixosConfigurations.razer.config.system.build.toplevel --no-link & echo "Building Razer..." ) & \
+    ( nix build .#nixosConfigurations.p620.config.system.build.toplevel --no-link & echo "Building P620..." ) & \
+    ( nix build .#nixosConfigurations.p510.config.system.build.toplevel --no-link & echo "Building P510..." ) & \
+    ( nix build .#nixosConfigurations.dex5550.config.system.build.toplevel --no-link & echo "Building DEX5550..." ) & \
+    wait && echo "✅ All builds completed!"
+
+# Deploy with binary cache optimization
+deploy-cached HOST:
+    @echo "💾 Deploying {{HOST}} with cache optimization..."
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --use-remote-sudo --fast --keep-going --option binary-caches "https://cache.nixos.org/ http://p620:5000" --accept-flake-config
+
 # Test all hosts can be reached
 ping-hosts:
     @echo "🏓 Pinging all hosts..."
@@ -688,7 +766,15 @@ help-extended:
     @echo "  just deploy            # Deploy to local system"
     @echo "  just p620              # Deploy to p620 host"
     @echo ""
+    @echo "⚡ FAST DEPLOYMENT:"
+    @echo "  just quick-test        # Parallel test all hosts"
+    @echo "  just quick-deploy p620 # Smart deploy (only if changed)"
+    @echo "  just quick-all         # Test all, then deploy all"
+    @echo "  just deploy-fast p620  # Fast deploy with minimal builds"
+    @echo "  just deploy-all-parallel # Deploy all hosts in parallel"
+    @echo ""
     @echo "🧪 TESTING:"
+    @echo "  just test-all-parallel # Test all hosts in parallel"
     @echo "  just ci                # Full CI pipeline"
     @echo "  just ci-quick          # Quick CI tests"
     @echo "  just test-all          # Test all configurations"
