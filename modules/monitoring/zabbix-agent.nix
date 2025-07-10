@@ -34,6 +34,7 @@ in {
     # Zabbix Agent 2
     services.zabbixAgent = {
       enable = true;
+      server = cfg.serverHost;  # Legacy option for compatibility
       
       settings = {
         # Server connection
@@ -67,12 +68,6 @@ in {
         
         # Auto-registration
         HostMetadata = mkIf (cfg.hostMetadata != "") cfg.hostMetadata;
-        
-        # Plugin settings for monitoring
-        Plugins = {
-          "Docker.Endpoint" = "unix:///var/run/docker.sock";
-          "SystemRun.LogRemoteCommands" = "1";
-        };
       };
     };
 

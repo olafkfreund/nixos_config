@@ -42,7 +42,7 @@ in {
       
       port = mkOption {
         type = types.port;
-        default = 8080;
+        default = 8081;
         description = "Port for Zabbix web interface";
       };
     };
