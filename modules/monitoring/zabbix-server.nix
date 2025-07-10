@@ -159,7 +159,7 @@ in {
         passwordFile = "/run/agenix/zabbix-db-password";
       };
       
-      virtualHost = {
+      httpd.virtualHost = {
         listen = [
           {
             ip = "127.0.0.1";
@@ -187,7 +187,6 @@ in {
     environment.systemPackages = with pkgs; [
       zabbix-cli
       net-snmp
-      snmp-mibs-downloader
     ];
 
     # Firewall
