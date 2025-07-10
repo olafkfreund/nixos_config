@@ -32,9 +32,8 @@ in {
 
   config = mkIf cfg.enable {
     # Zabbix Agent 2
-    services.zabbix-agent = {
+    services.zabbixAgent = {
       enable = true;
-      package = pkgs.zabbix.agent2;
       
       settings = {
         # Server connection
@@ -101,7 +100,7 @@ in {
       notifempty = true;
       create = "640 zabbix zabbix";
       postrotate = ''
-        systemctl reload zabbix-agent2 2>/dev/null || true
+        systemctl reload zabbixAgent 2>/dev/null || true
       '';
     };
   };

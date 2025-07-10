@@ -65,9 +65,8 @@ in {
 
   config = mkIf cfg.enable {
     # Zabbix Server
-    services.zabbix-server = {
+    services.zabbixServer = {
       enable = true;
-      package = pkgs.zabbix.server-sqlite;
       
       database = {
         type = "sqlite3";
@@ -114,9 +113,8 @@ in {
     };
 
     # Zabbix Web Interface
-    services.zabbix-web = mkIf cfg.web.enable {
+    services.zabbixWeb = mkIf cfg.web.enable {
       enable = true;
-      package = pkgs.zabbix.web-sqlite;
       
       database = {
         type = "sqlite3";
@@ -162,8 +160,8 @@ in {
     # Database initialization
     systemd.services.zabbix-db-init = {
       description = "Initialize Zabbix SQLite database";
-      wantedBy = [ "zabbix-server.service" ];
-      before = [ "zabbix-server.service" ];
+      wantedBy = [ "zabbixServer.service" ];
+      before = [ "zabbixServer.service" ];
       serviceConfig = {
         Type = "oneshot";
         User = "zabbix";
@@ -244,7 +242,7 @@ in {
       notifempty = true;
       create = "640 zabbix zabbix";
       postrotate = ''
-        systemctl reload zabbix-server 2>/dev/null || true
+        systemctl reload zabbixServer 2>/dev/null || true
       '';
     };
   };
