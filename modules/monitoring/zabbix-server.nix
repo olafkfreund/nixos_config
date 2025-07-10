@@ -13,15 +13,27 @@ in {
     
     database = {
       type = mkOption {
-        type = types.enum ["sqlite" "postgresql" "mysql"];
-        default = "sqlite";
+        type = types.enum ["postgresql" "mysql"];
+        default = "postgresql";
         description = "Database type for Zabbix server";
       };
       
-      path = mkOption {
+      host = mkOption {
         type = types.str;
-        default = "/var/lib/zabbix/zabbix.db";
-        description = "Path to SQLite database file";
+        default = "localhost";
+        description = "Database host";
+      };
+      
+      name = mkOption {
+        type = types.str;
+        default = "zabbix";
+        description = "Database name";
+      };
+      
+      user = mkOption {
+        type = types.str;
+        default = "zabbix";
+        description = "Database user";
       };
     };
     
@@ -64,13 +76,36 @@ in {
   };
 
   config = mkIf cfg.enable {
+    # Age secret for database password
+    age.secrets.zabbix-db-password = {
+      file = ../../secrets/zabbix-db-password.age;
+      owner = "zabbix";
+      group = "zabbix";
+      mode = "0400";
+    };
+
+    # PostgreSQL database setup
+    services.postgresql = {
+      enable = true;
+      ensureDatabases = [ cfg.database.name ];
+      ensureUsers = [
+        {
+          name = cfg.database.user;
+          ensureDBOwnership = true;
+        }
+      ];
+    };
+
     # Zabbix Server
     services.zabbixServer = {
       enable = true;
       
       database = {
-        type = "sqlite3";
-        name = cfg.database.path;
+        type = "pgsql";
+        host = cfg.database.host;
+        name = cfg.database.name;
+        user = cfg.database.user;
+        passwordFile = "/run/agenix/zabbix-db-password";
       };
       
       settings = {
@@ -117,13 +152,18 @@ in {
       enable = true;
       
       database = {
-        type = "sqlite3";
-        name = cfg.database.path;
+        type = "pgsql";
+        host = cfg.database.host;
+        name = cfg.database.name;
+        user = cfg.database.user;
+        passwordFile = "/run/agenix/zabbix-db-password";
       };
       
       settings = {
-        "DB[TYPE]" = "SQLITE3";
-        "DB[DATABASE]" = cfg.database.path;
+        "DB[TYPE]" = "POSTGRESQL";
+        "DB[SERVER]" = cfg.database.host;
+        "DB[DATABASE]" = cfg.database.name;
+        "DB[USER]" = cfg.database.user;
         
         # PHP settings
         "max_execution_time" = "300";
@@ -157,34 +197,7 @@ in {
     
     users.groups.zabbix = {};
 
-    # Database initialization
-    systemd.services.zabbix-db-init = {
-      description = "Initialize Zabbix SQLite database";
-      wantedBy = [ "zabbixServer.service" ];
-      before = [ "zabbixServer.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-        User = "zabbix";
-        Group = "zabbix";
-        RemainAfterExit = true;
-      };
-      script = ''
-        if [ ! -f "${cfg.database.path}" ]; then
-          echo "Initializing Zabbix SQLite database..."
-          
-          mkdir -p $(dirname "${cfg.database.path}")
-          
-          ${pkgs.sqlite}/bin/sqlite3 "${cfg.database.path}" < ${pkgs.zabbix.server-sqlite}/share/zabbix/database/sqlite3/schema.sql
-          ${pkgs.sqlite}/bin/sqlite3 "${cfg.database.path}" < ${pkgs.zabbix.server-sqlite}/share/zabbix/database/sqlite3/images.sql
-          ${pkgs.sqlite}/bin/sqlite3 "${cfg.database.path}" < ${pkgs.zabbix.server-sqlite}/share/zabbix/database/sqlite3/data.sql
-          
-          chmod 660 "${cfg.database.path}"
-          chown zabbix:zabbix "${cfg.database.path}"
-          
-          echo "Zabbix database initialized successfully"
-        fi
-      '';
-    };
+    # Database will be automatically initialized by NixOS Zabbix service
 
     # SNMP tools
     environment.systemPackages = with pkgs; [
@@ -198,23 +211,23 @@ in {
 
     # Backup service
     systemd.services.zabbix-backup = {
-      description = "Backup Zabbix SQLite database";
+      description = "Backup Zabbix PostgreSQL database";
       serviceConfig = {
         Type = "oneshot";
-        User = "zabbix";
-        Group = "zabbix";
+        User = "postgres";
+        Group = "postgres";
       };
       script = ''
         backup_dir="/var/lib/zabbix/backups"
         mkdir -p "$backup_dir"
         
         timestamp=$(date +%Y%m%d_%H%M%S)
-        backup_file="$backup_dir/zabbix_backup_$timestamp.db"
+        backup_file="$backup_dir/zabbix_backup_$timestamp.sql"
         
-        ${pkgs.sqlite}/bin/sqlite3 "${cfg.database.path}" ".backup '$backup_file'"
+        ${pkgs.postgresql}/bin/pg_dump -h ${cfg.database.host} -U ${cfg.database.user} -d ${cfg.database.name} > "$backup_file"
         ${pkgs.gzip}/bin/gzip "$backup_file"
         
-        find "$backup_dir" -name "zabbix_backup_*.db.gz" -mtime +7 -delete
+        find "$backup_dir" -name "zabbix_backup_*.sql.gz" -mtime +7 -delete
         
         echo "Backup completed: $backup_file.gz"
       '';

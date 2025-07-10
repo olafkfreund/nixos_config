@@ -37,4 +37,7 @@ in {
   
   # Tailscale secrets
   "secrets/tailscale-auth-key.age".publicKeys = allUsers ++ allHosts;
+  
+  # Zabbix secrets
+  "secrets/zabbix-db-password.age".publicKeys = allUsers ++ allHosts;
 }
