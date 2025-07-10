@@ -167,6 +167,51 @@ in {
     };
   };
 
+  # Zabbix monitoring server configuration
+  modules.monitoring.zabbix = {
+    enable = true;
+    mode = "server";
+    serverHost = "dex5550";
+    
+    snmpDevices = [
+      {
+        name = "Deco-Main-Router";
+        ip = "192.168.1.1";
+        community = "public";
+        template = "Template Net TP-LINK SNMP";
+      }
+      {
+        name = "Deco-Bedroom";
+        ip = "192.168.1.10";
+        community = "public";
+        template = "Template Net TP-LINK SNMP";
+      }
+      {
+        name = "Deco-Office";
+        ip = "192.168.1.11";
+        community = "public";
+        template = "Template Net TP-LINK SNMP";
+      }
+      # Add Google devices (you'll need to find their IPs and enable SNMP)
+      {
+        name = "Google-Home-Living";
+        ip = "192.168.1.100";  # Replace with actual IP
+        community = "public";
+        template = "Template Net Network Generic Device SNMP";
+      }
+      {
+        name = "Google-Nest-Hub";
+        ip = "192.168.1.101";  # Replace with actual IP
+        community = "public";
+        template = "Template Net Network Generic Device SNMP";
+      }
+    ];
+    
+    grafanaIntegration = {
+      enable = true;
+    };
+  };
+
   # Custom Grafana configuration - configured for sub-path with external proxy
   services.grafana = {
     settings = {
@@ -698,6 +743,13 @@ in {
             tls.certResolver = "letsencrypt";
           };
           
+          # Zabbix router
+          zabbix = {
+            rule = "Host(`home.freundcloud.com`) && PathPrefix(`/zabbix`)";
+            middlewares = [ "zabbix-stripprefix" "secure-headers" "zabbix-auth" ];
+            service = "zabbix";
+            tls.certResolver = "letsencrypt";
+          };
           
           # Traefik dashboard router
           dashboard = {
@@ -718,6 +770,14 @@ in {
           };
           alertmanager-stripprefix = {
             stripPrefix.prefixes = [ "/alertmanager" ];
+          };
+          zabbix-stripprefix = {
+            stripPrefix.prefixes = [ "/zabbix" ];
+          };
+          zabbix-auth = {
+            basicAuth = {
+              users = [ "admin:$2y$10$8K1p/a0dCN.UFUAASL/2Ounwz1KNB.ZYQH/A7RsKNLq/q/gKZvP0W" ];  # admin:zabbix123
+            };
           };
           secure-headers = {
             headers = {
@@ -749,6 +809,11 @@ in {
           alertmanager = {
             loadBalancer.servers = [{
               url = "http://127.0.0.1:9093";
+            }];
+          };
+          zabbix = {
+            loadBalancer.servers = [{
+              url = "http://127.0.0.1:8080";
             }];
           };
         };

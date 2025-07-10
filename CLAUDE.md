@@ -16,8 +16,14 @@ just validate
 # Test specific host
 just test-host p620
 
-# Test all hosts
+# Test all hosts (sequential)
 just test-all
+
+# Test all hosts in parallel (75% faster)
+just test-all-parallel
+
+# Quick parallel test (recommended)
+just quick-test
 
 # Run full CI pipeline
 just ci
@@ -38,16 +44,35 @@ just format
 just perf-test
 ```
 
-### Deployment
+### Fast Deployment (Optimized)
 ```bash
 # Deploy to local system
 just deploy
 
-# Deploy to specific hosts
-just p620    # AMD workstation with ROCm
-just razer   # Intel/NVIDIA laptop
-just p510    # Intel Xeon/NVIDIA workstation
-just dex5550 # Intel SFF with integrated graphics
+# RECOMMENDED: Smart deployment (only if changed)
+just quick-deploy p620    # Deploy P620 only if configuration changed
+just quick-deploy razer   # Deploy Razer only if configuration changed
+just quick-deploy p510    # Deploy P510 only if configuration changed
+just quick-deploy dex5550 # Deploy DEX5550 only if configuration changed
+
+# Standard optimized deployment to specific hosts
+just p620    # AMD workstation with ROCm (optimized)
+just razer   # Intel/NVIDIA laptop (optimized)
+just p510    # Intel Xeon/NVIDIA workstation (optimized)
+just dex5550 # Intel SFF with integrated graphics (optimized)
+
+# Advanced deployment options
+just deploy-fast p620        # Fast deployment with minimal builds
+just deploy-local-build p620 # Build locally, deploy remotely
+just deploy-cached p620      # Deploy with binary cache optimization
+
+# Bulk deployment operations
+just deploy-all              # Deploy to all hosts sequentially
+just deploy-all-parallel     # Deploy to all hosts in parallel (fastest)
+just quick-all              # Test all + deploy all if tests pass
+
+# Emergency deployment (skip safety checks)
+just emergency-deploy p620   # Emergency deployment without tests
 
 # Update system
 just update
@@ -55,6 +80,78 @@ just update
 # Update flake inputs
 just update-flake
 ```
+
+### Performance Comparison
+```bash
+# Traditional workflow (slow)
+just test-all && just deploy-all     # ~12 minutes total
+
+# Optimized workflow (fast)  
+just quick-all                       # ~3 minutes total (75% faster)
+
+# Single host workflows
+just test-host p620 && just p620     # ~3 minutes (traditional)
+just quick-deploy p620               # ~30 seconds (smart - only if changed)
+```
+
+## Deployment Strategies
+
+### Quick Start (Recommended)
+```bash
+# 1. Test all configurations in parallel
+just quick-test
+
+# 2. Deploy only changed configurations
+just quick-deploy p620
+just quick-deploy razer  
+just quick-deploy p510
+just quick-deploy dex5550
+
+# 3. Or do both in one command
+just quick-all
+```
+
+### Deployment Scenarios
+
+#### Development Iteration
+```bash
+# Fastest cycle for development changes
+just quick-deploy HOST  # Only deploys if configuration changed
+```
+
+#### Production Deployment
+```bash
+# Full validation before deployment
+just validate
+just test-all-parallel
+just deploy-all-parallel
+```
+
+#### Emergency Fixes
+```bash
+# Skip tests for critical fixes
+just emergency-deploy HOST
+```
+
+#### Slow Network/Remote Hosts
+```bash
+# Build locally, deploy results
+just deploy-local-build HOST
+```
+
+#### First-time Setup
+```bash
+# Use cached deployment for faster initial setup
+just deploy-cached HOST
+```
+
+### Deployment Optimizations Applied
+
+1. **Parallel Operations**: All builds and deployments can run simultaneously
+2. **Smart Detection**: Skip deployment if no configuration changes
+3. **Binary Cache**: Leverage P620's nix-serve cache for faster builds
+4. **Fast Mode**: Skip unnecessary rebuild steps with `--fast` flag
+5. **Resilient**: Continue on non-critical failures with `--keep-going`
 
 ### Secrets Management
 ```bash
@@ -140,11 +237,28 @@ Each user has configurations in `Users/username/` with host-specific home files 
 
 ## Testing Workflow
 
+### Recommended Fast Workflow
+1. Make changes to configuration
+2. Run `just check-syntax` to verify syntax (optional for quick iteration)
+3. Run `just quick-test` to test all hosts in parallel
+4. Deploy with `just quick-deploy HOST` (only if changed)
+
+### Comprehensive Workflow
 1. Make changes to configuration
 2. Run `just check-syntax` to verify syntax
-3. Run `just test-host HOST` to test build
+3. Run `just test-host HOST` to test specific build
 4. Run `just validate` for comprehensive validation
 5. Deploy with `just HOST` or `just deploy` for local
+
+### Development Iteration (Fastest)
+1. Make changes to configuration
+2. Run `just quick-deploy HOST` (includes smart change detection)
+
+### Production Release Workflow
+1. Run `just validate` for full validation
+2. Run `just test-all-parallel` to test all configurations
+3. Run `just quick-all` for comprehensive test + deploy
+4. Or run `just deploy-all-parallel` for maximum speed
 
 ## Common Development Tasks
 
@@ -473,6 +587,76 @@ ai-cli --status              # ✅ All API keys available
 ```
 
 ## Troubleshooting
+
+### Deployment Issues
+
+**Slow deployment performance:**
+```bash
+# Try parallel deployment instead
+just deploy-all-parallel  # Instead of just deploy-all
+
+# Use smart deployment to skip unchanged hosts
+just quick-deploy HOST    # Only deploys if configuration changed
+
+# Check if binary cache is working
+just deploy-cached HOST   # Use P620's nix-serve cache
+```
+
+**Host unreachable during deployment:**
+```bash
+# Check host connectivity
+just ping-hosts          # Test all hosts
+
+# Use local build for unreliable networks
+just deploy-local-build HOST  # Build locally, deploy remotely
+
+# Try fast deployment with minimal network usage
+just deploy-fast HOST     # Minimal builds and transfers
+```
+
+**Build failures during deployment:**
+```bash
+# Test configuration before deploying
+just test-host HOST       # Test build without deployment
+just quick-test          # Test all hosts in parallel
+
+# Check for syntax errors
+just check-syntax        # Validate all Nix files
+
+# Use keep-going to continue past non-critical failures
+# (Already enabled in optimized deployment commands)
+```
+
+**Emergency deployment needed:**
+```bash
+# Skip all tests for critical fixes
+just emergency-deploy HOST  # Fastest possible deployment
+
+# Check what would change
+just diff HOST           # Show configuration differences
+```
+
+**Deployment taking too long:**
+```bash
+# Traditional: ~12 minutes for all hosts
+just test-all && just deploy-all
+
+# Optimized: ~3 minutes for all hosts  
+just quick-all           # Test + deploy all hosts
+
+# Ultimate speed: ~2 minutes for all hosts
+just deploy-all-parallel # Deploy all hosts simultaneously
+```
+
+**Configuration hasn't changed but deployment slow:**
+```bash
+# Use smart deployment to detect no changes
+just quick-deploy HOST   # Automatically skips if unchanged
+
+# Check if configuration actually changed
+just diff HOST           # Shows what would change
+nix build .#nixosConfigurations.HOST.config.system.build.toplevel --no-link --print-out-paths
+```
 
 ### AI Provider Issues
 

@@ -427,6 +427,13 @@ in {
     };
   };
 
+  # Zabbix agent configuration for P620
+  modules.monitoring.zabbix = {
+    enable = true;
+    mode = "agent";
+    serverHost = "dex5550";
+  };
+
   # Enable encrypted API keys
   secrets.apiKeys = {
     enable = true;
