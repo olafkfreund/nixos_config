@@ -44,11 +44,11 @@ in {
 
   # Use NetworkManager for DNS management - disable systemd-resolved
   services.resolved.enable = lib.mkForce false;
-  
+
   # Use NetworkManager for simple network management
   networking.networkmanager = {
     enable = true;
-    dns = "default";  # Use NetworkManager's built-in DNS
+    dns = "default"; # Use NetworkManager's built-in DNS
     # Configure settings using new structured format
     settings = {
       main = {
@@ -59,29 +59,29 @@ in {
     };
   };
   networking.useNetworkd = false;
-  
+
   # Set custom nameservers as fallback
-  networking.nameservers = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
+  networking.nameservers = ["192.168.1.222" "1.1.1.1" "8.8.8.8"];
 
   # Configure AI providers directly
   ai.providers = {
     enable = true;
     defaultProvider = "anthropic";
     enableFallback = true;
-    
+
     # Enable specific providers
     openai.enable = true;
     anthropic.enable = true;
     gemini.enable = true;
     ollama.enable = true;
   };
-  
+
   # Enable AI-powered system analysis
   ai.analysis = {
     enable = true;
     aiProvider = "anthropic";
     enableFallback = true;
-    
+
     features = {
       performanceAnalysis = true;
       resourceOptimization = true;
@@ -90,13 +90,13 @@ in {
       logAnalysis = true;
       securityAnalysis = true;
     };
-    
+
     # Analysis intervals
     intervals = {
-      performanceAnalysis = "hourly";  # Every hour
-      maintenanceAnalysis = "daily";   # Once daily
-      configDriftCheck = "*:0/6";      # Every 6 hours
-      logAnalysis = "*:0/4";           # Every 4 hours
+      performanceAnalysis = "hourly"; # Every hour
+      maintenanceAnalysis = "daily"; # Once daily
+      configDriftCheck = "*:0/6"; # Every 6 hours
+      logAnalysis = "*:0/4"; # Every 4 hours
     };
   };
 
@@ -112,7 +112,7 @@ in {
       lua = true;
       nix = true;
       shell = true;
-      devshell = false; # Temporarily disabled due to patch issue
+      devshell = true; # Temporarily disabled due to patch issue
       python = true;
       nodejs = true;
     };
@@ -169,14 +169,14 @@ in {
   # Monitoring configuration - Razer as client
   monitoring = {
     enable = true;
-    mode = "client";  # Monitored by dex5550
+    mode = "client"; # Monitored by dex5550
     serverHost = "dex5550";
-    
+
     features = {
       nodeExporter = true;
       nixosMetrics = true;
-      alerting = false;  # Only server handles alerting
-      gpuMetrics = true;  # Enable NVIDIA GPU monitoring
+      alerting = false; # Only server handles alerting
+      gpuMetrics = true; # Enable NVIDIA GPU monitoring
     };
   };
 
@@ -199,7 +199,6 @@ in {
       keep-derivations = true
     '';
   };
-
 
   # Disable secure-dns to use dex5550 DNS server for internal domains
   services.secure-dns.enable = false;
@@ -233,7 +232,6 @@ in {
   systemd.services = {
     # Disable network wait services to improve boot time
     NetworkManager-wait-online.enable = lib.mkForce false;
-    
   };
 
   # Use standard NetworkManager for laptop - useNetworkd already set above
