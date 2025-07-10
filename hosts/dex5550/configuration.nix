@@ -743,10 +743,10 @@ in {
             tls.certResolver = "letsencrypt";
           };
           
-          # Zabbix router - test without path prefix
+          # Zabbix router
           zabbix = {
-            rule = "Host(`zabbix.home.freundcloud.com`)";
-            middlewares = [ "secure-headers" ];
+            rule = "Host(`home.freundcloud.com`) && PathPrefix(`/zabbix`)";
+            middlewares = [ "zabbix-stripprefix" "secure-headers" ];
             service = "zabbix";
             tls.certResolver = "letsencrypt";
           };
