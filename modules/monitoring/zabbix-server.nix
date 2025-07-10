@@ -154,6 +154,7 @@ in {
       home = "/var/lib/zabbix";
       createHome = true;
       shell = pkgs.bash;
+      extraGroups = mkIf config.virtualisation.docker.enable [ "docker" ];
     };
     
     users.groups.zabbix = {};

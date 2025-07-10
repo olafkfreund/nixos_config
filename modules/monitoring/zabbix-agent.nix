@@ -77,11 +77,12 @@ in {
       };
     };
 
-    # Create zabbix user for agent
+    # Create zabbix user for agent (only if not already created by server)
     users.users.zabbix = mkIf (!config.services.zabbix-monitoring.server.enable) {
       isSystemUser = true;
       group = "zabbix";
       shell = pkgs.bash;
+      extraGroups = mkIf config.virtualisation.docker.enable [ "docker" ];
     };
     
     users.groups.zabbix = mkIf (!config.services.zabbix-monitoring.server.enable) {};
@@ -103,8 +104,5 @@ in {
         systemctl reload zabbix-agent2 2>/dev/null || true
       '';
     };
-
-    # Add zabbix user to docker group if docker is enabled
-    users.users.zabbix.extraGroups = mkIf config.virtualisation.docker.enable [ "docker" ];
   };
 }
