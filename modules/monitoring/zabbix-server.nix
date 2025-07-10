@@ -159,22 +159,6 @@ in {
         passwordFile = "/run/agenix/zabbix-db-password";
       };
       
-      settings = {
-        "DB[TYPE]" = "POSTGRESQL";
-        "DB[SERVER]" = cfg.database.host;
-        "DB[DATABASE]" = cfg.database.name;
-        "DB[USER]" = cfg.database.user;
-        
-        # PHP settings
-        "max_execution_time" = "300";
-        "memory_limit" = "128M";
-        "post_max_size" = "16M";
-        "upload_max_filesize" = "8M";
-        "max_input_time" = "300";
-        "max_input_vars" = "10000";
-        "date.timezone" = "Europe/Oslo";
-      };
-      
       virtualHost = {
         listen = [
           {
