@@ -75,7 +75,8 @@ in {
         rPackages.chatgpt    # R interface for ChatGPT
         tgpt                 # Terminal GPT - simple CLI for multiple AI models
         shell-gpt            # Shell integration for GPT models
-        yai                  # Yet Another AI CLI tool
+        yai
+        codex                # Yet Another AI CLI tool
       ] ++
       
       # Code assistants  
