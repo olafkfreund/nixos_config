@@ -619,6 +619,191 @@ in {
   # Nix configuration
   nix.settings.allowed-users = ["nix-serve"];
 
+  # Performance Optimization Configuration (Phase 10.4)
+  # High-performance AMD workstation profile
+  system.resourceManager = {
+    enable = true;
+    profile = "performance";
+    
+    cpuManagement = {
+      enable = true;
+      dynamicGovernor = true;
+      affinityOptimization = true;
+      coreReservation = false;  # Use all cores for maximum performance
+    };
+    
+    memoryManagement = {
+      enable = true;
+      dynamicSwap = true;
+      hugePagesOptimization = true;
+      memoryCompression = false;  # Disable for performance
+      oomProtection = true;
+    };
+    
+    ioManagement = {
+      enable = true;
+      dynamicScheduler = true;
+      ioNiceOptimization = true;
+      cacheOptimization = true;
+    };
+    
+    networkManagement = {
+      enable = true;
+      trafficShaping = false;
+      connectionOptimization = true;
+    };
+  };
+  
+  # Network performance tuning
+  networking.performanceTuning = {
+    enable = true;
+    profile = "throughput";  # Optimize for AI workload throughput
+    
+    tcpOptimization = {
+      enable = true;
+      congestionControl = "bbr";
+      windowScaling = true;
+      fastOpen = true;
+      lowLatency = false;  # Prioritize throughput over latency
+    };
+    
+    bufferOptimization = {
+      enable = true;
+      receiveBuffer = 33554432;  # 32MB for high-throughput AI workloads
+      sendBuffer = 33554432;     # 32MB for high-throughput AI workloads
+      autotuning = true;
+    };
+    
+    interHostOptimization = {
+      enable = true;
+      hosts = ["dex5550" "p510" "razer"];
+      jumboFrames = false;  # Keep disabled for compatibility
+      routeOptimization = true;
+    };
+    
+    dnsOptimization = {
+      enable = true;
+      caching = true;
+      parallelQueries = true;
+      customServers = ["192.168.1.222" "1.1.1.1"];
+    };
+    
+    monitoringOptimization = {
+      enable = true;
+      compression = true;
+      batchingInterval = 5;  # More frequent for performance workstation
+      prioritization = true;
+    };
+  };
+  
+  # Storage performance optimization
+  storage.performanceOptimization = {
+    enable = true;
+    profile = "performance";
+    
+    ioSchedulerOptimization = {
+      enable = true;
+      dynamicScheduling = true;
+      ssdOptimization = true;
+      hddOptimization = true;
+    };
+    
+    filesystemOptimization = {
+      enable = true;
+      readaheadOptimization = true;
+      cacheOptimization = true;
+      compressionOptimization = false;  # Disable for performance
+    };
+    
+    nvmeOptimization = {
+      enable = true;
+      queueDepth = 64;  # High queue depth for performance
+      polling = true;
+      multiQueue = true;
+    };
+    
+    diskCacheOptimization = {
+      enable = true;
+      writeCache = true;
+      readCache = true;
+      barrierOptimization = false;  # Keep safe
+    };
+    
+    tmpfsOptimization = {
+      enable = true;
+      tmpSize = "4G";      # Large temp space for AI workloads
+      varTmpSize = "2G";
+      devShmSize = "50%";
+    };
+  };
+  
+  # Performance analytics
+  monitoring.performanceAnalytics = {
+    enable = true;
+    dataRetention = "30d";
+    analysisInterval = "1m";  # Frequent analysis for performance workstation
+    
+    metricsCollection = {
+      enable = true;
+      systemMetrics = true;
+      applicationMetrics = true;
+      networkMetrics = true;
+      storageMetrics = true;
+      aiMetrics = true;
+    };
+    
+    analytics = {
+      enable = true;
+      trendAnalysis = true;
+      anomalyDetection = true;
+      predictiveAnalysis = true;
+      bottleneckDetection = true;
+    };
+    
+    reporting = {
+      enable = true;
+      dailyReports = true;
+      weeklyReports = true;
+      alertThresholds = true;
+    };
+    
+    dashboards = {
+      enable = true;
+      realTimeMetrics = true;
+      historicalAnalysis = true;
+      customMetrics = true;
+    };
+  };
+  
+  # AI-powered automated performance tuning
+  ai.autoPerformanceTuner = {
+    enable = true;
+    aiProvider = "anthropic";
+    enableFallback = true;
+    tuningInterval = "30min";  # Frequent tuning for performance workstation
+    safeMode = false;  # Allow aggressive optimizations on performance workstation
+    
+    features = {
+      adaptiveTuning = true;
+      predictiveOptimization = true;
+      workloadDetection = true;
+      resourceBalancing = true;
+      anomalyCorrection = true;
+    };
+    
+    thresholds = {
+      cpuUtilization = 75;     # Lower threshold for performance workstation
+      memoryUtilization = 80;
+      ioWait = 25;            # Lower threshold for fast storage
+      responseTime = 3000;    # Stricter response time requirement
+    };
+    
+    notifications = {
+      enable = true;
+      logFile = "/var/log/ai-analysis/auto-tuner-p620.log";
+    };
+  };
+
   # Package configurations
   nixpkgs.config.permittedInsecurePackages = [
     "olm-3.2.16"

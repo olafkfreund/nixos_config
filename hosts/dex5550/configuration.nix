@@ -792,6 +792,189 @@ in {
     };
   };
 
+  # Performance Optimization Configuration (Phase 10.4)
+  # Balanced monitoring server profile
+  system.resourceManager = {
+    enable = true;
+    profile = "balanced";
+    
+    cpuManagement = {
+      enable = true;
+      dynamicGovernor = true;
+      affinityOptimization = true;
+      coreReservation = true;   # Reserve 2 cores for critical monitoring services
+      reservedCores = 2;
+    };
+    
+    memoryManagement = {
+      enable = true;
+      dynamicSwap = true;
+      hugePagesOptimization = true;
+      memoryCompression = true;  # Enable for monitoring server efficiency
+      oomProtection = true;
+    };
+    
+    ioManagement = {
+      enable = true;
+      dynamicScheduler = true;
+      ioNiceOptimization = true;
+      cacheOptimization = true;
+    };
+    
+    networkManagement = {
+      enable = true;
+      trafficShaping = true;    # Enable for monitoring traffic prioritization
+      connectionOptimization = true;
+    };
+  };
+  
+  # Network performance tuning for monitoring server
+  networking.performanceTuning = {
+    enable = true;
+    profile = "balanced";
+    
+    tcpOptimization = {
+      enable = true;
+      congestionControl = "bbr";
+      windowScaling = true;
+      fastOpen = true;
+      lowLatency = true;  # Important for monitoring responsiveness
+    };
+    
+    bufferOptimization = {
+      enable = true;
+      receiveBuffer = 16777216;  # 16MB for monitoring data
+      sendBuffer = 16777216;     # 16MB for monitoring data
+      autotuning = true;
+    };
+    
+    interHostOptimization = {
+      enable = true;
+      hosts = ["p620" "p510" "razer"];
+      jumboFrames = false;
+      routeOptimization = true;
+    };
+    
+    dnsOptimization = {
+      enable = true;
+      caching = true;
+      parallelQueries = true;
+      customServers = ["127.0.0.1" "1.1.1.1"];  # Use local DNS first
+    };
+    
+    monitoringOptimization = {
+      enable = true;
+      compression = true;
+      batchingInterval = 15;  # Standard interval for monitoring server
+      prioritization = true;
+    };
+  };
+  
+  # Storage performance optimization for monitoring server
+  storage.performanceOptimization = {
+    enable = true;
+    profile = "reliability";  # Prioritize reliability for monitoring data
+    
+    ioSchedulerOptimization = {
+      enable = true;
+      dynamicScheduling = true;
+      ssdOptimization = true;
+      hddOptimization = false;  # DEX5550 uses SSD
+    };
+    
+    filesystemOptimization = {
+      enable = true;
+      readaheadOptimization = true;
+      cacheOptimization = true;
+      compressionOptimization = false;
+    };
+    
+    nvmeOptimization = {
+      enable = false;  # DEX5550 uses SATA SSD
+    };
+    
+    diskCacheOptimization = {
+      enable = true;
+      writeCache = true;
+      readCache = true;
+      barrierOptimization = false;  # Keep barriers for data integrity
+    };
+    
+    tmpfsOptimization = {
+      enable = true;
+      tmpSize = "1G";      # Conservative for SFF system
+      varTmpSize = "512M";
+      devShmSize = "25%";
+    };
+  };
+  
+  # Performance analytics for monitoring server
+  monitoring.performanceAnalytics = {
+    enable = true;
+    dataRetention = "60d";  # Longer retention for monitoring server
+    analysisInterval = "5m";
+    
+    metricsCollection = {
+      enable = true;
+      systemMetrics = true;
+      applicationMetrics = true;
+      networkMetrics = true;
+      storageMetrics = true;
+      aiMetrics = true;
+    };
+    
+    analytics = {
+      enable = true;
+      trendAnalysis = true;
+      anomalyDetection = true;
+      predictiveAnalysis = true;
+      bottleneckDetection = true;
+    };
+    
+    reporting = {
+      enable = true;
+      dailyReports = true;
+      weeklyReports = true;
+      alertThresholds = true;
+    };
+    
+    dashboards = {
+      enable = true;
+      realTimeMetrics = true;
+      historicalAnalysis = true;
+      customMetrics = true;
+    };
+  };
+  
+  # AI-powered automated performance tuning for monitoring server
+  ai.autoPerformanceTuner = {
+    enable = true;
+    aiProvider = "anthropic";
+    enableFallback = true;
+    tuningInterval = "hourly";  # Less frequent for stable monitoring server
+    safeMode = true;  # Conservative tuning for critical monitoring infrastructure
+    
+    features = {
+      adaptiveTuning = true;
+      predictiveOptimization = true;
+      workloadDetection = true;
+      resourceBalancing = true;
+      anomalyCorrection = true;
+    };
+    
+    thresholds = {
+      cpuUtilization = 80;     # Higher threshold for monitoring server
+      memoryUtilization = 85;  # Important threshold for Grafana/Prometheus
+      ioWait = 30;
+      responseTime = 5000;     # Monitoring queries can be slower
+    };
+    
+    notifications = {
+      enable = true;
+      logFile = "/var/log/ai-analysis/auto-tuner-dex5550.log";
+    };
+  };
+
   nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16" "python3.12-youtube-dl-2021.12.17"];
 
   system.stateVersion = "25.11";

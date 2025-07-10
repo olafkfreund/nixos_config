@@ -60,5 +60,12 @@
     
     # System optimization modules
     ./system/fstrim-optimization.nix
+    
+    # Performance optimization modules (Phase 10.4)
+    ./system/resource-manager.nix
+    ./networking/performance-tuning.nix
+    ./storage/performance-optimization.nix
+    ./monitoring/performance-analytics.nix
+    ./ai/auto-performance-tuner.nix
   ];
 }
