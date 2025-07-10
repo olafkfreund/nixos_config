@@ -333,10 +333,12 @@ in {
             
             # Network latency to configured hosts
             LATENCY_STATS=$(
-              ${concatStringsSep "\n" (map (host: ''
-                LATENCY=$(ping -c 1 -W 1 ${host} 2>/dev/null | grep "time=" | sed 's/.*time=//;s/ ms//' || echo "timeout")
-                echo "\"${host}\": \"$LATENCY\""
-              '') cfg.interHostOptimization.hosts)} | paste -sd, -
+              {
+                ${concatStringsSep "\n" (map (host: ''
+                  LATENCY=$(ping -c 1 -W 1 ${host} 2>/dev/null | grep "time=" | sed 's/.*time=//;s/ ms//' || echo "timeout")
+                  echo "\"${host}\": \"$LATENCY\""
+                '') cfg.interHostOptimization.hosts)}
+              } | paste -sd, -
             )
             
             # DNS resolution time
@@ -365,10 +367,8 @@ in {
     };
     
     # Network tuning based on profile
-    boot.kernel.sysctl = {
-      # Core network settings
-      "net.core.rmem_default" = mkDefault 262144;
-      "net.core.wmem_default" = mkDefault 262144;
+    boot.kernel.sysctl = mkIf cfg.enable {
+      # Core network settings (only set if not already defined by other modules)
       "net.core.rmem_max" = mkDefault cfg.bufferOptimization.receiveBuffer;
       "net.core.wmem_max" = mkDefault cfg.bufferOptimization.sendBuffer;
       "net.core.netdev_max_backlog" = mkDefault (if cfg.profile == "throughput" then 30000 else 5000);
@@ -422,12 +422,12 @@ in {
       enable = true;
       dnssec = "false";  # Disable for performance
       llmnr = "true";
-      multicastDns = "true";
       fallbackDns = cfg.dnsOptimization.customServers;
       extraConfig = ''
         Cache=yes
         CacheFromLocalhost=yes
         DNSStubListener=yes
+        MulticastDNS=yes
       '';
     };
     

@@ -420,18 +420,8 @@ EOF
     };
     
     # Storage optimization kernel parameters
-    boot.kernel.sysctl = {
-      # VM settings for storage performance
-      "vm.dirty_background_ratio" = mkDefault (
-        if cfg.profile == "performance" then 5
-        else if cfg.profile == "balanced" then 10
-        else 5
-      );
-      "vm.dirty_ratio" = mkDefault (
-        if cfg.profile == "performance" then 10
-        else if cfg.profile == "balanced" then 20
-        else 10
-      );
+    boot.kernel.sysctl = mkIf cfg.enable {
+      # VM settings for storage performance (lower priority than resource manager)
       "vm.dirty_writeback_centisecs" = mkDefault (
         if cfg.profile == "performance" then 1500
         else if cfg.profile == "balanced" then 1500
@@ -443,16 +433,7 @@ EOF
         else 1000
       );
       
-      # I/O settings
-      "vm.vfs_cache_pressure" = mkDefault (
-        if cfg.profile == "performance" then 50
-        else 100
-      );
-      "vm.swappiness" = mkDefault (
-        if cfg.profile == "performance" then 1
-        else if cfg.profile == "balanced" then 10
-        else 60
-      );
+      # I/O settings (avoid conflicts with resource manager)
       
       # Read-ahead settings
       "vm.page-cluster" = mkDefault 3;  # Optimize page clustering
@@ -461,7 +442,7 @@ EOF
     # Storage performance packages
     environment.systemPackages = with pkgs; [
       iotop        # I/O monitoring
-      iostat       # I/O statistics
+      sysstat      # Contains iostat and other system statistics tools
       hdparm       # Hard disk parameters
       smartmontools # SMART monitoring
       nvme-cli     # NVMe management

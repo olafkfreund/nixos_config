@@ -437,20 +437,20 @@ in {
           
           # Create baseline file
           cat > "$BASELINE_FILE" << EOF
-          {
-            "calibrated": "$(date -Iseconds)",
-            "baseline_metrics": {
-              "cpu_usage": $CPU_BASELINE,
-              "memory_usage": $MEMORY_BASELINE,
-              "io_wait": $IO_BASELINE
-            },
-            "optimization_targets": {
-              "cpu_efficiency": $(echo "$CPU_BASELINE * 0.8" | bc),
-              "memory_efficiency": $(echo "$MEMORY_BASELINE * 0.9" | bc),
-              "io_efficiency": $(echo "$IO_BASELINE * 0.7" | bc)
-            }
-          }
-          EOF
+{
+  "calibrated": "$(date -Iseconds)",
+  "baseline_metrics": {
+    "cpu_usage": $CPU_BASELINE,
+    "memory_usage": $MEMORY_BASELINE,
+    "io_wait": $IO_BASELINE
+  },
+  "optimization_targets": {
+    "cpu_efficiency": $(echo "$CPU_BASELINE * 0.8" | bc),
+    "memory_efficiency": $(echo "$MEMORY_BASELINE * 0.9" | bc),
+    "io_efficiency": $(echo "$IO_BASELINE * 0.7" | bc)
+  }
+}
+EOF
           
           echo "[$(date)] Performance baseline calibrated:"
           echo "[$(date)] CPU Baseline: $CPU_BASELINE%"
@@ -489,23 +489,23 @@ in {
             
             # Create assessment report
             cat > "$ASSESSMENT_FILE" << EOF
-            {
-              "assessment_date": "$(date -Iseconds)",
-              "current_metrics": {
-                "cpu_usage": $CURRENT_CPU,
-                "memory_usage": $CURRENT_MEMORY
-              },
-              "baseline_metrics": {
-                "cpu_usage": $BASELINE_CPU,
-                "memory_usage": $BASELINE_MEMORY
-              },
-              "improvements": {
-                "cpu_improvement_percent": $CPU_IMPROVEMENT,
-                "memory_improvement_percent": $MEMORY_IMPROVEMENT
-              },
-              "optimization_effectiveness": "$(echo "$CPU_IMPROVEMENT + $MEMORY_IMPROVEMENT" | bc | awk '{if($1>0) print "positive"; else print "neutral"}')"
-            }
-            EOF
+{
+  "assessment_date": "$(date -Iseconds)",
+  "current_metrics": {
+    "cpu_usage": $CURRENT_CPU,
+    "memory_usage": $CURRENT_MEMORY
+  },
+  "baseline_metrics": {
+    "cpu_usage": $BASELINE_CPU,
+    "memory_usage": $BASELINE_MEMORY
+  },
+  "improvements": {
+    "cpu_improvement_percent": $CPU_IMPROVEMENT,
+    "memory_improvement_percent": $MEMORY_IMPROVEMENT
+  },
+  "optimization_effectiveness": "$(echo "$CPU_IMPROVEMENT + $MEMORY_IMPROVEMENT" | bc | awk '{if(\$1>0) print "positive"; else print "neutral"}')"
+}
+EOF
             
             echo "[$(date)] Impact assessment completed:"
             echo "[$(date)] CPU Improvement: $CPU_IMPROVEMENT%"

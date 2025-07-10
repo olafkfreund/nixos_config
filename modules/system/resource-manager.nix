@@ -475,11 +475,7 @@ in {
       "vm.dirty_background_ratio" = mkDefault 10;
       "vm.dirty_ratio" = mkDefault 20;
       
-      # Network optimization
-      "net.core.rmem_default" = mkDefault 262144;
-      "net.core.wmem_default" = mkDefault 262144;
-      "net.core.rmem_max" = mkDefault 16777216;
-      "net.core.wmem_max" = mkDefault 16777216;
+      # Note: Network optimization settings moved to networking.performanceTuning module
     };
     
     # System packages for resource management
