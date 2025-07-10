@@ -18,6 +18,5 @@ result-*
 .DS_Store
 Thumbs.db
 
-# Secrets management
-secrets.nix
-secrets/*.age
+# Secrets management - plaintext secrets only
+# Note: .age files (encrypted) should be committed, plaintext should not
