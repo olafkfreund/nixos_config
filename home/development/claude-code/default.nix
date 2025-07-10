@@ -77,7 +77,7 @@
       fi
 
       mkdir -p $out/bin
-      makeWrapper ${nodejs}/bin/node $out/bin/claude-code \
+      makeWrapper ${nodejs}/bin/node $out/bin/claude \
         --add-flags "$out/lib/node_modules/@anthropic-ai/claude-code/$CLI_FILE"
 
       runHook postInstall
