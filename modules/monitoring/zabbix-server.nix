@@ -158,7 +158,6 @@ in {
         name = cfg.database.name;
         user = cfg.database.user;
         passwordFile = "/run/agenix/zabbix-db-password";
-        createLocally = false;
       };
       
       virtualHost = {
