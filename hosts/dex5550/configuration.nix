@@ -743,10 +743,10 @@ in {
             tls.certResolver = "letsencrypt";
           };
           
-          # Zabbix router
+          # Zabbix router - test without path prefix
           zabbix = {
-            rule = "Host(`home.freundcloud.com`) && PathPrefix(`/zabbix`)";
-            middlewares = [ "zabbix-stripprefix" "secure-headers" "zabbix-auth" ];
+            rule = "Host(`zabbix.home.freundcloud.com`)";
+            middlewares = [ "secure-headers" ];
             service = "zabbix";
             tls.certResolver = "letsencrypt";
           };
@@ -773,11 +773,6 @@ in {
           };
           zabbix-stripprefix = {
             stripPrefix.prefixes = [ "/zabbix" ];
-          };
-          zabbix-auth = {
-            basicAuth = {
-              users = [ "admin:$2y$10$8K1p/a0dCN.UFUAASL/2Ounwz1KNB.ZYQH/A7RsKNLq/q/gKZvP0W" ];  # admin:zabbix123
-            };
           };
           secure-headers = {
             headers = {
