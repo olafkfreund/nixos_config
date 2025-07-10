@@ -112,7 +112,6 @@ in {
       settings = {
         ListenPort = 10051;
         ListenIP = "0.0.0.0";
-        DBName = cfg.database.path;
         
         # Performance settings for small installation
         StartPollers = 8;
