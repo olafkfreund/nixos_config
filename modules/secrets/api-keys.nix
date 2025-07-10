@@ -65,6 +65,13 @@ in {
         owner = username;
         group = "users";
       };
+      
+      tailscale-auth-key = {
+        file = ../../secrets/tailscale-auth-key.age;
+        mode = "0600";
+        owner = "root";
+        group = "root";
+      };
     };
 
     # Note: System environment variables removed - use shell initialization instead

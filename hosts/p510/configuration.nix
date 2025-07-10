@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   inputs,
   lib,
@@ -36,6 +37,23 @@ in {
 
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "server";
+  
+  # Tailscale VPN Configuration - P510 media server
+  networking.tailscale = {
+    enable = true;
+    authKeyFile = config.age.secrets.tailscale-auth-key.path;
+    hostname = "p510-media";
+    acceptRoutes = true;
+    acceptDns = false;  # Keep local DNS setup
+    ssh = true;
+    shields = true;
+    useRoutingFeatures = "client";  # Accept routes from other nodes
+    extraUpFlags = [
+      "--operator=olafkfreund"
+      "--accept-risk=lose-ssh"
+      "--advertise-tags=tag:server,tag:media"
+    ];
+  };
 
   # Use static DNS configuration for reliable internal resolution
   services.resolved.enable = lib.mkForce false;

@@ -34,4 +34,7 @@ in {
   "secrets/postgres-password.age".publicKeys = allUsers ++ servers;
   "secrets/nextcloud-admin-password.age".publicKeys = allUsers ++ servers;
   "secrets/smtp-password.age".publicKeys = allUsers ++ allHosts;
+  
+  # Tailscale secrets
+  "secrets/tailscale-auth-key.age".publicKeys = allUsers ++ allHosts;
 }

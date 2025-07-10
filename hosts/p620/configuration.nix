@@ -42,6 +42,23 @@ in {
 
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "server";
+  
+  # Tailscale VPN Configuration
+  networking.tailscale = {
+    enable = true;
+    authKeyFile = config.age.secrets.tailscale-auth-key.path;
+    hostname = "p620-workstation";
+    subnet = "192.168.1.0/24";  # Advertise local subnet
+    acceptRoutes = true;
+    acceptDns = false;  # Keep local DNS setup
+    ssh = true;
+    shields = true;
+    useRoutingFeatures = "both";  # Can route and accept routes
+    extraUpFlags = [
+      "--operator=olafkfreund"
+      "--accept-risk=lose-ssh"
+    ];
+  };
 
   # Use static DNS configuration for reliable internal resolution
   services.resolved.enable = lib.mkForce false;

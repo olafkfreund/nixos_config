@@ -67,5 +67,8 @@
     ./storage/performance-optimization.nix
     ./monitoring/performance-analytics.nix
     ./ai/auto-performance-tuner.nix
+    
+    # Networking modules
+    ./networking/tailscale.nix
   ];
 }

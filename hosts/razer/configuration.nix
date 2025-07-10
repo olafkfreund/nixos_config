@@ -41,6 +41,23 @@ in {
 
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "desktop";
+  
+  # Tailscale VPN Configuration - Razer mobile laptop
+  networking.tailscale = {
+    enable = true;
+    authKeyFile = config.age.secrets.tailscale-auth-key.path;
+    hostname = "razer-laptop";
+    acceptRoutes = true;
+    acceptDns = false;  # Keep NetworkManager DNS
+    ssh = true;
+    shields = true;
+    useRoutingFeatures = "client";  # Client that accepts routes
+    extraUpFlags = [
+      "--operator=olafkfreund"
+      "--accept-risk=lose-ssh"
+      "--advertise-tags=tag:laptop,tag:mobile"
+    ];
+  };
 
   # Use NetworkManager for DNS management - disable systemd-resolved
   services.resolved.enable = lib.mkForce false;

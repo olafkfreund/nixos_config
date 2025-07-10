@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   lib,
   hostUsers,
@@ -21,6 +22,25 @@ in {
 
   # Choose networking profile: "server" for server configuration
   networking.profile = "server";
+  
+  # Tailscale VPN Configuration - DEX5550 as exit node and subnet router
+  networking.tailscale = {
+    enable = true;
+    authKeyFile = config.age.secrets.tailscale-auth-key.path;
+    hostname = "dex5550-server";
+    exitNode = true;  # Enable as exit node for external internet access
+    subnet = "192.168.1.0/24";  # Advertise home network subnet
+    acceptRoutes = true;
+    acceptDns = false;  # Use local BIND9 DNS
+    ssh = true;
+    shields = false;  # Disable shields for server to allow incoming connections
+    useRoutingFeatures = "server";  # Act as router for other nodes
+    extraUpFlags = [
+      "--operator=olafkfreund"
+      "--accept-risk=lose-ssh"
+      "--advertise-tags=tag:server,tag:exitnode"
+    ];
+  };
 
   # Configure AI providers directly - lightweight config for low-power system
   ai.providers = {
