@@ -91,9 +91,17 @@ let
     analysis_result="Basic system metrics collected successfully. CPU: $cpu_usage%, Memory: $memory_usage%, Disk: $disk_usage%, Load: $load_avg"
     
     if [ $? -eq 0 ] && [ -n "$analysis_result" ]; then
-        # Save analysis results
+        # Save analysis results with fallback directory creation
         output_file="$OUTPUT_PATH/reports/system_analysis_$(date +%Y%m%d_%H%M%S).txt"
-        mkdir -p "$(dirname "$output_file")"
+        if ! mkdir -p "$(dirname "$output_file")" 2>/dev/null; then
+            # Fallback to user directory if system directory not writable
+            output_file="$HOME/.local/share/ai-analysis/reports/system_analysis_$(date +%Y%m%d_%H%M%S).txt"
+            mkdir -p "$(dirname "$output_file")" 2>/dev/null || {
+                log "ERROR: Cannot create reports directory"
+                exit 1
+            }
+            log "Using fallback reports directory: $(dirname "$output_file")"
+        fi
         
         {
             echo "=== AI System Analysis Report ==="
@@ -122,20 +130,35 @@ let
   configBaselineScript = pkgs.writeShellScriptBin "ai-config-baseline" ''
     set -euo pipefail
     
-    export PATH="${lib.makeBinPath (with pkgs; [ curl jq coreutils util-linux findutils nix systemd gnugrep gawk hostname kmod iproute2 gnused ])}"
+    export PATH="${lib.makeBinPath (with pkgs; [ curl jq coreutils util-linux findutils nix systemd gnugrep gawk inetutils kmod iproute2 gnused ])}"
     export OUTPUT_PATH="''${OUTPUT_PATH:-/var/lib/ai-analysis}"
     export LOG_FILE="/var/log/ai-analysis/config-drift.log"
     
     # Logging function
     log() {
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
+        if [ -w "$(dirname "$LOG_FILE")" ]; then
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$LOG_FILE" 2>/dev/null || true
+        else
+            # Fallback to user-accessible log location
+            mkdir -p "$HOME/.local/share/ai-analysis/logs" 2>/dev/null || true
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$HOME/.local/share/ai-analysis/logs/config-drift.log" 2>/dev/null || true
+        fi
     }
     
     log "Starting configuration baseline capture"
     
-    # Create baseline directory
+    # Create baseline directory with fallback
     baseline_dir="$OUTPUT_PATH/config-baseline"
-    mkdir -p "$baseline_dir"
+    if ! mkdir -p "$baseline_dir" 2>/dev/null; then
+        # Fallback to user directory if system directory not writable
+        baseline_dir="$HOME/.local/share/ai-analysis/config-baseline"
+        mkdir -p "$baseline_dir" 2>/dev/null || {
+            log "ERROR: Cannot create baseline directory"
+            exit 1
+        }
+        log "Using fallback baseline directory: $baseline_dir"
+    fi
     
     # Create timestamp for this baseline
     timestamp=$(date +%Y%m%d_%H%M%S)
@@ -233,9 +256,17 @@ EOF
     
     log "Starting AI Capacity Planning Analysis"
     
-    # Create analysis directory
+    # Create analysis directory with fallback
     planning_dir="$OUTPUT_PATH/capacity-planning"
-    mkdir -p "$planning_dir"
+    if ! mkdir -p "$planning_dir" 2>/dev/null; then
+        # Fallback to user directory if system directory not writable
+        planning_dir="$HOME/.local/share/ai-analysis/capacity-planning"
+        mkdir -p "$planning_dir" 2>/dev/null || {
+            log "ERROR: Cannot create capacity planning directory"
+            exit 1
+        }
+        log "Using fallback capacity planning directory: $planning_dir"
+    fi
     
     # Generate timestamp for this analysis
     timestamp=$(date +%Y%m%d_%H%M%S)
@@ -469,9 +500,17 @@ EOF
     
     log "Starting AI Log Analysis"
     
-    # Create analysis directory
+    # Create analysis directory with fallback
     analysis_dir="$OUTPUT_PATH/log-analysis"
-    mkdir -p "$analysis_dir"
+    if ! mkdir -p "$analysis_dir" 2>/dev/null; then
+        # Fallback to user directory if system directory not writable
+        analysis_dir="$HOME/.local/share/ai-analysis/log-analysis"
+        mkdir -p "$analysis_dir" 2>/dev/null || {
+            log "ERROR: Cannot create log analysis directory"
+            exit 1
+        }
+        log "Using fallback log analysis directory: $analysis_dir"
+    fi
     
     # Analyze recent system logs
     timestamp=$(date +%Y%m%d_%H%M%S)
@@ -586,13 +625,20 @@ EOF
   configDriftScript = pkgs.writeShellScriptBin "ai-config-drift" ''
     set -euo pipefail
     
-    export PATH="${lib.makeBinPath (with pkgs; [ curl jq coreutils util-linux bc findutils nix systemd gnugrep gawk hostname kmod iproute2 gnused ])}"
+    export PATH="${lib.makeBinPath (with pkgs; [ curl jq coreutils util-linux bc findutils nix systemd gnugrep gawk inetutils kmod iproute2 gnused ])}"
     export OUTPUT_PATH="''${OUTPUT_PATH:-/var/lib/ai-analysis}"
     export LOG_FILE="/var/log/ai-analysis/config-drift.log"
     
     # Logging function
     log() {
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
+        if [ -w "$(dirname "$LOG_FILE")" ]; then
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$LOG_FILE" 2>/dev/null || true
+        else
+            # Fallback to user-accessible log location
+            mkdir -p "$HOME/.local/share/ai-analysis/logs" 2>/dev/null || true
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$HOME/.local/share/ai-analysis/logs/config-drift.log" 2>/dev/null || true
+        fi
     }
     
     # AI query function
@@ -613,7 +659,18 @@ EOF
     
     baseline_dir="$OUTPUT_PATH/config-baseline"
     drift_dir="$OUTPUT_PATH/config-drift"
-    mkdir -p "$drift_dir"
+    
+    # Create drift directory with fallback
+    if ! mkdir -p "$drift_dir" 2>/dev/null; then
+        # Fallback to user directory if system directory not writable
+        drift_dir="$HOME/.local/share/ai-analysis/config-drift"
+        baseline_dir="$HOME/.local/share/ai-analysis/config-baseline"
+        mkdir -p "$drift_dir" 2>/dev/null || {
+            log "ERROR: Cannot create config drift directory"
+            exit 1
+        }
+        log "Using fallback drift directory: $drift_dir"
+    fi
     
     # Check if baseline exists
     if [ ! -f "$baseline_dir/current_baseline.json" ]; then
@@ -937,6 +994,12 @@ in {
             Group = "ai-analysis";
             ExecStart = "${analysisScript}/bin/ai-analyze-system";
             
+            # Directories
+            StateDirectory = "ai-analysis";
+            StateDirectoryMode = "0755";
+            LogsDirectory = "ai-analysis";
+            LogsDirectoryMode = "0755";
+            
             # Environment variables
             Environment = [
               "AI_PROVIDER=${cfg.aiProvider}"
@@ -982,6 +1045,12 @@ in {
             Group = "ai-analysis";
             ExecStart = "${configBaselineScript}/bin/ai-config-baseline";
             
+            # Directories
+            StateDirectory = "ai-analysis";
+            StateDirectoryMode = "0755";
+            LogsDirectory = "ai-analysis";
+            LogsDirectoryMode = "0755";
+            
             # Environment variables
             Environment = [
               "OUTPUT_PATH=${cfg.outputPath}"
@@ -1024,6 +1093,12 @@ in {
             User = "ai-analysis";
             Group = "ai-analysis";
             ExecStart = "${configDriftScript}/bin/ai-config-drift";
+            
+            # Directories
+            StateDirectory = "ai-analysis";
+            StateDirectoryMode = "0755";
+            LogsDirectory = "ai-analysis";
+            LogsDirectoryMode = "0755";
             
             # Environment variables
             Environment = [
@@ -1075,6 +1150,12 @@ in {
             Group = "ai-analysis";
             ExecStart = "${logAnalysisScript}/bin/ai-log-analysis";
             
+            # Directories
+            StateDirectory = "ai-analysis";
+            StateDirectoryMode = "0755";
+            LogsDirectory = "ai-analysis";
+            LogsDirectoryMode = "0755";
+            
             # Environment variables
             Environment = [
               "AI_PROVIDER=${cfg.aiProvider}"
@@ -1124,6 +1205,12 @@ in {
             User = "ai-analysis";
             Group = "ai-analysis";
             ExecStart = "${capacityPlanningScript}/bin/ai-capacity-planning";
+            
+            # Directories
+            StateDirectory = "ai-analysis";
+            StateDirectoryMode = "0755";
+            LogsDirectory = "ai-analysis";
+            LogsDirectoryMode = "0755";
             
             # Environment variables
             Environment = [

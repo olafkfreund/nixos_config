@@ -343,6 +343,17 @@ in {
         User = "root";
         Restart = "always";
         RestartSec = "30s";
+        Environment = [
+          "PATH=${lib.makeBinPath (with pkgs; [
+            sysstat    # iostat
+            gawk       # awk
+            coreutils  # basic utilities
+            util-linux # lsblk
+            procps     # general process utilities
+            gnugrep    # grep
+            gnused     # sed
+          ])}"
+        ];
         ExecStart = pkgs.writeShellScript "storage-performance-monitor" ''
           #!/bin/bash
           

@@ -70,6 +70,7 @@ in {
       serviceConfig = {
         Type = "oneshot";
         User = "root";
+        
         ExecStart = pkgs.writeShellScript "ai-memory-optimization" ''
           #!/bin/bash
           
@@ -79,21 +80,21 @@ in {
           exec 1> >(tee -a "$LOG_FILE")
           exec 2>&1
           
-          echo "[$(date)] Starting AI memory optimization..."
+          echo "[$(${pkgs.coreutils}/bin/date)] Starting AI memory optimization..."
           
           # Check current memory usage
-          MEMORY_USAGE=$(free | grep Mem | awk '{printf "%.1f", $3/$2 * 100.0}')
-          MEMORY_USAGE_INT=$(echo "$MEMORY_USAGE" | cut -d. -f1)
+          MEMORY_USAGE=$(${pkgs.procps}/bin/free | ${pkgs.gnugrep}/bin/grep Mem | ${pkgs.gawk}/bin/awk '{printf "%.1f", $3/$2 * 100.0}')
+          MEMORY_USAGE_INT=$(echo "$MEMORY_USAGE" | ${pkgs.coreutils}/bin/cut -d. -f1)
           
-          echo "[$(date)] Current memory usage: $MEMORY_USAGE%"
+          echo "[$(${pkgs.coreutils}/bin/date)] Current memory usage: $MEMORY_USAGE%"
           
           # Check disk usage for root filesystem
-          ROOT_DISK_USAGE=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
-          echo "[$(date)] Root disk usage: $ROOT_DISK_USAGE%"
+          ROOT_DISK_USAGE=$(${pkgs.coreutils}/bin/df / | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $5}' | ${pkgs.gnused}/bin/sed 's/%//')
+          echo "[$(${pkgs.coreutils}/bin/date)] Root disk usage: $ROOT_DISK_USAGE%"
           
           # Memory optimization actions
           if [ "$MEMORY_USAGE_INT" -gt ${toString cfg.thresholds.memoryCritical} ]; then
-            echo "[$(date)] CRITICAL: Memory usage above ${toString cfg.thresholds.memoryCritical}% - taking emergency actions"
+            echo "[$(${pkgs.coreutils}/bin/date)] CRITICAL: Memory usage above ${toString cfg.thresholds.memoryCritical}% - taking emergency actions"
             
             # Clear page cache
             echo 1 > /proc/sys/vm/drop_caches
@@ -108,7 +109,7 @@ in {
             fi
             
           elif [ "$MEMORY_USAGE_INT" -gt ${toString cfg.thresholds.memoryWarning} ]; then
-            echo "[$(date)] WARNING: Memory usage above ${toString cfg.thresholds.memoryWarning}% - optimizing"
+            echo "[$(${pkgs.coreutils}/bin/date)] WARNING: Memory usage above ${toString cfg.thresholds.memoryWarning}% - optimizing"
             
             # Clear page cache
             echo 1 > /proc/sys/vm/drop_caches
@@ -119,7 +120,7 @@ in {
           
           # Disk optimization actions
           if [ "$ROOT_DISK_USAGE" -gt ${toString cfg.thresholds.diskCritical} ]; then
-            echo "[$(date)] CRITICAL: Root disk usage above ${toString cfg.thresholds.diskCritical}% - emergency cleanup"
+            echo "[$(${pkgs.coreutils}/bin/date)] CRITICAL: Root disk usage above ${toString cfg.thresholds.diskCritical}% - emergency cleanup"
             
             # Force Nix store optimization
             nix-store --optimise --verbose
@@ -136,7 +137,7 @@ in {
             journalctl --vacuum-size=100M
             
           elif [ "$ROOT_DISK_USAGE" -gt ${toString cfg.thresholds.diskWarning} ]; then
-            echo "[$(date)] WARNING: Root disk usage above ${toString cfg.thresholds.diskWarning}% - cleaning up"
+            echo "[$(${pkgs.coreutils}/bin/date)] WARNING: Root disk usage above ${toString cfg.thresholds.diskWarning}% - cleaning up"
             
             # Nix store optimization
             nix-store --optimise
@@ -153,8 +154,8 @@ in {
           fi
           
           # P510 specific optimizations (root disk at 79.6%)
-          if [ "$(hostname)" = "p510" ]; then
-            echo "[$(date)] P510 specific optimizations - high disk usage detected"
+          if [ "$(${pkgs.inetutils}/bin/hostname)" = "p510" ]; then
+            echo "[$(${pkgs.coreutils}/bin/date)] P510 specific optimizations - high disk usage detected"
             
             # Aggressive Nix store cleanup for P510
             nix-collect-garbage -d --delete-older-than 1d
@@ -173,16 +174,16 @@ in {
           fi
           
           # Final status check
-          NEW_MEMORY_USAGE=$(free | grep Mem | awk '{printf "%.1f", $3/$2 * 100.0}')
-          NEW_ROOT_DISK_USAGE=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+          NEW_MEMORY_USAGE=$(${pkgs.procps}/bin/free | ${pkgs.gnugrep}/bin/grep Mem | ${pkgs.gawk}/bin/awk '{printf "%.1f", $3/$2 * 100.0}')
+          NEW_ROOT_DISK_USAGE=$(${pkgs.coreutils}/bin/df / | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $5}' | ${pkgs.gnused}/bin/sed 's/%//')
           
-          echo "[$(date)] Optimization complete - Memory: $NEW_MEMORY_USAGE%, Root disk: $NEW_ROOT_DISK_USAGE%"
+          echo "[$(${pkgs.coreutils}/bin/date)] Optimization complete - Memory: $NEW_MEMORY_USAGE%, Root disk: $NEW_ROOT_DISK_USAGE%"
           
           # Create optimization report
           cat > /var/lib/ai-analysis/memory-optimization-report.json << EOF
           {
-            "timestamp": "$(date -Iseconds)",
-            "hostname": "$(hostname)",
+            "timestamp": "$(${pkgs.coreutils}/bin/date -Iseconds)",
+            "hostname": "$(${pkgs.inetutils}/bin/hostname)",
             "before": {
               "memory_usage": $MEMORY_USAGE,
               "root_disk_usage": $ROOT_DISK_USAGE
@@ -199,7 +200,7 @@ in {
           }
           EOF
           
-          echo "[$(date)] Memory optimization completed successfully"
+          echo "[$(${pkgs.coreutils}/bin/date)] Memory optimization completed successfully"
         '';
       };
     };
@@ -250,15 +251,6 @@ in {
           copytruncate = true;
         };
         
-        "/var/log/prometheus/*.log" = {
-          frequency = "daily";
-          rotate = 14;
-          compress = true;
-          delaycompress = true;
-          missingok = true;
-          notifempty = true;
-          copytruncate = true;
-        };
       };
     };
 

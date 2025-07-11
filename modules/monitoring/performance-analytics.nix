@@ -220,8 +220,8 @@ in {
             
             ${optionalString cfg.metricsCollection.applicationMetrics ''
               # Application metrics
-              local ai_services=$(systemctl list-units --type=service --state=running | grep -c ai- || echo 0)
-              local monitoring_services=$(systemctl list-units --type=service --state=running | grep -E "(prometheus|grafana|node-exporter)" | wc -l)
+              local ai_services=$(${pkgs.systemd}/bin/systemctl list-units --type=service --state=running | grep -c ai- || echo 0)
+              local monitoring_services=$(${pkgs.systemd}/bin/systemctl list-units --type=service --state=running | grep -E "(prometheus|grafana|node-exporter)" | wc -l)
               
               echo "$timestamp,application,ai_services_running,$ai_services"
               echo "$timestamp,application,monitoring_services_running,$monitoring_services"

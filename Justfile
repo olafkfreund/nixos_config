@@ -179,23 +179,23 @@ check-syntax:
 
 # Deploy to razer laptop (Intel/NVIDIA) - OPTIMIZED
 razer:
-    nixos-rebuild switch --flake .#razer --target-host razer --build-host razer --use-remote-sudo --fast --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#razer --target-host razer --build-host razer --sudo --no-reexec --keep-going --accept-flake-config
 
 # Deploy to p620 workstation (AMD) - OPTIMIZED
 p620:
-    nixos-rebuild switch --flake .#p620 --target-host p620 --build-host p620 --use-remote-sudo --fast --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#p620 --target-host p620 --build-host p620 --sudo --no-reexec --keep-going --accept-flake-config
 
 # Deploy to p510 workstation (Intel Xeon/NVIDIA) - OPTIMIZED  
 p510:
-    nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --use-remote-sudo --fast --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --sudo --no-reexec --keep-going --accept-flake-config
 
 # Deploy to dex5550 SFF system (Intel integrated) - OPTIMIZED
 dex5550:
-    nixos-rebuild switch --flake .#dex5550 --target-host dex5550 --build-host dex5550 --use-remote-sudo --fast --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#dex5550 --target-host dex5550 --build-host dex5550 --sudo --no-reexec --keep-going --accept-flake-config
 
 # Deploy to samsung system (Intel integrated)
 samsung:
-    nixos-rebuild switch --flake .#samsung --target-host 192.168.1.92 --build-host 192.168.1.92 --use-remote-sudo --impure --accept-flake-config
+    nixos-rebuild switch --flake .#samsung --target-host 192.168.1.92 --build-host 192.168.1.92 --sudo --impure --accept-flake-config
 
 # =============================================================================
 # ARCHIVED/LEGACY HOSTS (FOR REFERENCE)
@@ -204,17 +204,17 @@ samsung:
 # Deploy to hp (archived)
 hp:
     @echo "⚠️  hp is archived - use at your own risk"
-    nixos-rebuild switch --flake .#hp --target-host hp --build-host hp --use-remote-sudo --impure --accept-flake-config
+    nixos-rebuild switch --flake .#hp --target-host hp --build-host hp --sudo --impure --accept-flake-config
 
 # Deploy to lms (archived)  
 lms:
     @echo "⚠️  lms is archived - use at your own risk"
-    nixos-rebuild switch --flake .#lms --target-host lms --build-host lms --use-remote-sudo --impure --accept-flake-config
+    nixos-rebuild switch --flake .#lms --target-host lms --build-host lms --sudo --impure --accept-flake-config
 
 # Deploy to pvm (archived)
 pvm:
     @echo "⚠️  pvm is archived - use at your own risk"
-    nixos-rebuild switch --flake .#pvm --target-host pvm --build-host pvm --use-remote-sudo --impure --accept-flake-config
+    nixos-rebuild switch --flake .#pvm --target-host pvm --build-host pvm --sudo --impure --accept-flake-config
 
 # =============================================================================
 # MODERN CONFIGURATION MANAGEMENT
@@ -592,7 +592,7 @@ quick-all:
 emergency-deploy HOST:
     @echo "🚨 EMERGENCY deployment to {{HOST}} (skipping tests)..."
     @read -p "Are you sure? This skips all safety checks! (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --use-remote-sudo --fast --keep-going --no-build-nix --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --no-build-nix --accept-flake-config
 
 # =============================================================================
 # UTILITIES AND HELPERS
@@ -707,12 +707,12 @@ deploy-all-parallel:
 # Fast deployment with minimal builds
 deploy-fast HOST:
     @echo "⚡ Fast deployment to {{HOST}}..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --use-remote-sudo --fast --keep-going --no-build-nix --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --no-build-nix --accept-flake-config
 
 # Build locally, deploy remotely (for slow remote hosts)
 deploy-local-build HOST:
     @echo "🏗️ Building {{HOST}} locally, deploying remotely..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --use-remote-sudo --fast --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going --accept-flake-config
 
 # Deploy only if changed (smart deployment)
 deploy-smart HOST:
@@ -737,7 +737,7 @@ build-all-parallel:
 # Deploy with binary cache optimization
 deploy-cached HOST:
     @echo "💾 Deploying {{HOST}} with cache optimization..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --use-remote-sudo --fast --keep-going --option binary-caches "https://cache.nixos.org/ http://p620:5000" --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --option binary-caches "https://cache.nixos.org/ http://p620:5000" --accept-flake-config
 
 # Test all hosts can be reached
 ping-hosts:

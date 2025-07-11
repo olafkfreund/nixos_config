@@ -154,18 +154,18 @@ in {
             local timestamp=$(date -Iseconds)
             
             # System metrics
-            local cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/%us,//' | tr -d '[:space:]')
-            local load_avg=$(uptime | awk -F'load average:' '{print $2}' | awk '{print $1}' | sed 's/,//' | tr -d '[:space:]')
-            local memory_total=$(free -b | grep Mem | awk '{print $2}')
-            local memory_used=$(free -b | grep Mem | awk '{print $3}')
-            local memory_percent=$(echo "scale=1; $memory_used * 100 / $memory_total" | bc)
-            local io_wait=$(top -bn1 | grep "Cpu(s)" | awk '{print $10}' | sed 's/%wa,//' | sed 's/%wa//' | tr -d '[:space:]')
+            local cpu_usage=$(${pkgs.procps}/bin/top -bn1 | grep "Cpu(s)" | ${pkgs.gawk}/bin/awk '{print $2}' | sed 's/%us,//' | tr -d '[:space:]')
+            local load_avg=$(uptime | ${pkgs.gawk}/bin/awk -F'load average:' '{print $2}' | ${pkgs.gawk}/bin/awk '{print $1}' | sed 's/,//' | tr -d '[:space:]')
+            local memory_total=$(${pkgs.procps}/bin/free -b | grep Mem | ${pkgs.gawk}/bin/awk '{print $2}')
+            local memory_used=$(${pkgs.procps}/bin/free -b | grep Mem | ${pkgs.gawk}/bin/awk '{print $3}')
+            local memory_percent=$(echo "scale=1; $memory_used * 100 / $memory_total" | ${pkgs.bc}/bin/bc)
+            local io_wait=$(${pkgs.procps}/bin/top -bn1 | grep "Cpu(s)" | ${pkgs.gawk}/bin/awk '{print $10}' | sed 's/%wa,//' | sed 's/%wa//' | tr -d '[:space:]')
             
             # Network metrics
             local network_connections=$(ss -tuln | grep LISTEN | wc -l)
             
             # Disk metrics
-            local disk_usage=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+            local disk_usage=$(df / | tail -1 | ${pkgs.gawk}/bin/awk '{print $5}' | sed 's/%//')
             
             # AI service metrics
             local ai_services_running=$(systemctl list-units --type=service --state=running | grep -c ai- || echo 0)
@@ -419,9 +419,9 @@ in {
           for i in $(seq 1 $SAMPLES); do
             echo "[$(date)] Collecting baseline sample $i/$SAMPLES..."
             
-            CPU=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/%us,//' | tr -d '[:space:]')
-            MEMORY=$(free | grep Mem | awk '{printf "%.1f", $3/$2 * 100.0}')
-            IO_WAIT=$(top -bn1 | grep "Cpu(s)" | awk '{print $10}' | sed 's/%wa,//' | sed 's/%wa//' | tr -d '[:space:]')
+            CPU=$(${pkgs.procps}/bin/top -bn1 | grep "Cpu(s)" | ${pkgs.gawk}/bin/awk '{print $2}' | sed 's/%us,//' | tr -d '[:space:]')
+            MEMORY=$(${pkgs.procps}/bin/free | grep Mem | ${pkgs.gawk}/bin/awk '{printf "%.1f", $3/$2 * 100.0}')
+            IO_WAIT=$(${pkgs.procps}/bin/top -bn1 | grep "Cpu(s)" | ${pkgs.gawk}/bin/awk '{print $10}' | sed 's/%wa,//' | sed 's/%wa//' | tr -d '[:space:]')
             
             CPU_SAMPLES+=($CPU)
             MEMORY_SAMPLES+=($MEMORY)
@@ -431,9 +431,9 @@ in {
           done
           
           # Calculate averages
-          CPU_BASELINE=$(printf '%s\n' "''${CPU_SAMPLES[@]}" | awk '{sum+=$1; count++} END {printf "%.1f", sum/count}')
-          MEMORY_BASELINE=$(printf '%s\n' "''${MEMORY_SAMPLES[@]}" | awk '{sum+=$1; count++} END {printf "%.1f", sum/count}')
-          IO_BASELINE=$(printf '%s\n' "''${IO_SAMPLES[@]}" | awk '{sum+=$1; count++} END {printf "%.1f", sum/count}')
+          CPU_BASELINE=$(printf '%s\n' "''${CPU_SAMPLES[@]}" | ${pkgs.gawk}/bin/awk '{sum+=$1; count++} END {printf "%.1f", sum/count}')
+          MEMORY_BASELINE=$(printf '%s\n' "''${MEMORY_SAMPLES[@]}" | ${pkgs.gawk}/bin/awk '{sum+=$1; count++} END {printf "%.1f", sum/count}')
+          IO_BASELINE=$(printf '%s\n' "''${IO_SAMPLES[@]}" | ${pkgs.gawk}/bin/awk '{sum+=$1; count++} END {printf "%.1f", sum/count}')
           
           # Create baseline file
           cat > "$BASELINE_FILE" << EOF
@@ -476,8 +476,8 @@ EOF
           
           if [ -f "$TUNING_DB" ] && [ -f "/var/lib/auto-performance-tuner/performance_baseline.json" ]; then
             # Get current performance metrics
-            CURRENT_CPU=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/%us,//' | tr -d '[:space:]')
-            CURRENT_MEMORY=$(free | grep Mem | awk '{printf "%.1f", $3/$2 * 100.0}')
+            CURRENT_CPU=$(${pkgs.procps}/bin/top -bn1 | grep "Cpu(s)" | ${pkgs.gawk}/bin/awk '{print $2}' | sed 's/%us,//' | tr -d '[:space:]')
+            CURRENT_MEMORY=$(${pkgs.procps}/bin/free | grep Mem | ${pkgs.gawk}/bin/awk '{printf "%.1f", $3/$2 * 100.0}')
             
             # Get baseline metrics
             BASELINE_CPU=$(jq -r '.baseline_metrics.cpu_usage' /var/lib/auto-performance-tuner/performance_baseline.json)
@@ -503,7 +503,7 @@ EOF
     "cpu_improvement_percent": $CPU_IMPROVEMENT,
     "memory_improvement_percent": $MEMORY_IMPROVEMENT
   },
-  "optimization_effectiveness": "$(echo "$CPU_IMPROVEMENT + $MEMORY_IMPROVEMENT" | bc | awk '{if(\$1>0) print "positive"; else print "neutral"}')"
+  "optimization_effectiveness": "$(echo "$CPU_IMPROVEMENT + $MEMORY_IMPROVEMENT" | ${pkgs.bc}/bin/bc | ${pkgs.gawk}/bin/awk '{if(\$1>0) print "positive"; else print "neutral"}')"
 }
 EOF
             

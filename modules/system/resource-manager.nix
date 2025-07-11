@@ -175,6 +175,17 @@ in {
         User = "root";
         Restart = "always";
         RestartSec = "10s";
+        Environment = [
+          "PATH=${lib.makeBinPath (with pkgs; [
+            bc         # mathematical calculations
+            procps     # free, top, pgrep
+            gawk       # awk
+            coreutils  # basic utilities
+            util-linux # renice, ionice, taskset
+            gnugrep    # grep
+            gnused     # sed
+          ])}"
+        ];
         ExecStart = pkgs.writeShellScript "dynamic-resource-manager" ''
           #!/bin/bash
           
@@ -413,6 +424,17 @@ in {
         User = "root";
         Restart = "always";
         RestartSec = "60s";
+        Environment = [
+          "PATH=${lib.makeBinPath (with pkgs; [
+            procps     # top, free
+            gawk       # awk
+            coreutils  # basic utilities
+            iproute2   # ss (socket statistics)
+            util-linux # uptime
+            gnugrep    # grep
+            gnused     # sed
+          ])}"
+        ];
         ExecStart = pkgs.writeShellScript "resource-monitor" ''
           #!/bin/bash
           

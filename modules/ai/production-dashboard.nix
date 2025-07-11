@@ -588,6 +588,7 @@ in {
       serviceConfig = {
         Type = "oneshot";
         User = "root";
+        
         ExecStart = pkgs.writeShellScript "collect-production-metrics" ''
           #!/bin/bash
           
@@ -603,35 +604,35 @@ in {
           echo "[$(date)] Starting production metrics collection..."
           
           # Collect AI service metrics
-          TIMESTAMP=$(date +%s)
-          HOSTNAME=$(hostname)
+          TIMESTAMP=$(${pkgs.coreutils}/bin/date +%s)
+          HOSTNAME=$(${pkgs.inetutils}/bin/hostname)
           
           # AI Analysis Service Metrics
-          AI_SERVICES_RUNNING=$(systemctl list-units --type=service --state=running | grep -c "ai-" || echo 0)
-          AI_SERVICES_FAILED=$(systemctl list-units --type=service --state=failed | grep -c "ai-" || echo 0)
+          AI_SERVICES_RUNNING=$(${pkgs.systemd}/bin/systemctl list-units --type=service --state=running | ${pkgs.gnugrep}/bin/grep -c "ai-" || echo 0)
+          AI_SERVICES_FAILED=$(${pkgs.systemd}/bin/systemctl list-units --type=service --state=failed | ${pkgs.gnugrep}/bin/grep -c "ai-" || echo 0)
           
           # Performance Metrics
           if command -v ai-cli &>/dev/null; then
-            AI_RESPONSE_TIME=$(timeout 10 time ai-cli "test" 2>&1 | grep real | awk '{print $2}' | sed 's/[^0-9.]//g' || echo "0")
+            AI_RESPONSE_TIME=$(${pkgs.coreutils}/bin/timeout 10 time ai-cli "test" 2>&1 | ${pkgs.gnugrep}/bin/grep real | ${pkgs.gawk}/bin/awk '{print $2}' | ${pkgs.gnused}/bin/sed 's/[^0-9.]//g' || echo "0")
           else
             AI_RESPONSE_TIME="0"
           fi
           
           # Security Metrics
-          SSH_FAILED_ATTEMPTS=$(journalctl -u sshd --since="1 hour ago" | grep -c "Failed password" || echo 0)
-          SSH_SUCCESSFUL_LOGINS=$(journalctl -u sshd --since="1 hour ago" | grep -c "Accepted" || echo 0)
+          SSH_FAILED_ATTEMPTS=$(${pkgs.systemd}/bin/journalctl -u sshd --since="1 hour ago" | ${pkgs.gnugrep}/bin/grep -c "Failed password" || echo 0)
+          SSH_SUCCESSFUL_LOGINS=$(${pkgs.systemd}/bin/journalctl -u sshd --since="1 hour ago" | ${pkgs.gnugrep}/bin/grep -c "Accepted" || echo 0)
           
           # System Resource Metrics
-          CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/%us,//')
-          MEMORY_USAGE=$(free | grep Mem | awk '{printf "%.1f", $3/$2 * 100.0}')
-          DISK_USAGE=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+          CPU_USAGE=$(${pkgs.procps}/bin/top -bn1 | ${pkgs.gnugrep}/bin/grep "Cpu(s)" | ${pkgs.gawk}/bin/awk '{print $2}' | ${pkgs.gnused}/bin/sed 's/%us,//')
+          MEMORY_USAGE=$(${pkgs.procps}/bin/free | ${pkgs.gnugrep}/bin/grep Mem | ${pkgs.gawk}/bin/awk '{printf "%.1f", $3/$2 * 100.0}')
+          DISK_USAGE=$(${pkgs.coreutils}/bin/df / | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $5}' | ${pkgs.gnused}/bin/sed 's/%//')
           
           # Storage Critical Check (P510 specific)
           if [ "$HOSTNAME" = "p510" ]; then
-            P510_DISK_USAGE=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+            P510_DISK_USAGE=$(${pkgs.coreutils}/bin/df / | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $5}' | ${pkgs.gnused}/bin/sed 's/%//')
             if [ "$P510_DISK_USAGE" -gt 75 ]; then
-              echo "[$(date)] CRITICAL: P510 disk usage at $P510_DISK_USAGE%"
-              logger -t ai-production-metrics "CRITICAL: P510 disk usage at $P510_DISK_USAGE%"
+              echo "[$(${pkgs.coreutils}/bin/date)] CRITICAL: P510 disk usage at $P510_DISK_USAGE%"
+              ${pkgs.util-linux}/bin/logger -t ai-production-metrics "CRITICAL: P510 disk usage at $P510_DISK_USAGE%"
             fi
           fi
           
@@ -655,16 +656,16 @@ in {
               "disk_usage": $DISK_USAGE
             },
             "health_status": {
-              "overall": "$([ $AI_SERVICES_FAILED -eq 0 ] && echo "healthy" || echo "degraded")",
-              "critical_alerts": $([ "$DISK_USAGE" -gt ${toString cfg.criticalThresholds.diskUsage} ] && echo "true" || echo "false")
+              "overall": "$([ $AI_SERVICES_FAILED -eq 0 ] 2>/dev/null && echo \"healthy\" || echo \"degraded\")",
+              "critical_alerts": "$([ $DISK_USAGE -gt ${toString cfg.criticalThresholds.diskUsage} ] 2>/dev/null && echo \"true\" || echo \"false\")"
             }
           }
           EOF
           
           # Cleanup old metrics (keep last 24 hours)
-          find "$METRICS_DIR" -name "metrics_*.json" -mtime +1 -delete
+          ${pkgs.findutils}/bin/find "$METRICS_DIR" -name "metrics_*.json" -mtime +1 -delete
           
-          echo "[$(date)] Production metrics collection completed"
+          echo "[$(${pkgs.coreutils}/bin/date)] Production metrics collection completed"
         '';
       };
     };
@@ -696,7 +697,7 @@ in {
             echo "[$(date)] Grafana is healthy"
           else
             echo "[$(date)] WARNING: Grafana is not responding"
-            logger -t ai-dashboard-health "WARNING: Grafana is not responding at $GRAFANA_URL"
+            ${pkgs.util-linux}/bin/logger -t ai-dashboard-health "WARNING: Grafana is not responding at $GRAFANA_URL"
           fi
           
           # Check Prometheus availability
@@ -704,7 +705,7 @@ in {
             echo "[$(date)] Prometheus is healthy"
           else
             echo "[$(date)] WARNING: Prometheus is not responding"
-            logger -t ai-dashboard-health "WARNING: Prometheus is not responding at $PROMETHEUS_URL"
+            ${pkgs.util-linux}/bin/logger -t ai-dashboard-health "WARNING: Prometheus is not responding at $PROMETHEUS_URL"
           fi
           
           # Check dashboard files
@@ -713,7 +714,7 @@ in {
             echo "[$(date)] Found $DASHBOARD_COUNT dashboard files"
           else
             echo "[$(date)] WARNING: No dashboard files found"
-            logger -t ai-dashboard-health "WARNING: No dashboard files found in ${cfg.dashboardPath}"
+            ${pkgs.util-linux}/bin/logger -t ai-dashboard-health "WARNING: No dashboard files found in ${cfg.dashboardPath}"
           fi
           
           echo "[$(date)] Dashboard health check completed"

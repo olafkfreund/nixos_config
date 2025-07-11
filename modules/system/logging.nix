@@ -59,8 +59,6 @@ in {
     virtualisation.docker.daemon.settings = {
       log-driver = "journald";
       log-opts = {
-        "max-size" = "10m";
-        "max-file" = "5";
         "labels" = "service";
       };
     };

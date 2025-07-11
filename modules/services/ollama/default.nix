@@ -73,11 +73,11 @@ in {
           Restart = "always";
           RestartSec = "10";
           
-          # Security hardening
+          # Reduced security hardening to fix "File exists" error
           NoNewPrivileges = true;
-          ProtectSystem = "strict";
-          ProtectHome = true;
-          PrivateTmp = true;
+          ProtectSystem = "false";  # Changed from "strict" to allow file operations
+          ProtectHome = false;      # Changed from true to allow temp file creation
+          PrivateTmp = false;       # Changed from true - was causing file conflicts
           PrivateDevices = true;
           ProtectKernelTunables = true;
           ProtectKernelModules = true;
@@ -86,6 +86,7 @@ in {
           # Writable paths
           ReadWritePaths = [
             "/var/lib/chromadb"
+            "/tmp"  # Allow access to system temp directory
           ];
           
           # Resource limits

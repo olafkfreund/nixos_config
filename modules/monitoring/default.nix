@@ -340,7 +340,7 @@ in {
           CHECK_INTERVAL_MINUTES=5
           
           # Hardware-specific patterns based on host
-          HOSTNAME=$(hostname)
+          HOSTNAME=$(${pkgs.inetutils}/bin/hostname)
           
           # Common hardware issue patterns
           declare -A PATTERNS=(
