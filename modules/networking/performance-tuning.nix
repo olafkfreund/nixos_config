@@ -139,6 +139,15 @@ in {
       wants = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
       
+      # Add proper PATH for required tools
+      path = with pkgs; [
+        iproute2      # ip, tc commands
+        inetutils     # ping command
+        systemd       # systemctl command
+        coreutils     # basic utilities
+        gawk          # awk command
+      ];
+      
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
@@ -222,15 +231,15 @@ in {
               ${concatStringsSep "\n" (map (host: ''
                 if ping -c 1 -W 1 ${host} &>/dev/null; then
                   # Get current route
-                  ROUTE_INFO=$(ip route get ${host} 2>/dev/null | head -1)
+                  ROUTE_INFO=$(${pkgs.iproute2}/bin/ip route get ${host} 2>/dev/null | head -1)
                   if [ -n "$ROUTE_INFO" ]; then
                     echo "[$(date)] Route to ${host}: $ROUTE_INFO"
                     
                     # Optimize route metrics if needed
-                    INTERFACE=$(echo "$ROUTE_INFO" | awk '{for(i=1;i<=NF;i++) if($i=="dev") print $(i+1)}')
+                    INTERFACE=$(echo "$ROUTE_INFO" | ${pkgs.gawk}/bin/awk '{for(i=1;i<=NF;i++) if($i=="dev") print $(i+1)}')
                     if [ -n "$INTERFACE" ]; then
                       # Increase interface queue length for better performance
-                      ip link set dev "$INTERFACE" txqueuelen 10000 2>/dev/null || true
+                      ${pkgs.iproute2}/bin/ip link set dev "$INTERFACE" txqueuelen 10000 2>/dev/null || true
                     fi
                   fi
                 fi
@@ -239,9 +248,9 @@ in {
             
             ${optionalString cfg.interHostOptimization.jumboFrames ''
               # Enable jumbo frames on appropriate interfaces
-              for interface in $(ip link show | grep "state UP" | awk -F: '{print $2}' | grep -E "^(eth|ens|enp)" | tr -d ' '); do
+              for interface in $(${pkgs.iproute2}/bin/ip link show | grep "state UP" | ${pkgs.gawk}/bin/awk -F: '{print $2}' | grep -E "^(eth|ens|enp)" | tr -d ' '); do
                 if [ -n "$interface" ]; then
-                  ip link set dev "$interface" mtu 9000 2>/dev/null || true
+                  ${pkgs.iproute2}/bin/ip link set dev "$interface" mtu 9000 2>/dev/null || true
                   echo "[$(date)] Jumbo frames enabled on $interface"
                 fi
               done
@@ -304,6 +313,16 @@ in {
       wants = [ "network-performance-optimizer.service" ];
       wantedBy = [ "multi-user.target" ];
       
+      # Add proper PATH to avoid "command not found" errors
+      path = with pkgs; [
+        gawk          # awk command
+        iproute2      # ss, ip commands
+        coreutils     # basic utilities
+        gnugrep       # grep command
+        inetutils     # ping command
+        time          # time command
+      ];
+      
       serviceConfig = {
         Type = "simple";
         User = "root";
@@ -320,16 +339,16 @@ in {
             
             # Network interface statistics
             NETWORK_STATS=$(cat /proc/net/dev | tail -n +3 | while read line; do
-              IFACE=$(echo "$line" | awk -F: '{print $1}' | tr -d ' ')
+              IFACE=$(echo "$line" | ${pkgs.gawk}/bin/awk -F: '{print $1}' | tr -d ' ')
               if [[ "$IFACE" != "lo" ]]; then
-                RX_BYTES=$(echo "$line" | awk '{print $2}')
-                TX_BYTES=$(echo "$line" | awk '{print $10}')
+                RX_BYTES=$(echo "$line" | ${pkgs.gawk}/bin/awk '{print $2}')
+                TX_BYTES=$(echo "$line" | ${pkgs.gawk}/bin/awk '{print $10}')
                 echo "\"$IFACE\": {\"rx_bytes\": $RX_BYTES, \"tx_bytes\": $TX_BYTES}"
               fi
             done | paste -sd, -)
             
             # TCP connection statistics
-            TCP_STATS=$(ss -s | grep TCP | head -1 | awk '{print $2}')
+            TCP_STATS=$(${pkgs.iproute2}/bin/ss -s | grep TCP | head -1 | ${pkgs.gawk}/bin/awk '{print $2}')
             
             # Network latency to configured hosts
             LATENCY_STATS=$(
@@ -342,7 +361,7 @@ in {
             )
             
             # DNS resolution time
-            DNS_TIME=$(time (nslookup google.com >/dev/null 2>&1) 2>&1 | grep real | awk '{print $2}' | sed 's/[^0-9.]//g' || echo "0")
+            DNS_TIME=$(time (nslookup google.com >/dev/null 2>&1) 2>&1 | grep real | ${pkgs.gawk}/bin/awk '{print $2}' | sed 's/[^0-9.]//g' || echo "0")
             
             # Congestion control algorithm
             CONGESTION_CONTROL=$(cat /proc/sys/net/ipv4/tcp_congestion_control)
