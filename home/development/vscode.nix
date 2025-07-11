@@ -491,6 +491,10 @@ in {
           "git.enableCommitSigning" = false;
           "diffEditor.ignoreTrimWhitespace" = false;
           "telemetry.telemetryLevel" = "off";
+          
+          # Disable settings sync to prevent conflicts with declarative configuration
+          "settingsSync.keybindingsPerPlatform" = false;
+          "settingsSync.enabled" = false;
         };
       };
     };

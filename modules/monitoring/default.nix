@@ -192,6 +192,56 @@ in {
         default = false;
         description = "Enable AMD GPU metrics collection";
       };
+
+      hardwareMonitor = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable hardware monitoring with desktop notifications";
+      };
+    };
+
+    hardwareMonitor = {
+      enable = mkEnableOption "Hardware monitoring with desktop notifications";
+      
+      interval = mkOption {
+        type = types.int;
+        default = 300; # 5 minutes
+        description = "Check interval in seconds";
+      };
+      
+      enableDesktopNotifications = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable desktop notifications for hardware issues";
+      };
+      
+      logFile = mkOption {
+        type = types.str;
+        default = "/var/log/hardware-monitor.log";
+        description = "Path to hardware monitor log file";
+      };
+      
+      criticalThresholds = mkOption {
+        type = types.attrsOf types.int;
+        default = {
+          diskUsage = 90;
+          memoryUsage = 95;
+          cpuLoad = 200;
+          temperature = 90;
+        };
+        description = "Critical threshold values for system metrics";
+      };
+      
+      warningThresholds = mkOption {
+        type = types.attrsOf types.int;
+        default = {
+          diskUsage = 80;
+          memoryUsage = 85;
+          cpuLoad = 150;
+          temperature = 80;
+        };
+        description = "Warning threshold values for system metrics";
+      };
     };
   };
 
@@ -241,6 +291,9 @@ in {
     systemd.tmpfiles.rules = [
       "d /var/lib/monitoring 0755 monitoring monitoring -"
       "d /var/log/monitoring 0755 monitoring monitoring -"
+    ] ++ optionals cfg.hardwareMonitor.enable [
+      "d ${dirOf cfg.hardwareMonitor.logFile} 0755 root root -"
+      "f ${cfg.hardwareMonitor.logFile} 0644 root root -"
     ];
 
     # Environment variables for monitoring services
@@ -262,6 +315,198 @@ in {
       nethogs
       bandwhich
       procs
+    ] ++ optionals cfg.hardwareMonitor.enable [
+      libnotify    # notify-send
+      lm_sensors   # sensors command  
+      bc           # calculator for temperature comparisons
     ];
+
+    # Hardware monitoring service
+    systemd.services.hardware-monitor = mkIf cfg.hardwareMonitor.enable {
+      description = "Hardware Monitor Service";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" "systemd-journald.service" ];
+      
+      serviceConfig = {
+        Type = "simple";
+        ExecStart = "${pkgs.writeShellScript "hardware-monitor" ''
+          #!/bin/bash
+          set -euo pipefail
+          
+          # Configuration
+          SCRIPT_NAME="Hardware Monitor"
+          LOG_FILE="${cfg.hardwareMonitor.logFile}"
+          STATE_FILE="/tmp/hardware-monitor-state" 
+          CHECK_INTERVAL_MINUTES=5
+          
+          # Hardware-specific patterns based on host
+          HOSTNAME=$(hostname)
+          
+          # Common hardware issue patterns
+          declare -A PATTERNS=(
+              ["usb_disconnect"]="usb.*disconnect"
+              ["usb_power_fail"]="Cannot enable.*USB cable"
+              ["disk_error"]="ata.*error|sd.*error|nvme.*error"
+              ["memory_error"]="Machine Check Exception|memory.*error|EDAC.*error"
+              ["oom_kill"]="Out of memory.*Killed process"
+              ["network_down"]="Link is Down|carrier lost|network.*timeout"
+              ["thermal_throttle"]="thermal.*throttle|temperature.*critical"
+              ["power_fail"]="power.*supply.*fail|voltage.*out of range"
+          )
+          
+          # Host-specific patterns
+          case "$HOSTNAME" in
+              "p620")
+                  PATTERNS+=(
+                      ["amd_gpu_error"]="amdgpu.*error|radeon.*error|DRM.*error"
+                      ["rocm_fail"]="ROCm.*error|HSA.*fail"
+                  )
+                  ;;
+              "razer")
+                  PATTERNS+=(
+                      ["nvidia_error"]="nvidia.*error|NVRM.*error"
+                      ["intel_gpu_error"]="i915.*error|intel.*graphics.*error"
+                      ["optimus_fail"]="optimus.*error|gpu.*switch.*fail"
+                  )
+                  ;;
+          esac
+          
+          # Notification function
+          send_notification() {
+              local severity="$1"
+              local title="$2"
+              local message="$3"
+              local icon="$4"
+              
+              echo "$(date '+%Y-%m-%d %H:%M:%S') [$severity] $title: $message" >> "$LOG_FILE"
+              
+              if command -v notify-send >/dev/null 2>&1; then
+                  case "$severity" in
+                      "CRITICAL") urgency="critical"; timeout=0 ;;
+                      "WARNING") urgency="normal"; timeout=10000 ;;
+                      "INFO") urgency="low"; timeout=5000 ;;
+                  esac
+                  
+                  DISPLAY=:0 notify-send --urgency="$urgency" --expire-time="$timeout" --icon="$icon" --category="hardware" "$title" "$message" || true
+              fi
+              
+              case "$severity" in
+                  "CRITICAL") logger -p daemon.crit -t "$SCRIPT_NAME" "$title: $message" ;;
+                  "WARNING") logger -p daemon.warning -t "$SCRIPT_NAME" "$title: $message" ;;
+                  "INFO") logger -p daemon.info -t "$SCRIPT_NAME" "$title: $message" ;;
+              esac
+          }
+          
+          # Check for hardware issues in logs
+          check_hardware_issues() {
+              local since_time="$1"
+              local issues_found=0
+              
+              local journal_output
+              journal_output=$(journalctl --since="$since_time" --no-pager -q 2>/dev/null || true)
+              
+              if [[ -z "$journal_output" ]]; then
+                  return 0
+              fi
+              
+              for pattern_name in "$${!PATTERNS[@]}"; do
+                  local pattern="$${PATTERNS[$pattern_name]}"
+                  local matches
+                  
+                  matches=$(echo "$journal_output" | grep -iE "$pattern" || true)
+                  
+                  if [[ -n "$matches" ]]; then
+                      issues_found=$((issues_found + 1))
+                      local count=$(echo "$matches" | wc -l)
+                      
+                      case "$pattern_name" in
+                          *"error"|*"fail"|*"critical"|"memory_error"|"oom_kill"|"thermal_throttle")
+                              send_notification "CRITICAL" "Hardware Issue: $${pattern_name//_/ }" "$count occurrence(s) detected!" "dialog-error"
+                              ;;
+                          *"disconnect"|*"down"|*"timeout"|*"throttle")
+                              send_notification "WARNING" "Hardware Warning: $${pattern_name//_/ }" "$count occurrence(s) detected." "dialog-warning"
+                              ;;
+                          *)
+                              send_notification "INFO" "Hardware Notice: $${pattern_name//_/ }" "$count occurrence(s) detected." "dialog-information"
+                              ;;
+                      esac
+                  fi
+              done
+              
+              return $issues_found
+          }
+          
+          # Main monitoring function
+          main() {
+              local since_time="5 minutes ago"
+              if [[ -f "$STATE_FILE" ]]; then
+                  since_time=$(cat "$STATE_FILE" 2>/dev/null || echo "5 minutes ago")
+              fi
+              
+              date '+%Y-%m-%d %H:%M:%S' > "$STATE_FILE"
+              
+              local total_issues=0
+              echo "$(date '+%Y-%m-%d %H:%M:%S') Starting hardware monitoring check..." >> "$LOG_FILE"
+              
+              if check_hardware_issues "$since_time"; then
+                  total_issues=$((total_issues + $?))
+              fi
+              
+              if [[ "$total_issues" -gt 0 ]]; then
+                  send_notification "WARNING" "Hardware Monitor Summary" "$total_issues hardware issue(s) detected." "dialog-warning"
+              fi
+          }
+          
+          # Daemon mode
+          while true; do
+              main
+              sleep $((CHECK_INTERVAL_MINUTES * 60))
+          done
+        ''}/bin/hardware-monitor";
+        Restart = "always";
+        RestartSec = "30s";
+        
+        # Security hardening
+        NoNewPrivileges = true;
+        PrivateTmp = true;
+        ProtectSystem = "strict";
+        ProtectHome = "read-only";
+        ReadWritePaths = [ 
+          cfg.hardwareMonitor.logFile 
+          "/tmp"
+        ];
+        
+        User = "root";
+        Group = "root";
+        
+        Environment = [
+          "DISPLAY=:0"
+        ];
+      };
+    };
+
+    # Timer for regular checks (backup)
+    systemd.timers.hardware-monitor = mkIf cfg.hardwareMonitor.enable {
+      description = "Hardware Monitor Timer";
+      wantedBy = [ "timers.target" ];
+      
+      timerConfig = {
+        OnBootSec = "2min";
+        OnUnitActiveSec = "${toString cfg.hardwareMonitor.interval}s";
+        Persistent = true;
+        AccuracySec = "30s";
+      };
+    };
+
+    # Logrotate configuration
+    services.logrotate.settings."${cfg.hardwareMonitor.logFile}" = mkIf cfg.hardwareMonitor.enable {
+      frequency = "weekly";
+      rotate = 4;
+      compress = true;
+      delaycompress = true;
+      missingok = true;
+      notifempty = true;
+      postrotate = "systemctl reload hardware-monitor || true";
+    };
   };
 }

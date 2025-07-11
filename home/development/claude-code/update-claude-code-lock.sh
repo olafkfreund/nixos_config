@@ -172,14 +172,15 @@ update_default_nix() {
     # Create backup
     cp "$DEFAULT_NIX_FILE" "$DEFAULT_NIX_FILE.backup"
     
+    # Use a safer sed approach with different delimiters to avoid conflicts with hash special characters
     # Update version
-    sed -i 's/version = "[^"]*";/version = "'"$new_version"'";/' "$DEFAULT_NIX_FILE"
+    sed -i "s|version = \"[^\"]*\";|version = \"$new_version\";|" "$DEFAULT_NIX_FILE"
     
-    # Update source hash
-    sed -i 's/hash = "[^"]*";/hash = "'"$new_source_hash"'";/' "$DEFAULT_NIX_FILE"
+    # Update source hash - use # as delimiter to avoid conflicts with + and / in hashes
+    sed -i "s#hash = \"[^\"]*\";#hash = \"$new_source_hash\";#" "$DEFAULT_NIX_FILE"
     
-    # Update npmDepsHash
-    sed -i 's/npmDepsHash = "[^"]*";/npmDepsHash = "'"$new_npm_deps_hash"'";/' "$DEFAULT_NIX_FILE"
+    # Update npmDepsHash - use % as delimiter to avoid conflicts
+    sed -i "s%npmDepsHash = \"[^\"]*\";%npmDepsHash = \"$new_npm_deps_hash\";%" "$DEFAULT_NIX_FILE"
     
     # Verify changes were made
     if grep -q "version = \"$new_version\"" "$DEFAULT_NIX_FILE" && \
@@ -189,7 +190,48 @@ update_default_nix() {
         rm "$DEFAULT_NIX_FILE.backup"
     else
         log_error "Failed to update default.nix properly"
+        log_warn "Attempting manual update with escaped characters..."
+        
+        # Fallback: Use printf and temporary files for safer replacement
+        update_default_nix_fallback "$new_version" "$new_source_hash" "$new_npm_deps_hash"
+    fi
+}
+
+# Fallback update method using temporary files
+update_default_nix_fallback() {
+    local new_version="$1"
+    local new_source_hash="$2"
+    local new_npm_deps_hash="$3"
+    
+    local temp_file
+    temp_file=$(mktemp)
+    
+    # Process file line by line to avoid sed issues with special characters
+    while IFS= read -r line; do
+        if [[ $line =~ ^[[:space:]]*version[[:space:]]*=[[:space:]]*\"[^\"]*\"\; ]]; then
+            printf '    version = "%s";\n' "$new_version" >> "$temp_file"
+        elif [[ $line =~ ^[[:space:]]*hash[[:space:]]*=[[:space:]]*\"[^\"]*\"\; ]]; then
+            printf '      hash = "%s";\n' "$new_source_hash" >> "$temp_file"
+        elif [[ $line =~ ^[[:space:]]*npmDepsHash[[:space:]]*=[[:space:]]*\"[^\"]*\"\; ]]; then
+            printf '    npmDepsHash = "%s";\n' "$new_npm_deps_hash" >> "$temp_file"
+        else
+            printf '%s\n' "$line" >> "$temp_file"
+        fi
+    done < "$DEFAULT_NIX_FILE"
+    
+    # Replace original file with updated version
+    mv "$temp_file" "$DEFAULT_NIX_FILE"
+    
+    # Final verification
+    if grep -q "version = \"$new_version\"" "$DEFAULT_NIX_FILE" && \
+       grep -q "hash = \"$new_source_hash\"" "$DEFAULT_NIX_FILE" && \
+       grep -q "npmDepsHash = \"$new_npm_deps_hash\"" "$DEFAULT_NIX_FILE"; then
+        log_success "default.nix updated successfully using fallback method"
+        rm -f "$DEFAULT_NIX_FILE.backup"
+    else
+        log_error "Fallback update also failed - restoring backup"
         mv "$DEFAULT_NIX_FILE.backup" "$DEFAULT_NIX_FILE"
+        rm -f "$temp_file"
         exit 1
     fi
 }
@@ -283,7 +325,7 @@ EOF
     # Create temporary directory
     local temp_dir
     temp_dir=$(mktemp -d)
-    trap "rm -rf '$temp_dir'" EXIT
+    trap 'rm -rf "$temp_dir"' EXIT
     
     # Download and extract
     download_and_extract "$target_version" "$temp_dir"

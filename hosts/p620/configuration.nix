@@ -60,10 +60,13 @@ in {
     ];
   };
 
-  # Use static DNS configuration for reliable internal resolution
-  services.resolved.enable = lib.mkForce false;
-  networking.nameservers = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
-  networking.search = [ "home.freundcloud.com" ];
+  # Use systemd-resolved for proper DNS management with systemd-networkd
+  services.resolved = {
+    enable = true;
+    fallbackDns = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
+    domains = [ "home.freundcloud.com" ];
+    dnssec = lib.mkForce "false";  # Resolve DNSSEC conflict
+  };
 
   # Configure AI providers directly
   ai.providers = {
@@ -187,6 +190,27 @@ in {
     enableFail2Ban = true;
     enableKeyOnlyAccess = true;
     trustedNetworks = ["192.168.1.0/24" "10.0.0.0/8"];
+  };
+
+  # Enable hardware monitoring with desktop notifications
+  monitoring.hardwareMonitor = {
+    enable = true;
+    interval = 300; # Check every 5 minutes
+    enableDesktopNotifications = true;
+    
+    criticalThresholds = {
+      diskUsage = 85;     # P620 at 49.6%, lower threshold for early warning
+      memoryUsage = 90;   # P620 at 22.8%, higher threshold OK for workstation
+      cpuLoad = 200;      # AMD Ryzen 5 PRO 4650G (12 cores)
+      temperature = 85;   # AMD CPU, conservative threshold
+    };
+    
+    warningThresholds = {
+      diskUsage = 75;     # Early warning for P620
+      memoryUsage = 80;   # Memory warning
+      cpuLoad = 150;      # Load warning  
+      temperature = 75;   # Temperature warning
+    };
   };
 
   # Enable production monitoring dashboard
@@ -601,7 +625,8 @@ in {
           MulticastDNS = false;
           DHCP = "ipv4";
           IPv6AcceptRA = true;
-          Domains = "home.freundcloud.com";  # Configure DNS domain for internal resolution
+          Domains = "home.freundcloud.com";
+          DNS = [ "192.168.1.222" "1.1.1.1" ];
         };
         # Higher priority for wired connection
         dhcpV4Config = {

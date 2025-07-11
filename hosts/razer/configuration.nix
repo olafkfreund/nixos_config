@@ -197,6 +197,27 @@ in {
     };
   };
 
+  # Enable hardware monitoring with desktop notifications
+  monitoring.hardwareMonitor = {
+    enable = true;
+    interval = 300; # Check every 5 minutes
+    enableDesktopNotifications = true;
+    
+    criticalThresholds = {
+      diskUsage = 90;     # Laptop storage, higher threshold OK
+      memoryUsage = 95;   # 32GB RAM, can handle higher usage
+      cpuLoad = 200;      # Intel i7-10875H (8 cores/16 threads)
+      temperature = 90;   # Laptop CPU, higher temp tolerance
+    };
+    
+    warningThresholds = {
+      diskUsage = 80;     # Laptop storage warning
+      memoryUsage = 85;   # Memory warning
+      cpuLoad = 150;      # Load warning
+      temperature = 80;   # Temperature warning for laptop
+    };
+  };
+
   # Zabbix monitoring removed
 
   # Enable encrypted API keys
