@@ -140,6 +140,9 @@ in {
         User = "root";
         Restart = "always";
         RestartSec = "10s";
+        Environment = [
+          "PATH=${lib.makeBinPath (with pkgs; [ procps gawk iproute2 util-linux bc coreutils ])}"
+        ];
         ExecStart = pkgs.writeShellScript "performance-analytics" ''
           #!/bin/bash
           
@@ -381,6 +384,9 @@ in {
       serviceConfig = {
         Type = "oneshot";
         User = "root";
+        Environment = [
+          "PATH=${lib.makeBinPath (with pkgs; [ procps gawk iproute2 util-linux bc coreutils ])}"
+        ];
         ExecStart = pkgs.writeShellScript "performance-reporter" ''
           #!/bin/bash
           
@@ -468,6 +474,9 @@ in {
       serviceConfig = {
         Type = "oneshot";
         User = "root";
+        Environment = [
+          "PATH=${lib.makeBinPath (with pkgs; [ procps gawk iproute2 util-linux bc coreutils ])}"
+        ];
         ExecStart = pkgs.writeShellScript "performance-dashboard-provisioner" ''
           #!/bin/bash
           
@@ -623,6 +632,10 @@ in {
       jq           # JSON processing
       gnuplot      # Data visualization
       python3      # For advanced analytics
+      procps       # Provides top, free commands
+      gawk         # Provides awk command
+      iproute2     # Provides ss command for network monitoring
+      util-linux   # Provides additional system utilities
     ];
   };
 }

@@ -683,11 +683,11 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1752202894,
-        "narHash": "sha256-knafgng4gCjZIUMyAEWjxxdols6n/swkYnbWr+oF+1w=",
+        "lastModified": 1752246954,
+        "narHash": "sha256-c1Rq5Hc4WZLKj1RkmjLFCcX4QHBwrL+DIZNMEHno7DU=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "fab659b346c0d4252208434c3c4b3983a4b38fec",
+        "rev": "e90b28967cacc64de7fb8742314ed0d7d12f47c6",
         "type": "github"
       },
       "original": {
@@ -772,11 +772,11 @@
         "xdph": "xdph"
       },
       "locked": {
-        "lastModified": 1752149340,
-        "narHash": "sha256-DJc2ROpttbP6FHcXwWpmK7EB2cpVsP/LmXjEr8RWcO8=",
+        "lastModified": 1752249064,
+        "narHash": "sha256-HqXJrGbiwpoQtyNN9O2SFNAYEEhFIuEFaduBpyn8oZA=",
         "owner": "hyprwm",
         "repo": "Hyprland",
-        "rev": "b5433bb75324a95dd27eb5492141565466c2cdd6",
+        "rev": "e589adb00db833d5e78fab20d76f94f8de035476",
         "type": "github"
       },
       "original": {
@@ -1637,11 +1637,11 @@
         "nixpkgs": "nixpkgs_15"
       },
       "locked": {
-        "lastModified": 1752224230,
-        "narHash": "sha256-dvbk0mu4tzth2ouG1qng9R2IfJ9mnvSzDrmMsO3wUjc=",
+        "lastModified": 1752251481,
+        "narHash": "sha256-LEUp7Tu3UDv85NyhEcEKaR9+iLEZn4RSzNC9TKxt3dk=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "891a063f11cdf9e138b4661fa127cacdf7d022f0",
+        "rev": "0f9cb91c906d17bccb6dcd32f71aafb64b6ccf8a",
         "type": "github"
       },
       "original": {
@@ -1958,11 +1958,11 @@
         "tinted-zed": "tinted-zed"
       },
       "locked": {
-        "lastModified": 1752201883,
-        "narHash": "sha256-SZVbQ4YThvYU50cJ4W4GNMy7/rVOJI8qmXqbEcRNsug=",
+        "lastModified": 1752250117,
+        "narHash": "sha256-zCPV1a8w9hRn5ukOQwaAggA3X5cMmVsZVBYo8wLfLuU=",
         "owner": "danth",
         "repo": "stylix",
-        "rev": "d395780b9c5c36f191b990b2021c71af180a1982",
+        "rev": "0da583a359fd911d5cbfd2c789424b888b777a4b",
         "type": "github"
       },
       "original": {
@@ -2268,11 +2268,11 @@
         "systems": "systems_13"
       },
       "locked": {
-        "lastModified": 1751960655,
-        "narHash": "sha256-ljv2qfzdkbCJK+PvqQayqx8txS4un9IkLy7kHUYXSjY=",
+        "lastModified": 1752245988,
+        "narHash": "sha256-t0Sg3HWhDIIQISLGt2cYnD28RUI3SKKTVE9bFL9M5Ok=",
         "owner": "abenz1267",
         "repo": "walker",
-        "rev": "592c9fdbed303a947e3e9c542c2b7b0d47c70857",
+        "rev": "33c1ee26f675902b4404f64288ad1facb9ecec22",
         "type": "github"
       },
       "original": {
