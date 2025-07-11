@@ -16,6 +16,10 @@ in {
     ./promtail.nix
     ./gpu-exporter.nix
     ./amd-gpu-exporter.nix
+    ./nzbget-exporter.nix
+    ./nzbget-dashboard.nix
+    ./plex-exporter.nix
+    ./plex-dashboard.nix
   ];
 
   options.monitoring = {

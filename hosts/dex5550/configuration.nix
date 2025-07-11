@@ -153,6 +153,10 @@ in {
     mode = "server";  # Now the monitoring server for network
     serverHost = "dex5550";
     
+    # Enable dashboards
+    nzbgetDashboard.enable = true;
+    plexDashboard.enable = true;
+    
     features = {
       prometheus = true;    # Prometheus server
       grafana = true;       # Grafana dashboards

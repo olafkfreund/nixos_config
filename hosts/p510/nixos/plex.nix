@@ -18,6 +18,19 @@
       enable = true;
       user = "olafkfreund";
       package = pkgs-unstable.nzbget;
+      settings = {
+        MainDir = "/mnt/media/nzbget";
+        DestDir = "/mnt/media/Media/Downloads";
+        InterDir = "/mnt/media/nzbget/intermediate";
+        QueueDir = "/mnt/media/nzbget/queue";
+        TempDir = "/mnt/media/nzbget/tmp";
+        ControlIP = "0.0.0.0";
+        ControlPort = 6789;
+        ControlUsername = "nzbget";
+        ControlPassword = "Xs4monly4e!!";
+        # API access for monitoring
+        AuthorizedIP = "127.0.0.1,192.168.1.*";
+      };
     };
 
     radarr = {
@@ -39,6 +52,7 @@
       user = "olafkfreund";
       dataDir = "/mnt/media/tautulli";
       package = pkgs-unstable.tautulli;
+      port = 8181;
     };
 
     lidarr = {
@@ -90,7 +104,12 @@
   systemd.tmpfiles.rules = [
     "d /mnt/media/jackett 0755 olafkfreund users -"
     "d /mnt/media/prowlarr 0755 olafkfreund users -"
+    "d /mnt/media/nzbget 0755 olafkfreund users -"
+    "d /mnt/media/nzbget/intermediate 0755 olafkfreund users -"
+    "d /mnt/media/nzbget/queue 0755 olafkfreund users -"
+    "d /mnt/media/nzbget/tmp 0755 olafkfreund users -"
+    "d /mnt/media/Media/Downloads 0755 olafkfreund users -"
   ];
 
-  networking.firewall.allowedTCPPorts = [5055 9117 9696]; # Tautulli, Jackett, Prowlarr
+  networking.firewall.allowedTCPPorts = [5055 6789 8181 9103 9104 9117 9696]; # Tautulli, NZBGet, Tautulli, NZBGet-exporter, Plex-exporter, Jackett, Prowlarr
 }

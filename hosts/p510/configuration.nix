@@ -254,6 +254,26 @@ in {
       alerting = false;  # Only server handles alerting
       gpuMetrics = true;  # Enable NVIDIA GPU monitoring
     };
+    
+    # Enable NZBGet monitoring
+    nzbgetExporter = {
+      enable = true;
+      nzbgetUrl = "http://localhost:6789";
+      username = "nzbget";
+      password = "Xs4monly4e!!";
+      port = 9103;
+      interval = "30s";
+    };
+    
+    # Enable Plex monitoring
+    plexExporter = {
+      enable = true;
+      tautulliUrl = "http://localhost:8181";
+      apiKey = "your-tautulli-api-key-here";  # You'll need to get this from Tautulli settings
+      port = 9104;
+      interval = "60s";
+      historyDays = 30;
+    };
   };
 
   # Zabbix monitoring removed
