@@ -216,8 +216,8 @@ in {
   # Enable production monitoring dashboard
   ai.productionDashboard = {
     enable = true;
-    grafanaUrl = "http://dex5550.home.freundcloud.com:3001";
-    prometheusUrl = "http://dex5550.home.freundcloud.com:9090";
+    grafanaUrl = "http://dex5550:3001";
+    prometheusUrl = "http://dex5550:9090";
     enableAlerts = true;
     refreshInterval = "30s";
   };

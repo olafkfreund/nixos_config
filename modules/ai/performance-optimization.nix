@@ -47,18 +47,18 @@ in {
           #!/bin/bash
           
           LOG_FILE="/var/log/ai-analysis/performance-optimization.log"
-          mkdir -p "$(dirname "$LOG_FILE")"
+          ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "$LOG_FILE")"
           exec 1> >(tee -a "$LOG_FILE")
           exec 2>&1
           
-          echo "[$(date)] Starting AI provider performance optimization..."
+          echo "[$(${pkgs.coreutils}/bin/date)] Starting AI provider performance optimization..."
           
           # Configure AI provider timeouts and connection pooling
           if [ -f /etc/ai-providers.json ]; then
-            echo "[$(date)] Optimizing AI provider configuration..."
+            echo "[$(${pkgs.coreutils}/bin/date)] Optimizing AI provider configuration..."
             
             # Create optimized AI provider configuration
-            cat > /etc/ai-providers.json.optimized << 'EOF'
+            ${pkgs.coreutils}/bin/cat > /etc/ai-providers.json.optimized << 'EOF'
           {
             "providers": {
               "anthropic": {
@@ -117,15 +117,15 @@ in {
           EOF
             
             # Backup original and replace with optimized version
-            cp /etc/ai-providers.json /etc/ai-providers.json.backup
-            mv /etc/ai-providers.json.optimized /etc/ai-providers.json
+            ${pkgs.coreutils}/bin/cp /etc/ai-providers.json /etc/ai-providers.json.backup
+            ${pkgs.coreutils}/bin/mv /etc/ai-providers.json.optimized /etc/ai-providers.json
             
-            echo "[$(date)] AI provider configuration optimized"
+            echo "[$(${pkgs.coreutils}/bin/date)] AI provider configuration optimized"
           fi
           
           # Configure AI CLI performance settings
-          if command -v ai-cli &>/dev/null; then
-            echo "[$(date)] Optimizing AI CLI performance..."
+          if ${pkgs.coreutils}/bin/command -v ai-cli &>/dev/null; then
+            echo "[$(${pkgs.coreutils}/bin/date)] Optimizing AI CLI performance..."
             
             # Set environment variables for better performance
             export AI_TIMEOUT=30
@@ -136,27 +136,27 @@ in {
             export AI_COMPRESSION=true
             
             # Test AI provider performance
-            echo "[$(date)] Testing AI provider performance..."
+            echo "[$(${pkgs.coreutils}/bin/date)] Testing AI provider performance..."
             
             for provider in anthropic openai gemini ollama; do
-              echo "[$(date)] Testing $provider..."
-              start_time=$(date +%s%3N)
+              echo "[$(${pkgs.coreutils}/bin/date)] Testing $provider..."
+              start_time=$(${pkgs.coreutils}/bin/date +%s%3N)
               
-              if timeout 30 ai-cli -p "$provider" "test response time" &>/dev/null; then
-                end_time=$(date +%s%3N)
+              if ${pkgs.coreutils}/bin/timeout 30 ai-cli -p "$provider" "test response time" &>/dev/null; then
+                end_time=$(${pkgs.coreutils}/bin/date +%s%3N)
                 response_time=$((end_time - start_time))
-                echo "[$(date)] $provider response time: ''${response_time}ms"
+                echo "[$(${pkgs.coreutils}/bin/date)] $provider response time: ''${response_time}ms"
                 
                 # Log performance metrics
-                echo "$(date -Iseconds),$provider,$response_time,success" >> /var/lib/ai-analysis/provider-performance.csv
+                echo "$(${pkgs.coreutils}/bin/date -Iseconds),$provider,$response_time,success" >> /var/lib/ai-analysis/provider-performance.csv
               else
-                echo "[$(date)] $provider timeout or error"
-                echo "$(date -Iseconds),$provider,30000,timeout" >> /var/lib/ai-analysis/provider-performance.csv
+                echo "[$(${pkgs.coreutils}/bin/date)] $provider timeout or error"
+                echo "$(${pkgs.coreutils}/bin/date -Iseconds),$provider,30000,timeout" >> /var/lib/ai-analysis/provider-performance.csv
               fi
             done
           fi
           
-          echo "[$(date)] AI provider optimization completed"
+          echo "[$(${pkgs.coreutils}/bin/date)] AI provider optimization completed"
         '';
       };
     };
@@ -172,14 +172,14 @@ in {
           #!/bin/bash
           
           LOG_FILE="/var/log/ai-analysis/system-optimization.log"
-          mkdir -p "$(dirname "$LOG_FILE")"
+          ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "$LOG_FILE")"
           exec 1> >(tee -a "$LOG_FILE")
           exec 2>&1
           
-          echo "[$(date)] Starting system performance optimization..."
+          echo "[$(${pkgs.coreutils}/bin/date)] Starting system performance optimization..."
           
           # CPU scheduling optimization for AI workloads
-          echo "[$(date)] Optimizing CPU scheduling..."
+          echo "[$(${pkgs.coreutils}/bin/date)] Optimizing CPU scheduling..."
           
           # Set CPU governor to performance for AI processes
           if [ -d /sys/devices/system/cpu/cpu0/cpufreq ]; then
@@ -188,11 +188,11 @@ in {
                 echo "performance" > "$cpu" 2>/dev/null || true
               fi
             done
-            echo "[$(date)] CPU governor set to performance"
+            echo "[$(${pkgs.coreutils}/bin/date)] CPU governor set to performance"
           fi
           
           # I/O scheduling optimization
-          echo "[$(date)] Optimizing I/O scheduling..."
+          echo "[$(${pkgs.coreutils}/bin/date)] Optimizing I/O scheduling..."
           
           # Set I/O scheduler to deadline for better AI workload performance
           for device in /sys/block/*/queue/scheduler; do
@@ -202,7 +202,7 @@ in {
           done
           
           # Memory optimization for AI workloads
-          echo "[$(date)] Optimizing memory management..."
+          echo "[$(${pkgs.coreutils}/bin/date)] Optimizing memory management..."
           
           # Adjust swappiness for AI workloads
           echo 10 > /proc/sys/vm/swappiness
@@ -215,7 +215,7 @@ in {
           echo 50 > /proc/sys/vm/vfs_cache_pressure
           
           # Network optimization for AI providers
-          echo "[$(date)] Optimizing network performance..."
+          echo "[$(${pkgs.coreutils}/bin/date)] Optimizing network performance..."
           
           # TCP optimization for AI API calls
           echo 1 > /proc/sys/net/ipv4/tcp_window_scaling
@@ -232,7 +232,7 @@ in {
           echo 65536 > /proc/sys/net/core/wmem_max
           echo 1024 > /proc/sys/net/core/netdev_max_backlog
           
-          echo "[$(date)] System optimization completed"
+          echo "[$(${pkgs.coreutils}/bin/date)] System optimization completed"
         '';
       };
     };
@@ -248,18 +248,18 @@ in {
           #!/bin/bash
           
           LOG_FILE="/var/log/ai-analysis/cache-optimization.log"
-          mkdir -p "$(dirname "$LOG_FILE")"
+          ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "$LOG_FILE")"
           exec 1> >(tee -a "$LOG_FILE")
           exec 2>&1
           
-          echo "[$(date)] Starting cache optimization..."
+          echo "[$(${pkgs.coreutils}/bin/date)] Starting cache optimization..."
           
           # Create AI response cache directory
-          mkdir -p /var/cache/ai-analysis
-          chmod 755 /var/cache/ai-analysis
+          ${pkgs.coreutils}/bin/mkdir -p /var/cache/ai-analysis
+          ${pkgs.coreutils}/bin/chmod 755 /var/cache/ai-analysis
           
           # Redis-like caching for AI responses (simple file-based)
-          cat > /usr/local/bin/ai-cache-manager << 'EOF'
+          ${pkgs.coreutils}/bin/cat > /usr/local/bin/ai-cache-manager << 'EOF'
           #!/bin/bash
           
           CACHE_DIR="/var/cache/ai-analysis"
@@ -301,12 +301,12 @@ in {
           esac
           EOF
           
-          chmod +x /usr/local/bin/ai-cache-manager
+          ${pkgs.coreutils}/bin/chmod +x /usr/local/bin/ai-cache-manager
           
           # Set up cache cleanup cron job
           echo "0 * * * * root /usr/local/bin/ai-cache-manager cleanup" > /etc/cron.d/ai-cache-cleanup
           
-          echo "[$(date)] Cache optimization completed"
+          echo "[$(${pkgs.coreutils}/bin/date)] Cache optimization completed"
         '';
       };
     };
@@ -325,38 +325,38 @@ in {
           
           LOG_FILE="/var/log/ai-analysis/performance-monitor.log"
           METRICS_FILE="/var/lib/ai-analysis/performance-metrics.json"
-          mkdir -p "$(dirname "$LOG_FILE")"
-          mkdir -p "$(dirname "$METRICS_FILE")"
+          ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "$LOG_FILE")"
+          ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "$METRICS_FILE")"
           exec 1> >(tee -a "$LOG_FILE")
           exec 2>&1
           
-          echo "[$(date)] Starting performance monitoring..."
+          echo "[$(${pkgs.coreutils}/bin/date)] Starting performance monitoring..."
           
           # Collect system performance metrics
-          TIMESTAMP=$(date -Iseconds)
-          HOSTNAME=$(hostname)
+          TIMESTAMP=$(${pkgs.coreutils}/bin/date -Iseconds)
+          HOSTNAME=$(${pkgs.nettools}/bin/hostname)
           
           # CPU metrics
-          CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/%us,//' | sed 's/,//')
-          LOAD_AVG=$(uptime | awk -F'load average:' '{print $2}' | awk '{print $1}' | sed 's/,//')
+          CPU_USAGE=$(${pkgs.procps}/bin/top -bn1 | ${pkgs.gnugrep}/bin/grep "Cpu(s)" | ${pkgs.gawk}/bin/awk '{print $2}' | ${pkgs.gnused}/bin/sed 's/%us,//' | ${pkgs.gnused}/bin/sed 's/,//')
+          LOAD_AVG=$(${pkgs.procps}/bin/uptime | ${pkgs.gawk}/bin/awk -F'load average:' '{print $2}' | ${pkgs.gawk}/bin/awk '{print $1}' | ${pkgs.gnused}/bin/sed 's/,//')
           
           # Memory metrics
-          MEMORY_TOTAL=$(free -b | grep Mem | awk '{print $2}')
-          MEMORY_USED=$(free -b | grep Mem | awk '{print $3}')
-          MEMORY_PERCENT=$(echo "scale=2; $MEMORY_USED * 100 / $MEMORY_TOTAL" | bc)
+          MEMORY_TOTAL=$(${pkgs.procps}/bin/free -b | ${pkgs.gnugrep}/bin/grep Mem | ${pkgs.gawk}/bin/awk '{print $2}')
+          MEMORY_USED=$(${pkgs.procps}/bin/free -b | ${pkgs.gnugrep}/bin/grep Mem | ${pkgs.gawk}/bin/awk '{print $3}')
+          MEMORY_PERCENT=$(echo "scale=2; $MEMORY_USED * 100 / $MEMORY_TOTAL" | ${pkgs.bc}/bin/bc)
           
           # Disk metrics
-          DISK_USAGE=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+          DISK_USAGE=$(${pkgs.coreutils}/bin/df / | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $5}' | ${pkgs.gnused}/bin/sed 's/%//')
           
           # Network metrics
-          if command -v ss &>/dev/null; then
-            NETWORK_CONNECTIONS=$(ss -tuln | grep LISTEN | wc -l)
+          if ${pkgs.coreutils}/bin/command -v ${pkgs.iproute2}/bin/ss &>/dev/null; then
+            NETWORK_CONNECTIONS=$(${pkgs.iproute2}/bin/ss -tuln | ${pkgs.gnugrep}/bin/grep LISTEN | ${pkgs.coreutils}/bin/wc -l)
           else
             NETWORK_CONNECTIONS=0
           fi
           
           # AI service metrics
-          AI_SERVICES_RUNNING=$(systemctl list-units --type=service --state=running | grep -c ai- || echo 0)
+          AI_SERVICES_RUNNING=$(${pkgs.systemd}/bin/systemctl list-units --type=service --state=running | ${pkgs.gnugrep}/bin/grep -c ai- || echo 0)
           
           # Create performance metrics report
           cat > "$METRICS_FILE" << EOF
@@ -375,12 +375,12 @@ in {
             "ai_metrics": {
               "ai_services_running": $AI_SERVICES_RUNNING,
               "ai_provider_status": "$(ai-cli --status 2>/dev/null | grep -c "✓" || echo 0)",
-              "last_optimization": "$(date -Iseconds)"
+              "last_optimization": "$(${pkgs.coreutils}/bin/date -Iseconds)"
             }
           }
           EOF
           
-          echo "[$(date)] Performance metrics collected and saved to $METRICS_FILE"
+          echo "[$(${pkgs.coreutils}/bin/date)] Performance metrics collected and saved to $METRICS_FILE"
         '';
       };
     };

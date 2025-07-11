@@ -10,13 +10,13 @@ in {
     
     grafanaUrl = mkOption {
       type = types.str;
-      default = "http://dex5550.home.freundcloud.com:3001";
+      default = "http://dex5550:3001";
       description = "Grafana server URL for dashboard deployment";
     };
     
     prometheusUrl = mkOption {
       type = types.str;
-      default = "http://dex5550.home.freundcloud.com:9090";
+      default = "http://dex5550:9090";
       description = "Prometheus server URL for metrics collection";
     };
     

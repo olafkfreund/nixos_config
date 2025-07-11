@@ -217,7 +217,7 @@ EOF
     export PATH="${lib.makeBinPath (with pkgs; [ curl jq coreutils util-linux bc findutils systemd gnugrep gawk hostname ])}"
     export OUTPUT_PATH="''${OUTPUT_PATH:-/var/lib/ai-analysis}"
     export LOG_FILE="/var/log/ai-analysis/capacity-planning.log"
-    export MONITORING_URL="''${MONITORING_URL:-http://dex5550.home.freundcloud.com:9090}"
+    export MONITORING_URL="''${MONITORING_URL:-http://dex5550:9090}"
     
     # Logging function
     log() {
@@ -1003,7 +1003,7 @@ in {
             # Environment variables
             Environment = [
               "AI_PROVIDER=${cfg.aiProvider}"
-              "MONITORING_URL=http://dex5550.home.freundcloud.com:9090"
+              "MONITORING_URL=http://dex5550:9090"
               "OUTPUT_PATH=${cfg.outputPath}"
               "PATH=/run/current-system/sw/bin:/run/wrappers/bin"
             ];
@@ -1215,7 +1215,7 @@ in {
             # Environment variables
             Environment = [
               "AI_PROVIDER=${cfg.aiProvider}"
-              "MONITORING_URL=http://dex5550.home.freundcloud.com:9090"
+              "MONITORING_URL=http://dex5550:9090"
               "OUTPUT_PATH=${cfg.outputPath}"
               "PATH=/run/current-system/sw/bin:/run/wrappers/bin"
             ];

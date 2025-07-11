@@ -49,7 +49,7 @@ let
         local query="$1"
         local duration="''${2:-24h}"
         local step="''${3:-300}"
-        local monitoring_url="''${MONITORING_URL:-http://dex5550.home.freundcloud.com:9090}"
+        local monitoring_url="''${MONITORING_URL:-http://dex5550:9090}"
         
         curl -s -G "$monitoring_url/api/v1/query_range" \
             --data-urlencode "query=$query" \
@@ -311,7 +311,7 @@ print(json.dumps(stats))
     # Prometheus query function
     prometheus_query() {
         local query="$1"
-        local monitoring_url="''${MONITORING_URL:-http://dex5550.home.freundcloud.com:9090}"
+        local monitoring_url="''${MONITORING_URL:-http://dex5550:9090}"
         
         curl -s -G "$monitoring_url/api/v1/query" \
             --data-urlencode "query=$query" \
@@ -655,7 +655,7 @@ in {
           # Environment variables
           Environment = [
             "AI_PROVIDER=${cfg.aiProvider}"
-            "MONITORING_URL=http://dex5550.home.freundcloud.com:9090"
+            "MONITORING_URL=http://dex5550:9090"
             "OUTPUT_PATH=${cfg.outputPath}"
             "PATH=/run/current-system/sw/bin:/run/wrappers/bin"
             "AI_PROVIDERS_CONFIG=/etc/ai-providers.json"
@@ -701,7 +701,7 @@ in {
           
           # Environment variables
           Environment = [
-            "MONITORING_URL=http://dex5550.home.freundcloud.com:9090"
+            "MONITORING_URL=http://dex5550:9090"
             "OUTPUT_PATH=${cfg.outputPath}"
             "PATH=/run/current-system/sw/bin:/run/wrappers/bin"
           ];
