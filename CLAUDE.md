@@ -465,8 +465,152 @@ node-exporter-status    # All exporters status and metrics
 **Deployment Status**: ✅ **ALL HOSTS MONITORED**
 - P620: ✅ Node exporter, systemd exporter, AI metrics
 - DEX5550: ✅ Prometheus, Grafana, Alertmanager
-- P510: ✅ Node exporter, systemd exporter, storage metrics
+- P510: ✅ Node exporter, systemd exporter, storage metrics, Plex monitoring, NZBGet monitoring
 - Razer: ✅ Node exporter, systemd exporter, mobile metrics
+
+### Advanced Media Server Monitoring (Phase 10.1 - FULLY DEPLOYED)
+
+**Comprehensive Plex Media Server Analytics**
+
+A complete enterprise-grade media server monitoring solution with detailed analytics, user behavior tracking, and geographic insights deployed on P510 and visualized on DEX5550.
+
+**✅ Deployment Status: FULLY OPERATIONAL**
+
+**🎬 Specialized Grafana Dashboards (4 Total):**
+
+1. **Plex Overview Dashboard**
+   - Real-time server status and stream activity
+   - Active streams, transcoding, and direct play metrics
+   - Total bandwidth usage with WAN/LAN breakdown
+   - Live streaming activity graphs and trends
+
+2. **Top Content & Users Dashboard**
+   - Top 10 movies and TV shows (last 30 days)
+   - User activity rankings by plays and watch time
+   - Interactive pie charts and horizontal bar graphs
+   - Watch time analytics in hours
+
+3. **Geographic & Platform Analytics Dashboard**
+   - Streaming by location and country analysis
+   - Platform and player application distribution  
+   - Stream quality and resolution metrics
+   - Unique IP tracking with anonymized analysis
+
+4. **Library Statistics Dashboard**
+   - Content library counts by media type
+   - Daily watch time and play count trends
+   - Content type distribution analysis
+   - Historical viewing patterns
+
+**📊 Comprehensive Metrics Collection:**
+
+**Plex/Tautulli Exporter (Port 9104):**
+- **Live Activity**: Current streams, transcoding sessions, bandwidth usage
+- **Top Analytics**: Most played content, user statistics with watch times
+- **Geographic Data**: Streaming locations, countries, platform analysis
+- **Quality Metrics**: Stream resolutions, transcode vs direct play ratios
+- **Historical Data**: 30-day trends, daily statistics, usage patterns
+- **Server Info**: Version tracking, platform details, library counts
+
+**NZBGet Exporter (Port 9103):**
+- **Download Metrics**: Real-time download rates, queue status
+- **Completion Tracking**: Success/failure statistics, retry analysis
+- **Data Volume**: Total downloaded data, remaining queue size
+- **Performance**: Thread utilization, server responsiveness
+- **Queue Management**: Active downloads, paused status, quota tracking
+
+**🔧 Configuration Details:**
+
+**Media Server Setup (P510):**
+```nix
+# Plex monitoring configuration
+plexExporter = {
+  enable = true;
+  tautulliUrl = "http://localhost:8181";
+  apiKey = "099a2877fb7c410fb3031e24b3e781bf";  # Configured Tautulli API key
+  port = 9104;
+  interval = "60s";
+  historyDays = 30;
+};
+
+# NZBGet monitoring configuration
+nzbgetExporter = {
+  enable = true;
+  nzbgetUrl = "http://localhost:6789";
+  username = "nzbget";
+  password = "Xs4monly4e!!";
+  port = 9103;
+  interval = "30s";
+};
+```
+
+**Dashboard Server (DEX5550):**
+```nix
+# Enable comprehensive dashboards
+monitoring = {
+  nzbgetDashboard.enable = true;
+  plexDashboard.enable = true;
+};
+```
+
+**🎯 Key Features:**
+
+**Real-Time Analytics:**
+- Live stream monitoring with user identification
+- Bandwidth usage tracking (total, WAN, LAN)
+- Transcoding load and direct play statistics
+- Download queue status and completion rates
+
+**User Behavior Analytics:**
+- Top users by play count and watch time
+- Content popularity rankings (movies, shows, audiobooks)
+- Geographic distribution of streaming activity
+- Device and platform usage patterns
+
+**Performance Insights:**
+- Stream quality distribution and resolution analytics
+- Transcoding vs direct play ratios
+- Server performance and response times
+- Download success/failure analysis
+
+**📈 Access Your Media Analytics:**
+
+```bash
+# Access comprehensive media monitoring
+# Grafana Portal: http://dex5550:3001 (admin/nixos-admin)
+
+# Available dashboards:
+# - 🎬 Plex Media Server - Overview
+# - 🏆 Plex - Top Content & Users  
+# - 🌍 Plex - Geographic & Platform Analytics
+# - 📚 Plex - Library Statistics
+# - 📥 NZBGet Download Monitor
+
+# Direct metrics access:
+curl http://p510:9104/metrics  # Plex metrics
+curl http://p510:9103/metrics  # NZBGet metrics
+```
+
+**🔑 Tautulli API Key Setup:**
+
+If you need to reconfigure the Tautulli API key:
+
+1. **Access Tautulli**: http://p510:8181 or http://192.168.1.127:8181
+2. **Navigate to Settings** → Web Interface → API section
+3. **Copy the API Key** (long alphanumeric string)
+4. **Update P510 configuration** at line 272 in `hosts/p510/configuration.nix`
+5. **Redeploy**: `just quick-deploy p510`
+
+**📊 What You'll See:**
+
+- **Enterprise-grade analytics** with beautiful, informative visualizations
+- **Real-time updates** every 30-60 seconds across all dashboards
+- **User insights** showing who watches what content and when
+- **Geographic intelligence** revealing streaming patterns and locations
+- **Performance optimization** data for server tuning and capacity planning
+- **Download monitoring** with comprehensive success/failure tracking
+
+The implementation provides professional-grade media server analytics comparable to commercial solutions, with complete customization and privacy control.
 
 ## Complete AI Infrastructure Deployment (Phase 9.3 - Production Ready)
 
@@ -710,6 +854,85 @@ systemctl status nixos-exporter systemd-exporter
 # Check if Python HTTP servers are running and accessible
 curl http://localhost:9101/metrics  # NixOS metrics
 curl http://localhost:9102/metrics  # Systemd metrics
+```
+
+### Media Server Monitoring Issues
+
+**Plex/Tautulli exporter not working:**
+```bash
+# Check Plex exporter service status
+systemctl status plex-exporter
+journalctl -u plex-exporter -f
+
+# Test Tautulli API connectivity
+curl -s "http://localhost:8181/api/v2?apikey=YOUR_API_KEY&cmd=get_activity"
+
+# Verify Tautulli service is running
+systemctl status tautulli
+
+# Check exporter metrics endpoint
+curl http://localhost:9104/metrics
+
+# Common issues:
+# - Incorrect API key in configuration
+# - Tautulli service not running or accessible
+# - Firewall blocking port 9104
+# - Missing dependencies (curl, jq, bc, python3)
+```
+
+**NZBGet exporter not working:**
+```bash
+# Check NZBGet exporter service status
+systemctl status nzbget-exporter
+journalctl -u nzbget-exporter -f
+
+# Test NZBGet API connectivity
+curl -s -u "nzbget:Xs4monly4e!!" "http://localhost:6789/jsonrpc/status"
+
+# Verify NZBGet service is running
+systemctl status nzbget
+
+# Check exporter metrics endpoint
+curl http://localhost:9103/metrics
+
+# Common issues:
+# - Incorrect username/password in configuration
+# - NZBGet service not running or accessible
+# - Firewall blocking port 9103
+# - API authentication failures
+```
+
+**Media dashboards showing no data:**
+```bash
+# Check if exporters are being scraped by Prometheus
+curl -s http://dex5550:9090/api/v1/targets | jq '.data.activeTargets[] | select(.labels.job | contains("plex") or contains("nzbget"))'
+
+# Verify dashboard provisioning
+ls -la /var/lib/grafana/dashboards/plex-*.json
+ls -la /var/lib/grafana/dashboards/nzbget-*.json
+
+# Check Grafana logs for dashboard errors
+journalctl -u grafana -f
+
+# Restart dashboard provisioning services
+systemctl restart plex-dashboard-provisioner
+systemctl restart nzbget-dashboard-provisioner
+```
+
+**Tautulli API key issues:**
+```bash
+# Get new API key from Tautulli web interface
+# Navigate to: http://p510:8181 → Settings → Web Interface → API
+
+# Update configuration with new key
+nano /home/olafkfreund/.config/nixos/hosts/p510/configuration.nix
+# Find line 272: apiKey = "your-new-api-key-here";
+
+# Redeploy P510 configuration
+just quick-deploy p510
+
+# Verify new key works
+curl -s "http://localhost:8181/api/v2?apikey=NEW_KEY&cmd=get_server_info"
 ```
 
 ### General Debugging
