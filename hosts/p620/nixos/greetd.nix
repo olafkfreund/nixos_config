@@ -7,8 +7,16 @@
 }: {
   # greetd display manager
   services.greetd = let
+    hyprland_wrapper = pkgs.writeShellScript "hyprland-wrapper" ''
+      export LIBVA_DRIVER_NAME=radeonsi
+      export VDPAU_DRIVER=radeonsi
+      export DRI_PRIME=1
+      export LIBGL_DRIVERS_PATH=${pkgs.mesa}/lib/dri
+      export __GL_SHADER_DISK_CACHE_PATH=/tmp
+      exec ${lib.getExe config.programs.hyprland.package}
+    '';
     session_hypr = {
-      command = "${lib.getExe config.programs.hyprland.package}";
+      command = "${hyprland_wrapper}";
       user = "${username}";
     };
     session_sway = {

@@ -94,7 +94,7 @@ in {
       lua = true;
       nix = true;
       shell = true;
-      devshell = false;
+      devshell = true;
       python = true;
       nodejs = true;
     };

@@ -7,9 +7,14 @@
     enable = true;
     enable32Bit = true;
     extraPackages32 = with pkgs.driversi686Linux; [
+      # 32-bit Mesa DRI drivers for compatibility
+      mesa
       amdvlk
     ];
     extraPackages = with pkgs; [
+      # Mesa DRI drivers for OpenGL/EGL support
+      mesa
+      # Vulkan and video acceleration
       vulkan-validation-layers
       libva-vdpau-driver
       amdvlk
@@ -87,6 +92,11 @@
 
   # Environment variables for better AMD compatibility
   environment.variables = {
+    # DRI and VA-API variables for proper driver loading
+    LIBVA_DRIVER_NAME = "radeonsi";
+    VDPAU_DRIVER = "radeonsi";
+    DRI_PRIME = "1";
+    
     # Uncomment if you want to force RADV (Mesa Vulkan driver)
     # AMD_VULKAN_ICD = "RADV";
 

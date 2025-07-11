@@ -188,7 +188,7 @@ in {
       lua = true;
       nix = true;
       shell = true;
-      devshell = false; # Temporarily disabled due to patch issue
+      devshell = true; # Enable devenv development environment
       python = true;
       nodejs = true;
     };
