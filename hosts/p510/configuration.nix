@@ -253,6 +253,7 @@ in {
       nixosMetrics = true;
       alerting = false; # Only server handles alerting
       gpuMetrics = true; # Enable NVIDIA GPU monitoring
+      networkDiscovery = true; # Enable network discovery from media server
     };
 
     # Enable NZBGet monitoring

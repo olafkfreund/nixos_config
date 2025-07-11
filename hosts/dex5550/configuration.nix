@@ -156,6 +156,7 @@ in {
     # Enable dashboards
     nzbgetDashboard.enable = true;
     plexDashboard.enable = true;
+    networkDashboards.enable = true;
     
     features = {
       prometheus = true;    # Prometheus server
@@ -168,6 +169,10 @@ in {
       # The actual GPU exporter services run on hosts with GPUs (razer, p510, p620)
       gpuMetrics = true;    # Enable GPU dashboards for NVIDIA clients
       amdGpuMetrics = true; # Enable AMD GPU dashboards for AMD clients
+      # Network monitoring features
+      networkDiscovery = true;    # Enable network device discovery
+      trafficAnalysis = true;     # Enable traffic analysis
+      networkDashboards = true;   # Enable network dashboards
     };
   };
 

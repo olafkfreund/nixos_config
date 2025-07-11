@@ -20,6 +20,9 @@ in {
     ./nzbget-dashboard.nix
     ./plex-exporter.nix
     ./plex-dashboard.nix
+    ./network-discovery.nix
+    ./traffic-analyzer.nix
+    ./network-dashboards.nix
   ];
 
   options.monitoring = {
@@ -201,6 +204,24 @@ in {
         type = types.bool;
         default = false;
         description = "Enable hardware monitoring with desktop notifications";
+      };
+
+      networkDiscovery = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable network device discovery and classification";
+      };
+
+      trafficAnalysis = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable network traffic analysis and protocol detection";
+      };
+
+      networkDashboards = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable beautiful network activity dashboards";
       };
     };
 
