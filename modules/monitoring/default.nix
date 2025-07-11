@@ -329,7 +329,7 @@ in {
       
       serviceConfig = {
         Type = "simple";
-        ExecStart = "${pkgs.writeShellScript "hardware-monitor" ''
+        ExecStart = pkgs.writeShellScript "hardware-monitor" ''
           #!/bin/bash
           set -euo pipefail
           
@@ -462,7 +462,7 @@ in {
               main
               sleep $((CHECK_INTERVAL_MINUTES * 60))
           done
-        ''}/bin/hardware-monitor";
+        '';
         Restart = "always";
         RestartSec = "30s";
         

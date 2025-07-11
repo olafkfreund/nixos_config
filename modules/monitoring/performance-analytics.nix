@@ -141,7 +141,7 @@ in {
         Restart = "always";
         RestartSec = "10s";
         Environment = [
-          "PATH=${lib.makeBinPath (with pkgs; [ procps gawk iproute2 util-linux bc coreutils ])}"
+          "PATH=${lib.makeBinPath (with pkgs; [ procps gawk iproute2 util-linux bc coreutils gnugrep gnused ])}"
         ];
         ExecStart = pkgs.writeShellScript "performance-analytics" ''
           #!/bin/bash
@@ -385,7 +385,7 @@ in {
         Type = "oneshot";
         User = "root";
         Environment = [
-          "PATH=${lib.makeBinPath (with pkgs; [ procps gawk iproute2 util-linux bc coreutils ])}"
+          "PATH=${lib.makeBinPath (with pkgs; [ procps gawk iproute2 util-linux bc coreutils gnugrep gnused ])}"
         ];
         ExecStart = pkgs.writeShellScript "performance-reporter" ''
           #!/bin/bash
@@ -475,7 +475,7 @@ in {
         Type = "oneshot";
         User = "root";
         Environment = [
-          "PATH=${lib.makeBinPath (with pkgs; [ procps gawk iproute2 util-linux bc coreutils ])}"
+          "PATH=${lib.makeBinPath (with pkgs; [ procps gawk iproute2 util-linux bc coreutils gnugrep gnused ])}"
         ];
         ExecStart = pkgs.writeShellScript "performance-dashboard-provisioner" ''
           #!/bin/bash
@@ -636,6 +636,8 @@ in {
       gawk         # Provides awk command
       iproute2     # Provides ss command for network monitoring
       util-linux   # Provides additional system utilities
+      gnugrep      # Provides grep command
+      gnused       # Provides sed command
     ];
   };
 }
