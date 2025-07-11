@@ -343,7 +343,7 @@ in {
       lua = true;
       nix = true;
       shell = true;
-      devshell = false; # Temporarily disabled due to patch issue
+      devshell = true; # Temporarily disabled due to patch issue
       python = true;
       nodejs = true;
     };
