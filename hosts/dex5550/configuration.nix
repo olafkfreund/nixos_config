@@ -167,50 +167,7 @@ in {
     };
   };
 
-  # Zabbix monitoring server configuration
-  modules.monitoring.zabbix = {
-    enable = true;
-    mode = "server";
-    serverHost = "dex5550";
-    
-    snmpDevices = [
-      {
-        name = "Deco-Main-Router";
-        ip = "192.168.1.1";
-        community = "public";
-        template = "Template Net TP-LINK SNMP";
-      }
-      {
-        name = "Deco-Bedroom";
-        ip = "192.168.1.10";
-        community = "public";
-        template = "Template Net TP-LINK SNMP";
-      }
-      {
-        name = "Deco-Office";
-        ip = "192.168.1.11";
-        community = "public";
-        template = "Template Net TP-LINK SNMP";
-      }
-      # Add Google devices (you'll need to find their IPs and enable SNMP)
-      {
-        name = "Google-Home-Living";
-        ip = "192.168.1.100";  # Replace with actual IP
-        community = "public";
-        template = "Template Net Network Generic Device SNMP";
-      }
-      {
-        name = "Google-Nest-Hub";
-        ip = "192.168.1.101";  # Replace with actual IP
-        community = "public";
-        template = "Template Net Network Generic Device SNMP";
-      }
-    ];
-    
-    grafanaIntegration = {
-      enable = true;
-    };
-  };
+  # Zabbix monitoring removed
 
   # Custom Grafana configuration - configured for sub-path with external proxy
   services.grafana = {
@@ -465,7 +422,7 @@ in {
       file = pkgs.writeText "home.freundcloud.com.zone" ''
         $TTL 86400
         @       IN      SOA     dex5550.home.freundcloud.com. admin.home.freundcloud.com. (
-                        2025070801      ; Serial - updated for razer IP change
+                        2025071002      ; Serial - updated for zabbix subpath routing
                         3600            ; Refresh
                         1800            ; Retry
                         604800          ; Expire
@@ -695,6 +652,7 @@ in {
         };
       };
       
+      
       # API and dashboard
       api = {
         dashboard = true;
@@ -743,13 +701,7 @@ in {
             tls.certResolver = "letsencrypt";
           };
           
-          # Zabbix router
-          zabbix = {
-            rule = "Host(`home.freundcloud.com`) && PathPrefix(`/zabbix`)";
-            middlewares = [ "zabbix-stripprefix" "secure-headers" ];
-            service = "zabbix";
-            tls.certResolver = "letsencrypt";
-          };
+          # Zabbix router removed
           
           # Traefik dashboard router
           dashboard = {
@@ -771,9 +723,7 @@ in {
           alertmanager-stripprefix = {
             stripPrefix.prefixes = [ "/alertmanager" ];
           };
-          zabbix-stripprefix = {
-            stripPrefix.prefixes = [ "/zabbix" ];
-          };
+          # Zabbix middlewares removed
           secure-headers = {
             headers = {
               customRequestHeaders = {
@@ -806,11 +756,7 @@ in {
               url = "http://127.0.0.1:9093";
             }];
           };
-          zabbix = {
-            loadBalancer.servers = [{
-              url = "http://127.0.0.1:8081";
-            }];
-          };
+          # Zabbix service removed
         };
       };
     };
@@ -821,6 +767,8 @@ in {
     "d /var/log/traefik 0755 traefik traefik -"
     "d /var/lib/traefik 0700 traefik traefik -"
   ];
+
+
 
   # Additional security services
   environment.systemPackages = with pkgs; [

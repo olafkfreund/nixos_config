@@ -25,10 +25,7 @@
     
     # Monitoring modules
     ./monitoring/default.nix
-    ./monitoring/zabbix.nix
-    ./monitoring/zabbix-server.nix
-    ./monitoring/zabbix-agent.nix
-    ./monitoring/zabbix-grafana.nix
+    # Zabbix monitoring removed
     
     # Virtualization modules
     ./virt/default.nix

@@ -197,12 +197,7 @@ in {
     };
   };
 
-  # Zabbix agent configuration for Razer
-  modules.monitoring.zabbix = {
-    enable = true;
-    mode = "agent";
-    serverHost = "dex5550";
-  };
+  # Zabbix monitoring removed
 
   # Enable encrypted API keys
   secrets.apiKeys = {
