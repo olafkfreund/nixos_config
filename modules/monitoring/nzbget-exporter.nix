@@ -207,7 +207,7 @@ nzbget_up $([ "$download_rate" != "" ] && echo "1" || echo "0")
 
 EOF
               
-              log "Metrics updated: Queue=$queue_count, Rate=${download_rate_kbs}KB/s, Completed=$completed_count, Failed=$failed_count"
+              log "Metrics updated: Queue=$queue_count, Rate=$(echo "scale=2; $download_rate / 1024" | bc 2>/dev/null || echo "0")KB/s, Completed=$completed_count, Failed=$failed_count"
           }
           
           # Function to serve metrics
@@ -247,7 +247,7 @@ class MetricsHandler(http.server.SimpleHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
 
-with socketserver.TCPServer(('', $EXPORTER_PORT), MetricsHandler) as httpd:
+with socketserver.TCPServer(('0.0.0.0', $EXPORTER_PORT), MetricsHandler) as httpd:
     httpd.serve_forever()
 " &
                       HTTP_PID=$!
