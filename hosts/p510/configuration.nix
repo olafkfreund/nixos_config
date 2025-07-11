@@ -37,17 +37,17 @@ in {
 
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "server";
-  
+
   # Tailscale VPN Configuration - P510 media server
   networking.tailscale = {
     enable = true;
     authKeyFile = config.age.secrets.tailscale-auth-key.path;
     hostname = "p510-media";
     acceptRoutes = true;
-    acceptDns = false;  # Keep local DNS setup
+    acceptDns = false; # Keep local DNS setup
     ssh = true;
     shields = true;
-    useRoutingFeatures = "client";  # Accept routes from other nodes
+    useRoutingFeatures = "client"; # Accept routes from other nodes
     extraUpFlags = [
       "--operator=olafkfreund"
       "--accept-risk=lose-ssh"
@@ -57,28 +57,28 @@ in {
 
   # Use static DNS configuration for reliable internal resolution
   services.resolved.enable = lib.mkForce false;
-  networking.nameservers = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
-  networking.search = [ "home.freundcloud.com" ];
+  networking.nameservers = ["192.168.1.222" "1.1.1.1" "8.8.8.8"];
+  networking.search = ["home.freundcloud.com"];
 
   # Configure AI providers directly
   ai.providers = {
     enable = true;
     defaultProvider = "anthropic";
     enableFallback = true;
-    
+
     # Enable specific providers
     openai.enable = true;
     anthropic.enable = true;
     gemini.enable = true;
     ollama.enable = true;
   };
-  
+
   # Enable AI-powered system analysis
   ai.analysis = {
     enable = true;
     aiProvider = "anthropic";
     enableFallback = true;
-    
+
     features = {
       performanceAnalysis = true;
       resourceOptimization = true;
@@ -87,13 +87,13 @@ in {
       logAnalysis = true;
       securityAnalysis = true;
     };
-    
+
     # Analysis intervals
     intervals = {
-      performanceAnalysis = "hourly";  # Every hour
-      maintenanceAnalysis = "daily";   # Once daily
-      configDriftCheck = "*:0/6";      # Every 6 hours
-      logAnalysis = "*:0/4";           # Every 4 hours
+      performanceAnalysis = "hourly"; # Every hour
+      maintenanceAnalysis = "daily"; # Once daily
+      configDriftCheck = "*:0/6"; # Every 6 hours
+      logAnalysis = "*:0/4"; # Every 4 hours
     };
   };
 
@@ -103,38 +103,38 @@ in {
     autoOptimize = true;
     nixStoreOptimization = true;
     logRotation = true;
-    
+
     thresholds = {
-      memoryWarning = 80;    # P510 is at 12.5%, normal threshold
-      memoryCritical = 90;   # Standard critical threshold
-      diskWarning = 75;      # P510 is at 79.6%, urgent threshold
-      diskCritical = 85;     # Prevent disk full - already close!
+      memoryWarning = 80; # P510 is at 12.5%, normal threshold
+      memoryCritical = 90; # Standard critical threshold
+      diskWarning = 75; # P510 is at 79.6%, urgent threshold
+      diskCritical = 85; # Prevent disk full - already close!
     };
   };
 
   # Enable automated remediation - CRITICAL for P510 disk space management
   ai.automatedRemediation = {
     enable = true;
-    enableSelfHealing = true;  # Enable for P510 due to critical disk usage
-    safeMode = false;          # Disable safe mode for P510 - aggressive cleanup needed
-    
+    enableSelfHealing = true; # Enable for P510 due to critical disk usage
+    safeMode = false; # Disable safe mode for P510 - aggressive cleanup needed
+
     notifications = {
       enable = true;
       logFile = "/var/log/ai-analysis/remediation-p510.log";
     };
-    
+
     actions = {
-      diskCleanup = true;           # Critical - P510 at 79.6%
-      memoryOptimization = true;    # Preventive
-      serviceRestart = true;        # Enable for P510
-      configurationReset = false;   # Keep disabled for safety
+      diskCleanup = true; # Critical - P510 at 79.6%
+      memoryOptimization = true; # Preventive
+      serviceRestart = true; # Enable for P510
+      configurationReset = false; # Keep disabled for safety
     };
   };
 
   # Enable emergency storage analysis for P510 critical disk situation
   ai.storageAnalysis = {
     enable = true;
-    emergencyMode = true;      # CRITICAL: P510 at 79.6% disk usage
+    emergencyMode = true; # CRITICAL: P510 at 79.6% disk usage
     analysisInterval = "*:0/30"; # Every 30 minutes for critical monitoring
     reportPath = "/var/lib/ai-analysis/p510-storage-reports";
   };
@@ -142,13 +142,13 @@ in {
   # Enable critical backup strategy for P510 before aggressive cleanup
   ai.backupStrategy = {
     enable = true;
-    criticalMode = true;       # Enable frequent backups for P510
+    criticalMode = true; # Enable frequent backups for P510
     backupPath = "/mnt/img_pool/backups"; # Use img_pool (only 5.1% used)
-    retentionDays = 7;         # Keep backups for 7 days due to space constraints
-    
+    retentionDays = 7; # Keep backups for 7 days due to space constraints
+
     remoteBackup = {
       enable = true;
-      targetHost = "p620";      # Backup to P620 with more space
+      targetHost = "p620"; # Backup to P620 with more space
       targetPath = "/mnt/data/p510-backups";
     };
   };
@@ -156,23 +156,23 @@ in {
   # Enable storage expansion analysis for P510 optimization
   ai.storageExpansion = {
     enable = true;
-    analysisMode = "expansion";  # Full expansion planning for P510
+    analysisMode = "expansion"; # Full expansion planning for P510
     recommendationsPath = "/mnt/img_pool/storage-recommendations";
   };
 
   # Enable emergency storage migration for P510 critical situation
   ai.storageMigration = {
     enable = true;
-    targetVolume = "/mnt/img_pool";  # 938GB available, only 5.1% used
-    migrationMode = "preparation";   # Start with preparation mode for safety
+    targetVolume = "/mnt/img_pool"; # 938GB available, only 5.1% used
+    migrationMode = "preparation"; # Start with preparation mode for safety
   };
 
   # Enable comprehensive security auditing for P510
   ai.securityAudit = {
     enable = true;
-    auditLevel = "comprehensive";  # Full security audit for P510
-    autoHardening = false;         # Manual review required for P510
-    scheduleInterval = "daily";    # Daily security audits
+    auditLevel = "comprehensive"; # Full security audit for P510
+    autoHardening = false; # Manual review required for P510
+    scheduleInterval = "daily"; # Daily security audits
     reportPath = "/mnt/img_pool/security-reports";
   };
 
@@ -245,16 +245,16 @@ in {
   # Monitoring configuration - P510 as client
   monitoring = {
     enable = true;
-    mode = "client";  # Monitored by dex5550
+    mode = "client"; # Monitored by dex5550
     serverHost = "dex5550";
-    
+
     features = {
       nodeExporter = true;
       nixosMetrics = true;
-      alerting = false;  # Only server handles alerting
-      gpuMetrics = true;  # Enable NVIDIA GPU monitoring
+      alerting = false; # Only server handles alerting
+      gpuMetrics = true; # Enable NVIDIA GPU monitoring
     };
-    
+
     # Enable NZBGet monitoring
     nzbgetExporter = {
       enable = true;
@@ -264,12 +264,12 @@ in {
       port = 9103;
       interval = "30s";
     };
-    
+
     # Enable Plex monitoring
     plexExporter = {
       enable = true;
       tautulliUrl = "http://localhost:8181";
-      apiKey = "your-tautulli-api-key-here";  # You'll need to get this from Tautulli settings
+      apiKey = "099a2877fb7c410fb3031e24b3e781bf"; # You'll need to get this from Tautulli settings
       port = 9104;
       interval = "60s";
       historyDays = 30;
@@ -284,7 +284,6 @@ in {
     enableEnvironmentVariables = true;
     enableUserEnvironment = true;
   };
-
 
   # BOOT PERFORMANCE: Prevent fstrim from blocking boot (saves 8+ minutes)
   services.fstrim-optimization = {
@@ -306,7 +305,6 @@ in {
     ];
     videoDrivers = ["${vars.gpu}"];
   };
-
 
   # Hardware-specific configurations
   security.wrappers.sunshine = {
@@ -345,7 +343,7 @@ in {
         networkConfig = {
           MulticastDNS = false;
           IPv6AcceptRA = true;
-          Domains = "home.freundcloud.com";  # Configure DNS domain for internal resolution
+          Domains = "home.freundcloud.com"; # Configure DNS domain for internal resolution
         };
         dhcpV4Config = {
           RouteMetric = 10;
