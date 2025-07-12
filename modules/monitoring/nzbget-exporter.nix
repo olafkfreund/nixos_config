@@ -54,7 +54,7 @@ in {
         Restart = "always";
         RestartSec = "10s";
         Environment = [
-          "PATH=${lib.makeBinPath (with pkgs; [ curl jq coreutils bc gnugrep gnused ])}"
+          "PATH=${lib.makeBinPath (with pkgs; [ curl jq coreutils bc gnugrep gnused netcat-gnu python3 ])}"
         ];
         
         ExecStart = pkgs.writeShellScript "nzbget-exporter" ''
@@ -214,48 +214,58 @@ EOF
           serve_metrics() {
               log "Starting metrics server on port $EXPORTER_PORT..."
               
-              while true; do
-                  # Use netcat to serve metrics
-                  if command -v nc >/dev/null 2>&1; then
-                      {
-                          echo -e "HTTP/1.1 200 OK\r"
-                          echo -e "Content-Type: text/plain\r"
-                          echo -e "\r"
-                          cat "$METRICS_FILE" 2>/dev/null || echo "# No metrics available"
-                      } | nc -l "$EXPORTER_PORT" 2>/dev/null || true
-                  else
-                      # Fallback: create a simple HTTP server with Python
-                      python3 -c "
+              # Use Python HTTP server for reliable metrics serving
+              python3 -c "
 import http.server
 import socketserver
+import socket
 import os
-import threading
-import time
 
 class MetricsHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/metrics':
-            self.send_response(200)
-            self.send_header('Content-type', 'text/plain')
-            self.end_headers()
             try:
-                with open('$METRICS_FILE', 'r') as f:
-                    self.wfile.write(f.read().encode())
-            except:
-                self.wfile.write(b'# No metrics available\n')
+                self.send_response(200)
+                self.send_header('Content-type', 'text/plain; charset=utf-8')
+                self.end_headers()
+                try:
+                    with open('$METRICS_FILE', 'r') as f:
+                        self.wfile.write(f.read().encode('utf-8'))
+                except:
+                    self.wfile.write(b'# No metrics available\\n')
+            except BrokenPipeError:
+                # Client disconnected - ignore
+                pass
+        elif self.path == '/health':
+            try:
+                self.send_response(200)
+                self.send_header('Content-type', 'text/plain')
+                self.end_headers()
+                self.wfile.write(b'OK\\n')
+            except BrokenPipeError:
+                # Client disconnected - ignore
+                pass
         else:
-            self.send_response(404)
-            self.end_headers()
+            try:
+                self.send_response(404)
+                self.end_headers()
+            except BrokenPipeError:
+                # Client disconnected - ignore
+                pass
+    
+    def log_message(self, format, *args):
+        # Disable default logging to avoid spam
+        pass
 
-with socketserver.TCPServer(('0.0.0.0', $EXPORTER_PORT), MetricsHandler) as httpd:
+class ReusableTCPServer(socketserver.TCPServer):
+    def server_bind(self):
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        super().server_bind()
+
+print('Starting NZBGet exporter HTTP server on port $EXPORTER_PORT')
+with ReusableTCPServer(('0.0.0.0', $EXPORTER_PORT), MetricsHandler) as httpd:
     httpd.serve_forever()
-" &
-                      HTTP_PID=$!
-                      sleep 300  # Serve for 5 minutes then restart
-                      kill $HTTP_PID 2>/dev/null || true
-                  fi
-                  sleep 1
-              done
+"
           }
           
           # Initialize metrics file
