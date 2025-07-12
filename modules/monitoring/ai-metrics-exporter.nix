@@ -186,15 +186,15 @@ EOF
 EOF
                   
                   local hostname=$(jq -r '.hostname // "unknown"' "$memory_file" 2>/dev/null || echo "unknown")
-                  local status=$(jq -r '.status // "unknown"' "$memory_file" 2>/dev/null || echo "unknown")
-                  local status_value=0
+                  local status="completed"  # Default status since new format doesn't have status field
+                  local status_value=1
                   
-                  case "$status" in
-                      "completed"|"success") status_value=1 ;;
-                      "running"|"in_progress") status_value=2 ;;
-                      "failed"|"error") status_value=0 ;;
-                      *) status_value=0 ;;
-                  esac
+                  # Check if actions_taken exists as indicator of completion
+                  local actions_taken=$(jq -r '.actions_taken // []' "$memory_file" 2>/dev/null)
+                  if [[ "$actions_taken" == "[]" || "$actions_taken" == "null" ]]; then
+                      status="no_actions"
+                      status_value=0
+                  fi
                   
                   cat >> "$METRICS_FILE" << EOF
 ai_memory_optimization_status{hostname="$hostname",status="$status"} $status_value
@@ -203,7 +203,12 @@ EOF
               fi
               
               # Count AI analysis files for activity indicator
-              local analysis_files=$(find "$AI_DATA_DIR" -name "*.json" -mtime -1 2>/dev/null | wc -l || echo "0")
+              local analysis_files=$(find "$AI_DATA_DIR" -name "*.json" -mtime -1 2>/dev/null | wc -l 2>/dev/null || echo "0")
+              
+              # Validate analysis_files is a number
+              if ! [[ "$analysis_files" =~ ^[0-9]+$ ]]; then
+                  analysis_files=0
+              fi
               
               cat >> "$METRICS_FILE" << EOF
 # HELP ai_analysis_files_recent Recent AI analysis files count
