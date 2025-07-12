@@ -73,7 +73,7 @@ in {
         
         Environment = [
           "PATH=${lib.makeBinPath (with pkgs; [ 
-            coreutils curl jq bc tcpdump netstat ss lsof
+            coreutils curl jq bc tcpdump nettools ss lsof
             python3 gnugrep gnused gawk iproute2 procps
           ])}"
         ];
