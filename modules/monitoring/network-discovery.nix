@@ -333,7 +333,7 @@ with socketserver.TCPServer(('0.0.0.0', $EXPORTER_PORT), NetworkDiscoveryHandler
                   generate_metrics
                   
                   # Convert interval to seconds
-                  sleep_seconds=$(echo "${cfg.scanInterval}" | sed 's/s$//' | sed 's/m$/*60/' | bc 2>/dev/null || echo "300")
+                  sleep_seconds=$(echo "${netCfg.scanInterval}" | sed 's/s$//' | sed 's/m$/*60/' | bc 2>/dev/null || echo "300")
                   sleep "$sleep_seconds"
               done
           }

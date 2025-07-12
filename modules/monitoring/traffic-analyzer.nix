@@ -517,7 +517,7 @@ with socketserver.TCPServer(('0.0.0.0', $EXPORTER_PORT), TrafficAnalyzerHandler)
                   generate_metrics
                   
                   # Convert interval to seconds
-                  sleep_seconds=$(echo "${cfg.captureInterval}" | sed 's/s$//' | sed 's/m$/*60/' | bc 2>/dev/null || echo "30")
+                  sleep_seconds=$(echo "${trafficCfg.captureInterval}" | sed 's/s$//' | sed 's/m$/*60/' | bc 2>/dev/null || echo "30")
                   sleep "$sleep_seconds"
               done
           }
