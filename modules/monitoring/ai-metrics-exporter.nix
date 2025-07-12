@@ -193,29 +193,20 @@ EOF
                       actions_count=0
                   fi
                   
-                  cat >> "$METRICS_FILE" << EOF
-ai_memory_optimization_status{hostname="$hostname",status="completed"} $actions_count
-
-EOF
+                  echo "ai_memory_optimization_status{hostname=\"$hostname\",status=\"completed\"} $actions_count" >> "$METRICS_FILE"
+                  echo "" >> "$METRICS_FILE"
               fi
               
-              # Count AI analysis files for activity indicator
-              local analysis_files=$(find "$AI_DATA_DIR" -name "*.json" -mtime -1 2>/dev/null | wc -l 2>/dev/null || echo "0")
+              # Count AI analysis files for activity indicator  
+              local analysis_files=3  # Fixed value for now to isolate the issue
               
-              # Validate analysis_files is a number
-              if ! [[ "$analysis_files" =~ ^[0-9]+$ ]]; then
-                  analysis_files=0
-              fi
-              
-              cat >> "$METRICS_FILE" << EOF
-# HELP ai_analysis_files_recent Recent AI analysis files count
-# TYPE ai_analysis_files_recent gauge
-ai_analysis_files_recent $analysis_files
-
-# HELP ai_last_metrics_update AI metrics last update timestamp
-# TYPE ai_last_metrics_update gauge
-ai_last_metrics_update $(date +%s)
-EOF
+              echo "# HELP ai_analysis_files_recent Recent AI analysis files count" >> "$METRICS_FILE"
+              echo "# TYPE ai_analysis_files_recent gauge" >> "$METRICS_FILE"
+              echo "ai_analysis_files_recent $analysis_files" >> "$METRICS_FILE"
+              echo "" >> "$METRICS_FILE"
+              echo "# HELP ai_last_metrics_update AI metrics last update timestamp" >> "$METRICS_FILE"
+              echo "# TYPE ai_last_metrics_update gauge" >> "$METRICS_FILE"
+              echo "ai_last_metrics_update $(date +%s)" >> "$METRICS_FILE"
               
               log "AI metrics generated with $(wc -l < "$METRICS_FILE" || echo "unknown") lines"
           }
