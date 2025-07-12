@@ -222,7 +222,7 @@ EOF
                           echo -e "Content-Type: text/plain\r"
                           echo -e "\r"
                           cat "$METRICS_FILE" 2>/dev/null || echo "# No metrics available"
-                      } | nc -l -p "$EXPORTER_PORT" -q 1 2>/dev/null || true
+                      } | nc -l "$EXPORTER_PORT" 2>/dev/null || true
                   else
                       # Fallback: create a simple HTTP server with Python
                       python3 -c "

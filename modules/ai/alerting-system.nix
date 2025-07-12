@@ -595,7 +595,6 @@ in {
           # Create Alert Management Dashboard
           cat > "$DASHBOARD_DIR/ai-alert-management.json" << 'EOF'
           {
-            "dashboard": {
               "id": null,
               "title": "AI Alert Management",
               "description": "Advanced alerting and notification system monitoring",
@@ -751,8 +750,10 @@ in {
                     "sortOrder": "Descending"
                   }
                 }
-              ]
-            }
+              ],
+              "schemaVersion": 39,
+              "version": 1,
+              "overwrite": true
           }
           EOF
           

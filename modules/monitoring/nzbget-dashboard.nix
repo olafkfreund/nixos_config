@@ -38,9 +38,8 @@ in {
           # Create comprehensive NZBGet dashboard
           cat > "$DASHBOARD_DIR/nzbget-monitoring.json" << 'EOF'
 {
-  "dashboard": {
-    "id": null,
-    "title": "NZBGet Monitoring",
+  "id": null,
+  "title": "NZBGet Monitoring",
     "tags": ["nzbget", "downloads", "media"],
     "timezone": "browser",
     "panels": [
@@ -342,8 +341,7 @@ in {
     "time": {"from": "now-6h", "to": "now"},
     "refresh": "30s",
     "schemaVersion": 39,
-    "version": 1
-  },
+    "version": 1,
   "overwrite": true
 }
 EOF

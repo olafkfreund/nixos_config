@@ -137,7 +137,7 @@ in {
               else
                 echo -e "HTTP/1.1 404 Not Found\r\n\r\nNot found"
               fi
-            } | ${pkgs.netcat}/bin/nc -l -p $PORT -q 1
+            } | ${pkgs.netcat}/bin/nc -l $PORT
           done
         '';
         Restart = "always";

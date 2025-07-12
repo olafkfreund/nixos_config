@@ -38,9 +38,8 @@ in {
           # Create main Plex overview dashboard
           cat > "$DASHBOARD_DIR/plex-overview.json" << 'EOF'
 {
-  "dashboard": {
-    "id": null,
-    "title": "🎬 Plex Media Server - Overview",
+  "id": null,
+  "title": "🎬 Plex Media Server - Overview",
     "tags": ["plex", "media", "streaming"],
     "timezone": "browser",
     "panels": [
@@ -249,8 +248,7 @@ in {
     "time": {"from": "now-6h", "to": "now"},
     "refresh": "30s",
     "schemaVersion": 39,
-    "version": 1
-  },
+    "version": 1,
   "overwrite": true
 }
 EOF
@@ -258,9 +256,8 @@ EOF
           # Create Top Content dashboard
           cat > "$DASHBOARD_DIR/plex-top-content.json" << 'EOF'
 {
-  "dashboard": {
-    "id": null,
-    "title": "🏆 Plex - Top Content & Users",
+  "id": null,
+  "title": "🏆 Plex - Top Content & Users",
     "tags": ["plex", "analytics", "top"],
     "timezone": "browser",
     "panels": [
@@ -376,8 +373,7 @@ EOF
     "time": {"from": "now-30d", "to": "now"},
     "refresh": "5m",
     "schemaVersion": 39,
-    "version": 1
-  },
+    "version": 1,
   "overwrite": true
 }
 EOF
@@ -385,9 +381,8 @@ EOF
           # Create Geographic & Platform Analytics dashboard
           cat > "$DASHBOARD_DIR/plex-analytics.json" << 'EOF'
 {
-  "dashboard": {
-    "id": null,
-    "title": "🌍 Plex - Geographic & Platform Analytics",
+  "id": null,
+  "title": "🌍 Plex - Geographic & Platform Analytics",
     "tags": ["plex", "analytics", "geographic"],
     "timezone": "browser",
     "panels": [
@@ -512,8 +507,7 @@ EOF
     "time": {"from": "now-30d", "to": "now"},
     "refresh": "5m",
     "schemaVersion": 39,
-    "version": 1
-  },
+    "version": 1,
   "overwrite": true
 }
 EOF
@@ -521,9 +515,8 @@ EOF
           # Create Library Statistics dashboard
           cat > "$DASHBOARD_DIR/plex-library-stats.json" << 'EOF'
 {
-  "dashboard": {
-    "id": null,
-    "title": "📚 Plex - Library Statistics",
+  "id": null,
+  "title": "📚 Plex - Library Statistics",
     "tags": ["plex", "library", "statistics"],
     "timezone": "browser",
     "panels": [
@@ -610,8 +603,7 @@ EOF
     "time": {"from": "now-30d", "to": "now"},
     "refresh": "5m",
     "schemaVersion": 39,
-    "version": 1
-  },
+    "version": 1,
   "overwrite": true
 }
 EOF

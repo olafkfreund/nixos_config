@@ -38,9 +38,8 @@ in {
           # Create Network Overview Dashboard
           cat > "$DASHBOARD_DIR/network-overview.json" << 'EOF'
 {
-  "dashboard": {
-    "id": null,
-    "title": "🌐 Network Overview - Real-Time Activity",
+  "id": null,
+  "title": "🌐 Network Overview - Real-Time Activity",
     "tags": ["network", "overview", "activity"],
     "timezone": "browser",
     "panels": [
@@ -222,8 +221,7 @@ in {
     "time": {"from": "now-1h", "to": "now"},
     "refresh": "30s",
     "schemaVersion": 39,
-    "version": 1
-  },
+    "version": 1,
   "overwrite": true
 }
 EOF
@@ -231,9 +229,8 @@ EOF
           # Create Device Activity Dashboard
           cat > "$DASHBOARD_DIR/network-devices.json" << 'EOF'
 {
-  "dashboard": {
-    "id": null,
-    "title": "📱 Network Devices - Activity & Classification",
+  "id": null,
+  "title": "📱 Network Devices - Activity & Classification",
     "tags": ["network", "devices", "activity"],
     "timezone": "browser",
     "panels": [
@@ -377,8 +374,7 @@ EOF
     "time": {"from": "now-6h", "to": "now"},
     "refresh": "1m",
     "schemaVersion": 39,
-    "version": 1
-  },
+    "version": 1,
   "overwrite": true
 }
 EOF
@@ -386,9 +382,8 @@ EOF
           # Create Traffic Analysis Dashboard
           cat > "$DASHBOARD_DIR/network-traffic-analysis.json" << 'EOF'
 {
-  "dashboard": {
-    "id": null,
-    "title": "🚦 Network Traffic Analysis - Deep Insights",
+  "id": null,
+  "title": "🚦 Network Traffic Analysis - Deep Insights",
     "tags": ["network", "traffic", "analysis", "protocols"],
     "timezone": "browser",
     "panels": [
@@ -587,8 +582,7 @@ EOF
     "time": {"from": "now-3h", "to": "now"},
     "refresh": "15s",
     "schemaVersion": 39,
-    "version": 1
-  },
+    "version": 1,
   "overwrite": true
 }
 EOF
@@ -596,9 +590,8 @@ EOF
           # Create Network Performance Dashboard
           cat > "$DASHBOARD_DIR/network-performance.json" << 'EOF'
 {
-  "dashboard": {
-    "id": null,
-    "title": "⚡ Network Performance & Health",
+  "id": null,
+  "title": "⚡ Network Performance & Health",
     "tags": ["network", "performance", "health", "monitoring"],
     "timezone": "browser",
     "panels": [
@@ -762,8 +755,7 @@ EOF
     "time": {"from": "now-2h", "to": "now"},
     "refresh": "30s",
     "schemaVersion": 39,
-    "version": 1
-  },
+    "version": 1,
   "overwrite": true
 }
 EOF
