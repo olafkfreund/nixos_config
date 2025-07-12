@@ -117,9 +117,14 @@ in {
               
               if [ "$listgroups_data" != "{}" ]; then
                   queue_count=$(echo "$listgroups_data" | jq -r '.result | length' 2>/dev/null || echo "0")
-                  queue_total_size=$(echo "$listgroups_data" | jq -r '[.result[]? | .FileSizeMB] | add' 2>/dev/null || echo "0")
-                  queue_remaining_size=$(echo "$listgroups_data" | jq -r '[.result[]? | .RemainingSizeMB] | add' 2>/dev/null || echo "0")
+                  queue_total_size=$(echo "$listgroups_data" | jq -r '[.result[]? | .FileSizeMB] | add // 0' 2>/dev/null || echo "0")
+                  queue_remaining_size=$(echo "$listgroups_data" | jq -r '[.result[]? | .RemainingSizeMB] | add // 0' 2>/dev/null || echo "0")
               fi
+              
+              # Ensure values are never null or empty
+              [ -z "$queue_count" ] || [ "$queue_count" = "null" ] && queue_count=0
+              [ -z "$queue_total_size" ] || [ "$queue_total_size" = "null" ] && queue_total_size=0
+              [ -z "$queue_remaining_size" ] || [ "$queue_remaining_size" = "null" ] && queue_remaining_size=0
               
               # Parse history data
               local completed_count=0
@@ -129,8 +134,13 @@ in {
               if [ "$history_data" != "{}" ]; then
                   completed_count=$(echo "$history_data" | jq -r '[.result[]? | select(.Status == "SUCCESS")] | length' 2>/dev/null || echo "0")
                   failed_count=$(echo "$history_data" | jq -r '[.result[]? | select(.Status != "SUCCESS")] | length' 2>/dev/null || echo "0")
-                  total_downloaded=$(echo "$history_data" | jq -r '[.result[]? | .FileSizeMB] | add' 2>/dev/null || echo "0")
+                  total_downloaded=$(echo "$history_data" | jq -r '[.result[]? | .FileSizeMB] | add // 0' 2>/dev/null || echo "0")
               fi
+              
+              # Ensure values are never null or empty
+              [ -z "$completed_count" ] || [ "$completed_count" = "null" ] && completed_count=0
+              [ -z "$failed_count" ] || [ "$failed_count" = "null" ] && failed_count=0
+              [ -z "$total_downloaded" ] || [ "$total_downloaded" = "null" ] && total_downloaded=0
               
               # Convert download rate from bytes to KB/s
               local download_rate_kbs=$(echo "scale=2; $download_rate / 1024" | bc 2>/dev/null || echo "0")

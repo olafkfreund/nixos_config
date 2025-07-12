@@ -71,6 +71,9 @@ in {
       serviceConfig = {
         Type = "oneshot";
         User = "root";
+        Environment = [
+          "PATH=${lib.makeBinPath (with pkgs; [ coreutils hostname systemd findutils gawk gnugrep gnused curl ])}"
+        ];
         ExecStart = pkgs.writeShellScript "ai-automated-remediation" ''
           #!/bin/bash
           
