@@ -103,13 +103,18 @@ EOF
 # TYPE ai_services_running gauge
 EOF
                   
-                  # Extract metrics using jq
-                  local hostname=$(jq -r '.hostname // "unknown"' "$perf_file" 2>/dev/null || echo "unknown")
-                  local cpu_usage=$(jq -r '.system_metrics.cpu_usage_percent // "0"' "$perf_file" 2>/dev/null || echo "0")
-                  local memory_usage=$(jq -r '.system_metrics.memory_usage_percent // "0"' "$perf_file" 2>/dev/null || echo "0")
-                  local disk_usage=$(jq -r '.system_metrics.disk_usage_percent // "0"' "$perf_file" 2>/dev/null || echo "0")
-                  local load_avg=$(jq -r '.system_metrics.load_average_1m // "0"' "$perf_file" 2>/dev/null || echo "0")
-                  local ai_services=$(jq -r '.ai_metrics.ai_services_running // "0"' "$perf_file" 2>/dev/null || echo "0")
+                  # Clean JSON file first to handle invalid characters
+                  local clean_perf_file="/tmp/perf-metrics-clean.json"
+                  # Remove control characters and fix newlines in JSON strings
+                  cat "$perf_file" | tr -d '\000-\037' | sed 's/\n/ /g' > "$clean_perf_file" 2>/dev/null || cp "$perf_file" "$clean_perf_file"
+                  
+                  # Extract metrics using jq from cleaned file
+                  local hostname=$(jq -r '.hostname // "unknown"' "$clean_perf_file" 2>/dev/null || echo "unknown")
+                  local cpu_usage=$(jq -r '.system_metrics.cpu_usage_percent // "0"' "$clean_perf_file" 2>/dev/null || echo "0")
+                  local memory_usage=$(jq -r '.system_metrics.memory_usage_percent // "0"' "$clean_perf_file" 2>/dev/null || echo "0")
+                  local disk_usage=$(jq -r '.system_metrics.disk_usage_percent // "0"' "$clean_perf_file" 2>/dev/null || echo "0")
+                  local load_avg=$(jq -r '.system_metrics.load_average_1m // "0"' "$clean_perf_file" 2>/dev/null || echo "0")
+                  local ai_services=$(jq -r '.ai_metrics.ai_services_running // "0"' "$clean_perf_file" 2>/dev/null || echo "0")
                   
                   # Clean numeric values
                   cpu_usage=$(echo "$cpu_usage" | sed 's/[^0-9.]//g' | head -c 10)
