@@ -153,6 +153,45 @@ in {
           }];
           scrape_interval = "30s";
         }
+
+        # GPU metrics (NVIDIA/AMD)
+        {
+          job_name = "gpu-exporter";
+          static_configs = [{
+            targets = map (host: "${host}.home.freundcloud.com:9400") (filter (host: host == "p620" || host == "razer" || host == "p510") cfg.hosts);
+            labels = {
+              service = "gpu-exporter";
+              role = "hardware";
+            };
+          }];
+          scrape_interval = "30s";
+        }
+
+        # Plex/Tautulli exporter (P510 only)
+        {
+          job_name = "plex-exporter";
+          static_configs = [{
+            targets = [ "p510.home.freundcloud.com:9104" ];
+            labels = {
+              service = "plex";
+              role = "media";
+            };
+          }];
+          scrape_interval = "60s";
+        }
+
+        # NZBGet exporter (P510 only)
+        {
+          job_name = "nzbget-exporter";
+          static_configs = [{
+            targets = [ "p510.home.freundcloud.com:9103" ];
+            labels = {
+              service = "nzbget";
+              role = "media";
+            };
+          }];
+          scrape_interval = "30s";
+        }
       ] ++ 
       # Optional AI metrics scraping
       (optionals cfg.features.aiMetrics [
