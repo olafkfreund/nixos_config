@@ -153,6 +153,32 @@ just deploy-cached HOST
 4. **Fast Mode**: Skip unnecessary rebuild steps with `--fast` flag
 5. **Resilient**: Continue on non-critical failures with `--keep-going`
 
+### Live USB Installer System
+```bash
+# Build live USB installer images
+just build-live p620              # Build P620 installer  
+just build-live razer             # Build Razer installer
+just build-live p510              # Build P510 installer
+just build-live dex5550           # Build DEX5550 installer
+just build-live samsung           # Build Samsung installer
+just build-all-live               # Build all host installers
+
+# Flash to USB device (DESTRUCTIVE!)
+just show-devices                 # Find USB device (e.g., /dev/sdX)
+just flash-live p620 /dev/sdX     # Flash P620 installer to USB
+
+# Test and validation
+just test-live-config p620        # Test live configuration
+just test-hw-config p620          # Test hardware config parser
+just clean-live                   # Clean build artifacts
+just live-help                    # Show comprehensive help
+
+# Installation workflow
+# 1. Build: just build-live p620
+# 2. Flash: just flash-live p620 /dev/sdX  
+# 3. Boot USB and run: sudo install-p620
+```
+
 ### Secrets Management
 ```bash
 # Interactive secrets management
@@ -217,6 +243,43 @@ Each user has configurations in `Users/username/` with host-specific home files 
 - Secrets named as `user-password-USERNAME.age`
 - Access controlled via SSH keys in `secrets.nix`
 - Host and user-specific access control
+
+### Live USB Installer System
+The repository includes a comprehensive live USB installer system for automated NixOS installation:
+
+**Key Features:**
+- **Host-specific live USB images** for each system (P620, Razer, P510, DEX5550, Samsung)
+- **Hardware configuration auto-detection** reusing existing `hardware-configuration.nix` files
+- **TUI-based installation wizard** with guided workflow and safety confirmations
+- **SSH access enabled** (root/nixos) for remote installation
+- **Comprehensive tool suite** including editors, disk utilities, network tools
+- **Automated partitioning** based on existing host configurations
+
+**Architecture:**
+- `modules/installer/` - Live system and installer tool configurations
+- `scripts/install-helpers/` - Installation wizard and helper scripts
+- `lib/make-live-iso.nix` - ISO building helper functions
+- `flake.nix` - Live image outputs and package definitions
+
+**Installation Scripts:**
+- `install-wizard.sh` - Main guided installation wizard
+- `parse-hardware-config.py` - Hardware configuration parser
+- `partition-disk.sh` - Automated disk partitioning
+- `mount-filesystems.sh` - Filesystem mounting helpers
+
+**Workflow:**
+1. Build host-specific live USB: `just build-live p620`
+2. Flash to USB device: `just flash-live p620 /dev/sdX`
+3. Boot from USB and run: `sudo install-p620`
+4. Follow guided installation process with hardware auto-detection
+
+**Live Environment Includes:**
+- All essential TUI tools (neovim, tmux, htop, etc.)
+- Network utilities (NetworkManager, SSH, curl, wget)
+- Disk management tools (parted, fdisk, filesystem utilities)
+- Hardware detection tools (lshw, dmidecode, lscpu)
+- Development tools (git, python3, jq, bc)
+- System monitoring utilities (iotop, nethogs, powertop)
 
 ## Important Conventions
 
@@ -827,6 +890,138 @@ ai-cli -p openai -v "test"     # May fail if CLI tools missing
 # Check Ollama service
 systemctl status ollama
 ollama list  # Show available models
+```
+
+### Live USB Installer Issues
+
+**Live USB build failures:**
+```bash
+# Test live configuration first
+just test-live-config p620    # Test live system configuration
+
+# Check for syntax errors in installer modules
+just check-syntax             # Validate all Nix files
+
+# Build with detailed output
+nix build .#packages.x86_64-linux.live-iso-p620 --show-trace
+
+# Clean build artifacts and retry
+just clean-live               # Remove old build artifacts
+nix-collect-garbage -d        # Clean Nix store
+```
+
+**Hardware configuration parser errors:**
+```bash
+# Test hardware config parser
+just test-hw-config p620      # Test parser for specific host
+
+# Check if hardware config exists
+ls -la hosts/p620/nixos/hardware-configuration.nix
+
+# Manually test parser
+python3 scripts/install-helpers/parse-hardware-config.py p620
+
+# Common issues:
+# - Missing hardware-configuration.nix file
+# - Malformed filesystem definitions
+# - Invalid UUID formats in hardware config
+```
+
+**USB flashing issues:**
+```bash
+# Check available devices
+just show-devices             # List all storage devices
+lsblk -f                     # Show filesystem info
+
+# Verify USB device exists
+ls -la /dev/sdX              # Replace X with your device letter
+
+# Manual flashing (if just command fails)
+sudo dd if=result/iso/nixos-p620-live.iso of=/dev/sdX bs=4M status=progress oflag=sync
+sudo sync
+
+# Common issues:
+# - Wrong device path (/dev/sdX1 instead of /dev/sdX)
+# - USB device not unmounted before flashing
+# - Insufficient permissions (need sudo)
+# - USB device write-protected
+```
+
+**Live system boot issues:**
+```bash
+# Check ISO integrity
+sha256sum result/iso/nixos-p620-live.iso
+
+# Verify UEFI/BIOS compatibility
+# - Modern systems: Use UEFI mode
+# - Older systems: Use Legacy/BIOS mode
+
+# Boot troubleshooting:
+# - Check boot order in BIOS/UEFI
+# - Try different USB ports (USB 2.0 vs 3.0)
+# - Verify Secure Boot is disabled
+# - Check if ISO is corrupted (re-flash)
+```
+
+**Installation wizard issues:**
+```bash
+# Check if wizard script exists and is executable
+ls -la /etc/nixos-config/scripts/install-helpers/install-wizard.sh
+
+# Run with debug output
+sudo bash -x /etc/nixos-config/scripts/install-helpers/install-wizard.sh p620
+
+# Check if flake configuration is accessible
+ls -la /etc/nixos-config/
+cd /etc/nixos-config && git status
+
+# Common issues:
+# - Missing Python dependencies (pyyaml, requests)
+# - Disk detection failures (no suitable disks found)
+# - Network connectivity issues during installation
+# - Insufficient disk space for installation
+```
+
+**SSH access issues in live environment:**
+```bash
+# Check SSH service status
+systemctl status sshd
+
+# Verify network connectivity
+ip addr show                  # Show IP addresses
+ping 8.8.8.8                 # Test internet connectivity
+
+# Check firewall
+iptables -L                   # List firewall rules
+
+# Reset root password if needed
+passwd root                   # Set new password
+
+# Test SSH from another machine
+ssh root@<live-system-ip>     # Default password: nixos
+```
+
+**Disk partitioning failures:**
+```bash
+# Check available disks
+lsblk -f
+fdisk -l
+
+# Verify disk is not mounted
+umount /dev/sdX*             # Unmount all partitions
+
+# Check for disk errors
+smartctl -a /dev/sdX         # SMART health check
+badblocks -v /dev/sdX        # Check for bad blocks
+
+# Manual partitioning (if script fails)
+sudo /etc/nixos-config/scripts/install-helpers/partition-disk.sh p620 /dev/sdX
+
+# Common issues:
+# - Disk in use by another process
+# - Hardware errors or bad sectors
+# - Incorrect disk size detection
+# - Partition table corruption
 ```
 
 ### Monitoring Issues
