@@ -37,8 +37,8 @@ in {
       
       serviceConfig = {
         Type = "simple";
-        User = "ai-metrics-exporter";
-        Group = "ai-metrics-exporter";
+        User = "root";
+        Group = "root";
         Restart = "always";
         RestartSec = "10s";
         
