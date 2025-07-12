@@ -154,19 +154,6 @@ in {
           scrape_interval = "30s";
         }
 
-        # GPU metrics (NVIDIA/AMD)
-        {
-          job_name = "gpu-exporter";
-          static_configs = [{
-            targets = map (host: "${host}.home.freundcloud.com:9400") (filter (host: host == "p620" || host == "razer" || host == "p510") cfg.hosts);
-            labels = {
-              service = "gpu-exporter";
-              role = "hardware";
-            };
-          }];
-          scrape_interval = "30s";
-        }
-
         # Plex/Tautulli exporter (P510 only)
         {
           job_name = "plex-exporter";
