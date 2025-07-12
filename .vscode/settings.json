@@ -1,2 +1,53 @@
 {
+  "mcpServers": {
+    "nixai": {
+      "command": "socat",
+      "args": ["STDIO", "UNIX-CONNECT:/tmp/nixai-mcp.sock"],
+      "env": {},
+      "description": "NixOS AI Help - Documentation and configuration assistant with 41 tools",
+      "tools": [
+        "analyze_dependencies",
+        "analyze_garbage_collection",
+        "analyze_package_repo",
+        "build_system_analyze",
+        "check_system_health",
+        "compare_configurations",
+        "complete_nixos_option",
+        "context_diff",
+        "context_status",
+        "create_devenv",
+        "detect_nixos_context",
+        "diagnose_system",
+        "explain_dependency_chain",
+        "explain_home_manager_option",
+        "explain_nixos_option",
+        "flake_operations",
+        "generate_configuration",
+        "get_community_resources",
+        "get_configuration_snippets",
+        "get_configuration_templates",
+        "get_deployment_status",
+        "get_hardware_info",
+        "get_learning_resources",
+        "get_nixos_context",
+        "get_service_examples",
+        "interactive_assistance",
+        "manage_machines",
+        "migrate_to_flakes",
+        "nix_lsp_completion",
+        "nix_lsp_definition",
+        "nix_lsp_diagnostics",
+        "nix_lsp_hover",
+        "performance_analysis",
+        "query_nixos_docs",
+        "reset_nixos_context",
+        "search_advanced",
+        "search_nixos_packages",
+        "setup_neovim_integration",
+        "store_operations",
+        "suggest_devenv_template",
+        "validate_configuration"
+      ]
+    }
+  }
 }
