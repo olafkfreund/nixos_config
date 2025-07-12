@@ -192,10 +192,17 @@ in {
               for i in $(seq 0 $HISTORY_DAYS); do
                   local date=$(date -d "$i days ago" +%Y-%m-%d)
                   local day_stats=$(tautulli_api "get_plays_by_date" "&time_range=1&start_date=$date")
-                  local total_duration=$(echo "$day_stats" | jq -r '.response.data[]? | .total_duration // 0' | awk '{sum += $1} END {print sum}')
-                  local total_plays=$(echo "$day_stats" | jq -r '.response.data[]? | .total_plays // 0' | awk '{sum += $1} END {print sum}')
+                  local total_duration=$(echo "$day_stats" | jq -r '.response.data[]? | .total_duration // 0' | awk '{sum += $1} END {print sum || 0}')
+                  local total_plays=$(echo "$day_stats" | jq -r '.response.data[]? | .total_plays // 0' | awk '{sum += $1} END {print sum || 0}')
                   
-                  echo "plex_daily_watch_hours{date=\"$date\"} $(echo "scale=2; $total_duration / 3600" | bc 2>/dev/null || echo "0")" >> "$TEMP_DIR/daily_stats.prom"
+                  # Ensure values are never empty
+                  [ -z "$total_duration" ] && total_duration=0
+                  [ -z "$total_plays" ] && total_plays=0
+                  
+                  local watch_hours=$(echo "scale=2; $total_duration / 3600" | bc 2>/dev/null || echo "0")
+                  [ -z "$watch_hours" ] && watch_hours=0
+                  
+                  echo "plex_daily_watch_hours{date=\"$date\"} $watch_hours" >> "$TEMP_DIR/daily_stats.prom"
                   echo "plex_daily_plays{date=\"$date\"} $total_plays" >> "$TEMP_DIR/daily_stats.prom"
               done
           }
