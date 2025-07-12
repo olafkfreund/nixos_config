@@ -566,10 +566,9 @@ with socketserver.TCPServer(('0.0.0.0', $EXPORTER_PORT), TrafficAnalyzerHandler)
     # Required packages
     environment.systemPackages = with pkgs; [
       tcpdump
-      netstat-nat
-      ss
+      nettools  # includes netstat
+      iproute2  # includes ss
       lsof
-      iproute2
       procps
       curl
       jq
