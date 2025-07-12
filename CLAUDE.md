@@ -1154,6 +1154,213 @@ journalctl -u SERVICE_NAME -f  # Follow logs in real-time
 journalctl -u SERVICE_NAME --since "10 minutes ago"  # Recent logs
 ```
 
+## MicroVM Development Environments (Phase 11 - FULLY DEPLOYED)
+
+### Comprehensive Virtualization System
+A complete MicroVM infrastructure using microvm.nix providing lightweight, isolated development environments with enterprise-grade features.
+
+**✅ Deployment Status: FULLY OPERATIONAL**
+
+### **🖥️ Three MicroVM Templates Available:**
+
+**1. Development VM (dev-vm)**
+- **Purpose**: Full development environment with modern toolchain
+- **Resources**: 8GB RAM, 4 CPU cores
+- **SSH Access**: `ssh dev@localhost -p 2222` (password: dev)
+- **Web Ports**: 8080 (HTTP), 3000 (development server)
+- **Features**:
+  - Complete development stack: Git, Node.js, Python, Go, Rust
+  - Docker and Docker Compose for containerization
+  - Build tools: GCC, Make, CMake, Ninja
+  - Persistent project directory: `/home/dev/projects`
+  - Shared storage with host via `/mnt/shared`
+
+**2. Testing VM (test-vm)**
+- **Purpose**: Minimal isolated testing environment
+- **Resources**: 8GB RAM, 4 CPU cores  
+- **SSH Access**: `ssh test@localhost -p 2223` (password: test)
+- **Features**:
+  - Lightweight testing tools: Git, Python, essential utilities
+  - Clean slate environment for testing
+  - Reset capability for fresh testing cycles
+  - Minimal package set for focused testing
+
+**3. Playground VM (playground-vm)**
+- **Purpose**: Experimental sandbox for advanced tooling
+- **Resources**: 8GB RAM, 4 CPU cores
+- **SSH Access**: `ssh root@localhost -p 2224` (password: playground)
+- **Web Ports**: 8081 (HTTP)
+- **Features**:
+  - Advanced DevOps tools: Kubernetes, Helm, Ansible
+  - Network analysis: Wireshark, tcpdump, nmap
+  - Root access for system-level experimentation
+  - Docker and containerization support
+  - Experiments directory: `/root/experiments`
+
+### **🛠️ MicroVM Management Commands:**
+
+**Starting and Stopping VMs:**
+```bash
+# Start individual VMs
+just start-microvm dev-vm        # Start development environment
+just start-microvm test-vm       # Start testing environment
+just start-microvm playground-vm # Start experimental environment
+
+# Stop VMs
+just stop-microvm dev-vm         # Stop specific VM
+just stop-all-microvms          # Stop all running VMs
+
+# Restart VMs
+just restart-microvm dev-vm     # Restart specific VM
+```
+
+**VM Management and Monitoring:**
+```bash
+# Check VM status
+just list-microvms              # Show status of all VMs
+
+# SSH into running VMs
+just ssh-microvm dev-vm         # SSH into development VM
+just ssh-microvm test-vm        # SSH into testing VM
+just ssh-microvm playground-vm  # SSH into playground VM
+```
+
+**Configuration and Maintenance:**
+```bash
+# Test VM configurations
+just test-microvm dev-vm        # Test single VM configuration
+just test-all-microvms         # Test all VM configurations
+
+# Rebuild VMs with new configuration
+just rebuild-microvm dev-vm     # Rebuild and restart VM
+
+# Clean up VM data (DESTRUCTIVE)
+just clean-microvms            # Remove all VM data and stop services
+```
+
+**Help and Documentation:**
+```bash
+# Get comprehensive help
+just microvm-help              # Show all MicroVM commands and usage
+```
+
+### **🔧 Technical Configuration:**
+
+**Network Setup:**
+- **NAT Networking**: Simple user-mode networking for easy setup
+- **Port Forwarding**: Each VM has unique SSH ports (2222, 2223, 2224)
+- **Web Access**: Development ports forwarded for web development
+- **Host Integration**: Seamless network access to host services
+
+**Storage Configuration:**
+- **Shared /nix/store**: Efficient storage sharing between host and VMs
+- **Persistent Volumes**: Home directories and data persist across restarts
+- **Shared Directory**: `/tmp/microvm-shared` accessible from all VMs
+- **Project Storage**: Dedicated project directories with host access
+
+**Resource Allocation:**
+- **Memory**: 8GB RAM per VM (configurable in flake.nix)
+- **CPU**: 4 cores per VM (configurable in flake.nix)
+- **Hypervisor**: QEMU with hardware acceleration
+- **Optimization**: Minimal overhead with shared store
+
+### **🚀 Quick Start Workflow:**
+
+**Development Workflow:**
+```bash
+# 1. Start development environment
+just start-microvm dev-vm
+
+# 2. SSH into the VM
+just ssh-microvm dev-vm
+# Or manually: ssh dev@localhost -p 2222
+
+# 3. Work on projects (persistent storage)
+cd /home/dev/projects
+git clone https://github.com/your/project.git
+
+# 4. Access shared files
+ls /mnt/shared  # Files shared with host
+
+# 5. Stop when done
+just stop-microvm dev-vm
+```
+
+**Testing Workflow:**
+```bash
+# 1. Start clean testing environment
+just start-microvm test-vm
+
+# 2. Run tests in isolation
+just ssh-microvm test-vm
+
+# 3. Reset environment for next test
+just stop-microvm test-vm
+just start-microvm test-vm  # Fresh clean state
+```
+
+### **⚙️ Host Configuration:**
+
+**Enable MicroVMs on a Host:**
+```nix
+# In hosts/HOSTNAME/configuration.nix
+features = {
+  microvms = {
+    enable = true;
+    dev-vm.enable = true;
+    test-vm.enable = true; 
+    playground-vm.enable = true;
+  };
+};
+```
+
+**Currently Available Hosts:**
+- **P620**: ✅ Available (enable in configuration as needed)
+- **Razer**: ✅ Available (enable in configuration as needed)
+- **P510**: Available for activation
+- **DEX5550**: Available for activation
+
+### **🚨 Troubleshooting:**
+
+**VM Won't Start:**
+```bash
+# Check VM configuration
+just test-microvm dev-vm
+
+# Check system resources
+free -h  # Ensure sufficient memory
+df -h    # Ensure sufficient disk space
+
+# Check for port conflicts
+ss -tlnp | grep -E "222[2-4]"  # Check SSH ports
+```
+
+**SSH Connection Issues:**
+```bash
+# Verify VM is running
+just list-microvms
+
+# Check port forwarding
+netstat -tlnp | grep -E "222[2-4]"
+
+# Test connection manually
+ssh -v dev@localhost -p 2222  # Verbose SSH for debugging
+```
+
+**Storage Issues:**
+```bash
+# Check available space
+df -h /var/lib/microvms/
+
+# Clean up VM data if needed
+just clean-microvms  # WARNING: Destructive operation
+
+# Check shared directory
+ls -la /tmp/microvm-shared/
+```
+
+The MicroVM system provides enterprise-grade virtualization capabilities with minimal overhead, perfect for development, testing, and experimentation workflows.
+
 ## Network and Cache Configuration
 
 - Binary cache server on P620: `http://p620:5000`
