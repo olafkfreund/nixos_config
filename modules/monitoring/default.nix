@@ -23,6 +23,7 @@ in {
     ./network-discovery.nix
     ./traffic-analyzer.nix
     ./network-dashboards.nix
+    ./ai-metrics-exporter.nix
   ];
 
   options.monitoring = {

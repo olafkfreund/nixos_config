@@ -448,6 +448,15 @@ in {
       prometheus = false;  # Only server runs Prometheus
       grafana = false;     # Only server runs Grafana
       amdGpuMetrics = true;  # Enable AMD GPU monitoring for P620
+      aiMetrics = true;      # Enable AI metrics collection
+    };
+    
+    # Enable AI metrics exporter
+    aiMetricsExporter = {
+      enable = true;
+      port = 9105;
+      interval = "30s";
+      dataDir = "/var/lib/ai-analysis";
     };
   };
 

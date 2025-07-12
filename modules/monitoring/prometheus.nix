@@ -205,6 +205,19 @@ in {
           }];
           scrape_interval = "30s";
         }
+
+        # AI metrics exporter (P620 only)
+        {
+          job_name = "ai-metrics";
+          static_configs = [{
+            targets = [ "p620.home.freundcloud.com:9105" ];
+            labels = {
+              service = "ai-metrics";
+              role = "ai";
+            };
+          }];
+          scrape_interval = "60s";
+        }
       ] ++ 
       # Optional AI metrics scraping
       (optionals cfg.features.aiMetrics [
