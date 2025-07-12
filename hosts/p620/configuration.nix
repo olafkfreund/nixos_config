@@ -24,6 +24,7 @@ in {
     ./themes/stylix.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
+# ../../modules/microvms/default.nix  # Disabled for now - enable as needed
     ../common/hyprland.nix
     ../../modules/security/secrets.nix
     ../../modules/secrets/api-keys.nix
@@ -381,6 +382,13 @@ in {
       libvirt = true;
       sunshine = true;
     };
+
+# microvms = {
+    #   enable = true;
+    #   dev-vm.enable = true;
+    #   test-vm.enable = true;
+    #   playground-vm.enable = true;
+    # };
 
     cloud = {
       enable = true;

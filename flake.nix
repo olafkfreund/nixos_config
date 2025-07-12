@@ -355,6 +355,208 @@
       samsung = mkLiveImage "samsung";
     };
 
+    # MicroVM configurations
+    mkMicroVM = vmName: vmConfig: nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      specialArgs = {
+        inherit inputs;
+      };
+      modules = [
+        inputs.microvm.nixosModules.microvm
+        {
+          networking.hostName = vmName;
+          
+          # Basic system configuration
+          time.timeZone = "Europe/Oslo";
+          i18n.defaultLocale = "en_GB.UTF-8";
+          system.stateVersion = "25.11";
+          
+          # Enable flakes
+          nix.settings.experimental-features = [ "nix-command" "flakes" ];
+          
+          # Allow unfree packages
+          nixpkgs.config.allowUnfree = true;
+          
+          # MicroVM configuration
+          microvm = {
+            hypervisor = "qemu";
+            
+            # Resource allocation
+            mem = 8192;  # 8GB RAM
+            vcpu = 4;    # 4 CPU cores
+            
+            # Network configuration - Simple NAT
+            interfaces = [{
+              type = "user";
+              id = "vm-user";
+              mac = vmConfig.mac or "02:00:00:01:01:01";
+            }];
+            
+            # Port forwarding for SSH and development
+            forwardPorts = vmConfig.forwardPorts or [
+              { from = "host"; host.port = vmConfig.sshPort or 2222; guest.port = 22; }
+            ];
+            
+            # Storage configuration
+            shares = [
+              {
+                # Shared /nix/store for efficiency
+                source = "/nix/store";
+                mountPoint = "/nix/.ro-store";
+                tag = "ro-store";
+                proto = "virtiofs";
+                socket = "store.sock";
+              }
+              {
+                # Shared host directory
+                source = "/tmp/microvm-shared";
+                mountPoint = "/mnt/shared";
+                tag = "shared";
+                proto = "virtiofs";
+                socket = "shared.sock";
+              }
+            ] ++ (vmConfig.extraShares or []);
+            
+            # Persistent volumes
+            volumes = vmConfig.volumes or [];
+          };
+        }
+        vmConfig.extraModules or {}
+      ];
+    };
+
+    microvms = {
+      dev-vm = mkMicroVM "dev-vm" {
+        mac = "02:00:00:01:01:01";
+        sshPort = 2222;
+        forwardPorts = [
+          { from = "host"; host.port = 2222; guest.port = 22; }
+          { from = "host"; host.port = 8080; guest.port = 80; }
+          { from = "host"; host.port = 3000; guest.port = 3000; }
+        ];
+        extraShares = [
+          {
+            source = "/var/lib/microvms/dev-vm/projects";
+            mountPoint = "/home/dev/projects";
+            tag = "projects";
+            proto = "virtiofs";
+            socket = "projects.sock";
+          }
+        ];
+        volumes = [
+          {
+            image = "/var/lib/microvms/dev-vm/home.img";
+            mountPoint = "/home/dev";
+            size = 10240;  # 10GB
+          }
+        ];
+        extraModules = {
+          # Development environment packages
+          environment.systemPackages = with nixpkgs.legacyPackages.x86_64-linux; [
+            git vim neovim tmux htop tree curl wget
+            nodejs python3 go rustc docker-compose
+            gcc gnumake cmake ninja
+          ];
+          
+          # Create dev user
+          users.users.dev = {
+            isNormalUser = true;
+            password = "dev";
+            extraGroups = [ "wheel" "docker" ];
+            shell = nixpkgs.legacyPackages.x86_64-linux.bash;
+          };
+          
+          # Enable SSH
+          services.openssh = {
+            enable = true;
+            settings.PasswordAuthentication = true;
+          };
+          
+          # Enable Docker
+          virtualisation.docker.enable = true;
+        };
+      };
+      
+      test-vm = mkMicroVM "test-vm" {
+        mac = "02:00:00:01:01:02";
+        sshPort = 2223;
+        extraShares = [
+          {
+            source = "/var/lib/microvms/test-vm/data";
+            mountPoint = "/mnt/data";
+            tag = "data";
+            proto = "virtiofs";
+            socket = "data.sock";
+          }
+        ];
+        extraModules = {
+          # Minimal testing environment
+          environment.systemPackages = with nixpkgs.legacyPackages.x86_64-linux; [
+            git vim htop tree curl wget python3
+          ];
+          
+          # Create test user
+          users.users.test = {
+            isNormalUser = true;
+            password = "test";
+            extraGroups = [ "wheel" ];
+          };
+          
+          # Enable SSH
+          services.openssh = {
+            enable = true;
+            settings.PasswordAuthentication = true;
+          };
+        };
+      };
+      
+      playground-vm = mkMicroVM "playground-vm" {
+        mac = "02:00:00:01:01:03";
+        sshPort = 2224;
+        forwardPorts = [
+          { from = "host"; host.port = 2224; guest.port = 22; }
+          { from = "host"; host.port = 8081; guest.port = 80; }
+        ];
+        extraShares = [
+          {
+            source = "/var/lib/microvms/playground-vm/experiments";
+            mountPoint = "/root/experiments";
+            tag = "experiments";
+            proto = "virtiofs";
+            socket = "experiments.sock";
+          }
+        ];
+        extraModules = {
+          # Allow unfree packages for experimental tools
+          nixpkgs.config.allowUnfree = true;
+          
+          # Experimental playground packages
+          environment.systemPackages = with nixpkgs.legacyPackages.x86_64-linux; [
+            git vim neovim tmux htop tree curl wget
+            python3 nodejs go rustc
+            docker-compose kubernetes helm
+            ansible
+            wireshark tcpdump nmap
+          ];
+          
+          # Root access for experimentation
+          users.users.root.password = "playground";
+          
+          # Enable SSH
+          services.openssh = {
+            enable = true;
+            settings = {
+              PasswordAuthentication = true;
+              PermitRootLogin = "yes";
+            };
+          };
+          
+          # Enable Docker and K8s tools
+          virtualisation.docker.enable = true;
+        };
+      };
+    };
+
     # Get primary user (first in the list) for backward compatibility
     getPrimaryUser = host: builtins.head (hostUsers.${host} or ["olafkfreund"]);
 
@@ -464,10 +666,15 @@
       p510 = nixpkgs.lib.nixosSystem (makeNixosSystem "p510");
       p620 = nixpkgs.lib.nixosSystem (makeNixosSystem "p620");
       samsung = nixpkgs.lib.nixosSystem (makeNixosSystem "samsung");
+      
+      # MicroVM configurations
+      dev-vm = microvms.dev-vm;
+      test-vm = microvms.test-vm;
+      playground-vm = microvms.playground-vm;
     };
 
-    # Expose liveImages in outputs
-    inherit liveImages;
+    # Expose liveImages and microvms in outputs
+    inherit liveImages microvms;
 
     packages.x86_64-linux = {
       claude-code = import ./home/development/claude-code {
