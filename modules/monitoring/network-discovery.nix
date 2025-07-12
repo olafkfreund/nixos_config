@@ -379,6 +379,6 @@ with socketserver.TCPServer(('0.0.0.0', $EXPORTER_PORT), NetworkDiscoveryHandler
     ];
     
     # Open firewall port
-    networking.firewall.allowedTCPPorts = [ cfg.port ];
+    networking.firewall.allowedTCPPorts = [ netCfg.port ];
   };
 }

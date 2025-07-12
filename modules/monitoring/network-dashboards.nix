@@ -4,7 +4,6 @@
 with lib;
 let
   cfg = config.monitoring;
-  netDashCfg = config.monitoring.networkDashboards;
 in {
   options.monitoring.networkDashboards = {
     enable = mkEnableOption "Enable beautiful network activity dashboards";
