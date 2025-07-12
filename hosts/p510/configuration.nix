@@ -55,10 +55,13 @@ in {
     ];
   };
 
-  # Use static DNS configuration for reliable internal resolution
-  services.resolved.enable = lib.mkForce false;
-  networking.nameservers = ["192.168.1.222" "1.1.1.1" "8.8.8.8"];
-  networking.search = ["home.freundcloud.com"];
+  # Use systemd-resolved for proper DNS management with systemd-networkd
+  services.resolved = {
+    enable = true;
+    fallbackDns = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
+    domains = [ "home.freundcloud.com" ];
+    dnssec = lib.mkForce "false";  # Resolve DNSSEC conflict
+  };
 
   # Configure AI providers directly
   ai.providers = {
@@ -325,9 +328,6 @@ in {
   # Network-specific overrides that go beyond the network profile
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
   systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
-
-  # Use DHCP-provided DNS servers
-  # networking.nameservers = vars.nameservers; # Commented out to use DHCP
 
   # In case the networking profile doesn't apply all needed settings
   networking.useNetworkd = lib.mkForce true;

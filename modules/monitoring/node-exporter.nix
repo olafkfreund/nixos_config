@@ -214,6 +214,7 @@ with socketserver.TCPServer(('0.0.0.0', $PORT), MetricsHandler) as httpd:
 import http.server
 import socketserver
 import subprocess
+import socket
 import os
 
 class MetricsHandler(http.server.BaseHTTPRequestHandler):
@@ -252,7 +253,12 @@ class MetricsHandler(http.server.BaseHTTPRequestHandler):
         # Disable default logging to avoid spam
         pass
 
-with socketserver.TCPServer(('0.0.0.0', $PORT), MetricsHandler) as httpd:
+class ReusableTCPServer(socketserver.TCPServer):
+    def server_bind(self):
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        super().server_bind()
+
+with ReusableTCPServer(('0.0.0.0', $PORT), MetricsHandler) as httpd:
     httpd.serve_forever()
 "
     }
