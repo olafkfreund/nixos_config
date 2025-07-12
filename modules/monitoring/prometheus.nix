@@ -179,6 +179,32 @@ in {
           }];
           scrape_interval = "30s";
         }
+
+        # Network discovery exporter (DEX5550 only)
+        {
+          job_name = "network-discovery";
+          static_configs = [{
+            targets = [ "dex5550.home.freundcloud.com:9200" ];
+            labels = {
+              service = "network-discovery";
+              role = "network";
+            };
+          }];
+          scrape_interval = "60s";
+        }
+
+        # Traffic analyzer exporter (DEX5550 only)
+        {
+          job_name = "traffic-analyzer";
+          static_configs = [{
+            targets = [ "dex5550.home.freundcloud.com:9201" ];
+            labels = {
+              service = "traffic-analyzer";
+              role = "network";
+            };
+          }];
+          scrape_interval = "30s";
+        }
       ] ++ 
       # Optional AI metrics scraping
       (optionals cfg.features.aiMetrics [

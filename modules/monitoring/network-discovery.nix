@@ -69,7 +69,7 @@ in {
         
         Environment = [
           "PATH=${lib.makeBinPath (with pkgs; [ 
-            coreutils curl jq bc nmap iproute2 net-tools 
+            coreutils curl jq bc nmap iproute2 nettools 
             arp-scan ethtool python3 gnugrep gnused
           ])}"
         ];
@@ -370,7 +370,7 @@ with socketserver.TCPServer(('0.0.0.0', $EXPORTER_PORT), NetworkDiscoveryHandler
       arp-scan
       ethtool
       iproute2
-      net-tools
+      nettools
       curl
       jq
       bc
