@@ -3,7 +3,8 @@
 
 with lib;
 let
-  cfg = config.monitoring.networkDashboards;
+  cfg = config.monitoring;
+  netDashCfg = config.monitoring.networkDashboards;
 in {
   options.monitoring.networkDashboards = {
     enable = mkEnableOption "Enable beautiful network activity dashboards";
@@ -15,7 +16,7 @@ in {
     };
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.features.networkDashboards) {
     # Network Dashboards Provisioning Service
     systemd.services.network-dashboards-provisioner = {
       description = "Network Activity Dashboards Provisioner";

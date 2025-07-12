@@ -3,7 +3,8 @@
 
 with lib;
 let
-  cfg = config.monitoring.networkDiscovery;
+  cfg = config.monitoring;
+  netCfg = config.monitoring.networkDiscovery;
 in {
   options.monitoring.networkDiscovery = {
     enable = mkEnableOption "Enable network discovery and device classification";
@@ -45,7 +46,7 @@ in {
     };
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.features.networkDiscovery) {
     # Network Discovery Service
     systemd.services.network-discovery = {
       description = "Network Discovery and Device Classification Service";
@@ -78,12 +79,12 @@ in {
           set -euo pipefail
           
           # Configuration
-          INTERFACE="${cfg.interface}"
-          NETWORK_RANGE="${cfg.networkRange}"
-          SCAN_INTERVAL="${cfg.scanInterval}"
-          EXPORTER_PORT="${toString cfg.port}"
-          ENABLE_DEEP_SCAN="${if cfg.enableDeepScan then "true" else "false"}"
-          ENABLE_VENDOR_LOOKUP="${if cfg.enableVendorLookup then "true" else "false"}"
+          INTERFACE="${netCfg.interface}"
+          NETWORK_RANGE="${netCfg.networkRange}"
+          SCAN_INTERVAL="${netCfg.scanInterval}"
+          EXPORTER_PORT="${toString netCfg.port}"
+          ENABLE_DEEP_SCAN="${if netCfg.enableDeepScan then "true" else "false"}"
+          ENABLE_VENDOR_LOOKUP="${if netCfg.enableVendorLookup then "true" else "false"}"
           
           # Data directories
           DATA_DIR="/var/lib/network-discovery"

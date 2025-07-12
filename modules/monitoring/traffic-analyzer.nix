@@ -3,7 +3,8 @@
 
 with lib;
 let
-  cfg = config.monitoring.trafficAnalyzer;
+  cfg = config.monitoring;
+  trafficCfg = config.monitoring.trafficAnalyzer;
 in {
   options.monitoring.trafficAnalyzer = {
     enable = mkEnableOption "Enable network traffic analysis and protocol detection";
@@ -45,7 +46,7 @@ in {
     };
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.features.trafficAnalysis) {
     # Traffic Analysis Service
     systemd.services.traffic-analyzer = {
       description = "Network Traffic Analysis and Protocol Detection Service";
@@ -82,12 +83,12 @@ in {
           set -euo pipefail
           
           # Configuration
-          INTERFACE="${cfg.interface}"
-          EXPORTER_PORT="${toString cfg.port}"
-          CAPTURE_INTERVAL="${cfg.captureInterval}"
-          ENABLE_DPI="${if cfg.enableDeepInspection then "true" else "false"}"
-          ENABLE_GEO="${if cfg.enableGeoLocation then "true" else "false"}"
-          RETENTION_DAYS="${toString cfg.retentionDays}"
+          INTERFACE="${trafficCfg.interface}"
+          EXPORTER_PORT="${toString trafficCfg.port}"
+          CAPTURE_INTERVAL="${trafficCfg.captureInterval}"
+          ENABLE_DPI="${if trafficCfg.enableDeepInspection then "true" else "false"}"
+          ENABLE_GEO="${if trafficCfg.enableGeoLocation then "true" else "false"}"
+          RETENTION_DAYS="${toString trafficCfg.retentionDays}"
           
           # Data directories
           DATA_DIR="/var/lib/traffic-analyzer"
