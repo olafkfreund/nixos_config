@@ -98,7 +98,7 @@ in {
                 type = "prometheus";
                 uid = "prometheus";
               };
-              expr = "up{job=\"ai-analysis\"}";
+              expr = "ai_exporter_up{job=\"ai-metrics\"}";
               format = "table";
               instant = true;
               refId = "A";
@@ -341,13 +341,13 @@ in {
                 type = "prometheus";
                 uid = "prometheus";
               };
-              expr = "rate(ai_analysis_total[5m])";
+              expr = "ai_analysis_files_recent{job=\"ai-metrics\"}";
               format = "table";
               instant = true;
               refId = "A";
             }
           ];
-          title = "AI Analysis Rate";
+          title = "AI Analysis Files";
           type = "table";
         }
         {
@@ -428,7 +428,7 @@ in {
                 type = "prometheus";
                 uid = "prometheus";
               };
-              expr = "rate(memory_optimization_actions_total[5m])";
+              expr = "ai_memory_optimization_status{job=\"ai-metrics\"}";
               refId = "A";
             }
           ];
@@ -513,12 +513,279 @@ in {
                 type = "prometheus";
                 uid = "prometheus";
               };
-              expr = "ai_analysis_duration_seconds";
+              expr = "ai_last_metrics_update{job=\"ai-metrics\"}";
               refId = "A";
             }
           ];
-          title = "AI Analysis Duration";
+          title = "AI Last Update Timestamp";
           type = "timeseries";
+        }
+        {
+          datasource = {
+            type = "prometheus";
+            uid = "prometheus";
+          };
+          description = "AI System CPU Usage";
+          fieldConfig = {
+            defaults = {
+              color = {
+                mode = "palette-classic";
+              };
+              custom = {
+                axisLabel = "";
+                axisPlacement = "auto";
+                barAlignment = 0;
+                drawStyle = "line";
+                fillOpacity = 0;
+                gradientMode = "none";
+                hideFrom = {
+                  legend = false;
+                  tooltip = false;
+                  vis = false;
+                };
+                lineInterpolation = "linear";
+                lineWidth = 1;
+                pointSize = 5;
+                scaleDistribution = {
+                  type = "linear";
+                };
+                showPoints = "auto";
+                spanNulls = false;
+                stacking = {
+                  group = "A";
+                  mode = "none";
+                };
+                thresholdsStyle = {
+                  mode = "off";
+                };
+              };
+              mappings = [];
+              thresholds = {
+                mode = "absolute";
+                steps = [
+                  {
+                    color = "green";
+                    value = null;
+                  }
+                  {
+                    color = "yellow";
+                    value = 70;
+                  }
+                  {
+                    color = "red";
+                    value = 85;
+                  }
+                ];
+              };
+              unit = "percent";
+            };
+            overrides = [];
+          };
+          gridPos = {
+            h = 8;
+            w = 8;
+            x = 0;
+            y = 32;
+          };
+          id = 7;
+          options = {
+            legend = {
+              calcs = [];
+              displayMode = "list";
+              placement = "bottom";
+              showLegend = true;
+            };
+            tooltip = {
+              mode = "single";
+              sort = "none";
+            };
+          };
+          targets = [
+            {
+              datasource = {
+                type = "prometheus";
+                uid = "prometheus";
+              };
+              expr = "ai_system_cpu_usage_percent{job=\"ai-metrics\"}";
+              refId = "A";
+            }
+          ];
+          title = "AI System CPU Usage";
+          type = "timeseries";
+        }
+        {
+          datasource = {
+            type = "prometheus";
+            uid = "prometheus";
+          };
+          description = "AI System Memory Usage";
+          fieldConfig = {
+            defaults = {
+              color = {
+                mode = "palette-classic";
+              };
+              custom = {
+                axisLabel = "";
+                axisPlacement = "auto";
+                barAlignment = 0;
+                drawStyle = "line";
+                fillOpacity = 0;
+                gradientMode = "none";
+                hideFrom = {
+                  legend = false;
+                  tooltip = false;
+                  vis = false;
+                };
+                lineInterpolation = "linear";
+                lineWidth = 1;
+                pointSize = 5;
+                scaleDistribution = {
+                  type = "linear";
+                };
+                showPoints = "auto";
+                spanNulls = false;
+                stacking = {
+                  group = "A";
+                  mode = "none";
+                };
+                thresholdsStyle = {
+                  mode = "off";
+                };
+              };
+              mappings = [];
+              thresholds = {
+                mode = "absolute";
+                steps = [
+                  {
+                    color = "green";
+                    value = null;
+                  }
+                  {
+                    color = "yellow";
+                    value = 75;
+                  }
+                  {
+                    color = "red";
+                    value = 90;
+                  }
+                ];
+              };
+              unit = "percent";
+            };
+            overrides = [];
+          };
+          gridPos = {
+            h = 8;
+            w = 8;
+            x = 8;
+            y = 32;
+          };
+          id = 8;
+          options = {
+            legend = {
+              calcs = [];
+              displayMode = "list";
+              placement = "bottom";
+              showLegend = true;
+            };
+            tooltip = {
+              mode = "single";
+              sort = "none";
+            };
+          };
+          targets = [
+            {
+              datasource = {
+                type = "prometheus";
+                uid = "prometheus";
+              };
+              expr = "ai_system_memory_usage_percent{job=\"ai-metrics\"}";
+              refId = "A";
+            }
+          ];
+          title = "AI System Memory Usage";
+          type = "timeseries";
+        }
+        {
+          datasource = {
+            type = "prometheus";
+            uid = "prometheus";
+          };
+          description = "AI Remediation Status";
+          fieldConfig = {
+            defaults = {
+              color = {
+                mode = "thresholds";
+              };
+              custom = {
+                align = "auto";
+                cellOptions = {
+                  type = "auto";
+                };
+                inspect = false;
+              };
+              mappings = [
+                {
+                  options = {
+                    "0" = {
+                      text = "Disabled";
+                      color = "red";
+                    };
+                    "1" = {
+                      text = "Enabled";
+                      color = "green";
+                    };
+                  };
+                  type = "value";
+                }
+              ];
+              thresholds = {
+                mode = "absolute";
+                steps = [
+                  {
+                    color = "green";
+                    value = null;
+                  }
+                ];
+              };
+            };
+            overrides = [];
+          };
+          gridPos = {
+            h = 8;
+            w = 8;
+            x = 16;
+            y = 32;
+          };
+          id = 9;
+          options = {
+            showHeader = true;
+          };
+          pluginVersion = "9.5.2";
+          targets = [
+            {
+              datasource = {
+                type = "prometheus";
+                uid = "prometheus";
+              };
+              expr = "ai_remediation_safe_mode{job=\"ai-metrics\"}";
+              format = "table";
+              instant = true;
+              refId = "A";
+            }
+            {
+              datasource = {
+                type = "prometheus";
+                uid = "prometheus";
+              };
+              expr = "ai_remediation_self_healing{job=\"ai-metrics\"}";
+              format = "table";
+              instant = true;
+              refId = "B";
+            }
+          ];
+          title = "AI Remediation Status";
+          type = "table";
         }
       ];
       refresh = "5s";
