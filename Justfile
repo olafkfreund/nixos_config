@@ -808,4 +808,157 @@ summary:
     echo "  just test-host p620   # Test single host"
     echo "  just ci-quick         # Quick tests"
 
+# ============================================================================
+# Live USB Installer Commands
+# ============================================================================
+
+# Build live USB installer image for a specific host
+build-live host:
+    #!/usr/bin/env bash
+    echo "🔧 Building live USB installer for {{host}}..."
+    nix build .#packages.x86_64-linux.live-iso-{{host}} --show-trace
+    if [ $? -eq 0 ]; then
+        echo "✅ Live USB image built successfully!"
+        echo "📁 Image location: $(readlink -f result)/iso/nixos-{{host}}-live.iso"
+        echo "💡 Flash with: just flash-live {{host}} /dev/sdX"
+    else
+        echo "❌ Build failed!"
+        exit 1
+    fi
+
+# Build all live USB installer images
+build-all-live:
+    #!/usr/bin/env bash
+    echo "🔧 Building all live USB installer images..."
+    hosts=("p620" "razer" "p510" "dex5550" "samsung")
+    failed=()
+    
+    for host in "${hosts[@]}"; do
+        echo ""
+        echo "Building live image for $host..."
+        if just build-live "$host"; then
+            echo "✅ $host: Build successful"
+        else
+            echo "❌ $host: Build failed"
+            failed+=("$host")
+        fi
+    done
+    
+    echo ""
+    echo "📋 Build Summary:"
+    echo "================="
+    for host in "${hosts[@]}"; do
+        if [[ " ${failed[@]} " =~ " ${host} " ]]; then
+            echo "❌ $host: FAILED"
+        else
+            echo "✅ $host: SUCCESS"
+        fi
+    done
+    
+    if [ ${#failed[@]} -gt 0 ]; then
+        echo ""
+        echo "❌ ${#failed[@]} builds failed: ${failed[*]}"
+        exit 1
+    else
+        echo ""
+        echo "🎉 All live USB images built successfully!"
+    fi
+
+# Flash live USB image to device (DANGEROUS - will erase target device)
+flash-live host device:
+    #!/usr/bin/env bash
+    if [ ! -e "{{device}}" ]; then
+        echo "❌ Device {{device}} does not exist!"
+        exit 1
+    fi
+    
+    if [ ! -f "result/iso/nixos-{{host}}-live.iso" ]; then
+        echo "⚠️  Live image for {{host}} not found. Building it first..."
+        just build-live {{host}}
+    fi
+    
+    echo "🚨 WARNING: This will ERASE all data on {{device}}!"
+    echo "📱 Target device: {{device}}"
+    echo "💿 Source image: nixos-{{host}}-live.iso"
+    echo ""
+    read -p "Type 'yes' to continue: " confirm
+    if [ "$confirm" != "yes" ]; then
+        echo "❌ Cancelled by user"
+        exit 1
+    fi
+    
+    echo "🔧 Flashing image to {{device}}..."
+    sudo dd if=result/iso/nixos-{{host}}-live.iso of={{device}} bs=4M status=progress oflag=sync
+    sudo sync
+    
+    echo "✅ Flashing completed!"
+    echo "💡 You can now boot from {{device}} to install NixOS on {{host}}"
+
+# Test hardware config parser for a host
+test-hw-config host:
+    #!/usr/bin/env bash
+    echo "🔍 Testing hardware configuration parser for {{host}}..."
+    if [ ! -f "hosts/{{host}}/nixos/hardware-configuration.nix" ]; then
+        echo "❌ Hardware config not found: hosts/{{host}}/nixos/hardware-configuration.nix"
+        exit 1
+    fi
+    
+    echo "📋 Parsed configuration:"
+    ./scripts/install-helpers/parse-hardware-config.py {{host}}
+
+# Show available devices for flashing
+show-devices:
+    #!/usr/bin/env bash
+    echo "💿 Available storage devices:"
+    echo "============================="
+    lsblk -d -o NAME,SIZE,MODEL,TRAN | grep -E "(usb|sata|nvme)" || echo "No devices found"
+    echo ""
+    echo "⚠️  WARNING: Double-check device names before flashing!"
+    echo "💡 Use 'lsblk' for detailed device information"
+
+# Clean up old live USB build artifacts
+clean-live:
+    #!/usr/bin/env bash
+    echo "🧹 Cleaning up live USB build artifacts..."
+    rm -rf result*
+    nix-collect-garbage -d
+    echo "✅ Cleanup completed"
+
+# Quick test of live system configuration
+test-live-config host:
+    #!/usr/bin/env bash
+    echo "🧪 Testing live system configuration for {{host}}..."
+    nix build .#liveImages.{{host}}.config.system.build.toplevel --dry-run
+    if [ $? -eq 0 ]; then
+        echo "✅ Live configuration test passed"
+    else
+        echo "❌ Live configuration test failed"
+        exit 1
+    fi
+
+# Show live USB creation help
+live-help:
+    @echo "🔧 Live USB Installer Help"
+    @echo "=========================="
+    @echo ""
+    @echo "📋 Available Commands:"
+    @echo "  just build-live <host>     - Build live USB for specific host"
+    @echo "  just build-all-live        - Build live USBs for all hosts"
+    @echo "  just flash-live <host> <device> - Flash USB (⚠️ DESTRUCTIVE!)"
+    @echo "  just test-hw-config <host> - Test hardware config parser"
+    @echo "  just show-devices          - List available storage devices"
+    @echo "  just clean-live           - Clean up build artifacts"
+    @echo "  just test-live-config <host> - Test live config"
+    @echo ""
+    @echo "📖 Example Workflow:"
+    @echo "  1. just show-devices              # Find your USB device"
+    @echo "  2. just build-live p620           # Build P620 installer"
+    @echo "  3. just flash-live p620 /dev/sdX  # Flash to USB"
+    @echo "  4. Boot from USB and run: sudo install-p620"
+    @echo ""
+    @echo "🎯 Available Hosts:"
+    @echo "  p620, razer, p510, dex5550, samsung"
+    @echo ""
+    @echo "⚠️  WARNING: flash-live will ERASE the target device!"
+
 
