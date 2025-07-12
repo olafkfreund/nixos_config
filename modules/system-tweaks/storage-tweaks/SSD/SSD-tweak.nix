@@ -3,7 +3,8 @@
   lib,
   ...
 }:
-# SSD performance and longevity optimization
+with lib;
+# SSD performance and longevity optimization  
 # Balances performance with write reduction to extend SSD lifespan
 {
   boot.kernel.sysctl = {
@@ -41,9 +42,9 @@
   #---------------------------------------------------------------------
   # Mount options for SSDs
   #---------------------------------------------------------------------
-  fileSystems = lib.mkIf (config.fileSystems ? "/") {
+  fileSystems = mkIf (config.fileSystems ? "/") {
     "/" = {
-      options = lib.mkBefore [
+      options = mkBefore [
         "noatime" # Disable access time updates
         "nodiratime" # Disable directory access time updates
         "discard" # Enable continuous TRIM (use with caution)

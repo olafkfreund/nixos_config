@@ -3,14 +3,15 @@
   lib,
   config,
   ...
-}: let
+}:
+with lib; let
   cfg = config.modules.desktop.hyprland;
 in {
   options.modules.desktop.hyprland = {
-    enable = lib.mkEnableOption "Enable Hyprland window manager with appropriate configuration";
+    enable = mkEnableOption "Enable Hyprland window manager with appropriate configuration";
   };
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
     # Enable Hyprland system configuration
     programs.hyprland = {
       enable = true;

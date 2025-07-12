@@ -2,26 +2,29 @@
   config,
   lib,
   ...
-}: {
+}:
+with lib; let
+  cfg = config.modules.system.performance;
+in {
   options.modules.system.performance = {
-    enable = lib.mkEnableOption "system performance optimizations";
+    enable = mkEnableOption "system performance optimizations";
 
     binaryCache = {
-      enable = lib.mkOption {
-        type = lib.types.bool;
+      enable = mkOption {
+        type = types.bool;
         default = true;
         description = "Enable binary cache optimization";
       };
 
-      extraCaches = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
+      extraCaches = mkOption {
+        type = types.listOf types.str;
         default = [];
         description = "Additional binary caches to use";
         example = ["https://devenv.cachix.org"];
       };
 
-      extraTrustedKeys = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
+      extraTrustedKeys = mkOption {
+        type = types.listOf types.str;
         default = [];
         description = "Additional trusted public keys";
         example = ["devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="];
@@ -29,21 +32,21 @@
     };
 
     garbageCollection = {
-      enable = lib.mkOption {
-        type = lib.types.bool;
+      enable = mkOption {
+        type = types.bool;
         default = true;
         description = "Enable automatic garbage collection";
       };
 
-      frequency = lib.mkOption {
-        type = lib.types.str;
+      frequency = mkOption {
+        type = types.str;
         default = "weekly";
         description = "How often to run garbage collection";
         example = "daily";
       };
 
-      deleteOlderThan = lib.mkOption {
-        type = lib.types.str;
+      deleteOlderThan = mkOption {
+        type = types.str;
         default = "30d";
         description = "Delete store paths older than this";
         example = "7d";
@@ -51,41 +54,41 @@
     };
 
     buildOptimization = {
-      maxJobs = lib.mkOption {
-        type = lib.types.either lib.types.int (lib.types.enum ["auto"]);
+      maxJobs = mkOption {
+        type = types.either types.int (types.enum ["auto"]);
         default = "auto";
         description = "Maximum number of build jobs";
       };
 
-      cores = lib.mkOption {
-        type = lib.types.int;
+      cores = mkOption {
+        type = types.int;
         default = 0;
         description = "Number of CPU cores to use (0 = all available)";
       };
     };
   };
 
-  config = lib.mkIf config.modules.system.performance.enable {
+  config = mkIf cfg.enable {
     nix = {
       settings = {
         # Binary cache configuration
-        substituters = lib.mkIf config.modules.system.performance.binaryCache.enable ([
+        substituters = mkIf cfg.binaryCache.enable ([
             "https://cache.nixos.org/"
             "https://nix-community.cachix.org"
             "https://nixpkgs-unfree.cachix.org"
           ]
-          ++ config.modules.system.performance.binaryCache.extraCaches);
+          ++ cfg.binaryCache.extraCaches);
 
-        trusted-public-keys = lib.mkIf config.modules.system.performance.binaryCache.enable ([
+        trusted-public-keys = mkIf cfg.binaryCache.enable ([
             "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
             "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
             "nixpkgs-unfree.cachix.org-1:hqvoInulhbV4nJ9yJOEr+4wxhDV4xq2d1DK7S6Nqlt="
           ]
-          ++ config.modules.system.performance.binaryCache.extraTrustedKeys);
+          ++ cfg.binaryCache.extraTrustedKeys);
 
         # Build optimization
-        max-jobs = config.modules.system.performance.buildOptimization.maxJobs;
-        cores = config.modules.system.performance.buildOptimization.cores;
+        max-jobs = cfg.buildOptimization.maxJobs;
+        cores = cfg.buildOptimization.cores;
 
         # Enable modern Nix features
         experimental-features = ["nix-command" "flakes"];
@@ -104,10 +107,10 @@
       };
 
       # Garbage collection
-      gc = lib.mkIf config.modules.system.performance.garbageCollection.enable {
+      gc = mkIf cfg.garbageCollection.enable {
         automatic = true;
-        dates = config.modules.system.performance.garbageCollection.frequency;
-        options = "--delete-older-than ${config.modules.system.performance.garbageCollection.deleteOlderThan}";
+        dates = cfg.garbageCollection.frequency;
+        options = "--delete-older-than ${cfg.garbageCollection.deleteOlderThan}";
       };
 
       # Store optimization
@@ -147,26 +150,26 @@
     # Validation
     assertions = [
       {
-        assertion = config.modules.system.performance.buildOptimization.maxJobs > 0;
+        assertion = cfg.buildOptimization.maxJobs > 0;
         message = "Build optimization max-jobs must be greater than 0";
       }
       {
-        assertion = config.modules.system.performance.buildOptimization.cores > 0;
+        assertion = cfg.buildOptimization.cores > 0;
         message = "Build optimization cores must be greater than 0";
       }
       {
-        assertion = config.modules.system.performance.garbageCollection.enable -> (lib.hasInfix "d" config.modules.system.performance.garbageCollection.deleteOlderThan);
+        assertion = cfg.garbageCollection.enable -> (hasInfix "d" cfg.garbageCollection.deleteOlderThan);
         message = "Garbage collection deleteOlderThan must specify a time period (e.g., '30d', '7 days')";
       }
     ];
 
     # Helpful warnings
     warnings = [
-      (lib.mkIf (config.modules.system.performance.buildOptimization.maxJobs > 8) ''
-        Build max-jobs is set to ${toString config.modules.system.performance.buildOptimization.maxJobs}.
+      (mkIf (cfg.buildOptimization.maxJobs > 8) ''
+        Build max-jobs is set to ${toString cfg.buildOptimization.maxJobs}.
         Very high values may cause system instability or excessive memory usage.
       '')
-      (lib.mkIf (!config.modules.system.performance.garbageCollection.enable) ''
+      (mkIf (!cfg.garbageCollection.enable) ''
         Garbage collection is disabled. The Nix store will grow indefinitely.
         Consider enabling it to manage disk usage.
       '')

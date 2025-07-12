@@ -3,7 +3,9 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+with lib; let
+  cfg = config.scrcpyWifi;
   # Script to automate adb Wi-Fi connection and launch scrcpy
   scrcpyWifiScript = pkgs.writeShellScriptBin "scrcpy-wifi" ''
     set -e
@@ -27,17 +29,17 @@
   '';
 in {
   options.scrcpyWifi = {
-    enable = lib.mkEnableOption "Enable scrcpy Wi-Fi automation module";
+    enable = mkEnableOption "Enable scrcpy Wi-Fi automation module";
 
-    defaultPort = lib.mkOption {
-      type = lib.types.int;
+    defaultPort = mkOption {
+      type = types.int;
       default = 5555;
       description = "Default TCP/IP port for adb Wi-Fi connection";
       example = 5555;
     };
   };
 
-  config = lib.mkIf config.scrcpyWifi.enable {
+  config = mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
       scrcpy
       android-tools

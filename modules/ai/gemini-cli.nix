@@ -3,22 +3,23 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+with lib; let
   cfg = config.modules.ai.gemini-cli;
   # Import our custom gemini-cli package
   geminiCliPkg = pkgs.callPackage ../../pkgs/gemini-cli {};
 in {
   options.modules.ai.gemini-cli = {
-    enable = lib.mkEnableOption "Google Gemini CLI - AI workflow tool";
+    enable = mkEnableOption "Google Gemini CLI - AI workflow tool";
 
-    package = lib.mkOption {
-      type = lib.types.package;
+    package = mkOption {
+      type = types.package;
       default = geminiCliPkg;
       description = "The gemini-cli package to use";
     };
 
-    environmentVariables = lib.mkOption {
-      type = lib.types.attrsOf lib.types.str;
+    environmentVariables = mkOption {
+      type = types.attrsOf types.str;
       default = {};
       description = "Environment variables to set for gemini-cli";
       example = {
@@ -27,14 +28,14 @@ in {
       };
     };
 
-    enableShellIntegration = lib.mkOption {
-      type = lib.types.bool;
+    enableShellIntegration = mkOption {
+      type = types.bool;
       default = true;
       description = "Enable shell integration for gemini-cli";
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
     # Add the package to system packages
     environment.systemPackages = [cfg.package];
 
@@ -42,13 +43,13 @@ in {
     environment.variables = cfg.environmentVariables;
 
     # Optional shell integration
-    environment.shellAliases = lib.mkIf cfg.enableShellIntegration {
+    environment.shellAliases = mkIf cfg.enableShellIntegration {
       gemini = "gemini";
-      ai = lib.mkDefault "gemini"; # Convenient alias with default priority
+      ai = mkDefault "gemini"; # Convenient alias with default priority
     };
 
     # Create a desktop entry for GUI environments
-    environment.etc."applications/gemini-cli.desktop" = lib.mkIf cfg.enableShellIntegration {
+    environment.etc."applications/gemini-cli.desktop" = mkIf cfg.enableShellIntegration {
       text = ''
         [Desktop Entry]
         Name=Gemini CLI

@@ -4,7 +4,8 @@
   pkgs,
   inputs,
   ...
-}: let
+}:
+with lib; let
   cfg = config.modules.security.secrets;
 
   # Helper function to check if a secret file exists
@@ -12,36 +13,36 @@
 
   # Helper function to conditionally create secret configuration
   mkSecret = name: secretConfig:
-    lib.optionalAttrs (secretExists secretConfig.file) {
+    optionalAttrs (secretExists secretConfig.file) {
       ${name} = secretConfig;
     };
 in {
   options.modules.security.secrets = {
-    enable = lib.mkEnableOption "Agenix secrets management";
+    enable = mkEnableOption "Agenix secrets management";
 
-    hostKeys = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
+    hostKeys = mkOption {
+      type = types.listOf types.str;
       default = [];
       description = "List of SSH host key paths for decryption";
       example = ["/etc/ssh/ssh_host_ed25519_key"];
     };
 
-    userKeys = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
+    userKeys = mkOption {
+      type = types.listOf types.str;
       default = [];
       description = "List of user SSH key paths for secrets management";
       example = ["/home/olafkfreund/.ssh/id_ed25519"];
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
     # Install agenix CLI tool system-wide
     environment.systemPackages = [
       inputs.agenix.packages.${pkgs.system}.default
     ];
 
     # Age secrets configuration - only include secrets that exist
-    age.secrets = lib.mkMerge [
+    age.secrets = mkMerge [
       # User passwords
       (mkSecret "user-password-olafkfreund" {
         file = ../../secrets/user-password-olafkfreund.age;
@@ -100,7 +101,7 @@ in {
 
     # Warning when secrets directory doesn't exist
     warnings =
-      lib.optional (!builtins.pathExists ../../secrets)
+      optional (!builtins.pathExists ../../secrets)
       "Secrets directory not found. Run './scripts/setup-secrets.sh' to initialize secrets management.";
   };
 }

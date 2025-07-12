@@ -3,12 +3,15 @@
   lib,
   config,
   ...
-}: {
+}:
+with lib; let
+  cfg = config.modules.desktop.hyprland-uwsm;
+in {
   options.modules.desktop.hyprland-uwsm = {
-    enable = lib.mkEnableOption "Hyprland with UWSM integration";
+    enable = mkEnableOption "Hyprland with UWSM integration";
   };
 
-  config = lib.mkIf config.modules.desktop.hyprland-uwsm.enable {
+  config = mkIf cfg.enable {
     # Enable the Hyprland window manager itself
     programs.hyprland = {
       enable = true;
