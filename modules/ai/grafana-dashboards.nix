@@ -16,13 +16,13 @@ in {
         type = "file";
         disableDeletion = true;
         updateIntervalSeconds = 10;
-        options.path = "/var/lib/grafana/dashboards/ai-analysis";
+        options.path = "/var/lib/grafana/ai-dashboards";
       }
     ];
 
     # Create AI Analysis Overview Dashboard
     systemd.tmpfiles.rules = [
-      ''d /var/lib/grafana/dashboards/ai-analysis 0755 grafana grafana -''
+      ''d /var/lib/grafana/ai-dashboards 0755 grafana grafana -''
     ];
 
     # AI Analysis Overview Dashboard
@@ -552,8 +552,8 @@ in {
         User = "grafana";
         Group = "grafana";
         ExecStart = pkgs.writeShellScript "setup-ai-dashboards" ''
-          mkdir -p /var/lib/grafana/dashboards/ai-analysis
-          ln -sf /etc/grafana/dashboards/ai-analysis-overview.json /var/lib/grafana/dashboards/ai-analysis/
+          mkdir -p /var/lib/grafana/ai-dashboards
+          ln -sf /etc/grafana/dashboards/ai-analysis-overview.json /var/lib/grafana/ai-dashboards/
           
           # Restart Grafana to load the new dashboards
           systemctl reload grafana || true

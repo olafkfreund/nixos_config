@@ -103,16 +103,28 @@ class MetricsHandler(http.server.BaseHTTPRequestHandler):
                 self.send_header('Content-Type', 'text/plain; charset=utf-8')
                 self.end_headers()
                 self.wfile.write(result.stdout.encode())
+            except BrokenPipeError:
+                # Client disconnected - this is normal, just ignore it
+                pass
             except Exception as e:
-                self.send_response(500)
-                self.send_header('Content-Type', 'text/plain')
-                self.end_headers()
-                self.wfile.write(f'Error: {str(e)}'.encode())
+                try:
+                    self.send_response(500)
+                    self.send_header('Content-Type', 'text/plain')
+                    self.end_headers()
+                    self.wfile.write(f'Error: {str(e)}'.encode())
+                except BrokenPipeError:
+                    # Client disconnected while sending error - ignore
+                    pass
         else:
-            self.send_response(404)
-            self.end_headers()
+            try:
+                self.send_response(404)
+                self.end_headers()
+            except BrokenPipeError:
+                # Client disconnected - ignore
+                pass
     
     def log_message(self, format, *args):
+        # Disable default logging to avoid spam
         pass
 
 with socketserver.TCPServer(('0.0.0.0', $PORT), MetricsHandler) as httpd:
@@ -216,16 +228,28 @@ class MetricsHandler(http.server.BaseHTTPRequestHandler):
                 self.send_header('Content-Type', 'text/plain; charset=utf-8')
                 self.end_headers()
                 self.wfile.write(result.stdout.encode())
+            except BrokenPipeError:
+                # Client disconnected - this is normal, just ignore it
+                pass
             except Exception as e:
-                self.send_response(500)
-                self.send_header('Content-Type', 'text/plain')
-                self.end_headers()
-                self.wfile.write(f'Error: {str(e)}'.encode())
+                try:
+                    self.send_response(500)
+                    self.send_header('Content-Type', 'text/plain')
+                    self.end_headers()
+                    self.wfile.write(f'Error: {str(e)}'.encode())
+                except BrokenPipeError:
+                    # Client disconnected while sending error - ignore
+                    pass
         else:
-            self.send_response(404)
-            self.end_headers()
+            try:
+                self.send_response(404)
+                self.end_headers()
+            except BrokenPipeError:
+                # Client disconnected - ignore
+                pass
     
     def log_message(self, format, *args):
+        # Disable default logging to avoid spam
         pass
 
 with socketserver.TCPServer(('0.0.0.0', $PORT), MetricsHandler) as httpd:

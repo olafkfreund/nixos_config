@@ -54,7 +54,7 @@ in {
         Restart = "always";
         RestartSec = "15s";
         Environment = [
-          "PATH=${lib.makeBinPath (with pkgs; [ curl jq coreutils bc gnugrep gnused python3 ])}"
+          "PATH=${lib.makeBinPath (with pkgs; [ curl jq coreutils bc gnugrep gnused python3 gawk ])}"
         ];
         
         ExecStart = pkgs.writeShellScript "plex-exporter" ''
