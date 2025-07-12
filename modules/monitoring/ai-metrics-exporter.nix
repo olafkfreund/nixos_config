@@ -186,18 +186,15 @@ EOF
 EOF
                   
                   local hostname=$(jq -r '.hostname // "unknown"' "$memory_file" 2>/dev/null || echo "unknown")
-                  local status="completed"  # Default status since new format doesn't have status field
-                  local status_value=1
+                  local actions_count=$(jq -r '.actions_taken | length' "$memory_file" 2>/dev/null || echo "0")
                   
-                  # Check if actions_taken exists as indicator of completion
-                  local actions_taken=$(jq -r '.actions_taken // []' "$memory_file" 2>/dev/null)
-                  if [[ "$actions_taken" == "[]" || "$actions_taken" == "null" ]]; then
-                      status="no_actions"
-                      status_value=0
+                  # Validate actions_count is a number
+                  if ! [[ "$actions_count" =~ ^[0-9]+$ ]]; then
+                      actions_count=0
                   fi
                   
                   cat >> "$METRICS_FILE" << EOF
-ai_memory_optimization_status{hostname="$hostname",status="$status"} $status_value
+ai_memory_optimization_status{hostname="$hostname",status="completed"} $actions_count
 
 EOF
               fi
