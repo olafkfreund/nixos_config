@@ -853,7 +853,7 @@ in {
     };
     
     thresholds = {
-      cpuUtilization = 75;     # Lower threshold for performance workstation
+      cpuUtilization = 75;     # Lower threshold for performance work.station
       memoryUtilization = 80;
       ioWait = 25;            # Lower threshold for fast storage
       responseTime = 3000;    # Stricter response time requirement
@@ -870,6 +870,7 @@ in {
     "olm-3.2.16"
     "python3.12-youtube-dl-2021.12.17"
   ];
+  nixpkgs.config.allowBrokenPackages = true;
 
   # System version
   system.stateVersion = "25.11";
