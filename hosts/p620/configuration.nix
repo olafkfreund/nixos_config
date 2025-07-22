@@ -536,7 +536,8 @@ in {
   # users.users.${vars.username} is now handled by the genAttrs above
 
   # Productivity tools
-  programs.streamcontroller.enable = lib.mkForce true;
+  # Temporarily disabled due to textual package test failures
+  # programs.streamcontroller.enable = lib.mkForce true;
 
   # Service-specific configurations
   services = {

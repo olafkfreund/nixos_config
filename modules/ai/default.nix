@@ -33,7 +33,8 @@
     pkgs.shell-gpt
     pkgs.aichat
     pkgs.gorilla-cli
-    pkgs.oterm
+    # Temporarily disabled due to textual package test failures
+    # pkgs.oterm
     pkgs.gpt-cli
     pkgs.chatmcp
     inputs.claude-desktop.packages.x86_64-linux.claude-desktop

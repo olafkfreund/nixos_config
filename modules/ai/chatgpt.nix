@@ -90,7 +90,7 @@ in {
       # Terminal tools
       optionals cfg.packages.terminalTools [
         gorilla-cli         # AI-powered command suggestions
-        oterm               # AI-enhanced terminal
+        # oterm               # AI-enhanced terminal (disabled due to textual test failures)
       ] ++
       
       # MCP tools (Model Context Protocol)
