@@ -793,7 +793,7 @@ in {
     
     tmpfsOptimization = {
       enable = true;
-      tmpSize = "4G";      # Large temp space for AI workloads
+      tmpSize = "16G";     # Large temp space for AI workloads and complex builds
       varTmpSize = "2G";
       devShmSize = "50%";
     };
