@@ -6,7 +6,7 @@
     substituters = [
       "https://cache.nixos.org/"
       "https://nix-community.cachix.org"
-      "http://192.168.1.97:5000"
+      #"http://192.168.1.97:5000"
     ];
     trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
