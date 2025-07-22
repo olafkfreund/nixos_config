@@ -199,7 +199,7 @@ let
     Only include fields that are clearly indicated. If no due date mentioned, omit it."
     
     # Get AI analysis
-    ai_response=$(ai-cli -p anthropic "$ai_prompt" 2>/dev/null || echo "[]")
+    ai_response=$(ai-cli -p openai "$ai_prompt" 2>/dev/null || echo "[]")
     
     if [[ "$ai_response" == "[]" ]] || [[ -z "$ai_response" ]]; then
         echo -e "''${YELLOW}⚠️  AI parsing failed, creating simple task...''${NC}"
@@ -300,7 +300,7 @@ let
         Keep each insight to one line, use emojis, be encouraging and practical."
         
         echo -e "''${YELLOW}💭 Analyzing your tasks...''${NC}"
-        ai_insights=$(ai-cli -p anthropic "$ai_prompt" 2>/dev/null || echo "Focus on high-priority tasks first! 🎯")
+        ai_insights=$(ai-cli -p openai "$ai_prompt" 2>/dev/null || echo "Focus on high-priority tasks first! 🎯")
         
         echo -e "''${GREEN}$ai_insights''${NC}"
     else
@@ -483,7 +483,7 @@ in {
         data.location=~/.task
         
         # Enhanced color theme
-        include /usr/share/taskwarrior/dark-256.theme
+        include ${pkgs.taskwarrior3}/share/doc/task/rc/dark-256.theme
         
         # Enhanced urgency coefficients
         urgency.user.project.Inbox.coefficient=15.0

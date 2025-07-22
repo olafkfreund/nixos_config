@@ -55,7 +55,7 @@ let
     Only include fields that are clearly indicated. If no due date mentioned, omit it."
     
     # Get AI analysis
-    ai_response=$(ai-cli -p anthropic "$ai_prompt" 2>/dev/null || echo "[]")
+    ai_response=$(ai-cli -p openai "$ai_prompt" 2>/dev/null || echo "[]")
     
     if [[ "$ai_response" == "[]" ]] || [[ -z "$ai_response" ]]; then
         echo -e "''${YELLOW}⚠️  AI parsing failed, creating simple task...''${NC}"
@@ -156,7 +156,7 @@ let
         Keep each insight to one line, use emojis, be encouraging and practical."
         
         echo -e "''${YELLOW}💭 Analyzing your tasks...''${NC}"
-        ai_insights=$(ai-cli -p anthropic "$ai_prompt" 2>/dev/null || echo "Focus on high-priority tasks first! 🎯")
+        ai_insights=$(ai-cli -p openai "$ai_prompt" 2>/dev/null || echo "Focus on high-priority tasks first! 🎯")
         
         echo -e "''${GREEN}$ai_insights''${NC}"
     else
@@ -230,7 +230,7 @@ let
     echo -e "''${CYAN}💭 Analyzing your task portfolio...''${NC}"
     echo ""
     
-    analysis=$(ai-cli -p anthropic "$ai_prompt" 2>/dev/null || echo "Unable to analyze tasks at this time.")
+    analysis=$(ai-cli -p openai "$ai_prompt" 2>/dev/null || echo "Unable to analyze tasks at this time.")
     
     echo -e "''${GREEN}$analysis''${NC}"
     echo ""
@@ -307,7 +307,7 @@ let
     echo -e "''${CYAN}🤖 Generating your work summary...''${NC}"
     echo ""
     
-    summary=$(ai-cli -p anthropic "$ai_prompt" 2>/dev/null || echo "Unable to generate summary at this time.")
+    summary=$(ai-cli -p openai "$ai_prompt" 2>/dev/null || echo "Unable to generate summary at this time.")
     
     echo -e "''${GREEN}$summary''${NC}"
     echo ""
@@ -404,7 +404,7 @@ in {
         fi
         
         echo "🧠 AI is breaking down your project..."
-        ai-cli -p anthropic "Break down this project into 5-8 actionable Taskwarrior tasks with priorities and dependencies: '$*'. Format as individual task add commands I can run."
+        ai-cli -p openai "Break down this project into 5-8 actionable Taskwarrior tasks with priorities and dependencies: '$*'. Format as individual task add commands I can run."
       }
       
       ai-insights() {
@@ -412,7 +412,7 @@ in {
         local completed_count=$(task completed end:week count 2>/dev/null || echo "0")
         local pending_count=$(task status:pending count 2>/dev/null || echo "0") 
         
-        ai-cli -p anthropic "Based on $completed_count completed tasks this week and $pending_count pending tasks, provide 3 productivity insights and suggestions for optimization. Be encouraging and practical."
+        ai-cli -p openai "Based on $completed_count completed tasks this week and $pending_count pending tasks, provide 3 productivity insights and suggestions for optimization. Be encouraging and practical."
       }
       
       ai-suggest() {
@@ -424,7 +424,7 @@ in {
           git_branch=$(git branch --show-current 2>/dev/null || echo "")
         fi
         
-        ai-cli -p anthropic "I'm working in directory '$current_context'$([ -n "$git_branch" ] && echo " on git branch '$git_branch'"). Based on my current tasks: $(task next export 2>/dev/null | jq -c '.[0:3]' || echo "[]"), suggest what I should work on next. Consider context and priorities."
+        ai-cli -p openai "I'm working in directory '$current_context'$([ -n "$git_branch" ] && echo " on git branch '$git_branch'"). Based on my current tasks: $(task next export 2>/dev/null | jq -c '.[0:3]' || echo "[]"), suggest what I should work on next. Consider context and priorities."
       }
       
       # Quick task completion with AI celebration
@@ -439,7 +439,7 @@ in {
         
         if [[ -n "$task_desc" ]]; then
           echo "🎉 Great work completing: $task_desc"
-          ai-cli -p anthropic "Generate a brief, encouraging message for completing this task: '$task_desc'. Keep it motivational and under 20 words."
+          ai-cli -p openai "Generate a brief, encouraging message for completing this task: '$task_desc'. Keep it motivational and under 20 words."
         fi
       }
     '';
