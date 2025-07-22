@@ -1,14 +1,15 @@
 {...}: {
   wayland.windowManager.hyprland.extraConfig = ''
     plugin {
-      hyprbars {
-        bar_height = 20
-        bar_color = rgb(ebdbb2)
-        bar_title_enabled = true
-        bar_text_align = left
-        col.text = rgb(282828)
-        bar_part_of_window = true
-      }
+      # hyprbars disabled due to API compatibility issues with Hyprland 0.50+
+      # hyprbars {
+      #   bar_height = 20
+      #   bar_color = rgb(ebdbb2)
+      #   bar_title_enabled = true
+      #   bar_text_align = left
+      #   col.text = rgb(282828)
+      #   bar_part_of_window = true
+      # }
       # hyprexpo disabled due to API compatibility issues with Hyprland 0.50+
       # hyprexpo {
       #   columns = 3

@@ -52,7 +52,7 @@ let
     # Plugin system
     plugins = {
       expo = false;                   # Workspace overview (disabled due to API compatibility issues)
-      hyprbars = true;                # Window titlebars
+      hyprbars = false;               # Window titlebars (disabled due to API compatibility issues)
       hyprfocus = false;              # Focus indicators (disabled by default)
     };
     
