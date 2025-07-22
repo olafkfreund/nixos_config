@@ -428,6 +428,15 @@ in {
       };
     };
 
+    email = {
+      enable = true;
+      neomutt.enable = true;
+      ai.enable = true;
+      ai.provider = "openai";
+      notifications.enable = true;
+      notifications.highPriorityOnly = true;
+    };
+
     programs = {
       lazygit = true;
       thunderbird = true;

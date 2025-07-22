@@ -23,6 +23,9 @@
     ./ai/default.nix
     ./helpers/helpers.nix
     
+    # Email modules
+    ./email/default.nix
+    
     # Monitoring modules
     ./monitoring/default.nix
     # Zabbix monitoring removed
