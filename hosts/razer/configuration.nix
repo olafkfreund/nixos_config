@@ -321,6 +321,9 @@ in {
   };
   hardware.nvidia-container-toolkit.enable = vars.gpu == "nvidia";
 
-  nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16" "python3.12-youtube-dl-2021.12.17"];
+  nixpkgs.config = {
+    allowBroken = true;
+    permittedInsecurePackages = ["olm-3.2.16" "python3.12-youtube-dl-2021.12.17"];
+  };
   system.stateVersion = "25.11";
 }

@@ -370,6 +370,9 @@ in {
   services.ollama.acceleration = vars.acceleration;
   hardware.nvidia-container-toolkit.enable = true;
 
-  nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16" "dotnet-sdk-6.0.428" "python3.12-youtube-dl-2021.12.17"];
+  nixpkgs.config = {
+    allowBroken = true;
+    permittedInsecurePackages = ["olm-3.2.16" "dotnet-sdk-6.0.428" "python3.12-youtube-dl-2021.12.17"];
+  };
   system.stateVersion = "25.11";
 }
