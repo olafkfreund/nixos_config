@@ -35,6 +35,11 @@ in {
   "secrets/nextcloud-admin-password.age".publicKeys = allUsers ++ servers;
   "secrets/smtp-password.age".publicKeys = allUsers ++ allHosts;
   
+  # Gmail OAuth2 secrets for email integration
+  "secrets/gmail-oauth2-client-secret.age".publicKeys = allUsers ++ allHosts;
+  "secrets/gmail-oauth2-refresh-token-primary.age".publicKeys = allUsers ++ allHosts;
+  "secrets/gmail-oauth2-refresh-token-secondary.age".publicKeys = allUsers ++ allHosts;
+  
   # Tailscale secrets
   "secrets/tailscale-auth-key.age".publicKeys = allUsers ++ allHosts;
   

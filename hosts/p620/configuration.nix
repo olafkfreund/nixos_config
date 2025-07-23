@@ -432,7 +432,7 @@ in {
       enable = true;
       neomutt.enable = true;
       ai.enable = true;
-      ai.provider = "openai";
+      ai.provider = "openai"; 
       notifications.enable = true;
       notifications.highPriorityOnly = true;
     };

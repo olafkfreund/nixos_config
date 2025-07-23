@@ -7,6 +7,7 @@ let
 in {
   imports = [
     ./neomutt
+    # ./auth  # Temporarily disabled for testing
   ];
 
   options.features.email = {
@@ -29,6 +30,15 @@ in {
     neomutt = {
       enable = mkEnableOption "NeoMutt email client" // { default = true; };
     };
+    
+    # auth = {
+    #   enable = mkEnableOption "Email authentication system" // { default = true; };
+    #   method = mkOption {
+    #     type = types.enum [ "oauth2" "app-password" ];
+    #     default = "oauth2";
+    #     description = "Authentication method for Gmail accounts";
+    #   };
+    # };
     
     ai = {
       enable = mkEnableOption "AI-powered email processing";
