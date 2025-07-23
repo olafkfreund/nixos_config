@@ -45,13 +45,13 @@ in
       positionX = "left";
       positionY = "top";
       
-      # Control center positioning - keep on left side only
+      # Control center positioning - full height left side
       control-center-positionX = "left";
       control-center-positionY = "top";
-      control-center-margin-top = 10;
-      control-center-margin-bottom = 10;
-      control-center-margin-right = 10;
-      control-center-margin-left = 10;
+      control-center-margin-top = 0;
+      control-center-margin-bottom = 0;
+      control-center-margin-right = 0;
+      control-center-margin-left = 0;
       
       # Notification window positioning
       notification-window-positionX = "left";
@@ -62,9 +62,9 @@ in
       timeout-low = 5;
       timeout-critical = 0;
       
-      # Control center dimensions - limit to left side
+      # Control center dimensions - full height on left side
       control-center-width = 500;
-      control-center-height = 600;
+      control-center-height = 0;  # 0 means full screen height
       control-center-layer = "overlay";
       control-center-exclusive-zone = false;
       
@@ -74,9 +74,13 @@ in
       # Behavior
       fit-to-screen = false;
       layer-shell = true;
-      transition-time = 200;
+      transition-time = 0;  # No transition animations
       hide-on-clear = true;
       hide-on-action = true;
+      
+      # Force solid appearance
+      cssPriority = "user";
+      keyboard-shortcuts = true;
       
       # Widgets
       widgets = [
@@ -165,13 +169,15 @@ in
         font-family: "JetBrainsMono Nerd Font";
         font-size: 14px;
         font-weight: normal;
-        transition: none;
+        transition: none !important;
+        animation: none !important;
         border: none !important;
         border-radius: 0px !important;
         outline: none !important;
         box-shadow: none !important;
         opacity: 1.0 !important;
         background-color: #282828 !important;
+        -gtk-icon-effect: none !important;
       }
       
       /* Main control center - completely flat like rofi */
@@ -182,10 +188,13 @@ in
         border-radius: 0px !important;
         box-shadow: none !important;
         outline: none !important;
-        margin: 0px;
+        margin: 0px !important;
         padding: 0;
         max-width: 500px;
         width: 500px;
+        height: 100vh !important;
+        min-height: 100vh !important;
+        max-height: 100vh !important;
         opacity: 1.0 !important;
       }
       
@@ -199,6 +208,10 @@ in
         outline: none !important;
         max-width: 500px;
         width: 500px;
+        height: 100vh !important;
+        min-height: 100vh !important;
+        max-height: 100vh !important;
+        margin: 0px !important;
         opacity: 1.0 !important;
       }
       
