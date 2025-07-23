@@ -8,29 +8,28 @@
   host ? "default",
   ...
 }:
-with lib;
-let
+with lib; let
   # Import host-specific variables if available
-  hostVars = 
+  hostVars =
     if builtins.pathExists ../../../../hosts/${host}/variables.nix
     then import ../../../../hosts/${host}/variables.nix
     else {};
-  
+
   # Import basic enhancement systems
-  performanceProfiles = import ./performance-profiles.nix { inherit config lib pkgs; };
-  themeSystem = import ./theme-system.nix { inherit config lib pkgs; };
-  ruleSystem = import ./rule-generators.nix { inherit config lib pkgs; };
-  
+  performanceProfiles = import ./performance-profiles.nix {inherit config lib pkgs;};
+  themeSystem = import ./theme-system.nix {inherit config lib pkgs;};
+  ruleSystem = import ./rule-generators.nix {inherit config lib pkgs;};
+
   # Auto-detect or use specified performance profile
   selectedProfile = hostVars.hyprland.performanceProfile or "balanced";
   activePerformanceProfile = performanceProfiles.hyprland.getProfile selectedProfile;
-  
+
   # Auto-detect or use specified theme
   selectedTheme = hostVars.hyprland.theme or "gruvbox-dark";
   activeTheme = themeSystem.hyprland.getTheme selectedTheme;
-  
+
   # Note: workspaceSystem and validationSystem will be defined after cfg is complete
-  
+
   # Feature flags with smart defaults based on host capabilities
   cfg = {
     # Core features (always enabled)
@@ -39,7 +38,7 @@ let
       xwayland = true;
       systemd = true;
     };
-    
+
     # Performance features (now from performance profiles)
     performance = {
       animations = activePerformanceProfile.animations.enabled;
@@ -48,38 +47,38 @@ let
       vrr = activePerformanceProfile.graphics.vrr;
       allowTearing = activePerformanceProfile.graphics.allow_tearing;
     };
-    
+
     # Plugin system
     plugins = {
-      expo = false;                   # Workspace overview (disabled due to API compatibility issues)
-      hyprbars = false;               # Window titlebars (disabled due to API compatibility issues)
-      hyprfocus = false;              # Focus indicators (disabled by default)
+      expo = false; # Workspace overview (disabled due to API compatibility issues)
+      hyprbars = false; # Window titlebars (disabled due to API compatibility issues)
+      hyprfocus = false; # Focus indicators (disabled by default)
     };
-    
+
     # Utility features
     utilities = {
-      idle = true;                    # Idle management
-      lock = true;                    # Screen locking
-      screenshots = true;             # Screenshot tools
-      clipboard = true;               # Clipboard management
-      notifications = true;           # Notification system
-      wallpapers = true;              # Wallpaper management
+      idle = true; # Idle management
+      lock = true; # Screen locking
+      screenshots = true; # Screenshot tools
+      clipboard = true; # Clipboard management
+      notifications = true; # Notification system
+      wallpapers = true; # Wallpaper management
     };
-    
+
     # Development features
     development = {
       enable = hostVars.features.development.enable or false;
-      debugging = false;              # Debug tools and logging
-      profiling = false;              # Performance profiling
+      debugging = false; # Debug tools and logging
+      profiling = false; # Performance profiling
     };
-    
+
     # Gaming optimizations
     gaming = {
       enable = hostVars.features.gaming.enable or false;
-      immediate = true;               # Immediate mode for games
-      noVsync = false;                # Disable VSync for competitive gaming
+      immediate = true; # Immediate mode for games
+      noVsync = false; # Disable VSync for competitive gaming
     };
-    
+
     # Accessibility features
     accessibility = {
       enable = false;
@@ -88,16 +87,16 @@ let
       screenReader = false;
     };
   };
-  
+
   # Conditional imports based on feature flags
-  conditionalImports = 
-    [ 
+  conditionalImports =
+    [
       # Core configuration (always imported)
       ./config/env.nix
       ./config/settings.nix
       ./config/binds.nix
       ./config/monitors.nix
-    ] 
+    ]
     ++ optional cfg.utilities.idle ./hypridle.nix
     ++ optional cfg.utilities.lock ./hyprlock.nix
     ++ optional true ./config/input.nix
@@ -106,9 +105,9 @@ let
     ++ optional (cfg.plugins.expo || cfg.plugins.hyprbars) ./config/plugins.nix
     ++ optional true ./config/workspace.nix
     ++ optional (cfg.utilities.screenshots || cfg.utilities.clipboard) ./scripts/packages.nix;
-    
+
   # Conditional packages based on feature flags
-  conditionalPackages = 
+  conditionalPackages =
     # Core Hyprland utilities
     []
     # Wallpaper management
@@ -146,11 +145,11 @@ let
       pkgs.nwg-displays
     ]
     ++ optionals cfg.development.debugging [
-      pkgs.glib  # For debugging D-Bus issues
+      pkgs.glib # For debugging D-Bus issues
     ]
     # Gaming utilities
     ++ optionals cfg.gaming.enable [
-      pkgs.hyprdim  # Dim inactive windows
+      pkgs.hyprdim # Dim inactive windows
     ]
     # General utilities (always included)
     ++ [
@@ -160,16 +159,15 @@ let
       pkgs.xdg-utils
       pkgs.kanshi
       pkgs.hyprcursor
-      pkgs.sherlock-launcher
+      # pkgs.sherlock-launcher
     ];
-    
+
   # Conditional plugins based on feature flags
-  conditionalPlugins = 
+  conditionalPlugins =
     []
     ++ optional cfg.plugins.expo pkgs.hyprlandPlugins.hyprexpo
     ++ optional cfg.plugins.hyprbars pkgs.hyprlandPlugins.hyprbars
     ++ optional cfg.plugins.hyprfocus pkgs.hyprlandPlugins.hyprfocus;
-    
 in {
   imports = conditionalImports;
 
@@ -178,9 +176,9 @@ in {
   _module.args.hyprlandTheme = activeTheme;
   _module.args.hyprlandPerformanceProfile = activePerformanceProfile;
   _module.args.hyprlandRuleGenerators = ruleSystem.hyprland.ruleGenerators;
-  
+
   home.packages = conditionalPackages;
-  
+
   wayland.windowManager.hyprland = {
     enable = cfg.core.enable;
     systemd = mkIf cfg.core.systemd {
@@ -192,7 +190,7 @@ in {
     portalPackage = null;
     plugins = conditionalPlugins;
   };
-  
+
   # Performance monitoring when development features are enabled
   home.file = mkIf cfg.development.enable {
     ".config/hypr/debug.conf".text = ''
@@ -203,12 +201,15 @@ in {
       }
     '';
   };
-  
+
   # Gaming-specific environment variables
   home.sessionVariables = mkMerge [
     (mkIf cfg.gaming.enable {
       # Gaming optimizations
-      __GL_SYNC_TO_VBLANK = if cfg.gaming.noVsync then "0" else "1";
+      __GL_SYNC_TO_VBLANK =
+        if cfg.gaming.noVsync
+        then "0"
+        else "1";
       __GL_SYNC_DISPLAY_DEVICE = "1";
     })
     (mkIf cfg.accessibility.enable {

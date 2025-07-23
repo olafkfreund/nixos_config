@@ -10,7 +10,7 @@
     pkgs.caprine-bin
     pkgs.element-desktop
     pkgs.imagemagick
-    pkgs.fractal
+    # pkgs.fractal
     pkgs.vesktop
     # pkgs.telegram-desktop
     pkgs.whatsapp-for-linux

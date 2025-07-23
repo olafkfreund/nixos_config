@@ -64,7 +64,7 @@
     # Applications and specific tools
     claude-desktop = {
       url = "github:k3d3/claude-desktop-linux-flake";
-      inputs.nixpkgs.follows = "nixpkgs-stable";
+      inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
 
@@ -137,302 +137,390 @@
       dex5550 = ["olafkfreund"];
     };
 
-    # Live USB installer images for each host  
+    # Live USB installer images for each host
     mkLiveImage = hostName: let
       hostConfig = hostUsers.${hostName} or ["olafkfreund"];
-    in nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      specialArgs = {
-        inherit inputs;
-        host = hostName;
-        hostUsers = hostConfig;
-      };
-      modules = [
-        # Import live system configuration
-        ({ config, lib, pkgs, modulesPath, ... }: {
-          imports = [
-            "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix"
-          ];
-          
-          # Basic system configuration
-          time.timeZone = lib.mkDefault "Europe/Oslo";
-          i18n.defaultLocale = lib.mkDefault "en_GB.UTF-8";
+    in
+      nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {
+          inherit inputs;
+          host = hostName;
+          hostUsers = hostConfig;
+        };
+        modules = [
+          # Import live system configuration
+          ({
+            config,
+            lib,
+            pkgs,
+            modulesPath,
+            ...
+          }: {
+            imports = [
+              "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix"
+            ];
 
-          # Network configuration
-          networking = {
-            hostName = lib.mkDefault "nixos-installer";
-            networkmanager.enable = true;
-            wireless.enable = false;
-            firewall = {
+            # Basic system configuration
+            time.timeZone = lib.mkDefault "Europe/Oslo";
+            i18n.defaultLocale = lib.mkDefault "en_GB.UTF-8";
+
+            # Network configuration
+            networking = {
+              hostName = lib.mkDefault "nixos-installer";
+              networkmanager.enable = true;
+              wireless.enable = false;
+              firewall = {
+                enable = true;
+                allowedTCPPorts = [22];
+              };
+            };
+
+            # SSH configuration for remote installation
+            services.openssh = {
               enable = true;
-              allowedTCPPorts = [ 22 ];
+              settings = {
+                PermitRootLogin = "yes";
+                PasswordAuthentication = true;
+                KbdInteractiveAuthentication = false;
+              };
             };
-          };
 
-          # SSH configuration for remote installation
-          services.openssh = {
-            enable = true;
-            settings = {
-              PermitRootLogin = "yes";
-              PasswordAuthentication = true;
-              KbdInteractiveAuthentication = false;
+            # Set root password for SSH access
+            users.users.root.password = "nixos";
+
+            # Copy flake configuration to live system
+            environment.etc."nixos-config" = {
+              source = ./.;
+              target = "nixos-config";
             };
-          };
 
-          # Set root password for SSH access
-          users.users.root.password = "nixos";
+            # ISO configuration
+            isoImage = {
+              isoName = lib.mkDefault "nixos-${hostName}-live.iso";
+              volumeID = lib.mkDefault "NIXOS_${lib.toUpper hostName}";
+              makeEfiBootable = true;
+              makeUsbBootable = true;
+              squashfsCompression = "gzip -Xcompression-level 1";
+            };
 
-          # Copy flake configuration to live system
-          environment.etc."nixos-config" = {
-            source = ./.;
-            target = "nixos-config";
-          };
+            # Boot configuration
+            boot = {
+              supportedFilesystems = ["ext4" "vfat" "ntfs" "exfat"];
+              kernelParams = ["boot.shell_on_fail"];
+              initrd.availableKernelModules = [
+                "xhci_pci"
+                "ehci_pci"
+                "ahci"
+                "usb_storage"
+                "sd_mod"
+                "nvme"
+                "sdhci_pci"
+                "rtsx_pci_sdmmc"
+              ];
+            };
 
-          # ISO configuration
-          isoImage = {
-            isoName = lib.mkDefault "nixos-${hostName}-live.iso";
-            volumeID = lib.mkDefault "NIXOS_${lib.toUpper hostName}";
-            makeEfiBootable = true;
-            makeUsbBootable = true;
-            squashfsCompression = "gzip -Xcompression-level 1";
-          };
+            # System configuration
+            nixpkgs.config = {
+              allowUnfree = true;
+              allowInsecure = true;
+            };
 
-          # Boot configuration
-          boot = {
-            supportedFilesystems = [ "ext4" "vfat" "ntfs" "exfat" ];
-            kernelParams = [ "boot.shell_on_fail" ];
-            initrd.availableKernelModules = [
-              "xhci_pci" "ehci_pci" "ahci" "usb_storage" "sd_mod"
-              "nvme" "sdhci_pci" "rtsx_pci_sdmmc"
-            ];
-          };
+            # Enable flakes
+            nix.settings = {
+              experimental-features = ["nix-command" "flakes"];
+              substituters = [
+                "https://cache.nixos.org/"
+                "https://nix-community.cachix.org"
+              ];
+              trusted-public-keys = [
+                "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+                "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+              ];
+            };
 
-          # System configuration
-          nixpkgs.config = {
-            allowUnfree = true;
-            allowInsecure = true;
-          };
+            # No GUI services
+            services.xserver.enable = false;
 
-          # Enable flakes
-          nix.settings = {
-            experimental-features = [ "nix-command" "flakes" ];
-            substituters = [
-              "https://cache.nixos.org/"
-              "https://nix-community.cachix.org"
-            ];
-            trusted-public-keys = [
-              "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-              "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-            ];
-          };
+            # Welcome message
+            environment.etc."issue".text = ''
+              Welcome to NixOS Live Installer for ${hostName}
 
-          # No GUI services
-          services.xserver.enable = false;
-          
-          # Welcome message
-          environment.etc."issue".text = ''
-            Welcome to NixOS Live Installer for ${hostName}
-            
-            To install: sudo install-${hostName}
-            For SSH: root/nixos (CHANGE AFTER INSTALL!)
-            Config: /etc/nixos-config
-          '';
-          
-          # Bash configuration with helpful aliases
-          programs.bash = {
-            interactiveShellInit = ''
-              # Helpful aliases for installation
-              alias ll='ls -la'
-              alias la='ls -A'
-              alias l='ls -CF'
-              alias ..='cd ..'
-              alias ...='cd ../..'
-              alias grep='grep --color=auto'
-              alias fgrep='fgrep --color=auto'
-              alias egrep='egrep --color=auto'
-              
-              # NixOS specific aliases
-              alias nix-repl='nix repl'
-              alias nixos-help='man configuration.nix'
-              alias show-config='cat /etc/nixos-config/hosts/${hostName}/configuration.nix'
-              alias show-hardware='cat /etc/nixos-config/hosts/${hostName}/hardware-configuration.nix'
-              alias list-devices='lsblk -f'
-              alias scan-hardware='lshw -short'
-              
-              # Installation helpers
-              alias start-install='sudo install-${hostName}'
-              alias test-config='test-${hostName}-config'
-              alias quick-install='echo "Quick install for ${hostName}"; sudo install-${hostName} --quick'
-              
-              # Set a nice prompt
-              export PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
-              
-              # Show welcome message on login
-              echo ""
-              echo "🚀 NixOS Live Installer for ${hostName}"
-              echo "📝 Quick commands:"
-              echo "   start-install    - Begin installation wizard"
-              echo "   test-config      - Test hardware configuration"
-              echo "   list-devices     - Show available disks"
-              echo "   scan-hardware    - Show hardware overview"
-              echo "   show-config      - View host configuration"
-              echo ""
+              To install: sudo install-${hostName}
+              For SSH: root/nixos (CHANGE AFTER INSTALL!)
+              Config: /etc/nixos-config
             '';
-          };
-        })
-        
-        # Host-specific configuration
-        {
-          _module.args.host = hostName;
-          
-          # Override default nixpkgs config
-          nixpkgs.config = {
-            allowUnfree = true;
-            allowInsecure = true;
-          };
-          
-          # Comprehensive TUI tools and installer packages
-          environment.systemPackages = with nixpkgs.legacyPackages.x86_64-linux; [
-            # Host-specific installer commands
-            (writeScriptBin "install-${hostName}" ''
-              #!/bin/bash
-              exec /etc/nixos-config/scripts/install-helpers/install-wizard.sh "${hostName}" "$@"
-            '')
-            
-            (writeScriptBin "test-${hostName}-config" ''
-              #!/bin/bash
-              echo "Testing hardware configuration for ${hostName}..."
-              /etc/nixos-config/scripts/install-helpers/parse-hardware-config.py "${hostName}"
-            '')
-            
-            # Essential TUI tools
-            neovim nano tmux htop btop tree ranger
-            
-            # System information and hardware detection
-            lshw hwinfo pciutils usbutils dmidecode inxi
-            smartmontools
-            
-            # Disk partitioning and filesystem tools
-            parted gptfdisk util-linux dosfstools e2fsprogs
-            ntfs3g exfatprogs btrfs-progs xfsprogs
-            
-            # Network tools
-            networkmanager curl wget nettools iproute2
-            iperf3 tcpdump nmap openssh
-            
-            # Archive and file tools
-            unzip zip gnutar gzip p7zip file which
-            rsync rclone
-            
-            # Development and system tools
-            git python3 python3Packages.pyyaml python3Packages.requests
-            jq bc coreutils findutils gnugrep gnused gawk
-            
-            # Text processing
-            less more vim diffutils patch
-            
-            # System monitoring
-            iotop nethogs powertop lsof psmisc
-            
-            # Boot and rescue tools
-            testdisk ddrescue
-            
-            # Console enhancements
-            bash-completion zsh oh-my-zsh
-            
-            # Terminal multiplexer and session management
-            screen zellij
-          ];
-        }
-      ];
-    };
+
+            # Bash configuration with helpful aliases
+            programs.bash = {
+              interactiveShellInit = ''
+                # Helpful aliases for installation
+                alias ll='ls -la'
+                alias la='ls -A'
+                alias l='ls -CF'
+                alias ..='cd ..'
+                alias ...='cd ../..'
+                alias grep='grep --color=auto'
+                alias fgrep='fgrep --color=auto'
+                alias egrep='egrep --color=auto'
+
+                # NixOS specific aliases
+                alias nix-repl='nix repl'
+                alias nixos-help='man configuration.nix'
+                alias show-config='cat /etc/nixos-config/hosts/${hostName}/configuration.nix'
+                alias show-hardware='cat /etc/nixos-config/hosts/${hostName}/hardware-configuration.nix'
+                alias list-devices='lsblk -f'
+                alias scan-hardware='lshw -short'
+
+                # Installation helpers
+                alias start-install='sudo install-${hostName}'
+                alias test-config='test-${hostName}-config'
+                alias quick-install='echo "Quick install for ${hostName}"; sudo install-${hostName} --quick'
+
+                # Set a nice prompt
+                export PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+
+                # Show welcome message on login
+                echo ""
+                echo "🚀 NixOS Live Installer for ${hostName}"
+                echo "📝 Quick commands:"
+                echo "   start-install    - Begin installation wizard"
+                echo "   test-config      - Test hardware configuration"
+                echo "   list-devices     - Show available disks"
+                echo "   scan-hardware    - Show hardware overview"
+                echo "   show-config      - View host configuration"
+                echo ""
+              '';
+            };
+          })
+
+          # Host-specific configuration
+          {
+            _module.args.host = hostName;
+
+            # Override default nixpkgs config
+            nixpkgs.config = {
+              allowUnfree = true;
+              allowInsecure = true;
+            };
+
+            # Comprehensive TUI tools and installer packages
+            environment.systemPackages = with nixpkgs.legacyPackages.x86_64-linux; [
+              # Host-specific installer commands
+              (writeScriptBin "install-${hostName}" ''
+                #!/bin/bash
+                exec /etc/nixos-config/scripts/install-helpers/install-wizard.sh "${hostName}" "$@"
+              '')
+
+              (writeScriptBin "test-${hostName}-config" ''
+                #!/bin/bash
+                echo "Testing hardware configuration for ${hostName}..."
+                /etc/nixos-config/scripts/install-helpers/parse-hardware-config.py "${hostName}"
+              '')
+
+              # Essential TUI tools
+              neovim
+              nano
+              tmux
+              htop
+              btop
+              tree
+              ranger
+
+              # System information and hardware detection
+              lshw
+              hwinfo
+              pciutils
+              usbutils
+              dmidecode
+              inxi
+              smartmontools
+
+              # Disk partitioning and filesystem tools
+              parted
+              gptfdisk
+              util-linux
+              dosfstools
+              e2fsprogs
+              ntfs3g
+              exfatprogs
+              btrfs-progs
+              xfsprogs
+
+              # Network tools
+              networkmanager
+              curl
+              wget
+              nettools
+              iproute2
+              iperf3
+              tcpdump
+              nmap
+              openssh
+
+              # Archive and file tools
+              unzip
+              zip
+              gnutar
+              gzip
+              p7zip
+              file
+              which
+              rsync
+              rclone
+
+              # Development and system tools
+              git
+              python3
+              python3Packages.pyyaml
+              python3Packages.requests
+              jq
+              bc
+              coreutils
+              findutils
+              gnugrep
+              gnused
+              gawk
+
+              # Text processing
+              less
+              more
+              vim
+              diffutils
+              patch
+
+              # System monitoring
+              iotop
+              nethogs
+              powertop
+              lsof
+              psmisc
+
+              # Boot and rescue tools
+              testdisk
+              ddrescue
+
+              # Console enhancements
+              bash-completion
+              zsh
+              oh-my-zsh
+
+              # Terminal multiplexer and session management
+              screen
+              zellij
+            ];
+          }
+        ];
+      };
 
     liveImages = {
       p620 = mkLiveImage "p620";
-      razer = mkLiveImage "razer"; 
+      razer = mkLiveImage "razer";
       p510 = mkLiveImage "p510";
       dex5550 = mkLiveImage "dex5550";
       samsung = mkLiveImage "samsung";
     };
 
     # MicroVM configurations
-    mkMicroVM = vmName: vmConfig: nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      specialArgs = {
-        inherit inputs;
+    mkMicroVM = vmName: vmConfig:
+      nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {
+          inherit inputs;
+        };
+        modules = [
+          inputs.microvm.nixosModules.microvm
+          {
+            networking.hostName = vmName;
+
+            # Basic system configuration
+            time.timeZone = "Europe/Oslo";
+            i18n.defaultLocale = "en_GB.UTF-8";
+            system.stateVersion = "25.11";
+
+            # Enable flakes
+            nix.settings.experimental-features = ["nix-command" "flakes"];
+
+            # Allow unfree packages
+            nixpkgs.config.allowUnfree = true;
+
+            # MicroVM configuration
+            microvm = {
+              hypervisor = "qemu";
+
+              # Resource allocation
+              mem = 8192; # 8GB RAM
+              vcpu = 4; # 4 CPU cores
+
+              # Network configuration - Simple NAT
+              interfaces = [
+                {
+                  type = "user";
+                  id = "vm-user";
+                  mac = vmConfig.mac or "02:00:00:01:01:01";
+                }
+              ];
+
+              # Port forwarding for SSH and development
+              forwardPorts =
+                vmConfig.forwardPorts or [
+                  {
+                    from = "host";
+                    host.port = vmConfig.sshPort or 2222;
+                    guest.port = 22;
+                  }
+                ];
+
+              # Storage configuration
+              shares =
+                [
+                  {
+                    # Shared /nix/store for efficiency
+                    source = "/nix/store";
+                    mountPoint = "/nix/.ro-store";
+                    tag = "ro-store";
+                    proto = "virtiofs";
+                    socket = "store.sock";
+                  }
+                  {
+                    # Shared host directory
+                    source = "/tmp/microvm-shared";
+                    mountPoint = "/mnt/shared";
+                    tag = "shared";
+                    proto = "virtiofs";
+                    socket = "shared.sock";
+                  }
+                ]
+                ++ (vmConfig.extraShares or []);
+
+              # Persistent volumes
+              volumes = vmConfig.volumes or [];
+            };
+          }
+          vmConfig.extraModules or {}
+        ];
       };
-      modules = [
-        inputs.microvm.nixosModules.microvm
-        {
-          networking.hostName = vmName;
-          
-          # Basic system configuration
-          time.timeZone = "Europe/Oslo";
-          i18n.defaultLocale = "en_GB.UTF-8";
-          system.stateVersion = "25.11";
-          
-          # Enable flakes
-          nix.settings.experimental-features = [ "nix-command" "flakes" ];
-          
-          # Allow unfree packages
-          nixpkgs.config.allowUnfree = true;
-          
-          # MicroVM configuration
-          microvm = {
-            hypervisor = "qemu";
-            
-            # Resource allocation
-            mem = 8192;  # 8GB RAM
-            vcpu = 4;    # 4 CPU cores
-            
-            # Network configuration - Simple NAT
-            interfaces = [{
-              type = "user";
-              id = "vm-user";
-              mac = vmConfig.mac or "02:00:00:01:01:01";
-            }];
-            
-            # Port forwarding for SSH and development
-            forwardPorts = vmConfig.forwardPorts or [
-              { from = "host"; host.port = vmConfig.sshPort or 2222; guest.port = 22; }
-            ];
-            
-            # Storage configuration
-            shares = [
-              {
-                # Shared /nix/store for efficiency
-                source = "/nix/store";
-                mountPoint = "/nix/.ro-store";
-                tag = "ro-store";
-                proto = "virtiofs";
-                socket = "store.sock";
-              }
-              {
-                # Shared host directory
-                source = "/tmp/microvm-shared";
-                mountPoint = "/mnt/shared";
-                tag = "shared";
-                proto = "virtiofs";
-                socket = "shared.sock";
-              }
-            ] ++ (vmConfig.extraShares or []);
-            
-            # Persistent volumes
-            volumes = vmConfig.volumes or [];
-          };
-        }
-        vmConfig.extraModules or {}
-      ];
-    };
 
     microvms = {
       dev-vm = mkMicroVM "dev-vm" {
         mac = "02:00:00:01:01:01";
         sshPort = 2222;
         forwardPorts = [
-          { from = "host"; host.port = 2222; guest.port = 22; }
-          { from = "host"; host.port = 8080; guest.port = 80; }
-          { from = "host"; host.port = 3000; guest.port = 3000; }
+          {
+            from = "host";
+            host.port = 2222;
+            guest.port = 22;
+          }
+          {
+            from = "host";
+            host.port = 8080;
+            guest.port = 80;
+          }
+          {
+            from = "host";
+            host.port = 3000;
+            guest.port = 3000;
+          }
         ];
         extraShares = [
           {
@@ -447,36 +535,50 @@
           {
             image = "/var/lib/microvms/dev-vm/home.img";
             mountPoint = "/home/dev";
-            size = 10240;  # 10GB
+            size = 10240; # 10GB
           }
         ];
         extraModules = {
           # Development environment packages
           environment.systemPackages = with nixpkgs.legacyPackages.x86_64-linux; [
-            git vim neovim tmux htop tree curl wget
-            nodejs python3 go rustc docker-compose
-            gcc gnumake cmake ninja
+            git
+            vim
+            neovim
+            tmux
+            htop
+            tree
+            curl
+            wget
+            nodejs
+            python3
+            go
+            rustc
+            docker-compose
+            gcc
+            gnumake
+            cmake
+            ninja
           ];
-          
+
           # Create dev user
           users.users.dev = {
             isNormalUser = true;
             password = "dev";
-            extraGroups = [ "wheel" "docker" ];
+            extraGroups = ["wheel" "docker"];
             shell = nixpkgs.legacyPackages.x86_64-linux.bash;
           };
-          
+
           # Enable SSH
           services.openssh = {
             enable = true;
             settings.PasswordAuthentication = true;
           };
-          
+
           # Enable Docker
           virtualisation.docker.enable = true;
         };
       };
-      
+
       test-vm = mkMicroVM "test-vm" {
         mac = "02:00:00:01:01:02";
         sshPort = 2223;
@@ -492,16 +594,22 @@
         extraModules = {
           # Minimal testing environment
           environment.systemPackages = with nixpkgs.legacyPackages.x86_64-linux; [
-            git vim htop tree curl wget python3
+            git
+            vim
+            htop
+            tree
+            curl
+            wget
+            python3
           ];
-          
+
           # Create test user
           users.users.test = {
             isNormalUser = true;
             password = "test";
-            extraGroups = [ "wheel" ];
+            extraGroups = ["wheel"];
           };
-          
+
           # Enable SSH
           services.openssh = {
             enable = true;
@@ -509,13 +617,21 @@
           };
         };
       };
-      
+
       playground-vm = mkMicroVM "playground-vm" {
         mac = "02:00:00:01:01:03";
         sshPort = 2224;
         forwardPorts = [
-          { from = "host"; host.port = 2224; guest.port = 22; }
-          { from = "host"; host.port = 8081; guest.port = 80; }
+          {
+            from = "host";
+            host.port = 2224;
+            guest.port = 22;
+          }
+          {
+            from = "host";
+            host.port = 8081;
+            guest.port = 80;
+          }
         ];
         extraShares = [
           {
@@ -529,19 +645,33 @@
         extraModules = {
           # Allow unfree packages for experimental tools
           nixpkgs.config.allowUnfree = true;
-          
+
           # Experimental playground packages
           environment.systemPackages = with nixpkgs.legacyPackages.x86_64-linux; [
-            git vim neovim tmux htop tree curl wget
-            python3 nodejs go rustc
-            docker-compose kubernetes helm
+            git
+            vim
+            neovim
+            tmux
+            htop
+            tree
+            curl
+            wget
+            python3
+            nodejs
+            go
+            rustc
+            docker-compose
+            kubernetes
+            helm
             ansible
-            wireshark tcpdump nmap
+            wireshark
+            tcpdump
+            nmap
           ];
-          
+
           # Root access for experimentation
           users.users.root.password = "playground";
-          
+
           # Enable SSH
           services.openssh = {
             enable = true;
@@ -550,7 +680,7 @@
               PermitRootLogin = "yes";
             };
           };
-          
+
           # Enable Docker and K8s tools
           virtualisation.docker.enable = true;
         };
@@ -586,7 +716,10 @@
       primaryUser = getPrimaryUser host;
       allUsers = getHostUsers host;
       # Only import stylix for desktop/workstation hosts, not servers
-      stylixModule = if host == "dex5550" then [] else [inputs.stylix.nixosModules.stylix];
+      stylixModule =
+        if host == "dex5550"
+        then []
+        else [inputs.stylix.nixosModules.stylix];
     in {
       system = "x86_64-linux";
       specialArgs = {
@@ -596,67 +729,73 @@
         username = primaryUser; # Primary user for backward compatibility
         hostUsers = allUsers; # All users for this host
       };
-      modules = [
-        {nixpkgs.overlays = overlays;}
-        ./hosts/${host}/configuration.nix
-        nur.modules.nixos.default
-        home-manager.nixosModules.home-manager
-        inputs.nix-colors.homeManagerModules.default
-        inputs.nix-snapd.nixosModules.default
-        inputs.agenix.nixosModules.default
-        nix-index-database.nixosModules.nix-index
-        ./home/shell/zellij/zjstatus.nix
-        inputs.nixvim.nixosModules.nixvim
-        nixai.nixosModules.default
-      ] ++ stylixModule ++ [
-        {
-          home-manager = {
-            useGlobalPkgs = true;
-            useUserPackages = true;
-            backupFileExtension = "backup";
-            extraSpecialArgs = {
-              pkgs-stable = import nixpkgs-stable (mkPkgs nixpkgs-stable);
-              pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable);
-              inherit
-                inputs
-                nixpkgs
-                zjstatus
-                spicetify-nix
-                ags
-                agenix
-                razer-laptop-control
-                walker
-                nix-index-database
-                nixpkgs-f2k
-                bzmenu
-                iwmenu
-                home-manager
-                nixpkgs-stable
-                nixpkgs-unstable
-                nix-colors
-                nix-snapd
-                nixvim
-                host
-                ;
-              # Only include stylix for non-server hosts
-              stylix = if host == "dex5550" then null else stylix;
-              username = primaryUser;
-              hostUsers = allUsers;
-            };
+      modules =
+        [
+          {nixpkgs.overlays = overlays;}
+          ./hosts/${host}/configuration.nix
+          nur.modules.nixos.default
+          home-manager.nixosModules.home-manager
+          inputs.nix-colors.homeManagerModules.default
+          inputs.nix-snapd.nixosModules.default
+          inputs.agenix.nixosModules.default
+          nix-index-database.nixosModules.nix-index
+          ./home/shell/zellij/zjstatus.nix
+          inputs.nixvim.nixosModules.nixvim
+          nixai.nixosModules.default
+        ]
+        ++ stylixModule
+        ++ [
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              backupFileExtension = "backup";
+              extraSpecialArgs = {
+                pkgs-stable = import nixpkgs-stable (mkPkgs nixpkgs-stable);
+                pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable);
+                inherit
+                  inputs
+                  nixpkgs
+                  zjstatus
+                  spicetify-nix
+                  ags
+                  agenix
+                  razer-laptop-control
+                  walker
+                  nix-index-database
+                  nixpkgs-f2k
+                  bzmenu
+                  iwmenu
+                  home-manager
+                  nixpkgs-stable
+                  nixpkgs-unstable
+                  nix-colors
+                  nix-snapd
+                  nixvim
+                  host
+                  ;
+                # Only include stylix for non-server hosts
+                stylix =
+                  if host == "dex5550"
+                  then null
+                  else stylix;
+                username = primaryUser;
+                hostUsers = allUsers;
+              };
 
-            # Configure home-manager for all users on this host
-            users = builtins.listToAttrs (map (user: {
-                name = user;
-                value = import ./Users/${user}/${host}_home.nix;
-              })
-              allUsers);
-            sharedModules = [
-              inputs.nixvim.homeManagerModules.nixvim
-              nixai.homeManagerModules.default
-            ];
-          };
-        }
-      ];
+              # Configure home-manager for all users on this host
+              users = builtins.listToAttrs (map (user: {
+                  name = user;
+                  value = import ./Users/${user}/${host}_home.nix;
+                })
+                allUsers);
+              sharedModules = [
+                inputs.nixvim.homeManagerModules.nixvim
+                nixai.homeManagerModules.default
+              ];
+            };
+          }
+        ];
     };
   in {
     nixosConfigurations = {
@@ -666,7 +805,7 @@
       p510 = nixpkgs.lib.nixosSystem (makeNixosSystem "p510");
       p620 = nixpkgs.lib.nixosSystem (makeNixosSystem "p620");
       samsung = nixpkgs.lib.nixosSystem (makeNixosSystem "samsung");
-      
+
       # MicroVM configurations
       dev-vm = microvms.dev-vm;
       test-vm = microvms.test-vm;
@@ -681,7 +820,7 @@
         inherit (nixpkgs.legacyPackages.x86_64-linux) lib buildNpmPackage fetchurl nodejs makeWrapper writeShellScriptBin;
       };
       gemini-cli = nixpkgs.legacyPackages.x86_64-linux.callPackage ./pkgs/gemini-cli {};
-      
+
       # Add live ISO packages for easy building
       live-iso-p620 = liveImages.p620.config.system.build.isoImage;
       live-iso-razer = liveImages.razer.config.system.build.isoImage;
