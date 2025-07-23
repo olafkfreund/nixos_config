@@ -37,6 +37,6 @@
     # pkgs.oterm
     pkgs.gpt-cli
     pkgs.chatmcp
-    inputs.claude-desktop.packages.x86_64-linux.claude-desktop-with-fhs
+    # inputs.claude-desktop.packages.x86_64-linux.claude-desktop-with-fhs
   ];
 }
