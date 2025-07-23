@@ -170,11 +170,14 @@ in
         border-radius: 0px !important;
         outline: none !important;
         box-shadow: none !important;
+        opacity: 1.0 !important;
+        background-color: #282828 !important;
       }
       
       /* Main control center - completely flat like rofi */
       .control-center {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         border: none !important;
         border-radius: 0px !important;
         box-shadow: none !important;
@@ -183,32 +186,38 @@ in
         padding: 0;
         max-width: 500px;
         width: 500px;
+        opacity: 1.0 !important;
       }
       
       /* Remove any window decorations */
       .control-center-window {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         border: none !important;
         border-radius: 0px !important;
         box-shadow: none !important;
         outline: none !important;
         max-width: 500px;
         width: 500px;
+        opacity: 1.0 !important;
       }
       
       /* Title widget */
       .control-center .widget-title {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #ebdbb2;
         font-size: 14px;
         font-weight: bold;
         padding: 12px;
         border-radius: 0px;
         border: none;
+        opacity: 1.0 !important;
       }
       
       .control-center .widget-title button {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #fabd2f;
         border: none;
         border-radius: 0px;
@@ -218,13 +227,15 @@ in
       }
       
       .control-center .widget-title button:hover {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #fabd2f;
       }
       
       /* DND widget */
       .control-center .widget-dnd {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #ebdbb2;
         padding: 12px;
         border-radius: 0px;
@@ -233,7 +244,8 @@ in
       }
       
       .control-center .widget-dnd button {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #ebdbb2;
         border: none;
         border-radius: 0px;
@@ -242,35 +254,42 @@ in
       }
       
       .control-center .widget-dnd button.enabled {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #fabd2f;
       }
       
       /* Notifications */
       .notification {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         border: none;
         border-radius: 0px;
         margin: 0px;
         padding: 0;
         box-shadow: none;
+        opacity: 1.0 !important;
       }
       
       .notification .notification-content {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #ebdbb2;
         padding: 12px;
+        opacity: 1.0 !important;
       }
       
       .notification .notification-default-action {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #ebdbb2;
         border: none;
         border-radius: 0px;
       }
       
       .notification .notification-default-action:hover {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #fabd2f;
       }
       
@@ -294,7 +313,8 @@ in
       
       /* MPRIS widget */
       .control-center .widget-mpris {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         border-radius: 0px;
         border: none;
         margin: 0px;
@@ -318,7 +338,8 @@ in
       }
       
       .control-center .widget-mpris button {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #ebdbb2;
         border: none;
         border-radius: 0px;
@@ -328,13 +349,15 @@ in
       }
       
       .control-center .widget-mpris button:hover {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #fabd2f;
       }
       
       /* Volume widget */
       .control-center .widget-volume {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         border-radius: 0px;
         border: none;
         margin: 0px;
@@ -342,7 +365,8 @@ in
       }
       
       .control-center .widget-volume .volume-slider {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         border-radius: 0px;
       }
       
@@ -353,7 +377,8 @@ in
       
       /* Buttons grid */
       .control-center .widget-buttons-grid {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         border-radius: 0px;
         border: none;
         margin: 0px;
@@ -361,7 +386,8 @@ in
       }
       
       .control-center .widget-buttons-grid button {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #ebdbb2;
         border: none;
         border-radius: 0px;
@@ -373,28 +399,34 @@ in
       }
       
       .control-center .widget-buttons-grid button:hover {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #fabd2f;
       }
       
       /* Floating notifications */
       .floating-notifications .notification {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         border: none;
         border-radius: 0px;
         box-shadow: none;
         margin: 0px;
         padding: 0;
+        opacity: 1.0 !important;
       }
       
       .floating-notifications .notification .notification-content {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #ebdbb2;
         padding: 16px;
+        opacity: 1.0 !important;
       }
       
       .floating-notifications .notification .close-button {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #fabd2f;
         border: none;
         border-radius: 0px;
@@ -404,13 +436,15 @@ in
       }
       
       .floating-notifications .notification .close-button:hover {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #fabd2f;
       }
       
       /* Action buttons in notifications - SMALL TEXT */
       .notification .notification-action {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #fabd2f;
         border: none;
         border-radius: 0px;
@@ -422,19 +456,22 @@ in
       }
       
       .notification .notification-action:hover {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #fabd2f;
         text-decoration: underline;
       }
       
       /* Action text in popup notifications - VERY SMALL */
       .notification .actions {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         padding: 4px;
       }
       
       .notification .actions button {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #fabd2f;
         border: none;
         border-radius: 0px;
@@ -446,14 +483,16 @@ in
       }
       
       .notification .actions button:hover {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         color: #fabd2f;
         text-decoration: underline;
       }
       
       /* Critical notifications */
       .notification.critical {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
       }
       
       .notification.critical .summary {
@@ -462,7 +501,9 @@ in
       
       /* Low priority notifications */
       .notification.low {
-        opacity: 1.0;
+        opacity: 1.0 !important;
+        background: #282828 !important;
+        background-color: #282828 !important;
       }
       
       /* Remove all window borders and decorations - FORCE FLAT */
@@ -471,7 +512,8 @@ in
       window,
       .swaync-control-center,
       .swaync-notification-window {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         border: none !important;
         border-radius: 0px !important;
         outline: none !important;
@@ -483,7 +525,8 @@ in
       /* Force remove any GTK window decorations */
       window.swaync-control-center,
       window.swaync-notification-window {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         border: none !important;
         border-radius: 0px !important;
         outline: none !important;
@@ -494,19 +537,22 @@ in
       
       /* Scrollbars - hidden like rofi */
       scrollbar {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         border-radius: 0px;
         width: 0px;
       }
       
       scrollbar slider {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
         border-radius: 0px;
         min-height: 0px;
       }
       
       scrollbar slider:hover {
-        background: #282828;
+        background: #282828 !important;
+        background-color: #282828 !important;
       }
     '';
 
