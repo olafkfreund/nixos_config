@@ -45,7 +45,9 @@ in
       positionX = "left";
       positionY = "top";
       
-      # Control center positioning
+      # Control center positioning - keep on left side only
+      control-center-positionX = "left";
+      control-center-positionY = "top";
       control-center-margin-top = 10;
       control-center-margin-bottom = 10;
       control-center-margin-right = 10;
@@ -60,8 +62,17 @@ in
       timeout-low = 5;
       timeout-critical = 0;
       
+      # Control center dimensions - limit to left side
+      control-center-width = 500;
+      control-center-height = 600;
+      control-center-layer = "overlay";
+      control-center-exclusive-zone = false;
+      
+      # Notification window dimensions
+      notification-window-width = 400;
+      
       # Behavior
-      fit-to-screen = true;
+      fit-to-screen = false;
       layer-shell = true;
       transition-time = 200;
       hide-on-clear = true;
@@ -170,6 +181,8 @@ in
         outline: none !important;
         margin: 0px;
         padding: 0;
+        max-width: 500px;
+        width: 500px;
       }
       
       /* Remove any window decorations */
@@ -179,6 +192,8 @@ in
         border-radius: 0px !important;
         box-shadow: none !important;
         outline: none !important;
+        max-width: 500px;
+        width: 500px;
       }
       
       /* Title widget */
