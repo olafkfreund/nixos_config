@@ -44,7 +44,7 @@
     # Special workspaces
     bind = $mainMod, S, togglespecialworkspace, magic
     bind = $mainMod, S, togglespecialworkspace, slack
-    bind = $mainMod, B, togglespecialworkspace, chrome
+    bind = $mainMod, B, togglespecialworkspace, firefox
     bind = $mainMod, M, togglespecialworkspace, mail
     bind = $mainMod, T, togglespecialworkspace, scratchpad
     bind = $mainMod, D, togglespecialworkspace, discord

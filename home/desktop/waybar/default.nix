@@ -121,6 +121,7 @@
             "10" = "<span foreground='#fe8019'>10</span>";
             "magic" = "<span foreground='#fabd2f'>󱕴 </span>";
             "chrome" = "<span foreground='#458588'> </span>";
+            "firefox" = "<span foreground='#458588'>󰈹 </span>";
             "hidden" = "<span foreground='#8ec07c'>󰐃 </span>";
             "secret" = "<span foreground='#fabd2f'>󱕴 </span>";
             "spotify" = "<span foreground='#518554'> </span>";

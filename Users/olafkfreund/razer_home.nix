@@ -116,7 +116,7 @@ in {
     commandLineArgs = lib.mkForce [
       "--enable-features=UseOzonePlatform"
       "--ozone-platform=wayland"
-      "--disable-gpu"
+      # "--disable-gpu"
     ];
   };
 }
