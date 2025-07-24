@@ -28,12 +28,13 @@ in {
       enable = true;
       package = pkgs.google-chrome;
       commandLineArgs = [
-        # Native Wayland support
+        # Native Wayland support (VizDisplayCompositor disabled for Hyprland compatibility)
         "--enable-features=UseOzonePlatform,WaylandWindowDecorations,VaapiVideoDecoder"
         "--ozone-platform=wayland"
         
         # Wayland input and display
         "--enable-wayland-ime"
+        # CRITICAL FIX: Disable VizDisplayCompositor to fix page loading on Hyprland
         "--disable-features=VizDisplayCompositor"
         
         # Secure memory management
