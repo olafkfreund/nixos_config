@@ -44,11 +44,11 @@ in {
     # SwayNC configuration
     xdg.configFile."swaync/config.json".text = builtins.toJSON {
       positionX = "left";
-      positionY = "buttom";
+      positionY = "bottom";
 
       # Control center positioning - full height left side
       control-center-positionX = "left";
-      control-center-positionY = "buttom";
+      control-center-positionY = "bottom";
       control-center-margin-top = 0;
       control-center-margin-bottom = 0;
       control-center-margin-right = 0;
@@ -56,7 +56,7 @@ in {
 
       # Notification window positioning
       notification-window-positionX = "left";
-      notification-window-positionY = "buttom";
+      notification-window-positionY = "bottom";
 
       # Timeout settings
       timeout = 10;

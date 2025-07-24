@@ -343,12 +343,8 @@ in {
             };
           };
 
-          # GitHub Copilot chat instructions
-          "github.copilot.chat.codeGeneration.instructions" = [
-            {
-              "text" = "When answering questions about frameworks, libraries, or APIs, use Context7 to retrieve current documentation rather than relying on training data.";
-            }
-          ];
+          # GitHub Copilot chat instructions - using new instructions file format
+          "github.copilot.chat.codeGeneration.useInstructionFiles" = true;
 
           # GitHub Copilot custom instructions configuration
           "github.copilot.chat.customInstructions" = {
