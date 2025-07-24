@@ -57,7 +57,7 @@
     exec-once = vesktop
     exec-once = spotify
     exec-once = thunderbird
-    exec=once = google-chrome-stable
+    exec=once = firefox
     exec=once = 1password
   '';
 }

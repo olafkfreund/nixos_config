@@ -49,12 +49,6 @@ with lib; {
       # Electron and Chromium-based applications
       "ELECTRON_OZONE_PLATFORM_HINT,wayland" # Force Electron to use Wayland
       "OZONE_PLATFORM,wayland" # Ozone platform
-
-      # NVIDIA GPU settings (commented out - uncomment if using NVIDIA)
-      # "GBM_BACKEND,nvidia-drm"           # NVIDIA GBM backend
-      # "__GLX_VENDOR_LIBRARY_NAME,nvidia" # GLX vendor library
-      # "WLR_NO_HARDWARE_CURSORS,1"        # Disable hardware cursors
-      # "WLR_DRM_NO_ATOMIC,1"              # Disable atomic mode setting
     ];
   };
 }
