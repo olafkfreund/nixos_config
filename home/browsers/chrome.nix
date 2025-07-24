@@ -23,24 +23,31 @@ in {
     #   XDG_DATA_DIRS = "${pkgs.adwaita-icon-theme}/share:${pkgs.hicolor-icon-theme}/share:${pkgs.gtk3}/share:${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}:${pkgs.gtk4}/share";
     # };
 
-    # Configure Chrome with proper Wayland support and stability fixes
+    # Configure Chrome with proper Wayland support (secure configuration)
     programs.chromium = {
       enable = true;
       package = pkgs.google-chrome;
       commandLineArgs = [
-        # Basic Wayland support
-        "--enable-features=UseOzonePlatform"
+        # Native Wayland support
+        "--enable-features=UseOzonePlatform,WaylandWindowDecorations,VaapiVideoDecoder"
         "--ozone-platform=wayland"
         
-        # Stability fixes for Wayland
-        "--disable-dev-shm-usage"
-        "--no-sandbox"
-        "--disable-gpu-sandbox"
-        "--disable-software-rasterizer"
-        
-        # Additional Wayland compatibility
+        # Wayland input and display
         "--enable-wayland-ime"
-        "--gtk-version=4"
+        "--disable-features=VizDisplayCompositor"
+        
+        # Secure memory management
+        "--disable-dev-shm-usage"
+        "--memory-pressure-off"
+        
+        # Graphics acceleration (secure)
+        "--use-gl=desktop"
+        "--enable-gpu-rasterization"
+        "--enable-zero-copy"
+        
+        # Process management
+        "--process-per-site"
+        "--max_old_space_size=4096"
       ];
     };
   };
