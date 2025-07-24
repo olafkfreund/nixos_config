@@ -122,6 +122,14 @@
             "magic" = "<span foreground='#fabd2f'>󱕴 </span>";
             "chrome" = "<span foreground='#458588'> </span>";
             "firefox" = "<span foreground='#ff7f00'>󰈹 </span>";
+            "special:firefox" = "<span foreground='#ff7f00'>󰈹 </span>";
+            "special:chrome" = "<span foreground='#458588'> </span>";
+            "special:magic" = "<span foreground='#fabd2f'>󱕴 </span>";
+            "special:spotify" = "<span foreground='#518554'> </span>";
+            "special:slack" = "<span foreground='#fe8019'> </span>";
+            "special:discord" = "<span foreground='#8ec07c'> </span>";
+            "special:mail" = "<span foreground='#83a598'> </span>";
+            "special:scratchpad" = "<span foreground='#d3869b'> </span>";
             "hidden" = "<span foreground='#8ec07c'>󰐃 </span>";
             "secret" = "<span foreground='#fabd2f'>󱕴 </span>";
             "spotify" = "<span foreground='#518554'> </span>";
