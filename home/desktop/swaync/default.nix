@@ -1,14 +1,15 @@
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
-  cfg = config.desktop.swaync;
-in
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
+  cfg = config.desktop.swaync;
+in {
   options.desktop.swaync = {
     enable = mkEnableOption "SwayNC notification center";
-    
+
     package = mkOption {
       type = types.package;
       default = pkgs.swaynotificationcenter;
@@ -17,16 +18,16 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.packages = [ cfg.package ];
+    home.packages = [cfg.package];
 
     # Enable swaync service via systemd
     systemd.user.services.swaync = {
       Unit = {
         Description = "SwayNC notification daemon";
-        After = [ "graphical-session-pre.target" ];
-        PartOf = [ "graphical-session.target" ];
+        After = ["graphical-session-pre.target"];
+        PartOf = ["graphical-session.target"];
       };
-      
+
       Service = {
         Type = "simple";
         ExecStart = "${cfg.package}/bin/swaync";
@@ -34,54 +35,54 @@ in
         RestartSec = 1;
         TimeoutStopSec = 10;
       };
-      
+
       Install = {
-        WantedBy = [ "graphical-session.target" ];
+        WantedBy = ["graphical-session.target"];
       };
     };
 
     # SwayNC configuration
     xdg.configFile."swaync/config.json".text = builtins.toJSON {
       positionX = "left";
-      positionY = "top";
-      
+      positionY = "buttom";
+
       # Control center positioning - full height left side
       control-center-positionX = "left";
-      control-center-positionY = "top";
+      control-center-positionY = "buttom";
       control-center-margin-top = 0;
       control-center-margin-bottom = 0;
       control-center-margin-right = 0;
       control-center-margin-left = 0;
-      
+
       # Notification window positioning
       notification-window-positionX = "left";
-      notification-window-positionY = "top";
-      
+      notification-window-positionY = "buttom";
+
       # Timeout settings
       timeout = 10;
       timeout-low = 5;
       timeout-critical = 0;
-      
+
       # Control center dimensions - full height on left side
       control-center-width = 500;
-      control-center-height = 0;  # 0 means full screen height
+      control-center-height = 0; # 0 means full screen height
       control-center-layer = "overlay";
       control-center-exclusive-zone = false;
-      
+
       # Notification window dimensions
       notification-window-width = 400;
-      
+
       # Behavior
       fit-to-screen = false;
       layer-shell = true;
-      transition-time = 0;  # No transition animations
+      transition-time = 0; # No transition animations
       hide-on-clear = true;
       hide-on-action = true;
-      
+
       # Force solid appearance
       cssPriority = "user";
       keyboard-shortcuts = true;
-      
+
       # Widgets
       widgets = [
         "dnd"
@@ -91,19 +92,19 @@ in
         "volume"
         "buttons-grid"
       ];
-      
+
       # Widget configurations
       widget-config = {
         dnd = {
           text = "Do not disturb";
         };
-        
+
         title = {
           text = "Control Center";
           clear-all-button = true;
           button-text = " 󰆴";
         };
-        
+
         mpris = {
           contents = [
             "album-art"
@@ -122,14 +123,14 @@ in
           text-overflow = "ellipsis";
           hide-when-inactive = true;
           force-artwork = true;
-          preferred-players = [ "spotify" "mpd" "firefox" ];
+          preferred-players = ["spotify" "mpd" "firefox"];
         };
-        
+
         volume = {
           label = "󰕾";
           show-per-app = true;
         };
-        
+
         buttons-grid = {
           actions = [
             {
@@ -179,7 +180,7 @@ in
         background-color: #282828 !important;
         -gtk-icon-effect: none !important;
       }
-      
+
       /* Main control center - completely flat like rofi */
       .control-center {
         background: #282828 !important;
@@ -197,7 +198,7 @@ in
         max-height: 100vh !important;
         opacity: 1.0 !important;
       }
-      
+
       /* Remove any window decorations */
       .control-center-window {
         background: #282828 !important;
@@ -214,7 +215,7 @@ in
         margin: 0px !important;
         opacity: 1.0 !important;
       }
-      
+
       /* Title widget */
       .control-center .widget-title {
         background: #282828 !important;
@@ -227,7 +228,7 @@ in
         border: none;
         opacity: 1.0 !important;
       }
-      
+
       .control-center .widget-title button {
         background: #282828 !important;
         background-color: #282828 !important;
@@ -238,13 +239,13 @@ in
         font-size: 14px;
         font-weight: bold;
       }
-      
+
       .control-center .widget-title button:hover {
         background: #282828 !important;
         background-color: #282828 !important;
         color: #fabd2f;
       }
-      
+
       /* DND widget */
       .control-center .widget-dnd {
         background: #282828 !important;
@@ -255,7 +256,7 @@ in
         border: none;
         margin: 0px;
       }
-      
+
       .control-center .widget-dnd button {
         background: #282828 !important;
         background-color: #282828 !important;
@@ -265,13 +266,13 @@ in
         padding: 8px 12px;
         font-weight: bold;
       }
-      
+
       .control-center .widget-dnd button.enabled {
         background: #282828 !important;
         background-color: #282828 !important;
         color: #fabd2f;
       }
-      
+
       /* Notifications */
       .notification {
         background: #282828 !important;
@@ -283,7 +284,7 @@ in
         box-shadow: none;
         opacity: 1.0 !important;
       }
-      
+
       .notification .notification-content {
         background: #282828 !important;
         background-color: #282828 !important;
@@ -291,7 +292,7 @@ in
         padding: 12px;
         opacity: 1.0 !important;
       }
-      
+
       .notification .notification-default-action {
         background: #282828 !important;
         background-color: #282828 !important;
@@ -299,31 +300,31 @@ in
         border: none;
         border-radius: 0px;
       }
-      
+
       .notification .notification-default-action:hover {
         background: #282828 !important;
         background-color: #282828 !important;
         color: #fabd2f;
       }
-      
+
       .notification .summary {
         color: #ebdbb2;
         font-size: 14px;
         font-weight: bold;
         margin-bottom: 4px;
       }
-      
+
       .notification .body {
         color: #ebdbb2;
         font-size: 12px;
       }
-      
+
       .notification .app-name {
         color: #fabd2f;
         font-size: 11px;
         font-weight: bold;
       }
-      
+
       /* MPRIS widget */
       .control-center .widget-mpris {
         background: #282828 !important;
@@ -333,23 +334,23 @@ in
         margin: 0px;
         padding: 12px;
       }
-      
+
       .control-center .widget-mpris .album-art {
         border-radius: 0px;
         margin-right: 12px;
       }
-      
+
       .control-center .widget-mpris .title {
         color: #ebdbb2;
         font-size: 14px;
         font-weight: bold;
       }
-      
+
       .control-center .widget-mpris .artist {
         color: #ebdbb2;
         font-size: 12px;
       }
-      
+
       .control-center .widget-mpris button {
         background: #282828 !important;
         background-color: #282828 !important;
@@ -360,13 +361,13 @@ in
         height: 32px;
         margin: 2px;
       }
-      
+
       .control-center .widget-mpris button:hover {
         background: #282828 !important;
         background-color: #282828 !important;
         color: #fabd2f;
       }
-      
+
       /* Volume widget */
       .control-center .widget-volume {
         background: #282828 !important;
@@ -376,18 +377,18 @@ in
         margin: 0px;
         padding: 12px;
       }
-      
+
       .control-center .widget-volume .volume-slider {
         background: #282828 !important;
         background-color: #282828 !important;
         border-radius: 0px;
       }
-      
+
       .control-center .widget-volume .volume-slider slider {
         background: #fabd2f;
         border-radius: 0px;
       }
-      
+
       /* Buttons grid */
       .control-center .widget-buttons-grid {
         background: #282828 !important;
@@ -397,7 +398,7 @@ in
         margin: 0px;
         padding: 12px;
       }
-      
+
       .control-center .widget-buttons-grid button {
         background: #282828 !important;
         background-color: #282828 !important;
@@ -410,13 +411,13 @@ in
         font-size: 16px;
         font-weight: bold;
       }
-      
+
       .control-center .widget-buttons-grid button:hover {
         background: #282828 !important;
         background-color: #282828 !important;
         color: #fabd2f;
       }
-      
+
       /* Floating notifications */
       .floating-notifications .notification {
         background: #282828 !important;
@@ -428,7 +429,7 @@ in
         padding: 0;
         opacity: 1.0 !important;
       }
-      
+
       .floating-notifications .notification .notification-content {
         background: #282828 !important;
         background-color: #282828 !important;
@@ -436,7 +437,7 @@ in
         padding: 16px;
         opacity: 1.0 !important;
       }
-      
+
       .floating-notifications .notification .close-button {
         background: #282828 !important;
         background-color: #282828 !important;
@@ -447,13 +448,13 @@ in
         height: 24px;
         margin: 8px;
       }
-      
+
       .floating-notifications .notification .close-button:hover {
         background: #282828 !important;
         background-color: #282828 !important;
         color: #fabd2f;
       }
-      
+
       /* Action buttons in notifications - SMALL TEXT */
       .notification .notification-action {
         background: #282828 !important;
@@ -467,21 +468,21 @@ in
         font-weight: normal;
         cursor: pointer;
       }
-      
+
       .notification .notification-action:hover {
         background: #282828 !important;
         background-color: #282828 !important;
         color: #fabd2f;
         text-decoration: underline;
       }
-      
+
       /* Action text in popup notifications - VERY SMALL */
       .notification .actions {
         background: #282828 !important;
         background-color: #282828 !important;
         padding: 4px;
       }
-      
+
       .notification .actions button {
         background: #282828 !important;
         background-color: #282828 !important;
@@ -494,31 +495,31 @@ in
         font-weight: normal;
         cursor: pointer;
       }
-      
+
       .notification .actions button:hover {
         background: #282828 !important;
         background-color: #282828 !important;
         color: #fabd2f;
         text-decoration: underline;
       }
-      
+
       /* Critical notifications */
       .notification.critical {
         background: #282828 !important;
         background-color: #282828 !important;
       }
-      
+
       .notification.critical .summary {
         color: #fabd2f;
       }
-      
+
       /* Low priority notifications */
       .notification.low {
         opacity: 1.0 !important;
         background: #282828 !important;
         background-color: #282828 !important;
       }
-      
+
       /* Remove all window borders and decorations - FORCE FLAT */
       .notification-window,
       .control-center-window,
@@ -534,7 +535,7 @@ in
         -gtk-outline-radius: 0px !important;
         -gtk-outline-width: 0px !important;
       }
-      
+
       /* Force remove any GTK window decorations */
       window.swaync-control-center,
       window.swaync-notification-window {
@@ -547,7 +548,7 @@ in
         -gtk-outline-radius: 0px !important;
         -gtk-outline-width: 0px !important;
       }
-      
+
       /* Scrollbars - hidden like rofi */
       scrollbar {
         background: #282828 !important;
@@ -555,14 +556,14 @@ in
         border-radius: 0px;
         width: 0px;
       }
-      
+
       scrollbar slider {
         background: #282828 !important;
         background-color: #282828 !important;
         border-radius: 0px;
         min-height: 0px;
       }
-      
+
       scrollbar slider:hover {
         background: #282828 !important;
         background-color: #282828 !important;
@@ -571,12 +572,12 @@ in
 
     # Hyprland integration
     wayland.windowManager.hyprland = mkIf config.wayland.windowManager.hyprland.enable {
-      settings = {        
+      settings = {
         bind = [
           "SUPER, N, exec, swaync-client -t -sw"
           "SUPER SHIFT, N, exec, swaync-client -d -sw"
         ];
-        
+
         layerrule = [
           "animation slide left, swaync-control-center"
           "animation slide top, swaync-notification-window"
@@ -593,7 +594,7 @@ in
         '';
         executable = true;
       };
-      
+
       ".local/bin/swaync-dismiss" = {
         text = ''
           #!/bin/sh
