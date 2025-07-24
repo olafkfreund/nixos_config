@@ -52,12 +52,12 @@
     exec-once = $keybinds = $(hyprkeys -bjl | jq '.Binds | map(.Bind + " -> " + .Dispatcher + ", " + .Command)'[] -r)
     exec-once = $execs = $(hyprkeys -aj | jq '.AutoStart | map("[" + .ExecType + "] " + .Command)'[] -r)
 
-    #Start the usal applications
+    # Start essential applications
     exec-once = foot --title "Terminal" --exec "zsh"
     exec-once = vesktop
     exec-once = spotify
     exec-once = thunderbird
-    exec=once = firefox
-    exec=once = 1password
+    exec-once = firefox
+    exec-once = 1password
   '';
 }

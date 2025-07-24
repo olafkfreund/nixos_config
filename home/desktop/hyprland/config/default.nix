@@ -1,14 +1,15 @@
 {
   # Import all configuration components
   imports = [
-    ./animations.nix
-    ./decoration.nix
-    ./general.nix
-    ./input.nix
+    ./autostart.nix
     ./binds.nix
-    ./misc.nix
+    ./env.nix
+    ./input.nix
+    ./layerrules.nix
     ./monitors.nix
+    ./plugins.nix
     ./rules.nix
-    ./layerrules.nix # Added layerrules import
+    ./settings.nix
+    ./workspace.nix
   ];
 }

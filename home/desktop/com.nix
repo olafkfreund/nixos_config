@@ -23,11 +23,11 @@
   xdg.mimeApps = {
     enable = true;
     defaultApplications = {
-      "text/html" = "google-chrome.desktop";
-      "x-scheme-handler/http" = "google-chrome.desktop";
-      "x-scheme-handler/https" = "google-chrome.desktop";
-      "x-scheme-handler/about" = "google-chrome.desktop";
-      "x-scheme-handler/unknown" = "google-chrome.desktop";
+      "text/html" = "firefox.desktop";
+      "x-scheme-handler/http" = "firefox.desktop";
+      "x-scheme-handler/https" = "firefox.desktop";
+      "x-scheme-handler/about" = "firefox.desktop";
+      "x-scheme-handler/unknown" = "firefox.desktop";
     };
   };
   xdg.desktopEntries = {
@@ -41,6 +41,16 @@
       mimeType = ["x-scheme-handler/obsidian"];
       type = "Application";
     };
+    firefox = {
+      name = "Firefox";
+      exec = "firefox %U";
+      categories = ["Network"];
+      comment = "Web Browser";
+      icon = "firefox";
+      mimeType = ["text/html" "x-scheme-handler/http" "x-scheme-handler/https"];
+      type = "Application";
+    };
+    
     google-chrome = {
       name = "google-chrome";
       exec = "google-chrome-stable %U";

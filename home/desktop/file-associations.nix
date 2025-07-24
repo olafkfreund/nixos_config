@@ -1,4 +1,5 @@
 let
+  firefox.desktop = ["firefox"];
   google-chrome.desktop = ["google-chrome-stable"];
   archiveManager = ["archive"];
   feh.desktop = ["feh"];
@@ -6,26 +7,26 @@ let
 in {
   # XDG MIME types
   associations = {
-    "application/x-extension-htm" = google-chrome.desktop;
-    "application/x-extension-html" = google-chrome.desktop;
-    "application/x-extension-shtml" = google-chrome.desktop;
-    "application/x-extension-xht" = google-chrome.desktop;
-    "application/x-extension-xhtml" = google-chrome.desktop;
-    "application/xhtml+xml" = google-chrome.desktop;
-    "text/html" = google-chrome.desktop;
-    "x-scheme-handler/about" = google-chrome.desktop;
-    "x-scheme-handler/chrome" = google-chrome.desktop;
-    "x-scheme-handler/ftp" = google-chrome.desktop;
-    "x-scheme-handler/http" = google-chrome.desktop;
-    "x-scheme-handler/https" = google-chrome.desktop;
-    "x-scheme-handler/unknown" = google-chrome.desktop;
+    "application/x-extension-htm" = firefox.desktop;
+    "application/x-extension-html" = firefox.desktop;
+    "application/x-extension-shtml" = firefox.desktop;
+    "application/x-extension-xht" = firefox.desktop;
+    "application/x-extension-xhtml" = firefox.desktop;
+    "application/xhtml+xml" = firefox.desktop;
+    "text/html" = firefox.desktop;
+    "x-scheme-handler/about" = firefox.desktop;
+    "x-scheme-handler/chrome" = firefox.desktop;
+    "x-scheme-handler/ftp" = firefox.desktop;
+    "x-scheme-handler/http" = firefox.desktop;
+    "x-scheme-handler/https" = firefox.desktop;
+    "x-scheme-handler/unknown" = firefox.desktop;
     "x-scheme-handler/mailto" = thunderbird.desktop;
 
     "audio/*" = ["mpv"];
     "video/*" = ["mpv"];
     "image/*" = ["feh"];
 
-    "application/json" = google-chrome.desktop;
+    "application/json" = firefox.desktop;
 
     "application/pdf" = ["zathura"];
 
