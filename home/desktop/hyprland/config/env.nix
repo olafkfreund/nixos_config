@@ -10,7 +10,7 @@ with lib; {
     env = [
       # General system settings
       "EDITOR,nvim" # Default text editor
-      "BROWSER,firefox" # Default web browser
+      "BROWSER,google-chrome-stable" # Default web browser
       "TERMINAL,foot" # Default terminal emulator
 
       # Wayland-specific settings
