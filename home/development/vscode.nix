@@ -334,46 +334,6 @@ in {
           # GitHub Copilot chat instructions - using new instructions file format
           "github.copilot.chat.codeGeneration.useInstructionFiles" = true;
 
-          # GitHub Copilot custom instructions configuration
-          "github.copilot.chat.customInstructions" = {
-            "instructions" = ''
-              # Enhanced Development Environment Guidelines for GitHub Copilot
-
-              ## NixOS & Language Development
-              - Use declarative configuration with NixOS modules
-              - Follow Nixpkgs contribution guidelines and unified language support
-              - Maintain pure and reproducible builds with centralized tooling
-              - Use flakes for dependency management with language-specific configurations
-              - Prefer functional programming patterns across all languages
-              - Use 2 spaces for indentation in Nix, follow language conventions otherwise
-              - Use camelCase for variable and function names in Nix
-              - Group related options together with feature flags
-              - Document options with description field and examples
-              - Keep configurations pure and reproducible with shared LSP configs
-              
-              ## Language Support Integration
-              - Use centralized language server configurations from languages.nix
-              - Follow established formatter preferences (alejandra for Nix, black for Python, etc.)
-              - Integrate with unified development tooling and environment variables
-              - Leverage shared aliases and shortcuts for language-specific workflows
-              - Maintain consistency across editors for language features
-              
-              ## Development Workflow
-              - Use systemd service units when appropriate
-              - Follow least privilege principle
-              - Implement proper error handling with language-appropriate patterns
-              - Document breaking changes and migration paths
-              - Handle upgrades gracefully with version management
-              - Integrate with Git workflow and development utilities'';
-            "context" = ''
-              I am working on an enhanced NixOS development environment using Home Manager and Flakes.
-              The configuration includes unified language support, centralized LSP configurations, and
-              integrated development tooling across multiple editors (VS Code, Neovim, Emacs, Zed).
-              Please provide code that follows NixOS best practices, leverages the enhanced development
-              infrastructure, and maintains consistency across the development stack.
-              Consider performance, security, maintainability, and cross-editor compatibility.'';
-          };
-
           # Wayland optimization settings
           "window.titleBarStyle" = "custom";
           "window.customTitleBarVisibility" = "auto";
