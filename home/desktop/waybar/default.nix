@@ -305,23 +305,23 @@
 
         "custom/swaync" = {
           tooltip = false;
-          format = "{icon} ";
+          format = "{icon} {}";
           format-icons = {
-            notification = "<span foreground='red'><sup></sup></span>";
-            none = "";
-            dnd-notification = "<span foreground='red'><sup></sup></span>";
-            dnd-none = "";
-            inhibited-notification = "<span foreground='red'><sup></sup></span>";
-            inhibited-none = "";
-            dnd-inhibited-notification = "<span foreground='red'><sup></sup></span>";
-            dnd-inhibited-none = "";
+            notification = "<span foreground='#fabd2f'>󰂚</span>";
+            none = "<span foreground='#ebdbb2'>󰂚</span>";
+            dnd-notification = "<span foreground='#fb4934'>󰂛</span>";
+            dnd-none = "<span foreground='#928374'>󰂛</span>";
+            inhibited-notification = "<span foreground='#fabd2f'>󰂚</span>";
+            inhibited-none = "<span foreground='#ebdbb2'>󰂚</span>";
+            dnd-inhibited-notification = "<span foreground='#fb4934'>󰂛</span>";
+            dnd-inhibited-none = "<span foreground='#928374'>󰂛</span>";
           };
           return-type = "json";
           exec-if = "which swaync-client";
           exec = "${pkgs.swaynotificationcenter}/bin/swaync-client -swb";
           on-click = "${pkgs.swaynotificationcenter}/bin/swaync-client -t";
           on-click-right = "${pkgs.swaynotificationcenter}/bin/swaync-client -C";
-          on-click-middle = "notify_count";
+          on-click-middle = "${pkgs.swaynotificationcenter}/bin/swaync-client -d -sw";
           escape = true;
         };
 

@@ -43,12 +43,13 @@ in {
 
     # SwayNC configuration
     xdg.configFile."swaync/config.json".text = builtins.toJSON {
+      # Position notifications on left
       positionX = "left";
-      positionY = "bottom";
+      positionY = "top";
 
-      # Control center positioning - full height left side
+      # Control center positioning - full height left side from top to bottom
       control-center-positionX = "left";
-      control-center-positionY = "bottom";
+      control-center-positionY = "top";
       control-center-margin-top = 0;
       control-center-margin-bottom = 0;
       control-center-margin-right = 0;
@@ -56,7 +57,7 @@ in {
 
       # Notification window positioning
       notification-window-positionX = "left";
-      notification-window-positionY = "bottom";
+      notification-window-positionY = "top";
 
       # Timeout settings
       timeout = 10;
@@ -65,23 +66,29 @@ in {
 
       # Control center dimensions - full height on left side
       control-center-width = 500;
-      control-center-height = 0; # 0 means full screen height
+      control-center-height = 0; # 0 means full screen height (top to bottom)
       control-center-layer = "overlay";
       control-center-exclusive-zone = false;
-
+      fit-to-screen = true; # Ensure it fits screen properly
+      
       # Notification window dimensions
       notification-window-width = 400;
 
-      # Behavior
-      fit-to-screen = false;
+      # Behavior - force no transparency
       layer-shell = true;
       transition-time = 0; # No transition animations
       hide-on-clear = true;
       hide-on-action = true;
-
-      # Force solid appearance
+      
+      # Force completely solid appearance with no compositor effects
       cssPriority = "user";
       keyboard-shortcuts = true;
+      
+      # Additional transparency controls
+      notification-2fa-action = true;
+      notification-inline-replies = true;
+      notification-body-image-height = 100;
+      notification-body-image-width = 200;
 
       # Widgets
       widgets = [
@@ -138,7 +145,7 @@ in {
               command = "systemctl poweroff";
             }
             {
-              label = "";
+              label = "󰜉";
               command = "systemctl reboot";
             }
             {
@@ -164,7 +171,7 @@ in {
       };
     };
 
-    # SwayNC CSS styling - completely flat design like rofi
+    # SwayNC CSS styling - completely flat design like rofi with forced opacity
     xdg.configFile."swaync/style.css".text = ''
       * {
         font-family: "JetBrainsMono Nerd Font";
@@ -177,43 +184,67 @@ in {
         outline: none !important;
         box-shadow: none !important;
         opacity: 1.0 !important;
-        background-color: #282828 !important;
         -gtk-icon-effect: none !important;
       }
+      
+      /* Override all GTK transparency and compositor effects */
+      window {
+        opacity: 1.0 !important;
+        background: rgba(40, 40, 40, 1.0) !important;
+        background-color: rgba(40, 40, 40, 1.0) !important;
+        -gtk-window-decorations: none !important;
+      }
+      
+      /* Force complete opacity on all elements */
+      *, *:before, *:after {
+        background-color: rgba(40, 40, 40, 1.0) !important;
+        opacity: 1.0 !important;
+      }
+      
+      /* Remove any compositor alpha blending */
+      window.background {
+        background: rgba(40, 40, 40, 1.0) !important;
+        background-color: rgba(40, 40, 40, 1.0) !important;
+      }
 
-      /* Main control center - completely flat like rofi */
+      /* Main control center - completely flat covering full left side */
       .control-center {
-        background: #282828 !important;
-        background-color: #282828 !important;
+        background: rgba(40, 40, 40, 1.0) !important;
+        background-color: rgba(40, 40, 40, 1.0) !important;
         border: none !important;
         border-radius: 0px !important;
         box-shadow: none !important;
         outline: none !important;
         margin: 0px !important;
         padding: 0;
-        max-width: 500px;
-        width: 500px;
+        width: 500px !important;
         height: 100vh !important;
         min-height: 100vh !important;
         max-height: 100vh !important;
         opacity: 1.0 !important;
       }
 
-      /* Remove any window decorations */
+      /* Control center window - force full height positioning */
       .control-center-window {
-        background: #282828 !important;
-        background-color: #282828 !important;
+        background: rgba(40, 40, 40, 1.0) !important;
+        background-color: rgba(40, 40, 40, 1.0) !important;
         border: none !important;
         border-radius: 0px !important;
         box-shadow: none !important;
         outline: none !important;
-        max-width: 500px;
-        width: 500px;
+        width: 500px !important;
         height: 100vh !important;
         min-height: 100vh !important;
         max-height: 100vh !important;
         margin: 0px !important;
+        padding: 0px !important;
         opacity: 1.0 !important;
+        
+        /* Force positioning from top to bottom on left */
+        position: fixed !important;
+        top: 0px !important;
+        left: 0px !important;
+        bottom: 0px !important;
       }
 
       /* Title widget */
@@ -536,23 +567,34 @@ in {
         -gtk-outline-width: 0px !important;
       }
 
-      /* Force remove any GTK window decorations */
+      /* Force remove any GTK window decorations and transparency */
       window.swaync-control-center,
       window.swaync-notification-window {
-        background: #282828 !important;
-        background-color: #282828 !important;
+        background: rgba(40, 40, 40, 1.0) !important;
+        background-color: rgba(40, 40, 40, 1.0) !important;
         border: none !important;
         border-radius: 0px !important;
         outline: none !important;
         box-shadow: none !important;
         -gtk-outline-radius: 0px !important;
         -gtk-outline-width: 0px !important;
+        opacity: 1.0 !important;
+      }
+      
+      /* Force solid background on control center and notifications */
+      .swaync-control-center,
+      .swaync-notification-window,
+      .control-center,
+      .control-center-window {
+        background: rgba(40, 40, 40, 1.0) !important;
+        background-color: rgba(40, 40, 40, 1.0) !important;
+        opacity: 1.0 !important;
       }
 
       /* Scrollbars - hidden like rofi */
       scrollbar {
-        background: #282828 !important;
-        background-color: #282828 !important;
+        background: rgba(40, 40, 40, 1.0) !important;
+        background-color: rgba(40, 40, 40, 1.0) !important;
         border-radius: 0px;
         width: 0px;
       }
