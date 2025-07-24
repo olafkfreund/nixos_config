@@ -158,7 +158,7 @@ in {
 
           # JSON settings
           "[json]" = {
-            "editor.defaultFormatter" = "ms-vscode.vscode-json";
+            "editor.defaultFormatter" = "vscode.json-language-features";
             "editor.tabSize" = 2;
           };
 
