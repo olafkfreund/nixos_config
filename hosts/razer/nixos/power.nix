@@ -61,8 +61,8 @@
   # Set CPU governor on boot
   powerManagement = {
     enable = true;
-    cpuFreqGovernor = "ondemand"; # Changed from "powersave" to prevent input device issues
-    powertop.enable = false; # Disabled - was causing USB device suspensions
+    cpuFreqGovernor = lib.mkForce "ondemand"; # Changed from "powersave" to prevent input device issues
+    powertop.enable = lib.mkForce false; # Disabled - was causing USB device suspensions
   };
   
   # Disable USB autosuspend to prevent keyboard/mouse from turning off
