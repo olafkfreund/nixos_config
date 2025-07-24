@@ -260,7 +260,7 @@
         "temperature" = {
           format = "<span foreground='#fe8019'> {icon}</span> {temperatureC}°C ";
           format-icons = ["" "" "" "" "" "󰸁"];
-          hwmon-path = "/sys/devices/pci0000:00/0000:00:18.3/hwmon/hwmon2/temp1_input";
+          # hwmon-path removed for auto-detection - works on both P620 (AMD) and Razer (Intel)
           tooltip-format = "{temperatureC}°C ";
           interval = 10;
         };
