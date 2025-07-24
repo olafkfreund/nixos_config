@@ -164,7 +164,7 @@ in {
 
           # Python settings
           "[python]" = {
-            "editor.defaultFormatter" = "ms-python.black-formatter";
+            "editor.defaultFormatter" = null;  # ms-python.black-formatter not available
             "editor.formatOnSave" = true;
             "editor.codeActionsOnSave" = {
               "source.organizeImports" = "explicit";
