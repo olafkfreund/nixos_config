@@ -12,18 +12,6 @@ with lib; let
   # Note: Uncomment and add proper sha256 hashes when needed
   customExtensions = [
     # Example: Uncomment and get hash using scripts/get-extension-hashes.sh
-    # (pkgs.vscode-utils.buildVscodeMarketplaceExtension {
-    #   mktplcRef = {
-    #     name = "geminicodeassist";
-    #     publisher = "google";
-    #     version = "2.36.0";
-    #     sha256 = "sha256-REPLACE_WITH_ACTUAL_HASH";
-    #   };
-    #   meta = {
-    #     description = "Google Gemini Code Assist for VS Code";
-    #     license = lib.licenses.unfree;
-    #   };
-    # })
   ];
 in {
   options.editor.vscode = {
@@ -471,16 +459,6 @@ in {
           "workbench.editor.enablePreviewFromQuickOpen" = false;
           "genieai.enableConversationHistory" = true;
           "alejandra.program" = "alejandra";
-          "geminicodeassist.codeGenerationPaneViewEnabled" = true;
-          "geminicodeassist.project" = "gen-lang-client-0059434248";
-          "geminicodeassist.enableChat" = true;
-          "geminicodeassist.language" = "en";
-          "geminicodeassist.region" = "us-central1";
-          "geminicodeassist.enableCodeCompletions" = true;
-          "geminicodeassist.enableExplainCode" = true;
-          "geminicodeassist.chatWindow.isVisible" = true;
-          "geminicodeassist.chatWindow.position" = "right";
-          "geminicodeassist.modelName" = "gemini-2.5-pro";
           "workbench.externalBrowser" = "google-chrome-stable";
           # "codeium.enableConfig" = {
           #   "*" = true;
