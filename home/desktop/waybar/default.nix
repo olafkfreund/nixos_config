@@ -1,4 +1,51 @@
-{pkgs, ...}: {
+{
+  config,
+  lib,
+  pkgs,
+  host ? "default",
+  ...
+}:
+with lib;
+let
+  # Import host-specific variables if available
+  hostVars = 
+    if builtins.pathExists ../../../hosts/${host}/variables.nix
+    then import ../../../hosts/${host}/variables.nix
+    else {};
+  
+  # Host-specific temperature sensor configuration
+  temperatureConfig = {
+    p620 = {
+      # AMD Ryzen system - use k10temp or amdgpu
+      hwmon-path = null; # Let auto-detection work for AMD
+      tooltip = "AMD CPU Temperature: {temperatureC}°C";
+    };
+    p510 = {
+      # Intel Xeon system - use coretemp
+      hwmon-path = "/sys/class/hwmon/hwmon6/temp1_input";
+      tooltip = "Intel Xeon Package: {temperatureC}°C";
+    };
+    razer = {
+      # Intel mobile system - use coretemp  
+      hwmon-path = "/sys/class/hwmon/hwmon6/temp1_input";
+      tooltip = "Intel CPU Package: {temperatureC}°C";
+    };
+    dex5550 = {
+      # Intel small form factor - use coretemp
+      hwmon-path = null; # Let auto-detection work
+      tooltip = "Intel CPU Temperature: {temperatureC}°C";
+    };
+    default = {
+      # Fallback configuration
+      hwmon-path = null;
+      tooltip = "CPU Temperature: {temperatureC}°C";
+    };
+  };
+  
+  # Get configuration for current host
+  currentTempConfig = temperatureConfig.${host} or temperatureConfig.default;
+
+in {
   programs.waybar = {
     enable = true;
     package = pkgs.waybar;
@@ -269,9 +316,11 @@
         "temperature" = {
           format = "<span foreground='#fe8019'> {icon}</span> {temperatureC}°C ";
           format-icons = ["" "" "" "" "" "󰸁"];
-          # hwmon-path removed for auto-detection - works on both P620 (AMD) and Razer (Intel)
-          tooltip-format = "{temperatureC}°C ";
-          interval = 10;
+          # Host-aware temperature sensor configuration
+          tooltip-format = currentTempConfig.tooltip;
+          interval = 5;
+        } // optionalAttrs (currentTempConfig.hwmon-path != null) {
+          hwmon-path = currentTempConfig.hwmon-path;
         };
 
         "power-profiles-daemon" = {

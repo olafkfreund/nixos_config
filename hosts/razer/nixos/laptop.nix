@@ -8,13 +8,11 @@
   services.libinput = {
     enable = true; # Previously services.xserver.libinput.enable
     touchpad = {
-      # Previously services.xserver.libinput.touchpad
-      accelProfile = "adaptive";
-      accelSpeed = "0.5";
-      naturalScrolling = true;
       tapping = true;
-      tappingDragLock = false;
-      disableWhileTyping = true;
+      naturalScrolling = true;
+      scrollMethod = "twofinger";
+      disableWhileTyping = false;
+      clickMethod = "clickfinger";
     };
   };
 
@@ -52,6 +50,13 @@
   hardware.openrazer = {
     enable = true;
     users = ["olafkfreund"]; # Adjust to your username
+    syncEffectsEnabled = true;
+    devicesOffOnScreensaver = true;
+    batteryNotifier = {
+      enable = true;
+      frequency = 600;
+      percentage = 33;
+    };
   };
 
   # Add Razer utilities

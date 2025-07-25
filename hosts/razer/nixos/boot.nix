@@ -20,6 +20,8 @@
     "i915.enable_guc=2" # Enable graphics microcontroller
     "nvme.noacpi=1" # Try if having NVMe issues
     "pcie_aspm=default" # PCIe Active State Power Management
+    "button.lid_init_state=open" # Lid open state on boot
+    "mitigations=off" # Disable all CPU mitigations for performance (use with caution)
   ];
 
   # For improved boot time
