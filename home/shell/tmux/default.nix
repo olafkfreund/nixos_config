@@ -106,8 +106,8 @@ in {
             # Theme configuration for consistency with Starship
             set -g @gruvbox_flavour 'dark'
             set -g @gruvbox_window_left_separator ""
-            set -g @gruvbox_window_right_separator ""
-            set -g @gruvbox_window_middle_separator " █"
+            set -g @gruvbox_window_right_separator " "
+            set -g @gruvbox_window_middle_separator "│"
             set -g @gruvbox_window_number_position "right"
             
             # Window display settings
@@ -118,7 +118,7 @@ in {
             
             # Status line modules for development workflow
             set -g @gruvbox_status_modules_right "directory session date_time"
-            set -g @gruvbox_status_left_separator " "
+            set -g @gruvbox_status_left_separator ""
             set -g @gruvbox_status_right_separator ""
             set -g @gruvbox_status_right_separator_inverse "no"
             set -g @gruvbox_status_fill "icon"
@@ -141,6 +141,11 @@ in {
         set-option -g terminal-overrides ',xterm-256color:RGB,alacritty:RGB,kitty:RGB,foot:RGB,wezterm:RGB'
         set-option -g status-position top
         set-option -ga terminal-overrides ',*:Tc' # True color support
+        
+        # Fix powerline alignment and character rendering
+        set-option -ga terminal-overrides ',*:sitm=\E[3m'  # Fix italic support
+        set-option -ga terminal-overrides ',*:smcup@:rmcup@' # Fix screen buffer
+        set-option -g status-justify left # Ensure left alignment
         
         # Performance optimizations
         set -s escape-time 0              # Remove delay for ESC key
@@ -167,6 +172,11 @@ in {
         set -g history-limit 50000        # Increase history limit
         set -g display-time 4000          # Display messages for 4 seconds
         set -g status-interval 5          # Update status every 5 seconds
+        
+        # Status line alignment fixes
+        set -g status-left-length 40      # Ensure adequate left space
+        set -g status-right-length 120    # Ensure adequate right space
+        set -g window-status-separator ""  # Remove extra separators
         
         # ========== Enhanced Keybindings ==========
         # Reload configuration
@@ -260,6 +270,12 @@ in {
         
         # ========== Apply Theme ==========
         run-shell "${tmux-gruvbox}/share/tmux-plugins/tmux-gruvbox/gruvbox.tmux"
+        
+        # ========== Override Theme Settings for Alignment ==========
+        # Apply our alignment fixes after theme loads
+        set -g status-left-length 40      # Override theme left length
+        set -g status-right-length 120    # Override theme right length  
+        set -g window-status-separator ""  # Override theme separator
       '';
     };
   };
