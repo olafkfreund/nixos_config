@@ -105,8 +105,8 @@ in {
             
             # Theme configuration for consistency with Starship
             set -g @gruvbox_flavour 'dark'
-            set -g @gruvbox_window_left_separator ""
-            set -g @gruvbox_window_right_separator " "
+            set -g @gruvbox_window_left_separator "│"
+            set -g @gruvbox_window_right_separator "│"
             set -g @gruvbox_window_middle_separator "│"
             set -g @gruvbox_window_number_position "right"
             
@@ -118,8 +118,8 @@ in {
             
             # Status line modules for development workflow
             set -g @gruvbox_status_modules_right "directory session date_time"
-            set -g @gruvbox_status_left_separator ""
-            set -g @gruvbox_status_right_separator ""
+            set -g @gruvbox_status_left_separator "│"
+            set -g @gruvbox_status_right_separator "│"
             set -g @gruvbox_status_right_separator_inverse "no"
             set -g @gruvbox_status_fill "icon"
             set -g @gruvbox_status_connect_separator "no"
@@ -275,7 +275,20 @@ in {
         # Apply our alignment fixes after theme loads
         set -g status-left-length 40      # Override theme left length
         set -g status-right-length 120    # Override theme right length  
-        set -g window-status-separator ""  # Override theme separator
+        set -g window-status-separator " " # Clean separator between windows
+        
+        # ========== Remove Round Corners and Fix Powerline ==========
+        # Force flat separators and prevent powerline curve characters
+        set -g status-left "#{?client_prefix,#[bg=#fabd2f]#[fg=#1d2021],#[bg=#458588]#[fg=#1d2021]} #S #[fg=default,bg=default] "
+        set -g status-right " #[fg=#a89984]#{s|$HOME|~|:pane_current_path} │ %H:%M │ %d-%b "
+        
+        # Override window status format to ensure clean appearance
+        set -g window-status-format " #I #W "
+        set -g window-status-current-format " #I #W "
+        
+        # Ensure no powerline characters are used
+        set -g window-status-separator " │ "
+        set -g status-style "bg=#1d2021,fg=#a89984"
       '';
     };
   };
