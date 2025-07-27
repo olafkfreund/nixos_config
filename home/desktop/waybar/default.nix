@@ -16,8 +16,8 @@ let
   # Host-specific temperature sensor configuration
   temperatureConfig = {
     p620 = {
-      # AMD Ryzen system - use k10temp or amdgpu
-      hwmon-path = null; # Let auto-detection work for AMD
+      # AMD Ryzen system - use k10temp
+      hwmon-path = "/sys/class/hwmon/hwmon2/temp1_input";
       tooltip = "AMD CPU Temperature: {temperatureC}°C";
     };
     p510 = {

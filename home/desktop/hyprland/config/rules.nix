@@ -175,6 +175,13 @@ in {
         "size ${terminalSize.width} ${terminalSize.height}, class:(web-search)"
         "animation slide down, class:^(web-search)$"
 
+        # Temperature dashboard
+        "float, class:(temp-dashboard)"
+        "size 400 250, class:(temp-dashboard)"
+        "center, class:(temp-dashboard)"
+        "pin, class:(temp-dashboard)"
+        "animation slide down, class:(temp-dashboard)"
+
         # =============================================================================
         # SYSTEM UTILITY RULES
         # =============================================================================

@@ -100,26 +100,18 @@ cpu_color=$(get_temp_color "$cpu_temp")
 gpu_color=$(get_temp_color "$gpu_temp")
 nvme_color=$(get_temp_color "$nvme_temp")
 
-# Create YAD dialog
-yad \
-    --title="System Temperature Dashboard" \
-    --width=400 \
-    --height=300 \
-    --center \
-    --on-top \
-    --no-buttons \
-    --timeout=30 \
-    --timeout-indicator=bottom \
-    --text-align=center \
-    --fontname="JetBrainsMono Nerd Font 12" \
-    --fore="#ebdbb2" \
-    --back="#282828" \
-    --text="<big><b>🌡️ System Temperatures</b></big>
-
-<span font='JetBrainsMono Nerd Font 16' foreground='$cpu_color'><b>🔥 CPU: $cpu_display</b></span>
-
-<span font='JetBrainsMono Nerd Font 16' foreground='$gpu_color'><b>🎮 GPU: $gpu_display</b></span>
-
-<span font='JetBrainsMono Nerd Font 16' foreground='$nvme_color'><b>💾 NVMe: $nvme_display</b></span>
-
-<small><i>Auto-closes in 30 seconds</i></small>"
+# Create terminal dashboard in a small floating window
+foot --title="Temperature Dashboard" \
+     --app-id=temp-dashboard \
+     -e bash -c "
+clear
+echo -e '\033[1;33m\033[4mSYSTEM TEMPERATURE DASHBOARD\033[0m'
+echo -e '\033[2m══════════════════════════════════════\033[0m'
+echo
+echo -e '\033[1;31mCPU:\033[0m      \033[1m$cpu_display\033[0m'
+echo -e '\033[1;32mGPU:\033[0m      \033[1m$gpu_display\033[0m' 
+echo -e '\033[1;34mNVMe:\033[0m     \033[1m$nvme_display\033[0m'
+echo
+echo -e '\033[2mPress any key to close...\033[0m'
+read -n 1 -s
+"
