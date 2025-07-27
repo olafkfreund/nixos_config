@@ -116,21 +116,21 @@
     theme = "gruvbox";
   };
 
-  # P620 Chrome fix - Focus on GL/graphics issues based on error analysis  
+  # P620 Chrome fix - Working configuration now applied to Google Chrome
   programs.chromium = {
-    package = lib.mkForce pkgs.chromium;
+    package = lib.mkForce pkgs.google-chrome;  # Switch back to Google Chrome
     commandLineArgs = lib.mkForce [
       # Wayland support
       "--enable-features=UseOzonePlatform"
       "--ozone-platform=wayland"
       "--disable-features=VizDisplayCompositor"
       
-      # Graphics/GL fixes (the key missing piece)
+      # Graphics/GL fixes (the key that made it work)
       "--use-gl=desktop"
       "--enable-gpu-rasterization"
       "--ignore-gpu-blocklist"
       
-      # Remove problematic single-process mode that causes V8 proxy errors
+      # Stable process model
       "--process-per-site"
       
       # Memory management
