@@ -116,9 +116,21 @@
     theme = "gruvbox";
   };
 
+  # P620 Chrome configuration - Force X11 mode to avoid Wayland issues
   programs.chromium.commandLineArgs = lib.mkForce [
     "--enable-features=UseOzonePlatform"
     "--ozone-platform=wayland"
-    "--disable-gpu"
+
+    # Disable problematic features that may cause page loading issues
+    "--disable-features=VizDisplayCompositor,SiteIsolation"
+    "--disable-site-isolation-trials"
+
+    # Process model changes to mimic incognito behavior
+    "--process-per-site"
+
+    # Disable potentially problematic background features
+    "--disable-background-timer-throttling"
+    "--disable-renderer-backgrounding"
+    "--disable-backgrounding-occluded-windows"
   ];
 }
