@@ -12,6 +12,7 @@
     ./pkgs/default.nix
     ./overlays/default.nix
     ./system-scripts/default.nix
+    ./scripts/temp-dashboard.nix
     
     # System utilities - always useful
     ./system-utils/utils.nix
