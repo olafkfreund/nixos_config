@@ -116,21 +116,37 @@
     theme = "gruvbox";
   };
 
-  # P620 Chrome configuration - Force X11 mode to avoid Wayland issues
-  programs.chromium.commandLineArgs = lib.mkForce [
-    "--enable-features=UseOzonePlatform"
-    "--ozone-platform=wayland"
-
-    # Disable problematic features that may cause page loading issues
-    "--disable-features=VizDisplayCompositor,SiteIsolation"
-    "--disable-site-isolation-trials"
-
-    # Process model changes to mimic incognito behavior
-    "--process-per-site"
-
-    # Disable potentially problematic background features
-    "--disable-background-timer-throttling"
-    "--disable-renderer-backgrounding"
-    "--disable-backgrounding-occluded-windows"
-  ];
+  # P620 Chrome fix - Focus on GL/graphics issues based on error analysis  
+  programs.chromium = {
+    package = lib.mkForce pkgs.chromium;
+    commandLineArgs = lib.mkForce [
+      # Wayland support
+      "--enable-features=UseOzonePlatform"
+      "--ozone-platform=wayland"
+      "--disable-features=VizDisplayCompositor"
+      
+      # Graphics/GL fixes (the key missing piece)
+      "--use-gl=desktop"
+      "--enable-gpu-rasterization"
+      "--ignore-gpu-blocklist"
+      
+      # Remove problematic single-process mode that causes V8 proxy errors
+      "--process-per-site"
+      
+      # Memory management
+      "--max_old_space_size=4096"
+      "--memory-pressure-off"
+    ];
+  };
+  
+  # Keep Firefox as backup
+  programs.firefox = {
+    enable = true;
+    profiles.default = {
+      settings = {
+        "widget.use-xdg-desktop-portal.file-picker" = 1;
+        "media.ffmpeg.vaapi.enabled" = true;
+      };
+    };
+  };
 }
