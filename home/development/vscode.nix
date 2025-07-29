@@ -40,7 +40,7 @@ in {
     programs.vscode = {
       enable = true;
       package = pkgs.vscode-fhs;
-      
+
       # Enable mutable extensions and settings
       mutableExtensionsDir = true;
 
@@ -52,7 +52,7 @@ in {
         mkhl.direnv
         jnoortheen.nix-ide
         arrterian.nix-env-selector
-        
+
         # Essential development tools
         github.copilot
         github.copilot-chat
@@ -63,6 +63,8 @@ in {
         golang.go
       ];
 
+      # Minimal essential settings that should remain consistent
+      userSettings = {
         # Essential Nix development settings (critical for our workflow)
         "[nix]" = {
           "editor.defaultFormatter" = "kamadorueda.alejandra";
@@ -177,7 +179,7 @@ in {
         "settingsSync.enabled" = false; # Use mutable settings instead
         "alejandra.program" = "alejandra";
         "workbench.externalBrowser" = "google-chrome-stable";
-        
+
         # Performance optimizations for NixOS
         "files.watcherExclude" = {
           "**/node_modules/**" = true;
@@ -197,10 +199,10 @@ in {
     home.activation.vscodeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
       SETTINGS_DIR="$HOME/.config/Code/User"
       SETTINGS_FILE="$SETTINGS_DIR/settings.json"
-      
+
       # Create VS Code config directory if it doesn't exist
       mkdir -p "$SETTINGS_DIR"
-      
+
       # Only create settings file if it doesn't exist - VS Code will manage it after that
       if [ ! -f "$SETTINGS_FILE" ]; then
         echo "Creating initial VS Code settings file (VS Code will manage it after this)..."
