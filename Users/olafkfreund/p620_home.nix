@@ -116,26 +116,37 @@
     theme = "gruvbox";
   };
 
-  # P620 Chrome fix - Working configuration now applied to Google Chrome
+  # P620 Chrome configuration - Modern flags for AMD GPU systems
   programs.chromium = {
-    package = lib.mkForce pkgs.google-chrome;  # Switch back to Google Chrome
+    package = lib.mkForce pkgs.google-chrome;
     commandLineArgs = lib.mkForce [
-      # Wayland support
-      "--enable-features=UseOzonePlatform"
+      # Modern Wayland support
+      "--enable-features=UseOzonePlatform,WaylandWindowDecorations"
       "--ozone-platform=wayland"
       "--disable-features=VizDisplayCompositor"
       
-      # Graphics/GL fixes (the key that made it work)
+      # Modern AMD GPU acceleration
       "--use-gl=desktop"
       "--enable-gpu-rasterization"
+      "--enable-zero-copy"
       "--ignore-gpu-blocklist"
+      "--disable-gpu-driver-bug-workarounds"
       
-      # Stable process model
+      # Hardware acceleration for AMD
+      "--enable-accelerated-2d-canvas"
+      "--enable-accelerated-video-decode"
+      "--use-vulkan"
+      
+      # Network and stability improvements
+      "--enable-quic"
+      "--enable-tcp-fast-open"
+      "--aggressive-cache-discard"
+      
+      # Process and memory optimization
       "--process-per-site"
-      
-      # Memory management
       "--max_old_space_size=4096"
       "--memory-pressure-off"
+      "--no-zygote"
     ];
   };
   

@@ -134,7 +134,7 @@ nixos-rebuild switch --flake .#new-hostname
 // hosts/new-hostname/configuration.nix
 {
   # AMD GPU configuration
-  hardware.opengl = {
+  hardware.graphics = {
     enable = true;
     driSupport = true;
     driSupport32Bit = true;
@@ -174,7 +174,7 @@ nixos-rebuild switch --flake .#new-hostname
   };
 
   # Intel graphics
-  hardware.opengl.extraPackages = with pkgs; [
+  hardware.graphics.extraPackages = with pkgs; [
     intel-media-driver
     vaapiIntel
     vaapiVdpau
@@ -187,7 +187,7 @@ nixos-rebuild switch --flake .#new-hostname
 ```nix
 {
   # Intel integrated graphics
-  hardware.opengl = {
+  hardware.graphics = {
     enable = true;
     extraPackages = with pkgs; [
       intel-media-driver

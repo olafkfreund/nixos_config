@@ -39,7 +39,7 @@ in {
 
     programs.vscode = {
       enable = true;
-      package = pkgs.vscode;
+      package = pkgs.vscode-fhs;
 
       # Use the new profiles structure
       profiles.default = {

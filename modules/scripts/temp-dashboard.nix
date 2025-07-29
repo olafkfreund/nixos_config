@@ -170,7 +170,7 @@ in {
       yad
       bc
       smartmontools
-    ] ++ lib.optionals (config.hardware.opengl.extraPackages or [] != []) [
+    ] ++ lib.optionals (config.hardware.graphics.extraPackages or [] != []) [
       rocmPackages.rocm-smi
     ];
   };

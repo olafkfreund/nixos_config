@@ -33,6 +33,7 @@
     pkgs.shell-gpt
     pkgs.aichat
     pkgs.gorilla-cli
+    pkgs.newelle
     # Temporarily disabled due to textual package test failures
     # pkgs.oterm
     pkgs.gpt-cli
