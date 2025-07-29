@@ -40,410 +40,177 @@ in {
     programs.vscode = {
       enable = true;
       package = pkgs.vscode-fhs;
+      
+      # Enable mutable extensions and settings
+      mutableExtensionsDir = true;
 
-      # Use the new profiles structure
-      profiles.default = {
-        extensions = with pkgs;
-          [
-            vscode-extensions.bbenoist.nix
-            vscode-extensions.kamadorueda.alejandra
-            vscode-extensions.mkhl.direnv
-            vscode-extensions.tailscale.vscode-tailscale
-            vscode-extensions.jnoortheen.nix-ide
-            vscode-extensions.golang.go
-            vscode-extensions.skellock.just
-            vscode-extensions.redhat.vscode-yaml
-            vscode-extensions.redhat.vscode-xml
-            # vscode-extensions.redhat.ansible
-            vscode-extensions.pkief.material-product-icons
-            vscode-extensions.pkief.material-icon-theme
-            vscode-extensions.ms-vscode-remote.remote-containers
-            vscode-extensions.ms-vscode-remote.remote-ssh
-            vscode-extensions.ms-kubernetes-tools.vscode-kubernetes-tools
-            # vscode-extensions.ms-azuretools.vscode-docker
-            vscode-extensions.mads-hartmann.bash-ide-vscode
-            vscode-extensions.jdinhlife.gruvbox
-            vscode-extensions.hediet.vscode-drawio
-            vscode-extensions.hashicorp.terraform
-            vscode-extensions.github.vscode-pull-request-github
-            vscode-extensions.github.vscode-github-actions
-            vscode-extensions.github.copilot-chat
-            vscode-extensions.github.copilot
-            vscode-extensions.genieai.chatgpt-vscode
-            vscode-extensions.formulahendry.auto-close-tag
-            vscode-extensions.file-icons.file-icons
-            vscode-extensions.donjayamanne.githistory
-            vscode-extensions.bierner.markdown-preview-github-styles
-            vscode-extensions.bierner.markdown-emoji
-            vscode-extensions.arrterian.nix-env-selector
-            vscode-extensions.sainnhe.gruvbox-material
-            vscode-extensions.davidanson.vscode-markdownlint
-            vscode-extensions.eamodio.gitlens
+      # Essential extensions that should always be available
+      extensions = with pkgs.vscode-extensions; [
+        # Core Nix development (critical for our workflow)
+        bbenoist.nix
+        kamadorueda.alejandra
+        mkhl.direnv
+        jnoortheen.nix-ide
+        arrterian.nix-env-selector
+        
+        # Essential development tools
+        github.copilot
+        github.copilot-chat
+        eamodio.gitlens
+        rust-lang.rust-analyzer
+        ms-python.python
+        ms-python.vscode-pylance
+        golang.go
+      ];
 
-            # Python support
-            vscode-extensions.ms-python.python
-            vscode-extensions.ms-python.debugpy
-            vscode-extensions.ms-python.vscode-pylance
-
-            # Additional useful extensions
-            vscode-extensions.esbenp.prettier-vscode # Prettier formatter
-            vscode-extensions.bradlc.vscode-tailwindcss # Tailwind CSS
-            vscode-extensions.rust-lang.rust-analyzer # Rust support
-            vscode-extensions.ms-vscode.cpptools # C++ support
-            vscode-extensions.ms-dotnettools.csharp # C# support
-            vscode-extensions.ms-vscode.live-server # Live server
-            vscode-extensions.usernamehw.errorlens # Error lens for better error visibility
-            vscode-extensions.streetsidesoftware.code-spell-checker # Spell checker
-            # vscode-extensions.ms-vscode.vscode-json # JSON support - not available
-            vscode-extensions.yzhang.markdown-all-in-one # Better markdown support
-            vscode-extensions.christian-kohler.path-intellisense # Path autocomplete
-            vscode-extensions.oderwat.indent-rainbow # Indent visualization
-            vscode-extensions.gruntfuggly.todo-tree # TODO highlighting
-            vscode-extensions.vscode-icons-team.vscode-icons # Better icons
-            vscode-extensions.ms-vscode.hexeditor # Hex editor
-            # vscode-extensions.ms-ceintl.vscode-language-pack-en # English language pack - not available
-
-            # Docker support (if available in nixpkgs)
-            # vscode-extensions.ms-azuretools.vscode-docker
-
-            # Add any missing extensions here by finding their nixpkgs equivalent
-            # Or use vscode-utils.buildVscodeMarketplaceExtension for unavailable ones
-          ]
-          ++ customExtensions;
-
-        userSettings = {
-          # Nix-specific settings
-          "[nix]" = {
-            "editor.defaultFormatter" = "kamadorueda.alejandra";
-            "editor.formatOnPaste" = true;
-            "editor.formatOnSave" = true;
-            "editor.formatOnType" = true;
-          };
-
-          # JavaScript settings
-          "[javascript]" = {
-            "editor.defaultFormatter" = "vscode.typescript-language-features";
-          };
-
-          # YAML settings
-          "[yaml]" = {
-            "editor.defaultFormatter" = "redhat.vscode-yaml";
-            "editor.insertSpaces" = true;
-            "editor.tabSize" = 2;
-            "editor.autoIndent" = "advanced";
-          };
-
-          # Markdown settings
-          "[markdown]" = {
-            "editor.defaultFormatter" = "yzhang.markdown-all-in-one";
-            "editor.wordWrap" = "on";
-            "editor.quickSuggestions" = {
-              "comments" = "off";
-              "strings" = "off";
-              "other" = "off";
-            };
-          };
-
-          # JSON settings
-          "[json]" = {
-            "editor.defaultFormatter" = "vscode.json-language-features";
-            "editor.tabSize" = 2;
-          };
-
-          # Python settings
-          "[python]" = {
-            "editor.defaultFormatter" = null;  # ms-python.black-formatter not available
-            "editor.formatOnSave" = true;
-            "editor.codeActionsOnSave" = {
-              "source.organizeImports" = "explicit";
-            };
-          };
-
-          # Go settings
-          "[go]" = {
-            "editor.formatOnSave" = true;
-            "editor.codeActionsOnSave" = {
-              "source.organizeImports" = "explicit";
-            };
-          };
-
-          # Rust settings
-          "[rust]" = {
-            "editor.defaultFormatter" = "rust-lang.rust-analyzer";
-            "editor.formatOnSave" = true;
-          };
-
-          # General settings
-          "window.menuBarVisibility" = "toggle";
-          "editor.minimap.enabled" = false;
-          "editor.bracketPairColorization.enabled" = true;
-          "editor.guides.bracketPairs" = "active";
-          "editor.linkedEditing" = true;
-          "editor.cursorBlinking" = "smooth";
-          "editor.cursorSmoothCaretAnimation" = "on";
-          "editor.fontLigatures" = true;
-          "editor.fontSize" = mkDefault 14;
-          "editor.fontFamily" = mkDefault "'JetBrainsMono Nerd Font', 'Droid Sans Mono', 'monospace'";
-          "editor.lineHeight" = 1.6;
-          "editor.letterSpacing" = 0.5;
-          "editor.tabSize" = 2;
-          "editor.insertSpaces" = true;
-          "editor.trimAutoWhitespace" = true;
-          "editor.detectIndentation" = true;
-          "editor.wordWrap" = "bounded";
-          "editor.wordWrapColumn" = 100;
-          "editor.rulers" = [80 100];
-          "editor.formatOnSave" = true;
+        # Essential Nix development settings (critical for our workflow)
+        "[nix]" = {
+          "editor.defaultFormatter" = "kamadorueda.alejandra";
           "editor.formatOnPaste" = true;
-          "editor.codeActionsOnSave" = {
-            "source.organizeImports" = "explicit";
-            "source.fixAll" = "explicit";
-          };
-          "nix.serverPath" = "nixd";
-          "nix.enableLanguageServer" = true;
-          "nix.formatterWidth" = 100;
-          "nix.editor.tabSize" = 2;
-          "nix.diagnostics" = {
-            "ignored" = [];
-            "excluded" = [
-              ".direnv/**"
-              "result/**"
-              ".git/**"
-              "node_modules/**"
-            ];
-          };
-          "nix.env" = {
-            "NIX_PATH" = "nixpkgs=channel:nixos-unstable";
-          };
+          "editor.formatOnSave" = true;
+          "editor.formatOnType" = true;
+        };
 
-          "nix.serverSettings" = {
-            "nixd" = {
-              "formatting" = {
-                "command" = ["alejandra"];
-                "timeout_ms" = 5000;
-              };
-              "options" = {
-                "enable" = true;
-                "target" = ["all"];
-                "offline" = true;
-                "nixos" = {
-                  "expr" = "(builtins.getFlake (\"git+file://\" + toString /home/${config.home.username}/.config/nixos)).nixosConfigurations.p620.options";
-                };
-                "home_manager" = {
-                  "expr" = "(builtins.getFlake (\"git+file://\" + toString /home/${config.home.username}/.config/nixos)).homeConfigurations.\"${config.home.username}@p620\".options";
-                };
-              };
-              "diagnostics" = {
-                "enable" = true;
-                "ignored" = [];
-                "excluded" = [
-                  "\\.direnv"
-                  "result"
-                  "\\.git"
-                  "node_modules"
-                ];
-              };
-              "eval" = {
-                "depth" = 2;
-                "workers" = 3;
-                "trace" = {
-                  "server" = "off";
-                  "evaluation" = "off";
-                };
-              };
-              "completion" = {
-                "enable" = true;
-                "priority" = 10;
-                "insertSingleCandidateImmediately" = true;
-              };
-              "path" = {
-                "include" = ["**/*.nix"];
-                "exclude" = [
-                  ".direnv/**"
-                  "result/**"
-                  ".git/**"
-                  "node_modules/**"
-                ];
-              };
-              "lsp" = {
-                "progressBar" = true;
-                "snippets" = true;
-                "logLevel" = "info";
-                "maxIssues" = 100;
-                "failureHandling" = {
-                  "retry" = {
-                    "max" = 3;
-                    "delayMs" = 1000;
-                  };
-                  "fallbackToOffline" = true;
-                };
-              };
+        # Nix language server configuration (critical)
+        "nix.serverPath" = "nixd";
+        "nix.enableLanguageServer" = true;
+        "nix.formatterWidth" = 100;
+        "nix.editor.tabSize" = 2;
+        "nix.diagnostics" = {
+          "ignored" = [];
+          "excluded" = [
+            ".direnv/**"
+            "result/**"
+            ".git/**"
+            "node_modules/**"
+          ];
+        };
+        "nix.env" = {
+          "NIX_PATH" = "nixpkgs=channel:nixos-unstable";
+        };
+
+        "nix.serverSettings" = {
+          "nixd" = {
+            "formatting" = {
+              "command" = ["alejandra"];
+              "timeout_ms" = 5000;
             };
-          };
-
-          # Context7 MCP configuration
-          "mcp" = {
-            "servers" = {
-              "Context7" = {
-                "type" = "stdio";
-                "command" = "npx";
-                "args" = [
-                  "-y"
-                  "@upstash/context7-mcp@latest"
-                ];
-              };
+            "options" = {
+              "enable" = true;
+              "target" = ["all"];
+              "offline" = true;
               "nixos" = {
-                "type" = "stdio";
-                "command" = "nix";
-                "args" = [
-                  "shell"
-                  "nixpkgs#uv"
-                  "--command"
-                  "uvx"
-                  "mcp-nixos@0.3.1"
-                ];
+                "expr" = "(builtins.getFlake (\"git+file://\" + toString /home/${config.home.username}/.config/nixos)).nixosConfigurations.p620.options";
               };
-              "terraform-registry" = {
-                "command" = "npx";
-                "args" = [
-                  "-y"
-                  "terraform-mcp-server"
-                ];
+              "home_manager" = {
+                "expr" = "(builtins.getFlake (\"git+file://\" + toString /home/${config.home.username}/.config/nixos)).homeConfigurations.\"${config.home.username}@p620\".options";
               };
-              "gcp" = {
-                "command" = "sh";
-                "args" = [
-                  "-c"
-                  "npx -y gcp-mcp"
-                ];
-              };
-              "github" = {
-                "type" = "stdio";
-                "command" = "npx";
-                "args" = [
-                  "-y"
-                  "@modelcontextprotocol/server-github"
-                ];
-                "env" = {
-                  "GITHUB_PERSONAL_ACCESS_TOKEN" = "\${GITHUB_TOKEN}";
-                };
+            };
+            "diagnostics" = {
+              "enable" = true;
+              "ignored" = [];
+              "excluded" = [
+                "\\.direnv"
+                "result"
+                "\\.git"
+                "node_modules"
+              ];
+            };
+          };
+        };
+
+        # Core system integration
+        "editor.fontFamily" = mkDefault "'JetBrainsMono Nerd Font', 'Droid Sans Mono', 'monospace'";
+        "terminal.integrated.fontFamily" = "'JetBrainsMono Nerd Font'";
+        "terminal.integrated.shell.linux" = "${pkgs.zsh}/bin/zsh";
+        "terminal.integrated.defaultProfile.linux" = "zsh";
+        "terminal.integrated.profiles.linux" = {
+          "zsh" = {
+            "path" = "${pkgs.zsh}/bin/zsh";
+            "args" = ["-l"];
+          };
+          "bash" = {
+            "path" = "${pkgs.bash}/bin/bash";
+            "args" = ["-l"];
+          };
+        };
+
+        # Critical MCP server configuration
+        "mcp" = {
+          "servers" = {
+            "Context7" = {
+              "type" = "stdio";
+              "command" = "npx";
+              "args" = [
+                "-y"
+                "@upstash/context7-mcp@latest"
+              ];
+            };
+            "nixos" = {
+              "type" = "stdio";
+              "command" = "nix";
+              "args" = [
+                "shell"
+                "nixpkgs#uv"
+                "--command"
+                "uvx"
+                "mcp-nixos@0.3.1"
+              ];
+            };
+            "github" = {
+              "type" = "stdio";
+              "command" = "npx";
+              "args" = [
+                "-y"
+                "@modelcontextprotocol/server-github"
+              ];
+              "env" = {
+                "GITHUB_PERSONAL_ACCESS_TOKEN" = "\${GITHUB_TOKEN}";
               };
             };
           };
+        };
 
-          # GitHub Copilot chat instructions - using new instructions file format
-          "github.copilot.chat.codeGeneration.useInstructionFiles" = true;
-
-          # Wayland optimization settings
-          "window.titleBarStyle" = "custom";
-          "window.customTitleBarVisibility" = "auto";
-          "window.nativeTabs" = false; # Native tabs don't work well with Wayland
-          "window.nativeFullScreen" = true;
-          "editor.renderWhitespace" = "all";
-          "editor.smoothScrolling" = true;
-          "workbench.list.smoothScrolling" = true;
-          # Terminal settings
-          "terminal.integrated.gpuAcceleration" = "on";
-          "terminal.integrated.fontFamily" = "'JetBrainsMono Nerd Font'";
-          "terminal.integrated.fontSize" = mkDefault 13;
-          "terminal.integrated.lineHeight" = 1.2;
-          "terminal.integrated.cursorBlinking" = true;
-          "terminal.integrated.cursorStyle" = "line";
-          "terminal.integrated.scrollback" = 10000;
-          "terminal.integrated.shell.linux" = "${pkgs.zsh}/bin/zsh";
-          "terminal.integrated.defaultProfile.linux" = "zsh";
-          "terminal.integrated.profiles.linux" = {
-            "zsh" = {
-              "path" = "${pkgs.zsh}/bin/zsh";
-              "args" = ["-l"];
-            };
-            "bash" = {
-              "path" = "${pkgs.bash}/bin/bash";
-              "args" = ["-l"];
-            };
-          };
-          "update.mode" = "none"; # Managed by Nix
-          
-          # Performance optimizations
-          "files.watcherExclude" = {
-            "**/node_modules/**" = true;
-            "**/target/**" = true;
-            "**/result/**" = true;
-            "**/.direnv/**" = true;
-            "**/.git/**" = true;
-            "**/dist/**" = true;
-            "**/build/**" = true;
-          };
-          "search.exclude" = {
-            "**/node_modules" = true;
-            "**/target" = true;
-            "**/result" = true;
-            "**/.direnv" = true;
-            "**/dist" = true;
-            "**/build" = true;
-          };
-          "files.exclude" = {
-            "**/.direnv" = true;
-            "**/result" = true;
-          };
-          "typescript.tsc.autoDetect" = "off";
-          "npm.autoDetect" = "off";
-          "gulp.autoDetect" = "off";
-          "jake.autoDetect" = "off";
-          "grunt.autoDetect" = "off";
-          "chat.mcp.enabled" = true;
-          "chat.agent.enabled" = true;
-          "chat.mcp.discovery.enabled" = true;
-          "chat.tools.autoApprove" = true;
-          "chat.agent.maxRequests" = 15;
-          "github.copilot.chat.codesearch.enabled" = true;
-          "github.copilot.chat.scopeSelection" = true;
-          "github.copilot.chat.agent.thinkingTool" = true;
-          "githubPullRequests.notifications" = "pullRequests";
-          # Workbench settings
-          "workbench.colorTheme" = mkDefault "Gruvbox Material Dark";
-          "workbench.iconTheme" = "file-icons-colourless";
-          "workbench.browser.preferredBrowser" = "google-chrome-stable";
-          "workbench.startupEditor" = "welcomePageInEmptyWorkbench";
-          "workbench.editor.tabCloseButton" = "right";
-          "workbench.editor.tabSizing" = "shrink";
-          "workbench.editor.limit.enabled" = true;
-          "workbench.editor.limit.value" = 10;
-          "workbench.editor.limit.perEditorGroup" = true;
-          "workbench.activityBar.location" = "top";
-          "workbench.tree.indent" = 20;
-          "workbench.tree.renderIndentGuides" = "always";
-          "workbench.sideBar.location" = "left";
-          "workbench.panel.defaultLocation" = "bottom";
-          "workbench.editor.enablePreview" = false;
-          "workbench.editor.enablePreviewFromQuickOpen" = false;
-          "genieai.enableConversationHistory" = true;
-          "alejandra.program" = "alejandra";
-          "workbench.externalBrowser" = "google-chrome-stable";
-          # "codeium.enableConfig" = {
-          #   "*" = true;
-          #   "nix" = true;
-          # };
-
-          # Git settings
-          "git.enableSmartCommit" = true;
-          "git.confirmSync" = false;
-          "git.autofetch" = true;
-          "git.fetchOnPull" = true;
-          "git.pruneOnFetch" = true;
-          "git.openRepositoryInParentFolders" = "always";
-          "git.showPushSuccessNotification" = true;
-          "git.enableCommitSigning" = false;
-          "diffEditor.ignoreTrimWhitespace" = false;
-          "telemetry.telemetryLevel" = "off";
-          
-          # Disable settings sync to prevent conflicts with declarative configuration
-          "settingsSync.keybindingsPerPlatform" = false;
-          "settingsSync.enabled" = false;
+        # Essential system settings
+        "update.mode" = "none"; # Managed by Nix
+        "telemetry.telemetryLevel" = "off";
+        "settingsSync.enabled" = false; # Use mutable settings instead
+        "alejandra.program" = "alejandra";
+        "workbench.externalBrowser" = "google-chrome-stable";
+        
+        # Performance optimizations for NixOS
+        "files.watcherExclude" = {
+          "**/node_modules/**" = true;
+          "**/target/**" = true;
+          "**/result/**" = true;
+          "**/.direnv/**" = true;
+          "**/.git/**" = true;
+        };
+        "files.exclude" = {
+          "**/.direnv" = true;
+          "**/result" = true;
         };
       };
     };
-    # programs.vscode.mutableExtensionsDir = true; # Disabled to prevent settings conflicts
+
+    # Initialize VS Code settings file if it doesn't exist (then let VS Code manage it)
+    home.activation.vscodeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      SETTINGS_DIR="$HOME/.config/Code/User"
+      SETTINGS_FILE="$SETTINGS_DIR/settings.json"
+      
+      # Create VS Code config directory if it doesn't exist
+      mkdir -p "$SETTINGS_DIR"
+      
+      # Only create settings file if it doesn't exist - VS Code will manage it after that
+      if [ ! -f "$SETTINGS_FILE" ]; then
+        echo "Creating initial VS Code settings file (VS Code will manage it after this)..."
+        cp ${./vscode-settings-template.json} "$SETTINGS_FILE"
+        chmod 644 "$SETTINGS_FILE"
+        echo "VS Code settings initialized. You can now modify settings through VS Code UI."
+      else
+        echo "VS Code settings file exists - letting VS Code manage it."
+      fi
+    '';
 
     # Set up XDG file associations for VSCode
     xdg.mimeApps = {

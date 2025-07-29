@@ -1,0 +1,149 @@
+{
+  // VS Code Initial Settings Template - Mutable after first creation
+  // This file provides initial settings that VS Code can then modify
+  
+  // Editor settings
+  "editor.fontSize": 14,
+  "editor.lineHeight": 1.6,
+  "editor.letterSpacing": 0.5,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.trimAutoWhitespace": true,
+  "editor.detectIndentation": true,
+  "editor.wordWrap": "bounded",
+  "editor.wordWrapColumn": 100,
+  "editor.rulers": [80, 100],
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.minimap.enabled": false,
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.linkedEditing": true,
+  "editor.cursorBlinking": "smooth",
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.fontLigatures": true,
+  "editor.renderWhitespace": "all",
+  "editor.smoothScrolling": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit",
+    "source.fixAll": "explicit"
+  },
+
+  // Language-specific settings (can be modified by extensions/user)
+  "[javascript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.autoIndent": "advanced"
+  },
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.quickSuggestions": {
+      "comments": "off",
+      "strings": "off",
+      "other": "off"
+    }
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.tabSize": 2
+  },
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "[go]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer",
+    "editor.formatOnSave": true
+  },
+
+  // Window settings
+  "window.menuBarVisibility": "toggle",
+  "window.titleBarStyle": "custom",
+  "window.customTitleBarVisibility": "auto",
+  "window.nativeTabs": false,
+  "window.nativeFullScreen": true,
+
+  // Workbench settings
+  "workbench.colorTheme": "Gruvbox Material Dark",
+  "workbench.iconTheme": "file-icons-colourless",
+  "workbench.startupEditor": "welcomePageInEmptyWorkbench",
+  "workbench.editor.tabCloseButton": "right",
+  "workbench.editor.tabSizing": "shrink",
+  "workbench.editor.limit.enabled": true,
+  "workbench.editor.limit.value": 10,
+  "workbench.editor.limit.perEditorGroup": true,
+  "workbench.activityBar.location": "top",
+  "workbench.tree.indent": 20,
+  "workbench.tree.renderIndentGuides": "always",
+  "workbench.sideBar.location": "left",
+  "workbench.panel.defaultLocation": "bottom",
+  "workbench.editor.enablePreview": false,
+  "workbench.editor.enablePreviewFromQuickOpen": false,
+  "workbench.list.smoothScrolling": true,
+
+  // Terminal settings
+  "terminal.integrated.gpuAcceleration": "on",
+  "terminal.integrated.fontSize": 13,
+  "terminal.integrated.lineHeight": 1.2,
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.cursorStyle": "line",
+  "terminal.integrated.scrollback": 10000,
+
+  // Git settings
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "git.autofetch": true,
+  "git.fetchOnPull": true,
+  "git.pruneOnFetch": true,
+  "git.openRepositoryInParentFolders": "always",
+  "git.showPushSuccessNotification": true,
+  "git.enableCommitSigning": false,
+  "diffEditor.ignoreTrimWhitespace": false,
+
+  // Performance settings
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/target": true,
+    "**/result": true,
+    "**/.direnv": true,
+    "**/dist": true,
+    "**/build": true
+  },
+  "typescript.tsc.autoDetect": "off",
+  "npm.autoDetect": "off",
+  "gulp.autoDetect": "off",
+  "jake.autoDetect": "off",
+  "grunt.autoDetect": "off",
+
+  // GitHub Copilot settings
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "github.copilot.chat.codesearch.enabled": true,
+  "github.copilot.chat.scopeSelection": true,
+  "github.copilot.chat.agent.thinkingTool": true,
+  
+  // MCP settings
+  "chat.mcp.enabled": true,
+  "chat.agent.enabled": true,
+  "chat.mcp.discovery.enabled": true,
+  "chat.tools.autoApprove": true,
+  "chat.agent.maxRequests": 15,
+
+  // Extensions settings
+  "genieai.enableConversationHistory": true,
+  "githubPullRequests.notifications": "pullRequests"
+}
