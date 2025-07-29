@@ -2,6 +2,115 @@
   // VS Code Initial Settings Template - Mutable after first creation
   // This file provides initial settings that VS Code can then modify
   
+  // Essential Nix development settings (critical for our workflow)
+  "[nix]": {
+    "editor.defaultFormatter": "kamadorueda.alejandra",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true
+  },
+
+  // Nix language server configuration (critical)
+  "nix.serverPath": "nixd",
+  "nix.enableLanguageServer": true,
+  "nix.formatterWidth": 100,
+  "nix.editor.tabSize": 2,
+  "nix.diagnostics": {
+    "ignored": [],
+    "excluded": [
+      ".direnv/**",
+      "result/**",
+      ".git/**",
+      "node_modules/**"
+    ]
+  },
+  "nix.env": {
+    "NIX_PATH": "nixpkgs=channel:nixos-unstable"
+  },
+  "nix.serverSettings": {
+    "nixd": {
+      "formatting": {
+        "command": ["alejandra"],
+        "timeout_ms": 5000
+      },
+      "options": {
+        "enable": true,
+        "target": ["all"],
+        "offline": true
+      },
+      "diagnostics": {
+        "enable": true,
+        "ignored": [],
+        "excluded": [
+          "\\.direnv",
+          "result",
+          "\\.git",
+          "node_modules"
+        ]
+      }
+    }
+  },
+
+  // Essential system settings
+  "update.mode": "none",
+  "telemetry.telemetryLevel": "off",
+  "settingsSync.enabled": false,
+  "alejandra.program": "alejandra",
+  "workbench.externalBrowser": "google-chrome-stable",
+
+  // Core system integration
+  "editor.fontFamily": "'JetBrainsMono Nerd Font', 'Droid Sans Mono', 'monospace'",
+  "terminal.integrated.fontFamily": "'JetBrainsMono Nerd Font'",
+
+  // Critical MCP server configuration
+  "mcp": {
+    "servers": {
+      "Context7": {
+        "type": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@upstash/context7-mcp@latest"
+        ]
+      },
+      "nixos": {
+        "type": "stdio",
+        "command": "nix",
+        "args": [
+          "shell",
+          "nixpkgs#uv",
+          "--command",
+          "uvx",
+          "mcp-nixos@0.3.1"
+        ]
+      },
+      "github": {
+        "type": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-github"
+        ],
+        "env": {
+          "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+        }
+      }
+    }
+  },
+
+  // Performance optimizations for NixOS
+  "files.watcherExclude": {
+    "**\/node_modules\/**": true,
+    "**\/target\/**": true,
+    "**\/result\/**": true,
+    "**\/.direnv\/**": true,
+    "**\/.git\/**": true
+  },
+  "files.exclude": {
+    "**\/.direnv": true,
+    "**\/result": true
+  },
+  
   // Editor settings
   "editor.fontSize": 14,
   "editor.lineHeight": 1.6,
