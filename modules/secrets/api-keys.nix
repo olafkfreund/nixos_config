@@ -115,8 +115,6 @@ in {
         if [ -r "${config.age.secrets.api-github-token.path}" ]; then
           export GITHUB_TOKEN="$(cat ${config.age.secrets.api-github-token.path})"
         fi
-        
-        echo "API keys loaded successfully"
       '')
       
       (pkgs.writeScriptBin "api-keys-status" ''
