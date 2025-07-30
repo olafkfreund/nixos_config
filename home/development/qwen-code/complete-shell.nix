@@ -2,6 +2,6 @@
 { pkgs ? import <nixpkgs> {} }:
 
 let
-  qwen-code = pkgs.callPackage ./default.nix {};
+  qwen-code = pkgs.callPackage ./complete.nix {};
 in
   qwen-code
