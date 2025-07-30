@@ -52,6 +52,13 @@ in {
         group = "users";
       };
       
+      api-qwen = {
+        file = ../../secrets/api-qwen.age;
+        mode = "0644";
+        owner = "root";
+        group = "users";
+      };
+      
       api-langchain = {
         file = ../../secrets/api-langchain.age;
         mode = "0600";
@@ -97,6 +104,10 @@ in {
           export ANTHROPIC_API_KEY="$(cat ${config.age.secrets.api-anthropic.path})"
         fi
         
+        if [ -r "${config.age.secrets.api-qwen.path}" ]; then
+          export QWEN_API_KEY="$(cat ${config.age.secrets.api-qwen.path})"
+        fi
+        
         if [ -r "${config.age.secrets.api-langchain.path}" ]; then
           export LANGCHAIN_API_KEY="$(cat ${config.age.secrets.api-langchain.path})"
         fi
@@ -117,6 +128,7 @@ in {
         [ -n "$OPENAI_API_KEY" ] && echo "✅ OpenAI: Available" || echo "❌ OpenAI: Not available"
         [ -n "$GEMINI_API_KEY" ] && echo "✅ Gemini: Available" || echo "❌ Gemini: Not available" 
         [ -n "$ANTHROPIC_API_KEY" ] && echo "✅ Anthropic: Available" || echo "❌ Anthropic: Not available"
+        [ -n "$QWEN_API_KEY" ] && echo "✅ Qwen: Available" || echo "❌ Qwen: Not available"
         [ -n "$LANGCHAIN_API_KEY" ] && echo "✅ LangChain: Available" || echo "❌ LangChain: Not available"
         [ -n "$GITHUB_TOKEN" ] && echo "✅ GitHub Token: Available" || echo "❌ GitHub Token: Not available"
         
@@ -161,6 +173,9 @@ in {
         fi
         if [ -f "${config.age.secrets.api-anthropic.path}" ]; then
           chown ${username}:users "${config.age.secrets.api-anthropic.path}" 2>/dev/null || true
+        fi
+        if [ -f "${config.age.secrets.api-qwen.path}" ]; then
+          chown ${username}:users "${config.age.secrets.api-qwen.path}" 2>/dev/null || true
         fi
         if [ -f "${config.age.secrets.api-langchain.path}" ]; then
           chown ${username}:users "${config.age.secrets.api-langchain.path}" 2>/dev/null || true

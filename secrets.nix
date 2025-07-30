@@ -23,6 +23,7 @@ in {
   "secrets/api-openai.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-gemini.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-anthropic.age".publicKeys = allUsers ++ allHosts;
+  "secrets/api-qwen.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-langchain.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-github-token.age".publicKeys = allUsers ++ allHosts;
   

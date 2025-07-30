@@ -11,6 +11,7 @@ in {
     ./openai.nix
     ./anthropic.nix
     ./gemini.nix
+    ./qwen.nix
     ./ollama.nix
     ./unified-client.nix
   ];
@@ -19,7 +20,7 @@ in {
     enable = mkEnableOption "Enhanced AI provider support with unified interface";
 
     defaultProvider = mkOption {
-      type = types.enum ["openai" "anthropic" "gemini" "ollama"];
+      type = types.enum ["openai" "anthropic" "gemini" "qwen" "ollama"];
       default = "openai";
       description = "Default AI provider to use";
       example = "anthropic";
@@ -106,11 +107,30 @@ in {
       };
     };
 
+    qwen = {
+      enable = mkEnableOption "Qwen provider support";
+      priority = mkOption {
+        type = types.int;
+        default = 4;
+        description = "Provider priority (1 = highest)";
+      };
+      models = mkOption {
+        type = types.listOf types.str;
+        default = ["qwen-turbo" "qwen-plus" "qwen-max"];
+        description = "Available Qwen models";
+      };
+      defaultModel = mkOption {
+        type = types.str;
+        default = "qwen-turbo";
+        description = "Default Qwen model";
+      };
+    };
+
     ollama = {
       enable = mkEnableOption "Ollama local provider support";
       priority = mkOption {
         type = types.int;
-        default = 4;
+        default = 5;
         description = "Provider priority (1 = highest)";
       };
       models = mkOption {
@@ -136,6 +156,7 @@ in {
     ai.providers.openai.enabled = cfg.openai.enable;
     ai.providers.anthropic.enabled = cfg.anthropic.enable;
     ai.providers.gemini.enabled = cfg.gemini.enable;
+    ai.providers.qwen.enabled = cfg.qwen.enable;
     ai.providers.ollama.enabled = cfg.ollama.enable;
 
     # Create provider configuration file
@@ -174,6 +195,16 @@ in {
           defaultModel = cfg.gemini.defaultModel;
           apiKeyFile = "/run/agenix/api-gemini";
           baseUrl = "https://generativelanguage.googleapis.com/v1beta";
+          requiresApiKey = true;
+        } else null;
+        
+        qwen = if cfg.qwen.enable then {
+          enabled = true;
+          priority = cfg.qwen.priority;
+          models = cfg.qwen.models;
+          defaultModel = cfg.qwen.defaultModel;
+          apiKeyFile = "/run/agenix/api-qwen";
+          baseUrl = "https://dashscope.aliyuncs.com/api/v1";
           requiresApiKey = true;
         } else null;
         
