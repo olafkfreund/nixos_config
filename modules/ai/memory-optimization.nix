@@ -220,7 +220,7 @@ in {
     services.logrotate = mkIf cfg.logRotation {
       enable = true;
       settings = {
-        "/var/log/ai-analysis/*.log" = {
+        "/var/log/ai-analysis/memory-optimization.log" = {
           frequency = "daily";
           rotate = 7;
           compress = true;

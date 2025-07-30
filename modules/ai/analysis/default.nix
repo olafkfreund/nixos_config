@@ -19,7 +19,7 @@ let
     set -euo pipefail
     
     export PATH="${lib.makeBinPath (with pkgs; [ curl jq coreutils util-linux ])}"
-    export AI_PROVIDER="''${AI_PROVIDER:-anthropic}"
+    export AI_PROVIDER="''${AI_PROVIDER:-openai}"
     export OUTPUT_PATH="''${OUTPUT_PATH:-/var/lib/ai-analysis}"
     export LOG_FILE="/var/log/ai-analysis/system.log"
     
@@ -776,6 +776,9 @@ EOF
     else
         echo "Status: 🚨 SIGNIFICANT DRIFT - Major changes detected"
     fi
+    
+    # Ensure successful exit
+    exit 0
   '';
   
 in {

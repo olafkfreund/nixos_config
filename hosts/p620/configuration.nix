@@ -85,7 +85,7 @@ in {
   # Enable AI-powered system analysis
   ai.analysis = {
     enable = true;
-    aiProvider = "anthropic";
+    aiProvider = "openai";
     enableFallback = true;
     
     features = {
@@ -852,7 +852,7 @@ in {
   # AI-powered automated performance tuning
   ai.autoPerformanceTuner = {
     enable = true;
-    aiProvider = "anthropic";
+    aiProvider = "openai";
     enableFallback = true;
     tuningInterval = "30min";  # Frequent tuning for performance workstation
     safeMode = false;  # Allow aggressive optimizations on performance workstation

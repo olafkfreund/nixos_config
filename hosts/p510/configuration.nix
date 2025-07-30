@@ -79,7 +79,7 @@ in {
   # Enable AI-powered system analysis
   ai.analysis = {
     enable = true;
-    aiProvider = "anthropic";
+    aiProvider = "openai";
     enableFallback = true;
 
     features = {

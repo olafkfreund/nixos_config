@@ -58,7 +58,7 @@ in {
   # Enable AI-powered system analysis
   ai.analysis = {
     enable = true;
-    aiProvider = "anthropic";
+    aiProvider = "openai";
     enableFallback = true;
     
     features = {
@@ -986,7 +986,7 @@ in {
   # AI-powered automated performance tuning for monitoring server
   ai.autoPerformanceTuner = {
     enable = true;
-    aiProvider = "anthropic";
+    aiProvider = "openai";
     enableFallback = true;
     tuningInterval = "hourly";  # Less frequent for stable monitoring server
     safeMode = true;  # Conservative tuning for critical monitoring infrastructure

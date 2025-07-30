@@ -9,7 +9,7 @@ let
     set -euo pipefail
     
     export PATH="${lib.makeBinPath (with pkgs; [ curl jq coreutils util-linux bc python3 ])}"
-    export AI_PROVIDER="''${AI_PROVIDER:-anthropic}"
+    export AI_PROVIDER="''${AI_PROVIDER:-openai}"
     export OUTPUT_PATH="''${OUTPUT_PATH:-/var/lib/ai-analysis}"
     export LOG_FILE="/var/log/ai-analysis/predictive.log"
     
