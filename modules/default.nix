@@ -18,6 +18,9 @@
     ./system-utils/utils.nix
     ./system-utils/unpack.nix
     ./system-utils/system_util.nix
+    
+    # Tools and monitoring
+    ./tools/nixpkgs-monitors.nix
     ./ssh/ssh.nix
     
     # Development modules

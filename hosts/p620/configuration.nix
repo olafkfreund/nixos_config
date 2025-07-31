@@ -223,6 +223,12 @@ in {
     refreshInterval = "30s";
   };
 
+  # Enable NixOS package monitoring tools
+  tools.nixpkgs-monitors = {
+    enable = true;
+    installAll = true;
+  };
+
   # Enable load testing for AI services
   ai.loadTesting = {
     enable = true;

@@ -465,7 +465,7 @@ let
         echo "========================="
         
         local current_gen=$(nixos-rebuild list-generations | grep current | head -1)
-        local nixos_version=$(${pkgs.nixos-version}/bin/nixos-version)
+        local nixos_version=$(nixos-version)
         local channel=$(${pkgs.nix}/bin/nix-channel --list | grep nixos || echo "No channels configured")
         
         echo "NixOS Version: $nixos_version"

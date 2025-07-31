@@ -226,7 +226,11 @@ in {
     };
   };
 
-  # Zabbix monitoring removed
+  # Enable NixOS package monitoring tools
+  tools.nixpkgs-monitors = {
+    enable = true;
+    installAll = true;
+  };
 
   # Enable encrypted API keys
   secrets.apiKeys = {
