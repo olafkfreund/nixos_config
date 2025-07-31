@@ -33,7 +33,8 @@
     pkgs.shell-gpt
     pkgs.aichat
     pkgs.gorilla-cli
-    pkgs.newelle
+    # Temporarily disabled due to llama-index-core build failure (upstream nixpkgs issue)
+    # pkgs.newelle
     # Temporarily disabled due to textual package test failures
     # pkgs.oterm
     pkgs.gpt-cli
