@@ -27,8 +27,8 @@ stdenv.mkDerivation {
     
     echo "=== Building working qwen-code CLI ==="
     
-    # Create simple working qwen CLI (using .cjs for CommonJS compatibility)
-    cat > qwen-cli.cjs << 'ENDJS'
+    # Create simple working qwen CLI
+    cat > qwen-cli.js << 'ENDJS'
 #!/usr/bin/env node
 
 const fs = require('fs');
@@ -113,7 +113,7 @@ console.log('   Full API integration can be added in future versions');
 
 ENDJS
 
-    chmod +x qwen-cli.cjs
+    chmod +x qwen-cli.js
     
     runHook postBuild
   '';
@@ -130,7 +130,7 @@ ENDJS
     
     # Create wrapper
     makeWrapper "${nodejs_22}/bin/node" "$out/bin/qwen" \
-      --add-flags "$out/lib/qwen-code/qwen-cli.cjs"
+      --add-flags "$out/lib/qwen-code/qwen-cli.js"
     
     echo "=== Installation completed ==="
     
