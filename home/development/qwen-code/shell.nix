@@ -1,7 +1,0 @@
-# Complete qwen-code package
-{ pkgs ? import <nixpkgs> {} }:
-
-let
-  qwen-code = pkgs.callPackage ./default.nix {};
-in
-  qwen-code
