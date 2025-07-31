@@ -311,6 +311,12 @@ in {
       config.age.secrets."user-password-${username}".path;
   });
 
+  # System packages
+  environment.systemPackages = with pkgs; [
+    # Custom qwen-code package for system-wide availability
+    (callPackage ../../home/development/qwen-code/default.nix {})
+  ];
+
   # Hardware and service specific configurations
   services.playerctld.enable = true;
   services.fwupd.enable = true;

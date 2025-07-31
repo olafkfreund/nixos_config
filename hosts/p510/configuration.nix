@@ -353,6 +353,12 @@ in {
     };
   };
 
+  # System packages
+  environment.systemPackages = with pkgs; [
+    # Custom qwen-code package for system-wide availability
+    (callPackage ../../home/development/qwen-code/default.nix {})
+  ];
+
   # User-specific configuration from variables
   users.users.${vars.username} = {
     isNormalUser = true;
@@ -362,6 +368,8 @@ in {
     packages = with pkgs; [
       vim
       wally-cli
+      # Custom qwen-code package
+      (callPackage ../../home/development/qwen-code/default.nix {})
     ];
   };
 

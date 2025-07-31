@@ -275,7 +275,7 @@ in {
   system.autoUpgrade = {
     enable = true;
     allowReboot = false;
-    flake = "github:olafkfreund/nixos-config";
+    flake = "github:olafkfreund/nixos_config";
     flags = ["--update-input" "nixpkgs" "--no-write-lock-file"];
   };
 

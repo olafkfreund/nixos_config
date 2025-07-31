@@ -72,7 +72,7 @@ in {
   # Configure AI providers directly
   ai.providers = {
     enable = true;
-    defaultProvider = "anthropic";
+    defaultProvider = "openai";
     enableFallback = true;
     
     # Enable specific providers
@@ -417,7 +417,7 @@ in {
       # Enable unified AI provider support
       providers = {
         enable = true;
-        defaultProvider = "anthropic";
+        defaultProvider = "openai";
         enableFallback = true;
         
         # Enable specific providers
@@ -610,6 +610,8 @@ in {
     scream
     vim
     wally-cli
+    # Custom qwen-code package
+    (callPackage ../../home/development/qwen-code/default.nix {})
   ];
 
   # Hardware-specific configurations
