@@ -32,7 +32,6 @@
     
     # Monitoring modules
     ./monitoring/default.nix
-    # Zabbix monitoring removed
     
     # Virtualization modules
     ./virt/default.nix

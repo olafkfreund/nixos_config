@@ -9,6 +9,8 @@ in {
     polarity = "dark";
     targets = {
       chromium.enable = false;
+      firefox.enable = false; # Disable Firefox theming to avoid warnings
+      qt.enable = false; # Disable Qt theming to avoid GNOME platform warnings
     };
     fonts = {
       monospace = {

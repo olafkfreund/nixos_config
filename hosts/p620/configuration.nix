@@ -24,7 +24,6 @@ in {
     ./themes/stylix.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
-# ../../modules/microvms/default.nix  # Disabled for now - enable as needed
     ../common/hyprland.nix
     ../../modules/security/secrets.nix
     ../../modules/secrets/api-keys.nix
@@ -389,12 +388,6 @@ in {
       sunshine = true;
     };
 
-# microvms = {
-    #   enable = true;
-    #   dev-vm.enable = true;
-    #   test-vm.enable = true;
-    #   playground-vm.enable = true;
-    # };
 
     cloud = {
       enable = true;
@@ -483,7 +476,6 @@ in {
     };
   };
 
-  # Zabbix monitoring removed
 
   # Enable encrypted API keys
   secrets.apiKeys = {
@@ -552,10 +544,6 @@ in {
 
   # Remove duplicate user configuration - use the one above that handles all hostUsers
   # users.users.${vars.username} is now handled by the genAttrs above
-
-  # Productivity tools
-  # Temporarily disabled due to textual package test failures
-  # programs.streamcontroller.enable = lib.mkForce true;
 
   # Service-specific configurations
   services = {

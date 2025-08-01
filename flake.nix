@@ -186,8 +186,7 @@
               };
             };
 
-            # Set root password for SSH access
-            users.users.root.password = "nixos";
+            # Root password is set in live-system.nix module
 
             # Copy flake configuration to live system
             environment.etc."nixos-config" = {
@@ -812,8 +811,6 @@
       playground-vm = microvms.playground-vm;
     };
 
-    # Expose liveImages and microvms in outputs
-    inherit liveImages microvms;
 
     packages.x86_64-linux = {
       claude-code = import ./home/development/claude-code {

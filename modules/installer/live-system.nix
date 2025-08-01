@@ -38,7 +38,13 @@ with lib; {
   };
 
   # Set root password for SSH access (change after installation)
-  users.users.root.password = "nixos";
+  users.users.root = {
+    password = lib.mkForce "nixos";
+    initialHashedPassword = lib.mkForce null;
+    hashedPassword = lib.mkForce null;
+    hashedPasswordFile = lib.mkForce null;
+    initialPassword = lib.mkForce null;
+  };
 
   # Include git and networking tools
   environment.systemPackages = with pkgs; [

@@ -12,6 +12,7 @@ in {
     ./nixos/power.nix
     ./nixos/boot.nix
     ./nixos/i18n.nix
+    ./nixos/n8n.nix
     ../../modules/default.nix
     ../../modules/development/default.nix
     ../../modules/secrets/api-keys.nix
@@ -176,7 +177,6 @@ in {
     };
   };
 
-  # Zabbix monitoring removed
 
   # Custom Grafana configuration - configured for sub-path with external proxy
   services.grafana = {
@@ -437,7 +437,7 @@ in {
       file = pkgs.writeText "home.freundcloud.com.zone" ''
         $TTL 86400
         @       IN      SOA     dex5550.home.freundcloud.com. admin.home.freundcloud.com. (
-                        2025071002      ; Serial - updated for zabbix subpath routing
+                        2025071002      ; Serial
                         3600            ; Refresh
                         1800            ; Retry
                         604800          ; Expire
@@ -716,7 +716,6 @@ in {
             tls.certResolver = "letsencrypt";
           };
           
-          # Zabbix router removed
           
           # Traefik dashboard router
           dashboard = {
@@ -738,7 +737,6 @@ in {
           alertmanager-stripprefix = {
             stripPrefix.prefixes = [ "/alertmanager" ];
           };
-          # Zabbix middlewares removed
           secure-headers = {
             headers = {
               customRequestHeaders = {
@@ -771,7 +769,6 @@ in {
               url = "http://127.0.0.1:9093";
             }];
           };
-          # Zabbix service removed
         };
       };
     };

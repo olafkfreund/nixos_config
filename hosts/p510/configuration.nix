@@ -9,8 +9,6 @@
   vars = import ./variables.nix;
 in {
   imports = [
-    # inputs.microvm.nixosModules.host
-
     ./nixos/hardware-configuration.nix # Docker configuration
     ./nixos/power.nix
     ./nixos/boot.nix

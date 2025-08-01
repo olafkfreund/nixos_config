@@ -53,12 +53,6 @@
     "jitsi-meet-1.0.8043"
     "olm-3.2.16"
   ];
-  # programs.nix-index = {
-  #   enable = true;
-  #   package = pkgs.nix-index;
-  #   enableBashIntegration = false;
-  #   enableZshIntegration = false;
-  # };
   environment.systemPackages = with pkgs; [
     wget
     home-manager

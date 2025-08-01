@@ -40,6 +40,8 @@ in {
     # Target-specific configuration
     targets = {
       chromium.enable = false; # Exclude browser theming
+      firefox.enable = false; # Disable Firefox theming to avoid warnings
+      qt.enable = false; # Disable Qt theming to avoid GNOME platform warnings
     };
   };
 }

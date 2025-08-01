@@ -5,21 +5,14 @@
   pkgs,
   ...
 }: {
-  services.greetd = let
-    session_hypr = {
-      command = "${lib.getExe config.programs.hyprland.package}";
-      user = "${username}";
-    };
-    session_sway = {
-      command = "${lib.getExe config.programs.sway.package} --unsupported-gpu";
-      user = "${username}";
-    };
-  in {
+  services.greetd = {
     enable = true;
     settings = {
       terminal.vt = 1;
-      default_session = session_hypr;
-      initial_session = session_hypr;
+      default_session = {
+        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --remember-user-session --asterisks --power-shutdown 'systemctl poweroff' --power-reboot 'systemctl reboot' --greeting 'Welcome to Razer Gaming Laptop'";
+        user = "greeter";
+      };
     };
   };
 
@@ -56,6 +49,14 @@
       RestartSec = 1;
       TimeoutStopSec = 10;
     };
+  };
+
+  # NVIDIA and Intel iGPU specific environment variables
+  environment.sessionVariables = {
+    WLR_NO_HARDWARE_CURSORS = "1"; # NVIDIA compatibility
+    # Intel iGPU + NVIDIA optimization
+    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+    WLR_DRM_NO_ATOMIC = "1"; # Prevent some NVIDIA issues
   };
 
   # Console configuration

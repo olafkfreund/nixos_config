@@ -113,10 +113,8 @@ return {
                 home_manager = {
                   expr = '(builtins.getFlake ("git+file://" + toString ./.)).homeConfigurations."olafkfreund@p620".options',
                 },
-                target = ["all"], -- Target all available options
-                enable = true,
-                offline = true, -- Work in offline mode when internet is unavailable
               },
+              target = "all", -- Target all available options
               diagnostics = {
                 enable = true,
                 ignored = [], -- Specific diagnostic codes to ignore

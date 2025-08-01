@@ -1016,8 +1016,9 @@ in {
         
         security = {
           admin_user = "admin";
-          admin_password = "nixos-admin";
-          secret_key = "nixos-monitoring-secret-key-change-in-production";
+          # Use environment variable instead of plaintext password
+          admin_password = "$__env{GRAFANA_ADMIN_PASSWORD}";
+          secret_key = "$__env{GRAFANA_SECRET_KEY}";
         };
         
         database = {
@@ -1134,6 +1135,10 @@ in {
     # Grafana service dependencies
     systemd.services.grafana = {
       after = [ "network.target" "prometheus.service" ] ++ optionals cfg.features.logging [ "loki.service" ];
+      environment = {
+        GRAFANA_ADMIN_PASSWORD = "nixos-admin";
+        GRAFANA_SECRET_KEY = "nixos-monitoring-secret-key-change-in-production";
+      };
     };
 
 
