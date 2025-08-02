@@ -22,7 +22,14 @@ in {
     ./nixos/memory.nix
     ./nixos/load.nix
     ./themes/stylix.nix
-    ../../modules/default.nix
+    # Modular imports - testing new approach
+    ../../modules/core.nix
+    ../../modules/development.nix
+    ../../modules/desktop.nix
+    ../../modules/virtualization.nix
+    ../../modules/monitoring.nix
+    ../../modules/performance.nix
+    ../../modules/email.nix
     ../../modules/development/default.nix
     ../common/hyprland.nix
     ../../modules/security/secrets.nix

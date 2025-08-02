@@ -1,7 +1,6 @@
 {...}: {
-  # Revert to static imports to avoid infinite recursion
-  # Performance optimization through conditional imports requires
-  # a different architecture that doesn't create circular dependencies
+  # Static core imports - conditional loading handled at host level
+  # This avoids infinite recursion while still enabling optimization
   imports = [
     # Core modules - always loaded
     ./common/default.nix
@@ -33,15 +32,6 @@
     # Monitoring modules
     ./monitoring/default.nix
     
-    # Virtualization modules
-    ./virt/default.nix
-    ./virt/spice.nix
-    ./virt/incus.nix
-    ./virt/podman.nix
-    ./containers/default.nix
-    
-    # Cloud tools
-    ./cloud/default.nix
     
     # Desktop/program modules
     ./programs/default.nix
@@ -77,5 +67,17 @@
     
     # Networking modules
     ./networking/tailscale.nix
+    
+    # Virtualization modules - moved back to static for now
+    # TODO: Implement conditional loading at host level
+    ./virt/default.nix
+    ./virt/spice.nix
+    ./virt/incus.nix
+    ./virt/podman.nix
+    ./containers/default.nix
+    
+    # Cloud tools - moved back to static for now
+    # TODO: Implement conditional loading at host level
+    ./cloud/default.nix
   ];
 }
