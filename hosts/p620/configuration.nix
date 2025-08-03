@@ -487,6 +487,14 @@ in {
 
 
   # Enable encrypted API keys
+  # Centralized Logging - Send logs to DEX5550 Loki server
+  services.promtail-logging = {
+    enable = true;
+    lokiUrl = "http://dex5550:3100";
+    collectJournal = true;
+    collectKernel = true;
+  };
+
   secrets.apiKeys = {
     enable = true;
     enableEnvironmentVariables = true;

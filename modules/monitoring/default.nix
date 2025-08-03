@@ -12,7 +12,7 @@ in {
     ./grafana.nix
     ./node-exporter.nix
     ./alerting.nix
-    ./loki.nix
+    # ./loki.nix  # Using host-specific Loki configuration instead
     ./promtail.nix
     ./gpu-exporter.nix
     ./amd-gpu-exporter.nix

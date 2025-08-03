@@ -13,6 +13,7 @@ in {
     ./nixos/boot.nix
     ./nixos/i18n.nix
     ./nixos/n8n.nix
+    # ./nixos/loki.nix  # Temporarily commented for testing
     # Modular imports - monitoring server (needs all features for feature-impl compatibility)
     ../../modules/core.nix
     ../../modules/monitoring.nix
@@ -186,6 +187,64 @@ in {
     };
   };
 
+  # Loki log aggregation server
+  services.loki = {
+    enable = true;
+    configuration = {
+      server = {
+        http_listen_port = 3100;
+        grpc_listen_port = 9096;
+      };
+      auth_enabled = false;
+      ingester = {
+        lifecycler = {
+          address = "0.0.0.0";
+          ring = {
+            kvstore.store = "inmemory";
+            replication_factor = 1;
+          };
+        };
+        chunk_idle_period = "1h";
+        max_chunk_age = "1h";
+        chunk_target_size = 1048576;
+        chunk_retain_period = "30s";
+      };
+      schema_config = {
+        configs = [
+          {
+            from = "2023-01-01";
+            store = "boltdb-shipper";
+            object_store = "filesystem";
+            schema = "v11";
+            index = {
+              prefix = "index_";
+              period = "24h";
+            };
+          }
+        ];
+      };
+      storage_config = {
+        boltdb_shipper = {
+          active_index_directory = "/var/lib/loki/boltdb-shipper-active";
+          cache_location = "/var/lib/loki/boltdb-shipper-cache";
+        };
+        filesystem = {
+          directory = "/var/lib/loki/chunks";
+        };
+      };
+      limits_config = {
+        retention_period = "30d";
+        allow_structured_metadata = false;  # Compatibility with v11 schema
+      };
+    };
+  };
+  
+  services.promtail-logging = {
+    enable = true;
+    lokiUrl = "http://localhost:3100";  # Local Loki server
+    collectJournal = true;
+    collectKernel = true;
+  };
 
   # Custom Grafana configuration - configured for sub-path with external proxy
   services.grafana = {
@@ -499,8 +558,10 @@ in {
     interfaces."eno1" = {
       allowedTCPPorts = [
         3001  # Grafana
+        3100  # Loki HTTP
         9090  # Prometheus
         9093  # Alertmanager
+        9096  # Loki gRPC
         9100  # Node Exporter
         9101  # NixOS Exporter
         9102  # Systemd Exporter

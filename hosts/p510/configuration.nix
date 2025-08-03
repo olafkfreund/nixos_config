@@ -286,6 +286,16 @@ in {
     };
   };
 
+  # Centralized Logging - Send logs to DEX5550 Loki server
+  services.promtail-logging = {
+    enable = true;
+    lokiUrl = "http://dex5550:3100";
+    collectJournal = true;
+    collectKernel = true;
+    # Enable nginx logs collection for media server
+    collectNginx = false;  # Set to true if using nginx
+  };
+
   # Enable NixOS package monitoring tools
   tools.nixpkgs-monitors = {
     enable = true;
