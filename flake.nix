@@ -81,6 +81,12 @@
     agenix.url = "github:ryantm/agenix";
     nix-snapd.url = "github:io12/nix-snapd";
     microvm.url = "github:astro/microvm.nix";
+    
+    # Secure Boot
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v0.4.1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
@@ -111,6 +117,7 @@
     nur,
     nixai,
     agenix,
+    lanzaboote,
     razer-laptop-control,
     nixpkgs-f2k,
     nix-colors,
@@ -737,6 +744,7 @@
           inputs.nix-colors.homeManagerModules.default
           inputs.nix-snapd.nixosModules.default
           inputs.agenix.nixosModules.default
+          inputs.lanzaboote.nixosModules.lanzaboote
           nix-index-database.nixosModules.nix-index
           ./home/shell/zellij/zjstatus.nix
           inputs.nixvim.nixosModules.nixvim
