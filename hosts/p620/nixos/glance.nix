@@ -1,4 +1,5 @@
-#TODO follow: https://github.com/glanceapp/glance/blob/main/docs/configuration.md
+# Glance dashboard configuration
+# Configuration reference: https://github.com/glanceapp/glance/blob/main/docs/configuration.md
 {
   services.glance = {
     enable = true;

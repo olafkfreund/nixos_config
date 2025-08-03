@@ -45,16 +45,7 @@
     };
   };
 
-  # Power-related packages
-  environment.systemPackages = with pkgs; [
-    cpupower-gui # GUI for CPU frequency scaling
-    powertop # Power consumption analyzer
-    lm_sensors # Hardware monitoring
-    s-tui # Terminal UI stress test and monitoring tool
-    htop # Process viewer with power info
-    acpi # Command line battery info
-    # tlpui # GUI for TLP (if using TLP)
-  ];
+  # Power-related packages moved to main configuration.nix for consolidation
 
   # Kernel parameters for better power efficiency (removed - moved below)
 

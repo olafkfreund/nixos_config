@@ -60,10 +60,7 @@
   };
 
   # Add Razer utilities
-  environment.systemPackages = with pkgs; [
-    polychromatic # GUI for Razer devices
-    razergenie # Another Razer configuration tool
-  ];
+  # Razer hardware packages moved to main configuration.nix for consolidation
 
   # Support for closing lid
   services.logind = {

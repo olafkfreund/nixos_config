@@ -17,9 +17,7 @@
   };
 
   # Install greetd-related packages
-  environment.systemPackages = with pkgs; [
-    greetd.tuigreet
-  ];
+  # greetd packages moved to main configuration.nix for consolidation
 
   # Security and authentication configuration
   security = {

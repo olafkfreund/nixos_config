@@ -318,10 +318,29 @@ in {
       config.age.secrets."user-password-${username}".path;
   });
 
-  # System packages
+  # System packages - consolidated from individual nixos modules
   environment.systemPackages = with pkgs; [
-    # Custom qwen-code package for system-wide availability
+    # Custom packages
     (callPackage ../../home/development/qwen-code/default.nix {})
+    
+    # Power management (from power.nix) 
+    cpupower-gui # GUI for CPU frequency scaling
+    powertop # Power consumption analyzer
+    lm_sensors # Hardware monitoring
+    s-tui # Terminal UI stress test and monitoring tool
+    htop # Process viewer with power info
+    acpi # Command line battery info
+    
+    # Razer hardware support (from laptop.nix)
+    polychromatic # GUI for Razer devices
+    razergenie # Another Razer configuration tool
+    
+    # Login manager (from greetd.nix)
+    greetd.tuigreet
+    
+    # Secure Boot management (from secure-boot.nix) - only when secure boot enabled
+  ] ++ lib.optionals (config.boot.lanzaboote.enable or false) [
+    sbctl # For managing Secure Boot keys
   ];
 
   # Hardware and service specific configurations

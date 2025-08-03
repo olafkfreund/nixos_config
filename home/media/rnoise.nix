@@ -4,7 +4,7 @@
 }: let
   format = pkgs.formats.json {};
 in {
-  #TODO add custom options to enable it
+  # TODO: Add custom options to conditionally enable noise suppression
     # Write a PipeWire userspace configuration based on werman's noise-supression-for-voice
     # for usage instructions, see:
     # <https://github.com/werman/noise-suppression-for-voice?tab=readme-ov-file#linux>

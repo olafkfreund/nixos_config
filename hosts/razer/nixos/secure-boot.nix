@@ -3,7 +3,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: {
   # Import lanzaboote module
@@ -23,8 +22,5 @@
   # Still need EFI variables
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Environment packages for managing Secure Boot
-  environment.systemPackages = with pkgs; [
-    sbctl # For managing Secure Boot keys
-  ];
+  # Secure Boot packages moved to main configuration.nix for conditional inclusion
 }

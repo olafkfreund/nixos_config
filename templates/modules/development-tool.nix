@@ -197,7 +197,7 @@ in {
     # Development-specific udev rules (for hardware tools)
     # services.udev.extraRules = ''
     #   # TOOL_NAME hardware access rules
-    #   SUBSYSTEM=="usb", ATTRS{idVendor}=="XXXX", MODE="0666"
+    #   SUBSYSTEM=="usb", ATTRS{idVendor}=="1234", MODE="0666"
     # '';
 
     # Validation assertions
