@@ -13,7 +13,16 @@ in {
     ./nixos/boot.nix
     ./nixos/i18n.nix
     ./nixos/n8n.nix
-    ../../modules/default.nix
+    # Modular imports - monitoring server (needs all features for feature-impl compatibility)
+    ../../modules/core.nix
+    ../../modules/monitoring.nix
+    ../../modules/email.nix
+    ../../modules/development.nix
+    ../../modules/performance.nix
+    ../../modules/cloud.nix
+    ../../modules/programs.nix
+    ../../modules/desktop.nix
+    ../../modules/virtualization.nix
     ../../modules/development/default.nix
     ../../modules/secrets/api-keys.nix
   ];

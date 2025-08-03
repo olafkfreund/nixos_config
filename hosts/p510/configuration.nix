@@ -23,8 +23,16 @@ in {
     ./nixos/plex.nix
     ./flaresolverr.nix
     ./themes/stylix.nix
-    ../../modules/server.nix
-    ../../modules/default.nix
+    # Modular imports - media server needs all features for feature-impl compatibility
+    ../../modules/core.nix
+    ../../modules/monitoring.nix
+    ../../modules/email.nix
+    ../../modules/development.nix
+    ../../modules/performance.nix
+    ../../modules/cloud.nix
+    ../../modules/programs.nix
+    ../../modules/desktop.nix
+    ../../modules/virtualization.nix
     ../../modules/development/default.nix
     ../common/hyprland.nix
     ../../modules/secrets/api-keys.nix

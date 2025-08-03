@@ -22,7 +22,16 @@ in {
     ./nixos/laptop.nix
     ./nixos/memory.nix
     ./themes/stylix.nix
-    ../../modules/default.nix
+    # Modular imports - laptop needs full desktop experience  
+    ../../modules/core.nix
+    ../../modules/development.nix
+    ../../modules/desktop.nix
+    ../../modules/cloud.nix
+    ../../modules/programs.nix
+    ../../modules/virtualization.nix
+    ../../modules/monitoring.nix
+    ../../modules/email.nix
+    ../../modules/performance.nix
     ../../modules/development/default.nix
     ../common/hyprland.nix
     ../../modules/security/secrets.nix

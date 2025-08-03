@@ -258,7 +258,7 @@ with lib; {
       ReadWritePaths = [ "/var/lib/n8n" ];
       
       # Restart policy
-      Restart = "always";
+      Restart = lib.mkForce "always";
       RestartSec = "10s";
       
       # Health monitoring

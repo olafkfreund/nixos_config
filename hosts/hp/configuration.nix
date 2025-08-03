@@ -18,8 +18,17 @@ in {
     ./nixos/greetd.nix
     ./nixos/hosts.nix
     ./themes/stylix.nix
+    # Modular imports - server/workstation needs all features due to feature-impl compatibility
+    ../../modules/core.nix
+    ../../modules/development.nix
+    ../../modules/desktop.nix
+    ../../modules/cloud.nix
+    ../../modules/programs.nix
+    ../../modules/virtualization.nix
+    ../../modules/monitoring.nix
+    ../../modules/email.nix
+    ../../modules/performance.nix
     ../../modules/server.nix
-    ../../modules/default.nix
     ../../modules/development/default.nix
     # ./guests/k3sserver.nix
     ../common/hyprland.nix

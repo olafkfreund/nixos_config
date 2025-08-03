@@ -30,6 +30,8 @@ in {
     ../../modules/monitoring.nix
     ../../modules/performance.nix
     ../../modules/email.nix
+    ../../modules/cloud.nix
+    ../../modules/programs.nix
     ../../modules/development/default.nix
     ../common/hyprland.nix
     ../../modules/security/secrets.nix
