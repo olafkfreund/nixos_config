@@ -265,12 +265,18 @@ in {
     installAll = true;
   };
 
-  # Enable encrypted API keys
-  secrets.apiKeys = {
-    enable = true;
-    enableEnvironmentVariables = true;
-    enableUserEnvironment = true;
+  # Configure only essential secrets for monitoring server
+  age.secrets = {
+    tailscale-auth-key = {
+      file = ../../secrets/tailscale-auth-key.age;
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
   };
+  
+  # Disable API keys module (not needed on monitoring server)
+  secrets.apiKeys.enable = false;
 
   # Enable AI analysis Grafana dashboards
   ai.grafanaDashboards.enable = true;
