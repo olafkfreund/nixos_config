@@ -14,15 +14,15 @@ in {
     ./nixos/i18n.nix
     ./nixos/n8n.nix
     # ./nixos/loki.nix  # Temporarily commented for testing
-    # Modular imports - monitoring server (needs all features for feature-impl compatibility)
+    # Modular imports - monitoring server (headless configuration)
     ../../modules/core.nix
     ../../modules/monitoring.nix
     ../../modules/email.nix
     ../../modules/development.nix
     ../../modules/performance.nix
     ../../modules/cloud.nix
-    ../../modules/programs.nix
-    ../../modules/desktop.nix
+    ../../modules/programs.nix      # Re-enabled - needed for module structure, droidcam disabled via features
+    # ../../modules/desktop.nix       # Removed - Desktop/GUI components not needed on server
     ../../modules/virtualization.nix
     ../../modules/development/default.nix
     ../../modules/secrets/api-keys.nix

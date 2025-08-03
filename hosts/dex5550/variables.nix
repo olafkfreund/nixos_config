@@ -6,12 +6,8 @@
   gitEmail = "olaf.loken@gmail.com";
   gitHubToken = "";
 
-  # Display configuration
-  laptop_monitor = "monitor = ,preferred,auto,1";
-  external_monitor = "monitor = HEADLESS-1,3840x2160@30,0x0,1.5";
-
-  # Hardware settings
-  gpu = "modesetting";
+  # Hardware settings (headless server configuration)
+  gpu = "none";  # No display driver needed for headless server
   acceleration = ""; # For ollama - Default to empty for this machine
 
   # System groups - server optimized
@@ -39,10 +35,9 @@
   # Locale and time
   timezone = "Europe/London";
   locale = "en_GB.UTF-8";
-  # Different settings for console and X server keyboard layouts
+  # Console keyboard layout only (headless server)
   keyboardLayouts = {
-    console = "uk"; # For virtual console
-    xserver = "gb"; # For X server and Wayland
+    console = "uk"; # For virtual console only
   };
 
   # No theme settings needed for server configuration

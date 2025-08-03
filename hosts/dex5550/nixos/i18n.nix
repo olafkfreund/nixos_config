@@ -16,8 +16,9 @@ in {
     LC_TIME = vars.locale;
   };
   console.keyMap = vars.keyboardLayouts.console;
-  services.xserver = {
-    xkb.layout = vars.keyboardLayouts.xserver;
-    xkb.variant = "";
-  };
+  # X server configuration removed for headless server
+  # services.xserver = {
+  #   xkb.layout = vars.keyboardLayouts.xserver;
+  #   xkb.variant = "";
+  # };
 }
