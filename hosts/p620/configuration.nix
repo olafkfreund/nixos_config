@@ -14,6 +14,8 @@ in {
     ./nixos/power.nix
     ./nixos/boot.nix
     ./nixos/amd.nix
+    ./nixos/nvidia.nix  # Add NVIDIA for AI/compute workloads
+    ./nixos/usb-power-fix.nix  # Fix USB mouse freezing issues
     ./nixos/i18n.nix
     ./nixos/hosts.nix
     ./nixos/envvar.nix

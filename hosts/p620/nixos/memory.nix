@@ -19,6 +19,21 @@
     # NUMA optimizations
     "vm.zone_reclaim_mode" = 0;
     "kernel.numa_balancing" = 0;
+
+    # Network performance optimizations for NFS and media streaming
+    # Override AI module settings with higher performance values
+    "net.core.rmem_max" = lib.mkForce 134217728;     # 128MB receive buffer
+    "net.core.wmem_max" = lib.mkForce 134217728;     # 128MB send buffer
+    "net.core.rmem_default" = 262144;                # 256KB default receive
+    "net.core.wmem_default" = 262144;                # 256KB default send
+    "net.core.netdev_max_backlog" = lib.mkForce 5000;  # Increased queue size
+    "net.ipv4.tcp_rmem" = "4096 262144 134217728";   # TCP receive memory
+    "net.ipv4.tcp_wmem" = "4096 262144 134217728";   # TCP send memory
+    "net.ipv4.tcp_congestion_control" = "bbr";       # Better congestion control
+    "net.ipv4.tcp_window_scaling" = 1;               # Enable window scaling
+    "net.ipv4.tcp_timestamps" = lib.mkForce 1;       # Enable timestamps for RTT
+    "net.ipv4.tcp_sack" = lib.mkForce 1;             # Selective acknowledgment
+    "net.core.default_qdisc" = "fq";                 # Fair queuing scheduler
   };
 
   # zram for improved memory performance
