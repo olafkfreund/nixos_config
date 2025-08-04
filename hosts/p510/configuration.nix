@@ -302,6 +302,18 @@ in {
     installAll = true;
   };
 
+  # Enable SSH security hardening
+  security.sshHardening = {
+    enable = true;
+    allowedUsers = hostUsers;
+    allowPasswordAuthentication = false;
+    allowRootLogin = false;
+    maxAuthTries = 3;
+    enableFail2Ban = true;
+    enableKeyOnlyAccess = true;
+    trustedNetworks = ["192.168.1.0/24" "10.0.0.0/8"];
+  };
+
   # Enable encrypted API keys
   secrets.apiKeys = {
     enable = true;
