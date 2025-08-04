@@ -65,7 +65,7 @@ in {
     extraUpFlags = [
       "--operator=olafkfreund"
       "--accept-risk=lose-ssh"
-      "--advertise-tags=tag:laptop,tag:mobile"
+      # "--advertise-tags=tag:laptop,tag:mobile"  # Disabled - tags not permitted
     ];
   };
 
