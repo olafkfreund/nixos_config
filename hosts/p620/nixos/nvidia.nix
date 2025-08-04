@@ -33,10 +33,9 @@
     enable = true;
     enable32Bit = true;
     extraPackages = with pkgs; [
-      # CUDA support for AI workloads
+      # CUDA support for AI workloads (toolkit only to avoid LICENSE conflicts)
       cudaPackages.cudatoolkit
-      cudaPackages.cudnn
-      cudaPackages.tensorrt
+      # Note: cuDNN installed separately via systemPackages to avoid LICENSE conflicts
       
       # Vulkan support (useful for some AI frameworks)
       vulkan-validation-layers
@@ -57,6 +56,9 @@
     # CUDA development tools
     cudaPackages.cuda_nvcc
     cudaPackages.cuda_gdb
+    
+    # Deep learning libraries (separate from graphics to avoid LICENSE conflicts)
+    cudaPackages.cudnn
     
     # Performance monitoring
     libva-utils
