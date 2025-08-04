@@ -35,10 +35,15 @@ in {
         # CRITICAL FIX: Disable VizDisplayCompositor to fix page loading on Hyprland
         "--disable-features=VizDisplayCompositor"
         
-        # Fix zygote/sandbox error by disabling problematic sandbox features
+        # Fix zygote/sandbox error - comprehensive sandbox fixes
+        "--no-zygote"
+        "--no-sandbox"
         "--disable-dev-shm-usage"
         "--disable-gpu-sandbox"
         "--disable-software-rasterizer"
+        "--disable-background-timer-throttling"
+        "--disable-backgrounding-occluded-windows"
+        "--disable-renderer-backgrounding"
         
         # Memory and process management
         "--memory-pressure-off"
