@@ -48,11 +48,11 @@ with lib; {
       random_page_cost = "1.1";  # SSD optimization
       effective_io_concurrency = "200";
       
-      # Logging for monitoring
+      # Logging for monitoring - temporarily simplified to fix filesystem issues
       log_destination = "stderr";
-      logging_collector = true;
-      log_directory = "/var/log/postgresql";
-      log_filename = "postgresql-%Y-%m-%d_%H%M%S.log";
+      logging_collector = false;  # Disable file logging temporarily
+      # log_directory = "/var/log/postgresql";  # Disabled due to read-only filesystem
+      # log_filename = "postgresql-%Y-%m-%d_%H%M%S.log";  # Disabled
       log_min_duration_statement = "1000";  # Log slow queries (1s+)
     };
   };
