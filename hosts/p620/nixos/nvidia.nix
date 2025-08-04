@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }: {
   # Hybrid setup: AMD primary for display, NVIDIA for compute/AI
@@ -50,9 +51,8 @@
 
   # Environment packages for AI development
   environment.systemPackages = with pkgs; [
-    # NVIDIA utilities
-    nvidia-smi
-    nvtop
+    # NVIDIA utilities (nvidia-smi comes with the driver)
+    nvtopPackages.nvidia
     
     # CUDA development tools
     cudaPackages.cuda_nvcc
@@ -66,7 +66,11 @@
   environment.variables = {
     CUDA_PATH = "${pkgs.cudaPackages.cudatoolkit}";
     CUDA_ROOT = "${pkgs.cudaPackages.cudatoolkit}";
-    LD_LIBRARY_PATH = "${pkgs.cudaPackages.cudatoolkit}/lib:${pkgs.cudaPackages.cudnn}/lib";
+  };
+
+  # Append CUDA libraries to LD_LIBRARY_PATH without conflicts
+  environment.sessionVariables = {
+    LD_LIBRARY_PATH = lib.mkAfter "${pkgs.cudaPackages.cudatoolkit}/lib:${pkgs.cudaPackages.cudnn}/lib";
   };
 
   # Kernel modules
