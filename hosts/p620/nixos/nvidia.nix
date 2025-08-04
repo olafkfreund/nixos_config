@@ -68,9 +68,9 @@
     CUDA_ROOT = "${pkgs.cudaPackages.cudatoolkit}";
   };
 
-  # Append CUDA libraries to LD_LIBRARY_PATH without conflicts
+  # Override LD_LIBRARY_PATH to include both SANE and CUDA libraries
   environment.sessionVariables = {
-    LD_LIBRARY_PATH = lib.mkAfter "${pkgs.cudaPackages.cudatoolkit}/lib:${pkgs.cudaPackages.cudnn}/lib";
+    LD_LIBRARY_PATH = lib.mkForce "/etc/sane-libs:${pkgs.cudaPackages.cudatoolkit}/lib:${pkgs.cudaPackages.cudnn}/lib";
   };
 
   # Kernel modules

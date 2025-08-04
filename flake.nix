@@ -50,10 +50,6 @@
     stylix.url = "github:danth/stylix";
 
     # Editor
-    nixvim = {
-      url = "github:nix-community/nixvim";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     # Development and utilities
     sops-nix = {
@@ -132,7 +128,6 @@
     zjstatus,
     walker,
     hyprland,
-    nixvim,
     ...
   } @ inputs: let
     # Define users per host
@@ -203,10 +198,14 @@
 
             # ISO configuration
             isoImage = {
-              isoName = lib.mkDefault "nixos-${hostName}-live.iso";
               volumeID = lib.mkDefault "NIXOS_${lib.toUpper hostName}";
               makeEfiBootable = true;
               makeUsbBootable = true;
+            };
+
+            # Image configuration
+            image = {
+              fileName = lib.mkDefault "nixos-${hostName}-live.iso";
               squashfsCompression = "gzip -Xcompression-level 1";
             };
 
@@ -747,7 +746,6 @@
           inputs.lanzaboote.nixosModules.lanzaboote
           nix-index-database.nixosModules.nix-index
           ./home/shell/zellij/zjstatus.nix
-          inputs.nixvim.nixosModules.nixvim
           nixai.nixosModules.default
         ]
         ++ stylixModule
@@ -778,7 +776,6 @@
                   nixpkgs-unstable
                   nix-colors
                   nix-snapd
-                  nixvim
                   host
                   ;
                 # Only include stylix for non-server hosts
@@ -797,7 +794,6 @@
                 })
                 allUsers);
               sharedModules = [
-                inputs.nixvim.homeManagerModules.nixvim
                 nixai.homeManagerModules.default
               ];
             };

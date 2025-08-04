@@ -432,9 +432,9 @@ in {
       "vm.vfs_cache_pressure" = mkDefault 50;
       
       # Network optimization
-      "net.ipv4.tcp_window_scaling" = 1;
-      "net.ipv4.tcp_timestamps" = 1;
-      "net.ipv4.tcp_sack" = 1;
+      "net.ipv4.tcp_window_scaling" = mkDefault 1;
+      "net.ipv4.tcp_timestamps" = mkDefault 1;
+      "net.ipv4.tcp_sack" = mkDefault 1;
       "net.ipv4.tcp_fack" = 1;
       "net.core.rmem_max" = 134217728;
       "net.core.wmem_max" = 134217728;
