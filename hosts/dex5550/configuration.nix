@@ -422,7 +422,7 @@ in {
       Compression = false;
       TCPKeepAlive = false;
       X11Forwarding = lib.mkForce false;
-      AllowTcpForwarding = "no";
+      AllowTcpForwarding = lib.mkForce "no";
       AllowAgentForwarding = lib.mkForce false;
       AllowStreamLocalForwarding = false;
       AuthorizedKeysFile = "/etc/ssh/authorized_keys.d/%u .ssh/authorized_keys .ssh/authorized_keys2";
