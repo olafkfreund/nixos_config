@@ -4,7 +4,7 @@
   lib,
   ...
 }: {
-  # Hybrid setup: AMD primary for display, NVIDIA for compute/AI
+  # Hybrid setup: AMD primary for display, NVIDIA for compute/AI only
   # Do NOT add NVIDIA to videoDrivers - keep AMD as primary display
   
   hardware.nvidia = {
@@ -14,18 +14,6 @@
     open = false;
     nvidiaSettings = false;  # No GUI settings needed for AI workloads
     package = config.boot.kernelPackages.nvidiaPackages.latest;
-    
-    # Prime configuration for hybrid setup
-    prime = {
-      # Allow NVIDIA to be used for compute while AMD handles display
-      offload = {
-        enable = true;
-        enableOffloadCmd = true;
-      };
-      # Bus IDs from lspci output
-      amdgpuBusId = "PCI:227:0:0";    # e3:00.0 -> 227:0:0 in decimal
-      nvidiaBusId = "PCI:193:0:0";    # c1:00.0 -> 193:0:0 in decimal
-    };
   };
 
   # Graphics support optimized for AI/compute workloads
@@ -75,14 +63,16 @@
     LD_LIBRARY_PATH = lib.mkForce "/etc/sane-libs:${pkgs.cudaPackages.cudatoolkit}/lib:${pkgs.cudaPackages.cudnn}/lib";
   };
 
-  # Kernel modules
-  boot.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
+  # Load NVIDIA kernel modules for compute/AI (not display)
+  boot.kernelModules = [ "nvidia" "nvidia_uvm" ];
   
-  # Kernel parameters for headless operation
+  # Kernel parameters for compute-only operation
   boot.kernelParams = [
-    "nvidia-drm.modeset=1"
     "nvidia.NVreg_PreserveVideoMemoryAllocations=1"
   ];
+
+  # Ensure NVIDIA modules are available
+  hardware.nvidia.forceFullCompositionPipeline = false;
 
   # Systemd services for NVIDIA persistence
   systemd.services.nvidia-persistenced = {
