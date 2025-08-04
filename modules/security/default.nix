@@ -1,7 +1,7 @@
 {...}: {
   imports = [
     ./ssh-hardening.nix
-    # ./firewall.nix  # Temporarily disabled for deployment
+    ./firewall.nix
   ];
   security.sudo.wheelNeedsPassword = false;
   # Fix for "no new privileges" flag error
