@@ -29,27 +29,20 @@ in {
       package = pkgs.google-chrome;
       commandLineArgs = [
         # Native Wayland support (VizDisplayCompositor disabled for Hyprland compatibility)
-        # "--enable-features=UseOzonePlatform,WaylandWindowDecorations,VaapiVideoDecoder"
         "--enable-features=UseOzonePlatform"
         "--ozone-platform=wayland"
 
-        # # Wayland input and display
-        # "--enable-wayland-ime"
-        # # CRITICAL FIX: Disable VizDisplayCompositor to fix page loading on Hyprland
+        # CRITICAL FIX: Disable VizDisplayCompositor to fix page loading on Hyprland
         "--disable-features=VizDisplayCompositor"
-
-        # # Secure memory management
-        # "--disable-dev-shm-usage"
-        # "--memory-pressure-off"
-
-        # # Graphics acceleration (secure)
-        # "--use-gl=desktop"
-        # "--enable-gpu-rasterization"
-        # "--enable-zero-copy"
-
-        # # Process management
-        # "--process-per-site"
-        # "--max_old_space_size=4096"
+        
+        # Fix zygote/sandbox error by disabling problematic sandbox features
+        "--disable-dev-shm-usage"
+        "--disable-gpu-sandbox"
+        "--disable-software-rasterizer"
+        
+        # Memory and process management
+        "--memory-pressure-off"
+        "--max_old_space_size=4096"
       ];
     };
   };
