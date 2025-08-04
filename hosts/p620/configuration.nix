@@ -90,9 +90,9 @@ in {
     ollama.enable = true;
   };
   
-  # Enable AI-powered system analysis (temporarily disabled due to service failures)
+  # Enable AI-powered system analysis
   ai.analysis = {
-    enable = false;  # Disabled until service issues are resolved
+    enable = true;  # Re-enabled to fix logrotate service dependency
     aiProvider = "openai";
     enableFallback = true;
     
