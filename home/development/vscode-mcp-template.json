@@ -1,0 +1,37 @@
+{
+  // VS Code MCP Configuration Template - Mutable after first creation
+  // This file provides initial MCP server configuration that VS Code can then modify
+  
+  "servers": {
+    "Context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ]
+    },
+    "nixos": {
+      "type": "stdio", 
+      "command": "nix",
+      "args": [
+        "shell",
+        "nixpkgs#uv",
+        "--command",
+        "uvx",
+        "mcp-nixos@0.3.1"
+      ]
+    },
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    }
+  }
+}

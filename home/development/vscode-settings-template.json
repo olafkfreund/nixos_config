@@ -62,42 +62,6 @@
   "editor.fontFamily": "'JetBrainsMono Nerd Font', 'Droid Sans Mono', 'monospace'",
   "terminal.integrated.fontFamily": "'JetBrainsMono Nerd Font'",
 
-  // Critical MCP server configuration
-  "mcp": {
-    "servers": {
-      "Context7": {
-        "type": "stdio",
-        "command": "npx",
-        "args": [
-          "-y",
-          "@upstash/context7-mcp@latest"
-        ]
-      },
-      "nixos": {
-        "type": "stdio",
-        "command": "nix",
-        "args": [
-          "shell",
-          "nixpkgs#uv",
-          "--command",
-          "uvx",
-          "mcp-nixos@0.3.1"
-        ]
-      },
-      "github": {
-        "type": "stdio",
-        "command": "npx",
-        "args": [
-          "-y",
-          "@modelcontextprotocol/server-github"
-        ],
-        "env": {
-          "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
-        }
-      }
-    }
-  },
-
   // Performance optimizations for NixOS
   "files.watcherExclude": {
     "**\/node_modules\/**": true,
@@ -244,13 +208,6 @@
   "github.copilot.chat.codesearch.enabled": true,
   "github.copilot.chat.scopeSelection": true,
   "github.copilot.chat.agent.thinkingTool": true,
-  
-  // MCP settings
-  "chat.mcp.enabled": true,
-  "chat.agent.enabled": true,
-  "chat.mcp.discovery.enabled": true,
-  "chat.tools.autoApprove": true,
-  "chat.agent.maxRequests": 15,
 
   // Extensions settings
   "genieai.enableConversationHistory": true,

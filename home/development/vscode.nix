@@ -69,29 +69,51 @@ in {
       }; # End of profiles.default
     }; # End of programs.vscode
 
-    # Initialize VS Code settings file as mutable (remove any Home Manager symlinks)
+    # Initialize VS Code settings and MCP files as mutable (remove any Home Manager symlinks)
     home.activation.vscodeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
       SETTINGS_DIR="$HOME/.config/Code/User"
       SETTINGS_FILE="$SETTINGS_DIR/settings.json"
-      TEMPLATE_FILE="${./vscode-settings-template.json}"
+      MCP_FILE="$SETTINGS_DIR/mcp.json"
+      SETTINGS_TEMPLATE_FILE="${./vscode-settings-template.json}"
+      MCP_TEMPLATE_FILE="${./vscode-mcp-template.json}"
 
       # Create VS Code config directory if it doesn't exist
       mkdir -p "$SETTINGS_DIR"
 
-      # Remove any existing symlink created by Home Manager
+      # Remove any existing backup files that cause conflicts
+      if [ -f "$SETTINGS_DIR/settings.json.backup" ]; then
+        echo "Removing conflicting settings.json.backup file..."
+        rm "$SETTINGS_DIR/settings.json.backup"
+      fi
+
+      # Handle settings.json
       if [ -L "$SETTINGS_FILE" ]; then
         echo "Removing Home Manager symlink for VS Code settings..."
         rm "$SETTINGS_FILE"
       fi
 
-      # Create mutable settings file if it doesn't exist or was a symlink
       if [ ! -f "$SETTINGS_FILE" ]; then
         echo "Creating initial mutable VS Code settings file..."
-        cp "$TEMPLATE_FILE" "$SETTINGS_FILE"
+        cp "$SETTINGS_TEMPLATE_FILE" "$SETTINGS_FILE"
         chmod 644 "$SETTINGS_FILE"
-        echo "✅ VS Code settings initialized as mutable file. You can now modify settings through VS Code UI."
+        echo "✅ VS Code settings.json initialized as mutable file."
       else
-        echo "VS Code settings file exists and is already mutable - leaving it alone."
+        echo "VS Code settings.json file exists and is already mutable - leaving it alone."
+      fi
+
+      # Handle mcp.json
+      if [ -L "$MCP_FILE" ]; then
+        echo "Removing Home Manager symlink for MCP configuration..."
+        rm "$MCP_FILE"
+      fi
+
+      if [ ! -f "$MCP_FILE" ]; then
+        echo "Creating initial mutable MCP configuration file..."
+        cp "$MCP_TEMPLATE_FILE" "$MCP_FILE"
+        chmod 644 "$MCP_FILE"
+        echo "✅ VS Code mcp.json initialized as mutable file."
+      else
+        echo "VS Code mcp.json file exists and is already mutable - leaving it alone."
       fi
     '';
 
