@@ -95,10 +95,10 @@ check_ai_services() {
             local ai_services=("ollama" "ai-alert-manager" "ai-production-dashboard")
             ;;
         "dex5550")
-            local ai_services=("prometheus" "grafana" "ai-analysis")
+            local ai_services=("prometheus" "grafana")
             ;;
         "p510"|"razer")
-            local ai_services=("ai-storage-analysis" "ai-memory-optimization")
+            local ai_services=("ai-memory-optimization")
             ;;
     esac
     

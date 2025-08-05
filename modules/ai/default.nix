@@ -7,7 +7,7 @@
     ./chatgpt.nix
     ./gemini-cli.nix
     ./providers/default.nix
-    ./analysis/default.nix
+    # ./analysis/default.nix  # Removed - was non-functional
     ./memory-optimization.nix
     ./grafana-dashboards.nix
     ./prometheus-alerts.nix

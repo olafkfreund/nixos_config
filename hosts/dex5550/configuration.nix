@@ -66,29 +66,11 @@ in {
     ollama.enable = false;  # Disabled on low-power system
   };
   
-  # Enable AI-powered system analysis
-  ai.analysis = {
-    enable = true;
-    aiProvider = "openai";
-    enableFallback = true;
-    
-    features = {
-      performanceAnalysis = true;
-      resourceOptimization = true;
-      configDriftDetection = true;
-      predictiveMaintenance = true;
-      logAnalysis = true;
-      securityAnalysis = true;
-    };
-    
-    # Analysis intervals
-    intervals = {
-      performanceAnalysis = "hourly";  # Every hour
-      maintenanceAnalysis = "daily";   # Once daily
-      configDriftCheck = "*:0/6";      # Every 6 hours
-      logAnalysis = "*:0/4";           # Every 4 hours
-    };
-  };
+  # AI analysis services removed - were non-functional and consuming resources
+  # ai.analysis = {
+  #   enable = false;  # Removed completely - provided no meaningful analysis
+  #   aiProvider = "openai";
+  # };
 
   # Use nameservers from variables (commented out to avoid conflict)
   # networking.nameservers = vars.nameservers;

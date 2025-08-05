@@ -103,29 +103,11 @@ in {
     ollama.enable = true;
   };
 
-  # Enable AI-powered system analysis (temporarily disabled due to service failures)
-  ai.analysis = {
-    enable = false;  # Disabled until service issues are resolved
-    aiProvider = "openai";
-    enableFallback = true;
-
-    features = {
-      performanceAnalysis = true;
-      resourceOptimization = true;
-      configDriftDetection = true;
-      predictiveMaintenance = true;
-      logAnalysis = true;
-      securityAnalysis = true;
-    };
-
-    # Analysis intervals
-    intervals = {
-      performanceAnalysis = "hourly"; # Every hour
-      maintenanceAnalysis = "daily"; # Once daily
-      configDriftCheck = "*:0/6"; # Every 6 hours
-      logAnalysis = "*:0/4"; # Every 4 hours
-    };
-  };
+  # AI analysis services removed - were non-functional and consuming resources
+  # ai.analysis = {
+  #   enable = false;  # Removed completely - provided no meaningful analysis
+  #   aiProvider = "openai";
+  # };
 
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
