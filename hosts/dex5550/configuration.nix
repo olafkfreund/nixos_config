@@ -272,106 +272,13 @@ in {
   # Disable API keys module (not needed on monitoring server)
   secrets.apiKeys.enable = false;
 
-  # Enable AI analysis Grafana dashboards
-  ai.grafanaDashboards.enable = true;
+  # AI Grafana dashboards removed - using standard Grafana dashboards instead
 
-  # Enable AI analysis Prometheus alerts
-  ai.prometheusAlerts.enable = true;
+  # AI Prometheus alerts removed - handled by standard Prometheus alerting rules
   
-  # Enable advanced alerting and notification system on monitoring server
-  ai.alerting = {
-    enable = true;
-    
-    # Email configuration
-    enableEmail = true;
-    smtpServer = "smtp.gmail.com";
-    smtpPort = 587;
-    fromEmail = "ai-alerts@freundcloud.com";
-    alertRecipients = ["admin@freundcloud.com"];
-    
-    # Notification channels
-    enableSlack = false;
-    enableSms = false;
-    enableDiscord = false;
-    
-    # Alert thresholds optimized for monitoring server
-    alertThresholds = {
-      diskUsage = 80;             # Lower threshold for monitoring server
-      memoryUsage = 85;           # Important for Grafana/Prometheus
-      cpuUsage = 85;              # Higher threshold for server workload
-      aiResponseTime = 8000;      # AI response time in milliseconds
-      sshFailedAttempts = 20;     # Higher threshold for public server
-      serviceDowntime = 300;      # Service downtime in seconds
-      loadTestFailures = 50;      # Load test failure rate %
-    };
-    
-    # Escalation rules
-    escalationRules = {
-      level1 = {
-        timeMinutes = 5;
-        recipients = ["admin@freundcloud.com"];
-        channels = ["email"];
-      };
-      level2 = {
-        timeMinutes = 15;
-        recipients = ["admin@freundcloud.com"];
-        channels = ["email"];
-      };
-      level3 = {
-        timeMinutes = 30;
-        recipients = ["admin@freundcloud.com"];
-        channels = ["email"];
-      };
-    };
-    
-    # Notification settings
-    notificationTimeout = 30;
-    notificationRetries = 3;
-    
-    # Maintenance mode
-    maintenanceMode = false;
-    
-    # Alert levels configuration
-    alertLevels = {
-      critical = {
-        email = true;
-        slack = true;
-        sms = true;
-        discord = true;
-      };
-      warning = {
-        email = true;
-        slack = true;
-        sms = false;
-        discord = false;
-      };
-      info = {
-        email = false;
-        slack = false;
-        sms = false;
-        discord = false;
-      };
-    };
-  };
+  # AI alerting removed - was non-functional, handled by Prometheus/Grafana/Alertmanager
 
-  # Enable automated remediation for monitoring server
-  ai.automatedRemediation = {
-    enable = true;
-    enableSelfHealing = true;   # Enable for monitoring server stability
-    safeMode = true;           # Safe mode for critical monitoring infrastructure
-    
-    notifications = {
-      enable = true;
-      logFile = "/var/log/ai-analysis/remediation-dex5550.log";
-    };
-    
-    actions = {
-      diskCleanup = true;           # Keep monitoring server healthy
-      memoryOptimization = true;    # Important for Grafana/Prometheus
-      serviceRestart = true;        # Critical for monitoring services
-      configurationReset = false;   # Keep disabled for safety
-    };
-  };
+  # AI automated remediation removed - was non-functional and consuming resources
 
   # Non-functional AI modules removed - were consuming resources without providing value
   # ai.securityAudit = {
@@ -1052,34 +959,7 @@ in {
     };
   };
   
-  # AI-powered automated performance tuning for monitoring server
-  ai.autoPerformanceTuner = {
-    enable = true;
-    aiProvider = "openai";
-    enableFallback = true;
-    tuningInterval = "hourly";  # Less frequent for stable monitoring server
-    safeMode = true;  # Conservative tuning for critical monitoring infrastructure
-    
-    features = {
-      adaptiveTuning = true;
-      predictiveOptimization = true;
-      workloadDetection = true;
-      resourceBalancing = true;
-      anomalyCorrection = true;
-    };
-    
-    thresholds = {
-      cpuUtilization = 80;     # Higher threshold for monitoring server
-      memoryUtilization = 85;  # Important threshold for Grafana/Prometheus
-      ioWait = 30;
-      responseTime = 5000;     # Monitoring queries can be slower
-    };
-    
-    notifications = {
-      enable = true;
-      logFile = "/var/log/ai-analysis/auto-tuner-dex5550.log";
-    };
-  };
+  # AI auto-performance tuner removed - was non-functional and consuming resources
 
   nixpkgs.config = {
     allowBroken = true;

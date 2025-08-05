@@ -88,39 +88,9 @@ in {
   #   aiProvider = "openai";
   # };
 
-  # Enable AI-powered memory optimization - CRITICAL for P510 with 79.6% disk usage
-  ai.memoryOptimization = {
-    enable = true;
-    autoOptimize = true;
-    nixStoreOptimization = true;
-    logRotation = true;
+  # AI memory optimization removed - was non-functional and consuming resources
 
-    thresholds = {
-      memoryWarning = 80; # P510 is at 12.5%, normal threshold
-      memoryCritical = 90; # Standard critical threshold
-      diskWarning = 75; # P510 is at 79.6%, urgent threshold
-      diskCritical = 85; # Prevent disk full - already close!
-    };
-  };
-
-  # Enable automated remediation - CRITICAL for P510 disk space management
-  ai.automatedRemediation = {
-    enable = true;
-    enableSelfHealing = true; # Enable for P510 due to critical disk usage
-    safeMode = false; # Disable safe mode for P510 - aggressive cleanup needed
-
-    notifications = {
-      enable = true;
-      logFile = "/var/log/ai-analysis/remediation-p510.log";
-    };
-
-    actions = {
-      diskCleanup = true; # Critical - P510 at 79.6%
-      memoryOptimization = true; # Preventive
-      serviceRestart = true; # Enable for P510
-      configurationReset = false; # Keep disabled for safety
-    };
-  };
+  # AI automated remediation removed - was non-functional and consuming resources
 
   # Non-functional AI modules removed - were consuming resources without providing value
   # ai.storageAnalysis = {
