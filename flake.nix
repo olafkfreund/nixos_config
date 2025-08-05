@@ -86,8 +86,6 @@
 
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
-    bzmenu.url = "github:e-tho/bzmenu";
-    iwmenu.url = "github:e-tho/iwmenu";
     walker.url = "github:abenz1267/walker";
     zjstatus.url = "github:dj95/zjstatus";
     ags.url = "github:Aylur/ags";
@@ -123,8 +121,6 @@
     home-manager,
     stylix,
     nix-index-database,
-    bzmenu,
-    iwmenu,
     zjstatus,
     walker,
     hyprland,
@@ -769,8 +765,6 @@
                   walker
                   nix-index-database
                   nixpkgs-f2k
-                  bzmenu
-                  iwmenu
                   home-manager
                   nixpkgs-stable
                   nixpkgs-unstable

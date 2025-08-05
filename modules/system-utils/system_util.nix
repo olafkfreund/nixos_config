@@ -100,8 +100,6 @@
     twitch-tui
     deploy-rs
     
-    # External packages
-    inputs.iwmenu.packages.${pkgs.system}.default
-    inputs.bzmenu.packages.${pkgs.system}.default
+    # External packages (iwmenu and bzmenu removed - not used)
     ];
 }

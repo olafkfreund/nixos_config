@@ -21,13 +21,13 @@
     "mitigations=auto" # Balance security mitigations with performance
   ];
 
-  # Memory management for Xeon workstation
+  # Boot-specific kernel parameters for Xeon workstation
   boot.kernel.sysctl = {
     "vm.nr_hugepages" = 1024;
-    "vm.max_map_count" = 1048576; # Helps with memory-mapped files for large models
-    "vm.swappiness" = 10; # Reduce swap usage on workstation
-    "vm.dirty_ratio" = 10; # Memory percentage for dirty pages before sync
-    # "vm.dirty_background_ratio" = 5; # Moved to memory.nix to avoid conflict
+    # "vm.max_map_count" moved to memory.nix to avoid conflict
+    # "vm.swappiness" moved to memory.nix to avoid conflict
+    # "vm.dirty_ratio" moved to memory.nix to avoid conflict  
+    # "vm.dirty_background_ratio" moved to memory.nix to avoid conflict
     "kernel.numa_balancing" = 0; # Disable automatic NUMA balancing
   };
 
