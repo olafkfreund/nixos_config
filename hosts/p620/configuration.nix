@@ -78,7 +78,7 @@ in {
     fallbackDns = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
     domains = [ "~home.freundcloud.com" ];  # Use routing directive for local domain
     dnssec = lib.mkForce "false";  # Resolve DNSSEC conflict
-    llmnr = "false";  # Disable LLMNR to avoid conflicts with Tailscale
+    llmnr = lib.mkForce "false";  # Disable LLMNR to avoid conflicts with Tailscale
     extraConfig = ''
       DNS=192.168.1.222 1.1.1.1 8.8.8.8
       Domains=~home.freundcloud.com
