@@ -14,7 +14,6 @@ in {
     ./nixos/power.nix
     ./nixos/boot.nix
     ./nixos/amd.nix
-    ./nixos/nvidia.nix  # Add NVIDIA for AI/compute workloads
     ./nixos/usb-power-fix.nix  # Fix USB mouse freezing issues
     ./nixos/i18n.nix
     ./nixos/hosts.nix
@@ -55,13 +54,14 @@ in {
   networking.profile = "server";
   
   # Tailscale VPN Configuration
+  # Research shows acceptDns=false is critical for NixOS to avoid DNS conflicts
   networking.tailscale = {
     enable = true;
     authKeyFile = config.age.secrets.tailscale-auth-key.path;
     hostname = "p620-workstation";
     subnet = "192.168.1.0/24";  # Advertise local subnet
     acceptRoutes = true;
-    acceptDns = false;  # Keep local DNS setup
+    acceptDns = false;  # CRITICAL: Prevent Tailscale DNS conflicts with systemd-resolved
     ssh = true;
     shields = true;
     useRoutingFeatures = "both";  # Can route and accept routes
@@ -72,11 +72,21 @@ in {
   };
 
   # Use systemd-resolved for proper DNS management with systemd-networkd
+  # Based on Tailscale best practices research - avoid DNS conflicts
   services.resolved = {
     enable = true;
     fallbackDns = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
-    domains = [ "home.freundcloud.com" ];
+    domains = [ "~home.freundcloud.com" ];  # Use routing directive for local domain
     dnssec = lib.mkForce "false";  # Resolve DNSSEC conflict
+    llmnr = "false";  # Disable LLMNR to avoid conflicts with Tailscale
+    extraConfig = ''
+      DNS=192.168.1.222 1.1.1.1 8.8.8.8
+      Domains=~home.freundcloud.com
+      Cache=yes
+      CacheFromLocalhost=no
+      DNSStubListener=yes
+      ReadEtcHosts=yes
+    '';
   };
 
   # Configure AI providers directly
@@ -668,26 +678,41 @@ in {
         matchConfig.Name = "en*";
         networkConfig = {
           MulticastDNS = false;
+          LLMNR = false;
           DHCP = "ipv4";
           IPv6AcceptRA = true;
-          Domains = "home.freundcloud.com";
-          DNS = [ "192.168.1.222" "1.1.1.1" ];
+          Domains = "~home.freundcloud.com";  # Use routing directive for local domain
+          DNS = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
         };
         # Higher priority for wired connection
         dhcpV4Config = {
           RouteMetric = 10;
+          UseDNS = false;  # Use our custom DNS configuration
         };
       };
       "25-wireless" = {
         matchConfig.Name = "wl*";
         networkConfig = {
           MulticastDNS = false;
+          LLMNR = false;
           DHCP = "ipv4";
           IPv6AcceptRA = true;
         };
         # Lower priority for wireless
         dhcpV4Config = {
           RouteMetric = 20;
+        };
+      };
+      # Configure Tailscale interface - CRITICAL: Don't let systemd-networkd manage it
+      # Research shows this prevents "Link tailscale0 is managed" DNS conflicts
+      "30-tailscale" = {
+        matchConfig.Name = "tailscale0";
+        networkConfig = {
+          MulticastDNS = false;
+          LLMNR = false;
+          DHCP = "no";  # NEVER enable DHCP on Tailscale interface
+          DNS = [ ];  # Explicitly no DNS - let Tailscale handle it
+          Domains = [ ];  # No domain routing through this interface
         };
       };
     };
