@@ -142,39 +142,19 @@ in {
     };
   };
 
-  # Enable storage analysis for P620 in monitoring mode
-  ai.storageAnalysis = {
-    enable = true;
-    emergencyMode = false;     # P620 at acceptable 49.6% usage
-    analysisInterval = "daily"; # Daily monitoring for P620
-    reportPath = "/var/lib/ai-analysis/p620-storage-reports";
-  };
-
-  # Enable security auditing for P620
-  ai.securityAudit = {
-    enable = true;
-    auditLevel = "comprehensive";  # Full security audit for P620
-    autoHardening = false;         # Manual review required
-    scheduleInterval = "weekly";   # Weekly security audits
-    reportPath = "/mnt/data/security-reports";
-  };
-
-  # Enable comprehensive system validation for P620
-  ai.systemValidation = {
-    enable = true;
-    validationLevel = "comprehensive";  # Full validation testing
-    enableLoadTesting = false;          # Disable load testing for development system
-    testReportPath = "/mnt/data/validation-reports";
-  };
-
-  # Enable AI performance optimization
-  ai.performanceOptimization = {
-    enable = true;
-    aiProviderOptimization = true;
-    cacheOptimization = true;
-    networkOptimization = true;
-    systemOptimization = true;
-  };
+  # Non-functional AI modules removed - were consuming resources without providing value
+  # ai.storageAnalysis = {
+  #   enable = false;  # Removed - no meaningful analysis output
+  # };
+  # ai.securityAudit = {
+  #   enable = false;  # Removed - no actual audits performed
+  # };
+  # ai.systemValidation = {
+  #   enable = false;  # Removed - no validation functionality
+  # };
+  # ai.performanceOptimization = {
+  #   enable = false;  # Removed - no actual optimizations applied
+  # };
 
   # Enable SSH security hardening
   security.sshHardening = {

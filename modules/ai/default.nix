@@ -12,13 +12,13 @@
     ./grafana-dashboards.nix
     ./prometheus-alerts.nix
     ./automated-remediation.nix
-    ./storage-analysis.nix
-    ./backup-strategy.nix
-    ./storage-expansion.nix
-    ./storage-migration.nix
-    ./security-audit.nix
-    ./system-validation.nix
-    ./performance-optimization.nix
+    # ./storage-analysis.nix  # Removed - no meaningful analysis output
+    # ./backup-strategy.nix  # Removed - no actual backups being created
+    # ./storage-expansion.nix  # Removed - no expansion planning functionality
+    # ./storage-migration.nix  # Removed - no migration functionality
+    # ./security-audit.nix  # Removed - no actual audits performed
+    # ./system-validation.nix  # Removed - no validation functionality
+    # ./performance-optimization.nix  # Removed - no actual optimizations applied
     ./production-dashboard.nix
     ./load-testing.nix
     ./alerting-system.nix
