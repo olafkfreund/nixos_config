@@ -108,39 +108,7 @@ in {
   #   aiProvider = "openai";
   # };
 
-  # Enable AI-powered memory optimization
-  ai.memoryOptimization = {
-    enable = true;
-    autoOptimize = true;
-    nixStoreOptimization = true;
-    logRotation = true;
-    
-    thresholds = {
-      memoryWarning = 75;    # P620 is at 22.8%, set lower threshold
-      memoryCritical = 85;   # Prevent memory exhaustion
-      diskWarning = 45;      # P620 root disk at 49.6%, set lower threshold
-      diskCritical = 55;     # Prevent disk full
-    };
-  };
-
-  # Enable automated remediation in safe mode for P620
-  ai.automatedRemediation = {
-    enable = true;
-    enableSelfHealing = false;  # Conservative for P620
-    safeMode = true;           # Safe mode for P620
-    
-    notifications = {
-      enable = true;
-      logFile = "/var/log/ai-analysis/remediation-p620.log";
-    };
-    
-    actions = {
-      diskCleanup = true;           # Preventive
-      memoryOptimization = true;    # P620 at 22.8% memory
-      serviceRestart = false;       # Disabled in safe mode
-      configurationReset = false;   # Keep disabled for safety
-    };
-  };
+  # AI memory optimization and automated remediation removed - were non-functional and consuming resources
 
   # Non-functional AI modules removed - were consuming resources without providing value
   # ai.storageAnalysis = {
@@ -189,14 +157,7 @@ in {
     };
   };
 
-  # Enable production monitoring dashboard
-  ai.productionDashboard = {
-    enable = true;
-    grafanaUrl = "http://dex5550:3001";
-    prometheusUrl = "http://dex5550:9090";
-    enableAlerts = true;
-    refreshInterval = "30s";
-  };
+  # AI production dashboard and load testing removed - were non-functional services consuming resources
 
   # Enable NixOS package monitoring tools
   tools.nixpkgs-monitors = {
@@ -204,138 +165,7 @@ in {
     installAll = true;
   };
 
-  # Enable load testing for AI services
-  ai.loadTesting = {
-    enable = true;
-    testDuration = "3m";
-    maxConcurrentUsers = 8;
-    testInterval = "weekly";
-    enableContinuousLoad = false;  # Disable continuous load testing for development system
-    
-    providers = ["anthropic" "ollama"];  # Test available providers
-    
-    testEndpoints = [
-      "http://localhost:9090/-/healthy"    # Prometheus
-      "http://localhost:3001/api/health"   # Grafana  
-      "http://localhost:11434/api/tags"    # Ollama
-    ];
-    
-    loadTestProfiles = {
-      light = {
-        users = 3;
-        duration = "1m";
-        rampUp = "20s";
-      };
-      moderate = {
-        users = 8;
-        duration = "3m";
-        rampUp = "40s";
-      };
-      heavy = {
-        users = 15;
-        duration = "5m";
-        rampUp = "1m";
-      };
-      stress = {
-        users = 25;
-        duration = "8m";
-        rampUp = "2m";
-      };
-    };
-    
-    alertThresholds = {
-      responseTime = 8000;      # 8 seconds for P620
-      errorRate = 10;           # 10% error rate acceptable for development
-      throughput = 5;           # 5 requests per second minimum
-      cpuUsage = 75;            # 75% CPU usage threshold
-      memoryUsage = 80;         # 80% memory usage threshold
-    };
-    
-    reportPath = "/mnt/data/load-test-reports";
-  };
-
-  # AI alerting moved to DEX5550 monitoring server
-  ai.alerting = {
-    enable = false;  # Alerts handled by DEX5550
-    enableEmail = true;
-    enableSlack = false;        # Disable Slack for now
-    enableSms = false;          # Disable SMS for now
-    enableDiscord = false;      # Disable Discord for now
-    
-    # Email configuration
-    smtpServer = "smtp.gmail.com";
-    smtpPort = 587;
-    fromEmail = "ai-alerts@freundcloud.com";
-    alertRecipients = ["admin@freundcloud.com"];
-    
-    # Alert thresholds (tuned for P620)
-    alertThresholds = {
-      diskUsage = 80;           # 80% disk usage for P620
-      memoryUsage = 85;         # 85% memory usage
-      cpuUsage = 80;            # 80% CPU usage
-      aiResponseTime = 8000;    # 8 seconds for P620
-      sshFailedAttempts = 15;   # 15 failed SSH attempts
-      serviceDowntime = 300;    # 5 minutes service downtime
-      loadTestFailures = 50;    # 50% load test failure rate
-    };
-    
-    # Alert level preferences
-    alertLevels = {
-      critical = {
-        email = true;
-        slack = false;
-        sms = false;
-        discord = false;
-      };
-      warning = {
-        email = true;
-        slack = false;
-        sms = false;
-        discord = false;
-      };
-      info = {
-        email = false;
-        slack = false;
-        sms = false;
-        discord = false;
-      };
-    };
-    
-    # Escalation rules
-    escalationRules = {
-      level1 = {
-        timeMinutes = 5;
-        recipients = ["admin@freundcloud.com"];
-        channels = ["email"];
-      };
-      level2 = {
-        timeMinutes = 15;
-        recipients = ["admin@freundcloud.com"];
-        channels = ["email"];
-      };
-      level3 = {
-        timeMinutes = 30;
-        recipients = ["admin@freundcloud.com"];
-        channels = ["email"];
-      };
-    };
-    
-    # Maintenance mode (disabled by default)
-    maintenanceMode = false;
-    
-    # Alert suppression rules
-    alertSuppressionRules = [
-      "health check"
-      "connection established"
-      "connection closed"
-      "router dispatching"
-      "body-parser"
-    ];
-    
-    # Notification settings
-    notificationRetries = 3;
-    notificationTimeout = 30;
-  };
+  # AI alerting removed - was non-functional, handled by DEX5550 monitoring server via Prometheus/Grafana/Alertmanager
 
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
@@ -844,34 +674,7 @@ in {
     };
   };
   
-  # AI-powered automated performance tuning
-  ai.autoPerformanceTuner = {
-    enable = true;
-    aiProvider = "openai";
-    enableFallback = true;
-    tuningInterval = "30min";  # Frequent tuning for performance workstation
-    safeMode = false;  # Allow aggressive optimizations on performance workstation
-    
-    features = {
-      adaptiveTuning = true;
-      predictiveOptimization = true;
-      workloadDetection = true;
-      resourceBalancing = true;
-      anomalyCorrection = true;
-    };
-    
-    thresholds = {
-      cpuUtilization = 75;     # Lower threshold for performance work.station
-      memoryUtilization = 80;
-      ioWait = 25;            # Lower threshold for fast storage
-      responseTime = 3000;    # Stricter response time requirement
-    };
-    
-    notifications = {
-      enable = true;
-      logFile = "/var/log/ai-analysis/auto-tuner-p620.log";
-    };
-  };
+  # AI-powered automated performance tuning removed - was non-functional and consuming resources
 
   # Package configurations
   nixpkgs.config = {
