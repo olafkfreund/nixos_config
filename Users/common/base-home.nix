@@ -1,6 +1,5 @@
 {
   inputs,
-  lib,
   pkgs ? {},
   username ? "olafkfreund", # Default fallback
   ...

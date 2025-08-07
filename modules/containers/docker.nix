@@ -47,7 +47,7 @@ in {
     };
 
     # Add specified users to docker group
-    users.users = genAttrs cfg.users (username: {
+    users.users = genAttrs cfg.users (_username: {
       extraGroups = ["docker"];
     });
 

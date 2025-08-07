@@ -2,7 +2,7 @@
 # This file provides a comprehensive server configuration template
 # Edit variables.nix to customize for your specific server needs
 
-{ config, lib, pkgs, inputs, system, hostUsers, ... }:
+{ config, lib, pkgs, system, ... }:
 
 let
   vars = import ./variables.nix;

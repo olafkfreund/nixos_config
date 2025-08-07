@@ -2,7 +2,6 @@
   config,
   pkgs,
   lib,
-  inputs,
   hostUsers,
   ...
 }: let

@@ -2,7 +2,6 @@
   pkgs,
   config,
   lib,
-  inputs,
   hostUsers,
   ...
 }: let
@@ -338,7 +337,7 @@ in {
     razergenie # Another Razer configuration tool
     
     # Login manager (from greetd.nix)
-    greetd.tuigreet
+    tuigreet
     
     # Secure Boot management (from secure-boot.nix) - only when secure boot enabled
   ] ++ lib.optionals (config.boot.lanzaboote.enable or false) [

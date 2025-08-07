@@ -1,9 +1,7 @@
 # Network stability configuration for p620
 # Fixes net::ERR_NETWORK_CHANGED errors
 {
-  config,
   lib,
-  pkgs,
   ...
 }: {
   # Enable the comprehensive network stability service with p620-specific settings

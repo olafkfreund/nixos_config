@@ -19,7 +19,7 @@
     nixpkgs,
     microvm,
     ...
-  } @ inputs: let
+  }: let
     system = "x86_64-linux";
     username = "k3suser";
     k3sToken = "7j2hK6sVjkzN5sE8sF+pQyXlJd3w8bX0y5ZvX7K9KAo="; # Replace with your generated token

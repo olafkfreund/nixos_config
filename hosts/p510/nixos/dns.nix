@@ -1,13 +1,8 @@
 {
-  config,
-  lib,
-  inputs,
-  self,
   pkgs,
   ...
 }: let
   ipv4 = "5.78.43.185";
-  ipv6Prefix = "2a01:4ff:1f0:872a";
   fqdn2domain = "infra.holochain.org";
 in {
   system.activationScripts.bind-zones.text = ''

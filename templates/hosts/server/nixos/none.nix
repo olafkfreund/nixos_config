@@ -1,6 +1,6 @@
 # No GPU / Headless configuration for server template
 # Optimized for pure headless server operation without any GPU
-{ config, pkgs, lib, ... }:
+{ pkgs, lib, ... }:
 
 {
   # Minimal graphics support for headless servers

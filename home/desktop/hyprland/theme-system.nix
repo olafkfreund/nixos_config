@@ -1,9 +1,7 @@
 # Hyprland Centralized Theming System
 # Provides consistent theming across all Hyprland components
 {
-  config,
   lib,
-  pkgs,
   ...
 }:
 with lib;

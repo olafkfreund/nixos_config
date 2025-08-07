@@ -1,7 +1,6 @@
 # Enhanced Workspace Configuration
 # Smart multi-monitor workspace distribution with host-specific variables
 {
-  config,
   lib,
   host ? "default",
   ...

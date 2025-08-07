@@ -10,9 +10,6 @@ with lib; let
 
   # Custom extensions not available in nixpkgs
   # Note: Uncomment and add proper sha256 hashes when needed
-  customExtensions = [
-    # Example: Uncomment and get hash using scripts/get-extension-hashes.sh
-  ];
 in {
   options.editor.vscode = {
     enable = mkEnableOption "Visual Studio Code editor" // {default = true;};

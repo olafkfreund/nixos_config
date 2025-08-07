@@ -1,11 +1,10 @@
 # Enhanced feature system with dependency resolution and validation
 {
   lib,
-  pkgs,
   config,
   ...
 }: let
-  inherit (lib) mkOption types mkIf attrNames filter flatten unique;
+  inherit (lib) mkOption types attrNames filter flatten;
   
   # Feature registry with metadata
   featureRegistry = {

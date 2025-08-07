@@ -1,8 +1,4 @@
 {
-  lib,
-  config,
-  pkgs,
-  pkgs-unstable,
   ...
 }: {
   services.syncthing = {

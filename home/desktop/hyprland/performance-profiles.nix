@@ -1,8 +1,5 @@
 # Simplified Performance Profiles
 {
-  config,
-  lib,
-  pkgs,
   ...
 }:
 let

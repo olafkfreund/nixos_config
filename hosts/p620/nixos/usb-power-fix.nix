@@ -1,6 +1,4 @@
 {
-  config,
-  pkgs,
   ...
 }: {
   # Fix USB mouse freezing by disabling autosuspend for Bluetooth devices

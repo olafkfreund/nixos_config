@@ -1,4 +1,4 @@
-{ inputs, lib, config, pkgs, ... }:{
+{ pkgs, ... }:{
 
 # Thunar File Manager 
 programs.thunar = {

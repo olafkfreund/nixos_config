@@ -2,7 +2,6 @@
 {
   lib,
   config,
-  inputs,
   ...
 }: let
   inherit (lib) mkOption types;

@@ -150,7 +150,7 @@ in
   inherit mkLiveISO;
   
   # Convenience function to build all live ISOs
-  mkAllLiveISOs = hosts: nixpkgs.lib.mapAttrs (hostName: hostConfig: 
+  mkAllLiveISOs = hosts: nixpkgs.lib.mapAttrs (hostName: _hostConfig: 
     nixpkgs.lib.nixosSystem (mkLiveISO hostName)
   ) hosts;
 }

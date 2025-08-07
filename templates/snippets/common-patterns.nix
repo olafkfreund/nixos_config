@@ -388,7 +388,7 @@ with lib; {
   # Custom package with overlay
   examples.customPackage = {
     nixpkgs.overlays = [
-      (final: prev: {
+      (_final: prev: {
         example-custom = prev.example-package.overrideAttrs (oldAttrs: {
           version = "custom";
           buildInputs = oldAttrs.buildInputs ++ [ prev.extra-dependency ];

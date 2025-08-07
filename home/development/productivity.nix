@@ -2,9 +2,7 @@
 # Note-taking, task management, time tracking, and collaboration tools
 {
   pkgs,
-  config,
   lib,
-  host ? "default",
   ...
 }:
 with lib;

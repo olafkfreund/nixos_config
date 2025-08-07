@@ -66,7 +66,6 @@
       tempDir = cfg.tempDir;
       terminals = cfg.terminals;
       keybindings = cfg.keybindings;
-      model = cfg.model;
 
       # Pre-generate the terminal selection logic to avoid shell expansion issues
       terminalSelectionScript =

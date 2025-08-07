@@ -1,6 +1,5 @@
 {
   pkgs,
-  config,
   ...
 }: let
   # Define variables here

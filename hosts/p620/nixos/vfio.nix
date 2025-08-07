@@ -6,7 +6,6 @@ let
   ];
 in
   {
-    pkgs,
     lib,
     config,
     ...

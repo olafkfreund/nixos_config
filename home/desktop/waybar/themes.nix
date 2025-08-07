@@ -1,7 +1,6 @@
 # Waybar Theme System
 # Provides consistent theming for Waybar
 {
-  config,
   lib,
   ...
 }:

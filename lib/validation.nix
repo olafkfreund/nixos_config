@@ -1,7 +1,6 @@
 # Configuration validation and testing utilities
 {
   lib,
-  pkgs,
   config,
   ...
 }: let

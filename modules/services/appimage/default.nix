@@ -1,6 +1,5 @@
 {
   pkgs,
-  config,
   ...
 }: {
   boot.binfmt.registrations.appimage = {

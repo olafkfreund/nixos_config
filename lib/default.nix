@@ -4,7 +4,7 @@
   inputs,
   ...
 }: let
-  inherit (lib) makeExtensible attrValues foldr;
+  inherit (lib) makeExtensible;
   
   # Import all library modules
   modules = {
@@ -23,7 +23,7 @@ in makeExtensible (self: modules // {
   mkFeatureModule = name: config: self.mkModule { inherit lib; } name config;
   
   # Host creation helper
-  mkNixosHost = hostName: config: inputs.nixpkgs.lib.nixosSystem {
+  mkNixosHost = _hostName: config: inputs.nixpkgs.lib.nixosSystem {
     system = "x86_64-linux";
     specialArgs = { inherit inputs lib; };
     modules = [

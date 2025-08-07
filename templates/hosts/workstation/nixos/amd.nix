@@ -1,5 +1,5 @@
 # AMD GPU configuration for workstation template
-{ config, pkgs, lib, ... }:
+{ pkgs, lib, ... }:
 
 {
   # AMD GPU hardware support

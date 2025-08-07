@@ -73,7 +73,7 @@ in {
 
     # Add users to the required groups
     users.users =
-      mapAttrs (name: _: {
+      mapAttrs (_name: _: {
         extraGroups = [cfg.vhostNetGroup cfg.macvtapGroup cfg.usbGroup];
       })
       cfg.users;

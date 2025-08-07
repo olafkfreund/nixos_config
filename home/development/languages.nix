@@ -2,9 +2,7 @@
 # Unified language server, formatter, and development tool configuration
 {
   pkgs,
-  config,
   lib,
-  host ? "default",
   ...
 }:
 with lib;
@@ -118,8 +116,8 @@ let
   };
   
   # Helper functions
-  enabledLanguages = filterAttrs (name: lang: lang.enable) cfg.languages;
-  enabledUtilities = filterAttrs (name: util: any (x: x) (attrValues util)) cfg.utilities;
+  enabledLanguages = filterAttrs (_name: lang: lang.enable) cfg.languages;
+  enabledUtilities = filterAttrs (_name: util: any (x: x) (attrValues util)) cfg.utilities;
   
   # Package collections
   languagePackages = flatten (mapAttrsToList (name: lang: 
@@ -316,7 +314,7 @@ in {
   
   # Language server configurations export for editors
   home.file.".config/development/lsp-config.json".text = builtins.toJSON {
-    languages = mapAttrs (name: lang: {
+    languages = mapAttrs (_name: lang: {
       lsp = lang.lsp;
       formatters = lang.formatters;
       enabled = lang.enable;

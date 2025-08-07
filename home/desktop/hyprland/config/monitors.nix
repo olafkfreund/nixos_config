@@ -2,8 +2,6 @@
 # Host-specific monitor setup using variables from host configuration
 {
   host,
-  config,
-  lib,
   ...
 }: let
   inherit

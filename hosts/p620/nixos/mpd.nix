@@ -1,6 +1,4 @@
 {
-  config,
-  lib,
   ...
 }: {
   services.mpd = {

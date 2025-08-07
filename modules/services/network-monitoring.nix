@@ -143,12 +143,7 @@ in {
       wantedBy = ["multi-user.target"];
 
       # Add proper ordering with stability helper when both are enabled
-      serviceConfig = let
-        networkStabilityEnabled =
-          config.services.network-stability.enable
-          && config.services.network-stability.helperService.enable;
-      in
-        mkMerge [
+      serviceConfig = mkMerge [
           {
             Type = "simple";
             ExecStart = "${pkgs.writeShellScriptBin "network-monitor" ""}/bin/network-monitor";

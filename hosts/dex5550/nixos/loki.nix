@@ -1,8 +1,6 @@
 # Loki Log Aggregation Server Configuration
 # Centralized logging for all NixOS hosts
 {
-  config,
-  lib,
   pkgs,
   ...
 }: {

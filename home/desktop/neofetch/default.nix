@@ -2,9 +2,7 @@
 # Includes neofetch configuration plus system monitoring utilities
 {
   pkgs,
-  config,
   lib,
-  host ? "default",
   ...
 }:
 with lib;

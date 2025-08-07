@@ -104,7 +104,6 @@
   };
 
   outputs = {
-    self,
     nixpkgs,
     nixpkgs-stable,
     nixpkgs-unstable,
@@ -123,7 +122,6 @@
     nix-index-database,
     zjstatus,
     walker,
-    hyprland,
     ...
   } @ inputs: let
     # Define users per host
@@ -151,7 +149,6 @@
           ({
             config,
             lib,
-            pkgs,
             modulesPath,
             ...
           }: {
@@ -695,7 +692,7 @@
     getHostUsers = host: hostUsers.${host} or ["olafkfreund"];
 
     # Helper function for package imports
-    mkPkgs = pkgs: {
+    mkPkgs = _pkgs: {
       system = "x86_64-linux";
       config.allowUnfree = true;
       config.allowInsecure = true;
@@ -703,12 +700,12 @@
 
     # Import custom packages
     overlays = [
-      (final: prev: {
+      (final: _prev: {
         customPkgs = import ./pkgs {
           pkgs = final;
         };
       })
-      (final: prev: {
+      (_final: prev: {
         zjstatus = inputs.zjstatus.packages.${prev.system}.default;
       })
     ];

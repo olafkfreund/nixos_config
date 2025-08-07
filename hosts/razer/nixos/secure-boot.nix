@@ -1,7 +1,6 @@
 # Secure Boot configuration for Razer Blade
 # Using Lanzaboote for NixOS Secure Boot support
 {
-  config,
   lib,
   ...
 }: {

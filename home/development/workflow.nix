@@ -2,9 +2,7 @@
 # Task runners, build systems, testing frameworks, and CI/CD integration
 {
   pkgs,
-  config,
   lib,
-  host ? "default",
   ...
 }:
 with lib;

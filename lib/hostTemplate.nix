@@ -2,7 +2,6 @@
 {
   lib,
   pkgs,
-  inputs,
   ...
 }: {
   # Host types with default configurations

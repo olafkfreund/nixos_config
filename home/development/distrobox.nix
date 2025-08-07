@@ -75,20 +75,14 @@ with builtins; let
     ++ [
       "$HOME/.local/bin"
     ];
-
-  nuPath =
-    path
-    ++ [
-      "$\"($env.HOME)/.local/bin\""
-    ];
 in {
   home.packages = let
-    aliases = mapAttrs (name: value: mkBoxAlias value) boxes;
+    aliases = mapAttrs (_name: value: mkBoxAlias value) boxes;
   in
     (attrValues aliases) ++ [pkgs.distrobox];
 
   home.file = let
-    links = mapAttrs (name: value: mkBoxLinks value) boxes;
+    links = mapAttrs (_name: value: mkBoxLinks value) boxes;
   in
     foldl' (x: y: x // y) {} (attrValues links);
 

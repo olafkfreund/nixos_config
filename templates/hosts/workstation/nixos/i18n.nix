@@ -1,5 +1,5 @@
 # Internationalization configuration for workstation template
-{ config, lib, pkgs, ... }:
+{ lib, pkgs, ... }:
 
 let
   vars = import ../variables.nix;

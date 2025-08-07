@@ -1,8 +1,5 @@
 # Simplified Rule Generators
 {
-  config,
-  lib,
-  pkgs,
   ...
 }:
 {

@@ -1,6 +1,4 @@
 {
-  inputs,
-  lib,
   ...
 }: {
   imports = [

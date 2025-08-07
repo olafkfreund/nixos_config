@@ -1,7 +1,6 @@
 # n8n Workflow Automation Configuration
 # Production setup with PostgreSQL database for DEX5550 monitoring server
 {
-  config,
   lib,
   pkgs,
   ...

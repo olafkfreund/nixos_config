@@ -4,7 +4,6 @@
   config,
   lib,
   pkgs,
-  inputs,
   ...
 }:
 with lib; let

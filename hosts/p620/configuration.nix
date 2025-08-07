@@ -2,7 +2,6 @@
   config, # Add config to the function parameters
   pkgs,
   lib,
-  inputs,
   hostUsers,
   ...
 }: let

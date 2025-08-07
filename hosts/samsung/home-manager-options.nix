@@ -1,10 +1,6 @@
 {
-  lib,
-  config,
   ...
-}: let
-  vars = import ./variables.nix;
-in {
+}: {
   # Host-specific features configuration
   # This replaces all the individual lib.mkForce calls with a unified approach
   features = {

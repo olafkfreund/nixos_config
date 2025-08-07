@@ -1,5 +1,4 @@
 {
-  config,
   lib,
   pkgs,
   host ? "default",
@@ -8,10 +7,6 @@
 with lib;
 let
   # Import host-specific variables if available
-  hostVars = 
-    if builtins.pathExists ../../../hosts/${host}/variables.nix
-    then import ../../../hosts/${host}/variables.nix
-    else {};
   
   # Host-specific temperature sensor configuration
   temperatureConfig = {

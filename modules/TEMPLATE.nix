@@ -89,7 +89,7 @@ in {
     };
 
     # User configuration (if applicable)
-    users.users = genAttrs cfg.users (user: {
+    users.users = genAttrs cfg.users (_user: {
       extraGroups = [ "module-group" ];
     });
 

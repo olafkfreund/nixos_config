@@ -4,7 +4,6 @@
   lib,
   config,
   pkgs,
-  host ? "default",
   ...
 }:
 with lib; let

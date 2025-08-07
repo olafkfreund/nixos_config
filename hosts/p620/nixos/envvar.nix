@@ -1,7 +1,4 @@
 {
-  self,
-  config,
-  pkgs,
   ...
 }: let
   vars = import ../variables.nix;

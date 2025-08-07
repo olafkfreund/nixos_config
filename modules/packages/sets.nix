@@ -2,7 +2,6 @@
 # This reduces redundant package declarations across modules
 {
   pkgs,
-  lib,
   ...
 }: {
   # Core system packages - always needed

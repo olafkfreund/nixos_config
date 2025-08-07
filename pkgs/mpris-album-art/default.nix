@@ -1,7 +1,5 @@
 {
-  lib,
   pkgs,
-  fetchFromGitHub,
   ...
 }:
 pkgs.writeShellScriptBin "mpris-album-art" ''

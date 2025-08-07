@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
 with lib; let
@@ -167,7 +166,7 @@ in {
       timeout = cfg.timeout;
       maxRetries = cfg.maxRetries;
       
-      providers = lib.filterAttrs (name: value: value != null) {
+      providers = lib.filterAttrs (_name: value: value != null) {
         openai = if cfg.openai.enable then {
           enabled = true;
           priority = cfg.openai.priority;

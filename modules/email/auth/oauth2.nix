@@ -150,7 +150,7 @@ in {
         ExecStart = let
           refreshScript = pkgs.writeShellScript "refresh-all-tokens" ''
             set -euo pipefail
-            ${concatStringsSep "\n" (mapAttrsToList (name: account: ''
+            ${concatStringsSep "\n" (mapAttrsToList (_name: account: ''
               echo "Refreshing OAuth2 token for ${account.email}..."
               /etc/neomutt/oauth2-refresh.sh "${account.email}" \
                 "${account.refreshTokenFile}" \

@@ -1,7 +1,6 @@
 # Hyprland Core Settings Configuration
 # Converted to native Nix configuration for better type safety and maintainability
 {
-  config,
   lib,
   hyprlandFeatures ? {},
   hyprlandTheme ? {},

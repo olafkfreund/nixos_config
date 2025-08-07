@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   ...
 }: {
   xdg.configFile."hypr/hyprlock.conf".text = ''

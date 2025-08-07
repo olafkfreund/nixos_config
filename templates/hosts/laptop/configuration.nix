@@ -2,7 +2,7 @@
 # This file provides a comprehensive mobile-optimized laptop configuration
 # Edit variables.nix to customize for your specific laptop needs
 
-{ config, lib, pkgs, inputs, system, hostUsers, ... }:
+{ config, lib, pkgs, system, ... }:
 
 let
   vars = import ./variables.nix;
@@ -307,7 +307,7 @@ in {
       enable = true;
       settings = {
         default_session = {
-          command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd Hyprland";
+          command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd Hyprland";
           user = "greeter";
         };
       };

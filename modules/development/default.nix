@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{ ...}: {
   imports = [
     ./cargo.nix
     ./python.nix

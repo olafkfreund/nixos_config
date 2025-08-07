@@ -4,7 +4,6 @@
   config,
   lib,
   pkgs-unstable,
-  host ? "default",
   ...
 }:
 with lib; let
@@ -66,7 +65,7 @@ with lib; let
       preferred_line_length = 100;
       auto_indent_using_language_server = true;
     }
-  ) (filterAttrs (n: l: l.enable) features.languages);
+  ) (filterAttrs (_n: l: l.enable) features.languages);
   
 in {
   options.editor.zed-editor = {

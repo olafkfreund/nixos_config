@@ -1,6 +1,6 @@
 # Enhanced Modern Zsh Configuration
 # Optimized for performance, maintainability, and developer experience
-{pkgs, lib, config, ...}:
+{pkgs, lib, ...}:
 with lib;
 {
   imports = [

@@ -1,6 +1,5 @@
 {
   pkgs,
-  lib,
   ...
 }: {
   # Thermal and power management services

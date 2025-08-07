@@ -1,5 +1,5 @@
 # Headless/No GPU configuration for workstation template
-{ config, pkgs, lib, ... }:
+{ pkgs, lib, ... }:
 
 {
   # Minimal graphics support for headless systems

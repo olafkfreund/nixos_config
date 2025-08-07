@@ -4,7 +4,6 @@
   pkgs,
   config,
   lib,
-  imports ? [ ./default_layout.nix ./zjstatus.nix ],
   ...
 }: 
 with lib; let 

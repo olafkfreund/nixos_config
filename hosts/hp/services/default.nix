@@ -1,9 +1,4 @@
 {
-  pkgs,
-  lib,
-  system,
-  inputs,
-  proxmox-nixos,
   ...
 }: {
   # imports = [

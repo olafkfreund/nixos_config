@@ -1,7 +1,6 @@
 # Enhanced Hyprland Window Rules Configuration
 # Converted to native Nix configuration with feature flags and smart defaults
 {
-  config,
   lib,
   host ? "default",
   ...
@@ -100,10 +99,8 @@ with lib; let
   # Helper functions for generating rules
   mkRule = rule: conditions: "${rule}, ${conditions}";
   mkFloat = conditions: mkRule "float" conditions;
-  mkSize = width: height: conditions: mkRule "size ${toString width} ${toString height}" conditions;
   mkWorkspace = workspace: conditions: mkRule "workspace ${workspaceToString workspace}" conditions;
   mkCenter = conditions: mkRule "center" conditions;
-  mkAnimation = anim: conditions: mkRule "animation ${anim}" conditions;
 
   # Smart sizing based on screen resolution (defaults to 1920x1080)
   screenWidth = hostVars.screenWidth or 1920;
@@ -134,7 +131,7 @@ with lib; let
   # Generate workspace assignments
   mkWorkspaceRules = assignments:
     lib.flatten (lib.mapAttrsToList (
-        category: apps:
+        _category: apps:
           lib.mapAttrsToList (
             app: workspace:
               mkWorkspace workspace "class:^(${app})$"

@@ -1,6 +1,5 @@
 {
   inputs,
-  lib,
   ...
 }: {
   # Common imports for all user configurations

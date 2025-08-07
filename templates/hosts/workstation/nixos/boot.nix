@@ -1,5 +1,5 @@
 # Boot configuration for workstation template
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 
 {
   # Bootloader configuration

@@ -5,7 +5,7 @@
 #
 # This template provides common hardware configurations as examples.
 
-{ config, lib, pkgs, modulesPath, ... }:
+{ config, lib, modulesPath, ... }:
 
 {
   imports =

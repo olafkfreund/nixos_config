@@ -1,6 +1,5 @@
 let
   firefox.desktop = ["firefox"];
-  google-chrome.desktop = ["google-chrome-stable"];
   archiveManager = ["archive"];
   feh.desktop = ["feh"];
   thunderbird.desktop = ["thunderbird"];

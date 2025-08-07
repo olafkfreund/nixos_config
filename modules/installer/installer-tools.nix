@@ -1,7 +1,5 @@
 # Installer Tools and TUI Utilities for Live USB
 {
-  config,
-  lib,
   pkgs,
   ...
 }:
