@@ -74,112 +74,112 @@ in
 
         ExecStart = pkgs.writeShellScript "ai-memory-optimization" ''
           #!/bin/bash
-          
+
           # Log setup
           LOG_FILE="/var/log/ai-analysis/memory-optimization.log"
           mkdir -p "$(dirname "$LOG_FILE")"
           exec 1> >(tee -a "$LOG_FILE")
           exec 2>&1
-          
+
           echo "[$(${pkgs.coreutils}/bin/date)] Starting AI memory optimization..."
-          
+
           # Check current memory usage
           MEMORY_USAGE=$(${pkgs.procps}/bin/free | ${pkgs.gnugrep}/bin/grep Mem | ${pkgs.gawk}/bin/awk '{printf "%.1f", $3/$2 * 100.0}')
           MEMORY_USAGE_INT=$(echo "$MEMORY_USAGE" | ${pkgs.coreutils}/bin/cut -d. -f1)
-          
+
           echo "[$(${pkgs.coreutils}/bin/date)] Current memory usage: $MEMORY_USAGE%"
-          
+
           # Check disk usage for root filesystem
           ROOT_DISK_USAGE=$(${pkgs.coreutils}/bin/df / | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $5}' | ${pkgs.gnused}/bin/sed 's/%//')
           echo "[$(${pkgs.coreutils}/bin/date)] Root disk usage: $ROOT_DISK_USAGE%"
-          
+
           # Memory optimization actions
           if [ "$MEMORY_USAGE_INT" -gt ${toString cfg.thresholds.memoryCritical} ]; then
             echo "[$(${pkgs.coreutils}/bin/date)] CRITICAL: Memory usage above ${toString cfg.thresholds.memoryCritical}% - taking emergency actions"
-            
+
             # Clear page cache
             echo 1 > /proc/sys/vm/drop_caches
-            
+
             # Restart high-memory services
             if systemctl is-active --quiet chromadb; then
               systemctl restart chromadb
             fi
-            
+
             if systemctl is-active --quiet grafana; then
               systemctl restart grafana
             fi
-            
+
           elif [ "$MEMORY_USAGE_INT" -gt ${toString cfg.thresholds.memoryWarning} ]; then
             echo "[$(${pkgs.coreutils}/bin/date)] WARNING: Memory usage above ${toString cfg.thresholds.memoryWarning}% - optimizing"
-            
+
             # Clear page cache
             echo 1 > /proc/sys/vm/drop_caches
-            
+
             # Compact memory
             echo 1 > /proc/sys/vm/compact_memory
           fi
-          
+
           # Disk optimization actions
           if [ "$ROOT_DISK_USAGE" -gt ${toString cfg.thresholds.diskCritical} ]; then
             echo "[$(${pkgs.coreutils}/bin/date)] CRITICAL: Root disk usage above ${toString cfg.thresholds.diskCritical}% - emergency cleanup"
-            
+
             # Force Nix store optimization
             nix-store --optimise --verbose
-            
+
             # Clean old generations (keep only last 2)
             nix-collect-garbage -d --delete-older-than 2d
-            
+
             # Clean Docker if available
             if command -v docker &> /dev/null; then
               docker system prune -f --volumes
             fi
-            
+
             # Clean systemd journal
             journalctl --vacuum-size=100M
-            
+
           elif [ "$ROOT_DISK_USAGE" -gt ${toString cfg.thresholds.diskWarning} ]; then
             echo "[$(${pkgs.coreutils}/bin/date)] WARNING: Root disk usage above ${toString cfg.thresholds.diskWarning}% - cleaning up"
-            
+
             # Nix store optimization
             nix-store --optimise
-            
+
             # Clean old generations (keep last 5)
             nix-collect-garbage --delete-older-than 7d
-            
+
             # Clean temporary files
             find /tmp -type f -atime +7 -delete 2>/dev/null || true
             find /var/tmp -type f -atime +7 -delete 2>/dev/null || true
-            
+
             # Clean systemd journal
             journalctl --vacuum-size=500M
           fi
-          
+
           # P510 specific optimizations (root disk at 79.6%)
           if [ "$(${pkgs.inetutils}/bin/hostname)" = "p510" ]; then
             echo "[$(${pkgs.coreutils}/bin/date)] P510 specific optimizations - high disk usage detected"
-            
+
             # Aggressive Nix store cleanup for P510
             nix-collect-garbage -d --delete-older-than 1d
-            
+
             # Clean Docker more aggressively
             if command -v docker &> /dev/null; then
               docker system prune -af --volumes
               docker image prune -af
             fi
-            
+
             # Clean large log files
             find /var/log -name "*.log" -size +50M -exec truncate -s 10M {} \;
-            
+
             # Clean Nix build cache
             rm -rf /tmp/nix-build-* 2>/dev/null || true
           fi
-          
+
           # Final status check
           NEW_MEMORY_USAGE=$(${pkgs.procps}/bin/free | ${pkgs.gnugrep}/bin/grep Mem | ${pkgs.gawk}/bin/awk '{printf "%.1f", $3/$2 * 100.0}')
           NEW_ROOT_DISK_USAGE=$(${pkgs.coreutils}/bin/df / | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $5}' | ${pkgs.gnused}/bin/sed 's/%//')
-          
+
           echo "[$(${pkgs.coreutils}/bin/date)] Optimization complete - Memory: $NEW_MEMORY_USAGE%, Root disk: $NEW_ROOT_DISK_USAGE%"
-          
+
           # Create optimization report
           cat > /var/lib/ai-analysis/memory-optimization-report.json << EOF
           {
@@ -200,7 +200,7 @@ in
             ]
           }
           EOF
-          
+
           echo "[$(${pkgs.coreutils}/bin/date)] Memory optimization completed successfully"
         '';
       };

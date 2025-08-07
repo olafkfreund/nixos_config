@@ -11,12 +11,12 @@ with lib; let
   # Minimal Loki configuration that works with current version
   lokiConfigFile = pkgs.writeText "loki.yaml" ''
     auth_enabled: false
-    
+
     server:
       http_listen_port: ${toString cfg.network.lokiPort}
       grpc_listen_port: ${toString cfg.network.lokiGrpcPort}
       log_level: info
-      
+
     common:
       path_prefix: /var/lib/loki
       storage:
@@ -28,14 +28,14 @@ with lib; let
         instance_addr: 127.0.0.1
         kvstore:
           store: inmemory
-          
+
     query_range:
       results_cache:
         cache:
           embedded_cache:
             enabled: true
             max_size_mb: 100
-            
+
     schema_config:
       configs:
         - from: 2020-10-24
@@ -45,7 +45,7 @@ with lib; let
           index:
             prefix: index_
             period: 24h
-            
+
     limits_config:
       retention_period: ${cfg.logRetention}
       ingestion_rate_mb: 4
@@ -53,7 +53,7 @@ with lib; let
       max_streams_per_user: 10000
       max_line_size: 256000
       max_entries_limit_per_query: 5000
-      
+
     ingester:
       lifecycler:
         address: 127.0.0.1
@@ -65,7 +65,7 @@ with lib; let
       max_chunk_age: 1h
       chunk_target_size: 1048576
       chunk_retain_period: 30s
-      
+
     storage_config:
       tsdb_shipper:
         active_index_directory: /var/lib/loki/tsdb-shipper-active
@@ -108,7 +108,7 @@ in
         mkdir -p /var/lib/loki/{chunks,rules,tsdb-shipper-active,tsdb-shipper-cache,retention}
         chown -R loki:loki /var/lib/loki
         chmod -R 755 /var/lib/loki
-        
+
         # Create log directory
         mkdir -p /var/log/loki
         chown loki:loki /var/log/loki

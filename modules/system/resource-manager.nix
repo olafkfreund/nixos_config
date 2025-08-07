@@ -189,35 +189,35 @@ in
         ];
         ExecStart = pkgs.writeShellScript "dynamic-resource-manager" ''
           #!/bin/bash
-          
+
           LOG_FILE="/var/log/resource-manager/manager.log"
           mkdir -p "$(dirname "$LOG_FILE")"
           exec 1> >(tee -a "$LOG_FILE")
           exec 2>&1
-          
+
           echo "[$(date)] Starting Dynamic Resource Manager..."
           echo "[$(date)] Profile: ${cfg.profile}"
-          
+
           # Function to get system load
           get_load() {
             uptime | awk -F'load average:' '{print $2}' | awk '{print $1}' | sed 's/,//'
           }
-          
+
           # Function to get memory pressure
           get_memory_pressure() {
             free | grep Mem | awk '{printf "%.1f", $3/$2 * 100.0}'
           }
-          
+
           # Function to get CPU usage
           get_cpu_usage() {
             top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/%us,//' | cut -d. -f1
           }
-          
+
           # Function to optimize CPU governor
           optimize_cpu_governor() {
             local load=$1
             local cpu_usage=$2
-            
+
             ${optionalString cfg.cpuManagement.dynamicGovernor ''
               if (( $(echo "$load > 2.0" | bc -l) )) || [ "$cpu_usage" -gt 80 ]; then
                 # High load - use performance governor
@@ -246,11 +246,11 @@ in
               fi
             ''}
           }
-          
+
           # Function to optimize memory management
           optimize_memory() {
             local memory_pressure=$1
-            
+
             ${optionalString cfg.memoryManagement.dynamicSwap ''
               if (( $(echo "$memory_pressure > 85.0" | bc -l) )); then
                 # High memory pressure - reduce swappiness
@@ -262,7 +262,7 @@ in
                 echo "[$(date)] Memory pressure low ($memory_pressure%), normal swappiness"
               fi
             ''}
-            
+
             ${optionalString cfg.memoryManagement.hugePagesOptimization ''
               # Optimize huge pages based on memory usage
               if (( $(echo "$memory_pressure > 70.0" | bc -l) )); then
@@ -272,11 +272,11 @@ in
               fi
             ''}
           }
-          
+
           # Function to optimize I/O scheduler
           optimize_io_scheduler() {
             local load=$1
-            
+
             ${optionalString cfg.ioManagement.dynamicScheduler ''
               for disk in /sys/block/*/queue/scheduler; do
                 if [ -f "$disk" ]; then
@@ -292,7 +292,7 @@ in
               echo "[$(date)] I/O scheduler optimized for load: $load"
             ''}
           }
-          
+
           # Function to apply workload profiles
           apply_workload_profiles() {
             ${concatStringsSep "\n" (mapAttrsToList (name: profile: ''
@@ -301,10 +301,10 @@ in
                 if [ -n "$pid" ]; then
                   # Set CPU priority
                   renice ${toString profile.cpuPriority} "$pid" 2>/dev/null || true
-                  
+
                   # Set I/O priority
                   ionice -c ${toString profile.ioClass} -n ${toString profile.ioPriority} -p "$pid" 2>/dev/null || true
-                  
+
                   ${optionalString (profile.cpuAffinity != null) ''
                     # Set CPU affinity
                     taskset -cp ${profile.cpuAffinity} "$pid" 2>/dev/null || true
@@ -313,22 +313,22 @@ in
               done
             '') cfg.workloadProfiles)}
           }
-          
+
           # Main monitoring loop
           while true; do
             # Get current system metrics
             LOAD=$(get_load)
             MEMORY_PRESSURE=$(get_memory_pressure)
             CPU_USAGE=$(get_cpu_usage)
-            
+
             echo "[$(date)] System metrics - Load: $LOAD, Memory: $MEMORY_PRESSURE%, CPU: $CPU_USAGE%"
-            
+
             # Apply optimizations
             optimize_cpu_governor "$LOAD" "$CPU_USAGE"
             optimize_memory "$MEMORY_PRESSURE"
             optimize_io_scheduler "$LOAD"
             apply_workload_profiles
-            
+
             # Wait before next check
             sleep 30
           done
@@ -348,30 +348,30 @@ in
         User = "root";
         ExecStart = pkgs.writeShellScript "cpu-core-reservation" ''
           #!/bin/bash
-          
+
           TOTAL_CORES=$(nproc)
           RESERVED_CORES=${toString cfg.cpuManagement.reservedCores}
-          
+
           if [ "$RESERVED_CORES" -ge "$TOTAL_CORES" ]; then
             echo "Error: Cannot reserve $RESERVED_CORES cores on $TOTAL_CORES core system"
             exit 1
           fi
-          
+
           # Calculate core ranges
           AVAILABLE_CORES=$((TOTAL_CORES - RESERVED_CORES))
           RESERVED_START=$AVAILABLE_CORES
           RESERVED_END=$((TOTAL_CORES - 1))
-          
+
           echo "Reserving cores $RESERVED_START-$RESERVED_END for critical processes"
-          
+
           # Set CPU isolation
           echo "0-$((AVAILABLE_CORES - 1))" > /sys/fs/cgroup/cpuset/cpuset.cpus
-          
+
           # Create reserved core group
           mkdir -p /sys/fs/cgroup/cpuset/reserved
           echo "$RESERVED_START-$RESERVED_END" > /sys/fs/cgroup/cpuset/reserved/cpuset.cpus
           echo 0 > /sys/fs/cgroup/cpuset/reserved/cpuset.mems
-          
+
           echo "CPU core reservation completed"
         '';
       };
@@ -388,16 +388,16 @@ in
         User = "root";
         ExecStart = pkgs.writeShellScript "memory-optimizer" ''
           #!/bin/bash
-          
+
           echo "Starting memory optimization..."
-          
+
           ${optionalString cfg.memoryManagement.hugePagesOptimization ''
             # Configure huge pages
             echo madvise > /sys/kernel/mm/transparent_hugepage/enabled
             echo defer > /sys/kernel/mm/transparent_hugepage/defrag
             echo "[$(date)] Huge pages optimization enabled"
           ''}
-          
+
           ${optionalString cfg.memoryManagement.oomProtection ''
             # Protect critical services from OOM killer
             for service in sshd systemd-logind dbus; do
@@ -407,7 +407,7 @@ in
             done
             echo "[$(date)] OOM protection applied to critical services"
           ''}
-          
+
           echo "Memory optimization completed"
         '';
       };
@@ -438,27 +438,27 @@ in
         ];
         ExecStart = pkgs.writeShellScript "resource-monitor" ''
           #!/bin/bash
-          
+
           METRICS_FILE="/var/lib/resource-manager/metrics.json"
           mkdir -p "$(dirname "$METRICS_FILE")"
-          
+
           while true; do
             TIMESTAMP=$(date -Iseconds)
-            
+
             # System metrics
             CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/%us,//')
             LOAD_1M=$(uptime | awk -F'load average:' '{print $2}' | awk '{print $1}' | sed 's/,//')
             MEMORY_USAGE=$(free | grep Mem | awk '{printf "%.1f", $3/$2 * 100.0}')
-            
+
             # CPU governor status
             CPU_GOVERNOR=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo "unknown")
-            
+
             # I/O wait
             IO_WAIT=$(top -bn1 | grep "Cpu(s)" | awk '{print $10}' | sed 's/%wa,//')
-            
+
             # Network connections
             NETWORK_CONNS=$(ss -tuln | grep LISTEN | wc -l)
-            
+
             # Create metrics JSON
             cat > "$METRICS_FILE" << EOF
             {
@@ -478,7 +478,7 @@ in
               "profile": "${cfg.profile}"
             }
           EOF
-            
+
             sleep 60
           done
         '';

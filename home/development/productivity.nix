@@ -79,7 +79,7 @@ let
       # Clipboard management
       clipboard = true; # Enhanced clipboard tools
 
-      # Screen capture  
+      # Screen capture
       flameshot = false; # Screenshot tool (handled by desktop module)
       asciinema = true; # Terminal recording
     };
@@ -150,7 +150,7 @@ let
   smartTaskAdd = pkgs.writeShellScript "smart-task-add" ''
     #!/usr/bin/env bash
     set -euo pipefail
-    
+
     # Colors for beautiful output
     RED='\033[0;31m'
     GREEN='\033[0;32m'
@@ -159,73 +159,73 @@ let
     PURPLE='\033[0;35m'
     CYAN='\033[0;36m'
     NC='\033[0m' # No Color
-    
+
     if [[ $# -eq 0 ]]; then
         echo -e "''${RED}Usage:''${NC} smart-add <natural language task description>"
         echo -e "''${CYAN}Example:''${NC} smart-add \"Review PR, update docs, deploy by Friday\""
         exit 1
     fi
-    
+
     input_text="$*"
-    
+
     echo -e "''${BLUE}🧠 AI is analyzing your task...''${NC}"
-    
+
     # Use AI to parse natural language into structured tasks
-    ai_prompt="Parse this natural language task description into structured Taskwarrior tasks. 
-    
+    ai_prompt="Parse this natural language task description into structured Taskwarrior tasks.
+
     Input: '$input_text'
-    
+
     For each task, provide:
     - Description (clear, actionable)
-    - Project (if mentioned or inferable)  
+    - Project (if mentioned or inferable)
     - Priority (H/M/L based on urgency indicators)
     - Due date (if mentioned, use YYYY-MM-DD format)
     - Tags (relevant context tags)
-    
+
     Format your response as JSON array of tasks:
     [
       {
         \"description\": \"task description\",
         \"project\": \"project_name\",
-        \"priority\": \"H|M|L\", 
+        \"priority\": \"H|M|L\",
         \"due\": \"YYYY-MM-DD\",
         \"tags\": [\"tag1\", \"tag2\"]
       }
     ]
-    
+
     Only include fields that are clearly indicated. If no due date mentioned, omit it."
-    
+
     # Get AI analysis
     ai_response=$(ai-cli -p openai "$ai_prompt" 2>/dev/null || echo "[]")
-    
+
     if [[ "$ai_response" == "[]" ]] || [[ -z "$ai_response" ]]; then
         echo -e "''${YELLOW}⚠️  AI parsing failed, creating simple task...''${NC}"
         ${pkgs.taskwarrior3}/bin/task add "$input_text"
         exit 0
     fi
-    
+
     echo -e "''${GREEN}✨ Creating structured tasks:''${NC}"
-    
+
     # Parse JSON and create tasks (simplified for now)
     echo "$ai_response" | ${pkgs.jq}/bin/jq -c '.[]' | while IFS= read -r task_json; do
         desc=$(echo "$task_json" | ${pkgs.jq}/bin/jq -r '.description // empty')
-        project=$(echo "$task_json" | ${pkgs.jq}/bin/jq -r '.project // empty') 
+        project=$(echo "$task_json" | ${pkgs.jq}/bin/jq -r '.project // empty')
         priority=$(echo "$task_json" | ${pkgs.jq}/bin/jq -r '.priority // empty')
         due=$(echo "$task_json" | ${pkgs.jq}/bin/jq -r '.due // empty')
         tags=$(echo "$task_json" | ${pkgs.jq}/bin/jq -r '.tags[]? // empty' | tr '\n' ' ')
-        
+
         if [[ -n "$desc" ]]; then
             cmd="task add \"$desc\""
             [[ -n "$project" ]] && cmd="$cmd project:$project"
             [[ -n "$priority" ]] && cmd="$cmd priority:$priority"
             [[ -n "$due" ]] && cmd="$cmd due:$due"
             [[ -n "$tags" ]] && cmd="$cmd $tags"
-            
+
             echo -e "''${CYAN}📝 Adding:''${NC} $desc"
             eval "$cmd"
         fi
     done
-    
+
     echo -e "''${GREEN}✅ Tasks created successfully!''${NC}"
     echo -e "''${BLUE}📋 Your current tasks:''${NC}"
     ${pkgs.taskwarrior3}/bin/task next
@@ -235,7 +235,7 @@ let
   aiDashboard = pkgs.writeShellScript "ai-dashboard" ''
     #!/usr/bin/env bash
     set -euo pipefail
-    
+
     # Colors and emojis for beautiful output
     RED='\033[0;31m'
     GREEN='\033[0;32m'
@@ -245,30 +245,30 @@ let
     CYAN='\033[0;36m'
     BOLD='\033[1m'
     NC='\033[0m'
-    
+
     clear
     echo -e "''${BOLD}''${BLUE}╔══════════════════════════════════════════════════════════════════╗''${NC}"
     echo -e "''${BOLD}''${BLUE}║                   🚀 AI-Enhanced Daily Dashboard                 ║''${NC}"
     echo -e "''${BOLD}''${BLUE}╚══════════════════════════════════════════════════════════════════╝''${NC}"
     echo ""
-    
+
     # Date and time
     echo -e "''${BOLD}''${CYAN}📅 $(date '+%A, %B %d, %Y')''${NC} - ''${BOLD}''${YELLOW}⏰ $(date '+%H:%M')''${NC}"
     echo ""
-    
+
     # Task summary with beautiful formatting
     echo -e "''${BOLD}''${GREEN}📋 TASK OVERVIEW''${NC}"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    
+
     # Count various task types
     total_tasks=$(${pkgs.taskwarrior3}/bin/task status:pending count 2>/dev/null || echo "0")
     urgent_tasks=$(${pkgs.taskwarrior3}/bin/task status:pending urgency.over:10 count 2>/dev/null || echo "0")
     due_today=$(${pkgs.taskwarrior3}/bin/task due:today count 2>/dev/null || echo "0")
     overdue=$(${pkgs.taskwarrior3}/bin/task overdue count 2>/dev/null || echo "0")
-    
+
     echo -e "📊 Total Tasks: ''${BOLD}$total_tasks''${NC} | 🔥 Urgent: ''${BOLD}''${RED}$urgent_tasks''${NC} | 📅 Due Today: ''${BOLD}''${YELLOW}$due_today''${NC} | ⚠️  Overdue: ''${BOLD}''${RED}$overdue''${NC}"
     echo ""
-    
+
     # Show next tasks with priorities
     if [[ "$total_tasks" -gt 0 ]]; then
         echo -e "''${BOLD}''${PURPLE}🎯 NEXT PRIORITY TASKS''${NC}"
@@ -276,43 +276,43 @@ let
         ${pkgs.taskwarrior3}/bin/task next limit:5 2>/dev/null || echo "No pending tasks"
         echo ""
     fi
-    
+
     # AI Insights section
     echo -e "''${BOLD}''${CYAN}🧠 AI INSIGHTS''${NC}"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    
+
     # Get current tasks for AI analysis
     current_tasks=$(${pkgs.taskwarrior3}/bin/task status:pending export 2>/dev/null | ${pkgs.jq}/bin/jq -c '.[0:5]' || echo "[]")
-    
+
     if [[ "$current_tasks" != "[]" ]] && [[ -n "$current_tasks" ]]; then
         ai_prompt="Based on these pending tasks, provide 3 brief actionable insights for productivity:
-        
+
         Tasks: $current_tasks
-        
+
         Focus on:
         1. Priority recommendations
-        2. Time management tips  
+        2. Time management tips
         3. Workflow optimization
-        
+
         Keep each insight to one line, use emojis, be encouraging and practical."
-        
+
         echo -e "''${YELLOW}💭 Analyzing your tasks...''${NC}"
         ai_insights=$(ai-cli -p openai "$ai_prompt" 2>/dev/null || echo "Focus on high-priority tasks first! 🎯")
-        
+
         echo -e "''${GREEN}$ai_insights''${NC}"
     else
         echo -e "''${GREEN}🎉 No pending tasks! Great job staying on top of things!''${NC}"
     fi
-    
+
     echo ""
-    
+
     # Quick actions
     echo -e "''${BOLD}''${BLUE}⚡ QUICK ACTIONS''${NC}"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo -e "🆕 smart-add \"description\"  📝 t            🏁 td <id>        🔍 ai-analyze"
     echo -e "📊 ai-summary daily          📈 ai-insights  🗂️  task projects  ⏰ tws \"work\""
     echo ""
-    
+
     # Time tracking summary if timewarrior is active
     if command -v ${pkgs.timewarrior}/bin/timew >/dev/null 2>&1; then
         active_tracking=$(${pkgs.timewarrior}/bin/timew get dom.active 2>/dev/null || echo "0")
@@ -322,13 +322,13 @@ let
             ${pkgs.timewarrior}/bin/timew summary :ids
             echo ""
         fi
-        
+
         # Today's time summary
         today_time=$(${pkgs.timewarrior}/bin/timew summary today 2>/dev/null | tail -n 1 || echo "No time tracked today")
         echo -e "''${BOLD}''${CYAN}⏲️  TODAY'S TIME: ''${today_time}''${NC}"
         echo ""
     fi
-    
+
     echo -e "''${BOLD}''${GREEN}Ready to make today productive! 🚀''${NC}"
     echo ""
   '';
@@ -476,18 +476,18 @@ in
       ".taskrc".text = ''
         # Enhanced Taskwarrior Configuration
         # Productivity-focused setup with modern features
-        
+
         # Data location
         data.location=~/.task
-        
+
         # Enhanced color theme
         include ${pkgs.taskwarrior3}/share/doc/task/rc/dark-256.theme
-        
+
         # Enhanced urgency coefficients
         urgency.user.project.Inbox.coefficient=15.0
         urgency.user.project.Work.coefficient=10.0
         urgency.user.project.Personal.coefficient=5.0
-        
+
         # Enhanced aliases
         alias.in=add +inbox
         alias.work=add +work
@@ -495,28 +495,28 @@ in
         alias.today=list due:today
         alias.week=list due:week
         alias.inbox=list +inbox
-        
+
         # Enhanced reports
         report.next.description=Next tasks
         report.next.columns=id,start.age,depends,priority,project,tag,recur,scheduled.countdown,due.relative,until.remaining,description,urgency
         report.next.filter=status:pending -WAITING -inbox
-        
+
         report.inbox.description=Inbox items to process
         report.inbox.columns=id,description
         report.inbox.filter=status:pending +inbox
-        
+
         # Enhanced context definitions
         context.work=+work or +@work
         context.personal=+personal or +@home
-        
+
         # Default command
         default.command=next
-        
+
         # Enhanced UDA (User Defined Attributes)
         uda.estimate.type=string
         uda.estimate.label=Estimate
         uda.estimate.values=S,M,L,XL
-        
+
         # Enhanced hooks (if available)
         hooks=on
       '';
@@ -530,42 +530,42 @@ in
           echo "📅 Daily Productivity Dashboard"
           echo "==============================="
           echo
-          
+
           # Today's date
           echo "📆 Today: $(date '+%A, %B %d, %Y')"
           echo
-          
+
           # Task management
           ${optionalString cfg.tasks.taskwarrior ''
           echo "✅ Today's Tasks:"
           ${pkgs.taskwarrior3}/bin/task list due:today 2>/dev/null || echo "  No tasks due today"
           echo
-          
+
           echo "📋 Inbox Items:"
           ${pkgs.taskwarrior3}/bin/task list +inbox 2>/dev/null || echo "  Inbox is empty"
           echo
           ''}
-          
+
           # Time tracking
           ${optionalString cfg.tasks.timewarrior ''
           echo "⏰ Time Tracking:"
           ${pkgs.timewarrior}/bin/timew day 2>/dev/null || echo "  No time tracked today"
           echo
           ''}
-          
+
           # Git status for current directory
           if [ -d .git ]; then
             echo "🔗 Git Status:"
             git status --short
             echo
           fi
-          
+
           # System info
           echo "💻 System:"
           echo "  Uptime: $(uptime -p)"
           echo "  Load: $(uptime | awk -F'load average:' '{print $2}')"
           echo
-          
+
           echo "🚀 Have a productive day!"
         '';
         executable = true;
@@ -578,14 +578,14 @@ in
         text = ''
           #!/bin/sh
           # Quick note creator for Obsidian
-          
+
           NOTES_DIR="$HOME/Documents/Notes"
           DATE=$(date '+%Y-%m-%d')
           TIME=$(date '+%H:%M')
-          
+
           # Create notes directory if it doesn't exist
           mkdir -p "$NOTES_DIR"
-          
+
           # Note filename
           if [ $# -eq 0 ]; then
             FILENAME="$NOTES_DIR/Quick-Note-$DATE-$TIME.md"
@@ -593,26 +593,26 @@ in
             TITLE=$(echo "$*" | tr ' ' '-')
             FILENAME="$NOTES_DIR/$TITLE-$DATE.md"
           fi
-          
+
           # Create note with template
           cat > "$FILENAME" << EOF
           # Quick Note - $DATE $TIME
-          
+
           ## Summary
-          
+
           ## Details
-          
+
           ## Tags
           #quick-note #$(date '+%Y-%m')
-          
+
           ## Links
-          
+
           ---
           Created: $DATE $TIME
           EOF
-          
+
           echo "📝 Created note: $FILENAME"
-          
+
           # Open in editor if available
           if command -v nvim >/dev/null 2>&1; then
             nvim "$FILENAME"
@@ -646,7 +646,7 @@ in
           echo "🚀 Productivity Tools"
           echo "===================="
           echo
-          
+
           echo "📝 Available Tools:"
           ${optionalString cfg.tasks.taskwarrior ''echo "  task          - Task management (t, ta, tl, td)"''}
           ${optionalString cfg.tasks.timewarrior ''echo "  timew         - Time tracking (tw, tws, twp)"''}
@@ -655,13 +655,13 @@ in
           ${optionalString cfg.automation.flameshot ''echo "  flameshot     - Screenshots (screenshot, ss)"''}
           ${optionalString cfg.notes.obsidian ''echo "  obsidian      - Knowledge management"''}
           echo
-          
+
           echo "📋 Quick Commands:"
           echo "  daily-dashboard - Show productivity overview"
           ${optionalString cfg.notes.obsidian ''echo "  quick-note      - Create quick note"''}
           echo "  productivity-help - Show this help"
           echo
-          
+
           echo "⚡ Productivity Tips:"
           echo "  - Use 'task add' to quickly capture tasks"
           echo "  - Use 'timew start <description>' to track time"

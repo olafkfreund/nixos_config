@@ -140,29 +140,29 @@ in
         User = "root";
         ExecStart = pkgs.writeShellScript "storage-performance-optimizer" ''
           #!/bin/bash
-          
+
           LOG_FILE="/var/log/storage-tuning/optimizer.log"
           mkdir -p "$(dirname "$LOG_FILE")"
           exec 1> >(tee -a "$LOG_FILE")
           exec 2>&1
-          
+
           echo "[$(date)] Starting storage performance optimization..."
           echo "[$(date)] Profile: ${cfg.profile}"
-          
+
           # Detect storage devices
           echo "[$(date)] Detecting storage devices..."
-          
+
           # Get all block devices
           BLOCK_DEVICES=$(lsblk -nd -o NAME,TYPE | grep disk | awk '{print $1}')
-          
+
           for device in $BLOCK_DEVICES; do
             DEVICE_PATH="/dev/$device"
             echo "[$(date)] Processing device: $DEVICE_PATH"
-            
+
             # Detect device type
             if [ -f "/sys/block/$device/queue/rotational" ]; then
               ROTATIONAL=$(cat "/sys/block/$device/queue/rotational")
-              
+
               if [ "$ROTATIONAL" = "0" ]; then
                 DEVICE_TYPE="ssd"
                 echo "[$(date)] Detected SSD: $DEVICE_PATH"
@@ -174,11 +174,11 @@ in
               DEVICE_TYPE="unknown"
               echo "[$(date)] Unknown device type: $DEVICE_PATH"
             fi
-            
+
             # I/O scheduler optimization
             ${optionalString cfg.ioSchedulerOptimization.enable ''
               echo "[$(date)] Optimizing I/O scheduler for $DEVICE_PATH..."
-              
+
               SCHEDULER_PATH="/sys/block/$device/queue/scheduler"
               if [ -f "$SCHEDULER_PATH" ]; then
                 ${optionalString cfg.ioSchedulerOptimization.dynamicScheduling ''
@@ -211,7 +211,7 @@ in
                 ''}
               fi
             ''}
-            
+
             # Queue depth optimization
             QUEUE_DEPTH_PATH="/sys/block/$device/queue/nr_requests"
             if [ -f "$QUEUE_DEPTH_PATH" ]; then
@@ -230,7 +230,7 @@ in
                   ;;
               esac
             fi
-            
+
             # Read-ahead optimization
             ${optionalString cfg.filesystemOptimization.readaheadOptimization ''
               READAHEAD_PATH="/sys/block/$device/queue/read_ahead_kb"
@@ -247,12 +247,12 @@ in
                 esac
               fi
             ''}
-            
+
             # NVMe-specific optimizations
             ${optionalString cfg.nvmeOptimization.enable ''
               if [[ "$device" == nvme* ]]; then
                 echo "[$(date)] Applying NVMe optimizations for $DEVICE_PATH..."
-                
+
                 ${optionalString cfg.nvmeOptimization.polling ''
                   # Enable polling for low latency
                   POLL_PATH="/sys/block/$device/queue/io_poll"
@@ -261,7 +261,7 @@ in
                     echo "[$(date)] Enabled NVMe polling for $DEVICE_PATH"
                   fi
                 ''}
-                
+
                 ${optionalString cfg.nvmeOptimization.multiQueue ''
                   # Optimize queue count
                   WBT_PATH="/sys/block/$device/queue/wbt_lat_usec"
@@ -272,11 +272,11 @@ in
                 ''}
               fi
             ''}
-            
+
             # Disk cache optimization
             ${optionalString cfg.diskCacheOptimization.enable ''
               echo "[$(date)] Optimizing disk cache for $DEVICE_PATH..."
-              
+
               ${optionalString cfg.diskCacheOptimization.writeCache ''
                 # Enable write cache if available
                 if command -v hdparm >/dev/null 2>&1; then
@@ -284,7 +284,7 @@ in
                   echo "[$(date)] Enabled write cache for $DEVICE_PATH"
                 fi
               ''}
-              
+
               ${optionalString cfg.diskCacheOptimization.readCache ''
                 # Enable read cache if available
                 if command -v hdparm >/dev/null 2>&1; then
@@ -294,11 +294,11 @@ in
               ''}
             ''}
           done
-          
+
           # Filesystem-level optimizations
           ${optionalString cfg.filesystemOptimization.enable ''
             echo "[$(date)] Applying filesystem optimizations..."
-            
+
             ${optionalString cfg.filesystemOptimization.cacheOptimization ''
               # Optimize filesystem cache settings
               case "${cfg.profile}" in
@@ -326,7 +326,7 @@ in
               esac
             ''}
           ''}
-          
+
           echo "[$(date)] Storage performance optimization completed"
         '';
       };
@@ -357,13 +357,13 @@ in
         ];
         ExecStart = pkgs.writeShellScript "storage-performance-monitor" ''
                     #!/bin/bash
-          
+
                     METRICS_FILE="/var/lib/storage-tuning/metrics.json"
                     mkdir -p "$(dirname "$METRICS_FILE")"
-          
+
                     while true; do
                       TIMESTAMP=$(date -Iseconds)
-            
+
                       # Collect I/O statistics
                       IO_STATS=$(iostat -x 1 1 | tail -n +4 | while read line; do
                         if [[ "$line" =~ ^[a-zA-Z] ]]; then
@@ -374,7 +374,7 @@ in
                           echo "\"$DEVICE\": {\"utilization\": \"$UTIL\", \"await\": \"$AWAIT\", \"iops\": \"$IOPS\"}"
                         fi
                       done | paste -sd, -)
-            
+
                       # Disk usage information
                       DISK_USAGE=$(df -h | grep -E '^/dev/' | while read line; do
                         DEVICE=$(echo "$line" | awk '{print $1}')
@@ -382,17 +382,17 @@ in
                         MOUNT=$(echo "$line" | awk '{print $6}')
                         echo "\"$DEVICE\": {\"usage_percent\": $USAGE, \"mount\": \"$MOUNT\"}"
                       done | paste -sd, -)
-            
+
                       # Memory usage for caching
                       CACHE_STATS=$(free -b | grep -E '^(Mem|Buffers|Cached)' | awk '
                         /^Mem:/ { total=$2; used=$3; free=$4; available=$7 }
-                        END { 
+                        END {
                           cache_used = total - available - free
                           cache_percent = (cache_used * 100) / total
                           printf "\"cache_used_bytes\": %d, \"cache_percent\": %.1f", cache_used, cache_percent
                         }
                       ')
-            
+
                       # Create metrics JSON
                       cat > "$METRICS_FILE" << EOF
                       {
@@ -403,7 +403,7 @@ in
                         "profile": "${cfg.profile}"
                       }
           EOF
-            
+
                       sleep 60
                     done
         '';

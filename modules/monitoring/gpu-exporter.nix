@@ -72,11 +72,11 @@ in
           echo "GPU exporter: http://localhost:${toString cfg.network.gpuExporterPort}"
           echo "Prometheus target: http://$(hostname):${toString cfg.network.gpuExporterPort}/metrics"
           echo ""
-          
+
           echo "Service status:"
           systemctl status nvidia-gpu-exporter --no-pager -l
           echo ""
-          
+
           echo "GPU exporter metrics:"
           if curl -s http://localhost:${toString cfg.network.gpuExporterPort}/metrics > /dev/null 2>&1; then
             echo "GPU exporter: Available"
@@ -85,7 +85,7 @@ in
             echo "GPU exporter: Not available"
           fi
           echo ""
-          
+
           echo "NVIDIA GPU status:"
           if command -v nvidia-smi >/dev/null 2>&1; then
             nvidia-smi --query-gpu=name,memory.total,memory.used,memory.free,temperature.gpu,utilization.gpu,utilization.memory --format=csv,noheader,nounits
@@ -93,7 +93,7 @@ in
             echo "nvidia-smi not available"
           fi
           echo ""
-          
+
           echo "GPU device files:"
           ls -la /dev/nvidia* 2>/dev/null || echo "No NVIDIA devices found"
         '')

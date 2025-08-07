@@ -151,18 +151,18 @@ in
       extraConfig = ''
         # Additional security configurations
         ${optionalString (cfg.allowedUsers != []) "AllowUsers ${concatStringsSep " " cfg.allowedUsers}"}
-        
+
         # Banner
         Banner /etc/ssh/banner
-        
+
         # Subsystems
         Subsystem sftp internal-sftp
-        
+
         # Match conditions for enhanced security
         Match Address ${concatStringsSep "," cfg.trustedNetworks}
             PasswordAuthentication ${if cfg.allowPasswordAuthentication then "yes" else "no"}
             MaxAuthTries ${toString cfg.maxAuthTries}
-        
+
         Match Address *,!${concatStringsSep ",!" cfg.trustedNetworks}
             PasswordAuthentication no
             MaxAuthTries 1
@@ -175,16 +175,16 @@ in
       ================================================================================
       AUTHORIZED USE ONLY
       ================================================================================
-      
+
       This computer system is for authorized users only. All activities on this
       system are logged and monitored. Unauthorized access is strictly prohibited
       and will be prosecuted to the full extent of the law.
-      
+
       By accessing this system, you acknowledge that:
       - Your activities may be monitored and recorded
       - Unauthorized access is a criminal offense
       - You consent to monitoring for security purposes
-      
+
       Disconnect immediately if you are not an authorized user.
       ================================================================================
     '';
@@ -215,10 +215,10 @@ in
         # Rate limiting for SSH connections
         iptables -I INPUT -p tcp --dport ${toString cfg.listenPort} -m conntrack --ctstate NEW -m recent --set --name SSH_LIMIT
         iptables -I INPUT -p tcp --dport ${toString cfg.listenPort} -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name SSH_LIMIT -j DROP
-        
+
         # Allow established SSH connections
         iptables -A INPUT -p tcp --dport ${toString cfg.listenPort} -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-        
+
         # Log dropped SSH attempts
         iptables -A INPUT -p tcp --dport ${toString cfg.listenPort} -j LOG --log-prefix "SSH-DROP: " --log-level 4
       '';
@@ -239,7 +239,7 @@ in
             KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512
             Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
             MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha2-256,hmac-sha2-512
-            
+
             # Security settings
             StrictHostKeyChecking ask
             VerifyHostKeyDNS yes
@@ -248,12 +248,12 @@ in
             ForwardX11Trusted no
             PermitLocalCommand no
             Tunnel no
-            
+
             # Connection settings
             ServerAliveInterval 300
             ServerAliveCountMax 2
             TCPKeepAlive yes
-            
+
             # Authentication
             PreferredAuthentications publickey,keyboard-interactive,password
             PubkeyAuthentication yes
@@ -297,28 +297,28 @@ in
         User = "root";
         ExecStart = pkgs.writeShellScript "ssh-monitor" ''
           #!/bin/bash
-          
+
           LOG_FILE="/var/log/ssh-monitor.log"
           ALERT_THRESHOLD=5
           TIME_WINDOW=300  # 5 minutes
-          
+
           # Count failed login attempts in the last 5 minutes
           FAILED_ATTEMPTS=$(journalctl -u sshd --since="5 minutes ago" | \
                            grep "Failed password" | wc -l)
-          
+
           # Count successful logins in the last 5 minutes
           SUCCESSFUL_LOGINS=$(journalctl -u sshd --since="5 minutes ago" | \
                              grep -E "Accepted (publickey|password)" | wc -l)
-          
+
           # Log current status
           echo "$(date): Failed attempts: $FAILED_ATTEMPTS, Successful logins: $SUCCESSFUL_LOGINS" >> "$LOG_FILE"
-          
+
           # Alert on excessive failed attempts
           if [ "$FAILED_ATTEMPTS" -gt "$ALERT_THRESHOLD" ]; then
             logger -t ssh-monitor "ALERT: $FAILED_ATTEMPTS failed SSH login attempts in last 5 minutes"
             echo "$(date): ALERT - Excessive failed login attempts: $FAILED_ATTEMPTS" >> "$LOG_FILE"
           fi
-          
+
           # Clean up old log entries (keep last 1000 lines)
           tail -1000 "$LOG_FILE" > "$LOG_FILE.tmp" && mv "$LOG_FILE.tmp" "$LOG_FILE"
         '';
@@ -341,42 +341,42 @@ in
       fail2ban
       (writeShellScriptBin "ssh-security-check" ''
         #!/bin/bash
-        
+
         echo "=== SSH Security Status ==="
         echo
-        
+
         # SSH service status
         echo "SSH Service Status:"
         systemctl status sshd --no-pager -l
         echo
-        
+
         # Active connections
         echo "Active SSH Connections:"
         ss -tnp | grep :${toString cfg.listenPort} || echo "No active SSH connections"
         echo
-        
+
         # Recent failed attempts
         echo "Recent Failed Login Attempts (last 24h):"
         journalctl -u sshd --since="24 hours ago" | grep "Failed password" | tail -10 || echo "No recent failed attempts"
         echo
-        
+
         # Recent successful logins
         echo "Recent Successful Logins (last 24h):"
         journalctl -u sshd --since="24 hours ago" | grep "Accepted" | tail -10 || echo "No recent successful logins"
         echo
-        
+
         # Fail2ban status
         if command -v fail2ban-client &> /dev/null; then
           echo "Fail2ban Status:"
           fail2ban-client status ssh 2>/dev/null || echo "Fail2ban SSH jail not active"
           echo
         fi
-        
+
         # SSH configuration validation
         echo "SSH Configuration Test:"
         sshd -t && echo "SSH configuration is valid" || echo "SSH configuration has errors"
         echo
-        
+
         # Key information
         echo "SSH Host Keys:"
         for key in /etc/ssh/ssh_host_*_key.pub; do
@@ -388,25 +388,25 @@ in
 
       (writeShellScriptBin "ssh-user-keys" ''
         #!/bin/bash
-        
+
         if [ $# -eq 0 ]; then
           echo "Usage: $0 <username> [add|remove|list] [public_key_file]"
           exit 1
         fi
-        
+
         USERNAME="$1"
         ACTION="''${2:-list}"
         KEY_FILE="$3"
-        
+
         USER_HOME=$(getent passwd "$USERNAME" | cut -d: -f6)
         if [ -z "$USER_HOME" ]; then
           echo "Error: User $USERNAME not found"
           exit 1
         fi
-        
+
         SSH_DIR="$USER_HOME/.ssh"
         AUTHORIZED_KEYS="$SSH_DIR/authorized_keys"
-        
+
         case "$ACTION" in
           list)
             echo "SSH keys for user $USERNAME:"
@@ -429,17 +429,17 @@ in
               echo "Error: Key file $KEY_FILE not found"
               exit 1
             fi
-            
+
             # Create SSH directory if it doesn't exist
             mkdir -p "$SSH_DIR"
             chown "$USERNAME:$(id -gn "$USERNAME")" "$SSH_DIR"
             chmod 700 "$SSH_DIR"
-            
+
             # Add key
             cat "$KEY_FILE" >> "$AUTHORIZED_KEYS"
             chown "$USERNAME:$(id -gn "$USERNAME")" "$AUTHORIZED_KEYS"
             chmod 600 "$AUTHORIZED_KEYS"
-            
+
             echo "Added key from $KEY_FILE to $USERNAME's authorized keys"
             ;;
           remove)
@@ -451,12 +451,12 @@ in
               echo "Error: No authorized keys file found for $USERNAME"
               exit 1
             fi
-            
+
             # Remove matching key
             KEY_CONTENT=$(cat "$KEY_FILE")
             grep -v -F "$KEY_CONTENT" "$AUTHORIZED_KEYS" > "$AUTHORIZED_KEYS.tmp"
             mv "$AUTHORIZED_KEYS.tmp" "$AUTHORIZED_KEYS"
-            
+
             echo "Removed key from $USERNAME's authorized keys"
             ;;
           *)
@@ -477,33 +477,33 @@ in
         User = "root";
         ExecStart = pkgs.writeShellScript "ssh-security-audit" ''
           #!/bin/bash
-          
+
           AUDIT_LOG="/var/log/ssh-security-audit.log"
           TIMESTAMP=$(date -Iseconds)
-          
+
           echo "[$TIMESTAMP] Starting SSH security audit..." >> "$AUDIT_LOG"
-          
+
           # Check SSH configuration
           if sshd -t 2>/dev/null; then
             echo "[$TIMESTAMP] SSH configuration: PASS" >> "$AUDIT_LOG"
           else
             echo "[$TIMESTAMP] SSH configuration: FAIL - Configuration errors detected" >> "$AUDIT_LOG"
           fi
-          
+
           # Check for weak authentication methods
           if grep -q "PasswordAuthentication yes" /etc/ssh/sshd_config; then
             echo "[$TIMESTAMP] Password authentication: WARNING - Enabled" >> "$AUDIT_LOG"
           else
             echo "[$TIMESTAMP] Password authentication: PASS - Disabled" >> "$AUDIT_LOG"
           fi
-          
+
           # Check for root login
           if grep -q "PermitRootLogin yes" /etc/ssh/sshd_config; then
             echo "[$TIMESTAMP] Root login: WARNING - Enabled" >> "$AUDIT_LOG"
           else
             echo "[$TIMESTAMP] Root login: PASS - Disabled" >> "$AUDIT_LOG"
           fi
-          
+
           # Check host key permissions
           for key in /etc/ssh/ssh_host_*_key; do
             if [ -f "$key" ]; then
@@ -515,17 +515,17 @@ in
               fi
             fi
           done
-          
+
           # Check for recent security events
           FAILED_COUNT=$(journalctl -u sshd --since="24 hours ago" | grep -c "Failed password" || echo 0)
           echo "[$TIMESTAMP] Failed login attempts (24h): $FAILED_COUNT" >> "$AUDIT_LOG"
-          
+
           # Check fail2ban status
           if command -v fail2ban-client &> /dev/null; then
             BANNED_IPS=$(fail2ban-client status ssh 2>/dev/null | grep "Banned IP list" | wc -w)
             echo "[$TIMESTAMP] Fail2ban banned IPs: $BANNED_IPS" >> "$AUDIT_LOG"
           fi
-          
+
           echo "[$TIMESTAMP] SSH security audit completed" >> "$AUDIT_LOG"
         '';
       };

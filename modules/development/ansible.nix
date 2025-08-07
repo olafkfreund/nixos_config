@@ -19,4 +19,3 @@ in
     ] ++ cfg.packages;
   };
 }
-

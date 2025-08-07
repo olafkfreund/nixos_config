@@ -414,10 +414,10 @@ in
                         1800            ; Retry
                         604800          ; Expire
                         86400 )         ; Minimum TTL
-        
+
         ; Name servers
         @       IN      NS      dex5550.home.freundcloud.com.
-        
+
         ; A records for services and hosts
         @               IN      A       192.168.1.222
         dex5550         IN      A       192.168.1.222
@@ -781,16 +781,16 @@ in
       User = "root";
       ExecStart = pkgs.writeShellScript "security-scan" ''
         echo "[$(date)] Starting security scan..."
-        
+
         # Check for rootkits
         ${pkgs.chkrootkit}/bin/chkrootkit -q || echo "chkrootkit found issues"
-        
+
         # Run system audit
         ${pkgs.lynis}/bin/lynis audit system --quick --quiet
-        
+
         # Check open ports
         ${pkgs.nettools}/bin/netstat -tuln > /var/log/security-scan-ports.log
-        
+
         echo "[$(date)] Security scan completed"
       '';
     };

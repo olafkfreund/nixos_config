@@ -6,13 +6,13 @@ let
   # Temperature dashboard script with proper dependencies
   tempDashboard = pkgs.writeShellScriptBin "temp-dashboard" ''
         #!/usr/bin/env bash
-    
+
         # Temperature Dashboard for NixOS using yad for GUI
         # Shows CPU, GPU, and NVMe temperatures
-    
+
         get_cpu_temp() {
             local temp_path=""
-        
+
             # Look for k10temp (AMD) or coretemp (Intel)
             for hwmon in /sys/class/hwmon/hwmon*/; do
                 if [[ -f "$hwmon/name" ]]; then
@@ -25,7 +25,7 @@ let
                     fi
                 fi
             done
-        
+
             if [[ -n "$temp_path" && -f "$temp_path" ]]; then
                 local temp_millicelsius=$(cat "$temp_path")
                 echo "scale=1; $temp_millicelsius / 1000" | ${pkgs.bc}/bin/bc
@@ -33,7 +33,7 @@ let
                 echo "N/A"
             fi
         }
-    
+
         get_gpu_temp() {
             # Try AMD GPU first
             if command -v ${pkgs.rocmPackages.rocm-smi}/bin/rocm-smi >/dev/null 2>&1; then
@@ -43,7 +43,7 @@ let
                     return
                 fi
             fi
-        
+
             # Try NVIDIA GPU
             if command -v ${pkgs.linuxPackages.nvidia_x11}/bin/nvidia-smi >/dev/null 2>&1; then
                 local temp=$(${pkgs.linuxPackages.nvidia_x11}/bin/nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null)
@@ -52,7 +52,7 @@ let
                     return
                 fi
             fi
-        
+
             # Try amdgpu hwmon
             for hwmon in /sys/class/hwmon/hwmon*/; do
                 if [[ -f "$hwmon/name" ]]; then
@@ -66,10 +66,10 @@ let
                     fi
                 fi
             done
-        
+
             echo "N/A"
         }
-    
+
         get_nvme_temp() {
             # Try smartctl first
             if command -v ${pkgs.smartmontools}/bin/smartctl >/dev/null 2>&1; then
@@ -79,7 +79,7 @@ let
                     return
                 fi
             fi
-        
+
             # Try hwmon for nvme
             for hwmon in /sys/class/hwmon/hwmon*/; do
                 if [[ -f "$hwmon/name" ]]; then
@@ -93,10 +93,10 @@ let
                     fi
                 fi
             done
-        
+
             echo "N/A"
         }
-    
+
         get_temp_color() {
             local temp=$1
             if [[ "$temp" == "N/A" ]]; then
@@ -109,7 +109,7 @@ let
                 echo "#fb4934"  # Critical (red)
             fi
         }
-    
+
         format_temp() {
             local temp=$1
             if [[ "$temp" == "N/A" ]]; then
@@ -118,22 +118,22 @@ let
                 echo "''${temp}°C"
             fi
         }
-    
+
         # Get temperatures
         cpu_temp=$(get_cpu_temp)
         gpu_temp=$(get_gpu_temp)
         nvme_temp=$(get_nvme_temp)
-    
+
         # Format temperatures
         cpu_display=$(format_temp "$cpu_temp")
         gpu_display=$(format_temp "$gpu_temp")
         nvme_display=$(format_temp "$nvme_temp")
-    
+
         # Get colors
         cpu_color=$(get_temp_color "$cpu_temp")
         gpu_color=$(get_temp_color "$gpu_temp")
         nvme_color=$(get_temp_color "$nvme_temp")
-    
+
         # Create YAD dialog
         ${pkgs.yad}/bin/yad \
             --title="System Temperature Dashboard" \

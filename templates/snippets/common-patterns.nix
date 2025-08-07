@@ -29,7 +29,7 @@ with lib; {
       enable = mkEnableOption "MODULE_DESCRIPTION";
       # ... other options
     };
-    
+
     config = mkIf cfg.enable {
       # ... configuration
     };
@@ -321,7 +321,7 @@ with lib; {
     [section1]
     key1 = value1
     key2 = ${config.example.value}
-    
+
     [section2]
     enabled = true
     ${concatStringsSep "\n" (mapAttrsToList (k: v: "${k} = ${v}") config.example.settings)}

@@ -23,4 +23,3 @@ in
     virtualisation.incus.ui.enable = true;
   };
 }
-

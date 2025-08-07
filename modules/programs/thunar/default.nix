@@ -1,6 +1,6 @@
 { pkgs, ... }: {
 
-  # Thunar File Manager 
+  # Thunar File Manager
   programs.thunar = {
     enable = true;
     plugins = with pkgs.xfce; [

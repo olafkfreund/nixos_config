@@ -78,7 +78,7 @@ in
         codex # Yet Another AI CLI tool
       ] ++
 
-      # Code assistants  
+      # Code assistants
       optionals cfg.packages.codeAssistants [
         gh-copilot # GitHub Copilot CLI integration
         aichat # AI chat with code assistance features

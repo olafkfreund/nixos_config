@@ -20,7 +20,7 @@ let
       tooltip = "Intel Xeon Package: {temperatureC}°C";
     };
     razer = {
-      # Intel mobile system - use coretemp  
+      # Intel mobile system - use coretemp
       hwmon-path = "/sys/class/hwmon/hwmon6/temp1_input";
       tooltip = "Intel CPU Package: {temperatureC}°C";
     };

@@ -4,10 +4,10 @@
   services.udev.extraRules = ''
     # Disable autosuspend for TP-Link Bluetooth adapter (causes mouse freezing)
     ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="2357", ATTRS{idProduct}=="0604", ATTR{power/autosuspend}="-1"
-    
+
     # Disable autosuspend for all Bluetooth class devices
     ACTION=="add", SUBSYSTEM=="usb", ATTRS{bDeviceClass}=="e0", ATTR{power/autosuspend}="-1"
-    
+
     # Disable autosuspend for HID devices (mice, keyboards)
     ACTION=="add", SUBSYSTEM=="usb", ATTRS{bInterfaceClass}=="03", ATTR{power/autosuspend}="-1"
   '';

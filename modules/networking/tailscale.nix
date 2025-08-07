@@ -111,19 +111,19 @@ in
         RemainAfterExit = true;
         ExecStart = pkgs.writeShellScript "tailscale-autoconnect" ''
           #!/bin/bash
-          
+
           # Wait for tailscaled to be ready
           sleep 2
-          
+
           # Check if already authenticated
           if ${pkgs.tailscale}/bin/tailscale status --json | ${pkgs.jq}/bin/jq -e '.BackendState == "Running"' >/dev/null 2>&1; then
             echo "Tailscale already authenticated and running"
             exit 0
           fi
-          
+
           # Build tailscale up command
           UP_ARGS=""
-          
+
           ${optionalString (cfg.authKeyFile != null) ''
             if [ -f "${cfg.authKeyFile}" ]; then
               AUTH_KEY=$(cat "${cfg.authKeyFile}")
@@ -132,43 +132,43 @@ in
               echo "Warning: Auth key file ${cfg.authKeyFile} not found"
             fi
           ''}
-          
+
           ${optionalString cfg.exitNode ''
             UP_ARGS="$UP_ARGS --advertise-exit-node"
           ''}
-          
+
           ${optionalString (cfg.subnet != null) ''
             UP_ARGS="$UP_ARGS --advertise-routes=${cfg.subnet}"
           ''}
-          
+
           ${optionalString (cfg.hostname != null) ''
             UP_ARGS="$UP_ARGS --hostname=${cfg.hostname}"
           ''}
-          
+
           ${optionalString cfg.acceptRoutes ''
             UP_ARGS="$UP_ARGS --accept-routes"
           ''}
-          
+
           ${optionalString cfg.acceptDns ''
             UP_ARGS="$UP_ARGS --accept-dns"
           ''}
-          
+
           ${optionalString cfg.ssh ''
             UP_ARGS="$UP_ARGS --ssh"
           ''}
-          
+
           ${optionalString cfg.shields ''
             UP_ARGS="$UP_ARGS --shields-up"
           ''}
-          
+
           # Add extra flags
           ${concatStringsSep "\n" (map (flag: ''
             UP_ARGS="$UP_ARGS ${flag}"
           '') cfg.extraUpFlags)}
-          
+
           echo "Connecting to Tailscale with args: $UP_ARGS"
           ${pkgs.tailscale}/bin/tailscale up $UP_ARGS
-          
+
           # Wait a moment and check status
           sleep 3
           ${pkgs.tailscale}/bin/tailscale status
@@ -190,14 +190,14 @@ in
         RestartSec = "30s";
         ExecStart = pkgs.writeShellScript "tailscale-monitor" ''
           #!/bin/bash
-          
+
           LOG_FILE="/var/log/tailscale/monitor.log"
           mkdir -p "$(dirname "$LOG_FILE")"
           exec 1> >(tee -a "$LOG_FILE")
           exec 2>&1
-          
+
           echo "[$(date)] Starting Tailscale monitor..."
-          
+
           while true; do
             # Check Tailscale status
             if ! ${pkgs.tailscale}/bin/tailscale status >/dev/null 2>&1; then
@@ -209,7 +209,7 @@ in
               # Log status periodically
               STATUS=$(${pkgs.tailscale}/bin/tailscale status --json 2>/dev/null || echo '{"BackendState":"Unknown"}')
               BACKEND_STATE=$(echo "$STATUS" | ${pkgs.jq}/bin/jq -r '.BackendState // "Unknown"')
-              
+
               if [ "$BACKEND_STATE" != "Running" ]; then
                 echo "[$(date)] Tailscale backend state: $BACKEND_STATE"
                 if [ "$BACKEND_STATE" = "NeedsLogin" ]; then
@@ -218,7 +218,7 @@ in
                 fi
               fi
             fi
-            
+
             sleep 300  # Check every 5 minutes
           done
         '';
@@ -230,15 +230,15 @@ in
       tailscale
       (writeShellScriptBin "tailscale-status" ''
         #!/bin/bash
-        
+
         echo "=== Tailscale Status ==="
         ${pkgs.tailscale}/bin/tailscale status || echo "Tailscale not running"
-        
+
         echo ""
         echo "=== Tailscale Ping Test ==="
         # Test connectivity to other known Tailscale nodes
         NODES=$(${pkgs.tailscale}/bin/tailscale status --json 2>/dev/null | ${pkgs.jq}/bin/jq -r '.Peer[].TailscaleIPs[0]' 2>/dev/null || echo "")
-        
+
         if [ -n "$NODES" ]; then
           for NODE in $NODES; do
             if ping -c 1 -W 2 "$NODE" >/dev/null 2>&1; then
@@ -250,11 +250,11 @@ in
         else
           echo "No other Tailscale nodes found"
         fi
-        
+
         echo ""
         echo "=== Tailscale Service Status ==="
         systemctl status tailscale.service --no-pager -l
-        
+
         echo ""
         echo "=== Tailscale Logs (last 10 lines) ==="
         journalctl -u tailscale.service -n 10 --no-pager
@@ -262,15 +262,15 @@ in
 
       (writeShellScriptBin "tailscale-reconnect" ''
         #!/bin/bash
-        
+
         echo "Reconnecting Tailscale..."
         systemctl restart tailscale.service
         sleep 5
         systemctl restart tailscale-autoconnect.service
-        
+
         echo "Waiting for connection..."
         sleep 10
-        
+
         echo "Current status:"
         ${pkgs.tailscale}/bin/tailscale status
       '')

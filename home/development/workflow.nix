@@ -250,20 +250,20 @@ in
               - id: check-merge-conflict
               - id: check-case-conflict
               - id: mixed-line-ending
-          
+
           # Nix-specific hooks
           - repo: https://github.com/nix-community/nixpkgs-fmt
             rev: v1.3.0
             hooks:
               - id: nixpkgs-fmt
-          
+
           # Additional language-specific hooks can be enabled here
           # Python
           # - repo: https://github.com/psf/black
           #   rev: 23.1.0
           #   hooks:
           #     - id: black
-          
+
           # JavaScript/TypeScript
           # - repo: https://github.com/pre-commit/mirrors-prettier
           #   rev: v3.0.0-alpha.4
@@ -278,7 +278,7 @@ in
           #!/bin/sh
           # Development environment setup script
           echo "🚀 Setting up development environment..."
-          
+
           # Initialize pre-commit if available
           ${optionalString cfg.cicd.pre_commit ''
           if [ -f .pre-commit-config.yaml ]; then
@@ -286,39 +286,39 @@ in
             ${pkgs.pre-commit}/bin/pre-commit install
           fi
           ''}
-          
+
           # Initialize justfile if it doesn't exist
           if [ ! -f justfile ] && [ ! -f Justfile ]; then
             echo "📝 Creating basic justfile..."
             cat > justfile << 'EOF'
           # Development workflow commands
-          
+
           # Show available commands
           default:
             @just --list
-          
+
           # Run tests
           test:
             echo "Running tests..."
-          
+
           # Format code
           format:
             echo "Formatting code..."
-          
+
           # Build project
           build:
             echo "Building project..."
-          
+
           # Clean build artifacts
           clean:
             echo "Cleaning build artifacts..."
-          
+
           # Start development server
           dev:
             echo "Starting development server..."
           EOF
           fi
-          
+
           echo "✅ Development environment ready!"
         '';
         executable = true;
@@ -334,12 +334,12 @@ in
           echo "📊 Project Statistics"
           echo "===================="
           echo
-          
+
           # Code statistics
           echo "📝 Code Statistics:"
           ${pkgs.tokei}/bin/tokei
           echo
-          
+
           # Git statistics
           if [ -d .git ]; then
             echo "🔗 Git Statistics:"
@@ -349,12 +349,12 @@ in
             echo "Last commit: $(git log -1 --format='%cr')"
             echo
           fi
-          
+
           # Directory size
           echo "📁 Directory Size:"
           du -sh . 2>/dev/null || echo "Unable to calculate directory size"
           echo
-          
+
           # Recent activity
           if [ -d .git ]; then
             echo "⏰ Recent Activity (last 10 commits):"
@@ -374,7 +374,7 @@ in
           echo "🛠️  Development Workflow Tools"
           echo "=============================="
           echo
-          
+
           echo "📋 Available Tools:"
           ${optionalString cfg.taskRunners.just ''echo "  just          - Task runner (j, jl, jr)"''}
           ${optionalString cfg.cicd.github_cli ''echo "  gh            - GitHub CLI (gh-pr, gh-status)"''}
@@ -383,13 +383,13 @@ in
           ${optionalString cfg.networking.jq ''echo "  jq            - JSON processor (pretty-json, json-keys)"''}
           ${optionalString cfg.monitoring.btop ''echo "  btop          - Process monitor (top)"''}
           echo
-          
+
           echo "📝 Quick Commands:"
           echo "  dev-setup     - Initialize development environment"
           ${optionalString cfg.testing.tokei ''echo "  project-stats - Show project statistics"''}
           echo "  dev-help      - Show this help"
           echo
-          
+
           echo "📚 Documentation:"
           echo "  All tools are configured with sensible defaults and enhanced aliases."
           echo "  Check individual tool help with: <tool> --help"

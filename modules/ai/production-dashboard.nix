@@ -66,18 +66,18 @@ in
         RemainAfterExit = true;
         ExecStart = pkgs.writeShellScript "provision-production-dashboard" ''
           #!/bin/bash
-          
+
           LOG_FILE="/var/log/ai-analysis/production-dashboard.log"
           DASHBOARD_DIR="${cfg.dashboardPath}"
-          
+
           mkdir -p "$(dirname "$LOG_FILE")"
           mkdir -p "$DASHBOARD_DIR"
-          
+
           exec 1> >(tee -a "$LOG_FILE")
           exec 2>&1
-          
+
           echo "[$(date)] Starting production dashboard provisioning..."
-          
+
           # Create AI Production Overview Dashboard
           cat > "$DASHBOARD_DIR/ai-production-overview.json" << 'EOF'
           {
@@ -371,7 +371,7 @@ in
             }
           }
           EOF
-          
+
           # Create AI Security Dashboard
           cat > "$DASHBOARD_DIR/ai-security-dashboard.json" << 'EOF'
           {
@@ -469,7 +469,7 @@ in
             }
           }
           EOF
-          
+
           # Create AI Performance Dashboard
           cat > "$DASHBOARD_DIR/ai-performance-dashboard.json" << 'EOF'
           {
@@ -563,18 +563,18 @@ in
             }
           }
           EOF
-          
+
           echo "[$(date)] Production dashboards created successfully"
-          
+
           # Set proper permissions
           chmod 644 "$DASHBOARD_DIR"/*.json
-          
+
           # Restart Grafana if running to pick up new dashboards
           if systemctl is-active grafana &>/dev/null; then
             echo "[$(date)] Restarting Grafana to load new dashboards..."
             systemctl restart grafana
           fi
-          
+
           echo "[$(date)] Production dashboard provisioning completed"
         '';
       };
@@ -592,42 +592,42 @@ in
 
         ExecStart = pkgs.writeShellScript "collect-production-metrics" ''
           #!/bin/bash
-          
+
           LOG_FILE="/var/log/ai-analysis/production-metrics.log"
           METRICS_DIR="/var/lib/ai-analysis/production-metrics"
-          
+
           mkdir -p "$(dirname "$LOG_FILE")"
           mkdir -p "$METRICS_DIR"
-          
+
           exec 1> >(tee -a "$LOG_FILE")
           exec 2>&1
-          
+
           echo "[$(date)] Starting production metrics collection..."
-          
+
           # Collect AI service metrics
           TIMESTAMP=$(${pkgs.coreutils}/bin/date +%s)
           HOSTNAME=$(${pkgs.inetutils}/bin/hostname)
-          
+
           # AI Analysis Service Metrics
           AI_SERVICES_RUNNING=$(${pkgs.systemd}/bin/systemctl list-units --type=service --state=running | ${pkgs.gnugrep}/bin/grep -c "ai-" || echo 0)
           AI_SERVICES_FAILED=$(${pkgs.systemd}/bin/systemctl list-units --type=service --state=failed | ${pkgs.gnugrep}/bin/grep -c "ai-" || echo 0)
-          
+
           # Performance Metrics
           if command -v ai-cli &>/dev/null; then
             AI_RESPONSE_TIME=$(${pkgs.coreutils}/bin/timeout 10 time ai-cli "test" 2>&1 | ${pkgs.gnugrep}/bin/grep real | ${pkgs.gawk}/bin/awk '{print $2}' | ${pkgs.gnused}/bin/sed 's/[^0-9.]//g' || echo "0")
           else
             AI_RESPONSE_TIME="0"
           fi
-          
+
           # Security Metrics
           SSH_FAILED_ATTEMPTS=$(${pkgs.systemd}/bin/journalctl -u sshd --since="1 hour ago" | ${pkgs.gnugrep}/bin/grep -c "Failed password" || echo 0)
           SSH_SUCCESSFUL_LOGINS=$(${pkgs.systemd}/bin/journalctl -u sshd --since="1 hour ago" | ${pkgs.gnugrep}/bin/grep -c "Accepted" || echo 0)
-          
+
           # System Resource Metrics
           CPU_USAGE=$(${pkgs.procps}/bin/top -bn1 | ${pkgs.gnugrep}/bin/grep "Cpu(s)" | ${pkgs.gawk}/bin/awk '{print $2}' | ${pkgs.gnused}/bin/sed 's/%us,//')
           MEMORY_USAGE=$(${pkgs.procps}/bin/free | ${pkgs.gnugrep}/bin/grep Mem | ${pkgs.gawk}/bin/awk '{printf "%.1f", $3/$2 * 100.0}')
           DISK_USAGE=$(${pkgs.coreutils}/bin/df / | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $5}' | ${pkgs.gnused}/bin/sed 's/%//')
-          
+
           # Storage Critical Check (P510 specific)
           if [ "$HOSTNAME" = "p510" ]; then
             P510_DISK_USAGE=$(${pkgs.coreutils}/bin/df / | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $5}' | ${pkgs.gnused}/bin/sed 's/%//')
@@ -636,7 +636,7 @@ in
               ${pkgs.util-linux}/bin/logger -t ai-production-metrics "CRITICAL: P510 disk usage at $P510_DISK_USAGE%"
             fi
           fi
-          
+
           # Create metrics file
           cat > "$METRICS_DIR/metrics_$TIMESTAMP.json" << EOF
           {
@@ -662,10 +662,10 @@ in
             }
           }
           EOF
-          
+
           # Cleanup old metrics (keep last 24 hours)
           ${pkgs.findutils}/bin/find "$METRICS_DIR" -name "metrics_*.json" -mtime +1 -delete
-          
+
           echo "[$(${pkgs.coreutils}/bin/date)] Production metrics collection completed"
         '';
       };
@@ -682,17 +682,17 @@ in
         User = "root";
         ExecStart = pkgs.writeShellScript "dashboard-health-check" ''
           #!/bin/bash
-          
+
           LOG_FILE="/var/log/ai-analysis/dashboard-health.log"
           GRAFANA_URL="${cfg.grafanaUrl}"
           PROMETHEUS_URL="${cfg.prometheusUrl}"
-          
+
           mkdir -p "$(dirname "$LOG_FILE")"
           exec 1> >(tee -a "$LOG_FILE")
           exec 2>&1
-          
+
           echo "[$(date)] Starting dashboard health check..."
-          
+
           # Check Grafana availability
           if curl -sf "$GRAFANA_URL/api/health" &>/dev/null; then
             echo "[$(date)] Grafana is healthy"
@@ -700,7 +700,7 @@ in
             echo "[$(date)] WARNING: Grafana is not responding"
             ${pkgs.util-linux}/bin/logger -t ai-dashboard-health "WARNING: Grafana is not responding at $GRAFANA_URL"
           fi
-          
+
           # Check Prometheus availability
           if curl -sf "$PROMETHEUS_URL/-/healthy" &>/dev/null; then
             echo "[$(date)] Prometheus is healthy"
@@ -708,7 +708,7 @@ in
             echo "[$(date)] WARNING: Prometheus is not responding"
             ${pkgs.util-linux}/bin/logger -t ai-dashboard-health "WARNING: Prometheus is not responding at $PROMETHEUS_URL"
           fi
-          
+
           # Check dashboard files
           DASHBOARD_COUNT=$(find "${cfg.dashboardPath}" -name "*.json" | wc -l)
           if [ "$DASHBOARD_COUNT" -gt 0 ]; then
@@ -717,7 +717,7 @@ in
             echo "[$(date)] WARNING: No dashboard files found"
             ${pkgs.util-linux}/bin/logger -t ai-dashboard-health "WARNING: No dashboard files found in ${cfg.dashboardPath}"
           fi
-          
+
           echo "[$(date)] Dashboard health check completed"
         '';
       };
@@ -767,48 +767,48 @@ in
     environment.systemPackages = [
       (pkgs.writeShellScriptBin "ai-dashboard-status" ''
         #!/bin/bash
-        
+
         echo "=== AI Production Dashboard Status ==="
         echo
-        
+
         echo "Dashboard Services:"
         systemctl status ai-production-dashboard --no-pager -l
         echo
-        
+
         echo "Metrics Collection:"
         systemctl status ai-production-metrics --no-pager -l
         echo
-        
+
         echo "Dashboard Health:"
         systemctl status ai-dashboard-health --no-pager -l
         echo
-        
+
         echo "Available Dashboards:"
         find "${cfg.dashboardPath}" -name "*.json" -exec basename {} \; | sort
         echo
-        
+
         echo "Recent Metrics:"
         ls -la /var/lib/ai-analysis/production-metrics/ | tail -5
         echo
-        
+
         echo "Grafana URL: ${cfg.grafanaUrl}"
         echo "Prometheus URL: ${cfg.prometheusUrl}"
       '')
 
       (pkgs.writeShellScriptBin "ai-dashboard-reload" ''
         #!/bin/bash
-        
+
         echo "Reloading AI production dashboards..."
-        
+
         # Restart dashboard provisioner
         systemctl restart ai-production-dashboard
-        
+
         # Restart Grafana if running
         if systemctl is-active grafana &>/dev/null; then
           echo "Restarting Grafana..."
           systemctl restart grafana
         fi
-        
+
         echo "Dashboard reload completed"
       '')
     ];

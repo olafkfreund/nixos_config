@@ -96,21 +96,21 @@ in
         Group = "monitoring";
         ExecStart = pkgs.writeShellScript "alert-webhook" ''
                     #!/bin/bash
-          
+
                     # Simple webhook server for receiving alerts using Python HTTP server
                     PORT=9097
-          
+
                     log_alert() {
                       local severity="$1"
                       local timestamp=$(date -Iseconds)
                       echo "[$timestamp] [$severity] Alert received" >> /var/log/monitoring/alerts.log
                     }
-          
+
                     # Create log directory
                     mkdir -p /var/log/monitoring
-          
+
                     echo "Starting alert webhook server on port $PORT"
-          
+
                     # Use Python HTTP server for more reliable webhook handling
                     ${pkgs.python3}/bin/python3 -c "
           import http.server
@@ -123,7 +123,7 @@ in
               def log_message(self, format, *args):
                   # Disable default logging to avoid spam
                   pass
-        
+
               def do_POST(self):
                   if self.path.startswith('/webhook'):
                       try:
@@ -134,7 +134,7 @@ in
                                   payload = json.loads(post_data.decode('utf-8'))
                               except:
                                   payload = post_data.decode('utf-8')
-                
+
                           # Determine severity from path
                           if '/critical' in self.path:
                               severity = 'CRITICAL'
@@ -142,20 +142,20 @@ in
                               severity = 'WARNING'
                           else:
                               severity = 'INFO'
-                
+
                           # Log alert
                           timestamp = datetime.now().isoformat()
                           with open('/var/log/monitoring/alerts.log', 'a') as f:
                               f.write(f'[{timestamp}] [{severity}] Alert received\\n')
                               if content_length > 0:
                                   f.write(f'[{timestamp}] Payload: {str(payload)}\\n')
-                
+
                           # Send response
                           self.send_response(200)
                           self.send_header('Content-type', 'text/plain')
                           self.end_headers()
                           self.wfile.write(f'{severity} alert received\\n'.encode())
-                
+
                       except Exception as e:
                           self.send_response(500)
                           self.send_header('Content-type', 'text/plain')
@@ -166,7 +166,7 @@ in
                       self.send_header('Content-type', 'text/plain')
                       self.end_headers()
                       self.wfile.write(b'Not found\\n')
-    
+
               def do_GET(self):
                   if self.path == '/health':
                       self.send_response(200)

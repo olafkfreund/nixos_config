@@ -153,7 +153,7 @@ in
     warningThresholds = {
       diskUsage = 75; # Early warning for P620
       memoryUsage = 80; # Memory warning
-      cpuLoad = 150; # Load warning  
+      cpuLoad = 150; # Load warning
       temperature = 75; # Temperature warning
     };
   };

@@ -44,7 +44,7 @@ with lib; let
       pkgs.gcc # For native compilation
 
       # Essential Lua/Ruby dependencies for Neovim
-      pkgs.luajitPackages.lpeg # LPeg for parsing  
+      pkgs.luajitPackages.lpeg # LPeg for parsing
       pkgs.luajitPackages.luabitop # Bitwise operations
       pkgs.luajitPackages.mpack # MessagePack for Neovim RPC
       pkgs.libuv # libuv (libluv dependency)
@@ -145,35 +145,35 @@ in
       "nvim/lua/config/nix-env.lua".text = ''
         -- NixOS Development Environment Information
         -- This file provides paths for LazyVim to use system-provided tools
-        
+
         local M = {}
-        
+
         -- LSP server paths (provided by Nix)
         M.lsp_paths = {
           nixd = "${pkgs.nixd}/bin/nixd",
-          rust_analyzer = "${pkgs.rust-analyzer}/bin/rust-analyzer", 
+          rust_analyzer = "${pkgs.rust-analyzer}/bin/rust-analyzer",
           gopls = "${pkgs.gopls}/bin/gopls",
           tsserver = "${pkgs.nodePackages.typescript-language-server}/bin/typescript-language-server",
           pylsp = "${pkgs.python313Packages.python-lsp-server}/bin/pylsp",
           lua_ls = "${pkgs.lua-language-server}/bin/lua-language-server",
         }
-        
+
         -- Formatter paths (provided by Nix)
         M.formatter_paths = {
           alejandra = "${pkgs.alejandra}/bin/alejandra",
-          stylua = "${pkgs.stylua}/bin/stylua", 
+          stylua = "${pkgs.stylua}/bin/stylua",
           prettier = "${pkgs.nodePackages.prettier}/bin/prettier",
           black = "${pkgs.python313Packages.black}/bin/black",
           isort = "${pkgs.python313Packages.isort}/bin/isort",
         }
-        
+
         -- Development tools (provided by Nix)
         M.tool_paths = {
           ripgrep = "${pkgs.ripgrep}/bin/rg",
           fd = "${pkgs.fd}/bin/fd",
           lazygit = "${pkgs.lazygit}/bin/lazygit",
         }
-        
+
         return M
       '';
     };

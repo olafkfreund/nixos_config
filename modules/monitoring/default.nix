@@ -343,7 +343,7 @@ in
       procs
     ] ++ optionals cfg.hardwareMonitor.enable [
       libnotify # notify-send
-      lm_sensors # sensors command  
+      lm_sensors # sensors command
       bc # calculator for temperature comparisons
     ];
 
@@ -358,16 +358,16 @@ in
         ExecStart = pkgs.writeShellScript "hardware-monitor" ''
           #!/bin/bash
           set -euo pipefail
-          
+
           # Configuration
           SCRIPT_NAME="Hardware Monitor"
           LOG_FILE="${cfg.hardwareMonitor.logFile}"
-          STATE_FILE="/tmp/hardware-monitor-state" 
+          STATE_FILE="/tmp/hardware-monitor-state"
           CHECK_INTERVAL_MINUTES=5
-          
+
           # Hardware-specific patterns based on host
           HOSTNAME=$(${pkgs.inetutils}/bin/hostname)
-          
+
           # Common hardware issue patterns
           declare -A PATTERNS=(
               ["usb_disconnect"]="usb.*disconnect"
@@ -379,7 +379,7 @@ in
               ["thermal_throttle"]="thermal.*throttle|temperature.*critical"
               ["power_fail"]="power.*supply.*fail|voltage.*out of range"
           )
-          
+
           # Host-specific patterns
           case "$HOSTNAME" in
               "p620")
@@ -396,55 +396,55 @@ in
                   )
                   ;;
           esac
-          
+
           # Notification function
           send_notification() {
               local severity="$1"
               local title="$2"
               local message="$3"
               local icon="$4"
-              
+
               echo "$(date '+%Y-%m-%d %H:%M:%S') [$severity] $title: $message" >> "$LOG_FILE"
-              
+
               if command -v notify-send >/dev/null 2>&1; then
                   case "$severity" in
                       "CRITICAL") urgency="critical"; timeout=0 ;;
                       "WARNING") urgency="normal"; timeout=10000 ;;
                       "INFO") urgency="low"; timeout=5000 ;;
                   esac
-                  
+
                   DISPLAY=:0 notify-send --urgency="$urgency" --expire-time="$timeout" --icon="$icon" --category="hardware" "$title" "$message" || true
               fi
-              
+
               case "$severity" in
                   "CRITICAL") logger -p daemon.crit -t "$SCRIPT_NAME" "$title: $message" ;;
                   "WARNING") logger -p daemon.warning -t "$SCRIPT_NAME" "$title: $message" ;;
                   "INFO") logger -p daemon.info -t "$SCRIPT_NAME" "$title: $message" ;;
               esac
           }
-          
+
           # Check for hardware issues in logs
           check_hardware_issues() {
               local since_time="$1"
               local issues_found=0
-              
+
               local journal_output
               journal_output=$(journalctl --since="$since_time" --no-pager -q 2>/dev/null || true)
-              
+
               if [[ -z "$journal_output" ]]; then
                   return 0
               fi
-              
+
               for pattern_name in "$${!PATTERNS[@]}"; do
                   local pattern="$${PATTERNS[$pattern_name]}"
                   local matches
-                  
+
                   matches=$(echo "$journal_output" | grep -iE "$pattern" || true)
-                  
+
                   if [[ -n "$matches" ]]; then
                       issues_found=$((issues_found + 1))
                       local count=$(echo "$matches" | wc -l)
-                      
+
                       case "$pattern_name" in
                           *"error"|*"fail"|*"critical"|"memory_error"|"oom_kill"|"thermal_throttle")
                               send_notification "CRITICAL" "Hardware Issue: $${pattern_name//_/ }" "$count occurrence(s) detected!" "dialog-error"
@@ -458,31 +458,31 @@ in
                       esac
                   fi
               done
-              
+
               return $issues_found
           }
-          
+
           # Main monitoring function
           main() {
               local since_time="5 minutes ago"
               if [[ -f "$STATE_FILE" ]]; then
                   since_time=$(cat "$STATE_FILE" 2>/dev/null || echo "5 minutes ago")
               fi
-              
+
               date '+%Y-%m-%d %H:%M:%S' > "$STATE_FILE"
-              
+
               local total_issues=0
               echo "$(date '+%Y-%m-%d %H:%M:%S') Starting hardware monitoring check..." >> "$LOG_FILE"
-              
+
               if check_hardware_issues "$since_time"; then
                   total_issues=$((total_issues + $?))
               fi
-              
+
               if [[ "$total_issues" -gt 0 ]]; then
                   send_notification "WARNING" "Hardware Monitor Summary" "$total_issues hardware issue(s) detected." "dialog-warning"
               fi
           }
-          
+
           # Daemon mode
           while true; do
               main

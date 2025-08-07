@@ -98,7 +98,7 @@ in
         # Extract and save new access token
         echo "$RESPONSE" | jq -r '.access_token' > "$ACCESS_TOKEN_FILE"
         chmod 600 "$ACCESS_TOKEN_FILE"
-        
+
         echo "OAuth2 token refreshed successfully for $ACCOUNT"
       '';
       mode = "0755";

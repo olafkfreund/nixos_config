@@ -35,23 +35,23 @@ class AMDGPUMetrics:
         self.metrics = {}
         self.lock = threading.Lock()
         self.update_metrics()
-        
+
     def run_rocm_smi(self, args):
         """Run rocm-smi command and return output"""
         try:
-            result = subprocess.run(['rocm-smi'] + args, 
+            result = subprocess.run(['rocm-smi'] + args,
                                   capture_output=True, text=True, timeout=10)
             return result.stdout if result.returncode == 0 else None
         except Exception as e:
             print(f"Error running rocm-smi: {e}")
             return None
-    
+
     def parse_temperature(self, output):
         """Parse temperature from rocm-smi output"""
         temps = {}
         if not output:
             return temps
-            
+
         for line in output.split('\n'):
             if 'Temperature (Sensor edge)' in line:
                 match = re.search(r':\s*(\d+\.?\d*)', line)
@@ -66,39 +66,39 @@ class AMDGPUMetrics:
                 if match:
                     temps['memory'] = float(match.group(1))
         return temps
-    
+
     def parse_power(self, output):
         """Parse power consumption from rocm-smi output"""
         power = {}
         if not output:
             return power
-            
+
         for line in output.split('\n'):
             if 'Average Graphics Package Power' in line:
                 match = re.search(r':\s*(\d+\.?\d*)', line)
                 if match:
                     power['graphics_package'] = float(match.group(1))
         return power
-    
+
     def parse_utilization(self, output):
         """Parse GPU utilization from rocm-smi output"""
         util = {}
         if not output:
             return util
-            
+
         for line in output.split('\n'):
             if 'GPU use (%)' in line:
                 match = re.search(r':\s*(\d+)', line)
                 if match:
                     util['gpu'] = float(match.group(1))
         return util
-    
+
     def parse_memory(self, output):
         """Parse memory usage from rocm-smi output"""
         memory = {}
         if not output:
             return memory
-            
+
         for line in output.split('\n'):
             if 'GPU Memory Allocated (VRAM%)' in line:
                 match = re.search(r':\s*(\d+)', line)
@@ -109,26 +109,26 @@ class AMDGPUMetrics:
                 if match:
                     memory['activity_percent'] = float(match.group(1))
         return memory
-    
+
     def update_metrics(self):
         """Update all metrics from rocm-smi"""
         try:
             # Get temperature data
             temp_output = self.run_rocm_smi(['--showtemp'])
             temperatures = self.parse_temperature(temp_output)
-            
+
             # Get power data
             power_output = self.run_rocm_smi(['--showpower'])
             power = self.parse_power(power_output)
-            
+
             # Get utilization data
             util_output = self.run_rocm_smi(['--showuse'])
             utilization = self.parse_utilization(util_output)
-            
+
             # Get memory data
             memory_output = self.run_rocm_smi(['--showmemuse'])
             memory = self.parse_memory(memory_output)
-            
+
             with self.lock:
                 self.metrics = {
                     'temperature': temperatures,
@@ -139,15 +139,15 @@ class AMDGPUMetrics:
                 }
         except Exception as e:
             print(f"Error updating metrics: {e}")
-    
+
     def get_prometheus_metrics(self):
         """Convert metrics to Prometheus format"""
         with self.lock:
             if not self.metrics:
                 return "# No metrics available\n"
-            
+
             output = []
-            
+
             # Temperature metrics
             temps = self.metrics.get('temperature', {})
             if 'edge' in temps:
@@ -156,27 +156,27 @@ class AMDGPUMetrics:
                 output.append(f'amd_gpu_temperature_celsius{{sensor="junction"}} {temps["junction"]}')
             if 'memory' in temps:
                 output.append(f'amd_gpu_temperature_celsius{{sensor="memory"}} {temps["memory"]}')
-            
+
             # Power metrics
             power = self.metrics.get('power', {})
             if 'graphics_package' in power:
                 output.append(f'amd_gpu_power_watts{{type="graphics_package"}} {power["graphics_package"]}')
-            
+
             # Utilization metrics
             util = self.metrics.get('utilization', {})
             if 'gpu' in util:
                 output.append(f'amd_gpu_utilization_percent {{}} {util["gpu"]}')
-            
+
             # Memory metrics
             memory = self.metrics.get('memory', {})
             if 'vram_used_percent' in memory:
                 output.append(f'amd_gpu_memory_used_percent {{}} {memory["vram_used_percent"]}')
             if 'activity_percent' in memory:
                 output.append(f'amd_gpu_memory_activity_percent {{}} {memory["activity_percent"]}')
-            
+
             # Add timestamp
             output.append(f'amd_gpu_scrape_timestamp {{}} {self.metrics["timestamp"]}')
-            
+
             return '\n'.join(output) + '\n'
 
 # Global metrics instance
@@ -209,7 +209,7 @@ if __name__ == '__main__':
     update_thread = threading.Thread(target=update_metrics_loop)
     update_thread.daemon = True
     update_thread.start()
-    
+
     # Start HTTP server
     with socketserver.TCPServer(("", PORT), MetricsHandler) as httpd:
         print(f"AMD GPU Exporter serving on port {PORT}")
@@ -268,11 +268,11 @@ if __name__ == '__main__':
         echo "AMD GPU exporter: http://localhost:${toString cfg.network.amdGpuExporterPort}"
         echo "Prometheus target: http://$(hostname):${toString cfg.network.amdGpuExporterPort}/metrics"
         echo ""
-        
+
         echo "Service status:"
         systemctl status amd-gpu-exporter --no-pager -l
         echo ""
-        
+
         echo "AMD GPU exporter metrics:"
         if curl -s http://localhost:${toString cfg.network.amdGpuExporterPort}/metrics > /dev/null 2>&1; then
           echo "AMD GPU exporter: Available"
@@ -281,7 +281,7 @@ if __name__ == '__main__':
           echo "AMD GPU exporter: Not available"
         fi
         echo ""
-        
+
         echo "AMD GPU status (via rocm-smi):"
         if command -v rocm-smi >/dev/null 2>&1; then
           rocm-smi --showtemp --showpower --showuse --showmemuse --showfan --showclocks || echo "rocm-smi failed - check ROCm installation"
@@ -289,11 +289,11 @@ if __name__ == '__main__':
           echo "rocm-smi not available"
         fi
         echo ""
-        
+
         echo "AMD GPU device files:"
         ls -la /dev/kfd /dev/dri/render* 2>/dev/null || echo "No AMD GPU devices found"
         echo ""
-        
+
         echo "ROCm runtime status:"
         if command -v rocminfo >/dev/null 2>&1; then
           rocminfo | grep -E "Name:|Market Name:|Vendor Name:" | head -5
@@ -339,7 +339,7 @@ if __name__ == '__main__':
       SUBSYSTEM=="drm", KERNEL=="card*", GROUP="video", MODE="0664"
       SUBSYSTEM=="drm", KERNEL=="renderD*", GROUP="render", MODE="0664"
       SUBSYSTEM=="drm", KERNEL=="controlD*", GROUP="video", MODE="0664"
-      
+
       # AMD KFD (Kernel Fusion Driver)
       SUBSYSTEM=="kfd", KERNEL=="kfd", GROUP="render", MODE="0664"
     '';

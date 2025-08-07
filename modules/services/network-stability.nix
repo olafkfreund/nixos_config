@@ -138,7 +138,7 @@ in
           # Consolidated DNS monitoring from network-monitoring and secure-dns modules
           while true; do
             dns_failed=0
-            
+
             # Check multiple domains for robustness
             for domain in "cloudflare.com" "google.com" "nixos.org"; do
               if ! ${pkgs.inetutils}/bin/host -W 2 "$domain" >/dev/null 2>&1; then
@@ -146,14 +146,14 @@ in
                 dns_failed=1
               fi
             done
-            
+
             # If any DNS check failed, restart systemd-resolved
             if [ "$dns_failed" -eq 1 ]; then
               echo "Restarting systemd-resolved due to DNS failures" | ${pkgs.systemd}/bin/systemd-cat -t network-dns-monitor -p warning
               ${pkgs.systemd}/bin/systemctl restart systemd-resolved.service
               sleep 10
             fi
-            
+
             sleep ${toString cfg.monitoring.interval}
           done
         '';

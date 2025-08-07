@@ -23,17 +23,17 @@ in
       MaxLevelStore=info
       MaxLevelSyslog=info
       MaxLevelConsole=warning
-      
+
       # Rate limiting for high-volume logs
       RateLimitInterval=30s
       RateLimitBurst=10000
-      
+
       # Storage optimization
       SystemMaxUse=1G
       SystemMaxFileSize=128M
       RuntimeMaxUse=512M
       RuntimeMaxFileSize=64M
-      
+
       # Retention policy
       MaxRetentionSec=7day
       MaxFileSec=1day
@@ -49,7 +49,7 @@ in
         ExecStart = pkgs.writeShellScript "setup-journal-filter" ''
           # Create custom journal namespace for filtered logs
           mkdir -p /var/log/journal-filtered
-          
+
           # Set up log filtering via systemd-journald
           systemctl restart systemd-journald
         '';

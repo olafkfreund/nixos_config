@@ -131,20 +131,20 @@ with lib; {
 
   # Welcome message
   environment.etc."issue".text = ''
-    
+
     Welcome to NixOS Live Installer${optionalString (host != null) " for ${host}"}
-    
+
     To install NixOS${optionalString (host != null) " on ${host}"}:
     ${optionalString (host != null) "  sudo install-${host}"}
     ${optionalString (host == null) "  sudo /etc/nixos-config/scripts/install-helpers/install-wizard.sh <hostname>"}
-    
+
     For SSH access:
       - Username: root
       - Password: nixos (CHANGE AFTER INSTALLATION!)
       - IP: $(ip route get 1.1.1.1 | head -1 | awk '{print $7}')
-    
+
     Configuration available at: /etc/nixos-config
-    
+
   '';
 
   # Set MOTD

@@ -60,22 +60,22 @@ in
 
         ExecStart = pkgs.writeShellScript "nzbget-exporter" ''
                     #!/bin/bash
-          
+
                     # NZBGet API configuration
                     NZBGET_URL="${cfg.nzbgetUrl}"
                     NZBGET_USER="${cfg.username}"
                     NZBGET_PASS="${cfg.password}"
                     EXPORTER_PORT="${toString cfg.port}"
                     UPDATE_INTERVAL="${cfg.interval}"
-          
+
                     # Metrics file for serving
                     METRICS_FILE="/tmp/nzbget-metrics.prom"
-          
+
                     # Logging
                     log() {
                         echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >&2
                     }
-          
+
                     # Function to get NZBGet API data
                     get_nzbget_data() {
                         local endpoint="$1"
@@ -84,21 +84,21 @@ in
                             --connect-timeout 10 \
                             --max-time 30 || echo "{}"
                     }
-          
+
                     # Function to extract JSON value
                     json_value() {
                         echo "$1" | jq -r "$2" 2>/dev/null || echo "0"
                     }
-          
+
                     # Function to collect NZBGet metrics
                     collect_metrics() {
                         log "Collecting NZBGet metrics..."
-              
+
                         # Get status data
                         local status_data=$(get_nzbget_data "status")
                         local history_data=$(get_nzbget_data "history")
                         local listgroups_data=$(get_nzbget_data "listgroups")
-              
+
                         # Parse status metrics
                         local download_rate=$(json_value "$status_data" '.result.DownloadRate')
                         local remaining_size=$(json_value "$status_data" '.result.RemainingSizeMB')
@@ -110,42 +110,42 @@ in
                         local post_paused=$(json_value "$status_data" '.result.PostPaused')
                         local download_paused=$(json_value "$status_data" '.result.DownloadPaused')
                         local quota_reached=$(json_value "$status_data" '.result.QuotaReached')
-              
+
                         # Parse queue data
                         local queue_count=0
                         local queue_total_size=0
                         local queue_remaining_size=0
-              
+
                         if [ "$listgroups_data" != "{}" ]; then
                             queue_count=$(echo "$listgroups_data" | jq -r '.result | length' 2>/dev/null || echo "0")
                             queue_total_size=$(echo "$listgroups_data" | jq -r '[.result[]? | .FileSizeMB] | add // 0' 2>/dev/null || echo "0")
                             queue_remaining_size=$(echo "$listgroups_data" | jq -r '[.result[]? | .RemainingSizeMB] | add // 0' 2>/dev/null || echo "0")
                         fi
-              
+
                         # Ensure values are never null or empty
                         [ -z "$queue_count" ] || [ "$queue_count" = "null" ] && queue_count=0
                         [ -z "$queue_total_size" ] || [ "$queue_total_size" = "null" ] && queue_total_size=0
                         [ -z "$queue_remaining_size" ] || [ "$queue_remaining_size" = "null" ] && queue_remaining_size=0
-              
+
                         # Parse history data
                         local completed_count=0
                         local failed_count=0
                         local total_downloaded=0
-              
+
                         if [ "$history_data" != "{}" ]; then
                             completed_count=$(echo "$history_data" | jq -r '[.result[]? | select(.Status == "SUCCESS")] | length' 2>/dev/null || echo "0")
                             failed_count=$(echo "$history_data" | jq -r '[.result[]? | select(.Status != "SUCCESS")] | length' 2>/dev/null || echo "0")
                             total_downloaded=$(echo "$history_data" | jq -r '[.result[]? | .FileSizeMB] | add // 0' 2>/dev/null || echo "0")
                         fi
-              
+
                         # Ensure values are never null or empty
                         [ -z "$completed_count" ] || [ "$completed_count" = "null" ] && completed_count=0
                         [ -z "$failed_count" ] || [ "$failed_count" = "null" ] && failed_count=0
                         [ -z "$total_downloaded" ] || [ "$total_downloaded" = "null" ] && total_downloaded=0
-              
+
                         # Convert download rate from bytes to KB/s
                         local download_rate_kbs=$(echo "scale=2; $download_rate / 1024" | bc 2>/dev/null || echo "0")
-              
+
                         # Generate Prometheus metrics
                         cat > "$METRICS_FILE" << EOF
           # HELP nzbget_download_rate_kbps Current download rate in KB/s
@@ -217,14 +217,14 @@ in
           nzbget_up $([ "$download_rate" != "" ] && echo "1" || echo "0")
 
           EOF
-              
+
                         log "Metrics updated: Queue=$queue_count, Rate=$(echo "scale=2; $download_rate / 1024" | bc 2>/dev/null || echo "0")KB/s, Completed=$completed_count, Failed=$failed_count"
                     }
-          
+
                     # Function to serve metrics
                     serve_metrics() {
                         log "Starting metrics server on port $EXPORTER_PORT..."
-              
+
                         # Use Python HTTP server for reliable metrics serving
                         python3 -c "
           import http.server
@@ -263,7 +263,7 @@ in
                       except BrokenPipeError:
                           # Client disconnected - ignore
                           pass
-    
+
               def log_message(self, format, *args):
                   # Disable default logging to avoid spam
                   pass
@@ -278,10 +278,10 @@ in
               httpd.serve_forever()
           "
                     }
-          
+
                     # Initialize metrics file
                     echo "# NZBGet metrics not available" > "$METRICS_FILE"
-          
+
                     # Start metrics collection loop
                     {
                         while true; do
@@ -290,7 +290,7 @@ in
                             sleep "$sleep_seconds"
                         done
                     } &
-          
+
                     # Start metrics server
                     serve_metrics
         '';

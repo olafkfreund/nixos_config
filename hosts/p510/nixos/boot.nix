@@ -23,7 +23,7 @@
     "vm.nr_hugepages" = 1024;
     # "vm.max_map_count" moved to memory.nix to avoid conflict
     # "vm.swappiness" moved to memory.nix to avoid conflict
-    # "vm.dirty_ratio" moved to memory.nix to avoid conflict  
+    # "vm.dirty_ratio" moved to memory.nix to avoid conflict
     # "vm.dirty_background_ratio" moved to memory.nix to avoid conflict
     "kernel.numa_balancing" = 0; # Disable automatic NUMA balancing
   };

@@ -7,7 +7,7 @@
 with lib; let
   cfg = config.secrets.apiKeys;
 
-  # Get the main user from host variables  
+  # Get the main user from host variables
   vars = import ../../hosts/${config.networking.hostName}/variables.nix;
   username = vars.username;
 in
@@ -90,28 +90,28 @@ in
         #!/bin/sh
         # Load API keys from encrypted storage
         # This script can be sourced in shell sessions
-        
+
         if [ -r "${config.age.secrets.api-openai.path}" ]; then
           export OPENAI_API_KEY="$(cat ${config.age.secrets.api-openai.path})"
           export OPENAI_KEY="$OPENAI_API_KEY"  # Compatibility alias
         fi
-        
+
         if [ -r "${config.age.secrets.api-gemini.path}" ]; then
           export GEMINI_API_KEY="$(cat ${config.age.secrets.api-gemini.path})"
         fi
-        
+
         if [ -r "${config.age.secrets.api-anthropic.path}" ]; then
           export ANTHROPIC_API_KEY="$(cat ${config.age.secrets.api-anthropic.path})"
         fi
-        
+
         if [ -r "${config.age.secrets.api-qwen.path}" ]; then
           export QWEN_API_KEY="$(cat ${config.age.secrets.api-qwen.path})"
         fi
-        
+
         if [ -r "${config.age.secrets.api-langchain.path}" ]; then
           export LANGCHAIN_API_KEY="$(cat ${config.age.secrets.api-langchain.path})"
         fi
-        
+
         if [ -r "${config.age.secrets.api-github-token.path}" ]; then
           export GITHUB_TOKEN="$(cat ${config.age.secrets.api-github-token.path})"
         fi
@@ -121,19 +121,19 @@ in
         #!/bin/bash
         echo "API Keys Status:"
         echo "==============="
-        
+
         # Check environment variables
         [ -n "$OPENAI_API_KEY" ] && echo "✅ OpenAI: Available" || echo "❌ OpenAI: Not available"
-        [ -n "$GEMINI_API_KEY" ] && echo "✅ Gemini: Available" || echo "❌ Gemini: Not available" 
+        [ -n "$GEMINI_API_KEY" ] && echo "✅ Gemini: Available" || echo "❌ Gemini: Not available"
         [ -n "$ANTHROPIC_API_KEY" ] && echo "✅ Anthropic: Available" || echo "❌ Anthropic: Not available"
         [ -n "$QWEN_API_KEY" ] && echo "✅ Qwen: Available" || echo "❌ Qwen: Not available"
         [ -n "$LANGCHAIN_API_KEY" ] && echo "✅ LangChain: Available" || echo "❌ LangChain: Not available"
         [ -n "$GITHUB_TOKEN" ] && echo "✅ GitHub Token: Available" || echo "❌ GitHub Token: Not available"
-        
+
         echo ""
         echo "Secret Files:"
         echo "============="
-        
+
         # Check secret files
         find /run/agenix* -name "api-*" 2>/dev/null | while read file; do
           if [ -r "$file" ] && [ -s "$file" ]; then
@@ -153,7 +153,7 @@ in
     '';
 
     programs.bash.interactiveShellInit = mkIf cfg.enableUserEnvironment ''
-      # Load API keys if available  
+      # Load API keys if available
       if command -v load-api-keys >/dev/null 2>&1; then
         eval "$(load-api-keys 2>/dev/null)"
       fi

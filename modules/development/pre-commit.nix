@@ -52,7 +52,7 @@ in
         pre-commit install
         echo "Pre-commit hooks installed successfully"
       }
-      
+
       pc-check() {
         if [ -f .pre-commit-config.yaml ]; then
           echo "Running pre-commit checks..."

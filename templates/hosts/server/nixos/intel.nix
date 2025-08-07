@@ -96,10 +96,10 @@
     # Intel GPU rules for compute access
     KERNEL=="renderD*", GROUP="render", MODE="0664"
     KERNEL=="card*", GROUP="video", MODE="0664"
-    
+
     # Intel-specific device permissions for compute
     SUBSYSTEM=="drm", KERNEL=="renderD128", GROUP="render", MODE="0666"
-    
+
     # Power management permissions for monitoring
     KERNEL=="hwmon*", SUBSYSTEM=="hwmon", ACTION=="add", PROGRAM="${pkgs.bash}/bin/bash -c 'readlink -f /sys/class/hwmon/%k/device'", RESULT=="/sys/devices/pci*/*/*/drm/card*/device", RUN+="${pkgs.bash}/bin/bash -c 'chmod 664 /sys/class/hwmon/%k/{temp*_input,fan*_input,pwm*,in*_input}; chgrp users /sys/class/hwmon/%k/{temp*_input,fan*_input,pwm*,in*_input}'"
   '';

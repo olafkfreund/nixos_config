@@ -30,12 +30,12 @@ in
         RemainAfterExit = true;
         ExecStart = pkgs.writeShellScript "nzbget-dashboard-provisioner" ''
                     #!/bin/bash
-          
+
                     DASHBOARD_DIR="/var/lib/grafana/dashboards"
                     mkdir -p "$DASHBOARD_DIR"
-          
+
                     echo "[$(date)] Provisioning NZBGet dashboard..."
-          
+
                     # Create comprehensive NZBGet dashboard
                     cat > "$DASHBOARD_DIR/nzbget-monitoring.json" << 'EOF'
           {
@@ -346,7 +346,7 @@ in
             "overwrite": true
           }
           EOF
-          
+
                     echo "[$(date)] NZBGet dashboard provisioned successfully"
         '';
       };

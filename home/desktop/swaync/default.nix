@@ -186,7 +186,7 @@ in
         opacity: 1.0 !important;
         -gtk-icon-effect: none !important;
       }
-      
+
       /* Override all GTK transparency and compositor effects */
       window {
         opacity: 1.0 !important;
@@ -194,13 +194,13 @@ in
         background-color: rgba(40, 40, 40, 1.0) !important;
         -gtk-window-decorations: none !important;
       }
-      
+
       /* Force complete opacity on all elements */
       *, *:before, *:after {
         background-color: rgba(40, 40, 40, 1.0) !important;
         opacity: 1.0 !important;
       }
-      
+
       /* Remove any compositor alpha blending */
       window.background {
         background: rgba(40, 40, 40, 1.0) !important;
@@ -239,7 +239,7 @@ in
         margin: 0px !important;
         padding: 0px !important;
         opacity: 1.0 !important;
-        
+
         /* Force positioning from top to bottom on left */
         position: fixed !important;
         top: 0px !important;
@@ -580,7 +580,7 @@ in
         -gtk-outline-width: 0px !important;
         opacity: 1.0 !important;
       }
-      
+
       /* Force solid background on control center and notifications */
       .swaync-control-center,
       .swaync-notification-window,

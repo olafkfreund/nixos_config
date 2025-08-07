@@ -30,12 +30,12 @@ in
         RemainAfterExit = true;
         ExecStart = pkgs.writeShellScript "plex-dashboard-provisioner" ''
                     #!/bin/bash
-          
+
                     DASHBOARD_DIR="/var/lib/grafana/dashboards"
                     mkdir -p "$DASHBOARD_DIR"
-          
+
                     echo "[$(date)] Provisioning comprehensive Plex Media Server dashboard..."
-          
+
                     # Create main Plex overview dashboard
                     cat > "$DASHBOARD_DIR/plex-overview.json" << 'EOF'
           {

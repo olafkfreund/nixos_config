@@ -110,7 +110,7 @@ in
             }
           ]) ++
 
-          # Kernel logs  
+          # Kernel logs
           (optionals cfg.collectKernel [
             {
               job_name = "kernel";
@@ -169,7 +169,7 @@ in
       "d /var/lib/promtail 0755 promtail promtail -"
     ];
 
-    # Promtail user and group  
+    # Promtail user and group
     users.users.promtail = {
       isSystemUser = true;
       group = "promtail";
@@ -194,7 +194,7 @@ in
         ReadWritePaths = [ "/var/lib/promtail" ];
         ReadOnlyPaths = [ "/var/log" "/dev/kmsg" ];
 
-        # Restart policy  
+        # Restart policy
         Restart = lib.mkForce "always";
         RestartSec = "10s";
 

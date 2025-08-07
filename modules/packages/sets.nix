@@ -15,7 +15,7 @@
     tree
     file
 
-    # Network utilities  
+    # Network utilities
     iproute2
     inetutils
 

@@ -69,8 +69,8 @@ in
         ReadWritePaths = [ "/var/lib/network-discovery" "/tmp" ];
 
         Environment = [
-          "PATH=${lib.makeBinPath (with pkgs; [ 
-            coreutils curl jq bc nmap iproute2 nettools 
+          "PATH=${lib.makeBinPath (with pkgs; [
+            coreutils curl jq bc nmap iproute2 nettools
             arp-scan ethtool python3 gnugrep gnused
           ])}"
         ];
@@ -78,7 +78,7 @@ in
         ExecStart = pkgs.writeShellScript "network-discovery" ''
                     #!/bin/bash
                     set -euo pipefail
-          
+
                     # Configuration
                     INTERFACE="${netCfg.interface}"
                     NETWORK_RANGE="${netCfg.networkRange}"
@@ -86,18 +86,18 @@ in
                     EXPORTER_PORT="${toString netCfg.port}"
                     ENABLE_DEEP_SCAN="${if netCfg.enableDeepScan then "true" else "false"}"
                     ENABLE_VENDOR_LOOKUP="${if netCfg.enableVendorLookup then "true" else "false"}"
-          
+
                     # Data directories
                     DATA_DIR="/var/lib/network-discovery"
                     METRICS_FILE="/tmp/network-discovery-metrics.prom"
                     DEVICES_DB="$DATA_DIR/devices.json"
                     VENDOR_DB="$DATA_DIR/vendors.json"
-          
+
                     # Logging
                     log() {
                         echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >&2
                     }
-          
+
                     # Initialize vendor database
                     init_vendor_db() {
                         if [[ "$ENABLE_VENDOR_LOOKUP" == "true" && ! -f "$VENDOR_DB" ]]; then
@@ -109,7 +109,7 @@ in
                             mv "$VENDOR_DB.tmp" "$VENDOR_DB"
                         fi
                     }
-          
+
                     # Get vendor from MAC address
                     get_vendor() {
                         local mac="$1"
@@ -122,34 +122,34 @@ in
                             echo "Unknown"
                         fi
                     }
-          
+
                     # Network scanning function
                     scan_network() {
                         log "Scanning network $NETWORK_RANGE..."
-              
+
                         # Get current ARP table
                         local arp_entries=$(arp -a | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" || true)
-              
+
                         # Perform network scan
                         local nmap_results=""
                         if command -v nmap >/dev/null 2>&1; then
                             nmap_results=$(nmap -sn "$NETWORK_RANGE" 2>/dev/null | grep -E "(Nmap scan report|MAC Address)" || true)
                         fi
-              
+
                         # Combine results and extract device information
                         local devices_json="[]"
-              
+
                         # Process ARP entries
                         while IFS= read -r line; do
                             if [[ -n "$line" ]]; then
                                 local hostname=$(echo "$line" | grep -oE '\([^)]+\)' | tr -d '()' || echo "unknown")
                                 local ip=$(echo "$line" | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' || echo "")
                                 local mac=$(echo "$line" | grep -oE '([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}' || echo "")
-                      
+
                                 if [[ -n "$ip" && -n "$mac" ]]; then
                                     local vendor=$(get_vendor "$mac")
                                     local timestamp=$(date +%s)
-                          
+
                                     # Device type classification
                                     local device_type="unknown"
                                     case "$hostname" in
@@ -157,7 +157,7 @@ in
                                         *android*|*iphone*|*samsung*) device_type="mobile" ;;
                                         *router*|*gateway*) device_type="network" ;;
                                         *tv*|*roku*|*chromecast*) device_type="media" ;;
-                                        *) 
+                                        *)
                                             case "$vendor" in
                                                 *Apple*) device_type="apple-device" ;;
                                                 *Samsung*) device_type="samsung-device" ;;
@@ -166,7 +166,7 @@ in
                                             esac
                                         ;;
                                     esac
-                          
+
                                     # Add device to JSON
                                     devices_json=$(echo "$devices_json" | jq --arg ip "$ip" --arg mac "$mac" --arg hostname "$hostname" --arg vendor "$vendor" --arg type "$device_type" --arg ts "$timestamp" '. + [{
                                         "ip": $ip,
@@ -180,62 +180,62 @@ in
                                 fi
                             fi
                         done <<< "$arp_entries"
-              
+
                         # Save devices database
                         echo "$devices_json" > "$DEVICES_DB"
-              
+
                         log "Discovered $(echo "$devices_json" | jq 'length') devices"
                     }
-          
+
                     # Deep scan for additional device information
                     deep_scan_device() {
                         local ip="$1"
                         local device_info="{}"
-              
+
                         if [[ "$ENABLE_DEEP_SCAN" == "true" ]]; then
                             log "Deep scanning device $ip..."
-                  
+
                             # Port scan for service detection
                             local open_ports=""
                             if command -v nmap >/dev/null 2>&1; then
                                 open_ports=$(nmap -F "$ip" 2>/dev/null | grep "open" | cut -d'/' -f1 | tr '\n' ',' | sed 's/,$//' || echo "")
                             fi
-                  
+
                             # HTTP banner grabbing
                             local http_banner=""
                             if curl -s --connect-timeout 2 --max-time 5 "http://$ip" >/dev/null 2>&1; then
                                 http_banner=$(curl -s --connect-timeout 2 --max-time 5 -I "http://$ip" | head -1 | tr -d '\r\n' || echo "")
                             fi
-                  
+
                             # SSH banner
                             local ssh_banner=""
                             if nc -z -w2 "$ip" 22 2>/dev/null; then
                                 ssh_banner=$(timeout 3 nc "$ip" 22 2>/dev/null | head -1 | tr -d '\r\n' || echo "")
                             fi
-                  
+
                             device_info=$(jq -n --arg ports "$open_ports" --arg http "$http_banner" --arg ssh "$ssh_banner" '{
                                 "open_ports": $ports,
                                 "http_banner": $http,
                                 "ssh_banner": $ssh
                             }')
                         fi
-              
+
                         echo "$device_info"
                     }
-          
+
                     # Generate Prometheus metrics
                     generate_metrics() {
                         log "Generating network discovery metrics..."
-              
+
                         if [[ ! -f "$DEVICES_DB" ]]; then
                             echo "# No devices database found" > "$METRICS_FILE"
                             return
                         fi
-              
+
                         local devices=$(cat "$DEVICES_DB")
                         local total_devices=$(echo "$devices" | jq 'length')
                         local active_devices=$(echo "$devices" | jq '[.[] | select(.active == true)] | length')
-              
+
                         cat > "$METRICS_FILE" << EOF
           # HELP network_devices_total Total number of discovered devices
           # TYPE network_devices_total gauge
@@ -248,39 +248,39 @@ in
           # HELP network_device_info Device information
           # TYPE network_device_info gauge
           EOF
-              
+
                         # Per-device metrics
-                        echo "$devices" | jq -r '.[] | 
+                        echo "$devices" | jq -r '.[] |
                             "network_device_info{ip=\"" + .ip + "\",mac=\"" + .mac + "\",hostname=\"" + .hostname + "\",vendor=\"" + .vendor + "\",type=\"" + .device_type + "\"} 1"' >> "$METRICS_FILE"
-              
+
                         # Device type counts
                         echo "" >> "$METRICS_FILE"
                         echo "# HELP network_devices_by_type Number of devices by type" >> "$METRICS_FILE"
                         echo "# TYPE network_devices_by_type gauge" >> "$METRICS_FILE"
-              
-                        echo "$devices" | jq -r 'group_by(.device_type) | .[] | 
+
+                        echo "$devices" | jq -r 'group_by(.device_type) | .[] |
                             "network_devices_by_type{type=\"" + .[0].device_type + "\"} " + (length | tostring)' >> "$METRICS_FILE"
-              
+
                         # Vendor distribution
                         echo "" >> "$METRICS_FILE"
                         echo "# HELP network_devices_by_vendor Number of devices by vendor" >> "$METRICS_FILE"
                         echo "# TYPE network_devices_by_vendor gauge" >> "$METRICS_FILE"
-              
-                        echo "$devices" | jq -r 'group_by(.vendor) | .[] | 
+
+                        echo "$devices" | jq -r 'group_by(.vendor) | .[] |
                             "network_devices_by_vendor{vendor=\"" + .[0].vendor + "\"} " + (length | tostring)' >> "$METRICS_FILE"
-              
+
                         echo "" >> "$METRICS_FILE"
                         echo "# HELP network_discovery_last_scan_timestamp Last scan timestamp" >> "$METRICS_FILE"
                         echo "# TYPE network_discovery_last_scan_timestamp gauge" >> "$METRICS_FILE"
                         echo "network_discovery_last_scan_timestamp $(date +%s)" >> "$METRICS_FILE"
-              
+
                         log "Generated metrics for $total_devices devices ($active_devices active)"
                     }
-          
+
                     # HTTP server for metrics
                     serve_metrics() {
                         log "Starting network discovery metrics server on port $EXPORTER_PORT..."
-              
+
                         python3 -c "
           import http.server
           import socketserver
@@ -318,7 +318,7 @@ in
                   else:
                       self.send_response(404)
                       self.end_headers()
-    
+
               def log_message(self, format, *args):
                   pass  # Suppress HTTP logs
 
@@ -327,24 +327,24 @@ in
               httpd.serve_forever()
           " &
                         HTTP_PID=$!
-              
+
                         # Main discovery loop
                         while true; do
                             scan_network
                             generate_metrics
-                  
+
                             # Convert interval to seconds
                             sleep_seconds=$(echo "${netCfg.scanInterval}" | sed 's/s$//' | sed 's/m$/*60/' | bc 2>/dev/null || echo "300")
                             sleep "$sleep_seconds"
                         done
                     }
-          
+
                     # Initialize
                     mkdir -p "$DATA_DIR"
                     init_vendor_db
                     echo "[]" > "$DEVICES_DB"
                     echo "# Network discovery starting..." > "$METRICS_FILE"
-          
+
                     # Start metrics server and discovery
                     serve_metrics
         '';

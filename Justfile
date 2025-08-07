@@ -93,11 +93,11 @@ pre-commit-hook HOOK:
 format-all:
     @echo "🎨 Formatting all files..."
     pre-commit run nixpkgs-fmt --all-files || true
-    pre-commit run shfmt --all-files || true 
+    pre-commit run shfmt --all-files || true
     pre-commit run prettier --all-files || true
     @echo "✅ All files formatted!"
 
-# Lint all files using pre-commit  
+# Lint all files using pre-commit
 lint-all:
     @echo "🔍 Linting all files..."
     pre-commit run statix --all-files || true
@@ -154,7 +154,7 @@ test-build-verbose HOST:
     @echo "🔨 Test building {{HOST}} with verbose output..."
     nixos-rebuild build --flake .#{{HOST}} --show-trace --verbose
 
-# Validate Home Manager configurations  
+# Validate Home Manager configurations
 test-home:
     @echo "🏠 Testing Home Manager configurations..."
     @for host in razer dex5550 p510 p620; do \
@@ -239,7 +239,7 @@ razer:
 p620:
     nixos-rebuild switch --flake .#p620 --target-host p620 --build-host p620 --sudo --no-reexec --keep-going --accept-flake-config
 
-# Deploy to p510 workstation (Intel Xeon/NVIDIA) - OPTIMIZED  
+# Deploy to p510 workstation (Intel Xeon/NVIDIA) - OPTIMIZED
 p510:
     nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --sudo --no-reexec --keep-going --accept-flake-config
 
@@ -260,7 +260,7 @@ hp:
     @echo "⚠️  hp is archived - use at your own risk"
     nixos-rebuild switch --flake .#hp --target-host hp --build-host hp --sudo --impure --accept-flake-config
 
-# Deploy to lms (archived)  
+# Deploy to lms (archived)
 lms:
     @echo "⚠️  lms is archived - use at your own risk"
     nixos-rebuild switch --flake .#lms --target-host lms --build-host lms --sudo --impure --accept-flake-config
@@ -743,7 +743,7 @@ deploy-all:
     @echo "🚨 Deploying to ALL active hosts..."
     @read -p "Are you sure? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
     just razer
-    just p620  
+    just p620
     just p510
     just dex5550
 
@@ -886,7 +886,7 @@ build-all-live:
     echo "🔧 Building all live USB installer images..."
     hosts=("p620" "razer" "p510" "dex5550" "samsung")
     failed=()
-    
+
     for host in "${hosts[@]}"; do
         echo ""
         echo "Building live image for $host..."
@@ -897,7 +897,7 @@ build-all-live:
             failed+=("$host")
         fi
     done
-    
+
     echo ""
     echo "📋 Build Summary:"
     echo "================="
@@ -908,7 +908,7 @@ build-all-live:
             echo "✅ $host: SUCCESS"
         fi
     done
-    
+
     if [ ${#failed[@]} -gt 0 ]; then
         echo ""
         echo "❌ ${#failed[@]} builds failed: ${failed[*]}"
@@ -925,12 +925,12 @@ flash-live host device:
         echo "❌ Device {{device}} does not exist!"
         exit 1
     fi
-    
+
     if [ ! -f "result/iso/nixos-{{host}}-live.iso" ]; then
         echo "⚠️  Live image for {{host}} not found. Building it first..."
         just build-live {{host}}
     fi
-    
+
     echo "🚨 WARNING: This will ERASE all data on {{device}}!"
     echo "📱 Target device: {{device}}"
     echo "💿 Source image: nixos-{{host}}-live.iso"
@@ -940,11 +940,11 @@ flash-live host device:
         echo "❌ Cancelled by user"
         exit 1
     fi
-    
+
     echo "🔧 Flashing image to {{device}}..."
     sudo dd if=result/iso/nixos-{{host}}-live.iso of={{device}} bs=4M status=progress oflag=sync
     sudo sync
-    
+
     echo "✅ Flashing completed!"
     echo "💡 You can now boot from {{device}} to install NixOS on {{host}}"
 
@@ -956,7 +956,7 @@ test-hw-config host:
         echo "❌ Hardware config not found: hosts/{{host}}/nixos/hardware-configuration.nix"
         exit 1
     fi
-    
+
     echo "📋 Parsed configuration:"
     ./scripts/install-helpers/parse-hardware-config.py {{host}}
 
@@ -1095,20 +1095,20 @@ list-microvms:
     #!/usr/bin/env bash
     echo "📋 MicroVM Status:"
     echo "=================="
-    
+
     for vm in dev-vm test-vm playground-vm; do
         if systemctl is-active microvm-$vm >/dev/null 2>&1; then
             status="🟢 RUNNING"
         else
             status="🔴 STOPPED"
         fi
-        
+
         case "$vm" in
             "dev-vm") port="2222"; user="dev" ;;
             "test-vm") port="2223"; user="test" ;;
             "playground-vm") port="2224"; user="root" ;;
         esac
-        
+
         echo "$vm: $status (SSH: $user@localhost:$port)"
     done
 
@@ -1142,13 +1142,13 @@ rebuild-microvm vm:
 clean-microvms:
     #!/usr/bin/env bash
     echo "🧹 Cleaning up MicroVM artifacts..."
-    
+
     # Stop all VMs first
     just stop-all-microvms
-    
+
     # Clean build artifacts
     rm -rf result*
-    
+
     echo "⚠️  This will delete all MicroVM persistent data!"
     read -p "Type 'yes' to confirm: " confirm
     if [ "$confirm" = "yes" ]; then
@@ -1184,7 +1184,7 @@ test-all-microvms:
     #!/usr/bin/env bash
     echo "🧪 Testing all MicroVM configurations..."
     failed=()
-    
+
     for vm in dev-vm test-vm playground-vm; do
         echo "Testing $vm..."
         if just test-microvm $vm; then
@@ -1194,7 +1194,7 @@ test-all-microvms:
             failed+=("$vm")
         fi
     done
-    
+
     echo ""
     echo "📋 Test Summary:"
     echo "================"
@@ -1205,7 +1205,7 @@ test-all-microvms:
             echo "✅ $vm: PASSED"
         fi
     done
-    
+
     if [ ${#failed[@]} -gt 0 ]; then
         echo ""
         echo "❌ ${#failed[@]} MicroVM configurations failed"
@@ -1262,5 +1262,3 @@ microvm-help:
     @echo "  - VMs have 8GB RAM and 4 CPU cores each"
     @echo "  - P620 (32GB) can run all VMs simultaneously"
     @echo "  - Razer (16GB) should run 1-2 VMs at a time"
-
-

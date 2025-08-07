@@ -39,11 +39,11 @@ buildNpmPackage (finalAttrs: {
 
     mkdir -p $out/bin
     cp -r bundle/* $out/
-    
+
     # Fix node shebang for NixOS
     substituteInPlace $out/gemini.js \
       --replace '/usr/bin/env node' "$(type -p node)"
-    
+
     # Create both command variants
     ln -s $out/gemini.js $out/bin/qwen-code
     ln -s $out/gemini.js $out/bin/qwen

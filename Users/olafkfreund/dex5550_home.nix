@@ -50,7 +50,7 @@
       enable = true; # Keep CLI editors enabled
       cursor = false; # GUI editor - disabled
       neovim = true; # CLI editor - keep enabled
-      vscode = false; # GUI editor - disabled  
+      vscode = false; # GUI editor - disabled
       zed = false; # GUI editor - disabled
       windsurf = false; # GUI editor - disabled
     };

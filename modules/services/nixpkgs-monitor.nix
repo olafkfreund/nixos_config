@@ -10,17 +10,17 @@ let
   monitorScript = pkgs.writeScriptBin "nixpkgs-monitor" ''
     #!${pkgs.bash}/bin/bash
     set -euo pipefail
-    
+
     # Configuration
     SCRIPT_DIR="${config.users.users.${cfg.user}.home}/.config/nixos/scripts"
     LOG_FILE="/var/log/nixpkgs-monitor.log"
-    
+
     log() {
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"
     }
-    
+
     log "🔍 Starting nixpkgs update check..."
-    
+
     # Run the update checker
     if "${cfg.scriptPath}" --update --channel "${cfg.channel}" --format "${cfg.format}"; then
         log "✅ Update check completed successfully"
@@ -28,7 +28,7 @@ let
         log "❌ Update check failed"
         exit 1
     fi
-    
+
     # Optional: Send notification
     ${optionalString cfg.notifications.enable ''
       if command -v notify-send >/dev/null 2>&1; then

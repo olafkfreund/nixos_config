@@ -52,7 +52,7 @@ in
         ReadWritePaths = [ "/tmp" ];
 
         Environment = [
-          "PATH=${lib.makeBinPath (with pkgs; [ 
+          "PATH=${lib.makeBinPath (with pkgs; [
             coreutils curl jq python3 gnugrep gnused
           ])}"
         ];
@@ -60,22 +60,22 @@ in
         ExecStart = pkgs.writeShellScript "ai-metrics-exporter" ''
                     #!/bin/bash
                     set -euo pipefail
-          
+
                     # Configuration
                     EXPORTER_PORT="${toString aiCfg.port}"
                     COLLECTION_INTERVAL="${aiCfg.interval}"
                     AI_DATA_DIR="${aiCfg.dataDir}"
                     METRICS_FILE="/tmp/ai-metrics.prom"
-          
+
                     # Logging
                     log() {
                         echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >&2
                     }
-          
+
                     # Convert JSON metrics to Prometheus format
                     generate_ai_metrics() {
                         log "Generating AI metrics from $AI_DATA_DIR..."
-              
+
                         cat > "$METRICS_FILE" << 'EOF'
           # HELP ai_exporter_up AI metrics exporter status
           # TYPE ai_exporter_up gauge
@@ -86,11 +86,11 @@ in
           EOF
                         echo "ai_exporter_last_update $(date +%s)" >> "$METRICS_FILE"
                         echo "" >> "$METRICS_FILE"
-              
+
                         # Process performance metrics
                         if [[ -f "$AI_DATA_DIR/performance-metrics.json" ]]; then
                             local perf_file="$AI_DATA_DIR/performance-metrics.json"
-                  
+
                             cat >> "$METRICS_FILE" << 'EOF'
           # HELP ai_system_cpu_usage_percent System CPU usage percentage
           # TYPE ai_system_cpu_usage_percent gauge
@@ -103,12 +103,12 @@ in
           # HELP ai_services_running Number of AI services running
           # TYPE ai_services_running gauge
           EOF
-                  
+
                             # Clean JSON file first to handle invalid characters
                             local clean_perf_file="/tmp/perf-metrics-clean.json"
                             # Remove control characters and fix newlines in JSON strings
                             cat "$perf_file" | tr -d '\000-\037' | sed 's/\n/ /g' > "$clean_perf_file" 2>/dev/null || cp "$perf_file" "$clean_perf_file"
-                  
+
                             # Extract metrics using jq from cleaned file
                             local hostname=$(jq -r '.hostname // "unknown"' "$clean_perf_file" 2>/dev/null || echo "unknown")
                             local cpu_usage=$(jq -r '.system_metrics.cpu_usage_percent // "0"' "$clean_perf_file" 2>/dev/null || echo "0")
@@ -116,21 +116,21 @@ in
                             local disk_usage=$(jq -r '.system_metrics.disk_usage_percent // "0"' "$clean_perf_file" 2>/dev/null || echo "0")
                             local load_avg=$(jq -r '.system_metrics.load_average_1m // "0"' "$clean_perf_file" 2>/dev/null || echo "0")
                             local ai_services=$(jq -r '.ai_metrics.ai_services_running // "0"' "$clean_perf_file" 2>/dev/null || echo "0")
-                  
+
                             # Clean numeric values
                             cpu_usage=$(echo "$cpu_usage" | sed 's/[^0-9.]//g' | head -c 10)
                             memory_usage=$(echo "$memory_usage" | sed 's/[^0-9.]//g' | head -c 10)
                             disk_usage=$(echo "$disk_usage" | sed 's/[^0-9.]//g' | head -c 10)
                             load_avg=$(echo "$load_avg" | sed 's/[^0-9.]//g' | head -c 10)
                             ai_services=$(echo "$ai_services" | sed 's/[^0-9]//g' | head -c 10)
-                  
+
                             # Validate and default values
                             [[ -z "$cpu_usage" || ! "$cpu_usage" =~ ^[0-9.]+$ ]] && cpu_usage=0
                             [[ -z "$memory_usage" || ! "$memory_usage" =~ ^[0-9.]+$ ]] && memory_usage=0
                             [[ -z "$disk_usage" || ! "$disk_usage" =~ ^[0-9.]+$ ]] && disk_usage=0
                             [[ -z "$load_avg" || ! "$load_avg" =~ ^[0-9.]+$ ]] && load_avg=0
                             [[ -z "$ai_services" || ! "$ai_services" =~ ^[0-9]+$ ]] && ai_services=0
-                  
+
                             cat >> "$METRICS_FILE" << EOF
           ai_system_cpu_usage_percent{hostname="$hostname"} $cpu_usage
           ai_system_memory_usage_percent{hostname="$hostname"} $memory_usage
@@ -140,11 +140,11 @@ in
 
           EOF
                         fi
-              
+
                         # Process remediation report
                         if [[ -f "$AI_DATA_DIR/remediation-report.json" ]]; then
                             local remediation_file="$AI_DATA_DIR/remediation-report.json"
-                  
+
                             cat >> "$METRICS_FILE" << 'EOF'
           # HELP ai_remediation_safe_mode AI remediation safe mode status
           # TYPE ai_remediation_safe_mode gauge
@@ -155,19 +155,19 @@ in
           # HELP ai_remediation_actions_memory_optimization AI remediation memory optimization enabled
           # TYPE ai_remediation_actions_memory_optimization gauge
           EOF
-                  
+
                             local hostname=$(jq -r '.hostname // "unknown"' "$remediation_file" 2>/dev/null || echo "unknown")
                             local safe_mode=$(jq -r '.safe_mode // false' "$remediation_file" 2>/dev/null)
                             local self_healing=$(jq -r '.self_healing // false' "$remediation_file" 2>/dev/null)
                             local disk_cleanup=$(jq -r '.actions_enabled.disk_cleanup // false' "$remediation_file" 2>/dev/null)
                             local memory_opt=$(jq -r '.actions_enabled.memory_optimization // false' "$remediation_file" 2>/dev/null)
-                  
+
                             # Convert boolean to numeric
                             [[ "$safe_mode" == "true" ]] && safe_mode=1 || safe_mode=0
                             [[ "$self_healing" == "true" ]] && self_healing=1 || self_healing=0
                             [[ "$disk_cleanup" == "true" ]] && disk_cleanup=1 || disk_cleanup=0
                             [[ "$memory_opt" == "true" ]] && memory_opt=1 || memory_opt=0
-                  
+
                             cat >> "$METRICS_FILE" << EOF
           ai_remediation_safe_mode{hostname="$hostname"} $safe_mode
           ai_remediation_self_healing{hostname="$hostname"} $self_healing
@@ -176,31 +176,31 @@ in
 
           EOF
                         fi
-              
+
                         # Process memory optimization report
                         if [[ -f "$AI_DATA_DIR/memory-optimization-report.json" ]]; then
                             local memory_file="$AI_DATA_DIR/memory-optimization-report.json"
-                  
+
                             cat >> "$METRICS_FILE" << 'EOF'
           # HELP ai_memory_optimization_status Memory optimization status
           # TYPE ai_memory_optimization_status gauge
           EOF
-                  
+
                             local hostname=$(jq -r '.hostname // "unknown"' "$memory_file" 2>/dev/null || echo "unknown")
                             local actions_count=$(jq -r '.actions_taken | length' "$memory_file" 2>/dev/null || echo "0")
-                  
+
                             # Validate actions_count is a number
                             if ! [[ "$actions_count" =~ ^[0-9]+$ ]]; then
                                 actions_count=0
                             fi
-                  
+
                             echo "ai_memory_optimization_status{hostname=\"$hostname\",status=\"completed\"} $actions_count" >> "$METRICS_FILE"
                             echo "" >> "$METRICS_FILE"
                         fi
-              
-                        # Count AI analysis files for activity indicator  
+
+                        # Count AI analysis files for activity indicator
                         local analysis_files=3  # Fixed value for now to isolate the issue
-              
+
                         echo "# HELP ai_analysis_files_recent Recent AI analysis files count" >> "$METRICS_FILE"
                         echo "# TYPE ai_analysis_files_recent gauge" >> "$METRICS_FILE"
                         echo "ai_analysis_files_recent $analysis_files" >> "$METRICS_FILE"
@@ -208,14 +208,14 @@ in
                         echo "# HELP ai_last_metrics_update AI metrics last update timestamp" >> "$METRICS_FILE"
                         echo "# TYPE ai_last_metrics_update gauge" >> "$METRICS_FILE"
                         echo "ai_last_metrics_update $(date +%s)" >> "$METRICS_FILE"
-              
+
                         log "AI metrics generated with $(wc -l < "$METRICS_FILE" || echo "unknown") lines"
                     }
-          
+
                     # HTTP server for metrics
                     serve_metrics() {
                         log "Starting AI metrics server on port $EXPORTER_PORT..."
-              
+
                         python3 -c "
           import http.server
           import socketserver
@@ -241,7 +241,7 @@ in
                   else:
                       self.send_response(404)
                       self.end_headers()
-    
+
               def log_message(self, format, *args):
                   pass
 
@@ -255,20 +255,20 @@ in
               httpd.serve_forever()
           " &
                         HTTP_PID=$!
-              
+
                         # Main metrics collection loop
                         while true; do
                             generate_ai_metrics
-                  
+
                             # Convert interval to seconds
                             sleep_seconds=$(echo "${aiCfg.interval}" | sed 's/s$//' | sed 's/m$/*60/' | bc 2>/dev/null || echo "30")
                             sleep "$sleep_seconds"
                         done
                     }
-          
+
                     # Initialize
                     echo "# AI metrics starting..." > "$METRICS_FILE"
-          
+
                     # Start metrics server and collection
                     serve_metrics
         '';

@@ -23,10 +23,10 @@ in
         # Create persistent storage if not exists
         mkdir -p ${cfg.storageRoot}/test-vm/data
         mkdir -p ${cfg.storageRoot}/test-vm/results
-        
+
         # Create shared directory
         mkdir -p ${cfg.sharedRoot}/test-vm
-        
+
         echo "Testing MicroVM service started"
       '';
 

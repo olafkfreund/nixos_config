@@ -30,12 +30,12 @@ in
         RemainAfterExit = true;
         ExecStart = pkgs.writeShellScript "network-dashboards-provisioner" ''
                     #!/bin/bash
-          
+
                     DASHBOARD_DIR="/var/lib/grafana/dashboards"
                     mkdir -p "$DASHBOARD_DIR"
-          
+
                     echo "[$(date)] Provisioning beautiful network activity dashboards..."
-          
+
                     # Create Network Overview Dashboard
                     cat > "$DASHBOARD_DIR/network-overview.json" << 'EOF'
           {
@@ -256,7 +256,7 @@ in
                         "indexByName": {},
                         "renameByName": {
                           "ip": "IP Address",
-                          "mac": "MAC Address", 
+                          "mac": "MAC Address",
                           "hostname": "Hostname",
                           "vendor": "Vendor",
                           "type": "Device Type"

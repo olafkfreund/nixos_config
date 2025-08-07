@@ -190,24 +190,24 @@ in
             iptables -I INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --set --name SSH_LIMIT
             iptables -I INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount ${toString cfg.rateLimiting.sshLimit} --name SSH_LIMIT -j DROP
           ''}
-          
+
           # Rate limiting for HTTP/HTTPS
           ${optionalString cfg.rateLimiting.enable ''
             iptables -I INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -m recent --set --name HTTP_LIMIT
             iptables -I INPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount ${toString cfg.rateLimiting.httpLimit} --name HTTP_LIMIT -j DROP
           ''}
-          
+
           # Drop invalid packets
           iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
-          
+
           # Allow established and related connections
           iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-          
+
           # Trusted network access
           ${concatMapStringsSep "\n" (network: ''
             iptables -A INPUT -s ${network} -j ACCEPT
           '') cfg.trustedNetworks}
-          
+
           # Anti-scan protection
           iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
           iptables -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
@@ -215,7 +215,7 @@ in
           iptables -A INPUT -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
           iptables -A INPUT -p tcp --tcp-flags SYN,RST SYN,RST -j DROP
           iptables -A INPUT -p tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
-          
+
           # Log dropped packets (if enabled)
           ${optionalString cfg.enableLogging ''
             iptables -A INPUT -m limit --limit 5/min -j LOG --log-prefix "FIREWALL-DROP: " --log-level 4
@@ -241,43 +241,43 @@ in
       fail2ban
       (writeShellScriptBin "firewall-status" ''
         #!/bin/bash
-        
+
         echo "=== Firewall Status ==="
         echo
-        
+
         # Service status
         echo "Firewall Service Status:"
         systemctl status firewall --no-pager -l
         echo
-        
+
         # Active rules
         echo "Active IPtables Rules:"
         iptables -L -n -v
         echo
-        
+
         # Rate limiting status
         echo "Rate Limiting Status:"
         iptables -L -n -v | grep -E "(SSH_LIMIT|HTTP_LIMIT)" || echo "No rate limiting active"
         echo
-        
+
         # Connection tracking
         echo "Connection Tracking:"
         cat /proc/sys/net/netfilter/nf_conntrack_count 2>/dev/null || echo "Connection tracking not available"
         cat /proc/sys/net/netfilter/nf_conntrack_max 2>/dev/null || echo "Connection tracking not available"
         echo
-        
+
         # Recent connection attempts (if logging enabled)
         ${optionalString cfg.enableLogging ''
           echo "Recent Dropped Connections (last 20):"
           journalctl -k | grep "FIREWALL-DROP" | tail -20 || echo "No recent drops logged"
           echo
         ''}
-        
+
         # Open ports
         echo "Listening Ports:"
         ss -tlnp | grep LISTEN
         echo
-        
+
         # Active connections by service
         echo "Active Connections by Port:"
         ss -tn | grep ESTAB | awk '{print $4}' | cut -d: -f2 | sort | uniq -c | sort -nr | head -10
@@ -285,19 +285,19 @@ in
 
       (writeShellScriptBin "firewall-test" ''
         #!/bin/bash
-        
+
         if [ $# -eq 0 ]; then
           echo "Usage: $0 <host> <port> [protocol]"
           echo "Test if a port is accessible from this host"
           exit 1
         fi
-        
+
         HOST="$1"
         PORT="$2"
         PROTOCOL="''${3:-tcp}"
-        
+
         echo "Testing connection to $HOST:$PORT ($PROTOCOL)..."
-        
+
         if [ "$PROTOCOL" = "tcp" ]; then
           if timeout 5 bash -c "echo >/dev/tcp/$HOST/$PORT" 2>/dev/null; then
             echo "✅ Port $PORT is OPEN on $HOST"
@@ -322,20 +322,20 @@ in
 
       (writeShellScriptBin "firewall-analyze" ''
         #!/bin/bash
-        
+
         echo "=== Firewall Security Analysis ==="
         echo
-        
+
         # Check for common security issues
         echo "Security Analysis:"
-        
+
         # Check if SSH is rate limited
         if iptables -L | grep -q "SSH_LIMIT"; then
           echo "✅ SSH rate limiting: ENABLED"
         else
           echo "⚠️  SSH rate limiting: DISABLED"
         fi
-        
+
         # Check for trusted network restrictions
         TRUSTED_RULES=$(iptables -L | grep -c "192.168\|10\.\|172\.")
         if [ "$TRUSTED_RULES" -gt 0 ]; then
@@ -343,20 +343,20 @@ in
         else
           echo "⚠️  Trusted network rules: NOT CONFIGURED"
         fi
-        
+
         # Check for invalid packet dropping
         if iptables -L | grep -q "ctstate INVALID"; then
           echo "✅ Invalid packet dropping: ENABLED"
         else
           echo "⚠️  Invalid packet dropping: DISABLED"
         fi
-        
+
         # Check open ports
         echo
         echo "Port Security Analysis:"
         OPEN_PORTS=$(ss -tln | grep LISTEN | wc -l)
         echo "Total listening ports: $OPEN_PORTS"
-        
+
         # Check for potentially risky open ports
         RISKY_PORTS=(21 23 25 53 139 445 1433 3306 5432 6379)
         for port in "''${RISKY_PORTS[@]}"; do
@@ -364,11 +364,11 @@ in
             echo "⚠️  Potentially risky port open: $port"
           fi
         done
-        
+
         # Firewall rule count
         RULE_COUNT=$(iptables -L | wc -l)
         echo "Total firewall rules: $RULE_COUNT"
-        
+
         if [ "$RULE_COUNT" -lt 20 ]; then
           echo "⚠️  Consider adding more specific firewall rules"
         else
@@ -388,28 +388,28 @@ in
         User = "root";
         ExecStart = pkgs.writeShellScript "firewall-monitor" ''
           #!/bin/bash
-          
+
           LOG_FILE="/var/log/firewall-monitor.log"
           TIMESTAMP=$(date -Iseconds)
-          
+
           # Count current connections
           CONNECTIONS=$(ss -tn | grep ESTAB | wc -l)
-          
+
           # Count firewall rules
           RULES=$(iptables -L | wc -l)
-          
+
           # Check for recent attacks (high rate of drops)
           RECENT_DROPS=$(journalctl -k --since="5 minutes ago" | grep -c "FIREWALL-DROP" || echo 0)
-          
+
           # Log status
           echo "[$TIMESTAMP] Connections: $CONNECTIONS, Rules: $RULES, Recent drops: $RECENT_DROPS" >> "$LOG_FILE"
-          
+
           # Alert on suspicious activity
           if [ "$RECENT_DROPS" -gt 50 ]; then
             logger -t firewall-monitor "HIGH: $RECENT_DROPS firewall drops in last 5 minutes"
             echo "[$TIMESTAMP] ALERT - High drop rate: $RECENT_DROPS drops" >> "$LOG_FILE"
           fi
-          
+
           # Clean up old log entries (keep last 1000 lines)
           tail -1000 "$LOG_FILE" > "$LOG_FILE.tmp" && mv "$LOG_FILE.tmp" "$LOG_FILE"
         '';

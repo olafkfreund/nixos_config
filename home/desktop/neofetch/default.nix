@@ -50,7 +50,7 @@ in
     # Disk utilities
     (optionals cfg.utilities.diskTools [ ncdu dust duf tree ])
 
-    # Network tools  
+    # Network tools
     (optionals cfg.utilities.networkTools [ bandwhich nethogs iftop nload speedtest-cli ])
 
     # Text processing
@@ -98,23 +98,23 @@ in
           echo "│          System Dashboard           │"
           echo "╰─────────────────────────────────────╯"
           echo
-          
+
           # System info
           echo "📊 System Information:"
           ${optionalString cfg.systemMonitors.fastfetch "${pkgs.fastfetch}/bin/fastfetch --config small"}
           ${optionalString (!cfg.systemMonitors.fastfetch && cfg.neofetch.enable) "${pkgs.neofetch}/bin/neofetch --disable packages"}
           echo
-          
+
           # Resource usage
           echo "💾 Storage Usage:"
           ${optionalString cfg.utilities.diskTools "${pkgs.duf}/bin/duf"}
           echo
-          
+
           # Process overview
           echo "⚡ Top Processes:"
           ${optionalString cfg.utilities.processTools "${pkgs.procs}/bin/procs --tree --color always | head -15"}
           echo
-          
+
           # Network activity
           echo "🌐 Network Activity:"
           ${optionalString cfg.utilities.networkTools "${pkgs.bandwhich}/bin/bandwhich --interfaces"}

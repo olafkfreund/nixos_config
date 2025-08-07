@@ -146,17 +146,17 @@ in
         ];
         ExecStart = pkgs.writeShellScript "performance-analytics" ''
           #!/bin/bash
-          
+
           LOG_FILE="/var/log/performance-analytics/analytics.log"
           METRICS_DIR="/var/lib/performance-analytics"
           mkdir -p "$(dirname "$LOG_FILE")" "$METRICS_DIR"
           exec 1> >(tee -a "$LOG_FILE")
           exec 2>&1
-          
+
           echo "[$(date)] Starting Performance Analytics Service..."
           echo "[$(date)] Data retention: ${cfg.dataRetention}"
           echo "[$(date)] Analysis interval: ${cfg.analysisInterval}"
-          
+
           # Initialize analytics database
           ANALYTICS_DB="$METRICS_DIR/performance_analytics.json"
           if [ ! -f "$ANALYTICS_DB" ]; then
@@ -175,114 +175,114 @@ in
           EOF
             echo "[$(date)] Initialized analytics database"
           fi
-          
+
           # Function to collect system metrics
           collect_system_metrics() {
             local timestamp=$(date -Iseconds)
-            
+
             ${optionalString cfg.metricsCollection.systemMetrics ''
               # CPU metrics
               local cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/%us,//')
               local load_avg=$(uptime | awk -F'load average:' '{print $2}' | awk '{print $1}' | sed 's/,//')
-              
+
               # Memory metrics
               local memory_total=$(free -b | grep Mem | awk '{print $2}')
               local memory_used=$(free -b | grep Mem | awk '{print $3}')
               local memory_percent=$(echo "scale=2; $memory_used * 100 / $memory_total" | bc)
-              
+
               # System uptime
               local uptime_seconds=$(awk '{print $1}' /proc/uptime)
-              
+
               echo "$timestamp,system,cpu_usage,$cpu_usage"
               echo "$timestamp,system,load_average,$load_avg"
               echo "$timestamp,system,memory_percent,$memory_percent"
               echo "$timestamp,system,uptime_seconds,$uptime_seconds"
             ''}
-            
+
             ${optionalString cfg.metricsCollection.networkMetrics ''
               # Network metrics
               local network_rx=$(cat /proc/net/dev | tail -n +3 | awk -F: '{sum += $2} END {print sum}')
               local network_tx=$(cat /proc/net/dev | tail -n +3 | awk '{sum += $10} END {print sum}')
               local connections=$(ss -tuln | grep LISTEN | wc -l)
-              
+
               echo "$timestamp,network,rx_bytes,$network_rx"
               echo "$timestamp,network,tx_bytes,$network_tx"
               echo "$timestamp,network,connections,$connections"
             ''}
-            
+
             ${optionalString cfg.metricsCollection.storageMetrics ''
               # Storage metrics
               local disk_usage=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
               local inode_usage=$(df -i / | tail -1 | awk '{print $5}' | sed 's/%//')
-              
+
               echo "$timestamp,storage,disk_usage_percent,$disk_usage"
               echo "$timestamp,storage,inode_usage_percent,$inode_usage"
             ''}
-            
+
             ${optionalString cfg.metricsCollection.applicationMetrics ''
               # Application metrics
               local ai_services=$(${pkgs.systemd}/bin/systemctl list-units --type=service --state=running | grep -c ai- || echo 0)
               local monitoring_services=$(${pkgs.systemd}/bin/systemctl list-units --type=service --state=running | grep -E "(prometheus|grafana|node-exporter)" | wc -l)
-              
+
               echo "$timestamp,application,ai_services_running,$ai_services"
               echo "$timestamp,application,monitoring_services_running,$monitoring_services"
             ''}
-            
+
             ${optionalString cfg.metricsCollection.aiMetrics ''
               # AI performance metrics
               if [ -f "/var/lib/ai-analysis/performance-metrics.json" ]; then
                 local ai_response_time=$(jq -r '.ai_metrics.last_response_time // "0"' /var/lib/ai-analysis/performance-metrics.json 2>/dev/null || echo "0")
                 local ai_provider_status=$(jq -r '.ai_metrics.ai_provider_status // "0"' /var/lib/ai-analysis/performance-metrics.json 2>/dev/null || echo "0")
-                
+
                 echo "$timestamp,ai,response_time_ms,$ai_response_time"
                 echo "$timestamp,ai,provider_status,$ai_provider_status"
               fi
             ''}
           }
-          
+
           # Function to analyze performance trends
           analyze_trends() {
             ${optionalString cfg.analytics.trendAnalysis ''
               echo "[$(date)] Analyzing performance trends..."
-              
+
               # Calculate moving averages and trends
               local metrics_file="$METRICS_DIR/current_metrics.csv"
-              
+
               if [ -f "$metrics_file" ] && [ $(wc -l < "$metrics_file") -gt 10 ]; then
                 # CPU usage trend
                 local cpu_trend=$(tail -n 20 "$metrics_file" | grep "system,cpu_usage" | awk -F, '{sum+=$4; count++} END {if(count>0) print sum/count; else print 0}')
-                
+
                 # Memory usage trend
                 local memory_trend=$(tail -n 20 "$metrics_file" | grep "system,memory_percent" | awk -F, '{sum+=$4; count++} END {if(count>0) print sum/count; else print 0}')
-                
+
                 # Store trends in analytics database
                 local trend_data="{\"timestamp\": \"$(date -Iseconds)\", \"cpu_avg\": $cpu_trend, \"memory_avg\": $memory_trend}"
                 echo "[$(date)] Current trends - CPU: $cpu_trend%, Memory: $memory_trend%"
               fi
             ''}
           }
-          
+
           # Function to detect anomalies
           detect_anomalies() {
             ${optionalString cfg.analytics.anomalyDetection ''
               echo "[$(date)] Detecting performance anomalies..."
-              
+
               local metrics_file="$METRICS_DIR/current_metrics.csv"
               local anomalies_file="$METRICS_DIR/anomalies.log"
-              
+
               if [ -f "$metrics_file" ]; then
                 # Check for CPU anomalies (usage > 90%)
                 local high_cpu=$(tail -n 5 "$metrics_file" | grep "system,cpu_usage" | awk -F, '$4 > 90 {print $1, $4}')
                 if [ -n "$high_cpu" ]; then
                   echo "[$(date)] ANOMALY: High CPU usage detected: $high_cpu" | tee -a "$anomalies_file"
                 fi
-                
+
                 # Check for memory anomalies (usage > 95%)
                 local high_memory=$(tail -n 5 "$metrics_file" | grep "system,memory_percent" | awk -F, '$4 > 95 {print $1, $4}')
                 if [ -n "$high_memory" ]; then
                   echo "[$(date)] ANOMALY: High memory usage detected: $high_memory" | tee -a "$anomalies_file"
                 fi
-                
+
                 # Check for disk anomalies (usage > 90%)
                 local high_disk=$(tail -n 5 "$metrics_file" | grep "storage,disk_usage_percent" | awk -F, '$4 > 90 {print $1, $4}')
                 if [ -n "$high_disk" ]; then
@@ -291,18 +291,18 @@ in
               fi
             ''}
           }
-          
+
           # Function to detect bottlenecks
           detect_bottlenecks() {
             ${optionalString cfg.analytics.bottleneckDetection ''
               echo "[$(date)] Detecting performance bottlenecks..."
-              
+
               # Check for I/O bottlenecks
               local io_wait=$(top -bn1 | grep "Cpu(s)" | awk '{print $10}' | sed 's/%wa,//' | sed 's/%wa//')
               if [ -n "$io_wait" ] && (( $(echo "$io_wait > 30" | bc -l) )); then
                 echo "[$(date)] BOTTLENECK: High I/O wait detected: $io_wait%"
               fi
-              
+
               # Check for network bottlenecks
               if [ -f "/var/lib/network-tuning/metrics.json" ]; then
                 local connection_count=$(jq -r '.tcp_connections // 0' /var/lib/network-tuning/metrics.json 2>/dev/null || echo 0)
@@ -310,7 +310,7 @@ in
                   echo "[$(date)] BOTTLENECK: High connection count detected: $connection_count"
                 fi
               fi
-              
+
               # Check for memory bottlenecks
               local swap_usage=$(free | grep Swap | awk '{if($2>0) printf "%.1f", $3/$2*100; else print "0"}')
               if (( $(echo "$swap_usage > 50" | bc -l) )); then
@@ -318,19 +318,19 @@ in
               fi
             ''}
           }
-          
+
           # Function to generate predictions
           generate_predictions() {
             ${optionalString cfg.analytics.predictiveAnalysis ''
               echo "[$(date)] Generating performance predictions..."
-              
+
               local metrics_file="$METRICS_DIR/current_metrics.csv"
               local predictions_file="$METRICS_DIR/predictions.json"
-              
+
               if [ -f "$metrics_file" ] && [ $(wc -l < "$metrics_file") -gt 50 ]; then
                 # Simple linear trend prediction for next hour
                 local cpu_prediction=$(tail -n 30 "$metrics_file" | grep "system,cpu_usage" | awk -F, '
-                  {x++; y+=$4; xy+=x*$4; x2+=x*x} 
+                  {x++; y+=$4; xy+=x*$4; x2+=x*x}
                   END {
                     if(x>1) {
                       slope = (x*xy - x*y) / (x*x2 - x*x)
@@ -340,37 +340,37 @@ in
                     } else print "0"
                   }
                 ')
-                
+
                 echo "[$(date)] Predicted CPU usage in 1 hour: $cpu_prediction%"
                 echo "{\"timestamp\": \"$(date -Iseconds)\", \"cpu_1h\": $cpu_prediction}" > "$predictions_file"
               fi
             ''}
           }
-          
+
           # Main monitoring loop
           while true; do
             echo "[$(date)] Collecting performance metrics..."
-            
+
             # Collect metrics
             METRICS_FILE="$METRICS_DIR/current_metrics.csv"
             collect_system_metrics >> "$METRICS_FILE"
-            
+
             # Rotate metrics file if it gets too large (keep last 10000 lines)
             if [ $(wc -l < "$METRICS_FILE") -gt 10000 ]; then
               tail -n 5000 "$METRICS_FILE" > "$METRICS_FILE.tmp"
               mv "$METRICS_FILE.tmp" "$METRICS_FILE"
             fi
-            
+
             # Perform analytics
             analyze_trends
             detect_anomalies
             detect_bottlenecks
             generate_predictions
-            
+
             # Clean up old data based on retention policy
             find "$METRICS_DIR" -name "*.csv" -mtime +30 -delete 2>/dev/null || true
             find "$METRICS_DIR" -name "*.log" -mtime +7 -delete 2>/dev/null || true
-            
+
             # Parse interval (convert 5m to seconds)
             SLEEP_SECONDS=$(echo "${cfg.analysisInterval}" | sed 's/m/*60/' | sed 's/s//' | bc)
             sleep "$SLEEP_SECONDS"
@@ -390,27 +390,27 @@ in
         ];
         ExecStart = pkgs.writeShellScript "performance-reporter" ''
           #!/bin/bash
-          
+
           REPORTS_DIR="/var/lib/performance-analytics/reports"
           METRICS_DIR="/var/lib/performance-analytics"
           mkdir -p "$REPORTS_DIR"
-          
+
           echo "[$(date)] Generating performance reports..."
-          
+
           ${optionalString cfg.reporting.dailyReports ''
             # Daily performance report
             DAILY_REPORT="$REPORTS_DIR/daily-$(date +%Y-%m-%d).json"
-            
+
             if [ -f "$METRICS_DIR/current_metrics.csv" ]; then
               # Calculate daily averages
               TODAY=$(date +%Y-%m-%d)
               DAILY_METRICS=$(grep "$TODAY" "$METRICS_DIR/current_metrics.csv" 2>/dev/null || echo "")
-              
+
               if [ -n "$DAILY_METRICS" ]; then
                 CPU_AVG=$(echo "$DAILY_METRICS" | grep "system,cpu_usage" | awk -F, '{sum+=$4; count++} END {if(count>0) printf "%.1f", sum/count; else print "0"}')
                 MEMORY_AVG=$(echo "$DAILY_METRICS" | grep "system,memory_percent" | awk -F, '{sum+=$4; count++} END {if(count>0) printf "%.1f", sum/count; else print "0"}')
                 DISK_AVG=$(echo "$DAILY_METRICS" | grep "storage,disk_usage_percent" | awk -F, '{sum+=$4; count++} END {if(count>0) printf "%.1f", sum/count; else print "0"}')
-                
+
                 cat > "$DAILY_REPORT" << EOF
           {
             "date": "$TODAY",
@@ -423,27 +423,27 @@ in
             "generated": "$(date -Iseconds)"
           }
           EOF
-                
+
                 echo "[$(date)] Daily report generated: $DAILY_REPORT"
               fi
             fi
           ''}
-          
+
           ${optionalString cfg.reporting.weeklyReports ''
             # Weekly performance report (run on Sundays)
             if [ $(date +%u) -eq 7 ]; then
               WEEKLY_REPORT="$REPORTS_DIR/weekly-$(date +%Y-W%V).json"
               WEEK_START=$(date -d "last Monday" +%Y-%m-%d)
-              
+
               echo "[$(date)] Generating weekly report starting from $WEEK_START"
-              
+
               if [ -f "$METRICS_DIR/current_metrics.csv" ]; then
                 WEEK_METRICS=$(grep -E "($WEEK_START|$(date -d "$WEEK_START +1 day" +%Y-%m-%d)|$(date -d "$WEEK_START +2 days" +%Y-%m-%d)|$(date -d "$WEEK_START +3 days" +%Y-%m-%d)|$(date -d "$WEEK_START +4 days" +%Y-%m-%d)|$(date -d "$WEEK_START +5 days" +%Y-%m-%d)|$(date -d "$WEEK_START +6 days" +%Y-%m-%d))" "$METRICS_DIR/current_metrics.csv" 2>/dev/null || echo "")
-                
+
                 if [ -n "$WEEK_METRICS" ]; then
                   CPU_WEEK_AVG=$(echo "$WEEK_METRICS" | grep "system,cpu_usage" | awk -F, '{sum+=$4; count++} END {if(count>0) printf "%.1f", sum/count; else print "0"}')
                   MEMORY_WEEK_AVG=$(echo "$WEEK_METRICS" | grep "system,memory_percent" | awk -F, '{sum+=$4; count++} END {if(count>0) printf "%.1f", sum/count; else print "0"}')
-                  
+
                   cat > "$WEEKLY_REPORT" << EOF
           {
             "week": "$(date +%Y-W%V)",
@@ -455,13 +455,13 @@ in
             "generated": "$(date -Iseconds)"
           }
           EOF
-                  
+
                   echo "[$(date)] Weekly report generated: $WEEKLY_REPORT"
                 fi
               fi
             fi
           ''}
-          
+
           echo "[$(date)] Performance reporting completed"
         '';
       };
@@ -480,12 +480,12 @@ in
         ];
         ExecStart = pkgs.writeShellScript "performance-dashboard-provisioner" ''
           #!/bin/bash
-          
+
           DASHBOARD_DIR="/var/lib/grafana/dashboards"
           mkdir -p "$DASHBOARD_DIR"
-          
+
           echo "[$(date)] Provisioning performance dashboards..."
-          
+
           ${optionalString cfg.dashboards.realTimeMetrics ''
             # Real-time Performance Dashboard
             cat > "$DASHBOARD_DIR/performance-realtime.json" << 'EOF'
@@ -560,7 +560,7 @@ in
           }
           EOF
           ''}
-          
+
           ${optionalString cfg.dashboards.historicalAnalysis ''
             # Historical Performance Analysis Dashboard
             cat > "$DASHBOARD_DIR/performance-historical.json" << 'EOF'
@@ -603,7 +603,7 @@ in
           }
           EOF
           ''}
-          
+
           echo "[$(date)] Performance dashboards provisioned"
         '';
       };

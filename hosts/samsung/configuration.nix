@@ -21,7 +21,7 @@ in
     ./nixos/cpu.nix
     ./nixos/laptop.nix
     ./themes/stylix.nix
-    # Modular imports - laptop needs full desktop experience  
+    # Modular imports - laptop needs full desktop experience
     ../../modules/core.nix
     ../../modules/development.nix
     ../../modules/desktop.nix

@@ -23,7 +23,7 @@ in
     ./nixos/laptop.nix
     ./nixos/memory.nix
     ./themes/stylix.nix
-    # Modular imports - laptop needs full desktop experience  
+    # Modular imports - laptop needs full desktop experience
     ../../modules/core.nix
     ../../modules/development.nix
     ../../modules/desktop.nix
@@ -325,7 +325,7 @@ in
     # Custom packages
     (callPackage ../../home/development/qwen-code/default.nix { })
 
-    # Power management (from power.nix) 
+    # Power management (from power.nix)
     cpupower-gui # GUI for CPU frequency scaling
     powertop # Power consumption analyzer
     lm_sensors # Hardware monitoring

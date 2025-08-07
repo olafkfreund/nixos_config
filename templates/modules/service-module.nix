@@ -194,7 +194,7 @@ in
       preStart = ''
         # Ensure configuration file is properly linked
         ln -sf ${serviceConfigFile} ${cfg.dataDir}/config/SERVICE_NAME.conf
-        
+
         # Set proper permissions
         chown -R ${serviceUser}:${serviceGroup} ${cfg.dataDir}
         chmod 755 ${cfg.dataDir}
@@ -257,7 +257,7 @@ in
     # Helpful warnings
     warnings = [
       (mkIf (cfg.host == "0.0.0.0" && !cfg.openFirewall) ''
-        SERVICE_NAME is configured to bind to all interfaces (0.0.0.0) 
+        SERVICE_NAME is configured to bind to all interfaces (0.0.0.0)
         but firewall is not opened. Service may not be accessible externally.
       '')
       (mkIf (serviceUser == "root") ''

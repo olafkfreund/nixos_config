@@ -822,7 +822,7 @@ in
         ExecStart = pkgs.writeShellScript "setup-ai-dashboards" ''
           mkdir -p /var/lib/grafana/ai-dashboards
           ln -sf /etc/grafana/dashboards/ai-analysis-overview.json /var/lib/grafana/ai-dashboards/
-          
+
           # Restart Grafana to load the new dashboards
           systemctl reload grafana || true
         '';

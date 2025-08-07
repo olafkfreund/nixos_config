@@ -86,7 +86,7 @@ let
       publicKeys =
         # Host keys
         (map (host: config.age.secrets.${host}.publicKey or null) hosts) ++
-        # User keys  
+        # User keys
         (map (user: config.age.secrets.${user}.publicKey or null) users);
 
       # Runtime configuration

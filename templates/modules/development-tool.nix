@@ -1,6 +1,6 @@
 # Development Tool Module Template
 #
-# This template is for development tools, programming languages, 
+# This template is for development tools, programming languages,
 # and development environment configurations.
 #
 # Usage:
@@ -215,7 +215,7 @@ in
     # Development-specific warnings
     warnings = [
       (mkIf (cfg.enableDebugger && !cfg.enableLSP) ''
-        TOOL_NAME: Debugger is enabled but LSP is not. 
+        TOOL_NAME: Debugger is enabled but LSP is not.
         Consider enabling LSP for better debugging experience.
       '')
       (mkIf (cfg.enableProjectTemplates && cfg.extraPackages == [ ]) ''

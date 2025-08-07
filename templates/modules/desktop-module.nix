@@ -5,7 +5,7 @@
 #
 # Usage:
 # 1. Copy to modules/desktop/COMPONENT_NAME.nix
-# 2. Replace PLACEHOLDER values  
+# 2. Replace PLACEHOLDER values
 # 3. Add to modules/desktop/default.nix imports
 # 4. Enable with: features.desktop.COMPONENT_NAME = true;
 

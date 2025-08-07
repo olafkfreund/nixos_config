@@ -142,7 +142,7 @@ with lib;
     initContent = ''
       # Load completions efficiently
       fpath+=(${pkgs.zsh-completions}/share/zsh/site-functions)
-      
+
       # Kitty integration (conditional and safe)
       if [[ -n "$KITTY_INSTALLATION_DIR" ]]; then
         export KITTY_SHELL_INTEGRATION="enabled"
@@ -152,10 +152,10 @@ with lib;
           unfunction kitty-integration
         fi
       fi
-      
+
       # Safe sourcing of external configs
       [[ -f ~/.openai.sh ]] && source ~/.openai.sh
-      
+
       # Enhanced history management
       export HISTSIZE=50000
       export SAVEHIST=50000
@@ -169,12 +169,12 @@ with lib;
       setopt HIST_IGNORE_SPACE
       setopt HIST_SAVE_NO_DUPS
       setopt HIST_VERIFY
-      
+
       # Modern history with atuin
       if command -v atuin >/dev/null 2>&1; then
         eval "$(atuin init zsh)"
       fi
-      
+
       # Enhanced AIChat integration
       if command -v aichat >/dev/null 2>&1; then
         zmodload zsh/zle
@@ -204,10 +204,10 @@ with lib;
       zmodload zsh/zle
       zmodload zsh/zpty
       zmodload zsh/complist
-      
+
       # Initialize colors
       autoload -Uz colors && colors
-      
+
       # Smart completion cache management for better performance
       autoload -U compinit
       if [[ -n "''${ZDOTDIR}/.zcompdump"(#qN.mh+24) ]]; then
@@ -215,7 +215,7 @@ with lib;
       else
         compinit -C
       fi
-      
+
       # Include hidden files in completion
       _comp_options+=(globdots)
 
@@ -226,14 +226,14 @@ with lib;
       bindkey "^H" backward-kill-word       # Ctrl+Backspace
       bindkey "^[[OH" beginning-of-line     # Home
       bindkey "^[[OF" end-of-line           # End
-      
+
       # AI integration keybindings
       bindkey '^[|' zsh_gh_copilot_explain  # Alt+Shift+\
       bindkey '^[\\' zsh_gh_copilot_suggest  # Alt+\
-      
+
       # Productivity keybindings
       bindkey -s ^f "tmux-sessionizer\n"    # Ctrl+F for session manager
-      
+
       # Enhanced command editing
       autoload -z edit-command-line
       zle -N edit-command-line
@@ -254,7 +254,7 @@ with lib;
       zstyle ':completion:*:messages' format '%d'
       zstyle ':completion:*:corrections' format '%B%d (errors: %e)%b'
       zstyle ':completion:*:descriptions' format '[%d]'
-      
+
       # Directory completion
       zstyle ':completion:*:*:cd:*' tag-order local-directories directory-stack path-directories
       zstyle ':completion:*:*:cd:*:directory-stack' menu yes select
@@ -262,7 +262,7 @@ with lib;
       zstyle ':completion:*:*:-command-:*:*' group-order aliases builtins functions commands
       zstyle ':completion:*' special-dirs true
       zstyle ':completion:*' squeeze-slashes true
-      
+
       # Optimized sorting for better performance
       zstyle ':completion:*' sort false
       zstyle ":completion:*:git-checkout:*" sort false
@@ -270,7 +270,7 @@ with lib;
       zstyle ':completion:*:eza' sort false
       zstyle ':completion:complete:*:options' sort false
       zstyle ':completion:files' sort false
-      
+
       # Enhanced fzf-tab configuration
       zstyle ':fzf-tab:*' use-fzf-default-opts yes
       zstyle ':fzf-tab:complete:*:*' fzf-preview 'eza --icons -a --group-directories-first -1 --color=always $realpath'
@@ -293,23 +293,23 @@ with lib;
       export BROWSER="firefox"
       export EDITOR="nvim"
       export VISUAL="$EDITOR"
-      
+
       # Performance optimizations
       export KEYTIMEOUT=1
       export REPORTTIME=10
       export ZSH_AUTOSUGGEST_MANUAL_REBIND=1
       export ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
-      
+
       # Better defaults for common tools
       export LESS="-F -g -i -M -R -S -w -X -z-4"
       export PAGER="less"
       export MANPAGER="sh -c 'col -bx | bat -l man -p'"
       export MANROFFOPT="-c"
-      
+
       # Enhanced history settings
       export HISTCONTROL="ignoreboth:erasedups"
       export HISTIGNORE="ls:cd:cd -:pwd:exit:date:* --help:man *:history"
-      
+
       # Modern tool configurations
       export BAT_THEME="gruvbox-dark"
       export EZA_COLORS="da=1;34:gm=1;34"

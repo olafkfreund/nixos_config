@@ -19,17 +19,17 @@ pkgs.writeShellScriptBin "tmux-sessionizer" ''
     # Enhanced project detection and selection
     find_projects() {
       local paths=()
-    
+
       # Only include paths that exist
       for path in "''${SEARCH_PATHS[@]}"; do
         [[ -d "$path" ]] && paths+=("$path")
       done
-    
+
       if [[ ''${#paths[@]} -eq 0 ]]; then
         echo "No valid search paths found" >&2
         exit 1
       fi
-    
+
       # Find projects with enhanced filtering
       ${pkgs.fd}/bin/fd . "''${paths[@]}" \
         --min-depth 1 \
@@ -48,15 +48,15 @@ pkgs.writeShellScriptBin "tmux-sessionizer" ''
     generate_session_name() {
       local path="$1"
       local name
-    
+
       # Use basename and clean it up for tmux compatibility
       name=$(basename "$path" | tr '.' '_' | tr ' ' '_' | tr '-' '_')
-    
+
       # Ensure name starts with alphanumeric character
       if [[ ! "$name" =~ ^[a-zA-Z0-9] ]]; then
         name="proj_$name"
       fi
-    
+
       echo "$name"
     }
 
@@ -84,25 +84,25 @@ pkgs.writeShellScriptBin "tmux-sessionizer" ''
     main() {
       local selected
       selected=$(select_project "$@")
-    
+
       if [[ -z "$selected" ]]; then
         exit 0
       fi
-    
+
       if [[ ! -d "$selected" ]]; then
         echo "Error: Directory '$selected' does not exist" >&2
         exit 1
       fi
-    
+
       local session_name
       session_name=$(generate_session_name "$selected")
-    
+
       # Check if tmux is running
       if ! ${pkgs.tmux}/bin/tmux list-sessions &> /dev/null; then
         # No tmux server running, start new session
         exec ${pkgs.tmux}/bin/tmux new-session -s "$session_name" -c "$selected"
       fi
-    
+
       # Tmux server exists
       if [[ -z "''${TMUX:-}" ]]; then
         # Not inside tmux, attach or create
@@ -135,7 +135,7 @@ pkgs.writeShellScriptBin "tmux-sessionizer" ''
 
   Keybindings in fzf:
     Ctrl-/     Toggle preview
-    Ctrl-U     Preview page up  
+    Ctrl-U     Preview page up
     Ctrl-D     Preview page down
     Enter      Select project
     Esc        Cancel

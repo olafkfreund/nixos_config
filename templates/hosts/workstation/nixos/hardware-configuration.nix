@@ -1,5 +1,5 @@
 # Hardware configuration for workstation template
-# 
+#
 # IMPORTANT: This is a template file. Replace with actual hardware configuration:
 # nixos-generate-config --show-hardware-config > nixos/hardware-configuration.nix
 #
@@ -93,7 +93,7 @@
   services.udev.extraRules = ''
     # USB device permissions
     KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0660", TAG+="uaccess"
-    
+
     # Storage device optimizations
     ACTION=="add|change", KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="mq-deadline"
     ACTION=="add|change", KERNEL=="nvme[0-9]*", ATTR{queue/scheduler}="none"

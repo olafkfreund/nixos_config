@@ -100,11 +100,11 @@
     # AMD GPU rules for compute
     KERNEL=="renderD*", GROUP="render", MODE="0664"
     KERNEL=="card*", GROUP="video", MODE="0664"
-    
+
     # ROCm device permissions for compute workloads
     SUBSYSTEM=="drm", KERNEL=="renderD128", GROUP="render", MODE="0666"
     SUBSYSTEM=="kfd", KERNEL=="kfd", GROUP="render", MODE="0666"
-    
+
     # Power management permissions for monitoring
     KERNEL=="hwmon*", SUBSYSTEM=="hwmon", DRIVERS=="amdgpu", GROUP="users", MODE="0664"
   '';

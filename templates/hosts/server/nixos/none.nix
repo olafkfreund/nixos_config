@@ -152,10 +152,10 @@
     # Basic device permissions for servers
     KERNEL=="tty*", GROUP="tty", MODE="0664"
     KERNEL=="console", GROUP="tty", MODE="0664"
-    
+
     # Serial device permissions
     KERNEL=="ttyS*", GROUP="dialout", MODE="0664"
-    
+
     # Block device permissions
     KERNEL=="sd*", GROUP="disk", MODE="0664"
     KERNEL=="nvme*", GROUP="disk", MODE="0664"
@@ -289,10 +289,10 @@
       # Rate limit SSH connections
       iptables -A INPUT -p tcp --dport 22 -m state --state NEW -m recent --set --name SSH
       iptables -A INPUT -p tcp --dport 22 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 --rttl --name SSH -j DROP
-      
+
       # Drop invalid packets
       iptables -A INPUT -m state --state INVALID -j DROP
-      
+
       # Rate limit ping requests
       iptables -A INPUT -p icmp --icmp-type echo-request -m limit --limit 1/second -j ACCEPT
     '';

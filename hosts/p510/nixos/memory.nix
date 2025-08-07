@@ -19,7 +19,7 @@
     # Network performance optimizations for NFS server and media streaming
     # Override AI module settings with higher performance values for media server
     "net.core.rmem_max" = lib.mkForce 134217728; # 128MB receive buffer
-    "net.core.wmem_max" = lib.mkForce 134217728; # 128MB send buffer  
+    "net.core.wmem_max" = lib.mkForce 134217728; # 128MB send buffer
     "net.core.rmem_default" = 262144; # 256KB default receive
     "net.core.wmem_default" = 262144; # 256KB default send
     "net.core.netdev_max_backlog" = lib.mkForce 5000; # Increased queue size

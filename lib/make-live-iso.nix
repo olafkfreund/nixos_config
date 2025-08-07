@@ -47,31 +47,31 @@ let
           ╭─────────────────────────────────────────╮
           │     NixOS Live Installer for ${hostName}       │
           ╰─────────────────────────────────────────╯
-          
+
           Quick Start:
           1. Connect to network: nmtui
           2. Install NixOS: sudo install-${hostName}
           3. Test config: test-${hostName}-config
-          
+
           For SSH access:
           - User: root
           - Pass: nixos (CHANGE AFTER INSTALL!)
-          
+
           Configuration: /etc/nixos-config
           Scripts: /etc/nixos-config/scripts/install-helpers/
-          
+
           Hardware config will be auto-detected from:
           hosts/${hostName}/nixos/hardware-configuration.nix
         '';
 
         # Add host info to MOTD
         users.motd = ''
-          
+
           Welcome to NixOS Live Installer for ${hostName}!
-          
+
           To install: sudo install-${hostName}
           For help: cat /etc/welcome-${hostName}
-          
+
         '';
       }
 
@@ -114,7 +114,7 @@ let
           neovim
           nano
 
-          # Terminal utilities  
+          # Terminal utilities
           tmux
           htop
           tree

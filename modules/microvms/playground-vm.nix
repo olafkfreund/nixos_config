@@ -23,10 +23,10 @@ in
         # Create persistent storage if not exists
         mkdir -p ${cfg.storageRoot}/playground-vm/experiments
         mkdir -p ${cfg.storageRoot}/playground-vm/sandbox
-        
+
         # Create shared directory
         mkdir -p ${cfg.sharedRoot}/playground-vm
-        
+
         echo "Playground MicroVM service started"
       '';
 

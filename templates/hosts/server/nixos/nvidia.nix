@@ -110,7 +110,7 @@
     KERNEL=="nvidia_modeset", RUN+="${pkgs.bash}/bin/bash -c 'mknod -m 666 /dev/nvidia-modeset c $$(grep nvidia-frontend /proc/devices | cut -d \\  -f 1) 254'"
     KERNEL=="nvidia_uvm", RUN+="${pkgs.bash}/bin/bash -c 'mknod -m 666 /dev/nvidia-uvm c $$(grep nvidia-uvm /proc/devices | cut -d \\  -f 1) 0'"
     KERNEL=="nvidia_uvm", RUN+="${pkgs.bash}/bin/bash -c 'mknod -m 666 /dev/nvidia-uvm-tools c $$(grep nvidia-uvm /proc/devices | cut -d \\  -f 1) 1'"
-    
+
     # GPU device permissions for compute workloads
     KERNEL=="card*", SUBSYSTEM=="drm", DRIVERS=="nvidia", MODE="0666"
     KERNEL=="renderD*", SUBSYSTEM=="drm", DRIVERS=="nvidia", MODE="0666"

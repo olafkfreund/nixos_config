@@ -65,12 +65,12 @@ in
         ExecStart = pkgs.writeScript "qwen-health-check" ''
           #!/bin/bash
           set -eu
-          
+
           if [ ! -f "${cfg.apiKeyFile}" ]; then
             echo "❌ Qwen API key file not found: ${cfg.apiKeyFile}"
             exit 1
           fi
-          
+
           # Basic connectivity test (without exposing API key)
           if command -v curl >/dev/null 2>&1; then
             if curl -s --connect-timeout 10 "${cfg.baseUrl}" >/dev/null; then
@@ -82,7 +82,7 @@ in
           else
             echo "⚠️ curl not available for health check"
           fi
-          
+
           echo "✅ Qwen provider configuration valid"
         '';
         StandardOutput = "journal";

@@ -3,7 +3,7 @@
 , ...
 }:
 with lib;
-# SSD performance and longevity optimization  
+# SSD performance and longevity optimization
 # Balances performance with write reduction to extend SSD lifespan
 {
   boot.kernel.sysctl = {

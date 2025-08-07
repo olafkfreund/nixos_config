@@ -155,36 +155,36 @@ in
         User = "root";
         ExecStart = pkgs.writeShellScript "network-performance-optimizer" ''
           #!/bin/bash
-          
+
           LOG_FILE="/var/log/network-tuning/optimizer.log"
           mkdir -p "$(dirname "$LOG_FILE")"
           exec 1> >(tee -a "$LOG_FILE")
           exec 2>&1
-          
+
           echo "[$(date)] Starting network performance optimization..."
           echo "[$(date)] Profile: ${cfg.profile}"
-          
+
           # TCP optimization
           ${optionalString cfg.tcpOptimization.enable ''
             echo "[$(date)] Applying TCP optimizations..."
-            
+
             # Set congestion control algorithm
             echo "${cfg.tcpOptimization.congestionControl}" > /proc/sys/net/ipv4/tcp_congestion_control
             echo "[$(date)] TCP congestion control set to ${cfg.tcpOptimization.congestionControl}"
-            
+
             # TCP window scaling
             echo ${if cfg.tcpOptimization.windowScaling then "1" else "0"} > /proc/sys/net/ipv4/tcp_window_scaling
-            
+
             # TCP Fast Open
             echo ${if cfg.tcpOptimization.fastOpen then "3" else "0"} > /proc/sys/net/ipv4/tcp_fastopen
-            
+
             ${optionalString cfg.tcpOptimization.lowLatency ''
               # Low latency TCP settings
               echo 1 > /proc/sys/net/ipv4/tcp_low_latency
               echo 1 > /proc/sys/net/ipv4/tcp_no_delay_ack
               echo 0 > /proc/sys/net/ipv4/tcp_slow_start_after_idle
             ''}
-            
+
             # Profile-specific TCP settings
             ${if cfg.profile == "latency" then ''
               echo 1 > /proc/sys/net/ipv4/tcp_timestamps
@@ -206,15 +206,15 @@ in
               echo "[$(date)] Applied balanced TCP settings"
             ''}
           ''}
-          
+
           # Buffer optimization
           ${optionalString cfg.bufferOptimization.enable ''
             echo "[$(date)] Optimizing network buffers..."
-            
+
             # Set buffer sizes
             echo ${toString cfg.bufferOptimization.receiveBuffer} > /proc/sys/net/core/rmem_max
             echo ${toString cfg.bufferOptimization.sendBuffer} > /proc/sys/net/core/wmem_max
-            
+
             ${optionalString cfg.bufferOptimization.autotuning ''
               # Enable autotuning
               echo "4096 87380 ${toString cfg.bufferOptimization.receiveBuffer}" > /proc/sys/net/ipv4/tcp_rmem
@@ -222,11 +222,11 @@ in
               echo "[$(date)] Network buffer autotuning enabled"
             ''}
           ''}
-          
+
           # Inter-host optimization
           ${optionalString cfg.interHostOptimization.enable ''
             echo "[$(date)] Optimizing inter-host communication..."
-            
+
             ${optionalString cfg.interHostOptimization.routeOptimization ''
               # Optimize routes to known hosts
               ${concatStringsSep "\n" (map (host: ''
@@ -235,7 +235,7 @@ in
                   ROUTE_INFO=$(${pkgs.iproute2}/bin/ip route get ${host} 2>/dev/null | head -1)
                   if [ -n "$ROUTE_INFO" ]; then
                     echo "[$(date)] Route to ${host}: $ROUTE_INFO"
-                    
+
                     # Optimize route metrics if needed
                     INTERFACE=$(echo "$ROUTE_INFO" | ${pkgs.gawk}/bin/awk '{for(i=1;i<=NF;i++) if($i=="dev") print $(i+1)}')
                     if [ -n "$INTERFACE" ]; then
@@ -246,7 +246,7 @@ in
                 fi
               '') cfg.interHostOptimization.hosts)}
             ''}
-            
+
             ${optionalString cfg.interHostOptimization.jumboFrames ''
               # Enable jumbo frames on appropriate interfaces
               for interface in $(${pkgs.iproute2}/bin/ip link show | grep "state UP" | ${pkgs.gawk}/bin/awk -F: '{print $2}' | grep -E "^(eth|ens|enp)" | tr -d ' '); do
@@ -257,11 +257,11 @@ in
               done
             ''}
           ''}
-          
+
           # DNS optimization
           ${optionalString cfg.dnsOptimization.enable ''
             echo "[$(date)] Optimizing DNS performance..."
-            
+
             ${optionalString cfg.dnsOptimization.caching ''
               # Configure systemd-resolved for better caching
               if systemctl is-active systemd-resolved &>/dev/null; then
@@ -279,11 +279,11 @@ in
               fi
             ''}
           ''}
-          
+
           # Monitoring traffic optimization
           ${optionalString cfg.monitoringOptimization.enable ''
             echo "[$(date)] Optimizing monitoring traffic..."
-            
+
             ${optionalString cfg.monitoringOptimization.prioritization ''
               # Set up traffic prioritization for monitoring
               tc qdisc add dev lo root handle 1: htb default 30 2>/dev/null || true
@@ -291,17 +291,17 @@ in
               tc class add dev lo parent 1:1 classid 1:10 htb rate 100mbit ceil 1gbit prio 1 2>/dev/null || true  # High priority
               tc class add dev lo parent 1:1 classid 1:20 htb rate 500mbit ceil 1gbit prio 2 2>/dev/null || true  # Medium priority
               tc class add dev lo parent 1:1 classid 1:30 htb rate 300mbit ceil 1gbit prio 3 2>/dev/null || true  # Default
-              
+
               # Prioritize monitoring ports
               tc filter add dev lo protocol ip parent 1:0 prio 1 u32 match ip dport 9090 0xffff flowid 1:10 2>/dev/null || true  # Prometheus
               tc filter add dev lo protocol ip parent 1:0 prio 1 u32 match ip dport 3001 0xffff flowid 1:10 2>/dev/null || true  # Grafana
               tc filter add dev lo protocol ip parent 1:0 prio 1 u32 match ip dport 9093 0xffff flowid 1:10 2>/dev/null || true  # Alertmanager
               tc filter add dev lo protocol ip parent 1:0 prio 2 u32 match ip dport 9100 0xffff flowid 1:20 2>/dev/null || true  # Node exporter
-              
+
               echo "[$(date)] Monitoring traffic prioritization configured"
             ''}
           ''}
-          
+
           echo "[$(date)] Network performance optimization completed"
         '';
       };
@@ -331,13 +331,13 @@ in
         RestartSec = "30s";
         ExecStart = pkgs.writeShellScript "network-performance-monitor" ''
           #!/bin/bash
-          
+
           METRICS_FILE="/var/lib/network-tuning/metrics.json"
           mkdir -p "$(dirname "$METRICS_FILE")"
-          
+
           while true; do
             TIMESTAMP=$(date -Iseconds)
-            
+
             # Network interface statistics
             NETWORK_STATS=$(cat /proc/net/dev | tail -n +3 | while read line; do
               IFACE=$(echo "$line" | ${pkgs.gawk}/bin/awk -F: '{print $1}' | tr -d ' ')
@@ -347,10 +347,10 @@ in
                 echo "\"$IFACE\": {\"rx_bytes\": $RX_BYTES, \"tx_bytes\": $TX_BYTES}"
               fi
             done | paste -sd, -)
-            
+
             # TCP connection statistics
             TCP_STATS=$(${pkgs.iproute2}/bin/ss -s | grep TCP | head -1 | ${pkgs.gawk}/bin/awk '{print $2}')
-            
+
             # Network latency to configured hosts
             LATENCY_STATS=$(
               {
@@ -360,13 +360,13 @@ in
                 '') cfg.interHostOptimization.hosts)}
               } | paste -sd, -
             )
-            
+
             # DNS resolution time
             DNS_TIME=$(time (nslookup google.com >/dev/null 2>&1) 2>&1 | grep real | ${pkgs.gawk}/bin/awk '{print $2}' | sed 's/[^0-9.]//g' || echo "0")
-            
+
             # Congestion control algorithm
             CONGESTION_CONTROL=$(cat /proc/sys/net/ipv4/tcp_congestion_control)
-            
+
             # Create metrics JSON
             cat > "$METRICS_FILE" << EOF
             {
@@ -379,7 +379,7 @@ in
               "profile": "${cfg.profile}"
             }
           EOF
-            
+
             sleep 60
           done
         '';

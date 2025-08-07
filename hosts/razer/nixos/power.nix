@@ -79,7 +79,7 @@
       script = ''
         # Reset USB devices if needed
         ${pkgs.usbutils}/bin/usb-devices > /dev/null
-        
+
         # Re-enable USB devices that may have been suspended
         for device in /sys/bus/usb/devices/*/power/control; do
           if [ -w "$device" ]; then
