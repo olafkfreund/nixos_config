@@ -1,8 +1,8 @@
-# 🗂️ NixOS Configuration
+# NixOS Configuration
 
 A sophisticated, modular NixOS configuration system designed for managing multiple hosts with different hardware profiles, comprehensive optimization, and advanced automation. This configuration emphasizes maintainability, modularity, and production-ready quality standards.
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 This configuration uses a **flake-based** approach with extensive modularization and optimization:
 
@@ -31,21 +31,22 @@ nixos-config/
 └── docs/                     # Comprehensive documentation
 ```
 
-### 🏆 Key Features
+### Key Features
 
-✅ **Multi-host support** with hardware-specific optimizations  
-✅ **141+ optimized modules** with comprehensive validation  
-✅ **Feature flag system** for granular control  
-✅ **Automated secrets management** with Agenix  
-✅ **Quality validation framework** with automated testing  
-✅ **Performance optimizations** for different hardware profiles  
-✅ **Comprehensive documentation** and templates  
-✅ **CI/CD pipeline** with automated testing and validation  
-✅ **Dead code elimination** and performance optimization  
+- **Multi-host support** with hardware-specific optimizations  
+- **141+ optimized modules** with comprehensive validation  
+- **Feature flag system** for granular control  
+- **Automated secrets management** with Agenix  
+- **Quality validation framework** with automated testing  
+- **Performance optimizations** for different hardware profiles  
+- **Comprehensive documentation** and templates  
+- **CI/CD pipeline** with automated testing and validation  
+- **Dead code elimination** and performance optimization  
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
+
 - NixOS installed with flakes enabled
 - Git configured with your credentials
 - Basic understanding of Nix/NixOS
@@ -53,32 +54,38 @@ nixos-config/
 ### Initial Setup
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/olafkfreund/nixos_config.git
    cd nixos_config
    ```
 
 2. **Install just command runner:**
+
    ```bash
    nix profile install nixpkgs#just
    ```
 
 3. **View available commands:**
+
    ```bash
    just --list
    ```
 
 4. **Validate the configuration:**
+
    ```bash
    just validate
    ```
 
 5. **Deploy to your system:**
+
    ```bash
    just deploy
    ```
 
 6. **Try the AI-enhanced task management:**
+
    ```bash
    # Beautiful AI dashboard with insights
    ai-dashboard
@@ -90,19 +97,22 @@ nixos-config/
    ai-analyze
    ```
 
-## 🆕 Latest Updates (January 2025)
+## Latest Updates (January 2025)
 
-### ✅ Phase 12: AI-Enhanced Task Management System (Completed)
+### Phase 12: AI-Enhanced Task Management System (Completed)
+
 Revolutionary productivity system integrating Taskwarrior with Claude AI for intelligent task management:
 
-**🧠 Core AI Features:**
+**Core AI Features:**
+
 - **Smart Task Creation**: Natural language → structured Taskwarrior tasks with context awareness
 - **AI-Enhanced Dashboard**: Beautiful daily overview with AI-generated insights and recommendations
 - **Intelligent Analysis**: Task prioritization and optimization suggestions based on workload
 - **Work Summarization**: Professional daily/weekly reports with productivity pattern analysis
 - **Context-Aware Workflows**: Git, time, and location-aware task suggestions
 
-**🎯 Ready-to-Use Commands:**
+**Ready-to-Use Commands:**
+
 ```bash
 # Smart task creation from natural language
 smart-add "Review PR, update docs, deploy by Friday"
@@ -124,20 +134,23 @@ summary     # Alias (defaults to daily)
 weekly-summary  # Weekly report
 ```
 
-**⚡ Productivity Benefits:**
+**Productivity Benefits:**
+
 - **85% faster** task creation with natural language processing
 - **60% less** time spent on task prioritization
 - **70% more accurate** time estimates with AI analysis
 - **Beautiful interface** with colors, emojis, and visual progress indicators
 - **Context-aware suggestions** based on current work environment
 
-**🎨 Visual Design Features:**
+**Visual Design Features:**
+
 - **Color-coded interface**: Red (urgent), Yellow (due today), Green (completed), Blue (info)
-- **Emoji indicators**: 📋 (tasks), 🎯 (priority), ⏰ (time), 🧠 (AI insights), ✅ (completed)
+- **Visual indicators**: Tasks, priority, time, AI insights, completed status
 - **Progress visualization**: Task counters, completion trends, productivity metrics
 - **Beautiful formatting**: Headers, separators, and organized layouts
 
-**🔧 Advanced AI Functions:**
+**Advanced AI Functions:**
+
 ```bash
 # AI project breakdown
 ai-project "Build user authentication system"  # Creates full project plan
@@ -158,7 +171,8 @@ smart-complete 15    # Alternative completion command
 ai-find "tasks related to documentation"  # Semantic task search
 ```
 
-**🌅 Productivity Workflows:**
+**Productivity Workflows:**
+
 ```bash
 # Morning routine (automated sequence)
 morning    # AI dashboard + context suggestions + priority analysis
@@ -175,26 +189,30 @@ smart-done 1                                      # Complete with AI feedback
 summary                                           # End-of-session report
 ```
 
-**🔗 Integration Points:**
+**Integration Points:**
+
 - **AI Provider System**: Uses existing unified AI infrastructure (Anthropic/OpenAI/Gemini/Ollama)
 - **Taskwarrior Enhancement**: Builds on comprehensive Taskwarrior 3.0 configuration
 - **Shell Integration**: ZSH functions, aliases, and tab completion
 - **Time Tracking**: Seamless integration with Timewarrior
 - **Monitoring**: Task metrics integration with Prometheus/Grafana stack
 
-**📚 Documentation:**
+**Documentation:**
+
 - **Complete Guide**: `/home/olafkfreund/.config/nixos/docs/AI-Task-Management.md`
 - **Getting Started**: Step-by-step setup and usage examples
 - **Troubleshooting**: Common issues and solutions
 - **Advanced Usage**: Power user features and customization
 
-**🏠 Host Integration:**
+**Host Integration:**
 The AI task management system is automatically available on all hosts with productivity features enabled. No additional configuration required - just start using `smart-add` or `ai-dashboard` immediately!
 
-### ✅ Phase 9.3: Enhanced Hyprland Configuration (Completed)
+### Phase 9.3: Enhanced Hyprland Configuration (Completed)
+
 Advanced Hyprland window manager configuration with comprehensive keybindings:
 
 **High-Priority Enhancements:**
+
 - **Window Switching**: `ALT + TAB` and `ALT + SHIFT + TAB` for forward/backward window cycling
 - **Workspace Navigation**: `SUPER + TAB` for previous workspace (back-and-forth switching)
 - **Application Shortcuts**: `SUPER + E` (file manager), `SUPER + V` (clipboard manager), `SUPER + =` (calculator)
@@ -202,6 +220,7 @@ Advanced Hyprland window manager configuration with comprehensive keybindings:
 - **Quick Lock**: `SUPER + L` for immediate screen lock
 
 **Advanced Features:**
+
 - **Gaming Mode**: `SUPER + CTRL + G` to disable compositor effects for performance
 - **Media Controls**: Hardware keys and `SUPER + P` for play/pause, `SUPER + SHIFT + ,/.` for track navigation
 - **Window Opacity**: `SUPER + ALT + -/=/0` for transparency control (80%/90%/100%)
@@ -209,33 +228,40 @@ Advanced Hyprland window manager configuration with comprehensive keybindings:
 - **Power Management**: `SUPER + SHIFT + End/Delete/Insert` for suspend/poweroff/reboot
 
 **Development Workflow:**
+
 - **Code Editor**: `SUPER + SHIFT + Return` for VS Code
 - **Terminal Options**: `SUPER + SHIFT + T` (large floating), `SUPER + CTRL + T` (tmux session)
 - **Network Management**: `SUPER + SHIFT + W` for network configuration TUI
 
 **Configuration Location:**
+
 - Main binds: `/home/olafkfreund/.config/nixos/home/desktop/hyprland/config/binds.nix`
 - Documentation: `/home/olafkfreund/.config/nixos/docs/Hyprland_config.md`
 
-### ✅ Phase 7: Monitoring & Observability (Completed)
+### Phase 7: Monitoring & Observability (Completed)
+
 A comprehensive monitoring infrastructure has been deployed:
 
 **Core Services:**
+
 - **Prometheus** (port 9090): Metrics collection and storage with 30-day retention
 - **Grafana** (port 3001): Advanced dashboards and visualization
 - **Alertmanager** (port 9093): Intelligent alert management and routing
 - **Node Exporters** (port 9100): System-level metrics collection
 
 **Custom Exporters:**
+
 - **NixOS Exporter** (port 9101): Nix store, generations, and system-specific metrics
 - **Systemd Exporter** (port 9102): Service status and systemd unit monitoring
 
 **Available Dashboards:**
+
 - NixOS System Overview: Comprehensive system health and performance
 - Host-specific dashboards: Tailored monitoring for each system (p620-AMD, razer-NVIDIA, etc.)
 - Hardware-specific panels: GPU utilization, thermal monitoring, and performance metrics
 
 **Quick Access:**
+
 ```bash
 # Check monitoring status
 grafana-status          # Service status and dashboard count
@@ -248,10 +274,12 @@ node-exporter-status    # All exporter services status
 # Alertmanager: http://p620:9093
 ```
 
-### ✅ Phase 9.1: Unified AI Provider System (Completed)
+### Phase 9.1: Unified AI Provider System (Completed)
+
 A sophisticated multi-provider AI interface with automatic fallback:
 
 **Unified Commands:**
+
 ```bash
 # Main AI interface
 ai-cli "your question"                    # Use default provider (Anthropic)
@@ -271,23 +299,25 @@ ai-cli -v "question"                     # Verbose debugging output
 ```
 
 **Supported Providers:**
-1. **Anthropic Claude** ✅ (Priority 2, Default)
+
+1. **Anthropic Claude** (Priority 2, Default)
    - Models: claude-3-5-sonnet, claude-3-5-haiku, claude-3-opus
    - Encrypted API key management via agenix
 
-2. **OpenAI** ✅ (Priority 1)
+2. **OpenAI** (Priority 1)
    - Models: gpt-4o, gpt-4o-mini, gpt-3.5-turbo
    - Full API integration with encrypted secrets
 
-3. **Google Gemini** ✅ (Priority 3)
+3. **Google Gemini** (Priority 3)
    - Models: gemini-1.5-pro, gemini-1.5-flash, gemini-2.0-flash-exp
    - Native integration with Google APIs
 
-4. **Ollama Local** ✅ (Priority 4)
+4. **Ollama Local** (Priority 4)
    - Models: mistral-small3.1, llama3.2, custom models
    - Local inference with ROCm GPU acceleration on P620
 
 **Shell Integration:**
+
 ```bash
 # Convenient aliases available system-wide
 ai "question"              # Quick AI query
@@ -299,6 +329,7 @@ ai-status                  # Check provider status
 ```
 
 **Features:**
+
 - **Intelligent Fallback**: Automatically tries alternative providers if one fails
 - **Cost Optimization**: Smart provider selection based on usage and cost
 - **Encrypted Secrets**: All API keys secured with agenix encryption
@@ -306,10 +337,11 @@ ai-status                  # Check provider status
 - **Timeout Management**: Configurable request timeouts and retry logic
 - **Comprehensive Logging**: Debug modes for troubleshooting
 
-### ✅ Phase 11: MicroVM Development Environments (Completed)
+### Phase 11: MicroVM Development Environments (Completed)
+
 A comprehensive MicroVM infrastructure using microvm.nix providing lightweight, isolated development environments:
 
-**🖥️ Three MicroVM Templates:**
+**Three MicroVM Templates:**
 
 1. **Development VM (dev-vm)**
    - **Resources**: 8GB RAM, 4 CPU cores, SSH port 2222
@@ -327,7 +359,8 @@ A comprehensive MicroVM infrastructure using microvm.nix providing lightweight, 
    - **Features**: Advanced DevOps tools (Kubernetes, Helm, Ansible, Wireshark)
    - **Use Cases**: System experimentation, network analysis, learning environments
 
-**🛠️ Management Commands:**
+**Management Commands:**
+
 ```bash
 # VM Lifecycle
 just start-microvm dev-vm        # Start development environment
@@ -349,14 +382,16 @@ just clean-microvms            # Clean up VM data (DESTRUCTIVE)
 just microvm-help              # Comprehensive help and examples
 ```
 
-**🔧 Key Features:**
+**Key Features:**
+
 - **NAT Networking**: Simple setup with unique SSH ports per VM
 - **Shared Storage**: Efficient /nix/store sharing and persistent volumes
 - **Resource Allocation**: 8GB RAM and 4 CPU cores per VM (configurable)
 - **QEMU Hypervisor**: Hardware acceleration with minimal overhead
 - **Host Integration**: Seamless access to host services and shared directories
 
-**⚙️ Host Configuration:**
+**Host Configuration:**
+
 ```nix
 # Enable MicroVMs on any host
 features = {
@@ -370,12 +405,14 @@ features = {
 ```
 
 **Currently Available Hosts:**
-- **P620**: ✅ Available (enable in configuration as needed)
-- **Razer**: ✅ Available (enable in configuration as needed)
+
+- **P620**: Available (enable in configuration as needed)
+- **Razer**: Available (enable in configuration as needed)
 - **P510**: Available for activation
 - **DEX5550**: Available for activation
 
 **Quick Start Workflow:**
+
 ```bash
 # 1. Start development environment
 just start-microvm dev-vm
@@ -393,24 +430,25 @@ just stop-microvm dev-vm
 
 The MicroVM system provides enterprise-grade virtualization capabilities with minimal overhead, perfect for development, testing, and experimentation workflows.
 
-### 🔧 Key Fixes Applied
+### Key Fixes Applied
+
 1. **Grafana Dashboard Structure**: Fixed JSON generation for proper dashboard loading
 2. **Prometheus Port Conflicts**: Resolved Docker port 3000 conflict by moving Grafana to 3001
 3. **Custom Exporter Compatibility**: Replaced problematic netcat with Python HTTP servers
 4. **API Key Path Resolution**: Fixed secret paths to use correct agenix locations (`/run/agenix/api-*`)
 5. **Service Dependencies**: Optimized service startup order and dependency management
 
-## 🔧 Using the Justfile
+## Using the Justfile
 
 The Justfile provides convenient commands for all operations. It's the primary interface for managing this configuration.
 
-### 📋 Available Commands
+### Available Commands
 
 ```bash
 just --list  # Show all available commands
 ```
 
-### 🏗️ Building and Testing
+### Building and Testing
 
 ```bash
 # Comprehensive validation (recommended)
@@ -438,7 +476,7 @@ just format
 just perf-test
 ```
 
-### 🚀 Deployment Commands
+### Deployment Commands
 
 ```bash
 # Deploy to local system (auto-detects hostname)
@@ -461,7 +499,7 @@ just update-flake
 just update-input INPUT_NAME
 ```
 
-### 🔍 Quality and Maintenance
+### Quality and Maintenance
 
 ```bash
 # Run quality validation with detailed reporting
@@ -480,11 +518,12 @@ just test-modules
 just perf-test
 ```
 
-## 🏠 Host Configuration
+## Host Configuration
 
 Each host has a standardized, optimized structure:
 
 ### Host Directory Structure
+
 ```
 hosts/hostname/
 ├── configuration.nix         # Main NixOS configuration
@@ -502,23 +541,27 @@ hosts/hostname/
 ### Adding a New Host
 
 1. **Create host directory:**
+
    ```bash
    mkdir hosts/newhostname
    ```
 
 2. **Use configuration templates:**
+
    ```bash
    cp templates/configuration.nix.template hosts/newhostname/configuration.nix
    cp templates/variables.nix.template hosts/newhostname/variables.nix
    ```
 
 3. **Generate hardware configuration:**
+
    ```bash
    nixos-generate-config --dir /tmp/nixos-config
    cp /tmp/nixos-config/hardware-configuration.nix hosts/newhostname/
    ```
 
 4. **Configure host variables:**
+
    ```nix
    # hosts/newhostname/variables.nix
    {
@@ -554,6 +597,7 @@ hosts/hostname/
    ```
 
 5. **Add to flake.nix:**
+
    ```nix
    nixosConfigurations = {
      # ... existing hosts
@@ -562,14 +606,16 @@ hosts/hostname/
    ```
 
 6. **Test and validate:**
+
    ```bash
    just test-host newhostname
    just validate
    ```
 
-## 👥 User Management
+## User Management
 
 ### User Configuration Structure
+
 ```
 Users/username/
 ├── common/                   # Shared user configuration
@@ -580,11 +626,13 @@ Users/username/
 ### Adding a New User
 
 1. **Create user directory structure:**
+
    ```bash
    mkdir -p Users/newuser/common
    ```
 
 2. **Create base user configuration:**
+
    ```nix
    # Users/newuser/common/default.nix
    { config, lib, pkgs, ... }: {
@@ -609,12 +657,14 @@ Users/username/
    ```
 
 3. **Create host-specific configurations:**
+
    ```bash
    # For each host the user will use
    cp templates/user_home.nix.template Users/newuser/hostname_home.nix
    ```
 
 4. **Generate SSH key and add to secrets:**
+
    ```bash
    ssh-keygen -t ed25519 -f ~/.ssh/newuser_key -N ""
    
@@ -623,23 +673,26 @@ Users/username/
    ```
 
 5. **Create user password secret:**
+
    ```bash
    ./scripts/manage-secrets.sh create user-password-newuser
    ```
 
 6. **Add user to host variables:**
+
    ```nix
    # hosts/hostname/variables.nix
    hostUsers = ["existinguser" "newuser"];
    ```
 
 7. **Test and deploy:**
+
    ```bash
    just test-host hostname
    just deploy
    ```
 
-## 🧩 Module System
+## Module System
 
 ### Module Categories
 
@@ -659,11 +712,13 @@ The configuration includes 141+ optimized modules organized by function:
 ### Creating a New Module
 
 1. **Use the standardized module template:**
+
    ```bash
    cp modules/TEMPLATE.nix modules/category/newmodule.nix
    ```
 
 2. **Follow the established pattern:**
+
    ```nix
    # modules/category/newmodule.nix
    {
@@ -724,6 +779,7 @@ The configuration includes 141+ optimized modules organized by function:
    ```
 
 3. **Add to module imports:**
+
    ```nix
    # modules/category/default.nix
    {
@@ -735,12 +791,14 @@ The configuration includes 141+ optimized modules organized by function:
    ```
 
 4. **Create comprehensive documentation:**
+
    ```bash
    cp modules/MODULE_README_TEMPLATE.md modules/category/README.md
    # Edit with module-specific information
    ```
 
 5. **Test and validate:**
+
    ```bash
    just check-syntax
    just test-modules
@@ -758,7 +816,7 @@ The configuration includes 141+ optimized modules organized by function:
 - **Use organized option groups** for related settings
 - **Implement proper error handling** with meaningful messages
 
-## 🔧 Feature System
+## Feature System
 
 The configuration uses an advanced feature flag system for granular control:
 
@@ -835,6 +893,7 @@ features = {
 ### Using Features in Configuration
 
 1. **Host-level configuration:**
+
    ```nix
    # hosts/hostname/variables.nix
    features = {
@@ -845,6 +904,7 @@ features = {
    ```
 
 2. **User-level overrides:**
+
    ```nix
    # Users/username/features.nix
    {
@@ -855,6 +915,7 @@ features = {
    ```
 
 3. **Conditional module loading:**
+
    ```nix
    # Modules automatically respect feature flags
    config = mkIf config.features.development.enable {
@@ -862,81 +923,92 @@ features = {
    };
    ```
 
-## 🚀 Enhanced Shell Environment
+## Enhanced Shell Environment
 
 ### Comprehensive Terminal Experience
 
 This configuration provides a modern, high-performance shell environment with seamless integration across all components:
 
-#### ✨ **Enhanced Zsh Configuration** (`home/shell/zsh.nix`)
+#### Enhanced Zsh Configuration (`home/shell/zsh.nix`)
 
 **Modern Performance Features:**
+
 - 50,000 command history with intelligent deduplication
 - Smart completion caching for faster startup
 - Performance-optimized plugin loading with lazy initialization
 - Enhanced syntax highlighting with Gruvbox theme colors
 
 **AI Integration:**
+
 - GitHub Copilot integration (`Alt+\` for suggestions, `Alt+Shift+\` for explanations)
 - AIChat integration (`Alt+E` for command enhancement)
 - Smart command completion and enhancement
 
 **Developer Productivity:**
+
 - Modern keybindings (Ctrl+Arrow for word navigation, Ctrl+F for session manager)
 - Enhanced fzf-tab integration with file previews
 - Smart directory navigation with zoxide
 - Git-aware prompt and completions
 
-#### ⭐ **Enhanced Starship Prompt** (`home/shell/starship/default.nix`)
+#### Enhanced Starship Prompt (`home/shell/starship/default.nix`)
 
 **Rich Information Display:**
+
 - Command duration for performance awareness (shows for commands >1s)
 - Comprehensive Git status with branch, commits, and file states
 - Development context (Nix shells, containers, cloud environments)
 - Hardware-aware icons and consistent Gruvbox theming
 
-#### 🖥️ **Enhanced Tmux Configuration** (`home/shell/tmux/default.nix`)
+#### Enhanced Tmux Configuration (`home/shell/tmux/default.nix`)
 
 **Modern Performance:**
+
 - Zero escape time and aggressive resizing for responsiveness
 - 50,000 line history with enhanced scrollback
 - True color support for all modern terminals
 - Focus events and clipboard integration
 
 **Vim-Style Navigation:**
+
 - `hjkl` pane navigation with `Alt+hjkl` prefix-free navigation
 - `HJKL` pane resizing and `Alt+1-5` quick window access
 - Smart pane splitting (`|` vertical, `-` horizontal)
 - Intelligent session management with project detection
 
 **Developer Productivity:**
+
 - **Tilish**: i3/sway-like tiling window management
 - **tmux-thumbs**: Quick text copying with hint mode
 - **extrakto**: Enhanced text extraction from terminal output
 - **Enhanced Session Manager**: Smart project detection with fuzzy selection
 
-#### 📱 **Enhanced Zellij Configuration** (`home/shell/zellij/default.nix`)
+#### Enhanced Zellij Configuration (`home/shell/zellij/default.nix`)
 
 **Modern Alternative to Tmux:**
+
 - Vim-style keybindings consistent with tmux
 - Built-in session management and file browsing
 - Smart layouts for development workflows
 - Gruvbox theming matching the ecosystem
 
 **Productivity Features:**
+
 - **Development Layout**: 70% editor, 30% terminal, 25% logs
 - **File Manager Integration**: Built-in strider file manager
 - **Session Management**: Advanced session handling with persistence
 - **Smart Keybindings**: Intuitive navigation and window management
 
-#### 🔧 **Key Features and Integrations**
+#### Key Features and Integrations
 
 **Consistent Theming:**
+
 - Gruvbox Dark theme across all components
 - Consistent icons and color schemes
 - Modern Nerd Font integration
 
 **Smart Aliases and Commands:**
+
 ```bash
 # Git enhancements
 gc="git commit -v"           # Verbose commits
@@ -953,19 +1025,21 @@ tmux-sessionizer             # Smart project session management
 ```
 
 **Integration Points:**
+
 - **Claude Code**: Full integration with enhanced terminal features
 - **Modern Tools**: bat, eza, ripgrep, fd, zoxide, atuin
 - **Development**: Language servers, formatters, and debugging tools
 - **Cloud/DevOps**: AWS, Azure, Terraform, Kubernetes integration
 
-#### 📖 **Documentation**
+#### Documentation
 
 Detailed documentation for each component:
+
 - [`home/shell/zsh/README.md`](home/shell/zsh/README.md) - Zsh configuration guide
 - [`home/shell/tmux/README.md`](home/shell/tmux/README.md) - Tmux setup and keybindings
 - [`home/shell/zellij/README.md`](home/shell/zellij/README.md) - Zellij configuration guide
 
-#### 🎯 **Quick Start**
+#### Quick Start
 
 The enhanced shell environment is automatically available on all configured hosts. Key productivity features:
 
@@ -975,7 +1049,7 @@ The enhanced shell environment is automatically available on all configured host
 4. **AI assistance**: `Alt+E` for command help, `aiexplain command` for explanations
 5. **Modern search**: `fzfpreview` for file searching with previews
 
-## 🔐 Secrets Management
+## Secrets Management
 
 ### Comprehensive Agenix Integration
 
@@ -1017,29 +1091,33 @@ The configuration uses Agenix for encrypted, declarative secret handling:
 }
 ```
 
-## 🚦 Testing and Validation
+## Testing and Validation
 
 ### Comprehensive Validation Framework
 
 The configuration includes multiple validation levels:
 
 1. **Syntax Validation:**
+
    ```bash
    just check-syntax  # Fast syntax checking
    ```
 
 2. **Build Testing:**
+
    ```bash
    just test-host hostname     # Test specific host
    just test-all              # Test all hosts
    ```
 
 3. **Quality Validation:**
+
    ```bash
    just validate-quality      # Comprehensive quality checks
    ```
 
 4. **Full Validation:**
+
    ```bash
    just validate             # Complete validation suite
    ```
@@ -1047,13 +1125,14 @@ The configuration includes multiple validation levels:
 ### Quality Validation Features
 
 The quality validation script checks:
+
 - Module documentation coverage
 - Option naming patterns and consistency
 - Code quality and complexity
 - Configuration pattern adherence
 - Missing assertions and error handling
 
-## 🔄 Update and Maintenance Procedures
+## Update and Maintenance Procedures
 
 ### Regular Updates
 
@@ -1079,27 +1158,32 @@ just validate-full       # Comprehensive validation
 1. **Review changelogs** for breaking changes
 2. **Update staging environment** first
 3. **Run comprehensive validation**:
+
    ```bash
    just ci  # Full CI pipeline
    ```
+
 4. **Deploy incrementally** host by host
 5. **Monitor for issues** and rollback if needed
 
-## 🛠️ Hardware-Specific Optimizations
+## Hardware-Specific Optimizations
 
 ### Multi-Host Hardware Support
 
 #### AMD GPU Systems (P620)
+
 - **ROCm support** for GPU computing and AI workloads
 - **AMD-specific driver optimizations**
 - **Memory and thermal management**
 
 #### NVIDIA Systems (Razer, P510)  
+
 - **Hybrid graphics** configuration for laptops (Optimus)
 - **CUDA support** for workstations and development
 - **Wayland compatibility** layers and optimizations
 
 #### Intel Integrated Graphics (Samsung, DEX5550)
+
 - **Power efficiency** optimizations for battery life
 - **Wayland-native** configurations for performance
 - **Thermal and frequency** scaling optimizations
@@ -1116,9 +1200,10 @@ just perf-test
 just validate-performance
 ```
 
-## 📚 Documentation and Resources
+## Documentation and Resources
 
 ### Primary Documentation
+
 - **[ROADMAP.md](ROADMAP.md)** - Comprehensive development roadmap and planned features
 - **[PROGRESS_TRACKER.md](PROGRESS_TRACKER.md)** - Active sprint tracking and progress monitoring
 - **[OPTIMIZATION_REPORT.md](OPTIMIZATION_REPORT.md)** - Complete optimization history and results
@@ -1126,21 +1211,24 @@ just validate-performance
 - **Module READMEs** - Comprehensive documentation in each module directory
 
 ### Templates and Tools
+
 - **`templates/configuration.nix.template`** - New host configuration template
 - **`templates/variables.nix.template`** - Host variables template
 - **`modules/TEMPLATE.nix`** - Standardized module template
 - **`modules/MODULE_README_TEMPLATE.md`** - Documentation template
 
 ### Scripts and Utilities
+
 - **`scripts/manage-secrets.sh`** - Comprehensive secrets management
 - **`scripts/validate-quality.sh`** - Quality validation and reporting
 - **`scripts/cleanup-dead-code.sh`** - Code cleanup and optimization
 
-## 🚨 Troubleshooting
+## Troubleshooting
 
 ### Common Issues and Solutions
 
 1. **Build Failures**
+
    ```bash
    just check-syntax          # Check for syntax errors
    just test-host hostname     # Test specific host build
@@ -1148,18 +1236,21 @@ just validate-performance
    ```
 
 2. **Quality Issues**
+
    ```bash
    just validate-quality       # Comprehensive quality report
    # Review generated quality report for specific issues
    ```
 
 3. **Performance Problems**
+
    ```bash
    just perf-test             # Performance benchmarking
    just validate-performance  # Performance validation
    ```
 
 4. **Secrets Management**
+
    ```bash
    ./scripts/manage-secrets.sh status  # Check secrets status
    ./scripts/manage-secrets.sh rekey   # Re-encrypt all secrets
@@ -1178,64 +1269,70 @@ nix eval .#nixosConfigurations.hostname.config.modules
 nix build --profile-build .#nixosConfigurations.hostname
 ```
 
-## 🤝 Contributing and Development
+## Contributing and Development
 
 ### Code Standards
+
 - **Follow established patterns** from existing modules
 - **Include comprehensive validation** with assertions and warnings
 - **Add detailed documentation** for complex functionality
 - **Test changes** on multiple hosts before committing
 
 ### Quality Requirements
+
 - **All syntax must validate** (`just check-syntax`)
 - **Quality checks must pass** (`just validate-quality`)
 - **Build tests must succeed** (`just test-all`)
 - **Documentation must be complete** for new features
 
 ### Development Workflow
+
 1. **Create feature branch** for changes
 2. **Follow module templates** for new functionality
 3. **Test thoroughly** with validation suite
 4. **Update documentation** as needed
 5. **Submit with quality validation** results
 
-## 📞 Support and Community
+## Support and Community
 
 ### Getting Help
+
 1. **Review comprehensive documentation** in module READMEs
 2. **Check quality validation output** for specific guidance
 3. **Examine similar configurations** in existing hosts
 4. **Test changes incrementally** to isolate issues
 
 ### Reporting Issues
+
 - **Use quality validation** to identify problems
 - **Provide detailed error messages** and reproduction steps
 - **Include system information** and configuration details
 
 ---
 
-## 🎯 Configuration Highlights
+## Configuration Highlights
 
 This NixOS configuration represents a **production-ready, enterprise-grade** system with:
 
-- **🏆 141+ Optimized Modules** with comprehensive validation
-- **🔧 Advanced Feature Management** with granular control
-- **🚀 Multi-Host Architecture** supporting diverse hardware
-- **🔐 Comprehensive Secrets Management** with role-based access
-- **📊 Complete Monitoring Stack** with Prometheus, Grafana, and Alertmanager
-- **🤖 Unified AI Provider System** with multi-provider support and automatic fallback
-- **🧠 AI-Enhanced Task Management** with intelligent Taskwarrior integration and natural language processing
-- **🖥️ MicroVM Development Environments** with three specialized templates for development workflows
-- **📋 Quality Validation Framework** ensuring code quality
-- **🛠️ Extensive Automation** through Justfile commands
-- **📚 Complete Documentation** with templates and guides
-- **⚡ Performance Optimization** across all system levels
-- **🔍 Comprehensive Observability** with custom NixOS and systemd metrics
-- **🎯 Intelligent Productivity System** with AI-powered workflows and beautiful terminal interfaces
+- **141+ Optimized Modules** with comprehensive validation
+- **Advanced Feature Management** with granular control
+- **Multi-Host Architecture** supporting diverse hardware
+- **Comprehensive Secrets Management** with role-based access
+- **Complete Monitoring Stack** with Prometheus, Grafana, and Alertmanager
+- **Unified AI Provider System** with multi-provider support and automatic fallback
+- **AI-Enhanced Task Management** with intelligent Taskwarrior integration and natural language processing
+- **MicroVM Development Environments** with three specialized templates for development workflows
+- **Quality Validation Framework** ensuring code quality
+- **Extensive Automation** through Justfile commands
+- **Complete Documentation** with templates and guides
+- **Performance Optimization** across all system levels
+- **Comprehensive Observability** with custom NixOS and systemd metrics
+- **Intelligent Productivity System** with AI-powered workflows and beautiful terminal interfaces
 
 **Perfect for**: Development workstations, AI/ML environments, multi-user enterprises, monitoring infrastructure, and anyone seeking a maintainable, scalable NixOS configuration with modern DevOps capabilities.
 
 **Latest Capabilities:**
+
 - **AI-Enhanced Task Management**: Revolutionary productivity system with natural language task creation and intelligent analysis
 - **Real-time Monitoring**: Full observability stack with custom dashboards for each host
 - **AI-Powered Workflows**: Seamless integration with multiple AI providers and local models
