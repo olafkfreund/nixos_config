@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.terraform.packages;
-in {
+in
+{
   options.terraform.packages = {
     enable = mkEnableOption "Enable terraform packages";
   };

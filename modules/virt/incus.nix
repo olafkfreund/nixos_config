@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: 
+{ config
+, lib
+, pkgs
+, ...
+}:
 with lib; let
   cfg = config.services.incus;
-in {
+in
+{
   options.services.incus = {
     enable = mkEnableOption {
       default = false;

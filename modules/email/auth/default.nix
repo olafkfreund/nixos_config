@@ -5,7 +5,8 @@ with lib;
 let
   cfg = config.features.email.auth;
   emailCfg = config.features.email;
-in {
+in
+{
   imports = [
     ./oauth2.nix
   ];
@@ -26,14 +27,14 @@ in {
             type = types.str;
             description = "Gmail account email address";
           };
-          
+
           passwordFile = mkOption {
             type = types.path;
             description = "Path to file containing app-specific password";
           };
         };
       });
-      default = {};
+      default = { };
       description = "App-specific password configuration for Gmail accounts";
     };
   };
@@ -49,7 +50,7 @@ in {
         refreshTokenFile = "/run/agenix/gmail-oauth2-refresh-token-primary";
         accessTokenFile = "/tmp/neomutt-oauth2-access-token-primary";
       };
-      
+
       secondary = {
         email = emailCfg.accounts.secondary;
         refreshTokenFile = "/run/agenix/gmail-oauth2-refresh-token-secondary";
@@ -59,7 +60,7 @@ in {
 
     # Configure OAuth2 client credentials
     features.email.auth.oauth2.clientCredentials = mkIf (cfg.method == "oauth2") {
-      clientId = "YOUR_GMAIL_OAUTH2_CLIENT_ID_HERE";  # To be configured
+      clientId = "YOUR_GMAIL_OAUTH2_CLIENT_ID_HERE"; # To be configured
       clientSecretFile = "/run/agenix/gmail-oauth2-client-secret";
     };
 
@@ -69,7 +70,7 @@ in {
         email = emailCfg.accounts.primary;
         passwordFile = "/run/agenix/gmail-app-password-primary";
       };
-      
+
       secondary = {
         email = emailCfg.accounts.secondary;
         passwordFile = "/run/agenix/gmail-app-password-secondary";
@@ -78,7 +79,7 @@ in {
 
     # Install authentication helper tools
     environment.systemPackages = with pkgs; [
-      gnupg  # For password management
+      gnupg # For password management
     ] ++ optionals (cfg.method == "oauth2") [
       oauth2ms
       curl

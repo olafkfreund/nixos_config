@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{ pkgs, ... }: {
   environment.systemPackages = with pkgs; [
     # nodePackages.neovim
     vimPlugins.nix-develop-nvim

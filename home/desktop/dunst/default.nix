@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.desktop.dunst;
-in {
+in
+{
   options.desktop.dunst = {
     enable = mkEnableOption "Dunst notification daemon";
   };

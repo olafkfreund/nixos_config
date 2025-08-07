@@ -1,12 +1,13 @@
 { config, lib, pkgs, ... }:
 with lib; let
   cfg = config.ansible.development;
-in {
+in
+{
   options.ansible.development = {
     enable = mkEnableOption "Enable Ansible development environment";
     packages = mkOption {
       type = with types; listOf str;
-      default = [];
+      default = [ ];
       description = "Packages to install for Ansible development";
     };
   };

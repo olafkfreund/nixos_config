@@ -1,8 +1,7 @@
 # Host configuration template system
-{
-  lib,
-  pkgs,
-  ...
+{ lib
+, pkgs
+, ...
 }: {
   # Host types with default configurations
   hostTypes = {
@@ -16,14 +15,14 @@
       hardware.enableRedistributableFirmware = true;
       services.xserver.enable = true;
     };
-    
+
     laptop = {
       featureProfiles.workstation = true;
       features = {
         graphics.enable = true;
         audio.enable = true;
         networking.enable = true;
-        power.enable = true;  # Power management for laptops
+        power.enable = true; # Power management for laptops
       };
       hardware = {
         enableRedistributableFirmware = true;
@@ -31,10 +30,10 @@
       };
       services = {
         xserver.enable = true;
-        tlp.enable = true;  # Power management
+        tlp.enable = true; # Power management
       };
     };
-    
+
     server = {
       featureProfiles.server = true;
       features = {
@@ -45,7 +44,7 @@
       services.openssh.enable = true;
       networking.firewall.enable = true;
     };
-    
+
     gaming = {
       featureProfiles.gaming = true;
       features = {
@@ -67,11 +66,11 @@
       hardware.nvidia = {
         modesetting.enable = true;
         powerManagement.enable = true;
-        open = false;  # Use proprietary driver
+        open = false; # Use proprietary driver
       };
-      services.xserver.videoDrivers = ["nvidia"];
+      services.xserver.videoDrivers = [ "nvidia" ];
     };
-    
+
     amd = {
       hardware.opengl = {
         enable = true;
@@ -83,7 +82,7 @@
         ];
       };
     };
-    
+
     intel = {
       hardware.opengl = {
         enable = true;
@@ -100,37 +99,40 @@
   };
 
   # Generate host configuration
-  mkHost = {
-    hostTypes,
-    hardwareProfiles,
-  }: hostName: {
-    type ? "workstation",
-    hardware ? [],
-    users ? ["olafkfreund"],
-    extraConfig ? {},
-    variables ? {},
-  }: let
-    baseConfig = hostTypes.${type} or {};
-    hardwareConfig = lib.foldl' lib.recursiveUpdate {} (
-      map (hw: hardwareProfiles.${hw} or {}) hardware
-    );
-  in lib.recursiveUpdate (lib.recursiveUpdate baseConfig hardwareConfig) (extraConfig // {
-    networking.hostName = hostName;
-    
-    # User configuration
-    users.users = lib.genAttrs users (user: {
-      isNormalUser = true;
-      description = variables.fullName or user;
-      extraGroups = variables.userGroups or ["wheel" "networkmanager"];
-      shell = pkgs.zsh;
-    });
+  mkHost =
+    { hostTypes
+    , hardwareProfiles
+    ,
+    }: hostName: { type ? "workstation"
+                 , hardware ? [ ]
+                 , users ? [ "olafkfreund" ]
+                 , extraConfig ? { }
+                 , variables ? { }
+                 ,
+                 }:
+    let
+      baseConfig = hostTypes.${type} or { };
+      hardwareConfig = lib.foldl' lib.recursiveUpdate { } (
+        map (hw: hardwareProfiles.${hw} or { }) hardware
+      );
+    in
+    lib.recursiveUpdate (lib.recursiveUpdate baseConfig hardwareConfig) (extraConfig // {
+      networking.hostName = hostName;
 
-    # Import host-specific configuration
-    imports = [
-      ./hosts/${hostName}/hardware-configuration.nix
-      ./hosts/${hostName}/variables.nix
-    ] ++ (if builtins.pathExists ./hosts/${hostName}/themes/stylix.nix 
-          then [./hosts/${hostName}/themes/stylix.nix] 
-          else []);
-  });
+      # User configuration
+      users.users = lib.genAttrs users (user: {
+        isNormalUser = true;
+        description = variables.fullName or user;
+        extraGroups = variables.userGroups or [ "wheel" "networkmanager" ];
+        shell = pkgs.zsh;
+      });
+
+      # Import host-specific configuration
+      imports = [
+        ./hosts/${hostName}/hardware-configuration.nix
+        ./hosts/${hostName}/variables.nix
+      ] ++ (if builtins.pathExists ./hosts/${hostName}/themes/stylix.nix
+      then [ ./hosts/${hostName}/themes/stylix.nix ]
+      else [ ]);
+    });
 }

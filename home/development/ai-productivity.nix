@@ -4,7 +4,7 @@ with lib;
 
 let
   cfg = config.development.ai-productivity;
-  
+
   # AI-enhanced task creation script
   smartTaskAdd = pkgs.writeShellScript "smart-task-add" ''
     #!/usr/bin/env bash
@@ -89,7 +89,7 @@ let
     echo -e "''${BLUE}📋 Your current tasks:''${NC}"
     ${pkgs.taskwarrior3}/bin/task next
   '';
-  
+
   # AI-enhanced daily dashboard
   aiDashboard = pkgs.writeShellScript "ai-dashboard" ''
     #!/usr/bin/env bash
@@ -191,7 +191,7 @@ let
     echo -e "''${BOLD}''${GREEN}Ready to make today productive! 🚀''${NC}"
     echo ""
   '';
-  
+
   # AI task analysis and suggestions
   aiAnalyze = pkgs.writeShellScript "ai-analyze" ''
     #!/usr/bin/env bash
@@ -241,7 +241,7 @@ let
     echo "• task next - View priority queue"
     echo "• td <id> - Mark task complete"
   '';
-  
+
   # AI work summarization
   aiSummary = pkgs.writeShellScript "ai-summary" ''
     #!/usr/bin/env bash
@@ -329,22 +329,23 @@ let
     echo -e "''${BLUE}💾 Summary saved to: $summary_file''${NC}"
   '';
 
-in {
+in
+{
   options.development.ai-productivity = {
     enable = mkEnableOption "AI-enhanced productivity tools";
-    
+
     enhancedDashboard = mkEnableOption "AI-enhanced daily dashboard";
-    
+
     smartTaskCreation = mkEnableOption "AI-powered natural language task creation";
-    
+
     workSummarization = mkEnableOption "AI work summarization and reporting";
   };
 
   config = mkIf cfg.enable {
     # Install required packages
     home.packages = with pkgs; [
-      jq  # JSON processing
-      bc  # Basic calculator for time calculations
+      jq # JSON processing
+      bc # Basic calculator for time calculations
     ];
 
     # Install AI productivity scripts
@@ -352,17 +353,17 @@ in {
       source = smartTaskAdd;
       executable = true;
     };
-    
+
     home.file.".local/bin/ai-dashboard" = mkIf cfg.enhancedDashboard {
       source = aiDashboard;
       executable = true;
     };
-    
+
     home.file.".local/bin/ai-analyze" = {
       source = aiAnalyze;
       executable = true;
     };
-    
+
     home.file.".local/bin/ai-summary" = mkIf cfg.workSummarization {
       source = aiSummary;
       executable = true;
@@ -372,21 +373,21 @@ in {
     programs.zsh.shellAliases = mkMerge [
       (mkIf cfg.smartTaskCreation {
         "smart-add" = "smart-add";
-        "sa" = "smart-add";  # Quick alias
+        "sa" = "smart-add"; # Quick alias
       })
-      
+
       (mkIf cfg.enhancedDashboard {
         "dashboard" = "ai-dashboard";
         "dash" = "ai-dashboard";
         "daily" = "ai-dashboard";
       })
-      
+
       {
         "ai-analyze" = "ai-analyze";
         "analyze" = "ai-analyze";
         "insights" = "ai-analyze";
       }
-      
+
       (mkIf cfg.workSummarization {
         "ai-summary" = "ai-summary";
         "summary" = "ai-summary daily";

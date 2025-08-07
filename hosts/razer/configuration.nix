@@ -1,12 +1,13 @@
-{
-  pkgs,
-  config,
-  lib,
-  hostUsers,
-  ...
-}: let
+{ pkgs
+, config
+, lib
+, hostUsers
+, ...
+}:
+let
   vars = import ./variables.nix;
-in {
+in
+{
   imports = [
     ./nixos/hardware-configuration.nix # Docker configuration
     ./nixos/screens.nix
@@ -50,17 +51,17 @@ in {
 
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "desktop";
-  
+
   # Tailscale VPN Configuration - Razer mobile laptop
   networking.tailscale = {
     enable = true;
     authKeyFile = config.age.secrets.tailscale-auth-key.path;
     hostname = "razer-laptop";
     acceptRoutes = true;
-    acceptDns = false;  # Keep NetworkManager DNS
+    acceptDns = false; # Keep NetworkManager DNS
     ssh = true;
     shields = true;
-    useRoutingFeatures = "client";  # Client that accepts routes
+    useRoutingFeatures = "client"; # Client that accepts routes
     extraUpFlags = [
       "--operator=olafkfreund"
       "--accept-risk=lose-ssh"
@@ -87,7 +88,7 @@ in {
   networking.useNetworkd = false;
 
   # Set custom nameservers as fallback
-  networking.nameservers = ["192.168.1.222" "1.1.1.1" "8.8.8.8"];
+  networking.nameservers = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
 
   # Configure AI providers directly
   ai.providers = {
@@ -194,19 +195,19 @@ in {
     enable = true;
     interval = 300; # Check every 5 minutes
     enableDesktopNotifications = true;
-    
+
     criticalThresholds = {
-      diskUsage = 90;     # Laptop storage, higher threshold OK
-      memoryUsage = 95;   # 32GB RAM, can handle higher usage
-      cpuLoad = 200;      # Intel i7-10875H (8 cores/16 threads)
-      temperature = 90;   # Laptop CPU, higher temp tolerance
+      diskUsage = 90; # Laptop storage, higher threshold OK
+      memoryUsage = 95; # 32GB RAM, can handle higher usage
+      cpuLoad = 200; # Intel i7-10875H (8 cores/16 threads)
+      temperature = 90; # Laptop CPU, higher temp tolerance
     };
-    
+
     warningThresholds = {
-      diskUsage = 80;     # Laptop storage warning
-      memoryUsage = 85;   # Memory warning
-      cpuLoad = 150;      # Load warning
-      temperature = 80;   # Temperature warning for laptop
+      diskUsage = 80; # Laptop storage warning
+      memoryUsage = 85; # Memory warning
+      cpuLoad = 150; # Load warning
+      temperature = 80; # Temperature warning for laptop
     };
   };
 
@@ -254,7 +255,7 @@ in {
         "-nolisten tcp"
         "-dpi 96"
       ];
-      videoDrivers = [vars.gpu];
+      videoDrivers = [ vars.gpu ];
     };
 
     # Desktop environment
@@ -296,34 +297,34 @@ in {
     maxAuthTries = 3;
     enableFail2Ban = true;
     enableKeyOnlyAccess = true;
-    trustedNetworks = ["192.168.1.0/24" "10.0.0.0/8"];
+    trustedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ];
   };
 
   # Enable secrets management
   modules.security.secrets = {
     enable = true;
-    hostKeys = ["/etc/ssh/ssh_host_ed25519_key"];
-    userKeys = ["/home/${vars.username}/.ssh/id_ed25519"];
+    hostKeys = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    userKeys = [ "/home/${vars.username}/.ssh/id_ed25519" ];
   };
 
   users.users = lib.genAttrs hostUsers (username: {
     isNormalUser = true;
     description = "User ${username}";
-    extraGroups = ["wheel" "networkmanager"];
+    extraGroups = [ "wheel" "networkmanager" ];
     shell = pkgs.zsh;
     # Only use secret-managed password if the secret exists
     hashedPasswordFile =
       lib.mkIf
-      (config.modules.security.secrets.enable
-        && builtins.hasAttr "user-password-${username}" config.age.secrets)
-      config.age.secrets."user-password-${username}".path;
+        (config.modules.security.secrets.enable
+          && builtins.hasAttr "user-password-${username}" config.age.secrets)
+        config.age.secrets."user-password-${username}".path;
   });
 
   # System packages - consolidated from individual nixos modules
   environment.systemPackages = with pkgs; [
     # Custom packages
-    (callPackage ../../home/development/qwen-code/default.nix {})
-    
+    (callPackage ../../home/development/qwen-code/default.nix { })
+
     # Power management (from power.nix) 
     cpupower-gui # GUI for CPU frequency scaling
     powertop # Power consumption analyzer
@@ -331,14 +332,14 @@ in {
     s-tui # Terminal UI stress test and monitoring tool
     htop # Process viewer with power info
     acpi # Command line battery info
-    
+
     # Razer hardware support (from laptop.nix)
     polychromatic # GUI for Razer devices
     razergenie # Another Razer configuration tool
-    
+
     # Login manager (from greetd.nix)
     tuigreet
-    
+
     # Secure Boot management (from secure-boot.nix) - only when secure boot enabled
   ] ++ lib.optionals (config.boot.lanzaboote.enable or false) [
     sbctl # For managing Secure Boot keys
@@ -356,7 +357,7 @@ in {
 
   nixpkgs.config = {
     allowBroken = true;
-    permittedInsecurePackages = ["olm-3.2.16" "python3.12-youtube-dl-2021.12.17"];
+    permittedInsecurePackages = [ "olm-3.2.16" "python3.12-youtube-dl-2021.12.17" ];
   };
   system.stateVersion = "25.11";
 }

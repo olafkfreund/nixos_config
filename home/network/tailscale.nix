@@ -1,11 +1,11 @@
-{
-  config,
-  lib,
-  ...
+{ config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.hosts.tailscale;
-in {
+in
+{
   options.hosts.tailscale = {
     enable = mkEnableOption "Enable Tailscale agent";
   };
@@ -19,16 +19,16 @@ in {
     networking.firewall = {
       # Required for tailscale
       checkReversePath = "loose";
-      trustedInterfaces = ["tailscale0"];
+      trustedInterfaces = [ "tailscale0" ];
     };
     # create a systemd oneshot job to authenticate to Tailscale on startup
     systemd.services.tailscale-autoconnect = {
       description = "Automatic connection to Tailscale";
 
       # make sure tailscale is running before trying to connect to tailscale
-      after = ["network-pre.target" "tailscale.service"];
-      wants = ["network-pre.target" "tailscale.service"];
-      wantedBy = ["multi-user.target"];
+      after = [ "network-pre.target" "tailscale.service" ];
+      wants = [ "network-pre.target" "tailscale.service" ];
+      wantedBy = [ "multi-user.target" ];
 
       # set this service as a oneshot job
       serviceConfig.Type = "oneshot";

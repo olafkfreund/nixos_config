@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{ pkgs, ... }: {
   home.packages = [
     # pkgs.spotify # Removing direct Spotify installation (provided by Spicetify)
     pkgs.ncspot # Spotify
@@ -14,6 +14,6 @@
     pkgs.musicpod
     pkgs.spicetify-cli
     pkgs.playerctl # Required dependency for our script
-    (pkgs.callPackage ../../pkgs/mpris-album-art {}) # Our album art script
+    (pkgs.callPackage ../../pkgs/mpris-album-art { }) # Our album art script
   ];
 }

@@ -1,11 +1,11 @@
-{
-  config,
-  lib,
-  ...
-}: 
+{ config
+, lib
+, ...
+}:
 with lib; let
   cfg = config.swaylock;
-in {
+in
+{
   options.swaylock = {
     enable = mkEnableOption {
       default = false;
@@ -22,5 +22,5 @@ in {
         show-failed-attempts = true;
       };
     };
-};
+  };
 }

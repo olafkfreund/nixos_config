@@ -1,5 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }: {
   home.packages = [
-    (import ./tmux/tmux-sessionizer.nix {inherit pkgs;})
+    (import ./tmux/tmux-sessionizer.nix { inherit pkgs; })
   ];
 }

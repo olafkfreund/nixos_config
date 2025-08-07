@@ -1,11 +1,11 @@
 # Enhanced secrets management with validation and organization
-{
-  lib,
-  config,
-  ...
-}: let
+{ lib
+, config
+, ...
+}:
+let
   inherit (lib) mkOption types;
-  
+
   # Secret categories and validation
   secretCategories = {
     user-passwords = {
@@ -17,7 +17,7 @@
         message = "User password secrets must follow pattern: user-password-<username>";
       };
     };
-    
+
     service-keys = {
       pattern = "service-*-key";
       required = false;
@@ -27,7 +27,7 @@
         message = "Service key secrets must follow pattern: service-<name>-key";
       };
     };
-    
+
     certificates = {
       pattern = "*-cert.pem";
       required = false;
@@ -37,7 +37,7 @@
         message = "Certificate secrets must end with -cert.pem";
       };
     };
-    
+
     ssh-keys = {
       pattern = "ssh-*";
       required = false;
@@ -50,58 +50,62 @@
   };
 
   # Validate secrets against categories
-  validateSecrets = secrets: let
-    validateSecret = secretName: let
-      category = lib.findFirst 
-        (cat: builtins.match secretCategories.${cat}.pattern secretName != null)
-        null
-        (lib.attrNames secretCategories);
-    in 
-      if category != null then
-        secretCategories.${category}.validation secretName
-      else {
-        assertion = false;
-        message = "Secret '${secretName}' doesn't match any known category pattern";
-      };
-      
-    results = map validateSecret (lib.attrNames secrets);
-    failures = builtins.filter (r: !r.assertion) results;
-  in {
-    isValid = failures == [];
-    errors = map (f: f.message) failures;
-  };
+  validateSecrets = secrets:
+    let
+      validateSecret = secretName:
+        let
+          category = lib.findFirst
+            (cat: builtins.match secretCategories.${cat}.pattern secretName != null)
+            null
+            (lib.attrNames secretCategories);
+        in
+        if category != null then
+          secretCategories.${category}.validation secretName
+        else {
+          assertion = false;
+          message = "Secret '${secretName}' doesn't match any known category pattern";
+        };
+
+      results = map validateSecret (lib.attrNames secrets);
+      failures = builtins.filter (r: !r.assertion) results;
+    in
+    {
+      isValid = failures == [ ];
+      errors = map (f: f.message) failures;
+    };
 
   # Secret access control helpers
-  mkSecretAccess = {
-    hosts ? [],
-    users ? [],
-    mode ? "0400",
-    owner ? "root",
-    group ? "root",
-  }: {
-    publicKeys = 
-      # Host keys
-      (map (host: config.age.secrets.${host}.publicKey or null) hosts) ++
-      # User keys  
-      (map (user: config.age.secrets.${user}.publicKey or null) users);
-    
-    # Runtime configuration
-    mode = mode;
-    owner = owner;
-    group = group;
-  };
+  mkSecretAccess =
+    { hosts ? [ ]
+    , users ? [ ]
+    , mode ? "0400"
+    , owner ? "root"
+    , group ? "root"
+    ,
+    }: {
+      publicKeys =
+        # Host keys
+        (map (host: config.age.secrets.${host}.publicKey or null) hosts) ++
+        # User keys  
+        (map (user: config.age.secrets.${user}.publicKey or null) users);
+
+      # Runtime configuration
+      mode = mode;
+      owner = owner;
+      group = group;
+    };
 
   # Common secret templates
   secretTemplates = {
     userPassword = user: {
       name = "user-password-${user}";
       access = mkSecretAccess {
-        users = [user];
+        users = [ user ];
         mode = "0600";
         owner = user;
       };
     };
-    
+
     serviceKey = service: hosts: {
       name = "service-${service}-key";
       access = mkSecretAccess {
@@ -109,18 +113,19 @@
         mode = "0600";
       };
     };
-    
+
     sshKey = keyName: user: {
       name = "ssh-${keyName}";
       access = mkSecretAccess {
-        users = [user];
+        users = [ user ];
         mode = "0600";
         owner = user;
       };
     };
   };
 
-in {
+in
+{
   options = {
     secretsConfig = {
       validation = {
@@ -129,14 +134,14 @@ in {
           default = true;
           description = "Enable secrets validation";
         };
-        
+
         strictNaming = mkOption {
           type = types.bool;
           default = true;
           description = "Enforce strict naming conventions for secrets";
         };
       };
-      
+
       categories = mkOption {
         type = types.attrsOf (types.submodule {
           options = {
@@ -145,36 +150,38 @@ in {
               default = false;
               description = "Whether this category is required";
             };
-            
+
             hosts = mkOption {
               type = types.listOf types.str;
-              default = [];
+              default = [ ];
               description = "Hosts that need access to this category";
             };
           };
         });
-        default = {};
+        default = { };
         description = "Secret category configuration";
       };
     };
   };
 
-  config = let
-    secretValidation = validateSecrets config.age.secrets;
-  in lib.mkIf config.secretsConfig.validation.enable {
-    assertions = [
-      {
-        assertion = !config.secretsConfig.validation.strictNaming || secretValidation.isValid;
-        message = ''
-          Secret validation failed:
-          ${lib.concatStringsSep "\n" secretValidation.errors}
-        '';
-      }
-    ];
+  config =
+    let
+      secretValidation = validateSecrets config.age.secrets;
+    in
+    lib.mkIf config.secretsConfig.validation.enable {
+      assertions = [
+        {
+          assertion = !config.secretsConfig.validation.strictNaming || secretValidation.isValid;
+          message = ''
+            Secret validation failed:
+            ${lib.concatStringsSep "\n" secretValidation.errors}
+          '';
+        }
+      ];
 
-    # Export helpers for use in configuration
-    _module.args.secretTemplates = secretTemplates;
-    _module.args.mkSecretAccess = mkSecretAccess;
-    _module.args.secretCategories = secretCategories;
-  };
+      # Export helpers for use in configuration
+      _module.args.secretTemplates = secretTemplates;
+      _module.args.mkSecretAccess = mkSecretAccess;
+      _module.args.secretCategories = secretCategories;
+    };
 }

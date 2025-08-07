@@ -4,99 +4,100 @@
 with lib;
 let
   cfg = config.ai.autoPerformanceTuner;
-in {
+in
+{
   options.ai.autoPerformanceTuner = {
     enable = mkEnableOption "Enable automated performance tuning system";
-    
+
     aiProvider = mkOption {
       type = types.str;
       default = "anthropic";
       description = "AI provider for performance analysis";
     };
-    
+
     enableFallback = mkOption {
       type = types.bool;
       default = true;
       description = "Enable AI provider fallback";
     };
-    
+
     tuningInterval = mkOption {
       type = types.str;
       default = "hourly";
       description = "Automated tuning interval";
     };
-    
+
     safeMode = mkOption {
       type = types.bool;
       default = true;
       description = "Enable safe mode (conservative tuning)";
     };
-    
+
     features = {
       adaptiveTuning = mkOption {
         type = types.bool;
         default = true;
         description = "Enable adaptive performance tuning based on workload";
       };
-      
+
       predictiveOptimization = mkOption {
         type = types.bool;
         default = true;
         description = "Enable predictive performance optimization";
       };
-      
+
       workloadDetection = mkOption {
         type = types.bool;
         default = true;
         description = "Enable automatic workload detection and optimization";
       };
-      
+
       resourceBalancing = mkOption {
         type = types.bool;
         default = true;
         description = "Enable automatic resource balancing";
       };
-      
+
       anomalyCorrection = mkOption {
         type = types.bool;
         default = true;
         description = "Enable automatic performance anomaly correction";
       };
     };
-    
+
     thresholds = {
       cpuUtilization = mkOption {
         type = types.int;
         default = 80;
         description = "CPU utilization threshold for optimization";
       };
-      
+
       memoryUtilization = mkOption {
         type = types.int;
         default = 85;
         description = "Memory utilization threshold for optimization";
       };
-      
+
       ioWait = mkOption {
         type = types.int;
         default = 30;
         description = "I/O wait threshold for optimization";
       };
-      
+
       responseTime = mkOption {
         type = types.int;
         default = 5000;
         description = "Response time threshold in milliseconds";
       };
     };
-    
+
     notifications = {
       enable = mkOption {
         type = types.bool;
         default = true;
         description = "Enable optimization notifications";
       };
-      
+
       logFile = mkOption {
         type = types.str;
         default = "/var/log/ai-analysis/auto-tuner.log";
@@ -112,20 +113,20 @@ in {
       after = [ "network.target" "ai-providers.service" ];
       wants = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
-      
+
       serviceConfig = {
         Type = "simple";
         User = "root";
         Restart = "always";
         RestartSec = "30s";
-        
+
         # Add required tools to PATH
         Environment = [
           "PATH=${lib.makeBinPath (with pkgs; [ 
             coreutils bash gawk procps bc jq curl gnugrep gnused systemd iproute2
           ])}"
         ];
-        
+
         ExecStart = pkgs.writeShellScript "ai-auto-performance-tuner" ''
           #!/bin/bash
           
@@ -398,147 +399,147 @@ in {
         '';
       };
     };
-    
+
     # Performance Baseline Calibration Service
     systemd.services.performance-baseline-calibrator = {
       description = "Performance Baseline Calibration";
       after = [ "ai-auto-performance-tuner.service" ];
       wants = [ "ai-auto-performance-tuner.service" ];
-      
+
       serviceConfig = {
         Type = "oneshot";
         User = "root";
-        
+
         # Add required tools to PATH
         Environment = [
           "PATH=${lib.makeBinPath (with pkgs; [ 
             coreutils bash gawk procps bc jq curl gnugrep gnused systemd iproute2
           ])}"
         ];
-        
+
         ExecStart = pkgs.writeShellScript "performance-baseline-calibrator" ''
-          #!/bin/bash
+                    #!/bin/bash
           
-          BASELINE_FILE="/var/lib/auto-performance-tuner/performance_baseline.json"
-          METRICS_DIR="/var/lib/auto-performance-tuner"
+                    BASELINE_FILE="/var/lib/auto-performance-tuner/performance_baseline.json"
+                    METRICS_DIR="/var/lib/auto-performance-tuner"
           
-          echo "[$(date)] Calibrating performance baseline..."
+                    echo "[$(date)] Calibrating performance baseline..."
           
-          # Collect baseline measurements over 10 minutes
-          SAMPLES=10
-          INTERVAL=60
+                    # Collect baseline measurements over 10 minutes
+                    SAMPLES=10
+                    INTERVAL=60
           
-          CPU_SAMPLES=()
-          MEMORY_SAMPLES=()
-          IO_SAMPLES=()
+                    CPU_SAMPLES=()
+                    MEMORY_SAMPLES=()
+                    IO_SAMPLES=()
           
-          for i in $(seq 1 $SAMPLES); do
-            echo "[$(date)] Collecting baseline sample $i/$SAMPLES..."
+                    for i in $(seq 1 $SAMPLES); do
+                      echo "[$(date)] Collecting baseline sample $i/$SAMPLES..."
             
-            CPU=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/%us,//' | tr -d '[:space:]')
-            MEMORY=$(free | grep Mem | awk '{printf "%.1f", $3/$2 * 100.0}')
-            IO_WAIT=$(top -bn1 | grep "Cpu(s)" | awk '{print $10}' | sed 's/%wa,//' | sed 's/%wa//' | tr -d '[:space:]')
+                      CPU=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/%us,//' | tr -d '[:space:]')
+                      MEMORY=$(free | grep Mem | awk '{printf "%.1f", $3/$2 * 100.0}')
+                      IO_WAIT=$(top -bn1 | grep "Cpu(s)" | awk '{print $10}' | sed 's/%wa,//' | sed 's/%wa//' | tr -d '[:space:]')
             
-            CPU_SAMPLES+=($CPU)
-            MEMORY_SAMPLES+=($MEMORY)
-            IO_SAMPLES+=($IO_WAIT)
+                      CPU_SAMPLES+=($CPU)
+                      MEMORY_SAMPLES+=($MEMORY)
+                      IO_SAMPLES+=($IO_WAIT)
             
-            sleep $INTERVAL
-          done
+                      sleep $INTERVAL
+                    done
           
-          # Calculate averages
-          CPU_BASELINE=$(printf '%s\n' "''${CPU_SAMPLES[@]}" | awk '{sum+=$1; count++} END {printf "%.1f", sum/count}')
-          MEMORY_BASELINE=$(printf '%s\n' "''${MEMORY_SAMPLES[@]}" | awk '{sum+=$1; count++} END {printf "%.1f", sum/count}')
-          IO_BASELINE=$(printf '%s\n' "''${IO_SAMPLES[@]}" | awk '{sum+=$1; count++} END {printf "%.1f", sum/count}')
+                    # Calculate averages
+                    CPU_BASELINE=$(printf '%s\n' "''${CPU_SAMPLES[@]}" | awk '{sum+=$1; count++} END {printf "%.1f", sum/count}')
+                    MEMORY_BASELINE=$(printf '%s\n' "''${MEMORY_SAMPLES[@]}" | awk '{sum+=$1; count++} END {printf "%.1f", sum/count}')
+                    IO_BASELINE=$(printf '%s\n' "''${IO_SAMPLES[@]}" | awk '{sum+=$1; count++} END {printf "%.1f", sum/count}')
           
-          # Create baseline file
-          cat > "$BASELINE_FILE" << EOF
-{
-  "calibrated": "$(date -Iseconds)",
-  "baseline_metrics": {
-    "cpu_usage": $CPU_BASELINE,
-    "memory_usage": $MEMORY_BASELINE,
-    "io_wait": $IO_BASELINE
-  },
-  "optimization_targets": {
-    "cpu_efficiency": $(echo "$CPU_BASELINE * 0.8" | bc),
-    "memory_efficiency": $(echo "$MEMORY_BASELINE * 0.9" | bc),
-    "io_efficiency": $(echo "$IO_BASELINE * 0.7" | bc)
-  }
-}
-EOF
+                    # Create baseline file
+                    cat > "$BASELINE_FILE" << EOF
+          {
+            "calibrated": "$(date -Iseconds)",
+            "baseline_metrics": {
+              "cpu_usage": $CPU_BASELINE,
+              "memory_usage": $MEMORY_BASELINE,
+              "io_wait": $IO_BASELINE
+            },
+            "optimization_targets": {
+              "cpu_efficiency": $(echo "$CPU_BASELINE * 0.8" | bc),
+              "memory_efficiency": $(echo "$MEMORY_BASELINE * 0.9" | bc),
+              "io_efficiency": $(echo "$IO_BASELINE * 0.7" | bc)
+            }
+          }
+          EOF
           
-          echo "[$(date)] Performance baseline calibrated:"
-          echo "[$(date)] CPU Baseline: $CPU_BASELINE%"
-          echo "[$(date)] Memory Baseline: $MEMORY_BASELINE%"
-          echo "[$(date)] I/O Wait Baseline: $IO_BASELINE%"
+                    echo "[$(date)] Performance baseline calibrated:"
+                    echo "[$(date)] CPU Baseline: $CPU_BASELINE%"
+                    echo "[$(date)] Memory Baseline: $MEMORY_BASELINE%"
+                    echo "[$(date)] I/O Wait Baseline: $IO_BASELINE%"
         '';
       };
     };
-    
+
     # Optimization Impact Assessment Service
     systemd.services.optimization-impact-assessor = {
       description = "Optimization Impact Assessment";
       serviceConfig = {
         Type = "oneshot";
         User = "root";
-        
+
         # Add required tools to PATH
         Environment = [
           "PATH=${lib.makeBinPath (with pkgs; [ 
             coreutils bash gawk procps bc jq curl gnugrep gnused systemd iproute2
           ])}"
         ];
-        
+
         ExecStart = pkgs.writeShellScript "optimization-impact-assessor" ''
-          #!/bin/bash
+                    #!/bin/bash
           
-          ASSESSMENT_FILE="/var/lib/auto-performance-tuner/impact_assessment.json"
-          TUNING_DB="/var/lib/auto-performance-tuner/tuning_history.json"
+                    ASSESSMENT_FILE="/var/lib/auto-performance-tuner/impact_assessment.json"
+                    TUNING_DB="/var/lib/auto-performance-tuner/tuning_history.json"
           
-          echo "[$(date)] Assessing optimization impact..."
+                    echo "[$(date)] Assessing optimization impact..."
           
-          if [ -f "$TUNING_DB" ] && [ -f "/var/lib/auto-performance-tuner/performance_baseline.json" ]; then
-            # Get current performance metrics
-            CURRENT_CPU=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/%us,//' | tr -d '[:space:]')
-            CURRENT_MEMORY=$(free | grep Mem | awk '{printf "%.1f", $3/$2 * 100.0}')
+                    if [ -f "$TUNING_DB" ] && [ -f "/var/lib/auto-performance-tuner/performance_baseline.json" ]; then
+                      # Get current performance metrics
+                      CURRENT_CPU=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/%us,//' | tr -d '[:space:]')
+                      CURRENT_MEMORY=$(free | grep Mem | awk '{printf "%.1f", $3/$2 * 100.0}')
             
-            # Get baseline metrics
-            BASELINE_CPU=$(jq -r '.baseline_metrics.cpu_usage' /var/lib/auto-performance-tuner/performance_baseline.json)
-            BASELINE_MEMORY=$(jq -r '.baseline_metrics.memory_usage' /var/lib/auto-performance-tuner/performance_baseline.json)
+                      # Get baseline metrics
+                      BASELINE_CPU=$(jq -r '.baseline_metrics.cpu_usage' /var/lib/auto-performance-tuner/performance_baseline.json)
+                      BASELINE_MEMORY=$(jq -r '.baseline_metrics.memory_usage' /var/lib/auto-performance-tuner/performance_baseline.json)
             
-            # Calculate improvements
-            CPU_IMPROVEMENT=$(echo "scale=1; ($BASELINE_CPU - $CURRENT_CPU) / $BASELINE_CPU * 100" | bc)
-            MEMORY_IMPROVEMENT=$(echo "scale=1; ($BASELINE_MEMORY - $CURRENT_MEMORY) / $BASELINE_MEMORY * 100" | bc)
+                      # Calculate improvements
+                      CPU_IMPROVEMENT=$(echo "scale=1; ($BASELINE_CPU - $CURRENT_CPU) / $BASELINE_CPU * 100" | bc)
+                      MEMORY_IMPROVEMENT=$(echo "scale=1; ($BASELINE_MEMORY - $CURRENT_MEMORY) / $BASELINE_MEMORY * 100" | bc)
             
-            # Create assessment report
-            cat > "$ASSESSMENT_FILE" << EOF
-{
-  "assessment_date": "$(date -Iseconds)",
-  "current_metrics": {
-    "cpu_usage": $CURRENT_CPU,
-    "memory_usage": $CURRENT_MEMORY
-  },
-  "baseline_metrics": {
-    "cpu_usage": $BASELINE_CPU,
-    "memory_usage": $BASELINE_MEMORY
-  },
-  "improvements": {
-    "cpu_improvement_percent": $CPU_IMPROVEMENT,
-    "memory_improvement_percent": $MEMORY_IMPROVEMENT
-  },
-  "optimization_effectiveness": "$(echo "$CPU_IMPROVEMENT + $MEMORY_IMPROVEMENT" | bc | awk '{if(\$1>0) print "positive"; else print "neutral"}')"
-}
-EOF
+                      # Create assessment report
+                      cat > "$ASSESSMENT_FILE" << EOF
+          {
+            "assessment_date": "$(date -Iseconds)",
+            "current_metrics": {
+              "cpu_usage": $CURRENT_CPU,
+              "memory_usage": $CURRENT_MEMORY
+            },
+            "baseline_metrics": {
+              "cpu_usage": $BASELINE_CPU,
+              "memory_usage": $BASELINE_MEMORY
+            },
+            "improvements": {
+              "cpu_improvement_percent": $CPU_IMPROVEMENT,
+              "memory_improvement_percent": $MEMORY_IMPROVEMENT
+            },
+            "optimization_effectiveness": "$(echo "$CPU_IMPROVEMENT + $MEMORY_IMPROVEMENT" | bc | awk '{if(\$1>0) print "positive"; else print "neutral"}')"
+          }
+          EOF
             
-            echo "[$(date)] Impact assessment completed:"
-            echo "[$(date)] CPU Improvement: $CPU_IMPROVEMENT%"
-            echo "[$(date)] Memory Improvement: $MEMORY_IMPROVEMENT%"
-          fi
+                      echo "[$(date)] Impact assessment completed:"
+                      echo "[$(date)] CPU Improvement: $CPU_IMPROVEMENT%"
+                      echo "[$(date)] Memory Improvement: $MEMORY_IMPROVEMENT%"
+                    fi
         '';
       };
     };
-    
+
     # Timers for regular operations
     systemd.timers.performance-baseline-calibrator = {
       description = "Performance Baseline Calibration Timer";
@@ -549,7 +550,7 @@ EOF
         RandomizedDelaySec = "1h";
       };
     };
-    
+
     systemd.timers.optimization-impact-assessor = {
       description = "Optimization Impact Assessment Timer";
       wantedBy = [ "timers.target" ];
@@ -559,20 +560,20 @@ EOF
         RandomizedDelaySec = "30m";
       };
     };
-    
+
     # Create directories
     systemd.tmpfiles.rules = [
       "d /var/lib/auto-performance-tuner 0755 root root -"
       "d /var/log/ai-analysis 0755 root root -"
     ];
-    
+
     # Performance tuning packages
     environment.systemPackages = with pkgs; [
-      bc          # Basic calculator
-      jq          # JSON processor
-      curl        # For AI API calls
-      procps      # System monitoring
-      util-linux  # System utilities
+      bc # Basic calculator
+      jq # JSON processor
+      curl # For AI API calls
+      procps # System monitoring
+      util-linux # System utilities
     ];
   };
 }

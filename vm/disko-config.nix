@@ -19,7 +19,7 @@
                 type = "filesystem";
                 format = "vfat";
                 mountpoint = "/boot";
-                mountOptions = ["defaults" "umask=0077"];
+                mountOptions = [ "defaults" "umask=0077" ];
               };
             };
             root = {
@@ -28,7 +28,7 @@
                 type = "filesystem";
                 format = "ext4";
                 mountpoint = "/";
-                mountOptions = ["noatime" "nodiratime" "discard"];
+                mountOptions = [ "noatime" "nodiratime" "discard" ];
               };
             };
           };

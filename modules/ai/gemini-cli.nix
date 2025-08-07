@@ -1,14 +1,14 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.modules.ai.gemini-cli;
   # Import our custom gemini-cli package
-  geminiCliPkg = pkgs.callPackage ../../pkgs/gemini-cli {};
-in {
+  geminiCliPkg = pkgs.callPackage ../../pkgs/gemini-cli { };
+in
+{
   options.modules.ai.gemini-cli = {
     enable = mkEnableOption "Google Gemini CLI - AI workflow tool";
 
@@ -20,7 +20,7 @@ in {
 
     environmentVariables = mkOption {
       type = types.attrsOf types.str;
-      default = {};
+      default = { };
       description = "Environment variables to set for gemini-cli";
       example = {
         GEMINI_API_KEY = "your-api-key";
@@ -37,7 +37,7 @@ in {
 
   config = mkIf cfg.enable {
     # Add the package to system packages
-    environment.systemPackages = [cfg.package];
+    environment.systemPackages = [ cfg.package ];
 
     # Set environment variables if provided
     environment.variables = cfg.environmentVariables;

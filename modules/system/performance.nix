@@ -1,11 +1,11 @@
-{
-  config,
-  lib,
-  ...
+{ config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.modules.system.performance;
-in {
+in
+{
   options.modules.system.performance = {
     enable = mkEnableOption "system performance optimizations";
 
@@ -18,16 +18,16 @@ in {
 
       extraCaches = mkOption {
         type = types.listOf types.str;
-        default = [];
+        default = [ ];
         description = "Additional binary caches to use";
-        example = ["https://devenv.cachix.org"];
+        example = [ "https://devenv.cachix.org" ];
       };
 
       extraTrustedKeys = mkOption {
         type = types.listOf types.str;
-        default = [];
+        default = [ ];
         description = "Additional trusted public keys";
-        example = ["devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="];
+        example = [ "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=" ];
       };
     };
 
@@ -55,7 +55,7 @@ in {
 
     buildOptimization = {
       maxJobs = mkOption {
-        type = types.either types.int (types.enum ["auto"]);
+        type = types.either types.int (types.enum [ "auto" ]);
         default = "auto";
         description = "Maximum number of build jobs";
       };
@@ -73,25 +73,25 @@ in {
       settings = {
         # Binary cache configuration
         substituters = mkIf cfg.binaryCache.enable ([
-            "https://cache.nixos.org/"
-            "https://nix-community.cachix.org"
-            "https://nixpkgs-unfree.cachix.org"
-          ]
-          ++ cfg.binaryCache.extraCaches);
+          "https://cache.nixos.org/"
+          "https://nix-community.cachix.org"
+          "https://nixpkgs-unfree.cachix.org"
+        ]
+        ++ cfg.binaryCache.extraCaches);
 
         trusted-public-keys = mkIf cfg.binaryCache.enable ([
-            "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-            "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-            "nixpkgs-unfree.cachix.org-1:hqvoInulhbV4nJ9yJOEr+4wxhDV4xq2d1DK7S6Nqlt="
-          ]
-          ++ cfg.binaryCache.extraTrustedKeys);
+          "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+          "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+          "nixpkgs-unfree.cachix.org-1:hqvoInulhbV4nJ9yJOEr+4wxhDV4xq2d1DK7S6Nqlt="
+        ]
+        ++ cfg.binaryCache.extraTrustedKeys);
 
         # Build optimization
         max-jobs = cfg.buildOptimization.maxJobs;
         cores = cfg.buildOptimization.cores;
 
         # Enable modern Nix features
-        experimental-features = ["nix-command" "flakes"];
+        experimental-features = [ "nix-command" "flakes" ];
 
         # Store optimization
         auto-optimise-store = true;
@@ -116,7 +116,7 @@ in {
       # Store optimization
       optimise = {
         automatic = true;
-        dates = ["03:45"]; # Run during low usage hours
+        dates = [ "03:45" ]; # Run during low usage hours
       };
     };
 

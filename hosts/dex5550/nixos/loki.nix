@@ -1,13 +1,12 @@
 # Loki Log Aggregation Server Configuration
 # Centralized logging for all NixOS hosts
-{
-  pkgs,
-  ...
+{ pkgs
+, ...
 }: {
   # Loki log aggregation server
   services.loki = {
     enable = true;
-    
+
     configuration = {
       server = {
         http_listen_port = 3100;
@@ -74,7 +73,7 @@
         enforce_metric_name = false;
         reject_old_samples = true;
         reject_old_samples_max_age = "168h";
-        retention_period = "30d";  # 30 days retention
+        retention_period = "30d"; # 30 days retention
         ingestion_rate_mb = 4;
         ingestion_burst_size_mb = 6;
         max_line_size = 256000;
@@ -134,30 +133,30 @@
     home = "/var/lib/loki";
     createHome = true;
   };
-  
-  users.groups.loki = {};
+
+  users.groups.loki = { };
 
   # Systemd service optimizations
   systemd.services.loki = {
     serviceConfig = {
       # Resource limits for monitoring server
       MemoryMax = "2G";
-      CPUQuota = "200%";  # Allow up to 2 CPU cores
-      
+      CPUQuota = "200%"; # Allow up to 2 CPU cores
+
       # Security hardening
       NoNewPrivileges = true;
       ProtectSystem = "strict";
       ProtectHome = true;
       ReadWritePaths = [ "/var/lib/loki" ];
-      
+
       # Restart policy
       Restart = "always";
       RestartSec = "10s";
-      
+
       # Health monitoring
       WatchdogSec = "300s";
     };
-    
+
     # Wait for filesystem to be ready
     after = [ "local-fs.target" "network-online.target" ];
     wants = [ "network-online.target" ];

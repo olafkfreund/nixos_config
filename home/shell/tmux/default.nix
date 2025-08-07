@@ -1,10 +1,9 @@
 # Enhanced Modern Tmux Configuration
 # Optimized for speed, maintainability, and seamless integration with Zsh/Starship
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.multiplexer.tmux;
@@ -12,17 +11,18 @@ with lib; let
   # Modern Gruvbox theme with enhanced icons and performance
   tmux-gruvbox =
     pkgs.tmuxPlugins.mkTmuxPlugin
-    {
-      pluginName = "tmux-gruvbox";
-      version = "unstable-2024-06-17";
-      src = pkgs.fetchFromGitHub {
-        owner = "z3z1ma";
-        repo = "tmux-gruvbox";
-        rev = "master";
-        sha256 = "sha256-wBhOKM85aOcV4jD7wdyB/zXKDdhODE5k1iud+cm6Wk0=";
+      {
+        pluginName = "tmux-gruvbox";
+        version = "unstable-2024-06-17";
+        src = pkgs.fetchFromGitHub {
+          owner = "z3z1ma";
+          repo = "tmux-gruvbox";
+          rev = "master";
+          sha256 = "sha256-wBhOKM85aOcV4jD7wdyB/zXKDdhODE5k1iud+cm6Wk0=";
+        };
       };
-    };
-in {
+in
+{
   options.multiplexer.tmux = {
     enable = mkEnableOption {
       default = true;
@@ -44,9 +44,9 @@ in {
       # Curated plugin selection for optimal performance and functionality
       plugins = with pkgs; [
         # Core functionality
-        tmuxPlugins.sensible              # Better defaults
-        tmuxPlugins.better-mouse-mode     # Enhanced mouse support
-        
+        tmuxPlugins.sensible # Better defaults
+        tmuxPlugins.better-mouse-mode # Enhanced mouse support
+
         # Navigation and window management
         {
           plugin = tmuxPlugins.tilish;
@@ -56,7 +56,7 @@ in {
             set -g @tilish-default 'main-vertical'
           '';
         }
-        
+
         # Enhanced session management
         {
           plugin = tmuxPlugins.t-smart-tmux-session-manager;
@@ -67,7 +67,7 @@ in {
             set -g @t-fzf-default-results 'sessions'
           '';
         }
-        
+
         # Modern fuzzy finding
         {
           plugin = tmuxPlugins.tmux-fzf;
@@ -77,7 +77,7 @@ in {
             set -g @tmux-fzf-order 'session|window|pane|command|keybinding'
           '';
         }
-        
+
         # URL handling with modern browser integration
         {
           plugin = tmuxPlugins.fzf-tmux-url;
@@ -88,7 +88,7 @@ in {
             set -g @fzf-url-bind 'u'
           '';
         }
-        
+
         # Enhanced Gruvbox theme with modern icons
         {
           plugin = tmux-gruvbox;
@@ -128,12 +128,12 @@ in {
             set -g @gruvbox_directory_text "#{s|$HOME|~|:pane_current_path}"
           '';
         }
-        
+
         # Development productivity plugins
-        tmuxPlugins.tmux-thumbs           # Quick text copying
-        tmuxPlugins.extrakto              # Enhanced text extraction
+        tmuxPlugins.tmux-thumbs # Quick text copying
+        tmuxPlugins.extrakto # Enhanced text extraction
       ];
-      
+
       # Enhanced configuration for modern terminal workflows
       extraConfig = ''
         # ========== Terminal and Display Settings ==========

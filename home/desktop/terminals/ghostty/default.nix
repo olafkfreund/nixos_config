@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.ghostty;
-in {
+in
+{
   options.ghostty = {
     enable = mkEnableOption "Ghostty terminal emulator";
   };

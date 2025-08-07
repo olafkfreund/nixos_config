@@ -1,8 +1,7 @@
 # Hyprland Centralized Theming System
 # Provides consistent theming across all Hyprland components
-{
-  lib,
-  ...
+{ lib
+, ...
 }:
 with lib;
 let
@@ -35,7 +34,7 @@ let
       };
     };
   };
-  
+
   # Theme configuration generator
   createThemeConfig = colorScheme: {
     hyprland = {
@@ -51,14 +50,15 @@ let
       };
     };
   };
-  
+
   defaultTheme = "gruvbox-dark";
-  
-in {
+
+in
+{
   hyprland.colorSchemes = colorSchemes;
   hyprland.createThemeConfig = createThemeConfig;
   hyprland.activeTheme = createThemeConfig colorSchemes.${defaultTheme};
-  hyprland.getTheme = themeName: 
+  hyprland.getTheme = themeName:
     if builtins.hasAttr themeName colorSchemes
     then createThemeConfig colorSchemes.${themeName}
     else createThemeConfig colorSchemes.${defaultTheme};

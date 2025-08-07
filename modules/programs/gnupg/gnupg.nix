@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.security.gnupg;
-in {
+in
+{
   options.security.gnupg = {
     enable = mkEnableOption {
       default = false;
@@ -18,7 +18,7 @@ in {
       enable = true;
       enableSSHSupport = true;
     };
-    environment.systemPackages = [ 
+    environment.systemPackages = [
       pkgs.gpg-tui
       pkgs.gpgme
       pkgs.gnupg

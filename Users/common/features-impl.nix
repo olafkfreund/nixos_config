@@ -1,11 +1,11 @@
-{
-  config,
-  lib,
-  ...
+{ config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.features;
-in {
+in
+{
   imports = [
     ./features.nix
   ];

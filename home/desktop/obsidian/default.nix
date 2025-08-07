@@ -1,11 +1,11 @@
-{
-  config,
-  lib,
-  ...
+{ config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.desktop.obsidian;
-in {
+in
+{
   options.desktop.obsidian = {
     enable = mkEnableOption {
       default = false;
@@ -21,8 +21,8 @@ in {
       icon = "obsidian";
       comment = "Knowledge base that works on top of a local folder of plain text Markdown files";
       genericName = "Note Taking";
-      categories = ["Office" "Utility"];
-      mimeType = ["text/markdown" "x-scheme-handler/obsidian"];
+      categories = [ "Office" "Utility" ];
+      mimeType = [ "text/markdown" "x-scheme-handler/obsidian" ];
     };
   };
 }

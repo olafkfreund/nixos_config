@@ -1,8 +1,7 @@
-{
-  lib,
-  pkgs,
-  isImageTarget,
-  ...
+{ lib
+, pkgs
+, isImageTarget
+, ...
 }: {
   imports = lib.optionals (!isImageTarget) [
     ./hardware-configuration.nix
@@ -18,7 +17,7 @@
   # Define the "nixos" user
   users.users.nixos = {
     isNormalUser = true;
-    extraGroups = ["wheel" "networkmanager"]; # "wheel" for sudo, "networkmanager" for networking
+    extraGroups = [ "wheel" "networkmanager" ]; # "wheel" for sudo, "networkmanager" for networking
     initialPassword = "nixos"; # Default password (changeable on first login)
   };
 

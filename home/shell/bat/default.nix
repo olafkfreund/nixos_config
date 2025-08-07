@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.cli.bat;
-in {
+in
+{
   options.cli.bat = {
     enable = mkEnableOption {
       default = true;

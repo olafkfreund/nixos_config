@@ -4,119 +4,120 @@
 with lib;
 let
   cfg = config.storage.performanceOptimization;
-in {
+in
+{
   options.storage.performanceOptimization = {
     enable = mkEnableOption "Enable storage performance optimization";
-    
+
     profile = mkOption {
-      type = types.enum ["performance" "balanced" "reliability"];
+      type = types.enum [ "performance" "balanced" "reliability" ];
       default = "balanced";
       description = "Storage optimization profile";
     };
-    
+
     ioSchedulerOptimization = {
       enable = mkEnableOption "Enable I/O scheduler optimization";
-      
+
       dynamicScheduling = mkOption {
         type = types.bool;
         default = true;
         description = "Enable dynamic I/O scheduler selection based on workload";
       };
-      
+
       ssdOptimization = mkOption {
         type = types.bool;
         default = true;
         description = "Enable SSD-specific optimizations";
       };
-      
+
       hddOptimization = mkOption {
         type = types.bool;
         default = true;
         description = "Enable HDD-specific optimizations";
       };
     };
-    
+
     filesystemOptimization = {
       enable = mkEnableOption "Enable filesystem optimization";
-      
+
       readaheadOptimization = mkOption {
         type = types.bool;
         default = true;
         description = "Enable readahead optimization";
       };
-      
+
       cacheOptimization = mkOption {
         type = types.bool;
         default = true;
         description = "Enable filesystem cache optimization";
       };
-      
+
       compressionOptimization = mkOption {
         type = types.bool;
         default = false;
         description = "Enable filesystem compression optimization";
       };
     };
-    
+
     nvmeOptimization = {
       enable = mkEnableOption "Enable NVMe-specific optimizations";
-      
+
       queueDepth = mkOption {
         type = types.int;
         default = 32;
         description = "NVMe queue depth optimization";
       };
-      
+
       polling = mkOption {
         type = types.bool;
         default = true;
         description = "Enable NVMe polling for low latency";
       };
-      
+
       multiQueue = mkOption {
         type = types.bool;
         default = true;
         description = "Enable NVMe multi-queue support";
       };
     };
-    
+
     diskCacheOptimization = {
       enable = mkEnableOption "Enable disk cache optimization";
-      
+
       writeCache = mkOption {
         type = types.bool;
         default = true;
         description = "Enable write cache optimization";
       };
-      
+
       readCache = mkOption {
         type = types.bool;
         default = true;
         description = "Enable read cache optimization";
       };
-      
+
       barrierOptimization = mkOption {
         type = types.bool;
         default = false;
         description = "Disable write barriers for performance (unsafe)";
       };
     };
-    
+
     tmpfsOptimization = {
       enable = mkEnableOption "Enable tmpfs optimization for performance";
-      
+
       tmpSize = mkOption {
         type = types.str;
         default = "2G";
         description = "Size of /tmp tmpfs";
       };
-      
+
       varTmpSize = mkOption {
         type = types.str;
         default = "1G";
         description = "Size of /var/tmp tmpfs";
       };
-      
+
       devShmSize = mkOption {
         type = types.str;
         default = "50%";
@@ -132,7 +133,7 @@ in {
       after = [ "local-fs.target" ];
       wants = [ "local-fs.target" ];
       wantedBy = [ "multi-user.target" ];
-      
+
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
@@ -330,14 +331,14 @@ in {
         '';
       };
     };
-    
+
     # Storage Performance Monitor
     systemd.services.storage-performance-monitor = {
       description = "Storage Performance Monitor";
       after = [ "storage-performance-optimizer.service" ];
       wants = [ "storage-performance-optimizer.service" ];
       wantedBy = [ "multi-user.target" ];
-      
+
       serviceConfig = {
         Type = "simple";
         User = "root";
@@ -355,60 +356,60 @@ in {
           ])}"
         ];
         ExecStart = pkgs.writeShellScript "storage-performance-monitor" ''
-          #!/bin/bash
+                    #!/bin/bash
           
-          METRICS_FILE="/var/lib/storage-tuning/metrics.json"
-          mkdir -p "$(dirname "$METRICS_FILE")"
+                    METRICS_FILE="/var/lib/storage-tuning/metrics.json"
+                    mkdir -p "$(dirname "$METRICS_FILE")"
           
-          while true; do
-            TIMESTAMP=$(date -Iseconds)
+                    while true; do
+                      TIMESTAMP=$(date -Iseconds)
             
-            # Collect I/O statistics
-            IO_STATS=$(iostat -x 1 1 | tail -n +4 | while read line; do
-              if [[ "$line" =~ ^[a-zA-Z] ]]; then
-                DEVICE=$(echo "$line" | awk '{print $1}')
-                UTIL=$(echo "$line" | awk '{print $NF}')
-                AWAIT=$(echo "$line" | awk '{print $(NF-1)}')
-                IOPS=$(echo "$line" | awk '{print $4+$5}')
-                echo "\"$DEVICE\": {\"utilization\": \"$UTIL\", \"await\": \"$AWAIT\", \"iops\": \"$IOPS\"}"
-              fi
-            done | paste -sd, -)
+                      # Collect I/O statistics
+                      IO_STATS=$(iostat -x 1 1 | tail -n +4 | while read line; do
+                        if [[ "$line" =~ ^[a-zA-Z] ]]; then
+                          DEVICE=$(echo "$line" | awk '{print $1}')
+                          UTIL=$(echo "$line" | awk '{print $NF}')
+                          AWAIT=$(echo "$line" | awk '{print $(NF-1)}')
+                          IOPS=$(echo "$line" | awk '{print $4+$5}')
+                          echo "\"$DEVICE\": {\"utilization\": \"$UTIL\", \"await\": \"$AWAIT\", \"iops\": \"$IOPS\"}"
+                        fi
+                      done | paste -sd, -)
             
-            # Disk usage information
-            DISK_USAGE=$(df -h | grep -E '^/dev/' | while read line; do
-              DEVICE=$(echo "$line" | awk '{print $1}')
-              USAGE=$(echo "$line" | awk '{print $5}' | sed 's/%//')
-              MOUNT=$(echo "$line" | awk '{print $6}')
-              echo "\"$DEVICE\": {\"usage_percent\": $USAGE, \"mount\": \"$MOUNT\"}"
-            done | paste -sd, -)
+                      # Disk usage information
+                      DISK_USAGE=$(df -h | grep -E '^/dev/' | while read line; do
+                        DEVICE=$(echo "$line" | awk '{print $1}')
+                        USAGE=$(echo "$line" | awk '{print $5}' | sed 's/%//')
+                        MOUNT=$(echo "$line" | awk '{print $6}')
+                        echo "\"$DEVICE\": {\"usage_percent\": $USAGE, \"mount\": \"$MOUNT\"}"
+                      done | paste -sd, -)
             
-            # Memory usage for caching
-            CACHE_STATS=$(free -b | grep -E '^(Mem|Buffers|Cached)' | awk '
-              /^Mem:/ { total=$2; used=$3; free=$4; available=$7 }
-              END { 
-                cache_used = total - available - free
-                cache_percent = (cache_used * 100) / total
-                printf "\"cache_used_bytes\": %d, \"cache_percent\": %.1f", cache_used, cache_percent
-              }
-            ')
+                      # Memory usage for caching
+                      CACHE_STATS=$(free -b | grep -E '^(Mem|Buffers|Cached)' | awk '
+                        /^Mem:/ { total=$2; used=$3; free=$4; available=$7 }
+                        END { 
+                          cache_used = total - available - free
+                          cache_percent = (cache_used * 100) / total
+                          printf "\"cache_used_bytes\": %d, \"cache_percent\": %.1f", cache_used, cache_percent
+                        }
+                      ')
             
-            # Create metrics JSON
-            cat > "$METRICS_FILE" << EOF
-            {
-              "timestamp": "$TIMESTAMP",
-              "io_devices": { $IO_STATS },
-              "disk_usage": { $DISK_USAGE },
-              "cache_stats": { $CACHE_STATS },
-              "profile": "${cfg.profile}"
-            }
-EOF
+                      # Create metrics JSON
+                      cat > "$METRICS_FILE" << EOF
+                      {
+                        "timestamp": "$TIMESTAMP",
+                        "io_devices": { $IO_STATS },
+                        "disk_usage": { $DISK_USAGE },
+                        "cache_stats": { $CACHE_STATS },
+                        "profile": "${cfg.profile}"
+                      }
+          EOF
             
-            sleep 60
-          done
+                      sleep 60
+                    done
         '';
       };
     };
-    
+
     # Tmpfs optimization
     fileSystems = mkIf cfg.tmpfsOptimization.enable {
       "/tmp" = mkIf (cfg.tmpfsOptimization.tmpSize != "") {
@@ -416,20 +417,20 @@ EOF
         fsType = "tmpfs";
         options = [ "rw" "nosuid" "nodev" "size=${cfg.tmpfsOptimization.tmpSize}" ];
       };
-      
+
       "/var/tmp" = mkIf (cfg.tmpfsOptimization.varTmpSize != "") {
         device = "tmpfs";
         fsType = "tmpfs";
         options = [ "rw" "nosuid" "nodev" "size=${cfg.tmpfsOptimization.varTmpSize}" ];
       };
-      
+
       "/dev/shm" = mkIf (cfg.tmpfsOptimization.devShmSize != "") {
         device = "tmpfs";
         fsType = "tmpfs";
         options = [ "rw" "nosuid" "nodev" "size=${cfg.tmpfsOptimization.devShmSize}" ];
       };
     };
-    
+
     # Storage optimization kernel parameters
     boot.kernel.sysctl = mkIf cfg.enable {
       # VM settings for storage performance (lower priority than resource manager)
@@ -443,36 +444,36 @@ EOF
         else if cfg.profile == "balanced" then 3000
         else 1000
       );
-      
+
       # I/O settings (avoid conflicts with resource manager)
-      
+
       # Read-ahead settings
-      "vm.page-cluster" = mkDefault 3;  # Optimize page clustering
+      "vm.page-cluster" = mkDefault 3; # Optimize page clustering
     };
-    
+
     # Storage performance packages
     environment.systemPackages = with pkgs; [
-      iotop        # I/O monitoring
-      sysstat      # Contains iostat and other system statistics tools
-      hdparm       # Hard disk parameters
+      iotop # I/O monitoring
+      sysstat # Contains iostat and other system statistics tools
+      hdparm # Hard disk parameters
       smartmontools # SMART monitoring
-      nvme-cli     # NVMe management
-      fio          # Flexible I/O tester
-      bonnie       # Filesystem benchmarking
+      nvme-cli # NVMe management
+      fio # Flexible I/O tester
+      bonnie # Filesystem benchmarking
     ];
-    
+
     # Create directories
     systemd.tmpfiles.rules = [
       "d /var/lib/storage-tuning 0755 root root -"
       "d /var/log/storage-tuning 0755 root root -"
     ];
-    
+
     # Enable TRIM for SSDs
     services.fstrim = {
       enable = true;
       interval = "weekly";
     };
-    
+
     # SMART monitoring
     services.smartd = {
       enable = true;
@@ -481,7 +482,7 @@ EOF
         x11.enable = false;
         wall.enable = true;
         mail = {
-          enable = false;  # Disable email notifications by default
+          enable = false; # Disable email notifications by default
         };
       };
     };

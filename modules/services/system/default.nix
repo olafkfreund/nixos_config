@@ -1,5 +1,5 @@
 { ... }: {
-  
+
   services.gvfs = {
     enable = true;
   };
@@ -13,13 +13,13 @@
     enable = true;
   };
   services.hardware.bolt = {
-    enable = true; 
+    enable = true;
   };
 
   system.activationScripts.binbash = {
     deps = [ "binsh" ];
     text = ''
-         ln -sf /bin/sh /bin/bash
+      ln -sf /bin/sh /bin/bash
     '';
   };
 }

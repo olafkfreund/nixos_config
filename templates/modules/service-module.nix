@@ -9,25 +9,25 @@
 # 3. Add to modules/default.nix imports
 # 4. Enable with: features.services.SERVICE_NAME = true;
 
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.modules.services.SERVICE_NAME;
-  
+
   # Service configuration file generation
   serviceConfigFile = pkgs.writeText "SERVICE_NAME.conf" ''
     # Generated configuration for SERVICE_NAME
     ${concatStringsSep "\n" (mapAttrsToList (name: value: "${name} = ${toString value}") cfg.settings)}
   '';
-  
+
   # Service user/group management
   serviceUser = cfg.user;
   serviceGroup = cfg.group;
-in {
+in
+{
   options.modules.services.SERVICE_NAME = {
     enable = mkEnableOption "SERVICE_NAME service";
 
@@ -54,7 +54,7 @@ in {
     # Service settings
     settings = mkOption {
       type = types.attrsOf types.str;
-      default = {};
+      default = { };
       description = "SERVICE_NAME configuration settings";
       example = literalExpression ''
         {
@@ -94,14 +94,14 @@ in {
     # Advanced options
     extraArgs = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       description = "Additional command line arguments";
       example = [ "--verbose" "--debug" ];
     };
 
     environmentVariables = mkOption {
       type = types.attrsOf types.str;
-      default = {};
+      default = { };
       description = "Environment variables for the service";
       example = literalExpression ''
         {
@@ -125,7 +125,7 @@ in {
       createHome = true;
     };
 
-    users.groups.${serviceGroup} = mkIf (serviceGroup == "SERVICE_NAME") {};
+    users.groups.${serviceGroup} = mkIf (serviceGroup == "SERVICE_NAME") { };
 
     # Data directory setup
     systemd.tmpfiles.rules = [
@@ -147,7 +147,7 @@ in {
         User = serviceUser;
         Group = serviceGroup;
         WorkingDirectory = cfg.dataDir;
-        
+
         # Command to run
         ExecStart = concatStringsSep " " ([
           "${cfg.package}/bin/SERVICE_NAME"
@@ -171,7 +171,7 @@ in {
         ProtectSystem = "strict";
         ReadWritePaths = [ cfg.dataDir ];
         ReadOnlyPaths = [ serviceConfigFile ];
-        
+
         # Additional security options
         ProtectHostname = true;
         ProtectKernelLogs = true;
@@ -181,11 +181,11 @@ in {
         RestrictNamespaces = true;
         RestrictRealtime = true;
         SystemCallArchitectures = "native";
-        
+
         # Resource limits
         LimitNOFILE = 65536;
         MemoryMax = "1G";
-        
+
         # Environment variables
         Environment = mapAttrsToList (name: value: "${name}=${value}") cfg.environmentVariables;
       };

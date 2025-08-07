@@ -1,16 +1,16 @@
-{ 
-  config, 
-  lib, 
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
-with lib; let 
+with lib; let
   cfg = config.cli.programs.ssh;
-in {
+in
+{
   options.cli.programs.ssh = with types; {
     enable = mkEnableOption "ssh";
   };
-  
+
   config = mkIf cfg.enable {
     programs.ssh = {
       enable = true;
@@ -18,8 +18,8 @@ in {
     };
     programs.keychain = {
       enable = true;
-      keys = ["id_ed25519"];
-      agents = ["ssh" "gpg"];
+      keys = [ "id_ed25519" ];
+      agents = [ "ssh" "gpg" ];
     };
   };
 }

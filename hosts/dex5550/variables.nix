@@ -7,7 +7,7 @@
   gitHubToken = "";
 
   # Hardware settings (headless server configuration)
-  gpu = "none";  # No display driver needed for headless server
+  gpu = "none"; # No display driver needed for headless server
   acceleration = ""; # For ollama - Default to empty for this machine
 
   # System groups - server optimized
@@ -23,10 +23,10 @@
 
   # Networking
   hostName = "dex5550";
-  nameservers = ["1.1.1.1" "8.8.8.8"];
+  nameservers = [ "1.1.1.1" "8.8.8.8" ];
   hostMappings = {
     "192.168.1.127" = "p510";
-    "192.168.1.188" = "razer";  # Updated to current wired IP
+    "192.168.1.188" = "razer"; # Updated to current wired IP
     "192.168.1.97" = "p620";
     "192.168.1.246" = "hp";
     "192.168.1.222" = "dex5550";

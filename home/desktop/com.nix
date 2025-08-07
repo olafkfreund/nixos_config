@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{ pkgs, ... }: {
   home.packages = [
     # slack
     pkgs.teams-for-linux
@@ -35,29 +35,29 @@
       name = "Obsidian :)";
       # Fix for gpu issues
       exec = "obsidian --disable-gpu %u";
-      categories = ["Office"];
+      categories = [ "Office" ];
       comment = "Knowledge base";
       icon = "obsidian";
-      mimeType = ["x-scheme-handler/obsidian"];
+      mimeType = [ "x-scheme-handler/obsidian" ];
       type = "Application";
     };
     firefox = {
       name = "Firefox";
       exec = "firefox %U";
-      categories = ["Network"];
+      categories = [ "Network" ];
       comment = "Web Browser";
       icon = "firefox";
-      mimeType = ["text/html" "x-scheme-handler/http" "x-scheme-handler/https"];
+      mimeType = [ "text/html" "x-scheme-handler/http" "x-scheme-handler/https" ];
       type = "Application";
     };
-    
+
     google-chrome = {
       name = "google-chrome";
       exec = "google-chrome-stable %U";
-      categories = ["Network"];
+      categories = [ "Network" ];
       comment = "Web Browser";
       icon = "google-chrome";
-      mimeType = ["x-scheme-handler/http" "x-scheme-handler/https"];
+      mimeType = [ "x-scheme-handler/http" "x-scheme-handler/https" ];
       type = "Application";
     };
   };

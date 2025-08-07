@@ -1,15 +1,15 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: 
-with lib; let 
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.browsers.opera;
-in {
+in
+{
   options.browsers.opera = {
     enable = mkEnableOption {
-      default = false; 
+      default = false;
       description = "Opera browser";
     };
   };

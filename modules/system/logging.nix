@@ -4,13 +4,14 @@
 with lib;
 let
   cfg = config.system.logging;
-in {
+in
+{
   options.system.logging = {
     enableFiltering = mkEnableOption "Enable log filtering for noise reduction";
-    
+
     filterRules = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       description = "List of log filtering rules";
     };
   };
@@ -62,12 +63,12 @@ in {
         "labels" = "service";
       };
     };
-    
+
     # Environment variables for better log control
     environment.variables = {
       # Reduce Docker log verbosity
       DOCKER_LOG_LEVEL = "warn";
-      
+
       # Node.js applications log level
       NODE_ENV = "production";
       LOG_LEVEL = "info";

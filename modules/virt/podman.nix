@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.services.podman;
-in {
+in
+{
   options.services.podman = {
     enable = mkEnableOption {
       default = false;

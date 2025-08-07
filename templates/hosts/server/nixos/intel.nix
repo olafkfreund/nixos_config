@@ -9,10 +9,10 @@
     enable32Bit = false; # Usually not needed for servers
     extraPackages = with pkgs; [
       # Intel-specific packages for compute
-      intel-media-driver    # Modern Intel GPUs (Broadwell+)
-      intel-vaapi-driver    # Legacy Intel GPUs
+      intel-media-driver # Modern Intel GPUs (Broadwell+)
+      intel-vaapi-driver # Legacy Intel GPUs
       intel-compute-runtime # OpenCL runtime for compute
-      
+
       # Minimal video acceleration
       libva
       libva-utils
@@ -23,69 +23,69 @@
   # Environment packages for Intel server monitoring
   environment.systemPackages = with pkgs; [
     # Intel monitoring and control
-    intel-gpu-tools        # Intel GPU utilities (intel_gpu_top, etc.)
-    libva-utils           # VA-API utilities
-    
+    intel-gpu-tools # Intel GPU utilities (intel_gpu_top, etc.)
+    libva-utils # VA-API utilities
+
     # Development tools for compute
-    intel-compute-runtime  # OpenCL runtime
-    
+    intel-compute-runtime # OpenCL runtime
+
     # System monitoring optimized for servers
-    powertop              # Intel power monitoring
-    thermald              # Thermal management
-    
+    powertop # Intel power monitoring
+    thermald # Thermal management
+
     # Hardware diagnostics
-    dmidecode             # Hardware information
-    lshw                  # Hardware listing
+    dmidecode # Hardware information
+    lshw # Hardware listing
   ];
 
   # Environment variables for Intel graphics compute
   environment.variables = {
     # Video acceleration (minimal for servers)
-    LIBVA_DRIVER_NAME = "iHD";  # Use iHD for modern Intel GPUs
+    LIBVA_DRIVER_NAME = "iHD"; # Use iHD for modern Intel GPUs
     # LIBVA_DRIVER_NAME = "i965"; # Use i965 for older Intel GPUs
-    
+
     # OpenCL configuration for compute workloads
     OPENCL_VENDOR_PATH = "${pkgs.intel-compute-runtime}/etc/OpenCL/vendors";
-    
+
     # Mesa configuration for Intel
-    MESA_LOADER_DRIVER_OVERRIDE = "iris";  # Use iris driver for modern Intel
-    
+    MESA_LOADER_DRIVER_OVERRIDE = "iris"; # Use iris driver for modern Intel
+
     # Disable GUI-related optimizations
-    MOZ_ENABLE_WAYLAND = "0";    # Disable for servers
+    MOZ_ENABLE_WAYLAND = "0"; # Disable for servers
     QT_QPA_PLATFORM = "minimal"; # Minimal platform for servers
   };
 
   # Kernel modules and parameters for server use
   boot.kernelModules = [ "i915" ];
-  
+
   boot.kernelParams = [
     # Intel GPU specific parameters optimized for servers
-    "i915.enable_guc=2"        # Enable GuC and HuC firmware
-    "i915.enable_fbc=1"        # Enable framebuffer compression
-    "i915.fastboot=1"          # Enable fastboot
-    
+    "i915.enable_guc=2" # Enable GuC and HuC firmware
+    "i915.enable_fbc=1" # Enable framebuffer compression
+    "i915.fastboot=1" # Enable fastboot
+
     # Performance optimizations for compute
-    "i915.modeset=1"           # Enable kernel modesetting
-    "i915.nuclear_pageflip=1"  # Enable atomic modesetting
-    
+    "i915.modeset=1" # Enable kernel modesetting
+    "i915.nuclear_pageflip=1" # Enable atomic modesetting
+
     # Power management for servers
-    "i915.enable_rc6=1"        # Enable RC6 power saving
-    "i915.enable_dc=1"         # Enable display C-states
+    "i915.enable_rc6=1" # Enable RC6 power saving
+    "i915.enable_dc=1" # Enable display C-states
     "i915.disable_power_well=0" # Keep power wells enabled
-    
+
     # Memory and compute optimizations
-    "i915.preliminary_hw_support=1"  # Support for newer hardware
-    "i915.enable_hangcheck=1"  # Enable hang detection
+    "i915.preliminary_hw_support=1" # Support for newer hardware
+    "i915.enable_hangcheck=1" # Enable hang detection
   ];
 
   # Kernel configuration for Intel servers
   boot.kernel.sysctl = {
     # Graphics performance for compute
     "dev.i915.perf_stream_paranoid" = 0;
-    
+
     # Power management optimizations
-    "kernel.nmi_watchdog" = 0;  # Disable NMI watchdog for power saving
-    
+    "kernel.nmi_watchdog" = 0; # Disable NMI watchdog for power saving
+
     # Memory management for compute workloads
     "vm.overcommit_memory" = 1;
     "vm.overcommit_ratio" = 100;
@@ -108,7 +108,7 @@
   powerManagement = {
     enable = true;
     cpuFreqGovernor = "powersave"; # Intel CPUs work well with powersave
-    powertop.enable = true;        # Intel power optimization
+    powertop.enable = true; # Intel power optimization
   };
 
   # Thermal management for Intel systems
@@ -131,11 +131,11 @@
   hardware = {
     # CPU-specific optimizations
     cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-    
+
     # Disable unnecessary hardware for servers
     bluetooth.enable = lib.mkDefault false;
     pulseaudio.enable = lib.mkForce false;
-    
+
     # Graphics support for compute
     graphics.driSupport = true;
     graphics.driSupport32Bit = false; # Not needed for servers
@@ -213,14 +213,14 @@
 
   # Intel-specific optimizations for different generations
   # Uncomment based on your Intel GPU generation
-  
+
   # # For very old Intel GPUs (pre-Haswell)
   # environment.variables.LIBVA_DRIVER_NAME = "i965";
   # boot.kernelParams = lib.mkAfter [ "i915.preliminary_hw_support=1" ];
-  
+
   # # For Haswell and newer (most common)
   # environment.variables.LIBVA_DRIVER_NAME = "iHD";
-  
+
   # # For latest Intel Arc GPUs (if using on servers)
   # environment.variables.LIBVA_DRIVER_NAME = "iHD";
   # boot.kernelParams = lib.mkAfter [ "i915.force_probe=*" ];
@@ -232,7 +232,7 @@
     runtimes = {
       intel = {
         path = "${pkgs.runc}/bin/runc";
-        runtimeArgs = [];
+        runtimeArgs = [ ];
       };
     };
   };
@@ -242,11 +242,11 @@
     # Disable GUI-related variables
     { WLR_NO_HARDWARE_CURSORS = "1"; }
     { LIBGL_ALWAYS_SOFTWARE = "0"; } # Allow hardware for compute
-    
+
     # Optimize for compute workloads
     { INTEL_DEBUG = ""; } # Disable debugging overhead
-    { I915_DEBUG = ""; }  # Disable debugging overhead
-    
+    { I915_DEBUG = ""; } # Disable debugging overhead
+
     # Set compute-focused configuration
     { MESA_GLSL_CACHE_DISABLE = "false"; } # Enable shader cache
     { MESA_GLSL_CACHE_MAX_SIZE = "100M"; } # Reasonable cache size

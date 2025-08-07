@@ -1,76 +1,75 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.monitoring;
-  
+
   # Pre-configured NixOS dashboard
   nixosDashboard = pkgs.writeText "nixos-dashboard.json" (builtins.toJSON {
     id = null;
     title = "NixOS System Overview";
-    tags = ["nixos" "system"];
+    tags = [ "nixos" "system" ];
     timezone = "browser";
-      panels = [
-        {
-          id = 1;
-          title = "System Load";
-          type = "stat";
-          targets = [{
-            expr = "node_load1";
-            legendFormat = "1m load";
-          }];
-          gridPos = { h = 8; w = 6; x = 0; y = 0; };
-        }
-        {
-          id = 2;
-          title = "Memory Usage";
-          type = "stat";
-          targets = [{
-            expr = "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100";
-            legendFormat = "Memory %";
-          }];
-          gridPos = { h = 8; w = 6; x = 6; y = 0; };
-        }
-        {
-          id = 3;
-          title = "CPU Usage";
-          type = "timeseries";
-          targets = [{
-            expr = "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)";
-            legendFormat = "{{instance}}";
-          }];
-          gridPos = { h = 8; w = 12; x = 0; y = 8; };
-        }
-        {
-          id = 4;
-          title = "Disk Usage";
-          type = "bargauge";
-          targets = [{
-            expr = "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\"} / node_filesystem_size_bytes{fstype!=\"tmpfs\"})) * 100";
-            legendFormat = "{{instance}} {{mountpoint}}";
-          }];
-          gridPos = { h = 8; w = 12; x = 12; y = 0; };
-        }
-        {
-          id = 5;
-          title = "Network Traffic";
-          type = "timeseries";
-          targets = [
-            {
-              expr = "rate(node_network_receive_bytes_total[5m])";
-              legendFormat = "{{instance}} RX";
-            }
-            {
-              expr = "rate(node_network_transmit_bytes_total[5m])";
-              legendFormat = "{{instance}} TX";
-            }
-          ];
-          gridPos = { h = 8; w = 12; x = 12; y = 8; };
-        }
-      ];
+    panels = [
+      {
+        id = 1;
+        title = "System Load";
+        type = "stat";
+        targets = [{
+          expr = "node_load1";
+          legendFormat = "1m load";
+        }];
+        gridPos = { h = 8; w = 6; x = 0; y = 0; };
+      }
+      {
+        id = 2;
+        title = "Memory Usage";
+        type = "stat";
+        targets = [{
+          expr = "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100";
+          legendFormat = "Memory %";
+        }];
+        gridPos = { h = 8; w = 6; x = 6; y = 0; };
+      }
+      {
+        id = 3;
+        title = "CPU Usage";
+        type = "timeseries";
+        targets = [{
+          expr = "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)";
+          legendFormat = "{{instance}}";
+        }];
+        gridPos = { h = 8; w = 12; x = 0; y = 8; };
+      }
+      {
+        id = 4;
+        title = "Disk Usage";
+        type = "bargauge";
+        targets = [{
+          expr = "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\"} / node_filesystem_size_bytes{fstype!=\"tmpfs\"})) * 100";
+          legendFormat = "{{instance}} {{mountpoint}}";
+        }];
+        gridPos = { h = 8; w = 12; x = 12; y = 0; };
+      }
+      {
+        id = 5;
+        title = "Network Traffic";
+        type = "timeseries";
+        targets = [
+          {
+            expr = "rate(node_network_receive_bytes_total[5m])";
+            legendFormat = "{{instance}} RX";
+          }
+          {
+            expr = "rate(node_network_transmit_bytes_total[5m])";
+            legendFormat = "{{instance}} TX";
+          }
+        ];
+        gridPos = { h = 8; w = 12; x = 12; y = 8; };
+      }
+    ];
     time = {
       from = "now-1h";
       to = "now";
@@ -82,7 +81,7 @@ with lib; let
   hostDashboard = hostname: hardware: pkgs.writeText "${hostname}-dashboard.json" (builtins.toJSON {
     id = null;
     title = "${hostname} - ${hardware}";
-    tags = ["nixos" "host" hostname];
+    tags = [ "nixos" "host" hostname ];
     timezone = "browser";
     panels = [
       {
@@ -170,7 +169,7 @@ with lib; let
         }];
         gridPos = { h = 8; w = 12; x = 0; y = 20; };
       }
-    ] else []);
+    ] else [ ]);
     time = {
       from = "now-6h";
       to = "now";
@@ -182,7 +181,7 @@ with lib; let
   plexDashboard = pkgs.writeText "plex-dashboard.json" (builtins.toJSON {
     id = null;
     title = "Plex Media Server";
-    tags = ["media" "plex" "p510"];
+    tags = [ "media" "plex" "p510" ];
     timezone = "browser";
     panels = [
       {
@@ -244,7 +243,7 @@ with lib; let
   sonarrDashboard = pkgs.writeText "sonarr-dashboard.json" (builtins.toJSON {
     id = null;
     title = "Sonarr TV Shows";
-    tags = ["media" "sonarr" "p510"];
+    tags = [ "media" "sonarr" "p510" ];
     timezone = "browser";
     panels = [
       {
@@ -307,7 +306,7 @@ with lib; let
   radarrDashboard = pkgs.writeText "radarr-dashboard.json" (builtins.toJSON {
     id = null;
     title = "Radarr Movies";
-    tags = ["media" "radarr" "p510"];
+    tags = [ "media" "radarr" "p510" ];
     timezone = "browser";
     panels = [
       {
@@ -370,7 +369,7 @@ with lib; let
   lidarrDashboard = pkgs.writeText "lidarr-dashboard.json" (builtins.toJSON {
     id = null;
     title = "Lidarr Music";
-    tags = ["media" "lidarr" "p510"];
+    tags = [ "media" "lidarr" "p510" ];
     timezone = "browser";
     panels = [
       {
@@ -437,7 +436,7 @@ with lib; let
   prowlarrDashboard = pkgs.writeText "prowlarr-dashboard.json" (builtins.toJSON {
     id = null;
     title = "Prowlarr Indexer Manager";
-    tags = ["media" "prowlarr" "p510"];
+    tags = [ "media" "prowlarr" "p510" ];
     timezone = "browser";
     panels = [
       {
@@ -512,7 +511,7 @@ with lib; let
   logsDashboard = pkgs.writeText "logs-dashboard.json" (builtins.toJSON {
     id = null;
     title = "Centralized Logs";
-    tags = ["logs" "loki" "system"];
+    tags = [ "logs" "loki" "system" ];
     timezone = "browser";
     panels = [
       {
@@ -627,7 +626,7 @@ with lib; let
   gpuDashboard = hostname: pkgs.writeText "${hostname}-gpu-dashboard.json" (builtins.toJSON {
     id = null;
     title = "${hostname} - NVIDIA GPU";
-    tags = ["nvidia" "gpu" hostname];
+    tags = [ "nvidia" "gpu" hostname ];
     timezone = "browser";
     panels = [
       {
@@ -788,7 +787,7 @@ with lib; let
   amdGpuDashboard = hostname: pkgs.writeText "${hostname}-amd-gpu-dashboard.json" (builtins.toJSON {
     id = null;
     title = "${hostname} - AMD GPU";
-    tags = ["amd" "gpu" "rocm" hostname];
+    tags = [ "amd" "gpu" "rocm" hostname ];
     timezone = "browser";
     panels = [
       {
@@ -1001,11 +1000,12 @@ with lib; let
     refresh = "30s";
   });
 
-in {
+in
+{
   config = mkIf (cfg.enable && (cfg.mode == "server" || cfg.mode == "standalone")) {
     services.grafana = {
       enable = true;
-      
+
       settings = {
         server = {
           http_addr = "0.0.0.0";
@@ -1013,29 +1013,29 @@ in {
           domain = cfg.serverHost;
           root_url = "http://${cfg.serverHost}:${toString cfg.network.grafanaPort}";
         };
-        
+
         security = {
           admin_user = "admin";
           # Use environment variable instead of plaintext password
           admin_password = "$__env{GRAFANA_ADMIN_PASSWORD}";
           secret_key = "$__env{GRAFANA_SECRET_KEY}";
         };
-        
+
         database = {
           type = "sqlite3";
           path = "/var/lib/grafana/grafana.db";
         };
-        
+
         analytics = {
           reporting_enabled = false;
           check_for_updates = false;
         };
-        
+
         users = {
           allow_sign_up = false;
           auto_assign_org_role = "Viewer";
         };
-        
+
         "auth.anonymous" = {
           enabled = false;
         };
@@ -1044,7 +1044,7 @@ in {
       # Data source provisioning
       provision = {
         enable = true;
-        
+
         datasources.settings = {
           apiVersion = 1;
           datasources = [
@@ -1105,21 +1105,21 @@ in {
       "d /var/lib/grafana/dashboards/media 0755 grafana grafana -"
       "d /var/lib/grafana/dashboards/logs 0755 grafana grafana -"
       "d /var/lib/grafana/dashboards/gpu 0755 grafana grafana -"
-      
+
       # System and host dashboards
       "L+ /var/lib/grafana/dashboards/nixos/system-overview.json - - - - ${nixosDashboard}"
       "L+ /var/lib/grafana/dashboards/hosts/p620.json - - - - ${hostDashboard "p620" "AMD"}"
       "L+ /var/lib/grafana/dashboards/hosts/razer.json - - - - ${hostDashboard "razer" "NVIDIA"}"
       "L+ /var/lib/grafana/dashboards/hosts/p510.json - - - - ${hostDashboard "p510" "NVIDIA"}"
       "L+ /var/lib/grafana/dashboards/hosts/dex5550.json - - - - ${hostDashboard "dex5550" "Intel"}"
-      
+
       # Media service dashboards
       "L+ /var/lib/grafana/dashboards/media/plex.json - - - - ${plexDashboard}"
       "L+ /var/lib/grafana/dashboards/media/sonarr.json - - - - ${sonarrDashboard}"
       "L+ /var/lib/grafana/dashboards/media/radarr.json - - - - ${radarrDashboard}"
       "L+ /var/lib/grafana/dashboards/media/lidarr.json - - - - ${lidarrDashboard}"
       "L+ /var/lib/grafana/dashboards/media/prowlarr.json - - - - ${prowlarrDashboard}"
-      
+
       # Logs dashboard
     ] ++ optionals cfg.features.logging [
       "L+ /var/lib/grafana/dashboards/logs/centralized-logs.json - - - - ${logsDashboard}"

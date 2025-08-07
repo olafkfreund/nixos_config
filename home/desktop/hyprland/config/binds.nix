@@ -1,4 +1,4 @@
-{...}: {
+{ ... }: {
   wayland.windowManager.hyprland.extraConfig = ''
     # System binds
     $mainMod = SUPER

@@ -1,4 +1,4 @@
-{...}: {
+{ ... }: {
   imports = [
     ./imports.nix
     ./base-home.nix

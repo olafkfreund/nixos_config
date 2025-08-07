@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.development.nixd;
-in {
+in
+{
   options.development.nixd = {
     enable = mkEnableOption "nixd language server configuration";
 
@@ -30,19 +30,19 @@ in {
 
     formatterCommand = mkOption {
       type = types.listOf types.str;
-      default = ["alejandra"];
+      default = [ "alejandra" ];
       description = "Command to use for formatting Nix files";
     };
 
     diagnosticsIgnored = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       description = "Diagnostic codes to ignore";
     };
 
     diagnosticsExcluded = mkOption {
       type = types.listOf types.str;
-      default = ["\\.direnv" "result" "\\.git"];
+      default = [ "\\.direnv" "result" "\\.git" ];
       description = "File paths to exclude from diagnostics";
     };
   };
@@ -93,7 +93,7 @@ in {
         };
 
         path = {
-          include = ["**/*.nix"];
+          include = [ "**/*.nix" ];
           exclude = [
             ".direnv/**"
             "result/**"

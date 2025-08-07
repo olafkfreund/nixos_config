@@ -8,12 +8,11 @@
 #   Open an SSH tunnel to run any program remotely and display it locally:
 #      `waypipe ssh user@server`
 #
-{
-  pkgs,
-  lib,
-  ...
+{ pkgs
+, lib
+, ...
 }: {
-  home.packages = [pkgs.waypipe];
+  home.packages = [ pkgs.waypipe ];
   systemd.user.services = {
     waypipe-client = {
       Unit.Description = "Runs waypipe on startup to support SSH forwarding";
@@ -22,7 +21,7 @@
         ExecStart = "${lib.getExe pkgs.waypipe} --socket %h/.waypipe/client.sock client";
         ExecStopPost = "${lib.getExe' pkgs.coreutils "rm"} -f %h/.waypipe/client.sock";
       };
-      Install.WantedBy = ["graphical-session.target"];
+      Install.WantedBy = [ "graphical-session.target" ];
     };
     waypipe-server = {
       Unit.Description = "Runs waypipe on startup to support SSH forwarding";
@@ -32,7 +31,7 @@
         ExecStart = "${lib.getExe pkgs.waypipe} --socket %h/.waypipe/server.sock --title-prefix '[%H] ' --login-shell --display wayland-waypipe server -- ${lib.getExe' pkgs.coreutils "sleep"} infinity";
         ExecStopPost = "${lib.getExe' pkgs.coreutils "rm"} -f %h/.waypipe/server.sock %t/wayland-waypipe";
       };
-      Install.WantedBy = ["default.target"];
+      Install.WantedBy = [ "default.target" ];
     };
   };
 }

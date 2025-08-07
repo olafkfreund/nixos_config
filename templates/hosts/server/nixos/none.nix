@@ -16,50 +16,50 @@
     nethogs
     lm_sensors
     smartmontools
-    
+
     # Hardware diagnostics (no GPU tools)
-    pciutils      # lspci
-    usbutils      # lsusb
-    lshw          # Hardware listing
-    dmidecode     # Hardware information
-    
+    pciutils # lspci
+    usbutils # lsusb
+    lshw # Hardware listing
+    dmidecode # Hardware information
+
     # Network monitoring
-    iftop         # Network bandwidth
-    mtr           # Network diagnostics
-    tcpdump       # Packet capture
-    
+    iftop # Network bandwidth
+    mtr # Network diagnostics
+    tcpdump # Packet capture
+
     # System monitoring
-    sysstat       # System statistics
-    lsof          # Open files
-    strace        # System call tracing
-    
+    sysstat # System statistics
+    lsof # Open files
+    strace # System call tracing
+
     # Process management
-    psmisc        # killall, pstree, etc.
-    procps        # ps, top, etc.
-    
+    psmisc # killall, pstree, etc.
+    procps # ps, top, etc.
+
     # Storage tools
-    parted        # Disk partitioning
-    gptfdisk      # GPT partitioning
-    cryptsetup    # Disk encryption
-    
+    parted # Disk partitioning
+    gptfdisk # GPT partitioning
+    cryptsetup # Disk encryption
+
     # Backup and archiving
-    borgbackup    # Deduplicating backup
-    rsync         # File synchronization
-    rclone        # Cloud storage sync
-    
+    borgbackup # Deduplicating backup
+    rsync # File synchronization
+    rclone # Cloud storage sync
+
     # Security tools
-    fail2ban      # Intrusion prevention
-    rkhunter      # Rootkit hunter
-    chkrootkit    # Rootkit detection
-    
+    fail2ban # Intrusion prevention
+    rkhunter # Rootkit hunter
+    chkrootkit # Rootkit detection
+
     # Remote access (no VNC)
-    openssh       # SSH client
-    mosh          # Mobile shell
-    
+    openssh # SSH client
+    mosh # Mobile shell
+
     # Text processing
-    jq            # JSON processor
-    yq            # YAML processor
-    xmlstarlet    # XML processor
+    jq # JSON processor
+    yq # YAML processor
+    xmlstarlet # XML processor
   ];
 
   # Environment variables for headless operation
@@ -67,16 +67,16 @@
     # Force software rendering if needed
     LIBGL_ALWAYS_SOFTWARE = "1";
     GALLIUM_DRIVER = "llvmpipe";
-    
+
     # Terminal-focused environment
     TERM = "xterm-256color";
-    
+
     # Disable all GPU-related variables
     GPU_MAX_ALLOC_PERCENT = "";
     GPU_USE_SYNC_OBJECTS = "";
     AMD_VULKAN_ICD = "";
     NVIDIA_DRIVER_CAPABILITIES = "";
-    
+
     # Console-only configuration
     DISPLAY = "";
     WAYLAND_DISPLAY = "";
@@ -85,21 +85,21 @@
 
   # No GPU kernel modules
   boot.kernelModules = [ ];
-  
+
   # Server-optimized kernel parameters
   boot.kernelParams = [
-    "nomodeset"           # Disable all kernel modesetting
-    "vga=normal"          # Use basic VGA text mode
-    "quiet"               # Quiet boot for servers
-    "loglevel=3"          # Reduce boot messages
+    "nomodeset" # Disable all kernel modesetting
+    "vga=normal" # Use basic VGA text mode
+    "quiet" # Quiet boot for servers
+    "loglevel=3" # Reduce boot messages
     "systemd.show_status=auto"
     "rd.udev.log_level=3"
-    
+
     # Disable graphics-related features
-    "video=efifb:off"     # Disable EFI framebuffer
-    "i915.modeset=0"      # Disable Intel graphics
-    "radeon.modeset=0"    # Disable AMD graphics
-    "nouveau.modeset=0"   # Disable Nouveau
+    "video=efifb:off" # Disable EFI framebuffer
+    "i915.modeset=0" # Disable Intel graphics
+    "radeon.modeset=0" # Disable AMD graphics
+    "nouveau.modeset=0" # Disable Nouveau
   ];
 
   # Server-optimized kernel configuration
@@ -110,17 +110,17 @@
     "net.ipv4.tcp_rmem" = "4096 65536 134217728";
     "net.ipv4.tcp_wmem" = "4096 65536 134217728";
     "net.ipv4.tcp_congestion_control" = "bbr";
-    
+
     # Memory management for servers
-    "vm.swappiness" = 1;        # Minimize swap usage
-    "vm.dirty_ratio" = 10;      # Conservative disk I/O
+    "vm.swappiness" = 1; # Minimize swap usage
+    "vm.dirty_ratio" = 10; # Conservative disk I/O
     "vm.dirty_background_ratio" = 5;
     "vm.vfs_cache_pressure" = 50;
-    
+
     # Security hardening
     "kernel.kptr_restrict" = 2;
     "kernel.dmesg_restrict" = 1;
-    "kernel.printk" = "3 3 3 3";  # Reduce kernel messages
+    "kernel.printk" = "3 3 3 3"; # Reduce kernel messages
     "kernel.unprivileged_bpf_disabled" = 1;
     "net.core.bpf_jit_harden" = 2;
     "dev.tty.ldisc_autoload" = 0;
@@ -129,7 +129,7 @@
     "kernel.sysrq" = 0;
     "kernel.unprivileged_userns_clone" = 0;
     "kernel.perf_event_paranoid" = 3;
-    
+
     # Network security
     "net.ipv4.tcp_syncookies" = 1;
     "net.ipv4.tcp_rfc1337" = 1;
@@ -164,8 +164,8 @@
   # Power management optimized for efficiency
   powerManagement = {
     enable = true;
-    cpuFreqGovernor = "powersave";  # Maximum power efficiency
-    powertop.enable = true;         # Power optimization
+    cpuFreqGovernor = "powersave"; # Maximum power efficiency
+    powertop.enable = true; # Power optimization
   };
 
   # Completely disable gaming and multimedia
@@ -191,11 +191,11 @@
     # Disable GPU-specific features
     enableAllFirmware = lib.mkDefault false;
     enableRedistributableFirmware = lib.mkDefault true; # Keep for network/storage
-    
+
     # Disable unnecessary hardware
     bluetooth.enable = lib.mkForce false;
     pulseaudio.enable = lib.mkForce false;
-    
+
     # Graphics completely disabled
     graphics.enable = lib.mkForce false;
   };
@@ -204,7 +204,7 @@
   console = {
     enable = true;
     font = "Lat2-Terminus16";
-    useXkbConfig = false;  # No X11 keyboard config needed
+    useXkbConfig = false; # No X11 keyboard config needed
     packages = with pkgs; [ terminus_font ];
   };
 
@@ -212,11 +212,11 @@
   networking = {
     # Use networkd for server-style networking
     useNetworkd = lib.mkDefault true;
-    dhcpcd.enable = lib.mkDefault false;  # Use systemd-networkd instead
-    
+    dhcpcd.enable = lib.mkDefault false; # Use systemd-networkd instead
+
     # Minimal network configuration
     usePredictableInterfaceNames = true;
-    
+
     # Enable IPv6
     enableIPv6 = true;
   };
@@ -233,8 +233,8 @@
         networkConfig = {
           DHCP = "ipv4";
           IPv6AcceptRA = true;
-          MulticastDNS = false;  # Disable for servers
-          LLMNR = false;         # Disable for servers
+          MulticastDNS = false; # Disable for servers
+          LLMNR = false; # Disable for servers
           LinkLocalAddressing = "ipv6";
         };
         dhcpV4Config = {
@@ -275,15 +275,15 @@
   # Strict firewall configuration for servers
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 22 ];  # SSH only by default
+    allowedTCPPorts = [ 22 ]; # SSH only by default
     allowedUDPPorts = [ ];
-    
+
     # Strict firewall settings
     allowPing = true;
     logReversePathDrops = true;
-    logRefusedConnections = false;  # Reduce log spam
-    logRefusedPackets = false;      # Reduce log spam
-    
+    logRefusedConnections = false; # Reduce log spam
+    logRefusedPackets = false; # Reduce log spam
+
     # Extra security rules
     extraCommands = ''
       # Rate limit SSH connections
@@ -300,7 +300,7 @@
 
   # Completely minimal font configuration
   fonts = {
-    enableDefaultPackages = false;  # Disable all GUI fonts
+    enableDefaultPackages = false; # Disable all GUI fonts
     packages = with pkgs; [
       # Only console fonts
       terminus_font
@@ -317,7 +317,7 @@
     rtkit-daemon.enable = lib.mkForce false;
     alsa-state.enable = lib.mkForce false;
     udisks2.enable = lib.mkForce false;
-    
+
     # Keep essential services only
     sshd.enable = lib.mkDefault true;
     fail2ban.enable = lib.mkDefault true;
@@ -349,44 +349,44 @@
     unzip
     tar
     gzip
-    
+
     # Network tools
-    bind          # dig, nslookup
-    iproute2      # ip command
-    ethtool       # Network interface tools
-    iperf3        # Network performance
-    mtr           # Network diagnostics
-    nmap          # Network scanner
-    
+    bind # dig, nslookup
+    iproute2 # ip command
+    ethtool # Network interface tools
+    iperf3 # Network performance
+    mtr # Network diagnostics
+    nmap # Network scanner
+
     # System administration
-    pciutils      # lspci
-    usbutils      # lsusb
-    util-linux    # Various utilities
-    procps        # ps, top, etc.
-    sysstat       # System statistics
-    lm_sensors    # Hardware sensors
+    pciutils # lspci
+    usbutils # lsusb
+    util-linux # Various utilities
+    procps # ps, top, etc.
+    sysstat # System statistics
+    lm_sensors # Hardware sensors
     smartmontools # Disk health
-    
+
     # Security
     fail2ban
     rkhunter
     chkrootkit
-    
+
     # Monitoring
-    nethogs       # Network usage per process
-    iftop         # Network bandwidth usage
-    
+    nethogs # Network usage per process
+    iftop # Network bandwidth usage
+
     # File management
-    findutils     # find, locate, etc.
-    coreutils     # Basic utilities
-    diffutils     # diff, cmp, etc.
-    
+    findutils # find, locate, etc.
+    coreutils # Basic utilities
+    diffutils # diff, cmp, etc.
+
     # Text processing
-    gnugrep       # grep
-    gnused        # sed
-    gawk          # awk
-    less          # pager
-    
+    gnugrep # grep
+    gnused # sed
+    gawk # awk
+    less # pager
+
     # Compression
     bzip2
     xz
@@ -394,7 +394,7 @@
   ]);
 
   # Systemd user services disabled
-  systemd.user.services = {};
+  systemd.user.services = { };
   systemd.user.targets.default.enable = lib.mkForce false;
 
   # Optimized logging configuration for servers
@@ -413,7 +413,7 @@
     enable = lib.mkDefault false;
     doc.enable = lib.mkDefault false;
     info.enable = lib.mkDefault false;
-    man.enable = lib.mkDefault true;  # Keep man pages
+    man.enable = lib.mkDefault true; # Keep man pages
     nixos.enable = lib.mkDefault false;
   };
 
@@ -422,11 +422,11 @@
     # Disable GUI security features
     polkit.enable = lib.mkDefault false;
     rtkit.enable = lib.mkForce false;
-    
+
     # Enable essential security
     sudo.enable = true;
     pam.services.sudo.requireWheel = true;
-    
+
     # Login limits for server performance
     pam.loginLimits = [
       {
@@ -455,7 +455,7 @@
     # Keep container support but disable GUI
     docker.enable = lib.mkDefault false;
     podman.enable = lib.mkDefault false;
-    
+
     # Completely disable desktop virtualization
     libvirtd.enable = lib.mkDefault false;
     virtualbox.host.enable = lib.mkForce false;
@@ -468,11 +468,11 @@
       # File system performance
       "fs.file-max" = 2097152;
       "fs.nr_open" = 1048576;
-      
+
       # Process limits
       "kernel.pid_max" = 4194304;
       "kernel.threads-max" = 1048576;
-      
+
       # Memory management
       "vm.max_map_count" = 262144;
       "vm.min_free_kbytes" = 65536;

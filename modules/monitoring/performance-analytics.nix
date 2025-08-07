@@ -4,121 +4,122 @@
 with lib;
 let
   cfg = config.monitoring.performanceAnalytics;
-in {
+in
+{
   options.monitoring.performanceAnalytics = {
     enable = mkEnableOption "Enable performance monitoring and analytics";
-    
+
     dataRetention = mkOption {
       type = types.str;
       default = "30d";
       description = "Performance data retention period";
     };
-    
+
     analysisInterval = mkOption {
       type = types.str;
       default = "5m";
       description = "Performance analysis interval";
     };
-    
+
     metricsCollection = {
       enable = mkEnableOption "Enable comprehensive metrics collection";
-      
+
       systemMetrics = mkOption {
         type = types.bool;
         default = true;
         description = "Collect system performance metrics";
       };
-      
+
       applicationMetrics = mkOption {
         type = types.bool;
         default = true;
         description = "Collect application performance metrics";
       };
-      
+
       networkMetrics = mkOption {
         type = types.bool;
         default = true;
         description = "Collect network performance metrics";
       };
-      
+
       storageMetrics = mkOption {
         type = types.bool;
         default = true;
         description = "Collect storage performance metrics";
       };
-      
+
       aiMetrics = mkOption {
         type = types.bool;
         default = true;
         description = "Collect AI workload performance metrics";
       };
     };
-    
+
     analytics = {
       enable = mkEnableOption "Enable performance analytics and insights";
-      
+
       trendAnalysis = mkOption {
         type = types.bool;
         default = true;
         description = "Enable performance trend analysis";
       };
-      
+
       anomalyDetection = mkOption {
         type = types.bool;
         default = true;
         description = "Enable performance anomaly detection";
       };
-      
+
       predictiveAnalysis = mkOption {
         type = types.bool;
         default = true;
         description = "Enable predictive performance analysis";
       };
-      
+
       bottleneckDetection = mkOption {
         type = types.bool;
         default = true;
         description = "Enable performance bottleneck detection";
       };
     };
-    
+
     reporting = {
       enable = mkEnableOption "Enable performance reporting";
-      
+
       dailyReports = mkOption {
         type = types.bool;
         default = true;
         description = "Generate daily performance reports";
       };
-      
+
       weeklyReports = mkOption {
         type = types.bool;
         default = true;
         description = "Generate weekly performance reports";
       };
-      
+
       alertThresholds = mkOption {
         type = types.bool;
         default = true;
         description = "Enable performance threshold alerting";
       };
     };
-    
+
     dashboards = {
       enable = mkEnableOption "Enable performance dashboards";
-      
+
       realTimeMetrics = mkOption {
         type = types.bool;
         default = true;
         description = "Enable real-time performance dashboards";
       };
-      
+
       historicalAnalysis = mkOption {
         type = types.bool;
         default = true;
         description = "Enable historical performance analysis";
       };
-      
+
       customMetrics = mkOption {
         type = types.bool;
         default = true;
@@ -134,7 +135,7 @@ in {
       after = [ "network.target" ];
       wants = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
-      
+
       serviceConfig = {
         Type = "simple";
         User = "root";
@@ -377,7 +378,7 @@ in {
         '';
       };
     };
-    
+
     # Performance Report Generator
     systemd.services.performance-reporter = mkIf cfg.reporting.enable {
       description = "Performance Report Generator";
@@ -465,7 +466,7 @@ in {
         '';
       };
     };
-    
+
     # Performance Dashboard Provisioning
     systemd.services.performance-dashboard-provisioner = mkIf cfg.dashboards.enable {
       description = "Performance Dashboard Provisioner";
@@ -607,7 +608,7 @@ in {
         '';
       };
     };
-    
+
     # Timers for regular operations
     systemd.timers.performance-reporter = mkIf cfg.reporting.enable {
       description = "Performance Report Generator Timer";
@@ -618,26 +619,26 @@ in {
         RandomizedDelaySec = "10m";
       };
     };
-    
+
     # Create directories
     systemd.tmpfiles.rules = [
       "d /var/lib/performance-analytics 0755 root root -"
       "d /var/log/performance-analytics 0755 root root -"
       "d /var/lib/performance-analytics/reports 0755 root root -"
     ];
-    
+
     # Performance analytics packages
     environment.systemPackages = with pkgs; [
-      bc           # Calculations
-      jq           # JSON processing
-      gnuplot      # Data visualization
-      python3      # For advanced analytics
-      procps       # Provides top, free commands
-      gawk         # Provides awk command
-      iproute2     # Provides ss command for network monitoring
-      util-linux   # Provides additional system utilities
-      gnugrep      # Provides grep command
-      gnused       # Provides sed command
+      bc # Calculations
+      jq # JSON processing
+      gnuplot # Data visualization
+      python3 # For advanced analytics
+      procps # Provides top, free commands
+      gawk # Provides awk command
+      iproute2 # Provides ss command for network monitoring
+      util-linux # Provides additional system utilities
+      gnugrep # Provides grep command
+      gnused # Provides sed command
     ];
   };
 }

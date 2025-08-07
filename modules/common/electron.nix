@@ -1,13 +1,13 @@
 # modules/desktop/electron.nix
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.electron-apps;
-in {
+in
+{
   options.electron-apps = {
     enable = mkEnableOption "Electron applications with Wayland optimizations";
 
@@ -36,7 +36,8 @@ in {
           --force-fieldtrials="NetworkQualityEstimator/Enabled/"
           --enable-features=NetworkServiceInProcess
         '';
-      in ''
+      in
+      ''
         # Create Electron flags configuration file for each user
         for userDir in /home/*; do
           if [ -d "$userDir" ]; then

@@ -4,73 +4,74 @@
 with lib;
 let
   cfg = config.security.sshHardening;
-in {
+in
+{
   options.security.sshHardening = {
     enable = mkEnableOption "Enable SSH security hardening";
-    
+
     allowedUsers = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       description = "List of users allowed SSH access";
     };
-    
+
     allowPasswordAuthentication = mkOption {
       type = types.bool;
       default = false;
       description = "Allow password authentication (disabled by default for security)";
     };
-    
+
     allowRootLogin = mkOption {
       type = types.bool;
       default = false;
       description = "Allow root login via SSH (disabled by default)";
     };
-    
+
     maxAuthTries = mkOption {
       type = types.int;
       default = 3;
       description = "Maximum authentication attempts per connection";
     };
-    
+
     clientAliveInterval = mkOption {
       type = types.int;
       default = 300;
       description = "Time (in seconds) the server will wait before sending a null packet to the client";
     };
-    
+
     clientAliveCountMax = mkOption {
       type = types.int;
       default = 2;
       description = "Number of client alive messages sent without client response";
     };
-    
+
     listenPort = mkOption {
       type = types.int;
       default = 22;
       description = "SSH listen port";
     };
-    
+
     enableFail2Ban = mkOption {
       type = types.bool;
       default = true;
       description = "Enable fail2ban for SSH protection";
     };
-    
+
     enableKeyOnlyAccess = mkOption {
       type = types.bool;
       default = true;
       description = "Enable key-only access (disables password authentication)";
     };
-    
+
     enableStrictModes = mkOption {
       type = types.bool;
       default = true;
       description = "Enable strict file and directory permission checks";
     };
-    
+
     trustedNetworks = mkOption {
       type = types.listOf types.str;
-      default = ["192.168.1.0/24" "10.0.0.0/8" "172.16.0.0/12"];
+      default = [ "192.168.1.0/24" "10.0.0.0/8" "172.16.0.0/12" ];
       description = "List of trusted network CIDRs for SSH access";
     };
   };
@@ -80,7 +81,7 @@ in {
     services.openssh = {
       enable = true;
       ports = [ cfg.listenPort ];
-      
+
       settings = {
         # Authentication
         PasswordAuthentication = cfg.allowPasswordAuthentication;
@@ -88,14 +89,14 @@ in {
         PubkeyAuthentication = true;
         AuthenticationMethods = if cfg.enableKeyOnlyAccess then "publickey" else "publickey,password";
         MaxAuthTries = cfg.maxAuthTries;
-        
+
         # Connection settings
         ClientAliveInterval = cfg.clientAliveInterval;
         ClientAliveCountMax = cfg.clientAliveCountMax;
         MaxSessions = 10;
         MaxStartups = "10:30:100";
         LoginGraceTime = 60;
-        
+
         # Security settings
         Protocol = 2;
         StrictModes = cfg.enableStrictModes;
@@ -106,19 +107,19 @@ in {
         KerberosAuthentication = false;
         GSSAPIAuthentication = false;
         UsePAM = true;
-        
+
         # Logging
         LogLevel = "VERBOSE";
-        
+
         # Compression
         Compression = false;
-        
+
         # Forwarding restrictions
         AllowTcpForwarding = "yes";
         AllowAgentForwarding = "yes";
         GatewayPorts = "no";
         X11Forwarding = mkForce false;
-        
+
         # Modern cryptography
         KexAlgorithms = [
           "curve25519-sha256"
@@ -127,7 +128,7 @@ in {
           "diffie-hellman-group18-sha512"
           "diffie-hellman-group-exchange-sha256"
         ];
-        
+
         Ciphers = [
           "chacha20-poly1305@openssh.com"
           "aes256-gcm@openssh.com"
@@ -136,7 +137,7 @@ in {
           "aes192-ctr"
           "aes128-ctr"
         ];
-        
+
         Macs = [
           "hmac-sha2-256-etm@openssh.com"
           "hmac-sha2-512-etm@openssh.com"
@@ -144,7 +145,7 @@ in {
           "hmac-sha2-512"
         ];
       };
-      
+
       # Only allow specific users if configured
       allowSFTP = false;
       extraConfig = ''
@@ -193,7 +194,7 @@ in {
       enable = true;
       maxretry = cfg.maxAuthTries;
       bantime = "1h";
-      
+
       jails = {
         ssh.settings = {
           enabled = true;
@@ -208,7 +209,7 @@ in {
     # Firewall configuration for SSH
     networking.firewall = {
       allowedTCPPorts = [ cfg.listenPort ];
-      
+
       # Extra rules for SSH protection
       extraCommands = ''
         # Rate limiting for SSH connections
@@ -221,7 +222,7 @@ in {
         # Log dropped SSH attempts
         iptables -A INPUT -p tcp --dport ${toString cfg.listenPort} -j LOG --log-prefix "SSH-DROP: " --log-level 4
       '';
-      
+
       extraStopCommands = ''
         # Clean up SSH rules
         iptables -D INPUT -p tcp --dport ${toString cfg.listenPort} -m conntrack --ctstate NEW -m recent --set --name SSH_LIMIT 2>/dev/null || true
@@ -275,7 +276,7 @@ in {
         ExecStart = "${pkgs.systemd}/bin/journalctl --vacuum-time=30d --unit=sshd";
       };
     };
-    
+
     systemd.timers.ssh-journal-cleanup = {
       description = "SSH Journal Cleanup Timer";
       wantedBy = [ "timers.target" ];
@@ -290,7 +291,7 @@ in {
       description = "SSH Connection Monitor";
       after = [ "network.target" "sshd.service" ];
       wants = [ "sshd.service" ];
-      
+
       serviceConfig = {
         Type = "oneshot";
         User = "root";
@@ -384,7 +385,7 @@ in {
           fi
         done
       '')
-      
+
       (writeShellScriptBin "ssh-user-keys" ''
         #!/bin/bash
         
@@ -470,7 +471,7 @@ in {
     # SSH security audit script
     systemd.services.ssh-security-audit = {
       description = "SSH Security Audit";
-      
+
       serviceConfig = {
         Type = "oneshot";
         User = "root";

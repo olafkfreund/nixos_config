@@ -1,6 +1,8 @@
-{...}: let
+{ ... }:
+let
   vars = import ../variables.nix;
-in {
+in
+{
   home-manager.extraSpecialArgs = {
     vars = {
       hostName = vars.hostName;

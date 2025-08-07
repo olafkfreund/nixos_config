@@ -1,6 +1,5 @@
-{
-  pkgs,
-  ...
+{ pkgs
+, ...
 }: {
   environment.systemPackages = with pkgs; [
     lavat #lava lamp

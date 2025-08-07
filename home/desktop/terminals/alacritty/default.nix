@@ -1,11 +1,11 @@
-{
-  config,
-  lib,
-  ...
+{ config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.alacritty;
-in {
+in
+{
   options.alacritty = {
     enable = mkEnableOption {
       default = false;

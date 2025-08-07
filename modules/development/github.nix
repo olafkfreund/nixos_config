@@ -1,17 +1,17 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.github.development;
-in {
+in
+{
   options.github.development = {
     enable = mkEnableOption "Enable GitHub development environment";
     packages = mkOption {
       type = with types; listOf str;
-      default = [];
+      default = [ ];
       description = "Packages to install for GitHub development";
     };
   };

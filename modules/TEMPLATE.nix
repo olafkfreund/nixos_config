@@ -1,14 +1,14 @@
 # NixOS Module Template
 # This template provides a standardized structure for all modules in this configuration
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.modules.category.moduleName;
-in {
+in
+{
   # Module metadata (optional but recommended for complex modules)
   meta = {
     description = "Brief description of what this module provides";
@@ -24,7 +24,7 @@ in {
     # Example package selection option
     packages = mkOption {
       type = types.listOf types.package;
-      default = [];
+      default = [ ];
       description = ''
         List of additional packages to install with this module.
         These extend the default package set.
@@ -40,7 +40,7 @@ in {
     # Example configuration option
     settings = mkOption {
       type = types.attrsOf types.anything;
-      default = {};
+      default = { };
       description = ''
         Configuration settings for the module.
         These will be merged with default settings.
@@ -59,7 +59,7 @@ in {
     # Example user-specific option
     users = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       description = ''
         List of users who should have access to this module's features.
         Empty list means all users have access.
@@ -95,14 +95,14 @@ in {
 
     # Environment variables (if applicable)
     environment.sessionVariables = {
-      MODULE_CONFIG = toString (pkgs.writeText "module-config" 
-        (generators.toINI {} cfg.settings));
+      MODULE_CONFIG = toString (pkgs.writeText "module-config"
+        (generators.toINI { } cfg.settings));
     };
 
     # Assertions for validation
     assertions = [
       {
-        assertion = cfg.users == [] || all (user: hasAttr user config.users.users) cfg.users;
+        assertion = cfg.users == [ ] || all (user: hasAttr user config.users.users) cfg.users;
         message = "All users specified in modules.category.moduleName.users must exist";
       }
     ];

@@ -1,6 +1,5 @@
-{
-  pkgs,
-  ...
+{ pkgs
+, ...
 }: {
   environment.systemPackages = with pkgs; [
     # Core utilities (from consolidated sets)
@@ -19,7 +18,7 @@
     wget
     unzip
     zip
-    
+
     # Network utilities
     mtr
     iperf3
@@ -27,12 +26,12 @@
     ldns
     nmap
     ipcalc
-    
+
     # System monitoring
     htop
     btop
     iotop
-    
+
     # Additional system-specific packages
     bc
     zstd
@@ -98,7 +97,7 @@
     chatterino2
     twitch-tui
     deploy-rs
-    
+
     # External packages (iwmenu and bzmenu removed - not used)
-    ];
+  ];
 }

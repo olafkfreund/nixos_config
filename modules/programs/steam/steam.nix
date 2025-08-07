@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{ pkgs, ... }: {
   #Steam
   hardware.steam-hardware.enable = true;
 
@@ -34,5 +34,5 @@
     "vm.max_map_count" = 2147483642;
   };
 
-  environment.sessionVariables = {WINEDEBUG = "-all";};
+  environment.sessionVariables = { WINEDEBUG = "-all"; };
 }

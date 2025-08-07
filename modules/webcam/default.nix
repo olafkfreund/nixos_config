@@ -1,12 +1,12 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
+{ pkgs
+, config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.programs.webcam;
-in {
+in
+{
   options.programs.webcam = {
     enable = mkEnableOption {
       default = false;

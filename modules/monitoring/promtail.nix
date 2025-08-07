@@ -1,13 +1,13 @@
 # Promtail Log Collection Module
 # Collects logs from systemd journal and sends to Loki
-{
-  config,
-  lib,
-  ...
+{ config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.services.promtail-logging;
-in {
+in
+{
   options.services.promtail-logging = {
     enable = mkEnableOption "Promtail log collection for centralized logging";
 
@@ -43,7 +43,7 @@ in {
 
     extraScrapeConfigs = mkOption {
       type = types.listOf types.attrs;
-      default = [];
+      default = [ ];
       description = "Additional scrape configurations";
     };
   };
@@ -51,7 +51,7 @@ in {
   config = mkIf cfg.enable {
     services.promtail = {
       enable = true;
-      
+
       configuration = {
         server = {
           http_listen_port = 9080;
@@ -68,15 +68,16 @@ in {
             external_labels = {
               hostname = cfg.hostname;
               environment = "production";
-              role = if config.networking.hostName == "dex5550" then "monitoring" 
-                     else if config.networking.hostName == "p510" then "media-server"
-                     else if config.networking.hostName == "p620" then "workstation"
-                     else "client";
+              role =
+                if config.networking.hostName == "dex5550" then "monitoring"
+                else if config.networking.hostName == "p510" then "media-server"
+                else if config.networking.hostName == "p620" then "workstation"
+                else "client";
             };
           }
         ];
 
-        scrape_configs = 
+        scrape_configs =
           # Systemd journal logs
           (optionals cfg.collectJournal [
             {
@@ -108,7 +109,7 @@ in {
               ];
             }
           ]) ++
-          
+
           # Kernel logs  
           (optionals cfg.collectKernel [
             {
@@ -176,8 +177,8 @@ in {
       createHome = true;
       extraGroups = [ "systemd-journal" ]; # Access to journal
     };
-    
-    users.groups.promtail = {};
+
+    users.groups.promtail = { };
 
     # Systemd service optimizations
     systemd.services.promtail = {
@@ -185,25 +186,25 @@ in {
         # Resource limits
         MemoryMax = "256M";
         CPUQuota = "50%";
-        
+
         # Security hardening
         NoNewPrivileges = true;
         ProtectSystem = "strict";
         ProtectHome = true;
         ReadWritePaths = [ "/var/lib/promtail" ];
         ReadOnlyPaths = [ "/var/log" "/dev/kmsg" ];
-        
+
         # Restart policy  
         Restart = lib.mkForce "always";
         RestartSec = "10s";
-        
+
         # Health monitoring
         WatchdogSec = "120s";
-        
+
         # Ensure access to journal
         SupplementaryGroups = [ "systemd-journal" ];
       };
-      
+
       # Dependencies
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];

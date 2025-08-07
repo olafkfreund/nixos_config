@@ -1,6 +1,5 @@
-{
-  lib,
-  ...
+{ lib
+, ...
 }: {
   imports = [
     # Import common modules

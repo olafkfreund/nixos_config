@@ -1,6 +1,6 @@
 # Enhanced Modern Zsh Configuration
 # Optimized for performance, maintainability, and developer experience
-{pkgs, lib, ...}:
+{ pkgs, lib, ... }:
 with lib;
 {
   imports = [
@@ -13,30 +13,30 @@ with lib;
     zsh
     oh-my-zsh
     zplug
-    
+
     # Essential lightweight plugins
     zsh-edit
     zsh-autopair
     zsh-clipboard
     any-nix-shell
-    
+
     # Modern shell tools
-    atuin          # Better history
-    zoxide         # Smart directory navigation
-    eza            # Better ls
-    bat            # Better cat
-    ripgrep        # Better grep
-    fd             # Better find
-    bottom         # Better top
-    dust           # Better du
-    tokei          # Code statistics
-    
+    atuin # Better history
+    zoxide # Smart directory navigation
+    eza # Better ls
+    bat # Better cat
+    ripgrep # Better grep
+    fd # Better find
+    bottom # Better top
+    dust # Better du
+    tokei # Code statistics
+
     # Development tools
     lazygit
-    delta          # Better git diff
-    
+    delta # Better git diff
+
     # Productivity
-    glow           # Markdown viewer
+    glow # Markdown viewer
     # claude-code managed by claude-integration module
   ];
 
@@ -55,7 +55,7 @@ with lib;
   programs.zsh = {
     enable = true;
     enableCompletion = true;
-    
+
     # Enhanced syntax highlighting with better performance
     syntaxHighlighting = {
       enable = true;
@@ -69,7 +69,7 @@ with lib;
         unknown-token = "fg=#cc241d";
       };
     };
-    
+
     # Enhanced autosuggestions
     autosuggestion = {
       enable = true;
@@ -87,7 +87,7 @@ with lib;
         }
       ];
     };
-    
+
     # Optimized plugin selection - removed redundancies and conflicts
     plugins = [
       # Essential productivity plugins
@@ -96,42 +96,42 @@ with lib;
         src = pkgs.zsh-fzf-tab;
         file = "share/fzf-tab/fzf-tab.plugin.zsh";
       }
-      
+
       # Nix integration (essential for NixOS)
       {
         name = "zsh-nix-shell";
         src = pkgs.zsh-nix-shell;
         file = "share/zsh-nix-shell/nix-shell.plugin.zsh";
       }
-      
+
       # Git integration
       {
         name = "zsh-forgit";
         src = pkgs.zsh-forgit;
         file = "share/zsh/zsh-forgit/forgit.plugin.zsh";
       }
-      
+
       # Enhanced editing
       {
         name = "zsh-edit";
         src = pkgs.zsh-edit;
         file = "share/zsh-edit/zsh-edit.plugin.zsh";
       }
-      
+
       # Nix completions
       {
         name = "nix-zsh-completions";
         src = pkgs.nix-zsh-completions;
         file = "share/zsh/plugins/nix/nix-zsh-completions.plugin.zsh";
       }
-      
+
       # Helpful suggestions (learn aliases)
       {
         name = "zsh-you-should-use";
         src = pkgs.zsh-you-should-use;
         file = "share/zsh/plugins/you-should-use/you-should-use.plugin.zsh";
       }
-      
+
       # Note: Removed zsh-syntax-highlighting plugin since we use built-in syntaxHighlighting
       # Note: Removed zsh-autosuggestions plugin since we use built-in autosuggestion
       # Note: Removed zsh-autocomplete to avoid conflicts with built-in completion
@@ -319,17 +319,17 @@ with lib;
     oh-my-zsh = {
       enable = true;
       plugins = [
-        "sudo"         # Essential utility
-        "direnv"       # Development environment
-        "history"      # History management
-        "starship"     # Prompt integration
-        "git"          # Git integration
-        "terraform"    # Infrastructure
-        "aws"          # Cloud
-        "azure"        # Cloud
-        "1password"    # Productivity
-        "emoji-clock"  # Fun utility
-        "lxd"          # Containers
+        "sudo" # Essential utility
+        "direnv" # Development environment
+        "history" # History management
+        "starship" # Prompt integration
+        "git" # Git integration
+        "terraform" # Infrastructure
+        "aws" # Cloud
+        "azure" # Cloud
+        "1password" # Productivity
+        "emoji-clock" # Fun utility
+        "lxd" # Containers
       ];
       theme = "gruvbox";
     };
@@ -337,13 +337,13 @@ with lib;
     # Enhanced shell aliases - only forcing critical improvements where needed
     shellAliases = {
       # Core Git enhancements (using mkForce to override existing)
-      gc = lib.mkForce "git commit -v";  # More verbose commits
-      gl = lib.mkForce "git log --oneline --graph --decorate";  # Better git log
-      
+      gc = lib.mkForce "git commit -v"; # More verbose commits
+      gl = lib.mkForce "git log --oneline --graph --decorate"; # Better git log
+
       # NixOS management aliases
       nhs = "nh os switch";
       nhu = "nh home switch";
-      
+
       # Safe unique aliases
       reload = "exec zsh";
       weather = "curl -s https://wttr.in/London";
@@ -361,8 +361,8 @@ with lib;
       enable = true;
       enableZshIntegration = true;
     };
-    
-    
+
+
     # Enhanced directory listing
     eza = {
       enable = true;
@@ -370,9 +370,9 @@ with lib;
       icons = "auto";
       git = true;
     };
-    
+
     # Note: bat configuration managed by home/shell/bat/default.nix
-    
+
     # Modern git UI
     lazygit = {
       enable = true;

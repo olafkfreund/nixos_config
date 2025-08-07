@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.k8s.packages;
-in {
+in
+{
   options.k8s.packages = {
     enable = mkEnableOption "Enable k8s packages";
   };

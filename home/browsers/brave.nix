@@ -1,12 +1,12 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
+{ pkgs
+, config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.browsers.brave;
-in {
+in
+{
   options.browsers.brave = {
     enable = mkEnableOption "Brave browser";
   };
@@ -30,7 +30,7 @@ in {
         "--gtk-version=4"
       ];
       extensions = [
-        {id = "eimadpbcbfnmbkopoojfekhnkhdbieeh";} # Dark Reader
+        { id = "eimadpbcbfnmbkopoojfekhnkhdbieeh"; } # Dark Reader
       ];
     };
   };

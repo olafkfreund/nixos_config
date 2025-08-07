@@ -52,6 +52,60 @@ validate-full:
     ./scripts/validate-config.sh
     ./scripts/validate-quality.sh
 
+# =============================================================================
+# PRE-COMMIT HOOKS
+# =============================================================================
+
+# Install pre-commit hooks
+pre-commit-install:
+    @echo "🔨 Installing pre-commit hooks..."
+    pre-commit install
+    @echo "✅ Pre-commit hooks installed!"
+
+# Run all pre-commit hooks
+pre-commit-run:
+    @echo "🧪 Running all pre-commit hooks..."
+    pre-commit run --all-files
+
+# Run pre-commit hooks on staged files only
+pre-commit-staged:
+    @echo "🧪 Running pre-commit hooks on staged files..."
+    pre-commit run
+
+# Update pre-commit hook versions
+pre-commit-update:
+    @echo "⬆️ Updating pre-commit hooks..."
+    pre-commit autoupdate
+    @echo "✅ Pre-commit hooks updated!"
+
+# Clean pre-commit cache
+pre-commit-clean:
+    @echo "🧹 Cleaning pre-commit cache..."
+    pre-commit clean
+    @echo "✅ Pre-commit cache cleaned!"
+
+# Run specific pre-commit hook
+pre-commit-hook HOOK:
+    @echo "🧪 Running pre-commit hook: {{HOOK}}..."
+    pre-commit run {{HOOK}} --all-files
+
+# Format all files using pre-commit
+format-all:
+    @echo "🎨 Formatting all files..."
+    pre-commit run nixpkgs-fmt --all-files || true
+    pre-commit run shfmt --all-files || true 
+    pre-commit run prettier --all-files || true
+    @echo "✅ All files formatted!"
+
+# Lint all files using pre-commit  
+lint-all:
+    @echo "🔍 Linting all files..."
+    pre-commit run statix --all-files || true
+    pre-commit run deadnix --all-files || true
+    pre-commit run shellcheck --all-files || true
+    pre-commit run markdownlint --all-files || true
+    @echo "✅ All files linted!"
+
 # Test all configurations build successfully
 test-all:
     @echo "🧪 Testing all NixOS configurations..."

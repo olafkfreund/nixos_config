@@ -1,14 +1,14 @@
 # Enhanced Modern Zellij Configuration
 # Optimized for speed, maintainability, and seamless integration with Zsh/Starship
-{
-  pkgs,
-  config,
-  lib,
-  ...
-}: 
-with lib; let 
+{ pkgs
+, config
+, lib
+, ...
+}:
+with lib; let
   cfg = config.multiplexer.zellij;
-in {
+in
+{
   options.multiplexer.zellij = {
     enable = mkEnableOption {
       default = false;
@@ -19,9 +19,9 @@ in {
     programs.zellij = {
       enable = true;
       enableBashIntegration = false;
-      enableZshIntegration = false;  # Disable auto-start
+      enableZshIntegration = false; # Disable auto-start
       package = pkgs.zellij;
-      
+
       # Enhanced settings for modern development workflow
       settings = {
         # Core configuration
@@ -29,14 +29,14 @@ in {
         simplified_ui = true;
         copy_command = lib.getExe' pkgs.wl-clipboard "wl-copy";
         copy_on_select = false;
-        hide_session_name = false;  # Show session name for better context
+        hide_session_name = false; # Show session name for better context
         session_serialization = true;
-        
+
         # Modern UI enhancements
-        pane_frames = true;  # Enable for better visual separation
+        pane_frames = true; # Enable for better visual separation
         default_layout = "compact";
         theme = lib.mkForce "gruvbox-dark";
-        
+
         # Enhanced UI configuration
         ui = {
           pane_frames = {
@@ -44,19 +44,19 @@ in {
             rounded_corners = true;
           };
         };
-        
+
         # Essential plugins for productivity (only basic ones that work)
         plugins = [
           "status-bar"
-          "tab-bar" 
+          "tab-bar"
           "compact-bar"
         ];
-        
+
         # Performance and behavior optimizations
         scrollback_editor = "${pkgs.neovim}/bin/nvim";
         default_mode = "normal";
         mouse_mode = true;
-        
+
         # Basic keybindings - simplified to avoid parsing errors
         keybinds = {
           normal = {
@@ -65,29 +65,29 @@ in {
             "bind \"j\"" = { MoveFocus = "Down"; };
             "bind \"k\"" = { MoveFocus = "Up"; };
             "bind \"l\"" = { MoveFocus = "Right"; };
-            
+
             # Basic tab management
-            "bind \"t\"" = { NewTab = {}; };
-            "bind \"x\"" = { CloseTab = {}; };
-            
+            "bind \"t\"" = { NewTab = { }; };
+            "bind \"x\"" = { CloseTab = { }; };
+
             # Basic pane splitting
             "bind \"|\"" = { NewPane = "Right"; };
             "bind \"-\"" = { NewPane = "Down"; };
-            
+
             # Basic functionality
-            "bind \"f\"" = { ToggleFloatingPanes = {}; };
-            "bind \"z\"" = { ToggleFocusFullscreen = {}; };
+            "bind \"f\"" = { ToggleFloatingPanes = { }; };
+            "bind \"z\"" = { ToggleFocusFullscreen = { }; };
           };
-          
+
           # Simplified scroll mode
           scroll = {
-            "bind \"j\"" = { ScrollDown = {}; };
-            "bind \"k\"" = { ScrollUp = {}; };
-            "bind \"d\"" = { HalfPageScrollDown = {}; };
-            "bind \"u\"" = { HalfPageScrollUp = {}; };
+            "bind \"j\"" = { ScrollDown = { }; };
+            "bind \"k\"" = { ScrollUp = { }; };
+            "bind \"d\"" = { HalfPageScrollDown = { }; };
+            "bind \"u\"" = { HalfPageScrollUp = { }; };
           };
         };
-        
+
         # Enhanced theming
         themes = {
           gruvbox-dark = {
@@ -106,7 +106,7 @@ in {
         };
       };
     };
-    
+
     # Enhanced shell aliases for productivity
     home.shellAliases = {
       zj = "zellij";
@@ -117,13 +117,13 @@ in {
       zjr = "zellij run";
       zje = "zellij edit";
     };
-    
+
     # Additional packages for enhanced Zellij experience
     home.packages = with pkgs; [
-      zjstatus      # Enhanced status bar
-      tmate         # Terminal sharing
+      zjstatus # Enhanced status bar
+      tmate # Terminal sharing
     ];
-    
+
     # Zellij configuration directory setup
     xdg.configFile."zellij/layouts/development.kdl".text = ''
       layout {
@@ -148,7 +148,7 @@ in {
           }
       }
     '';
-    
+
     xdg.configFile."zellij/layouts/simple.kdl".text = ''
       layout {
           pane size=1 borderless=true {

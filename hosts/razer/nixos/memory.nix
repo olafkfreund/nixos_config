@@ -1,6 +1,5 @@
-{
-  lib,
-  ...
+{ lib
+, ...
 }: {
   # Memory optimization for 64GB RAM
   boot.kernel.sysctl = {

@@ -1,13 +1,13 @@
-{
-  config,
-  home,
-  lib,
-  pkgs,
-  ...
+{ config
+, home
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.cli.yazi;
-in {
+in
+{
   options.cli.yazi = {
     enable = mkEnableOption {
       default = true;

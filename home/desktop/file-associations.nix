@@ -1,9 +1,10 @@
 let
-  firefox.desktop = ["firefox"];
-  archiveManager = ["archive"];
-  feh.desktop = ["feh"];
-  thunderbird.desktop = ["thunderbird"];
-in {
+  firefox.desktop = [ "firefox" ];
+  archiveManager = [ "archive" ];
+  feh.desktop = [ "feh" ];
+  thunderbird.desktop = [ "thunderbird" ];
+in
+{
   # XDG MIME types
   associations = {
     "application/x-extension-htm" = firefox.desktop;
@@ -21,13 +22,13 @@ in {
     "x-scheme-handler/unknown" = firefox.desktop;
     "x-scheme-handler/mailto" = thunderbird.desktop;
 
-    "audio/*" = ["mpv"];
-    "video/*" = ["mpv"];
-    "image/*" = ["feh"];
+    "audio/*" = [ "mpv" ];
+    "video/*" = [ "mpv" ];
+    "image/*" = [ "feh" ];
 
     "application/json" = firefox.desktop;
 
-    "application/pdf" = ["zathura"];
+    "application/pdf" = [ "zathura" ];
 
     # Archives / compressed files
     "application/x-7z-compressed" = archiveManager;

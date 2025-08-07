@@ -1,16 +1,16 @@
-{
-  config,
-  lib,
-  ...
-}: 
-with lib; let 
+{ config
+, lib
+, ...
+}:
+with lib; let
   cfg = config.cli.direnv;
-in {
+in
+{
   options.cli.direnv = {
     enable = mkEnableOption {
-      default = true; 
+      default = true;
       description = "direnv";
-    };  
+    };
   };
   config = mkIf cfg.enable {
     programs.direnv = {

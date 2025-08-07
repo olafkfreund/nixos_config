@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.ai.providers.anthropic;
-in {
+in
+{
   options.ai.providers.anthropic = {
     enabled = mkOption {
       type = types.bool;
@@ -20,7 +20,7 @@ in {
     environment.systemPackages = with pkgs; [
       # Claude Desktop app if available
       # claude-desktop # Add when available in nixpkgs
-      
+
       # CLI tools that support Claude API
       aichat # Supports multiple providers including Claude
     ];

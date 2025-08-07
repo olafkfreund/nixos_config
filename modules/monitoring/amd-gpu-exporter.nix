@@ -1,17 +1,18 @@
 { config, lib, pkgs, ... }:
 with lib; let
   cfg = config.monitoring;
-  
+
   # Import our custom AMD SMI exporter package
   # amd-smi-exporter = pkgs.amd-smi-exporter;  # Commented out until package build issues resolved
-in {
+in
+{
   config = mkIf (cfg.enable && cfg.features.amdGpuMetrics) {
     # AMD GPU Exporter service using rocm-smi wrapper script
     systemd.services.amd-gpu-exporter = {
       description = "AMD GPU Prometheus Exporter";
       after = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
-      
+
       serviceConfig = {
         Type = "simple";
         ExecStart = "${pkgs.writeShellScript "amd-gpu-exporter-wrapper" ''
@@ -219,13 +220,13 @@ if __name__ == '__main__':
         RestartSec = "5s";
         User = "amd-gpu-exporter";
         Group = "amd-gpu-exporter";
-        
+
         # Security hardening
         NoNewPrivileges = true;
         ProtectSystem = "strict";
         ProtectHome = true;
         PrivateTmp = true;
-        PrivateDevices = false;  # Need access to GPU devices
+        PrivateDevices = false; # Need access to GPU devices
         ProtectKernelTunables = true;
         ProtectKernelModules = true;
         ProtectControlGroups = true;
@@ -233,30 +234,30 @@ if __name__ == '__main__':
         RestrictRealtime = true;
         RestrictNamespaces = true;
         LockPersonality = true;
-        
+
         # Memory and CPU limits
         MemoryMax = "128M";
         CPUQuota = "10%";
       };
-      
+
       # Environment for ROCm
       environment = {
         ROCM_PATH = "${pkgs.rocmPackages.rocm-smi}";
       };
     };
-    
+
     # Create user for AMD GPU exporter
-    users.groups.amd-gpu-exporter = {};
+    users.groups.amd-gpu-exporter = { };
     users.users.amd-gpu-exporter = {
       isSystemUser = true;
       group = "amd-gpu-exporter";
       description = "AMD GPU Exporter service user";
-      extraGroups = [ "video" "render" ];  # Access to GPU devices
+      extraGroups = [ "video" "render" ]; # Access to GPU devices
     };
-    
+
     # Open firewall port for AMD GPU exporter
     networking.firewall.allowedTCPPorts = [ cfg.network.amdGpuExporterPort ];
-    
+
     # AMD GPU exporter CLI tool
     environment.systemPackages = with pkgs; [
       # amd-smi-exporter  # Commented out until package build issues resolved
@@ -301,7 +302,7 @@ if __name__ == '__main__':
         fi
       '')
     ];
-    
+
     # Prometheus scrape configuration for AMD GPU metrics
     services.prometheus = mkIf (cfg.mode == "server" || cfg.mode == "standalone") {
       scrapeConfigs = [
@@ -321,7 +322,7 @@ if __name__ == '__main__':
         }
       ];
     };
-    
+
     # Ensure ROCm is available for AMD GPU systems
     hardware.graphics = {
       enable = true;
@@ -331,7 +332,7 @@ if __name__ == '__main__':
         rocmPackages.rocm-runtime
       ];
     };
-    
+
     # AMD GPU udev rules for proper device access
     services.udev.extraRules = ''
       # AMD GPU devices

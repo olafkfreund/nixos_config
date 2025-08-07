@@ -4,82 +4,83 @@
 with lib;
 let
   cfg = config.networking.tailscale;
-in {
+in
+{
   options.networking.tailscale = {
     enable = mkEnableOption "Enable Tailscale VPN";
-    
+
     authKeyFile = mkOption {
       type = types.nullOr types.str;
       default = null;
       description = "Path to file containing Tailscale auth key";
     };
-    
+
     exitNode = mkOption {
       type = types.bool;
       default = false;
       description = "Enable this host as a Tailscale exit node";
     };
-    
+
     subnet = mkOption {
       type = types.nullOr types.str;
       default = null;
       description = "Subnet to advertise (e.g., '192.168.1.0/24')";
     };
-    
+
     hostname = mkOption {
       type = types.nullOr types.str;
       default = null;
       description = "Custom hostname for this Tailscale node";
     };
-    
+
     acceptRoutes = mkOption {
       type = types.bool;
       default = true;
       description = "Accept routes from other Tailscale nodes";
     };
-    
+
     acceptDns = mkOption {
       type = types.bool;
       default = true;
       description = "Accept DNS configuration from Tailscale";
     };
-    
+
     ssh = mkOption {
       type = types.bool;
       default = true;
       description = "Enable Tailscale SSH";
     };
-    
+
     shields = mkOption {
       type = types.bool;
       default = true;
       description = "Enable Tailscale shields (firewall)";
     };
-    
+
     extraUpFlags = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       description = "Additional flags to pass to tailscale up";
     };
-    
+
     useRoutingFeatures = mkOption {
-      type = types.enum ["none" "client" "server" "both"];
+      type = types.enum [ "none" "client" "server" "both" ];
       default = "client";
       description = "Enable routing features for subnet routing or exit node";
     };
-    
+
     interfaceName = mkOption {
       type = types.str;
       default = "tailscale0";
       description = "Name of the Tailscale network interface";
     };
-    
+
     port = mkOption {
       type = types.port;
       default = 41641;
       description = "UDP port for Tailscale";
     };
-    
+
     openFirewall = mkOption {
       type = types.bool;
       default = true;
@@ -96,14 +97,14 @@ in {
       openFirewall = cfg.openFirewall;
       useRoutingFeatures = cfg.useRoutingFeatures;
     };
-    
+
     # Tailscale up service with authentication
     systemd.services.tailscale-autoconnect = {
       description = "Automatic connection to Tailscale";
       after = [ "network-pre.target" "tailscale.service" ];
       wants = [ "network-pre.target" "tailscale.service" ];
       wantedBy = [ "multi-user.target" ];
-      
+
       serviceConfig = {
         Type = "oneshot";
         User = "root";
@@ -174,14 +175,14 @@ in {
         '';
       };
     };
-    
+
     # Tailscale status monitoring service
     systemd.services.tailscale-monitor = {
       description = "Tailscale Status Monitor";
       after = [ "tailscale-autoconnect.service" ];
       wants = [ "tailscale-autoconnect.service" ];
       wantedBy = [ "multi-user.target" ];
-      
+
       serviceConfig = {
         Type = "simple";
         User = "root";
@@ -223,7 +224,7 @@ in {
         '';
       };
     };
-    
+
     # Tailscale health check script
     environment.systemPackages = with pkgs; [
       tailscale
@@ -258,7 +259,7 @@ in {
         echo "=== Tailscale Logs (last 10 lines) ==="
         journalctl -u tailscale.service -n 10 --no-pager
       '')
-      
+
       (writeShellScriptBin "tailscale-reconnect" ''
         #!/bin/bash
         
@@ -274,12 +275,12 @@ in {
         ${pkgs.tailscale}/bin/tailscale status
       '')
     ];
-    
+
     # Firewall configuration
     networking.firewall = mkIf cfg.openFirewall {
       allowedUDPPorts = [ cfg.port ];
       trustedInterfaces = [ cfg.interfaceName ];
-      
+
       # Allow Tailscale subnet if specified
       extraCommands = mkIf (cfg.subnet != null) ''
         # Allow traffic from Tailscale subnet
@@ -287,7 +288,7 @@ in {
         iptables -A FORWARD -s ${cfg.subnet} -j ACCEPT
         iptables -A FORWARD -d ${cfg.subnet} -j ACCEPT
       '';
-      
+
       extraStopCommands = mkIf (cfg.subnet != null) ''
         # Remove Tailscale subnet rules
         iptables -D INPUT -s ${cfg.subnet} -j ACCEPT 2>/dev/null || true
@@ -295,18 +296,18 @@ in {
         iptables -D FORWARD -d ${cfg.subnet} -j ACCEPT 2>/dev/null || true
       '';
     };
-    
+
     # Enable IP forwarding if using routing features
     boot.kernel.sysctl = mkIf (cfg.useRoutingFeatures == "server" || cfg.useRoutingFeatures == "both" || cfg.exitNode || cfg.subnet != null) {
       "net.ipv4.ip_forward" = 1;
       "net.ipv6.conf.all.forwarding" = 1;
     };
-    
+
     # Create directories
     systemd.tmpfiles.rules = [
       "d /var/log/tailscale 0755 root root -"
     ];
-    
+
     # Ensure tailscaled starts early in boot process
     systemd.services.tailscale.wantedBy = mkForce [ "multi-user.target" ];
     systemd.services.tailscale.after = mkForce [ "network-pre.target" ];

@@ -1,8 +1,9 @@
-{ config, lib, pkgs, ...}: 
+{ config, lib, pkgs, ... }:
 with lib;
 let
   cfg = config.cloud-tools.packages;
-in {
+in
+{
   options.cloud-tools.packages = {
     enable = mkEnableOption "Enable cloud tools";
   };

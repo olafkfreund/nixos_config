@@ -1,9 +1,8 @@
 # Enhanced Project Management and Productivity Tools
 # Note-taking, task management, time tracking, and collaboration tools
-{
-  pkgs,
-  lib,
-  ...
+{ pkgs
+, lib
+, ...
 }:
 with lib;
 let
@@ -11,87 +10,87 @@ let
   cfg = {
     # Note-taking and knowledge management
     notes = {
-      obsidian = true;          # Knowledge management
-      logseq = false;           # Block-based notes
-      zettlr = false;           # Academic writing
-      notable = false;          # Markdown notes
+      obsidian = true; # Knowledge management
+      logseq = false; # Block-based notes
+      zettlr = false; # Academic writing
+      notable = false; # Markdown notes
     };
-    
+
     # Task and project management
     tasks = {
       # CLI task management
-      taskwarrior = true;       # Advanced task management
-      todo_txt = false;         # Simple todo.txt format
-      
+      taskwarrior = true; # Advanced task management
+      todo_txt = false; # Simple todo.txt format
+
       # Time tracking
-      timewarrior = true;       # Time tracking companion to taskwarrior
-      toggl_cli = false;        # Toggl time tracking
+      timewarrior = true; # Time tracking companion to taskwarrior
+      toggl_cli = false; # Toggl time tracking
     };
-    
+
     # Communication and collaboration
     communication = {
       # Chat and messaging
-      slack = true;             # Team communication
-      discord = true;           # Community communication
-      telegram = true;          # Personal messaging
-      
+      slack = true; # Team communication
+      discord = true; # Community communication
+      telegram = true; # Personal messaging
+
       # Email
-      thunderbird = true;       # Email client
-      mailutils = false;        # Command-line email tools
+      thunderbird = true; # Email client
+      mailutils = false; # Command-line email tools
     };
-    
+
     # Documentation and writing
     writing = {
       # Document editors
-      libreoffice = false;      # Office suite
-      
+      libreoffice = false; # Office suite
+
       # Writing tools
-      aspell = true;            # Spell checker
-      languagetool = false;     # Grammar checker
-      
+      aspell = true; # Spell checker
+      languagetool = false; # Grammar checker
+
       # Presentation tools
-      slides = false;           # Terminal presentations
+      slides = false; # Terminal presentations
     };
-    
+
     # File management and organization
     files = {
       # File managers
-      ranger = true;            # Terminal file manager
-      nnn = false;              # Lightweight file manager
-      
+      ranger = true; # Terminal file manager
+      nnn = false; # Lightweight file manager
+
       # File utilities
-      fzf = true;               # Fuzzy finder
-      fd = true;                # Modern find replacement
-      ripgrep = true;           # Modern grep replacement
-      bat = true;               # Modern cat replacement
-      exa = true;               # Modern ls replacement
-      
+      fzf = true; # Fuzzy finder
+      fd = true; # Modern find replacement
+      ripgrep = true; # Modern grep replacement
+      bat = true; # Modern cat replacement
+      exa = true; # Modern ls replacement
+
       # Archive tools
-      unzip = true;             # ZIP extraction
-      p7zip = true;             # 7z support
-      unrar = true;             # RAR support
+      unzip = true; # ZIP extraction
+      p7zip = true; # 7z support
+      unrar = true; # RAR support
     };
-    
+
     # Productivity automation
     automation = {
       # Scripting and automation
-      expect = false;           # Automation scripting
-      
+      expect = false; # Automation scripting
+
       # Clipboard management
-      clipboard = true;         # Enhanced clipboard tools
-      
+      clipboard = true; # Enhanced clipboard tools
+
       # Screen capture  
-      flameshot = false;        # Screenshot tool (handled by desktop module)
-      asciinema = true;         # Terminal recording
+      flameshot = false; # Screenshot tool (handled by desktop module)
+      asciinema = true; # Terminal recording
     };
-    
+
     # Calendar and scheduling
     calendar = {
-      calcurse = false;         # Terminal calendar
-      khal = false;             # CLI calendar
+      calcurse = false; # Terminal calendar
+      khal = false; # CLI calendar
     };
   };
-  
+
   # Package collections based on configuration
   notesPackages = with pkgs; flatten [
     (optional cfg.notes.obsidian obsidian)
@@ -99,14 +98,14 @@ let
     (optional cfg.notes.zettlr zettlr)
     (optional cfg.notes.notable notable)
   ];
-  
+
   tasksPackages = with pkgs; flatten [
     (optional cfg.tasks.taskwarrior taskwarrior3)
     (optional cfg.tasks.todo_txt todo-txt-cli)
     (optional cfg.tasks.timewarrior timewarrior)
     (optional cfg.tasks.toggl_cli toggl-track)
   ];
-  
+
   communicationPackages = with pkgs; flatten [
     (optional cfg.communication.slack slack)
     (optional cfg.communication.discord discord)
@@ -114,14 +113,14 @@ let
     (optional cfg.communication.thunderbird thunderbird)
     (optional cfg.communication.mailutils mailutils)
   ];
-  
+
   writingPackages = with pkgs; flatten [
     (optional cfg.writing.libreoffice libreoffice)
     (optional cfg.writing.aspell aspell)
     (optional cfg.writing.languagetool languagetool)
     (optional cfg.writing.slides slides)
   ];
-  
+
   filesPackages = with pkgs; flatten [
     (optional cfg.files.ranger ranger)
     (optional cfg.files.nnn nnn)
@@ -134,14 +133,14 @@ let
     (optional cfg.files.p7zip p7zip)
     (optional cfg.files.unrar unrar)
   ];
-  
+
   automationPackages = with pkgs; flatten [
     (optional cfg.automation.expect expect)
     (optional cfg.automation.clipboard wl-clipboard)
     (optional cfg.automation.flameshot flameshot)
     (optional cfg.automation.asciinema asciinema)
   ];
-  
+
   calendarPackages = with pkgs; flatten [
     (optional cfg.calendar.calcurse calcurse)
     (optional cfg.calendar.khal khal)
@@ -231,7 +230,7 @@ let
     echo -e "''${BLUE}📋 Your current tasks:''${NC}"
     ${pkgs.taskwarrior3}/bin/task next
   '';
-  
+
   # AI-enhanced daily dashboard
   aiDashboard = pkgs.writeShellScript "ai-dashboard" ''
     #!/usr/bin/env bash
@@ -334,7 +333,8 @@ let
     echo ""
   '';
 
-in {
+in
+{
   # Enhanced productivity packages
   home.packages = flatten [
     notesPackages
@@ -344,11 +344,11 @@ in {
     filesPackages
     automationPackages
     calendarPackages
-    
+
     # Required packages for AI integration
     [ pkgs.jq pkgs.bc ]
   ];
-  
+
   # Enhanced shell aliases for productivity
   home.shellAliases = mkMerge [
     # Task management
@@ -361,7 +361,7 @@ in {
       tp = "task projects";
       tt = "task tags";
     })
-    
+
     (mkIf cfg.tasks.timewarrior {
       tw = "timew";
       tws = "timew start";
@@ -370,13 +370,13 @@ in {
       twr = "timew report";
       twd = "timew day";
     })
-    
+
     # File management
     (mkIf cfg.files.ranger {
       r = "ranger";
     })
-    
-    
+
+
     (mkIf cfg.files.exa {
       # Note: ls alias already configured in shell/bash.nix with comprehensive options
       # Use alternative aliases to avoid conflicts
@@ -386,7 +386,7 @@ in {
       # Use mkDefault for tree to avoid conflict with zsh.nix
       tree = mkDefault "exa --tree";
     })
-    
+
     (mkIf cfg.files.fzf {
       ff = "fzf";
       fh = "history | fzf";
@@ -394,51 +394,51 @@ in {
       fzp = "fzf --preview 'bat --color=always --line-range :50 {}'";
       fzd = "find . -type d | fzf";
     })
-    
+
     # Productivity shortcuts
     (mkIf cfg.automation.flameshot {
       screenshot = "flameshot gui";
       ss = "flameshot gui";
     })
-    
+
     (mkIf cfg.automation.asciinema {
       record = "asciinema rec";
       play = "asciinema play";
     })
-    
+
     # AI-enhanced productivity aliases
     {
       # Smart task creation
       "smart-add" = "smart-add";
-      "sa" = "smart-add";  # Quick alias
-      
+      "sa" = "smart-add"; # Quick alias
+
       # AI dashboard
       "ai-dashboard" = "ai-dashboard";
       "dashboard" = "ai-dashboard";
       "daily" = "ai-dashboard";
       "dash" = "ai-dashboard";
     }
-    
+
     # Additional productivity aliases that complement existing shell setup
     (mkIf cfg.files.bat {
       # Alternative cat aliases that don't conflict with bash.nix
       batcat = "bat";
       preview = "bat --color=always --line-range :50";
     })
-    
+
     (mkIf cfg.files.ripgrep {
       # Enhanced ripgrep aliases
       rg-code = "rg --type-add 'code:*.{js,ts,jsx,tsx,py,go,rs,nix}' --type code";
       rg-docs = "rg --type-add 'docs:*.{md,txt,org,rst}' --type docs";
     })
-    
+
     (mkIf cfg.files.fd {
       # Enhanced fd aliases
       fd-code = "fd --extension js --extension ts --extension py --extension go --extension rs --extension nix";
       fd-docs = "fd --extension md --extension txt --extension org";
     })
   ];
-  
+
   # Enhanced environment variables for productivity
   home.sessionVariables = mkMerge [
     # Task management configuration
@@ -446,14 +446,14 @@ in {
       TASKDATA = "$HOME/.task";
       TASKRC = "$HOME/.taskrc";
     })
-    
+
     # File management configuration
     (mkIf cfg.files.fzf {
       FZF_DEFAULT_COMMAND = mkDefault "fd --type f";
       FZF_CTRL_T_COMMAND = mkDefault "$FZF_DEFAULT_COMMAND";
       FZF_DEFAULT_OPTS = mkDefault "--height 40% --layout=reverse --border";
     })
-    
+
     # Editor preferences
     {
       EDITOR = mkDefault "nvim";
@@ -462,13 +462,13 @@ in {
       PAGER = mkIf cfg.files.bat (mkDefault "bat");
     }
   ];
-  
+
   # Note: Git configuration removed to avoid conflicts with existing git setup
   # All necessary git aliases are already configured in the shell modules
-  
-  
+
+
   # Note: FZF configuration is handled by the dedicated fzf module in home/shell/fzf/
-  
+
   # Productivity configuration files and scripts
   home.file = mkMerge [
     # Taskwarrior configuration
@@ -571,7 +571,7 @@ in {
         executable = true;
       };
     }
-    
+
     # Quick note creator
     (mkIf cfg.notes.obsidian {
       ".local/bin/quick-note" = {
@@ -623,20 +623,20 @@ in {
         executable = true;
       };
     })
-    
+
     # AI-enhanced productivity scripts
     {
       ".local/bin/smart-add" = {
         source = smartTaskAdd;
         executable = true;
       };
-      
+
       ".local/bin/ai-dashboard" = {
         source = aiDashboard;
         executable = true;
       };
     }
-    
+
     # Productivity helper
     {
       ".local/bin/productivity-help" = {

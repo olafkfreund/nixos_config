@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.programs.obs;
-in {
+in
+{
   options.programs.obs = {
     enable = mkEnableOption "OBS Studio for screen recording and streaming";
   };

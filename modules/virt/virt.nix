@@ -1,13 +1,13 @@
-{
-  config,
-  lib,
-  pkgs,
-  pkgs-unstable,
-  ...
+{ config
+, lib
+, pkgs
+, pkgs-unstable
+, ...
 }:
 with lib; let
   cfg = config.services.libvirt;
-in {
+in
+{
   options.services.libvirt = {
     enable = mkEnableOption {
       default = false;
@@ -22,7 +22,7 @@ in {
         qemu = {
           swtpm.enable = true;
           ovmf.enable = true;
-          ovmf.packages = [pkgs.OVMFFull.fd];
+          ovmf.packages = [ pkgs.OVMFFull.fd ];
           package = pkgs-unstable.qemu;
           runAsRoot = false;
         };
@@ -32,9 +32,9 @@ in {
         enable = true;
       };
     };
-    environment.sessionVariables.LIBVIRT_DEFAULT_URI = ["qemu:///system"];
+    environment.sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
     services.spice-vdagentd.enable = true;
-    systemd.tmpfiles.rules = ["L+ /var/lib/qemu/firmware - - - - ${pkgs-unstable.qemu}/share/qemu/firmware"];
+    systemd.tmpfiles.rules = [ "L+ /var/lib/qemu/firmware - - - - ${pkgs-unstable.qemu}/share/qemu/firmware" ];
     systemd.services.libvirtd.restartIfChanged = false;
     boot.kernelParams = [
       "cgroup_enable=cpuset"

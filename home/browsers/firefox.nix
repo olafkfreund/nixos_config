@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.browsers.firefox;
-in {
+in
+{
   options.browsers.firefox = {
     enable = mkEnableOption {
       default = true;

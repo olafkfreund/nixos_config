@@ -1,8 +1,7 @@
-{
-  config,
-  lib,
-  pkgs,
-  # pkgs-unstable,
+{ config
+, lib
+, pkgs
+, # pkgs-unstable,
   ...
 }:
 with lib; let
@@ -10,9 +9,10 @@ with lib; let
 
   # Custom extensions not available in nixpkgs
   # Note: Uncomment and add proper sha256 hashes when needed
-in {
+in
+{
   options.editor.vscode = {
-    enable = mkEnableOption "Visual Studio Code editor" // {default = true;};
+    enable = mkEnableOption "Visual Studio Code editor" // { default = true; };
   };
 
   config = mkIf cfg.enable {
@@ -67,7 +67,7 @@ in {
     }; # End of programs.vscode
 
     # Initialize VS Code settings and MCP files as mutable (remove any Home Manager symlinks)
-    home.activation.vscodeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    home.activation.vscodeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       SETTINGS_DIR="$HOME/.config/Code/User"
       SETTINGS_FILE="$SETTINGS_DIR/settings.json"
       MCP_FILE="$SETTINGS_DIR/mcp.json"
@@ -118,19 +118,19 @@ in {
     xdg.mimeApps = {
       enable = true;
       associations.added = {
-        "text/plain" = ["code.desktop"];
-        "text/markdown" = ["code.desktop"];
-        "application/json" = ["code.desktop"];
-        "application/x-yaml" = ["code.desktop"];
-        "text/x-python" = ["code.desktop"];
-        "text/x-csrc" = ["code.desktop"];
-        "text/x-c++src" = ["code.desktop"];
-        "text/x-chdr" = ["code.desktop"];
-        "text/x-c++hdr" = ["code.desktop"];
-        "text/x-shellscript" = ["code.desktop"];
-        "text/html" = ["code.desktop"];
-        "text/css" = ["code.desktop"];
-        "text/javascript" = ["code.desktop"];
+        "text/plain" = [ "code.desktop" ];
+        "text/markdown" = [ "code.desktop" ];
+        "application/json" = [ "code.desktop" ];
+        "application/x-yaml" = [ "code.desktop" ];
+        "text/x-python" = [ "code.desktop" ];
+        "text/x-csrc" = [ "code.desktop" ];
+        "text/x-c++src" = [ "code.desktop" ];
+        "text/x-chdr" = [ "code.desktop" ];
+        "text/x-c++hdr" = [ "code.desktop" ];
+        "text/x-shellscript" = [ "code.desktop" ];
+        "text/html" = [ "code.desktop" ];
+        "text/css" = [ "code.desktop" ];
+        "text/javascript" = [ "code.desktop" ];
       };
     };
 
@@ -138,7 +138,7 @@ in {
     xdg.desktopEntries.code = {
       name = "Visual Studio Code";
       exec = "code --ozone-platform=wayland --enable-features=UseOzonePlatform,WaylandWindowDecorations %F";
-      categories = ["Development" "IDE"];
+      categories = [ "Development" "IDE" ];
       comment = "Code Editing. Optimized for Wayland.";
       icon = "code";
       mimeType = [

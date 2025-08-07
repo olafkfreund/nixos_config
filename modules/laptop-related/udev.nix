@@ -1,8 +1,8 @@
-{pkgs, ...}: {
+{ pkgs, ... }: {
   services = {
     udev = {
       enable = true;
-      packages = with pkgs; [gnome-settings-daemon];
+      packages = with pkgs; [ gnome-settings-daemon ];
     };
   };
 }

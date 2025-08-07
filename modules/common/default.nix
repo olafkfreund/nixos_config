@@ -1,4 +1,4 @@
-{...}: {
+{ ... }: {
   imports = [
     ./base-user.nix
     ./features.nix

@@ -8,22 +8,22 @@
     enable32Bit = true;
     extraPackages = with pkgs; [
       # Intel-specific packages
-      intel-media-driver    # Modern Intel GPUs (Broadwell+)
-      intel-vaapi-driver    # Legacy Intel GPUs
-      libvdpau-va-gl       # VDPAU over VA-API
+      intel-media-driver # Modern Intel GPUs (Broadwell+)
+      intel-vaapi-driver # Legacy Intel GPUs
+      libvdpau-va-gl # VDPAU over VA-API
       intel-compute-runtime # OpenCL runtime
-      
+
       # Vulkan support
       vulkan-validation-layers
       vulkan-loader
       vulkan-tools
-      
+
       # Video acceleration
       libva
       libva-utils
       intel-gpu-tools
     ];
-    
+
     extraPackages32 = with pkgs.driversi686Linux; [
       intel-vaapi-driver
       intel-media-driver
@@ -33,38 +33,38 @@
   # Environment packages for Intel development and monitoring
   environment.systemPackages = with pkgs; [
     # Intel monitoring and control
-    intel-gpu-tools        # Intel GPU utilities (intel_gpu_top, etc.)
-    libva-utils           # VA-API utilities
-    
+    intel-gpu-tools # Intel GPU utilities (intel_gpu_top, etc.)
+    libva-utils # VA-API utilities
+
     # Development tools
-    intel-compute-runtime  # OpenCL runtime
-    oclgrind              # OpenCL debugger
-    
+    intel-compute-runtime # OpenCL runtime
+    oclgrind # OpenCL debugger
+
     # Video utilities
     libva-utils
     vdpauinfo
-    
+
     # Performance profiling
     intel-gpu-tools
-    
+
     # System monitoring
-    powertop              # Intel power monitoring
-    thermald              # Thermal management
+    powertop # Intel power monitoring
+    thermald # Thermal management
   ];
 
   # Environment variables for Intel graphics
   environment.variables = {
     # Video acceleration
-    LIBVA_DRIVER_NAME = "iHD";  # Use iHD for modern Intel GPUs
+    LIBVA_DRIVER_NAME = "iHD"; # Use iHD for modern Intel GPUs
     # LIBVA_DRIVER_NAME = "i965"; # Use i965 for older Intel GPUs
     VDPAU_DRIVER = "va_gl";
-    
+
     # OpenCL configuration
     OPENCL_VENDOR_PATH = "${pkgs.intel-compute-runtime}/etc/OpenCL/vendors";
-    
+
     # Mesa configuration for Intel
-    MESA_LOADER_DRIVER_OVERRIDE = "iris";  # Use iris driver for modern Intel
-    
+    MESA_LOADER_DRIVER_OVERRIDE = "iris"; # Use iris driver for modern Intel
+
     # Wayland optimizations
     MOZ_ENABLE_WAYLAND = "1";
     QT_QPA_PLATFORM = "wayland;xcb";
@@ -72,34 +72,34 @@
 
   # Kernel modules and parameters
   boot.kernelModules = [ "i915" ];
-  
+
   boot.kernelParams = [
     # Intel GPU specific parameters
-    "i915.enable_guc=2"        # Enable GuC and HuC firmware
-    "i915.enable_fbc=1"        # Enable framebuffer compression
-    "i915.enable_psr=1"        # Enable Panel Self Refresh
-    "i915.fastboot=1"          # Enable fastboot
-    
+    "i915.enable_guc=2" # Enable GuC and HuC firmware
+    "i915.enable_fbc=1" # Enable framebuffer compression
+    "i915.enable_psr=1" # Enable Panel Self Refresh
+    "i915.fastboot=1" # Enable fastboot
+
     # Performance optimizations
-    "i915.modeset=1"           # Enable kernel modesetting
-    "i915.nuclear_pageflip=1"  # Enable atomic modesetting
-    
+    "i915.modeset=1" # Enable kernel modesetting
+    "i915.nuclear_pageflip=1" # Enable atomic modesetting
+
     # Power management
-    "i915.enable_rc6=1"        # Enable RC6 power saving
-    "i915.enable_dc=1"         # Enable display C-states
+    "i915.enable_rc6=1" # Enable RC6 power saving
+    "i915.enable_dc=1" # Enable display C-states
     "i915.disable_power_well=0" # Keep power wells enabled
-    
+
     # Memory management
-    "i915.preliminary_hw_support=1"  # Support for newer hardware
+    "i915.preliminary_hw_support=1" # Support for newer hardware
   ];
 
   # Additional kernel configuration for Intel
   boot.kernel.sysctl = {
     # Graphics performance
     "dev.i915.perf_stream_paranoid" = 0;
-    
+
     # Power management
-    "kernel.nmi_watchdog" = 0;  # Disable NMI watchdog for power saving
+    "kernel.nmi_watchdog" = 0; # Disable NMI watchdog for power saving
   };
 
   # Hardware-specific udev rules
@@ -119,7 +119,7 @@
   powerManagement = {
     enable = true;
     cpuFreqGovernor = "powersave"; # Intel CPUs work well with powersave
-    powertop.enable = true;        # Intel power optimization
+    powertop.enable = true; # Intel power optimization
   };
 
   # Thermal management for Intel systems
@@ -150,12 +150,12 @@
     enable = true;
     settings = {
       general = {
-        renice = 5;  # Less aggressive than discrete GPUs
+        renice = 5; # Less aggressive than discrete GPUs
         ioprio = 4;
         inhibit_screensaver = 1;
         softrealtime = "auto";
       };
-      
+
       gpu = {
         apply_gpu_optimisations = "accept-responsibility";
         gpu_device = 0;
@@ -167,10 +167,10 @@
   hardware = {
     # CPU-specific optimizations
     cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-    
+
     # Audio support
     pulseaudio.support32Bit = true;
-    
+
     # Bluetooth support
     bluetooth = {
       enable = true;
@@ -227,14 +227,14 @@
 
   # Intel-specific optimizations for different generations
   # Uncomment based on your Intel GPU generation
-  
+
   # # For very old Intel GPUs (pre-Haswell)
   # environment.variables.LIBVA_DRIVER_NAME = "i965";
   # boot.kernelParams = lib.mkAfter [ "i915.preliminary_hw_support=1" ];
-  
+
   # # For Haswell and newer
   # environment.variables.LIBVA_DRIVER_NAME = "iHD";
-  
+
   # # For latest Intel Arc GPUs
   # environment.variables.LIBVA_DRIVER_NAME = "iHD";
   # boot.kernelParams = lib.mkAfter [ "i915.force_probe=*" ];

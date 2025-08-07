@@ -1,13 +1,13 @@
 # modules/desktop/wayland/environment.nix
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.wayland-environment;
-in {
+in
+{
   options.wayland-environment = {
     enable = mkEnableOption "Common Wayland environment variables";
 

@@ -30,7 +30,7 @@
 
   # Networking
   hostName = "hp";
-  nameservers = ["1.1.1.1" "8.8.8.8"];
+  nameservers = [ "1.1.1.1" "8.8.8.8" ];
   hostMappings = {
     "192.168.1.127" = "p510";
     "192.168.1.96" = "razer";

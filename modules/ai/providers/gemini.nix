@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.ai.providers.gemini;
-in {
+in
+{
   options.ai.providers.gemini = {
     enabled = mkOption {
       type = types.bool;
@@ -20,7 +20,7 @@ in {
     environment.systemPackages = with pkgs; [
       # Custom Gemini CLI from the existing configuration
       gemini-cli
-      
+
       # Tools that support Gemini API
       aichat # Supports Gemini models
     ];

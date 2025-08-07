@@ -5,17 +5,18 @@ let
     "10de:228e" # Audio
   ];
 in
-  {
-    lib,
-    config,
-    ...
-  }: {
-    options.vfio.enable = with lib;
-      mkEnableOption "Configure the machine for VFIO";
+{ lib
+, config
+, ...
+}: {
+  options.vfio.enable = with lib;
+    mkEnableOption "Configure the machine for VFIO";
 
-    config = let
+  config =
+    let
       cfg = config.vfio;
-    in {
+    in
+    {
       boot = {
         initrd.kernelModules = [
           "vfio_pci"
@@ -30,10 +31,10 @@ in
             "amd_iommu=on"
           ]
           ++ lib.optional cfg.enable
-          # isolate the GPU
-          ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs);
+            # isolate the GPU
+            ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs);
       };
 
       virtualisation.spiceUSBRedirection.enable = true;
     };
-  }
+}

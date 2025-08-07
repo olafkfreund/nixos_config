@@ -1,12 +1,12 @@
-{
-  pkgs,
-  lib,
-  config,
-  ...
+{ pkgs
+, lib
+, config
+, ...
 }:
 with lib; let
   cfg = config.modules.desktop.hyprland;
-in {
+in
+{
   options.modules.desktop.hyprland = {
     enable = mkEnableOption "Enable Hyprland window manager with appropriate configuration";
   };
@@ -21,15 +21,15 @@ in {
     # Proper XDG Portal setup for Hyprland
     xdg.portal = {
       enable = true;
-      extraPortals = [pkgs.xdg-desktop-portal-hyprland];
+      extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];
       config = {
         common = {
-          default = ["hyprland" "gtk"];
+          default = [ "hyprland" "gtk" ];
         };
         hyprland = {
-          default = ["hyprland" "gtk"];
-          "org.freedesktop.impl.portal.Secret" = ["gnome-keyring"];
-          "org.freedesktop.impl.portal.Screencast" = ["hyprland"];
+          default = [ "hyprland" "gtk" ];
+          "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
+          "org.freedesktop.impl.portal.Screencast" = [ "hyprland" ];
         };
       };
     };

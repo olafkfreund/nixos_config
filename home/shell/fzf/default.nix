@@ -1,11 +1,11 @@
-{
-  lib,
-  config,
-  ...
+{ lib
+, config
+, ...
 }:
 with lib; let
   cfg = config.cli.fzf;
-in {
+in
+{
   options.cli.fzf = {
     enable = mkEnableOption {
       default = true;

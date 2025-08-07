@@ -1,19 +1,19 @@
 # XDG Desktop Portal Configuration Module
 # Configures desktop integration for Wayland and X11 applications
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.modules.services.xdg-portal;
-in {
+in
+{
   options.modules.services.xdg-portal = {
     enable = mkEnableOption "XDG desktop portal services";
 
     backend = mkOption {
-      type = types.enum ["hyprland" "sway" "gnome" "kde"];
+      type = types.enum [ "hyprland" "sway" "gnome" "kde" ];
       default = "hyprland";
       description = ''Primary desktop environment backend for portals'';
       example = "sway";
@@ -45,35 +45,35 @@ in {
     xdg.portal = {
       enable = true;
       xdgOpenUsePortal = cfg.forcePortalOpen;
-      
+
       config = mkMerge [
         # Common configuration for all backends
         {
           common = {
-            default = [cfg.backend "gtk"];
+            default = [ cfg.backend "gtk" ];
           };
         }
-        
+
         # Hyprland-specific configuration
         (mkIf (cfg.backend == "hyprland") {
           hyprland = {
-            default = ["hyprland" "gtk"];
-            "org.freedesktop.impl.portal.Secret" = ["gnome-keyring"];
+            default = [ "hyprland" "gtk" ];
+            "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
           } // optionalAttrs cfg.enableScreencast {
-            "org.freedesktop.impl.portal.Screencast" = ["hyprland"];
+            "org.freedesktop.impl.portal.Screencast" = [ "hyprland" ];
           };
         })
-        
+
         # Sway-specific configuration
         (mkIf (cfg.backend == "sway") {
           sway = {
-            default = ["wlr" "gtk"];
+            default = [ "wlr" "gtk" ];
           } // optionalAttrs cfg.enableScreencast {
-            "org.freedesktop.impl.portal.Screencast" = ["wlr"];
+            "org.freedesktop.impl.portal.Screencast" = [ "wlr" ];
           };
         })
       ];
-      
+
       configPackages = with pkgs; [
         xdg-desktop-portal-gtk
         xdg-desktop-portal

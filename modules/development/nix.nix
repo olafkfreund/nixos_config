@@ -1,17 +1,17 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.nix.development;
-in {
+in
+{
   options.nix.development = {
     enable = mkEnableOption "Enable Nix development environment";
     packages = mkOption {
       type = with types; listOf package;
-      default = [];
+      default = [ ];
       description = "Packages to install for Nix development";
     };
   };

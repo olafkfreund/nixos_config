@@ -1,12 +1,13 @@
-{
-  config,
-  pkgs,
-  lib,
-  hostUsers,
-  ...
-}: let
+{ config
+, pkgs
+, lib
+, hostUsers
+, ...
+}:
+let
   vars = import ./variables.nix;
-in {
+in
+{
   imports = [
     # Hardware and system configuration
     ./nixos/hardware-configuration.nix
@@ -14,7 +15,7 @@ in {
     ./nixos/power.nix
     ./nixos/boot.nix
     ./nixos/${vars.gpu}.nix  # GPU-specific configuration
-    ./nixos/usb-power-fix.nix  # Fix USB issues (optional)
+    ./nixos/usb-power-fix.nix # Fix USB issues (optional)
     ./nixos/i18n.nix
     ./nixos/hosts.nix
     ./nixos/envvar.nix
@@ -23,7 +24,7 @@ in {
     ./nixos/memory.nix
     ./nixos/load.nix
     ./themes/stylix.nix
-    
+
     # Modular imports
     ../../modules/core.nix
     ../../modules/development.nix
@@ -48,19 +49,19 @@ in {
 
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "desktop";
-  
+
   # Tailscale VPN Configuration
   # Research shows acceptDns=false is critical for NixOS to avoid DNS conflicts  
   networking.tailscale = {
     enable = true;
     authKeyFile = config.age.secrets.tailscale-auth-key.path;
     hostname = "${vars.hostName}-workstation";
-    subnet = "192.168.1.0/24";  # Advertise local subnet
+    subnet = "192.168.1.0/24"; # Advertise local subnet
     acceptRoutes = true;
-    acceptDns = false;  # CRITICAL: Prevent Tailscale DNS conflicts with systemd-resolved
+    acceptDns = false; # CRITICAL: Prevent Tailscale DNS conflicts with systemd-resolved
     ssh = true;
     shields = true;
-    useRoutingFeatures = "client";  # Can route and accept routes
+    useRoutingFeatures = "client"; # Can route and accept routes
     extraUpFlags = [
       "--operator=${vars.username}"
       "--accept-risk=lose-ssh"
@@ -72,9 +73,9 @@ in {
   services.resolved = {
     enable = true;
     fallbackDns = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
-    domains = [ "~home.freundcloud.com" ];  # Use routing directive for local domain
-    dnssec = lib.mkForce "false";  # Resolve DNSSEC conflict
-    llmnr = lib.mkForce "false";  # Disable LLMNR to avoid conflicts with Tailscale
+    domains = [ "~home.freundcloud.com" ]; # Use routing directive for local domain
+    dnssec = lib.mkForce "false"; # Resolve DNSSEC conflict
+    llmnr = lib.mkForce "false"; # Disable LLMNR to avoid conflicts with Tailscale
     extraConfig = ''
       DNS=192.168.1.222 1.1.1.1 8.8.8.8
       Domains=~home.freundcloud.com
@@ -88,22 +89,22 @@ in {
   # Configure AI providers (customize based on your needs)
   ai.providers = {
     enable = true;
-    defaultProvider = "anthropic";  # or "openai", "gemini", "ollama"
+    defaultProvider = "anthropic"; # or "openai", "gemini", "ollama"
     enableFallback = true;
-    
+
     # Enable specific providers (customize as needed)
     openai.enable = true;
     anthropic.enable = true;
     gemini.enable = true;
-    ollama.enable = true;  # Set to false for lower resource usage
+    ollama.enable = true; # Set to false for lower resource usage
   };
-  
+
   # AI-powered system analysis (optional but recommended)
   ai.analysis = {
     enable = true;
     aiProvider = "anthropic";
     enableFallback = true;
-    
+
     features = {
       performanceAnalysis = true;
       resourceOptimization = true;
@@ -112,7 +113,7 @@ in {
       logAnalysis = true;
       securityAnalysis = true;
     };
-    
+
     # Analysis intervals
     intervals = {
       performanceAnalysis = "hourly";
@@ -120,11 +121,11 @@ in {
       configDriftCheck = "*:0/6";
       logAnalysis = "*:0/4";
     };
-    
+
     # Conservative automation for workstation
     automation = {
-      autoApplyOptimizations = false;  # Keep disabled for safety
-      autoCorrectDrift = false;        # Keep disabled for safety
+      autoApplyOptimizations = false; # Keep disabled for safety
+      autoCorrectDrift = false; # Keep disabled for safety
       generateReports = true;
     };
   };
@@ -135,7 +136,7 @@ in {
     autoOptimize = true;
     nixStoreOptimization = true;
     logRotation = true;
-    
+
     thresholds = {
       memoryWarning = 75;
       memoryCritical = 85;
@@ -153,7 +154,7 @@ in {
     maxAuthTries = 3;
     enableFail2Ban = true;
     enableKeyOnlyAccess = true;
-    trustedNetworks = ["192.168.1.0/24" "10.0.0.0/8"];
+    trustedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ];
   };
 
   # Hardware monitoring with desktop notifications
@@ -161,14 +162,14 @@ in {
     enable = true;
     interval = 300; # Check every 5 minutes
     enableDesktopNotifications = true;
-    
+
     criticalThresholds = {
       diskUsage = 85;
       memoryUsage = 90;
-      cpuLoad = 200;  # Adjust based on your CPU cores
+      cpuLoad = 200; # Adjust based on your CPU cores
       temperature = 85;
     };
-    
+
     warningThresholds = {
       diskUsage = 75;
       memoryUsage = 80;
@@ -224,15 +225,15 @@ in {
 
     ai = {
       enable = true;
-      ollama = true;  # Set to false for lower resource usage
+      ollama = true; # Set to false for lower resource usage
       gemini-cli = true;
-      
+
       # Enable unified AI provider support
       providers = {
         enable = true;
-        defaultProvider = "anthropic";  # Customize your preferred provider
+        defaultProvider = "anthropic"; # Customize your preferred provider
         enableFallback = true;
-        
+
         # Enable providers based on your API access
         openai.enable = true;
         anthropic.enable = true;
@@ -245,7 +246,7 @@ in {
       enable = true;
       neomutt.enable = true;
       ai.enable = true;
-      ai.provider = "anthropic"; 
+      ai.provider = "anthropic";
       notifications.enable = true;
       notifications.highPriorityOnly = true;
     };
@@ -265,7 +266,7 @@ in {
 
     # Gaming support (optional - set to false if not needed)
     gaming = {
-      enable = true;  # Set to false for work-focused systems
+      enable = true; # Set to false for work-focused systems
       steam = true;
       lutris = true;
       gamemode = true;
@@ -275,22 +276,22 @@ in {
   # Monitoring configuration - client mode (sends data to monitoring server)
   monitoring = {
     enable = true;
-    mode = "client";  # Send data to monitoring server
-    serverHost = "dex5550";  # Change to your monitoring server hostname
-    
+    mode = "client"; # Send data to monitoring server
+    serverHost = "dex5550"; # Change to your monitoring server hostname
+
     features = {
       nodeExporter = true;
       nixosMetrics = true;
-      alerting = false;  # Only server handles alerting
-      logging = true;   # Enable Promtail for log collection
-      prometheus = false;  # Only server runs Prometheus
-      grafana = false;     # Only server runs Grafana
+      alerting = false; # Only server handles alerting
+      logging = true; # Enable Promtail for log collection
+      prometheus = false; # Only server runs Prometheus
+      grafana = false; # Only server runs Grafana
       # GPU metrics - enable based on your GPU type
       amdGpuMetrics = lib.mkIf (vars.gpu == "amd") true;
       nvidiaGpuMetrics = lib.mkIf (vars.gpu == "nvidia") true;
-      aiMetrics = true;  # Enable AI metrics collection
+      aiMetrics = true; # Enable AI metrics collection
     };
-    
+
     # Enable AI metrics exporter
     aiMetricsExporter = {
       enable = true;
@@ -303,7 +304,7 @@ in {
   # Centralized Logging - Send logs to monitoring server
   services.promtail-logging = {
     enable = true;
-    lokiUrl = "http://dex5550:3100";  # Change to your monitoring server
+    lokiUrl = "http://dex5550:3100"; # Change to your monitoring server
     collectJournal = true;
     collectKernel = true;
   };
@@ -337,7 +338,7 @@ in {
 
   # AI Ollama-specific configuration
   ai.ollama = {
-    enableRag = false;  # Can be enabled if needed
+    enableRag = false; # Can be enabled if needed
     ragDirectory = "/home/${vars.username}/documents/rag-files";
     allowBrokenPackages = false;
   };
@@ -355,22 +356,22 @@ in {
   # Enable secrets management
   modules.security.secrets = {
     enable = true;
-    hostKeys = ["/etc/ssh/ssh_host_ed25519_key"];
-    userKeys = ["/home/${vars.username}/.ssh/id_ed25519"];
+    hostKeys = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    userKeys = [ "/home/${vars.username}/.ssh/id_ed25519" ];
   };
 
   # Create system users for all host users
   users.users = lib.genAttrs hostUsers (username: {
     isNormalUser = true;
     description = "User ${username}";
-    extraGroups = ["wheel" "networkmanager" "render" "docker"];
+    extraGroups = [ "wheel" "networkmanager" "render" "docker" ];
     shell = pkgs.zsh;
     # Only use secret-managed password if the secret exists
     hashedPasswordFile =
       lib.mkIf
-      (config.modules.security.secrets.enable
-        && builtins.hasAttr "user-password-${username}" config.age.secrets)
-      config.age.secrets."user-password-${username}".path;
+        (config.modules.security.secrets.enable
+          && builtins.hasAttr "user-password-${username}" config.age.secrets)
+        config.age.secrets."user-password-${username}".path;
   });
 
   # Service-specific configurations
@@ -381,7 +382,7 @@ in {
         "-nolisten tcp"
         "-dpi 96"
       ];
-      videoDrivers = ["${vars.gpu}gpu"]; # Set video driver based on GPU
+      videoDrivers = [ "${vars.gpu}gpu" ]; # Set video driver based on GPU
     };
 
     # Desktop environment
@@ -407,14 +408,14 @@ in {
     ollama = lib.mkIf (vars.gpu != "none") {
       enable = true;
       acceleration = lib.mkForce vars.acceleration;
-      environmentVariables = 
+      environmentVariables =
         if vars.gpu == "amd" then {
           HCC_AMDGPU_TARGET = lib.mkForce "gfx1100";
           ROC_ENABLE_PRE_VEGA = lib.mkForce "1";
           HSA_OVERRIDE_GFX_VERSION = lib.mkForce "11.0.0";
         } else if vars.gpu == "nvidia" then {
           CUDA_VISIBLE_DEVICES = lib.mkForce "0";
-        } else {};
+        } else { };
     };
   };
 
@@ -435,7 +436,7 @@ in {
   # Hardware-specific configurations
   hardware = {
     keyboard.qmk.enable = true;
-    flipperzero.enable = lib.mkDefault false;  # Enable if you have one
+    flipperzero.enable = lib.mkDefault false; # Enable if you have one
   };
 
   # Network-specific overrides that go beyond the network profile
@@ -462,13 +463,13 @@ in {
           LLMNR = false;
           DHCP = "ipv4";
           IPv6AcceptRA = true;
-          Domains = "~home.freundcloud.com";  # Use routing directive for local domain
+          Domains = "~home.freundcloud.com"; # Use routing directive for local domain
           DNS = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
         };
         # Higher priority for wired connection
         dhcpV4Config = {
           RouteMetric = 10;
-          UseDNS = false;  # Use our custom DNS configuration
+          UseDNS = false; # Use our custom DNS configuration
         };
       };
       "25-wireless" = {
@@ -491,9 +492,9 @@ in {
         networkConfig = {
           MulticastDNS = false;
           LLMNR = false;
-          DHCP = "no";  # NEVER enable DHCP on Tailscale interface
-          DNS = [ ];  # Explicitly no DNS - let Tailscale handle it
-          Domains = [ ];  # No domain routing through this interface
+          DHCP = "no"; # NEVER enable DHCP on Tailscale interface
+          DNS = [ ]; # Explicitly no DNS - let Tailscale handle it
+          Domains = [ ]; # No domain routing through this interface
         };
       };
     };
@@ -503,101 +504,101 @@ in {
   # High-performance workstation profile
   system.resourceManager = {
     enable = true;
-    profile = "performance";  # Options: "performance", "balanced", "efficiency"
-    
+    profile = "performance"; # Options: "performance", "balanced", "efficiency"
+
     cpuManagement = {
       enable = true;
       dynamicGovernor = true;
       affinityOptimization = true;
-      coreReservation = false;  # Use all cores for maximum performance
+      coreReservation = false; # Use all cores for maximum performance
     };
-    
+
     memoryManagement = {
       enable = true;
       dynamicSwap = true;
       hugePagesOptimization = true;
-      memoryCompression = false;  # Disable for performance
+      memoryCompression = false; # Disable for performance
       oomProtection = true;
     };
-    
+
     ioManagement = {
       enable = true;
       dynamicScheduler = true;
       ioNiceOptimization = true;
       cacheOptimization = true;
     };
-    
+
     networkManagement = {
       enable = true;
       trafficShaping = false;
       connectionOptimization = true;
     };
   };
-  
+
   # Network performance tuning
   networking.performanceTuning = {
     enable = true;
-    profile = "balanced";  # Options: "throughput", "latency", "balanced"
-    
+    profile = "balanced"; # Options: "throughput", "latency", "balanced"
+
     tcpOptimization = {
       enable = true;
       congestionControl = "bbr";
       windowScaling = true;
       fastOpen = true;
-      lowLatency = false;  # Set to true for gaming/real-time apps
+      lowLatency = false; # Set to true for gaming/real-time apps
     };
-    
+
     bufferOptimization = {
       enable = true;
-      receiveBuffer = 16777216;  # 16MB
-      sendBuffer = 16777216;     # 16MB
+      receiveBuffer = 16777216; # 16MB
+      sendBuffer = 16777216; # 16MB
       autotuning = true;
     };
-    
+
     interHostOptimization = {
       enable = true;
-      hosts = ["dex5550" "p510" "razer"];  # Your other hosts
-      jumboFrames = false;  # Keep disabled for compatibility
+      hosts = [ "dex5550" "p510" "razer" ]; # Your other hosts
+      jumboFrames = false; # Keep disabled for compatibility
       routeOptimization = true;
     };
-    
+
     dnsOptimization = {
       enable = true;
       caching = true;
       parallelQueries = true;
-      customServers = ["192.168.1.222" "1.1.1.1"];
+      customServers = [ "192.168.1.222" "1.1.1.1" ];
     };
   };
-  
+
   # Storage performance optimization
   storage.performanceOptimization = {
     enable = true;
-    profile = "performance";  # Options: "performance", "balanced", "capacity"
-    
+    profile = "performance"; # Options: "performance", "balanced", "capacity"
+
     ioSchedulerOptimization = {
       enable = true;
       dynamicScheduling = true;
       ssdOptimization = true;
       hddOptimization = true;
     };
-    
+
     filesystemOptimization = {
       enable = true;
       readaheadOptimization = true;
       cacheOptimization = true;
-      compressionOptimization = false;  # Disable for performance
+      compressionOptimization = false; # Disable for performance
     };
-    
+
     nvmeOptimization = {
       enable = true;
-      queueDepth = 64;  # High queue depth for performance
+      queueDepth = 64; # High queue depth for performance
       polling = true;
       multiQueue = true;
     };
-    
+
     tmpfsOptimization = {
       enable = true;
-      tmpSize = "8G";      # Adjust based on your RAM
+      tmpSize = "8G"; # Adjust based on your RAM
       varTmpSize = "2G";
       devShmSize = "50%";
     };

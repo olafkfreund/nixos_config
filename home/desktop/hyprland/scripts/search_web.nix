@@ -1,4 +1,4 @@
-{pkgs, ...}:
+{ pkgs, ... }:
 pkgs.writeShellScriptBin "search_web" ''
   # Launch the search script inside foot terminal
   exec foot -a web-search -e ${pkgs.writeShellScript "search_web" ''

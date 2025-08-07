@@ -1,4 +1,4 @@
-{...}: {
+{ ... }: {
   # Virtualization and container modules
   # Only load on hosts that run VMs or containers
   imports = [

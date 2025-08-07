@@ -11,7 +11,7 @@
             {
               size = "full";
               widgets = [
-                {type = "calendar";}
+                { type = "calendar"; }
                 {
                   type = "weather";
                   location = "Nivelles, Belgium";

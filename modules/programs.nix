@@ -1,4 +1,4 @@
-{...}: {
+{ ... }: {
   # Program-specific modules
   # Only load on hosts that need these specific programs
   imports = [

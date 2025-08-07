@@ -1,11 +1,11 @@
-{
-  config,
-  lib,
-  ...
+{ config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.services.sunshine;
-in {
+in
+{
   options.services.sunshine = {
     enable = mkEnableOption {
       default = false;
@@ -19,10 +19,10 @@ in {
       capSysAdmin = true;
     };
     security.wrappers.sunshine = {
-        owner = "root";
-        group = "root";
-        capabilities = "cap_sys_admin+p";
-        source = "${pkgs.sunshine}/bin/sunshine";
+      owner = "root";
+      group = "root";
+      capabilities = "cap_sys_admin+p";
+      source = "${pkgs.sunshine}/bin/sunshine";
     };
   };
 }

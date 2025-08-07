@@ -1,11 +1,11 @@
-{
-  config,
-  lib,
-  ...
+{ config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.desktop.swayosd;
-in {
+in
+{
   options.desktop.swayosd = {
     enable = mkEnableOption {
       default = false;

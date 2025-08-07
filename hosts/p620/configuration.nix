@@ -1,19 +1,21 @@
-{
-  config, # Add config to the function parameters
-  pkgs,
-  lib,
-  hostUsers,
-  ...
-}: let
+{ config
+, # Add config to the function parameters
+  pkgs
+, lib
+, hostUsers
+, ...
+}:
+let
   vars = import ./variables.nix;
-in {
+in
+{
   imports = [
     ./nixos/hardware-configuration.nix
     ./nixos/screens.nix
     ./nixos/power.nix
     ./nixos/boot.nix
     ./nixos/amd.nix
-    ./nixos/usb-power-fix.nix  # Fix USB mouse freezing issues
+    ./nixos/usb-power-fix.nix # Fix USB mouse freezing issues
     ./nixos/i18n.nix
     ./nixos/hosts.nix
     ./nixos/envvar.nix
@@ -51,19 +53,19 @@ in {
 
   # Choose networking profile: "desktop", "server", or "minimal"
   networking.profile = "server";
-  
+
   # Tailscale VPN Configuration
   # Research shows acceptDns=false is critical for NixOS to avoid DNS conflicts
   networking.tailscale = {
     enable = true;
     authKeyFile = config.age.secrets.tailscale-auth-key.path;
     hostname = "p620-workstation";
-    subnet = "192.168.1.0/24";  # Advertise local subnet
+    subnet = "192.168.1.0/24"; # Advertise local subnet
     acceptRoutes = true;
-    acceptDns = false;  # CRITICAL: Prevent Tailscale DNS conflicts with systemd-resolved
+    acceptDns = false; # CRITICAL: Prevent Tailscale DNS conflicts with systemd-resolved
     ssh = true;
     shields = true;
-    useRoutingFeatures = "both";  # Can route and accept routes
+    useRoutingFeatures = "both"; # Can route and accept routes
     extraUpFlags = [
       "--operator=olafkfreund"
       "--accept-risk=lose-ssh"
@@ -75,9 +77,9 @@ in {
   services.resolved = {
     enable = true;
     fallbackDns = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
-    domains = [ "~home.freundcloud.com" ];  # Use routing directive for local domain
-    dnssec = lib.mkForce "false";  # Resolve DNSSEC conflict
-    llmnr = lib.mkForce "false";  # Disable LLMNR to avoid conflicts with Tailscale
+    domains = [ "~home.freundcloud.com" ]; # Use routing directive for local domain
+    dnssec = lib.mkForce "false"; # Resolve DNSSEC conflict
+    llmnr = lib.mkForce "false"; # Disable LLMNR to avoid conflicts with Tailscale
     extraConfig = ''
       DNS=192.168.1.222 1.1.1.1 8.8.8.8
       Domains=~home.freundcloud.com
@@ -93,14 +95,14 @@ in {
     enable = true;
     defaultProvider = "openai";
     enableFallback = true;
-    
+
     # Enable specific providers
     openai.enable = true;
     anthropic.enable = true;
     gemini.enable = true;
     ollama.enable = true;
   };
-  
+
   # AI analysis services removed - were non-functional and consuming resources
   # ai.analysis = {
   #   enable = false;  # Removed completely - provided no meaningful analysis
@@ -132,7 +134,7 @@ in {
     maxAuthTries = 3;
     enableFail2Ban = true;
     enableKeyOnlyAccess = true;
-    trustedNetworks = ["192.168.1.0/24" "10.0.0.0/8"];
+    trustedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ];
   };
 
   # Enable hardware monitoring with desktop notifications
@@ -140,19 +142,19 @@ in {
     enable = true;
     interval = 300; # Check every 5 minutes
     enableDesktopNotifications = true;
-    
+
     criticalThresholds = {
-      diskUsage = 85;     # P620 at 49.6%, lower threshold for early warning
-      memoryUsage = 90;   # P620 at 22.8%, higher threshold OK for workstation
-      cpuLoad = 200;      # AMD Ryzen 5 PRO 4650G (12 cores)
-      temperature = 85;   # AMD CPU, conservative threshold
+      diskUsage = 85; # P620 at 49.6%, lower threshold for early warning
+      memoryUsage = 90; # P620 at 22.8%, higher threshold OK for workstation
+      cpuLoad = 200; # AMD Ryzen 5 PRO 4650G (12 cores)
+      temperature = 85; # AMD CPU, conservative threshold
     };
-    
+
     warningThresholds = {
-      diskUsage = 75;     # Early warning for P620
-      memoryUsage = 80;   # Memory warning
-      cpuLoad = 150;      # Load warning  
-      temperature = 75;   # Temperature warning
+      diskUsage = 75; # Early warning for P620
+      memoryUsage = 80; # Memory warning
+      cpuLoad = 150; # Load warning  
+      temperature = 75; # Temperature warning
     };
   };
 
@@ -217,13 +219,13 @@ in {
       enable = true;
       ollama = true;
       gemini-cli = true;
-      
+
       # Enable unified AI provider support
       providers = {
         enable = true;
         defaultProvider = "openai";
         enableFallback = true;
-        
+
         # Enable specific providers
         openai.enable = true;
         anthropic.enable = true;
@@ -236,7 +238,7 @@ in {
       enable = true;
       neomutt.enable = true;
       ai.enable = true;
-      ai.provider = "openai"; 
+      ai.provider = "openai";
       notifications.enable = true;
       notifications.highPriorityOnly = true;
     };
@@ -258,20 +260,20 @@ in {
   # Monitoring configuration - P620 as client, dex5550 is now server
   monitoring = {
     enable = true;
-    mode = "client";  # Send data to dex5550 monitoring server
+    mode = "client"; # Send data to dex5550 monitoring server
     serverHost = "dex5550";
-    
+
     features = {
       nodeExporter = true;
       nixosMetrics = true;
-      alerting = false;  # Only server handles alerting
-      logging = true;   # Enable Promtail for log collection
-      prometheus = false;  # Only server runs Prometheus
-      grafana = false;     # Only server runs Grafana
-      amdGpuMetrics = true;  # Enable AMD GPU monitoring for P620
-      aiMetrics = true;      # Enable AI metrics collection
+      alerting = false; # Only server handles alerting
+      logging = true; # Enable Promtail for log collection
+      prometheus = false; # Only server runs Prometheus
+      grafana = false; # Only server runs Grafana
+      amdGpuMetrics = true; # Enable AMD GPU monitoring for P620
+      aiMetrics = true; # Enable AI metrics collection
     };
-    
+
     # Enable AI metrics exporter
     aiMetricsExporter = {
       enable = true;
@@ -319,7 +321,7 @@ in {
 
   # AI Ollama-specific configuration that goes beyond simple enabling
   ai.ollama = {
-    enableRag = false;  # Temporarily disabled due to ChromaDB 1.0.12 startup bug
+    enableRag = false; # Temporarily disabled due to ChromaDB 1.0.12 startup bug
     ragDirectory = "/home/${vars.username}/documents/rag-files";
     allowBrokenPackages = false;
   };
@@ -337,22 +339,22 @@ in {
   # Enable secrets management
   modules.security.secrets = {
     enable = true;
-    hostKeys = ["/etc/ssh/ssh_host_ed25519_key"];
-    userKeys = ["/home/${vars.username}/.ssh/id_ed25519"];
+    hostKeys = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    userKeys = [ "/home/${vars.username}/.ssh/id_ed25519" ];
   };
 
   # Create system users for all host users
   users.users = lib.genAttrs hostUsers (username: {
     isNormalUser = true;
     description = "User ${username}";
-    extraGroups = ["wheel" "networkmanager" "render"];
+    extraGroups = [ "wheel" "networkmanager" "render" ];
     shell = pkgs.zsh;
     # Only use secret-managed password if the secret exists
     hashedPasswordFile =
       lib.mkIf
-      (config.modules.security.secrets.enable
-        && builtins.hasAttr "user-password-${username}" config.age.secrets)
-      config.age.secrets."user-password-${username}".path;
+        (config.modules.security.secrets.enable
+          && builtins.hasAttr "user-password-${username}" config.age.secrets)
+        config.age.secrets."user-password-${username}".path;
   });
 
   # Remove duplicate user configuration - use the one above that handles all hostUsers
@@ -366,7 +368,7 @@ in {
         "-nolisten tcp"
         "-dpi 96"
       ];
-      videoDrivers = ["${vars.gpu}gpu"]; # Correct way to set the video driver
+      videoDrivers = [ "${vars.gpu}gpu" ]; # Correct way to set the video driver
     };
 
     # Desktop environment
@@ -418,11 +420,11 @@ in {
     vim
     wally-cli
     # Custom qwen-code package
-    (callPackage ../../home/development/qwen-code/default.nix {})
+    (callPackage ../../home/development/qwen-code/default.nix { })
   ];
 
   # Hardware-specific configurations
-  services.udev.packages = [pkgs.via];
+  services.udev.packages = [ pkgs.via ];
   services.udev.extraRules = builtins.concatStringsSep "\n" [
     ''ACTION=="add", SUBSYSTEM=="video4linux", DRIVERS=="uvcvideo", RUN+="${pkgs.v4l-utils}/bin/v4l2-ctl --set-ctrl=power_line_frequency=1"''
     ''KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0660", TAG+="uaccess"''
@@ -438,7 +440,7 @@ in {
   fileSystems."/mnt/media" = {
     device = "192.168.1.127:/mnt/media";
     fsType = "nfs";
-    options = ["x-systemd.automount" "noauto"];
+    options = [ "x-systemd.automount" "noauto" ];
   };
 
   # Network-specific overrides that go beyond the network profile
@@ -465,13 +467,13 @@ in {
           LLMNR = false;
           DHCP = "ipv4";
           IPv6AcceptRA = true;
-          Domains = "~home.freundcloud.com";  # Use routing directive for local domain
+          Domains = "~home.freundcloud.com"; # Use routing directive for local domain
           DNS = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
         };
         # Higher priority for wired connection
         dhcpV4Config = {
           RouteMetric = 10;
-          UseDNS = false;  # Use our custom DNS configuration
+          UseDNS = false; # Use our custom DNS configuration
         };
       };
       "25-wireless" = {
@@ -494,9 +496,9 @@ in {
         networkConfig = {
           MulticastDNS = false;
           LLMNR = false;
-          DHCP = "no";  # NEVER enable DHCP on Tailscale interface
-          DNS = [ ];  # Explicitly no DNS - let Tailscale handle it
-          Domains = [ ];  # No domain routing through this interface
+          DHCP = "no"; # NEVER enable DHCP on Tailscale interface
+          DNS = [ ]; # Explicitly no DNS - let Tailscale handle it
+          Domains = [ ]; # No domain routing through this interface
         };
       };
     };
@@ -510,137 +512,137 @@ in {
       ExecStart = "${pkgs.scream}/bin/scream-ivshmem-pulse /dev/shm/scream";
       Restart = "always";
     };
-    wantedBy = ["multi-user.target"];
-    requires = ["pulseaudio.service"];
+    wantedBy = [ "multi-user.target" ];
+    requires = [ "pulseaudio.service" ];
   };
 
   # Nix configuration
-  nix.settings.allowed-users = ["nix-serve"];
+  nix.settings.allowed-users = [ "nix-serve" ];
 
   # Performance Optimization Configuration (Phase 10.4)
   # High-performance AMD workstation profile
   system.resourceManager = {
     enable = true;
     profile = "performance";
-    
+
     cpuManagement = {
       enable = true;
       dynamicGovernor = true;
       affinityOptimization = true;
-      coreReservation = false;  # Use all cores for maximum performance
+      coreReservation = false; # Use all cores for maximum performance
     };
-    
+
     memoryManagement = {
       enable = true;
       dynamicSwap = true;
       hugePagesOptimization = true;
-      memoryCompression = false;  # Disable for performance
+      memoryCompression = false; # Disable for performance
       oomProtection = true;
     };
-    
+
     ioManagement = {
       enable = true;
       dynamicScheduler = true;
       ioNiceOptimization = true;
       cacheOptimization = true;
     };
-    
+
     networkManagement = {
       enable = true;
       trafficShaping = false;
       connectionOptimization = true;
     };
   };
-  
+
   # Network performance tuning
   networking.performanceTuning = {
     enable = true;
-    profile = "throughput";  # Optimize for AI workload throughput
-    
+    profile = "throughput"; # Optimize for AI workload throughput
+
     tcpOptimization = {
       enable = true;
       congestionControl = "bbr";
       windowScaling = true;
       fastOpen = true;
-      lowLatency = false;  # Prioritize throughput over latency
+      lowLatency = false; # Prioritize throughput over latency
     };
-    
+
     bufferOptimization = {
       enable = true;
-      receiveBuffer = 33554432;  # 32MB for high-throughput AI workloads
-      sendBuffer = 33554432;     # 32MB for high-throughput AI workloads
+      receiveBuffer = 33554432; # 32MB for high-throughput AI workloads
+      sendBuffer = 33554432; # 32MB for high-throughput AI workloads
       autotuning = true;
     };
-    
+
     interHostOptimization = {
       enable = true;
-      hosts = ["dex5550" "p510" "razer"];
-      jumboFrames = false;  # Keep disabled for compatibility
+      hosts = [ "dex5550" "p510" "razer" ];
+      jumboFrames = false; # Keep disabled for compatibility
       routeOptimization = true;
     };
-    
+
     dnsOptimization = {
       enable = true;
       caching = true;
       parallelQueries = true;
-      customServers = ["192.168.1.222" "1.1.1.1"];
+      customServers = [ "192.168.1.222" "1.1.1.1" ];
     };
-    
+
     monitoringOptimization = {
       enable = true;
       compression = true;
-      batchingInterval = 5;  # More frequent for performance workstation
+      batchingInterval = 5; # More frequent for performance workstation
       prioritization = true;
     };
   };
-  
+
   # Storage performance optimization
   storage.performanceOptimization = {
     enable = true;
     profile = "performance";
-    
+
     ioSchedulerOptimization = {
       enable = true;
       dynamicScheduling = true;
       ssdOptimization = true;
       hddOptimization = true;
     };
-    
+
     filesystemOptimization = {
       enable = true;
       readaheadOptimization = true;
       cacheOptimization = true;
-      compressionOptimization = false;  # Disable for performance
+      compressionOptimization = false; # Disable for performance
     };
-    
+
     nvmeOptimization = {
       enable = true;
-      queueDepth = 64;  # High queue depth for performance
+      queueDepth = 64; # High queue depth for performance
       polling = true;
       multiQueue = true;
     };
-    
+
     diskCacheOptimization = {
       enable = true;
       writeCache = true;
       readCache = true;
-      barrierOptimization = false;  # Keep safe
+      barrierOptimization = false; # Keep safe
     };
-    
+
     tmpfsOptimization = {
       enable = true;
-      tmpSize = "16G";     # Large temp space for AI workloads and complex builds
+      tmpSize = "16G"; # Large temp space for AI workloads and complex builds
       varTmpSize = "2G";
       devShmSize = "50%";
     };
   };
-  
+
   # Performance analytics
   monitoring.performanceAnalytics = {
     enable = true;
     dataRetention = "30d";
-    analysisInterval = "1m";  # Frequent analysis for performance workstation
-    
+    analysisInterval = "1m"; # Frequent analysis for performance workstation
+
     metricsCollection = {
       enable = true;
       systemMetrics = true;
@@ -649,7 +651,7 @@ in {
       storageMetrics = true;
       aiMetrics = true;
     };
-    
+
     analytics = {
       enable = true;
       trendAnalysis = true;
@@ -657,14 +659,14 @@ in {
       predictiveAnalysis = true;
       bottleneckDetection = true;
     };
-    
+
     reporting = {
       enable = true;
       dailyReports = true;
       weeklyReports = true;
       alertThresholds = true;
     };
-    
+
     dashboards = {
       enable = true;
       realTimeMetrics = true;
@@ -672,7 +674,7 @@ in {
       customMetrics = true;
     };
   };
-  
+
   # AI-powered automated performance tuning removed - was non-functional and consuming resources
 
   # Package configurations

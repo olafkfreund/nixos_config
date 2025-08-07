@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.aws.packages;
-in {
+in
+{
   options.aws.packages = {
     enable = mkEnableOption "Enable AWS packages";
   };

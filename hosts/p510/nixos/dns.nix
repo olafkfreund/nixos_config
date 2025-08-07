@@ -1,10 +1,11 @@
-{
-  pkgs,
-  ...
-}: let
+{ pkgs
+, ...
+}:
+let
   ipv4 = "5.78.43.185";
   fqdn2domain = "infra.holochain.org";
-in {
+in
+{
   system.activationScripts.bind-zones.text = ''
     mkdir -p /etc/bind/zones
     chown named:named /etc/bind/zones
@@ -50,7 +51,7 @@ in {
     zones = [
       {
         name = fqdn2domain;
-        allowQuery = ["any"];
+        allowQuery = [ "any" ];
         file = "/etc/bind/zones/${fqdn2domain}.zone";
         master = true;
         extraConfig = "allow-update { key rfc2136key.${fqdn2domain}.; };";
@@ -58,37 +59,39 @@ in {
     ];
   };
 
-  systemd.services.dns-rfc2136-2-conf = let
-    dnskeysConfPath = "/var/lib/secrets/${fqdn2domain}-dnskeys.conf";
-    dnskeysSecretPath = "/var/lib/secrets/${fqdn2domain}-dnskeys.secret";
-  in {
-    requiredBy = ["acme-${fqdn2domain}.service" "bind.service"];
-    before = ["acme-${fqdn2domain}.service" "bind.service"];
-    unitConfig = {
-      ConditionPathExists = "!${dnskeysConfPath}";
-    };
-    serviceConfig = {
-      Type = "oneshot";
-      UMask = 0077;
-    };
-    path = [pkgs.bind];
-    script = ''
-      mkdir -p /var/lib/secrets
-      chmod 755 /var/lib/secrets
-      tsig-keygen rfc2136key.${fqdn2domain} > ${dnskeysConfPath}
-      chown named:root ${dnskeysConfPath}
-      chmod 400 ${dnskeysConfPath}
+  systemd.services.dns-rfc2136-2-conf =
+    let
+      dnskeysConfPath = "/var/lib/secrets/${fqdn2domain}-dnskeys.conf";
+      dnskeysSecretPath = "/var/lib/secrets/${fqdn2domain}-dnskeys.secret";
+    in
+    {
+      requiredBy = [ "acme-${fqdn2domain}.service" "bind.service" ];
+      before = [ "acme-${fqdn2domain}.service" "bind.service" ];
+      unitConfig = {
+        ConditionPathExists = "!${dnskeysConfPath}";
+      };
+      serviceConfig = {
+        Type = "oneshot";
+        UMask = 0077;
+      };
+      path = [ pkgs.bind ];
+      script = ''
+        mkdir -p /var/lib/secrets
+        chmod 755 /var/lib/secrets
+        tsig-keygen rfc2136key.${fqdn2domain} > ${dnskeysConfPath}
+        chown named:root ${dnskeysConfPath}
+        chmod 400 ${dnskeysConfPath}
 
-      # extract secret value from the dnskeys.conf
-      while read x y; do if [ "$x" = "secret" ]; then secret="''${y:1:''${#y}-3}"; fi; done < ${dnskeysConfPath}
+        # extract secret value from the dnskeys.conf
+        while read x y; do if [ "$x" = "secret" ]; then secret="''${y:1:''${#y}-3}"; fi; done < ${dnskeysConfPath}
 
-      cat > ${dnskeysSecretPath} << EOF
-      RFC2136_NAMESERVER='127.0.0.1:53'
-      RFC2136_TSIG_ALGORITHM='hmac-sha256.'
-      RFC2136_TSIG_KEY='rfc2136key.${fqdn2domain}'
-      RFC2136_TSIG_SECRET='$secret'
-      EOF
-      chmod 400 ${dnskeysSecretPath}
-    '';
-  };
+        cat > ${dnskeysSecretPath} << EOF
+        RFC2136_NAMESERVER='127.0.0.1:53'
+        RFC2136_TSIG_ALGORITHM='hmac-sha256.'
+        RFC2136_TSIG_KEY='rfc2136key.${fqdn2domain}'
+        RFC2136_TSIG_SECRET='$secret'
+        EOF
+        chmod 400 ${dnskeysSecretPath}
+      '';
+    };
 }

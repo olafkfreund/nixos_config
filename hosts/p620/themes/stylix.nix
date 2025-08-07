@@ -1,6 +1,8 @@
-{pkgs, ...}: let
+{ pkgs, ... }:
+let
   vars = import ../variables.nix;
-in {
+in
+{
   stylix = {
     enable = true;
     polarity = "dark";

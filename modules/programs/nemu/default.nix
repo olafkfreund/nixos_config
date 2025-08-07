@@ -1,12 +1,12 @@
-{
-  pkgs,
-  lib,
-  config,
-  ...
+{ pkgs
+, lib
+, config
+, ...
 }:
 with lib; let
   cfg = config.virt.nemu;
-in {
+in
+{
   options.virt.nemu = {
     enable = mkEnableOption "Nemu virtualization";
 
@@ -25,7 +25,7 @@ in {
           };
         };
       });
-      default = {};
+      default = { };
       description = "Users allowed to use Nemu";
     };
 
@@ -66,17 +66,18 @@ in {
 
     # Create required groups if they don't exist
     users.groups = {
-      "${cfg.vhostNetGroup}" = {};
-      "${cfg.macvtapGroup}" = {};
-      "${cfg.usbGroup}" = {};
+      "${cfg.vhostNetGroup}" = { };
+      "${cfg.macvtapGroup}" = { };
+      "${cfg.usbGroup}" = { };
     };
 
     # Add users to the required groups
     users.users =
-      mapAttrs (_name: _: {
-        extraGroups = [cfg.vhostNetGroup cfg.macvtapGroup cfg.usbGroup];
-      })
-      cfg.users;
+      mapAttrs
+        (_name: _: {
+          extraGroups = [ cfg.vhostNetGroup cfg.macvtapGroup cfg.usbGroup ];
+        })
+        cfg.users;
 
     # Load kernel modules required by Nemu
     boot.kernelModules = [

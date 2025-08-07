@@ -1,19 +1,19 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.monitoring;
-in {
+in
+{
   config = mkIf (cfg.enable && (cfg.mode == "server" || cfg.mode == "standalone")) {
     services.prometheus = {
       enable = true;
       port = cfg.network.prometheusPort;
       listenAddress = "0.0.0.0";
       retentionTime = cfg.retention;
-      
+
       # Global configuration
       globalConfig = {
         scrape_interval = cfg.scrapeInterval;
@@ -218,7 +218,7 @@ in {
           }];
           scrape_interval = "60s";
         }
-      ] ++ 
+      ] ++
       # Optional AI metrics scraping
       (optionals cfg.features.aiMetrics [
         {

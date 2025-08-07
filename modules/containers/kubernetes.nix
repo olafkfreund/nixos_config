@@ -6,8 +6,8 @@
     tfk8s
     kubectl-explore
     kubernetes-helm
-	  kubecolor
-	  k9s
+    kubecolor
+    k9s
     minikube
     werf
   ];

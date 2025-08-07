@@ -1,12 +1,12 @@
-{
-  pkgs,
-  lib,
-  config,
-  ...
+{ pkgs
+, lib
+, config
+, ...
 }:
 with lib; let
   cfg = config.modules.desktop.hyprland-uwsm;
-in {
+in
+{
   options.modules.desktop.hyprland-uwsm = {
     enable = mkEnableOption "Hyprland with UWSM integration";
   };
@@ -33,12 +33,12 @@ in {
       ];
       config = {
         common = {
-          default = ["hyprland" "gtk"];
+          default = [ "hyprland" "gtk" ];
         };
         hyprland = {
-          default = ["hyprland" "gtk"];
-          "org.freedesktop.impl.portal.Secret" = ["gnome-keyring"];
-          "org.freedesktop.impl.portal.Screencast" = ["hyprland"];
+          default = [ "hyprland" "gtk" ];
+          "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
+          "org.freedesktop.impl.portal.Screencast" = [ "hyprland" ];
         };
       };
     };

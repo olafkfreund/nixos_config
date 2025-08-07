@@ -1,4 +1,4 @@
-{pkgs, ...}:
+{ pkgs, ... }:
 pkgs.writeShellScriptBin "screenshoot" ''
   slurp_select_area="slurp -d -b '#ebdbb244' -c '#323232FF' -B '#323232FF' -F 'JetBrains Mono Nerd Font' -w '1'"
   # Theme Elements

@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs-unstable,
-  ...
+{ config
+, lib
+, pkgs-unstable
+, ...
 }:
 with lib; let
   cfg = config.program.streamcontroller;
-in {
+in
+{
   options.program.streamcontroller = {
     enable = mkEnableOption {
       description = "Enable Streamcontroller";

@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.ai.providers.ollama;
-in {
+in
+{
   options.ai.providers.ollama = {
     enabled = mkOption {
       type = types.bool;
@@ -20,7 +20,7 @@ in {
     environment.systemPackages = with pkgs; [
       # Core Ollama tools
       ollama
-      
+
       # Tools that work well with Ollama
       aichat # Supports Ollama models
     ];

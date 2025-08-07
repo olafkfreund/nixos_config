@@ -1,12 +1,12 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
+{ pkgs
+, config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.desktop.remotedesktop;
-in {
+in
+{
   options.desktop.remotedesktop = {
     enable = mkEnableOption {
       default = false;

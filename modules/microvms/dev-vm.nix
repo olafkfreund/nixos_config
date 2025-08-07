@@ -2,14 +2,15 @@
 { config, lib, pkgs, ... }:
 with lib; let
   cfg = config.features.microvms;
-in {
+in
+{
   config = mkIf (cfg.enable && cfg.dev-vm.enable) {
     # Development VM systemd service
     systemd.services.microvm-dev = {
       description = "Development MicroVM";
-      wantedBy = [];  # Manual start only
+      wantedBy = [ ]; # Manual start only
       after = [ "network.target" ];
-      
+
       serviceConfig = {
         Type = "forking";
         User = "root";
@@ -17,7 +18,7 @@ in {
         Restart = "on-failure";
         RestartSec = "5s";
       };
-      
+
       script = ''
         # Create persistent storage if not exists
         mkdir -p ${cfg.storageRoot}/dev-vm/projects
@@ -28,12 +29,12 @@ in {
         
         echo "Development MicroVM service started"
       '';
-      
+
       preStop = ''
         echo "Stopping Development MicroVM"
       '';
     };
-    
+
     # Development VM runner script
     environment.systemPackages = with pkgs; [
       (writeScriptBin "start-dev-vm" ''
@@ -49,7 +50,7 @@ in {
           exit 1
         fi
       '')
-      
+
       (writeScriptBin "stop-dev-vm" ''
         #!/bin/bash
         echo "Stopping Development MicroVM..."

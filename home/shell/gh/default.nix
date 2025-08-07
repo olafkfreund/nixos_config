@@ -1,12 +1,12 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
+{ pkgs
+, config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.cli.versioncontrol.gh;
-in {
+in
+{
   options.cli.versioncontrol.gh = {
     enable = mkEnableOption {
       default = false;

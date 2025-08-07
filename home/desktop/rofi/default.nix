@@ -1,8 +1,7 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.desktop.rofi;
@@ -127,7 +126,8 @@ with lib; let
       background-color: @gruvbox-bg;
     }
   '';
-in {
+in
+{
   options.desktop.rofi = {
     enable = mkEnableOption "Rofi application launcher with Gruvbox theme";
   };
@@ -187,7 +187,7 @@ in {
     # Import our custom script
     home.packages = [
       #Rofi scripts
-      (import ./scripts/websearch.nix {inherit pkgs;})
+      (import ./scripts/websearch.nix { inherit pkgs; })
     ];
 
     # Create launcher scripts for common rofi use cases and for websearch

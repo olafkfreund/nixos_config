@@ -1,12 +1,13 @@
-{
-  config,
-  pkgs,
-  lib,
-  hostUsers,
-  ...
-}: let
+{ config
+, pkgs
+, lib
+, hostUsers
+, ...
+}:
+let
   vars = import ./variables.nix;
-in {
+in
+{
   imports = [
     ./nixos/hardware-configuration.nix # Docker configuration
     ./nixos/power.nix
@@ -65,7 +66,7 @@ in {
     enable = true;
     fallbackDns = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
     domains = [ "home.freundcloud.com" ];
-    dnssec = lib.mkForce "false";  # Resolve DNSSEC conflict
+    dnssec = lib.mkForce "false"; # Resolve DNSSEC conflict
   };
 
   # Configure AI providers directly
@@ -216,7 +217,7 @@ in {
     collectJournal = true;
     collectKernel = true;
     # Enable nginx logs collection for media server
-    collectNginx = false;  # Set to true if using nginx
+    collectNginx = false; # Set to true if using nginx
   };
 
   # Enable NixOS package monitoring tools
@@ -234,7 +235,7 @@ in {
     maxAuthTries = 3;
     enableFail2Ban = true;
     enableKeyOnlyAccess = true;
-    trustedNetworks = ["192.168.1.0/24" "10.0.0.0/8"];
+    trustedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ];
   };
 
   # Enable encrypted API keys
@@ -262,7 +263,7 @@ in {
       "-nolisten tcp"
       "-dpi 96"
     ];
-    videoDrivers = ["${vars.gpu}"];
+    videoDrivers = [ "${vars.gpu}" ];
   };
 
   # Hardware-specific configurations
@@ -311,7 +312,7 @@ in {
   # System packages
   environment.systemPackages = with pkgs; [
     # Custom qwen-code package for system-wide availability
-    (callPackage ../../home/development/qwen-code/default.nix {})
+    (callPackage ../../home/development/qwen-code/default.nix { })
   ];
 
   # User-specific configuration from variables
@@ -324,7 +325,7 @@ in {
       vim
       wally-cli
       # Custom qwen-code package
-      (callPackage ../../home/development/qwen-code/default.nix {})
+      (callPackage ../../home/development/qwen-code/default.nix { })
     ];
   };
 
@@ -335,7 +336,7 @@ in {
 
   nixpkgs.config = {
     allowBroken = true;
-    permittedInsecurePackages = ["olm-3.2.16" "dotnet-sdk-6.0.428" "python3.12-youtube-dl-2021.12.17"];
+    permittedInsecurePackages = [ "olm-3.2.16" "dotnet-sdk-6.0.428" "python3.12-youtube-dl-2021.12.17" ];
   };
   system.stateVersion = "25.11";
 }

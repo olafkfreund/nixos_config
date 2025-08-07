@@ -1,17 +1,17 @@
-{ 
-  config, 
-  lib, 
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
-with lib; let 
+with lib; let
   cfg = config.cli.markdown;
-in {
+in
+{
   options.cli.markdown = with types; {
     enable = mkEnableOption {
-      default = false; 
+      default = false;
       description = "Include markdown syntax highlighting";
-    };  
+    };
   };
   config = mkIf cfg.enable {
     home.packages = with pkgs; [

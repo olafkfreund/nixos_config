@@ -1,12 +1,12 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
+{ pkgs
+, config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.openshift.packages;
-in {
+in
+{
   options.openshift.packages = {
     enable = mkEnableOption "Enable OpenShift packages";
   };

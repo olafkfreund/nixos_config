@@ -1,12 +1,12 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
+{ pkgs
+, config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.azure.packages;
-in {
+in
+{
   options.azure.packages = {
     enable = mkEnableOption "Enable Azure packages";
   };

@@ -1,7 +1,8 @@
-{
-  ...
-}: let
+{ ...
+}:
+let
   vars = import ../variables.nix;
-in {
+in
+{
   environment.sessionVariables = vars.environmentVariables;
 }

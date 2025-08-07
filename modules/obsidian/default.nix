@@ -3,7 +3,8 @@
 with lib;
 let
   cfg = config.programs.obsidian.enable;
-in {
+in
+{
   options.programs.obsidian = {
     enable = mkEnableOption "Obsidian markdown editor";
   };

@@ -1,8 +1,7 @@
 # Hyprland Environment Variables Configuration
 # Converted to native Nix configuration for better type safety and maintainability
-{
-  lib,
-  ...
+{ lib
+, ...
 }:
 with lib; {
   wayland.windowManager.hyprland.settings = {

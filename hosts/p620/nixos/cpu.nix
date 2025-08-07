@@ -1,7 +1,6 @@
-{
-  lib,
-  pkgs,
-  ...
+{ lib
+, pkgs
+, ...
 }: {
   # CPU frequency scaling
   powerManagement.cpuFreqGovernor = "performance";

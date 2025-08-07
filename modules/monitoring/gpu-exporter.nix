@@ -4,7 +4,8 @@ with lib; let
   vars = import ../../hosts/${config.networking.hostName}/variables.nix;
   hasNvidiaGpu = vars.gpu == "nvidia";
   isMonitoringServer = cfg.mode == "server" || cfg.mode == "standalone";
-in {
+in
+{
   config = mkMerge [
     # NVIDIA GPU Exporter service - only on hosts with NVIDIA GPUs
     (mkIf (cfg.enable && cfg.features.gpuMetrics && hasNvidiaGpu) {
@@ -13,7 +14,7 @@ in {
         description = "NVIDIA GPU Prometheus Exporter";
         after = [ "network.target" ];
         wantedBy = [ "multi-user.target" ];
-        
+
         serviceConfig = {
           Type = "simple";
           ExecStart = "${pkgs.writeShellScript "nvidia-gpu-exporter-wrapper" ''
@@ -24,13 +25,13 @@ in {
           RestartSec = "5s";
           User = "nvidia-gpu-exporter";
           Group = "nvidia-gpu-exporter";
-          
+
           # Security hardening
           NoNewPrivileges = true;
           ProtectSystem = "strict";
           ProtectHome = true;
           PrivateTmp = true;
-          PrivateDevices = false;  # Need access to GPU devices
+          PrivateDevices = false; # Need access to GPU devices
           ProtectKernelTunables = true;
           ProtectKernelModules = true;
           ProtectControlGroups = true;
@@ -38,31 +39,31 @@ in {
           RestrictRealtime = true;
           RestrictNamespaces = true;
           LockPersonality = true;
-          
+
           # Memory and CPU limits
           MemoryMax = "64M";
           CPUQuota = "10%";
         };
-        
+
         # Environment for NVIDIA drivers
         environment = {
           NVIDIA_VISIBLE_DEVICES = "all";
           NVIDIA_DRIVER_CAPABILITIES = "compute,utility";
         };
       };
-      
+
       # Create user for GPU exporter
-      users.groups.nvidia-gpu-exporter = {};
+      users.groups.nvidia-gpu-exporter = { };
       users.users.nvidia-gpu-exporter = {
         isSystemUser = true;
         group = "nvidia-gpu-exporter";
         description = "NVIDIA GPU Exporter service user";
-        extraGroups = [ "video" ];  # Access to GPU devices
+        extraGroups = [ "video" ]; # Access to GPU devices
       };
-      
+
       # Open firewall port for GPU exporter
       networking.firewall.allowedTCPPorts = [ cfg.network.gpuExporterPort ];
-      
+
       # GPU exporter CLI tool
       environment.systemPackages = with pkgs; [
         (writeShellScriptBin "gpu-exporter-status" ''

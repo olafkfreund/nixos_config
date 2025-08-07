@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{ pkgs, ... }: {
   imports = [
     ../common/base-home.nix
     # Add htpcuser-specific modules here

@@ -1,14 +1,13 @@
 # Enhanced Zed Editor Configuration
 # Integrated with unified language support and enhanced AI features
-{
-  config,
-  lib,
-  pkgs-unstable,
-  ...
+{ config
+, lib
+, pkgs-unstable
+, ...
 }:
 with lib; let
   cfg = config.editor.zed-editor;
-  
+
   # Enhanced feature configuration
   features = {
     # AI and language support
@@ -18,7 +17,7 @@ with lib; let
       ollama = false;
       multiple_providers = true;
     };
-    
+
     # Language integration (from languages.nix)
     languages = {
       nix = { enable = true; lsp = "nixd"; formatter = "alejandra"; };
@@ -27,7 +26,7 @@ with lib; let
       go = { enable = true; lsp = "gopls"; formatter = "gofmt"; };
       rust = { enable = true; lsp = "rust-analyzer"; formatter = "rustfmt"; };
     };
-    
+
     # Editor enhancements
     editor = {
       vim_mode = true;
@@ -36,7 +35,7 @@ with lib; let
       theme = "gruvbox-dark";
       direnv = true;
     };
-    
+
     # Development workflow
     workflow = {
       git_integration = true;
@@ -45,29 +44,33 @@ with lib; let
       collaboration = false;
     };
   };
-  
+
   # Generate language configurations from unified language support
-  languageConfigs = mapAttrs (name: lang: 
-    optionalAttrs lang.enable {
-      language_servers = [ lang.lsp ];
-      formatter = {
-        external = {
-          command = lang.formatter;
-          arguments = 
-            if lang.formatter == "alejandra" then [ "-q" "-" ]
-            else if lang.formatter == "black" then [ "-" ]
-            else if lang.formatter == "prettier" then [ "--stdin-filepath" ".${name}" ]
-            else [];
-        };
-      };
-    } // optionalAttrs (name == "go") {
-      tab_size = 8;
-      preferred_line_length = 100;
-      auto_indent_using_language_server = true;
-    }
-  ) (filterAttrs (_n: l: l.enable) features.languages);
-  
-in {
+  languageConfigs = mapAttrs
+    (name: lang:
+      optionalAttrs lang.enable
+        {
+          language_servers = [ lang.lsp ];
+          formatter = {
+            external = {
+              command = lang.formatter;
+              arguments =
+                if lang.formatter == "alejandra" then [ "-q" "-" ]
+                else if lang.formatter == "black" then [ "-" ]
+                else if lang.formatter == "prettier" then [ "--stdin-filepath" ".${name}" ]
+                else [ ];
+            };
+          };
+        } // optionalAttrs (name == "go") {
+        tab_size = 8;
+        preferred_line_length = 100;
+        auto_indent_using_language_server = true;
+      }
+    )
+    (filterAttrs (_n: l: l.enable) features.languages);
+
+in
+{
   options.editor.zed-editor = {
     enable = mkEnableOption "zed-editor"; # Fixed syntax to use string description
   };
@@ -77,7 +80,7 @@ in {
     programs.zed-editor = {
       enable = true;
       package = pkgs-unstable.zed-editor;
-      
+
       userSettings = {
         # Enhanced AI features with multiple providers
         features = mkMerge [
@@ -95,13 +98,13 @@ in {
             inline_completions = true;
           }
         ];
-        
+
         # Privacy and telemetry
         telemetry = {
           metrics = false;
           diagnostics = false;
         };
-        
+
         # Enhanced LSP configuration with unified language support
         lsp = mkMerge [
           # Rust analyzer with enhanced settings
@@ -115,7 +118,7 @@ in {
               };
             };
           })
-          
+
           # Nixd with comprehensive configuration
           (mkIf features.languages.nix.enable {
             nixd = {
@@ -129,7 +132,7 @@ in {
               };
             };
           })
-          
+
           # Enhanced language server configurations
           {
             # Global LSP settings
@@ -140,7 +143,7 @@ in {
             };
           }
         ];
-        
+
         # Dynamic language configurations from unified language support
         languages = mkMerge [
           # Core language mappings (capitalized for Zed)
@@ -169,7 +172,7 @@ in {
             };
           })
         ];
-        
+
         # Enhanced AI assistant configuration
         assistant = mkMerge [
           (mkIf features.ai.claude {
@@ -188,7 +191,7 @@ in {
             };
           })
         ];
-        
+
         # Enhanced language model providers
         language_models = mkMerge [
           (mkIf features.ai.multiple_providers {
@@ -214,17 +217,17 @@ in {
             };
           })
         ];
-        
+
         # Enhanced editor settings
         auto_update = mkDefault features.editor.auto_update;
         format_on_save = mkIf features.editor.format_on_save "on";
         vim_mode = mkDefault features.editor.vim_mode;
         load_direnv = mkIf features.editor.direnv "shell_hook";
         theme = mkDefault "Gruvbox Dark Soft";
-        
+
         # Enhanced workflow settings
-        ssh_connections = [];
-        
+        ssh_connections = [ ];
+
         # Enhanced search and navigation
         project_panel = mkIf features.workflow.project_search {
           dock = "left";
@@ -234,7 +237,7 @@ in {
           git_status = true;
           indent_size = 20;
         };
-        
+
         # Enhanced terminal integration
         terminal = mkIf features.workflow.terminal {
           dock = "bottom";
@@ -244,7 +247,7 @@ in {
           working_directory = "current_project_directory";
           shell = "zsh";
         };
-        
+
         # Enhanced Git integration
         git = mkIf features.workflow.git_integration {
           git_gutter = "tracked_files";
@@ -253,24 +256,24 @@ in {
             delay_ms = 800;
           };
         };
-        
+
         # Enhanced collaboration settings
         collaboration_panel = mkIf features.workflow.collaboration {
           dock = "left";
           default_width = 240;
         };
-        
+
         # Font and UI customizations
         ui_font_family = mkDefault "Inter";
         ui_font_size = mkDefault 16;
         buffer_font_family = mkDefault "JetBrains Mono";
         buffer_font_size = mkDefault 14;
         buffer_line_height = mkDefault "comfortable";
-        
+
         # Enhanced cursor and selection
         cursor_blink = false;
         show_whitespaces = "selection";
-        
+
         # Enhanced file handling
         file_scan_exclusions = [
           "**/.git"
@@ -285,7 +288,7 @@ in {
         ];
       };
     };
-    
+
     # Enhanced shell integration
     home.shellAliases = mkMerge [
       { zed = "zed ."; }
@@ -294,7 +297,7 @@ in {
         zgit = "GIT_EDITOR='zed --wait' git";
       })
     ];
-    
+
     # Enhanced environment variables
     home.sessionVariables = mkMerge [
       (mkIf features.editor.direnv {

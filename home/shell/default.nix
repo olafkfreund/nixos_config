@@ -1,4 +1,4 @@
-{...}: {
+{ ... }: {
   imports = [
     ./scripts.nix
     ./lf/default.nix

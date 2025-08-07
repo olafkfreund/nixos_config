@@ -4,49 +4,50 @@
 with lib;
 let
   cfg = config.ai.productionDashboard;
-in {
+in
+{
   options.ai.productionDashboard = {
     enable = mkEnableOption "Enable AI production monitoring dashboard";
-    
+
     grafanaUrl = mkOption {
       type = types.str;
       default = "http://dex5550:3001";
       description = "Grafana server URL for dashboard deployment";
     };
-    
+
     prometheusUrl = mkOption {
       type = types.str;
       default = "http://dex5550:9090";
       description = "Prometheus server URL for metrics collection";
     };
-    
+
     dashboardPath = mkOption {
       type = types.str;
       default = "/var/lib/grafana/dashboards";
       description = "Path to store Grafana dashboard configurations";
     };
-    
+
     refreshInterval = mkOption {
       type = types.str;
       default = "30s";
       description = "Dashboard refresh interval";
     };
-    
+
     enableAlerts = mkOption {
       type = types.bool;
       default = true;
       description = "Enable dashboard alerting panels";
     };
-    
+
     criticalThresholds = mkOption {
       type = types.attrs;
       default = {
         cpuUsage = 80;
         memoryUsage = 85;
         diskUsage = 70;
-        aiResponseTime = 10000;  # 10 seconds
+        aiResponseTime = 10000; # 10 seconds
         sshFailedAttempts = 10;
-        serviceDowntime = 300;   # 5 minutes
+        serviceDowntime = 300; # 5 minutes
       };
       description = "Critical threshold values for alerts";
     };
@@ -58,7 +59,7 @@ in {
       description = "AI Production Dashboard Provisioner";
       after = [ "network.target" ];
       wants = [ "network.target" ];
-      
+
       serviceConfig = {
         Type = "oneshot";
         User = "root";
@@ -584,11 +585,11 @@ in {
       description = "AI Production Metrics Collector";
       after = [ "network.target" ];
       wants = [ "network.target" ];
-      
+
       serviceConfig = {
         Type = "oneshot";
         User = "root";
-        
+
         ExecStart = pkgs.writeShellScript "collect-production-metrics" ''
           #!/bin/bash
           
@@ -675,7 +676,7 @@ in {
       description = "AI Dashboard Health Check";
       after = [ "network.target" ];
       wants = [ "network.target" ];
-      
+
       serviceConfig = {
         Type = "oneshot";
         User = "root";
@@ -733,22 +734,22 @@ in {
           RandomizedDelaySec = "30m";
         };
       };
-      
+
       ai-production-metrics = {
         description = "AI Production Metrics Timer";
         wantedBy = [ "timers.target" ];
         timerConfig = {
-          OnCalendar = "*:0/5";  # Every 5 minutes
+          OnCalendar = "*:0/5"; # Every 5 minutes
           Persistent = true;
           RandomizedDelaySec = "30s";
         };
       };
-      
+
       ai-dashboard-health = {
         description = "AI Dashboard Health Check Timer";
         wantedBy = [ "timers.target" ];
         timerConfig = {
-          OnCalendar = "*:0/15";  # Every 15 minutes
+          OnCalendar = "*:0/15"; # Every 15 minutes
           Persistent = true;
           RandomizedDelaySec = "1m";
         };
@@ -793,7 +794,7 @@ in {
         echo "Grafana URL: ${cfg.grafanaUrl}"
         echo "Prometheus URL: ${cfg.prometheusUrl}"
       '')
-      
+
       (pkgs.writeShellScriptBin "ai-dashboard-reload" ''
         #!/bin/bash
         

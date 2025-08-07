@@ -729,22 +729,23 @@ let
     esac
   '';
 
-in {
+in
+{
   options.tools.nixpkgs-monitors = {
     enable = mkEnableOption "Enable NixOS nixpkgs monitoring tools";
-    
+
     installAll = mkOption {
       type = types.bool;
       default = true;
       description = "Install all monitoring tools";
     };
-    
+
     tools = mkOption {
-      type = types.listOf (types.enum [ 
-        "nixpkgs-update-checker" 
-        "nixpkgs-api-checker" 
-        "nixos-system-updates" 
-        "nixos-updates" 
+      type = types.listOf (types.enum [
+        "nixpkgs-update-checker"
+        "nixpkgs-api-checker"
+        "nixos-system-updates"
+        "nixos-updates"
       ]);
       default = [ "nixpkgs-update-checker" "nixpkgs-api-checker" "nixos-system-updates" "nixos-updates" ];
       description = "List of tools to install";
@@ -752,7 +753,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    environment.systemPackages = 
+    environment.systemPackages =
       (optionals (cfg.installAll || elem "nixpkgs-update-checker" cfg.tools) [ nixpkgs-update-checker ]) ++
       (optionals (cfg.installAll || elem "nixpkgs-api-checker" cfg.tools) [ nixpkgs-api-checker ]) ++
       (optionals (cfg.installAll || elem "nixos-system-updates" cfg.tools) [ nixos-system-updates ]) ++
@@ -763,14 +764,14 @@ in {
         pkgs.jq
         pkgs.curl
       ];
-    
+
     # Create shell aliases for convenience
     programs.bash.shellAliases = mkIf cfg.enable {
       "check-updates" = "nixos-updates quick";
       "check-packages" = "nixpkgs-api-checker";
       "check-system" = "nixos-system-updates check";
     };
-    
+
     programs.zsh.shellAliases = mkIf cfg.enable {
       "check-updates" = "nixos-updates quick";
       "check-packages" = "nixpkgs-api-checker";

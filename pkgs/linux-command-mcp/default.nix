@@ -1,10 +1,10 @@
-{
-  lib,
-  stdenv,
-  fetchFromGitHub,
-  nodejs_24,
-  makeWrapper,
-  pm2,
+{ lib
+, stdenv
+, fetchFromGitHub
+, nodejs_24
+, makeWrapper
+, pm2
+,
 }:
 stdenv.mkDerivation rec {
   pname = "linux-command-mcp";
@@ -68,7 +68,7 @@ stdenv.mkDerivation rec {
     description = "Linux Command MCP (Model Context Protocol) for secure command execution";
     homepage = "https://github.com/xkiranj/linux-command-mcp";
     license = licenses.mit;
-    maintainers = [];
+    maintainers = [ ];
     platforms = platforms.linux;
   };
 }

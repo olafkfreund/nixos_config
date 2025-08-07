@@ -4,7 +4,8 @@ with lib;
 
 let
   cfg = config.programs.lazygit;
-in {
+in
+{
   options.programs.lazygit = {
     enable = mkEnableOption "lazygit";
   };

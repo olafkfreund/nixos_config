@@ -1,14 +1,13 @@
-{
-  pkgs,
-  lib,
-  ...
+{ pkgs
+, lib
+, ...
 }: {
-  home.packages = [pkgs.waypipe];
+  home.packages = [ pkgs.waypipe ];
   systemd.user.services = {
     waypipe-client = {
       Unit = {
         Description = "Waypipe client for SSH Wayland forwarding";
-        After = ["graphical-session.target"];
+        After = [ "graphical-session.target" ];
       };
       Service = {
         ExecStartPre = "${lib.getExe' pkgs.coreutils "mkdir"} -p %h/.waypipe";
@@ -17,12 +16,12 @@
         Restart = "on-failure";
         RestartSec = 5;
       };
-      Install.WantedBy = ["graphical-session.target"];
+      Install.WantedBy = [ "graphical-session.target" ];
     };
     waypipe-server = {
       Unit = {
         Description = "Waypipe server for SSH Wayland forwarding";
-        After = ["default.target"];
+        After = [ "default.target" ];
       };
       Service = {
         Type = "simple";
@@ -33,7 +32,7 @@
         Restart = "on-failure";
         RestartSec = 5;
       };
-      Install.WantedBy = ["default.target"];
+      Install.WantedBy = [ "default.target" ];
     };
   };
 }

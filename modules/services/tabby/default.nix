@@ -1,4 +1,4 @@
-{pkgs-unstable, ...}: {
+{ pkgs-unstable, ... }: {
   services.tabby = {
     enable = true;
     package = pkgs-unstable.tabby;

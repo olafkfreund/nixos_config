@@ -1,6 +1,5 @@
-{
-  pkgs,
-  ...
+{ pkgs
+, ...
 }: {
   # CPU frequency scaling for Xeon workstation
   powerManagement = {

@@ -1,17 +1,17 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.shell.development;
-in {
+in
+{
   options.shell.development = {
     enable = mkEnableOption "Enable Shell development environment";
     packages = mkOption {
       type = with types; listOf str;
-      default = [];
+      default = [ ];
       description = "Packages to install for Shell development";
     };
   };

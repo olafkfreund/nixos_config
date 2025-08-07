@@ -1,8 +1,7 @@
 # Waybar Theme System
 # Provides consistent theming for Waybar
-{
-  lib,
-  ...
+{ lib
+, ...
 }:
 with lib;
 let
@@ -26,7 +25,7 @@ let
       };
     };
   };
-  
+
   # Generate theme configuration
   createWaybarTheme = colorScheme: {
     colors = colorScheme.colors;
@@ -47,14 +46,15 @@ let
       };
     };
   };
-  
+
   defaultTheme = "gruvbox-dark";
-  
-in {
+
+in
+{
   waybar.colorSchemes = colorSchemes;
   waybar.createTheme = createWaybarTheme;
   waybar.activeTheme = createWaybarTheme colorSchemes.${defaultTheme};
-  waybar.getTheme = themeName: 
+  waybar.getTheme = themeName:
     if builtins.hasAttr themeName colorSchemes
     then createWaybarTheme colorSchemes.${themeName}
     else createWaybarTheme colorSchemes.${defaultTheme};

@@ -1,6 +1,5 @@
-{
-  inputs,
-  ...
+{ inputs
+, ...
 }: {
   # Common imports for all user configurations
   imports = [
@@ -13,7 +12,7 @@
     ./base-home.nix
     ./features.nix
     ./features-impl.nix
-    
+
     # Development environment modules
     ../../home/development/default.nix
   ];

@@ -1,17 +1,17 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.services.secure-dns;
-in {
+in
+{
   options.services.secure-dns = {
     enable = mkEnableOption "Secure DNS with enhanced stability";
 
     dnssec = mkOption {
-      type = types.enum ["true" "false" "allow-downgrade"];
+      type = types.enum [ "true" "false" "allow-downgrade" ];
       default = "true";
       description = "Whether to enable DNSSEC validation";
       example = "allow-downgrade";
@@ -31,7 +31,7 @@ in {
         "8.8.8.8#dns.google"
       ];
       description = "List of fallback DNS providers to use";
-      example = ["9.9.9.9#dns.quad9.net"];
+      example = [ "9.9.9.9#dns.quad9.net" ];
     };
 
     cacheSize = mkOption {
@@ -61,7 +61,7 @@ in {
     services.resolved = {
       enable = true;
       dnssec = cfg.dnssec;
-      domains = ["~."]; # Use systemd-resolved for all domains
+      domains = [ "~." ]; # Use systemd-resolved for all domains
       fallbackDns = cfg.fallbackProviders;
       extraConfig = ''
         DNSOverTLS=${
@@ -78,7 +78,7 @@ in {
 
     # Use systemd-resolved stub resolver if enabled
     networking = mkIf cfg.useStubResolver {
-      nameservers = ["127.0.0.53"];
+      nameservers = [ "127.0.0.53" ];
 
       # Ensure NetworkManager uses systemd-resolved if both are enabled
       networkmanager = mkIf (config.networking.networkmanager.enable && cfg.networkManagerIntegration) {
@@ -94,7 +94,7 @@ in {
           matchConfig.Name = "*";
           linkConfig.RequiredForOnline = "no";
           networkConfig = {
-            DNS = ["127.0.0.53"];
+            DNS = [ "127.0.0.53" ];
             DNSOverTLS =
               if cfg.dnsOverTls
               then "yes"
@@ -109,11 +109,11 @@ in {
 
     # Force systemd-resolved to manage resolv.conf properly
     environment.etc."resolv.conf".source = mkIf cfg.useStubResolver (mkForce "${pkgs.systemd}/lib/systemd/resolv.conf");
-    
+
     # Ensure proper linking for systemd-resolved
     systemd.services.systemd-resolved = {
-      wantedBy = ["multi-user.target"];
-      before = ["network.target"];
+      wantedBy = [ "multi-user.target" ];
+      before = [ "network.target" ];
       serviceConfig = {
         # Ensure proper restart behavior
         Restart = "always";

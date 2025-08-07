@@ -1,7 +1,6 @@
-{
-  lib,
-  pkgs,
-  ...
+{ lib
+, pkgs
+, ...
 }: {
   imports = [
     # Import common modules
@@ -123,35 +122,35 @@
       "--enable-features=UseOzonePlatform,WaylandWindowDecorations"
       "--ozone-platform=wayland"
       "--disable-features=VizDisplayCompositor"
-      
+
       # Modern AMD GPU acceleration
       "--use-gl=desktop"
       "--enable-gpu-rasterization"
       "--enable-zero-copy"
       "--ignore-gpu-blocklist"
       "--disable-gpu-driver-bug-workarounds"
-      
+
       # Hardware acceleration for AMD
       "--enable-accelerated-2d-canvas"
       "--enable-accelerated-video-decode"
       "--use-vulkan"
-      
+
       # Network and stability improvements
       "--enable-quic"
       "--enable-tcp-fast-open"
       "--aggressive-cache-discard"
-      
+
       # Process and memory optimization
       "--process-per-site"
       "--max_old_space_size=4096"
       "--memory-pressure-off"
-      
+
       # Fix zygote/sandbox error
       "--no-zygote"
       "--no-sandbox"
     ];
   };
-  
+
   # Keep Firefox as backup
   programs.firefox = {
     enable = true;

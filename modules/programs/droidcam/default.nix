@@ -1,13 +1,13 @@
-{
-  config,
-  lib,
-  pkgs,
-  username,
-  ...
+{ config
+, lib
+, pkgs
+, username
+, ...
 }:
 with lib; let
   cfg = config.media.droidcam;
-in {
+in
+{
   options.media.droidcam = {
     enable = mkEnableOption {
       description = "Enable Droicam";

@@ -1,13 +1,13 @@
-{
-  config,
-  lib,
-  pkgs,
-  pkgs-stable,
-  ...
+{ config
+, lib
+, pkgs
+, pkgs-stable
+, ...
 }:
 with lib; let
   cfg = config.ai.ollama;
-in {
+in
+{
   options.ai.ollama = {
     enable = mkEnableOption {
       default = false;
@@ -64,7 +64,7 @@ in {
         description = "ChromaDB Vector Database";
         after = [ "network.target" ];
         wantedBy = [ "multi-user.target" ];
-        
+
         serviceConfig = {
           Type = "simple";
           User = "chromadb";
@@ -72,32 +72,32 @@ in {
           ExecStart = "${pkgs.python3Packages.chromadb}/bin/chroma run --path /var/lib/chromadb --host 0.0.0.0 --port 8000";
           Restart = "always";
           RestartSec = "10";
-          
+
           # Reduced security hardening to fix "File exists" error
           NoNewPrivileges = true;
-          ProtectSystem = "false";  # Changed from "strict" to allow file operations
-          ProtectHome = false;      # Changed from true to allow temp file creation
-          PrivateTmp = false;       # Changed from true - was causing file conflicts
+          ProtectSystem = "false"; # Changed from "strict" to allow file operations
+          ProtectHome = false; # Changed from true to allow temp file creation
+          PrivateTmp = false; # Changed from true - was causing file conflicts
           PrivateDevices = true;
           ProtectKernelTunables = true;
           ProtectKernelModules = true;
           ProtectControlGroups = true;
-          
+
           # Writable paths
           ReadWritePaths = [
             "/var/lib/chromadb"
-            "/tmp"  # Allow access to system temp directory
+            "/tmp" # Allow access to system temp directory
           ];
-          
+
           # Resource limits
           MemoryMax = "1G";
           CPUQuota = "50%";
         };
-        
+
       };
-      
+
       # Create chromadb user and group
-      users.groups.chromadb = {};
+      users.groups.chromadb = { };
       users.users.chromadb = {
         isSystemUser = true;
         group = "chromadb";

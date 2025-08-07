@@ -1,9 +1,11 @@
-{pkgs, ...}: let
+{ pkgs, ... }:
+let
   # Shell script to launch clipse in foot terminal with custom class
   open-clip = pkgs.writeShellScriptBin "open-clip" ''
     foot -a clipse -e 'clipse'
   '';
-in {
+in
+{
   home.packages = [
     pkgs.clipse
     pkgs.wl-clipboard
@@ -16,7 +18,7 @@ in {
   };
 
   wayland.windowManager.hyprland.settings = {
-    exec-once = ["clipse -listen"];
+    exec-once = [ "clipse -listen" ];
     windowrulev2 = [
       "float,        class:(clipse)"
       "size 800 800, class:(clipse)"

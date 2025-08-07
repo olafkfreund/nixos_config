@@ -1,13 +1,13 @@
 # Package sets interface for performance optimization
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   packageSets = import ./sets.nix { inherit pkgs lib; };
-in {
+in
+{
   options.packages = {
     sets = mkOption {
       type = types.anything;

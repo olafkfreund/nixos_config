@@ -6,21 +6,23 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    flake-utils,
-    ...
-  }:
+  outputs =
+    { self
+    , nixpkgs
+    , flake-utils
+    , ...
+    }:
     flake-utils.lib.eachDefaultSystem (
-      system: let
+      system:
+      let
         pkgs = import nixpkgs {
           inherit system;
         };
-      in {
+      in
+      {
         packages = {
           default = self.packages.${system}.linux-command-mcp;
-          linux-command-mcp = pkgs.callPackage ./default.nix {};
+          linux-command-mcp = pkgs.callPackage ./default.nix { };
         };
 
         apps.default = flake-utils.lib.mkApp {

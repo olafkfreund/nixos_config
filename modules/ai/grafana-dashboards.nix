@@ -4,7 +4,8 @@
 with lib;
 let
   cfg = config.ai.grafanaDashboards;
-in {
+in
+{
   options.ai.grafanaDashboards = {
     enable = mkEnableOption "Enable AI analysis Grafana dashboards";
   };
@@ -47,7 +48,7 @@ in {
       fiscalYearStartMonth = 0;
       graphTooltip = 0;
       id = null;
-      links = [];
+      links = [ ];
       liveNow = false;
       panels = [
         {
@@ -68,7 +69,7 @@ in {
                 };
                 inspect = false;
               };
-              mappings = [];
+              mappings = [ ];
               thresholds = {
                 mode = "absolute";
                 steps = [
@@ -79,7 +80,7 @@ in {
                 ];
               };
             };
-            overrides = [];
+            overrides = [ ];
           };
           gridPos = {
             h = 8;
@@ -146,7 +147,7 @@ in {
                   mode = "off";
                 };
               };
-              mappings = [];
+              mappings = [ ];
               thresholds = {
                 mode = "absolute";
                 steps = [
@@ -166,7 +167,7 @@ in {
               };
               unit = "percent";
             };
-            overrides = [];
+            overrides = [ ];
           };
           gridPos = {
             h = 8;
@@ -177,7 +178,7 @@ in {
           id = 2;
           options = {
             legend = {
-              calcs = [];
+              calcs = [ ];
               displayMode = "list";
               placement = "bottom";
               showLegend = true;
@@ -239,7 +240,7 @@ in {
                   mode = "off";
                 };
               };
-              mappings = [];
+              mappings = [ ];
               thresholds = {
                 mode = "absolute";
                 steps = [
@@ -259,7 +260,7 @@ in {
               };
               unit = "percent";
             };
-            overrides = [];
+            overrides = [ ];
           };
           gridPos = {
             h = 8;
@@ -270,7 +271,7 @@ in {
           id = 3;
           options = {
             legend = {
-              calcs = [];
+              calcs = [ ];
               displayMode = "list";
               placement = "bottom";
               showLegend = true;
@@ -311,7 +312,7 @@ in {
                 };
                 inspect = false;
               };
-              mappings = [];
+              mappings = [ ];
               thresholds = {
                 mode = "absolute";
                 steps = [
@@ -322,7 +323,7 @@ in {
                 ];
               };
             };
-            overrides = [];
+            overrides = [ ];
           };
           gridPos = {
             h = 8;
@@ -389,7 +390,7 @@ in {
                   mode = "off";
                 };
               };
-              mappings = [];
+              mappings = [ ];
               thresholds = {
                 mode = "absolute";
                 steps = [
@@ -401,7 +402,7 @@ in {
               };
               unit = "short";
             };
-            overrides = [];
+            overrides = [ ];
           };
           gridPos = {
             h = 8;
@@ -412,7 +413,7 @@ in {
           id = 5;
           options = {
             legend = {
-              calcs = [];
+              calcs = [ ];
               displayMode = "list";
               placement = "bottom";
               showLegend = true;
@@ -474,7 +475,7 @@ in {
                   mode = "off";
                 };
               };
-              mappings = [];
+              mappings = [ ];
               thresholds = {
                 mode = "absolute";
                 steps = [
@@ -486,7 +487,7 @@ in {
               };
               unit = "s";
             };
-            overrides = [];
+            overrides = [ ];
           };
           gridPos = {
             h = 8;
@@ -497,7 +498,7 @@ in {
           id = 6;
           options = {
             legend = {
-              calcs = [];
+              calcs = [ ];
               displayMode = "list";
               placement = "bottom";
               showLegend = true;
@@ -559,7 +560,7 @@ in {
                   mode = "off";
                 };
               };
-              mappings = [];
+              mappings = [ ];
               thresholds = {
                 mode = "absolute";
                 steps = [
@@ -579,7 +580,7 @@ in {
               };
               unit = "percent";
             };
-            overrides = [];
+            overrides = [ ];
           };
           gridPos = {
             h = 8;
@@ -590,7 +591,7 @@ in {
           id = 7;
           options = {
             legend = {
-              calcs = [];
+              calcs = [ ];
               displayMode = "list";
               placement = "bottom";
               showLegend = true;
@@ -652,7 +653,7 @@ in {
                   mode = "off";
                 };
               };
-              mappings = [];
+              mappings = [ ];
               thresholds = {
                 mode = "absolute";
                 steps = [
@@ -672,7 +673,7 @@ in {
               };
               unit = "percent";
             };
-            overrides = [];
+            overrides = [ ];
           };
           gridPos = {
             h = 8;
@@ -683,7 +684,7 @@ in {
           id = 8;
           options = {
             legend = {
-              calcs = [];
+              calcs = [ ];
               displayMode = "list";
               placement = "bottom";
               showLegend = true;
@@ -749,7 +750,7 @@ in {
                 ];
               };
             };
-            overrides = [];
+            overrides = [ ];
           };
           gridPos = {
             h = 8;
@@ -791,15 +792,15 @@ in {
       refresh = "5s";
       schemaVersion = 37;
       style = "dark";
-      tags = ["ai" "analysis" "monitoring"];
+      tags = [ "ai" "analysis" "monitoring" ];
       templating = {
-        list = [];
+        list = [ ];
       };
       time = {
         from = "now-1h";
         to = "now";
       };
-      timepicker = {};
+      timepicker = { };
       timezone = "";
       title = "AI Analysis Overview";
       uid = "ai-analysis-overview";
@@ -812,7 +813,7 @@ in {
       description = "Setup AI Analysis Grafana Dashboards";
       after = [ "grafana.service" ];
       wantedBy = [ "multi-user.target" ];
-      
+
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;

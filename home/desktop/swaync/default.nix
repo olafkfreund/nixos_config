@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.desktop.swaync;
-in {
+in
+{
   options.desktop.swaync = {
     enable = mkEnableOption "SwayNC notification center";
 
@@ -18,14 +18,14 @@ in {
   };
 
   config = mkIf cfg.enable {
-    home.packages = [cfg.package];
+    home.packages = [ cfg.package ];
 
     # Enable swaync service via systemd
     systemd.user.services.swaync = {
       Unit = {
         Description = "SwayNC notification daemon";
-        After = ["graphical-session-pre.target"];
-        PartOf = ["graphical-session.target"];
+        After = [ "graphical-session-pre.target" ];
+        PartOf = [ "graphical-session.target" ];
       };
 
       Service = {
@@ -37,7 +37,7 @@ in {
       };
 
       Install = {
-        WantedBy = ["graphical-session.target"];
+        WantedBy = [ "graphical-session.target" ];
       };
     };
 
@@ -70,7 +70,7 @@ in {
       control-center-layer = "overlay";
       control-center-exclusive-zone = false;
       fit-to-screen = true; # Ensure it fits screen properly
-      
+
       # Notification window dimensions
       notification-window-width = 400;
 
@@ -79,11 +79,11 @@ in {
       transition-time = 0; # No transition animations
       hide-on-clear = true;
       hide-on-action = true;
-      
+
       # Force completely solid appearance with no compositor effects
       cssPriority = "user";
       keyboard-shortcuts = true;
-      
+
       # Additional transparency controls
       notification-2fa-action = true;
       notification-inline-replies = true;
@@ -130,7 +130,7 @@ in {
           text-overflow = "ellipsis";
           hide-when-inactive = true;
           force-artwork = true;
-          preferred-players = ["spotify" "mpd" "firefox"];
+          preferred-players = [ "spotify" "mpd" "firefox" ];
         };
 
         volume = {

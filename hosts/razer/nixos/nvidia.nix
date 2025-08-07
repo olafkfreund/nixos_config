@@ -1,7 +1,6 @@
-{
-  config,
-  pkgs,
-  ...
+{ config
+, pkgs
+, ...
 }: {
   hardware.nvidia = {
     modesetting.enable = true;
@@ -62,7 +61,7 @@
     ];
 
     # Early load NVIDIA modules
-    initrd.kernelModules = ["nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm"];
+    initrd.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
   };
 
   # Create proper device nodes for NVIDIA

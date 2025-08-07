@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: 
+{ config
+, lib
+, pkgs
+, ...
+}:
 with lib; let
   cfg = config.services.spice;
-in {
+in
+{
   options.services.spice = {
     enable = mkEnableOption {
       default = false;
@@ -25,6 +25,6 @@ in {
       spice-vdagent
       swtpm
     ];
-  };  
+  };
 }
 

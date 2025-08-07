@@ -1,7 +1,7 @@
-{
-  inputs,
-  pkgs ? {},
-  username ? "olafkfreund", # Default fallback
+{ inputs
+, pkgs ? { }
+, username ? "olafkfreund"
+, # Default fallback
   ...
 }: {
   # Common configuration for all users

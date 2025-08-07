@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: 
+{ config
+, lib
+, pkgs
+, ...
+}:
 with lib; let
   cfg = config.programs.office;
-in {
+in
+{
   options.programs.office = {
     enable = mkEnableOption {
       default = false;

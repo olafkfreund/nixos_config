@@ -1,13 +1,12 @@
-{
-  lib,
-  pkgs,
-  host ? "default",
-  ...
+{ lib
+, pkgs
+, host ? "default"
+, ...
 }:
 with lib;
 let
   # Import host-specific variables if available
-  
+
   # Host-specific temperature sensor configuration
   temperatureConfig = {
     p620 = {
@@ -36,11 +35,12 @@ let
       tooltip = "CPU Temperature: {temperatureC}°C";
     };
   };
-  
+
   # Get configuration for current host
   currentTempConfig = temperatureConfig.${host} or temperatureConfig.default;
 
-in {
+in
+{
   programs.waybar = {
     enable = true;
     package = pkgs.waybar;
@@ -294,7 +294,7 @@ in {
           scroll-step = 1;
           format-icons = {
             car = "";
-            default = ["" " " " "];
+            default = [ "" " " " " ];
             headphones = "";
             headset = "";
           };
@@ -310,7 +310,7 @@ in {
 
         "temperature" = {
           format = "<span foreground='#fe8019'> {icon}</span> {temperatureC}°C ";
-          format-icons = ["" "" "" "" "" "󰸁"];
+          format-icons = [ "" "" "" "" "" "󰸁" ];
           # Host-aware temperature sensor configuration
           tooltip-format = currentTempConfig.tooltip;
           interval = 5;
@@ -339,7 +339,7 @@ in {
         "sway/scratchpad" = {
           format = "{icon} {count}";
           show-empty = false;
-          format-icons = ["" ""];
+          format-icons = [ "" "" ];
           tooltip = true;
           tooltip-format = "{app}: {title}";
         };

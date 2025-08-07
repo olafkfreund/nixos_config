@@ -1,4 +1,5 @@
-{pkgs, ...}: let
+{ pkgs, ... }:
+let
   gitSyncObsidian = pkgs.writeScriptBin "git-sync-obsidian" ''
     #!/bin/sh
 
@@ -8,8 +9,9 @@
     git commit -m "$(date '+%Y-%m-%d %H:%M:%S')"
     git push origin main || exit 0
   '';
-in {
-  home.packages = [gitSyncObsidian];
+in
+{
+  home.packages = [ gitSyncObsidian ];
 
   systemd.user.services.git-sync-obsidian = {
     Unit = {
@@ -25,6 +27,6 @@ in {
   systemd.user.timers.git-sync-obsidian = {
     Unit.Description = "Run Git Sync for Obsidian Vault";
     Timer.OnCalendar = "*:0/15";
-    Install.WantedBy = ["timers.target"];
+    Install.WantedBy = [ "timers.target" ];
   };
 }

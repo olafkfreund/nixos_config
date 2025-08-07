@@ -1,11 +1,11 @@
-{
-  config,
-  lib,
-  ...
-}: 
-with lib; let 
+{ config
+, lib
+, ...
+}:
+with lib; let
   cfg = config.cli.zoxide;
-in {
+in
+{
   options.cli.zoxide = {
     enable = mkEnableOption {
       default = true;
@@ -17,7 +17,7 @@ in {
       enable = true;
       enableBashIntegration = true;
       enableZshIntegration = true;
-      options = ["--cmd cd"];
+      options = [ "--cmd cd" ];
     };
   };
 }

@@ -4,7 +4,8 @@ with lib;
 
 let
   cfg = config.features.email;
-in {
+in
+{
   config = mkIf (cfg.enable && cfg.neomutt.enable) {
     # Gruvbox theme for NeoMutt
     environment.etc."neomutt/colors-gruvbox" = {

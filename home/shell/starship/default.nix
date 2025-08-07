@@ -1,11 +1,11 @@
-{
-  lib,
-  config,
-  ...
+{ lib
+, config
+, ...
 }:
 with lib; let
   cfg = config.cli.starship;
-in {
+in
+{
   options.cli.starship = {
     enable = mkEnableOption {
       default = true;
@@ -115,7 +115,7 @@ in {
         hostname = {
           format = "$ssh_symbol$hostname ";
           ssh_only = true;
-          detect_env_vars = [''!TMUX''];
+          detect_env_vars = [ ''!TMUX'' ];
           style = "bold fg:color_purple";
         };
 

@@ -1,12 +1,11 @@
-{
-  pkgs,
-  ...
+{ pkgs
+, ...
 }: {
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   # boot.kernelParams = [ "mitigations=off" "systemd.unified_cgroup_hierarchy=0" "SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1"];
-  boot.kernelParams = ["mitigations=off"];
+  boot.kernelParams = [ "mitigations=off" ];
   # boot.extraModprobeConfig = ''
   #    SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1
   #    systemd.unified_cgroup_hierarchy=0

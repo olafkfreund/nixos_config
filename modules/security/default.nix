@@ -1,4 +1,4 @@
-{...}: {
+{ ... }: {
   imports = [
     ./ssh-hardening.nix
     ./firewall.nix
@@ -8,9 +8,9 @@
   security.sudo.execWheelOnly = true;
   # This ensures sudo doesn't get the "no new privs" flag
   security.unprivilegedUsernsClone = true;
-  security.pam.services.hyprlock = {};
+  security.pam.services.hyprlock = { };
   security.pam.services.hyprland.enableGnomeKeyring = true;
-  security.pam.services.swaylock = {};
+  security.pam.services.swaylock = { };
   security.polkit.enable = true;
 
   security.polkit.extraConfig = ''

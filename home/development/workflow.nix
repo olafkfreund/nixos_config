@@ -1,9 +1,8 @@
 # Enhanced Development Workflow Tools
 # Task runners, build systems, testing frameworks, and CI/CD integration
-{
-  pkgs,
-  lib,
-  ...
+{ pkgs
+, lib
+, ...
 }:
 with lib;
 let
@@ -11,82 +10,82 @@ let
   cfg = {
     # Task runners and build systems
     taskRunners = {
-      just = true;              # Justfile task runner
-      make = true;              # GNU Make
-      ninja = false;            # Ninja build system
-      bazel = false;            # Bazel build system
-      earthly = false;          # Earthly CI/CD
+      just = true; # Justfile task runner
+      make = true; # GNU Make
+      ninja = false; # Ninja build system
+      bazel = false; # Bazel build system
+      earthly = false; # Earthly CI/CD
     };
-    
+
     # Testing frameworks and tools
     testing = {
       # Multi-language testing
-      act = true;               # GitHub Actions local testing
-      hyperfine = true;         # Benchmarking tool
-      tokei = true;             # Code statistics
-      
+      act = true; # GitHub Actions local testing
+      hyperfine = true; # Benchmarking tool
+      tokei = true; # Code statistics
+
       # Language-specific testing
-      pytest = true;            # Python testing
-      jest = false;             # JavaScript testing
-      cargo_test = true;        # Rust testing (via cargo)
-      go_test = true;           # Go testing (via go)
+      pytest = true; # Python testing
+      jest = false; # JavaScript testing
+      cargo_test = true; # Rust testing (via cargo)
+      go_test = true; # Go testing (via go)
     };
-    
+
     # CI/CD and automation
     cicd = {
-      github_cli = true;        # GitHub CLI
-      act = true;               # Local GitHub Actions
-      pre_commit = true;        # Pre-commit hooks
-      commitizen = false;       # Conventional commits
+      github_cli = true; # GitHub CLI
+      act = true; # Local GitHub Actions
+      pre_commit = true; # Pre-commit hooks
+      commitizen = false; # Conventional commits
     };
-    
+
     # Development databases and services
     services = {
       # Local development databases
-      sqlite = true;            # SQLite for local development
-      redis = false;            # Redis for caching
-      postgresql = false;       # PostgreSQL for complex apps
-      
+      sqlite = true; # SQLite for local development
+      redis = false; # Redis for caching
+      postgresql = false; # PostgreSQL for complex apps
+
       # Development servers
-      caddy = false;            # Modern web server
-      nginx = false;            # Traditional web server
+      caddy = false; # Modern web server
+      nginx = false; # Traditional web server
     };
-    
+
     # API and networking tools
     networking = {
-      httpie = true;            # Modern HTTP client
-      curl = true;              # Traditional HTTP client
-      wget = true;              # File downloader
-      jq = true;                # JSON processor
-      yq = true;                # YAML processor
-      dive = true;              # Docker image analyzer
+      httpie = true; # Modern HTTP client
+      curl = true; # Traditional HTTP client
+      wget = true; # File downloader
+      jq = true; # JSON processor
+      yq = true; # YAML processor
+      dive = true; # Docker image analyzer
     };
-    
+
     # Documentation and publishing
     documentation = {
       # Documentation generators
-      mdbook = false;           # Rust-based documentation
-      hugo = false;             # Static site generator
-      
+      mdbook = false; # Rust-based documentation
+      hugo = false; # Static site generator
+
       # Documentation tools
-      pandoc = true;            # Document converter
-      graphviz = true;          # Graph visualization
-      plantuml = false;         # UML diagrams
+      pandoc = true; # Document converter
+      graphviz = true; # Graph visualization
+      plantuml = false; # UML diagrams
     };
-    
+
     # Performance and monitoring
     monitoring = {
       # System monitoring
-      htop = true;              # Process monitor
-      btop = true;              # Modern process monitor
-      bandwhich = true;         # Network monitor
-      
+      htop = true; # Process monitor
+      btop = true; # Modern process monitor
+      bandwhich = true; # Network monitor
+
       # Development monitoring
-      flamegraph = false;       # Performance profiling
-      perf = false;             # Linux performance tools
+      flamegraph = false; # Performance profiling
+      perf = false; # Linux performance tools
     };
   };
-  
+
   # Package collections based on configuration
   taskRunnerPackages = with pkgs; flatten [
     (optional cfg.taskRunners.just just)
@@ -95,7 +94,7 @@ let
     (optional cfg.taskRunners.bazel bazel)
     (optional cfg.taskRunners.earthly earthly)
   ];
-  
+
   testingPackages = with pkgs; flatten [
     (optional cfg.testing.act act)
     (optional cfg.testing.hyperfine hyperfine)
@@ -104,14 +103,14 @@ let
     (optional cfg.testing.jest nodePackages.jest)
     # Note: cargo test and go test are included with their respective language packages
   ];
-  
+
   cicdPackages = with pkgs; flatten [
     (optional cfg.cicd.github_cli gh)
     (optional cfg.cicd.act act)
     (optional cfg.cicd.pre_commit pre-commit)
     (optional cfg.cicd.commitizen commitizen)
   ];
-  
+
   servicePackages = with pkgs; flatten [
     (optional cfg.services.sqlite sqlite)
     (optional cfg.services.redis redis)
@@ -119,7 +118,7 @@ let
     (optional cfg.services.caddy caddy)
     (optional cfg.services.nginx nginx)
   ];
-  
+
   networkingPackages = with pkgs; flatten [
     (optional cfg.networking.httpie httpie)
     (optional cfg.networking.curl curl)
@@ -128,7 +127,7 @@ let
     (optional cfg.networking.yq yq-go)
     (optional cfg.networking.dive dive)
   ];
-  
+
   documentationPackages = with pkgs; flatten [
     (optional cfg.documentation.mdbook mdbook)
     (optional cfg.documentation.hugo hugo)
@@ -136,7 +135,7 @@ let
     (optional cfg.documentation.graphviz graphviz)
     (optional cfg.documentation.plantuml plantuml)
   ];
-  
+
   monitoringPackages = with pkgs; flatten [
     (optional cfg.monitoring.htop htop)
     (optional cfg.monitoring.btop btop)
@@ -145,7 +144,8 @@ let
     (optional cfg.monitoring.perf linuxPackages.perf)
   ];
 
-in {
+in
+{
   # Enhanced development workflow packages
   home.packages = flatten [
     taskRunnerPackages
@@ -156,7 +156,7 @@ in {
     documentationPackages
     monitoringPackages
   ];
-  
+
   # Enhanced shell aliases for workflow tools
   home.shellAliases = mkMerge [
     # Task runners
@@ -165,14 +165,14 @@ in {
       jl = "just --list";
       jr = "just --show";
     })
-    
+
     # Testing shortcuts
     (mkIf cfg.testing.pytest {
       pyt = "python -m pytest";
       pytv = "python -m pytest -v";
       pytw = "python -m pytest --watch";
     })
-    
+
     # CI/CD shortcuts
     (mkIf cfg.cicd.github_cli {
       gh-pr = "gh pr create";
@@ -180,7 +180,7 @@ in {
       gh-view = "gh pr view";
       gh-merge = "gh pr merge";
     })
-    
+
     # API and networking shortcuts
     (mkIf cfg.networking.httpie {
       http-get = "http GET";
@@ -188,18 +188,18 @@ in {
       http-put = "http PUT";
       http-delete = "http DELETE";
     })
-    
+
     (mkIf cfg.networking.jq {
       pretty-json = "jq '.'";
       json-keys = "jq 'keys'";
     })
-    
+
     # Documentation shortcuts
     (mkIf cfg.documentation.pandoc {
       md2pdf = "pandoc -o output.pdf";
       md2html = "pandoc -o output.html";
     })
-    
+
     # Monitoring shortcuts
     (mkIf cfg.monitoring.btop {
       # Use 'btop' directly instead of 'top' to avoid conflict with bash.nix
@@ -207,7 +207,7 @@ in {
       proc-mon = "btop";
     })
   ];
-  
+
   # Enhanced environment variables for workflow
   home.sessionVariables = mkMerge [
     # Task runner configuration
@@ -215,22 +215,22 @@ in {
       JUST_CHOOSER = "fzf";
       JUST_UNSTABLE = "1";
     })
-    
+
     # Testing configuration
     (mkIf cfg.testing.pytest {
       PYTEST_CURRENT_TEST = "1";
     })
-    
+
     # CI/CD configuration
     (mkIf cfg.cicd.github_cli {
       GH_PAGER = "less";
       GH_EDITOR = "nvim";
     })
   ];
-  
+
   # Note: Git configuration removed to avoid conflicts with existing git setup
   # GitHub CLI integration is handled separately when gh is enabled
-  
+
   # Development workflow scripts and configuration files
   home.file = mkMerge [
     # Pre-commit configuration
@@ -324,7 +324,7 @@ in {
         executable = true;
       };
     })
-    
+
     # Project statistics script
     (mkIf cfg.testing.tokei {
       ".local/bin/project-stats" = {
@@ -364,7 +364,7 @@ in {
         executable = true;
       };
     })
-    
+
     # Development workflow helper
     {
       ".local/bin/dev-help" = {

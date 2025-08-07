@@ -1,6 +1,5 @@
-{
-  pkgs,
-  ...
+{ pkgs
+, ...
 }: {
   boot.binfmt.registrations.appimage = {
     wrapInterpreterInShell = false;

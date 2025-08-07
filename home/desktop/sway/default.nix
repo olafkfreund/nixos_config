@@ -1,11 +1,11 @@
-{
-  config,
-  lib,
-  ...
+{ config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.desktop.sway;
-in {
+in
+{
   options.desktop.sway = {
     enable = mkEnableOption {
       default = false;
@@ -50,35 +50,35 @@ in {
       config = {
         modifier = "Mod4";
         bars = [
-          {command = "\${pkgs.waybar}/bin/waybar";}
+          { command = "\${pkgs.waybar}/bin/waybar"; }
         ];
         terminal = "foot";
         menu = "rofi -show drun";
         startup = [
-          {command = "foot";}
-          {command = "wayvnc 0.0.0.0";}
+          { command = "foot"; }
+          { command = "wayvnc 0.0.0.0"; }
           {
             command = "systemctl --user restart waybar";
             always = true;
           }
-          {command = "gsettings set org.gnome.desktop.interface cursor-theme 'Bibata-Modern-Ice'";}
-          {command = "gsettings set org.gnome.desktop.interface icon-theme 'Gruvbox-Material-Dark'";}
-          {command = "gsettings set org.gnome.desktop.interface gtk-theme 'Gruvbox-Material-Dark'";}
-          {command = "gnome-keyring-daemon --start --components=secrets";}
-          {command = "wl-paste --type text --watch cliphist store";}
-          {command = "wl-paste --type image --watch cliphist store";}
-          {command = "kdeconnectd";}
-          {command = "playerctld daemon";}
-          {command = "polkit-agent-helper-1";}
-          {command = "swww-daemon";}
+          { command = "gsettings set org.gnome.desktop.interface cursor-theme 'Bibata-Modern-Ice'"; }
+          { command = "gsettings set org.gnome.desktop.interface icon-theme 'Gruvbox-Material-Dark'"; }
+          { command = "gsettings set org.gnome.desktop.interface gtk-theme 'Gruvbox-Material-Dark'"; }
+          { command = "gnome-keyring-daemon --start --components=secrets"; }
+          { command = "wl-paste --type text --watch cliphist store"; }
+          { command = "wl-paste --type image --watch cliphist store"; }
+          { command = "kdeconnectd"; }
+          { command = "playerctld daemon"; }
+          { command = "polkit-agent-helper-1"; }
+          { command = "swww-daemon"; }
         ];
 
         assigns = {
-          "13" = [{app_id = "Slack";}];
-          "14" = [{app_id = "thunderbird";}];
-          "12" = [{app_id = "Spotify";}];
+          "13" = [{ app_id = "Slack"; }];
+          "14" = [{ app_id = "thunderbird"; }];
+          "12" = [{ app_id = "Spotify"; }];
         };
-        focus = {followMouse = "always";};
+        focus = { followMouse = "always"; };
         gaps = {
           inner = 2;
           outer = 2;

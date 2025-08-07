@@ -2,14 +2,15 @@
 { config, lib, pkgs, ... }:
 with lib; let
   cfg = config.features.microvms;
-in {
+in
+{
   config = mkIf (cfg.enable && cfg.playground-vm.enable) {
     # Playground VM systemd service
     systemd.services.microvm-playground = {
       description = "Playground MicroVM";
-      wantedBy = [];  # Manual start only
+      wantedBy = [ ]; # Manual start only
       after = [ "network.target" ];
-      
+
       serviceConfig = {
         Type = "forking";
         User = "root";
@@ -17,7 +18,7 @@ in {
         Restart = "on-failure";
         RestartSec = "5s";
       };
-      
+
       script = ''
         # Create persistent storage if not exists
         mkdir -p ${cfg.storageRoot}/playground-vm/experiments
@@ -28,12 +29,12 @@ in {
         
         echo "Playground MicroVM service started"
       '';
-      
+
       preStop = ''
         echo "Stopping Playground MicroVM"
       '';
     };
-    
+
     # Playground VM runner script
     environment.systemPackages = with pkgs; [
       (writeScriptBin "start-playground-vm" ''
@@ -49,14 +50,14 @@ in {
           exit 1
         fi
       '')
-      
+
       (writeScriptBin "stop-playground-vm" ''
         #!/bin/bash
         echo "Stopping Playground MicroVM..."
         systemctl stop microvm-playground
         echo "Playground MicroVM stopped"
       '')
-      
+
       (writeScriptBin "destroy-playground-vm" ''
         #!/bin/bash
         echo "⚠️  This will destroy all playground data!"

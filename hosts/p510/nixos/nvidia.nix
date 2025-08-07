@@ -1,7 +1,6 @@
-{
-  config,
-  pkgs,
-  ...
+{ config
+, pkgs
+, ...
 }: {
   hardware.nvidia = {
     modesetting.enable = true;
@@ -9,7 +8,7 @@
     nvidiaPersistenced = true;
     open = false;
     nvidiaSettings = true;
-    package = config.boot.kernelPackages.nvidiaPackages.latest;  # Use latest drivers to fix version mismatch
+    package = config.boot.kernelPackages.nvidiaPackages.latest; # Use latest drivers to fix version mismatch
   };
   hardware.graphics = {
     enable = true;

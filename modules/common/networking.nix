@@ -1,14 +1,13 @@
 # Network Configuration Module
 # Provides network profile management and stability enhancements
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; {
   options.networking.profile = mkOption {
-    type = types.enum ["desktop" "server" "minimal"];
+    type = types.enum [ "desktop" "server" "minimal" ];
     default = "desktop";
     description = "Network profile to use";
   };
@@ -40,7 +39,7 @@ with lib; {
       networking.useNetworkd = false;
       networking.firewall.enable = false;
       networking.nftables.enable = true;
-      networking.timeServers = ["pool.ntp.org"];
+      networking.timeServers = [ "pool.ntp.org" ];
 
       # Better integration with systemd-resolved when using NetworkManager
       networking.networkmanager.dns = mkIf config.services.resolved.enable "systemd-resolved";
@@ -54,13 +53,13 @@ with lib; {
       networking.useHostResolvConf = false;
       networking.firewall.enable = false;
       networking.nftables.enable = true;
-      networking.timeServers = ["pool.ntp.org"];
+      networking.timeServers = [ "pool.ntp.org" ];
 
       # Enable systemd-resolved for DNS resolution with systemd-networkd
       services.resolved = {
         enable = true;
         dnssec = "true";
-        domains = ["~."]; # Use systemd-resolved for all domains
+        domains = [ "~." ]; # Use systemd-resolved for all domains
         fallbackDns = [
           "1.1.1.1"
           "8.8.8.8"
@@ -81,7 +80,7 @@ with lib; {
       # Minimal networking configuration with just DHCP
       networking.useDHCP = true;
       networking.firewall.enable = false;
-      networking.timeServers = ["pool.ntp.org"];
+      networking.timeServers = [ "pool.ntp.org" ];
     })
 
     # Fix for duplicate systemd.network: Only add link configuration enhancements,
@@ -123,8 +122,8 @@ with lib; {
       # Global network stabilization service to allow applications to wait for a stable connection
       systemd.user.services.network-stabilize = {
         description = "Wait for network to stabilize";
-        wantedBy = ["default.target"];
-        before = ["graphical-session.target"];
+        wantedBy = [ "default.target" ];
+        before = [ "graphical-session.target" ];
         serviceConfig = {
           Type = "oneshot";
           ExecStart = "${pkgs.bash}/bin/bash -c 'sleep 3'";

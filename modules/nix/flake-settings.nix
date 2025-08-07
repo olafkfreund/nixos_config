@@ -1,10 +1,9 @@
-{
-  ...
+{ ...
 }: {
   nix = {
     settings = {
       # Enable flakes and nix-command by default
-      experimental-features = ["nix-command" "flakes"];
+      experimental-features = [ "nix-command" "flakes" ];
 
       # Accept flake configurations automatically
       accept-flake-config = true;

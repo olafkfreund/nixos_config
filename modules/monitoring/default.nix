@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.monitoring;
-in {
+in
+{
   imports = [
     ./prometheus.nix
     ./grafana.nix
@@ -30,7 +30,7 @@ in {
     enable = mkEnableOption "Enable monitoring and observability stack";
 
     mode = mkOption {
-      type = types.enum ["server" "client" "standalone"];
+      type = types.enum [ "server" "client" "standalone" ];
       default = "client";
       description = ''
         Monitoring mode:
@@ -66,7 +66,7 @@ in {
 
     hosts = mkOption {
       type = types.listOf types.str;
-      default = ["p620" "razer" "p510" "dex5550"];
+      default = [ "p620" "razer" "p510" "dex5550" ];
       description = "List of hosts to monitor";
     };
 
@@ -228,25 +228,25 @@ in {
 
     hardwareMonitor = {
       enable = mkEnableOption "Hardware monitoring with desktop notifications";
-      
+
       interval = mkOption {
         type = types.int;
         default = 300; # 5 minutes
         description = "Check interval in seconds";
       };
-      
+
       enableDesktopNotifications = mkOption {
         type = types.bool;
         default = true;
         description = "Enable desktop notifications for hardware issues";
       };
-      
+
       logFile = mkOption {
         type = types.str;
         default = "/var/log/hardware-monitor.log";
         description = "Path to hardware monitor log file";
       };
-      
+
       criticalThresholds = mkOption {
         type = types.attrsOf types.int;
         default = {
@@ -257,7 +257,7 @@ in {
         };
         description = "Critical threshold values for system metrics";
       };
-      
+
       warningThresholds = mkOption {
         type = types.attrsOf types.int;
         default = {
@@ -273,7 +273,7 @@ in {
 
   config = mkIf cfg.enable {
     # Create monitoring user and group
-    users.groups.monitoring = {};
+    users.groups.monitoring = { };
     users.users.monitoring = {
       isSystemUser = true;
       group = "monitoring";
@@ -292,22 +292,22 @@ in {
           cfg.network.lokiGrpcPort
         ];
       })
-      
+
       (mkIf cfg.features.nodeExporter {
         allowedTCPPorts = [ cfg.network.nodeExporterPort ];
       })
-      
+
       (mkIf cfg.features.logging {
         allowedTCPPorts = [
           cfg.network.promtailPort
           cfg.network.promtailGrpcPort
         ];
       })
-      
+
       (mkIf cfg.features.gpuMetrics {
         allowedTCPPorts = [ cfg.network.gpuExporterPort ];
       })
-      
+
       (mkIf cfg.features.amdGpuMetrics {
         allowedTCPPorts = [ cfg.network.amdGpuExporterPort ];
       })
@@ -342,9 +342,9 @@ in {
       bandwhich
       procs
     ] ++ optionals cfg.hardwareMonitor.enable [
-      libnotify    # notify-send
-      lm_sensors   # sensors command  
-      bc           # calculator for temperature comparisons
+      libnotify # notify-send
+      lm_sensors # sensors command  
+      bc # calculator for temperature comparisons
     ];
 
     # Hardware monitoring service
@@ -352,7 +352,7 @@ in {
       description = "Hardware Monitor Service";
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" "systemd-journald.service" ];
-      
+
       serviceConfig = {
         Type = "simple";
         ExecStart = pkgs.writeShellScript "hardware-monitor" ''
@@ -491,20 +491,20 @@ in {
         '';
         Restart = "always";
         RestartSec = "30s";
-        
+
         # Security hardening
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = "read-only";
-        ReadWritePaths = [ 
-          cfg.hardwareMonitor.logFile 
+        ReadWritePaths = [
+          cfg.hardwareMonitor.logFile
           "/tmp"
         ];
-        
+
         User = "root";
         Group = "root";
-        
+
         Environment = [
           "DISPLAY=:0"
         ];
@@ -515,7 +515,7 @@ in {
     systemd.timers.hardware-monitor = mkIf cfg.hardwareMonitor.enable {
       description = "Hardware Monitor Timer";
       wantedBy = [ "timers.target" ];
-      
+
       timerConfig = {
         OnBootSec = "2min";
         OnUnitActiveSec = "${toString cfg.hardwareMonitor.interval}s";

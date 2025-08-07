@@ -1,11 +1,11 @@
-{
-  config,
-  lib,
-  ...
-}: 
-with lib; let 
+{ config
+, lib
+, ...
+}:
+with lib; let
   cfg = config.security.onepassword;
-in {
+in
+{
   options.security.onepassword = {
     enable = mkEnableOption {
       description = "Enable 1Password integration";
@@ -16,7 +16,7 @@ in {
     programs._1password.enable = true;
     programs._1password-gui = {
       enable = true;
-      polkitPolicyOwners = ["olafkfreund"];
+      polkitPolicyOwners = [ "olafkfreund" ];
     };
   };
 }

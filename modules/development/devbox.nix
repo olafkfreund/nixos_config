@@ -1,12 +1,13 @@
 { config, lib, pkgs, ... }:
 with lib; let
   cfg = config.devshell.development;
-in {
+in
+{
   options.devshell.development = {
     enable = mkEnableOption "Enable DevShell development environment";
     packages = mkOption {
       type = with types; listOf package;
-      default = [];
+      default = [ ];
       description = "Packages to install for DevShell development";
     };
   };

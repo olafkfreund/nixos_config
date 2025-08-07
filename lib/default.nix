@@ -1,11 +1,11 @@
 # Library functions and utilities
-{
-  lib,
-  inputs,
-  ...
-}: let
+{ lib
+, inputs
+, ...
+}:
+let
   inherit (lib) makeExtensible;
-  
+
   # Import all library modules
   modules = {
     mkModule = import ./mkModule.nix;
@@ -15,13 +15,14 @@
     secrets = import ./secrets.nix;
   };
 
-in makeExtensible (self: modules // {
+in
+makeExtensible (self: modules // {
   # Utility functions
   inherit (lib) mkIf mkOption mkEnableOption types;
-  
+
   # Custom utility functions
   mkFeatureModule = name: config: self.mkModule { inherit lib; } name config;
-  
+
   # Host creation helper
   mkNixosHost = _hostName: config: inputs.nixpkgs.lib.nixosSystem {
     system = "x86_64-linux";
@@ -34,15 +35,17 @@ in makeExtensible (self: modules // {
       self.secrets
     ];
   };
-  
+
   # Import helpers
-  importModules = path: 
+  importModules = path:
     builtins.filter (f: f != null) (
-      map (f: 
-        let fullPath = path + "/${f}";
-        in if builtins.pathExists fullPath && lib.hasSuffix ".nix" f
-           then fullPath
-           else null
-      ) (builtins.attrNames (builtins.readDir path))
+      map
+        (f:
+          let fullPath = path + "/${f}";
+          in if builtins.pathExists fullPath && lib.hasSuffix ".nix" f
+          then fullPath
+          else null
+        )
+        (builtins.attrNames (builtins.readDir path))
     );
 })

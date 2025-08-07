@@ -1,15 +1,15 @@
 # FlareSolverr Configuration Module
 # A proxy server to bypass Cloudflare protection for web scraping applications
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib;
 let
   cfg = config.services.flaresolverr;
-in {
+in
+{
   options.services.flaresolverr = {
     enable = mkEnableOption "FlareSolverr proxy server";
 
@@ -33,7 +33,7 @@ in {
     };
 
     logLevel = mkOption {
-      type = types.enum ["debug" "info" "warning" "error"];
+      type = types.enum [ "debug" "info" "warning" "error" ];
       default = "info";
       description = "Log level for FlareSolverr";
     };
@@ -45,7 +45,7 @@ in {
     };
 
     captchaSolver = mkOption {
-      type = types.enum ["none" "hcaptcha-solver" "harvester"];
+      type = types.enum [ "none" "hcaptcha-solver" "harvester" ];
       default = "none";
       description = "CAPTCHA solver to use";
     };
@@ -94,7 +94,7 @@ in {
 
     extraEnvironment = mkOption {
       type = types.attrs;
-      default = {};
+      default = { };
       description = "Extra environment variables for FlareSolverr";
       example = {
         PROMETHEUS_ENABLED = "true";
@@ -119,7 +119,7 @@ in {
       createHome = true;
     };
 
-    users.groups.${cfg.group} = {};
+    users.groups.${cfg.group} = { };
 
     # Create data directory
     systemd.tmpfiles.rules = [
@@ -129,9 +129,9 @@ in {
     # FlareSolverr service
     systemd.services.flaresolverr = {
       description = "FlareSolverr proxy server";
-      wantedBy = ["multi-user.target"];
-      after = ["network.target"];
-      
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
+
       serviceConfig = {
         Type = "simple";
         User = cfg.user;
@@ -140,13 +140,13 @@ in {
         ExecStart = "${cfg.package}/bin/flaresolverr";
         Restart = "always";
         RestartSec = 10;
-        
+
         # Security settings
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [cfg.dataDir];
+        ReadWritePaths = [ cfg.dataDir ];
         ProtectKernelTunables = true;
         ProtectKernelModules = true;
         ProtectControlGroups = true;
@@ -154,7 +154,7 @@ in {
         RestrictSUIDSGID = true;
         RemoveIPC = true;
         LockPersonality = true;
-        
+
         # Resource limits
         MemoryMax = "2G";
         CPUQuota = "200%";
@@ -171,7 +171,7 @@ in {
         SESSION_TTL = toString cfg.sessionTtl;
         HEADLESS = if cfg.headless then "true" else "false";
         BROWSER_TIMEOUT = toString cfg.browserTimeout;
-        
+
         # Chrome/Chromium settings for headless operation
         DISPLAY = ":99";
         CHROME_ARGS = "--no-sandbox --disable-dev-shm-usage --disable-gpu --remote-debugging-port=9222";
@@ -180,13 +180,13 @@ in {
 
     # Firewall configuration
     networking.firewall = mkIf cfg.openFirewall {
-      allowedTCPPorts = [cfg.port];
+      allowedTCPPorts = [ cfg.port ];
     };
 
     # Ensure required packages are available
     environment.systemPackages = with pkgs; [
       cfg.package
-      chromium  # Required for browser automation
+      chromium # Required for browser automation
     ];
 
     # Add monitoring integration if prometheus is enabled

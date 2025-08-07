@@ -1,4 +1,4 @@
-{...}: {
+{ ... }: {
   wayland.windowManager.hyprland.extraConfig = ''
     plugin {
       # hyprbars disabled due to API compatibility issues with Hyprland 0.50+

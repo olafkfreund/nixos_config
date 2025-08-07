@@ -1,9 +1,10 @@
+{ lib
+, pkgs
+, ...
+}:
+let
+  plasmaModules = import ../../common/plasma-packages.nix { inherit lib pkgs; };
+in
 {
-  lib,
-  pkgs,
-  ...
-}: let
-  plasmaModules = import ../../common/plasma-packages.nix {inherit lib pkgs;};
-in {
   environment.systemPackages = plasmaModules.plasmaCommonPackages;
 }

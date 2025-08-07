@@ -1,12 +1,13 @@
 { config, lib, pkgs, ... }:
 with lib; let
   cfg = config.modules.development.python;
-in {
+in
+{
   options.modules.development.python = {
     enable = mkEnableOption "Enable Python development environment";
     packages = mkOption {
       type = with types; listOf str;
-      default = [];
+      default = [ ];
       description = "Packages to install for Python development";
     };
   };
@@ -29,7 +30,7 @@ in {
       pkgs.python312Packages.pycairo
       pkgs.python312Packages.pillow
       pkgs.python312Packages.requests
-      
+
       # Add spaCy with Python 3.13 (using our overlay fix)
       pkgs.python313Packages.spacy
     ] ++ cfg.packages;

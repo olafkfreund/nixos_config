@@ -1,12 +1,11 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.ai.providers;
-  
+
   # Create the unified AI CLI script
   unifiedAiScript = pkgs.writeShellScriptBin "ai-cli" ''
     #!/bin/bash
@@ -432,7 +431,8 @@ with lib; let
     esac
   '';
 
-in {
+in
+{
   options.ai.providers.unifiedClient = {
     enable = mkOption {
       type = types.bool;

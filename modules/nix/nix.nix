@@ -1,7 +1,6 @@
-{
-  pkgs,
-  lib,
-  ...
+{ pkgs
+, lib
+, ...
 }: {
   system.autoUpgrade = {
     enable = true;
@@ -20,8 +19,8 @@
     flake = "github:olafkfreund/nixos_config";
   };
 
-  nix.settings.experimental-features = ["nix-command" "flakes"];
-  nix.settings.trusted-users = ["root" "olafkfreund"];
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.trusted-users = [ "root" "olafkfreund" ];
   nix.settings.http-connections = 50;
   nix.settings.warn-dirty = false;
   nix.settings.log-lines = 50;

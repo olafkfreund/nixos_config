@@ -1,6 +1,5 @@
-{
-  pkgs,
-  ...
+{ pkgs
+, ...
 }: {
   # Thermal and power management services
   services = {
@@ -80,8 +79,8 @@
     # Add sleep hooks to handle hardware properly during sleep/resume
     services.fix-suspend-issues = {
       description = "Fix issues when resuming from suspend";
-      wantedBy = ["suspend.target" "hibernate.target" "hybrid-sleep.target"];
-      after = ["suspend.target" "hibernate.target" "hybrid-sleep.target"];
+      wantedBy = [ "suspend.target" "hibernate.target" "hybrid-sleep.target" ];
+      after = [ "suspend.target" "hibernate.target" "hybrid-sleep.target" ];
       script = ''
         # Reset USB devices if needed
         ${pkgs.usbutils}/bin/usb-devices > /dev/null

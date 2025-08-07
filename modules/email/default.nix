@@ -4,7 +4,8 @@ with lib;
 
 let
   cfg = config.features.email;
-in {
+in
+{
   imports = [
     ./neomutt
     # ./auth  # Temporarily disabled for testing
@@ -12,25 +13,25 @@ in {
 
   options.features.email = {
     enable = mkEnableOption "Email system with NeoMutt and Gmail integration";
-    
+
     accounts = {
       primary = mkOption {
         type = types.str;
         default = "olaf@freundcloud.com";
         description = "Primary email account";
       };
-      
+
       secondary = mkOption {
         type = types.str;
-        default = "olaf.loken@gmail.com"; 
+        default = "olaf.loken@gmail.com";
         description = "Secondary email account";
       };
     };
-    
+
     neomutt = {
       enable = mkEnableOption "NeoMutt email client" // { default = true; };
     };
-    
+
     # auth = {
     #   enable = mkEnableOption "Email authentication system" // { default = true; };
     #   method = mkOption {
@@ -39,7 +40,7 @@ in {
     #     description = "Authentication method for Gmail accounts";
     #   };
     # };
-    
+
     ai = {
       enable = mkEnableOption "AI-powered email processing";
       provider = mkOption {
@@ -48,7 +49,7 @@ in {
         description = "AI provider for email processing";
       };
     };
-    
+
     notifications = {
       enable = mkEnableOption "Email notifications via SwayNC";
       highPriorityOnly = mkOption {
@@ -67,14 +68,14 @@ in {
         message = "Email accounts must be configured when NeoMutt is enabled";
       }
     ];
-    
+
     # Add email packages to system
     environment.systemPackages = with pkgs; mkIf cfg.neomutt.enable [
       neomutt
-      isync        # For mbsync email synchronization
-      msmtp        # For SMTP email sending
-      w3m          # For HTML email rendering
-      notmuch      # For email indexing and search
+      isync # For mbsync email synchronization
+      msmtp # For SMTP email sending
+      w3m # For HTML email rendering
+      notmuch # For email indexing and search
     ];
   };
 }

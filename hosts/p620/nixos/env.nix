@@ -1,4 +1,4 @@
-{...}: {
+{ ... }: {
   wayland.windowManager.hyprland.extraConfig = ''
     # Environment variables for Hyprland configuration
 

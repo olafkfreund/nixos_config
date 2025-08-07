@@ -1,6 +1,8 @@
-{pkgs, ...}: let
+{ pkgs, ... }:
+let
   vars = import ../variables.nix;
-in {
+in
+{
   time.timeZone = vars.timezone;
 
   i18n.defaultLocale = vars.locale;

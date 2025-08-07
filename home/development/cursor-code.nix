@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs-unstable,
-  ...
+{ config
+, lib
+, pkgs-unstable
+, ...
 }:
 with lib; let
   cfg = config.editor.cursor;
-in {
+in
+{
   options.editor.cursor = {
     enable = mkEnableOption {
       default = false;

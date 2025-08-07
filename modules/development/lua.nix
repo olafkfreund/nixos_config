@@ -1,12 +1,13 @@
 { config, lib, pkgs, ... }:
 with lib; let
   cfg = config.lua.development;
-in {
+in
+{
   options.lua.development = {
     enable = mkEnableOption "Enable Lua development environment";
     packages = mkOption {
       type = with types; listOf str;
-      default = [];
+      default = [ ];
       description = "Packages to install for Lua development";
     };
   };
@@ -14,7 +15,7 @@ in {
     environment.systemPackages = [
       pkgs.lua
       pkgs.stylua
-      pkgs.sumneko-lua-language-server 
+      pkgs.sumneko-lua-language-server
     ] ++ cfg.packages;
   };
 }

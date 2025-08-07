@@ -1,7 +1,6 @@
-{
-  config,
-  pkgs,
-  ...
+{ config
+, pkgs
+, ...
 }: {
   # Required packages for proper Thunderbird UI rendering
   home.packages = with pkgs; [

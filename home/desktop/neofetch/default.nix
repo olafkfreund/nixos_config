@@ -1,9 +1,8 @@
 # Enhanced System Information and Monitoring
 # Includes neofetch configuration plus system monitoring utilities
-{
-  pkgs,
-  lib,
-  ...
+{ pkgs
+, lib
+, ...
 }:
 with lib;
 let
@@ -14,49 +13,50 @@ let
       customLogo = true;
       imageSupport = true;
     };
-    
+
     systemMonitors = {
       btop = true;
       htop = true;
       nvtop = true;
       iotop = true;
-      fastfetch = true;  # Modern neofetch alternative
+      fastfetch = true; # Modern neofetch alternative
     };
-    
+
     utilities = {
-      processTools = true;   # procs, killall, etc.
-      diskTools = true;      # ncdu, dust, duf, etc.
-      networkTools = true;   # bandwhich, nethogs, etc.
-      textTools = true;      # ripgrep, fd, jq, etc.
+      processTools = true; # procs, killall, etc.
+      diskTools = true; # ncdu, dust, duf, etc.
+      networkTools = true; # bandwhich, nethogs, etc.
+      textTools = true; # ripgrep, fd, jq, etc.
     };
   };
 
-in {
+in
+{
   # Enhanced system monitoring packages
   home.packages = with pkgs; flatten [
     # Core system info
     (optionals cfg.neofetch.enable [ neofetch ])
     (optionals cfg.systemMonitors.fastfetch [ fastfetch ])
-    
+
     # System monitors
     (optionals cfg.systemMonitors.btop [ btop ])
     (optionals cfg.systemMonitors.htop [ htop ])
     (optionals cfg.systemMonitors.nvtop [ nvtopPackages.full ])
     (optionals cfg.systemMonitors.iotop [ iotop ])
-    
+
     # Process tools
     (optionals cfg.utilities.processTools [ procs pstree lsof killall ])
-    
+
     # Disk utilities
     (optionals cfg.utilities.diskTools [ ncdu dust duf tree ])
-    
+
     # Network tools  
     (optionals cfg.utilities.networkTools [ bandwhich nethogs iftop nload speedtest-cli ])
-    
+
     # Text processing
     (optionals cfg.utilities.textTools [ ripgrep fd jq yq-go hyperfine tokei ])
   ];
-  
+
   # Enhanced btop configuration
   programs.btop = mkIf cfg.systemMonitors.btop {
     enable = true;
@@ -85,7 +85,7 @@ in {
       net_sync = false;
     };
   };
-  
+
   # Custom monitoring scripts
   home.file = mkMerge [
     # System dashboard script
@@ -122,7 +122,7 @@ in {
         executable = true;
       };
     }
-    
+
     # Quick system info script
     {
       ".local/bin/sysinfo" = {
@@ -135,35 +135,35 @@ in {
         executable = true;
       };
     }
-    
+
     # Neofetch configuration
     {
       ".config/neofetch/config.conf".text = ''
-    print_info() {
-        prin "$(color 6)  NIXOS "
-        info underline
-        info "$(color 7)  VER" kernel
-        info "$(color 2)  UP " uptime
-        info "$(color 4)  PKG" packages
-        info "$(color 6)  DE " de
-        info "$(color 5)  TER" term
-        info "$(color 3)  CPU" cpu
-        info "$(color 7)  GPU" gpu
-        info "$(color 5)  MEM" memory
-        prin " "
-        prin "$(color 1) $(color 2) $(color 3) $(color 4) $(color 5) $(color 6) $(color 7) $(color 8)"
-    }
-    distro_shorthand="on"
-    memory_unit="gib"
-    cpu_temp="C"
-    separator=" $(color 4)>"
-    stdout="off"
-    image_backend="kitty"
-    image_source=$HOME/Pictures/wallpapers/gruvbox/finalizer.png
-    image_size="100px"
-    crop_mode="normal"
-    crop_offset="west"
-  '';
+        print_info() {
+            prin "$(color 6)  NIXOS "
+            info underline
+            info "$(color 7)  VER" kernel
+            info "$(color 2)  UP " uptime
+            info "$(color 4)  PKG" packages
+            info "$(color 6)  DE " de
+            info "$(color 5)  TER" term
+            info "$(color 3)  CPU" cpu
+            info "$(color 7)  GPU" gpu
+            info "$(color 5)  MEM" memory
+            prin " "
+            prin "$(color 1) $(color 2) $(color 3) $(color 4) $(color 5) $(color 6) $(color 7) $(color 8)"
+        }
+        distro_shorthand="on"
+        memory_unit="gib"
+        cpu_temp="C"
+        separator=" $(color 4)>"
+        stdout="off"
+        image_backend="kitty"
+        image_source=$HOME/Pictures/wallpapers/gruvbox/finalizer.png
+        image_size="100px"
+        crop_mode="normal"
+        crop_offset="west"
+      '';
     }
   ];
 }

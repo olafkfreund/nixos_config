@@ -1,13 +1,13 @@
-{
-  config,
-  lib,
-  pkgs,
-  hostUsers ? [],
-  ...
+{ config
+, lib
+, pkgs
+, hostUsers ? [ ]
+, ...
 }:
 with lib; let
   cfg = config.modules.containers.docker;
-in {
+in
+{
   options.modules.containers.docker = {
     enable = mkEnableOption "Docker container support";
 
@@ -15,7 +15,7 @@ in {
       type = types.listOf types.str;
       default = hostUsers; # Use host users as default
       description = "List of users to add to the docker group";
-      example = ["olafkfreund" "workuser"];
+      example = [ "olafkfreund" "workuser" ];
     };
 
     rootless = mkOption {
@@ -48,13 +48,13 @@ in {
 
     # Add specified users to docker group
     users.users = genAttrs cfg.users (_username: {
-      extraGroups = ["docker"];
+      extraGroups = [ "docker" ];
     });
 
     # Validation
     assertions = [
       {
-        assertion = cfg.rootless -> (cfg.users != []);
+        assertion = cfg.rootless -> (cfg.users != [ ]);
         message = "Rootless Docker requires at least one user to be specified";
       }
       {
@@ -65,11 +65,11 @@ in {
 
     # Helpful warnings
     warnings = [
-      (mkIf (cfg.enable && !cfg.rootless && cfg.users == []) ''
+      (mkIf (cfg.enable && !cfg.rootless && cfg.users == [ ]) ''
         Docker is enabled but no users are specified.
         Users won't be able to use Docker without being manually added to the docker group.
       '')
-      (mkIf (cfg.rootless && cfg.users != []) ''
+      (mkIf (cfg.rootless && cfg.users != [ ]) ''
         Rootless Docker is enabled. Users will have their own Docker daemon instances.
         Consider the security implications and resource usage.
       '')

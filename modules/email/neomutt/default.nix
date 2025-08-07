@@ -5,7 +5,8 @@ with lib;
 let
   cfg = config.features.email;
   emailCfg = cfg.neomutt;
-in {
+in
+{
   imports = [
     ./accounts.nix
     ./theme.nix
@@ -70,7 +71,7 @@ in {
       '';
       mode = "0644";
     };
-    
+
     # Create mailcap for HTML handling
     environment.etc."neomutt/mailcap" = {
       text = ''
@@ -90,7 +91,7 @@ in {
       '';
       mode = "0644";
     };
-    
+
     # Ensure mail directory exists for users
     system.activationScripts.emailDirectories = ''
       # Create mail directories for known users

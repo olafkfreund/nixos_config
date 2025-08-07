@@ -1,26 +1,26 @@
 # API Keys Management with Age Encryption
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.secrets.apiKeys;
-  
+
   # Get the main user from host variables  
   vars = import ../../hosts/${config.networking.hostName}/variables.nix;
   username = vars.username;
-in {
+in
+{
   options.secrets.apiKeys = {
     enable = mkEnableOption "Enable encrypted API keys management";
-    
+
     enableEnvironmentVariables = mkOption {
       type = types.bool;
       default = true;
       description = "Export API keys as environment variables system-wide";
     };
-    
+
     enableUserEnvironment = mkOption {
       type = types.bool;
       default = true;
@@ -37,42 +37,42 @@ in {
         owner = "root";
         group = "users";
       };
-      
+
       api-gemini = {
         file = ../../secrets/api-gemini.age;
         mode = "0644";
         owner = "root";
         group = "users";
       };
-      
+
       api-anthropic = {
         file = ../../secrets/api-anthropic.age;
         mode = "0644";
         owner = "root";
         group = "users";
       };
-      
+
       api-qwen = {
         file = ../../secrets/api-qwen.age;
         mode = "0644";
         owner = "root";
         group = "users";
       };
-      
+
       api-langchain = {
         file = ../../secrets/api-langchain.age;
         mode = "0600";
         owner = username;
         group = "users";
       };
-      
+
       api-github-token = {
         file = ../../secrets/api-github-token.age;
         mode = "0600";
         owner = username;
         group = "users";
       };
-      
+
       tailscale-auth-key = {
         file = ../../secrets/tailscale-auth-key.age;
         mode = "0600";
@@ -116,7 +116,7 @@ in {
           export GITHUB_TOKEN="$(cat ${config.age.secrets.api-github-token.path})"
         fi
       '')
-      
+
       (pkgs.writeScriptBin "api-keys-status" ''
         #!/bin/bash
         echo "API Keys Status:"

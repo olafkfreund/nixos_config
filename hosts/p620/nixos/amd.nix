@@ -1,6 +1,5 @@
-{
-  pkgs,
-  ...
+{ pkgs
+, ...
 }: {
   hardware.graphics = {
     enable = true;
@@ -64,9 +63,9 @@
 
   # Systemd configuration
   systemd = {
-    packages = with pkgs; [lact];
+    packages = with pkgs; [ lact ];
     services.lactd = {
-      wantedBy = ["multi-user.target"];
+      wantedBy = [ "multi-user.target" ];
       # Add restart-on-failure for better reliability
       serviceConfig = {
         Restart = "on-failure";
@@ -86,7 +85,7 @@
       "amdgpu.dcfeaturemask=1" # Enable display core features
     ];
     # Blacklist incompatible modules
-    blacklistedKernelModules = ["radeon"];
+    blacklistedKernelModules = [ "radeon" ];
   };
 
   # Environment variables for better AMD compatibility
@@ -95,7 +94,7 @@
     LIBVA_DRIVER_NAME = "radeonsi";
     VDPAU_DRIVER = "radeonsi";
     DRI_PRIME = "1";
-    
+
     # Uncomment if you want to force RADV (Mesa Vulkan driver)
     # AMD_VULKAN_ICD = "RADV";
 

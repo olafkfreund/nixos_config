@@ -1,6 +1,5 @@
-{
-  pkgs,
-  ...
+{ pkgs
+, ...
 }: {
   # Install GTK and theming packages at system level to avoid conflicts
   environment.systemPackages = with pkgs; [

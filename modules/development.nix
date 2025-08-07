@@ -1,4 +1,4 @@
-{...}: {
+{ ... }: {
   # Development-related modules
   # Only load on hosts that do development work
   imports = [

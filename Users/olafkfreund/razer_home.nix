@@ -1,10 +1,11 @@
-{
-  lib,
-  pkgs,
-  ...
-}: let
+{ lib
+, pkgs
+, ...
+}:
+let
   vars = import ../../hosts/razer/variables.nix;
-in {
+in
+{
   imports = [
     # Import common modules
     ../common/default.nix

@@ -1,17 +1,17 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
-}: 
-with lib; let 
+{ pkgs
+, config
+, lib
+, ...
+}:
+with lib; let
   cfg = config.desktop.screenshots.kooha;
-in {
+in
+{
   options.desktop.screenshots.kooha = {
     enable = mkEnableOption {
       default = false;
       description = "Enable Kooha screenshots";
-     };
+    };
   };
   config = mkIf cfg.enable {
     home.packages = [

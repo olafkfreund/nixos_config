@@ -1,16 +1,15 @@
-{
-  pkgs-unstable,
-  config,
-  ...
+{ pkgs-unstable
+, config
+, ...
 }: {
   services = {
     plex = {
       enable = true;
       user = "olafkfreund";
-      accelerationDevices = ["*"];
+      accelerationDevices = [ "*" ];
       dataDir = "/mnt/media/plex";
       package = pkgs-unstable.plex;
-      extraPlugins = [];
+      extraPlugins = [ ];
     };
 
     nzbget = {
@@ -95,10 +94,10 @@
     nfs.server = {
       enable = true;
       # Performance-optimized NFS configuration
-      nproc = 16;           # Increase number of NFS server processes
-      lockdPort = 4001;     # Fixed port for firewalls
-      mountdPort = 4002;    # Fixed mount daemon port
-      statdPort = 4000;     # Fixed status daemon port
+      nproc = 16; # Increase number of NFS server processes
+      lockdPort = 4001; # Fixed port for firewalls
+      mountdPort = 4002; # Fixed mount daemon port
+      statdPort = 4000; # Fixed status daemon port
       extraNfsdConfig = ''
         # Performance optimizations
         [nfsd]
@@ -134,22 +133,22 @@
   ];
 
   networking.firewall.allowedTCPPorts = [
-    2049        # NFS server
-    4000        # NFS status daemon
-    4001        # NFS lock daemon  
-    4002        # NFS mount daemon
-    5055        # Overseerr
-    6789        # NZBGet
-    8181        # Tautulli
-    9103        # NZBGet-exporter
-    9104        # Plex-exporter  
-    9117        # Jackett
-    9696        # Prowlarr
+    2049 # NFS server
+    4000 # NFS status daemon
+    4001 # NFS lock daemon  
+    4002 # NFS mount daemon
+    5055 # Overseerr
+    6789 # NZBGet
+    8181 # Tautulli
+    9103 # NZBGet-exporter
+    9104 # Plex-exporter  
+    9117 # Jackett
+    9696 # Prowlarr
   ];
   networking.firewall.allowedUDPPorts = [
-    111         # RPC portmapper
-    2049        # NFS server
-    4000        # NFS status daemon
-    4002        # NFS mount daemon
+    111 # RPC portmapper
+    2049 # NFS server
+    4000 # NFS status daemon
+    4002 # NFS mount daemon
   ];
 }

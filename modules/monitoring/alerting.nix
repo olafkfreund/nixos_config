@@ -1,18 +1,18 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.monitoring;
-in {
+in
+{
   config = mkIf (cfg.enable && cfg.features.alerting && (cfg.mode == "server" || cfg.mode == "standalone")) {
     services.prometheus.alertmanager = {
       enable = true;
       port = cfg.network.alertmanagerPort;
       listenAddress = "0.0.0.0";
-      
+
       configuration = {
         global = {
           smtp_smarthost = "localhost:587";
@@ -25,7 +25,7 @@ in {
           group_interval = "10s";
           repeat_interval = "1h";
           receiver = "default";
-          
+
           routes = [
             {
               match = {
@@ -53,7 +53,7 @@ in {
               send_resolved = true;
             }];
           }
-          
+
           {
             name = "critical";
             webhook_configs = [{
@@ -61,9 +61,9 @@ in {
               send_resolved = true;
             }];
           }
-          
+
           {
-            name = "warning";  
+            name = "warning";
             webhook_configs = [{
               url = "http://localhost:9097/webhook/warning";
               send_resolved = true;
@@ -95,95 +95,95 @@ in {
         User = "monitoring";
         Group = "monitoring";
         ExecStart = pkgs.writeShellScript "alert-webhook" ''
-          #!/bin/bash
+                    #!/bin/bash
           
-          # Simple webhook server for receiving alerts using Python HTTP server
-          PORT=9097
+                    # Simple webhook server for receiving alerts using Python HTTP server
+                    PORT=9097
           
-          log_alert() {
-            local severity="$1"
-            local timestamp=$(date -Iseconds)
-            echo "[$timestamp] [$severity] Alert received" >> /var/log/monitoring/alerts.log
-          }
+                    log_alert() {
+                      local severity="$1"
+                      local timestamp=$(date -Iseconds)
+                      echo "[$timestamp] [$severity] Alert received" >> /var/log/monitoring/alerts.log
+                    }
           
-          # Create log directory
-          mkdir -p /var/log/monitoring
+                    # Create log directory
+                    mkdir -p /var/log/monitoring
           
-          echo "Starting alert webhook server on port $PORT"
+                    echo "Starting alert webhook server on port $PORT"
           
-          # Use Python HTTP server for more reliable webhook handling
-          ${pkgs.python3}/bin/python3 -c "
-import http.server
-import socketserver
-import urllib.parse
-import json
-from datetime import datetime
+                    # Use Python HTTP server for more reliable webhook handling
+                    ${pkgs.python3}/bin/python3 -c "
+          import http.server
+          import socketserver
+          import urllib.parse
+          import json
+          from datetime import datetime
 
-class AlertWebhookHandler(http.server.BaseHTTPRequestHandler):
-    def log_message(self, format, *args):
-        # Disable default logging to avoid spam
-        pass
+          class AlertWebhookHandler(http.server.BaseHTTPRequestHandler):
+              def log_message(self, format, *args):
+                  # Disable default logging to avoid spam
+                  pass
         
-    def do_POST(self):
-        if self.path.startswith('/webhook'):
-            try:
-                content_length = int(self.headers.get('Content-Length', 0))
-                if content_length > 0:
-                    post_data = self.rfile.read(content_length)
-                    try:
-                        payload = json.loads(post_data.decode('utf-8'))
-                    except:
-                        payload = post_data.decode('utf-8')
+              def do_POST(self):
+                  if self.path.startswith('/webhook'):
+                      try:
+                          content_length = int(self.headers.get('Content-Length', 0))
+                          if content_length > 0:
+                              post_data = self.rfile.read(content_length)
+                              try:
+                                  payload = json.loads(post_data.decode('utf-8'))
+                              except:
+                                  payload = post_data.decode('utf-8')
                 
-                # Determine severity from path
-                if '/critical' in self.path:
-                    severity = 'CRITICAL'
-                elif '/warning' in self.path:
-                    severity = 'WARNING'
-                else:
-                    severity = 'INFO'
+                          # Determine severity from path
+                          if '/critical' in self.path:
+                              severity = 'CRITICAL'
+                          elif '/warning' in self.path:
+                              severity = 'WARNING'
+                          else:
+                              severity = 'INFO'
                 
-                # Log alert
-                timestamp = datetime.now().isoformat()
-                with open('/var/log/monitoring/alerts.log', 'a') as f:
-                    f.write(f'[{timestamp}] [{severity}] Alert received\\n')
-                    if content_length > 0:
-                        f.write(f'[{timestamp}] Payload: {str(payload)}\\n')
+                          # Log alert
+                          timestamp = datetime.now().isoformat()
+                          with open('/var/log/monitoring/alerts.log', 'a') as f:
+                              f.write(f'[{timestamp}] [{severity}] Alert received\\n')
+                              if content_length > 0:
+                                  f.write(f'[{timestamp}] Payload: {str(payload)}\\n')
                 
-                # Send response
-                self.send_response(200)
-                self.send_header('Content-type', 'text/plain')
-                self.end_headers()
-                self.wfile.write(f'{severity} alert received\\n'.encode())
+                          # Send response
+                          self.send_response(200)
+                          self.send_header('Content-type', 'text/plain')
+                          self.end_headers()
+                          self.wfile.write(f'{severity} alert received\\n'.encode())
                 
-            except Exception as e:
-                self.send_response(500)
-                self.send_header('Content-type', 'text/plain')
-                self.end_headers()
-                self.wfile.write(f'Error: {str(e)}\\n'.encode())
-        else:
-            self.send_response(404)
-            self.send_header('Content-type', 'text/plain')
-            self.end_headers()
-            self.wfile.write(b'Not found\\n')
+                      except Exception as e:
+                          self.send_response(500)
+                          self.send_header('Content-type', 'text/plain')
+                          self.end_headers()
+                          self.wfile.write(f'Error: {str(e)}\\n'.encode())
+                  else:
+                      self.send_response(404)
+                      self.send_header('Content-type', 'text/plain')
+                      self.end_headers()
+                      self.wfile.write(b'Not found\\n')
     
-    def do_GET(self):
-        if self.path == '/health':
-            self.send_response(200)
-            self.send_header('Content-type', 'text/plain')
-            self.end_headers()
-            self.wfile.write(b'OK\\n')
-        else:
-            self.do_POST()
+              def do_GET(self):
+                  if self.path == '/health':
+                      self.send_response(200)
+                      self.send_header('Content-type', 'text/plain')
+                      self.end_headers()
+                      self.wfile.write(b'OK\\n')
+                  else:
+                      self.do_POST()
 
-try:
-    with socketserver.TCPServer(('0.0.0.0', $PORT), AlertWebhookHandler) as httpd:
-        print(f'Alert webhook server listening on port $PORT')
-        httpd.serve_forever()
-except Exception as e:
-    print(f'Error starting server: {e}')
-    exit(1)
-"
+          try:
+              with socketserver.TCPServer(('0.0.0.0', $PORT), AlertWebhookHandler) as httpd:
+                  print(f'Alert webhook server listening on port $PORT')
+                  httpd.serve_forever()
+          except Exception as e:
+              print(f'Error starting server: {e}')
+              exit(1)
+          "
         '';
         Restart = "always";
         RestartSec = "10s";

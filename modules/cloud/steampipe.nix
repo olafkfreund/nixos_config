@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.steampipe.packages;
-in {
+in
+{
   options.steampipe.packages = {
     enable = mkEnableOption "Enable cloud steampipe tools";
   };

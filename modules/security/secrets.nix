@@ -1,9 +1,8 @@
-{
-  config,
-  lib,
-  pkgs,
-  inputs,
-  ...
+{ config
+, lib
+, pkgs
+, inputs
+, ...
 }:
 with lib; let
   cfg = config.modules.security.secrets;
@@ -16,22 +15,23 @@ with lib; let
     optionalAttrs (secretExists secretConfig.file) {
       ${name} = secretConfig;
     };
-in {
+in
+{
   options.modules.security.secrets = {
     enable = mkEnableOption "Agenix secrets management";
 
     hostKeys = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       description = "List of SSH host key paths for decryption";
-      example = ["/etc/ssh/ssh_host_ed25519_key"];
+      example = [ "/etc/ssh/ssh_host_ed25519_key" ];
     };
 
     userKeys = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       description = "List of user SSH key paths for secrets management";
-      example = ["/home/olafkfreund/.ssh/id_ed25519"];
+      example = [ "/home/olafkfreund/.ssh/id_ed25519" ];
     };
   };
 
@@ -102,6 +102,6 @@ in {
     # Warning when secrets directory doesn't exist
     warnings =
       optional (!builtins.pathExists ../../secrets)
-      "Secrets directory not found. Run './scripts/setup-secrets.sh' to initialize secrets management.";
+        "Secrets directory not found. Run './scripts/setup-secrets.sh' to initialize secrets management.";
   };
 }

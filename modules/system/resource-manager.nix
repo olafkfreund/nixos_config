@@ -4,110 +4,111 @@
 with lib;
 let
   cfg = config.system.resourceManager;
-in {
+in
+{
   options.system.resourceManager = {
     enable = mkEnableOption "Enable dynamic system resource management";
-    
+
     profile = mkOption {
-      type = types.enum ["performance" "balanced" "power-save"];
+      type = types.enum [ "performance" "balanced" "power-save" ];
       default = "balanced";
       description = "Resource management profile";
     };
-    
+
     cpuManagement = {
       enable = mkEnableOption "Enable CPU resource management";
-      
+
       dynamicGovernor = mkOption {
         type = types.bool;
         default = true;
         description = "Enable dynamic CPU governor switching";
       };
-      
+
       affinityOptimization = mkOption {
         type = types.bool;
         default = true;
         description = "Enable CPU affinity optimization";
       };
-      
+
       coreReservation = mkOption {
         type = types.bool;
         default = false;
         description = "Reserve CPU cores for critical processes";
       };
-      
+
       reservedCores = mkOption {
         type = types.int;
         default = 2;
         description = "Number of CPU cores to reserve";
       };
     };
-    
+
     memoryManagement = {
       enable = mkEnableOption "Enable memory resource management";
-      
+
       dynamicSwap = mkOption {
         type = types.bool;
         default = true;
         description = "Enable dynamic swap management";
       };
-      
+
       hugePagesOptimization = mkOption {
         type = types.bool;
         default = true;
         description = "Enable huge pages optimization";
       };
-      
+
       memoryCompression = mkOption {
         type = types.bool;
         default = false;
         description = "Enable memory compression (zram)";
       };
-      
+
       oomProtection = mkOption {
         type = types.bool;
         default = true;
         description = "Enable OOM protection for critical services";
       };
     };
-    
+
     ioManagement = {
       enable = mkEnableOption "Enable I/O resource management";
-      
+
       dynamicScheduler = mkOption {
         type = types.bool;
         default = true;
         description = "Enable dynamic I/O scheduler selection";
       };
-      
+
       ioNiceOptimization = mkOption {
         type = types.bool;
         default = true;
         description = "Enable I/O nice optimization";
       };
-      
+
       cacheOptimization = mkOption {
         type = types.bool;
         default = true;
         description = "Enable file system cache optimization";
       };
     };
-    
+
     networkManagement = {
       enable = mkEnableOption "Enable network resource management";
-      
+
       trafficShaping = mkOption {
         type = types.bool;
         default = false;
         description = "Enable network traffic shaping";
       };
-      
+
       connectionOptimization = mkOption {
         type = types.bool;
         default = true;
         description = "Enable connection optimization";
       };
     };
-    
+
     workloadProfiles = mkOption {
       type = types.attrsOf (types.submodule {
         options = {
@@ -116,25 +117,25 @@ in {
             default = 0;
             description = "CPU priority for this workload";
           };
-          
+
           memoryLimit = mkOption {
             type = types.nullOr types.str;
             default = null;
             description = "Memory limit for this workload";
           };
-          
+
           ioClass = mkOption {
             type = types.int;
             default = 2;
             description = "I/O class for this workload (1=RT, 2=BE, 3=IDLE)";
           };
-          
+
           ioPriority = mkOption {
             type = types.int;
             default = 4;
             description = "I/O priority within class (0-7)";
           };
-          
+
           cpuAffinity = mkOption {
             type = types.nullOr types.str;
             default = null;
@@ -169,7 +170,7 @@ in {
       description = "Dynamic System Resource Manager";
       after = [ "multi-user.target" ];
       wantedBy = [ "multi-user.target" ];
-      
+
       serviceConfig = {
         Type = "simple";
         User = "root";
@@ -334,13 +335,13 @@ in {
         '';
       };
     };
-    
+
     # CPU Core Reservation Service
     systemd.services.cpu-core-reservation = mkIf cfg.cpuManagement.coreReservation {
       description = "CPU Core Reservation for Critical Processes";
       after = [ "multi-user.target" ];
       wantedBy = [ "multi-user.target" ];
-      
+
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
@@ -375,13 +376,13 @@ in {
         '';
       };
     };
-    
+
     # Memory Optimization Service
     systemd.services.memory-optimizer = mkIf cfg.memoryManagement.enable {
       description = "Memory Optimization Service";
       after = [ "multi-user.target" ];
       wantedBy = [ "multi-user.target" ];
-      
+
       serviceConfig = {
         Type = "oneshot";
         User = "root";
@@ -411,14 +412,14 @@ in {
         '';
       };
     };
-    
+
     # Performance monitoring and tuning
     systemd.services.resource-monitor = {
       description = "Resource Usage Monitor";
       after = [ "dynamic-resource-manager.service" ];
       wants = [ "dynamic-resource-manager.service" ];
       wantedBy = [ "multi-user.target" ];
-      
+
       serviceConfig = {
         Type = "simple";
         User = "root";
@@ -483,43 +484,43 @@ in {
         '';
       };
     };
-    
+
     # Kernel parameters for resource management
     boot.kernel.sysctl = {
       # CPU scheduling
-      "kernel.sched_latency_ns" = mkDefault 6000000;  # 6ms
-      "kernel.sched_min_granularity_ns" = mkDefault 750000;  # 0.75ms
-      "kernel.sched_wakeup_granularity_ns" = mkDefault 1000000;  # 1ms
-      
+      "kernel.sched_latency_ns" = mkDefault 6000000; # 6ms
+      "kernel.sched_min_granularity_ns" = mkDefault 750000; # 0.75ms
+      "kernel.sched_wakeup_granularity_ns" = mkDefault 1000000; # 1ms
+
       # Memory management
       "vm.swappiness" = mkDefault (if cfg.profile == "performance" then 1 else 60);
       "vm.vfs_cache_pressure" = mkDefault 100;
       "vm.dirty_background_ratio" = mkDefault 10;
       "vm.dirty_ratio" = mkDefault 20;
-      
+
       # Note: Network optimization settings moved to networking.performanceTuning module
     };
-    
+
     # System packages for resource management
     environment.systemPackages = with pkgs; [
-      util-linux  # for ionice, taskset
-      bc          # for calculations
-      procps      # for pgrep, top
-      inetutils   # for network tools
+      util-linux # for ionice, taskset
+      bc # for calculations
+      procps # for pgrep, top
+      inetutils # for network tools
     ] ++ optionals cfg.memoryManagement.memoryCompression [
       zram-generator
     ];
-    
+
     # Create directories
     systemd.tmpfiles.rules = [
       "d /var/lib/resource-manager 0755 root root -"
       "d /var/log/resource-manager 0755 root root -"
     ];
-    
+
     # Enable memory compression if configured
     zramSwap = mkIf cfg.memoryManagement.memoryCompression {
       enable = true;
-      memoryPercent = 25;  # Use 25% of RAM for compressed swap
+      memoryPercent = 25; # Use 25% of RAM for compressed swap
     };
   };
 }

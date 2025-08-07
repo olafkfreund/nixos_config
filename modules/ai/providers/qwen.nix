@@ -1,39 +1,39 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.ai.providers.qwen;
-in {
+in
+{
   options.ai.providers.qwen = {
     enabled = mkEnableOption "Qwen AI provider support";
-    
+
     apiKeyFile = mkOption {
       type = types.str;
       default = "/run/agenix/api-qwen";
       description = "Path to the Qwen API key file";
     };
-    
+
     baseUrl = mkOption {
       type = types.str;
       default = "https://dashscope.aliyuncs.com/api/v1";
       description = "Qwen API base URL";
     };
-    
+
     model = mkOption {
       type = types.str;
       default = "qwen-turbo";
       description = "Default Qwen model to use";
     };
-    
+
     timeout = mkOption {
       type = types.int;
       default = 30;
       description = "Request timeout in seconds";
     };
-    
+
     maxRetries = mkOption {
       type = types.int;
       default = 3;
@@ -98,7 +98,7 @@ in {
         Persistent = true;
         RandomizedDelaySec = "10m";
       };
-      wantedBy = ["timers.target"];
+      wantedBy = [ "timers.target" ];
     };
   };
 }

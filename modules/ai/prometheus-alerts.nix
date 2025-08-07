@@ -4,7 +4,8 @@
 with lib;
 let
   cfg = config.ai.prometheusAlerts;
-in {
+in
+{
   options.ai.prometheusAlerts = {
     enable = mkEnableOption "Enable AI analysis Prometheus alerts";
   };

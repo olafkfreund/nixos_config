@@ -9,15 +9,15 @@
 # 3. Add to modules/desktop/default.nix imports
 # 4. Enable with: features.desktop.COMPONENT_NAME = true;
 
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.modules.desktop.COMPONENT_NAME;
-in {
+in
+{
   options.modules.desktop.COMPONENT_NAME = {
     enable = mkEnableOption "COMPONENT_NAME desktop component";
 
@@ -71,7 +71,7 @@ in {
 
         options = mkOption {
           type = types.listOf types.str;
-          default = [];
+          default = [ ];
           description = "Keyboard options";
           example = [ "caps:escape" "compose:ralt" ];
         };
@@ -156,7 +156,7 @@ in {
     # Application defaults
     defaultApplications = mkOption {
       type = types.attrsOf types.str;
-      default = {};
+      default = { };
       description = "Default applications for file types";
       example = literalExpression ''
         {
@@ -170,7 +170,7 @@ in {
     # Autostart applications
     autostart = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       description = "Applications to start automatically";
       example = [ "firefox" "thunderbird" ];
     };
@@ -178,7 +178,7 @@ in {
     # Keybindings
     keybindings = mkOption {
       type = types.attrsOf types.str;
-      default = {};
+      default = { };
       description = "Custom keybindings";
       example = literalExpression ''
         {
@@ -199,7 +199,7 @@ in {
 
       names = mkOption {
         type = types.listOf types.str;
-        default = [];
+        default = [ ];
         description = "Workspace names";
         example = [ "web" "dev" "chat" "media" ];
       };
@@ -290,7 +290,7 @@ in {
     # Desktop environment configuration
     services.xserver = {
       enable = true;
-      
+
       # Display manager
       displayManager = {
         # Configure based on component type
@@ -350,7 +350,7 @@ in {
         fira-code
         fira-code-symbols
       ];
-      
+
       fontconfig = {
         defaultFonts = {
           serif = [ cfg.theme.font.name ];
@@ -364,19 +364,21 @@ in {
     xdg.mime.defaultApplications = cfg.defaultApplications;
 
     # Autostart applications
-    systemd.user.services = listToAttrs (map (app: {
-      name = "autostart-${app}";
-      value = {
-        description = "Autostart ${app}";
-        after = [ "graphical-session.target" ];
-        partOf = [ "graphical-session.target" ];
-        serviceConfig = {
-          Type = "simple";
-          ExecStart = "${app}";
-          Restart = "on-failure";
+    systemd.user.services = listToAttrs (map
+      (app: {
+        name = "autostart-${app}";
+        value = {
+          description = "Autostart ${app}";
+          after = [ "graphical-session.target" ];
+          partOf = [ "graphical-session.target" ];
+          serviceConfig = {
+            Type = "simple";
+            ExecStart = "${app}";
+            Restart = "on-failure";
+          };
         };
-      };
-    }) cfg.autostart);
+      })
+      cfg.autostart);
 
     # Desktop-specific environment variables
     environment.sessionVariables = {
@@ -404,7 +406,7 @@ in {
 
     # GTK theme configuration
     programs.dconf.enable = true;
-    
+
     # Hardware acceleration
     hardware.graphics.enable = true;
 
@@ -424,7 +426,7 @@ in {
         message = "COMPONENT_NAME: workspace count must be greater than 0";
       }
       {
-        assertion = cfg.workspaces.names == [] || length cfg.workspaces.names == cfg.workspaces.count;
+        assertion = cfg.workspaces.names == [ ] || length cfg.workspaces.names == cfg.workspaces.count;
         message = "COMPONENT_NAME: workspace names length must match workspace count";
       }
       {
@@ -443,7 +445,7 @@ in {
         COMPONENT_NAME: Wallpaper path specified but wallpaper management is disabled.
         Set enableWallpaper = true to use the specified wallpaper.
       '')
-      (mkIf (cfg.autostart != [] && !cfg.panel.enable) ''
+      (mkIf (cfg.autostart != [ ] && !cfg.panel.enable) ''
         COMPONENT_NAME: Autostart applications configured but panel is disabled.
         Users may not have easy access to running applications.
       '')

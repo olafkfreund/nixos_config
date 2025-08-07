@@ -1,8 +1,7 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.scrcpyWifi;
@@ -27,7 +26,8 @@ with lib; let
     # Launch scrcpy
     scrcpy
   '';
-in {
+in
+{
   options.scrcpyWifi = {
     enable = mkEnableOption "Enable scrcpy Wi-Fi automation module";
 

@@ -1,6 +1,5 @@
-{
-  pkgs,
-  ...
+{ pkgs
+, ...
 }:
 pkgs.writeShellScriptBin "mpris-album-art" ''
   #!/usr/bin/env bash

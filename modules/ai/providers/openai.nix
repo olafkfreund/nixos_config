@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.ai.providers.openai;
-in {
+in
+{
   options.ai.providers.openai = {
     enabled = mkOption {
       type = types.bool;

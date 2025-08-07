@@ -1,29 +1,30 @@
 # Standard module template for consistent structure
-{
-  lib,
-  pkgs,
-  ...
-}: name: {
-  options ? {},
-  config ? {},
-  meta ? {},
-}: let
+{ lib
+, pkgs
+, ...
+}: name: { options ? { }
+         , config ? { }
+         , meta ? { }
+         ,
+         }:
+let
   inherit (lib) mkEnableOption mkOption mkIf types;
   cfg = config.${name};
-in {
+in
+{
   options.${name} = {
-    enable = mkEnableOption "Enable ${name} module" // {default = false;};
-    
+    enable = mkEnableOption "Enable ${name} module" // { default = false; };
+
     # Standard options every module should have
     package = mkOption {
       type = types.package;
       default = pkgs.${name} or null;
       description = "Package to use for ${name}";
     };
-    
+
     extraConfig = mkOption {
       type = types.attrs;
-      default = {};
+      default = { };
       description = "Extra configuration for ${name}";
     };
   } // options;
@@ -39,7 +40,7 @@ in {
   });
 
   meta = {
-    maintainers = ["olafkfreund"];
+    maintainers = [ "olafkfreund" ];
     doc = ./docs + "/${name}.md";
     platforms = lib.platforms.linux;
   } // meta;

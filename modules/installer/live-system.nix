@@ -1,10 +1,9 @@
 # Live USB System Configuration for NixOS Installation
-{
-  config,
-  lib,
-  pkgs,
-  host ? null,
-  ...
+{ config
+, lib
+, pkgs
+, host ? null
+, ...
 }:
 with lib; {
   imports = [
@@ -53,7 +52,7 @@ with lib; {
     wget
     rsync
     tailscale
-    
+
     # Add host-specific flake configuration
     (writeScriptBin "install-${if host != null then host else "host"}" ''
       #!/bin/bash
@@ -71,12 +70,12 @@ with lib; {
   isoImage = {
     isoName = mkDefault "nixos-${if host != null then host else "installer"}-live.iso";
     volumeID = mkDefault "NIXOS_${lib.toUpper (if host != null then host else "INSTALLER")}";
-    
+
     # 4GB image size
     isoBaseName = mkDefault "nixos-${if host != null then host else "installer"}";
     makeEfiBootable = true;
     makeUsbBootable = true;
-    
+
     # Include extra space for tools and configs
     squashfsCompression = "gzip -Xcompression-level 1";
   };
@@ -85,11 +84,17 @@ with lib; {
   boot = {
     supportedFilesystems = [ "ext4" "vfat" "ntfs" "exfat" ];
     kernelParams = [ "boot.shell_on_fail" ];
-    
+
     # Include common drivers
     initrd.availableKernelModules = [
-      "xhci_pci" "ehci_pci" "ahci" "usb_storage" "sd_mod"
-      "nvme" "sdhci_pci" "rtsx_pci_sdmmc"
+      "xhci_pci"
+      "ehci_pci"
+      "ahci"
+      "usb_storage"
+      "sd_mod"
+      "nvme"
+      "sdhci_pci"
+      "rtsx_pci_sdmmc"
     ];
   };
 
@@ -123,7 +128,7 @@ with lib; {
 
   # No GUI services
   services.xserver.enable = false;
-  
+
   # Welcome message
   environment.etc."issue".text = ''
     

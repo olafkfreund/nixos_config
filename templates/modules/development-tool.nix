@@ -9,15 +9,15 @@
 # 3. Add to modules/development/default.nix imports
 # 4. Enable with: features.development.TOOL_NAME = true;
 
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.modules.development.TOOL_NAME;
-in {
+in
+{
   options.modules.development.TOOL_NAME = {
     enable = mkEnableOption "TOOL_NAME development environment";
 
@@ -31,7 +31,7 @@ in {
     # Additional packages
     extraPackages = mkOption {
       type = types.listOf types.package;
-      default = [];
+      default = [ ];
       description = "Additional TOOL_NAME-related packages";
       example = literalExpression "[ pkgs.tool-extension pkgs.tool-plugin ]";
     };
@@ -72,7 +72,7 @@ in {
     # Configuration settings
     globalConfig = mkOption {
       type = types.attrsOf types.str;
-      default = {};
+      default = { };
       description = "Global TOOL_NAME configuration";
       example = literalExpression ''
         {
@@ -108,7 +108,7 @@ in {
     # Core packages
     environment.systemPackages = with pkgs; [
       cfg.package
-    ] 
+    ]
     # Language Server Protocol
     ++ optionals cfg.enableLSP [
       # TOOL_NAME-lsp
@@ -146,7 +146,7 @@ in {
     };
 
     # Global configuration file
-    environment.etc."TOOL_NAME/config" = mkIf (cfg.globalConfig != {}) {
+    environment.etc."TOOL_NAME/config" = mkIf (cfg.globalConfig != { }) {
       text = concatStringsSep "\n" (mapAttrsToList (name: value: "${name}=${value}") cfg.globalConfig);
       mode = "0644";
     };
@@ -155,7 +155,7 @@ in {
     programs.TOOL_NAME = mkIf (hasAttr "TOOL_NAME" config.programs) {
       enable = true;
       package = cfg.package;
-      
+
       # Tool-specific configuration
       # settings = cfg.globalConfig;
     };
@@ -218,7 +218,7 @@ in {
         TOOL_NAME: Debugger is enabled but LSP is not. 
         Consider enabling LSP for better debugging experience.
       '')
-      (mkIf (cfg.enableProjectTemplates && cfg.extraPackages == []) ''
+      (mkIf (cfg.enableProjectTemplates && cfg.extraPackages == [ ]) ''
         TOOL_NAME: Project templates enabled but no extra packages specified.
         Consider adding relevant packages to extraPackages.
       '')

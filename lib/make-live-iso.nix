@@ -1,10 +1,9 @@
 # Live ISO Builder Helper Function
-{
-  nixpkgs,
-  inputs,
-  host,
-  hostUsers ? [],
-  ...
+{ nixpkgs
+, inputs
+, host
+, hostUsers ? [ ]
+, ...
 }:
 let
   # Helper to build live ISO for a specific host
@@ -18,31 +17,31 @@ let
     modules = [
       # Base live system configuration
       ../modules/installer/live-system.nix
-      
+
       # Pass host name to the live system
-      { 
+      {
         _module.args.host = hostName;
-        
+
         # Set the ISO name and volume ID
         isoImage = {
           isoName = "nixos-${hostName}-live.iso";
           volumeID = "NIXOS_${nixpkgs.lib.toUpper hostName}";
         };
-        
+
         # Include the host-specific installer command
         environment.systemPackages = with nixpkgs.legacyPackages.x86_64-linux; [
           (writeScriptBin "install-${hostName}" ''
             #!/bin/bash
             exec /etc/nixos-config/scripts/install-helpers/install-wizard.sh "${hostName}" "$@"
           '')
-          
+
           (writeScriptBin "test-${hostName}-config" ''
             #!/bin/bash
             echo "Testing hardware configuration for ${hostName}..."
             /etc/nixos-config/scripts/install-helpers/parse-hardware-config.py "${hostName}"
           '')
         ];
-        
+
         # Create a welcome script specific to this host
         environment.etc."welcome-${hostName}".text = ''
           ╭─────────────────────────────────────────╮
@@ -64,7 +63,7 @@ let
           Hardware config will be auto-detected from:
           hosts/${hostName}/nixos/hardware-configuration.nix
         '';
-        
+
         # Add host info to MOTD
         users.motd = ''
           
@@ -75,32 +74,32 @@ let
           
         '';
       }
-      
+
       # Networking and basic services
       {
         # Enable NetworkManager for easy network setup
         networking.networkmanager.enable = true;
         networking.wireless.enable = false;
-        
+
         # Basic firewall
         networking.firewall = {
           enable = true;
           allowedTCPPorts = [ 22 ];
         };
-        
+
         # Time zone (can be changed during install)
         time.timeZone = "Europe/Oslo";
-        
+
         # Locale
         i18n.defaultLocale = "en_GB.UTF-8";
-        
+
         # Console setup
         console = {
           keyMap = "us";
           font = "Lat2-Terminus16";
         };
       }
-      
+
       # Essential packages for installation
       {
         environment.systemPackages = with nixpkgs.legacyPackages.x86_64-linux; [
@@ -110,33 +109,33 @@ let
           pciutils
           usbutils
           dmidecode
-          
+
           # Text editors
           neovim
           nano
-          
+
           # Terminal utilities  
           tmux
           htop
           tree
-          
+
           # Network tools
           wget
           curl
-          
+
           # Installation tools (already included in installer-tools.nix)
           git
           jq
           python3
           python3Packages.pyyaml
-          
+
           # File system tools
           parted
           gptfdisk
           util-linux
           dosfstools
           e2fsprogs
-          
+
           # Archive tools
           unzip
           tar
@@ -148,9 +147,11 @@ let
 in
 {
   inherit mkLiveISO;
-  
+
   # Convenience function to build all live ISOs
-  mkAllLiveISOs = hosts: nixpkgs.lib.mapAttrs (hostName: _hostConfig: 
-    nixpkgs.lib.nixosSystem (mkLiveISO hostName)
-  ) hosts;
+  mkAllLiveISOs = hosts: nixpkgs.lib.mapAttrs
+    (hostName: _hostConfig:
+      nixpkgs.lib.nixosSystem (mkLiveISO hostName)
+    )
+    hosts;
 }

@@ -1,7 +1,6 @@
-{
-  pkgs,
-  lib,
-  ...
+{ pkgs
+, lib
+, ...
 }: {
   home.packages = with pkgs; [
     gitui
@@ -75,8 +74,8 @@
   development.nixd = {
     enable = true;
     offlineMode = true;
-    formatterCommand = ["alejandra"];
-    diagnosticsIgnored = [];
+    formatterCommand = [ "alejandra" ];
+    diagnosticsIgnored = [ ];
     diagnosticsExcluded = [
       "\\.direnv"
       "result"

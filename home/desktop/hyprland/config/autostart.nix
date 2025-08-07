@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{ pkgs, ... }: {
   wayland.windowManager.hyprland.extraConfig = ''
     # Core system services and environment
     exec-once = systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE WAYLAND_DEBUG NO_XDG_ICON_WARNING NIXOS_OZONE_WL

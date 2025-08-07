@@ -1,14 +1,14 @@
 # AI and ChatGPT Tools Module
 # Provides various AI-powered command line tools and interfaces
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.modules.ai.chatgpt;
-in {
+in
+{
 
   options.modules.ai.chatgpt = {
     enable = mkEnableOption "AI and ChatGPT command line tools";
@@ -53,7 +53,7 @@ in {
 
     additionalPackages = mkOption {
       type = types.listOf types.package;
-      default = [];
+      default = [ ];
       description = ''
         Additional AI-related packages to install beyond the default sets.
       '';
@@ -67,37 +67,37 @@ in {
   };
 
   config = mkIf cfg.enable {
-    environment.systemPackages = with pkgs; 
+    environment.systemPackages = with pkgs;
       # Chat interfaces
       optionals cfg.packages.chatInterfaces [
-        chatgpt-cli          # OpenAI ChatGPT command line interface
-        rPackages.chatgpt    # R interface for ChatGPT
-        tgpt                 # Terminal GPT - simple CLI for multiple AI models
-        shell-gpt            # Shell integration for GPT models
+        chatgpt-cli # OpenAI ChatGPT command line interface
+        rPackages.chatgpt # R interface for ChatGPT
+        tgpt # Terminal GPT - simple CLI for multiple AI models
+        shell-gpt # Shell integration for GPT models
         yai
-        codex                # Yet Another AI CLI tool
+        codex # Yet Another AI CLI tool
       ] ++
-      
+
       # Code assistants  
       optionals cfg.packages.codeAssistants [
-        gh-copilot          # GitHub Copilot CLI integration
-        aichat              # AI chat with code assistance features
-        gpt-cli             # General purpose GPT CLI
+        gh-copilot # GitHub Copilot CLI integration
+        aichat # AI chat with code assistance features
+        gpt-cli # General purpose GPT CLI
         # codex removed due to build issues with OpenSSL dependencies
       ] ++
-      
+
       # Terminal tools
       optionals cfg.packages.terminalTools [
-        gorilla-cli         # AI-powered command suggestions
+        gorilla-cli # AI-powered command suggestions
         # oterm               # AI-enhanced terminal (disabled due to textual test failures)
       ] ++
-      
+
       # MCP tools (Model Context Protocol)
       optionals cfg.packages.mcpTools [
-        chatmcp             # ChatGPT with MCP support
-        mcphost             # MCP host implementation
+        chatmcp # ChatGPT with MCP support
+        mcphost # MCP host implementation
       ] ++
-      
+
       # Additional user-specified packages
       cfg.additionalPackages;
 

@@ -9,31 +9,33 @@
 
 {
   imports =
-    [ (modulesPath + "/installer/scan/not-detected.nix")
+    [
+      (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
   # CPU configuration - EXAMPLE (replace with your actual CPU)
   boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-intel" ];  # Change to "kvm-amd" for AMD CPUs
+  boot.kernelModules = [ "kvm-intel" ]; # Change to "kvm-amd" for AMD CPUs
   boot.extraModulePackages = [ ];
 
   # File systems - EXAMPLE (replace with your actual configuration)
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/REPLACE-WITH-YOUR-ROOT-UUID";
+    {
+      device = "/dev/disk/by-uuid/REPLACE-WITH-YOUR-ROOT-UUID";
       fsType = "ext4";
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/REPLACE-WITH-YOUR-BOOT-UUID";
+    {
+      device = "/dev/disk/by-uuid/REPLACE-WITH-YOUR-BOOT-UUID";
       fsType = "vfat";
       options = [ "fmask=0077" "dmask=0077" ];
     };
 
   # Swap configuration - EXAMPLE
   swapDevices =
-    [ { device = "/dev/disk/by-uuid/REPLACE-WITH-YOUR-SWAP-UUID"; }
-    ];
+    [{ device = "/dev/disk/by-uuid/REPLACE-WITH-YOUR-SWAP-UUID"; }];
 
   # Network interface - EXAMPLE (replace with your actual interface)
   networking.useDHCP = lib.mkDefault true;
@@ -41,25 +43,25 @@
 
   # Hardware acceleration and graphics
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  
+
   # CPU-specific optimizations
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   # For AMD CPUs, use instead:
   # hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
   # GPU-specific configurations (uncomment based on your GPU)
-  
+
   # For NVIDIA GPUs:
   # hardware.graphics.enable = true;
   # hardware.nvidia.modesetting.enable = true;
   # hardware.nvidia.powerManagement.enable = false;
   # hardware.nvidia.open = false;
   # hardware.nvidia.nvidiaSettings = true;
-  
+
   # For AMD GPUs:
   # hardware.graphics.enable = true;
   # hardware.amdgpu.loadInInitrd = true;
-  
+
   # For Intel integrated graphics:
   # hardware.graphics.enable = true;
   # hardware.graphics.extraPackages = with pkgs; [
@@ -105,7 +107,7 @@
   boot.kernelParams = [
     "quiet"
     "splash"
-    "mitigations=off"  # Disable CPU vulnerability mitigations for performance (security trade-off)
+    "mitigations=off" # Disable CPU vulnerability mitigations for performance (security trade-off)
     # Add more parameters based on your hardware
   ];
 

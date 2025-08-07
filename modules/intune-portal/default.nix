@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.security.intune-portal;
-in {
+in
+{
   options.security.intune-portal = {
     enable = mkEnableOption {
       default = false;

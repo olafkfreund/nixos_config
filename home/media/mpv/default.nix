@@ -1,11 +1,10 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
-}: 
+{ pkgs
+, config
+, lib
+, ...
+}:
 let
-  inherit (lib.modules)  mkMerge;
+  inherit (lib.modules) mkMerge;
 in
 {
   programs.mpv = {

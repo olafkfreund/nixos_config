@@ -4,55 +4,56 @@
 with lib;
 let
   cfg = config.ai.automatedRemediation;
-in {
+in
+{
   options.ai.automatedRemediation = {
     enable = mkEnableOption "Enable automated remediation system";
-    
+
     enableSelfHealing = mkOption {
       type = types.bool;
       default = false;
       description = "Enable automatic self-healing actions (use with caution)";
     };
-    
+
     safeMode = mkOption {
       type = types.bool;
       default = true;
       description = "Enable safe mode - only non-destructive actions";
     };
-    
+
     notifications = {
       enable = mkOption {
         type = types.bool;
         default = true;
         description = "Enable notifications for remediation actions";
       };
-      
+
       logFile = mkOption {
         type = types.str;
         default = "/var/log/ai-analysis/remediation.log";
         description = "Log file for remediation actions";
       };
     };
-    
+
     actions = {
       diskCleanup = mkOption {
         type = types.bool;
         default = true;
         description = "Enable automated disk cleanup";
       };
-      
+
       memoryOptimization = mkOption {
         type = types.bool;
         default = true;
         description = "Enable automated memory optimization";
       };
-      
+
       serviceRestart = mkOption {
         type = types.bool;
         default = false;
         description = "Enable automatic service restart for failed services";
       };
-      
+
       configurationReset = mkOption {
         type = types.bool;
         default = false;
@@ -67,7 +68,7 @@ in {
       description = "AI Automated Remediation Service";
       after = [ "network.target" "prometheus.service" ];
       wants = [ "network.target" ];
-      
+
       serviceConfig = {
         Type = "oneshot";
         User = "root";
@@ -355,7 +356,7 @@ in {
     # Emergency remediation service (triggered by critical alerts)
     systemd.services.ai-emergency-remediation = {
       description = "AI Emergency Remediation Service";
-      
+
       serviceConfig = {
         Type = "oneshot";
         User = "root";

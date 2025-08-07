@@ -1,7 +1,6 @@
-{
-  pkgs,
-  config,
-  ...
+{ pkgs
+, config
+, ...
 }: {
   # Boot optimizations
   boot.loader.systemd-boot = {
@@ -25,7 +24,7 @@
 
   # For improved boot time
   boot.initrd.compressor = "zstd";
-  boot.initrd.compressorArgs = ["-19" "-T0"];
+  boot.initrd.compressorArgs = [ "-19" "-T0" ];
 
   # Use latest kernel for newer hardware support
   boot.kernelPackages = pkgs.linuxPackages;
@@ -37,7 +36,7 @@
   # };
   # This is for OBS Virtual Cam Support - v4l2loopback setup
   # boot.kernelPackages = pkgs.linuxPackages_default;
-  boot.kernelModules = ["v4l2loopback"];
+  boot.kernelModules = [ "v4l2loopback" ];
   boot.extraModulePackages = with config.boot.kernelPackages; [
     v4l2loopback
   ];

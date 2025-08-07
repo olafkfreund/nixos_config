@@ -6,17 +6,18 @@
 
 let
   vars = import ./variables.nix;
-in {
+in
+{
   imports = [
     # Hardware configuration (auto-generated)
     ./nixos/hardware-configuration.nix
-    
+
     # GPU configuration based on variables
     (if vars.gpu == "amd" then ./nixos/amd.nix
-     else if vars.gpu == "nvidia" then ./nixos/nvidia.nix
-     else if vars.gpu == "intel" then ./nixos/intel.nix
-     else ./nixos/none.nix)
-    
+    else if vars.gpu == "nvidia" then ./nixos/nvidia.nix
+    else if vars.gpu == "intel" then ./nixos/intel.nix
+    else ./nixos/none.nix)
+
     # Laptop-optimized modules
     ../../modules/desktop
     ../../modules/network
@@ -41,7 +42,7 @@ in {
       efi.canTouchEfiVariables = true;
       timeout = 2; # Quick boot for laptops
     };
-    
+
     # Laptop-optimized kernel parameters
     kernelParams = [
       "quiet"
@@ -49,25 +50,25 @@ in {
       "loglevel=3"
       "systemd.show_status=auto"
       "rd.udev.log_level=3"
-      
+
       # Power management
       "acpi_enforce_resources=lax"
       "pcie_aspm=force"
       "iwlwifi.power_save=1"
       "iwlwifi.power_level=5"
-      
+
       # Graphics optimizations
       "i915.enable_fbc=1"
       "i915.enable_psr=1"
       "i915.fastboot=1"
     ];
-    
+
     # Fast boot optimizations
     initrd = {
       verbose = false;
       systemd.enable = true;
     };
-    
+
     # Kernel modules for laptop hardware
     kernelModules = [ "kvm-intel" "kvm-amd" ];
     extraModulePackages = with config.boot.kernelPackages; [ ];
@@ -159,7 +160,7 @@ in {
       enable = vars.features.monitoring.enable;
       mode = vars.features.monitoring.mode;
       serverHost = vars.features.monitoring.serverHost;
-      
+
       features = {
         nodeExporter = true;
         systemdExporter = true;
@@ -175,7 +176,7 @@ in {
         enable = vars.features.ai.enable;
         defaultProvider = vars.features.ai.defaultProvider;
         enableFallback = vars.features.ai.enableFallback;
-        
+
         openai.enable = vars.features.ai.openai;
         anthropic.enable = vars.features.ai.anthropic;
         gemini.enable = vars.features.ai.gemini;
@@ -220,11 +221,11 @@ in {
       wifi.macAddress = "random";
       dns = "systemd-resolved";
     };
-    
+
     # Disable networkd for laptops (use NetworkManager)
     useNetworkd = false;
     dhcpcd.enable = false;
-    
+
     # Firewall configuration
     firewall = {
       enable = true;
@@ -234,7 +235,7 @@ in {
       logReversePathDrops = false; # Reduce log spam on laptops
       logRefusedConnections = false;
     };
-    
+
     # Host mappings for local services
     hosts = vars.network.hostMappings;
   };
@@ -253,7 +254,7 @@ in {
     thermald.enable = lib.mkDefault true;
     auto-cpufreq.enable = true;
     upower.enable = true;
-    
+
     # Audio
     pipewire = {
       enable = true;
@@ -266,25 +267,25 @@ in {
       };
       wireplumber.enable = true;
     };
-    
+
     # Bluetooth
     blueman.enable = true;
-    
+
     # Printing
     printing = {
       enable = true;
       drivers = with pkgs; [ hplip epson-escpr ];
     };
-    
+
     # Scanning
     sane = {
       enable = true;
       extraBackends = with pkgs; [ hplipWithPlugin ];
     };
-    
+
     # Location services
     geoclue2.enable = true;
-    
+
     # Display management
     xserver = {
       enable = true;
@@ -298,10 +299,10 @@ in {
           user = lib.mkIf vars.autoLogin.enable vars.userName;
         };
       };
-      
+
       desktopManager.gnome.enable = vars.features.desktop.gnome;
     };
-    
+
     # Wayland compositor
     greetd = lib.mkIf vars.features.desktop.hyprland {
       enable = true;
@@ -331,21 +332,21 @@ in {
       noto-fonts
       noto-fonts-cjk
       noto-fonts-emoji
-      
+
       # Programming fonts
       fira-code
       fira-code-symbols
       jetbrains-mono
       source-code-pro
-      
+
       # Google Fonts
       google-fonts
-      
+
       # Icon fonts
       font-awesome
       material-design-icons
     ];
-    
+
     fontconfig = {
       enable = true;
       defaultFonts = {
@@ -366,65 +367,65 @@ in {
     libreoffice
     gimp
     vlc
-    
+
     # System utilities
     gnome.gnome-system-monitor
     gnome.gnome-disk-utility
     gnome.file-roller
-    
+
     # Development tools
     vscode
     git
     curl
     wget
-    
+
     # Terminal applications
     htop
     neofetch
     tree
     unzip
-    
+
     # Network tools
     networkmanagerapplet
     blueman
-    
+
     # Audio/Video
     pavucontrol
     alsa-utils
     pulseaudio
-    
+
     # Graphics
     mesa
     vulkan-tools
-    
+
     # Power management
     powertop
     acpi
-    
+
     # File management
     thunar
     xfce.thunar-volman
     xfce.thunar-archive-plugin
-    
+
     # Screenshot and screen recording
     grim
     slurp
     wl-clipboard
-    
+
     # Laptop-specific tools
-    brightnessctl      # Brightness control
-    playerctl          # Media control
-    pamixer            # Audio control
-    
+    brightnessctl # Brightness control
+    playerctl # Media control
+    pamixer # Audio control
+
     # Communication
     discord
     slack
     zoom-us
-    
+
     # Productivity
     obsidian
     notion-app-enhanced
-    
+
     # Entertainment
     spotify
     steam
@@ -434,7 +435,7 @@ in {
   hardware = {
     # Audio
     pulseaudio.enable = false; # Using pipewire
-    
+
     # Bluetooth
     bluetooth = {
       enable = true;
@@ -446,22 +447,22 @@ in {
         };
       };
     };
-    
+
     # Graphics acceleration
     graphics = {
       enable = true;
       enable32Bit = true;
     };
-    
+
     # Webcam
     facetimehd.enable = lib.mkDefault false; # Enable for MacBook users
-    
+
     # Trackpad
     trackpoint.enable = lib.mkDefault false; # Enable for ThinkPads
-    
+
     # Sensors
     sensor.iio.enable = true; # Screen rotation
-    
+
     # Firmware
     enableRedistributableFirmware = true;
     enableAllFirmware = true;
@@ -476,9 +477,9 @@ in {
         (lib.mkIf vars.features.desktop.hyprland xdg-desktop-portal-hyprland)
       ];
     };
-    
+
     mime.enable = true;
-    
+
     userDirs = {
       enable = true;
       createDirectories = true;
@@ -489,13 +490,13 @@ in {
   security = {
     polkit.enable = true;
     rtkit.enable = true;
-    
+
     # Sudo configuration
     sudo = {
       enable = true;
       wheelNeedsPassword = true;
     };
-    
+
     # PAM configuration
     pam.services = {
       login.enableGnomeKeyring = true;
@@ -518,12 +519,12 @@ in {
         wantedBy = [ "default.target" ];
       };
     };
-    
+
     # System services
     services = {
       # Disable unnecessary services for laptops
       NetworkManager-wait-online.enable = lib.mkForce false;
-      
+
       # Laptop-specific services
       laptop-mode = {
         enable = vars.mobile.batteryOptimization;
@@ -581,26 +582,26 @@ in {
       dates = "weekly";
       options = "--delete-older-than 14d"; # More frequent for limited storage
     };
-    
+
     # Optimize store
     optimise = {
       automatic = true;
       dates = [ "weekly" ];
     };
-    
+
     settings = {
       # Build settings for laptops
       max-jobs = "auto";
       cores = 0;
-      
+
       # Experimental features
       experimental-features = [ "nix-command" "flakes" ];
-      
+
       # Binary cache settings
       trusted-users = [ "root" vars.userName ];
       substituters = vars.nix.substituters;
       trusted-public-keys = vars.nix.trustedPublicKeys;
-      
+
       # Laptop optimizations
       auto-optimise-store = true;
       keep-outputs = false; # Save space
@@ -615,27 +616,27 @@ in {
       owner = vars.userName;
       group = "users";
     };
-    
+
     # Tailscale auth key
     "tailscale-auth-key" = lib.mkIf vars.tailscale.enable {
       file = ../../secrets/tailscale-auth-key.age;
       owner = "root";
       group = "root";
     };
-    
+
     # AI provider API keys (if enabled)
     "api-openai" = lib.mkIf vars.features.ai.openai {
       file = ../../secrets/api-openai.age;
       owner = vars.userName;
       group = "users";
     };
-    
+
     "api-anthropic" = lib.mkIf vars.features.ai.anthropic {
       file = ../../secrets/api-anthropic.age;
       owner = vars.userName;
       group = "users";
     };
-    
+
     "api-gemini" = lib.mkIf vars.features.ai.gemini {
       file = ../../secrets/api-gemini.age;
       owner = vars.userName;

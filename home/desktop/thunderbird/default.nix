@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs-unstable,
-  ...
+{ config
+, lib
+, pkgs-unstable
+, ...
 }:
 with lib; let
   cfg = config.programs.thunderbird.enable;
-in {
+in
+{
   config = mkIf cfg {
     programs.thunderbird = {
       enable = true;

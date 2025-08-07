@@ -1,4 +1,5 @@
-{...}: let
+{ ... }:
+let
   vars = import ../variables.nix;
 
   # Convert the host mappings attrset to a string
@@ -7,6 +8,7 @@
     concatStringsSep "\n" (
       attrValues (mapAttrs (ip: hostname: "${ip} ${hostname}") vars.hostMappings)
     );
-in {
+in
+{
   networking.extraHosts = hostsString;
 }

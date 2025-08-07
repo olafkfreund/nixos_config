@@ -4,50 +4,51 @@
 with lib;
 let
   cfg = config.ai.loadTesting;
-in {
+in
+{
   options.ai.loadTesting = {
     enable = mkEnableOption "Enable AI load testing capabilities";
-    
+
     testDuration = mkOption {
       type = types.str;
       default = "5m";
       description = "Duration for load tests (e.g., 5m, 10s, 1h)";
     };
-    
+
     maxConcurrentUsers = mkOption {
       type = types.int;
       default = 10;
       description = "Maximum number of concurrent users for load testing";
     };
-    
+
     testInterval = mkOption {
       type = types.str;
       default = "daily";
       description = "Interval for automated load testing";
     };
-    
+
     enableContinuousLoad = mkOption {
       type = types.bool;
       default = false;
       description = "Enable continuous load testing";
     };
-    
+
     providers = mkOption {
       type = types.listOf types.str;
-      default = ["anthropic" "openai" "gemini" "ollama"];
+      default = [ "anthropic" "openai" "gemini" "ollama" ];
       description = "AI providers to test";
     };
-    
+
     testEndpoints = mkOption {
       type = types.listOf types.str;
       default = [
-        "http://localhost:9090/-/healthy"    # Prometheus
-        "http://localhost:3001/api/health"   # Grafana
-        "http://localhost:11434/api/tags"    # Ollama
+        "http://localhost:9090/-/healthy" # Prometheus
+        "http://localhost:3001/api/health" # Grafana
+        "http://localhost:11434/api/tags" # Ollama
       ];
       description = "Service endpoints to load test";
     };
-    
+
     loadTestProfiles = mkOption {
       type = types.attrs;
       default = {
@@ -74,19 +75,19 @@ in {
       };
       description = "Load testing profiles with different intensities";
     };
-    
+
     alertThresholds = mkOption {
       type = types.attrs;
       default = {
-        responseTime = 5000;      # 5 seconds
-        errorRate = 5;            # 5% error rate
-        throughput = 10;          # 10 requests per second minimum
-        cpuUsage = 80;            # 80% CPU usage
-        memoryUsage = 85;         # 85% memory usage
+        responseTime = 5000; # 5 seconds
+        errorRate = 5; # 5% error rate
+        throughput = 10; # 10 requests per second minimum
+        cpuUsage = 80; # 80% CPU usage
+        memoryUsage = 85; # 85% memory usage
       };
       description = "Alert thresholds for load testing metrics";
     };
-    
+
     reportPath = mkOption {
       type = types.str;
       default = "/var/lib/ai-analysis/load-test-reports";
@@ -100,7 +101,7 @@ in {
       description = "AI Provider Load Testing Service";
       after = [ "network.target" ];
       wants = [ "network.target" ];
-      
+
       serviceConfig = {
         Type = "oneshot";
         User = "root";
@@ -524,7 +525,7 @@ in {
       description = "AI Continuous Load Testing Service";
       after = [ "network.target" ];
       wants = [ "network.target" ];
-      
+
       serviceConfig = {
         Type = "simple";
         User = "root";
@@ -576,7 +577,7 @@ in {
       description = "AI Load Test Profiles Service";
       after = [ "network.target" ];
       wants = [ "network.target" ];
-      
+
       serviceConfig = {
         Type = "oneshot";
         User = "root";
@@ -687,7 +688,7 @@ in {
     environment.systemPackages = [
       pkgs.curl
       pkgs.jq
-      
+
       (pkgs.writeShellScriptBin "ai-load-test" ''
         #!/bin/bash
         
@@ -723,7 +724,7 @@ in {
             ;;
         esac
       '')
-      
+
       (pkgs.writeShellScriptBin "ai-load-test-status" ''
         #!/bin/bash
         
@@ -747,7 +748,7 @@ in {
         echo "Load Test Logs (last 20 lines):"
         tail -20 /var/log/ai-analysis/load-testing.log 2>/dev/null || echo "No load test logs found"
       '')
-      
+
       (pkgs.writeShellScriptBin "ai-load-test-report" ''
         #!/bin/bash
         

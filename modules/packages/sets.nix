@@ -1,8 +1,7 @@
 # Consolidated package sets for performance optimization
 # This reduces redundant package declarations across modules
-{
-  pkgs,
-  ...
+{ pkgs
+, ...
 }: {
   # Core system packages - always needed
   core = with pkgs; [
@@ -15,11 +14,11 @@
     which
     tree
     file
-    
+
     # Network utilities  
     iproute2
     inetutils
-    
+
     # Basic tools
     git
     curl

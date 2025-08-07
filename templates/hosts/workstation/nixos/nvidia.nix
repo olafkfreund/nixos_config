@@ -11,7 +11,7 @@
     open = false; # Use proprietary driver (better for gaming/AI)
     nvidiaSettings = true; # GUI settings tool
     package = config.boot.kernelPackages.nvidiaPackages.latest;
-    
+
     # Prime.offload for laptops with dual GPUs (uncomment if needed)
     # prime = {
     #   offload = {
@@ -31,21 +31,21 @@
       # CUDA support for AI workloads
       cudaPackages.cudatoolkit
       cudaPackages.cudnn
-      
+
       # Vulkan support
       vulkan-validation-layers
       vulkan-loader
       vulkan-tools
-      
+
       # Video acceleration
       libva-vdpau-driver
       nvidia-vaapi-driver
       vaapiVdpau
-      
+
       # OpenGL and compute
       libGL
       libGLU
-      
+
       # NVIDIA specific
       nvidia-vaapi-driver
     ];
@@ -54,31 +54,31 @@
   # Environment packages for NVIDIA development
   environment.systemPackages = with pkgs; [
     # NVIDIA utilities
-    nvtopPackages.nvidia      # GPU monitoring
-    nvidia-system-monitor-qt  # GUI monitoring
-    
+    nvtopPackages.nvidia # GPU monitoring
+    nvidia-system-monitor-qt # GUI monitoring
+
     # CUDA development tools
-    cudaPackages.cuda_nvcc    # NVCC compiler
-    cudaPackages.cuda_gdb     # CUDA debugger
+    cudaPackages.cuda_nvcc # NVCC compiler
+    cudaPackages.cuda_gdb # CUDA debugger
     cudaPackages.nsight_compute # Profiling
     cudaPackages.nsight_systems # System analysis
-    
+
     # Deep learning libraries
     cudaPackages.cudnn
     cudaPackages.cutensor
     cudaPackages.nccl
-    
+
     # Video utilities
-    libva-utils              # VA-API utilities
-    vdpauinfo               # VDPAU information
-    
+    libva-utils # VA-API utilities
+    vdpauinfo # VDPAU information
+
     # Vulkan utilities
     vulkan-tools
     vulkan-validation-layers
-    
+
     # Performance monitoring
     nvtopPackages.nvidia
-    gwe                     # GPU control GUI
+    gwe # GPU control GUI
   ];
 
   # Environment variables for CUDA
@@ -86,17 +86,17 @@
     CUDA_PATH = "${pkgs.cudaPackages.cudatoolkit}";
     CUDA_ROOT = "${pkgs.cudaPackages.cudatoolkit}";
     CUDNN_PATH = "${pkgs.cudaPackages.cudnn}";
-    
+
     # OpenGL and video
     LIBVA_DRIVER_NAME = "nvidia";
     VDPAU_DRIVER = "nvidia";
     GBM_BACKEND = "nvidia-drm";
     __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-    
+
     # Wayland compatibility
     WLR_NO_HARDWARE_CURSORS = "1";
     NIXOS_OZONE_WL = "1";
-    
+
     # Gaming optimizations
     __GL_SHADER_DISK_CACHE = "1";
     __GL_SHADER_DISK_CACHE_PATH = "/tmp/nvidia-shader-cache";
@@ -111,17 +111,17 @@
 
   # Load NVIDIA kernel modules
   boot.kernelModules = [ "nvidia" "nvidia_uvm" "nvidia_drm" "nvidia_modeset" ];
-  
+
   # Kernel parameters for NVIDIA
   boot.kernelParams = [
     "nvidia.NVreg_PreserveVideoMemoryAllocations=1"
     "nvidia-drm.modeset=1"
     "nvidia-drm.fbdev=1"
-    
+
     # Gaming optimizations
     "nvidia.NVreg_UsePageAttributeTable=1"
     "nvidia.NVreg_InitializeSystemMemoryAllocations=0"
-    
+
     # Wayland support
     "nvidia_drm.modeset=1"
   ];
@@ -158,7 +158,7 @@
     isSystemUser = true;
     group = "nvidia-persistenced";
   };
-  users.groups.nvidia-persistenced = {};
+  users.groups.nvidia-persistenced = { };
 
   # Gaming optimizations with GameMode
   programs.gamemode = {
@@ -170,13 +170,13 @@
         inhibit_screensaver = 1;
         softrealtime = "auto";
       };
-      
+
       gpu = {
         apply_gpu_optimisations = "accept-responsibility";
         gpu_device = 0;
         nvidia_powerlimit = "max";
       };
-      
+
       custom = {
         start = "${pkgs.bash}/bin/bash -c 'nvidia-settings -a GPUPowerMizerMode=1'";
         end = "${pkgs.bash}/bin/bash -c 'nvidia-settings -a GPUPowerMizerMode=0'";
@@ -275,11 +275,11 @@
     nsight-compute
     nsight-systems
     cuda-samples
-    
+
     # Monitoring
     nvtopPackages.nvidia
     nvidia-system-monitor-qt
-    
+
     # Utilities
     nvidia-vaapi-driver
     libva-utils

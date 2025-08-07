@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.browsers.edge;
-in {
+in
+{
   options.browsers.edge = {
     enable = mkEnableOption {
       default = false;

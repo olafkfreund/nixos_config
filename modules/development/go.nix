@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs-unstable,
-  ...
+{ config
+, lib
+, pkgs-unstable
+, ...
 }:
 with lib; let
   cfg = config.go.development;
-in {
+in
+{
   options.go.development = {
     enable = mkEnableOption "Enable Go development environment";
     packages = mkOption {

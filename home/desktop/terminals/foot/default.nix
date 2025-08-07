@@ -1,12 +1,12 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
+{ pkgs
+, config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.foot;
-in {
+in
+{
   options.foot = {
     enable = mkEnableOption {
       default = false;

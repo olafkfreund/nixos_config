@@ -1,13 +1,13 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   username = "olafkfreund";
   cfg = config.services.print;
-in {
+in
+{
   options.services.print = {
     enable = mkEnableOption {
       default = false;
@@ -34,12 +34,12 @@ in {
     };
     hardware.sane = {
       enable = true;
-      extraBackends = [pkgs.hplip];
-      disabledDefaultBackends = ["escl"];
+      extraBackends = [ pkgs.hplip ];
+      disabledDefaultBackends = [ "escl" ];
     };
-    services.printing.drivers = [pkgs.hplip];
+    services.printing.drivers = [ pkgs.hplip ];
     programs.system-config-printer.enable = true;
-    users.users.${username}.extraGroups = ["scanner" "lp"];
+    users.users.${username}.extraGroups = [ "scanner" "lp" ];
     environment.systemPackages = [
       pkgs.hplip
       pkgs.xsane

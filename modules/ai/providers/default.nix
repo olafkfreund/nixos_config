@@ -1,11 +1,11 @@
-{
-  config,
-  lib,
-  ...
+{ config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.ai.providers;
-in {
+in
+{
   imports = [
     ./openai.nix
     ./anthropic.nix
@@ -19,7 +19,7 @@ in {
     enable = mkEnableOption "Enhanced AI provider support with unified interface";
 
     defaultProvider = mkOption {
-      type = types.enum ["openai" "anthropic" "gemini" "qwen" "ollama"];
+      type = types.enum [ "openai" "anthropic" "gemini" "qwen" "ollama" ];
       default = "openai";
       description = "Default AI provider to use";
       example = "anthropic";
@@ -58,7 +58,7 @@ in {
       };
       models = mkOption {
         type = types.listOf types.str;
-        default = ["gpt-4o" "gpt-4o-mini" "gpt-3.5-turbo"];
+        default = [ "gpt-4o" "gpt-4o-mini" "gpt-3.5-turbo" ];
         description = "Available OpenAI models";
       };
       defaultModel = mkOption {
@@ -77,7 +77,7 @@ in {
       };
       models = mkOption {
         type = types.listOf types.str;
-        default = ["claude-3-5-sonnet-20241022" "claude-3-5-haiku-20241022" "claude-3-opus-20240229"];
+        default = [ "claude-3-5-sonnet-20241022" "claude-3-5-haiku-20241022" "claude-3-opus-20240229" ];
         description = "Available Anthropic models";
       };
       defaultModel = mkOption {
@@ -96,7 +96,7 @@ in {
       };
       models = mkOption {
         type = types.listOf types.str;
-        default = ["gemini-1.5-pro" "gemini-1.5-flash" "gemini-2.0-flash-exp"];
+        default = [ "gemini-1.5-pro" "gemini-1.5-flash" "gemini-2.0-flash-exp" ];
         description = "Available Gemini models";
       };
       defaultModel = mkOption {
@@ -115,7 +115,7 @@ in {
       };
       models = mkOption {
         type = types.listOf types.str;
-        default = ["qwen-turbo" "qwen-plus" "qwen-max"];
+        default = [ "qwen-turbo" "qwen-plus" "qwen-max" ];
         description = "Available Qwen models";
       };
       defaultModel = mkOption {
@@ -134,7 +134,7 @@ in {
       };
       models = mkOption {
         type = types.listOf types.str;
-        default = ["mistral-small3.1" "GandalfBaum/llama3.2-claude3.7" "llama3.2"];
+        default = [ "mistral-small3.1" "GandalfBaum/llama3.2-claude3.7" "llama3.2" ];
         description = "Available Ollama models";
       };
       defaultModel = mkOption {
@@ -165,56 +165,61 @@ in {
       costOptimization = cfg.costOptimization;
       timeout = cfg.timeout;
       maxRetries = cfg.maxRetries;
-      
+
       providers = lib.filterAttrs (_name: value: value != null) {
-        openai = if cfg.openai.enable then {
-          enabled = true;
-          priority = cfg.openai.priority;
-          models = cfg.openai.models;
-          defaultModel = cfg.openai.defaultModel;
-          apiKeyFile = "/run/agenix/api-openai";
-          baseUrl = "https://api.openai.com/v1";
-          requiresApiKey = true;
-        } else null;
-        
-        anthropic = if cfg.anthropic.enable then {
-          enabled = true;
-          priority = cfg.anthropic.priority;
-          models = cfg.anthropic.models;
-          defaultModel = cfg.anthropic.defaultModel;
-          apiKeyFile = "/run/agenix/api-anthropic";
-          baseUrl = "https://api.anthropic.com";
-          requiresApiKey = true;
-        } else null;
-        
-        gemini = if cfg.gemini.enable then {
-          enabled = true;
-          priority = cfg.gemini.priority;
-          models = cfg.gemini.models;
-          defaultModel = cfg.gemini.defaultModel;
-          apiKeyFile = "/run/agenix/api-gemini";
-          baseUrl = "https://generativelanguage.googleapis.com/v1beta";
-          requiresApiKey = true;
-        } else null;
-        
-        qwen = if cfg.qwen.enable then {
-          enabled = true;
-          priority = cfg.qwen.priority;
-          models = cfg.qwen.models;
-          defaultModel = cfg.qwen.defaultModel;
-          apiKeyFile = "/run/agenix/api-qwen";
-          baseUrl = "https://dashscope.aliyuncs.com/api/v1";
-          requiresApiKey = true;
-        } else null;
-        
-        ollama = if cfg.ollama.enable then {
-          enabled = true;
-          priority = cfg.ollama.priority;
-          models = cfg.ollama.models;
-          defaultModel = cfg.ollama.defaultModel;
-          baseUrl = "http://${cfg.ollama.host}";
-          requiresApiKey = false;
-        } else null;
+        openai =
+          if cfg.openai.enable then {
+            enabled = true;
+            priority = cfg.openai.priority;
+            models = cfg.openai.models;
+            defaultModel = cfg.openai.defaultModel;
+            apiKeyFile = "/run/agenix/api-openai";
+            baseUrl = "https://api.openai.com/v1";
+            requiresApiKey = true;
+          } else null;
+
+        anthropic =
+          if cfg.anthropic.enable then {
+            enabled = true;
+            priority = cfg.anthropic.priority;
+            models = cfg.anthropic.models;
+            defaultModel = cfg.anthropic.defaultModel;
+            apiKeyFile = "/run/agenix/api-anthropic";
+            baseUrl = "https://api.anthropic.com";
+            requiresApiKey = true;
+          } else null;
+
+        gemini =
+          if cfg.gemini.enable then {
+            enabled = true;
+            priority = cfg.gemini.priority;
+            models = cfg.gemini.models;
+            defaultModel = cfg.gemini.defaultModel;
+            apiKeyFile = "/run/agenix/api-gemini";
+            baseUrl = "https://generativelanguage.googleapis.com/v1beta";
+            requiresApiKey = true;
+          } else null;
+
+        qwen =
+          if cfg.qwen.enable then {
+            enabled = true;
+            priority = cfg.qwen.priority;
+            models = cfg.qwen.models;
+            defaultModel = cfg.qwen.defaultModel;
+            apiKeyFile = "/run/agenix/api-qwen";
+            baseUrl = "https://dashscope.aliyuncs.com/api/v1";
+            requiresApiKey = true;
+          } else null;
+
+        ollama =
+          if cfg.ollama.enable then {
+            enabled = true;
+            priority = cfg.ollama.priority;
+            models = cfg.ollama.models;
+            defaultModel = cfg.ollama.defaultModel;
+            baseUrl = "http://${cfg.ollama.host}";
+            requiresApiKey = false;
+          } else null;
       };
     };
 

@@ -1,7 +1,6 @@
-{
-  config,
-  lib,
-  ...
+{ config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.desktop.zathura;
@@ -19,7 +18,8 @@ with lib; let
     blue = "#83a598";
     orange = "#fe8019";
   };
-in {
+in
+{
   options.desktop.zathura = {
     enable = mkEnableOption "zathura document viewer";
   };

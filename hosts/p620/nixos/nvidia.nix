@@ -1,18 +1,17 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
+{ config
+, pkgs
+, lib
+, ...
 }: {
   # Hybrid setup: AMD primary for display, NVIDIA for compute/AI only
   # Do NOT add NVIDIA to videoDrivers - keep AMD as primary display
-  
+
   hardware.nvidia = {
     modesetting.enable = true;
     powerManagement.enable = false;
     nvidiaPersistenced = true;
     open = false;
-    nvidiaSettings = false;  # No GUI settings needed for AI workloads
+    nvidiaSettings = false; # No GUI settings needed for AI workloads
     package = config.boot.kernelPackages.nvidiaPackages.latest;
   };
 
@@ -24,12 +23,12 @@
       # CUDA support for AI workloads (toolkit only to avoid LICENSE conflicts)
       cudaPackages.cudatoolkit
       # Note: cuDNN installed separately via systemPackages to avoid LICENSE conflicts
-      
+
       # Vulkan support (useful for some AI frameworks)
       vulkan-validation-layers
       vulkan-loader
       vulkan-tools
-      
+
       # Video acceleration (minimal set)
       libva-vdpau-driver
       nvidia-vaapi-driver
@@ -40,14 +39,14 @@
   environment.systemPackages = with pkgs; [
     # NVIDIA utilities (nvidia-smi comes with the driver)
     nvtopPackages.nvidia
-    
+
     # CUDA development tools
     cudaPackages.cuda_nvcc
     cudaPackages.cuda_gdb
-    
+
     # Deep learning libraries (separate from graphics to avoid LICENSE conflicts)
     cudaPackages.cudnn
-    
+
     # Performance monitoring
     libva-utils
   ];
@@ -65,7 +64,7 @@
 
   # Load NVIDIA kernel modules for compute/AI (not display)
   boot.kernelModules = [ "nvidia" "nvidia_uvm" ];
-  
+
   # Kernel parameters for compute-only operation
   boot.kernelParams = [
     "nvidia.NVreg_PreserveVideoMemoryAllocations=1"

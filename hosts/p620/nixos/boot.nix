@@ -1,23 +1,22 @@
-{
-  pkgs,
-  ...
+{ pkgs
+, ...
 }: {
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages_latest; # Use the beta kernel for better hardware support
   boot.plymouth.enable = true;
-  
+
   # Configure tmpfs size for large builds
   boot.tmp = {
     useTmpfs = true;
-    tmpfsSize = "16G";  # Allocate 16GB of RAM for /tmp
+    tmpfsSize = "16G"; # Allocate 16GB of RAM for /tmp
   };
   # This is for OBS Virtual Cam Support - v4l2loopback setup
   # boot.kernelPackages = pkgs.linuxPackages_default;
   # boot.kernelModules = ["v4l2loopback"];
-  boot.initrd.kernelModules = ["amdgpu"];
-  boot.blacklistedKernelModules = ["nvidia" "nouveau"];
+  boot.initrd.kernelModules = [ "amdgpu" ];
+  boot.blacklistedKernelModules = [ "nvidia" "nouveau" ];
   boot.kernelParams = [
     "amdgpu.gpu_recovery=1"
     "amd_iommu=on"

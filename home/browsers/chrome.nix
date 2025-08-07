@@ -1,12 +1,12 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
+{ pkgs
+, config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.browsers.chrome;
-in {
+in
+{
   options.browsers.chrome = {
     enable = mkEnableOption "Google Chrome";
   };
@@ -34,7 +34,7 @@ in {
 
         # CRITICAL FIX: Disable VizDisplayCompositor to fix page loading on Hyprland
         "--disable-features=VizDisplayCompositor"
-        
+
         # Fix zygote/sandbox error - comprehensive sandbox fixes
         "--no-zygote"
         "--no-sandbox"
@@ -44,7 +44,7 @@ in {
         "--disable-background-timer-throttling"
         "--disable-backgrounding-occluded-windows"
         "--disable-renderer-backgrounding"
-        
+
         # Memory and process management
         "--memory-pressure-off"
         "--max_old_space_size=4096"

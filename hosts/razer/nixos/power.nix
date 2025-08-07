@@ -1,7 +1,6 @@
-{
-  pkgs,
-  lib,
-  ...
+{ pkgs
+, lib
+, ...
 }: {
   # Thermal and power management services
   services = {
@@ -55,7 +54,7 @@
     cpuFreqGovernor = lib.mkForce "ondemand"; # Changed from "powersave" to prevent input device issues
     powertop.enable = lib.mkForce false; # Disabled - was causing USB device suspensions
   };
-  
+
   # Disable USB autosuspend to prevent keyboard/mouse from turning off
   boot.kernelParams = [
     "mem_sleep_default=deep" # Prefer deep sleep modes
@@ -75,8 +74,8 @@
     # Add sleep hooks to handle hardware properly during sleep/resume
     services.fix-suspend-issues = {
       description = "Fix issues when resuming from suspend";
-      wantedBy = ["suspend.target" "hibernate.target" "hybrid-sleep.target"];
-      after = ["suspend.target" "hibernate.target" "hybrid-sleep.target"];
+      wantedBy = [ "suspend.target" "hibernate.target" "hybrid-sleep.target" ];
+      after = [ "suspend.target" "hibernate.target" "hybrid-sleep.target" ];
       script = ''
         # Reset USB devices if needed
         ${pkgs.usbutils}/bin/usb-devices > /dev/null
@@ -100,7 +99,7 @@
         RemainAfterExit = true;
       };
     };
-    
+
     # Service to prevent USB input devices from suspending
     services.keep-usb-input-active = {
       description = "Keep USB input devices (keyboard/mouse) active";

@@ -4,125 +4,126 @@
 with lib;
 let
   cfg = config.networking.performanceTuning;
-in {
+in
+{
   options.networking.performanceTuning = {
     enable = mkEnableOption "Enable network performance tuning";
-    
+
     profile = mkOption {
-      type = types.enum ["latency" "throughput" "balanced"];
+      type = types.enum [ "latency" "throughput" "balanced" ];
       default = "balanced";
       description = "Network optimization profile";
     };
-    
+
     tcpOptimization = {
       enable = mkEnableOption "Enable TCP optimization";
-      
+
       congestionControl = mkOption {
         type = types.str;
         default = "bbr";
         description = "TCP congestion control algorithm";
       };
-      
+
       windowScaling = mkOption {
         type = types.bool;
         default = true;
         description = "Enable TCP window scaling";
       };
-      
+
       fastOpen = mkOption {
         type = types.bool;
         default = true;
         description = "Enable TCP Fast Open";
       };
-      
+
       lowLatency = mkOption {
         type = types.bool;
         default = false;
         description = "Enable low latency TCP settings";
       };
     };
-    
+
     bufferOptimization = {
       enable = mkEnableOption "Enable buffer optimization";
-      
+
       receiveBuffer = mkOption {
         type = types.int;
-        default = 16777216;  # 16MB
+        default = 16777216; # 16MB
         description = "Maximum receive buffer size";
       };
-      
+
       sendBuffer = mkOption {
         type = types.int;
-        default = 16777216;  # 16MB
+        default = 16777216; # 16MB
         description = "Maximum send buffer size";
       };
-      
+
       autotuning = mkOption {
         type = types.bool;
         default = true;
         description = "Enable buffer autotuning";
       };
     };
-    
+
     interHostOptimization = {
       enable = mkEnableOption "Enable inter-host communication optimization";
-      
+
       hosts = mkOption {
         type = types.listOf types.str;
-        default = ["p620" "dex5550" "p510" "razer"];
+        default = [ "p620" "dex5550" "p510" "razer" ];
         description = "Hosts to optimize communication between";
       };
-      
+
       jumboFrames = mkOption {
         type = types.bool;
         default = false;
         description = "Enable jumbo frames for inter-host communication";
       };
-      
+
       routeOptimization = mkOption {
         type = types.bool;
         default = true;
         description = "Enable route optimization";
       };
     };
-    
+
     dnsOptimization = {
       enable = mkEnableOption "Enable DNS optimization";
-      
+
       caching = mkOption {
         type = types.bool;
         default = true;
         description = "Enable DNS caching";
       };
-      
+
       parallelQueries = mkOption {
         type = types.bool;
         default = true;
         description = "Enable parallel DNS queries";
       };
-      
+
       customServers = mkOption {
         type = types.listOf types.str;
-        default = ["1.1.1.1" "8.8.8.8"];
+        default = [ "1.1.1.1" "8.8.8.8" ];
         description = "Custom DNS servers for better performance";
       };
     };
-    
+
     monitoringOptimization = {
       enable = mkEnableOption "Enable monitoring traffic optimization";
-      
+
       compression = mkOption {
         type = types.bool;
         default = true;
         description = "Enable monitoring data compression";
       };
-      
+
       batchingInterval = mkOption {
         type = types.int;
-        default = 10;  # seconds
+        default = 10; # seconds
         description = "Metrics batching interval";
       };
-      
+
       prioritization = mkOption {
         type = types.bool;
         default = true;
@@ -138,16 +139,16 @@ in {
       after = [ "network.target" ];
       wants = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
-      
+
       # Add proper PATH for required tools
       path = with pkgs; [
-        iproute2      # ip, tc commands
-        inetutils     # ping command
-        systemd       # systemctl command
-        coreutils     # basic utilities
-        gawk          # awk command
+        iproute2 # ip, tc commands
+        inetutils # ping command
+        systemd # systemctl command
+        coreutils # basic utilities
+        gawk # awk command
       ];
-      
+
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
@@ -305,24 +306,24 @@ in {
         '';
       };
     };
-    
+
     # Network Performance Monitor
     systemd.services.network-performance-monitor = {
       description = "Network Performance Monitor";
       after = [ "network-performance-optimizer.service" ];
       wants = [ "network-performance-optimizer.service" ];
       wantedBy = [ "multi-user.target" ];
-      
+
       # Add proper PATH to avoid "command not found" errors
       path = with pkgs; [
-        gawk          # awk command
-        iproute2      # ss, ip commands
-        coreutils     # basic utilities
-        gnugrep       # grep command
-        inetutils     # ping command
-        time          # time command
+        gawk # awk command
+        iproute2 # ss, ip commands
+        coreutils # basic utilities
+        gnugrep # grep command
+        inetutils # ping command
+        time # time command
       ];
-      
+
       serviceConfig = {
         Type = "simple";
         User = "root";
@@ -384,7 +385,7 @@ in {
         '';
       };
     };
-    
+
     # Network tuning based on profile
     boot.kernel.sysctl = mkIf cfg.enable {
       # Core network settings (only set if not already defined by other modules)
@@ -392,7 +393,7 @@ in {
       "net.core.wmem_max" = mkDefault cfg.bufferOptimization.sendBuffer;
       "net.core.netdev_max_backlog" = mkDefault (if cfg.profile == "throughput" then 30000 else 5000);
       "net.core.netdev_budget" = mkDefault 600;
-      
+
       # TCP settings
       "net.ipv4.tcp_congestion_control" = mkDefault cfg.tcpOptimization.congestionControl;
       "net.ipv4.tcp_window_scaling" = mkDefault (if cfg.tcpOptimization.windowScaling then 1 else 0);
@@ -400,46 +401,46 @@ in {
       "net.ipv4.tcp_sack" = mkDefault 1;
       "net.ipv4.tcp_fack" = mkDefault 1;
       "net.ipv4.tcp_fastopen" = mkDefault (if cfg.tcpOptimization.fastOpen then 3 else 0);
-      
+
       # Buffer autotuning
-      "net.ipv4.tcp_rmem" = mkDefault (if cfg.bufferOptimization.autotuning 
-        then "4096 87380 ${toString cfg.bufferOptimization.receiveBuffer}"
-        else "4096 65536 16777216");
+      "net.ipv4.tcp_rmem" = mkDefault (if cfg.bufferOptimization.autotuning
+      then "4096 87380 ${toString cfg.bufferOptimization.receiveBuffer}"
+      else "4096 65536 16777216");
       "net.ipv4.tcp_wmem" = mkDefault (if cfg.bufferOptimization.autotuning
-        then "4096 65536 ${toString cfg.bufferOptimization.sendBuffer}"
-        else "4096 65536 16777216");
-        
+      then "4096 65536 ${toString cfg.bufferOptimization.sendBuffer}"
+      else "4096 65536 16777216");
+
       # Profile-specific optimizations
       "net.ipv4.tcp_slow_start_after_idle" = mkDefault (if cfg.profile == "latency" then 0 else 1);
       "net.ipv4.tcp_tw_reuse" = mkDefault (if cfg.profile == "latency" then 1 else 0);
       "net.ipv4.tcp_fin_timeout" = mkDefault (if cfg.profile == "latency" then 10 else 60);
-      
+
       # Connection tracking
       "net.netfilter.nf_conntrack_max" = mkDefault 262144;
       "net.ipv4.ip_local_port_range" = mkDefault "1024 65535";
-      
+
       # DNS optimization
       "net.ipv4.tcp_keepalive_time" = mkDefault 600;
       "net.ipv4.tcp_keepalive_intvl" = mkDefault 60;
       "net.ipv4.tcp_keepalive_probes" = mkDefault 3;
     };
-    
+
     # Network performance packages
     environment.systemPackages = with pkgs; [
-      iproute2     # ip, tc commands
-      ethtool      # Ethernet tool
-      iperf3       # Network performance testing
-      nettools     # Basic network tools
-      tcpdump      # Packet capture
+      iproute2 # ip, tc commands
+      ethtool # Ethernet tool
+      iperf3 # Network performance testing
+      nettools # Basic network tools
+      tcpdump # Packet capture
       wireshark-cli # Network analysis
-      mtr          # Network diagnostic tool
-      bandwhich    # Bandwidth monitoring
+      mtr # Network diagnostic tool
+      bandwhich # Bandwidth monitoring
     ];
-    
+
     # DNS configuration
     services.resolved = mkIf cfg.dnsOptimization.enable {
       enable = true;
-      dnssec = "false";  # Disable for performance
+      dnssec = "false"; # Disable for performance
       llmnr = "true";
       fallbackDns = cfg.dnsOptimization.customServers;
       extraConfig = ''
@@ -449,7 +450,7 @@ in {
         MulticastDNS=yes
       '';
     };
-    
+
     # Create directories
     systemd.tmpfiles.rules = [
       "d /var/lib/network-tuning 0755 root root -"

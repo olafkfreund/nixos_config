@@ -4,11 +4,12 @@ with lib;
 
 let
   cfg = config.features.email;
-in {
+in
+{
   config = mkIf (cfg.enable && cfg.neomutt.enable) {
     # Placeholder account configurations
     # These will be created as templates for now, actual OAuth2 setup comes later
-    
+
     environment.etc."neomutt/accounts/freundcloud.template" = {
       text = ''
         # Account configuration for olaf@freundcloud.com
@@ -36,7 +37,7 @@ in {
       '';
       mode = "0644";
     };
-    
+
     environment.etc."neomutt/accounts/gmail.template" = {
       text = ''
         # Account configuration for olaf.loken@gmail.com
@@ -64,7 +65,7 @@ in {
       '';
       mode = "0644";
     };
-    
+
     # Create basic signature templates
     environment.etc."neomutt/signatures/freundcloud.template" = {
       text = ''
@@ -74,7 +75,7 @@ in {
       '';
       mode = "0644";
     };
-    
+
     environment.etc."neomutt/signatures/gmail.template" = {
       text = ''
         --

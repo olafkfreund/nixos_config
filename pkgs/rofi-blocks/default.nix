@@ -1,15 +1,15 @@
-{
-  lib,
-  stdenv,
-  fetchFromGitHub,
-  pkg-config,
-  meson,
-  ninja,
-  rofi,
-  json-glib,
-  cairo,
-  glib,
-  makeWrapper,
+{ lib
+, stdenv
+, fetchFromGitHub
+, pkg-config
+, meson
+, ninja
+, rofi
+, json-glib
+, cairo
+, glib
+, makeWrapper
+,
 }:
 stdenv.mkDerivation rec {
   pname = "rofi-blocks";

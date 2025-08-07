@@ -6,17 +6,18 @@
 
 let
   vars = import ./variables.nix;
-in {
+in
+{
   imports = [
     # Hardware configuration (auto-generated)
     ./nixos/hardware-configuration.nix
-    
+
     # GPU configuration based on variables
     (if vars.gpu == "amd" then ./nixos/amd.nix
-     else if vars.gpu == "nvidia" then ./nixos/nvidia.nix
-     else if vars.gpu == "intel" then ./nixos/intel.nix
-     else ./nixos/none.nix)
-    
+    else if vars.gpu == "nvidia" then ./nixos/nvidia.nix
+    else if vars.gpu == "intel" then ./nixos/intel.nix
+    else ./nixos/none.nix)
+
     # Server-optimized modules
     ../../modules/server
     ../../modules/network
@@ -40,7 +41,7 @@ in {
       efi.canTouchEfiVariables = true;
       timeout = 3; # Quick boot for servers
     };
-    
+
     # Server-optimized kernel parameters
     kernelParams = [
       "quiet"
@@ -49,7 +50,7 @@ in {
       "rd.udev.log_level=3"
       "mitigations=auto"
     ];
-    
+
     # Enable KSM for memory efficiency
     kernel.sysctl = {
       "kernel.kptr_restrict" = 2;
@@ -76,10 +77,15 @@ in {
       "net.ipv4.conf.all.send_redirects" = 0;
       "net.ipv4.conf.default.send_redirects" = 0;
     };
-    
+
     # Disable initrd modules we don't need
     initrd.availableKernelModules = lib.mkForce [
-      "xhci_pci" "ehci_pci" "ahci" "usbhid" "usb_storage" "sd_mod"
+      "xhci_pci"
+      "ehci_pci"
+      "ahci"
+      "usbhid"
+      "usb_storage"
+      "sd_mod"
     ];
   };
 
@@ -165,7 +171,7 @@ in {
       enable = vars.features.monitoring.enable;
       mode = vars.features.monitoring.mode;
       serverHost = vars.features.monitoring.serverHost;
-      
+
       features = {
         nodeExporter = true;
         systemdExporter = true;
@@ -181,7 +187,7 @@ in {
         enable = vars.features.ai.enable;
         defaultProvider = vars.features.ai.defaultProvider;
         enableFallback = vars.features.ai.enableFallback;
-        
+
         openai.enable = vars.features.ai.openai;
         anthropic.enable = vars.features.ai.anthropic;
         gemini.enable = vars.features.ai.gemini;
@@ -242,7 +248,7 @@ in {
     # Use networkd for server-grade networking
     useNetworkd = true;
     dhcpcd.enable = false;
-    
+
     # Firewall configuration
     firewall = {
       enable = true;
@@ -253,10 +259,10 @@ in {
       logRefusedConnections = false; # Reduce log spam
       logRefusedPackets = false;
     };
-    
+
     # Host mappings for local services
     hosts = vars.network.hostMappings;
-    
+
     # Network interfaces
     interfaces = vars.network.interfaces;
   };
@@ -270,7 +276,7 @@ in {
         DHCP = "ipv4";
         IPv6AcceptRA = true;
         MulticastDNS = false; # Disable for servers
-        LLMNR = false;        # Disable for servers
+        LLMNR = false; # Disable for servers
       };
       dhcpV4Config = {
         RouteMetric = 10;
@@ -348,42 +354,42 @@ in {
     unzip
     tar
     gzip
-    
+
     # Network tools
-    bind          # dig, nslookup
-    iproute2      # ip command
-    ethtool       # Network interface tools
-    iperf3        # Network performance testing
-    mtr           # Network diagnostics
-    nmap          # Network scanner
-    
+    bind # dig, nslookup
+    iproute2 # ip command
+    ethtool # Network interface tools
+    iperf3 # Network performance testing
+    mtr # Network diagnostics
+    nmap # Network scanner
+
     # System monitoring
-    lm_sensors    # Hardware sensors
+    lm_sensors # Hardware sensors
     smartmontools # Disk health
-    sysstat       # System statistics
-    nethogs       # Network usage per process
-    iftop         # Network bandwidth usage
-    
+    sysstat # System statistics
+    nethogs # Network usage per process
+    iftop # Network bandwidth usage
+
     # Hardware tools
-    pciutils      # lspci
-    usbutils      # lsusb
-    util-linux    # Various utilities
-    procps        # ps, top, etc.
-    dmidecode     # Hardware information
-    
+    pciutils # lspci
+    usbutils # lsusb
+    util-linux # Various utilities
+    procps # ps, top, etc.
+    dmidecode # Hardware information
+
     # Security tools
-    fail2ban      # Intrusion prevention
-    logwatch      # Log analysis
-    rkhunter      # Rootkit hunter
-    
+    fail2ban # Intrusion prevention
+    logwatch # Log analysis
+    rkhunter # Rootkit hunter
+
     # Backup and archiving
-    borgbackup    # Deduplicating backup
-    duplicity     # Encrypted backup
-    rdiff-backup  # Incremental backup
-    
+    borgbackup # Deduplicating backup
+    duplicity # Encrypted backup
+    rdiff-backup # Incremental backup
+
     # Automation
-    ansible       # Configuration management
-    terraform     # Infrastructure as code
+    ansible # Configuration management
+    terraform # Infrastructure as code
   ];
 
   # Systemd service optimizations for servers
@@ -396,7 +402,7 @@ in {
       rtkit-daemon.enable = lib.mkForce false;
       alsa-state.enable = lib.mkForce false;
     };
-    
+
     # Server-optimized targets
     targets = {
       sleep.enable = false;
@@ -404,7 +410,7 @@ in {
       hibernate.enable = false;
       hybrid-sleep.enable = false;
     };
-    
+
     # Optimize journal for servers
     extraConfig = ''
       DefaultTimeoutStopSec=10s
@@ -426,17 +432,17 @@ in {
   security = {
     # Disable polkit for headless servers
     polkit.enable = lib.mkDefault false;
-    
+
     # Enable sudo with wheel group
     sudo = {
       enable = true;
       wheelNeedsPassword = true;
       execWheelOnly = true;
     };
-    
+
     # PAM configuration
     pam.services.sudo.requireWheel = true;
-    
+
     # Login limits for performance
     pam.loginLimits = [
       {
@@ -459,7 +465,7 @@ in {
     enable = lib.mkDefault false;
     doc.enable = lib.mkDefault false;
     info.enable = lib.mkDefault false;
-    man.enable = lib.mkDefault true;  # Keep man pages
+    man.enable = lib.mkDefault true; # Keep man pages
     nixos.enable = lib.mkDefault false;
   };
 
@@ -478,21 +484,21 @@ in {
       dates = "weekly";
       options = "--delete-older-than 30d";
     };
-    
+
     # Optimize store regularly
     optimise = {
       automatic = true;
       dates = [ "weekly" ];
     };
-    
+
     settings = {
       # Build settings for servers
       max-jobs = "auto";
       cores = 0;
-      
+
       # Experimental features
       experimental-features = [ "nix-command" "flakes" ];
-      
+
       # Binary cache settings
       trusted-users = [ "root" vars.userName ];
       substituters = vars.nix.substituters;
@@ -507,33 +513,33 @@ in {
       owner = vars.userName;
       group = "users";
     };
-    
+
     "user-password-root" = {
       file = ../../secrets/user-password-root.age;
       owner = "root";
       group = "root";
     };
-    
+
     # Tailscale auth key
     "tailscale-auth-key" = lib.mkIf vars.tailscale.enable {
       file = ../../secrets/tailscale-auth-key.age;
       owner = "root";
       group = "root";
     };
-    
+
     # AI provider API keys (if enabled)
     "api-openai" = lib.mkIf vars.features.ai.openai {
       file = ../../secrets/api-openai.age;
       owner = vars.userName;
       group = "users";
     };
-    
+
     "api-anthropic" = lib.mkIf vars.features.ai.anthropic {
       file = ../../secrets/api-anthropic.age;
       owner = vars.userName;
       group = "users";
     };
-    
+
     "api-gemini" = lib.mkIf vars.features.ai.gemini {
       file = ../../secrets/api-gemini.age;
       owner = vars.userName;

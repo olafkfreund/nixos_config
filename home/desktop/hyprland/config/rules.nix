@@ -1,16 +1,15 @@
 # Enhanced Hyprland Window Rules Configuration
 # Converted to native Nix configuration with feature flags and smart defaults
-{
-  lib,
-  host ? "default",
-  ...
+{ lib
+, host ? "default"
+, ...
 }:
 with lib; let
   # Import host-specific variables if available
   hostVars =
     if builtins.pathExists ../../../../hosts/${host}/variables.nix
     then import ../../../../hosts/${host}/variables.nix
-    else {};
+    else { };
 
   # Window management feature flags
   cfg = {
@@ -107,10 +106,11 @@ with lib; let
   screenHeight = hostVars.screenHeight or 1080;
 
   # Responsive sizing functions
-  mkSmartSize = percentage: conditions: let
-    width = toString (screenWidth * percentage / 100);
-    height = toString (screenHeight * percentage / 100);
-  in
+  mkSmartSize = percentage: conditions:
+    let
+      width = toString (screenWidth * percentage / 100);
+      height = toString (screenHeight * percentage / 100);
+    in
     mkRule "size ${width} ${height}" conditions;
 
   mkSmartFloat = percentage: conditions: [
@@ -130,16 +130,19 @@ with lib; let
 
   # Generate workspace assignments
   mkWorkspaceRules = assignments:
-    lib.flatten (lib.mapAttrsToList (
+    lib.flatten (lib.mapAttrsToList
+      (
         _category: apps:
-          lib.mapAttrsToList (
-            app: workspace:
-              mkWorkspace workspace "class:^(${app})$"
-          )
-          apps
+          lib.mapAttrsToList
+            (
+              app: workspace:
+                mkWorkspace workspace "class:^(${app})$"
+            )
+            apps
       )
       assignments);
-in {
+in
+{
   wayland.windowManager.hyprland.settings = {
     # Window rules using the modern windowrulev2 format
     windowrulev2 =
@@ -157,11 +160,11 @@ in {
       ]
       ++ lib.optionals cfg.terminals.float (lib.flatten [
         # Terminal emulators with smart sizing
-        (mkMultiRule "float" ["class:(alacritty)" "class:(kitty)" "class:(wezterm)" "class:(foot)"])
-        (mkMultiRule "size ${terminalSize.width} ${terminalSize.height}" ["class:(alacritty)" "class:(kitty)" "class:(wezterm)" "class:(foot)"])
+        (mkMultiRule "float" [ "class:(alacritty)" "class:(kitty)" "class:(wezterm)" "class:(foot)" ])
+        (mkMultiRule "size ${terminalSize.width} ${terminalSize.height}" [ "class:(alacritty)" "class:(kitty)" "class:(wezterm)" "class:(foot)" ])
       ])
       ++ lib.optionals (cfg.terminals.center && cfg.terminals.float) (lib.flatten [
-        (mkMultiRule "center" ["class:(alacritty)" "class:(kitty)" "class:(wezterm)" "class:(foot)"])
+        (mkMultiRule "center" [ "class:(alacritty)" "class:(kitty)" "class:(wezterm)" "class:(foot)" ])
       ])
       ++ lib.optionals (cfg.terminals.animations && cfg.terminals.float) [
         "animation slide left, class:^(foot)$"
@@ -600,7 +603,7 @@ in {
         # =============================================================================
       ]
       ++ lib.optionals cfg.workspaces.useSpecialWorkspaces
-      (mkWorkspaceRules cfg.workspaces.assignments)
+        (mkWorkspaceRules cfg.workspaces.assignments)
       ++ [
         # =============================================================================
         # ACCESSIBILITY AND SYSTEM UTILITIES

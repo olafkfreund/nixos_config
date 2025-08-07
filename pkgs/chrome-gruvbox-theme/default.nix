@@ -1,6 +1,6 @@
-{
-  lib,
-  stdenv,
+{ lib
+, stdenv
+,
 }:
 stdenv.mkDerivation {
   name = "chrome-gruvbox-theme";

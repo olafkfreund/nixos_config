@@ -1,6 +1,5 @@
-{
-  pkgs,
-  ...
+{ pkgs
+, ...
 }: {
   # System-wide optimization for Electron applications under Wayland
   environment = {

@@ -1,9 +1,8 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
-}: 
+{ pkgs
+, config
+, lib
+, ...
+}:
 with lib; let
   cfg = config.programs.kdeconnect;
   kdeconnect-cli = "${pkgs.kdePackages.kdeconnect-kde}/bin/kdeconnect-cli";
@@ -11,7 +10,8 @@ with lib; let
   script-fortune = pkgs.writeShellScriptBin "fortune" ''
     ${kdeconnect-cli} -d $(${kdeconnect-cli} --list-available --id-only) --ping-msg "$(${fortune})"
   '';
-in {
+in
+{
   options.programs.kdeconnect = {
     enable = mkEnableOption {
       default = false;

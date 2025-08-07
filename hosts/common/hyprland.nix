@@ -1,7 +1,6 @@
-{
-  pkgs,
-  config,
-  ...
+{ pkgs
+, config
+, ...
 }: {
   # Enable Hyprland window manager
   programs.hyprland = {
@@ -12,15 +11,15 @@
   # Proper XDG Portal setup for Hyprland
   xdg.portal = {
     enable = true;
-    extraPortals = [pkgs.xdg-desktop-portal-hyprland];
+    extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];
     config = {
       common = {
-        default = ["hyprland" "gtk"];
+        default = [ "hyprland" "gtk" ];
       };
       hyprland = {
-        default = ["hyprland" "gtk"];
-        "org.freedesktop.impl.portal.Secret" = ["gnome-keyring"];
-        "org.freedesktop.impl.portal.Screencast" = ["hyprland"];
+        default = [ "hyprland" "gtk" ];
+        "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
+        "org.freedesktop.impl.portal.Screencast" = [ "hyprland" ];
       };
     };
   };

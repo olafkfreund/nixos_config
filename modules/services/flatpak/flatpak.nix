@@ -1,14 +1,14 @@
 # Flatpak Application Management Module
 # Enables Flatpak with automatic Flathub repository setup
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.modules.services.flatpak;
-in {
+in
+{
   options.modules.services.flatpak = {
     enable = mkEnableOption "Flatpak application management";
 
@@ -43,10 +43,10 @@ in {
     # Automatic Flathub repository setup
     systemd.services.flatpak-repo = mkIf cfg.autoAddFlathub {
       description = "Add Flathub repository to Flatpak";
-      wantedBy = ["multi-user.target"];
-      after = ["network-online.target"];
-      wants = ["network-online.target"];
-      path = [pkgs.flatpak];
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
+      path = [ pkgs.flatpak ];
       serviceConfig = {
         Type = "oneshot";
         Restart = "on-failure";

@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.services.network-monitoring;
-in {
+in
+{
   options.services.network-monitoring = {
     enable = mkEnableOption "Network stability monitoring";
 
@@ -137,38 +137,38 @@ in {
     # Create a systemd service to run the monitoring script
     systemd.services.network-monitoring = {
       description = "Network Stability Monitoring Service";
-      documentation = ["https://github.com/olafkfreund/nixos-config/blob/main/doc/network-stability-guide.md"];
-      wants = ["network-online.target"];
-      after = ["network-online.target"];
-      wantedBy = ["multi-user.target"];
+      documentation = [ "https://github.com/olafkfreund/nixos-config/blob/main/doc/network-stability-guide.md" ];
+      wants = [ "network-online.target" ];
+      after = [ "network-online.target" ];
+      wantedBy = [ "multi-user.target" ];
 
       # Add proper ordering with stability helper when both are enabled
       serviceConfig = mkMerge [
-          {
-            Type = "simple";
-            ExecStart = "${pkgs.writeShellScriptBin "network-monitor" ""}/bin/network-monitor";
-            Restart = "on-failure";
-            RestartSec = "30s";
-            # Security hardening
-            ProtectSystem = "strict";
-            ProtectHome = true;
-            PrivateTmp = true;
-            # Create log directory with appropriate permissions
-            StateDirectory = "network-monitoring";
+        {
+          Type = "simple";
+          ExecStart = "${pkgs.writeShellScriptBin "network-monitor" ""}/bin/network-monitor";
+          Restart = "on-failure";
+          RestartSec = "30s";
+          # Security hardening
+          ProtectSystem = "strict";
+          ProtectHome = true;
+          PrivateTmp = true;
+          # Create log directory with appropriate permissions
+          StateDirectory = "network-monitoring";
 
-            # Resource management
-            CPUSchedulingPolicy = "idle";
-            IOSchedulingClass = "idle";
-            MemoryHigh = "75M";
-            MemoryMax = "100M";
+          # Resource management
+          CPUSchedulingPolicy = "idle";
+          IOSchedulingClass = "idle";
+          MemoryHigh = "75M";
+          MemoryMax = "100M";
 
-            # Provide better service isolation
-            PrivateDevices = true;
-            ProtectKernelTunables = true;
-            RestrictAddressFamilies = "AF_INET AF_INET6";
-            RestrictNamespaces = true;
-          }
-        ];
+          # Provide better service isolation
+          PrivateDevices = true;
+          ProtectKernelTunables = true;
+          RestrictAddressFamilies = "AF_INET AF_INET6";
+          RestrictNamespaces = true;
+        }
+      ];
     };
 
     # Create a directory for network monitoring logs

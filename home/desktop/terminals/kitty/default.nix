@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.kitty;
-in {
+in
+{
   options.kitty = {
     enable = mkEnableOption {
       default = false;

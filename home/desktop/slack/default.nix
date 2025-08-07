@@ -1,12 +1,12 @@
-{
-  lib,
-  config,
-  pkgs,
-  ...
+{ lib
+, config
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.programs.slack;
-in {
+in
+{
   options.programs.slack = {
     enable = mkEnableOption "Slack";
   };

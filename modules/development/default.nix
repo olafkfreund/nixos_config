@@ -1,4 +1,4 @@
-{ ...}: {
+{ ... }: {
   imports = [
     ./cargo.nix
     ./python.nix
@@ -11,5 +11,6 @@
     ./devbox.nix
     ./nodejs.nix
     ./github.nix
+    ./pre-commit.nix
   ];
 }

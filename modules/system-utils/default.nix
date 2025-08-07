@@ -1,4 +1,4 @@
-{...}: {
+{ ... }: {
   imports = [
     ./system_util.nix
     ./unpack.nix

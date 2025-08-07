@@ -1,5 +1,4 @@
-{
-  ...
+{ ...
 }: {
   # Fix USB mouse freezing by disabling autosuspend for Bluetooth devices
   services.udev.extraRules = ''
@@ -15,7 +14,7 @@
 
   # Alternative: Increase global USB autosuspend delay
   boot.kernelParams = [
-    "usbcore.autosuspend=30"  # Increase from 2 to 30 seconds
+    "usbcore.autosuspend=30" # Increase from 2 to 30 seconds
   ];
 
   # Bluetooth power management improvements

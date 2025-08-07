@@ -1,11 +1,12 @@
-{
-  lib,
-  buildNpmPackage,
-  fetchurl,
-  nodejs,
-  makeWrapper,
-  writeShellScriptBin,
-}: let
+{ lib
+, buildNpmPackage
+, fetchurl
+, nodejs
+, makeWrapper
+, writeShellScriptBin
+,
+}:
+let
   claudeCode = buildNpmPackage rec {
     pname = "claude-code";
     version = "1.0.70";
@@ -33,7 +34,7 @@
 
     dontNpmBuild = true;
 
-    nativeBuildInputs = [makeWrapper];
+    nativeBuildInputs = [ makeWrapper ];
 
     installPhase = ''
       runHook preInstall
@@ -87,7 +88,7 @@
       description = "Claude Code CLI tool";
       homepage = "https://github.com/anthropics/claude-code";
       license = licenses.mit;
-      maintainers = [];
+      maintainers = [ ];
       platforms = platforms.all;
     };
   };
@@ -128,7 +129,7 @@
     rm -rf "$TEMP_DIR"
   '';
 in
-  claudeCode
+claudeCode
   // {
-    inherit updateScript;
-  }
+  inherit updateScript;
+}

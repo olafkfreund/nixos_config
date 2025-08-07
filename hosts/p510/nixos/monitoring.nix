@@ -1,5 +1,4 @@
-{
-  ...
+{ ...
 }: {
   services = {
     grafana = {
@@ -115,7 +114,7 @@
       exporters = {
         node = {
           enable = true;
-          enabledCollectors = ["systemd" "processes"];
+          enabledCollectors = [ "systemd" "processes" ];
           port = 9100;
         };
       };
@@ -125,7 +124,7 @@
           job_name = "node";
           static_configs = [
             {
-              targets = ["localhost:9100"];
+              targets = [ "localhost:9100" ];
             }
           ];
         }
@@ -133,7 +132,7 @@
           job_name = "plex";
           static_configs = [
             {
-              targets = ["localhost:32400"];
+              targets = [ "localhost:32400" ];
             }
           ];
           metrics_path = "/metrics";
@@ -142,7 +141,7 @@
           job_name = "sonarr";
           static_configs = [
             {
-              targets = ["localhost:8989"];
+              targets = [ "localhost:8989" ];
             }
           ];
           metrics_path = "/metrics";
@@ -151,7 +150,7 @@
           job_name = "radarr";
           static_configs = [
             {
-              targets = ["localhost:7878"];
+              targets = [ "localhost:7878" ];
             }
           ];
           metrics_path = "/metrics";
@@ -160,7 +159,7 @@
           job_name = "tautulli";
           static_configs = [
             {
-              targets = ["localhost:8181"];
+              targets = [ "localhost:8181" ];
             }
           ];
           metrics_path = "/metrics";
@@ -195,7 +194,7 @@
             };
             relabel_configs = [
               {
-                source_labels = ["__journal__systemd_unit"];
+                source_labels = [ "__journal__systemd_unit" ];
                 target_label = "unit";
               }
             ];

@@ -1,12 +1,12 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
+{ pkgs
+, config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.desktop.walker;
-in {
+in
+{
   options.desktop.walker = {
     enable = mkEnableOption {
       default = false;
@@ -155,7 +155,7 @@ in {
 
     # Add auto-start for Sway if runAsService is enabled
     wayland.windowManager.sway.config.startup = mkIf (cfg.runAsService && config.wayland.windowManager.sway.enable) [
-      {command = "walker --gapplication-service";}
+      { command = "walker --gapplication-service"; }
     ];
 
     # Add a custom theme file for Gruvbox

@@ -4,48 +4,49 @@
 with lib;
 let
   cfg = config.ai.memoryOptimization;
-in {
+in
+{
   options.ai.memoryOptimization = {
     enable = mkEnableOption "Enable AI-powered memory optimization";
-    
+
     autoOptimize = mkOption {
       type = types.bool;
       default = false;
       description = "Enable automatic memory optimization";
     };
-    
+
     thresholds = {
       memoryWarning = mkOption {
         type = types.int;
         default = 80;
         description = "Memory usage percentage to trigger warnings";
       };
-      
+
       memoryCritical = mkOption {
         type = types.int;
         default = 90;
         description = "Memory usage percentage to trigger critical actions";
       };
-      
+
       diskWarning = mkOption {
         type = types.int;
         default = 80;
         description = "Disk usage percentage to trigger warnings";
       };
-      
+
       diskCritical = mkOption {
         type = types.int;
         default = 90;
         description = "Disk usage percentage to trigger critical actions";
       };
     };
-    
+
     nixStoreOptimization = mkOption {
       type = types.bool;
       default = true;
       description = "Enable Nix store optimization";
     };
-    
+
     logRotation = mkOption {
       type = types.bool;
       default = true;
@@ -66,11 +67,11 @@ in {
       description = "AI Memory Optimization Service";
       after = [ "network.target" ];
       wants = [ "network.target" ];
-      
+
       serviceConfig = {
         Type = "oneshot";
         User = "root";
-        
+
         ExecStart = pkgs.writeShellScript "ai-memory-optimization" ''
           #!/bin/bash
           
@@ -230,7 +231,7 @@ in {
           create = "0644 ai-analysis ai-analysis";
           postrotate = "systemctl reload-or-restart rsyslog || true";
         };
-        
+
         "/var/log/docker/*.log" = {
           frequency = "daily";
           rotate = 5;
@@ -240,7 +241,7 @@ in {
           notifempty = true;
           copytruncate = true;
         };
-        
+
         "/var/log/grafana/*.log" = {
           frequency = "daily";
           rotate = 14;
@@ -250,7 +251,7 @@ in {
           notifempty = true;
           copytruncate = true;
         };
-        
+
       };
     };
 
@@ -258,14 +259,14 @@ in {
     boot.kernel.sysctl = {
       # Reduce swappiness to prefer RAM over swap
       "vm.swappiness" = mkDefault 10;
-      
+
       # Increase cache pressure to free memory faster
       "vm.vfs_cache_pressure" = mkDefault 50;
-      
+
       # More aggressive memory overcommit
       "vm.overcommit_memory" = mkDefault 1;
       "vm.overcommit_ratio" = mkDefault 50;
-      
+
       # Dirty page management
       "vm.dirty_background_ratio" = mkDefault 5;
       "vm.dirty_ratio" = mkDefault 10;

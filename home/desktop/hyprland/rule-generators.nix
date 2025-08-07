@@ -1,6 +1,5 @@
 # Simplified Rule Generators
-{
-  ...
+{ ...
 }:
 {
   hyprland.ruleGenerators = {

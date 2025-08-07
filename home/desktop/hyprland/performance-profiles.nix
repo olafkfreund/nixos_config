@@ -1,6 +1,5 @@
 # Simplified Performance Profiles
-{
-  ...
+{ ...
 }:
 let
   profiles = {
@@ -14,7 +13,8 @@ let
       };
     };
   };
-in {
+in
+{
   hyprland.performanceProfiles = profiles;
   hyprland.getProfile = profileName: profiles.${profileName} or profiles.balanced;
 }

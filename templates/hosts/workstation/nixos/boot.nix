@@ -6,14 +6,14 @@
   boot.loader = {
     systemd-boot = {
       enable = true;
-      configurationLimit = 10;  # Keep last 10 generations
-      editor = false;           # Disable editor for security
+      configurationLimit = 10; # Keep last 10 generations
+      editor = false; # Disable editor for security
     };
     efi = {
       canTouchEfiVariables = true;
       efiSysMountPoint = "/boot";
     };
-    timeout = 3;  # Boot timeout in seconds
+    timeout = 3; # Boot timeout in seconds
   };
 
   # Alternative: GRUB configuration (uncomment if preferred)
@@ -28,17 +28,17 @@
   # };
 
   # Kernel selection
-  boot.kernelPackages = pkgs.linuxPackages_latest;  # Use latest kernel
+  boot.kernelPackages = pkgs.linuxPackages_latest; # Use latest kernel
   # Alternative: LTS kernel for stability
   # boot.kernelPackages = pkgs.linuxPackages;
 
   # Boot optimization
   boot.kernelParams = [
-    "quiet"                    # Quiet boot
-    "splash"                   # Show splash screen
-    "rd.systemd.show_status=false"  # Hide systemd status
-    "rd.udev.log_level=3"      # Reduce udev log level
-    "udev.log_priority=3"      # Reduce udev log priority
+    "quiet" # Quiet boot
+    "splash" # Show splash screen
+    "rd.systemd.show_status=false" # Hide systemd status
+    "rd.udev.log_level=3" # Reduce udev log level
+    "udev.log_priority=3" # Reduce udev log priority
   ];
 
   # Performance optimizations
@@ -49,15 +49,15 @@
     "net.ipv4.tcp_rmem" = "4096 65536 268435456";
     "net.ipv4.tcp_wmem" = "4096 65536 268435456";
     "net.ipv4.tcp_congestion_control" = "bbr";
-    
+
     # File system performance
-    "vm.swappiness" = 10;      # Reduce swap usage
-    "vm.dirty_ratio" = 15;     # Improve disk I/O
+    "vm.swappiness" = 10; # Reduce swap usage
+    "vm.dirty_ratio" = 15; # Improve disk I/O
     "vm.dirty_background_ratio" = 5;
-    
+
     # Memory management
-    "vm.max_map_count" = 2147483642;  # Increase for applications like games
-    
+    "vm.max_map_count" = 2147483642; # Increase for applications like games
+
     # Security hardening (optional)
     "kernel.dmesg_restrict" = 1;
     "kernel.kptr_restrict" = 2;
@@ -68,7 +68,7 @@
   # Tmpfs for /tmp (performance improvement)
   boot.tmp = {
     useTmpfs = true;
-    tmpfsSize = "50%";  # Use up to 50% of RAM for /tmp
+    tmpfsSize = "50%"; # Use up to 50% of RAM for /tmp
   };
 
   # Boot splash configuration
@@ -100,10 +100,10 @@
   # Initrd configuration
   boot.initrd = {
     supportedFilesystems = [ "ext4" "vfat" "xfs" "btrfs" ];
-    
+
     # Network support in initrd (for remote unlocking)
     network = {
-      enable = false;  # Set to true if you need network in initrd
+      enable = false; # Set to true if you need network in initrd
       # ssh = {
       #   enable = true;
       #   port = 2222;

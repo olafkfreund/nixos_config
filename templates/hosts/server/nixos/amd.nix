@@ -12,8 +12,8 @@
       rocmPackages.rocm-runtime
       rocmPackages.rocminfo
       rocmPackages.rocm-smi
-      rocmPackages.clr.icd      # ROCm OpenCL driver
-      
+      rocmPackages.clr.icd # ROCm OpenCL driver
+
       # Video acceleration (minimal)
       libva
       libvdpau-va-gl
@@ -23,14 +23,14 @@
   # Environment packages for AMD server monitoring
   environment.systemPackages = with pkgs; [
     # AMD monitoring and control
-    radeontop              # AMD GPU monitoring
-    rocmPackages.rocm-smi  # ROCm system management
-    rocmPackages.rocminfo  # ROCm information
-    
+    radeontop # AMD GPU monitoring
+    rocmPackages.rocm-smi # ROCm system management
+    rocmPackages.rocminfo # ROCm information
+
     # Development tools for compute workloads
-    rocmPackages.hip       # HIP runtime
-    rocmPackages.hipcc     # HIP compiler
-    
+    rocmPackages.hip # HIP runtime
+    rocmPackages.hipcc # HIP compiler
+
     # Performance profiling
     rocmPackages.rocprofiler
     rocmPackages.roctracer
@@ -40,17 +40,17 @@
   environment.variables = {
     # ROCm configuration
     ROC_ENABLE_PRE_VEGA = "1";
-    HCC_AMDGPU_TARGET = "gfx1100";  # Adjust based on your GPU
-    HSA_OVERRIDE_GFX_VERSION = "11.0.0";  # Adjust based on your GPU
-    
+    HCC_AMDGPU_TARGET = "gfx1100"; # Adjust based on your GPU
+    HSA_OVERRIDE_GFX_VERSION = "11.0.0"; # Adjust based on your GPU
+
     # OpenCL configuration
     OPENCL_VENDOR_PATH = "${pkgs.rocmPackages.clr.icd}/etc/OpenCL/vendors";
-    
+
     # Video acceleration (minimal)
     LIBVA_DRIVER_NAME = "radeonsi";
-    
+
     # Disable GUI-related variables
-    LIBGL_ALWAYS_SOFTWARE = "0";  # Hardware acceleration for compute
+    LIBGL_ALWAYS_SOFTWARE = "0"; # Hardware acceleration for compute
   };
 
   # Session variables for compute workloads
@@ -62,27 +62,27 @@
 
   # Kernel modules and parameters for server use
   boot.kernelModules = [ "amdgpu" ];
-  
+
   boot.kernelParams = [
     # AMD GPU specific parameters
-    "amdgpu.si_support=1"      # Southern Islands support
-    "amdgpu.cik_support=1"     # Sea Islands support
-    "radeon.si_support=0"      # Disable radeon for SI
-    "radeon.cik_support=0"     # Disable radeon for CIK
-    
+    "amdgpu.si_support=1" # Southern Islands support
+    "amdgpu.cik_support=1" # Sea Islands support
+    "radeon.si_support=0" # Disable radeon for SI
+    "radeon.cik_support=0" # Disable radeon for CIK
+
     # Performance and features for compute
-    "amdgpu.gpu_recovery=1"    # Enable GPU recovery
-    "amdgpu.ppfeaturemask=0xffffffff"  # Enable all PowerPlay features
-    
+    "amdgpu.gpu_recovery=1" # Enable GPU recovery
+    "amdgpu.ppfeaturemask=0xffffffff" # Enable all PowerPlay features
+
     # Memory management
-    "amdgpu.vm_fragment_size=9"  # Optimize VM fragments
-    
+    "amdgpu.vm_fragment_size=9" # Optimize VM fragments
+
     # Display configuration (minimal for servers)
-    "amdgpu.dc=1"              # Enable Display Core
-    "amdgpu.dpm=1"             # Enable Dynamic Power Management
-    
+    "amdgpu.dc=1" # Enable Display Core
+    "amdgpu.dpm=1" # Enable Dynamic Power Management
+
     # Server optimizations
-    "amdgpu.nomodeset=0"       # Allow modesetting for basic display
+    "amdgpu.nomodeset=0" # Allow modesetting for basic display
   ];
 
   # Kernel configuration for compute performance
@@ -90,7 +90,7 @@
     # Memory overcommit for large compute applications
     "vm.overcommit_memory" = 1;
     "vm.overcommit_ratio" = 100;
-    
+
     # GPU-related optimizations
     "dev.i915.perf_stream_paranoid" = 0;
   };
@@ -127,7 +127,7 @@
   hardware = {
     graphics.driSupport = true;
     graphics.driSupport32Bit = false; # Not needed for servers
-    
+
     # Disable unnecessary hardware for servers
     bluetooth.enable = lib.mkDefault false;
     pulseaudio.enable = lib.mkForce false;
@@ -200,7 +200,7 @@
     runtimes = {
       rocm = {
         path = "${pkgs.runc}/bin/runc";
-        runtimeArgs = [];
+        runtimeArgs = [ ];
       };
     };
   };
@@ -210,11 +210,11 @@
     # Disable GUI acceleration attempts
     { WLR_NO_HARDWARE_CURSORS = "1"; }
     { LIBGL_ALWAYS_SOFTWARE = "0"; } # Allow hardware for compute
-    
+
     # Optimize for compute workloads
     { AMD_DEBUG = ""; } # Disable debugging overhead
     { R600_DEBUG = ""; } # Disable debugging overhead
-    
+
     # Set compute-focused driver preferences
     { AMD_VULKAN_ICD = "RADV"; }
     { RADV_PERFTEST = ""; } # Disable experimental features for stability
@@ -235,7 +235,7 @@
 
   # Optimize for headless compute workloads
   boot.kernelParams = lib.mkAfter [
-    "amdgpu.runpm=0"           # Disable runtime PM for stability
-    "amdgpu.bapm=0"            # Disable bidirectional power management
+    "amdgpu.runpm=0" # Disable runtime PM for stability
+    "amdgpu.bapm=0" # Disable bidirectional power management
   ];
 }

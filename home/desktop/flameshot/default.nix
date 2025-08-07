@@ -1,12 +1,12 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
+{ pkgs
+, config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.desktop.screenshots.flameshot;
-in {
+in
+{
   options.desktop.screenshots.flameshot = {
     enable = mkEnableOption {
       default = false;
@@ -16,7 +16,7 @@ in {
   config = mkIf cfg.enable {
     services.flameshot = {
       enable = true;
-      package = pkgs.flameshot.override {enableWlrSupport = true;};
+      package = pkgs.flameshot.override { enableWlrSupport = true; };
       settings = {
         General = {
           showStartupLaunchMessage = false;

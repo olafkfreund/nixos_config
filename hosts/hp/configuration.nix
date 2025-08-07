@@ -1,11 +1,12 @@
-{
-  pkgs,
-  lib,
-  inputs,
-  ...
-}: let
+{ pkgs
+, lib
+, inputs
+, ...
+}:
+let
   vars = import ./variables.nix;
-in {
+in
+{
   imports = [
     inputs.microvm.nixosModules.host
 
@@ -94,7 +95,7 @@ in {
       "-nolisten tcp"
       "-dpi 96"
     ];
-    videoDrivers = ["${vars.gpu}"];
+    videoDrivers = [ "${vars.gpu}" ];
   };
 
   programs.sway = {
@@ -154,7 +155,7 @@ in {
   };
 
   users.defaultUserShell = pkgs.zsh;
-  environment.shells = with pkgs; [zsh];
+  environment.shells = with pkgs; [ zsh ];
   programs.zsh.enable = true;
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
@@ -176,6 +177,6 @@ in {
   hardware.nvidia-container-toolkit.enable = true;
   networking.firewall.enable = false;
   networking.nftables.enable = true;
-  networking.timeServers = ["pool.ntp.org"];
+  networking.timeServers = [ "pool.ntp.org" ];
   system.stateVersion = "24.11";
 }

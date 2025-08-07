@@ -1,12 +1,13 @@
-{
-  pkgs,
-  config,
-  lib,
-  hostUsers,
-  ...
-}: let
+{ pkgs
+, config
+, lib
+, hostUsers
+, ...
+}:
+let
   vars = import ./variables.nix;
-in {
+in
+{
   imports = [
     ./nixos/hardware-configuration.nix # Docker configuration
     ./nixos/screens.nix
@@ -158,7 +159,7 @@ in {
         "-nolisten tcp"
         "-dpi 96"
       ];
-      videoDrivers = [vars.gpu];
+      videoDrivers = [ vars.gpu ];
     };
 
     # Desktop environment
@@ -187,21 +188,21 @@ in {
   # Enable secrets management
   modules.security.secrets = {
     enable = true;
-    hostKeys = ["/etc/ssh/ssh_host_ed25519_key"];
-    userKeys = ["/home/${vars.username}/.ssh/id_ed25519"];
+    hostKeys = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    userKeys = [ "/home/${vars.username}/.ssh/id_ed25519" ];
   };
 
   users.users = lib.genAttrs hostUsers (username: {
     isNormalUser = true;
     description = "User ${username}";
-    extraGroups = ["wheel" "networkmanager"];
+    extraGroups = [ "wheel" "networkmanager" ];
     shell = pkgs.zsh;
     # Only use secret-managed password if the secret exists
     hashedPasswordFile =
       lib.mkIf
-      (config.modules.security.secrets.enable
-        && builtins.hasAttr "user-password-${username}" config.age.secrets)
-      config.age.secrets."user-password-${username}".path;
+        (config.modules.security.secrets.enable
+          && builtins.hasAttr "user-password-${username}" config.age.secrets)
+        config.age.secrets."user-password-${username}".path;
   });
 
   # Hardware and service specific configurations
@@ -214,6 +215,6 @@ in {
   };
   hardware.nvidia-container-toolkit.enable = vars.gpu == "nvidia";
 
-  nixpkgs.config.permittedInsecurePackages = ["olm-3.2.16" "python3.12-youtube-dl-2021.12.17"];
+  nixpkgs.config.permittedInsecurePackages = [ "olm-3.2.16" "python3.12-youtube-dl-2021.12.17" ];
   system.stateVersion = "25.11";
 }

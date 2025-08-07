@@ -12,7 +12,7 @@
     open = false; # Use proprietary driver for better compute support
     nvidiaSettings = false; # Disable GUI settings for servers
     package = config.boot.kernelPackages.nvidiaPackages.production; # Stable driver
-    
+
     # Disable Prime for servers (usually single GPU)
     prime.offload.enable = lib.mkForce false;
   };
@@ -25,11 +25,11 @@
       # CUDA support for compute workloads
       cudaPackages.cudatoolkit
       cudaPackages.cudnn
-      
+
       # Video acceleration (minimal)
       libva-vdpau-driver
       nvidia-vaapi-driver
-      
+
       # OpenGL for compute
       libGL
       libGLU
@@ -39,24 +39,24 @@
   # Environment packages for NVIDIA server development
   environment.systemPackages = with pkgs; [
     # NVIDIA utilities for servers
-    nvtopPackages.nvidia      # GPU monitoring
-    
+    nvtopPackages.nvidia # GPU monitoring
+
     # CUDA development tools
-    cudaPackages.cuda_nvcc    # NVCC compiler
-    cudaPackages.cuda_gdb     # CUDA debugger
+    cudaPackages.cuda_nvcc # NVCC compiler
+    cudaPackages.cuda_gdb # CUDA debugger
     cudaPackages.nsight_compute # Profiling
-    
+
     # Deep learning libraries
     cudaPackages.cudnn
     cudaPackages.cutensor
     cudaPackages.nccl
-    
+
     # Minimal video utilities
-    libva-utils              # VA-API utilities
-    vdpauinfo               # VDPAU information
-    
+    libva-utils # VA-API utilities
+    vdpauinfo # VDPAU information
+
     # System monitoring
-    nvidia-smi              # NVIDIA system management
+    nvidia-smi # NVIDIA system management
   ];
 
   # Environment variables for CUDA compute
@@ -64,19 +64,19 @@
     CUDA_PATH = "${pkgs.cudaPackages.cudatoolkit}";
     CUDA_ROOT = "${pkgs.cudaPackages.cudatoolkit}";
     CUDNN_PATH = "${pkgs.cudaPackages.cudnn}";
-    
+
     # Video acceleration (minimal)
     LIBVA_DRIVER_NAME = "nvidia";
     VDPAU_DRIVER = "nvidia";
-    
+
     # OpenGL for compute
     __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-    
+
     # Disable GUI-related optimizations
-    __GL_SHADER_DISK_CACHE = "0";  # Disable for servers
-    
+    __GL_SHADER_DISK_CACHE = "0"; # Disable for servers
+
     # Compute optimizations
-    CUDA_CACHE_DISABLE = "0";      # Enable CUDA cache
+    CUDA_CACHE_DISABLE = "0"; # Enable CUDA cache
     CUDA_CACHE_MAXSIZE = "1073741824"; # 1GB cache
   };
 
@@ -88,16 +88,16 @@
 
   # Load NVIDIA kernel modules for compute
   boot.kernelModules = [ "nvidia" "nvidia_uvm" "nvidia_drm" "nvidia_modeset" ];
-  
+
   # Kernel parameters optimized for server compute
   boot.kernelParams = [
     "nvidia.NVreg_PreserveVideoMemoryAllocations=1"
     "nvidia-drm.modeset=1"
-    
+
     # Compute optimizations
     "nvidia.NVreg_UsePageAttributeTable=1"
     "nvidia.NVreg_InitializeSystemMemoryAllocations=0"
-    
+
     # Server optimizations
     "nvidia.NVreg_TemporaryFilePath=/tmp"
     "nvidia.NVreg_EnablePCIeGen3=1"
@@ -136,7 +136,7 @@
     isSystemUser = true;
     group = "nvidia-persistenced";
   };
-  users.groups.nvidia-persistenced = {};
+  users.groups.nvidia-persistenced = { };
 
   # Disable gaming optimizations for servers
   programs.gamemode.enable = lib.mkForce false;
@@ -232,7 +232,7 @@
     runtimes = {
       nvidia = {
         path = "${pkgs.nvidia-docker}/bin/nvidia-container-runtime";
-        runtimeArgs = [];
+        runtimeArgs = [ ];
       };
     };
   };
@@ -242,11 +242,11 @@
     # Disable GUI-related variables
     { WLR_NO_HARDWARE_CURSORS = "1"; }
     { NIXOS_OZONE_WL = "0"; } # Disable Wayland for servers
-    
+
     # Optimize for compute workloads
     { NVIDIA_DRIVER_CAPABILITIES = "compute,utility"; }
     { NVIDIA_REQUIRE_CUDA = "cuda>=11.0"; }
-    
+
     # Set compute-focused configuration
     { __GL_SYNC_TO_VBLANK = "0"; } # Disable VSync for compute
     { __GL_ALLOW_UNOFFICIAL_PROTOCOL = "1"; }
@@ -257,7 +257,7 @@
     # Memory overcommit for large compute applications
     "vm.overcommit_memory" = 1;
     "vm.overcommit_ratio" = 100;
-    
+
     # NUMA optimizations for multi-GPU systems
     "kernel.numa_balancing" = 0;
   };

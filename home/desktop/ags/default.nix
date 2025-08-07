@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.programs.agspanel;
-in {
+in
+{
   options.programs.agspanel = {
     enable = mkEnableOption {
       default = false;

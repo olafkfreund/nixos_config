@@ -5,7 +5,8 @@ with lib;
 let
   cfg = config.features.email.auth.oauth2;
   emailCfg = config.features.email;
-in {
+in
+{
   options.features.email.auth.oauth2 = {
     enable = mkEnableOption "OAuth2 authentication for Gmail accounts";
 
@@ -15,7 +16,7 @@ in {
         description = "OAuth2 client ID for Gmail API access";
         default = "";
       };
-      
+
       clientSecretFile = mkOption {
         type = types.path;
         description = "Path to file containing OAuth2 client secret";
@@ -30,19 +31,19 @@ in {
             type = types.str;
             description = "Gmail account email address";
           };
-          
+
           refreshTokenFile = mkOption {
             type = types.path;
             description = "Path to file containing OAuth2 refresh token";
           };
-          
+
           accessTokenFile = mkOption {
             type = types.path;
             description = "Path to file containing OAuth2 access token";
           };
         };
       });
-      default = {};
+      default = { };
       description = "OAuth2 configuration for Gmail accounts";
     };
   };
@@ -50,9 +51,9 @@ in {
   config = mkIf (emailCfg.enable && cfg.enable) {
     # Install OAuth2 helper tools
     environment.systemPackages = with pkgs; [
-      oauth2ms  # OAuth2 Microsoft and Gmail helper
-      curl      # For API calls
-      jq        # JSON processing
+      oauth2ms # OAuth2 Microsoft and Gmail helper
+      curl # For API calls
+      jq # JSON processing
     ];
 
     # Create OAuth2 token refresh script
@@ -142,27 +143,29 @@ in {
     };
 
     # OAuth2 token refresh systemd service
-    systemd.services.neomutt-oauth2-refresh = mkIf (cfg.accounts != {}) {
+    systemd.services.neomutt-oauth2-refresh = mkIf (cfg.accounts != { }) {
       description = "Refresh OAuth2 tokens for NeoMutt Gmail accounts";
       serviceConfig = {
         Type = "oneshot";
         User = "olafkfreund";
-        ExecStart = let
-          refreshScript = pkgs.writeShellScript "refresh-all-tokens" ''
-            set -euo pipefail
-            ${concatStringsSep "\n" (mapAttrsToList (_name: account: ''
-              echo "Refreshing OAuth2 token for ${account.email}..."
-              /etc/neomutt/oauth2-refresh.sh "${account.email}" \
-                "${account.refreshTokenFile}" \
-                "${account.accessTokenFile}" || echo "Failed to refresh token for ${account.email}"
-            '') cfg.accounts)}
-          '';
-        in "${refreshScript}";
+        ExecStart =
+          let
+            refreshScript = pkgs.writeShellScript "refresh-all-tokens" ''
+              set -euo pipefail
+              ${concatStringsSep "\n" (mapAttrsToList (_name: account: ''
+                echo "Refreshing OAuth2 token for ${account.email}..."
+                /etc/neomutt/oauth2-refresh.sh "${account.email}" \
+                  "${account.refreshTokenFile}" \
+                  "${account.accessTokenFile}" || echo "Failed to refresh token for ${account.email}"
+              '') cfg.accounts)}
+            '';
+          in
+          "${refreshScript}";
       };
     };
 
     # Timer to refresh tokens every 30 minutes
-    systemd.timers.neomutt-oauth2-refresh = mkIf (cfg.accounts != {}) {
+    systemd.timers.neomutt-oauth2-refresh = mkIf (cfg.accounts != { }) {
       description = "Timer for OAuth2 token refresh";
       wantedBy = [ "timers.target" ];
       timerConfig = {

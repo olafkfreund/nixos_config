@@ -1,12 +1,12 @@
-{
-  lib,
-  config,
-  pkgs,
-  ...
+{ lib
+, config
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.programs.evince;
-in {
+in
+{
   options.programs.evince = {
     enable = mkEnableOption {
       default = false;
@@ -14,14 +14,14 @@ in {
     };
   };
   config = mkIf cfg.enable {
-    home.packages = [pkgs.evince];
+    home.packages = [ pkgs.evince ];
     xdg.mimeApps = {
       enable = true;
       associations.added = {
-        "application/pdf" = ["org.gnome.Evince.desktop"];
+        "application/pdf" = [ "org.gnome.Evince.desktop" ];
       };
       defaultApplications = {
-        "application/pdf" = ["org.gnome.Evince.desktop"];
+        "application/pdf" = [ "org.gnome.Evince.desktop" ];
       };
     };
   };

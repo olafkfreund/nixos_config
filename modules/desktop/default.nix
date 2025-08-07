@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{ pkgs, ... }: {
   imports = [
     ./hyprland-uwsm.nix
     ./desktop-common.nix
@@ -8,6 +8,6 @@
   environment.systemPackages = with pkgs; [
     adwaita-qt
     adwaita-qt6
-    wldash  # Moved from desktop/wldash/default.nix
+    wldash # Moved from desktop/wldash/default.nix
   ];
 }

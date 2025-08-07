@@ -8,26 +8,26 @@
     enable32Bit = true;
     extraPackages = with pkgs; [
       # AMD-specific packages
-      amdvlk                    # AMD Vulkan driver
-      rocmPackages.clr.icd      # ROCm OpenCL driver
-      
+      amdvlk # AMD Vulkan driver
+      rocmPackages.clr.icd # ROCm OpenCL driver
+
       # Video acceleration
       libva
       libva-vdpau-driver
       libvdpau-va-gl
       vaapiVdpau
-      
+
       # Vulkan support
       vulkan-validation-layers
       vulkan-loader
       vulkan-tools
-      
+
       # ROCm packages for AI/ML
       rocmPackages.rocm-runtime
       rocmPackages.rocminfo
       rocmPackages.rocm-smi
     ];
-    
+
     extraPackages32 = with pkgs.driversi686Linux; [
       amdvlk
     ];
@@ -36,23 +36,23 @@
   # Environment packages for AMD development and monitoring
   environment.systemPackages = with pkgs; [
     # AMD monitoring and control
-    radeontop              # AMD GPU monitoring
-    rocmPackages.rocm-smi  # ROCm system management
-    rocmPackages.rocminfo  # ROCm information
-    
+    radeontop # AMD GPU monitoring
+    rocmPackages.rocm-smi # ROCm system management
+    rocmPackages.rocminfo # ROCm information
+
     # Development tools
     rocmPackages.llvm.libcxx
-    rocmPackages.hip       # HIP runtime
-    rocmPackages.hipcc     # HIP compiler
-    
+    rocmPackages.hip # HIP runtime
+    rocmPackages.hipcc # HIP compiler
+
     # Vulkan utilities
     vulkan-tools
     vulkan-validation-layers
-    
+
     # Video utilities
-    libva-utils           # VA-API utilities
-    vdpauinfo            # VDPAU information
-    
+    libva-utils # VA-API utilities
+    vdpauinfo # VDPAU information
+
     # Performance profiling
     rocmPackages.rocprofiler
     rocmPackages.roctracer
@@ -62,16 +62,16 @@
   environment.variables = {
     # ROCm configuration
     ROC_ENABLE_PRE_VEGA = "1";
-    HCC_AMDGPU_TARGET = "gfx1100";  # Adjust based on your GPU
-    HSA_OVERRIDE_GFX_VERSION = "11.0.0";  # Adjust based on your GPU
-    
+    HCC_AMDGPU_TARGET = "gfx1100"; # Adjust based on your GPU
+    HSA_OVERRIDE_GFX_VERSION = "11.0.0"; # Adjust based on your GPU
+
     # OpenCL configuration
     OPENCL_VENDOR_PATH = "${pkgs.rocmPackages.clr.icd}/etc/OpenCL/vendors";
-    
+
     # Video acceleration
     LIBVA_DRIVER_NAME = "radeonsi";
     VDPAU_DRIVER = "radeonsi";
-    
+
     # Mesa configuration
     MESA_LOADER_DRIVER_OVERRIDE = "radeonsi";
     AMD_VULKAN_ICD = "RADV";
@@ -82,31 +82,31 @@
     # Development paths
     ROCM_PATH = "${pkgs.rocmPackages.rocm-runtime}";
     HIP_PATH = "${pkgs.rocmPackages.hip}";
-    
+
     # Library paths
     LD_LIBRARY_PATH = lib.mkAfter "${pkgs.rocmPackages.rocm-runtime}/lib:${pkgs.rocmPackages.hip}/lib";
   };
 
   # Kernel modules and parameters
   boot.kernelModules = [ "amdgpu" ];
-  
+
   boot.kernelParams = [
     # AMD GPU specific parameters
-    "amdgpu.si_support=1"      # Southern Islands support
-    "amdgpu.cik_support=1"     # Sea Islands support
-    "radeon.si_support=0"      # Disable radeon for SI
-    "radeon.cik_support=0"     # Disable radeon for CIK
-    
+    "amdgpu.si_support=1" # Southern Islands support
+    "amdgpu.cik_support=1" # Sea Islands support
+    "radeon.si_support=0" # Disable radeon for SI
+    "radeon.cik_support=0" # Disable radeon for CIK
+
     # Performance and features
-    "amdgpu.gpu_recovery=1"    # Enable GPU recovery
-    "amdgpu.ppfeaturemask=0xffffffff"  # Enable all PowerPlay features
-    
+    "amdgpu.gpu_recovery=1" # Enable GPU recovery
+    "amdgpu.ppfeaturemask=0xffffffff" # Enable all PowerPlay features
+
     # Memory management
-    "amdgpu.vm_fragment_size=9"  # Optimize VM fragments
-    
+    "amdgpu.vm_fragment_size=9" # Optimize VM fragments
+
     # Display configuration
-    "amdgpu.dc=1"              # Enable Display Core
-    "amdgpu.dpm=1"             # Enable Dynamic Power Management
+    "amdgpu.dc=1" # Enable Display Core
+    "amdgpu.dpm=1" # Enable Dynamic Power Management
   ];
 
   # Additional kernel configuration for gaming and performance
@@ -114,7 +114,7 @@
     # Gaming optimizations
     "dev.i915.perf_stream_paranoid" = 0;
     "kernel.split_lock_mitigate" = 0;
-    
+
     # Memory overcommit for large applications
     "vm.overcommit_memory" = 1;
     "vm.overcommit_ratio" = 100;
@@ -144,7 +144,7 @@
         inhibit_screensaver = 1;
         softrealtime = "auto";
       };
-      
+
       gpu = {
         apply_gpu_optimisations = "accept-responsibility";
         gpu_device = 0;
@@ -171,10 +171,10 @@
     # GPU scheduling
     graphics.driSupport = true;
     graphics.driSupport32Bit = true;
-    
+
     # Audio support
     pulseaudio.support32Bit = true;
-    
+
     # Bluetooth with A2DP support
     bluetooth = {
       enable = true;
@@ -233,7 +233,7 @@
   #   amdctl
   #   amdgpu-fan
   # ];
-  
+
   # systemd.services.amdgpu-fan = {
   #   enable = false; # Set to true if needed
   #   description = "AMD GPU Fan Control";

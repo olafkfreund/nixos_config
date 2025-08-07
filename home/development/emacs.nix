@@ -1,8 +1,7 @@
-{
-  lib,
-  pkgs,
-  config,
-  ...
+{ lib
+, pkgs
+, config
+, ...
 }: {
   programs.emacs = {
     enable = true;
@@ -123,7 +122,7 @@
   };
 
   # Ensure org-roam directory exists
-  home.activation.createOrgRoamDir = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  home.activation.createOrgRoamDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     $DRY_RUN_CMD mkdir -p $VERBOSE_ARG $HOME/org-roam
   '';
 

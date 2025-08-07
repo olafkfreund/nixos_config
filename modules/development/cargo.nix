@@ -1,17 +1,17 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.cargo.development;
-in {
+in
+{
   options.cargo.development = {
     enable = mkEnableOption "Enable Cargo development environment";
     packages = mkOption {
       type = with types; listOf str;
-      default = [];
+      default = [ ];
       description = "Packages to install for Cargo development";
     };
   };

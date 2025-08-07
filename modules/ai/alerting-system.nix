@@ -4,70 +4,71 @@
 with lib;
 let
   cfg = config.ai.alerting;
-in {
+in
+{
   options.ai.alerting = {
     enable = mkEnableOption "Enable advanced alerting and notification system";
-    
+
     enableEmail = mkOption {
       type = types.bool;
       default = true;
       description = "Enable email notifications";
     };
-    
+
     enableSlack = mkOption {
       type = types.bool;
       default = false;
       description = "Enable Slack notifications";
     };
-    
+
     enableSms = mkOption {
       type = types.bool;
       default = false;
       description = "Enable SMS notifications";
     };
-    
+
     enableDiscord = mkOption {
       type = types.bool;
       default = false;
       description = "Enable Discord notifications";
     };
-    
+
     smtpServer = mkOption {
       type = types.str;
       default = "smtp.gmail.com";
       description = "SMTP server for email notifications";
     };
-    
+
     smtpPort = mkOption {
       type = types.int;
       default = 587;
       description = "SMTP server port";
     };
-    
+
     fromEmail = mkOption {
       type = types.str;
       default = "ai-alerts@freundcloud.com";
       description = "From email address for notifications";
     };
-    
+
     alertRecipients = mkOption {
       type = types.listOf types.str;
-      default = ["admin@freundcloud.com"];
+      default = [ "admin@freundcloud.com" ];
       description = "Email recipients for alerts";
     };
-    
+
     slackWebhook = mkOption {
       type = types.str;
       default = "";
       description = "Slack webhook URL for notifications";
     };
-    
+
     discordWebhook = mkOption {
       type = types.str;
       default = "";
       description = "Discord webhook URL for notifications";
     };
-    
+
     alertLevels = mkOption {
       type = types.attrs;
       default = {
@@ -92,49 +93,49 @@ in {
       };
       description = "Alert level notification preferences";
     };
-    
+
     alertThresholds = mkOption {
       type = types.attrs;
       default = {
-        diskUsage = 85;           # Critical disk usage %
-        memoryUsage = 90;         # Critical memory usage %
-        cpuUsage = 85;            # Critical CPU usage %
-        aiResponseTime = 10000;   # Critical AI response time ms
-        sshFailedAttempts = 20;   # Critical SSH failed attempts
-        serviceDowntime = 300;    # Critical service downtime seconds
-        loadTestFailures = 50;    # Critical load test failure rate %
+        diskUsage = 85; # Critical disk usage %
+        memoryUsage = 90; # Critical memory usage %
+        cpuUsage = 85; # Critical CPU usage %
+        aiResponseTime = 10000; # Critical AI response time ms
+        sshFailedAttempts = 20; # Critical SSH failed attempts
+        serviceDowntime = 300; # Critical service downtime seconds
+        loadTestFailures = 50; # Critical load test failure rate %
       };
       description = "Alert threshold values";
     };
-    
+
     escalationRules = mkOption {
       type = types.attrs;
       default = {
         level1 = {
           timeMinutes = 5;
-          recipients = ["admin@freundcloud.com"];
-          channels = ["email"];
+          recipients = [ "admin@freundcloud.com" ];
+          channels = [ "email" ];
         };
         level2 = {
           timeMinutes = 15;
-          recipients = ["admin@freundcloud.com" "oncall@freundcloud.com"];
-          channels = ["email" "slack"];
+          recipients = [ "admin@freundcloud.com" "oncall@freundcloud.com" ];
+          channels = [ "email" "slack" ];
         };
         level3 = {
           timeMinutes = 30;
-          recipients = ["admin@freundcloud.com" "oncall@freundcloud.com" "emergency@freundcloud.com"];
-          channels = ["email" "slack" "sms"];
+          recipients = [ "admin@freundcloud.com" "oncall@freundcloud.com" "emergency@freundcloud.com" ];
+          channels = [ "email" "slack" "sms" ];
         };
       };
       description = "Alert escalation rules";
     };
-    
+
     maintenanceMode = mkOption {
       type = types.bool;
       default = false;
       description = "Enable maintenance mode (suppresses non-critical alerts)";
     };
-    
+
     alertSuppressionRules = mkOption {
       type = types.listOf types.str;
       default = [
@@ -145,13 +146,13 @@ in {
       ];
       description = "Alert suppression patterns";
     };
-    
+
     notificationRetries = mkOption {
       type = types.int;
       default = 3;
       description = "Number of notification retry attempts";
     };
-    
+
     notificationTimeout = mkOption {
       type = types.int;
       default = 30;
@@ -166,7 +167,7 @@ in {
       after = [ "network.target" ];
       wants = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
-      
+
       serviceConfig = {
         Type = "simple";
         User = "root";
@@ -574,7 +575,7 @@ in {
       description = "AI Alert Dashboard Service";
       after = [ "network.target" ];
       wants = [ "network.target" ];
-      
+
       serviceConfig = {
         Type = "oneshot";
         User = "root";
@@ -765,7 +766,7 @@ in {
     # Alert maintenance service
     systemd.services.ai-alert-maintenance = {
       description = "AI Alert Maintenance Service";
-      
+
       serviceConfig = {
         Type = "oneshot";
         User = "root";
@@ -864,12 +865,12 @@ in {
     environment.systemPackages = with pkgs; [
       curl
       jq
-      mailutils  # For sendmail
-      coreutils  # For hostname, free, etc.
-      procps     # For top, ps
-      gawk       # For awk
+      mailutils # For sendmail
+      coreutils # For hostname, free, etc.
+      procps # For top, ps
+      gawk # For awk
       util-linux # For additional utilities
-      
+
       (writeShellScriptBin "ai-alert-status" ''
         #!/bin/bash
         
@@ -914,7 +915,7 @@ in {
         echo "  Memory Usage: $(/run/current-system/sw/bin/free | grep Mem | /run/current-system/sw/bin/awk '{printf "%.1f%%", $3/$2 * 100.0}')"
         echo "  CPU Usage: $(/run/current-system/sw/bin/top -bn1 | grep "Cpu(s)" | /run/current-system/sw/bin/awk '{print $2}')"
       '')
-      
+
       (writeShellScriptBin "ai-alert-test" ''
         #!/bin/bash
         
@@ -946,7 +947,7 @@ in {
             ;;
         esac
       '')
-      
+
       (writeShellScriptBin "ai-alert-maintenance-mode" ''
         #!/bin/bash
         
@@ -973,7 +974,7 @@ in {
             ;;
         esac
       '')
-      
+
       (writeShellScriptBin "ai-alert-history" ''
         #!/bin/bash
         

@@ -1,6 +1,5 @@
-{
-  lib,
-  ...
+{ lib
+, ...
 }: {
   programs.obs.enable = lib.mkForce true;
   programs.kdeconnect.enable = lib.mkForce true;

@@ -1,12 +1,13 @@
-{
-  pkgs,
-  ...
-}: let
+{ pkgs
+, ...
+}:
+let
   # Define variables here
   username = "olafkfreund";
   k3sToken = "7j2hK6sVjkzN5sE8sF+pQyXlJd3w8bX0y5ZvX7K9KAo="; # Replace with your custom token
-in {
-  nix.settings.experimental-features = ["nix-command" "flakes"];
+in
+{
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
   imports = [
     ./microvm.nix
   ];
@@ -22,9 +23,9 @@ in {
     matchConfig.Type = "ether";
     matchConfig.MACAddress = "5E:6D:F8:D1:E8:2A";
     networkConfig = {
-      Address = ["192.168.1.203/24"];
+      Address = [ "192.168.1.203/24" ];
       Gateway = "192.168.1.254";
-      DNS = ["8.8.8.8" "1.1.1.1"];
+      DNS = [ "8.8.8.8" "1.1.1.1" ];
       IPv6AcceptRA = true;
       DHCP = "no";
     };
@@ -61,7 +62,7 @@ in {
   # Users
   users.users.${username} = {
     isNormalUser = true;
-    extraGroups = ["wheel"]; # Enable 'sudo' for the user.
+    extraGroups = [ "wheel" ]; # Enable 'sudo' for the user.
     initialHashedPassword = "$y$j9T$BG0c0RpL47BPIrgHJsNV.0$bbU2swVEq7wfL2NfKZXqs4gKD7LwDAMr7au1JlrEec1";
     openssh.authorizedKeys = [
       "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCMqMzUgRe2K350QBbQXbJFxVomsQbiIEw/ePUzjbyALklt5gMyo/yxbCWaKV1zeL4baR/vS5WOp9jytxceGFDaoJ7/O8yL4F2jj96Q5BKQOAz3NW/+Hmj/EemTOvVJWB1LQ+V7KgCbkxv6Zc
@@ -72,7 +73,7 @@ in {
   };
   # Nix settings
   nix.settings = {
-    trusted-users = ["root" username];
+    trusted-users = [ "root" username ];
   };
   security.sudo.wheelNeedsPassword = false;
   system.stateVersion = "24.11";

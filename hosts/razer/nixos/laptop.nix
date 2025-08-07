@@ -1,7 +1,6 @@
-{
-  lib,
-  pkgs,
-  ...
+{ lib
+, pkgs
+, ...
 }: {
   # Trackpad and input device optimization - using updated option names
   services.libinput = {
@@ -22,13 +21,13 @@
     bindings = [
       # Add key bindings for brightness control
       {
-        keys = [224];
-        events = ["key"];
+        keys = [ 224 ];
+        events = [ "key" ];
         command = "${pkgs.light}/bin/light -U 5";
       }
       {
-        keys = [225];
-        events = ["key"];
+        keys = [ 225 ];
+        events = [ "key" ];
         command = "${pkgs.light}/bin/light -A 5";
       }
     ];
@@ -48,7 +47,7 @@
   # Razer-specific utilities
   hardware.openrazer = {
     enable = true;
-    users = ["olafkfreund"]; # Adjust to your username
+    users = [ "olafkfreund" ]; # Adjust to your username
     syncEffectsEnabled = true;
     devicesOffOnScreensaver = true;
     batteryNotifier = {

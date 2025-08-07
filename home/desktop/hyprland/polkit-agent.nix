@@ -1,11 +1,11 @@
-{pkgs, ...}: {
+{ pkgs, ... }: {
   systemd.user.services.polkit-kde-authentication-agent-1 = {
     Unit.Description = "polkit-kde-authentication-agent-1";
 
     Install = {
-      WantedBy = ["graphical-session.target"];
-      Wants = ["graphical-session.target"];
-      After = ["graphical-session.target"];
+      WantedBy = [ "graphical-session.target" ];
+      Wants = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
     };
 
     Service = {
@@ -25,12 +25,12 @@
     Unit = {
       Description = "polkit-gnome-authentication-agent-1";
       # Make sure it doesn't conflict with KDE agent
-      Conflicts = ["polkit-kde-authentication-agent-1.service"];
+      Conflicts = [ "polkit-kde-authentication-agent-1.service" ];
     };
 
     Install = {
-      WantedBy = ["graphical-session.target"];
-      After = ["graphical-session.target"];
+      WantedBy = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
     };
 
     Service = {

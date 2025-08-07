@@ -1,14 +1,14 @@
 # System Font Configuration Module
 # Provides comprehensive font packages and fontconfig settings
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.modules.fonts;
-in {
+in
+{
   options.modules.fonts = {
     enable = mkEnableOption "comprehensive font configuration";
 
@@ -72,7 +72,7 @@ in {
       enableGhostscriptFonts = true;
       enableDefaultPackages = false;
 
-      packages = with pkgs; 
+      packages = with pkgs;
         # Core fonts
         optionals cfg.packages.core [
           corefonts
@@ -82,7 +82,7 @@ in {
           ubuntu_font_family
           noto-fonts-lgc-plus
         ] ++
-        
+
         # Programming fonts
         optionals cfg.packages.programming [
           fira
@@ -91,7 +91,7 @@ in {
           jetbrains-mono
           powerline-symbols
         ] ++
-        
+
         # Nerd Fonts
         optionals cfg.packages.nerdFonts [
           nerd-fonts.jetbrains-mono
@@ -99,13 +99,13 @@ in {
           nerd-fonts.symbols-only
           nerd-fonts.caskaydia-cove
         ] ++
-        
+
         # CJK fonts
         optionals cfg.packages.cjk [
           noto-fonts-cjk-sans
           texlivePackages.hebrew-fonts
         ] ++
-        
+
         # Icon fonts
         optionals cfg.packages.icons [
           font-awesome

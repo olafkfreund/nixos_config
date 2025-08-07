@@ -1,12 +1,13 @@
-{
-  pkgs,
-  ...
-}: let
+{ pkgs
+, ...
+}:
+let
   username = "olafkfreund";
   hostname = "nixvm";
   mac = "02:00:00:00:00:10"; # Unique MAC address
   ip = "192.168.1.210/24"; # Unique IP address
-in {
+in
+{
   # MicroVM configuration
   microvm = {
     enable = true;
@@ -85,9 +86,9 @@ in {
     networks."20-lan" = {
       matchConfig.Type = "ether";
       networkConfig = {
-        Address = [ip];
+        Address = [ ip ];
         Gateway = "192.168.1.254";
-        DNS = ["8.8.8.8" "8.8.4.4"];
+        DNS = [ "8.8.8.8" "8.8.4.4" ];
         IPv6AcceptRA = false;
         DHCP = "no";
       };
@@ -112,8 +113,8 @@ in {
   nix = {
     enable = true;
     settings = {
-      extra-experimental-features = ["nix-command" "flakes"];
-      trusted-users = ["root" username];
+      extra-experimental-features = [ "nix-command" "flakes" ];
+      trusted-users = [ "root" username ];
       auto-optimise-store = true;
     };
     gc = {
@@ -132,7 +133,7 @@ in {
   # User configuration
   users.users.${username} = {
     isNormalUser = true;
-    extraGroups = ["wheel" "networkmanager" "audio" "video" "docker"];
+    extraGroups = [ "wheel" "networkmanager" "audio" "video" "docker" ];
     initialPassword = "changeme";
     openssh.authorizedKeys.keys = [
       "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCMqMzUgRe2K350QBbQXbJFxVomsQbiIEw/ePUzjbyALklt5gMyo/yxbCWaKV1zeL4baR/vS5WOp9jytxceGFDaoJ7/O8yL4F2jj96Q5BKQOAz3NW/+Hmj/EemTOvVJWB1LQ+V7KgCbkxv6ZcUwL5a5+2QoujQNL5yVL3ZrIXv6LuKg8w8wykl57zDcJGgYsF+05oChswAmTFXI7hR5MdQgMGNM/eN78VZjSKJYGgeujoJg4BPQ6VE/qfIcJaPmuiiJBs0MDYIB8pKeSImXCDqYWEL6dZkSyro8HHHMAzFk1YP+pNIWVi8l3F+ajEFrEpTYKvdsZ4TiP/7CBaaI+0yVIq1mQ100AWeUiTn89iF8yqAgP8laLgMqZbM15Gm5UD7+g9/zsW0razyuclLogijvYRTMKt8vBa/rEfcx+qs8CuIrkXnD/KGfvoMDRgniWz8teaV1zfdDrkd6BhPVc5P3hI6gDY/xnSeijyyXL+XDE1ex6nfW5vNCwMiAWfDM+6k= olafkfreund@razer"
@@ -274,7 +275,7 @@ in {
     enable = true;
     allowReboot = false;
     flake = "github:olafkfreund/nixos_config";
-    flags = ["--update-input" "nixpkgs" "--no-write-lock-file"];
+    flags = [ "--update-input" "nixpkgs" "--no-write-lock-file" ];
   };
 
   # Automatic optimizations

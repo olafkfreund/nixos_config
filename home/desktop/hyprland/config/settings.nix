@@ -1,10 +1,9 @@
 # Hyprland Core Settings Configuration
 # Converted to native Nix configuration for better type safety and maintainability
-{
-  lib,
-  hyprlandFeatures ? {},
-  hyprlandTheme ? {},
-  ...
+{ lib
+, hyprlandFeatures ? { }
+, hyprlandTheme ? { }
+, ...
 }:
 with lib; let
   # Feature flags with fallback defaults
@@ -81,7 +80,8 @@ with lib; let
         ];
     };
   };
-in {
+in
+{
   wayland.windowManager.hyprland.settings = {
     # XWayland configuration
     xwayland = {

@@ -1,11 +1,11 @@
-{
-  lib,
-  config,
-  ...
+{ lib
+, config
+, ...
 }:
 with lib; let
   cfg = config.modules.desktop.common;
-in {
+in
+{
   options.modules.desktop.common = {
     enable = mkEnableOption "Common desktop environment configuration";
     enableHyprland = mkEnableOption "Enable Hyprland as the window manager";

@@ -1,6 +1,5 @@
-{
-  pkgs,
-  ...
+{ pkgs
+, ...
 }:
 pkgs.writeShellScriptBin "weather-popup" ''
   #!/usr/bin/env bash

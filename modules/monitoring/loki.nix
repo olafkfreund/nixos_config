@@ -1,14 +1,13 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.monitoring;
-  
+
   # Loki configuration
-  
+
   # Minimal Loki configuration that works with current version
   lokiConfigFile = pkgs.writeText "loki.yaml" ''
     auth_enabled: false
@@ -75,8 +74,9 @@ with lib; let
       filesystem:
         directory: /var/lib/loki/chunks
   '';
-  
-in {
+
+in
+{
   config = mkIf (cfg.enable && cfg.features.logging && (cfg.mode == "server" || cfg.mode == "standalone")) {
     # Loki service
     systemd.services.loki = {
@@ -90,19 +90,19 @@ in {
         ExecStart = "${pkgs.grafana-loki}/bin/loki -config.file=${lokiConfigFile}";
         Restart = "always";
         RestartSec = "10s";
-        
+
         # Security settings
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
         ReadWritePaths = [ "/var/lib/loki" "/var/log/loki" ];
-        
+
         # Resource limits
         MemoryMax = "512M";
         CPUQuota = "50%";
       };
-      
+
       preStart = ''
         # Create necessary directories
         mkdir -p /var/lib/loki/{chunks,rules,tsdb-shipper-active,tsdb-shipper-cache,retention}
@@ -115,9 +115,9 @@ in {
         chmod 755 /var/log/loki
       '';
     };
-    
+
     # Create loki user and group
-    users.groups.loki = {};
+    users.groups.loki = { };
     users.users.loki = {
       isSystemUser = true;
       group = "loki";
@@ -125,7 +125,7 @@ in {
       home = "/var/lib/loki";
       createHome = false;
     };
-    
+
     # Create data directories
     systemd.tmpfiles.rules = [
       "d /var/lib/loki 0755 loki loki -"
@@ -136,18 +136,18 @@ in {
       "d /var/lib/loki/retention 0755 loki loki -"
       "d /var/log/loki 0755 loki loki -"
     ];
-    
+
     # Open firewall ports for Loki
     networking.firewall.allowedTCPPorts = [
       cfg.network.lokiPort
       cfg.network.lokiGrpcPort
     ];
-    
+
     # Install Loki CLI tools
     environment.systemPackages = with pkgs; [
       grafana-loki
       # logcli is included in grafana-loki package
-      
+
       # Loki management script
       (pkgs.writeShellScriptBin "loki-status" ''
         echo "Loki Status"

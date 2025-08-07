@@ -1,24 +1,23 @@
 # Hyprland Configuration with Feature Flags
 # Provides granular control over Hyprland components and features
-{
-  config,
-  lib,
-  pkgs,
-  inputs,
-  host ? "default",
-  ...
+{ config
+, lib
+, pkgs
+, inputs
+, host ? "default"
+, ...
 }:
 with lib; let
   # Import host-specific variables if available
   hostVars =
     if builtins.pathExists ../../../../hosts/${host}/variables.nix
     then import ../../../../hosts/${host}/variables.nix
-    else {};
+    else { };
 
   # Import basic enhancement systems
-  performanceProfiles = import ./performance-profiles.nix {inherit config lib pkgs;};
-  themeSystem = import ./theme-system.nix {inherit config lib pkgs;};
-  ruleSystem = import ./rule-generators.nix {inherit config lib pkgs;};
+  performanceProfiles = import ./performance-profiles.nix { inherit config lib pkgs; };
+  themeSystem = import ./theme-system.nix { inherit config lib pkgs; };
+  ruleSystem = import ./rule-generators.nix { inherit config lib pkgs; };
 
   # Auto-detect or use specified performance profile
   selectedProfile = hostVars.hyprland.performanceProfile or "balanced";
@@ -109,7 +108,7 @@ with lib; let
   # Conditional packages based on feature flags
   conditionalPackages =
     # Core Hyprland utilities
-    []
+    [ ]
     # Wallpaper management
     ++ optionals cfg.utilities.wallpapers [
       pkgs.swww
@@ -164,11 +163,12 @@ with lib; let
 
   # Conditional plugins based on feature flags
   conditionalPlugins =
-    []
+    [ ]
     ++ optional cfg.plugins.expo pkgs.hyprlandPlugins.hyprexpo
     ++ optional cfg.plugins.hyprbars pkgs.hyprlandPlugins.hyprbars
     ++ optional cfg.plugins.hyprfocus pkgs.hyprlandPlugins.hyprfocus;
-in {
+in
+{
   imports = conditionalImports;
 
   # Configuration passed to child modules
@@ -183,7 +183,7 @@ in {
     enable = cfg.core.enable;
     systemd = mkIf cfg.core.systemd {
       enable = true;
-      variables = ["--all"];
+      variables = [ "--all" ];
     };
     xwayland.enable = cfg.core.xwayland;
     package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;

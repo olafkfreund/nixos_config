@@ -1,14 +1,14 @@
 # Audio System Configuration Module
 # Configures PipeWire audio system with Bluetooth support
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.modules.services.sound;
-in {
+in
+{
   options.modules.services.sound = {
     enable = mkEnableOption "PipeWire audio system";
 
@@ -70,7 +70,7 @@ in {
         "bluez5.enable-sbc-xq" = true;
         "bluez5.enable-msbc" = true;
         "bluez5.enable-hw-volume" = cfg.bluetooth.enableHardwareVolume;
-        "bluez5.roles" = ["hsp_hs" "hsp_ag" "hfp_hf" "hfp_ag"];
+        "bluez5.roles" = [ "hsp_hs" "hsp_ag" "hfp_hf" "hfp_ag" ];
       };
     };
 

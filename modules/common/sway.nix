@@ -1,19 +1,19 @@
 # modules/desktop/wayland/sway/default.nix
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.desktop.sway;
-in {
+in
+{
   options.desktop.sway = {
     enable = mkEnableOption "Sway window manager with standardized configuration";
 
     extraPackages = mkOption {
       type = types.listOf types.package;
-      default = [];
+      default = [ ];
       description = "Additional packages to install with Sway";
     };
   };
@@ -45,7 +45,7 @@ in {
     xdg.portal = {
       enable = true;
       wlr.enable = true;
-      extraPortals = [pkgs.xdg-desktop-portal-gtk];
+      extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
     };
 
     # Sunshine remote desktop wrapper with proper capabilities

@@ -1,11 +1,11 @@
 # Qwen-Code NixOS Package
 # AI-powered coding assistant using Qwen3-Coder models
-{
-  lib,
-  buildNpmPackage,
-  fetchFromGitHub,
-  fetchNpmDeps,
-  nix-update-script,
+{ lib
+, buildNpmPackage
+, fetchFromGitHub
+, fetchNpmDeps
+, nix-update-script
+,
 }:
 
 buildNpmPackage (finalAttrs: {
@@ -51,7 +51,7 @@ buildNpmPackage (finalAttrs: {
     runHook postInstall
   '';
 
-  passthru.updateScript = nix-update-script {};
+  passthru.updateScript = nix-update-script { };
 
   meta = with lib; {
     description = "AI-powered coding assistant using Qwen3-Coder models";
@@ -63,7 +63,7 @@ buildNpmPackage (finalAttrs: {
     '';
     homepage = "https://github.com/QwenLM/qwen-code";
     license = licenses.asl20;
-    maintainers = with maintainers; [];
+    maintainers = with maintainers; [ ];
     mainProgram = "qwen-code";
     platforms = platforms.all;
   };

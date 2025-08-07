@@ -1,14 +1,13 @@
 # Installer Tools and TUI Utilities for Live USB
-{
-  pkgs,
-  ...
+{ pkgs
+, ...
 }:
 {
   environment.systemPackages = with pkgs; [
     # Text editors
     neovim
     nano
-    
+
     # Terminal utilities
     tmux
     screen
@@ -16,85 +15,85 @@
     btop
     tree
     ranger
-    
+
     # Network tools
     networkmanager
-    networkmanagerapplet  # for nmtui
+    networkmanagerapplet # for nmtui
     wget
     curl
     openssh
     tailscale
-    
+
     # Disk and filesystem tools
     parted
-    gptfdisk  # gdisk
-    util-linux  # fdisk, lsblk, etc.
-    dosfstools  # mkfs.fat
-    e2fsprogs  # mkfs.ext4
+    gptfdisk # gdisk
+    util-linux # fdisk, lsblk, etc.
+    dosfstools # mkfs.fat
+    e2fsprogs # mkfs.ext4
     ntfs3g
     exfatprogs
     cryptsetup
-    
+
     # System tools
-    pciutils  # lspci
-    usbutils  # lsusb
+    pciutils # lspci
+    usbutils # lsusb
     dmidecode
     smartmontools
     hdparm
-    
+
     # Development and scripting
     git
     python3
     python3Packages.pyyaml
     jq
     yq
-    
+
     # Archive tools
     unzip
     zip
     tar
     gzip
-    
+
     # File transfer
     rsync
     scp
-    
+
     # System information
     lshw
     hwinfo
     inxi
-    
+
     # Process management
     killall
     psmisc
     procps
-    
+
     # Text processing
     grep
     sed
     awk
     ripgrep
     fd
-    
+
     # Monitoring
     iotop
     iftop
     nethogs
-    
+
     # Terminal enhancements
     bash-completion
     zsh
     oh-my-zsh
-    
+
     # File managers
-    mc  # Midnight Commander
-    
+    mc # Midnight Commander
+
     # Network diagnostics
-    inetutils  # ping, telnet, etc.
-    dnsutils   # dig, nslookup
+    inetutils # ping, telnet, etc.
+    dnsutils # dig, nslookup
     tcpdump
     nmap
-    
+
     # Hardware testing
     memtest86plus
     stress

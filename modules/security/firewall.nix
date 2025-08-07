@@ -4,26 +4,26 @@
 with lib;
 let
   cfg = config.security.firewall;
-  
+
   # Define service port groups for better organization
   servicePortGroups = {
-    ssh = { tcp = [ 22 ]; udp = []; };
+    ssh = { tcp = [ 22 ]; udp = [ ]; };
     dns = { tcp = [ 53 ]; udp = [ 53 ]; };
-    web = { tcp = [ 80 443 ]; udp = []; };
-    monitoring = { 
-      tcp = [ 3000 3001 3100 9090 9093 9096 9100 9101 9102 9103 9104 28183 ]; 
-      udp = []; 
+    web = { tcp = [ 80 443 ]; udp = [ ]; };
+    monitoring = {
+      tcp = [ 3000 3001 3100 9090 9093 9096 9100 9101 9102 9103 9104 28183 ];
+      udp = [ ];
     };
-    media = { 
-      tcp = [ 5055 6789 8181 8989 7878 9117 9696 32400 ]; 
-      udp = []; 
+    media = {
+      tcp = [ 5055 6789 8181 8989 7878 9117 9696 32400 ];
+      udp = [ ];
     };
-    development = { 
-      tcp = [ 3000 8080 8081 5000 ]; 
-      udp = []; 
+    development = {
+      tcp = [ 3000 8080 8081 5000 ];
+      udp = [ ];
     };
   };
-  
+
   # Host type configurations
   hostProfiles = {
     workstation = {
@@ -31,126 +31,131 @@ let
       trustedInterfaces = [ "lo" ];
       restrictedAccess = false;
     };
-    
+
     server = {
       allowedServices = [ "ssh" "web" "dns" ];
       trustedInterfaces = [ "lo" ];
       restrictedAccess = true;
     };
-    
+
     mediaServer = {
       allowedServices = [ "ssh" "media" "monitoring" ];
       trustedInterfaces = [ "lo" ];
       restrictedAccess = true;
     };
-    
+
     monitoringServer = {
       allowedServices = [ "ssh" "web" "dns" "monitoring" ];
       trustedInterfaces = [ "lo" ];
       restrictedAccess = true;
     };
   };
-  
+
   # Get ports for enabled services
   getServicePorts = services: protocol:
-    flatten (map (service: 
-      if hasAttr service servicePortGroups 
-      then getAttr protocol (getAttr service servicePortGroups)
-      else []
-    ) services);
-    
+    flatten (map
+      (service:
+        if hasAttr service servicePortGroups
+        then getAttr protocol (getAttr service servicePortGroups)
+        else [ ]
+      )
+      services);
+
   # Build firewall rules based on profile
-  buildFirewallConfig = profile: let
-    profileConfig = getAttr profile hostProfiles;
-    tcpPorts = getServicePorts profileConfig.allowedServices "tcp";
-    udpPorts = getServicePorts profileConfig.allowedServices "udp";
-  in {
-    allowedTCPPorts = tcpPorts ++ cfg.extraTcpPorts;
-    allowedUDPPorts = udpPorts ++ cfg.extraUdpPorts;
-    interfaces = cfg.interfaceRules;
-    trustedInterfaces = profileConfig.trustedInterfaces ++ cfg.extraTrustedInterfaces;
-  };
-in {
+  buildFirewallConfig = profile:
+    let
+      profileConfig = getAttr profile hostProfiles;
+      tcpPorts = getServicePorts profileConfig.allowedServices "tcp";
+      udpPorts = getServicePorts profileConfig.allowedServices "udp";
+    in
+    {
+      allowedTCPPorts = tcpPorts ++ cfg.extraTcpPorts;
+      allowedUDPPorts = udpPorts ++ cfg.extraUdpPorts;
+      interfaces = cfg.interfaceRules;
+      trustedInterfaces = profileConfig.trustedInterfaces ++ cfg.extraTrustedInterfaces;
+    };
+in
+{
   options.security.firewall = {
     enable = mkEnableOption "Centralized firewall configuration";
-    
+
     profile = mkOption {
       type = types.enum [ "workstation" "server" "mediaServer" "monitoringServer" "custom" ];
       default = "workstation";
       description = "Firewall profile to use";
     };
-    
+
     extraTcpPorts = mkOption {
       type = types.listOf types.port;
-      default = [];
+      default = [ ];
       description = "Additional TCP ports to allow";
     };
-    
+
     extraUdpPorts = mkOption {
       type = types.listOf types.port;
-      default = [];
+      default = [ ];
       description = "Additional UDP ports to allow";
     };
-    
+
     extraTrustedInterfaces = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       description = "Additional trusted interfaces";
     };
-    
+
     interfaceRules = mkOption {
       type = types.attrsOf (types.submodule {
         options = {
           allowedTCPPorts = mkOption {
             type = types.listOf types.port;
-            default = [];
+            default = [ ];
             description = "TCP ports allowed on this interface";
           };
           allowedUDPPorts = mkOption {
             type = types.listOf types.port;
-            default = [];
+            default = [ ];
             description = "UDP ports allowed on this interface";
           };
         };
       });
-      default = {};
+      default = { };
       description = "Per-interface firewall rules";
     };
-    
+
     enableAdvancedRules = mkOption {
       type = types.bool;
       default = true;
       description = "Enable advanced iptables rules for enhanced security";
     };
-    
+
     enableLogging = mkOption {
       type = types.bool;
       default = true;
       description = "Enable firewall logging for dropped packets";
     };
-    
+
     trustedNetworks = mkOption {
       type = types.listOf types.str;
       default = [ "192.168.1.0/24" "10.0.0.0/8" "172.16.0.0/12" ];
       description = "Trusted network CIDRs";
     };
-    
+
     blockCountries = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       example = [ "CN" "RU" "KP" ];
       description = "ISO country codes to block (requires GeoIP)";
     };
-    
+
     rateLimiting = {
       enable = mkEnableOption "Rate limiting for connections";
-      
+
       sshLimit = mkOption {
         type = types.int;
         default = 4;
         description = "SSH connection attempts per minute";
       };
-      
+
       httpLimit = mkOption {
         type = types.int;
         default = 100;
@@ -162,21 +167,21 @@ in {
   config = mkIf cfg.enable {
     # Disable nftables to use iptables-based firewall consistently
     networking.nftables.enable = mkForce false;
-    
+
     # Main firewall configuration
     networking.firewall = mkMerge [
       {
         enable = mkForce true;
-        
+
         # Default settings
         allowPing = true;
         pingLimit = "--limit 5/minute --limit-burst 10";
-        
+
         # Apply profile-based configuration
-        inherit (buildFirewallConfig cfg.profile) 
+        inherit (buildFirewallConfig cfg.profile)
           allowedTCPPorts allowedUDPPorts interfaces trustedInterfaces;
       }
-      
+
       # Advanced iptables rules
       (mkIf cfg.enableAdvancedRules {
         extraCommands = ''
@@ -216,7 +221,7 @@ in {
             iptables -A INPUT -m limit --limit 5/min -j LOG --log-prefix "FIREWALL-DROP: " --log-level 4
           ''}
         '';
-        
+
         extraStopCommands = ''
           # Clean up rate limiting rules
           ${optionalString cfg.rateLimiting.enable ''
@@ -228,11 +233,11 @@ in {
         '';
       })
     ];
-    
+
     # Firewall monitoring and management tools
     environment.systemPackages = with pkgs; [
       iptables
-      nftables  # Keep available as backup
+      nftables # Keep available as backup
       fail2ban
       (writeShellScriptBin "firewall-status" ''
         #!/bin/bash
@@ -277,7 +282,7 @@ in {
         echo "Active Connections by Port:"
         ss -tn | grep ESTAB | awk '{print $4}' | cut -d: -f2 | sort | uniq -c | sort -nr | head -10
       '')
-      
+
       (writeShellScriptBin "firewall-test" ''
         #!/bin/bash
         
@@ -314,7 +319,7 @@ in {
           exit 1
         fi
       '')
-      
+
       (writeShellScriptBin "firewall-analyze" ''
         #!/bin/bash
         
@@ -371,13 +376,13 @@ in {
         fi
       '')
     ];
-    
+
     # Firewall monitoring service
     systemd.services.firewall-monitor = {
       description = "Firewall Monitoring Service";
       after = [ "network.target" "firewall.service" ];
       wants = [ "firewall.service" ];
-      
+
       serviceConfig = {
         Type = "oneshot";
         User = "root";

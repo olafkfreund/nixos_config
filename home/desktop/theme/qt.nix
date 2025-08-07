@@ -1,9 +1,9 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
-}: let
+{ pkgs
+, config
+, lib
+, ...
+}:
+let
   # Detect if KDE Plasma is enabled
   isPlasmaEnabled = config.desktop.plasma.enable or false;
 
@@ -12,7 +12,8 @@
     if isPlasmaEnabled
     then "kde"
     else "qtct";
-in {
+in
+{
   qt = {
     enable = true;
     platformTheme = {

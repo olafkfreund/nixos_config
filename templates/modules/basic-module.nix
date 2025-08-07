@@ -9,16 +9,16 @@
 # 3. Add your module to the appropriate imports in modules/default.nix
 # 4. Enable in host configuration with: features.CATEGORY.MODULE = true;
 
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   # Configuration reference - adjust path to match your module location
   cfg = config.modules.CATEGORY.MODULE_NAME;
-in {
+in
+{
   # Module options definition
   options.modules.CATEGORY.MODULE_NAME = {
     enable = mkEnableOption "DESCRIPTION_OF_MODULE";
@@ -41,7 +41,7 @@ in {
     # Example list option
     packages = mkOption {
       type = types.listOf types.package;
-      default = [];
+      default = [ ];
       description = "Additional packages to install";
       example = literalExpression "[ pkgs.example-package ]";
     };
@@ -49,7 +49,7 @@ in {
     # Example attribute set option
     settings = mkOption {
       type = types.attrsOf types.str;
-      default = {};
+      default = { };
       description = "Configuration settings";
       example = literalExpression ''
         {
@@ -102,7 +102,7 @@ in {
 
     # Helpful warnings
     warnings = [
-      (mkIf (cfg.enableFeature && cfg.packages == []) ''
+      (mkIf (cfg.enableFeature && cfg.packages == [ ]) ''
         MODULE_NAME: enableFeature is true but no packages specified.
         Consider adding packages to cfg.packages.
       '')

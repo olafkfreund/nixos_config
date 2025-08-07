@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.browsers.floorp;
-in {
+in
+{
   options.browsers.floorp = {
     enable = mkEnableOption {
       default = false;

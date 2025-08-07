@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.google.packages;
-in {
+in
+{
   options.google.packages = {
     enable = mkEnableOption "Enable Google packages";
   };
