@@ -311,6 +311,12 @@ in
         config.age.secrets."user-password-${username}".path;
   });
 
+  # Enable passwordless sudo for wheel group (for NixOS deployments)
+  security.sudo = {
+    enable = true;
+    wheelNeedsPassword = false;
+  };
+
   # System packages - consolidated from individual nixos modules
   environment.systemPackages = with pkgs; [
     # Power management
