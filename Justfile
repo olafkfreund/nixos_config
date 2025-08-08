@@ -249,7 +249,7 @@ dex5550:
 
 # Deploy to samsung system (Intel integrated)
 samsung:
-    nixos-rebuild switch --flake .#samsung --target-host 192.168.1.92 --build-host 192.168.1.92 --sudo --impure --accept-flake-config
+    nixos-rebuild switch --flake .#samsung --target-host 192.168.1.90 --build-host 192.168.1.90 --sudo --impure --accept-flake-config
 
 # =============================================================================
 # ARCHIVED/LEGACY HOSTS (FOR REFERENCE)

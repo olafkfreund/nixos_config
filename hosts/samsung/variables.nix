@@ -12,7 +12,7 @@
 
   # Hardware settings
   gpu = "intel";
-  acceleration = "cuda"; # For ollama
+  acceleration = "vaapi"; # Intel video acceleration
 
   # System groups
   userGroups = [
@@ -34,10 +34,11 @@
   nameservers = [ "1.1.1.1" "8.8.8.8" ];
   hostMappings = {
     "192.168.1.127" = "p510";
-    "192.168.1.96" = "razer";
+    "192.168.1.188" = "razer"; # Updated to current wired IP
     "192.168.1.97" = "p620";
     "192.168.1.246" = "hp";
     "192.168.1.222" = "dex5550";
+    "192.168.1.90" = "samsung"; # This host
   };
 
   # Locale and time
@@ -84,9 +85,10 @@
     NIXPKGS_ALLOW_UNFREE = "1";
     ELECTRON_OZONE_PLATFORM_HINT = "auto";
     KITTY_DISABLE_WAYLAND = "0";
-    GBM_BACKEND = "nvidia-drm";
-    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-    NVD_BACKEND = "direct";
+    # Intel graphics optimization
+    MESA_LOADER_DRIVER_OVERRIDE = "iris";
+    INTEL_DEBUG = "norbc";
+    LIBVA_DRIVER_NAME = "iHD";
   };
 
   # Service-specific configs

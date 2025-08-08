@@ -57,20 +57,24 @@ in
   python.development.enable = true;
   nodejs.development.enable = lib.mkForce true;
 
-  # Git tools
-  programs.lazygit.enable = lib.mkForce true;
-  programs.thunderbird.enable = lib.mkForce false;
-  programs.obsidian.enable = lib.mkForce false;
-  programs.office.enable = lib.mkForce false;
-  programs.webcam.enable = lib.mkForce false;
+  # Configure programs and services
+  programs = {
+    lazygit.enable = lib.mkForce true;
+    thunderbird.enable = lib.mkForce false;
+    obsidian.enable = lib.mkForce false;
+    office.enable = lib.mkForce false;
+    webcam.enable = lib.mkForce false;
+  };
 
-  # Virtualization tools
-  services.docker.enable = lib.mkForce true;
-  services.incus.enable = lib.mkForce false;
-  services.podman.enable = lib.mkForce true;
-  services.spice.enable = lib.mkForce true;
-  services.libvirt.enable = lib.mkForce true;
-  services.sunshine.enable = lib.mkForce true;
+  # Virtualization services
+  services = {
+    docker.enable = lib.mkForce true;
+    incus.enable = lib.mkForce false;
+    podman.enable = lib.mkForce true;
+    spice.enable = lib.mkForce true;
+    libvirt.enable = lib.mkForce true;
+    sunshine.enable = lib.mkForce true;
+  };
 
   # Password management
   security.onepassword.enable = lib.mkForce false;

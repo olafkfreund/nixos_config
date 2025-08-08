@@ -33,8 +33,9 @@
   nameservers = [ "1.1.1.1" "8.8.8.8" ];
   hostMappings = {
     "192.168.1.127" = "p510";
-    "192.168.1.96" = "razer";
+    "192.168.1.188" = "razer"; # Updated to current wired IP
     "192.168.1.97" = "p620";
+    "192.168.1.90" = "samsung"; # Samsung host
     "192.168.1.246" = "hp";
     "192.168.1.222" = "dex5550";
   };

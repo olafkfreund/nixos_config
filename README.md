@@ -1,47 +1,119 @@
-# NixOS Configuration
+# NixOS Infrastructure Hub
 
-A sophisticated, modular NixOS configuration system designed for managing multiple hosts with different hardware profiles, comprehensive optimization, and advanced automation. This configuration emphasizes maintainability, modularity, and production-ready quality standards.
+[![Modern Flake Architecture](https://img.shields.io/badge/Flake-Modern%20Architecture-blue?style=flat-square&logo=nixos)](https://nixos.org)
+[![Comprehensive Validation](https://img.shields.io/badge/Quality-10%20Validation%20Checks-green?style=flat-square)](./checks)
+[![Development Shells](https://img.shields.io/badge/DevShells-3%20Environments-orange?style=flat-square)](./shells)
+[![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-success?style=flat-square)](#current-status)
 
-## Architecture Overview
+A sophisticated, enterprise-grade NixOS configuration management system with advanced automation, monitoring, AI integration,
+and development environments. Built using **modern flake architecture** with comprehensive validation, quality assurance,
+and production-ready standards.
 
-This configuration uses a **flake-based** approach with extensive modularization and optimization:
+## Modern Flake Architecture ⭐
 
-```
-nixos-config/
-├── flake.nix                 # Main entry point, defines hosts and inputs
-├── Justfile                  # Command runner for all operations
-├── hosts/                    # Host-specific configurations
-│   ├── p620/                # AMD workstation (ROCm GPU)
-│   ├── razer/               # Intel/NVIDIA laptop
-│   ├── p510/                # Intel Xeon/NVIDIA workstation  
-│   ├── samsung/             # Intel laptop
-│   └── dex5550/             # Intel SFF with integrated graphics
-├── modules/                  # 141+ optimized, reusable NixOS modules
-│   ├── ai/                  # AI tools and services
-│   ├── desktop/             # Desktop environment components
-│   ├── services/            # System services and daemons
-│   ├── containers/          # Docker, Podman, Kubernetes
-│   ├── development/         # Development tools and languages
-│   └── ...                  # Other functional categories
-├── home/                     # Home Manager base configurations
-├── Users/                    # Per-user configurations with host-specific files
-├── lib/                      # Custom library functions and utilities
-├── scripts/                  # Management, validation, and utility scripts
-├── templates/                # Configuration templates for new hosts/modules
-└── docs/                     # Comprehensive documentation
+This configuration features a **modern, enterprise-grade flake architecture** with structured outputs, comprehensive validation,
+and advanced developer experience:
+
+```bash
+nixos/                                    # NixOS Configuration Repository
+├── .agent-os/                           # Agent OS Product Documentation
+│   └── product/                         # Product mission, roadmap, decisions
+├── flake.nix                           # Main Flake Configuration
+├── flake.lock                          # Flake Dependencies Lock
+├── README.md                           # Documentation (This File)
+├── justfile                            # Task Automation and Commands
+│
+├── apps/                               # ⭐ NEW: Application Workflow Tools
+│   └── default.nix                     # Deploy, test, build-live, dev-utils apps
+│
+├── checks/                             # ⭐ NEW: Quality Assurance & Validation
+│   └── default.nix                     # 10 comprehensive validation checks
+│
+├── shells/                             # ⭐ NEW: Development Shell Environments
+│   ├── dev.nix                        # Primary development environment
+│   ├── testing.nix                    # Testing and validation environment
+│   └── docs.nix                       # Documentation generation environment
+│
+├── lib/                                # ⭐ NEW: Helper Libraries & Utilities
+│   └── default.nix                     # Shared functions and utilities
+│
+├── hosts/                              # Host-Specific Configurations
+│   ├── p620/                          # AMD Workstation (Primary Development)
+│   ├── p510/                          # Intel Xeon Server (Media & Storage)
+│   ├── razer/                         # Intel/NVIDIA Laptop (Mobile)
+│   ├── dex5550/                       # Intel SFF (Monitoring Server)
+│   ├── samsung/                       # Samsung Laptop (Secondary)
+│   └── common/                        # Shared host configurations
+│
+├── modules/                           # Modular NixOS System Components (141+ modules)
+│   ├── ai/                           # AI Provider Integration
+│   ├── desktop/                      # Desktop Environment Modules
+│   ├── development/                  # Development Tools & Languages
+│   ├── monitoring/                   # Prometheus/Grafana Stack
+│   ├── networking/                   # Network Configuration
+│   ├── security/                     # Security & Hardening
+│   ├── services/                     # System Services
+│   ├── virtualization/               # Container & VM Support
+│   └── [additional categories]       # 15+ other module categories
+│
+├── home/                             # Home Manager Configurations
+│   ├── desktop/                      # Desktop Environment Settings
+│   ├── development/                  # Development Tools Configuration
+│   ├── shell/                        # Shell & Terminal Configuration
+│   └── [additional categories]       # Media, network, etc.
+│
+├── Users/                            # Per-User Configurations
+│   ├── olafkfreund/                  # Primary user configurations
+│   │   ├── p620_home.nix            # P620-specific home config
+│   │   ├── p510_home.nix            # P510-specific home config
+│   │   └── [other hosts]            # Other host-specific configs
+│   └── [other users]/               # Additional user configurations
+│
+├── secrets/                          # Encrypted Secrets (Agenix)
+│   ├── secrets.nix                   # Secret definitions and access
+│   └── *.age                        # Encrypted secret files
+│
+├── scripts/                          # Automation & Management Scripts
+│   ├── install-helpers/             # Live USB installation wizards
+│   ├── manage-secrets.sh            # Interactive secrets management
+│   └── [utility scripts]           # Additional automation tools
+│
+├── pkgs/                            # Custom Package Definitions
+│   ├── gemini-cli/                  # Custom Gemini CLI package
+│   └── [other packages]            # Additional custom packages
+│
+├── templates/                       # Configuration Templates
+│   ├── hosts/                       # Host template configurations
+│   └── modules/                     # Module template structures
+│
+└── [additional directories]         # Icons, themes, documentation, etc.
 ```
 
 ### Key Features
 
-- **Multi-host support** with hardware-specific optimizations  
-- **141+ optimized modules** with comprehensive validation  
-- **Feature flag system** for granular control  
-- **Automated secrets management** with Agenix  
-- **Quality validation framework** with automated testing  
-- **Performance optimizations** for different hardware profiles  
-- **Comprehensive documentation** and templates  
-- **CI/CD pipeline** with automated testing and validation  
-- **Dead code elimination** and performance optimization  
+#### 🏗️ **Modern Flake Architecture**
+
+- **Structured outputs** with devShells, checks, apps, and nixosModules
+- **3 specialized development environments** (dev, testing, docs)
+- **10 comprehensive validation checks** for quality assurance
+- **4 application workflow tools** for deployment and management
+- **Advanced developer experience** with modern Nix tooling
+
+#### 🖥️ **Infrastructure Management**
+
+- **Multi-host support** with hardware-specific optimizations
+- **141+ optimized modules** with comprehensive validation
+- **Feature flag system** for granular control
+- **Automated secrets management** with Agenix
+- **Performance optimizations** for different hardware profiles
+
+#### 🔍 **Quality & Validation**
+
+- **Quality validation framework** with automated testing
+- **CI/CD pipeline** with automated testing and validation
+- **Dead code elimination** and performance optimization
+- **Comprehensive documentation** and templates
+- **Enterprise-grade reliability** and production readiness
 
 ## Quick Start
 
@@ -89,125 +161,161 @@ nixos-config/
    ```bash
    # Beautiful AI dashboard with insights
    ai-dashboard
-   
+
    # Smart task creation from natural language
    smart-add "Set up development environment, review code, deploy by Friday"
-   
+
    # Get AI-powered task analysis
    ai-analyze
    ```
 
-## Latest Updates (January 2025)
+## Modern Flake Commands ⚡
 
-### Phase 12: AI-Enhanced Task Management System (Completed)
+The modern flake architecture provides structured access to all development tools and workflows:
+
+### Development Environments
+
+Enter specialized development environments with all necessary tools pre-installed:
+
+```bash
+# Primary development environment (nixd, statix, pre-commit, etc.)
+nix develop
+
+# Testing and validation environment (VM testing, networking tools)
+nix develop .#testing
+
+# Documentation environment (mdbook, graphviz, pandoc)
+nix develop .#docs
+```
+
+### Quality Assurance & Validation
+
+Run comprehensive quality checks with the validation system:
+
+```bash
+# Run all 10 validation checks
+nix flake check
+
+# Run specific validation checks
+nix build .#checks.x86_64-linux.statix-lint
+nix build .#checks.x86_64-linux.host-build-validation
+nix build .#checks.x86_64-linux.security-check
+
+# View available checks
+nix eval .#checks.x86_64-linux --apply builtins.attrNames
+```
+
+### Application Workflow Tools
+
+Use integrated workflow applications for common operations:
+
+```bash
+# Deployment workflows
+nix run .#deploy -- host p620          # Deploy to specific host
+nix run .#deploy -- all               # Deploy to all hosts
+nix run .#deploy -- parallel          # Parallel deployment
+
+# Testing workflows
+nix run .#test -- host p620           # Test specific host
+nix run .#test -- all                 # Test all configurations
+nix run .#test -- quick               # Quick validation
+
+# Live USB building
+nix run .#build-live -- p620          # Build P620 live USB
+nix run .#build-live -- all           # Build all live USBs
+
+# Development utilities
+nix run .#dev-utils -- lint           # Run linting
+nix run .#dev-utils -- format         # Format code
+nix run .#dev-utils -- cleanup        # Cleanup build artifacts
+```
+
+### Package Building
+
+Build packages and live images:
+
+```bash
+# Build custom packages
+nix build .#packages.x86_64-linux.gemini-cli
+nix build .#packages.x86_64-linux.claude-code
+
+# Build live ISO images
+nix build .#packages.x86_64-linux.live-iso-p620
+nix build .#packages.x86_64-linux.live-iso-razer
+```
+
+### Module Exports
+
+The flake exports modules for reuse in other configurations:
+
+```nix
+# Import specific modules in other flakes
+inputs.nixos-infrastructure.nixosModules.monitoring
+inputs.nixos-infrastructure.nixosModules.ai-providers
+inputs.nixos-infrastructure.nixosModules.development
+```
+
+## AI-Enhanced Productivity Tools
 
 Revolutionary productivity system integrating Taskwarrior with Claude AI for intelligent task management:
 
-**Core AI Features:**
+### Core AI Features
 
 - **Smart Task Creation**: Natural language → structured Taskwarrior tasks with context awareness
-- **AI-Enhanced Dashboard**: Beautiful daily overview with AI-generated insights and recommendations
 - **Intelligent Analysis**: Task prioritization and optimization suggestions based on workload
 - **Work Summarization**: Professional daily/weekly reports with productivity pattern analysis
 - **Context-Aware Workflows**: Git, time, and location-aware task suggestions
 
-**Ready-to-Use Commands:**
+### Ready-to-Use Commands
 
 ```bash
 # Smart task creation from natural language
-smart-add "Review PR, update docs, deploy by Friday"
-sa "Quick task description"  # Short alias
-
-# Beautiful AI-powered dashboard
-ai-dashboard
-daily       # Alias
-dash        # Quick alias
+smart-task "Review PR, update docs, deploy by Friday"
+smt "Quick task description"  # Short alias
 
 # Intelligent task analysis and insights
-ai-analyze
-analyze     # Alias
-insights    # Alias
+ai-prioritize               # Smart priority recommendations
+ai-metrics                  # Performance analysis and trends
+ai-context suggest          # AI suggests optimal work context
 
-# Professional work summarization
-ai-summary daily
-summary     # Alias (defaults to daily)
-weekly-summary  # Weekly report
-```
-
-**Productivity Benefits:**
-
-- **85% faster** task creation with natural language processing
-- **60% less** time spent on task prioritization
-- **70% more accurate** time estimates with AI analysis
-- **Beautiful interface** with colors, emojis, and visual progress indicators
-- **Context-aware suggestions** based on current work environment
-
-**Visual Design Features:**
-
-- **Color-coded interface**: Red (urgent), Yellow (due today), Green (completed), Blue (info)
-- **Visual indicators**: Tasks, priority, time, AI insights, completed status
-- **Progress visualization**: Task counters, completion trends, productivity metrics
-- **Beautiful formatting**: Headers, separators, and organized layouts
-
-**Advanced AI Functions:**
-
-```bash
-# AI project breakdown
-ai-project "Build user authentication system"  # Creates full project plan
-
-# Productivity insights and patterns
-ai-insights     # Weekly patterns and optimization tips
-ai-metrics      # Performance analysis and trends
-
-# Context-aware management  
-ai-context suggest    # AI suggests optimal work context
-focus                # Quick context suggestion alias
-
-# Smart completion with AI celebration
-smart-done 1         # Complete task with AI motivation
-smart-complete 15    # Alternative completion command
-
-# Intelligent task search
+# Project breakdown and planning
+ai-breakdown "Build user authentication system"  # Creates full project plan
+ai-review week             # Weekly review with AI insights
 ai-find "tasks related to documentation"  # Semantic task search
+
+# Smart completion with AI feedback
+smart-complete 1           # Complete task with AI motivation
+smart-done 15             # Alternative completion command
 ```
 
-**Productivity Workflows:**
+### Productivity Workflows
 
 ```bash
 # Morning routine (automated sequence)
-morning    # AI dashboard + context suggestions + priority analysis
+morning    # Context suggestions + priority analysis
 
-# Evening review (automated sequence)  
+# Evening review (automated sequence)
 evening    # Daily summary + accomplishments + tomorrow planning
 
 # Development workflow example
 cd /path/to/project
-smart-add "Fix auth bug, add tests, update docs"  # Context-aware task creation
-focus                                              # AI suggests work sequence
-ai-prioritize                                     # Intelligent priority analysis
-smart-done 1                                      # Complete with AI feedback
-summary                                           # End-of-session report
+smart-task "Fix auth bug, add tests, update docs"  # Context-aware task creation
+focus                                               # AI suggests work sequence
+ai-prioritize                                      # Intelligent priority analysis
+smart-complete 1                                   # Complete with AI feedback
 ```
 
-**Integration Points:**
+### Integration
 
-- **AI Provider System**: Uses existing unified AI infrastructure (Anthropic/OpenAI/Gemini/Ollama)
-- **Taskwarrior Enhancement**: Builds on comprehensive Taskwarrior 3.0 configuration
+- **AI Provider System**: Uses unified AI infrastructure (Anthropic/OpenAI/Gemini/Ollama)
+- **Taskwarrior Enhancement**: Builds on comprehensive Taskwarrior configuration
 - **Shell Integration**: ZSH functions, aliases, and tab completion
 - **Time Tracking**: Seamless integration with Timewarrior
 - **Monitoring**: Task metrics integration with Prometheus/Grafana stack
 
-**Documentation:**
+The AI productivity system is automatically available on all hosts with productivity features enabled.
 
-- **Complete Guide**: `/home/olafkfreund/.config/nixos/docs/AI-Task-Management.md`
-- **Getting Started**: Step-by-step setup and usage examples
-- **Troubleshooting**: Common issues and solutions
-- **Advanced Usage**: Power user features and customization
-
-**Host Integration:**
-The AI task management system is automatically available on all hosts with productivity features enabled. No additional configuration required - just start using `smart-add` or `ai-dashboard` immediately!
-
-### Phase 9.3: Enhanced Hyprland Configuration (Completed)
+## Enhanced Hyprland Configuration
 
 Advanced Hyprland window manager configuration with comprehensive keybindings:
 
@@ -238,7 +346,7 @@ Advanced Hyprland window manager configuration with comprehensive keybindings:
 - Main binds: `/home/olafkfreund/.config/nixos/home/desktop/hyprland/config/binds.nix`
 - Documentation: `/home/olafkfreund/.config/nixos/docs/Hyprland_config.md`
 
-### Phase 7: Monitoring & Observability (Completed)
+## Monitoring & Observability
 
 A comprehensive monitoring infrastructure has been deployed:
 
@@ -274,7 +382,7 @@ node-exporter-status    # All exporter services status
 # Alertmanager: http://p620:9093
 ```
 
-### Phase 9.1: Unified AI Provider System (Completed)
+## Unified AI Provider System
 
 A sophisticated multi-provider AI interface with automatic fallback:
 
@@ -337,7 +445,7 @@ ai-status                  # Check provider status
 - **Timeout Management**: Configurable request timeouts and retry logic
 - **Comprehensive Logging**: Debug modes for troubleshooting
 
-### Phase 11: MicroVM Development Environments (Completed)
+## MicroVM Development Environments
 
 A comprehensive MicroVM infrastructure using microvm.nix providing lightweight, isolated development environments:
 
@@ -398,7 +506,7 @@ features = {
   microvms = {
     enable = true;
     dev-vm.enable = true;
-    test-vm.enable = true; 
+    test-vm.enable = true;
     playground-vm.enable = true;
   };
 };
@@ -524,7 +632,7 @@ Each host has a standardized, optimized structure:
 
 ### Host Directory Structure
 
-```
+```bash
 hosts/hostname/
 ├── configuration.nix         # Main NixOS configuration
 ├── variables.nix             # Host-specific variables and features
@@ -567,13 +675,13 @@ hosts/hostname/
    {
      # Host identification
      hostName = "newhostname";
-     
+
      # Users on this host
      hostUsers = ["username"];
-     
+
      # Hardware profile
      hardwareProfile = "desktop"; # or "laptop", "server"
-     
+
      # Feature flags for granular control
      features = {
        development = {
@@ -616,7 +724,7 @@ hosts/hostname/
 
 ### User Configuration Structure
 
-```
+```bash
 Users/username/
 ├── common/                   # Shared user configuration
 ├── hostname_home.nix         # Host-specific home configuration
@@ -641,14 +749,14 @@ Users/username/
        homeDirectory = "/home/newuser";
        stateVersion = "24.11";
      };
-     
+
      # Import common configurations
      imports = [
        ../../../home/desktop
        ../../../home/development
        ../../../home/shell
      ];
-     
+
      # User-specific package customizations
      home.packages = with pkgs; [
        # Additional user-specific packages
@@ -667,7 +775,7 @@ Users/username/
 
    ```bash
    ssh-keygen -t ed25519 -f ~/.ssh/newuser_key -N ""
-   
+
    # Add public key to secrets.nix
    nano secrets.nix
    ```
@@ -732,7 +840,7 @@ The configuration includes 141+ optimized modules organized by function:
    in {
      options.modules.category.newmodule = {
        enable = mkEnableOption "comprehensive description of module functionality";
-       
+
        # Organized option groups
        packages = {
          core = mkOption {
@@ -742,7 +850,7 @@ The configuration includes 141+ optimized modules organized by function:
            example = false;
          };
        };
-       
+
        # Configuration options with examples
        settings = mkOption {
          type = types.attrsOf types.str;
@@ -751,14 +859,14 @@ The configuration includes 141+ optimized modules organized by function:
          example = { setting1 = "value1"; };
        };
      };
-     
+
      config = mkIf cfg.enable {
        # Conditional implementation
-       environment.systemPackages = with pkgs; 
+       environment.systemPackages = with pkgs;
          optionals cfg.packages.core [
            # Core packages
          ];
-       
+
        # Always include validation
        assertions = [
          {
@@ -766,7 +874,7 @@ The configuration includes 141+ optimized modules organized by function:
            message = "Core packages require configuration settings";
          }
        ];
-       
+
        # Helpful warnings for users
        warnings = [
          (mkIf (!cfg.packages.core) ''
@@ -808,7 +916,7 @@ The configuration includes 141+ optimized modules organized by function:
 ### Module Best Practices
 
 - **Always use enable options** for conditional functionality
-- **Include comprehensive assertions** for configuration validation  
+- **Include comprehensive assertions** for configuration validation
 - **Provide helpful warnings** for common misconfigurations
 - **Add detailed examples** in option descriptions
 - **Follow naming conventions** (`modules.category.name`)
@@ -832,36 +940,36 @@ features = {
     docker = true;     # Container development
     github = true;     # GitHub CLI and tools
   };
-  
+
   desktop = {
     enable = true;      # Desktop environment
     hyprland = true;    # Hyprland window manager
     plasma = false;     # KDE Plasma (alternative)
     applications = true; # Desktop applications
   };
-  
+
   virtualization = {
     enable = true;      # Virtualization support
     docker = true;      # Docker containers
     libvirt = true;     # KVM/QEMU virtualization
     incus = false;      # Incus containers
   };
-  
+
   gaming = {
     enable = false;     # Gaming support
     steam = false;      # Steam client
   };
-  
+
   ai = {
     enable = true;      # AI tools and services
     ollama = true;      # Local AI models
-    
+
     # Unified AI provider support
     providers = {
       enable = true;           # Enable unified AI provider system
       defaultProvider = "anthropic";  # Default provider to use
       enableFallback = true;   # Automatic fallback between providers
-      
+
       # Individual provider support
       openai.enable = true;    # OpenAI ChatGPT/GPT models
       anthropic.enable = true; # Anthropic Claude models
@@ -869,19 +977,19 @@ features = {
       ollama.enable = true;    # Local Ollama models
     };
   };
-  
+
   monitoring = {
     enable = true;      # Monitoring and observability
     mode = "server";    # server|client|standalone
     serverHost = "p620"; # Monitoring server hostname
-    
+
     features = {
       nodeExporter = true;   # System metrics collection
       nixosMetrics = true;   # NixOS-specific metrics
       alerting = true;       # Alert management
     };
   };
-  
+
   security = {
     enable = true;      # Security tools
     onepassword = true; # 1Password integration
@@ -1083,7 +1191,7 @@ The configuration uses Agenix for encrypted, declarative secret handling:
     systems.hostname1
     systems.hostname2
   ];
-  
+
   "api-service-name.age".publicKeys = [
     users.admin
     systems.production-host
@@ -1176,7 +1284,7 @@ just validate-full       # Comprehensive validation
 - **AMD-specific driver optimizations**
 - **Memory and thermal management**
 
-#### NVIDIA Systems (Razer, P510)  
+#### NVIDIA Systems (Razer, P510)
 
 - **Hybrid graphics** configuration for laptops (Optimus)
 - **CUDA support** for workstations and development
@@ -1343,4 +1451,4 @@ This NixOS configuration represents a **production-ready, enterprise-grade** sys
 
 ---
 
-*This configuration has undergone comprehensive optimization across 12+ phases, including advanced monitoring infrastructure, unified AI provider systems, revolutionary AI-enhanced task management, and MicroVM development environments, eliminating technical debt, enhancing performance, and establishing production-ready quality standards for modern DevOps and productivity environments.*
+_This configuration has undergone comprehensive optimization across 12+ phases, including advanced monitoring infrastructure, unified AI provider systems, revolutionary AI-enhanced task management, and MicroVM development environments, eliminating technical debt, enhancing performance, and establishing production-ready quality standards for modern DevOps and productivity environments._

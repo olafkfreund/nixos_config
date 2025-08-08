@@ -20,6 +20,7 @@ in
     ./nixos/greetd.nix
     ./nixos/cpu.nix
     ./nixos/laptop.nix
+    ./nixos/memory.nix
     ./themes/stylix.nix
     # Modular imports - laptop needs full desktop experience
     ../../modules/core.nix
@@ -34,28 +35,61 @@ in
     ../../modules/development/default.nix
     ../common/hyprland.nix
     ../../modules/security/secrets.nix
+    ../../modules/secrets/api-keys.nix
     ../../modules/containers/docker.nix
   ];
 
-  # Set hostname from variables
-  networking.hostName = vars.hostName;
+  # Consolidated networking configuration
+  networking = {
+    # Set hostname from variables
+    inherit (vars) hostName;
 
-  #Nixai
-  services.nixai = {
-    enable = true;
-    mcp.enable = true;
+    # Choose networking profile: "desktop", "server", or "minimal"
+    profile = "desktop";
+
+    # Tailscale VPN Configuration - Samsung laptop
+    tailscale = {
+      enable = true;
+      hostname = "samsung-laptop";
+      acceptRoutes = true;
+      acceptDns = false; # Keep NetworkManager DNS
+      ssh = true;
+      shields = true;
+      useRoutingFeatures = "client"; # Client that accepts routes
+      extraUpFlags = [
+        "--operator=olafkfreund"
+        "--accept-risk=lose-ssh"
+      ];
+    };
+
+    # Use NetworkManager for simple network management
+    networkmanager = {
+      enable = true;
+      dns = "default"; # Use NetworkManager's built-in DNS
+      settings = {
+        main = {
+          dns = "default";
+        };
+      };
+    };
+    useNetworkd = false;
+
+    # Set custom nameservers as fallback
+    nameservers = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
   };
 
-  # Centralized Logging - Send logs to DEX5550 Loki server
-  services.promtail-logging = {
+  # Configure AI providers directly
+  ai.providers = {
     enable = true;
-    lokiUrl = "http://dex5550:3100";
-    collectJournal = true;
-    collectKernel = true;
-  };
+    defaultProvider = "anthropic";
+    enableFallback = true;
 
-  # Choose networking profile: "desktop", "server", or "minimal"
-  networking.profile = "desktop";
+    # Enable specific providers (no Ollama for Intel GPU)
+    openai.enable = true;
+    anthropic.enable = true;
+    gemini.enable = true;
+    ollama.enable = false;
+  };
 
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
@@ -69,7 +103,7 @@ in
       lua = true;
       nix = true;
       shell = true;
-      devshell = false; # Temporarily disabled due to patch issue
+      devshell = true; # Re-enabled for Samsung
       python = true;
       nodejs = true;
     };
@@ -105,7 +139,7 @@ in
 
     ai = {
       enable = true;
-      ollama = false;
+      ollama = false; # Intel GPU - no local inference
       gemini-cli = true;
     };
 
@@ -123,16 +157,58 @@ in
     };
   };
 
-  # IDIOT-PROOF DNS CONFIGURATION: Prevent Tailscale from breaking DNS
-  services.tailscale = {
+  # Monitoring configuration - Samsung as client
+  monitoring = {
     enable = true;
-    useRoutingFeatures = "none"; # Safer default
+    mode = "client"; # Monitored by dex5550
+    serverHost = "dex5550";
+
+    features = {
+      nodeExporter = true;
+      nixosMetrics = true;
+      alerting = false; # Only server handles alerting
+      gpuMetrics = false; # Intel integrated graphics
+    };
+  };
+
+  # Enable hardware monitoring with desktop notifications
+  monitoring.hardwareMonitor = {
+    enable = true;
+    interval = 300; # Check every 5 minutes
+    enableDesktopNotifications = true;
+
+    criticalThresholds = {
+      diskUsage = 90; # Laptop storage
+      memoryUsage = 95; # 16GB RAM
+      cpuLoad = 100; # Intel i7-1260P (12 cores/16 threads)
+      temperature = 90; # Laptop CPU, higher temp tolerance
+    };
+
+    warningThresholds = {
+      diskUsage = 80; # Laptop storage warning
+      memoryUsage = 85; # Memory warning
+      cpuLoad = 80; # Load warning
+      temperature = 80; # Temperature warning for laptop
+    };
+  };
+
+  # Enable NixOS package monitoring tools
+  tools.nixpkgs-monitors = {
+    enable = true;
+    installAll = true;
+  };
+
+  # Enable encrypted API keys
+  secrets.apiKeys = {
+    enable = true;
+    enableEnvironmentVariables = true;
+    enableUserEnvironment = true;
   };
 
   # Nix build optimizations
   nix = {
     settings = {
-      max-jobs = lib.mkDefault 16; # i7-10875H has 8 cores/16 threads
+      max-jobs = lib.mkDefault 12; # i7-1260P has 12 cores/16 threads
       cores = lib.mkDefault 16; # Use all threads
       auto-optimise-store = true;
     };
@@ -142,17 +218,29 @@ in
     '';
   };
 
-  # Enable secure DNS with DNS over TLS
-  services.secure-dns = {
-    enable = true;
-    dnssec = "true";
-    fallbackProviders = [
-      "1.1.1.1#cloudflare-dns.com" # Cloudflare DNS
-      "8.8.8.8#dns.google" # Google DNS
-    ];
-  };
-
+  # Consolidated services configuration
   services = {
+    # Nixai
+    nixai = {
+      enable = true;
+      mcp.enable = true;
+    };
+
+    # Use NetworkManager for DNS management - disable systemd-resolved
+    resolved.enable = lib.mkForce false;
+
+    # Centralized Logging - Send logs to DEX5550 Loki server
+    promtail-logging = {
+      enable = true;
+      lokiUrl = "http://dex5550:3100";
+      collectJournal = true;
+      collectKernel = true;
+    };
+
+    # Disable secure-dns to use dex5550 DNS server for internal domains
+    secure-dns.enable = false;
+
+    # X server and desktop environment
     xserver = {
       enable = true;
       displayManager.xserverArgs = [
@@ -164,26 +252,44 @@ in
 
     # Desktop environment
     desktopManager.gnome.enable = true;
+
+    # Hardware and service specific configurations
+    playerctld.enable = true;
+    fwupd.enable = true;
+    ollama.acceleration = vars.acceleration;
+    nfs.server = lib.mkIf vars.services.nfs.enable {
+      enable = true;
+      inherit (vars.services.nfs) exports;
+    };
   };
 
-  # Docker configuration
-  modules.containers.docker = {
-    enable = true;
-    users = hostUsers; # Use all users for this host
-    rootless = false;
+  # CRITICAL: DNS Resolution Fix for Tailscale
+  # Ensure proper service ordering to prevent DNS conflicts
+  systemd.services = {
+    # Disable network wait services to improve boot time
+    NetworkManager-wait-online.enable = lib.mkForce false;
   };
 
-  # Use variables for nameservers
-  networking.nameservers = vars.nameservers;
-
-  # Disable network wait services to improve boot time regardless of network manager
-  systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
+  # Use standard NetworkManager for laptop
+  networking.useHostResolvConf = false;
 
   environment.sessionVariables =
     vars.environmentVariables
     // {
       NH_FLAKE = vars.paths.flakeDir;
     };
+
+  # Enable SSH security hardening
+  security.sshHardening = {
+    enable = true;
+    allowedUsers = hostUsers;
+    allowPasswordAuthentication = false;
+    allowRootLogin = false;
+    maxAuthTries = 3;
+    enableFail2Ban = true;
+    enableKeyOnlyAccess = true;
+    trustedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ];
+  };
 
   # Enable secrets management
   modules.security.secrets = {
@@ -205,15 +311,28 @@ in
         config.age.secrets."user-password-${username}".path;
   });
 
-  # Hardware and service specific configurations
-  services.playerctld.enable = true;
-  services.fwupd.enable = true;
-  services.ollama.acceleration = vars.acceleration;
-  services.nfs.server = lib.mkIf vars.services.nfs.enable {
+  # System packages - consolidated from individual nixos modules
+  environment.systemPackages = with pkgs; [
+    # Power management
+    cpupower-gui # GUI for CPU frequency scaling
+    powertop # Power consumption analyzer
+    lm_sensors # Hardware monitoring
+    s-tui # Terminal UI stress test and monitoring tool
+    htop # Process viewer with power info
+    acpi # Command line battery info
+
+    # Login manager
+    tuigreet
+  ];
+
+  # Docker configuration
+  modules.containers.docker = {
     enable = true;
-    exports = vars.services.nfs.exports;
+    users = hostUsers; # Use all users for this host
+    rootless = false;
   };
-  hardware.nvidia-container-toolkit.enable = vars.gpu == "nvidia";
+
+  hardware.nvidia-container-toolkit.enable = false; # Samsung has Intel GPU
 
   nixpkgs.config.permittedInsecurePackages = [ "olm-3.2.16" "python3.12-youtube-dl-2021.12.17" ];
   system.stateVersion = "25.11";

@@ -9,7 +9,7 @@ with lib; let
 
   # Get the main user from host variables
   vars = import ../../hosts/${config.networking.hostName}/variables.nix;
-  username = vars.username;
+  inherit (vars) username;
 in
 {
   options.secrets.apiKeys = {
