@@ -3,9 +3,11 @@
 }: {
   systemd.user.timers.mbsync = {
     Unit.Description = "mbsync";
-    Timer.OnBootSec = "10m";
-    Timer.OnUnitInactiveSec = "10m";
-    Timer.Unit = "mbsync.service";
+    Timer = {
+      OnBootSec = "10m";
+      OnUnitInactiveSec = "10m";
+      Unit = "mbsync.service";
+    };
     Install.WantedBy = [ "timers.target" ];
   };
 

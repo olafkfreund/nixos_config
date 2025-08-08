@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   imports = [
     ./nix/nix.nix
     ./fonts/fonts.nix

@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   imports = [
     ./chrome.nix
     ./msedge.nix

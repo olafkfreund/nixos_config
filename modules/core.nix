@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   # Core modules - always loaded on every host
   # These provide essential system functionality
   imports = [

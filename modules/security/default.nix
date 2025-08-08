@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   imports = [
     ./ssh-hardening.nix
     ./firewall.nix

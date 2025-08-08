@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   # Overlays for P620-specific package overrides
   # nixpkgs.overlays = [
   #   (final: prev: {

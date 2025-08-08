@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   # Desktop environment modules
   # Only load on hosts with desktop environments
   imports = [

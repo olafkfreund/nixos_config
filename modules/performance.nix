@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   # Performance optimization modules
   # Only load on hosts that need advanced performance tuning
   imports = [

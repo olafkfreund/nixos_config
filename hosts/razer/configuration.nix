@@ -40,55 +40,49 @@ in
     ../../modules/containers/docker.nix
   ];
 
-  # Set hostname from variables
-  networking.hostName = vars.hostName;
+  # Consolidated networking configuration
+  networking = {
+    # Set hostname from variables
+    inherit (vars) hostName;
 
-  #Nixai
-  services.nixai = {
-    enable = true;
-    mcp.enable = true;
-  };
+    # Choose networking profile: "desktop", "server", or "minimal"
+    profile = "desktop";
 
-  # Choose networking profile: "desktop", "server", or "minimal"
-  networking.profile = "desktop";
-
-  # Tailscale VPN Configuration - Razer mobile laptop
-  networking.tailscale = {
-    enable = true;
-    authKeyFile = config.age.secrets.tailscale-auth-key.path;
-    hostname = "razer-laptop";
-    acceptRoutes = true;
-    acceptDns = false; # Keep NetworkManager DNS
-    ssh = true;
-    shields = true;
-    useRoutingFeatures = "client"; # Client that accepts routes
-    extraUpFlags = [
-      "--operator=olafkfreund"
-      "--accept-risk=lose-ssh"
-      # "--advertise-tags=tag:laptop,tag:mobile"  # Disabled - tags not permitted
-    ];
-  };
-
-  # Use NetworkManager for DNS management - disable systemd-resolved
-  services.resolved.enable = lib.mkForce false;
-
-  # Use NetworkManager for simple network management
-  networking.networkmanager = {
-    enable = true;
-    dns = "default"; # Use NetworkManager's built-in DNS
-    # Configure settings using new structured format
-    settings = {
-      main = {
-        dns = "default";
-      };
-      # Note: global DNS domain settings are not supported in structured format
-      # Will use networking.nameservers for DNS configuration instead
+    # Tailscale VPN Configuration - Razer mobile laptop
+    tailscale = {
+      enable = true;
+      authKeyFile = config.age.secrets.tailscale-auth-key.path;
+      hostname = "razer-laptop";
+      acceptRoutes = true;
+      acceptDns = false; # Keep NetworkManager DNS
+      ssh = true;
+      shields = true;
+      useRoutingFeatures = "client"; # Client that accepts routes
+      extraUpFlags = [
+        "--operator=olafkfreund"
+        "--accept-risk=lose-ssh"
+        # "--advertise-tags=tag:laptop,tag:mobile"  # Disabled - tags not permitted
+      ];
     };
-  };
-  networking.useNetworkd = false;
 
-  # Set custom nameservers as fallback
-  networking.nameservers = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
+    # Use NetworkManager for simple network management
+    networkmanager = {
+      enable = true;
+      dns = "default"; # Use NetworkManager's built-in DNS
+      # Configure settings using new structured format
+      settings = {
+        main = {
+          dns = "default";
+        };
+        # Note: global DNS domain settings are not supported in structured format
+        # Will use networking.nameservers for DNS configuration instead
+      };
+    };
+    useNetworkd = false;
+
+    # Set custom nameservers as fallback
+    nameservers = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
+  };
 
   # Configure AI providers directly
   ai.providers = {
@@ -211,13 +205,6 @@ in
     };
   };
 
-  # Centralized Logging - Send logs to DEX5550 Loki server
-  services.promtail-logging = {
-    enable = true;
-    lokiUrl = "http://dex5550:3100";
-    collectJournal = true;
-    collectKernel = true;
-  };
 
   # Enable NixOS package monitoring tools
   tools.nixpkgs-monitors = {
@@ -245,10 +232,29 @@ in
     '';
   };
 
-  # Disable secure-dns to use dex5550 DNS server for internal domains
-  services.secure-dns.enable = false;
-
+  # Consolidated services configuration
   services = {
+    # Nixai
+    nixai = {
+      enable = true;
+      mcp.enable = true;
+    };
+
+    # Use NetworkManager for DNS management - disable systemd-resolved
+    resolved.enable = lib.mkForce false;
+
+    # Centralized Logging - Send logs to DEX5550 Loki server
+    promtail-logging = {
+      enable = true;
+      lokiUrl = "http://dex5550:3100";
+      collectJournal = true;
+      collectKernel = true;
+    };
+
+    # Disable secure-dns to use dex5550 DNS server for internal domains
+    secure-dns.enable = false;
+
+    # X server and desktop environment
     xserver = {
       enable = true;
       displayManager.xserverArgs = [
@@ -260,6 +266,15 @@ in
 
     # Desktop environment
     desktopManager.gnome.enable = true;
+
+    # Hardware and service specific configurations
+    playerctld.enable = true;
+    fwupd.enable = true;
+    ollama.acceleration = vars.acceleration;
+    nfs.server = lib.mkIf vars.services.nfs.enable {
+      enable = true;
+      inherit (vars.services.nfs) exports;
+    };
   };
 
   # Docker configuration
@@ -345,14 +360,6 @@ in
     sbctl # For managing Secure Boot keys
   ];
 
-  # Hardware and service specific configurations
-  services.playerctld.enable = true;
-  services.fwupd.enable = true;
-  services.ollama.acceleration = vars.acceleration;
-  services.nfs.server = lib.mkIf vars.services.nfs.enable {
-    enable = true;
-    exports = vars.services.nfs.exports;
-  };
   hardware.nvidia-container-toolkit.enable = vars.gpu == "nvidia";
 
   nixpkgs.config = {

@@ -1,5 +1,4 @@
-{ ...
-}: {
+_: {
   services = {
     grafana = {
       enable = true;

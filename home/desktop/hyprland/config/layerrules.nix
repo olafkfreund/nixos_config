@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   wayland.windowManager.hyprland.extraConfig = ''
     # =============================================================================
     # LAYER RULES

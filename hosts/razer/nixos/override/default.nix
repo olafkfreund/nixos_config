@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   # Overlays for Razer-specific package overrides
   # nixpkgs.overlays = [
   #   (final: prev: {

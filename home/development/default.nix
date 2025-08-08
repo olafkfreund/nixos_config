@@ -1,6 +1,6 @@
 # Enhanced Development Environment
 # Complete development workflow with unified language support and productivity tools
-{ ... }: {
+_: {
   imports = [
     # Editor configurations (enhanced)
     ./vscode.nix

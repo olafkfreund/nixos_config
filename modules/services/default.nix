@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   imports = [
     ./mtr/mtr.nix
     ./print/default.nix

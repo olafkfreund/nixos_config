@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   imports = [
     # ./scripts.nix
     ./terminals/default.nix

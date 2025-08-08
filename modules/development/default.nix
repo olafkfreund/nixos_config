@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   imports = [
     ./cargo.nix
     ./python.nix

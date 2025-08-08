@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   services = {
     github-runners = {
       runner = {

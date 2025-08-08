@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   imports = [
     ./browsers/default.nix
     ./desktop/default-servers.nix

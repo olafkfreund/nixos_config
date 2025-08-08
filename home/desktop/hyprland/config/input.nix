@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   wayland.windowManager.hyprland.extraConfig = ''
     input {
       kb_layout=gb

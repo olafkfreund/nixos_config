@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   imports = [
     # ./hyprland/hypr.nix
     ./1password/1password.nix

@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   wayland.windowManager.hyprland.extraConfig = ''
     # Environment variables for Hyprland configuration
     env = GBM_BACKEND,nvidia-drm           # Use NVIDIA GBM backend

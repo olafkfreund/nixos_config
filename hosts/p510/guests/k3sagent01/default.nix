@@ -21,14 +21,14 @@ in
       enable = true;
       permitRootLogin = "yes";
     };
-    
+
     resolved = {
       enable = true;
       extraConfig = ''
         MulticastDNS=true
       '';
     };
-    
+
     k3s = {
       enable = true;
       role = "agent";
