@@ -15,25 +15,43 @@ in
   networking.hostName = "k3sagent01";
   environment.noXlibs = false;
 
-  services.openssh.enable = true;
-  services.openssh.permitRootLogin = "yes";
-
-  systemd.network.enable = true;
-  systemd.network.networks."20-tap" = {
-    matchConfig.Type = "ether";
-    matchConfig.MACAddress = "5E:6D:F8:D1:E8:1A";
-    networkConfig = {
-      Address = [ "192.168.1.202/24" ];
-      Gateway = "192.168.1.254";
-      DNS = [ "8.8.8.8" "1.1.1.1" ];
-      IPv6AcceptRA = true;
-      DHCP = "no";
+  # Consolidated services configuration
+  services = {
+    openssh = {
+      enable = true;
+      permitRootLogin = "yes";
+    };
+    
+    resolved = {
+      enable = true;
+      extraConfig = ''
+        MulticastDNS=true
+      '';
+    };
+    
+    k3s = {
+      enable = true;
+      role = "agent";
+      serverUrl = "https://k3sserver.local:6443";
+      token = k3sToken;
     };
   };
-  services.resolved.enable = true;
-  services.resolved.extraConfig = ''
-    MulticastDNS=true
-  '';
+
+  # Consolidated systemd configuration
+  systemd.network = {
+    enable = true;
+    networks."20-tap" = {
+      matchConfig.Type = "ether";
+      matchConfig.MACAddress = "5E:6D:F8:D1:E8:1A";
+      networkConfig = {
+        Address = [ "192.168.1.202/24" ];
+        Gateway = "192.168.1.254";
+        DNS = [ "8.8.8.8" "1.1.1.1" ];
+        IPv6AcceptRA = true;
+        DHCP = "no";
+      };
+    };
+  };
 
   networking.extraHosts = ''
     192.168.1.201 k3sserver.local
@@ -43,12 +61,6 @@ in
 
   time.timeZone = "Europe/London";
 
-  services.k3s = {
-    enable = true;
-    role = "agent";
-    serverUrl = "https://k3sserver.local:6443";
-    token = k3sToken;
-  };
   environment.systemPackages = with pkgs; [
     kubectl
     k3s

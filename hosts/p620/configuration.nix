@@ -42,52 +42,100 @@ in
     ../../modules/scrcpy/default.nix
     ../../modules/system/logging.nix
   ];
-  #Nixai
-  services.nixai = {
-    enable = true;
-    mcp.enable = true;
-  };
+  # Consolidated networking configuration
+  networking = {
+    # Set hostname from variables
+    inherit (vars) hostName;
 
-  # Set hostname from variables
-  networking.hostName = vars.hostName;
+    # Choose networking profile: "desktop", "server", or "minimal"
+    profile = "server";
 
-  # Choose networking profile: "desktop", "server", or "minimal"
-  networking.profile = "server";
+    # Tailscale VPN Configuration
+    # Research shows acceptDns=false is critical for NixOS to avoid DNS conflicts
+    tailscale = {
+      enable = true;
+      authKeyFile = config.age.secrets.tailscale-auth-key.path;
+      hostname = "p620-workstation";
+      subnet = "192.168.1.0/24"; # Advertise local subnet
+      acceptRoutes = true;
+      acceptDns = false; # CRITICAL: Prevent Tailscale DNS conflicts with systemd-resolved
+      ssh = true;
+      shields = true;
+      useRoutingFeatures = "both"; # Can route and accept routes
+      extraUpFlags = [
+        "--operator=olafkfreund"
+        "--accept-risk=lose-ssh"
+      ];
+    };
 
-  # Tailscale VPN Configuration
-  # Research shows acceptDns=false is critical for NixOS to avoid DNS conflicts
-  networking.tailscale = {
-    enable = true;
-    authKeyFile = config.age.secrets.tailscale-auth-key.path;
-    hostname = "p620-workstation";
-    subnet = "192.168.1.0/24"; # Advertise local subnet
-    acceptRoutes = true;
-    acceptDns = false; # CRITICAL: Prevent Tailscale DNS conflicts with systemd-resolved
-    ssh = true;
-    shields = true;
-    useRoutingFeatures = "both"; # Can route and accept routes
-    extraUpFlags = [
-      "--operator=olafkfreund"
-      "--accept-risk=lose-ssh"
-    ];
-  };
+    # Use DHCP-provided DNS and standard networking
+    useNetworkd = lib.mkForce true;
 
-  # Use systemd-resolved for proper DNS management with systemd-networkd
-  # Based on Tailscale best practices research - avoid DNS conflicts
-  services.resolved = {
-    enable = true;
-    fallbackDns = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
-    domains = [ "~home.freundcloud.com" ]; # Use routing directive for local domain
-    dnssec = lib.mkForce "false"; # Resolve DNSSEC conflict
-    llmnr = lib.mkForce "false"; # Disable LLMNR to avoid conflicts with Tailscale
-    extraConfig = ''
-      DNS=192.168.1.222 1.1.1.1 8.8.8.8
-      Domains=~home.freundcloud.com
-      Cache=yes
-      CacheFromLocalhost=no
-      DNSStubListener=yes
-      ReadEtcHosts=yes
-    '';
+    # Network performance tuning
+    performanceTuning = {
+      enable = true;
+      profile = "throughput"; # Optimize for AI workload throughput
+
+      tcpOptimization = {
+        enable = true;
+        congestionControl = "bbr";
+        windowScaling = true;
+        fastOpen = true;
+        lowLatency = false; # Prioritize throughput over latency
+      };
+
+      bufferOptimization = {
+        enable = true;
+        receiveBuffer = 33554432; # 32MB for high-throughput AI workloads
+        sendBuffer = 33554432; # 32MB for high-throughput AI workloads
+        autotuning = true;
+      };
+
+      interHostOptimization = {
+        enable = true;
+        hosts = [ "dex5550" "p510" "razer" ];
+        jumboFrames = false; # Keep disabled for compatibility
+        routeOptimization = true;
+      };
+
+      dnsOptimization = {
+        enable = true;
+        caching = true;
+        parallelQueries = true;
+        customServers = [ "192.168.1.222" "1.1.1.1" ];
+      };
+
+      monitoringOptimization = {
+        enable = true;
+        compression = true;
+        batchingInterval = 5; # More frequent for performance workstation
+        prioritization = true;
+      };
+    };
+
+    # Firewall configuration for SSH
+    firewall = {
+      allowedTCPPorts = [ 22 ]; # SSH port from hardening config
+
+      # Extra rules for SSH protection
+      extraCommands = ''
+        # Rate limiting for SSH connections
+        iptables -I INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --set --name SSH_LIMIT
+        iptables -I INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name SSH_LIMIT -j DROP
+
+        # Allow established SSH connections
+        iptables -A INPUT -p tcp --dport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+        # Log dropped SSH attempts
+        iptables -A INPUT -p tcp --dport 22 -j LOG --log-prefix "SSH-DROP: " --log-level 4
+      '';
+
+      extraStopCommands = ''
+        # Clean up SSH rules
+        iptables -D INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --set --name SSH_LIMIT 2>/dev/null || true
+        iptables -D INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name SSH_LIMIT -j DROP 2>/dev/null || true
+      '';
+    };
   };
 
   # Configure AI providers directly
@@ -137,26 +185,6 @@ in
     trustedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ];
   };
 
-  # Enable hardware monitoring with desktop notifications
-  monitoring.hardwareMonitor = {
-    enable = true;
-    interval = 300; # Check every 5 minutes
-    enableDesktopNotifications = true;
-
-    criticalThresholds = {
-      diskUsage = 85; # P620 at 49.6%, lower threshold for early warning
-      memoryUsage = 90; # P620 at 22.8%, higher threshold OK for workstation
-      cpuLoad = 200; # AMD Ryzen 5 PRO 4650G (12 cores)
-      temperature = 85; # AMD CPU, conservative threshold
-    };
-
-    warningThresholds = {
-      diskUsage = 75; # Early warning for P620
-      memoryUsage = 80; # Memory warning
-      cpuLoad = 150; # Load warning
-      temperature = 75; # Temperature warning
-    };
-  };
 
   # AI production dashboard and load testing removed - were non-functional services consuming resources
 
@@ -257,7 +285,7 @@ in
     };
   };
 
-  # Monitoring configuration - P620 as client, dex5550 is now server
+  # Consolidated monitoring configuration
   monitoring = {
     enable = true;
     mode = "client"; # Send data to dex5550 monitoring server
@@ -281,17 +309,69 @@ in
       interval = "30s";
       dataDir = "/var/lib/ai-analysis";
     };
+
+    # Enable hardware monitoring with desktop notifications
+    hardwareMonitor = {
+      enable = true;
+      interval = 300; # Check every 5 minutes
+      enableDesktopNotifications = true;
+
+      criticalThresholds = {
+        diskUsage = 85; # P620 at 49.6%, lower threshold for early warning
+        memoryUsage = 90; # P620 at 22.8%, higher threshold OK for workstation
+        cpuLoad = 200; # AMD Ryzen 5 PRO 4650G (12 cores)
+        temperature = 85; # AMD CPU, conservative threshold
+      };
+
+      warningThresholds = {
+        diskUsage = 75; # Early warning for P620
+        memoryUsage = 80; # Memory warning
+        cpuLoad = 150; # Load warning
+        temperature = 75; # Temperature warning
+      };
+    };
+
+    # Performance analytics
+    performanceAnalytics = {
+      enable = true;
+      dataRetention = "30d";
+      analysisInterval = "1m"; # Frequent analysis for performance workstation
+
+      metricsCollection = {
+        enable = true;
+        systemMetrics = true;
+        applicationMetrics = true;
+        networkMetrics = true;
+        storageMetrics = true;
+        aiMetrics = true;
+      };
+
+      analytics = {
+        enable = true;
+        trendAnalysis = true;
+        anomalyDetection = true;
+        predictiveAnalysis = true;
+        bottleneckDetection = true;
+      };
+
+      reporting = {
+        enable = true;
+        dailyReports = true;
+        weeklyReports = true;
+        alertThresholds = true;
+      };
+
+      dashboards = {
+        enable = true;
+        realTimeMetrics = true;
+        historicalAnalysis = true;
+        customMetrics = true;
+      };
+    };
   };
 
 
   # Enable encrypted API keys
-  # Centralized Logging - Send logs to DEX5550 Loki server
-  services.promtail-logging = {
-    enable = true;
-    lokiUrl = "http://dex5550:3100";
-    collectJournal = true;
-    collectKernel = true;
-  };
 
   secrets.apiKeys = {
     enable = true;
@@ -299,18 +379,59 @@ in
     enableUserEnvironment = true;
   };
 
-  # Enable logging configuration for noise reduction
-  system.logging = {
-    enableFiltering = true;
-    filterRules = [
-      "router dispatching GET /health"
-      "router jsonParser  : /health"
-      "body-parser:json skip empty body"
-      "GET /health"
-      "health check"
-      "connection established"
-      "connection closed"
-    ];
+  # Consolidated system configuration
+  system = {
+    # Enable logging configuration for noise reduction
+    logging = {
+      enableFiltering = true;
+      filterRules = [
+        "router dispatching GET /health"
+        "router jsonParser  : /health"
+        "body-parser:json skip empty body"
+        "GET /health"
+        "health check"
+        "connection established"
+        "connection closed"
+      ];
+    };
+
+    # Performance Optimization Configuration (Phase 10.4)
+    # High-performance AMD workstation profile
+    resourceManager = {
+      enable = true;
+      profile = "performance";
+
+      cpuManagement = {
+        enable = true;
+        dynamicGovernor = true;
+        affinityOptimization = true;
+        coreReservation = false; # Use all cores for maximum performance
+      };
+
+      memoryManagement = {
+        enable = true;
+        dynamicSwap = true;
+        hugePagesOptimization = true;
+        memoryCompression = false; # Disable for performance
+        oomProtection = true;
+      };
+
+      ioManagement = {
+        enable = true;
+        dynamicScheduler = true;
+        ioNiceOptimization = true;
+        cacheOptimization = true;
+      };
+
+      networkManagement = {
+        enable = true;
+        trafficShaping = false;
+        connectionOptimization = true;
+      };
+    };
+
+    # System version
+    stateVersion = "25.11";
   };
 
 
@@ -326,21 +447,24 @@ in
     allowBrokenPackages = false;
   };
 
-  # Enable Hyprland system configuration
-  modules.desktop.hyprland-uwsm.enable = true;
+  # Consolidated modules configuration
+  modules = {
+    # Enable Hyprland system configuration
+    desktop.hyprland-uwsm.enable = true;
 
-  # Docker configuration
-  modules.containers.docker = {
-    enable = true;
-    users = hostUsers; # Use all users for this host
-    rootless = false;
-  };
+    # Docker configuration
+    containers.docker = {
+      enable = true;
+      users = hostUsers; # Use all users for this host
+      rootless = false;
+    };
 
-  # Enable secrets management
-  modules.security.secrets = {
-    enable = true;
-    hostKeys = [ "/etc/ssh/ssh_host_ed25519_key" ];
-    userKeys = [ "/home/${vars.username}/.ssh/id_ed25519" ];
+    # Enable secrets management
+    security.secrets = {
+      enable = true;
+      hostKeys = [ "/etc/ssh/ssh_host_ed25519_key" ];
+      userKeys = [ "/home/${vars.username}/.ssh/id_ed25519" ];
+    };
   };
 
   # Create system users for all host users
@@ -360,8 +484,33 @@ in
   # Remove duplicate user configuration - use the one above that handles all hostUsers
   # users.users.${vars.username} is now handled by the genAttrs above
 
-  # Service-specific configurations
+  # Consolidated services configuration
   services = {
+    # Nixai
+    nixai = {
+      enable = true;
+      mcp.enable = true;
+    };
+
+    # Use systemd-resolved for proper DNS management with systemd-networkd
+    # Based on Tailscale best practices research - avoid DNS conflicts
+    resolved = {
+      enable = true;
+      fallbackDns = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
+      domains = [ "~home.freundcloud.com" ]; # Use routing directive for local domain
+      dnssec = lib.mkForce "false"; # Resolve DNSSEC conflict
+      llmnr = lib.mkForce "false"; # Disable LLMNR to avoid conflicts with Tailscale
+      extraConfig = ''
+        DNS=192.168.1.222 1.1.1.1 8.8.8.8
+        Domains=~home.freundcloud.com
+        Cache=yes
+        CacheFromLocalhost=no
+        DNSStubListener=yes
+        ReadEtcHosts=yes
+      '';
+    };
+
+    # X server configuration
     xserver = {
       enable = true;
       displayManager.xserverArgs = [
@@ -377,7 +526,7 @@ in
     # File systems and services
     nfs.server = lib.mkIf vars.services.nfs.enable {
       enable = true;
-      exports = vars.services.nfs.exports;
+      inherit (vars.services.nfs) exports;
     };
 
     # Other services
@@ -409,6 +558,23 @@ in
         HSA_OVERRIDE_GFX_VERSION = lib.mkForce "11.0.0";
       };
     };
+
+    # Centralized Logging - Send logs to DEX5550 Loki server
+    promtail-logging = {
+      enable = true;
+      lokiUrl = "http://dex5550:3100";
+      collectJournal = true;
+      collectKernel = true;
+    };
+
+    # Hardware-specific configurations
+    udev = {
+      packages = [ pkgs.via ];
+      extraRules = builtins.concatStringsSep "\n" [
+        ''ACTION=="add", SUBSYSTEM=="video4linux", DRIVERS=="uvcvideo", RUN+="${pkgs.v4l-utils}/bin/v4l2-ctl --set-ctrl=power_line_frequency=1"''
+        ''KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0660", TAG+="uaccess"''
+      ];
+    };
   };
 
   # System packages
@@ -423,12 +589,6 @@ in
     (callPackage ../../home/development/qwen-code/default.nix { })
   ];
 
-  # Hardware-specific configurations
-  services.udev.packages = [ pkgs.via ];
-  services.udev.extraRules = builtins.concatStringsSep "\n" [
-    ''ACTION=="add", SUBSYSTEM=="video4linux", DRIVERS=="uvcvideo", RUN+="${pkgs.v4l-utils}/bin/v4l2-ctl --set-ctrl=power_line_frequency=1"''
-    ''KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0660", TAG+="uaccess"''
-  ];
 
   # Hardware features
   hardware = {
@@ -443,158 +603,83 @@ in
     options = [ "x-systemd.automount" "noauto" ];
   };
 
-  # Network-specific overrides that go beyond the network profile
-  systemd.network.wait-online.timeout = 10;
-  systemd.services = {
-    NetworkManager-wait-online.enable = lib.mkForce false;
-    systemd-networkd-wait-online.enable = lib.mkForce false;
-    fwupd.serviceConfig.LimitNOFILE = 524288;
-  };
-
-  # Use DHCP-provided DNS and standard networking
-  networking = {
-    useNetworkd = lib.mkForce true;
-  };
-
-  # Configure systemd-networkd for your network interfaces
-  systemd.network = {
-    enable = true;
-    networks = {
-      "20-wired" = {
-        matchConfig.Name = "en*";
-        networkConfig = {
-          MulticastDNS = false;
-          LLMNR = false;
-          DHCP = "ipv4";
-          IPv6AcceptRA = true;
-          Domains = "~home.freundcloud.com"; # Use routing directive for local domain
-          DNS = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
+  # Consolidated systemd configuration
+  systemd = {
+    # Network-specific overrides that go beyond the network profile
+    network = {
+      enable = true;
+      wait-online.timeout = 10;
+      networks = {
+        "20-wired" = {
+          matchConfig.Name = "en*";
+          networkConfig = {
+            MulticastDNS = false;
+            LLMNR = false;
+            DHCP = "ipv4";
+            IPv6AcceptRA = true;
+            Domains = "~home.freundcloud.com"; # Use routing directive for local domain
+            DNS = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
+          };
+          # Higher priority for wired connection
+          dhcpV4Config = {
+            RouteMetric = 10;
+            UseDNS = false; # Use our custom DNS configuration
+          };
         };
-        # Higher priority for wired connection
-        dhcpV4Config = {
-          RouteMetric = 10;
-          UseDNS = false; # Use our custom DNS configuration
+        "25-wireless" = {
+          matchConfig.Name = "wl*";
+          networkConfig = {
+            MulticastDNS = false;
+            LLMNR = false;
+            DHCP = "ipv4";
+            IPv6AcceptRA = true;
+          };
+          # Lower priority for wireless
+          dhcpV4Config = {
+            RouteMetric = 20;
+          };
         };
-      };
-      "25-wireless" = {
-        matchConfig.Name = "wl*";
-        networkConfig = {
-          MulticastDNS = false;
-          LLMNR = false;
-          DHCP = "ipv4";
-          IPv6AcceptRA = true;
-        };
-        # Lower priority for wireless
-        dhcpV4Config = {
-          RouteMetric = 20;
-        };
-      };
-      # Configure Tailscale interface - CRITICAL: Don't let systemd-networkd manage it
-      # Research shows this prevents "Link tailscale0 is managed" DNS conflicts
-      "30-tailscale" = {
-        matchConfig.Name = "tailscale0";
-        networkConfig = {
-          MulticastDNS = false;
-          LLMNR = false;
-          DHCP = "no"; # NEVER enable DHCP on Tailscale interface
-          DNS = [ ]; # Explicitly no DNS - let Tailscale handle it
-          Domains = [ ]; # No domain routing through this interface
+        # Configure Tailscale interface - CRITICAL: Don't let systemd-networkd manage it
+        # Research shows this prevents "Link tailscale0 is managed" DNS conflicts
+        "30-tailscale" = {
+          matchConfig.Name = "tailscale0";
+          networkConfig = {
+            MulticastDNS = false;
+            LLMNR = false;
+            DHCP = "no"; # NEVER enable DHCP on Tailscale interface
+            DNS = [ ]; # Explicitly no DNS - let Tailscale handle it
+            Domains = [ ]; # No domain routing through this interface
+          };
         };
       };
     };
+
+    services = {
+      NetworkManager-wait-online.enable = lib.mkForce false;
+      systemd-networkd-wait-online.enable = lib.mkForce false;
+      fwupd.serviceConfig.LimitNOFILE = 524288;
+    };
+
+    # User services
+    user.services.scream-ivshmem = {
+      enable = true;
+      description = "Scream IVSHMEM";
+      serviceConfig = {
+        ExecStart = "${pkgs.scream}/bin/scream-ivshmem-pulse /dev/shm/scream";
+        Restart = "always";
+      };
+      wantedBy = [ "multi-user.target" ];
+      requires = [ "pulseaudio.service" ];
+    };
   };
 
-  # User services
-  systemd.user.services.scream-ivshmem = {
-    enable = true;
-    description = "Scream IVSHMEM";
-    serviceConfig = {
-      ExecStart = "${pkgs.scream}/bin/scream-ivshmem-pulse /dev/shm/scream";
-      Restart = "always";
-    };
-    wantedBy = [ "multi-user.target" ];
-    requires = [ "pulseaudio.service" ];
-  };
+
+
 
   # Nix configuration
   nix.settings.allowed-users = [ "nix-serve" ];
 
-  # Performance Optimization Configuration (Phase 10.4)
-  # High-performance AMD workstation profile
-  system.resourceManager = {
-    enable = true;
-    profile = "performance";
 
-    cpuManagement = {
-      enable = true;
-      dynamicGovernor = true;
-      affinityOptimization = true;
-      coreReservation = false; # Use all cores for maximum performance
-    };
-
-    memoryManagement = {
-      enable = true;
-      dynamicSwap = true;
-      hugePagesOptimization = true;
-      memoryCompression = false; # Disable for performance
-      oomProtection = true;
-    };
-
-    ioManagement = {
-      enable = true;
-      dynamicScheduler = true;
-      ioNiceOptimization = true;
-      cacheOptimization = true;
-    };
-
-    networkManagement = {
-      enable = true;
-      trafficShaping = false;
-      connectionOptimization = true;
-    };
-  };
-
-  # Network performance tuning
-  networking.performanceTuning = {
-    enable = true;
-    profile = "throughput"; # Optimize for AI workload throughput
-
-    tcpOptimization = {
-      enable = true;
-      congestionControl = "bbr";
-      windowScaling = true;
-      fastOpen = true;
-      lowLatency = false; # Prioritize throughput over latency
-    };
-
-    bufferOptimization = {
-      enable = true;
-      receiveBuffer = 33554432; # 32MB for high-throughput AI workloads
-      sendBuffer = 33554432; # 32MB for high-throughput AI workloads
-      autotuning = true;
-    };
-
-    interHostOptimization = {
-      enable = true;
-      hosts = [ "dex5550" "p510" "razer" ];
-      jumboFrames = false; # Keep disabled for compatibility
-      routeOptimization = true;
-    };
-
-    dnsOptimization = {
-      enable = true;
-      caching = true;
-      parallelQueries = true;
-      customServers = [ "192.168.1.222" "1.1.1.1" ];
-    };
-
-    monitoringOptimization = {
-      enable = true;
-      compression = true;
-      batchingInterval = 5; # More frequent for performance workstation
-      prioritization = true;
-    };
-  };
 
   # Storage performance optimization
   storage.performanceOptimization = {
@@ -637,43 +722,6 @@ in
     };
   };
 
-  # Performance analytics
-  monitoring.performanceAnalytics = {
-    enable = true;
-    dataRetention = "30d";
-    analysisInterval = "1m"; # Frequent analysis for performance workstation
-
-    metricsCollection = {
-      enable = true;
-      systemMetrics = true;
-      applicationMetrics = true;
-      networkMetrics = true;
-      storageMetrics = true;
-      aiMetrics = true;
-    };
-
-    analytics = {
-      enable = true;
-      trendAnalysis = true;
-      anomalyDetection = true;
-      predictiveAnalysis = true;
-      bottleneckDetection = true;
-    };
-
-    reporting = {
-      enable = true;
-      dailyReports = true;
-      weeklyReports = true;
-      alertThresholds = true;
-    };
-
-    dashboards = {
-      enable = true;
-      realTimeMetrics = true;
-      historicalAnalysis = true;
-      customMetrics = true;
-    };
-  };
 
   # AI-powered automated performance tuning removed - was non-functional and consuming resources
 
@@ -686,6 +734,4 @@ in
     ];
   };
 
-  # System version
-  system.stateVersion = "25.11";
 }
