@@ -2,47 +2,58 @@
 , pkgs
 , ...
 }: {
-  # Trackpad and input device optimization - using updated option names
-  services.libinput = {
-    enable = true; # Previously services.xserver.libinput.enable
-    touchpad = {
-      tapping = true;
-      naturalScrolling = true;
-      scrollMethod = "twofinger";
-      disableWhileTyping = false;
-      clickMethod = "clickfinger";
+  # Consolidated services configuration
+  services = {
+    # Trackpad and input device optimization - using updated option names
+    libinput = {
+      enable = true; # Previously services.xserver.libinput.enable
+      touchpad = {
+        tapping = true;
+        naturalScrolling = true;
+        scrollMethod = "twofinger";
+        disableWhileTyping = false;
+        clickMethod = "clickfinger";
+      };
+    };
+
+    # Backlight control key bindings
+    actkbd = {
+      enable = true;
+      bindings = [
+        # Add key bindings for brightness control
+        {
+          keys = [ 224 ];
+          events = [ "key" ];
+          command = "${pkgs.light}/bin/light -U 5";
+        }
+        {
+          keys = [ 225 ];
+          events = [ "key" ];
+          command = "${pkgs.light}/bin/light -A 5";
+        }
+      ];
+    };
+
+    # Battery optimization
+    upower = {
+      enable = true;
+      criticalPowerAction = "Hibernate";
+    };
+
+    # Support for closing lid
+    logind = {
+      lidSwitch = lib.mkDefault "suspend";
+      lidSwitchExternalPower = "ignore";
     };
   };
 
   # Backlight control
   programs.light.enable = true;
-  services.actkbd = {
-    enable = true;
-    bindings = [
-      # Add key bindings for brightness control
-      {
-        keys = [ 224 ];
-        events = [ "key" ];
-        command = "${pkgs.light}/bin/light -U 5";
-      }
-      {
-        keys = [ 225 ];
-        events = [ "key" ];
-        command = "${pkgs.light}/bin/light -A 5";
-      }
-    ];
-  };
 
   # Fan control and thermal management for Razer
   boot.extraModprobeConfig = ''
     options i915 enable_fbc=1 enable_guc=2
   '';
-
-  # Battery optimization
-  services.upower = {
-    enable = true;
-    criticalPowerAction = "Hibernate";
-  };
 
   # Razer-specific utilities
   hardware.openrazer = {
@@ -59,10 +70,4 @@
 
   # Add Razer utilities
   # Razer hardware packages moved to main configuration.nix for consolidation
-
-  # Support for closing lid
-  services.logind = {
-    lidSwitch = lib.mkDefault "suspend";
-    lidSwitchExternalPower = "ignore";
-  };
 }

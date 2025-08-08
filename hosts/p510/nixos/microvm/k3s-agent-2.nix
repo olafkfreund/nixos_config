@@ -31,7 +31,7 @@ in
       {
         type = "tap";
         id = hostname;
-        mac = mac;
+        inherit mac;
       }
     ];
 
@@ -66,23 +66,60 @@ in
   };
 
   # Basic system configuration
-  boot.isContainer = true;
   system.stateVersion = "24.11";
 
   # Set hostname explicitly
   networking.hostName = hostname;
 
-  # Enhanced K3s configuration
-  services.k3s = {
-    enable = true;
-    role = "agent";
-    serverAddr = "https://${masterIP}:6443";
-    token = k3sToken;
-    extraFlags = toString [
-      "--node-ip=${lib.head (lib.splitString "/" ip)}" # Extract IP without CIDR
-      "--kubelet-arg=eviction-hard=memory.available<100Mi,nodefs.available<5%"
-      "--kubelet-arg=eviction-minimum-reclaim=memory.available=100Mi,nodefs.available=1Gi"
-    ];
+  # Consolidated boot configuration
+  boot = {
+    isContainer = true;
+    # Enable cgroups v2 for better container resource management
+    kernelParams = [ "cgroup_enable=cpuset" "cgroup_memory=1" "cgroup_enable=memory" ];
+    # Sysctl tuning for Kubernetes
+    kernel.sysctl = {
+      # Network optimization for k8s
+      "net.ipv4.ip_forward" = 1;
+      "net.bridge.bridge-nf-call-iptables" = 1;
+      "net.bridge.bridge-nf-call-ip6tables" = 1;
+
+      # Performance optimization
+      "vm.swappiness" = 0; # Disable swapping for k8s
+      "vm.overcommit_memory" = 1; # Allow overcommitting memory
+      "kernel.panic" = 10; # Reboot after 10 seconds on kernel panic
+
+      # File descriptor limits
+      "fs.file-max" = 1048576; # Increase max file descriptors
+    };
+  };
+
+  # Consolidated services configuration
+  services = {
+    # Enhanced K3s configuration
+    k3s = {
+      enable = true;
+      role = "agent";
+      serverAddr = "https://${masterIP}:6443";
+      token = k3sToken;
+      extraFlags = toString [
+        "--node-ip=${lib.head (lib.splitString "/" ip)}" # Extract IP without CIDR
+        "--kubelet-arg=eviction-hard=memory.available<100Mi,nodefs.available<5%"
+        "--kubelet-arg=eviction-minimum-reclaim=memory.available=100Mi,nodefs.available=1Gi"
+      ];
+    };
+
+    # Auto-login
+    getty.autologinUser = username;
+
+    # SSH configuration - enhanced security
+    openssh = {
+      enable = true;
+      settings = {
+        PermitRootLogin = "yes";
+        PasswordAuthentication = false; # Enforce key-based auth
+        KbdInteractiveAuthentication = false;
+      };
+    };
   };
 
   # Networking optimization with static IP
@@ -133,18 +170,6 @@ in
     wheelNeedsPassword = false;
   };
 
-  # Auto-login
-  services.getty.autologinUser = username;
-
-  # SSH configuration - enhanced security
-  services.openssh = {
-    enable = true;
-    settings = {
-      PermitRootLogin = "yes";
-      PasswordAuthentication = false; # Enforce key-based auth
-      KbdInteractiveAuthentication = false;
-    };
-  };
 
   # User configuration
   users.users.${username} = {
@@ -185,22 +210,4 @@ in
     yq-go
   ];
 
-  # Enable cgroups v2 for better container resource management
-  boot.kernelParams = [ "cgroup_enable=cpuset" "cgroup_memory=1" "cgroup_enable=memory" ];
-
-  # Sysctl tuning for Kubernetes
-  boot.kernel.sysctl = {
-    # Network optimization for k8s
-    "net.ipv4.ip_forward" = 1;
-    "net.bridge.bridge-nf-call-iptables" = 1;
-    "net.bridge.bridge-nf-call-ip6tables" = 1;
-
-    # Performance optimization
-    "vm.swappiness" = 0; # Disable swapping for k8s
-    "vm.overcommit_memory" = 1; # Allow overcommitting memory
-    "kernel.panic" = 10; # Reboot after 10 seconds on kernel panic
-
-    # File descriptor limits
-    "fs.file-max" = 1048576; # Increase max file descriptors
-  };
 }

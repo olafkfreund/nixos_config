@@ -29,29 +29,114 @@ in
     ../../modules/secrets/api-keys.nix
   ];
 
-  # Set hostname from variables
-  networking.hostName = vars.hostName;
+  # Consolidated networking configuration
+  networking = {
+    # Set hostname from variables
+    hostName = vars.hostName;
 
-  # Choose networking profile: "server" for server configuration
-  networking.profile = "server";
+    # Choose networking profile: "server" for server configuration
+    profile = "server";
 
-  # Tailscale VPN Configuration - DEX5550 as exit node and subnet router
-  networking.tailscale = {
-    enable = true;
-    authKeyFile = config.age.secrets.tailscale-auth-key.path;
-    hostname = "dex5550-server";
-    exitNode = true; # Enable as exit node for external internet access
-    subnet = "192.168.1.0/24"; # Advertise home network subnet
-    acceptRoutes = true;
-    acceptDns = false; # Use local BIND9 DNS
-    ssh = true;
-    shields = false; # Disable shields for server to allow incoming connections
-    useRoutingFeatures = "server"; # Act as router for other nodes
-    extraUpFlags = [
-      "--operator=olafkfreund"
-      "--accept-risk=lose-ssh"
-      "--advertise-tags=tag:server,tag:exitnode"
-    ];
+    # Tailscale VPN Configuration - DEX5550 as exit node and subnet router
+    tailscale = {
+      enable = true;
+      authKeyFile = config.age.secrets.tailscale-auth-key.path;
+      hostname = "dex5550-server";
+      exitNode = true; # Enable as exit node for external internet access
+      subnet = "192.168.1.0/24"; # Advertise home network subnet
+      acceptRoutes = true;
+      acceptDns = false; # Use local BIND9 DNS
+      ssh = true;
+      shields = false; # Disable shields for server to allow incoming connections
+      useRoutingFeatures = "server"; # Act as router for other nodes
+      extraUpFlags = [
+        "--operator=olafkfreund"
+        "--accept-risk=lose-ssh"
+        "--advertise-tags=tag:server,tag:exitnode"
+      ];
+    };
+
+    # Use local DNS server
+    nameservers = [ "127.0.0.1" ];
+
+    # Disable nftables to use iptables-based firewall
+    nftables.enable = lib.mkForce false;
+
+    # Comprehensive firewall configuration for management server
+    firewall = {
+      enable = lib.mkForce true;
+
+      # Default deny policy - only explicitly allowed ports are open
+      allowPing = true;
+
+      # External access ports (will be secured by reverse proxy)
+      allowedTCPPorts = [
+        22 # SSH (will be rate limited)
+        53 # DNS (TCP) - BIND9
+        80 # HTTP (redirect to HTTPS)
+        443 # HTTPS (reverse proxy)
+      ];
+
+      allowedUDPPorts = [
+        53 # DNS (UDP) - BIND9
+      ];
+
+      # Internal network management ports (192.168.1.0/24 only)
+      interfaces."eno1" = {
+        allowedTCPPorts = [
+          3001 # Grafana
+          3100 # Loki HTTP
+          9090 # Prometheus
+          9093 # Alertmanager
+          9096 # Loki gRPC
+          9100 # Node Exporter
+          9101 # NixOS Exporter
+          9102 # Systemd Exporter
+        ];
+      };
+    };
+
+    # Network performance tuning for monitoring server
+    performanceTuning = {
+      enable = true;
+      profile = "balanced";
+
+      tcpOptimization = {
+        enable = true;
+        congestionControl = "bbr";
+        windowScaling = true;
+        fastOpen = true;
+        lowLatency = true; # Important for monitoring responsiveness
+      };
+
+      bufferOptimization = {
+        enable = true;
+        receiveBuffer = 16777216; # 16MB for monitoring data
+        sendBuffer = 16777216; # 16MB for monitoring data
+        autotuning = true;
+      };
+
+      interHostOptimization = {
+        enable = true;
+        hosts = [ "p620" "p510" "razer" ];
+        jumboFrames = false;
+        routeOptimization = true;
+      };
+
+      dnsOptimization = {
+        enable = true;
+        caching = true;
+        parallelQueries = true;
+        customServers = [ "127.0.0.1" "1.1.1.1" ]; # Use local DNS first
+      };
+
+      monitoringOptimization = {
+        enable = true;
+        compression = true;
+        batchingInterval = 15; # Standard interval for monitoring server
+        prioritization = true;
+      };
+    };
   };
 
   # Configure AI providers directly - lightweight config for low-power system
@@ -170,76 +255,376 @@ in
     };
   };
 
-  # Loki log aggregation server
-  services.loki = {
-    enable = true;
-    configuration = {
-      server = {
-        http_listen_port = 3100;
-        grpc_listen_port = 9096;
-      };
-      auth_enabled = false;
-      ingester = {
-        lifecycler = {
-          address = "0.0.0.0";
-          ring = {
-            kvstore.store = "inmemory";
-            replication_factor = 1;
+  # Consolidated services configuration for DEX5550 monitoring server
+  services = {
+    # Loki log aggregation server
+    loki = {
+      enable = true;
+      configuration = {
+        server = {
+          http_listen_port = 3100;
+          grpc_listen_port = 9096;
+        };
+        auth_enabled = false;
+        ingester = {
+          lifecycler = {
+            address = "0.0.0.0";
+            ring = {
+              kvstore.store = "inmemory";
+              replication_factor = 1;
+            };
+          };
+          chunk_idle_period = "1h";
+          max_chunk_age = "1h";
+          chunk_target_size = 1048576;
+          chunk_retain_period = "30s";
+        };
+        schema_config = {
+          configs = [
+            {
+              from = "2023-01-01";
+              store = "boltdb-shipper";
+              object_store = "filesystem";
+              schema = "v11";
+              index = {
+                prefix = "index_";
+                period = "24h";
+              };
+            }
+          ];
+        };
+        storage_config = {
+          boltdb_shipper = {
+            active_index_directory = "/var/lib/loki/boltdb-shipper-active";
+            cache_location = "/var/lib/loki/boltdb-shipper-cache";
+          };
+          filesystem = {
+            directory = "/var/lib/loki/chunks";
           };
         };
-        chunk_idle_period = "1h";
-        max_chunk_age = "1h";
-        chunk_target_size = 1048576;
-        chunk_retain_period = "30s";
+        limits_config = {
+          retention_period = "30d";
+          allow_structured_metadata = false; # Compatibility with v11 schema
+        };
       };
-      schema_config = {
-        configs = [
-          {
-            from = "2023-01-01";
-            store = "boltdb-shipper";
-            object_store = "filesystem";
-            schema = "v11";
-            index = {
-              prefix = "index_";
-              period = "24h";
-            };
-          }
+    };
+
+    # Promtail logging service
+    promtail-logging = {
+      enable = true;
+      lokiUrl = "http://localhost:3100"; # Local Loki server
+      collectJournal = true;
+      collectKernel = true;
+    };
+
+    # Custom Grafana configuration - configured for sub-path with external proxy
+    grafana = {
+      settings = {
+        server = {
+          root_url = lib.mkForce "https://home.freundcloud.com/grafana/";
+          serve_from_sub_path = lib.mkForce true;
+          domain = lib.mkForce "home.freundcloud.com";
+          http_port = lib.mkForce 3001;
+          protocol = lib.mkForce "http";
+        };
+      };
+    };
+
+    # Boot performance optimization
+    fstrim-optimization = {
+      enable = true;
+      preventBootBlocking = true;
+    };
+
+    # SSH security hardening
+    openssh = {
+      enable = true;
+      settings = {
+        # Harden SSH configuration
+        PermitRootLogin = "no";
+        PasswordAuthentication = false;
+        PubkeyAuthentication = true;
+        AuthenticationMethods = "publickey";
+        MaxAuthTries = 3;
+        ClientAliveInterval = 300;
+        ClientAliveCountMax = 2;
+        Compression = false;
+        TCPKeepAlive = false;
+        X11Forwarding = lib.mkForce false;
+        AllowTcpForwarding = lib.mkForce "no";
+        AllowAgentForwarding = lib.mkForce false;
+        AllowStreamLocalForwarding = false;
+        AuthorizedKeysFile = "/etc/ssh/authorized_keys.d/%u .ssh/authorized_keys .ssh/authorized_keys2";
+
+        # Protocol and cipher hardening
+        Protocol = 2;
+        Ciphers = [
+          "chacha20-poly1305@openssh.com"
+          "aes256-gcm@openssh.com"
+          "aes128-gcm@openssh.com"
+          "aes256-ctr"
+          "aes192-ctr"
+          "aes128-ctr"
+        ];
+        KexAlgorithms = [
+          "curve25519-sha256@libssh.org"
+          "diffie-hellman-group16-sha512"
+          "diffie-hellman-group18-sha512"
+          "diffie-hellman-group14-sha256"
+        ];
+        Macs = [
+          "hmac-sha2-256-etm@openssh.com"
+          "hmac-sha2-512-etm@openssh.com"
+          "hmac-sha2-256"
+          "hmac-sha2-512"
         ];
       };
-      storage_config = {
-        boltdb_shipper = {
-          active_index_directory = "/var/lib/loki/boltdb-shipper-active";
-          cache_location = "/var/lib/loki/boltdb-shipper-cache";
-        };
-        filesystem = {
-          directory = "/var/lib/loki/chunks";
-        };
-      };
-      limits_config = {
-        retention_period = "30d";
-        allow_structured_metadata = false; # Compatibility with v11 schema
+
+      # Only allow SSH from internal network initially
+      listenAddresses = [
+        { addr = "0.0.0.0"; port = 22; }
+      ];
+    };
+
+    # Server configuration - no GUI services needed
+    xserver.enable = false;
+
+    # Disable systemd-resolved to avoid conflicts with BIND9
+    resolved.enable = lib.mkForce false;
+
+    # BIND9 DNS Server - configured for internal network access
+    bind = {
+      enable = true;
+      listenOn = [ "192.168.1.222" "127.0.0.1" ];
+      listenOnIpv6 = [ "none" ];
+      forwarders = [ "1.1.1.1" "8.8.8.8" ];
+
+      # Simple configuration without ACLs
+      extraConfig = "";
+
+      # Configure caching
+      cacheNetworks = [ "127.0.0.0/8" "192.168.1.0/24" ];
+
+      zones."home.freundcloud.com" = {
+        master = true;
+        file = pkgs.writeText "home.freundcloud.com.zone" ''
+          $TTL 86400
+          @       IN      SOA     dex5550.home.freundcloud.com. admin.home.freundcloud.com. (
+                          2025071002      ; Serial
+                          3600            ; Refresh
+                          1800            ; Retry
+                          604800          ; Expire
+                          86400 )         ; Minimum TTL
+
+          ; Name servers
+          @       IN      NS      dex5550.home.freundcloud.com.
+
+          ; A records for services and hosts
+          @               IN      A       192.168.1.222
+          dex5550         IN      A       192.168.1.222
+          p620            IN      A       192.168.1.97
+          razer           IN      A       192.168.1.188
+          p510            IN      A       192.168.1.127
+          grafana         IN      A       192.168.1.222
+          prometheus      IN      A       192.168.1.222
+          alertmanager    IN      A       192.168.1.222
+          rss             IN      A       192.168.1.222
+        '';
       };
     };
-  };
 
-  services.promtail-logging = {
-    enable = true;
-    lokiUrl = "http://localhost:3100"; # Local Loki server
-    collectJournal = true;
-    collectKernel = true;
-  };
+    # Fail2Ban configuration for additional SSH protection
+    fail2ban = {
+      enable = true;
+      maxretry = 3;
+      bantime = "1h";
+      bantime-increment = {
+        enable = true;
+        multipliers = "1 2 4 8 16 32 64";
+        maxtime = "168h"; # 1 week
+        overalljails = true;
+      };
 
-  # Custom Grafana configuration - configured for sub-path with external proxy
-  services.grafana = {
-    settings = {
-      server = {
-        root_url = lib.mkForce "https://home.freundcloud.com/grafana/";
-        serve_from_sub_path = lib.mkForce true;
-        domain = lib.mkForce "home.freundcloud.com";
-        http_port = lib.mkForce 3001;
-        protocol = lib.mkForce "http";
+      jails = {
+        # SSH protection
+        sshd = {
+          settings = {
+            enabled = true;
+            filter = "sshd";
+            maxretry = 3;
+            findtime = "10m";
+            bantime = "1h";
+          };
+        };
       };
     };
+
+    # Logging and monitoring for security
+    logrotate = {
+      enable = true;
+      settings = {
+        "/var/log/fail2ban.log" = {
+          frequency = "daily";
+          rotate = 7;
+          compress = true;
+          delaycompress = true;
+          missingok = true;
+          notifempty = true;
+        };
+        "/var/log/auth.log" = {
+          frequency = "daily";
+          rotate = 30;
+          compress = true;
+          delaycompress = true;
+          missingok = true;
+          notifempty = true;
+        };
+      };
+    };
+
+    # Traefik Reverse Proxy for external access
+    traefik = {
+      enable = true;
+
+      # Static configuration
+      staticConfigOptions = {
+        # Entry points
+        entryPoints = {
+          web = {
+            address = ":80";
+            http.redirections.entrypoint = {
+              to = "websecure";
+              scheme = "https";
+              permanent = true;
+            };
+          };
+          websecure = {
+            address = ":443";
+          };
+        };
+
+        # Certificate resolvers
+        certificatesResolvers = {
+          letsencrypt = {
+            acme = {
+              tlsChallenge = { };
+              email = "admin@freundcloud.com";
+              storage = "/var/lib/traefik/acme.json";
+              keyType = "EC256";
+            };
+          };
+        };
+
+        # API and dashboard
+        api = {
+          dashboard = true;
+          insecure = false; # Only accessible via HTTPS
+        };
+
+        # Metrics for monitoring
+        metrics.prometheus.addEntryPointsLabels = true;
+
+        # Logging
+        log = {
+          level = "INFO";
+          filePath = "/var/log/traefik/traefik.log";
+        };
+        accessLog = {
+          filePath = "/var/log/traefik/access.log";
+        };
+      };
+
+      # Dynamic configuration via file
+      dynamicConfigOptions = {
+        http = {
+          # Routers for internal services
+          routers = {
+            # Grafana router
+            grafana = {
+              rule = "Host(`home.freundcloud.com`) && PathPrefix(`/grafana`)";
+              middlewares = [ "secure-headers" ];
+              service = "grafana";
+              tls.certResolver = "letsencrypt";
+            };
+
+            # Prometheus router
+            prometheus = {
+              rule = "Host(`home.freundcloud.com`) && PathPrefix(`/prometheus`)";
+              middlewares = [ "prometheus-stripprefix" "secure-headers" ];
+              service = "prometheus";
+              tls.certResolver = "letsencrypt";
+            };
+
+            # Alertmanager router
+            alertmanager = {
+              rule = "Host(`home.freundcloud.com`) && PathPrefix(`/alertmanager`)";
+              middlewares = [ "alertmanager-stripprefix" "secure-headers" ];
+              service = "alertmanager";
+              tls.certResolver = "letsencrypt";
+            };
+
+            # Traefik dashboard router
+            dashboard = {
+              rule = "Host(`home.freundcloud.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))";
+              middlewares = [ "secure-headers" ];
+              service = "api@internal";
+              tls.certResolver = "letsencrypt";
+            };
+          };
+
+          # Middlewares
+          middlewares = {
+            grafana-stripprefix = {
+              stripPrefix.prefixes = [ "/grafana" ];
+            };
+            prometheus-stripprefix = {
+              stripPrefix.prefixes = [ "/prometheus" ];
+            };
+            alertmanager-stripprefix = {
+              stripPrefix.prefixes = [ "/alertmanager" ];
+            };
+            secure-headers = {
+              headers = {
+                customRequestHeaders = {
+                  "X-Forwarded-Proto" = "https";
+                };
+                customResponseHeaders = {
+                  "X-Frame-Options" = "DENY";
+                  "X-Content-Type-Options" = "nosniff";
+                  "Referrer-Policy" = "strict-origin-when-cross-origin";
+                  "Strict-Transport-Security" = "max-age=31536000; includeSubDomains";
+                };
+              };
+            };
+          };
+
+          # Services
+          services = {
+            grafana = {
+              loadBalancer.servers = [{
+                url = "http://127.0.0.1:3001";
+              }];
+            };
+            prometheus = {
+              loadBalancer.servers = [{
+                url = "http://127.0.0.1:9090";
+              }];
+            };
+            alertmanager = {
+              loadBalancer.servers = [{
+                url = "http://127.0.0.1:9093";
+              }];
+            };
+          };
+        };
+      };
+    };
+
+    # Server-specific configuration for Ollama (CPU only)
+    ollama.acceleration =
+      if vars.acceleration != ""
+      then vars.acceleration
+      else "cpu";
   };
 
   # Enable NixOS package monitoring tools
@@ -287,61 +672,7 @@ in
   # };
 
 
-  # BOOT PERFORMANCE: Prevent fstrim from blocking boot (saves 3+ minutes)
-  services.fstrim-optimization = {
-    enable = true;
-    preventBootBlocking = true;
-  };
 
-  # Security services for management server
-  services.openssh = {
-    enable = true;
-    settings = {
-      # Harden SSH configuration
-      PermitRootLogin = "no";
-      PasswordAuthentication = false;
-      PubkeyAuthentication = true;
-      AuthenticationMethods = "publickey";
-      MaxAuthTries = 3;
-      ClientAliveInterval = 300;
-      ClientAliveCountMax = 2;
-      Compression = false;
-      TCPKeepAlive = false;
-      X11Forwarding = lib.mkForce false;
-      AllowTcpForwarding = lib.mkForce "no";
-      AllowAgentForwarding = lib.mkForce false;
-      AllowStreamLocalForwarding = false;
-      AuthorizedKeysFile = "/etc/ssh/authorized_keys.d/%u .ssh/authorized_keys .ssh/authorized_keys2";
-
-      # Protocol and cipher hardening
-      Protocol = 2;
-      Ciphers = [
-        "chacha20-poly1305@openssh.com"
-        "aes256-gcm@openssh.com"
-        "aes128-gcm@openssh.com"
-        "aes256-ctr"
-        "aes192-ctr"
-        "aes128-ctr"
-      ];
-      KexAlgorithms = [
-        "curve25519-sha256@libssh.org"
-        "diffie-hellman-group16-sha512"
-        "diffie-hellman-group18-sha512"
-        "diffie-hellman-group14-sha256"
-      ];
-      Macs = [
-        "hmac-sha2-256-etm@openssh.com"
-        "hmac-sha2-512-etm@openssh.com"
-        "hmac-sha2-256"
-        "hmac-sha2-512"
-      ];
-    };
-
-    # Only allow SSH from internal network initially
-    listenAddresses = [
-      { addr = "0.0.0.0"; port = 22; }
-    ];
-  };
 
   # System hardening and additional security services
   security.sudo = {
@@ -385,119 +716,9 @@ in
     flake = lib.mkForce "github:olafkfreund/nixos_config";
   };
 
-  # Server configuration - no GUI services needed
-  services.xserver.enable = false;
-
-  # Disable systemd-resolved to avoid conflicts with BIND9
-  services.resolved.enable = lib.mkForce false;
-
-  # BIND9 DNS Server - configured for internal network access
-  services.bind = {
-    enable = true;
-    listenOn = [ "192.168.1.222" "127.0.0.1" ];
-    listenOnIpv6 = [ "none" ];
-    forwarders = [ "1.1.1.1" "8.8.8.8" ];
-
-    # Simple configuration without ACLs
-    extraConfig = "";
-
-    # Configure caching
-    cacheNetworks = [ "127.0.0.0/8" "192.168.1.0/24" ];
-
-    zones."home.freundcloud.com" = {
-      master = true;
-      file = pkgs.writeText "home.freundcloud.com.zone" ''
-        $TTL 86400
-        @       IN      SOA     dex5550.home.freundcloud.com. admin.home.freundcloud.com. (
-                        2025071002      ; Serial
-                        3600            ; Refresh
-                        1800            ; Retry
-                        604800          ; Expire
-                        86400 )         ; Minimum TTL
-
-        ; Name servers
-        @       IN      NS      dex5550.home.freundcloud.com.
-
-        ; A records for services and hosts
-        @               IN      A       192.168.1.222
-        dex5550         IN      A       192.168.1.222
-        p620            IN      A       192.168.1.97
-        razer           IN      A       192.168.1.188
-        p510            IN      A       192.168.1.127
-        grafana         IN      A       192.168.1.222
-        prometheus      IN      A       192.168.1.222
-        alertmanager    IN      A       192.168.1.222
-        rss             IN      A       192.168.1.222
-      '';
-    };
-  };
-
-  # Use local DNS server
-  networking.nameservers = [ "127.0.0.1" ];
 
 
-  # Disable nftables to use iptables-based firewall
-  networking.nftables.enable = lib.mkForce false;
 
-  # Comprehensive firewall configuration for management server
-  networking.firewall = {
-    enable = lib.mkForce true;
-
-    # Default deny policy - only explicitly allowed ports are open
-    allowPing = true;
-
-    # External access ports (will be secured by reverse proxy)
-    allowedTCPPorts = [
-      22 # SSH (will be rate limited)
-      53 # DNS (TCP) - BIND9
-      80 # HTTP (redirect to HTTPS)
-      443 # HTTPS (reverse proxy)
-    ];
-
-    allowedUDPPorts = [
-      53 # DNS (UDP) - BIND9
-    ];
-
-    # Internal network management ports (192.168.1.0/24 only)
-    interfaces."eno1" = {
-      allowedTCPPorts = [
-        3001 # Grafana
-        3100 # Loki HTTP
-        9090 # Prometheus
-        9093 # Alertmanager
-        9096 # Loki gRPC
-        9100 # Node Exporter
-        9101 # NixOS Exporter
-        9102 # Systemd Exporter
-      ];
-    };
-  };
-
-  # Fail2Ban configuration for additional SSH protection
-  services.fail2ban = {
-    enable = true;
-    maxretry = 3;
-    bantime = "1h";
-    bantime-increment = {
-      enable = true;
-      multipliers = "1 2 4 8 16 32 64";
-      maxtime = "168h"; # 1 week
-      overalljails = true;
-    };
-
-    jails = {
-      # SSH protection
-      sshd = {
-        settings = {
-          enabled = true;
-          filter = "sshd";
-          maxretry = 3;
-          findtime = "10m";
-          bantime = "1h";
-        };
-      };
-    };
-  };
 
   # Server-specific configurations - no GUI hardware wrappers needed
 
@@ -542,28 +763,6 @@ in
     ];
   };
 
-  # Logging and monitoring for security
-  services.logrotate = {
-    enable = true;
-    settings = {
-      "/var/log/fail2ban.log" = {
-        frequency = "daily";
-        rotate = 7;
-        compress = true;
-        delaycompress = true;
-        missingok = true;
-        notifempty = true;
-      };
-      "/var/log/auth.log" = {
-        frequency = "daily";
-        rotate = 30;
-        compress = true;
-        delaycompress = true;
-        missingok = true;
-        notifempty = true;
-      };
-    };
-  };
 
   # Kernel security hardening
   boot.kernel.sysctl = {
@@ -597,10 +796,6 @@ in
 
   # Server hardware configurations
   hardware.keyboard.zsa.enable = false; # No physical keyboard management needed
-  services.ollama.acceleration =
-    if vars.acceleration != ""
-    then vars.acceleration
-    else "cpu";
   hardware.nvidia-container-toolkit.enable = false;
 
   # Monitoring configuration handled by monitoring module
@@ -608,145 +803,6 @@ in
 
 
 
-  # Traefik Reverse Proxy for external access
-  services.traefik = {
-    enable = true;
-
-    # Static configuration
-    staticConfigOptions = {
-      # Entry points
-      entryPoints = {
-        web = {
-          address = ":80";
-          http.redirections.entrypoint = {
-            to = "websecure";
-            scheme = "https";
-            permanent = true;
-          };
-        };
-        websecure = {
-          address = ":443";
-        };
-      };
-
-      # Certificate resolvers
-      certificatesResolvers = {
-        letsencrypt = {
-          acme = {
-            tlsChallenge = { };
-            email = "admin@freundcloud.com";
-            storage = "/var/lib/traefik/acme.json";
-            keyType = "EC256";
-          };
-        };
-      };
-
-
-      # API and dashboard
-      api = {
-        dashboard = true;
-        insecure = false; # Only accessible via HTTPS
-      };
-
-      # Metrics for monitoring
-      metrics.prometheus.addEntryPointsLabels = true;
-
-      # Logging
-      log = {
-        level = "INFO";
-        filePath = "/var/log/traefik/traefik.log";
-      };
-      accessLog = {
-        filePath = "/var/log/traefik/access.log";
-      };
-    };
-
-    # Dynamic configuration via file
-    dynamicConfigOptions = {
-      http = {
-        # Routers for internal services
-        routers = {
-          # Grafana router
-          grafana = {
-            rule = "Host(`home.freundcloud.com`) && PathPrefix(`/grafana`)";
-            middlewares = [ "secure-headers" ];
-            service = "grafana";
-            tls.certResolver = "letsencrypt";
-          };
-
-          # Prometheus router
-          prometheus = {
-            rule = "Host(`home.freundcloud.com`) && PathPrefix(`/prometheus`)";
-            middlewares = [ "prometheus-stripprefix" "secure-headers" ];
-            service = "prometheus";
-            tls.certResolver = "letsencrypt";
-          };
-
-          # Alertmanager router
-          alertmanager = {
-            rule = "Host(`home.freundcloud.com`) && PathPrefix(`/alertmanager`)";
-            middlewares = [ "alertmanager-stripprefix" "secure-headers" ];
-            service = "alertmanager";
-            tls.certResolver = "letsencrypt";
-          };
-
-
-          # Traefik dashboard router
-          dashboard = {
-            rule = "Host(`home.freundcloud.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))";
-            middlewares = [ "secure-headers" ];
-            service = "api@internal";
-            tls.certResolver = "letsencrypt";
-          };
-        };
-
-        # Middlewares
-        middlewares = {
-          grafana-stripprefix = {
-            stripPrefix.prefixes = [ "/grafana" ];
-          };
-          prometheus-stripprefix = {
-            stripPrefix.prefixes = [ "/prometheus" ];
-          };
-          alertmanager-stripprefix = {
-            stripPrefix.prefixes = [ "/alertmanager" ];
-          };
-          secure-headers = {
-            headers = {
-              customRequestHeaders = {
-                "X-Forwarded-Proto" = "https";
-              };
-              customResponseHeaders = {
-                "X-Frame-Options" = "DENY";
-                "X-Content-Type-Options" = "nosniff";
-                "Referrer-Policy" = "strict-origin-when-cross-origin";
-                "Strict-Transport-Security" = "max-age=31536000; includeSubDomains";
-              };
-            };
-          };
-        };
-
-        # Services
-        services = {
-          grafana = {
-            loadBalancer.servers = [{
-              url = "http://127.0.0.1:3001";
-            }];
-          };
-          prometheus = {
-            loadBalancer.servers = [{
-              url = "http://127.0.0.1:9090";
-            }];
-          };
-          alertmanager = {
-            loadBalancer.servers = [{
-              url = "http://127.0.0.1:9093";
-            }];
-          };
-        };
-      };
-    };
-  };
 
   # Create log directories for Traefik
   systemd.tmpfiles.rules = [
@@ -842,47 +898,6 @@ in
     };
   };
 
-  # Network performance tuning for monitoring server
-  networking.performanceTuning = {
-    enable = true;
-    profile = "balanced";
-
-    tcpOptimization = {
-      enable = true;
-      congestionControl = "bbr";
-      windowScaling = true;
-      fastOpen = true;
-      lowLatency = true; # Important for monitoring responsiveness
-    };
-
-    bufferOptimization = {
-      enable = true;
-      receiveBuffer = 16777216; # 16MB for monitoring data
-      sendBuffer = 16777216; # 16MB for monitoring data
-      autotuning = true;
-    };
-
-    interHostOptimization = {
-      enable = true;
-      hosts = [ "p620" "p510" "razer" ];
-      jumboFrames = false;
-      routeOptimization = true;
-    };
-
-    dnsOptimization = {
-      enable = true;
-      caching = true;
-      parallelQueries = true;
-      customServers = [ "127.0.0.1" "1.1.1.1" ]; # Use local DNS first
-    };
-
-    monitoringOptimization = {
-      enable = true;
-      compression = true;
-      batchingInterval = 15; # Standard interval for monitoring server
-      prioritization = true;
-    };
-  };
 
   # Storage performance optimization for monitoring server
   storage.performanceOptimization = {

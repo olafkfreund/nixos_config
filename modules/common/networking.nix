@@ -26,34 +26,37 @@ with lib; {
   config = mkMerge [
     (mkIf (config.networking.profile == "desktop") {
       # Desktop networking configuration with NetworkManager
-      networking.networkmanager = {
-        enable = true;
-        # Add connection configuration for stability
-        connectionConfig = mkIf config.networking.stableConnection.enable {
-          "connection.stable-id" = "\${CONNECTION}/\${BOOT}";
-          "connection.wait-device-timeout" = config.networking.stableConnection.interfaceSwitchDelayMs;
-          "connection.mdns" = 2; # Enable mDNS
+      networking = {
+        networkmanager = {
+          enable = true;
+          # Add connection configuration for stability
+          connectionConfig = mkIf config.networking.stableConnection.enable {
+            "connection.stable-id" = "\${CONNECTION}/\${BOOT}";
+            "connection.wait-device-timeout" = config.networking.stableConnection.interfaceSwitchDelayMs;
+            "connection.mdns" = 2; # Enable mDNS
+          };
+          # Better integration with systemd-resolved when using NetworkManager
+          dns = mkIf config.services.resolved.enable "systemd-resolved";
         };
+        useDHCP = false;
+        useNetworkd = false;
+        firewall.enable = false;
+        nftables.enable = true;
+        timeServers = [ "pool.ntp.org" ];
       };
-      networking.useDHCP = false;
-      networking.useNetworkd = false;
-      networking.firewall.enable = false;
-      networking.nftables.enable = true;
-      networking.timeServers = [ "pool.ntp.org" ];
-
-      # Better integration with systemd-resolved when using NetworkManager
-      networking.networkmanager.dns = mkIf config.services.resolved.enable "systemd-resolved";
     })
 
     (mkIf (config.networking.profile == "server") {
       # Server networking with systemd-networkd
-      networking.networkmanager.enable = false;
-      networking.useDHCP = false;
-      networking.useNetworkd = true;
-      networking.useHostResolvConf = false;
-      networking.firewall.enable = false;
-      networking.nftables.enable = true;
-      networking.timeServers = [ "pool.ntp.org" ];
+      networking = {
+        networkmanager.enable = false;
+        useDHCP = false;
+        useNetworkd = true;
+        useHostResolvConf = false;
+        firewall.enable = false;
+        nftables.enable = true;
+        timeServers = [ "pool.ntp.org" ];
+      };
 
       # Enable systemd-resolved for DNS resolution with systemd-networkd
       services.resolved = {
@@ -71,16 +74,22 @@ with lib; {
       };
 
       # Systemd network wait settings
-      systemd.network.wait-online.timeout = 10;
-      systemd.services.NetworkManager-wait-online.enable = mkForce false;
-      systemd.services.systemd-networkd-wait-online.enable = mkForce false;
+      systemd = {
+        network.wait-online.timeout = 10;
+        services = {
+          NetworkManager-wait-online.enable = mkForce false;
+          systemd-networkd-wait-online.enable = mkForce false;
+        };
+      };
     })
 
     (mkIf (config.networking.profile == "minimal") {
       # Minimal networking configuration with just DHCP
-      networking.useDHCP = true;
-      networking.firewall.enable = false;
-      networking.timeServers = [ "pool.ntp.org" ];
+      networking = {
+        useDHCP = true;
+        firewall.enable = false;
+        timeServers = [ "pool.ntp.org" ];
+      };
     })
 
     # Fix for duplicate systemd.network: Only add link configuration enhancements,

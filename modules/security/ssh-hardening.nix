@@ -77,96 +77,123 @@ in
   };
 
   config = mkIf cfg.enable {
-    # SSH daemon configuration with security hardening
-    services.openssh = {
-      enable = true;
-      ports = [ cfg.listenPort ];
+    # Consolidated services configuration
+    services = {
+      # SSH daemon configuration with security hardening
+      openssh = {
+        enable = true;
+        ports = [ cfg.listenPort ];
 
-      settings = {
-        # Authentication
-        PasswordAuthentication = cfg.allowPasswordAuthentication;
-        PermitRootLogin = if cfg.allowRootLogin then "yes" else "no";
-        PubkeyAuthentication = true;
-        AuthenticationMethods = if cfg.enableKeyOnlyAccess then "publickey" else "publickey,password";
-        MaxAuthTries = cfg.maxAuthTries;
+        settings = {
+          # Authentication
+          PasswordAuthentication = cfg.allowPasswordAuthentication;
+          PermitRootLogin = if cfg.allowRootLogin then "yes" else "no";
+          PubkeyAuthentication = true;
+          AuthenticationMethods = if cfg.enableKeyOnlyAccess then "publickey" else "publickey,password";
+          MaxAuthTries = cfg.maxAuthTries;
 
-        # Connection settings
-        ClientAliveInterval = cfg.clientAliveInterval;
-        ClientAliveCountMax = cfg.clientAliveCountMax;
-        MaxSessions = 10;
-        MaxStartups = "10:30:100";
-        LoginGraceTime = 60;
+          # Connection settings
+          ClientAliveInterval = cfg.clientAliveInterval;
+          ClientAliveCountMax = cfg.clientAliveCountMax;
+          MaxSessions = 10;
+          MaxStartups = "10:30:100";
+          LoginGraceTime = 60;
 
-        # Security settings
-        Protocol = 2;
-        StrictModes = cfg.enableStrictModes;
-        IgnoreRhosts = true;
-        HostbasedAuthentication = false;
-        PermitEmptyPasswords = false;
-        ChallengeResponseAuthentication = false;
-        KerberosAuthentication = false;
-        GSSAPIAuthentication = false;
-        UsePAM = true;
+          # Security settings
+          Protocol = 2;
+          StrictModes = cfg.enableStrictModes;
+          IgnoreRhosts = true;
+          HostbasedAuthentication = false;
+          PermitEmptyPasswords = false;
+          ChallengeResponseAuthentication = false;
+          KerberosAuthentication = false;
+          GSSAPIAuthentication = false;
+          UsePAM = true;
 
-        # Logging
-        LogLevel = "VERBOSE";
+          # Logging
+          LogLevel = "VERBOSE";
 
-        # Compression
-        Compression = false;
+          # Compression
+          Compression = false;
 
-        # Forwarding restrictions
-        AllowTcpForwarding = "yes";
-        AllowAgentForwarding = "yes";
-        GatewayPorts = "no";
-        X11Forwarding = mkForce false;
+          # Forwarding restrictions
+          AllowTcpForwarding = "yes";
+          AllowAgentForwarding = "yes";
+          GatewayPorts = "no";
+          X11Forwarding = mkForce false;
 
-        # Modern cryptography
-        KexAlgorithms = [
-          "curve25519-sha256"
-          "curve25519-sha256@libssh.org"
-          "diffie-hellman-group16-sha512"
-          "diffie-hellman-group18-sha512"
-          "diffie-hellman-group-exchange-sha256"
-        ];
+          # Modern cryptography
+          KexAlgorithms = [
+            "curve25519-sha256"
+            "curve25519-sha256@libssh.org"
+            "diffie-hellman-group16-sha512"
+            "diffie-hellman-group18-sha512"
+            "diffie-hellman-group-exchange-sha256"
+          ];
 
-        Ciphers = [
-          "chacha20-poly1305@openssh.com"
-          "aes256-gcm@openssh.com"
-          "aes128-gcm@openssh.com"
-          "aes256-ctr"
-          "aes192-ctr"
-          "aes128-ctr"
-        ];
+          Ciphers = [
+            "chacha20-poly1305@openssh.com"
+            "aes256-gcm@openssh.com"
+            "aes128-gcm@openssh.com"
+            "aes256-ctr"
+            "aes192-ctr"
+            "aes128-ctr"
+          ];
 
-        Macs = [
-          "hmac-sha2-256-etm@openssh.com"
-          "hmac-sha2-512-etm@openssh.com"
-          "hmac-sha2-256"
-          "hmac-sha2-512"
-        ];
+          Macs = [
+            "hmac-sha2-256-etm@openssh.com"
+            "hmac-sha2-512-etm@openssh.com"
+            "hmac-sha2-256"
+            "hmac-sha2-512"
+          ];
+        };
+
+        # Only allow specific users if configured
+        allowSFTP = false;
+        extraConfig = ''
+          # Additional security configurations
+          ${optionalString (cfg.allowedUsers != []) "AllowUsers ${concatStringsSep " " cfg.allowedUsers}"}
+
+          # Banner
+          Banner /etc/ssh/banner
+
+          # Subsystems
+          Subsystem sftp internal-sftp
+
+          # Match conditions for enhanced security
+          Match Address ${concatStringsSep "," cfg.trustedNetworks}
+              PasswordAuthentication ${if cfg.allowPasswordAuthentication then "yes" else "no"}
+              MaxAuthTries ${toString cfg.maxAuthTries}
+
+          Match Address *,!${concatStringsSep ",!" cfg.trustedNetworks}
+              PasswordAuthentication no
+              MaxAuthTries 1
+              DenyUsers *
+        '';
       };
 
-      # Only allow specific users if configured
-      allowSFTP = false;
-      extraConfig = ''
-        # Additional security configurations
-        ${optionalString (cfg.allowedUsers != []) "AllowUsers ${concatStringsSep " " cfg.allowedUsers}"}
+      # Fail2ban configuration for SSH protection
+      fail2ban = mkIf cfg.enableFail2Ban {
+        enable = true;
+        maxretry = cfg.maxAuthTries;
+        bantime = "1h";
 
-        # Banner
-        Banner /etc/ssh/banner
+        jails = {
+          ssh.settings = {
+            enabled = true;
+            filter = "sshd";
+            maxretry = cfg.maxAuthTries;
+            findtime = "10m";
+            bantime = "1h";
+          };
+        };
+      };
 
-        # Subsystems
-        Subsystem sftp internal-sftp
-
-        # Match conditions for enhanced security
-        Match Address ${concatStringsSep "," cfg.trustedNetworks}
-            PasswordAuthentication ${if cfg.allowPasswordAuthentication then "yes" else "no"}
-            MaxAuthTries ${toString cfg.maxAuthTries}
-
-        Match Address *,!${concatStringsSep ",!" cfg.trustedNetworks}
-            PasswordAuthentication no
-            MaxAuthTries 1
-            DenyUsers *
+      # Enhanced logging for SSH events
+      journald.extraConfig = ''
+        # Increase journal size for SSH logging
+        SystemMaxUse=1G
+        RuntimeMaxUse=256M
       '';
     };
 
@@ -189,22 +216,6 @@ in
       ================================================================================
     '';
 
-    # Fail2ban configuration for SSH protection
-    services.fail2ban = mkIf cfg.enableFail2Ban {
-      enable = true;
-      maxretry = cfg.maxAuthTries;
-      bantime = "1h";
-
-      jails = {
-        ssh.settings = {
-          enabled = true;
-          filter = "sshd";
-          maxretry = cfg.maxAuthTries;
-          findtime = "10m";
-          bantime = "1h";
-        };
-      };
-    };
 
     # Firewall configuration for SSH
     networking.firewall = {
@@ -261,77 +272,78 @@ in
       '';
     };
 
-    # Enhanced logging for SSH events
-    services.journald.extraConfig = ''
-      # Increase journal size for SSH logging
-      SystemMaxUse=1G
-      RuntimeMaxUse=256M
-    '';
 
-    # Journal logging configuration for SSH
-    systemd.services.ssh-journal-cleanup = {
-      description = "SSH Journal Cleanup";
-      serviceConfig = {
-        Type = "oneshot";
-        ExecStart = "${pkgs.systemd}/bin/journalctl --vacuum-time=30d --unit=sshd";
+    # Consolidated systemd configuration
+    systemd = {
+      # Journal logging configuration for SSH
+      services = {
+        ssh-journal-cleanup = {
+          description = "SSH Journal Cleanup";
+          serviceConfig = {
+            Type = "oneshot";
+            ExecStart = "${pkgs.systemd}/bin/journalctl --vacuum-time=30d --unit=sshd";
+          };
+        };
+
+        # SSH monitoring and alerting
+        ssh-monitor = {
+          description = "SSH Connection Monitor";
+          after = [ "network.target" "sshd.service" ];
+          wants = [ "sshd.service" ];
+
+          serviceConfig = {
+            Type = "oneshot";
+            User = "root";
+            ExecStart = pkgs.writeShellScript "ssh-monitor" ''
+              #!/bin/bash
+
+              LOG_FILE="/var/log/ssh-monitor.log"
+              ALERT_THRESHOLD=5
+              TIME_WINDOW=300  # 5 minutes
+
+              # Count failed login attempts in the last 5 minutes
+              FAILED_ATTEMPTS=$(journalctl -u sshd --since="5 minutes ago" | \
+                               grep "Failed password" | wc -l)
+
+              # Count successful logins in the last 5 minutes
+              SUCCESSFUL_LOGINS=$(journalctl -u sshd --since="5 minutes ago" | \
+                                 grep -E "Accepted (publickey|password)" | wc -l)
+
+              # Log current status
+              echo "$(date): Failed attempts: $FAILED_ATTEMPTS, Successful logins: $SUCCESSFUL_LOGINS" >> "$LOG_FILE"
+
+              # Alert on excessive failed attempts
+              if [ "$FAILED_ATTEMPTS" -gt "$ALERT_THRESHOLD" ]; then
+                logger -t ssh-monitor "ALERT: $FAILED_ATTEMPTS failed SSH login attempts in last 5 minutes"
+                echo "$(date): ALERT - Excessive failed login attempts: $FAILED_ATTEMPTS" >> "$LOG_FILE"
+              fi
+
+              # Clean up old log entries (keep last 1000 lines)
+              tail -1000 "$LOG_FILE" > "$LOG_FILE.tmp" && mv "$LOG_FILE.tmp" "$LOG_FILE"
+            '';
+          };
+        };
       };
-    };
 
-    systemd.timers.ssh-journal-cleanup = {
-      description = "SSH Journal Cleanup Timer";
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "weekly";
-        Persistent = true;
-      };
-    };
+      timers = {
+        ssh-journal-cleanup = {
+          description = "SSH Journal Cleanup Timer";
+          wantedBy = [ "timers.target" ];
+          timerConfig = {
+            OnCalendar = "weekly";
+            Persistent = true;
+          };
+        };
 
-    # SSH monitoring and alerting
-    systemd.services.ssh-monitor = {
-      description = "SSH Connection Monitor";
-      after = [ "network.target" "sshd.service" ];
-      wants = [ "sshd.service" ];
-
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-        ExecStart = pkgs.writeShellScript "ssh-monitor" ''
-          #!/bin/bash
-
-          LOG_FILE="/var/log/ssh-monitor.log"
-          ALERT_THRESHOLD=5
-          TIME_WINDOW=300  # 5 minutes
-
-          # Count failed login attempts in the last 5 minutes
-          FAILED_ATTEMPTS=$(journalctl -u sshd --since="5 minutes ago" | \
-                           grep "Failed password" | wc -l)
-
-          # Count successful logins in the last 5 minutes
-          SUCCESSFUL_LOGINS=$(journalctl -u sshd --since="5 minutes ago" | \
-                             grep -E "Accepted (publickey|password)" | wc -l)
-
-          # Log current status
-          echo "$(date): Failed attempts: $FAILED_ATTEMPTS, Successful logins: $SUCCESSFUL_LOGINS" >> "$LOG_FILE"
-
-          # Alert on excessive failed attempts
-          if [ "$FAILED_ATTEMPTS" -gt "$ALERT_THRESHOLD" ]; then
-            logger -t ssh-monitor "ALERT: $FAILED_ATTEMPTS failed SSH login attempts in last 5 minutes"
-            echo "$(date): ALERT - Excessive failed login attempts: $FAILED_ATTEMPTS" >> "$LOG_FILE"
-          fi
-
-          # Clean up old log entries (keep last 1000 lines)
-          tail -1000 "$LOG_FILE" > "$LOG_FILE.tmp" && mv "$LOG_FILE.tmp" "$LOG_FILE"
-        '';
-      };
-    };
-
-    # Timer for SSH monitoring
-    systemd.timers.ssh-monitor = {
-      description = "SSH Monitor Timer";
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "*:0/5"; # Every 5 minutes
-        Persistent = true;
+        # Timer for SSH monitoring
+        ssh-monitor = {
+          description = "SSH Monitor Timer";
+          wantedBy = [ "timers.target" ];
+          timerConfig = {
+            OnCalendar = "*:0/5"; # Every 5 minutes
+            Persistent = true;
+          };
+        };
       };
     };
 
