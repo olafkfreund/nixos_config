@@ -72,12 +72,12 @@ with lib; {
     volumeID = mkDefault "NIXOS_${lib.toUpper (if host != null then host else "INSTALLER")}";
 
     # 4GB image size
-    isoBaseName = mkDefault "nixos-${if host != null then host else "installer"}";
+    # isoBaseName has been moved to image.baseName
     makeEfiBootable = true;
     makeUsbBootable = true;
 
     # Include extra space for tools and configs
-    squashfsCompression = "gzip -Xcompression-level 1";
+    # Note: squashfsCompression option removed in recent NixOS versions
   };
 
   # Boot configuration

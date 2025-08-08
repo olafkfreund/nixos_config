@@ -284,13 +284,8 @@ in
 
     users.groups.ai-metrics-exporter = { };
 
-    # Required packages
-    environment.systemPackages = with pkgs; [
-      curl
-      jq
-      bc
-      python3
-    ];
+    # Use shared monitoring dependencies
+    features.packages.monitoringTools = true;
 
     # Open firewall port
     networking.firewall.allowedTCPPorts = [ aiCfg.port ];

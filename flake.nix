@@ -134,6 +134,48 @@
         dex5550 = [ "olafkfreund" ];
       };
 
+      # Consolidated MicroVM package sets to reduce duplication
+      microvmPackages = with nixpkgs.legacyPackages.x86_64-linux; {
+        # Common packages across all MicroVMs
+        common = [
+          git # Version control
+          vim # Text editor
+          htop # Process monitor
+          tree # Directory listing
+          curl # HTTP client
+          wget # File downloader
+          python3 # Scripting language
+        ];
+
+        # Extended development tools (dev-vm and playground-vm)
+        development = [
+          neovim # Advanced text editor
+          tmux # Terminal multiplexer
+          nodejs # JavaScript runtime
+          go # Go language
+          rustc # Rust compiler
+          docker-compose # Container orchestration
+        ];
+
+        # Build tools (dev-vm specific)
+        buildTools = [
+          gcc # C compiler
+          gnumake # Build system
+          cmake # Build system generator
+          ninja # Build system
+        ];
+
+        # Security and network analysis tools (playground-vm specific)
+        securityTools = [
+          kubernetes # Container orchestration
+          helm # Kubernetes package manager
+          ansible # Configuration management
+          wireshark # Network protocol analyzer
+          tcpdump # Network packet analyzer
+          nmap # Network discovery
+        ];
+      };
+
       # Live USB installer images for each host
       mkLiveImage = hostName:
         let
@@ -198,9 +240,13 @@
               };
 
               # Image configuration
+              isoImage = {
+                # Note: squashfsCompression option has been removed in recent NixOS versions
+              };
+
+              # Use the new image namespace for ISO configuration
               image = {
-                fileName = lib.mkDefault "nixos-${hostName}-live.iso";
-                squashfsCompression = "gzip -Xcompression-level 1";
+                baseName = lib.mkDefault "nixos-${hostName}-live";
               };
 
               # Boot configuration
@@ -538,26 +584,10 @@
             }
           ];
           extraModules = {
-            # Development environment packages
-            environment.systemPackages = with nixpkgs.legacyPackages.x86_64-linux; [
-              git
-              vim
-              neovim
-              tmux
-              htop
-              tree
-              curl
-              wget
-              nodejs
-              python3
-              go
-              rustc
-              docker-compose
-              gcc
-              gnumake
-              cmake
-              ninja
-            ];
+            # Development environment packages (using consolidated package sets)
+            environment.systemPackages = microvmPackages.common
+              ++ microvmPackages.development
+              ++ microvmPackages.buildTools;
 
             # Create dev user
             users.users.dev = {
@@ -591,16 +621,8 @@
             }
           ];
           extraModules = {
-            # Minimal testing environment
-            environment.systemPackages = with nixpkgs.legacyPackages.x86_64-linux; [
-              git
-              vim
-              htop
-              tree
-              curl
-              wget
-              python3
-            ];
+            # Minimal testing environment (using common package set)
+            environment.systemPackages = microvmPackages.common;
 
             # Create test user
             users.users.test = {
@@ -645,28 +667,10 @@
             # Allow unfree packages for experimental tools
             nixpkgs.config.allowUnfree = true;
 
-            # Experimental playground packages
-            environment.systemPackages = with nixpkgs.legacyPackages.x86_64-linux; [
-              git
-              vim
-              neovim
-              tmux
-              htop
-              tree
-              curl
-              wget
-              python3
-              nodejs
-              go
-              rustc
-              docker-compose
-              kubernetes
-              helm
-              ansible
-              wireshark
-              tcpdump
-              nmap
-            ];
+            # Experimental playground packages (using consolidated package sets)
+            environment.systemPackages = microvmPackages.common
+              ++ microvmPackages.development
+              ++ microvmPackages.securityTools;
 
             # Root access for experimentation
             users.users.root.password = "playground";

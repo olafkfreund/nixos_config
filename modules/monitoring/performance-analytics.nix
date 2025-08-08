@@ -627,12 +627,12 @@ in
       "d /var/lib/performance-analytics/reports 0755 root root -"
     ];
 
-    # Performance analytics packages
+    # Use shared monitoring dependencies (includes bc, jq, python3)
+    features.packages.monitoringTools = true;
+
+    # Additional specific packages for performance analytics
     environment.systemPackages = with pkgs; [
-      bc # Calculations
-      jq # JSON processing
       gnuplot # Data visualization
-      python3 # For advanced analytics
       procps # Provides top, free commands
       gawk # Provides awk command
       iproute2 # Provides ss command for network monitoring

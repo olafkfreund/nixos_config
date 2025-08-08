@@ -372,10 +372,6 @@ in
       ethtool
       iproute2
       nettools
-      curl
-      jq
-      bc
-      python3
       netcat-gnu
     ];
 

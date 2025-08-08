@@ -380,12 +380,7 @@ in
 
     users.groups.plex-exporter = { };
 
-    # Required packages
-    environment.systemPackages = with pkgs; [
-      curl
-      jq
-      bc
-      python3
-    ];
+    # Use shared monitoring dependencies
+    features.packages.monitoringTools = true;
   };
 }

@@ -74,8 +74,8 @@ in
 
         Environment = [
           "PATH=${lib.makeBinPath (with pkgs; [
-            coreutils curl jq bc tcpdump nettools lsof
-            python3 gnugrep gnused gawk iproute2 procps
+            coreutils tcpdump nettools lsof
+            gnugrep gnused gawk iproute2 procps
           ])}"
         ];
 
@@ -564,17 +564,16 @@ in
       "d /var/lib/traffic-analyzer/captures 0755 traffic-analyzer traffic-analyzer -"
     ];
 
-    # Required packages
+    # Use shared monitoring dependencies (includes curl, jq, bc, python3)
+    features.packages.monitoringTools = true;
+
+    # Additional specific packages for traffic analysis
     environment.systemPackages = with pkgs; [
       tcpdump
       nettools # includes netstat
       iproute2 # includes ss
       lsof
       procps
-      curl
-      jq
-      bc
-      python3
       gawk
     ];
 

@@ -306,13 +306,12 @@ in
 
     users.groups.nzbget-exporter = { };
 
-    # Required packages
+    # Use shared monitoring dependencies (includes curl, jq, bc, python3)
+    features.packages.monitoringTools = true;
+
+    # Additional specific package for NZBGet
     environment.systemPackages = with pkgs; [
-      curl
-      jq
-      bc
       netcat-gnu
-      python3
     ];
   };
 }

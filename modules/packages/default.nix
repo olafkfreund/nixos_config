@@ -8,6 +8,10 @@ with lib; let
   packageSets = import ./sets.nix { inherit pkgs lib; };
 in
 {
+  imports = [
+    ./dependency-sets.nix
+  ];
+
   options.packages = {
     sets = mkOption {
       type = types.anything;
