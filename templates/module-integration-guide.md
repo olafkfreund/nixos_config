@@ -5,7 +5,7 @@ This guide explains how to properly integrate new modules into the existing NixO
 ## Table of Contents
 
 1. [Module Creation Process](#module-creation-process)
-2. [Module Categories](#module-categories) 
+2. [Module Categories](#module-categories)
 3. [Integration Steps](#integration-steps)
 4. [Feature Flag System](#feature-flag-system)
 5. [Host Configuration](#host-configuration)
@@ -21,7 +21,7 @@ Select the appropriate template based on your module type:
 
 - **Basic Module**: `templates/modules/basic-module.nix` - For simple configuration modules
 - **Service Module**: `templates/modules/service-module.nix` - For systemd services
-- **Development Tool**: `templates/modules/development-tool.nix` - For programming languages/tools  
+- **Development Tool**: `templates/modules/development-tool.nix` - For programming languages/tools
 - **Desktop Component**: `templates/modules/desktop-module.nix` - For desktop environment components
 
 ### Step 2: Copy and Customize
@@ -38,17 +38,18 @@ cp templates/modules/service-module.nix modules/services/myservice.nix
 
 ### Step 3: Follow Naming Conventions
 
-| Component | Convention | Example |
-|-----------|------------|---------|
-| File name | `kebab-case.nix` | `my-service.nix` |
-| Module path | `modules.category.name` | `modules.services.myService` |
-| Config variable | `cfg` | `cfg = config.modules.services.myService` |
-| Service user | `service-name` | `myservice` |
-| Service group | `service-name` | `myservice` |
+| Component       | Convention              | Example                                   |
+| --------------- | ----------------------- | ----------------------------------------- |
+| File name       | `kebab-case.nix`        | `my-service.nix`                          |
+| Module path     | `modules.category.name` | `modules.services.myService`              |
+| Config variable | `cfg`                   | `cfg = config.modules.services.myService` |
+| Service user    | `service-name`          | `myservice`                               |
+| Service group   | `service-name`          | `myservice`                               |
 
 ## Module Categories
 
 ### Directory Structure
+
 ```
 modules/
 ├── ai/                    # AI and machine learning tools
@@ -68,14 +69,14 @@ modules/
 
 ### Category Guidelines
 
-| Category | Purpose | Examples |
-|----------|---------|----------|
-| `ai/` | AI tools, models, inference | ollama, gemini-cli, ai-providers |
-| `services/` | Background services | databases, web servers, daemons |
-| `development/` | Dev tools & languages | python, go, rust, editors |
-| `desktop/` | GUI components | window managers, themes, panels |
-| `security/` | Security & hardening | secrets, ssh, firewall |
-| `monitoring/` | Observability tools | prometheus, grafana, exporters |
+| Category       | Purpose                     | Examples                         |
+| -------------- | --------------------------- | -------------------------------- |
+| `ai/`          | AI tools, models, inference | ollama, gemini-cli, ai-providers |
+| `services/`    | Background services         | databases, web servers, daemons  |
+| `development/` | Dev tools & languages       | python, go, rust, editors        |
+| `desktop/`     | GUI components              | window managers, themes, panels  |
+| `security/`    | Security & hardening        | secrets, ssh, firewall           |
+| `monitoring/`  | Observability tools         | prometheus, grafana, exporters   |
 
 ## Integration Steps
 
@@ -102,8 +103,9 @@ Edit `modules/default.nix` or the category-specific default file:
 ```
 
 Or for category-specific:
+
 ```nix
-# modules/services/default.nix  
+# modules/services/default.nix
 {
   imports = [
     # ... existing imports
@@ -156,14 +158,14 @@ features = {
     go = mkEnableOption "Go development";
     # ... other dev tools
   };
-  
+
   services = {
     enable = mkEnableOption "System services";
     database = mkEnableOption "Database services";
     monitoring = mkEnableOption "Monitoring stack";
     # ... other services
   };
-  
+
   desktop = {
     enable = mkEnableOption "Desktop environment";
     hyprland = mkEnableOption "Hyprland window manager";
@@ -175,6 +177,7 @@ features = {
 ### Adding New Feature Categories
 
 1. **Define in modules/default.nix**:
+
 ```nix
 options.features.myCategory = {
   enable = mkEnableOption "My category description";
@@ -184,12 +187,13 @@ options.features.myCategory = {
 ```
 
 2. **Connect to modules**:
+
 ```nix
 config = mkMerge [
   (mkIf config.features.myCategory.enable {
     # Base category configuration
   })
-  
+
   (mkIf config.features.myCategory.feature1 {
     modules.myCategory.feature1.enable = true;
   })
@@ -208,7 +212,7 @@ features = {
     enable = true;
     myService = true;  # Enable your new service
   };
-  
+
   development = {
     enable = true;
     python = true;
@@ -239,11 +243,13 @@ modules.services.myService = {
 ## Testing and Validation
 
 ### 1. Syntax Check
+
 ```bash
 just check-syntax
 ```
 
 ### 2. Build Test
+
 ```bash
 # Test specific host
 just test-host p620
@@ -253,6 +259,7 @@ just test-all
 ```
 
 ### 3. Module-Specific Testing
+
 ```bash
 # Test module evaluation
 nix eval .#nixosConfigurations.p620.config.modules.services.myService.enable
@@ -262,6 +269,7 @@ nix eval .#nixosConfigurations.p620.config.systemd.services.myservice
 ```
 
 ### 4. Flake Check
+
 ```bash
 nix flake check
 ```
@@ -271,7 +279,7 @@ nix flake check
 ### 1. Module Structure
 
 - **Always use the standard header pattern**
-- **Use `with lib; let cfg = ...` consistently**  
+- **Use `with lib; let cfg = ...` consistently**
 - **Define options before config**
 - **Use `mkIf cfg.enable` for all configuration**
 
@@ -304,6 +312,7 @@ nix flake check
 ## Common Pitfalls
 
 ### 1. ❌ Wrong Import Location
+
 ```nix
 # DON'T: Add directly to host config
 imports = [ ./modules/services/myservice.nix ];
@@ -313,6 +322,7 @@ imports = [ ./services/myservice.nix ];
 ```
 
 ### 2. ❌ Missing Feature Flag Connection
+
 ```nix
 # DON'T: Only module options
 modules.services.myService.enable = true;
@@ -323,6 +333,7 @@ features.services.myService = true;
 ```
 
 ### 3. ❌ Inconsistent Naming
+
 ```nix
 # DON'T: Inconsistent naming
 options.modules.services.my_service = ...;  # snake_case
@@ -334,13 +345,14 @@ config.features.services.myService = ...;
 ```
 
 ### 4. ❌ Missing lib Import
+
 ```nix
 # DON'T: Use lib functions without import
 { config, pkgs, ... }: {
   options.test = lib.mkOption { ... };  # lib not imported
 }
 
-# DO: Import lib and use with pattern  
+# DO: Import lib and use with pattern
 { config, lib, pkgs, ... }:
 with lib; {
   options.test = mkOption { ... };
@@ -348,6 +360,7 @@ with lib; {
 ```
 
 ### 5. ❌ Hardcoded Paths
+
 ```nix
 # DON'T: Hardcode paths
 ExecStart = "/run/current-system/sw/bin/myservice";
@@ -357,6 +370,7 @@ ExecStart = "${cfg.package}/bin/myservice";
 ```
 
 ### 6. ❌ Missing Validation
+
 ```nix
 # DON'T: No validation
 port = mkOption {

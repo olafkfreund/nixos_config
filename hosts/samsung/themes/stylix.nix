@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
   vars = import ../variables.nix;
 in
@@ -43,7 +43,10 @@ in
     # Target-specific configuration
     targets = {
       chromium.enable = false; # Exclude browser theming
-      qt.enable = true; # Enable Qt theming for consistent styling
+      qt = {
+        enable = true; # Enable Qt theming for consistent styling
+        platform = lib.mkForce "qt5ct"; # Use qt5ct platform (supported by Stylix)
+      };
     };
   };
 }

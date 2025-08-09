@@ -5,12 +5,15 @@ This directory contains low-level system configuration modules that manage core 
 ## Available Modules
 
 ### Performance and Optimization
+
 - **performance.nix** - System performance tuning and optimization settings
 
 ## Module Overview
 
 ### Performance (`performance.nix`)
+
 Provides comprehensive system performance optimizations including:
+
 - CPU scheduler optimizations
 - Memory management tuning
 - I/O scheduler configuration
@@ -21,6 +24,7 @@ Provides comprehensive system performance optimizations including:
 ## Usage Examples
 
 ### Basic Performance Optimization
+
 ```nix
 {
   modules.system.performance = {
@@ -31,6 +35,7 @@ Provides comprehensive system performance optimizations including:
 ```
 
 ### Custom Performance Tuning
+
 ```nix
 {
   modules.system.performance = {
@@ -51,6 +56,7 @@ Provides comprehensive system performance optimizations including:
 ```
 
 ### Gaming-Optimized Configuration
+
 ```nix
 {
   modules.system.performance = {
@@ -68,24 +74,28 @@ Provides comprehensive system performance optimizations including:
 ## Performance Profiles
 
 ### Desktop Profile
+
 - Balanced performance and power efficiency
 - Optimized for interactive workloads
 - Reasonable resource limits
 - Moderate I/O scheduling
 
 ### Server Profile
+
 - Maximum throughput optimization
 - Aggressive caching and buffering
 - Network stack tuning for high loads
 - Minimal power management interference
 
 ### Laptop Profile
+
 - Power efficiency focused
 - Thermal throttling protection
 - Battery life optimization
 - Dynamic performance scaling
 
 ### Gaming Profile
+
 - Low latency optimizations
 - Real-time scheduling priorities
 - Disabled power saving features
@@ -94,24 +104,28 @@ Provides comprehensive system performance optimizations including:
 ## Configuration Categories
 
 ### CPU Optimization
+
 - Scheduler algorithm selection (CFS, deadline, RT)
 - CPU governor configuration (performance, powersave, ondemand)
 - Core isolation for specific workloads
 - NUMA topology awareness
 
 ### Memory Management
+
 - Swappiness tuning (0-100 scale)
 - ZRAM compression for additional memory
 - Transparent huge pages configuration
 - OOM killer tuning
 
 ### Storage I/O
+
 - I/O scheduler selection (mq-deadline, kyber, bfq)
 - Read-ahead optimization
 - Dirty page writeback tuning
 - SSD-specific optimizations
 
 ### Network Tuning
+
 - TCP congestion control algorithms
 - Buffer size optimization
 - Interrupt mitigation
@@ -120,18 +134,21 @@ Provides comprehensive system performance optimizations including:
 ## Hardware-Specific Considerations
 
 ### SSD Storage
+
 - Enable TRIM support
 - Disable access time updates
 - Optimize mount options
 - Reduce write amplification
 
 ### Multi-Core Systems
+
 - CPU affinity management
 - IRQ balancing
 - NUMA memory policies
 - Cache optimization
 
 ### High-Memory Systems
+
 - Large page support
 - Memory compaction tuning
 - Swap configuration
@@ -140,6 +157,7 @@ Provides comprehensive system performance optimizations including:
 ## Monitoring and Validation
 
 ### Performance Metrics
+
 ```bash
 # CPU performance
 htop
@@ -149,7 +167,7 @@ sar -u 1 5
 free -h
 vmstat 1 5
 
-# I/O performance  
+# I/O performance
 iostat -x 1 5
 iotop
 
@@ -159,6 +177,7 @@ nethogs
 ```
 
 ### Benchmarking
+
 ```bash
 # CPU benchmark
 sysbench cpu run
@@ -193,6 +212,7 @@ iperf3 -c server_ip
    - Monitor device temperature
 
 ### Debug Commands
+
 ```bash
 # Check current CPU governor
 cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor

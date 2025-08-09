@@ -11,6 +11,7 @@ This directory contains NixOS modules for Kubernetes (K8s) container orchestrati
 ## Features
 
 The Kubernetes modules provide:
+
 - Command-line tools (`kubectl`, `k9s`, `helm`, etc.)
 - Deployment and management utilities
 - Development tools for Kubernetes

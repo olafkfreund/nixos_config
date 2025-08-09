@@ -1,6 +1,7 @@
 # Quick NixOS Module Snippets
 
 ## Basic Module Header
+
 ```nix
 {
   config,
@@ -14,7 +15,7 @@ in {
   options.modules.CATEGORY.MODULE_NAME = {
     enable = mkEnableOption "DESCRIPTION";
   };
-  
+
   config = mkIf cfg.enable {
     # Configuration here
   };
@@ -24,6 +25,7 @@ in {
 ## Common Option Types
 
 ### String Option
+
 ```nix
 optionName = mkOption {
   type = types.str;
@@ -34,6 +36,7 @@ optionName = mkOption {
 ```
 
 ### Boolean Option
+
 ```nix
 enableFeature = mkOption {
   type = types.bool;
@@ -43,6 +46,7 @@ enableFeature = mkOption {
 ```
 
 ### Package Option
+
 ```nix
 package = mkOption {
   type = types.package;
@@ -52,6 +56,7 @@ package = mkOption {
 ```
 
 ### List of Packages
+
 ```nix
 extraPackages = mkOption {
   type = types.listOf types.package;
@@ -62,6 +67,7 @@ extraPackages = mkOption {
 ```
 
 ### Port Option
+
 ```nix
 port = mkOption {
   type = types.port;
@@ -71,6 +77,7 @@ port = mkOption {
 ```
 
 ### Enum Option
+
 ```nix
 logLevel = mkOption {
   type = types.enum [ "debug" "info" "warn" "error" ];
@@ -80,6 +87,7 @@ logLevel = mkOption {
 ```
 
 ### Attribute Set
+
 ```nix
 settings = mkOption {
   type = types.attrsOf types.str;
@@ -97,12 +105,13 @@ settings = mkOption {
 ## Service Configuration
 
 ### Basic Service
+
 ```nix
 systemd.services.service-name = {
   description = "Service Description";
   after = [ "network.target" ];
   wantedBy = [ "multi-user.target" ];
-  
+
   serviceConfig = {
     Type = "simple";
     User = "service-user";
@@ -115,22 +124,23 @@ systemd.services.service-name = {
 ```
 
 ### Hardened Service
+
 ```nix
 systemd.services.service-name = {
   description = "Hardened Service";
   after = [ "network.target" ];
   wantedBy = [ "multi-user.target" ];
-  
+
   serviceConfig = {
     Type = "simple";
     User = "service-user";
     Group = "service-group";
     ExecStart = "${cfg.package}/bin/command";
-    
+
     # Restart
     Restart = "always";
     RestartSec = "10s";
-    
+
     # Security
     NoNewPrivileges = true;
     PrivateTmp = true;
@@ -144,6 +154,7 @@ systemd.services.service-name = {
 ## User Management
 
 ### System User
+
 ```nix
 users.users.service-user = {
   isSystemUser = true;
@@ -157,6 +168,7 @@ users.groups.service-group = {};
 ```
 
 ### Normal User
+
 ```nix
 users.users.username = {
   isNormalUser = true;
@@ -168,6 +180,7 @@ users.users.username = {
 ```
 
 ## Directory Setup
+
 ```nix
 systemd.tmpfiles.rules = [
   "d /var/lib/service 0755 service-user service-group -"
@@ -179,6 +192,7 @@ systemd.tmpfiles.rules = [
 ## Conditional Configuration
 
 ### Simple Conditional
+
 ```nix
 config = mkIf cfg.enable {
   environment.systemPackages = [ cfg.package ];
@@ -186,6 +200,7 @@ config = mkIf cfg.enable {
 ```
 
 ### Multiple Conditions
+
 ```nix
 programs.example = mkIf (cfg.enable && cfg.advanced) {
   enable = true;
@@ -194,10 +209,11 @@ programs.example = mkIf (cfg.enable && cfg.advanced) {
 ```
 
 ### Optional Lists
+
 ```nix
 environment.systemPackages = with pkgs; [
   base-package
-] 
+]
 ++ optional cfg.enableFeature1 feature1-package
 ++ optionals cfg.enableFeatures [ pkg1 pkg2 pkg3 ];
 ```
@@ -205,6 +221,7 @@ environment.systemPackages = with pkgs; [
 ## Validation
 
 ### Assertions
+
 ```nix
 assertions = [
   {
@@ -219,6 +236,7 @@ assertions = [
 ```
 
 ### Warnings
+
 ```nix
 warnings = [
   (mkIf (cfg.enable && !cfg.secure) ''
@@ -230,6 +248,7 @@ warnings = [
 ## Configuration Files
 
 ### JSON Config
+
 ```nix
 configFile = pkgs.writeText "config.json" (builtins.toJSON {
   setting1 = cfg.setting1;
@@ -238,12 +257,13 @@ configFile = pkgs.writeText "config.json" (builtins.toJSON {
 ```
 
 ### INI Config
+
 ```nix
 configFile = pkgs.writeText "config.ini" ''
   [section]
   key1 = ${cfg.value1}
   key2 = ${cfg.value2}
-  
+
   ${concatStringsSep "\n" (mapAttrsToList (k: v: "${k} = ${v}") cfg.settings)}
 '';
 ```
@@ -251,11 +271,13 @@ configFile = pkgs.writeText "config.ini" ''
 ## Networking
 
 ### Firewall Ports
+
 ```nix
 networking.firewall.allowedTCPPorts = mkIf cfg.openFirewall [ cfg.port ];
 ```
 
 ### Multiple Ports
+
 ```nix
 networking.firewall = {
   allowedTCPPorts = [ 80 443 ];
@@ -264,6 +286,7 @@ networking.firewall = {
 ```
 
 ## Environment Variables
+
 ```nix
 environment.variables = {
   SERVICE_HOME = "/etc/service";
@@ -272,6 +295,7 @@ environment.variables = {
 ```
 
 ## Shell Integration
+
 ```nix
 environment.shellAliases = mkIf cfg.enableShellIntegration {
   service-start = "systemctl start service-name";
@@ -283,6 +307,7 @@ environment.shellAliases = mkIf cfg.enableShellIntegration {
 ## Development Features
 
 ### LSP Support
+
 ```nix
 environment.systemPackages = optionals cfg.enableLSP [
   language-server-package
@@ -291,6 +316,7 @@ environment.systemPackages = optionals cfg.enableLSP [
 ```
 
 ### Editor Integration
+
 ```nix
 programs.vscode = mkIf cfg.enableEditorIntegration {
   extensions = with pkgs.vscode-extensions; [

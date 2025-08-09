@@ -182,5 +182,12 @@ in
   networking.firewall.enable = false;
   networking.nftables.enable = true;
   networking.timeServers = [ "pool.ntp.org" ];
+
+  # Qt theme control tools for Stylix
+  environment.systemPackages = with pkgs; [
+    libsForQt5.qt5ct
+    kdePackages.qt6ct
+  ];
+
   system.stateVersion = "24.11";
 }

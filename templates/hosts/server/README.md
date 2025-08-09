@@ -10,7 +10,7 @@ This server template provides:
 - **Security Hardening**: Enhanced security with fail2ban, firewall, and kernel hardening
 - **Container Support**: Docker, Podman, and LXC virtualization
 - **Monitoring Integration**: Built-in Prometheus/Grafana monitoring support
-- **Media Server Ready**: Optional Plex, Jellyfin, and *arr services
+- **Media Server Ready**: Optional Plex, Jellyfin, and \*arr services
 - **Database Support**: PostgreSQL, MySQL, Redis, MongoDB options
 - **Web Services**: Nginx, Apache, Node.js support
 - **Network Optimized**: Server-grade networking with systemd-networkd
@@ -20,6 +20,7 @@ This server template provides:
 ## Quick Start
 
 1. **Copy and customize the template:**
+
    ```bash
    cp -r templates/hosts/server hosts/myserver
    cd hosts/myserver
@@ -32,6 +33,7 @@ This server template provides:
    - Enable desired features (media server, databases, etc.)
 
 3. **Generate hardware configuration:**
+
    ```bash
    nixos-generate-config --show-hardware-config > nixos/hardware-configuration.nix
    ```
@@ -39,6 +41,7 @@ This server template provides:
 4. **Update flake.nix** (add your server configuration)
 
 5. **Test and deploy:**
+
    ```bash
    just test-host myserver
    just myserver
@@ -56,7 +59,7 @@ network = {
     tcp = [ 22 80 443 8080 ];     # Add your service ports
     udp = [ ];
   };
-  
+
   # Static IP example
   interfaces = {
     "enp3s0" = {
@@ -83,14 +86,14 @@ features = {
     radarr = true;
     transmission = true;
   };
-  
+
   # Database services
   database = {
     enable = true;
     postgresql = true;
     redis = true;
   };
-  
+
   # Web services
   webServices = {
     enable = true;
@@ -122,6 +125,7 @@ monitoring = {
 ```
 
 Includes:
+
 - Node exporter for system metrics
 - Systemd exporter for service monitoring
 - Docker metrics (if enabled)
@@ -165,7 +169,7 @@ autoUpgrade = {
 
 This template implements server security best practices:
 
-1. **SSH Security**: 
+1. **SSH Security**:
    - Key-only authentication
    - Root login with keys only
    - Limited connection attempts
@@ -208,6 +212,7 @@ Flexible storage options:
 ## Common Use Cases
 
 ### Media Server
+
 ```nix
 features.mediaServer = {
   enable = true;
@@ -220,6 +225,7 @@ features.mediaServer = {
 ```
 
 ### Development Server
+
 ```nix
 features = {
   development = true;
@@ -230,6 +236,7 @@ features = {
 ```
 
 ### Monitoring Server
+
 ```nix
 features.monitoring = {
   enable = true;
@@ -238,6 +245,7 @@ features.monitoring = {
 ```
 
 ### File Server
+
 ```nix
 # Add specific file server configuration
 # Samba, NFS, or other file sharing services

@@ -5,6 +5,7 @@ This directory contains configuration for [bat](https://github.com/sharkdp/bat),
 ## Overview
 
 Bat is configured in this NixOS setup to provide:
+
 - Syntax highlighting with the gruvbox-dark theme (as referenced in your shell aliases)
 - Integration with git for showing file changes
 - A more readable alternative to the standard `cat` command
@@ -12,6 +13,7 @@ Bat is configured in this NixOS setup to provide:
 ## Configuration
 
 The configuration in this directory integrates bat into your shell environment with the following features:
+
 - Custom theme settings
 - Integration with other tools like fzf for previews
 - File type association for syntax highlighting

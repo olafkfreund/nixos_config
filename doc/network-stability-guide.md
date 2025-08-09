@@ -31,13 +31,13 @@ Enable network stability in your host configuration:
 {
   services.network-stability = {
     enable = true;
-    
+
     # Monitoring configuration
     monitoring = {
       enable = true;        # Enable monitoring service
       interval = 30;        # Check interval in seconds
     };
-    
+
     # Secure DNS configuration
     secureDns = {
       enable = true;
@@ -46,31 +46,31 @@ Enable network stability in your host configuration:
         "8.8.8.8#dns.google"
       ];
     };
-    
+
     # Tailscale integration
     tailscale = {
       enhance = true;
       acceptDns = false;    # Don't let Tailscale manage DNS
     };
-    
+
     # Electron application improvements
     electron = {
-      improve = true; 
+      improve = true;
     };
-    
+
     # Connection stability settings
     connectionStability = {
       enable = true;
       switchDelayMs = 5000;  # Delay before switching interfaces
     };
-    
+
     # Helper service configuration
     helperService = {
       enable = true;
       startDelay = 5;        # Delay before starting
       restartSec = 30;       # Restart interval on failure
     };
-    
+
     # Custom script path if needed
     scriptPath = ./scripts/network-stability-helper.sh;
   };
@@ -81,12 +81,12 @@ Enable network stability in your host configuration:
 
 For Electron applications, the following environment variables are set:
 
-| Variable | Value | Purpose |
-|----------|-------|---------|
-| `DISABLE_REQUEST_THROTTLING` | `1` | Prevents limiting concurrent requests |
-| `ELECTRON_FORCE_WINDOW_MENU_BAR` | `1` | Improves UI stability during network changes |
-| `CHROME_NET_TCP_SOCKET_CONNECT_TIMEOUT_MS` | `60000` | Increases connection timeouts to 60 seconds |
-| `CHROME_NET_TCP_SOCKET_CONNECT_ATTEMPT_DELAY_MS` | `2000` | Adds 2-second delay between connection attempts |
+| Variable                                         | Value   | Purpose                                         |
+| ------------------------------------------------ | ------- | ----------------------------------------------- |
+| `DISABLE_REQUEST_THROTTLING`                     | `1`     | Prevents limiting concurrent requests           |
+| `ELECTRON_FORCE_WINDOW_MENU_BAR`                 | `1`     | Improves UI stability during network changes    |
+| `CHROME_NET_TCP_SOCKET_CONNECT_TIMEOUT_MS`       | `60000` | Increases connection timeouts to 60 seconds     |
+| `CHROME_NET_TCP_SOCKET_CONNECT_ATTEMPT_DELAY_MS` | `2000`  | Adds 2-second delay between connection attempts |
 
 ## Monitoring and Troubleshooting
 
@@ -110,11 +110,13 @@ cat /var/log/network-monitoring/events.json
 If an application still shows `net::ERR_NETWORK_CHANGED` errors:
 
 1. Increase the connection delay:
+
    ```nix
    services.network-stability.connectionStability.switchDelayMs = 10000;
    ```
 
 2. Add more DNS providers:
+
    ```nix
    services.network-stability.secureDns.providers = [
      "1.1.1.1#cloudflare-dns.com"
@@ -124,6 +126,7 @@ If an application still shows `net::ERR_NETWORK_CHANGED` errors:
    ```
 
 3. Launch the application with the helper script:
+
    ```bash
    electron-net-stable your-electron-app
    ```
@@ -133,6 +136,7 @@ If an application still shows `net::ERR_NETWORK_CHANGED` errors:
 If experiencing problems with network interfaces switching too frequently:
 
 1. Add interface priority in NetworkManager:
+
    ```nix
    networking.networkmanager.connectionConfig = {
      "connection.autoconnect-priority" = 10;  # Higher for preferred connections
@@ -140,6 +144,7 @@ If experiencing problems with network interfaces switching too frequently:
    ```
 
 2. Adjust the TCP keepalive settings:
+
    ```nix
    boot.kernel.sysctl = {
      "net.ipv4.tcp_keepalive_time" = 600;

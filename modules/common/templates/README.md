@@ -24,13 +24,13 @@ The `variables.nix` approach allows you to centralize host-specific settings in 
 Import the variables at the top of your configuration files:
 
 ```nix
-{ ... }: let 
+{ ... }: let
   vars = import ../variables.nix;
 in {
   # Use variables in your configuration
   networking.hostName = vars.hostName;
   time.timeZone = vars.timezone;
-  
+
   # ...other configuration
 }
 ```
@@ -133,7 +133,7 @@ The following configuration files typically use variables from `variables.nix`:
 - `configuration.nix` - Main system configuration
 - `nixos/i18n.nix` - Locale and timezone settings
 - `nixos/hosts.nix` - Network host mappings
-- `nixos/envvar.nix` - Environment variables 
+- `nixos/envvar.nix` - Environment variables
 - `themes/stylix.nix` - Theme configuration
 - `nixos/screens.nix` - Monitor configuration
 

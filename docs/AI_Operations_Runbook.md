@@ -7,6 +7,7 @@ This runbook provides comprehensive operational procedures for managing the AI i
 ## Quick Reference
 
 ### Key Commands
+
 ```bash
 # AI Provider Management
 ai-cli "test query"                    # Test AI provider
@@ -34,14 +35,16 @@ systemctl status fail2ban             # Check fail2ban status
 ```
 
 ### Service Endpoints
-- **Grafana**: http://dex5550.home.freundcloud.com:3001 (admin/nixos-admin)
-- **Prometheus**: http://dex5550.home.freundcloud.com:9090
-- **Alertmanager**: http://dex5550.home.freundcloud.com:9093
-- **Ollama**: http://localhost:11434 (P620 only)
+
+- **Grafana**: <http://dex5550.home.freundcloud.com:3001> (admin/nixos-admin)
+- **Prometheus**: <http://dex5550.home.freundcloud.com:9090>
+- **Alertmanager**: <http://dex5550.home.freundcloud.com:9093>
+- **Ollama**: <http://localhost:11434> (P620 only)
 
 ## Daily Operations
 
 ### Morning Health Check
+
 ```bash
 # 1. Check overall system health
 systemctl status ai-*
@@ -61,6 +64,7 @@ df -h | grep -E "(/$|/mnt)" | awk '$5 > 70 { print $0 }'
 ```
 
 ### Weekly Maintenance
+
 ```bash
 # 1. Run comprehensive system validation
 systemctl start ai-system-validation
@@ -82,6 +86,7 @@ systemctl restart ai-provider-optimization
 ## Host-Specific Operations
 
 ### P620 (AMD Workstation - Monitoring Client)
+
 ```bash
 # Primary AI development and testing host
 # Status: Monitoring client sending data to DEX5550
@@ -102,6 +107,7 @@ ai-cli -p ollama "test local inference"
 ```
 
 ### DEX5550 (Intel SFF - Monitoring Server)
+
 ```bash
 # Primary monitoring server
 # Status: Centralized monitoring for all hosts
@@ -120,6 +126,7 @@ ls -la /var/lib/grafana/dashboards/
 ```
 
 ### P510 (Intel Xeon - High Storage Usage)
+
 ```bash
 # Critical storage monitoring required
 # Status: 79.6% disk usage - requires attention
@@ -138,6 +145,7 @@ systemctl status ai-storage-analysis
 ```
 
 ### Razer (Intel/NVIDIA Laptop)
+
 ```bash
 # Mobile development platform
 # Status: Monitoring client with hybrid graphics
@@ -157,6 +165,7 @@ ping dex5550.home.freundcloud.com
 ### AI Provider Issues
 
 #### Symptom: AI commands returning "No providers available"
+
 ```bash
 # Diagnosis
 ai-cli --status
@@ -171,6 +180,7 @@ ls -la /run/agenix/api-*
 ```
 
 #### Symptom: High AI response times
+
 ```bash
 # Diagnosis
 ai-load-test light
@@ -187,6 +197,7 @@ journalctl -u ai-provider-optimization --since "1 hour ago"
 ### Monitoring Issues
 
 #### Symptom: Grafana dashboards not loading
+
 ```bash
 # Diagnosis
 systemctl status grafana
@@ -201,6 +212,7 @@ ls -la /var/lib/grafana/dashboards/
 ```
 
 #### Symptom: Missing metrics in Prometheus
+
 ```bash
 # Diagnosis
 curl -s http://localhost:9090/api/v1/targets
@@ -217,6 +229,7 @@ systemctl status nixos-exporter
 ### Performance Issues
 
 #### Symptom: High CPU usage on AI services
+
 ```bash
 # Diagnosis
 top -p $(pgrep -f "ai-|ollama")
@@ -231,6 +244,7 @@ journalctl -u ai-system-optimization --since "1 hour ago"
 ```
 
 #### Symptom: Storage space critical
+
 ```bash
 # Diagnosis
 df -h
@@ -247,6 +261,7 @@ systemctl status ai-storage-analysis
 ### Security Issues
 
 #### Symptom: Multiple failed SSH attempts
+
 ```bash
 # Diagnosis
 ssh-security-check
@@ -261,6 +276,7 @@ journalctl -u sshd --since "1 hour ago" | grep "Failed password"
 ```
 
 #### Symptom: Security audit failures
+
 ```bash
 # Diagnosis
 systemctl status ai-security-audit
@@ -277,6 +293,7 @@ ls -la /var/log/ssh-security-audit.log
 ## Emergency Procedures
 
 ### Critical System Failure
+
 ```bash
 # 1. Immediate assessment
 systemctl --failed
@@ -301,6 +318,7 @@ iostat -x 1 3
 ```
 
 ### Storage Emergency (P510)
+
 ```bash
 # P510 at 79.6% - emergency cleanup required
 # CRITICAL: Run immediately if usage > 85%
@@ -326,6 +344,7 @@ watch -n 5 'df -h /'
 ```
 
 ### Network Partition
+
 ```bash
 # If monitoring server (DEX5550) is unreachable
 
@@ -350,18 +369,21 @@ ai-cli --status
 ## Maintenance Schedules
 
 ### Daily (Automated)
+
 - System validation (ai-system-validation)
 - Performance monitoring (ai-performance-monitor)
 - Security monitoring (ssh-monitor)
 - Log rotation (logrotate)
 
 ### Weekly (Automated)
+
 - Load testing (ai-provider-load-test)
 - Security audits (ai-security-audit)
 - Storage analysis (ai-storage-analysis)
 - Performance optimization (ai-system-optimization)
 
 ### Monthly (Manual)
+
 - Review security logs and update configurations
 - Update AI provider configurations
 - Performance tuning based on monitoring data
@@ -369,6 +391,7 @@ ai-cli --status
 - Review and update documentation
 
 ### Quarterly (Manual)
+
 - Full system security audit
 - Performance baseline review
 - Infrastructure capacity planning
@@ -378,6 +401,7 @@ ai-cli --status
 ## Monitoring and Alerting
 
 ### Key Metrics to Monitor
+
 - AI provider response times (target: <5s)
 - System resource usage (CPU <80%, Memory <85%)
 - Storage usage (especially P510: current 79.6%)
@@ -385,11 +409,13 @@ ai-cli --status
 - Service availability
 
 ### Alert Thresholds
+
 - **Critical**: Storage >85%, Memory >90%, AI response >10s
 - **Warning**: Storage >70%, Memory >80%, AI response >5s
 - **Info**: New SSH connections, service restarts
 
 ### Dashboard Links
+
 - [AI Production Overview](http://dex5550.home.freundcloud.com:3001/d/ai-production-overview)
 - [AI Security Dashboard](http://dex5550.home.freundcloud.com:3001/d/ai-security-dashboard)
 - [AI Performance Dashboard](http://dex5550.home.freundcloud.com:3001/d/ai-performance-dashboard)
@@ -397,6 +423,7 @@ ai-cli --status
 ## Backup and Recovery
 
 ### Critical Data Locations
+
 - `/etc/ai-providers.json` - AI provider configurations
 - `/var/lib/ai-analysis/` - Analysis data and reports
 - `/var/lib/grafana/dashboards/` - Dashboard configurations
@@ -404,6 +431,7 @@ ai-cli --status
 - `/run/agenix/` - Encrypted secrets (managed by agenix)
 
 ### Backup Commands
+
 ```bash
 # Create backup
 tar -czf /tmp/ai-backup-$(date +%Y%m%d).tar.gz \
@@ -420,12 +448,14 @@ systemctl restart grafana prometheus
 ## Configuration Management
 
 ### Key Configuration Files
+
 - `/etc/ai-providers.json` - AI provider settings
 - `/etc/prometheus/prometheus.yml` - Metrics collection
 - `/var/lib/grafana/dashboards/` - Monitoring dashboards
 - `/etc/ssh/sshd_config` - SSH security settings
 
 ### Making Changes
+
 1. Test changes in development environment
 2. Update configuration files
 3. Validate syntax: `just check-syntax`
@@ -442,6 +472,6 @@ systemctl restart grafana prometheus
 
 ---
 
-*Last Updated: $(date)*
-*Version: 1.0*
-*Next Review: $(date -d "+1 month")*
+_Last Updated: $(date)_
+_Version: 1.0_
+_Next Review: $(date -d "+1 month")_

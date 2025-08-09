@@ -7,6 +7,7 @@ This directory contains Home Manager configurations for user environments and is
 ### How to Use This Configuration
 
 1. **Clone the repository** to your NixOS system:
+
    ```sh
    git clone <your-repo-url> ~/.config/nixos
    cd ~/.config/nixos
@@ -30,10 +31,13 @@ This directory contains Home Manager configurations for user environments and is
 
 5. **Apply the configuration:**
    - For system config:
+
      ```sh
      sudo nixos-rebuild switch --flake .#<hostname>
      ```
+
    - For user config (Home Manager):
+
      ```sh
      home-manager switch --flake .#<username>@<hostname>
      ```

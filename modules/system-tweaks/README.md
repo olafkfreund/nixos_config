@@ -14,6 +14,7 @@ This directory contains NixOS modules for various system-level optimizations and
 ## Features
 
 These modules provide:
+
 - Memory management optimizations
 - I/O schedulers tuning
 - Virtual memory subsystem tweaks

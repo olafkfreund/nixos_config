@@ -7,20 +7,23 @@ This guide provides step-by-step instructions for deploying the AI infrastructur
 ## Prerequisites
 
 ### System Requirements
+
 - NixOS 25.11 or later
 - Flakes enabled
 - SSH access to all hosts
 - Internet connectivity for API providers
 
 ### Required Secrets
+
 - `api-anthropic` - Anthropic Claude API key
-- `api-openai` - OpenAI API key  
+- `api-openai` - OpenAI API key
 - `api-gemini` - Google Gemini API key
 - User password secrets (managed via agenix)
 
 ## Initial Deployment
 
 ### Step 1: Configure Secrets
+
 ```bash
 # Navigate to configuration directory
 cd /home/olafkfreund/.config/nixos
@@ -35,6 +38,7 @@ cd /home/olafkfreund/.config/nixos
 ```
 
 ### Step 2: Enable AI Infrastructure
+
 Edit the host configuration to enable AI features:
 
 ```nix
@@ -43,7 +47,7 @@ ai.providers = {
   enable = true;
   defaultProvider = "anthropic";
   enableFallback = true;
-  
+
   # Enable specific providers
   openai.enable = true;
   anthropic.enable = true;
@@ -56,7 +60,7 @@ ai.analysis = {
   enable = true;
   aiProvider = "anthropic";
   enableFallback = true;
-  
+
   features = {
     performanceAnalysis = true;
     resourceOptimization = true;
@@ -69,14 +73,16 @@ ai.analysis = {
 ```
 
 ### Step 3: Configure Monitoring
+
 Enable monitoring based on host role:
 
 **For Monitoring Server (DEX5550)**:
+
 ```nix
 monitoring = {
   enable = true;
   mode = "server";  # Central monitoring server
-  
+
   features = {
     prometheus = true;
     grafana = true;
@@ -89,12 +95,13 @@ monitoring = {
 ```
 
 **For Monitored Hosts (P620, P510, Razer)**:
+
 ```nix
 monitoring = {
   enable = true;
   mode = "client";  # Send data to monitoring server
   serverHost = "dex5550";
-  
+
   features = {
     nodeExporter = true;
     nixosMetrics = true;
@@ -107,6 +114,7 @@ monitoring = {
 ```
 
 ### Step 4: Test Configuration
+
 ```bash
 # Validate configuration syntax
 just check-syntax
@@ -120,6 +128,7 @@ just test-all
 ```
 
 ### Step 5: Deploy Configuration
+
 ```bash
 # Deploy to specific host
 just p620
@@ -134,9 +143,11 @@ just deploy
 ## Host-Specific Deployment
 
 ### P620 (AMD Workstation) - Primary AI Host
+
 **Role**: AI development, local inference, monitoring client
 
 **Configuration Features**:
+
 - AI providers (Anthropic, Ollama)
 - Performance optimization
 - Load testing
@@ -144,6 +155,7 @@ just deploy
 - Production dashboard
 
 **Deployment Steps**:
+
 ```bash
 # 1. Test configuration
 just test-host p620
@@ -162,6 +174,7 @@ ssh p620 'ai-cli -p ollama "test"'
 ```
 
 **Post-Deployment Verification**:
+
 ```bash
 # Check AI provider status
 ssh p620 'ai-cli --status'
@@ -177,15 +190,18 @@ ssh p620 'ai-load-test light'
 ```
 
 ### DEX5550 (Intel SFF) - Monitoring Server
+
 **Role**: Centralized monitoring, metrics collection
 
 **Configuration Features**:
+
 - Prometheus server
 - Grafana dashboards
 - Alertmanager
 - Log collection (Loki)
 
 **Deployment Steps**:
+
 ```bash
 # 1. Test configuration
 just test-host dex5550
@@ -205,6 +221,7 @@ curl -f http://dex5550.home.freundcloud.com:9090/-/healthy
 ```
 
 **Post-Deployment Verification**:
+
 ```bash
 # Check Prometheus targets
 curl -s http://dex5550.home.freundcloud.com:9090/api/v1/targets | jq '.data.activeTargets[].health'
@@ -217,15 +234,18 @@ curl -s http://dex5550.home.freundcloud.com:9093/api/v1/status
 ```
 
 ### P510 (Intel Xeon) - High Storage Monitoring
+
 **Role**: High-performance computing, critical storage monitoring
 
 **Configuration Features**:
+
 - Storage analysis (emergency mode)
 - Memory optimization
 - Automated remediation
 - Security auditing
 
 **Deployment Steps**:
+
 ```bash
 # 1. Check current storage usage
 ssh p510 'df -h /'
@@ -244,6 +264,7 @@ ssh p510 'systemctl start ai-emergency-storage-cleanup'
 ```
 
 **Post-Deployment Verification**:
+
 ```bash
 # Check storage analysis
 ssh p510 'systemctl status ai-storage-analysis'
@@ -256,14 +277,17 @@ ssh p510 'df -h / && du -sh /nix/store'
 ```
 
 ### Razer (Intel/NVIDIA Laptop) - Mobile Platform
+
 **Role**: Mobile development, monitoring client
 
 **Configuration Features**:
+
 - Basic AI providers
 - Mobile-optimized monitoring
 - Power management integration
 
 **Deployment Steps**:
+
 ```bash
 # 1. Test configuration
 just test-host razer
@@ -281,6 +305,7 @@ ssh razer 'powertop --help'
 ## Service Configuration
 
 ### AI Provider Services
+
 After deployment, configure AI providers:
 
 ```bash
@@ -298,6 +323,7 @@ systemctl status ai-provider-optimization
 ```
 
 ### Monitoring Services
+
 Configure monitoring after deployment:
 
 ```bash
@@ -313,6 +339,7 @@ grafana-status
 ```
 
 ### Security Services
+
 Configure security features:
 
 ```bash
@@ -329,6 +356,7 @@ systemctl start ai-security-audit
 ## Verification and Testing
 
 ### Comprehensive System Test
+
 ```bash
 #!/bin/bash
 # Comprehensive deployment verification
@@ -384,6 +412,7 @@ echo "=== Deployment Verification Complete ==="
 ```
 
 ### Load Testing After Deployment
+
 ```bash
 # Run comprehensive load test
 ai-load-test moderate
@@ -400,8 +429,10 @@ ai-dashboard-status
 ### Common Deployment Problems
 
 #### Build Failures
+
 **Symptoms**: `just test-host` or `just deploy` fails
 **Diagnosis**:
+
 ```bash
 # Check syntax
 just check-syntax
@@ -414,14 +445,17 @@ just test-host p620 2>&1 | grep -E "(error|failed)"
 ```
 
 **Resolution**:
+
 1. Fix syntax errors
 2. Add missing dependencies
 3. Check flake.lock for version conflicts
 4. Rebuild with clean environment
 
 #### Service Start Failures
+
 **Symptoms**: AI services fail to start after deployment
 **Diagnosis**:
+
 ```bash
 # Check service status
 systemctl status ai-*
@@ -434,14 +468,17 @@ systemctl list-dependencies ai-providers
 ```
 
 **Resolution**:
+
 1. Check service configuration
 2. Verify dependencies are met
 3. Check API key availability
 4. Restart services in order
 
 #### API Key Issues
+
 **Symptoms**: AI providers not working after deployment
 **Diagnosis**:
+
 ```bash
 # Check API key existence
 ls -la /run/agenix/api-*
@@ -454,6 +491,7 @@ ls -la /run/agenix/ | grep api-
 ```
 
 **Resolution**:
+
 1. Recreate API keys: `./scripts/manage-secrets.sh create api-anthropic`
 2. Update secret permissions
 3. Restart agenix service: `systemctl restart agenix`
@@ -462,8 +500,10 @@ ls -la /run/agenix/ | grep api-
 ### Monitoring Deployment Issues
 
 #### Grafana Not Accessible
+
 **Symptoms**: Cannot access Grafana dashboard
 **Diagnosis**:
+
 ```bash
 # Check Grafana service
 systemctl status grafana
@@ -476,14 +516,17 @@ firewall-cmd --list-ports | grep 3001
 ```
 
 **Resolution**:
+
 1. Start Grafana: `systemctl start grafana`
 2. Check network configuration
 3. Open firewall ports
 4. Verify dashboard provisioning
 
 #### Prometheus Not Scraping
+
 **Symptoms**: No metrics in Prometheus
 **Diagnosis**:
+
 ```bash
 # Check Prometheus targets
 curl -s http://localhost:9090/api/v1/targets
@@ -496,6 +539,7 @@ ping target-host
 ```
 
 **Resolution**:
+
 1. Start exporters on target hosts
 2. Check network connectivity
 3. Verify Prometheus configuration
@@ -506,6 +550,7 @@ ping target-host
 ### Regular Maintenance Tasks
 
 #### Weekly
+
 ```bash
 # Update flake inputs
 just update-flake
@@ -521,6 +566,7 @@ just deploy
 ```
 
 #### Monthly
+
 ```bash
 # Update AI provider configurations
 systemctl restart ai-provider-optimization
@@ -536,6 +582,7 @@ systemctl start ai-security-audit
 ```
 
 #### Quarterly
+
 ```bash
 # Full system validation
 just validate
@@ -554,6 +601,7 @@ systemctl start ai-security-audit
 ### Update Procedures
 
 #### Adding New Hosts
+
 1. Create host configuration directory
 2. Add host to flake.nix
 3. Configure monitoring client/server
@@ -561,6 +609,7 @@ systemctl start ai-security-audit
 5. Verify monitoring integration
 
 #### Adding New AI Providers
+
 1. Create provider configuration
 2. Add API key secret
 3. Update provider list
@@ -568,6 +617,7 @@ systemctl start ai-security-audit
 5. Update monitoring dashboards
 
 #### Scaling Infrastructure
+
 1. Analyze current capacity
 2. Plan resource allocation
 3. Update host configurations
@@ -577,6 +627,7 @@ systemctl start ai-security-audit
 ## Backup and Recovery
 
 ### Critical Configuration Backup
+
 ```bash
 # Backup configuration
 tar -czf /tmp/ai-config-backup-$(date +%Y%m%d).tar.gz \
@@ -592,6 +643,7 @@ tar -czf /tmp/ai-monitoring-backup-$(date +%Y%m%d).tar.gz \
 ```
 
 ### Recovery Procedures
+
 ```bash
 # Restore configuration
 tar -xzf /tmp/ai-config-backup-YYYYMMDD.tar.gz -C /
@@ -607,18 +659,21 @@ systemctl restart prometheus grafana
 ## Best Practices
 
 ### Deployment Best Practices
+
 1. **Test First**: Always test configurations before deployment
 2. **Incremental Updates**: Deploy changes gradually
 3. **Monitor Impact**: Watch for issues after deployment
 4. **Document Changes**: Keep deployment logs and notes
 
 ### Security Best Practices
+
 1. **Rotate API Keys**: Regularly update API keys
 2. **Monitor Access**: Watch for unauthorized access
 3. **Update Security**: Keep security configurations current
 4. **Audit Regularly**: Run security audits frequently
 
 ### Performance Best Practices
+
 1. **Baseline Performance**: Establish performance baselines
 2. **Regular Testing**: Run load tests regularly
 3. **Monitor Trends**: Track performance over time
@@ -631,6 +686,7 @@ systemctl restart prometheus grafana
 **Deployment Completed**: July 9, 2025 at 23:52:28 BST
 
 ### Deployment Summary
+
 ✅ **All 4 hosts successfully deployed**
 ✅ **Enterprise-grade monitoring active**
 ✅ **Multi-provider AI system operational**
@@ -639,6 +695,7 @@ systemctl restart prometheus grafana
 ✅ **Performance optimization enabled**
 
 ### Validation Results
+
 - **Connectivity**: All hosts reachable and SSH accessible
 - **AI Services**: P620 with Ollama (6 models), API providers active
 - **Monitoring**: DEX5550 server with P620/P510/Razer clients
@@ -647,11 +704,13 @@ systemctl restart prometheus grafana
 - **Performance**: All systems within healthy resource usage
 
 ### Access Points (Production Ready)
-- **Grafana**: http://dex5550.home.freundcloud.com:3001
-- **Prometheus**: http://dex5550.home.freundcloud.com:9090
-- **Alertmanager**: http://dex5550.home.freundcloud.com:9093
+
+- **Grafana**: <http://dex5550.home.freundcloud.com:3001>
+- **Prometheus**: <http://dex5550.home.freundcloud.com:9090>
+- **Alertmanager**: <http://dex5550.home.freundcloud.com:9093>
 
 ### Validation Command
+
 ```bash
 # Run comprehensive deployment validation
 ./scripts/deployment-validation.sh
@@ -659,6 +718,6 @@ systemctl restart prometheus grafana
 
 ---
 
-*This deployment guide should be used with the Operations Runbook and other documentation.*
-*Always test configurations before production deployment.*
-*Last Updated: July 9, 2025 - Production Deployment Complete*
+_This deployment guide should be used with the Operations Runbook and other documentation._
+_Always test configurations before production deployment._
+_Last Updated: July 9, 2025 - Production Deployment Complete_

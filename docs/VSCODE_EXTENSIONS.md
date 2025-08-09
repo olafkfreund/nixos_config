@@ -5,6 +5,7 @@ This guide shows you how to add VS Code extensions to your NixOS configuration.
 ## Method 1: Extensions Available in nixpkgs (Recommended)
 
 ### Step 1: Search for available extensions
+
 ```bash
 # Search for specific extensions
 nix search nixpkgs vscode-extensions.ms-python
@@ -15,6 +16,7 @@ nix search nixpkgs vscode-extensions
 ```
 
 ### Step 2: Add to your vscode.nix
+
 ```nix
 # In home/development/vscode.nix, add to the extensions list:
 extensions = with pkgs; [
@@ -29,6 +31,7 @@ extensions = with pkgs; [
 ```
 
 ### Step 3: Rebuild your system
+
 ```bash
 cd /home/olafkfreund/.config/nixos
 sudo nixos-rebuild switch --flake .
@@ -39,12 +42,15 @@ sudo nixos-rebuild switch --flake .
 For extensions not available in nixpkgs, use `buildVscodeMarketplaceExtension`.
 
 ### Step 1: Get extension information
+
 Visit the [VS Code Marketplace](https://marketplace.visualstudio.com/vscode) and find:
+
 - Publisher name
 - Extension name
 - Version number
 
 ### Step 2: Get the SHA256 hash
+
 ```bash
 # Use the provided script
 /home/olafkfreund/.config/nixos/scripts/get-extension-hashes.sh
@@ -54,6 +60,7 @@ nix-prefetch-url "https://marketplace.visualstudio.com/_apis/public/gallery/publ
 ```
 
 ### Step 3: Add to customExtensions
+
 ```nix
 # In home/development/vscode.nix, add to customExtensions:
 customExtensions = [
@@ -73,6 +80,7 @@ customExtensions = [
 ```
 
 ### Step 4: Add customExtensions to extensions list
+
 ```nix
 extensions = with pkgs; [
   # Regular nixpkgs extensions...
@@ -83,6 +91,7 @@ extensions = with pkgs; [
 ## Real-World Examples
 
 ### Example 1: Adding Rust support
+
 ```nix
 # These are available in nixpkgs:
 vscode-extensions.rust-lang.rust-analyzer
@@ -91,6 +100,7 @@ vscode-extensions.serayuzgur.crates
 ```
 
 ### Example 2: Adding a marketplace extension (GitHub Copilot Chat)
+
 ```nix
 # Already available in nixpkgs:
 vscode-extensions.github.copilot
@@ -98,6 +108,7 @@ vscode-extensions.github.copilot-chat
 ```
 
 ### Example 3: Adding a custom marketplace extension
+
 ```nix
 customExtensions = [
   (pkgs.vscode-utils.buildVscodeMarketplaceExtension {
@@ -118,7 +129,9 @@ customExtensions = [
 ## Troubleshooting
 
 ### Extension conflicts
+
 If you have manually installed extensions causing conflicts:
+
 ```bash
 # Clean VS Code extensions
 /home/olafkfreund/.config/nixos/scripts/clean-vscode.sh
@@ -131,11 +144,13 @@ sudo nixos-rebuild switch --flake .
 ```
 
 ### Finding extension names
+
 1. Go to VS Code Marketplace
 2. Look at the URL: `https://marketplace.visualstudio.com/items?itemName=PUBLISHER.NAME`
 3. Use PUBLISHER as `publisher` and NAME as `name`
 
 ### Getting correct hashes
+
 ```bash
 # Use the provided script
 chmod +x scripts/get-extension-hashes.sh

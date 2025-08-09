@@ -5,6 +5,7 @@ This directory contains the configuration for [direnv](https://direnv.net/), a t
 ## Overview
 
 Direnv is integrated with your NixOS configuration to enable:
+
 - Automatic loading of project-specific environment variables
 - Seamless integration with Nix development environments
 - Per-directory environment management
@@ -18,11 +19,13 @@ Direnv is integrated with your NixOS configuration to enable:
 ## Usage
 
 When you navigate into a directory containing an `.envrc` file, direnv automatically:
+
 1. Loads the environment specified in the file
 2. Shows a notification about the environment change
 3. Makes all specified environment variables available to your shell
 
 Common use cases:
+
 - Project-specific environment variables
 - Language-specific configuration
 - Automatic activation of virtual environments
@@ -35,6 +38,7 @@ layout python  # Activate Python virtualenv
 ```
 
 Direnv is activated in both your bash and zsh configurations:
+
 ```bash
 eval "$(direnv hook bash)"
 ```

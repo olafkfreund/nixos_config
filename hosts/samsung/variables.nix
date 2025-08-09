@@ -85,6 +85,8 @@
     NIXPKGS_ALLOW_UNFREE = "1";
     ELECTRON_OZONE_PLATFORM_HINT = "auto";
     KITTY_DISABLE_WAYLAND = "0";
+    # Qt theme platform for Stylix compatibility
+    QT_QPA_PLATFORMTHEME = "qt5ct";
     # Intel graphics optimization
     MESA_LOADER_DRIVER_OVERRIDE = "iris";
     INTEL_DEBUG = "norbc";

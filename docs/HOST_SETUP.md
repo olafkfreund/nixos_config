@@ -23,6 +23,7 @@ cp -r hosts/p620/* hosts/new-hostname/
 ### 2. Generate Host SSH Keys
 
 On the new host:
+
 ```bash
 # Generate host SSH key if not present
 sudo ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -N ""
@@ -39,17 +40,17 @@ sudo cat /etc/ssh/ssh_host_ed25519_key.pub
   hostName = "new-hostname";
   username = "primary-user";
   fullName = "Primary User";
-  
+
   # Hardware configuration
   gpu = "amd";  # or "nvidia", "intel"
   acceleration = "rocm";  # or "cuda", "vaapi"
-  
+
   # Users for this host
   hostUsers = [
     "primary-user"
     "secondary-user"
   ];
-  
+
   # Hardware-specific settings
   userGroups = [
     "wheel"
@@ -58,12 +59,12 @@ sudo cat /etc/ssh/ssh_host_ed25519_key.pub
     "video"
     "audio"
   ];
-  
+
   nameservers = [
     "1.1.1.1"
     "8.8.8.8"
   ];
-  
+
   services = {
     nfs = {
       enable = false;
@@ -82,7 +83,7 @@ Add the new host to `secrets.nix`:
 let
   # Add new host key
   newhost = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINewHostPublicKey root@new-hostname";
-  
+
   # Update host groups
   allHosts = [ p620 razer p510 dex5550 newhost ];
   workstations = [ p620 razer newhost ];  # If it's a workstation
@@ -92,7 +93,7 @@ in
 {
   # Existing secrets get access to new host
   "secrets/user-password-primary-user.age".publicKeys = [ primaryUser ] ++ allHosts;
-  
+
   # Host-specific secrets if needed
   "secrets/host-newhost-specific.age".publicKeys = adminUsers ++ [ newhost ];
 }
@@ -107,7 +108,7 @@ Update `flake.nix`:
 {
   nixosConfigurations = {
     # ... existing hosts ...
-    
+
     new-hostname = makeNixosSystem "new-hostname";
   };
 }
@@ -206,6 +207,7 @@ nixos-rebuild switch --flake .#new-hostname
 ### Adding Users to New Host
 
 1. **Update host variables**:
+
    ```nix
    // hosts/new-hostname/variables.nix
    {
@@ -217,6 +219,7 @@ nixos-rebuild switch --flake .#new-hostname
    ```
 
 2. **Generate user SSH keys**:
+
    ```bash
    # As the new user
    ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""
@@ -224,6 +227,7 @@ nixos-rebuild switch --flake .#new-hostname
    ```
 
 3. **Update secrets.nix**:
+
    ```nix
    let
      newuser = "ssh-ed25519 AAAAC3... new-user@new-hostname";
@@ -235,6 +239,7 @@ nixos-rebuild switch --flake .#new-hostname
    ```
 
 4. **Create user secrets**:
+
    ```bash
    ./scripts/manage-secrets.sh create user-password-newuser
    ./scripts/manage-secrets.sh rekey
@@ -282,7 +287,7 @@ nixos-rebuild switch --flake .#new-hostname
     enable = true;
     allowedTCPPorts = [ 22 80 443 ];
     allowedUDPPorts = [ 53 ];
-    
+
     # Host-specific ports
     allowedTCPPorts = lib.optionals (vars.hostName == "server-host") [
       3000  # Application port
@@ -395,22 +400,26 @@ lspci | grep -i gpu
 ### Migrating from Existing Host
 
 1. **Export current configuration**:
+
    ```bash
    nixos-generate-config --show-hardware-config > new-hardware.nix
    ```
 
 2. **Copy user data**:
+
    ```bash
    rsync -av /home/username/ new-host:/home/username/
    ```
 
 3. **Transfer secrets**:
+
    ```bash
    # Secrets automatically available after configuration deployment
    # No manual transfer needed
    ```
 
 4. **Update DNS/network references**:
+
    ```bash
    # Update any hardcoded IP addresses or hostnames
    ```
@@ -433,14 +442,14 @@ lspci | grep -i gpu
   };
 }
 
-# Server pattern  
+# Server pattern
 {
   features = {
     networking.enable = true;
     security.enable = true;
     cloud.enable = true;
   };
-  
+
   services = {
     openssh.enable = true;
     fail2ban.enable = true;
@@ -452,7 +461,7 @@ lspci | grep -i gpu
   features = {
     security.enable = true;
   };
-  
+
   services.openssh.enable = true;
 }
 ```
@@ -460,16 +469,19 @@ lspci | grep -i gpu
 ### Troubleshooting
 
 #### Host Not Building
+
 - Check hardware-configuration.nix syntax
 - Verify all imports exist
 - Test with minimal configuration first
 
 #### Network Issues
+
 - Check systemd-networkd status: `systemctl status systemd-networkd`
 - Verify network interface names: `ip link show`
 - Test DNS resolution: `nslookup google.com`
 
 #### Secrets Not Working
+
 - Verify host key in secrets.nix
 - Check secret file permissions
 - Run recovery script: `./scripts/recover-secrets.sh`

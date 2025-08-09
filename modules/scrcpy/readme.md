@@ -18,6 +18,7 @@
    ```
 
    - Accept the prompt on your phone to allow USB debugging if it appears.
+
 3. Start scrcpy:
 
    ```sh

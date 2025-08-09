@@ -7,12 +7,14 @@ Your NixOS configuration has been enhanced with modern, modular architecture and
 ## 📦 New Library System
 
 ### Enhanced Features (`lib/features.nix`)
+
 - **Feature Dependencies**: Automatically validates feature dependencies
-- **Conflict Detection**: Prevents incompatible feature combinations  
+- **Conflict Detection**: Prevents incompatible feature combinations
 - **Feature Profiles**: Predefined configurations for common use cases
 - **Validation**: Built-in assertions for feature configuration
 
-### Usage Examples:
+### Usage Examples
+
 ```nix
 # Use a predefined profile
 featureProfiles.workstation = true;
@@ -25,11 +27,13 @@ features = {
 ```
 
 ### Host Templates (`lib/hostTemplate.nix`)
+
 - **Host Types**: Predefined templates (workstation, laptop, server, gaming)
 - **Hardware Profiles**: Automatic driver configuration (nvidia, amd, intel)
 - **Smart Defaults**: Sensible defaults based on host type
 
-### Usage:
+### Usage
+
 ```bash
 # Create new host with template
 just create-host newhost laptop nvidia
@@ -44,7 +48,8 @@ hostConfig = mkHost "hostname" {
 
 ## 🛠️ Enhanced Justfile Commands
 
-### Modern Management:
+### Modern Management
+
 ```bash
 # Create new host from template
 just create-host myhost workstation intel
@@ -68,7 +73,8 @@ just docs
 just cleanup 7
 ```
 
-### Improved Validation:
+### Improved Validation
+
 ```bash
 # Comprehensive validation suite
 just validate
@@ -85,13 +91,15 @@ just validate-features p620
 
 ## 🔒 Enhanced Secrets Management (`lib/secrets.nix`)
 
-### Features:
+### Features
+
 - **Category-based Organization**: Structured secret naming
 - **Access Control Templates**: Easy permission management
 - **Validation Rules**: Enforce naming conventions
 - **Security Templates**: Common secret patterns
 
-### Usage:
+### Usage
+
 ```nix
 # Use secret templates
 secrets."user-password-olafkfreund" = secretTemplates.userPassword "olafkfreund";
@@ -100,13 +108,15 @@ secrets."service-nextcloud-key" = secretTemplates.serviceKey "nextcloud" ["serve
 
 ## 📋 Configuration Validation (`lib/validation.nix`)
 
-### Built-in Checks:
+### Built-in Checks
+
 - **Security Validation**: Firewall, SSH configuration
-- **Performance Checks**: Swap, memory configuration  
+- **Performance Checks**: Swap, memory configuration
 - **User Validation**: Password policies
 - **Custom Rules**: Extensible validation framework
 
-### Configuration:
+### Configuration
+
 ```nix
 validation = {
   enable = true;
@@ -116,7 +126,8 @@ validation = {
 
 ## 🏗️ Module System (`lib/mkModule.nix`)
 
-### Standardized Structure:
+### Standardized Structure
+
 ```nix
 # Every module now follows consistent pattern
 myModule = mkModule "myservice" {
@@ -135,6 +146,7 @@ myModule = mkModule "myservice" {
 ## 🎯 Migration Steps
 
 ### 1. **Update Existing Hosts**
+
 ```bash
 # Backup current configuration
 cp -r hosts/p620 hosts/p620.backup
@@ -147,14 +159,15 @@ just test-host p620
 ```
 
 ### 2. **Modernize Module Structure**
+
 ```nix
 # Old way
-{ config, lib, pkgs, ... }: { 
+{ config, lib, pkgs, ... }: {
   # Module definition
 }
 
 # New way using templates
-{ config, lib, pkgs, ... }: 
+{ config, lib, pkgs, ... }:
 mkModule "service-name" {
   options = { /* ... */ };
   config = { /* ... */ };
@@ -162,6 +175,7 @@ mkModule "service-name" {
 ```
 
 ### 3. **Use Feature Profiles**
+
 ```nix
 # Replace complex feature definitions
 featureProfiles.workstation = true;  # Enables development + desktop + virtualization + security
@@ -172,6 +186,7 @@ features.ai.enable = true;  # Add AI tools to server profile
 ```
 
 ### 4. **Enhance Secrets Management**
+
 ```bash
 # Reorganize secrets with new naming
 ./scripts/manage-secrets.sh rename old-secret user-password-username
@@ -186,21 +201,25 @@ secrets."service-api-key" = mkSecretAccess {
 ## 📈 Benefits
 
 ### **Modularity**
+
 - ✅ Consistent module structure
 - ✅ Reusable components
 - ✅ Clear separation of concerns
 
-### **Validation** 
+### **Validation**
+
 - ✅ Feature dependency checking
 - ✅ Security policy enforcement
 - ✅ Configuration consistency
 
 ### **Maintainability**
+
 - ✅ Automated host creation
 - ✅ Template-based configuration
 - ✅ Self-documenting code
 
 ### **Reliability**
+
 - ✅ Built-in testing framework
 - ✅ Validation before deployment
 - ✅ Rollback capabilities
@@ -218,7 +237,7 @@ secrets."service-api-key" = mkSecretAccess {
 ## 📚 Further Reading
 
 - **Feature System**: `lib/features.nix` - Advanced feature management
-- **Host Templates**: `lib/hostTemplate.nix` - Automated host configuration  
+- **Host Templates**: `lib/hostTemplate.nix` - Automated host configuration
 - **Validation**: `lib/validation.nix` - Configuration checking
 - **Secrets**: `lib/secrets.nix` - Enhanced secrets management
 - **Justfile**: Enhanced commands for modern workflow

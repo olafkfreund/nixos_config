@@ -9,13 +9,13 @@ echo "Fetching source hash..."
 SRC_HASH=$(nix-prefetch-github google-gemini gemini-cli --rev "v0.1.1" 2>/dev/null | grep sha256 | cut -d'"' -f4)
 
 if [ -z "$SRC_HASH" ]; then
-    echo "Could not fetch source hash automatically. Please run:"
-    echo 'nix-prefetch-github google-gemini gemini-cli --rev "v0.1.1"'
-    echo ""
-    echo "Alternative method:"
-    echo 'nix-prefetch-url --unpack "https://github.com/google-gemini/gemini-cli/archive/v0.1.1.tar.gz"'
+  echo "Could not fetch source hash automatically. Please run:"
+  echo 'nix-prefetch-github google-gemini gemini-cli --rev "v0.1.1"'
+  echo ""
+  echo "Alternative method:"
+  echo 'nix-prefetch-url --unpack "https://github.com/google-gemini/gemini-cli/archive/v0.1.1.tar.gz"'
 else
-    echo "Source hash: sha256-$SRC_HASH"
+  echo "Source hash: sha256-$SRC_HASH"
 fi
 
 echo ""

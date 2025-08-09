@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
   vars = import ../variables.nix;
 in
@@ -11,7 +11,10 @@ in
     polarity = "dark";
     targets = {
       chromium.enable = false;
-      qt.enable = true; # Enable Qt theming for consistent styling
+      qt = {
+        enable = true; # Enable Qt theming for consistent styling
+        platform = lib.mkForce "qt5ct"; # Use qt5ct platform (supported by Stylix)
+      };
     };
     fonts = {
       monospace = {

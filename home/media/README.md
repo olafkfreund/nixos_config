@@ -13,6 +13,7 @@ This directory contains configurations for media playback and management tools.
 ## Features
 
 The media configurations provide:
+
 - Music playback through MPD and clients
 - Integration with Spotify through Spicetify
 - Audio tweaking and noise reduction

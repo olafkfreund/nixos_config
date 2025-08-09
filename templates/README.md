@@ -8,7 +8,7 @@ This directory contains templates and code snippets for creating consistent NixO
 templates/
 ├── modules/                    # Module templates
 │   ├── basic-module.nix       # Basic module template
-│   ├── service-module.nix     # Systemd service template  
+│   ├── service-module.nix     # Systemd service template
 │   ├── development-tool.nix   # Development tool template
 │   └── desktop-module.nix     # Desktop component template
 ├── snippets/                  # Code snippets and patterns
@@ -24,12 +24,12 @@ templates/
 
 Select the appropriate template based on your module type:
 
-| Template | Use Case | Example |
-|----------|----------|---------|
-| `basic-module.nix` | Simple configuration modules | themes, tweaks, basic apps |
-| `service-module.nix` | Background services | databases, web servers, daemons |
-| `development-tool.nix` | Programming tools | languages, IDEs, compilers |
-| `desktop-module.nix` | Desktop components | window managers, panels, themes |
+| Template               | Use Case                     | Example                         |
+| ---------------------- | ---------------------------- | ------------------------------- |
+| `basic-module.nix`     | Simple configuration modules | themes, tweaks, basic apps      |
+| `service-module.nix`   | Background services          | databases, web servers, daemons |
+| `development-tool.nix` | Programming tools            | languages, IDEs, compilers      |
+| `desktop-module.nix`   | Desktop components           | window managers, panels, themes |
 
 ### 2. Copy and Customize
 
@@ -39,7 +39,7 @@ cp templates/modules/service-module.nix modules/services/myservice.nix
 
 # Edit the file to replace ALL_CAPS placeholders:
 # - SERVICE_NAME → myservice
-# - SERVICE_DESCRIPTION → "My Service Description"  
+# - SERVICE_DESCRIPTION → "My Service Description"
 # - SERVICE_PACKAGE → myservice-package
 # - etc.
 ```
@@ -60,7 +60,7 @@ just check-syntax
 # Test build
 just test-host p620
 
-# Deploy if successful  
+# Deploy if successful
 just p620
 ```
 
@@ -73,9 +73,10 @@ just p620
 **Purpose**: Simple modules that primarily configure existing NixOS options or install packages.
 
 **Features**:
+
 - Standard module structure with options/config
 - Common option types (string, bool, package, list)
-- Validation examples  
+- Validation examples
 - Environment variable setup
 
 **Best For**: Themes, system tweaks, simple applications
@@ -87,6 +88,7 @@ just p620
 **Purpose**: Comprehensive template for systemd services with full security hardening.
 
 **Features**:
+
 - Systemd service configuration
 - User/group management
 - Security hardening (NoNewPrivileges, PrivateTmp, etc.)
@@ -104,6 +106,7 @@ just p620
 **Purpose**: Development environments, programming languages, and dev tools.
 
 **Features**:
+
 - LSP (Language Server Protocol) support
 - Debugger integration
 - Formatter and linter configuration
@@ -120,6 +123,7 @@ just p620
 **Purpose**: Desktop environment components and window managers.
 
 **Features**:
+
 - Display configuration
 - Input management (keyboard, mouse, touchpad)
 - Theme and appearance settings
@@ -137,7 +141,7 @@ just p620
 For rapid development, check `snippets/quick-snippets.md` for:
 
 - Basic module headers
-- Common option types  
+- Common option types
 - Service configurations
 - User management
 - Validation patterns
@@ -160,6 +164,7 @@ The `snippets/common-patterns.nix` file contains reusable patterns for:
 For detailed instructions on integrating modules into the configuration, see [`module-integration-guide.md`](./module-integration-guide.md).
 
 The guide covers:
+
 - **Module creation process** step-by-step
 - **Feature flag system** and how to use it
 - **Host configuration** patterns
@@ -170,6 +175,7 @@ The guide covers:
 ## 🎯 Module Conventions
 
 ### File Structure
+
 ```nix
 {
   config,
@@ -193,25 +199,25 @@ in {
 
 ### Naming Conventions
 
-| Component | Convention | Example |
-|-----------|------------|---------|
-| **File name** | `kebab-case.nix` | `my-service.nix` |
-| **Module path** | `modules.category.camelCase` | `modules.services.myService` |
-| **Feature flag** | `features.category.camelCase` | `features.services.myService` |
-| **Config variable** | `cfg` | `cfg = config.modules.services.myService` |
-| **Service name** | `kebab-case` | `my-service` |
-| **User/Group** | `kebab-case` | `my-service` |
+| Component           | Convention                    | Example                                   |
+| ------------------- | ----------------------------- | ----------------------------------------- |
+| **File name**       | `kebab-case.nix`              | `my-service.nix`                          |
+| **Module path**     | `modules.category.camelCase`  | `modules.services.myService`              |
+| **Feature flag**    | `features.category.camelCase` | `features.services.myService`             |
+| **Config variable** | `cfg`                         | `cfg = config.modules.services.myService` |
+| **Service name**    | `kebab-case`                  | `my-service`                              |
+| **User/Group**      | `kebab-case`                  | `my-service`                              |
 
 ### Directory Categories
 
-| Directory | Purpose | Examples |
-|-----------|---------|----------|
-| `ai/` | AI and ML tools | ollama, gemini-cli |
-| `services/` | Background services | postgres, nginx, redis |
-| `development/` | Dev tools | python, go, rust, vscode |
-| `desktop/` | GUI components | hyprland, plasma, themes |
-| `security/` | Security tools | secrets, ssh-hardening |
-| `monitoring/` | Observability | prometheus, grafana |
+| Directory      | Purpose             | Examples                 |
+| -------------- | ------------------- | ------------------------ |
+| `ai/`          | AI and ML tools     | ollama, gemini-cli       |
+| `services/`    | Background services | postgres, nginx, redis   |
+| `development/` | Dev tools           | python, go, rust, vscode |
+| `desktop/`     | GUI components      | hyprland, plasma, themes |
+| `security/`    | Security tools      | secrets, ssh-hardening   |
+| `monitoring/`  | Observability       | prometheus, grafana      |
 
 ## ✅ Template Checklist
 
@@ -221,7 +227,7 @@ When creating a new module, ensure:
 - [ ] **All placeholders replaced** (search for ALL_CAPS)
 - [ ] **Module added to imports** in `modules/default.nix`
 - [ ] **Feature flag defined** and connected
-- [ ] **Naming conventions followed** consistently  
+- [ ] **Naming conventions followed** consistently
 - [ ] **Security hardening applied** (for services)
 - [ ] **Validation added** (assertions/warnings)
 - [ ] **Syntax check passes** (`just check-syntax`)
@@ -231,11 +237,13 @@ When creating a new module, ensure:
 ## 🔍 Testing Your Module
 
 ### 1. Syntax Validation
+
 ```bash
 just check-syntax
 ```
 
 ### 2. Build Testing
+
 ```bash
 # Test specific host
 just test-host p620
@@ -245,6 +253,7 @@ just test-all
 ```
 
 ### 3. Module Evaluation
+
 ```bash
 # Check module options
 nix eval .#nixosConfigurations.p620.config.modules.services.myService
@@ -254,6 +263,7 @@ nix eval .#nixosConfigurations.p620.config.systemd.services.my-service
 ```
 
 ### 4. Integration Testing
+
 ```bash
 # Enable in host config
 features.services.myService = true;
@@ -265,18 +275,22 @@ just p620
 ## 🚨 Common Issues
 
 ### Missing Imports
+
 **Error**: `error: attribute 'myService' missing`
 **Fix**: Add module to imports in `modules/default.nix`
 
-### Type Mismatches  
+### Type Mismatches
+
 **Error**: `A definition for option ... is not of type ...`
 **Fix**: Check option types in template (types.str vs types.package)
 
 ### Feature Flag Issues
+
 **Error**: Module not enabled despite feature flag
 **Fix**: Ensure feature flag connects to module enable option
 
 ### Service Failures
+
 **Error**: Service fails to start
 **Fix**: Check user permissions, paths, and security settings
 
@@ -292,13 +306,14 @@ For questions or issues:
 ## 🎉 Examples
 
 ### Simple Service Example
+
 ```bash
 # 1. Copy template
 cp templates/modules/service-module.nix modules/services/redis.nix
 
 # 2. Edit placeholders
 # SERVICE_NAME → redis
-# SERVICE_PACKAGE → redis  
+# SERVICE_PACKAGE → redis
 # etc.
 
 # 3. Add to imports
@@ -312,8 +327,9 @@ just test-host p620 && just p620
 ```
 
 ### Development Tool Example
+
 ```bash
-# 1. Copy template  
+# 1. Copy template
 cp templates/modules/development-tool.nix modules/development/rust.nix
 
 # 2. Customize for Rust

@@ -12,6 +12,7 @@ This directory contains NixOS modules for security-related tools and configurati
 ## Features
 
 The security modules provide:
+
 - Password and secret management with 1Password
 - Encryption and digital signatures with GnuPG
 - Hardware-based two-factor authentication with YubiKey

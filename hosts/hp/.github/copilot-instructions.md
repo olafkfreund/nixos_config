@@ -13,6 +13,7 @@ These instructions help GitHub Copilot understand our NixOS configuration prefer
 ## Code Style
 
 ### Nix Expression Format
+
 ```nix
 {
   config,
@@ -26,12 +27,14 @@ These instructions help GitHub Copilot understand our NixOS configuration prefer
 ```
 
 ### Naming Conventions
+
 - Use camelCase for variable and function names
 - Use descriptive names that reflect purpose
 - Prefix private functions with underscore
 - Use plural forms for lists/sets (e.g., `users`, `services`)
 
 ### Module Structure
+
 - Group related options together
 - Use type system for option declarations
 - Document options with description field
@@ -40,10 +43,11 @@ These instructions help GitHub Copilot understand our NixOS configuration prefer
 ## Best Practices
 
 ### Option Declarations
+
 ```nix
 options.myModule = {
   enable = lib.mkEnableOption "my module";
-  
+
   setting = lib.mkOption {
     type = lib.types.str;
     default = "value";
@@ -54,12 +58,14 @@ options.myModule = {
 ```
 
 ### Service Configuration
+
 - Use systemd service units when appropriate
 - Handle service dependencies explicitly
 - Consider resource limits
 - Implement proper shutdown behavior
 
 ### File Organization
+
 - Separate concerns into distinct modules
 - Use `default.nix` for module entry points
 - Keep related configurations together
@@ -68,6 +74,7 @@ options.myModule = {
 ## Common Patterns
 
 ### Package Overlays
+
 ```nix
 final: prev: {
   myPackage = prev.myPackage.overrideAttrs (old: {
@@ -77,6 +84,7 @@ final: prev: {
 ```
 
 ### Service Definitions
+
 ```nix
 systemd.services.myService = {
   description = "My Service";
@@ -113,12 +121,14 @@ systemd.services.myService = {
 ## Documentation
 
 ### Module Documentation
+
 - Document all custom options
 - Include usage examples
 - Explain dependencies
 - Document any required system configuration
 
 ### Comment Style
+
 ```nix
 # Single-line comments for brief explanations
 

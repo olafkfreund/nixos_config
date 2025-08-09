@@ -52,6 +52,7 @@ hyprland/
 **Purpose**: Core Hyprland compositor settings including animations, layouts, and visual effects.
 
 **Key Features**:
+
 - Optimized animation curves with Material Design 3 beziers
 - Performance-tuned blur and shadow effects
 - Multiple layout support (master/dwindle)
@@ -59,6 +60,7 @@ hyprland/
 - VRR (Variable Refresh Rate) support
 
 **Important Settings**:
+
 ```nix
 # Performance optimizations
 misc.vrr = 1;                    # Adaptive sync
@@ -71,6 +73,7 @@ animations.enabled = true;       # Smooth animations with optimized timing
 **Purpose**: Comprehensive window management rules for various applications.
 
 **Organization**:
+
 - **Terminal Emulators**: Consistent floating behavior (1000x1000)
 - **System Utilities**: Bluetooth, network, sound controls
 - **Productivity Apps**: Thunderbird with detailed dialog handling
@@ -80,6 +83,7 @@ animations.enabled = true;       # Smooth animations with optimized timing
 - **Screen Sharing**: XWayland video bridge compatibility
 
 **Special Workspaces**:
+
 - `special:magic` - 1Password
 - `special:chrome` - Google Chrome
 - `special:mail` - Thunderbird
@@ -94,6 +98,7 @@ animations.enabled = true;       # Smooth animations with optimized timing
 **Layout**: Vim-style navigation with SUPER as main modifier
 
 **Key Categories**:
+
 - **Window Navigation**: `SUPER + h/j/k/l` for focus movement
 - **Workspace Switching**: `SUPER + 1-0` for workspace numbers
 - **Window Management**: `SUPER + Q` (kill), `SUPER + F` (fullscreen)
@@ -109,6 +114,7 @@ animations.enabled = true;       # Smooth animations with optimized timing
 **Purpose**: Configure environment variables for optimal Wayland integration.
 
 **Categories**:
+
 - **System Defaults**: Editor (nvim), browser (chrome), terminal (foot)
 - **Wayland Integration**: Session type, desktop environment
 - **Application Support**: Kitty, Firefox, Qt, GTK configuration
@@ -120,6 +126,7 @@ animations.enabled = true;       # Smooth animations with optimized timing
 **Purpose**: Host-specific monitor setup using dynamic configuration.
 
 **Features**:
+
 - Imports monitor settings from host variables
 - Supports laptop + external monitor configurations
 - Uses string interpolation for dynamic setup
@@ -162,6 +169,7 @@ external_monitor = "monitor=DP-1,2560x1440@144,1920x0,1";
 ### Adding New Applications
 
 1. **Window Rules** (`config/rules.nix`):
+
 ```nix
 # Add to windowrulev2 array
 "float, class:(your-app)"
@@ -170,6 +178,7 @@ external_monitor = "monitor=DP-1,2560x1440@144,1920x0,1";
 ```
 
 2. **Keybindings** (`config/binds.nix`):
+
 ```nix
 # Add to bind array
 "$mainMod, X, exec, your-application"
@@ -181,6 +190,7 @@ external_monitor = "monitor=DP-1,2560x1440@144,1920x0,1";
 For different hardware capabilities, adjust these settings in `config/settings.nix`:
 
 **High-end systems**:
+
 ```nix
 decoration.blur.passes = 6;        # More blur passes
 animations.enabled = true;         # Full animations
@@ -188,6 +198,7 @@ misc.vrr = 1;                     # Variable refresh rate
 ```
 
 **Lower-end systems**:
+
 ```nix
 decoration.blur.passes = 2;        # Fewer blur passes
 decoration.blur.enabled = false;   # Disable blur entirely
@@ -197,12 +208,14 @@ animations.enabled = false;        # Disable animations
 ### Theme Customization
 
 1. **Colors** (`config/settings.nix`):
+
 ```nix
 general."col.active_border" = "rgb(your-color)";
 general."col.inactive_border" = "rgb(your-color)";
 ```
 
 2. **Cursor Theme** (`config/env.nix`):
+
 ```nix
 "XCURSOR_THEME,Your-Cursor-Theme"
 "GTK_THEME,Your-GTK-Theme"
@@ -285,6 +298,7 @@ Enable immediate mode for specific games in `config/rules.nix`:
 For development-focused setup:
 
 1. **IDE Integration**:
+
 ```nix
 # In rules.nix
 "workspace 2, class:^(code)$"        # VS Code on workspace 2
@@ -292,8 +306,9 @@ For development-focused setup:
 ```
 
 2. **Terminal Management**:
+
 ```nix
-# In binds.nix  
+# In binds.nix
 "$mainMod, grave, togglespecialworkspace, terminal"  # Quick terminal access
 ```
 
@@ -307,6 +322,7 @@ If migrating from old string-based configuration:
 4. **Validate**: Ensure all features still work
 
 **Example Migration**:
+
 ```nix
 # Old format
 extraConfig = ''
@@ -346,9 +362,9 @@ When contributing to this configuration:
 
 ## Resources
 
-- **Hyprland Wiki**: https://wiki.hyprland.org/
-- **NixOS Manual**: https://nixos.org/manual/nixos/stable/
-- **Home Manager**: https://nix-community.github.io/home-manager/
+- **Hyprland Wiki**: <https://wiki.hyprland.org/>
+- **NixOS Manual**: <https://nixos.org/manual/nixos/stable/>
+- **Home Manager**: <https://nix-community.github.io/home-manager/>
 - **Configuration Examples**: Check other files in this repository
 
 ---

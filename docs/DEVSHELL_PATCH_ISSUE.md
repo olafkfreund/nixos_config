@@ -13,18 +13,21 @@ This patch failure prevents any NixOS configuration with `devshell = true` from 
 ## Resolution
 
 **Temporary Fix Applied (2025-06-26):**
+
 - Disabled `devshell = true` on all affected hosts:
   - `hosts/p620/configuration.nix`
-  - `hosts/p510/configuration.nix` 
+  - `hosts/p510/configuration.nix`
   - `hosts/razer/configuration.nix`
   - `hosts/dex5550/configuration.nix`
 
 **Changed from:**
+
 ```nix
 devshell = true;
 ```
 
 **Changed to:**
+
 ```nix
 devshell = false; # Temporarily disabled due to patch issue
 ```
@@ -43,10 +46,10 @@ devshell = false; # Temporarily disabled due to patch issue
 
 ## Status Verification
 
-✅ Flake check passes: `nix flake check`  
-✅ Gemini CLI builds: `nix build .#gemini-cli`  
-✅ NixOS configurations build: All hosts can be built successfully  
-✅ Gemini CLI functional: `./result/bin/gemini --help` works correctly  
+✅ Flake check passes: `nix flake check`
+✅ Gemini CLI builds: `nix build .#gemini-cli`
+✅ NixOS configurations build: All hosts can be built successfully
+✅ Gemini CLI functional: `./result/bin/gemini --help` works correctly
 
 ## Commit Reference
 

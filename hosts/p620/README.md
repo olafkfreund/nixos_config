@@ -33,6 +33,7 @@ This directory contains the NixOS configuration for the P620 workstation, which 
 ## Hardware
 
 The P620 system has:
+
 - AMD CPU (Ryzen)
 - AMD GPU
 - Multiple storage volumes including dedicated game storage

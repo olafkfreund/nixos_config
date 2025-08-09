@@ -24,12 +24,12 @@ This module provides a NixOS configuration for setting up [Ollama](https://ollam
 
 This module exposes the following NixOS options:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `ai.ollama.enable` | boolean | `false` | Enable the Ollama service |
-| `ai.ollama.enableRag` | boolean | `false` | Enable RAG with ChromaDB integration |
-| `ai.ollama.ragDirectory` | string | `/var/lib/ollama/rag-files` | Directory for storing files to be scanned for RAG |
-| `ai.ollama.allowBrokenPackages` | boolean | `false` | Allow installation of AI packages that might be marked as broken (like spaCy) |
+| Option                          | Type    | Default                     | Description                                                                   |
+| ------------------------------- | ------- | --------------------------- | ----------------------------------------------------------------------------- |
+| `ai.ollama.enable`              | boolean | `false`                     | Enable the Ollama service                                                     |
+| `ai.ollama.enableRag`           | boolean | `false`                     | Enable RAG with ChromaDB integration                                          |
+| `ai.ollama.ragDirectory`        | string  | `/var/lib/ollama/rag-files` | Directory for storing files to be scanned for RAG                             |
+| `ai.ollama.allowBrokenPackages` | boolean | `false`                     | Allow installation of AI packages that might be marked as broken (like spaCy) |
 
 ## Usage Examples
 
@@ -79,7 +79,7 @@ This module exposes the following NixOS options:
     enable = true;
     enableRag = true;
   };
-  
+
   # Configure ROCm acceleration
   services.ollama.acceleration = "rocm";
   services.ollama.rocmOverrideGfx = "11.0.0"; # Set to your GPU architecture
@@ -100,7 +100,7 @@ This module exposes the following NixOS options:
     enable = true;
     enableRag = true;
   };
-  
+
   # Configure CUDA acceleration
   services.ollama.acceleration = "cuda";
 }
@@ -130,6 +130,7 @@ cp your-document.pdf /path/to/your/rag-directory/
 ```
 
 The system will scan the directory for new files and add them to the vector database. This process occurs:
+
 - When files are added to the directory
 - When the Open WebUI service starts up
 - When you manually trigger indexing from the Open WebUI interface
@@ -157,11 +158,13 @@ If the RAG system isn't finding content from your documents:
 ### GPU Acceleration Issues
 
 For ROCm (AMD) issues:
+
 - Verify your GPU is supported by ROCm
 - Check that the `gfx` version matches your hardware
 - Examine the Ollama logs: `journalctl -u ollama`
 
 For CUDA (NVIDIA) issues:
+
 - Ensure NVIDIA drivers are properly installed
 - Verify CUDA compatibility with your GPU model
 - Check CUDA-related logs: `journalctl -u ollama | grep -i cuda`
@@ -198,7 +201,7 @@ services.open-webui = {
     WEBUI_DB_PATH = "/var/lib/open-webui/rag";
     CHROMA_SERVER_HOST = "127.0.0.1";
     CHROMA_SERVER_PORT = "8000";
-    
+
     # Other custom settings
     WEBUI_AUTH = "False";  # Disable authentication
   };
@@ -238,11 +241,12 @@ services.open-webui.environment = {
 For the best RAG experience, we recommend using models with good context handling:
 
 1. **mistral-small** - Good balance of performance and accuracy
-2. **llama3** - Excellent comprehension and reasoning 
+2. **llama3** - Excellent comprehension and reasoning
 3. **openchat** - Strong in conversation and document Q&A
 4. **GandalfBaum/llama3.2-claude3.7** - Hybrid model with enhanced reasoning
 
 For embedding models:
+
 1. **nomic-embed-text** - Default embedding model with good performance
 2. **all-minilm** - Lighter alternative for basic RAG needs
 

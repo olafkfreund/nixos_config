@@ -36,8 +36,8 @@ check_secrets_config() {
 
 # Alternative function to run agenix
 run_agenix() {
-  if command -v agenix &> /dev/null; then
-    cd "$NIXOS_DIR"  # Run from config root
+  if command -v agenix &>/dev/null; then
+    cd "$NIXOS_DIR" # Run from config root
     agenix "$@"
   else
     log "Running agenix through nix..."
@@ -60,13 +60,13 @@ check_current_config() {
 # Initialize secrets management
 init_secrets() {
   log "Initializing secrets management..."
-  
+
   # Create secrets directory
   mkdir -p "$SECRETS_DIR"
-  
+
   # Create secrets.nix in the root directory (standard agenix location)
   if [[ ! -f "$SECRETS_CONFIG" ]]; then
-    cat > "$SECRETS_CONFIG" << 'EOF'
+    cat >"$SECRETS_CONFIG" <<'EOF'
 # This file defines which keys can decrypt which secrets
 # Run: agenix -e <secret-name>.age
 let
@@ -98,11 +98,11 @@ in
 EOF
     log "Created $SECRETS_CONFIG"
   fi
-  
+
   # Update .gitignore
   local gitignore="$NIXOS_DIR/.gitignore"
   if ! grep -q "secrets.nix" "$gitignore" 2>/dev/null; then
-    cat >> "$gitignore" << 'EOF'
+    cat >>"$gitignore" <<'EOF'
 
 # Secrets management
 secrets.nix
@@ -110,7 +110,7 @@ secrets/*.age
 EOF
     log "Updated .gitignore"
   fi
-  
+
   log "Secrets management initialized!"
   log ""
   log "Next steps:"
@@ -123,17 +123,17 @@ EOF
 create_secret() {
   local secret_name="$1"
   check_secrets_config
-  
+
   # Add secrets/ prefix if not present
   if [[ ! "$secret_name" == secrets/* ]]; then
     secret_name="secrets/$secret_name"
   fi
-  
+
   if [[ -f "$NIXOS_DIR/$secret_name.age" ]]; then
     warn "Secret $secret_name already exists. Use 'edit' to modify it."
     return 1
   fi
-  
+
   log "Creating secret: $secret_name"
   run_agenix -e "$secret_name.age"
 }
@@ -142,18 +142,18 @@ create_secret() {
 edit_secret() {
   local secret_name="$1"
   check_secrets_config
-  
+
   # Add secrets/ prefix if not present
   if [[ ! "$secret_name" == secrets/* ]]; then
     secret_name="secrets/$secret_name"
   fi
-  
+
   if [[ ! -f "$NIXOS_DIR/$secret_name.age" ]]; then
     error "Secret $secret_name does not exist. Available secrets:"
     list_secrets
     return 1
   fi
-  
+
   log "Editing secret: $secret_name"
   run_agenix -e "$secret_name.age"
 }
@@ -162,13 +162,13 @@ edit_secret() {
 rekey_secrets() {
   check_secrets_config
   log "Rekeying all secrets..."
-  
+
   # Show what secrets will be rekeyed
   log "The following secrets will be rekeyed:"
   list_secrets
-  
+
   run_agenix -r
-  
+
   if [[ $? -eq 0 ]]; then
     log "✅ All secrets successfully rekeyed!"
   else
@@ -189,23 +189,23 @@ list_secrets() {
 status() {
   log "Secrets Management Status:"
   echo ""
-  
+
   # Check if secrets.nix exists
   if [[ -f "$SECRETS_CONFIG" ]]; then
     log "✅ secrets.nix configuration found"
   else
     warn "❌ secrets.nix not found"
   fi
-  
+
   # Check available secrets
   local secret_count=$(find "$SECRETS_DIR" -name "*.age" 2>/dev/null | wc -l)
   log "📁 Found $secret_count secret files"
-  
+
   # Show current configuration
   check_current_config
-  
+
   # Check if agenix is available
-  if command -v agenix &> /dev/null; then
+  if command -v agenix &>/dev/null; then
     log "✅ agenix command available"
   else
     warn "⚠️  agenix not in PATH (will use nix run)"

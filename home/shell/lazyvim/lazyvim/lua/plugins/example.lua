@@ -136,14 +136,14 @@ return {
                 include = ["${workspaceFolder}/**/*.nix"], -- Include all Nix files in workspace
                 exclude = {
                   "${workspaceFolder}/.direnv/**",
-                  "${workspaceFolder}/result/**", 
+                  "${workspaceFolder}/result/**",
                   "${workspaceFolder}/.git/**"
                 }, -- Exclude build artifacts and git files
               },
             },
           },
         },
-      },  
+      },
       -- you can do any additional lsp server setup here
       -- return true if you don't want this server to be setup with lspconfig
       ---@type table<string, fun(server:string, opts:_.lspconfig.options):boolean?>

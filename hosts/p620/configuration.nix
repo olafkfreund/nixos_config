@@ -570,6 +570,9 @@ in
     scream
     vim
     wally-cli
+    # Qt theme control tools for Stylix
+    libsForQt5.qt5ct
+    kdePackages.qt6ct
     # Custom qwen-code package
     (callPackage ../../home/development/qwen-code/default.nix { })
   ];

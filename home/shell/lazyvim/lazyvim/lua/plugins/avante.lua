@@ -17,7 +17,7 @@ return {
     -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
     build = "make",
     -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
-    
+
     -- You can use keys to define custom mappings if desired
     keys = {
       { "<leader>aa", function() require("avante.api").ask() end, desc = "Avante: Ask AI" },
@@ -25,14 +25,14 @@ return {
       { "<leader>ar", function() require("avante.api").refresh() end, desc = "Avante: Refresh" },
       -- Image paste shortcut that works both in normal buffers and Avante input
       { "<leader>ip", function()
-          return vim.bo.filetype == "AvanteInput" and 
-            require("avante.clipboard").paste_image() or 
+          return vim.bo.filetype == "AvanteInput" and
+            require("avante.clipboard").paste_image() or
             require("img-clip").paste_image()
-        end, 
+        end,
         desc = "Paste image (works in Avante too)"
       },
     },
-    
+
     dependencies = {
       "stevearc/dressing.nvim",
       "nvim-lua/plenary.nvim",

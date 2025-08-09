@@ -25,14 +25,14 @@ The feature system provides a declarative way to enable or disable specific func
       nodejs = false; # Disable Node.js
       # ...other options
     };
-    
+
     # Enable virtualization with specific tools
     virtualization = {
       enable = true;
       docker = true;
       podman = false;
     };
-    
+
     # ... other feature categories
   };
 }
@@ -102,7 +102,7 @@ To use these common modules, simply import the directory in your configuration:
     ../modules/common
     # ... other imports
   ];
-  
+
   # Then configure features as needed
   features.development.enable = true;
   features.development.python = true;

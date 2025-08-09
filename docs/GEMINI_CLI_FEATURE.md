@@ -25,14 +25,14 @@ The `programs.gemini-cli` module provides these configuration options:
 ```nix
 programs.gemini-cli = {
   enable = true;  # Enable/disable the service
-  
+
   package = pkgs.gemini-cli;  # Override the package if needed
-  
+
   environmentVariables = {
     GEMINI_API_KEY = "your-api-key";
     GEMINI_MODEL = "gemini-2.5-pro";
   };
-  
+
   enableShellIntegration = true;  # Adds shell aliases and desktop entry
 };
 ```
@@ -61,6 +61,7 @@ programs.gemini-cli = {
 ### Shell Aliases
 
 When `enableShellIntegration = true` (default), these aliases are available:
+
 - `gemini` - Run the Gemini CLI
 - `ai` - Convenient shortcut for `gemini`
 
@@ -76,7 +77,7 @@ A desktop entry is automatically created at `/etc/applications/gemini-cli.deskto
 # In hosts/p620/configuration.nix
 features.ai.gemini-cli = true;
 
-# In hosts/razer/configuration.nix  
+# In hosts/razer/configuration.nix
 features.ai.gemini-cli = true;
 
 # In hosts/p510/configuration.nix

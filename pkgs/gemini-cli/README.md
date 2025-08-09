@@ -64,6 +64,7 @@ gemini -d
 ## Configuration
 
 The CLI supports various authentication methods:
+
 - API key via `GEMINI_API_KEY` environment variable
 - Google account OAuth
 - Google Workspace accounts

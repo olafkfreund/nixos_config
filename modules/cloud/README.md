@@ -14,6 +14,7 @@ This directory contains NixOS modules for various cloud provider tools and SDKs.
 ## Features
 
 Each module provides:
+
 - CLI tools for the respective cloud provider
 - SDKs and development libraries
 - Authentication utilities

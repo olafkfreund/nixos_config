@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" style="isolation:isolate">
     <path d="M165.685 11.947c74.055 0 84.639 10.557 84.639 84.544v59.251c0 73.986-10.584 84.543-84.639 84.543h-75.37c-74.055 0-84.639-10.557-84.639-84.543V96.491c0-73.987 10.584-84.544 84.639-84.544h75.37z" fill="none" stroke="#282828" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.077" vector-effect="non-scaling-stroke" opacity=".1"/>
     <path d="M165.685 11.947c74.055 0 84.639 10.557 84.639 84.544v59.251c0 73.986-10.584 84.543-84.639 84.543h-75.37c-74.055 0-84.639-10.557-84.639-84.543V96.491c0-73.987 10.584-84.544 84.639-84.544h75.37z" fill="#665c54"/>
-    
+
     <path d="M48 128c0-44.153 35.847-80 80-80s80 35.847 80 80-35.847 80-80 80-80-35.847-80-80zm63.313 0c0-9.21 7.477-16.687 16.687-16.687s16.688 7.477 16.688 16.687-7.478 16.688-16.688 16.688-16.687-7.478-16.687-16.688z" fill="#282828" fill-rule="evenodd"/>
     <radialGradient id="c" cx=".5" cy=".5" r=".5" gradientTransform="matrix(150 0 0 150 53 53)" gradientUnits="userSpaceOnUse">
         <stop offset="0" stop-color="#3c3836"/>

@@ -7,21 +7,25 @@ This guide provides comprehensive information about monitoring the AI infrastruc
 ## Monitoring Architecture
 
 ### Current Setup
+
 - **Monitoring Server**: DEX5550 (Intel SFF) - Centralized monitoring
 - **Monitored Hosts**: P620 (AMD), P510 (Intel Xeon), Razer (Intel/NVIDIA)
 - **Monitoring Stack**: Prometheus + Grafana + Alertmanager + Node Exporters
 
 ### Service Endpoints
-- **Grafana**: http://dex5550.home.freundcloud.com:3001
-- **Prometheus**: http://dex5550.home.freundcloud.com:9090
-- **Alertmanager**: http://dex5550.home.freundcloud.com:9093
+
+- **Grafana**: <http://dex5550.home.freundcloud.com:3001>
+- **Prometheus**: <http://dex5550.home.freundcloud.com:9090>
+- **Alertmanager**: <http://dex5550.home.freundcloud.com:9093>
 
 ## Dashboard Overview
 
 ### AI Production Overview Dashboard
-**URL**: http://dex5550.home.freundcloud.com:3001/d/ai-production-overview
+
+**URL**: <http://dex5550.home.freundcloud.com:3001/d/ai-production-overview>
 
 **Key Panels**:
+
 1. **System Health Overview** - Shows up/down status of all hosts
 2. **AI Analysis Services Status** - AI service availability
 3. **AI Provider Response Times** - Response time trends by provider
@@ -36,9 +40,11 @@ This guide provides comprehensive information about monitoring the AI infrastruc
 **Refresh Rate**: 30 seconds
 
 ### AI Security Dashboard
-**URL**: http://dex5550.home.freundcloud.com:3001/d/ai-security-dashboard
+
+**URL**: <http://dex5550.home.freundcloud.com:3001/d/ai-security-dashboard>
 
 **Key Panels**:
+
 1. **SSH Connection Attempts** - Total and failed SSH attempts over time
 2. **Security Audit Status** - Last security audit run and findings
 3. **Fail2Ban Activity** - Banned IPs and new bans over time
@@ -46,9 +52,11 @@ This guide provides comprehensive information about monitoring the AI infrastruc
 **Refresh Rate**: 30 seconds
 
 ### AI Performance Dashboard
-**URL**: http://dex5550.home.freundcloud.com:3001/d/ai-performance-dashboard
+
+**URL**: <http://dex5550.home.freundcloud.com:3001/d/ai-performance-dashboard>
 
 **Key Panels**:
+
 1. **AI Provider Performance Comparison** - Response times by provider
 2. **Performance Optimization History** - Optimization runs and improvements
 3. **Cache Performance** - Cache hit rates and cache size
@@ -60,23 +68,27 @@ This guide provides comprehensive information about monitoring the AI infrastruc
 ### System Health Metrics
 
 #### Host Availability
+
 - **Metric**: `up{job="node-exporter"}`
 - **Normal**: 1 (up), 0 (down)
 - **Alert**: Any host showing 0 for >5 minutes
 
 #### CPU Usage
+
 - **Metric**: `100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)`
 - **Normal**: <70%
 - **Warning**: 70-80%
 - **Critical**: >80%
 
 #### Memory Usage
+
 - **Metric**: `(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100`
 - **Normal**: <75%
 - **Warning**: 75-85%
 - **Critical**: >85%
 
 #### Disk Usage
+
 - **Metric**: `100 - ((node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100)`
 - **Normal**: <60%
 - **Warning**: 60-70%
@@ -86,6 +98,7 @@ This guide provides comprehensive information about monitoring the AI infrastruc
 ### AI Service Metrics
 
 #### AI Provider Response Times
+
 - **Metric**: `ai_provider_response_time_ms`
 - **Normal**: <3000ms
 - **Warning**: 3000-5000ms
@@ -93,12 +106,14 @@ This guide provides comprehensive information about monitoring the AI infrastruc
 - **Alert**: >10000ms
 
 #### AI Analysis Success Rate
+
 - **Metric**: `(ai_analysis_success_total / ai_analysis_total) * 100`
 - **Normal**: >95%
 - **Warning**: 90-95%
 - **Critical**: <90%
 
 #### AI Service Availability
+
 - **Metric**: `up{job="ai-analysis"}`
 - **Normal**: 1 (up)
 - **Alert**: 0 (down) for >2 minutes
@@ -106,12 +121,14 @@ This guide provides comprehensive information about monitoring the AI infrastruc
 ### Security Metrics
 
 #### SSH Failed Attempts
+
 - **Metric**: `rate(ssh_failed_attempts_total[5m]) * 60`
 - **Normal**: <5 attempts/minute
 - **Warning**: 5-10 attempts/minute
 - **Critical**: >10 attempts/minute
 
 #### Fail2Ban Activity
+
 - **Metric**: `fail2ban_banned_ips_total`
 - **Normal**: Occasional bans
 - **Alert**: Sudden spike in bans
@@ -119,12 +136,14 @@ This guide provides comprehensive information about monitoring the AI infrastruc
 ### Performance Metrics
 
 #### Load Testing Results
+
 - **Metric**: `ai_load_test_success_rate`
 - **Normal**: >80%
 - **Warning**: 70-80%
 - **Critical**: <70%
 
 #### Cache Performance
+
 - **Metric**: `ai_cache_hit_rate`
 - **Normal**: >70%
 - **Warning**: 50-70%
@@ -135,21 +154,25 @@ This guide provides comprehensive information about monitoring the AI infrastruc
 ### Critical Alerts
 
 #### High Disk Usage (P510)
+
 - **Condition**: P510 disk usage >85%
 - **Action**: Immediate attention required
 - **Recovery**: Run emergency cleanup procedures
 
 #### AI Provider Failures
+
 - **Condition**: AI provider response time >10s or availability <90%
 - **Action**: Check provider status and connectivity
 - **Recovery**: Restart provider optimization services
 
 #### Memory Exhaustion
+
 - **Condition**: Memory usage >90%
 - **Action**: Immediate memory optimization
 - **Recovery**: Run memory cleanup procedures
 
 #### SSH Security Breach
+
 - **Condition**: >20 failed SSH attempts in 5 minutes
 - **Action**: Security incident response
 - **Recovery**: Check logs and block malicious IPs
@@ -157,11 +180,13 @@ This guide provides comprehensive information about monitoring the AI infrastruc
 ### Warning Alerts
 
 #### High Resource Usage
+
 - **Condition**: CPU >80% or Memory >85% for >10 minutes
 - **Action**: Monitor and optimize if needed
 - **Recovery**: Run performance optimization
 
 #### Slow AI Responses
+
 - **Condition**: Average response time >5s for >15 minutes
 - **Action**: Performance investigation
 - **Recovery**: Restart AI services or optimize
@@ -169,11 +194,13 @@ This guide provides comprehensive information about monitoring the AI infrastruc
 ### Information Alerts
 
 #### Service Restarts
+
 - **Condition**: Any AI service restart
 - **Action**: Monitor for stability
 - **Recovery**: Check service logs
 
 #### Storage Cleanup
+
 - **Condition**: Automated cleanup triggered
 - **Action**: Monitor storage trends
 - **Recovery**: None required
@@ -181,22 +208,26 @@ This guide provides comprehensive information about monitoring the AI infrastruc
 ## Host-Specific Monitoring
 
 ### P620 (AMD Workstation)
+
 **Role**: Primary AI development and testing
 **Current Status**: Monitoring client
 
 **Key Metrics**:
+
 - AMD GPU utilization (ROCm)
 - Ollama service performance
 - AI provider response times
 - Development workload patterns
 
 **Monitoring Focus**:
+
 - GPU temperature and utilization
 - AI model loading times
 - Development environment stability
 - Local AI inference performance
 
 **Commands**:
+
 ```bash
 # Check P620 specific metrics
 rocm-smi  # GPU status
@@ -205,22 +236,26 @@ ai-cli -p ollama "test"  # Test local inference
 ```
 
 ### DEX5550 (Intel SFF)
+
 **Role**: Monitoring server
 **Current Status**: Centralized monitoring hub
 
 **Key Metrics**:
+
 - Prometheus scrape success rate
 - Grafana dashboard responsiveness
 - Alertmanager notification delivery
 - Metrics storage usage
 
 **Monitoring Focus**:
+
 - Monitoring service availability
 - Metrics ingestion rate
 - Dashboard performance
 - Alert processing time
 
 **Commands**:
+
 ```bash
 # Check DEX5550 monitoring services
 systemctl status prometheus grafana alertmanager
@@ -229,22 +264,26 @@ grafana-status     # Check dashboards
 ```
 
 ### P510 (Intel Xeon)
+
 **Role**: High-performance computing
 **Current Status**: Critical storage monitoring (79.6% usage)
 
 **Key Metrics**:
+
 - Storage usage trends
 - NVIDIA GPU utilization
 - Compute workload performance
 - Storage I/O patterns
 
 **Monitoring Focus**:
+
 - **CRITICAL**: Disk usage monitoring
 - Storage cleanup automation
 - Compute performance optimization
 - GPU utilization tracking
 
 **Commands**:
+
 ```bash
 # Check P510 critical metrics
 df -h /  # Monitor disk usage
@@ -253,22 +292,26 @@ systemctl status ai-storage-analysis
 ```
 
 ### Razer (Intel/NVIDIA Laptop)
+
 **Role**: Mobile development platform
 **Current Status**: Monitoring client
 
 **Key Metrics**:
+
 - Battery and power management
 - Hybrid GPU switching
 - Network connectivity
 - Mobile workload patterns
 
 **Monitoring Focus**:
+
 - Power consumption
 - Thermal management
 - Network stability
 - Mobile development productivity
 
 **Commands**:
+
 ```bash
 # Check Razer mobile metrics
 powertop  # Power consumption
@@ -279,6 +322,7 @@ ping dex5550.home.freundcloud.com  # Network connectivity
 ## Monitoring Commands
 
 ### Daily Health Check
+
 ```bash
 #!/bin/bash
 # Daily monitoring health check
@@ -326,6 +370,7 @@ journalctl -p err --since "24 hours ago" --no-pager | tail -5
 ```
 
 ### Performance Analysis
+
 ```bash
 #!/bin/bash
 # Performance analysis script
@@ -377,6 +422,7 @@ df -h / | tail -1 | awk '{print $5}'
 ```
 
 ### Security Monitoring
+
 ```bash
 #!/bin/bash
 # Security monitoring check
@@ -420,18 +466,21 @@ journalctl -u ai-security-audit --since "24 hours ago" --no-pager | tail -5 || e
 ## Troubleshooting Monitoring Issues
 
 ### Dashboard Not Loading
+
 1. Check Grafana service: `systemctl status grafana`
 2. Check network connectivity: `curl -f http://localhost:3001/api/health`
 3. Restart Grafana: `systemctl restart grafana`
 4. Check dashboard files: `ls -la /var/lib/grafana/dashboards/`
 
 ### Missing Metrics
+
 1. Check Prometheus targets: `curl -s http://localhost:9090/api/v1/targets`
 2. Check exporters: `systemctl status node-exporter nixos-exporter`
 3. Check network connectivity between hosts
 4. Restart Prometheus: `systemctl restart prometheus`
 
 ### Alerts Not Firing
+
 1. Check Alertmanager: `systemctl status alertmanager`
 2. Check alert rules: `curl -s http://localhost:9090/api/v1/rules`
 3. Check notification configuration
@@ -440,24 +489,28 @@ journalctl -u ai-security-audit --since "24 hours ago" --no-pager | tail -5 || e
 ## Best Practices
 
 ### Regular Monitoring Tasks
+
 1. **Daily**: Check dashboard for anomalies
 2. **Weekly**: Review performance trends
 3. **Monthly**: Analyze capacity planning metrics
 4. **Quarterly**: Review and update alert thresholds
 
 ### Performance Optimization
+
 1. Monitor response time trends
 2. Set up automated performance testing
 3. Track resource utilization patterns
 4. Optimize based on usage patterns
 
 ### Security Monitoring
+
 1. Review SSH logs regularly
 2. Monitor for unusual access patterns
 3. Keep security audit results current
 4. Update security configurations based on findings
 
 ### Capacity Planning
+
 1. Track storage usage trends (especially P510)
 2. Monitor resource growth patterns
 3. Plan for scalability requirements
@@ -465,6 +518,6 @@ journalctl -u ai-security-audit --since "24 hours ago" --no-pager | tail -5 || e
 
 ---
 
-*This monitoring guide should be used with the Operations Runbook and Troubleshooting Guide.*
-*For dashboard access, use the provided URLs and credentials.*
-*Last Updated: $(date)*
+_This monitoring guide should be used with the Operations Runbook and Troubleshooting Guide._
+_For dashboard access, use the provided URLs and credentials._
+_Last Updated: $(date)_

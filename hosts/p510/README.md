@@ -34,6 +34,7 @@ This directory contains the NixOS configuration for the P510 system, which appea
 ## Hardware
 
 The P510 system appears to have:
+
 - Intel CPU
 - NVIDIA GPU
 - Multiple storage volumes for media and system

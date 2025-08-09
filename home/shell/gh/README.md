@@ -5,6 +5,7 @@ This directory contains configuration for [GitHub CLI](https://cli.github.com/) 
 ## Overview
 
 The GitHub CLI is configured in your NixOS setup to provide:
+
 - Command-line access to GitHub repositories and features
 - Custom aliases for frequently used operations
 - Integration with your local git workflow

@@ -65,7 +65,7 @@ nix-build -E "with import <nixpkgs> {}; callPackage ./default.nix {}"
 This package is already integrated into the NixOS configuration and available system-wide on:
 
 - P620 (AMD workstation)
-- P510 (Intel/NVIDIA server)  
+- P510 (Intel/NVIDIA server)
 - Razer (Intel/NVIDIA laptop)
 
 ## Source

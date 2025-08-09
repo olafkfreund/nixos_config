@@ -17,7 +17,7 @@ BOLD='\033[1m'
 
 # Check for required commands
 for cmd in jq nix column; do
-  if ! command -v "$cmd" &> /dev/null; then
+  if ! command -v "$cmd" &>/dev/null; then
     echo -e "${RED}Error:${NC} $cmd is required but not installed. Please install it first."
     exit 1
   fi
@@ -100,18 +100,18 @@ for input in $inputs; do
   if [[ "$input" == "root" ]]; then
     continue
   fi
-  
+
   # Get current version
   current=$(echo "$OLD_LOCK" | jq -r --arg input "$input" '.[$input].original.rev // .[$input].locked.rev // "N/A"')
   current_short=${current:0:8}
-  
+
   # Get new version
   latest=$(echo "$NEW_LOCK" | jq -r --arg input "$input" '.[$input].original.rev // .[$input].locked.rev // "N/A"')
   latest_short=${latest:0:8}
-  
+
   # Get URL
   url=$(echo "$OLD_LOCK" | jq -r --arg input "$input" '.[$input].locked.url // .[$input].original.url // "N/A"')
-  
+
   # Format and display
   if [[ "$current" != "$latest" && "$current" != "N/A" && "$latest" != "N/A" ]]; then
     printf "%-25s ${RED}%-15s${NC} ${GREEN}%-15s${NC} %s\n" "$input" "$current_short" "$latest_short" "$url"

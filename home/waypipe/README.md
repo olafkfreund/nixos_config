@@ -30,6 +30,7 @@ waypipe ssh user@remote-server program-name
 ```
 
 This will:
+
 1. Connect to the remote server via SSH
 2. Run the specified program on the remote server
 3. Display its GUI locally on your machine
@@ -41,6 +42,7 @@ waypipe ssh user@remote-server
 ```
 
 This will:
+
 1. Open an SSH connection to the remote server
 2. Allow you to run multiple graphical programs over that connection
 3. Each program will appear as a local window on your machine
@@ -56,7 +58,7 @@ Both client and server components are managed by systemd:
 
 The setup consists of two systemd user services:
 
-1. **waypipe-client**: 
+1. **waypipe-client**:
    - Creates and manages the client socket
    - Automatically starts with your graphical session
    - Cleans up when the session ends
@@ -71,17 +73,20 @@ The setup consists of two systemd user services:
 If you experience issues:
 
 1. Check socket availability:
+
    ```bash
    ls -la ~/.waypipe/
    ```
 
 2. Verify the services are running:
+
    ```bash
    systemctl --user status waypipe-client
    systemctl --user status waypipe-server
    ```
 
 3. Restart the services if needed:
+
    ```bash
    systemctl --user restart waypipe-client
    systemctl --user restart waypipe-server

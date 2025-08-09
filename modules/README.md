@@ -37,5 +37,6 @@ This directory contains modular NixOS configurations that can be imported by dif
 These modules are imported by host configurations in the `hosts/` directory. The main entry point is `default.nix` which imports common modules needed by most systems.
 
 For specialized system types, separate entry points exist:
+
 - `server.nix` - For server systems
 - `laptops.nix` - For laptop systems

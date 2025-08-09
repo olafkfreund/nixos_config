@@ -7,7 +7,7 @@ This guide provides detailed instructions for managing users in the multi-user N
 The configuration supports multiple users per host with role-based configurations. Each user gets:
 
 - Automatic system account creation
-- Role-specific Home Manager configuration  
+- Role-specific Home Manager configuration
 - Automatic Docker group membership
 - Host-specific package and service configurations
 
@@ -26,12 +26,12 @@ hostUsers = {
 
 ### User Roles
 
-| User | Role | Hosts | Purpose |
-|------|------|-------|---------|
-| `olafkfreund` | Primary Admin | All | Full development environment, system administration |
-| `workuser` | Business User | P620 | Office applications, business communication tools |
-| `serveruser` | Server Admin | P510 | Server management, monitoring, network diagnostics |
-| `htpcuser` | Media User | DEX5550 | Media center applications, entertainment |
+| User          | Role          | Hosts   | Purpose                                             |
+| ------------- | ------------- | ------- | --------------------------------------------------- |
+| `olafkfreund` | Primary Admin | All     | Full development environment, system administration |
+| `workuser`    | Business User | P620    | Office applications, business communication tools   |
+| `serveruser`  | Server Admin  | P510    | Server management, monitoring, network diagnostics  |
+| `htpcuser`    | Media User    | DEX5550 | Media center applications, entertainment            |
 
 ## ➕ Adding New Users
 
@@ -53,7 +53,7 @@ Edit `flake.nix` to add the user to appropriate hosts:
 hostUsers = {
   p620 = ["olafkfreund" "workuser" "devuser"];
   razer = ["olafkfreund"];
-  p510 = ["olafkfreund" "serveruser" "devuser"]; 
+  p510 = ["olafkfreund" "serveruser" "devuser"];
   dex5550 = ["olafkfreund" "htpcuser"];
 };
 ```
@@ -89,22 +89,22 @@ Create `Users/devuser/p620_home.nix`:
     rustc
     cargo
     go
-    
+
     # Development tools
     vscode
     vim
     git
     github-cli
-    
+
     # Containers and virtualization
     docker-compose
     kubectl
-    
+
     # Debugging and profiling
     gdb
     valgrind
     strace
-    
+
     # Documentation
     man-pages
     tldr
@@ -121,7 +121,7 @@ Create `Users/devuser/p620_home.nix`:
         core.editor = "code --wait";
       };
     };
-    
+
     vscode = {
       enable = true;
       extensions = with pkgs.vscode-extensions; [
@@ -130,7 +130,7 @@ Create `Users/devuser/p620_home.nix`:
         bradlc.vscode-tailwindcss
       ];
     };
-    
+
     zsh = {
       enable = true;
       autosuggestion.enable = true;
@@ -181,21 +181,21 @@ Create `Users/devuser/p510_home.nix`:
     nodejs
     python3
     go
-    
+
     # Container and orchestration
     docker-compose
     kubectl
     helm
-    
+
     # Server monitoring
     htop
     iotop
-    
+
     # Network tools
     curl
     wget
     jq
-    
+
     # Text processing
     vim
     tmux
@@ -211,7 +211,7 @@ Create `Users/devuser/p510_home.nix`:
         pull.rebase = true;
       };
     };
-    
+
     tmux = {
       enable = true;
       keyMode = "vi";
@@ -232,7 +232,7 @@ Rebuild the affected hosts:
 # For P620
 sudo nixos-rebuild switch --flake .#p620
 
-# For P510  
+# For P510
 sudo nixos-rebuild switch --flake .#p510
 ```
 
@@ -269,23 +269,23 @@ sudo -u devuser docker run hello-world
     github-cli
     vscode
     vim
-    
+
     # Programming languages
     nodejs
     python3
     rustc
     cargo
     go
-    
+
     # Build tools
     cmake
     gnumake
     gcc
-    
+
     # Container tools
     docker-compose
     kubectl
-    
+
     # Debugging
     gdb
     strace
@@ -302,7 +302,7 @@ sudo -u devuser docker run hello-world
         core.editor = "code --wait";
       };
     };
-    
+
     vscode = {
       enable = true;
       extensions = with pkgs.vscode-extensions; [
@@ -330,17 +330,17 @@ sudo -u devuser docker run hello-world
     inkscape
     blender
     krita
-    
+
     # Web design
     firefox
     chromium
-    
+
     # File management
     nautilus
-    
+
     # Productivity
     libreoffice-fresh
-    
+
     # Media utilities
     vlc
     imagemagick
@@ -352,7 +352,7 @@ sudo -u devuser docker run hello-world
       userName = "Designer";
       userEmail = "design@example.com";
     };
-    
+
     firefox = {
       enable = true;
       profiles.design = {
@@ -385,19 +385,19 @@ sudo -u devuser docker run hello-world
     # Testing tools
     selenium-server-standalone
     postman
-    
+
     # Browsers for testing
     firefox
     chromium
-    
+
     # Performance testing
     apache-bench
     wrk
-    
+
     # API testing
     curl
     jq
-    
+
     # Documentation
     pandoc
   ];

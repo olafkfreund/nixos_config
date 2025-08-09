@@ -306,6 +306,9 @@ in
 
   # System packages - consolidated from individual nixos modules
   environment.systemPackages = with pkgs; [
+    # Qt theme control tools for Stylix
+    libsForQt5.qt5ct
+    kdePackages.qt6ct
     # Power management
     cpupower-gui # GUI for CPU frequency scaling
     powertop # Power consumption analyzer

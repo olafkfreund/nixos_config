@@ -5,6 +5,7 @@ This directory contains modules for desktop environment configuration and relate
 ## Available Modules
 
 ### Core Desktop Components
+
 - **gtk/** - GTK theme and application configuration
 - **electron-config.nix** - Wayland optimization for Electron applications
 - **hyprland-uwsm.nix** - Hyprland with UWSM session management
@@ -14,18 +15,20 @@ This directory contains modules for desktop environment configuration and relate
 - **wlr/** - wlroots-based compositor utilities
 
 ### Application Integration
+
 - **cloud-sync/** - Cloud storage synchronization services
 
 ## Usage Examples
 
 ### Basic Desktop Setup
+
 ```nix
 {
   # Enable core desktop functionality
   imports = [
     ./modules/desktop
   ];
-  
+
   # Configure desktop environment
   modules.desktop = {
     enable = true;
@@ -35,6 +38,7 @@ This directory contains modules for desktop environment configuration and relate
 ```
 
 ### Electron Application Optimization
+
 ```nix
 {
   # Optimize Electron apps for Wayland
@@ -48,6 +52,7 @@ This directory contains modules for desktop environment configuration and relate
 ## Module Dependencies
 
 Most desktop modules require:
+
 - A compatible window manager or desktop environment
 - Graphics drivers properly configured
 - Audio system (PipeWire recommended)
@@ -61,11 +66,13 @@ Most desktop modules require:
 ## Troubleshooting
 
 ### Common Issues
+
 1. **Missing desktop session**: Ensure display manager is properly configured
 2. **Graphics issues**: Verify GPU drivers are installed and configured
 3. **Audio problems**: Check PipeWire/PulseAudio configuration in services/sound
 
 ### Debug Commands
+
 ```bash
 # Check session status
 echo $XDG_SESSION_TYPE

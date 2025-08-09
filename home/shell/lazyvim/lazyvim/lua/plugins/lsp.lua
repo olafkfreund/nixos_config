@@ -50,7 +50,7 @@ return {
                 exclude = {
                   ".direnv/**",
                   "result/**",
-                  ".git/**", 
+                  ".git/**",
                   "node_modules/**",
                 },
               },

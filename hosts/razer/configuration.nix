@@ -317,6 +317,9 @@ in
   # System packages - consolidated from individual nixos modules
   environment.systemPackages = with pkgs;
     [
+      # Qt theme control tools for Stylix
+      libsForQt5.qt5ct
+      kdePackages.qt6ct
       # Custom packages
       (callPackage ../../home/development/qwen-code/default.nix { })
 

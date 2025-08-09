@@ -2,7 +2,7 @@
  *
  * Author : Aditya Shakya (adi1090x)
  * Github : @adi1090x
- * 
+ *
  * Colors
  **/
 
@@ -10,7 +10,7 @@
     background:     #282828FF;
     background-alt: #353535FF;
     foreground:     #EBDBB2FF;
-    selected:       linear-gradient(#D4BE98FF,#D4BE98, #32302FDD); 
+    selected:       linear-gradient(#D4BE98FF,#D4BE98, #32302FDD);
     active:         #B8BB26FF;
     urgent:         #FB4934FF;
 }

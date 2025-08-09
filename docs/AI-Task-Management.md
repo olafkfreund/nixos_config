@@ -5,8 +5,9 @@ Complete guide to the intelligent Taskwarrior integration with Claude AI for pro
 ## 🚀 **Overview**
 
 Your NixOS system now includes a sophisticated AI-powered task management system that combines:
+
 - **Taskwarrior 3.0**: Advanced CLI task management
-- **Claude AI**: Intelligent task parsing, analysis, and insights  
+- **Claude AI**: Intelligent task parsing, analysis, and insights
 - **Beautiful UI**: Color-coded, emoji-rich terminal interface
 - **Context Awareness**: Git, time, and location-aware task management
 - **Automated Workflows**: Smart prioritization and project breakdown
@@ -14,18 +15,23 @@ Your NixOS system now includes a sophisticated AI-powered task management system
 ## 🎯 **Key Features**
 
 ### **1. Intelligent Task Creation**
+
 Transform natural language into structured tasks with context awareness.
 
-### **2. AI-Enhanced Daily Dashboard** 
+### **2. AI-Enhanced Daily Dashboard**
+
 Beautiful, insightful overview with AI-generated recommendations and priority suggestions.
 
 ### **3. Smart Work Summarization**
+
 Professional daily/weekly reports with AI analysis of productivity patterns.
 
 ### **4. Context-Aware Task Management**
+
 AI considers your current directory, git branch, time of day, and work patterns.
 
 ### **5. Automated Priority Management**
+
 AI analyzes urgency, dependencies, and optimal work sequences.
 
 ---
@@ -33,6 +39,7 @@ AI analyzes urgency, dependencies, and optimal work sequences.
 ## 🛠️ **Core Commands**
 
 ### **Smart Task Creation**
+
 ```bash
 # Natural language to structured tasks
 smart-add "Review PR, update docs, deploy by Friday"
@@ -41,11 +48,12 @@ sa "Quick task description"  # Short alias
 
 # Result: Creates multiple tasks with proper:
 # - Projects and tags
-# - Due dates and priorities  
+# - Due dates and priorities
 # - Context-aware categorization
 ```
 
 ### **AI-Enhanced Dashboard**
+
 ```bash
 # Beautiful daily overview with AI insights
 ai-dashboard
@@ -55,17 +63,18 @@ dash        # Quick alias
 
 # Shows:
 # - Task summary with visual indicators
-# - AI-generated priority recommendations  
+# - AI-generated priority recommendations
 # - Context-aware productivity tips
 # - Time tracking integration
 # - Quick action shortcuts
 ```
 
 ### **Task Analysis & Insights**
+
 ```bash
 # AI analyzes current tasks for optimization
 ai-analyze
-analyze     # Alias  
+analyze     # Alias
 insights    # Alias
 
 # Provides:
@@ -76,13 +85,14 @@ insights    # Alias
 ```
 
 ### **Work Summarization**
+
 ```bash
 # Professional daily summary
 ai-summary daily
 summary      # Alias (defaults to daily)
 
 # Professional weekly report
-ai-summary weekly  
+ai-summary weekly
 weekly-summary     # Alias
 
 # Generates:
@@ -98,6 +108,7 @@ weekly-summary     # Alias
 ## 💡 **Advanced AI Functions**
 
 ### **Smart Task Completion**
+
 ```bash
 # AI-enhanced task completion with celebration
 smart-complete 15
@@ -111,6 +122,7 @@ sc 15              # Quick alias
 ```
 
 ### **AI-Powered Prioritization**
+
 ```bash
 # Intelligent task priority analysis
 ai-prioritize
@@ -125,11 +137,12 @@ ap            # Alias
 ```
 
 ### **Context-Aware Management**
+
 ```bash
 # AI suggests optimal work context
 ai-context suggest
 ai-context work      # Switch to work context
-ai-context personal  # Switch to personal context  
+ai-context personal  # Switch to personal context
 ai-context clear     # Clear all context filters
 
 # Quick aliases
@@ -138,6 +151,7 @@ focus         # AI context suggestion alias
 ```
 
 ### **Project Breakdown**
+
 ```bash
 # AI breaks complex projects into actionable tasks
 ai-breakdown "Build REST API for user authentication"
@@ -152,6 +166,7 @@ ab "Implement CI/CD pipeline"  # Alias
 ```
 
 ### **Productivity Metrics**
+
 ```bash
 # AI analyzes your productivity patterns
 ai-metrics
@@ -160,13 +175,14 @@ metrics    # Alias
 
 # Provides:
 # - Performance assessment and trends
-# - Optimization suggestions  
+# - Optimization suggestions
 # - Energy management recommendations
 # - Predictive completion estimates
 # - Data-driven productivity insights
 ```
 
 ### **Intelligent Task Search**
+
 ```bash
 # AI-powered semantic task search
 ai-find "tasks related to documentation"
@@ -181,6 +197,7 @@ find-task "urgent items"  # Alias
 ```
 
 ### **Weekly Review & Planning**
+
 ```bash
 # Comprehensive AI-powered review
 ai-review week
@@ -203,6 +220,7 @@ ai-review day
 ## 🌅 **Productivity Workflows**
 
 ### **Morning Routine**
+
 ```bash
 morning
 
@@ -214,6 +232,7 @@ morning
 ```
 
 ### **Evening Review**
+
 ```bash
 evening
 
@@ -225,6 +244,7 @@ evening
 ```
 
 ### **Quick Development Workflow**
+
 ```bash
 # Context-aware project task creation
 cd /path/to/project
@@ -248,6 +268,7 @@ summary
 ## 🎨 **Visual Design Features**
 
 ### **Color-Coded Interface**
+
 - **🔥 Red**: Urgent/overdue tasks
 - **⚡ Yellow**: Due today/high priority
 - **💚 Green**: Completed tasks and success messages
@@ -256,9 +277,10 @@ summary
 - **🔗 Cyan**: Links and secondary info
 
 ### **Emoji Indicators**
+
 - **📋 Task Overview**: General task information
 - **🎯 Priority**: High-importance items
-- **⏰ Time**: Time-sensitive information  
+- **⏰ Time**: Time-sensitive information
 - **🧠 AI**: AI-generated insights
 - **✅ Completed**: Finished tasks
 - **🚀 Action**: Next steps and motivation
@@ -266,6 +288,7 @@ summary
 - **📊 Metrics**: Data and analysis
 
 ### **Progress Visualization**
+
 - Visual task counters and statistics
 - Progress bars for project completion
 - Trend indicators for productivity metrics
@@ -276,20 +299,26 @@ summary
 ## ⚙️ **Configuration & Customization**
 
 ### **AI Provider Configuration**
+
 The system uses your existing AI provider setup with automatic fallback:
+
 - **Primary**: Anthropic Claude (most capable for task analysis)
 - **Fallback**: OpenAI GPT, Google Gemini, Local Ollama
 - **Configuration**: `/etc/ai-providers.json`
 
 ### **Taskwarrior Integration**
+
 Enhanced `.taskrc` configuration with:
+
 - Custom urgency coefficients for AI-enhanced prioritization
 - Context definitions for work/personal separation
 - Enhanced reports optimized for AI analysis
 - User-defined attributes for effort estimation
 
 ### **Shell Integration**
+
 Comprehensive ZSH function library providing:
+
 - Context-aware command completion
 - Intelligent alias expansion
 - Git and directory integration
@@ -300,18 +329,21 @@ Comprehensive ZSH function library providing:
 ## 📈 **Productivity Benefits**
 
 ### **Time Savings**
+
 - **85% faster** task creation with natural language processing
 - **60% less** time spent on task prioritization
 - **70% more accurate** time estimates with AI analysis
 - **50% reduction** in context switching overhead
 
 ### **Quality Improvements**
+
 - **Better task breakdown** with AI-assisted project planning
 - **Improved priority accuracy** through multi-factor AI analysis
 - **Enhanced motivation** with intelligent completion celebrations
 - **Clearer progress tracking** with AI-generated summaries
 
 ### **Workflow Optimization**
+
 - **Context-aware task suggestions** based on current work environment
 - **Energy-level matching** for optimal task scheduling
 - **Dependency management** with AI-identified blockers
@@ -322,6 +354,7 @@ Comprehensive ZSH function library providing:
 ## 🔧 **Troubleshooting**
 
 ### **AI Commands Not Working**
+
 ```bash
 # Check AI provider status
 ai-cli --status
@@ -334,6 +367,7 @@ ai-cli -p anthropic "test message"
 ```
 
 ### **Tasks Not Displaying Properly**
+
 ```bash
 # Check Taskwarrior configuration
 task config
@@ -346,6 +380,7 @@ task context none
 ```
 
 ### **Performance Issues**
+
 ```bash
 # Check system resources
 ai-metrics
@@ -362,6 +397,7 @@ task completed delete
 ## 🚀 **Getting Started**
 
 ### **1. Initialize Your Task System**
+
 ```bash
 # Start with the enhanced dashboard
 ai-dashboard
@@ -374,6 +410,7 @@ ai-prioritize
 ```
 
 ### **2. Set Up Your Contexts**
+
 ```bash
 # Define work context
 ai-context work
@@ -381,7 +418,7 @@ ai-context work
 # Add some work tasks
 smart-add "Review team code, update project docs, plan sprint"
 
-# Switch to personal context  
+# Switch to personal context
 ai-context personal
 
 # Add personal tasks
@@ -389,6 +426,7 @@ smart-add "Schedule dentist, organize photos, plan weekend"
 ```
 
 ### **3. Experience the AI Enhancement**
+
 ```bash
 # Get intelligent insights
 ai-analyze
@@ -401,6 +439,7 @@ ai-metrics
 ```
 
 ### **4. Integrate Into Daily Workflow**
+
 ```bash
 # Morning startup
 morning
@@ -419,16 +458,19 @@ weekly-summary
 ## 📚 **Additional Resources**
 
 ### **Taskwarrior Documentation**
-- Official docs: https://taskwarrior.org/docs/
+
+- Official docs: <https://taskwarrior.org/docs/>
 - Your enhanced config: `~/.taskrc`
 - Data location: `~/.task/`
 
 ### **AI Provider Management**
-- Configuration: `/etc/ai-providers.json`  
+
+- Configuration: `/etc/ai-providers.json`
 - Status check: `ai-cli --status`
 - Provider switching: `ai-switch <provider>`
 
 ### **Shell Integration**
+
 - Function definitions: `~/.config/nixos/home/shell/ai-task-integration.nix`
 - Aliases reference: `alias | grep -E "(smart|ai|task)"`
 - Help system: `productivity-help`

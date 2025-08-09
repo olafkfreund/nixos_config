@@ -5,7 +5,9 @@ This directory contains templates for creating new hosts in the NixOS infrastruc
 ## Available Templates
 
 ### 1. Workstation Template (`workstation/`)
+
 Full-featured desktop workstation with:
+
 - Complete desktop environment (Hyprland/KDE)
 - Development tools and IDEs
 - Virtualization support (Docker, MicroVMs)
@@ -16,7 +18,9 @@ Full-featured desktop workstation with:
 **Best for**: Primary development machines, powerful desktop systems
 
 ### 2. Server Template (`server/`)
+
 Headless server configuration with:
+
 - No desktop environment
 - Network services focus
 - Monitoring server capabilities
@@ -27,7 +31,9 @@ Headless server configuration with:
 **Best for**: Dedicated servers, monitoring hosts, network services
 
 ### 3. Laptop Template (`laptop/`)
+
 Mobile-optimized configuration with:
+
 - Power management optimization
 - Battery life optimization
 - Mobile display management
@@ -41,20 +47,25 @@ Mobile-optimized configuration with:
 
 1. **Choose a template** based on your host type
 2. **Copy the template** to a new host directory:
+
    ```bash
    cp -r templates/hosts/workstation hosts/new-hostname
    ```
+
 3. **Customize variables.nix** with your host-specific settings
 4. **Generate hardware configuration**:
+
    ```bash
    nixos-generate-config --show-hardware-config > hosts/new-hostname/nixos/hardware-configuration.nix
    ```
+
 5. **Add host to flake.nix** in the nixosConfigurations section
 6. **Deploy** the new configuration
 
 ## Template Structure
 
 Each template contains:
+
 - `configuration.nix` - Main configuration file
 - `variables.nix` - Host-specific variables and settings
 - `nixos/` - System configuration files
@@ -64,22 +75,23 @@ Each template contains:
 ## Customization Guide
 
 See the individual template README files for detailed customization instructions:
+
 - [Workstation Template Guide](workstation/README.md)
 - [Server Template Guide](server/README.md)
 - [Laptop Template Guide](laptop/README.md)
 
 ## Feature Matrix
 
-| Feature | Workstation | Server | Laptop |
-|---------|-------------|--------|--------|
-| Desktop Environment | ✅ | ❌ | ✅ |
-| Development Tools | ✅ | 🔧 | 🔧 |
-| Virtualization | ✅ | ✅ | 🔧 |
-| AI Providers | ✅ | 🔧 | 🔧 |
-| Gaming Support | ✅ | ❌ | 🔧 |
-| Power Management | 🔧 | ❌ | ✅ |
-| Monitoring Client | ✅ | N/A | ✅ |
-| Monitoring Server | 🔧 | ✅ | ❌ |
+| Feature             | Workstation | Server | Laptop |
+| ------------------- | ----------- | ------ | ------ |
+| Desktop Environment | ✅          | ❌     | ✅     |
+| Development Tools   | ✅          | 🔧     | 🔧     |
+| Virtualization      | ✅          | ✅     | 🔧     |
+| AI Providers        | ✅          | 🔧     | 🔧     |
+| Gaming Support      | ✅          | ❌     | 🔧     |
+| Power Management    | 🔧          | ❌     | ✅     |
+| Monitoring Client   | ✅          | N/A    | ✅     |
+| Monitoring Server   | 🔧          | ✅     | ❌     |
 
 **Legend**: ✅ = Enabled by default, 🔧 = Configurable, ❌ = Not included
 
@@ -88,6 +100,7 @@ See the individual template README files for detailed customization instructions
 ### Step-by-Step Process
 
 1. **Copy Template**:
+
    ```bash
    cp -r templates/hosts/workstation hosts/mynewhost
    ```
@@ -100,11 +113,13 @@ See the individual template README files for detailed customization instructions
    - Choose theme and appearance
 
 3. **Generate Hardware Config**:
+
    ```bash
    nixos-generate-config --show-hardware-config > hosts/mynewhost/nixos/hardware-configuration.nix
    ```
 
 4. **Update flake.nix**:
+
    ```nix
    nixosConfigurations = {
      # ... existing hosts
@@ -123,11 +138,13 @@ See the individual template README files for detailed customization instructions
    ```
 
 5. **Test Configuration**:
+
    ```bash
    just test-host mynewhost
    ```
 
 6. **Deploy**:
+
    ```bash
    just mynewhost  # If deploying to local machine
    # OR
@@ -137,23 +154,28 @@ See the individual template README files for detailed customization instructions
 ## Template Customization Options
 
 ### GPU Configuration
+
 - **AMD**: ROCm acceleration, gaming support
 - **NVIDIA**: CUDA support, AI workloads, gaming
 - **Intel**: Integrated graphics, power efficiency
 - **None**: Headless systems, servers
 
 ### Host Roles
+
 - **Workstation**: Full desktop, development focus
 - **Server**: Headless, service focus
 - **Laptop**: Mobile optimization, power management
 
 ### Network Configuration
+
 - **Static IP**: For servers and fixed workstations
 - **DHCP**: For laptops and flexible hosts
 - **Tailscale**: VPN integration for all hosts
 
 ### Feature Flags
+
 Each template includes comprehensive feature flags:
+
 ```nix
 features = {
   development.enable = true;    # Development tools
@@ -169,20 +191,26 @@ features = {
 ## Common Customizations
 
 ### Changing GPU Type
+
 Edit `variables.nix`:
+
 ```nix
 gpu = "nvidia";  # or "amd", "intel", "none"
 acceleration = "cuda";  # or "rocm", "none"
 ```
 
 ### Adding Users
+
 Edit `flake.nix` hostUsers:
+
 ```nix
 hostUsers = [ "username1" "username2" ];
 ```
 
 ### Network Configuration
+
 Edit `variables.nix`:
+
 ```nix
 hostMappings = {
   "192.168.1.100" = "mynewhost";
@@ -192,7 +220,9 @@ hostMappings = {
 ```
 
 ### Desktop Theme
+
 Edit `themes/stylix.nix` or `variables.nix`:
+
 ```nix
 theme = {
   scheme = "gruvbox-dark-medium";
@@ -203,21 +233,25 @@ theme = {
 ## Testing Your New Host
 
 ### Syntax Check
+
 ```bash
 just check-syntax
 ```
 
 ### Build Test
+
 ```bash
 just test-host mynewhost
 ```
 
 ### Full System Test
+
 ```bash
 just validate
 ```
 
 ### Deploy Test
+
 ```bash
 # Local deployment
 just mynewhost

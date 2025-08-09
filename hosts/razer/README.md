@@ -30,6 +30,7 @@ This directory contains the NixOS configuration for the Razer laptop.
 ## Hardware
 
 The Razer laptop appears to have:
+
 - Intel CPU
 - NVIDIA GPU
 - High-resolution display

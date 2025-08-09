@@ -1,7 +1,7 @@
 {
   // VS Code Initial Settings Template - Mutable after first creation
   // This file provides initial settings that VS Code can then modify
-  
+
   // Essential Nix development settings (critical for our workflow)
   "[nix]": {
     "editor.defaultFormatter": "kamadorueda.alejandra",
@@ -17,12 +17,7 @@
   "nix.editor.tabSize": 2,
   "nix.diagnostics": {
     "ignored": [],
-    "excluded": [
-      ".direnv/**",
-      "result/**",
-      ".git/**",
-      "node_modules/**"
-    ]
+    "excluded": [".direnv/**", "result/**", ".git/**", "node_modules/**"]
   },
   "nix.env": {
     "NIX_PATH": "nixpkgs=channel:nixos-unstable"
@@ -41,12 +36,7 @@
       "diagnostics": {
         "enable": true,
         "ignored": [],
-        "excluded": [
-          "\\.direnv",
-          "result",
-          "\\.git",
-          "node_modules"
-        ]
+        "excluded": ["\\.direnv", "result", "\\.git", "node_modules"]
       }
     }
   },
@@ -74,7 +64,7 @@
     "**\/.direnv": true,
     "**\/result": true
   },
-  
+
   // Editor settings
   "editor.fontSize": 14,
   "editor.lineHeight": 1.6,

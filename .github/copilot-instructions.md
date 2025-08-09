@@ -13,6 +13,7 @@ These instructions help GitHub Copilot understand our NixOS configuration prefer
 ## Code Style
 
 ### Nix Expression Format
+
 ```nix
 {
   config,
@@ -26,12 +27,14 @@ These instructions help GitHub Copilot understand our NixOS configuration prefer
 ```
 
 ### Naming Conventions
+
 - Use camelCase for variable and function names
 - Use descriptive names that reflect purpose
 - Prefix private functions with underscore
 - Use plural forms for lists/sets (e.g., `users`, `services`)
 
 ### Module Structure
+
 - Group related options together
 - Use type system for option declarations
 - Document options with description field
@@ -40,10 +43,11 @@ These instructions help GitHub Copilot understand our NixOS configuration prefer
 ## Best Practices
 
 ### Option Declarations
+
 ```nix
 options.myModule = {
   enable = lib.mkEnableOption "my module";
-  
+
   setting = lib.mkOption {
     type = lib.types.str;
     default = "value";
@@ -54,6 +58,7 @@ options.myModule = {
 ```
 
 ### Package Verification
+
 - Always verify package names exist before using them in configurations
 - Use the nixos-mcp server for package verification when available
 - Alternatively, use `nix-env -f '<nixpkgs>' -qaP` to list and verify available packages
@@ -61,12 +66,14 @@ options.myModule = {
 - Prefer using the exact attribute path (e.g., `pkgs.python3Packages.requests` instead of just `requests`)
 
 ### Service Configuration
+
 - Use systemd service units when appropriate
 - Handle service dependencies explicitly
 - Consider resource limits
 - Implement proper shutdown behavior
 
 ### File Organization
+
 - Separate concerns into distinct modules
 - Use `default.nix` for module entry points
 - Keep related configurations together
@@ -75,6 +82,7 @@ options.myModule = {
 ## Common Patterns
 
 ### Package Overlays
+
 ```nix
 final: prev: {
   myPackage = prev.myPackage.overrideAttrs (old: {
@@ -84,6 +92,7 @@ final: prev: {
 ```
 
 ### Service Definitions
+
 ```nix
 systemd.services.myService = {
   description = "My Service";
@@ -101,6 +110,7 @@ systemd.services.myService = {
 Our configuration manages several distinct hosts, each with unique hardware specifications that require tailored configurations:
 
 ### P620 Workstation
+
 - **CPU**: AMD processor
 - **GPU**: AMD graphics card
 - **Use Case**: High-performance workstation
@@ -110,6 +120,7 @@ Our configuration manages several distinct hosts, each with unique hardware spec
   - Configure for optimal thermal management under heavy workloads
 
 ### Razer Laptop
+
 - **CPU**: Intel processor
 - **GPU**: NVIDIA graphics card
 - **Use Case**: Mobile development platform
@@ -120,6 +131,7 @@ Our configuration manages several distinct hosts, each with unique hardware spec
   - Implement thermal throttling protection
 
 ### P510 Workstation
+
 - **CPU**: Intel Xeon processor
 - **GPU**: NVIDIA graphics card
 - **Use Case**: Server/workstation hybrid
@@ -129,6 +141,7 @@ Our configuration manages several distinct hosts, each with unique hardware spec
   - Use NVIDIA proprietary drivers for CUDA support
 
 ### DEX5550 SFF System
+
 - **CPU**: Intel processor (smaller form factor)
 - **GPU**: Intel integrated graphics
 - **Use Case**: Compact desktop/HTPC
@@ -139,6 +152,7 @@ Our configuration manages several distinct hosts, each with unique hardware spec
   - Hardware video decoding support
 
 ### Host-Specific Module Pattern
+
 ```nix
 {
   config,
@@ -159,7 +173,7 @@ Our configuration manages several distinct hosts, each with unique hardware spec
         nvidiaBusId = "PCI:1:0:0";
       };
     })
-    
+
     (lib.mkIf (config.networking.hostName == "dex5550") {
       # DEX5550-specific configuration
       hardware.opengl = {
@@ -198,12 +212,14 @@ Our configuration manages several distinct hosts, each with unique hardware spec
 ## Documentation
 
 ### Module Documentation
+
 - Document all custom options
 - Include usage examples
 - Explain dependencies
 - Document any required system configuration
 
 ### Comment Style
+
 ```nix
 # Single-line comments for brief explanations
 

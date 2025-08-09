@@ -22,7 +22,7 @@ features.ai.providers = {
   defaultProvider = "openai";
   enableFallback = true;
   costOptimization = false;
-  
+
   openai.enable = true;
   anthropic.enable = true;
   gemini.enable = true;
@@ -55,6 +55,7 @@ ai-cli [OPTIONS] "prompt"
 ```
 
 **Options:**
+
 - `-p, --provider PROVIDER` - Use specific provider (openai|anthropic|gemini|ollama)
 - `-m, --model MODEL` - Use specific model
 - `-f, --fallback` - Enable fallback to other providers on failure
@@ -122,6 +123,7 @@ ai-status
 ### Specialized Functions
 
 #### Claude/Anthropic
+
 ```bash
 claude-chat "model" "prompt"
 claude-code "model" "code prompt"
@@ -129,12 +131,14 @@ claude-analyze "/path/to/file"
 ```
 
 #### OpenAI
+
 ```bash
 openai-chat "model" "prompt"
 openai-code "model" "code prompt"
 ```
 
 #### Gemini
+
 ```bash
 gemini-chat "model" "prompt"
 gemini-vision "/path/to/image.jpg" "describe"
@@ -142,6 +146,7 @@ gemini-translate "text" "target_language"
 ```
 
 #### Ollama
+
 ```bash
 ollama-chat "model" "prompt"
 ollama-models
@@ -174,7 +179,7 @@ ai.providers = {
     models = ["gpt-4o" "gpt-4o-mini" "gpt-3.5-turbo"];
     defaultModel = "gpt-4o-mini";
   };
-  
+
   anthropic = {
     models = ["claude-3-5-sonnet-20241022" "claude-3-5-haiku-20241022"];
     defaultModel = "claude-3-5-sonnet-20241022";
@@ -201,6 +206,7 @@ ai-cli --status
 ```
 
 Example output:
+
 ```
 AI Provider Status
 ==================
@@ -257,11 +263,12 @@ modules/ai/providers/
 When enabled, cost optimization considers:
 
 1. **Model costs** per token
-2. **Provider reliability** 
+2. **Provider reliability**
 3. **Response speed**
 4. **Current API limits**
 
 Priority order for cost optimization:
+
 1. Ollama (free, local)
 2. Gemini (cost-effective)
 3. OpenAI (balanced)
@@ -297,7 +304,7 @@ ai "Help me debug this function"
 ```bash
 # Compare responses from different providers
 echo "Explain quantum computing" | ai-cli -p openai
-echo "Explain quantum computing" | ai-cli -p anthropic  
+echo "Explain quantum computing" | ai-cli -p anthropic
 echo "Explain quantum computing" | ai-cli -p gemini
 ```
 
@@ -306,23 +313,27 @@ echo "Explain quantum computing" | ai-cli -p gemini
 ### Common Issues
 
 1. **API Key Not Found**
+
    ```bash
    ai-cli --status  # Check API key status
    # Ensure secrets are properly deployed
    ```
 
 2. **Ollama Service Not Running**
+
    ```bash
    systemctl start ollama
    ollama-status
    ```
 
 3. **Provider Timeout**
+
    ```bash
    ai-cli -t 60 "prompt"  # Increase timeout
    ```
 
 4. **Model Not Available**
+
    ```bash
    ai-cli -p provider -M  # List available models
    ```

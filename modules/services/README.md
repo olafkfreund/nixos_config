@@ -9,6 +9,7 @@ This directory contains modules designed to improve network stability and resolv
 A DNS resolution enhancement module that provides stable DNS resolution even during network transitions.
 
 **Key features:**
+
 - DNS-over-TLS support
 - DNSSEC validation
 - Large DNS cache for better reliability
@@ -16,6 +17,7 @@ A DNS resolution enhancement module that provides stable DNS resolution even dur
 - Monitoring and automatic recovery
 
 **Example usage:**
+
 ```nix
 {
   services.secure-dns = {
@@ -35,12 +37,14 @@ A DNS resolution enhancement module that provides stable DNS resolution even dur
 A monitoring service that tracks network changes and helps diagnose connectivity issues.
 
 **Key features:**
+
 - Monitors interface changes
 - Tracks DNS resolution
 - Detects route changes
 - Maintains comprehensive logs
 
 **Example usage:**
+
 ```nix
 {
   services.network-monitoring = {
@@ -56,6 +60,7 @@ A monitoring service that tracks network changes and helps diagnose connectivity
 A comprehensive module that ties together all stability enhancements.
 
 **Key features:**
+
 - Connection stability improvements
 - Secure DNS integration
 - Electron app optimizations
@@ -64,11 +69,12 @@ A comprehensive module that ties together all stability enhancements.
 - TCP/IP stack tuning
 
 **Example usage:**
+
 ```nix
 {
   services.network-stability = {
     enable = true;
-    
+
     # Optional configuration adjustments
     monitoring.interval = 60;
     secureDns.providers = ["9.9.9.9#dns.quad9.net"];

@@ -9,6 +9,7 @@ This directory contains configurations for gaming-related tools and applications
 ## Features
 
 The gaming configurations provide:
+
 - Steam platform with Linux native and Windows game support via Proton
 - Performance optimizations for gaming
 - Controller support

@@ -84,6 +84,8 @@
     NIXPKGS_ALLOW_UNFREE = "1";
     ELECTRON_OZONE_PLATFORM_HINT = "auto";
     KITTY_DISABLE_WAYLAND = "0";
+    # Qt theme platform for Stylix compatibility (align with system default)
+    QT_QPA_PLATFORMTHEME = "qt5ct";
     # AMD-specific variables instead of NVIDIA ones
     # LIBVA_DRIVER_NAME = "radeonsi";
   };

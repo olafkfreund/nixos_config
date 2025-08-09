@@ -57,7 +57,7 @@ secrets.nix (key definitions)
 # Output example:
 # User public key (olafkfreund):
 #   olafkfreund = "ssh-ed25519 AAAAC3Nz... olafkfreund@nixos";
-# 
+#
 # Host public key (p620):
 #   p620 = "ssh-ed25519 AAAAC3Nz... root@p620";
 ```
@@ -83,7 +83,7 @@ let
   allUsers = [ olafkfreund newuser ];
   adminUsers = [ olafkfreund ];
   standardUsers = [ newuser ];
-  
+
   allHosts = [ p620 razer p510 dex5550 ];
   workstations = [ p620 razer ];
   servers = [ p510 dex5550 ];
@@ -92,16 +92,16 @@ in
   # User passwords - accessible by user and their designated hosts
   "secrets/user-password-olafkfreund.age".publicKeys = [ olafkfreund ] ++ allHosts;
   "secrets/user-password-newuser.age".publicKeys = [ newuser ] ++ workstations;
-  
+
   # Admin secrets - only for admin users
   "secrets/root-password.age".publicKeys = adminUsers ++ allHosts;
   "secrets/admin-api-keys.age".publicKeys = adminUsers ++ allHosts;
-  
+
   # Service secrets - role-based access
   "secrets/docker-registry-auth.age".publicKeys = allUsers ++ allHosts;
   "secrets/github-token.age".publicKeys = allUsers ++ workstations;
   "secrets/database-password.age".publicKeys = adminUsers ++ servers;
-  
+
   # Host-specific secrets
   "secrets/wifi-password.age".publicKeys = allUsers ++ [ razer ]; # Only laptop
   "secrets/backup-encryption-key.age".publicKeys = adminUsers ++ servers;
@@ -134,8 +134,8 @@ Add to each host's `configuration.nix`:
   # Users automatically get secret-managed passwords if available
   users.users = lib.genAttrs hostUsers (username: {
     isNormalUser = true;
-    hashedPasswordFile = lib.mkIf 
-      (config.modules.security.secrets.enable && 
+    hashedPasswordFile = lib.mkIf
+      (config.modules.security.secrets.enable &&
        builtins.hasAttr "user-password-${username}" config.age.secrets)
       config.age.secrets."user-password-${username}".path;
   });
@@ -187,7 +187,7 @@ Add the new user's public key to `secrets.nix`:
 let
   # Add new user public key
   newuser = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHm4Cmh2EQaXmEBtKGJ9IKvQGGzLOhQIGHGJDmTrJKpO newuser@nixos";
-  
+
   # Update user groups
   allUsers = [ olafkfreund newuser ];
   standardUsers = [ newuser ];
@@ -195,7 +195,7 @@ in
 {
   # Add secrets for new user
   "secrets/user-password-newuser.age".publicKeys = [ newuser ] ++ workstations;
-  
+
   # Update existing secrets if user needs access
   "secrets/docker-registry-auth.age".publicKeys = allUsers ++ allHosts;
 }
@@ -263,21 +263,25 @@ sudo nixos-rebuild switch --flake .#<hostname>
 ### Secret Access Patterns
 
 #### User Passwords
+
 ```nix
 "secrets/user-password-${username}.age".publicKeys = [ userKey ] ++ relevantHosts;
 ```
 
 #### Service Credentials
+
 ```nix
 "secrets/service-${servicename}.age".publicKeys = serviceUsers ++ serviceHosts;
 ```
 
 #### Admin Secrets
+
 ```nix
 "secrets/admin-${secretname}.age".publicKeys = adminUsers ++ allHosts;
 ```
 
 #### Host-Specific Secrets
+
 ```nix
 "secrets/host-${hostname}-${secretname}.age".publicKeys = adminUsers ++ [ hostKey ];
 ```
@@ -287,25 +291,28 @@ sudo nixos-rebuild switch --flake .#<hostname>
 ### Adding New Hosts
 
 1. **Generate Host SSH Keys**:
+
    ```bash
    # On the new host
    sudo ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -N ""
-   
+
    # Extract public key
    sudo cat /etc/ssh/ssh_host_ed25519_key.pub
    ```
 
 2. **Update secrets.nix**:
+
    ```nix
    let
      # Add new host key
      newhost = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINewHostKey root@newhost";
-     
+
      # Update host groups
      allHosts = [ p620 razer p510 dex5550 newhost ];
    ```
 
 3. **Create Host Configuration**:
+
    ```nix
    # hosts/newhost/configuration.nix
    {
@@ -318,6 +325,7 @@ sudo nixos-rebuild switch --flake .#<hostname>
    ```
 
 4. **Rekey All Secrets**:
+
    ```bash
    ./scripts/manage-secrets.sh rekey
    ```
@@ -337,6 +345,7 @@ sudo nixos-rebuild switch --flake .#<hostname>
 **Cause**: SSH keys in `secrets.nix` don't match the keys used to encrypt the secret.
 
 **Solution**:
+
 ```bash
 # Extract current keys
 ./scripts/get-keys.sh
@@ -353,6 +362,7 @@ nano secrets.nix
 **Cause**: Secret file permissions or paths incorrect.
 
 **Solution**:
+
 ```bash
 # Check secret file exists and has correct permissions
 ls -la /run/agenix/
@@ -369,6 +379,7 @@ sudo nixos-rebuild switch --flake .#<hostname>
 **Cause**: Some secrets encrypted with keys not in current `secrets.nix`.
 
 **Solution**:
+
 ```bash
 # Use recovery script
 ./scripts/recover-secrets.sh

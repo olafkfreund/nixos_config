@@ -301,6 +301,9 @@ in
 
   # System packages
   environment.systemPackages = with pkgs; [
+    # Qt theme control tools for Stylix
+    libsForQt5.qt5ct
+    kdePackages.qt6ct
     # Custom qwen-code package for system-wide availability
     (callPackage ../../home/development/qwen-code/default.nix { })
   ];

@@ -12,17 +12,17 @@ sleep 2
 
 # Backup current settings
 if [[ -f ~/.config/Code/User/settings.json ]]; then
-    echo "💾 Backing up current settings.json..."
-    cp ~/.config/Code/User/settings.json ~/.config/Code/User/settings.json.backup.$(date +%Y%m%d_%H%M%S)
+  echo "💾 Backing up current settings.json..."
+  cp ~/.config/Code/User/settings.json ~/.config/Code/User/settings.json.backup.$(date +%Y%m%d_%H%M%S)
 fi
 
 # Remove manually installed extensions
 echo "🗑️  Removing manually installed extensions..."
 if [[ -d ~/.vscode/extensions ]]; then
-    # Keep only Nix-managed extensions (symlinks)
-    find ~/.vscode/extensions -maxdepth 1 -type d ! -name "extensions" ! -name ".*" -exec rm -rf {} + 2>/dev/null || true
-    # Remove manually installed extension files
-    find ~/.vscode/extensions -maxdepth 1 -type f -name "*.json" ! -name ".extensions-immutable.json" -delete 2>/dev/null || true
+  # Keep only Nix-managed extensions (symlinks)
+  find ~/.vscode/extensions -maxdepth 1 -type d ! -name "extensions" ! -name ".*" -exec rm -rf {} + 2>/dev/null || true
+  # Remove manually installed extension files
+  find ~/.vscode/extensions -maxdepth 1 -type f -name "*.json" ! -name ".extensions-immutable.json" -delete 2>/dev/null || true
 fi
 
 # Remove VS Code user settings that conflict with Nix
@@ -47,7 +47,7 @@ echo "3. If you need specific extensions, install them through Nix configuration
 echo ""
 echo "🚨 Extensions that need to be added to Nix config:"
 echo "   - google.geminicodeassist"
-echo "   - anthropic.claude-code"  
+echo "   - anthropic.claude-code"
 echo "   - docker.docker"
 echo "   - ms-python.python"
 echo "   - saoudrizwan.claude-dev"

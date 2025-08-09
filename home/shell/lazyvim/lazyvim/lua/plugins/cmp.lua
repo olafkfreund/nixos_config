@@ -59,13 +59,13 @@ return {
             if icons[item.kind] then
               item.kind = icons[item.kind] .. item.kind
             end
-            
+
             -- Special formatting for Copilot suggestions
             if entry.source.name == "copilot" then
               item.kind = " Copilot"
               item.kind_hl_group = "CmpItemKindCopilot"
             end
-            
+
             return item
           end,
         },

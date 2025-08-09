@@ -7,6 +7,7 @@ Zellij is a modern terminal multiplexer with built-in session management, layout
 ## 🚀 Key Features
 
 ### Modern Architecture
+
 - **Built-in session management** with persistence
 - **Plugin system** with first-class plugin support
 - **Layout management** with predefined development layouts
@@ -14,12 +15,14 @@ Zellij is a modern terminal multiplexer with built-in session management, layout
 - **Smart keybindings** consistent with tmux/vim
 
 ### Developer Experience
+
 - **File manager integration** with built-in strider
 - **Session management** with advanced persistence
 - **Development layouts** optimized for coding workflows
 - **Gruvbox theming** consistent with the shell ecosystem
 
 ### Integration
+
 - **Zsh integration** for seamless shell experience
 - **Clipboard support** with Wayland integration
 - **Scrollback editor** using Neovim
@@ -28,6 +31,7 @@ Zellij is a modern terminal multiplexer with built-in session management, layout
 ## 🎹 Keybindings
 
 ### Core Navigation
+
 ```bash
 # Pane navigation (vim-style)
 h/j/k/l    # Move focus between panes
@@ -42,6 +46,7 @@ x          # Close current pane
 ```
 
 ### Tab Management
+
 ```bash
 # Tab operations
 t          # Create new tab
@@ -51,6 +56,7 @@ r          # Rename current tab
 ```
 
 ### Session Management
+
 ```bash
 # Session operations
 s          # Open session manager
@@ -58,6 +64,7 @@ d          # Detach from session (Ctrl+p + d in normal mode)
 ```
 
 ### Special Features
+
 ```bash
 # Floating panes
 f          # Toggle floating panes
@@ -66,22 +73,26 @@ e          # Open file manager (strider)
 ```
 
 ### Modes
+
 Zellij operates in different modes accessed via `Ctrl+p`:
 
 #### Normal Mode (Default)
+
 - Standard pane navigation and management
 - Most operations available without mode switching
 
 #### Scroll Mode (`Ctrl+p + s`)
+
 ```bash
 h/j/k/l    # Navigate in scrollback
 d          # Half-page down
-u          # Half-page up  
+u          # Half-page up
 Ctrl+f     # Full page down
 Ctrl+b     # Full page up
 ```
 
 #### Search Mode (`Ctrl+p + /`)
+
 ```bash
 n          # Next search result
 N          # Previous search result
@@ -90,6 +101,7 @@ N          # Previous search result
 ## 🔌 Plugin Architecture
 
 ### Essential Plugins
+
 ```nix
 plugins = [
   "status-bar"           # Bottom status information
@@ -104,18 +116,21 @@ plugins = [
 ### Plugin Features
 
 #### Status Bar
+
 - **Session information**: Current session name and status
 - **Tab indicators**: Active and background tabs
 - **Mode display**: Current operating mode
 - **Time/date**: System time display
 
 #### Strider (File Manager)
+
 - **Tree navigation**: Directory browsing
 - **File operations**: Basic file management
 - **Quick access**: Integrated with file picker
 - **Vim-style navigation**: Familiar keybindings
 
 #### Session Manager
+
 - **Session persistence**: Automatic session saving
 - **Multiple sessions**: Support for multiple concurrent sessions
 - **Session switching**: Quick session selection
@@ -124,6 +139,7 @@ plugins = [
 ## 🎨 Visual Configuration
 
 ### Gruvbox Theme
+
 ```bash
 # Color scheme matching shell environment
 bg: "#282828"           # Dark background
@@ -138,6 +154,7 @@ cyan: "#689d6a"         # Secondary info
 ```
 
 ### UI Configuration
+
 ```bash
 # Modern UI settings
 simplified_ui: true     # Clean interface
@@ -149,7 +166,9 @@ hide_session_name: false # Show context
 ## 📐 Layout System
 
 ### Development Layout
+
 **Optimized for coding workflows:**
+
 ```
 ┌─────────────────┬───────────┐
 │                 │           │
@@ -165,7 +184,9 @@ hide_session_name: false # Show context
 **Usage**: Automatically applies when working in development projects
 
 ### Simple Layout
+
 **For general terminal use:**
+
 ```
 ┌─────────────────────────────┐
 │                             │
@@ -178,7 +199,9 @@ hide_session_name: false # Show context
 **Usage**: Default layout for general terminal work
 
 ### Custom Layouts
+
 Create custom layouts by:
+
 1. Setting up desired pane configuration
 2. Saving layout with session manager
 3. Accessing via session management interface
@@ -186,6 +209,7 @@ Create custom layouts by:
 ## 🔧 Configuration Structure
 
 ### Core Settings
+
 ```nix
 settings = {
   default-shell = "zsh";           # Use enhanced zsh
@@ -204,13 +228,14 @@ settings = {
 ```
 
 ### Keybinding Customization
+
 ```nix
 keybinds = {
   normal = {
     # Custom keybindings for normal mode
   };
   scroll = {
-    # Custom keybindings for scroll mode  
+    # Custom keybindings for scroll mode
   };
   search = {
     # Custom keybindings for search mode
@@ -221,6 +246,7 @@ keybinds = {
 ## 🚀 Shell Integration
 
 ### Zsh Aliases
+
 ```bash
 zj="zellij"                    # Quick access
 zja="zellij attach"            # Attach to session
@@ -232,6 +258,7 @@ zje="zellij edit"             # Edit file in new pane
 ```
 
 ### Environment Integration
+
 - **Shell**: Uses enhanced zsh configuration
 - **Editor**: Integrates with Neovim setup
 - **Clipboard**: Native Wayland support
@@ -240,6 +267,7 @@ zje="zellij edit"             # Edit file in new pane
 ## 🎯 Workflow Examples
 
 ### Starting a Development Session
+
 ```bash
 # Create new session for project
 zj new-session project-name
@@ -252,6 +280,7 @@ zja project-name
 ```
 
 ### File Management Workflow
+
 ```bash
 # Open file manager
 e          # Opens strider in floating pane
@@ -264,12 +293,13 @@ e          # Opens strider in floating pane
 ```
 
 ### Multi-Pane Development
+
 ```bash
 # Start with development layout
 # Split for additional terminal if needed
 -          # Horizontal split for logs/terminal
 
-# Use floating panes for temporary work  
+# Use floating panes for temporary work
 f          # Toggle floating pane for quick tasks
 
 # Focus management
@@ -279,16 +309,19 @@ z          # Fullscreen current pane when needed
 ## 📊 Performance Features
 
 ### Startup Optimization
+
 - **Fast initialization**: Minimal startup overhead
 - **Efficient plugins**: Optimized plugin loading
 - **Smart defaults**: Performance-oriented configuration
 
 ### Memory Management
+
 - **Session persistence**: Efficient session storage
 - **Plugin management**: Controlled plugin resource usage
 - **Scrollback limits**: Reasonable buffer sizes
 
 ### Responsiveness
+
 - **Native performance**: Written in Rust for speed
 - **Efficient rendering**: Optimized terminal rendering
 - **Low latency**: Minimal input lag
@@ -296,17 +329,20 @@ z          # Fullscreen current pane when needed
 ## 🔗 Integration Points
 
 ### Development Tools
+
 - **Neovim**: Seamless editor integration
 - **Git**: Status awareness and integration
 - **Language servers**: Proper LSP functionality
 - **Debuggers**: Debug session management
 
 ### Shell Environment
+
 - **Zsh**: Full integration with enhanced zsh config
 - **Starship**: Prompt compatibility
 - **Modern tools**: Integration with eza, bat, fzf, etc.
 
 ### System Integration
+
 - **Clipboard**: Native Wayland/X11 support
 - **Notifications**: Desktop notification integration
 - **File associations**: Proper file type handling
@@ -314,7 +350,9 @@ z          # Fullscreen current pane when needed
 ## 🔧 Customization
 
 ### Adding Custom Layouts
+
 Create layout files in `~/.config/zellij/layouts/`:
+
 ```kdl
 layout {
     pane split_direction="vertical" {
@@ -329,7 +367,9 @@ layout {
 ```
 
 ### Custom Keybindings
+
 Modify keybindings in configuration:
+
 ```nix
 keybinds = {
   normal = {
@@ -339,7 +379,9 @@ keybinds = {
 ```
 
 ### Plugin Configuration
+
 Add plugins to the plugins array:
+
 ```nix
 plugins = [
   "existing-plugins"
@@ -350,6 +392,7 @@ plugins = [
 ## 🆚 Comparison with Tmux
 
 ### Advantages of Zellij
+
 - **Modern architecture**: Built-in features vs plugins
 - **Better defaults**: Less configuration needed
 - **Plugin system**: First-class plugin support
@@ -357,13 +400,16 @@ plugins = [
 - **Session management**: Advanced session features
 
 ### When to Use Zellij vs Tmux
+
 **Use Zellij when:**
+
 - Starting fresh with terminal multiplexing
 - Preferring modern defaults and architecture
 - Wanting built-in session management
 - Needing advanced layout features
 
 **Use Tmux when:**
+
 - Already comfortable with tmux workflows
 - Requiring specific tmux plugins
 - Working in environments where tmux is standard
@@ -374,26 +420,31 @@ plugins = [
 ### Common Issues
 
 #### Session Not Persisting
+
 1. **Check permissions**: Ensure zellij can write to config directory
 2. **Verify settings**: Confirm `session_serialization = true`
 3. **Storage space**: Check available disk space
 
 #### Keybindings Not Working
+
 1. **Mode awareness**: Ensure you're in correct mode
 2. **Check conflicts**: Verify no conflicting keybindings
 3. **Terminal compatibility**: Some terminals may intercept keys
 
 #### Layout Issues
+
 1. **Layout files**: Check layout file syntax
 2. **Permissions**: Verify layout files are readable
 3. **Plugin status**: Ensure layout plugins are loaded
 
 #### Performance Issues
+
 1. **Plugin optimization**: Disable unnecessary plugins
 2. **Terminal performance**: Check terminal emulator performance
 3. **Session cleanup**: Remove old unused sessions
 
 ### Debug Information
+
 ```bash
 # Show current configuration
 zellij setup --dump-config

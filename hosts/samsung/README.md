@@ -30,6 +30,7 @@ This directory contains the NixOS configuration for the Samsung laptop.
 ## Hardware
 
 The Razer laptop appears to have:
+
 - Intel CPU
 - Intel GPU
 - High-resolution display

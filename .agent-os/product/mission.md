@@ -17,12 +17,14 @@ NixOS Infrastructure Hub is a comprehensive, sophisticated private NixOS configu
 ### User Personas
 
 **Infrastructure Engineer** (30-50 years old)
+
 - **Role:** DevOps/Infrastructure Engineering
 - **Context:** Managing complex multi-host NixOS infrastructure with advanced monitoring and automation
 - **Pain Points:** Configuration drift, inconsistent environments, manual deployment processes, lack of comprehensive monitoring
 - **Goals:** Declarative infrastructure, automated deployments, comprehensive observability, reproducible environments
 
 **NixOS Community Member** (25-45 years old)
+
 - **Role:** Software Engineer/System Administrator
 - **Context:** Looking for advanced NixOS configuration patterns and modular architecture examples
 - **Pain Points:** Complex NixOS configurations, lack of advanced examples, monitoring setup complexity

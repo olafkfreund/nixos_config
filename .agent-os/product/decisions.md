@@ -42,6 +42,7 @@ NixOS provides the ideal foundation for declarative infrastructure with immutabl
 ### Consequences
 
 **Positive:**
+
 - Declarative infrastructure with zero configuration drift
 - Reproducible environments across all hosts
 - Advanced monitoring and observability capabilities
@@ -50,6 +51,7 @@ NixOS provides the ideal foundation for declarative infrastructure with immutabl
 - Comprehensive automation reducing operational overhead
 
 **Negative:**
+
 - Steep learning curve for NixOS-specific patterns
 - Complex build times for large configuration changes
 - Limited ecosystem compared to traditional tools
@@ -78,12 +80,14 @@ Feature flags enable selective module deployment based on host capabilities and 
 ### Consequences
 
 **Positive:**
+
 - Consistent configuration patterns across all modules
 - Reduced resource usage through selective feature deployment
 - Prevention of configuration conflicts through validation
 - Easier maintenance and testing of individual components
 
 **Negative:**
+
 - Increased complexity in module development
 - Learning curve for understanding feature dependencies
 - Potential performance overhead in validation logic
@@ -110,12 +114,14 @@ Unified interface prevents vendor lock-in while enabling experimentation with di
 ### Consequences
 
 **Positive:**
+
 - Intelligent infrastructure optimization and suggestions
 - Reduced operational overhead through automation
 - Future-proofing with multiple AI provider support
 - Enhanced troubleshooting capabilities
 
 **Negative:**
+
 - Additional complexity in configuration management
 - Potential security concerns with API key management
 - Resource usage for local AI model deployment
@@ -143,12 +149,14 @@ Prometheus/Grafana provides enterprise-grade monitoring with excellent NixOS int
 ### Consequences
 
 **Positive:**
+
 - Proactive identification of performance issues and resource constraints
 - Historical data for capacity planning and optimization
 - Automated alerting for critical infrastructure problems
 - Performance baselines for measuring optimization effectiveness
 
 **Negative:**
+
 - Additional resource usage for monitoring infrastructure
 - Complexity in configuring and maintaining monitoring stack
 - Learning curve for Prometheus/Grafana administration
@@ -176,12 +184,14 @@ Hardware-specific installers ensure optimal configuration for each host type. Au
 ### Consequences
 
 **Positive:**
+
 - Rapid deployment and recovery capabilities
 - Reduced human error in installation processes
 - Consistent configuration deployment across hosts
 - Enhanced disaster recovery preparedness
 
 **Negative:**
+
 - Additional maintenance overhead for installer images
 - Storage requirements for multiple installer variants
 - Complexity in maintaining hardware-specific configurations

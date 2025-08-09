@@ -39,14 +39,14 @@ services.flaresolverr = {
   sessionTtl = 300000;           # 5 minutes session timeout
   browserTimeout = 60000;        # 1 minute browser timeout
   headless = true;               # Run in headless mode
-  
+
   # Custom environment variables
   extraEnvironment = {
     PROMETHEUS_ENABLED = "true";
     PROMETHEUS_PORT = "8192";
     CUSTOM_VAR = "value";
   };
-  
+
   # Security settings
   user = "flaresolverr";
   group = "flaresolverr";
@@ -76,12 +76,12 @@ services.flaresolverr = {
   port = 8191;
   logLevel = "info";
   openFirewall = true;
-  
+
   extraEnvironment = {
     PROMETHEUS_ENABLED = "true";
     PROMETHEUS_PORT = "8192";
   };
-  
+
   # Performance tuning
   sessionTtl = 600000;           # 10 minutes
   browserTimeout = 30000;        # 30 seconds
@@ -96,7 +96,7 @@ services.flaresolverr = {
   host = "127.0.0.1";
   port = 8191;
   logLevel = "info";
-  
+
   # Optimized for media automation
   sessionTtl = 900000;           # 15 minutes
   browserTimeout = 45000;        # 45 seconds
@@ -177,6 +177,7 @@ services.flaresolverr = {
 ### Resource Limits
 
 The service includes default resource limits:
+
 - Memory: 2GB maximum
 - CPU: 200% (2 cores)
 - Tasks: 1024 maximum

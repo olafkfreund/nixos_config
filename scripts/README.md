@@ -9,17 +9,20 @@ This directory contains utility scripts for managing, testing, and working with 
 Comprehensive validation suite for NixOS configurations.
 
 **Usage:**
+
 ```bash
 ./validate-config.sh [OPTIONS]
 ```
 
 **Options:**
+
 - `-h, --help`: Show help message
 - `-t, --timeout N`: Set timeout for tests (default: 300 seconds)
 - `-q, --quick`: Run quick validation (skip time-consuming tests)
 - `-v, --verbose`: Enable verbose output
 
 **Features:**
+
 - Tests flake validity and syntax
 - Validates all host configurations build
 - Tests Home Manager configurations
@@ -32,22 +35,26 @@ Comprehensive validation suite for NixOS configurations.
 Automated CI/CD testing pipeline for continuous integration.
 
 **Usage:**
+
 ```bash
 ./ci-test.sh [OPTIONS]
 ```
 
 **Options:**
+
 - `-j, --jobs N`: Number of parallel jobs (default: 4)
 - `-t, --timeout N`: Timeout per test in seconds (default: 600)
 - `-q, --quick`: Quick mode (reduced test coverage)
 - `-v, --verbose`: Verbose output
 
 **Environment Variables:**
+
 - `CI_SKIP_PERFORMANCE`: Skip performance regression tests
 - `CI_SKIP_HOME_MANAGER`: Skip Home Manager tests
 - `CI_HOSTS`: Override host list (comma-separated)
 
 **Features:**
+
 - Parallel test execution
 - Performance regression testing
 - Comprehensive reporting
@@ -59,11 +66,13 @@ Automated CI/CD testing pipeline for continuous integration.
 Test individual NixOS modules and their dependencies.
 
 **Usage:**
+
 ```bash
 ./test-modules.sh [modules|home|specific <path>|docs]
 ```
 
 **Examples:**
+
 ```bash
 ./test-modules.sh modules           # Test all system modules
 ./test-modules.sh home              # Test Home Manager modules
@@ -72,6 +81,7 @@ Test individual NixOS modules and their dependencies.
 ```
 
 **Features:**
+
 - Individual module testing
 - Dependency checking
 - Documentation validation
@@ -82,11 +92,13 @@ Test individual NixOS modules and their dependencies.
 Performance benchmarking and optimization testing.
 
 **Usage:**
+
 ```bash
 ./performance-test.sh [build-times|memory|eval|parallel|cache|full]
 ```
 
 **Test Types:**
+
 - `build-times`: Measure build times for all hosts
 - `memory`: Monitor memory usage during builds
 - `eval`: Test flake evaluation performance
@@ -95,6 +107,7 @@ Performance benchmarking and optimization testing.
 - `full`: Comprehensive performance suite
 
 **Features:**
+
 - Multi-run averaging
 - Memory monitoring
 - Cache efficiency analysis
@@ -107,11 +120,13 @@ Performance benchmarking and optimization testing.
 Quick integration test for the testing framework itself.
 
 **Usage:**
+
 ```bash
 ./integration-test.sh
 ```
 
 **Features:**
+
 - Validates all testing scripts
 - Checks Justfile syntax
 - Tests critical commands
@@ -124,6 +139,7 @@ Quick integration test for the testing framework itself.
 Checks for updates to your NixOS flake inputs and displays them in a table format.
 
 **Usage:**
+
 ```bash
 ./check-nixos-updates.sh
 ```
@@ -175,6 +191,7 @@ sudo ./toggle-vfio.sh 0000:01:00.0 amdgpu
 ```
 
 **How it works:**
+
 1. Identifies the current driver binding for the specified device
 2. Unbinds the device from its current driver
 3. Updates driver IDs in the sysfs interface
@@ -182,6 +199,7 @@ sudo ./toggle-vfio.sh 0000:01:00.0 amdgpu
 5. Verifies and displays the result
 
 **Notes:**
+
 - Requires root permissions due to sysfs modifications
 - You may need to restart related services after driver switching
 - For GPUs, you might need to restart your display server after switching back to the host
@@ -189,6 +207,7 @@ sudo ./toggle-vfio.sh 0000:01:00.0 amdgpu
 ## Adding New Scripts
 
 When adding new scripts to this directory:
+
 1. Ensure they follow similar structure and error handling patterns
 2. Add documentation to this README.md
 3. Make your scripts executable with `chmod +x script-name.sh`
@@ -213,6 +232,7 @@ echo "0000:01:00.0" > /sys/bus/pci/drivers/amdgpu/bind   # For AMD GPU
 # OR
 echo "0000:01:00.0" > /sys/bus/pci/drivers/nvidia/bind   # For NVIDIA GPU
 ```
+
 ```bash
 # Assuming device PCI address is 0000:01:00.0
 # 1. Unbind from current driver (e.g., amdgpu)

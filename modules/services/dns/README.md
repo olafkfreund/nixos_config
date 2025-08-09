@@ -20,14 +20,14 @@ Enable secure DNS in your host configuration:
   services.secure-dns = {
     enable = true;
     dnssec = "true";  # Can be "true", "false", or "allow-downgrade"
-    
+
     # Configure your preferred DNS providers
     fallbackProviders = [
       "1.1.1.1#cloudflare-dns.com"  # Cloudflare
       "8.8.8.8#dns.google"          # Google
       "9.9.9.9#dns.quad9.net"       # Quad9 (filtered for security)
     ];
-    
+
     # Whether to point system nameservers to systemd-resolved's stub resolver
     useStubResolver = true;
   };
@@ -51,7 +51,7 @@ After enabling the module and rebuilding your system, you can verify that DNS ov
 # Check systemd-resolved status
 resolvectl status
 
-# Test a DNS lookup 
+# Test a DNS lookup
 resolvectl query nixos.org
 ```
 
@@ -70,12 +70,12 @@ If DNS resolution isn't working:
 
 Here are some popular DNS providers that support DoT:
 
-| Provider | IP Address | DoT Hostname |
-|----------|------------|-------------|
-| Cloudflare | 1.1.1.1 | cloudflare-dns.com |
-| Google | 8.8.8.8 | dns.google |
-| Quad9 | 9.9.9.9 | dns.quad9.net |
-| AdGuard | 94.140.14.14 | dns.adguard.com |
+| Provider      | IP Address      | DoT Hostname                          |
+| ------------- | --------------- | ------------------------------------- |
+| Cloudflare    | 1.1.1.1         | cloudflare-dns.com                    |
+| Google        | 8.8.8.8         | dns.google                            |
+| Quad9         | 9.9.9.9         | dns.quad9.net                         |
+| AdGuard       | 94.140.14.14    | dns.adguard.com                       |
 | CleanBrowsing | 185.228.168.168 | security-filter-dns.cleanbrowsing.org |
 
 ## Further Customization
