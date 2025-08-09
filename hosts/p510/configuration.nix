@@ -336,6 +336,12 @@ in
   services.ollama.acceleration = vars.acceleration;
   hardware.nvidia-container-toolkit.enable = true;
 
+  # Agenix identity configuration - specify where to find decryption keys
+  age.identityPaths = [
+    "/etc/ssh/ssh_host_ed25519_key" # System host key
+    "/home/olafkfreund/.ssh/id_ed25519" # User key
+  ];
+
   nixpkgs.config = {
     allowBroken = true;
     permittedInsecurePackages = [ "olm-3.2.16" "dotnet-sdk-6.0.428" "python3.12-youtube-dl-2021.12.17" ];

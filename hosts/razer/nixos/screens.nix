@@ -5,7 +5,7 @@ in
 {
   home-manager.extraSpecialArgs = {
     vars = {
-      hostName = vars.hostName;
+      inherit (vars) hostName;
       class = "laptop";
       screen = {
         name = "eDP-1";

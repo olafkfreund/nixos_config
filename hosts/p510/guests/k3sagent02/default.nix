@@ -15,25 +15,46 @@ in
   networking.hostName = "k3sagent02";
   environment.noXlibs = false;
 
-  services.openssh.enable = true;
-  services.openssh.permitRootLogin = "yes";
+  services = {
+    openssh = {
+      enable = true;
+      permitRootLogin = "yes";
+    };
 
-  systemd.network.enable = true;
-  systemd.network.networks."20-tap" = {
-    matchConfig.Type = "ether";
-    matchConfig.MACAddress = "5E:6D:F8:D1:E8:2A";
-    networkConfig = {
-      Address = [ "192.168.1.203/24" ];
-      Gateway = "192.168.1.254";
-      DNS = [ "8.8.8.8" "1.1.1.1" ];
-      IPv6AcceptRA = true;
-      DHCP = "no";
+    resolved = {
+      enable = true;
+      extraConfig = ''
+        MulticastDNS=true
+      '';
+    };
+
+    k3s = {
+      enable = true;
+      role = "server";
+      extraFlags = toString [
+        "--disable-cloud-controller"
+        "--disable=traefik"
+        "--disable=servicelb"
+        "--disable=local-storage"
+      ];
+      token = k3sToken;
     };
   };
-  services.resolved.enable = true;
-  services.resolved.extraConfig = ''
-    MulticastDNS=true
-  '';
+
+  systemd.network = {
+    enable = true;
+    networks."20-tap" = {
+      matchConfig.Type = "ether";
+      matchConfig.MACAddress = "5E:6D:F8:D1:E8:2A";
+      networkConfig = {
+        Address = [ "192.168.1.203/24" ];
+        Gateway = "192.168.1.254";
+        DNS = [ "8.8.8.8" "1.1.1.1" ];
+        IPv6AcceptRA = true;
+        DHCP = "no";
+      };
+    };
+  };
 
   networking.extraHosts = ''    :q
         192.168.1.201 k3sserver.local
@@ -42,18 +63,6 @@ in
   '';
 
   time.timeZone = "Europe/London";
-
-  services.k3s = {
-    enable = true;
-    role = "server";
-    extraFlags = toString [
-      "--disable-cloud-controller"
-      "--disable=traefik"
-      "--disable=servicelb"
-      "--disable=local-storage"
-    ];
-    token = k3sToken;
-  };
   environment.systemPackages = with pkgs; [
     kubectl
     k3s

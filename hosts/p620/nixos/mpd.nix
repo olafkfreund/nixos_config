@@ -1,5 +1,4 @@
-{ ...
-}: {
+_: {
   services.mpd = {
     enable = false;
     musicDirectory = "/mnt/media/Media/Music";

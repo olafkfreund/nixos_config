@@ -1,5 +1,4 @@
-{ ...
-}: {
+_: {
   # Increase resource limits for professional workloads
   security.pam.loginLimits = [
     {

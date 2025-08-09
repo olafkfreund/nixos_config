@@ -32,12 +32,11 @@ in
     fonts.sizes = vars.theme.font.sizes;
 
     # Opacity settings
-    opacity = vars.theme.opacity;
+    inherit (vars.theme) opacity;
 
     cursor = {
-      name = vars.theme.cursor.name;
+      inherit (vars.theme.cursor) name size;
       package = pkgs.bibata-cursors;
-      size = vars.theme.cursor.size;
     };
 
     # Target-specific configuration

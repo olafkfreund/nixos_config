@@ -38,7 +38,13 @@
           modules = [
             microvm.nixosModules.microvm
             {
-              networking.hostName = "k3s-master";
+              networking = {
+                hostName = "k3s-master";
+                firewall.enable = false;
+                useDHCP = false;
+                interfaces.eth0.useDHCP = true;
+              };
+
               users.users.root.password = "";
               users.users.${username} = {
                 isNormalUser = true;
@@ -59,10 +65,6 @@
                 ];
                 token = k3sToken;
               };
-
-              networking.firewall.enable = false;
-              networking.useDHCP = false;
-              networking.interfaces.eth0.useDHCP = true;
 
               nix.settings.trusted-users = [ "root" username ];
 
@@ -111,7 +113,13 @@
           modules = [
             microvm.nixosModules.microvm
             {
-              networking.hostName = "k3s-agent";
+              networking = {
+                hostName = "k3s-agent";
+                firewall.enable = false;
+                useDHCP = false;
+                interfaces.eth0.useDHCP = true;
+              };
+
               users.users.root.password = "";
               users.users.${username} = {
                 isNormalUser = true;
@@ -127,10 +135,6 @@
                 serverAddr = "https://k3s-master:6443"; # Adjust if necessary
                 token = k3sToken;
               };
-
-              networking.firewall.enable = false;
-              networking.useDHCP = false;
-              networking.interfaces.eth0.useDHCP = true;
 
               nix.settings.trusted-users = [ "root" username ];
 

@@ -106,41 +106,47 @@ in
       pkgs.curl
     ];
 
-    # Create the systemd service
-    systemd.services.nixpkgs-monitor = {
-      description = "NixOS Nixpkgs Update Monitor";
-      wants = [ "network-online.target" ];
-      after = [ "network-online.target" ];
+    # Create systemd configuration
+    systemd = {
+      services.nixpkgs-monitor = {
+        description = "NixOS Nixpkgs Update Monitor";
+        wants = [ "network-online.target" ];
+        after = [ "network-online.target" ];
 
-      serviceConfig = {
-        Type = "oneshot";
-        User = cfg.user;
-        Group = "users";
-        ExecStart = "${monitorScript}/bin/nixpkgs-monitor";
+        serviceConfig = {
+          Type = "oneshot";
+          User = cfg.user;
+          Group = "users";
+          ExecStart = "${monitorScript}/bin/nixpkgs-monitor";
 
-        # Security settings
-        PrivateTmp = true;
-        ProtectKernelTunables = true;
-        ProtectControlGroups = true;
-        RestrictSUIDSGID = true;
-        NoNewPrivileges = true;
+          # Security settings
+          PrivateTmp = true;
+          ProtectKernelTunables = true;
+          ProtectControlGroups = true;
+          RestrictSUIDSGID = true;
+          NoNewPrivileges = true;
 
-        # Logging
-        StandardOutput = mkIf cfg.logging.enable "journal";
-        StandardError = mkIf cfg.logging.enable "journal";
+          # Logging
+          StandardOutput = mkIf cfg.logging.enable "journal";
+          StandardError = mkIf cfg.logging.enable "journal";
+        };
       };
-    };
 
-    # Create the systemd timer
-    systemd.timers.nixpkgs-monitor = {
-      description = "Timer for NixOS Nixpkgs Update Monitor";
-      wantedBy = [ "timers.target" ];
+      timers.nixpkgs-monitor = {
+        description = "Timer for NixOS Nixpkgs Update Monitor";
+        wantedBy = [ "timers.target" ];
 
-      timerConfig = {
-        OnCalendar = cfg.schedule;
-        Persistent = true;
-        RandomizedDelaySec = "5m"; # Random delay to avoid load spikes
+        timerConfig = {
+          OnCalendar = cfg.schedule;
+          Persistent = true;
+          RandomizedDelaySec = "5m"; # Random delay to avoid load spikes
+        };
       };
+
+      tmpfiles.rules = mkIf cfg.logging.enable [
+        "d /var/log 0755 root root -"
+        "f /var/log/nixpkgs-monitor.log 0644 ${cfg.user} users -"
+      ];
     };
 
     # Log rotation
@@ -156,10 +162,5 @@ in
       };
     };
 
-    # Create log directory
-    systemd.tmpfiles.rules = mkIf cfg.logging.enable [
-      "d /var/log 0755 root root -"
-      "f /var/log/nixpkgs-monitor.log 0644 ${cfg.user} users -"
-    ];
   };
 }

@@ -1,5 +1,4 @@
-{ ...
-}: {
+_: {
   # Host-specific features configuration
   # This replaces all the individual lib.mkForce calls with a unified approach
   features = {
