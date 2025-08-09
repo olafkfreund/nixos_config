@@ -1,15 +1,17 @@
 { config
-, # Add config to the function parameters
-  pkgs
+, pkgs
 , lib
 , hostUsers
+, hostTypes
 , ...
 }:
 let
   vars = import ./variables.nix;
 in
 {
-  imports = [
+  # Use workstation template and add P620-specific modules
+  imports = hostTypes.workstation.imports ++ [
+    # Hardware-specific imports
     ./nixos/hardware-configuration.nix
     ./nixos/screens.nix
     ./nixos/power.nix
@@ -24,16 +26,8 @@ in
     ./nixos/memory.nix
     ./nixos/load.nix
     ./themes/stylix.nix
-    # Modular imports - testing new approach
-    ../../modules/core.nix
-    ../../modules/development.nix
-    ../../modules/desktop.nix
-    ../../modules/virtualization.nix
-    ../../modules/monitoring.nix
-    ../../modules/performance.nix
-    ../../modules/email.nix
-    ../../modules/cloud.nix
-    ../../modules/programs.nix
+
+    # P620-specific additional modules
     ../../modules/development/default.nix
     ../common/hyprland.nix
     ../../modules/security/secrets.nix
@@ -138,18 +132,13 @@ in
     };
   };
 
-  # Configure AI providers directly
-  ai.providers = {
+  # Use AI provider defaults with workstation profile
+  aiDefaults = {
     enable = true;
-    defaultProvider = "openai";
-    enableFallback = true;
-
-    # Enable specific providers
-    openai.enable = true;
-    anthropic.enable = true;
-    gemini.enable = true;
-    ollama.enable = true;
+    profile = "workstation";
   };
+  # P620-specific override: use OpenAI as default instead of Anthropic
+  ai.providers.defaultProvider = "openai";
 
   # AI analysis services removed - were non-functional and consuming resources
   # ai.analysis = {

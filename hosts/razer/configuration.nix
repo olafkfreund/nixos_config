@@ -2,14 +2,17 @@
 , config
 , lib
 , hostUsers
+, hostTypes
 , ...
 }:
 let
   vars = import ./variables.nix;
 in
 {
-  imports = [
-    ./nixos/hardware-configuration.nix # Docker configuration
+  # Use laptop template and add Razer-specific modules
+  imports = hostTypes.laptop.imports ++ [
+    # Hardware-specific imports
+    ./nixos/hardware-configuration.nix
     ./nixos/screens.nix
     ./nixos/power.nix
     ./nixos/boot.nix
@@ -23,16 +26,8 @@ in
     ./nixos/laptop.nix
     ./nixos/memory.nix
     ./themes/stylix.nix
-    # Modular imports - laptop needs full desktop experience
-    ../../modules/core.nix
-    ../../modules/development.nix
-    ../../modules/desktop.nix
-    ../../modules/cloud.nix
-    ../../modules/programs.nix
-    ../../modules/virtualization.nix
-    ../../modules/monitoring.nix
-    ../../modules/email.nix
-    ../../modules/performance.nix
+
+    # Razer-specific additional modules
     ../../modules/development/default.nix
     ../common/hyprland.nix
     ../../modules/security/secrets.nix
@@ -84,17 +79,10 @@ in
     nameservers = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
   };
 
-  # Configure AI providers directly
-  ai.providers = {
+  # Use AI provider defaults with laptop profile (disables Ollama for battery life)
+  aiDefaults = {
     enable = true;
-    defaultProvider = "anthropic";
-    enableFallback = true;
-
-    # Enable specific providers
-    openai.enable = true;
-    anthropic.enable = true;
-    gemini.enable = true;
-    ollama.enable = true;
+    profile = "laptop";
   };
 
   # AI analysis services removed - were non-functional and consuming resources

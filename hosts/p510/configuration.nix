@@ -2,14 +2,17 @@
 , pkgs
 , lib
 , hostUsers
+, hostTypes
 , ...
 }:
 let
   vars = import ./variables.nix;
 in
 {
-  imports = [
-    ./nixos/hardware-configuration.nix # Docker configuration
+  # Use workstation template and add P510-specific modules
+  imports = hostTypes.workstation.imports ++ [
+    # Hardware-specific imports
+    ./nixos/hardware-configuration.nix
     ./nixos/power.nix
     ./nixos/boot.nix
     ./nixos/nvidia.nix
@@ -23,16 +26,8 @@ in
     ./nixos/plex.nix
     ./flaresolverr.nix
     ./themes/stylix.nix
-    # Modular imports - media server needs all features for feature-impl compatibility
-    ../../modules/core.nix
-    ../../modules/monitoring.nix
-    ../../modules/email.nix
-    ../../modules/development.nix
-    ../../modules/performance.nix
-    ../../modules/cloud.nix
-    ../../modules/programs.nix
-    ../../modules/desktop.nix
-    ../../modules/virtualization.nix
+
+    # P510-specific additional modules (media server)
     ../../modules/development/default.nix
     ../common/hyprland.nix
     ../../modules/secrets/api-keys.nix
@@ -71,17 +66,10 @@ in
     dnssec = lib.mkForce "false"; # Resolve DNSSEC conflict
   };
 
-  # Configure AI providers directly
-  ai.providers = {
+  # Use AI provider defaults with workstation profile
+  aiDefaults = {
     enable = true;
-    defaultProvider = "anthropic";
-    enableFallback = true;
-
-    # Enable specific providers
-    openai.enable = true;
-    anthropic.enable = true;
-    gemini.enable = true;
-    ollama.enable = true;
+    profile = "workstation";
   };
 
   # AI analysis services removed - were non-functional and consuming resources

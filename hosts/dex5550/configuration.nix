@@ -2,28 +2,24 @@
 , pkgs
 , lib
 , hostUsers
+, hostTypes
 , ...
 }:
 let
   vars = import ./variables.nix;
 in
 {
-  imports = [
+  # Use server template and add DEX5550-specific modules
+  imports = hostTypes.server.imports ++ [
+    # Hardware-specific imports
     ./nixos/hardware-configuration.nix
     ./nixos/power.nix
     ./nixos/boot.nix
     ./nixos/i18n.nix
     ./nixos/n8n.nix
     # ./nixos/loki.nix  # Temporarily commented for testing
-    # Modular imports - monitoring server (headless configuration)
-    ../../modules/core.nix
-    ../../modules/monitoring.nix
-    ../../modules/email.nix
-    ../../modules/development.nix
-    ../../modules/performance.nix
-    ../../modules/cloud.nix
-    ../../modules/programs.nix # Re-enabled - needed for module structure, droidcam disabled via features
-    # ../../modules/desktop.nix       # Removed - Desktop/GUI components not needed on server
+
+    # DEX5550-specific additional modules
     ../../modules/virtualization.nix
     ../../modules/development/default.nix
     ../../modules/secrets/api-keys.nix
@@ -139,17 +135,10 @@ in
     };
   };
 
-  # Configure AI providers directly - lightweight config for low-power system
-  ai.providers = {
+  # Use AI provider defaults with server profile (automatically disables Ollama)
+  aiDefaults = {
     enable = true;
-    defaultProvider = "anthropic";
-    enableFallback = true;
-
-    # Enable only cloud providers (no local Ollama to save resources)
-    openai.enable = true;
-    anthropic.enable = true;
-    gemini.enable = true;
-    ollama.enable = false; # Disabled on low-power system
+    profile = "server";
   };
 
   # AI analysis services removed - were non-functional and consuming resources

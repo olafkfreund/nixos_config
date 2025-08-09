@@ -187,6 +187,9 @@
       # Get all users for a host
       getHostUsers = host: hostUsers.${host} or [ "olafkfreund" ];
 
+      # Host type templates for configuration reduction
+      hostTypes = import ./lib/hostTypes.nix { inherit (nixpkgs) lib; };
+
       # Helper function for package imports
       mkPkgs = _pkgs: {
         system = "x86_64-linux";
@@ -221,7 +224,7 @@
           specialArgs = {
             pkgs-stable = import nixpkgs-stable (mkPkgs nixpkgs-stable);
             pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable);
-            inherit inputs host;
+            inherit inputs host hostTypes;
             username = primaryUser; # Primary user for backward compatibility
             hostUsers = allUsers; # All users for this host
           };
