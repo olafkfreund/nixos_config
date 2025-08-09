@@ -9,19 +9,28 @@ with lib; let
 in
 {
   options.features.packages = {
-    monitoringTools = mkEnableOption "Core monitoring tools (curl, jq, bc, python3)";
+    coreTools = mkEnableOption "Core shared tools (curl, jq, bc, python3, vim, git)";
+    monitoringTools = mkEnableOption "Core monitoring tools (requires coreTools)";
     extendedMonitoringTools = mkEnableOption "Extended monitoring tools with network utilities";
     networkTools = mkEnableOption "Network analysis tools";
-    basicDevTools = mkEnableOption "Basic development tools (vim, git, curl, wget)";
+    basicDevTools = mkEnableOption "Basic development tools (wget, requires coreTools)";
     containerDevTools = mkEnableOption "Container/K8s development tools";
     extendedDevTools = mkEnableOption "Extended development environment tools";
-    scriptTools = mkEnableOption "Script processing dependencies";
+    scriptTools = mkEnableOption "Script processing dependencies (requires coreTools)";
     systemScriptTools = mkEnableOption "System administration script tools";
   };
 
   config = mkMerge [
+    # Core tools - install these first to avoid collisions
+    (mkIf config.features.packages.coreTools {
+      environment.systemPackages = commonDeps.coreTools;
+    })
+
+    # Additional tools that depend on or extend core tools
     (mkIf config.features.packages.monitoringTools {
       environment.systemPackages = commonDeps.monitoringTools;
+      # Automatically enable core tools dependency
+      features.packages.coreTools = mkDefault true;
     })
     (mkIf config.features.packages.extendedMonitoringTools {
       environment.systemPackages = commonDeps.extendedMonitoringTools;
@@ -31,6 +40,8 @@ in
     })
     (mkIf config.features.packages.basicDevTools {
       environment.systemPackages = commonDeps.basicDevTools;
+      # Automatically enable core tools dependency
+      features.packages.coreTools = mkDefault true;
     })
     (mkIf config.features.packages.containerDevTools {
       environment.systemPackages = commonDeps.containerDevTools;
@@ -40,6 +51,8 @@ in
     })
     (mkIf config.features.packages.scriptTools {
       environment.systemPackages = commonDeps.scriptTools;
+      # Automatically enable core tools dependency
+      features.packages.coreTools = mkDefault true;
     })
     (mkIf config.features.packages.systemScriptTools {
       environment.systemPackages = commonDeps.systemScriptTools;

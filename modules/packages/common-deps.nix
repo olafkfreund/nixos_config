@@ -1,19 +1,23 @@
 # Common dependency sets for reducing package duplication
+# Restructured to eliminate overlapping packages and collisions
 { pkgs }: {
-  # Core monitoring tools used by all exporters
-  monitoringTools = with pkgs; [
+  # Core shared tools (used by multiple categories)
+  coreTools = with pkgs; [
     curl # HTTP API requests
     jq # JSON processing
     bc # Mathematical calculations
     python3 # Script execution
+    vim # Text editor
+    git # Version control
   ];
 
-  # Extended monitoring tools with network utilities
+  # Core monitoring tools used by all exporters
+  monitoringTools = with pkgs; [
+    # No overlap - core tools handled separately
+  ];
+
+  # Extended monitoring tools with network utilities (only additional tools)
   extendedMonitoringTools = with pkgs; [
-    curl
-    jq
-    bc
-    python3
     netcat-gnu # Network connectivity testing
     gawk # Text processing
     coreutils # Basic utilities
@@ -29,11 +33,8 @@
     procps # Process utilities
   ];
 
-  # Basic development tools for all environments
+  # Basic development tools (only additional tools beyond core)
   basicDevTools = with pkgs; [
-    vim # Text editor
-    git # Version control
-    curl # HTTP client
     wget # File downloader
   ];
 
@@ -45,30 +46,23 @@
     kubernetes-helm
   ];
 
-  # Extended development environment tools
+  # Extended development environment tools (only additional tools)
   extendedDevTools = with pkgs; [
-    vim
-    git
-    curl
-    wget
     tmux # Terminal multiplexer
     htop # Process monitor
     iftop # Network monitor
     tree # Directory listing
   ];
 
-  # Script processing dependencies
+  # Script processing dependencies (only additional tools beyond core)
   scriptTools = with pkgs; [
-    bc # Mathematical calculations
-    jq # JSON processing
     gawk # Text processing
     gnugrep # Text searching
     gnused # Text manipulation
   ];
 
-  # System administration script tools
+  # System administration script tools (only additional tools)
   systemScriptTools = with pkgs; [
-    bc
     smartmontools # Hardware monitoring
     yad # GUI dialogs
     procps # Process utilities
