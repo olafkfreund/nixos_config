@@ -29,20 +29,32 @@ with lib; {
       networking = {
         networkmanager = {
           enable = true;
+          dns = "default"; # Use NetworkManager's built-in DNS instead of systemd-resolved
           # Add connection configuration for stability
-          connectionConfig = mkIf config.networking.stableConnection.enable {
-            "connection.stable-id" = "\${CONNECTION}/\${BOOT}";
-            "connection.wait-device-timeout" = config.networking.stableConnection.interfaceSwitchDelayMs;
-            "connection.mdns" = 2; # Enable mDNS
+          settings = mkIf config.networking.stableConnection.enable {
+            main = {
+              dns = "default";
+            };
+            connection = {
+              stable-id = "\${CONNECTION}/\${BOOT}";
+              wait-device-timeout = toString config.networking.stableConnection.interfaceSwitchDelayMs;
+            };
           };
-          # Better integration with systemd-resolved when using NetworkManager
-          dns = mkIf config.services.resolved.enable "systemd-resolved";
         };
         useDHCP = false;
         useNetworkd = false;
+        useHostResolvConf = false;
         firewall.enable = false;
         nftables.enable = true;
         timeServers = [ "pool.ntp.org" ];
+      };
+
+      # Disable systemd-resolved for desktop profile - NetworkManager handles DNS
+      services.resolved.enable = lib.mkDefault false;
+      
+      # Disable network wait services for faster boot
+      systemd.services = {
+        NetworkManager-wait-online.enable = lib.mkDefault false;
       };
     })
 

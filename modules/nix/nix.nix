@@ -37,21 +37,29 @@
     "p620-nix-serve:mZR6o5z5KcWeu4PVXgjHA7vb1sHQgRdWMKQt8x3a4rU="
   ];
 
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
-  nixpkgs.config.allowInsecure = true;
-  nixpkgs.config.joypixels.acceptLicense = true;
-  nixpkgs.config.allowUnfreePredicate = pkg:
-    builtins.elem (lib.getName pkg) [
-      "slack-4.36.140"
+  # Package permissions - security-focused configuration
+  nixpkgs.config = {
+    # Allow unfree packages globally (needed for many essential packages)
+    allowUnfree = true;
+    joypixels.acceptLicense = true;
+    
+    # Specific unfree packages (if needed for additional control)
+    allowUnfreePredicate = pkg:
+      builtins.elem (lib.getName pkg) [
+        "slack-4.36.140"
+      ];
+    
+    # SECURITY: Only allow specific insecure packages, never global allowInsecure
+    # Remove allowInsecure = true for better security
+    permittedInsecurePackages = [
+      "electron-25.9.0"     # Required by some Electron apps
+      "electron-29.4.6"     # Required by some Electron apps  
+      "nix-2.15.3"          # Required for compatibility
+      "jitsi-meet-1.0.8043" # Required for video conferencing
+      "olm-3.2.16"          # Required for Matrix client
+      "python3.12-youtube-dl-2021.12.17" # Required for media tools
     ];
-  nixpkgs.config.permittedInsecurePackages = [
-    "electron-25.9.0"
-    "electron-29.4.6"
-    "nix-2.15.3"
-    "jitsi-meet-1.0.8043"
-    "olm-3.2.16"
-  ];
+  };
   environment.systemPackages = with pkgs; [
     wget
     home-manager

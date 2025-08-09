@@ -226,8 +226,7 @@ in
       mcp.enable = true;
     };
 
-    # Use NetworkManager for DNS management - disable systemd-resolved
-    resolved.enable = lib.mkForce false;
+    # DNS management handled by networking profile
 
     # Centralized Logging - Send logs to DEX5550 Loki server
     promtail-logging = {

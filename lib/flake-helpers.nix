@@ -9,7 +9,14 @@ rec {
     inherit system overlays;
     config = {
       allowUnfree = true;
-      allowInsecure = true;
+      # SECURITY: Remove global allowInsecure - let individual systems specify permittedInsecurePackages
+      # allowInsecure = true; # REMOVED for security
+      
+      # Default permitted insecure packages that are commonly needed
+      permittedInsecurePackages = [
+        "olm-3.2.16"
+        "python3.12-youtube-dl-2021.12.17"
+      ];
     };
   };
 

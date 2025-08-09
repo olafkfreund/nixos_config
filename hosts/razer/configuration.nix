@@ -240,9 +240,6 @@ in
       mcp.enable = true;
     };
 
-    # Use NetworkManager for DNS management - disable systemd-resolved
-    resolved.enable = lib.mkForce false;
-
     # Centralized Logging - Send logs to DEX5550 Loki server
     promtail-logging = {
       enable = true;
@@ -288,11 +285,7 @@ in
   # networking.nameservers = vars.nameservers; # Commented out to use DHCP
 
   # CRITICAL: DNS Resolution Fix for Tailscale
-  # Ensure proper service ordering to prevent DNS conflicts
-  systemd.services = {
-    # Disable network wait services to improve boot time
-    NetworkManager-wait-online.enable = lib.mkForce false;
-  };
+  # Network profile handles service ordering automatically
 
   # Use standard NetworkManager for laptop - useNetworkd already set above
   networking.useHostResolvConf = false;
