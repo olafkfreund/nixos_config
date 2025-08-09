@@ -243,7 +243,7 @@ with lib; {
 
   # Systemd service overrides for better reliability
   systemd.services.n8n = {
-    wants = [ "postgresql.service" ];
+    wants = [ "postgresql.service" "network-online.target" ];
     after = [ "postgresql.service" "network-online.target" ];
 
     serviceConfig = {
