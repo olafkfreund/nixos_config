@@ -56,36 +56,45 @@ in
 
         # Hyprland-specific configuration
         (mkIf (cfg.backend == "hyprland") {
-          hyprland = {
-            default = [ "hyprland" "gtk" ];
-            "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
-          } // optionalAttrs cfg.enableScreencast {
-            "org.freedesktop.impl.portal.Screencast" = [ "hyprland" ];
-          };
+          hyprland =
+            {
+              default = [ "hyprland" "gtk" ];
+              "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
+            }
+            // optionalAttrs cfg.enableScreencast {
+              "org.freedesktop.impl.portal.Screencast" = [ "hyprland" ];
+            };
         })
 
         # Sway-specific configuration
         (mkIf (cfg.backend == "sway") {
-          sway = {
-            default = [ "wlr" "gtk" ];
-          } // optionalAttrs cfg.enableScreencast {
-            "org.freedesktop.impl.portal.Screencast" = [ "wlr" ];
-          };
+          sway =
+            {
+              default = [ "wlr" "gtk" ];
+            }
+            // optionalAttrs cfg.enableScreencast {
+              "org.freedesktop.impl.portal.Screencast" = [ "wlr" ];
+            };
         })
       ];
 
-      configPackages = with pkgs; [
-        xdg-desktop-portal-gtk
-        xdg-desktop-portal
-      ] ++ optionals (cfg.backend == "hyprland") [
-        xdg-desktop-portal-hyprland
-      ] ++ optionals (cfg.backend == "sway") [
-        xdg-desktop-portal-wlr
-      ] ++ optionals (cfg.backend == "gnome") [
-        xdg-desktop-portal-gnome
-      ] ++ optionals (cfg.backend == "kde") [
-        xdg-desktop-portal-kde
-      ];
+      configPackages = with pkgs;
+        [
+          xdg-desktop-portal-gtk
+          xdg-desktop-portal
+        ]
+        ++ optionals (cfg.backend == "hyprland") [
+          xdg-desktop-portal-hyprland
+        ]
+        ++ optionals (cfg.backend == "sway") [
+          xdg-desktop-portal-wlr
+        ]
+        ++ optionals (cfg.backend == "gnome") [
+          xdg-desktop-portal-gnome
+        ]
+        ++ optionals (cfg.backend == "kde") [
+          xdg-desktop-portal-kde
+        ];
     };
 
     # Optional environment variables

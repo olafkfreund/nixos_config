@@ -11,6 +11,7 @@ in
     polarity = "dark";
     targets = {
       chromium.enable = false;
+      qt.enable = true; # Enable Qt theming for consistent styling
     };
     fonts = {
       monospace = {

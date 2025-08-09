@@ -1,8 +1,10 @@
 # Automated Remediation System for AI Analysis Framework
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.ai.automatedRemediation;
 in
 {
@@ -73,15 +75,23 @@ in
         Type = "oneshot";
         User = "root";
         Environment = [
-          "PATH=${lib.makeBinPath (with pkgs; [ coreutils hostname systemd findutils gawk gnugrep gnused curl ])}"
+          "PATH=${lib.makeBinPath (with pkgs; [coreutils hostname systemd findutils gawk gnugrep gnused curl])}"
         ];
         ExecStart = pkgs.writeShellScript "ai-automated-remediation" ''
           #!/bin/bash
 
           # Configuration
           LOG_FILE="${cfg.notifications.logFile}"
-          SAFE_MODE="${if cfg.safeMode then "true" else "false"}"
-          SELF_HEALING="${if cfg.enableSelfHealing then "true" else "false"}"
+          SAFE_MODE="${
+            if cfg.safeMode
+            then "true"
+            else "false"
+          }"
+          SELF_HEALING="${
+            if cfg.enableSelfHealing
+            then "true"
+            else "false"
+          }"
           PROMETHEUS_URL="http://localhost:9090"
 
           # Ensure log directory exists
@@ -135,141 +145,141 @@ in
 
           # 1. Check and remediate disk space issues
           ${optionalString cfg.actions.diskCleanup ''
-          echo "[$(date)] Checking disk space issues..."
+            echo "[$(date)] Checking disk space issues..."
 
-          # Query disk usage from Prometheus
-          disk_usage=$(query_prometheus '100 * (1 - (node_filesystem_avail_bytes{fstype!="tmpfs",fstype!="ramfs",fstype!="squashfs",mountpoint="/"} / node_filesystem_size_bytes{fstype!="tmpfs",fstype!="ramfs",fstype!="squashfs",mountpoint="/"}))' | head -10)
+            # Query disk usage from Prometheus
+            disk_usage=$(query_prometheus '100 * (1 - (node_filesystem_avail_bytes{fstype!="tmpfs",fstype!="ramfs",fstype!="squashfs",mountpoint="/"} / node_filesystem_size_bytes{fstype!="tmpfs",fstype!="ramfs",fstype!="squashfs",mountpoint="/"}))' | head -10)
 
-          if [ -n "$disk_usage" ]; then
-            while IFS=':' read -r instance usage; do
-              usage_int=$(echo "$usage" | cut -d. -f1)
-              if [ "$usage_int" -gt 85 ]; then
-                send_notification "ALERT: Critical disk usage $usage% on $instance" "CRITICAL"
+            if [ -n "$disk_usage" ]; then
+              while IFS=':' read -r instance usage; do
+                usage_int=$(echo "$usage" | cut -d. -f1)
+                if [ "$usage_int" -gt 85 ]; then
+                  send_notification "ALERT: Critical disk usage $usage% on $instance" "CRITICAL"
 
-                # Execute emergency disk cleanup
-                execute_action "disk-cleanup" "Emergency disk cleanup on $instance" "
-                  nix-collect-garbage -d --delete-older-than 1d
-                  nix-store --optimise
-                  find /tmp -type f -atime +1 -delete 2>/dev/null || true
-                  find /var/tmp -type f -atime +1 -delete 2>/dev/null || true
-                  journalctl --vacuum-size=100M
-                  if command -v docker &> /dev/null; then
-                    docker system prune -f --volumes
-                  fi
-                "
-              elif [ "$usage_int" -gt 75 ]; then
-                send_notification "WARNING: High disk usage $usage% on $instance" "WARNING"
+                  # Execute emergency disk cleanup
+                  execute_action "disk-cleanup" "Emergency disk cleanup on $instance" "
+                    nix-collect-garbage -d --delete-older-than 1d
+                    nix-store --optimise
+                    find /tmp -type f -atime +1 -delete 2>/dev/null || true
+                    find /var/tmp -type f -atime +1 -delete 2>/dev/null || true
+                    journalctl --vacuum-size=100M
+                    if command -v docker &> /dev/null; then
+                      docker system prune -f --volumes
+                    fi
+                  "
+                elif [ "$usage_int" -gt 75 ]; then
+                  send_notification "WARNING: High disk usage $usage% on $instance" "WARNING"
 
-                # Execute preventive cleanup
-                execute_action "disk-cleanup" "Preventive disk cleanup on $instance" "
-                  nix-collect-garbage --delete-older-than 7d
-                  nix-store --optimise
-                  journalctl --vacuum-size=500M
-                "
-              fi
-            done <<< "$disk_usage"
-          fi
+                  # Execute preventive cleanup
+                  execute_action "disk-cleanup" "Preventive disk cleanup on $instance" "
+                    nix-collect-garbage --delete-older-than 7d
+                    nix-store --optimise
+                    journalctl --vacuum-size=500M
+                  "
+                fi
+              done <<< "$disk_usage"
+            fi
           ''}
 
           # 2. Check and remediate memory issues
           ${optionalString cfg.actions.memoryOptimization ''
-          echo "[$(date)] Checking memory issues..."
+            echo "[$(date)] Checking memory issues..."
 
-          # Query memory usage from Prometheus
-          memory_usage=$(query_prometheus '100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))' | head -10)
+            # Query memory usage from Prometheus
+            memory_usage=$(query_prometheus '100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))' | head -10)
 
-          if [ -n "$memory_usage" ]; then
-            while IFS=':' read -r instance usage; do
-              usage_int=$(echo "$usage" | cut -d. -f1)
-              if [ "$usage_int" -gt 90 ]; then
-                send_notification "ALERT: Critical memory usage $usage% on $instance" "CRITICAL"
+            if [ -n "$memory_usage" ]; then
+              while IFS=':' read -r instance usage; do
+                usage_int=$(echo "$usage" | cut -d. -f1)
+                if [ "$usage_int" -gt 90 ]; then
+                  send_notification "ALERT: Critical memory usage $usage% on $instance" "CRITICAL"
 
-                # Execute emergency memory cleanup
-                execute_action "memory-cleanup" "Emergency memory cleanup on $instance" "
-                  echo 3 > /proc/sys/vm/drop_caches
-                  echo 1 > /proc/sys/vm/compact_memory
+                  # Execute emergency memory cleanup
+                  execute_action "memory-cleanup" "Emergency memory cleanup on $instance" "
+                    echo 3 > /proc/sys/vm/drop_caches
+                    echo 1 > /proc/sys/vm/compact_memory
 
-                  # Restart memory-intensive services if self-healing is enabled
-                  if [ '$SELF_HEALING' = 'true' ]; then
-                    systemctl restart grafana || true
-                    systemctl restart prometheus || true
-                    systemctl restart chromadb || true
-                  fi
-                "
-              elif [ "$usage_int" -gt 80 ]; then
-                send_notification "WARNING: High memory usage $usage% on $instance" "WARNING"
+                    # Restart memory-intensive services if self-healing is enabled
+                    if [ '$SELF_HEALING' = 'true' ]; then
+                      systemctl restart grafana || true
+                      systemctl restart prometheus || true
+                      systemctl restart chromadb || true
+                    fi
+                  "
+                elif [ "$usage_int" -gt 80 ]; then
+                  send_notification "WARNING: High memory usage $usage% on $instance" "WARNING"
 
-                # Execute preventive memory optimization
-                execute_action "memory-optimization" "Preventive memory optimization on $instance" "
-                  echo 1 > /proc/sys/vm/drop_caches
-                "
-              fi
-            done <<< "$memory_usage"
-          fi
+                  # Execute preventive memory optimization
+                  execute_action "memory-optimization" "Preventive memory optimization on $instance" "
+                    echo 1 > /proc/sys/vm/drop_caches
+                  "
+                fi
+              done <<< "$memory_usage"
+            fi
           ''}
 
           # 3. Check and remediate service failures
           ${optionalString cfg.actions.serviceRestart ''
-          echo "[$(date)] Checking service health..."
+            echo "[$(date)] Checking service health..."
 
-          # Query service health from Prometheus
-          services_down=$(query_prometheus 'up{job!="prometheus"} == 0' | head -20)
+            # Query service health from Prometheus
+            services_down=$(query_prometheus 'up{job!="prometheus"} == 0' | head -20)
 
-          if [ -n "$services_down" ]; then
-            while IFS=':' read -r instance status; do
-              service_name=$(echo "$instance" | cut -d. -f1)
-              send_notification "ALERT: Service down: $service_name" "CRITICAL"
+            if [ -n "$services_down" ]; then
+              while IFS=':' read -r instance status; do
+                service_name=$(echo "$instance" | cut -d. -f1)
+                send_notification "ALERT: Service down: $service_name" "CRITICAL"
 
-              # Attempt service restart if self-healing is enabled
-              if [ "$SELF_HEALING" = "true" ]; then
-                case "$service_name" in
-                  *grafana*)
-                    execute_action "service-restart" "Restart Grafana service" "systemctl restart grafana"
-                    ;;
-                  *prometheus*)
-                    execute_action "service-restart" "Restart Prometheus service" "systemctl restart prometheus"
-                    ;;
-                  *chromadb*)
-                    execute_action "service-restart" "Restart ChromaDB service" "systemctl restart chromadb"
-                    ;;
-                  *node-exporter*)
-                    execute_action "service-restart" "Restart Node Exporter service" "systemctl restart prometheus-node-exporter"
-                    ;;
-                  *ai-analysis*)
-                    execute_action "service-restart" "Restart AI Analysis service" "systemctl restart ai-analysis-system"
-                    ;;
-                  *)
-                    send_notification "INFO: Unknown service $service_name down - manual intervention required" "INFO"
-                    ;;
-                esac
-              else
-                send_notification "INFO: Service $service_name down - self-healing disabled" "INFO"
-              fi
-            done <<< "$services_down"
-          fi
+                # Attempt service restart if self-healing is enabled
+                if [ "$SELF_HEALING" = "true" ]; then
+                  case "$service_name" in
+                    *grafana*)
+                      execute_action "service-restart" "Restart Grafana service" "systemctl restart grafana"
+                      ;;
+                    *prometheus*)
+                      execute_action "service-restart" "Restart Prometheus service" "systemctl restart prometheus"
+                      ;;
+                    *chromadb*)
+                      execute_action "service-restart" "Restart ChromaDB service" "systemctl restart chromadb"
+                      ;;
+                    *node-exporter*)
+                      execute_action "service-restart" "Restart Node Exporter service" "systemctl restart prometheus-node-exporter"
+                      ;;
+                    *ai-analysis*)
+                      execute_action "service-restart" "Restart AI Analysis service" "systemctl restart ai-analysis-system"
+                      ;;
+                    *)
+                      send_notification "INFO: Unknown service $service_name down - manual intervention required" "INFO"
+                      ;;
+                  esac
+                else
+                  send_notification "INFO: Service $service_name down - self-healing disabled" "INFO"
+                fi
+              done <<< "$services_down"
+            fi
           ''}
 
           # 4. Check for configuration drift
           ${optionalString cfg.actions.configurationReset ''
-          echo "[$(date)] Checking configuration drift..."
+            echo "[$(date)] Checking configuration drift..."
 
-          # Query configuration drift from Prometheus
-          config_drift=$(query_prometheus 'config_drift_detected > 0' | head -10)
+            # Query configuration drift from Prometheus
+            config_drift=$(query_prometheus 'config_drift_detected > 0' | head -10)
 
-          if [ -n "$config_drift" ]; then
-            while IFS=':' read -r instance drift_count; do
-              send_notification "ALERT: Configuration drift detected on $instance" "WARNING"
+            if [ -n "$config_drift" ]; then
+              while IFS=':' read -r instance drift_count; do
+                send_notification "ALERT: Configuration drift detected on $instance" "WARNING"
 
-              # Create new baseline if self-healing is enabled
-              if [ "$SELF_HEALING" = "true" ]; then
-                execute_action "config-reset" "Reset configuration baseline on $instance" "
-                  systemctl start ai-config-baseline || true
-                "
-              else
-                send_notification "INFO: Configuration drift on $instance - self-healing disabled" "INFO"
-              fi
-            done <<< "$config_drift"
-          fi
+                # Create new baseline if self-healing is enabled
+                if [ "$SELF_HEALING" = "true" ]; then
+                  execute_action "config-reset" "Reset configuration baseline on $instance" "
+                    systemctl start ai-config-baseline || true
+                  "
+                else
+                  send_notification "INFO: Configuration drift on $instance - self-healing disabled" "INFO"
+                fi
+              done <<< "$config_drift"
+            fi
           ''}
 
           # 5. Check AI provider health
@@ -327,10 +337,26 @@ in
             "safe_mode": $SAFE_MODE,
             "self_healing": $SELF_HEALING,
             "actions_enabled": {
-              "disk_cleanup": ${if cfg.actions.diskCleanup then "true" else "false"},
-              "memory_optimization": ${if cfg.actions.memoryOptimization then "true" else "false"},
-              "service_restart": ${if cfg.actions.serviceRestart then "true" else "false"},
-              "configuration_reset": ${if cfg.actions.configurationReset then "true" else "false"}
+              "disk_cleanup": ${
+            if cfg.actions.diskCleanup
+            then "true"
+            else "false"
+          },
+              "memory_optimization": ${
+            if cfg.actions.memoryOptimization
+            then "true"
+            else "false"
+          },
+              "service_restart": ${
+            if cfg.actions.serviceRestart
+            then "true"
+            else "false"
+          },
+              "configuration_reset": ${
+            if cfg.actions.configurationReset
+            then "true"
+            else "false"
+          }
             },
             "last_run": "$(date -Iseconds)",
             "status": "completed"

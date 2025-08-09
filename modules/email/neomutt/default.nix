@@ -1,8 +1,9 @@
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.features.email;
   emailCfg = cfg.neomutt;
 in

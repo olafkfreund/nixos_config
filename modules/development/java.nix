@@ -16,11 +16,13 @@ in
     };
   };
   config = mkIf cfg.enable {
-    environment.systemPackages = [
-      pkgs.jdk11
-      pkgs.gradle
-      pkgs.maven
-      # pkgs.jetbrains.idea-community-bin
-    ] ++ cfg.packages;
+    environment.systemPackages =
+      [
+        pkgs.jdk11
+        pkgs.gradle
+        pkgs.maven
+        # pkgs.jetbrains.idea-community-bin
+      ]
+      ++ cfg.packages;
   };
 }

@@ -1,8 +1,10 @@
 # Automated Performance Tuner Module
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.ai.autoPerformanceTuner;
 in
 {
@@ -123,7 +125,17 @@ in
         # Add required tools to PATH
         Environment = [
           "PATH=${lib.makeBinPath (with pkgs; [
-            coreutils bash gawk procps bc jq curl gnugrep gnused systemd iproute2
+            coreutils
+            bash
+            gawk
+            procps
+            bc
+            jq
+            curl
+            gnugrep
+            gnused
+            systemd
+            iproute2
           ])}"
         ];
 
@@ -212,19 +224,19 @@ in
             local network_connections=$4
 
             ${optionalString cfg.features.workloadDetection ''
-              # Simple workload classification
-              if [ "$ai_services" -gt 2 ] && [ $(echo "$cpu_usage > 60" | bc) -eq 1 ]; then
-                echo "ai-intensive"
-              elif [ "$network_connections" -gt 500 ]; then
-                echo "network-intensive"
-              elif [ $(echo "$memory_percent > 70" | bc) -eq 1 ]; then
-                echo "memory-intensive"
-              elif [ $(echo "$cpu_usage > 50" | bc) -eq 1 ]; then
-                echo "cpu-intensive"
-              else
-                echo "balanced"
-              fi
-            ''}
+            # Simple workload classification
+            if [ "$ai_services" -gt 2 ] && [ $(echo "$cpu_usage > 60" | bc) -eq 1 ]; then
+              echo "ai-intensive"
+            elif [ "$network_connections" -gt 500 ]; then
+              echo "network-intensive"
+            elif [ $(echo "$memory_percent > 70" | bc) -eq 1 ]; then
+              echo "memory-intensive"
+            elif [ $(echo "$cpu_usage > 50" | bc) -eq 1 ]; then
+              echo "cpu-intensive"
+            else
+              echo "balanced"
+            fi
+          ''}
           }
 
           # Function to generate AI-powered optimization recommendations
@@ -282,55 +294,55 @@ in
             local ai_response_time=$(echo "$performance_data" | jq -r '.ai.response_time_ms // 0')
 
             ${optionalString cfg.features.adaptiveTuning ''
-              # Adaptive CPU governor tuning
-              if [ $(echo "$cpu_usage > ${toString cfg.thresholds.cpuUtilization}" | bc) -eq 1 ]; then
-                echo "[$(date)] High CPU usage detected ($cpu_usage%), switching to performance governor"
-                for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
-                  if [ -f "$cpu" ]; then
-                    echo performance > "$cpu" 2>/dev/null || true
-                  fi
-                done
-              elif [ $(echo "$cpu_usage < 30" | bc) -eq 1 ]; then
-                echo "[$(date)] Low CPU usage detected ($cpu_usage%), switching to powersave governor"
-                for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
-                  if [ -f "$cpu" ]; then
-                    echo powersave > "$cpu" 2>/dev/null || true
-                  fi
-                done
-              fi
-            ''}
+            # Adaptive CPU governor tuning
+            if [ $(echo "$cpu_usage > ${toString cfg.thresholds.cpuUtilization}" | bc) -eq 1 ]; then
+              echo "[$(date)] High CPU usage detected ($cpu_usage%), switching to performance governor"
+              for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+                if [ -f "$cpu" ]; then
+                  echo performance > "$cpu" 2>/dev/null || true
+                fi
+              done
+            elif [ $(echo "$cpu_usage < 30" | bc) -eq 1 ]; then
+              echo "[$(date)] Low CPU usage detected ($cpu_usage%), switching to powersave governor"
+              for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+                if [ -f "$cpu" ]; then
+                  echo powersave > "$cpu" 2>/dev/null || true
+                fi
+              done
+            fi
+          ''}
 
             ${optionalString cfg.features.resourceBalancing ''
-              # Memory optimization
-              if [ $(echo "$memory_percent > ${toString cfg.thresholds.memoryUtilization}" | bc) -eq 1 ]; then
-                echo "[$(date)] High memory usage detected ($memory_percent%), optimizing memory settings"
-                echo 1 > /proc/sys/vm/swappiness 2>/dev/null || true
-                echo 1 > /proc/sys/vm/drop_caches 2>/dev/null || true
-              fi
+            # Memory optimization
+            if [ $(echo "$memory_percent > ${toString cfg.thresholds.memoryUtilization}" | bc) -eq 1 ]; then
+              echo "[$(date)] High memory usage detected ($memory_percent%), optimizing memory settings"
+              echo 1 > /proc/sys/vm/swappiness 2>/dev/null || true
+              echo 1 > /proc/sys/vm/drop_caches 2>/dev/null || true
+            fi
 
-              # I/O optimization
-              if [ -n "$io_wait" ] && [ $(echo "$io_wait > ${toString cfg.thresholds.ioWait}" | bc) -eq 1 ]; then
-                echo "[$(date)] High I/O wait detected ($io_wait%), optimizing I/O scheduler"
-                for device in /sys/block/*/queue/scheduler; do
-                  if [ -f "$device" ]; then
-                    echo deadline > "$device" 2>/dev/null || true
-                  fi
-                done
-              fi
-            ''}
+            # I/O optimization
+            if [ -n "$io_wait" ] && [ $(echo "$io_wait > ${toString cfg.thresholds.ioWait}" | bc) -eq 1 ]; then
+              echo "[$(date)] High I/O wait detected ($io_wait%), optimizing I/O scheduler"
+              for device in /sys/block/*/queue/scheduler; do
+                if [ -f "$device" ]; then
+                  echo deadline > "$device" 2>/dev/null || true
+                fi
+              done
+            fi
+          ''}
 
             ${optionalString cfg.features.anomalyCorrection ''
-              # AI response time optimization
-              if [ "$ai_response_time" -gt "${toString cfg.thresholds.responseTime}" ]; then
-                echo "[$(date)] High AI response time detected (''${ai_response_time}ms), optimizing network settings"
+            # AI response time optimization
+            if [ "$ai_response_time" -gt "${toString cfg.thresholds.responseTime}" ]; then
+              echo "[$(date)] High AI response time detected (''${ai_response_time}ms), optimizing network settings"
 
-                # Optimize TCP settings for AI API calls
-                echo 1 > /proc/sys/net/ipv4/tcp_window_scaling 2>/dev/null || true
-                echo 1 > /proc/sys/net/ipv4/tcp_timestamps 2>/dev/null || true
-                echo "4096 87380 16777216" > /proc/sys/net/ipv4/tcp_rmem 2>/dev/null || true
-                echo "4096 65536 16777216" > /proc/sys/net/ipv4/tcp_wmem 2>/dev/null || true
-              fi
-            ''}
+              # Optimize TCP settings for AI API calls
+              echo 1 > /proc/sys/net/ipv4/tcp_window_scaling 2>/dev/null || true
+              echo 1 > /proc/sys/net/ipv4/tcp_timestamps 2>/dev/null || true
+              echo "4096 87380 16777216" > /proc/sys/net/ipv4/tcp_rmem 2>/dev/null || true
+              echo "4096 65536 16777216" > /proc/sys/net/ipv4/tcp_wmem 2>/dev/null || true
+            fi
+          ''}
           }
 
           # Function to log tuning actions
@@ -413,7 +425,17 @@ in
         # Add required tools to PATH
         Environment = [
           "PATH=${lib.makeBinPath (with pkgs; [
-            coreutils bash gawk procps bc jq curl gnugrep gnused systemd iproute2
+            coreutils
+            bash
+            gawk
+            procps
+            bc
+            jq
+            curl
+            gnugrep
+            gnused
+            systemd
+            iproute2
           ])}"
         ];
 
@@ -487,7 +509,17 @@ in
         # Add required tools to PATH
         Environment = [
           "PATH=${lib.makeBinPath (with pkgs; [
-            coreutils bash gawk procps bc jq curl gnugrep gnused systemd iproute2
+            coreutils
+            bash
+            gawk
+            procps
+            bc
+            jq
+            curl
+            gnugrep
+            gnused
+            systemd
+            iproute2
           ])}"
         ];
 

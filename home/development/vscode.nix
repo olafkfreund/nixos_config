@@ -6,7 +6,6 @@
 }:
 with lib; let
   cfg = config.editor.vscode;
-
   # Custom extensions not available in nixpkgs
   # Note: Uncomment and add proper sha256 hashes when needed
 in

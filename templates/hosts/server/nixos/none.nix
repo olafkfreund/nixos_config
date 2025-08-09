@@ -1,8 +1,9 @@
 # No GPU / Headless configuration for server template
 # Optimized for pure headless server operation without any GPU
-{ pkgs, lib, ... }:
-
-{
+{ pkgs
+, lib
+, ...
+}: {
   # Minimal graphics support for headless servers
   hardware.graphics = {
     enable = false; # Completely disable graphics subsystem

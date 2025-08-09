@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}: {
+{ pkgs, ... }: {
   # Thermal and power management services
   services = {
     # CPU temperature monitoring and management

@@ -1,6 +1,9 @@
-{ config, lib, pkgs, ... }:
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.cloud-tools.packages;
 in
 {

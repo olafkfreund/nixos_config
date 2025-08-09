@@ -1,7 +1,6 @@
 # Server template variables.nix
 # Edit these values to customize your server configuration
 # This template is optimized for headless server deployments
-
 {
   # === BASIC HOST CONFIGURATION ===
   hostName = "HOSTNAME"; # Replace with your server hostname

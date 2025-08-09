@@ -1,8 +1,10 @@
 # SSH Configuration Hardening Module
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.security.sshHardening;
 in
 {
@@ -87,9 +89,15 @@ in
         settings = {
           # Authentication
           PasswordAuthentication = cfg.allowPasswordAuthentication;
-          PermitRootLogin = if cfg.allowRootLogin then "yes" else "no";
+          PermitRootLogin =
+            if cfg.allowRootLogin
+            then "yes"
+            else "no";
           PubkeyAuthentication = true;
-          AuthenticationMethods = if cfg.enableKeyOnlyAccess then "publickey" else "publickey,password";
+          AuthenticationMethods =
+            if cfg.enableKeyOnlyAccess
+            then "publickey"
+            else "publickey,password";
           MaxAuthTries = cfg.maxAuthTries;
 
           # Connection settings
@@ -162,7 +170,11 @@ in
 
           # Match conditions for enhanced security
           Match Address ${concatStringsSep "," cfg.trustedNetworks}
-              PasswordAuthentication ${if cfg.allowPasswordAuthentication then "yes" else "no"}
+              PasswordAuthentication ${
+            if cfg.allowPasswordAuthentication
+            then "yes"
+            else "no"
+          }
               MaxAuthTries ${toString cfg.maxAuthTries}
 
           Match Address *,!${concatStringsSep ",!" cfg.trustedNetworks}
@@ -216,7 +228,6 @@ in
       ================================================================================
     '';
 
-
     # Firewall configuration for SSH
     networking.firewall = {
       allowedTCPPorts = [ cfg.listenPort ];
@@ -268,10 +279,13 @@ in
             # Authentication
             PreferredAuthentications publickey,keyboard-interactive,password
             PubkeyAuthentication yes
-            PasswordAuthentication ${if cfg.allowPasswordAuthentication then "yes" else "no"}
+            PasswordAuthentication ${
+          if cfg.allowPasswordAuthentication
+          then "yes"
+          else "no"
+        }
       '';
     };
-
 
     # Consolidated systemd configuration
     systemd = {

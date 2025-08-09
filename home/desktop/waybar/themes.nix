@@ -1,10 +1,7 @@
 # Waybar Theme System
 # Provides consistent theming for Waybar
-{ lib
-, ...
-}:
-with lib;
-let
+{ lib, ... }:
+with lib; let
   # Color scheme definitions matching Hyprland themes
   colorSchemes = {
     gruvbox-dark = {
@@ -48,7 +45,6 @@ let
   };
 
   defaultTheme = "gruvbox-dark";
-
 in
 {
   waybar.colorSchemes = colorSchemes;

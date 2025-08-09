@@ -1,5 +1,4 @@
 { pkgs, ... }:
-
 pkgs.writeShellScriptBin "fzf-preview" ''
   if [[ $# -ne 1 ]]; then
     >&2 echo "usage: $0 FILENAME"

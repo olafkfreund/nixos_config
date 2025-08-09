@@ -1,9 +1,12 @@
 # Server template configuration.nix
 # This file provides a comprehensive server configuration template
 # Edit variables.nix to customize for your specific server needs
-
-{ config, lib, pkgs, system, ... }:
-
+{ config
+, lib
+, pkgs
+, system
+, ...
+}:
 let
   vars = import ./variables.nix;
 in
@@ -13,10 +16,15 @@ in
     ./nixos/hardware-configuration.nix
 
     # GPU configuration based on variables
-    (if vars.gpu == "amd" then ./nixos/amd.nix
-    else if vars.gpu == "nvidia" then ./nixos/nvidia.nix
-    else if vars.gpu == "intel" then ./nixos/intel.nix
-    else ./nixos/none.nix)
+    (
+      if vars.gpu == "amd"
+      then ./nixos/amd.nix
+      else if vars.gpu == "nvidia"
+      then ./nixos/nvidia.nix
+      else if vars.gpu == "intel"
+      then ./nixos/intel.nix
+      else ./nixos/none.nix
+    )
 
     # Server-optimized modules
     ../../modules/server

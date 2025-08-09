@@ -4,8 +4,7 @@
 , lib
 , ...
 }:
-with lib;
-let
+with lib; let
   # Feature flags for system monitoring
   cfg = {
     neofetch = {
@@ -29,33 +28,33 @@ let
       textTools = true; # ripgrep, fd, jq, etc.
     };
   };
-
 in
 {
   # Enhanced system monitoring packages
-  home.packages = with pkgs; flatten [
-    # Core system info
-    (optionals cfg.neofetch.enable [ neofetch ])
-    (optionals cfg.systemMonitors.fastfetch [ fastfetch ])
+  home.packages = with pkgs;
+    flatten [
+      # Core system info
+      (optionals cfg.neofetch.enable [ neofetch ])
+      (optionals cfg.systemMonitors.fastfetch [ fastfetch ])
 
-    # System monitors
-    (optionals cfg.systemMonitors.btop [ btop ])
-    (optionals cfg.systemMonitors.htop [ htop ])
-    (optionals cfg.systemMonitors.nvtop [ nvtopPackages.full ])
-    (optionals cfg.systemMonitors.iotop [ iotop ])
+      # System monitors
+      (optionals cfg.systemMonitors.btop [ btop ])
+      (optionals cfg.systemMonitors.htop [ htop ])
+      (optionals cfg.systemMonitors.nvtop [ nvtopPackages.full ])
+      (optionals cfg.systemMonitors.iotop [ iotop ])
 
-    # Process tools
-    (optionals cfg.utilities.processTools [ procs pstree lsof killall ])
+      # Process tools
+      (optionals cfg.utilities.processTools [ procs pstree lsof killall ])
 
-    # Disk utilities
-    (optionals cfg.utilities.diskTools [ ncdu dust duf tree ])
+      # Disk utilities
+      (optionals cfg.utilities.diskTools [ ncdu dust duf tree ])
 
-    # Network tools
-    (optionals cfg.utilities.networkTools [ bandwhich nethogs iftop nload speedtest-cli ])
+      # Network tools
+      (optionals cfg.utilities.networkTools [ bandwhich nethogs iftop nload speedtest-cli ])
 
-    # Text processing
-    (optionals cfg.utilities.textTools [ ripgrep fd jq yq-go hyperfine tokei ])
-  ];
+      # Text processing
+      (optionals cfg.utilities.textTools [ ripgrep fd jq yq-go hyperfine tokei ])
+    ];
 
   # Enhanced btop configuration
   programs.btop = mkIf cfg.systemMonitors.btop {

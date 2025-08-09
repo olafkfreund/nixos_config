@@ -430,7 +430,6 @@ with lib; let
             ;;
     esac
   '';
-
 in
 {
   options.ai.providers.unifiedClient = {

@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}:
+{ pkgs, ... }:
 pkgs.writeShellScriptBin "mpris-album-art" ''
   #!/usr/bin/env bash
   # mpris-album-art: Shows the album art of currently playing media using MPRIS

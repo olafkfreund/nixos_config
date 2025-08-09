@@ -130,7 +130,6 @@ in
       sunshine = true;
     };
 
-
     cloud = {
       enable = true;
       aws = true;
@@ -204,7 +203,6 @@ in
       temperature = 80; # Temperature warning for laptop
     };
   };
-
 
   # Enable NixOS package monitoring tools
   tools.nixpkgs-monitors = {
@@ -329,29 +327,31 @@ in
   });
 
   # System packages - consolidated from individual nixos modules
-  environment.systemPackages = with pkgs; [
-    # Custom packages
-    (callPackage ../../home/development/qwen-code/default.nix { })
+  environment.systemPackages = with pkgs;
+    [
+      # Custom packages
+      (callPackage ../../home/development/qwen-code/default.nix { })
 
-    # Power management (from power.nix)
-    cpupower-gui # GUI for CPU frequency scaling
-    powertop # Power consumption analyzer
-    lm_sensors # Hardware monitoring
-    s-tui # Terminal UI stress test and monitoring tool
-    htop # Process viewer with power info
-    acpi # Command line battery info
+      # Power management (from power.nix)
+      cpupower-gui # GUI for CPU frequency scaling
+      powertop # Power consumption analyzer
+      lm_sensors # Hardware monitoring
+      s-tui # Terminal UI stress test and monitoring tool
+      htop # Process viewer with power info
+      acpi # Command line battery info
 
-    # Razer hardware support (from laptop.nix)
-    polychromatic # GUI for Razer devices
-    razergenie # Another Razer configuration tool
+      # Razer hardware support (from laptop.nix)
+      polychromatic # GUI for Razer devices
+      razergenie # Another Razer configuration tool
 
-    # Login manager (from greetd.nix)
-    tuigreet
+      # Login manager (from greetd.nix)
+      tuigreet
 
-    # Secure Boot management (from secure-boot.nix) - only when secure boot enabled
-  ] ++ lib.optionals (config.boot.lanzaboote.enable or false) [
-    sbctl # For managing Secure Boot keys
-  ];
+      # Secure Boot management (from secure-boot.nix) - only when secure boot enabled
+    ]
+    ++ lib.optionals (config.boot.lanzaboote.enable or false) [
+      sbctl # For managing Secure Boot keys
+    ];
 
   hardware.nvidia-container-toolkit.enable = vars.gpu == "nvidia";
 

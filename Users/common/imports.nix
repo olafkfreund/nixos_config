@@ -1,6 +1,4 @@
-{ inputs
-, ...
-}: {
+{ inputs, ... }: {
   # Common imports for all user configurations
   imports = [
     inputs.nix-colors.homeManagerModules.default

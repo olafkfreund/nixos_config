@@ -1,7 +1,10 @@
 # Dependency set management with feature flags
-{ config, lib, pkgs, ... }:
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   commonDeps = import ./common-deps.nix { inherit pkgs; };
 in
 {

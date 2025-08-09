@@ -1,5 +1,4 @@
-{ ...
-}: {
+{ ... }: {
   imports = [
     # Import common modules
     ../common/default.nix

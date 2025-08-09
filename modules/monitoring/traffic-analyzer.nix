@@ -1,8 +1,10 @@
 # Traffic Analysis and Protocol Detection Module
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.monitoring;
   trafficCfg = config.monitoring.trafficAnalyzer;
 in
@@ -74,8 +76,15 @@ in
 
         Environment = [
           "PATH=${lib.makeBinPath (with pkgs; [
-            coreutils tcpdump nettools lsof
-            gnugrep gnused gawk iproute2 procps
+            coreutils
+            tcpdump
+            nettools
+            lsof
+            gnugrep
+            gnused
+            gawk
+            iproute2
+            procps
           ])}"
         ];
 
@@ -87,8 +96,16 @@ in
                     INTERFACE="${trafficCfg.interface}"
                     EXPORTER_PORT="${toString trafficCfg.port}"
                     CAPTURE_INTERVAL="${trafficCfg.captureInterval}"
-                    ENABLE_DPI="${if trafficCfg.enableDeepInspection then "true" else "false"}"
-                    ENABLE_GEO="${if trafficCfg.enableGeoLocation then "true" else "false"}"
+                    ENABLE_DPI="${
+            if trafficCfg.enableDeepInspection
+            then "true"
+            else "false"
+          }"
+                    ENABLE_GEO="${
+            if trafficCfg.enableGeoLocation
+            then "true"
+            else "false"
+          }"
                     RETENTION_DAYS="${toString trafficCfg.retentionDays}"
 
                     # Data directories

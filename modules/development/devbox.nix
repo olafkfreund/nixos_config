@@ -1,4 +1,8 @@
-{ config, lib, pkgs, ... }:
+{ config
+, lib
+, pkgs
+, ...
+}:
 with lib; let
   cfg = config.devshell.development;
 in
@@ -12,9 +16,11 @@ in
     };
   };
   config = mkIf cfg.enable {
-    environment.systemPackages = [
-      pkgs.devbox
-      pkgs.devenv
-    ] ++ cfg.packages;
+    environment.systemPackages =
+      [
+        pkgs.devbox
+        pkgs.devenv
+      ]
+      ++ cfg.packages;
   };
 }

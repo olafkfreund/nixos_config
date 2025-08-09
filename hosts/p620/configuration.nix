@@ -185,7 +185,6 @@ in
     trustedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ];
   };
 
-
   # AI production dashboard and load testing removed - were non-functional services consuming resources
 
   # Enable NixOS package monitoring tools
@@ -222,7 +221,6 @@ in
       libvirt = true;
       sunshine = true;
     };
-
 
     cloud = {
       enable = true;
@@ -370,7 +368,6 @@ in
     };
   };
 
-
   # Enable encrypted API keys
 
   secrets.apiKeys = {
@@ -433,7 +430,6 @@ in
     # System version
     stateVersion = "25.11";
   };
-
 
   scrcpyWifi.enable = true;
 
@@ -589,7 +585,6 @@ in
     (callPackage ../../home/development/qwen-code/default.nix { })
   ];
 
-
   # Hardware features
   hardware = {
     keyboard.qmk.enable = true;
@@ -673,13 +668,8 @@ in
     };
   };
 
-
-
-
   # Nix configuration
   nix.settings.allowed-users = [ "nix-serve" ];
-
-
 
   # Storage performance optimization
   storage.performanceOptimization = {
@@ -722,7 +712,6 @@ in
     };
   };
 
-
   # AI-powered automated performance tuning removed - was non-functional and consuming resources
 
   # Agenix identity configuration - specify where to find decryption keys
@@ -739,5 +728,4 @@ in
       "python3.12-youtube-dl-2021.12.17"
     ];
   };
-
 }

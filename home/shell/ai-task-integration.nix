@@ -1,8 +1,5 @@
 { lib, ... }:
-
-with lib;
-
-{
+with lib; {
   # Enhanced ZSH configuration for AI-integrated task management
   programs.zsh.initExtra = ''
     # AI-Enhanced Task Management Functions

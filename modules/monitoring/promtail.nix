@@ -69,9 +69,12 @@ in
               hostname = cfg.hostname;
               environment = "production";
               role =
-                if config.networking.hostName == "dex5550" then "monitoring"
-                else if config.networking.hostName == "p510" then "media-server"
-                else if config.networking.hostName == "p620" then "workstation"
+                if config.networking.hostName == "dex5550"
+                then "monitoring"
+                else if config.networking.hostName == "p510"
+                then "media-server"
+                else if config.networking.hostName == "p620"
+                then "workstation"
                 else "client";
             };
           }
@@ -108,8 +111,8 @@ in
                 }
               ];
             }
-          ]) ++
-
+          ])
+          ++
           # Kernel logs
           (optionals cfg.collectKernel [
             {
@@ -125,8 +128,8 @@ in
                 }
               ];
             }
-          ]) ++
-
+          ])
+          ++
           # Nginx logs (if enabled)
           (optionals cfg.collectNginx [
             {
@@ -157,8 +160,8 @@ in
                 }
               ];
             }
-          ]) ++
-
+          ])
+          ++
           # Extra configurations
           cfg.extraScrapeConfigs;
       };

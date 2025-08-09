@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}: {
+{ pkgs, ... }: {
   nixpkgs.overlays = [
     (_self: super: {
       openrazer-daemon = super.openrazer-daemon.overrideAttrs (oldAttrs: {
@@ -15,11 +13,13 @@
             doCheck = false;
 
             # Add additional build dependencies if needed
-            nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [
-              super.rustc
-              super.cargo
-              super.pkg-config
-            ];
+            nativeBuildInputs =
+              (oldAttrs.nativeBuildInputs or [ ])
+              ++ [
+                super.rustc
+                super.cargo
+                super.pkg-config
+              ];
 
             # Skip problematic test files
             checkPhase = ''
@@ -33,21 +33,23 @@
             '';
 
             # Ensure we have all required Python dependencies
-            propagatedBuildInputs = (oldAttrs.propagatedBuildInputs or [ ]) ++ [
-              python-self.numpy
-              python-self.cython
-              python-self.cymem
-              python-self.preshed
-              python-self.thinc
-              python-self.wasabi
-              python-self.srsly
-              python-self.catalogue
-              python-self.typer
-              python-self.pydantic
-              python-self.jinja2
-              python-self.setuptools
-              python-self.wheel
-            ];
+            propagatedBuildInputs =
+              (oldAttrs.propagatedBuildInputs or [ ])
+              ++ [
+                python-self.numpy
+                python-self.cython
+                python-self.cymem
+                python-self.preshed
+                python-self.thinc
+                python-self.wasabi
+                python-self.srsly
+                python-self.catalogue
+                python-self.typer
+                python-self.pydantic
+                python-self.jinja2
+                python-self.setuptools
+                python-self.wheel
+              ];
 
             # Set environment variables for Rust compilation
             preBuild = ''
@@ -55,9 +57,11 @@
               export RUSTFLAGS="-C target-cpu=native"
             '';
 
-            meta = oldAttrs.meta // {
-              description = "Industrial-strength Natural Language Processing (NLP) with Python and Cython (patched for NixOS)";
-            };
+            meta =
+              oldAttrs.meta
+              // {
+                description = "Industrial-strength Natural Language Processing (NLP) with Python and Cython (patched for NixOS)";
+              };
           });
         };
       };

@@ -1,6 +1,5 @@
 # Primary Development Shell Environment
 { pkgs, ... }:
-
 pkgs.mkShell {
   name = "nixos-dev-environment";
 

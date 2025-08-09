@@ -1,8 +1,6 @@
 # Hyprland Environment Variables Configuration
 # Converted to native Nix configuration for better type safety and maintainability
-{ lib
-, ...
-}:
+{ lib, ... }:
 with lib; {
   wayland.windowManager.hyprland.settings = {
     env = [
@@ -40,7 +38,7 @@ with lib; {
       "GDK_BACKEND,wayland,x11" # GTK backend (Wayland with X11 fallback)
       "GTK_THEME,Gruvbox-Dark-B-LB" # GTK theme
       "QT_QPA_PLATFORM,wayland;xcb" # Qt platform (Wayland with X11 fallback)
-      "QT_QPA_PLATFORMTHEME,gnome" # Qt theming
+      "QT_QPA_PLATFORMTHEME,qtct" # Qt theming (compatible with Stylix)
       "QT_WAYLAND_DISABLE_WINDOWDECORATION,1" # Disable Qt window decorations
       "QT_AUTO_SCREEN_SCALE_FACTOR,1" # Qt automatic scaling
 

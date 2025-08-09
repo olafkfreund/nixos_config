@@ -28,11 +28,11 @@ in
             mkdir $DIR
           }}
         '';
-        on-cd = ''        &{{
-                export STARSHIP_SHELL=
-                fmt="$(starship prompt)"
-                lf -remote "send $id set promptfmt \"$fmt\""
-                }}
+        on-cd = ''          &{{
+                  export STARSHIP_SHELL=
+                  fmt="$(starship prompt)"
+                  lf -remote "send $id set promptfmt \"$fmt\""
+                  }}
         '';
       };
 

@@ -10,9 +10,17 @@ with lib; let
   settingsToToml = attrs:
     let
       mkValue = v:
-        if builtins.isString v then ''"${v}"''
-        else if builtins.isBool v then (if v then "true" else "false")
-        else if builtins.isInt v || builtins.isFloat v then toString v
+        if builtins.isString v
+        then ''"${v}"''
+        else if builtins.isBool v
+        then
+          (
+            if v
+            then "true"
+            else "false"
+          )
+        else if builtins.isInt v || builtins.isFloat v
+        then toString v
         else throw "Unsupported type for TOML conversion";
 
       lines = lib.mapAttrsToList (k: v: "${k} = ${mkValue v}") attrs;

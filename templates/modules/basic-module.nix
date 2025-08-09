@@ -8,7 +8,6 @@
 # 2. Replace PLACEHOLDER values with your module specifics
 # 3. Add your module to the appropriate imports in modules/default.nix
 # 4. Enable in host configuration with: features.CATEGORY.MODULE = true;
-
 { config
 , lib
 , pkgs
@@ -63,10 +62,12 @@ in
   # Module configuration - only applied when enabled
   config = mkIf cfg.enable {
     # System packages
-    environment.systemPackages = with pkgs; [
-      # Add your packages here
-      # example-package
-    ] ++ cfg.packages;
+    environment.systemPackages = with pkgs;
+      [
+        # Add your packages here
+        # example-package
+      ]
+      ++ cfg.packages;
 
     # Example service configuration
     # systemd.services.MODULE_NAME = {

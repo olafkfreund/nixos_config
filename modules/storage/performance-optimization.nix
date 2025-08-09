@@ -1,8 +1,10 @@
 # Storage Performance Optimization Module
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.storage.performanceOptimization;
 in
 {
@@ -177,40 +179,40 @@ in
 
             # I/O scheduler optimization
             ${optionalString cfg.ioSchedulerOptimization.enable ''
-              echo "[$(date)] Optimizing I/O scheduler for $DEVICE_PATH..."
+            echo "[$(date)] Optimizing I/O scheduler for $DEVICE_PATH..."
 
-              SCHEDULER_PATH="/sys/block/$device/queue/scheduler"
-              if [ -f "$SCHEDULER_PATH" ]; then
-                ${optionalString cfg.ioSchedulerOptimization.dynamicScheduling ''
-                  case "$DEVICE_TYPE" in
-                    "ssd")
-                      ${optionalString cfg.ioSchedulerOptimization.ssdOptimization ''
-                        # Use none or mq-deadline for SSDs
-                        if grep -q "none" "$SCHEDULER_PATH"; then
-                          echo none > "$SCHEDULER_PATH"
-                          echo "[$(date)] Set scheduler to 'none' for SSD $DEVICE_PATH"
-                        elif grep -q "mq-deadline" "$SCHEDULER_PATH"; then
-                          echo mq-deadline > "$SCHEDULER_PATH"
-                          echo "[$(date)] Set scheduler to 'mq-deadline' for SSD $DEVICE_PATH"
-                        fi
-                      ''}
-                      ;;
-                    "hdd")
-                      ${optionalString cfg.ioSchedulerOptimization.hddOptimization ''
-                        # Use bfq or mq-deadline for HDDs
-                        if grep -q "bfq" "$SCHEDULER_PATH"; then
-                          echo bfq > "$SCHEDULER_PATH"
-                          echo "[$(date)] Set scheduler to 'bfq' for HDD $DEVICE_PATH"
-                        elif grep -q "mq-deadline" "$SCHEDULER_PATH"; then
-                          echo mq-deadline > "$SCHEDULER_PATH"
-                          echo "[$(date)] Set scheduler to 'mq-deadline' for HDD $DEVICE_PATH"
-                        fi
-                      ''}
-                      ;;
-                  esac
-                ''}
-              fi
+            SCHEDULER_PATH="/sys/block/$device/queue/scheduler"
+            if [ -f "$SCHEDULER_PATH" ]; then
+              ${optionalString cfg.ioSchedulerOptimization.dynamicScheduling ''
+              case "$DEVICE_TYPE" in
+                "ssd")
+                  ${optionalString cfg.ioSchedulerOptimization.ssdOptimization ''
+                # Use none or mq-deadline for SSDs
+                if grep -q "none" "$SCHEDULER_PATH"; then
+                  echo none > "$SCHEDULER_PATH"
+                  echo "[$(date)] Set scheduler to 'none' for SSD $DEVICE_PATH"
+                elif grep -q "mq-deadline" "$SCHEDULER_PATH"; then
+                  echo mq-deadline > "$SCHEDULER_PATH"
+                  echo "[$(date)] Set scheduler to 'mq-deadline' for SSD $DEVICE_PATH"
+                fi
+              ''}
+                  ;;
+                "hdd")
+                  ${optionalString cfg.ioSchedulerOptimization.hddOptimization ''
+                # Use bfq or mq-deadline for HDDs
+                if grep -q "bfq" "$SCHEDULER_PATH"; then
+                  echo bfq > "$SCHEDULER_PATH"
+                  echo "[$(date)] Set scheduler to 'bfq' for HDD $DEVICE_PATH"
+                elif grep -q "mq-deadline" "$SCHEDULER_PATH"; then
+                  echo mq-deadline > "$SCHEDULER_PATH"
+                  echo "[$(date)] Set scheduler to 'mq-deadline' for HDD $DEVICE_PATH"
+                fi
+              ''}
+                  ;;
+              esac
             ''}
+            fi
+          ''}
 
             # Queue depth optimization
             QUEUE_DEPTH_PATH="/sys/block/$device/queue/nr_requests"
@@ -233,66 +235,66 @@ in
 
             # Read-ahead optimization
             ${optionalString cfg.filesystemOptimization.readaheadOptimization ''
-              READAHEAD_PATH="/sys/block/$device/queue/read_ahead_kb"
-              if [ -f "$READAHEAD_PATH" ]; then
-                case "$DEVICE_TYPE" in
-                  "ssd")
-                    echo 128 > "$READAHEAD_PATH" 2>/dev/null || true
-                    echo "[$(date)] Set read-ahead to 128KB for SSD $DEVICE_PATH"
-                    ;;
-                  "hdd")
-                    echo 4096 > "$READAHEAD_PATH" 2>/dev/null || true
-                    echo "[$(date)] Set read-ahead to 4MB for HDD $DEVICE_PATH"
-                    ;;
-                esac
-              fi
-            ''}
+            READAHEAD_PATH="/sys/block/$device/queue/read_ahead_kb"
+            if [ -f "$READAHEAD_PATH" ]; then
+              case "$DEVICE_TYPE" in
+                "ssd")
+                  echo 128 > "$READAHEAD_PATH" 2>/dev/null || true
+                  echo "[$(date)] Set read-ahead to 128KB for SSD $DEVICE_PATH"
+                  ;;
+                "hdd")
+                  echo 4096 > "$READAHEAD_PATH" 2>/dev/null || true
+                  echo "[$(date)] Set read-ahead to 4MB for HDD $DEVICE_PATH"
+                  ;;
+              esac
+            fi
+          ''}
 
             # NVMe-specific optimizations
             ${optionalString cfg.nvmeOptimization.enable ''
-              if [[ "$device" == nvme* ]]; then
-                echo "[$(date)] Applying NVMe optimizations for $DEVICE_PATH..."
+            if [[ "$device" == nvme* ]]; then
+              echo "[$(date)] Applying NVMe optimizations for $DEVICE_PATH..."
 
-                ${optionalString cfg.nvmeOptimization.polling ''
-                  # Enable polling for low latency
-                  POLL_PATH="/sys/block/$device/queue/io_poll"
-                  if [ -f "$POLL_PATH" ]; then
-                    echo 1 > "$POLL_PATH" 2>/dev/null || true
-                    echo "[$(date)] Enabled NVMe polling for $DEVICE_PATH"
-                  fi
-                ''}
-
-                ${optionalString cfg.nvmeOptimization.multiQueue ''
-                  # Optimize queue count
-                  WBT_PATH="/sys/block/$device/queue/wbt_lat_usec"
-                  if [ -f "$WBT_PATH" ]; then
-                    echo 0 > "$WBT_PATH" 2>/dev/null || true
-                    echo "[$(date)] Disabled write back throttling for $DEVICE_PATH"
-                  fi
-                ''}
+              ${optionalString cfg.nvmeOptimization.polling ''
+              # Enable polling for low latency
+              POLL_PATH="/sys/block/$device/queue/io_poll"
+              if [ -f "$POLL_PATH" ]; then
+                echo 1 > "$POLL_PATH" 2>/dev/null || true
+                echo "[$(date)] Enabled NVMe polling for $DEVICE_PATH"
               fi
             ''}
 
+              ${optionalString cfg.nvmeOptimization.multiQueue ''
+              # Optimize queue count
+              WBT_PATH="/sys/block/$device/queue/wbt_lat_usec"
+              if [ -f "$WBT_PATH" ]; then
+                echo 0 > "$WBT_PATH" 2>/dev/null || true
+                echo "[$(date)] Disabled write back throttling for $DEVICE_PATH"
+              fi
+            ''}
+            fi
+          ''}
+
             # Disk cache optimization
             ${optionalString cfg.diskCacheOptimization.enable ''
-              echo "[$(date)] Optimizing disk cache for $DEVICE_PATH..."
+            echo "[$(date)] Optimizing disk cache for $DEVICE_PATH..."
 
-              ${optionalString cfg.diskCacheOptimization.writeCache ''
-                # Enable write cache if available
-                if command -v hdparm >/dev/null 2>&1; then
-                  hdparm -W1 "$DEVICE_PATH" 2>/dev/null || true
-                  echo "[$(date)] Enabled write cache for $DEVICE_PATH"
-                fi
-              ''}
-
-              ${optionalString cfg.diskCacheOptimization.readCache ''
-                # Enable read cache if available
-                if command -v hdparm >/dev/null 2>&1; then
-                  hdparm -A1 "$DEVICE_PATH" 2>/dev/null || true
-                  echo "[$(date)] Enabled read cache for $DEVICE_PATH"
-                fi
-              ''}
+            ${optionalString cfg.diskCacheOptimization.writeCache ''
+              # Enable write cache if available
+              if command -v hdparm >/dev/null 2>&1; then
+                hdparm -W1 "$DEVICE_PATH" 2>/dev/null || true
+                echo "[$(date)] Enabled write cache for $DEVICE_PATH"
+              fi
             ''}
+
+            ${optionalString cfg.diskCacheOptimization.readCache ''
+              # Enable read cache if available
+              if command -v hdparm >/dev/null 2>&1; then
+                hdparm -A1 "$DEVICE_PATH" 2>/dev/null || true
+                echo "[$(date)] Enabled read cache for $DEVICE_PATH"
+              fi
+            ''}
+          ''}
           done
 
           # Filesystem-level optimizations
@@ -346,13 +348,13 @@ in
         RestartSec = "30s";
         Environment = [
           "PATH=${lib.makeBinPath (with pkgs; [
-            sysstat    # iostat
-            gawk       # awk
-            coreutils  # basic utilities
+            sysstat # iostat
+            gawk # awk
+            coreutils # basic utilities
             util-linux # lsblk
-            procps     # general process utilities
-            gnugrep    # grep
-            gnused     # sed
+            procps # general process utilities
+            gnugrep # grep
+            gnused # sed
           ])}"
         ];
         ExecStart = pkgs.writeShellScript "storage-performance-monitor" ''
@@ -435,13 +437,17 @@ in
     boot.kernel.sysctl = mkIf cfg.enable {
       # VM settings for storage performance (lower priority than resource manager)
       "vm.dirty_writeback_centisecs" = mkDefault (
-        if cfg.profile == "performance" then 1500
-        else if cfg.profile == "balanced" then 1500
+        if cfg.profile == "performance"
+        then 1500
+        else if cfg.profile == "balanced"
+        then 1500
         else 500
       );
       "vm.dirty_expire_centisecs" = mkDefault (
-        if cfg.profile == "performance" then 500
-        else if cfg.profile == "balanced" then 3000
+        if cfg.profile == "performance"
+        then 500
+        else if cfg.profile == "balanced"
+        then 3000
         else 1000
       );
 

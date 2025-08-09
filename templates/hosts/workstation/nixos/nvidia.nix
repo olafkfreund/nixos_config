@@ -1,7 +1,9 @@
 # NVIDIA GPU configuration for workstation template
-{ config, pkgs, lib, ... }:
-
-{
+{ config
+, pkgs
+, lib
+, ...
+}: {
   # NVIDIA hardware configuration
   hardware.nvidia = {
     modesetting.enable = true;

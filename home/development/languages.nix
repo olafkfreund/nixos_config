@@ -4,8 +4,7 @@
 , lib
 , ...
 }:
-with lib;
-let
+with lib; let
   # Language support configuration
   cfg = {
     # Core programming languages
@@ -120,90 +119,95 @@ let
 
   # Package collections
   languagePackages = flatten (mapAttrsToList
-    (name: lang:
-      optionals lang.enable (
-        # LSP servers
-        (optional (lang.lsp == "nixd") pkgs.nixd) ++
-        (optional (lang.lsp == "pylsp") pkgs.python313Packages.python-lsp-server) ++
-        (optional (lang.lsp == "typescript-language-server") pkgs.nodePackages.typescript-language-server) ++
-        (optional (lang.lsp == "gopls") pkgs.gopls) ++
-        (optional (lang.lsp == "rust-analyzer") pkgs.rust-analyzer) ++
-        (optional (lang.lsp == "clangd") pkgs.clang-tools) ++
-
-        # Formatters
-        (optional (elem "alejandra" lang.formatters) pkgs.alejandra) ++
-        (optional (elem "deadnix" lang.formatters) pkgs.deadnix) ++
-        (optional (elem "statix" lang.formatters) pkgs.statix) ++
-        (optional (elem "black" lang.formatters) pkgs.python313Packages.black) ++
-        (optional (elem "isort" lang.formatters) pkgs.python313Packages.isort) ++
-        (optional (elem "prettier" lang.formatters) pkgs.nodePackages.prettier) ++
-        (optional (elem "eslint" lang.formatters) pkgs.nodePackages.eslint) ++
-        (optional (elem "gofmt" lang.formatters) pkgs.go) ++
-        (optional (elem "rustfmt" lang.formatters) pkgs.rustfmt) ++
-
-        # Language-specific tools
-        (optionals (name == "nix") (with pkgs; [ nix-tree nix-diff nix-prefetch-git ])) ++
-        (optionals (name == "python") (with pkgs; [
-          python313Packages.poetry-core
-          python313Packages.pytest
-          python313Packages.mypy
-          python313Packages.flake8
-        ])) ++
-        (optionals (name == "javascript") (with pkgs; [ nodejs yarn ])) ++
-        (optionals (name == "go") (with pkgs; [ go delve gore gotests ])) ++
-        (optionals (name == "rust") (with pkgs; [ cargo rustc clippy ]))
-      )
+    (
+      name: lang:
+        optionals lang.enable (
+          # LSP servers
+          (optional (lang.lsp == "nixd") pkgs.nixd)
+          ++ (optional (lang.lsp == "pylsp") pkgs.python313Packages.python-lsp-server)
+          ++ (optional (lang.lsp == "typescript-language-server") pkgs.nodePackages.typescript-language-server)
+          ++ (optional (lang.lsp == "gopls") pkgs.gopls)
+          ++ (optional (lang.lsp == "rust-analyzer") pkgs.rust-analyzer)
+          ++ (optional (lang.lsp == "clangd") pkgs.clang-tools)
+          ++
+          # Formatters
+          (optional (elem "alejandra" lang.formatters) pkgs.alejandra)
+          ++ (optional (elem "deadnix" lang.formatters) pkgs.deadnix)
+          ++ (optional (elem "statix" lang.formatters) pkgs.statix)
+          ++ (optional (elem "black" lang.formatters) pkgs.python313Packages.black)
+          ++ (optional (elem "isort" lang.formatters) pkgs.python313Packages.isort)
+          ++ (optional (elem "prettier" lang.formatters) pkgs.nodePackages.prettier)
+          ++ (optional (elem "eslint" lang.formatters) pkgs.nodePackages.eslint)
+          ++ (optional (elem "gofmt" lang.formatters) pkgs.go)
+          ++ (optional (elem "rustfmt" lang.formatters) pkgs.rustfmt)
+          ++
+          # Language-specific tools
+          (optionals (name == "nix") (with pkgs; [ nix-tree nix-diff nix-prefetch-git ]))
+          ++ (optionals (name == "python") (with pkgs; [
+            python313Packages.poetry-core
+            python313Packages.pytest
+            python313Packages.mypy
+            python313Packages.flake8
+          ]))
+          ++ (optionals (name == "javascript") (with pkgs; [ nodejs yarn ]))
+          ++ (optionals (name == "go") (with pkgs; [ go delve gore gotests ]))
+          ++ (optionals (name == "rust") (with pkgs; [ cargo rustc clippy ]))
+        )
     )
     enabledLanguages);
 
   utilityPackages = flatten (mapAttrsToList
-    (category: utils:
-      optionals (any (x: x) (attrValues utils)) (
-        # VCS tools
-        (optionals (category == "vcs") (with pkgs;
-        (optional utils.git git) ++
-        (optional utils.lazygit lazygit) ++
-        (optional utils.gh gh) ++
-        (optional utils.git-crypt git-crypt)
-        )) ++
-
-        # Container tools
-        (optionals (category == "containers") (with pkgs;
-        (optional utils.docker docker) ++
-        (optional utils.podman podman) ++
-        (optional utils.kubectl kubectl) ++
-        (optional utils.helm helm)
-        )) ++
-
-        # Database tools
-        (optionals (category == "databases") (with pkgs;
-        (optional utils.sqlite sqlite) ++
-        (optional utils.postgresql postgresql) ++
-        (optional utils.redis redis)
-        )) ++
-
-        # Cloud tools
-        (optionals (category == "cloud") (with pkgs;
-        (optional utils.terraform terraform) ++
-        (optional utils.ansible ansible) ++
-        (optional utils.aws awscli2) ++
-        (optional utils.gcp google-cloud-sdk)
-        )) ++
-
-        # Monitoring tools
-        (optionals (category == "monitoring") (with pkgs;
-        (optional utils.htop htop) ++
-        (optional utils.btop btop) ++
-        (optional utils.bandwhich bandwhich) ++
-        (optional utils.ncdu ncdu)
-        ))
-      )
+    (
+      category: utils:
+        optionals (any (x: x) (attrValues utils)) (
+          # VCS tools
+          (optionals (category == "vcs") (
+            with pkgs;
+            (optional utils.git git)
+            ++ (optional utils.lazygit lazygit)
+            ++ (optional utils.gh gh)
+            ++ (optional utils.git-crypt git-crypt)
+          ))
+          ++
+          # Container tools
+          (optionals (category == "containers") (
+            with pkgs;
+            (optional utils.docker docker)
+            ++ (optional utils.podman podman)
+            ++ (optional utils.kubectl kubectl)
+            ++ (optional utils.helm helm)
+          ))
+          ++
+          # Database tools
+          (optionals (category == "databases") (
+            with pkgs;
+            (optional utils.sqlite sqlite)
+            ++ (optional utils.postgresql postgresql)
+            ++ (optional utils.redis redis)
+          ))
+          ++
+          # Cloud tools
+          (optionals (category == "cloud") (
+            with pkgs;
+            (optional utils.terraform terraform)
+            ++ (optional utils.ansible ansible)
+            ++ (optional utils.aws awscli2)
+            ++ (optional utils.gcp google-cloud-sdk)
+          ))
+          ++
+          # Monitoring tools
+          (optionals (category == "monitoring") (
+            with pkgs;
+            (optional utils.htop htop)
+            ++ (optional utils.btop btop)
+            ++ (optional utils.bandwhich bandwhich)
+            ++ (optional utils.ncdu ncdu)
+          ))
+        )
     )
     enabledUtilities);
 
-  aiPackages = with pkgs;
-    (optional cfg.ai.ollama ollama);
-
+  aiPackages = with pkgs; (optional cfg.ai.ollama ollama);
 in
 {
   # Language support packages
@@ -318,13 +322,14 @@ in
 
   # Language server configurations export for editors
   home.file.".config/development/lsp-config.json".text = builtins.toJSON {
-    languages = mapAttrs
-      (_name: lang: {
-        lsp = lang.lsp;
-        formatters = lang.formatters;
-        enabled = lang.enable;
-      })
-      cfg.languages;
+    languages =
+      mapAttrs
+        (_name: lang: {
+          lsp = lang.lsp;
+          formatters = lang.formatters;
+          enabled = lang.enable;
+        })
+        cfg.languages;
 
     paths = {
       nixd = "${pkgs.nixd}/bin/nixd";

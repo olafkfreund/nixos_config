@@ -41,8 +41,9 @@ let
     # User validation
     users = {
       noEmptyPasswords = {
-        assertion = !config.users.mutableUsers ||
-          (builtins.all (user: user.hashedPassword != null || user.passwordFile != null)
+        assertion =
+          !config.users.mutableUsers
+          || (builtins.all (user: user.hashedPassword != null || user.passwordFile != null)
             (builtins.attrValues config.users.users));
         message = "Users should have passwords set";
         severity = "error";
@@ -54,28 +55,27 @@ let
   runValidation = rules:
     let
       results = lib.flatten (lib.mapAttrsToList
-        (category: categoryRules:
-          lib.mapAttrsToList
-            (name: rule: {
-              inherit (rule) assertion message severity;
-              name = "${category}.${name}";
-              passed = rule.assertion;
-            })
-            categoryRules
+        (
+          category: categoryRules:
+            lib.mapAttrsToList
+              (name: rule: {
+                inherit (rule) assertion message severity;
+                name = "${category}.${name}";
+                passed = rule.assertion;
+              })
+              categoryRules
         )
         rules);
 
       errors = builtins.filter (r: !r.passed && r.severity == "error") results;
       warnings = builtins.filter (r: !r.passed && r.severity == "warning") results;
       info = builtins.filter (r: !r.passed && r.severity == "info") results;
-
     in
     {
       inherit results errors warnings info;
       hasErrors = errors != [ ];
       hasWarnings = warnings != [ ];
     };
-
 in
 {
   options = {
@@ -100,32 +100,37 @@ in
     in
     lib.mkIf config.validation.enable {
       # Convert validation results to assertions
-      assertions = map
-        (error: {
-          assertion = false;
-          message = "Validation Error [${error.name}]: ${error.message}";
-        })
-        validation.errors ++
-      (if config.validation.strictMode then
+      assertions =
         map
-          (warning: {
+          (error: {
             assertion = false;
-            message = "Validation Warning [${warning.name}]: ${warning.message}";
+            message = "Validation Error [${error.name}]: ${error.message}";
           })
-          validation.warnings
-      else [ ]);
+          validation.errors
+        ++ (
+          if config.validation.strictMode
+          then
+            map
+              (warning: {
+                assertion = false;
+                message = "Validation Warning [${warning.name}]: ${warning.message}";
+              })
+              validation.warnings
+          else [ ]
+        );
 
       # Add warnings to system
-      warnings = map
-        (warning:
-          "Validation Warning [${warning.name}]: ${warning.message}"
-        )
-        validation.warnings ++
-      map
-        (info:
-          "Validation Info [${info.name}]: ${info.message}"
-        )
-        validation.info;
+      warnings =
+        map
+          (
+            warning: "Validation Warning [${warning.name}]: ${warning.message}"
+          )
+          validation.warnings
+        ++ map
+          (
+            info: "Validation Info [${info.name}]: ${info.message}"
+          )
+          validation.info;
 
       # Export validation results for other tools
       _module.args.validationResults = validation;

@@ -17,41 +17,69 @@ with lib; let
         id = 1;
         title = "System Load";
         type = "stat";
-        targets = [{
-          expr = "node_load1";
-          legendFormat = "1m load";
-        }];
-        gridPos = { h = 8; w = 6; x = 0; y = 0; };
+        targets = [
+          {
+            expr = "node_load1";
+            legendFormat = "1m load";
+          }
+        ];
+        gridPos = {
+          h = 8;
+          w = 6;
+          x = 0;
+          y = 0;
+        };
       }
       {
         id = 2;
         title = "Memory Usage";
         type = "stat";
-        targets = [{
-          expr = "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100";
-          legendFormat = "Memory %";
-        }];
-        gridPos = { h = 8; w = 6; x = 6; y = 0; };
+        targets = [
+          {
+            expr = "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100";
+            legendFormat = "Memory %";
+          }
+        ];
+        gridPos = {
+          h = 8;
+          w = 6;
+          x = 6;
+          y = 0;
+        };
       }
       {
         id = 3;
         title = "CPU Usage";
         type = "timeseries";
-        targets = [{
-          expr = "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)";
-          legendFormat = "{{instance}}";
-        }];
-        gridPos = { h = 8; w = 12; x = 0; y = 8; };
+        targets = [
+          {
+            expr = "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)";
+            legendFormat = "{{instance}}";
+          }
+        ];
+        gridPos = {
+          h = 8;
+          w = 12;
+          x = 0;
+          y = 8;
+        };
       }
       {
         id = 4;
         title = "Disk Usage";
         type = "bargauge";
-        targets = [{
-          expr = "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\"} / node_filesystem_size_bytes{fstype!=\"tmpfs\"})) * 100";
-          legendFormat = "{{instance}} {{mountpoint}}";
-        }];
-        gridPos = { h = 8; w = 12; x = 12; y = 0; };
+        targets = [
+          {
+            expr = "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\"} / node_filesystem_size_bytes{fstype!=\"tmpfs\"})) * 100";
+            legendFormat = "{{instance}} {{mountpoint}}";
+          }
+        ];
+        gridPos = {
+          h = 8;
+          w = 12;
+          x = 12;
+          y = 0;
+        };
       }
       {
         id = 5;
@@ -67,7 +95,12 @@ with lib; let
             legendFormat = "{{instance}} TX";
           }
         ];
-        gridPos = { h = 8; w = 12; x = 12; y = 8; };
+        gridPos = {
+          h = 8;
+          w = 12;
+          x = 12;
+          y = 8;
+        };
       }
     ];
     time = {
@@ -78,104 +111,178 @@ with lib; let
   });
 
   # Host-specific dashboard generator
-  hostDashboard = hostname: hardware: pkgs.writeText "${hostname}-dashboard.json" (builtins.toJSON {
-    id = null;
-    title = "${hostname} - ${hardware}";
-    tags = [ "nixos" "host" hostname ];
-    timezone = "browser";
-    panels = [
-      {
-        id = 1;
-        title = "${hostname} Status";
-        type = "stat";
-        targets = [{
-          expr = "up{instance=\"${hostname}.home.freundcloud.com:9100\"}";
-          legendFormat = "Status";
-        }];
-        gridPos = { h = 4; w = 6; x = 0; y = 0; };
-        fieldConfig = {
-          defaults = {
-            mappings = [
-              { options = { "0" = { text = "DOWN"; color = "red"; }; }; type = "value"; }
-              { options = { "1" = { text = "UP"; color = "green"; }; }; type = "value"; }
+  hostDashboard = hostname: hardware:
+    pkgs.writeText "${hostname}-dashboard.json" (builtins.toJSON {
+      id = null;
+      title = "${hostname} - ${hardware}";
+      tags = [ "nixos" "host" hostname ];
+      timezone = "browser";
+      panels =
+        [
+          {
+            id = 1;
+            title = "${hostname} Status";
+            type = "stat";
+            targets = [
+              {
+                expr = "up{instance=\"${hostname}.home.freundcloud.com:9100\"}";
+                legendFormat = "Status";
+              }
             ];
-          };
-        };
-      }
-      {
-        id = 2;
-        title = "Uptime";
-        type = "stat";
-        targets = [{
-          expr = "node_time_seconds{instance=\"${hostname}.home.freundcloud.com:9100\"} - node_boot_time_seconds{instance=\"${hostname}.home.freundcloud.com:9100\"}";
-          legendFormat = "Uptime";
-        }];
-        gridPos = { h = 4; w = 6; x = 6; y = 0; };
-        fieldConfig = {
-          defaults = {
-            unit = "s";
-          };
-        };
-      }
-      {
-        id = 3;
-        title = "CPU Usage";
-        type = "timeseries";
-        targets = [{
-          expr = "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",instance=\"${hostname}.home.freundcloud.com:9100\"}[5m])) * 100)";
-          legendFormat = "CPU %";
-        }];
-        gridPos = { h = 8; w = 12; x = 0; y = 4; };
-      }
-      {
-        id = 4;
-        title = "Memory Usage";
-        type = "timeseries";
-        targets = [{
-          expr = "(1 - (node_memory_MemAvailable_bytes{instance=\"${hostname}.home.freundcloud.com:9100\"} / node_memory_MemTotal_bytes{instance=\"${hostname}.home.freundcloud.com:9100\"})) * 100";
-          legendFormat = "Memory %";
-        }];
-        gridPos = { h = 8; w = 12; x = 12; y = 4; };
-      }
-      {
-        id = 5;
-        title = "Disk Usage";
-        type = "bargauge";
-        targets = [{
-          expr = "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\",instance=\"${hostname}.home.freundcloud.com:9100\"} / node_filesystem_size_bytes{fstype!=\"tmpfs\",instance=\"${hostname}.home.freundcloud.com:9100\"})) * 100";
-          legendFormat = "{{mountpoint}}";
-        }];
-        gridPos = { h = 8; w = 24; x = 0; y = 12; };
-      }
-    ] ++ (if (hardware == "AMD") then [
-      {
-        id = 10;
-        title = "AMD GPU Usage";
-        type = "timeseries";
-        targets = [{
-          expr = "rocm_gpu_usage{instance=\"${hostname}.home.freundcloud.com:9100\"}";
-          legendFormat = "GPU {{device}}";
-        }];
-        gridPos = { h = 8; w = 12; x = 0; y = 20; };
-      }
-    ] else if (hardware == "NVIDIA") then [
-      {
-        id = 11;
-        title = "NVIDIA GPU Usage";
-        type = "timeseries";
-        targets = [{
-          expr = "nvidia_smi_utilization_gpu_ratio{instance=\"${hostname}.home.freundcloud.com:9400\"}";
-          legendFormat = "GPU {{device}}";
-        }];
-        gridPos = { h = 8; w = 12; x = 0; y = 20; };
-      }
-    ] else [ ]);
-    time = {
-      from = "now-6h";
-      to = "now";
-    };
-    refresh = "30s";
-  });
+            gridPos = {
+              h = 4;
+              w = 6;
+              x = 0;
+              y = 0;
+            };
+            fieldConfig = {
+              defaults = {
+                mappings = [
+                  {
+                    options = {
+                      "0" = {
+                        text = "DOWN";
+                        color = "red";
+                      };
+                    };
+                    type = "value";
+                  }
+                  {
+                    options = {
+                      "1" = {
+                        text = "UP";
+                        color = "green";
+                      };
+                    };
+                    type = "value";
+                  }
+                ];
+              };
+            };
+          }
+          {
+            id = 2;
+            title = "Uptime";
+            type = "stat";
+            targets = [
+              {
+                expr = "node_time_seconds{instance=\"${hostname}.home.freundcloud.com:9100\"} - node_boot_time_seconds{instance=\"${hostname}.home.freundcloud.com:9100\"}";
+                legendFormat = "Uptime";
+              }
+            ];
+            gridPos = {
+              h = 4;
+              w = 6;
+              x = 6;
+              y = 0;
+            };
+            fieldConfig = {
+              defaults = {
+                unit = "s";
+              };
+            };
+          }
+          {
+            id = 3;
+            title = "CPU Usage";
+            type = "timeseries";
+            targets = [
+              {
+                expr = "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",instance=\"${hostname}.home.freundcloud.com:9100\"}[5m])) * 100)";
+                legendFormat = "CPU %";
+              }
+            ];
+            gridPos = {
+              h = 8;
+              w = 12;
+              x = 0;
+              y = 4;
+            };
+          }
+          {
+            id = 4;
+            title = "Memory Usage";
+            type = "timeseries";
+            targets = [
+              {
+                expr = "(1 - (node_memory_MemAvailable_bytes{instance=\"${hostname}.home.freundcloud.com:9100\"} / node_memory_MemTotal_bytes{instance=\"${hostname}.home.freundcloud.com:9100\"})) * 100";
+                legendFormat = "Memory %";
+              }
+            ];
+            gridPos = {
+              h = 8;
+              w = 12;
+              x = 12;
+              y = 4;
+            };
+          }
+          {
+            id = 5;
+            title = "Disk Usage";
+            type = "bargauge";
+            targets = [
+              {
+                expr = "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\",instance=\"${hostname}.home.freundcloud.com:9100\"} / node_filesystem_size_bytes{fstype!=\"tmpfs\",instance=\"${hostname}.home.freundcloud.com:9100\"})) * 100";
+                legendFormat = "{{mountpoint}}";
+              }
+            ];
+            gridPos = {
+              h = 8;
+              w = 24;
+              x = 0;
+              y = 12;
+            };
+          }
+        ]
+        ++ (
+          if (hardware == "AMD")
+          then [
+            {
+              id = 10;
+              title = "AMD GPU Usage";
+              type = "timeseries";
+              targets = [
+                {
+                  expr = "rocm_gpu_usage{instance=\"${hostname}.home.freundcloud.com:9100\"}";
+                  legendFormat = "GPU {{device}}";
+                }
+              ];
+              gridPos = {
+                h = 8;
+                w = 12;
+                x = 0;
+                y = 20;
+              };
+            }
+          ]
+          else if (hardware == "NVIDIA")
+          then [
+            {
+              id = 11;
+              title = "NVIDIA GPU Usage";
+              type = "timeseries";
+              targets = [
+                {
+                  expr = "nvidia_smi_utilization_gpu_ratio{instance=\"${hostname}.home.freundcloud.com:9400\"}";
+                  legendFormat = "GPU {{device}}";
+                }
+              ];
+              gridPos = {
+                h = 8;
+                w = 12;
+                x = 0;
+                y = 20;
+              };
+            }
+          ]
+          else [ ]
+        );
+      time = {
+        from = "now-6h";
+        to = "now";
+      };
+      refresh = "30s";
+    });
 
   # Media services dashboards
   plexDashboard = pkgs.writeText "plex-dashboard.json" (builtins.toJSON {
@@ -188,16 +295,39 @@ with lib; let
         id = 1;
         title = "Plex Service Status";
         type = "stat";
-        targets = [{
-          expr = "systemd_unit_state{name=\"plex.service\",instance=\"p510.home.freundcloud.com:9102\"}";
-          legendFormat = "Service State";
-        }];
-        gridPos = { h = 4; w = 6; x = 0; y = 0; };
+        targets = [
+          {
+            expr = "systemd_unit_state{name=\"plex.service\",instance=\"p510.home.freundcloud.com:9102\"}";
+            legendFormat = "Service State";
+          }
+        ];
+        gridPos = {
+          h = 4;
+          w = 6;
+          x = 0;
+          y = 0;
+        };
         fieldConfig = {
           defaults = {
             mappings = [
-              { options = { "1" = { text = "ACTIVE"; color = "green"; }; }; type = "value"; }
-              { options = { "0" = { text = "INACTIVE"; color = "red"; }; }; type = "value"; }
+              {
+                options = {
+                  "1" = {
+                    text = "ACTIVE";
+                    color = "green";
+                  };
+                };
+                type = "value";
+              }
+              {
+                options = {
+                  "0" = {
+                    text = "INACTIVE";
+                    color = "red";
+                  };
+                };
+                type = "value";
+              }
             ];
           };
         };
@@ -206,31 +336,52 @@ with lib; let
         id = 2;
         title = "Server CPU Usage";
         type = "timeseries";
-        targets = [{
-          expr = "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",instance=\"p510.home.freundcloud.com:9100\"}[5m])) * 100)";
-          legendFormat = "CPU %";
-        }];
-        gridPos = { h = 8; w = 12; x = 0; y = 4; };
+        targets = [
+          {
+            expr = "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",instance=\"p510.home.freundcloud.com:9100\"}[5m])) * 100)";
+            legendFormat = "CPU %";
+          }
+        ];
+        gridPos = {
+          h = 8;
+          w = 12;
+          x = 0;
+          y = 4;
+        };
       }
       {
         id = 3;
         title = "Server Memory Usage";
         type = "timeseries";
-        targets = [{
-          expr = "(1 - (node_memory_MemAvailable_bytes{instance=\"p510.home.freundcloud.com:9100\"} / node_memory_MemTotal_bytes{instance=\"p510.home.freundcloud.com:9100\"})) * 100";
-          legendFormat = "Memory %";
-        }];
-        gridPos = { h = 8; w = 12; x = 12; y = 4; };
+        targets = [
+          {
+            expr = "(1 - (node_memory_MemAvailable_bytes{instance=\"p510.home.freundcloud.com:9100\"} / node_memory_MemTotal_bytes{instance=\"p510.home.freundcloud.com:9100\"})) * 100";
+            legendFormat = "Memory %";
+          }
+        ];
+        gridPos = {
+          h = 8;
+          w = 12;
+          x = 12;
+          y = 4;
+        };
       }
       {
         id = 4;
         title = "Media Storage Usage";
         type = "bargauge";
-        targets = [{
-          expr = "(1 - (node_filesystem_avail_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"} / node_filesystem_size_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"})) * 100";
-          legendFormat = "Media Storage";
-        }];
-        gridPos = { h = 6; w = 24; x = 0; y = 12; };
+        targets = [
+          {
+            expr = "(1 - (node_filesystem_avail_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"} / node_filesystem_size_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"})) * 100";
+            legendFormat = "Media Storage";
+          }
+        ];
+        gridPos = {
+          h = 6;
+          w = 24;
+          x = 0;
+          y = 12;
+        };
       }
     ];
     time = {
@@ -250,16 +401,39 @@ with lib; let
         id = 1;
         title = "Sonarr Service Status";
         type = "stat";
-        targets = [{
-          expr = "systemd_unit_state{name=\"sonarr.service\",instance=\"p510.home.freundcloud.com:9102\"}";
-          legendFormat = "Service State";
-        }];
-        gridPos = { h = 4; w = 6; x = 0; y = 0; };
+        targets = [
+          {
+            expr = "systemd_unit_state{name=\"sonarr.service\",instance=\"p510.home.freundcloud.com:9102\"}";
+            legendFormat = "Service State";
+          }
+        ];
+        gridPos = {
+          h = 4;
+          w = 6;
+          x = 0;
+          y = 0;
+        };
         fieldConfig = {
           defaults = {
             mappings = [
-              { options = { "1" = { text = "ACTIVE"; color = "green"; }; }; type = "value"; }
-              { options = { "0" = { text = "INACTIVE"; color = "red"; }; }; type = "value"; }
+              {
+                options = {
+                  "1" = {
+                    text = "ACTIVE";
+                    color = "green";
+                  };
+                };
+                type = "value";
+              }
+              {
+                options = {
+                  "0" = {
+                    text = "INACTIVE";
+                    color = "red";
+                  };
+                };
+                type = "value";
+              }
             ];
           };
         };
@@ -268,11 +442,18 @@ with lib; let
         id = 2;
         title = "Downloads Directory Usage";
         type = "stat";
-        targets = [{
-          expr = "node_filesystem_size_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"} - node_filesystem_avail_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"}";
-          legendFormat = "Used Space";
-        }];
-        gridPos = { h = 4; w = 6; x = 6; y = 0; };
+        targets = [
+          {
+            expr = "node_filesystem_size_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"} - node_filesystem_avail_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"}";
+            legendFormat = "Used Space";
+          }
+        ];
+        gridPos = {
+          h = 4;
+          w = 6;
+          x = 6;
+          y = 0;
+        };
         fieldConfig = {
           defaults = {
             unit = "bytes";
@@ -293,7 +474,12 @@ with lib; let
             legendFormat = "Upload";
           }
         ];
-        gridPos = { h = 8; w = 24; x = 0; y = 4; };
+        gridPos = {
+          h = 8;
+          w = 24;
+          x = 0;
+          y = 4;
+        };
       }
     ];
     time = {
@@ -313,16 +499,39 @@ with lib; let
         id = 1;
         title = "Radarr Service Status";
         type = "stat";
-        targets = [{
-          expr = "systemd_unit_state{name=\"radarr.service\",instance=\"p510.home.freundcloud.com:9102\"}";
-          legendFormat = "Service State";
-        }];
-        gridPos = { h = 4; w = 6; x = 0; y = 0; };
+        targets = [
+          {
+            expr = "systemd_unit_state{name=\"radarr.service\",instance=\"p510.home.freundcloud.com:9102\"}";
+            legendFormat = "Service State";
+          }
+        ];
+        gridPos = {
+          h = 4;
+          w = 6;
+          x = 0;
+          y = 0;
+        };
         fieldConfig = {
           defaults = {
             mappings = [
-              { options = { "1" = { text = "ACTIVE"; color = "green"; }; }; type = "value"; }
-              { options = { "0" = { text = "INACTIVE"; color = "red"; }; }; type = "value"; }
+              {
+                options = {
+                  "1" = {
+                    text = "ACTIVE";
+                    color = "green";
+                  };
+                };
+                type = "value";
+              }
+              {
+                options = {
+                  "0" = {
+                    text = "INACTIVE";
+                    color = "red";
+                  };
+                };
+                type = "value";
+              }
             ];
           };
         };
@@ -331,11 +540,18 @@ with lib; let
         id = 2;
         title = "Movie Storage Usage";
         type = "stat";
-        targets = [{
-          expr = "node_filesystem_size_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"} - node_filesystem_avail_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"}";
-          legendFormat = "Used Space";
-        }];
-        gridPos = { h = 4; w = 6; x = 6; y = 0; };
+        targets = [
+          {
+            expr = "node_filesystem_size_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"} - node_filesystem_avail_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"}";
+            legendFormat = "Used Space";
+          }
+        ];
+        gridPos = {
+          h = 4;
+          w = 6;
+          x = 6;
+          y = 0;
+        };
         fieldConfig = {
           defaults = {
             unit = "bytes";
@@ -356,7 +572,12 @@ with lib; let
             legendFormat = "Write";
           }
         ];
-        gridPos = { h = 8; w = 24; x = 0; y = 4; };
+        gridPos = {
+          h = 8;
+          w = 24;
+          x = 0;
+          y = 4;
+        };
       }
     ];
     time = {
@@ -376,16 +597,39 @@ with lib; let
         id = 1;
         title = "Lidarr Service Status";
         type = "stat";
-        targets = [{
-          expr = "systemd_unit_state{name=\"lidarr.service\",instance=\"p510.home.freundcloud.com:9102\"}";
-          legendFormat = "Service State";
-        }];
-        gridPos = { h = 4; w = 6; x = 0; y = 0; };
+        targets = [
+          {
+            expr = "systemd_unit_state{name=\"lidarr.service\",instance=\"p510.home.freundcloud.com:9102\"}";
+            legendFormat = "Service State";
+          }
+        ];
+        gridPos = {
+          h = 4;
+          w = 6;
+          x = 0;
+          y = 0;
+        };
         fieldConfig = {
           defaults = {
             mappings = [
-              { options = { "1" = { text = "ACTIVE"; color = "green"; }; }; type = "value"; }
-              { options = { "0" = { text = "INACTIVE"; color = "red"; }; }; type = "value"; }
+              {
+                options = {
+                  "1" = {
+                    text = "ACTIVE";
+                    color = "green";
+                  };
+                };
+                type = "value";
+              }
+              {
+                options = {
+                  "0" = {
+                    text = "INACTIVE";
+                    color = "red";
+                  };
+                };
+                type = "value";
+              }
             ];
           };
         };
@@ -394,11 +638,18 @@ with lib; let
         id = 2;
         title = "Music Library Size";
         type = "stat";
-        targets = [{
-          expr = "node_filesystem_size_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"} - node_filesystem_avail_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"}";
-          legendFormat = "Used Space";
-        }];
-        gridPos = { h = 4; w = 6; x = 6; y = 0; };
+        targets = [
+          {
+            expr = "node_filesystem_size_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"} - node_filesystem_avail_bytes{mountpoint=\"/mnt/media\",instance=\"p510.home.freundcloud.com:9100\"}";
+            legendFormat = "Used Space";
+          }
+        ];
+        gridPos = {
+          h = 4;
+          w = 6;
+          x = 6;
+          y = 0;
+        };
         fieldConfig = {
           defaults = {
             unit = "bytes";
@@ -423,7 +674,12 @@ with lib; let
             legendFormat = "15m";
           }
         ];
-        gridPos = { h = 8; w = 24; x = 0; y = 4; };
+        gridPos = {
+          h = 8;
+          w = 24;
+          x = 0;
+          y = 4;
+        };
       }
     ];
     time = {
@@ -443,16 +699,39 @@ with lib; let
         id = 1;
         title = "Prowlarr Service Status";
         type = "stat";
-        targets = [{
-          expr = "systemd_unit_state{name=\"prowlarr.service\",instance=\"p510.home.freundcloud.com:9102\"}";
-          legendFormat = "Service State";
-        }];
-        gridPos = { h = 4; w = 6; x = 0; y = 0; };
+        targets = [
+          {
+            expr = "systemd_unit_state{name=\"prowlarr.service\",instance=\"p510.home.freundcloud.com:9102\"}";
+            legendFormat = "Service State";
+          }
+        ];
+        gridPos = {
+          h = 4;
+          w = 6;
+          x = 0;
+          y = 0;
+        };
         fieldConfig = {
           defaults = {
             mappings = [
-              { options = { "1" = { text = "ACTIVE"; color = "green"; }; }; type = "value"; }
-              { options = { "0" = { text = "INACTIVE"; color = "red"; }; }; type = "value"; }
+              {
+                options = {
+                  "1" = {
+                    text = "ACTIVE";
+                    color = "green";
+                  };
+                };
+                type = "value";
+              }
+              {
+                options = {
+                  "0" = {
+                    text = "INACTIVE";
+                    color = "red";
+                  };
+                };
+                type = "value";
+              }
             ];
           };
         };
@@ -461,11 +740,18 @@ with lib; let
         id = 2;
         title = "Indexer Management Load";
         type = "stat";
-        targets = [{
-          expr = "node_load1{instance=\"p510.home.freundcloud.com:9100\"}";
-          legendFormat = "System Load";
-        }];
-        gridPos = { h = 4; w = 6; x = 6; y = 0; };
+        targets = [
+          {
+            expr = "node_load1{instance=\"p510.home.freundcloud.com:9100\"}";
+            legendFormat = "System Load";
+          }
+        ];
+        gridPos = {
+          h = 4;
+          w = 6;
+          x = 6;
+          y = 0;
+        };
         fieldConfig = {
           defaults = {
             min = 0;
@@ -487,17 +773,29 @@ with lib; let
             legendFormat = "Upload";
           }
         ];
-        gridPos = { h = 8; w = 12; x = 0; y = 4; };
+        gridPos = {
+          h = 8;
+          w = 12;
+          x = 0;
+          y = 4;
+        };
       }
       {
         id = 4;
         title = "Memory Usage";
         type = "timeseries";
-        targets = [{
-          expr = "(1 - (node_memory_MemAvailable_bytes{instance=\"p510.home.freundcloud.com:9100\"} / node_memory_MemTotal_bytes{instance=\"p510.home.freundcloud.com:9100\"})) * 100";
-          legendFormat = "Memory %";
-        }];
-        gridPos = { h = 8; w = 12; x = 12; y = 4; };
+        targets = [
+          {
+            expr = "(1 - (node_memory_MemAvailable_bytes{instance=\"p510.home.freundcloud.com:9100\"} / node_memory_MemTotal_bytes{instance=\"p510.home.freundcloud.com:9100\"})) * 100";
+            legendFormat = "Memory %";
+          }
+        ];
+        gridPos = {
+          h = 8;
+          w = 12;
+          x = 12;
+          y = 4;
+        };
       }
     ];
     time = {
@@ -518,11 +816,18 @@ with lib; let
         id = 1;
         title = "System Logs";
         type = "logs";
-        targets = [{
-          expr = "{job=\"systemd-journal\"} |= \"\"";
-          refId = "A";
-        }];
-        gridPos = { h = 12; w = 24; x = 0; y = 0; };
+        targets = [
+          {
+            expr = "{job=\"systemd-journal\"} |= \"\"";
+            refId = "A";
+          }
+        ];
+        gridPos = {
+          h = 12;
+          w = 24;
+          x = 0;
+          y = 0;
+        };
         options = {
           showTime = true;
           showLabels = true;
@@ -542,11 +847,18 @@ with lib; let
         id = 2;
         title = "Error Logs";
         type = "logs";
-        targets = [{
-          expr = "{job=\"systemd-journal\"} |~ \"(?i)error|fail|exception|critical\"";
-          refId = "B";
-        }];
-        gridPos = { h = 12; w = 24; x = 0; y = 12; };
+        targets = [
+          {
+            expr = "{job=\"systemd-journal\"} |~ \"(?i)error|fail|exception|critical\"";
+            refId = "B";
+          }
+        ];
+        gridPos = {
+          h = 12;
+          w = 24;
+          x = 0;
+          y = 12;
+        };
         options = {
           showTime = true;
           showLabels = true;
@@ -566,11 +878,18 @@ with lib; let
         id = 3;
         title = "Application Logs";
         type = "logs";
-        targets = [{
-          expr = "{job=\"application-logs\"} |= \"\"";
-          refId = "C";
-        }];
-        gridPos = { h = 12; w = 24; x = 0; y = 24; };
+        targets = [
+          {
+            expr = "{job=\"application-logs\"} |= \"\"";
+            refId = "C";
+          }
+        ];
+        gridPos = {
+          h = 12;
+          w = 24;
+          x = 0;
+          y = 24;
+        };
         options = {
           showTime = true;
           showLabels = true;
@@ -590,11 +909,18 @@ with lib; let
         id = 4;
         title = "Log Volume by Host";
         type = "timeseries";
-        targets = [{
-          expr = "sum by (host) (rate({job=\"systemd-journal\"}[5m]))";
-          refId = "D";
-        }];
-        gridPos = { h = 8; w = 12; x = 0; y = 36; };
+        targets = [
+          {
+            expr = "sum by (host) (rate({job=\"systemd-journal\"}[5m]))";
+            refId = "D";
+          }
+        ];
+        gridPos = {
+          h = 8;
+          w = 12;
+          x = 0;
+          y = 36;
+        };
         datasource = {
           type = "loki";
           uid = "P8E80F9AEF21F6940";
@@ -604,11 +930,18 @@ with lib; let
         id = 5;
         title = "Log Levels";
         type = "piechart";
-        targets = [{
-          expr = "sum by (priority) (count_over_time({job=\"systemd-journal\"}[1h]))";
-          refId = "E";
-        }];
-        gridPos = { h = 8; w = 12; x = 12; y = 36; };
+        targets = [
+          {
+            expr = "sum by (priority) (count_over_time({job=\"systemd-journal\"}[1h]))";
+            refId = "E";
+          }
+        ];
+        gridPos = {
+          h = 8;
+          w = 12;
+          x = 12;
+          y = 36;
+        };
         datasource = {
           type = "loki";
           uid = "P8E80F9AEF21F6940";
@@ -623,383 +956,551 @@ with lib; let
   });
 
   # GPU Dashboard for NVIDIA systems
-  gpuDashboard = hostname: pkgs.writeText "${hostname}-gpu-dashboard.json" (builtins.toJSON {
-    id = null;
-    title = "${hostname} - NVIDIA GPU";
-    tags = [ "nvidia" "gpu" hostname ];
-    timezone = "browser";
-    panels = [
-      {
-        id = 1;
-        title = "GPU Utilization";
-        type = "stat";
-        targets = [{
-          expr = "nvidia_smi_utilization_gpu_ratio{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
-          legendFormat = "GPU %";
-          refId = "A";
-        }];
-        gridPos = { h = 8; w = 8; x = 0; y = 0; };
-        fieldConfig = {
-          defaults = {
-            unit = "percent";
-            max = 100;
-            min = 0;
-            thresholds = {
-              steps = [
-                { color = "green"; value = 0; }
-                { color = "yellow"; value = 50; }
-                { color = "red"; value = 80; }
-              ];
+  gpuDashboard = hostname:
+    pkgs.writeText "${hostname}-gpu-dashboard.json" (builtins.toJSON {
+      id = null;
+      title = "${hostname} - NVIDIA GPU";
+      tags = [ "nvidia" "gpu" hostname ];
+      timezone = "browser";
+      panels = [
+        {
+          id = 1;
+          title = "GPU Utilization";
+          type = "stat";
+          targets = [
+            {
+              expr = "nvidia_smi_utilization_gpu_ratio{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
+              legendFormat = "GPU %";
+              refId = "A";
+            }
+          ];
+          gridPos = {
+            h = 8;
+            w = 8;
+            x = 0;
+            y = 0;
+          };
+          fieldConfig = {
+            defaults = {
+              unit = "percent";
+              max = 100;
+              min = 0;
+              thresholds = {
+                steps = [
+                  {
+                    color = "green";
+                    value = 0;
+                  }
+                  {
+                    color = "yellow";
+                    value = 50;
+                  }
+                  {
+                    color = "red";
+                    value = 80;
+                  }
+                ];
+              };
             };
           };
-        };
-      }
-      {
-        id = 2;
-        title = "GPU Memory Usage";
-        type = "stat";
-        targets = [{
-          expr = "nvidia_smi_memory_used_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"} / nvidia_smi_memory_total_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"} * 100";
-          legendFormat = "Memory %";
-          refId = "B";
-        }];
-        gridPos = { h = 8; w = 8; x = 8; y = 0; };
-        fieldConfig = {
-          defaults = {
-            unit = "percent";
-            max = 100;
-            min = 0;
-            thresholds = {
-              steps = [
-                { color = "green"; value = 0; }
-                { color = "yellow"; value = 70; }
-                { color = "red"; value = 85; }
-              ];
+        }
+        {
+          id = 2;
+          title = "GPU Memory Usage";
+          type = "stat";
+          targets = [
+            {
+              expr = "nvidia_smi_memory_used_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"} / nvidia_smi_memory_total_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"} * 100";
+              legendFormat = "Memory %";
+              refId = "B";
+            }
+          ];
+          gridPos = {
+            h = 8;
+            w = 8;
+            x = 8;
+            y = 0;
+          };
+          fieldConfig = {
+            defaults = {
+              unit = "percent";
+              max = 100;
+              min = 0;
+              thresholds = {
+                steps = [
+                  {
+                    color = "green";
+                    value = 0;
+                  }
+                  {
+                    color = "yellow";
+                    value = 70;
+                  }
+                  {
+                    color = "red";
+                    value = 85;
+                  }
+                ];
+              };
             };
           };
-        };
-      }
-      {
-        id = 3;
-        title = "GPU Temperature";
-        type = "stat";
-        targets = [{
-          expr = "nvidia_smi_temperature_gpu{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
-          legendFormat = "Temperature °C";
-          refId = "C";
-        }];
-        gridPos = { h = 8; w = 8; x = 16; y = 0; };
-        fieldConfig = {
-          defaults = {
-            unit = "celsius";
-            thresholds = {
-              steps = [
-                { color = "green"; value = 0; }
-                { color = "yellow"; value = 70; }
-                { color = "red"; value = 85; }
-              ];
+        }
+        {
+          id = 3;
+          title = "GPU Temperature";
+          type = "stat";
+          targets = [
+            {
+              expr = "nvidia_smi_temperature_gpu{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
+              legendFormat = "Temperature °C";
+              refId = "C";
+            }
+          ];
+          gridPos = {
+            h = 8;
+            w = 8;
+            x = 16;
+            y = 0;
+          };
+          fieldConfig = {
+            defaults = {
+              unit = "celsius";
+              thresholds = {
+                steps = [
+                  {
+                    color = "green";
+                    value = 0;
+                  }
+                  {
+                    color = "yellow";
+                    value = 70;
+                  }
+                  {
+                    color = "red";
+                    value = 85;
+                  }
+                ];
+              };
             };
           };
-        };
-      }
-      {
-        id = 4;
-        title = "GPU Utilization Over Time";
-        type = "timeseries";
-        targets = [{
-          expr = "nvidia_smi_utilization_gpu_ratio{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
-          legendFormat = "GPU Utilization %";
-          refId = "D";
-        }];
-        gridPos = { h = 8; w = 12; x = 0; y = 8; };
-        fieldConfig = {
-          defaults = {
-            unit = "percent";
-            max = 100;
-            min = 0;
+        }
+        {
+          id = 4;
+          title = "GPU Utilization Over Time";
+          type = "timeseries";
+          targets = [
+            {
+              expr = "nvidia_smi_utilization_gpu_ratio{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
+              legendFormat = "GPU Utilization %";
+              refId = "D";
+            }
+          ];
+          gridPos = {
+            h = 8;
+            w = 12;
+            x = 0;
+            y = 8;
           };
-        };
-      }
-      {
-        id = 5;
-        title = "GPU Memory Usage Over Time";
-        type = "timeseries";
-        targets = [
-          {
-            expr = "nvidia_smi_memory_used_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
-            legendFormat = "Memory Used";
-            refId = "E";
-          }
-          {
-            expr = "nvidia_smi_memory_total_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
-            legendFormat = "Memory Total";
-            refId = "F";
-          }
-        ];
-        gridPos = { h = 8; w = 12; x = 12; y = 8; };
-        fieldConfig = {
-          defaults = {
-            unit = "bytes";
+          fieldConfig = {
+            defaults = {
+              unit = "percent";
+              max = 100;
+              min = 0;
+            };
           };
-        };
-      }
-      {
-        id = 6;
-        title = "GPU Power Usage";
-        type = "timeseries";
-        targets = [{
-          expr = "nvidia_smi_power_draw_watts{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
-          legendFormat = "Power Draw W";
-          refId = "G";
-        }];
-        gridPos = { h = 8; w = 12; x = 0; y = 16; };
-        fieldConfig = {
-          defaults = {
-            unit = "watt";
+        }
+        {
+          id = 5;
+          title = "GPU Memory Usage Over Time";
+          type = "timeseries";
+          targets = [
+            {
+              expr = "nvidia_smi_memory_used_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
+              legendFormat = "Memory Used";
+              refId = "E";
+            }
+            {
+              expr = "nvidia_smi_memory_total_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
+              legendFormat = "Memory Total";
+              refId = "F";
+            }
+          ];
+          gridPos = {
+            h = 8;
+            w = 12;
+            x = 12;
+            y = 8;
           };
-        };
-      }
-      {
-        id = 7;
-        title = "GPU Fan Speed";
-        type = "timeseries";
-        targets = [{
-          expr = "node_hwmon_fan_rpm{instance=\"${hostname}.home.freundcloud.com:9100\"}";
-          legendFormat = "Fan Speed RPM";
-          refId = "H";
-        }];
-        gridPos = { h = 8; w = 12; x = 12; y = 16; };
-        fieldConfig = {
-          defaults = {
-            unit = "rpm";
+          fieldConfig = {
+            defaults = {
+              unit = "bytes";
+            };
           };
-        };
-      }
-    ];
-    time = {
-      from = "now-1h";
-      to = "now";
-    };
-    refresh = "30s";
-  });
+        }
+        {
+          id = 6;
+          title = "GPU Power Usage";
+          type = "timeseries";
+          targets = [
+            {
+              expr = "nvidia_smi_power_draw_watts{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.gpuExporterPort}\"}";
+              legendFormat = "Power Draw W";
+              refId = "G";
+            }
+          ];
+          gridPos = {
+            h = 8;
+            w = 12;
+            x = 0;
+            y = 16;
+          };
+          fieldConfig = {
+            defaults = {
+              unit = "watt";
+            };
+          };
+        }
+        {
+          id = 7;
+          title = "GPU Fan Speed";
+          type = "timeseries";
+          targets = [
+            {
+              expr = "node_hwmon_fan_rpm{instance=\"${hostname}.home.freundcloud.com:9100\"}";
+              legendFormat = "Fan Speed RPM";
+              refId = "H";
+            }
+          ];
+          gridPos = {
+            h = 8;
+            w = 12;
+            x = 12;
+            y = 16;
+          };
+          fieldConfig = {
+            defaults = {
+              unit = "rpm";
+            };
+          };
+        }
+      ];
+      time = {
+        from = "now-1h";
+        to = "now";
+      };
+      refresh = "30s";
+    });
 
   # AMD GPU Dashboard
-  amdGpuDashboard = hostname: pkgs.writeText "${hostname}-amd-gpu-dashboard.json" (builtins.toJSON {
-    id = null;
-    title = "${hostname} - AMD GPU";
-    tags = [ "amd" "gpu" "rocm" hostname ];
-    timezone = "browser";
-    panels = [
-      {
-        id = 1;
-        title = "GPU Utilization";
-        type = "stat";
-        targets = [{
-          expr = "amd_gpu_utilization_percent{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
-          legendFormat = "GPU %";
-          refId = "A";
-        }];
-        gridPos = { h = 8; w = 8; x = 0; y = 0; };
-        fieldConfig = {
-          defaults = {
-            unit = "percent";
-            max = 100;
-            min = 0;
-            thresholds = {
-              steps = [
-                { color = "green"; value = 0; }
-                { color = "yellow"; value = 50; }
-                { color = "red"; value = 80; }
-              ];
+  amdGpuDashboard = hostname:
+    pkgs.writeText "${hostname}-amd-gpu-dashboard.json" (builtins.toJSON {
+      id = null;
+      title = "${hostname} - AMD GPU";
+      tags = [ "amd" "gpu" "rocm" hostname ];
+      timezone = "browser";
+      panels = [
+        {
+          id = 1;
+          title = "GPU Utilization";
+          type = "stat";
+          targets = [
+            {
+              expr = "amd_gpu_utilization_percent{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
+              legendFormat = "GPU %";
+              refId = "A";
+            }
+          ];
+          gridPos = {
+            h = 8;
+            w = 8;
+            x = 0;
+            y = 0;
+          };
+          fieldConfig = {
+            defaults = {
+              unit = "percent";
+              max = 100;
+              min = 0;
+              thresholds = {
+                steps = [
+                  {
+                    color = "green";
+                    value = 0;
+                  }
+                  {
+                    color = "yellow";
+                    value = 50;
+                  }
+                  {
+                    color = "red";
+                    value = 80;
+                  }
+                ];
+              };
             };
           };
-        };
-      }
-      {
-        id = 2;
-        title = "GPU Memory Usage";
-        type = "stat";
-        targets = [{
-          expr = "amd_gpu_memory_used_percent{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
-          legendFormat = "Memory %";
-          refId = "B";
-        }];
-        gridPos = { h = 8; w = 8; x = 8; y = 0; };
-        fieldConfig = {
-          defaults = {
-            unit = "percent";
-            max = 100;
-            min = 0;
-            thresholds = {
-              steps = [
-                { color = "green"; value = 0; }
-                { color = "yellow"; value = 70; }
-                { color = "red"; value = 85; }
-              ];
+        }
+        {
+          id = 2;
+          title = "GPU Memory Usage";
+          type = "stat";
+          targets = [
+            {
+              expr = "amd_gpu_memory_used_percent{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
+              legendFormat = "Memory %";
+              refId = "B";
+            }
+          ];
+          gridPos = {
+            h = 8;
+            w = 8;
+            x = 8;
+            y = 0;
+          };
+          fieldConfig = {
+            defaults = {
+              unit = "percent";
+              max = 100;
+              min = 0;
+              thresholds = {
+                steps = [
+                  {
+                    color = "green";
+                    value = 0;
+                  }
+                  {
+                    color = "yellow";
+                    value = 70;
+                  }
+                  {
+                    color = "red";
+                    value = 85;
+                  }
+                ];
+              };
             };
           };
-        };
-      }
-      {
-        id = 3;
-        title = "GPU Temperature";
-        type = "stat";
-        targets = [{
-          expr = "amd_gpu_temperature_celsius{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
-          legendFormat = "Temperature °C";
-          refId = "C";
-        }];
-        gridPos = { h = 8; w = 8; x = 16; y = 0; };
-        fieldConfig = {
-          defaults = {
-            unit = "celsius";
-            thresholds = {
-              steps = [
-                { color = "green"; value = 0; }
-                { color = "yellow"; value = 75; }
-                { color = "red"; value = 85; }
-              ];
+        }
+        {
+          id = 3;
+          title = "GPU Temperature";
+          type = "stat";
+          targets = [
+            {
+              expr = "amd_gpu_temperature_celsius{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
+              legendFormat = "Temperature °C";
+              refId = "C";
+            }
+          ];
+          gridPos = {
+            h = 8;
+            w = 8;
+            x = 16;
+            y = 0;
+          };
+          fieldConfig = {
+            defaults = {
+              unit = "celsius";
+              thresholds = {
+                steps = [
+                  {
+                    color = "green";
+                    value = 0;
+                  }
+                  {
+                    color = "yellow";
+                    value = 75;
+                  }
+                  {
+                    color = "red";
+                    value = 85;
+                  }
+                ];
+              };
             };
           };
-        };
-      }
-      {
-        id = 4;
-        title = "GPU Power Usage";
-        type = "stat";
-        targets = [{
-          expr = "amd_gpu_power_watts{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
-          legendFormat = "Power W";
-          refId = "D";
-        }];
-        gridPos = { h = 8; w = 8; x = 0; y = 8; };
-        fieldConfig = {
-          defaults = {
-            unit = "watt";
-            thresholds = {
-              steps = [
-                { color = "green"; value = 0; }
-                { color = "yellow"; value = 200; }
-                { color = "red"; value = 250; }
-              ];
+        }
+        {
+          id = 4;
+          title = "GPU Power Usage";
+          type = "stat";
+          targets = [
+            {
+              expr = "amd_gpu_power_watts{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
+              legendFormat = "Power W";
+              refId = "D";
+            }
+          ];
+          gridPos = {
+            h = 8;
+            w = 8;
+            x = 0;
+            y = 8;
+          };
+          fieldConfig = {
+            defaults = {
+              unit = "watt";
+              thresholds = {
+                steps = [
+                  {
+                    color = "green";
+                    value = 0;
+                  }
+                  {
+                    color = "yellow";
+                    value = 200;
+                  }
+                  {
+                    color = "red";
+                    value = 250;
+                  }
+                ];
+              };
             };
           };
-        };
-      }
-      {
-        id = 5;
-        title = "GPU Clock Frequencies";
-        type = "timeseries";
-        targets = [
-          {
-            expr = "amd_gpu_sclk_mhz{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
-            legendFormat = "SCLK MHz";
-            refId = "E";
-          }
-          {
-            expr = "amd_gpu_mclk_mhz{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
-            legendFormat = "MCLK MHz";
-            refId = "F";
-          }
-        ];
-        gridPos = { h = 8; w = 16; x = 8; y = 8; };
-        fieldConfig = {
-          defaults = {
-            unit = "hertz";
-            custom = {
-              unitScale = true;
+        }
+        {
+          id = 5;
+          title = "GPU Clock Frequencies";
+          type = "timeseries";
+          targets = [
+            {
+              expr = "amd_gpu_sclk_mhz{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
+              legendFormat = "SCLK MHz";
+              refId = "E";
+            }
+            {
+              expr = "amd_gpu_mclk_mhz{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
+              legendFormat = "MCLK MHz";
+              refId = "F";
+            }
+          ];
+          gridPos = {
+            h = 8;
+            w = 16;
+            x = 8;
+            y = 8;
+          };
+          fieldConfig = {
+            defaults = {
+              unit = "hertz";
+              custom = {
+                unitScale = true;
+              };
             };
           };
-        };
-      }
-      {
-        id = 6;
-        title = "GPU Utilization Over Time";
-        type = "timeseries";
-        targets = [{
-          expr = "amd_gpu_utilization_percent{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
-          legendFormat = "GPU Utilization %";
-          refId = "G";
-        }];
-        gridPos = { h = 8; w = 12; x = 0; y = 16; };
-        fieldConfig = {
-          defaults = {
-            unit = "percent";
-            max = 100;
-            min = 0;
+        }
+        {
+          id = 6;
+          title = "GPU Utilization Over Time";
+          type = "timeseries";
+          targets = [
+            {
+              expr = "amd_gpu_utilization_percent{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
+              legendFormat = "GPU Utilization %";
+              refId = "G";
+            }
+          ];
+          gridPos = {
+            h = 8;
+            w = 12;
+            x = 0;
+            y = 16;
           };
-        };
-      }
-      {
-        id = 7;
-        title = "GPU Memory Usage Over Time";
-        type = "timeseries";
-        targets = [
-          {
-            expr = "amd_gpu_memory_used_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
-            legendFormat = "Memory Used";
-            refId = "H";
-          }
-          {
-            expr = "amd_gpu_memory_total_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
-            legendFormat = "Memory Total";
-            refId = "I";
-          }
-        ];
-        gridPos = { h = 8; w = 12; x = 12; y = 16; };
-        fieldConfig = {
-          defaults = {
-            unit = "bytes";
+          fieldConfig = {
+            defaults = {
+              unit = "percent";
+              max = 100;
+              min = 0;
+            };
           };
-        };
-      }
-      {
-        id = 8;
-        title = "GPU Fan Speed";
-        type = "timeseries";
-        targets = [{
-          expr = "amd_gpu_fan_speed_rpm{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
-          legendFormat = "Fan Speed RPM";
-          refId = "J";
-        }];
-        gridPos = { h = 8; w = 12; x = 0; y = 24; };
-        fieldConfig = {
-          defaults = {
-            unit = "rpm";
+        }
+        {
+          id = 7;
+          title = "GPU Memory Usage Over Time";
+          type = "timeseries";
+          targets = [
+            {
+              expr = "amd_gpu_memory_used_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
+              legendFormat = "Memory Used";
+              refId = "H";
+            }
+            {
+              expr = "amd_gpu_memory_total_bytes{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
+              legendFormat = "Memory Total";
+              refId = "I";
+            }
+          ];
+          gridPos = {
+            h = 8;
+            w = 12;
+            x = 12;
+            y = 16;
           };
-        };
-      }
-      {
-        id = 9;
-        title = "GPU Power and Temperature";
-        type = "timeseries";
-        targets = [
-          {
-            expr = "amd_gpu_power_watts{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
-            legendFormat = "Power W";
-            refId = "K";
-          }
-          {
-            expr = "amd_gpu_temperature_celsius{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
-            legendFormat = "Temperature °C";
-            refId = "L";
-          }
-        ];
-        gridPos = { h = 8; w = 12; x = 12; y = 24; };
-        fieldConfig = {
-          defaults = {
-            unit = "short";
+          fieldConfig = {
+            defaults = {
+              unit = "bytes";
+            };
           };
-        };
-      }
-    ];
-    time = {
-      from = "now-1h";
-      to = "now";
-    };
-    refresh = "30s";
-  });
-
+        }
+        {
+          id = 8;
+          title = "GPU Fan Speed";
+          type = "timeseries";
+          targets = [
+            {
+              expr = "amd_gpu_fan_speed_rpm{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
+              legendFormat = "Fan Speed RPM";
+              refId = "J";
+            }
+          ];
+          gridPos = {
+            h = 8;
+            w = 12;
+            x = 0;
+            y = 24;
+          };
+          fieldConfig = {
+            defaults = {
+              unit = "rpm";
+            };
+          };
+        }
+        {
+          id = 9;
+          title = "GPU Power and Temperature";
+          type = "timeseries";
+          targets = [
+            {
+              expr = "amd_gpu_power_watts{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
+              legendFormat = "Power W";
+              refId = "K";
+            }
+            {
+              expr = "amd_gpu_temperature_celsius{instance=\"${hostname}.home.freundcloud.com:${toString cfg.network.amdGpuExporterPort}\"}";
+              legendFormat = "Temperature °C";
+              refId = "L";
+            }
+          ];
+          gridPos = {
+            h = 8;
+            w = 12;
+            x = 12;
+            y = 24;
+          };
+          fieldConfig = {
+            defaults = {
+              unit = "short";
+            };
+          };
+        }
+      ];
+      time = {
+        from = "now-1h";
+        to = "now";
+      };
+      refresh = "30s";
+    });
 in
 {
   config = mkIf (cfg.enable && (cfg.mode == "server" || cfg.mode == "standalone")) {
@@ -1047,33 +1548,35 @@ in
 
         datasources.settings = {
           apiVersion = 1;
-          datasources = [
-            {
-              name = "Prometheus";
-              type = "prometheus";
-              access = "proxy";
-              url = "http://localhost:${toString cfg.network.prometheusPort}";
-              isDefault = true;
-              jsonData = {
-                timeInterval = cfg.scrapeInterval;
-                queryTimeout = "60s";
-                httpMethod = "POST";
-              };
-            }
-          ] ++ optionals cfg.features.logging [
-            {
-              name = "Loki";
-              type = "loki";
-              uid = "P8E80F9AEF21F6940";
-              access = "proxy";
-              url = "http://localhost:${toString cfg.network.lokiPort}";
-              isDefault = false;
-              jsonData = {
-                maxLines = 1000;
-                timeout = "60s";
-              };
-            }
-          ];
+          datasources =
+            [
+              {
+                name = "Prometheus";
+                type = "prometheus";
+                access = "proxy";
+                url = "http://localhost:${toString cfg.network.prometheusPort}";
+                isDefault = true;
+                jsonData = {
+                  timeInterval = cfg.scrapeInterval;
+                  queryTimeout = "60s";
+                  httpMethod = "POST";
+                };
+              }
+            ]
+            ++ optionals cfg.features.logging [
+              {
+                name = "Loki";
+                type = "loki";
+                uid = "P8E80F9AEF21F6940";
+                access = "proxy";
+                url = "http://localhost:${toString cfg.network.lokiPort}";
+                isDefault = false;
+                jsonData = {
+                  maxLines = 1000;
+                  timeout = "60s";
+                };
+              }
+            ];
         };
 
         # Dashboard provisioning
@@ -1096,41 +1599,45 @@ in
     };
 
     # Create dashboard files and directories
-    systemd.tmpfiles.rules = [
-      # Ensure Grafana directories are owned by grafana user
-      "d /var/lib/grafana 0755 grafana grafana -"
-      "d /var/lib/grafana/dashboards 0755 grafana grafana -"
-      "d /var/lib/grafana/dashboards/nixos 0755 grafana grafana -"
-      "d /var/lib/grafana/dashboards/hosts 0755 grafana grafana -"
-      "d /var/lib/grafana/dashboards/media 0755 grafana grafana -"
-      "d /var/lib/grafana/dashboards/logs 0755 grafana grafana -"
-      "d /var/lib/grafana/dashboards/gpu 0755 grafana grafana -"
+    systemd.tmpfiles.rules =
+      [
+        # Ensure Grafana directories are owned by grafana user
+        "d /var/lib/grafana 0755 grafana grafana -"
+        "d /var/lib/grafana/dashboards 0755 grafana grafana -"
+        "d /var/lib/grafana/dashboards/nixos 0755 grafana grafana -"
+        "d /var/lib/grafana/dashboards/hosts 0755 grafana grafana -"
+        "d /var/lib/grafana/dashboards/media 0755 grafana grafana -"
+        "d /var/lib/grafana/dashboards/logs 0755 grafana grafana -"
+        "d /var/lib/grafana/dashboards/gpu 0755 grafana grafana -"
 
-      # System and host dashboards
-      "L+ /var/lib/grafana/dashboards/nixos/system-overview.json - - - - ${nixosDashboard}"
-      "L+ /var/lib/grafana/dashboards/hosts/p620.json - - - - ${hostDashboard "p620" "AMD"}"
-      "L+ /var/lib/grafana/dashboards/hosts/razer.json - - - - ${hostDashboard "razer" "NVIDIA"}"
-      "L+ /var/lib/grafana/dashboards/hosts/p510.json - - - - ${hostDashboard "p510" "NVIDIA"}"
-      "L+ /var/lib/grafana/dashboards/hosts/dex5550.json - - - - ${hostDashboard "dex5550" "Intel"}"
+        # System and host dashboards
+        "L+ /var/lib/grafana/dashboards/nixos/system-overview.json - - - - ${nixosDashboard}"
+        "L+ /var/lib/grafana/dashboards/hosts/p620.json - - - - ${hostDashboard "p620" "AMD"}"
+        "L+ /var/lib/grafana/dashboards/hosts/razer.json - - - - ${hostDashboard "razer" "NVIDIA"}"
+        "L+ /var/lib/grafana/dashboards/hosts/p510.json - - - - ${hostDashboard "p510" "NVIDIA"}"
+        "L+ /var/lib/grafana/dashboards/hosts/dex5550.json - - - - ${hostDashboard "dex5550" "Intel"}"
 
-      # Media service dashboards
-      "L+ /var/lib/grafana/dashboards/media/plex.json - - - - ${plexDashboard}"
-      "L+ /var/lib/grafana/dashboards/media/sonarr.json - - - - ${sonarrDashboard}"
-      "L+ /var/lib/grafana/dashboards/media/radarr.json - - - - ${radarrDashboard}"
-      "L+ /var/lib/grafana/dashboards/media/lidarr.json - - - - ${lidarrDashboard}"
-      "L+ /var/lib/grafana/dashboards/media/prowlarr.json - - - - ${prowlarrDashboard}"
+        # Media service dashboards
+        "L+ /var/lib/grafana/dashboards/media/plex.json - - - - ${plexDashboard}"
+        "L+ /var/lib/grafana/dashboards/media/sonarr.json - - - - ${sonarrDashboard}"
+        "L+ /var/lib/grafana/dashboards/media/radarr.json - - - - ${radarrDashboard}"
+        "L+ /var/lib/grafana/dashboards/media/lidarr.json - - - - ${lidarrDashboard}"
+        "L+ /var/lib/grafana/dashboards/media/prowlarr.json - - - - ${prowlarrDashboard}"
 
-      # Logs dashboard
-    ] ++ optionals cfg.features.logging [
-      "L+ /var/lib/grafana/dashboards/logs/centralized-logs.json - - - - ${logsDashboard}"
-    ] ++ optionals cfg.features.gpuMetrics [
-      # GPU dashboards for NVIDIA systems
-      "L+ /var/lib/grafana/dashboards/gpu/razer-gpu.json - - - - ${gpuDashboard "razer"}"
-      "L+ /var/lib/grafana/dashboards/gpu/p510-gpu.json - - - - ${gpuDashboard "p510"}"
-    ] ++ optionals cfg.features.amdGpuMetrics [
-      # GPU dashboards for AMD systems
-      "L+ /var/lib/grafana/dashboards/gpu/p620-amd-gpu.json - - - - ${amdGpuDashboard "p620"}"
-    ];
+        # Logs dashboard
+      ]
+      ++ optionals cfg.features.logging [
+        "L+ /var/lib/grafana/dashboards/logs/centralized-logs.json - - - - ${logsDashboard}"
+      ]
+      ++ optionals cfg.features.gpuMetrics [
+        # GPU dashboards for NVIDIA systems
+        "L+ /var/lib/grafana/dashboards/gpu/razer-gpu.json - - - - ${gpuDashboard "razer"}"
+        "L+ /var/lib/grafana/dashboards/gpu/p510-gpu.json - - - - ${gpuDashboard "p510"}"
+      ]
+      ++ optionals cfg.features.amdGpuMetrics [
+        # GPU dashboards for AMD systems
+        "L+ /var/lib/grafana/dashboards/gpu/p620-amd-gpu.json - - - - ${amdGpuDashboard "p620"}"
+      ];
 
     # Grafana service dependencies
     systemd.services.grafana = {
@@ -1140,7 +1647,6 @@ in
         GRAFANA_SECRET_KEY = "nixos-monitoring-secret-key-change-in-production";
       };
     };
-
 
     # Grafana CLI tools
     environment.systemPackages = with pkgs; [

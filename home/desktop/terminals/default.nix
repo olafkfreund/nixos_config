@@ -5,8 +5,7 @@
 , host ? "default"
 , ...
 }:
-with lib;
-let
+with lib; let
   # Import host-specific variables if available
   hostVars =
     if builtins.pathExists ../../../hosts/${host}/variables.nix
@@ -100,7 +99,6 @@ let
       "calt"
     ];
   };
-
 in
 {
   # Backward compatibility options for individual terminals
@@ -200,16 +198,36 @@ in
           # Appearance
           window_margin_width = 8;
           hide_window_decorations = true;
-          background_opacity = mkDefault (if cfg.features.transparency then 0.95 else 1.0);
+          background_opacity = mkDefault (
+            if cfg.features.transparency
+            then 0.95
+            else 1.0
+          );
 
           # Font
-          font_family = mkDefault (if cfg.features.nerdFont then fontConfig.name else "monospace");
+          font_family = mkDefault (
+            if cfg.features.nerdFont
+            then fontConfig.name
+            else "monospace"
+          );
           font_size = mkDefault fontConfig.size;
-          disable_ligatures = mkDefault (if cfg.features.fontLigatures then "never" else "always");
+          disable_ligatures = mkDefault (
+            if cfg.features.fontLigatures
+            then "never"
+            else "always"
+          );
 
           # Behavior
-          copy_on_select = mkDefault (if cfg.features.copyOnSelect then "yes" else "no");
-          mouse_hide_wait = mkDefault (if cfg.features.mouseSupport then 20 else -1);
+          copy_on_select = mkDefault (
+            if cfg.features.copyOnSelect
+            then "yes"
+            else "no"
+          );
+          mouse_hide_wait = mkDefault (
+            if cfg.features.mouseSupport
+            then 20
+            else -1
+          );
           scrollback_lines = mkDefault cfg.features.scrollback;
 
           # Terminal
@@ -217,12 +235,20 @@ in
           shell = "${pkgs.zsh}/bin/zsh";
 
           # URLs
-          detect_urls = mkDefault (if cfg.features.urlDetection then "yes" else "no");
+          detect_urls = mkDefault (
+            if cfg.features.urlDetection
+            then "yes"
+            else "no"
+          );
           url_style = "curly";
 
           # Cursor
           cursor_shape = "beam";
-          cursor_blink_interval = mkDefault (if cfg.features.animations then 1 else 0);
+          cursor_blink_interval = mkDefault (
+            if cfg.features.animations
+            then 1
+            else 0
+          );
           cursor_stop_blinking_after = 15;
 
           # Tabs
@@ -275,15 +301,16 @@ in
             # Nerd Font symbol mappings
             symbol_map U+e000-U+e00a,U+ea60-U+ebeb,U+e0a0-U+e0c8,U+e0ca,U+e0cc-U+e0d4,U+e200-U+e2a9,U+e300-U+e3e3,U+e5fa-U+e6b1,U+e700-U+e7c5,U+f000-U+f2e0,U+f300-U+f372,U+f400-U+f532,U+f0001-U+f1af0 Symbols Nerd Font Mono
             symbol_map U+2600-U+26FF Noto Color Emoji
-          '' + optionalString cfg.features.mouseSupport ''
+          ''
+          + optionalString cfg.features.mouseSupport ''
 
-        # Mouse mappings
-        mouse_map left press ungrabbed mouse_selection normal
-        mouse_map left doublepress ungrabbed mouse_selection word
-        mouse_map left triplepress ungrabbed mouse_selection line
-        mouse_map right press ungrabbed mouse_paste
-        mouse_map middle release ungrabbed paste_from_selection
-      '';
+            # Mouse mappings
+            mouse_map left press ungrabbed mouse_selection normal
+            mouse_map left doublepress ungrabbed mouse_selection word
+            mouse_map left triplepress ungrabbed mouse_selection line
+            mouse_map right press ungrabbed mouse_paste
+            mouse_map middle release ungrabbed paste_from_selection
+          '';
 
         shellIntegration = mkIf cfg.features.shellIntegration {
           enableZshIntegration = true;
@@ -378,11 +405,31 @@ in
 
           # Keyboard bindings
           keyboard.bindings = [
-            { key = "C"; mods = "Control|Shift"; action = "Copy"; }
-            { key = "V"; mods = "Control|Shift"; action = "Paste"; }
-            { key = "Plus"; mods = "Control|Shift"; action = "IncreaseFontSize"; }
-            { key = "Minus"; mods = "Control|Shift"; action = "DecreaseFontSize"; }
-            { key = "Backspace"; mods = "Control|Shift"; action = "ResetFontSize"; }
+            {
+              key = "C";
+              mods = "Control|Shift";
+              action = "Copy";
+            }
+            {
+              key = "V";
+              mods = "Control|Shift";
+              action = "Paste";
+            }
+            {
+              key = "Plus";
+              mods = "Control|Shift";
+              action = "IncreaseFontSize";
+            }
+            {
+              key = "Minus";
+              mods = "Control|Shift";
+              action = "DecreaseFontSize";
+            }
+            {
+              key = "Backspace";
+              mods = "Control|Shift";
+              action = "ResetFontSize";
+            }
           ];
         };
       };
@@ -391,38 +438,46 @@ in
       xdg.mimeApps = {
         associations.added = {
           "x-scheme-handler/terminal" =
-            if cfg.terminals.kitty then "kitty.desktop"
-            else if cfg.terminals.foot then "foot.desktop"
-            else if cfg.terminals.alacritty then "Alacritty.desktop"
+            if cfg.terminals.kitty
+            then "kitty.desktop"
+            else if cfg.terminals.foot
+            then "foot.desktop"
+            else if cfg.terminals.alacritty
+            then "Alacritty.desktop"
             else "foot.desktop";
         };
         defaultApplications = {
           "x-scheme-handler/terminal" =
-            if cfg.terminals.kitty then "kitty.desktop"
-            else if cfg.terminals.foot then "foot.desktop"
-            else if cfg.terminals.alacritty then "Alacritty.desktop"
+            if cfg.terminals.kitty
+            then "kitty.desktop"
+            else if cfg.terminals.foot
+            then "foot.desktop"
+            else if cfg.terminals.alacritty
+            then "Alacritty.desktop"
             else "foot.desktop";
         };
       };
 
       # Terminal utilities
-      home.packages = with pkgs; [
-        # Terminal multiplexers
-        tmux
-        zellij
+      home.packages = with pkgs;
+        [
+          # Terminal multiplexers
+          tmux
+          zellij
 
-        # Terminal utilities
-        btop # System monitor
-        neofetch # System info
-        fastfetch # Fast system info
+          # Terminal utilities
+          btop # System monitor
+          neofetch # System info
+          fastfetch # Fast system info
 
-        # File managers
-        lf # Terminal file manager
-        yazi # Modern terminal file manager
-      ] ++ optionals cfg.features.nerdFont [
-        # Nerd fonts
-        nerd-fonts.jetbrains-mono
-      ];
+          # File managers
+          lf # Terminal file manager
+          yazi # Modern terminal file manager
+        ]
+        ++ optionals cfg.features.nerdFont [
+          # Nerd fonts
+          nerd-fonts.jetbrains-mono
+        ];
     }
   ];
 }

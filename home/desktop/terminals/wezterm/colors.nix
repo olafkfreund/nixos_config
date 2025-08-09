@@ -1,5 +1,4 @@
 { colors, ... }:
-
 with colors; {
   followSystem = {
     # basic colors

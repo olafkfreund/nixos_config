@@ -81,8 +81,8 @@ in
           noto-fonts-emoji
           ubuntu_font_family
           noto-fonts-lgc-plus
-        ] ++
-
+        ]
+        ++
         # Programming fonts
         optionals cfg.packages.programming [
           fira
@@ -90,22 +90,22 @@ in
           fira-go
           jetbrains-mono
           powerline-symbols
-        ] ++
-
+        ]
+        ++
         # Nerd Fonts
         optionals cfg.packages.nerdFonts [
           nerd-fonts.jetbrains-mono
           nerd-fonts.fira-code
           nerd-fonts.symbols-only
           nerd-fonts.caskaydia-cove
-        ] ++
-
+        ]
+        ++
         # CJK fonts
         optionals cfg.packages.cjk [
           noto-fonts-cjk-sans
           texlivePackages.hebrew-fonts
-        ] ++
-
+        ]
+        ++
         # Icon fonts
         optionals cfg.packages.icons [
           font-awesome

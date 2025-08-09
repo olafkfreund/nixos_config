@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}: {
+{ pkgs, ... }: {
   networking.firewall.allowedTCPPorts = [
     3000
   ];

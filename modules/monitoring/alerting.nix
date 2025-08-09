@@ -48,26 +48,32 @@ in
         receivers = [
           {
             name = "default";
-            webhook_configs = [{
-              url = "http://localhost:9097/webhook";
-              send_resolved = true;
-            }];
+            webhook_configs = [
+              {
+                url = "http://localhost:9097/webhook";
+                send_resolved = true;
+              }
+            ];
           }
 
           {
             name = "critical";
-            webhook_configs = [{
-              url = "http://localhost:9097/webhook/critical";
-              send_resolved = true;
-            }];
+            webhook_configs = [
+              {
+                url = "http://localhost:9097/webhook/critical";
+                send_resolved = true;
+              }
+            ];
           }
 
           {
             name = "warning";
-            webhook_configs = [{
-              url = "http://localhost:9097/webhook/warning";
-              send_resolved = true;
-            }];
+            webhook_configs = [
+              {
+                url = "http://localhost:9097/webhook/warning";
+                send_resolved = true;
+              }
+            ];
           }
         ];
 

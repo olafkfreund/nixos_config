@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}: {
+{ pkgs, ... }: {
   environment.systemPackages = [
     pkgs.waypaper
     pkgs.wl-clipboard

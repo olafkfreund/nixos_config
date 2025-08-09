@@ -71,11 +71,13 @@ in
   # Configuration implementation
   config = mkIf cfg.enable {
     # Package installation
-    environment.systemPackages = with pkgs; [
-      # Default packages for this module
-      defaultPackage1
-      defaultPackage2
-    ] ++ cfg.packages;
+    environment.systemPackages = with pkgs;
+      [
+        # Default packages for this module
+        defaultPackage1
+        defaultPackage2
+      ]
+      ++ cfg.packages;
 
     # Service configuration (if applicable)
     systemd.services.module-service = {
@@ -95,8 +97,9 @@ in
 
     # Environment variables (if applicable)
     environment.sessionVariables = {
-      MODULE_CONFIG = toString (pkgs.writeText "module-config"
-        (generators.toINI { } cfg.settings));
+      MODULE_CONFIG =
+        toString (pkgs.writeText "module-config"
+          (generators.toINI { } cfg.settings));
     };
 
     # Assertions for validation

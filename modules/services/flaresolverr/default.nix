@@ -5,8 +5,7 @@
 , pkgs
 , ...
 }:
-with lib;
-let
+with lib; let
   cfg = config.services.flaresolverr;
 in
 {
@@ -161,21 +160,29 @@ in
         TasksMax = 1024;
       };
 
-      environment = {
-        HOST = cfg.host;
-        PORT = toString cfg.port;
-        LOG_LEVEL = cfg.logLevel;
-        LOG_HTML = if cfg.logHtml then "true" else "false";
-        CAPTCHA_SOLVER = cfg.captchaSolver;
-        TEST_URL = cfg.testUrl;
-        SESSION_TTL = toString cfg.sessionTtl;
-        HEADLESS = if cfg.headless then "true" else "false";
-        BROWSER_TIMEOUT = toString cfg.browserTimeout;
+      environment =
+        {
+          HOST = cfg.host;
+          PORT = toString cfg.port;
+          LOG_LEVEL = cfg.logLevel;
+          LOG_HTML =
+            if cfg.logHtml
+            then "true"
+            else "false";
+          CAPTCHA_SOLVER = cfg.captchaSolver;
+          TEST_URL = cfg.testUrl;
+          SESSION_TTL = toString cfg.sessionTtl;
+          HEADLESS =
+            if cfg.headless
+            then "true"
+            else "false";
+          BROWSER_TIMEOUT = toString cfg.browserTimeout;
 
-        # Chrome/Chromium settings for headless operation
-        DISPLAY = ":99";
-        CHROME_ARGS = "--no-sandbox --disable-dev-shm-usage --disable-gpu --remote-debugging-port=9222";
-      } // cfg.extraEnvironment;
+          # Chrome/Chromium settings for headless operation
+          DISPLAY = ":99";
+          CHROME_ARGS = "--no-sandbox --disable-dev-shm-usage --disable-gpu --remote-debugging-port=9222";
+        }
+        // cfg.extraEnvironment;
     };
 
     # Firewall configuration

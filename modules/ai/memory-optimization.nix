@@ -1,8 +1,10 @@
 # Memory optimization based on AI capacity planning
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.ai.memoryOptimization;
 in
 {
@@ -251,7 +253,6 @@ in
           notifempty = true;
           copytruncate = true;
         };
-
       };
     };
 

@@ -40,7 +40,10 @@ in
       size = vars.theme.cursor.size;
     };
 
-    # Exclude specific targets
-    targets.chromium.enable = false; # Exclude browser theming
+    # Target-specific configuration
+    targets = {
+      chromium.enable = false; # Exclude browser theming
+      qt.enable = true; # Enable Qt theming for consistent styling
+    };
   };
 }

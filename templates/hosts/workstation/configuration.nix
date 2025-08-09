@@ -14,7 +14,7 @@ in
     ./nixos/screens.nix
     ./nixos/power.nix
     ./nixos/boot.nix
-    ./nixos/${vars.gpu}.nix  # GPU-specific configuration
+    ./nixos/${vars.gpu}.nix # GPU-specific configuration
     ./nixos/usb-power-fix.nix # Fix USB issues (optional)
     ./nixos/i18n.nix
     ./nixos/hosts.nix
@@ -409,29 +409,36 @@ in
       enable = true;
       acceleration = lib.mkForce vars.acceleration;
       environmentVariables =
-        if vars.gpu == "amd" then {
+        if vars.gpu == "amd"
+        then {
           HCC_AMDGPU_TARGET = lib.mkForce "gfx1100";
           ROC_ENABLE_PRE_VEGA = lib.mkForce "1";
           HSA_OVERRIDE_GFX_VERSION = lib.mkForce "11.0.0";
-        } else if vars.gpu == "nvidia" then {
+        }
+        else if vars.gpu == "nvidia"
+        then {
           CUDA_VISIBLE_DEVICES = lib.mkForce "0";
-        } else { };
+        }
+        else { };
     };
   };
 
   # System packages
-  environment.systemPackages = with pkgs; [
-    vim
-    git
-    htop
-    curl
-    wget
-    # Add GPU-specific packages
-  ] ++ lib.optionals (vars.gpu == "amd") [
-    rocmPackages.llvm.libcxx
-  ] ++ lib.optionals (vars.gpu == "nvidia") [
-    nvtopPackages.nvidia
-  ];
+  environment.systemPackages = with pkgs;
+    [
+      vim
+      git
+      htop
+      curl
+      wget
+      # Add GPU-specific packages
+    ]
+    ++ lib.optionals (vars.gpu == "amd") [
+      rocmPackages.llvm.libcxx
+    ]
+    ++ lib.optionals (vars.gpu == "nvidia") [
+      nvtopPackages.nvidia
+    ];
 
   # Hardware-specific configurations
   hardware = {

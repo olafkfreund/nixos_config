@@ -1,8 +1,10 @@
 # AI Metrics Exporter Module
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.monitoring;
   aiCfg = config.monitoring.aiMetricsExporter;
 in
@@ -53,7 +55,12 @@ in
 
         Environment = [
           "PATH=${lib.makeBinPath (with pkgs; [
-            coreutils curl jq python3 gnugrep gnused
+            coreutils
+            curl
+            jq
+            python3
+            gnugrep
+            gnused
           ])}"
         ];
 

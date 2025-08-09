@@ -20,11 +20,31 @@ with lib; let
 
     # Language integration (from languages.nix)
     languages = {
-      nix = { enable = true; lsp = "nixd"; formatter = "alejandra"; };
-      python = { enable = true; lsp = "pyright"; formatter = "black"; };
-      javascript = { enable = true; lsp = "typescript-language-server"; formatter = "prettier"; };
-      go = { enable = true; lsp = "gopls"; formatter = "gofmt"; };
-      rust = { enable = true; lsp = "rust-analyzer"; formatter = "rustfmt"; };
+      nix = {
+        enable = true;
+        lsp = "nixd";
+        formatter = "alejandra";
+      };
+      python = {
+        enable = true;
+        lsp = "pyright";
+        formatter = "black";
+      };
+      javascript = {
+        enable = true;
+        lsp = "typescript-language-server";
+        formatter = "prettier";
+      };
+      go = {
+        enable = true;
+        lsp = "gopls";
+        formatter = "gofmt";
+      };
+      rust = {
+        enable = true;
+        lsp = "rust-analyzer";
+        formatter = "rustfmt";
+      };
     };
 
     # Editor enhancements
@@ -46,29 +66,34 @@ with lib; let
   };
 
   # Generate language configurations from unified language support
-  languageConfigs = mapAttrs
-    (name: lang:
-      optionalAttrs lang.enable
-        {
-          language_servers = [ lang.lsp ];
-          formatter = {
-            external = {
-              command = lang.formatter;
-              arguments =
-                if lang.formatter == "alejandra" then [ "-q" "-" ]
-                else if lang.formatter == "black" then [ "-" ]
-                else if lang.formatter == "prettier" then [ "--stdin-filepath" ".${name}" ]
-                else [ ];
-            };
-          };
-        } // optionalAttrs (name == "go") {
-        tab_size = 8;
-        preferred_line_length = 100;
-        auto_indent_using_language_server = true;
-      }
-    )
-    (filterAttrs (_n: l: l.enable) features.languages);
-
+  languageConfigs =
+    mapAttrs
+      (
+        name: lang:
+          optionalAttrs lang.enable
+            {
+              language_servers = [ lang.lsp ];
+              formatter = {
+                external = {
+                  command = lang.formatter;
+                  arguments =
+                    if lang.formatter == "alejandra"
+                    then [ "-q" "-" ]
+                    else if lang.formatter == "black"
+                    then [ "-" ]
+                    else if lang.formatter == "prettier"
+                    then [ "--stdin-filepath" ".${name}" ]
+                    else [ ];
+                };
+              };
+            }
+          // optionalAttrs (name == "go") {
+            tab_size = 8;
+            preferred_line_length = 100;
+            auto_indent_using_language_server = true;
+          }
+      )
+      (filterAttrs (_n: l: l.enable) features.languages);
 in
 {
   options.editor.zed-editor = {
@@ -163,13 +188,15 @@ in
             "Go" = languageConfigs.go;
           })
           (mkIf features.languages.rust.enable {
-            "Rust" = languageConfigs.rust // {
-              # Rust-specific enhancements
-              hard_tabs = false;
-              tab_size = 4;
-              preferred_line_length = 100;
-              language_servers = [ "rust-analyzer" ];
-            };
+            "Rust" =
+              languageConfigs.rust
+              // {
+                # Rust-specific enhancements
+                hard_tabs = false;
+                tab_size = 4;
+                preferred_line_length = 100;
+                language_servers = [ "rust-analyzer" ];
+              };
           })
         ];
 

@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}: {
+{ pkgs, ... }: {
   environment.systemPackages = with pkgs; [
     # Core utilities (from consolidated sets)
     coreutils

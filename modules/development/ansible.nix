@@ -1,4 +1,8 @@
-{ config, lib, pkgs, ... }:
+{ config
+, lib
+, pkgs
+, ...
+}:
 with lib; let
   cfg = config.ansible.development;
 in
@@ -12,10 +16,12 @@ in
     };
   };
   config = mkIf cfg.enable {
-    environment.systemPackages = [
-      pkgs.ansible
-      pkgs.ansible-lint
-      # pkgs.ansible-navigator
-    ] ++ cfg.packages;
+    environment.systemPackages =
+      [
+        pkgs.ansible
+        pkgs.ansible-lint
+        # pkgs.ansible-navigator
+      ]
+      ++ cfg.packages;
   };
 }

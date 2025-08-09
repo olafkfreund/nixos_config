@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}: {
+{ pkgs, ... }: {
   # System-wide optimization for Electron applications under Wayland
   environment = {
     # Create a global flags configuration file for all Chromium/Electron apps

@@ -3,10 +3,8 @@
 , host ? "default"
 , ...
 }:
-with lib;
-let
+with lib; let
   # Import host-specific variables if available
-
   # Host-specific temperature sensor configuration
   temperatureConfig = {
     p620 = {
@@ -38,7 +36,6 @@ let
 
   # Get configuration for current host
   currentTempConfig = temperatureConfig.${host} or temperatureConfig.default;
-
 in
 {
   programs.waybar = {
@@ -308,16 +305,18 @@ in
           interval = 3600;
         };
 
-        "temperature" = {
-          format = "<span foreground='#fe8019'> {icon}</span> {temperatureC}°C ";
-          format-icons = [ "" "" "" "" "" "󰸁" ];
-          # Host-aware temperature sensor configuration
-          tooltip-format = currentTempConfig.tooltip;
-          interval = 5;
-          on-click = "/home/olafkfreund/.config/nixos/scripts/temp-dashboard-simple.sh";
-        } // optionalAttrs (currentTempConfig.hwmon-path != null) {
-          hwmon-path = currentTempConfig.hwmon-path;
-        };
+        "temperature" =
+          {
+            format = "<span foreground='#fe8019'> {icon}</span> {temperatureC}°C ";
+            format-icons = [ "" "" "" "" "" "󰸁" ];
+            # Host-aware temperature sensor configuration
+            tooltip-format = currentTempConfig.tooltip;
+            interval = 5;
+            on-click = "/home/olafkfreund/.config/nixos/scripts/temp-dashboard-simple.sh";
+          }
+          // optionalAttrs (currentTempConfig.hwmon-path != null) {
+            hwmon-path = currentTempConfig.hwmon-path;
+          };
 
         "power-profiles-daemon" = {
           format = " {icon} ";

@@ -1,7 +1,8 @@
 # Headless/No GPU configuration for workstation template
-{ pkgs, lib, ... }:
-
-{
+{ pkgs
+, lib
+, ...
+}: {
   # Minimal graphics support for headless systems
   hardware.graphics = {
     enable = true;

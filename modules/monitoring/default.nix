@@ -283,14 +283,16 @@ in
     # Open firewall ports for monitoring services
     networking.firewall = mkMerge [
       (mkIf (cfg.mode == "server" || cfg.mode == "standalone") {
-        allowedTCPPorts = [
-          cfg.network.prometheusPort
-          cfg.network.grafanaPort
-          cfg.network.alertmanagerPort
-        ] ++ optionals cfg.features.logging [
-          cfg.network.lokiPort
-          cfg.network.lokiGrpcPort
-        ];
+        allowedTCPPorts =
+          [
+            cfg.network.prometheusPort
+            cfg.network.grafanaPort
+            cfg.network.alertmanagerPort
+          ]
+          ++ optionals cfg.features.logging [
+            cfg.network.lokiPort
+            cfg.network.lokiGrpcPort
+          ];
       })
 
       (mkIf cfg.features.nodeExporter {
@@ -314,13 +316,15 @@ in
     ];
 
     # Create monitoring data directories
-    systemd.tmpfiles.rules = [
-      "d /var/lib/monitoring 0755 monitoring monitoring -"
-      "d /var/log/monitoring 0755 monitoring monitoring -"
-    ] ++ optionals cfg.hardwareMonitor.enable [
-      "d ${dirOf cfg.hardwareMonitor.logFile} 0755 root root -"
-      "f ${cfg.hardwareMonitor.logFile} 0644 root root -"
-    ];
+    systemd.tmpfiles.rules =
+      [
+        "d /var/lib/monitoring 0755 monitoring monitoring -"
+        "d /var/log/monitoring 0755 monitoring monitoring -"
+      ]
+      ++ optionals cfg.hardwareMonitor.enable [
+        "d ${dirOf cfg.hardwareMonitor.logFile} 0755 root root -"
+        "f ${cfg.hardwareMonitor.logFile} 0644 root root -"
+      ];
 
     # Environment variables for monitoring services
     environment.sessionVariables = {
@@ -332,20 +336,22 @@ in
     };
 
     # Install monitoring CLI tools
-    environment.systemPackages = with pkgs; [
-      prometheus
-      grafana
-      # Monitoring utilities
-      htop
-      iotop
-      nethogs
-      bandwhich
-      procs
-    ] ++ optionals cfg.hardwareMonitor.enable [
-      libnotify # notify-send
-      lm_sensors # sensors command
-      bc # calculator for temperature comparisons
-    ];
+    environment.systemPackages = with pkgs;
+      [
+        prometheus
+        grafana
+        # Monitoring utilities
+        htop
+        iotop
+        nethogs
+        bandwhich
+        procs
+      ]
+      ++ optionals cfg.hardwareMonitor.enable [
+        libnotify # notify-send
+        lm_sensors # sensors command
+        bc # calculator for temperature comparisons
+      ];
 
     # Hardware monitoring service
     systemd.services.hardware-monitor = mkIf cfg.hardwareMonitor.enable {

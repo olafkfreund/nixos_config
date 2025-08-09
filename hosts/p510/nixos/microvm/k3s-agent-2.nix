@@ -170,7 +170,6 @@ in
     wheelNeedsPassword = false;
   };
 
-
   # User configuration
   users.users.${username} = {
     isNormalUser = true;
@@ -209,5 +208,4 @@ in
     jq
     yq-go
   ];
-
 }

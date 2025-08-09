@@ -1,8 +1,10 @@
 # AMD GPU configuration for server template
 # Optimized for compute workloads and headless operation
-{ config, pkgs, lib, ... }:
-
-{
+{ config
+, pkgs
+, lib
+, ...
+}: {
   # AMD GPU hardware support for compute
   hardware.graphics = {
     enable = true;

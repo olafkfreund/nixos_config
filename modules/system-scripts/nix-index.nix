@@ -1,5 +1,4 @@
 { pkgs, ... }:
-
 pkgs.writeShellScriptBin "new-nix-index" ''
   download_nixpkgs_cache_index () {
   filename="index-$(uname -m | sed 's/^arm64$/aarch64/')-$(uname | tr A-Z a-z)"

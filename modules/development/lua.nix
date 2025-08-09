@@ -1,4 +1,8 @@
-{ config, lib, pkgs, ... }:
+{ config
+, lib
+, pkgs
+, ...
+}:
 with lib; let
   cfg = config.lua.development;
 in
@@ -12,10 +16,12 @@ in
     };
   };
   config = mkIf cfg.enable {
-    environment.systemPackages = [
-      pkgs.lua
-      pkgs.stylua
-      pkgs.sumneko-lua-language-server
-    ] ++ cfg.packages;
+    environment.systemPackages =
+      [
+        pkgs.lua
+        pkgs.stylua
+        pkgs.sumneko-lua-language-server
+      ]
+      ++ cfg.packages;
   };
 }

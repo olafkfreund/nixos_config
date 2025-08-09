@@ -65,7 +65,6 @@ with lib; let
     # Note: LazyVim manages plugins itself, so we don't install them via Nix
     # to avoid package conflicts and let LazyVim handle version management
   };
-
 in
 {
   options.editor.neovim = {

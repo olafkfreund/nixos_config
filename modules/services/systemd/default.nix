@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}: {
+{ pkgs, ... }: {
   #Setup auth agent and keyring
   systemd = {
     user.services.polkit-gnome-authentication-agent-1 = {

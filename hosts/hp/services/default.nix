@@ -1,5 +1,4 @@
-{ ...
-}: {
+{ ... }: {
   # imports = [
   #   inputs.proxmox-nixos.nixosModules.proxmox-ve
   # ];
@@ -52,5 +51,4 @@
     };
     linkConfig.RequiredForOnline = "routable";
   };
-
 }

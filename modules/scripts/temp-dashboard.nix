@@ -1,8 +1,9 @@
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   # Temperature dashboard script with proper dependencies
   tempDashboard = pkgs.writeShellScriptBin "temp-dashboard" ''
         #!/usr/bin/env bash
@@ -158,7 +159,6 @@ let
 
     <small><i>Auto-closes in 30 seconds</i></small>"
   '';
-
 in
 {
   options.scripts.tempDashboard = {
@@ -166,13 +166,15 @@ in
   };
 
   config = mkIf config.scripts.tempDashboard.enable {
-    environment.systemPackages = with pkgs; [
-      tempDashboard
-      yad
-      bc
-      smartmontools
-    ] ++ lib.optionals (config.hardware.graphics.extraPackages or [ ] != [ ]) [
-      rocmPackages.rocm-smi
-    ];
+    environment.systemPackages = with pkgs;
+      [
+        tempDashboard
+        yad
+        bc
+        smartmontools
+      ]
+      ++ lib.optionals (config.hardware.graphics.extraPackages or [ ] != [ ]) [
+        rocmPackages.rocm-smi
+      ];
   };
 }

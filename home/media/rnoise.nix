@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}:
+{ pkgs, ... }:
 let
   format = pkgs.formats.json { };
 in

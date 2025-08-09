@@ -8,7 +8,6 @@
 # 2. Replace PLACEHOLDER values
 # 3. Add to modules/default.nix imports
 # 4. Enable with: features.services.SERVICE_NAME = true;
-
 { config
 , lib
 , pkgs
@@ -155,7 +154,8 @@ in
           "--host ${cfg.host}"
           "--port ${toString cfg.port}"
           "--data-dir ${cfg.dataDir}"
-        ] ++ cfg.extraArgs);
+        ]
+        ++ cfg.extraArgs);
 
         # Restart configuration
         Restart = "always";

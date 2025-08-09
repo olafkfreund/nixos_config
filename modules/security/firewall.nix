@@ -1,15 +1,26 @@
 # Centralized Firewall Configuration Module
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.security.firewall;
 
   # Define service port groups for better organization
   servicePortGroups = {
-    ssh = { tcp = [ 22 ]; udp = [ ]; };
-    dns = { tcp = [ 53 ]; udp = [ 53 ]; };
-    web = { tcp = [ 80 443 ]; udp = [ ]; };
+    ssh = {
+      tcp = [ 22 ];
+      udp = [ ];
+    };
+    dns = {
+      tcp = [ 53 ];
+      udp = [ 53 ];
+    };
+    web = {
+      tcp = [ 80 443 ];
+      udp = [ ];
+    };
     monitoring = {
       tcp = [ 3000 3001 3100 9090 9093 9096 9100 9101 9102 9103 9104 28183 ];
       udp = [ ];
@@ -54,7 +65,8 @@ let
   # Get ports for enabled services
   getServicePorts = services: protocol:
     flatten (map
-      (service:
+      (
+        service:
         if hasAttr service servicePortGroups
         then getAttr protocol (getAttr service servicePortGroups)
         else [ ]
@@ -178,8 +190,13 @@ in
         pingLimit = "--limit 5/minute --limit-burst 10";
 
         # Apply profile-based configuration
-        inherit (buildFirewallConfig cfg.profile)
-          allowedTCPPorts allowedUDPPorts interfaces trustedInterfaces;
+        inherit
+          (buildFirewallConfig cfg.profile)
+          allowedTCPPorts
+          allowedUDPPorts
+          interfaces
+          trustedInterfaces
+          ;
       }
 
       # Advanced iptables rules
@@ -205,8 +222,9 @@ in
 
           # Trusted network access
           ${concatMapStringsSep "\n" (network: ''
-            iptables -A INPUT -s ${network} -j ACCEPT
-          '') cfg.trustedNetworks}
+              iptables -A INPUT -s ${network} -j ACCEPT
+            '')
+            cfg.trustedNetworks}
 
           # Anti-scan protection
           iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP

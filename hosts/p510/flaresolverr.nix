@@ -1,8 +1,6 @@
 # FlareSolverr Configuration for P510
 # Uses built-in NixOS FlareSolverr service
-{ pkgs
-, ...
-}: {
+{ pkgs, ... }: {
   # Enable the built-in NixOS FlareSolverr service
   services.flaresolverr = {
     enable = true;

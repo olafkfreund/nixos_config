@@ -168,7 +168,8 @@ in
 
       providers = lib.filterAttrs (_name: value: value != null) {
         openai =
-          if cfg.openai.enable then {
+          if cfg.openai.enable
+          then {
             enabled = true;
             priority = cfg.openai.priority;
             models = cfg.openai.models;
@@ -176,10 +177,12 @@ in
             apiKeyFile = "/run/agenix/api-openai";
             baseUrl = "https://api.openai.com/v1";
             requiresApiKey = true;
-          } else null;
+          }
+          else null;
 
         anthropic =
-          if cfg.anthropic.enable then {
+          if cfg.anthropic.enable
+          then {
             enabled = true;
             priority = cfg.anthropic.priority;
             models = cfg.anthropic.models;
@@ -187,10 +190,12 @@ in
             apiKeyFile = "/run/agenix/api-anthropic";
             baseUrl = "https://api.anthropic.com";
             requiresApiKey = true;
-          } else null;
+          }
+          else null;
 
         gemini =
-          if cfg.gemini.enable then {
+          if cfg.gemini.enable
+          then {
             enabled = true;
             priority = cfg.gemini.priority;
             models = cfg.gemini.models;
@@ -198,10 +203,12 @@ in
             apiKeyFile = "/run/agenix/api-gemini";
             baseUrl = "https://generativelanguage.googleapis.com/v1beta";
             requiresApiKey = true;
-          } else null;
+          }
+          else null;
 
         qwen =
-          if cfg.qwen.enable then {
+          if cfg.qwen.enable
+          then {
             enabled = true;
             priority = cfg.qwen.priority;
             models = cfg.qwen.models;
@@ -209,17 +216,20 @@ in
             apiKeyFile = "/run/agenix/api-qwen";
             baseUrl = "https://dashscope.aliyuncs.com/api/v1";
             requiresApiKey = true;
-          } else null;
+          }
+          else null;
 
         ollama =
-          if cfg.ollama.enable then {
+          if cfg.ollama.enable
+          then {
             enabled = true;
             priority = cfg.ollama.priority;
             models = cfg.ollama.models;
             defaultModel = cfg.ollama.defaultModel;
             baseUrl = "http://${cfg.ollama.host}";
             requiresApiKey = false;
-          } else null;
+          }
+          else null;
       };
     };
 

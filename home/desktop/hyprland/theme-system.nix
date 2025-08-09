@@ -1,10 +1,7 @@
 # Hyprland Centralized Theming System
 # Provides consistent theming across all Hyprland components
-{ lib
-, ...
-}:
-with lib;
-let
+{ lib, ... }:
+with lib; let
   # Color scheme definitions
   colorSchemes = {
     gruvbox-dark = {
@@ -52,7 +49,6 @@ let
   };
 
   defaultTheme = "gruvbox-dark";
-
 in
 {
   hyprland.colorSchemes = colorSchemes;

@@ -1,8 +1,10 @@
 # Enhanced Modern Zsh Configuration
 # Optimized for performance, maintainability, and developer experience
-{ pkgs, lib, ... }:
-with lib;
-{
+{ pkgs
+, lib
+, ...
+}:
+with lib; {
   imports = [
     ./claude-integration.nix
   ];
@@ -361,7 +363,6 @@ with lib;
       enable = true;
       enableZshIntegration = true;
     };
-
 
     # Enhanced directory listing
     eza = {

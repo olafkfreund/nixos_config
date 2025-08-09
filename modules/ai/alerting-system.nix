@@ -1,8 +1,10 @@
 # Advanced Alerting and Notification System
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.ai.alerting;
 in
 {
@@ -187,13 +189,33 @@ in
           INFO_LEVEL="info"
 
           # Notification channels
-          EMAIL_ENABLED=${if cfg.enableEmail then "true" else "false"}
-          SLACK_ENABLED=${if cfg.enableSlack then "true" else "false"}
-          SMS_ENABLED=${if cfg.enableSms then "true" else "false"}
-          DISCORD_ENABLED=${if cfg.enableDiscord then "true" else "false"}
+          EMAIL_ENABLED=${
+            if cfg.enableEmail
+            then "true"
+            else "false"
+          }
+          SLACK_ENABLED=${
+            if cfg.enableSlack
+            then "true"
+            else "false"
+          }
+          SMS_ENABLED=${
+            if cfg.enableSms
+            then "true"
+            else "false"
+          }
+          DISCORD_ENABLED=${
+            if cfg.enableDiscord
+            then "true"
+            else "false"
+          }
 
           # Maintenance mode
-          MAINTENANCE_MODE=${if cfg.maintenanceMode then "true" else "false"}
+          MAINTENANCE_MODE=${
+            if cfg.maintenanceMode
+            then "true"
+            else "false"
+          }
 
           # Setup logging
           mkdir -p "$(dirname "$LOG_FILE")"
@@ -216,11 +238,19 @@ in
             },
             "slack": {
               "webhook": "${cfg.slackWebhook}",
-              "enabled": ${if cfg.enableSlack then "true" else "false"}
+              "enabled": ${
+            if cfg.enableSlack
+            then "true"
+            else "false"
+          }
             },
             "discord": {
               "webhook": "${cfg.discordWebhook}",
-              "enabled": ${if cfg.enableDiscord then "true" else "false"}
+              "enabled": ${
+            if cfg.enableDiscord
+            then "true"
+            else "false"
+          }
             },
             "thresholds": {
               "disk_usage": ${toString cfg.alertThresholds.diskUsage},
@@ -422,21 +452,57 @@ in
 
             case "$level" in
               "critical")
-                send_email=${if cfg.alertLevels.critical.email then "true" else "false"}
-                send_slack=${if cfg.alertLevels.critical.slack then "true" else "false"}
-                send_discord=${if cfg.alertLevels.critical.discord then "true" else "false"}
+                send_email=${
+            if cfg.alertLevels.critical.email
+            then "true"
+            else "false"
+          }
+                send_slack=${
+            if cfg.alertLevels.critical.slack
+            then "true"
+            else "false"
+          }
+                send_discord=${
+            if cfg.alertLevels.critical.discord
+            then "true"
+            else "false"
+          }
                 color="danger"
                 ;;
               "warning")
-                send_email=${if cfg.alertLevels.warning.email then "true" else "false"}
-                send_slack=${if cfg.alertLevels.warning.slack then "true" else "false"}
-                send_discord=${if cfg.alertLevels.warning.discord then "true" else "false"}
+                send_email=${
+            if cfg.alertLevels.warning.email
+            then "true"
+            else "false"
+          }
+                send_slack=${
+            if cfg.alertLevels.warning.slack
+            then "true"
+            else "false"
+          }
+                send_discord=${
+            if cfg.alertLevels.warning.discord
+            then "true"
+            else "false"
+          }
                 color="warning"
                 ;;
               "info")
-                send_email=${if cfg.alertLevels.info.email then "true" else "false"}
-                send_slack=${if cfg.alertLevels.info.slack then "true" else "false"}
-                send_discord=${if cfg.alertLevels.info.discord then "true" else "false"}
+                send_email=${
+            if cfg.alertLevels.info.email
+            then "true"
+            else "false"
+          }
+                send_slack=${
+            if cfg.alertLevels.info.slack
+            then "true"
+            else "false"
+          }
+                send_discord=${
+            if cfg.alertLevels.info.discord
+            then "true"
+            else "false"
+          }
                 color="good"
                 ;;
             esac
@@ -801,12 +867,20 @@ in
           # Test notification channels
           echo "[$(date)] Testing notification channels..."
 
-          if [ "${if cfg.enableEmail then "true" else "false"}" = "true" ]; then
+          if [ "${
+            if cfg.enableEmail
+            then "true"
+            else "false"
+          }" = "true" ]; then
             echo "[$(date)] Email notifications: ENABLED"
             # Test email configuration
           fi
 
-          if [ "${if cfg.enableSlack then "true" else "false"}" = "true" ]; then
+          if [ "${
+            if cfg.enableSlack
+            then "true"
+            else "false"
+          }" = "true" ]; then
             echo "[$(date)] Slack notifications: ENABLED"
             # Test Slack webhook
             if [ -n "${cfg.slackWebhook}" ]; then
@@ -817,7 +891,11 @@ in
             fi
           fi
 
-          if [ "${if cfg.enableDiscord then "true" else "false"}" = "true" ]; then
+          if [ "${
+            if cfg.enableDiscord
+            then "true"
+            else "false"
+          }" = "true" ]; then
             echo "[$(date)] Discord notifications: ENABLED"
             # Test Discord webhook
             if [ -n "${cfg.discordWebhook}" ]; then
@@ -885,14 +963,34 @@ in
 
         # Check notification channels
         echo "Notification Channels:"
-        echo "  Email: ${if cfg.enableEmail then "✓ ENABLED" else "✗ DISABLED"}"
-        echo "  Slack: ${if cfg.enableSlack then "✓ ENABLED" else "✗ DISABLED"}"
-        echo "  SMS: ${if cfg.enableSms then "✓ ENABLED" else "✗ DISABLED"}"
-        echo "  Discord: ${if cfg.enableDiscord then "✓ ENABLED" else "✗ DISABLED"}"
+        echo "  Email: ${
+          if cfg.enableEmail
+          then "✓ ENABLED"
+          else "✗ DISABLED"
+        }"
+        echo "  Slack: ${
+          if cfg.enableSlack
+          then "✓ ENABLED"
+          else "✗ DISABLED"
+        }"
+        echo "  SMS: ${
+          if cfg.enableSms
+          then "✓ ENABLED"
+          else "✗ DISABLED"
+        }"
+        echo "  Discord: ${
+          if cfg.enableDiscord
+          then "✓ ENABLED"
+          else "✗ DISABLED"
+        }"
         echo
 
         # Check maintenance mode
-        echo "Maintenance Mode: ${if cfg.maintenanceMode then "✓ ACTIVE" else "✗ INACTIVE"}"
+        echo "Maintenance Mode: ${
+          if cfg.maintenanceMode
+          then "✓ ACTIVE"
+          else "✗ INACTIVE"
+        }"
         echo
 
         # Check recent alerts
@@ -966,7 +1064,11 @@ in
             echo "Set ai.alerting.maintenanceMode = false; in configuration"
             ;;
           "status")
-            echo "Maintenance Mode Status: ${if cfg.maintenanceMode then "ACTIVE" else "INACTIVE"}"
+            echo "Maintenance Mode Status: ${
+          if cfg.maintenanceMode
+          then "ACTIVE"
+          else "INACTIVE"
+        }"
             ;;
           *)
             echo "Usage: $0 {enable|disable|status}"
@@ -998,6 +1100,5 @@ in
       "alert-history" = "ai-alert-history";
       "alert-maintenance" = "ai-alert-maintenance-mode";
     };
-
   };
 }

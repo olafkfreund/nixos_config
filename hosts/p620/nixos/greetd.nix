@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}: {
+{ pkgs, ... }: {
   # Enhanced greetd display manager with tuigreet
   services.greetd = {
     enable = true;

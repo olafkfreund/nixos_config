@@ -1,8 +1,9 @@
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.features.email.auth.oauth2;
   emailCfg = config.features.email;
 in
@@ -153,11 +154,12 @@ in
             refreshScript = pkgs.writeShellScript "refresh-all-tokens" ''
               set -euo pipefail
               ${concatStringsSep "\n" (mapAttrsToList (_name: account: ''
-                echo "Refreshing OAuth2 token for ${account.email}..."
-                /etc/neomutt/oauth2-refresh.sh "${account.email}" \
-                  "${account.refreshTokenFile}" \
-                  "${account.accessTokenFile}" || echo "Failed to refresh token for ${account.email}"
-              '') cfg.accounts)}
+                  echo "Refreshing OAuth2 token for ${account.email}..."
+                  /etc/neomutt/oauth2-refresh.sh "${account.email}" \
+                    "${account.refreshTokenFile}" \
+                    "${account.accessTokenFile}" || echo "Failed to refresh token for ${account.email}"
+                '')
+                cfg.accounts)}
             '';
           in
           "${refreshScript}";

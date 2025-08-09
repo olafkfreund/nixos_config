@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}:
+{ pkgs, ... }:
 pkgs.writeShellScriptBin "weather-popup" ''
   #!/usr/bin/env bash
   # weather-popup: Shows weather information in a popup terminal

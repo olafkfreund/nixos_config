@@ -1,6 +1,4 @@
-{ config
-, ...
-}: {
+{ config, ... }: {
   xdg.configFile."hypr/hyprlock.conf".text = ''
 
     background {

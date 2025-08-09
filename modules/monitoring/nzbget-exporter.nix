@@ -1,8 +1,10 @@
 # NZBGet Prometheus Exporter Module
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.monitoring.nzbgetExporter;
 in
 {
@@ -55,7 +57,7 @@ in
         Restart = "always";
         RestartSec = "10s";
         Environment = [
-          "PATH=${lib.makeBinPath (with pkgs; [ curl jq coreutils bc gnugrep gnused netcat-gnu python3 ])}"
+          "PATH=${lib.makeBinPath (with pkgs; [curl jq coreutils bc gnugrep gnused netcat-gnu python3])}"
         ];
 
         ExecStart = pkgs.writeShellScript "nzbget-exporter" ''

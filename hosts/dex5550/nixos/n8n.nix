@@ -180,9 +180,11 @@ with lib; {
     # Add n8n service to existing services
     services = {
       n8n = {
-        loadBalancer.servers = [{
-          url = "http://127.0.0.1:5678";
-        }];
+        loadBalancer.servers = [
+          {
+            url = "http://127.0.0.1:5678";
+          }
+        ];
       };
     };
   };

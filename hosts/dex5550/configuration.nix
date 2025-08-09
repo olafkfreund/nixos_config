@@ -382,7 +382,10 @@ in
 
       # Only allow SSH from internal network initially
       listenAddresses = [
-        { addr = "0.0.0.0"; port = 22; }
+        {
+          addr = "0.0.0.0";
+          port = 22;
+        }
       ];
     };
 
@@ -601,19 +604,25 @@ in
           # Services
           services = {
             grafana = {
-              loadBalancer.servers = [{
-                url = "http://127.0.0.1:3001";
-              }];
+              loadBalancer.servers = [
+                {
+                  url = "http://127.0.0.1:3001";
+                }
+              ];
             };
             prometheus = {
-              loadBalancer.servers = [{
-                url = "http://127.0.0.1:9090";
-              }];
+              loadBalancer.servers = [
+                {
+                  url = "http://127.0.0.1:9090";
+                }
+              ];
             };
             alertmanager = {
-              loadBalancer.servers = [{
-                url = "http://127.0.0.1:9093";
-              }];
+              loadBalancer.servers = [
+                {
+                  url = "http://127.0.0.1:9093";
+                }
+              ];
             };
           };
         };
@@ -671,9 +680,6 @@ in
   #   enable = false;  # Removed - no actual audits performed
   # };
 
-
-
-
   # System hardening and additional security services
   security.sudo = {
     wheelNeedsPassword = lib.mkForce true;
@@ -715,10 +721,6 @@ in
     randomizedDelaySec = "45min";
     flake = lib.mkForce "github:olafkfreund/nixos_config";
   };
-
-
-
-
 
   # Server-specific configurations - no GUI hardware wrappers needed
 
@@ -763,7 +765,6 @@ in
     ];
   };
 
-
   # Kernel security hardening
   boot.kernel.sysctl = {
     # Network security
@@ -800,17 +801,11 @@ in
 
   # Monitoring configuration handled by monitoring module
 
-
-
-
-
   # Create log directories for Traefik
   systemd.tmpfiles.rules = [
     "d /var/log/traefik 0755 traefik traefik -"
     "d /var/lib/traefik 0700 traefik traefik -"
   ];
-
-
 
   # Additional security services
   environment.systemPackages = with pkgs; [
@@ -897,7 +892,6 @@ in
       connectionOptimization = true;
     };
   };
-
 
   # Storage performance optimization for monitoring server
   storage.performanceOptimization = {

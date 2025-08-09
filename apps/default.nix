@@ -1,14 +1,12 @@
 # Application entries for common workflows
-{ pkgs, ... }:
-
-{
+{ pkgs, ... }: {
   # Deployment applications
   deploy = pkgs.writeShellApplication {
     name = "nixos-deploy";
     runtimeInputs = with pkgs; [ openssh rsync nix ];
     text = ''
       #!/bin/bash
-      
+
       show_help() {
         echo "NixOS Deployment Tool"
         echo ""
@@ -27,7 +25,7 @@
         echo "  nix run .#deploy quick razer"
         echo ""
       }
-      
+
       case "''${1:-}" in
         host)
           if [ -z "''${2:-}" ]; then
@@ -88,13 +86,13 @@
     '';
   };
 
-  # Testing applications  
+  # Testing applications
   test = pkgs.writeShellApplication {
     name = "nixos-test";
     runtimeInputs = with pkgs; [ nix ];
     text = ''
       #!/bin/bash
-      
+
       show_help() {
         echo "NixOS Testing Tool"
         echo ""
@@ -114,7 +112,7 @@
         echo "  nix run .#test validate"
         echo ""
       }
-      
+
       case "''${1:-}" in
         host)
           if [ -z "''${2:-}" ]; then
@@ -168,7 +166,7 @@
     runtimeInputs = with pkgs; [ nix coreutils ];
     text = ''
       #!/bin/bash
-      
+
       show_help() {
         echo "NixOS Live USB Builder"
         echo ""
@@ -186,9 +184,9 @@
         echo "  nix run .#build-live all"
         echo ""
       }
-      
+
       available_hosts="p620 p510 razer dex5550 samsung"
-      
+
       case "''${1:-}" in
         build)
           if [ -z "''${2:-}" ]; then
@@ -196,7 +194,7 @@
             show_help
             exit 1
           fi
-          
+
           if echo "$available_hosts" | grep -q "$2"; then
             echo "Building live USB image for: $2"
             nix build ".#packages.x86_64-linux.live-iso-$2" --show-trace
@@ -252,7 +250,7 @@
     runtimeInputs = with pkgs; [ nix git nixpkgs-fmt statix deadnix ];
     text = ''
       #!/bin/bash
-      
+
       show_help() {
         echo "NixOS Development Utilities"
         echo ""
@@ -271,7 +269,7 @@
         echo "  nix run .#dev-utils lint"
         echo ""
       }
-      
+
       case "''${1:-}" in
         format)
           echo "Formatting all Nix files..."

@@ -1,7 +1,9 @@
 # Intel GPU configuration for workstation template
-{ config, pkgs, lib, ... }:
-
-{
+{ config
+, pkgs
+, lib
+, ...
+}: {
   # Intel graphics hardware support
   hardware.graphics = {
     enable = true;

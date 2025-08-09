@@ -74,7 +74,6 @@ with lib; let
       filesystem:
         directory: /var/lib/loki/chunks
   '';
-
 in
 {
   config = mkIf (cfg.enable && cfg.features.logging && (cfg.mode == "server" || cfg.mode == "standalone")) {

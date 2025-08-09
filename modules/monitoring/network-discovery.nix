@@ -1,8 +1,10 @@
 # Network Discovery and Device Classification Module
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.monitoring;
   netCfg = config.monitoring.networkDiscovery;
 in
@@ -70,8 +72,18 @@ in
 
         Environment = [
           "PATH=${lib.makeBinPath (with pkgs; [
-            coreutils curl jq bc nmap iproute2 nettools
-            arp-scan ethtool python3 gnugrep gnused
+            coreutils
+            curl
+            jq
+            bc
+            nmap
+            iproute2
+            nettools
+            arp-scan
+            ethtool
+            python3
+            gnugrep
+            gnused
           ])}"
         ];
 
@@ -84,8 +96,16 @@ in
                     NETWORK_RANGE="${netCfg.networkRange}"
                     SCAN_INTERVAL="${netCfg.scanInterval}"
                     EXPORTER_PORT="${toString netCfg.port}"
-                    ENABLE_DEEP_SCAN="${if netCfg.enableDeepScan then "true" else "false"}"
-                    ENABLE_VENDOR_LOOKUP="${if netCfg.enableVendorLookup then "true" else "false"}"
+                    ENABLE_DEEP_SCAN="${
+            if netCfg.enableDeepScan
+            then "true"
+            else "false"
+          }"
+                    ENABLE_VENDOR_LOOKUP="${
+            if netCfg.enableVendorLookup
+            then "true"
+            else "false"
+          }"
 
                     # Data directories
                     DATA_DIR="/var/lib/network-discovery"

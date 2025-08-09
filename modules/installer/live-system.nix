@@ -54,9 +54,17 @@ with lib; {
     tailscale
 
     # Add host-specific flake configuration
-    (writeScriptBin "install-${if host != null then host else "host"}" ''
+    (writeScriptBin "install-${
+        if host != null
+        then host
+        else "host"
+      }" ''
       #!/bin/bash
-      exec /etc/nixos-config/scripts/install-helpers/install-wizard.sh "${if host != null then host else ""}" "$@"
+      exec /etc/nixos-config/scripts/install-helpers/install-wizard.sh "${
+        if host != null
+        then host
+        else ""
+      }" "$@"
     '')
   ];
 
@@ -68,8 +76,16 @@ with lib; {
 
   # ISO configuration
   isoImage = {
-    isoName = mkDefault "nixos-${if host != null then host else "installer"}-live.iso";
-    volumeID = mkDefault "NIXOS_${lib.toUpper (if host != null then host else "INSTALLER")}";
+    isoName = mkDefault "nixos-${
+      if host != null
+      then host
+      else "installer"
+    }-live.iso";
+    volumeID = mkDefault "NIXOS_${lib.toUpper (
+      if host != null
+      then host
+      else "INSTALLER"
+    )}";
 
     # 4GB image size
     # isoBaseName has been moved to image.baseName

@@ -8,7 +8,6 @@
 # 2. Replace PLACEHOLDER values
 # 3. Add to modules/development/default.nix imports
 # 4. Enable with: features.development.TOOL_NAME = true;
-
 { config
 , lib
 , pkgs
@@ -106,38 +105,41 @@ in
 
   config = mkIf cfg.enable {
     # Core packages
-    environment.systemPackages = with pkgs; [
-      cfg.package
-    ]
-    # Language Server Protocol
-    ++ optionals cfg.enableLSP [
-      # TOOL_NAME-lsp
-    ]
-    # Debugger support
-    ++ optionals cfg.enableDebugger [
-      # TOOL_NAME-debugger
-    ]
-    # Formatter
-    ++ optionals cfg.enableFormatter [
-      # TOOL_NAME-formatter
-    ]
-    # Linter
-    ++ optionals cfg.enableLinter [
-      # TOOL_NAME-linter
-    ]
-    # Project templates
-    ++ optionals cfg.enableProjectTemplates [
-      # TOOL_NAME-templates
-      # cookiecutter
-    ]
-    # Additional packages
-    ++ cfg.extraPackages;
+    environment.systemPackages = with pkgs;
+      [
+        cfg.package
+      ]
+      # Language Server Protocol
+      ++ optionals cfg.enableLSP [
+        # TOOL_NAME-lsp
+      ]
+      # Debugger support
+      ++ optionals cfg.enableDebugger [
+        # TOOL_NAME-debugger
+      ]
+      # Formatter
+      ++ optionals cfg.enableFormatter [
+        # TOOL_NAME-formatter
+      ]
+      # Linter
+      ++ optionals cfg.enableLinter [
+        # TOOL_NAME-linter
+      ]
+      # Project templates
+      ++ optionals cfg.enableProjectTemplates [
+        # TOOL_NAME-templates
+        # cookiecutter
+      ]
+      # Additional packages
+      ++ cfg.extraPackages;
 
     # Environment variables
-    environment.variables = {
-      # TOOL_NAME_HOME = "/etc/TOOL_NAME";
-      # TOOL_NAME_CONFIG = "/etc/TOOL_NAME/config";
-    } // cfg.globalConfig;
+    environment.variables =
+      {
+        # TOOL_NAME_HOME = "/etc/TOOL_NAME";
+        # TOOL_NAME_CONFIG = "/etc/TOOL_NAME/config";
+      }
+      // cfg.globalConfig;
 
     # Shell aliases and functions
     environment.shellAliases = mkIf cfg.enableShellIntegration {

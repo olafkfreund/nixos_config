@@ -1,5 +1,9 @@
 # Playground MicroVM Configuration
-{ config, lib, pkgs, ... }:
+{ config
+, lib
+, pkgs
+, ...
+}:
 with lib; let
   cfg = config.features.microvms;
 in

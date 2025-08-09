@@ -1,44 +1,43 @@
 # Documentation Development Shell
-{ pkgs, ... }: 
-
+{ pkgs, ... }:
 pkgs.mkShell {
   name = "nixos-docs-environment";
-  
+
   packages = with pkgs; [
     # Documentation generation
-    mdbook              # Rust-based documentation
-    mdbook-mermaid      # Mermaid diagram support
-    mdbook-toc          # Table of contents generation
-    
+    mdbook # Rust-based documentation
+    mdbook-mermaid # Mermaid diagram support
+    mdbook-toc # Table of contents generation
+
     # Diagram and visualization
-    graphviz           # Graph visualization
-    plantuml           # UML diagrams
-    mermaid-cli        # Mermaid diagram CLI
-    
+    graphviz # Graph visualization
+    plantuml # UML diagrams
+    mermaid-cli # Mermaid diagram CLI
+
     # Documentation tools
-    pandoc             # Document conversion
-    texlive.combined.scheme-medium  # LaTeX for PDF generation
-    
+    pandoc # Document conversion
+    texlive.combined.scheme-medium # LaTeX for PDF generation
+
     # NixOS documentation tools
-    nixos-option       # Option documentation
-    nix-doc            # Nix documentation
-    
+    nixos-option # Option documentation
+    nix-doc # Nix documentation
+
     # Web and preview
-    python3Packages.livereload  # Live preview server
-    nodePackages.live-server   # Alternative live server
-    
+    python3Packages.livereload # Live preview server
+    nodePackages.live-server # Alternative live server
+
     # Text processing
-    ripgrep            # Fast text search
-    fd                 # Fast file finding
-    bat                # Better cat with syntax highlighting
-    
+    ripgrep # Fast text search
+    fd # Fast file finding
+    bat # Better cat with syntax highlighting
+
     # Git and version control
     git
-    git-cliff          # Changelog generation
-    
+    git-cliff # Changelog generation
+
     # Linting and formatting
-    markdownlint-cli   # Markdown linting
-    vale               # Prose linting
+    markdownlint-cli # Markdown linting
+    vale # Prose linting
   ];
 
   shellHook = ''
@@ -46,7 +45,7 @@ pkgs.mkShell {
     echo ""
     echo "📖 Documentation Generation:"
     echo "  mdbook init         - Initialize new book"
-    echo "  mdbook build        - Build documentation" 
+    echo "  mdbook build        - Build documentation"
     echo "  mdbook serve        - Serve with live reload"
     echo ""
     echo "📊 Visualization:"

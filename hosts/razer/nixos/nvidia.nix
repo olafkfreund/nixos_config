@@ -38,7 +38,6 @@
         # cudaPackages.cudatoolkit
         # cudaPackages.cudnn
       ];
-
     };
 
     # Docker NVIDIA support
@@ -78,5 +77,4 @@
 
   # Remove global Firefox/Chromium configs to avoid conflicts
   # These will be handled in individual user configurations
-
 }

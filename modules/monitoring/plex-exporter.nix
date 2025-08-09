@@ -1,8 +1,10 @@
 # Plex/Tautulli Prometheus Exporter Module
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.monitoring.plexExporter;
 in
 {
@@ -55,7 +57,7 @@ in
         Restart = "always";
         RestartSec = "15s";
         Environment = [
-          "PATH=${lib.makeBinPath (with pkgs; [ curl jq coreutils bc gnugrep gnused python3 gawk ])}"
+          "PATH=${lib.makeBinPath (with pkgs; [curl jq coreutils bc gnugrep gnused python3 gawk])}"
         ];
 
         ExecStart = pkgs.writeShellScript "plex-exporter" ''

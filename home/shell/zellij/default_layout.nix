@@ -1,8 +1,7 @@
 { pkgs
 , config
 , ...
-}:
-{
+}: {
   xdg.configFile."zellij/layouts/default.kdl".text = ''
     layout {
         default_tab_template {

@@ -265,7 +265,6 @@ with lib; let
         echo "Starting systemd metrics exporter on port $PORT"
         serve_metrics
   '';
-
 in
 {
   config = mkIf (cfg.enable && cfg.features.nodeExporter) {

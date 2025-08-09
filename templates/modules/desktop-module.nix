@@ -8,7 +8,6 @@
 # 2. Replace PLACEHOLDER values
 # 3. Add to modules/desktop/default.nix imports
 # 4. Enable with: features.desktop.COMPONENT_NAME = true;
-
 { config
 , lib
 , pkgs
@@ -267,25 +266,26 @@ in
 
   config = mkIf cfg.enable {
     # Core desktop packages
-    environment.systemPackages = with pkgs; [
-      cfg.package
-    ]
-    # Screenshot tools
-    ++ optionals cfg.enableScreenshots [
-      grim
-      slurp
-      swappy
-    ]
-    # Notification daemon
-    ++ optionals cfg.enableNotifications [
-      libnotify
-      dunst
-    ]
-    # Wallpaper tools
-    ++ optionals cfg.enableWallpaper [
-      feh
-      swaybg
-    ];
+    environment.systemPackages = with pkgs;
+      [
+        cfg.package
+      ]
+      # Screenshot tools
+      ++ optionals cfg.enableScreenshots [
+        grim
+        slurp
+        swappy
+      ]
+      # Notification daemon
+      ++ optionals cfg.enableNotifications [
+        libnotify
+        dunst
+      ]
+      # Wallpaper tools
+      ++ optionals cfg.enableWallpaper [
+        feh
+        swaybg
+      ];
 
     # Desktop environment configuration
     services.xserver = {

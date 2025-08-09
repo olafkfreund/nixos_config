@@ -1,5 +1,9 @@
 # Common MicroVM Configuration
-{ config, lib, pkgs, ... }:
+{ config
+, lib
+, pkgs
+, ...
+}:
 with lib; let
   cfg = config.features.microvms;
 in
@@ -50,7 +54,10 @@ in
     networking.firewall = {
       allowedTCPPorts = [ 2222 2223 2224 ]; # SSH ports for VMs
       allowedTCPPortRanges = [
-        { from = 8080; to = 8090; } # Web development ports
+        {
+          from = 8080;
+          to = 8090;
+        } # Web development ports
       ];
     };
 

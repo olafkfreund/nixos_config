@@ -9,7 +9,6 @@ with lib; let
   cfg = config.modules.ai.chatgpt;
 in
 {
-
   options.modules.ai.chatgpt = {
     enable = mkEnableOption "AI and ChatGPT command line tools";
 
@@ -76,28 +75,28 @@ in
         shell-gpt # Shell integration for GPT models
         yai
         codex # Yet Another AI CLI tool
-      ] ++
-
+      ]
+      ++
       # Code assistants
       optionals cfg.packages.codeAssistants [
         gh-copilot # GitHub Copilot CLI integration
         aichat # AI chat with code assistance features
         gpt-cli # General purpose GPT CLI
         # codex removed due to build issues with OpenSSL dependencies
-      ] ++
-
+      ]
+      ++
       # Terminal tools
       optionals cfg.packages.terminalTools [
         gorilla-cli # AI-powered command suggestions
         # oterm               # AI-enhanced terminal (disabled due to textual test failures)
-      ] ++
-
+      ]
+      ++
       # MCP tools (Model Context Protocol)
       optionals cfg.packages.mcpTools [
         chatmcp # ChatGPT with MCP support
         mcphost # MCP host implementation
-      ] ++
-
+      ]
+      ++
       # Additional user-specified packages
       cfg.additionalPackages;
 

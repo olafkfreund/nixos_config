@@ -1,7 +1,8 @@
 # AMD GPU configuration for workstation template
-{ pkgs, lib, ... }:
-
-{
+{ pkgs
+, lib
+, ...
+}: {
   # AMD GPU hardware support
   hardware.graphics = {
     enable = true;

@@ -1,8 +1,6 @@
 # Consolidated package sets for performance optimization
 # This reduces redundant package declarations across modules
-{ pkgs
-, ...
-}: {
+{ pkgs, ... }: {
   # Core system packages - always needed
   core = with pkgs; [
     # System utilities

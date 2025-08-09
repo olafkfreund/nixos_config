@@ -1,8 +1,10 @@
 # Dynamic System Resource Manager Module
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.system.resourceManager;
 in
 {
@@ -178,13 +180,13 @@ in
         RestartSec = "10s";
         Environment = [
           "PATH=${lib.makeBinPath (with pkgs; [
-            bc         # mathematical calculations
-            procps     # free, top, pgrep
-            gawk       # awk
-            coreutils  # basic utilities
+            bc # mathematical calculations
+            procps # free, top, pgrep
+            gawk # awk
+            coreutils # basic utilities
             util-linux # renice, ionice, taskset
-            gnugrep    # grep
-            gnused     # sed
+            gnugrep # grep
+            gnused # sed
           ])}"
         ];
         ExecStart = pkgs.writeShellScript "dynamic-resource-manager" ''
@@ -219,32 +221,32 @@ in
             local cpu_usage=$2
 
             ${optionalString cfg.cpuManagement.dynamicGovernor ''
-              if (( $(echo "$load > 2.0" | bc -l) )) || [ "$cpu_usage" -gt 80 ]; then
-                # High load - use performance governor
-                for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
-                  if [ -f "$cpu" ]; then
-                    echo performance > "$cpu" 2>/dev/null || true
-                  fi
-                done
-                echo "[$(date)] CPU governor set to performance (load: $load, usage: $cpu_usage%)"
-              elif (( $(echo "$load < 0.5" | bc -l) )) && [ "$cpu_usage" -lt 20 ]; then
-                # Low load - use powersave governor
-                for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
-                  if [ -f "$cpu" ]; then
-                    echo powersave > "$cpu" 2>/dev/null || true
-                  fi
-                done
-                echo "[$(date)] CPU governor set to powersave (load: $load, usage: $cpu_usage%)"
-              else
-                # Medium load - use ondemand governor
-                for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
-                  if [ -f "$cpu" ]; then
-                    echo ondemand > "$cpu" 2>/dev/null || true
-                  fi
-                done
-                echo "[$(date)] CPU governor set to ondemand (load: $load, usage: $cpu_usage%)"
-              fi
-            ''}
+            if (( $(echo "$load > 2.0" | bc -l) )) || [ "$cpu_usage" -gt 80 ]; then
+              # High load - use performance governor
+              for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+                if [ -f "$cpu" ]; then
+                  echo performance > "$cpu" 2>/dev/null || true
+                fi
+              done
+              echo "[$(date)] CPU governor set to performance (load: $load, usage: $cpu_usage%)"
+            elif (( $(echo "$load < 0.5" | bc -l) )) && [ "$cpu_usage" -lt 20 ]; then
+              # Low load - use powersave governor
+              for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+                if [ -f "$cpu" ]; then
+                  echo powersave > "$cpu" 2>/dev/null || true
+                fi
+              done
+              echo "[$(date)] CPU governor set to powersave (load: $load, usage: $cpu_usage%)"
+            else
+              # Medium load - use ondemand governor
+              for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+                if [ -f "$cpu" ]; then
+                  echo ondemand > "$cpu" 2>/dev/null || true
+                fi
+              done
+              echo "[$(date)] CPU governor set to ondemand (load: $load, usage: $cpu_usage%)"
+            fi
+          ''}
           }
 
           # Function to optimize memory management
@@ -252,25 +254,25 @@ in
             local memory_pressure=$1
 
             ${optionalString cfg.memoryManagement.dynamicSwap ''
-              if (( $(echo "$memory_pressure > 85.0" | bc -l) )); then
-                # High memory pressure - reduce swappiness
-                echo 1 > /proc/sys/vm/swappiness
-                echo "[$(date)] Memory pressure high ($memory_pressure%), reduced swappiness"
-              elif (( $(echo "$memory_pressure < 50.0" | bc -l) )); then
-                # Low memory pressure - normal swappiness
-                echo 60 > /proc/sys/vm/swappiness
-                echo "[$(date)] Memory pressure low ($memory_pressure%), normal swappiness"
-              fi
-            ''}
+            if (( $(echo "$memory_pressure > 85.0" | bc -l) )); then
+              # High memory pressure - reduce swappiness
+              echo 1 > /proc/sys/vm/swappiness
+              echo "[$(date)] Memory pressure high ($memory_pressure%), reduced swappiness"
+            elif (( $(echo "$memory_pressure < 50.0" | bc -l) )); then
+              # Low memory pressure - normal swappiness
+              echo 60 > /proc/sys/vm/swappiness
+              echo "[$(date)] Memory pressure low ($memory_pressure%), normal swappiness"
+            fi
+          ''}
 
             ${optionalString cfg.memoryManagement.hugePagesOptimization ''
-              # Optimize huge pages based on memory usage
-              if (( $(echo "$memory_pressure > 70.0" | bc -l) )); then
-                echo madvise > /sys/kernel/mm/transparent_hugepage/enabled
-              else
-                echo always > /sys/kernel/mm/transparent_hugepage/enabled
-              fi
-            ''}
+            # Optimize huge pages based on memory usage
+            if (( $(echo "$memory_pressure > 70.0" | bc -l) )); then
+              echo madvise > /sys/kernel/mm/transparent_hugepage/enabled
+            else
+              echo always > /sys/kernel/mm/transparent_hugepage/enabled
+            fi
+          ''}
           }
 
           # Function to optimize I/O scheduler
@@ -278,19 +280,19 @@ in
             local load=$1
 
             ${optionalString cfg.ioManagement.dynamicScheduler ''
-              for disk in /sys/block/*/queue/scheduler; do
-                if [ -f "$disk" ]; then
-                  if (( $(echo "$load > 1.5" | bc -l) )); then
-                    # High load - use deadline scheduler
-                    echo deadline > "$disk" 2>/dev/null || true
-                  else
-                    # Normal load - use CFQ scheduler
-                    echo cfq > "$disk" 2>/dev/null || true
-                  fi
+            for disk in /sys/block/*/queue/scheduler; do
+              if [ -f "$disk" ]; then
+                if (( $(echo "$load > 1.5" | bc -l) )); then
+                  # High load - use deadline scheduler
+                  echo deadline > "$disk" 2>/dev/null || true
+                else
+                  # Normal load - use CFQ scheduler
+                  echo cfq > "$disk" 2>/dev/null || true
                 fi
-              done
-              echo "[$(date)] I/O scheduler optimized for load: $load"
-            ''}
+              fi
+            done
+            echo "[$(date)] I/O scheduler optimized for load: $load"
+          ''}
           }
 
           # Function to apply workload profiles
@@ -306,12 +308,13 @@ in
                   ionice -c ${toString profile.ioClass} -n ${toString profile.ioPriority} -p "$pid" 2>/dev/null || true
 
                   ${optionalString (profile.cpuAffinity != null) ''
-                    # Set CPU affinity
-                    taskset -cp ${profile.cpuAffinity} "$pid" 2>/dev/null || true
-                  ''}
+                # Set CPU affinity
+                taskset -cp ${profile.cpuAffinity} "$pid" 2>/dev/null || true
+              ''}
                 fi
               done
-            '') cfg.workloadProfiles)}
+            '')
+            cfg.workloadProfiles)}
           }
 
           # Main monitoring loop
@@ -427,13 +430,13 @@ in
         RestartSec = "60s";
         Environment = [
           "PATH=${lib.makeBinPath (with pkgs; [
-            procps     # top, free
-            gawk       # awk
-            coreutils  # basic utilities
-            iproute2   # ss (socket statistics)
+            procps # top, free
+            gawk # awk
+            coreutils # basic utilities
+            iproute2 # ss (socket statistics)
             util-linux # uptime
-            gnugrep    # grep
-            gnused     # sed
+            gnugrep # grep
+            gnused # sed
           ])}"
         ];
         ExecStart = pkgs.writeShellScript "resource-monitor" ''
@@ -493,7 +496,11 @@ in
       "kernel.sched_wakeup_granularity_ns" = mkDefault 1000000; # 1ms
 
       # Memory management
-      "vm.swappiness" = mkDefault (if cfg.profile == "performance" then 1 else 60);
+      "vm.swappiness" = mkDefault (
+        if cfg.profile == "performance"
+        then 1
+        else 60
+      );
       "vm.vfs_cache_pressure" = mkDefault 100;
       "vm.dirty_background_ratio" = mkDefault 10;
       "vm.dirty_ratio" = mkDefault 20;
@@ -502,14 +509,16 @@ in
     };
 
     # System packages for resource management
-    environment.systemPackages = with pkgs; [
-      util-linux # for ionice, taskset
-      bc # for calculations
-      procps # for pgrep, top
-      inetutils # for network tools
-    ] ++ optionals cfg.memoryManagement.memoryCompression [
-      zram-generator
-    ];
+    environment.systemPackages = with pkgs;
+      [
+        util-linux # for ionice, taskset
+        bc # for calculations
+        procps # for pgrep, top
+        inetutils # for network tools
+      ]
+      ++ optionals cfg.memoryManagement.memoryCompression [
+        zram-generator
+      ];
 
     # Create directories
     systemd.tmpfiles.rules = [

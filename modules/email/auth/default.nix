@@ -1,8 +1,9 @@
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.features.email.auth;
   emailCfg = config.features.email;
 in
@@ -78,13 +79,15 @@ in
     };
 
     # Install authentication helper tools
-    environment.systemPackages = with pkgs; [
-      gnupg # For password management
-    ] ++ optionals (cfg.method == "oauth2") [
-      oauth2ms
-      curl
-      jq
-    ];
+    environment.systemPackages = with pkgs;
+      [
+        gnupg # For password management
+      ]
+      ++ optionals (cfg.method == "oauth2") [
+        oauth2ms
+        curl
+        jq
+      ];
 
     # Create directories for temporary token storage
     systemd.tmpfiles.rules = [

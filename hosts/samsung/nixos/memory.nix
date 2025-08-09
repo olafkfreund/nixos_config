@@ -1,6 +1,4 @@
-{ lib
-, ...
-}: {
+{ lib, ... }: {
   # Memory optimization for 16GB RAM
   boot.kernel.sysctl = {
     "vm.swappiness" = 10; # Reduce swap usage with high RAM

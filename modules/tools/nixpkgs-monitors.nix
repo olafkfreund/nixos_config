@@ -1,9 +1,10 @@
 # NixOS Nixpkgs Update Monitoring Tools
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.tools.nixpkgs-monitors;
 
   # Git-based comprehensive update checker
@@ -728,7 +729,6 @@ let
             ;;
     esac
   '';
-
 in
 {
   options.tools.nixpkgs-monitors = {
@@ -754,11 +754,11 @@ in
 
   config = mkIf cfg.enable {
     environment.systemPackages =
-      (optionals (cfg.installAll || elem "nixpkgs-update-checker" cfg.tools) [ nixpkgs-update-checker ]) ++
-      (optionals (cfg.installAll || elem "nixpkgs-api-checker" cfg.tools) [ nixpkgs-api-checker ]) ++
-      (optionals (cfg.installAll || elem "nixos-system-updates" cfg.tools) [ nixos-system-updates ]) ++
-      (optionals (cfg.installAll || elem "nixos-updates" cfg.tools) [ nixos-updates ]) ++
-      [
+      (optionals (cfg.installAll || elem "nixpkgs-update-checker" cfg.tools) [ nixpkgs-update-checker ])
+      ++ (optionals (cfg.installAll || elem "nixpkgs-api-checker" cfg.tools) [ nixpkgs-api-checker ])
+      ++ (optionals (cfg.installAll || elem "nixos-system-updates" cfg.tools) [ nixos-system-updates ])
+      ++ (optionals (cfg.installAll || elem "nixos-updates" cfg.tools) [ nixos-updates ])
+      ++ [
         # Dependencies
         pkgs.git
         pkgs.jq

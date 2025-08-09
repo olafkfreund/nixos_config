@@ -1,6 +1,4 @@
-{ lib
-, ...
-}: {
+{ lib, ... }: {
   aws.packages.enable = true;
   azure.packages.enable = true;
   cloud-tools.packages.enable = true;

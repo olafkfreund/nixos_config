@@ -1,7 +1,8 @@
 # Boot configuration for workstation template
-{ config, pkgs, ... }:
-
-{
+{ config
+, pkgs
+, ...
+}: {
   # Bootloader configuration
   boot.loader = {
     systemd-boot = {

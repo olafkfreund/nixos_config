@@ -1,6 +1,5 @@
 # Simplified Performance Profiles
-{ ...
-}:
+{ ... }:
 let
   profiles = {
     balanced = {

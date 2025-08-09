@@ -1,6 +1,5 @@
 # Common dependency sets for reducing package duplication
-{ pkgs }:
-{
+{ pkgs }: {
   # Core monitoring tools used by all exporters
   monitoringTools = with pkgs; [
     curl # HTTP API requests

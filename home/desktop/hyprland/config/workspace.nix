@@ -4,8 +4,7 @@
 , host ? "default"
 , ...
 }:
-with lib;
-let
+with lib; let
   # Import host-specific variables if available
   hostVars =
     if builtins.pathExists ../../../../hosts/${host}/variables.nix
@@ -62,8 +61,8 @@ let
           defaultPrimary = cfg.multiMonitor.primary.defaultWorkspace;
           defaultSecondary = cfg.multiMonitor.secondary.defaultWorkspace;
         in
-        (map (ws: "workspace = ${toString ws},monitor:${primary}${optionalString (ws == defaultPrimary) ",default:true"}") primaryWorkspaces) ++
-        (map (ws: "workspace = ${toString ws},monitor:${secondary}${optionalString (ws == defaultSecondary) ",default:true"}") secondaryWorkspaces)
+        (map (ws: "workspace = ${toString ws},monitor:${primary}${optionalString (ws == defaultPrimary) ",default:true"}") primaryWorkspaces)
+        ++ (map (ws: "workspace = ${toString ws},monitor:${secondary}${optionalString (ws == defaultSecondary) ",default:true"}") secondaryWorkspaces)
       );
 
       # Single monitor fallback
@@ -84,15 +83,12 @@ let
       specialRules = optionals cfg.special.enable [
         "# Special workspaces for organized application management"
       ];
-
     in
     multiMonitorRules ++ singleMonitorRules ++ specialRules;
-
 in
 {
-  wayland.windowManager.hyprland.extraConfig =
-    concatStringsSep "\n" (
-      [ "# Enhanced Workspace Rules with Smart Multi-Monitor Support" ] ++
-      generateWorkspaceRules
-    );
+  wayland.windowManager.hyprland.extraConfig = concatStringsSep "\n" (
+    [ "# Enhanced Workspace Rules with Smart Multi-Monitor Support" ]
+    ++ generateWorkspaceRules
+  );
 }

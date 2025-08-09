@@ -1,8 +1,6 @@
 # Network stability configuration for p620
 # Fixes net::ERR_NETWORK_CHANGED errors
-{ lib
-, ...
-}: {
+{ lib, ... }: {
   # Enable the comprehensive network stability service with p620-specific settings
   services.network-stability = {
     enable = true;

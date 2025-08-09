@@ -1,8 +1,10 @@
 # AI Analysis Grafana Dashboards
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.ai.grafanaDashboards;
 in
 {

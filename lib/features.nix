@@ -67,7 +67,8 @@ let
 
       # Check dependencies
       missingDeps = flatten (map
-        (feature:
+        (
+          feature:
           let
             deps = featureRegistry.${feature}.dependencies or [ ];
             missing = filter (dep: !(enabledFeatures.${dep} or false)) deps;
@@ -78,7 +79,8 @@ let
 
       # Check conflicts
       conflicts = flatten (map
-        (feature:
+        (
+          feature:
           let
             conflictList = featureRegistry.${feature}.conflicts or [ ];
             activeConflicts = filter (conflict: enabledFeatures.${conflict} or false) conflictList;
@@ -86,7 +88,6 @@ let
           map (conflict: "${feature} conflicts with ${conflict}") activeConflicts
         )
         enabledNames);
-
     in
     {
       inherit missingDeps conflicts;
@@ -118,7 +119,6 @@ let
       security.enable = true;
     };
   };
-
 in
 {
   options = {
@@ -153,7 +153,6 @@ in
 
       allFeatures = lib.recursiveUpdate profileFeatures config.features;
       validation = validateFeatures allFeatures;
-
     in
     {
       # Feature validation assertions

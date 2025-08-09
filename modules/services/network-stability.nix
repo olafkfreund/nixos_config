@@ -45,7 +45,6 @@ in
       };
     };
 
-
     electron = {
       improve = mkOption {
         type = types.bool;
@@ -162,7 +161,6 @@ in
       };
     };
 
-
     # Environment configuration for network stability
     environment = mkMerge [
       # Electron network stability improvements
@@ -252,7 +250,6 @@ in
         };
       }
     );
-
 
     # Create sync point for network stability events
     systemd.tmpfiles.rules = mkIf cfg.helperService.enable [

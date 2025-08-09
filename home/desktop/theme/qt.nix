@@ -24,10 +24,11 @@ in
         else pkgs.qt6ct
       );
     };
-    style = {
-      name = lib.mkForce "adwaita-dark";
-      package = lib.mkForce pkgs.adwaita-qt;
-    };
+    # Let Stylix handle Qt styling instead of forcing a specific style
+    # style = {
+    #   name = lib.mkForce "adwaita-dark";
+    #   package = lib.mkForce pkgs.adwaita-qt;
+    # };
   };
 
   home.packages = with pkgs; [

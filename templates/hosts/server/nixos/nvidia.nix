@@ -1,8 +1,10 @@
 # NVIDIA GPU configuration for server template
 # Optimized for compute workloads and headless operation
-{ config, pkgs, lib, ... }:
-
-{
+{ config
+, pkgs
+, lib
+, ...
+}: {
   # NVIDIA hardware configuration for compute
   hardware.nvidia = {
     modesetting.enable = true;

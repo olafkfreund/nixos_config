@@ -4,8 +4,7 @@
 , lib
 , ...
 }:
-with lib;
-let
+with lib; let
   # Workflow configuration
   cfg = {
     # Task runners and build systems
@@ -87,63 +86,69 @@ let
   };
 
   # Package collections based on configuration
-  taskRunnerPackages = with pkgs; flatten [
-    (optional cfg.taskRunners.just just)
-    (optional cfg.taskRunners.make gnumake)
-    (optional cfg.taskRunners.ninja ninja)
-    (optional cfg.taskRunners.bazel bazel)
-    (optional cfg.taskRunners.earthly earthly)
-  ];
+  taskRunnerPackages = with pkgs;
+    flatten [
+      (optional cfg.taskRunners.just just)
+      (optional cfg.taskRunners.make gnumake)
+      (optional cfg.taskRunners.ninja ninja)
+      (optional cfg.taskRunners.bazel bazel)
+      (optional cfg.taskRunners.earthly earthly)
+    ];
 
-  testingPackages = with pkgs; flatten [
-    (optional cfg.testing.act act)
-    (optional cfg.testing.hyperfine hyperfine)
-    (optional cfg.testing.tokei tokei)
-    (optional cfg.testing.pytest python313Packages.pytest)
-    (optional cfg.testing.jest nodePackages.jest)
-    # Note: cargo test and go test are included with their respective language packages
-  ];
+  testingPackages = with pkgs;
+    flatten [
+      (optional cfg.testing.act act)
+      (optional cfg.testing.hyperfine hyperfine)
+      (optional cfg.testing.tokei tokei)
+      (optional cfg.testing.pytest python313Packages.pytest)
+      (optional cfg.testing.jest nodePackages.jest)
+      # Note: cargo test and go test are included with their respective language packages
+    ];
 
-  cicdPackages = with pkgs; flatten [
-    (optional cfg.cicd.github_cli gh)
-    (optional cfg.cicd.act act)
-    (optional cfg.cicd.pre_commit pre-commit)
-    (optional cfg.cicd.commitizen commitizen)
-  ];
+  cicdPackages = with pkgs;
+    flatten [
+      (optional cfg.cicd.github_cli gh)
+      (optional cfg.cicd.act act)
+      (optional cfg.cicd.pre_commit pre-commit)
+      (optional cfg.cicd.commitizen commitizen)
+    ];
 
-  servicePackages = with pkgs; flatten [
-    (optional cfg.services.sqlite sqlite)
-    (optional cfg.services.redis redis)
-    (optional cfg.services.postgresql postgresql)
-    (optional cfg.services.caddy caddy)
-    (optional cfg.services.nginx nginx)
-  ];
+  servicePackages = with pkgs;
+    flatten [
+      (optional cfg.services.sqlite sqlite)
+      (optional cfg.services.redis redis)
+      (optional cfg.services.postgresql postgresql)
+      (optional cfg.services.caddy caddy)
+      (optional cfg.services.nginx nginx)
+    ];
 
-  networkingPackages = with pkgs; flatten [
-    (optional cfg.networking.httpie httpie)
-    (optional cfg.networking.curl curl)
-    (optional cfg.networking.wget wget)
-    (optional cfg.networking.jq jq)
-    (optional cfg.networking.yq yq-go)
-    (optional cfg.networking.dive dive)
-  ];
+  networkingPackages = with pkgs;
+    flatten [
+      (optional cfg.networking.httpie httpie)
+      (optional cfg.networking.curl curl)
+      (optional cfg.networking.wget wget)
+      (optional cfg.networking.jq jq)
+      (optional cfg.networking.yq yq-go)
+      (optional cfg.networking.dive dive)
+    ];
 
-  documentationPackages = with pkgs; flatten [
-    (optional cfg.documentation.mdbook mdbook)
-    (optional cfg.documentation.hugo hugo)
-    (optional cfg.documentation.pandoc pandoc)
-    (optional cfg.documentation.graphviz graphviz)
-    (optional cfg.documentation.plantuml plantuml)
-  ];
+  documentationPackages = with pkgs;
+    flatten [
+      (optional cfg.documentation.mdbook mdbook)
+      (optional cfg.documentation.hugo hugo)
+      (optional cfg.documentation.pandoc pandoc)
+      (optional cfg.documentation.graphviz graphviz)
+      (optional cfg.documentation.plantuml plantuml)
+    ];
 
-  monitoringPackages = with pkgs; flatten [
-    (optional cfg.monitoring.htop htop)
-    (optional cfg.monitoring.btop btop)
-    (optional cfg.monitoring.bandwhich bandwhich)
-    (optional cfg.monitoring.flamegraph flamegraph)
-    (optional cfg.monitoring.perf linuxPackages.perf)
-  ];
-
+  monitoringPackages = with pkgs;
+    flatten [
+      (optional cfg.monitoring.htop htop)
+      (optional cfg.monitoring.btop btop)
+      (optional cfg.monitoring.bandwhich bandwhich)
+      (optional cfg.monitoring.flamegraph flamegraph)
+      (optional cfg.monitoring.perf linuxPackages.perf)
+    ];
 in
 {
   # Enhanced development workflow packages
@@ -281,10 +286,10 @@ in
 
           # Initialize pre-commit if available
           ${optionalString cfg.cicd.pre_commit ''
-          if [ -f .pre-commit-config.yaml ]; then
-            echo "📋 Installing pre-commit hooks..."
-            ${pkgs.pre-commit}/bin/pre-commit install
-          fi
+            if [ -f .pre-commit-config.yaml ]; then
+              echo "📋 Installing pre-commit hooks..."
+              ${pkgs.pre-commit}/bin/pre-commit install
+            fi
           ''}
 
           # Initialize justfile if it doesn't exist

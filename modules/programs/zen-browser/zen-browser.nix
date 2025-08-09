@@ -1,8 +1,8 @@
 { lib
 , stdenv
 , pkgs
+,
 }:
-
 stdenv.mkDerivation rec {
   pname = "zen-browser";
   version = "1.0.0-a.26";
@@ -14,34 +14,36 @@ stdenv.mkDerivation rec {
 
   nativeBuildInputs = [ pkgs.makeWrapper ];
 
-  runtimeLibs = with pkgs; [
-    libGL
-    stdenv.cc.cc
-    fontconfig
-    libxkbcommon
-    zlib
-    freetype
-    gtk3
-    libxml2
-    dbus
-    xcb-util-cursor
-    alsa-lib
-    pango
-    atk
-    cairo
-    gdk-pixbuf
-    glib
-  ] ++ (with pkgs.xorg; [
-    libxcb
-    libX11
-    libXcursor
-    libXrandr
-    libXi
-    libXext
-    libXcomposite
-    libXdamage
-    libXfixes
-  ]);
+  runtimeLibs = with pkgs;
+    [
+      libGL
+      stdenv.cc.cc
+      fontconfig
+      libxkbcommon
+      zlib
+      freetype
+      gtk3
+      libxml2
+      dbus
+      xcb-util-cursor
+      alsa-lib
+      pango
+      atk
+      cairo
+      gdk-pixbuf
+      glib
+    ]
+    ++ (with pkgs.xorg; [
+      libxcb
+      libX11
+      libXcursor
+      libXrandr
+      libXi
+      libXext
+      libXcomposite
+      libXdamage
+      libXfixes
+    ]);
 
   installPhase = ''
     runHook preInstall

@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}: {
+{ pkgs, ... }: {
   systemd.user.timers.mbsync = {
     Unit.Description = "mbsync";
     Timer = {

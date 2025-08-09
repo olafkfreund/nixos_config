@@ -1,6 +1,4 @@
-{ lib
-, ...
-}:
+{ lib, ... }:
 with lib; {
   options.features = {
     terminals = {

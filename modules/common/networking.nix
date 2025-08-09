@@ -51,7 +51,7 @@ with lib; {
 
       # Disable systemd-resolved for desktop profile - NetworkManager handles DNS
       services.resolved.enable = lib.mkDefault false;
-      
+
       # Disable network wait services for faster boot
       systemd.services = {
         NetworkManager-wait-online.enable = lib.mkDefault false;

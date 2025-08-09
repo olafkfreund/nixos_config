@@ -1,4 +1,8 @@
-{ config, lib, pkgs, ... }:
+{ config
+, lib
+, pkgs
+, ...
+}:
 with lib; let
   cfg = config.monitoring;
   vars = import ../../hosts/${config.networking.hostName}/variables.nix;
@@ -106,16 +110,18 @@ in
         scrapeConfigs = [
           {
             job_name = "gpu-exporter";
-            static_configs = [{
-              targets = [
-                "razer.home.freundcloud.com:${toString cfg.network.gpuExporterPort}"
-                "p510.home.freundcloud.com:${toString cfg.network.gpuExporterPort}"
-              ];
-              labels = {
-                service = "gpu-exporter";
-                role = "gpu-metrics";
-              };
-            }];
+            static_configs = [
+              {
+                targets = [
+                  "razer.home.freundcloud.com:${toString cfg.network.gpuExporterPort}"
+                  "p510.home.freundcloud.com:${toString cfg.network.gpuExporterPort}"
+                ];
+                labels = {
+                  service = "gpu-exporter";
+                  role = "gpu-metrics";
+                };
+              }
+            ];
             scrape_interval = cfg.scrapeInterval;
             metrics_path = "/metrics";
           }

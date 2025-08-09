@@ -1,8 +1,10 @@
 # AI Load Testing Module
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.ai.loadTesting;
 in
 {

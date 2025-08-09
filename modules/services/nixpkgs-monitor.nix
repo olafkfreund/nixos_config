@@ -1,9 +1,10 @@
 # NixOS Nixpkgs Update Monitor Service
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.services.nixpkgs-monitor;
 
   # Create the monitoring script
@@ -36,7 +37,6 @@ let
       fi
     ''}
   '';
-
 in
 {
   options.services.nixpkgs-monitor = {
@@ -161,6 +161,5 @@ in
         create = "644 ${cfg.user} users";
       };
     };
-
   };
 }

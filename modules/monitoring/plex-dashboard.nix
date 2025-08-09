@@ -1,8 +1,10 @@
 # Enhanced Plex Media Server Grafana Dashboard
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.monitoring.plexDashboard;
 in
 {

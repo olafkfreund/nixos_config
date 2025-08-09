@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}:
+{ pkgs, ... }:
 let
   ipv4 = "5.78.43.185";
   fqdn2domain = "infra.holochain.org";

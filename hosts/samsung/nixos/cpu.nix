@@ -1,5 +1,4 @@
-{ ...
-}: {
+{ ... }: {
   # Intel i7-10875H specific optimizations
   hardware.cpu.intel.updateMicrocode = true;
 

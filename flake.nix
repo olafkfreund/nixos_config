@@ -257,7 +257,8 @@
                       ags
                       agenix
                       razer-laptop-control
-                      host;
+                      host
+                      ;
                     username = primaryUser;
                     hostUsers = allUsers;
                   };
@@ -287,57 +288,59 @@
         # playground-vm = microvms.playground-vm;
       };
 
-
       # Modern structured outputs
-      packages.x86_64-linux = 
+      packages.x86_64-linux =
         let
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
-        in {
+        in
+        {
           # Custom applications
           claude-code = import ./home/development/claude-code {
             inherit (pkgs) lib buildNpmPackage fetchurl nodejs makeWrapper writeShellScriptBin;
           };
           gemini-cli = pkgs.callPackage ./pkgs/gemini-cli { };
-          
+
           # Live ISO images (temporarily disabled during flake restructuring)
           # live-iso-p620 = liveImages.liveImages.p620.config.system.build.isoImage;
           # live-iso-razer = liveImages.liveImages.razer.config.system.build.isoImage;
           # live-iso-p510 = liveImages.liveImages.p510.config.system.build.isoImage;
           # live-iso-dex5550 = liveImages.liveImages.dex5550.config.system.build.isoImage;
           # live-iso-samsung = liveImages.liveImages.samsung.config.system.build.isoImage;
-          
+
           # Development and deployment tools available as packages
           # (Apps are available separately via apps.x86_64-linux)
         };
-      
+
       # Development shells
-      devShells.x86_64-linux = 
+      devShells.x86_64-linux =
         let
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
-        in {
+        in
+        {
           default = import ./shells/dev.nix { inherit pkgs inputs; };
           testing = import ./shells/testing.nix { inherit pkgs; };
           docs = import ./shells/docs.nix { inherit pkgs; };
         };
-      
+
       # Quality assurance and validation checks
-      checks.x86_64-linux = import ./checks/default.nix { 
+      checks.x86_64-linux = import ./checks/default.nix {
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
-        inherit (nixpkgs) lib; 
+        inherit (nixpkgs) lib;
       };
-      
+
       # Application entries for common workflows
-      apps.x86_64-linux = 
+      apps.x86_64-linux =
         let
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
           appPkgs = import ./apps/default.nix { inherit pkgs; };
-        in {
+        in
+        {
           deploy = {
             type = "app";
             program = "${appPkgs.deploy}/bin/nixos-deploy";
           };
           test = {
-            type = "app"; 
+            type = "app";
             program = "${appPkgs.test}/bin/nixos-test";
           };
           build-live = {
@@ -349,10 +352,10 @@
             program = "${appPkgs.dev-utils}/bin/nixos-dev-utils";
           };
         };
-      
+
       # Formatter
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;
-      
+
       # Module exports for reuse by other flakes
       nixosModules = {
         # Core module categories
@@ -360,15 +363,15 @@
         ai-providers = ./modules/ai;
         development = ./modules/development;
         desktop = ./modules/desktop;
-        
+
         # Feature modules
         features = ./modules/features;
         packages = ./modules/packages;
-        
+
         # System modules
         core = ./modules/core.nix;
         security = ./modules/security;
-        
+
         # Utility modules
         network = ./modules/network;
         virtualization = ./modules/virtualization;

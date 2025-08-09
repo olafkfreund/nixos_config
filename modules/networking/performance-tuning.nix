@@ -1,8 +1,10 @@
 # Network Performance Tuning Module
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.networking.performanceTuning;
 in
 {
@@ -173,10 +175,18 @@ in
             echo "[$(date)] TCP congestion control set to ${cfg.tcpOptimization.congestionControl}"
 
             # TCP window scaling
-            echo ${if cfg.tcpOptimization.windowScaling then "1" else "0"} > /proc/sys/net/ipv4/tcp_window_scaling
+            echo ${
+              if cfg.tcpOptimization.windowScaling
+              then "1"
+              else "0"
+            } > /proc/sys/net/ipv4/tcp_window_scaling
 
             # TCP Fast Open
-            echo ${if cfg.tcpOptimization.fastOpen then "3" else "0"} > /proc/sys/net/ipv4/tcp_fastopen
+            echo ${
+              if cfg.tcpOptimization.fastOpen
+              then "3"
+              else "0"
+            } > /proc/sys/net/ipv4/tcp_fastopen
 
             ${optionalString cfg.tcpOptimization.lowLatency ''
               # Low latency TCP settings
@@ -186,25 +196,31 @@ in
             ''}
 
             # Profile-specific TCP settings
-            ${if cfg.profile == "latency" then ''
-              echo 1 > /proc/sys/net/ipv4/tcp_timestamps
-              echo 1 > /proc/sys/net/ipv4/tcp_sack
-              echo 1 > /proc/sys/net/ipv4/tcp_fack
-              echo 0 > /proc/sys/net/ipv4/tcp_tw_recycle
-              echo 1 > /proc/sys/net/ipv4/tcp_tw_reuse
-              echo "[$(date)] Applied latency-optimized TCP settings"
-            '' else if cfg.profile == "throughput" then ''
-              echo 1 > /proc/sys/net/ipv4/tcp_timestamps
-              echo 1 > /proc/sys/net/ipv4/tcp_sack
-              echo 1 > /proc/sys/net/ipv4/tcp_fack
-              echo 262144 > /proc/sys/net/core/netdev_max_backlog
-              echo "[$(date)] Applied throughput-optimized TCP settings"
-            '' else ''
-              echo 1 > /proc/sys/net/ipv4/tcp_timestamps
-              echo 1 > /proc/sys/net/ipv4/tcp_sack
-              echo 1 > /proc/sys/net/ipv4/tcp_fack
-              echo "[$(date)] Applied balanced TCP settings"
-            ''}
+            ${
+              if cfg.profile == "latency"
+              then ''
+                echo 1 > /proc/sys/net/ipv4/tcp_timestamps
+                echo 1 > /proc/sys/net/ipv4/tcp_sack
+                echo 1 > /proc/sys/net/ipv4/tcp_fack
+                echo 0 > /proc/sys/net/ipv4/tcp_tw_recycle
+                echo 1 > /proc/sys/net/ipv4/tcp_tw_reuse
+                echo "[$(date)] Applied latency-optimized TCP settings"
+              ''
+              else if cfg.profile == "throughput"
+              then ''
+                echo 1 > /proc/sys/net/ipv4/tcp_timestamps
+                echo 1 > /proc/sys/net/ipv4/tcp_sack
+                echo 1 > /proc/sys/net/ipv4/tcp_fack
+                echo 262144 > /proc/sys/net/core/netdev_max_backlog
+                echo "[$(date)] Applied throughput-optimized TCP settings"
+              ''
+              else ''
+                echo 1 > /proc/sys/net/ipv4/tcp_timestamps
+                echo 1 > /proc/sys/net/ipv4/tcp_sack
+                echo 1 > /proc/sys/net/ipv4/tcp_fack
+                echo "[$(date)] Applied balanced TCP settings"
+              ''
+            }
           ''}
 
           # Buffer optimization
@@ -230,21 +246,22 @@ in
             ${optionalString cfg.interHostOptimization.routeOptimization ''
               # Optimize routes to known hosts
               ${concatStringsSep "\n" (map (host: ''
-                if ping -c 1 -W 1 ${host} &>/dev/null; then
-                  # Get current route
-                  ROUTE_INFO=$(${pkgs.iproute2}/bin/ip route get ${host} 2>/dev/null | head -1)
-                  if [ -n "$ROUTE_INFO" ]; then
-                    echo "[$(date)] Route to ${host}: $ROUTE_INFO"
+                  if ping -c 1 -W 1 ${host} &>/dev/null; then
+                    # Get current route
+                    ROUTE_INFO=$(${pkgs.iproute2}/bin/ip route get ${host} 2>/dev/null | head -1)
+                    if [ -n "$ROUTE_INFO" ]; then
+                      echo "[$(date)] Route to ${host}: $ROUTE_INFO"
 
-                    # Optimize route metrics if needed
-                    INTERFACE=$(echo "$ROUTE_INFO" | ${pkgs.gawk}/bin/awk '{for(i=1;i<=NF;i++) if($i=="dev") print $(i+1)}')
-                    if [ -n "$INTERFACE" ]; then
-                      # Increase interface queue length for better performance
-                      ${pkgs.iproute2}/bin/ip link set dev "$INTERFACE" txqueuelen 10000 2>/dev/null || true
+                      # Optimize route metrics if needed
+                      INTERFACE=$(echo "$ROUTE_INFO" | ${pkgs.gawk}/bin/awk '{for(i=1;i<=NF;i++) if($i=="dev") print $(i+1)}')
+                      if [ -n "$INTERFACE" ]; then
+                        # Increase interface queue length for better performance
+                        ${pkgs.iproute2}/bin/ip link set dev "$INTERFACE" txqueuelen 10000 2>/dev/null || true
+                      fi
                     fi
                   fi
-                fi
-              '') cfg.interHostOptimization.hosts)}
+                '')
+                cfg.interHostOptimization.hosts)}
             ''}
 
             ${optionalString cfg.interHostOptimization.jumboFrames ''
@@ -263,20 +280,20 @@ in
             echo "[$(date)] Optimizing DNS performance..."
 
             ${optionalString cfg.dnsOptimization.caching ''
-              # Configure systemd-resolved for better caching
-              if systemctl is-active systemd-resolved &>/dev/null; then
-                mkdir -p /etc/systemd/resolved.conf.d
-                cat > /etc/systemd/resolved.conf.d/performance.conf << EOF
-          [Resolve]
-          DNS=${concatStringsSep " " cfg.dnsOptimization.customServers}
-          Cache=yes
-          CacheFromLocalhost=yes
-          MulticastDNS=yes
-          LLMNR=yes
-          EOF
-                systemctl reload-or-restart systemd-resolved
-                echo "[$(date)] DNS caching optimized"
-              fi
+                  # Configure systemd-resolved for better caching
+                  if systemctl is-active systemd-resolved &>/dev/null; then
+                    mkdir -p /etc/systemd/resolved.conf.d
+                    cat > /etc/systemd/resolved.conf.d/performance.conf << EOF
+              [Resolve]
+              DNS=${concatStringsSep " " cfg.dnsOptimization.customServers}
+              Cache=yes
+              CacheFromLocalhost=yes
+              MulticastDNS=yes
+              LLMNR=yes
+              EOF
+                    systemctl reload-or-restart systemd-resolved
+                    echo "[$(date)] DNS caching optimized"
+                  fi
             ''}
           ''}
 
@@ -355,9 +372,10 @@ in
             LATENCY_STATS=$(
               {
                 ${concatStringsSep "\n" (map (host: ''
-                  LATENCY=$(ping -c 1 -W 1 ${host} 2>/dev/null | grep "time=" | sed 's/.*time=//;s/ ms//' || echo "timeout")
-                  echo "\"${host}\": \"$LATENCY\""
-                '') cfg.interHostOptimization.hosts)}
+              LATENCY=$(ping -c 1 -W 1 ${host} 2>/dev/null | grep "time=" | sed 's/.*time=//;s/ ms//' || echo "timeout")
+              echo "\"${host}\": \"$LATENCY\""
+            '')
+            cfg.interHostOptimization.hosts)}
               } | paste -sd, -
             )
 
@@ -391,29 +409,57 @@ in
       # Core network settings (only set if not already defined by other modules)
       "net.core.rmem_max" = mkDefault cfg.bufferOptimization.receiveBuffer;
       "net.core.wmem_max" = mkDefault cfg.bufferOptimization.sendBuffer;
-      "net.core.netdev_max_backlog" = mkDefault (if cfg.profile == "throughput" then 30000 else 5000);
+      "net.core.netdev_max_backlog" = mkDefault (
+        if cfg.profile == "throughput"
+        then 30000
+        else 5000
+      );
       "net.core.netdev_budget" = mkDefault 600;
 
       # TCP settings
       "net.ipv4.tcp_congestion_control" = mkDefault cfg.tcpOptimization.congestionControl;
-      "net.ipv4.tcp_window_scaling" = mkDefault (if cfg.tcpOptimization.windowScaling then 1 else 0);
+      "net.ipv4.tcp_window_scaling" = mkDefault (
+        if cfg.tcpOptimization.windowScaling
+        then 1
+        else 0
+      );
       "net.ipv4.tcp_timestamps" = mkDefault 1;
       "net.ipv4.tcp_sack" = mkDefault 1;
       "net.ipv4.tcp_fack" = mkDefault 1;
-      "net.ipv4.tcp_fastopen" = mkDefault (if cfg.tcpOptimization.fastOpen then 3 else 0);
+      "net.ipv4.tcp_fastopen" = mkDefault (
+        if cfg.tcpOptimization.fastOpen
+        then 3
+        else 0
+      );
 
       # Buffer autotuning
-      "net.ipv4.tcp_rmem" = mkDefault (if cfg.bufferOptimization.autotuning
-      then "4096 87380 ${toString cfg.bufferOptimization.receiveBuffer}"
-      else "4096 65536 16777216");
-      "net.ipv4.tcp_wmem" = mkDefault (if cfg.bufferOptimization.autotuning
-      then "4096 65536 ${toString cfg.bufferOptimization.sendBuffer}"
-      else "4096 65536 16777216");
+      "net.ipv4.tcp_rmem" = mkDefault (
+        if cfg.bufferOptimization.autotuning
+        then "4096 87380 ${toString cfg.bufferOptimization.receiveBuffer}"
+        else "4096 65536 16777216"
+      );
+      "net.ipv4.tcp_wmem" = mkDefault (
+        if cfg.bufferOptimization.autotuning
+        then "4096 65536 ${toString cfg.bufferOptimization.sendBuffer}"
+        else "4096 65536 16777216"
+      );
 
       # Profile-specific optimizations
-      "net.ipv4.tcp_slow_start_after_idle" = mkDefault (if cfg.profile == "latency" then 0 else 1);
-      "net.ipv4.tcp_tw_reuse" = mkDefault (if cfg.profile == "latency" then 1 else 0);
-      "net.ipv4.tcp_fin_timeout" = mkDefault (if cfg.profile == "latency" then 10 else 60);
+      "net.ipv4.tcp_slow_start_after_idle" = mkDefault (
+        if cfg.profile == "latency"
+        then 0
+        else 1
+      );
+      "net.ipv4.tcp_tw_reuse" = mkDefault (
+        if cfg.profile == "latency"
+        then 1
+        else 0
+      );
+      "net.ipv4.tcp_fin_timeout" = mkDefault (
+        if cfg.profile == "latency"
+        then 10
+        else 60
+      );
 
       # Connection tracking
       "net.netfilter.nf_conntrack_max" = mkDefault 262144;

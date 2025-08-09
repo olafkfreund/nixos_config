@@ -100,140 +100,162 @@ in
       ];
 
       # Scrape configurations
-      scrapeConfigs = [
-        # Prometheus itself
-        {
-          job_name = "prometheus";
-          static_configs = [{
-            targets = [ "localhost:${toString cfg.network.prometheusPort}" ];
-            labels = {
-              service = "prometheus";
-              role = "server";
-            };
-          }];
-          scrape_interval = "30s";
-        }
+      scrapeConfigs =
+        [
+          # Prometheus itself
+          {
+            job_name = "prometheus";
+            static_configs = [
+              {
+                targets = [ "localhost:${toString cfg.network.prometheusPort}" ];
+                labels = {
+                  service = "prometheus";
+                  role = "server";
+                };
+              }
+            ];
+            scrape_interval = "30s";
+          }
 
-        # Node exporters on all hosts
-        {
-          job_name = "node-exporter";
-          static_configs = [{
-            targets = map (host: "${host}.home.freundcloud.com:${toString cfg.network.nodeExporterPort}") cfg.hosts;
-            labels = {
-              service = "node-exporter";
-              role = "system";
-            };
-          }];
-          scrape_interval = cfg.scrapeInterval;
-          metrics_path = "/metrics";
-        }
+          # Node exporters on all hosts
+          {
+            job_name = "node-exporter";
+            static_configs = [
+              {
+                targets = map (host: "${host}.home.freundcloud.com:${toString cfg.network.nodeExporterPort}") cfg.hosts;
+                labels = {
+                  service = "node-exporter";
+                  role = "system";
+                };
+              }
+            ];
+            scrape_interval = cfg.scrapeInterval;
+            metrics_path = "/metrics";
+          }
 
-        # NixOS specific metrics
-        {
-          job_name = "nixos-exporter";
-          static_configs = [{
-            targets = map (host: "${host}.home.freundcloud.com:9101") cfg.hosts; # Custom NixOS exporter port
-            labels = {
-              service = "nixos-exporter";
-              role = "nixos";
-            };
-          }];
-          scrape_interval = "60s"; # Less frequent for NixOS metrics
-        }
+          # NixOS specific metrics
+          {
+            job_name = "nixos-exporter";
+            static_configs = [
+              {
+                targets = map (host: "${host}.home.freundcloud.com:9101") cfg.hosts; # Custom NixOS exporter port
+                labels = {
+                  service = "nixos-exporter";
+                  role = "nixos";
+                };
+              }
+            ];
+            scrape_interval = "60s"; # Less frequent for NixOS metrics
+          }
 
-        # Systemd services
-        {
-          job_name = "systemd-exporter";
-          static_configs = [{
-            targets = map (host: "${host}.home.freundcloud.com:9102") cfg.hosts;
-            labels = {
-              service = "systemd-exporter";
-              role = "services";
-            };
-          }];
-          scrape_interval = "30s";
-        }
+          # Systemd services
+          {
+            job_name = "systemd-exporter";
+            static_configs = [
+              {
+                targets = map (host: "${host}.home.freundcloud.com:9102") cfg.hosts;
+                labels = {
+                  service = "systemd-exporter";
+                  role = "services";
+                };
+              }
+            ];
+            scrape_interval = "30s";
+          }
 
-        # Plex/Tautulli exporter (P510 only)
-        {
-          job_name = "plex-exporter";
-          static_configs = [{
-            targets = [ "p510.home.freundcloud.com:9104" ];
-            labels = {
-              service = "plex";
-              role = "media";
-            };
-          }];
-          scrape_interval = "60s";
-        }
+          # Plex/Tautulli exporter (P510 only)
+          {
+            job_name = "plex-exporter";
+            static_configs = [
+              {
+                targets = [ "p510.home.freundcloud.com:9104" ];
+                labels = {
+                  service = "plex";
+                  role = "media";
+                };
+              }
+            ];
+            scrape_interval = "60s";
+          }
 
-        # NZBGet exporter (P510 only)
-        {
-          job_name = "nzbget-exporter";
-          static_configs = [{
-            targets = [ "p510.home.freundcloud.com:9103" ];
-            labels = {
-              service = "nzbget";
-              role = "media";
-            };
-          }];
-          scrape_interval = "30s";
-        }
+          # NZBGet exporter (P510 only)
+          {
+            job_name = "nzbget-exporter";
+            static_configs = [
+              {
+                targets = [ "p510.home.freundcloud.com:9103" ];
+                labels = {
+                  service = "nzbget";
+                  role = "media";
+                };
+              }
+            ];
+            scrape_interval = "30s";
+          }
 
-        # Network discovery exporter (DEX5550 only)
-        {
-          job_name = "network-discovery";
-          static_configs = [{
-            targets = [ "dex5550.home.freundcloud.com:9200" ];
-            labels = {
-              service = "network-discovery";
-              role = "network";
-            };
-          }];
-          scrape_interval = "60s";
-        }
+          # Network discovery exporter (DEX5550 only)
+          {
+            job_name = "network-discovery";
+            static_configs = [
+              {
+                targets = [ "dex5550.home.freundcloud.com:9200" ];
+                labels = {
+                  service = "network-discovery";
+                  role = "network";
+                };
+              }
+            ];
+            scrape_interval = "60s";
+          }
 
-        # Traffic analyzer exporter (DEX5550 only)
-        {
-          job_name = "traffic-analyzer";
-          static_configs = [{
-            targets = [ "dex5550.home.freundcloud.com:9201" ];
-            labels = {
-              service = "traffic-analyzer";
-              role = "network";
-            };
-          }];
-          scrape_interval = "30s";
-        }
+          # Traffic analyzer exporter (DEX5550 only)
+          {
+            job_name = "traffic-analyzer";
+            static_configs = [
+              {
+                targets = [ "dex5550.home.freundcloud.com:9201" ];
+                labels = {
+                  service = "traffic-analyzer";
+                  role = "network";
+                };
+              }
+            ];
+            scrape_interval = "30s";
+          }
 
-        # AI metrics exporter (P620 only)
-        {
-          job_name = "ai-metrics";
-          static_configs = [{
-            targets = [ "p620.home.freundcloud.com:9105" ];
-            labels = {
-              service = "ai-metrics";
-              role = "ai";
-            };
-          }];
-          scrape_interval = "60s";
-        }
-      ] ++
-      # Optional AI metrics scraping
-      (optionals cfg.features.aiMetrics [
-        {
-          job_name = "ollama-exporter";
-          static_configs = [{
-            targets = map (host: "${host}.home.freundcloud.com:11434") (filter (host: host == "p620" || host == "razer") cfg.hosts);
-            labels = {
-              service = "ollama";
-              role = "ai";
-            };
-          }];
-          scrape_interval = "60s";
-          metrics_path = "/metrics";
-        }
-      ]);
+          # AI metrics exporter (P620 only)
+          {
+            job_name = "ai-metrics";
+            static_configs = [
+              {
+                targets = [ "p620.home.freundcloud.com:9105" ];
+                labels = {
+                  service = "ai-metrics";
+                  role = "ai";
+                };
+              }
+            ];
+            scrape_interval = "60s";
+          }
+        ]
+        ++
+        # Optional AI metrics scraping
+        (optionals cfg.features.aiMetrics [
+          {
+            job_name = "ollama-exporter";
+            static_configs = [
+              {
+                targets = map (host: "${host}.home.freundcloud.com:11434") (filter (host: host == "p620" || host == "razer") cfg.hosts);
+                labels = {
+                  service = "ollama";
+                  role = "ai";
+                };
+              }
+            ];
+            scrape_interval = "60s";
+            metrics_path = "/metrics";
+          }
+        ]);
 
       # Additional configuration flags
       extraFlags = [

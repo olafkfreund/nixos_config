@@ -2,14 +2,12 @@
 #
 # This file contains reusable code patterns and snippets commonly used
 # in NixOS modules within this configuration.
-
 { config
 , lib
 , pkgs
 , ...
 }:
 with lib; {
-
   # ============================================================================
   # BASIC MODULE STRUCTURE PATTERN
   # ============================================================================
@@ -26,12 +24,12 @@ with lib; {
     cfg = config.modules.CATEGORY.MODULE_NAME;
     in {
     options.modules.CATEGORY.MODULE_NAME = {
-      enable = mkEnableOption "MODULE_DESCRIPTION";
-      # ... other options
+    enable = mkEnableOption "MODULE_DESCRIPTION";
+    # ... other options
     };
 
     config = mkIf cfg.enable {
-      # ... configuration
+    # ... configuration
     };
     }
   */
@@ -264,12 +262,14 @@ with lib; {
 
   # Conditional attributes
   examples.conditionalAttrs = {
-    programs.example = {
-      enable = true;
-    } // optionalAttrs config.example.enableAdvanced {
-      advancedConfig = true;
-      extraOptions = [ "option1" "option2" ];
-    };
+    programs.example =
+      {
+        enable = true;
+      }
+      // optionalAttrs config.example.enableAdvanced {
+        advancedConfig = true;
+        extraOptions = [ "option1" "option2" ];
+      };
   };
 
   # ============================================================================
@@ -346,7 +346,10 @@ with lib; {
       allowedTCPPorts = [ 80 443 8080 ];
       allowedUDPPorts = [ 53 67 68 ];
       allowedTCPPortRanges = [
-        { from = 8000; to = 8999; }
+        {
+          from = 8000;
+          to = 8999;
+        }
       ];
     };
   };

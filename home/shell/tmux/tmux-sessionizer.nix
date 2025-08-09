@@ -1,7 +1,6 @@
 # Enhanced Tmux Session Manager
 # Smart project-based session management with fuzzy finding
 { pkgs, ... }:
-
 pkgs.writeShellScriptBin "tmux-sessionizer" ''
     #!/usr/bin/env bash
     set -euo pipefail

@@ -1,8 +1,9 @@
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.features.email;
 in
 {
@@ -70,12 +71,13 @@ in
     ];
 
     # Add email packages to system
-    environment.systemPackages = with pkgs; mkIf cfg.neomutt.enable [
-      neomutt
-      isync # For mbsync email synchronization
-      msmtp # For SMTP email sending
-      w3m # For HTML email rendering
-      notmuch # For email indexing and search
-    ];
+    environment.systemPackages = with pkgs;
+      mkIf cfg.neomutt.enable [
+        neomutt
+        isync # For mbsync email synchronization
+        msmtp # For SMTP email sending
+        w3m # For HTML email rendering
+        notmuch # For email indexing and search
+      ];
   };
 }

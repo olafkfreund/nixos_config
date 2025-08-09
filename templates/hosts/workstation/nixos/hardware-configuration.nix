@@ -4,14 +4,14 @@
 # nixos-generate-config --show-hardware-config > nixos/hardware-configuration.nix
 #
 # This template provides common hardware configurations as examples.
-
-{ config, lib, modulesPath, ... }:
-
-{
-  imports =
-    [
-      (modulesPath + "/installer/scan/not-detected.nix")
-    ];
+{ config
+, lib
+, modulesPath
+, ...
+}: {
+  imports = [
+    (modulesPath + "/installer/scan/not-detected.nix")
+  ];
 
   # CPU configuration - EXAMPLE (replace with your actual CPU)
   boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
@@ -20,22 +20,19 @@
   boot.extraModulePackages = [ ];
 
   # File systems - EXAMPLE (replace with your actual configuration)
-  fileSystems."/" =
-    {
-      device = "/dev/disk/by-uuid/REPLACE-WITH-YOUR-ROOT-UUID";
-      fsType = "ext4";
-    };
+  fileSystems."/" = {
+    device = "/dev/disk/by-uuid/REPLACE-WITH-YOUR-ROOT-UUID";
+    fsType = "ext4";
+  };
 
-  fileSystems."/boot" =
-    {
-      device = "/dev/disk/by-uuid/REPLACE-WITH-YOUR-BOOT-UUID";
-      fsType = "vfat";
-      options = [ "fmask=0077" "dmask=0077" ];
-    };
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-uuid/REPLACE-WITH-YOUR-BOOT-UUID";
+    fsType = "vfat";
+    options = [ "fmask=0077" "dmask=0077" ];
+  };
 
   # Swap configuration - EXAMPLE
-  swapDevices =
-    [{ device = "/dev/disk/by-uuid/REPLACE-WITH-YOUR-SWAP-UUID"; }];
+  swapDevices = [{ device = "/dev/disk/by-uuid/REPLACE-WITH-YOUR-SWAP-UUID"; }];
 
   # Network interface - EXAMPLE (replace with your actual interface)
   networking.useDHCP = lib.mkDefault true;

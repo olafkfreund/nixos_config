@@ -1,6 +1,4 @@
-{ lib
-, ...
-}: {
+{ lib, ... }: {
   imports = [
     # Import common modules
     ../common/default.nix
@@ -12,6 +10,9 @@
     ../../home/desktop/sway/swayosd.nix
     ./private.nix
   ];
+
+  # Fix Stylix Firefox profile warnings
+  stylix.targets.firefox.profileNames = [ "default" ];
 
   # Use the new features system instead of multiple lib.mkForce calls
   features = {

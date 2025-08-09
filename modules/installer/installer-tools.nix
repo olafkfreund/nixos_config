@@ -1,8 +1,5 @@
 # Installer Tools and TUI Utilities for Live USB
-{ pkgs
-, ...
-}:
-{
+{ pkgs, ... }: {
   environment.systemPackages = with pkgs; [
     # Text editors
     neovim

@@ -4,8 +4,7 @@
 , lib
 , ...
 }:
-with lib;
-let
+with lib; let
   # Productivity configuration
   cfg = {
     # Note-taking and knowledge management
@@ -92,59 +91,66 @@ let
   };
 
   # Package collections based on configuration
-  notesPackages = with pkgs; flatten [
-    (optional cfg.notes.obsidian obsidian)
-    (optional cfg.notes.logseq logseq)
-    (optional cfg.notes.zettlr zettlr)
-    (optional cfg.notes.notable notable)
-  ];
+  notesPackages = with pkgs;
+    flatten [
+      (optional cfg.notes.obsidian obsidian)
+      (optional cfg.notes.logseq logseq)
+      (optional cfg.notes.zettlr zettlr)
+      (optional cfg.notes.notable notable)
+    ];
 
-  tasksPackages = with pkgs; flatten [
-    (optional cfg.tasks.taskwarrior taskwarrior3)
-    (optional cfg.tasks.todo_txt todo-txt-cli)
-    (optional cfg.tasks.timewarrior timewarrior)
-    (optional cfg.tasks.toggl_cli toggl-track)
-  ];
+  tasksPackages = with pkgs;
+    flatten [
+      (optional cfg.tasks.taskwarrior taskwarrior3)
+      (optional cfg.tasks.todo_txt todo-txt-cli)
+      (optional cfg.tasks.timewarrior timewarrior)
+      (optional cfg.tasks.toggl_cli toggl-track)
+    ];
 
-  communicationPackages = with pkgs; flatten [
-    (optional cfg.communication.slack slack)
-    (optional cfg.communication.discord discord)
-    (optional cfg.communication.telegram telegram-desktop)
-    (optional cfg.communication.thunderbird thunderbird)
-    (optional cfg.communication.mailutils mailutils)
-  ];
+  communicationPackages = with pkgs;
+    flatten [
+      (optional cfg.communication.slack slack)
+      (optional cfg.communication.discord discord)
+      (optional cfg.communication.telegram telegram-desktop)
+      (optional cfg.communication.thunderbird thunderbird)
+      (optional cfg.communication.mailutils mailutils)
+    ];
 
-  writingPackages = with pkgs; flatten [
-    (optional cfg.writing.libreoffice libreoffice)
-    (optional cfg.writing.aspell aspell)
-    (optional cfg.writing.languagetool languagetool)
-    (optional cfg.writing.slides slides)
-  ];
+  writingPackages = with pkgs;
+    flatten [
+      (optional cfg.writing.libreoffice libreoffice)
+      (optional cfg.writing.aspell aspell)
+      (optional cfg.writing.languagetool languagetool)
+      (optional cfg.writing.slides slides)
+    ];
 
-  filesPackages = with pkgs; flatten [
-    (optional cfg.files.ranger ranger)
-    (optional cfg.files.nnn nnn)
-    (optional cfg.files.fzf fzf)
-    (optional cfg.files.fd fd)
-    (optional cfg.files.ripgrep ripgrep)
-    (optional cfg.files.bat bat)
-    (optional cfg.files.exa eza)
-    (optional cfg.files.unzip unzip)
-    (optional cfg.files.p7zip p7zip)
-    (optional cfg.files.unrar unrar)
-  ];
+  filesPackages = with pkgs;
+    flatten [
+      (optional cfg.files.ranger ranger)
+      (optional cfg.files.nnn nnn)
+      (optional cfg.files.fzf fzf)
+      (optional cfg.files.fd fd)
+      (optional cfg.files.ripgrep ripgrep)
+      (optional cfg.files.bat bat)
+      (optional cfg.files.exa eza)
+      (optional cfg.files.unzip unzip)
+      (optional cfg.files.p7zip p7zip)
+      (optional cfg.files.unrar unrar)
+    ];
 
-  automationPackages = with pkgs; flatten [
-    (optional cfg.automation.expect expect)
-    (optional cfg.automation.clipboard wl-clipboard)
-    (optional cfg.automation.flameshot flameshot)
-    (optional cfg.automation.asciinema asciinema)
-  ];
+  automationPackages = with pkgs;
+    flatten [
+      (optional cfg.automation.expect expect)
+      (optional cfg.automation.clipboard wl-clipboard)
+      (optional cfg.automation.flameshot flameshot)
+      (optional cfg.automation.asciinema asciinema)
+    ];
 
-  calendarPackages = with pkgs; flatten [
-    (optional cfg.calendar.calcurse calcurse)
-    (optional cfg.calendar.khal khal)
-  ];
+  calendarPackages = with pkgs;
+    flatten [
+      (optional cfg.calendar.calcurse calcurse)
+      (optional cfg.calendar.khal khal)
+    ];
 
   # AI-enhanced task creation script
   smartTaskAdd = pkgs.writeShellScript "smart-task-add" ''
@@ -332,7 +338,6 @@ let
     echo -e "''${BOLD}''${GREEN}Ready to make today productive! 🚀''${NC}"
     echo ""
   '';
-
 in
 {
   # Enhanced productivity packages
@@ -375,7 +380,6 @@ in
     (mkIf cfg.files.ranger {
       r = "ranger";
     })
-
 
     (mkIf cfg.files.exa {
       # Note: ls alias already configured in shell/bash.nix with comprehensive options
@@ -466,7 +470,6 @@ in
   # Note: Git configuration removed to avoid conflicts with existing git setup
   # All necessary git aliases are already configured in the shell modules
 
-
   # Note: FZF configuration is handled by the dedicated fzf module in home/shell/fzf/
 
   # Productivity configuration files and scripts
@@ -537,20 +540,20 @@ in
 
           # Task management
           ${optionalString cfg.tasks.taskwarrior ''
-          echo "✅ Today's Tasks:"
-          ${pkgs.taskwarrior3}/bin/task list due:today 2>/dev/null || echo "  No tasks due today"
-          echo
+            echo "✅ Today's Tasks:"
+            ${pkgs.taskwarrior3}/bin/task list due:today 2>/dev/null || echo "  No tasks due today"
+            echo
 
-          echo "📋 Inbox Items:"
-          ${pkgs.taskwarrior3}/bin/task list +inbox 2>/dev/null || echo "  Inbox is empty"
-          echo
+            echo "📋 Inbox Items:"
+            ${pkgs.taskwarrior3}/bin/task list +inbox 2>/dev/null || echo "  Inbox is empty"
+            echo
           ''}
 
           # Time tracking
           ${optionalString cfg.tasks.timewarrior ''
-          echo "⏰ Time Tracking:"
-          ${pkgs.timewarrior}/bin/timew day 2>/dev/null || echo "  No time tracked today"
-          echo
+            echo "⏰ Time Tracking:"
+            ${pkgs.timewarrior}/bin/timew day 2>/dev/null || echo "  No time tracked today"
+            echo
           ''}
 
           # Git status for current directory

@@ -1,5 +1,4 @@
 { pkgs, ... }: {
-
   # Thunar File Manager
   programs.thunar = {
     enable = true;

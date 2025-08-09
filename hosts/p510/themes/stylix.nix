@@ -11,7 +11,7 @@ in
     polarity = "dark";
     targets = {
       chromium.enable = false;
-      qt.enable = false; # Disable Qt theming to avoid GNOME platform warnings
+      qt.enable = true; # Enable Qt theming for consistent styling
     };
     fonts = {
       monospace = {

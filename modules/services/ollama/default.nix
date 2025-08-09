@@ -93,7 +93,6 @@ in
           MemoryMax = "1G";
           CPUQuota = "50%";
         };
-
       };
 
       # Create chromadb user and group

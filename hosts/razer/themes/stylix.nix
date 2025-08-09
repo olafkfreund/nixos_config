@@ -42,7 +42,7 @@ in
     # Target-specific configuration
     targets = {
       chromium.enable = false; # Exclude browser theming
-      qt.enable = false; # Disable Qt theming to avoid GNOME platform warnings
+      qt.enable = true; # Enable Qt theming for consistent styling
     };
   };
 }

@@ -1,5 +1,4 @@
-{ ...
-}: {
+{ ... }: {
   services.syncthing = {
     settings = {
       devices = {

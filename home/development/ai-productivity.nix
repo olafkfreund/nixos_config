@@ -1,8 +1,9 @@
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.development.ai-productivity;
 
   # AI-enhanced task creation script
@@ -328,7 +329,6 @@ let
 
     echo -e "''${BLUE}💾 Summary saved to: $summary_file''${NC}"
   '';
-
 in
 {
   options.development.ai-productivity = {

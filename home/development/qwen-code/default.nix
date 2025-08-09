@@ -7,7 +7,6 @@
 , nix-update-script
 ,
 }:
-
 buildNpmPackage (finalAttrs: {
   pname = "qwen-code";
   version = "unstable-2025-07-24";

@@ -1,5 +1,4 @@
-{ ...
-}: {
+{ ... }: {
   # Fix USB mouse freezing by disabling autosuspend for Bluetooth devices
   services.udev.extraRules = ''
     # Disable autosuspend for TP-Link Bluetooth adapter (causes mouse freezing)

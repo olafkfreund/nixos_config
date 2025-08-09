@@ -1,6 +1,4 @@
-{ pkgs
-, ...
-}:
+{ pkgs, ... }:
 let
   username = "olafkfreund";
   hostname = "nixvm";

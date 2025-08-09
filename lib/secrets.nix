@@ -54,13 +54,14 @@ let
     let
       validateSecret = secretName:
         let
-          category = lib.findFirst
-            (cat: builtins.match secretCategories.${cat}.pattern secretName != null)
-            null
-            (lib.attrNames secretCategories);
+          category =
+            lib.findFirst
+              (cat: builtins.match secretCategories.${cat}.pattern secretName != null)
+              null
+              (lib.attrNames secretCategories);
         in
-        if category != null then
-          secretCategories.${category}.validation secretName
+        if category != null
+        then secretCategories.${category}.validation secretName
         else {
           assertion = false;
           message = "Secret '${secretName}' doesn't match any known category pattern";
@@ -85,7 +86,8 @@ let
     }: {
       publicKeys =
         # Host keys
-        (map (host: config.age.secrets.${host}.publicKey or null) hosts) ++
+        (map (host: config.age.secrets.${host}.publicKey or null) hosts)
+        ++
         # User keys
         (map (user: config.age.secrets.${user}.publicKey or null) users);
 
@@ -123,7 +125,6 @@ let
       };
     };
   };
-
 in
 {
   options = {

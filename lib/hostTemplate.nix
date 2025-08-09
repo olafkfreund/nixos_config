@@ -116,7 +116,8 @@
         map (hw: hardwareProfiles.${hw} or { }) hardware
       );
     in
-    lib.recursiveUpdate (lib.recursiveUpdate baseConfig hardwareConfig) (extraConfig // {
+    lib.recursiveUpdate (lib.recursiveUpdate baseConfig hardwareConfig) (extraConfig
+      // {
       networking.hostName = hostName;
 
       # User configuration
@@ -128,11 +129,15 @@
       });
 
       # Import host-specific configuration
-      imports = [
-        ./hosts/${hostName}/hardware-configuration.nix
-        ./hosts/${hostName}/variables.nix
-      ] ++ (if builtins.pathExists ./hosts/${hostName}/themes/stylix.nix
-      then [ ./hosts/${hostName}/themes/stylix.nix ]
-      else [ ]);
+      imports =
+        [
+          ./hosts/${hostName}/hardware-configuration.nix
+          ./hosts/${hostName}/variables.nix
+        ]
+        ++ (
+          if builtins.pathExists ./hosts/${hostName}/themes/stylix.nix
+          then [ ./hosts/${hostName}/themes/stylix.nix ]
+          else [ ]
+        );
     });
 }

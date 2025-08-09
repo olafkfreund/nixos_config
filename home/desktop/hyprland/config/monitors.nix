@@ -1,8 +1,6 @@
 # Hyprland Monitor Configuration
 # Host-specific monitor setup using variables from host configuration
-{ host
-, ...
-}:
+{ host, ... }:
 let
   inherit
     (import ../../../../hosts/${host}/variables.nix)

@@ -1,8 +1,10 @@
 # Tailscale VPN Configuration Module
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.networking.tailscale;
 in
 {
@@ -163,8 +165,9 @@ in
 
           # Add extra flags
           ${concatStringsSep "\n" (map (flag: ''
-            UP_ARGS="$UP_ARGS ${flag}"
-          '') cfg.extraUpFlags)}
+              UP_ARGS="$UP_ARGS ${flag}"
+            '')
+            cfg.extraUpFlags)}
 
           echo "Connecting to Tailscale with args: $UP_ARGS"
           ${pkgs.tailscale}/bin/tailscale up $UP_ARGS

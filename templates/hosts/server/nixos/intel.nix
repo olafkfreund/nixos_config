@@ -1,8 +1,10 @@
 # Intel GPU configuration for server template
 # Optimized for basic graphics and compute workloads in headless operation
-{ config, pkgs, lib, ... }:
-
-{
+{ config
+, pkgs
+, lib
+, ...
+}: {
   # Intel graphics hardware support for servers
   hardware.graphics = {
     enable = true;

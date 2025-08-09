@@ -4,8 +4,8 @@
 , go
 , rocmPackages
 , makeWrapper
+,
 }:
-
 stdenv.mkDerivation rec {
   pname = "amd-smi-exporter";
   version = "2.0.0";
@@ -54,7 +54,7 @@ stdenv.mkDerivation rec {
   # Post-install wrapper to ensure ROCm tools are in PATH
   postInstall = ''
     wrapProgram $out/bin/amd_smi_exporter \
-      --prefix PATH : ${lib.makeBinPath [ rocmPackages.rocm-smi ]} \
+      --prefix PATH : ${lib.makeBinPath [rocmPackages.rocm-smi]} \
       --set ROCM_PATH ${rocmPackages.rocm-smi}
   '';
 
