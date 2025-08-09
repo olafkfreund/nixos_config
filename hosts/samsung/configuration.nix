@@ -343,7 +343,7 @@ in
   # Agenix identity configuration - specify where to find decryption keys
   age.identityPaths = [
     "/etc/ssh/ssh_host_rsa_key" # System RSA host key (ed25519 key is managed by agenix)
-    # "/home/olafkfreund/.ssh/id_ed25519" # User key doesn't exist on Samsung yet
+    "/home/olafkfreund/.ssh/id_ed25519" # User key (now copied from p620)
   ];
 
   nixpkgs.config.permittedInsecurePackages = [ "olm-3.2.16" "python3.12-youtube-dl-2021.12.17" ];
