@@ -38,27 +38,29 @@ in
     ../../modules/secrets/api-keys.nix
   ];
 
-  # Set hostname from variables
-  networking.hostName = vars.hostName;
+  # Networking configuration
+  networking = {
+    hostName = vars.hostName;
+    profile = "server";
+    useNetworkd = lib.mkForce true;
+    useHostResolvConf = false;
 
-  # Choose networking profile: "desktop", "server", or "minimal"
-  networking.profile = "server";
-
-  # Tailscale VPN Configuration - P510 media server
-  networking.tailscale = {
-    enable = true;
-    authKeyFile = config.age.secrets.tailscale-auth-key.path;
-    hostname = "p510-media";
-    acceptRoutes = true;
-    acceptDns = false; # Keep local DNS setup
-    ssh = true;
-    shields = true;
-    useRoutingFeatures = "client"; # Accept routes from other nodes
-    extraUpFlags = [
-      "--operator=olafkfreund"
-      "--accept-risk=lose-ssh"
-      "--advertise-tags=tag:server,tag:media"
-    ];
+    # Tailscale VPN Configuration - P510 media server
+    tailscale = {
+      enable = true;
+      authKeyFile = config.age.secrets.tailscale-auth-key.path;
+      hostname = "p510-media";
+      acceptRoutes = true;
+      acceptDns = false; # Keep local DNS setup
+      ssh = true;
+      shields = true;
+      useRoutingFeatures = "client"; # Accept routes from other nodes
+      extraUpFlags = [
+        "--operator=olafkfreund"
+        "--accept-risk=lose-ssh"
+        "--advertise-tags=tag:server,tag:media"
+      ];
+    };
   };
 
   # Use systemd-resolved for proper DNS management with systemd-networkd
@@ -282,28 +284,28 @@ in
   };
 
   # Network-specific overrides that go beyond the network profile
-  systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
-  systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
+  systemd = {
+    services = {
+      NetworkManager-wait-online.enable = lib.mkForce false;
+      systemd-networkd-wait-online.enable = lib.mkForce false;
+    };
 
-  # In case the networking profile doesn't apply all needed settings
-  networking.useNetworkd = lib.mkForce true;
-  networking.useHostResolvConf = false;
-
-  # Configure systemd-networkd for your network interfaces
-  # Ensure the interface name matches the output of `ip link` (e.g., eno1)
-  systemd.network = {
-    enable = true;
-    networks = {
-      eno1 = {
-        name = "eno1";
-        DHCP = "ipv4";
-        networkConfig = {
-          MulticastDNS = false;
-          IPv6AcceptRA = true;
-          Domains = "home.freundcloud.com"; # Configure DNS domain for internal resolution
-        };
-        dhcpV4Config = {
-          RouteMetric = 10;
+    # Configure systemd-networkd for your network interfaces
+    # Ensure the interface name matches the output of `ip link` (e.g., eno1)
+    network = {
+      enable = true;
+      networks = {
+        eno1 = {
+          name = "eno1";
+          DHCP = "ipv4";
+          networkConfig = {
+            MulticastDNS = false;
+            IPv6AcceptRA = true;
+            Domains = "home.freundcloud.com"; # Configure DNS domain for internal resolution
+          };
+          dhcpV4Config = {
+            RouteMetric = 10;
+          };
         };
       };
     };

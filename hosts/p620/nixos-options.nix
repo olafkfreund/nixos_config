@@ -23,29 +23,33 @@
   nodejs.development.enable = true;
 
   # Git tools
-  programs.lazygit.enable = lib.mkForce true;
-  programs.thunderbird.enable = lib.mkForce true;
-  programs.obsidian.enable = lib.mkForce true;
-  programs.office.enable = lib.mkForce true;
-  programs.webcam.enable = lib.mkForce true;
+  programs = {
+    lazygit.enable = lib.mkForce true;
+    thunderbird.enable = lib.mkForce true;
+    obsidian.enable = lib.mkForce true;
+    office.enable = lib.mkForce true;
+    webcam.enable = lib.mkForce true;
+  };
 
-  # Virtualization tools
-  services.docker.enable = lib.mkForce true;
-  services.incus.enable = lib.mkForce true;
-  services.podman.enable = lib.mkForce true;
-  services.spice.enable = lib.mkForce true;
-  services.libvirt.enable = lib.mkForce true;
+  # Virtualization tools and services
+  services = {
+    docker.enable = lib.mkForce true;
+    incus.enable = lib.mkForce true;
+    podman.enable = lib.mkForce true;
+    spice.enable = lib.mkForce true;
+    libvirt.enable = lib.mkForce true;
+    print.enable = lib.mkForce true;
+  };
 
   # Password management
-  security.onepassword.enable = lib.mkForce true;
-  security.gnupg.enable = lib.mkForce true;
+  security = {
+    onepassword.enable = lib.mkForce true;
+    gnupg.enable = lib.mkForce true;
+  };
 
   # VPN
   vpn.tailscale.enable = lib.mkForce true;
 
   # AI
   ai.ollama.enable = lib.mkForce true;
-
-  # Printing
-  services.print.enable = lib.mkForce true;
 }
