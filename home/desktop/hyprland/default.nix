@@ -64,6 +64,30 @@ with lib; let
       wallpapers = true; # Wallpaper management
     };
 
+    # QuickShell features (experimental - runs alongside Waybar)
+    quickshell = {
+      enable = false; # Will be enabled via conditional import
+      bar = {
+        position = "top"; # Top position to avoid conflict with Waybar
+        height = 32;
+        transparent = true;
+        offset = 0;
+      };
+      widgets = {
+        workspaces = true;
+        clock = true;
+        systemTray = true;
+        battery = true;
+        network = true;
+        audio = true;
+      };
+      animations = {
+        enabled = activePerformanceProfile.animations.enabled;
+        duration = 200;
+        curve = "ease-out";
+      };
+    };
+
     # Development features
     development = {
       enable = hostVars.features.development.enable or false;

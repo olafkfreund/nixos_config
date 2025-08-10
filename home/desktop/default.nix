@@ -11,6 +11,7 @@
     ./theme/default.nix
     ./gaming/default.nix
     ./sound/default.nix
+    ./quickshell.nix
 
     # Re-enabled desktop modules (enhanced configs take precedence)
     ./plasma/default.nix

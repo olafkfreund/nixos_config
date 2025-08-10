@@ -34,6 +34,17 @@ with lib; let
 
   # Theme configuration generator
   createThemeConfig = colorScheme: {
+    name = colorScheme.name;
+    colors = {
+      background = "#${colorScheme.colors.bg0}";
+      foreground = "#${colorScheme.colors.fg1}";
+      accent = "#${colorScheme.colors.yellow}";
+      urgent = "#${colorScheme.colors.red}";
+      warning = "#${colorScheme.colors.orange}";
+      success = "#${colorScheme.colors.green}";
+      info = "#${colorScheme.colors.blue}";
+      secondary = "#${colorScheme.colors.purple}";
+    };
     hyprland = {
       general = {
         "col.active_border" = "rgb(${colorScheme.colors.blue})";
@@ -45,6 +56,15 @@ with lib; let
         fullscreen_opacity = colorScheme.opacity.fullscreen;
         shadow.color = "rgb(${colorScheme.colors.bg0})";
       };
+    };
+    quickshell = {
+      background = "#${colorScheme.colors.bg0}";
+      foreground = "#${colorScheme.colors.fg1}";
+      accent = "#${colorScheme.colors.yellow}";
+      urgent = "#${colorScheme.colors.red}";
+      warning = "#${colorScheme.colors.orange}";
+      success = "#${colorScheme.colors.green}";
+      transparency = colorScheme.opacity.inactive;
     };
   };
 

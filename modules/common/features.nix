@@ -126,6 +126,11 @@ with lib; {
       droidcam = mkEnableOption "Enable DroidCam";
     };
 
+    # QuickShell desktop shell (experimental)
+    quickshell = {
+      enable = mkEnableOption "Enable QuickShell desktop shell (runs alongside Waybar for testing)";
+    };
+
     monitoring = {
       enable = mkEnableOption "Enable monitoring and observability";
 

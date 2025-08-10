@@ -49,6 +49,9 @@ with lib; {
       kdeconnect = mkEnableOption "Enable KDE Connect";
       slack = mkEnableOption "Enable Slack";
       lanmouse = mkEnableOption "Enable LAN Mouse";
+
+      # Desktop shell (experimental)
+      quickshell = mkEnableOption "Enable QuickShell desktop shell (runs alongside Waybar for testing)";
     };
 
     cli = {

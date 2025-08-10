@@ -100,6 +100,9 @@
     };
   };
 
+  # Override desktop features for P620 (add to existing desktop config)
+  features.desktop.quickshell = true;
+
   home.packages = [
     # pkgs.customPkgs.rofi-blocks
     # pkgs.msty

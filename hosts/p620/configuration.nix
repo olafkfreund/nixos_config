@@ -270,6 +270,11 @@ in
     media = {
       droidcam = true;
     };
+
+    # Enable QuickShell for testing (experimental - runs alongside Waybar)
+    quickshell = {
+      enable = true;
+    };
   };
 
   # Consolidated monitoring configuration
