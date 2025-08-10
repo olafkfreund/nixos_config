@@ -132,12 +132,12 @@ test-build-all:
     failed_hosts=()
     success_count=0
     total_hosts=5
-    
+
     for host in p620 razer p510 dex5550 samsung; do
         echo ""
         echo "🔨 Building $host..."
         start_time=$(date +%s)
-        
+
         if nixos-rebuild build --flake .#$host --show-trace 2>&1 | tee /tmp/build-$host.log; then
             build_time=$(($(date +%s) - start_time))
             echo "✅ $host: Build successful (${build_time}s)"
@@ -149,13 +149,13 @@ test-build-all:
             failed_hosts+=("$host")
         fi
     done
-    
+
     echo ""
     echo "📊 Build Summary:"
     echo "================="
     echo "✅ Successful: $success_count/$total_hosts"
     echo "❌ Failed: ${#failed_hosts[@]}/$total_hosts"
-    
+
     if [ ${#failed_hosts[@]} -gt 0 ]; then
         echo ""
         echo "❌ Failed hosts: ${failed_hosts[*]}"
@@ -176,47 +176,47 @@ test-build-all:
 test-build-all-parallel:
     #!/usr/bin/env bash
     echo "🚀 Test building all host configurations in parallel..."
-    
+
     # Start all builds in parallel and capture their PIDs
     (nixos-rebuild build --flake .#p620 --show-trace > /tmp/build-p620.log 2>&1 && echo "✅ P620: Build successful" || echo "❌ P620: Build failed") &
     p620_pid=$!
-    
+
     (nixos-rebuild build --flake .#razer --show-trace > /tmp/build-razer.log 2>&1 && echo "✅ Razer: Build successful" || echo "❌ Razer: Build failed") &
     razer_pid=$!
-    
+
     (nixos-rebuild build --flake .#p510 --show-trace > /tmp/build-p510.log 2>&1 && echo "✅ P510: Build successful" || echo "❌ P510: Build failed") &
     p510_pid=$!
-    
+
     (nixos-rebuild build --flake .#dex5550 --show-trace > /tmp/build-dex5550.log 2>&1 && echo "✅ DEX5550: Build successful" || echo "❌ DEX5550: Build failed") &
     dex5550_pid=$!
-    
+
     (nixos-rebuild build --flake .#samsung --show-trace > /tmp/build-samsung.log 2>&1 && echo "✅ Samsung: Build successful" || echo "❌ Samsung: Build failed") &
     samsung_pid=$!
-    
+
     # Wait for all builds to complete
     echo "⏳ Waiting for all builds to complete..."
     wait $p620_pid; p620_result=$?
-    wait $razer_pid; razer_result=$?  
+    wait $razer_pid; razer_result=$?
     wait $p510_pid; p510_result=$?
     wait $dex5550_pid; dex5550_result=$?
     wait $samsung_pid; samsung_result=$?
-    
+
     # Count results
     failed_hosts=()
     success_count=0
-    
+
     if [ $p620_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("p620"); fi
     if [ $razer_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("razer"); fi
     if [ $p510_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("p510"); fi
     if [ $dex5550_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("dex5550"); fi
     if [ $samsung_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("samsung"); fi
-    
+
     echo ""
     echo "📊 Parallel Build Summary:"
     echo "========================="
     echo "✅ Successful: $success_count/5"
     echo "❌ Failed: ${#failed_hosts[@]}/5"
-    
+
     if [ ${#failed_hosts[@]} -gt 0 ]; then
         echo ""
         echo "❌ Failed hosts: ${failed_hosts[*]}"
@@ -882,7 +882,7 @@ secrets-status-host HOST:
 fix-agenix-remote HOST:
     @echo "🔧 Attempting to fix agenix issues on {{HOST}}..."
     ssh {{HOST}} "sudo systemctl stop agenix || true"
-    ssh {{HOST}} "sudo rm -rf /run/agenix.d || true" 
+    ssh {{HOST}} "sudo rm -rf /run/agenix.d || true"
     ssh {{HOST}} "sudo systemctl start agenix || echo 'Agenix service failed to start'"
     ssh {{HOST}} "sudo systemctl status agenix --no-pager"
 
