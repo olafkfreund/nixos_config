@@ -8,7 +8,7 @@ with lib; let
   cfg = config.secrets.apiKeys;
 
   # Get the main user from host variables
-  vars = import ../../hosts/${config.networking.hostName}/variables.nix;
+  vars = import ../../hosts/${config.networking.hostName}/variables.nix { inherit lib; };
   inherit (vars) username;
 in
 {

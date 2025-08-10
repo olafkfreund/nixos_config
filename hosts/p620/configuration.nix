@@ -6,7 +6,7 @@
 , ...
 }:
 let
-  vars = import ./variables.nix;
+  vars = import ./variables.nix { inherit lib; };
 in
 {
   # Use workstation template and add P620-specific modules
@@ -18,9 +18,9 @@ in
     ./nixos/boot.nix
     ./nixos/amd.nix
     ./nixos/usb-power-fix.nix # Fix USB mouse freezing issues
-    ./nixos/i18n.nix
-    ./nixos/hosts.nix
-    ./nixos/envvar.nix
+    ../common/nixos/i18n.nix
+    ../common/nixos/hosts.nix
+    ../common/nixos/envvar.nix
     ./nixos/greetd.nix
     ./nixos/cpu.nix
     ./nixos/memory.nix

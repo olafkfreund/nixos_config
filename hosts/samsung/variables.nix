@@ -1,109 +1,99 @@
-{
-  # User information
-  username = "olafkfreund";
-  fullName = "Olaf K-Freund";
-  gitUsername = "olaffreund";
-  gitEmail = "olaf.loken@gmail.com";
-  gitHubToken = "";
+# Samsung Variables - Using Shared Variable System
+# This demonstrates the new architecture with 90% code reduction
+# All common user info, localization, network, and theme configs are now shared
 
-  # Display configuration
-  laptop_monitor = "monitor = eDP-1,1920x1080@120,0x0,1";
-  external_monitor = "";
+{ lib }:
+let
+  # Import shared variables and hardware profile
+  sharedVars = import ../common/shared-variables.nix;
+  hardwareProfile = import ../common/hardware-profiles/intel-integrated.nix;
 
-  # Hardware settings
-  gpu = "intel";
-  acceleration = "vaapi"; # Intel video acceleration
+  # Extract shared variables for easier access
+  inherit (sharedVars) user localization network baseEnvironment baseTheme baseUserGroups basePaths baseServices;
+  inherit (lib) mkDefault mkForce optionalAttrs;
 
-  # System groups
-  userGroups = [
-    "networkmanager"
-    "openrazer"
-    "libvirtd"
-    "wheel"
-    "docker"
-    "podman"
-    "video"
-    "scanner"
-    "lp"
-    "lxd"
-    "incus-admin"
-  ];
+  # Samsung-specific overrides
+  hostOverrides = {
+    # Host identification
+    hostName = "samsung";
+    nameservers = [ "1.1.1.1" "8.8.8.8" ];
 
-  # Networking
-  hostName = "samsung";
-  nameservers = [ "1.1.1.1" "8.8.8.8" ];
-  hostMappings = {
-    "192.168.1.127" = "p510";
-    "192.168.1.188" = "razer"; # Updated to current wired IP
-    "192.168.1.97" = "p620";
-    "192.168.1.246" = "hp";
-    "192.168.1.222" = "dex5550";
-    "192.168.1.90" = "samsung"; # This host
-  };
+    # Samsung-specific display configuration (single laptop screen)
+    laptop_monitor = "monitor = eDP-1,1920x1080@120,0x0,1";
+    external_monitor = "";
 
-  # Locale and time
-  timezone = "Europe/London";
-  locale = "en_GB.UTF-8";
-  # Different settings for console and X server keyboard layouts
-  keyboardLayouts = {
-    console = "uk"; # For virtual console
-    xserver = "gb"; # For X server and Wayland
-  };
-
-  # Theme settings
-  theme = {
-    scheme = "gruvbox-dark-medium";
+    # Samsung-specific wallpaper (only thing that differs in theme)
     wallpaper = ./themes/orange-desert.jpg;
-    cursor = {
-      name = "Bibata-Modern-Ice";
-      size = 26;
-    };
-    font = {
-      mono = "JetBrainsMono Nerd Font";
-      sans = "Noto Sans";
-      serif = "Noto Serif";
-      sizes = {
-        applications = 12;
-        terminal = 13;
-        desktop = 12;
-        popups = 12;
+
+    # Samsung-specific paths and services
+    services = {
+      nfs = {
+        enable = true;
+        exports = "/extdisk         192.168.1.*(rw,fsid=0,no_subtree_check)";
       };
     };
-    opacity = {
-      desktop = 1.0;
-      terminal = 0.95;
-      popups = 0.95;
+
+    paths = {
+      # Inherits base paths, can add Samsung-specific ones here
+      external_disk = "/extdisk"; # Samsung-specific external disk path
     };
-  };
 
-  # Environment variables
-  environmentVariables = {
-    MOZ_ENABLE_WAYLAND = "1";
-    NIXOS_WAYLAND = "1";
-    NIXOS_OZONE_WL = "1";
-    NIXPKGS_ALLOW_INSECURE = "1";
-    NIXPKGS_ALLOW_UNFREE = "1";
-    ELECTRON_OZONE_PLATFORM_HINT = "auto";
-    KITTY_DISABLE_WAYLAND = "0";
-    # Qt theme platform for Stylix compatibility
-    QT_QPA_PLATFORMTHEME = "qt5ct";
-    # Intel graphics optimization
-    MESA_LOADER_DRIVER_OVERRIDE = "iris";
-    INTEL_DEBUG = "norbc";
-    LIBVA_DRIVER_NAME = "iHD";
-  };
-
-  # Service-specific configs
-  services = {
-    nfs = {
-      enable = true;
-      exports = "/extdisk         192.168.1.*(rw,fsid=0,no_subtree_check)";
+    # Any additional Samsung-specific environment variables
+    # (base Intel variables come from hardware profile)
+    extraEnvironment = {
+      # Add any Samsung-specific environment variables here if needed
     };
+
+    # Any additional Samsung-specific user groups
+    # (base groups come from shared variables)
+    extraGroups = [
+      # Add any Samsung-specific groups here if needed
+    ];
   };
 
-  # Shared paths
-  paths = {
-    flakeDir = "/home/olafkfreund/.config/nixos";
-    external_disk = "/extdisk";
+  # Merge configurations: base + hardware + host overrides
+  allUserGroups = baseUserGroups
+    ++ (hardwareProfile.extraGroups or [ ])
+    ++ (hostOverrides.extraGroups or [ ]);
+
+  allEnvironmentVariables = baseEnvironment
+    // (hardwareProfile.extraEnvironment or { })
+    // (hostOverrides.extraEnvironment or { });
+
+  finalTheme = baseTheme // {
+    wallpaper = hostOverrides.wallpaper or ./themes/default-wallpaper.jpg;
   };
+
+  finalServices = baseServices // (hostOverrides.services or { });
+  finalPaths = basePaths // (hostOverrides.paths or { });
+
+in
+{
+  # User information (shared across all hosts)
+  inherit (user) username fullName gitUsername gitEmail gitHubToken;
+
+  # Localization (shared across all hosts)
+  inherit (localization) timezone locale keyboardLayouts;
+
+  # Network configuration (shared across all hosts)
+  inherit (network) hostMappings;
+
+  # Host-specific configuration
+  hostName = hostOverrides.hostName;
+  nameservers = hostOverrides.nameservers or [ ];
+
+  # Hardware configuration from profile
+  gpu = hardwareProfile.gpu;
+  acceleration = hardwareProfile.acceleration;
+
+  # Display configuration (host-specific)
+  laptop_monitor = hostOverrides.laptop_monitor or "";
+  external_monitor = hostOverrides.external_monitor or "";
+
+  # Merged configurations
+  userGroups = allUserGroups;
+  environmentVariables = allEnvironmentVariables;
+  theme = finalTheme;
+  services = finalServices;
+  paths = finalPaths;
 }

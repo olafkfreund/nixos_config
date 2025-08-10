@@ -112,7 +112,6 @@
     , agenix
     , lanzaboote
     , razer-laptop-control
-    , nixpkgs-f2k
     , nix-colors
     , ags
     , nix-snapd
@@ -121,11 +120,17 @@
     , stylix
     , nix-index-database
     , zjstatus
-    , walker
     , ...
     } @ inputs:
     let
-      # Define users per host
+      # ========================================
+      # SHARED ARCHITECTURE COMPONENTS
+      # ========================================
+
+      # Import centralized user mappings from shared variables
+      sharedVariables = import ./hosts/common/shared-variables.nix;
+
+      # Define users per host (can be customized per host if needed)
       hostUsers = {
         p620 = [ "olafkfreund" ];
         samsung = [ "olafkfreund" ];
@@ -134,52 +139,11 @@
         dex5550 = [ "olafkfreund" ];
       };
 
-      # Consolidated MicroVM package sets to reduce duplication
-      microvmPackages = with nixpkgs.legacyPackages.x86_64-linux; {
-        # Common packages across all MicroVMs
-        common = [
-          git # Version control
-          vim # Text editor
-          htop # Process monitor
-          tree # Directory listing
-          curl # HTTP client
-          wget # File downloader
-          python3 # Scripting language
-        ];
+      # Note: MicroVM packages and live images temporarily disabled during refactoring
 
-        # Extended development tools (dev-vm and playground-vm)
-        development = [
-          neovim # Advanced text editor
-          tmux # Terminal multiplexer
-          nodejs # JavaScript runtime
-          go # Go language
-          rustc # Rust compiler
-          docker-compose # Container orchestration
-        ];
-
-        # Build tools (dev-vm specific)
-        buildTools = [
-          gcc # C compiler
-          gnumake # Build system
-          cmake # Build system generator
-          ninja # Build system
-        ];
-
-        # Security and network analysis tools (playground-vm specific)
-        securityTools = [
-          kubernetes # Container orchestration
-          helm # Kubernetes package manager
-          ansible # Configuration management
-          wireshark # Network protocol analyzer
-          tcpdump # Network packet analyzer
-          nmap # Network discovery
-        ];
-      };
-
-      # Live USB installer images (extracted for better performance)
-      liveImages = import ./lib/live-images.nix {
-        inherit nixpkgs inputs hostUsers;
-      };
+      # ========================================
+      # HELPER FUNCTIONS
+      # ========================================
 
       # Get primary user (first in the list) for backward compatibility
       getPrimaryUser = host: builtins.head (hostUsers.${host} or [ "olafkfreund" ]);
@@ -187,8 +151,23 @@
       # Get all users for a host
       getHostUsers = host: hostUsers.${host} or [ "olafkfreund" ];
 
-      # Host type templates for configuration reduction
+      # ========================================
+      # ARCHITECTURE TEMPLATES
+      # ========================================
+
+      # Host type templates for configuration reduction (workstation, laptop, server, hybrid)
       hostTypes = import ./lib/hostTypes.nix { inherit (nixpkgs) lib; };
+
+      # Hardware profiles for GPU-specific configurations
+      hardwareProfiles = {
+        amd = import ./hosts/common/hardware-profiles/amd-gpu.nix;
+        nvidia = import ./hosts/common/hardware-profiles/nvidia-gpu.nix;
+        intel = import ./hosts/common/hardware-profiles/intel-integrated.nix;
+      };
+
+      # ========================================
+      # PACKAGE CONFIGURATION
+      # ========================================
 
       # Helper function for package imports
       mkPkgs = _pkgs: {
@@ -197,7 +176,7 @@
         # config.allowInsecure = true; # REMOVED for security - using targeted permissions
       };
 
-      # Import custom packages
+      # Import custom packages and overlays
       overlays = [
         (final: _prev: {
           customPkgs = import ./pkgs {
@@ -227,6 +206,8 @@
             inherit inputs host hostTypes;
             username = primaryUser; # Primary user for backward compatibility
             hostUsers = allUsers; # All users for this host
+            # Shared variables and hardware profiles for explicit tracking
+            inherit sharedVariables hardwareProfiles;
           };
           modules =
             [
@@ -264,6 +245,8 @@
                       ;
                     username = primaryUser;
                     hostUsers = allUsers;
+                    # Shared variables and hardware profiles for home-manager
+                    inherit sharedVariables hardwareProfiles;
                   };
                   users = builtins.listToAttrs (map
                     (user: {
@@ -277,13 +260,23 @@
         };
     in
     {
+      # ========================================
+      # HOST CONFIGURATIONS
+      # ========================================
       nixosConfigurations = {
-        razer = nixpkgs.lib.nixosSystem (makeNixosSystem "razer");
-        dex5550 = nixpkgs.lib.nixosSystem (makeNixosSystem "dex5550");
-        # hp = nixpkgs.lib.nixosSystem (makeNixosSystem "hp");
-        p510 = nixpkgs.lib.nixosSystem (makeNixosSystem "p510");
-        p620 = nixpkgs.lib.nixosSystem (makeNixosSystem "p620");
-        samsung = nixpkgs.lib.nixosSystem (makeNixosSystem "samsung");
+        # Workstations (high-performance desktop systems)
+        p620 = nixpkgs.lib.nixosSystem (makeNixosSystem "p620"); # AMD workstation (primary AI host)
+        p510 = nixpkgs.lib.nixosSystem (makeNixosSystem "p510"); # Intel Xeon server (media server)
+
+        # Laptops (portable systems with power management)
+        razer = nixpkgs.lib.nixosSystem (makeNixosSystem "razer"); # Intel/NVIDIA laptop (mobile dev)
+        samsung = nixpkgs.lib.nixosSystem (makeNixosSystem "samsung"); # Intel laptop (mobile)
+
+        # Servers (headless monitoring and services)
+        dex5550 = nixpkgs.lib.nixosSystem (makeNixosSystem "dex5550"); # Intel SFF (monitoring server)
+
+        # Hybrid systems (server/workstation combinations)
+        # hp = nixpkgs.lib.nixosSystem (makeNixosSystem "hp"); # Currently inactive
 
         # MicroVM configurations (temporarily disabled for flake restructuring)
         # dev-vm = microvms.dev-vm;
@@ -291,7 +284,9 @@
         # playground-vm = microvms.playground-vm;
       };
 
-      # Modern structured outputs
+      # ========================================
+      # PACKAGES AND APPLICATIONS
+      # ========================================
       packages.x86_64-linux =
         let
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
@@ -314,7 +309,9 @@
           # (Apps are available separately via apps.x86_64-linux)
         };
 
-      # Development shells
+      # ========================================
+      # DEVELOPMENT ENVIRONMENTS
+      # ========================================
       devShells.x86_64-linux =
         let
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
@@ -324,6 +321,10 @@
           testing = import ./shells/testing.nix { inherit pkgs; };
           docs = import ./shells/docs.nix { inherit pkgs; };
         };
+
+      # ========================================
+      # VALIDATION AND AUTOMATION
+      # ========================================
 
       # Quality assurance and validation checks
       checks.x86_64-linux = import ./checks/default.nix {
@@ -356,8 +357,12 @@
           };
         };
 
-      # Formatter
+      # Code formatter for consistent formatting
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;
+
+      # ========================================
+      # MODULE EXPORTS
+      # ========================================
 
       # Module exports for reuse by other flakes
       nixosModules = {

@@ -6,7 +6,7 @@
 , ...
 }:
 let
-  vars = import ./variables.nix;
+  vars = import ./variables.nix { inherit lib; };
 in
 {
   # Use laptop template and add Samsung-specific modules
@@ -17,9 +17,9 @@ in
     ./nixos/power.nix
     ./nixos/boot.nix
     ./nixos/intel.nix
-    ./nixos/i18n.nix
-    ./nixos/hosts.nix
-    ./nixos/envvar.nix
+    ../common/nixos/i18n.nix
+    ../common/nixos/hosts.nix
+    ../common/nixos/envvar.nix
     ./nixos/greetd.nix
     ./nixos/cpu.nix
     ./nixos/laptop.nix
@@ -159,9 +159,9 @@ in
     };
   };
 
-  # Enable hardware monitoring with desktop notifications
+  # Enable hardware monitoring with desktop notifications - temporarily disabled during configuration fixes
   monitoring.hardwareMonitor = {
-    enable = true;
+    enable = false; # Temporarily disabled to fix service issues
     interval = 300; # Check every 5 minutes
     enableDesktopNotifications = true;
 

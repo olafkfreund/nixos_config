@@ -3,7 +3,7 @@
 , ...
 }:
 let
-  vars = import ../../hosts/razer/variables.nix;
+  vars = import ../../hosts/razer/variables.nix { inherit lib; };
 in
 {
   imports = [

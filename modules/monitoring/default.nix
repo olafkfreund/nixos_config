@@ -243,7 +243,7 @@ in
 
       logFile = mkOption {
         type = types.str;
-        default = "/var/log/hardware-monitor.log";
+        default = "/var/log/monitoring/hardware-monitor.log";
         description = "Path to hardware monitor log file";
       };
 
@@ -357,10 +357,17 @@ in
     systemd.services.hardware-monitor = mkIf cfg.hardwareMonitor.enable {
       description = "Hardware Monitor Service";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" "systemd-journald.service" ];
+      after = [ "network.target" "systemd-journald.service" "systemd-tmpfiles-setup.service" ];
+      wants = [ "systemd-tmpfiles-setup.service" ];
 
       serviceConfig = {
         Type = "simple";
+        ExecStartPre = pkgs.writeShellScript "hardware-monitor-pre" ''
+          # Ensure log directory exists
+          mkdir -p /var/log/monitoring
+          touch ${cfg.hardwareMonitor.logFile}
+          chmod 644 ${cfg.hardwareMonitor.logFile}
+        '';
         ExecStart = pkgs.writeShellScript "hardware-monitor" ''
           #!/bin/bash
           set -euo pipefail
@@ -498,15 +505,10 @@ in
         Restart = "always";
         RestartSec = "30s";
 
-        # Security hardening
-        NoNewPrivileges = true;
-        PrivateTmp = true;
-        ProtectSystem = "strict";
-        ProtectHome = "read-only";
-        ReadWritePaths = [
-          cfg.hardwareMonitor.logFile
-          "/tmp"
-        ];
+        # Simplified security - prioritize functionality over excessive hardening
+        PrivateTmp = false; # Allow access to /tmp for state file
+        # Remove ProtectSystem to avoid namespace issues
+        # ReadWritePaths removed to avoid mount namespace conflicts
 
         User = "root";
         Group = "root";

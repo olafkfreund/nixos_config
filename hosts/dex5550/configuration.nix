@@ -6,7 +6,7 @@
 , ...
 }:
 let
-  vars = import ./variables.nix;
+  vars = import ./variables.nix { inherit lib; };
 in
 {
   # Use server template and add DEX5550-specific modules

@@ -46,31 +46,34 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Disable PulseAudio in favor of PipeWire
-    services.pulseaudio = {
-      enable = false;
-      package = pkgs.pulseaudioFull;
-    };
-
     # Enable real-time kit for audio performance
     security.rtkit.enable = true;
 
-    # Configure PipeWire
-    services.pipewire = {
-      enable = true;
-      alsa.enable = true;
-      alsa.support32Bit = cfg.pipewire.enable32BitSupport;
-      pulse.enable = true;
-      jack.enable = cfg.pipewire.enableJack;
-    };
+    # Configure audio services
+    services = {
+      # Disable PulseAudio in favor of PipeWire
+      pulseaudio = {
+        enable = false;
+        package = pkgs.pulseaudioFull;
+      };
 
-    # Bluetooth audio configuration
-    services.pipewire.wireplumber.extraConfig = mkIf cfg.bluetooth.enableAdvancedCodecs {
-      "monitor.bluez.properties" = {
-        "bluez5.enable-sbc-xq" = true;
-        "bluez5.enable-msbc" = true;
-        "bluez5.enable-hw-volume" = cfg.bluetooth.enableHardwareVolume;
-        "bluez5.roles" = [ "hsp_hs" "hsp_ag" "hfp_hf" "hfp_ag" ];
+      # Configure PipeWire
+      pipewire = {
+        enable = true;
+        alsa.enable = true;
+        alsa.support32Bit = cfg.pipewire.enable32BitSupport;
+        pulse.enable = true;
+        jack.enable = cfg.pipewire.enableJack;
+
+        # Bluetooth audio configuration
+        wireplumber.extraConfig = mkIf cfg.bluetooth.enableAdvancedCodecs {
+          "monitor.bluez.properties" = {
+            "bluez5.enable-sbc-xq" = true;
+            "bluez5.enable-msbc" = true;
+            "bluez5.enable-hw-volume" = cfg.bluetooth.enableHardwareVolume;
+            "bluez5.roles" = [ "hsp_hs" "hsp_ag" "hfp_hf" "hfp_ag" ];
+          };
+        };
       };
     };
 

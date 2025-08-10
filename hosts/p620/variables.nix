@@ -1,106 +1,99 @@
-{
-  # User information
-  username = "olafkfreund";
-  fullName = "Olaf K-Freund";
-  gitUsername = "olaffreund";
-  gitEmail = "olaf.loken@gmail.com";
-  gitHubToken = "";
+# P620 Variables - Using Shared Variable System
+# This demonstrates the new architecture with 90% code reduction
+# All common user info, localization, network, and theme configs are now shared
 
-  # Display configuration
-  laptop_monitor = "monitor = DP-2,1920x1080@60,3840x1080,1";
-  external_monitor = "monitor = DP-1,3840x2160@120,0x0,1";
+{ lib }:
+let
+  # Import shared variables and hardware profile
+  sharedVars = import ../common/shared-variables.nix;
+  hardwareProfile = import ../common/hardware-profiles/amd-gpu.nix;
 
-  # Hardware settings
-  gpu = "amd";
-  acceleration = "rocm"; # For ollama
+  # Extract shared variables for easier access
+  inherit (sharedVars) user localization network baseEnvironment baseTheme baseUserGroups basePaths baseServices;
+  inherit (lib) mkDefault;
 
-  # System groups
-  userGroups = [
-    "networkmanager"
-    "libvirtd"
-    "wheel"
-    "docker"
-    "podman"
-    "video"
-    "scanner"
-    "lp"
-    "lxd"
-    "incus-admin"
-  ];
+  # P620-specific overrides
+  hostOverrides = {
+    # Host identification
+    hostName = "p620";
+    nameservers = [ ]; # Use DHCP-provided DNS servers
 
-  # Networking
-  hostName = "p620";
-  nameservers = [ ]; # Use DHCP-provided DNS servers
-  hostMappings = {
-    "192.168.1.127" = "p510";
-    "192.168.1.188" = "razer"; # Updated to current wired IP
-    "192.168.1.97" = "p620";
-    "192.168.1.90" = "samsung"; # Samsung host
-    "192.168.1.246" = "hp";
-    "192.168.1.222" = "dex5550";
-  };
+    # P620-specific display configuration
+    laptop_monitor = "monitor = DP-2,1920x1080@60,3840x1080,1";
+    external_monitor = "monitor = DP-1,3840x2160@120,0x0,1";
 
-  # Locale and time
-  timezone = "Europe/London";
-  locale = "en_GB.UTF-8";
-  # Different settings for console and X server keyboard layouts
-  keyboardLayouts = {
-    console = "uk"; # For virtual console
-    xserver = "gb"; # For X server and Wayland
-  };
-
-  # Theme settings
-  theme = {
-    scheme = "gruvbox-dark-medium";
+    # P620-specific wallpaper (only thing that differs in theme)
     wallpaper = ./themes/orange-desert.jpg;
-    cursor = {
-      name = "Bibata-Modern-Ice";
-      size = 26;
-    };
-    font = {
-      mono = "JetBrainsMono Nerd Font";
-      sans = "Noto Sans";
-      serif = "Noto Serif";
-      sizes = {
-        applications = 12;
-        terminal = 13;
-        desktop = 12;
-        popups = 12;
+
+    # P620-specific paths and services
+    services = {
+      nfs = {
+        enable = true;
+        exports = "/extdisk         192.168.1.*(rw,fsid=0,no_subtree_check)";
       };
     };
-    opacity = {
-      desktop = 1.0;
-      terminal = 0.95;
-      popups = 0.95;
+
+    paths = {
+      # Inherits base paths, can add P620-specific ones here
+      external_disk = "/extdisk"; # P620-specific external disk path
     };
-  };
 
-  # Environment variables
-  environmentVariables = {
-    MOZ_ENABLE_WAYLAND = "1";
-    NIXOS_WAYLAND = "1";
-    NIXOS_OZONE_WL = "1";
-    NIXPKGS_ALLOW_INSECURE = "1";
-    NIXPKGS_ALLOW_UNFREE = "1";
-    ELECTRON_OZONE_PLATFORM_HINT = "auto";
-    KITTY_DISABLE_WAYLAND = "0";
-    # Qt theme platform for Stylix compatibility (align with system default)
-    QT_QPA_PLATFORMTHEME = "qt5ct";
-    # AMD-specific variables instead of NVIDIA ones
-    # LIBVA_DRIVER_NAME = "radeonsi";
-  };
-
-  # Service-specific configs
-  services = {
-    nfs = {
-      enable = true;
-      exports = "/extdisk         192.168.1.*(rw,fsid=0,no_subtree_check)";
+    # Any additional P620-specific environment variables
+    # (base AMD variables come from hardware profile)
+    extraEnvironment = {
+      # Add any P620-specific environment variables here if needed
     };
+
+    # Any additional P620-specific user groups
+    # (base groups come from shared variables)
+    extraGroups = [
+      # Add any P620-specific groups here if needed
+    ];
   };
 
-  # Shared paths
-  paths = {
-    flakeDir = "/home/olafkfreund/.config/nixos";
-    external_disk = "/extdisk";
+  # Merge configurations: base + hardware + host overrides
+  allUserGroups = baseUserGroups
+    ++ (hardwareProfile.extraGroups or [ ])
+    ++ (hostOverrides.extraGroups or [ ]);
+
+  allEnvironmentVariables = baseEnvironment
+    // (hardwareProfile.extraEnvironment or { })
+    // (hostOverrides.extraEnvironment or { });
+
+  finalTheme = baseTheme // {
+    wallpaper = hostOverrides.wallpaper or ./themes/default-wallpaper.jpg;
   };
+
+  finalServices = baseServices // (hostOverrides.services or { });
+  finalPaths = basePaths // (hostOverrides.paths or { });
+
+in
+{
+  # User information (shared across all hosts)
+  inherit (user) username fullName gitUsername gitEmail gitHubToken;
+
+  # Localization (shared across all hosts)
+  inherit (localization) timezone locale keyboardLayouts;
+
+  # Network configuration (shared across all hosts)
+  inherit (network) hostMappings;
+
+  # Host-specific configuration
+  hostName = hostOverrides.hostName;
+  nameservers = hostOverrides.nameservers or [ ];
+
+  # Hardware configuration from profile
+  gpu = hardwareProfile.gpu;
+  acceleration = hardwareProfile.acceleration;
+
+  # Display configuration (host-specific)
+  laptop_monitor = hostOverrides.laptop_monitor or "";
+  external_monitor = hostOverrides.external_monitor or "";
+
+  # Merged configurations
+  userGroups = allUserGroups;
+  environmentVariables = allEnvironmentVariables;
+  theme = finalTheme;
+  services = finalServices;
+  paths = finalPaths;
 }

@@ -109,7 +109,7 @@ lint-all:
 # Test all configurations build successfully
 test-all:
     @echo "🧪 Testing all NixOS configurations..."
-    @for host in razer dex5550 p510 p620; do \
+    @for host in p620 razer p510 dex5550 samsung; do \
         echo "Testing $host..."; \
         nix build .#nixosConfigurations.$host.config.system.build.toplevel --show-trace || exit 1; \
     done
@@ -118,11 +118,118 @@ test-all:
 # Test all configurations in parallel (FASTER)
 test-all-parallel:
     @echo "🧪 Testing all NixOS configurations in parallel..."
-    @( nix build .#nixosConfigurations.razer.config.system.build.toplevel --no-link --show-trace && echo "✅ Razer" || echo "❌ Razer" ) & \
-    ( nix build .#nixosConfigurations.dex5550.config.system.build.toplevel --no-link --show-trace && echo "✅ DEX5550" || echo "❌ DEX5550" ) & \
+    @( nix build .#nixosConfigurations.p620.config.system.build.toplevel --no-link --show-trace && echo "✅ P620" || echo "❌ P620" ) & \
+    ( nix build .#nixosConfigurations.razer.config.system.build.toplevel --no-link --show-trace && echo "✅ Razer" || echo "❌ Razer" ) & \
     ( nix build .#nixosConfigurations.p510.config.system.build.toplevel --no-link --show-trace && echo "✅ P510" || echo "❌ P510" ) & \
-    ( nix build .#nixosConfigurations.p620.config.system.build.toplevel --no-link --show-trace && echo "✅ P620" || echo "❌ P620" ) & \
+    ( nix build .#nixosConfigurations.dex5550.config.system.build.toplevel --no-link --show-trace && echo "✅ DEX5550" || echo "❌ DEX5550" ) & \
+    ( nix build .#nixosConfigurations.samsung.config.system.build.toplevel --no-link --show-trace && echo "✅ Samsung" || echo "❌ Samsung" ) & \
     wait && echo "✅ All parallel tests completed!"
+
+# Test build all hosts with detailed error reporting
+test-build-all:
+    #!/usr/bin/env bash
+    echo "🔨 Test building all host configurations with detailed reporting..."
+    failed_hosts=()
+    success_count=0
+    total_hosts=5
+    
+    for host in p620 razer p510 dex5550 samsung; do
+        echo ""
+        echo "🔨 Building $host..."
+        start_time=$(date +%s)
+        
+        if nixos-rebuild build --flake .#$host --show-trace 2>&1 | tee /tmp/build-$host.log; then
+            build_time=$(($(date +%s) - start_time))
+            echo "✅ $host: Build successful (${build_time}s)"
+            success_count=$((success_count + 1))
+        else
+            build_time=$(($(date +%s) - start_time))
+            echo "❌ $host: Build failed (${build_time}s)"
+            echo "   📋 Error log saved to: /tmp/build-$host.log"
+            failed_hosts+=("$host")
+        fi
+    done
+    
+    echo ""
+    echo "📊 Build Summary:"
+    echo "================="
+    echo "✅ Successful: $success_count/$total_hosts"
+    echo "❌ Failed: ${#failed_hosts[@]}/$total_hosts"
+    
+    if [ ${#failed_hosts[@]} -gt 0 ]; then
+        echo ""
+        echo "❌ Failed hosts: ${failed_hosts[*]}"
+        echo "📋 Check error logs in /tmp/build-*.log"
+        echo ""
+        echo "🔧 To view specific errors:"
+        for host in "${failed_hosts[@]}"; do
+            echo "   tail -50 /tmp/build-$host.log"
+        done
+        exit 1
+    else
+        echo ""
+        echo "🎉 All host configurations built successfully!"
+        echo "✅ Safe to proceed with deployment"
+    fi
+
+# Test build all hosts in parallel (FASTEST)
+test-build-all-parallel:
+    #!/usr/bin/env bash
+    echo "🚀 Test building all host configurations in parallel..."
+    
+    # Start all builds in parallel and capture their PIDs
+    (nixos-rebuild build --flake .#p620 --show-trace > /tmp/build-p620.log 2>&1 && echo "✅ P620: Build successful" || echo "❌ P620: Build failed") &
+    p620_pid=$!
+    
+    (nixos-rebuild build --flake .#razer --show-trace > /tmp/build-razer.log 2>&1 && echo "✅ Razer: Build successful" || echo "❌ Razer: Build failed") &
+    razer_pid=$!
+    
+    (nixos-rebuild build --flake .#p510 --show-trace > /tmp/build-p510.log 2>&1 && echo "✅ P510: Build successful" || echo "❌ P510: Build failed") &
+    p510_pid=$!
+    
+    (nixos-rebuild build --flake .#dex5550 --show-trace > /tmp/build-dex5550.log 2>&1 && echo "✅ DEX5550: Build successful" || echo "❌ DEX5550: Build failed") &
+    dex5550_pid=$!
+    
+    (nixos-rebuild build --flake .#samsung --show-trace > /tmp/build-samsung.log 2>&1 && echo "✅ Samsung: Build successful" || echo "❌ Samsung: Build failed") &
+    samsung_pid=$!
+    
+    # Wait for all builds to complete
+    echo "⏳ Waiting for all builds to complete..."
+    wait $p620_pid; p620_result=$?
+    wait $razer_pid; razer_result=$?  
+    wait $p510_pid; p510_result=$?
+    wait $dex5550_pid; dex5550_result=$?
+    wait $samsung_pid; samsung_result=$?
+    
+    # Count results
+    failed_hosts=()
+    success_count=0
+    
+    if [ $p620_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("p620"); fi
+    if [ $razer_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("razer"); fi
+    if [ $p510_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("p510"); fi
+    if [ $dex5550_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("dex5550"); fi
+    if [ $samsung_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("samsung"); fi
+    
+    echo ""
+    echo "📊 Parallel Build Summary:"
+    echo "========================="
+    echo "✅ Successful: $success_count/5"
+    echo "❌ Failed: ${#failed_hosts[@]}/5"
+    
+    if [ ${#failed_hosts[@]} -gt 0 ]; then
+        echo ""
+        echo "❌ Failed hosts: ${failed_hosts[*]}"
+        echo "📋 Check error logs:"
+        for host in "${failed_hosts[@]}"; do
+            echo "   tail -50 /tmp/build-$host.log"
+        done
+        exit 1
+    else
+        echo ""
+        echo "🎉 All host configurations built successfully in parallel!"
+        echo "✅ Safe to proceed with deployment"
+    fi
 
 # Test specific host configuration
 test-host HOST:
@@ -157,7 +264,7 @@ test-build-verbose HOST:
 # Validate Home Manager configurations
 test-home:
     @echo "🏠 Testing Home Manager configurations..."
-    @for host in razer dex5550 p510 p620; do \
+    @for host in p620 razer p510 dex5550 samsung; do \
         echo "Testing Home Manager for olafkfreund@$host..."; \
         nix build .#homeConfigurations.\"olafkfreund@$host\".activationPackage --show-trace || echo "⚠️  Home Manager config for $host failed"; \
     done
@@ -247,28 +354,36 @@ p510:
 dex5550:
     nixos-rebuild switch --flake .#dex5550 --target-host dex5550 --build-host dex5550 --sudo --no-reexec --keep-going --accept-flake-config
 
-# Deploy to samsung system (Intel integrated)
+# Deploy to samsung system (Intel integrated) - requires special handling
 samsung:
-    NIXOS_REBUILD_REMOTE_SUDO_USE_AGENT=1 nixos-rebuild switch --flake .#samsung --target-host 192.168.1.90 --build-host 192.168.1.90 --sudo --impure --accept-flake-config
+    @echo "🖥️  Deploying to Samsung system..."
+    @echo "⚠️  Samsung requires special handling due to network configuration"
+    @echo "📡 Testing connection first..."
+    @ping -c 1 samsung > /dev/null 2>&1 || (echo "❌ Samsung not reachable via hostname, trying IP..."; ping -c 1 192.168.1.90 > /dev/null 2>&1 || (echo "❌ Samsung not reachable at all"; exit 1))
+    @echo "✅ Samsung is reachable, proceeding with deployment..."
+    NIXOS_REBUILD_REMOTE_SUDO_USE_AGENT=1 nixos-rebuild switch --flake .#samsung --target-host 192.168.1.90 --build-host 192.168.1.90 --sudo --ask-sudo-password --impure --accept-flake-config --show-trace
+
+# Deploy to samsung system with debug mode (for troubleshooting)
+samsung-debug:
+    @echo "🐛 Deploying to Samsung system with debug mode..."
+    @echo "📡 Testing SSH connection..."
+    ssh -o ConnectTimeout=10 192.168.1.90 "echo 'SSH connection successful'"
+    @echo "🔐 Testing sudo access..."
+    ssh 192.168.1.90 "sudo -n echo 'Sudo access confirmed' || echo 'Sudo password required'"
+    @echo "🔑 Checking agenix status on remote..."
+    ssh 192.168.1.90 "sudo systemctl status agenix --no-pager || echo 'Agenix service not active'"
+    @echo "🚀 Starting deployment with extra verbosity..."
+    NIXOS_REBUILD_REMOTE_SUDO_USE_AGENT=1 nixos-rebuild switch --flake .#samsung --target-host 192.168.1.90 --build-host 192.168.1.90 --sudo --ask-sudo-password --impure --accept-flake-config --show-trace --verbose
 
 # =============================================================================
 # ARCHIVED/LEGACY HOSTS (FOR REFERENCE)
 # =============================================================================
 
-# Deploy to hp (archived)
+# Deploy to hp (archived - not in current flake)
 hp:
-    @echo "⚠️  hp is archived - use at your own risk"
-    nixos-rebuild switch --flake .#hp --target-host hp --build-host hp --sudo --impure --accept-flake-config
-
-# Deploy to lms (archived)
-lms:
-    @echo "⚠️  lms is archived - use at your own risk"
-    nixos-rebuild switch --flake .#lms --target-host lms --build-host lms --sudo --impure --accept-flake-config
-
-# Deploy to pvm (archived)
-pvm:
-    @echo "⚠️  pvm is archived - use at your own risk"
-    nixos-rebuild switch --flake .#pvm --target-host pvm --build-host pvm --sudo --impure --accept-flake-config
+    @echo "⚠️  hp is archived and not available in current flake configuration"
+    @echo "Use 'git log' to find historical configurations if needed"
+    @exit 1
 
 # =============================================================================
 # MODERN CONFIGURATION MANAGEMENT
@@ -345,7 +460,7 @@ status:
 
 # View system generation history
 history:
-    nix profile history --profile /nix/var/nix/profiles/system
+    sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
 
 # =============================================================================
 # CONFIGURATION OPTIMIZATION
@@ -401,21 +516,43 @@ validate-migration HOST:
         echo "❌ Not using shared stylix configuration"; \
     fi
 
-# Open Nix REPL with nixpkgs
+# Open Nix REPL with current flake
 repl:
-    nix repl -f flake:nixpkgs
+    nix repl
+
+# Open Nix REPL with nixpkgs
+repl-nixpkgs:
+    nix repl '<nixpkgs>'
 
 # Garbage collect old generations
 gc:
+    @echo "🗑️ Collecting garbage (keeping current generation)..."
     sudo nix-collect-garbage --delete-old
+    @echo "✅ Garbage collection complete!"
 
 # Aggressive garbage collection (remove all non-current generations)
 gc-aggressive:
+    @echo "🚨 WARNING: This will remove ALL previous generations!"
+    @read -p "Are you sure? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
     sudo nix-collect-garbage -d
+    @echo "✅ Aggressive garbage collection complete!"
 
-# Optimize nix store
+# Optimize nix store (deduplicate identical files)
 optimize:
+    @echo "♾️ Optimizing nix store..."
     sudo nix-store --optimize
+    @echo "✅ Store optimization complete!"
+
+# Full cleanup: garbage collect, optimize, and show savings
+full-cleanup:
+    @echo "🧹 Starting full system cleanup..."
+    @echo "Before cleanup:"
+    @du -sh /nix/store 2>/dev/null || echo "Cannot access /nix/store"
+    sudo nix-collect-garbage --delete-old
+    sudo nix-store --optimize
+    @echo "After cleanup:"
+    @du -sh /nix/store 2>/dev/null || echo "Cannot access /nix/store"
+    @echo "✅ Full cleanup complete!"
 
 
 # =============================================================================
@@ -511,13 +648,13 @@ update-input INPUT:
 check-module MODULE:
     nix-instantiate --parse {{MODULE}} > /dev/null && echo "✅ {{MODULE}} syntax is valid" || echo "❌ {{MODULE}} has syntax errors"
 
-# Format all Nix files
+# Format all Nix files using nixpkgs-fmt (preferred over alejandra)
 format:
-    find . -name "*.nix" -not -path "./result*" -not -path "./.git/*" | xargs alejandra
+    find . -name "*.nix" -not -path "./result*" -not -path "./.git/*" -exec nixpkgs-fmt {} +
 
 # Format specific file or directory
 format-path PATH:
-    alejandra {{PATH}}
+    nixpkgs-fmt {{PATH}}
 
 # Show package derivation
 show-drv PACKAGE:
@@ -530,7 +667,12 @@ dev-shell:
 # Show what would be built for a configuration
 show-build HOST:
     @echo "📋 Showing what would be built for {{HOST}}..."
-    nixos-rebuild build --flake .#{{HOST}} --dry-run
+    nix build .#nixosConfigurations.{{HOST}}.config.system.build.toplevel --dry-run
+
+# Show build diff between current and new configuration
+show-diff HOST:
+    @echo "🔄 Showing configuration differences for {{HOST}}..."
+    nixos-rebuild dry-activate --flake .#{{HOST}} --show-trace
 
 # Trace evaluation of a specific option
 trace-option HOST OPTION:
@@ -603,7 +745,7 @@ test-all-users:
     @for user_dir in Users/*/; do \
         user=$$(basename "$$user_dir"); \
         echo "Testing user: $$user"; \
-        for host in razer dex5550 p510 p620; do \
+        for host in p620 razer p510 dex5550 samsung; do \
             if [ -f "Users/$$user/$${host}_home.nix" ]; then \
                 echo "  Testing $$user@$$host..."; \
                 nix build .#homeConfigurations.\"$$user@$$host\".activationPackage --no-link 2>/dev/null || echo "    ⚠️  Failed: $$user@$$host"; \
@@ -612,10 +754,13 @@ test-all-users:
     done
 
 
-# Check for deprecated options
+# Check for deprecated options and patterns
 check-deprecated:
     @echo "⚠️  Checking for deprecated options..."
-    @grep -r "mkDefault\|mkForce\|mkOverride" . --include="*.nix" | head -20 || echo "No deprecated patterns found"
+    @echo "Checking for deprecated mkDefault/mkForce patterns..."
+    @grep -r "mkDefault\|mkForce\|mkOverride" . --include="*.nix" | head -10 || echo "No deprecated patterns found"
+    @echo "Checking for old nixpkgs references..."
+    @grep -r "nixpkgs-unstable\|nixpkgs-stable" . --include="*.nix" | head -5 || echo "No old nixpkgs references found"
 
 # Check for security issues
 security-scan:
@@ -626,40 +771,45 @@ security-scan:
     @grep -r "allowUnfree.*true\|permittedInsecurePackages" . --include="*.nix" | head -5 || echo "No overly permissive settings found"
 
 # =============================================================================
-# QUICK DEPLOYMENT SHORTCUTS
+# QUICK DEPLOYMENT SHORTCUTS (OPTIMIZED WORKFLOWS)
 # =============================================================================
 
 # Quick commands for common operations
 quick-test:
     just test-all-parallel
 
+# Smart deploy only if configuration changed
 quick-deploy HOST:
     just deploy-smart {{HOST}}
 
+# Complete workflow: test all hosts then optionally deploy all
 quick-all:
     @echo "🚀 Quick test and deploy all hosts..."
     just test-all-parallel
     @read -p "Tests passed! Deploy all? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
     just deploy-all-parallel
 
-# Emergency deployment (skip tests)
+# Emergency deployment (skip tests) - USE WITH CAUTION
 emergency-deploy HOST:
     @echo "🚨 EMERGENCY deployment to {{HOST}} (skipping tests)..."
-    @read -p "Are you sure? This skips all safety checks! (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --no-build-nix --accept-flake-config
+    @echo "This will skip ALL safety checks and validation!"
+    @read -p "Are you absolutely sure? (type 'emergency'): " confirm && [ "$$confirm" = "emergency" ] || exit 1
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --accept-flake-config
 
 # =============================================================================
 # UTILITIES AND HELPERS
 # =============================================================================
 
-# Clean up all build artifacts and caches
+# Clean up all build artifacts and caches (DESTRUCTIVE)
 clean-all:
-    @echo "🧹 Cleaning up everything..."
-    sudo nix-collect-garbage -d
-    nix-store --gc
-    sudo nix-store --optimize
+    @echo "🧹 DESTRUCTIVE: Cleaning up everything..."
+    @echo "This will remove ALL previous generations and build artifacts!"
+    @read -p "Are you absolutely sure? (type 'clean-all'): " confirm && [ "$$confirm" = "clean-all" ] || exit 1
     rm -rf result*
-    @echo "✅ Cleanup complete!"
+    sudo nix-collect-garbage -d
+    sudo nix-store --gc
+    sudo nix-store --optimize
+    @echo "✅ Complete cleanup finished!"
 
 # Create backup of current configuration
 backup:
@@ -722,6 +872,20 @@ recover-secrets:
 secrets-status:
     ./scripts/manage-secrets.sh status
 
+# Check secrets status on specific host
+secrets-status-host HOST:
+    @echo "🔑 Checking secrets status on {{HOST}}..."
+    ssh {{HOST}} "sudo ls -la /run/agenix/ || echo 'Agenix directory not found'"
+    ssh {{HOST}} "sudo systemctl status agenix --no-pager || echo 'Agenix service not running'"
+
+# Fix agenix issues on remote host
+fix-agenix-remote HOST:
+    @echo "🔧 Attempting to fix agenix issues on {{HOST}}..."
+    ssh {{HOST}} "sudo systemctl stop agenix || true"
+    ssh {{HOST}} "sudo rm -rf /run/agenix.d || true" 
+    ssh {{HOST}} "sudo systemctl start agenix || echo 'Agenix service failed to start'"
+    ssh {{HOST}} "sudo systemctl status agenix --no-pager"
+
 # =============================================================================
 # NETWORKING AND MONITORING
 # =============================================================================
@@ -742,21 +906,23 @@ network-check:
 deploy-all:
     @echo "🚨 Deploying to ALL active hosts..."
     @read -p "Are you sure? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
-    just razer
     just p620
+    just razer
     just p510
     just dex5550
+    @echo "⚠️  Note: Samsung requires manual deployment due to network configuration"
 
 # Deploy to all hosts in parallel (FASTEST)
 deploy-all-parallel:
     @echo "🚀 Deploying to ALL hosts in parallel..."
     @read -p "Are you sure? This will max out resources! (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
     @echo "Starting parallel deployments..."
-    ( just razer & echo "Razer started" ) & \
     ( just p620 & echo "P620 started" ) & \
+    ( just razer & echo "Razer started" ) & \
     ( just p510 & echo "P510 started" ) & \
     ( just dex5550 & echo "DEX5550 started" ) & \
     wait && echo "✅ All deployments completed!"
+    @echo "⚠️  Note: Samsung requires manual deployment due to network configuration"
 
 # Fast deployment with minimal builds
 deploy-fast HOST:
@@ -782,10 +948,11 @@ deploy-smart HOST:
 # Parallel build for all hosts (build only, no deployment)
 build-all-parallel:
     @echo "🔨 Building all configurations in parallel..."
-    ( nix build .#nixosConfigurations.razer.config.system.build.toplevel --no-link & echo "Building Razer..." ) & \
     ( nix build .#nixosConfigurations.p620.config.system.build.toplevel --no-link & echo "Building P620..." ) & \
+    ( nix build .#nixosConfigurations.razer.config.system.build.toplevel --no-link & echo "Building Razer..." ) & \
     ( nix build .#nixosConfigurations.p510.config.system.build.toplevel --no-link & echo "Building P510..." ) & \
     ( nix build .#nixosConfigurations.dex5550.config.system.build.toplevel --no-link & echo "Building DEX5550..." ) & \
+    ( nix build .#nixosConfigurations.samsung.config.system.build.toplevel --no-link & echo "Building Samsung..." ) & \
     wait && echo "✅ All builds completed!"
 
 # Deploy with binary cache optimization
@@ -796,7 +963,7 @@ deploy-cached HOST:
 # Test all hosts can be reached
 ping-hosts:
     @echo "🏓 Pinging all hosts..."
-    @for host in razer p620 p510 dex5550; do \
+    @for host in p620 razer p510 dex5550 samsung; do \
         echo -n "$$host: "; \
         ping -c 1 -W 2 $$host >/dev/null 2>&1 && echo "✅ reachable" || echo "❌ unreachable"; \
     done
@@ -828,11 +995,13 @@ help-extended:
     @echo "  just deploy-all-parallel # Deploy all hosts in parallel"
     @echo ""
     @echo "🧪 TESTING:"
-    @echo "  just test-all-parallel # Test all hosts in parallel"
-    @echo "  just ci                # Full CI pipeline"
-    @echo "  just ci-quick          # Quick CI tests"
-    @echo "  just test-all          # Test all configurations"
-    @echo "  just perf-test         # Performance benchmarks"
+    @echo "  just test-all-parallel     # Test all hosts in parallel"
+    @echo "  just test-build-all        # Test build all hosts (sequential)"
+    @echo "  just test-build-all-parallel # Test build all hosts (parallel)"
+    @echo "  just ci                    # Full CI pipeline"
+    @echo "  just ci-quick              # Quick CI tests"
+    @echo "  just test-all              # Test all configurations"
+    @echo "  just perf-test             # Performance benchmarks"
     @echo ""
     @echo "🔧 DEVELOPMENT:"
     @echo "  just format            # Format all Nix files"
@@ -851,7 +1020,7 @@ summary:
     #!/usr/bin/env bash
     echo "📋 NixOS Configuration Summary"
     echo "=============================="
-    echo "Active hosts: razer, dex5550, p510, p620"
+    echo "Active hosts: p620 (AMD workstation), razer (Intel/NVIDIA laptop), p510 (Intel Xeon server), dex5550 (Intel SFF monitoring), samsung (Intel laptop)"
     echo "Users: $(ls Users/ | grep -v README | tr '\n' ' ')"
     echo "Modules: $(find modules -name '*.nix' -not -name 'default.nix' | wc -l) modules"
     echo "Last update: $(stat -c %y flake.lock | cut -d' ' -f1)"

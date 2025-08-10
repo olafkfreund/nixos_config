@@ -6,7 +6,7 @@
 , ...
 }:
 let
-  vars = import ./variables.nix;
+  vars = import ./variables.nix { inherit lib; };
 in
 {
   # Use laptop template and add Razer-specific modules
@@ -18,9 +18,9 @@ in
     ./nixos/boot.nix
     # ./nixos/secure-boot.nix  # Uncomment when ready to enable Secure Boot
     ./nixos/nvidia.nix
-    ./nixos/i18n.nix
-    ./nixos/hosts.nix
-    ./nixos/envvar.nix
+    ../common/nixos/i18n.nix
+    ../common/nixos/hosts.nix
+    ../common/nixos/envvar.nix
     ./nixos/greetd.nix
     ./nixos/cpu.nix
     ./nixos/laptop.nix

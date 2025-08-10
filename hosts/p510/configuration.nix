@@ -6,7 +6,7 @@
 , ...
 }:
 let
-  vars = import ./variables.nix;
+  vars = import ./variables.nix { inherit lib; };
 in
 {
   # Use workstation template and add P510-specific modules
@@ -16,12 +16,12 @@ in
     ./nixos/power.nix
     ./nixos/boot.nix
     ./nixos/nvidia.nix
-    ./nixos/i18n.nix
-    ./nixos/envvar.nix
+    ../common/nixos/i18n.nix
+    ../common/nixos/envvar.nix
     ./nixos/cpu.nix
     ./nixos/memory.nix
     ./nixos/greetd.nix
-    ./nixos/hosts.nix
+    ../common/nixos/hosts.nix
     ./nixos/screens.nix
     ./nixos/plex.nix
     ./flaresolverr.nix

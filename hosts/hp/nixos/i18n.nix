@@ -1,6 +1,6 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 let
-  vars = import ../variables.nix;
+  vars = import ../variables.nix { inherit lib; };
 in
 {
   time.timeZone = vars.timezone;

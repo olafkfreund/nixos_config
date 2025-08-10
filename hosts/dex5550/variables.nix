@@ -1,65 +1,103 @@
-{
-  # User information
-  username = "olafkfreund";
-  fullName = "Olaf K-Freund";
-  gitUsername = "olaffreund";
-  gitEmail = "olaf.loken@gmail.com";
-  gitHubToken = "";
+{ lib }:
+let
+  # Import shared variables and Intel hardware profile
+  sharedVars = import ../common/shared-variables.nix;
+  hardwareProfile = import ../common/hardware-profiles/intel-integrated.nix;
 
-  # Hardware settings (headless server configuration)
-  gpu = "none"; # No display driver needed for headless server
-  acceleration = ""; # For ollama - Default to empty for this machine
+  # DEX5550-specific overrides (monitoring server)
+  hostOverrides = {
+    hostName = "dex5550";
+    nameservers = [ "1.1.1.1" "8.8.8.8" ]; # External DNS for monitoring server
 
-  # System groups - server optimized
-  userGroups = [
-    "networkmanager"
-    "libvirtd"
-    "wheel"
-    "docker"
-    "podman"
-    "lxd"
-    "incus-admin"
-  ];
+    # Server-specific user groups (no GUI-related groups)
+    serverUserGroups = [
+      "networkmanager"
+      "libvirtd"
+      "wheel"
+      "docker"
+      "podman"
+      "lxd"
+      "incus-admin"
+    ];
 
-  # Networking
-  hostName = "dex5550";
-  nameservers = [ "1.1.1.1" "8.8.8.8" ];
-  hostMappings = {
-    "192.168.1.127" = "p510";
-    "192.168.1.188" = "razer"; # Updated to current wired IP
-    "192.168.1.97" = "p620";
-    "192.168.1.90" = "samsung"; # Samsung host
-    "192.168.1.246" = "hp";
-    "192.168.1.222" = "dex5550";
-  };
+    # Server environment (minimal for headless)
+    serverEnvironment = {
+      NIXPKGS_ALLOW_INSECURE = "1";
+      NIXPKGS_ALLOW_UNFREE = "1";
+    };
 
-  # Locale and time
-  timezone = "Europe/London";
-  locale = "en_GB.UTF-8";
-  # Console keyboard layout only (headless server)
-  keyboardLayouts = {
-    console = "uk"; # For virtual console only
-  };
-
-  # No theme settings needed for server configuration
-
-  # Environment variables - server optimized
-  environmentVariables = {
-    NIXPKGS_ALLOW_INSECURE = "1";
-    NIXPKGS_ALLOW_UNFREE = "1";
-  };
-
-  # Service-specific configs
-  services = {
-    nfs = {
+    # NFS disabled for monitoring server
+    nfsConfig = {
       enable = false;
       exports = "";
     };
+
+    # Keyboard layout for console only (headless)
+    keyboardLayouts = {
+      console = "uk"; # For virtual console only
+    };
   };
 
-  # Shared paths
-  paths = {
-    flakeDir = "/home/olafkfreund/.config/nixos";
-    external_disk = "/mnt/data";
+  # Merge shared variables with hardware profile and server overrides
+  user = sharedVars.user // { };
+  localization = sharedVars.localization // {
+    inherit (hostOverrides) keyboardLayouts; # Server override
   };
+
+  # Merge network configuration
+  network = sharedVars.network // {
+    inherit (hostOverrides) hostName nameservers;
+  };
+
+  # Hardware configuration from Intel profile
+  hardware = {
+    inherit (hardwareProfile) gpu acceleration videoDrivers extraEnvironment;
+  };
+
+  # No theme needed for headless server
+  theme = { };
+
+  # Environment variables: minimal server environment only
+  environmentVariables = hostOverrides.serverEnvironment;
+
+  # User groups: server-specific groups (no GUI groups)
+  userGroups = hostOverrides.serverUserGroups;
+
+  # Services configuration
+  services = {
+    nfs = hostOverrides.nfsConfig;
+  };
+
+  # Paths configuration (shared)
+  paths = sharedVars.basePaths;
+
+in
+{
+  # User information (shared across all hosts)
+  inherit (user) username fullName gitUsername gitEmail gitHubToken;
+
+  # Hardware configuration (Intel integrated graphics)
+  inherit (hardware) gpu acceleration;
+
+  # User groups (server-optimized)
+  inherit userGroups;
+
+  # Network configuration (shared base + server overrides)
+  inherit (network) hostName nameservers;
+  inherit (network) hostMappings;
+
+  # Localization (shared + server keyboard layout)
+  inherit (localization) timezone locale keyboardLayouts;
+
+  # Theme configuration (empty for headless server)
+  inherit theme;
+
+  # Environment variables (minimal server environment)
+  inherit environmentVariables;
+
+  # Services configuration (NFS disabled)
+  inherit services;
+
+  # Paths configuration (shared)
+  inherit paths;
 }

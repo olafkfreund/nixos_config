@@ -98,27 +98,31 @@
       lockdPort = 4001; # Fixed port for firewalls
       mountdPort = 4002; # Fixed mount daemon port
       statdPort = 4000; # Fixed status daemon port
-      extraNfsdConfig = ''
-        # Performance optimizations
-        [nfsd]
-        threads=16
-        host=*
-        port=2049
-        vers3=y
-        vers4=y
-        vers4.0=y
-        vers4.1=y
-        vers4.2=y
-
-        [exportfs]
-        debug=0
-
-        [gssd]
-        use-memcache=1
-      '';
       exports = ''
         /mnt/media         *(rw,fsid=0,no_subtree_check,sync,wdelay,insecure,root_squash,all_squash,anonuid=1000,anongid=100)
       '';
+    };
+
+    nfs.settings = {
+      # Performance optimizations
+      nfsd = {
+        threads = 16;
+        host = "*";
+        port = 2049;
+        vers3 = "y";
+        vers4 = "y";
+        "vers4.0" = "y";
+        "vers4.1" = "y";
+        "vers4.2" = "y";
+      };
+
+      exportfs = {
+        debug = 0;
+      };
+
+      gssd = {
+        use-memcache = 1;
+      };
     };
   };
 
