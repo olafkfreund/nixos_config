@@ -55,21 +55,21 @@ with lib; let
         "smooth, 0.25, 0.1, 0.25, 1.0"
         "smoothOut, 0.36, 0, 0.66, -0.56"
         "smoothIn, 0.25, 0.46, 0.45, 0.94"
-        
+
         # Bouncy and playful effects
         "bounce, 0.68, -0.55, 0.265, 1.55"
         "elastic, 0.175, 0.885, 0.32, 1.275"
         "overshot, 0.05, 0.9, 0.1, 1.05"
-        
+
         # Sharp and snappy
         "snap, 0, 0.85, 0.15, 1.0"
         "quick, 0.23, 1, 0.32, 1"
-        
+
         # Specialized curves
         "workspace, 0.22, 1, 0.36, 1"
         "fade, 0.33, 0.83, 0.4, 0.96"
         "border, 0.19, 1, 0.22, 1"
-        
+
         # Legacy MD3 support (kept for compatibility)
         "md3_decel, 0.05, 0.7, 0.1, 1.0"
         "md3_standard, 0.4, 0, 0.2, 1"
@@ -84,11 +84,11 @@ with lib; let
           "windowsIn, 1, 8, elastic, popin 70%"
           "windowsOut, 1, 5, smoothOut, popin 80%"
           "windowsMove, 1, 6, smooth"
-          
+
           # Border animations for visual appeal
           "border, 1, 8, border"
           "borderangle, 1, 30, border, loop"
-          
+
           # Smooth fading
           "fade, 1, 10, fade"
           "fadeIn, 1, 8, smoothIn"
@@ -96,11 +96,11 @@ with lib; let
           "fadeSwitch, 1, 8, smooth"
           "fadeShadow, 1, 8, smooth"
           "fadeDim, 1, 8, smooth"
-          
+
           # Workspace transitions with directional slides
           "workspaces, 1, 6, workspace, slide"
           "specialWorkspace, 1, 7, overshot, slidevert"
-          
+
           # Layer rule animations for notifications/popups
           "layers, 1, 6, smooth, popin 60%"
           "layersIn, 1, 7, elastic, popin 50%"
@@ -109,7 +109,7 @@ with lib; let
         else [
           "windows, 0"
           "windowsIn, 0"
-          "windowsOut, 0" 
+          "windowsOut, 0"
           "windowsMove, 0"
           "border, 0"
           "borderangle, 0"
@@ -144,7 +144,7 @@ in
         then 1
         else 0; # Adaptive sync based on feature flags
       focus_on_activate = true; # Focus windows that request activation
-      
+
       # Modern animation enhancements (2024)
       layers_hog_keyboard_focus = true; # Better layer handling
       enable_swallow = true; # Terminal swallowing for smoother transitions
@@ -167,7 +167,7 @@ in
     # Window decoration settings - enhanced for modern animations
     decoration = {
       rounding = 5; # Rounded corners for smoother visual transitions
-      
+
       # Performance-aware blur configuration
       blur = performanceSettings.blur // {
         # Enhanced blur for animation compatibility
@@ -190,7 +190,7 @@ in
       active_opacity = mkDefault (theme.hyprland.decoration.active_opacity or 0.98);
       inactive_opacity = mkDefault (theme.hyprland.decoration.inactive_opacity or 0.85);
       fullscreen_opacity = mkDefault (theme.hyprland.decoration.fullscreen_opacity or 1.0);
-      
+
       # Modern animation-friendly settings
       dim_inactive = true;
       dim_strength = 0.1;
@@ -321,6 +321,16 @@ in
       "pin,class:^(flameshot)$"
       "noblur,class:^(flameshot)$"
       "nofocus,class:^(flameshot)$"
+
+      # SwayNC - Force completely opaque (no transparency)
+      "opacity 1.0 1.0,title:^(swaync).*"
+      "opacity 1.0 1.0,class:^(swaync).*"
+      "noblur,title:^(swaync).*"
+      "noblur,class:^(swaync).*"
+      "noshadow,title:^(swaync).*"
+      "noshadow,class:^(swaync).*"
+      "opaque,title:^(swaync).*"
+      "opaque,class:^(swaync).*"
     ];
   };
 }
