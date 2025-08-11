@@ -5,7 +5,7 @@ let
   olafkfreund = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILeccj+vW/qyKepgXK0oXZfVFMf1kwmqj4uBHmjU2fz8 olafkfreund"; # Replace with your actual public key
 
   # Host public keys - extract with: ssh-keyscan <hostname>
-  p620 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF+0dkuZaRIzLUtOHYeMyA3LFfjvwmr6bbC9VD6pxSg0 root@nixos";
+  p620 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFKIer2sfZnELLfQ96qw2fpUeYUqDFVzEO9pcx31nGCv root@p620";
   razer = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMaUdl4g8muVf0AUZDq9toM+I7q9Y8dYoPJMZDocfZLd root@nixos";
   p510 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILeaICX13Cw/ErM1Wag3P2letYRGXf3zIiuzPBQMlPAL root@nixos";
   dex5550 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFxuY6knpMg87Gh0F8aqaG6Mi/8qm423pc618lDm9FtL root@nixos";

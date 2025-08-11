@@ -962,7 +962,6 @@ in
 
   # Agenix identity configuration - specify where to find decryption keys
   age.identityPaths = [
-    "/etc/ssh/ssh_host_ed25519_key" # System host key
     "/home/olafkfreund/.ssh/id_ed25519" # User key
   ];
 
