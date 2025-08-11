@@ -338,6 +338,9 @@ in
       "center,class:^(walker)$"
       "size 1000 800,class:^(walker)$"
       "rounding 8,class:^(walker)$"
+      "opacity 1.0 1.0,class:^(walker)$"
+      "opaque,class:^(walker)$"
+      "noshadow,class:^(walker)$"
     ];
   };
 }

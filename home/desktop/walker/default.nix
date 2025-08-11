@@ -198,7 +198,7 @@ in
 
       /* General theme variables */
       @define-color foreground @fg;
-      @define-color background alpha(@bg, 0.95);
+      @define-color background @bg;
       @define-color color1 @bright_aqua;
       @define-color shadow rgba(0, 0, 0, 0.3);
 
@@ -212,19 +212,21 @@ in
       #window,
       #box,
       #aiScroll {
-        background-color: @background;
+        background-color: @bg;
         color: @foreground;
         border: 1px solid @bg3;
         border-radius: 8px;
+        opacity: 1.0;
       }
 
       #input {
-        background-color: alpha(@bg1, 0.7);
+        background-color: @bg1;
         border: 1px solid @bg3;
         border-radius: 6px;
         color: @foreground;
         margin: 8px;
         padding: 8px;
+        opacity: 1.0;
       }
 
       #input:focus {
@@ -243,8 +245,9 @@ in
       }
 
       #entry:selected {
-        background-color: alpha(@bg2, 0.7);
+        background-color: @bg2;
         border: 1px solid @bright_aqua;
+        opacity: 1.0;
       }
 
       #text {
@@ -256,9 +259,10 @@ in
       }
 
       #scrollbar {
-        background-color: alpha(@bg1, 0.7);
+        background-color: @bg1;
         border-radius: 6px;
         margin: 5px;
+        opacity: 1.0;
       }
 
       #scrollbar slider {
