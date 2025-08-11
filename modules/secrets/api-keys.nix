@@ -89,11 +89,27 @@ in
     environment.systemPackages = [
       (pkgs.writeScriptBin "load-api-keys" ''
         #!/bin/sh
-        # TEMPORARY: Load API keys from encrypted storage - currently disabled
-        # All API secrets need to be recreated due to decryption failures
+        # Load API keys from encrypted storage
 
-        echo "load-api-keys: temporarily disabled - all API secrets need recreation"
-        echo "To fix: recreate the broken agenix secrets with current SSH keys"
+        # Try to load API keys from agenix secrets
+        if [ -r "/run/agenix/api-openai" ]; then
+          echo "export OPENAI_API_KEY=\"$(cat /run/agenix/api-openai)\""
+        fi
+
+        if [ -r "/run/agenix/api-anthropic" ]; then
+          echo "export ANTHROPIC_API_KEY=\"$(cat /run/agenix/api-anthropic)\""
+        fi
+
+        if [ -r "/run/agenix/api-gemini" ]; then
+          echo "export GEMINI_API_KEY=\"$(cat /run/agenix/api-gemini)\""
+        fi
+
+        if [ -r "/run/agenix/api-github-token" ]; then
+          echo "export GITHUB_TOKEN=\"$(cat /run/agenix/api-github-token)\""
+        fi
+
+        # If no secrets are available, output nothing (safe for eval)
+        true
       '')
 
       (pkgs.writeScriptBin "api-keys-status" ''
@@ -105,7 +121,6 @@ in
         [ -n "$OPENAI_API_KEY" ] && echo "✅ OpenAI: Available" || echo "❌ OpenAI: Not available"
         [ -n "$GEMINI_API_KEY" ] && echo "✅ Gemini: Available" || echo "❌ Gemini: Not available"
         [ -n "$ANTHROPIC_API_KEY" ] && echo "✅ Anthropic: Available" || echo "❌ Anthropic: Not available"
-        [ -n "$QWEN_API_KEY" ] && echo "✅ Qwen: Available" || echo "❌ Qwen: Not available"
         [ -n "$LANGCHAIN_API_KEY" ] && echo "✅ LangChain: Available" || echo "❌ LangChain: Not available"
         [ -n "$GITHUB_TOKEN" ] && echo "✅ GitHub Token: Available" || echo "❌ GitHub Token: Not available"
 

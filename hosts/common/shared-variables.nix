@@ -1,14 +1,13 @@
 # Shared Variables System
 # Centralizes 100% identical user information, localization, and network mappings
 # Eliminates ~1,100 lines of code duplication across 6 hosts
-
 # No parameters needed - pure data structure
 {
   # Centralized user information (100% identical across all hosts)
   user = {
     username = "olafkfreund";
     fullName = "Olaf K-Freund";
-    gitUsername = "olaffreund";
+    gitUsername = "olafkfreund";
     gitEmail = "olaf.loken@gmail.com";
     gitHubToken = "";
   };

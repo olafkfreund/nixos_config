@@ -1,6 +1,6 @@
 # QuickShell Configuration Module
 # Provides modern QtQuick-based desktop shell alongside existing Waybar
-{ config, lib, pkgs, hyprlandFeatures ? { }, hyprlandTheme ? { }, ... }:
+{ lib, pkgs, hyprlandFeatures ? { }, hyprlandTheme ? { }, ... }:
 with lib;
 let
   cfg = hyprlandFeatures.quickshell or { };

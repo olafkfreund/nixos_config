@@ -711,6 +711,7 @@ in
   # Agenix identity configuration - specify where to find decryption keys
   age.identityPaths = [
     "/home/olafkfreund/.ssh/id_ed25519" # User key
+    "/etc/ssh/ssh_host_ed25519_key" # Host key
   ];
 
   # Package configurations

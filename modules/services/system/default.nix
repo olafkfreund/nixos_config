@@ -1,15 +1,9 @@
 _: {
-  services.gvfs = {
-    enable = true;
-  };
-  services.udisks2 = {
-    enable = true;
-  };
-  services.devmon = {
-    enable = true;
-  };
-  services.thermald = {
-    enable = true;
+  services = {
+    gvfs.enable = true;
+    udisks2.enable = true;
+    devmon.enable = true;
+    thermald.enable = true;
   };
   services.hardware.bolt = {
     enable = true;
