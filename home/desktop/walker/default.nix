@@ -31,15 +31,24 @@ in
         search.placeholder = "Search...";
         ui = {
           fullscreen = false;
-          centered = true; # Add this to center Walker on the screen
-          icon_theme = "Adwaita"; # Explicit icon theme to avoid mismatches
-          icon_size = 26; # Match the system theme size of 26px
+          anchors = {
+            left = false;
+            right = false;
+            top = false;
+            bottom = false;
+          };
+          margins = {
+            top = 0;
+            bottom = 0;
+            left = 0;
+            right = 0;
+          };
+          icon_theme = "Adwaita";
+          icon_size = 26;
         };
-        as_window = false;
         list = {
           height = 800;
           width = 1000;
-          center = true; # Add this to explicitly center the list
         };
         hotreload_theme = true;
         builtins.windows.weight = 100;

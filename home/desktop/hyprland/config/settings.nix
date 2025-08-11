@@ -332,10 +332,12 @@ in
       "opaque,title:^(swaync).*"
       "opaque,class:^(swaync).*"
 
-      # Walker - Disable blur and center properly
+      # Walker - Disable blur, center, and force windowed mode
       "noblur,class:^(walker)$"
-      "center,class:^(walker)$"
       "float,class:^(walker)$"
+      "center,class:^(walker)$"
+      "size 1000 800,class:^(walker)$"
+      "rounding 8,class:^(walker)$"
     ];
   };
 }
