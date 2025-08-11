@@ -86,6 +86,19 @@ in
         enable = true;
         ports = [ cfg.listenPort ];
 
+        # Ensure host keys are generated and configured
+        hostKeys = [
+          {
+            path = "/etc/ssh/ssh_host_ed25519_key";
+            type = "ed25519";
+          }
+          {
+            path = "/etc/ssh/ssh_host_rsa_key";
+            type = "rsa";
+            bits = 4096;
+          }
+        ];
+
         settings = {
           # Authentication
           PasswordAuthentication = cfg.allowPasswordAuthentication;
