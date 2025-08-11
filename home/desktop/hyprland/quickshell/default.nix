@@ -62,8 +62,8 @@ mkIf finalConfig.enable {
       };
     };
 
-    # Main QML entry point
-    ".config/quickshell/main.qml".source = ./components/main.qml;
+    # Main QML entry point (QuickShell expects shell.qml)
+    ".config/quickshell/shell.qml".source = ./components/main.qml;
 
     # Bar component
     ".config/quickshell/bar.qml".source = ./components/bar.qml;
@@ -77,10 +77,37 @@ mkIf finalConfig.enable {
     ".config/quickshell/widgets/AudioIndicator.qml".source = ./components/widgets/AudioIndicator.qml;
   };
 
-  # Auto-start QuickShell with Hyprland (alongside existing bars)
-  wayland.windowManager.hyprland.settings.exec-once = [
-    "quickshell"
-  ];
+  # QuickShell systemd service
+  systemd.user.services.quickshell = {
+    Unit = {
+      Description = "QuickShell - Modern QtQuick Desktop Shell";
+      Documentation = "https://quickshell.org/";
+      After = [ "graphical-session.target" ];
+      Wants = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+
+    Service = {
+      Type = "simple";
+      ExecStart = "${pkgs.quickshell}/bin/quickshell";
+      Restart = "on-failure";
+      RestartSec = "1";
+
+      # Environment variables for Wayland
+      Environment = [
+        "QT_QPA_PLATFORM=wayland"
+        "QT_WAYLAND_DISABLE_WINDOWDECORATION=1"
+      ];
+    };
+
+    Install = {
+      # Not auto-started - manual testing only
+      # WantedBy = [ "graphical-session.target" ];
+    };
+  };
+
+  # QuickShell available for manual start - not auto-started with Hyprland
+  # To test: systemctl --user start quickshell
 
   # Layer shell rules for QuickShell (ensure it stays on top layer)
   wayland.windowManager.hyprland.settings.layerrule = [

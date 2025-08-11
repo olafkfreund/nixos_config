@@ -44,8 +44,6 @@ in
     # Choose networking profile: "desktop", "server", or "minimal"
     profile = "server";
 
-    # Tailscale VPN Configuration
-    # Research shows acceptDns=false is critical for NixOS to avoid DNS conflicts
     tailscale = {
       enable = true;
       authKeyFile = config.age.secrets.tailscale-auth-key.path;

@@ -31,6 +31,7 @@ in
   config = mkIf cfg.enable {
     # Define age secrets for API keys
     age.secrets = {
+      # Working API keys - recreated with current SSH keys
       api-openai = {
         file = ../../secrets/api-openai.age;
         mode = "0644";
@@ -52,19 +53,19 @@ in
         group = "users";
       };
 
-      api-qwen = {
-        file = ../../secrets/api-qwen.age;
-        mode = "0644";
-        owner = "root";
-        group = "users";
-      };
+      # api-qwen = {
+      #   file = ../../secrets/api-qwen.age;
+      #   mode = "0644";
+      #   owner = "root";
+      #   group = "users";
+      # };
 
-      api-langchain = {
-        file = ../../secrets/api-langchain.age;
-        mode = "0600";
-        owner = username;
-        group = "users";
-      };
+      # api-langchain = {
+      #   file = ../../secrets/api-langchain.age;
+      #   mode = "0600";
+      #   owner = username;
+      #   group = "users";
+      # };
 
       api-github-token = {
         file = ../../secrets/api-github-token.age;
@@ -88,33 +89,11 @@ in
     environment.systemPackages = [
       (pkgs.writeScriptBin "load-api-keys" ''
         #!/bin/sh
-        # Load API keys from encrypted storage
-        # This script can be sourced in shell sessions
+        # TEMPORARY: Load API keys from encrypted storage - currently disabled
+        # All API secrets need to be recreated due to decryption failures
 
-        if [ -r "${config.age.secrets.api-openai.path}" ]; then
-          export OPENAI_API_KEY="$(cat ${config.age.secrets.api-openai.path})"
-          export OPENAI_KEY="$OPENAI_API_KEY"  # Compatibility alias
-        fi
-
-        if [ -r "${config.age.secrets.api-gemini.path}" ]; then
-          export GEMINI_API_KEY="$(cat ${config.age.secrets.api-gemini.path})"
-        fi
-
-        if [ -r "${config.age.secrets.api-anthropic.path}" ]; then
-          export ANTHROPIC_API_KEY="$(cat ${config.age.secrets.api-anthropic.path})"
-        fi
-
-        if [ -r "${config.age.secrets.api-qwen.path}" ]; then
-          export QWEN_API_KEY="$(cat ${config.age.secrets.api-qwen.path})"
-        fi
-
-        if [ -r "${config.age.secrets.api-langchain.path}" ]; then
-          export LANGCHAIN_API_KEY="$(cat ${config.age.secrets.api-langchain.path})"
-        fi
-
-        if [ -r "${config.age.secrets.api-github-token.path}" ]; then
-          export GITHUB_TOKEN="$(cat ${config.age.secrets.api-github-token.path})"
-        fi
+        echo "load-api-keys: temporarily disabled - all API secrets need recreation"
+        echo "To fix: recreate the broken agenix secrets with current SSH keys"
       '')
 
       (pkgs.writeScriptBin "api-keys-status" ''
@@ -159,30 +138,12 @@ in
       fi
     '';
 
-    # Ensure secrets are accessible after system activation
-    system.activationScripts.api-keys-setup = {
-      text = ''
-        # Ensure API key files are readable by the user
-        if [ -f "${config.age.secrets.api-openai.path}" ]; then
-          chown ${username}:users "${config.age.secrets.api-openai.path}" 2>/dev/null || true
-        fi
-        if [ -f "${config.age.secrets.api-gemini.path}" ]; then
-          chown ${username}:users "${config.age.secrets.api-gemini.path}" 2>/dev/null || true
-        fi
-        if [ -f "${config.age.secrets.api-anthropic.path}" ]; then
-          chown ${username}:users "${config.age.secrets.api-anthropic.path}" 2>/dev/null || true
-        fi
-        if [ -f "${config.age.secrets.api-qwen.path}" ]; then
-          chown ${username}:users "${config.age.secrets.api-qwen.path}" 2>/dev/null || true
-        fi
-        if [ -f "${config.age.secrets.api-langchain.path}" ]; then
-          chown ${username}:users "${config.age.secrets.api-langchain.path}" 2>/dev/null || true
-        fi
-        if [ -f "${config.age.secrets.api-github-token.path}" ]; then
-          chown ${username}:users "${config.age.secrets.api-github-token.path}" 2>/dev/null || true
-        fi
-      '';
-      deps = [ "agenix" ];
-    };
+    # TEMPORARY: Completely disabled activation script until secrets are recreated
+    # system.activationScripts.api-keys-setup = {
+    #   text = ''
+    #     echo "API keys setup - temporarily disabled for broken secrets"
+    #   '';
+    #   deps = [ "agenix" ];
+    # };
   };
 }

@@ -26,23 +26,13 @@ in
   "secrets/api-openai.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-gemini.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-anthropic.age".publicKeys = allUsers ++ allHosts;
-  "secrets/api-qwen.age".publicKeys = allUsers ++ allHosts;
-  "secrets/api-langchain.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-github-token.age".publicKeys = allUsers ++ allHosts;
 
   # System secrets
   "secrets/github-token.age".publicKeys = allUsers ++ workstations;
-  "secrets/ssh-host-ed25519-key.age".publicKeys = allUsers ++ allHosts;
   "secrets/wifi-password.age".publicKeys = allUsers ++ [ razer ];
-  "secrets/docker-auth.age".publicKeys = allUsers ++ allHosts;
   "secrets/postgres-password.age".publicKeys = allUsers ++ servers;
   "secrets/nextcloud-admin-password.age".publicKeys = allUsers ++ servers;
-  "secrets/smtp-password.age".publicKeys = allUsers ++ allHosts;
-
-  # Gmail OAuth2 secrets for email integration
-  "secrets/gmail-oauth2-client-secret.age".publicKeys = allUsers ++ allHosts;
-  "secrets/gmail-oauth2-refresh-token-primary.age".publicKeys = allUsers ++ allHosts;
-  "secrets/gmail-oauth2-refresh-token-secondary.age".publicKeys = allUsers ++ allHosts;
 
   # Tailscale secrets
   "secrets/tailscale-auth-key.age".publicKeys = allUsers ++ allHosts;

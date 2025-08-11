@@ -42,25 +42,26 @@ in
     ];
 
     # Age secrets configuration - only include secrets that exist
+    # TEMPORARY: Commented out broken secrets to fix activation errors
     age.secrets = mkMerge [
-      # User passwords
-      (mkSecret "user-password-olafkfreund" {
-        file = ../../secrets/user-password-olafkfreund.age;
-        owner = "olafkfreund";
-        group = "users";
-        mode = "0400";
-      })
+      # BROKEN - commented out temporarily
+      # (mkSecret "user-password-olafkfreund" {
+      #   file = ../../secrets/user-password-olafkfreund.age;
+      #   owner = "olafkfreund";
+      #   group = "users";
+      #   mode = "0400";
+      # })
 
-      # SSH keys
-      (mkSecret "ssh-host-ed25519-key" {
-        file = ../../secrets/ssh-host-ed25519-key.age;
-        owner = "root";
-        group = "root";
-        mode = "0400";
-        path = "/etc/ssh/ssh_host_ed25519_key";
-      })
+      # BROKEN - commented out temporarily
+      # (mkSecret "ssh-host-ed25519-key" {
+      #   file = ../../secrets/ssh-host-ed25519-key.age;
+      #   owner = "root";
+      #   group = "root";
+      #   mode = "0400";
+      #   path = "/etc/ssh/ssh_host_ed25519_key";
+      # })
 
-      # WiFi passwords (for laptops)
+      # WORKING - WiFi passwords (for laptops)
       (mkSecret "wifi-password" {
         file = ../../secrets/wifi-password.age;
         owner = "root";
@@ -68,15 +69,15 @@ in
         mode = "0400";
       })
 
-      # Docker registry credentials
-      (mkSecret "docker-auth" {
-        file = ../../secrets/docker-auth.age;
-        owner = "root";
-        group = "docker";
-        mode = "0440";
-      })
+      # BROKEN - commented out temporarily
+      # (mkSecret "docker-auth" {
+      #   file = ../../secrets/docker-auth.age;
+      #   owner = "root";
+      #   group = "docker";
+      #   mode = "0440";
+      # })
 
-      # API keys and tokens
+      # WORKING - API keys and tokens
       (mkSecret "github-token" {
         file = ../../secrets/github-token.age;
         owner = "olafkfreund";
@@ -84,7 +85,7 @@ in
         mode = "0400";
       })
 
-      # Database credentials
+      # WORKING - Database credentials
       (mkSecret "postgres-password" {
         file = ../../secrets/postgres-password.age;
         owner = "postgres";
