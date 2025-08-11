@@ -117,8 +117,8 @@ return {
               target = "all", -- Target all available options
               diagnostics = {
                 enable = true,
-                ignored = [], -- Specific diagnostic codes to ignore
-                excluded = [], -- Files/paths to exclude from diagnostics
+                ignored = {}, -- Specific diagnostic codes to ignore
+                excluded = {}, -- Files/paths to exclude from diagnostics
               },
               eval = {
                 depth = 2, -- Evaluation depth for better performance
@@ -133,7 +133,7 @@ return {
                 priority = 10,
               },
               path = {
-                include = ["${workspaceFolder}/**/*.nix"], -- Include all Nix files in workspace
+                include = {"${workspaceFolder}/**/*.nix"}, -- Include all Nix files in workspace
                 exclude = {
                   "${workspaceFolder}/.direnv/**",
                   "${workspaceFolder}/result/**",

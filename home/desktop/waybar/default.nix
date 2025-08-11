@@ -58,6 +58,7 @@ in
         "gtk-layer-shell" = true;
 
         "modules-left" = [
+          "custom/ai-assistant"
           "hyprland/workspaces"
           "sway/workspaces"
           "sway/scratchpad"
@@ -117,6 +118,13 @@ in
         "custom/cycle_wall" = {
           format = " 󰡼 ";
           on-click = "waypaper";
+        };
+
+        "custom/ai-assistant" = {
+          format = "<span foreground='#83a598'>󰜗</span>";
+          tooltip = "AI Assistant - Left click: Claude Code | Right click: Gemini CLI";
+          on-click = "foot -e claude";
+          on-click-right = "foot -e gemini";
         };
 
         "idle_inhibitor" = {
@@ -223,13 +231,21 @@ in
 
         clock = {
           calendar = {
+            mode = "year";
+            mode-mon-col = 3;
+            weeks-pos = "right";
+            on-scroll = 1;
             format = {
-              today = "<span color='#98971A'><b>{}</b></span>";
+              months = "<span color='#fabd2f'><b>{}</b></span>";
+              days = "<span color='#ebdbb2'><b>{}</b></span>";
+              weeks = "<span color='#83a598'><b>W{}</b></span>";
+              weekdays = "<span color='#8ec07c'><b>{}</b></span>";
+              today = "<span color='#fb4934'><b><u>{}</u></b></span>";
             };
           };
           format = "  {:%H:%M}";
           tooltip = "true";
-          tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
+          tooltip-format = "<big>{:%Y}</big>\n<tt><small>{calendar}</small></tt>";
           format-alt = "  {:%d/%m}";
           on-click = "weather-popup";
           on-left-click = "foot -e 'zsh -c thunderbird -calendar'";
@@ -490,6 +506,18 @@ in
           color: #fabd2f;
           background-color: transparent;
           border-bottom: 2px solid #ebdbb2;
+        }
+
+        #custom-ai-assistant {
+          color: #ebdbb2;
+          font-family: JetBrainsMono Nerd Font;
+          font-size: 14px;
+          font-weight: bold;
+          border-radius: 5px;
+          margin-bottom: 2px;
+          margin-right: 5px;
+          padding-left: 8px;
+          padding-right: 8px;
         }
 
         #custom-weather {

@@ -16,16 +16,7 @@ return {
 
       -- Keymaps for Claude Code integration
       keymaps = {
-        toggle = {
-          normal = "<C-,>", -- Toggle Claude Code terminal in normal mode
-          terminal = "<C-,>", -- Toggle Claude Code terminal in terminal mode
-          variants = {
-            continue = "<leader>cC", -- Continue last conversation
-            verbose = "<leader>cV", -- Verbose mode for detailed output
-            new = "<leader>cn", -- Start new conversation
-            ask = "<leader>ca", -- Quick ask functionality
-          }
-        }
+        toggle = "<C-,>", -- Toggle Claude Code terminal
       },
 
       -- Claude Code CLI configuration
@@ -89,10 +80,6 @@ return {
           ["<leader>c"] = {
             name = "Claude Code",
             c = "Toggle Claude Code",
-            C = "Continue conversation",
-            V = "Verbose mode",
-            n = "New conversation",
-            a = "Quick ask",
             q = "Quick ask Claude",
             e = "Explain selection",
             f = "Fix current file",

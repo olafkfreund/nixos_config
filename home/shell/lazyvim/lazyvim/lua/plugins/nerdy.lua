@@ -7,7 +7,11 @@ return {
     },
     cmd = "Nerdy",
     keys = {
-      { "<leader>N", "<cmd>Nerdy<CR>", "Pick icon" },
+      { "<leader>N", "<cmd>Nerdy<CR>", desc = "Pick icon" },
     },
+    config = function()
+      -- Ensure clean setup
+      require("nerdy").setup()
+    end,
   },
 }
