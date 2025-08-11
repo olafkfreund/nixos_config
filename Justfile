@@ -361,7 +361,7 @@ samsung:
     @echo "📡 Testing connection first..."
     @ping -c 1 samsung > /dev/null 2>&1 || (echo "❌ Samsung not reachable via hostname, trying IP..."; ping -c 1 192.168.1.90 > /dev/null 2>&1 || (echo "❌ Samsung not reachable at all"; exit 1))
     @echo "✅ Samsung is reachable, proceeding with deployment..."
-    NIXOS_REBUILD_REMOTE_SUDO_USE_AGENT=1 nixos-rebuild switch --flake .#samsung --target-host 192.168.1.90 --build-host 192.168.1.90 --sudo --ask-sudo-password --impure --accept-flake-config --show-trace
+    NIX_SSHOPTS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -F /dev/null" NIXOS_REBUILD_REMOTE_SUDO_USE_AGENT=1 nixos-rebuild switch --flake .#samsung --target-host 192.168.1.90 --build-host 192.168.1.90 --sudo --impure --accept-flake-config --show-trace
 
 # Deploy to samsung system with debug mode (for troubleshooting)
 samsung-debug:
@@ -373,7 +373,7 @@ samsung-debug:
     @echo "🔑 Checking agenix status on remote..."
     ssh 192.168.1.90 "sudo systemctl status agenix --no-pager || echo 'Agenix service not active'"
     @echo "🚀 Starting deployment with extra verbosity..."
-    NIXOS_REBUILD_REMOTE_SUDO_USE_AGENT=1 nixos-rebuild switch --flake .#samsung --target-host 192.168.1.90 --build-host 192.168.1.90 --sudo --ask-sudo-password --impure --accept-flake-config --show-trace --verbose
+    NIX_SSHOPTS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -F /dev/null" NIXOS_REBUILD_REMOTE_SUDO_USE_AGENT=1 nixos-rebuild switch --flake .#samsung --target-host 192.168.1.90 --build-host 192.168.1.90 --sudo --impure --accept-flake-config --show-trace --verbose
 
 # =============================================================================
 # ARCHIVED/LEGACY HOSTS (FOR REFERENCE)
