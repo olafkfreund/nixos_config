@@ -49,34 +49,74 @@ with lib; let
     animations = {
       enabled = cfg.performance.animations or true;
 
-      # Bezier curves for different animation types
+      # Modern 2024 Bezier curves - optimized for smooth, fancy animations
       bezier = optionals (cfg.performance.animations or true) [
-        "linear, 0, 0, 1, 1"
-        "md3_standard, 0.05, 0, 0, 1"
-        "md3_decel, 0.03, 0.3, 0.05, 0.8"
-        "md3_accel, 0.1, 0, 0.4, 0.2"
-        "overshot, 0.03, 0.5, 0.1, 1.03"
-        "hyprnostretch, 0.03, 0.5, 0.1, 1.0"
+        # Smooth and natural curves
+        "smooth, 0.25, 0.1, 0.25, 1.0"
+        "smoothOut, 0.36, 0, 0.66, -0.56"
+        "smoothIn, 0.25, 0.46, 0.45, 0.94"
+        
+        # Bouncy and playful effects
+        "bounce, 0.68, -0.55, 0.265, 1.55"
+        "elastic, 0.175, 0.885, 0.32, 1.275"
+        "overshot, 0.05, 0.9, 0.1, 1.05"
+        
+        # Sharp and snappy
         "snap, 0, 0.85, 0.15, 1.0"
-        "weather, 0.25, 0.1, 0.25, 1"
+        "quick, 0.23, 1, 0.32, 1"
+        
+        # Specialized curves
+        "workspace, 0.22, 1, 0.36, 1"
+        "fade, 0.33, 0.83, 0.4, 0.96"
+        "border, 0.19, 1, 0.22, 1"
+        
+        # Legacy MD3 support (kept for compatibility)
+        "md3_decel, 0.05, 0.7, 0.1, 1.0"
+        "md3_standard, 0.4, 0, 0.2, 1"
       ];
 
-      # Animation assignments with conditional performance tuning
+      # Modern 2024 animation assignments - optimized speeds and fancy effects
       animation =
         if (cfg.performance.animations or true)
         then [
-          "windows, 1, 25, md3_decel, slide"
-          "border, 1, 30, default"
-          "fade, 1, 8, default"
-          "workspaces, 1, 20, md3_decel"
-          "windowsOut, 1, 5, snap, slide"
-          "specialWorkspace, 1, 6, weather, slidevert"
+          # Window animations with popin effects for modern feel
+          "windows, 1, 7, bounce, popin 80%"
+          "windowsIn, 1, 8, elastic, popin 70%"
+          "windowsOut, 1, 5, smoothOut, popin 80%"
+          "windowsMove, 1, 6, smooth"
+          
+          # Border animations for visual appeal
+          "border, 1, 8, border"
+          "borderangle, 1, 30, border, loop"
+          
+          # Smooth fading
+          "fade, 1, 10, fade"
+          "fadeIn, 1, 8, smoothIn"
+          "fadeOut, 1, 6, smoothOut"
+          "fadeSwitch, 1, 8, smooth"
+          "fadeShadow, 1, 8, smooth"
+          "fadeDim, 1, 8, smooth"
+          
+          # Workspace transitions with directional slides
+          "workspaces, 1, 6, workspace, slide"
+          "specialWorkspace, 1, 7, overshot, slidevert"
+          
+          # Layer rule animations for notifications/popups
+          "layers, 1, 6, smooth, popin 60%"
+          "layersIn, 1, 7, elastic, popin 50%"
+          "layersOut, 1, 5, snap, popin 80%"
         ]
         else [
           "windows, 0"
+          "windowsIn, 0"
+          "windowsOut, 0" 
+          "windowsMove, 0"
           "border, 0"
+          "borderangle, 0"
           "fade, 0"
           "workspaces, 0"
+          "specialWorkspace, 0"
+          "layers, 0"
         ];
     };
   };
@@ -88,7 +128,7 @@ in
       force_zero_scaling = true;
     };
 
-    # Mouse and input behavior
+    # Mouse and input behavior - enhanced for smooth animations
     misc = {
       animate_mouse_windowdragging = true;
       mouse_move_focuses_monitor = true;
@@ -104,6 +144,13 @@ in
         then 1
         else 0; # Adaptive sync based on feature flags
       focus_on_activate = true; # Focus windows that request activation
+      
+      # Modern animation enhancements (2024)
+      layers_hog_keyboard_focus = true; # Better layer handling
+      animate_mouse_windowdragging = true; # Smooth window dragging
+      enable_swallow = true; # Terminal swallowing for smoother transitions
+      swallow_regex = "^(foot|kitty|alacritty|Alacritty)$";
+      new_window_takes_over_fullscreen = 2; # Smart fullscreen handling
     };
 
     # General window appearance
@@ -118,20 +165,38 @@ in
       allow_tearing = false; # Prevent screen tearing
     };
 
-    # Window decoration settings
+    # Window decoration settings - enhanced for modern animations
     decoration = {
-      rounding = 0;
-
+      rounding = 5; # Rounded corners for smoother visual transitions
+      
       # Performance-aware blur configuration
-      blur = performanceSettings.blur;
+      blur = performanceSettings.blur // {
+        # Enhanced blur for animation compatibility
+        vibrancy = 0.1696;
+        vibrancy_darkness = 0.0;
+        special = false;
+        popups = true;
+        popups_ignorealpha = 0.2;
+      };
 
       # Performance-aware shadow configuration (using mkDefault to allow override)
-      shadow = mkDefault performanceSettings.shadow;
+      shadow = mkDefault (performanceSettings.shadow // {
+        # Enhanced shadows for depth during animations
+        color = "rgba(1a1a1a, 0.8)";
+        scale = 0.97;
+        sharp = false;
+      });
 
-      # Theme-aware opacity settings (using mkDefault to allow override)
-      active_opacity = mkDefault (theme.hyprland.decoration.active_opacity or 1.0);
-      inactive_opacity = mkDefault (theme.hyprland.decoration.inactive_opacity or 1.0);
+      # Theme-aware opacity settings optimized for animations
+      active_opacity = mkDefault (theme.hyprland.decoration.active_opacity or 0.98);
+      inactive_opacity = mkDefault (theme.hyprland.decoration.inactive_opacity or 0.85);
       fullscreen_opacity = mkDefault (theme.hyprland.decoration.fullscreen_opacity or 1.0);
+      
+      # Modern animation-friendly settings
+      dim_inactive = true;
+      dim_strength = 0.1;
+      dim_special = 0.5;
+      dim_around = 0.8;
     };
 
     # Performance-aware animation configuration

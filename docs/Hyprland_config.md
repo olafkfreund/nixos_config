@@ -301,8 +301,10 @@ When in resize mode (`SUPER + R`):
 
 - Gruvbox Dark color scheme
 - Consistent with system-wide theme
-- Modern blur effects and animations
-- Hardware-accelerated rendering
+- **2024 Modern Animations**: Bouncy, elastic, and smooth bezier curves
+- **Fancy Visual Effects**: Popin animations, directional slides, looping borders
+- **Enhanced Blur & Vibrancy**: Popup blur, vibrancy effects, smooth transitions
+- Hardware-accelerated rendering with 60+ FPS support
 
 **Window Behavior:**
 
@@ -336,6 +338,14 @@ When in resize mode (`SUPER + R`):
 - Disables compositor effects for maximum performance
 - One-click toggle for gaming sessions
 - Automatic restoration of effects
+
+**Modern Animation System (2024):**
+
+- **13 Custom Bezier Curves**: Smooth, bounce, elastic, overshot effects
+- **Comprehensive Animation Coverage**: Windows, borders, fades, workspaces, layers
+- **Fancy Visual Effects**: Popin (70-80%), directional slides, looping borders
+- **Performance Optimized**: 5-8 speed range for smooth 60+ FPS
+- **Smart Animation Hierarchy**: Specialized curves for different element types
 
 ### Integration Features
 
