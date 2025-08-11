@@ -147,7 +147,6 @@ in
       
       # Modern animation enhancements (2024)
       layers_hog_keyboard_focus = true; # Better layer handling
-      animate_mouse_windowdragging = true; # Smooth window dragging
       enable_swallow = true; # Terminal swallowing for smoother transitions
       swallow_regex = "^(foot|kitty|alacritty|Alacritty)$";
       new_window_takes_over_fullscreen = 2; # Smart fullscreen handling
