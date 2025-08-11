@@ -95,16 +95,6 @@ in
 
           # Development tools
           ssh.enable = true;
-          commands.enable = true;
-
-          # Additional useful modules
-          bookmarks.enable = true;
-          translation = {
-            enable = true;
-            provider = "googlefree";
-          };
-
-          # AI integration using system ai-cli with Gemini
           commands = {
             enable = true;
             commands = [
@@ -123,6 +113,13 @@ in
                 terminal = false;
               }
             ];
+          };
+
+          # Additional useful modules
+          bookmarks.enable = true;
+          translation = {
+            enable = true;
+            provider = "googlefree";
           };
 
           # Custom commands for frequently used tools
