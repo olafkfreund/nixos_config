@@ -14,7 +14,7 @@ let
 
   # Key groups
   allUsers = [ olafkfreund ];
-  allHosts = [ p620 razer p510 dex5550 samsung samsung-rsa ];
+  allHosts = [ p620 razer p510 dex5550 samsung-rsa ]; # Samsung uses RSA key to avoid Ed25519 circular dependency
   workstations = [ p620 razer ];
   servers = [ p510 dex5550 ];
 in
