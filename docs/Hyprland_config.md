@@ -76,28 +76,50 @@ modules/desktop/hyprland-uwsm.nix  # UWSM session management
 | `SUPER + ALT + 0`       | Reset opacity  | Set window opacity to 100% |
 | `SUPER + ALT + h/j/k/l` | Manual tiling  | Preselect split direction  |
 
+### Modern Window Management (2024)
+
+| Keybinding                   | Action             | Description                        |
+| ---------------------------- | ------------------ | ---------------------------------- |
+| `SUPER + W`                  | Toggle group       | Create window tabs/groups          |
+| `SUPER + SHIFT + W`          | Lock groups        | Prevent accidental ungrouping      |
+| `SUPER + CTRL + TAB`         | Next group tab     | Switch to next window in group     |
+| `SUPER + CTRL + SHIFT + TAB` | Previous group tab | Switch to previous window in group |
+| `SUPER + ALT + 1/2`          | Group indicators   | Set visual group colors            |
+
+### Smart Window Sizing
+
+| Keybinding          | Action       | Description                       |
+| ------------------- | ------------ | --------------------------------- |
+| `SUPER + SHIFT + =` | Full HD size | Resize to 1920x1080               |
+| `SUPER + SHIFT + -` | HD size      | Resize to 1280x720                |
+| `SUPER + SHIFT + 0` | Half screen  | Resize to 50% screen size         |
+| `SUPER + ALT + G`   | Golden ratio | Resize to 61.8% width (aesthetic) |
+
 ### Application Launchers
 
 | Keybinding               | Action            | Description                               |
 | ------------------------ | ----------------- | ----------------------------------------- |
 | `SUPER + RETURN`         | Floating terminal | Launch foot terminal (floating, centered) |
+| `SUPER + CTRL + RETURN`  | Tiled terminal    | Launch foot terminal (tiled mode)         |
 | `SUPER + space`          | App launcher      | Launch rofi application launcher          |
 | `SUPER + backspace`      | Show keybindings  | Display this help via rofi                |
 | `SUPER + E`              | File manager      | Launch thunar file manager                |
 | `SUPER + V`              | Clipboard manager | Access clipboard history via rofi         |
+| `SUPER + CTRL + V`       | Clear clipboard   | Clear clipboard history with notification |
 | `SUPER + =`              | Calculator        | Launch qalc calculator (floating)         |
 | `SUPER + SHIFT + Escape` | System monitor    | Launch htop system monitor                |
 
 ### Special Workspaces
 
-| Keybinding         | Action            | Description                          |
-| ------------------ | ----------------- | ------------------------------------ |
-| `SUPER + S`        | Magic workspace   | Toggle magic/slack special workspace |
-| `SUPER + B`        | Chrome workspace  | Toggle Chrome special workspace      |
-| `SUPER + M`        | Mail workspace    | Toggle mail special workspace        |
-| `SUPER + T`        | Scratchpad        | Toggle scratchpad workspace          |
-| `SUPER + D`        | Discord workspace | Toggle Discord special workspace     |
-| `CTRL + SHIFT + M` | Spotify workspace | Toggle Spotify special workspace     |
+| Keybinding          | Action            | Description                      |
+| ------------------- | ----------------- | -------------------------------- |
+| `SUPER + S`         | Slack workspace   | Toggle Slack special workspace   |
+| `SUPER + SHIFT + S` | Magic workspace   | Toggle magic special workspace   |
+| `SUPER + B`         | Firefox workspace | Toggle Firefox special workspace |
+| `SUPER + M`         | Mail workspace    | Toggle mail special workspace    |
+| `SUPER + SHIFT + M` | Spotify workspace | Toggle Spotify special workspace |
+| `SUPER + T`         | Scratchpad        | Toggle scratchpad workspace      |
+| `SUPER + D`         | Discord workspace | Toggle Discord special workspace |
 
 ### Development Workflow
 
@@ -107,6 +129,21 @@ modules/desktop/hyprland-uwsm.nix  # UWSM session management
 | `SUPER + SHIFT + T`      | Large terminal | Launch large floating terminal (80% screen) |
 | `SUPER + CTRL + T`       | Tmux session   | Launch tmux in floating terminal            |
 | `SUPER + CTRL + Y`       | AI assistant   | Launch yai AI assistant                     |
+
+### Dynamic Workspace Management
+
+| Keybinding         | Action             | Description                |
+| ------------------ | ------------------ | -------------------------- |
+| `SUPER + CTRL + N` | Create workspace   | Create new empty workspace |
+| `SUPER + CTRL + X` | Previous workspace | Go to previous workspace   |
+
+### Workspace-Specific Layouts
+
+| Keybinding        | Action         | Description                       |
+| ----------------- | -------------- | --------------------------------- |
+| `SUPER + ALT + 1` | Dwindle layout | Set workspace 1 to dwindle layout |
+| `SUPER + ALT + 2` | Master layout  | Set workspace 2 to master layout  |
+| `SUPER + ALT + 3` | Dwindle layout | Set workspace 3 to dwindle layout |
 
 ### Layout Management
 
@@ -158,7 +195,8 @@ modules/desktop/hyprland-uwsm.nix  # UWSM session management
 
 | Keybinding          | Action      | Description                |
 | ------------------- | ----------- | -------------------------- |
-| `SUPER + SHIFT + W` | Network TUI | Launch network manager TUI |
+| `SUPER + CTRL + W`  | Network TUI | Launch network manager TUI |
+| `SUPER + SHIFT + W` | Weather     | Launch weather popup       |
 
 ### Media Controls
 
@@ -198,6 +236,43 @@ modules/desktop/hyprland-uwsm.nix  # UWSM session management
 | --------------- | ----------------------- | -------------------------------------- |
 | `Print`         | Screenshot to clipboard | Capture area to clipboard              |
 | `SHIFT + Print` | Screenshot to file      | Capture area to ~/Pictures/screenshots |
+| `CTRL + Print`  | Full screenshot to file | Capture entire screen to file          |
+
+### Modern Mouse Integration (2024)
+
+| Keybinding      | Action             | Description               |
+| --------------- | ------------------ | ------------------------- |
+| `Mouse Forward` | Next workspace     | Use mouse forward button  |
+| `Mouse Back`    | Previous workspace | Use mouse back button     |
+| `SUPER + Click` | Focus window       | Focus window under cursor |
+
+### Modern Touchpad Gestures
+
+| Gesture            | Action             | Description              |
+| ------------------ | ------------------ | ------------------------ |
+| `3-finger swipe →` | Previous workspace | Swipe right to go back   |
+| `3-finger swipe ←` | Next workspace     | Swipe left to go forward |
+| `3-finger swipe ↑` | Empty workspace    | Go to empty workspace    |
+| `3-finger swipe ↓` | Close window       | Kill active window       |
+
+### Performance Controls (2024)
+
+| Keybinding          | Action                  | Description                      |
+| ------------------- | ----------------------- | -------------------------------- |
+| `SUPER + SHIFT + G` | Toggle blur             | Instantly toggle blur effects    |
+| `SUPER + SHIFT + A` | Toggle animations       | Instantly toggle all animations  |
+| `SUPER + CTRL + M`  | GPU monitor             | Launch nvtop (GPU usage monitor) |
+| `SUPER + SHIFT + M` | Enhanced system monitor | Launch htop (70% screen size)    |
+
+### Emergency & Debug Tools
+
+| Keybinding                 | Action            | Description                       |
+| -------------------------- | ----------------- | --------------------------------- |
+| `SUPER + CTRL + SHIFT + R` | Reload config     | Reload Hyprland configuration     |
+| `SUPER + CTRL + SHIFT + K` | Kill Hyprland     | Emergency kill (force exit)       |
+| `SUPER + CTRL + SHIFT + E` | Exit Hyprland     | Clean exit to login manager       |
+| `SUPER + SHIFT + D`        | Copy window info  | Copy active window debug info     |
+| `SUPER + SHIFT + I`        | Copy version info | Copy Hyprland version for support |
 
 ### Resize Mode
 
@@ -232,9 +307,21 @@ When in resize mode (`SUPER + R`):
 **Window Behavior:**
 
 - Smart gaps and borders
-- Automatic floating for specific applications
-- Intelligent window placement
+- **Modern Focus Management:** Focus follows mouse with intelligent floating focus
+- **Comprehensive Auto-Placement:** Applications automatically position and size themselves
+- **Smart Window Rules:** Over 25 application-specific rules for optimal UX
+- **Workspace Auto-Assignment:** Development, communication, and media apps auto-organize
 - Multi-monitor support
+
+**Smart Application Rules (2024):**
+
+- **Audio/Video Controls:** pavucontrol auto-floats and centers (800x600)
+- **System Monitors:** htop/btop auto-size to 900x650 and center
+- **Development IDEs:** VS Code automatically assigned to workspace 3
+- **Communication Apps:** Discord/Slack auto-assign to special workspaces
+- **Gaming Optimization:** Steam games get performance optimizations automatically
+- **Media Windows:** Picture-in-picture auto-pins and positions correctly
+- **File Managers:** thunar opens at optimal 1000x700 size
 
 ### Performance Optimizations
 
@@ -391,14 +478,29 @@ hyprctl reload
 3. **Consider ergonomics** when adding new shortcuts
 4. **Maintain consistency** with existing patterns
 
+## Recent Enhancements (2024)
+
+### Recently Added Modern Features ✅
+
+1. **Smart Window Rules** - Automatic application positioning and sizing
+2. **Modern Focus Management** - Focus follows mouse with intelligent behavior
+3. **Window Grouping/Tabbing** - Browser-like tabs for window organization
+4. **Smart Window Sizing** - Golden ratio and standard size shortcuts
+5. **Dynamic Workspace Management** - Create/destroy workspaces on demand
+6. **Performance Quick Toggles** - Instant blur/animation control
+7. **Mouse Integration** - Forward/back buttons for workspace navigation
+8. **Touchpad Gestures** - 3-finger swipes for all major actions
+9. **Emergency Tools** - Debug shortcuts and system recovery
+10. **Enhanced System Monitoring** - GPU monitoring and better system tools
+
 ## Future Enhancements
 
 ### Planned Features
 
-1. **Workspace-specific layouts** for different workflows
+1. **Action Menu System** - Context-sensitive quick actions
 2. **Enhanced multi-monitor support** with workspace assignment
 3. **Application-specific keybindings** for specialized workflows
-4. **Integration with external tools** for productivity
+4. **Advanced Alt-Tab with previews** - Modern window switcher
 
 ### Contributing
 

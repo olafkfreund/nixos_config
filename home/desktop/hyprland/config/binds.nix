@@ -30,6 +30,7 @@ _: {
 
     # Application launchers
     bind = $mainMod, RETURN, exec, [float; size 50% 50%; center]foot
+    bind = $mainMod CTRL, RETURN, exec, foot
     bind = $mainMod, space, exec, pkill rofi || rofi -show drun
     bind = $mainMod, backspace, exec, rofi-hyprkeys
     bind = $mainMod CTRL, Y, exec, [float]foot yai
@@ -42,13 +43,13 @@ _: {
     bind = $mainMod SHIFT, Escape, exec, [float; size 60% 70%; center]foot htop
 
     # Special workspaces
-    bind = $mainMod, S, togglespecialworkspace, magic
     bind = $mainMod, S, togglespecialworkspace, slack
+    bind = $mainMod SHIFT, S, togglespecialworkspace, magic
     bind = $mainMod, B, togglespecialworkspace, firefox
     bind = $mainMod, M, togglespecialworkspace, mail
+    bind = $mainMod SHIFT, M, togglespecialworkspace, spotify
     bind = $mainMod, T, togglespecialworkspace, scratchpad
     bind = $mainMod, D, togglespecialworkspace, discord
-    bind = Control_SHIFT, M, togglespecialworkspace, spotify
     bind = $mainMod SHIFT, W, exec, weather-popup
     bind = $mainMod, Escape, killactive, title:^(Weather - London)$
 
@@ -72,10 +73,16 @@ _: {
     bind = $mainMod SHIFT, j, movewindow, d
     bind = $mainMod SHIFT, c, centerwindow, none
 
+    # Window swapping (modern pattern)
+    bind = $mainMod CTRL, h, swapwindow, l
+    bind = $mainMod CTRL, l, swapwindow, r
+    bind = $mainMod CTRL, k, swapwindow, u
+    bind = $mainMod CTRL, j, swapwindow, d
+
     # Window management
     bind = $mainMod, Q, killactive
-    bind = $mainMod, F, fullscreen, 1
-    bind = $mainMod, F, togglefloating
+    bind = $mainMod, F, fullscreen, 0
+    bind = $mainMod SHIFT, F, togglefloating
     bind = $mainMod ALT, P, pin
     bind = $mainMod, Y, exec, hyprctl keyword general:layout "dwindle"
     bind = $mainMod, U, exec, hyprctl keyword general:layout "master"
@@ -116,7 +123,6 @@ _: {
     bind = $mainMod SHIFT, I, exec, open-clip
     bind = $mainMod, N, exec, swaync-client --toggle-panel
     bind = $mainMod SHIFT, N, exec, swaync-client --close-all
-    bind = $mainMod ALT, L, exec, hyprlock
     bind = $mainMod, L, exec, hyprlock
 
     # Gaming mode toggle (disables compositor effects for performance)
@@ -142,7 +148,7 @@ _: {
     bind = $mainMod CTRL, T, exec, [float; size 60% 40%; center]foot -e tmux
 
     # Network management
-    bind = $mainMod SHIFT, W, exec, [float; size 50% 60%; center]foot nmtui
+    bind = $mainMod CTRL, W, exec, [float; size 50% 60%; center]foot nmtui
 
     # Volume controls (consolidated)
     bind = $mainMod, SLASH, exec, pamixer -t
@@ -183,5 +189,65 @@ _: {
     # Screenshot bindings
     bind = , Print, exec, flameshot gui --raw | wl-copy
     bind = SHIFT, Print, exec, flameshot gui --path ~/Pictures/screenshots
+    bind = CTRL, Print, exec, flameshot full --path ~/Pictures/screenshots
+
+    # Modern mouse navigation (forward/back buttons)
+    bind = , mouse:276, workspace, e+1
+    bind = , mouse:275, workspace, e-1
+    bindm = $mainMod, mouse:272, focuswindow
+
+    # Modern touchpad/mouse gestures
+    bind = , swipe:3:right, workspace, e-1
+    bind = , swipe:3:left, workspace, e+1
+    bind = , swipe:3:up, exec, hyprctl dispatch workspace empty
+    bind = , swipe:3:down, killactive
+
+    # Enhanced window grouping/tabbing (modern productivity)
+    bind = $mainMod, W, togglegroup
+    bind = $mainMod SHIFT, W, lockgroups
+    bind = $mainMod CTRL, TAB, changegroupactive, f
+    bind = $mainMod CTRL SHIFT, TAB, changegroupactive, b
+
+    # Visual group indicators
+    bind = $mainMod ALT, 1, exec, hyprctl setprop active group:set:1
+    bind = $mainMod ALT, 2, exec, hyprctl setprop active group:set:2
+
+    # Smart window sizing (golden ratio + standard sizes)
+    bind = $mainMod SHIFT, equal, exec, hyprctl dispatch resizeactive exact 1920 1080
+    bind = $mainMod SHIFT, minus, exec, hyprctl dispatch resizeactive exact 1280 720
+    bind = $mainMod SHIFT, 0, exec, hyprctl dispatch resizeactive exact 50% 50%
+    bind = $mainMod ALT, G, exec, hyprctl dispatch resizeactive exact 61.8% 100%
+
+    # Dynamic workspace management
+    bind = $mainMod CTRL, N, exec, hyprctl dispatch workspace empty
+    bind = $mainMod CTRL, X, exec, hyprctl dispatch workspace previous
+
+    # Performance toggles (quick controls)
+    bind = $mainMod SHIFT, G, exec, hyprctl keyword decoration:blur:enabled $([ $(hyprctl getoption decoration:blur:enabled -j | jq '.int') = 1 ] && echo false || echo true) && notify-send "Hyprland" "Blur toggled"
+    bind = $mainMod SHIFT, A, exec, hyprctl keyword animations:enabled $([ $(hyprctl getoption animations:enabled -j | jq '.int') = 1 ] && echo false || echo true) && notify-send "Hyprland" "Animations toggled"
+
+    # GPU monitoring and system performance
+    bind = $mainMod CTRL, M, exec, [float; size 70% 80%; center]foot -e nvtop
+    bind = $mainMod SHIFT, M, exec, [float; size 70% 80%; center]foot -e htop
+
+    # Emergency and debugging shortcuts
+    bind = $mainMod CTRL SHIFT, R, exec, hyprctl reload && notify-send "Hyprland" "Configuration reloaded"
+    bind = $mainMod CTRL SHIFT, K, exec, hyprctl kill
+    bind = $mainMod CTRL SHIFT, E, exec, hyprctl dispatch exit
+
+    # Debug information (copy to clipboard)
+    bind = $mainMod SHIFT, D, exec, hyprctl activewindow -j | wl-copy && notify-send "Debug" "Active window info copied"
+    bind = $mainMod SHIFT, I, exec, hyprctl version | wl-copy && notify-send "Debug" "Hyprland version copied"
+
+    # Enhanced clipboard with clear option
+    bind = $mainMod CTRL, V, exec, cliphist clear && notify-send "Clipboard" "History cleared"
+
+    # Workspace-specific layouts (productivity optimization)
+    bind = $mainMod ALT, 1, exec, hyprctl keyword general:layout dwindle && hyprctl dispatch workspace 1
+    bind = $mainMod ALT, 2, exec, hyprctl keyword general:layout master && hyprctl dispatch workspace 2
+    bind = $mainMod ALT, 3, exec, hyprctl keyword general:layout dwindle && hyprctl dispatch workspace 3
+
+    # Focus window under cursor (modern UX)
+    bind = $mainMod CTRL, mouse:272, focuswindow
   '';
 }

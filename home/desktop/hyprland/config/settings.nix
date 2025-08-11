@@ -165,14 +165,17 @@ in
 
     # Input device settings
     input = {
-      follow_mouse = 2;
-      float_switch_override_focus = 0; # Focus follows mouse
+      follow_mouse = 1; # Modern focus follows mouse
+      float_switch_override_focus = 2; # Smart floating focus
       sensitivity = 0.0; # No acceleration
       accel_profile = "flat";
 
       touchpad = {
         natural_scroll = true; # Natural scrolling on touchpad
         disable_while_typing = true; # Disable touchpad while typing
+        tap-to-click = true; # Tap to click
+        drag_lock = false;
+        scroll_factor = 1.0;
       };
     };
 
@@ -181,6 +184,79 @@ in
       "notifications"
       "swayosd"
       "waybar"
+    ];
+
+    # Modern window rules - smart application positioning
+    windowrulev2 = [
+      # Audio/Video Controls - floating and centered
+      "float,class:^(pavucontrol)$"
+      "size 800 600,class:^(pavucontrol)$"
+      "center,class:^(pavucontrol)$"
+
+      # System monitors - floating and positioned
+      "float,class:^(btop)$"
+      "size 900 650,class:^(btop)$"
+      "center,class:^(btop)$"
+
+      # File managers - reasonable size
+      "size 1000 700,class:^(thunar)$"
+      "center,class:^(thunar)$"
+
+      # Development IDE auto-assignment
+      "workspace 3,class:^(code-oss)$"
+      "workspace 3,class:^(Code)$"
+      "workspace 3,class:^(codium)$"
+      "workspace 3,class:^(VSCodium)$"
+
+      # Communication apps to special workspaces
+      "workspace special:discord,class:^(discord)$"
+      "workspace special:discord,class:^(Discord)$"
+      "workspace special:slack,class:^(Slack)$"
+      "workspace special:mail,class:^(thunderbird)$"
+      "workspace special:mail,class:^(Thunderbird)$"
+
+      # Browser assignments
+      "workspace special:firefox,class:^(firefox)$"
+      "workspace special:firefox,class:^(Firefox)$"
+      "workspace 2,class:^(Google-chrome)$"
+      "workspace 2,class:^(chromium)$"
+
+      # Media applications
+      "workspace special:spotify,class:^(Spotify)$"
+      "workspace special:spotify,class:^(spotify)$"
+
+      # Gaming - fullscreen and no shadows for performance
+      "fullscreen,class:^(steam_app_).*"
+      "workspace 9,class:^(steam)$"
+      "workspace 9,class:^(Steam)$"
+      "immediate,class:^(steam_app_).*"
+      "noblur,class:^(steam_app_).*"
+      "noshadow,class:^(steam_app_).*"
+
+      # Dialogs and popups - always float
+      "float,class:^(org.kde.polkit-kde-authentication-agent-1)$"
+      "float,class:^(zenity)$"
+      "float,title:^(Authentication Required)$"
+
+      # Picture-in-picture and media overlays
+      "float,title:^(Picture-in-Picture)$"
+      "pin,title:^(Picture-in-Picture)$"
+      "size 400 225,title:^(Picture-in-Picture)$"
+      "move 1500 50,title:^(Picture-in-Picture)$"
+
+      # Terminal preferences
+      "size 900 600,class:^(foot)$,floating:1"
+
+      # Calculator
+      "float,class:^(qalc)$"
+      "size 400 600,class:^(qalc)$"
+      "center,class:^(qalc)$"
+
+      # Screenshot tools
+      "float,class:^(flameshot)$"
+      "pin,class:^(flameshot)$"
+      "noblur,class:^(flameshot)$"
+      "nofocus,class:^(flameshot)$"
     ];
   };
 }
