@@ -10,6 +10,7 @@
     pkgs.castero # Podcasts
     pkgs.gnome-podcasts # Podcasts
     pkgs.hypnotix
+    pkgs.wiremix # Music streaming
     pkgs.parabolic
     pkgs.musicpod
     pkgs.spicetify-cli

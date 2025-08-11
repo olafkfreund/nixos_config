@@ -31,7 +31,7 @@ _: {
     # Application launchers
     bind = $mainMod, RETURN, exec, [float; size 50% 50%; center]foot
     bind = $mainMod CTRL, RETURN, exec, foot
-    bind = $mainMod, space, exec, pkill rofi || rofi -show drun
+    bind = $mainMod, space, exec, walker
     bind = $mainMod, backspace, exec, rofi-hyprkeys
     bind = $mainMod CTRL, Y, exec, [float]foot yai
     bind = $mainMod CTRL, M, exec, wdisplays

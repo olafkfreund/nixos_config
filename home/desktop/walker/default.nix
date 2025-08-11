@@ -104,28 +104,25 @@ in
             provider = "googlefree";
           };
 
-          # AI module for Claude integration
-          ai = {
+          # AI integration using system ai-cli with Gemini
+          commands = {
             enable = true;
-            # Comment out Anthropic integration until API key is fixed
-            anthropic = {
-              prompts = [
-                {
-                  model = "claude-3-5-sonnet-20241022";
-                  temperature = 1.0;
-                  max_tokens = "1_000";
-                  label = "Code Helper";
-                  prompt = "You are a helpful coding assistant focused on helping with programming tasks. Keep your answers concise and practical.";
-                }
-                {
-                  model = "claude-3-5-sonnet-20241022";
-                  temperature = 0.7;
-                  max_tokens = "1_000";
-                  label = "NixOS Expert";
-                  prompt = "You are a NixOS expert. Help the user with their NixOS configuration, modules, and package management questions.";
-                }
-              ];
-            };
+            commands = [
+              {
+                name = "Ask Gemini AI";
+                cmd = "ai-cli -p gemini '%s'";
+                prefix = "ai";
+                description = "Ask Gemini AI a question";
+                terminal = true;
+              }
+              {
+                name = "Ask Gemini (No Terminal)";
+                cmd = "ai-cli -p gemini '%s' | wl-copy && notify-send 'AI Response' 'Copied to clipboard'";
+                prefix = "gem";
+                description = "Ask Gemini and copy response to clipboard";
+                terminal = false;
+              }
+            ];
           };
 
           # Custom commands for frequently used tools
@@ -158,40 +155,40 @@ in
       { command = "walker --gapplication-service"; }
     ];
 
-    # Add a custom theme file for Gruvbox
+    # Add a custom theme file for Gruvbox Material
     xdg.configFile."walker/themes/gruvbox.css".text = ''
-      /* Define Gruvbox dark color scheme variables */
+      /* Define Gruvbox Material color scheme variables */
       @define-color bg_h #1d2021;     /* hard dark background */
-      @define-color bg #282828;       /* dark background */
+      @define-color bg #282828;       /* material dark background */
       @define-color bg_s #32302f;     /* soft dark background */
-      @define-color bg1 #3c3836;      /* dark bg1 */
-      @define-color bg2 #504945;      /* dark bg2 */
-      @define-color bg3 #665c54;      /* dark bg3 */
-      @define-color bg4 #7c6f64;      /* dark bg4 */
-      @define-color fg #ebdbb2;       /* dark fg */
-      @define-color fg0 #fbf1c7;      /* dark fg0 */
-      @define-color fg1 #ebdbb2;      /* dark fg1 */
-      @define-color fg2 #d5c4a1;      /* dark fg2 */
-      @define-color fg3 #bdae93;      /* dark fg3 */
-      @define-color fg4 #a89984;      /* dark fg4 */
+      @define-color bg1 #3c3836;      /* material bg1 */
+      @define-color bg2 #504945;      /* material bg2 */
+      @define-color bg3 #665c54;      /* material bg3 */
+      @define-color bg4 #7c6f64;      /* material bg4 */
+      @define-color fg #dcd7ba;       /* material foreground - warmer tone */
+      @define-color fg0 #fbf1c7;      /* material fg0 */
+      @define-color fg1 #dcd7ba;      /* material fg1 - softer than original */
+      @define-color fg2 #c8c093;      /* material fg2 - muted */
+      @define-color fg3 #a6a69c;      /* material fg3 - subtle */
+      @define-color fg4 #9e9b93;      /* material fg4 */
 
-      /* Gruvbox accent colors */
-      @define-color red #cc241d;
-      @define-color green #98971a;
-      @define-color yellow #d79921;
-      @define-color blue #458588;
-      @define-color purple #b16286;
-      @define-color aqua #689d6a;
-      @define-color orange #d65d0e;
+      /* Gruvbox Material accent colors - more muted and sophisticated */
+      @define-color red #e67e80;      /* material red - softer */
+      @define-color green #a7c080;    /* material green - sage-like */
+      @define-color yellow #dbbc7f;   /* material yellow - golden */
+      @define-color blue #7fbbb3;     /* material blue - teal-ish */
+      @define-color purple #d699b6;   /* material purple - dusty rose */
+      @define-color aqua #83c092;     /* material aqua - mint green */
+      @define-color orange #e69875;   /* material orange - coral */
 
-      /* Bright Gruvbox accent colors */
-      @define-color bright_red #fb4934;
-      @define-color bright_green #b8bb26;
-      @define-color bright_yellow #fabd2f;
-      @define-color bright_blue #83a598;
-      @define-color bright_purple #d3869b;
-      @define-color bright_aqua #8ec07c;
-      @define-color bright_orange #fe8019;
+      /* Bright Material accent colors */
+      @define-color bright_red #ec5f67;
+      @define-color bright_green #99c794;
+      @define-color bright_yellow #fac863;
+      @define-color bright_blue #6bb6ff;
+      @define-color bright_purple #c594c5;
+      @define-color bright_aqua #5fb3b3;
+      @define-color bright_orange #f99157;
 
       /* General theme variables */
       @define-color foreground @fg;

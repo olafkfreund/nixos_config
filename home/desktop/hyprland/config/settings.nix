@@ -331,6 +331,11 @@ in
       "noshadow,class:^(swaync).*"
       "opaque,title:^(swaync).*"
       "opaque,class:^(swaync).*"
+
+      # Walker - Disable blur and center properly
+      "noblur,class:^(walker)$"
+      "center,class:^(walker)$"
+      "float,class:^(walker)$"
     ];
   };
 }
