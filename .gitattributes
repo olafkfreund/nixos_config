@@ -1,0 +1,4 @@
+# Prevent pre-commit hooks from corrupting binary agenix encrypted files
+secrets/*.age binary
+secrets/*.age -text
+secrets/*.age -diff
