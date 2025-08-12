@@ -22,6 +22,8 @@ in
       settings = {
         add_newline = true;
         format = lib.concatStrings [
+          "[────────────────────────────────────────────────────────────────────────────────](dimmed fg:color_bg3)"
+          "$line_break"
           "($container)"
           "$os"
           "$hostname"
@@ -263,6 +265,7 @@ in
         line_break = {
           disabled = false;
         };
+
 
         bun.symbol = "bun ";
         c.symbol = "C ";
