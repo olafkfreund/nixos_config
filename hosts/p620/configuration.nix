@@ -428,6 +428,9 @@ in
   # Temperature dashboard script
   scripts.tempDashboard.enable = true;
 
+  # Advanced CPU monitoring script for Waybar
+  scripts.cpuAdvanced.enable = true;
+
   # AI Ollama-specific configuration that goes beyond simple enabling
   ai.ollama = {
     enableRag = false; # Temporarily disabled due to ChromaDB 1.0.12 startup bug

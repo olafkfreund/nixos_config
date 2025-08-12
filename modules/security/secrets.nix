@@ -85,13 +85,13 @@ in
         mode = "0400";
       })
 
-      # WORKING - Database credentials
-      (mkSecret "postgres-password" {
+      # WORKING - Database credentials (servers only)
+      (mkIf (builtins.elem config.networking.hostName [ "p510" "dex5550" ]) (mkSecret "postgres-password" {
         file = ../../secrets/postgres-password.age;
         owner = "postgres";
         group = "postgres";
         mode = "0400";
-      })
+      }))
     ];
 
     # Ensure secrets directory exists

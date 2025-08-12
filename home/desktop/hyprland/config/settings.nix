@@ -250,6 +250,11 @@ in
       "waybar"
     ];
 
+    # Layer rules for specific applications
+    layerrule = [
+      "noanim, walker"
+    ];
+
     # Modern window rules - smart application positioning
     windowrulev2 = [
       # Audio/Video Controls - floating and centered
@@ -341,6 +346,17 @@ in
       "opacity 1.0 1.0,class:^(walker)$"
       "opaque,class:^(walker)$"
       "noshadow,class:^(walker)$"
+      
+      # Additional Walker rules for different possible class names and force windowed mode
+      "noblur,title:^(Walker).*"
+      "float,title:^(Walker).*"
+      "center,title:^(Walker).*"
+      "size 1000 800,title:^(Walker).*"
+      "rounding 8,title:^(Walker).*"
+      "opacity 1.0 1.0,title:^(Walker).*"
+      "opaque,title:^(Walker).*"
+      "noshadow,title:^(Walker).*"
+      
     ];
   };
 }

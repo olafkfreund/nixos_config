@@ -301,27 +301,27 @@ with lib; {
         local command="$1"
         local term_width=$(get_term_width)
         local max_content_width=$((term_width - 4))  # Account for │ │ padding
-        
+
         # Truncate command if too long
         if [[ ''${#command} -gt $max_content_width ]]; then
           command="''${command:0:$((max_content_width - 3))}..."
         fi
-        
+
         local content_width=''${#command}
         local padding_needed=$((max_content_width - content_width))
         local left_padding=$((padding_needed / 2))
         local right_padding=$((padding_needed - left_padding))
-        
+
         # Top border
         printf "''${BOX_COLORS[aqua]}%s" "''${BOX_CHARS[top_left]}"
         draw_line $((max_content_width + 2))
         printf "%s''${BOX_COLORS[reset]}\n" "''${BOX_CHARS[top_right]}"
-        
+
         # Command line with proper centering
         printf "''${BOX_COLORS[aqua]}%s ''${BOX_COLORS[fg]}" "''${BOX_CHARS[vertical]}"
         printf "%*s%s%*s" $left_padding "" "$command" $right_padding ""
         printf " ''${BOX_COLORS[aqua]}%s''${BOX_COLORS[reset]}\n" "''${BOX_CHARS[vertical]}"
-        
+
         # Bottom border
         printf "''${BOX_COLORS[aqua]}%s" "''${BOX_CHARS[bottom_left]}"
         draw_line $((max_content_width + 2))
@@ -334,7 +334,7 @@ with lib; {
         local duration=$2
         local term_width=$(get_term_width)
         local max_content_width=$((term_width - 4))
-        
+
         # Determine result status and color
         local status_icon result_text color
         if [[ $exit_code -eq 0 ]]; then
@@ -346,32 +346,32 @@ with lib; {
           result_text="Command failed (exit code: $exit_code)"
           color="''${BOX_COLORS[red]}"
         fi
-        
+
         # Add duration if available
         if [[ -n "$duration" ]]; then
           result_text="$result_text in ''${duration}s"
         fi
-        
+
         # Truncate if too long
         if [[ ''${#result_text} -gt $max_content_width ]]; then
           result_text="''${result_text:0:$((max_content_width - 3))}..."
         fi
-        
+
         local content="$status_icon  $result_text"
         local content_width=''${#content}
         local padding_needed=$((max_content_width - content_width))
         local right_padding=$padding_needed
-        
+
         # Top border
         printf "''${color}%s" "''${BOX_CHARS[top_left]}"
         draw_line $((max_content_width + 2))
         printf "%s''${BOX_COLORS[reset]}\n" "''${BOX_CHARS[top_right]}"
-        
+
         # Result line
         printf "''${color}%s ''${BOX_COLORS[fg]}" "''${BOX_CHARS[vertical]}"
         printf "%s%*s" "$content" $right_padding ""
         printf " ''${color}%s''${BOX_COLORS[reset]}\n" "''${BOX_CHARS[vertical]}"
-        
+
         # Bottom border
         printf "''${color}%s" "''${BOX_CHARS[bottom_left]}"
         draw_line $((max_content_width + 2))
@@ -381,11 +381,11 @@ with lib; {
       # Preexec hook - called before command execution
       preexec_command_box() {
         [[ $BOX_ENABLED -eq 0 ]] && return
-        
+
         # Store command and start time
         CURRENT_COMMAND="$1"
         COMMAND_START_TIME=$EPOCHSECONDS
-        
+
         # Draw command box
         echo
         draw_command_box "> $1"
@@ -394,21 +394,21 @@ with lib; {
       # Precmd hook - called before each prompt
       precmd_command_box() {
         [[ $BOX_ENABLED -eq 0 ]] && return
-        
+
         # Only show result if we have a command
         if [[ -n "$CURRENT_COMMAND" ]]; then
           local exit_code=$?
           local duration=""
-          
+
           # Calculate duration if start time is available
           if [[ -n "$COMMAND_START_TIME" ]]; then
             duration=$((EPOCHSECONDS - COMMAND_START_TIME))
           fi
-          
+
           # Draw result box
           draw_result_box $exit_code "$duration"
           echo
-          
+
           # Reset for next command
           CURRENT_COMMAND=""
           COMMAND_START_TIME=""
@@ -444,11 +444,11 @@ with lib; {
       # Function to draw a visual separator line
       draw_prompt_separator() {
         [[ $SEPARATOR_ENABLED -eq 0 ]] && return
-        
+
         local width=''${COLUMNS:-80}
         local line_color='\033[38;2;146;131;116m'  # Gruvbox material gray
         local reset_color='\033[0m'
-        
+
         # Draw a subtle separator line
         printf "''${line_color}"
         printf '%.0s─' $(seq 1 $((width)))
@@ -587,7 +587,7 @@ with lib; {
       ll = lib.mkForce "eza --icons=auto --color=auto --long --group-directories-first --git";
       la = lib.mkForce "eza --icons=auto --color=auto --long --all --group-directories-first --git";
       l = lib.mkForce "eza --icons=auto --color=auto --long --group-directories-first";
-      
+
       # Additional eza aliases for enhanced file operations
       lt = lib.mkForce "eza --icons=auto --color=auto --tree --level=2 --group-directories-first";
       lta = "eza --icons=auto --color=auto --tree --level=2 --all --group-directories-first";

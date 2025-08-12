@@ -10,6 +10,7 @@ _: {
     ./overlays/default.nix
     ./system-scripts/default.nix
     ./scripts/temp-dashboard.nix
+    ./scripts/cpu-advanced.nix
 
     # System utilities - always useful
     ./system-utils/utils.nix

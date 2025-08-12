@@ -16,7 +16,7 @@ return {
 
       -- Keymaps for Claude Code integration
       keymaps = {
-        toggle = "<C-,>", -- Toggle Claude Code terminal
+        toggle = { "<C-,>", "Toggle Claude Code terminal" }, -- Toggle Claude Code terminal
       },
 
       -- Claude Code CLI configuration
@@ -79,13 +79,13 @@ return {
         require("which-key").register({
           ["<leader>c"] = {
             name = "Claude Code",
-            c = "Toggle Claude Code",
-            q = "Quick ask Claude",
-            e = "Explain selection",
-            f = "Fix current file",
-            r = "Review changes",
+            c = { function() require("claude-code").toggle() end, "Toggle Claude Code" },
+            q = { function() require("claude-code").ask() end, "Quick ask Claude" },
+            e = { function() require("claude-code").explain_selection() end, "Explain selection" },
+            f = { function() require("claude-code").fix_file() end, "Fix current file" },
+            r = { function() require("claude-code").review_changes() end, "Review changes" },
           }
-        })
+        }, { mode = "n" })
       end
     end,
 

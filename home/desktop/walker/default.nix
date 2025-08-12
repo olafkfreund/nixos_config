@@ -38,19 +38,23 @@ in
             bottom = false;
           };
           margins = {
-            top = 0;
-            bottom = 0;
-            left = 0;
-            right = 0;
+            top = 20;
+            bottom = 20;
+            left = 20;
+            right = 20;
           };
+          width = 1000;
+          height = 800;
           icon_theme = "Adwaita";
           icon_size = 26;
+          show_search = true;
         };
         list = {
-          height = 800;
-          width = 1000;
+          height = 650;
+          width = 960;
+          margin = 20;
         };
-        hotreload_theme = true;
+        hotreload_theme = false;
         builtins.windows.weight = 100;
         builtins.clipboard = {
           prefix = ''"'';
@@ -161,7 +165,7 @@ in
       { command = "walker --gapplication-service"; }
     ];
 
-    # Add a custom theme file for Gruvbox Material
+    # Add a custom theme file for Gruvbox Material - FLAT DESIGN
     xdg.configFile."walker/themes/gruvbox.css".text = ''
       /* Define Gruvbox Material color scheme variables */
       @define-color bg_h #1d2021;     /* hard dark background */
@@ -200,74 +204,128 @@ in
       @define-color foreground @fg;
       @define-color background @bg;
       @define-color color1 @bright_aqua;
-      @define-color shadow rgba(0, 0, 0, 0.3);
 
-      /* Global styles */
+      /* FLAT MATERIAL DESIGN - NO GRADIENTS, NO SHADOWS, NO ROUNDED CORNERS */
       * {
         font-family: "JetBrainsMono Nerd Font";
         font-size: 14px;
         background-clip: border-box;
+        border-radius: 0px;
+        box-shadow: none;
+        background-image: none;
+        background: none;
       }
 
-      #window,
+      #window {
+        background-color: @bg;
+        background: @bg;
+        color: @foreground;
+        border: 1px solid @bg3;
+        border-radius: 0px;
+        opacity: 1.0;
+        padding: 16px;
+        box-shadow: none;
+      }
+
       #box,
       #aiScroll {
         background-color: @bg;
+        background: @bg;
         color: @foreground;
-        border: 1px solid @bg3;
-        border-radius: 8px;
+        border: none;
+        border-radius: 0px;
         opacity: 1.0;
+        box-shadow: none;
       }
 
+      /* FLAT SEARCH INPUT - COMPLETELY SEPARATE FROM RESULTS */
       #input {
         background-color: @bg1;
+        background: @bg1;
         border: 1px solid @bg3;
-        border-radius: 6px;
+        border-radius: 0px;
         color: @foreground;
-        margin: 8px;
-        padding: 8px;
+        margin: 0px 0px 24px 0px;
+        padding: 16px;
         opacity: 1.0;
+        min-height: 20px;
+        box-shadow: none;
+        position: relative;
+        z-index: 100;
       }
 
       #input:focus {
-        border-color: @bright_aqua;
+        border: 2px solid @bright_aqua;
+        background-color: @bg1;
+        background: @bg1;
+        outline: none;
+        box-shadow: none;
       }
 
+      /* FLAT RESULTS LIST - COMPLETELY SEPARATE */
       #list {
-        background: transparent;
-        margin: 8px;
+        background-color: @bg;
+        background: @bg;
+        margin: 0px;
+        padding: 0px;
+        position: relative;
+        z-index: 1;
+        border-top: 2px solid @bg3;
       }
 
+      /* FLAT LIST ENTRIES */
       #entry {
-        padding: 8px;
-        margin: 2px 8px;
-        border-radius: 6px;
+        background-color: @bg;
+        background: @bg;
+        padding: 12px 16px;
+        margin: 0px;
+        border: none;
+        border-radius: 0px;
+        border-bottom: 1px solid @bg2;
       }
 
       #entry:selected {
         background-color: @bg2;
-        border: 1px solid @bright_aqua;
+        background: @bg2;
+        border: none;
+        border-left: 4px solid @bright_aqua;
         opacity: 1.0;
+      }
+
+      #entry:hover {
+        background-color: @bg1;
+        background: @bg1;
       }
 
       #text {
         color: @foreground;
+        background: none;
       }
 
       #text:selected {
         color: @bright_aqua;
+        background: none;
       }
 
+      /* FLAT SCROLLBAR */
       #scrollbar {
-        background-color: @bg1;
-        border-radius: 6px;
-        margin: 5px;
+        background-color: @bg2;
+        background: @bg2;
+        border-radius: 0px;
+        margin: 0px;
         opacity: 1.0;
+        width: 8px;
       }
 
       #scrollbar slider {
         background-color: @bg4;
-        border-radius: 6px;
+        background: @bg4;
+        border-radius: 0px;
+      }
+
+      /* REMOVE ALL GRADIENTS AND EFFECTS */
+      .gradient, .shadow, .blur {
+        display: none;
       }
     '';
   };

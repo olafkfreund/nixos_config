@@ -70,7 +70,7 @@ in
         "modules-right" = [
           # "clock"
           "network"
-          "cpu"
+          "custom/cpu-advanced"
           "memory"
           "temperature"
           "pulseaudio"
@@ -113,6 +113,15 @@ in
           states = {
             warning = 95;
           };
+        };
+
+        "custom/cpu-advanced" = {
+          exec = "cpu-advanced";
+          format = " {} ";
+          interval = 2;
+          return-type = "json";
+          tooltip = true;
+          on-click-right = "hyprctl dispatch exec '[float; center; size 950 650] foot --override font_size=14 --title float_kitty btop'";
         };
 
         "custom/cycle_wall" = {
@@ -282,10 +291,13 @@ in
           format = "{ifname} {ipaddr} ";
           format-wifi = "<span foreground='#B16286'>󰖩 </span>";
           format-ethernet = "<span foreground='#B16286'>󰈀 </span>{ifname} ";
-          tooltip-format = "{ipaddr}  {bandwidthUpBytes}  {bandwidthDownBytes}";
+          tooltip-format-wifi = "Network Details:\n• SSID: {essid}\n• BSSID: {bssid}\n• Signal: {signalStrength}% ({signaldBm}dBm)\n• Frequency: {frequency}GHz\n• Interface: {ifname}\n• IP Address: {ipaddr}\n• Subnet: {cidr}\n• Gateway: {gwaddr}\n• Upload: {bandwidthUpBytes}\n• Download: {bandwidthDownBytes}\n• Total: {bandwidthTotalBytes}";
+          tooltip-format-ethernet = "Ethernet Details:\n• Interface: {ifname}\n• IP Address: {ipaddr}\n• Subnet: {cidr}\n• Gateway: {gwaddr}\n• Upload: {bandwidthUpBytes}\n• Download: {bandwidthDownBytes}\n• Total: {bandwidthTotalBytes}";
+          tooltip-format-disconnected = "Network Disconnected";
           format-linked = "{ifname} (No IP)";
           format-disconnected = "<span foreground='#fb4934'> 󰌙 </span>";
           format-alt = "{signalStrength}% ";
+          interval = 1;
           on-click = "foot -e 'nmtui'";
         };
 
@@ -302,7 +314,7 @@ in
           format = "<span foreground='#83a598'> {icon} </span>{volume}%";
           format-bluetooth = "<span foreground='#83a598'> {icon} </span>{volume}% ";
           format-muted = "<span foreground='#83a598'> </span> {volume}%";
-          on-click = "pavucontrol -t 3";
+          on-click = "foot -e 'wiremix'";
           tooltip-format = " {icon} {desc} // {volume}%";
           scroll-step = 1;
           format-icons = {
@@ -389,7 +401,7 @@ in
           format = " {icon} {format_source} ";
           format-source = "<span foreground='#83a598'> </span>{volume}%";
           format-source-muted = "<span foreground='#83a598'> </span>";
-          on-click = "${pkgs.pavucontrol}/bin/pavucontrol -t 4";
+          on-click = "${pkgs.foot}/bin/foot -e 'wiremix'";
           tooltip-format = "{format_source} {source_desc} // {source_volume}%";
           scroll-step = 5;
         };
@@ -681,6 +693,32 @@ in
           border: none;
           border-radius: 5px;
           margin-bottom: 2px;
+        }
+
+        #custom-cpu-advanced {
+          color: #ebdbb2;
+          font-family: JetBrainsMono Nerd Font;
+          font-size: 14px;
+          font-weight: bold;
+          border: none;
+          border-radius: 5px;
+          margin-bottom: 2px;
+        }
+
+        #custom-cpu-advanced.low {
+          color: #8ec07c;
+        }
+
+        #custom-cpu-advanced.normal {
+          color: #ebdbb2;
+        }
+
+        #custom-cpu-advanced.warning {
+          color: #fabd2f;
+        }
+
+        #custom-cpu-advanced.critical {
+          color: #fb4934;
         }
 
         #memory {
