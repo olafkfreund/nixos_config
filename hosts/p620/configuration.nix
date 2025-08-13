@@ -363,9 +363,9 @@ in
   # Enable encrypted API keys
 
   secrets.apiKeys = {
-    enable = false; # TEMPORARY: Disabled due to age decryption failures
-    enableEnvironmentVariables = false;
-    enableUserEnvironment = false;
+    enable = true; # Re-enabled after recreating secrets with current SSH keys
+    enableEnvironmentVariables = true;
+    enableUserEnvironment = true;
   };
 
   # Consolidated system configuration
