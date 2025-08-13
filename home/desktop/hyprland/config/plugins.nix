@@ -51,7 +51,7 @@ _: {
       }
 
       stack3d {
-        enable = true
+        enable = false
         transition_duration = 0.8
         transition_style = smooth_slide
         default_layout = grid
