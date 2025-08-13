@@ -126,7 +126,7 @@ with lib; let
     ++ optional true ./config/input.nix
     ++ optional true ./config/rules.nix
     ++ optional true ./config/autostart.nix
-    ++ optional (cfg.plugins.expo || cfg.plugins.hyprbars || cfg.plugins.stack3d) ./config/plugins.nix
+    ++ optional true ./config/plugins.nix  # Always include for debugging
     ++ optional true ./config/workspace.nix
     ++ optional (cfg.utilities.screenshots || cfg.utilities.clipboard) ./scripts/packages.nix;
 
