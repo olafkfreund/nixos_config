@@ -346,7 +346,7 @@ in
       "opacity 1.0 1.0,class:^(walker)$"
       "opaque,class:^(walker)$"
       "noshadow,class:^(walker)$"
-      
+
       # Additional Walker rules for different possible class names and force windowed mode
       "noblur,title:^(Walker).*"
       "float,title:^(Walker).*"
@@ -356,7 +356,7 @@ in
       "opacity 1.0 1.0,title:^(Walker).*"
       "opaque,title:^(Walker).*"
       "noshadow,title:^(Walker).*"
-      
+
     ];
   };
 }

@@ -429,7 +429,6 @@ in
   scripts.tempDashboard.enable = true;
 
   # Advanced CPU monitoring script for Waybar
-  scripts.cpuAdvanced.enable = true;
 
   # AI Ollama-specific configuration that goes beyond simple enabling
   ai.ollama = {

@@ -70,7 +70,7 @@ in
         "modules-right" = [
           # "clock"
           "network"
-          "custom/cpu-advanced"
+          "cpu"
           "memory"
           "temperature"
           "pulseaudio"

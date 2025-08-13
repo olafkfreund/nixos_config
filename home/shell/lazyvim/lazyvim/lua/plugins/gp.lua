@@ -106,7 +106,7 @@ return {
 
           require("which-key").register({
             ["<C-g>"] = {
-              name = "GPT", 
+              name = "GPT",
               c = { "<cmd>GpChatNew<cr>", "New Chat" },
               t = { "<cmd>GpChatToggle<cr>", "Toggle Chat" },
               f = { "<cmd>GpChatFinder<cr>", "Chat Finder" },
