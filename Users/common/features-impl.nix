@@ -52,7 +52,7 @@ in
         rofi.enable = cfg.desktop.rofi;
         obsidian.enable = cfg.desktop.obsidian;
         remotedesktop.enable = cfg.desktop.remotedesktop;
-        walker.enable = cfg.desktop.walker;
+        # walker.enable = cfg.desktop.walker; # Temporarily disabled - walker input broken
         screenshots = {
           flameshot.enable = cfg.desktop.flameshot;
           kooha.enable = cfg.desktop.kooha;

@@ -4,7 +4,7 @@
     inputs.nix-colors.homeManagerModules.default
     inputs.ags.homeManagerModules.default
     inputs.spicetify-nix.homeManagerModules.default
-    inputs.walker.homeManagerModules.default
+    # inputs.walker.homeManagerModules.default # Temporarily disabled - broken commit
 
     # Internal modules
     ./base-home.nix

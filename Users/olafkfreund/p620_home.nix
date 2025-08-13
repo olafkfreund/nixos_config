@@ -59,7 +59,7 @@
       flameshot = true;
       kooha = true;
       remotedesktop = true;
-      walker = true;
+      walker = false; # Temporarily disabled - walker input broken
 
       # Communication and media
       obs = true;
