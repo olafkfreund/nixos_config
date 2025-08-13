@@ -363,9 +363,9 @@ in
   # Enable encrypted API keys
 
   secrets.apiKeys = {
-    enable = true;
-    enableEnvironmentVariables = true;
-    enableUserEnvironment = true;
+    enable = false; # TEMPORARY: Disabled due to age decryption failures
+    enableEnvironmentVariables = false;
+    enableUserEnvironment = false;
   };
 
   # Consolidated system configuration
