@@ -16,6 +16,7 @@ _: {
 
     # AI-powered development tools
     ./codex-cli.nix
+    ./claude-desktop
 
     # Core language support and tooling
     ./languages.nix
