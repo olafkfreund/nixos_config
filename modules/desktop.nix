@@ -8,6 +8,7 @@ _: {
     ./desktop/cloud-sync/default.nix
     ./desktop/vnc/default.nix
     ./desktop/gtk/default.nix
+    ./desktop/hyprland/hyprland-stack3d.nix
     ./fonts/fonts.nix
   ];
 }

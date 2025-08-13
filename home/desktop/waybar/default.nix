@@ -132,8 +132,8 @@ in
         "custom/ai-assistant" = {
           format = "<span foreground='#83a598'>󰜗</span>";
           tooltip = "AI Assistant - Left click: Claude Code | Right click: Gemini CLI";
-          on-click = "foot -e claude";
-          on-click-right = "foot -e gemini";
+          on-click = "google-chrome-stable --app=https://gemini.google.com";
+          on-click-right = "google-chrome-stable --app=https://chatgpt.com";
         };
 
         "idle_inhibitor" = {

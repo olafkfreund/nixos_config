@@ -40,26 +40,23 @@ in
   };
 
   config = mkIf cfg.enable {
-    assertions = [
-      {
-        assertion = config.features.desktop.hyprland.enable;
-        message = "Hyprland must be enabled to use Stack3D plugin";
-      }
-    ];
-
-    # Add the plugin to Hyprland
-    wayland.windowManager.hyprland.plugins = [
+    # Make the plugin package available to the system
+    # The actual plugin configuration is done in Home Manager
+    environment.systemPackages = [
       inputs.hyprland-stack3d.packages.${pkgs.system}.default
     ];
 
-    # Configure the plugin settings
-    wayland.windowManager.hyprland.settings.plugin.stack3d = {
-      enable = true;
-      transition_duration = cfg.transitionDuration;
-      transition_style = cfg.transitionStyle;
-      default_layout = cfg.defaultLayout;
-      enable_physics = cfg.enablePhysics;
-      perspective_strength = cfg.perspectiveStrength;
+    # Pass plugin configuration to Home Manager via specialArgs
+    home-manager.extraSpecialArgs = {
+      hyprlandStack3dPlugin = inputs.hyprland-stack3d.packages.${pkgs.system}.default;
+      hyprlandStack3dConfig = {
+        enable = true;
+        transition_duration = cfg.transitionDuration;
+        transition_style = cfg.transitionStyle;
+        default_layout = cfg.defaultLayout;
+        enable_physics = cfg.enablePhysics;
+        perspective_strength = cfg.perspectiveStrength;
+      };
     };
   };
 }
