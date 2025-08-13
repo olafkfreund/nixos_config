@@ -51,7 +51,8 @@ with lib; let
     plugins = {
       expo = false; # Workspace overview (disabled due to API compatibility issues)
       hyprbars = false; # Window titlebars (disabled due to API compatibility issues)
-      hyprfocus = false; # Focus indicators (disabled by default)
+      hyprfocus = true; # Focus indicators (needed for plugin configuration)
+      stack3d = true; # 3D stack animation plugin
     };
 
     # Utility features
@@ -125,7 +126,7 @@ with lib; let
     ++ optional true ./config/input.nix
     ++ optional true ./config/rules.nix
     ++ optional true ./config/autostart.nix
-    ++ optional (cfg.plugins.expo || cfg.plugins.hyprbars) ./config/plugins.nix
+    ++ optional (cfg.plugins.expo || cfg.plugins.hyprbars || cfg.plugins.stack3d) ./config/plugins.nix
     ++ optional true ./config/workspace.nix
     ++ optional (cfg.utilities.screenshots || cfg.utilities.clipboard) ./scripts/packages.nix;
 
@@ -190,7 +191,8 @@ with lib; let
     [ ]
     ++ optional cfg.plugins.expo pkgs.hyprlandPlugins.hyprexpo
     ++ optional cfg.plugins.hyprbars pkgs.hyprlandPlugins.hyprbars
-    ++ optional cfg.plugins.hyprfocus pkgs.hyprlandPlugins.hyprfocus;
+    ++ optional cfg.plugins.hyprfocus pkgs.hyprlandPlugins.hyprfocus
+    ++ optional cfg.plugins.stack3d inputs.hyprland-stack3d.packages.${pkgs.system}.default;
 in
 {
   imports = conditionalImports;

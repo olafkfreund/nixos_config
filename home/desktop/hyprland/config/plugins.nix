@@ -49,6 +49,15 @@ _: {
             out_speed = 1
         }
       }
+
+      stack3d {
+        enable = true
+        transition_duration = 0.8
+        transition_style = smooth_slide
+        default_layout = grid
+        enable_physics = true
+        perspective_strength = 1.0
+      }
     }
   '';
 }
