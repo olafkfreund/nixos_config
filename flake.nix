@@ -296,6 +296,9 @@
           claude-code = import ./home/development/claude-code {
             inherit (pkgs) lib buildNpmPackage fetchurl nodejs makeWrapper writeShellScriptBin;
           };
+          codex-cli = pkgs.callPackage ./home/development/codex-cli {
+            nodejs_22 = pkgs.nodejs_22;
+          };
           gemini-cli = pkgs.callPackage ./pkgs/gemini-cli { };
 
           # Live ISO images (temporarily disabled during flake restructuring)

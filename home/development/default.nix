@@ -14,6 +14,9 @@ _: {
     ./distrobox.nix
     ./nixd.nix
 
+    # AI-powered development tools
+    ./codex-cli.nix
+
     # Core language support and tooling
     ./languages.nix
 
