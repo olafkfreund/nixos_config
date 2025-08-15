@@ -11,14 +11,10 @@ in
     QT_QPA_PLATFORMTHEME = lib.mkForce "qt5ct";
   };
 
-  # Fix PATH ordering at systemd level (fixes sudo setuid issue)
-  # This ensures /run/wrappers/bin comes before /run/current-system/sw/bin
-  systemd.settings.Manager.DefaultEnvironment = [
-    "PATH=/run/wrappers/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin"
+  # Create a custom sudo wrapper that points to the setuid wrapper
+  environment.systemPackages = [
+    (pkgs.writeShellScriptBin "sudo" ''
+      exec /run/wrappers/bin/sudo "$@"
+    '')
   ];
-
-  # Also create environment.d file for system-wide PATH fix
-  environment.etc."environment.d/99-sudo-path-fix.conf".text = ''
-    PATH=/run/wrappers/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin
-  '';
 }
