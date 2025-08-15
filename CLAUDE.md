@@ -1641,3 +1641,5 @@ When asked to work on this codebase:
 - Product-specific files in `.agent-os/product/` override any global standards
 - User's specific instructions override (or amend) instructions found in `.agent-os/specs/...`
 - Always adhere to established patterns, code style, and best practices documented above.
+
+- "the home manager is install as module in flake.nix do not use the home-manager switch command"

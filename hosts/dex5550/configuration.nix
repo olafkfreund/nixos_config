@@ -18,6 +18,7 @@ in
     ./nixos/i18n.nix
     ./nixos/n8n.nix
     # ./nixos/loki.nix  # Temporarily commented for testing
+    ../common/nixos/envvar.nix
 
     # DEX5550-specific additional modules
     ../../modules/virtualization.nix

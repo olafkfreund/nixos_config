@@ -25,6 +25,10 @@
     nmap
     ipcalc
 
+    # Development build tools
+    pkg-config
+    gtk4-layer-shell
+
     # System monitoring
     htop
     btop

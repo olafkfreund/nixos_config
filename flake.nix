@@ -87,7 +87,6 @@
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
     # walker.url = "github:abenz1267/walker"; # Temporarily disabled - broken commit
-    hyprland-stack3d.url = "github:olafkfreund/3Dstack-hyrpland";
     zjstatus.url = "github:dj95/zjstatus";
     ags.url = "github:Aylur/ags";
 
@@ -121,7 +120,6 @@
     , stylix
     , nix-index-database
     , zjstatus
-    , hyprland-stack3d
     , ...
     } @ inputs:
     let

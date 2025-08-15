@@ -140,6 +140,12 @@ with lib; {
       # Note: Removed zsh-f-sy-h as it conflicts with built-in syntax highlighting
     ];
 
+    # Fix sudo PATH issue with shell alias
+    shellAliases = {
+      sudo = "/run/wrappers/bin/sudo";
+    };
+
+
     # Enhanced initialization with performance optimizations
     initContent = ''
       # Load completions efficiently
@@ -157,6 +163,7 @@ with lib; {
 
       # Safe sourcing of external configs
       [[ -f ~/.openai.sh ]] && source ~/.openai.sh
+
 
       # Enhanced history management
       export HISTSIZE=50000

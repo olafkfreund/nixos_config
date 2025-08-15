@@ -52,7 +52,7 @@ with lib; let
       expo = false; # Workspace overview (disabled due to API compatibility issues)
       hyprbars = false; # Window titlebars (disabled due to API compatibility issues)
       hyprfocus = true; # Focus indicators (needed for plugin configuration)
-      stack3d = true; # 3D stack animation plugin
+      stack3d = false; # 3D stack animation plugin (disabled - causing crashes)
     };
 
     # Utility features
@@ -191,8 +191,7 @@ with lib; let
     [ ]
     ++ optional cfg.plugins.expo pkgs.hyprlandPlugins.hyprexpo
     ++ optional cfg.plugins.hyprbars pkgs.hyprlandPlugins.hyprbars
-    ++ optional cfg.plugins.hyprfocus pkgs.hyprlandPlugins.hyprfocus
-    ++ optional cfg.plugins.stack3d inputs.hyprland-stack3d.packages.${pkgs.system}.default;
+    ++ optional cfg.plugins.hyprfocus pkgs.hyprlandPlugins.hyprfocus;
 in
 {
   imports = conditionalImports;
