@@ -1,9 +1,9 @@
-{ config, lib, pkgs, ... }:
+{ ... }:
 
 {
   # Claude Desktop Application Entry
   # Provides a desktop launcher for Anthropic's Claude Desktop GUI application
-  
+
   xdg.desktopEntries.claude-desktop = {
     name = "Claude Desktop";
     comment = "Anthropic's Claude AI Desktop Application";
@@ -16,7 +16,7 @@
 
   # Ensure claude-desktop is available in PATH
   # This is typically provided by the system configuration
-  home.sessionPath = [ 
-    "/run/current-system/sw/bin" 
+  home.sessionPath = [
+    "/run/current-system/sw/bin"
   ];
 }

@@ -3,7 +3,8 @@
 , nixpkgs
 ,
 }:
-with lib; rec {
+with lib;
+let
   # Create a system-specific package set with our overlays
   mkPkgs = system: overlays:
     import nixpkgs {
@@ -20,6 +21,10 @@ with lib; rec {
         ];
       };
     };
+in
+{
+  # Export mkPkgs function
+  inherit mkPkgs;
 
   # Helper to create shell environments for all systems
   mkShells =
