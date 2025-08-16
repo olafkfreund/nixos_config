@@ -392,14 +392,218 @@ The repository includes a comprehensive live USB installer system for automated 
 6. **Secrets** must be created through the management script, never hardcoded
 7. **MODULAR ARCHITECTURE**: All new services MUST be created in their own configuration files within `modules/` directory
 
-### ❌ **DON'T - Avoid These Anti-Patterns**
+### ❌ **DON'T - Critical NixOS Anti-Patterns to Avoid**
 
-1. **Configuration Copy-Paste**: Never copy entire configurations between hosts. Always identify what can be shared.
-2. **Inline Package Lists**: Don't define the same packages in multiple places. Use feature modules.
-3. **Repeated Service Configurations**: Don't recreate the same service settings everywhere. Define once in modules, customize per host.
-4. **Direct Service Configuration**: Never add `services.myservice = { ... }` directly in `hosts/*/configuration.nix`
-5. **Hardcoded Values**: Use variables and functions instead of repeating the same hardcoded values.
-6. **Single-Use Modules**: Don't create modules used by only one host. Keep host-specific configs in the host directory.
+#### **1. The `mkIf true` Anti-Pattern**
+
+```nix
+# ❌ WRONG - Unnecessary abstraction
+services.myservice.enable = mkIf cfg.enable true;
+light.enable = mkIf (cfg.profile == "laptop") true;
+
+# ✅ CORRECT - Direct assignment
+services.myservice.enable = cfg.enable;
+light.enable = cfg.profile == "laptop";
+```
+
+**Why this is wrong**: The NixOS module system automatically ignores disabled services. `mkIf condition true` adds evaluation overhead for no benefit. Trust the module system to handle enablement correctly.
+
+#### **2. Nix Language Anti-Patterns**
+
+**Excessive `with` Usage**
+
+```nix
+# ❌ WRONG - Unclear variable origins
+with (import <nixpkgs> {});
+with lib;
+with stdenv;
+buildInputs = [ curl jq ];  # Where do these come from?
+
+# ✅ CORRECT - Explicit imports
+let pkgs = import <nixpkgs> {}; in
+buildInputs = with pkgs; [ curl jq ];  # Limited, clear scope
+```
+
+**Dangerous `rec` Usage**
+
+```nix
+# ❌ WRONG - Infinite recursion risk
+rec {
+  a = 1;
+  b = let a = a + 1; in a;  # Infinite recursion!
+}
+
+# ✅ CORRECT - Explicit self-reference
+let
+  attrset = { a = 1; b = attrset.a + 1; };
+in attrset
+```
+
+**Import From Derivation (IFD)**
+
+```nix
+# ❌ WRONG - Blocks evaluation
+let configValue = builtins.readFile generatedConfig;  # Forces build!
+
+# ✅ CORRECT - Keep evaluation and building separate
+pkgs.runCommand "app-config" { inherit generatedConfig; } ''
+  cp $generatedConfig $out
+''
+```
+
+#### **3. Security Anti-Patterns**
+
+**Reading Secrets During Evaluation**
+
+```nix
+# ❌ WRONG - Exposes password in store
+services.myservice.password = builtins.readFile "/secrets/password";
+
+# ✅ CORRECT - Reference paths for runtime loading
+services.myservice.passwordFile = "/secrets/password";
+# OR use proper secret management (agenix)
+```
+
+**Running Services as Root Unnecessarily**
+
+```nix
+# ❌ WRONG - Service runs as root
+systemd.services.myservice.serviceConfig.ExecStart = "${pkgs.myapp}/bin/myapp";
+
+# ✅ CORRECT - Dedicated user with hardening
+systemd.services.myservice.serviceConfig = {
+  User = "myservice";
+  DynamicUser = true;
+  PrivateTmp = true;
+  ProtectSystem = "strict";
+  NoNewPrivileges = true;
+};
+```
+
+#### **4. Package Management Anti-Patterns**
+
+**Using `nix-env` for System Packages**
+
+```bash
+# ❌ WRONG - Breaks declarative configuration
+nix-env -i firefox vim git
+
+# ✅ CORRECT - Declarative in configuration.nix
+environment.systemPackages = with pkgs; [ firefox vim git ];
+```
+
+**Misusing `environment.systemPackages`**
+
+```nix
+# ❌ WRONG - Everything system-wide
+environment.systemPackages = with pkgs; [ firefox vscode spotify ];
+
+# ✅ CORRECT - Proper separation
+environment.systemPackages = with pkgs; [ wget curl git vim ];  # System essentials
+users.users.alice.packages = with pkgs; [ firefox vscode spotify ];  # User-specific
+```
+
+#### **5. Development Environment Anti-Patterns**
+
+**Everything in flake.nix**
+
+```nix
+# ❌ WRONG - Unmaintainable monolith
+outputs = { nixpkgs }: {
+  packages.x86_64-linux.default = nixpkgs.legacyPackages.x86_64-linux.stdenv.mkDerivation {
+    # 100+ lines of derivation code
+  };
+};
+
+# ✅ CORRECT - Modular structure
+outputs = { nixpkgs }: {
+  packages.x86_64-linux.default =
+    nixpkgs.legacyPackages.x86_64-linux.callPackage ./package.nix { };
+};
+```
+
+#### **6. Performance Anti-Patterns**
+
+**Never Running Garbage Collection**
+
+```nix
+# ❌ WRONG - Store grows unbounded (100GB+)
+
+# ✅ CORRECT - Automated management
+nix.gc = {
+  automatic = true;
+  dates = "weekly";
+  options = "--delete-older-than 30d";
+};
+```
+
+#### **7. Infrastructure-Specific Anti-Patterns**
+
+- **Direct Service Configuration**: Never add `services.myservice = { ... }` directly in `hosts/*/configuration.nix`
+- **Monolithic Configuration**: Don't put everything in one large configuration.nix file
+- **Magic Auto-Discovery**: Avoid complex readDir or auto-import logic that hides behavior
+- **Configuration Copy-Paste & Duplication**: Extract common functionality instead of repeating it
+- **Poor Firewall Configuration**: Don't disable firewall or open unnecessary ports
+- **Unsafe System Updates**: Always test before applying to production
+
+### ✅ **Required Patterns for NixOS**
+
+#### **1. Always Use Explicit Imports**
+
+- List all module imports explicitly in a clear list
+- Avoid auto-discovery mechanisms that hide behavior
+- Make dependencies and load order obvious
+- Enable easy addition/removal of modules
+
+#### **2. Trust the NixOS Module System**
+
+- Don't wrap functionality that already works correctly
+- Use direct boolean assignments for service enablement
+- Let the type system and module evaluation do their job
+- The module system handles disabled services properly
+
+#### **3. Extract Common Functionality Properly**
+
+- Use shared variables for truly repeated data
+- Create functions only when they add real abstraction value
+- Prefer composition over unnecessary wrapper functions
+- Extract at the right level (don't over-abstract)
+
+### 🔧 **Code Review Checklist**
+
+Before submitting any NixOS configuration changes, verify:
+
+**Language & Syntax:**
+
+- [ ] **No `mkIf condition true` patterns** - use direct assignment instead
+- [ ] **URLs are quoted** - no bare URLs (deprecated since RFC 45)
+- [ ] **No excessive `with` usage** - explicit imports for clarity
+- [ ] **Using `inherit` where appropriate** - avoid manual assignment repetition
+- [ ] **Minimal `rec` usage** - avoid infinite recursion risks
+- [ ] **No Import From Derivation (IFD)** - keep evaluation and build separate
+
+**Security & Safety:**
+
+- [ ] **Secrets not read during evaluation** - use runtime loading or agenix
+- [ ] **Services run with minimal privileges** - dedicated users, not root
+- [ ] **Firewall enabled with minimal ports** - only necessary ports open
+- [ ] **No `nix-env` for system packages** - use declarative configuration
+
+**Architecture & Organization:**
+
+- [ ] **No magic auto-discovery mechanisms** - use explicit imports
+- [ ] **All imports are explicit and clear** - avoid hidden module loading
+- [ ] **Modular configuration structure** - no monolithic files
+- [ ] **Proper package separation** - system vs user packages
+- [ ] **Common functionality is properly extracted** - eliminate duplication
+- [ ] **Functions add real value** - avoid trivial wrappers
+
+**Performance & Maintenance:**
+
+- [ ] **Garbage collection configured** - prevent unbounded store growth
+- [ ] **Binary caches properly configured** - correct public keys
+- [ ] **Safe update procedures** - test before production deployment
+- [ ] **Configuration follows NixOS community patterns** - check nixpkgs for examples
 
 ### 🔧 **Code Deduplication Workflow**
 
