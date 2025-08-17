@@ -4,7 +4,7 @@
 , ...
 }:
 let
-  vars = import ./variables.nix { inherit lib; };
+  vars = import ./variables.nix { };
 in
 {
   imports = [

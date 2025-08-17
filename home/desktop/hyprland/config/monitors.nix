@@ -1,9 +1,9 @@
 # Hyprland Monitor Configuration
 # Host-specific monitor setup using variables from host configuration
-{ host, lib, ... }:
+{ host, ... }:
 let
   inherit
-    (import ../../../../hosts/${host}/variables.nix { inherit lib; })
+    (import ../../../../hosts/${host}/variables.nix { })
     laptop_monitor
     external_monitor
     ;

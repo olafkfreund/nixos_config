@@ -9,7 +9,7 @@ with lib; let
   # Import host-specific variables if available
   hostVars =
     if builtins.pathExists ../../../hosts/${host}/variables.nix
-    then import ../../../hosts/${host}/variables.nix { inherit lib; }
+    then import ../../../hosts/${host}/variables.nix { }
     else { };
 
   # Terminal feature flags

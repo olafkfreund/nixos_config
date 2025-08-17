@@ -5,7 +5,7 @@
 }:
 with lib; let
   cfg = config.monitoring;
-  vars = import ../../hosts/${config.networking.hostName}/variables.nix { inherit lib; };
+  vars = import ../../hosts/${config.networking.hostName}/variables.nix { };
   hasNvidiaGpu = vars.gpu == "nvidia";
   isMonitoringServer = cfg.mode == "server" || cfg.mode == "standalone";
 in

@@ -1,6 +1,6 @@
-{ lib, ... }:
+{ ... }:
 let
-  vars = import ../variables.nix { inherit lib; };
+  vars = import ../variables.nix { };
 in
 {
   environment.sessionVariables = vars.environmentVariables;

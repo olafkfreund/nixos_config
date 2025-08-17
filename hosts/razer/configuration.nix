@@ -6,7 +6,7 @@
 , ...
 }:
 let
-  vars = import ./variables.nix { inherit lib; };
+  vars = import ./variables.nix { };
 in
 {
   # Use laptop template and add Razer-specific modules

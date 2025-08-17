@@ -6,7 +6,7 @@
 , ...
 }:
 let
-  vars = import ./variables.nix { inherit lib; };
+  vars = import ./variables.nix { };
 in
 {
   # Use workstation template and add P510-specific modules
