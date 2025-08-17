@@ -58,7 +58,7 @@ return {
       { "<leader>ce", function() require("claude-code").explain_selection() end, desc = "Explain selected code", mode = "v" },
       { "<leader>cf", function() require("claude-code").fix_file() end, desc = "Fix current file" },
       { "<leader>cr", function() require("claude-code").review_changes() end, desc = "Review git changes" },
-      
+
       -- Register the group using new which-key format
       { "<leader>c", group = "Claude Code" },
     },

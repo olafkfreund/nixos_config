@@ -2,7 +2,6 @@
 # This file coordinates all module imports and prevents conflicts
 { config
 , lib
-, pkgs
 , ...
 }:
 with lib; {
@@ -53,7 +52,7 @@ with lib; {
     warnings =
       optional (config.nixpkgs.config.allowUnfree or false && config.nixpkgs.config.allowInsecure or false)
         "Both allowUnfree and allowInsecure are globally enabled. Consider using targeted package permissions instead."
-      ++ optional (builtins.length (attrNames (filterAttrs (n: v: v.enable or false && hasAttr "mkForce" (attrNames v)) config.services)) > 0)
+      ++ optional (builtins.length (attrNames (filterAttrs (_n: v: v.enable or false && hasAttr "mkForce" (attrNames v)) config.services)) > 0)
         "Some services are using mkForce. This may indicate configuration conflicts.";
   };
 

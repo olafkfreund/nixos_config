@@ -166,9 +166,7 @@ let
   # Host-specific live configurations
   hostSpecificConfigs = {
     p620 =
-      { config
-      , lib
-      , ...
+      { ...
       }: {
         # AMD-specific drivers and tools
         boot.kernelModules = [ "amdgpu" ];
@@ -180,9 +178,7 @@ let
       };
 
     razer =
-      { config
-      , lib
-      , ...
+      { ...
       }: {
         # Intel/NVIDIA hybrid graphics
         boot.kernelModules = [ "i915" "nvidia" ];
@@ -191,9 +187,7 @@ let
       };
 
     p510 =
-      { config
-      , lib
-      , ...
+      { ...
       }: {
         # Intel Xeon with NVIDIA
         boot.kernelModules = [ "nvidia" ];
@@ -201,9 +195,7 @@ let
       };
 
     dex5550 =
-      { config
-      , lib
-      , ...
+      { ...
       }: {
         # Intel integrated graphics
         boot.kernelModules = [ "i915" ];
@@ -211,9 +203,7 @@ let
       };
 
     samsung =
-      { config
-      , lib
-      , ...
+      { ...
       }: {
         # Intel integrated graphics (laptop)
         boot.kernelModules = [ "i915" ];

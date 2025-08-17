@@ -1,7 +1,6 @@
-{
-  pkgs,
-  config,
-  ...
+{ pkgs
+, config
+, ...
 }: {
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -17,8 +16,8 @@
   # This is for OBS Virtual Cam Support - v4l2loopback setup
   # boot.kernelPackages = pkgs.linuxPackages_default;
   # boot.kernelModules = ["v4l2loopback"];
-  boot.initrd.kernelModules = ["amdgpu"];
-  boot.blacklistedKernelModules = ["nvidia" "nouveau"];
+  boot.initrd.kernelModules = [ "amdgpu" ];
+  boot.blacklistedKernelModules = [ "nvidia" "nouveau" ];
   boot.kernelParams = [
     "amdgpu.gpu_recovery=1"
     "amd_iommu=on"

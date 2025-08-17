@@ -1,4 +1,4 @@
-{ lib }:
+{ }:
 let
   # Import shared variables and Intel hardware profile
   sharedVars = import ../common/shared-variables.nix;

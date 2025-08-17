@@ -104,53 +104,56 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Core packages
-    environment.systemPackages = with pkgs;
-      [
-        cfg.package
-      ]
-      # Language Server Protocol
-      ++ optionals cfg.enableLSP [
-        # TOOL_NAME-lsp
-      ]
-      # Debugger support
-      ++ optionals cfg.enableDebugger [
-        # TOOL_NAME-debugger
-      ]
-      # Formatter
-      ++ optionals cfg.enableFormatter [
-        # TOOL_NAME-formatter
-      ]
-      # Linter
-      ++ optionals cfg.enableLinter [
-        # TOOL_NAME-linter
-      ]
-      # Project templates
-      ++ optionals cfg.enableProjectTemplates [
-        # TOOL_NAME-templates
-        # cookiecutter
-      ]
-      # Additional packages
-      ++ cfg.extraPackages;
+    # Environment configuration
+    environment = {
+      # Core packages
+      systemPackages = with pkgs;
+        [
+          cfg.package
+        ]
+        # Language Server Protocol
+        ++ optionals cfg.enableLSP [
+          # TOOL_NAME-lsp
+        ]
+        # Debugger support
+        ++ optionals cfg.enableDebugger [
+          # TOOL_NAME-debugger
+        ]
+        # Formatter
+        ++ optionals cfg.enableFormatter [
+          # TOOL_NAME-formatter
+        ]
+        # Linter
+        ++ optionals cfg.enableLinter [
+          # TOOL_NAME-linter
+        ]
+        # Project templates
+        ++ optionals cfg.enableProjectTemplates [
+          # TOOL_NAME-templates
+          # cookiecutter
+        ]
+        # Additional packages
+        ++ cfg.extraPackages;
 
-    # Environment variables
-    environment.variables =
-      {
-        # TOOL_NAME_HOME = "/etc/TOOL_NAME";
-        # TOOL_NAME_CONFIG = "/etc/TOOL_NAME/config";
-      }
-      // cfg.globalConfig;
+      # Environment variables
+      variables =
+        {
+          # TOOL_NAME_HOME = "/etc/TOOL_NAME";
+          # TOOL_NAME_CONFIG = "/etc/TOOL_NAME/config";
+        }
+        // cfg.globalConfig;
 
-    # Shell aliases and functions
-    environment.shellAliases = mkIf cfg.enableShellIntegration {
-      # Common TOOL_NAME aliases
-      # TOOL_alias = "TOOL_NAME command";
-    };
+      # Shell aliases and functions
+      shellAliases = mkIf cfg.enableShellIntegration {
+        # Common TOOL_NAME aliases
+        # TOOL_alias = "TOOL_NAME command";
+      };
 
-    # Global configuration file
-    environment.etc."TOOL_NAME/config" = mkIf (cfg.globalConfig != { }) {
-      text = concatStringsSep "\n" (mapAttrsToList (name: value: "${name}=${value}") cfg.globalConfig);
-      mode = "0644";
+      # Global configuration file
+      etc."TOOL_NAME/config" = mkIf (cfg.globalConfig != { }) {
+        text = concatStringsSep "\n" (mapAttrsToList (name: value: "${name}=${value}") cfg.globalConfig);
+        mode = "0644";
+      };
     };
 
     # Development environment setup

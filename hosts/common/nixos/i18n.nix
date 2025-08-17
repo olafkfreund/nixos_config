@@ -1,6 +1,6 @@
 # Consolidated i18n.nix - used by all hosts
 # Internationalization and localization settings from shared variables
-{ lib, pkgs, ... }:
+{ pkgs, ... }:
 let
   # Import shared variables directly
   sharedVars = import ../shared-variables.nix;
