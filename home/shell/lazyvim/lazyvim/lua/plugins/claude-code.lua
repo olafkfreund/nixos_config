@@ -49,45 +49,19 @@ return {
 
     config = function(_, opts)
       require("claude-code").setup(opts)
-
-      -- Additional keymaps for better integration
-      local keymap = vim.keymap.set
-
-      -- Quick access keymaps
-      keymap("n", "<leader>cc", function()
-        require("claude-code").toggle()
-      end, { desc = "Toggle Claude Code" })
-
-      keymap("n", "<leader>cq", function()
-        require("claude-code").ask()
-      end, { desc = "Quick ask Claude" })
-
-      keymap("v", "<leader>ce", function()
-        require("claude-code").explain_selection()
-      end, { desc = "Explain selected code" })
-
-      keymap("n", "<leader>cf", function()
-        require("claude-code").fix_file()
-      end, { desc = "Fix current file" })
-
-      keymap("n", "<leader>cr", function()
-        require("claude-code").review_changes()
-      end, { desc = "Review git changes" })
-
-      -- Integration with existing LazyVim which-key setup
-      if pcall(require, "which-key") then
-        require("which-key").register({
-          ["<leader>c"] = {
-            name = "Claude Code",
-            c = { function() require("claude-code").toggle() end, "Toggle Claude Code" },
-            q = { function() require("claude-code").ask() end, "Quick ask Claude" },
-            e = { function() require("claude-code").explain_selection() end, "Explain selection" },
-            f = { function() require("claude-code").fix_file() end, "Fix current file" },
-            r = { function() require("claude-code").review_changes() end, "Review changes" },
-          }
-        }, { mode = "n" })
-      end
     end,
+
+    -- Define keymaps using LazyVim's keys spec
+    keys = {
+      { "<leader>cc", function() require("claude-code").toggle() end, desc = "Toggle Claude Code" },
+      { "<leader>cq", function() require("claude-code").ask() end, desc = "Quick ask Claude" },
+      { "<leader>ce", function() require("claude-code").explain_selection() end, desc = "Explain selected code", mode = "v" },
+      { "<leader>cf", function() require("claude-code").fix_file() end, desc = "Fix current file" },
+      { "<leader>cr", function() require("claude-code").review_changes() end, desc = "Review git changes" },
+      
+      -- Register the group using new which-key format
+      { "<leader>c", group = "Claude Code" },
+    },
 
     -- Commands for Claude Code integration
     cmd = {

@@ -11,6 +11,7 @@ This document serves as a comprehensive reference for identifying and avoiding a
 ### 1.1 Syntax and Type Anti-patterns
 
 #### **Unquoted URLs (Deprecated)**
+
 **Problem:** Using bare URLs without quotes is deprecated and causes parsing ambiguities.
 
 ```nix
@@ -30,6 +31,7 @@ fetchurl {
 **Why problematic:** RFC 45 deprecated unquoted URLs due to parsing ambiguities and static analysis difficulties.
 
 #### **Path Division Confusion**
+
 **Problem:** Nix interprets `6/3` as a path, not division.
 
 ```nix
@@ -43,6 +45,7 @@ result = builtins.div 6 3;
 ```
 
 #### **Type Coercion in String Interpolation**
+
 **Problem:** Not all types can be directly interpolated into strings.
 
 ```nix
@@ -68,6 +71,7 @@ in {
 ### 1.2 Scoping and Variable Anti-patterns
 
 #### **Excessive `with` Usage**
+
 **Problem:** `with` at top level makes code hard to analyze and debug.
 
 ```nix
@@ -95,6 +99,7 @@ stdenv.mkDerivation {
 **Why problematic:** Static analysis tools can't determine variable sources, makes refactoring difficult, and creates ambiguity for newcomers.
 
 #### **Manual Assignment Instead of `inherit`**
+
 **Problem:** Verbose, repetitive, and error-prone.
 
 ```nix
@@ -118,6 +123,7 @@ in {
 ### 1.3 Dangerous Builtins Usage
 
 #### **Import From Derivation (IFD)**
+
 **Problem:** Forces sequential evaluation, blocking the evaluator.
 
 ```nix
@@ -144,6 +150,7 @@ pkgs.runCommand "app-config" { inherit generatedConfig; } ''
 **Performance impact:** Can increase evaluation time from seconds to hours for complex projects.
 
 #### **Reading Secrets During Evaluation**
+
 **Problem:** Secrets get copied to the world-readable Nix store.
 
 ```nix
@@ -165,6 +172,7 @@ services.myservice.passwordFile = config.age.secrets.myservice-password.path;
 ### 1.4 `rec` and `let` Anti-patterns
 
 #### **Dangerous `rec` Usage**
+
 **Problem:** Easy to create infinite recursion with shadowing.
 
 ```nix
@@ -184,6 +192,7 @@ in attrset
 ```
 
 #### **Empty or Collapsible `let` Expressions**
+
 **Problem:** Adds unnecessary visual clutter.
 
 ```nix
@@ -206,6 +215,7 @@ in {
 ### 2.1 Package Management Anti-patterns
 
 #### **Using `nix-env` for System Packages**
+
 **Problem:** Breaks declarative configuration and reproducibility.
 
 ```bash
@@ -225,6 +235,7 @@ environment.systemPackages = with pkgs; [
 **Why problematic:** Packages installed via `nix-env` aren't tracked in configuration, persist across rebuilds unexpectedly, and make rollbacks incomplete.
 
 #### **Misusing `environment.systemPackages`**
+
 **Problem:** Installing user-specific packages system-wide.
 
 ```nix
@@ -248,6 +259,7 @@ users.users.alice.packages = with pkgs; [
 ### 2.2 Security Anti-patterns
 
 #### **Running Services as Root Unnecessarily**
+
 **Problem:** Violates principle of least privilege.
 
 ```nix
@@ -271,18 +283,18 @@ systemd.services.myservice = {
     ExecStart = "${pkgs.myapp}/bin/myapp";
     User = "myservice";
     Group = "myservice";
-    
+
     # Process isolation
     DynamicUser = true;
     PrivateTmp = true;
     ProtectSystem = "strict";
     ProtectHome = true;
-    
+
     # Capabilities restrictions
     NoNewPrivileges = true;
     ProtectKernelTunables = true;
     ProtectKernelModules = true;
-    
+
     # Memory protections
     MemoryDenyWriteExecute = true;
     RestrictRealtime = true;
@@ -292,6 +304,7 @@ systemd.services.myservice = {
 ```
 
 #### **Poor Firewall Configuration**
+
 **Problem:** Disabling firewall or opening unnecessary ports.
 
 ```nix
@@ -304,7 +317,7 @@ networking.firewall.allowedTCPPorts = [ 1-65535 ];
 networking.firewall = {
   enable = true;
   allowedTCPPorts = [ 80 443 ];  # Only what's needed
-  
+
   # Interface-specific rules
   interfaces."enp3s0" = {
     allowedTCPPorts = [ 5432 ];  # PostgreSQL on internal only
@@ -315,6 +328,7 @@ networking.firewall = {
 ### 2.3 Module Organization Anti-patterns
 
 #### **Monolithic Configuration File**
+
 **Problem:** Everything in one large `configuration.nix`.
 
 ```nix
@@ -348,6 +362,7 @@ networking.firewall = {
 ### 3.1 Overlay Anti-patterns
 
 #### **Incorrect `final` vs `prev` Usage**
+
 **Problem:** Causes infinite recursion or broken dependencies.
 
 ```nix
@@ -367,6 +382,7 @@ final: prev: {
 ```
 
 #### **Using `rec` in Overlays**
+
 **Problem:** Breaks composability and prevents later overrides.
 
 ```nix
@@ -386,6 +402,7 @@ final: prev: {
 ### 3.2 Derivation Anti-patterns
 
 #### **Impure Derivations**
+
 **Problem:** Accessing network or filesystem during build.
 
 ```nix
@@ -408,6 +425,7 @@ stdenv.mkDerivation {
 ```
 
 #### **Missing Phase Hooks**
+
 **Problem:** Breaking extensibility by not calling hooks.
 
 ```nix
@@ -427,6 +445,7 @@ installPhase = ''
 ```
 
 #### **Wrong Dependency Types**
+
 **Problem:** Confusing build-time and runtime dependencies.
 
 ```nix
@@ -450,6 +469,7 @@ stdenv.mkDerivation {
 ### 4.1 Flake Anti-patterns
 
 #### **Everything in flake.nix**
+
 **Problem:** Creates unmaintainable rightward drift.
 
 ```nix
@@ -465,13 +485,14 @@ stdenv.mkDerivation {
 # ✅ GOOD - Modular structure
 {
   outputs = { self, nixpkgs }: {
-    packages.x86_64-linux.default = 
+    packages.x86_64-linux.default =
       nixpkgs.legacyPackages.x86_64-linux.callPackage ./package.nix { };
   };
 }
 ```
 
 #### **Cross-compilation Incompatible Outputs**
+
 **Problem:** Hardcoding system prevents cross-compilation.
 
 ```nix
@@ -487,6 +508,7 @@ overlays.default = final: prev: {
 ### 4.2 Shell Environment Anti-patterns
 
 #### **Mixing Build and Runtime Dependencies**
+
 **Problem:** Wrong categorization breaks cross-compilation.
 
 ```nix
@@ -503,6 +525,7 @@ mkShell {
 ```
 
 #### **Blocking direnv Operations**
+
 **Problem:** Slow `.envrc` freezes shells and editors.
 
 ```bash
@@ -518,6 +541,7 @@ use flake  # With nix-direnv installed
 ### 4.3 CI/CD Anti-patterns
 
 #### **No Binary Cache Usage**
+
 **Problem:** Rebuilding everything from scratch.
 
 ```yaml
@@ -541,6 +565,7 @@ use flake  # With nix-direnv installed
 ### 5.1 Evaluation Performance
 
 #### **Import From Derivation (IFD)**
+
 **Problem:** Blocks parallel evaluation.
 
 ```nix
@@ -557,6 +582,7 @@ in
 **Impact:** Can increase evaluation from seconds to hours.
 
 #### **Excessive Thunk Creation**
+
 **Problem:** Memory usage and stack overflow risks.
 
 ```nix
@@ -575,6 +601,7 @@ in values
 ### 5.2 Store Management
 
 #### **Never Running Garbage Collection**
+
 **Problem:** Store grows unbounded (100GB+).
 
 ```nix
@@ -594,6 +621,7 @@ nix.optimise = {
 ```
 
 #### **Poor Binary Cache Configuration**
+
 **Problem:** Missing or misconfigured caches cause rebuilds.
 
 ```nix
@@ -619,6 +647,7 @@ nix.settings = {
 ### 5.3 Update Strategies
 
 #### **Unsafe System Updates**
+
 **Problem:** Direct production updates without testing.
 
 ```bash
@@ -639,6 +668,7 @@ nixos-rebuild switch      # Apply when confident
 ### 6.1 Integration Issues
 
 #### **Duplicate Package Management**
+
 **Problem:** Same packages in system and Home Manager.
 
 ```nix
@@ -655,6 +685,7 @@ home.packages = with pkgs; [ neovim git ];  # Conflict!
 ```
 
 #### **Missing stateVersion**
+
 **Problem:** Most common Home Manager error.
 
 ```nix
@@ -674,6 +705,7 @@ home.packages = with pkgs; [ neovim git ];  # Conflict!
 ### 6.2 Dotfile Management
 
 #### **Mixing Managed and Unmanaged Configs**
+
 **Problem:** Partial adoption creates conflicts.
 
 ```nix
@@ -690,11 +722,12 @@ programs.bash = {
 ```
 
 #### **Improper mkOutOfStoreSymlink Usage**
+
 **Problem:** Breaks flake purity.
 
 ```nix
 # ❌ BAD - Impure reference
-home.file.".vimrc".source = 
+home.file.".vimrc".source =
   config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dotfiles/.vimrc";
 
 # ✅ GOOD - Pure configuration
@@ -710,7 +743,9 @@ home.file.".vimrc".text = ''
 ## 7. Detection and Prevention Tools
 
 ### Language Linters
+
 - **statix**: Detects 20+ anti-patterns automatically
+
   ```bash
   statix check   # Find issues
   statix fix     # Auto-fix many problems
@@ -719,22 +754,27 @@ home.file.".vimrc".text = ''
 - **nixfmt/alejandra**: Enforce consistent formatting
 
 ### Package Tools
+
 - **nixpkgs-hammering**: Detects packaging anti-patterns
+
   ```bash
   nix run github:jtojnar/nixpkgs-hammering -- packagename
   ```
 
 - **nixpkgs-review**: Tests package changes
+
   ```bash
   nixpkgs-review pr 12345
   ```
 
 ### System Tools
+
 - **systemd-analyze security**: Audit service security
 - **lynis**: Comprehensive security auditing
 - **nixos-rebuild build-vm**: Safe testing environment
 
 ### Performance Tools
+
 - **NIX_SHOW_STATS=1**: Shows evaluation statistics
 - **nix path-info -S**: Check closure sizes
 - **nix-tree**: Visualize dependencies
@@ -744,6 +784,7 @@ home.file.".vimrc".text = ''
 ## 8. Quick Reference Checklist
 
 ### Language
+
 - [ ] URLs are quoted
 - [ ] No excessive `with` statements
 - [ ] Using `inherit` where appropriate
@@ -752,6 +793,7 @@ home.file.".vimrc".text = ''
 - [ ] Minimal `rec` usage
 
 ### System Configuration
+
 - [ ] No `nix-env` for system packages
 - [ ] Proper package separation (system vs user)
 - [ ] Services run with minimal privileges
@@ -759,6 +801,7 @@ home.file.".vimrc".text = ''
 - [ ] Modular configuration structure
 
 ### Packages & Overlays
+
 - [ ] Correct `final` vs `prev` usage
 - [ ] No `rec` in overlays
 - [ ] Pure derivations only
@@ -766,6 +809,7 @@ home.file.".vimrc".text = ''
 - [ ] Phase hooks included
 
 ### Development
+
 - [ ] Modular flake structure
 - [ ] Cross-compilation compatible
 - [ ] Fast direnv integration
@@ -773,6 +817,7 @@ home.file.".vimrc".text = ''
 - [ ] Language-specific tools included
 
 ### Performance
+
 - [ ] Garbage collection automated
 - [ ] Binary caches configured
 - [ ] Store optimization enabled
@@ -780,6 +825,7 @@ home.file.".vimrc".text = ''
 - [ ] No unnecessary IFD
 
 ### Home Manager
+
 - [ ] stateVersion set correctly
 - [ ] No duplicate packages
 - [ ] Gradual config migration

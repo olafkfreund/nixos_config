@@ -11,6 +11,7 @@ This document captures critical lessons learned from real community feedback abo
 ### **1. Nix Language Anti-Patterns**
 
 #### **Unquoted URLs (Deprecated)**
+
 ```nix
 # ❌ BAD - Unquoted URL
 fetchurl {
@@ -24,9 +25,11 @@ fetchurl {
   sha256 = "...";
 }
 ```
+
 **Why problematic:** RFC 45 deprecated unquoted URLs due to parsing ambiguities and static analysis difficulties.
 
 #### **Excessive `with` Usage**
+
 ```nix
 # ❌ BAD - Unclear variable origins
 with (import <nixpkgs> {});
@@ -41,9 +44,11 @@ let
 in
 buildInputs = with pkgs; [ curl jq ];  # Limited, clear scope
 ```
+
 **Why problematic:** Static analysis tools can't determine variable sources, makes refactoring difficult, and creates ambiguity for newcomers.
 
 #### **Dangerous `rec` Usage**
+
 ```nix
 # ❌ BAD - Infinite recursion risk
 rec {
@@ -58,6 +63,7 @@ in attrset
 ```
 
 #### **Import From Derivation (IFD)**
+
 ```nix
 # ❌ BAD - IFD blocks evaluation
 let
@@ -78,9 +84,11 @@ pkgs.runCommand "app-config" { inherit generatedConfig; } ''
   cp $generatedConfig $out
 ''
 ```
+
 **Performance impact:** Can increase evaluation time from seconds to hours for complex projects.
 
 #### **Reading Secrets During Evaluation**
+
 ```nix
 # ❌ BAD - Exposes password in store
 services.myservice = {
@@ -204,6 +212,7 @@ imports = [
 ### **4. Security Anti-Patterns**
 
 #### **Running Services as Root Unnecessarily**
+
 ```nix
 # ❌ BAD - Service runs as root by default
 systemd.services.myservice = {
@@ -225,13 +234,13 @@ systemd.services.myservice = {
     ExecStart = "${pkgs.myapp}/bin/myapp";
     User = "myservice";
     Group = "myservice";
-    
+
     # Process isolation
     DynamicUser = true;
     PrivateTmp = true;
     ProtectSystem = "strict";
     ProtectHome = true;
-    
+
     # Capabilities restrictions
     NoNewPrivileges = true;
     ProtectKernelTunables = true;
@@ -241,6 +250,7 @@ systemd.services.myservice = {
 ```
 
 #### **Poor Firewall Configuration**
+
 ```nix
 # ❌ BAD - Security nightmare
 networking.firewall.enable = false;
@@ -251,7 +261,7 @@ networking.firewall.allowedTCPPorts = [ 1-65535 ];
 networking.firewall = {
   enable = true;
   allowedTCPPorts = [ 80 443 ];  # Only what's needed
-  
+
   # Interface-specific rules
   interfaces."enp3s0" = {
     allowedTCPPorts = [ 5432 ];  # PostgreSQL on internal only
@@ -262,6 +272,7 @@ networking.firewall = {
 ### **5. Package Management Anti-Patterns**
 
 #### **Using `nix-env` for System Packages**
+
 ```bash
 # ❌ BAD - Imperative installation
 nix-env -i firefox vim git
@@ -275,9 +286,11 @@ environment.systemPackages = with pkgs; [
   git
 ];
 ```
+
 **Why problematic:** Packages installed via `nix-env` aren't tracked in configuration, persist across rebuilds unexpectedly, and make rollbacks incomplete.
 
 #### **Misusing `environment.systemPackages`**
+
 ```nix
 # ❌ BAD - Everything system-wide
 environment.systemPackages = with pkgs; [
@@ -297,6 +310,7 @@ users.users.alice.packages = with pkgs; [
 ```
 
 #### **Monolithic Configuration File**
+
 ```nix
 # ❌ BAD - 500+ line configuration.nix
 { config, pkgs, ... }: {
@@ -324,6 +338,7 @@ users.users.alice.packages = with pkgs; [
 ### **6. Performance Anti-Patterns**
 
 #### **Never Running Garbage Collection**
+
 ```nix
 # ❌ BAD - No automated cleanup
 
@@ -339,9 +354,11 @@ nix.optimise = {
   dates = [ "03:45" ];
 };
 ```
+
 **Problem:** Store grows unbounded (100GB+).
 
 #### **Poor Binary Cache Configuration**
+
 ```nix
 # ❌ BAD - Wrong public key
 nix.settings = {
@@ -363,6 +380,7 @@ nix.settings = {
 ```
 
 #### **Unsafe System Updates**
+
 ```bash
 # ❌ BAD - Risky
 nixos-rebuild switch --upgrade
@@ -377,6 +395,7 @@ nixos-rebuild switch      # Apply when confident
 ### **7. Home Manager Anti-Patterns**
 
 #### **Missing stateVersion**
+
 ```nix
 # ❌ BAD - No stateVersion
 {
@@ -392,6 +411,7 @@ nixos-rebuild switch      # Apply when confident
 ```
 
 #### **Duplicate Package Management**
+
 ```nix
 # ❌ BAD - Duplication
 # /etc/nixos/configuration.nix
@@ -571,6 +591,7 @@ The anti-pattern fixes in this repository resulted in:
 Before submitting any NixOS configuration changes, verify:
 
 ### **Language & Syntax:**
+
 - [ ] **No `mkIf condition true` patterns** - use direct assignment instead
 - [ ] **URLs are quoted** - no bare URLs (deprecated since RFC 45)
 - [ ] **No excessive `with` usage** - explicit imports for clarity
@@ -580,6 +601,7 @@ Before submitting any NixOS configuration changes, verify:
 - [ ] **Path division uses spacing** - `6 / 3` not `6/3`
 
 ### **Security & Safety:**
+
 - [ ] **Secrets not read during evaluation** - use runtime loading or agenix
 - [ ] **Services run with minimal privileges** - dedicated users, not root
 - [ ] **Firewall enabled with minimal ports** - only necessary ports open
@@ -587,6 +609,7 @@ Before submitting any NixOS configuration changes, verify:
 - [ ] **Proper systemd hardening** - DynamicUser, ProtectSystem, etc.
 
 ### **Architecture & Organization:**
+
 - [ ] **No magic auto-discovery mechanisms** - use explicit imports
 - [ ] **All imports are explicit and clear** - avoid hidden module loading
 - [ ] **Modular configuration structure** - no monolithic files
@@ -596,6 +619,7 @@ Before submitting any NixOS configuration changes, verify:
 - [ ] **No trivial function re-exports** - call library functions directly
 
 ### **Performance & Maintenance:**
+
 - [ ] **Garbage collection configured** - prevent unbounded store growth
 - [ ] **Binary caches properly configured** - correct public keys
 - [ ] **Store optimization enabled** - nix.optimise settings
@@ -603,18 +627,21 @@ Before submitting any NixOS configuration changes, verify:
 - [ ] **No blocking direnv operations** - <500ms execution time
 
 ### **Home Manager (if applicable):**
+
 - [ ] **stateVersion is set** - most common Home Manager error
 - [ ] **No duplicate package management** - clear system/user separation
 - [ ] **Gradual config migration** - avoid conflicts with existing dotfiles
 - [ ] **Pure configuration** - avoid mkOutOfStoreSymlink in flakes
 
 ### **Development Environment:**
+
 - [ ] **Modular flake structure** - no everything-in-flake.nix
 - [ ] **Cross-compilation compatible** - proper system handling
 - [ ] **Correct dependency categorization** - nativeBuildInputs vs buildInputs
 - [ ] **Phase hooks included** - runHook preInstall/postInstall
 
 ### **General Best Practices:**
+
 - [ ] **Configuration follows NixOS community patterns** - check nixpkgs for examples
 - [ ] **AI assistance is properly disclosed** (if applicable) - transparency in generated content
 - [ ] **Detection tools used** - statix check, nixpkgs-hammering when relevant

@@ -82,44 +82,31 @@ return {
       },
     })
   end,
-  init = function()
-    -- Setup keymaps after plugin loads
-    vim.api.nvim_create_autocmd("User", {
-      pattern = "LazyDone",
-      callback = function()
-        if pcall(require, "which-key") then
-          require("which-key").register({
-            ["<C-g>"] = {
-              name = "GPT",
-              c = { ":<C-u>'<,'>GpChatNew<cr>", "Visual Chat New" },
-              p = { ":<C-u>'<,'>GpChatPaste<cr>", "Visual Chat Paste" },
-              t = { ":<C-u>'<,'>GpChatToggle<cr>", "Visual Toggle Chat" },
-              r = { ":<C-u>'<,'>GpRewrite<cr>", "Visual Rewrite" },
-              a = { ":<C-u>'<,'>GpAppend<cr>", "Visual Append (after)" },
-              b = { ":<C-u>'<,'>GpPrepend<cr>", "Visual Prepend (before)" },
-              i = { ":<C-u>'<,'>GpImplement<cr>", "Implement selection" },
-              n = { "<cmd>GpNextAgent<cr>", "Next Agent" },
-              s = { "<cmd>GpStop<cr>", "GpStop" },
-              x = { ":<C-u>'<,'>GpContext<cr>", "Visual GpContext" },
-            },
-          }, { mode = "v" })
+  -- Define keymaps using LazyVim's keys spec with new which-key format
+  keys = {
+    -- Visual mode mappings
+    { "<C-g>", group = "GPT", mode = "v" },
+    { "<C-g>c", ":<C-u>'<,'>GpChatNew<cr>", desc = "Visual Chat New", mode = "v" },
+    { "<C-g>p", ":<C-u>'<,'>GpChatPaste<cr>", desc = "Visual Chat Paste", mode = "v" },
+    { "<C-g>t", ":<C-u>'<,'>GpChatToggle<cr>", desc = "Visual Toggle Chat", mode = "v" },
+    { "<C-g>r", ":<C-u>'<,'>GpRewrite<cr>", desc = "Visual Rewrite", mode = "v" },
+    { "<C-g>a", ":<C-u>'<,'>GpAppend<cr>", desc = "Visual Append (after)", mode = "v" },
+    { "<C-g>b", ":<C-u>'<,'>GpPrepend<cr>", desc = "Visual Prepend (before)", mode = "v" },
+    { "<C-g>i", ":<C-u>'<,'>GpImplement<cr>", desc = "Implement selection", mode = "v" },
+    { "<C-g>n", "<cmd>GpNextAgent<cr>", desc = "Next Agent", mode = "v" },
+    { "<C-g>s", "<cmd>GpStop<cr>", desc = "GpStop", mode = "v" },
+    { "<C-g>x", ":<C-u>'<,'>GpContext<cr>", desc = "Visual GpContext", mode = "v" },
 
-          require("which-key").register({
-            ["<C-g>"] = {
-              name = "GPT",
-              c = { "<cmd>GpChatNew<cr>", "New Chat" },
-              t = { "<cmd>GpChatToggle<cr>", "Toggle Chat" },
-              f = { "<cmd>GpChatFinder<cr>", "Chat Finder" },
-              r = { "<cmd>GpRewrite<cr>", "Inline Rewrite" },
-              a = { "<cmd>GpAppend<cr>", "Append (after)" },
-              b = { "<cmd>GpPrepend<cr>", "Prepend (before)" },
-              n = { "<cmd>GpNextAgent<cr>", "Next Agent" },
-              s = { "<cmd>GpStop<cr>", "GpStop" },
-              x = { "<cmd>GpContext<cr>", "Toggle GpContext" },
-            },
-          }, { mode = "n" })
-        end
-      end,
-    })
-  end,
+    -- Normal mode mappings
+    { "<C-g>", group = "GPT", mode = "n" },
+    { "<C-g>c", "<cmd>GpChatNew<cr>", desc = "New Chat", mode = "n" },
+    { "<C-g>t", "<cmd>GpChatToggle<cr>", desc = "Toggle Chat", mode = "n" },
+    { "<C-g>f", "<cmd>GpChatFinder<cr>", desc = "Chat Finder", mode = "n" },
+    { "<C-g>r", "<cmd>GpRewrite<cr>", desc = "Inline Rewrite", mode = "n" },
+    { "<C-g>a", "<cmd>GpAppend<cr>", desc = "Append (after)", mode = "n" },
+    { "<C-g>b", "<cmd>GpPrepend<cr>", desc = "Prepend (before)", mode = "n" },
+    { "<C-g>n", "<cmd>GpNextAgent<cr>", desc = "Next Agent", mode = "n" },
+    { "<C-g>s", "<cmd>GpStop<cr>", desc = "GpStop", mode = "n" },
+    { "<C-g>x", "<cmd>GpContext<cr>", desc = "Toggle GpContext", mode = "n" },
+  },
 }

@@ -1,41 +1,42 @@
-{ config
-, pkgs
-, lib
-, hostUsers
-, hostTypes
-, ...
-}:
-let
-  vars = import ./variables.nix { inherit lib; };
-in
 {
+  config,
+  pkgs,
+  lib,
+  hostUsers,
+  hostTypes,
+  ...
+}: let
+  vars = import ./variables.nix {inherit lib;};
+in {
   # Use workstation template and add P620-specific modules
-  imports = hostTypes.workstation.imports ++ [
-    # Hardware-specific imports
-    ./nixos/hardware-configuration.nix
-    ./nixos/screens.nix
-    ./nixos/power.nix
-    ./nixos/boot.nix
-    ./nixos/amd.nix
-    ./nixos/usb-power-fix.nix # Fix USB mouse freezing issues
-    ../common/nixos/i18n.nix
-    ../common/nixos/hosts.nix
-    ../common/nixos/envvar.nix
-    ./nixos/greetd.nix
-    ./nixos/cpu.nix
-    ./nixos/memory.nix
-    ./nixos/load.nix
-    ./themes/stylix.nix
+  imports =
+    hostTypes.workstation.imports
+    ++ [
+      # Hardware-specific imports
+      ./nixos/hardware-configuration.nix
+      ./nixos/screens.nix
+      ./nixos/power.nix
+      ./nixos/boot.nix
+      ./nixos/amd.nix
+      ./nixos/usb-power-fix.nix # Fix USB mouse freezing issues
+      ../common/nixos/i18n.nix
+      ../common/nixos/hosts.nix
+      ../common/nixos/envvar.nix
+      ./nixos/greetd.nix
+      ./nixos/cpu.nix
+      ./nixos/memory.nix
+      ./nixos/load.nix
+      ./themes/stylix.nix
 
-    # P620-specific additional modules
-    ../../modules/development/default.nix
-    ../common/hyprland.nix
-    ../../modules/security/secrets.nix
-    ../../modules/secrets/api-keys.nix
-    ../../modules/containers/docker.nix
-    ../../modules/scrcpy/default.nix
-    ../../modules/system/logging.nix
-  ];
+      # P620-specific additional modules
+      ../../modules/development/default.nix
+      ../common/hyprland.nix
+      ../../modules/security/secrets.nix
+      ../../modules/secrets/api-keys.nix
+      ../../modules/containers/docker.nix
+      ../../modules/scrcpy/default.nix
+      ../../modules/system/logging.nix
+    ];
   # Consolidated networking configuration
   networking = {
     # Set hostname from variables
@@ -85,7 +86,7 @@ in
 
       interHostOptimization = {
         enable = true;
-        hosts = [ "dex5550" "p510" "razer" ];
+        hosts = ["dex5550" "p510" "razer"];
         jumboFrames = false; # Keep disabled for compatibility
         routeOptimization = true;
       };
@@ -94,7 +95,7 @@ in
         enable = true;
         caching = true;
         parallelQueries = true;
-        customServers = [ "192.168.1.222" "1.1.1.1" ];
+        customServers = ["192.168.1.222" "1.1.1.1"];
       };
 
       monitoringOptimization = {
@@ -107,7 +108,7 @@ in
 
     # Firewall configuration for SSH
     firewall = {
-      allowedTCPPorts = [ 22 ]; # SSH port from hardening config
+      allowedTCPPorts = [22]; # SSH port from hardening config
 
       # Extra rules for SSH protection
       extraCommands = ''
@@ -169,7 +170,7 @@ in
     maxAuthTries = 3;
     enableFail2Ban = true;
     enableKeyOnlyAccess = true;
-    trustedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ];
+    trustedNetworks = ["192.168.1.0/24" "10.0.0.0/8"];
   };
 
   # AI production dashboard and load testing removed - were non-functional services consuming resources
@@ -452,7 +453,7 @@ in
     # Enable secrets management
     security.secrets = {
       enable = true;
-      userKeys = [ "/home/${vars.username}/.ssh/id_ed25519" ];
+      userKeys = ["/home/${vars.username}/.ssh/id_ed25519"];
     };
   };
 
@@ -460,14 +461,14 @@ in
   users.users = lib.genAttrs hostUsers (username: {
     isNormalUser = true;
     description = "User ${username}";
-    extraGroups = [ "wheel" "networkmanager" "render" ];
+    extraGroups = ["wheel" "networkmanager" "render"];
     shell = pkgs.zsh;
     # Only use secret-managed password if the secret exists
     hashedPasswordFile =
       lib.mkIf
-        (config.modules.security.secrets.enable
-          && builtins.hasAttr "user-password-${username}" config.age.secrets)
-        config.age.secrets."user-password-${username}".path;
+      (config.modules.security.secrets.enable
+        && builtins.hasAttr "user-password-${username}" config.age.secrets)
+      config.age.secrets."user-password-${username}".path;
   });
 
   # Remove duplicate user configuration - use the one above that handles all hostUsers
@@ -485,8 +486,8 @@ in
     # Based on Tailscale best practices research - avoid DNS conflicts
     resolved = {
       enable = true;
-      fallbackDns = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
-      domains = [ "~home.freundcloud.com" ]; # Use routing directive for local domain
+      fallbackDns = ["192.168.1.222" "1.1.1.1" "8.8.8.8"];
+      domains = ["~home.freundcloud.com"]; # Use routing directive for local domain
       dnssec = lib.mkForce "false"; # Resolve DNSSEC conflict
       llmnr = lib.mkForce "false"; # Disable LLMNR to avoid conflicts with Tailscale
       extraConfig = ''
@@ -506,7 +507,7 @@ in
         "-nolisten tcp"
         "-dpi 96"
       ];
-      videoDrivers = [ "${vars.gpu}gpu" ]; # Correct way to set the video driver
+      videoDrivers = ["${vars.gpu}gpu"]; # Correct way to set the video driver
     };
 
     # Desktop environment
@@ -558,7 +559,7 @@ in
 
     # Hardware-specific configurations
     udev = {
-      packages = [ pkgs.via ];
+      packages = [pkgs.via];
       extraRules = builtins.concatStringsSep "\n" [
         ''ACTION=="add", SUBSYSTEM=="video4linux", DRIVERS=="uvcvideo", RUN+="${pkgs.v4l-utils}/bin/v4l2-ctl --set-ctrl=power_line_frequency=1"''
         ''KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0660", TAG+="uaccess"''
@@ -578,7 +579,7 @@ in
     libsForQt5.qt5ct
     kdePackages.qt6ct
     # Custom qwen-code package
-    (callPackage ../../home/development/qwen-code/default.nix { })
+    (callPackage ../../home/development/qwen-code/default.nix {})
   ];
 
   # Hardware features
@@ -591,7 +592,7 @@ in
   fileSystems."/mnt/media" = {
     device = "192.168.1.127:/mnt/media";
     fsType = "nfs";
-    options = [ "x-systemd.automount" "noauto" ];
+    options = ["x-systemd.automount" "noauto"];
   };
 
   # Consolidated systemd configuration
@@ -609,7 +610,7 @@ in
             DHCP = "ipv4";
             IPv6AcceptRA = true;
             Domains = "~home.freundcloud.com"; # Use routing directive for local domain
-            DNS = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
+            DNS = ["192.168.1.222" "1.1.1.1" "8.8.8.8"];
           };
           # Higher priority for wired connection
           dhcpV4Config = {
@@ -638,8 +639,8 @@ in
             MulticastDNS = false;
             LLMNR = false;
             DHCP = "no"; # NEVER enable DHCP on Tailscale interface
-            DNS = [ ]; # Explicitly no DNS - let Tailscale handle it
-            Domains = [ ]; # No domain routing through this interface
+            DNS = []; # Explicitly no DNS - let Tailscale handle it
+            Domains = []; # No domain routing through this interface
           };
         };
       };
@@ -659,13 +660,13 @@ in
         ExecStart = "${pkgs.scream}/bin/scream-ivshmem-pulse /dev/shm/scream";
         Restart = "always";
       };
-      wantedBy = [ "multi-user.target" ];
-      requires = [ "pulseaudio.service" ];
+      wantedBy = ["multi-user.target"];
+      requires = ["pulseaudio.service"];
     };
   };
 
   # Nix configuration
-  nix.settings.allowed-users = [ "nix-serve" ];
+  nix.settings.allowed-users = ["nix-serve"];
 
   # Storage performance optimization
   storage.performanceOptimization = {
