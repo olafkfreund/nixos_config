@@ -3,6 +3,7 @@
 , lib
 , hostUsers
 , hostTypes
+, inputs
 , ...
 }:
 let
@@ -265,6 +266,7 @@ in
       office = true;
       webcam = true;
       print = true;
+      yt-x.enable = true; # Terminal YouTube browser
     };
 
     media = {
@@ -581,6 +583,8 @@ in
     kdePackages.qt6ct
     # Custom qwen-code package
     (callPackage ../../home/development/qwen-code/default.nix { })
+    # yt-x terminal YouTube browser
+    inputs.yt-x.packages.${pkgs.system}.default
   ];
 
   # Hardware features

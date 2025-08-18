@@ -88,6 +88,12 @@
     lan-mouse.url = "github:feschber/lan-mouse";
     # walker.url = "github:abenz1267/walker"; # Temporarily disabled - broken commit
     zjstatus.url = "github:dj95/zjstatus";
+    
+    # Terminal YouTube browser
+    yt-x = {
+      url = "github:Benexl/yt-x";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     ags.url = "github:Aylur/ags";
 
     # Hardware specific
@@ -120,6 +126,7 @@
     , stylix
     , nix-index-database
     , zjstatus
+    , yt-x
     , ...
     } @ inputs:
     let

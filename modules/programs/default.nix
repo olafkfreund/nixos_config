@@ -10,6 +10,7 @@ _: {
     ./firefox/default.nix
     ./wshowkeys/default.nix
     ./droidcam/default.nix
+    ./yt-x/default.nix # Terminal YouTube browser
     # ./streamcontroller/default.nix
     # ./thunar/default.nix
   ];
