@@ -63,9 +63,7 @@
     programs.zsh.initContent =
       let
         cfg = config.programs.claudeCode;
-        tempDir = cfg.tempDir;
-        terminals = cfg.terminals;
-        keybindings = cfg.keybindings;
+        inherit (cfg) tempDir terminals keybindings;
 
         # Pre-generate the terminal selection logic to avoid shell expansion issues
         terminalSelectionScript =

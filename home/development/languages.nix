@@ -210,9 +210,6 @@ with lib; let
   aiPackages = with pkgs; (optional cfg.ai.ollama ollama);
 in
 {
-  # Language support packages
-  home.packages = languagePackages ++ utilityPackages ++ aiPackages;
-
   # Git configuration enhancement
   programs.git = mkIf cfg.utilities.vcs.git {
     enable = true;
@@ -234,110 +231,116 @@ in
     nix-direnv.enable = true;
   };
 
-  # Development shell aliases
-  home.shellAliases = mkMerge [
-    # Nix development
-    (mkIf cfg.languages.nix.enable {
-      nix-build-test = "nix-build --dry-run";
-      nix-shell-pure = "nix-shell --pure";
-      nix-fmt = "alejandra";
-      nix-check = "statix check && deadnix check";
-    })
+  # Combined home configuration
+  home = {
+    # Language support packages
+    packages = languagePackages ++ utilityPackages ++ aiPackages;
 
-    # Python development
-    (mkIf cfg.languages.python.enable {
-      py = "python3";
-      pip-upgrade = "pip install --upgrade pip";
-      pytest-watch = "ptw";
-      py-format = "black . && isort .";
-    })
+    # Development shell aliases
+    shellAliases = mkMerge [
+      # Nix development
+      (mkIf cfg.languages.nix.enable {
+        nix-build-test = "nix-build --dry-run";
+        nix-shell-pure = "nix-shell --pure";
+        nix-fmt = "alejandra";
+        nix-check = "statix check && deadnix check";
+      })
 
-    # JavaScript/TypeScript development
-    (mkIf cfg.languages.javascript.enable {
-      npm-ls = "npm list --depth=0";
-      npm-outdated = "npm outdated";
-      yarn-upgrade = "yarn upgrade-interactive";
-      js-format = "prettier --write .";
-    })
+      # Python development
+      (mkIf cfg.languages.python.enable {
+        py = "python3";
+        pip-upgrade = "pip install --upgrade pip";
+        pytest-watch = "ptw";
+        py-format = "black . && isort .";
+      })
 
-    # Go development
-    (mkIf cfg.languages.go.enable {
-      go-mod-tidy = "go mod tidy";
-      go-test-verbose = "go test -v";
-      go-build-all = "go build ./...";
-      go-format = "gofmt -w .";
-    })
+      # JavaScript/TypeScript development
+      (mkIf cfg.languages.javascript.enable {
+        npm-ls = "npm list --depth=0";
+        npm-outdated = "npm outdated";
+        yarn-upgrade = "yarn upgrade-interactive";
+        js-format = "prettier --write .";
+      })
 
-    # Rust development
-    (mkIf cfg.languages.rust.enable {
-      cargo-check-all = "cargo check --all-targets";
-      cargo-test-all = "cargo test --all";
-      cargo-clippy-all = "cargo clippy --all-targets";
-      rust-format = "cargo fmt";
-    })
+      # Go development
+      (mkIf cfg.languages.go.enable {
+        go-mod-tidy = "go mod tidy";
+        go-test-verbose = "go test -v";
+        go-build-all = "go build ./...";
+        go-format = "gofmt -w .";
+      })
 
-    # Git shortcuts
-    (mkIf cfg.utilities.vcs.git {
-      gs = "git status";
-      ga = "git add";
-      gc = "git commit";
-      gp = "git push";
-      gl = "git log --oneline";
-      gd = "git diff";
-      lg = "lazygit";
-    })
+      # Rust development
+      (mkIf cfg.languages.rust.enable {
+        cargo-check-all = "cargo check --all-targets";
+        cargo-test-all = "cargo test --all";
+        cargo-clippy-all = "cargo clippy --all-targets";
+        rust-format = "cargo fmt";
+      })
 
-    # Container shortcuts
-    (mkIf cfg.utilities.containers.docker {
-      d = "docker";
-      dc = "docker-compose";
-      k = "kubectl";
-    })
-  ];
+      # Git shortcuts
+      (mkIf cfg.utilities.vcs.git {
+        gs = "git status";
+        ga = "git add";
+        gc = "git commit";
+        gp = "git push";
+        gl = "git log --oneline";
+        gd = "git diff";
+        lg = "lazygit";
+      })
 
-  # Environment variables for development
-  home.sessionVariables = mkMerge [
-    # General development
-    {
-      EDITOR = "nvim";
-      BROWSER = "firefox";
-      TERM = "foot";
-    }
+      # Container shortcuts
+      (mkIf cfg.utilities.containers.docker {
+        d = "docker";
+        dc = "docker-compose";
+        k = "kubectl";
+      })
+    ];
 
-    # Language-specific
-    (mkIf cfg.languages.go.enable {
-      GOPATH = "$HOME/go";
-      GOBIN = "$HOME/go/bin";
-    })
+    # Environment variables for development
+    sessionVariables = mkMerge [
+      # General development
+      {
+        EDITOR = "nvim";
+        BROWSER = "firefox";
+        TERM = "foot";
+      }
 
-    (mkIf cfg.languages.rust.enable {
-      CARGO_HOME = "$HOME/.cargo";
-    })
+      # Language-specific
+      (mkIf cfg.languages.go.enable {
+        GOPATH = "$HOME/go";
+        GOBIN = "$HOME/go/bin";
+      })
 
-    (mkIf cfg.languages.python.enable {
-      PYTHONDONTWRITEBYTECODE = "1";
-      PYTHONUNBUFFERED = "1";
-    })
-  ];
+      (mkIf cfg.languages.rust.enable {
+        CARGO_HOME = "$HOME/.cargo";
+      })
 
-  # Language server configurations export for editors
-  home.file.".config/development/lsp-config.json".text = builtins.toJSON {
-    languages =
-      mapAttrs
-        (_name: lang: {
-          lsp = lang.lsp;
-          formatters = lang.formatters;
-          enabled = lang.enable;
-        })
-        cfg.languages;
+      (mkIf cfg.languages.python.enable {
+        PYTHONDONTWRITEBYTECODE = "1";
+        PYTHONUNBUFFERED = "1";
+      })
+    ];
 
-    paths = {
-      nixd = "${pkgs.nixd}/bin/nixd";
-      pylsp = "${pkgs.python313Packages.python-lsp-server}/bin/pylsp";
-      typescript-language-server = "${pkgs.nodePackages.typescript-language-server}/bin/typescript-language-server";
-      gopls = "${pkgs.gopls}/bin/gopls";
-      rust-analyzer = "${pkgs.rust-analyzer}/bin/rust-analyzer";
-      clangd = "${pkgs.clang-tools}/bin/clangd";
+    # Language server configurations export for editors
+    file.".config/development/lsp-config.json".text = builtins.toJSON {
+      languages =
+        mapAttrs
+          (_name: lang: {
+            lsp = lang.lsp;
+            formatters = lang.formatters;
+            enabled = lang.enable;
+          })
+          cfg.languages;
+
+      paths = {
+        nixd = "${pkgs.nixd}/bin/nixd";
+        pylsp = "${pkgs.python313Packages.python-lsp-server}/bin/pylsp";
+        typescript-language-server = "${pkgs.nodePackages.typescript-language-server}/bin/typescript-language-server";
+        gopls = "${pkgs.gopls}/bin/gopls";
+        rust-analyzer = "${pkgs.rust-analyzer}/bin/rust-analyzer";
+        clangd = "${pkgs.clang-tools}/bin/clangd";
+      };
     };
   };
 }

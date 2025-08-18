@@ -712,11 +712,11 @@ in
 
   # AI-powered automated performance tuning removed - was non-functional and consuming resources
 
-  # Agenix identity configuration - specify where to find decryption keys
+  # Agenix identity configuration - use only host keys for system activation
+  # This ensures secrets can be decrypted during boot when only root has access
   age.identityPaths = [
-    "/home/olafkfreund/.ssh/id_ed25519" # User key
-    "/etc/ssh/ssh_host_ed25519_key" # Host key (Ed25519)
-    "/etc/ssh/ssh_host_rsa_key" # Host key (RSA fallback)
+    "/etc/ssh/ssh_host_ed25519_key" # Primary host key (Ed25519)
+    "/etc/ssh/ssh_host_rsa_key" # Fallback host key (RSA)
   ];
 
   # Package configurations

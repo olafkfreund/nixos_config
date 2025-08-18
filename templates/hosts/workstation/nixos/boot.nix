@@ -5,6 +5,7 @@
 }: {
   # Bootloader configuration
   boot.loader = {
+    timeout = 3; # Boot timeout in seconds
     systemd-boot = {
       enable = true;
       configurationLimit = 10; # Keep last 10 generations
@@ -14,7 +15,6 @@
       canTouchEfiVariables = true;
       efiSysMountPoint = "/boot";
     };
-    timeout = 3; # Boot timeout in seconds
   };
 
   # Alternative: GRUB configuration (uncomment if preferred)
