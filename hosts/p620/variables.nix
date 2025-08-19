@@ -2,7 +2,7 @@
 # This demonstrates the new architecture with 90% code reduction
 # All common user info, localization, network, and theme configs are now shared
 
-{ }:
+{}:
 let
   # Import shared variables and hardware profile
   sharedVars = import ../common/shared-variables.nix;

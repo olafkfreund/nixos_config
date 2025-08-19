@@ -1,4 +1,4 @@
-{ }:
+{}:
 let
   # Import shared variables and NVIDIA hardware profile
   sharedVars = import ../common/shared-variables.nix;
