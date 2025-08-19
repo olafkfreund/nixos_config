@@ -12,6 +12,9 @@ in
       # from nixpkgs
       # cutter # cut and automatically concat videos
       mpris # MPRIS plugin
+      twitch-chat # Twitch chat integration
+      youtube-chat # YouTube chat integration
+      mpv-cheatsheet # display a cheatsheet of keybindings
       # thumbnail # OSC seekbar thumbnails
       # thumbfast # on-the-fly thumbnailer
       # sponsorblock # skip sponsored segments
