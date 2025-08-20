@@ -52,6 +52,11 @@ with lib; {
       enable = mkEnableOption "Enable AI tools";
       ollama = mkEnableOption "Enable Ollama AI";
       gemini-cli = mkEnableOption "Enable Google Gemini CLI";
+      claude-desktop = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable Claude Desktop GUI application";
+      };
 
       # Enhanced AI provider support
       providers = {
