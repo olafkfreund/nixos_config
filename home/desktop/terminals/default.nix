@@ -325,7 +325,7 @@ in
 
         settings = {
           # Terminal configuration
-          shell = {
+          terminal.shell = {
             program = "${pkgs.zsh}/bin/zsh";
           };
 

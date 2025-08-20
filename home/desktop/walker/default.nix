@@ -54,7 +54,7 @@ in
       width = 960
       margin = 20
 
-      hotreload_theme = false
+      hotreload_theme = true
       theme = "gruvbox"
     '';
 
@@ -68,168 +68,272 @@ in
       { command = "walker --gapplication-service"; }
     ];
 
-    # Add a custom theme file that uses Stylix colors dynamically
+    # Gruvbox theme TOML layout configuration (exact copy of default.toml with Gruvbox marker color)
+    xdg.configFile."walker/themes/gruvbox.toml".text = ''
+      [ui.anchors]
+      bottom = true
+      left = true
+      right = true
+      top = true
+
+      [ui.window]
+      h_align = "fill"
+      v_align = "fill"
+
+      [ui.window.box]
+      h_align = "center"
+      width = 450
+
+      [ui.window.box.bar]
+      orientation = "horizontal"
+      position = "end"
+
+      [ui.window.box.bar.entry]
+      h_align = "fill"
+      h_expand = true
+
+      [ui.window.box.bar.entry.icon]
+      h_align = "center"
+      h_expand = true
+      pixel_size = 24
+      theme = ""
+
+      [ui.window.box.margins]
+      top = 200
+
+      [ui.window.box.ai_scroll]
+      name = "aiScroll"
+      h_align = "fill"
+      v_align = "fill"
+      max_height = 300
+      min_width = 400
+      height = 300
+      width = 400
+
+      [ui.window.box.ai_scroll.margins]
+      top = 8
+
+      [ui.window.box.ai_scroll.list]
+      name = "aiList"
+      orientation = "vertical"
+      width = 400
+      spacing = 10
+
+      [ui.window.box.ai_scroll.list.item]
+      name = "aiItem"
+      h_align = "fill"
+      v_align = "fill"
+      x_align = 0
+      y_align = 0
+      wrap = true
+
+      [ui.window.box.scroll.list]
+      marker_color = "#8ec07c"
+      max_height = 300
+      max_width = 400
+      min_width = 400
+      width = 400
+
+      [ui.window.box.scroll.list.item.activation_label]
+      h_align = "fill"
+      v_align = "fill"
+      width = 20
+      x_align = 0.5
+      y_align = 0.5
+
+      [ui.window.box.scroll.list.item.icon]
+      pixel_size = 26
+      theme = ""
+
+      [ui.window.box.scroll.list.margins]
+      top = 8
+
+      [ui.window.box.search.prompt]
+      name = "prompt"
+      icon = "edit-find"
+      theme = ""
+      pixel_size = 18
+      h_align = "center"
+      v_align = "center"
+
+      [ui.window.box.search.clear]
+      name = "clear"
+      icon = "edit-clear"
+      theme = ""
+      pixel_size = 18
+      h_align = "center"
+      v_align = "center"
+
+      [ui.window.box.search.input]
+      h_align = "fill"
+      h_expand = true
+      icons = true
+
+      [ui.window.box.search.spinner]
+      hide = true
+    '';
+
+    # Gruvbox theme CSS (exact copy of default.css with Gruvbox colors)
     xdg.configFile."walker/themes/gruvbox.css".text = ''
-      /* Stylix integration - Use system theme colors dynamically */
-      @define-color bg_h #${config.lib.stylix.colors.base00};     /* darkest background */
-      @define-color bg #${config.lib.stylix.colors.base00};       /* main background */
-      @define-color bg_s #${config.lib.stylix.colors.base01};     /* soft background */
-      @define-color bg1 #${config.lib.stylix.colors.base01};      /* lighter bg */
-      @define-color bg2 #${config.lib.stylix.colors.base02};      /* selection bg */
-      @define-color bg3 #${config.lib.stylix.colors.base03};      /* comments, invisibles */
-      @define-color bg4 #${config.lib.stylix.colors.base04};      /* dark foreground */
-      @define-color fg #${config.lib.stylix.colors.base05};       /* main foreground */
-      @define-color fg0 #${config.lib.stylix.colors.base07};      /* lightest foreground */
-      @define-color fg1 #${config.lib.stylix.colors.base05};      /* default fg */
-      @define-color fg2 #${config.lib.stylix.colors.base06};      /* light fg */
-      @define-color fg3 #${config.lib.stylix.colors.base04};      /* dark fg */
-      @define-color fg4 #${config.lib.stylix.colors.base03};      /* darkest fg */
+      /* Gruvbox colors for Walker theme */
+      @define-color foreground #ebdbb2;
+      @define-color background #282828;
+      @define-color color1 #8ec07c;
 
-      /* Stylix accent colors from base16 scheme */
-      @define-color red #${config.lib.stylix.colors.base08};      /* red */
-      @define-color orange #${config.lib.stylix.colors.base09};   /* orange */
-      @define-color yellow #${config.lib.stylix.colors.base0A};   /* yellow */
-      @define-color green #${config.lib.stylix.colors.base0B};    /* green */
-      @define-color aqua #${config.lib.stylix.colors.base0C};     /* cyan/aqua */
-      @define-color blue #${config.lib.stylix.colors.base0D};     /* blue */
-      @define-color purple #${config.lib.stylix.colors.base0E};   /* purple/magenta */
-      @define-color brown #${config.lib.stylix.colors.base0F};    /* brown */
+      #window,
+      #box,
+      #aiScroll,
+      #aiList,
+      #search,
+      #password,
+      #input,
+      #prompt,
+      #clear,
+      #typeahead,
+      #list,
+      child,
+      scrollbar,
+      slider,
+      #item,
+      #text,
+      #label,
+      #bar,
+      #sub,
+      #activationlabel {
+        all: unset;
+      }
 
-      /* Bright variants (using the same colors for consistency) */
-      @define-color bright_red #${config.lib.stylix.colors.base08};
-      @define-color bright_green #${config.lib.stylix.colors.base0B};
-      @define-color bright_yellow #${config.lib.stylix.colors.base0A};
-      @define-color bright_blue #${config.lib.stylix.colors.base0D};
-      @define-color bright_purple #${config.lib.stylix.colors.base0E};
-      @define-color bright_aqua #${config.lib.stylix.colors.base0C};
-      @define-color bright_orange #${config.lib.stylix.colors.base09};
-
-      /* General theme variables */
-      @define-color foreground @fg;
-      @define-color background @bg;
-      @define-color color1 @bright_aqua;
-
-      /* Font configuration from Stylix */
-      * {
-        font-family: "${config.stylix.fonts.monospace.name}";
-        font-size: ${toString config.stylix.fonts.sizes.applications}px;
-        background-clip: border-box;
-        border-radius: 0px;
-        box-shadow: none;
-        background-image: none;
-        background: none;
+      #cfgerr {
+        background: rgba(255, 0, 0, 0.4);
+        margin-top: 20px;
+        padding: 8px;
+        font-size: 1.2em;
       }
 
       #window {
-        background-color: @bg;
-        background: @bg;
         color: @foreground;
-        border: 1px solid @bg3;
-        border-radius: 0px;
-        opacity: ${toString config.stylix.opacity.desktop};
-        padding: 16px;
-        box-shadow: none;
       }
 
-      #box,
-      #aiScroll {
-        background-color: @bg;
-        background: @bg;
-        color: @foreground;
-        border: none;
-        border-radius: 0px;
-        opacity: 1.0;
-        box-shadow: none;
+      #box {
+        border-radius: 2px;
+        background: @background;
+        padding: 32px;
+        border: 1px solid lighter(@background);
+        box-shadow:
+          0 19px 38px rgba(0, 0, 0, 0.3),
+          0 15px 12px rgba(0, 0, 0, 0.22);
       }
 
-      /* Search input - separate from results */
+      #search {
+        box-shadow:
+          0 1px 3px rgba(0, 0, 0, 0.1),
+          0 1px 2px rgba(0, 0, 0, 0.22);
+        background: lighter(@background);
+        padding: 8px;
+      }
+
+      #prompt {
+        margin-left: 4px;
+        margin-right: 12px;
+        color: @foreground;
+        opacity: 0.2;
+      }
+
+      #clear {
+        color: @foreground;
+        opacity: 0.8;
+      }
+
+      #password,
+      #input,
+      #typeahead {
+        border-radius: 2px;
+      }
+
       #input {
-        background-color: @bg1;
-        background: @bg1;
-        border: 1px solid @bg3;
-        border-radius: 0px;
+        background: none;
+      }
+
+      #password {
+      }
+
+      #spinner {
+        padding: 8px;
+      }
+
+      #typeahead {
         color: @foreground;
-        margin: 0px 0px 24px 0px;
-        padding: 16px;
-        opacity: 1.0;
-        min-height: 20px;
-        box-shadow: none;
-        position: relative;
-        z-index: 100;
+        opacity: 0.8;
       }
 
-      #input:focus {
-        border: 2px solid @bright_aqua;
-        background-color: @bg1;
-        background: @bg1;
-        outline: none;
-        box-shadow: none;
+      #input placeholder {
+        opacity: 0.5;
       }
 
-      /* Results list */
       #list {
-        background-color: @bg;
-        background: @bg;
-        margin: 0px;
-        padding: 0px;
-        position: relative;
-        z-index: 1;
-        border-top: 2px solid @bg3;
       }
 
-      /* List entries */
-      #entry {
-        background-color: @bg;
-        background: @bg;
-        padding: 12px 16px;
-        margin: 0px;
-        border: none;
-        border-radius: 0px;
-        border-bottom: 1px solid @bg2;
+      child {
+        padding: 8px;
+        border-radius: 2px;
       }
 
-      #entry:selected {
-        background-color: @bg2;
-        background: @bg2;
-        border: none;
-        border-left: 4px solid @bright_aqua;
-        opacity: 1.0;
+      child:selected,
+      child:hover {
+        background: alpha(@color1, 0.4);
       }
 
-      #entry:hover {
-        background-color: @bg1;
-        background: @bg1;
+      #item {
+      }
+
+      #icon {
+        margin-right: 8px;
       }
 
       #text {
+      }
+
+      #label {
+        font-weight: 500;
+      }
+
+      #sub {
+        opacity: 0.5;
+        font-size: 0.8em;
+      }
+
+      #activationlabel {
+      }
+
+      #bar {
+      }
+
+      .barentry {
+      }
+
+      .activation #activationlabel {
+      }
+
+      .activation #text,
+      .activation #icon,
+      .activation #search {
+        opacity: 0.5;
+      }
+
+      .aiItem {
+        padding: 10px;
+        border-radius: 2px;
         color: @foreground;
-        background: none;
+        background: @background;
       }
 
-      #text:selected {
-        color: @bright_aqua;
-        background: none;
+      .aiItem.user {
+        padding-left: 0;
+        padding-right: 0;
       }
 
-      /* Scrollbar */
-      #scrollbar {
-        background-color: @bg2;
-        background: @bg2;
-        border-radius: 0px;
-        margin: 0px;
-        opacity: 1.0;
-        width: 8px;
-      }
-
-      #scrollbar slider {
-        background-color: @bg4;
-        background: @bg4;
-        border-radius: 0px;
-      }
-
-      /* Remove all gradients and effects for flat design */
-      .gradient, .shadow, .blur {
-        display: none;
+      .aiItem.assistant {
+        background: lighter(@background);
       }
     '';
   };

@@ -10,11 +10,11 @@ default:
 
 # Deploy to local system using nh
 deploy:
-    nh os switch --accept-flake-config
+    nh os switch
 
 # Update local system using nh
 update:
-    nh os update --accept-flake-config
+    nh os update
 
 # Update flake inputs and deploy
 update-flake:
@@ -344,7 +344,7 @@ razer:
 
 # Deploy to p620 workstation (AMD) - OPTIMIZED
 p620:
-    nixos-rebuild switch --flake .#p620 --target-host p620 --build-host p620 --sudo --no-reexec --keep-going --accept-flake-config
+    sudo nixos-rebuild switch --flake .#p620 --accept-flake-config
 
 # Deploy to p510 workstation (Intel Xeon/NVIDIA) - OPTIMIZED
 p510:
