@@ -149,6 +149,7 @@ in
       enable = true;
       ollama = true;
       gemini-cli = true;
+      claude-desktop = false; # Disable GUI app on media server
     };
 
     programs = {

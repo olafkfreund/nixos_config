@@ -1,7 +1,14 @@
-{ pkgs
+{ config
+, lib
+, pkgs
 , inputs
 , ...
-}: {
+}:
+with lib;
+let
+  cfg = config.features.ai;
+in
+{
   imports = [
     ./chatgpt.nix
     ./gemini-cli.nix
@@ -23,21 +30,24 @@
     # ./alerting-system.nix  # Removed - non-functional alerting system
   ];
 
-  environment.systemPackages = [
-    pkgs.chatgpt-cli
-    pkgs.rPackages.chatgpt
-    pkgs.tgpt
-    pkgs.gh-copilot
-    pkgs.yai
-    pkgs.shell-gpt
-    pkgs.aichat
-    pkgs.gorilla-cli
-    # Temporarily disabled due to llama-index-core build failure (upstream nixpkgs issue)
-    # pkgs.newelle
-    # Temporarily disabled due to textual package test failures
-    # pkgs.oterm
-    pkgs.gpt-cli
-    pkgs.chatmcp
-    inputs.claude-desktop.packages.x86_64-linux.claude-desktop-with-fhs
-  ];
+  config = mkIf cfg.enable {
+    environment.systemPackages = [
+      pkgs.chatgpt-cli
+      pkgs.rPackages.chatgpt
+      pkgs.tgpt
+      pkgs.gh-copilot
+      pkgs.yai
+      pkgs.shell-gpt
+      pkgs.aichat
+      pkgs.gorilla-cli
+      # Temporarily disabled due to llama-index-core build failure (upstream nixpkgs issue)
+      # pkgs.newelle
+      # Temporarily disabled due to textual package test failures
+      # pkgs.oterm
+      pkgs.gpt-cli
+      pkgs.chatmcp
+    ] ++ optionals (cfg.claude-desktop or false) [
+      inputs.claude-desktop.packages.x86_64-linux.claude-desktop-with-fhs
+    ];
+  };
 }

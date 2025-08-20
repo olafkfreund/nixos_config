@@ -200,6 +200,7 @@ in
     ai = {
       enable = true; # Enable AI tools but no local inference
       ollama = false; # Keep disabled - too resource intensive for SFF
+      claude-desktop = false; # Disable GUI app on headless server
     };
 
     programs = {
