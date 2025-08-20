@@ -138,7 +138,7 @@ in
       package = pkgs.rofi-wayland;
 
       extraConfig = {
-        modi = "drun,run,filebrowser,websearch:rwebsearch";
+        modi = "drun,run,filebrowser";
         lines = 10;
         font = "JetBrainsMono Nerd Font 14";
         show-icons = true;

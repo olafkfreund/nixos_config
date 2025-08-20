@@ -99,7 +99,6 @@
     chatterino2
     twitch-tui
     deploy-rs
-
-    # External packages (iwmenu and bzmenu removed - not used)
+    walker
   ];
 }
