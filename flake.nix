@@ -126,7 +126,6 @@
     , stylix
     , nix-index-database
     , zjstatus
-    , yt-x
     , ...
     } @ inputs:
     let

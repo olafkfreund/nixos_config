@@ -1,6 +1,5 @@
 { config
 , lib
-, options
 , ...
 }:
 with lib; let
@@ -101,11 +100,6 @@ in
     # Development implementations - packages and configurations only
     (mkIf cfg.development.enable {
       # Development modules are imported at the top level in imports.nix
-    })
-
-    # Walker implementation - only if the module is imported
-    (mkIf (cfg.desktop.enable && cfg.desktop.walker && (options ? desktop.walker)) {
-      desktop.walker.enable = true;
     })
   ];
 }

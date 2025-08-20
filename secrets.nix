@@ -15,7 +15,6 @@ let
   allUsers = [ olafkfreund ];
   allHosts = [ p620 razer p510 dex5550 samsung ];
   workstations = [ p620 razer ];
-  servers = [ p510 dex5550 ];
 in
 {
   # User passwords

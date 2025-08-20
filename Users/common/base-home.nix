@@ -6,7 +6,7 @@
 }: {
   # Common configuration for all users
   home = {
-    username = username;
+    inherit username;
     homeDirectory = "/home/${username}";
     sessionPath = [
       "$HOME/.local/bin"

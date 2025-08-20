@@ -94,10 +94,7 @@ in
     # Enable Tailscale service
     services.tailscale = {
       enable = true;
-      port = cfg.port;
-      interfaceName = cfg.interfaceName;
-      openFirewall = cfg.openFirewall;
-      useRoutingFeatures = cfg.useRoutingFeatures;
+      inherit (cfg) port interfaceName openFirewall useRoutingFeatures;
     };
 
     # Tailscale up service with authentication
