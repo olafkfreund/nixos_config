@@ -29,7 +29,7 @@
     ./remotedesktop/default.nix
     ./evince/default.nix
     ./lanmouse/default.nix
-    # ./walker/default.nix # Temporarily disabled - walker input broken
+    ./walker/default.nix # Re-enabled with Stylix integration
     ./obsidian/default.nix
   ];
 

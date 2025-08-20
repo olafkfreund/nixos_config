@@ -21,139 +21,42 @@ in
   };
 
   config = mkIf cfg.enable {
-    programs.walker = {
-      enable = true;
-      package = pkgs.walker;
-      inherit (cfg) runAsService;
+    # Install Walker as a package since programs.walker doesn't exist in home-manager
+    home.packages = [ pkgs.walker ];
 
-      # Configuration options for Walker
-      config = {
-        search.placeholder = "Search...";
-        ui = {
-          fullscreen = false;
-          anchors = {
-            left = false;
-            right = false;
-            top = false;
-            bottom = false;
-          };
-          margins = {
-            top = 20;
-            bottom = 20;
-            left = 20;
-            right = 20;
-          };
-          width = 1000;
-          height = 800;
-          icon_theme = "Adwaita";
-          icon_size = 26;
-          show_search = true;
-        };
-        list = {
-          height = 650;
-          width = 960;
-          margin = 20;
-        };
-        hotreload_theme = false;
-        builtins.windows.weight = 100;
-        builtins.clipboard = {
-          prefix = ''"'';
-          always_put_new_on_top = true;
-        };
-        activation_mode.disabled = true;
-        ignore_mouse = true;
-        websearch.prefix = "?";
-        switcher.prefix = "/";
-        theme = "gruvbox";
+    # Create Walker configuration manually via xdg.configFile
+    xdg.configFile."walker/config.toml".text = ''
+      [search]
+      placeholder = "Search..."
 
-        # Enable and configure Walker modules
-        modules = {
-          # Core modules
-          applications = {
-            enable = true;
-            # Filter out desktop entries with empty exec lines
-            filter = "true"; # Default filter
-            fuzzy = true; # Enable fuzzy matching
-            show_icons = true; # Show application icons
-          };
-          calculator.enable = true;
-          runner.enable = true;
-          clipboard = {
-            enable = true;
-            # Always put new clipboard entries at the top
-            always_put_new_on_top = true;
-          };
+      [ui]
+      fullscreen = false
+      width = 1000
+      height = 800
+      icon_theme = "Adwaita"
+      icon_size = 26
+      show_search = true
 
-          # Web and search modules
-          websearch = {
-            enable = true;
-            # Custom search engines
-            entries = [
-              {
-                name = "GitHub";
-                url = "https://github.com/search?q=%s";
-                prefix = "gh";
-              }
-              {
-                name = "NixOS Packages";
-                url = "https://search.nixos.org/packages?query=%s";
-                prefix = "nix";
-              }
-            ];
-          };
+      [ui.anchors]
+      left = false
+      right = false
+      top = false
+      bottom = false
 
-          # System and window management
-          windows.enable = true;
-          switcher.enable = true;
+      [ui.margins]
+      top = 20
+      bottom = 20
+      left = 20
+      right = 20
 
-          # Development tools
-          ssh.enable = true;
-          commands = {
-            enable = true;
-            commands = [
-              {
-                name = "Ask Gemini AI";
-                cmd = "ai-cli -p gemini '%s'";
-                prefix = "ai";
-                description = "Ask Gemini AI a question";
-                terminal = true;
-              }
-              {
-                name = "Ask Gemini (No Terminal)";
-                cmd = "ai-cli -p gemini '%s' | wl-copy && notify-send 'AI Response' 'Copied to clipboard'";
-                prefix = "gem";
-                description = "Ask Gemini and copy response to clipboard";
-                terminal = false;
-              }
-            ];
-          };
+      [list]
+      height = 650
+      width = 960
+      margin = 20
 
-          # Additional useful modules
-          bookmarks.enable = true;
-          translation = {
-            enable = true;
-            provider = "googlefree";
-          };
-
-          # Custom commands for frequently used tools
-          customCommands = {
-            enable = true;
-            commands = [
-              {
-                name = "Rebuild NixOS";
-                cmd = "sudo nixos-rebuild switch --flake /home/${config.home.username}/.config/nixos#";
-                terminal = true;
-              }
-              {
-                name = "Edit Walker Config";
-                cmd = "nvim /home/${config.home.username}/.config/nixos/home/desktop/walker/default.nix";
-                terminal = true;
-              }
-            ];
-          };
-        };
-      };
-    };
+      hotreload_theme = false
+      theme = "gruvbox"
+    '';
 
     # Add auto-start for Hyprland if runAsService is enabled
     wayland.windowManager.hyprland.extraConfig = mkIf (cfg.runAsService && config.wayland.windowManager.hyprland.enable) ''

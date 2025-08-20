@@ -86,7 +86,7 @@
 
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
-    # walker.url = "github:abenz1267/walker"; # Temporarily disabled - broken commit
+    # walker.url = "github:abenz1267/walker"; # Temporarily disabled - flake.nix missing
     zjstatus.url = "github:dj95/zjstatus";
 
     # Terminal YouTube browser
