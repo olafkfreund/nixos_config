@@ -92,7 +92,7 @@
       enable = true;
       languages = true;
       workflow = true;
-      productivity = true;
+      productivity = false;
     };
   };
 
