@@ -63,7 +63,7 @@ in
       flameshot = true;
       kooha = true;
       remotedesktop = true;
-      walker = false; # Temporarily disabled - walker input broken
+      walker = true; # Re-enabled with Stylix integration
 
       # Communication and media
       obs = true;

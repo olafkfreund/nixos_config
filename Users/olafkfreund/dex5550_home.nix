@@ -21,7 +21,7 @@
     ../../home/desktop/flameshot/default.nix # Provides desktop.screenshots.flameshot option
     ../../home/desktop/kooha/default.nix # Provides desktop.screenshots.kooha option
     ../../home/desktop/remotedesktop/default.nix # Provides desktop.remotedesktop option
-    # ../../home/desktop/walker/default.nix # Temporarily disabled - walker input broken
+    # ../../home/desktop/walker/default.nix # Not needed on headless server
     # Program modules (provide programs.* options referenced by features system)
     ../../home/desktop/obs/default.nix # Provides programs.obs option
     ../../home/desktop/evince/default.nix # Provides programs.evince option

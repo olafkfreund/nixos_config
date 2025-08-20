@@ -1,5 +1,6 @@
 { config
 , lib
+, options
 , ...
 }:
 with lib; let
@@ -52,7 +53,6 @@ in
         rofi.enable = cfg.desktop.rofi;
         obsidian.enable = cfg.desktop.obsidian;
         remotedesktop.enable = cfg.desktop.remotedesktop;
-        walker.enable = cfg.desktop.walker; # Re-enabled with Stylix integration
         screenshots = {
           flameshot.enable = cfg.desktop.flameshot;
           kooha.enable = cfg.desktop.kooha;
@@ -101,6 +101,11 @@ in
     # Development implementations - packages and configurations only
     (mkIf cfg.development.enable {
       # Development modules are imported at the top level in imports.nix
+    })
+
+    # Walker implementation - only if the module is imported
+    (mkIf (cfg.desktop.enable && cfg.desktop.walker && (options ? desktop.walker)) {
+      desktop.walker.enable = true;
     })
   ];
 }
