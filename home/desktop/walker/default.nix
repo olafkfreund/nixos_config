@@ -165,50 +165,51 @@ in
       { command = "walker --gapplication-service"; }
     ];
 
-    # Add a custom theme file for Gruvbox Material - FLAT DESIGN
+    # Add a custom theme file that uses Stylix colors dynamically
     xdg.configFile."walker/themes/gruvbox.css".text = ''
-      /* Define Gruvbox Material color scheme variables */
-      @define-color bg_h #1d2021;     /* hard dark background */
-      @define-color bg #282828;       /* material dark background */
-      @define-color bg_s #32302f;     /* soft dark background */
-      @define-color bg1 #3c3836;      /* material bg1 */
-      @define-color bg2 #504945;      /* material bg2 */
-      @define-color bg3 #665c54;      /* material bg3 */
-      @define-color bg4 #7c6f64;      /* material bg4 */
-      @define-color fg #dcd7ba;       /* material foreground - warmer tone */
-      @define-color fg0 #fbf1c7;      /* material fg0 */
-      @define-color fg1 #dcd7ba;      /* material fg1 - softer than original */
-      @define-color fg2 #c8c093;      /* material fg2 - muted */
-      @define-color fg3 #a6a69c;      /* material fg3 - subtle */
-      @define-color fg4 #9e9b93;      /* material fg4 */
+      /* Stylix integration - Use system theme colors dynamically */
+      @define-color bg_h #${config.lib.stylix.colors.base00};     /* darkest background */
+      @define-color bg #${config.lib.stylix.colors.base00};       /* main background */
+      @define-color bg_s #${config.lib.stylix.colors.base01};     /* soft background */
+      @define-color bg1 #${config.lib.stylix.colors.base01};      /* lighter bg */
+      @define-color bg2 #${config.lib.stylix.colors.base02};      /* selection bg */
+      @define-color bg3 #${config.lib.stylix.colors.base03};      /* comments, invisibles */
+      @define-color bg4 #${config.lib.stylix.colors.base04};      /* dark foreground */
+      @define-color fg #${config.lib.stylix.colors.base05};       /* main foreground */
+      @define-color fg0 #${config.lib.stylix.colors.base07};      /* lightest foreground */
+      @define-color fg1 #${config.lib.stylix.colors.base05};      /* default fg */
+      @define-color fg2 #${config.lib.stylix.colors.base06};      /* light fg */
+      @define-color fg3 #${config.lib.stylix.colors.base04};      /* dark fg */
+      @define-color fg4 #${config.lib.stylix.colors.base03};      /* darkest fg */
 
-      /* Gruvbox Material accent colors - more muted and sophisticated */
-      @define-color red #e67e80;      /* material red - softer */
-      @define-color green #a7c080;    /* material green - sage-like */
-      @define-color yellow #dbbc7f;   /* material yellow - golden */
-      @define-color blue #7fbbb3;     /* material blue - teal-ish */
-      @define-color purple #d699b6;   /* material purple - dusty rose */
-      @define-color aqua #83c092;     /* material aqua - mint green */
-      @define-color orange #e69875;   /* material orange - coral */
+      /* Stylix accent colors from base16 scheme */
+      @define-color red #${config.lib.stylix.colors.base08};      /* red */
+      @define-color orange #${config.lib.stylix.colors.base09};   /* orange */
+      @define-color yellow #${config.lib.stylix.colors.base0A};   /* yellow */
+      @define-color green #${config.lib.stylix.colors.base0B};    /* green */
+      @define-color aqua #${config.lib.stylix.colors.base0C};     /* cyan/aqua */
+      @define-color blue #${config.lib.stylix.colors.base0D};     /* blue */
+      @define-color purple #${config.lib.stylix.colors.base0E};   /* purple/magenta */
+      @define-color brown #${config.lib.stylix.colors.base0F};    /* brown */
 
-      /* Bright Material accent colors */
-      @define-color bright_red #ec5f67;
-      @define-color bright_green #99c794;
-      @define-color bright_yellow #fac863;
-      @define-color bright_blue #6bb6ff;
-      @define-color bright_purple #c594c5;
-      @define-color bright_aqua #5fb3b3;
-      @define-color bright_orange #f99157;
+      /* Bright variants (using the same colors for consistency) */
+      @define-color bright_red #${config.lib.stylix.colors.base08};
+      @define-color bright_green #${config.lib.stylix.colors.base0B};
+      @define-color bright_yellow #${config.lib.stylix.colors.base0A};
+      @define-color bright_blue #${config.lib.stylix.colors.base0D};
+      @define-color bright_purple #${config.lib.stylix.colors.base0E};
+      @define-color bright_aqua #${config.lib.stylix.colors.base0C};
+      @define-color bright_orange #${config.lib.stylix.colors.base09};
 
       /* General theme variables */
       @define-color foreground @fg;
       @define-color background @bg;
       @define-color color1 @bright_aqua;
 
-      /* FLAT MATERIAL DESIGN - NO GRADIENTS, NO SHADOWS, NO ROUNDED CORNERS */
+      /* Font configuration from Stylix */
       * {
-        font-family: "JetBrainsMono Nerd Font";
-        font-size: 14px;
+        font-family: "${config.stylix.fonts.monospace.name}";
+        font-size: ${toString config.stylix.fonts.sizes.applications}px;
         background-clip: border-box;
         border-radius: 0px;
         box-shadow: none;
@@ -222,7 +223,7 @@ in
         color: @foreground;
         border: 1px solid @bg3;
         border-radius: 0px;
-        opacity: 1.0;
+        opacity: ${toString config.stylix.opacity.desktop};
         padding: 16px;
         box-shadow: none;
       }
@@ -238,7 +239,7 @@ in
         box-shadow: none;
       }
 
-      /* FLAT SEARCH INPUT - COMPLETELY SEPARATE FROM RESULTS */
+      /* Search input - separate from results */
       #input {
         background-color: @bg1;
         background: @bg1;
@@ -262,7 +263,7 @@ in
         box-shadow: none;
       }
 
-      /* FLAT RESULTS LIST - COMPLETELY SEPARATE */
+      /* Results list */
       #list {
         background-color: @bg;
         background: @bg;
@@ -273,7 +274,7 @@ in
         border-top: 2px solid @bg3;
       }
 
-      /* FLAT LIST ENTRIES */
+      /* List entries */
       #entry {
         background-color: @bg;
         background: @bg;
@@ -307,7 +308,7 @@ in
         background: none;
       }
 
-      /* FLAT SCROLLBAR */
+      /* Scrollbar */
       #scrollbar {
         background-color: @bg2;
         background: @bg2;
@@ -323,7 +324,7 @@ in
         border-radius: 0px;
       }
 
-      /* REMOVE ALL GRADIENTS AND EFFECTS */
+      /* Remove all gradients and effects for flat design */
       .gradient, .shadow, .blur {
         display: none;
       }
