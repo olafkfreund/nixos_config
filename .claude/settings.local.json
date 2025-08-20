@@ -115,7 +115,8 @@
       "Bash(sudo pkill:*)",
       "Bash(promtail-status:*)",
       "Bash(git rm:*)"
-    ]
+    ],
+    "additionalDirectories": ["/"]
   },
   "enableAllProjectMcpServers": false
 }
