@@ -1,22 +1,28 @@
-{ ... }:
-
+{ config, lib, ... }:
+with lib;
+let
+  cfg = config.features.development;
+in
 {
   # Claude Desktop Application Entry
   # Provides a desktop launcher for Anthropic's Claude Desktop GUI application
+  # Only enabled when development productivity features are enabled
 
-  xdg.desktopEntries.claude-desktop = {
-    name = "Claude Desktop";
-    comment = "Anthropic's Claude AI Desktop Application";
-    exec = "claude-desktop";
-    icon = "applications-office"; # Generic office application icon
-    terminal = false;
-    type = "Application";
-    categories = [ "Office" ];
+  config = mkIf (cfg.enable && cfg.productivity) {
+    xdg.desktopEntries.claude-desktop = {
+      name = "Claude Desktop";
+      comment = "Anthropic's Claude AI Desktop Application";
+      exec = "claude-desktop";
+      icon = "applications-office"; # Generic office application icon
+      terminal = false;
+      type = "Application";
+      categories = [ "Office" ];
+    };
+
+    # Ensure claude-desktop is available in PATH
+    # This is typically provided by the system configuration
+    home.sessionPath = [
+      "/run/current-system/sw/bin"
+    ];
   };
-
-  # Ensure claude-desktop is available in PATH
-  # This is typically provided by the system configuration
-  home.sessionPath = [
-    "/run/current-system/sw/bin"
-  ];
 }
