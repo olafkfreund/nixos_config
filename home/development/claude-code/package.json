@@ -1,6 +1,6 @@
 {
   "name": "@anthropic-ai/claude-code",
-  "version": "1.0.85",
+  "version": "1.0.86",
   "main": "sdk.mjs",
   "types": "sdk.d.ts",
   "bin": {
@@ -16,9 +16,6 @@
   "homepage": "https://github.com/anthropics/claude-code",
   "bugs": {
     "url": "https://github.com/anthropics/claude-code/issues"
-  },
-  "scripts": {
-    "prepare": "node -e \"if (!process.env.AUTHORIZED) { console.error('ERROR: Direct publishing is not allowed.\\nPlease use the publish-external.sh script to publish this package.'); process.exit(1); }\""
   },
   "dependencies": {},
   "optionalDependencies": {

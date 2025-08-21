@@ -16,15 +16,30 @@
 
   # Environment packages for headless monitoring
   environment.systemPackages = with pkgs; [
+    # Essential system tools
+    vim
+    git
+    curl
+    wget
+
     # System monitoring (no GPU-specific tools)
     htop
     iotop
     nethogs
+    lsof
+    tcpdump
+    rsync
 
     # Basic utilities
     pciutils
     usbutils
     lshw
+
+    # Network tools
+    bind # dig, nslookup
+    iputils # ping, traceroute
+    nettools # netstat
+    iproute2 # ip command
 
     # Remote access tools
     tigervnc # VNC server if needed
@@ -92,7 +107,6 @@
   };
 
   # Disable audio entirely for headless
-  hardware.pulseaudio.enable = lib.mkForce false;
   sound.enable = lib.mkDefault false;
 
   # Minimal hardware support
@@ -228,41 +242,6 @@
     sshd.enable = lib.mkDefault true;
   };
 
-  # Remove GUI applications from system packages
-  environment.systemPackages = lib.mkForce (with pkgs; [
-    # Essential system tools only
-    vim
-    git
-    curl
-    wget
-    htop
-    iotop
-    lsof
-    tcpdump
-    rsync
-
-    # Network tools
-    bind # dig, nslookup
-    iproute2 # ip command
-    ethtool # Network interface tools
-
-    # System administration
-    pciutils # lspci
-    usbutils # lsusb
-    util-linux # Various utilities
-    procps # ps, top, etc.
-
-    # File management
-    tree
-    file
-    unzip
-    tar
-    gzip
-
-    # Monitoring
-    lm_sensors # Hardware sensors
-    smartmontools # Disk health
-  ]);
 
   # Systemd user services disabled
   systemd.user.services = { };

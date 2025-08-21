@@ -32,18 +32,27 @@ let
       };
 
       # User configuration
-      users.users = builtins.listToAttrs (map
-        (username: {
-          name = username;
-          value = {
-            isNormalUser = true;
-            description = "Live system user ${username}";
-            extraGroups = [ "wheel" "networkmanager" ];
-            # Default password for live system
-            password = "nixos";
-          };
-        })
-        hostUsers);
+      users.users = builtins.listToAttrs
+        (map
+          (username: {
+            name = username;
+            value = {
+              isNormalUser = true;
+              description = "Live system user ${username}";
+              extraGroups = [ "wheel" "networkmanager" ];
+              # Default password for live system
+              password = "nixos";
+            };
+          })
+          hostUsers) // {
+        # Root user configuration
+        root = {
+          password = "nixos";
+          openssh.authorizedKeys.keys = [
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILeccj+vW/qyKepgXK0oXZfVFMf1kwmqj4uBHmjU2fz8 olafkfreund"
+          ];
+        };
+      };
 
       # Enable sudo without password for installation
       security.sudo = {
@@ -59,14 +68,6 @@ let
           PasswordAuthentication = true;
           PubkeyAuthentication = true;
         };
-      };
-
-      # Root user configuration
-      users.users.root = {
-        password = "nixos";
-        openssh.authorizedKeys.keys = [
-          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILeccj+vW/qyKepgXK0oXZfVFMf1kwmqj4uBHmjU2fz8 olafkfreund"
-        ];
       };
 
       # System configuration
@@ -210,8 +211,7 @@ let
         services.xserver.videoDrivers = [ "intel" ];
       };
   };
-in
-{
+
   # Function to create a live image for a specific host
   mkLiveImage = hostName:
     let
@@ -230,7 +230,15 @@ in
         hostSpecific
       ];
     };
+in
+{
+  # Export the function
+  inherit mkLiveImage;
 
   # Create all live images
-  liveImages = builtins.mapAttrs (name: _: mkLiveImage name) hostUsers;
+  liveImages = builtins.listToAttrs (map
+    (hostName: {
+      name = "live-iso-${hostName}";
+      value = mkLiveImage hostName;
+    }) [ "p620" "razer" "p510" "dex5550" "samsung" ]);
 }

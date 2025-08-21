@@ -64,6 +64,9 @@
     cudaPackages.cuda_gdb # CUDA debugger
     cudaPackages.nsight_compute # Profiling
     cudaPackages.nsight_systems # System analysis
+    nsight-compute
+    nsight-systems
+    cuda-samples
 
     # Deep learning libraries
     cudaPackages.cudnn
@@ -73,13 +76,13 @@
     # Video utilities
     libva-utils # VA-API utilities
     vdpauinfo # VDPAU information
+    nvidia-vaapi-driver
 
     # Vulkan utilities
     vulkan-tools
     vulkan-validation-layers
 
     # Performance monitoring
-    nvtopPackages.nvidia
     gwe # GPU control GUI
   ];
 
@@ -271,20 +274,4 @@
     portalPackage = pkgs.xdg-desktop-portal-hyprland;
   };
 
-  # Additional packages for NVIDIA development
-  environment.systemPackages = with pkgs; [
-    # Development
-    nsight-compute
-    nsight-systems
-    cuda-samples
-
-    # Monitoring
-    nvtopPackages.nvidia
-    nvidia-system-monitor-qt
-
-    # Utilities
-    nvidia-vaapi-driver
-    libva-utils
-    vdpauinfo
-  ];
 }

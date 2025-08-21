@@ -4,13 +4,21 @@
 , lib
 , ...
 }: {
-  # Minimal graphics support for headless servers
-  hardware.graphics = {
-    enable = false; # Completely disable graphics subsystem
-  };
+  # Minimal graphics support for headless servers disabled later in hardware block
 
   # Server-focused system packages (no GPU tools)
   environment.systemPackages = with pkgs; [
+    # Essential command-line tools
+    vim
+    git
+    curl
+    wget
+    tree
+    file
+    unzip
+    tar
+    gzip
+
     # Essential system administration
     htop
     iotop
@@ -24,15 +32,21 @@
     lshw # Hardware listing
     dmidecode # Hardware information
 
-    # Network monitoring
+    # Network monitoring and tools
     iftop # Network bandwidth
     mtr # Network diagnostics
     tcpdump # Packet capture
+    bind # dig, nslookup
+    iproute2 # ip command
+    ethtool # Network interface tools
+    iperf3 # Network performance
+    nmap # Network scanner
 
     # System monitoring
     sysstat # System statistics
     lsof # Open files
     strace # System call tracing
+    util-linux # Various utilities
 
     # Process management
     psmisc # killall, pstree, etc.
@@ -146,6 +160,18 @@
     "net.ipv4.conf.default.send_redirects" = 0;
     "net.ipv4.icmp_echo_ignore_broadcasts" = 1;
     "net.ipv4.icmp_ignore_bogus_error_responses" = 1;
+
+    # File system performance
+    "fs.file-max" = 2097152;
+    "fs.nr_open" = 1048576;
+
+    # Process limits
+    "kernel.pid_max" = 4194304;
+    "kernel.threads-max" = 1048576;
+
+    # Additional memory management
+    "vm.max_map_count" = 262144;
+    "vm.min_free_kbytes" = 65536;
   };
 
   # No GPU-specific udev rules
@@ -175,7 +201,6 @@
 
   # Disable all audio for headless servers
   services.pipewire.enable = lib.mkForce false;
-  hardware.pulseaudio.enable = lib.mkForce false;
   sound.enable = lib.mkForce false;
   services.alsa.enable = lib.mkForce false;
 
@@ -333,66 +358,6 @@
     graphical-session.enable = lib.mkForce false;
   };
 
-  # Minimal system packages for headless servers
-  environment.systemPackages = lib.mkForce (with pkgs; [
-    # Essential command-line tools only
-    vim
-    git
-    curl
-    wget
-    htop
-    iotop
-    lsof
-    tcpdump
-    rsync
-    tree
-    file
-    unzip
-    tar
-    gzip
-
-    # Network tools
-    bind # dig, nslookup
-    iproute2 # ip command
-    ethtool # Network interface tools
-    iperf3 # Network performance
-    mtr # Network diagnostics
-    nmap # Network scanner
-
-    # System administration
-    pciutils # lspci
-    usbutils # lsusb
-    util-linux # Various utilities
-    procps # ps, top, etc.
-    sysstat # System statistics
-    lm_sensors # Hardware sensors
-    smartmontools # Disk health
-
-    # Security
-    fail2ban
-    rkhunter
-    chkrootkit
-
-    # Monitoring
-    nethogs # Network usage per process
-    iftop # Network bandwidth usage
-
-    # File management
-    findutils # find, locate, etc.
-    coreutils # Basic utilities
-    diffutils # diff, cmp, etc.
-
-    # Text processing
-    gnugrep # grep
-    gnused # sed
-    gawk # awk
-    less # pager
-
-    # Compression
-    bzip2
-    xz
-    zstd
-  ]);
 
   # Systemd user services disabled
   systemd.user.services = { };
@@ -462,21 +427,4 @@
     virtualbox.host.enable = lib.mkForce false;
     vmware.host.enable = lib.mkForce false;
   };
-
-  # Server performance tuning
-  boot.kernel.sysctl = lib.mkMerge [
-    {
-      # File system performance
-      "fs.file-max" = 2097152;
-      "fs.nr_open" = 1048576;
-
-      # Process limits
-      "kernel.pid_max" = 4194304;
-      "kernel.threads-max" = 1048576;
-
-      # Memory management
-      "vm.max_map_count" = 262144;
-      "vm.min_free_kbytes" = 65536;
-    }
-  ];
 }

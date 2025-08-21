@@ -41,7 +41,6 @@ in
   system.stateVersion = vars.stateVersion;
   networking.hostName = vars.hostName;
   time.timeZone = vars.timezone;
-  i18n.defaultLocale = vars.locale;
 
   # Boot configuration optimized for laptops
   boot = {

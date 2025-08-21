@@ -53,6 +53,15 @@
 
     # Disable GUI-related variables
     LIBGL_ALWAYS_SOFTWARE = "0"; # Hardware acceleration for compute
+    WLR_NO_HARDWARE_CURSORS = "1";
+
+    # Optimize for compute workloads
+    AMD_DEBUG = ""; # Disable debugging overhead
+    R600_DEBUG = ""; # Disable debugging overhead
+
+    # Set compute-focused driver preferences
+    AMD_VULKAN_ICD = "RADV";
+    RADV_PERFTEST = ""; # Disable experimental features for stability
   };
 
   # Session variables for compute workloads
@@ -85,6 +94,8 @@
 
     # Server optimizations
     "amdgpu.nomodeset=0" # Allow modesetting for basic display
+    "amdgpu.runpm=0" # Disable runtime PM for stability
+    "amdgpu.bapm=0" # Disable bidirectional power management
   ];
 
   # Kernel configuration for compute performance
@@ -122,7 +133,6 @@
 
   # Disable audio for headless servers
   services.pipewire.enable = lib.mkForce false;
-  hardware.pulseaudio.enable = lib.mkForce false;
   sound.enable = lib.mkForce false;
 
   # Minimal hardware support for servers
@@ -207,20 +217,6 @@
     };
   };
 
-  # Environment optimization for server workloads
-  environment.variables = lib.mkMerge [
-    # Disable GUI acceleration attempts
-    { WLR_NO_HARDWARE_CURSORS = "1"; }
-    { LIBGL_ALWAYS_SOFTWARE = "0"; } # Allow hardware for compute
-
-    # Optimize for compute workloads
-    { AMD_DEBUG = ""; } # Disable debugging overhead
-    { R600_DEBUG = ""; } # Disable debugging overhead
-
-    # Set compute-focused driver preferences
-    { AMD_VULKAN_ICD = "RADV"; }
-    { RADV_PERFTEST = ""; } # Disable experimental features for stability
-  ];
 
   # Monitoring service for AMD GPU (optional)
   systemd.services.amd-gpu-monitor = {
@@ -235,9 +231,4 @@
     };
   };
 
-  # Optimize for headless compute workloads
-  boot.kernelParams = lib.mkAfter [
-    "amdgpu.runpm=0" # Disable runtime PM for stability
-    "amdgpu.bapm=0" # Disable bidirectional power management
-  ];
 }

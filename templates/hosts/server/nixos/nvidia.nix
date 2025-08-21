@@ -59,6 +59,11 @@
 
     # System monitoring
     nvidia-smi # NVIDIA system management
+
+    # Optional CUDA development tools
+    cuda-samples
+    nsight-systems
+    nsight-compute
   ];
 
   # Environment variables for CUDA compute
@@ -76,10 +81,16 @@
 
     # Disable GUI-related optimizations
     __GL_SHADER_DISK_CACHE = "0"; # Disable for servers
+    WLR_NO_HARDWARE_CURSORS = "1";
+    NIXOS_OZONE_WL = "0"; # Disable Wayland for servers
 
     # Compute optimizations
     CUDA_CACHE_DISABLE = "0"; # Enable CUDA cache
     CUDA_CACHE_MAXSIZE = "1073741824"; # 1GB cache
+    NVIDIA_DRIVER_CAPABILITIES = "compute,utility";
+    NVIDIA_REQUIRE_CUDA = "cuda>=11.0";
+    __GL_SYNC_TO_VBLANK = "0"; # Disable VSync for compute
+    __GL_ALLOW_UNOFFICIAL_PROTOCOL = "1";
   };
 
   # Session variables for compute development
@@ -239,20 +250,6 @@
     };
   };
 
-  # Environment optimization for server compute workloads
-  environment.variables = lib.mkMerge [
-    # Disable GUI-related variables
-    { WLR_NO_HARDWARE_CURSORS = "1"; }
-    { NIXOS_OZONE_WL = "0"; } # Disable Wayland for servers
-
-    # Optimize for compute workloads
-    { NVIDIA_DRIVER_CAPABILITIES = "compute,utility"; }
-    { NVIDIA_REQUIRE_CUDA = "cuda>=11.0"; }
-
-    # Set compute-focused configuration
-    { __GL_SYNC_TO_VBLANK = "0"; } # Disable VSync for compute
-    { __GL_ALLOW_UNOFFICIAL_PROTOCOL = "1"; }
-  ];
 
   # Kernel configuration for NVIDIA compute
   boot.kernel.sysctl = {
@@ -264,12 +261,6 @@
     "kernel.numa_balancing" = 0;
   };
 
-  # CUDA samples and development tools (optional)
-  environment.systemPackages = lib.mkIf config.features.development.enable (with pkgs; [
-    cuda-samples
-    nsight-systems
-    nsight-compute
-  ]);
 
   # Temperature monitoring for server workloads
   systemd.services.nvidia-thermal-monitor = {

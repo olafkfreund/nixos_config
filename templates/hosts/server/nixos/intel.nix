@@ -55,6 +55,16 @@
     # Disable GUI-related optimizations
     MOZ_ENABLE_WAYLAND = "0"; # Disable for servers
     QT_QPA_PLATFORM = "minimal"; # Minimal platform for servers
+    WLR_NO_HARDWARE_CURSORS = "1";
+    LIBGL_ALWAYS_SOFTWARE = "0"; # Allow hardware for compute
+
+    # Optimize for compute workloads
+    INTEL_DEBUG = ""; # Disable debugging overhead
+    I915_DEBUG = ""; # Disable debugging overhead
+
+    # Set compute-focused configuration
+    MESA_GLSL_CACHE_DISABLE = "false"; # Enable shader cache
+    MESA_GLSL_CACHE_MAX_SIZE = "100M"; # Reasonable cache size
   };
 
   # Kernel modules and parameters for server use
@@ -126,7 +136,6 @@
   # Disable gaming and audio for servers
   programs.gamemode.enable = lib.mkForce false;
   services.pipewire.enable = lib.mkForce false;
-  hardware.pulseaudio.enable = lib.mkForce false;
   sound.enable = lib.mkForce false;
 
   # Minimal hardware support for servers
@@ -239,20 +248,6 @@
     };
   };
 
-  # Environment optimization for server workloads
-  environment.variables = lib.mkMerge [
-    # Disable GUI-related variables
-    { WLR_NO_HARDWARE_CURSORS = "1"; }
-    { LIBGL_ALWAYS_SOFTWARE = "0"; } # Allow hardware for compute
-
-    # Optimize for compute workloads
-    { INTEL_DEBUG = ""; } # Disable debugging overhead
-    { I915_DEBUG = ""; } # Disable debugging overhead
-
-    # Set compute-focused configuration
-    { MESA_GLSL_CACHE_DISABLE = "false"; } # Enable shader cache
-    { MESA_GLSL_CACHE_MAX_SIZE = "100M"; } # Reasonable cache size
-  ];
 
   # Intel GPU frequency scaling for servers
   systemd.services.intel-gpu-frequency = {

@@ -306,6 +306,7 @@
             nodejs_22 = pkgs.nodejs_22;
           };
           gemini-cli = pkgs.callPackage ./pkgs/gemini-cli { };
+          opencode = pkgs.callPackage ./home/development/opencode { };
 
           # Live ISO images (temporarily disabled during flake restructuring)
           # live-iso-p620 = liveImages.liveImages.p620.config.system.build.isoImage;
