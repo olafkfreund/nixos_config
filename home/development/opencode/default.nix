@@ -1,7 +1,8 @@
 { lib
 , stdenv
 , fetchzip
-, autoPatchelfHook
+, makeWrapper
+, glibc
 }:
 
 stdenv.mkDerivation rec {
@@ -15,17 +16,27 @@ stdenv.mkDerivation rec {
   };
 
   nativeBuildInputs = [
-    autoPatchelfHook
+    makeWrapper
   ];
 
   buildInputs = [
     stdenv.cc.cc.lib
+    glibc
   ];
+
+  dontPatchELF = true;
+  dontStrip = true;
 
   installPhase = ''
     runHook preInstall
 
-    install -Dm755 opencode $out/bin/opencode
+    # Install the binary
+    install -Dm755 opencode $out/bin/.opencode-real
+
+    # Create wrapper that adds library paths and handles arguments
+    makeWrapper $out/bin/.opencode-real $out/bin/opencode \
+      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ stdenv.cc.cc.lib glibc ]}" \
+      --run 'if [ $# -eq 0 ]; then set -- .; fi'
 
     runHook postInstall
   '';
