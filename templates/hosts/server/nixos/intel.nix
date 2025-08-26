@@ -123,19 +123,23 @@
     powertop.enable = true; # Intel power optimization
   };
 
-  # Thermal management for Intel systems
-  services.thermald = {
-    enable = true;
-    debug = false;
-    configFile = null; # Use default configuration
+  # Intel-specific services for servers
+  services = {
+    # Thermal management for Intel systems
+    thermald = {
+      enable = true;
+      debug = false;
+      configFile = null; # Use default configuration
+    };
+
+    intel-gpu-tools.enable = lib.mkDefault false; # Enable if needed
+    
+    # Disable audio for servers
+    pipewire.enable = lib.mkForce false;
   };
 
-  # Intel-specific services for servers
-  services.intel-gpu-tools.enable = lib.mkDefault false; # Enable if needed
-
-  # Disable gaming and audio for servers
+  # Disable gaming for servers
   programs.gamemode.enable = lib.mkForce false;
-  services.pipewire.enable = lib.mkForce false;
   sound.enable = lib.mkForce false;
 
   # Minimal hardware support for servers

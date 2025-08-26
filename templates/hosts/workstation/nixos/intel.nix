@@ -124,25 +124,27 @@
     powertop.enable = true; # Intel power optimization
   };
 
-  # Thermal management for Intel systems
-  services.thermald = {
-    enable = true;
-    debug = false;
-    configFile = null; # Use default configuration
-  };
-
   # Intel-specific services
-  services.intel-gpu-tools.enable = true;
+  services = {
+    # Thermal management for Intel systems
+    thermald = {
+      enable = true;
+      debug = false;
+      configFile = null; # Use default configuration
+    };
 
-  # Audio configuration optimized for Intel
-  services.pipewire = {
-    extraConfig.pipewire = {
-      "context.properties" = {
-        # Optimize for power efficiency
-        "default.clock.rate" = 48000;
-        "default.clock.quantum" = 1024;
-        "default.clock.min-quantum" = 32;
-        "default.clock.max-quantum" = 8192;
+    intel-gpu-tools.enable = true;
+
+    # Audio configuration optimized for Intel
+    pipewire = {
+      extraConfig.pipewire = {
+        "context.properties" = {
+          # Optimize for power efficiency
+          "default.clock.rate" = 48000;
+          "default.clock.quantum" = 1024;
+          "default.clock.min-quantum" = 32;
+          "default.clock.max-quantum" = 8192;
+        };
       };
     };
   };
