@@ -121,9 +121,9 @@ in
       docker = true;
       incus = false;
       podman = true;
-      spice = true;
-      libvirt = true;
-      sunshine = true;
+      spice = false; # Disabled due to potential v4l2loopback dependency
+      libvirt = false; # Disabled due to potential v4l2loopback dependency
+      sunshine = false; # Disabled due to v4l2loopback build failures on P510
     };
 
     cloud = {
@@ -157,12 +157,12 @@ in
       thunderbird = false;
       obsidian = false;
       office = false;
-      webcam = true;
+      webcam = false; # Disabled due to v4l2loopback build failures on P510
       print = false;
     };
 
     media = {
-      droidcam = true;
+      droidcam = false; # Disabled due to v4l2loopback build failures on P510
     };
   };
 

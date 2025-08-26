@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ pkgs, lib, ... }: {
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -47,7 +47,10 @@
   ];
 
   # Force empty extraModulePackages to completely remove v4l2loopback
-  boot.extraModulePackages = [ ];
+  boot.extraModulePackages = lib.mkForce [ ];
+  
+  # Explicitly blacklist v4l2loopback kernel module
+  boot.blacklistedKernelModules = lib.mkForce [ "v4l2loopback" ];
 
   # Enable microcode updates
   hardware.cpu.intel.updateMicrocode = true;
