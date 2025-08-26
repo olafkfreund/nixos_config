@@ -44,7 +44,7 @@ in
       chromium.enable = false; # Exclude browser theming
       qt = {
         enable = true; # Enable Qt theming for consistent styling
-        platform = lib.mkForce "qt5ct"; # Use qt5ct platform (supported by Stylix)
+        platform = lib.mkForce "qtct"; # Use qtct platform (supported by stylix)
       };
     };
   };

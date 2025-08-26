@@ -13,7 +13,7 @@ in
       chromium.enable = false;
       qt = {
         enable = true; # Enable Qt theming for consistent styling
-        platform = lib.mkForce "qt5ct"; # Use qt5ct platform (supported by Stylix)
+        platform = lib.mkForce "qtct"; # Use qtct platform (supported by stylix)
       };
     };
     fonts = {

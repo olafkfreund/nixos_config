@@ -4,7 +4,7 @@
     bibata-cursors
     nix-prefetch-scripts
     polkit
-    libsForQt5.polkit-kde-agent
+    kdePackages.polkit-kde-agent-1
     libsForQt5.qt5.qtgraphicaleffects
 
     wget

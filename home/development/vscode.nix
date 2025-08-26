@@ -56,8 +56,8 @@ in
           github.copilot-chat
           eamodio.gitlens
           rust-lang.rust-analyzer
-          ms-python.python
-          ms-python.vscode-pylance
+          # ms-python.python  # Temporarily disabled due to pygls compatibility issue
+          # ms-python.vscode-pylance  # Temporarily disabled due to pygls dependency
           golang.go
         ];
 

@@ -121,7 +121,7 @@ in
     cloud = {
       enable = true;
       aws = true;
-      azure = true;
+      azure = false; # Temporarily disabled due to msgraph-core build failure
       google = true;
       k8s = true;
       terraform = true;
