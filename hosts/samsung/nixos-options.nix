@@ -25,7 +25,7 @@
   programs.thunderbird.enable = lib.mkForce true;
   programs.obsidian.enable = lib.mkForce true;
   programs.office.enable = lib.mkForce true;
-  programs.webcam.enable = lib.mkForce true;
+  programs.webcam.enable = lib.mkForce false; # Temporarily disabled due to v4l2loopback build failure
 
   # Virtualization tools
   services.docker.enable = lib.mkForce true;
