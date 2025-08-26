@@ -3,7 +3,7 @@
 , ...
 }: {
   home.packages = with pkgs; [
-    gitui
+    # gitui  # Temporarily disabled due to Rust compilation error
     git-credential-oauth
     git-credential-manager
     onefetch

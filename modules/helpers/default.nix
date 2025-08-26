@@ -23,7 +23,7 @@
     macchina #file manager
     slides #markdown presentation
     tldr #cheatsheet
-    khal #calendar
+    # khal #calendar - Temporarily disabled due to vdirsyncer test failures
     newsboat #rss reader
     buku #bookmark manager
   ];
