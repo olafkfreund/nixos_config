@@ -5,10 +5,10 @@
   hardware.nvidia = {
     modesetting.enable = true;
     powerManagement.enable = false;
-    nvidiaPersistenced = true;
+    nvidiaPersistenced = false;  # Disabled due to rpc/rpc.h build error with latest drivers
     open = false;
     nvidiaSettings = true;
-    package = config.boot.kernelPackages.nvidiaPackages.latest; # Use latest drivers to fix version mismatch
+    package = config.boot.kernelPackages.nvidiaPackages.production; # Use production drivers for stability
   };
   hardware.graphics = {
     enable = true;

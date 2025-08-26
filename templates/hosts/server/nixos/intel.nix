@@ -133,7 +133,7 @@
     };
 
     intel-gpu-tools.enable = lib.mkDefault false; # Enable if needed
-    
+
     # Disable audio for servers
     pipewire.enable = lib.mkForce false;
   };
