@@ -10,6 +10,7 @@
   # '';
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.plymouth.enable = true;
+  boot.blacklistedKernelModules = [ "v4l2loopback" ];
 
   # This is for OBS Virtual Cam Support - v4l2loopback setup
   # boot.kernelPackages = pkgs.linuxPackages_default;

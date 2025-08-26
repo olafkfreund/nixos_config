@@ -17,7 +17,7 @@
   # boot.kernelPackages = pkgs.linuxPackages_default;
   # boot.kernelModules = ["v4l2loopback"];
   boot.initrd.kernelModules = [ "amdgpu" ];
-  boot.blacklistedKernelModules = [ "nvidia" "nouveau" ];
+  boot.blacklistedKernelModules = [ "nvidia" "nouveau" "v4l2loopback" ];
   boot.kernelParams = [
     "amdgpu.gpu_recovery=1"
     "amd_iommu=on"
