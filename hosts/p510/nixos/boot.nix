@@ -46,10 +46,8 @@
     "xhci_pci" # USB 3.0 support
   ];
 
-  # boot.extraModulePackages = with config.boot.kernelPackages; [
-  #   v4l2loopback
-  #   # intel-thermald # Thermal management for Intel CPUs
-  # ];
+  # Force empty extraModulePackages to completely remove v4l2loopback
+  boot.extraModulePackages = [ ];
 
   # Enable microcode updates
   hardware.cpu.intel.updateMicrocode = true;

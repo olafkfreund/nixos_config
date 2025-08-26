@@ -14,7 +14,7 @@
     initrd.availableKernelModules = [ "ahci" "xhci_pci" "ata_generic" "ehci_pci" "usbhid" "usb_storage" "sd_mod" "sr_mod" "rtsx_usb_sdmmc" ];
     initrd.kernelModules = [ ];
     kernelModules = [ "kvm-intel" ];
-    kernelParams = [ "module_blacklist=nouveau" ];
+    kernelParams = [ "module_blacklist=nouveau,v4l2loopback" ];
     extraModulePackages = [ ];
   };
 
