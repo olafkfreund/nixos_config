@@ -24,7 +24,7 @@ in
     ../common/nixos/hosts.nix
     ./nixos/screens.nix
     ./nixos/plex.nix
-    ./flaresolverr.nix
+    # ./flaresolverr.nix  # Temporarily disabled due to xvfbwrapper Python 3.13 build error
     ./themes/stylix.nix
 
     # P510-specific additional modules (media server)
