@@ -16,7 +16,7 @@ let
       hash = "sha256-Hvp+fKWUP20ZeZDlNXwV+Re6qIQtnY0LwbhfJRRL99o=";
     };
 
-    npmDepsHash = "sha256-2CxhwxnzMCWgySrX/5Ejnl8v7hipQg6YeE8C6EcCWM0=";
+    npmDepsHash = "sha256-GYz6b4ZroARVbK4AaxINU6WQBnOPkpnEbaj5PYx3JOg=";
 
     inherit nodejs;
 
