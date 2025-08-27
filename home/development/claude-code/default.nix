@@ -9,14 +9,14 @@
 let
   claudeCode = buildNpmPackage rec {
     pname = "claude-code";
-    version = "1.0.93";
+    version = "1.0.94";
 
     src = fetchurl {
       url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-      hash = "sha256-+A+dACICdEQqVPkc2EvLt7iN7NAC/4RJjPeC+Vqox+s=";
+      hash = "sha256-Hvp+fKWUP20ZeZDlNXwV+Re6qIQtnY0LwbhfJRRL99o=";
     };
 
-    npmDepsHash = "sha256-GYz6b4ZroARVbK4AaxINU6WQBnOPkpnEbaj5PYx3JOg=";
+    npmDepsHash = "sha256-2CxhwxnzMCWgySrX/5Ejnl8v7hipQg6YeE8C6EcCWM0=";
 
     inherit nodejs;
 
