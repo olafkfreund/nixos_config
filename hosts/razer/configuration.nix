@@ -148,12 +148,12 @@ in
       thunderbird = true;
       obsidian = true;
       office = true;
-      webcam = true;
+      webcam = false; # Disabled due to v4l2loopback build failures
       print = true;
     };
 
     media = {
-      droidcam = true;
+      droidcam = false; # Disabled due to v4l2loopback dependency
     };
   };
 

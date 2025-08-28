@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }: {
+{ pkgs, ... }: {
   # Boot optimizations
   boot.loader.systemd-boot = {
     enable = true;
