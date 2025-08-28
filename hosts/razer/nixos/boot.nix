@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ pkgs, lib, ... }: {
   # Boot optimizations
   boot.loader.systemd-boot = {
     enable = true;
@@ -41,4 +41,10 @@
   # boot.extraModprobeConfig = ''
   #   options v4l2loopback devices=2 video_nr=1,2 card_label="OBS Cam1","OBS Cam2" exclusive_caps=1
   # '';
+
+  # Fix for v4l2loopback build failures
+  boot.blacklistedKernelModules = [ "v4l2loopback" ];
+  
+  # Force empty extraModulePackages to prevent any automatic inclusion
+  boot.extraModulePackages = lib.mkForce [ ];
 }
