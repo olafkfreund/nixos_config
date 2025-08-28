@@ -7,7 +7,7 @@
       modesetting.enable = true;
       powerManagement.enable = true;
       powerManagement.finegrained = false;
-      nvidiaPersistenced = true;
+      nvidiaPersistenced = false;
       open = false; # Use proprietary drivers for better Wayland compatibility
       nvidiaSettings = false;
       package = config.boot.kernelPackages.nvidiaPackages.beta; # Use beta for cutting edge support
