@@ -44,7 +44,4 @@
 
   # Fix for v4l2loopback build failures
   boot.blacklistedKernelModules = [ "v4l2loopback" ];
-  
-  # Force empty extraModulePackages to prevent any automatic inclusion
-  boot.extraModulePackages = lib.mkForce [ ];
 }
