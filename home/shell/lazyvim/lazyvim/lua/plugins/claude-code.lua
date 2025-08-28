@@ -16,7 +16,9 @@ return {
 
       -- Keymaps for Claude Code integration
       keymaps = {
-        toggle = { "<C-,>", "Toggle Claude Code terminal" }, -- Toggle Claude Code terminal
+        toggle = {
+          normal = "<C-,>", -- Toggle Claude Code terminal in normal mode
+        },
       },
 
       -- Claude Code CLI configuration
