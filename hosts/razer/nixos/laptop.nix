@@ -42,8 +42,10 @@
 
     # Support for closing lid
     logind = {
-      lidSwitch = lib.mkDefault "suspend";
-      lidSwitchExternalPower = "ignore";
+      settings.Login = {
+        HandleLidSwitch = lib.mkDefault "suspend";
+        HandleLidSwitchExternalPower = "ignore";
+      };
     };
   };
 
