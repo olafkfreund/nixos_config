@@ -42,7 +42,7 @@ in
 
   config = mkIf (emailCfg.enable && cfg.enable) {
     # Enable OAuth2 if selected
-    features.email.auth.oauth2.enable = mkIf (cfg.method == "oauth2") true;
+    features.email.auth.oauth2.enable = cfg.method == "oauth2";
 
     # Configure OAuth2 accounts if method is oauth2
     features.email.auth.oauth2.accounts = mkIf (cfg.method == "oauth2") {

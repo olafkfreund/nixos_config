@@ -49,7 +49,7 @@ in
     # AI tools (conditional enables)
     ai.ollama.enable = mkIf cfg.ai.enable cfg.ai.ollama;
     modules.ai.gemini-cli.enable = mkIf cfg.ai.enable cfg.ai.gemini-cli;
-    modules.ai.chatgpt.enable = mkIf cfg.ai.enable (cfg.ai.chatgpt or true);
+    modules.ai.chatgpt.enable = mkIf cfg.ai.enable (cfg.ai.chatgpt or false);
 
     # Enhanced AI provider support
     ai.providers = mkIf cfg.ai.providers.enable {

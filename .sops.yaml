@@ -1,0 +1,88 @@
+# SOPS configuration for NixOS secrets management
+# This file defines encryption keys and rules for secret files
+
+keys:
+  # Admin/User keys
+  - &olafkfreund age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p
+  
+  # Host keys (converted from SSH host keys using ssh-to-age)
+  # Extract with: ssh-keyscan hostname | ssh-to-age
+  - &p620 age1yubikey1qwqw7l3lqxrp7d2xh39rwx0x5q4xjqfkpzdxwyqal4x9s5pw2x6z9q
+  - &razer age1yubikey1q2z8xpqxrp7d2xh39rwx0x5q4xjqfkpzdxwyqal4x9s5pw2x6z9q
+  - &p510 age1yubikey1q3w7l3lqxrp7d2xh39rwx0x5q4xjqfkpzdxwyqal4x9s5pw2x6z9q
+  - &dex5550 age1yubikey1q4qw7l3lqxrp7d2xh39rwx0x5q4xjqfkpzdxwyqal4x9s5pw2x6z9q
+  - &samsung age1yubikey1q5qw7l3lqxrp7d2xh39rwx0x5q4xjqfkpzdxwyqal4x9s5pw2x6z9q
+
+# Group definitions for easier management
+groups:
+  - &admin_users
+    - *olafkfreund
+  
+  - &all_hosts
+    - *p620
+    - *razer
+    - *p510
+    - *dex5550
+    - *samsung
+  
+  - &workstations
+    - *p620
+    - *razer
+  
+  - &servers
+    - *p510
+    - *dex5550
+
+creation_rules:
+  # Default rule: All secrets accessible by admin and all hosts
+  - path_regex: secrets/common/[^/]+\.(yaml|json|env|ini)$
+    key_groups:
+    - age:
+      - *olafkfreund
+      - *p620
+      - *razer
+      - *p510
+      - *dex5550
+      - *samsung
+  
+  # Host-specific secrets - only accessible by admin and specific host
+  - path_regex: secrets/hosts/p620/[^/]+\.(yaml|json|env|ini)$
+    key_groups:
+    - age:
+      - *olafkfreund
+      - *p620
+  
+  - path_regex: secrets/hosts/razer/[^/]+\.(yaml|json|env|ini)$
+    key_groups:
+    - age:
+      - *olafkfreund
+      - *razer
+  
+  - path_regex: secrets/hosts/p510/[^/]+\.(yaml|json|env|ini)$
+    key_groups:
+    - age:
+      - *olafkfreund
+      - *p510
+  
+  - path_regex: secrets/hosts/dex5550/[^/]+\.(yaml|json|env|ini)$
+    key_groups:
+    - age:
+      - *olafkfreund
+      - *dex5550
+  
+  - path_regex: secrets/hosts/samsung/[^/]+\.(yaml|json|env|ini)$
+    key_groups:
+    - age:
+      - *olafkfreund
+      - *samsung
+  
+  # Binary files (for certificates, keys, etc.)
+  - path_regex: secrets/[^/]+\.bin$
+    key_groups:
+    - age:
+      - *olafkfreund
+      - *p620
+      - *razer
+      - *p510
+      - *dex5550
+      - *samsung

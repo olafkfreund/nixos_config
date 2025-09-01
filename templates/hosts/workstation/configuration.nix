@@ -287,8 +287,8 @@ in
       prometheus = false; # Only server runs Prometheus
       grafana = false; # Only server runs Grafana
       # GPU metrics - enable based on your GPU type
-      amdGpuMetrics = lib.mkIf (vars.gpu == "amd") true;
-      nvidiaGpuMetrics = lib.mkIf (vars.gpu == "nvidia") true;
+      amdGpuMetrics = vars.gpu == "amd";
+      nvidiaGpuMetrics = vars.gpu == "nvidia";
       aiMetrics = true; # Enable AI metrics collection
     };
 

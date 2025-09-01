@@ -24,7 +24,7 @@ in
   stylix.targets.firefox.profileNames = [ "default" ];
 
   # Enable Walker launcher when feature flag is set
-  desktop.walker.enable = lib.mkIf config.features.desktop.walker true;
+  desktop.walker.enable = config.features.desktop.walker;
 
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
