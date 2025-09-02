@@ -113,9 +113,9 @@ in
   config = mkMerge [
     # Individual terminal configurations (for backward compatibility)
     {
-      programs.alacritty.enable = config.alacritty.enable;
-      programs.foot.enable = config.foot.enable;
-      programs.kitty.enable = config.kitty.enable;
+      programs.alacritty.enable = mkDefault config.alacritty.enable;
+      programs.foot.enable = mkDefault config.foot.enable;
+      programs.kitty.enable = mkDefault config.kitty.enable;
     }
 
     # Enhanced unified configuration
