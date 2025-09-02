@@ -31,32 +31,29 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      # Core media tools (headless-compatible)
-    ]
-    # Media server tools (headless-compatible)
-    ++ lib.optionals cfg.server [
-      ffmpeg
-      mediainfo
-      youtube-dl
-      yt-dlp
-      rsync
-      rclone
-    ]
+    environment.systemPackages = with pkgs;
+      # Media server tools (headless-compatible)
+      lib.optionals cfg.server [
+        ffmpeg
+        mediainfo
+        youtube-dl
+        yt-dlp
+        rsync
+        rclone
+      ]
 
-    # Media processing tools (headless-compatible)
-    ++ lib.optionals cfg.processing [
-      ffmpeg-full
-      imagemagick
-      sox
-      lame
-      flac
-      opus-tools
-    ]
+      # Media processing tools (headless-compatible)
+      ++ lib.optionals cfg.processing [
+        ffmpeg-full
+        imagemagick
+        sox
+        lame
+        flac
+        opus-tools
+      ]
 
-    # GUI media applications (only if desktop enabled)
-    ++ lib.optionals (cfg.gui && (config.packages.desktop.enable or false)) (
-      packageSets.media
-    );
+      # GUI media applications (only if desktop enabled)
+      ++ lib.optionals (cfg.gui && (config.packages.desktop.enable or false))
+        packageSets.media;
   };
 }

@@ -31,21 +31,19 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      # Base virtualization tools
-    ]
-    # Docker tools (headless-compatible)
-    ++ lib.optionals cfg.docker packageSets.virtualization.docker
+    environment.systemPackages = with pkgs;
+      # Docker tools (headless-compatible)
+      lib.optionals cfg.docker packageSets.virtualization.docker
 
-    # Kubernetes tools (headless-compatible)
-    ++ lib.optionals cfg.kubernetes packageSets.virtualization.kubernetes
+      # Kubernetes tools (headless-compatible)
+      ++ lib.optionals cfg.kubernetes packageSets.virtualization.kubernetes
 
-    # VM management tools (mix of headless and GUI)
-    ++ lib.optionals cfg.vm (
-      # Headless VM tools
-      [ qemu libvirt spice spice-protocol ]
+      # VM management tools (mix of headless and GUI)
+      ++ lib.optionals cfg.vm (
+        # Headless VM tools
+        [ qemu libvirt spice spice-protocol ]
         # GUI VM tools (only if desktop enabled)
         ++ lib.optionals (config.packages.desktop.enable or false) [ virt-manager spice-gtk ]
-    );
+      );
   };
 }

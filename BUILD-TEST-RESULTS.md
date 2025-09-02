@@ -18,7 +18,7 @@
 
 ### **🔧 Tests Performed**
 
-**1. Local Build Test (P620)**
+### 1. Local Build Test (P620)
 
 ```bash
 sudo nixos-rebuild build --fast --show-trace
@@ -26,7 +26,7 @@ sudo nixos-rebuild build --fast --show-trace
 # Only warning: --fast deprecated (use --no-reexec)
 ```
 
-**2. Host Configuration Evaluation**
+### 2. Host Configuration Evaluation
 
 ```bash
 nix eval .#nixosConfigurations.{HOST}.config.system.name --raw
@@ -38,7 +38,7 @@ nix eval .#nixosConfigurations.{HOST}.config.system.name --raw
 # - samsung ✅
 ```
 
-**3. hostTypes Template Test**
+### 3. hostTypes Template Test
 
 ```bash
 nix eval .#lib.hostTypes.server.imports --json
@@ -47,7 +47,7 @@ nix eval .#lib.hostTypes.workstation.imports --json
 # Fixed import path issue resolved
 ```
 
-**4. Flake Structure Validation**
+### 4. Flake Structure Validation
 
 ```bash
 nix flake check --no-build

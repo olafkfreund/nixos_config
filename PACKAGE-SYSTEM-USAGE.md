@@ -8,7 +8,7 @@
 
 ### **Architecture Components**
 
-```
+```text
 modules/nixos/packages/
 ├── core.nix                    # Tier 1: Essential packages (ALL hosts)
 ├── conditional.nix             # Tier 2: Feature-based packages
