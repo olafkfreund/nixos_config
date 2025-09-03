@@ -165,7 +165,7 @@
     wget
     httpie
     jq
-    yq
+    yq-go # Use Go version consistently with system modules
 
     # Text processing
     gnused
