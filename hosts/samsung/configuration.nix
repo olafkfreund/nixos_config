@@ -45,6 +45,7 @@ in
     # Tailscale VPN Configuration - Samsung laptop
     tailscale = {
       enable = true;
+      authKeyFile = config.age.secrets.tailscale-auth-key.path;
       hostname = "samsung-laptop";
       acceptRoutes = true;
       acceptDns = false; # Keep NetworkManager DNS
