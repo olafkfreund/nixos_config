@@ -9,8 +9,8 @@ let
   vars = import ./variables.nix { };
 in
 {
-  # Use workstation template and add P510-specific modules
-  imports = hostTypes.workstation.imports ++ [
+  # Use server template for headless operation with media server modules
+  imports = hostTypes.server.imports ++ [
     # Hardware-specific imports
     ./nixos/hardware-configuration.nix
     ./nixos/power.nix
@@ -20,17 +20,18 @@ in
     ../common/nixos/envvar.nix
     ./nixos/cpu.nix
     ./nixos/memory.nix
-    ./nixos/greetd.nix
     ../common/nixos/hosts.nix
-    ./nixos/screens.nix
     ./nixos/plex.nix
     # ./flaresolverr.nix  # Temporarily disabled due to xvfbwrapper Python 3.13 build error
-    ./themes/stylix.nix
 
-    # P510-specific additional modules (media server)
+    # P510-specific server modules (media server)
     ../../modules/development/default.nix
-    ../common/hyprland.nix
     ../../modules/secrets/api-keys.nix
+    # Remove desktop-specific imports:
+    # ./nixos/greetd.nix      # Display manager - not needed for headless
+    # ./nixos/screens.nix     # Display configuration - not needed for headless
+    # ./themes/stylix.nix     # Theming - not needed for headless
+    # ../common/hyprland.nix  # Window manager - not needed for headless
   ];
 
   # Networking configuration
@@ -66,10 +67,10 @@ in
     dnssec = lib.mkForce "false"; # Resolve DNSSEC conflict
   };
 
-  # Use AI provider defaults with workstation profile
+  # Use AI provider defaults with server profile
   aiDefaults = {
     enable = true;
-    profile = "workstation";
+    profile = "server"; # Optimized for headless media server operation
   };
 
   # AI analysis services removed - were non-functional and consuming resources
@@ -243,18 +244,23 @@ in
   };
 
   # Specific service configurations
-  programs.streamdeck-ui = {
-    enable = true;
-    autoStart = true;
+  # StreamDeck UI disabled for headless operation
+  programs.streamdeck-ui.enable = lib.mkForce false;
+
+  # Disable X server for headless operation but keep NVIDIA driver for container toolkit
+  services.xserver = {
+    enable = lib.mkForce false;
+    videoDrivers = [ "nvidia" ]; # Required for nvidia-container-toolkit even in headless mode
   };
 
-  services.xserver = {
+  # Keep video drivers for hardware transcoding (Plex) but disable display
+  hardware.graphics = {
     enable = true;
-    displayManager.xserverArgs = [
-      "-nolisten tcp"
-      "-dpi 96"
+    extraPackages = with pkgs; [
+      nvidia-vaapi-driver
+      vaapiVdpau
+      libvdpau-va-gl
     ];
-    videoDrivers = [ "${vars.gpu}" ];
   };
 
   # Hardware-specific configurations

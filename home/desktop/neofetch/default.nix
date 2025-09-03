@@ -158,7 +158,7 @@ in
         separator=" $(color 4)>"
         stdout="off"
         image_backend="kitty"
-        image_source=$HOME/Pictures/wallpapers/gruvbox/finalizer.png
+        image_source=$HOME/Pictures/assets/wallpapers/gruvbox/finalizer.png
         image_size="100px"
         crop_mode="normal"
         crop_offset="west"

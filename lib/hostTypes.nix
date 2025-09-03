@@ -7,25 +7,16 @@
   base = {
     imports = [
       ../modules/core.nix
-      ../modules/monitoring.nix
-      ../modules/performance.nix
-      ../modules/cloud.nix
+      ../modules/nixos/core/monitoring.nix
+      ../modules/nixos/core/performance.nix
+      ../modules/nixos/development/cloud.nix
     ];
   };
 
   # Workstation configuration (P620, P510 - powerful desktop systems)
   workstation = {
     imports = [
-      ../modules/core.nix
-      ../modules/development.nix
-      ../modules/desktop.nix
-      ../modules/virtualization.nix
-      ../modules/monitoring.nix
-      ../modules/performance.nix
-      ../modules/email.nix
-      ../modules/cloud.nix
-      ../modules/programs.nix
-      ../modules/common/ai-defaults.nix
+      ../hosts/templates/workstation.nix
     ];
 
     # Workstation defaults
@@ -46,16 +37,7 @@
   # Laptop configuration (Razer, Samsung - portable systems with power management)
   laptop = {
     imports = [
-      ../modules/core.nix
-      ../modules/development.nix
-      ../modules/desktop.nix
-      ../modules/virtualization.nix
-      ../modules/monitoring.nix
-      ../modules/performance.nix
-      ../modules/email.nix
-      ../modules/cloud.nix
-      ../modules/programs.nix
-      ../modules/common/ai-defaults.nix
+      ../hosts/templates/laptop.nix
     ];
 
     # Laptop-specific defaults
@@ -87,15 +69,7 @@
   # Server configuration (DEX5550 - headless monitoring server)
   server = {
     imports = [
-      ../modules/core.nix
-      ../modules/monitoring.nix
-      ../modules/performance.nix
-      ../modules/cloud.nix
-      ../modules/development.nix # Minimal dev tools for administration
-      ../modules/email.nix
-      ../modules/programs.nix # Needed for media and other program features
-      ../modules/common/ai-defaults.nix
-      # No desktop modules for servers
+      ../hosts/templates/server.nix
     ];
 
     # Server-specific defaults
@@ -143,16 +117,7 @@
   # Hybrid configuration (HP - server/workstation hybrid)
   hybrid = {
     imports = [
-      ../modules/core.nix
-      ../modules/development.nix
-      ../modules/desktop.nix
-      ../modules/virtualization.nix
-      ../modules/monitoring.nix
-      ../modules/performance.nix
-      ../modules/email.nix
-      ../modules/cloud.nix
-      ../modules/programs.nix
-      ../modules/common/ai-defaults.nix
+      ../hosts/templates/workstation.nix # Use workstation template as base
     ];
 
     # Hybrid-specific defaults (can function as both workstation and server)

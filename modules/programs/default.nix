@@ -1,17 +1,17 @@
 _: {
   imports = [
-    # ./hyprland/hypr.nix
-    ./1password/1password.nix
-    # ./steam/steam.nix
-    ./gnupg/gnupg.nix
-    ./dconf/dconf.nix
-    ./sway/sway.nix
-    ./nix-ld/default.nix
-    ./firefox/default.nix
-    ./wshowkeys/default.nix
-    ./droidcam/default.nix
-    ./yt-x/default.nix # Terminal YouTube browser
-    # ./streamcontroller/default.nix
-    # ./thunar/default.nix
+    # ./hyprland.nix
+    ./1password.nix
+    # ./steam.nix
+    ./gnupg.nix
+    ./dconf.nix
+    ./sway.nix
+    ./nix-ld.nix
+    ./firefox.nix
+    ./wshowkeys.nix
+    ./droidcam.nix
+    ./yt-x.nix # Terminal YouTube browser
+    # ./streamcontroller.nix
+    # ./thunar.nix
   ];
 }
