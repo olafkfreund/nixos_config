@@ -165,7 +165,7 @@
     wget
     httpie
     jq
-    yq-go # Use Go version consistently with system modules
+    # yq-go provided by developer/server-admin profiles
 
     # Text processing
     gnused

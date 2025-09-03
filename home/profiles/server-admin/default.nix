@@ -124,7 +124,7 @@
     curl
     wget
     jq
-    yq
+    yq-go  # Use Go version consistently across all configurations
 
     # Network tools
     nmap

@@ -43,7 +43,7 @@
     python3
     python3Packages.pyyaml
     jq
-    yq
+    yq-go  # Use Go version consistently
 
     # Archive tools
     unzip

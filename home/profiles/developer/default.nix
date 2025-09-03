@@ -146,7 +146,7 @@
 
     # Text processing and analysis
     jq
-    yq
+    yq-go  # Use Go version consistently across all configurations
     xmlstarlet
 
     # Performance and monitoring

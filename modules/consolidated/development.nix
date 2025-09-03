@@ -9,7 +9,7 @@ with lib; let
     essential = with pkgs; [
       git git-crypt gh
       curl wget
-      jq yq
+      jq yq-go  # Use Go version consistently
       direnv
     ];
     
