@@ -3,7 +3,7 @@
 
     background {
         monitor =
-        path = /home/${config.home.username}/Pictures/wallpapers/gruvbox/hypr/fly_agaric_mushroom_fall_foliage_117318_1920x1080.jpg
+        path = /home/${config.home.username}/Pictures/assets/wallpapers/gruvbox/hypr/fly_agaric_mushroom_fall_foliage_117318_1920x1080.jpg
         blur_size = 7
         blur_passes = 3 # 0 disables blurring
         noise = 0.0117

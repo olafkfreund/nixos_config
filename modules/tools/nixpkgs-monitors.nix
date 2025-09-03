@@ -59,13 +59,13 @@ with lib; let
         $(basename "$0") --init                    # First time setup
         $(basename "$0") --update                  # Check for updates
         $(basename "$0") --since 7                # Show changes from last 7 days
-        $(basename "$0") --channel nixos-24.05    # Monitor stable channel
+        $(basename "$0") --channel nixos-25.05    # Monitor stable channel
         $(basename "$0") --watch                   # Continuous monitoring
 
     ''${BOLD}CHANNELS:''${NC}
         nixos-unstable     Latest unstable packages (default)
-        nixos-24.05        Current stable release
-        nixos-23.11        Previous stable release
+        nixos-25.05        Current stable release
+        nixos-25.11        Previous stable release
     EOF
     }
 

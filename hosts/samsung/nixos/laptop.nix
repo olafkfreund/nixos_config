@@ -46,9 +46,9 @@
     criticalPowerAction = "Hibernate";
   };
 
-  # Support for closing lid
-  services.logind = {
-    lidSwitch = lib.mkDefault "suspend";
-    lidSwitchExternalPower = "ignore";
+  # Support for closing lid - using modern option format
+  services.logind.settings.Login = {
+    HandleLidSwitch = lib.mkDefault "suspend";
+    HandleLidSwitchExternalPower = "ignore";
   };
 }

@@ -327,9 +327,9 @@
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
         in
         {
-          default = import ./shells/dev.nix { inherit pkgs inputs; };
-          testing = import ./shells/testing.nix { inherit pkgs; };
-          docs = import ./shells/docs.nix { inherit pkgs; };
+          default = import ./tools/dev.nix { inherit pkgs inputs; };
+          testing = import ./tools/testing.nix { inherit pkgs; };
+          docs = import ./tools/docs.nix { inherit pkgs; };
         };
 
       # ========================================
@@ -346,7 +346,7 @@
       apps.x86_64-linux =
         let
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
-          appPkgs = import ./apps/default.nix { inherit pkgs; };
+          appPkgs = import ./tools/default.nix { inherit pkgs; };
         in
         {
           deploy = {

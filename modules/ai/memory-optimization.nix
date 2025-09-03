@@ -280,6 +280,6 @@ in
     ];
 
     # Enable automatic optimization if configured
-    systemd.services.ai-memory-optimization.enable = mkIf cfg.autoOptimize true;
+    systemd.services.ai-memory-optimization.enable = cfg.autoOptimize;
   };
 }

@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   nix = {
     settings = {
       # Enable flakes and nix-command by default
