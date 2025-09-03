@@ -105,7 +105,7 @@
   };
 
   # Override desktop features for P620 (add to existing desktop config)
-  features.desktop.quickshell = true;
+  features.desktop.quickshell = false; # Temporarily disabled - QML files missing
 
   home.packages = [
     # pkgs.customPkgs.rofi-blocks

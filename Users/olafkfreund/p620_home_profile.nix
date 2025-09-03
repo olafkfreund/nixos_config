@@ -35,7 +35,7 @@
   # P620-specific feature overrides
   features = {
     # Override desktop features for P620 (AMD workstation optimizations)
-    desktop.quickshell = true;
+    desktop.quickshell = false; # Temporarily disabled - QML files missing
 
     # Full gaming support on primary workstation
     gaming = {

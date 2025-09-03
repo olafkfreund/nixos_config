@@ -54,7 +54,7 @@ in
         home = cfg.dataDir;
         createHome = true;
       };
-      
+
       groups.${cfg.group} = { };
     };
 
@@ -63,12 +63,12 @@ in
       description = "Service Name daemon";
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" ];
-      
+
       serviceConfig = {
         Type = "simple";
         User = cfg.user;
         Group = cfg.group;
-        
+
         # Security hardening
         NoNewPrivileges = true;
         ProtectSystem = "strict";
@@ -78,18 +78,18 @@ in
         ProtectKernelTunables = true;
         ProtectControlGroups = true;
         RestrictSUIDSGID = true;
-        
+
         # Resource limits
         MemoryMax = "1G";
         TasksMax = 1000;
-        
+
         # Working directory and data
         WorkingDirectory = cfg.dataDir;
         ReadWritePaths = [ cfg.dataDir ];
-        
+
         # Command
         ExecStart = "${cfg.package}/bin/service-binary ${concatStringsSep " " cfg.extraArgs}";
-        
+
         # Restart policy
         Restart = "on-failure";
         RestartSec = "5s";
