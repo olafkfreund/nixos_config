@@ -1,9 +1,12 @@
-{ config, lib, pkgs, ... }:
-with lib;
-let
-  cfg = config.desktop.gnome;
-in
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
+  cfg = config.desktop.gnome;
+in {
   options.desktop.gnome = {
     enable = mkEnableOption "GNOME desktop environment";
 
@@ -12,7 +15,7 @@ in
 
       packages = mkOption {
         type = types.listOf types.package;
-        default = [ ];
+        default = [];
         description = "List of GNOME Shell extension packages to install";
         example = literalExpression ''
           with pkgs.gnomeExtensions; [
@@ -29,7 +32,7 @@ in
 
       packages = mkOption {
         type = types.listOf types.package;
-        default = [ ];
+        default = [];
         description = "List of additional GNOME application packages to install";
         example = literalExpression ''
           with pkgs; [
@@ -45,7 +48,7 @@ in
       enable = mkEnableOption "GNOME theming with Gruvbox";
 
       variant = mkOption {
-        type = types.enum [ "dark" "light" ];
+        type = types.enum ["dark" "light"];
         default = "dark";
         description = "Theme variant to use";
       };
@@ -64,7 +67,6 @@ in
   ];
 
   config = mkIf cfg.enable {
-
     # Enable GNOME desktop services
     services.gnome-keyring.enable = true;
 
@@ -74,6 +76,7 @@ in
       gnome-tweaks
       dconf-editor
       gnome-extension-manager
+      gruvbox-gtk-theme
 
       # Additional utilities
       gnome-screenshot
@@ -99,7 +102,11 @@ in
       "org/gnome/desktop/interface" = {
         clock-format = "24h";
         show-battery-percentage = true;
-        gtk-theme = mkDefault (if cfg.theme.enable then "Adwaita-dark" else "Adwaita");
+        gtk-theme = mkDefault (
+          if cfg.theme.enable
+          then "Adwaita-dark"
+          else "Adwaita"
+        );
         icon-theme = mkDefault "Adwaita";
         cursor-theme = mkDefault "Adwaita";
       };
@@ -134,18 +141,18 @@ in
 
       # Window management
       "org/gnome/desktop/wm/keybindings" = {
-        close = [ "<Super>q" ];
-        toggle-maximized = [ "<Super>m" ];
-        toggle-fullscreen = [ "F11" ];
+        close = ["<Super>q"];
+        toggle-maximized = ["<Super>m"];
+        toggle-fullscreen = ["F11"];
       };
 
       # Application switcher
       "org/gnome/shell/keybindings" = {
-        switch-to-application-1 = [ "<Super>1" ];
-        switch-to-application-2 = [ "<Super>2" ];
-        switch-to-application-3 = [ "<Super>3" ];
-        switch-to-application-4 = [ "<Super>4" ];
-        switch-to-application-5 = [ "<Super>5" ];
+        switch-to-application-1 = ["<Super>1"];
+        switch-to-application-2 = ["<Super>2"];
+        switch-to-application-3 = ["<Super>3"];
+        switch-to-application-4 = ["<Super>4"];
+        switch-to-application-5 = ["<Super>5"];
       };
     };
 
