@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.desktop.gnome;
-in {
+in
+{
   options.desktop.gnome = {
     enable = mkEnableOption "GNOME desktop environment";
 
@@ -15,7 +15,7 @@ in {
 
       packages = mkOption {
         type = types.listOf types.package;
-        default = [];
+        default = [ ];
         description = "List of GNOME Shell extension packages to install";
         example = literalExpression ''
           with pkgs.gnomeExtensions; [
@@ -32,7 +32,7 @@ in {
 
       packages = mkOption {
         type = types.listOf types.package;
-        default = [];
+        default = [ ];
         description = "List of additional GNOME application packages to install";
         example = literalExpression ''
           with pkgs; [
@@ -48,7 +48,7 @@ in {
       enable = mkEnableOption "GNOME theming with Gruvbox";
 
       variant = mkOption {
-        type = types.enum ["dark" "light"];
+        type = types.enum [ "dark" "light" ];
         default = "dark";
         description = "Theme variant to use";
       };
@@ -119,7 +119,7 @@ in {
       "org/gnome/shell" = {
         favorite-apps = [
           "org.gnome.Nautilus.desktop"
-          "firefox.desktop"
+          "google-chrome.desktop"
           "org.gnome.Terminal.desktop"
           "code.desktop"
           "org.gnome.Settings.desktop"
@@ -141,18 +141,18 @@ in {
 
       # Window management
       "org/gnome/desktop/wm/keybindings" = {
-        close = ["<Super>q"];
-        toggle-maximized = ["<Super>m"];
-        toggle-fullscreen = ["F11"];
+        close = [ "<Super>q" ];
+        toggle-maximized = [ "<Super>m" ];
+        toggle-fullscreen = [ "F11" ];
       };
 
       # Application switcher
       "org/gnome/shell/keybindings" = {
-        switch-to-application-1 = ["<Super>1"];
-        switch-to-application-2 = ["<Super>2"];
-        switch-to-application-3 = ["<Super>3"];
-        switch-to-application-4 = ["<Super>4"];
-        switch-to-application-5 = ["<Super>5"];
+        switch-to-application-1 = [ "<Super>1" ];
+        switch-to-application-2 = [ "<Super>2" ];
+        switch-to-application-3 = [ "<Super>3" ];
+        switch-to-application-4 = [ "<Super>4" ];
+        switch-to-application-5 = [ "<Super>5" ];
       };
     };
 
@@ -160,11 +160,11 @@ in {
     xdg.mimeApps = {
       enable = true;
       defaultApplications = {
-        "text/html" = "firefox.desktop";
-        "x-scheme-handler/http" = "firefox.desktop";
-        "x-scheme-handler/https" = "firefox.desktop";
-        "x-scheme-handler/about" = "firefox.desktop";
-        "x-scheme-handler/unknown" = "firefox.desktop";
+        "text/html" = "google-chrome.desktop";
+        "x-scheme-handler/http" = "google-chrome.desktop";
+        "x-scheme-handler/https" = "google-chrome.desktop";
+        "x-scheme-handler/about" = "google-chrome.desktop";
+        "x-scheme-handler/unknown" = "google-chrome.desktop";
         "inode/directory" = "org.gnome.Nautilus.desktop";
         "application/pdf" = "org.gnome.Evince.desktop";
         "image/jpeg" = "org.gnome.eog.desktop";

@@ -17,7 +17,7 @@ in
     };
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && !(config.desktop.gnome.enable or false)) {
     home.packages = [ cfg.package ];
 
     # Enable swaync service via systemd

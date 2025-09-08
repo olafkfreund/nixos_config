@@ -11,9 +11,9 @@ in
     enable = mkEnableOption "Dunst notification daemon";
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && !(config.desktop.gnome.enable or false)) {
     services.dunst = {
-      enable = false;
+      enable = true;
 
       settings = {
         global = {

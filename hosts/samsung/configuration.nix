@@ -20,7 +20,6 @@ in
     ../common/nixos/i18n.nix
     ../common/nixos/hosts.nix
     ../common/nixos/envvar.nix
-    ./nixos/greetd.nix
     ./nixos/cpu.nix
     ./nixos/laptop.nix
     ./nixos/memory.nix
@@ -240,8 +239,13 @@ in
 
     # Desktop environment
     desktopManager.gnome.enable = true;
+  };
 
-    # Hardware and service specific configurations
+  # Display manager
+  services.displayManager.gdm.enable = true;
+
+  # Hardware and service specific configurations
+  services = {
     playerctld.enable = true;
     fwupd.enable = true;
     ollama.acceleration = vars.acceleration;
