@@ -358,7 +358,11 @@ in
 
   nixpkgs.config = {
     allowBroken = true;
-    permittedInsecurePackages = [ "olm-3.2.16" "python3.12-youtube-dl-2021.12.17" ];
+    permittedInsecurePackages = [
+      "olm-3.2.16"
+      "python3.12-youtube-dl-2021.12.17"
+      "libsoup-2.74.3" # Temporary: Required by some GNOME packages until migration to libsoup-3
+    ];
   };
   system.stateVersion = "25.11";
 }
