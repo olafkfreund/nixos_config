@@ -15,7 +15,6 @@
 
     # Re-enabled desktop modules (enhanced configs take precedence)
     ./plasma/default.nix
-    ./ags/default.nix
     ./dunst/default.nix
     ./swaylock/default.nix
     ./com.nix

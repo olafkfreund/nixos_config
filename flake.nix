@@ -94,7 +94,6 @@
       url = "github:Benexl/yt-x";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    ags.url = "github:Aylur/ags";
 
     # Hardware specific
     razer-laptop-control.url = "github:Razer-Linux/razer-laptop-control-no-dkms";
@@ -119,7 +118,6 @@
     , lanzaboote
     , razer-laptop-control
     , nix-colors
-    , ags
     , nix-snapd
     , spicetify-nix
     , home-manager
@@ -244,7 +242,6 @@
                       nixpkgs
                       zjstatus
                       spicetify-nix
-                      ags
                       agenix
                       razer-laptop-control
                       host
