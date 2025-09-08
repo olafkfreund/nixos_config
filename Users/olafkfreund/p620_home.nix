@@ -1,7 +1,8 @@
-{ lib
-, pkgs
-, config
-, ...
+{
+  lib,
+  pkgs,
+  config,
+  ...
 }: {
   imports = [
     # Import common modules
@@ -17,14 +18,14 @@
   ];
 
   # Fix Stylix Firefox profile warnings
-  stylix.targets.firefox.profileNames = [ "default" ];
+  stylix.targets.firefox.profileNames = ["default"];
 
   # Enable Walker launcher when feature flag is set
   desktop.walker.enable = config.features.desktop.walker;
 
   # GNOME desktop environment (optional - can be enabled/disabled)
   desktop.gnome = {
-    enable = false; # Set to true to enable GNOME
+    enable = true; # Set to true to enable GNOME
     theme = {
       enable = true;
       variant = "dark";

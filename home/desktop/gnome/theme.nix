@@ -45,17 +45,17 @@ in
       (nerdfonts.override { fonts = [ "JetBrainsMono" "FiraCode" ]; })
     ];
 
-    # GNOME-specific theming via dconf
+    # GNOME-specific theming via dconf (defaults - can be overridden)
     dconf.settings = mkIf cfg.theme.enable {
       "org/gnome/desktop/interface" = {
-        gtk-theme = if cfg.theme.variant == "dark" then "Gruvbox-Dark-BL" else "Gruvbox-Light-BL";
-        icon-theme = "Gruvbox-Plus-Dark";
-        cursor-theme = "Bibata-Modern-Classic";
-        cursor-size = 16;
-        font-name = "Inter 11";
-        document-font-name = "Inter 11";
-        monospace-font-name = "JetBrainsMono Nerd Font 10";
-        color-scheme = if cfg.theme.variant == "dark" then "prefer-dark" else "prefer-light";
+        gtk-theme = mkDefault (if cfg.theme.variant == "dark" then "Gruvbox-Dark-BL" else "Gruvbox-Light-BL");
+        icon-theme = mkDefault "Gruvbox-Plus-Dark";
+        cursor-theme = mkDefault "Bibata-Modern-Classic";
+        cursor-size = mkDefault 16;
+        font-name = mkDefault "Inter 11";
+        document-font-name = mkDefault "Inter 11";
+        monospace-font-name = mkDefault "JetBrainsMono Nerd Font 10";
+        color-scheme = mkDefault (if cfg.theme.variant == "dark" then "prefer-dark" else "prefer-light");
       };
 
       "org/gnome/desktop/wm/preferences" = {
@@ -91,19 +91,19 @@ in
         visual-bell = false;
       };
 
-      # Set Gruvbox wallpaper if available
+      # Set Gruvbox wallpaper if available (defaults - can be overridden by Stylix)
       "org/gnome/desktop/background" = {
-        picture-uri = "file://${pkgs.gruvbox-gtk-theme}/share/themes/Gruvbox-Dark-BL/wallpaper.jpg";
-        picture-uri-dark = "file://${pkgs.gruvbox-gtk-theme}/share/themes/Gruvbox-Dark-BL/wallpaper.jpg";
-        picture-options = "zoom";
-        primary-color = "#282828";
-        secondary-color = "#1d2021";
+        picture-uri = mkDefault "file://${pkgs.gruvbox-gtk-theme}/share/themes/Gruvbox-Dark-BL/wallpaper.jpg";
+        picture-uri-dark = mkDefault "file://${pkgs.gruvbox-gtk-theme}/share/themes/Gruvbox-Dark-BL/wallpaper.jpg";
+        picture-options = mkDefault "zoom";
+        primary-color = mkDefault "#282828";
+        secondary-color = mkDefault "#1d2021";
       };
 
       "org/gnome/desktop/screensaver" = {
-        picture-uri = "file://${pkgs.gruvbox-gtk-theme}/share/themes/Gruvbox-Dark-BL/wallpaper.jpg";
-        primary-color = "#282828";
-        secondary-color = "#1d2021";
+        picture-uri = mkDefault "file://${pkgs.gruvbox-gtk-theme}/share/themes/Gruvbox-Dark-BL/wallpaper.jpg";
+        primary-color = mkDefault "#282828";
+        secondary-color = mkDefault "#1d2021";
       };
     };
 
@@ -136,38 +136,40 @@ in
       };
     };
 
-    # Custom CSS for GNOME applications (if needed)
-    home.file.".config/gtk-3.0/gtk.css".text = ''
-      /* Custom Gruvbox styling */
-      .titlebar {
-        background: #282828;
-        color: #ebdbb2;
-      }
+    # Custom CSS for GNOME applications (only if Stylix is not managing GTK)
+    home.file.".config/gtk-3.0/gtk.css" = mkIf (!config.stylix.targets.gtk.enable or true) {
+      text = ''
+        /* Custom Gruvbox styling */
+        .titlebar {
+          background: #282828;
+          color: #ebdbb2;
+        }
 
-      .sidebar {
-        background: #32302f;
-      }
+        .sidebar {
+          background: #32302f;
+        }
 
-      .view {
-        background: #282828;
-        color: #ebdbb2;
-      }
+        .view {
+          background: #282828;
+          color: #ebdbb2;
+        }
 
-      /* Dark variant specific */
-      @define-color theme_fg_color #ebdbb2;
-      @define-color theme_bg_color #282828;
-      @define-color theme_selected_bg_color #458588;
-      @define-color theme_selected_fg_color #ebdbb2;
-      @define-color insensitive_bg_color #3c3836;
-      @define-color insensitive_fg_color #928374;
-      @define-color insensitive_base_color #32302f;
-      @define-color theme_unfocused_fg_color #a89984;
-      @define-color theme_unfocused_bg_color #32302f;
-      @define-color theme_unfocused_base_color #282828;
-      @define-color theme_unfocused_selected_bg_color #458588;
-      @define-color theme_unfocused_selected_fg_color #ebdbb2;
-      @define-color borders #504945;
-      @define-color unfocused_borders #3c3836;
-    '';
+        /* Dark variant specific */
+        @define-color theme_fg_color #ebdbb2;
+        @define-color theme_bg_color #282828;
+        @define-color theme_selected_bg_color #458588;
+        @define-color theme_selected_fg_color #ebdbb2;
+        @define-color insensitive_bg_color #3c3836;
+        @define-color insensitive_fg_color #928374;
+        @define-color insensitive_base_color #32302f;
+        @define-color theme_unfocused_fg_color #a89984;
+        @define-color theme_unfocused_bg_color #32302f;
+        @define-color theme_unfocused_base_color #282828;
+        @define-color theme_unfocused_selected_bg_color #458588;
+        @define-color theme_unfocused_selected_fg_color #ebdbb2;
+        @define-color borders #504945;
+        @define-color unfocused_borders #3c3836;
+      '';
+    };
   };
 }

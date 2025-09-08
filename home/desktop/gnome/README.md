@@ -1,6 +1,7 @@
 # GNOME Desktop Environment Configuration
 
-A comprehensive, optional GNOME desktop environment configuration for NixOS with Gruvbox theming, extensions support, and extensive customization options.
+A comprehensive, optional GNOME desktop environment configuration for NixOS with Gruvbox theming, 
+extensions support, and extensive customization options.
 
 ## Features
 
@@ -15,7 +16,8 @@ A comprehensive, optional GNOME desktop environment configuration for NixOS with
 
 ### Enabling GNOME
 
-GNOME is **disabled by default** on all hosts. To enable it, set `desktop.gnome.enable = true` in your host-specific home configuration:
+GNOME is **disabled by default** on all hosts. To enable it, set `desktop.gnome.enable = true` 
+in your host-specific home configuration:
 
 #### P620 (Workstation)
 
@@ -268,7 +270,7 @@ Edit `keybindings.nix` to add or modify keyboard shortcuts.
 
 ## Architecture
 
-```
+```text
 home/desktop/gnome/
 ├── default.nix      # Main configuration and options
 ├── theme.nix        # Gruvbox theming and Stylix integration

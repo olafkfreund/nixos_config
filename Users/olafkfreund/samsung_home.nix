@@ -1,7 +1,8 @@
-{ lib
-, pkgs
-, config
-, ...
+{
+  lib,
+  pkgs,
+  config,
+  ...
 }: {
   imports = [
     # Import common modules
@@ -17,7 +18,7 @@
   ];
 
   # Fix Stylix Firefox profile warnings
-  stylix.targets.firefox.profileNames = [ "default" ];
+  stylix.targets.firefox.profileNames = ["default"];
 
   # Enable Walker launcher when feature flag is set
   desktop.walker.enable = config.features.desktop.walker;
