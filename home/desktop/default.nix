@@ -31,6 +31,7 @@
     ./lanmouse/default.nix
     ./walker/default.nix # Re-enabled with Stylix integration
     ./obsidian/default.nix
+    ./gnome # GNOME desktop environment (optional)
   ];
 
   home.packages = with pkgs; [

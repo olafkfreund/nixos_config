@@ -13,6 +13,7 @@
     # Desktop modules for mobile desktop environment
     ../../desktop/sway/default.nix # Lightweight window manager
     ../../desktop/sway/swayosd.nix # System OSD for laptops
+    ../../desktop/gnome # GNOME desktop environment (optional)
     ../../desktop/dunst/default.nix # Lightweight notifications
     ../../desktop/swaync/default.nix # Alternative notification system
     ../../desktop/zathura/default.nix # Lightweight PDF viewer

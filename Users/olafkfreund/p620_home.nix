@@ -1,7 +1,8 @@
-{ lib
-, pkgs
-, config
-, ...
+{
+  lib,
+  pkgs,
+  config,
+  ...
 }: {
   imports = [
     # Import common modules
@@ -17,10 +18,38 @@
   ];
 
   # Fix Stylix Firefox profile warnings
-  stylix.targets.firefox.profileNames = [ "default" ];
+  stylix.targets.firefox.profileNames = ["default"];
 
   # Enable Walker launcher when feature flag is set
   desktop.walker.enable = config.features.desktop.walker;
+
+  # GNOME desktop environment (optional - can be enabled/disabled)
+  desktop.gnome = {
+    enable = false; # Set to true to enable GNOME
+    theme = {
+      enable = true;
+      variant = "dark";
+    };
+    extensions = {
+      enable = true;
+      packages = with pkgs.gnomeExtensions; [
+        # Add popular extensions for workstation use
+        dash-to-dock
+        appindicator
+        vitals
+        blur-my-shell
+      ];
+    };
+    apps = {
+      enable = true;
+      packages = with pkgs; [
+        # Add additional GNOME apps as needed
+        gnome-tweaks
+        dconf-editor
+      ];
+    };
+    keybindings.enable = true;
+  };
 
   # Use the new features system instead of multiple lib.mkForce calls
   features = {

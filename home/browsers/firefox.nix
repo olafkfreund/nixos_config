@@ -1,12 +1,12 @@
-{ config
-, lib
-, pkgs
-, ...
+{
+  config,
+  lib,
+  pkgs,
+  ...
 }:
 with lib; let
   cfg = config.browsers.firefox;
-in
-{
+in {
   options.browsers.firefox = {
     enable = mkEnableOption {
       default = true;
@@ -17,7 +17,7 @@ in
     programs = {
       firefox = {
         enable = true;
-        package = pkgs.firefox;
+        package = pkgs.firefox-unwrapped;
 
         # Wayland-specific optimizations
         policies = {

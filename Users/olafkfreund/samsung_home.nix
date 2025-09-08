@@ -22,6 +22,35 @@
   # Enable Walker launcher when feature flag is set
   desktop.walker.enable = config.features.desktop.walker;
 
+  # GNOME desktop environment (optional - can be enabled/disabled)
+  desktop.gnome = {
+    enable = false; # Set to true to enable GNOME
+    theme = {
+      enable = true;
+      variant = "dark";
+    };
+    extensions = {
+      enable = true;
+      packages = with pkgs.gnomeExtensions; [
+        # Laptop-optimized extensions
+        dash-to-dock
+        appindicator
+        battery-threshold # Battery management
+        caffeine # Prevent sleep
+        clipboard-indicator
+      ];
+    };
+    apps = {
+      enable = true;
+      packages = with pkgs; [
+        # Essential GNOME apps for laptop
+        gnome-power-manager
+        gnome-system-monitor
+      ];
+    };
+    keybindings.enable = true;
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     terminals = {
