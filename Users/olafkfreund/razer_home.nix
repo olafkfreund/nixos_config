@@ -1,11 +1,12 @@
+{ lib
+, pkgs
+, config
+, ...
+}:
+let
+  vars = import ../../hosts/razer/variables.nix { };
+in
 {
-  lib,
-  pkgs,
-  config,
-  ...
-}: let
-  vars = import ../../hosts/razer/variables.nix {};
-in {
   imports = [
     # Import common modules
     ../common/default.nix
@@ -20,7 +21,7 @@ in {
   ];
 
   # Fix Stylix Firefox profile warnings
-  stylix.targets.firefox.profileNames = ["default"];
+  stylix.targets.firefox.profileNames = [ "default" ];
 
   # Enable Walker launcher when feature flag is set
   desktop.walker.enable = config.features.desktop.walker;
