@@ -35,7 +35,7 @@ in
           with pkgs; [
             gnome-tweaks
             dconf-editor
-            gnome-extensions-app
+            gnome-extension-manager
           ]
         '';
       };
@@ -73,7 +73,7 @@ in
       # Core GNOME utilities
       gnome-tweaks
       dconf-editor
-      gnome-extensions-app
+      gnome-extension-manager
 
       # Additional utilities
       gnome-screenshot
@@ -99,9 +99,9 @@ in
       "org/gnome/desktop/interface" = {
         clock-format = "24h";
         show-battery-percentage = true;
-        gtk-theme = if cfg.theme.enable then "Adwaita-dark" else "Adwaita";
-        icon-theme = "Adwaita";
-        cursor-theme = "Adwaita";
+        gtk-theme = mkDefault (if cfg.theme.enable then "Adwaita-dark" else "Adwaita");
+        icon-theme = mkDefault "Adwaita";
+        cursor-theme = mkDefault "Adwaita";
       };
 
       "org/gnome/desktop/wm/preferences" = {
@@ -149,22 +149,19 @@ in
       };
     };
 
-    # XDG configuration
-    xdg = {
+    # XDG mime applications (XDG directories handled by base-home.nix)
+    xdg.mimeApps = {
       enable = true;
-      mimeApps = {
-        enable = true;
-        defaultApplications = {
-          "text/html" = "firefox.desktop";
-          "x-scheme-handler/http" = "firefox.desktop";
-          "x-scheme-handler/https" = "firefox.desktop";
-          "x-scheme-handler/about" = "firefox.desktop";
-          "x-scheme-handler/unknown" = "firefox.desktop";
-          "inode/directory" = "org.gnome.Nautilus.desktop";
-          "application/pdf" = "org.gnome.Evince.desktop";
-          "image/jpeg" = "org.gnome.eog.desktop";
-          "image/png" = "org.gnome.eog.desktop";
-        };
+      defaultApplications = {
+        "text/html" = "firefox.desktop";
+        "x-scheme-handler/http" = "firefox.desktop";
+        "x-scheme-handler/https" = "firefox.desktop";
+        "x-scheme-handler/about" = "firefox.desktop";
+        "x-scheme-handler/unknown" = "firefox.desktop";
+        "inode/directory" = "org.gnome.Nautilus.desktop";
+        "application/pdf" = "org.gnome.Evince.desktop";
+        "image/jpeg" = "org.gnome.eog.desktop";
+        "image/png" = "org.gnome.eog.desktop";
       };
     };
   };

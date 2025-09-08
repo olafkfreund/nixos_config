@@ -14,7 +14,7 @@ in
         # Core GNOME applications
         gnome-tweaks
         dconf-editor
-        gnome-extensions-app
+        gnome-extension-manager
 
         # GNOME utilities
         gnome-usage # System resource usage
@@ -34,9 +34,8 @@ in
         gnome-weather # Weather information
         gnome-contacts # Contact manager
         gnome-maps # Maps application
-        gnome-contacts # Contact manager
-        gnome-todo # Task management
-        gnome-schedule # Event scheduling
+        # gnome-todo # Task management - package not available
+        # gnome-schedule # Event scheduling - package not available
         gnome-frog # Clipboard manager
         gnome-feeds # RSS feed reader
 
@@ -67,7 +66,7 @@ in
         liberation_ttf
         noto-fonts
         noto-fonts-emoji
-        noto-fonts-cjk
+        noto-fonts-cjk-sans
 
         # Additional applications from user configuration
       ]

@@ -42,7 +42,8 @@ in
     # Ensure required fonts are available
     home.packages = with pkgs; [
       inter
-      (nerdfonts.override { fonts = [ "JetBrainsMono" "FiraCode" ]; })
+      nerd-fonts.jetbrains-mono
+      nerd-fonts.fira-code
     ];
 
     # GNOME-specific theming via dconf (defaults - can be overridden)
@@ -107,34 +108,34 @@ in
       };
     };
 
-    # Stylix integration for system-wide theming
-    stylix = mkIf (hasAttr "stylix" config) {
-      enable = true;
-      base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
-      image = pkgs.fetchurl {
-        url = "https://raw.githubusercontent.com/lunik1/gruvbox-material-gtk/main/wallpapers/gruvbox-dark-rainbow.png";
-        sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-      };
-
-      fonts = {
-        serif = {
-          package = pkgs.inter;
-          name = "Inter";
-        };
-        sansSerif = {
-          package = pkgs.inter;
-          name = "Inter";
-        };
-        monospace = {
-          package = pkgs.nerdfonts.override { fonts = [ "JetBrainsMono" ]; };
-          name = "JetBrainsMono Nerd Font";
-        };
-        emoji = {
-          package = pkgs.noto-fonts-emoji;
-          name = "Noto Color Emoji";
-        };
-      };
-    };
+    # Stylix integration for system-wide theming (disabled - wallpaper URL not found)
+    # stylix = mkIf (hasAttr "stylix" config) {
+    #   enable = true;
+    #   base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+    #   image = pkgs.fetchurl {
+    #     url = "https://raw.githubusercontent.com/lunik1/gruvbox-material-gtk/main/wallpapers/gruvbox-dark-rainbow.png";
+    #     sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    #   };
+    #
+    #   fonts = {
+    #     serif = {
+    #       package = pkgs.inter;
+    #       name = "Inter";
+    #     };
+    #     sansSerif = {
+    #       package = pkgs.inter;
+    #       name = "Inter";
+    #     };
+    #     monospace = {
+    #       package = pkgs.nerd-fonts.jetbrains-mono;
+    #       name = "JetBrainsMono Nerd Font";
+    #     };
+    #     emoji = {
+    #       package = pkgs.noto-fonts-emoji;
+    #       name = "Noto Color Emoji";
+    #     };
+    #   };
+    # };
 
     # Custom CSS for GNOME applications (only if Stylix is not managing GTK)
     home.file.".config/gtk-3.0/gtk.css" = mkIf (!config.stylix.targets.gtk.enable or true) {

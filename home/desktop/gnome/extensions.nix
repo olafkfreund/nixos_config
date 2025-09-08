@@ -38,7 +38,7 @@ in
 
       # User Themes extension configuration
       "org/gnome/shell/extensions/user-theme" = {
-        name = if cfg.theme.enable then "Gruvbox-Dark-BL" else "Adwaita";
+        name = mkDefault (if cfg.theme.enable then "Gruvbox-Dark-BL" else "Adwaita");
       };
 
       # GSConnect configuration
@@ -127,12 +127,7 @@ in
       };
     };
 
-    # Custom keybindings for extensions
-    dconf.settings."org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = mkIf cfg.keybindings.enable {
-      binding = "<Super>e";
-      command = "nautilus";
-      name = "Open File Manager";
-    };
+    # Note: Custom keybindings are defined in keybindings.nix to avoid conflicts
 
     # Install GNOME Shell extensions and extension-specific packages
     home.packages = with pkgs; [
