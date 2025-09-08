@@ -38,7 +38,7 @@ in {
         # Laptop-optimized extensions
         dash-to-dock
         appindicator
-        battery-threshold # Battery management
+        battery-health-charging # Battery management
         caffeine # Prevent sleep
         clipboard-indicator
       ];
