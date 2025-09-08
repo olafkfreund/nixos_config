@@ -18,7 +18,7 @@ in
       enable = true;
       extraPackages = with pkgs; [
         gtksourceview
-        webkitgtk
+        webkitgtk_4_1  # Use WebKit with libsoup-3 instead of insecure libsoup-2
         accountsservice
       ];
     };
