@@ -1,12 +1,12 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
+{ pkgs
+, config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.desktop.walker;
-in {
+in
+{
   options.desktop.walker = {
     enable = mkEnableOption {
       default = true;
@@ -22,7 +22,7 @@ in {
 
   config = mkIf cfg.enable {
     # Install Walker as a package since programs.walker doesn't exist in home-manager
-    home.packages = [pkgs.walker];
+    home.packages = [ pkgs.walker ];
 
     # Create Walker configuration manually via xdg.configFile
     xdg.configFile."walker/config.toml".text = ''
@@ -65,7 +65,7 @@ in {
 
     # Add auto-start for Sway if runAsService is enabled
     wayland.windowManager.sway.config.startup = mkIf (cfg.runAsService && config.wayland.windowManager.sway.enable) [
-      {command = "walker --gapplication-service";}
+      { command = "walker --gapplication-service"; }
     ];
 
     # Gruvbox theme TOML layout configuration (exact copy of default.toml with Gruvbox marker color)
