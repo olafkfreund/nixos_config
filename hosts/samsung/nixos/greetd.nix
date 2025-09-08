@@ -1,24 +1,48 @@
-{ config
-, lib
-, ...
-}: {
-  # greetd display manager
-  services.greetd =
-    let
-      session_hypr = {
-        command = "${lib.getExe config.programs.hyprland.package}";
-        user = "olafkfreund";
-      };
-    in
-    {
-      enable = true;
-      settings = {
-        terminal.vt = 1;
-        default_session = session_hypr;
-        initial_session = session_hypr;
+{ pkgs, ... }: {
+  # Enhanced greetd display manager with tuigreet
+  services.greetd = {
+    enable = true;
+    settings = {
+      terminal.vt = 1;
+      default_session = {
+        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-user-session --asterisks --greeting 'Welcome to P620 AMD Workstation'";
+        user = "greeter";
       };
     };
+  };
 
-  # unlock GPG keyring on login
-  security.pam.services.greetd.enableGnomeKeyring = true;
+  # Install greetd-related packages
+  environment.systemPackages = with pkgs; [
+    tuigreet
+  ];
+
+  # Enhanced security and authentication configuration
+  security = {
+    # Unlock GNOME keyring on login
+    pam.services.greetd = {
+      enableGnomeKeyring = true;
+    };
+
+    # Polkit for privilege escalation
+    polkit.enable = true;
+  };
+
+  # Session configuration for privilege escalation
+  systemd.user.services.polkit-gnome-authentication-agent-1 = {
+    description = "polkit-gnome-authentication-agent-1";
+    wantedBy = [ "graphical-session.target" ];
+    wants = [ "graphical-session.target" ];
+    after = [ "graphical-session.target" ];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
+      Restart = "on-failure";
+      RestartSec = 1;
+      TimeoutStopSec = 10;
+    };
+  };
+  # Console configuration
+  console = {
+    earlySetup = true; # Setup console early for faster boot
+  };
 }
