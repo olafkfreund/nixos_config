@@ -2,7 +2,7 @@
   # Boot optimizations
   boot.loader.systemd-boot = {
     enable = true;
-    configurationLimit = 1; # Emergency single config for rebuild
+    configurationLimit = 2; # Reduced for boot partition space constraints
     editor = false; # Disable bootloader editing for security
   };
   boot.loader.efi.canTouchEfiVariables = true;
@@ -19,13 +19,9 @@
     "mitigations=off" # Disable all CPU mitigations for performance (use with caution)
   ];
 
-  # For improved boot time and smaller initrd
-  boot.initrd.compressor = "xz";
-  boot.initrd.compressorArgs = [ "-9" "-e" "--check=crc32" ];
-  # Minimize initrd size
-  boot.initrd.includeDefaultModules = false;
-  boot.initrd.availableKernelModules = [ "xhci_pci" "nvme" "usb_storage" "sd_mod" "rtsx_pci_sdmmc" ];
-  boot.initrd.kernelModules = [ ];
+  # For improved boot time
+  boot.initrd.compressor = "zstd";
+  boot.initrd.compressorArgs = [ "-19" "-T0" ];
 
   # Use latest kernel for newer hardware support
   boot.kernelPackages = pkgs.linuxPackages;
