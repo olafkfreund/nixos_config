@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.desktop.gnome;
-in {
+in
+{
   config = mkIf (cfg.enable && cfg.apps.enable) {
     # Essential GNOME applications and additional fonts
     home.packages = with pkgs;
@@ -91,8 +91,8 @@ in {
       };
 
       "org/gnome/nautilus/list-view" = {
-        default-column-order = ["name" "size" "type" "owner" "group" "permissions" "where" "date_modified" "date_modified_with_time" "date_accessed" "recency" "starred"];
-        default-visible-columns = ["name" "size" "date_modified"];
+        default-column-order = [ "name" "size" "type" "owner" "group" "permissions" "where" "date_modified" "date_modified_with_time" "date_accessed" "recency" "starred" ];
+        default-visible-columns = [ "name" "size" "date_modified" ];
         default-zoom-level = "standard";
         use-tree-view = false;
       };
@@ -144,21 +144,21 @@ in {
       # Weather application configuration
       "org/gnome/Weather" = {
         automatic-location = true;
-        locations = []; # Add locations as needed
+        locations = [ ]; # Add locations as needed
       };
 
       # Photos application configuration
       "org/gnome/photos" = {
         window-maximized = false;
-        window-position = [26 23];
-        window-size = [1200 800];
+        window-position = [ 26 23 ];
+        window-size = [ 1200 800 ];
       };
 
       # Music application configuration
       "org/gnome/Music" = {
         window-maximized = false;
-        window-position = [26 23];
-        window-size = [1200 800];
+        window-position = [ 26 23 ];
+        window-size = [ 1200 800 ];
         repeat-mode = "none"; # "none", "song", "all"
         shuffle-mode = false;
       };
@@ -175,7 +175,7 @@ in {
         sidebar-page = "thumbnails"; # "thumbnails", "links", "attachments"
         sidebar-size = 132;
         sizing-mode = "fit-page"; # "fit-page", "fit-width", "free"
-        window-ratio = [1.0 0.7071067811865476];
+        window-ratio = [ 1.0 0.7071067811865476 ];
         zoom = 1.0;
       };
 
@@ -185,24 +185,24 @@ in {
         maximized = false;
         show-dependencies = false;
         show-whose-processes = "user"; # "user", "active", "all"
-        window-state = [700 500 50 50];
+        window-state = [ 700 500 50 50 ];
       };
 
       "org/gnome/gnome-system-monitor/proctree" = {
-        columns-order = [0 1 2 3 4 6 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22];
+        columns-order = [ 0 1 2 3 4 6 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 ];
         sort-col = 15; # CPU column
         sort-order = 0; # Descending
       };
 
       # Disk Usage Analyzer configuration
       "org/gnome/baobab/ui" = {
-        window-size = [960 600];
+        window-size = [ 960 600 ];
         window-state = 87168;
       };
 
       # Character Map configuration
       "org/gnome/Characters" = {
-        recent-characters = [];
+        recent-characters = [ ];
       };
 
       # GNOME Tweaks integration (settings that Tweaks would normally handle)

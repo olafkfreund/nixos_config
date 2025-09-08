@@ -2,7 +2,8 @@
 with lib;
 let
   cfg = config.desktop.gnome;
-in {
+in
+{
   config = mkIf (cfg.enable && cfg.extensions.enable) {
 
     # GNOME Shell extensions configuration via dconf
@@ -14,10 +15,10 @@ in {
           # Essential extensions UUIDs
           "user-theme@gnome-shell-extensions.gcampax.github.com"
           "gsconnect@andyholmes.github.io"
-          
+
           # Popular extensions (commented out - uncomment as needed)
           "dash-to-dock@micxgx.gmail.com"
-          "appindicatorsupport@rgcjonas.gmail.com" 
+          "appindicatorsupport@rgcjonas.gmail.com"
           "Vitals@CoreCoding.com"
           "blur-my-shell@aunetx"
           # "places-menu@gnome-shell-extensions.gcampax.github.com"
@@ -47,7 +48,7 @@ in {
       };
 
       # Example configurations for popular extensions (commented out)
-      
+
       # Dash to Dock configuration
       "org/gnome/shell/extensions/dash-to-dock" = {
         dock-position = "BOTTOM";
@@ -113,7 +114,7 @@ in {
       # Clipboard Indicator configuration
       "org/gnome/shell/extensions/clipboard-indicator" = {
         cache-size = 50;
-        clear-history = [];
+        clear-history = [ ];
         confirm-clear = false;
         display-mode = 0;
         enable-keybindings = true;
@@ -147,15 +148,15 @@ in {
       gnomeExtensions.paperwm
       gnomeExtensions.quake-terminal
       gnomeExtensions.tailscale-status
-      
+
       # Extension-specific packages that might be needed
-      libnotify      # For GSConnect
-      lm_sensors     # For system monitoring extensions
-      curl           # For weather extensions
-      jq             # For data processing
-      xclip          # For clipboard extensions
-      wl-clipboard   # For Wayland clipboard
-      
+      libnotify # For GSConnect
+      lm_sensors # For system monitoring extensions
+      curl # For weather extensions
+      jq # For data processing
+      xclip # For clipboard extensions
+      wl-clipboard # For Wayland clipboard
+
       # Extensions from user configuration
     ] ++ cfg.extensions.packages;
   };

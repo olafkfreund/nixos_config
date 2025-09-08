@@ -17,7 +17,7 @@ in {
     programs = {
       firefox = {
         enable = true;
-        package = pkgs.firefox-unwrapped;
+        package = pkgs.firefox;
 
         # Wayland-specific optimizations
         policies = {

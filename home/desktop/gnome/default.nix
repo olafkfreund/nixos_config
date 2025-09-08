@@ -2,16 +2,17 @@
 with lib;
 let
   cfg = config.desktop.gnome;
-in {
+in
+{
   options.desktop.gnome = {
     enable = mkEnableOption "GNOME desktop environment";
 
     extensions = {
       enable = mkEnableOption "GNOME Shell extensions";
-      
+
       packages = mkOption {
         type = types.listOf types.package;
-        default = [];
+        default = [ ];
         description = "List of GNOME Shell extension packages to install";
         example = literalExpression ''
           with pkgs.gnomeExtensions; [
@@ -25,10 +26,10 @@ in {
 
     apps = {
       enable = mkEnableOption "Additional GNOME applications";
-      
+
       packages = mkOption {
         type = types.listOf types.package;
-        default = [];
+        default = [ ];
         description = "List of additional GNOME application packages to install";
         example = literalExpression ''
           with pkgs; [
@@ -42,7 +43,7 @@ in {
 
     theme = {
       enable = mkEnableOption "GNOME theming with Gruvbox";
-      
+
       variant = mkOption {
         type = types.enum [ "dark" "light" ];
         default = "dark";
@@ -66,29 +67,29 @@ in {
 
     # Enable GNOME desktop services
     services.gnome-keyring.enable = true;
-    
+
     # Essential GNOME packages
     home.packages = with pkgs; [
       # Core GNOME utilities
       gnome-tweaks
       dconf-editor
       gnome-extensions-app
-      
+
       # Additional utilities
       gnome-screenshot
       gnome-system-monitor
       gnome-calculator
       gnome-calendar
       gnome-weather
-      
+
       # File management
       nautilus
       file-roller
-      
+
       # Media
-      eog  # Eye of GNOME (image viewer)
-      totem  # GNOME Videos
-      
+      eog # Eye of GNOME (image viewer)
+      totem # GNOME Videos
+
       # Text editing
       gedit
     ];
@@ -128,23 +129,23 @@ in {
       "org/gnome/settings-daemon/plugins/power" = {
         sleep-inactive-ac-type = "nothing";
         sleep-inactive-battery-type = "suspend";
-        sleep-inactive-battery-timeout = 1200;  # 20 minutes
+        sleep-inactive-battery-timeout = 1200; # 20 minutes
       };
 
       # Window management
       "org/gnome/desktop/wm/keybindings" = {
-        close = ["<Super>q"];
-        toggle-maximized = ["<Super>m"];
-        toggle-fullscreen = ["F11"];
+        close = [ "<Super>q" ];
+        toggle-maximized = [ "<Super>m" ];
+        toggle-fullscreen = [ "F11" ];
       };
 
       # Application switcher
       "org/gnome/shell/keybindings" = {
-        switch-to-application-1 = ["<Super>1"];
-        switch-to-application-2 = ["<Super>2"];
-        switch-to-application-3 = ["<Super>3"];
-        switch-to-application-4 = ["<Super>4"];
-        switch-to-application-5 = ["<Super>5"];
+        switch-to-application-1 = [ "<Super>1" ];
+        switch-to-application-2 = [ "<Super>2" ];
+        switch-to-application-3 = [ "<Super>3" ];
+        switch-to-application-4 = [ "<Super>4" ];
+        switch-to-application-5 = [ "<Super>5" ];
       };
     };
 

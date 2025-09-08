@@ -2,12 +2,13 @@
 with lib;
 let
   cfg = config.desktop.gnome;
-in {
+in
+{
   config = mkIf (cfg.enable && cfg.theme.enable) {
     # GTK theming with Gruvbox colors
     gtk = {
       enable = true;
-      
+
       theme = {
         package = mkDefault pkgs.gruvbox-gtk-theme;
         name = mkDefault (if cfg.theme.variant == "dark" then "Gruvbox-Dark-BL" else "Gruvbox-Light-BL");
@@ -66,22 +67,22 @@ in {
         background-color = "#282828";
         foreground-color = "#ebdbb2";
         palette = [
-          "#282828"  # black
-          "#cc241d"  # red
-          "#98971a"  # green  
-          "#d79921"  # yellow
-          "#458588"  # blue
-          "#b16286"  # magenta
-          "#689d6a"  # cyan
-          "#a89984"  # white
-          "#928374"  # bright black
-          "#fb4934"  # bright red
-          "#b8bb26"  # bright green
-          "#fabd2f"  # bright yellow
-          "#83a598"  # bright blue
-          "#d3869b"  # bright magenta
-          "#8ec07c"  # bright cyan
-          "#ebdbb2"  # bright white
+          "#282828" # black
+          "#cc241d" # red
+          "#98971a" # green
+          "#d79921" # yellow
+          "#458588" # blue
+          "#b16286" # magenta
+          "#689d6a" # cyan
+          "#a89984" # white
+          "#928374" # bright black
+          "#fb4934" # bright red
+          "#b8bb26" # bright green
+          "#fabd2f" # bright yellow
+          "#83a598" # bright blue
+          "#d3869b" # bright magenta
+          "#8ec07c" # bright cyan
+          "#ebdbb2" # bright white
         ];
         use-theme-colors = false;
         use-system-font = false;
@@ -114,7 +115,7 @@ in {
         url = "https://raw.githubusercontent.com/lunik1/gruvbox-material-gtk/main/wallpapers/gruvbox-dark-rainbow.png";
         sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
       };
-      
+
       fonts = {
         serif = {
           package = pkgs.inter;

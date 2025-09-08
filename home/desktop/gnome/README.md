@@ -18,6 +18,7 @@ A comprehensive, optional GNOME desktop environment configuration for NixOS with
 GNOME is **disabled by default** on all hosts. To enable it, set `desktop.gnome.enable = true` in your host-specific home configuration:
 
 #### P620 (Workstation)
+
 ```nix
 # In Users/olafkfreund/p620_home.nix
 desktop.gnome = {
@@ -33,6 +34,7 @@ desktop.gnome = {
 ```
 
 #### Razer/Samsung (Laptops)
+
 ```nix
 # In Users/olafkfreund/razer_home.nix or samsung_home.nix
 desktop.gnome = {
@@ -50,6 +52,7 @@ desktop.gnome = {
 ### Configuration Options
 
 #### Theme Configuration
+
 ```nix
 desktop.gnome.theme = {
   enable = true;           # Enable Gruvbox theming
@@ -58,6 +61,7 @@ desktop.gnome.theme = {
 ```
 
 #### Extensions Configuration
+
 ```nix
 desktop.gnome.extensions = {
   enable = true;           # Enable extensions support
@@ -75,6 +79,7 @@ desktop.gnome.extensions = {
 ```
 
 #### Applications Configuration
+
 ```nix
 desktop.gnome.apps = {
   enable = true;           # Enable additional GNOME apps
@@ -89,6 +94,7 @@ desktop.gnome.apps = {
 ```
 
 #### Keybindings
+
 ```nix
 desktop.gnome.keybindings.enable = true;  # Enable custom keybindings
 ```
@@ -96,18 +102,21 @@ desktop.gnome.keybindings.enable = true;  # Enable custom keybindings
 ## Pre-configured Extensions
 
 ### Always Available (when extensions.enable = true)
+
 - **User Themes**: Enables custom shell themes
 - **GSConnect**: Android device integration
 
 ### Host-Specific Examples
 
 #### Workstation (P620)
+
 - Dash to Dock
 - AppIndicator support
 - Vitals (system monitoring)
 - Blur My Shell (visual effects)
 
 #### Laptops (Razer/Samsung)
+
 - Dash to Dock
 - AppIndicator support
 - Battery Threshold (battery management)
@@ -117,6 +126,7 @@ desktop.gnome.keybindings.enable = true;  # Enable custom keybindings
 ## Included Applications
 
 ### Core GNOME Apps
+
 - **System**: Tweaks, Extensions App, Settings, System Monitor
 - **Productivity**: Calculator, Calendar, Clocks, Weather, Contacts
 - **Media**: Eye of GNOME (images), Videos, Music, Photos
@@ -124,25 +134,30 @@ desktop.gnome.keybindings.enable = true;  # Enable custom keybindings
 - **Text**: Text Editor, Gedit, Evince (PDF)
 
 ### Development Tools
+
 - GNOME Builder (IDE) - optional, large package
 
 ## Theming Details
 
 ### Gruvbox Theme Components
+
 - **GTK Theme**: Gruvbox-Dark-BL / Gruvbox-Light-BL
 - **Icon Theme**: Gruvbox-Plus-Dark
 - **Cursor Theme**: Bibata-Modern-Classic
 - **Fonts**: Inter (UI), JetBrainsMono Nerd Font (terminal)
 
 ### Terminal Colors
+
 Custom Gruvbox color palette for GNOME Terminal with proper contrast and readability.
 
 ### Custom CSS
+
 Additional styling for consistent Gruvbox appearance across all GNOME applications.
 
 ## Keyboard Shortcuts
 
 ### Window Management
+
 - `Super + Q`: Close window
 - `Super + M`: Toggle maximize
 - `Super + H`: Minimize
@@ -150,17 +165,20 @@ Additional styling for consistent Gruvbox appearance across all GNOME applicatio
 - `F11`: Toggle fullscreen
 
 ### Workspaces
+
 - `Super + 1-9`: Switch to workspace
 - `Super + Shift + 1-9`: Move window to workspace
 - `Super + Ctrl + Arrow`: Navigate workspaces
 
 ### Applications
+
 - `Super + E`: File manager
 - `Super + C`: Calculator
 - `Ctrl + Alt + T`: Terminal
 - `Ctrl + Shift + Esc`: System monitor
 
 ### Media Keys
+
 - Volume, brightness, media playback controls
 - `Print`: Screenshot UI
 - `Alt + Print`: Window screenshot
@@ -168,8 +186,9 @@ Additional styling for consistent Gruvbox appearance across all GNOME applicatio
 ## File Associations
 
 Proper MIME type associations for GNOME applications:
+
 - Images → Eye of GNOME
-- Videos → GNOME Videos  
+- Videos → GNOME Videos
 - Music → GNOME Music
 - PDFs → Evince
 - Archives → File Roller
@@ -178,11 +197,13 @@ Proper MIME type associations for GNOME applications:
 ## Requirements
 
 ### System Requirements
+
 - GNOME desktop environment enabled in NixOS configuration
 - Wayland or X11 support
 - Sufficient resources for GNOME Shell
 
 ### Dependencies
+
 All required packages are automatically installed when GNOME components are enabled.
 
 ## Switching Between Desktop Environments
@@ -190,22 +211,25 @@ All required packages are automatically installed when GNOME components are enab
 You can have both GNOME and other desktop environments (like Hyprland) installed simultaneously:
 
 1. **Enable GNOME** in home-manager configuration
-2. **Enable GNOME** in NixOS system configuration  
+2. **Enable GNOME** in NixOS system configuration
 3. **Choose at login** which desktop session to use
 
 ## Troubleshooting
 
 ### GNOME Shell Extensions Not Working
+
 1. Ensure `desktop.gnome.extensions.enable = true`
 2. Check extension compatibility with your GNOME version
 3. Restart GNOME Shell: `Alt + F2`, type `r`, press Enter
 
 ### Theme Not Applied
+
 1. Verify `desktop.gnome.theme.enable = true`
 2. Check GNOME Tweaks → Appearance
 3. Restart user session
 
 ### Custom Keybindings Not Working
+
 1. Ensure `desktop.gnome.keybindings.enable = true`
 2. Check Settings → Keyboard → Keyboard Shortcuts
 3. Resolve conflicts with existing shortcuts
@@ -213,7 +237,9 @@ You can have both GNOME and other desktop environments (like Hyprland) installed
 ## Customization
 
 ### Adding Extensions
+
 Add extensions to your host configuration:
+
 ```nix
 desktop.gnome.extensions.packages = with pkgs.gnomeExtensions; [
   your-extension-here
@@ -222,7 +248,9 @@ desktop.gnome.extensions.packages = with pkgs.gnomeExtensions; [
 ```
 
 ### Adding Applications
+
 Add applications to your host configuration:
+
 ```nix
 desktop.gnome.apps.packages = with pkgs; [
   your-app-here
@@ -231,9 +259,11 @@ desktop.gnome.apps.packages = with pkgs; [
 ```
 
 ### Modifying Theme
+
 Edit `theme.nix` to customize colors, fonts, or styling.
 
 ### Custom Keybindings
+
 Edit `keybindings.nix` to add or modify keyboard shortcuts.
 
 ## Architecture
@@ -249,7 +279,8 @@ home/desktop/gnome/
 ```
 
 This modular architecture allows you to:
+
 - Enable/disable components independently
-- Customize each component separately  
+- Customize each component separately
 - Maintain clean, organized configuration
 - Share configurations between hosts with variations
