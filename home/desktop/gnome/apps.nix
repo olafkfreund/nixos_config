@@ -26,6 +26,7 @@ in
         gnome-connections # Remote desktop client
         gnome-firmware # Firmware updates
         boxbuddy # Manage distrobox containers
+        rewaita
 
         # GNOME productivity
         gnome-calculator # Calculator

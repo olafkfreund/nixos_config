@@ -45,7 +45,7 @@ in
     inherit (vars) hostName;
 
     # Choose networking profile: "desktop", "server", or "minimal"
-    profile = "server";
+    profile = "desktop"; # Switch to desktop profile for GNOME NetworkManager integration
 
     tailscale = {
       enable = true;
@@ -63,8 +63,10 @@ in
       ];
     };
 
-    # Use DHCP-provided DNS and standard networking
-    useNetworkd = lib.mkForce true;
+    # NetworkManager configuration with explicit DNS management
+    networkmanager = {
+      dns = lib.mkForce "default"; # Force NetworkManager to handle DNS directly
+    };
 
     # Network performance tuning
     performanceTuning = {
@@ -485,23 +487,8 @@ in
       mcp.enable = true;
     };
 
-    # Use systemd-resolved for proper DNS management with systemd-networkd
-    # Based on Tailscale best practices research - avoid DNS conflicts
-    resolved = {
-      enable = true;
-      fallbackDns = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
-      domains = [ "~home.freundcloud.com" ]; # Use routing directive for local domain
-      dnssec = lib.mkForce "false"; # Resolve DNSSEC conflict
-      llmnr = lib.mkForce "false"; # Disable LLMNR to avoid conflicts with Tailscale
-      extraConfig = ''
-        DNS=192.168.1.222 1.1.1.1 8.8.8.8
-        Domains=~home.freundcloud.com
-        Cache=yes
-        CacheFromLocalhost=no
-        DNSStubListener=yes
-        ReadEtcHosts=yes
-      '';
-    };
+    # Disable secure-dns to allow NetworkManager to manage DNS directly
+    secure-dns.enable = false;
 
     # X server configuration
     xserver = {
@@ -602,58 +589,11 @@ in
 
   # Consolidated systemd configuration
   systemd = {
-    # Network-specific overrides that go beyond the network profile
-    network = {
-      enable = true;
-      wait-online.timeout = 10;
-      networks = {
-        "20-wired" = {
-          matchConfig.Name = "en*";
-          networkConfig = {
-            MulticastDNS = false;
-            LLMNR = false;
-            DHCP = "ipv4";
-            IPv6AcceptRA = true;
-            Domains = "~home.freundcloud.com"; # Use routing directive for local domain
-            DNS = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
-          };
-          # Higher priority for wired connection
-          dhcpV4Config = {
-            RouteMetric = 10;
-            UseDNS = false; # Use our custom DNS configuration
-          };
-        };
-        "25-wireless" = {
-          matchConfig.Name = "wl*";
-          networkConfig = {
-            MulticastDNS = false;
-            LLMNR = false;
-            DHCP = "ipv4";
-            IPv6AcceptRA = true;
-          };
-          # Lower priority for wireless
-          dhcpV4Config = {
-            RouteMetric = 20;
-          };
-        };
-        # Configure Tailscale interface - CRITICAL: Don't let systemd-networkd manage it
-        # Research shows this prevents "Link tailscale0 is managed" DNS conflicts
-        "30-tailscale" = {
-          matchConfig.Name = "tailscale0";
-          networkConfig = {
-            MulticastDNS = false;
-            LLMNR = false;
-            DHCP = "no"; # NEVER enable DHCP on Tailscale interface
-            DNS = [ ]; # Explicitly no DNS - let Tailscale handle it
-            Domains = [ ]; # No domain routing through this interface
-          };
-        };
-      };
-    };
+    # Network configuration now handled by desktop profile (NetworkManager)
+    # systemd-networkd conflicts removed
 
     services = {
-      NetworkManager-wait-online.enable = lib.mkForce false;
-      systemd-networkd-wait-online.enable = lib.mkForce false;
+      # Network wait services now handled by desktop profile
       fwupd.serviceConfig.LimitNOFILE = 524288;
     };
 
