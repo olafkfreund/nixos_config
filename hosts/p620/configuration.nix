@@ -208,6 +208,10 @@ in
       nodejs = true;
     };
 
+    gnome-remote-desktop = {
+      enable = true;
+    };
+
     virtualization = {
       enable = true;
       docker = true;

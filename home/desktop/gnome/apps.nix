@@ -214,9 +214,22 @@ in
         recent-characters = [ ];
       };
 
+      # GNOME Remote Desktop configuration
+      "org/gnome/desktop/remote-desktop/vnc" = {
+        view-only = false;
+        auth-method = "password";
+      };
+
+      "org/gnome/desktop/remote-desktop/rdp" = {
+        view-only = false;
+        screen-share-mode = "extend";
+      };
+
       # GNOME Tweaks integration (settings that Tweaks would normally handle)
+      # Note: Animations disabled for better remote desktop performance
       "org/gnome/desktop/interface" = {
-        enable-animations = true;
+        enable-animations = false; # Disabled for better remote performance
+        enable-hot-corners = false; # Disabled for remote desktop
         gtk-enable-primary-paste = true;
         locate-pointer = false;
         show-battery-percentage = true;
@@ -228,6 +241,18 @@ in
         event-sounds = true;
         input-feedback-sounds = false;
         theme-name = "freedesktop";
+      };
+
+      # Remote Desktop optimizations - Prevent screen locking and power saving
+      "org/gnome/desktop/screensaver" = {
+        lock-enabled = false;
+        idle-activation-enabled = false;
+      };
+
+      # Disable power management for remote desktop sessions
+      "org/gnome/settings-daemon/plugins/power" = {
+        sleep-inactive-ac-timeout = 0;
+        sleep-inactive-battery-timeout = 0;
       };
 
       "org/gnome/desktop/peripherals/touchpad" = {

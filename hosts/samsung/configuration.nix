@@ -72,13 +72,7 @@ in
     # Set custom nameservers as fallback
     nameservers = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
 
-    # Firewall configuration for remote desktop
-    firewall = {
-      allowedTCPPorts = [
-        3389 # RDP port
-        5900 # VNC port
-      ];
-    };
+    # Firewall configuration for remote desktop moved to features.gnome-remote-desktop
   };
 
   # Use AI provider defaults with laptop profile (disables Ollama automatically)
@@ -102,6 +96,10 @@ in
       devshell = true; # Re-enabled for Samsung
       python = true;
       nodejs = true;
+    };
+
+    gnome-remote-desktop = {
+      enable = true;
     };
 
     virtualization = {
@@ -222,21 +220,7 @@ in
       mcp.enable = true;
     };
 
-    # GNOME Remote Desktop - Enable RDP and VNC access
-    gnome.gnome-remote-desktop = {
-      enable = true;
-    };
-
-    # Avahi for service discovery (helps with remote desktop discovery)
-    avahi = {
-      enable = true;
-      nssmdns4 = true;
-      publish = {
-        enable = true;
-        addresses = true;
-        userServices = true;
-      };
-    };
+    # GNOME Remote Desktop configuration moved to features.gnome-remote-desktop
 
     # DNS management handled by networking profile
 
