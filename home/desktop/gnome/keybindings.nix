@@ -1,6 +1,9 @@
-{ config, lib, pkgs, ... }:
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.desktop.gnome;
 in
 {
@@ -153,8 +156,8 @@ in
       # Terminal shortcut
       "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
         binding = "<Ctrl><Alt>t";
-        command = "gnome-terminal";
-        name = "Open Terminal";
+        command = "foot";
+        name = "Open Foot Terminal";
       };
 
       # File manager shortcut

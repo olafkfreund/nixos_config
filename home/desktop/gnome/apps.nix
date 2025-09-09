@@ -44,6 +44,8 @@ in
         gnome-feeds # RSS feed reader
         typst # Document typesetting system
         turtle # GUI for Git
+        logseq # Knowledge management and note-taking
+        lmstudio # AI-assisted coding assistant
 
         # GNOME multimedia
         eog # Eye of GNOME (image viewer)

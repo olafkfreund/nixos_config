@@ -1,11 +1,13 @@
-{ config, lib, pkgs, ... }:
-with lib;
-let
+{ config
+, lib
+, pkgs
+, ...
+}:
+with lib; let
   cfg = config.desktop.gnome;
 in
 {
   config = mkIf (cfg.enable && cfg.extensions.enable) {
-
     # GNOME Shell extensions configuration via dconf
     dconf.settings = {
       # Enable installed extensions
@@ -21,6 +23,7 @@ in
           "appindicatorsupport@rgcjonas.gmail.com"
           "Vitals@CoreCoding.com"
           "blur-my-shell@aunetx"
+          "top-panel-logo@jmpegi.github.com"
           # "places-menu@gnome-shell-extensions.gcampax.github.com"
           "workspace-indicator@gnome-shell-extensions.gcampax.github.com"
           "windowsNavigator@gnome-shell-extensions.gcampax.github.com"
@@ -38,7 +41,11 @@ in
 
       # User Themes extension configuration
       "org/gnome/shell/extensions/user-theme" = {
-        name = mkDefault (if cfg.theme.enable then "Gruvbox-Dark-BL" else "Adwaita");
+        name = mkDefault (
+          if cfg.theme.enable
+          then "Gruvbox-Dark-BL"
+          else "Adwaita"
+        );
       };
 
       # GSConnect configuration
@@ -130,29 +137,37 @@ in
     # Note: Custom keybindings are defined in keybindings.nix to avoid conflicts
 
     # Install GNOME Shell extensions and extension-specific packages
-    home.packages = with pkgs; [
-      # Essential extensions (always installed when extensions are enabled)
-      gnomeExtensions.user-themes
-      gnomeExtensions.gsconnect
-      gnomeExtensions.tiling-shell
-      gnomeExtensions.ascii-emoji
-      gnomeExtensions.dim-background-windows
-      gnomeExtensions.github-actions
-      gnomeExtensions.gemini-ai
-      gnomeExtensions.just-perfection
-      gnomeExtensions.paperwm
-      gnomeExtensions.quake-terminal
-      gnomeExtensions.tailscale-status
+    home.packages = with pkgs;
+      [
+        # Essential extensions (always installed when extensions are enabled)
+        gnomeExtensions.user-themes
+        gnomeExtensions.gsconnect
+        gnomeExtensions.tiling-shell
+        gnomeExtensions.ascii-emoji
+        gnomeExtensions.dim-background-windows
+        # gnomeExtensions.github-actions
+        # gnomeExtensions.gemini-ai
+        gnomeExtensions.just-perfection
+        gnomeExtensions.paperwm
+        gnomeExtensions.quake-terminal
+        gnomeExtensions.tailscale-status
+        gnomeExtensions.auto-accent-colour
+        gnomeExtensions.auto-move-windows
+        gnomeExtensions.bring-out-submenu-of-power-offlogout-button
+        gnomeExtensions.coverflow-alt-tab
+        gnomeExtensions.foresight
+        gnomeExtensions.move-to-next-screen
 
-      # Extension-specific packages that might be needed
-      libnotify # For GSConnect
-      lm_sensors # For system monitoring extensions
-      curl # For weather extensions
-      jq # For data processing
-      xclip # For clipboard extensions
-      wl-clipboard # For Wayland clipboard
+        # Extension-specific packages that might be needed
+        libnotify # For GSConnect
+        lm_sensors # For system monitoring extensions
+        curl # For weather extensions
+        jq # For data processing
+        xclip # For clipboard extensions
+        wl-clipboard # For Wayland clipboard
 
-      # Extensions from user configuration
-    ] ++ cfg.extensions.packages;
+        # Extensions from user configuration
+      ]
+      ++ cfg.extensions.packages;
   };
 }
