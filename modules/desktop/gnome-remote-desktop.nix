@@ -11,14 +11,14 @@ in
   config = mkIf cfg.enable {
     # Enable GNOME Remote Desktop backend
     services.gnome.gnome-remote-desktop.enable = true;
-    
+
     # Enable XRDP with GNOME session
     services.xrdp = {
       enable = true;
       defaultWindowManager = "${pkgs.gnome-session}/bin/gnome-session";
-      openFirewall = true;  # Automatically opens port 3389
+      openFirewall = true; # Automatically opens port 3389
     };
-    
+
     # Enable Avahi for service discovery
     services.avahi = {
       enable = true;
@@ -40,8 +40,8 @@ in
     services.getty.autologinUser = lib.mkForce null;
 
     # Disable power management for remote desktop sessions
-    systemd.targets.sleep.enable = false;
-    systemd.targets.suspend.enable = false;
+    systemd.targets.sleep.enable = mkForce false;
+    systemd.targets.suspend.enable = mkForce false;
 
     # Open firewall ports for remote desktop (XRDP openFirewall already handles 3389)
     networking.firewall.allowedTCPPorts = [
