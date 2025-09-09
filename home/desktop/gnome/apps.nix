@@ -252,7 +252,7 @@ in
       # Disable power management for remote desktop sessions
       "org/gnome/settings-daemon/plugins/power" = {
         sleep-inactive-ac-timeout = 0;
-        sleep-inactive-battery-timeout = 0;
+        sleep-inactive-battery-timeout = mkForce 0; # Override default 1200 setting
       };
 
       "org/gnome/desktop/peripherals/touchpad" = {
