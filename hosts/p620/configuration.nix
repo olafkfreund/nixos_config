@@ -112,10 +112,10 @@ in
 
     # Firewall configuration for SSH and remote desktop
     firewall = {
-      allowedTCPPorts = [ 
-        22    # SSH port from hardening config
-        3389  # RDP port for GNOME Remote Desktop
-        5900  # VNC port for GNOME Remote Desktop
+      allowedTCPPorts = [
+        22 # SSH port from hardening config
+        3389 # RDP port for GNOME Remote Desktop
+        5900 # VNC port for GNOME Remote Desktop
       ];
 
       # Extra rules for SSH protection

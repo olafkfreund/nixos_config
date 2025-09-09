@@ -79,9 +79,9 @@ in
 
     # Firewall configuration for remote desktop
     firewall = {
-      allowedTCPPorts = [ 
-        3389  # RDP port
-        5900  # VNC port
+      allowedTCPPorts = [
+        3389 # RDP port
+        5900 # VNC port
       ];
     };
   };
