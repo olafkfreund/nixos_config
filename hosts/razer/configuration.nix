@@ -76,6 +76,14 @@ in
 
     # Set custom nameservers as fallback
     nameservers = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
+
+    # Firewall configuration for remote desktop
+    firewall = {
+      allowedTCPPorts = [ 
+        3389  # RDP port
+        5900  # VNC port
+      ];
+    };
   };
 
   # Use AI provider defaults with laptop profile (disables Ollama for battery life)
@@ -223,6 +231,22 @@ in
     nixai = {
       enable = true;
       mcp.enable = true;
+    };
+
+    # GNOME Remote Desktop - Enable RDP and VNC access
+    gnome.gnome-remote-desktop = {
+      enable = true;
+    };
+
+    # Avahi for service discovery (helps with remote desktop discovery)
+    avahi = {
+      enable = true;
+      nssmdns4 = true;
+      publish = {
+        enable = true;
+        addresses = true;
+        userServices = true;
+      };
     };
 
     # Centralized Logging - Send logs to DEX5550 Loki server

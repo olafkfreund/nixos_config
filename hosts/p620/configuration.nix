@@ -110,9 +110,13 @@ in
       };
     };
 
-    # Firewall configuration for SSH
+    # Firewall configuration for SSH and remote desktop
     firewall = {
-      allowedTCPPorts = [ 22 ]; # SSH port from hardening config
+      allowedTCPPorts = [ 
+        22    # SSH port from hardening config
+        3389  # RDP port for GNOME Remote Desktop
+        5900  # VNC port for GNOME Remote Desktop
+      ];
 
       # Extra rules for SSH protection
       extraCommands = ''
@@ -489,6 +493,22 @@ in
 
     # Disable secure-dns to allow NetworkManager to manage DNS directly
     secure-dns.enable = false;
+
+    # GNOME Remote Desktop - Enable RDP and VNC access
+    gnome.gnome-remote-desktop = {
+      enable = true;
+    };
+
+    # Avahi for service discovery (helps with remote desktop discovery)
+    avahi = {
+      enable = true;
+      nssmdns4 = true;
+      publish = {
+        enable = true;
+        addresses = true;
+        userServices = true;
+      };
+    };
 
     # X server configuration
     xserver = {
