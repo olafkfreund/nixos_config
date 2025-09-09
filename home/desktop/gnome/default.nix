@@ -84,7 +84,6 @@ in
       gnome-calculator
       gnome-calendar
       gnome-weather
-      ulauncher
 
       # File management
       nautilus
