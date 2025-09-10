@@ -1,12 +1,12 @@
-{ config
-, lib
-, pkgs
-, ...
+{
+  config,
+  lib,
+  pkgs,
+  ...
 }:
 with lib; let
   cfg = config.kitty;
-in
-{
+in {
   options.kitty = {
     enable = mkEnableOption {
       default = false;
@@ -46,7 +46,7 @@ in
         window_margin_width = 8;
         term = "xterm-kitty";
         placement_strategy = "center";
-        hide_window_decorations = true;
+        hide_window_decorations = false;
         # background_opacity = 1.0;
         # dynamic_background_opacity = true;
         copy_on_select = true;

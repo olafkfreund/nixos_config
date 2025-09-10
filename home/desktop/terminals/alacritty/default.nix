@@ -1,11 +1,11 @@
-{ config
-, lib
-, ...
+{
+  config,
+  lib,
+  ...
 }:
 with lib; let
   cfg = config.alacritty;
-in
-{
+in {
   options.alacritty = {
     enable = mkEnableOption {
       default = false;
@@ -35,7 +35,7 @@ in
         ];
 
         window.startup_mode = "Windowed";
-        window.decorations = "none";
+        window.decorations = "full";
         window.blur = true;
         scrolling.history = 10000;
         selection.save_to_clipboard = true;
