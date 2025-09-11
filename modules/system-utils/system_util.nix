@@ -99,6 +99,5 @@
     chatterino2
     twitch-tui
     deploy-rs
-    walker
   ];
 }

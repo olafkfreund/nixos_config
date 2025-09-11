@@ -30,6 +30,8 @@ in
         embellish
         pipeline
         newsflash
+        gdm-settings
+        blackbox-terminal # Simple terminal emulator
 
         # GNOME productivity
         gnome-calculator # Calculator
@@ -55,6 +57,8 @@ in
         gnome-sound-recorder # Audio recording
         showtime # Media center application
         upscaler # Image upscaling tool
+        dissent
+        gnvim
 
         # GNOME text and documents
         gedit # Text editor
@@ -65,8 +69,12 @@ in
         nautilus # File manager
         file-roller # Archive manager
 
+        # AI assistants
+        newelle # AI chat client
+
         # GNOME development tools
         gnome-builder # IDE (optional - large package)
+        distroshelf # Manage Linux distributions
 
         # Fonts for better GNOME app experience
         cantarell-fonts
