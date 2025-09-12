@@ -6,6 +6,7 @@
 }:
 with lib; let
   cfg = config.networking.tailscale;
+  tailscalePkg = pkgs.tailscale.overrideAttrs { doCheck = false; };
 in
 {
   options.networking.tailscale = {
@@ -96,7 +97,7 @@ in
       enable = true;
       inherit (cfg) port interfaceName openFirewall useRoutingFeatures;
       # Fix build error by disabling tests that fail in sandbox
-      package = pkgs.tailscale.overrideAttrs { doCheck = false; };
+      package = tailscalePkg;
     };
 
     # Tailscale up service with authentication
@@ -117,7 +118,7 @@ in
           sleep 2
 
           # Check if already authenticated
-          if ${pkgs.tailscale}/bin/tailscale status --json | ${pkgs.jq}/bin/jq -e '.BackendState == "Running"' >/dev/null 2>&1; then
+          if ${tailscalePkg}/bin/tailscale status --json | ${pkgs.jq}/bin/jq -e '.BackendState == "Running"' >/dev/null 2>&1; then
             echo "Tailscale already authenticated and running"
             exit 0
           fi
@@ -169,11 +170,11 @@ in
             cfg.extraUpFlags)}
 
           echo "Connecting to Tailscale with args: $UP_ARGS"
-          ${pkgs.tailscale}/bin/tailscale up $UP_ARGS
+          ${tailscalePkg}/bin/tailscale up $UP_ARGS
 
           # Wait a moment and check status
           sleep 3
-          ${pkgs.tailscale}/bin/tailscale status
+          ${tailscalePkg}/bin/tailscale status
         '';
       };
     };
@@ -202,14 +203,14 @@ in
 
           while true; do
             # Check Tailscale status
-            if ! ${pkgs.tailscale}/bin/tailscale status >/dev/null 2>&1; then
+            if ! ${tailscalePkg}/bin/tailscale status >/dev/null 2>&1; then
               echo "[$(date)] Tailscale not responding, attempting restart..."
               systemctl restart tailscale.service
               sleep 10
               systemctl restart tailscale-autoconnect.service
             else
               # Log status periodically
-              STATUS=$(${pkgs.tailscale}/bin/tailscale status --json 2>/dev/null || echo '{"BackendState":"Unknown"}')
+              STATUS=$(${tailscalePkg}/bin/tailscale status --json 2>/dev/null || echo '{"BackendState":"Unknown"}')
               BACKEND_STATE=$(echo "$STATUS" | ${pkgs.jq}/bin/jq -r '.BackendState // "Unknown"')
 
               if [ "$BACKEND_STATE" != "Running" ]; then
@@ -229,17 +230,17 @@ in
 
     # Tailscale health check script
     environment.systemPackages = with pkgs; [
-      tailscale
+      tailscalePkg
       (writeShellScriptBin "tailscale-status" ''
         #!/bin/bash
 
         echo "=== Tailscale Status ==="
-        ${pkgs.tailscale}/bin/tailscale status || echo "Tailscale not running"
+        ${tailscalePkg}/bin/tailscale status || echo "Tailscale not running"
 
         echo ""
         echo "=== Tailscale Ping Test ==="
         # Test connectivity to other known Tailscale nodes
-        NODES=$(${pkgs.tailscale}/bin/tailscale status --json 2>/dev/null | ${pkgs.jq}/bin/jq -r '.Peer[].TailscaleIPs[0]' 2>/dev/null || echo "")
+        NODES=$(${tailscalePkg}/bin/tailscale status --json 2>/dev/null | ${pkgs.jq}/bin/jq -r '.Peer[].TailscaleIPs[0]' 2>/dev/null || echo "")
 
         if [ -n "$NODES" ]; then
           for NODE in $NODES; do
@@ -274,7 +275,7 @@ in
         sleep 10
 
         echo "Current status:"
-        ${pkgs.tailscale}/bin/tailscale status
+        ${tailscalePkg}/bin/tailscale status
       '')
     ];
 
