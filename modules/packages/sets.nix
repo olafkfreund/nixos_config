@@ -175,7 +175,7 @@
     terraform = with pkgs; [
       terraform
       terragrunt
-      terraform-docs
+      # terraform-docs
       tflint
     ];
   };

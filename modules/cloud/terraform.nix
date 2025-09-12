@@ -14,7 +14,7 @@ in
     environment.systemPackages = [
       pkgs.terraform
       pkgs.terraformer
-      pkgs.terraform-docs
+      # pkgs.terraform-docs
       pkgs.terraform-providers.digitalocean
       pkgs.terraform-providers.oci
       pkgs.terraform-providers.ssh
