@@ -41,6 +41,9 @@ in
     useNetworkd = lib.mkForce true;
     useHostResolvConf = false;
 
+    # Disable IPv6
+    enableIPv6 = false;
+
     # Tailscale VPN Configuration - P510 media server
     tailscale = {
       enable = true;

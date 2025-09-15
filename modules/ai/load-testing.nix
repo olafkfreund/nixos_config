@@ -670,139 +670,141 @@ in
         };
       };
 
-      # Timers for load testing
-      systemd.timers.ai-provider-load-test = {
-        description = "AI Provider Load Test Timer";
-        wantedBy = [ "timers.target" ];
-        timerConfig = {
-          OnCalendar = cfg.testInterval;
-          Persistent = true;
-          RandomizedDelaySec = "15m";
-        };
-      };
+    };
 
-      # Create necessary directories
-      systemd.tmpfiles.rules = [
-        "d ${cfg.reportPath} 0755 root root -"
-        "d /var/log/ai-analysis 0755 ai-analysis ai-analysis -"
-      ];
-
-      # Load testing management commands
-      environment.systemPackages = [
-        pkgs.curl
-        pkgs.jq
-
-        (pkgs.writeShellScriptBin "ai-load-test" ''
-          #!/bin/bash
-
-          PROFILE="''${1:-moderate}"
-
-          echo "Starting AI load test with profile: $PROFILE"
-
-          case "$PROFILE" in
-            "light"|"moderate"|"heavy"|"stress")
-              systemctl start ai-load-test-profiles
-              ;;
-            "continuous")
-              if systemctl is-active ai-continuous-load-test &>/dev/null; then
-                echo "Continuous load test already running"
-              else
-                systemctl start ai-continuous-load-test
-              fi
-              ;;
-            "stop")
-              systemctl stop ai-continuous-load-test
-              echo "Continuous load test stopped"
-              ;;
-            *)
-              echo "Usage: $0 {light|moderate|heavy|stress|continuous|stop}"
-              echo "Available profiles:"
-              echo "  light    - ${toString cfg.loadTestProfiles.light.users} users, ${cfg.loadTestProfiles.light.duration}"
-              echo "  moderate - ${toString cfg.loadTestProfiles.moderate.users} users, ${cfg.loadTestProfiles.moderate.duration}"
-              echo "  heavy    - ${toString cfg.loadTestProfiles.heavy.users} users, ${cfg.loadTestProfiles.heavy.duration}"
-              echo "  stress   - ${toString cfg.loadTestProfiles.stress.users} users, ${cfg.loadTestProfiles.stress.duration}"
-              echo "  continuous - Continuous light load testing"
-              echo "  stop     - Stop continuous load testing"
-              exit 1
-              ;;
-          esac
-        '')
-
-        (pkgs.writeShellScriptBin "ai-load-test-status" ''
-          #!/bin/bash
-
-          echo "=== AI Load Testing Status ==="
-          echo
-
-          echo "Load Test Services:"
-          systemctl status ai-provider-load-test --no-pager -l
-          echo
-
-          if systemctl is-active ai-continuous-load-test &>/dev/null; then
-            echo "Continuous Load Test:"
-            systemctl status ai-continuous-load-test --no-pager -l
-            echo
-          fi
-
-          echo "Recent Load Test Reports:"
-          ls -la ${cfg.reportPath}/ | tail -10
-          echo
-
-          echo "Load Test Logs (last 20 lines):"
-          tail -20 /var/log/ai-analysis/load-testing.log 2>/dev/null || echo "No load test logs found"
-        '')
-
-        (pkgs.writeShellScriptBin "ai-load-test-report" ''
-          #!/bin/bash
-
-          REPORT_FILE="''${1:-latest}"
-
-          if [ "$REPORT_FILE" = "latest" ]; then
-            REPORT_FILE=$(ls -t ${cfg.reportPath}/load_test_*.json 2>/dev/null | head -1)
-          fi
-
-          if [ -z "$REPORT_FILE" ] || [ ! -f "$REPORT_FILE" ]; then
-            echo "No load test report found"
-            exit 1
-          fi
-
-          echo "=== Load Test Report: $(basename "$REPORT_FILE") ==="
-          echo
-
-          # Extract and display key metrics
-          jq -r '
-            "Timestamp: " + .timestamp,
-            "Hostname: " + .hostname,
-            "",
-            "Summary:",
-            "  Total Tests: " + (.load_test_summary.total_tests | tostring),
-            "  Passed: " + (.load_test_summary.passed_tests | tostring),
-            "  Failed: " + (.load_test_summary.failed_tests | tostring),
-            "  Success Rate: " + (.load_test_summary.success_rate | tostring) + "%",
-            "",
-            "System Resources:",
-            "  Max CPU: " + (.system_resources.max_cpu_usage | tostring) + "%",
-            "  Max Memory: " + (.system_resources.max_memory_usage | tostring) + "%",
-            "",
-            "Test Results:"
-          ' "$REPORT_FILE"
-
-          # Display individual test results
-          jq -r '.test_results[] |
-            "  " + .name + ": " + .status +
-            " (avg: " + (.avg_response_time | tostring) + "ms, " +
-            "errors: " + (.error_rate | tostring) + "%)"
-          ' "$REPORT_FILE"
-        '')
-      ];
-
-      # Shell aliases for load testing
-      programs.zsh.shellAliases = mkIf config.programs.zsh.enable {
-        "load-test" = "ai-load-test";
-        "load-test-status" = "ai-load-test-status";
-        "load-test-report" = "ai-load-test-report";
-        "load-test-light" = "ai-load-test light";
-        "load-test-stress" = "ai-load-test stress";
+    # Timers for load testing
+    systemd.timers.ai-provider-load-test = {
+      description = "AI Provider Load Test Timer";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = cfg.testInterval;
+        Persistent = true;
+        RandomizedDelaySec = "15m";
       };
     };
-  }
+
+    # Create necessary directories
+    systemd.tmpfiles.rules = [
+      "d ${cfg.reportPath} 0755 root root -"
+      "d /var/log/ai-analysis 0755 ai-analysis ai-analysis -"
+    ];
+
+    # Load testing management commands
+    environment.systemPackages = [
+      pkgs.curl
+      pkgs.jq
+
+      (pkgs.writeShellScriptBin "ai-load-test" ''
+        #!/bin/bash
+
+        PROFILE="''${1:-moderate}"
+
+        echo "Starting AI load test with profile: $PROFILE"
+
+        case "$PROFILE" in
+          "light"|"moderate"|"heavy"|"stress")
+            systemctl start ai-load-test-profiles
+            ;;
+          "continuous")
+            if systemctl is-active ai-continuous-load-test &>/dev/null; then
+              echo "Continuous load test already running"
+            else
+              systemctl start ai-continuous-load-test
+            fi
+            ;;
+          "stop")
+            systemctl stop ai-continuous-load-test
+            echo "Continuous load test stopped"
+            ;;
+          *)
+            echo "Usage: $0 {light|moderate|heavy|stress|continuous|stop}"
+            echo "Available profiles:"
+            echo "  light    - ${toString cfg.loadTestProfiles.light.users} users, ${cfg.loadTestProfiles.light.duration}"
+            echo "  moderate - ${toString cfg.loadTestProfiles.moderate.users} users, ${cfg.loadTestProfiles.moderate.duration}"
+            echo "  heavy    - ${toString cfg.loadTestProfiles.heavy.users} users, ${cfg.loadTestProfiles.heavy.duration}"
+            echo "  stress   - ${toString cfg.loadTestProfiles.stress.users} users, ${cfg.loadTestProfiles.stress.duration}"
+            echo "  continuous - Continuous light load testing"
+            echo "  stop     - Stop continuous load testing"
+            exit 1
+            ;;
+        esac
+      '')
+
+      (pkgs.writeShellScriptBin "ai-load-test-status" ''
+        #!/bin/bash
+
+        echo "=== AI Load Testing Status ==="
+        echo
+
+        echo "Load Test Services:"
+        systemctl status ai-provider-load-test --no-pager -l
+        echo
+
+        if systemctl is-active ai-continuous-load-test &>/dev/null; then
+          echo "Continuous Load Test:"
+          systemctl status ai-continuous-load-test --no-pager -l
+          echo
+        fi
+
+        echo "Recent Load Test Reports:"
+        ls -la ${cfg.reportPath}/ | tail -10
+        echo
+
+        echo "Load Test Logs (last 20 lines):"
+        tail -20 /var/log/ai-analysis/load-testing.log 2>/dev/null || echo "No load test logs found"
+      '')
+
+      (pkgs.writeShellScriptBin "ai-load-test-report" ''
+        #!/bin/bash
+
+        REPORT_FILE="''${1:-latest}"
+
+        if [ "$REPORT_FILE" = "latest" ]; then
+          REPORT_FILE=$(ls -t ${cfg.reportPath}/load_test_*.json 2>/dev/null | head -1)
+        fi
+
+        if [ -z "$REPORT_FILE" ] || [ ! -f "$REPORT_FILE" ]; then
+          echo "No load test report found"
+          exit 1
+        fi
+
+        echo "=== Load Test Report: $(basename "$REPORT_FILE") ==="
+        echo
+
+        # Extract and display key metrics
+        jq -r '
+          "Timestamp: " + .timestamp,
+          "Hostname: " + .hostname,
+          "",
+          "Summary:",
+          "  Total Tests: " + (.load_test_summary.total_tests | tostring),
+          "  Passed: " + (.load_test_summary.passed_tests | tostring),
+          "  Failed: " + (.load_test_summary.failed_tests | tostring),
+          "  Success Rate: " + (.load_test_summary.success_rate | tostring) + "%",
+          "",
+          "System Resources:",
+          "  Max CPU: " + (.system_resources.max_cpu_usage | tostring) + "%",
+          "  Max Memory: " + (.system_resources.max_memory_usage | tostring) + "%",
+          "",
+          "Test Results:"
+        ' "$REPORT_FILE"
+
+        # Display individual test results
+        jq -r '.test_results[] |
+          "  " + .name + ": " + .status +
+          " (avg: " + (.avg_response_time | tostring) + "ms, " +
+          "errors: " + (.error_rate | tostring) + "%)"
+        ' "$REPORT_FILE"
+      '')
+    ];
+
+    # Shell aliases for load testing
+    programs.zsh.shellAliases = mkIf config.programs.zsh.enable {
+      "load-test" = "ai-load-test";
+      "load-test-status" = "ai-load-test-status";
+      "load-test-report" = "ai-load-test-report";
+      "load-test-light" = "ai-load-test light";
+      "load-test-stress" = "ai-load-test stress";
+    };
+  };
+}

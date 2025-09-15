@@ -804,7 +804,6 @@ in
     bind # DNS utilities (dig, nslookup, etc.)
     dnsutils # Additional DNS utilities
     # Security analysis tools
-    chkrootkit
     lynis
     # Network monitoring
     bandwhich
@@ -823,9 +822,6 @@ in
       User = "root";
       ExecStart = pkgs.writeShellScript "security-scan" ''
         echo "[$(date)] Starting security scan..."
-
-        # Check for rootkits
-        ${pkgs.chkrootkit}/bin/chkrootkit -q || echo "chkrootkit found issues"
 
         # Run system audit
         ${pkgs.lynis}/bin/lynis audit system --quick --quiet

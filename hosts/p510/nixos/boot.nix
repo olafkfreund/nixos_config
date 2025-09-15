@@ -14,6 +14,7 @@
     "idle=nomwait" # Disable mwait for consistent performance
     "numa_balancing=disable" # Better for workstation loads with consistent memory access patterns
     "mitigations=auto" # Balance security mitigations with performance
+    "ipv6.disable=1" # Completely disable IPv6 at kernel level
   ];
 
   # Boot-specific kernel parameters for Xeon workstation
@@ -48,7 +49,7 @@
 
   # Force empty extraModulePackages to completely remove v4l2loopback
   boot.extraModulePackages = lib.mkForce [ ];
-  
+
   # Explicitly blacklist v4l2loopback kernel module
   boot.blacklistedKernelModules = lib.mkForce [ "v4l2loopback" ];
 

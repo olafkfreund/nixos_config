@@ -51,7 +51,7 @@ with lib; let
     plugins = {
       expo = false; # Workspace overview (disabled due to API compatibility issues)
       hyprbars = false; # Window titlebars (disabled due to API compatibility issues)
-      hyprfocus = true; # Focus indicators (needed for plugin configuration)
+      hyprfocus = false; # Focus indicators (disabled due to API compatibility issues with Hyprland 0.51+)
       stack3d = false; # 3D stack animation plugin (disabled - causing crashes)
     };
 

@@ -1,7 +1,8 @@
 # Home Manager Profiles System
 # Provides profile-based user configurations with inheritance and composition
-{ lib, ... }: {
-
+{ lib, ... }:
+with lib;
+let
   # Profile definitions with inheritance capabilities
   profiles = {
 
@@ -169,4 +170,7 @@
         compositions;
     in
     singleProfiles // compositionProfiles;
+in
+{
+  inherit profiles compositions resolveProfile validateProfile getHostProfiles;
 }
