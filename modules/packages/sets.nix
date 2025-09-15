@@ -96,7 +96,7 @@
     # Wayland/Hyprland essentials
     wayland = with pkgs; [
       waybar
-      rofi-wayland
+      rofi
       swww
       grim
       slurp

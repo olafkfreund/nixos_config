@@ -59,13 +59,15 @@ in
     };
   };
 
-  # Use systemd-resolved for proper DNS management with systemd-networkd
+  # Disable systemd-resolved stub resolver due to DNS issues
+  # Use direct DNS servers instead
   services.resolved = {
-    enable = true;
-    fallbackDns = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
-    domains = [ "home.freundcloud.com" ];
-    dnssec = lib.mkForce "false"; # Resolve DNSSEC conflict
+    enable = lib.mkForce false; # Disabled due to stub resolver not responding
   };
+
+  # Configure DNS directly
+  networking.nameservers = [ "8.8.8.8" "1.1.1.1" ];
+  networking.resolvconf.enable = false; # Use static resolv.conf
 
   # Use AI provider defaults with server profile
   aiDefaults = {

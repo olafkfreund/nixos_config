@@ -72,7 +72,7 @@ in
           sticky_history = true;
           history_length = 20;
           browser = "${pkgs.xdg-utils}/bin/xdg-open";
-          dmenu = "${pkgs.rofi-wayland}/bin/rofi -dmenu -p dunst:"; # Using rofi instead
+          dmenu = "${pkgs.rofi}/bin/rofi -dmenu -p dunst:"; # Using rofi instead
           always_run_script = true;
           title = "Dunst";
           class = "Dunst";
