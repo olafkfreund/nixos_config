@@ -59,6 +59,7 @@ in
         upscaler # Image upscaling tool
         dissent
         gnvim
+        amberol
 
         # GNOME text and documents
         gedit # Text editor

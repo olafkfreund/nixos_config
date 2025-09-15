@@ -16,6 +16,7 @@ in
     ./nixos/power.nix
     ./nixos/boot.nix
     ./nixos/nvidia.nix
+    ./nixos/network.nix # Network configuration with dual-port Intel card
     ../common/nixos/i18n.nix
     ../common/nixos/envvar.nix
     ./nixos/cpu.nix
@@ -34,12 +35,9 @@ in
     # ../common/hyprland.nix  # Window manager - not needed for headless
   ];
 
-  # Networking configuration
+  # Basic networking configuration (detailed config in ./nixos/network.nix)
   networking = {
     hostName = vars.hostName;
-    profile = "server";
-    useNetworkd = lib.mkForce true;
-    useHostResolvConf = false;
 
     # Disable IPv6
     enableIPv6 = false;
@@ -60,17 +58,10 @@ in
         "--advertise-tags=tag:server,tag:media"
       ];
     };
-  };
 
-  # Disable systemd-resolved stub resolver due to DNS issues
-  # Use direct DNS servers instead
-  services.resolved = {
-    enable = lib.mkForce false; # Disabled due to stub resolver not responding
+    # DNS configuration
+    nameservers = [ "192.168.1.254" ];
   };
-
-  # Configure DNS directly using router DNS
-  networking.nameservers = [ "192.168.1.254" ];
-  networking.resolvconf.enable = false; # Use static resolv.conf
 
   # Use AI provider defaults with server profile
   aiDefaults = {
