@@ -23,25 +23,9 @@
 
   # P510-specific feature overrides for server + development
   features = {
-    # Force headless operation - override profile conflicts
+    # Force headless operation - completely disable desktop
     desktop = {
-      enable = lib.mkForce true; # Enable framework for options
-      # But disable all GUI components with mkForce to override profile conflicts
-      sway = lib.mkForce false;
-      dunst = lib.mkForce false;
-      swaync = lib.mkForce false;
-      zathura = lib.mkForce false;
-      rofi = lib.mkForce false;
-      obsidian = lib.mkForce false;
-      swaylock = lib.mkForce false;
-      flameshot = lib.mkForce false;
-      kooha = lib.mkForce false;
-      remotedesktop = lib.mkForce false;
-      walker = lib.mkForce false;
-      obs = lib.mkForce false;
-      evince = lib.mkForce false;
-      kdeconnect = lib.mkForce false;
-      slack = lib.mkForce false;
+      enable = lib.mkForce false; # Completely disable desktop framework for headless server
     };
 
     # Disable GUI terminals for headless operation - override profile conflicts
