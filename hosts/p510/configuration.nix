@@ -65,8 +65,8 @@ in
     enable = lib.mkForce false; # Disabled due to stub resolver not responding
   };
 
-  # Configure DNS directly
-  networking.nameservers = [ "8.8.8.8" "1.1.1.1" ];
+  # Configure DNS directly using router DNS
+  networking.nameservers = [ "192.168.1.254" ];
   networking.resolvconf.enable = false; # Use static resolv.conf
 
   # Use AI provider defaults with server profile
