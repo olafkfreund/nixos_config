@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.desktop.gnome;
-in {
+in
+{
   config = mkIf (cfg.enable && cfg.extensions.enable) {
     # GNOME Shell extensions configuration via dconf
     dconf.settings = {
@@ -172,7 +172,7 @@ in {
       # Clipboard Indicator configuration
       "org/gnome/shell/extensions/clipboard-indicator" = {
         cache-size = 50;
-        clear-history = [];
+        clear-history = [ ];
         confirm-clear = false;
         display-mode = 0;
         enable-keybindings = true;
