@@ -1,12 +1,12 @@
-{ config
-, lib
-, pkgs
-, ...
+{
+  config,
+  lib,
+  pkgs,
+  ...
 }:
 with lib; let
   cfg = config.desktop.gnome;
-in
-{
+in {
   config = mkIf (cfg.enable && cfg.extensions.enable) {
     # GNOME Shell extensions configuration via dconf
     dconf.settings = {
@@ -17,25 +17,30 @@ in
           # Essential extensions UUIDs
           "user-theme@gnome-shell-extensions.gcampax.github.com"
           "gsconnect@andyholmes.github.io"
-
-          # Popular extensions (commented out - uncomment as needed)
           "dash-to-dock@micxgx.gmail.com"
           "appindicatorsupport@rgcjonas.gmail.com"
+          "auto-accent-colour@Wartybix"
+          "auto-move-windows@gnome-shell-extensions.gcampax.github.com"
+          "bring-out-submenu-of-power-offlogout-button@gnome-shell-extensions.gcampax.github.com"
+          "coverflow-alt-tab@gnome-shell-extensions.gcampax.github.com"
+          "foresight@gnome-shell-extensions.gcampax.github.com"
+          "move-to-next-screen@gnome-shell-extensions.gcampax.github.com"
           "Vitals@CoreCoding.com"
           "blur-my-shell@aunetx"
           "top-panel-logo@jmpegi.github.com"
-          # "places-menu@gnome-shell-extensions.gcampax.github.com"
           "workspace-indicator@gnome-shell-extensions.gcampax.github.com"
+          "emoji-copy@felipeftn"
+          "Gnofi@aylur"
           "windowsNavigator@gnome-shell-extensions.gcampax.github.com"
-          # "screenshot-window-sizer@gnome-shell-extensions.gcampax.github.com"
-          # "drive-menu@gnome-shell-extensions.gcampax.github.com"
           "caffeine@patapon.info"
           "clipboard-indicator@tudmotu.com"
-          # "sound-output-device-chooser@kgshank.net"
-          # "topicons-plus@phocean.net"
-          # "unite@hardpixel.eu"
           "panel-osd@berend.de.schouwer.gmail.com"
-          # "weatherbit-extension@ayrton.senna"
+          "quake-terminal@diegodario88.github.io"
+          "tailscale-status@maxgallup.github.com"
+          "tilingshell@ferrarodomenico.com"
+          "user-themes@gnome-shell-extensions.gcampax.github.com"
+          "bluetooth-battery@michalw.github.com"
+          "BringOutSubmenuOfPowerOffLogoutButton@pratap.fastmail.fm"
         ];
       };
 
@@ -110,6 +115,13 @@ in
         static-blur = true;
       };
 
+      # Accent-gtk-theme configuration
+      "org/gnome/shell/extensions/accent-gtk-theme" = {
+        blue-theme-light = "Gruvbox";
+        set-link-gtk4 = true;
+        set-theme-path = "home/olafkfreund/.local/share/themes";
+      };
+
       # Caffeine configuration
       "org/gnome/shell/extensions/caffeine" = {
         enable-fullscreen = true;
@@ -118,10 +130,49 @@ in
         show-notification = false;
       };
 
+      # Auto Accent Colour configuration
+      "org/gnome/shell/extensions/auto-accent-colour" = {
+        hide-indicator = false;
+        highlight-mode = true;
+      };
+
+      # Dim Background Windows configuration
+      "org/gnome/shell/extensions/dim-background-windows" = {
+        dim-background = true;
+        dimming-enabled = true;
+        toogle-shortcut = "<Super>g";
+      };
+
+      # Quake Terminal configuration
+      "org/gnome/shell/extensions/quake-terminal" = {
+        always-on-top = true;
+        auto-hide-window = true;
+        render-on-primary-monitor = true;
+        render-on-current-monitor = false;
+        terminal-id = "Alacritty.desktop";
+        terminal-shortcut = "<Super>t";
+        vertical-size = 80;
+      };
+
+      # Tilling Shell configuration
+      "org/gnome/shell/extensions/tilingshell" = {
+        enable-autotilling = true;
+        enable-snap-assist = false;
+        enable-window-border = true;
+        inner-gabs = 4;
+        window-border-color = "rgb(154,153,150)";
+      };
+
+
+      # Gnofi configuration
+      "org/gnome/shell/extensions/gnofi" = {
+        window-hotkey = "<Super>Return";
+      };
+
       # Clipboard Indicator configuration
       "org/gnome/shell/extensions/clipboard-indicator" = {
         cache-size = 50;
-        clear-history = [ ];
+        clear-history = [];
         confirm-clear = false;
         display-mode = 0;
         enable-keybindings = true;
