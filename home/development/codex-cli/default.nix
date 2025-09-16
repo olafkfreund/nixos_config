@@ -1,59 +1,35 @@
 { lib, pkgs, fetchurl, buildNpmPackage, nodejs_22 }:
 
-let
-  # Since this package has no npm dependencies, we can use stdenv.mkDerivation instead
-  # But to keep it consistent with the npm ecosystem, we'll use buildNpmPackage with minimal deps
-  minimalPackageLock = pkgs.writeText "package-lock.json" (builtins.toJSON {
-    name = "@openai/codex";
-    version = "0.21.0";
-    lockfileVersion = 3;
-    requires = true;
-    packages = {
-      "" = {
-        name = "@openai/codex";
-        version = "0.21.0";
-        license = "Apache-2.0";
-        bin = {
-          codex = "bin/codex.js";
-        };
-        engines = {
-          node = ">=20";
-        };
-      };
-    };
-  });
-in
 buildNpmPackage rec {
   pname = "openai-codex";
-  version = "0.21.0";
+  version = "0.36.0";
 
   src = fetchurl {
     url = "https://registry.npmjs.org/@openai/codex/-/codex-${version}.tgz";
-    hash = "sha256-4Jm1BGUGvzXQrLF8sIwPAeCNH05orFT39VaR95j/xGE=";
+    hash = "sha256-OcKca1KAge7tqwTbe2W2NGTz4zBKc8qgh9UKyoqM20Y=";
   };
 
-  # Since there are no npm dependencies, use empty hash and force empty cache
-  npmDepsHash = "sha256-sCLNbUmCufTErDcHEZjQwTZFZqlSH+U2ekYqEyPyFnQ=";
-  forceEmptyCache = true;
+  # Use proper npm dependency resolution for version 0.36.0
+  npmDepsHash = "sha256-mwPhA5/4tw+bF56mHXv0DmkexA3LyZh1RiBzjKZYKnA=";
+  makeCacheWritable = true;
 
   nodejs = nodejs_22;
 
-  # Create the required package-lock.json during patch phase
+  # Copy the required package-lock.json during patch phase
   postPatch = ''
-    cp ${minimalPackageLock} ./package-lock.json
+    cp ${./package-lock.json} ./package-lock.json
   '';
 
   # Skip npm audit and funding messages
   npmFlags = [ "--ignore-scripts" "--no-audit" "--no-fund" ];
 
-  # Don't run npm build since this is a pre-compiled package
+  # Don't run npm build since this package has no build script
   dontNpmBuild = true;
-  dontNpmInstall = true;
 
   # OpenAI Codex requires Node.js 22+ and npm 10+
-  nativeBuildInputs = with pkgs; [
-    nodejs_22
-    makeWrapper
+  nativeBuildInputs = [
+    pkgs.nodejs_22
+    pkgs.makeWrapper
   ];
 
   # Custom install phase since this is a pre-compiled binary package
@@ -82,7 +58,7 @@ buildNpmPackage rec {
   '';
 
   # Metadata for the package
-  meta = with lib; {
+  meta = {
     description = "OpenAI Codex - Experimental coding agent by OpenAI";
     longDescription = ''
       OpenAI Codex is an experimental coding agent that can help with various programming tasks.
@@ -101,9 +77,9 @@ buildNpmPackage rec {
     '';
     homepage = "https://github.com/openai/codex";
     changelog = "https://github.com/openai/codex/releases";
-    license = licenses.asl20; # Apache-2.0 License
-    maintainers = with maintainers; [ ]; # Add maintainer when contributed upstream
-    platforms = platforms.all;
+    license = lib.licenses.asl20; # Apache-2.0 License
+    maintainers = [ ]; # Add maintainer when contributed upstream
+    platforms = lib.platforms.all;
     mainProgram = "codex-cli";
   };
 }
