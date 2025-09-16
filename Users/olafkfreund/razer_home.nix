@@ -136,6 +136,14 @@ in {
     };
   };
 
+  # GitLab development configuration for Razer (mobile development)
+  development.gitlab = {
+    enable = true;
+    runner.enable = false; # Disable runner on laptop for battery savings
+    fluxcd.enable = true;
+    ciLocal.enable = true;
+  };
+
   # Host-specific Windsurf configuration
   editor.windsurf.extraPackages = with pkgs; [
     nixpkgs-fmt

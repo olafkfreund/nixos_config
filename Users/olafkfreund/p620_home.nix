@@ -132,6 +132,14 @@
     };
   };
 
+  # GitLab development configuration for P620
+  development.gitlab = {
+    enable = true;
+    runner.enable = true;
+    fluxcd.enable = true;
+    ciLocal.enable = true;
+  };
+
   # Override desktop features for P620 (add to existing desktop config)
   features.desktop.quickshell = true;
 

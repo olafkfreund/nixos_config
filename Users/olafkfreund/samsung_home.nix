@@ -124,6 +124,21 @@
       enable = true;
       steam = true;
     };
+
+    development = {
+      enable = true;
+      languages = true;
+      workflow = true;
+      productivity = true;
+    };
+  };
+
+  # GitLab development configuration for Samsung (mobile development)
+  development.gitlab = {
+    enable = true;
+    runner.enable = false; # Disable runner on laptop for battery savings
+    fluxcd.enable = true;
+    ciLocal.enable = true;
   };
 
   home.packages = [

@@ -18,6 +18,9 @@ _: {
     ./codex-cli.nix
     ./claude-desktop
 
+    # Version control and CI/CD
+    ./gitlab/default.nix
+
     # Core language support and tooling
     ./languages.nix
 
