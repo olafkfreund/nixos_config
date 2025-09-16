@@ -1,7 +1,7 @@
 { lib, ... }:
 with lib; {
   # Enhanced ZSH configuration for AI-integrated task management
-  programs.zsh.initExtra = ''
+  programs.zsh.initContent = ''
     # AI-Enhanced Task Management Functions
 
     # Quick AI-powered task creation with context awareness

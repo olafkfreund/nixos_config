@@ -396,7 +396,7 @@ in
     ];
 
     # ZSH functions for enhanced functionality
-    programs.zsh.initExtra = ''
+    programs.zsh.initContent = ''
       # AI-enhanced task functions
       ai-project() {
         if [[ $# -eq 0 ]]; then

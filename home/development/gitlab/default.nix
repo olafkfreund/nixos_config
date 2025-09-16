@@ -134,7 +134,7 @@ in {
     };
 
     # Additional shell configuration for GitLab workflows
-    programs.zsh.initExtra = mkIf cfg.enable ''
+    programs.zsh.initContent = mkIf cfg.enable ''
       # GitLab workflow functions
       gitlab-clone() {
         if [[ $# -eq 0 ]]; then
