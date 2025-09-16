@@ -100,7 +100,7 @@ in
         search-view = "list-view";
         show-create-link = true;
         show-delete-permanently = true;
-        show-hidden-files = false;
+        show-hidden-files = true;
         thumbnail-limit = 10; # MB
       };
 

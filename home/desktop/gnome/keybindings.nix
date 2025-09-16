@@ -14,7 +14,7 @@ in
         # Window operations
         close = [ "<Super>q" "<Alt>F4" ];
         toggle-maximized = [ "<Super>m" ];
-        toggle-fullscreen = [ "F11" ];
+        toggle-fullscreen = [ "<Super>f" ];
         minimize = [ "<Super>h" ];
 
         # Window switching
@@ -181,12 +181,12 @@ in
         name = "Open Settings";
       };
 
-      # Input method keybindings
-      "org/gnome/desktop/input-sources" = {
-        # Switch input source
-        switch-input-source = [ "<Super>space" ];
-        switch-input-source-backward = [ "<Shift><Super>space" ];
-      };
+      # # Input method keybindings
+      # "org/gnome/desktop/input-sources" = {
+      #   # Switch input source
+      #   switch-input-source = [ "<Super>space" ];
+      #   switch-input-source-backward = [ "<Shift><Super>space" ];
+      # };
 
       # Accessibility keybindings
       "org/gnome/settings-daemon/plugins/media-keys" = {

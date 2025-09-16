@@ -1,18 +1,18 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.development.gitlab;
-in {
+in
+{
   options.development.gitlab = {
     enable = mkEnableOption "GitLab development tools and integration";
 
     packages = mkOption {
       type = types.listOf types.package;
-      default = [];
+      default = [ ];
       description = "Additional GitLab-related packages to install";
     };
 
@@ -25,7 +25,7 @@ in {
 
       config = mkOption {
         type = types.attrs;
-        default = {};
+        default = { };
         description = "GitLab Runner configuration";
         example = literalExpression ''
           {
@@ -58,7 +58,7 @@ in {
     # Core GitLab development packages
     home.packages = with pkgs; [
       # GitLab CLI and tools
-      glab                    # GitLab CLI tool for repository management
+      glab # GitLab CLI tool for repository management
 
       # GitLab Runner for local CI/CD testing
       (mkIf cfg.runner.enable gitlab-runner)
@@ -72,10 +72,10 @@ in {
       (mkIf cfg.ciLocal.enable gitlab-ci-local)
 
       # Additional related tools
-      git                     # Core git functionality
-      jq                      # JSON processing for API responses
-      curl                    # HTTP client for GitLab API
-      yq-go                   # YAML processing for CI/CD files
+      git # Core git functionality
+      jq # JSON processing for API responses
+      curl # HTTP client for GitLab API
+      yq-go # YAML processing for CI/CD files
 
     ] ++ cfg.packages;
 
@@ -122,16 +122,16 @@ in {
     };
 
     # Development environment variables
-    home.sessionVariables = mkIf cfg.enable {
+    home.sessionVariables = mkIf cfg.enable ({
       # GitLab CLI configuration
       GITLAB_HOST = "gitlab.com";
 
-      # GitLab Runner configuration
-      GITLAB_RUNNER_CONFIG_FILE = mkIf cfg.runner.enable "$HOME/.gitlab-runner/config.toml";
-
       # FluxCD configuration
       FLUX_SYSTEM_NAMESPACE = mkIf cfg.fluxcd.enable "flux-system";
-    };
+    } // (mkIf cfg.runner.enable {
+      # GitLab Runner configuration
+      GITLAB_RUNNER_CONFIG_FILE = "$HOME/.gitlab-runner/config.toml";
+    }));
 
     # Additional shell configuration for GitLab workflows
     programs.zsh.initContent = mkIf cfg.enable ''

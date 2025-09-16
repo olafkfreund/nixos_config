@@ -103,7 +103,7 @@ in
         position-in-panel = 2; # 0: left, 1: center, 2: right
         use-higher-precision = false;
         alphabetize = true;
-        include-public-ip = false;
+        include-public-ip = true;
         include-static-info = false;
       };
 
@@ -150,7 +150,7 @@ in
         render-on-primary-monitor = true;
         render-on-current-monitor = false;
         terminal-id = "Alacritty.desktop";
-        terminal-shortcut = "<Super>t";
+        terminal-shortcut = "<Super>Return";
         vertical-size = 80;
       };
 
@@ -163,10 +163,9 @@ in
         window-border-color = "rgb(154,153,150)";
       };
 
-
       # Gnofi configuration
       "org/gnome/shell/extensions/gnofi" = {
-        window-hotkey = "<Super>Return";
+        window-hotkey = "<Super>space";
       };
 
       # Clipboard Indicator configuration

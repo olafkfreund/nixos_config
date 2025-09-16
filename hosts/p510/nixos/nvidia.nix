@@ -5,9 +5,9 @@
   hardware.nvidia = {
     modesetting.enable = true;
     powerManagement.enable = false;
-    nvidiaPersistenced = false;  # Disabled due to rpc/rpc.h build error with latest drivers
+    nvidiaPersistenced = true; # Enable for headless operation (keeping device nodes persistent)
     open = false;
-    nvidiaSettings = true;
+    nvidiaSettings = false; # Disable GUI settings for headless
     package = config.boot.kernelPackages.nvidiaPackages.production; # Use production drivers for stability
   };
   hardware.graphics = {
@@ -24,15 +24,18 @@
       nvidia-vaapi-driver
       vaapiVdpau
 
-      # CUDA support
-      # cudaPackages.cudatoolkit
-      # cudaPackages.cudnn
+      # CUDA support for Ollama and LLM Studio
+      cudaPackages.cudatoolkit
+      cudaPackages.cudnn
     ];
   };
   environment = {
     systemPackages = with pkgs; [
       libva
       libva-utils
+      # CUDA tools for development and debugging
+      cudaPackages.cuda_nvcc
+      cudaPackages.cudatoolkit
     ];
   };
 }

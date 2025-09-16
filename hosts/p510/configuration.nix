@@ -243,10 +243,29 @@ in
   # StreamDeck UI disabled for headless operation
   programs.streamdeck-ui.enable = lib.mkForce false;
 
-  # Disable X server for headless operation but keep NVIDIA driver for container toolkit
+  # Enable NVIDIA drivers for headless operation (GPU transcoding and container toolkit)
   services.xserver = {
-    enable = lib.mkForce false;
-    videoDrivers = [ "nvidia" ]; # Required for nvidia-container-toolkit even in headless mode
+    enable = true; # Required to load NVIDIA kernel modules
+    videoDrivers = [ "nvidia" ];
+    autorun = false; # Don't start X automatically
+  };
+
+  # Enable display manager but configure for headless
+  services.displayManager = {
+    gdm.enable = false;
+    autoLogin = {
+      enable = false;
+    };
+  };
+
+  # Ensure NVIDIA modules are loaded at boot
+  boot.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
+
+  # Environment variables for CUDA support
+  environment.variables = {
+    CUDA_PATH = "${pkgs.cudaPackages.cudatoolkit}";
+    EXTRA_LDFLAGS = "-L/run/opengl-driver/lib";
+    EXTRA_CCFLAGS = "-I/run/opengl-driver/include";
   };
 
   # Keep video drivers for hardware transcoding (Plex) but disable display
