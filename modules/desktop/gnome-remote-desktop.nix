@@ -12,8 +12,12 @@ in
     # Enable GNOME Remote Desktop backend (modern RDP implementation)
     services.gnome.gnome-remote-desktop.enable = true;
 
-    # Disable xrdp to prevent port conflicts - GNOME Remote Desktop handles RDP
+    # Completely disable xrdp to prevent port conflicts - GNOME Remote Desktop handles RDP
     services.xrdp.enable = lib.mkForce false;
+
+    # Mask xrdp services to prevent any attempt to start them
+    systemd.services.xrdp.enable = lib.mkForce false;
+    systemd.services.xrdp-sesman.enable = lib.mkForce false;
 
     # Enable Avahi for service discovery
     services.avahi = {
