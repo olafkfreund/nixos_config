@@ -47,8 +47,8 @@
     "xhci_pci" # USB 3.0 support
   ];
 
-  # Force empty extraModulePackages to completely remove v4l2loopback
-  boot.extraModulePackages = lib.mkForce [ ];
+  # Don't force empty extraModulePackages - let nvidia.nix configure NVIDIA modules
+  # boot.extraModulePackages configured by nvidia.nix
 
   # Explicitly blacklist v4l2loopback kernel module
   boot.blacklistedKernelModules = lib.mkForce [ "v4l2loopback" ];

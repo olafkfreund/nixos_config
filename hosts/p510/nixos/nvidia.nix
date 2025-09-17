@@ -27,9 +27,8 @@
     # Modesetting is required for most Wayland compositors
     modesetting.enable = true;
 
-    # Use proprietary drivers for RTX 30 series for better stability
-    # Open-source drivers have communication issues with RTX 3060/3070 Ti
-    open = false;
+    # Try open-source drivers for RTX 30 series (may work better with newer kernels)
+    open = true;
 
     # Power management settings (disabled for server stability)
     powerManagement.enable = false;
@@ -38,8 +37,8 @@
     # Nvidia settings GUI (disabled for headless server)
     nvidiaSettings = true;
 
-    # Use legacy 535.x driver - stable for RTX 30 series, avoids 580.x deadlock
-    package = config.boot.kernelPackages.nvidiaPackages.legacy_535;
+    # Use beta driver for RTX 30 series with open-source drivers
+    package = config.boot.kernelPackages.nvidiaPackages.beta;
 
     # Enable persistence daemon for headless operation
     nvidiaPersistenced = true;
@@ -58,8 +57,7 @@
     # Blacklist conflicting drivers
     blacklistedKernelModules = [ "nouveau" ];
 
-    # Ensure NVIDIA modules are in extraModulePackages
-    extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
+    # Let hardware.nvidia module handle extraModulePackages automatically
   };
 
   # Docker NVIDIA support
