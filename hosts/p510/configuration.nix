@@ -224,9 +224,14 @@ in
 
   # Display manager configuration (force enable to fix masking issue)
   services.displayManager.gdm.enable = lib.mkForce true;
+  services.displayManager.gdm.wayland = true;
 
   # Desktop manager configuration
   services.desktopManager.gnome.enable = true;
+  services.displayManager.defaultSession = "gnome";
+
+  # Ensure display manager is enabled in systemd
+  systemd.targets.graphical.wants = [ "display-manager.service" ];
 
   # Disable GNOME initial setup to avoid build failures
   services.gnome.gnome-initial-setup.enable = false;
