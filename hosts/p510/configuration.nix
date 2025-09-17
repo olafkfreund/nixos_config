@@ -222,8 +222,8 @@ in
   # Enable X server (NVIDIA drivers configured in nvidia.nix)
   services.xserver.enable = true;
 
-  # Display manager configuration
-  services.displayManager.gdm.enable = true;
+  # Display manager configuration (force enable to fix masking issue)
+  services.displayManager.gdm.enable = lib.mkForce true;
 
   # Desktop manager configuration
   services.desktopManager.gnome.enable = true;
