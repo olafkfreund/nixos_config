@@ -232,7 +232,16 @@ in
   services.greetd.enable = lib.mkForce false;
 
   # Desktop manager configuration (new location)
-  services.desktopManager.gnome.enable = true;
+  services.desktopManager.gnome = {
+    enable = true;
+    extraGSettingsOverrides = ''
+      [org.gnome.initial-setup]
+      first-run=false
+    '';
+  };
+
+  # Disable GNOME initial setup to avoid build failures
+  services.gnome.gnome-initial-setup.enable = false;
 
   # NVIDIA modules now loaded via initrd.kernelModules in nvidia.nix for proper early initialization
 

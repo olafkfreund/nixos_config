@@ -112,21 +112,39 @@ in {
       ++ optionals cfg.languages.go languagePackages.go
       ++ optionals cfg.languages.system languagePackages.system;
     
-    # VS Code configuration
-    programs.vscode = mkIf cfg.editors.vscode editorConfigs.vscode;
-    
-    # Neovim with LazyVim (consolidated config)
-    programs.neovim = mkIf cfg.editors.neovim {
-      enable = true;
-      defaultEditor = true;
-      viAlias = true;
-      vimAlias = true;
-      
-      configure = {
-        customRC = ''
-          " LazyVim setup will be handled by Home Manager
-          lua require("lazy").setup()
-        '';
+    # Development programs
+    programs = {
+      # VS Code configuration
+      vscode = mkIf cfg.editors.vscode editorConfigs.vscode;
+
+      # Neovim with LazyVim (consolidated config)
+      neovim = mkIf cfg.editors.neovim {
+        enable = true;
+        defaultEditor = true;
+        viAlias = true;
+        vimAlias = true;
+
+        configure = {
+          customRC = ''
+            " LazyVim setup will be handled by Home Manager
+            lua require("lazy").setup()
+          '';
+        };
+      };
+
+      # Direnv for project environments
+      direnv = {
+        enable = true;
+        nix-direnv.enable = true;
+      };
+
+      # Better shell for development
+      zsh.enable = mkDefault true;
+
+      # Git configuration
+      git = {
+        enable = true;
+        lfs.enable = true;
       };
     };
     
@@ -156,23 +174,6 @@ in {
       };
     };
     
-    # Development shell environment
-    programs = {
-      # Direnv for project environments
-      direnv = {
-        enable = true;
-        nix-direnv.enable = true;
-      };
-      
-      # Better shell for development
-      zsh.enable = mkDefault true;
-      
-      # Git configuration
-      git = {
-        enable = true;
-        lfs.enable = true;
-      };
-    };
     
     # Development user groups
     users.groups = {

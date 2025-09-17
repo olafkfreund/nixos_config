@@ -21,8 +21,8 @@
 
   # NVIDIA driver configuration for RTX 3070 Ti and RTX 3060
   hardware.nvidia = {
-    # Use open-source drivers for RTX 30-series (recommended)
-    open = true;
+    # Use proprietary drivers for better stability with kernel updates
+    open = false;
 
     # Essential settings
     modesetting.enable = true;
