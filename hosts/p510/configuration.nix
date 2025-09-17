@@ -260,8 +260,7 @@ in
   # Desktop manager configuration (new location)
   services.desktopManager.gnome.enable = true;
 
-  # Ensure NVIDIA modules are loaded at boot
-  boot.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
+  # NVIDIA modules now loaded via initrd.kernelModules in nvidia.nix for proper early initialization
 
   # Environment variables for CUDA support
   environment.variables = {
@@ -349,7 +348,6 @@ in
   # NVIDIA specific configurations
   hardware.keyboard.zsa.enable = true;
   services.ollama.acceleration = vars.acceleration;
-  hardware.nvidia-container-toolkit.enable = true;
 
   # Agenix identity configuration - specify where to find decryption keys
   age.identityPaths = [
