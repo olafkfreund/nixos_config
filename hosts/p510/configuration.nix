@@ -219,11 +219,8 @@ in
   # StreamDeck UI disabled for headless operation
   programs.streamdeck-ui.enable = lib.mkForce false;
 
-  # Enable X server with NVIDIA support (required for GPU functionality)
-  services.xserver = {
-    enable = true;
-    videoDrivers = [ "nvidia" ];
-  };
+  # Enable X server (NVIDIA drivers configured in nvidia.nix)
+  services.xserver.enable = true;
 
   # Display manager configuration
   services.displayManager.gdm.enable = true;
@@ -243,15 +240,6 @@ in
     EXTRA_CCFLAGS = "-I/run/opengl-driver/include";
   };
 
-  # Keep video drivers for hardware transcoding (Plex) but disable display
-  hardware.graphics = {
-    enable = true;
-    extraPackages = with pkgs; [
-      nvidia-vaapi-driver
-      vaapiVdpau
-      libvdpau-va-gl
-    ];
-  };
 
   # Hardware-specific configurations
   security.wrappers.sunshine = {
