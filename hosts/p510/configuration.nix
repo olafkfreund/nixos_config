@@ -245,6 +245,9 @@ in
   # Fix GNOME Shell GDM typelib issue - multiple approaches
   environment.sessionVariables.GI_TYPELIB_PATH = "${pkgs.gdm}/lib/girepository-1.0";
 
+  # Add GSettings schema path for GDM login screen
+  environment.sessionVariables.GSETTINGS_SCHEMA_DIR = "${pkgs.gdm}/share/gsettings-schemas/gdm-${pkgs.gdm.version}/glib-2.0/schemas";
+
   # Add minimal GNOME packages for login screen functionality
   environment.systemPackages = with pkgs; [
     gdm # Provides the Gdm-1.0 typelib required by GNOME Shell
@@ -265,6 +268,7 @@ in
     EXTRA_LDFLAGS = "-L/run/opengl-driver/lib";
     EXTRA_CCFLAGS = "-I/run/opengl-driver/include";
     GI_TYPELIB_PATH = "${pkgs.gdm}/lib/girepository-1.0";
+    GSETTINGS_SCHEMA_DIR = "${pkgs.gdm}/share/gsettings-schemas/gdm-${pkgs.gdm.version}/glib-2.0/schemas";
   };
 
 
