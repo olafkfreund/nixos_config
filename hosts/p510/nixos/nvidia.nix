@@ -36,7 +36,7 @@
     powerManagement.finegrained = false;
 
     # Nvidia settings GUI (disabled for headless server)
-    nvidiaSettings = false;
+    nvidiaSettings = true;
 
     # Use stable driver version with latest stable kernel
     package = config.boot.kernelPackages.nvidiaPackages.stable;
@@ -52,9 +52,8 @@
       "nvidia-drm.modeset=1" # Required for proper modesetting
     ];
 
-    # These modules are automatically loaded by the nvidia module
-    # No need to explicitly specify them
-    # kernelModules = [ ];
+    # Load NVIDIA kernel modules at boot (not in initrd)
+    kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
 
     # Blacklist conflicting drivers
     blacklistedKernelModules = [ "nouveau" ];
