@@ -24,7 +24,6 @@ in
       ../common/nixos/i18n.nix
       ../common/nixos/hosts.nix
       ../common/nixos/envvar.nix
-      ./nixos/greetd.nix
       ./nixos/cpu.nix
       ./nixos/memory.nix
       ./nixos/load.nix
@@ -523,6 +522,12 @@ in
       ];
       videoDrivers = [ "${vars.gpu}gpu" ]; # Correct way to set the video driver
     };
+
+    # Display manager configuration
+    displayManager.gdm.enable = true;
+
+    # Disable greetd to prevent conflicts with GDM
+    greetd.enable = lib.mkForce false;
 
     # Desktop environment
     desktopManager.gnome.enable = true;

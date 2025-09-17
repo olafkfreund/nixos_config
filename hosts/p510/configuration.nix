@@ -254,6 +254,9 @@ in
   # Display manager configuration (new location)
   services.displayManager.gdm.enable = true;
 
+  # Disable greetd to prevent conflicts with GDM
+  services.greetd.enable = lib.mkForce false;
+
   # Desktop manager configuration (new location)
   services.desktopManager.gnome.enable = true;
 
