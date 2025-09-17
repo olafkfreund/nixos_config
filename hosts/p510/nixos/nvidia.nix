@@ -27,9 +27,9 @@
     # Modesetting is required for most Wayland compositors
     modesetting.enable = true;
 
-    # Use open-source kernel modules for RTX 30 series (Ampere)
-    # RTX 3060 and 3070 Ti are Ampere architecture, recommended to use open drivers
-    open = true;
+    # Use proprietary drivers for RTX 30 series for better stability
+    # Open-source drivers have communication issues with RTX 3060/3070 Ti
+    open = false;
 
     # Power management settings (disabled for server stability)
     powerManagement.enable = false;
@@ -38,8 +38,8 @@
     # Nvidia settings GUI (disabled for headless server)
     nvidiaSettings = true;
 
-    # Use stable driver version with latest stable kernel
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    # Use legacy 535.x driver - stable for RTX 30 series, avoids 580.x deadlock
+    package = config.boot.kernelPackages.nvidiaPackages.legacy_535;
 
     # Enable persistence daemon for headless operation
     nvidiaPersistenced = true;
