@@ -10,6 +10,9 @@
     ../../home/profiles/server-admin/default.nix
     ../../home/profiles/developer/default.nix
 
+    # Minimal GNOME desktop for login access only
+    ../../home/desktop/gnome/default.nix
+
     # Host-specific configurations
     ../../hosts/p510/nixos/env.nix
   ];
@@ -25,10 +28,10 @@
 
   # P510-specific feature overrides for server + development
   features = {
-    # Force headless operation
+    # Enable desktop with GNOME
     desktop = {
       enable = true; # Enable framework for options
-      # But disable all GUI components
+      # Enable GNOME for login but disable other desktop environments
       sway = false;
       dunst = false;
       swaync = false;

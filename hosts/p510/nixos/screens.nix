@@ -8,12 +8,12 @@ in
       hostName = vars.hostName;
       class = "workstation";
       screen = {
-        name = "DP-2";
+        name = "HDMI-A-1";
         ultrawide = true;
         hidpi = true;
         width = 3840;
         height = 2160;
-        refresh = 30;
+        refresh = 120;
       };
     };
   };

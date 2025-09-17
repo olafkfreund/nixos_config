@@ -30,11 +30,12 @@ in
       # P510-specific server modules (media server)
       ../../modules/development/default.nix
       ../../modules/secrets/api-keys.nix
-      # Remove desktop-specific imports:
-      # ./nixos/greetd.nix      # Display manager - not needed for headless
-      # ./nixos/screens.nix     # Display configuration - not needed for headless
-      ./themes/stylix.nix # Theming - not needed for headless
-      # ../common/hyprland.nix  # Window manager - not needed for headless
+      # Desktop-specific imports (needed for GNOME):
+      # ./nixos/greetd.nix      # Display manager - using GDM instead
+      ./nixos/screens.nix # Display configuration - needed for desktop
+      ./themes/stylix.nix # Theming
+      # ../../home/desktop/gnome/default.nix # Home Manager module - can't import here
+      # ../common/hyprland.nix  # Window manager - using GNOME instead
     ];
 
   # Basic networking configuration (detailed config in ./nixos/network.nix)
@@ -139,6 +140,7 @@ in
     };
   };
 
+
   # Monitoring configuration - P510 as client
   monitoring = {
     enable = true;
@@ -222,19 +224,38 @@ in
   # Enable X server (NVIDIA drivers configured in nvidia.nix)
   services.xserver.enable = true;
 
-  # Display manager configuration (force enable to fix masking issue)
+  # Display manager configuration (modern syntax like P620)
   services.displayManager.gdm.enable = lib.mkForce true;
   services.displayManager.gdm.wayland = true;
-
-  # Desktop manager configuration
-  services.desktopManager.gnome.enable = true;
   services.displayManager.defaultSession = "gnome";
+
+  # Desktop manager configuration - minimal GNOME for login only
+  services.desktopManager.gnome.enable = true;
+
+  # Essential GNOME services for login screen schemas (minimal set)
+  services.gnome = {
+    gnome-settings-daemon.enable = true;
+    gnome-keyring.enable = true;
+    gnome-initial-setup.enable = false;
+  };
 
   # Ensure display manager is enabled in systemd
   systemd.targets.graphical.wants = [ "display-manager.service" ];
 
-  # Disable GNOME initial setup to avoid build failures
-  services.gnome.gnome-initial-setup.enable = false;
+  # Fix GNOME Shell GDM typelib issue - multiple approaches
+  environment.sessionVariables.GI_TYPELIB_PATH = "${pkgs.gdm}/lib/girepository-1.0";
+
+  # Add minimal GNOME packages for login screen functionality
+  environment.systemPackages = with pkgs; [
+    gdm # Provides the Gdm-1.0 typelib required by GNOME Shell
+    gnome-control-center # Provides login-screen schema
+    gnome-settings-daemon # Additional GNOME schemas
+    # Qt theme control tools for Stylix
+    libsForQt5.qt5ct
+    kdePackages.qt6ct
+    # Custom qwen-code package for system-wide availability
+    (callPackage ../../home/development/qwen-code/default.nix { })
+  ];
 
   # NVIDIA modules now loaded via initrd.kernelModules in nvidia.nix for proper early initialization
 
@@ -243,6 +264,7 @@ in
     CUDA_PATH = "${pkgs.cudaPackages.cudatoolkit}";
     EXTRA_LDFLAGS = "-L/run/opengl-driver/lib";
     EXTRA_CCFLAGS = "-I/run/opengl-driver/include";
+    GI_TYPELIB_PATH = "${pkgs.gdm}/lib/girepository-1.0";
   };
 
 
@@ -289,14 +311,6 @@ in
     };
   };
 
-  # System packages
-  environment.systemPackages = with pkgs; [
-    # Qt theme control tools for Stylix
-    libsForQt5.qt5ct
-    kdePackages.qt6ct
-    # Custom qwen-code package for system-wide availability
-    (callPackage ../../home/development/qwen-code/default.nix { })
-  ];
 
   # User-specific configuration from variables
   users.users.${vars.username} = {
