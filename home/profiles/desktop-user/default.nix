@@ -1,6 +1,6 @@
 # Desktop User Profile - Full GUI configuration for desktop environments
 # Used by: P620, workstation environments, full desktop setups
-{ lib, pkgs, config, ... }: {
+{ pkgs, ... }: {
   imports = [
     # Import full home manager module suite
     ../../default.nix # Base home manager configuration

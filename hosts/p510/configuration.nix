@@ -56,6 +56,7 @@ in
         "--operator=olafkfreund"
         "--accept-risk=lose-ssh"
         "--advertise-tags=tag:server,tag:media"
+        "--accept-dns=false" # Explicitly set DNS flag to fix autoconnect
       ];
     };
 

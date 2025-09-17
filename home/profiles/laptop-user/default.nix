@@ -1,6 +1,6 @@
 # Laptop User Profile - Mobile-optimized configuration with power management
 # Used by: Razer, Samsung, portable systems with battery considerations
-{ lib, pkgs, config, ... }: {
+{ pkgs, ... }: {
   imports = [
     # Import home manager modules optimized for mobile use
     ../../browsers/default.nix # Browser support

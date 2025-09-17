@@ -1,6 +1,6 @@
 # Developer Profile - Development-focused configuration
 # Used by: P620, P510 (development mode), workstation environments
-{ lib, pkgs, config, ... }: {
+{ pkgs, ... }: {
   imports = [
     # Import common home manager modules
     ../../browsers/default.nix # Browser support for web development
@@ -146,7 +146,7 @@
 
     # Text processing and analysis
     jq
-    yq-go  # Use Go version consistently across all configurations
+    yq-go # Use Go version consistently across all configurations
     xmlstarlet
 
     # Performance and monitoring

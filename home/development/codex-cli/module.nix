@@ -7,19 +7,16 @@ let
 
   codex-cli = pkgs.callPackage ./. { nodejs_22 = pkgs.nodejs_22; };
 
-  # Configuration file template
-  configFile = pkgs.writeText "codex-config.json" (builtins.toJSON {
-    # Default configuration options
-    model = cfg.defaultModel;
-    temperature = cfg.temperature;
-    max_tokens = cfg.maxTokens;
-    timeout = cfg.timeout;
-
-    # Additional settings
-    auto_save = cfg.autoSave;
-    syntax_highlighting = cfg.syntaxHighlighting;
-    interactive_mode = cfg.interactiveMode;
-  });
+  # Note: Configuration template available but using inline generation instead
+  # configFile = pkgs.writeText "codex-config.json" (builtins.toJSON {
+  #   model = cfg.defaultModel;
+  #   temperature = cfg.temperature;
+  #   max_tokens = cfg.maxTokens;
+  #   timeout = cfg.timeout;
+  #   auto_save = cfg.autoSave;
+  #   syntax_highlighting = cfg.syntaxHighlighting;
+  #   interactive_mode = cfg.interactiveMode;
+  # });
 
 in
 {

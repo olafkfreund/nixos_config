@@ -100,7 +100,7 @@ let
   };
 
   # Profile resolution function
-  resolveProfile = hostName: userName: profileName:
+  resolveProfile = _hostName: _userName: profileName:
     let
       profile = profiles.${profileName} or null;
       composition = compositions.${profileName} or null;
@@ -158,13 +158,13 @@ let
   getHostProfiles = hostName:
     let
       singleProfiles = lib.filterAttrs
-        (name: profile:
+        (_name: profile:
           builtins.elem hostName profile.targetHosts
         )
         profiles;
 
       compositionProfiles = lib.filterAttrs
-        (name: composition:
+        (_name: composition:
           builtins.elem hostName composition.targetHosts
         )
         compositions;

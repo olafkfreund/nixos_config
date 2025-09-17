@@ -8,8 +8,8 @@ let
   profileName = config.meta.profile.name or "legacy";
   hostName = config.networking.hostName or "unknown";
 
-  # Validate profile selection
-  profileValid = profilesLib.validateProfile hostName profileName;
+  # Note: Profile validation available but not used in current implementation
+  # profileValid = profilesLib.validateProfile hostName profileName;
 
 in
 {

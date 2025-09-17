@@ -6,17 +6,22 @@
     # Lanzaboote module will be imported from flake
   ];
 
-  # Enable Lanzaboote for Secure Boot
-  boot.lanzaboote = {
-    enable = true;
-    pkiBundle = "/etc/secureboot";
+  # Boot configuration for Secure Boot
+  boot = {
+    # Enable Lanzaboote for Secure Boot
+    lanzaboote = {
+      enable = true;
+      pkiBundle = "/etc/secureboot";
+    };
+
+    # Bootloader configuration
+    loader = {
+      # Disable systemd-boot when using lanzaboote
+      systemd-boot.enable = lib.mkForce false;
+      # Still need EFI variables
+      efi.canTouchEfiVariables = true;
+    };
   };
-
-  # Disable systemd-boot when using lanzaboote
-  boot.loader.systemd-boot.enable = lib.mkForce false;
-
-  # Still need EFI variables
-  boot.loader.efi.canTouchEfiVariables = true;
 
   # Secure Boot packages moved to main configuration.nix for conditional inclusion
 }
