@@ -523,8 +523,8 @@ in
       videoDrivers = [ "${vars.gpu}gpu" ]; # Correct way to set the video driver
     };
 
-    # Display manager configuration
-    displayManager.gdm.enable = true;
+    # Display manager configuration (modern syntax)
+    displayManager.gdm.enable = lib.mkForce true;
 
     # Disable greetd to prevent conflicts with GDM
     greetd.enable = lib.mkForce false;
