@@ -9,15 +9,11 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Enable GNOME Remote Desktop backend
+    # Enable GNOME Remote Desktop backend (modern RDP implementation)
     services.gnome.gnome-remote-desktop.enable = true;
 
-    # Enable XRDP with GNOME session
-    services.xrdp = {
-      enable = true;
-      defaultWindowManager = "${pkgs.gnome-session}/bin/gnome-session";
-      openFirewall = true; # Automatically opens port 3389
-    };
+    # Disable xrdp to prevent port conflicts - GNOME Remote Desktop handles RDP
+    services.xrdp.enable = lib.mkForce false;
 
     # Enable Avahi for service discovery
     services.avahi = {
@@ -43,8 +39,9 @@ in
     systemd.targets.sleep.enable = mkForce false;
     systemd.targets.suspend.enable = mkForce false;
 
-    # Open firewall ports for remote desktop (XRDP openFirewall already handles 3389)
+    # Open firewall ports for GNOME Remote Desktop
     networking.firewall.allowedTCPPorts = [
+      3389 # RDP port for GNOME Remote Desktop
       5900 # VNC port
     ];
   };
