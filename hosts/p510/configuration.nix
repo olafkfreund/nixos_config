@@ -249,9 +249,13 @@ in
   services.xserver = {
     enable = true;
     videoDrivers = [ "nvidia" ];
-    displayManager.gdm.enable = true;
-    desktopManager.gnome.enable = true;
   };
+
+  # Display manager configuration (new location)
+  services.displayManager.gdm.enable = true;
+
+  # Desktop manager configuration (new location)
+  services.desktopManager.gnome.enable = true;
 
   # Ensure NVIDIA modules are loaded at boot
   boot.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
