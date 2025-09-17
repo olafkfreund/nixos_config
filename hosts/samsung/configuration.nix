@@ -199,6 +199,10 @@ in
     enableUserEnvironment = true;
   };
 
+  # TEMPORARY FIX: Disable tailscale-autoconnect service until auth key is fixed
+  # This prevents system activation failures
+  systemd.services.tailscale-autoconnect.enable = lib.mkForce false;
+
   # Nix build optimizations
   nix = {
     settings = {
