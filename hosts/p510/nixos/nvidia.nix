@@ -45,6 +45,9 @@
       "nvidia-drm.modeset=1" # Required for proper modesetting
     ];
 
+    # Load NVIDIA kernel modules at boot
+    kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
+
     # Blacklist conflicting drivers
     blacklistedKernelModules = [ "nouveau" ];
   };
