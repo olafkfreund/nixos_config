@@ -10,30 +10,32 @@ let
 in
 {
   # Use workstation template for desktop environment with media server modules
-  imports = hostTypes.workstation.imports ++ [
-    # Hardware-specific imports
-    ./nixos/hardware-configuration.nix
-    ./nixos/power.nix
-    ./nixos/boot.nix
-    ./nixos/nvidia.nix
-    ./nixos/network.nix # Network configuration with dual-port Intel card
-    ../common/nixos/i18n.nix
-    ../common/nixos/envvar.nix
-    ./nixos/cpu.nix
-    ./nixos/memory.nix
-    ../common/nixos/hosts.nix
-    ./nixos/plex.nix
-    # ./flaresolverr.nix  # Temporarily disabled due to xvfbwrapper Python 3.13 build error
+  imports =
+    hostTypes.workstation.imports
+    ++ [
+      # Hardware-specific imports
+      ./nixos/hardware-configuration.nix
+      ./nixos/power.nix
+      ./nixos/boot.nix
+      ./nixos/nvidia.nix
+      ./nixos/network.nix # Network configuration with dual-port Intel card
+      ../common/nixos/i18n.nix
+      ../common/nixos/envvar.nix
+      ./nixos/cpu.nix
+      ./nixos/memory.nix
+      ../common/nixos/hosts.nix
+      ./nixos/plex.nix
+      # ./flaresolverr.nix  # Temporarily disabled due to xvfbwrapper Python 3.13 build error
 
-    # P510-specific server modules (media server)
-    ../../modules/development/default.nix
-    ../../modules/secrets/api-keys.nix
-    # Remove desktop-specific imports:
-    # ./nixos/greetd.nix      # Display manager - not needed for headless
-    # ./nixos/screens.nix     # Display configuration - not needed for headless
-    # ./themes/stylix.nix     # Theming - not needed for headless
-    # ../common/hyprland.nix  # Window manager - not needed for headless
-  ];
+      # P510-specific server modules (media server)
+      ../../modules/development/default.nix
+      ../../modules/secrets/api-keys.nix
+      # Remove desktop-specific imports:
+      # ./nixos/greetd.nix      # Display manager - not needed for headless
+      # ./nixos/screens.nix     # Display configuration - not needed for headless
+      ./themes/stylix.nix # Theming - not needed for headless
+      # ../common/hyprland.nix  # Window manager - not needed for headless
+    ];
 
   # Basic networking configuration (detailed config in ./nixos/network.nix)
   networking = {
@@ -69,33 +71,6 @@ in
     enable = true;
     profile = lib.mkForce "workstation"; # Force workstation profile for desktop environment
   };
-
-  # AI analysis services removed - were non-functional and consuming resources
-  # ai.analysis = {
-  #   enable = false;  # Removed completely - provided no meaningful analysis
-  #   aiProvider = "openai";
-  # };
-
-  # AI memory optimization removed - was non-functional and consuming resources
-
-  # AI automated remediation removed - was non-functional and consuming resources
-
-  # Non-functional AI modules removed - were consuming resources without providing value
-  # ai.storageAnalysis = {
-  #   enable = false;  # Removed - no meaningful analysis output
-  # };
-  # ai.backupStrategy = {
-  #   enable = false;  # Removed - no actual backups being created
-  # };
-  # ai.storageExpansion = {
-  #   enable = false;  # Removed - no expansion planning functionality
-  # };
-  # ai.storageMigration = {
-  #   enable = false;  # Removed - no migration functionality
-  # };
-  # ai.securityAudit = {
-  #   enable = false;  # Removed - no actual audits performed
-  # };
 
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
@@ -162,7 +137,6 @@ in
     media = {
       droidcam = false; # Disabled due to v4l2loopback build failures on P510
     };
-
   };
 
   # Monitoring configuration - P510 as client
@@ -357,6 +331,7 @@ in
   ];
 
   nixpkgs.config = {
+    allowUnfree = true; # Required for NVIDIA drivers
     allowBroken = true;
     permittedInsecurePackages = [ "olm-3.2.16" "dotnet-sdk-6.0.428" "python3.12-youtube-dl-2021.12.17" ];
   };

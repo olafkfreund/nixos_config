@@ -1,6 +1,8 @@
-{ config, lib, pkgs, ... }:
-
-{
+{ config
+, lib
+, pkgs
+, ...
+}: {
   # Network interface configuration for P510
   # Primary interface: eno1 (onboard Intel I218-LM)
   # Additional interfaces: ens6f0, ens6f1 (Intel 82571EB dual-port card)
@@ -23,12 +25,12 @@
 
       # First port of the dual-port Intel card - for future use (Storage/Backup Network)
       ens6f0 = {
-        useDHCP = false; # Leave unconfigured for now
+        useDHCP = true; # Leave unconfigured for now
       };
 
       # Second port of the dual-port Intel card - for future use (Management/IPMI Network)
       ens6f1 = {
-        useDHCP = false; # Leave unconfigured for now
+        useDHCP = true; # Leave unconfigured for now
       };
     };
   };
@@ -89,6 +91,4 @@
       };
     };
   };
-
 }
-
