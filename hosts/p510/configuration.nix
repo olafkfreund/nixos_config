@@ -9,8 +9,8 @@ let
   vars = import ./variables.nix { };
 in
 {
-  # Use server template for headless operation with media server modules
-  imports = hostTypes.server.imports ++ [
+  # Use workstation template for desktop environment with media server modules
+  imports = hostTypes.workstation.imports ++ [
     # Hardware-specific imports
     ./nixos/hardware-configuration.nix
     ./nixos/power.nix
@@ -63,10 +63,10 @@ in
     nameservers = [ "192.168.1.254" ];
   };
 
-  # Use AI provider defaults with server profile
+  # Use AI provider defaults with workstation profile (now with desktop environment)
   aiDefaults = {
     enable = true;
-    profile = "server"; # Optimized for headless media server operation
+    profile = lib.mkForce "workstation"; # Force workstation profile for desktop environment
   };
 
   # AI analysis services removed - were non-functional and consuming resources
@@ -161,6 +161,7 @@ in
     media = {
       droidcam = false; # Disabled due to v4l2loopback build failures on P510
     };
+
   };
 
   # Monitoring configuration - P510 as client
@@ -243,19 +244,12 @@ in
   # StreamDeck UI disabled for headless operation
   programs.streamdeck-ui.enable = lib.mkForce false;
 
-  # Enable NVIDIA drivers for headless operation (GPU transcoding and container toolkit)
+  # Enable GNOME desktop environment with proper NVIDIA support
   services.xserver = {
-    enable = true; # Required to load NVIDIA kernel modules
+    enable = true;
     videoDrivers = [ "nvidia" ];
-    autorun = false; # Don't start X automatically
-  };
-
-  # Enable display manager but configure for headless
-  services.displayManager = {
-    gdm.enable = false;
-    autoLogin = {
-      enable = false;
-    };
+    displayManager.gdm.enable = true;
+    desktopManager.gnome.enable = true;
   };
 
   # Ensure NVIDIA modules are loaded at boot

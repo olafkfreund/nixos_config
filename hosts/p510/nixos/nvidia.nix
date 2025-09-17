@@ -23,10 +23,6 @@
       libva-vdpau-driver
       nvidia-vaapi-driver
       vaapiVdpau
-
-      # CUDA support for Ollama and LLM Studio
-      cudaPackages.cudatoolkit
-      cudaPackages.cudnn
     ];
   };
   environment = {
@@ -36,6 +32,7 @@
       # CUDA tools for development and debugging
       cudaPackages.cuda_nvcc
       cudaPackages.cudatoolkit
+      cudaPackages.cudnn
     ];
   };
 }
