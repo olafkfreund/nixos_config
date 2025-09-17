@@ -219,26 +219,17 @@ in
   # StreamDeck UI disabled for headless operation
   programs.streamdeck-ui.enable = lib.mkForce false;
 
-  # Enable GNOME desktop environment with proper NVIDIA support
+  # Enable X server with NVIDIA support (required for GPU functionality)
   services.xserver = {
     enable = true;
     videoDrivers = [ "nvidia" ];
   };
 
-  # Display manager configuration (new location)
+  # Display manager configuration
   services.displayManager.gdm.enable = true;
 
-  # Disable greetd to prevent conflicts with GDM
-  services.greetd.enable = lib.mkForce false;
-
-  # Desktop manager configuration (new location)
-  services.desktopManager.gnome = {
-    enable = true;
-    extraGSettingsOverrides = ''
-      [org.gnome.initial-setup]
-      first-run=false
-    '';
-  };
+  # Desktop manager configuration
+  services.desktopManager.gnome.enable = true;
 
   # Disable GNOME initial setup to avoid build failures
   services.gnome.gnome-initial-setup.enable = false;
