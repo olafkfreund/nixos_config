@@ -58,11 +58,7 @@
     };
 
     # Applications and specific tools
-    claude-desktop = {
-      url = "github:k3d3/claude-desktop-linux-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-    };
+    # claude-desktop now built locally in home/development/claude-desktop/
 
     # Desktop environment
     hyprland = {

@@ -6,4 +6,5 @@
   mpris-album-art = pkgs.callPackage ./mpris-album-art { };
   weather-popup = pkgs.callPackage ./weather-popup { };
   gemini-cli = pkgs.callPackage ./gemini-cli { };
+  claude-desktop = pkgs.callPackage ./claude-desktop { };
 }

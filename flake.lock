@@ -137,29 +137,6 @@
         "type": "github"
       }
     },
-    "claude-desktop": {
-      "inputs": {
-        "flake-utils": [
-          "flake-utils"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1757808445,
-        "narHash": "sha256-Mbs2oXQa17jPEapXaYECJWxrvVKN8kk1hHpgSacbWDU=",
-        "owner": "k3d3",
-        "repo": "claude-desktop-linux-flake",
-        "rev": "a7f42f42426130a51b0542a651a2cb29f99ac2b6",
-        "type": "github"
-      },
-      "original": {
-        "owner": "k3d3",
-        "repo": "claude-desktop-linux-flake",
-        "type": "github"
-      }
-    },
     "crane": {
       "inputs": {
         "nixpkgs": [
@@ -1605,7 +1582,6 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
-        "claude-desktop": "claude-desktop",
         "flake-utils": "flake-utils",
         "home-manager": "home-manager_2",
         "hyprland": "hyprland",
