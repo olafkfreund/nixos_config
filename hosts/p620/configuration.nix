@@ -146,6 +146,9 @@ in
   # P620-specific override: use OpenAI as default instead of Anthropic
   ai.providers.defaultProvider = "openai";
 
+  # Temporarily disable Claude Desktop due to hash mismatch
+  features.ai.claude-desktop = false;
+
   # AI analysis services removed - were non-functional and consuming resources
   # ai.analysis = {
   #   enable = false;  # Removed completely - provided no meaningful analysis
