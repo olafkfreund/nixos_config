@@ -40,11 +40,11 @@ let
     unpackPhase = ''
       runHook preUnpack
 
-      # Extract the Windows installer
-      7z x $src -o./claude-installer
+      # Extract the Windows installer with automatic yes to all prompts
+      7z x -y $src -o./claude-installer
 
-      # Extract the app resources
-      7z x ./claude-installer/'$PLUGINSDIR'/app-64.7z -o./claude-app
+      # Extract the app resources with automatic yes to all prompts
+      7z x -y ./claude-installer/'$PLUGINSDIR'/app-64.7z -o./claude-app
 
       runHook postUnpack
     '';
