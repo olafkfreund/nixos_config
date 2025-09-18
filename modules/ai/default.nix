@@ -46,6 +46,6 @@ in
       # pkgs.oterm
       pkgs.gpt-cli
       pkgs.chatmcp
-    ];
+    ] ++ optionals cfg.claude-desktop [ pkgs.customPkgs.claude-desktop ];
   };
 }
