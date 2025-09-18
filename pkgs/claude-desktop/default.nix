@@ -43,8 +43,24 @@ let
       # Extract the Windows installer with automatic yes to all prompts
       7z x -y $src -o./claude-installer
 
-      # Extract the app resources with automatic yes to all prompts
-      7z x -y ./claude-installer/'$PLUGINSDIR'/app-64.7z -o./claude-app
+      # List extracted contents to understand structure
+      echo "=== Installer contents ==="
+      find ./claude-installer -type f -name "*.7z" -o -name "*.zip" -o -name "*.nupkg" | head -20
+
+      # Extract the app resources - look for different possible locations
+      if [ -f ./claude-installer/'$PLUGINSDIR'/app-64.7z ]; then
+        7z x -y ./claude-installer/'$PLUGINSDIR'/app-64.7z -o./claude-app
+      elif [ -f ./claude-installer/app-64.7z ]; then
+        7z x -y ./claude-installer/app-64.7z -o./claude-app
+      elif [ -f ./claude-installer/*.nupkg ]; then
+        # Extract from NuGet package if that's the format
+        7z x -y ./claude-installer/*.nupkg -o./claude-app
+      else
+        echo "=== All files in installer ==="
+        find ./claude-installer -type f | head -20
+        echo "ERROR: Could not find app archive"
+        exit 1
+      fi
 
       runHook postUnpack
     '';
