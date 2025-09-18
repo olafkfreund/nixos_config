@@ -1,11 +1,12 @@
+{ lib
+, pkgs
+, config
+, ...
+}:
+let
+  vars = import ../../hosts/razer/variables.nix { };
+in
 {
-  lib,
-  pkgs,
-  config,
-  ...
-}: let
-  vars = import ../../hosts/razer/variables.nix {};
-in {
   imports = [
     # Import common modules
     ../common/default.nix
@@ -20,7 +21,7 @@ in {
   ];
 
   # Fix Stylix Firefox profile warnings
-  stylix.targets.firefox.profileNames = ["default"];
+  stylix.targets.firefox.profileNames = [ "default" ];
 
   # Enable Walker launcher when feature flag is set
   desktop.walker.enable = config.features.desktop.walker;
@@ -142,6 +143,15 @@ in {
     runner.enable = false; # Disable runner on laptop for battery savings
     fluxcd.enable = true;
     ciLocal.enable = true;
+  };
+
+  # Enable Proton applications suite for Razer (mobile/laptop usage)
+  programs.proton = {
+    enable = true;
+    vpn.enable = true;
+    pass.enable = true;
+    mail.enable = true;
+    authenticator.enable = true;
   };
 
   # Host-specific Windsurf configuration

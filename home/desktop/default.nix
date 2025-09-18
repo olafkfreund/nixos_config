@@ -30,6 +30,7 @@
     ./lanmouse/default.nix
     ./walker/default.nix # Re-enabled with Stylix integration
     ./obsidian/default.nix
+    ./proton/default.nix # Proton applications suite (optional)
     ./gnome # GNOME desktop environment (optional)
   ];
 

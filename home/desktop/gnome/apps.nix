@@ -60,6 +60,7 @@ in
         dissent
         gnvim
         amberol
+        hydrapaper
 
         # GNOME text and documents
         gedit # Text editor

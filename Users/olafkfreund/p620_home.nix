@@ -143,6 +143,15 @@
   # Override desktop features for P620 (add to existing desktop config)
   features.desktop.quickshell = true;
 
+  # Enable Proton applications suite for P620
+  programs.proton = {
+    enable = true;
+    vpn.enable = true;
+    pass.enable = true;
+    mail.enable = true;
+    authenticator.enable = true;
+  };
+
   home.packages = [
     # pkgs.customPkgs.rofi-blocks
     # pkgs.msty

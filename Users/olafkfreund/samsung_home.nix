@@ -141,6 +141,15 @@
     ciLocal.enable = true;
   };
 
+  # Enable Proton applications suite for Samsung (mobile/laptop usage)
+  programs.proton = {
+    enable = true;
+    vpn.enable = true;
+    pass.enable = true;
+    mail.enable = true;
+    authenticator.enable = true;
+  };
+
   home.packages = [
     # pkgs.customPkgs.rofi-blocks
     # pkgs.msty
