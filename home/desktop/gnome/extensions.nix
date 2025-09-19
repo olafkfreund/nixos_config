@@ -165,7 +165,7 @@ in
 
       # Gnofi configuration
       "org/gnome/shell/extensions/gnofi" = {
-        window-hotkey = "<Super>space";
+        window-hotkey = "<Super>space ";
       };
 
       # Clipboard Indicator configuration
@@ -193,10 +193,10 @@ in
         gnomeExtensions.user-themes
         gnomeExtensions.gsconnect
         gnomeExtensions.tiling-shell
-        gnomeExtensions.ascii-emoji
+        # gnomeExtensions.ascii-emoji
         gnomeExtensions.dim-background-windows
         gnomeExtensions.just-perfection
-        gnomeExtensions.paperwm
+        # gnomeExtensions.paperwm
         gnomeExtensions.quake-terminal
         gnomeExtensions.tailscale-status
         gnomeExtensions.auto-accent-colour
