@@ -195,8 +195,6 @@ in
         gnomeExtensions.tiling-shell
         gnomeExtensions.ascii-emoji
         gnomeExtensions.dim-background-windows
-        # gnomeExtensions.github-actions
-        # gnomeExtensions.gemini-ai
         gnomeExtensions.just-perfection
         gnomeExtensions.paperwm
         gnomeExtensions.quake-terminal
@@ -207,6 +205,7 @@ in
         gnomeExtensions.coverflow-alt-tab
         gnomeExtensions.foresight
         gnomeExtensions.move-to-next-screen
+        gnomeExtensions.top-bar-organizer
 
         # Extension-specific packages that might be needed
         libnotify # For GSConnect
