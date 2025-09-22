@@ -1,6 +1,6 @@
 { lib, ... }: {
   aws.packages.enable = true;
-  # azure.packages.enable = true; # Temporarily disabled due to msgraph-core build failure
+  azure.packages.enable = true; # Re-enabled Azure CLI
   cloud-tools.packages.enable = true;
   google.packages.enable = true;
   k8s.packages.enable = true;
