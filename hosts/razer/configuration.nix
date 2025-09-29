@@ -98,6 +98,7 @@ in
       enable = true;
       ansible = true;
       cargo = true;
+      copilot-cli = true; # GitHub Copilot CLI
       github = true;
       go = true;
       java = true;

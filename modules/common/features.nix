@@ -14,6 +14,7 @@ with lib; {
       shell = mkEnableOption "Shell development";
       ansible = mkEnableOption "Ansible development";
       cargo = mkEnableOption "Cargo/Rust development";
+      copilot-cli = mkEnableOption "GitHub Copilot CLI";
       github = mkEnableOption "GitHub development";
       devshell = mkEnableOption "DevShell development";
       precommit = mkEnableOption "Pre-commit hooks and linting";

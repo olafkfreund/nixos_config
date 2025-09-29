@@ -15,6 +15,7 @@ in
     # Development tools (conditional enables)
     ansible.development.enable = mkIf cfg.development.enable cfg.development.ansible;
     cargo.development.enable = mkIf cfg.development.enable cfg.development.cargo;
+    development.copilot-cli.enable = mkIf cfg.development.enable cfg.development.copilot-cli;
     github.development.enable = mkIf cfg.development.enable cfg.development.github;
     go.development.enable = mkIf cfg.development.enable cfg.development.go;
     java.development.enable = mkIf cfg.development.enable cfg.development.java;

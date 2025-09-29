@@ -1,0 +1,35 @@
+{
+  "name": "@github/copilot",
+  "description": "GitHub Copilot CLI brings the power of Copilot coding agent directly to your terminal.",
+  "version": "0.0.328",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/github/copilot-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/github/copilot-cli/issues"
+  },
+  "homepage": "https://github.com/github/copilot-cli/#readme",
+  "author": "GitHub",
+  "bin": {
+    "copilot": "index.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "tree-sitter.wasm",
+    "tree-sitter-bash.wasm",
+    "tree-sitter-powershell.wasm"
+  ],
+  "buildMetadata": {
+    "gitCommit": "3755a93"
+  },
+  "dependencies": {
+    "node-pty": "npm:@devm33/node-pty@^1.0.8",
+    "keytar-forked-forked": "^7.10.2"
+  }
+}

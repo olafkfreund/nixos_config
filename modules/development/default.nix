@@ -12,5 +12,6 @@ _: {
     ./nodejs.nix
     ./github.nix
     ./pre-commit.nix
+    ./copilot-cli.nix
   ];
 }
