@@ -13,5 +13,6 @@ _: {
     ./github.nix
     ./pre-commit.nix
     ./copilot-cli.nix
+    ./spec-kit.nix
   ];
 }
