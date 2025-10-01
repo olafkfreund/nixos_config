@@ -20,6 +20,8 @@ with lib; let
   '';
 in
 {
+  options.features.development.spec-kit = mkEnableOption "GitHub spec-kit for Spec-Driven Development";
+
   config = mkIf (cfg.enable && cfg.spec-kit or false) {
     # Install spec-kit wrapper and dependencies
     environment.systemPackages = [
