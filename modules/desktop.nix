@@ -8,6 +8,7 @@ _: {
     ./desktop/cloud-sync/default.nix
     ./desktop/vnc/default.nix
     ./desktop/gtk/default.nix
+    ./desktop/cosmic.nix
     ./fonts/fonts.nix
   ];
 }

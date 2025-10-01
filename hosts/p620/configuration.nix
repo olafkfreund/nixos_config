@@ -290,6 +290,14 @@ in {
     quickshell = {
       enable = true;
     };
+
+    # Enable COSMIC Desktop with all applications
+    desktop.cosmic = {
+      enable = true;
+      useCosmicGreeter = true;
+      defaultSession = false; # Keep Hyprland as default, COSMIC available at login
+      installAllApps = true;
+    };
   };
 
   # Consolidated monitoring configuration

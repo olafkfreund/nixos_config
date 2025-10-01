@@ -162,6 +162,14 @@ in
     media = {
       droidcam = false; # Disabled due to v4l2loopback dependency
     };
+
+    # Enable COSMIC Desktop with all applications
+    desktop.cosmic = {
+      enable = true;
+      useCosmicGreeter = true;
+      defaultSession = false; # Keep Hyprland as default, COSMIC available at login
+      installAllApps = true;
+    };
   };
 
   # Monitoring configuration - Razer as client
