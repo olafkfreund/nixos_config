@@ -143,11 +143,14 @@ in {
     profile = "workstation";
   };
 
-  # Ollama-specific configuration
-  ai.ollama = {
-    enableRag = false; # Temporarily disabled due to ChromaDB 1.0.12 startup bug
-    ragDirectory = "/home/${vars.username}/documents/rag-files";
-    allowBrokenPackages = false;
+  # AI service-level configuration (separate from features.ai)
+  ai = {
+    # Ollama-specific service configuration
+    ollama = {
+      enableRag = false; # Temporarily disabled due to ChromaDB 1.0.12 startup bug
+      ragDirectory = "/home/${vars.username}/documents/rag-files";
+      allowBrokenPackages = false;
+    };
   };
 
   # Re-enable Claude Desktop with local package
