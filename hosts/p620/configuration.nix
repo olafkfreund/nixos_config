@@ -143,16 +143,6 @@ in {
     profile = "workstation";
   };
 
-  # AI service-level configuration (separate from features.ai)
-  ai = {
-    # Ollama-specific service configuration
-    ollama = {
-      enableRag = false; # Temporarily disabled due to ChromaDB 1.0.12 startup bug
-      ragDirectory = "/home/${vars.username}/documents/rag-files";
-      allowBrokenPackages = false;
-    };
-  };
-
   # Re-enable Claude Desktop with local package
   features.ai.claude-desktop = true;
 
@@ -306,6 +296,13 @@ in {
       defaultSession = false; # Keep Hyprland as default, COSMIC available at login
       installAllApps = true;
     };
+  };
+
+  # AI service-level configuration (for ai.ollama module options)
+  ai.ollama = {
+    enableRag = false; # Temporarily disabled due to ChromaDB 1.0.12 startup bug
+    ragDirectory = "/home/${vars.username}/documents/rag-files";
+    allowBrokenPackages = false;
   };
 
   # Consolidated monitoring configuration
