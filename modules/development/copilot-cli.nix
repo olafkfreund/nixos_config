@@ -32,7 +32,9 @@ in
     };
 
     # Zsh aliases need noglob to prevent glob expansion of ? characters
-    programs.zsh.shellInit = ''
+    # Use interactiveShellInit instead of shellInit to ensure proper ordering
+    programs.zsh.interactiveShellInit = ''
+      # Disable glob expansion for copilot aliases
       alias '??'='noglob copilot'
       alias 'gh?'='noglob gh copilot'
       alias 'git?'='noglob gh copilot suggest -t git'
