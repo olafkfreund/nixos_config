@@ -31,11 +31,12 @@ in
       "shell?" = "gh copilot suggest -t shell";
     };
 
-    programs.zsh.shellAliases = {
-      "??" = "copilot";
-      "gh?" = "gh copilot";
-      "git?" = "gh copilot suggest -t git";
-      "shell?" = "gh copilot suggest -t shell";
-    };
+    # Zsh aliases need noglob to prevent glob expansion of ? characters
+    programs.zsh.shellInit = ''
+      alias '??'='noglob copilot'
+      alias 'gh?'='noglob gh copilot'
+      alias 'git?'='noglob gh copilot suggest -t git'
+      alias 'shell?'='noglob gh copilot suggest -t shell'
+    '';
   };
 }

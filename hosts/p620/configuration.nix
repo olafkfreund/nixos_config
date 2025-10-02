@@ -142,8 +142,13 @@ in {
     enable = true;
     profile = "workstation";
   };
-  # P620-specific override: use OpenAI as default instead of Anthropic
-  ai.providers.defaultProvider = "openai";
+
+  # Ollama-specific configuration
+  ai.ollama = {
+    enableRag = false; # Temporarily disabled due to ChromaDB 1.0.12 startup bug
+    ragDirectory = "/home/${vars.username}/documents/rag-files";
+    allowBrokenPackages = false;
+  };
 
   # Re-enable Claude Desktop with local package
   features.ai.claude-desktop = true;
@@ -252,7 +257,7 @@ in {
       # Enable unified AI provider support
       providers = {
         enable = true;
-        defaultProvider = "openai";
+        defaultProvider = "openai"; # P620-specific override: use OpenAI as default instead of Anthropic
         enableFallback = true;
 
         # Enable specific providers
@@ -294,7 +299,7 @@ in {
     # Enable COSMIC Desktop with all applications
     desktop.cosmic = {
       enable = true;
-      useCosmicGreeter = true;
+      useCosmicGreeter = false; # Use GDM instead
       defaultSession = false; # Keep Hyprland as default, COSMIC available at login
       installAllApps = true;
     };
@@ -455,13 +460,6 @@ in {
 
   # Advanced CPU monitoring script for Waybar
 
-  # AI Ollama-specific configuration that goes beyond simple enabling
-  ai.ollama = {
-    enableRag = false; # Temporarily disabled due to ChromaDB 1.0.12 startup bug
-    ragDirectory = "/home/${vars.username}/documents/rag-files";
-    allowBrokenPackages = false;
-  };
-
   # Consolidated modules configuration
   modules = {
     # Enable Hyprland system configuration
@@ -528,17 +526,22 @@ in {
     # X server configuration
     xserver = {
       enable = true;
-      displayManager.xserverArgs = [
-        "-nolisten tcp"
-        "-dpi 96"
-      ];
+      displayManager = {
+        xserverArgs = [
+          "-nolisten tcp"
+          "-dpi 96"
+        ];
+        # Disable LightDM to prevent conflicts with COSMIC Greeter
+        lightdm.enable = lib.mkForce false;
+      };
       videoDrivers = ["${vars.gpu}gpu"]; # Correct way to set the video driver
     };
 
     # Display manager configuration (modern syntax)
+    # Use GDM (GNOME Display Manager)
     displayManager.gdm.enable = lib.mkForce true;
 
-    # Disable greetd to prevent conflicts with GDM
+    # Disable other display managers
     greetd.enable = lib.mkForce false;
 
     # Desktop environment
