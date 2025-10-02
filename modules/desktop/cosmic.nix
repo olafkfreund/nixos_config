@@ -1,6 +1,10 @@
-{ config, lib, pkgs, ... }:
-with lib;
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
   cfg = config.features.desktop.cosmic;
 in {
   options.features.desktop.cosmic = {
@@ -36,52 +40,58 @@ in {
     services.displayManager.defaultSession = mkIf cfg.defaultSession "cosmic";
 
     # COSMIC applications and utilities
-    environment.systemPackages = with pkgs; [
-      # Essential applications (always installed)
-      cosmic-edit              # Text editor
-      cosmic-files             # File manager
-      cosmic-term              # Terminal emulator
-      cosmic-settings          # System settings
+    environment.systemPackages = with pkgs;
+      [
+        # Essential applications (always installed)
+        cosmic-edit # Text editor
+        cosmic-files # File manager
+        cosmic-term # Terminal emulator
+        cosmic-settings # System settings
 
-      # Wayland utilities
-      wl-clipboard
-      wl-clipboard-x11
+        #Applications for COSMIC core functionality
+        quick-webapps # Web application integration
+        tasks
 
-      # Screenshot and screen recording support
-      grim
-      slurp
+        # Wayland utilities
+        wl-clipboard
+        wl-clipboard-x11
 
-      # Notifications
-      libnotify
-    ] ++ optionals cfg.installAllApps [
-      # Productivity applications
-      cosmic-tasks             # Task/TODO manager
-      cosmic-reader            # PDF/document reader
-      cosmic-store             # Application store
-      cosmic-player            # Media player
+        # Screenshot and screen recording support
+        grim
+        slurp
 
-      # System utilities
-      cosmic-screenshot        # Screenshot tool
-      cosmic-randr             # Display configuration
+        # Notifications
+        libnotify
+      ]
+      ++ optionals cfg.installAllApps [
+        # Productivity applications
+        cosmic-tasks # Task/TODO manager
+        cosmic-reader # PDF/document reader
+        cosmic-store # Application store
+        cosmic-player # Media player
 
-      # Extensions and tweaks
-      cosmic-ext-calculator    # Calculator application
-      cosmic-ext-tweaks        # Advanced tweaking tool
-      cosmic-ext-ctl           # Extension control tool
+        # System utilities
+        cosmic-screenshot # Screenshot tool
+        cosmic-randr # Display configuration
 
-      # Visual assets
-      cosmic-icons             # COSMIC icon theme
-      cosmic-wallpapers        # Wallpaper collection
+        # Extensions and tweaks
+        cosmic-ext-calculator # Calculator application
+        cosmic-ext-tweaks # Advanced tweaking tool
+        cosmic-ext-ctl # Extension control tool
 
-      # Development/Design tools
-      cosmic-design-demo       # Design system demo
-    ];
+        # Visual assets
+        cosmic-icons # COSMIC icon theme
+        cosmic-wallpapers # Wallpaper collection
+
+        # Development/Design tools
+        cosmic-design-demo # Design system demo
+      ];
 
     # XDG portal configuration for COSMIC
     xdg.portal = {
       enable = true;
-      extraPortals = [ pkgs.xdg-desktop-portal-cosmic ];
-      config.cosmic.default = [ "cosmic" "*" ];
+      extraPortals = [pkgs.xdg-desktop-portal-cosmic];
+      config.cosmic.default = ["cosmic" "*"];
     };
 
     # Required system services
