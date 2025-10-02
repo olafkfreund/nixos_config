@@ -1,12 +1,12 @@
-{ pkgs
-, config
-, lib
-, ...
+{
+  pkgs,
+  config,
+  lib,
+  ...
 }:
 with lib; let
   cfg = config.browsers.chrome;
-in
-{
+in {
   options.browsers.chrome = {
     enable = mkEnableOption "Google Chrome";
   };
@@ -23,17 +23,15 @@ in
     #   XDG_DATA_DIRS = "${pkgs.adwaita-icon-theme}/share:${pkgs.hicolor-icon-theme}/share:${pkgs.gtk3}/share:${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}:${pkgs.gtk4}/share";
     # };
 
-    # Configure Chrome with proper Wayland support (secure configuration)
+    # Configure Chrome with proper Wayland support and screen sharing for GNOME
     programs.chromium = {
       enable = true;
       package = pkgs.google-chrome;
       commandLineArgs = [
-        # Native Wayland support (VizDisplayCompositor disabled for Hyprland compatibility)
-        "--enable-features=UseOzonePlatform"
-        "--ozone-platform=wayland"
-
-        # CRITICAL FIX: Disable VizDisplayCompositor to fix page loading on Hyprland
-        "--disable-features=VizDisplayCompositor"
+        # Native Wayland support for screen sharing
+        "--ozone-platform-hint=auto"
+        "--enable-features=WebRTCPipeWireCapturer"
+        "--enable-wayland-ime"
 
         # Fix zygote/sandbox error - comprehensive sandbox fixes
         "--no-zygote"

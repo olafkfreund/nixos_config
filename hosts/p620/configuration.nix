@@ -144,7 +144,7 @@ in {
   };
 
   # Re-enable Claude Desktop with local package
-  features.ai.claude-desktop = true;
+  # features.ai.claude-desktop = true;
 
   # Enable SSH security hardening
   security.sshHardening = {
@@ -224,6 +224,7 @@ in {
       enable = true;
       ollama = true;
       gemini-cli = true;
+      claude-desktop = true;
 
       # Enable unified AI provider support
       providers = {

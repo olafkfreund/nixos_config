@@ -92,6 +92,13 @@ in
   #   aiProvider = "openai";
   # };
 
+  # Enable XDG portal for GNOME screen sharing
+  modules.services.xdg-portal = {
+    enable = true;
+    backend = "gnome";
+    enableScreencast = true;
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {
@@ -163,12 +170,12 @@ in
       droidcam = false; # Disabled due to v4l2loopback dependency
     };
 
-    # Enable COSMIC Desktop with all applications
+    # COSMIC Desktop disabled - using GNOME for stable screen sharing
     desktop.cosmic = {
-      enable = true;
-      useCosmicGreeter = true;
-      defaultSession = false; # Keep Hyprland as default, COSMIC available at login
-      installAllApps = true;
+      enable = false;
+      useCosmicGreeter = false;
+      defaultSession = false;
+      installAllApps = false;
     };
   };
 
