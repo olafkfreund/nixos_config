@@ -26,9 +26,9 @@ in
     # Install spec-kit wrapper and dependencies
     environment.systemPackages = [
       spec-kit-wrapper
-      pkgs.uv          # Required for running spec-kit
-      pkgs.python311   # Required by spec-kit
-      pkgs.git         # Required by spec-kit for repository operations
+      pkgs.uv # Required for running spec-kit
+      pkgs.python311 # Required by spec-kit
+      pkgs.git # Required by spec-kit for repository operations
     ];
 
     # Add convenient shell aliases

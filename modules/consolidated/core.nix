@@ -3,16 +3,17 @@
 { config, lib, pkgs, ... }:
 with lib; let
   cfg = config.consolidated.core;
-in {
+in
+{
   options.consolidated.core = {
     enable = mkEnableOption "consolidated core system";
-    
+
     profile = mkOption {
       type = types.enum [ "minimal" "desktop" "server" "development" ];
       default = "desktop";
       description = "System profile determining enabled features";
     };
-    
+
     features = {
       networking = mkEnableOption "advanced networking" // { default = true; };
       security = mkEnableOption "security hardening" // { default = true; };
@@ -30,7 +31,7 @@ in {
         allowPing = mkDefault true;
       };
     };
-    
+
     # Consolidated security (replaces 12 modules)  
     security = mkIf cfg.features.security {
       sudo = {
@@ -40,7 +41,7 @@ in {
       polkit.enable = mkDefault true;
       rtkit.enable = mkDefault true;
     };
-    
+
     # Consolidated performance (replaces 6 modules)
     boot = mkIf cfg.features.performance {
       kernel.sysctl = {
@@ -62,13 +63,19 @@ in {
     };
 
     # Essential packages consolidated
-    environment.systemPackages = with pkgs; 
+    environment.systemPackages = with pkgs;
       optionals (cfg.profile != "minimal") [
-        wget curl git vim htop
+        wget
+        curl
+        git
+        vim
+        htop
       ] ++ optionals (cfg.profile == "desktop") [
-        firefox chromium
+        firefox
+        chromium
       ] ++ optionals (cfg.profile == "development") [
-        vscode git-crypt
+        vscode
+        git-crypt
       ];
   };
 }

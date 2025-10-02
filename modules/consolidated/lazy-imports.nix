@@ -4,12 +4,12 @@ with lib; {
   options.lazy = {
     enabledFeatures = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       description = "List of features to enable - only these modules are loaded";
     };
   };
 
-  imports = 
+  imports =
     let
       # Feature map - much faster than directory scanning
       featureMap = {
@@ -20,9 +20,9 @@ with lib; {
         ai = ./ai.nix;
         virtualization = ./virtualization.nix;
       };
-      
+
       # Only import enabled features
-      enabledModules = map (feature: featureMap.${feature}) 
+      enabledModules = map (feature: featureMap.${feature})
         (filter (feature: hasAttr feature featureMap) config.lazy.enabledFeatures);
     in
     enabledModules;

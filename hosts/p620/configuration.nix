@@ -1,14 +1,15 @@
+{ config
+, pkgs
+, lib
+, hostUsers
+, hostTypes
+, inputs
+, ...
+}:
+let
+  vars = import ./variables.nix { };
+in
 {
-  config,
-  pkgs,
-  lib,
-  hostUsers,
-  hostTypes,
-  inputs,
-  ...
-}: let
-  vars = import ./variables.nix {};
-in {
   # Use workstation template and add P620-specific modules
   imports =
     hostTypes.workstation.imports
@@ -88,7 +89,7 @@ in {
 
       interHostOptimization = {
         enable = true;
-        hosts = ["dex5550" "p510" "razer"];
+        hosts = [ "dex5550" "p510" "razer" ];
         jumboFrames = false; # Keep disabled for compatibility
         routeOptimization = true;
       };
@@ -97,7 +98,7 @@ in {
         enable = true;
         caching = true;
         parallelQueries = true;
-        customServers = ["192.168.1.222" "1.1.1.1"];
+        customServers = [ "192.168.1.222" "1.1.1.1" ];
       };
 
       monitoringOptimization = {
@@ -177,7 +178,7 @@ in {
     maxAuthTries = 3;
     enableFail2Ban = true;
     enableKeyOnlyAccess = true;
-    trustedNetworks = ["192.168.1.0/24" "10.0.0.0/8"];
+    trustedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ];
   };
 
   # AI production dashboard and load testing removed - were non-functional services consuming resources
@@ -475,7 +476,7 @@ in {
     # Enable secrets management
     security.secrets = {
       enable = true;
-      userKeys = ["/home/${vars.username}/.ssh/id_ed25519"];
+      userKeys = [ "/home/${vars.username}/.ssh/id_ed25519" ];
     };
   };
 
@@ -483,14 +484,14 @@ in {
   users.users = lib.genAttrs hostUsers (username: {
     isNormalUser = true;
     description = "User ${username}";
-    extraGroups = ["wheel" "networkmanager" "render"];
+    extraGroups = [ "wheel" "networkmanager" "render" ];
     shell = pkgs.zsh;
     # Only use secret-managed password if the secret exists
     hashedPasswordFile =
       lib.mkIf
-      (config.modules.security.secrets.enable
-        && builtins.hasAttr "user-password-${username}" config.age.secrets)
-      config.age.secrets."user-password-${username}".path;
+        (config.modules.security.secrets.enable
+          && builtins.hasAttr "user-password-${username}" config.age.secrets)
+        config.age.secrets."user-password-${username}".path;
   });
 
   # Remove duplicate user configuration - use the one above that handles all hostUsers
@@ -534,7 +535,7 @@ in {
         # Disable LightDM to prevent conflicts with COSMIC Greeter
         lightdm.enable = lib.mkForce false;
       };
-      videoDrivers = ["${vars.gpu}gpu"]; # Correct way to set the video driver
+      videoDrivers = [ "${vars.gpu}gpu" ]; # Correct way to set the video driver
     };
 
     # Display manager configuration (modern syntax)
@@ -593,7 +594,7 @@ in {
 
     # Hardware-specific configurations
     udev = {
-      packages = [pkgs.via];
+      packages = [ pkgs.via ];
       extraRules = builtins.concatStringsSep "\n" [
         ''ACTION=="add", SUBSYSTEM=="video4linux", DRIVERS=="uvcvideo", RUN+="${pkgs.v4l-utils}/bin/v4l2-ctl --set-ctrl=power_line_frequency=1"''
         ''KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0660", TAG+="uaccess"''
@@ -613,7 +614,7 @@ in {
     libsForQt5.qt5ct
     kdePackages.qt6ct
     # Custom qwen-code package
-    (callPackage ../../home/development/qwen-code/default.nix {})
+    (callPackage ../../home/development/qwen-code/default.nix { })
     # yt-x terminal YouTube browser
     inputs.yt-x.packages.${pkgs.system}.default
   ];
@@ -628,7 +629,7 @@ in {
   fileSystems."/mnt/media" = {
     device = "192.168.1.127:/mnt/media";
     fsType = "nfs";
-    options = ["x-systemd.automount" "noauto"];
+    options = [ "x-systemd.automount" "noauto" ];
   };
 
   # Consolidated systemd configuration
@@ -649,13 +650,13 @@ in {
         ExecStart = "${pkgs.scream}/bin/scream-ivshmem-pulse /dev/shm/scream";
         Restart = "always";
       };
-      wantedBy = ["multi-user.target"];
-      requires = ["pulseaudio.service"];
+      wantedBy = [ "multi-user.target" ];
+      requires = [ "pulseaudio.service" ];
     };
   };
 
   # Nix configuration
-  nix.settings.allowed-users = ["nix-serve"];
+  nix.settings.allowed-users = [ "nix-serve" ];
 
   # Storage performance optimization
   storage.performanceOptimization = {

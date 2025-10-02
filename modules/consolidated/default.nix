@@ -5,12 +5,12 @@ with lib; {
   imports = [
     # Core consolidated modules (replaces 40+ modules)
     ./core.nix
-    ./desktop.nix 
+    ./desktop.nix
     ./development.nix
-    
+
     # Feature-based lazy loading
     ./lazy-imports.nix
-  ] 
+  ]
   # Conditional imports - only load if explicitly requested
   ++ optionals (config.features.ai.enable or false) [ ./ai.nix ]
   ++ optionals (config.features.monitoring.server.enable or false) [ ./monitoring.nix ]
@@ -19,12 +19,14 @@ with lib; {
   # Fast validation - reduced assertion count
   config.assertions = [
     {
-      assertion = 
-        let conflicts = with config.features; [
-          (development.enable && minimal.enable)
-          (ai.enable && minimal.enable)
-        ];
-        in !any (x: x) conflicts;
+      assertion =
+        let
+          conflicts = with config.features; [
+            (development.enable && minimal.enable)
+            (ai.enable && minimal.enable)
+          ];
+        in
+          !any (x: x) conflicts;
       message = "Conflicting feature combinations detected";
     }
   ];

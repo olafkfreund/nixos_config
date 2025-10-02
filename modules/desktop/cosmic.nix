@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.features.desktop.cosmic;
-in {
+in
+{
   options.features.desktop.cosmic = {
     enable = mkEnableOption "COSMIC Desktop Environment";
 
@@ -90,8 +90,8 @@ in {
     # XDG portal configuration for COSMIC
     xdg.portal = {
       enable = true;
-      extraPortals = [pkgs.xdg-desktop-portal-cosmic];
-      config.cosmic.default = ["cosmic" "*"];
+      extraPortals = [ pkgs.xdg-desktop-portal-cosmic ];
+      config.cosmic.default = [ "cosmic" "*" ];
     };
 
     # Required system services

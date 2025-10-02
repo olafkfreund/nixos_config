@@ -7,7 +7,7 @@ with lib; let
   cfg = config.development.copilot-cli;
 
   # Import the copilot-cli package derivation
-  copilot-cli = pkgs.callPackage ../../home/development/copilot-cli {};
+  copilot-cli = pkgs.callPackage ../../home/development/copilot-cli { };
 in
 {
   options.development.copilot-cli = {
