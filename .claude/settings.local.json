@@ -116,7 +116,17 @@
       "Bash(promtail-status:*)",
       "Bash(git rm:*)",
       "Bash(awk:*)",
-      "Bash(nh os:*)"
+      "Bash(nh os:*)",
+      "Bash(nix-prefetch-url:*)",
+      "Bash(nix hash convert:*)",
+      "Bash(nix build:*)",
+      "Bash(nix log:*)",
+      "Bash(tar:*)",
+      "Bash(prefetch-npm-deps:*)",
+      "Bash(npm install:*)",
+      "Bash(result/bin/copilot:*)",
+      "Bash(result/bin/codex:*)",
+      "Bash(result/bin/claude:*)"
     ],
     "additionalDirectories": [
       "/"

@@ -2,15 +2,16 @@
 
 buildNpmPackage rec {
   pname = "openai-codex";
-  version = "0.36.0";
+  version = "0.44.0";
 
   src = fetchurl {
     url = "https://registry.npmjs.org/@openai/codex/-/codex-${version}.tgz";
-    hash = "sha256-OcKca1KAge7tqwTbe2W2NGTz4zBKc8qgh9UKyoqM20Y=";
+    hash = "sha256-SNRcqKdgjeh4nMkFgOjUJ2CGUPIs/cGNn7+bpZijMDQ=";
   };
 
-  # Use proper npm dependency resolution for version 0.36.0
-  npmDepsHash = "sha256-mwPhA5/4tw+bF56mHXv0DmkexA3LyZh1RiBzjKZYKnA=";
+  # Version 0.44.0 has no external dependencies
+  forceEmptyCache = true;
+  npmDepsHash = "sha256-xafWiooGJUDqQQLWefgyrPx9x6LMBgKItbvLkHi+D/U=";
   makeCacheWritable = true;
 
   nodejs = nodejs_22;
@@ -51,8 +52,9 @@ buildNpmPackage rec {
     makeWrapper ${nodejs_22}/bin/node $out/bin/codex-cli \
       --add-flags "$out/lib/node_modules/@openai/codex/bin/codex.js"
 
-    # Make the native binaries executable
-    chmod +x $out/lib/node_modules/@openai/codex/bin/codex-*
+    # Make the native binaries executable (they are in vendor/ subdirectories by arch)
+    find $out/lib/node_modules/@openai/codex/vendor -type f -name "codex" -exec chmod +x {} \; 2>/dev/null || true
+    find $out/lib/node_modules/@openai/codex/vendor -type f -name "rg" -exec chmod +x {} \; 2>/dev/null || true
 
     runHook postInstall
   '';
