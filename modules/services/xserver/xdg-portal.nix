@@ -76,6 +76,17 @@ in
               "org.freedesktop.impl.portal.Screencast" = [ "wlr" ];
             };
         })
+
+        # GNOME-specific configuration
+        (mkIf (cfg.backend == "gnome") {
+          gnome =
+            {
+              default = [ "gnome" "gtk" ];
+            }
+            // optionalAttrs cfg.enableScreencast {
+              "org.freedesktop.impl.portal.Screencast" = [ "gnome" ];
+            };
+        })
       ];
 
       configPackages = with pkgs;
@@ -105,8 +116,8 @@ in
     # Validation
     assertions = [
       {
-        assertion = cfg.enableScreencast -> (cfg.backend == "hyprland" || cfg.backend == "sway");
-        message = "Screencasting is currently only supported with Hyprland and Sway backends";
+        assertion = cfg.enableScreencast -> (cfg.backend == "hyprland" || cfg.backend == "sway" || cfg.backend == "gnome");
+        message = "Screencasting is currently only supported with Hyprland, Sway, and GNOME backends";
       }
     ];
 

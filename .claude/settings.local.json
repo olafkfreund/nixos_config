@@ -115,7 +115,8 @@
       "Bash(sudo pkill:*)",
       "Bash(promtail-status:*)",
       "Bash(git rm:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(nh os:*)"
     ],
     "additionalDirectories": [
       "/"

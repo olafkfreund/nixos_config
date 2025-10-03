@@ -5,7 +5,7 @@
     extraPackages32 = with pkgs.driversi686Linux; [
       # 32-bit Mesa DRI drivers for compatibility
       mesa
-      amdvlk
+      # amdvlk removed - RADV (Mesa Vulkan) is now default
     ];
     extraPackages = with pkgs; [
       # Mesa DRI drivers for OpenGL/EGL support
@@ -13,7 +13,7 @@
       # Vulkan and video acceleration
       vulkan-validation-layers
       libva-vdpau-driver
-      amdvlk
+      # amdvlk removed - RADV (Mesa Vulkan) is now default
       rocmPackages.clr.icd
     ];
   };
@@ -21,10 +21,8 @@
   # Enable AMD GPU features
   hardware.amdgpu = {
     opencl.enable = true;
-    amdvlk = {
-      enable = true;
-      supportExperimental.enable = false;
-    };
+    # RADV (Mesa's Vulkan driver) is now enabled by default
+    # amdvlk has been removed in favor of RADV
     # Load firmware early in the boot process for better stability
     # loadInInitrd = true;
   };
@@ -33,7 +31,7 @@
     systemPackages = with pkgs; [
       libva
       libva-utils
-      driversi686Linux.amdvlk
+      # driversi686Linux.amdvlk removed - RADV is now default
       lact
       glxinfo
       clinfo

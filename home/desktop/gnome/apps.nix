@@ -31,7 +31,7 @@ in
         pipeline
         newsflash
         gdm-settings
-        blackbox-terminal # Simple terminal emulator
+        (lib.lowPrio blackbox-terminal) # Simple terminal emulator (lowPrio to avoid icon conflicts with rewaita)
 
         # GNOME productivity
         gnome-calculator # Calculator

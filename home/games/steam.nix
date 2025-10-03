@@ -5,7 +5,7 @@
     gamescope
     steam-rom-manager
     steamtinkerlaunch
-    proton-caller
+    # proton-caller removed - unmaintained package
     protontricks
     steam-run
     lutris
