@@ -1,6 +1,7 @@
 { config
 , lib
 , pkgs
+, pkgs-stable
 , ...
 }:
 with lib; let
@@ -11,19 +12,19 @@ in
     enable = mkEnableOption "Enable AWS packages";
   };
   config = mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      awscli2
-      awsrm
-      awsls
-      awsume
-      awslogs
-      aws-mfa
-      aws-vault
-      aws-rotate-key
-      terraforming
-      aws-iam-authenticator
-      eksctl
-      istioctl
+    environment.systemPackages = [
+      pkgs-stable.awscli2
+      pkgs.awsrm
+      pkgs.awsls
+      pkgs.awsume
+      pkgs.awslogs
+      pkgs.aws-mfa
+      pkgs.aws-vault
+      pkgs.aws-rotate-key
+      pkgs.terraforming
+      pkgs.aws-iam-authenticator
+      pkgs.eksctl
+      pkgs.istioctl
     ];
   };
 }

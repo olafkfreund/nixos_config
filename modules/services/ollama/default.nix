@@ -54,7 +54,7 @@ in
         };
       };
       environment.systemPackages = [
-        pkgs.alpaca
+        # pkgs.alpaca  # Temporarily disabled due to CMake compatibility issues with ctranslate2
       ];
     })
 

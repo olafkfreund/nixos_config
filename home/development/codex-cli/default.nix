@@ -2,16 +2,16 @@
 
 buildNpmPackage rec {
   pname = "openai-codex";
-  version = "0.44.0";
+  version = "0.45.0";
 
   src = fetchurl {
     url = "https://registry.npmjs.org/@openai/codex/-/codex-${version}.tgz";
-    hash = "sha256-SNRcqKdgjeh4nMkFgOjUJ2CGUPIs/cGNn7+bpZijMDQ=";
+    hash = "sha256-wSymdEIDMtx9dXsfSIl0k6CAcGBrrQ4m2XZT6me+yUc=";
   };
 
-  # Version 0.44.0 has no external dependencies
+  # Version 0.45.0 has no external dependencies
   forceEmptyCache = true;
-  npmDepsHash = "sha256-xafWiooGJUDqQQLWefgyrPx9x6LMBgKItbvLkHi+D/U=";
+  npmDepsHash = "sha256-TKQ4ZL68ZsOEnKl/BQBiSUh2UO7yv2dYxp9vDluWIEI=";
   makeCacheWritable = true;
 
   nodejs = nodejs_22;

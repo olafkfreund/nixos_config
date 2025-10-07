@@ -8,7 +8,7 @@
   # Configure tmpfs size for large builds
   boot.tmp = {
     useTmpfs = true;
-    tmpfsSize = "16G"; # Allocate 16GB of RAM for /tmp
+    tmpfsSize = "32G"; # Allocate 32GB of RAM for /tmp (increased for LibreOffice and large builds)
   };
   # This is for OBS Virtual Cam Support - v4l2loopback setup
   # boot.kernelPackages = pkgs.linuxPackages_default;

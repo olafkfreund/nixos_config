@@ -29,6 +29,12 @@
   nix.settings.max-jobs = "auto";
   nix.settings.cores = 0;
 
+  # Maximize cache usage, allow local builds as fallback
+  nix.settings.builders-use-substitutes = true;
+  nix.settings.substitute = true;
+  nix.settings.max-substitution-jobs = 128;
+  nix.settings.fallback = true; # Build locally if substitute not available
+
   # Binary cache configuration for p620
   nix.settings.trusted-substituters = [
     "http://192.168.1.97:5000" # Use your p620's actual hostname or IP address here

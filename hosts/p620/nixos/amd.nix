@@ -37,7 +37,7 @@
       clinfo
       rocmPackages.rocm-smi
       rocmPackages.rocminfo
-      rocmPackages.rocsolver
+      # rocmPackages.rocsolver  # Temporarily disabled: depends on rocblas->hipblaslt (not in cache, build fails)
       rocmPackages.rocsparse
       rocmPackages.rocm-runtime
       rocmPackages.rpp-hip
@@ -46,8 +46,8 @@
       rocmPackages.clr.icd
       rocmPackages.rocm-cmake
       rocmPackages.rocm-device-libs
-      rocmPackages.hipblas
-      rocmPackages.rocblas
+      # rocmPackages.hipblas  # Temporarily disabled: depends on hipblaslt (not in cache, build fails)
+      # rocmPackages.rocblas  # Temporarily disabled: depends on hipblaslt (not in cache, build fails)
       rocmPackages.hip-common
       radeontop
       # virtualglLib

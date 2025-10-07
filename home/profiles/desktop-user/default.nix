@@ -1,6 +1,9 @@
 # Desktop User Profile - Full GUI configuration for desktop environments
 # Used by: P620, workstation environments, full desktop setups
-{ pkgs, ... }: {
+{ lib
+, pkgs
+, ...
+}: {
   imports = [
     # Import full home manager module suite
     ../../default.nix # Base home manager configuration
@@ -103,7 +106,7 @@
     mpv
 
     # Office and productivity
-    libreoffice
+    libreoffice-bin # Disabled: large build, use onlyoffice or online alternatives
     thunderbird
 
     # Communication

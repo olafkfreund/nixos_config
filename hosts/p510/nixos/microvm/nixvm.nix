@@ -209,7 +209,7 @@ in
     # GUI applications
     firefox
     thunderbird
-    libreoffice
+    #libreoffice
     vlc
 
     # System administration

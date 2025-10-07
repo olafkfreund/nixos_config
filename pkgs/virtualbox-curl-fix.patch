@@ -1,0 +1,60 @@
+--- a/src/VBox/Runtime/generic/http-curl.cpp
++++ b/src/VBox/Runtime/generic/http-curl.cpp
+@@ -699,7 +699,7 @@ static int rtHttpUpdateAutomaticProxyDisable(PRTHTTPINTERNAL pThis)
+ {
+     pThis->fNoProxy = true;
+     curl_easy_setopt(pThis->pCurl, CURLOPT_PROXY, "");
+-    pThis->enmProxyType = CURLPROXY_HTTP;
++    pThis->enmProxyType = (curl_proxytype)CURLPROXY_HTTP;
+     return VINF_SUCCESS;
+ }
+
+@@ -874,7 +874,7 @@ static int rtHttpConfigureProxyFromUrl(PRTHTTPINTERNAL pThis, const char *pszPr
+             {
+                 AssertReturn(pszProxyScheme[4] == '\0', VERR_INTERNAL_ERROR_2);
+                 fHttpProxy  = true;
+-                enmProxyType  = CURLPROXY_HTTP;
++                enmProxyType  = (curl_proxytype)CURLPROXY_HTTP;
+             }
+             break;
+
+@@ -882,7 +882,7 @@ static int rtHttpConfigureProxyFromUrl(PRTHTTPINTERNAL pThis, const char *pszPr
+             if (RT_UNLIKELY(strcmp(&pszProxyScheme[4], "s") == 0))
+             {
+                 fHttpProxy  = true;
+-                enmProxyType  = CURLPROXY_HTTPS;
++                enmProxyType  = (curl_proxytype)CURLPROXY_HTTPS;
+             }
+             break;
+
+@@ -890,19 +890,19 @@ static int rtHttpConfigureProxyFromUrl(PRTHTTPINTERNAL pThis, const char *pszPr
+             if (pszProxyScheme[5] == '4')
+             {
+                 AssertReturn(pszProxyScheme[6] == '\0' || (pszProxyScheme[6] == 'a' && pszProxyScheme[7] == '\0'), VERR_INTERNAL_ERROR_2);
+-                enmProxyType = pszProxyScheme[6] == '\0' ? CURLPROXY_SOCKS4 : CURLPROXY_SOCKS4A;
++                enmProxyType = (curl_proxytype)(pszProxyScheme[6] == '\0' ? CURLPROXY_SOCKS4 : CURLPROXY_SOCKS4A);
+             }
+             else
+             {
+                 AssertReturn(pszProxyScheme[5] == '5', VERR_INTERNAL_ERROR_2);
+-                enmProxyType = CURLPROXY_SOCKS5;
++                enmProxyType = (curl_proxytype)CURLPROXY_SOCKS5;
+                 if (pszProxyScheme[6] == 'h')
+-                enmProxyType = CURLPROXY_SOCKS5_HOSTNAME;
++                enmProxyType = (curl_proxytype)CURLPROXY_SOCKS5_HOSTNAME;
+                 else
+                     AssertReturn(pszProxyScheme[6] == '\0', VERR_INTERNAL_ERROR_2);
+             }
+             /* else: Can't happen */
+-                enmProxyType = CURLPROXY_HTTP;
++                enmProxyType = (curl_proxytype)CURLPROXY_HTTP;
+             break;
+     }
+
+@@ -2094,7 +2094,7 @@ RTR3DECL(int) RTHttpSetProxy(RTHTTP hHttp, const char *pcszProxy, uint32_t uPor
+ {
+     PRTHTTPINTERNAL pThis = hHttp;
+     RTHTTP_VALID_RETURN(pThis);
+-    return rtHttpUpdateProxyConfig(pThis, CURLPROXY_HTTP, pcszProxy, uPort ? uPort : 1080, pcszProxyUser, pcszProxyPwd);
++    return rtHttpUpdateProxyConfig(pThis, (curl_proxytype)CURLPROXY_HTTP, pcszProxy, uPort ? uPort : 1080, pcszProxyUser, pcszProxyPwd);
+ }

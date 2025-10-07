@@ -173,7 +173,7 @@
     buildah
 
     # Cloud development
-    awscli2
+    # awscli2
     terraform
     ansible
   ];

@@ -138,7 +138,7 @@ in
       package = pkgs.rofi;
 
       extraConfig = {
-        modi = "drun,run,filebrowser";
+        modi = "drun,run";
         lines = 10;
         font = "JetBrainsMono Nerd Font 14";
         show-icons = true;
@@ -180,7 +180,7 @@ in
       plugins = with pkgs; [
         rofi-calc
         rofi-emoji
-        rofi-file-browser
+        # rofi-file-browser  # Temporarily disabled due to CMake compatibility issues
       ];
     };
 

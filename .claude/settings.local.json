@@ -126,11 +126,31 @@
       "Bash(npm install:*)",
       "Bash(result/bin/copilot:*)",
       "Bash(result/bin/codex:*)",
-      "Bash(result/bin/claude:*)"
+      "Bash(result/bin/claude:*)",
+      "Bash(./home/development/claude-code/update-claude-code-lock.sh:*)",
+      "Bash(bash:*)",
+      "Bash(/nix/store/hz25j36y528hmldx3gh044ih0c2sw0lk-claude-code-2.0.9/bin/claude --version)",
+      "Bash(nix flake show:*)",
+      "Bash(tee:*)",
+      "Bash(sudo rm:*)",
+      "Bash(sudo find:*)",
+      "Bash(sudo find /tmp -type d -name \"cargo-*\" -exec rm -rf {} +)",
+      "Bash(sudo find /tmp -type d -name \"rust*\" -exec rm -rf {} +)",
+      "Bash(ps:*)",
+      "Bash(kill:*)",
+      "Bash(pkill:*)",
+      "Bash(xargs:*)",
+      "Bash(sudo du:*)",
+      "Bash(TMPDIR=~/nix-build-tmp nh os switch --ask)",
+      "Bash(nix-store:*)",
+      "Bash(sudo nix-store:*)",
+      "Bash(nix flake update:*)",
+      "Bash(pgrep:*)",
+      "Bash(nix-shell:*)",
+      "Bash(result/bin/gemini:*)",
+      "Bash(pre-commit install:*)"
     ],
-    "additionalDirectories": [
-      "/"
-    ]
+    "additionalDirectories": ["/"]
   },
   "enableAllProjectMcpServers": false
 }

@@ -7,7 +7,7 @@
   # Workuser-specific configuration for P620
   home.packages = with pkgs; [
     # Work-specific packages
-    libreoffice
+    # libreoffice  # Disabled: use online alternatives
     thunderbird
     teams-for-linux
     zoom-us

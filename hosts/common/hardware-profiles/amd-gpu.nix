@@ -5,7 +5,7 @@
 # No parameters needed - pure data structure
 {
   gpu = "amd";
-  acceleration = "rocm"; # For ollama and AMD GPU acceleration
+  acceleration = null; # Disabled: ROCm hipblaslt fails to build with Python 3.13
   videoDrivers = [ "amdgpu" ];
 
   # AMD-specific environment variables

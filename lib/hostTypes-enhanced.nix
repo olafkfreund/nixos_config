@@ -183,7 +183,7 @@
           };
           productivity = {
             obsidian = lib.mkDefault true;
-            libreoffice = lib.mkDefault true;
+            libreoffice = lib.mkDefault false; # Disabled: large build causing issues
             thunderbird = lib.mkDefault true;
             vscode = lib.mkDefault true;
           };
@@ -281,7 +281,7 @@
           };
           productivity = {
             obsidian = lib.mkDefault true;
-            libreoffice = lib.mkDefault true;
+            libreoffice = lib.mkDefault false; # Disabled: large build causing issues
             thunderbird = lib.mkDefault true;
           };
         };

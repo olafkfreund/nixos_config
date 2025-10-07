@@ -57,7 +57,7 @@ in
         gnome-sound-recorder # Audio recording
         showtime # Media center application
         upscaler # Image upscaling tool
-        dissent
+        # dissent # Temporarily disabled - build failure (no space left on device)
         gnvim
         amberol
         hydrapaper
@@ -72,7 +72,7 @@ in
         file-roller # Archive manager
 
         # AI assistants
-        newelle # AI chat client
+        # newelle # AI chat client - Temporarily disabled due to pymupdf/llama-index build failures
 
         # GNOME development tools
         gnome-builder # IDE (optional - large package)

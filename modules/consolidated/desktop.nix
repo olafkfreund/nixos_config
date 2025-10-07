@@ -1,40 +1,48 @@
 # Consolidated Desktop Module
 # Replaces 25+ desktop-related modules with intelligent feature detection
-{ config, lib, pkgs, ... }:
+{ config
+, lib
+, pkgs
+, ...
+}:
 with lib; let
   cfg = config.consolidated.desktop;
 
   # Hardware detection helpers
-  hasAMDGpu = any (pkg: hasInfix "amd" (toLower (toString pkg)))
-    (config.hardware.graphics.extraPackages or [ ]);
+  hasAMDGpu =
+    any (pkg: hasInfix "amd" (toLower (toString pkg)))
+      (config.hardware.graphics.extraPackages or [ ]);
   hasNvidiaGpu = config.hardware.nvidia.package or null != null;
   isLaptop = config.hardware.laptop or false;
 
   # Smart package selection based on hardware
-  desktopPackages = with pkgs; [
-    # Essential desktop apps
-    firefox
-    chromium
+  desktopPackages = with pkgs;
+    [
+      # Essential desktop apps
+      firefox
+      chromium
 
-    # Productivity
-    libreoffice-fresh
+      # Productivity
+      libreoffice-bin
 
-    # Media (conditional on hardware)
-  ] ++ optionals hasAMDGpu [
-    # AMD-optimized media tools
-    mpv-unwrapped.override
-    { vaapiSupport = true; }
-  ] ++ optionals hasNvidiaGpu [
-    # NVIDIA-optimized tools
-    obs-studio.override
-    { cudaSupport = true; }
-  ] ++ optionals isLaptop [
-    # Laptop-specific tools
-    brightnessctl
-    acpi
-    powertop
-  ];
-
+      # Media (conditional on hardware)
+    ]
+    ++ optionals hasAMDGpu [
+      # AMD-optimized media tools
+      mpv-unwrapped.override
+      { vaapiSupport = true; }
+    ]
+    ++ optionals hasNvidiaGpu [
+      # NVIDIA-optimized tools
+      obs-studio.override
+      { cudaSupport = true; }
+    ]
+    ++ optionals isLaptop [
+      # Laptop-specific tools
+      brightnessctl
+      acpi
+      powertop
+    ];
 in
 {
   options.consolidated.desktop = {
@@ -66,8 +74,10 @@ in
         enable = true;
         settings.default_session = {
           command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd ${
-            if cfg.environment == "hyprland" then "Hyprland"
-            else if cfg.environment == "plasma" then "plasma"
+            if cfg.environment == "hyprland"
+            then "Hyprland"
+            else if cfg.environment == "plasma"
+            then "plasma"
             else "hyprland" # fallback
           }";
         };
@@ -97,7 +107,8 @@ in
         optionals hasAMDGpu [
           amdvlk
           rocmPackages.rocm-runtime
-        ] ++
+        ]
+        ++
         # NVIDIA optimization
         optionals hasNvidiaGpu [
           nvidia-vaapi-driver
@@ -132,14 +143,19 @@ in
     };
 
     # Desktop packages (smart selection)
-    environment.systemPackages = desktopPackages
+    environment.systemPackages =
+      desktopPackages
       ++ optionals cfg.features.gaming (with pkgs; [ steam lutris ])
       ++ optionals cfg.features.development (with pkgs; [ vscode git-crypt ])
       ++ optionals cfg.features.media (with pkgs; [ gimp blender kdenlive ]);
 
     # Performance optimizations for desktop
     services.thermald.enable = mkDefault isLaptop;
-    powerManagement.cpuFreqGovernor = mkDefault (if isLaptop then "powersave" else "performance");
+    powerManagement.cpuFreqGovernor = mkDefault (
+      if isLaptop
+      then "powersave"
+      else "performance"
+    );
 
     # Laptop-specific optimizations
     services.tlp = mkIf isLaptop {

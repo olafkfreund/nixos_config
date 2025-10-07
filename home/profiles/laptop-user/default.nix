@@ -1,6 +1,6 @@
 # Laptop User Profile - Mobile-optimized configuration with power management
 # Used by: Razer, Samsung, portable systems with battery considerations
-{ pkgs, ... }: {
+{ lib, pkgs, ... }: {
   imports = [
     # Import home manager modules optimized for mobile use
     ../../browsers/default.nix # Browser support
@@ -138,7 +138,7 @@
     telegram-desktop # Messaging
 
     # Productivity (essential only)
-    libreoffice # Office suite
+    # libreoffice # Office suite - Disabled: large build
     thunderbird # Email client
 
     # Development essentials

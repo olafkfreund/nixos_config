@@ -61,7 +61,7 @@
     brightnessctl
     mpc-cli
     alsa-utils
-    pamixer
+    # pamixer  # Temporarily disabled due to build failures with cxxopts/icu dependencies
     playerctl
     getent
     pavucontrol

@@ -1,7 +1,7 @@
 { config
 , lib
 , pkgs
-, pkgs-unstable
+, pkgs-stable
 , ...
 }:
 with lib; let
@@ -21,9 +21,7 @@ in
         onBoot = "ignore";
         qemu = {
           swtpm.enable = true;
-          ovmf.enable = true;
-          ovmf.packages = [ pkgs.OVMFFull.fd ];
-          package = pkgs-unstable.qemu;
+          package = pkgs.qemu;
           runAsRoot = false;
         };
       };
@@ -56,7 +54,7 @@ in
     # Make sure the problematic libvirt drop-in isn't picked up anymore
     systemd.tmpfiles.rules = [
       "r /etc/ssh/ssh_config.d/30-libvirt-ssh-proxy.conf"
-      "L+ /var/lib/qemu/firmware - - - - ${pkgs-unstable.qemu}/share/qemu/firmware"
+      "L+ /var/lib/qemu/firmware - - - - ${pkgs.qemu}/share/qemu/firmware"
     ];
     environment.sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
     services.spice-vdagentd.enable = true;
@@ -67,25 +65,25 @@ in
       "cgroup_enable=memory"
     ];
     environment.systemPackages = [
-      pkgs-unstable.OVMFFull
-      pkgs-unstable.kvmtool
-      pkgs-unstable.libvirt
-      pkgs-unstable.multipass
-      pkgs-unstable.spice
-      pkgs-unstable.spice-gtk
-      pkgs-unstable.spice-protocol
-      pkgs-unstable.spice-vdagent
-      pkgs-unstable.spice-autorandr
-      pkgs-unstable.swtpm
-      pkgs-unstable.virt-manager
-      pkgs-unstable.virt-viewer
-      pkgs-unstable.win-spice
-      pkgs-unstable.win-virtio
-      pkgs-unstable.virtualbox
-      pkgs-unstable.btrfs-progs
-      pkgs-unstable.quickemu
-      # pkgs-unstable.vmware-workstation
-      pkgs-unstable.quickgui
+      pkgs.OVMFFull
+      pkgs.kvmtool
+      pkgs.libvirt
+      pkgs-stable.multipass
+      pkgs.spice
+      pkgs.spice-gtk
+      pkgs.spice-protocol
+      pkgs.spice-vdagent
+      pkgs.spice-autorandr
+      pkgs.swtpm
+      pkgs.virt-manager
+      pkgs.virt-viewer
+      pkgs.win-spice
+      pkgs.win-virtio
+      pkgs-stable.virtualbox # Using stable version to avoid libcurl proxy enum build errors in unstable
+      pkgs.btrfs-progs
+      pkgs.quickemu
+      # pkgs.vmware-workstation
+      pkgs.quickgui
     ];
   };
 }

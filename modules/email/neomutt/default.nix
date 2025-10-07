@@ -1,6 +1,7 @@
 { config
 , lib
 , pkgs
+, pkgs-stable
 , ...
 }:
 with lib; let
@@ -87,8 +88,8 @@ in
         image/*; ${pkgs.chafa}/bin/chafa --size=80x24 %s; copiousoutput;
 
         # Other document types
-        application/msword; ${pkgs.libreoffice}/bin/libreoffice --writer %s;
-        application/vnd.openxmlformats-officedocument.wordprocessingml.document; ${pkgs.libreoffice}/bin/libreoffice --writer %s;
+        application/msword; ${pkgs-stable.libreoffice}/bin/libreoffice --writer %s;
+        application/vnd.openxmlformats-officedocument.wordprocessingml.document; ${pkgs-stable.libreoffice}/bin/libreoffice --writer %s;
       '';
       mode = "0644";
     };
