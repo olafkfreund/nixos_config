@@ -347,6 +347,37 @@
           gemini-cli = pkgs.callPackage ./pkgs/gemini-cli { };
           opencode = pkgs.callPackage ./home/development/opencode { };
 
+          # Icon themes
+          neuwaita-icon-theme = pkgs.stdenvNoCC.mkDerivation {
+            pname = "neuwaita-icon-theme";
+            version = "unstable-2025-01-15";
+
+            src = pkgs.fetchFromGitHub {
+              owner = "RusticBard";
+              repo = "Neuwaita";
+              rev = "4c63e30493ab34558539104309282877ab767798";
+              hash = "sha256-NL8/ceugdGNSMpa8G/a4Eolutf5BcN6PXiQ9qDmHM1U=";
+            };
+
+            dontBuild = true;
+            dontConfigure = true;
+
+            installPhase = ''
+              runHook preInstall
+              mkdir -p $out/share/icons/Neuwaita
+              cp -r * $out/share/icons/Neuwaita/
+              rm -rf $out/share/icons/Neuwaita/.git*
+              runHook postInstall
+            '';
+
+            meta = with pkgs.lib; {
+              description = "A different take on the Adwaita icon theme";
+              homepage = "https://github.com/RusticBard/Neuwaita";
+              license = licenses.gpl3Plus;
+              platforms = platforms.linux;
+            };
+          };
+
           # Live ISO images (temporarily disabled during flake restructuring)
           # live-iso-p620 = liveImages.liveImages.p620.config.system.build.isoImage;
           # live-iso-razer = liveImages.liveImages.razer.config.system.build.isoImage;
