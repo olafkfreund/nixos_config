@@ -9,6 +9,7 @@
 ### 1. Path and String Concatenation Pitfalls
 
 **❌ WRONG - Missing Spaces Around Operators**
+
 ```nix
 # This is interpreted as a path, not division!
 let result = 6/2;  # result = <path 6/2>
@@ -18,6 +19,7 @@ let path = ./src/main;  # Unexpected path interpretation
 ```
 
 **✅ CORRECT - Always Use Spaces**
+
 ```nix
 # Proper numeric division
 let result = 6 / 2;  # result = 3
@@ -38,6 +40,7 @@ let fullPath = "${basePath}/config";
 ### 2. Variable Immutability - No Reassignment
 
 **❌ WRONG - Attempting to Mutate Variables**
+
 ```nix
 let
   x = 1;
@@ -46,6 +49,7 @@ in x
 ```
 
 **✅ CORRECT - Immutable Bindings**
+
 ```nix
 let
   x = 1;
@@ -62,6 +66,7 @@ in y
 ### 3. Type Mixing Without Conversion
 
 **❌ WRONG - Mixing Types Implicitly**
+
 ```nix
 let
   port = 8080;
@@ -70,6 +75,7 @@ in url
 ```
 
 **✅ CORRECT - Explicit Type Conversion**
+
 ```nix
 let
   port = 8080;
@@ -88,11 +94,13 @@ in url
 ### 4. Floating Point vs Integer Division
 
 **❌ WRONG - Assuming Integer Division**
+
 ```nix
 let result = 5 / 2;  # result = 2 (integer division!)
 ```
 
 **✅ CORRECT - Explicit Floating Point**
+
 ```nix
 let result = 5.0 / 2.0;  # result = 2.5 (float division)
 ```
@@ -106,6 +114,7 @@ let result = 5.0 / 2.0;  # result = 2.5 (float division)
 ### 5. Development vs Runtime Dependencies Confusion
 
 **❌ WRONG - Mixing Build and Development Dependencies**
+
 ```nix
 {
   buildInputs = [
@@ -119,6 +128,7 @@ let result = 5.0 / 2.0;  # result = 2.5 (float division)
 ```
 
 **✅ CORRECT - Proper Separation**
+
 ```nix
 {
   # Runtime/build dependencies
@@ -153,12 +163,14 @@ let result = 5.0 / 2.0;  # result = 2.5 (float division)
 ### 6. Not Committing flake.lock
 
 **❌ WRONG - Ignoring flake.lock**
+
 ```gitignore
 # .gitignore
 flake.lock  # DON'T ignore this!
 ```
 
 **✅ CORRECT - Commit Lockfile**
+
 ```bash
 git add flake.lock
 git commit -m "chore: Update flake.lock for reproducibility"
@@ -173,6 +185,7 @@ git commit -m "chore: Update flake.lock for reproducibility"
 ### 7. Overly Complex Flake References
 
 **❌ WRONG - Overcomplicated Input References**
+
 ```nix
 {
   inputs = {
@@ -189,6 +202,7 @@ git commit -m "chore: Update flake.lock for reproducibility"
 ```
 
 **✅ CORRECT - Simple, Clear References**
+
 ```nix
 {
   inputs = {
@@ -211,6 +225,7 @@ git commit -m "chore: Update flake.lock for reproducibility"
 ### 8. Shell Command Confusion
 
 **❌ WRONG - Misusing Nix Commands**
+
 ```bash
 # Confusing commands
 nix develop     # For modifying the package
@@ -221,6 +236,7 @@ nix run         # For building and running
 ```
 
 **✅ CORRECT - Right Tool for the Job**
+
 ```bash
 # Development workflow (modifying code)
 nix develop        # Enter dev shell with build tools
@@ -239,6 +255,7 @@ nix build          # Build package, create ./result symlink
 **Why It Matters**: Each command serves a specific purpose. Using the wrong one wastes time.
 
 **Rule**:
+
 - **`nix develop`**: Modify/develop package
 - **`nix shell`**: Temporarily use package
 - **`nix run`**: Build and run app
@@ -249,12 +266,14 @@ nix build          # Build package, create ./result symlink
 ### 9. Ignoring Git "Dirty" Warnings
 
 **❌ WRONG - Building with Uncommitted Changes**
+
 ```bash
 # Warning: Git tree is dirty
 nix build  # Proceeds anyway, but may not work correctly
 ```
 
 **✅ CORRECT - Clean Git State**
+
 ```bash
 # Add new files
 git add new-file.nix
@@ -275,6 +294,7 @@ nix build
 ### 10. Excessive Use of `with`
 
 **❌ WRONG - Overusing `with` Statement**
+
 ```nix
 with pkgs;
 with lib;
@@ -288,6 +308,7 @@ with builtins;
 ```
 
 **✅ CORRECT - Limited, Explicit `with` Usage**
+
 ```nix
 {
   packages = with pkgs; [
@@ -319,6 +340,7 @@ with builtins;
 ### 1. Function Parameter Patterns
 
 **✅ RECOMMENDED - Set Patterns for Functions**
+
 ```nix
 # Named parameters with defaults
 { pkgs
@@ -333,6 +355,7 @@ with builtins;
 ```
 
 **Benefits**:
+
 - Clear parameter names
 - Optional parameters with defaults
 - Extensible with `...`
@@ -342,6 +365,7 @@ with builtins;
 ### 2. Let Expressions for Local Scope
 
 **✅ RECOMMENDED - Use `let` for Local Variables**
+
 ```nix
 let
   basePort = 8080;
@@ -357,6 +381,7 @@ in {
 ```
 
 **Benefits**:
+
 - Scoped variable definitions
 - Improved readability
 - Avoid repetition
@@ -366,6 +391,7 @@ in {
 ### 3. Recursive Attribute Sets
 
 **✅ RECOMMENDED - Use `rec` Sparingly**
+
 ```nix
 # Use rec only when necessary
 rec {
@@ -391,6 +417,7 @@ in {
 ### 4. String Interpolation Best Practices
 
 **✅ RECOMMENDED - Consistent String Interpolation**
+
 ```nix
 let
   port = 8080;
@@ -420,6 +447,7 @@ in {
 ### 5. Flake Structure Best Practices
 
 **✅ RECOMMENDED - Standard Flake Template**
+
 ```nix
 {
   description = "Brief description of what this flake does";
@@ -451,6 +479,7 @@ in {
 ```
 
 **Structure**:
+
 1. **Description**: Brief, clear description
 2. **Inputs**: Dependencies and sources
 3. **Outputs**: Packages, apps, devShells
@@ -463,6 +492,7 @@ in {
 **✅ RECOMMENDED - Two-Tier Development Approach**
 
 **High-Level Workflow (Iterative)**:
+
 ```bash
 # Make changes to code or flake.nix
 vim src/main.hs
@@ -478,6 +508,7 @@ nix run
 ```
 
 **Low-Level Workflow (Detailed)**:
+
 ```bash
 # Enter development shell
 nix develop
@@ -493,6 +524,7 @@ exit
 ```
 
 **When to Use Each**:
+
 - **High-level**: Quick iterations, testing changes
 - **Low-level**: Debugging, detailed control, complex builds
 
@@ -503,6 +535,7 @@ exit
 ### 1. Module Option Definitions
 
 **✅ CORRECT - Consistent Option Pattern**
+
 ```nix
 { config, lib, pkgs, ... }:
 with lib; let
@@ -525,6 +558,7 @@ in {
 ```
 
 **Required Elements**:
+
 - Clear option naming: `config.features.*`
 - `mkEnableOption` for enable flags
 - `mkOption` with type, default, description
@@ -535,6 +569,7 @@ in {
 ### 2. Feature Flag Pattern
 
 **✅ CORRECT - Feature-Based Architecture**
+
 ```nix
 # In host configuration
 features = {
@@ -554,10 +589,12 @@ features = {
 ```
 
 **Don't**:
+
 - Don't enable services directly in host configs
 - Don't duplicate service configurations
 
 **Do**:
+
 - Use feature flags
 - Let modules handle service configuration
 - Enable features, not services
@@ -567,6 +604,7 @@ features = {
 ### 3. Secret Management Pattern
 
 **✅ CORRECT - Runtime Secret Loading**
+
 ```nix
 # Use file paths, not content
 services.myservice = {
@@ -588,6 +626,7 @@ services.myservice = {
 ### 4. Template-Based Host Configuration
 
 **✅ CORRECT - Use Host Templates**
+
 ```nix
 # hosts/p620/configuration.nix
 { lib, ... }:
@@ -604,10 +643,12 @@ services.myservice = {
 ```
 
 **Don't**:
+
 - Don't duplicate common configurations
 - Don't redefine services in host configs
 
 **Do**:
+
 - Import appropriate template
 - Add only host-specific configurations
 - Use feature flags
@@ -638,7 +679,7 @@ Before committing code, verify:
 
 ## 📚 Additional Resources
 
-- **Nix Book**: https://mhwombat.codeberg.page/nix-book/
+- **Nix Book**: <https://mhwombat.codeberg.page/nix-book/>
 - **Our Anti-Patterns Doc**: `docs/NIXOS-ANTI-PATTERNS.md`
 - **Research on Best Practices**: `docs/RESEARCH_USMCAMP_DOTFILES.md`
 - **Deduplication Report**: `docs/DEDUPLICATION_REPORT.md`
@@ -648,6 +689,7 @@ Before committing code, verify:
 ## 🔄 Living Document
 
 This document should be updated when:
+
 - New anti-patterns are discovered
 - Best practices evolve
 - Community standards change
