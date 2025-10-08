@@ -255,8 +255,8 @@ in
     # Qt theme control tools for Stylix
     libsForQt5.qt5ct
     kdePackages.qt6ct
-    # Custom qwen-code package for system-wide availability
-    (callPackage ../../home/development/qwen-code/default.nix { })
+    # Custom qwen-code package temporarily disabled due to npm registry network errors
+    # (callPackage ../../home/development/qwen-code/default.nix { })
   ];
 
   # NVIDIA modules now loaded via initrd.kernelModules in nvidia.nix for proper early initialization
@@ -322,8 +322,8 @@ in
     packages = with pkgs; [
       vim
       wally-cli
-      # Custom qwen-code package
-      (callPackage ../../home/development/qwen-code/default.nix { })
+      # Custom qwen-code package temporarily disabled due to npm registry network errors
+      # (callPackage ../../home/development/qwen-code/default.nix { })
     ];
   };
 
