@@ -148,7 +148,11 @@
       "Bash(pgrep:*)",
       "Bash(nix-shell:*)",
       "Bash(result/bin/gemini:*)",
-      "Bash(pre-commit install:*)"
+      "Bash(pre-commit install:*)",
+      "Bash(python3:*)",
+      "Bash(while read f)",
+      "Bash(do grep -q \"^#\" \"$f\")",
+      "Bash(echo:*)"
     ],
     "additionalDirectories": ["/"]
   },

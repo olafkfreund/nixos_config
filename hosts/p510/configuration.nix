@@ -95,9 +95,9 @@ in
       docker = true;
       incus = false;
       podman = true;
-      spice = false; # Disabled due to potential v4l2loopback dependency
-      libvirt = false; # Disabled due to potential v4l2loopback dependency
-      sunshine = false; # Disabled due to v4l2loopback build failures on P510
+      spice = true;
+      libvirt = true;
+      sunshine = false;
     };
 
     cloud = {
@@ -139,7 +139,6 @@ in
       droidcam = false; # Disabled due to v4l2loopback build failures on P510
     };
   };
-
 
   # Monitoring configuration - P510 as client
   monitoring = {
@@ -271,7 +270,6 @@ in
     GSETTINGS_SCHEMA_DIR = "${pkgs.gdm}/share/gsettings-schemas/gdm-${pkgs.gdm.version}/glib-2.0/schemas";
   };
 
-
   # Hardware-specific configurations
   security.wrappers.sunshine = {
     owner = "root";
@@ -314,7 +312,6 @@ in
       };
     };
   };
-
 
   # User-specific configuration from variables
   users.users.${vars.username} = {

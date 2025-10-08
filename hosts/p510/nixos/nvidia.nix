@@ -15,7 +15,8 @@
       # Video acceleration
       nvidia-vaapi-driver
       vaapiVdpau
-      libvdpau-va-gl
+      # libvdpau-va-gl removed - old unmaintained package with CMake compatibility issues
+      # nvidia-vaapi-driver and vaapiVdpau provide complete video acceleration for NVIDIA
     ];
   };
 

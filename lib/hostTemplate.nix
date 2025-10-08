@@ -92,7 +92,8 @@
           intel-media-driver
           vaapiIntel
           vaapiVdpau
-          libvdpau-va-gl
+          # libvdpau-va-gl removed - old unmaintained package with CMake compatibility issues
+          # Modern Intel systems work perfectly with intel-media-driver and vaapiIntel
         ];
       };
     };
