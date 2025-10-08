@@ -159,12 +159,12 @@ in
       droidcam = true;
     };
 
-    # COSMIC Desktop disabled - using GNOME for stable screen sharing
+    # COSMIC Desktop enabled alongside GNOME - using GDM
     desktop.cosmic = {
-      enable = false;
-      useCosmicGreeter = false;
-      defaultSession = false;
-      installAllApps = false;
+      enable = true;
+      useCosmicGreeter = false;  # Keep using GDM
+      defaultSession = false;     # Don't set as default, let user choose
+      installAllApps = true;      # Install full Cosmic app suite
     };
   };
 
