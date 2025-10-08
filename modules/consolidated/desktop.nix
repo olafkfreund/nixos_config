@@ -1,9 +1,10 @@
 # Consolidated Desktop Module
 # Replaces 25+ desktop-related modules with intelligent feature detection
-{ config
-, lib
-, pkgs
-, ...
+{
+  config,
+  lib,
+  pkgs,
+  ...
 }:
 with lib; let
   cfg = config.consolidated.desktop;
@@ -11,7 +12,7 @@ with lib; let
   # Hardware detection helpers
   hasAMDGpu =
     any (pkg: hasInfix "amd" (toLower (toString pkg)))
-      (config.hardware.graphics.extraPackages or [ ]);
+    (config.hardware.graphics.extraPackages or []);
   hasNvidiaGpu = config.hardware.nvidia.package or null != null;
   isLaptop = config.hardware.laptop or false;
 
@@ -23,19 +24,19 @@ with lib; let
       chromium
 
       # Productivity
-      libreoffice-bin
+      # libreoffice-bin
 
       # Media (conditional on hardware)
     ]
     ++ optionals hasAMDGpu [
       # AMD-optimized media tools
       mpv-unwrapped.override
-      { vaapiSupport = true; }
+      {vaapiSupport = true;}
     ]
     ++ optionals hasNvidiaGpu [
       # NVIDIA-optimized tools
       obs-studio.override
-      { cudaSupport = true; }
+      {cudaSupport = true;}
     ]
     ++ optionals isLaptop [
       # Laptop-specific tools
@@ -43,13 +44,12 @@ with lib; let
       acpi
       powertop
     ];
-in
-{
+in {
   options.consolidated.desktop = {
     enable = mkEnableOption "consolidated desktop environment";
 
     environment = mkOption {
-      type = types.enum [ "hyprland" "plasma" "gnome" "minimal" ];
+      type = types.enum ["hyprland" "plasma" "gnome" "minimal"];
       default = "hyprland";
       description = "Desktop environment to enable";
     };
@@ -62,7 +62,7 @@ in
     };
 
     hardware = {
-      autoDetect = mkEnableOption "automatic hardware optimization" // { default = true; };
+      autoDetect = mkEnableOption "automatic hardware optimization" // {default = true;};
     };
   };
 
@@ -129,15 +129,15 @@ in
     fonts = {
       enableDefaultPackages = true;
       packages = with pkgs; [
-        (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" ]; })
+        (nerdfonts.override {fonts = ["FiraCode" "DroidSansMono"];})
         inter
         source-code-pro
       ];
       fontconfig = {
         defaultFonts = {
-          serif = [ "Inter" ];
-          sansSerif = [ "Inter" ];
-          monospace = [ "FiraCode Nerd Font" ];
+          serif = ["Inter"];
+          sansSerif = ["Inter"];
+          monospace = ["FiraCode Nerd Font"];
         };
       };
     };
@@ -145,9 +145,9 @@ in
     # Desktop packages (smart selection)
     environment.systemPackages =
       desktopPackages
-      ++ optionals cfg.features.gaming (with pkgs; [ steam lutris ])
-      ++ optionals cfg.features.development (with pkgs; [ vscode git-crypt ])
-      ++ optionals cfg.features.media (with pkgs; [ gimp blender kdenlive ]);
+      ++ optionals cfg.features.gaming (with pkgs; [steam lutris])
+      ++ optionals cfg.features.development (with pkgs; [vscode git-crypt])
+      ++ optionals cfg.features.media (with pkgs; [gimp blender kdenlive]);
 
     # Performance optimizations for desktop
     services.thermald.enable = mkDefault isLaptop;

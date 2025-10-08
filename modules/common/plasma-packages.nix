@@ -1,11 +1,11 @@
-{ pkgs, ... }: {
+{pkgs, ...}: {
   # Define common packages used in both home-manager and system config
   plasmaCommonPackages = with pkgs; [
     kdePackages.xdg-desktop-portal-kde
     kdePackages.polkit-kde-agent-1
     kdePackages.qt6ct
     kdePackages.qt6gtk2
-    libreoffice-qt
+    # libreoffice-qt
     pywal
     wpgtk
     polychromatic
