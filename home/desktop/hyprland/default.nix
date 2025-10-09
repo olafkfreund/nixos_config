@@ -3,7 +3,6 @@
 { config
 , lib
 , pkgs
-, inputs
 , host ? "default"
 , ...
 }:
@@ -211,7 +210,7 @@ in
       variables = [ "--all" ];
     };
     xwayland.enable = cfg.core.xwayland;
-    package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+    package = pkgs.hyprland;
     portalPackage = null;
     plugins = conditionalPlugins;
   };

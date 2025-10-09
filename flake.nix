@@ -57,14 +57,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Applications and specific tools
-    # claude-desktop now built locally in home/development/claude-desktop/
-
-    # Desktop environment
-    hyprland = {
-      url = "github:hyprwm/Hyprland";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # # Desktop environment
+    # hyprland = {
+    #   url = "github:hyprwm/Hyprland";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
 
     # Browser and media
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
@@ -82,7 +79,6 @@
 
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
-    # walker.url = "github:abenz1267/walker"; # Temporarily disabled - flake.nix missing
     zjstatus.url = "github:dj95/zjstatus";
 
     # Terminal YouTube browser
@@ -126,7 +122,6 @@
       # ========================================
       # SHARED ARCHITECTURE COMPONENTS
       # ========================================
-
       # Import centralized user mappings from shared variables
       sharedVariables = import ./hosts/common/shared-variables.nix;
 
@@ -189,34 +184,46 @@
         # Fix CMake version compatibility issues for packages requiring CMake < 3.5
         (_final: prev: {
           clblast = prev.clblast.overrideAttrs (oldAttrs: {
-            cmakeFlags = (oldAttrs.cmakeFlags or [ ]) ++ [
-              "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-            ];
+            cmakeFlags =
+              (oldAttrs.cmakeFlags or [ ])
+              ++ [
+                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+              ];
           });
           cld2 = prev.cld2.overrideAttrs (oldAttrs: {
-            cmakeFlags = (oldAttrs.cmakeFlags or [ ]) ++ [
-              "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-            ];
+            cmakeFlags =
+              (oldAttrs.cmakeFlags or [ ])
+              ++ [
+                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+              ];
           });
           ctranslate2 = prev.ctranslate2.overrideAttrs (oldAttrs: {
-            cmakeFlags = (oldAttrs.cmakeFlags or [ ]) ++ [
-              "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-            ];
+            cmakeFlags =
+              (oldAttrs.cmakeFlags or [ ])
+              ++ [
+                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+              ];
           });
           rofi-file-browser-extended = prev.rofi-file-browser-extended.overrideAttrs (oldAttrs: {
-            cmakeFlags = (oldAttrs.cmakeFlags or [ ]) ++ [
-              "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-            ];
+            cmakeFlags =
+              (oldAttrs.cmakeFlags or [ ])
+              ++ [
+                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+              ];
           });
           birdtray = prev.birdtray.overrideAttrs (oldAttrs: {
-            cmakeFlags = (oldAttrs.cmakeFlags or [ ]) ++ [
-              "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-            ];
+            cmakeFlags =
+              (oldAttrs.cmakeFlags or [ ])
+              ++ [
+                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+              ];
           });
           allegro = prev.allegro.overrideAttrs (oldAttrs: {
-            cmakeFlags = (oldAttrs.cmakeFlags or [ ]) ++ [
-              "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-            ];
+            cmakeFlags =
+              (oldAttrs.cmakeFlags or [ ])
+              ++ [
+                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+              ];
           });
           # Skip ltrace tests that fail on newer kernels
           ltrace = prev.ltrace.overrideAttrs (oldAttrs: {
