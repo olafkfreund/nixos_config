@@ -376,16 +376,6 @@ samsung-debug:
     NIX_SSHOPTS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -F /dev/null" NIXOS_REBUILD_REMOTE_SUDO_USE_AGENT=1 nixos-rebuild switch --flake .#samsung --target-host 192.168.1.90 --build-host 192.168.1.90 --sudo --impure --accept-flake-config --show-trace --verbose
 
 # =============================================================================
-# ARCHIVED/LEGACY HOSTS (FOR REFERENCE)
-# =============================================================================
-
-# Deploy to hp (archived - not in current flake)
-hp:
-    @echo "⚠️  hp is archived and not available in current flake configuration"
-    @echo "Use 'git log' to find historical configurations if needed"
-    @exit 1
-
-# =============================================================================
 # MODERN CONFIGURATION MANAGEMENT
 # =============================================================================
 
@@ -476,19 +466,6 @@ cleanup-dead-code:
     @echo "⚠️  WARNING: This will modify your configuration files!"
     ./scripts/cleanup-dead-code.sh clean
 
-# Migrate host to use shared configurations
-migrate-host HOST:
-    @echo "🚀 Migrating {{HOST}} to use shared configurations..."
-    @echo "Backing up current configuration..."
-    @cp -r hosts/{{HOST}} hosts/{{HOST}}.backup.$(date +%Y%m%d_%H%M%S)
-    @echo "Updating stylix configuration..."
-    @echo 'import ../../shared/themes/stylix-base.nix { inherit pkgs; vars = import ./variables.nix; }' > hosts/{{HOST}}/themes/stylix.nix
-    @echo "Updating hyprland VNC if present..."
-    @if [ -f "hosts/{{HOST}}/nixos/hypr_override.nix" ]; then \
-        echo 'import ../../shared/desktop/hypr-vnc.nix' > hosts/{{HOST}}/nixos/hypr_override.nix; \
-    fi
-    @echo "✅ Migration complete. Test with: just test-host {{HOST}}"
-
 # Show configuration efficiency metrics
 efficiency-report:
     @echo "📊 Configuration Efficiency Report"
@@ -503,18 +480,6 @@ efficiency-report:
     @rg -c "enable.*=.*true" --type nix . | awk -F: '{sum += $2} END {print sum " explicit enables"}'
     @echo "📦 Host configurations: $(ls hosts/ | grep -v backup | wc -l)"
     @echo "👤 User configurations: $(find Users/ -name "*_home.nix" | wc -l)"
-
-# Validate migration success
-validate-migration HOST:
-    @echo "✅ Validating migration for {{HOST}}..."
-    @echo "Testing build..."
-    just test-host {{HOST}}
-    @echo "Checking for shared module usage..."
-    @if grep -q "shared/" hosts/{{HOST}}/themes/stylix.nix 2>/dev/null; then \
-        echo "✅ Using shared stylix configuration"; \
-    else \
-        echo "❌ Not using shared stylix configuration"; \
-    fi
 
 # Open Nix REPL with current flake
 repl:
@@ -834,7 +799,7 @@ restore BACKUP_PATH:
 deploy-interactive:
     @echo "🎯 Interactive deployment"
     @echo "Available hosts:"
-    @select host in razer dex5550 p510 p620 "Cancel"; do \
+    @select host in razer dex5550 p510 p620 samsung "Cancel"; do \
         case $$host in \
             "Cancel") echo "Deployment cancelled"; break ;; \
             "") echo "Invalid selection" ;; \
@@ -859,14 +824,6 @@ watch:
 # Manage secrets interactively
 secrets:
     ./scripts/manage-secrets.sh
-
-# Setup secrets for new host
-setup-secrets:
-    ./scripts/setup-secrets.sh
-
-# Recover secrets (emergency)
-recover-secrets:
-    ./scripts/recover-secrets.sh
 
 # Check secrets status
 secrets-status:
