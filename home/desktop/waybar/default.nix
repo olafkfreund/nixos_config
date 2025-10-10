@@ -1,5 +1,6 @@
 { lib
 , pkgs
+, config
 , host ? "default"
 , ...
 }:
@@ -340,7 +341,7 @@ in
             # Host-aware temperature sensor configuration
             tooltip-format = currentTempConfig.tooltip;
             interval = 5;
-            on-click = "/home/olafkfreund/.config/nixos/scripts/temp-dashboard-simple.sh";
+            on-click = "${config.home.homeDirectory}/.config/nixos/scripts/temp-dashboard-simple.sh";
           }
           // optionalAttrs (currentTempConfig.hwmon-path != null) {
             hwmon-path = currentTempConfig.hwmon-path;
