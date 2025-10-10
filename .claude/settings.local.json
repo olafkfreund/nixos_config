@@ -152,7 +152,11 @@
       "Bash(python3:*)",
       "Bash(while read f)",
       "Bash(do grep -q \"^#\" \"$f\")",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(docker:*)",
+      "Bash(nix flake lock:*)",
+      "Bash(for file in hosts/templates/*.nix)",
+      "Bash(do sed -i '/\\.\\.\\/\\.\\.\\/modules\\/monitoring\\.nix/d' \"$file\")"
     ],
     "additionalDirectories": ["/"]
   },

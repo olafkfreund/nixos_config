@@ -8,7 +8,6 @@
   base = {
     imports = [
       ../modules/core.nix
-      ../modules/monitoring.nix
       ../modules/performance.nix
       ../modules/cloud.nix
       # Add new package system
@@ -20,7 +19,6 @@
   server = {
     imports = [
       ../modules/core.nix
-      ../modules/monitoring.nix
       ../modules/performance.nix
       ../modules/cloud.nix
       ../modules/development.nix # Minimal dev tools for administration
@@ -126,7 +124,6 @@
       ../modules/development.nix
       ../modules/desktop.nix
       ../modules/virtualization.nix
-      ../modules/monitoring.nix
       ../modules/performance.nix
       ../modules/email.nix
       ../modules/cloud.nix
@@ -230,7 +227,6 @@
       ../modules/development.nix
       ../modules/desktop.nix
       ../modules/virtualization.nix
-      ../modules/monitoring.nix
       ../modules/performance.nix
       ../modules/email.nix
       ../modules/cloud.nix
@@ -327,7 +323,6 @@
       ../modules/development.nix
       ../modules/desktop.nix
       ../modules/virtualization.nix
-      ../modules/monitoring.nix
       ../modules/performance.nix
       ../modules/email.nix
       ../modules/cloud.nix

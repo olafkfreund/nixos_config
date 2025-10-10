@@ -25,7 +25,6 @@ _: {
 
     # Network stability modules - core networking
     ./services/dns/secure-dns.nix
-    ./services/network-monitoring.nix
     ./services/network-stability.nix
 
     # Networking modules

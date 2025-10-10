@@ -4,7 +4,6 @@
 {
   imports = [
     ../../modules/core.nix
-    ../../modules/monitoring.nix
     ../../modules/performance.nix
     ../../modules/cloud.nix
     ../../modules/development.nix # Minimal dev tools for administration

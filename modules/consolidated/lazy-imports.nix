@@ -16,7 +16,6 @@ with lib; {
         core = ./core.nix;
         desktop = ./desktop.nix;
         development = ./development.nix;
-        monitoring = ./monitoring.nix;
         ai = ./ai.nix;
         virtualization = ./virtualization.nix;
       };

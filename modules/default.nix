@@ -8,7 +8,6 @@ with lib; {
   imports = [
     # Core system modules (essential functionality)
     ./core.nix # Core system configuration
-    ./monitoring.nix # System monitoring and observability
     ./performance.nix # Performance optimization
     ./server.nix # Server-specific configurations
 

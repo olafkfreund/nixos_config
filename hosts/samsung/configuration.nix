@@ -162,44 +162,9 @@ in
     # COSMIC Desktop enabled alongside GNOME - using GDM
     desktop.cosmic = {
       enable = true;
-      useCosmicGreeter = false;  # Keep using GDM
-      defaultSession = false;     # Don't set as default, let user choose
-      installAllApps = true;      # Install full Cosmic app suite
-    };
-  };
-
-  # Monitoring configuration - Samsung as client
-  monitoring = {
-    enable = true;
-    mode = "client"; # Monitored by dex5550
-    serverHost = "dex5550";
-
-    features = {
-      nodeExporter = true;
-      nixosMetrics = true;
-      alerting = false; # Only server handles alerting
-      gpuMetrics = false; # Intel integrated graphics
-    };
-  };
-
-  # Enable hardware monitoring with desktop notifications - temporarily disabled during configuration fixes
-  monitoring.hardwareMonitor = {
-    enable = false; # Temporarily disabled to fix service issues
-    interval = 300; # Check every 5 minutes
-    enableDesktopNotifications = true;
-
-    criticalThresholds = {
-      diskUsage = 90; # Laptop storage
-      memoryUsage = 95; # 16GB RAM
-      cpuLoad = 100; # Intel i7-1260P (12 cores/16 threads)
-      temperature = 90; # Laptop CPU, higher temp tolerance
-    };
-
-    warningThresholds = {
-      diskUsage = 80; # Laptop storage warning
-      memoryUsage = 85; # Memory warning
-      cpuLoad = 80; # Load warning
-      temperature = 80; # Temperature warning for laptop
+      useCosmicGreeter = false; # Keep using GDM
+      defaultSession = false; # Don't set as default, let user choose
+      installAllApps = true; # Install full Cosmic app suite
     };
   };
 
@@ -244,14 +209,6 @@ in
     # GNOME Remote Desktop configuration moved to features.gnome-remote-desktop
 
     # DNS management handled by networking profile
-
-    # Centralized Logging - Send logs to DEX5550 Loki server
-    promtail-logging = {
-      enable = true;
-      lokiUrl = "http://dex5550:3100";
-      collectJournal = true;
-      collectKernel = true;
-    };
 
     # Disable secure-dns to use dex5550 DNS server for internal domains
     secure-dns.enable = false;

@@ -44,6 +44,10 @@ in
         enable = cfg.rootless;
         setSocketVariable = cfg.rootless;
       };
+      # Explicitly disable Docker Swarm
+      daemon.settings = {
+        swarm-default-advertise-addr = "";
+      };
     };
 
     # Add specified users to docker group

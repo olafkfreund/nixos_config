@@ -13,7 +13,6 @@ with lib; {
   ]
   # Conditional imports - only load if explicitly requested
   ++ optionals (config.features.ai.enable or false) [ ./ai.nix ]
-  ++ optionals (config.features.monitoring.server.enable or false) [ ./monitoring.nix ]
   ++ optionals (config.features.virtualization.enable or false) [ ./virtualization.nix ];
 
   # Fast validation - reduced assertion count

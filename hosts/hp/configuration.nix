@@ -26,7 +26,6 @@ in
     ../../modules/cloud.nix
     ../../modules/programs.nix
     ../../modules/virtualization.nix
-    ../../modules/monitoring.nix
     ../../modules/email.nix
     ../../modules/performance.nix
     ../../modules/server.nix

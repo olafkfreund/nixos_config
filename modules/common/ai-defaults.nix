@@ -30,8 +30,5 @@ with lib; {
         else true   # Enable on workstations
       );
     };
-
-    # Automatically enable core tools needed for AI workflows
-    features.packages.coreTools = mkDefault true;
   };
 }

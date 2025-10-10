@@ -90,18 +90,5 @@ in
 
     # Media tools (conditional enables)
     media.droidcam.enable = cfg.media.droidcam;
-
-    # Monitoring (conditional enables)
-    monitoring = mkIf cfg.monitoring.enable {
-      enable = true;
-      mode = cfg.monitoring.mode;
-      serverHost = cfg.monitoring.serverHost;
-      features = {
-        nodeExporter = cfg.monitoring.features.nodeExporter;
-        nixosMetrics = cfg.monitoring.features.nixosMetrics;
-        serviceMetrics = true; # Always enable service metrics
-        alerting = cfg.monitoring.features.alerting;
-      };
-    };
   };
 }

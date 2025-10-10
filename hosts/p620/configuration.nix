@@ -1,14 +1,15 @@
+{ config
+, pkgs
+, lib
+, hostUsers
+, hostTypes
+, inputs
+, ...
+}:
+let
+  vars = import ./variables.nix { };
+in
 {
-  config,
-  pkgs,
-  lib,
-  hostUsers,
-  hostTypes,
-  inputs,
-  ...
-}: let
-  vars = import ./variables.nix {};
-in {
   # Use workstation template and add P620-specific modules
   imports =
     hostTypes.workstation.imports
@@ -66,10 +67,10 @@ in {
       dns = lib.mkForce "default"; # Force NetworkManager to handle DNS directly
     };
 
-    # Network performance tuning
+    # Network performance tuning - disabled
     performanceTuning = {
-      enable = true;
-      profile = "throughput"; # Optimize for AI workload throughput
+      enable = false;
+      profile = "throughput";
 
       tcpOptimization = {
         enable = true;
@@ -88,7 +89,7 @@ in {
 
       interHostOptimization = {
         enable = true;
-        hosts = ["dex5550" "p510" "razer"];
+        hosts = [ "dex5550" "p510" "razer" ];
         jumboFrames = false; # Keep disabled for compatibility
         routeOptimization = true;
       };
@@ -97,7 +98,7 @@ in {
         enable = true;
         caching = true;
         parallelQueries = true;
-        customServers = ["192.168.1.222" "1.1.1.1"];
+        customServers = [ "192.168.1.222" "1.1.1.1" ];
       };
 
       monitoringOptimization = {
@@ -155,7 +156,7 @@ in {
     maxAuthTries = 3;
     enableFail2Ban = true;
     enableKeyOnlyAccess = true;
-    trustedNetworks = ["192.168.1.0/24" "10.0.0.0/8"];
+    trustedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ];
   };
 
   # AI production dashboard and load testing removed - were non-functional services consuming resources
@@ -284,91 +285,6 @@ in {
     allowBrokenPackages = false;
   };
 
-  # Consolidated monitoring configuration
-  monitoring = {
-    enable = true;
-    mode = "client"; # Send data to dex5550 monitoring server
-    serverHost = "dex5550";
-
-    features = {
-      nodeExporter = true;
-      nixosMetrics = true;
-      alerting = false; # Only server handles alerting
-      logging = true; # Enable Promtail for log collection
-      prometheus = false; # Only server runs Prometheus
-      grafana = false; # Only server runs Grafana
-      amdGpuMetrics = true; # Enable AMD GPU monitoring for P620
-      aiMetrics = true; # Enable AI metrics collection
-    };
-
-    # Enable AI metrics exporter
-    aiMetricsExporter = {
-      enable = true;
-      port = 9105;
-      interval = "30s";
-      dataDir = "/var/lib/ai-analysis";
-    };
-
-    # Enable hardware monitoring with desktop notifications
-    hardwareMonitor = {
-      enable = true;
-      interval = 300; # Check every 5 minutes
-      enableDesktopNotifications = true;
-
-      criticalThresholds = {
-        diskUsage = 85; # P620 at 49.6%, lower threshold for early warning
-        memoryUsage = 90; # P620 at 22.8%, higher threshold OK for workstation
-        cpuLoad = 200; # AMD Ryzen 5 PRO 4650G (12 cores)
-        temperature = 85; # AMD CPU, conservative threshold
-      };
-
-      warningThresholds = {
-        diskUsage = 75; # Early warning for P620
-        memoryUsage = 80; # Memory warning
-        cpuLoad = 150; # Load warning
-        temperature = 75; # Temperature warning
-      };
-    };
-
-    # Performance analytics
-    performanceAnalytics = {
-      enable = true;
-      dataRetention = "30d";
-      analysisInterval = "1m"; # Frequent analysis for performance workstation
-
-      metricsCollection = {
-        enable = true;
-        systemMetrics = true;
-        applicationMetrics = true;
-        networkMetrics = true;
-        storageMetrics = true;
-        aiMetrics = true;
-      };
-
-      analytics = {
-        enable = true;
-        trendAnalysis = true;
-        anomalyDetection = true;
-        predictiveAnalysis = true;
-        bottleneckDetection = true;
-      };
-
-      reporting = {
-        enable = true;
-        dailyReports = true;
-        weeklyReports = true;
-        alertThresholds = true;
-      };
-
-      dashboards = {
-        enable = true;
-        realTimeMetrics = true;
-        historicalAnalysis = true;
-        customMetrics = true;
-      };
-    };
-  };
-
   # Enable encrypted API keys
 
   secrets.apiKeys = {
@@ -393,10 +309,10 @@ in {
       ];
     };
 
-    # Performance Optimization Configuration (Phase 10.4)
+    # Performance Optimization Configuration - disabled
     # High-performance AMD workstation profile
     resourceManager = {
-      enable = true;
+      enable = false;
       profile = "performance";
 
       cpuManagement = {
@@ -454,7 +370,7 @@ in {
     # Enable secrets management
     security.secrets = {
       enable = true;
-      userKeys = ["/home/${vars.username}/.ssh/id_ed25519"];
+      userKeys = [ "/home/${vars.username}/.ssh/id_ed25519" ];
     };
   };
 
@@ -462,14 +378,14 @@ in {
   users.users = lib.genAttrs hostUsers (username: {
     isNormalUser = true;
     description = "User ${username}";
-    extraGroups = ["wheel" "networkmanager" "render"];
+    extraGroups = [ "wheel" "networkmanager" "render" ];
     shell = pkgs.zsh;
     # Only use secret-managed password if the secret exists
     hashedPasswordFile =
       lib.mkIf
-      (config.modules.security.secrets.enable
-        && builtins.hasAttr "user-password-${username}" config.age.secrets)
-      config.age.secrets."user-password-${username}".path;
+        (config.modules.security.secrets.enable
+          && builtins.hasAttr "user-password-${username}" config.age.secrets)
+        config.age.secrets."user-password-${username}".path;
   });
 
   # Remove duplicate user configuration - use the one above that handles all hostUsers
@@ -513,7 +429,7 @@ in {
         # Disable LightDM to prevent conflicts with COSMIC Greeter
         lightdm.enable = lib.mkForce false;
       };
-      videoDrivers = ["${vars.gpu}gpu"]; # Correct way to set the video driver
+      videoDrivers = [ "${vars.gpu}gpu" ]; # Correct way to set the video driver
     };
 
     # Display manager configuration (modern syntax)
@@ -562,17 +478,9 @@ in {
       };
     };
 
-    # Centralized Logging - Send logs to DEX5550 Loki server
-    promtail-logging = {
-      enable = true;
-      lokiUrl = "http://dex5550:3100";
-      collectJournal = true;
-      collectKernel = true;
-    };
-
     # Hardware-specific configurations
     udev = {
-      packages = [pkgs.via];
+      packages = [ pkgs.via ];
       extraRules = builtins.concatStringsSep "\n" [
         ''ACTION=="add", SUBSYSTEM=="video4linux", DRIVERS=="uvcvideo", RUN+="${pkgs.v4l-utils}/bin/v4l2-ctl --set-ctrl=power_line_frequency=1"''
         ''KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0660", TAG+="uaccess"''
@@ -592,7 +500,7 @@ in {
     libsForQt5.qt5ct
     kdePackages.qt6ct
     # Custom qwen-code package
-    (callPackage ../../home/development/qwen-code/default.nix {})
+    (callPackage ../../home/development/qwen-code/default.nix { })
     # yt-x terminal YouTube browser
     inputs.yt-x.packages.${pkgs.system}.default
   ];
@@ -607,7 +515,7 @@ in {
   fileSystems."/mnt/media" = {
     device = "192.168.1.127:/mnt/media";
     fsType = "nfs";
-    options = ["x-systemd.automount" "noauto"];
+    options = [ "x-systemd.automount" "noauto" ];
   };
 
   # Consolidated systemd configuration
@@ -628,13 +536,13 @@ in {
         ExecStart = "${pkgs.scream}/bin/scream-ivshmem-pulse /dev/shm/scream";
         Restart = "always";
       };
-      wantedBy = ["multi-user.target"];
-      requires = ["pulseaudio.service"];
+      wantedBy = [ "multi-user.target" ];
+      requires = [ "pulseaudio.service" ];
     };
   };
 
   # Nix configuration
-  nix.settings.allowed-users = ["nix-serve"];
+  nix.settings.allowed-users = [ "nix-serve" ];
 
   # Storage performance optimization
   storage.performanceOptimization = {

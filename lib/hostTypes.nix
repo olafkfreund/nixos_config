@@ -7,7 +7,6 @@
   base = {
     imports = [
       ../modules/core.nix
-      ../modules/nixos/core/monitoring.nix
       ../modules/nixos/core/performance.nix
       ../modules/nixos/development/cloud.nix
     ];

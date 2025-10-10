@@ -179,41 +179,6 @@ in
     };
   };
 
-  # Monitoring configuration - Razer as client
-  monitoring = {
-    enable = true;
-    mode = "client"; # Monitored by dex5550
-    serverHost = "dex5550";
-
-    features = {
-      nodeExporter = true;
-      nixosMetrics = true;
-      alerting = false; # Only server handles alerting
-      gpuMetrics = true; # Enable NVIDIA GPU monitoring
-    };
-  };
-
-  # Enable hardware monitoring with desktop notifications
-  monitoring.hardwareMonitor = {
-    enable = true;
-    interval = 300; # Check every 5 minutes
-    enableDesktopNotifications = true;
-
-    criticalThresholds = {
-      diskUsage = 90; # Laptop storage, higher threshold OK
-      memoryUsage = 95; # 32GB RAM, can handle higher usage
-      cpuLoad = 200; # Intel i7-10875H (8 cores/16 threads)
-      temperature = 90; # Laptop CPU, higher temp tolerance
-    };
-
-    warningThresholds = {
-      diskUsage = 80; # Laptop storage warning
-      memoryUsage = 85; # Memory warning
-      cpuLoad = 150; # Load warning
-      temperature = 80; # Temperature warning for laptop
-    };
-  };
-
   # Enable NixOS package monitoring tools
   tools.nixpkgs-monitors = {
     enable = true;
@@ -249,14 +214,6 @@ in
     };
 
     # GNOME Remote Desktop configuration moved to features.gnome-remote-desktop
-
-    # Centralized Logging - Send logs to DEX5550 Loki server
-    promtail-logging = {
-      enable = true;
-      lokiUrl = "http://dex5550:3100";
-      collectJournal = true;
-      collectKernel = true;
-    };
 
     # Disable secure-dns to use dex5550 DNS server for internal domains
     secure-dns.enable = false;

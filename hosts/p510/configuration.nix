@@ -140,51 +140,6 @@ in
     };
   };
 
-  # Monitoring configuration - P510 as client
-  monitoring = {
-    enable = true;
-    mode = "client"; # Monitored by dex5550
-    serverHost = "dex5550";
-
-    features = {
-      nodeExporter = true;
-      nixosMetrics = true;
-      alerting = false; # Only server handles alerting
-      gpuMetrics = true; # Enable NVIDIA GPU monitoring
-      networkDiscovery = true; # Enable network discovery from media server
-    };
-
-    # Enable NZBGet monitoring
-    nzbgetExporter = {
-      enable = true;
-      nzbgetUrl = "http://localhost:6789";
-      username = "nzbget";
-      password = "Xs4monly4e!!";
-      port = 9103;
-      interval = "30s";
-    };
-
-    # Enable Plex monitoring
-    plexExporter = {
-      enable = true;
-      tautulliUrl = "http://localhost:8181";
-      apiKey = "099a2877fb7c410fb3031e24b3e781bf"; # You'll need to get this from Tautulli settings
-      port = 9104;
-      interval = "60s";
-      historyDays = 30;
-    };
-  };
-
-  # Centralized Logging - Send logs to DEX5550 Loki server
-  services.promtail-logging = {
-    enable = true;
-    lokiUrl = "http://dex5550:3100";
-    collectJournal = true;
-    collectKernel = true;
-    # Enable nginx logs collection for media server
-    collectNginx = false; # Set to true if using nginx
-  };
-
   # Enable NixOS package monitoring tools
   tools.nixpkgs-monitors = {
     enable = true;

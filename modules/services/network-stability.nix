@@ -118,12 +118,6 @@ in
       useStubResolver = true;
     };
 
-    # Enable network monitoring if configured
-    services.network-monitoring = mkIf cfg.monitoring.enable {
-      enable = true;
-      monitorIntervalSeconds = cfg.monitoring.interval;
-    };
-
     # Consolidated DNS monitoring service
     systemd.services.network-dns-monitor = mkIf cfg.monitoring.enable {
       description = "Network DNS resolution monitoring and recovery";

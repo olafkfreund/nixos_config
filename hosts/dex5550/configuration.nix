@@ -217,110 +217,8 @@ in
     };
   };
 
-  # Monitoring configuration - DEX5550 as monitoring server
-  monitoring = {
-    enable = true;
-    mode = "server"; # Now the monitoring server for network
-    serverHost = "dex5550";
-
-    # Enable dashboards
-    nzbgetDashboard.enable = true;
-    plexDashboard.enable = true;
-    networkDashboards.enable = true;
-
-    features = {
-      prometheus = true; # Prometheus server
-      grafana = true; # Grafana dashboards
-      nodeExporter = true; # Local node exporter
-      nixosMetrics = true; # NixOS-specific metrics
-      alerting = true; # Alertmanager
-      logging = true; # Loki log aggregation server
-      # Note: GPU metrics features are enabled for dashboard provisioning only
-      # The actual GPU exporter services run on hosts with GPUs (razer, p510, p620)
-      gpuMetrics = true; # Enable GPU dashboards for NVIDIA clients
-      amdGpuMetrics = true; # Enable AMD GPU dashboards for AMD clients
-      # Network monitoring features
-      networkDiscovery = true; # Enable network device discovery
-      trafficAnalysis = true; # Enable traffic analysis
-      networkDashboards = true; # Enable network dashboards
-    };
-  };
-
-  # Consolidated services configuration for DEX5550 monitoring server
+  # Consolidated services configuration for DEX5550
   services = {
-    # Loki log aggregation server
-    loki = {
-      enable = true;
-      configuration = {
-        server = {
-          http_listen_port = 3100;
-          grpc_listen_port = 9096;
-        };
-        auth_enabled = false;
-        ingester = {
-          lifecycler = {
-            address = "0.0.0.0";
-            ring = {
-              kvstore.store = "inmemory";
-              replication_factor = 1;
-            };
-          };
-          chunk_idle_period = "1h";
-          max_chunk_age = "1h";
-          chunk_target_size = 1048576;
-          chunk_retain_period = "30s";
-        };
-        schema_config = {
-          configs = [
-            {
-              from = "2023-01-01";
-              store = "boltdb-shipper";
-              object_store = "filesystem";
-              schema = "v11";
-              index = {
-                prefix = "index_";
-                period = "24h";
-              };
-            }
-          ];
-        };
-        storage_config = {
-          boltdb_shipper = {
-            active_index_directory = "/var/lib/loki/boltdb-shipper-active";
-            cache_location = "/var/lib/loki/boltdb-shipper-cache";
-          };
-          filesystem = {
-            directory = "/var/lib/loki/chunks";
-          };
-        };
-        limits_config = {
-          retention_period = "30d";
-          allow_structured_metadata = false; # Compatibility with v11 schema
-        };
-      };
-    };
-
-    # Promtail logging service
-    promtail-logging = {
-      enable = true;
-      lokiUrl = "http://localhost:3100"; # Local Loki server
-      collectJournal = true;
-      collectKernel = true;
-    };
-
-    # Custom Grafana configuration - configured for sub-path with external proxy
-    grafana = {
-      settings = {
-        server = {
-          root_url = lib.mkForce "https://home.freundcloud.com/grafana/";
-          serve_from_sub_path = lib.mkForce true;
-          domain = lib.mkForce "home.freundcloud.com";
-          http_port = lib.mkForce 3001;
-          protocol = lib.mkForce "http";
-        };
-      };
-    };
-
     # Boot performance optimization
     fstrim-optimization = {
       enable = true;
@@ -917,46 +815,6 @@ in
       devShmSize = "25%";
     };
   };
-
-  # Performance analytics for monitoring server
-  monitoring.performanceAnalytics = {
-    enable = true;
-    dataRetention = "60d"; # Longer retention for monitoring server
-    analysisInterval = "5m";
-
-    metricsCollection = {
-      enable = true;
-      systemMetrics = true;
-      applicationMetrics = true;
-      networkMetrics = true;
-      storageMetrics = true;
-      aiMetrics = true;
-    };
-
-    analytics = {
-      enable = true;
-      trendAnalysis = true;
-      anomalyDetection = true;
-      predictiveAnalysis = true;
-      bottleneckDetection = true;
-    };
-
-    reporting = {
-      enable = true;
-      dailyReports = true;
-      weeklyReports = true;
-      alertThresholds = true;
-    };
-
-    dashboards = {
-      enable = true;
-      realTimeMetrics = true;
-      historicalAnalysis = true;
-      customMetrics = true;
-    };
-  };
-
-  # AI auto-performance tuner removed - was non-functional and consuming resources
 
   # Agenix identity configuration - specify where to find decryption keys
   age.identityPaths = [

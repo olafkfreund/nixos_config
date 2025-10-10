@@ -7,7 +7,6 @@
     ../../modules/development.nix
     ../../modules/desktop.nix
     ../../modules/virtualization.nix
-    ../../modules/monitoring.nix
     ../../modules/performance.nix
     ../../modules/email.nix
     ../../modules/cloud.nix
