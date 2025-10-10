@@ -15,8 +15,6 @@ _: {
     unprivilegedUsernsClone = true;
 
     pam.services = {
-      hyprlock = { };
-      hyprland.enableGnomeKeyring = true;
       swaylock = { };
     };
 

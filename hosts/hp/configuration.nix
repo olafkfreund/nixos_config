@@ -31,7 +31,6 @@ in
     ../../modules/server.nix
     ../../modules/development/default.nix
     # ./guests/k3sserver.nix
-    ../common/hyprland.nix
   ];
 
   aws.packages.enable = lib.mkForce false;

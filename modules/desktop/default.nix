@@ -1,7 +1,5 @@
 { pkgs, ... }: {
   imports = [
-    ./hyprland-uwsm.nix
-    ./desktop-common.nix
     ./gnome-remote-desktop.nix
   ];
 

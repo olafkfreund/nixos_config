@@ -13,8 +13,8 @@ in
     enable = mkEnableOption "XDG desktop portal services";
 
     backend = mkOption {
-      type = types.enum [ "hyprland" "sway" "gnome" "kde" ];
-      default = "hyprland";
+      type = types.enum [ "sway" "gnome" "cosmic" ];
+      default = "gnome";
       description = ''Primary desktop environment backend for portals'';
       example = "sway";
     };
@@ -54,18 +54,6 @@ in
           };
         }
 
-        # Hyprland-specific configuration
-        (mkIf (cfg.backend == "hyprland") {
-          hyprland =
-            {
-              default = [ "hyprland" "gtk" ];
-              "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
-            }
-            // optionalAttrs cfg.enableScreencast {
-              "org.freedesktop.impl.portal.Screencast" = [ "hyprland" ];
-            };
-        })
-
         # Sway-specific configuration
         (mkIf (cfg.backend == "sway") {
           sway =
@@ -94,17 +82,14 @@ in
           xdg-desktop-portal-gtk
           xdg-desktop-portal
         ]
-        ++ optionals (cfg.backend == "hyprland") [
-          xdg-desktop-portal-hyprland
-        ]
         ++ optionals (cfg.backend == "sway") [
           xdg-desktop-portal-wlr
         ]
         ++ optionals (cfg.backend == "gnome") [
           xdg-desktop-portal-gnome
         ]
-        ++ optionals (cfg.backend == "kde") [
-          xdg-desktop-portal-kde
+        ++ optionals (cfg.backend == "cosmic") [
+          xdg-desktop-portal-cosmic
         ];
     };
 
@@ -116,8 +101,8 @@ in
     # Validation
     assertions = [
       {
-        assertion = cfg.enableScreencast -> (cfg.backend == "hyprland" || cfg.backend == "sway" || cfg.backend == "gnome");
-        message = "Screencasting is currently only supported with Hyprland, Sway, and GNOME backends";
+        assertion = cfg.enableScreencast -> (cfg.backend == "sway" || cfg.backend == "gnome");
+        message = "Screencasting is currently only supported with Sway and GNOME backends";
       }
     ];
 

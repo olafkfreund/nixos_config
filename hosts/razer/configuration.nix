@@ -28,7 +28,6 @@ in
 
     # Razer-specific additional modules
     ../../modules/development/default.nix
-    # ../common/hyprland.nix # Disabled to avoid frequent rebuilds
     ../../modules/security/secrets.nix
     ../../modules/secrets/api-keys.nix
     ../../modules/containers/docker.nix

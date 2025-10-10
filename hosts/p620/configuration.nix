@@ -31,7 +31,6 @@ in
 
       # P620-specific additional modules
       ../../modules/development/default.nix
-      # ../common/hyprland.nix # Disabled to avoid frequent rebuilds
       ../../modules/security/secrets.nix
       ../../modules/secrets/api-keys.nix
       ../../modules/containers/docker.nix
@@ -273,7 +272,7 @@ in
     desktop.cosmic = {
       enable = true;
       useCosmicGreeter = false; # Use GDM instead
-      defaultSession = false; # Keep Hyprland as default, COSMIC available at login
+      defaultSession = true; # Set COSMIC as default session
       installAllApps = true;
       disableOsd = true; # Workaround for polkit agent crashes in COSMIC beta
     };
@@ -358,9 +357,6 @@ in
 
   # Consolidated modules configuration
   modules = {
-    # Disable Hyprland system configuration to avoid frequent rebuilds
-    desktop.hyprland-uwsm.enable = false;
-
     # Docker configuration
     containers.docker = {
       enable = true;

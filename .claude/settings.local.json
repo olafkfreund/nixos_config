@@ -164,7 +164,9 @@
       "Bash(do if [ -f \"$dev/power/control\" ])",
       "Bash(fi)",
       "Bash(bluetoothctl:*)",
-      "Bash(/nix/store/ibpqb5xy2h0c4lm82plngbi49jj9h0nl-nixos-system-p620-25.11.20251007.c9b6fb7/bin/switch-to-configuration switch:*)"
+      "Bash(/nix/store/ibpqb5xy2h0c4lm82plngbi49jj9h0nl-nixos-system-p620-25.11.20251007.c9b6fb7/bin/switch-to-configuration switch:*)",
+      "Bash(for host in p620 p510 razer samsung hp dex5550)",
+      "Bash(do echo \"=== $host ===\")"
     ],
     "additionalDirectories": ["/"]
   },

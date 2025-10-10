@@ -1,10 +1,9 @@
 # Consolidated Desktop Module
 # Replaces 25+ desktop-related modules with intelligent feature detection
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.consolidated.desktop;
@@ -12,7 +11,7 @@ with lib; let
   # Hardware detection helpers
   hasAMDGpu =
     any (pkg: hasInfix "amd" (toLower (toString pkg)))
-    (config.hardware.graphics.extraPackages or []);
+      (config.hardware.graphics.extraPackages or [ ]);
   hasNvidiaGpu = config.hardware.nvidia.package or null != null;
   isLaptop = config.hardware.laptop or false;
 
@@ -31,12 +30,12 @@ with lib; let
     ++ optionals hasAMDGpu [
       # AMD-optimized media tools
       mpv-unwrapped.override
-      {vaapiSupport = true;}
+      { vaapiSupport = true; }
     ]
     ++ optionals hasNvidiaGpu [
       # NVIDIA-optimized tools
       obs-studio.override
-      {cudaSupport = true;}
+      { cudaSupport = true; }
     ]
     ++ optionals isLaptop [
       # Laptop-specific tools
@@ -44,13 +43,14 @@ with lib; let
       acpi
       powertop
     ];
-in {
+in
+{
   options.consolidated.desktop = {
     enable = mkEnableOption "consolidated desktop environment";
 
     environment = mkOption {
-      type = types.enum ["hyprland" "plasma" "gnome" "minimal"];
-      default = "hyprland";
+      type = types.enum [ "gnome" "cosmic" "sway" "minimal" ];
+      default = "gnome";
       description = "Desktop environment to enable";
     };
 
@@ -62,7 +62,7 @@ in {
     };
 
     hardware = {
-      autoDetect = mkEnableOption "automatic hardware optimization" // {default = true;};
+      autoDetect = mkEnableOption "automatic hardware optimization" // { default = true; };
     };
   };
 
@@ -74,26 +74,31 @@ in {
         enable = true;
         settings.default_session = {
           command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd ${
-            if cfg.environment == "hyprland"
-            then "Hyprland"
-            else if cfg.environment == "plasma"
-            then "plasma"
-            else "hyprland" # fallback
+            if cfg.environment == "gnome"
+            then "gnome-session"
+            else if cfg.environment == "cosmic"
+            then "cosmic-session"
+            else if cfg.environment == "sway"
+            then "sway"
+            else "gnome-session" # fallback
           }";
         };
       };
 
-      # Window manager/DE specific
-      xserver = mkIf (cfg.environment == "plasma") {
-        enable = true;
-        desktopManager.plasma6.enable = true;
-      };
+      # Desktop environment specific
+      xserver.enable = mkIf (cfg.environment == "gnome") true;
     };
 
-    # Hyprland configuration (most optimized)
-    programs.hyprland = mkIf (cfg.environment == "hyprland") {
+    # GNOME configuration
+    services.xserver.desktopManager.gnome.enable = mkIf (cfg.environment == "gnome") true;
+
+    # Cosmic DE configuration
+    services.desktopManager.cosmic.enable = mkIf (cfg.environment == "cosmic") true;
+
+    # Sway configuration
+    programs.sway = mkIf (cfg.environment == "sway") {
       enable = true;
-      xwayland.enable = true;
+      wrapperFeatures.gtk = true;
     };
 
     # Hardware-optimized graphics
@@ -129,15 +134,15 @@ in {
     fonts = {
       enableDefaultPackages = true;
       packages = with pkgs; [
-        (nerdfonts.override {fonts = ["FiraCode" "DroidSansMono"];})
+        (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" ]; })
         inter
         source-code-pro
       ];
       fontconfig = {
         defaultFonts = {
-          serif = ["Inter"];
-          sansSerif = ["Inter"];
-          monospace = ["FiraCode Nerd Font"];
+          serif = [ "Inter" ];
+          sansSerif = [ "Inter" ];
+          monospace = [ "FiraCode Nerd Font" ];
         };
       };
     };
@@ -145,9 +150,9 @@ in {
     # Desktop packages (smart selection)
     environment.systemPackages =
       desktopPackages
-      ++ optionals cfg.features.gaming (with pkgs; [steam lutris])
-      ++ optionals cfg.features.development (with pkgs; [vscode git-crypt])
-      ++ optionals cfg.features.media (with pkgs; [gimp blender kdenlive]);
+      ++ optionals cfg.features.gaming (with pkgs; [ steam lutris ])
+      ++ optionals cfg.features.development (with pkgs; [ vscode git-crypt ])
+      ++ optionals cfg.features.media (with pkgs; [ gimp blender kdenlive ]);
 
     # Performance optimizations for desktop
     services.thermald.enable = mkDefault isLaptop;

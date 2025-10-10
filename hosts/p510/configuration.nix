@@ -35,7 +35,6 @@ in
       ./nixos/screens.nix # Display configuration - needed for desktop
       ./themes/stylix.nix # Theming
       # ../../home/desktop/gnome/default.nix # Home Manager module - can't import here
-      # ../common/hyprland.nix  # Window manager - using GNOME instead
     ];
 
   # Basic networking configuration (detailed config in ./nixos/network.nix)

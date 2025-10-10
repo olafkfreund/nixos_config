@@ -31,7 +31,8 @@ with lib; {
     desktop = {
       enable = mkEnableOption "Enable desktop applications";
       sway = mkEnableOption "Enable Sway window manager";
-      hyprland = mkEnableOption "Enable Hyprland";
+      cosmic = mkEnableOption "Enable Cosmic DE";
+      gnome = mkEnableOption "Enable GNOME";
       dunst = mkEnableOption "Enable Dunst notifications";
       swaync = mkEnableOption "Enable SwayNC notifications";
       zathura = mkEnableOption "Enable Zathura PDF reader";

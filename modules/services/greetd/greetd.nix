@@ -1,12 +1,13 @@
 { config
 , lib
+, pkgs
 , ...
 }: {
   # greetd display manager
   services.greetd =
     let
-      session_hypr = {
-        command = "${lib.getExe config.programs.hyprland.package}";
+      session_gnome = {
+        command = "${pkgs.gnome-session}/bin/gnome-session";
         user = "olafkfreund";
       };
     in
@@ -14,8 +15,8 @@
       enable = true;
       settings = {
         terminal.vt = 1;
-        default_session = session_hypr;
-        initial_session = session_hypr;
+        default_session = session_gnome;
+        initial_session = session_gnome;
       };
     };
 
