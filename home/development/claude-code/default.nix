@@ -9,11 +9,12 @@
 let
   claudeCode = buildNpmPackage rec {
     pname = "claude-code";
-    version = "2.0.9";
+    version = "2.0.13";
 
     src = fetchurl {
       url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-      hash = "sha256-DKad+i1krmEm6xq+aA8pSQ0pQK7ykExCkCuSQZw++Qw=";
+      hash = "sha256-eZWtiIWE0pV7Z/6hAtr+s46t4nuv/d+U2K9AgfpjjSE=";
+      curlOptsList = [ "--http1.1" ];  # Force HTTP/1.1 to avoid HTTP/2 protocol errors
     };
 
     npmDepsHash = "sha256-oI1a8QdkHRPGeSQjGDFAX2lsojbJYyuUTDXw1wohG3U=";
@@ -22,7 +23,20 @@ let
 
     makeCacheWritable = true;
 
+    # Force HTTP/1.1 for npm dependency fetching to avoid HTTP/2 errors
+    NPM_CONFIG_FETCH_RETRY_MINTIMEOUT = "20000";
+    NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT = "120000";
+    NPM_CONFIG_FETCH_RETRIES = "5";
+
     postPatch = ''
+      # Create .npmrc to force HTTP/1.1 and increase timeouts
+      cat > .npmrc << EOF
+      fetch-retry-mintimeout=20000
+      fetch-retry-maxtimeout=120000
+      fetch-retries=5
+      maxsockets=1
+      EOF
+
       if [ -f "${./package-lock.json}" ]; then
         echo "Using vendored package-lock.json"
         cp "${./package-lock.json}" ./package-lock.json
