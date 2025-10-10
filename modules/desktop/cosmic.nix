@@ -1,12 +1,12 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.features.desktop.cosmic;
-in {
+in
+{
   options.features.desktop.cosmic = {
     enable = mkEnableOption "COSMIC Desktop Environment";
 
@@ -26,6 +26,12 @@ in {
       type = types.bool;
       default = true;
       description = "Install all COSMIC applications and extensions";
+    };
+
+    disableOsd = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Disable cosmic-osd (on-screen display) to work around polkit agent crashes";
     };
   };
 
@@ -94,7 +100,7 @@ in {
         pkgs.xdg-desktop-portal-cosmic
         pkgs.xdg-desktop-portal-gtk
       ];
-      config.cosmic.default = ["cosmic" "gtk" "*"];
+      config.cosmic.default = [ "cosmic" "gtk" "*" ];
     };
 
     # Required system services
@@ -117,6 +123,40 @@ in {
       NIXOS_OZONE_WL = "1";
       MOZ_ENABLE_WAYLAND = "1";
       QT_QPA_PLATFORM = "wayland";
+      # Disable cosmic-osd if requested (workaround for polkit crashes)
+      COSMIC_DISABLE_OSD = mkIf cfg.disableOsd "1";
+    };
+
+    # Workaround for cosmic-osd polkit agent crashes
+    systemd.user.services.cosmic-osd-blocker = mkIf cfg.disableOsd {
+      description = "Block cosmic-osd from starting (workaround for polkit crashes)";
+      wantedBy = [ "cosmic-session.target" ];
+      before = [ "cosmic-session.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+      # Create a dummy cosmic-osd that does nothing
+      script = ''
+        mkdir -p $HOME/.local/bin
+        cat > $HOME/.local/bin/cosmic-osd << 'EOF'
+        #!/bin/sh
+        # Dummy cosmic-osd to prevent crashes - does nothing
+        exit 0
+        EOF
+        chmod +x $HOME/.local/bin/cosmic-osd
+      '';
+    };
+
+    # Filter out harmless KDE notification hint warnings from logs
+    systemd.services.systemd-journald.environment = {
+      # Suppress KDE notification hint warnings (x-kde-* hints are not errors)
+      SYSTEMD_LOG_LEVEL = "info";
+    };
+
+    # Set environment variable to suppress KDE hint warnings in cosmic-notifications
+    environment.variables = {
+      COSMIC_IGNORE_KDE_HINTS = "1";
     };
   };
 }

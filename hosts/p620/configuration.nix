@@ -237,7 +237,7 @@ in
         openai.enable = true;
         anthropic.enable = true;
         gemini.enable = true;
-        ollama.enable = true;
+        ollama.enable = false; # Disabled to reduce resource usage
       };
     };
 
@@ -275,6 +275,7 @@ in
       useCosmicGreeter = false; # Use GDM instead
       defaultSession = false; # Keep Hyprland as default, COSMIC available at login
       installAllApps = true;
+      disableOsd = true; # Workaround for polkit agent crashes in COSMIC beta
     };
   };
 

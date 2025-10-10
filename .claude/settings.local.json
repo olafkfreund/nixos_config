@@ -156,7 +156,15 @@
       "Bash(docker:*)",
       "Bash(nix flake lock:*)",
       "Bash(for file in hosts/templates/*.nix)",
-      "Bash(do sed -i '/\\.\\.\\/\\.\\.\\/modules\\/monitoring\\.nix/d' \"$file\")"
+      "Bash(do sed -i '/\\.\\.\\/\\.\\.\\/modules\\/monitoring\\.nix/d' \"$file\")",
+      "Bash(coredumpctl list:*)",
+      "Bash(coredumpctl info:*)",
+      "Bash(lsusb:*)",
+      "Bash(for dev in /sys/bus/usb/devices/*)",
+      "Bash(do if [ -f \"$dev/power/control\" ])",
+      "Bash(fi)",
+      "Bash(bluetoothctl:*)",
+      "Bash(/nix/store/ibpqb5xy2h0c4lm82plngbi49jj9h0nl-nixos-system-p620-25.11.20251007.c9b6fb7/bin/switch-to-configuration switch:*)"
     ],
     "additionalDirectories": ["/"]
   },
