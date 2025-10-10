@@ -166,7 +166,16 @@
       "Bash(bluetoothctl:*)",
       "Bash(/nix/store/ibpqb5xy2h0c4lm82plngbi49jj9h0nl-nixos-system-p620-25.11.20251007.c9b6fb7/bin/switch-to-configuration switch:*)",
       "Bash(for host in p620 p510 razer samsung hp dex5550)",
-      "Bash(do echo \"=== $host ===\")"
+      "Bash(do echo \"=== $host ===\")",
+      "Bash(git log:*)",
+      "Bash(git reset:*)",
+      "Bash(npm view:*)",
+      "Bash(nix hash to-sri:*)",
+      "Bash(if [ -f package-lock.json ])",
+      "Bash(then echo \"✅ package-lock.json exists\")",
+      "Bash(else echo \"❌ No package-lock.json found\")",
+      "Bash(nix-prefetch-git:*)",
+      "Bash(git clone:*)"
     ],
     "additionalDirectories": ["/"]
   },
