@@ -86,14 +86,14 @@ in
       };
 
       # Desktop environment specific
-      xserver.enable = mkIf (cfg.environment == "gnome") true;
+      xserver.enable = cfg.environment == "gnome";
     };
 
     # GNOME configuration
-    services.xserver.desktopManager.gnome.enable = mkIf (cfg.environment == "gnome") true;
+    services.xserver.desktopManager.gnome.enable = cfg.environment == "gnome";
 
     # Cosmic DE configuration
-    services.desktopManager.cosmic.enable = mkIf (cfg.environment == "cosmic") true;
+    services.desktopManager.cosmic.enable = cfg.environment == "cosmic";
 
     # Sway configuration
     programs.sway = mkIf (cfg.environment == "sway") {

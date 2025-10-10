@@ -138,7 +138,7 @@ in
     # };
 
     # Custom CSS for GNOME applications (only if Stylix is not managing GTK)
-    home.file.".config/gtk-3.0/gtk.css" = mkIf (!config.stylix.targets.gtk.enable or true) {
+    home.file.".config/gtk-3.0/gtk.css" = mkIf (!(config.stylix.targets.gtk.enable or true)) {
       text = ''
         /* Custom Gruvbox styling */
         .titlebar {

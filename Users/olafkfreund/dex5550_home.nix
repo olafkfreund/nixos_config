@@ -27,10 +27,6 @@
     ../../home/desktop/evince/default.nix # Provides programs.evince option
     ../../home/desktop/kdeconnect/default.nix # Provides programs.kdeconnect option
     ../../home/desktop/slack/default.nix # Provides programs.slack option
-    # ../../home/desktop/default.nix   # Excluded - would import all at once
-    # ../../home/games/steam.nix       # Excluded - Gaming components
-    # ../../hosts/dex5550/nixos/hypr_override.nix  # Removed - Hyprland not needed on server
-    # ../../home/desktop/sway/swayosd.nix          # Removed - Sway OSD not needed on server
     ./private.nix
   ];
 

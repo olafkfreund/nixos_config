@@ -10,7 +10,6 @@
     ./theme/default.nix
     ./gaming/default.nix
     ./sound/default.nix
-    # ./quickshell.nix # Disabled - was Hyprland-specific
 
     # Re-enabled desktop modules (enhanced configs take precedence)
     ./plasma/default.nix
