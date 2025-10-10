@@ -4,7 +4,6 @@
     ../common/default.nix
 
     # Host-specific imports
-    ../../hosts/hp/nixos/hypr_override.nix
     ../../home/desktop/sway/default.nix
     ../../home/desktop/sway/swayosd.nix
     ./private.nix
