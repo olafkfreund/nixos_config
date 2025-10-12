@@ -175,7 +175,9 @@
       "Bash(then echo \"✅ package-lock.json exists\")",
       "Bash(else echo \"❌ No package-lock.json found\")",
       "Bash(nix-prefetch-git:*)",
-      "Bash(git clone:*)"
+      "Bash(git clone:*)",
+      "Bash(for file in anchor output size plugins_wings plugins_center)",
+      "Bash(do echo \"=== $file ===\")"
     ],
     "additionalDirectories": ["/"]
   },
