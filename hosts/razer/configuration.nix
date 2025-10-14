@@ -10,28 +10,30 @@ let
 in
 {
   # Use laptop template and add Razer-specific modules
-  imports = hostTypes.laptop.imports ++ [
-    # Hardware-specific imports
-    ./nixos/hardware-configuration.nix
-    ./nixos/screens.nix
-    ./nixos/power.nix
-    ./nixos/boot.nix
-    # ./nixos/secure-boot.nix  # Uncomment when ready to enable Secure Boot
-    ./nixos/nvidia.nix
-    ../common/nixos/i18n.nix
-    ../common/nixos/hosts.nix
-    ../common/nixos/envvar.nix
-    ./nixos/cpu.nix
-    ./nixos/laptop.nix
-    ./nixos/memory.nix
-    ./themes/stylix.nix
+  imports =
+    hostTypes.laptop.imports
+    ++ [
+      # Hardware-specific imports
+      ./nixos/hardware-configuration.nix
+      ./nixos/screens.nix
+      ./nixos/power.nix
+      ./nixos/boot.nix
+      # ./nixos/secure-boot.nix  # Uncomment when ready to enable Secure Boot
+      ./nixos/nvidia.nix
+      ../common/nixos/i18n.nix
+      ../common/nixos/hosts.nix
+      ../common/nixos/envvar.nix
+      ./nixos/cpu.nix
+      ./nixos/laptop.nix
+      ./nixos/memory.nix
+      ./themes/stylix.nix
 
-    # Razer-specific additional modules
-    ../../modules/development/default.nix
-    ../../modules/security/secrets.nix
-    ../../modules/secrets/api-keys.nix
-    ../../modules/containers/docker.nix
-  ];
+      # Razer-specific additional modules
+      ../../modules/development/default.nix
+      ../../modules/security/secrets.nix
+      ../../modules/secrets/api-keys.nix
+      ../../modules/containers/docker.nix
+    ];
 
   # Consolidated networking configuration
   networking = {
@@ -171,10 +173,10 @@ in
 
     # COSMIC Desktop disabled - using GNOME for stable screen sharing
     desktop.cosmic = {
-      enable = false;
+      enable = true;
       useCosmicGreeter = false;
-      defaultSession = false;
-      installAllApps = false;
+      defaultSession = true;
+      installAllApps = true;
     };
   };
 
