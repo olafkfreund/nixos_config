@@ -1,11 +1,10 @@
 # AMD GPU Hardware Profile
 # For hosts: p620
 # Provides AMD-specific GPU configurations and environment variables
-
 # No parameters needed - pure data structure
 {
   gpu = "amd";
-  acceleration = null; # Disabled: ROCm hipblaslt fails to build with Python 3.13
+  acceleration = "rocm"; # Disabled: ROCm hipblaslt fails to build with Python 3.13
   videoDrivers = [ "amdgpu" ];
 
   # AMD-specific environment variables

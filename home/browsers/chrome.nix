@@ -1,12 +1,12 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
+{ pkgs
+, config
+, lib
+, ...
 }:
 with lib; let
   cfg = config.browsers.chrome;
-in {
+in
+{
   options.browsers.chrome = {
     enable = mkEnableOption "Google Chrome";
   };
@@ -31,7 +31,6 @@ in {
         # Native Wayland support for screen sharing
         "--ozone-platform-hint=auto"
         "--enable-features=WebRTCPipeWireCapturer"
-        "--enable-wayland-ime"
 
         # Fix zygote/sandbox error - comprehensive sandbox fixes
         "--no-zygote"

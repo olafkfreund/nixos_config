@@ -177,7 +177,22 @@
       "Bash(nix-prefetch-git:*)",
       "Bash(git clone:*)",
       "Bash(for file in anchor output size plugins_wings plugins_center)",
-      "Bash(do echo \"=== $file ===\")"
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(time nslookup:*)",
+      "Bash(ip addr:*)",
+      "Bash(ip link:*)",
+      "Bash(ethtool:*)",
+      "Bash(traceroute:*)",
+      "Bash(mtr:*)",
+      "Bash(ss:*)",
+      "Bash(tc qdisc show:*)",
+      "Bash(ip route:*)",
+      "Bash(iperf3:*)",
+      "Bash(ip:*)",
+      "Bash(nmcli device show:*)",
+      "Bash(dmesg:*)",
+      "Bash(/nix/store/m7qccmjysrkg5xc64b65ks0z3avzc56r-claude-code-2.0.14/bin/claude --version)",
+      "Bash(git diff:*)"
     ],
     "additionalDirectories": ["/"]
   },

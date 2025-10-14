@@ -35,6 +35,6 @@
     gimp
     cameractrls
     cameractrls-gtk4
-    # alpaca
+    alpaca
   ];
 }
