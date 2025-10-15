@@ -332,6 +332,9 @@ in
 
   hardware.nvidia-container-toolkit.enable = vars.gpu == "nvidia";
 
+  # Enable ZSA keyboard support (Moonlander, Planck EZ, etc.)
+  hardware.keyboard.zsa.enable = true;
+
   # Agenix identity configuration - specify where to find decryption keys
   age.identityPaths = [
     "/home/olafkfreund/.ssh/id_ed25519" # User key
