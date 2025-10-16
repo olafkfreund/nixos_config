@@ -15,26 +15,25 @@ in
       pkgs.terraform
       pkgs.terraformer
       # pkgs.terraform-docs
-      pkgs.terraform-providers.digitalocean
-      pkgs.terraform-providers.oci
-      pkgs.terraform-providers.ssh
-      pkgs.terraform-providers.lxd
-      pkgs.terraform-providers.aws
-      pkgs.terraform-providers.age
-      pkgs.terraform-providers.sops
-      pkgs.terraform-providers.acme
-      pkgs.terraform-providers.local
-      pkgs.terraform-providers.google
-      pkgs.terraform-providers.github
-      pkgs.terraform-providers.libvirt
-      pkgs.terraform-providers.kubectl
-      pkgs.terraform-providers.azurerm
-      pkgs.terraform-providers.azuread
-      pkgs.terraform-providers.linuxbox
-      pkgs.terraform-providers.tailscale
-      pkgs.terraform-providers.openstack
-      pkgs.terraform-providers.kubernetes
-      pkgs.terraform-providers.digitalocean
+      pkgs.terraform-providers.digitalocean_digitalocean
+      pkgs.terraform-providers.oracle_oci
+      pkgs.terraform-providers.loafoe_ssh
+      pkgs.terraform-providers.terraform-lxd_lxd
+      pkgs.terraform-providers.hashicorp_aws
+      pkgs.terraform-providers.clementblaise_age
+      pkgs.terraform-providers.carlpett_sops
+      pkgs.terraform-providers.vancluever_acme
+      pkgs.terraform-providers.hashicorp_local
+      pkgs.terraform-providers.hashicorp_google
+      pkgs.terraform-providers.integrations_github
+      pkgs.terraform-providers.dmacvicar_libvirt
+      pkgs.terraform-providers.gavinbunney_kubectl
+      pkgs.terraform-providers.hashicorp_azurerm
+      pkgs.terraform-providers.hashicorp_azuread
+      pkgs.terraform-providers.numtide_linuxbox
+      pkgs.terraform-providers.tailscale_tailscale
+      pkgs.terraform-providers.terraform-provider-openstack_openstack
+      pkgs.terraform-providers.hashicorp_kubernetes
       # pkgs.checkov
       pkgs.terrascan
       pkgs.terranix # terrafrom by nix
