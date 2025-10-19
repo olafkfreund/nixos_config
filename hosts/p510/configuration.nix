@@ -246,25 +246,8 @@ in
       systemd-networkd-wait-online.enable = lib.mkForce false;
     };
 
-    # Configure systemd-networkd for your network interfaces
-    # Ensure the interface name matches the output of `ip link` (e.g., eno1)
-    network = {
-      enable = true;
-      networks = {
-        eno1 = {
-          name = "eno1";
-          DHCP = "ipv4";
-          networkConfig = {
-            MulticastDNS = false;
-            IPv6AcceptRA = true;
-            Domains = "home.freundcloud.com"; # Configure DNS domain for internal resolution
-          };
-          dhcpV4Config = {
-            RouteMetric = 10;
-          };
-        };
-      };
-    };
+    # Disable systemd-networkd completely - using NetworkManager only
+    network.enable = lib.mkForce false;
   };
 
   # User-specific configuration from variables
