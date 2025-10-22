@@ -194,7 +194,9 @@
       "Bash(/nix/store/m7qccmjysrkg5xc64b65ks0z3avzc56r-claude-code-2.0.14/bin/claude --version)",
       "Bash(git diff:*)",
       "Bash(/nix/store/vyrwsk4d13lq0050rxmbr74gq6vad1vy-claude-code-2.0.22/bin/claude --version)",
-      "Bash(nix-build --no-out-link .)"
+      "Bash(nix-build --no-out-link .)",
+      "Bash(git pull --rebase)",
+      "Bash(git pull --no-rebase)"
     ],
     "additionalDirectories": [
       "/"
