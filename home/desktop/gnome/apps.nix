@@ -42,7 +42,7 @@ in
         gnome-maps # Maps application
         # gnome-todo # Task management - package not available
         # gnome-schedule # Event scheduling - package not available
-        gnome-frog # Clipboard manager
+        # gnome-frog # Clipboard manager - Disabled due to gtts Python dependency issue (click version conflict)
         gnome-feeds # RSS feed reader
         typst # Document typesetting system
         turtle # GUI for Git

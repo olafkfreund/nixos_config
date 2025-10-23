@@ -35,6 +35,6 @@
     gimp
     cameractrls
     cameractrls-gtk4
-    # alpaca  # Temporarily disabled due to broken mercantile Python package (33 test failures)
+    # alpaca  # Disabled due to Python 3.13 compatibility issues with mercantile dependency
   ];
 }

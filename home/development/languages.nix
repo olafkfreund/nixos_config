@@ -213,7 +213,7 @@ in
   # Git configuration enhancement
   programs.git = mkIf cfg.utilities.vcs.git {
     enable = true;
-    extraConfig = {
+    settings = {
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;

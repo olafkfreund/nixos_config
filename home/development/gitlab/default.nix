@@ -109,7 +109,7 @@ in
 
     # GitLab CLI configuration
     programs = {
-      git.extraConfig = mkIf cfg.enable {
+      git.settings = mkIf cfg.enable {
         # GitLab-specific git configuration
         gitlab = {
           host = "gitlab.com";

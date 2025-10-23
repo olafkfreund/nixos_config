@@ -4,7 +4,7 @@
     kdePackages.xdg-desktop-portal-kde
     kdePackages.polkit-kde-agent-1
     kdePackages.qt6ct
-    kdePackages.qt6gtk2
+    # kdePackages.qt6gtk2  # Disabled due to incompatibility with Qt 6.10 (missing private headers)
     # libreoffice-qt
     pywal
     wpgtk

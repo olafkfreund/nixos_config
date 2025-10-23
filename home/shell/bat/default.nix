@@ -24,7 +24,7 @@ in
       extraPackages = with pkgs.bat-extras; [
         batman
         batpipe
-        batgrep
+        # batgrep  # Disabled due to failing snapshot tests in bat-extras 2024.08.24
       ];
     };
   };
