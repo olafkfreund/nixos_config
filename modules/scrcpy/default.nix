@@ -43,8 +43,10 @@ in
     environment.systemPackages = with pkgs; [
       scrcpy
       android-tools
-      android-udev-rules
       scrcpyWifiScript
     ];
+
+    # Android device access is now handled by built-in systemd uaccess rules
+    # No need for separate android-udev-rules package
   };
 }
