@@ -197,7 +197,8 @@
       "Bash(nix-build --no-out-link .)",
       "Bash(git pull --rebase)",
       "Bash(git pull --no-rebase)",
-      "Bash(claude:*)"
+      "Bash(claude:*)",
+      "Bash(/nix/store/8yjfz45gbyfh1biffkqpy45yw2p7fpbv-claude-code-2.0.27/bin/claude:*)"
     ],
     "additionalDirectories": [
       "/"
