@@ -21,7 +21,7 @@ in
       package = lib.mkForce (
         if isPlasmaEnabled
         then pkgs.libsForQt5.qtstyleplugin-kvantum
-        else pkgs.qt6ct
+        else pkgs.qt6Packages.qt6ct
       );
     };
     # Let Stylix handle Qt styling instead of forcing a specific style
@@ -37,7 +37,7 @@ in
     qt6Packages.qtstyleplugin-kvantum
     adwaita-qt
     adwaita-qt6
-    qt6ct
+    qt6Packages.qt6ct
   ];
 
   # Add environment variables for Qt application integration

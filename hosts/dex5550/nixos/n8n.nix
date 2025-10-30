@@ -60,7 +60,7 @@ with lib; {
     enable = true;
     openFirewall = false; # We'll manage firewall manually
 
-    settings = {
+    environment = {
       # Server configuration
       N8N_HOST = "0.0.0.0";
       N8N_PORT = 5678;

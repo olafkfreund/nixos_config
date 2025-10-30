@@ -17,7 +17,7 @@ in
     home.packages = with pkgs; [
       mdr
       slippy
-      mdt
+      md-tui
     ];
   };
 }
