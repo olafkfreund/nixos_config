@@ -78,7 +78,7 @@ in
           corefonts
           dejavu_fonts
           noto-fonts
-          noto-fonts-emoji
+          noto-fonts-color-emoji
           ubuntu_font_family
           noto-fonts-lgc-plus
         ]

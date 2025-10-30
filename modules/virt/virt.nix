@@ -78,7 +78,7 @@ in
       pkgs.virt-manager
       pkgs.virt-viewer
       pkgs.win-spice
-      pkgs.win-virtio
+      pkgs.virtio-win
       pkgs-stable.virtualbox # Using stable version to avoid libcurl proxy enum build errors in unstable
       pkgs.btrfs-progs
       pkgs.quickemu

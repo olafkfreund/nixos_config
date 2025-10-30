@@ -140,7 +140,7 @@
     # Fonts and themes
     font-awesome
     noto-fonts
-    noto-fonts-emoji
+    noto-fonts-color-emoji
 
     # System information
     neofetch

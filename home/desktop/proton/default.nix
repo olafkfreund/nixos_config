@@ -45,7 +45,7 @@ in
       # VPN packages
       (optionals cfg.vpn.enable [
         protonvpn-gui
-        protonvpn-cli
+        # NOTE: protonvpn-cli was removed upstream, use GUI instead
       ])
       # Password manager
       ++ (optionals cfg.pass.enable [
@@ -96,19 +96,20 @@ in
       };
     };
 
-    # Shell aliases for CLI tools
-    programs.bash.shellAliases = mkIf cfg.vpn.enable {
-      pvpn = "protonvpn-cli";
-      pvpn-connect = "protonvpn-cli connect";
-      pvpn-disconnect = "protonvpn-cli disconnect";
-      pvpn-status = "protonvpn-cli status";
-    };
+    # NOTE: Shell aliases for CLI tools disabled - protonvpn-cli was removed upstream
+    # Use the ProtonVPN GUI application instead
+    # programs.bash.shellAliases = mkIf cfg.vpn.enable {
+    #   pvpn = "protonvpn-cli";
+    #   pvpn-connect = "protonvpn-cli connect";
+    #   pvpn-disconnect = "protonvpn-cli disconnect";
+    #   pvpn-status = "protonvpn-cli status";
+    # };
 
-    programs.zsh.shellAliases = mkIf cfg.vpn.enable {
-      pvpn = "protonvpn-cli";
-      pvpn-connect = "protonvpn-cli connect";
-      pvpn-disconnect = "protonvpn-cli disconnect";
-      pvpn-status = "protonvpn-cli status";
-    };
+    # programs.zsh.shellAliases = mkIf cfg.vpn.enable {
+    #   pvpn = "protonvpn-cli";
+    #   pvpn-connect = "protonvpn-cli connect";
+    #   pvpn-disconnect = "protonvpn-cli disconnect";
+    #   pvpn-status = "protonvpn-cli status";
+    # };
   };
 }

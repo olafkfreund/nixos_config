@@ -13,7 +13,7 @@
     # pkgs.fractal
     pkgs.vesktop
     # pkgs.telegram-desktop
-    pkgs.whatsapp-for-linux
+    pkgs.wasistlos
     pkgs.ferdium
     pkgs.zoom-us
     pkgs.libcamera

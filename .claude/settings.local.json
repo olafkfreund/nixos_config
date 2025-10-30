@@ -198,7 +198,13 @@
       "Bash(git pull --rebase)",
       "Bash(git pull --no-rebase)",
       "Bash(claude:*)",
-      "Bash(/nix/store/8yjfz45gbyfh1biffkqpy45yw2p7fpbv-claude-code-2.0.27/bin/claude:*)"
+      "Bash(/nix/store/8yjfz45gbyfh1biffkqpy45yw2p7fpbv-claude-code-2.0.27/bin/claude:*)",
+      "Bash(gradle --version:*)",
+      "Bash(hosts/p510/nixos/microvm/nixvm.nix )",
+      "Bash(modules/fonts/fonts.nix )",
+      "Bash(home/profiles/desktop-user/default.nix )",
+      "Bash(home/desktop/gnome/apps.nix )",
+      "Bash(home/desktop/gnome/theme.nix)"
     ],
     "additionalDirectories": [
       "/"
