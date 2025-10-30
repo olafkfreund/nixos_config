@@ -63,31 +63,31 @@ with lib; {
     environment = {
       # Server configuration
       N8N_HOST = "0.0.0.0";
-      N8N_PORT = 5678;
+      N8N_PORT = "5678";
       N8N_PROTOCOL = "http";
       N8N_LISTEN_ADDRESS = "0.0.0.0";
 
       # Database configuration (PostgreSQL)
       DB_TYPE = "postgresdb";
       DB_POSTGRESDB_HOST = "127.0.0.1";
-      DB_POSTGRESDB_PORT = 5432;
+      DB_POSTGRESDB_PORT = "5432";
       DB_POSTGRESDB_DATABASE = "n8n";
       DB_POSTGRESDB_USER = "n8n";
       DB_POSTGRESDB_SCHEMA = "public";
-      DB_POSTGRESDB_SSL_ENABLED = false; # Local connection
+      DB_POSTGRESDB_SSL_ENABLED = "false"; # Local connection
 
       # Execution configuration
-      N8N_EXECUTE_IN_PROCESS = true; # Execute workflows in main process
-      EXECUTIONS_TIMEOUT = 3600; # 1 hour timeout
-      EXECUTIONS_TIMEOUT_MAX = 7200; # 2 hour max timeout
+      N8N_EXECUTE_IN_PROCESS = "true"; # Execute workflows in main process
+      EXECUTIONS_TIMEOUT = "3600"; # 1 hour timeout
+      EXECUTIONS_TIMEOUT_MAX = "7200"; # 2 hour max timeout
       EXECUTIONS_DATA_SAVE_ON_ERROR = "all";
       EXECUTIONS_DATA_SAVE_ON_SUCCESS = "all";
-      EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS = true;
+      EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS = "true";
 
       # Security and user management
       N8N_USER_MANAGEMENT_JWT_SECRET = "n8n-jwt-secret-change-me";
       N8N_ENCRYPTION_KEY = "n8n-encryption-key-change-me-32chars";
-      N8N_USER_MANAGEMENT_DISABLED = false; # Enable user management
+      N8N_USER_MANAGEMENT_DISABLED = "false"; # Enable user management
 
       # Webhook configuration
       N8N_WEBHOOK_URL = "https://home.freundcloud.com/n8n";
@@ -97,23 +97,23 @@ with lib; {
       N8N_LOG_LEVEL = "info";
       N8N_LOG_OUTPUT = "console,file";
       N8N_LOG_FILE_LOCATION = "/var/lib/n8n/logs/n8n.log";
-      N8N_DIAGNOSTICS_ENABLED = false; # Disable telemetry
+      N8N_DIAGNOSTICS_ENABLED = "false"; # Disable telemetry
 
       # Performance and resource limits
-      N8N_MAX_EXECUTION_TIMEOUT = 7200; # 2 hours
-      N8N_BINARY_DATA_TTL = 2880; # 48 hours in minutes
+      N8N_MAX_EXECUTION_TIMEOUT = "7200"; # 2 hours
+      N8N_BINARY_DATA_TTL = "2880"; # 48 hours in minutes
       N8N_BINARY_DATA_MANAGER_MODE = "filesystem";
 
       # Editor and UI configuration
-      N8N_DISABLE_UI = false;
-      N8N_HIDE_USAGE_PAGE = true;
-      N8N_TEMPLATES_ENABLED = true;
+      N8N_DISABLE_UI = "false";
+      N8N_HIDE_USAGE_PAGE = "true";
+      N8N_TEMPLATES_ENABLED = "true";
       N8N_TEMPLATES_HOST = "https://api.n8n.io/api/";
 
       # External service integrations
-      N8N_VERSION_NOTIFICATIONS_ENABLED = false;
+      N8N_VERSION_NOTIFICATIONS_ENABLED = "false";
       N8N_DEFAULT_LOCALE = "en";
-      N8N_METRICS = true; # Enable metrics for Prometheus
+      N8N_METRICS = "true"; # Enable metrics for Prometheus
 
       # File system paths
       N8N_USER_FOLDER = "/var/lib/n8n";

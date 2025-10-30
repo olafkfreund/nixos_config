@@ -30,7 +30,7 @@
         vulkan-tools
 
         # Video acceleration - proper order matters
-        vaapiVdpau
+        libva-vdpau-driver
         libva-vdpau-driver
         nvidia-vaapi-driver
 
