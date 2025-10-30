@@ -326,10 +326,17 @@ in
     "/etc/ssh/ssh_host_rsa_key" # Host key (RSA - avoids circular dependency with agenix-managed Ed25519 key)
   ];
 
-  nixpkgs.config.permittedInsecurePackages = [
-    "olm-3.2.16"
-    "python3.12-youtube-dl-2021.12.17"
-    "libsoup-2.74.3" # Temporary: Required by some GNOME packages until migration to libsoup-3
-  ];
+  nixpkgs.config = {
+    permittedInsecurePackages = [
+      "olm-3.2.16"
+      "python3.12-youtube-dl-2021.12.17"
+      "libsoup-2.74.3" # Temporary: Required by some GNOME packages until migration to libsoup-3
+    ];
+
+    # Allow broken packages (needed for some CUDA dependencies pulled transitively)
+    # Samsung is Intel-only, no NVIDIA GPU, but some development tools may pull CUDA
+    allowBroken = true;
+  };
+
   system.stateVersion = "25.11";
 }
