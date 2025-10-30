@@ -24,8 +24,8 @@ let
     src = fetchurl {
       url = "https://storage.googleapis.com/osprey-downloads-c02f6a0d-347c-492b-a752-3e0651722e97/nest-win-x64/Claude-Setup-x64.exe?v=${version}";
       name = "Claude-Setup-x64-${version}.exe";
-      # Updated hash from actual download (2025-01-29)
-      sha256 = "sha256-u7zw3Nv/iYd8k7D6/SQkbtsQ22V8xdq63+R4HMtapzE=";
+      # Updated hash from actual download (2025-10-30)
+      sha256 = "sha256-Sn/lvMlfKd7b/utFvCxrkWNDJTug4OOSA4lo9YV8aqk=";
     };
 
     nativeBuildInputs = [
