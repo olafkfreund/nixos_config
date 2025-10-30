@@ -33,7 +33,7 @@
       libva-utils
       # driversi686Linux.amdvlk removed - RADV is now default
       lact
-      glxinfo
+      mesa-demos
       clinfo
       rocmPackages.rocm-smi
       rocmPackages.rocminfo

@@ -50,7 +50,7 @@
       libva
       libva-utils
       # nvtop
-      # glxinfo
+      # mesa-demos
       # clinfo
       # virtualglLib
       # vulkan-loader
