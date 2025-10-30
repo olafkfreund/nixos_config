@@ -95,7 +95,7 @@
     icu
     spotdl
     termusic
-    qflipper
+    qFlipper
     chatterino2
     twitch-tui
     deploy-rs

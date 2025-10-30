@@ -20,7 +20,7 @@ in
       [
         pkgs.lua
         pkgs.stylua
-        pkgs.sumneko-lua-language-server
+        pkgs.lua-language-server
       ]
       ++ cfg.packages;
   };
