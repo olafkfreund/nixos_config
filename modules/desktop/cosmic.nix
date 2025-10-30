@@ -71,7 +71,7 @@ in
       ]
       ++ optionals cfg.installAllApps [
         # Productivity applications
-        cosmic-tasks # Task/TODO manager
+        tasks # Task/TODO manager
         cosmic-reader # PDF/document reader
         cosmic-store # Application store
         cosmic-player # Media player

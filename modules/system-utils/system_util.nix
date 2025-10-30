@@ -59,7 +59,7 @@
     acpi
     bluez-tools
     brightnessctl
-    mpc-cli
+    mpc
     alsa-utils
     # pamixer  # Temporarily disabled due to build failures with cxxopts/icu dependencies
     playerctl
