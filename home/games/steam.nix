@@ -9,5 +9,6 @@
     protontricks
     steam-run
     lutris
+    gfn-electron
   ];
 }
