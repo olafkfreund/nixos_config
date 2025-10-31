@@ -18,7 +18,7 @@ in
       ./nixos/screens.nix
       ./nixos/power.nix
       ./nixos/boot.nix
-      # ./nixos/secure-boot.nix  # Uncomment when ready to enable Secure Boot
+      ./nixos/secure-boot.nix # Secure Boot enabled with lanzaboote
       ./nixos/nvidia.nix
       ../common/nixos/i18n.nix
       ../common/nixos/hosts.nix

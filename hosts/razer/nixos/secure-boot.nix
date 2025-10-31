@@ -1,13 +1,11 @@
 # Secure Boot configuration for Razer Blade
 # Using Lanzaboote for NixOS Secure Boot support
 { lib, ... }: {
-  # Import lanzaboote module
-  imports = [
-    # Lanzaboote module will be imported from flake
-  ];
-
   # Boot configuration for Secure Boot
   boot = {
+    # Enable bootspec for lanzaboote (required for Secure Boot)
+    bootspec.enable = true;
+
     # Enable Lanzaboote for Secure Boot
     lanzaboote = {
       enable = true;
