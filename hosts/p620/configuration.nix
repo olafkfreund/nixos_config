@@ -271,7 +271,7 @@ in
     # Enable COSMIC Desktop with all applications
     desktop.cosmic = {
       enable = true;
-      useCosmicGreeter = false; # Use GDM instead
+      useCosmicGreeter = true; # Use COSMIC Greeter
       defaultSession = true; # Set COSMIC as default session
       installAllApps = true;
       disableOsd = true; # Workaround for polkit agent crashes in COSMIC beta
@@ -430,8 +430,8 @@ in
     };
 
     # Display manager configuration (modern syntax)
-    # Use GDM (GNOME Display Manager)
-    displayManager.gdm.enable = lib.mkForce true;
+    # Use COSMIC Greeter instead of GDM
+    displayManager.gdm.enable = lib.mkForce false;
 
     # Disable other display managers
     greetd.enable = lib.mkForce false;
