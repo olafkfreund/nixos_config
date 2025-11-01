@@ -56,6 +56,13 @@
 
   swapDevices = [ ];
 
+  # SSD I/O scheduler optimization
+  # Set optimal scheduler for SSDs (none/noop for better performance)
+  services.udev.extraRules = ''
+    # Automatically set 'none' scheduler for non-rotational drives (SSDs)
+    ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="none"
+  '';
+
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
   # still possible to use this option, but it's recommended to use it in conjunction

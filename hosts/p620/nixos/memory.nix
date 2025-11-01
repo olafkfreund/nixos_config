@@ -4,8 +4,9 @@
 }: {
   # Memory allocation and NUMA optimization
   boot.kernel.sysctl = {
-    # Existing settings
-    "vm.nr_hugepages" = 1024;
+    # Huge pages configuration (8 GB total for AI/ML workloads and VMs)
+    "vm.nr_hugepages" = 4096; # 4096 * 2MB = 8 GB
+    "vm.hugetlb_shm_group" = 0; # Allow all users to use huge pages
     "vm.max_map_count" = 1048576;
 
     # Memory management for high-core count Threadripper
@@ -14,9 +15,13 @@
     "vm.dirty_background_ratio" = 2;
     "vm.vfs_cache_pressure" = 50;
 
-    # NUMA optimizations
-    "vm.zone_reclaim_mode" = 0;
-    "kernel.numa_balancing" = 0;
+    # NUMA optimizations (enabled for Threadripper PRO performance)
+    # NOTE: These settings are overridden in cpu.nix for better NUMA performance
+    # "vm.zone_reclaim_mode" = 1;  # Configured in cpu.nix
+    # "kernel.numa_balancing" = 1; # Configured in cpu.nix
+
+    # Transparent Huge Pages (THP) - allow applications to request THP automatically
+    "vm.transparent_hugepage" = "madvise";
 
     # Network performance optimizations for NFS and media streaming
     # Override AI module settings with higher performance values

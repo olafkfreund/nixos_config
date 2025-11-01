@@ -68,6 +68,19 @@
         RestartSec = "5s";
       };
     };
+
+    # Auto-apply high-performance GPU profile on boot
+    services.lact-auto-profile = {
+      description = "Apply LACT GPU high-performance profile";
+      after = [ "lactd.service" ];
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.bash}/bin/bash -c 'sleep 5 && ${pkgs.lact}/bin/lact cli set-performance-level high || true'";
+        RemainAfterExit = true;
+      };
+    };
+
     tmpfiles.rules = [
       "L+    /opt/rocm   -    -    -     -    ${pkgs.rocmPackages.clr}"
     ];
@@ -95,7 +108,8 @@
     # AMD_VULKAN_ICD = "RADV";
 
     # ROCm environment variables for better compatibility
-    # HSA_OVERRIDE_GFX_VERSION = "10.3.0";
+    # CRITICAL: Required for RX 7900 XTX (gfx1100) ROCm support
+    HSA_OVERRIDE_GFX_VERSION = "11.0.0";
     # ROC_ENABLE_PRE_VEGA = "1";
   };
 }
