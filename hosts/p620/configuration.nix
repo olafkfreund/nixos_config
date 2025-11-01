@@ -433,9 +433,6 @@ in
     # Use COSMIC Greeter instead of GDM
     displayManager.gdm.enable = lib.mkForce false;
 
-    # Disable other display managers
-    greetd.enable = lib.mkForce false;
-
     # Desktop environment
     desktopManager.gnome.enable = true;
 
