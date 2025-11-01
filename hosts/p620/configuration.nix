@@ -591,6 +591,9 @@ in
     "/etc/ssh/ssh_host_rsa_key" # Fallback host key (RSA)
   ];
 
+  # Windows app integration
+  programs.winboat.enable = true;
+
   # Package configurations
   nixpkgs.config = {
     allowBroken = true;
@@ -598,6 +601,7 @@ in
       "olm-3.2.16"
       "python3.12-youtube-dl-2021.12.17"
       "libsoup-2.74.3" # Temporary: Required by some GNOME packages until migration to libsoup-3
+      "electron-35.7.5" # Required by gfn-electron (GeForce NOW client)
     ];
   };
 }

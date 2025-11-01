@@ -320,6 +320,9 @@ in
 
   hardware.nvidia-container-toolkit.enable = false; # Samsung has Intel GPU
 
+  # Windows app integration
+  programs.winboat.enable = true;
+
   # Agenix identity configuration - specify where to find decryption keys
   age.identityPaths = [
     "/home/olafkfreund/.ssh/id_ed25519" # User key
@@ -331,6 +334,7 @@ in
       "olm-3.2.16"
       "python3.12-youtube-dl-2021.12.17"
       "libsoup-2.74.3" # Temporary: Required by some GNOME packages until migration to libsoup-3
+      "electron-35.7.5" # Temporary: Required until upstream packages migrate to newer electron
     ];
 
     # Allow broken packages (needed for some CUDA dependencies pulled transitively)

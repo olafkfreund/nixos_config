@@ -12,6 +12,7 @@
     ../../modules/cloud.nix
     ../../modules/programs.nix
     ../../modules/common/ai-defaults.nix
+    ../../modules/windows/winboat.nix
   ];
 
   # Laptop-specific defaults

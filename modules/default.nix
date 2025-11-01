@@ -18,6 +18,7 @@ with lib; {
     ./cloud.nix # Cloud provider tools
     ./programs.nix # Application programs
     ./email.nix # Email client configuration
+    ./windows/winboat.nix # Windows app integration
 
     # Service modules (specific services)
     ./services/default.nix # Service configurations
