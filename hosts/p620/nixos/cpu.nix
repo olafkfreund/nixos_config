@@ -16,11 +16,14 @@
   hardware.cpu.amd.updateMicrocode = true;
 
   # Scheduler optimization for NUMA architecture
+  # NOTE: CPU isolation and nohz_full disabled due to desktop performance issues
+  # These settings are better suited for dedicated server/RT workloads
+  # Re-enable only if you have specific real-time requirements
   boot.kernelParams = lib.mkAfter [
     "amd_pstate=active" # Use the AMD pstate driver
-    "nohz_full=1-127" # Tickless CPU except CPU 0
+    # "nohz_full=1-127" # DISABLED: Causes scheduling delays on desktop
     "numa=on" # Explicitly enable NUMA support
-    "isolcpus=120-127" # Reserve last 8 cores for dedicated/real-time workloads
+    # "isolcpus=120-127" # DISABLED: Removes cores from desktop scheduler causing slowness
   ];
 
   # NUMA settings optimized for Threadripper PRO 3995WX

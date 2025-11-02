@@ -4,8 +4,9 @@
 }: {
   # Memory allocation and NUMA optimization
   boot.kernel.sysctl = {
-    # Huge pages configuration (8 GB total for AI/ML workloads and VMs)
-    "vm.nr_hugepages" = 4096; # 4096 * 2MB = 8 GB
+    # Huge pages configuration (reduced from 8GB to 2GB for desktop responsiveness)
+    # Can be increased when running specific AI/ML workloads
+    "vm.nr_hugepages" = 1024; # 1024 * 2MB = 2 GB
     "vm.hugetlb_shm_group" = 0; # Allow all users to use huge pages
     "vm.max_map_count" = 1048576;
 

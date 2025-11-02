@@ -32,7 +32,6 @@ in
     services.podman.enable = mkIf cfg.virtualization.enable cfg.virtualization.podman;
     services.spice.enable = mkIf cfg.virtualization.enable cfg.virtualization.spice;
     services.libvirt.enable = mkIf cfg.virtualization.enable cfg.virtualization.libvirt;
-    services.sunshine.enable = mkIf cfg.virtualization.enable cfg.virtualization.sunshine;
 
     # Cloud tools (conditional enables)
     aws.packages.enable = mkIf cfg.cloud.enable cfg.cloud.aws;

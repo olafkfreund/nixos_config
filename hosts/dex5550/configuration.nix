@@ -175,7 +175,6 @@ in
       podman = true;
       spice = false; # No GUI needed
       libvirt = true; # Keep for server VMs
-      sunshine = false; # No remote desktop needed
     };
 
     cloud = {

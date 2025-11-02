@@ -204,11 +204,10 @@
       "Bash(modules/fonts/fonts.nix )",
       "Bash(home/profiles/desktop-user/default.nix )",
       "Bash(home/desktop/gnome/apps.nix )",
-      "Bash(home/desktop/gnome/theme.nix)"
+      "Bash(home/desktop/gnome/theme.nix)",
+      "Bash(top:*)"
     ],
-    "additionalDirectories": [
-      "/"
-    ]
+    "additionalDirectories": ["/"]
   },
   "enableAllProjectMcpServers": false
 }

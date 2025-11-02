@@ -23,27 +23,16 @@ in
     #   XDG_DATA_DIRS = "${pkgs.adwaita-icon-theme}/share:${pkgs.hicolor-icon-theme}/share:${pkgs.gtk3}/share:${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}:${pkgs.gtk4}/share";
     # };
 
-    # Configure Chrome with proper Wayland support and screen sharing for GNOME
+    # Configure Chrome with proper Wayland support and screen sharing
     programs.chromium = {
       enable = true;
       package = pkgs.google-chrome;
       commandLineArgs = [
-        # Native Wayland support for screen sharing
+        # Native Wayland support (Chrome 142+ with modern COSMIC Desktop)
         "--ozone-platform-hint=auto"
         "--enable-features=WebRTCPipeWireCapturer"
 
-        # Fix zygote/sandbox error - comprehensive sandbox fixes
-        "--no-zygote"
-        "--no-sandbox"
-        "--disable-dev-shm-usage"
-        "--disable-gpu-sandbox"
-        "--disable-software-rasterizer"
-        "--disable-background-timer-throttling"
-        "--disable-backgrounding-occluded-windows"
-        "--disable-renderer-backgrounding"
-
-        # Memory and process management
-        "--memory-pressure-off"
+        # V8 JavaScript engine memory limit (4GB for heavy web apps)
         "--max_old_space_size=4096"
       ];
     };

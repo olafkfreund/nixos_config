@@ -27,7 +27,6 @@ with lib; {
       incus = mkEnableOption "Enable Incus containers";
       spice = mkEnableOption "Enable SPICE";
       libvirt = mkEnableOption "Enable libvirt";
-      sunshine = mkEnableOption "Enable Sunshine for streaming";
     };
 
     cloud = {

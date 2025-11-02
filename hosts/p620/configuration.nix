@@ -198,7 +198,6 @@ in
       podman = true;
       spice = true;
       libvirt = true;
-      sunshine = true;
     };
 
     cloud = {

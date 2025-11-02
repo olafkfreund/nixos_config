@@ -96,7 +96,6 @@ in
       podman = true;
       spice = true;
       libvirt = true;
-      sunshine = false;
     };
 
     cloud = {
@@ -222,14 +221,6 @@ in
     EXTRA_CCFLAGS = "-I/run/opengl-driver/include";
     GI_TYPELIB_PATH = "${pkgs.gdm}/lib/girepository-1.0";
     GSETTINGS_SCHEMA_DIR = "${pkgs.gdm}/share/gsettings-schemas/gdm-${pkgs.gdm.version}/glib-2.0/schemas";
-  };
-
-  # Hardware-specific configurations
-  security.wrappers.sunshine = {
-    owner = "root";
-    group = "root";
-    capabilities = "cap_sys_admin+p";
-    source = "${pkgs.sunshine}/bin/sunshine";
   };
 
   # Docker configuration

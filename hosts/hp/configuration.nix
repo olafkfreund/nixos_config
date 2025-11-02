@@ -71,7 +71,6 @@ in
     podman.enable = lib.mkForce true;
     spice.enable = lib.mkForce true;
     libvirt.enable = lib.mkForce true;
-    sunshine.enable = lib.mkForce true;
   };
 
   # Password management
@@ -123,13 +122,6 @@ in
       export WLR_BACKENDS="headless,libinput"
       export WLR_LIBINPUT_NO_DEVICES="1"
     '';
-  };
-
-  security.wrappers.sunshine = {
-    owner = "root";
-    group = "root";
-    capabilities = "cap_sys_admin+p";
-    source = "${pkgs.sunshine}/bin/sunshine";
   };
 
   systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
