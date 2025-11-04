@@ -120,6 +120,315 @@ These documentation files are based on official Nix resources:
 
 **Remember**: These documents are templates for AI-assisted and human development. Always consult them BEFORE and DURING code changes.
 
+---
+
+## 🚀 GitHub Workflow (Issue-Driven Development)
+
+**CRITICAL**: All development work MUST follow the GitHub-based workflow for proper tracking and code quality.
+
+### **Workflow Philosophy**
+
+**"No code without an issue, no issue without a plan"**
+
+Every change, bug fix, or improvement follows this process:
+
+```
+1. Create GitHub Issue → 2. Research & Plan → 3. Create Branch → 4. Implement → 5. Test → 6. PR Review → 7. Merge → 8. Deploy
+```
+
+### **Essential Commands**
+
+#### **Create New Task**: `/new_task`
+
+Creates a GitHub issue with comprehensive research and planning:
+
+```bash
+# Ask Claude to create a new task
+/new_task
+
+# Claude will guide you through:
+# 1. Task description and type (feature/bug/enhancement/docs/refactor/chore)
+# 2. Priority level (critical/high/medium/low)
+# 3. Technical research (if needed)
+# 4. Issue creation with structured format
+# 5. Next steps with branch name
+```
+
+**What `/new_task` does:**
+- ✅ Guides through issue creation
+- ✅ Conducts technical research using WebSearch
+- ✅ Reviews docs/PATTERNS.md and docs/NIXOS-ANTI-PATTERNS.md
+- ✅ Creates formatted GitHub issue with labels
+- ✅ Provides implementation plan with acceptance criteria
+- ✅ Generates branch name following conventions
+
+**Example:**
+```
+User: "/new_task"
+User: "Add PostgreSQL monitoring to the infrastructure"
+
+Claude will:
+1. Research PostgreSQL exporters and best practices
+2. Check existing monitoring patterns in codebase
+3. Create issue #123 with comprehensive plan
+4. Provide: git checkout -b feature/123-postgres-monitoring
+```
+
+#### **Check Open Tasks**: `/check_tasks`
+
+Reviews all open GitHub issues and identifies priorities:
+
+```bash
+# Check all open tasks
+/check_tasks
+
+# Check specific priority
+/check_tasks priority:high
+
+# Check blocked issues
+/check_tasks show blocked
+```
+
+**What `/check_tasks` shows:**
+- 📋 All open issues categorized by priority (critical/high/medium/low)
+- ⏸️ Blocked issues requiring attention
+- 📊 Statistics and progress tracking
+- 🎯 Recommended next actions
+- 🔄 Recent activity and updates
+
+**When to use:**
+- ✅ Start of each day - see what needs attention
+- ✅ Before starting new work - check priorities
+- ✅ Weekly planning - review all open issues
+- ✅ Identifying blockers - find stuck work
+
+### **Complete Workflow Example**
+
+#### **Scenario: Adding a New Feature**
+
+```bash
+# STEP 1: Create issue with research
+/new_task
+# Type: feature
+# Title: "Add PostgreSQL monitoring"
+# Priority: high
+# Research: yes
+# → Creates issue #123
+
+# STEP 2: Create branch from issue
+gh issue develop 123 --checkout
+# → Creates: feature/123-postgres-monitoring
+
+# STEP 3: Implement solution
+# ... make changes following docs/PATTERNS.md ...
+
+# STEP 4: Test locally
+just validate
+just test-host p620
+
+# STEP 5: Commit with conventional format
+git add .
+git commit -m "feat(monitoring): add PostgreSQL monitoring (#123)
+
+Implement comprehensive PostgreSQL monitoring with:
+- prometheus_postgres_exporter integration
+- Custom Grafana dashboard
+- Query performance tracking
+
+Relates to #123"
+
+# STEP 6: Push and create PR
+git push -u origin feature/123-postgres-monitoring
+gh pr create --fill
+
+# STEP 7: Code review
+/review
+# Claude reviews code against PATTERNS.md and ANTI-PATTERNS.md
+
+# STEP 8: Merge PR (auto-closes issue #123)
+gh pr merge 123 --squash --delete-branch
+
+# STEP 9: Deploy
+just quick-deploy p620
+
+# STEP 10: Verify
+/check_tasks  # Confirm issue #123 is closed
+```
+
+#### **Scenario: Fixing a Bug**
+
+```bash
+# STEP 1: Check for existing issue or create one
+/check_tasks
+# Found: Issue #67 "P510 boot delay"
+
+# STEP 2: Create fix branch
+gh issue develop 67 --checkout
+# → Creates: fix/67-p510-boot-delay
+
+# STEP 3: Debug and fix
+# ... investigate and implement fix ...
+
+# STEP 4: Test fix thoroughly
+just test-host p510
+# Test boot time improvement
+
+# STEP 5: Commit with fix reference
+git commit -m "fix(p510): resolve boot delay from fstrim service (#67)
+
+Optimize fstrim service configuration to prevent 8+ minute
+boot delays on P510 media server.
+
+Fixes #67"
+
+# STEP 6: PR and merge
+git push -u origin fix/67-p510-boot-delay
+gh pr create --fill
+gh pr merge 67 --squash --delete-branch
+# → Issue #67 automatically closed
+
+# STEP 7: Deploy and verify
+just quick-deploy p510
+# Verify boot time improved
+```
+
+### **Branch Naming Convention**
+
+**Format**: `<type>/<issue-number>-<brief-description>`
+
+**Examples:**
+```bash
+feature/123-postgres-monitoring     # New feature
+fix/67-p510-boot-delay             # Bug fix
+enhancement/156-grafana-dashboards  # Improvement
+docs/145-github-workflow           # Documentation
+refactor/167-module-dedup          # Refactoring
+chore/199-dependency-updates       # Maintenance
+```
+
+### **Commit Message Format**
+
+Follow **Conventional Commits** specification:
+
+```
+<type>(<scope>): <description> (#issue)
+
+<optional body>
+
+<optional footer>
+```
+
+**Examples:**
+```bash
+feat(monitoring): add PostgreSQL monitoring (#123)
+fix(p510): resolve boot delay from fstrim (#67)
+docs(workflow): add GitHub workflow guide (#145)
+refactor(modules): eliminate code duplication (#167)
+chore(deps): update flake inputs (#199)
+```
+
+### **Pull Request Requirements**
+
+Every PR must include:
+
+1. ✅ **Descriptive title** following Conventional Commits
+2. ✅ **Comprehensive summary** of changes
+3. ✅ **Testing evidence** (validation passed, hosts tested)
+4. ✅ **Documentation updates** (if applicable)
+5. ✅ **Links to issues** (Closes #123, Relates to #45)
+6. ✅ **Code review** using `/review` command
+7. ✅ **All checks passing** (validation, build, tests)
+
+### **GitHub CLI Setup**
+
+Ensure GitHub CLI is configured:
+
+```bash
+# Check if authenticated
+gh auth status
+
+# If not authenticated
+gh auth login
+
+# Verify repository access
+gh repo view
+```
+
+### **Comprehensive Documentation**
+
+For complete workflow details, see:
+- **[docs/GITHUB-WORKFLOW.md](./docs/GITHUB-WORKFLOW.md)** - Complete GitHub workflow guide
+
+**What's in the workflow documentation:**
+- Issue-driven development philosophy
+- Branch management strategies
+- Pull request process and review standards
+- Testing and validation requirements
+- Deployment strategy
+- Automation and tools
+- Troubleshooting guide
+- Complete examples and best practices
+
+### **Why This Workflow?**
+
+1. **📋 Traceability**: Every change tracked with context and rationale
+2. **🧪 Quality**: Code review and testing before merge
+3. **🤝 Collaboration**: Clear communication through issues and PRs
+4. **📈 Progress Tracking**: Visibility into what's being worked on
+5. **🔍 Searchability**: Find context for past decisions
+6. **🔄 Reproducibility**: Full history of changes and reasoning
+7. **🚀 Automation**: GitHub automatically closes issues, tracks progress
+8. **📚 Documentation**: Issues and PRs serve as living documentation
+
+### **Integration with Existing Tools**
+
+The GitHub workflow integrates seamlessly with:
+
+- **`/review` command**: Code review before creating PR
+- **docs/PATTERNS.md**: Referenced in issue research
+- **docs/NIXOS-ANTI-PATTERNS.md**: Checked during code review
+- **`just` commands**: Testing and validation before PR
+- **NixOS generations**: Rollback if deployment issues
+
+### **Best Practices**
+
+**Do's ✅:**
+- ✅ Create issue for every change (use `/new_task`)
+- ✅ Check open tasks daily (`/check_tasks`)
+- ✅ Use descriptive branch names with issue numbers
+- ✅ Write comprehensive commit messages
+- ✅ Test locally before creating PR
+- ✅ Use `/review` for code review
+- ✅ Update documentation with code changes
+- ✅ Link PRs to issues (Closes #123)
+- ✅ Delete branches after merge
+
+**Don'ts ❌:**
+- ❌ Commit directly to main
+- ❌ Create PRs without linked issues
+- ❌ Merge without testing
+- ❌ Skip code review
+- ❌ Leave PRs open indefinitely
+- ❌ Forget to update documentation
+
+### **Quick Reference**
+
+```bash
+# Daily workflow
+/check_tasks              # See what needs attention
+/new_task                 # Create new task when needed
+gh issue develop <n>      # Start work on issue
+# ... make changes ...
+just validate             # Validate changes
+/review                   # Review code
+git commit -m "..."       # Commit with reference
+gh pr create --fill       # Create PR
+gh pr merge <n> --squash  # Merge when approved
+just quick-deploy HOST    # Deploy changes
+```
+
+---
+
 ### Code Review Command
 
 Use the `/review` command for comprehensive code reviews based on these documentation files:

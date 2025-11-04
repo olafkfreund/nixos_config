@@ -208,7 +208,8 @@
       "Bash(top:*)",
       "Bash(AUTHORIZED=true npm install --package-lock-only)",
       "WebFetch(domain:nix.dev)",
-      "WebFetch(domain:nixos.org)"
+      "WebFetch(domain:nixos.org)",
+      "WebSearch"
     ],
     "additionalDirectories": [
       "/"
