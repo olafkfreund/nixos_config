@@ -22,6 +22,106 @@ This repository uses a **three-tier template-based architecture** designed to ma
 - **Easy Maintenance**: Changes to templates/profiles propagate automatically to all configurations
 - **Performance Optimized**: No evaluation overhead, automated garbage collection, binary caches
 
+## 📖 Required Documentation for All Development
+
+**CRITICAL**: Before writing any Nix code or making configuration changes, always consult these documentation files:
+
+### Essential Pattern References
+
+1. **[docs/PATTERNS.md](./docs/PATTERNS.md)** - Comprehensive Best Practices Guide
+   - ✅ **Module System Patterns**: Proper use of types, submodules, priorities, conditional config
+   - ✅ **Package Writing Patterns**: stdenv, dependencies, overlays, testing, cross-compilation
+   - ✅ **Configuration Patterns**: Modular structure, feature flags, Home Manager integration
+   - ✅ **Security Patterns**: Service hardening, secret management, firewall configuration
+   - ✅ **Performance Patterns**: Build optimization, store management, evaluation efficiency
+   - ✅ **Documentation Standards**: Comprehensive option descriptions and package metadata
+
+   **Use PATTERNS.md to**:
+   - Learn proper module system usage
+   - Understand type merging behavior
+   - Write correct package derivations
+   - Implement security best practices
+   - Optimize configuration performance
+
+2. **[docs/NIXOS-ANTI-PATTERNS.md](./docs/NIXOS-ANTI-PATTERNS.md)** - Critical Anti-Patterns to Avoid
+   - ❌ **The `mkIf true` Anti-Pattern**: Use direct boolean assignment
+   - ❌ **Nix Language Anti-Patterns**: Excessive `with`, dangerous `rec`, IFD, unquoted URLs
+   - ❌ **Security Anti-Patterns**: Reading secrets during evaluation, running services as root
+   - ❌ **Package Management Anti-Patterns**: Using `nix-env`, misusing system packages
+   - ❌ **Module System Anti-Patterns**: Incorrect types, missing assertions, ignoring priorities
+   - ❌ **Code Duplication**: Extract common functionality properly
+
+   **Use ANTI-PATTERNS.md to**:
+   - Avoid common mistakes
+   - Catch anti-patterns in code review
+   - Understand why certain patterns are problematic
+   - Follow community standards
+   - Write idiomatic Nix code
+
+### Development Workflow with Documentation
+
+**For Every Code Change:**
+
+```bash
+# 1. Review relevant patterns FIRST
+cat docs/PATTERNS.md              # Learn the correct approach
+cat docs/NIXOS-ANTI-PATTERNS.md   # Understand what to avoid
+
+# 2. Write code following patterns
+# ... make your changes ...
+
+# 3. Review against checklist (in ANTI-PATTERNS.md)
+# - Check module system usage
+# - Verify security practices
+# - Ensure proper types
+# - Validate architecture
+
+# 4. Test and validate
+just check-syntax                 # Syntax validation
+just test-host HOST              # Build test
+just validate                    # Comprehensive validation
+```
+
+**For Module Development:**
+
+1. **Read**: docs/PATTERNS.md → "Module System Patterns" section
+2. **Check**: Proper type usage, submodules, priorities
+3. **Validate**: Assertions, option descriptions, mkDefault usage
+4. **Review**: docs/NIXOS-ANTI-PATTERNS.md → "Module System Anti-Patterns"
+
+**For Package Writing:**
+
+1. **Read**: docs/PATTERNS.md → "Package Writing Patterns" section
+2. **Check**: strictDeps, proper input categorization, meta attributes
+3. **Follow**: Language-specific builders, phase hooks
+4. **Review**: docs/NIXOS-ANTI-PATTERNS.md → "Package Writing Anti-Patterns"
+
+**For Security Implementation:**
+
+1. **Read**: docs/PATTERNS.md → "Security Patterns" section
+2. **Implement**: Systemd hardening, secret management, firewall rules
+3. **Review**: docs/NIXOS-ANTI-PATTERNS.md → "Security Anti-Patterns"
+
+### Official Documentation Links
+
+These documentation files are based on official Nix resources:
+
+- **[Nix Module System Deep Dive](https://nix.dev/tutorials/module-system/deep-dive)** - Module system reference
+- **[Nixpkgs Manual](https://nixos.org/manual/nixpkgs/stable/)** - Package writing conventions
+- **[NixOS Manual](https://nixos.org/manual/nixos/stable/)** - System configuration guide
+
+### Why These Documents Matter
+
+1. **Type Safety**: Proper module system usage prevents configuration errors
+2. **Security**: Correct patterns prevent vulnerabilities and privilege escalation
+3. **Performance**: Avoiding anti-patterns improves build and evaluation speed
+4. **Maintainability**: Following patterns makes code easier to understand and modify
+5. **Community Alignment**: Using established patterns ensures compatibility with nixpkgs
+
+**Remember**: These documents are templates for AI-assisted and human development. Always consult them BEFORE and DURING code changes.
+
+---
+
 ## Key Commands
 
 ### Building and Testing
@@ -448,19 +548,26 @@ The repository includes a comprehensive live USB installer system for automated 
 
 ## Important Conventions & Anti-Patterns
 
+**⚠️ REQUIRED READING**: See comprehensive documentation at:
+- **[docs/PATTERNS.md](./docs/PATTERNS.md)** - Complete patterns guide with examples
+- **[docs/NIXOS-ANTI-PATTERNS.md](./docs/NIXOS-ANTI-PATTERNS.md)** - Detailed anti-patterns and checklist
+
 ### ✅ **DO - Follow These Patterns (NixOS Best Practices)**
 
-1. **Feature-First Development**: Always check if functionality should be in a shared module
-2. **Use feature flags** for conditional module loading instead of inline configurations
-3. **Follow Anti-Patterns Doc**: Strictly adhere to docs/NIXOS-ANTI-PATTERNS.md
-4. **Test changes** with `just test-host HOST` before deploying
-5. **Format code** with `just format` before committing
-6. **Validate** with `just validate` for comprehensive checks
-7. **Secrets** must use runtime loading only (passwordFile patterns)
-8. **MODULAR ARCHITECTURE**: All new services MUST be created in their own configuration files within `modules/` directory
-9. **No mkIf true**: Use direct boolean assignments - trust the NixOS module system
-10. **Explicit Imports**: Never use magic auto-discovery, always explicit import lists
-11. **Security First**: DynamicUser, ProtectSystem, minimal privileges for all services
+1. **Consult Documentation First**: Read docs/PATTERNS.md before writing any Nix code
+2. **Feature-First Development**: Always check if functionality should be in a shared module
+3. **Use feature flags** for conditional module loading instead of inline configurations
+4. **Follow Anti-Patterns Doc**: Strictly adhere to docs/NIXOS-ANTI-PATTERNS.md (zero tolerance)
+5. **Proper Module System Usage**: Use correct types, assertions, priorities (see PATTERNS.md)
+6. **Test changes** with `just test-host HOST` before deploying
+7. **Format code** with `just format` before committing
+8. **Validate** with `just validate` for comprehensive checks
+9. **Secrets** must use runtime loading only (passwordFile patterns)
+10. **MODULAR ARCHITECTURE**: All new services MUST be created in their own configuration files within `modules/` directory
+11. **No mkIf true**: Use direct boolean assignments - trust the NixOS module system
+12. **Explicit Imports**: Never use magic auto-discovery, always explicit import lists
+13. **Security First**: DynamicUser, ProtectSystem, minimal privileges for all services
+14. **Package Writing**: strictDeps, proper inputs, comprehensive meta attributes (see PATTERNS.md)
 
 ### ❌ **DON'T - Critical NixOS Anti-Patterns to Avoid**
 
