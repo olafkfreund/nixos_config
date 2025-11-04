@@ -205,9 +205,14 @@
       "Bash(home/profiles/desktop-user/default.nix )",
       "Bash(home/desktop/gnome/apps.nix )",
       "Bash(home/desktop/gnome/theme.nix)",
-      "Bash(top:*)"
+      "Bash(top:*)",
+      "Bash(AUTHORIZED=true npm install --package-lock-only)",
+      "WebFetch(domain:nix.dev)",
+      "WebFetch(domain:nixos.org)"
     ],
-    "additionalDirectories": ["/"]
+    "additionalDirectories": [
+      "/"
+    ]
   },
   "enableAllProjectMcpServers": false
 }

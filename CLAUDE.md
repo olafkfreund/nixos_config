@@ -120,6 +120,40 @@ These documentation files are based on official Nix resources:
 
 **Remember**: These documents are templates for AI-assisted and human development. Always consult them BEFORE and DURING code changes.
 
+### Code Review Command
+
+Use the `/review` command for comprehensive code reviews based on these documentation files:
+
+```bash
+# Review specific files
+/review
+Please review hosts/p620/configuration.nix
+
+# Review recent changes
+/review
+Please review all files I just committed
+
+# Review with specific focus
+/review
+Review modules/services/myservice.nix focusing on security and module system patterns
+```
+
+**The `/review` command will:**
+- ✅ Check against all patterns in PATTERNS.md
+- ❌ Detect anti-patterns from NIXOS-ANTI-PATTERNS.md
+- 📋 Run through the comprehensive code review checklist
+- 🔧 Provide specific fixes with code examples
+- 💯 Give an overall assessment and recommendations
+
+**Review Report Includes:**
+- Strengths and what's done well
+- Critical issues (must fix before merge)
+- Recommended improvements (should fix)
+- Minor suggestions (nice to have)
+- Complete checklist results
+- Actionable next steps with code snippets
+- Overall quality score and recommendation
+
 ---
 
 ## Key Commands
