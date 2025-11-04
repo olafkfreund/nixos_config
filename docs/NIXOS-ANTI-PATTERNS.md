@@ -1,10 +1,12 @@
 # NixOS Anti-Patterns and Best Practices
 
-> **Important**: These patterns were identified through community feedback and code review in GitHub issues #10, #11, and #12. Following these guidelines prevents common mistakes and ensures idiomatic NixOS code.
+> **Important**: These patterns were identified through community feedback, code review in GitHub issues #10, #11, and #12, and official Nix documentation from [nix.dev](https://nix.dev/tutorials/module-system/deep-dive) and the [Nixpkgs Manual](https://nixos.org/manual/nixpkgs/stable/).
 
 ## 📚 Background
 
-This document captures critical lessons learned from real community feedback about anti-patterns in NixOS configurations. These patterns were found in this repository and fixed based on expert review, helping establish guidelines for future development.
+This document captures critical lessons learned from real community feedback and official Nix documentation about anti-patterns in NixOS configurations. These patterns were found in this repository and fixed based on expert review, helping establish guidelines for future development.
+
+**Companion Document**: See [PATTERNS.md](./PATTERNS.md) for comprehensive best practices and recommended patterns.
 
 ## ❌ **Critical Anti-Patterns to Avoid**
 
@@ -86,6 +88,68 @@ pkgs.runCommand "app-config" { inherit generatedConfig; } ''
 ```
 
 **Performance impact:** Can increase evaluation time from seconds to hours for complex projects.
+
+#### **Incorrect Type Usage**
+
+```nix
+# ❌ BAD - Using wrong type with wrong merging behavior
+options.myList = lib.mkOption {
+  type = lib.types.str;  # String can't be merged!
+  default = "";
+};
+
+config.myList = "item1";
+config.myList = "item2";  # ERROR: multiple definitions
+
+# ✅ GOOD - Use appropriate type for data
+options.myList = lib.mkOption {
+  type = lib.types.listOf lib.types.str;
+  default = [];
+};
+
+config.myList = [ "item1" ];
+config.myList = [ "item2" ];  # Automatically merged to [ "item1" "item2" ]
+```
+
+**Why problematic:** From [nix.dev](https://nix.dev/tutorials/module-system/deep-dive): "The module system evaluates all modules it receives, and any of them can define a particular option's value" with merging behavior determined by the option's declared type. Using the wrong type prevents proper composition.
+
+**Type merging behavior:**
+- `str`: Single definition only - error on conflict
+- `lines`: Concatenates with newlines
+- `listOf`: Merges by concatenation
+- `attrsOf`: Merges recursively
+- `bool`: Error on conflicting values
+
+#### **Misunderstanding config vs. options**
+
+```nix
+# ❌ BAD - Confusing the two uses of 'config'
+{ config, ... }:  # This is the argument containing all evaluated config
+{
+  config = {      # This is the attribute exposing this module's values
+    # Using 'config' here refers to the argument, not this attribute
+    services.myservice.enable = config.someOtherOption;
+  };
+}
+
+# ✅ GOOD - Clear understanding of config argument vs. attribute
+{ config, lib, ... }:
+
+let
+  cfg = config.services.myservice;  # Access evaluated options
+in
+{
+  options.services.myservice = {
+    enable = lib.mkEnableOption "MyService";
+  };
+
+  config = lib.mkIf cfg.enable {  # Expose this module's config
+    # Implementation here
+  };
+}
+```
+
+**Official docs explain:** "The `config` argument passed to a module contains lazily-evaluated results from all imported modules, while the module's `config` attribute exposes that specific module's option values to the evaluation system."
 
 #### **Reading Secrets During Evaluation**
 
@@ -465,7 +529,255 @@ nixosConfigurations = {
 - Proliferates similar functions (9 template functions were removed)
 - Each wrapper function saved only 1 line of code
 
-### **5. Code Duplication Without Extraction**
+### **9. Package Writing Anti-Patterns**
+
+#### **Ignoring strictDeps**
+
+```nix
+# ❌ BAD - No dependency separation
+stdenv.mkDerivation {
+  pname = "myapp";
+  version = "1.0.0";
+
+  buildInputs = [
+    cmake        # Build tool, not runtime dependency!
+    pkg-config   # Build tool
+    zlib         # Runtime library
+  ];
+}
+
+# ✅ GOOD - Proper dependency categorization
+stdenv.mkDerivation {
+  pname = "myapp";
+  version = "1.0.0";
+
+  strictDeps = true;  # Essential for cross-compilation
+
+  # Tools that run on build platform
+  nativeBuildInputs = [
+    cmake
+    pkg-config
+  ];
+
+  # Libraries linked into binary
+  buildInputs = [
+    zlib
+  ];
+}
+```
+
+**Why problematic:** From the [Nixpkgs Manual](https://nixos.org/manual/nixpkgs/stable/): Build helpers should receive dependencies through function arguments for composability. Incorrect categorization breaks cross-compilation and causes unnecessary rebuilds.
+
+#### **Using override Instead of overrideAttrs**
+
+```nix
+# ❌ SUBOPTIMAL - override changes function arguments
+myPackage = originalPackage.override {
+  # Can only override function parameters
+  someInput = modifiedInput;
+};
+
+# ✅ PREFERRED - overrideAttrs modifies derivation
+myPackage = originalPackage.overrideAttrs (oldAttrs: {
+  # Can modify any derivation attribute
+  patches = (oldAttrs.patches or []) ++ [ ./my-patch.patch ];
+
+  postInstall = (oldAttrs.postInstall or "") + ''
+    # Additional installation steps
+  '';
+});
+```
+
+**Nixpkgs Manual states:** "overrideAttrs should be preferred in (almost) all cases" because it allows `stdenv.mkDerivation` to process input arguments properly.
+
+#### **Missing Meta Attributes**
+
+```nix
+# ❌ BAD - No metadata
+stdenv.mkDerivation {
+  pname = "myapp";
+  version = "1.0.0";
+  src = /* ... */;
+  # No meta!
+}
+
+# ✅ GOOD - Comprehensive metadata
+stdenv.mkDerivation {
+  pname = "myapp";
+  version = "1.0.0";
+  src = /* ... */;
+
+  meta = with lib; {
+    description = "Short description of the package";
+    longDescription = ''
+      Detailed explanation of what the package does
+      and its key features.
+    '';
+    homepage = "https://myapp.example.com";
+    changelog = "https://github.com/org/myapp/releases/tag/v${version}";
+    license = licenses.mit;
+    maintainers = with maintainers; [ myname ];
+    platforms = platforms.linux;
+    mainProgram = "myapp";
+  };
+}
+```
+
+**Why required:** The manual emphasizes that metadata "enables filtering and discovery" in NixOS's package search and supports automated tooling.
+
+#### **Missing Phase Hooks**
+
+```nix
+# ❌ BAD - Custom phases without hooks
+stdenv.mkDerivation {
+  pname = "myapp";
+
+  installPhase = ''
+    mkdir -p $out/bin
+    cp myapp $out/bin/
+  '';
+}
+
+# ✅ GOOD - Use phase hooks
+stdenv.mkDerivation {
+  pname = "myapp";
+
+  installPhase = ''
+    runHook preInstall
+
+    mkdir -p $out/bin
+    cp myapp $out/bin/
+
+    runHook postInstall
+  '';
+}
+```
+
+**Why important:** Phase hooks allow other modules and overlays to inject additional steps without completely overriding your phases.
+
+#### **Improper Use of pkgs.extend**
+
+```nix
+# ❌ BAD - Using extend for large-scale changes
+let
+  customPkgs = pkgs.extend (final: prev: {
+    # Many package overrides
+  });
+in
+{
+  environment.systemPackages = with customPkgs; [ /* ... */ ];
+}
+
+# ✅ GOOD - Use overlays for package set modifications
+nixpkgs.overlays = [
+  (final: prev: {
+    # Package overrides here
+  })
+];
+```
+
+**Performance issue:** The manual notes that `extend` can cause unnecessary re-evaluation. Prefer explicit overlays in `nixpkgs.overlays` for large-scale changes.
+
+### **10. Module System Anti-Patterns**
+
+#### **Not Using Assertions**
+
+```nix
+# ❌ BAD - Silent misconfiguration
+{ config, lib, ... }:
+
+let
+  cfg = config.services.myservice;
+in
+{
+  config = lib.mkIf cfg.enable {
+    # Assumes database.host is set, fails at runtime
+    systemd.services.myservice.environment = {
+      DB_HOST = cfg.database.host;
+    };
+  };
+}
+
+# ✅ GOOD - Validate configuration early
+{ config, lib, ... }:
+
+let
+  cfg = config.services.myservice;
+in
+{
+  config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = cfg.database.host != "";
+        message = "services.myservice.database.host must be set";
+      }
+      {
+        assertion = cfg.ssl.enable -> (cfg.ssl.certFile != null);
+        message = "services.myservice.ssl requires certFile when enabled";
+      }
+    ];
+
+    systemd.services.myservice.environment = {
+      DB_HOST = cfg.database.host;
+    };
+  };
+}
+```
+
+**From nix.dev:** "The module system performs type validation during evaluation, producing clear error messages" for type mismatches. Extend this with assertions for business logic validation.
+
+#### **Ignoring Priority System**
+
+```nix
+# ❌ BAD - Hard-coded values that can't be overridden
+config = {
+  services.nginx.user = "nginx";  # Normal priority
+  # User can't easily override this without lib.mkForce
+}
+
+# ✅ GOOD - Use mkDefault for overridable defaults
+config = {
+  services.nginx.user = lib.mkDefault "nginx";  # Low priority
+  # User can easily override without mkForce
+}
+```
+
+**Module system priorities:**
+- `mkForce` (50): Very high priority - avoid unless absolutely necessary
+- Normal (100): Default assignment
+- `mkDefault` (1000): Low priority - preferred for module defaults
+- `mkOverride <n>`: Custom priority
+
+#### **Missing Option Descriptions**
+
+```nix
+# ❌ BAD - No documentation
+options.services.myservice = {
+  port = lib.mkOption {
+    type = lib.types.port;
+    default = 8080;
+  };
+}
+
+# ✅ GOOD - Clear documentation
+options.services.myservice = {
+  port = lib.mkOption {
+    type = lib.types.port;
+    default = 8080;
+    example = 9000;
+    description = ''
+      Port for MyService to listen on.
+
+      Default is 8080. Choose a port that doesn't conflict
+      with other services on your system.
+    '';
+  };
+}
+```
+
+**Why essential:** Options form the public API of your module. Comprehensive descriptions enable users to configure your module correctly without reading implementation code.
+
+### **11. Code Duplication Without Extraction**
 
 ```nix
 # ❌ WRONG - Repeated definitions across configurations
@@ -598,7 +910,17 @@ Before submitting any NixOS configuration changes, verify:
 - [ ] **Using `inherit` where appropriate** - avoid manual assignment repetition
 - [ ] **Minimal `rec` usage** - avoid infinite recursion risks
 - [ ] **No Import From Derivation (IFD)** - keep evaluation and build separate
-- [ ] **Path division uses spacing** - `6 / 3` not `6/3`
+- [ ] **Correct type usage** - choose types that enable proper merging behavior
+- [ ] **Clear config vs. options understanding** - proper use of module system
+
+### **Module System:**
+
+- [ ] **Options have proper types** - enable automatic validation and merging
+- [ ] **Assertions validate configuration** - catch errors with helpful messages
+- [ ] **mkDefault used for overridable defaults** - avoid mkForce unless necessary
+- [ ] **Comprehensive option descriptions** - document public API thoroughly
+- [ ] **Submodules for complex structures** - group related options logically
+- [ ] **Phase hooks in custom phases** - runHook preInstall/postInstall
 
 ### **Security & Safety:**
 
@@ -633,12 +955,21 @@ Before submitting any NixOS configuration changes, verify:
 - [ ] **Gradual config migration** - avoid conflicts with existing dotfiles
 - [ ] **Pure configuration** - avoid mkOutOfStoreSymlink in flakes
 
+### **Package Writing:**
+
+- [ ] **strictDeps enabled** - proper dependency separation
+- [ ] **Correct input categorization** - nativeBuildInputs vs buildInputs
+- [ ] **Comprehensive meta attributes** - description, license, maintainers, platforms
+- [ ] **Phase hooks in custom phases** - runHook preInstall/postInstall
+- [ ] **Use overrideAttrs over override** - preferred for derivation modifications
+- [ ] **Proper overlay structure** - final/prev arguments correctly used
+
 ### **Development Environment:**
 
 - [ ] **Modular flake structure** - no everything-in-flake.nix
 - [ ] **Cross-compilation compatible** - proper system handling
-- [ ] **Correct dependency categorization** - nativeBuildInputs vs buildInputs
-- [ ] **Phase hooks included** - runHook preInstall/postInstall
+- [ ] **Language-specific builders** - use buildGoModule, buildPythonApplication, etc.
+- [ ] **Multi-output packages** - split dev, doc, man outputs where appropriate
 
 ### **General Best Practices:**
 
@@ -753,6 +1084,28 @@ Following these guidelines ensures NixOS configurations that are:
 - **Maintainable** with clear, explicit behavior
 - **Performant** without unnecessary evaluation overhead
 - **Debuggable** with obvious module relationships
+- **Type-safe** with proper module system usage
+- **Composable** with correct package and module patterns
 - **Trustworthy** with proper disclosure of AI assistance
 
 These patterns help both human developers and AI systems create better NixOS code that the community can rely on and build upon.
+
+## **Official Documentation References**
+
+For comprehensive best practices and patterns, consult these resources:
+
+### **Primary References:**
+- **[Nix Module System Deep Dive](https://nix.dev/tutorials/module-system/deep-dive)** - Official guide to the module system, type usage, and proper module composition
+- **[Nixpkgs Manual](https://nixos.org/manual/nixpkgs/stable/)** - Standard package writing conventions, build helpers, and overlay patterns
+- **[NixOS Manual](https://nixos.org/manual/nixos/stable/)** - System configuration and module development
+
+### **Companion Documents:**
+- **[PATTERNS.md](./PATTERNS.md)** - Comprehensive guide to recommended patterns and best practices for this repository
+- **[CLAUDE.md](../CLAUDE.md)** - Project-specific guidelines and architecture documentation
+
+### **Community Resources:**
+- [NixOS Discourse](https://discourse.nixos.org/) - Community discussions and help
+- [NixOS Wiki](https://nixos.wiki/) - Community-maintained documentation
+- [Nixpkgs Repository](https://github.com/NixOS/nixpkgs) - Source of truth for established patterns
+
+When in doubt, always check how official nixpkgs modules handle similar functionality before implementing your own patterns.
