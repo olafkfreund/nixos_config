@@ -155,6 +155,7 @@ Creates a GitHub issue with comprehensive research and planning:
 ```
 
 **What `/new_task` does:**
+
 - ✅ Guides through issue creation
 - ✅ Conducts technical research using WebSearch
 - ✅ Reviews docs/PATTERNS.md and docs/NIXOS-ANTI-PATTERNS.md
@@ -163,6 +164,7 @@ Creates a GitHub issue with comprehensive research and planning:
 - ✅ Generates branch name following conventions
 
 **Example:**
+
 ```
 User: "/new_task"
 User: "Add PostgreSQL monitoring to the infrastructure"
@@ -190,6 +192,7 @@ Reviews all open GitHub issues and identifies priorities:
 ```
 
 **What `/check_tasks` shows:**
+
 - 📋 All open issues categorized by priority (critical/high/medium/low)
 - ⏸️ Blocked issues requiring attention
 - 📊 Statistics and progress tracking
@@ -197,6 +200,7 @@ Reviews all open GitHub issues and identifies priorities:
 - 🔄 Recent activity and updates
 
 **When to use:**
+
 - ✅ Start of each day - see what needs attention
 - ✅ Before starting new work - check priorities
 - ✅ Weekly planning - review all open issues
@@ -297,6 +301,7 @@ just quick-deploy p510
 **Format**: `<type>/<issue-number>-<brief-description>`
 
 **Examples:**
+
 ```bash
 feature/123-postgres-monitoring     # New feature
 fix/67-p510-boot-delay             # Bug fix
@@ -319,6 +324,7 @@ Follow **Conventional Commits** specification:
 ```
 
 **Examples:**
+
 ```bash
 feat(monitoring): add PostgreSQL monitoring (#123)
 fix(p510): resolve boot delay from fstrim (#67)
@@ -357,9 +363,11 @@ gh repo view
 ### **Comprehensive Documentation**
 
 For complete workflow details, see:
+
 - **[docs/GITHUB-WORKFLOW.md](./docs/GITHUB-WORKFLOW.md)** - Complete GitHub workflow guide
 
 **What's in the workflow documentation:**
+
 - Issue-driven development philosophy
 - Branch management strategies
 - Pull request process and review standards
@@ -393,6 +401,7 @@ The GitHub workflow integrates seamlessly with:
 ### **Best Practices**
 
 **Do's ✅:**
+
 - ✅ Create issue for every change (use `/new_task`)
 - ✅ Check open tasks daily (`/check_tasks`)
 - ✅ Use descriptive branch names with issue numbers
@@ -404,6 +413,7 @@ The GitHub workflow integrates seamlessly with:
 - ✅ Delete branches after merge
 
 **Don'ts ❌:**
+
 - ❌ Commit directly to main
 - ❌ Create PRs without linked issues
 - ❌ Merge without testing
@@ -448,6 +458,7 @@ Review modules/services/myservice.nix focusing on security and module system pat
 ```
 
 **The `/review` command will:**
+
 - ✅ Check against all patterns in PATTERNS.md
 - ❌ Detect anti-patterns from NIXOS-ANTI-PATTERNS.md
 - 📋 Run through the comprehensive code review checklist
@@ -455,6 +466,7 @@ Review modules/services/myservice.nix focusing on security and module system pat
 - 💯 Give an overall assessment and recommendations
 
 **Review Report Includes:**
+
 - Strengths and what's done well
 - Critical issues (must fix before merge)
 - Recommended improvements (should fix)
@@ -889,6 +901,7 @@ The repository includes a comprehensive live USB installer system for automated 
 ## Important Conventions & Anti-Patterns
 
 **⚠️ REQUIRED READING**: See comprehensive documentation at:
+
 - **[docs/PATTERNS.md](./docs/PATTERNS.md)** - Complete patterns guide with examples
 - **[docs/NIXOS-ANTI-PATTERNS.md](./docs/NIXOS-ANTI-PATTERNS.md)** - Detailed anti-patterns and checklist
 
