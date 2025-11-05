@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a sophisticated multi-host NixOS Infrastructure Hub featuring a revolutionary **template-based architecture** that achieves unprecedented 95% code deduplication through systematic use of host templates, Home Manager profiles, and 141+ modular components. The repository manages 5 active hosts with different hardware profiles, supports multi-user environments, and provides comprehensive monitoring, AI integration, development environments, and follows comprehensive NixOS best practices with zero anti-patterns.
+This is a sophisticated multi-host NixOS Infrastructure Hub featuring a revolutionary **template-based architecture** that achieves unprecedented 95% code deduplication through systematic use of host templates, Home Manager profiles, and 141+ modular components. The repository manages 4 active hosts with different hardware profiles, supports multi-user environments, and provides comprehensive monitoring, AI integration, development environments, and follows comprehensive NixOS best practices with zero anti-patterns.
 
 ### Architecture Philosophy
 
@@ -514,13 +514,13 @@ just deploy
 just quick-deploy p620    # Deploy P620 only if configuration changed
 just quick-deploy razer   # Deploy Razer only if configuration changed
 just quick-deploy p510    # Deploy P510 only if configuration changed
-just quick-deploy dex5550 # Deploy DEX5550 only if configuration changed
+just quick-deploy samsung # Deploy Samsung only if configuration changed
 
 # Standard optimized deployment to specific hosts
 just p620    # AMD workstation with ROCm (optimized)
 just razer   # Intel/NVIDIA laptop (optimized)
 just p510    # Intel Xeon/NVIDIA workstation (optimized)
-just dex5550 # Intel SFF with integrated graphics (optimized)
+just samsung # Intel laptop (optimized)
 
 # Advanced deployment options
 just deploy-fast p620        # Fast deployment with minimal builds
@@ -568,7 +568,7 @@ just quick-test
 just quick-deploy p620
 just quick-deploy razer
 just quick-deploy p510
-just quick-deploy dex5550
+just quick-deploy samsung
 
 # 3. Or do both in one command
 just quick-all
@@ -628,7 +628,6 @@ just deploy-cached HOST
 just build-live p620              # Build P620 installer
 just build-live razer             # Build Razer installer
 just build-live p510              # Build P510 installer
-just build-live dex5550           # Build DEX5550 installer
 just build-live samsung           # Build Samsung installer
 just build-all-live               # Build all host installers
 
@@ -679,10 +678,10 @@ just live-help                    # Show comprehensive help
 │   ├── services/                     # Service-specific configurations
 │   └── default.nix                   # Module imports and organization
 ├── hosts/                            # Host-specific configurations
-│   ├── p620/                         # AMD workstation (primary AI host)
+│   ├── p620/                         # AMD workstation (primary AI host, monitoring server)
 │   ├── p510/                         # Intel Xeon server (media server)
 │   ├── razer/                        # Intel/NVIDIA laptop (mobile)
-│   ├── dex5550/                      # Intel SFF (monitoring server)
+│   ├── samsung/                      # Intel laptop (mobile)
 │   └── common/                       # Shared host configurations
 ├── home/                             # Home Manager configurations and profiles
 │   └── profiles/                     # Home Manager role-based profiles
@@ -695,10 +694,9 @@ just live-help                    # Show comprehensive help
 │   │   ├── workstation.nix           # Full desktop workstation template
 │   │   ├── laptop.nix                # Mobile laptop template
 │   │   └── server.nix                # Headless server template
-│   ├── p620/                         # AMD workstation (uses workstation template)
-│   ├── p510/                         # Intel Xeon server (uses server template)
+│   ├── p620/                         # AMD workstation (uses workstation template, monitoring server)
+│   ├── p510/                         # Intel Xeon server (uses server template, media server)
 │   ├── razer/                        # Intel/NVIDIA laptop (uses laptop template)
-│   ├── dex5550/                      # Intel SFF server (uses server template)
 │   ├── samsung/                      # Intel laptop (uses laptop template)
 │   └── common/                       # Shared host configurations
 ├── Users/                            # Per-user configurations with profile compositions
@@ -728,7 +726,7 @@ Three hardware-optimized templates provide base configurations:
   - Includes: Power management, mobile hardware support, battery optimization
 
 - **`server.nix`**: Headless server configuration
-  - Used by: P510 (media server), DEX5550 (monitoring server)
+  - Used by: P510 (media server)
   - Includes: Server services, monitoring, headless operation
 
 #### **Tier 2: Home Manager Profiles** (`home/profiles/`)
@@ -744,10 +742,9 @@ Four role-based profiles provide user environment configurations:
 
 Sophisticated profile combinations for specific use cases:
 
-- **P620**: `developer` + `desktop-user` (full workstation)
+- **P620**: `developer` + `desktop-user` (full workstation with monitoring)
 - **Razer/Samsung**: `developer` + `laptop-user` (mobile development)
 - **P510**: `server-admin` + `developer` (dev-server composition)
-- **DEX5550**: `server-admin` (pure server)
 
 ### Feature Module Architecture
 
@@ -804,7 +801,7 @@ features = {
   monitoring = {
     enable = true;
     mode = "client";  # or "server"
-    serverHost = "dex5550";
+    serverHost = "p620";
   };
 };
 ```
@@ -852,7 +849,7 @@ The repository includes a comprehensive live USB installer system for automated 
 
 **Key Features:**
 
-- **Host-specific live USB images** for each system (P620, Razer, P510, DEX5550, Samsung)
+- **Host-specific live USB images** for each system (P620, Razer, P510, Samsung)
 - **Hardware configuration auto-detection** reusing existing `hardware-configuration.nix` files
 - **TUI-based installation wizard** with guided workflow and safety confirmations
 - **SSH access enabled** (root/nixos) for remote installation
@@ -1137,10 +1134,9 @@ When you notice duplication:
 
 ## Hardware-Specific Considerations
 
-- **P620**: AMD GPU requires ROCm support, uses `amdgpu` driver (Workstation template)
+- **P620**: AMD GPU requires ROCm support, uses `amdgpu` driver (Workstation template, monitoring server)
 - **Razer**: Hybrid Intel/NVIDIA graphics needs Optimus configuration (Laptop template)
 - **P510**: Intel Xeon with NVIDIA, configured as headless media server (Server template)
-- **DEX5550**: Intel integrated graphics, monitoring/logging server (Server template)
 - **Samsung**: Intel laptop with power management (Laptop template)
 
 ## Testing Workflow
@@ -1342,7 +1338,7 @@ just deploy  # or just HOSTNAME
 
 ### Enabling Monitoring on Additional Hosts
 
-To add monitoring to other hosts (razer, p510, dex5550):
+To add monitoring to other hosts (razer, p510, samsung):
 
 1. **Enable monitoring in client mode:**
 
@@ -1383,9 +1379,9 @@ just HOSTNAME  # Deploy to specific host
 
 ### Monitoring Stack (Phase 7 - FULLY DEPLOYED)
 
-A comprehensive monitoring infrastructure deployed on DEX5550 as the monitoring server:
+A comprehensive monitoring infrastructure deployed on P620 as the monitoring server:
 
-**Services:**
+**Monitoring Stack (Deployed on P620):**
 
 - **Prometheus** (port 9090): Metrics collection and storage
 - **Grafana** (port 3001): Visualization and dashboards
@@ -1400,7 +1396,7 @@ A comprehensive monitoring infrastructure deployed on DEX5550 as the monitoring 
 **Dashboards Available:**
 
 - NixOS System Overview: Global system metrics
-- Host-specific dashboards: p620 (AMD), razer (NVIDIA), p510 (NVIDIA), dex5550 (Intel)
+- Host-specific dashboards: p620 (AMD), razer (NVIDIA), p510 (NVIDIA), samsung (Intel)
 - Hardware-specific panels for GPU metrics
 
 **Management Commands:**
@@ -1412,31 +1408,31 @@ prometheus-status       # Prometheus server and targets
 node-exporter-status    # All exporters status and metrics
 
 # Access monitoring interfaces
-# Grafana: http://dex5550.home.freundcloud.com:3001 (admin/nixos-admin)
-# Prometheus: http://dex5550.home.freundcloud.com:9090
-# Alertmanager: http://dex5550.home.freundcloud.com:9093
+# Grafana: http://p620.home.freundcloud.com:3001 (admin/nixos-admin)
+# Prometheus: http://p620.home.freundcloud.com:9090
+# Alertmanager: http://p620.home.freundcloud.com:9093
 ```
 
 **Configuration:**
 
-- Server mode on DEX5550 (monitoring server)
-- Client mode deployed on P620, P510, and Razer
+- Server mode on P620 (monitoring server)
+- Client mode deployed on P510, Razer, and Samsung
 - 30-day metrics retention
 - 15-second scrape intervals for real-time monitoring
 - Comprehensive alerting rules for system health
 
 **Deployment Status**: ✅ **ALL HOSTS MONITORED**
 
-- P620: ✅ Node exporter, systemd exporter, AI metrics
-- DEX5550: ✅ Prometheus, Grafana, Alertmanager
+- P620: ✅ Prometheus, Grafana, Alertmanager, Node exporter, systemd exporter, AI metrics (monitoring server)
 - P510: ✅ Node exporter, systemd exporter, storage metrics, Plex monitoring, NZBGet monitoring
 - Razer: ✅ Node exporter, systemd exporter, mobile metrics
+- Samsung: ✅ Node exporter, systemd exporter, mobile metrics
 
 ### Advanced Media Server Monitoring (Phase 10.1 - FULLY DEPLOYED)
 
 **Comprehensive Plex Media Server Analytics**
 
-A complete enterprise-grade media server monitoring solution with detailed analytics, user behavior tracking, and geographic insights deployed on P510 and visualized on DEX5550.
+A complete enterprise-grade media server monitoring solution with detailed analytics, user behavior tracking, and geographic insights deployed on P510 and visualized on P620.
 
 **✅ Deployment Status: FULLY OPERATIONAL**
 
@@ -1511,7 +1507,7 @@ nzbgetExporter = {
 };
 ```
 
-**Dashboard Server (DEX5550):**
+**Dashboard Server (P620):**
 
 ```nix
 # Enable comprehensive dashboards
@@ -1548,7 +1544,7 @@ monitoring = {
 
 ```bash
 # Access comprehensive media monitoring
-# Grafana Portal: http://dex5550:3001 (admin/nixos-admin)
+# Grafana Portal: http://p620:3001 (admin/nixos-admin)
 
 # Available dashboards:
 # - 🎬 Plex Media Server - Overview
@@ -1593,10 +1589,10 @@ A complete, production-ready AI infrastructure deployed across all 4 hosts with 
 
 ### Multi-Host Architecture
 
-- **P620** (Primary AI Host): AI providers, alerting, load testing, local inference
-- **DEX5550** (Monitoring Server): Prometheus, Grafana, centralized monitoring
-- **P510** (High Performance Client): Storage analysis, automated remediation
+- **P620** (Primary AI Host & Monitoring Server): AI providers, Prometheus, Grafana, alerting, load testing, local inference
+- **P510** (High Performance Client): Storage analysis, automated remediation, media server
 - **Razer** (Mobile Client): Basic monitoring and system analysis
+- **Samsung** (Mobile Client): Basic monitoring and system analysis
 
 ### Deployment Validation Results
 
@@ -1609,9 +1605,9 @@ A complete, production-ready AI infrastructure deployed across all 4 hosts with 
 
 ### Access Points
 
-- **Grafana**: <http://dex5550.home.freundcloud.com:3001>
-- **Prometheus**: <http://dex5550.home.freundcloud.com:9090>
-- **Alertmanager**: <http://dex5550.home.freundcloud.com:9093>
+- **Grafana**: <http://p620.home.freundcloud.com:3001>
+- **Prometheus**: <http://p620.home.freundcloud.com:9090>
+- **Alertmanager**: <http://p620.home.freundcloud.com:9093>
 
 ### Validation Command
 
@@ -2042,7 +2038,7 @@ curl http://localhost:9103/metrics
 
 ```bash
 # Check if exporters are being scraped by Prometheus
-curl -s http://dex5550:9090/api/v1/targets | jq '.data.activeTargets[] | select(.labels.job | contains("plex") or contains("nzbget"))'
+curl -s http://p620:9090/api/v1/targets | jq '.data.activeTargets[] | select(.labels.job | contains("plex") or contains("nzbget"))'
 
 # Verify dashboard provisioning
 ls -la /var/lib/grafana/dashboards/plex-*.json
@@ -2278,8 +2274,8 @@ features = {
 
 - **P620**: ✅ Available (enable in configuration as needed)
 - **Razer**: ✅ Available (enable in configuration as needed)
-- **P510**: Available for activation
-- **DEX5550**: Available for activation
+- **P510**: ✅ Available (enable in configuration as needed)
+- **Samsung**: ✅ Available (enable in configuration as needed)
 
 ### **🚨 Troubleshooting:**
 
@@ -2345,13 +2341,13 @@ The MicroVM system provides enterprise-grade virtualization capabilities with mi
 - **Anti-Patterns**: Zero - comprehensive best practices implementation completed
 - **Security**: All services hardened with DynamicUser and minimal privileges
 - **Performance**: Optimized builds, automated garbage collection, binary caches
-- **Hosts**: 5 active (P620, P510, Razer, DEX5550, Samsung) using appropriate templates
+- **Hosts**: 4 active (P620, P510, Razer, Samsung) using appropriate templates
 
 ### 📊 **Monitoring & Services Status**
 
-- **DEX5550**: Monitoring server (Prometheus, Grafana, Loki, Alertmanager) ✅
+- **P620**: Workstation and monitoring server (AI infrastructure, Prometheus, Grafana, Loki, Alertmanager) ✅
 - **P510**: Headless media server (Plex, NZBGet) with comprehensive analytics ✅
-- **P620**: AI infrastructure (4 providers), workstation template ✅
+- **Razer/Samsung**: Mobile systems with monitoring clients ✅
 - **All Hosts**: Centralized logging, performance monitoring, security hardening ✅
 
 ## Agent OS Documentation

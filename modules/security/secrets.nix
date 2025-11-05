@@ -86,7 +86,7 @@ in
       })
 
       # WORKING - Database credentials (servers only)
-      (mkIf (builtins.elem config.networking.hostName [ "p510" "dex5550" ]) (mkSecret "postgres-password" {
+      (mkIf (builtins.elem config.networking.hostName [ "p510" ]) (mkSecret "postgres-password" {
         file = ../../secrets/postgres-password.age;
         owner = "postgres";
         group = "postgres";

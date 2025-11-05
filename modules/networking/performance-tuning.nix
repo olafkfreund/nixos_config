@@ -72,7 +72,7 @@ in
 
       hosts = mkOption {
         type = types.listOf types.str;
-        default = [ "p620" "dex5550" "p510" "razer" ];
+        default = [ "p620" "p510" "razer" ];
         description = "Hosts to optimize communication between";
       };
 
