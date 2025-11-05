@@ -131,7 +131,6 @@
         samsung = [ "olafkfreund" ];
         razer = [ "olafkfreund" ];
         p510 = [ "olafkfreund" ];
-        dex5550 = [ "olafkfreund" ];
       };
 
       # Note: MicroVM packages and live images temporarily disabled during refactoring
@@ -245,11 +244,8 @@
         let
           primaryUser = getPrimaryUser host;
           allUsers = getHostUsers host;
-          # Only import stylix for desktop/workstation hosts, not servers
-          stylixModule =
-            if host == "dex5550"
-            then [ ]
-            else [ inputs.stylix.nixosModules.stylix ];
+          # Import stylix for all hosts (removed dex5550 check as host no longer exists)
+          stylixModule = [ inputs.stylix.nixosModules.stylix ];
         in
         {
           system = "x86_64-linux";
@@ -323,12 +319,6 @@
         # Laptops (portable systems with power management)
         razer = nixpkgs.lib.nixosSystem (makeNixosSystem "razer"); # Intel/NVIDIA laptop (mobile dev)
         samsung = nixpkgs.lib.nixosSystem (makeNixosSystem "samsung"); # Intel laptop (mobile)
-
-        # Servers (headless monitoring and services)
-        dex5550 = nixpkgs.lib.nixosSystem (makeNixosSystem "dex5550"); # Intel SFF (monitoring server)
-
-        # Hybrid systems (server/workstation combinations)
-        # hp = nixpkgs.lib.nixosSystem (makeNixosSystem "hp"); # Currently inactive
 
         # MicroVM configurations (temporarily disabled for flake restructuring)
         # dev-vm = microvms.dev-vm;

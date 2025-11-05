@@ -79,7 +79,7 @@ Unlike typical NixOS configurations with anti-patterns and technical debt, we fo
 
 ### Core Features
 
-- **Multi-Host Configuration Management:** Declarative NixOS configurations for 6+ hosts with hardware-specific optimizations
+- **Multi-Host Configuration Management:** Declarative NixOS configurations for 4 active hosts with hardware-specific optimizations
 - **Feature Flag System:** 141+ optimized modules with dependency validation and conditional loading
 - **Secrets Management:** Comprehensive Agenix-based secrets with automated rotation and access controls
 - **Live USB Installers:** Hardware-specific live installation images with automated setup wizards
