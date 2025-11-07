@@ -22,7 +22,7 @@ in
       gemini-cli
 
       # Tools that support Gemini API
-      aichat # Supports Gemini models
+      # aichat REMOVED due to extremely slow pyrate-limiter build dependency (2+ hours)
     ];
 
     # Gemini-specific environment setup

@@ -23,7 +23,7 @@ in
       shell-gpt
       # Enhanced CLI tools
       tgpt
-      aichat
+      # aichat REMOVED due to extremely slow pyrate-limiter build dependency (2+ hours)
     ];
 
     # OpenAI-specific environment setup

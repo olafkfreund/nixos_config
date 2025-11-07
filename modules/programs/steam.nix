@@ -12,7 +12,7 @@
       proton-ge-bin
       protonplus
       protonup-qt
-      lutris
+      # lutris REMOVED: depends on moddb with slow pyrate-limiter tests (25+ min)
       cartridges
       heroic
     ];

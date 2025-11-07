@@ -150,7 +150,7 @@ in
     # Desktop packages (smart selection)
     environment.systemPackages =
       desktopPackages
-      ++ optionals cfg.features.gaming (with pkgs; [ steam lutris ])
+      ++ optionals cfg.features.gaming (with pkgs; [ steam ]) # lutris removed: slow pyrate-limiter dependency
       ++ optionals cfg.features.development (with pkgs; [ vscode git-crypt ])
       ++ optionals cfg.features.media (with pkgs; [ gimp blender kdenlive ]);
 

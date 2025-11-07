@@ -22,7 +22,7 @@ in
       ollama
 
       # Tools that work well with Ollama
-      aichat # Supports Ollama models
+      # aichat REMOVED due to extremely slow pyrate-limiter build dependency (2+ hours)
     ];
 
     # Ollama-specific environment setup

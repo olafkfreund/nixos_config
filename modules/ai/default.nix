@@ -23,7 +23,7 @@ in
       pkgs.gh-copilot
       pkgs.yai
       pkgs.shell-gpt
-      pkgs.aichat
+      # aichat REMOVED due to extremely slow pyrate-limiter build dependency (2+ hours)
       pkgs.gorilla-cli
       # Temporarily disabled due to llama-index-core build failure (upstream nixpkgs issue)
       # pkgs.newelle

@@ -80,7 +80,7 @@ in
       # Code assistants
       optionals cfg.packages.codeAssistants [
         gh-copilot # GitHub Copilot CLI integration
-        aichat # AI chat with code assistance features
+        # aichat REMOVED due to extremely slow pyrate-limiter build dependency (2+ hours)
         gpt-cli # General purpose GPT CLI
         # codex removed due to build issues with OpenSSL dependencies
       ]

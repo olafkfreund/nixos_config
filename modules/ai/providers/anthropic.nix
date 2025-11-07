@@ -22,7 +22,7 @@ in
       # claude-desktop # Add when available in nixpkgs
 
       # CLI tools that support Claude API
-      aichat # Supports multiple providers including Claude
+      # aichat REMOVED due to extremely slow pyrate-limiter build dependency (2+ hours)
     ];
 
     # Anthropic-specific environment setup
