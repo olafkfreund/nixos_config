@@ -210,11 +210,13 @@
       "WebFetch(domain:nix.dev)",
       "WebFetch(domain:nixos.org)",
       "WebSearch",
-      "Bash(nix derivation show:*)"
+      "Bash(nix derivation show:*)",
+      "SlashCommand(/new_task)",
+      "Bash(gh issue create:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue comment:*)"
     ],
-    "additionalDirectories": [
-      "/"
-    ]
+    "additionalDirectories": ["/"]
   },
   "enableAllProjectMcpServers": false
 }
