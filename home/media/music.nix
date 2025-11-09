@@ -1,6 +1,6 @@
 { pkgs, ... }: {
   home.packages = [
-    # pkgs.spotify # Removing direct Spotify installation (provided by Spicetify)
+    pkgs.spotify # Re-enabled while Spicetify is temporarily disabled (issue #13)
     pkgs.ncspot # Spotify
     pkgs.plexamp # Plex
     pkgs.vlc # video player
