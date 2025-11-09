@@ -8,7 +8,10 @@ let
 in
 {
   programs.spicetify = {
-    enable = true;
+    # Temporarily disabled due to upstream syntax error in spicetify-nix
+    # Error: simpleBeautifulLyrics extension has syntax error at extensions.nix:197
+    # TODO: Re-enable when upstream fixes the issue
+    enable = false;
 
     # Switch from onepunch to Gruvbox theme
     theme = lib.mkDefault spicePkgs.themes.onepunch;
