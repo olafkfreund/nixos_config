@@ -597,7 +597,7 @@ in
       "olm-3.2.16"
       "python3.12-youtube-dl-2021.12.17"
       "libsoup-2.74.3" # Temporary: Required by some GNOME packages until migration to libsoup-3
-      "electron-35.7.5" # Required by gfn-electron (GeForce NOW client)
+      "electron-35.7.5" # Temporary: Required until upstream packages migrate to newer electron
     ];
   };
 }
