@@ -158,12 +158,13 @@ in
       droidcam = true;
     };
 
-    # COSMIC Desktop enabled alongside GNOME - using GDM
+    # COSMIC Desktop with COSMIC Greeter enabled
     desktop.cosmic = {
       enable = true;
-      useCosmicGreeter = false; # Keep using GDM
-      defaultSession = false; # Don't set as default, let user choose
+      useCosmicGreeter = true; # Use COSMIC Greeter like p620
+      defaultSession = true; # Set COSMIC as default session
       installAllApps = true; # Install full Cosmic app suite
+      disableOsd = true; # Workaround for polkit agent crashes in COSMIC beta
     };
   };
 
@@ -226,8 +227,8 @@ in
     desktopManager.gnome.enable = true;
   };
 
-  # Display manager
-  services.displayManager.gdm.enable = true;
+  # Display manager - Disable GDM to use COSMIC Greeter
+  services.displayManager.gdm.enable = lib.mkForce false;
 
   # Hardware and service specific configurations
   services = {

@@ -136,6 +136,15 @@ in
     media = {
       droidcam = false; # Disabled due to v4l2loopback build failures on P510
     };
+
+    # COSMIC Desktop with COSMIC Greeter enabled
+    desktop.cosmic = {
+      enable = true;
+      useCosmicGreeter = true; # Use COSMIC Greeter like p620
+      defaultSession = true; # Set COSMIC as default session
+      installAllApps = true;
+      disableOsd = true; # Workaround for polkit agent crashes in COSMIC beta
+    };
   };
 
   # Enable NixOS package monitoring tools
@@ -174,12 +183,20 @@ in
   programs.streamdeck-ui.enable = lib.mkForce false;
 
   # Enable X server (NVIDIA drivers configured in nvidia.nix)
-  services.xserver.enable = true;
+  services.xserver = {
+    enable = true;
+    displayManager = {
+      xserverArgs = [
+        "-nolisten tcp"
+        "-dpi 96"
+      ];
+      # Disable LightDM to prevent conflicts with COSMIC Greeter
+      lightdm.enable = lib.mkForce false;
+    };
+  };
 
-  # Display manager configuration (modern syntax like P620)
-  services.displayManager.gdm.enable = lib.mkForce true;
-  services.displayManager.gdm.wayland = true;
-  services.displayManager.defaultSession = "gnome";
+  # Display manager configuration - Disable GDM to use COSMIC Greeter
+  services.displayManager.gdm.enable = lib.mkForce false;
 
   # Desktop manager configuration - minimal GNOME for login only
   services.desktopManager.gnome.enable = true;
