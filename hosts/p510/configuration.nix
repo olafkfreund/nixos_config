@@ -152,6 +152,7 @@ in
       protocol = "both"; # Enable both RDP and VNC
       rdpPort = 3389;
       vncPort = 5900;
+      vncPassword = "p510remote"; # Change this to a secure password!
       allowedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ]; # Tailscale and local network
       disableScreenLock = false; # Keep screen lock for security
       disablePowerManagement = true; # Prevent sleep for remote access

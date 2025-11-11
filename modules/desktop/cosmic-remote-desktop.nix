@@ -45,6 +45,12 @@ in
       default = true;
       description = "Disable sleep/suspend for remote desktop availability";
     };
+
+    vncPassword = mkOption {
+      type = types.str;
+      default = "nixos";
+      description = "VNC password for authentication (change this for security!)";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -81,11 +87,15 @@ in
                 -subj "/CN=$(hostname)" \
                 -addext "subjectAltName=DNS:$(hostname),DNS:localhost,IP:127.0.0.1"
               chmod 600 ~/.config/wayvnc/*.pem
+              echo "  ✅ SSL certificates generated successfully"
+            else
+              echo "  ✅ SSL certificates already exist"
             fi
 
-            # Set VNC password
-            echo "  🔑 Please set a VNC password:"
-            ${wayvnc}/bin/wayvncctl --socket ~/.config/wayvnc/wayvnc.sock set-password
+            echo "  🔑 VNC Authentication:"
+            echo "     Username: vnc"
+            echo "     Password: ${cfg.vncPassword}"
+            echo "     ⚠️  Change the password in configuration.nix for security!"
 
             echo "  ✅ VNC server configured on port ${toString cfg.vncPort}"
           '' else ""}
@@ -145,6 +155,7 @@ in
               port=${toString cfg.vncPort}
               enable_auth=true
               username=vnc
+              password=${cfg.vncPassword}
               private_key_file=%h/.config/wayvnc/key.pem
               certificate_file=%h/.config/wayvnc/cert.pem
             ''}";
