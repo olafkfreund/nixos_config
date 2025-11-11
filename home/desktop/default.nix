@@ -5,6 +5,7 @@
     ./terminals/default.nix
     ./rofi/default.nix
     ./swaync/default.nix
+    ./terminal-apps-desktop-entries.nix
 
     # Core desktop modules (now enhanced)
     ./theme/default.nix
