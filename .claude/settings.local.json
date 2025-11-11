@@ -214,9 +214,25 @@
       "SlashCommand(/new_task)",
       "Bash(gh issue create:*)",
       "Bash(gh issue view:*)",
-      "Bash(gh issue comment:*)"
+      "Bash(gh issue comment:*)",
+      "Bash(tree:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(gh issue:*)",
+      "Bash(gh pr create:*)",
+      "SlashCommand(/new_task Update Claude-code to version 2.0.36)",
+      "SlashCommand(/new_task:*)",
+      "Bash(gh label list:*)",
+      "Bash(nix-hash:*)",
+      "Bash(while systemctl is-active --quiet background-bash-fa9fe0)",
+      "Bash(do sleep 5)",
+      "Bash(/dev/null)",
+      "Bash(git merge:*)",
+      "Bash(git branch:*)"
     ],
-    "additionalDirectories": ["/"]
+    "additionalDirectories": [
+      "/"
+    ]
   },
   "enableAllProjectMcpServers": false
 }
