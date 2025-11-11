@@ -1,4 +1,9 @@
-{ ... }: {
+{ lib, ... }: {
+  # Terminal app desktop entries
+  programs.k9s.desktopEntry.enable = lib.mkForce true;
+  programs.claude-code.desktopEntry.enable = lib.mkForce true;
+  programs.neovim.desktopEntry.enable = lib.mkForce true;
+
   # Host-specific features configuration
   # This replaces all the individual lib.mkForce calls with a unified approach
   features = {
