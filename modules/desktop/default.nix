@@ -1,6 +1,7 @@
 { pkgs, ... }: {
   imports = [
     ./gnome-remote-desktop.nix
+    ./cosmic-remote-desktop.nix
   ];
 
   # Make sure the adwaita-qt packages are installed

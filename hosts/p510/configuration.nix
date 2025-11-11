@@ -145,6 +145,17 @@ in
       installAllApps = true;
       disableOsd = true; # Workaround for polkit agent crashes in COSMIC beta
     };
+
+    # Remote Desktop support for COSMIC
+    desktop.cosmic-remote-desktop = {
+      enable = true;
+      protocol = "both"; # Enable both RDP and VNC
+      rdpPort = 3389;
+      vncPort = 5900;
+      allowedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ]; # Tailscale and local network
+      disableScreenLock = false; # Keep screen lock for security
+      disablePowerManagement = true; # Prevent sleep for remote access
+    };
   };
 
   # Enable NixOS package monitoring tools
