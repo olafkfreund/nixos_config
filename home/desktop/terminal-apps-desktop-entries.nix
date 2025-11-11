@@ -32,7 +32,6 @@ in
         terminal = true;
         type = "Application";
         categories = [ "System" "TerminalEmulator" "Development" ];
-        keywords = [ "kubernetes" "k8s" "cluster" "management" "container" "pod" ];
       };
     })
 
@@ -47,7 +46,6 @@ in
         terminal = true;
         type = "Application";
         categories = [ "Development" "TextEditor" "Utility" ];
-        keywords = [ "ai" "claude" "code" "assistant" "development" "anthropic" ];
       };
     })
 
@@ -62,7 +60,6 @@ in
         terminal = true;
         type = "Application";
         categories = [ "Development" "TextEditor" "Utility" ];
-        keywords = [ "vim" "neovim" "editor" "text" "code" ];
         mimeType = [
           "text/plain"
           "text/x-csrc"

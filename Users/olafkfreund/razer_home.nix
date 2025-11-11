@@ -26,6 +26,11 @@ in
   # Enable Walker launcher when feature flag is set
   desktop.walker.enable = config.features.desktop.walker;
 
+  # Terminal app desktop entries
+  programs.k9s.desktopEntry.enable = lib.mkForce true;
+  programs.claude-code.desktopEntry.enable = lib.mkForce true;
+  programs.neovim.desktopEntry.enable = lib.mkForce true;
+
   # GNOME desktop environment (optional - can be enabled/disabled)
   desktop.gnome = {
     enable = true; # Set to true to enable GNOME
