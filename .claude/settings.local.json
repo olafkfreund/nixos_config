@@ -228,11 +228,14 @@
       "Bash(do sleep 5)",
       "Bash(/dev/null)",
       "Bash(git merge:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(xfreerdp:*)",
+      "Bash(while systemctl is-active --quiet background-bash-af5a98:*)",
+      "Bash(gh pr comment:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(git restore:*)"
     ],
-    "additionalDirectories": [
-      "/"
-    ]
+    "additionalDirectories": ["/"]
   },
   "enableAllProjectMcpServers": false
 }
