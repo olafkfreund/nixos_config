@@ -12,12 +12,8 @@
     # Desktop modules for development workflows
     ../../desktop/terminals/default.nix # Multiple terminal options
     ../../desktop/sway/default.nix # Window manager support
-    ../../desktop/dunst/default.nix # Notification system
-    ../../desktop/swaync/default.nix # Advanced notifications
     ../../desktop/zathura/default.nix # PDF viewer for documentation
-    ../../desktop/rofi/default.nix # Application launcher
     ../../desktop/obsidian/default.nix # Note-taking for project docs
-    ../../desktop/swaylock/default.nix # Screen locking
     ../../desktop/flameshot/default.nix # Screenshots for documentation
     ../../desktop/kooha/default.nix # Screen recording for demos
     ../../desktop/remotedesktop/default.nix # Remote development access
@@ -61,16 +57,11 @@
     desktop = {
       enable = true; # Full desktop environment for development
       sway = true; # Window manager
-      dunst = false; # Use swaync instead
-      swaync = true; # Advanced notification system
       zathura = true; # PDF viewer for documentation
-      rofi = true; # Application launcher
       obsidian = true; # Note-taking and project documentation
-      swaylock = true; # Screen locking
       flameshot = true; # Screenshots for documentation
       kooha = true; # Screen recording for demos
       remotedesktop = true; # Remote development access
-      walker = true; # Advanced app launcher
 
       # Communication and media for development
       obs = true; # Screen recording for presentations

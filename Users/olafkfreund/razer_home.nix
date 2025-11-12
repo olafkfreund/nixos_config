@@ -16,7 +16,6 @@ in
     ../../home/desktop/sway/default.nix
     ../../home/desktop/sway/swayosd.nix
     ../../home/games/steam.nix
-    ../../hosts/razer/nixos/env.nix
     ./private.nix
   ];
 
@@ -24,7 +23,6 @@ in
   stylix.targets.firefox.profileNames = [ "default" ];
 
   # Enable Walker launcher when feature flag is set
-  desktop.walker.enable = config.features.desktop.walker;
 
   # Terminal app desktop entries
   programs.k9s.desktopEntry.enable = lib.mkForce true;
@@ -92,16 +90,11 @@ in
     desktop = {
       enable = true;
       sway = true;
-      dunst = false;
-      swaync = true;
       zathura = true;
-      rofi = true;
       obsidian = true;
-      swaylock = true;
       flameshot = true;
       kooha = true;
       remotedesktop = true;
-      walker = true; # Re-enabled with Stylix integration
 
       # Communication and media
       obs = true;

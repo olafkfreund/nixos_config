@@ -26,9 +26,6 @@
     desktop = {
       sway.enable = false;
       zathura.enable = true;
-      dunst.enable = true;
-      rofi.enable = true;
-      swaylock.enable = false;
       screenshots.flameshot.enable = true;
     };
 

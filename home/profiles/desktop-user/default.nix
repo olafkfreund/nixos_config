@@ -45,16 +45,11 @@
     desktop = {
       enable = true; # Full desktop environment
       sway = true; # Window manager
-      dunst = false; # Use swaync instead
-      swaync = true; # Advanced notifications
       zathura = true; # PDF viewer
-      rofi = true; # Application launcher
       obsidian = true; # Note-taking and knowledge management
-      swaylock = true; # Screen locking
       flameshot = true; # Screenshot tool
       kooha = true; # Screen recording
       remotedesktop = true; # Remote desktop access
-      walker = true; # Advanced app launcher
       quickshell = lib.mkDefault false; # Advanced desktop shell (can be enabled per-host)
 
       # Communication and media

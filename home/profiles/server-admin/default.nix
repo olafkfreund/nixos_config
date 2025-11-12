@@ -12,12 +12,8 @@
 
     # Desktop option modules (options only, implementations disabled via features)
     ../../desktop/sway/default.nix # Provides desktop.sway option
-    ../../desktop/dunst/default.nix # Provides desktop.dunst option
-    ../../desktop/swaync/default.nix # Provides desktop.swaync option
     ../../desktop/zathura/default.nix # Provides desktop.zathura option
-    ../../desktop/rofi/default.nix # Provides desktop.rofi option
     ../../desktop/obsidian/default.nix # Provides desktop.obsidian option
-    ../../desktop/swaylock/default.nix # Provides swaylock option
     ../../desktop/flameshot/default.nix # Provides desktop.screenshots.flameshot option
     ../../desktop/kooha/default.nix # Provides desktop.screenshots.kooha option
     ../../desktop/remotedesktop/default.nix # Provides desktop.remotedesktop option
@@ -62,16 +58,11 @@
       enable = true; # Enable framework but disable all components
       # Note: This avoids feature system evaluation issues while keeping components disabled
       sway = false;
-      dunst = false;
-      swaync = false;
       zathura = false; # PDF viewer - not needed on server
-      rofi = false; # Application launcher - not needed
       obsidian = false;
-      swaylock = false;
       flameshot = false; # Screenshot tool - not needed
       kooha = false; # Screen recorder - not needed
       remotedesktop = false; # Not needed for headless server
-      walker = false;
 
       # Communication and media
       obs = false;

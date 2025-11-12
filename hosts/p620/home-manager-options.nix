@@ -14,12 +14,9 @@
   wezterm.enable = lib.mkForce true;
   kitty.enable = lib.mkForce true;
 
-  # Wayland apps
+  # Desktop apps
   desktop.sway.enable = lib.mkForce false;
   desktop.zathura.enable = lib.mkForce true;
-  desktop.dunst.enable = lib.mkForce true;
-  desktop.rofi.enable = lib.mkForce true;
-  swaylock.enable = lib.mkForce false;
   desktop.screenshots.flameshot.enable = lib.mkForce true;
 
   # Browsers

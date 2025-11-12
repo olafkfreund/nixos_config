@@ -14,7 +14,6 @@
     ../../home/desktop/gnome/default.nix
 
     # Host-specific configurations
-    ../../hosts/p510/nixos/env.nix
   ];
 
   # Profile metadata
@@ -33,16 +32,11 @@
       enable = true; # Enable framework for options
       # Enable GNOME for login but disable other desktop environments
       sway = false;
-      dunst = false;
-      swaync = false;
       zathura = false;
-      rofi = false;
       obsidian = false;
-      swaylock = false;
       flameshot = false;
       kooha = false;
       remotedesktop = false;
-      walker = false;
       obs = false;
       evince = false;
       kdeconnect = false;

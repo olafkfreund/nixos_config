@@ -46,10 +46,7 @@ in
     (mkIf cfg.desktop.enable {
       desktop = {
         sway.enable = cfg.desktop.sway;
-        dunst.enable = cfg.desktop.dunst;
-        swaync.enable = cfg.desktop.swaync;
         zathura.enable = cfg.desktop.zathura;
-        rofi.enable = cfg.desktop.rofi;
         obsidian.enable = cfg.desktop.obsidian;
         remotedesktop.enable = cfg.desktop.remotedesktop;
         screenshots = {
@@ -57,8 +54,6 @@ in
           kooha.enable = cfg.desktop.kooha;
         };
       };
-
-      swaylock.enable = cfg.desktop.swaylock;
 
       # Communication and media apps
       programs = {

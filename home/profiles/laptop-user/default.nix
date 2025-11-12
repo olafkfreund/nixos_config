@@ -14,12 +14,8 @@
     ../../desktop/sway/default.nix # Lightweight window manager
     ../../desktop/sway/swayosd.nix # System OSD for laptops
     ../../desktop/gnome # GNOME desktop environment (optional)
-    ../../desktop/dunst/default.nix # Lightweight notifications
-    ../../desktop/swaync/default.nix # Alternative notification system
     ../../desktop/zathura/default.nix # Lightweight PDF viewer
-    ../../desktop/rofi/default.nix # Application launcher
     ../../desktop/obsidian/default.nix # Note-taking (can sync across devices)
-    ../../desktop/swaylock/default.nix # Screen locking (important for mobile)
     ../../desktop/flameshot/default.nix # Screenshots
     ../../desktop/kooha/default.nix # Screen recording
     ../../desktop/remotedesktop/default.nix # Remote access
@@ -62,16 +58,11 @@
     desktop = {
       enable = true; # Mobile-optimized desktop environment
       sway = true; # Efficient Wayland compositor
-      dunst = false; # Use swaync for better mobile experience
-      swaync = true; # Better notification management for mobile
       zathura = true; # Lightweight PDF viewer
-      rofi = true; # Efficient application launcher
       obsidian = true; # Note-taking with cloud sync
-      swaylock = true; # Essential for mobile security
       flameshot = true; # Screenshot capability
       kooha = false; # Skip screen recording to save battery
       remotedesktop = true; # Remote access capability
-      walker = false; # Skip additional launcher for simplicity
 
       # Communication optimized for mobile
       obs = false; # Skip resource-intensive recording

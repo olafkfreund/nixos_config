@@ -96,11 +96,8 @@
 
   # Desktop environment packages
   desktop = {
-    # Wayland/Hyprland essentials
+    # Wayland essentials (minimal set for GNOME Wayland)
     wayland = with pkgs; [
-      waybar
-      rofi
-      swww
       grim
       slurp
       wl-clipboard

@@ -8,13 +8,13 @@
     pkgs.dbeaver-bin
     pkgs.postgresql
     pkgs.caprine-bin
-    pkgs.element-desktop
+    # pkgs.element-desktop  # Disabled: depends on insecure jitsi-meet package (CVE-2024-45191, CVE-2024-45192, CVE-2024-45193)
     pkgs.imagemagick
     # pkgs.fractal
     pkgs.vesktop
     # pkgs.telegram-desktop
     pkgs.wasistlos
-    pkgs.ferdium
+    # pkgs.ferdium  # Removed: no longer needed
     pkgs.zoom-us
     pkgs.libcamera
     pkgs.nchat

@@ -61,7 +61,6 @@
       "electron-25.9.0" # Required by some Electron apps
       "electron-29.4.6" # Required by some Electron apps
       "nix-2.15.3" # Required for compatibility
-      "jitsi-meet-1.0.8043" # Required for video conferencing
       "olm-3.2.16" # Required for Matrix client
       "python3.12-youtube-dl-2021.12.17" # Required for media tools
     ];

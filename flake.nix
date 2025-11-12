@@ -57,12 +57,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # # Desktop environment
-    # hyprland = {
-    #   url = "github:hyprwm/Hyprland";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
     # Browser and media
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
 

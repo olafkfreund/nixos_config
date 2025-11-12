@@ -1,21 +1,16 @@
 { pkgs, ... }: {
   imports = [
-    # Enhanced desktop components
-    ./waybar/default.nix
+    # Desktop components
     ./terminals/default.nix
-    ./rofi/default.nix
-    ./swaync/default.nix
     ./terminal-apps-desktop-entries.nix
 
-    # Core desktop modules (now enhanced)
+    # Core desktop modules
     ./theme/default.nix
     ./gaming/default.nix
     ./sound/default.nix
 
-    # Re-enabled desktop modules (enhanced configs take precedence)
+    # Desktop modules
     ./plasma/default.nix
-    ./dunst/default.nix
-    ./swaylock/default.nix
     ./com.nix
     ./neofetch/default.nix
     ./kdeconnect/default.nix
@@ -27,7 +22,6 @@
     ./remotedesktop/default.nix
     ./evince/default.nix
     ./lanmouse/default.nix
-    ./walker/default.nix # Re-enabled with Stylix integration
     ./obsidian/default.nix
     ./proton/default.nix # Proton applications suite (optional)
     ./gnome # GNOME desktop environment (optional)

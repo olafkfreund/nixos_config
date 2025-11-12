@@ -157,11 +157,5 @@ in
       ];
       type = "Application";
     };
-
-    wayland.windowManager.hyprland.settings = {
-      layerrule = [
-        "animation slide top, code"
-      ];
-    };
   };
 }

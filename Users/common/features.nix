@@ -33,16 +33,11 @@ with lib; {
       sway = mkEnableOption "Enable Sway window manager";
       cosmic = mkEnableOption "Enable Cosmic DE";
       gnome = mkEnableOption "Enable GNOME";
-      dunst = mkEnableOption "Enable Dunst notifications";
-      swaync = mkEnableOption "Enable SwayNC notifications";
       zathura = mkEnableOption "Enable Zathura PDF reader";
-      rofi = mkEnableOption "Enable Rofi launcher";
       obsidian = mkEnableOption "Enable Obsidian notes";
-      swaylock = mkEnableOption "Enable Swaylock";
       flameshot = mkEnableOption "Enable Flameshot screenshots";
       kooha = mkEnableOption "Enable Kooha screen recording";
       remotedesktop = mkEnableOption "Enable Remote Desktop";
-      walker = mkEnableOption "Enable Walker";
 
       # Communication and media
       obs = mkEnableOption "Enable OBS Studio";

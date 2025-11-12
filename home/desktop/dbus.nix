@@ -5,7 +5,7 @@
       dconf
       gnome2.GConf
       xdg-desktop-portal
-      xdg-desktop-portal-hyprland
+      xdg-desktop-portal-gtk
     ];
   };
 }

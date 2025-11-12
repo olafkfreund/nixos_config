@@ -1,10 +1,9 @@
 # P620 Home Configuration - Full Workstation Profile
 # Uses full-workstation composition (developer + desktop-user)
-{
-  lib,
-  pkgs,
-  config,
-  ...
+{ lib
+, pkgs
+, config
+, ...
 }: {
   imports = [
     # Import common user configuration
@@ -16,7 +15,6 @@
     ../../home/profiles/desktop-user/default.nix
 
     # Host-specific configurations
-    ../../hosts/p620/nixos/env.nix
     ../../home/desktop/sway/default.nix
     ../../home/desktop/sway/swayosd.nix
     ../../home/games/steam.nix
@@ -27,15 +25,14 @@
     name = "full-workstation";
     type = "composition";
     description = "Full workstation combining development and desktop capabilities";
-    combines = ["developer" "desktop-user"];
+    combines = [ "developer" "desktop-user" ];
     host = "p620";
   };
 
   # Fix Stylix Firefox profile warnings
-  stylix.targets.firefox.profileNames = ["default"];
+  stylix.targets.firefox.profileNames = [ "default" ];
 
   # Enable Walker launcher when feature flag is set
-  desktop.walker.enable = config.features.desktop.walker;
 
   # Terminal app desktop entries
   programs.k9s.desktopEntry.enable = lib.mkForce true;

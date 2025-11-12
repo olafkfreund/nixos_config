@@ -11,7 +11,6 @@
     ../../home/profiles/laptop-user/default.nix
 
     # Host-specific configurations for laptop
-    ../../hosts/razer/nixos/env.nix
     ../../home/desktop/sway/default.nix
     ../../home/desktop/sway/swayosd.nix
   ];
