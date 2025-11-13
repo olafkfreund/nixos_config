@@ -5,7 +5,6 @@ _: {
     # ./steam.nix
     ./gnupg.nix
     ./dconf.nix
-    ./sway.nix
     ./nix-ld.nix
     ./firefox.nix
     ./wshowkeys.nix

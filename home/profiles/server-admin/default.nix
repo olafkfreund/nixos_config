@@ -11,7 +11,6 @@
     ../../files.nix # File associations and utilities
 
     # Desktop option modules (options only, implementations disabled via features)
-    ../../desktop/sway/default.nix # Provides desktop.sway option
     ../../desktop/zathura/default.nix # Provides desktop.zathura option
     ../../desktop/obsidian/default.nix # Provides desktop.obsidian option
     ../../desktop/flameshot/default.nix # Provides desktop.screenshots.flameshot option
@@ -57,7 +56,6 @@
     desktop = {
       enable = true; # Enable framework but disable all components
       # Note: This avoids feature system evaluation issues while keeping components disabled
-      sway = false;
       zathura = false; # PDF viewer - not needed on server
       obsidian = false;
       flameshot = false; # Screenshot tool - not needed

@@ -10,8 +10,6 @@
     # Host-specific imports
     ../../home/default.nix
     ../../home/games/steam.nix
-    ../../home/desktop/sway/default.nix
-    ../../home/desktop/sway/swayosd.nix
     ./private.nix
   ];
 

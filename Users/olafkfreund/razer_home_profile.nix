@@ -9,10 +9,6 @@
     # Import both developer and laptop-user profiles
     ../../home/profiles/developer/default.nix
     ../../home/profiles/laptop-user/default.nix
-
-    # Host-specific configurations for laptop
-    ../../home/desktop/sway/default.nix
-    ../../home/desktop/sway/swayosd.nix
   ];
 
   # Profile metadata

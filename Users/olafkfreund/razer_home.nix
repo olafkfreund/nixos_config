@@ -13,8 +13,6 @@ in
 
     # Host-specific imports
     ../../home/default.nix
-    ../../home/desktop/sway/default.nix
-    ../../home/desktop/sway/swayosd.nix
     ../../home/games/steam.nix
     ./private.nix
   ];
@@ -89,7 +87,6 @@ in
 
     desktop = {
       enable = true;
-      sway = true;
       zathura = true;
       obsidian = true;
       flameshot = true;

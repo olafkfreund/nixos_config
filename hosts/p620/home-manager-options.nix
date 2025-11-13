@@ -15,7 +15,6 @@
   kitty.enable = lib.mkForce true;
 
   # Desktop apps
-  desktop.sway.enable = lib.mkForce false;
   desktop.zathura.enable = lib.mkForce true;
   desktop.screenshots.flameshot.enable = lib.mkForce true;
 

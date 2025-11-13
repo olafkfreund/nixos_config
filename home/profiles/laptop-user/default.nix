@@ -57,7 +57,6 @@
 
     desktop = {
       enable = true; # Mobile-optimized desktop environment
-      sway = true; # Efficient Wayland compositor
       zathura = true; # Lightweight PDF viewer
       obsidian = true; # Note-taking with cloud sync
       flameshot = true; # Screenshot capability

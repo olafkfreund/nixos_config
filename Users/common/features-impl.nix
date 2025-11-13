@@ -45,7 +45,6 @@ in
     # Desktop implementations
     (mkIf cfg.desktop.enable {
       desktop = {
-        sway.enable = cfg.desktop.sway;
         zathura.enable = cfg.desktop.zathura;
         obsidian.enable = cfg.desktop.obsidian;
         remotedesktop.enable = cfg.desktop.remotedesktop;

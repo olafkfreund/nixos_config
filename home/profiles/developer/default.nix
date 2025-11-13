@@ -56,7 +56,6 @@
 
     desktop = {
       enable = true; # Full desktop environment for development
-      sway = true; # Window manager
       zathura = true; # PDF viewer for documentation
       obsidian = true; # Note-taking and project documentation
       flameshot = true; # Screenshots for documentation

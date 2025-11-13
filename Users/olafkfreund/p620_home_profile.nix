@@ -15,8 +15,6 @@
     ../../home/profiles/desktop-user/default.nix
 
     # Host-specific configurations
-    ../../home/desktop/sway/default.nix
-    ../../home/desktop/sway/swayosd.nix
     ../../home/games/steam.nix
   ];
 

@@ -44,7 +44,6 @@
 
     desktop = {
       enable = true; # Full desktop environment
-      sway = true; # Window manager
       zathura = true; # PDF viewer
       obsidian = true; # Note-taking and knowledge management
       flameshot = true; # Screenshot tool

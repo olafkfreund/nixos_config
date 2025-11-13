@@ -30,7 +30,6 @@ with lib; {
 
     desktop = {
       enable = mkEnableOption "Enable desktop applications";
-      sway = mkEnableOption "Enable Sway window manager";
       cosmic = mkEnableOption "Enable Cosmic DE";
       gnome = mkEnableOption "Enable GNOME";
       zathura = mkEnableOption "Enable Zathura PDF reader";

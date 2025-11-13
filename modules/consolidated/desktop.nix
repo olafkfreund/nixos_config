@@ -49,7 +49,7 @@ in
     enable = mkEnableOption "consolidated desktop environment";
 
     environment = mkOption {
-      type = types.enum [ "gnome" "cosmic" "sway" "minimal" ];
+      type = types.enum [ "gnome" "cosmic" "minimal" ];
       default = "gnome";
       description = "Desktop environment to enable";
     };
@@ -78,8 +78,6 @@ in
             then "gnome-session"
             else if cfg.environment == "cosmic"
             then "cosmic-session"
-            else if cfg.environment == "sway"
-            then "sway"
             else "gnome-session" # fallback
           }";
         };
@@ -94,12 +92,6 @@ in
 
     # Cosmic DE configuration
     services.desktopManager.cosmic.enable = cfg.environment == "cosmic";
-
-    # Sway configuration
-    programs.sway = mkIf (cfg.environment == "sway") {
-      enable = true;
-      wrapperFeatures.gtk = true;
-    };
 
     # Hardware-optimized graphics
     hardware.graphics = mkIf cfg.hardware.autoDetect {
