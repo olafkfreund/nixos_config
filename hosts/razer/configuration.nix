@@ -336,7 +336,7 @@ in
   hardware.keyboard.zsa.enable = true;
 
   # Windows app integration
-  programs.winboat.enable = true;
+  # programs.winboat.enable = true; # DISABLED: npm dependency error in nixpkgs (@electron/windows-sign)
 
   # Agenix identity configuration - specify where to find decryption keys
   age.identityPaths = [
@@ -348,10 +348,10 @@ in
   # Override GNOME Shell to remove problematic dark mode patch
   nixpkgs.overlays = [
     (final: prev: {
-      gnome-shell = prev.gnome-shell.overrideAttrs (oldAttrs: {
+      gnome-shell = prev.gnome-shell.overrideAttrs (old: {
         patches = builtins.filter
           (patch: !lib.hasSuffix "shell_remove_dark_mode.patch" (toString patch))
-          (oldAttrs.patches or [ ]);
+          (old.patches or [ ]);
       });
     })
   ];
