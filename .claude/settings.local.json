@@ -234,34 +234,14 @@
       "Bash(gh pr comment:*)",
       "Bash(gh pr merge:*)",
       "Bash(git restore:*)",
-      "Bash(/nix/store/q2pcnkc9nyzznni250gbb3ycd9f09gh1-claude-code-2.0.44/bin/claude:*)",
-      "Bash(./scripts/setup-gitlab-runner.sh:*)",
-      "Bash(sudo gitlab-runner list:*)",
-      "Bash(nix-build:*)",
-      "Bash(for pkg in shell-gpt codex protonvpn-gui winboat celeste upscaler)",
-      "Bash(do echo '=== Checking $pkg ===' nix search nixpkgs ^$pkg$ --json)",
-      "Bash(for pkg in codex celeste upscaler droidcam-obs gnome-shell-extension-gsconnect)",
-      "Bash(do echo \"=== Testing $pkg ===\" nix search nixpkgs \"^$pkg$\")",
-      "Bash(nix:*)",
-      "Bash(git stash:*)",
-      "Bash(./scripts/deploy-workaround.sh:*)",
-      "Bash(for pkg in castero upscaler)",
-      "Bash(do which $pkg)",
-      "Bash(/bin/ls:*)",
-      "Bash(sudo /nix/var/nix/profiles/system/activate:*)",
-      "Bash(for issue in 35 26 32 33 31 30 29 27)",
-      "Bash(do)",
-      "Bash(result/bin/kosli:*)",
-      "Bash(gh pr list:*)",
-      "Bash(git remote:*)",
-      "Bash(export AUTHORIZED=true)",
-      "Bash(./result/bin/claude:*)",
-      "Bash(jobs)",
-      "Bash(sudo nh os switch:*)",
-      "Bash(systemd-detect-virt:*)"
+      "Bash(ssh-add:*)",
+      "Bash(gh auth:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(gh ssh-key:*)"
     ],
-    "additionalDirectories": ["/"]
+    "additionalDirectories": [
+      "/"
+    ]
   },
-  "enableAllProjectMcpServers": false,
-  "outputStyle": "Explanatory"
+  "enableAllProjectMcpServers": false
 }
