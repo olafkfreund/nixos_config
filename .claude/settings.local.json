@@ -234,11 +234,11 @@
       "Bash(gh pr comment:*)",
       "Bash(gh pr merge:*)",
       "Bash(git restore:*)",
-      "Bash(/nix/store/q2pcnkc9nyzznni250gbb3ycd9f09gh1-claude-code-2.0.44/bin/claude:*)"
+      "Bash(/nix/store/q2pcnkc9nyzznni250gbb3ycd9f09gh1-claude-code-2.0.44/bin/claude:*)",
+      "Bash(./scripts/setup-gitlab-runner.sh:*)",
+      "Bash(sudo gitlab-runner list:*)"
     ],
-    "additionalDirectories": [
-      "/"
-    ]
+    "additionalDirectories": ["/"]
   },
   "enableAllProjectMcpServers": false
 }
