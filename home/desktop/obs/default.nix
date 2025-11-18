@@ -18,7 +18,7 @@ in
         wlrobs # Wayland window capture
         obs-backgroundremoval # Virtual background effects
         obs-pipewire-audio-capture # Audio capture for Pipewire
-        droidcam-obs # Use Android phone as camera
+        # droidcam-obs # DISABLED: Compilation error in v2.4.1 (signedness comparison)
         input-overlay # Show keyboard/mouse inputs
         obs-source-record # Record individual sources
         obs-livesplit-one # Speedrunning timer integration

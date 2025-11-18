@@ -20,7 +20,7 @@ in
     environment.systemPackages = with pkgs; [
       # Core OpenAI tools
       openai-whisper
-      shell-gpt
+      # shell-gpt REMOVED due to dependency conflict with openai>=2.0.0
       # Enhanced CLI tools
       tgpt
       # aichat REMOVED due to extremely slow pyrate-limiter build dependency (2+ hours)
@@ -34,16 +34,16 @@ in
 
     # Shell integration for OpenAI
     programs.zsh.interactiveShellInit = mkAfter ''
-      # OpenAI provider functions
+      # OpenAI provider functions using tgpt (replacement for shell-gpt)
       openai-chat() {
         local model="''${1:-${config.ai.providers.openai.defaultModel}}"
         local prompt="''${2:-}"
         if [[ -f "/run/secrets/api-openai" ]]; then
           export OPENAI_API_KEY="$(cat /run/secrets/api-openai)"
           if [[ -n "$prompt" ]]; then
-            sgpt --model "$model" "$prompt"
+            tgpt --provider openai --model "$model" "$prompt"
           else
-            sgpt --model "$model"
+            echo "Usage: openai-chat [model] <prompt>"
           fi
         else
           echo "OpenAI API key not found"
@@ -56,9 +56,9 @@ in
         if [[ -f "/run/secrets/api-openai" ]]; then
           export OPENAI_API_KEY="$(cat /run/secrets/api-openai)"
           if [[ -n "$prompt" ]]; then
-            sgpt --model "$model" --code "$prompt"
+            tgpt --provider openai --model "$model" --code "$prompt"
           else
-            sgpt --model "$model" --code
+            echo "Usage: openai-code [model] <prompt>"
           fi
         else
           echo "OpenAI API key not found"

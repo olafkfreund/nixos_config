@@ -72,9 +72,9 @@ in
         chatgpt-cli # OpenAI ChatGPT command line interface
         rPackages.chatgpt # R interface for ChatGPT
         tgpt # Terminal GPT - simple CLI for multiple AI models
-        shell-gpt # Shell integration for GPT models
+        # shell-gpt REMOVED due to dependency conflict with openai>=2.0.0
         yai
-        codex # Yet Another AI CLI tool
+        # codex REMOVED due to network download failures (npm registry HTTP/2 errors)
       ]
       ++
       # Code assistants
@@ -104,13 +104,12 @@ in
     environment.sessionVariables = {
       # Set default AI model preferences (users can override)
       OPENAI_API_MODEL = mkDefault "gpt-4";
-      # Enable shell-gpt command completion
-      SHELL_GPT_COMPLETION = mkDefault "1";
+      # shell-gpt removed - using tgpt instead
     };
 
     # Add helpful aliases for common AI tasks
     environment.shellAliases = {
-      ai = "shell-gpt"; # Higher priority than gemini-cli default
+      ai = "tgpt"; # Terminal GPT - replacement for shell-gpt
       chat = "chatgpt-cli";
       aicode = "gh copilot suggest";
       aiexplain = "gh copilot explain";

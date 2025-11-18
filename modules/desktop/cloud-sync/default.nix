@@ -1,6 +1,6 @@
 { pkgs, ... }: {
   environment.systemPackages = with pkgs; [
-    celeste
+    # celeste # DISABLED: Build failure in nixpkgs unstable
     rclone
   ];
 }

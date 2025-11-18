@@ -233,9 +233,12 @@
       "Bash(while systemctl is-active --quiet background-bash-af5a98:*)",
       "Bash(gh pr comment:*)",
       "Bash(gh pr merge:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(/nix/store/q2pcnkc9nyzznni250gbb3ycd9f09gh1-claude-code-2.0.44/bin/claude:*)"
     ],
-    "additionalDirectories": ["/"]
+    "additionalDirectories": [
+      "/"
+    ]
   },
   "enableAllProjectMcpServers": false
 }

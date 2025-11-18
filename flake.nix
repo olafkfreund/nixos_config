@@ -81,8 +81,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Hardware specific
-    razer-laptop-control.url = "github:Razer-Linux/razer-laptop-control-no-dkms";
+    # Hardware specific (removed unused razer-laptop-control)
 
     # Package collections
     nur.url = "github:nix-community/NUR";
@@ -102,7 +101,6 @@
     , nixai
     , agenix
     , lanzaboote
-    , razer-laptop-control
     , nix-colors
     , nix-snapd
     , spicetify-nix
@@ -282,7 +280,6 @@
                       zjstatus
                       spicetify-nix
                       agenix
-                      razer-laptop-control
                       host
                       ;
                     username = primaryUser;

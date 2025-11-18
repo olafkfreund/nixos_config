@@ -10,7 +10,7 @@ in
     vpn = {
       enable = mkOption {
         type = types.bool;
-        default = true;
+        default = false; # Temporarily disabled due to proton-core test failures
         description = "Enable ProtonVPN applications (GUI and CLI)";
       };
     };
