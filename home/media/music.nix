@@ -7,7 +7,7 @@
     pkgs.cava # audio visualizer
     pkgs.spotify-player # Spotify
     pkgs.sptlrx # Spotify Lyrics
-    # pkgs.castero # Podcasts - DISABLED: Segfault with Python 3.13.9 (pytest check phase)
+    pkgs.castero # Podcasts - Re-enabled: Python 3.13.9 compatibility fixed (issue #35 closed)
     pkgs.gnome-podcasts # Podcasts
     pkgs.hypnotix
     pkgs.wiremix # Music streaming
