@@ -1,6 +1,5 @@
 { lib
 , pkgs
-, config
 , ...
 }: {
   imports = [
@@ -151,9 +150,9 @@
   programs.antigravity = {
     enable = true;
     apiKeys = {
-      # Reuse existing agenix secrets for API keys
-      anthropic = config.age.secrets."api-anthropic".path;
-      openai = config.age.secrets."api-openai".path;
+      # Reuse existing agenix secrets for API keys (runtime paths)
+      anthropic = "/run/agenix/api-anthropic";
+      openai = "/run/agenix/api-openai";
       # Note: Add api-gemini secret if needed for Gemini 3 support
     };
   };
