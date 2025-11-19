@@ -1,6 +1,6 @@
 # Server Admin Profile - Minimal headless configuration for server administration
 # Used by: DEX5550, P510 (server mode), other headless servers
-{ lib, pkgs, config, ... }: {
+{ pkgs, ... }: {
   imports = [
     # Import common home manager modules
     ../../browsers/default.nix # Browser options only (no implementation when disabled)

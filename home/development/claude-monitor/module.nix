@@ -340,7 +340,7 @@ in
   echo "Enable claude-monitor to install it automatically"
   exit 1
   fi
-  ''  ;
+  ''   ;
       executable = true;
     };
 

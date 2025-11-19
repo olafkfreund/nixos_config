@@ -83,7 +83,6 @@
 
     desktop = {
       enable = true;
-      sway = false;
       zathura = true;
       obsidian = true;
       flameshot = true;
