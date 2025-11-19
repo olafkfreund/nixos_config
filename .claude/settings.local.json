@@ -236,9 +236,16 @@
       "Bash(git restore:*)",
       "Bash(/nix/store/q2pcnkc9nyzznni250gbb3ycd9f09gh1-claude-code-2.0.44/bin/claude:*)",
       "Bash(./scripts/setup-gitlab-runner.sh:*)",
-      "Bash(sudo gitlab-runner list:*)"
+      "Bash(sudo gitlab-runner list:*)",
+      "Bash(nix-build:*)",
+      "Bash(for pkg in shell-gpt codex protonvpn-gui winboat celeste upscaler)",
+      "Bash(do echo '=== Checking $pkg ===' nix search nixpkgs ^$pkg$ --json)",
+      "Bash(for pkg in codex celeste upscaler droidcam-obs gnome-shell-extension-gsconnect)",
+      "Bash(do echo \"=== Testing $pkg ===\" nix search nixpkgs \"^$pkg$\")"
     ],
-    "additionalDirectories": ["/"]
+    "additionalDirectories": [
+      "/"
+    ]
   },
   "enableAllProjectMcpServers": false
 }
