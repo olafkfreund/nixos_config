@@ -147,6 +147,17 @@
     authenticator.enable = true;
   };
 
+  # Enable Google Antigravity IDE with existing AI infrastructure
+  programs.antigravity = {
+    enable = true;
+    apiKeys = {
+      # Reuse existing agenix secrets for API keys
+      anthropic = config.age.secrets."api-anthropic".path;
+      openai = config.age.secrets."api-openai".path;
+      # Note: Add api-gemini secret if needed for Gemini 3 support
+    };
+  };
+
   home.packages = [
     # pkgs.customPkgs.rofi-blocks
     # pkgs.msty
