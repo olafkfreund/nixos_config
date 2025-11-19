@@ -146,16 +146,16 @@
     authenticator.enable = true;
   };
 
-  # Enable Google Antigravity IDE with existing AI infrastructure
-  programs.antigravity = {
-    enable = true;
-    apiKeys = {
-      # Reuse existing agenix secrets for API keys (runtime paths)
-      anthropic = "/run/agenix/api-anthropic";
-      openai = "/run/agenix/api-openai";
-      # Note: Add api-gemini secret if needed for Gemini 3 support
-    };
-  };
+  # Google Antigravity IDE - DISABLED: Causing deployment issues, needs investigation
+  # programs.antigravity = {
+  #   enable = false;
+  #   apiKeys = {
+  #     # Reuse existing agenix secrets for API keys (runtime paths)
+  #     anthropic = "/run/agenix/api-anthropic";
+  #     openai = "/run/agenix/api-openai";
+  #     # Note: Add api-gemini secret if needed for Gemini 3 support
+  #   };
+  # };
 
   home.packages = [
     # pkgs.customPkgs.rofi-blocks
