@@ -56,7 +56,7 @@ in {
         gnome-photos # Photo manager
         gnome-sound-recorder # Audio recording
         showtime # Media center application
-        # upscaler # DISABLED: pysdl2 test failures in Python 3.13
+        upscaler # Re-enabled: pysdl2 Python 3.13 compatibility fixed (issue #30 closed)
         gnvim
         amberol
         hydrapaper

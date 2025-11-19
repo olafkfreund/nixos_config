@@ -16,7 +16,7 @@ in
         enabled-extensions = [
           # Essential extensions UUIDs
           "user-theme@gnome-shell-extensions.gcampax.github.com"
-          # "gsconnect@andyholmes.github.io" # Temporarily disabled due to build failure
+          "gsconnect@andyholmes.github.io" # Re-enabled: Build failure fixed in nixpkgs (issue #27 closed)
           "dash-to-dock@micxgx.gmail.com"
           "appindicatorsupport@rgcjonas.gmail.com"
           "auto-accent-colour@Wartybix"
@@ -53,11 +53,11 @@ in
         );
       };
 
-      # GSConnect configuration (temporarily disabled due to build failure)
-      # "org/gnome/shell/extensions/gsconnect" = {
-      #   enabled = true;
-      #   show-indicators = true;
-      # };
+      # GSConnect configuration
+      "org/gnome/shell/extensions/gsconnect" = {
+        enabled = true;
+        show-indicators = true;
+      };
 
       # Example configurations for popular extensions (commented out)
 
@@ -191,7 +191,7 @@ in
       [
         # Essential extensions (always installed when extensions are enabled)
         gnomeExtensions.user-themes
-        # gnomeExtensions.gsconnect # Temporarily disabled due to build failure
+        gnomeExtensions.gsconnect # Re-enabled: Build failure fixed in nixpkgs (issue #27 closed)
         gnomeExtensions.tiling-shell
         # gnomeExtensions.ascii-emoji
         gnomeExtensions.dim-background-windows
