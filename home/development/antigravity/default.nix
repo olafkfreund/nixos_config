@@ -55,7 +55,7 @@ in
   config = mkIf cfg.enable {
     home.packages = [ cfg.package ];
 
-    # Set API keys as environment variables
+    # Set API keys as environment variables and enable Wayland support
     home.sessionVariables = mkMerge [
       (mkIf (cfg.apiKeys.gemini != null) {
         GOOGLE_API_KEY = cfg.apiKeys.gemini;
@@ -67,9 +67,8 @@ in
       (mkIf (cfg.apiKeys.openai != null) {
         OPENAI_API_KEY = cfg.apiKeys.openai;
       })
+      # Wayland support for Electron
+      { NIXOS_OZONE_WL = "1"; }
     ];
-
-    # Wayland support
-    home.sessionVariables.NIXOS_OZONE_WL = "1";
   };
 }
