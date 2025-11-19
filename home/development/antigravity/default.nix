@@ -56,16 +56,17 @@ in
     home.packages = [ cfg.package ];
 
     # Set API keys as environment variables and enable Wayland support
+    # Using mkDefault to allow other modules to override if needed
     home.sessionVariables = mkMerge [
       (mkIf (cfg.apiKeys.gemini != null) {
-        GOOGLE_API_KEY = cfg.apiKeys.gemini;
-        GEMINI_API_KEY = cfg.apiKeys.gemini;
+        GOOGLE_API_KEY = mkDefault cfg.apiKeys.gemini;
+        GEMINI_API_KEY = mkDefault cfg.apiKeys.gemini;
       })
       (mkIf (cfg.apiKeys.anthropic != null) {
-        ANTHROPIC_API_KEY = cfg.apiKeys.anthropic;
+        ANTHROPIC_API_KEY = mkDefault cfg.apiKeys.anthropic;
       })
       (mkIf (cfg.apiKeys.openai != null) {
-        OPENAI_API_KEY = cfg.apiKeys.openai;
+        OPENAI_API_KEY = mkDefault cfg.apiKeys.openai;
       })
       # Wayland support for Electron
       { NIXOS_OZONE_WL = "1"; }
