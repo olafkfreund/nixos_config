@@ -341,6 +341,7 @@
             nodejs_22 = pkgs.nodejs_22;
           };
           gemini-cli = pkgs.callPackage ./pkgs/gemini-cli { };
+          kosli-cli = pkgs.callPackage ./pkgs/kosli-cli { };
           opencode = pkgs.callPackage ./home/development/opencode { };
 
           # Icon themes
