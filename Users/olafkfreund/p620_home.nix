@@ -1,5 +1,6 @@
 { lib
 , pkgs
+, antigravity-nix
 , ...
 }: {
   imports = [
@@ -150,6 +151,9 @@
     # pkgs.customPkgs.rofi-blocks
     # pkgs.msty
     # pkgs.aider-chat-env
+
+    # Google Antigravity - AI coding assistant
+    antigravity-nix.packages.${pkgs.system}.default
   ];
 
   # Optional: Add additional packages to the Windsurf environment

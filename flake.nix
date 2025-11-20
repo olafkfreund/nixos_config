@@ -91,6 +91,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixai.url = "github:olafkfreund/nix-ai-help";
+
+    # Google Antigravity package
+    antigravity-nix = {
+      url = "github:jacopone/antigravity-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -108,6 +114,7 @@
     , stylix
     , nix-index-database
     , zjstatus
+    , antigravity-nix
     , ...
     } @ inputs:
     let
@@ -280,6 +287,7 @@
                       zjstatus
                       spicetify-nix
                       agenix
+                      antigravity-nix
                       host
                       ;
                     username = primaryUser;
