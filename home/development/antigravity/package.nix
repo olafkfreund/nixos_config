@@ -1,56 +1,54 @@
 { lib
-, stdenv
+, buildFHSEnv
 , fetchurl
-, autoPatchelfHook
-, makeWrapper
-, alsa-lib
-, at-spi2-atk
-, at-spi2-core
-, atk
-, cairo
-, cups
-, curl
-, dbus
-, expat
-, fontconfig
-, freetype
-, gdk-pixbuf
-, glib
-, gtk3
-, libdrm
-, libglvnd
-, libnotify
-, libpulseaudio
-, libsecret
-, libuuid
-, libxkbcommon
-, libxml2
-, mesa
-, nspr
-, nss
-, pango
-, systemd
-, vulkan-loader
-, zlib
-, xorg
+, makeDesktopItem
+, stdenv
 }:
 
-stdenv.mkDerivation rec {
-  pname = "google-antigravity";
-  version = "1.11.2";
-  buildId = "6251250307170304";
+let
+  # Extract the tarball to get the actual antigravity binary
+  antigravity-extracted = stdenv.mkDerivation rec {
+    pname = "google-antigravity-extracted";
+    version = "1.11.2";
+    buildId = "6251250307170304";
 
-  src = fetchurl {
-    url = "http://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/${version}-${buildId}/linux-x64/Antigravity.tar.gz";
-    hash = "sha256-1dv4bx598nshjsq0d8nnf8zfn86wsbjf2q56dqvmq9vcwxd13cfi";
+    src = fetchurl {
+      url = "http://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/${version}-${buildId}/linux-x64/Antigravity.tar.gz";
+      hash = "sha256-1dv4bx598nshjsq0d8nnf8zfn86wsbjf2q56dqvmq9vcwxd13cfi";
+    };
+
+    dontBuild = true;
+    dontConfigure = true;
+
+    installPhase = ''
+      runHook preInstall
+      mkdir -p $out
+      cp -r . $out/
+      runHook postInstall
+    '';
   };
 
-  nativeBuildInputs = [
-    autoPatchelfHook
-    makeWrapper
-  ];
+  desktopItem = makeDesktopItem {
+    name = "antigravity";
+    desktopName = "Google Antigravity";
+    comment = "Agentic Development Platform with Multi-Model AI Support";
+    exec = "antigravity %U";
+    icon = "antigravity";
+    terminal = false;
+    type = "Application";
+    categories = [ "Development" "IDE" ];
+    mimeTypes = [ "x-scheme-handler/antigravity" ];
+    keywords = [ "ai" "ide" "development" "gemini" "claude" "gpt" "agentic" ];
+    startupWMClass = "Antigravity";
+  };
 
-  buildInputs = [
+in
+buildFHSEnv {
+  name = "antigravity";
+
+  # Complete runtime environment with all necessary libraries
+  targetPkgs = pkgs: with pkgs; [
+    # Core system libraries
     alsa-lib
     at-spi2-atk
     at-spi2-core
@@ -65,22 +63,15 @@ stdenv.mkDerivation rec {
     gdk-pixbuf
     glib
     gtk3
+
+    # Graphics and rendering
     libdrm
+    libgbm
     libglvnd
-    libnotify
-    libpulseaudio
-    libsecret
-    libuuid
-    libxkbcommon
-    libxml2
     mesa
-    nspr
-    nss
-    pango
-    stdenv.cc.cc.lib
-    systemd
     vulkan-loader
-    zlib
+
+    # X11 libraries
     xorg.libX11
     xorg.libXScrnSaver
     xorg.libXcomposite
@@ -95,45 +86,58 @@ stdenv.mkDerivation rec {
     xorg.libxcb
     xorg.libxkbfile
     xorg.libxshmfence
+
+    # System integration
+    libsecret
+    systemd
+    nss
+    nspr
+
+    # Audio
+    libpulseaudio
+
+    # Additional dependencies for desktop integration
+    libappindicator-gtk3
+    libdbusmenu
+    gsettings-desktop-schemas
+    xdg-utils
+    libkrb5
+
+    # Utilities
+    libnotify
+    libuuid
+    libxkbcommon
+    libxml2
+    pango
+    zlib
+    stdenv.cc.cc.lib
   ];
 
-  dontBuild = true;
-  dontConfigure = true;
+  # Wrapper script with critical Electron and Antigravity flags
+  runScript = ''
+    # Set up environment
+    export LD_LIBRARY_PATH="${lib.makeLibraryPath [ antigravity-extracted ]}:/run/opengl-driver/lib:$LD_LIBRARY_PATH"
 
-  installPhase = ''
-    runHook preInstall
+    # Execute antigravity with critical flags
+    exec ${antigravity-extracted}/antigravity \
+      --no-sandbox \
+      --enable-proposed-api google.antigravity \
+      ''${NIXOS_OZONE_WL:+''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations}} \
+      "$@"
+  '';
 
-    mkdir -p $out/bin $out/share/antigravity $out/share/applications $out/share/pixmaps
+  # Install desktop entry and icon
+  extraInstallCommands = ''
+    mkdir -p $out/share/applications
+    mkdir -p $out/share/pixmaps
 
-    # Copy application files
-    cp -r . $out/share/antigravity/
+    # Copy desktop entry
+    cp ${desktopItem}/share/applications/*.desktop $out/share/applications/
 
-    # Create wrapper script with proper library paths
-    makeWrapper $out/share/antigravity/antigravity $out/bin/antigravity \
-      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ libglvnd ]}" \
-      --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations}}"
-
-    # Create desktop entry
-    cat > $out/share/applications/antigravity.desktop <<EOF
-    [Desktop Entry]
-    Name=Google Antigravity
-    Comment=Agentic Development Platform with Multi-Model AI Support
-    Exec=$out/bin/antigravity %U
-    Terminal=false
-    Type=Application
-    Icon=antigravity
-    StartupWMClass=Antigravity
-    Categories=Development;IDE;
-    MimeType=x-scheme-handler/antigravity;
-    Keywords=ai;ide;development;gemini;claude;gpt;agentic;
-    EOF
-
-    # Extract and install icon (if available)
-    if [ -f resources/app/icon.png ]; then
-      cp resources/app/icon.png $out/share/pixmaps/antigravity.png
+    # Extract and install icon if available
+    if [ -f ${antigravity-extracted}/resources/app/icon.png ]; then
+      cp ${antigravity-extracted}/resources/app/icon.png $out/share/pixmaps/antigravity.png
     fi
-
-    runHook postInstall
   '';
 
   meta = with lib; {
@@ -148,6 +152,9 @@ stdenv.mkDerivation rec {
       - Task-oriented development workflow
       - Dual interface: Editor view and Manager view
       - Free access with generous Gemini 3 Pro rate limits
+
+      This package uses buildFHSEnv for maximum Electron compatibility on NixOS.
+      Critical flags (--no-sandbox, --enable-proposed-api) are included for proper operation.
     '';
     homepage = "https://antigravity.google";
     license = licenses.unfree;
