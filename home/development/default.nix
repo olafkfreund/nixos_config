@@ -17,7 +17,6 @@ _: {
     # AI-powered development tools
     ./codex-cli.nix
     ./claude-desktop
-    ./antigravity # Google Antigravity IDE with multi-model AI support
 
     # Version control and CI/CD
     ./gitlab/default.nix
