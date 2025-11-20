@@ -8,6 +8,7 @@
   gemini-cli = pkgs.callPackage ../home/development/gemini-cli { };
   claude-desktop = pkgs.callPackage ./claude-desktop { };
   neuwaita-icon-theme = pkgs.callPackage ./neuwaita-icon-theme { };
+  kosli-cli = pkgs.callPackage ./kosli-cli { };
 
   # Override awscli2 to disable failing tests
   awscli2 = pkgs.awscli2.overrideAttrs (oldAttrs: {

@@ -154,6 +154,9 @@
 
     # Google Antigravity - AI coding assistant
     antigravity-nix.packages.${pkgs.system}.default
+
+    # Kosli CLI - Compliance monitoring and DevOps workflows
+    pkgs.customPkgs.kosli-cli
   ];
 
   # Optional: Add additional packages to the Windsurf environment
