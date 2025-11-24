@@ -253,7 +253,9 @@
       "Bash(do)",
       "Bash(result/bin/kosli:*)",
       "Bash(gh pr list:*)",
-      "Bash(git remote:*)"
+      "Bash(git remote:*)",
+      "Bash(export AUTHORIZED=true)",
+      "Bash(./result/bin/claude:*)"
     ],
     "additionalDirectories": ["/"]
   },
