@@ -250,11 +250,12 @@
       "Bash(/bin/ls:*)",
       "Bash(sudo /nix/var/nix/profiles/system/activate:*)",
       "Bash(for issue in 35 26 32 33 31 30 29 27)",
-      "Bash(do)"
+      "Bash(do)",
+      "Bash(result/bin/kosli:*)",
+      "Bash(gh pr list:*)",
+      "Bash(git remote:*)"
     ],
-    "additionalDirectories": [
-      "/"
-    ]
+    "additionalDirectories": ["/"]
   },
   "enableAllProjectMcpServers": false
 }
