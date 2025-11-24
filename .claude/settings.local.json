@@ -256,7 +256,8 @@
       "Bash(git remote:*)",
       "Bash(export AUTHORIZED=true)",
       "Bash(./result/bin/claude:*)",
-      "Bash(./result/bin/kosli version:*)"
+      "Bash(./result/bin/kosli version:*)",
+      "Bash(gh pr edit:*)"
     ],
     "additionalDirectories": [
       "/"
