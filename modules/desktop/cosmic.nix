@@ -162,7 +162,8 @@ in
     environment.variables = {
       COSMIC_IGNORE_KDE_HINTS = "1";
       # Fix for missing libEGL.so.1 in cosmic-greeter
-      LD_LIBRARY_PATH = "/run/opengl-driver/lib:/run/opengl-driver-32/lib";
+      # Use mkForce to resolve conflict with shells-environment.nix
+      LD_LIBRARY_PATH = lib.mkForce "/run/opengl-driver/lib:/run/opengl-driver-32/lib:/etc/sane-libs";
     };
   };
 }
