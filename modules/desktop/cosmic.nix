@@ -54,6 +54,10 @@ in
         cosmic-term # Terminal emulator
         cosmic-settings # System settings
 
+        # Fix for missing libEGL.so.1
+        libglvnd
+        mesa
+
         #Applications for COSMIC core functionality
         quick-webapps # Web application integration
         tasks
@@ -157,6 +161,8 @@ in
     # Set environment variable to suppress KDE hint warnings in cosmic-notifications
     environment.variables = {
       COSMIC_IGNORE_KDE_HINTS = "1";
+      # Fix for missing libEGL.so.1 in cosmic-greeter
+      LD_LIBRARY_PATH = "/run/opengl-driver/lib:/run/opengl-driver-32/lib";
     };
   };
 }

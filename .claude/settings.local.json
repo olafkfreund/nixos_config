@@ -255,7 +255,8 @@
       "Bash(gh pr list:*)",
       "Bash(git remote:*)",
       "Bash(export AUTHORIZED=true)",
-      "Bash(./result/bin/claude:*)"
+      "Bash(./result/bin/claude:*)",
+      "Bash(jobs)"
     ],
     "additionalDirectories": ["/"]
   },
