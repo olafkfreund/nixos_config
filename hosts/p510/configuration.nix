@@ -190,6 +190,17 @@ in
     preventBootBlocking = true;
   };
 
+  # DISK SPACE MANAGEMENT: Automatic garbage collection to prevent disk full issues
+  storage.garbageCollection = {
+    enable = true;
+    schedule = "weekly";
+    deleteOlderThan = "30d";
+    keepGenerations = 5;
+    optimizeStore = true;
+    minFreeSpace = 20; # Keep at least 20GB free
+    aggressiveCleanup = false;
+  };
+
   # Specific service configurations
   # StreamDeck UI disabled for headless operation
   programs.streamdeck-ui.enable = lib.mkForce false;
