@@ -257,7 +257,8 @@
       "Bash(export AUTHORIZED=true)",
       "Bash(./result/bin/claude:*)",
       "Bash(./result/bin/kosli version:*)",
-      "Bash(gh pr edit:*)"
+      "Bash(gh pr edit:*)",
+      "Bash(gh pr view:*)"
     ],
     "additionalDirectories": [
       "/"
