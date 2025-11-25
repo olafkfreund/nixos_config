@@ -48,23 +48,32 @@ in
     # COSMIC applications and utilities
     environment.systemPackages = with pkgs;
       let
-        # Wrap cosmic-settings with proper Wayland library paths
-        cosmic-settings-wrapped = pkgs.symlinkJoin {
-          name = "cosmic-settings-wrapped";
-          paths = [ pkgs.cosmic-settings ];
+        # Wayland library path for COSMIC applications
+        waylandLibs = lib.makeLibraryPath [ pkgs.wayland pkgs.libxkbcommon pkgs.vulkan-loader pkgs.libglvnd ];
+
+        # Helper function to wrap COSMIC apps with Wayland libraries
+        wrapCosmicApp = name: pkg: pkgs.symlinkJoin {
+          name = "${name}-wrapped";
+          paths = [ pkg ];
           buildInputs = [ pkgs.makeWrapper ];
           postBuild = ''
-            wrapProgram $out/bin/cosmic-settings \
-              --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ pkgs.wayland pkgs.libxkbcommon pkgs.vulkan-loader pkgs.libglvnd ]}"
+            wrapProgram $out/bin/${name} \
+              --prefix LD_LIBRARY_PATH : "${waylandLibs}"
           '';
         };
+
+        # Wrap essential COSMIC applications with proper Wayland library paths
+        cosmic-settings-wrapped = wrapCosmicApp "cosmic-settings" pkgs.cosmic-settings;
+        cosmic-term-wrapped = wrapCosmicApp "cosmic-term" pkgs.cosmic-term;
+        cosmic-edit-wrapped = wrapCosmicApp "cosmic-edit" pkgs.cosmic-edit;
+        cosmic-files-wrapped = wrapCosmicApp "cosmic-files" pkgs.cosmic-files;
       in
       [
-        # Essential applications (always installed)
-        cosmic-edit # Text editor
-        cosmic-files # File manager
-        cosmic-term # Terminal emulator
-        cosmic-settings-wrapped # System settings (wrapped with Wayland libs)
+        # Essential applications (always installed) - all wrapped with Wayland libs
+        cosmic-edit-wrapped # Text editor
+        cosmic-files-wrapped # File manager
+        cosmic-term-wrapped # Terminal emulator
+        cosmic-settings-wrapped # System settings
 
         # Fix for missing libEGL.so.1
         libglvnd
