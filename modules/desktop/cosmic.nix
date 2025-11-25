@@ -47,16 +47,30 @@ in
 
     # COSMIC applications and utilities
     environment.systemPackages = with pkgs;
+      let
+        # Wrap cosmic-settings with proper Wayland library paths
+        cosmic-settings-wrapped = pkgs.symlinkJoin {
+          name = "cosmic-settings-wrapped";
+          paths = [ pkgs.cosmic-settings ];
+          buildInputs = [ pkgs.makeWrapper ];
+          postBuild = ''
+            wrapProgram $out/bin/cosmic-settings \
+              --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ pkgs.wayland pkgs.libxkbcommon pkgs.vulkan-loader pkgs.libglvnd ]}"
+          '';
+        };
+      in
       [
         # Essential applications (always installed)
         cosmic-edit # Text editor
         cosmic-files # File manager
         cosmic-term # Terminal emulator
-        cosmic-settings # System settings
+        cosmic-settings-wrapped # System settings (wrapped with Wayland libs)
 
         # Fix for missing libEGL.so.1
         libglvnd
         mesa
+        wayland
+        libxkbcommon
 
         #Applications for COSMIC core functionality
         quick-webapps # Web application integration
