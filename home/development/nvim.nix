@@ -134,7 +134,7 @@ in
       lua-fmt = "stylua";
 
       # Git shortcuts for LazyVim integration
-      lg = "lazygit";
+      # Note: lg function defined in shell config for advanced lazygit integration
       gst = "git status";
     };
 

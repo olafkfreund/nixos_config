@@ -286,7 +286,7 @@ in
         gp = "git push";
         gl = "git log --oneline";
         gd = "git diff";
-        lg = "lazygit";
+        # Note: lg function defined in shell config for advanced lazygit integration
       })
 
       # Container shortcuts
