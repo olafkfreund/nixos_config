@@ -45,9 +45,15 @@
     flake-utils.url = "github:numtide/flake-utils";
 
     # Environment and theming
-    home-manager.url = "github:nix-community/home-manager";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nix-colors.url = "github:misterio77/nix-colors";
-    stylix.url = "github:danth/stylix";
+    stylix = {
+      url = "github:danth/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Editor
 
@@ -163,8 +169,8 @@
       # ========================================
 
       # Helper function for package imports
-      mkPkgs = _pkgs: {
-        system = "x86_64-linux";
+      mkPkgs = _pkgs: system: {
+        inherit system;
         config.allowUnfree = true;
         # config.allowInsecure = true; # REMOVED for security - using targeted permissions
       };
@@ -177,7 +183,11 @@
           };
         })
         (_final: prev: {
-          zjstatus = inputs.zjstatus.packages.${prev.system}.default;
+          zjstatus = inputs.zjstatus.packages.${prev.stdenv.hostPlatform.system}.default;
+        })
+        # Custom package: glim - GitLab CI/CD TUI
+        (final: _prev: {
+          glim = final.callPackage ./overlays/glim { };
         })
         # Fix CMake version compatibility issues for packages requiring CMake < 3.5
         (_final: prev: {
@@ -245,12 +255,13 @@
           allUsers = getHostUsers host;
           # Import stylix for all hosts (removed dex5550 check as host no longer exists)
           stylixModule = [ inputs.stylix.nixosModules.stylix ];
+          system = "x86_64-linux";
         in
         {
-          system = "x86_64-linux";
+          inherit system;
           specialArgs = {
-            pkgs-stable = import nixpkgs-stable (mkPkgs nixpkgs-stable);
-            pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable);
+            pkgs-stable = import nixpkgs-stable (mkPkgs nixpkgs-stable system);
+            pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable system);
             inherit inputs host hostTypes;
             username = primaryUser; # Primary user for backward compatibility
             hostUsers = allUsers; # All users for this host
@@ -279,8 +290,8 @@
                   useUserPackages = true;
                   backupFileExtension = "backup";
                   extraSpecialArgs = {
-                    pkgs-stable = import nixpkgs-stable (mkPkgs nixpkgs-stable);
-                    pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable);
+                    pkgs-stable = import nixpkgs-stable (mkPkgs nixpkgs-stable system);
+                    pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable system);
                     inherit
                       inputs
                       nixpkgs
@@ -341,6 +352,7 @@
             nodejs_22 = pkgs.nodejs_22;
           };
           gemini-cli = pkgs.callPackage ./pkgs/gemini-cli { };
+          glim = pkgs.callPackage ./overlays/glim { };
           kosli-cli = pkgs.callPackage ./pkgs/kosli-cli { };
           opencode = pkgs.callPackage ./home/development/opencode { };
 
