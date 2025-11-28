@@ -26,9 +26,12 @@ modules
 
   # Host creation helper
   mkNixosHost = _hostName: config:
-    inputs.nixpkgs.lib.nixosSystem {
+    let
       system = "x86_64-linux";
-      specialArgs = { inherit inputs lib; };
+    in
+    inputs.nixpkgs.lib.nixosSystem {
+      inherit system;
+      specialArgs = { inherit inputs lib system; };
       modules = [
         config
         ../modules

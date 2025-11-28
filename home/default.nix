@@ -14,8 +14,8 @@
   ];
 
   home.packages = [
-    inputs.self.packages.${pkgs.system}.claude-code
-    inputs.self.packages.${pkgs.system}.opencode
+    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
+    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.opencode
     (pkgs.callPackage ../pkgs/weather-popup/default.nix { })
   ];
 }

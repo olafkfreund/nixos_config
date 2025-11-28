@@ -256,9 +256,14 @@
       "Bash(git remote:*)",
       "Bash(export AUTHORIZED=true)",
       "Bash(./result/bin/claude:*)",
-      "Bash(jobs)"
+      "Bash(jobs)",
+      "Bash(sudo nh os switch:*)",
+      "Bash(systemd-detect-virt:*)"
     ],
-    "additionalDirectories": ["/"]
+    "additionalDirectories": [
+      "/"
+    ]
   },
-  "enableAllProjectMcpServers": false
+  "enableAllProjectMcpServers": false,
+  "outputStyle": "Explanatory"
 }

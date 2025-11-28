@@ -38,7 +38,7 @@ in
   config = mkIf cfg.enable {
     # Install agenix CLI tool system-wide
     environment.systemPackages = [
-      inputs.agenix.packages.${pkgs.system}.default
+      inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
 
     # Age secrets configuration - only include secrets that exist

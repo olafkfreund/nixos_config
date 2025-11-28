@@ -6,11 +6,12 @@
 , ...
 }:
 let
+  system = "x86_64-linux";
   # Helper to build live ISO for a specific host
   mkLiveISO = hostName: {
-    system = "x86_64-linux";
+    inherit system;
     specialArgs = {
-      inherit inputs host;
+      inherit inputs host system;
       username = builtins.head hostUsers;
       hostUsers = hostUsers;
     };

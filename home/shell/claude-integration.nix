@@ -78,6 +78,9 @@
         # Ensure required directories exist
         [[ -d "${tempDir}" ]] || mkdir -p "${tempDir}"
 
+        # Source Claude theme switcher if available
+        [[ -f "$HOME/.claude/claude-theme.sh" ]] && source "$HOME/.claude/claude-theme.sh"
+
         # Claude code completion function
         _claude_code_complete() {
           # Safety checks

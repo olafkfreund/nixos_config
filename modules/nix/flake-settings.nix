@@ -1,4 +1,4 @@
-_: {
+{ lib, ... }: {
   nix = {
     settings = {
       # Enable flakes and nix-command by default
@@ -15,7 +15,7 @@ _: {
     gc = {
       automatic = true;
       dates = "weekly";
-      options = "--delete-older-than 14d";
+      options = lib.mkDefault "--delete-older-than 14d";
     };
   };
 }

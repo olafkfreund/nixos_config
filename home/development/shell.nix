@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{pkgs, ...}: {
   home.packages = with pkgs; [
     shellcheck
     shfmt
@@ -7,5 +7,6 @@
     upbound
     crossplane-cli
     atac
+    markdownlint-cli
   ];
 }

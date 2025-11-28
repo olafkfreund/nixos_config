@@ -161,12 +161,15 @@ in
     # COSMIC Desktop with COSMIC Greeter enabled
     desktop.cosmic = {
       enable = true;
-      useCosmicGreeter = true; # Use COSMIC Greeter like p620
+      useCosmicGreeter = false; # Disabled due to libEGL.so.1 bug (nixpkgs #464392)
       defaultSession = true; # Set COSMIC as default session
       installAllApps = true; # Install full Cosmic app suite
       disableOsd = true; # Workaround for polkit agent crashes in COSMIC beta
     };
   };
+
+  # Use GDM instead of COSMIC greeter until bug is fixed
+  services.xserver.displayManager.gdm.enable = true;
 
   # Enable NixOS package monitoring tools
   tools.nixpkgs-monitors = {

@@ -217,11 +217,12 @@ let
     let
       hostConfig = hostUsers.${hostName} or [ "olafkfreund" ];
       hostSpecific = hostSpecificConfigs.${hostName} or { };
+      system = "x86_64-linux";
     in
     nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
+      inherit system;
       specialArgs = {
-        inherit inputs;
+        inherit inputs system;
         host = hostName;
         hostUsers = hostConfig;
       };

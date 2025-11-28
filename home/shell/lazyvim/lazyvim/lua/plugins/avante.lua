@@ -11,8 +11,14 @@ return {
         edit = "<leader>ae",   -- Key to edit prompt/response
         refresh = "<leader>ar" -- Key to refresh the response
       },
-      -- Using Copilot as the provider
-      provider = "copilot",
+      -- Using Claude (Anthropic) as the provider
+      provider = "claude",
+      claude = {
+        endpoint = "https://api.anthropic.com",
+        model = "claude-3-5-sonnet-20241022",
+        temperature = 0,
+        max_tokens = 4096,
+      },
     },
     -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
     build = "make",
@@ -39,7 +45,7 @@ return {
       "MunifTanjim/nui.nvim",
       --- The below dependencies are optional,
       "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
-      "zbirenbaum/copilot.lua", -- for providers='copilot'
+      -- Note: Using Claude (Anthropic) instead of Copilot
       {
         -- support for image pasting
         "HakonHarnes/img-clip.nvim",

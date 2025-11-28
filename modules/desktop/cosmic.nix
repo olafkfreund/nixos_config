@@ -42,6 +42,19 @@ in
     # Use COSMIC Greeter as display manager
     services.displayManager.cosmic-greeter.enable = cfg.useCosmicGreeter;
 
+    # Wrap cosmic-comp with proper library paths to fix libEGL.so.1 loading
+    nixpkgs.overlays = mkIf cfg.useCosmicGreeter [
+      (final: prev: {
+        cosmic-comp = prev.cosmic-comp.overrideAttrs (old: {
+          nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ prev.makeWrapper ];
+          postInstall = (old.postInstall or "") + ''
+            wrapProgram $out/bin/cosmic-comp \
+              --prefix LD_LIBRARY_PATH : "${prev.libglvnd}/lib:${prev.mesa}/lib:/run/opengl-driver/lib"
+          '';
+        });
+      })
+    ];
+
     # Set as default session if requested
     services.displayManager.defaultSession = mkIf cfg.defaultSession "cosmic";
 
@@ -187,6 +200,30 @@ in
       # Fix for missing libEGL.so.1 in cosmic-greeter
       # Use mkForce to resolve conflict with shells-environment.nix
       LD_LIBRARY_PATH = lib.mkForce "/run/opengl-driver/lib:/run/opengl-driver-32/lib:/etc/sane-libs";
+    };
+
+    # Fix for greetd service not inheriting LD_LIBRARY_PATH
+    # This ensures cosmic-comp can find libEGL.so.1 from libglvnd
+    systemd.services.greetd = mkIf cfg.useCosmicGreeter {
+      path = [ pkgs.libglvnd pkgs.mesa ];
+      serviceConfig = {
+        Environment = [
+          "LD_LIBRARY_PATH=${pkgs.libglvnd}/lib:/run/opengl-driver/lib:/run/opengl-driver-32/lib"
+        ];
+      };
+      # Also ensure hardware graphics drivers are loaded before greeter starts
+      after = [ "systemd-udev-settle.service" ];
+      wants = [ "systemd-udev-settle.service" ];
+    };
+
+    # Ensure cosmic-greeter-daemon has access to EGL libraries as well
+    systemd.services.cosmic-greeter-daemon = mkIf cfg.useCosmicGreeter {
+      path = [ pkgs.libglvnd pkgs.mesa pkgs.wayland ];
+      serviceConfig = {
+        Environment = [
+          "LD_LIBRARY_PATH=${pkgs.libglvnd}/lib:/run/opengl-driver/lib:/run/opengl-driver-32/lib"
+        ];
+      };
     };
   };
 }

@@ -153,7 +153,7 @@
     # pkgs.aider-chat-env
 
     # Google Antigravity - AI coding assistant
-    antigravity-nix.packages.${pkgs.system}.default
+    antigravity-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
 
     # Kosli CLI - Compliance monitoring and DevOps workflows
     pkgs.customPkgs.kosli-cli

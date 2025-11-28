@@ -184,49 +184,49 @@ let
                 hours_to_reset, mins_to_reset = time_until_reset(reset_hour, timezone)
 
                 # Display
-                print(f"\r{Colors.BOLD}Usage:{Colors.END} {format_tokens(used)}/{format_tokens(int(current_limit))} ", end='')
-  print(f"[{percentage:.1f}%]", end='')
+                print(f"\r{Colors.BOLD}Usage:{Colors.END} {format_tokens(used)}/{format_tokens(int(current_limit))} ", end="")
+                print(f"[{percentage:.1f}%]", end="")
 
                 if burn_rate > 0:
                     time_until_limit = ((current_limit - used) / burn_rate) * 60  # minutes
-                    print(f" | {Colors.BLUE}Burn: {burn_rate:.0f} tok/hr{Colors.END}", end='')
-  if time_until_limit > 0 and time_until_limit < 300:  # Less than 5 hours
-  print(f" | {Colors.RED}⚠ {time_until_limit:.0f}min until limit{Colors.END}", end='')
+                    print(f" | {Colors.BLUE}Burn: {burn_rate:.0f} tok/hr{Colors.END}", end="")
+                    if time_until_limit > 0 and time_until_limit < 300:  # Less than 5 hours
+                        print(f" | {Colors.RED}⚠ {time_until_limit:.0f}min until limit{Colors.END}", end="")
 
-                print(f" | Reset in: {hours_to_reset}h {mins_to_reset}m", end='', flush=True)
+                print(f" | Reset in: {hours_to_reset}h {mins_to_reset}m", end="", flush=True)
 
-  if verbose:
-  print()  # New line for verbose output
-  print(get_progress_bar(percentage))
+                if verbose:
+                    print()  # New line for verbose output
+                    print(get_progress_bar(percentage))
 
-  time.sleep(3)
+                time.sleep(3)
 
-  except KeyboardInterrupt:
-  print(f"\n{Colors.BOLD}Monitoring stopped{Colors.END}")
-  sys.exit(0)
+        except KeyboardInterrupt:
+            print(f"\n{Colors.BOLD}Monitoring stopped{Colors.END}")
+            sys.exit(0)
 
-  def main():
-  parser = argparse.ArgumentParser(description='Claude Code Usage Monitor')
-  parser.add_argument('--plan', choices=list(PLANS.keys()), default='pro',
-  help='Claude Code plan type')
-  parser.add_argument('--reset-hour', type=int, default=0,
-  help='Hour when usage resets (0-23)')
-  parser.add_argument('--timezone', default='UTC',
-  help='Timezone for reset time')
-  parser.add_argument('--verbose', action='store_true',
-  help='Show detailed output with progress bar')
+    def main():
+        parser = argparse.ArgumentParser(description='Claude Code Usage Monitor')
+        parser.add_argument('--plan', choices=list(PLANS.keys()), default='pro',
+                            help='Claude Code plan type')
+        parser.add_argument('--reset-hour', type=int, default=0,
+                            help='Hour when usage resets (0-23)')
+        parser.add_argument('--timezone', default='UTC',
+                            help='Timezone for reset time')
+        parser.add_argument('--verbose', action='store_true',
+                            help='Show detailed output with progress bar')
 
-  args = parser.parse_args()
+        args = parser.parse_args()
 
-  monitor_usage(
-  plan=args.plan,
-  reset_hour=args.reset_hour,
-  timezone=args.timezone,
-  verbose=args.verbose
-  )
+        monitor_usage(
+            plan=args.plan,
+            reset_hour=args.reset_hour,
+            timezone=args.timezone,
+            verbose=args.verbose
+        )
 
-  if __name__ == '__main__':
-  main()
+    if __name__ == '__main__':
+        main()
   '';
 
 in

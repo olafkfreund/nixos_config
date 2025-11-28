@@ -116,9 +116,7 @@ in
       };
 
       # Post-GC status report
-      postStop = pkgs.writeShellScript "nix-gc-post-report" ''
-        #!/bin/bash
-
+      postStop = ''
         LOG_FILE="/var/log/nix-gc/summary.log"
         mkdir -p "$(dirname "$LOG_FILE")"
 
