@@ -17,6 +17,7 @@
     ./slack/default.nix
     ./obs/default.nix
     ./flameshot/default.nix
+    ./screenshots/wayland-native.nix
     ./kooha/default.nix
     ./zathura/default.nix
     ./remotedesktop/default.nix
@@ -25,10 +26,5 @@
     ./obsidian/default.nix
     ./proton/default.nix # Proton applications suite (optional)
     ./gnome # GNOME desktop environment (optional)
-  ];
-
-  home.packages = with pkgs; [
-    remmina
-    freerdp
   ];
 }

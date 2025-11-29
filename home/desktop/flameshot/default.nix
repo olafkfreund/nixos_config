@@ -14,6 +14,9 @@ in
     };
   };
   config = mkIf cfg.enable {
+    # Ensure screenshots directory exists
+    home.file."Pictures/screenshots/.keep".text = "";
+
     services.flameshot = {
       enable = true;
       package = pkgs.flameshot.override { enableWlrSupport = true; };
@@ -24,9 +27,11 @@ in
           uiColor = "#ff0000"; # Customize UI color
           contrastUiColor = "#ffffff";
           saveAsFileExtension = "png";
-          savePath = "/home/${config.home.username}/Pictures/screenshots";
+          savePath = "${config.home.homeDirectory}/Pictures/screenshots";
           copyPathAfterSave = false;
           startupLaunch = true; # Auto-start on login
+          disabledGrimWarning = true; # Disable grim adapter warning
+          useGrimAdapter = true; # Use grim adapter for Wayland
         };
         Shortcuts = {
           TYPE_ARROW = "A";

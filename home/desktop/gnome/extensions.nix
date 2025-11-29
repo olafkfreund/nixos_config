@@ -45,13 +45,14 @@ in
       };
 
       # User Themes extension configuration
-      "org/gnome/shell/extensions/user-theme" = {
-        name = mkDefault (
-          if cfg.theme.enable
-          then "Gruvbox-Dark-BL"
-          else "Adwaita"
-        );
-      };
+      # Note: Disabled until Gruvbox Shell theme is properly installed
+      # "org/gnome/shell/extensions/user-theme" = {
+      #   name = mkDefault (
+      #     if cfg.theme.enable
+      #     then "Gruvbox-Dark-BL"
+      #     else "Adwaita"
+      #   );
+      # };
 
       # GSConnect configuration
       "org/gnome/shell/extensions/gsconnect" = {

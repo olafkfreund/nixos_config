@@ -13,8 +13,8 @@ in
     # Font configuration
     fonts = {
       monospace = {
-        # Use the specific nerd-fonts package to ensure proper icons
-        package = pkgs.nerd-fonts.jetbrains-mono;
+        # Use Adwaita Mono (built into GNOME)
+        package = pkgs.gnome-themes-extra;
         name = vars.theme.font.mono;
       };
       sansSerif = {
@@ -42,6 +42,8 @@ in
     # Target-specific configuration
     targets = {
       chromium.enable = false; # Exclude browser theming
+      gnome.enable = false; # Disable GNOME theming - let Home Manager handle it
+      gtk.enable = false; # Disable GTK theming - let Home Manager handle it
       qt = {
         enable = true; # Enable Qt theming for consistent styling
         platform = lib.mkForce "qtct"; # Use qtct platform (supported by stylix)
