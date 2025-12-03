@@ -225,4 +225,24 @@
     ipcalc
     dig
   ];
+
+  # AI and MCP (Model Context Protocol) servers
+  mcp = with pkgs; [
+    # Core MCP servers - recommended for all systems
+    playwright-mcp # Browser automation for AI agents
+    mcp-nixos # NixOS package and option queries
+    github-mcp-server # GitHub integration
+    chatmcp # AI chat client (already in use)
+
+    # Infrastructure MCP servers - optional but valuable
+    mcp-grafana # Grafana integration
+    mcp-k8s-go # Kubernetes integration
+    terraform-mcp-server # Terraform/IaC automation
+
+    # Version control MCP servers
+    gitea-mcp-server # Gitea integration (if applicable)
+
+    # Utility MCP servers
+    mcp-proxy # Proxy for stdio <-> SSE conversion
+  ];
 }

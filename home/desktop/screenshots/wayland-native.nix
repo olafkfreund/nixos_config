@@ -26,11 +26,11 @@ in
   config = mkIf cfg.enable {
     # Install Wayland screenshot tools
     home.packages = with pkgs; [
-      grim          # Screenshot capture from Wayland compositor
-      slurp         # Interactive region selection
-      wl-clipboard  # Clipboard integration for Wayland
+      grim # Screenshot capture from Wayland compositor
+      slurp # Interactive region selection
+      wl-clipboard # Clipboard integration for Wayland
     ] ++ optionals cfg.enableAnnotation [
-      swappy        # Screenshot annotation/editing tool
+      swappy # Screenshot annotation/editing tool
     ];
 
     # Ensure screenshots directory exists
@@ -78,7 +78,7 @@ in
     '';
 
     # Add convenient shell functions for zsh
-    programs.zsh.initExtra = mkIf config.programs.zsh.enable ''
+    programs.zsh.initContent = mkIf config.programs.zsh.enable ''
       # Take screenshot of selected region and save to file
       screenshot() {
         local filename="${cfg.savePath}/screenshot-$(date +%Y%m%d-%H%M%S).png"

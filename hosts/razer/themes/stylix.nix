@@ -6,6 +6,7 @@ in
   # Stylix theming
   stylix = {
     enable = true;
+    enableReleaseChecks = false;  # Disable version mismatch warnings
     polarity = "dark";
     autoEnable = true;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/${vars.theme.scheme}.yaml";

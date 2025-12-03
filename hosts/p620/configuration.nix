@@ -143,6 +143,21 @@ in
     profile = "workstation";
   };
 
+  # Enable MCP (Model Context Protocol) servers for AI integration
+  features.ai.mcp = {
+    enable = true;
+    # Enable Obsidian MCP server for knowledge base access
+    obsidian = {
+      enable = true;
+      vaultPath = "/home/olafkfreund/Documents/Caliti";
+    };
+    # Enable additional MCP servers
+    servers = {
+      grafana = true;  # Integration with monitoring stack
+      terraform = true;  # Infrastructure as Code support
+    };
+  };
+
   # Re-enable Claude Desktop with local package
   # features.ai.claude-desktop = true;
 

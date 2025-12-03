@@ -12,6 +12,7 @@ in
     ./chatgpt.nix
     ./gemini-cli.nix
     ./providers/default.nix
+    ./mcp-servers.nix
     # Non-functional AI modules removed - monitoring handled by Prometheus/Grafana on DEX5550
   ];
 
