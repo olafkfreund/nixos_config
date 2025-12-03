@@ -35,6 +35,7 @@ in
         pkgs.python312Packages.pycairo
         pkgs.python312Packages.pillow
         pkgs.python312Packages.requests
+        pkgs.python312Packages.mcp
 
       ]
       ++ cfg.packages;

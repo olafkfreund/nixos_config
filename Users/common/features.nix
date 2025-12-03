@@ -34,7 +34,8 @@ with lib; {
       gnome = mkEnableOption "Enable GNOME";
       zathura = mkEnableOption "Enable Zathura PDF reader";
       obsidian = mkEnableOption "Enable Obsidian notes";
-      flameshot = mkEnableOption "Enable Flameshot screenshots";
+      flameshot = mkEnableOption "Enable Flameshot screenshots (X11/limited Wayland)";
+      waylandScreenshots = mkEnableOption "Enable native Wayland screenshots (grim + swappy)";
       kooha = mkEnableOption "Enable Kooha screen recording";
       remotedesktop = mkEnableOption "Enable Remote Desktop";
 

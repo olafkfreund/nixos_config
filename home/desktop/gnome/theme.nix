@@ -11,12 +11,12 @@ in
 
       theme = {
         package = mkDefault pkgs.gruvbox-gtk-theme;
-        name = mkDefault (if cfg.theme.variant == "dark" then "Gruvbox-Dark-BL" else "Gruvbox-Light-BL");
+        name = mkDefault (if cfg.theme.variant == "dark" then "Gruvbox-Dark-Medium" else "Gruvbox-Light-BL");
       };
 
       iconTheme = {
         package = mkDefault pkgs.gruvbox-plus-icons;
-        name = mkDefault "Gruvbox-Plus-Dark";
+        name = mkDefault "Gruvbox-Material-Dark";
       };
 
       cursorTheme = {
@@ -46,17 +46,17 @@ in
       nerd-fonts.fira-code
     ];
 
-    # GNOME-specific theming via dconf (defaults - can be overridden)
+    # GNOME-specific theming via dconf (use mkForce to override Stylix)
     dconf.settings = mkIf cfg.theme.enable {
       "org/gnome/desktop/interface" = {
-        gtk-theme = mkDefault (if cfg.theme.variant == "dark" then "Gruvbox-Dark-BL" else "Gruvbox-Light-BL");
-        icon-theme = mkDefault "Gruvbox-Plus-Dark";
-        cursor-theme = mkDefault "Bibata-Modern-Classic";
-        cursor-size = mkDefault 16;
-        font-name = mkDefault "Inter 11";
-        document-font-name = mkDefault "Inter 11";
-        monospace-font-name = mkDefault "JetBrainsMono Nerd Font 10";
-        color-scheme = mkDefault (if cfg.theme.variant == "dark" then "prefer-dark" else "prefer-light");
+        gtk-theme = mkForce (if cfg.theme.variant == "dark" then "Gruvbox-Dark-Medium" else "Gruvbox-Light-BL");
+        icon-theme = mkForce "Gruvbox-Material-Dark";
+        cursor-theme = mkForce "Bibata-Modern-Classic";
+        cursor-size = mkForce 16;
+        font-name = mkForce "Inter 11";
+        document-font-name = mkForce "Inter 11";
+        monospace-font-name = mkForce "Adwaita Mono 11";
+        color-scheme = mkForce (if cfg.theme.variant == "dark" then "prefer-dark" else "prefer-light");
       };
 
       "org/gnome/desktop/wm/preferences" = {
@@ -87,7 +87,7 @@ in
         ];
         use-theme-colors = false;
         use-system-font = false;
-        font = "JetBrainsMono Nerd Font 10";
+        font = "Adwaita Mono 11";
         audible-bell = false;
         visual-bell = false;
       };

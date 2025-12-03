@@ -10,6 +10,9 @@
     ./features.nix
     ./features-impl.nix
 
+    # Desktop modules (options always available, enabled via features)
+    ../../home/desktop/default.nix
+
     # Development environment modules
     ../../home/development/default.nix
   ];

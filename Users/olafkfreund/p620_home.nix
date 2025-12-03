@@ -84,7 +84,8 @@
       enable = true;
       zathura = true;
       obsidian = true;
-      flameshot = true;
+      flameshot = false;  # Disabled - has issues with Wayland multi-monitor
+      waylandScreenshots = true;  # Use native Wayland screenshot tools instead
       kooha = true;
       remotedesktop = true;
 
@@ -157,6 +158,9 @@
 
     # Kosli CLI - Compliance monitoring and DevOps workflows
     pkgs.customPkgs.kosli-cli
+
+    # Glim - GitLab CI/CD TUI monitoring
+    pkgs.glim
   ];
 
   # Optional: Add additional packages to the Windsurf environment

@@ -9,16 +9,16 @@
 let
   claudeCode = buildNpmPackage rec {
     pname = "claude-code";
-    version = "2.0.56";
+    version = "2.0.57";
 
     src = fetchurl {
       url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-      hash = "sha256-lv8ORG3GYq+ujxEx+IDI7NVyY6q9CwT6QiOH4vn1vwQ=";
+      hash = "sha256-P/L5NfHkNvCoSOvarSd2ygurDB57lBZWzjpuZNC3QEM=";
       curlOptsList = [ "--http1.1" ]; # Force HTTP/1.1 to avoid HTTP/2 protocol errors
     };
 
     # No npm dependencies to cache - all dependencies are vendored
-    npmDepsHash = "sha256-yoVNRg7XdVBHGJPlmZ3g/vQ/0qSroKUVaN91N2XWtEs=";
+    npmDepsHash = "sha256-k7sCE3dyHz69qlxxrX+lnPuJUf8w/FAAUQtFuEdlTqA=";
 
     inherit nodejs;
 

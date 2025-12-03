@@ -55,7 +55,7 @@
       size = 26;
     };
     font = {
-      mono = "JetBrainsMono Nerd Font";
+      mono = "Adwaita Mono";
       sans = "Noto Sans";
       serif = "Noto Serif";
       sizes = {

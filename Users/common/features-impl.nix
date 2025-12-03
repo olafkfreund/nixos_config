@@ -50,6 +50,7 @@ in
         remotedesktop.enable = cfg.desktop.remotedesktop;
         screenshots = {
           flameshot.enable = cfg.desktop.flameshot;
+          wayland.enable = cfg.desktop.waylandScreenshots;
           kooha.enable = cfg.desktop.kooha;
         };
       };
