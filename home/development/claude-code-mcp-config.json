@@ -1,0 +1,46 @@
+{
+  "mcpServers": {
+    "obsidian": {
+      "command": "obsidian-mcp",
+      "args": ["${OBSIDIAN_VAULT_PATH:-/home/olafkfreund/Documents/Caliti}"],
+      "description": "Obsidian vault knowledge base - read/write/search notes in your Caliti vault"
+    },
+    "nixos": {
+      "command": "mcp-nixos",
+      "args": [],
+      "description": "NixOS package and option queries - prevents AI hallucinations about NixOS"
+    },
+    "github": {
+      "command": "github-mcp-server",
+      "args": [],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "GitHub repository integration - PR automation, issue management, repository queries"
+    },
+    "grafana": {
+      "command": "mcp-grafana",
+      "args": [
+        "--url", "http://dex5550:3001",
+        "--token", "${GRAFANA_API_TOKEN}"
+      ],
+      "description": "Grafana dashboard and metrics integration - query monitoring data from DEX5550"
+    },
+    "terraform": {
+      "command": "terraform-mcp-server",
+      "args": [],
+      "description": "Terraform Infrastructure as Code - manage and query terraform configurations"
+    },
+    "chatmcp": {
+      "command": "chatmcp",
+      "args": [],
+      "description": "AI chat client with MCP support - unified interface for AI interactions"
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "description": "Up-to-date library documentation - prevents coding hallucinations with current docs"
+    }
+  }
+}

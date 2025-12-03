@@ -179,6 +179,9 @@ with lib; {
       setopt HIST_SAVE_NO_DUPS
       setopt HIST_VERIFY
 
+      # MCP (Model Context Protocol) Environment Variables
+      export OBSIDIAN_VAULT_PATH="$HOME/Documents/Caliti"
+
       # Modern history with atuin
       if command -v atuin >/dev/null 2>&1; then
         eval "$(atuin init zsh)"
