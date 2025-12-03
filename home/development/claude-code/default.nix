@@ -18,7 +18,7 @@ let
     };
 
     # No npm dependencies to cache - all dependencies are vendored
-    npmDepsHash = "sha256-k7sCE3dyHz69qlxxrX+lnPuJUf8w/FAAUQtFuEdlTqA=";
+    npmDepsHash = "sha256-yoVNRg7XdVBHGJPlmZ3g/vQ/0qSroKUVaN91N2XWtEs=";
 
     inherit nodejs;
 
