@@ -26,5 +26,8 @@ _: {
 
     # CI/CD services
     ./gitlab-runner.nix
+
+    # System management services
+    ./nixos-update-checker/default.nix
   ];
 }

@@ -153,8 +153,8 @@ in
     };
     # Enable additional MCP servers
     servers = {
-      grafana = true;  # Integration with monitoring stack
-      terraform = true;  # Infrastructure as Code support
+      grafana = true; # Integration with monitoring stack
+      terraform = true; # Infrastructure as Code support
     };
   };
 
@@ -422,6 +422,14 @@ in
     nixai = {
       enable = true;
       mcp.enable = true;
+    };
+
+    # NixOS Update Checker - Safe update detection and management
+    nixos-update-checker = {
+      enable = true;
+      flakeDir = "/home/olafkfreund/.config/nixos";
+      checkInterval = "monthly"; # Check for updates monthly
+      enableMotd = false; # MOTD disabled - /etc is immutable in NixOS
     };
 
     # Disable secure-dns to allow NetworkManager to manage DNS directly
