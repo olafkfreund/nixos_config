@@ -69,6 +69,7 @@ This document defines the complete GitHub-based development workflow for the Nix
 **"No code without an issue, no issue without a plan"**
 
 Every code change, bug fix, or improvement must:
+
 1. Start with a GitHub issue
 2. Include research and planning
 3. Have clear acceptance criteria
@@ -83,6 +84,7 @@ User: "/new_task"
 ```
 
 The command will:
+
 1. ✅ Guide you through issue creation
 2. ✅ Conduct technical research if needed
 3. ✅ Create formatted GitHub issue
@@ -95,27 +97,34 @@ Every issue should include:
 
 ```markdown
 ## Description
+
 [What needs to be done and why]
 
 ## Research Summary
+
 [Technical research findings and recommendations]
 
 ### Recommended Approach
+
 - Step-by-step implementation plan
 
 ### Key Considerations
+
 - Important points to remember
 
 ### References
+
 - Links to documentation and examples
 
 ## Acceptance Criteria
+
 - [ ] Testable criteria 1
 - [ ] Testable criteria 2
 - [ ] All tests pass
 - [ ] Documentation updated
 
 ## Implementation Checklist
+
 - [ ] Create feature branch
 - [ ] Implement solution
 - [ ] Write tests
@@ -126,9 +135,11 @@ Every issue should include:
 - [ ] Merge
 
 ## Labels
+
 type:feature, priority:high
 
 ## Estimated Effort
+
 M (1 week)
 ```
 
@@ -167,6 +178,7 @@ User: "/check_tasks"
 ```
 
 The command provides:
+
 1. 📋 Summary of all open issues by priority
 2. 🎯 Recommended next actions
 3. ⏸️ Blocked issues requiring attention
@@ -251,6 +263,7 @@ main
 ### Branch Protection Rules
 
 **Main Branch Protection**:
+
 - ✅ Require pull request reviews before merging
 - ✅ Require status checks to pass before merging
 - ✅ Require branches to be up to date before merging
@@ -323,30 +336,37 @@ Every PR should include:
 
 ```markdown
 ## Summary
+
 Brief description of the changes and their purpose.
 
 ## Changes
+
 - Bullet list of specific changes made
 - Organized by category if needed
 
 ## Testing
+
 - ✅ Validation checks passed
 - ✅ Tested on specific hosts
 - ✅ All tests pass
 - ✅ Manual testing completed
 
 ## Screenshots (if applicable)
+
 [Visual proof of changes]
 
 ## Documentation
+
 - List of documentation updates
 - Links to updated docs
 
 ## Related Issues
+
 Closes #123
 Relates to #45
 
 ## Checklist
+
 - [ ] Code follows PATTERNS.md best practices
 - [ ] No anti-patterns from NIXOS-ANTI-PATTERNS.md
 - [ ] Tests added/updated
@@ -371,6 +391,7 @@ chore(deps): update flake inputs (#199)
 ```
 
 **Types**:
+
 - `feat` - New feature
 - `fix` - Bug fix
 - `docs` - Documentation only
@@ -381,6 +402,7 @@ chore(deps): update flake inputs (#199)
 - `chore` - Maintenance tasks
 
 **Scopes** (examples):
+
 - `monitoring` - Monitoring related changes
 - `p620`, `p510`, etc. - Host-specific changes
 - `modules` - Module system changes
@@ -392,6 +414,7 @@ chore(deps): update flake inputs (#199)
 #### 1. Automated Checks
 
 PRs must pass:
+
 - ✅ Nix syntax validation
 - ✅ Build tests for all affected hosts
 - ✅ Code review checklist from NIXOS-ANTI-PATTERNS.md
@@ -400,6 +423,7 @@ PRs must pass:
 #### 2. Human Review
 
 All PRs require:
+
 - ✅ At least one approval (can be self-reviewed for personal repo)
 - ✅ All conversations resolved
 - ✅ No requested changes outstanding
@@ -407,6 +431,7 @@ All PRs require:
 #### 3. Final Validation
 
 Before merge:
+
 - ✅ Branch is up to date with main
 - ✅ All checks pass
 - ✅ Documentation is updated
@@ -470,6 +495,7 @@ User: "/review"
 #### Manual Review Checklist
 
 **Code Quality**:
+
 - [ ] Follows PATTERNS.md best practices
 - [ ] No anti-patterns from NIXOS-ANTI-PATTERNS.md
 - [ ] Code is readable and well-structured
@@ -477,6 +503,7 @@ User: "/review"
 - [ ] Proper error handling
 
 **NixOS Specific**:
+
 - [ ] No `mkIf condition true` patterns
 - [ ] Explicit imports (no auto-discovery)
 - [ ] Proper secret handling (runtime loading)
@@ -484,18 +511,21 @@ User: "/review"
 - [ ] Correct dependency categorization
 
 **Testing**:
+
 - [ ] Validation passes (`just validate`)
 - [ ] Host tests pass (`just test-host HOST`)
 - [ ] Manual testing completed
 - [ ] No regressions introduced
 
 **Documentation**:
+
 - [ ] Code is documented
 - [ ] README/docs updated if needed
 - [ ] Commit messages are clear
 - [ ] PR description is comprehensive
 
 **Security**:
+
 - [ ] No secrets in code
 - [ ] Proper access controls
 - [ ] Services run with minimal privileges
@@ -530,6 +560,7 @@ User: "/review"
 ### Review Comments
 
 Use GitHub's review features:
+
 - **Comment**: Ask questions or request clarification
 - **Request Changes**: Require modifications before merge
 - **Approve**: Allow merge when ready
@@ -609,6 +640,7 @@ jobs:
 5. **Integration Level**: Services interact correctly
 
 **Test Coverage**:
+
 - ✅ All new features have tests
 - ✅ Bug fixes include regression tests
 - ✅ Configuration changes tested on affected hosts
@@ -913,6 +945,7 @@ gh pr merge 145 --squash --delete-branch
 ### Common Issues
 
 **Issue**: GitHub CLI not authenticated
+
 ```bash
 Solution:
 gh auth login
@@ -920,6 +953,7 @@ gh auth login
 ```
 
 **Issue**: PR checks failing
+
 ```bash
 Solution:
 just validate          # Check what's failing
@@ -928,6 +962,7 @@ just check-syntax      # Fix syntax errors
 ```
 
 **Issue**: Merge conflicts
+
 ```bash
 Solution:
 git checkout main
@@ -938,6 +973,7 @@ git push
 ```
 
 **Issue**: Can't create branch from issue
+
 ```bash
 Solution:
 # Manual creation
@@ -945,6 +981,7 @@ git checkout -b feature/123-description
 ```
 
 **Issue**: Issue not closing automatically
+
 ```bash
 Solution:
 # Ensure PR body includes:

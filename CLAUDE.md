@@ -4,7 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a sophisticated multi-host NixOS Infrastructure Hub featuring a revolutionary **template-based architecture** that achieves unprecedented 95% code deduplication through systematic use of host templates, Home Manager profiles, and 141+ modular components. The repository manages 4 active hosts with different hardware profiles, supports multi-user environments, and provides comprehensive monitoring, AI integration, development environments, and follows comprehensive NixOS best practices with zero anti-patterns.
+This is a sophisticated multi-host NixOS Infrastructure Hub featuring a revolutionary **template-based architecture** that achieves unprecedented 95% code deduplication through systematic use of host templates, Home Manager profiles, and 141+ modular components. The repository manages 4 active hosts (P620, Razer, P510, Samsung) with different hardware profiles, supports multi-user environments, and provides AI integration, development environments, and follows comprehensive NixOS best practices with zero anti-patterns.
+
+**Infrastructure Changes**:
+
+- **DEX5550**: Offline and no longer in use
+- **Monitoring Stack**: Prometheus/Grafana/Loki removed from configuration (infrastructure simplified)
 
 ### Architecture Philosophy
 
@@ -690,7 +695,7 @@ just live-help                    # Show comprehensive help
 │   ├── services/                     # Service-specific configurations
 │   └── default.nix                   # Module imports and organization
 ├── hosts/                            # Host-specific configurations
-│   ├── p620/                         # AMD workstation (primary AI host, monitoring server)
+│   ├── p620/                         # AMD workstation (primary AI host, development system)
 │   ├── p510/                         # Intel Xeon server (media server)
 │   ├── razer/                        # Intel/NVIDIA laptop (mobile)
 │   ├── samsung/                      # Intel laptop (mobile)
@@ -706,7 +711,7 @@ just live-help                    # Show comprehensive help
 │   │   ├── workstation.nix           # Full desktop workstation template
 │   │   ├── laptop.nix                # Mobile laptop template
 │   │   └── server.nix                # Headless server template
-│   ├── p620/                         # AMD workstation (uses workstation template, monitoring server)
+│   ├── p620/                         # AMD workstation (uses workstation template)
 │   ├── p510/                         # Intel Xeon server (uses server template, media server)
 │   ├── razer/                        # Intel/NVIDIA laptop (uses laptop template)
 │   ├── samsung/                      # Intel laptop (uses laptop template)
@@ -739,7 +744,7 @@ Three hardware-optimized templates provide base configurations:
 
 - **`server.nix`**: Headless server configuration
   - Used by: P510 (media server)
-  - Includes: Server services, monitoring, headless operation
+  - Includes: Server services, headless operation
 
 #### **Tier 2: Home Manager Profiles** (`home/profiles/`)
 
@@ -754,7 +759,7 @@ Four role-based profiles provide user environment configurations:
 
 Sophisticated profile combinations for specific use cases:
 
-- **P620**: `developer` + `desktop-user` (full workstation with monitoring)
+- **P620**: `developer` + `desktop-user` (full workstation)
 - **Razer/Samsung**: `developer` + `laptop-user` (mobile development)
 - **P510**: `server-admin` + `developer` (dev-server composition)
 
@@ -1349,38 +1354,16 @@ just test-host HOSTNAME
 just deploy  # or just HOSTNAME
 ```
 
-### Enabling Monitoring on Additional Hosts
+### System Management and Logging
 
-To add monitoring to other hosts (razer, p510, samsung):
+**Native NixOS Tools:**
 
-1. **Enable monitoring in client mode:**
+- **`journalctl`**: Systemd journal access for all service logs
+- **`systemctl status`**: Service status and health monitoring
+- **System logs**: Standard logs in `/var/log/` for troubleshooting
+- **NixOS generations**: Built-in rollback and configuration history
 
-```nix
-# In hosts/HOSTNAME/configuration.nix
-features = {
-  monitoring = {
-    enable = true;
-    mode = "client";  # Send metrics to P620 server
-    serverHost = "p620";
-
-    features = {
-      nodeExporter = true;
-      nixosMetrics = true;
-    };
-  };
-};
-```
-
-2. **Deploy configuration:**
-
-```bash
-just test-host HOSTNAME
-just HOSTNAME  # Deploy to specific host
-```
-
-3. **Verify monitoring:**
-   - Check Prometheus targets: <http://p620:9090/targets>
-   - View host dashboard in Grafana: <http://p620:3001>
+**Note**: External monitoring infrastructure (Prometheus/Grafana/Loki) has been **removed** for simplified configuration. Use native NixOS tools for system management.
 
 ## Network and Cache Configuration
 
@@ -1388,9 +1371,9 @@ just HOSTNAME  # Deploy to specific host
 - Tailscale VPN integration for remote access
 - Network stability module for connection monitoring
 
-## Monitoring and Observability
+## System Management (Monitoring Infrastructure Removed)
 
-### Monitoring Stack (Phase 7 - FULLY DEPLOYED)
+### Native System Tools (Simplified Approach)
 
 A comprehensive monitoring infrastructure deployed on P620 as the monitoring server:
 

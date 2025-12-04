@@ -97,5 +97,5 @@ in
   supportedSystems = [ "x86_64-linux" ];
 
   # Flake-utils compatible forAllSystems
-  forAllSystems = f: genAttrs supportedSystems (system: f system);
+  forAllSystems = f: genAttrs supportedSystems f;
 }

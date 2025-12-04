@@ -143,7 +143,7 @@ EOF
 
 After creating the issue, inform the user:
 
-```markdown
+````markdown
 ✅ **GitHub Issue Created**
 
 **Issue Number**: #123
@@ -158,17 +158,20 @@ After creating the issue, inform the user:
    git pull
    git checkout -b [type]/123-brief-description
    ```
+````
 
-   Or use gh CLI:
-   ```bash
-   gh issue develop 123 --checkout
-   ```
+Or use gh CLI:
+
+```bash
+gh issue develop 123 --checkout
+```
 
 2. **Begin Work**: Start implementing the solution following the research
 
 3. **Track Progress**: Update the issue checklist as you complete tasks
 
 4. **When Complete**:
+
    ```bash
    just validate
    just test-host HOST
@@ -178,6 +181,7 @@ After creating the issue, inform the user:
    ```
 
 5. **Create Pull Request**:
+
    ```bash
    gh pr create --fill
    ```
@@ -190,6 +194,7 @@ After creating the issue, inform the user:
 - `docs/123-description` - Documentation
 - `refactor/123-description` - Refactoring
 - `chore/123-description` - Maintenance
+
 ```
 
 ## Important Notes
@@ -222,33 +227,39 @@ Based on task type and priority:
 Follow conventional commits:
 
 ```
+
 type(scope): description (#issue-number)
 
 Longer description if needed
 
 Relates to #issue-number
+
 ```
 
 ### Examples
 
 **Feature**:
 ```
+
 feature(monitoring): add Plex media server monitoring (#45)
 
 Implement comprehensive Plex monitoring with Tautulli integration
 including real-time stream tracking and user analytics.
 
 Relates to #45
+
 ```
 
 **Bug Fix**:
 ```
+
 fix(p510): resolve boot delay from fstrim service (#67)
 
 Optimize fstrim service configuration to prevent 8+ minute
 boot delays on P510 media server.
 
 Fixes #67
+
 ```
 
 ## Error Handling
@@ -266,7 +277,9 @@ If creating issue fails, provide manual instructions for creating via GitHub web
 ### Simple Feature Request
 
 ```
+
 User: "Add support for PostgreSQL monitoring"
+
 ```
 
 **Assistant Response**:
@@ -278,7 +291,9 @@ User: "Add support for PostgreSQL monitoring"
 ### Bug Report
 
 ```
+
 User: "P620 boot is slow after recent changes"
+
 ```
 
 **Assistant Response**:
@@ -290,7 +305,9 @@ User: "P620 boot is slow after recent changes"
 ### Research-Heavy Task
 
 ```
+
 User: "Implement distributed monitoring with Thanos"
+
 ```
 
 **Assistant Response**:
@@ -298,3 +315,4 @@ User: "Implement distributed monitoring with Thanos"
 2. Review compatibility with current Prometheus setup
 3. Create detailed issue with implementation plan
 4. Include multiple phases if complex
+```

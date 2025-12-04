@@ -31,6 +31,7 @@ This will be available in all new shell sessions after deployment.
 ### Configuration File Location
 
 The MCP configuration is stored at:
+
 ```
 /home/olafkfreund/.config/nixos/home/development/claude-code-mcp-config.json
 ```
@@ -70,7 +71,7 @@ Set your GitHub token (if not already set):
 export GITHUB_TOKEN="your-github-token-here"
 ```
 
-Create a token at: https://github.com/settings/tokens
+Create a token at: <https://github.com/settings/tokens>
 
 Required scopes: `repo`, `read:org`, `read:user`
 
@@ -82,37 +83,42 @@ Set your Grafana API token:
 export GRAFANA_API_TOKEN="your-grafana-token-here"
 ```
 
-Create a token in Grafana at: http://dex5550:3001/org/apikeys
+Create a token in Grafana at: <http://dex5550:3001/org/apikeys>
 
 ## Testing MCP Servers
 
 Test each server individually:
 
 ### Obsidian MCP
+
 ```bash
 # Should use the environment variable automatically
 obsidian-mcp $OBSIDIAN_VAULT_PATH
 ```
 
 ### NixOS MCP
+
 ```bash
 mcp-nixos
 # Try: "search for package firefox"
 ```
 
 ### GitHub MCP
+
 ```bash
 github-mcp-server
 # Try: "list my repositories"
 ```
 
 ### Terraform MCP
+
 ```bash
 terraform-mcp-server
 # Try: "show terraform state"
 ```
 
 ### Grafana MCP
+
 ```bash
 mcp-grafana --url http://dex5550:3001 --token $GRAFANA_API_TOKEN
 # Try: "show dashboards"
@@ -123,26 +129,31 @@ mcp-grafana --url http://dex5550:3001 --token $GRAFANA_API_TOKEN
 Once configured, Claude Code can interact with all these servers. Example prompts:
 
 ### Obsidian Queries
+
 - "Search my Obsidian vault for notes about NixOS"
 - "Create a new note in my vault about MCP setup"
 - "What notes do I have about monitoring?"
 
 ### NixOS Queries
+
 - "What NixOS options are available for Docker?"
 - "Find packages related to AI development"
 - "Show me the configuration options for systemd services"
 
 ### GitHub Integration
+
 - "List open issues in my nixos_config repository"
 - "Create a new issue for updating Claude Code"
 - "Show recent pull requests"
 
 ### Grafana Monitoring
+
 - "What's the current CPU usage on P620?"
 - "Show me the Prometheus targets status"
 - "What alerts are currently firing?"
 
 ### Terraform
+
 - "List terraform resources in this directory"
 - "Show the current terraform state"
 - "Plan terraform changes"
@@ -152,11 +163,13 @@ Once configured, Claude Code can interact with all these servers. Example prompt
 ### MCP Server Not Found
 
 Ensure the server is installed:
+
 ```bash
 which obsidian-mcp mcp-nixos github-mcp-server
 ```
 
 If missing, rebuild your NixOS configuration:
+
 ```bash
 sudo nixos-rebuild switch --flake .#p620
 ```
@@ -164,11 +177,13 @@ sudo nixos-rebuild switch --flake .#p620
 ### Environment Variable Not Set
 
 Check if the variable exists:
+
 ```bash
 echo $OBSIDIAN_VAULT_PATH
 ```
 
 If empty, restart your shell or source zshrc:
+
 ```bash
 exec zsh
 # or
@@ -184,6 +199,7 @@ source ~/.zshrc
 ### Authentication Errors
 
 Verify tokens are set:
+
 ```bash
 echo $GITHUB_TOKEN
 echo $GRAFANA_API_TOKEN
@@ -204,7 +220,7 @@ This creates a powerful AI-assisted development environment with access to your 
 
 ## Documentation
 
-- **MCP Protocol**: https://modelcontextprotocol.io/
+- **MCP Protocol**: <https://modelcontextprotocol.io/>
 - **Server List**: `nix search nixpkgs mcp`
 - **System Info**: `cat /etc/mcp-servers-info.txt`
 - **MCP Servers Guide**: `cat docs/MCP-SERVERS.md`

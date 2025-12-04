@@ -54,28 +54,28 @@ in
     # Enhanced AI provider support
     ai.providers = mkIf cfg.ai.providers.enable {
       enable = true;
-      defaultProvider = cfg.ai.providers.defaultProvider;
-      enableFallback = cfg.ai.providers.enableFallback;
-      costOptimization = cfg.ai.providers.costOptimization;
+      inherit (cfg.ai.providers) defaultProvider;
+      inherit (cfg.ai.providers) enableFallback;
+      inherit (cfg.ai.providers) costOptimization;
 
       openai = {
-        enable = cfg.ai.providers.openai.enable;
-        priority = cfg.ai.providers.openai.priority;
+        inherit (cfg.ai.providers.openai) enable;
+        inherit (cfg.ai.providers.openai) priority;
       };
 
       anthropic = {
-        enable = cfg.ai.providers.anthropic.enable;
-        priority = cfg.ai.providers.anthropic.priority;
+        inherit (cfg.ai.providers.anthropic) enable;
+        inherit (cfg.ai.providers.anthropic) priority;
       };
 
       gemini = {
-        enable = cfg.ai.providers.gemini.enable;
-        priority = cfg.ai.providers.gemini.priority;
+        inherit (cfg.ai.providers.gemini) enable;
+        inherit (cfg.ai.providers.gemini) priority;
       };
 
       ollama = {
-        enable = cfg.ai.providers.ollama.enable;
-        priority = cfg.ai.providers.ollama.priority;
+        inherit (cfg.ai.providers.ollama) enable;
+        inherit (cfg.ai.providers.ollama) priority;
       };
     };
 

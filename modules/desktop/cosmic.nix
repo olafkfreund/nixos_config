@@ -46,7 +46,7 @@ in
     nixpkgs.overlays = mkIf cfg.useCosmicGreeter [
       (final: prev: {
         cosmic-comp = prev.cosmic-comp.overrideAttrs (old: {
-          nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ prev.makeWrapper ];
+          nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.makeWrapper ];
           postInstall = (old.postInstall or "") + ''
             wrapProgram $out/bin/cosmic-comp \
               --prefix LD_LIBRARY_PATH : "${prev.libglvnd}/lib:${prev.mesa}/lib:/run/opengl-driver/lib"

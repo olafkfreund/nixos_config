@@ -88,7 +88,7 @@ in
 
         # Build optimization
         max-jobs = cfg.buildOptimization.maxJobs;
-        cores = cfg.buildOptimization.cores;
+        inherit (cfg.buildOptimization) cores;
 
         # Enable modern Nix features
         experimental-features = [ "nix-command" "flakes" ];

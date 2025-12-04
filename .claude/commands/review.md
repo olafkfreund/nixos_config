@@ -37,6 +37,7 @@ git diff --cached --name-only | grep '.nix$'
 ### Step 2: Read and Analyze Files
 
 For each file to review:
+
 1. Read the entire file carefully
 2. Understand the context (module, package, configuration)
 3. Identify the purpose and scope
@@ -46,6 +47,7 @@ For each file to review:
 **Check Against PATTERNS.md:**
 
 #### Module System Review
+
 - ✅ **Function-based module structure**: Module receives proper arguments?
 - ✅ **Type usage**: Correct types enabling proper merging behavior?
 - ✅ **Submodules**: Used appropriately for complex structures?
@@ -56,6 +58,7 @@ For each file to review:
 - ✅ **Option descriptions**: Comprehensive documentation provided?
 
 #### Package Writing Review
+
 - ✅ **Derivation structure**: Follows stdenv.mkDerivation patterns?
 - ✅ **strictDeps**: Enabled for cross-compilation support?
 - ✅ **Input categorization**: nativeBuildInputs vs buildInputs correct?
@@ -65,12 +68,14 @@ For each file to review:
 - ✅ **Multi-output**: Large packages split appropriately?
 
 #### Security Review
+
 - ✅ **Systemd hardening**: DynamicUser, ProtectSystem, PrivateTmp?
 - ✅ **Service isolation**: Minimal privileges and capabilities?
 - ✅ **Secret management**: Runtime loading only (passwordFile patterns)?
 - ✅ **Firewall configuration**: Minimal ports, interface-specific rules?
 
 #### Performance Review
+
 - ✅ **Lazy evaluation**: No unnecessary eager evaluation?
 - ✅ **No IFD**: Import From Derivation avoided?
 - ✅ **Proper dependencies**: Dependencies correctly specified?
@@ -80,6 +85,7 @@ For each file to review:
 **Check Against NIXOS-ANTI-PATTERNS.md:**
 
 #### Language Anti-Patterns
+
 - ❌ **mkIf true pattern**: `mkIf condition true` (use direct assignment)
 - ❌ **Unquoted URLs**: All URLs properly quoted?
 - ❌ **Excessive with**: Variable origins clear?
@@ -89,12 +95,14 @@ For each file to review:
 - ❌ **Config confusion**: Misunderstanding config argument vs attribute?
 
 #### Security Anti-Patterns
+
 - ❌ **Secrets during evaluation**: builtins.readFile on secrets?
 - ❌ **Root services**: Services running without DynamicUser?
 - ❌ **Disabled firewall**: Firewall disabled or all ports open?
 - ❌ **Poor systemd security**: Missing hardening directives?
 
 #### Package Writing Anti-Patterns
+
 - ❌ **Missing strictDeps**: Cross-compilation broken?
 - ❌ **Wrong input category**: Build tools in buildInputs?
 - ❌ **Using override**: Should use overrideAttrs instead?
@@ -103,11 +111,13 @@ For each file to review:
 - ❌ **Improper extend**: Using pkgs.extend for large changes?
 
 #### Module System Anti-Patterns
+
 - ❌ **No assertions**: Silent misconfiguration possible?
 - ❌ **Ignoring priorities**: Hard-coded values instead of mkDefault?
 - ❌ **Missing descriptions**: Options without documentation?
 
 #### Architecture Anti-Patterns
+
 - ❌ **Magic auto-discovery**: Hidden module loading?
 - ❌ **Trivial wrappers**: Pointless function re-exports?
 - ❌ **Code duplication**: Repeated code not extracted?
@@ -118,14 +128,16 @@ For each file to review:
 
 Provide output in this format:
 
-```markdown
+````markdown
 ## Code Review Report
 
 ### Files Reviewed
+
 - path/to/file1.nix
 - path/to/file2.nix
 
 ### Summary
+
 [Brief overview of the code quality and purpose]
 
 ---
@@ -133,6 +145,7 @@ Provide output in this format:
 ## ✅ Strengths
 
 ### What's Done Well
+
 1. **[Pattern/Aspect]**: [Specific example from code]
    - Why this is good: [Explanation]
    - Reference: [Section in PATTERNS.md]
@@ -145,25 +158,32 @@ Provide output in this format:
 ## ⚠️ Issues Found
 
 ### Critical Issues (Must Fix)
+
 1. **[Anti-Pattern Name]** (Line XX)
    ```nix
    [Code snippet showing the issue]
    ```
-   - **Problem**: [Clear explanation of why this is wrong]
-   - **Fix**: [Specific solution with code example]
-   - **Reference**: [Section in NIXOS-ANTI-PATTERNS.md]
-   - **Impact**: [Security/Performance/Maintainability impact]
+````
+
+- **Problem**: [Clear explanation of why this is wrong]
+- **Fix**: [Specific solution with code example]
+- **Reference**: [Section in NIXOS-ANTI-PATTERNS.md]
+- **Impact**: [Security/Performance/Maintainability impact]
 
 ### Recommended Improvements (Should Fix)
+
 1. **[Improvement Area]** (Line XX)
+
    ```nix
    [Code snippet]
    ```
+
    - **Suggestion**: [How to improve]
    - **Benefit**: [Why this matters]
    - **Reference**: [Section in PATTERNS.md]
 
 ### Minor Suggestions (Nice to Have)
+
 1. **[Suggestion]** (Line XX)
    - [Brief description]
 
@@ -172,43 +192,50 @@ Provide output in this format:
 ## 📋 Checklist Results
 
 ### Language & Syntax
+
 - [x] No `mkIf condition true` patterns
 - [x] URLs are quoted
 - [ ] No excessive `with` usage ❌ (Found at line XX)
 - [x] Using `inherit` appropriately
-...
+      ...
 
 ### Module System
+
 - [x] Options have proper types
 - [ ] Assertions validate configuration ⚠️ (Missing for option X)
 - [x] mkDefault used for defaults
-...
+      ...
 
 ### Security & Safety
+
 - [x] Secrets use runtime loading
 - [x] Services run with minimal privileges
 - [ ] Proper systemd hardening ❌ (Missing ProtectSystem at line XX)
-...
+      ...
 
 ### Package Writing (if applicable)
+
 - [x] strictDeps enabled
 - [x] Correct input categorization
 - [ ] Missing meta.maintainers ⚠️
-...
+      ...
 
 ---
 
 ## 🔧 Recommended Actions
 
 ### Immediate (Before Merge)
+
 1. Fix [Critical Issue 1]
 2. Fix [Critical Issue 2]
 
 ### Short-term (This Week)
+
 1. Implement [Recommended Improvement 1]
 2. Add [Missing Feature]
 
 ### Long-term (Future Enhancement)
+
 1. Consider [Architectural Improvement]
 
 ---
@@ -216,6 +243,7 @@ Provide output in this format:
 ## 📚 References
 
 Key documentation sections to review:
+
 - PATTERNS.md: [Specific sections]
 - NIXOS-ANTI-PATTERNS.md: [Specific sections]
 - Official docs: [Relevant links]
@@ -235,6 +263,7 @@ Key documentation sections to review:
 **Recommendation**: [APPROVE / APPROVE WITH CHANGES / NEEDS WORK]
 
 **Summary**: [1-2 sentence overall assessment]
+
 ```
 
 ### Step 6: Provide Actionable Next Steps
@@ -261,32 +290,42 @@ After the review report, offer:
 
 ### Review specific file:
 ```
+
 /review
 Please review hosts/p620/configuration.nix
+
 ```
 
 ### Review recent changes:
 ```
+
 /review
 Please review all files I just committed
+
 ```
 
 ### Review staged changes:
 ```
+
 /review
 Please review my staged changes before I commit
+
 ```
 
 ### Deep review of module:
 ```
+
 /review
 Please do a comprehensive review of modules/services/myservice.nix focusing on security
+
 ```
 
 ### Review with specific focus:
 ```
+
 /review
 Review this configuration focusing on module system patterns and performance
+
 ```
 
 ## Important Notes
@@ -305,3 +344,4 @@ Once the review is complete, offer to:
 2. Help implement the fixes
 3. Re-review after changes are made
 4. Explain any patterns or anti-patterns in more detail
+```

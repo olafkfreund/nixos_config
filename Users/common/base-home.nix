@@ -16,6 +16,9 @@
       XDG_CONFIG_HOME = "\${HOME}/.config";
       XDG_BIN_HOME = "\${HOME}/.local/bin";
       XDG_DATA_HOME = "\${HOME}/.local/share";
+
+      # Obsidian MCP server vault path
+      OBSIDIAN_VAULT_PATH = "\${HOME}/Documents/Caliti";
     };
     stateVersion = "24.11";
 
@@ -44,6 +47,9 @@
   };
 
   programs.home-manager.enable = true;
+
+  # Stylix configuration (Home Manager level)
+  stylix.enableReleaseChecks = false; # Disable version mismatch warnings between Stylix and Home Manager
 
   # Set default Nix colorscheme
   colorScheme = inputs.nix-colors.colorSchemes.gruvbox-dark-medium;

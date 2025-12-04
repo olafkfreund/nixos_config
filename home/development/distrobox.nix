@@ -81,13 +81,13 @@ in
 {
   home.packages =
     let
-      aliases = mapAttrs (_name: value: mkBoxAlias value) boxes;
+      aliases = mapAttrs (_name: mkBoxAlias) boxes;
     in
     (attrValues aliases) ++ [ pkgs.distrobox ];
 
   home.file =
     let
-      links = mapAttrs (_name: value: mkBoxLinks value) boxes;
+      links = mapAttrs (_name: mkBoxLinks) boxes;
     in
     foldl' (x: y: x // y) { } (attrValues links);
 

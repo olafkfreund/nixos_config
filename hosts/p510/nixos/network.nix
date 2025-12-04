@@ -15,7 +15,7 @@
     # Use NetworkManager instead of systemd-networkd for simplicity
     networkmanager = {
       enable = true;
-      dns = lib.mkForce "systemd-resolved";  # Use systemd-resolved for DNS
+      dns = lib.mkForce "systemd-resolved"; # Use systemd-resolved for DNS
     };
     useNetworkd = lib.mkForce false;
 

@@ -14,8 +14,8 @@ let
   routerConfig = {
     Router = cfg.routing;
     Providers = cfg.providers;
-    transformers = cfg.transformers;
-    longContextThreshold = cfg.longContextThreshold;
+    inherit (cfg) transformers;
+    inherit (cfg) longContextThreshold;
   };
 
   configFile = pkgs.writeText "claude-code-router-config.json" (builtins.toJSON routerConfig);

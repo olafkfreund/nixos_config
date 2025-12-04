@@ -12,6 +12,6 @@
   boot.plymouth.enable = true;
   boot.blacklistedKernelModules = [ "v4l2loopback" ];
 
-  # Force empty extraModulePackages to prevent any automatic inclusion  
+  # Force empty extraModulePackages to prevent any automatic inclusion
   boot.extraModulePackages = lib.mkForce [ ];
 }

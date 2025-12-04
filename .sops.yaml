@@ -4,7 +4,7 @@
 keys:
   # Admin/User keys
   - &olafkfreund age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p
-  
+
   # Host keys (converted from SSH host keys using ssh-to-age)
   # Extract with: ssh-keyscan hostname | ssh-to-age
   - &p620 age1yubikey1qwqw7l3lqxrp7d2xh39rwx0x5q4xjqfkpzdxwyqal4x9s5pw2x6z9q
@@ -17,18 +17,18 @@ keys:
 groups:
   - &admin_users
     - *olafkfreund
-  
+
   - &all_hosts
     - *p620
     - *razer
     - *p510
     - *dex5550
     - *samsung
-  
+
   - &workstations
     - *p620
     - *razer
-  
+
   - &servers
     - *p510
     - *dex5550
@@ -37,52 +37,52 @@ creation_rules:
   # Default rule: All secrets accessible by admin and all hosts
   - path_regex: secrets/common/[^/]+\.(yaml|json|env|ini)$
     key_groups:
-    - age:
-      - *olafkfreund
-      - *p620
-      - *razer
-      - *p510
-      - *dex5550
-      - *samsung
-  
+      - age:
+          - *olafkfreund
+          - *p620
+          - *razer
+          - *p510
+          - *dex5550
+          - *samsung
+
   # Host-specific secrets - only accessible by admin and specific host
   - path_regex: secrets/hosts/p620/[^/]+\.(yaml|json|env|ini)$
     key_groups:
-    - age:
-      - *olafkfreund
-      - *p620
-  
+      - age:
+          - *olafkfreund
+          - *p620
+
   - path_regex: secrets/hosts/razer/[^/]+\.(yaml|json|env|ini)$
     key_groups:
-    - age:
-      - *olafkfreund
-      - *razer
-  
+      - age:
+          - *olafkfreund
+          - *razer
+
   - path_regex: secrets/hosts/p510/[^/]+\.(yaml|json|env|ini)$
     key_groups:
-    - age:
-      - *olafkfreund
-      - *p510
-  
+      - age:
+          - *olafkfreund
+          - *p510
+
   - path_regex: secrets/hosts/dex5550/[^/]+\.(yaml|json|env|ini)$
     key_groups:
-    - age:
-      - *olafkfreund
-      - *dex5550
-  
+      - age:
+          - *olafkfreund
+          - *dex5550
+
   - path_regex: secrets/hosts/samsung/[^/]+\.(yaml|json|env|ini)$
     key_groups:
-    - age:
-      - *olafkfreund
-      - *samsung
-  
+      - age:
+          - *olafkfreund
+          - *samsung
+
   # Binary files (for certificates, keys, etc.)
   - path_regex: secrets/[^/]+\.bin$
     key_groups:
-    - age:
-      - *olafkfreund
-      - *p620
-      - *razer
-      - *p510
-      - *dex5550
-      - *samsung
+      - age:
+          - *olafkfreund
+          - *p620
+          - *razer
+          - *p510
+          - *dex5550
+          - *samsung

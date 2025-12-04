@@ -114,6 +114,7 @@ config.myList = [ "item2" ];  # Automatically merged to [ "item1" "item2" ]
 **Why problematic:** From [nix.dev](https://nix.dev/tutorials/module-system/deep-dive): "The module system evaluates all modules it receives, and any of them can define a particular option's value" with merging behavior determined by the option's declared type. Using the wrong type prevents proper composition.
 
 **Type merging behavior:**
+
 - `str`: Single definition only - error on conflict
 - `lines`: Concatenates with newlines
 - `listOf`: Merges by concatenation
@@ -743,6 +744,7 @@ config = {
 ```
 
 **Module system priorities:**
+
 - `mkForce` (50): Very high priority - avoid unless absolutely necessary
 - Normal (100): Default assignment
 - `mkDefault` (1000): Low priority - preferred for module defaults
@@ -1095,15 +1097,18 @@ These patterns help both human developers and AI systems create better NixOS cod
 For comprehensive best practices and patterns, consult these resources:
 
 ### **Primary References:**
+
 - **[Nix Module System Deep Dive](https://nix.dev/tutorials/module-system/deep-dive)** - Official guide to the module system, type usage, and proper module composition
 - **[Nixpkgs Manual](https://nixos.org/manual/nixpkgs/stable/)** - Standard package writing conventions, build helpers, and overlay patterns
 - **[NixOS Manual](https://nixos.org/manual/nixos/stable/)** - System configuration and module development
 
 ### **Companion Documents:**
+
 - **[PATTERNS.md](./PATTERNS.md)** - Comprehensive guide to recommended patterns and best practices for this repository
 - **[CLAUDE.md](../CLAUDE.md)** - Project-specific guidelines and architecture documentation
 
 ### **Community Resources:**
+
 - [NixOS Discourse](https://discourse.nixos.org/) - Community discussions and help
 - [NixOS Wiki](https://nixos.wiki/) - Community-maintained documentation
 - [Nixpkgs Repository](https://github.com/NixOS/nixpkgs) - Source of truth for established patterns

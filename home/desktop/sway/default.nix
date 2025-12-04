@@ -1,4 +1,4 @@
-{...}:
+_:
 
 # Placeholder module for Sway window manager
 # TODO: Implement Sway configuration when needed

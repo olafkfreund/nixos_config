@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{ pkgs, ... }: {
   # Define common packages used in both home-manager and system config
   plasmaCommonPackages = with pkgs; [
     kdePackages.xdg-desktop-portal-kde

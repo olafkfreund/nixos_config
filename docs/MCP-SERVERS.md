@@ -22,14 +22,17 @@ The Model Context Protocol (MCP) is an open protocol released by Anthropic in No
 ### Core Servers (All Hosts)
 
 #### 1. **playwright-mcp** (v0.0.34)
+
 **Purpose**: Browser automation using Playwright
 **Benefits**:
+
 - AI can navigate and interact with web pages
 - Automated testing and web scraping
 - DOM manipulation and screenshot capabilities
 - Form filling and web automation
 
 **Usage**:
+
 ```bash
 # Launched automatically by claude-code
 # Configure in .claude/settings.local.json:
@@ -40,20 +43,24 @@ The Model Context Protocol (MCP) is an open protocol released by Anthropic in No
 ```
 
 **Example Use Cases**:
+
 - Automated web testing
 - Data extraction from websites
 - Filling out forms programmatically
 - Taking accessibility-tree snapshots
 
 #### 2. **mcp-nixos**
+
 **Purpose**: NixOS package and configuration queries
 **Benefits**:
+
 - Prevents AI hallucinations about NixOS packages (130K+ packages)
 - Provides accurate configuration option information (22K+ options)
 - Queries official NixOS documentation
 - Home Manager integration
 
 **Usage**:
+
 ```bash
 # Available tools:
 # - nixos_search(): Search packages and options
@@ -61,19 +68,23 @@ The Model Context Protocol (MCP) is an open protocol released by Anthropic in No
 ```
 
 **Example Queries**:
+
 - "What packages are available for monitoring?"
 - "How do I configure systemd services?"
 - "Show me all options for networking.firewall"
 
 #### 3. **github-mcp-server** (v0.20.2)
+
 **Purpose**: GitHub repository integration
 **Benefits**:
+
 - PR automation and review
 - Issue management
 - Repository operations
 - Code search across repositories
 
 **Usage**:
+
 ```bash
 # Requires GITHUB_TOKEN environment variable
 # Configure in .claude/settings.local.json:
@@ -84,19 +95,23 @@ The Model Context Protocol (MCP) is an open protocol released by Anthropic in No
 ```
 
 **Example Use Cases**:
+
 - Automated PR creation
 - Issue triage and labeling
 - Repository statistics
 - Code review assistance
 
 #### 4. **chatmcp**
+
 **Purpose**: AI chat client with MCP support
 **Benefits**:
+
 - Command-line AI interaction
 - MCP protocol testing
 - Scriptable AI workflows
 
 **Usage**:
+
 ```bash
 chatmcp "your question here"
 ```
@@ -104,14 +119,17 @@ chatmcp "your question here"
 ### Workstation Servers (P620, DEX5550)
 
 #### 5. **mcp-grafana**
+
 **Purpose**: Grafana dashboard and metrics integration
 **Benefits**:
+
 - Query metrics programmatically
 - Create and modify dashboards
 - Alert management
 - Data visualization automation
 
 **Usage**:
+
 ```bash
 # Requires GRAFANA_API_TOKEN
 # Configure to point to DEX5550 monitoring server:
@@ -122,25 +140,30 @@ chatmcp "your question here"
 ```
 
 **Example Use Cases**:
+
 - "Show me CPU usage for the last hour"
 - "Create a dashboard for NixOS metrics"
 - "What are the current active alerts?"
 
 #### 6. **terraform-mcp-server** (v0.3.3)
+
 **Purpose**: Infrastructure as Code automation
 **Benefits**:
+
 - Terraform plan/apply operations
 - State management
 - Resource queries
 - IaC best practices
 
 **Usage**:
+
 ```bash
 # Works with local Terraform configurations
 terraform-mcp-server
 ```
 
 **Example Use Cases**:
+
 - "What resources are in the current state?"
 - "Plan changes for this configuration"
 - "Show me the dependency graph"
@@ -148,8 +171,10 @@ terraform-mcp-server
 ### Optional Servers (Available on Demand)
 
 #### 7. **mcp-k8s-go**
+
 **Purpose**: Kubernetes cluster management
 **Benefits**:
+
 - Pod/deployment operations
 - Resource monitoring
 - Kubectl automation
@@ -158,8 +183,10 @@ terraform-mcp-server
 **Enable**: Set `features.ai.mcp.servers.kubernetes = true;`
 
 #### 8. **gitea-mcp-server** (v0.5.0)
+
 **Purpose**: Gitea repository management
 **Benefits**:
+
 - Self-hosted Git operations
 - PR and issue management
 - Repository administration
@@ -167,8 +194,10 @@ terraform-mcp-server
 **Enable**: Set `features.ai.mcp.servers.gitea = true;`
 
 #### 9. **mcp-proxy**
+
 **Purpose**: Protocol conversion (stdio ↔ SSE)
 **Benefits**:
+
 - Bridge different MCP transport protocols
 - Enable remote MCP server access
 - Protocol debugging
@@ -180,21 +209,25 @@ terraform-mcp-server
 Based on research of the MCP ecosystem, these servers would be highly beneficial:
 
 ### Development Tools
+
 - **Context7**: Up-to-date library documentation (already configured via npx)
 - **Semgrep**: Static analysis and security scanning
 - **Docker-MCP**: Container management and orchestration
 
 ### Database Integration
+
 - **PostgreSQL MCP**: Direct database queries
 - **MongoDB MCP**: NoSQL database operations
 - **ClickHouse MCP**: Analytics database integration
 
 ### Cloud Platforms
+
 - **AWS MCP**: AWS service management
 - **Azure MCP**: Azure resource operations
 - **Cloudflare MCP**: CDN and edge computing
 
 ### Workflow Automation
+
 - **Slack MCP**: Team communication
 - **Discord MCP**: Community management
 - **Zapier MCP**: 130+ SaaS integrations
@@ -206,16 +239,19 @@ Based on research of the MCP ecosystem, these servers would be highly beneficial
 MCP servers are automatically enabled based on host profile:
 
 **Workstation Profile** (P620, DEX5550):
+
 - ✅ Core servers: playwright, nixos, github, chatmcp
 - ✅ Infrastructure: grafana, terraform
 - ❌ Optional: kubernetes, gitea, proxy (enable manually if needed)
 
 **Server Profile** (P510):
+
 - ✅ Core servers: playwright, nixos, github, chatmcp
 - ✅ Infrastructure: grafana, terraform
 - ❌ Optional: kubernetes, gitea, proxy
 
 **Laptop Profile** (Razer, Samsung):
+
 - ✅ Core servers: playwright, nixos, github, chatmcp
 - ❌ Infrastructure: grafana, terraform, kubernetes, gitea, proxy
 
@@ -254,6 +290,7 @@ MCP servers are configured in two locations:
 2. **VS Code**: `/home/olafkfreund/.config/nixos/home/development/vscode-mcp-template.json`
 
 These configurations are automatically installed and include:
+
 - Playwright for browser automation
 - NixOS for package queries
 - GitHub for repository operations
@@ -274,6 +311,7 @@ claude "Show me the current Grafana dashboard for P620"
 ### With VS Code
 
 MCP servers are available in VS Code when using Claude/Copilot extensions:
+
 1. Open command palette (Ctrl+Shift+P)
 2. Select "Claude: Use MCP Server"
 3. Choose from available servers
@@ -325,21 +363,25 @@ playwright-mcp --browser chromium
 ## Benefits for Infrastructure
 
 ### 1. Enhanced Development Workflow
+
 - AI can query NixOS options and packages accurately
 - Browser automation for testing web services
 - GitHub integration for PR automation
 
 ### 2. Improved Monitoring
+
 - Grafana integration provides AI access to metrics
 - Automated dashboard creation and modification
 - Intelligent alert analysis
 
 ### 3. Infrastructure Automation
+
 - Terraform operations through AI
 - Kubernetes management (when enabled)
 - Automated infrastructure queries
 
 ### 4. Reduced Manual Work
+
 - AI handles repetitive browser tasks
 - Automated documentation searches
 - Intelligent package discovery
@@ -347,16 +389,19 @@ playwright-mcp --browser chromium
 ## Security Considerations
 
 ### API Keys
+
 - GitHub tokens stored in environment variables
 - Grafana API keys managed separately
 - Never commit API keys to repository
 
 ### Browser Automation
+
 - Playwright runs in sandboxed environment
 - Limited to specified browser (chromium)
 - No persistent browser data
 
 ### Server Access
+
 - MCP servers run with user permissions
 - No elevated privileges required
 - Firewall rules unchanged
@@ -364,12 +409,14 @@ playwright-mcp --browser chromium
 ## Future Enhancements
 
 ### Planned MCP Server Additions
+
 1. **PostgreSQL MCP**: Direct database queries
 2. **Docker MCP**: Container management
 3. **Prometheus MCP**: Direct metrics queries
 4. **Loki MCP**: Log aggregation queries
 
 ### Integration Improvements
+
 1. Automated API key management via agenix
 2. Host-specific MCP configurations
 3. Performance monitoring for MCP operations
@@ -377,10 +424,10 @@ playwright-mcp --browser chromium
 
 ## References
 
-- **Official MCP Specification**: https://modelcontextprotocol.io/
-- **MCP Server Registry**: https://github.com/modelcontextprotocol/servers
-- **Awesome MCP Servers**: https://github.com/punkpeye/awesome-mcp-servers
-- **Anthropic MCP Documentation**: https://docs.anthropic.com/mcp
+- **Official MCP Specification**: <https://modelcontextprotocol.io/>
+- **MCP Server Registry**: <https://github.com/modelcontextprotocol/servers>
+- **Awesome MCP Servers**: <https://github.com/punkpeye/awesome-mcp-servers>
+- **Anthropic MCP Documentation**: <https://docs.anthropic.com/mcp>
 
 ## Related Documentation
 

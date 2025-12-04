@@ -51,6 +51,7 @@ in
 ```
 
 **Why this works:**
+
 - Clear separation between options (what users configure) and config (what gets activated)
 - The module system handles merging automatically
 - Lazy evaluation allows circular dependencies to resolve correctly
@@ -107,6 +108,7 @@ options = {
 ```
 
 **Merging Behavior by Type:**
+
 - `str`: Single definition only (error on multiple)
 - `lines`: Multiple definitions concatenated with newlines
 - `listOf`: Lists merged by concatenation
@@ -163,6 +165,7 @@ config.services.myapp.instances = {
 ```
 
 **Special submodule arguments:**
+
 - `name`: The attribute name when used with `attrsOf`
 - `config`: The submodule's own config
 - Access parent config via the parent's `config` argument
@@ -203,6 +206,7 @@ in
 ```
 
 **Benefits:**
+
 - Clear separation of interface (options) and implementation (config)
 - Easier to review changes to public API
 - Options can be shared across multiple implementations
@@ -231,6 +235,7 @@ config = lib.mkIf cfg.enable {
 ```
 
 **Priority levels:**
+
 - `mkForce` = 50 (very high priority, avoid)
 - Normal = 100 (default)
 - `mkDefault` = 1000 (low priority, good for defaults)
@@ -301,7 +306,7 @@ in
 
 ### 8. Making Values Available Across Modules
 
-**Pattern: Use _module.args for Shared Dependencies**
+**Pattern: Use \_module.args for Shared Dependencies**
 
 Make custom values available to all modules using `_module.args`.
 
@@ -516,6 +521,7 @@ stdenv.mkDerivation rec {
 ```
 
 **Key principles:**
+
 - Use `rec` sparingly or not at all
 - `nativeBuildInputs` for build tools
 - `buildInputs` for runtime libraries
@@ -579,6 +585,7 @@ myPackagePatched = myPackage.overrideAttrs (oldAttrs: {
 ```
 
 **Why overrideAttrs is preferred:**
+
 - Preserves all derivation processing by `stdenv.mkDerivation`
 - Allows override of build phases, dependencies, and attributes
 - Maintains proper attribute merging
@@ -738,6 +745,7 @@ nixpkgs.overlays = [
 ```
 
 **Overlay argument conventions:**
+
 - `final` (or `self`): The **final** package set after all overlays
 - `prev` (or `super`): The package set from the **previous** overlay
 - Always use `final` for dependencies
@@ -1332,6 +1340,7 @@ These patterns represent best practices from official Nix documentation and the 
 - **Documentation**: Self-documenting code with comprehensive options
 
 Always refer to the official documentation for the most up-to-date information:
+
 - [Nix Module System Deep Dive](https://nix.dev/tutorials/module-system/deep-dive)
 - [Nixpkgs Manual](https://nixos.org/manual/nixpkgs/stable/)
 - [NixOS Manual](https://nixos.org/manual/nixos/stable/)

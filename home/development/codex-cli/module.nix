@@ -5,7 +5,7 @@ let
   inherit (lib) types;
   cfg = config.programs.codex-cli;
 
-  codex-cli = pkgs.callPackage ./. { nodejs_22 = pkgs.nodejs_22; };
+  codex-cli = pkgs.callPackage ./. { inherit (pkgs) nodejs_22; };
 
   # Note: Configuration template available but using inline generation instead
   # configFile = pkgs.writeText "codex-config.json" (builtins.toJSON {
@@ -108,9 +108,9 @@ in
       source = pkgs.writeText "codex-config.json" (builtins.toJSON (
         {
           model = cfg.defaultModel;
-          temperature = cfg.temperature;
+          inherit (cfg) temperature;
           max_tokens = cfg.maxTokens;
-          timeout = cfg.timeout;
+          inherit (cfg) timeout;
           auto_save = cfg.autoSave;
           syntax_highlighting = cfg.syntaxHighlighting;
           interactive_mode = cfg.interactiveMode;

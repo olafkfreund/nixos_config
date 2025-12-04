@@ -21,6 +21,31 @@ update-flake:
     nix flake update
     just deploy
 
+# Preview updates with detailed package changes (before building)
+preview-updates HOST="$(hostname)":
+    @echo "🔍 Previewing updates for {{HOST}}..."
+    ./scripts/preview-updates.sh {{HOST}}
+
+# Find newly added packages in nixpkgs
+new-packages:
+    @echo "🆕 Finding new packages in nixpkgs..."
+    ./scripts/find-new-packages.sh
+
+# Complete update workflow: preview → review → deploy
+update-workflow HOST="$(hostname)":
+    @echo "📦 Starting complete update workflow for {{HOST}}..."
+    @echo ""
+    just preview-updates {{HOST}}
+    @echo ""
+    @read -p "Apply these updates? [y/N] " -n 1 -r; echo; \
+    if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+        just quick-deploy {{HOST}}; \
+        echo ""; \
+        just new-packages; \
+    else \
+        echo "Updates cancelled. Run 'mv flake.lock.backup flake.lock' to revert."; \
+    fi
+
 # =============================================================================
 # TESTING AND VALIDATION
 # =============================================================================

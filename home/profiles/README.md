@@ -11,9 +11,11 @@ The Home Manager Profile System provides a sophisticated way to organize user co
 #### `server-admin`
 
 - **Purpose**: Minimal headless configuration for server administration
-- **Target Hosts**: DEX5550, P510 (server mode)
+- **Target Hosts**: P510 (media server mode)
 - **Features**: CLI tools, development basics, no GUI components
 - **Use Case**: Remote server management and maintenance
+
+**Note**: DEX5550 is **offline**. Server admin profile now primarily used on P510.
 
 #### `developer`
 

@@ -38,7 +38,7 @@ Configure your NixOS system with this complete configuration that enables all ne
       xdg-desktop-portal-cosmic  # Cosmic DE portal backend
       xdg-desktop-portal-gtk     # Fallback for file picker dialogs
     ];
-    
+
     # Explicit portal configuration (NixOS 23.05+)
     config = {
       cosmic = {
@@ -107,36 +107,47 @@ No additional configuration files in ~/.config/cosmic/ are needed for basic scre
 Systematic verification ensures each component in the screensharing chain functions properly. Start with the foundation and work up to browser testing.
 
 **Step 1: Verify PipeWire is running**
+
 ```bash
 systemctl --user status pipewire wireplumber
 ```
+
 Both services should show "active (running)". If not running, start them with `systemctl --user start pipewire wireplumber`. You can also check PipeWire's status with `wpctl status`, which should list audio and video devices.
 
 **Step 2: Check portal services**
+
 ```bash
 systemctl --user status xdg-desktop-portal xdg-desktop-portal-cosmic
 ```
+
 These services typically start on-demand via socket activation, so they may show as "inactive (dead)" until you attempt screensharing. This is normal. After attempting to screenshare once, they should be active.
 
 **Step 3: Verify environment variables**
+
 ```bash
 systemctl --user show-environment | grep -E 'WAYLAND_DISPLAY|XDG_CURRENT_DESKTOP'
 ```
+
 Should output something like:
+
 ```
 WAYLAND_DISPLAY=wayland-0
 XDG_CURRENT_DESKTOP=COSMIC
 ```
+
 If these are missing, the portal services cannot detect your session. Fix by running:
+
 ```bash
 systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
 dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
 ```
 
 **Step 4: Check installed portal backends**
+
 ```bash
 ls /usr/share/xdg-desktop-portal/portals/
 ```
+
 Should list `cosmic.portal` and `gtk.portal` files. These files declare which portal interfaces each backend implements.
 
 **Step 5: Test Chrome Wayland detection**
@@ -163,6 +174,7 @@ This application-specific issue often relates to how Electron apps detect the po
 
 **Symptom: Permission denied or "Request not allowed" errors**
 The portal dialog may have been dismissed or permissions denied previously. Clear permissions with:
+
 ```bash
 # Check current permissions
 flatpak permissions devices camera
@@ -175,6 +187,7 @@ This is a known issue (GitHub Issue #77) with Zoom's native application. Workaro
 
 **Debug logging for detailed diagnosis:**
 Enable verbose logging for portal components:
+
 ```bash
 # Stop existing portal services
 systemctl --user stop xdg-desktop-portal xdg-desktop-portal-cosmic
@@ -183,6 +196,7 @@ systemctl --user stop xdg-desktop-portal xdg-desktop-portal-cosmic
 /usr/lib/xdg-desktop-portal -r -v &
 journalctl --user -u xdg-desktop-portal-cosmic -f
 ```
+
 Then attempt screensharing and watch the log output for errors. Common errors include "No such interface org.freedesktop.impl.portal.ScreenCast" (backend missing), "Failed to create PipeWire stream" (PipeWire not running), or compositor-specific errors.
 
 **NVIDIA GPU specific issues:**

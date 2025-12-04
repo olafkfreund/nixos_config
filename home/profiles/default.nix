@@ -112,8 +112,8 @@ let
         meta.profile = {
           name = profileName;
           type = "single";
-          description = profile.description;
-          targetHosts = profile.targetHosts;
+          inherit (profile) description;
+          inherit (profile) targetHosts;
         };
       }
     else if composition != null then
@@ -123,9 +123,9 @@ let
         meta.profile = {
           name = profileName;
           type = "composition";
-          description = composition.description;
-          combines = composition.combines;
-          targetHosts = composition.targetHosts;
+          inherit (composition) description;
+          inherit (composition) combines;
+          inherit (composition) targetHosts;
           overrides = composition.overrides or { };
         };
       }

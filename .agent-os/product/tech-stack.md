@@ -60,7 +60,7 @@
 
 ### Host Architecture
 
-- **Multi-Host Management:** 6 active hosts (p620, p510, razer, samsung, dex5550, hp)
+- **Multi-Host Management:** 4 active hosts (p620, p510, razer, samsung) - **DEX5550 offline**, HP decommissioned
 - **Hardware Profiles:** AMD, Intel, NVIDIA configurations
 - **Desktop Environment:** Hyprland (Wayland), with Plasma fallback
 - **Live Installers:** Hardware-specific USB installation images
@@ -72,21 +72,24 @@
 - **Orchestration:** K3s clusters via MicroVM
 - **Storage:** Shared nix store with persistent volumes
 
-### Monitoring & Observability
+### System Management
 
-- **Metrics:** Prometheus + Grafana stack
-- **Exporters:** Node, systemd, custom NixOS exporters
-- **Dashboards:** Multi-host Grafana dashboards
-- **Alerting:** Alertmanager (configured, rules pending)
-- **Logging:** Planned Loki + Promtail implementation
+- **Configuration:** Declarative NixOS with flakes
+- **Deployment:** Automated with Just and shell scripts
+- **Validation:** Multi-stage testing framework
+- **Monitoring:** System logs and systemd journal (native tools)
+
+**Note**: External monitoring infrastructure (Prometheus/Grafana/Loki) has been **removed** for simplified configuration.
 
 ## Deployment Infrastructure
 
 ### Application Hosting
 
 - **Platform:** Self-hosted on NixOS infrastructure
-- **Primary Hosts:** p620 (workstation), p510 (server), dex5550 (monitoring)
+- **Primary Hosts:** p620 (primary workstation), p510 (media server), razer/samsung (mobile)
 - **Network:** Tailscale VPN mesh with DNS management
+
+**Note**: DEX5550 is **offline**. Monitoring infrastructure (Prometheus/Grafana/Loki) has been **removed**.
 
 ### Automation
 

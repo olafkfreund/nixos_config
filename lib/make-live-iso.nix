@@ -13,7 +13,7 @@ let
     specialArgs = {
       inherit inputs host system;
       username = builtins.head hostUsers;
-      hostUsers = hostUsers;
+      inherit hostUsers;
     };
     modules = [
       # Base live system configuration

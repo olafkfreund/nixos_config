@@ -260,9 +260,7 @@
       "Bash(sudo nh os switch:*)",
       "Bash(systemd-detect-virt:*)"
     ],
-    "additionalDirectories": [
-      "/"
-    ]
+    "additionalDirectories": ["/"]
   },
   "enableAllProjectMcpServers": false,
   "outputStyle": "Explanatory"

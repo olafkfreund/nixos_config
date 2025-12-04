@@ -160,20 +160,20 @@ in
 
     # Create provider configuration file
     environment.etc."ai-providers.json".text = builtins.toJSON {
-      defaultProvider = cfg.defaultProvider;
-      enableFallback = cfg.enableFallback;
-      costOptimization = cfg.costOptimization;
-      timeout = cfg.timeout;
-      maxRetries = cfg.maxRetries;
+      inherit (cfg) defaultProvider;
+      inherit (cfg) enableFallback;
+      inherit (cfg) costOptimization;
+      inherit (cfg) timeout;
+      inherit (cfg) maxRetries;
 
       providers = lib.filterAttrs (_name: value: value != null) {
         openai =
           if cfg.openai.enable
           then {
             enabled = true;
-            priority = cfg.openai.priority;
-            models = cfg.openai.models;
-            defaultModel = cfg.openai.defaultModel;
+            inherit (cfg.openai) priority;
+            inherit (cfg.openai) models;
+            inherit (cfg.openai) defaultModel;
             apiKeyFile = "/run/agenix/api-openai";
             baseUrl = "https://api.openai.com/v1";
             requiresApiKey = true;
@@ -184,9 +184,9 @@ in
           if cfg.anthropic.enable
           then {
             enabled = true;
-            priority = cfg.anthropic.priority;
-            models = cfg.anthropic.models;
-            defaultModel = cfg.anthropic.defaultModel;
+            inherit (cfg.anthropic) priority;
+            inherit (cfg.anthropic) models;
+            inherit (cfg.anthropic) defaultModel;
             apiKeyFile = "/run/agenix/api-anthropic";
             baseUrl = "https://api.anthropic.com";
             requiresApiKey = true;
@@ -197,9 +197,9 @@ in
           if cfg.gemini.enable
           then {
             enabled = true;
-            priority = cfg.gemini.priority;
-            models = cfg.gemini.models;
-            defaultModel = cfg.gemini.defaultModel;
+            inherit (cfg.gemini) priority;
+            inherit (cfg.gemini) models;
+            inherit (cfg.gemini) defaultModel;
             apiKeyFile = "/run/agenix/api-gemini";
             baseUrl = "https://generativelanguage.googleapis.com/v1beta";
             requiresApiKey = true;
@@ -210,9 +210,9 @@ in
           if cfg.qwen.enable
           then {
             enabled = true;
-            priority = cfg.qwen.priority;
-            models = cfg.qwen.models;
-            defaultModel = cfg.qwen.defaultModel;
+            inherit (cfg.qwen) priority;
+            inherit (cfg.qwen) models;
+            inherit (cfg.qwen) defaultModel;
             apiKeyFile = "/run/agenix/api-qwen";
             baseUrl = "https://dashscope.aliyuncs.com/api/v1";
             requiresApiKey = true;
@@ -223,9 +223,9 @@ in
           if cfg.ollama.enable
           then {
             enabled = true;
-            priority = cfg.ollama.priority;
-            models = cfg.ollama.models;
-            defaultModel = cfg.ollama.defaultModel;
+            inherit (cfg.ollama) priority;
+            inherit (cfg.ollama) models;
+            inherit (cfg.ollama) defaultModel;
             baseUrl = "http://${cfg.ollama.host}";
             requiresApiKey = false;
           }

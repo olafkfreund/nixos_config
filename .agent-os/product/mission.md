@@ -85,12 +85,14 @@ Unlike typical NixOS configurations with anti-patterns and technical debt, we fo
 - **Live USB Installers:** Hardware-specific live installation images with automated setup wizards
 - **MicroVM Development:** Containerized development environments with resource isolation
 
-### Monitoring & Observability Features
+### System Management Features
 
-- **Prometheus/Grafana Stack:** Full monitoring deployment with custom dashboards and alerting
-- **Custom Exporters:** Specialized metrics for NixOS, media servers, and system performance
-- **Performance Analytics:** Automated performance tracking with baseline establishment and regression detection
-- **Multi-Host Dashboards:** Centralized monitoring across all infrastructure components
+- **Declarative Configuration:** Complete infrastructure as code with NixOS
+- **Automated Deployment:** Advanced justfile automation with parallel execution
+- **Configuration Validation:** Multi-stage testing and validation framework
+- **System Analytics:** Performance tracking and resource management
+
+**Note**: Monitoring infrastructure (Prometheus/Grafana/Loki) has been **removed** to simplify the configuration. DEX5550 is **offline**.
 
 ### Development & Productivity Features
 

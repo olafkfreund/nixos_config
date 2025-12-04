@@ -349,7 +349,7 @@
             inherit (pkgs) lib buildNpmPackage fetchurl nodejs makeWrapper writeShellScriptBin;
           };
           codex-cli = pkgs.callPackage ./home/development/codex-cli {
-            nodejs_22 = pkgs.nodejs_22;
+            inherit (pkgs) nodejs_22;
           };
           gemini-cli = pkgs.callPackage ./pkgs/gemini-cli { };
           glim = pkgs.callPackage ./overlays/glim { };

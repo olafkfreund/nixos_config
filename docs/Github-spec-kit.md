@@ -17,6 +17,7 @@ One critical limitation: **uv doesn't lock build systems in uv.lock**, a known i
 **Minimum requirements for using uv2nix:**
 
 **System requirements:**
+
 - NixOS or Nix with flakes enabled
 - Python 3.11 or newer (required by spec-kit)
 - Git (optional but recommended for repository operations)
@@ -27,18 +28,18 @@ One critical limitation: **uv doesn't lock build systems in uv.lock**, a known i
 ```nix
 inputs = {
   nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-  
+
   pyproject-nix = {
     url = "github:pyproject-nix/pyproject.nix";
     inputs.nixpkgs.follows = "nixpkgs";
   };
-  
+
   uv2nix = {
     url = "github:pyproject-nix/uv2nix";
     inputs.pyproject-nix.follows = "pyproject-nix";
     inputs.nixpkgs.follows = "nixpkgs";
   };
-  
+
   pyproject-build-systems = {
     url = "github:pyproject-nix/build-system-pkgs";
     inputs.pyproject-nix.follows = "pyproject-nix";
@@ -87,6 +88,7 @@ uv lock
 This creates `uv.lock` with pinned versions of spec-kit's dependencies: **typer** (CLI framework), **rich** (terminal formatting), **platformdirs** (cross-platform paths), **readchar** (keyboard input), and **httpx** (HTTP client). All are pure Python packages from PyPI with no C extensions, making them straightforward to package.
 
 **Key spec-kit characteristics:**
+
 - Package name: `specify-cli` (not `spec-kit`)
 - Version: 0.0.17
 - Python requirement: >=3.11
@@ -101,21 +103,21 @@ Create a `flake.nix` in the spec-kit directory with the complete packaging defin
 ```nix
 {
   description = "GitHub spec-kit packaged with uv2nix for NixOS";
-  
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    
+
     pyproject-nix = {
       url = "github:pyproject-nix/pyproject.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     uv2nix = {
       url = "github:pyproject-nix/uv2nix";
       inputs.pyproject-nix.follows = "pyproject-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     pyproject-build-systems = {
       url = "github:pyproject-nix/build-system-pkgs";
       inputs.pyproject-nix.follows = "pyproject-nix";
@@ -123,47 +125,47 @@ Create a `flake.nix` in the spec-kit directory with the complete packaging defin
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
-  
+
   outputs = { self, nixpkgs, uv2nix, pyproject-nix, pyproject-build-systems, ... }:
   let
     inherit (nixpkgs) lib;
-    
+
     # Define supported system
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
-    
+
     # Use Python 3.11 (minimum required by spec-kit)
     python = pkgs.python311;
-    
+
     # Load the workspace (spec-kit's pyproject.toml and uv.lock)
-    workspace = uv2nix.lib.workspace.loadWorkspace { 
-      workspaceRoot = ./.; 
+    workspace = uv2nix.lib.workspace.loadWorkspace {
+      workspaceRoot = ./.;
     };
-    
+
     # Generate overlay from uv.lock
     # Prefer wheels over source distributions for better compatibility
     overlay = workspace.mkPyprojectOverlay {
       sourcePreference = "wheel";
     };
-    
+
     # Custom overrides for build fixes
     pyprojectOverrides = final: prev: {
       # spec-kit specific overrides if needed
       # All dependencies are pure Python, should work without fixes
-      
+
       # If building from source, may need to ensure build systems
       # Example pattern (likely not needed for spec-kit):
       # specify-cli = prev.specify-cli.overrideAttrs (old: {
-      #   nativeBuildInputs = old.nativeBuildInputs ++ 
+      #   nativeBuildInputs = old.nativeBuildInputs ++
       #     final.resolveBuildSystem { hatchling = []; };
       # });
     };
-    
+
     # Create Python base set with build infrastructure
     pythonBase = pkgs.callPackage pyproject-nix.build.packages {
       inherit python;
     };
-    
+
     # Compose final Python package set with overlays
     pythonSet = pythonBase.overrideScope (
       lib.composeManyExtensions [
@@ -175,22 +177,22 @@ Create a `flake.nix` in the spec-kit directory with the complete packaging defin
         pyprojectOverrides
       ]
     );
-    
+
     # Create virtual environment with spec-kit and dependencies
     # Package name MUST match [project.name] in pyproject.toml
     specKitEnv = pythonSet.mkVirtualEnv "specify-cli-env" {
       specify-cli = [];  # No extras needed
     };
-    
+
   in {
     # Production package
     packages.${system}.default = specKitEnv;
-    
+
     # Convenience wrapper for the specify command
     packages.${system}.specify-cli = pkgs.writeShellScriptBin "specify" ''
       exec ${specKitEnv}/bin/specify "$@"
     '';
-    
+
     # Development shell with uv and the built environment
     devShells.${system}.default = pkgs.mkShell {
       packages = [
@@ -199,39 +201,39 @@ Create a `flake.nix` in the spec-kit directory with the complete packaging defin
         pkgs.git  # spec-kit uses git for repository initialization
         specKitEnv
       ];
-      
+
       env = {
         # Prevent uv from downloading managed Python interpreters
         UV_PYTHON_DOWNLOADS = "never";
         # Use Nix-provided Python
         UV_PYTHON = "${python}/bin/python";
       };
-      
+
       shellHook = ''
         # Unset PYTHONPATH to avoid Nixpkgs builder contamination
         unset PYTHONPATH
-        
+
         echo "spec-kit development environment"
         echo "Run 'specify --help' to get started"
       '';
     };
-    
+
     # Alternative: Impure development shell (simpler, uses uv-managed venv)
     devShells.${system}.impure = pkgs.mkShell {
-      packages = [ 
-        python 
-        pkgs.uv 
+      packages = [
+        python
+        pkgs.uv
         pkgs.git
       ];
-      
+
       env = {
         UV_PYTHON_DOWNLOADS = "never";
         UV_PYTHON = "${python}/bin/python";
       };
-      
+
       shellHook = ''
         unset PYTHONPATH
-        
+
         # Let uv manage the virtual environment
         echo "Impure development mode"
         echo "Run: uv venv && source .venv/bin/activate"
@@ -260,12 +262,13 @@ nix run . -- --help
 nix profile install .
 
 # Or add to system configuration (configuration.nix)
-# environment.systemPackages = [ 
-#   (inputs.spec-kit.packages.${system}.default) 
+# environment.systemPackages = [
+#   (inputs.spec-kit.packages.${system}.default)
 # ];
 ```
 
 The build process:
+
 1. uv2nix loads workspace metadata from `pyproject.toml` and `uv.lock`
 2. Generates Nix derivations for each dependency (typer, rich, platformdirs, readchar, httpx)
 3. Applies the build-systems overlay to provide setuptools/hatchling
@@ -302,7 +305,7 @@ description = "Specify CLI, part of GitHub Spec Kit."
 requires-python = ">=3.11"
 dependencies = [
   "typer",
-  "rich", 
+  "rich",
   "platformdirs",
   "readchar",
   "httpx",
@@ -317,6 +320,7 @@ build-backend = "hatchling.build"
 ```
 
 **Key points:**
+
 - The `name` field must exactly match references in Nix expressions
 - `requires-python` sets minimum Python version (3.11)
 - `dependencies` lists runtime requirements (all from PyPI)
@@ -326,8 +330,9 @@ build-backend = "hatchling.build"
 ### uv.lock structure
 
 Generated by `uv lock`, this file contains:
+
 - **Exact dependency versions** with cryptographic hashes
-- **Resolved dependency tree** including transitive dependencies  
+- **Resolved dependency tree** including transitive dependencies
 - **Source locations** (PyPI URLs, Git repos, file paths)
 - **Platform markers** for conditional dependencies
 - **Integrity hashes** for reproducible builds
@@ -337,22 +342,27 @@ uv2nix parses this file to generate Nix derivations. The lock file ensures ident
 ### Critical Nix expressions
 
 **Workspace loading:**
+
 ```nix
-workspace = uv2nix.lib.workspace.loadWorkspace { 
-  workspaceRoot = ./.; 
+workspace = uv2nix.lib.workspace.loadWorkspace {
+  workspaceRoot = ./.;
 };
 ```
+
 Recursively discovers projects, parses all `pyproject.toml` files, loads `uv.lock`, and creates a workspace object with metadata and dependency specifications.
 
 **Overlay generation:**
+
 ```nix
 overlay = workspace.mkPyprojectOverlay {
   sourcePreference = "wheel";  # Prefer binary wheels over source
 };
 ```
+
 Translates `uv.lock` into a Nix overlay function that adds Python packages to the package set. Choosing `"wheel"` makes builds more likely to succeed without manual intervention.
 
 **Package set composition:**
+
 ```nix
 pythonSet = pythonBase.overrideScope (
   lib.composeManyExtensions [
@@ -362,14 +372,17 @@ pythonSet = pythonBase.overrideScope (
   ]
 );
 ```
+
 Stacks overlays in order: base build infrastructure, then locked packages, then custom overrides. Later overlays can modify packages from earlier ones.
 
 **Virtual environment creation:**
+
 ```nix
 pythonSet.mkVirtualEnv "specify-cli-env" {
   specify-cli = [];  # Include specify-cli with no optional extras
 }
 ```
+
 Aggregates the package and its dependencies into a virtual environment. The key `specify-cli` must match the package name in `pyproject.toml` exactly.
 
 ## Common pitfalls and troubleshooting
@@ -393,10 +406,10 @@ For spec-kit's dependencies, this shouldn't be an issue since we're using `sourc
 ```nix
 pyprojectOverrides = final: prev: {
   typer = prev.typer.overrideAttrs (old: {
-    nativeBuildInputs = old.nativeBuildInputs ++ 
-      final.resolveBuildSystem { 
-        hatchling = []; 
-        hatch-vcs = []; 
+    nativeBuildInputs = old.nativeBuildInputs ++
+      final.resolveBuildSystem {
+        hatchling = [];
+        hatch-vcs = [];
       };
   });
 };
@@ -452,11 +465,13 @@ NixOS cannot run dynamically linked executables without proper loader configurat
 **Problem specific to spec-kit:** The CLI downloads AI agent templates from GitHub at runtime, which may fail in pure Nix builds or restricted networks.
 
 **Considerations:**
+
 - Development shells need network access for `specify init` to download templates
 - If packaging for pure offline use, you'd need to pre-fetch templates and patch URLs
 - For most use cases, allowing network access in the development shell is acceptable
 
 **Pattern for offline use (advanced):**
+
 ```nix
 # Pre-fetch templates as fixed-output derivations
 templates = pkgs.fetchFromGitHub {
@@ -484,6 +499,7 @@ This level of patching is usually unnecessary unless you're deploying spec-kit i
 **Best practice:** Prefer `sourcePreference = "wheel"` for production. Binary wheels are prebuilt and contain all necessary metadata. Source distributions require more overrides and are more prone to failures.
 
 **When to use sdist:**
+
 - Package has no wheel for your platform
 - You need to apply patches to source code
 - Building from source for security auditing
@@ -518,7 +534,7 @@ editableOverlay = workspace.mkEditablePyprojectOverlay {
 editablePythonSet = pythonSet.overrideScope editableOverlay;
 
 devShell = pkgs.mkShell {
-  packages = [ 
+  packages = [
     (editablePythonSet.mkVirtualEnv "dev-env" workspace.deps.all)
   ];
   shellHook = ''
@@ -583,6 +599,7 @@ Then activate: `home-manager switch`
 ## Comparison with uv tool install
 
 **Standard uv approach:**
+
 ```bash
 uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
 ```
@@ -591,7 +608,7 @@ This is simpler but lacks Nix's reproducibility guarantees. The uv2nix approach 
 
 - **Pinned nixpkgs versions:** All dependencies come from a specific nixpkgs revision
 - **Declarative specification:** Your flake.nix fully describes the environment
-- **Integration with NixOS:** Can include in system or home-manager configurations  
+- **Integration with NixOS:** Can include in system or home-manager configurations
 - **Reproducible across machines:** `flake.lock` ensures identical builds everywhere
 - **Development environment consistency:** Dev shells have exact production dependencies
 

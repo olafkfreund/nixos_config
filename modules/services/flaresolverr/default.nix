@@ -112,7 +112,7 @@ in
     # Create user and group
     users.users.${cfg.user} = {
       isSystemUser = true;
-      group = cfg.group;
+      inherit (cfg) group;
       description = "FlareSolverr daemon user";
       home = cfg.dataDir;
       createHome = true;

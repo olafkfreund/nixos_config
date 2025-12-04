@@ -41,6 +41,7 @@ Organize issues into categories and display with formatted output:
 ### 🔴 Critical Priority (Priority: critical)
 
 **Issue #123**: [type] Title
+
 - **Status**: Open | In Progress | Blocked
 - **Branch**: feature/123-description (if created)
 - **Assignee**: @username
@@ -49,6 +50,7 @@ Organize issues into categories and display with formatted output:
 - **URL**: [Link to issue]
 
 **Progress**:
+
 - [x] Research completed
 - [x] Implementation started
 - [ ] Testing
@@ -77,6 +79,7 @@ Organize issues into categories and display with formatted output:
 ### ⏸️ Blocked Issues
 
 **Issue #456**: [type] Title
+
 - **Blocked By**: Issue #123, Missing dependency
 - **Reason**: Waiting for upstream fix
 - **Action**: [What needs to happen to unblock]
@@ -127,6 +130,7 @@ gh pr view <pr-number>
 Look for issues that may need attention:
 
 **Criteria for Flagging**:
+
 - Open for > 30 days with no updates
 - Marked "in progress" but no commits in > 7 days
 - Has open PR with no reviews
@@ -167,6 +171,7 @@ Based on the review, suggest concrete next steps:
 ## 📈 Progress Tracking
 
 Track overall project health and velocity:
+
 - **Issues Closed This Week**: 3
 - **Issues Opened This Week**: 2
 - **Average Time to Close**: 5 days
@@ -215,6 +220,7 @@ gh issue list --state open --json number,title,labels \
 ## Pre-Work Checklist
 
 Run `/check_tasks` to:
+
 1. ✅ Identify highest priority open issues
 2. ✅ Check if any issues are blocked
 3. ✅ Ensure no critical issues are waiting
@@ -235,6 +241,7 @@ Run `/check_tasks` to:
 ## Progress Tracking
 
 Periodically run `/check_tasks` to:
+
 - Monitor if new critical issues were created
 - Check if blockers were resolved
 - Update issue checklists with progress
@@ -247,6 +254,7 @@ Periodically run `/check_tasks` to:
 ## Review Session
 
 Use `/check_tasks` to:
+
 - Update issue statuses
 - Add comments on progress
 - Close completed issues (via PR merge)
@@ -280,6 +288,7 @@ Issues should typically be closed automatically via PR merge with proper keyword
 
 ```markdown
 In PR description use:
+
 - `Fixes #123` - Closes issue when PR merges
 - `Closes #123` - Alternative keyword
 - `Resolves #123` - Another alternative
@@ -296,12 +305,14 @@ Just show counts and critical items:
 ## 📋 Quick Task Summary
 
 **Open Issues**: 12 total
+
 - 🔴 Critical: 2 (need immediate attention)
 - 🟠 High: 5
 - 🟡 Medium: 3
 - 🟢 Low: 2
 
 **Action Required**:
+
 - Issue #123 (Critical) - Complete testing
 - Issue #124 (Critical) - Fix boot delay
 ```
@@ -313,6 +324,7 @@ Full breakdown with all issues listed by category.
 ### Custom Report
 
 Filter by:
+
 - Specific labels
 - Date range
 - Assignee
@@ -328,12 +340,14 @@ User: "/check_tasks"
 ```
 
 **Response**:
+
 ```markdown
 ## 📋 Daily Task Status
 
 Good morning! Here's your task overview:
 
 **🔴 Critical (2 issues)**
+
 - #123: [feature] Add PostgreSQL monitoring - In Progress
   - Branch: feature/123-postgres-monitoring
   - Status: Testing phase, 80% complete
@@ -356,6 +370,7 @@ User: "/check_tasks priority:high"
 ```
 
 **Response**:
+
 ```markdown
 ## 📋 High Priority Issues for Sprint Planning
 
@@ -384,6 +399,7 @@ User: "/check_tasks show blocked"
 ```
 
 **Response**:
+
 ```markdown
 ## ⏸️ Blocked Issues Report
 
@@ -417,10 +433,12 @@ User: "/check_tasks show blocked"
 **No open issues found.**
 
 This means either:
+
 - All work is completed
 - No issues have been created yet
 
 **Suggestions**:
+
 - Run `/new_task` to create a new task
 - Check closed issues for completed work: `gh issue list --state closed`
 - Review roadmap for upcoming features
@@ -428,7 +446,7 @@ This means either:
 
 ### GitHub CLI Not Authenticated
 
-```markdown
+````markdown
 ## ⚠️ GitHub CLI Not Authenticated
 
 Please authenticate the GitHub CLI:
@@ -436,9 +454,11 @@ Please authenticate the GitHub CLI:
 ```bash
 gh auth login
 ```
+````
 
 Follow the prompts to authenticate with your GitHub account.
-```
+
+````
 
 ### No Internet Connection
 
@@ -449,7 +469,7 @@ Unable to fetch issues. Please check:
 - Internet connection
 - GitHub status: https://www.githubstatus.com/
 - Repository access permissions
-```
+````
 
 ## Usage Tips
 

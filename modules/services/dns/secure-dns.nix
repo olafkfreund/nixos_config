@@ -60,7 +60,7 @@ in
     # Enable systemd-resolved
     services.resolved = {
       enable = true;
-      dnssec = cfg.dnssec;
+      inherit (cfg) dnssec;
       domains = [ "~." ]; # Use systemd-resolved for all domains
       fallbackDns = cfg.fallbackProviders;
       extraConfig = ''

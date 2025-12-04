@@ -31,7 +31,7 @@ in
     # Main service configuration
     services.example-service = {
       enable = true;
-      package = cfg.package;
+      inherit (cfg) package;
     };
 
     # System packages if needed

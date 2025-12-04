@@ -5,6 +5,7 @@ in
 {
   stylix = {
     enable = true;
+    enableReleaseChecks = false; # Disable version mismatch warnings
     autoEnable = true;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/${vars.theme.scheme}.yaml";
     image = vars.theme.wallpaper;

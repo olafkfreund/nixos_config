@@ -9,7 +9,7 @@
 **Status**: Production Ready
 **Completion**: 100%
 
-- [x] Multi-host NixOS configuration management with 6 active hosts (P620, Razer, P510, DEX5550, Samsung, NixVM) `L`
+- [x] Multi-host NixOS configuration management with 4 active hosts (P620, Razer, P510, Samsung) - **DEX5550 offline** `L`
 - [x] Feature flag system with 141+ optimized modules with validation `XL`
 - [x] Comprehensive secrets management using Agenix `L`
 - [x] Quality validation framework with comprehensive testing `M`
@@ -48,22 +48,22 @@
 - [x] Consistent network stability measures `M`
 - [x] DNS conflict prevention (razer laptop issue resolved) `S`
 
-## Phase 4: Monitoring & Observability (COMPLETED ✅)
+## Phase 4: Monitoring & Observability (DEPRECATED ⚠️)
 
-**Status**: Production Ready
-**Completion**: 90% (Missing centralized logging)
+**Status**: Removed from Configuration
+**Completion**: N/A (Infrastructure simplified)
 
-- [x] Prometheus/Grafana deployment on dex5550 as monitoring server `XL`
-- [x] System metrics collection (node, systemd, NixOS exporters) `L`
-- [x] Performance baseline establishment across all hosts `M`
-- [x] Resource usage tracking with custom NixOS metrics `M`
-- [x] Service health monitoring via Prometheus targets `M`
-- [x] Multi-host monitoring architecture (server/client) `L`
-- [x] Grafana dashboards for all hosts with hardware-specific panels `M`
-- [x] Alertmanager deployment ready for alerting rules `M`
-- [x] Media server monitoring (Plex/Tautulli, NZBGet) with 4 specialized dashboards `XL`
-- [x] CLI tools for monitoring status (grafana-status, prometheus-status) `S`
-- [x] Centralized log management with Loki and Promtail `L`
+**Deprecation Note**: The Prometheus/Grafana/Loki monitoring stack has been **removed** from the configuration to simplify infrastructure management. The following features are no longer active:
+
+- [~] ~~Prometheus/Grafana deployment~~ (removed - infrastructure simplified)
+- [~] ~~System metrics collection (node, systemd, NixOS exporters)~~ (using native systemd journal instead)
+- [~] ~~Performance baseline establishment~~ (simplified approach)
+- [~] ~~Grafana dashboards~~ (removed)
+- [~] ~~Alertmanager deployment~~ (removed)
+- [~] ~~Media server monitoring dashboards~~ (removed)
+- [~] ~~Centralized log management with Loki~~ (using native logs)
+
+**Current Approach**: Using native NixOS tools (systemd journal, system logs) for system management.
 
 ## Phase 5: AI Infrastructure (COMPLETED ✅)
 
@@ -197,33 +197,30 @@
 - Tailscale network infrastructure (completed)
 - Monitoring stack for security metrics (completed)
 
-## Phase 10: Centralized Logging (Q1 2025)
+## Phase 10: Centralized Logging (DEPRECATED ⚠️)
 
-**Status**: Missing Component from Monitoring Phase
-**Priority**: MEDIUM
-**Timeline**: Q1 2025
+**Status**: Cancelled - Infrastructure Simplified
+**Priority**: N/A
+**Timeline**: N/A
 
-**Goal:** Complete the observability stack with centralized log management
-**Success Criteria:** All logs centralized in Loki, searchable dashboards, log-based alerting operational
+**Deprecation Note**: Centralized logging infrastructure (Loki/Promtail) has been **removed** from the configuration to simplify infrastructure management.
 
-### Must-Have Features
+**Current Approach**: Using native NixOS logging tools:
 
-- [x] Loki deployment on dex5550 monitoring server `L`
-- [x] Promtail configuration across all hosts `M`
-- [x] Systemd journal log collection `S`
-- [x] Log retention policies and storage optimization `S`
-- [x] Log-based alerting rules in Grafana `M`
+- `journalctl` for systemd journal access
+- Standard system logs in `/var/log/`
+- Per-service logging as needed
 
-### Should-Have Features
+### Removed Features
 
-- [x] Log aggregation for application services `M`
-- [x] Log parsing and structured logging `L`
-- [x] Performance log analysis automation `L`
+- [~] ~~Loki deployment~~ (removed)
+- [~] ~~Promtail configuration~~ (removed)
+- [~] ~~Centralized log aggregation~~ (using native tools)
+- [~] ~~Log-based alerting~~ (simplified approach)
 
 ### Dependencies
 
-- ✅ Existing Prometheus/Grafana monitoring stack (completed)
-- ✅ Network connectivity between hosts (completed)
+- ❌ ~~Prometheus/Grafana monitoring stack~~ (removed)
 
 ---
 

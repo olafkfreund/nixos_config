@@ -327,8 +327,8 @@ in
       languages =
         mapAttrs
           (_name: lang: {
-            lsp = lang.lsp;
-            formatters = lang.formatters;
+            inherit (lang) lsp;
+            inherit (lang) formatters;
             enabled = lang.enable;
           })
           cfg.languages;

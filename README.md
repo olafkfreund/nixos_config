@@ -2,7 +2,9 @@
 
 ## Architecture Overview
 
-This repository implements a template-based NixOS configuration management system achieving 95% code deduplication through a three-tier architecture: host templates, Home Manager profiles, and modular components. The system manages 5 active hosts with different hardware profiles and supports multi-user environments.
+This repository implements a template-based NixOS configuration management system achieving 95% code deduplication through a three-tier architecture: host templates, Home Manager profiles, and modular components. The system manages 4 active hosts (P620, P510, Razer, Samsung) with different hardware profiles and supports multi-user environments.
+
+**Infrastructure Status**: DEX5550 is **offline**. Monitoring infrastructure (Prometheus/Grafana/Loki) has been **removed** for simplified configuration.
 
 ### Core Architecture Components
 
@@ -28,7 +30,7 @@ This repository implements a template-based NixOS configuration management syste
 │   ├── p620/                          # AMD workstation (uses workstation template)
 │   ├── p510/                          # Intel Xeon server (uses server template)
 │   ├── razer/                         # Intel/NVIDIA laptop (uses laptop template)
-│   ├── dex5550/                       # Intel SFF server (uses server template)
+│   ├── dex5550/                       # Intel SFF server (**OFFLINE - no longer in use**)
 │   ├── samsung/                       # Intel laptop (uses laptop template)
 │   └── common/                        # Shared host configurations
 ├── home/                              # Home Manager configurations and profiles
@@ -66,8 +68,10 @@ This repository implements a template-based NixOS configuration management syste
 **Server Template** (`hosts/templates/server.nix`)
 
 - Target: Headless server operation
-- Used by: P510 (media server), DEX5550 (monitoring server)
-- Features: Server services, monitoring, headless operation, security hardening
+- Used by: P510 (media server)
+- Features: Server services, headless operation, security hardening
+
+**Note**: DEX5550 is **offline** and no longer uses this template.
 
 ### Home Manager Profiles
 
@@ -81,7 +85,8 @@ This repository implements a template-based NixOS configuration management syste
 - **P620**: developer + desktop-user (full workstation)
 - **Razer/Samsung**: developer + laptop-user (mobile development)
 - **P510**: server-admin + developer (dev-server composition)
-- **DEX5550**: server-admin (pure server)
+
+**Note**: DEX5550 is **offline** and no longer has profile assignments.
 
 ## Build and Deployment Commands
 
@@ -330,19 +335,16 @@ ai-cli --list-providers
 
 **Supported Providers**: Anthropic Claude, OpenAI, Google Gemini, Ollama (local)
 
-### Monitoring Stack
+### System Management
 
-**Services**:
+**Native Tools**:
 
-- Prometheus (port 9090): Metrics collection
-- Grafana (port 3001): Visualization dashboards
-- Alertmanager (port 9093): Alert management
-- Node Exporters (port 9100): System metrics
+- `journalctl`: Systemd journal access and log management
+- System logs: Standard logging in `/var/log/`
+- `systemctl`: Service management and status monitoring
+- Native NixOS generation management
 
-**Custom Exporters**:
-
-- NixOS Exporter (port 9101): Nix-specific metrics
-- Systemd Exporter (port 9102): Service monitoring
+**Note**: External monitoring infrastructure (Prometheus/Grafana/Loki) has been **removed** for simplified configuration.
 
 ### MicroVM Development Environments
 
@@ -377,11 +379,13 @@ just ssh-microvm dev-vm
 - CUDA support for development
 - Wayland compatibility layers
 
-### Intel Systems (Samsung, DEX5550)
+### Intel Systems (Samsung)
 
 - Power efficiency optimizations
 - Wayland-native configurations
 - Thermal and frequency scaling
+
+**Note**: DEX5550 is **offline** and no longer in active use.
 
 ## Validation Framework
 

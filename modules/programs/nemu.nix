@@ -61,7 +61,7 @@ in
       enable = true;
       package = pkgs._nemu;
       inherit (cfg) vhostNetGroup macvtapGroup usbGroup;
-      users = cfg.users;
+      inherit (cfg) users;
     };
 
     # Create required groups if they don't exist

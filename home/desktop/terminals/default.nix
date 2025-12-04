@@ -158,8 +158,8 @@ in
           };
 
           colors = mkDefault {
-            foreground = activeColors.foreground;
-            background = activeColors.background;
+            inherit (activeColors) foreground;
+            inherit (activeColors) background;
             regular0 = activeColors.black;
             regular1 = activeColors.red;
             regular2 = activeColors.green;
@@ -353,7 +353,7 @@ in
               family = fontConfig.name;
               style = "Italic";
             };
-            size = fontConfig.size;
+            inherit (fontConfig) size;
           };
 
           # Colors

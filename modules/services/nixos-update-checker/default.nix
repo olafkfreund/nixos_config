@@ -209,7 +209,7 @@ in
     # User and group for the service
     users.users.${cfg.user} = {
       isSystemUser = true;
-      group = cfg.group;
+      inherit (cfg) group;
       description = "NixOS update checker service user";
     };
 

@@ -50,7 +50,7 @@ in
     users = {
       users.${cfg.user} = {
         isSystemUser = true;
-        group = cfg.group;
+        inherit (cfg) group;
         home = cfg.dataDir;
         createHome = true;
       };
@@ -100,8 +100,8 @@ in
     environment.etc."service-name/config.toml" = mkIf (cfg.settings != { }) {
       text = generators.toTOML { } cfg.settings;
       mode = "0644";
-      user = cfg.user;
-      group = cfg.group;
+      inherit (cfg) user;
+      inherit (cfg) group;
     };
 
     # Systemd tmpfiles for directory creation

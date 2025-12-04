@@ -167,8 +167,7 @@ let
   # Host-specific live configurations
   hostSpecificConfigs = {
     p620 =
-      { ...
-      }: {
+      _: {
         # AMD-specific drivers and tools
         boot.kernelModules = [ "amdgpu" ];
         services.xserver.videoDrivers = [ "amdgpu" ];
@@ -179,8 +178,7 @@ let
       };
 
     razer =
-      { ...
-      }: {
+      _: {
         # Intel/NVIDIA hybrid graphics
         boot.kernelModules = [ "i915" "nvidia" ];
         services.xserver.videoDrivers = [ "nvidia" ];
@@ -188,24 +186,21 @@ let
       };
 
     p510 =
-      { ...
-      }: {
+      _: {
         # Intel Xeon with NVIDIA
         boot.kernelModules = [ "nvidia" ];
         services.xserver.videoDrivers = [ "nvidia" ];
       };
 
     dex5550 =
-      { ...
-      }: {
+      _: {
         # Intel integrated graphics
         boot.kernelModules = [ "i915" ];
         services.xserver.videoDrivers = [ "intel" ];
       };
 
     samsung =
-      { ...
-      }: {
+      _: {
         # Intel integrated graphics (laptop)
         boot.kernelModules = [ "i915" ];
         services.xserver.videoDrivers = [ "intel" ];

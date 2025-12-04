@@ -682,8 +682,8 @@ in
     "/etc/ssh/ssh_host_rsa_key" # Fallback host key (RSA)
   ];
 
-  # Windows app integration (temporarily disabled due to npm dependency issues)
-  # programs.winboat.enable = true;
+  # Windows app integration - Re-enabled after upstream fix (v0.9.0)
+  programs.winboat.enable = true;
 
   # Fix broken GNOME Shell patch in nixpkgs (shell_remove_dark_mode.patch failing on 49.1)
   nixpkgs.overlays = [

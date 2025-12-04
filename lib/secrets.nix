@@ -92,9 +92,9 @@ let
         (map (user: config.age.secrets.${user}.publicKey or null) users);
 
       # Runtime configuration
-      mode = mode;
-      owner = owner;
-      group = group;
+      inherit mode;
+      inherit owner;
+      inherit group;
     };
 
   # Common secret templates

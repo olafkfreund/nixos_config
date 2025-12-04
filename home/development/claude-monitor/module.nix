@@ -287,7 +287,7 @@ in
     home.packages = [
       cfg.package
       pythonEnv
-      pkgs.nodejs  # For npm global installs
+      pkgs.nodejs # For npm global installs
     ];
 
     # Install monitor script
@@ -296,12 +296,12 @@ in
     };
 
     # Install ccusage npm package globally on activation
-    home.activation.installCcusage = lib.hm.dag.entryAfter ["writeBoundary"] ''
-  if ! command -v ccusage &> /dev/null;
-  then
-  $DRY_RUN_CMD ${pkgs.nodejs}/bin/npm install -g ccusage || echo "Warning: Failed to install ccusage"
-  fi
-  '';
+    home.activation.installCcusage = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      if ! command -v ccusage &> /dev/null;
+      then
+      $DRY_RUN_CMD ${pkgs.nodejs}/bin/npm install -g ccusage || echo "Warning: Failed to install ccusage"
+      fi
+    '';
 
     # Shell aliases
     programs.zsh.shellAliases = mkIf config.programs.zsh.enable cfg.shellAliases;
@@ -330,17 +330,17 @@ in
     # Helper script for quick status check
     home.file.".local/bin/claude-usage-check" = {
       text = ''
-  #!/usr/bin/env bash
-  # Quick usage check without continuous monitoring
+        #!/usr/bin/env bash
+        # Quick usage check without continuous monitoring
 
-  if command -v ccusage &> /dev/null; then
-  ${pkgs.nodejs}/bin/npx ccusage
-  else
-  echo "Error: ccusage not installed"
-  echo "Enable claude-monitor to install it automatically"
-  exit 1
-  fi
-  ''   ;
+        if command -v ccusage &> /dev/null; then
+        ${pkgs.nodejs}/bin/npx ccusage
+        else
+        echo "Error: ccusage not installed"
+        echo "Enable claude-monitor to install it automatically"
+        exit 1
+        fi
+      '';
       executable = true;
     };
 

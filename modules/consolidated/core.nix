@@ -32,7 +32,7 @@ in
       };
     };
 
-    # Consolidated security (replaces 12 modules)  
+    # Consolidated security (replaces 12 modules)
     security = mkIf cfg.features.security {
       sudo = {
         enable = mkDefault true;

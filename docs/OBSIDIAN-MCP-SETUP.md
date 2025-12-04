@@ -19,11 +19,12 @@ This guide covers the installation and configuration of the Obsidian MCP (Model 
 
 `★ Insight ─────────────────────────────────────`
 **Why @mauricio.wolff/mcp-obsidian?**
+
 - Zero dependencies - no Obsidian plugins required
 - 40-60% smaller responses than alternatives
 - Works with any vault structure (no setup needed)
 - Active maintenance and modern TypeScript implementation
-`─────────────────────────────────────────────────`
+  `─────────────────────────────────────────────────`
 
 ## Implementation Choice
 
@@ -38,10 +39,10 @@ We've chosen **@mauricio.wolff/mcp-obsidian** (by bitbonsai) because:
 
 ### Alternative Implementations (Not Used)
 
-| Server | Why Not Used |
-|--------|--------------|
+| Server                              | Why Not Used                                            |
+| ----------------------------------- | ------------------------------------------------------- |
 | **obsidian-mcp-server** (cyanheads) | Requires Local REST API plugin installation in Obsidian |
-| **@mseep/obsidian-mcp-server** | Also requires REST API plugin, more complex setup |
+| **@mseep/obsidian-mcp-server**      | Also requires REST API plugin, more complex setup       |
 
 ## Installation
 
@@ -114,16 +115,19 @@ The configuration has been added to `home/development/claude-code-mcp-config.jso
 **Configuration Steps:**
 
 1. Set your vault path:
+
    ```bash
    export OBSIDIAN_VAULT_PATH="/home/olafkfreund/Documents/ObsidianVault"
    ```
 
 2. Add to your shell profile (`.zshrc` or `.bashrc`):
+
    ```bash
    echo 'export OBSIDIAN_VAULT_PATH="/home/olafkfreund/Documents/ObsidianVault"' >> ~/.zshrc
    ```
 
 3. Reload shell or source profile:
+
    ```bash
    source ~/.zshrc
    ```
@@ -138,10 +142,7 @@ For VS Code integration, the template is in `home/development/vscode-mcp-templat
     "obsidian": {
       "type": "stdio",
       "command": "npx",
-      "args": [
-        "@mauricio.wolff/mcp-obsidian@latest",
-        "${OBSIDIAN_VAULT_PATH}"
-      ]
+      "args": ["@mauricio.wolff/mcp-obsidian@latest", "${OBSIDIAN_VAULT_PATH}"]
     }
   }
 }
@@ -517,6 +518,7 @@ export OBSIDIAN_MCP_PORT=3000   # Custom port (if needed)
 **Implementation Status**: ✅ Complete and ready for deployment
 
 **Next Steps**:
+
 1. Set OBSIDIAN_VAULT_PATH environment variable
 2. Enable in host configuration
 3. Deploy and test with Claude Code

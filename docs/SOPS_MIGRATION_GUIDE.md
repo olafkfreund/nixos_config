@@ -44,7 +44,7 @@ Create `.sops.yaml` in your repository root:
 keys:
   # User keys
   - &admin age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p
-  
+
   # Host keys (from SSH host keys)
   - &p620 age1yubikey1qwqw7l3lqxrp7d2xh39rwx0x5q4xjqfkpzdxwyqal4x9s5pw2x6z9q
   - &razer age1yubikey1q2z8xpqxrp7d2xh39rwx0x5q4xjqfkpzdxwyqal4x9s5pw2x6z9q
@@ -56,26 +56,26 @@ creation_rules:
   # Default rule for all secrets
   - path_regex: secrets/[^/]+\.(yaml|json|env|ini)$
     key_groups:
-    - age:
-      - *admin
-      - *p620
-      - *razer
-      - *p510
-      - *dex5550
-      - *samsung
-  
+      - age:
+          - *admin
+          - *p620
+          - *razer
+          - *p510
+          - *dex5550
+          - *samsung
+
   # Host-specific secrets
   - path_regex: secrets/hosts/p620/[^/]+\.(yaml|json|env|ini)$
     key_groups:
-    - age:
-      - *admin
-      - *p620
-  
+      - age:
+          - *admin
+          - *p620
+
   - path_regex: secrets/hosts/razer/[^/]+\.(yaml|json|env|ini)$
     key_groups:
-    - age:
-      - *admin
-      - *razer
+      - age:
+          - *admin
+          - *razer
 ```
 
 ### Step 4: Create New Secrets Structure
@@ -114,10 +114,10 @@ sops -e -i secrets/common/secrets.yaml
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    
+
     # Remove agenix
     # agenix.url = "github:ryantm/agenix";
-    
+
     # Add sops-nix
     sops-nix = {
       url = "github:Mic92/sops-nix";
@@ -150,7 +150,7 @@ let
 in {
   options.security.sops = {
     enable = mkEnableOption "SOPS secrets management";
-    
+
     hostSecrets = mkOption {
       type = types.bool;
       default = true;
@@ -164,57 +164,57 @@ in {
       # Age key file location
       age.keyFile = "/var/lib/sops-nix/key.txt";
       age.generateKey = true;
-      
+
       # SSH host key for decryption
       age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-      
+
       # Default sops file
       defaultSopsFile = ../../secrets/common/secrets.yaml;
       defaultSopsFormat = "yaml";
-      
+
       # Validation
       validateSopsFiles = true;
-      
+
       # Secret definitions
       secrets = {
         # User passwords
         "user_passwords/olafkfreund" = {
           neededForUsers = true;
         };
-        
+
         # API Keys
         "api_keys/openai" = {
           mode = "0400";
           owner = config.users.users.olafkfreund.name;
         };
-        
+
         "api_keys/anthropic" = {
           mode = "0400";
           owner = config.users.users.olafkfreund.name;
         };
-        
+
         "api_keys/gemini" = {
           mode = "0400";
           owner = config.users.users.olafkfreund.name;
         };
-        
+
         "api_keys/github_token" = {
           mode = "0400";
           owner = config.users.users.olafkfreund.name;
         };
-        
+
         # Network secrets
         "network/wifi_password" = {};
         "network/tailscale_auth_key" = {};
       };
-      
+
       # Host-specific secrets (if exists)
-      secrets = mkIf (cfg.hostSecrets && 
+      secrets = mkIf (cfg.hostSecrets &&
         builtins.pathExists ../../secrets/hosts/${config.networking.hostName}/secrets.yaml) {
         sopsFile = ../../secrets/hosts/${config.networking.hostName}/secrets.yaml;
       };
     };
-    
+
     # Ensure sops is available
     environment.systemPackages = with pkgs; [
       sops
@@ -326,14 +326,14 @@ sops secrets/hosts/p620/custom.yaml
   services.myapp = {
     apiKeyFile = config.sops.secrets."api_keys/openai".path;
   };
-  
+
   # Use in systemd service
   systemd.services.my-service = {
     serviceConfig = {
       EnvironmentFile = config.sops.secrets."service_env".path;
     };
   };
-  
+
   # Template usage
   services.grafana.provision.datasources.settings.datasources = [{
     access = "proxy";

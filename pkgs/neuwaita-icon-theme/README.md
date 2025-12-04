@@ -83,7 +83,7 @@ bash $THEME_PATH/watch-accent.sh
 
 ## Package Information
 
-- **Source**: https://github.com/RusticBard/Neuwaita
+- **Source**: <https://github.com/RusticBard/Neuwaita>
 - **License**: GPL-3.0-or-later
 - **Platforms**: Linux
 - **Version**: Tracks upstream unstable branch
@@ -93,6 +93,7 @@ bash $THEME_PATH/watch-accent.sh
 To update to the latest version:
 
 1. Get the latest commit hash from the repository:
+
    ```bash
    git ls-remote https://github.com/RusticBard/Neuwaita.git HEAD
    ```
@@ -100,6 +101,7 @@ To update to the latest version:
 2. Update the `rev` in `flake.nix`
 
 3. Get the new hash:
+
    ```bash
    nix-prefetch-url --unpack "https://github.com/RusticBard/Neuwaita/archive/NEW_COMMIT_HASH.tar.gz"
    nix hash convert --hash-algo sha256 HASH_FROM_ABOVE
@@ -122,6 +124,7 @@ ls -la ./result/share/icons/Neuwaita/
 ### Icons not appearing
 
 1. Ensure GTK cache is updated:
+
    ```bash
    gtk-update-icon-cache -f -t ~/.local/share/icons/Neuwaita
    ```
@@ -129,6 +132,7 @@ ls -la ./result/share/icons/Neuwaita/
 2. Restart your desktop session or application
 
 3. Check that the theme is properly installed:
+
    ```bash
    ls ~/.local/share/icons/Neuwaita/index.theme
    ```

@@ -84,8 +84,8 @@
       enable = true;
       zathura = true;
       obsidian = true;
-      flameshot = false;  # Disabled - has issues with Wayland multi-monitor
-      waylandScreenshots = true;  # Use native Wayland screenshot tools instead
+      flameshot = false; # Disabled - has issues with Wayland multi-monitor
+      waylandScreenshots = true; # Use native Wayland screenshot tools instead
       kooha = true;
       remotedesktop = true;
 

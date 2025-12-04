@@ -207,5 +207,5 @@ buildFHSEnv {
     ln -s ${claude-desktop-unwrapped}/share/icons $out/share/icons
   '';
 
-  meta = claude-desktop-unwrapped.meta;
+  inherit (claude-desktop-unwrapped) meta;
 }

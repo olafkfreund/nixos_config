@@ -106,7 +106,7 @@ in
   config = mkIf cfg.enable {
     # Enable network stability features
     networking.stableConnection = {
-      enable = cfg.connectionStability.enable;
+      inherit (cfg.connectionStability) enable;
       interfaceSwitchDelayMs = cfg.connectionStability.switchDelayMs;
     };
 

@@ -4,12 +4,16 @@ This directory contains system configurations for different machines. Each subdi
 
 ## Active Hosts
 
-- `dex5550/` - Configuration for the Dell Dex5550 laptop
-- `hp/` - Configuration for the HP server/workstation
-- `lms/` - Configuration for the LMS system
-- `p510/` - Configuration for the P510 system (includes MicroVM configurations)
-- `p620/` - Configuration for the P620 workstation (AMD-based system)
+- `p620/` - Configuration for the P620 workstation (AMD-based system, primary development)
+- `p510/` - Configuration for the P510 system (media server, includes MicroVM configurations)
 - `razer/` - Configuration for the Razer laptop
+- `samsung/` - Configuration for the Samsung laptop
+
+## Offline/Archived Hosts
+
+- `dex5550/` - **OFFLINE** - Dell Dex5550 SFF (monitoring infrastructure removed)
+- `hp/` - **ARCHIVED** - HP server/workstation (decommissioned)
+- `lms/` - **ARCHIVED** - LMS system (decommissioned)
 
 ## Host Directory Structure
 

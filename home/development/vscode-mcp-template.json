@@ -3,6 +3,16 @@
   // This file provides initial MCP server configuration that VS Code can then modify
 
   "servers": {
+    "obsidian": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@mauricio.wolff/mcp-obsidian@latest", "${OBSIDIAN_VAULT_PATH}"]
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "playwright-mcp",
+      "args": ["--browser", "chromium"]
+    },
     "Context7": {
       "type": "stdio",
       "command": "npx",
@@ -10,15 +20,23 @@
     },
     "nixos": {
       "type": "stdio",
-      "command": "nix",
-      "args": ["shell", "nixpkgs#uv", "--command", "uvx", "mcp-nixos@0.3.1"]
+      "command": "mcp-nixos",
+      "args": []
     },
     "github": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "command": "github-mcp-server",
+      "args": [],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "grafana": {
+      "type": "stdio",
+      "command": "mcp-grafana",
+      "args": ["--url", "http://dex5550:3001"],
+      "env": {
+        "GRAFANA_API_TOKEN": "${GRAFANA_API_TOKEN}"
       }
     }
   }

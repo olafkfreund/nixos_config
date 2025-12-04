@@ -61,7 +61,8 @@ in
     nix.gc = {
       automatic = true;
       dates = cfg.schedule;
-      options = if cfg.aggressiveCleanup
+      options =
+        if cfg.aggressiveCleanup
         then "--delete-old"
         else "--delete-older-than ${cfg.deleteOlderThan}";
     };
