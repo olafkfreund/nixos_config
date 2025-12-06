@@ -1662,6 +1662,17 @@ ai-cli -t 60 "question"                  # Custom timeout (seconds)
    - No API key required (local inference)
    - Running on P620 with ROCm acceleration
 
+   **Important**: As of January 2025, Ollama configuration uses `package` option instead of deprecated `acceleration`:
+   ```nix
+   # ✅ Current pattern
+   services.ollama.package = pkgs.ollama-rocm;  # or ollama-cuda
+
+   # ❌ Deprecated (removed from nixpkgs)
+   services.ollama.acceleration = "rocm";
+   ```
+
+   See comprehensive configuration guide in Obsidian: `NixOS/Ollama-Configuration.md`
+
 **Shell Integration:**
 
 ```bash
