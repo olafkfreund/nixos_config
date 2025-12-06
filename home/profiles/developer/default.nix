@@ -171,13 +171,18 @@
   # Git configuration for development
   programs.git = {
     enable = true;
-    delta.enable = true;
-    extraConfig = {
+    settings = {
       init.defaultBranch = "main";
       push.autoSetupRemote = true;
       pull.rebase = true;
       rebase.autoStash = true;
     };
+  };
+
+  # Delta (diff viewer) integration with Git
+  programs.delta = {
+    enable = true;
+    enableGitIntegration = true;
   };
 
   # Development environment configurations

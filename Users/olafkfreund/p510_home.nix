@@ -167,8 +167,7 @@
   # Enhanced git configuration for server development
   programs.git = {
     enable = true;
-    delta.enable = lib.mkForce true;
-    extraConfig = {
+    settings = {
       init.defaultBranch = "main";
       push.autoSetupRemote = true;
       pull.rebase = true;
@@ -180,6 +179,12 @@
       log.oneline = true;
       status.showUntrackedFiles = "all";
     };
+  };
+
+  # Delta (diff viewer) integration with Git
+  programs.delta = {
+    enable = lib.mkForce true;
+    enableGitIntegration = true;
   };
 
   # Development environment for server

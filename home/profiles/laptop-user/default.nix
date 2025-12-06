@@ -239,8 +239,7 @@
   # Git configuration for mobile development
   programs.git = {
     enable = true;
-    delta.enable = true;
-    extraConfig = {
+    settings = {
       init.defaultBranch = "main";
       push.autoSetupRemote = true;
       pull.rebase = true;
@@ -249,6 +248,12 @@
       core.autocrlf = "input";
       merge.tool = "vimdiff";
     };
+  };
+
+  # Delta (diff viewer) integration with Git
+  programs.delta = {
+    enable = true;
+    enableGitIntegration = true;
   };
 
   # Mobile development environment
