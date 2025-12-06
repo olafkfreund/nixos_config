@@ -32,8 +32,7 @@ in
     (mkIf cfg.enable {
       services.ollama = {
         enable = true;
-        package = pkgs.ollama;
-        acceleration = "cuda";
+        package = pkgs.ollama-cuda; # Use CUDA-enabled package
         host = "0.0.0.0";
         loadModels = [
           "mistral-small3.1"

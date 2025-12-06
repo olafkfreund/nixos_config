@@ -498,7 +498,7 @@ in
     # Ollama specific configurations for AMD GPU
     ollama = {
       enable = true;
-      acceleration = lib.mkForce vars.acceleration;
+      package = pkgs.ollama-rocm; # Use ROCm-enabled package for AMD GPU
       rocmOverrideGfx = lib.mkForce "11.0.0";
       environmentVariables = {
         HCC_AMDGPU_TARGET = lib.mkForce "gfx1100";
