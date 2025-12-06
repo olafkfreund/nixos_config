@@ -27,9 +27,6 @@ _: {
     ./services/dns/secure-dns.nix
     ./services/network-stability.nix
 
-    # Networking modules
-    ./networking/tailscale.nix
-
     # System optimization modules
     ./system/fstrim-optimization.nix
   ];

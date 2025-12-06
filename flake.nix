@@ -5,8 +5,8 @@
     # Primary caches
     substituters = [
       "https://cache.nixos.org/"
-      "https://nix-community.cachix.org"
-      #"http://192.168.1.97:5000"
+      "https://nix-community.cachix.org/"
+      #"http://192.168.1.97:5000/"
     ];
     trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
@@ -16,14 +16,14 @@
 
     # Development and specific package caches
     extra-substituters = [
-      "https://cuda-maintainers.cachix.org"
-      "https://hyprland.cachix.org"
-      "https://devenv.cachix.org"
+      "https://cuda-maintainers.cachix.org/"
+      "https://hyprland.cachix.org/"
+      "https://devenv.cachix.org/"
       "https://cosmic.cachix.org/"
-      "https://cache.saumon.network/proxmox-nixos"
-      "https://walker-git.cachix.org"
-      "https://walker.cachix.org"
-      "http://192.168.1.97:5000"
+      "https://cache.saumon.network/proxmox-nixos/"
+      "https://walker-git.cachix.org/"
+      "https://walker.cachix.org/"
+      "http://192.168.1.97:5000/"
     ];
     extra-trusted-public-keys = [
       "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="

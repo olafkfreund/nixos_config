@@ -66,47 +66,47 @@ in
       dns = lib.mkForce "default"; # Force NetworkManager to handle DNS directly
     };
 
-    # Network performance tuning - disabled
-    performanceTuning = {
-      enable = false;
-      profile = "throughput";
-
-      tcpOptimization = {
-        enable = true;
-        congestionControl = "bbr";
-        windowScaling = true;
-        fastOpen = true;
-        lowLatency = false; # Prioritize throughput over latency
-      };
-
-      bufferOptimization = {
-        enable = true;
-        receiveBuffer = 33554432; # 32MB for high-throughput AI workloads
-        sendBuffer = 33554432; # 32MB for high-throughput AI workloads
-        autotuning = true;
-      };
-
-      interHostOptimization = {
-        enable = true;
-        hosts = [ "dex5550" "p510" "razer" ];
-        jumboFrames = false; # Keep disabled for compatibility
-        routeOptimization = true;
-      };
-
-      dnsOptimization = {
-        enable = true;
-        caching = true;
-        parallelQueries = true;
-        customServers = [ "192.168.1.222" "1.1.1.1" ];
-      };
-
-      monitoringOptimization = {
-        enable = true;
-        compression = true;
-        batchingInterval = 5; # More frequent for performance workstation
-        prioritization = true;
-      };
-    };
+    # Network performance tuning - removed (module deleted during anti-pattern cleanup)
+    # performanceTuning = {
+    #   enable = false;
+    #   profile = "throughput";
+    #
+    #   tcpOptimization = {
+    #     enable = true;
+    #     congestionControl = "bbr";
+    #     windowScaling = true;
+    #     fastOpen = true;
+    #     lowLatency = false; # Prioritize throughput over latency
+    #   };
+    #
+    #   bufferOptimization = {
+    #     enable = true;
+    #     receiveBuffer = 33554432; # 32MB for high-throughput AI workloads
+    #     sendBuffer = 33554432; # 32MB for high-throughput AI workloads
+    #     autotuning = true;
+    #   };
+    #
+    #   interHostOptimization = {
+    #     enable = true;
+    #     hosts = [ "dex5550" "p510" "razer" ];
+    #     jumboFrames = false; # Keep disabled for compatibility
+    #     routeOptimization = true;
+    #   };
+    #
+    #   dnsOptimization = {
+    #     enable = true;
+    #     caching = true;
+    #     parallelQueries = true;
+    #     customServers = [ "192.168.1.222" "1.1.1.1" ];
+    #   };
+    #
+    #   monitoringOptimization = {
+    #     enable = true;
+    #     compression = true;
+    #     batchingInterval = 5; # More frequent for performance workstation
+    #     prioritization = true;
+    #   };
+    # };
 
     # Firewall configuration for SSH and remote desktop
     firewall = {

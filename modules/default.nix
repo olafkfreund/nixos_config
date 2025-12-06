@@ -29,7 +29,6 @@ with lib; {
     # Infrastructure modules
     ./common/default.nix # Common utilities and features
     ./common/ai-defaults.nix # AI provider defaults
-    ./networking/tailscale.nix # Network configurations
     ./secrets/api-keys.nix # Secret management
     ./microvms/default.nix # MicroVM configurations
   ];
