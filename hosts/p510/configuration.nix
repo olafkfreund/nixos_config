@@ -44,26 +44,18 @@ in
     # Disable IPv6
     enableIPv6 = false;
 
-    # Tailscale VPN Configuration - P510 media server
-    tailscale = {
-      enable = true;
-      authKeyFile = config.age.secrets.tailscale-auth-key.path;
-      hostname = "p510-media";
-      acceptRoutes = true;
-      acceptDns = false; # Keep local DNS setup
-      ssh = true;
-      shields = true;
-      useRoutingFeatures = "client"; # Accept routes from other nodes
-      extraUpFlags = [
-        "--operator=olafkfreund"
-        "--accept-risk=lose-ssh"
-        "--advertise-tags=tag:server,tag:media"
-        "--accept-dns=false" # Explicitly set DNS flag to fix autoconnect
-      ];
-    };
+    # Note: Tailscale is enabled via services.tailscale (built-in NixOS module)
+    # Custom networking.tailscale module was removed during anti-pattern cleanup
 
     # DNS configuration
     nameservers = [ "192.168.1.254" ];
+  };
+
+  # Tailscale VPN using built-in NixOS service
+  services.tailscale = {
+    enable = true;
+    useRoutingFeatures = "client"; # Accept routes from other nodes
+    openFirewall = true;
   };
 
   # Use AI provider defaults with workstation profile (now with desktop environment)
@@ -160,7 +152,7 @@ in
   };
 
   # Use GDM instead of COSMIC greeter until bug is fixed
-  services.xserver.displayManager.gdm.enable = true;
+  # Note: Using new services.displayManager.gdm.enable below
 
   # Enable NixOS package monitoring tools
   tools.nixpkgs-monitors = {
@@ -221,8 +213,8 @@ in
     };
   };
 
-  # Display manager configuration - Disable GDM to use COSMIC Greeter
-  services.displayManager.gdm.enable = lib.mkForce false;
+  # Display manager configuration - Use GDM (COSMIC greeter disabled due to libEGL.so.1 bug)
+  services.displayManager.gdm.enable = true;
 
   # Desktop manager configuration - minimal GNOME for login only
   services.desktopManager.gnome.enable = true;
@@ -300,7 +292,9 @@ in
 
   # NVIDIA specific configurations
   hardware.keyboard.zsa.enable = true;
-  services.ollama.acceleration = vars.acceleration;
+
+  # Ollama with CUDA acceleration for NVIDIA GPU
+  services.ollama.package = pkgs.ollama-cuda;
 
   # Agenix identity configuration - specify where to find decryption keys
   age.identityPaths = [

@@ -107,7 +107,7 @@
     # Intel Xeon + NVIDIA specific tools
     intel-gpu-tools
     python3Packages.pynvml
-    nvtopPackages.nvidia
+    # nvtopPackages.nvidia - removed to avoid conflict with neofetch module's nvtopPackages.full
 
     # Media server development (P510 hosts media services)
     ffmpeg
