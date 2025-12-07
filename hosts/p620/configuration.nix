@@ -45,21 +45,8 @@ in
     # Choose networking profile: "desktop", "server", or "minimal"
     profile = "desktop"; # Switch to desktop profile for GNOME NetworkManager integration
 
-    tailscale = {
-      enable = true;
-      authKeyFile = config.age.secrets.tailscale-auth-key.path;
-      hostname = "p620-workstation";
-      subnet = "192.168.1.0/24"; # Advertise local subnet
-      acceptRoutes = true;
-      acceptDns = false; # CRITICAL: Prevent Tailscale DNS conflicts with systemd-resolved
-      ssh = true;
-      shields = true;
-      useRoutingFeatures = "both"; # Can route and accept routes
-      extraUpFlags = [
-        "--operator=olafkfreund"
-        "--accept-risk=lose-ssh"
-      ];
-    };
+    # Note: Tailscale is enabled via services.tailscale (built-in NixOS module)
+    # Custom networking.tailscale module was removed during anti-pattern cleanup
 
     # NetworkManager configuration with explicit DNS management
     networkmanager = {
@@ -135,6 +122,13 @@ in
         iptables -D INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name SSH_LIMIT -j DROP 2>/dev/null || true
       '';
     };
+  };
+
+  # Tailscale VPN using built-in NixOS service
+  services.tailscale = {
+    enable = true;
+    useRoutingFeatures = "both"; # Can route and accept routes
+    openFirewall = true;
   };
 
   # Use AI provider defaults with workstation profile
@@ -326,40 +320,9 @@ in
       ];
     };
 
-    # Performance Optimization Configuration - disabled
-    # High-performance AMD workstation profile
-    resourceManager = {
-      enable = false;
-      profile = "performance";
-
-      cpuManagement = {
-        enable = true;
-        dynamicGovernor = true;
-        affinityOptimization = true;
-        coreReservation = false; # Use all cores for maximum performance
-      };
-
-      memoryManagement = {
-        enable = true;
-        dynamicSwap = true;
-        hugePagesOptimization = true;
-        memoryCompression = false; # Disable for performance
-        oomProtection = true;
-      };
-
-      ioManagement = {
-        enable = true;
-        dynamicScheduler = true;
-        ioNiceOptimization = true;
-        cacheOptimization = true;
-      };
-
-      networkManagement = {
-        enable = true;
-        trafficShaping = false;
-        connectionOptimization = true;
-      };
-    };
+    # Performance Optimization Configuration - REMOVED
+    # The system.resourceManager module was removed during anti-pattern cleanup
+    # Module had root services and is no longer needed
 
     # System version
     stateVersion = "25.11";

@@ -318,12 +318,14 @@ virt-viewer debian-test
 #### Problem 1: No Windows VM Support
 
 **Current situation:**
+
 - Your infrastructure is 100% NixOS/Linux
 - No way to test Windows-specific scenarios
 - Can't develop cross-platform applications
 - Limited enterprise compatibility testing
 
 **With NixVirt:**
+
 - Declarative Windows 11 VMs with Secure Boot + TPM
 - Professional Windows development environment
 - Cross-platform testing capabilities
@@ -334,12 +336,14 @@ virt-viewer debian-test
 #### Problem 2: No Professional VM Features
 
 **Current situation:**
+
 - microvm.nix is lightweight but limited
 - No Secure Boot support
 - No TPM emulation
 - No advanced VM features
 
 **With NixVirt:**
+
 - Full QEMU/KVM feature set
 - Secure Boot support
 - TPM 2.0 emulation (for BitLocker, etc.)
@@ -350,12 +354,14 @@ virt-viewer debian-test
 #### Problem 3: Manual VM Management
 
 **Current situation:**
+
 - If you need libvirt VMs, must configure via virt-manager
 - No infrastructure-as-code for traditional VMs
 - Can't version control VM definitions
 - Inconsistent VM configurations
 
 **With NixVirt:**
+
 - Infrastructure-as-code for all VMs
 - Version-controlled VM definitions
 - Reproducible deployments
@@ -385,19 +391,20 @@ virt-viewer debian-test
 
 ### Decision Matrix
 
-| Your Use Case | Recommendation | Rationale |
-|---------------|----------------|-----------|
-| **Need Windows VMs** | ✅ **YES** | This is the primary reason to implement |
-| **Want professional VM features** | ✅ **YES** | Secure Boot, TPM, full QEMU features |
-| **Align with IaC philosophy** | ✅ **YES** | Infrastructure-as-code matches your approach |
-| **Multi-host VM coordination** | ✅ **YES** | Single flake manages VMs across hosts |
-| **Just need NixOS VMs** | ❌ **NO** | microvm.nix is better |
-| **Prefer GUI management** | ❌ **NO** | Just use virt-manager directly |
-| **Don't need VMs at all** | ❌ **NO** | Don't add unused complexity |
+| Your Use Case                     | Recommendation | Rationale                                    |
+| --------------------------------- | -------------- | -------------------------------------------- |
+| **Need Windows VMs**              | ✅ **YES**     | This is the primary reason to implement      |
+| **Want professional VM features** | ✅ **YES**     | Secure Boot, TPM, full QEMU features         |
+| **Align with IaC philosophy**     | ✅ **YES**     | Infrastructure-as-code matches your approach |
+| **Multi-host VM coordination**    | ✅ **YES**     | Single flake manages VMs across hosts        |
+| **Just need NixOS VMs**           | ❌ **NO**      | microvm.nix is better                        |
+| **Prefer GUI management**         | ❌ **NO**      | Just use virt-manager directly               |
+| **Don't need VMs at all**         | ❌ **NO**      | Don't add unused complexity                  |
 
 ### For YOUR Infrastructure Specifically
 
 **Context from your setup:**
+
 - ✅ You already use microvm.nix (P510, P620)
 - ✅ You value infrastructure-as-code (entire config is declarative)
 - ✅ You have multi-host architecture
@@ -423,24 +430,28 @@ Breakdown:
 ### Costs
 
 **Implementation Time:**
+
 - Phase 1 (Setup): 2 hours
 - Phase 2 (VMs): 3 hours
 - Phase 3 (Integration): 2 hours
 - **Total**: 4-7 hours
 
 **Ongoing Maintenance:**
+
 - Minimal (VMs defined in config)
 - Update VM definitions as needed
 - Keep NixVirt flake input updated
 - **Estimate**: <1 hour/month
 
 **Complexity:**
+
 - Adds another virtualization system
 - Requires understanding libvirt concepts
 - Must manage VM lifecycle
 - **Impact**: LOW (well-documented with templates)
 
 **Disk Space:**
+
 - VM images can be large (50-100GB per Windows VM)
 - Storage pools need space
 - **Impact**: MEDIUM on P620 (plan accordingly)
@@ -448,6 +459,7 @@ Breakdown:
 ### Benefits
 
 **If You Need Windows VMs:**
+
 - ✅ **Time savings**: Declarative setup vs manual configuration
 - ✅ **Reproducibility**: Version-controlled VM definitions
 - ✅ **Consistency**: Same VM config across rebuilds
@@ -455,12 +467,14 @@ Breakdown:
 - **Value**: **HIGH** (8-10 hours saved per Windows VM)
 
 **If You Want Professional VMs:**
+
 - ✅ **Feature completeness**: All QEMU/KVM capabilities
 - ✅ **IaC alignment**: Fits your infrastructure philosophy
 - ✅ **Multi-host coordination**: Manage VMs across hosts
 - **Value**: **MEDIUM** (nice to have, not critical)
 
 **If You Don't Need VMs Beyond microvm.nix:**
+
 - **Value**: **NONE** (wasted implementation time)
 
 ## Alternatives to Consider
@@ -476,11 +490,13 @@ virtualisation.libvirtd.enable = true;
 ```
 
 **Pros:**
+
 - Much simpler (5 minutes setup)
 - Visual interface (easier for occasional use)
 - Full feature access immediately
 
 **Cons:**
+
 - Not infrastructure-as-code
 - Manual configuration
 - No version control
@@ -493,11 +509,13 @@ virtualisation.libvirtd.enable = true;
 **Skip libvirt VMs entirely**, use only microvm.nix:
 
 **Pros:**
+
 - Simpler infrastructure
 - One virtualization system
 - Lightweight and fast
 
 **Cons:**
+
 - No Windows VM support
 - Limited to NixOS guests
 - No Secure Boot/TPM
@@ -517,12 +535,14 @@ programs.virt-manager.enable = true;
 ```
 
 **Pros:**
+
 - Best of both worlds
 - IaC for permanent VMs
 - GUI for temporary testing
 - Flexible approach
 
 **Cons:**
+
 - Two management methods
 - Slight complexity increase
 
@@ -533,6 +553,7 @@ programs.virt-manager.enable = true;
 ### ✅ **IMPLEMENT - If You Need Windows VMs**
 
 **Conditions:**
+
 - You need Windows VM support
 - You value infrastructure-as-code
 - You want professional VM features
@@ -543,6 +564,7 @@ programs.virt-manager.enable = true;
 ### ⚠️ **DEFER - If Windows VMs Are "Nice to Have"**
 
 **Conditions:**
+
 - No immediate Windows VM need
 - Uncertain about future requirements
 - Limited time for implementation
@@ -553,6 +575,7 @@ programs.virt-manager.enable = true;
 ### ❌ **SKIP - If You Don't Need VMs Beyond microvm.nix**
 
 **Conditions:**
+
 - NixOS-only workflows
 - microvm.nix meets all needs
 - No Windows development
@@ -608,12 +631,14 @@ programs.virt-manager.enable = true;
 ## When to Reconsider
 
 **Implement NixVirt if you:**
+
 - Start Windows development
 - Need cross-platform testing
 - Require enterprise VM features
 - Want professional virtualization
 
 **Skip NixVirt if you:**
+
 - Never need Windows VMs
 - Prefer virt-manager simplicity
 - Only need NixOS VMs (keep microvm.nix)
@@ -624,6 +649,7 @@ programs.virt-manager.enable = true;
 ### For Your Infrastructure
 
 **Analysis:**
+
 - You have strong IaC culture ✅
 - You already use microvm.nix ✅
 - You have suitable hardware (P620) ✅
@@ -632,6 +658,7 @@ programs.virt-manager.enable = true;
 **Recommendation**: **⚠️ DEFER pending specific use case**
 
 **Rationale:**
+
 1. **No immediate need**: No Windows development mentioned
 2. **Time investment**: 4-7 hours better spent elsewhere
 3. **Alternative exists**: virt-manager for ad-hoc needs
@@ -655,6 +682,7 @@ Alternative: Use virt-manager for occasional VM needs."
 ```
 
 **When to Reconsider:**
+
 - Windows development project starts
 - Cross-platform testing needed
 - Enterprise compatibility requirements

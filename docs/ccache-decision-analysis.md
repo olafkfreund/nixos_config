@@ -13,6 +13,7 @@ ccache can provide **significant build time savings** (hours → minutes) for C/
 ### ✅ **High Value Scenarios** (Implement ccache)
 
 Implement ccache if you:
+
 - Frequently modify and rebuild **large C/C++ projects**
 - Build **custom kernels** or kernel modules regularly
 - Develop with **ROCm/CUDA** and rebuild GPU packages
@@ -25,6 +26,7 @@ Implement ccache if you:
 ### ⚠️ **Low Value Scenarios** (Skip ccache)
 
 ccache provides minimal benefit if you:
+
 - Primarily use **pre-built binary caches** (cache.nixos.org, P620 cache)
 - Rarely build packages from source
 - Don't do iterative C/C++ development
@@ -38,6 +40,7 @@ ccache provides minimal benefit if you:
 Based on system analysis:
 
 **Packages that would benefit:**
+
 - ✅ Qt framework packages (qtbase, qtwayland, qtsvg, etc.)
 - ✅ LLVM/Clang toolchain (for development)
 - ✅ GCC toolchain
@@ -47,6 +50,7 @@ Based on system analysis:
 - ⚠️ Browser (Google Chrome - likely binary)
 
 **Binary cache coverage:**
+
 - ✅ Most packages use nixpkgs binary cache
 - ✅ P620 provides custom binary cache for other hosts
 - ⚠️ Custom/modified packages would benefit from ccache
@@ -56,6 +60,7 @@ Based on system analysis:
 ### 🔴 **Critical Challenges**
 
 #### 1. **Random Seed Problem** (Severity: HIGH)
+
 - **Issue**: NixOS adds `-frandom-seed` that changes with derivation hash
 - **Impact**: Without workaround, cache hit rate is **0.35%** (useless)
 - **Workaround**: `CCACHE_SLOPPINESS=random_seed`
@@ -65,12 +70,14 @@ Based on system analysis:
 **Mitigation**: Accept reduced reproducibility or accept low cache hit rate
 
 #### 2. **Sandbox Configuration** (Severity: HIGH)
+
 - **Issue**: Cache directory must be exposed to Nix sandbox
 - **Impact**: Silent build failures if misconfigured
 - **Complexity**: Requires system-level configuration
 - **Fragility**: Easy to break on system updates
 
 **Required steps:**
+
 ```nix
 # Must be exact:
 nix.settings.extra-sandbox-paths = ["/nix/var/cache/ccache"];
@@ -78,12 +85,14 @@ nix.settings.extra-sandbox-paths = ["/nix/var/cache/ccache"];
 ```
 
 #### 3. **Manual Package Management** (Severity: MEDIUM)
+
 - **Issue**: Must manually specify every package
 - **Impact**: Ongoing maintenance burden
 - **Limitation**: Only works for top-level packages
 - **Workaround**: None currently available
 
 **Example:**
+
 ```nix
 programs.ccache.packageNames = [
   "qtbase" "qtwayland" "qtsvg"  # Must list ALL
@@ -92,12 +101,14 @@ programs.ccache.packageNames = [
 ```
 
 #### 4. **Indirect stdenv Usage** (Severity: MEDIUM)
+
 - **Issue**: Some packages don't use stdenv directly
 - **Impact**: Must manually override build system
 - **Complexity**: Requires deep package knowledge
 - **Debugging**: Difficult to troubleshoot
 
 #### 5. **Cache Management** (Severity: LOW)
+
 - **Issue**: Cache can grow to 50GB+
 - **Impact**: Disk space consumption
 - **Maintenance**: Requires periodic cleanup
@@ -106,6 +117,7 @@ programs.ccache.packageNames = [
 ### 🟡 **Ongoing Maintenance**
 
 **Required:**
+
 - Monitor cache hit rates with `nix-ccache --show-stats`
 - Clean cache periodically: `ccache --cleanup`
 - Set size limits: `ccache --max-size 20G`
@@ -113,6 +125,7 @@ programs.ccache.packageNames = [
 - Verify sandbox paths after system updates
 
 **Time investment:**
+
 - Initial setup: 4-8 hours
 - Monthly maintenance: 30 minutes
 - Per-package configuration: 15-30 minutes
@@ -122,12 +135,14 @@ programs.ccache.packageNames = [
 ### Method 1: Build Time Analysis
 
 **Step 1**: Identify packages that take longest to build
+
 ```bash
 # Run provided script:
 ./scripts/identify-ccache-candidates.sh
 ```
 
 **Step 2**: Measure actual build times
+
 ```bash
 # Time a rebuild without ccache
 time nix build .#nixosConfigurations.p620.config.system.build.toplevel
@@ -138,6 +153,7 @@ time nix build .#nixosConfigurations.p620.config.system.build.toplevel
 ### Method 2: Development Workflow Analysis
 
 **Consider enabling ccache for packages you:**
+
 1. Build from source locally (not from binary cache)
 2. Modify frequently during development
 3. Have incremental changes to
@@ -146,17 +162,20 @@ time nix build .#nixosConfigurations.p620.config.system.build.toplevel
 ### Method 3: System-Specific Packages
 
 **P620 (AMD workstation) priorities:**
+
 - ROCm packages (if building from source) - **HIGHEST**
 - Mesa drivers (if custom builds)
 - Qt development packages
 - Language toolchains
 
 **Razer/P510 (NVIDIA systems) priorities:**
+
 - CUDA packages (if building from source)
 - NVIDIA drivers (if custom)
 - Development toolchains
 
 **All hosts:**
+
 - Custom kernels (if applicable)
 - Local Qt applications
 - Development projects
@@ -166,37 +185,41 @@ time nix build .#nixosConfigurations.p620.config.system.build.toplevel
 **Start small, expand based on metrics:**
 
 Phase 1: Enable for 1-2 packages with known long build times
+
 ```nix
 programs.ccache.packageNames = [ "qtbase" ];
 ```
 
 Phase 2: Monitor cache hit rate
+
 ```bash
 nix-ccache --show-stats
 # Target: >70% cache hit rate
 ```
 
 Phase 3: Expand to more packages if successful
+
 ```nix
 programs.ccache.packageNames = [ "qtbase" "qtwayland" "qtsvg" ];
 ```
 
 Phase 4: Measure ROI
+
 - Build time before: X hours
 - Build time after: Y minutes
 - ROI: (X - Y) / setup time
 
 ## Cost-Benefit Matrix
 
-| Factor | Without ccache | With ccache | Difference |
-|--------|---------------|-------------|------------|
-| **Build time** (first) | 2-4 hours | 2-4 hours | No change |
-| **Build time** (incremental) | 2-4 hours | 5-20 minutes | **95% reduction** |
-| **Disk usage** | Current | +10-50GB | Increase |
-| **Configuration complexity** | Simple | Complex | Increase |
-| **Maintenance time** | None | 30min/month | Increase |
-| **Reproducibility** | Guaranteed | Reduced | Decrease |
-| **Setup time** | None | 4-8 hours | Increase |
+| Factor                       | Without ccache | With ccache  | Difference        |
+| ---------------------------- | -------------- | ------------ | ----------------- |
+| **Build time** (first)       | 2-4 hours      | 2-4 hours    | No change         |
+| **Build time** (incremental) | 2-4 hours      | 5-20 minutes | **95% reduction** |
+| **Disk usage**               | Current        | +10-50GB     | Increase          |
+| **Configuration complexity** | Simple         | Complex      | Increase          |
+| **Maintenance time**         | None           | 30min/month  | Increase          |
+| **Reproducibility**          | Guaranteed     | Reduced      | Decrease          |
+| **Setup time**               | None           | 4-8 hours    | Increase          |
 
 ## Recommendation
 
@@ -227,6 +250,7 @@ Phase 4: Measure ROI
 3. You have **one specific package** with long build times
 
 **Recommended approach**:
+
 ```bash
 # Phase 0: Test with ONE package
 programs.ccache = {
@@ -241,6 +265,7 @@ programs.ccache = {
 ## Implementation Roadmap (If Proceeding)
 
 ### Phase 1: Minimal Viable Implementation (1 day)
+
 - [ ] Enable `programs.ccache.enable = true`
 - [ ] Configure sandbox paths
 - [ ] Create cache directory with correct permissions
@@ -248,6 +273,7 @@ programs.ccache = {
 - [ ] Measure baseline cache hit rate
 
 ### Phase 2: Optimization (2-3 days)
+
 - [ ] Add ccacheWrapper overlay with environment variables
 - [ ] Configure CCACHE_SLOPPINESS=random_seed
 - [ ] Set cache size limits
@@ -255,12 +281,14 @@ programs.ccache = {
 - [ ] Document configuration
 
 ### Phase 3: Monitoring (ongoing)
+
 - [ ] Set up cache statistics monitoring
 - [ ] Create maintenance procedures
 - [ ] Measure ROI (build time savings)
 - [ ] Adjust package list based on metrics
 
 ### Phase 4: Scale or Rollback (week 2)
+
 - [ ] If ROI > 50%: Expand to more packages
 - [ ] If ROI < 20%: Rollback and close issue
 - [ ] Document lessons learned
@@ -268,7 +296,9 @@ programs.ccache = {
 ## Alternatives to Consider
 
 ### Alternative 1: Binary Cache Optimization
+
 **Instead of ccache**, optimize binary cache usage:
+
 - Ensure P620 nix-serve is properly configured
 - Use aggressive substituters configuration
 - Build once, distribute to all hosts
@@ -276,7 +306,9 @@ programs.ccache = {
 **Benefit**: Simpler, more reliable, better for your multi-host setup
 
 ### Alternative 2: Nix Build Optimization
+
 **Focus on nix-specific optimizations:**
+
 - Parallel builds: `nix.settings.max-jobs = "auto"`
 - More cores: `nix.settings.cores = 0`
 - Keep outputs: `nix.settings.keep-outputs = true`
@@ -284,7 +316,9 @@ programs.ccache = {
 **Benefit**: Faster builds without ccache complexity
 
 ### Alternative 3: Selective Package Versions
+
 **Use binary versions** for development packages:
+
 - Don't build Qt from source, use binary
 - Don't customize LLVM, use upstream
 - Accept some impurity for speed
@@ -296,6 +330,7 @@ programs.ccache = {
 **For your infrastructure:**
 
 Given that:
+
 1. You have **multi-host setup** with binary cache (P620)
 2. You're focused on **NixOS configuration**, not C++ development
 3. You have **existing performance optimizations** in place
@@ -304,12 +339,14 @@ Given that:
 **Recommendation**: **⚠️ DEFER implementation**
 
 **Instead, consider:**
+
 1. Optimize binary cache usage across hosts
 2. Profile actual build times to identify bottlenecks
 3. Only implement ccache if you identify **specific packages** with >1 hour rebuild times
 4. Start with **test phase** for ONE package before system-wide rollout
 
 **Close issue #59 with**:
+
 - "Evaluated, deferred pending specific use case"
 - "Will reconsider if ROCm/kernel development becomes primary workflow"
 - "Current binary cache strategy is more appropriate for infrastructure focus"

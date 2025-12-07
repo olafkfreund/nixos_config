@@ -80,8 +80,8 @@ This module exposes the following NixOS options:
     enableRag = true;
   };
 
-  # Configure ROCm acceleration
-  services.ollama.acceleration = "rocm";
+  # Configure ROCm acceleration (modern package-based approach)
+  services.ollama.package = pkgs.ollama-rocm;
   services.ollama.rocmOverrideGfx = "11.0.0"; # Set to your GPU architecture
   services.ollama.environmentVariables = {
     HCC_AMDGPU_TARGET = "gfx1100"; # Set to your GPU architecture
@@ -101,8 +101,8 @@ This module exposes the following NixOS options:
     enableRag = true;
   };
 
-  # Configure CUDA acceleration
-  services.ollama.acceleration = "cuda";
+  # Configure CUDA acceleration (modern package-based approach)
+  services.ollama.package = pkgs.ollama-cuda;
 }
 ```
 
