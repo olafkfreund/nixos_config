@@ -1,6 +1,6 @@
 # Laptop Template - Mobile Configuration with Power Management
 # Used by: Razer (Intel/NVIDIA laptop), Samsung, portable systems
-{ config, lib, pkgs, ... }:
+{ lib, ... }:
 {
   imports = [
     ../../modules/core.nix

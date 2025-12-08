@@ -112,12 +112,8 @@
     , nur
     , nixai
     , agenix
-    , lanzaboote
-    , nix-colors
-    , nix-snapd
     , spicetify-nix
     , home-manager
-    , stylix
     , nix-index-database
     , zjstatus
     , antigravity-nix
@@ -234,7 +230,7 @@
               ];
           });
           # Skip ltrace tests that fail on newer kernels
-          ltrace = prev.ltrace.overrideAttrs (oldAttrs: {
+          ltrace = prev.ltrace.overrideAttrs (_oldAttrs: {
             doCheck = false;
           });
           # Fix cxxopts missing icu dependency

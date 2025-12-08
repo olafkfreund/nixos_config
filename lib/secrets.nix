@@ -181,8 +181,10 @@ in
       ];
 
       # Export helpers for use in configuration
-      _module.args.secretTemplates = secretTemplates;
-      _module.args.mkSecretAccess = mkSecretAccess;
-      _module.args.secretCategories = secretCategories;
+      _module.args = {
+        inherit secretTemplates;
+        inherit mkSecretAccess;
+        inherit secretCategories;
+      };
     };
 }

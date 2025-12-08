@@ -150,100 +150,104 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.packages = [ cfg.package ];
+    home = {
+      packages = [ cfg.package ];
+
+      # Set up environment variables
+      sessionVariables = mkMerge [
+        (mkIf cfg.enableStatusLine {
+          CLAUDE_CODE_ROUTER_STATUS_LINE = "1";
+        })
+        # Add API keys from files as environment variables
+        (
+          let
+            providerEnvVars = mapAttrs'
+              (name: provider:
+                nameValuePair "CLAUDE_ROUTER_${toUpper name}_API_KEY"
+                  (mkIf (provider.apiKeyFile != null) "$(cat ${provider.apiKeyFile})")
+              )
+              cfg.providers;
+          in
+          providerEnvVars
+        )
+      ];
+
+      # Integration helper script
+      file.".local/bin/ccr-status" = {
+        text = ''
+          #!/usr/bin/env bash
+          # Claude Code Router status and management script
+
+          CONFIG_FILE="$HOME/.config/claude-code-router/config.json"
+
+          show_config() {
+            echo "Claude Code Router Configuration:"
+            echo "================================="
+            if [ -f "$CONFIG_FILE" ]; then
+              ${pkgs.jq}/bin/jq '.' "$CONFIG_FILE"
+            else
+              echo "No configuration file found at $CONFIG_FILE"
+            fi
+          }
+
+          show_providers() {
+            echo "Configured Providers:"
+            echo "===================="
+            if [ -f "$CONFIG_FILE" ]; then
+              ${pkgs.jq}/bin/jq -r '.Providers | keys[]' "$CONFIG_FILE"
+            fi
+          }
+
+          show_routing() {
+            echo "Model Routing:"
+            echo "=============="
+            if [ -f "$CONFIG_FILE" ]; then
+              ${pkgs.jq}/bin/jq '.Router' "$CONFIG_FILE"
+            fi
+          }
+
+          case "''${1:-help}" in
+            config)
+              show_config
+              ;;
+            providers)
+              show_providers
+              ;;
+            routing)
+              show_routing
+              ;;
+            help)
+              echo "Usage: ccr-status <command>"
+              echo "Commands:"
+              echo "  config    - Show full configuration"
+              echo "  providers - List configured providers"
+              echo "  routing   - Show model routing rules"
+              echo "  help      - Show this help"
+              ;;
+            *)
+              echo "Unknown command: $1"
+              echo "Run 'ccr-status help' for usage information"
+              exit 1
+              ;;
+          esac
+        '';
+        executable = true;
+      };
+
+      # Development environment integration
+      sessionPath = [ "$HOME/.local/bin" ];
+    };
 
     # Create configuration directory and file
     xdg.configFile."claude-code-router/config.json" = {
       source = configFile;
     };
 
-    # Set up environment variables
-    home.sessionVariables = mkMerge [
-      (mkIf cfg.enableStatusLine {
-        CLAUDE_CODE_ROUTER_STATUS_LINE = "1";
-      })
-      # Add API keys from files as environment variables
-      (
-        let
-          providerEnvVars = mapAttrs'
-            (name: provider:
-              nameValuePair "CLAUDE_ROUTER_${toUpper name}_API_KEY"
-                (mkIf (provider.apiKeyFile != null) "$(cat ${provider.apiKeyFile})")
-            )
-            cfg.providers;
-        in
-        providerEnvVars
-      )
-    ];
-
     # Shell aliases
-    programs.zsh.shellAliases = mkIf config.programs.zsh.enable cfg.shellAliases;
-    programs.bash.shellAliases = mkIf config.programs.bash.enable cfg.shellAliases;
-    programs.fish.shellAliases = mkIf config.programs.fish.enable cfg.shellAliases;
-
-    # Integration helper script
-    home.file.".local/bin/ccr-status" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Claude Code Router status and management script
-
-        CONFIG_FILE="$HOME/.config/claude-code-router/config.json"
-
-        show_config() {
-          echo "Claude Code Router Configuration:"
-          echo "================================="
-          if [ -f "$CONFIG_FILE" ]; then
-            ${pkgs.jq}/bin/jq '.' "$CONFIG_FILE"
-          else
-            echo "No configuration file found at $CONFIG_FILE"
-          fi
-        }
-
-        show_providers() {
-          echo "Configured Providers:"
-          echo "===================="
-          if [ -f "$CONFIG_FILE" ]; then
-            ${pkgs.jq}/bin/jq -r '.Providers | keys[]' "$CONFIG_FILE"
-          fi
-        }
-
-        show_routing() {
-          echo "Model Routing:"
-          echo "=============="
-          if [ -f "$CONFIG_FILE" ]; then
-            ${pkgs.jq}/bin/jq '.Router' "$CONFIG_FILE"
-          fi
-        }
-
-        case "''${1:-help}" in
-          config)
-            show_config
-            ;;
-          providers)
-            show_providers
-            ;;
-          routing)
-            show_routing
-            ;;
-          help)
-            echo "Usage: ccr-status <command>"
-            echo "Commands:"
-            echo "  config    - Show full configuration"
-            echo "  providers - List configured providers"
-            echo "  routing   - Show model routing rules"
-            echo "  help      - Show this help"
-            ;;
-          *)
-            echo "Unknown command: $1"
-            echo "Run 'ccr-status help' for usage information"
-            exit 1
-            ;;
-        esac
-      '';
-      executable = true;
+    programs = {
+      zsh.shellAliases = mkIf config.programs.zsh.enable cfg.shellAliases;
+      bash.shellAliases = mkIf config.programs.bash.enable cfg.shellAliases;
+      fish.shellAliases = mkIf config.programs.fish.enable cfg.shellAliases;
     };
-
-    # Development environment integration
-    home.sessionPath = [ "$HOME/.local/bin" ];
   };
 }

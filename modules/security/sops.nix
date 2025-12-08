@@ -67,12 +67,15 @@ in
 
     # SOPS configuration
     sops = {
-      # Use host SSH key for decryption
-      age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+      # Age key configuration
+      age = {
+        # Use host SSH key for decryption
+        sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
 
-      # Generate age key from SSH key if needed
-      age.generateKey = true;
-      age.keyFile = "/var/lib/sops-nix/key.txt";
+        # Generate age key from SSH key if needed
+        generateKey = true;
+        keyFile = "/var/lib/sops-nix/key.txt";
+      };
 
       # Default secrets file
       defaultSopsFile = ../../secrets/common/secrets.yaml;

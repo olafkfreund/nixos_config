@@ -23,15 +23,24 @@ in
     nix.development.enable = mkIf cfg.development.enable cfg.development.nix;
     shell.development.enable = mkIf cfg.development.enable cfg.development.shell;
     devshell.development.enable = mkIf cfg.development.enable cfg.development.devshell;
-    modules.development.python.enable = mkIf cfg.development.enable cfg.development.python;
     nodejs.development.enable = mkIf cfg.development.enable cfg.development.nodejs;
 
-    # Virtualization tools (conditional enables)
-    modules.containers.docker.enable = mkIf cfg.virtualization.enable cfg.virtualization.docker;
-    services.incus.enable = mkIf cfg.virtualization.enable cfg.virtualization.incus;
-    services.podman.enable = mkIf cfg.virtualization.enable cfg.virtualization.podman;
-    services.spice.enable = mkIf cfg.virtualization.enable cfg.virtualization.spice;
-    services.libvirt.enable = mkIf cfg.virtualization.enable cfg.virtualization.libvirt;
+    # Modules configuration
+    modules = {
+      development.python.enable = mkIf cfg.development.enable cfg.development.python;
+      containers.docker.enable = mkIf cfg.virtualization.enable cfg.virtualization.docker;
+      ai.gemini-cli.enable = mkIf cfg.ai.enable cfg.ai.gemini-cli;
+      ai.chatgpt.enable = mkIf cfg.ai.enable (cfg.ai.chatgpt or false);
+    };
+
+    # Services configuration
+    services = {
+      incus.enable = mkIf cfg.virtualization.enable cfg.virtualization.incus;
+      podman.enable = mkIf cfg.virtualization.enable cfg.virtualization.podman;
+      spice.enable = mkIf cfg.virtualization.enable cfg.virtualization.spice;
+      libvirt.enable = mkIf cfg.virtualization.enable cfg.virtualization.libvirt;
+      print.enable = cfg.programs.print;
+    };
 
     # Cloud tools (conditional enables)
     aws.packages.enable = mkIf cfg.cloud.enable cfg.cloud.aws;
@@ -48,8 +57,6 @@ in
 
     # AI tools (conditional enables)
     ai.ollama.enable = mkIf cfg.ai.enable cfg.ai.ollama;
-    modules.ai.gemini-cli.enable = mkIf cfg.ai.enable cfg.ai.gemini-cli;
-    modules.ai.chatgpt.enable = mkIf cfg.ai.enable (cfg.ai.chatgpt or false);
 
     # Enhanced AI provider support
     ai.providers = mkIf cfg.ai.providers.enable {
@@ -80,12 +87,13 @@ in
     };
 
     # Programs (conditional enables)
-    programs.lazygit.enable = cfg.programs.lazygit;
-    programs.thunderbird.enable = cfg.programs.thunderbird;
-    programs.obsidian.enable = cfg.programs.obsidian;
-    programs.office.enable = cfg.programs.office;
-    programs.webcam.enable = cfg.programs.webcam;
-    services.print.enable = cfg.programs.print;
+    programs = {
+      lazygit.enable = cfg.programs.lazygit;
+      thunderbird.enable = cfg.programs.thunderbird;
+      obsidian.enable = cfg.programs.obsidian;
+      office.enable = cfg.programs.office;
+      webcam.enable = cfg.programs.webcam;
+    };
 
     # Media tools (conditional enables)
     media.droidcam.enable = cfg.media.droidcam;

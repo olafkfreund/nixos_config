@@ -1,6 +1,6 @@
 # P510 Home Configuration - Development Server Profile
 # Uses dev-server composition (server-admin + developer)
-{ lib, pkgs, config, ... }: {
+{ lib, pkgs, ... }: {
   imports = [
     # Import common user configuration
     ../common/default.nix

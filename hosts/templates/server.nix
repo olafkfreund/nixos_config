@@ -1,6 +1,6 @@
 # Server Template - Headless Server Configuration
 # Used by: DEX5550 (monitoring server), P510 (media server)
-{ config, lib, pkgs, ... }:
+{ lib, ... }:
 {
   imports = [
     ../../modules/core.nix

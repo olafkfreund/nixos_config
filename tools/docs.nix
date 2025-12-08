@@ -24,7 +24,6 @@ pkgs.mkShell {
 
     # Web and preview
     python3Packages.livereload # Live preview server
-    nodePackages.live-server # Alternative live server
 
     # Text processing
     ripgrep # Fast text search

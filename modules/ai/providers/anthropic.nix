@@ -16,19 +16,40 @@ in
   };
 
   config = mkIf cfg.enabled {
-    # Enhanced Anthropic/Claude tools
-    environment.systemPackages = with pkgs; [
-      # Claude Desktop app if available
-      # claude-desktop # Add when available in nixpkgs
+    environment = {
+      # Enhanced Anthropic/Claude tools
+      systemPackages = with pkgs; [
+        # Claude Desktop app if available
+        # claude-desktop # Add when available in nixpkgs
 
-      # CLI tools that support Claude API
-      # aichat REMOVED due to extremely slow pyrate-limiter build dependency (2+ hours)
-    ];
+        # CLI tools that support Claude API
+        # aichat REMOVED due to extremely slow pyrate-limiter build dependency (2+ hours)
+      ];
 
-    # Anthropic-specific environment setup
-    environment.sessionVariables = {
-      ANTHROPIC_API_KEY_FILE = "/run/secrets/api-anthropic";
-      CLAUDE_MODEL_DEFAULT = config.ai.providers.anthropic.defaultModel;
+      # Anthropic-specific environment setup
+      sessionVariables = {
+        ANTHROPIC_API_KEY_FILE = "/run/secrets/api-anthropic";
+        CLAUDE_MODEL_DEFAULT = config.ai.providers.anthropic.defaultModel;
+      };
+
+      # Create wrapper script for Claude Desktop if needed
+      etc."claude-desktop-wrapper.sh" = {
+        text = ''
+          #!/bin/bash
+          # Claude Desktop wrapper with API key loading
+          if [[ -f "/run/secrets/api-anthropic" ]]; then
+            export ANTHROPIC_API_KEY="$(cat /run/secrets/api-anthropic)"
+          fi
+          # Launch Claude Desktop if available
+          if command -v claude-desktop >/dev/null 2>&1; then
+            claude-desktop "$@"
+          else
+            echo "Claude Desktop not available. Using web interface..."
+            xdg-open "https://claude.ai"
+          fi
+        '';
+        mode = "0755";
+      };
     };
 
     # Shell integration for Anthropic Claude
@@ -90,24 +111,5 @@ in
       alias code-claude='claude-code'
       alias analyze-claude='claude-analyze'
     '';
-
-    # Create wrapper script for Claude Desktop if needed
-    environment.etc."claude-desktop-wrapper.sh" = {
-      text = ''
-        #!/bin/bash
-        # Claude Desktop wrapper with API key loading
-        if [[ -f "/run/secrets/api-anthropic" ]]; then
-          export ANTHROPIC_API_KEY="$(cat /run/secrets/api-anthropic)"
-        fi
-        # Launch Claude Desktop if available
-        if command -v claude-desktop >/dev/null 2>&1; then
-          claude-desktop "$@"
-        else
-          echo "Claude Desktop not available. Using web interface..."
-          xdg-open "https://claude.ai"
-        fi
-      '';
-      mode = "0755";
-    };
   };
 }

@@ -74,25 +74,64 @@ in
     };
   };
   config = mkIf cfg.enable {
-    # LazyVim-compatible system package support
-    # Provides tools without conflicting with LazyVim configuration
-    home.packages = flatten [
-      # Ruby support for Neovim (Neovim installed via programs.neovim below)
-      [
-        pkgs.ruby # Ruby interpreter for Neovim plugins
-      ]
+    # Home configuration block
+    home = {
+      # LazyVim-compatible system package support
+      # Provides tools without conflicting with LazyVim configuration
+      packages = flatten [
+        # Ruby support for Neovim (Neovim installed via programs.neovim below)
+        [
+          pkgs.ruby # Ruby interpreter for Neovim plugins
+        ]
 
-      # Tree-sitter (LazyVim will install grammars as needed)
-      [
-        pkgs.tree-sitter # Core tree-sitter for syntax highlighting
-      ]
+        # Tree-sitter (LazyVim will install grammars as needed)
+        [
+          pkgs.tree-sitter # Core tree-sitter for syntax highlighting
+        ]
 
-      # LazyVim supporting packages
-      languageSupport.lsp
-      languageSupport.formatters
-      languageSupport.tools
-      languageSupport.ai
-    ];
+        # LazyVim supporting packages
+        languageSupport.lsp
+        languageSupport.formatters
+        languageSupport.tools
+        languageSupport.ai
+      ];
+
+      # Environment variables for LazyVim integration
+      sessionVariables = {
+        # Make LSP servers available to LazyVim
+        NIXD_PATH = "${pkgs.nixd}/bin/nixd";
+        RUST_ANALYZER_PATH = "${pkgs.rust-analyzer}/bin/rust-analyzer";
+        GOPLS_PATH = "${pkgs.gopls}/bin/gopls";
+        TYPESCRIPT_LANGUAGE_SERVER_PATH = "${pkgs.nodePackages.typescript-language-server}/bin/typescript-language-server";
+        PYLSP_PATH = "${pkgs.python313Packages.python-lsp-server}/bin/pylsp";
+        LUA_LANGUAGE_SERVER_PATH = "${pkgs.lua-language-server}/bin/lua-language-server";
+
+        # Make formatters available to LazyVim
+        ALEJANDRA_PATH = "${pkgs.alejandra}/bin/alejandra";
+        STYLUA_PATH = "${pkgs.stylua}/bin/stylua";
+        PRETTIER_PATH = "${pkgs.nodePackages.prettier}/bin/prettier";
+        BLACK_PATH = "${pkgs.python313Packages.black}/bin/black";
+        ISORT_PATH = "${pkgs.python313Packages.isort}/bin/isort";
+      };
+
+      # Shell aliases for development workflow (compatible with LazyVim)
+      shellAliases = {
+        # LazyVim aliases
+        lv = "nvim";
+        lazyvim = "nvim";
+
+        # Development shortcuts
+        nix-fmt = "alejandra";
+        py-fmt = "black";
+        py-isort = "isort";
+        js-fmt = "prettier --write";
+        lua-fmt = "stylua";
+
+        # Git shortcuts for LazyVim integration
+        # Note: lg function defined in shell config for advanced lazygit integration
+        gst = "git status";
+      };
+    };
 
     # Configure Neovim program
     programs.neovim = {
@@ -100,42 +139,6 @@ in
       defaultEditor = true;
       viAlias = true;
       vimAlias = true;
-    };
-
-    # Environment variables for LazyVim integration
-    home.sessionVariables = {
-      # Make LSP servers available to LazyVim
-      NIXD_PATH = "${pkgs.nixd}/bin/nixd";
-      RUST_ANALYZER_PATH = "${pkgs.rust-analyzer}/bin/rust-analyzer";
-      GOPLS_PATH = "${pkgs.gopls}/bin/gopls";
-      TYPESCRIPT_LANGUAGE_SERVER_PATH = "${pkgs.nodePackages.typescript-language-server}/bin/typescript-language-server";
-      PYLSP_PATH = "${pkgs.python313Packages.python-lsp-server}/bin/pylsp";
-      LUA_LANGUAGE_SERVER_PATH = "${pkgs.lua-language-server}/bin/lua-language-server";
-
-      # Make formatters available to LazyVim
-      ALEJANDRA_PATH = "${pkgs.alejandra}/bin/alejandra";
-      STYLUA_PATH = "${pkgs.stylua}/bin/stylua";
-      PRETTIER_PATH = "${pkgs.nodePackages.prettier}/bin/prettier";
-      BLACK_PATH = "${pkgs.python313Packages.black}/bin/black";
-      ISORT_PATH = "${pkgs.python313Packages.isort}/bin/isort";
-    };
-
-    # Shell aliases for development workflow (compatible with LazyVim)
-    home.shellAliases = {
-      # LazyVim aliases
-      lv = "nvim";
-      lazyvim = "nvim";
-
-      # Development shortcuts
-      nix-fmt = "alejandra";
-      py-fmt = "black";
-      py-isort = "isort";
-      js-fmt = "prettier --write";
-      lua-fmt = "stylua";
-
-      # Git shortcuts for LazyVim integration
-      # Note: lg function defined in shell config for advanced lazygit integration
-      gst = "git status";
     };
 
     # XDG configuration for LazyVim

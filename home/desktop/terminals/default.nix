@@ -1,6 +1,5 @@
 # Enhanced Terminal Configuration with Unified Theming and Feature Flags
-{ config
-, lib
+{ lib
 , pkgs
 , host ? "default"
 , ...
@@ -110,18 +109,10 @@ in
     ghostty.enable = mkEnableOption "Ghostty terminal (legacy compatibility)";
   };
 
-  config = mkMerge [
-    # Individual terminal configurations (for backward compatibility)
-    {
-      programs.alacritty.enable = mkDefault config.alacritty.enable;
-      programs.foot.enable = mkDefault config.foot.enable;
-      programs.kitty.enable = mkDefault config.kitty.enable;
-    }
-
-    # Enhanced unified configuration
-    {
+  config = {
+    programs = {
       # Foot terminal configuration
-      programs.foot = mkIf cfg.terminals.foot {
+      foot = mkIf cfg.terminals.foot {
         enable = true;
         package = pkgs.foot;
         settings = {
@@ -185,7 +176,7 @@ in
       };
 
       # Kitty terminal configuration
-      programs.kitty = mkIf cfg.terminals.kitty {
+      kitty = mkIf cfg.terminals.kitty {
         enable = true;
         package = pkgs.kitty;
 
@@ -319,7 +310,7 @@ in
       };
 
       # Alacritty terminal configuration
-      programs.alacritty = mkIf cfg.terminals.alacritty {
+      alacritty = mkIf cfg.terminals.alacritty {
         enable = true;
         package = pkgs.alacritty;
 
@@ -433,51 +424,51 @@ in
           ];
         };
       };
+    };
 
-      # Set default terminal
-      xdg.mimeApps = {
-        associations.added = {
-          "x-scheme-handler/terminal" =
-            if cfg.terminals.kitty
-            then "kitty.desktop"
-            else if cfg.terminals.foot
-            then "foot.desktop"
-            else if cfg.terminals.alacritty
-            then "Alacritty.desktop"
-            else "foot.desktop";
-        };
-        defaultApplications = {
-          "x-scheme-handler/terminal" =
-            if cfg.terminals.kitty
-            then "kitty.desktop"
-            else if cfg.terminals.foot
-            then "foot.desktop"
-            else if cfg.terminals.alacritty
-            then "Alacritty.desktop"
-            else "foot.desktop";
-        };
+    # Set default terminal
+    xdg.mimeApps = {
+      associations.added = {
+        "x-scheme-handler/terminal" =
+          if cfg.terminals.kitty
+          then "kitty.desktop"
+          else if cfg.terminals.foot
+          then "foot.desktop"
+          else if cfg.terminals.alacritty
+          then "Alacritty.desktop"
+          else "foot.desktop";
       };
+      defaultApplications = {
+        "x-scheme-handler/terminal" =
+          if cfg.terminals.kitty
+          then "kitty.desktop"
+          else if cfg.terminals.foot
+          then "foot.desktop"
+          else if cfg.terminals.alacritty
+          then "Alacritty.desktop"
+          else "foot.desktop";
+      };
+    };
 
-      # Terminal utilities
-      home.packages = with pkgs;
-        [
-          # Terminal multiplexers
-          tmux
-          zellij
+    # Terminal utilities
+    home.packages = with pkgs;
+      [
+        # Terminal multiplexers
+        tmux
+        zellij
 
-          # Terminal utilities
-          btop # System monitor
-          neofetch # System info
-          fastfetch # Fast system info
+        # Terminal utilities
+        btop # System monitor
+        neofetch # System info
+        fastfetch # Fast system info
 
-          # File managers
-          lf # Terminal file manager
-          yazi # Modern terminal file manager
-        ]
-        ++ optionals cfg.features.nerdFont [
-          # Nerd fonts
-          nerd-fonts.jetbrains-mono
-        ];
-    }
-  ];
+        # File managers
+        lf # Terminal file manager
+        yazi # Modern terminal file manager
+      ]
+      ++ optionals cfg.features.nerdFont [
+        # Nerd fonts
+        nerd-fonts.jetbrains-mono
+      ];
+  };
 }

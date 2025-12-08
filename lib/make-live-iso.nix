@@ -78,14 +78,16 @@ let
 
       # Networking and basic services
       {
-        # Enable NetworkManager for easy network setup
-        networking.networkmanager.enable = true;
-        networking.wireless.enable = false;
+        networking = {
+          # Enable NetworkManager for easy network setup
+          networkmanager.enable = true;
+          wireless.enable = false;
 
-        # Basic firewall
-        networking.firewall = {
-          enable = true;
-          allowedTCPPorts = [ 22 ];
+          # Basic firewall
+          firewall = {
+            enable = true;
+            allowedTCPPorts = [ 22 ];
+          };
         };
 
         # Time zone (can be changed during install)

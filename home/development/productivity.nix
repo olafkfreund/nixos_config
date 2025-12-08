@@ -340,339 +340,341 @@ with lib; let
   '';
 in
 {
-  # Enhanced productivity packages
-  home.packages = flatten [
-    notesPackages
-    tasksPackages
-    communicationPackages
-    writingPackages
-    filesPackages
-    automationPackages
-    calendarPackages
+  home = {
+    # Enhanced productivity packages
+    packages = flatten [
+      notesPackages
+      tasksPackages
+      communicationPackages
+      writingPackages
+      filesPackages
+      automationPackages
+      calendarPackages
 
-    # Required packages for AI integration
-    [ pkgs.jq pkgs.bc ]
-  ];
+      # Required packages for AI integration
+      [ pkgs.jq pkgs.bc ]
+    ];
 
-  # Enhanced shell aliases for productivity
-  home.shellAliases = mkMerge [
-    # Task management
-    (mkIf cfg.tasks.taskwarrior {
-      t = "task";
-      ta = "task add";
-      tl = "task list";
-      td = "task done";
-      tn = "task next";
-      tp = "task projects";
-      tt = "task tags";
-    })
+    # Enhanced shell aliases for productivity
+    shellAliases = mkMerge [
+      # Task management
+      (mkIf cfg.tasks.taskwarrior {
+        t = "task";
+        ta = "task add";
+        tl = "task list";
+        td = "task done";
+        tn = "task next";
+        tp = "task projects";
+        tt = "task tags";
+      })
 
-    (mkIf cfg.tasks.timewarrior {
-      tw = "timew";
-      tws = "timew start";
-      twp = "timew stop";
-      twt = "timew track";
-      twr = "timew report";
-      twd = "timew day";
-    })
+      (mkIf cfg.tasks.timewarrior {
+        tw = "timew";
+        tws = "timew start";
+        twp = "timew stop";
+        twt = "timew track";
+        twr = "timew report";
+        twd = "timew day";
+      })
 
-    # File management
-    (mkIf cfg.files.ranger {
-      r = "ranger";
-    })
+      # File management
+      (mkIf cfg.files.ranger {
+        r = "ranger";
+      })
 
-    (mkIf cfg.files.exa {
-      # Note: ls alias already configured in shell/bash.nix with comprehensive options
-      # Use alternative aliases to avoid conflicts
-      lsl = "exa -la";
-      lt = "exa --tree";
-      ll = mkDefault "exa -la";
-      # Use mkDefault for tree to avoid conflict with zsh.nix
-      tree = mkDefault "exa --tree";
-    })
+      (mkIf cfg.files.exa {
+        # Note: ls alias already configured in shell/bash.nix with comprehensive options
+        # Use alternative aliases to avoid conflicts
+        lsl = "exa -la";
+        lt = "exa --tree";
+        ll = mkDefault "exa -la";
+        # Use mkDefault for tree to avoid conflict with zsh.nix
+        tree = mkDefault "exa --tree";
+      })
 
-    (mkIf cfg.files.fzf {
-      ff = "fzf";
-      fh = "history | fzf";
-      # Additional fzf aliases for productivity
-      fzp = "fzf --preview 'bat --color=always --line-range :50 {}'";
-      fzd = "find . -type d | fzf";
-    })
+      (mkIf cfg.files.fzf {
+        ff = "fzf";
+        fh = "history | fzf";
+        # Additional fzf aliases for productivity
+        fzp = "fzf --preview 'bat --color=always --line-range :50 {}'";
+        fzd = "find . -type d | fzf";
+      })
 
-    # Productivity shortcuts
-    (mkIf cfg.automation.flameshot {
-      screenshot = "flameshot gui";
-      ss = "flameshot gui";
-    })
+      # Productivity shortcuts
+      (mkIf cfg.automation.flameshot {
+        screenshot = "flameshot gui";
+        ss = "flameshot gui";
+      })
 
-    (mkIf cfg.automation.asciinema {
-      record = "asciinema rec";
-      play = "asciinema play";
-    })
+      (mkIf cfg.automation.asciinema {
+        record = "asciinema rec";
+        play = "asciinema play";
+      })
 
-    # AI-enhanced productivity aliases
-    {
-      # Smart task creation
-      "smart-add" = "smart-add";
-      "sa" = "smart-add"; # Quick alias
+      # AI-enhanced productivity aliases
+      {
+        # Smart task creation
+        "smart-add" = "smart-add";
+        "sa" = "smart-add"; # Quick alias
 
-      # AI dashboard
-      "ai-dashboard" = "ai-dashboard";
-      "dashboard" = "ai-dashboard";
-      "daily" = "ai-dashboard";
-      "dash" = "ai-dashboard";
-    }
+        # AI dashboard
+        "ai-dashboard" = "ai-dashboard";
+        "dashboard" = "ai-dashboard";
+        "daily" = "ai-dashboard";
+        "dash" = "ai-dashboard";
+      }
 
-    # Additional productivity aliases that complement existing shell setup
-    (mkIf cfg.files.bat {
-      # Alternative cat aliases that don't conflict with bash.nix
-      batcat = "bat";
-      preview = "bat --color=always --line-range :50";
-    })
+      # Additional productivity aliases that complement existing shell setup
+      (mkIf cfg.files.bat {
+        # Alternative cat aliases that don't conflict with bash.nix
+        batcat = "bat";
+        preview = "bat --color=always --line-range :50";
+      })
 
-    (mkIf cfg.files.ripgrep {
-      # Enhanced ripgrep aliases
-      rg-code = "rg --type-add 'code:*.{js,ts,jsx,tsx,py,go,rs,nix}' --type code";
-      rg-docs = "rg --type-add 'docs:*.{md,txt,org,rst}' --type docs";
-    })
+      (mkIf cfg.files.ripgrep {
+        # Enhanced ripgrep aliases
+        rg-code = "rg --type-add 'code:*.{js,ts,jsx,tsx,py,go,rs,nix}' --type code";
+        rg-docs = "rg --type-add 'docs:*.{md,txt,org,rst}' --type docs";
+      })
 
-    (mkIf cfg.files.fd {
-      # Enhanced fd aliases
-      fd-code = "fd --extension js --extension ts --extension py --extension go --extension rs --extension nix";
-      fd-docs = "fd --extension md --extension txt --extension org";
-    })
-  ];
+      (mkIf cfg.files.fd {
+        # Enhanced fd aliases
+        fd-code = "fd --extension js --extension ts --extension py --extension go --extension rs --extension nix";
+        fd-docs = "fd --extension md --extension txt --extension org";
+      })
+    ];
 
-  # Enhanced environment variables for productivity
-  home.sessionVariables = mkMerge [
-    # Task management configuration
-    (mkIf cfg.tasks.taskwarrior {
-      TASKDATA = "$HOME/.task";
-      TASKRC = "$HOME/.taskrc";
-    })
+    # Enhanced environment variables for productivity
+    sessionVariables = mkMerge [
+      # Task management configuration
+      (mkIf cfg.tasks.taskwarrior {
+        TASKDATA = "$HOME/.task";
+        TASKRC = "$HOME/.taskrc";
+      })
 
-    # File management configuration
-    (mkIf cfg.files.fzf {
-      FZF_DEFAULT_COMMAND = mkDefault "fd --type f";
-      FZF_CTRL_T_COMMAND = mkDefault "$FZF_DEFAULT_COMMAND";
-      FZF_DEFAULT_OPTS = mkDefault "--height 40% --layout=reverse --border";
-    })
+      # File management configuration
+      (mkIf cfg.files.fzf {
+        FZF_DEFAULT_COMMAND = mkDefault "fd --type f";
+        FZF_CTRL_T_COMMAND = mkDefault "$FZF_DEFAULT_COMMAND";
+        FZF_DEFAULT_OPTS = mkDefault "--height 40% --layout=reverse --border";
+      })
 
-    # Editor preferences
-    {
-      EDITOR = mkDefault "nvim";
-      VISUAL = mkDefault "nvim";
-      # Use mkDefault to avoid conflict with existing shell configurations
-      PAGER = mkIf cfg.files.bat (mkDefault "bat");
-    }
-  ];
+      # Editor preferences
+      {
+        EDITOR = mkDefault "nvim";
+        VISUAL = mkDefault "nvim";
+        # Use mkDefault to avoid conflict with existing shell configurations
+        PAGER = mkIf cfg.files.bat (mkDefault "bat");
+      }
+    ];
 
-  # Note: Git configuration removed to avoid conflicts with existing git setup
-  # All necessary git aliases are already configured in the shell modules
+    # Note: Git configuration removed to avoid conflicts with existing git setup
+    # All necessary git aliases are already configured in the shell modules
 
-  # Note: FZF configuration is handled by the dedicated fzf module in home/shell/fzf/
+    # Note: FZF configuration is handled by the dedicated fzf module in home/shell/fzf/
 
-  # Productivity configuration files and scripts
-  home.file = mkMerge [
-    # Taskwarrior configuration
-    (mkIf cfg.tasks.taskwarrior {
-      ".taskrc".text = ''
-        # Enhanced Taskwarrior Configuration
-        # Productivity-focused setup with modern features
+    # Productivity configuration files and scripts
+    file = mkMerge [
+      # Taskwarrior configuration
+      (mkIf cfg.tasks.taskwarrior {
+        ".taskrc".text = ''
+          # Enhanced Taskwarrior Configuration
+          # Productivity-focused setup with modern features
 
-        # Data location
-        data.location=~/.task
+          # Data location
+          data.location=~/.task
 
-        # Enhanced color theme
-        include ${pkgs.taskwarrior3}/share/doc/task/rc/dark-256.theme
+          # Enhanced color theme
+          include ${pkgs.taskwarrior3}/share/doc/task/rc/dark-256.theme
 
-        # Enhanced urgency coefficients
-        urgency.user.project.Inbox.coefficient=15.0
-        urgency.user.project.Work.coefficient=10.0
-        urgency.user.project.Personal.coefficient=5.0
+          # Enhanced urgency coefficients
+          urgency.user.project.Inbox.coefficient=15.0
+          urgency.user.project.Work.coefficient=10.0
+          urgency.user.project.Personal.coefficient=5.0
 
-        # Enhanced aliases
-        alias.in=add +inbox
-        alias.work=add +work
-        alias.personal=add +personal
-        alias.today=list due:today
-        alias.week=list due:week
-        alias.inbox=list +inbox
+          # Enhanced aliases
+          alias.in=add +inbox
+          alias.work=add +work
+          alias.personal=add +personal
+          alias.today=list due:today
+          alias.week=list due:week
+          alias.inbox=list +inbox
 
-        # Enhanced reports
-        report.next.description=Next tasks
-        report.next.columns=id,start.age,depends,priority,project,tag,recur,scheduled.countdown,due.relative,until.remaining,description,urgency
-        report.next.filter=status:pending -WAITING -inbox
+          # Enhanced reports
+          report.next.description=Next tasks
+          report.next.columns=id,start.age,depends,priority,project,tag,recur,scheduled.countdown,due.relative,until.remaining,description,urgency
+          report.next.filter=status:pending -WAITING -inbox
 
-        report.inbox.description=Inbox items to process
-        report.inbox.columns=id,description
-        report.inbox.filter=status:pending +inbox
+          report.inbox.description=Inbox items to process
+          report.inbox.columns=id,description
+          report.inbox.filter=status:pending +inbox
 
-        # Enhanced context definitions
-        context.work=+work or +@work
-        context.personal=+personal or +@home
+          # Enhanced context definitions
+          context.work=+work or +@work
+          context.personal=+personal or +@home
 
-        # Default command
-        default.command=next
+          # Default command
+          default.command=next
 
-        # Enhanced UDA (User Defined Attributes)
-        uda.estimate.type=string
-        uda.estimate.label=Estimate
-        uda.estimate.values=S,M,L,XL
+          # Enhanced UDA (User Defined Attributes)
+          uda.estimate.type=string
+          uda.estimate.label=Estimate
+          uda.estimate.values=S,M,L,XL
 
-        # Enhanced hooks (if available)
-        hooks=on
-      '';
-    })
-    # Daily productivity dashboard
-    {
-      ".local/bin/daily-dashboard" = {
-        text = ''
-          #!/bin/sh
-          # Daily productivity dashboard
-          echo "📅 Daily Productivity Dashboard"
-          echo "==============================="
-          echo
-
-          # Today's date
-          echo "📆 Today: $(date '+%A, %B %d, %Y')"
-          echo
-
-          # Task management
-          ${optionalString cfg.tasks.taskwarrior ''
-            echo "✅ Today's Tasks:"
-            ${pkgs.taskwarrior3}/bin/task list due:today 2>/dev/null || echo "  No tasks due today"
-            echo
-
-            echo "📋 Inbox Items:"
-            ${pkgs.taskwarrior3}/bin/task list +inbox 2>/dev/null || echo "  Inbox is empty"
-            echo
-          ''}
-
-          # Time tracking
-          ${optionalString cfg.tasks.timewarrior ''
-            echo "⏰ Time Tracking:"
-            ${pkgs.timewarrior}/bin/timew day 2>/dev/null || echo "  No time tracked today"
-            echo
-          ''}
-
-          # Git status for current directory
-          if [ -d .git ]; then
-            echo "🔗 Git Status:"
-            git status --short
-            echo
-          fi
-
-          # System info
-          echo "💻 System:"
-          echo "  Uptime: $(uptime -p)"
-          echo "  Load: $(uptime | awk -F'load average:' '{print $2}')"
-          echo
-
-          echo "🚀 Have a productive day!"
+          # Enhanced hooks (if available)
+          hooks=on
         '';
-        executable = true;
-      };
-    }
+      })
+      # Daily productivity dashboard
+      {
+        ".local/bin/daily-dashboard" = {
+          text = ''
+            #!/bin/sh
+            # Daily productivity dashboard
+            echo "📅 Daily Productivity Dashboard"
+            echo "==============================="
+            echo
 
-    # Quick note creator
-    (mkIf cfg.notes.obsidian {
-      ".local/bin/quick-note" = {
-        text = ''
-          #!/bin/sh
-          # Quick note creator for Obsidian
+            # Today's date
+            echo "📆 Today: $(date '+%A, %B %d, %Y')"
+            echo
 
-          NOTES_DIR="$HOME/Documents/Notes"
-          DATE=$(date '+%Y-%m-%d')
-          TIME=$(date '+%H:%M')
+            # Task management
+            ${optionalString cfg.tasks.taskwarrior ''
+              echo "✅ Today's Tasks:"
+              ${pkgs.taskwarrior3}/bin/task list due:today 2>/dev/null || echo "  No tasks due today"
+              echo
 
-          # Create notes directory if it doesn't exist
-          mkdir -p "$NOTES_DIR"
+              echo "📋 Inbox Items:"
+              ${pkgs.taskwarrior3}/bin/task list +inbox 2>/dev/null || echo "  Inbox is empty"
+              echo
+            ''}
 
-          # Note filename
-          if [ $# -eq 0 ]; then
-            FILENAME="$NOTES_DIR/Quick-Note-$DATE-$TIME.md"
-          else
-            TITLE=$(echo "$*" | tr ' ' '-')
-            FILENAME="$NOTES_DIR/$TITLE-$DATE.md"
-          fi
+            # Time tracking
+            ${optionalString cfg.tasks.timewarrior ''
+              echo "⏰ Time Tracking:"
+              ${pkgs.timewarrior}/bin/timew day 2>/dev/null || echo "  No time tracked today"
+              echo
+            ''}
 
-          # Create note with template
-          cat > "$FILENAME" << EOF
-          # Quick Note - $DATE $TIME
+            # Git status for current directory
+            if [ -d .git ]; then
+              echo "🔗 Git Status:"
+              git status --short
+              echo
+            fi
 
-          ## Summary
+            # System info
+            echo "💻 System:"
+            echo "  Uptime: $(uptime -p)"
+            echo "  Load: $(uptime | awk -F'load average:' '{print $2}')"
+            echo
 
-          ## Details
+            echo "🚀 Have a productive day!"
+          '';
+          executable = true;
+        };
+      }
 
-          ## Tags
-          #quick-note #$(date '+%Y-%m')
+      # Quick note creator
+      (mkIf cfg.notes.obsidian {
+        ".local/bin/quick-note" = {
+          text = ''
+            #!/bin/sh
+            # Quick note creator for Obsidian
 
-          ## Links
+            NOTES_DIR="$HOME/Documents/Notes"
+            DATE=$(date '+%Y-%m-%d')
+            TIME=$(date '+%H:%M')
 
-          ---
-          Created: $DATE $TIME
-          EOF
+            # Create notes directory if it doesn't exist
+            mkdir -p "$NOTES_DIR"
 
-          echo "📝 Created note: $FILENAME"
+            # Note filename
+            if [ $# -eq 0 ]; then
+              FILENAME="$NOTES_DIR/Quick-Note-$DATE-$TIME.md"
+            else
+              TITLE=$(echo "$*" | tr ' ' '-')
+              FILENAME="$NOTES_DIR/$TITLE-$DATE.md"
+            fi
 
-          # Open in editor if available
-          if command -v nvim >/dev/null 2>&1; then
-            nvim "$FILENAME"
-          else
-            echo "Open with: nvim \"$FILENAME\""
-          fi
-        '';
-        executable = true;
-      };
-    })
+            # Create note with template
+            cat > "$FILENAME" << EOF
+            # Quick Note - $DATE $TIME
 
-    # AI-enhanced productivity scripts
-    {
-      ".local/bin/smart-add" = {
-        source = smartTaskAdd;
-        executable = true;
-      };
+            ## Summary
 
-      ".local/bin/ai-dashboard" = {
-        source = aiDashboard;
-        executable = true;
-      };
-    }
+            ## Details
 
-    # Productivity helper
-    {
-      ".local/bin/productivity-help" = {
-        text = ''
-          #!/bin/sh
-          # Productivity tools help
-          echo "🚀 Productivity Tools"
-          echo "===================="
-          echo
+            ## Tags
+            #quick-note #$(date '+%Y-%m')
 
-          echo "📝 Available Tools:"
-          ${optionalString cfg.tasks.taskwarrior ''echo "  task          - Task management (t, ta, tl, td)"''}
-          ${optionalString cfg.tasks.timewarrior ''echo "  timew         - Time tracking (tw, tws, twp)"''}
-          ${optionalString cfg.files.fzf ''echo "  fzf           - Fuzzy finder (ff, fh)"''}
-          ${optionalString cfg.files.ranger ''echo "  ranger        - File manager (r)"''}
-          ${optionalString cfg.automation.flameshot ''echo "  flameshot     - Screenshots (screenshot, ss)"''}
-          ${optionalString cfg.notes.obsidian ''echo "  obsidian      - Knowledge management"''}
-          echo
+            ## Links
 
-          echo "📋 Quick Commands:"
-          echo "  daily-dashboard - Show productivity overview"
-          ${optionalString cfg.notes.obsidian ''echo "  quick-note      - Create quick note"''}
-          echo "  productivity-help - Show this help"
-          echo
+            ---
+            Created: $DATE $TIME
+            EOF
 
-          echo "⚡ Productivity Tips:"
-          echo "  - Use 'task add' to quickly capture tasks"
-          echo "  - Use 'timew start <description>' to track time"
-          echo "  - Use 'fzf' to quickly find files"
-          echo "  - Use 'daily-dashboard' for morning planning"
-        '';
-        executable = true;
-      };
-    }
-  ];
+            echo "📝 Created note: $FILENAME"
+
+            # Open in editor if available
+            if command -v nvim >/dev/null 2>&1; then
+              nvim "$FILENAME"
+            else
+              echo "Open with: nvim \"$FILENAME\""
+            fi
+          '';
+          executable = true;
+        };
+      })
+
+      # AI-enhanced productivity scripts
+      {
+        ".local/bin/smart-add" = {
+          source = smartTaskAdd;
+          executable = true;
+        };
+
+        ".local/bin/ai-dashboard" = {
+          source = aiDashboard;
+          executable = true;
+        };
+      }
+
+      # Productivity helper
+      {
+        ".local/bin/productivity-help" = {
+          text = ''
+            #!/bin/sh
+            # Productivity tools help
+            echo "🚀 Productivity Tools"
+            echo "===================="
+            echo
+
+            echo "📝 Available Tools:"
+            ${optionalString cfg.tasks.taskwarrior ''echo "  task          - Task management (t, ta, tl, td)"''}
+            ${optionalString cfg.tasks.timewarrior ''echo "  timew         - Time tracking (tw, tws, twp)"''}
+            ${optionalString cfg.files.fzf ''echo "  fzf           - Fuzzy finder (ff, fh)"''}
+            ${optionalString cfg.files.ranger ''echo "  ranger        - File manager (r)"''}
+            ${optionalString cfg.automation.flameshot ''echo "  flameshot     - Screenshots (screenshot, ss)"''}
+            ${optionalString cfg.notes.obsidian ''echo "  obsidian      - Knowledge management"''}
+            echo
+
+            echo "📋 Quick Commands:"
+            echo "  daily-dashboard - Show productivity overview"
+            ${optionalString cfg.notes.obsidian ''echo "  quick-note      - Create quick note"''}
+            echo "  productivity-help - Show this help"
+            echo
+
+            echo "⚡ Productivity Tips:"
+            echo "  - Use 'task add' to quickly capture tasks"
+            echo "  - Use 'timew start <description>' to track time"
+            echo "  - Use 'fzf' to quickly find files"
+            echo "  - Use 'daily-dashboard' for morning planning"
+          '';
+          executable = true;
+        };
+      }
+    ];
+  };
 }

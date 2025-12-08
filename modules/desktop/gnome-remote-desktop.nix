@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, ... }:
 with lib;
 let
   cfg = config.features.gnome-remote-desktop;
@@ -9,39 +9,47 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Enable GNOME Remote Desktop backend (modern RDP implementation)
-    services.gnome.gnome-remote-desktop.enable = true;
+    # Services configuration
+    services = {
+      # Enable GNOME Remote Desktop backend (modern RDP implementation)
+      gnome.gnome-remote-desktop.enable = true;
 
-    # Completely disable xrdp to prevent port conflicts - GNOME Remote Desktop handles RDP
-    services.xrdp.enable = lib.mkForce false;
+      # Completely disable xrdp to prevent port conflicts - GNOME Remote Desktop handles RDP
+      xrdp.enable = lib.mkForce false;
 
-    # Mask xrdp services to prevent any attempt to start them
-    systemd.services.xrdp.enable = lib.mkForce false;
-    systemd.services.xrdp-sesman.enable = lib.mkForce false;
-
-    # Enable Avahi for service discovery
-    services.avahi = {
-      enable = true;
-      nssmdns4 = true;
-      publish = {
+      # Enable Avahi for service discovery
+      avahi = {
         enable = true;
-        addresses = true;
-        userServices = true;
+        nssmdns4 = true;
+        publish = {
+          enable = true;
+          addresses = true;
+          userServices = true;
+        };
+      };
+
+      # Disable autologin for remote desktop security
+      displayManager.autoLogin.enable = false;
+      getty.autologinUser = lib.mkForce null;
+    };
+
+    # Systemd configuration
+    systemd = {
+      # Mask xrdp services to prevent any attempt to start them
+      services = {
+        xrdp.enable = lib.mkForce false;
+        xrdp-sesman.enable = lib.mkForce false;
+
+        # Ensure GNOME Remote Desktop service starts with the graphical target
+        gnome-remote-desktop.wantedBy = [ "graphical.target" ];
+      };
+
+      # Disable power management for remote desktop sessions
+      targets = {
+        sleep.enable = mkForce false;
+        suspend.enable = mkForce false;
       };
     };
-
-    # Ensure GNOME Remote Desktop service starts with the graphical target
-    systemd.services.gnome-remote-desktop = {
-      wantedBy = [ "graphical.target" ];
-    };
-
-    # Disable autologin for remote desktop security
-    services.displayManager.autoLogin.enable = false;
-    services.getty.autologinUser = lib.mkForce null;
-
-    # Disable power management for remote desktop sessions
-    systemd.targets.sleep.enable = mkForce false;
-    systemd.targets.suspend.enable = mkForce false;
 
     # Open firewall ports for GNOME Remote Desktop
     networking.firewall.allowedTCPPorts = [

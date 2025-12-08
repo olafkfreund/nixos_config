@@ -343,7 +343,7 @@ in
 
   # Override GNOME Shell to remove problematic dark mode patch
   nixpkgs.overlays = [
-    (final: prev: {
+    (_final: prev: {
       gnome-shell = prev.gnome-shell.overrideAttrs (old: {
         patches = builtins.filter
           (patch: !lib.hasSuffix "shell_remove_dark_mode.patch" (toString patch))

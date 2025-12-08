@@ -4,7 +4,6 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.features.ai.mcp;
-  packageSets = import ../packages/sets.nix { inherit pkgs; pkgs-stable = pkgs; };
 in
 {
   options.features.ai.mcp = {

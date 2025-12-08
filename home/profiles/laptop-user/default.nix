@@ -186,79 +186,81 @@
   ];
 
   # Laptop-specific program configurations
-  programs.firefox = {
-    enable = true;
-    profiles.default = {
-      settings = {
-        # Battery-optimized Firefox settings
-        "widget.use-xdg-desktop-portal.file-picker" = 1;
-        "media.ffmpeg.vaapi.enabled" = true;
-        "dom.security.https_only_mode" = true;
-        "privacy.trackingprotection.enabled" = true;
-        "browser.newtabpage.activity-stream.showSponsored" = false;
-        "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
+  programs = {
+    firefox = {
+      enable = true;
+      profiles.default = {
+        settings = {
+          # Battery-optimized Firefox settings
+          "widget.use-xdg-desktop-portal.file-picker" = 1;
+          "media.ffmpeg.vaapi.enabled" = true;
+          "dom.security.https_only_mode" = true;
+          "privacy.trackingprotection.enabled" = true;
+          "browser.newtabpage.activity-stream.showSponsored" = false;
+          "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
 
-        # Power saving optimizations
-        "media.autoplay.default" = 5; # Block autoplay to save battery
-        "layers.acceleration.force-enabled" = true; # GPU acceleration
-        "gfx.webrender.all" = true; # WebRender for efficiency
+          # Power saving optimizations
+          "media.autoplay.default" = 5; # Block autoplay to save battery
+          "layers.acceleration.force-enabled" = true; # GPU acceleration
+          "gfx.webrender.all" = true; # WebRender for efficiency
+        };
       };
     };
-  };
 
-  # Chrome configuration optimized for laptops
-  programs.chromium = {
-    enable = true;
-    package = lib.mkDefault pkgs.google-chrome;
-    commandLineArgs = [
-      # Wayland support for better mobile integration
-      "--enable-features=UseOzonePlatform,WaylandWindowDecorations"
-      "--ozone-platform=wayland"
+    # Chrome configuration optimized for laptops
+    chromium = {
+      enable = true;
+      package = lib.mkDefault pkgs.google-chrome;
+      commandLineArgs = [
+        # Wayland support for better mobile integration
+        "--enable-features=UseOzonePlatform,WaylandWindowDecorations"
+        "--ozone-platform=wayland"
 
-      # Power efficiency optimizations
-      "--enable-gpu-rasterization"
-      "--enable-zero-copy"
-      "--ignore-gpu-blocklist"
-      "--disable-background-timer-throttling"
+        # Power efficiency optimizations
+        "--enable-gpu-rasterization"
+        "--enable-zero-copy"
+        "--ignore-gpu-blocklist"
+        "--disable-background-timer-throttling"
 
-      # Battery saving features
-      "--enable-aggressive-domstorage-flushing"
-      "--enable-memory-pressure-signal"
-      "--max-unused-resource-memory-usage-percentage=5"
+        # Battery saving features
+        "--enable-aggressive-domstorage-flushing"
+        "--enable-memory-pressure-signal"
+        "--max-unused-resource-memory-usage-percentage=5"
 
-      # Network optimizations for mobile connections
-      "--enable-quic"
-      "--aggressive-cache-discard"
+        # Network optimizations for mobile connections
+        "--enable-quic"
+        "--aggressive-cache-discard"
 
-      # Mobile-friendly flags
-      "--touch-events=enabled"
-      "--enable-pinch"
-    ];
-  };
-
-  # Git configuration for mobile development
-  programs.git = {
-    enable = true;
-    settings = {
-      init.defaultBranch = "main";
-      push.autoSetupRemote = true;
-      pull.rebase = true;
-      rebase.autoStash = true;
-      # Mobile-friendly settings
-      core.autocrlf = "input";
-      merge.tool = "vimdiff";
+        # Mobile-friendly flags
+        "--touch-events=enabled"
+        "--enable-pinch"
+      ];
     };
-  };
 
-  # Delta (diff viewer) integration with Git
-  programs.delta = {
-    enable = true;
-    enableGitIntegration = true;
-  };
+    # Git configuration for mobile development
+    git = {
+      enable = true;
+      settings = {
+        init.defaultBranch = "main";
+        push.autoSetupRemote = true;
+        pull.rebase = true;
+        rebase.autoStash = true;
+        # Mobile-friendly settings
+        core.autocrlf = "input";
+        merge.tool = "vimdiff";
+      };
+    };
 
-  # Mobile development environment
-  programs.direnv = {
-    enable = true;
-    nix-direnv.enable = true;
+    # Delta (diff viewer) integration with Git
+    delta = {
+      enable = true;
+      enableGitIntegration = true;
+    };
+
+    # Mobile development environment
+    direnv = {
+      enable = true;
+      nix-direnv.enable = true;
+    };
   };
 }

@@ -73,121 +73,126 @@ in
       dates = [ cfg.schedule ];
     };
 
-    # Systemd service for pre-GC disk space check
-    systemd.services.nix-gc-pre-check = mkIf (cfg.minFreeSpace != null) {
-      description = "Check disk space before garbage collection";
-      before = [ "nix-gc.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-        ExecStart = pkgs.writeShellScript "nix-gc-pre-check" ''
-          #!/bin/bash
+    # Systemd services configuration
+    systemd = {
+      services = {
+        # Pre-GC disk space check
+        nix-gc-pre-check = mkIf (cfg.minFreeSpace != null) {
+          description = "Check disk space before garbage collection";
+          before = [ "nix-gc.service" ];
+          serviceConfig = {
+            Type = "oneshot";
+            User = "root";
+            ExecStart = pkgs.writeShellScript "nix-gc-pre-check" ''
+              #!/bin/bash
 
-          LOG_FILE="/var/log/nix-gc/pre-check.log"
-          mkdir -p "$(dirname "$LOG_FILE")"
-          exec 1> >(tee -a "$LOG_FILE")
-          exec 2>&1
+              LOG_FILE="/var/log/nix-gc/pre-check.log"
+              mkdir -p "$(dirname "$LOG_FILE")"
+              exec 1> >(tee -a "$LOG_FILE")
+              exec 2>&1
 
-          echo "[$(date)] Checking disk space before garbage collection..."
+              echo "[$(date)] Checking disk space before garbage collection..."
 
-          # Get available space in GB
-          AVAILABLE_GB=$(df /nix/store | tail -1 | awk '{print int($4/1024/1024)}')
-          MIN_REQUIRED=${toString cfg.minFreeSpace}
+              # Get available space in GB
+              AVAILABLE_GB=$(df /nix/store | tail -1 | awk '{print int($4/1024/1024)}')
+              MIN_REQUIRED=${toString cfg.minFreeSpace}
 
-          echo "[$(date)] Available space: ''${AVAILABLE_GB}GB"
-          echo "[$(date)] Minimum required: ''${MIN_REQUIRED}GB"
+              echo "[$(date)] Available space: ''${AVAILABLE_GB}GB"
+              echo "[$(date)] Minimum required: ''${MIN_REQUIRED}GB"
 
-          if [ "$AVAILABLE_GB" -lt "$MIN_REQUIRED" ]; then
-            echo "[$(date)] Disk space below minimum threshold - garbage collection recommended"
-            exit 0
-          else
-            echo "[$(date)] Sufficient disk space available"
-            exit 0
-          fi
-        '';
+              if [ "$AVAILABLE_GB" -lt "$MIN_REQUIRED" ]; then
+                echo "[$(date)] Disk space below minimum threshold - garbage collection recommended"
+                exit 0
+              else
+                echo "[$(date)] Sufficient disk space available"
+                exit 0
+              fi
+            '';
+          };
+        };
+
+        # Enhanced garbage collection with logging
+        nix-gc = {
+          serviceConfig = {
+            # Add logging for garbage collection
+            StandardOutput = "journal+console";
+            StandardError = "journal+console";
+          };
+
+          # Post-GC status report
+          postStop = ''
+            LOG_FILE="/var/log/nix-gc/summary.log"
+            mkdir -p "$(dirname "$LOG_FILE")"
+
+            {
+              echo "==== Garbage Collection Report ===="
+              echo "Date: $(date)"
+              echo ""
+              echo "Disk Usage:"
+              df -h /nix/store | tail -1
+              echo ""
+              echo "Store Size:"
+              du -sh /nix/store 2>/dev/null || echo "Unable to calculate"
+              echo ""
+              echo "System Generations:"
+              nix-env --list-generations --profile /nix/var/nix/profiles/system | tail -10
+              echo "===================================="
+            } | tee -a "$LOG_FILE"
+          '';
+        };
+
+        # Weekly generation cleanup (keep only recent generations)
+        nix-generation-cleanup = mkIf (!cfg.aggressiveCleanup) {
+          description = "Clean up old NixOS generations";
+          after = [ "nix-gc.service" ];
+          serviceConfig = {
+            Type = "oneshot";
+            User = "root";
+            ExecStart = pkgs.writeShellScript "nix-generation-cleanup" ''
+              #!/bin/bash
+
+              LOG_FILE="/var/log/nix-gc/generation-cleanup.log"
+              mkdir -p "$(dirname "$LOG_FILE")"
+              exec 1> >(tee -a "$LOG_FILE")
+              exec 2>&1
+
+              echo "[$(date)] Starting generation cleanup..."
+              echo "[$(date)] Keeping last ${toString cfg.keepGenerations} generations"
+
+              # Get current generation
+              CURRENT=$(nix-env --list-generations --profile /nix/var/nix/profiles/system | grep current | awk '{print $1}')
+
+              # List all generations
+              GENERATIONS=$(nix-env --list-generations --profile /nix/var/nix/profiles/system | awk '{print $1}' | grep -v current | sort -rn)
+
+              # Keep only the last N generations
+              KEEP_COUNT=0
+              for gen in $GENERATIONS; do
+                if [ "$gen" = "$CURRENT" ]; then
+                  continue
+                fi
+
+                KEEP_COUNT=$((KEEP_COUNT + 1))
+
+                if [ $KEEP_COUNT -gt ${toString cfg.keepGenerations} ]; then
+                  echo "[$(date)] Deleting generation $gen"
+                  nix-env --delete-generations $gen --profile /nix/var/nix/profiles/system || true
+                else
+                  echo "[$(date)] Keeping generation $gen"
+                fi
+              done
+
+              echo "[$(date)] Generation cleanup completed"
+            '';
+          };
+        };
       };
+
+      # Create log directories
+      tmpfiles.rules = [
+        "d /var/log/nix-gc 0755 root root -"
+      ];
     };
-
-    # Enhanced garbage collection with logging
-    systemd.services.nix-gc = {
-      serviceConfig = {
-        # Add logging for garbage collection
-        StandardOutput = "journal+console";
-        StandardError = "journal+console";
-      };
-
-      # Post-GC status report
-      postStop = ''
-        LOG_FILE="/var/log/nix-gc/summary.log"
-        mkdir -p "$(dirname "$LOG_FILE")"
-
-        {
-          echo "==== Garbage Collection Report ===="
-          echo "Date: $(date)"
-          echo ""
-          echo "Disk Usage:"
-          df -h /nix/store | tail -1
-          echo ""
-          echo "Store Size:"
-          du -sh /nix/store 2>/dev/null || echo "Unable to calculate"
-          echo ""
-          echo "System Generations:"
-          nix-env --list-generations --profile /nix/var/nix/profiles/system | tail -10
-          echo "===================================="
-        } | tee -a "$LOG_FILE"
-      '';
-    };
-
-    # Weekly generation cleanup (keep only recent generations)
-    systemd.services.nix-generation-cleanup = mkIf (!cfg.aggressiveCleanup) {
-      description = "Clean up old NixOS generations";
-      after = [ "nix-gc.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-        ExecStart = pkgs.writeShellScript "nix-generation-cleanup" ''
-          #!/bin/bash
-
-          LOG_FILE="/var/log/nix-gc/generation-cleanup.log"
-          mkdir -p "$(dirname "$LOG_FILE")"
-          exec 1> >(tee -a "$LOG_FILE")
-          exec 2>&1
-
-          echo "[$(date)] Starting generation cleanup..."
-          echo "[$(date)] Keeping last ${toString cfg.keepGenerations} generations"
-
-          # Get current generation
-          CURRENT=$(nix-env --list-generations --profile /nix/var/nix/profiles/system | grep current | awk '{print $1}')
-
-          # List all generations
-          GENERATIONS=$(nix-env --list-generations --profile /nix/var/nix/profiles/system | awk '{print $1}' | grep -v current | sort -rn)
-
-          # Keep only the last N generations
-          KEEP_COUNT=0
-          for gen in $GENERATIONS; do
-            if [ "$gen" = "$CURRENT" ]; then
-              continue
-            fi
-
-            KEEP_COUNT=$((KEEP_COUNT + 1))
-
-            if [ $KEEP_COUNT -gt ${toString cfg.keepGenerations} ]; then
-              echo "[$(date)] Deleting generation $gen"
-              nix-env --delete-generations $gen --profile /nix/var/nix/profiles/system || true
-            else
-              echo "[$(date)] Keeping generation $gen"
-            fi
-          done
-
-          echo "[$(date)] Generation cleanup completed"
-        '';
-      };
-    };
-
-    # Create log directories
-    systemd.tmpfiles.rules = [
-      "d /var/log/nix-gc 0755 root root -"
-    ];
 
     # Add garbage collection monitoring script
     environment.systemPackages = [

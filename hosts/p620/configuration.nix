@@ -650,7 +650,7 @@ in
 
   # Fix broken GNOME Shell patch in nixpkgs (shell_remove_dark_mode.patch failing on 49.1)
   nixpkgs.overlays = [
-    (final: prev: {
+    (_final: prev: {
       gnome-shell = prev.gnome-shell.overrideAttrs (oldAttrs: {
         patches = builtins.filter
           (patch:
