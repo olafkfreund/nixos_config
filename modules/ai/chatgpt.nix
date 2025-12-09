@@ -66,53 +66,55 @@ in
   };
 
   config = mkIf cfg.enable {
-    environment.systemPackages = with pkgs;
-      # Chat interfaces
-      optionals cfg.packages.chatInterfaces [
-        chatgpt-cli # OpenAI ChatGPT command line interface
-        rPackages.chatgpt # R interface for ChatGPT
-        tgpt # Terminal GPT - simple CLI for multiple AI models
-        # shell-gpt REMOVED due to dependency conflict with openai>=2.0.0
-        yai
-        # codex REMOVED due to network download failures (npm registry HTTP/2 errors)
-      ]
-      ++
-      # Code assistants
-      optionals cfg.packages.codeAssistants [
-        gh-copilot # GitHub Copilot CLI integration
-        # aichat REMOVED due to extremely slow pyrate-limiter build dependency (2+ hours)
-        gpt-cli # General purpose GPT CLI
-        # codex removed due to build issues with OpenSSL dependencies
-      ]
-      ++
-      # Terminal tools
-      optionals cfg.packages.terminalTools [
-        gorilla-cli # AI-powered command suggestions
-        # oterm               # AI-enhanced terminal (disabled due to textual test failures)
-      ]
-      ++
-      # MCP tools (Model Context Protocol)
-      optionals cfg.packages.mcpTools [
-        chatmcp # ChatGPT with MCP support
-        mcphost # MCP host implementation
-      ]
-      ++
-      # Additional user-specified packages
-      cfg.additionalPackages;
+    environment = {
+      systemPackages = with pkgs;
+        # Chat interfaces
+        optionals cfg.packages.chatInterfaces [
+          chatgpt-cli # OpenAI ChatGPT command line interface
+          rPackages.chatgpt # R interface for ChatGPT
+          tgpt # Terminal GPT - simple CLI for multiple AI models
+          # shell-gpt REMOVED due to dependency conflict with openai>=2.0.0
+          yai
+          # codex REMOVED due to network download failures (npm registry HTTP/2 errors)
+        ]
+        ++
+        # Code assistants
+        optionals cfg.packages.codeAssistants [
+          gh-copilot # GitHub Copilot CLI integration
+          # aichat REMOVED due to extremely slow pyrate-limiter build dependency (2+ hours)
+          gpt-cli # General purpose GPT CLI
+          # codex removed due to build issues with OpenSSL dependencies
+        ]
+        ++
+        # Terminal tools
+        optionals cfg.packages.terminalTools [
+          gorilla-cli # AI-powered command suggestions
+          # oterm               # AI-enhanced terminal (disabled due to textual test failures)
+        ]
+        ++
+        # MCP tools (Model Context Protocol)
+        optionals cfg.packages.mcpTools [
+          chatmcp # ChatGPT with MCP support
+          mcphost # MCP host implementation
+        ]
+        ++
+        # Additional user-specified packages
+        cfg.additionalPackages;
 
-    # Configure environment for AI tools
-    environment.sessionVariables = {
-      # Set default AI model preferences (users can override)
-      OPENAI_API_MODEL = mkDefault "gpt-4";
-      # shell-gpt removed - using tgpt instead
-    };
+      # Configure environment for AI tools
+      sessionVariables = {
+        # Set default AI model preferences (users can override)
+        OPENAI_API_MODEL = mkDefault "gpt-4";
+        # shell-gpt removed - using tgpt instead
+      };
 
-    # Add helpful aliases for common AI tasks
-    environment.shellAliases = {
-      ai = "tgpt"; # Terminal GPT - replacement for shell-gpt
-      chat = "chatgpt-cli";
-      aicode = "gh copilot suggest";
-      aiexplain = "gh copilot explain";
+      # Add helpful aliases for common AI tasks
+      shellAliases = {
+        ai = "tgpt"; # Terminal GPT - replacement for shell-gpt
+        chat = "chatgpt-cli";
+        aicode = "gh copilot suggest";
+        aiexplain = "gh copilot explain";
+      };
     };
 
     # Ensure proper permissions for AI config directories

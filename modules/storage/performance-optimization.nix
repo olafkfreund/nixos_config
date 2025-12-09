@@ -129,225 +129,227 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Storage Performance Optimization Service
-    systemd.services.storage-performance-optimizer = {
-      description = "Storage Performance Optimization Service";
-      after = [ "local-fs.target" ];
-      wants = [ "local-fs.target" ];
-      wantedBy = [ "multi-user.target" ];
+    # Systemd configuration block
+    systemd = {
+      # Storage Performance Optimization Service
+      services.storage-performance-optimizer = {
+        description = "Storage Performance Optimization Service";
+        after = [ "local-fs.target" ];
+        wants = [ "local-fs.target" ];
+        wantedBy = [ "multi-user.target" ];
 
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        User = "root";
-        ExecStart = pkgs.writeShellScript "storage-performance-optimizer" ''
-          #!/bin/bash
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          User = "root";
+          ExecStart = pkgs.writeShellScript "storage-performance-optimizer" ''
+            #!/bin/bash
 
-          LOG_FILE="/var/log/storage-tuning/optimizer.log"
-          mkdir -p "$(dirname "$LOG_FILE")"
-          exec 1> >(tee -a "$LOG_FILE")
-          exec 2>&1
+            LOG_FILE="/var/log/storage-tuning/optimizer.log"
+            mkdir -p "$(dirname "$LOG_FILE")"
+            exec 1> >(tee -a "$LOG_FILE")
+            exec 2>&1
 
-          echo "[$(date)] Starting storage performance optimization..."
-          echo "[$(date)] Profile: ${cfg.profile}"
+            echo "[$(date)] Starting storage performance optimization..."
+            echo "[$(date)] Profile: ${cfg.profile}"
 
-          # Detect storage devices
-          echo "[$(date)] Detecting storage devices..."
+            # Detect storage devices
+            echo "[$(date)] Detecting storage devices..."
 
-          # Get all block devices
-          BLOCK_DEVICES=$(lsblk -nd -o NAME,TYPE | grep disk | awk '{print $1}')
+            # Get all block devices
+            BLOCK_DEVICES=$(lsblk -nd -o NAME,TYPE | grep disk | awk '{print $1}')
 
-          for device in $BLOCK_DEVICES; do
-            DEVICE_PATH="/dev/$device"
-            echo "[$(date)] Processing device: $DEVICE_PATH"
+            for device in $BLOCK_DEVICES; do
+              DEVICE_PATH="/dev/$device"
+              echo "[$(date)] Processing device: $DEVICE_PATH"
 
-            # Detect device type
-            if [ -f "/sys/block/$device/queue/rotational" ]; then
-              ROTATIONAL=$(cat "/sys/block/$device/queue/rotational")
+              # Detect device type
+              if [ -f "/sys/block/$device/queue/rotational" ]; then
+                ROTATIONAL=$(cat "/sys/block/$device/queue/rotational")
 
-              if [ "$ROTATIONAL" = "0" ]; then
-                DEVICE_TYPE="ssd"
-                echo "[$(date)] Detected SSD: $DEVICE_PATH"
+                if [ "$ROTATIONAL" = "0" ]; then
+                  DEVICE_TYPE="ssd"
+                  echo "[$(date)] Detected SSD: $DEVICE_PATH"
+                else
+                  DEVICE_TYPE="hdd"
+                  echo "[$(date)] Detected HDD: $DEVICE_PATH"
+                fi
               else
-                DEVICE_TYPE="hdd"
-                echo "[$(date)] Detected HDD: $DEVICE_PATH"
+                DEVICE_TYPE="unknown"
+                echo "[$(date)] Unknown device type: $DEVICE_PATH"
               fi
-            else
-              DEVICE_TYPE="unknown"
-              echo "[$(date)] Unknown device type: $DEVICE_PATH"
-            fi
 
-            # I/O scheduler optimization
-            ${optionalString cfg.ioSchedulerOptimization.enable ''
-            echo "[$(date)] Optimizing I/O scheduler for $DEVICE_PATH..."
+              # I/O scheduler optimization
+              ${optionalString cfg.ioSchedulerOptimization.enable ''
+              echo "[$(date)] Optimizing I/O scheduler for $DEVICE_PATH..."
 
-            SCHEDULER_PATH="/sys/block/$device/queue/scheduler"
-            if [ -f "$SCHEDULER_PATH" ]; then
-              ${optionalString cfg.ioSchedulerOptimization.dynamicScheduling ''
-              case "$DEVICE_TYPE" in
-                "ssd")
-                  ${optionalString cfg.ioSchedulerOptimization.ssdOptimization ''
-                # Use none or mq-deadline for SSDs
-                if grep -q "none" "$SCHEDULER_PATH"; then
-                  echo none > "$SCHEDULER_PATH"
-                  echo "[$(date)] Set scheduler to 'none' for SSD $DEVICE_PATH"
-                elif grep -q "mq-deadline" "$SCHEDULER_PATH"; then
-                  echo mq-deadline > "$SCHEDULER_PATH"
-                  echo "[$(date)] Set scheduler to 'mq-deadline' for SSD $DEVICE_PATH"
+              SCHEDULER_PATH="/sys/block/$device/queue/scheduler"
+              if [ -f "$SCHEDULER_PATH" ]; then
+                ${optionalString cfg.ioSchedulerOptimization.dynamicScheduling ''
+                case "$DEVICE_TYPE" in
+                  "ssd")
+                    ${optionalString cfg.ioSchedulerOptimization.ssdOptimization ''
+                  # Use none or mq-deadline for SSDs
+                  if grep -q "none" "$SCHEDULER_PATH"; then
+                    echo none > "$SCHEDULER_PATH"
+                    echo "[$(date)] Set scheduler to 'none' for SSD $DEVICE_PATH"
+                  elif grep -q "mq-deadline" "$SCHEDULER_PATH"; then
+                    echo mq-deadline > "$SCHEDULER_PATH"
+                    echo "[$(date)] Set scheduler to 'mq-deadline' for SSD $DEVICE_PATH"
+                  fi
+                ''}
+                    ;;
+                  "hdd")
+                    ${optionalString cfg.ioSchedulerOptimization.hddOptimization ''
+                  # Use bfq or mq-deadline for HDDs
+                  if grep -q "bfq" "$SCHEDULER_PATH"; then
+                    echo bfq > "$SCHEDULER_PATH"
+                    echo "[$(date)] Set scheduler to 'bfq' for HDD $DEVICE_PATH"
+                  elif grep -q "mq-deadline" "$SCHEDULER_PATH"; then
+                    echo mq-deadline > "$SCHEDULER_PATH"
+                    echo "[$(date)] Set scheduler to 'mq-deadline' for HDD $DEVICE_PATH"
+                  fi
+                ''}
+                    ;;
+                esac
+              ''}
+              fi
+            ''}
+
+              # Queue depth optimization
+              QUEUE_DEPTH_PATH="/sys/block/$device/queue/nr_requests"
+              if [ -f "$QUEUE_DEPTH_PATH" ]; then
+                case "${cfg.profile}" in
+                  "performance")
+                    echo 256 > "$QUEUE_DEPTH_PATH" 2>/dev/null || true
+                    echo "[$(date)] Set queue depth to 256 for $DEVICE_PATH"
+                    ;;
+                  "balanced")
+                    echo 128 > "$QUEUE_DEPTH_PATH" 2>/dev/null || true
+                    echo "[$(date)] Set queue depth to 128 for $DEVICE_PATH"
+                    ;;
+                  "reliability")
+                    echo 64 > "$QUEUE_DEPTH_PATH" 2>/dev/null || true
+                    echo "[$(date)] Set queue depth to 64 for $DEVICE_PATH"
+                    ;;
+                esac
+              fi
+
+              # Read-ahead optimization
+              ${optionalString cfg.filesystemOptimization.readaheadOptimization ''
+              READAHEAD_PATH="/sys/block/$device/queue/read_ahead_kb"
+              if [ -f "$READAHEAD_PATH" ]; then
+                case "$DEVICE_TYPE" in
+                  "ssd")
+                    echo 128 > "$READAHEAD_PATH" 2>/dev/null || true
+                    echo "[$(date)] Set read-ahead to 128KB for SSD $DEVICE_PATH"
+                    ;;
+                  "hdd")
+                    echo 4096 > "$READAHEAD_PATH" 2>/dev/null || true
+                    echo "[$(date)] Set read-ahead to 4MB for HDD $DEVICE_PATH"
+                    ;;
+                esac
+              fi
+            ''}
+
+              # NVMe-specific optimizations
+              ${optionalString cfg.nvmeOptimization.enable ''
+              if [[ "$device" == nvme* ]]; then
+                echo "[$(date)] Applying NVMe optimizations for $DEVICE_PATH..."
+
+                ${optionalString cfg.nvmeOptimization.polling ''
+                # Enable polling for low latency
+                POLL_PATH="/sys/block/$device/queue/io_poll"
+                if [ -f "$POLL_PATH" ]; then
+                  echo 1 > "$POLL_PATH" 2>/dev/null || true
+                  echo "[$(date)] Enabled NVMe polling for $DEVICE_PATH"
                 fi
               ''}
-                  ;;
-                "hdd")
-                  ${optionalString cfg.ioSchedulerOptimization.hddOptimization ''
-                # Use bfq or mq-deadline for HDDs
-                if grep -q "bfq" "$SCHEDULER_PATH"; then
-                  echo bfq > "$SCHEDULER_PATH"
-                  echo "[$(date)] Set scheduler to 'bfq' for HDD $DEVICE_PATH"
-                elif grep -q "mq-deadline" "$SCHEDULER_PATH"; then
-                  echo mq-deadline > "$SCHEDULER_PATH"
-                  echo "[$(date)] Set scheduler to 'mq-deadline' for HDD $DEVICE_PATH"
+
+                ${optionalString cfg.nvmeOptimization.multiQueue ''
+                # Optimize queue count
+                WBT_PATH="/sys/block/$device/queue/wbt_lat_usec"
+                if [ -f "$WBT_PATH" ]; then
+                  echo 0 > "$WBT_PATH" 2>/dev/null || true
+                  echo "[$(date)] Disabled write back throttling for $DEVICE_PATH"
                 fi
               ''}
-                  ;;
-              esac
-            ''}
-            fi
-          ''}
-
-            # Queue depth optimization
-            QUEUE_DEPTH_PATH="/sys/block/$device/queue/nr_requests"
-            if [ -f "$QUEUE_DEPTH_PATH" ]; then
-              case "${cfg.profile}" in
-                "performance")
-                  echo 256 > "$QUEUE_DEPTH_PATH" 2>/dev/null || true
-                  echo "[$(date)] Set queue depth to 256 for $DEVICE_PATH"
-                  ;;
-                "balanced")
-                  echo 128 > "$QUEUE_DEPTH_PATH" 2>/dev/null || true
-                  echo "[$(date)] Set queue depth to 128 for $DEVICE_PATH"
-                  ;;
-                "reliability")
-                  echo 64 > "$QUEUE_DEPTH_PATH" 2>/dev/null || true
-                  echo "[$(date)] Set queue depth to 64 for $DEVICE_PATH"
-                  ;;
-              esac
-            fi
-
-            # Read-ahead optimization
-            ${optionalString cfg.filesystemOptimization.readaheadOptimization ''
-            READAHEAD_PATH="/sys/block/$device/queue/read_ahead_kb"
-            if [ -f "$READAHEAD_PATH" ]; then
-              case "$DEVICE_TYPE" in
-                "ssd")
-                  echo 128 > "$READAHEAD_PATH" 2>/dev/null || true
-                  echo "[$(date)] Set read-ahead to 128KB for SSD $DEVICE_PATH"
-                  ;;
-                "hdd")
-                  echo 4096 > "$READAHEAD_PATH" 2>/dev/null || true
-                  echo "[$(date)] Set read-ahead to 4MB for HDD $DEVICE_PATH"
-                  ;;
-              esac
-            fi
-          ''}
-
-            # NVMe-specific optimizations
-            ${optionalString cfg.nvmeOptimization.enable ''
-            if [[ "$device" == nvme* ]]; then
-              echo "[$(date)] Applying NVMe optimizations for $DEVICE_PATH..."
-
-              ${optionalString cfg.nvmeOptimization.polling ''
-              # Enable polling for low latency
-              POLL_PATH="/sys/block/$device/queue/io_poll"
-              if [ -f "$POLL_PATH" ]; then
-                echo 1 > "$POLL_PATH" 2>/dev/null || true
-                echo "[$(date)] Enabled NVMe polling for $DEVICE_PATH"
               fi
             ''}
 
-              ${optionalString cfg.nvmeOptimization.multiQueue ''
-              # Optimize queue count
-              WBT_PATH="/sys/block/$device/queue/wbt_lat_usec"
-              if [ -f "$WBT_PATH" ]; then
-                echo 0 > "$WBT_PATH" 2>/dev/null || true
-                echo "[$(date)] Disabled write back throttling for $DEVICE_PATH"
-              fi
+              # Disk cache optimization
+              ${optionalString cfg.diskCacheOptimization.enable ''
+              echo "[$(date)] Optimizing disk cache for $DEVICE_PATH..."
+
+              ${optionalString cfg.diskCacheOptimization.writeCache ''
+                # Enable write cache if available
+                if command -v hdparm >/dev/null 2>&1; then
+                  hdparm -W1 "$DEVICE_PATH" 2>/dev/null || true
+                  echo "[$(date)] Enabled write cache for $DEVICE_PATH"
+                fi
+              ''}
+
+              ${optionalString cfg.diskCacheOptimization.readCache ''
+                # Enable read cache if available
+                if command -v hdparm >/dev/null 2>&1; then
+                  hdparm -A1 "$DEVICE_PATH" 2>/dev/null || true
+                  echo "[$(date)] Enabled read cache for $DEVICE_PATH"
+                fi
+              ''}
             ''}
-            fi
-          ''}
+            done
 
-            # Disk cache optimization
-            ${optionalString cfg.diskCacheOptimization.enable ''
-            echo "[$(date)] Optimizing disk cache for $DEVICE_PATH..."
+            # Filesystem-level optimizations
+            ${optionalString cfg.filesystemOptimization.enable ''
+              echo "[$(date)] Applying filesystem optimizations..."
 
-            ${optionalString cfg.diskCacheOptimization.writeCache ''
-              # Enable write cache if available
-              if command -v hdparm >/dev/null 2>&1; then
-                hdparm -W1 "$DEVICE_PATH" 2>/dev/null || true
-                echo "[$(date)] Enabled write cache for $DEVICE_PATH"
-              fi
+              ${optionalString cfg.filesystemOptimization.cacheOptimization ''
+                # Optimize filesystem cache settings
+                case "${cfg.profile}" in
+                  "performance")
+                    echo 5 > /proc/sys/vm/dirty_background_ratio
+                    echo 10 > /proc/sys/vm/dirty_ratio
+                    echo 1500 > /proc/sys/vm/dirty_writeback_centisecs
+                    echo 500 > /proc/sys/vm/dirty_expire_centisecs
+                    echo "[$(date)] Applied performance filesystem cache settings"
+                    ;;
+                  "balanced")
+                    echo 10 > /proc/sys/vm/dirty_background_ratio
+                    echo 20 > /proc/sys/vm/dirty_ratio
+                    echo 1500 > /proc/sys/vm/dirty_writeback_centisecs
+                    echo 3000 > /proc/sys/vm/dirty_expire_centisecs
+                    echo "[$(date)] Applied balanced filesystem cache settings"
+                    ;;
+                  "reliability")
+                    echo 5 > /proc/sys/vm/dirty_background_ratio
+                    echo 10 > /proc/sys/vm/dirty_ratio
+                    echo 500 > /proc/sys/vm/dirty_writeback_centisecs
+                    echo 1000 > /proc/sys/vm/dirty_expire_centisecs
+                    echo "[$(date)] Applied reliability filesystem cache settings"
+                    ;;
+                esac
+              ''}
             ''}
 
-            ${optionalString cfg.diskCacheOptimization.readCache ''
-              # Enable read cache if available
-              if command -v hdparm >/dev/null 2>&1; then
-                hdparm -A1 "$DEVICE_PATH" 2>/dev/null || true
-                echo "[$(date)] Enabled read cache for $DEVICE_PATH"
-              fi
-            ''}
-          ''}
-          done
-
-          # Filesystem-level optimizations
-          ${optionalString cfg.filesystemOptimization.enable ''
-            echo "[$(date)] Applying filesystem optimizations..."
-
-            ${optionalString cfg.filesystemOptimization.cacheOptimization ''
-              # Optimize filesystem cache settings
-              case "${cfg.profile}" in
-                "performance")
-                  echo 5 > /proc/sys/vm/dirty_background_ratio
-                  echo 10 > /proc/sys/vm/dirty_ratio
-                  echo 1500 > /proc/sys/vm/dirty_writeback_centisecs
-                  echo 500 > /proc/sys/vm/dirty_expire_centisecs
-                  echo "[$(date)] Applied performance filesystem cache settings"
-                  ;;
-                "balanced")
-                  echo 10 > /proc/sys/vm/dirty_background_ratio
-                  echo 20 > /proc/sys/vm/dirty_ratio
-                  echo 1500 > /proc/sys/vm/dirty_writeback_centisecs
-                  echo 3000 > /proc/sys/vm/dirty_expire_centisecs
-                  echo "[$(date)] Applied balanced filesystem cache settings"
-                  ;;
-                "reliability")
-                  echo 5 > /proc/sys/vm/dirty_background_ratio
-                  echo 10 > /proc/sys/vm/dirty_ratio
-                  echo 500 > /proc/sys/vm/dirty_writeback_centisecs
-                  echo 1000 > /proc/sys/vm/dirty_expire_centisecs
-                  echo "[$(date)] Applied reliability filesystem cache settings"
-                  ;;
-              esac
-            ''}
-          ''}
-
-          echo "[$(date)] Storage performance optimization completed"
-        '';
+            echo "[$(date)] Storage performance optimization completed"
+          '';
+        };
       };
-    };
 
-    # Storage Performance Monitor
-    systemd.services.storage-performance-monitor = {
-      description = "Storage Performance Monitor";
-      after = [ "storage-performance-optimizer.service" ];
-      wants = [ "storage-performance-optimizer.service" ];
-      wantedBy = [ "multi-user.target" ];
+      # Storage Performance Monitor
+      services.storage-performance-monitor = {
+        description = "Storage Performance Monitor";
+        after = [ "storage-performance-optimizer.service" ];
+        wants = [ "storage-performance-optimizer.service" ];
+        wantedBy = [ "multi-user.target" ];
 
-      serviceConfig = {
-        Type = "simple";
-        User = "root";
-        Restart = "always";
-        RestartSec = "30s";
-        Environment = [
-          "PATH=${lib.makeBinPath (with pkgs; [
+        serviceConfig = {
+          Type = "simple";
+          User = "root";
+          Restart = "always";
+          RestartSec = "30s";
+          Environment = [
+            "PATH=${lib.makeBinPath (with pkgs; [
             sysstat # iostat
             gawk # awk
             coreutils # basic utilities
@@ -356,60 +358,67 @@ in
             gnugrep # grep
             gnused # sed
           ])}"
-        ];
-        ExecStart = pkgs.writeShellScript "storage-performance-monitor" ''
-                    #!/bin/bash
+          ];
+          ExecStart = pkgs.writeShellScript "storage-performance-monitor" ''
+                      #!/bin/bash
 
-                    METRICS_FILE="/var/lib/storage-tuning/metrics.json"
-                    mkdir -p "$(dirname "$METRICS_FILE")"
+                      METRICS_FILE="/var/lib/storage-tuning/metrics.json"
+                      mkdir -p "$(dirname "$METRICS_FILE")"
 
-                    while true; do
-                      TIMESTAMP=$(date -Iseconds)
+                      while true; do
+                        TIMESTAMP=$(date -Iseconds)
 
-                      # Collect I/O statistics
-                      IO_STATS=$(iostat -x 1 1 | tail -n +4 | while read line; do
-                        if [[ "$line" =~ ^[a-zA-Z] ]]; then
+                        # Collect I/O statistics
+                        IO_STATS=$(iostat -x 1 1 | tail -n +4 | while read line; do
+                          if [[ "$line" =~ ^[a-zA-Z] ]]; then
+                            DEVICE=$(echo "$line" | awk '{print $1}')
+                            UTIL=$(echo "$line" | awk '{print $NF}')
+                            AWAIT=$(echo "$line" | awk '{print $(NF-1)}')
+                            IOPS=$(echo "$line" | awk '{print $4+$5}')
+                            echo "\"$DEVICE\": {\"utilization\": \"$UTIL\", \"await\": \"$AWAIT\", \"iops\": \"$IOPS\"}"
+                          fi
+                        done | paste -sd, -)
+
+                        # Disk usage information
+                        DISK_USAGE=$(df -h | grep -E '^/dev/' | while read line; do
                           DEVICE=$(echo "$line" | awk '{print $1}')
-                          UTIL=$(echo "$line" | awk '{print $NF}')
-                          AWAIT=$(echo "$line" | awk '{print $(NF-1)}')
-                          IOPS=$(echo "$line" | awk '{print $4+$5}')
-                          echo "\"$DEVICE\": {\"utilization\": \"$UTIL\", \"await\": \"$AWAIT\", \"iops\": \"$IOPS\"}"
-                        fi
-                      done | paste -sd, -)
+                          USAGE=$(echo "$line" | awk '{print $5}' | sed 's/%//')
+                          MOUNT=$(echo "$line" | awk '{print $6}')
+                          echo "\"$DEVICE\": {\"usage_percent\": $USAGE, \"mount\": \"$MOUNT\"}"
+                        done | paste -sd, -)
 
-                      # Disk usage information
-                      DISK_USAGE=$(df -h | grep -E '^/dev/' | while read line; do
-                        DEVICE=$(echo "$line" | awk '{print $1}')
-                        USAGE=$(echo "$line" | awk '{print $5}' | sed 's/%//')
-                        MOUNT=$(echo "$line" | awk '{print $6}')
-                        echo "\"$DEVICE\": {\"usage_percent\": $USAGE, \"mount\": \"$MOUNT\"}"
-                      done | paste -sd, -)
+                        # Memory usage for caching
+                        CACHE_STATS=$(free -b | grep -E '^(Mem|Buffers|Cached)' | awk '
+                          /^Mem:/ { total=$2; used=$3; free=$4; available=$7 }
+                          END {
+                            cache_used = total - available - free
+                            cache_percent = (cache_used * 100) / total
+                            printf "\"cache_used_bytes\": %d, \"cache_percent\": %.1f", cache_used, cache_percent
+                          }
+                        ')
 
-                      # Memory usage for caching
-                      CACHE_STATS=$(free -b | grep -E '^(Mem|Buffers|Cached)' | awk '
-                        /^Mem:/ { total=$2; used=$3; free=$4; available=$7 }
-                        END {
-                          cache_used = total - available - free
-                          cache_percent = (cache_used * 100) / total
-                          printf "\"cache_used_bytes\": %d, \"cache_percent\": %.1f", cache_used, cache_percent
+                        # Create metrics JSON
+                        cat > "$METRICS_FILE" << EOF
+                        {
+                          "timestamp": "$TIMESTAMP",
+                          "io_devices": { $IO_STATS },
+                          "disk_usage": { $DISK_USAGE },
+                          "cache_stats": { $CACHE_STATS },
+                          "profile": "${cfg.profile}"
                         }
-                      ')
+            EOF
 
-                      # Create metrics JSON
-                      cat > "$METRICS_FILE" << EOF
-                      {
-                        "timestamp": "$TIMESTAMP",
-                        "io_devices": { $IO_STATS },
-                        "disk_usage": { $DISK_USAGE },
-                        "cache_stats": { $CACHE_STATS },
-                        "profile": "${cfg.profile}"
-                      }
-          EOF
-
-                      sleep 60
-                    done
-        '';
+                        sleep 60
+                      done
+          '';
+        };
       };
+
+      # Create directories
+      tmpfiles.rules = [
+        "d /var/lib/storage-tuning 0755 root root -"
+        "d /var/log/storage-tuning 0755 root root -"
+      ];
     };
 
     # Tmpfs optimization
@@ -466,12 +475,6 @@ in
       nvme-cli # NVMe management
       fio # Flexible I/O tester
       bonnie # Filesystem benchmarking
-    ];
-
-    # Create directories
-    systemd.tmpfiles.rules = [
-      "d /var/lib/storage-tuning 0755 root root -"
-      "d /var/log/storage-tuning 0755 root root -"
     ];
 
     # Enable TRIM for SSDs

@@ -37,26 +37,29 @@ in
     # Solution: Replace /etc/ssh/ssh_config entirely and prevent libvirt drop-in inclusion
 
     # Replace /etc/ssh/ssh_config and drop the default Include line
-    environment.etc."ssh/ssh_config".text = lib.mkForce ''
-      Host *
-        SendEnv LANG LC_*
-        HashKnownHosts yes
-        ServerAliveInterval 60
-        ServerAliveCountMax 3
+    environment = {
+      etc."ssh/ssh_config".text = lib.mkForce ''
+        Host *
+          SendEnv LANG LC_*
+          HashKnownHosts yes
+          ServerAliveInterval 60
+          ServerAliveCountMax 3
 
-        # Additional security and performance settings
-        StrictHostKeyChecking ask
-        UserKnownHostsFile ~/.ssh/known_hosts
-        Compression yes
-        ConnectTimeout 10
-    '';
+          # Additional security and performance settings
+          StrictHostKeyChecking ask
+          UserKnownHostsFile ~/.ssh/known_hosts
+          Compression yes
+          ConnectTimeout 10
+      '';
+
+      sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
+    };
 
     # Make sure the problematic libvirt drop-in isn't picked up anymore
     systemd.tmpfiles.rules = [
       "r /etc/ssh/ssh_config.d/30-libvirt-ssh-proxy.conf"
       "L+ /var/lib/qemu/firmware - - - - ${pkgs.qemu}/share/qemu/firmware"
     ];
-    environment.sessionVariables.LIBVIRT_DEFAULT_URI = [ "qemu:///system" ];
     services.spice-vdagentd.enable = true;
     systemd.services.libvirtd.restartIfChanged = false;
     boot.kernelParams = [

@@ -1,6 +1,5 @@
 # Live USB System Configuration for NixOS Installation
-{ config
-, lib
+{ lib
 , pkgs
 , host ? null
 , ...
@@ -45,33 +44,56 @@ with lib; {
     initialPassword = lib.mkForce null;
   };
 
-  # Include git and networking tools
-  environment.systemPackages = with pkgs; [
-    git
-    curl
-    wget
-    rsync
-    tailscale
+  # Environment configuration
+  environment = {
+    # Include git and networking tools
+    systemPackages = with pkgs; [
+      git
+      curl
+      wget
+      rsync
+      tailscale
 
-    # Add host-specific flake configuration
-    (writeScriptBin "install-${
-        if host != null
-        then host
-        else "host"
-      }" ''
-      #!/bin/bash
-      exec /etc/nixos-config/scripts/install-helpers/install-wizard.sh "${
-        if host != null
-        then host
-        else ""
-      }" "$@"
-    '')
-  ];
+      # Add host-specific flake configuration
+      (writeScriptBin "install-${
+          if host != null
+          then host
+          else "host"
+        }" ''
+        #!/bin/bash
+        exec /etc/nixos-config/scripts/install-helpers/install-wizard.sh "${
+          if host != null
+          then host
+          else ""
+        }" "$@"
+      '')
+    ];
 
-  # Copy flake configuration to live system
-  environment.etc."nixos-config" = {
-    source = ../../.;
-    target = "nixos-config";
+    # Configuration files
+    etc = {
+      "nixos-config" = {
+        source = ../../.;
+        target = "nixos-config";
+      };
+
+      # Welcome message
+      "issue".text = ''
+
+        Welcome to NixOS Live Installer${optionalString (host != null) " for ${host}"}
+
+        To install NixOS${optionalString (host != null) " on ${host}"}:
+        ${optionalString (host != null) "  sudo install-${host}"}
+        ${optionalString (host == null) "  sudo /etc/nixos-config/scripts/install-helpers/install-wizard.sh <hostname>"}
+
+        For SSH access:
+          - Username: root
+          - Password: nixos (CHANGE AFTER INSTALLATION!)
+          - IP: $(ip route get 1.1.1.1 | head -1 | awk '{print $7}')
+
+        Configuration available at: /etc/nixos-config
+
+      '';
+    };
   };
 
   # ISO configuration
@@ -144,24 +166,6 @@ with lib; {
 
   # No GUI services
   services.xserver.enable = false;
-
-  # Welcome message
-  environment.etc."issue".text = ''
-
-    Welcome to NixOS Live Installer${optionalString (host != null) " for ${host}"}
-
-    To install NixOS${optionalString (host != null) " on ${host}"}:
-    ${optionalString (host != null) "  sudo install-${host}"}
-    ${optionalString (host == null) "  sudo /etc/nixos-config/scripts/install-helpers/install-wizard.sh <hostname>"}
-
-    For SSH access:
-      - Username: root
-      - Password: nixos (CHANGE AFTER INSTALLATION!)
-      - IP: $(ip route get 1.1.1.1 | head -1 | awk '{print $7}')
-
-    Configuration available at: /etc/nixos-config
-
-  '';
 
   # Set MOTD
   users.motd = builtins.readFile /etc/issue;

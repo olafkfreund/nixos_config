@@ -13,8 +13,33 @@ in
   networking.hostName = "k3sserver";
   environment.noXlibs = false;
 
-  services.openssh.enable = true;
-  services.openssh.permitRootLogin = "yes";
+  services = {
+    openssh = {
+      enable = true;
+      permitRootLogin = "yes";
+    };
+
+    resolved = {
+      enable = true;
+      extraConfig = ''
+        MulticastDNS=true
+      '';
+    };
+
+    k3s = {
+      enable = true;
+      role = "server";
+      extraFlags = toString [
+        ''--write-kubeconfig-mode "0644"''
+        "--disable-cloud-controller"
+        "--disable=traefik"
+        "--disable=servicelb"
+        "--disable=local-storage"
+      ];
+      token = k3sToken;
+      clusterInit = true;
+    };
+  };
 
   systemd.network.enable = true;
   systemd.network.networks."20-tap" = {
@@ -28,10 +53,6 @@ in
       DHCP = "no";
     };
   };
-  services.resolved.enable = true;
-  services.resolved.extraConfig = ''
-    MulticastDNS=true
-  '';
 
   networking.extraHosts = ''
     192.168.1.201 k3sserver.local
@@ -41,19 +62,6 @@ in
 
   time.timeZone = "Europe/London";
 
-  services.k3s = {
-    enable = true;
-    role = "server";
-    extraFlags = toString [
-      ''--write-kubeconfig-mode "0644"''
-      "--disable-cloud-controller"
-      "--disable=traefik"
-      "--disable=servicelb"
-      "--disable=local-storage"
-    ];
-    token = k3sToken;
-    clusterInit = true;
-  };
   environment.systemPackages = with pkgs; [
     kubectl
     k3s

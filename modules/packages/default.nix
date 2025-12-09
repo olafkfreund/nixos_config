@@ -1,6 +1,5 @@
 # Package sets interface for performance optimization
-{ config
-, lib
+{ lib
 , pkgs
 , ...
 }:

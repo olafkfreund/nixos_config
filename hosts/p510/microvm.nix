@@ -1,6 +1,4 @@
-{ config
-, pkgs
-, microvm
+{ pkgs
 , ...
 }: {
   microvm = rec {

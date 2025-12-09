@@ -1,8 +1,7 @@
 # Obsidian MCP Server Package
 # Lightweight Model Context Protocol server for Obsidian vault access
 # Uses @mauricio.wolff/mcp-obsidian - zero dependencies, no plugins required
-{ lib
-, writeShellScriptBin
+{ writeShellScriptBin
 , nodejs
 , ...
 }:

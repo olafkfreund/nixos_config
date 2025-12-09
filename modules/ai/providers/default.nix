@@ -152,11 +152,13 @@ in
 
   config = mkIf cfg.enable {
     # Enable individual provider modules based on configuration
-    ai.providers.openai.enabled = cfg.openai.enable;
-    ai.providers.anthropic.enabled = cfg.anthropic.enable;
-    ai.providers.gemini.enabled = cfg.gemini.enable;
-    ai.providers.qwen.enabled = cfg.qwen.enable;
-    ai.providers.ollama.enabled = cfg.ollama.enable;
+    ai.providers = {
+      openai.enabled = cfg.openai.enable;
+      anthropic.enabled = cfg.anthropic.enable;
+      gemini.enabled = cfg.gemini.enable;
+      qwen.enabled = cfg.qwen.enable;
+      ollama.enabled = cfg.ollama.enable;
+    };
 
     # Create provider configuration file
     environment.etc."ai-providers.json".text = builtins.toJSON {

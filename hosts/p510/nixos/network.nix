@@ -1,6 +1,4 @@
-{ config
-, lib
-, pkgs
+{ lib
 , ...
 }: {
   # Network interface configuration for P510

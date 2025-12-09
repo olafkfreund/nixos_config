@@ -1,6 +1,6 @@
 # P510 Home Configuration - Development Server Profile
 # Uses dev-server composition (server-admin + developer)
-{ lib, pkgs, config, ... }: {
+{ lib, pkgs, ... }: {
   imports = [
     # Import common user configuration
     ../common/default.nix
@@ -107,7 +107,7 @@
     # Intel Xeon + NVIDIA specific tools
     intel-gpu-tools
     python3Packages.pynvml
-    nvtopPackages.nvidia
+    # nvtopPackages.nvidia - removed to avoid conflict with neofetch module's nvtopPackages.full
 
     # Media server development (P510 hosts media services)
     ffmpeg
@@ -167,8 +167,7 @@
   # Enhanced git configuration for server development
   programs.git = {
     enable = true;
-    delta.enable = lib.mkForce true;
-    extraConfig = {
+    settings = {
       init.defaultBranch = "main";
       push.autoSetupRemote = true;
       pull.rebase = true;
@@ -180,6 +179,12 @@
       log.oneline = true;
       status.showUntrackedFiles = "all";
     };
+  };
+
+  # Delta (diff viewer) integration with Git
+  programs.delta = {
+    enable = lib.mkForce true;
+    enableGitIntegration = true;
   };
 
   # Development environment for server

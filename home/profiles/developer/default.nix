@@ -168,21 +168,29 @@
     ansible
   ];
 
-  # Git configuration for development
-  programs.git = {
-    enable = true;
-    delta.enable = true;
-    extraConfig = {
-      init.defaultBranch = "main";
-      push.autoSetupRemote = true;
-      pull.rebase = true;
-      rebase.autoStash = true;
+  # Program configurations for development
+  programs = {
+    # Git configuration for development
+    git = {
+      enable = true;
+      settings = {
+        init.defaultBranch = "main";
+        push.autoSetupRemote = true;
+        pull.rebase = true;
+        rebase.autoStash = true;
+      };
     };
-  };
 
-  # Development environment configurations
-  programs.direnv = {
-    enable = true;
-    nix-direnv.enable = true;
+    # Delta (diff viewer) integration with Git
+    delta = {
+      enable = true;
+      enableGitIntegration = true;
+    };
+
+    # Development environment configurations
+    direnv = {
+      enable = true;
+      nix-direnv.enable = true;
+    };
   };
 }

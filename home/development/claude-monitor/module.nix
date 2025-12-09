@@ -284,29 +284,55 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.packages = [
-      cfg.package
-      pythonEnv
-      pkgs.nodejs # For npm global installs
-    ];
+    home = {
+      packages = [
+        cfg.package
+        pythonEnv
+        pkgs.nodejs # For npm global installs
+      ];
 
-    # Install monitor script
-    home.file.".local/share/claude-monitor/ccusage_monitor.py" = {
-      source = monitorPythonScript;
+      file = {
+        # Install monitor script
+        ".local/share/claude-monitor/ccusage_monitor.py" = {
+          source = monitorPythonScript;
+        };
+
+        # Helper script for quick status check
+        ".local/bin/claude-usage-check" = {
+          text = ''
+            #!/usr/bin/env bash
+            # Quick usage check without continuous monitoring
+
+            if command -v ccusage &> /dev/null; then
+            ${pkgs.nodejs}/bin/npx ccusage
+            else
+            echo "Error: ccusage not installed"
+            echo "Enable claude-monitor to install it automatically"
+            exit 1
+            fi
+          '';
+          executable = true;
+        };
+      };
+
+      # Install ccusage npm package globally on activation
+      activation.installCcusage = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        if ! command -v ccusage &> /dev/null;
+        then
+        $DRY_RUN_CMD ${pkgs.nodejs}/bin/npm install -g ccusage || echo "Warning: Failed to install ccusage"
+        fi
+      '';
+
+      # Development environment integration
+      sessionPath = [ "$HOME/.local/bin" ];
     };
 
-    # Install ccusage npm package globally on activation
-    home.activation.installCcusage = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      if ! command -v ccusage &> /dev/null;
-      then
-      $DRY_RUN_CMD ${pkgs.nodejs}/bin/npm install -g ccusage || echo "Warning: Failed to install ccusage"
-      fi
-    '';
-
     # Shell aliases
-    programs.zsh.shellAliases = mkIf config.programs.zsh.enable cfg.shellAliases;
-    programs.bash.shellAliases = mkIf config.programs.bash.enable cfg.shellAliases;
-    programs.fish.shellAliases = mkIf config.programs.fish.enable cfg.shellAliases;
+    programs = {
+      zsh.shellAliases = mkIf config.programs.zsh.enable cfg.shellAliases;
+      bash.shellAliases = mkIf config.programs.bash.enable cfg.shellAliases;
+      fish.shellAliases = mkIf config.programs.fish.enable cfg.shellAliases;
+    };
 
     # Optional: Systemd service for continuous monitoring
     systemd.user.services.claude-monitor = mkIf cfg.enableService {
@@ -326,25 +352,5 @@ in
         WantedBy = [ "default.target" ];
       };
     };
-
-    # Helper script for quick status check
-    home.file.".local/bin/claude-usage-check" = {
-      text = ''
-        #!/usr/bin/env bash
-        # Quick usage check without continuous monitoring
-
-        if command -v ccusage &> /dev/null; then
-        ${pkgs.nodejs}/bin/npx ccusage
-        else
-        echo "Error: ccusage not installed"
-        echo "Enable claude-monitor to install it automatically"
-        exit 1
-        fi
-      '';
-      executable = true;
-    };
-
-    # Development environment integration
-    home.sessionPath = [ "$HOME/.local/bin" ];
   };
 }

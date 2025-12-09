@@ -118,41 +118,105 @@ in
       useStubResolver = true;
     };
 
-    # Consolidated DNS monitoring service
-    systemd.services.network-dns-monitor = mkIf cfg.monitoring.enable {
-      description = "Network DNS resolution monitoring and recovery";
-      after = [ "network-online.target" "systemd-resolved.service" ];
-      wantedBy = [ "multi-user.target" ];
-      wants = [ "network-online.target" ];
-      serviceConfig = {
-        Type = "simple";
-        ExecStart = pkgs.writeShellScript "network-dns-monitor" ''
-          #!/bin/sh
-          # Consolidated DNS monitoring from network-monitoring and secure-dns modules
-          while true; do
-            dns_failed=0
+    systemd = {
+      services = {
+        # Consolidated DNS monitoring service
+        network-dns-monitor = mkIf cfg.monitoring.enable {
+          description = "Network DNS resolution monitoring and recovery";
+          after = [ "network-online.target" "systemd-resolved.service" ];
+          wantedBy = [ "multi-user.target" ];
+          wants = [ "network-online.target" ];
+          serviceConfig = {
+            Type = "simple";
+            ExecStart = pkgs.writeShellScript "network-dns-monitor" ''
+              #!/bin/sh
+              # Consolidated DNS monitoring from network-monitoring and secure-dns modules
+              while true; do
+                dns_failed=0
 
-            # Check multiple domains for robustness
-            for domain in "cloudflare.com" "google.com" "nixos.org"; do
-              if ! ${pkgs.inetutils}/bin/host -W 2 "$domain" >/dev/null 2>&1; then
-                echo "DNS resolution failed for $domain" | ${pkgs.systemd}/bin/systemd-cat -t network-dns-monitor -p warning
-                dns_failed=1
-              fi
-            done
+                # Check multiple domains for robustness
+                for domain in "cloudflare.com" "google.com" "nixos.org"; do
+                  if ! ${pkgs.inetutils}/bin/host -W 2 "$domain" >/dev/null 2>&1; then
+                    echo "DNS resolution failed for $domain" | ${pkgs.systemd}/bin/systemd-cat -t network-dns-monitor -p warning
+                    dns_failed=1
+                  fi
+                done
 
-            # If any DNS check failed, restart systemd-resolved
-            if [ "$dns_failed" -eq 1 ]; then
-              echo "Restarting systemd-resolved due to DNS failures" | ${pkgs.systemd}/bin/systemd-cat -t network-dns-monitor -p warning
-              ${pkgs.systemd}/bin/systemctl restart systemd-resolved.service
-              sleep 10
-            fi
+                # If any DNS check failed, restart systemd-resolved
+                if [ "$dns_failed" -eq 1 ]; then
+                  echo "Restarting systemd-resolved due to DNS failures" | ${pkgs.systemd}/bin/systemd-cat -t network-dns-monitor -p warning
+                  ${pkgs.systemd}/bin/systemctl restart systemd-resolved.service
+                  sleep 10
+                fi
 
-            sleep ${toString cfg.monitoring.interval}
-          done
-        '';
-        Restart = "on-failure";
-        RestartSec = "30s";
+                sleep ${toString cfg.monitoring.interval}
+              done
+            '';
+            Restart = "on-failure";
+            RestartSec = "30s";
+          };
+        };
+
+        # Network stability helper service (merged from network-stability-service.nix)
+        network-stability-helper = mkIf cfg.helperService.enable (
+          let
+            stabilityScript = pkgs.writeShellScriptBin "network-stability-helper" (builtins.readFile (toString cfg.scriptPath));
+          in
+          {
+            description = "Network Stability Helper Service";
+            documentation = [ "https://github.com/olafkfreund/nixos-config/blob/main/doc/network-stability-guide.md" ];
+            wantedBy = [ "multi-user.target" ];
+            wants = [ "network-online.target" ];
+            after = [ "network-online.target" "NetworkManager.service" "systemd-networkd.service" ];
+
+            path = with pkgs; [
+              iproute2
+              inetutils
+              systemd
+              coreutils
+              gnugrep
+            ];
+
+            serviceConfig = {
+              Type = "simple";
+              ExecStartPre = "${pkgs.coreutils}/bin/sleep ${toString cfg.helperService.startDelay}";
+              ExecStart = "${stabilityScript}/bin/network-stability-helper";
+              Restart = "on-failure";
+              RestartSec = "${toString cfg.helperService.restartSec}";
+
+              # Security hardening
+              ProtectSystem = "strict";
+              ProtectHome = true;
+              PrivateTmp = true;
+              NoNewPrivileges = true;
+
+              # Resource limits
+              LimitNOFILE = 1024;
+              CPUSchedulingPolicy = "idle";
+              MemoryHigh = "100M";
+              MemoryMax = "150M";
+            };
+          }
+        );
+
+        # Consolidated network wait service (replaces separate wait services)
+        network-stability-wait = {
+          description = "Wait for network hardware and stability";
+          before = [ "network-online.target" "NetworkManager.service" "systemd-networkd.service" ];
+          wantedBy = [ "network-online.target" "NetworkManager.service" "systemd-networkd.service" ];
+          serviceConfig = {
+            Type = "oneshot";
+            ExecStart = "${pkgs.coreutils}/bin/sleep 3";
+            RemainAfterExit = true;
+          };
+        };
       };
+
+      # Create sync point for network stability events
+      tmpfiles.rules = mkIf cfg.helperService.enable [
+        "d /run/network-stability 0755 root root -"
+        "f /run/network-stability-event 0644 root root -"
+      ];
     };
 
     # Environment configuration for network stability
@@ -201,66 +265,6 @@ in
       "net.core.wmem_max" = 16777216;
       "net.core.rmem_default" = 1048576;
       "net.core.wmem_default" = 1048576;
-    };
-
-    # Network stability helper service (merged from network-stability-service.nix)
-    systemd.services.network-stability-helper = mkIf cfg.helperService.enable (
-      let
-        stabilityScript = pkgs.writeShellScriptBin "network-stability-helper" (builtins.readFile (toString cfg.scriptPath));
-      in
-      {
-        description = "Network Stability Helper Service";
-        documentation = [ "https://github.com/olafkfreund/nixos-config/blob/main/doc/network-stability-guide.md" ];
-        wantedBy = [ "multi-user.target" ];
-        wants = [ "network-online.target" ];
-        after = [ "network-online.target" "NetworkManager.service" "systemd-networkd.service" ];
-
-        path = with pkgs; [
-          iproute2
-          inetutils
-          systemd
-          coreutils
-          gnugrep
-        ];
-
-        serviceConfig = {
-          Type = "simple";
-          ExecStartPre = "${pkgs.coreutils}/bin/sleep ${toString cfg.helperService.startDelay}";
-          ExecStart = "${stabilityScript}/bin/network-stability-helper";
-          Restart = "on-failure";
-          RestartSec = "${toString cfg.helperService.restartSec}";
-
-          # Security hardening
-          ProtectSystem = "strict";
-          ProtectHome = true;
-          PrivateTmp = true;
-          NoNewPrivileges = true;
-
-          # Resource limits
-          LimitNOFILE = 1024;
-          CPUSchedulingPolicy = "idle";
-          MemoryHigh = "100M";
-          MemoryMax = "150M";
-        };
-      }
-    );
-
-    # Create sync point for network stability events
-    systemd.tmpfiles.rules = mkIf cfg.helperService.enable [
-      "d /run/network-stability 0755 root root -"
-      "f /run/network-stability-event 0644 root root -"
-    ];
-
-    # Consolidated network wait service (replaces separate wait services)
-    systemd.services.network-stability-wait = {
-      description = "Wait for network hardware and stability";
-      before = [ "network-online.target" "NetworkManager.service" "systemd-networkd.service" ];
-      wantedBy = [ "network-online.target" "NetworkManager.service" "systemd-networkd.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-        ExecStart = "${pkgs.coreutils}/bin/sleep 3";
-        RemainAfterExit = true;
-      };
     };
 
     # Validation and error handling (conditional to avoid evaluation issues)

@@ -44,7 +44,8 @@ in
       (optionals cfg.systemMonitors.iotop [ iotop ])
 
       # Process tools
-      (optionals cfg.utilities.processTools [ procs pstree lsof killall ])
+      # Note: pstree removed to avoid conflict with psmisc package (which also provides pstree)
+      (optionals cfg.utilities.processTools [ procs lsof killall ])
 
       # Disk utilities
       (optionals cfg.utilities.diskTools [ ncdu dust duf tree ])

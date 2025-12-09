@@ -101,7 +101,91 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.packages = [ cfg.package ];
+    home = {
+      packages = [ cfg.package ];
+
+      # Set up API key if provided
+      sessionVariables = mkIf (cfg.apiKeyFile != null) {
+        OPENAI_API_KEY = "$(cat ${cfg.apiKeyFile})";
+      };
+
+      # Integration script for development workflow
+      file.".local/bin/codex-project" = {
+        text = ''
+          #!/usr/bin/env bash
+          # OpenAI Codex project integration script
+
+          set -euo pipefail
+
+          CODEX_BIN="${cfg.package}/bin/codex-cli"
+          PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+
+          # Function to analyze project context
+          analyze_project() {
+            echo "Analyzing project context..."
+
+            # Detect project type
+            if [[ -f "package.json" ]]; then
+              echo "Detected: Node.js project"
+            elif [[ -f "Cargo.toml" ]]; then
+              echo "Detected: Rust project"
+            elif [[ -f "go.mod" ]]; then
+              echo "Detected: Go project"
+            elif [[ -f "pyproject.toml" ]] || [[ -f "requirements.txt" ]]; then
+              echo "Detected: Python project"
+            elif [[ -f "flake.nix" ]]; then
+              echo "Detected: Nix project"
+            else
+              echo "Detected: Generic project"
+            fi
+          }
+
+          # Function to run codex with project context
+          codex_with_context() {
+            local query="$1"
+            local context_file=$(mktemp)
+
+            # Build context information
+            {
+              echo "Project: $(basename "$PROJECT_ROOT")"
+              echo "Path: $PROJECT_ROOT"
+              echo "Language/Framework: $(analyze_project | tail -1)"
+              echo "Files in project:"
+              find . -type f -name "*.rs" -o -name "*.go" -o -name "*.py" -o -name "*.js" -o -name "*.ts" -o -name "*.nix" | head -20
+              echo ""
+              echo "Query: $query"
+            } > "$context_file"
+
+            "$CODEX_BIN" --context-file "$context_file" "$query"
+            rm "$context_file"
+          }
+
+          case "''${1:-help}" in
+            analyze)
+              analyze_project
+              ;;
+            ask)
+              shift
+              codex_with_context "$*"
+              ;;
+            help)
+              echo "Usage: codex-project <command>"
+              echo "Commands:"
+              echo "  analyze  - Analyze current project"
+              echo "  ask      - Ask codex with project context"
+              echo "  help     - Show this help"
+              ;;
+            *)
+              "$CODEX_BIN" "$@"
+              ;;
+          esac
+        '';
+        executable = true;
+      };
+
+      # Development environment integration
+      sessionPath = [ "$HOME/.local/bin" ];
+    };
 
     # Create configuration directory and file
     xdg.configFile."codex/config.json" = {
@@ -118,91 +202,11 @@ in
       ));
     };
 
-    # Set up API key if provided
-    home.sessionVariables = mkIf (cfg.apiKeyFile != null) {
-      OPENAI_API_KEY = "$(cat ${cfg.apiKeyFile})";
-    };
-
     # Shell aliases
-    programs.zsh.shellAliases = mkIf config.programs.zsh.enable cfg.shellAliases;
-    programs.bash.shellAliases = mkIf config.programs.bash.enable cfg.shellAliases;
-    programs.fish.shellAliases = mkIf config.programs.fish.enable cfg.shellAliases;
-
-    # Integration script for development workflow
-    home.file.".local/bin/codex-project" = {
-      text = ''
-        #!/usr/bin/env bash
-        # OpenAI Codex project integration script
-
-        set -euo pipefail
-
-        CODEX_BIN="${cfg.package}/bin/codex-cli"
-        PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-
-        # Function to analyze project context
-        analyze_project() {
-          echo "Analyzing project context..."
-
-          # Detect project type
-          if [[ -f "package.json" ]]; then
-            echo "Detected: Node.js project"
-          elif [[ -f "Cargo.toml" ]]; then
-            echo "Detected: Rust project"
-          elif [[ -f "go.mod" ]]; then
-            echo "Detected: Go project"
-          elif [[ -f "pyproject.toml" ]] || [[ -f "requirements.txt" ]]; then
-            echo "Detected: Python project"
-          elif [[ -f "flake.nix" ]]; then
-            echo "Detected: Nix project"
-          else
-            echo "Detected: Generic project"
-          fi
-        }
-
-        # Function to run codex with project context
-        codex_with_context() {
-          local query="$1"
-          local context_file=$(mktemp)
-
-          # Build context information
-          {
-            echo "Project: $(basename "$PROJECT_ROOT")"
-            echo "Path: $PROJECT_ROOT"
-            echo "Language/Framework: $(analyze_project | tail -1)"
-            echo "Files in project:"
-            find . -type f -name "*.rs" -o -name "*.go" -o -name "*.py" -o -name "*.js" -o -name "*.ts" -o -name "*.nix" | head -20
-            echo ""
-            echo "Query: $query"
-          } > "$context_file"
-
-          "$CODEX_BIN" --context-file "$context_file" "$query"
-          rm "$context_file"
-        }
-
-        case "''${1:-help}" in
-          analyze)
-            analyze_project
-            ;;
-          ask)
-            shift
-            codex_with_context "$*"
-            ;;
-          help)
-            echo "Usage: codex-project <command>"
-            echo "Commands:"
-            echo "  analyze  - Analyze current project"
-            echo "  ask      - Ask codex with project context"
-            echo "  help     - Show this help"
-            ;;
-          *)
-            "$CODEX_BIN" "$@"
-            ;;
-        esac
-      '';
-      executable = true;
+    programs = {
+      zsh.shellAliases = mkIf config.programs.zsh.enable cfg.shellAliases;
+      bash.shellAliases = mkIf config.programs.bash.enable cfg.shellAliases;
+      fish.shellAliases = mkIf config.programs.fish.enable cfg.shellAliases;
     };
-
-    # Development environment integration
-    home.sessionPath = [ "$HOME/.local/bin" ];
   };
 }

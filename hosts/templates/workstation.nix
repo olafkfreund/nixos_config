@@ -1,6 +1,6 @@
 # Workstation Template - Full Desktop Configuration
 # Used by: P620 (AMD workstation), powerful desktop systems
-{ config, lib, pkgs, ... }:
+{ lib, ... }:
 {
   imports = [
     ../../modules/core.nix

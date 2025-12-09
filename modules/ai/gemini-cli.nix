@@ -36,31 +36,33 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Add the package to system packages
-    environment.systemPackages = [ cfg.package ];
+    environment = {
+      # Add the package to system packages
+      systemPackages = [ cfg.package ];
 
-    # Set environment variables if provided
-    environment.variables = cfg.environmentVariables;
+      # Set environment variables if provided
+      variables = cfg.environmentVariables;
 
-    # Optional shell integration
-    environment.shellAliases = mkIf cfg.enableShellIntegration {
-      gemini = "gemini";
-      ai = mkDefault "gemini"; # Convenient alias with default priority
-    };
+      # Optional shell integration
+      shellAliases = mkIf cfg.enableShellIntegration {
+        gemini = "gemini";
+        ai = mkDefault "gemini"; # Convenient alias with default priority
+      };
 
-    # Create a desktop entry for GUI environments
-    environment.etc."applications/gemini-cli.desktop" = mkIf cfg.enableShellIntegration {
-      text = ''
-        [Desktop Entry]
-        Name=Gemini CLI
-        Comment=Google Gemini AI Command Line Interface
-        Exec=${cfg.package}/bin/gemini
-        Icon=terminal
-        Type=Application
-        Terminal=true
-        Categories=Development;Utility;ConsoleOnly;
-        Keywords=AI;Gemini;CLI;Google;
-      '';
+      # Create a desktop entry for GUI environments
+      etc."applications/gemini-cli.desktop" = mkIf cfg.enableShellIntegration {
+        text = ''
+          [Desktop Entry]
+          Name=Gemini CLI
+          Comment=Google Gemini AI Command Line Interface
+          Exec=${cfg.package}/bin/gemini
+          Icon=terminal
+          Type=Application
+          Terminal=true
+          Categories=Development;Utility;ConsoleOnly;
+          Keywords=AI;Gemini;CLI;Google;
+        '';
+      };
     };
   };
 }

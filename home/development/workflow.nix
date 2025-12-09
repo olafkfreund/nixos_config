@@ -151,256 +151,259 @@ with lib; let
     ];
 in
 {
-  # Enhanced development workflow packages
-  home.packages = flatten [
-    taskRunnerPackages
-    testingPackages
-    cicdPackages
-    servicePackages
-    networkingPackages
-    documentationPackages
-    monitoringPackages
-  ];
+  # Enhanced development workflow configuration
+  home = {
+    # Enhanced development workflow packages
+    packages = flatten [
+      taskRunnerPackages
+      testingPackages
+      cicdPackages
+      servicePackages
+      networkingPackages
+      documentationPackages
+      monitoringPackages
+    ];
 
-  # Enhanced shell aliases for workflow tools
-  home.shellAliases = mkMerge [
-    # Task runners
-    (mkIf cfg.taskRunners.just {
-      j = "just";
-      jl = "just --list";
-      jr = "just --show";
-    })
+    # Enhanced shell aliases for workflow tools
+    shellAliases = mkMerge [
+      # Task runners
+      (mkIf cfg.taskRunners.just {
+        j = "just";
+        jl = "just --list";
+        jr = "just --show";
+      })
 
-    # Testing shortcuts
-    (mkIf cfg.testing.pytest {
-      pyt = "python -m pytest";
-      pytv = "python -m pytest -v";
-      pytw = "python -m pytest --watch";
-    })
+      # Testing shortcuts
+      (mkIf cfg.testing.pytest {
+        pyt = "python -m pytest";
+        pytv = "python -m pytest -v";
+        pytw = "python -m pytest --watch";
+      })
 
-    # CI/CD shortcuts
-    (mkIf cfg.cicd.github_cli {
-      gh-pr = "gh pr create";
-      gh-status = "gh pr status";
-      gh-view = "gh pr view";
-      gh-merge = "gh pr merge";
-    })
+      # CI/CD shortcuts
+      (mkIf cfg.cicd.github_cli {
+        gh-pr = "gh pr create";
+        gh-status = "gh pr status";
+        gh-view = "gh pr view";
+        gh-merge = "gh pr merge";
+      })
 
-    # API and networking shortcuts
-    (mkIf cfg.networking.httpie {
-      http-get = "http GET";
-      http-post = "http POST";
-      http-put = "http PUT";
-      http-delete = "http DELETE";
-    })
+      # API and networking shortcuts
+      (mkIf cfg.networking.httpie {
+        http-get = "http GET";
+        http-post = "http POST";
+        http-put = "http PUT";
+        http-delete = "http DELETE";
+      })
 
-    (mkIf cfg.networking.jq {
-      pretty-json = "jq '.'";
-      json-keys = "jq 'keys'";
-    })
+      (mkIf cfg.networking.jq {
+        pretty-json = "jq '.'";
+        json-keys = "jq 'keys'";
+      })
 
-    # Documentation shortcuts
-    (mkIf cfg.documentation.pandoc {
-      md2pdf = "pandoc -o output.pdf";
-      md2html = "pandoc -o output.html";
-    })
+      # Documentation shortcuts
+      (mkIf cfg.documentation.pandoc {
+        md2pdf = "pandoc -o output.pdf";
+        md2html = "pandoc -o output.html";
+      })
 
-    # Monitoring shortcuts
-    (mkIf cfg.monitoring.btop {
-      # Use 'btop' directly instead of 'top' to avoid conflict with bash.nix
-      btop-mon = "btop";
-      proc-mon = "btop";
-    })
-  ];
+      # Monitoring shortcuts
+      (mkIf cfg.monitoring.btop {
+        # Use 'btop' directly instead of 'top' to avoid conflict with bash.nix
+        btop-mon = "btop";
+        proc-mon = "btop";
+      })
+    ];
 
-  # Enhanced environment variables for workflow
-  home.sessionVariables = mkMerge [
-    # Task runner configuration
-    (mkIf cfg.taskRunners.just {
-      JUST_CHOOSER = "fzf";
-      JUST_UNSTABLE = "1";
-    })
+    # Enhanced environment variables for workflow
+    sessionVariables = mkMerge [
+      # Task runner configuration
+      (mkIf cfg.taskRunners.just {
+        JUST_CHOOSER = "fzf";
+        JUST_UNSTABLE = "1";
+      })
 
-    # Testing configuration
-    (mkIf cfg.testing.pytest {
-      PYTEST_CURRENT_TEST = "1";
-    })
+      # Testing configuration
+      (mkIf cfg.testing.pytest {
+        PYTEST_CURRENT_TEST = "1";
+      })
 
-    # CI/CD configuration
-    (mkIf cfg.cicd.github_cli {
-      GH_PAGER = "less";
-      GH_EDITOR = "nvim";
-    })
-  ];
+      # CI/CD configuration
+      (mkIf cfg.cicd.github_cli {
+        GH_PAGER = "less";
+        GH_EDITOR = "nvim";
+      })
+    ];
 
-  # Note: Git configuration removed to avoid conflicts with existing git setup
-  # GitHub CLI integration is handled separately when gh is enabled
+    # Note: Git configuration removed to avoid conflicts with existing git setup
+    # GitHub CLI integration is handled separately when gh is enabled
 
-  # Development workflow scripts and configuration files
-  home.file = mkMerge [
-    # Pre-commit configuration
-    (mkIf cfg.cicd.pre_commit {
-      ".pre-commit-config.yaml".text = ''
-        # Enhanced pre-commit configuration for development workflow
-        repos:
-          - repo: https://github.com/pre-commit/pre-commit-hooks
-            rev: v4.4.0
-            hooks:
-              - id: trailing-whitespace
-              - id: end-of-file-fixer
-              - id: check-yaml
-              - id: check-json
-              - id: check-toml
-              - id: check-xml
-              - id: check-merge-conflict
-              - id: check-case-conflict
-              - id: mixed-line-ending
+    # Development workflow scripts and configuration files
+    file = mkMerge [
+      # Pre-commit configuration
+      (mkIf cfg.cicd.pre_commit {
+        ".pre-commit-config.yaml".text = ''
+          # Enhanced pre-commit configuration for development workflow
+          repos:
+            - repo: https://github.com/pre-commit/pre-commit-hooks
+              rev: v4.4.0
+              hooks:
+                - id: trailing-whitespace
+                - id: end-of-file-fixer
+                - id: check-yaml
+                - id: check-json
+                - id: check-toml
+                - id: check-xml
+                - id: check-merge-conflict
+                - id: check-case-conflict
+                - id: mixed-line-ending
 
-          # Nix-specific hooks
-          - repo: https://github.com/nix-community/nixpkgs-fmt
-            rev: v1.3.0
-            hooks:
-              - id: nixpkgs-fmt
+            # Nix-specific hooks
+            - repo: https://github.com/nix-community/nixpkgs-fmt
+              rev: v1.3.0
+              hooks:
+                - id: nixpkgs-fmt
 
-          # Additional language-specific hooks can be enabled here
-          # Python
-          # - repo: https://github.com/psf/black
-          #   rev: 23.1.0
-          #   hooks:
-          #     - id: black
+            # Additional language-specific hooks can be enabled here
+            # Python
+            # - repo: https://github.com/psf/black
+            #   rev: 23.1.0
+            #   hooks:
+            #     - id: black
 
-          # JavaScript/TypeScript
-          # - repo: https://github.com/pre-commit/mirrors-prettier
-          #   rev: v3.0.0-alpha.4
-          #   hooks:
-          #     - id: prettier
-      '';
-    })
-    # Development environment setup script
-    (mkIf cfg.taskRunners.just {
-      ".local/bin/dev-setup" = {
-        text = ''
-          #!/bin/sh
-          # Development environment setup script
-          echo "🚀 Setting up development environment..."
+            # JavaScript/TypeScript
+            # - repo: https://github.com/pre-commit/mirrors-prettier
+            #   rev: v3.0.0-alpha.4
+            #   hooks:
+            #     - id: prettier
+        '';
+      })
+      # Development environment setup script
+      (mkIf cfg.taskRunners.just {
+        ".local/bin/dev-setup" = {
+          text = ''
+            #!/bin/sh
+            # Development environment setup script
+            echo "🚀 Setting up development environment..."
 
-          # Initialize pre-commit if available
-          ${optionalString cfg.cicd.pre_commit ''
-            if [ -f .pre-commit-config.yaml ]; then
-              echo "📋 Installing pre-commit hooks..."
-              ${pkgs.pre-commit}/bin/pre-commit install
+            # Initialize pre-commit if available
+            ${optionalString cfg.cicd.pre_commit ''
+              if [ -f .pre-commit-config.yaml ]; then
+                echo "📋 Installing pre-commit hooks..."
+                ${pkgs.pre-commit}/bin/pre-commit install
+              fi
+            ''}
+
+            # Initialize justfile if it doesn't exist
+            if [ ! -f justfile ] && [ ! -f Justfile ]; then
+              echo "📝 Creating basic justfile..."
+              cat > justfile << 'EOF'
+            # Development workflow commands
+
+            # Show available commands
+            default:
+              @just --list
+
+            # Run tests
+            test:
+              echo "Running tests..."
+
+            # Format code
+            format:
+              echo "Formatting code..."
+
+            # Build project
+            build:
+              echo "Building project..."
+
+            # Clean build artifacts
+            clean:
+              echo "Cleaning build artifacts..."
+
+            # Start development server
+            dev:
+              echo "Starting development server..."
+            EOF
             fi
-          ''}
 
-          # Initialize justfile if it doesn't exist
-          if [ ! -f justfile ] && [ ! -f Justfile ]; then
-            echo "📝 Creating basic justfile..."
-            cat > justfile << 'EOF'
-          # Development workflow commands
+            echo "✅ Development environment ready!"
+          '';
+          executable = true;
+        };
+      })
 
-          # Show available commands
-          default:
-            @just --list
-
-          # Run tests
-          test:
-            echo "Running tests..."
-
-          # Format code
-          format:
-            echo "Formatting code..."
-
-          # Build project
-          build:
-            echo "Building project..."
-
-          # Clean build artifacts
-          clean:
-            echo "Cleaning build artifacts..."
-
-          # Start development server
-          dev:
-            echo "Starting development server..."
-          EOF
-          fi
-
-          echo "✅ Development environment ready!"
-        '';
-        executable = true;
-      };
-    })
-
-    # Project statistics script
-    (mkIf cfg.testing.tokei {
-      ".local/bin/project-stats" = {
-        text = ''
-          #!/bin/sh
-          # Project statistics and analysis
-          echo "📊 Project Statistics"
-          echo "===================="
-          echo
-
-          # Code statistics
-          echo "📝 Code Statistics:"
-          ${pkgs.tokei}/bin/tokei
-          echo
-
-          # Git statistics
-          if [ -d .git ]; then
-            echo "🔗 Git Statistics:"
-            echo "Total commits: $(git rev-list --all --count)"
-            echo "Contributors: $(git shortlog -sn | wc -l)"
-            echo "Current branch: $(git branch --show-current)"
-            echo "Last commit: $(git log -1 --format='%cr')"
+      # Project statistics script
+      (mkIf cfg.testing.tokei {
+        ".local/bin/project-stats" = {
+          text = ''
+            #!/bin/sh
+            # Project statistics and analysis
+            echo "📊 Project Statistics"
+            echo "===================="
             echo
-          fi
 
-          # Directory size
-          echo "📁 Directory Size:"
-          du -sh . 2>/dev/null || echo "Unable to calculate directory size"
-          echo
+            # Code statistics
+            echo "📝 Code Statistics:"
+            ${pkgs.tokei}/bin/tokei
+            echo
 
-          # Recent activity
-          if [ -d .git ]; then
-            echo "⏰ Recent Activity (last 10 commits):"
-            git log --oneline -10
-          fi
-        '';
-        executable = true;
-      };
-    })
+            # Git statistics
+            if [ -d .git ]; then
+              echo "🔗 Git Statistics:"
+              echo "Total commits: $(git rev-list --all --count)"
+              echo "Contributors: $(git shortlog -sn | wc -l)"
+              echo "Current branch: $(git branch --show-current)"
+              echo "Last commit: $(git log -1 --format='%cr')"
+              echo
+            fi
 
-    # Development workflow helper
-    {
-      ".local/bin/dev-help" = {
-        text = ''
-          #!/bin/sh
-          # Development workflow help
-          echo "🛠️  Development Workflow Tools"
-          echo "=============================="
-          echo
+            # Directory size
+            echo "📁 Directory Size:"
+            du -sh . 2>/dev/null || echo "Unable to calculate directory size"
+            echo
 
-          echo "📋 Available Tools:"
-          ${optionalString cfg.taskRunners.just ''echo "  just          - Task runner (j, jl, jr)"''}
-          ${optionalString cfg.cicd.github_cli ''echo "  gh            - GitHub CLI (gh-pr, gh-status)"''}
-          ${optionalString cfg.networking.httpie ''echo "  http          - HTTP client (http-get, http-post)"''}
-          ${optionalString cfg.testing.hyperfine ''echo "  hyperfine     - Benchmarking tool"''}
-          ${optionalString cfg.networking.jq ''echo "  jq            - JSON processor (pretty-json, json-keys)"''}
-          ${optionalString cfg.monitoring.btop ''echo "  btop          - Process monitor (top)"''}
-          echo
+            # Recent activity
+            if [ -d .git ]; then
+              echo "⏰ Recent Activity (last 10 commits):"
+              git log --oneline -10
+            fi
+          '';
+          executable = true;
+        };
+      })
 
-          echo "📝 Quick Commands:"
-          echo "  dev-setup     - Initialize development environment"
-          ${optionalString cfg.testing.tokei ''echo "  project-stats - Show project statistics"''}
-          echo "  dev-help      - Show this help"
-          echo
+      # Development workflow helper
+      {
+        ".local/bin/dev-help" = {
+          text = ''
+            #!/bin/sh
+            # Development workflow help
+            echo "🛠️  Development Workflow Tools"
+            echo "=============================="
+            echo
 
-          echo "📚 Documentation:"
-          echo "  All tools are configured with sensible defaults and enhanced aliases."
-          echo "  Check individual tool help with: <tool> --help"
-        '';
-        executable = true;
-      };
-    }
-  ];
+            echo "📋 Available Tools:"
+            ${optionalString cfg.taskRunners.just ''echo "  just          - Task runner (j, jl, jr)"''}
+            ${optionalString cfg.cicd.github_cli ''echo "  gh            - GitHub CLI (gh-pr, gh-status)"''}
+            ${optionalString cfg.networking.httpie ''echo "  http          - HTTP client (http-get, http-post)"''}
+            ${optionalString cfg.testing.hyperfine ''echo "  hyperfine     - Benchmarking tool"''}
+            ${optionalString cfg.networking.jq ''echo "  jq            - JSON processor (pretty-json, json-keys)"''}
+            ${optionalString cfg.monitoring.btop ''echo "  btop          - Process monitor (top)"''}
+            echo
+
+            echo "📝 Quick Commands:"
+            echo "  dev-setup     - Initialize development environment"
+            ${optionalString cfg.testing.tokei ''echo "  project-stats - Show project statistics"''}
+            echo "  dev-help      - Show this help"
+            echo
+
+            echo "📚 Documentation:"
+            echo "  All tools are configured with sensible defaults and enhanced aliases."
+            echo "  Check individual tool help with: <tool> --help"
+          '';
+          executable = true;
+        };
+      }
+    ];
+  };
 }

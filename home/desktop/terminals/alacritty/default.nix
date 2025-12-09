@@ -34,9 +34,11 @@ in
           }
         ];
 
-        window.startup_mode = "Windowed";
-        window.decorations = "full";
-        window.blur = true;
+        window = {
+          startup_mode = "Windowed";
+          decorations = "full";
+          blur = true;
+        };
         scrolling.history = 10000;
         selection.save_to_clipboard = true;
         terminal.osc52 = "CopyPaste";

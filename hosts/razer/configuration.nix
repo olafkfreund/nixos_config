@@ -43,22 +43,8 @@ in
     # Choose networking profile: "desktop", "server", or "minimal"
     profile = "desktop";
 
-    # Tailscale VPN Configuration - Razer mobile laptop
-    tailscale = {
-      enable = true;
-      authKeyFile = config.age.secrets.tailscale-auth-key.path;
-      hostname = "razer-laptop";
-      acceptRoutes = true;
-      acceptDns = false; # Keep NetworkManager DNS
-      ssh = true;
-      shields = true;
-      useRoutingFeatures = "client"; # Client that accepts routes
-      extraUpFlags = [
-        "--operator=olafkfreund"
-        "--accept-risk=lose-ssh"
-        # "--advertise-tags=tag:laptop,tag:mobile"  # Disabled - tags not permitted
-      ];
-    };
+    # Note: Tailscale is enabled via services.tailscale (built-in NixOS module)
+    # Custom networking.tailscale module was removed during anti-pattern cleanup
 
     # Use NetworkManager for simple network management
     networkmanager = {
@@ -79,6 +65,13 @@ in
     nameservers = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
 
     # Firewall configuration for remote desktop moved to features.gnome-remote-desktop
+  };
+
+  # Tailscale VPN using built-in NixOS service
+  services.tailscale = {
+    enable = true;
+    useRoutingFeatures = "client"; # Accept routes from other nodes
+    openFirewall = true;
   };
 
   # Use AI provider defaults with laptop profile (disables Ollama for battery life)
@@ -181,7 +174,7 @@ in
   };
 
   # Use GDM instead of COSMIC greeter until bug is fixed
-  services.xserver.displayManager.gdm.enable = true;
+  # Note: Using new services.displayManager.gdm.enable below
 
   # Enable NixOS package monitoring tools
   tools.nixpkgs-monitors = {
@@ -236,14 +229,14 @@ in
     desktopManager.gnome.enable = true;
   };
 
-  # Display manager - Disable GDM to use COSMIC Greeter
-  services.displayManager.gdm.enable = lib.mkForce false;
+  # Display manager - Use GDM (COSMIC greeter disabled due to libEGL.so.1 bug)
+  services.displayManager.gdm.enable = true;
 
   # Hardware and service specific configurations
   services = {
     playerctld.enable = true;
     fwupd.enable = true;
-    ollama.acceleration = vars.acceleration;
+    ollama.package = pkgs.ollama-cuda; # NVIDIA GPU acceleration
     nfs.server = lib.mkIf vars.services.nfs.enable {
       enable = true;
       inherit (vars.services.nfs) exports;
@@ -350,7 +343,7 @@ in
 
   # Override GNOME Shell to remove problematic dark mode patch
   nixpkgs.overlays = [
-    (final: prev: {
+    (_final: prev: {
       gnome-shell = prev.gnome-shell.overrideAttrs (old: {
         patches = builtins.filter
           (patch: !lib.hasSuffix "shell_remove_dark_mode.patch" (toString patch))

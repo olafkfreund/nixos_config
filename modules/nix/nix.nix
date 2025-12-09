@@ -19,29 +19,31 @@
     flake = "github:olafkfreund/nixos_config";
   };
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  nix.settings.trusted-users = [ "root" "olafkfreund" ];
-  nix.settings.http-connections = 50;
-  nix.settings.warn-dirty = false;
-  nix.settings.log-lines = 50;
-  nix.settings.sandbox = "relaxed";
-  nix.settings.auto-optimise-store = true;
-  nix.settings.max-jobs = "auto";
-  nix.settings.cores = 0;
+  nix.settings = {
+    experimental-features = [ "nix-command" "flakes" ];
+    trusted-users = [ "root" "olafkfreund" ];
+    http-connections = 50;
+    warn-dirty = false;
+    log-lines = 50;
+    sandbox = "relaxed";
+    auto-optimise-store = true;
+    max-jobs = "auto";
+    cores = 0;
 
-  # Maximize cache usage, allow local builds as fallback
-  nix.settings.builders-use-substitutes = true;
-  nix.settings.substitute = true;
-  nix.settings.max-substitution-jobs = 128;
-  nix.settings.fallback = true; # Build locally if substitute not available
+    # Maximize cache usage, allow local builds as fallback
+    builders-use-substitutes = true;
+    substitute = true;
+    max-substitution-jobs = 128;
+    fallback = true; # Build locally if substitute not available
 
-  # Binary cache configuration for p620
-  nix.settings.trusted-substituters = [
-    "http://192.168.1.97:5000" # Use your p620's actual hostname or IP address here
-  ];
-  nix.settings.trusted-public-keys = [
-    "p620-nix-serve:mZR6o5z5KcWeu4PVXgjHA7vb1sHQgRdWMKQt8x3a4rU="
-  ];
+    # Binary cache configuration for p620
+    trusted-substituters = [
+      "http://192.168.1.97:5000" # Use your p620's actual hostname or IP address here
+    ];
+    trusted-public-keys = [
+      "p620-nix-serve:mZR6o5z5KcWeu4PVXgjHA7vb1sHQgRdWMKQt8x3a4rU="
+    ];
+  };
 
   # Package permissions - security-focused configuration
   nixpkgs.config = {

@@ -41,40 +41,44 @@ in
   };
 
   config = mkIf (emailCfg.enable && cfg.enable) {
-    # Enable OAuth2 if selected
-    features.email.auth.oauth2.enable = cfg.method == "oauth2";
+    features.email.auth = {
+      # Enable OAuth2 if selected
+      oauth2 = {
+        enable = cfg.method == "oauth2";
 
-    # Configure OAuth2 accounts if method is oauth2
-    features.email.auth.oauth2.accounts = mkIf (cfg.method == "oauth2") {
-      primary = {
-        email = emailCfg.accounts.primary;
-        refreshTokenFile = "/run/agenix/gmail-oauth2-refresh-token-primary";
-        accessTokenFile = "/tmp/neomutt-oauth2-access-token-primary";
+        # Configure OAuth2 accounts if method is oauth2
+        accounts = mkIf (cfg.method == "oauth2") {
+          primary = {
+            email = emailCfg.accounts.primary;
+            refreshTokenFile = "/run/agenix/gmail-oauth2-refresh-token-primary";
+            accessTokenFile = "/tmp/neomutt-oauth2-access-token-primary";
+          };
+
+          secondary = {
+            email = emailCfg.accounts.secondary;
+            refreshTokenFile = "/run/agenix/gmail-oauth2-refresh-token-secondary";
+            accessTokenFile = "/tmp/neomutt-oauth2-access-token-secondary";
+          };
+        };
+
+        # Configure OAuth2 client credentials
+        clientCredentials = mkIf (cfg.method == "oauth2") {
+          clientId = "YOUR_GMAIL_OAUTH2_CLIENT_ID_HERE"; # To be configured
+          clientSecretFile = "/run/agenix/gmail-oauth2-client-secret";
+        };
       };
 
-      secondary = {
-        email = emailCfg.accounts.secondary;
-        refreshTokenFile = "/run/agenix/gmail-oauth2-refresh-token-secondary";
-        accessTokenFile = "/tmp/neomutt-oauth2-access-token-secondary";
-      };
-    };
+      # Configure app passwords if selected
+      appPasswords = mkIf (cfg.method == "app-password") {
+        primary = {
+          email = emailCfg.accounts.primary;
+          passwordFile = "/run/agenix/gmail-app-password-primary";
+        };
 
-    # Configure OAuth2 client credentials
-    features.email.auth.oauth2.clientCredentials = mkIf (cfg.method == "oauth2") {
-      clientId = "YOUR_GMAIL_OAUTH2_CLIENT_ID_HERE"; # To be configured
-      clientSecretFile = "/run/agenix/gmail-oauth2-client-secret";
-    };
-
-    # Configure app passwords if selected
-    features.email.auth.appPasswords = mkIf (cfg.method == "app-password") {
-      primary = {
-        email = emailCfg.accounts.primary;
-        passwordFile = "/run/agenix/gmail-app-password-primary";
-      };
-
-      secondary = {
-        email = emailCfg.accounts.secondary;
-        passwordFile = "/run/agenix/gmail-app-password-secondary";
+        secondary = {
+          email = emailCfg.accounts.secondary;
+          passwordFile = "/run/agenix/gmail-app-password-secondary";
+        };
       };
     };
 

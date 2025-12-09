@@ -132,9 +132,28 @@ in
         '')
       ];
 
-    # GNOME Remote Desktop for RDP support (works with COSMIC/Wayland)
-    services.gnome.gnome-remote-desktop.enable =
-      cfg.protocol == "rdp" || cfg.protocol == "both";
+    # Services configuration block
+    services = {
+      # GNOME Remote Desktop for RDP support (works with COSMIC/Wayland)
+      gnome.gnome-remote-desktop.enable =
+        cfg.protocol == "rdp" || cfg.protocol == "both";
+
+      # Enable Avahi for service discovery
+      avahi = {
+        enable = true;
+        nssmdns4 = true;
+        publish = {
+          enable = true;
+          addresses = true;
+          userServices = true;
+          domain = true;
+        };
+      };
+
+      # Disable autologin for security
+      displayManager.autoLogin.enable = lib.mkForce false;
+      getty.autologinUser = lib.mkForce null;
+    };
 
     # Configure systemd services and power management
     systemd = mkMerge [
@@ -167,24 +186,14 @@ in
 
       # Disable power management if requested
       (mkIf cfg.disablePowerManagement {
-        targets.sleep.enable = false;
-        targets.suspend.enable = false;
-        targets.hibernate.enable = false;
-        targets.hybrid-sleep.enable = false;
+        targets = {
+          sleep.enable = false;
+          suspend.enable = false;
+          hibernate.enable = false;
+          hybrid-sleep.enable = false;
+        };
       })
     ];
-
-    # Enable Avahi for service discovery
-    services.avahi = {
-      enable = true;
-      nssmdns4 = true;
-      publish = {
-        enable = true;
-        addresses = true;
-        userServices = true;
-        domain = true;
-      };
-    };
 
     # Firewall configuration
     networking.firewall = {
@@ -207,10 +216,6 @@ in
       # Prevent COSMIC from locking screen automatically
       COSMIC_DISABLE_LOCK = "1";
     };
-
-    # Disable autologin for security
-    services.displayManager.autoLogin.enable = lib.mkForce false;
-    services.getty.autologinUser = lib.mkForce null;
 
     # Security hardening
     security.pam.services.login.limits = [

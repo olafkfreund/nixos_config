@@ -45,68 +45,55 @@ in
     # Choose networking profile: "desktop", "server", or "minimal"
     profile = "desktop"; # Switch to desktop profile for GNOME NetworkManager integration
 
-    tailscale = {
-      enable = true;
-      authKeyFile = config.age.secrets.tailscale-auth-key.path;
-      hostname = "p620-workstation";
-      subnet = "192.168.1.0/24"; # Advertise local subnet
-      acceptRoutes = true;
-      acceptDns = false; # CRITICAL: Prevent Tailscale DNS conflicts with systemd-resolved
-      ssh = true;
-      shields = true;
-      useRoutingFeatures = "both"; # Can route and accept routes
-      extraUpFlags = [
-        "--operator=olafkfreund"
-        "--accept-risk=lose-ssh"
-      ];
-    };
+    # Note: Tailscale is enabled via services.tailscale (built-in NixOS module)
+    # Custom networking.tailscale module was removed during anti-pattern cleanup
 
     # NetworkManager configuration with explicit DNS management
     networkmanager = {
       dns = lib.mkForce "default"; # Force NetworkManager to handle DNS directly
     };
 
-    # Network performance tuning - disabled
-    performanceTuning = {
-      enable = false;
-      profile = "throughput";
-
-      tcpOptimization = {
-        enable = true;
-        congestionControl = "bbr";
-        windowScaling = true;
-        fastOpen = true;
-        lowLatency = false; # Prioritize throughput over latency
-      };
-
-      bufferOptimization = {
-        enable = true;
-        receiveBuffer = 33554432; # 32MB for high-throughput AI workloads
-        sendBuffer = 33554432; # 32MB for high-throughput AI workloads
-        autotuning = true;
-      };
-
-      interHostOptimization = {
-        enable = true;
-        hosts = [ "dex5550" "p510" "razer" ];
-        jumboFrames = false; # Keep disabled for compatibility
-        routeOptimization = true;
-      };
-
-      dnsOptimization = {
-        enable = true;
-        caching = true;
-        parallelQueries = true;
-        customServers = [ "192.168.1.222" "1.1.1.1" ];
-      };
-
-      monitoringOptimization = {
-        enable = true;
-        compression = true;
-        batchingInterval = 5; # More frequent for performance workstation
-        prioritization = true;
-      };
-    };
+    # Network performance tuning - removed (module deleted during anti-pattern cleanup)
+    # performanceTuning = {
+    #   enable = false;
+    #   profile = "throughput";
+    #
+    #   tcpOptimization = {
+    #     enable = true;
+    #     congestionControl = "bbr";
+    #     windowScaling = true;
+    #     fastOpen = true;
+    #     lowLatency = false; # Prioritize throughput over latency
+    #   };
+    #
+    #   bufferOptimization = {
+    #     enable = true;
+    #     receiveBuffer = 33554432; # 32MB for high-throughput AI workloads
+    #     sendBuffer = 33554432; # 32MB for high-throughput AI workloads
+    #     autotuning = true;
+    #   };
+    #
+    #   interHostOptimization = {
+    #     enable = true;
+    #     hosts = [ "dex5550" "p510" "razer" ];
+    #     jumboFrames = false; # Keep disabled for compatibility
+    #     routeOptimization = true;
+    #   };
+    #
+    #   dnsOptimization = {
+    #     enable = true;
+    #     caching = true;
+    #     parallelQueries = true;
+    #     customServers = [ "192.168.1.222" "1.1.1.1" ];
+    #   };
+    #
+    #   monitoringOptimization = {
+    #     enable = true;
+    #     compression = true;
+    #     batchingInterval = 5; # More frequent for performance workstation
+    #     prioritization = true;
+    #   };
+    # };
 
     # Firewall configuration for SSH and remote desktop
     firewall = {
@@ -135,6 +122,13 @@ in
         iptables -D INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name SSH_LIMIT -j DROP 2>/dev/null || true
       '';
     };
+  };
+
+  # Tailscale VPN using built-in NixOS service
+  services.tailscale = {
+    enable = true;
+    useRoutingFeatures = "both"; # Can route and accept routes
+    openFirewall = true;
   };
 
   # Use AI provider defaults with workstation profile
@@ -326,40 +320,9 @@ in
       ];
     };
 
-    # Performance Optimization Configuration - disabled
-    # High-performance AMD workstation profile
-    resourceManager = {
-      enable = false;
-      profile = "performance";
-
-      cpuManagement = {
-        enable = true;
-        dynamicGovernor = true;
-        affinityOptimization = true;
-        coreReservation = false; # Use all cores for maximum performance
-      };
-
-      memoryManagement = {
-        enable = true;
-        dynamicSwap = true;
-        hugePagesOptimization = true;
-        memoryCompression = false; # Disable for performance
-        oomProtection = true;
-      };
-
-      ioManagement = {
-        enable = true;
-        dynamicScheduler = true;
-        ioNiceOptimization = true;
-        cacheOptimization = true;
-      };
-
-      networkManagement = {
-        enable = true;
-        trafficShaping = false;
-        connectionOptimization = true;
-      };
-    };
+    # Performance Optimization Configuration - REMOVED
+    # The system.resourceManager module was removed during anti-pattern cleanup
+    # Module had root services and is no longer needed
 
     # System version
     stateVersion = "25.11";
@@ -687,7 +650,7 @@ in
 
   # Fix broken GNOME Shell patch in nixpkgs (shell_remove_dark_mode.patch failing on 49.1)
   nixpkgs.overlays = [
-    (final: prev: {
+    (_final: prev: {
       gnome-shell = prev.gnome-shell.overrideAttrs (oldAttrs: {
         patches = builtins.filter
           (patch:

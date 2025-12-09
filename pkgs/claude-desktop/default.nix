@@ -2,14 +2,10 @@
 , stdenv
 , fetchurl
 , makeWrapper
-, electron
 , p7zip
-, asar
 , imagemagick
-, icoutils
-, perl
 , buildFHSEnv
-, dpkg
+
 }:
 
 let
