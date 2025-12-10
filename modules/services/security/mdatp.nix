@@ -342,6 +342,5 @@ in
 
   meta = {
     maintainers = with lib.maintainers; [ ];
-    doc = ./mdatp.md;
   };
 }
