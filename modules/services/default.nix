@@ -30,6 +30,9 @@ _: {
     # System management services
     ./nixos-update-checker/default.nix
 
+    # Security services
+    ./security/mdatp.nix
+
     # Microsoft Intune Company Portal (custom package with version control)
     ./intune-portal.nix
   ];

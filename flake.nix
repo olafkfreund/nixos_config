@@ -357,6 +357,11 @@
           kosli-cli = pkgs.callPackage ./pkgs/kosli-cli { };
           opencode = pkgs.callPackage ./home/development/opencode { };
 
+          # Security tools
+          mdatp = pkgs.callPackage ./pkgs/microsoft-defender-for-endpoint {
+            inherit (pkgs) buildFHSEnv;
+          };
+
           # Icon themes
           neuwaita-icon-theme = pkgs.stdenvNoCC.mkDerivation {
             pname = "neuwaita-icon-theme";
