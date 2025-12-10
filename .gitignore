@@ -20,3 +20,4 @@ Thumbs.db
 
 # Secrets management - plaintext secrets only
 # Note: .age files (encrypted) should be committed, plaintext should not
+pkgs/microsoft-defender-for-endpoint/mdatp.deb
