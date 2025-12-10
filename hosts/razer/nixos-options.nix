@@ -41,8 +41,8 @@
   # VPN
   vpn.tailscale.enable = lib.mkForce true;
 
-  # AI
-  ai.ollama.enable = lib.mkForce true;
+  # AI (Ollama disabled on mobile hosts for resource optimization - Issue #67)
+  ai.ollama.enable = lib.mkForce false;
 
   # Printing
   services.print.enable = lib.mkForce true;
