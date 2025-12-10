@@ -2,7 +2,8 @@
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelPackages = pkgs.linuxPackages; # Use stable kernel for NVIDIA legacy driver compatibility
+  # Use kernel 6.18 for improved NVIDIA driver compatibility (Issue #66)
+  boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.plymouth.enable = true;
 
   # Xeon E5-2698 v4 Optimizations
