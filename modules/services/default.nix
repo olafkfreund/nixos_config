@@ -29,5 +29,8 @@ _: {
 
     # System management services
     ./nixos-update-checker/default.nix
+
+    # Microsoft Intune Company Portal (custom package with version control)
+    ./intune-portal.nix
   ];
 }
