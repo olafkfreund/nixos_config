@@ -63,6 +63,7 @@ in
     ./theme.nix
     ./extensions.nix
     ./apps.nix
+    ./authenticator.nix
     ./keybindings.nix
   ];
 
