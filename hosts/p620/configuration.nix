@@ -284,6 +284,13 @@ in
       installAllApps = true;
       disableOsd = true; # Workaround for polkit agent crashes in COSMIC beta
     };
+
+    # Microsoft Intune Company Portal (custom package with version control)
+    intune = {
+      enable = true;
+      autoStart = false; # Manual launch - start from application menu as needed
+      enableDesktopIntegration = true;
+    };
   };
 
   # Use GDM instead of COSMIC greeter until bug is fixed

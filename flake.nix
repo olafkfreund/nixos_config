@@ -185,6 +185,10 @@
         (final: _prev: {
           glim = final.callPackage ./overlays/glim { };
         })
+        # Custom package: intune-portal - Microsoft Intune Company Portal with version control
+        (final: _prev: {
+          intune-portal = final.callPackage ./pkgs/intune-portal { };
+        })
         # Fix CMake version compatibility issues for packages requiring CMake < 3.5
         (_final: prev: {
           clblast = prev.clblast.overrideAttrs (oldAttrs: {
@@ -349,6 +353,7 @@
           };
           gemini-cli = pkgs.callPackage ./pkgs/gemini-cli { };
           glim = pkgs.callPackage ./overlays/glim { };
+          intune-portal = pkgs.callPackage ./pkgs/intune-portal { };
           kosli-cli = pkgs.callPackage ./pkgs/kosli-cli { };
           opencode = pkgs.callPackage ./home/development/opencode { };
 
