@@ -94,12 +94,6 @@ in
       }))
     ];
 
-    # Ensure secrets directory exists
-    system.activationScripts.agenix-setup = ''
-      mkdir -p /run/agenix
-      chmod 755 /run/agenix
-    '';
-
     # Warning when secrets directory doesn't exist
     warnings =
       optional (!builtins.pathExists ../../secrets)
