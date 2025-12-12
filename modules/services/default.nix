@@ -35,5 +35,8 @@ _: {
 
     # Microsoft Intune Company Portal (custom package with version control)
     ./intune-portal.nix
+
+    # Citrix Workspace for remote access
+    ./citrix-workspace.nix
   ];
 }

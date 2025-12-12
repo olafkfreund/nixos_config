@@ -180,6 +180,12 @@ in
     };
   };
 
+  # Citrix Workspace for client project remote access
+  services.citrix-workspace = {
+    enable = true;
+    acceptLicense = true; # Accept Citrix EULA for client project work
+  };
+
   # Use GDM instead of COSMIC greeter until bug is fixed
   # Note: Using new services.displayManager.gdm.enable below
 
