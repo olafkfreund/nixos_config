@@ -132,7 +132,7 @@ in
         Consider using XWayland or a pure X11 session for Citrix.
         See: https://docs.citrix.com/en-us/citrix-workspace-app-for-linux/system-requirements.html
       ''
-      ++ optional (config.services.xserver.displayManager.gdm.wayland or false) ''
+      ++ optional (config.services.displayManager.gdm.wayland or false) ''
         WARNING: GDM Wayland session detected.
         Citrix Workspace requires X11. Switch to X11 session or use XWayland.
       '';
