@@ -4,7 +4,7 @@ set -euo pipefail
 # Citrix Workspace Fetch Helper
 # This script helps download and prepare Citrix Workspace for NixOS
 
-VERSION="2508.10"
+VERSION="25.08.10.111"
 TARBALL="linuxx64-${VERSION}.tar.gz"
 DOWNLOAD_DIR="$(dirname "$0")"
 TARBALL_PATH="${DOWNLOAD_DIR}/${TARBALL}"

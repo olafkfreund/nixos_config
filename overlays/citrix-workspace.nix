@@ -1,6 +1,6 @@
 _final: prev:
 let
-  version = "2508.10";
+  version = "25.08.10.111";
   tarballName = "linuxx64-${version}.tar.gz";
   configDir = builtins.getEnv "PWD";
   localTarball = "${configDir}/pkgs/citrix-workspace/${tarballName}";
@@ -16,7 +16,7 @@ in
           src = prev.requireFile {
             name = tarballName;
             path = localTarball;
-            sha256 = "0000000000000000000000000000000000000000000000000000"; # Placeholder - will be updated after download
+            sha256 = "sha256-bd3ClxBRJgvjJW+waKBE31k9ePam+n2pHeSjlkvkDRo="; # Placeholder - will be updated after download
             message = ''
               Citrix Workspace package found at: ${localTarball}
 

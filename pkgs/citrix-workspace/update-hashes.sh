@@ -11,7 +11,7 @@ echo "=== Citrix Workspace Hash Update Helper ==="
 echo ""
 
 # Check if tarball exists
-TARBALL="${SCRIPT_DIR}/linuxx64-2508.10.tar.gz"
+TARBALL="${SCRIPT_DIR}/linuxx64-25.08.10.111.tar.gz"
 
 if [ ! -f "${TARBALL}" ]; then
   echo "❌ Error: Tarball not found!"

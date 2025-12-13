@@ -1,7 +1,7 @@
 { pkgs, lib, ... }:
 
 let
-  version = "2508.10";
+  version = "25.08.10.111";
   mainTarballName = "linuxx64-${version}.tar.gz";
   usbTarballName = "linuxx64-usb-${version}.tar.gz";
 
@@ -21,7 +21,7 @@ let
           src = pkgs.requireFile {
             name = mainTarballName;
             path = toString localMainTarball;
-            sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; # Will be updated after first download
+            sha256 = "sha256-bd3ClxBRJgvjJW+waKBE31k9ePam+n2pHeSjlkvkDRo="; # Will be updated after first download
             message = ''
               Citrix Workspace main package found at: ${toString localMainTarball}
 
@@ -61,7 +61,7 @@ let
           src = pkgs.requireFile {
             name = usbTarballName;
             path = toString localUsbTarball;
-            sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; # Will be updated after first download
+            sha256 = "sha256-bd3ClxBRJgvjJW+waKBE31k9ePam+n2pHeSjlkvkDRo="; # Will be updated after first download
             message = ''
               Citrix Workspace USB support package found at: ${toString localUsbTarball}
 
