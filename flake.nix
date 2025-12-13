@@ -189,6 +189,8 @@
         (final: _prev: {
           intune-portal = final.callPackage ./pkgs/intune-portal { };
         })
+        # Custom package: citrix-workspace - Citrix Workspace with USB support and local tarball management
+        (import ./overlays/citrix-workspace.nix)
         # Fix CMake version compatibility issues for packages requiring CMake < 3.5
         (_final: prev: {
           clblast = prev.clblast.overrideAttrs (oldAttrs: {
@@ -369,6 +371,10 @@
           mdatp = pkgs.callPackage ./pkgs/microsoft-defender-for-endpoint {
             inherit (pkgs) buildFHSEnv;
           };
+
+          # Enterprise tools
+          # NOTE: citrix-workspace is provided via overlay (overlays/citrix-workspace.nix)
+          # It requires manual tarball download - see pkgs/citrix-workspace/fetch-citrix.sh
 
           # Icon themes
           neuwaita-icon-theme = pkgs.stdenvNoCC.mkDerivation {
