@@ -38,19 +38,33 @@ in
       ];
     };
 
-    # Install Citrix Workspace
-    environment.systemPackages = [ cfg.package ];
+    # Environment configuration
+    environment = {
+      # Install Citrix Workspace
+      systemPackages = [ cfg.package ];
 
-    # Enable required system services
-    services.dbus.enable = true;
-    services.udisks2.enable = true;
+      # Required for Citrix ICA client
+      etc = {
+        "ica_section_userexperience".text = ''
+          [WFClient]
+          Version=2
+        '';
+      };
 
-    # Required for Citrix ICA client
-    environment.etc = {
-      "ica_section_userexperience".text = ''
-        [WFClient]
-        Version=2
-      '';
+      # Required libraries for Citrix Workspace
+      variables = {
+        ICAROOT = "${cfg.package}/opt/Citrix/ICAClient";
+      };
+    };
+
+    # System services
+    services = {
+      # Enable required system services
+      dbus.enable = true;
+      udisks2.enable = true;
+
+      # Desktop integration
+      xserver.desktopManager.xterm.enable = mkDefault true;
     };
 
     # Add Citrix certificates if needed
@@ -70,14 +84,8 @@ in
       ];
     };
 
-    # Required libraries for Citrix Workspace
-    environment.variables = {
-      ICAROOT = "${cfg.package}/opt/Citrix/ICAClient";
-    };
-
     # Desktop integration
     xdg.mime.enable = true;
-    services.xserver.desktopManager.xterm.enable = mkDefault true;
 
     # Warnings and assertions
     warnings = optional (!cfg.acceptLicense) ''

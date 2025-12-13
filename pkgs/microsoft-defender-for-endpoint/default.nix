@@ -11,7 +11,6 @@
 , fetchurl
 , buildFHSEnv
 , dpkg
-, makeWrapper
 , systemd
 , python3
 , glibc
@@ -57,7 +56,8 @@ let
     };
   };
 
-in buildFHSEnv {
+in
+buildFHSEnv {
   name = pname;
 
   # Define target packages available in the FHS environment
@@ -147,7 +147,7 @@ in buildFHSEnv {
     changelog = "https://learn.microsoft.com/en-us/defender-endpoint/linux-whatsnew";
     sourceProvenance = with sourceTypes; [ binaryNativeCode ];
     license = licenses.unfree;
-    maintainers = [ ];  # Add maintainer info
+    maintainers = [ ]; # Add maintainer info
     platforms = platforms.linux;
     mainProgram = "mdatp";
 
