@@ -182,7 +182,7 @@ in
 
   # Citrix Workspace for client project remote access
   services.citrix-workspace = {
-    enable = true;
+    enable = true; # Enabled with version 25.08.10.111
     acceptLicense = true; # Accept Citrix EULA for client project work
   };
 

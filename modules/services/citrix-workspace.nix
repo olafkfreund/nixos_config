@@ -34,23 +34,70 @@ in
       allowBroken = true;
       permittedInsecurePackages = [
         "libsoup-2.74.3"
+        # Note: webkit2gtk-4.0 is now bundled directly in Citrix Workspace 2508.10+
+        # to resolve Ubuntu 24.04+ compatibility issues. The permission below may
+        # no longer be needed but is kept for compatibility with older nixpkgs versions.
+        # See: https://docs.citrix.com/en-us/citrix-workspace-app-for-linux/system-requirements.html
         "webkitgtk-2.42.4"
       ];
     };
 
-    # Install Citrix Workspace
-    environment.systemPackages = [ cfg.package ];
+    # Environment configuration
+    environment = {
+      # Install Citrix Workspace and required dependencies
+      systemPackages = with pkgs; [
+        cfg.package
 
-    # Enable required system services
-    services.dbus.enable = true;
-    services.udisks2.enable = true;
+        # Required system libraries per Citrix documentation
+        gtk2
+        gtk3
+        libva
+        json_c # JSON-C library for configuration parsing
+        curl # Required for cloud authentication (7.68+ with OpenSSL)
 
-    # Required for Citrix ICA client
-    environment.etc = {
-      "ica_section_userexperience".text = ''
-        [WFClient]
-        Version=2
-      '';
+        # Audio codecs (Speex and Vorbis)
+        speex
+        libvorbis
+
+        # Multimedia support (GStreamer for multimedia redirection)
+        gst_all_1.gstreamer
+        gst_all_1.gst-plugins-base
+        gst_all_1.gst-plugins-good
+        gst_all_1.gst-plugins-bad
+        gst_all_1.gst-plugins-ugly
+      ];
+
+      # Required for Citrix ICA client
+      etc = {
+        "ica_section_userexperience".text = ''
+          [WFClient]
+          Version=2
+        '';
+      };
+
+      # Required libraries for Citrix Workspace
+      variables = {
+        ICAROOT = "${cfg.package}/opt/Citrix/ICAClient";
+      };
+    };
+
+    # System services
+    services = {
+      # Enable required system services
+      dbus.enable = true;
+      udisks2.enable = true;
+
+      # Desktop integration
+      xserver.desktopManager.xterm.enable = mkDefault true;
+    };
+
+    # USB support (udev is enabled by default in NixOS)
+    services.udev.enable = true;
+
+    # Hardware support
+    hardware = {
+      # OpenGL/Video acceleration (required for HDX)
+      graphics.enable = true;
     };
 
     # Add Citrix certificates if needed
@@ -70,25 +117,38 @@ in
       ];
     };
 
-    # Required libraries for Citrix Workspace
-    environment.variables = {
-      ICAROOT = "${cfg.package}/opt/Citrix/ICAClient";
-    };
-
     # Desktop integration
     xdg.mime.enable = true;
-    services.xserver.desktopManager.xterm.enable = mkDefault true;
 
     # Warnings and assertions
-    warnings = optional (!cfg.acceptLicense) ''
-      Citrix Workspace requires accepting the EULA.
-      Set services.citrix-workspace.acceptLicense = true after reviewing the license.
-    '';
+    warnings =
+      optional (!cfg.acceptLicense) ''
+        Citrix Workspace requires accepting the EULA.
+        Set services.citrix-workspace.acceptLicense = true after reviewing the license.
+      ''
+      ++ optional (config.programs.hyprland.enable or false) ''
+        WARNING: Citrix Workspace officially supports X11 only.
+        Wayland (including Hyprland) is NOT officially supported and may have issues.
+        Consider using XWayland or a pure X11 session for Citrix.
+        See: https://docs.citrix.com/en-us/citrix-workspace-app-for-linux/system-requirements.html
+      ''
+      ++ optional (config.services.xserver.displayManager.gdm.wayland or false) ''
+        WARNING: GDM Wayland session detected.
+        Citrix Workspace requires X11. Switch to X11 session or use XWayland.
+      '';
 
     assertions = [
       {
-        assertion = cfg.enable -> config.services.xserver.enable || config.programs.hyprland.enable;
-        message = "Citrix Workspace requires a desktop environment (X11 or Wayland)";
+        assertion = cfg.enable -> (config.services.xserver.enable || config.programs.hyprland.enable);
+        message = "Citrix Workspace requires a desktop environment (X11 or XWayland)";
+      }
+      {
+        assertion = cfg.enable -> cfg.acceptLicense;
+        message = ''
+          Citrix Workspace requires EULA acceptance.
+          Set services.citrix-workspace.acceptLicense = true after reviewing:
+          https://www.citrix.com/downloads/workspace-app/linux/workspace-app-for-linux-latest.html
+        '';
       }
     ];
   };

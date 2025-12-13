@@ -294,8 +294,9 @@ in
   };
 
   # Citrix Workspace for client project remote access
+  # TODO: Complete manual tarball download - see docs/CITRIX-WORKSPACE-SETUP.md
   services.citrix-workspace = {
-    enable = true;
+    enable = true; # Enabled with version 25.08.10.111
     acceptLicense = true; # Accept Citrix EULA for client project work
   };
 

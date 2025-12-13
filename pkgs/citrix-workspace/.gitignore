@@ -1,0 +1,6 @@
+# Ignore Citrix Workspace tarballs (large binary files)
+*.tar.gz
+*.tgz
+
+# Keep the fetch script
+!fetch-citrix.sh
