@@ -134,19 +134,45 @@ in
     environment = {
       systemPackages = [ cfg.package ];
 
-      users = {
-        # Create required system user and group
-        users.mdatp = {
-          isSystemUser = true;
-          group = "mdatp";
-          description = "Microsoft Defender for Endpoint";
-          home = "/var/opt/microsoft/mdatp";
-        };
+      # Write managed settings if configured
+      etc = mkMerge [
+        (mkIf (cfg.managedSettings != null) {
+          "opt/microsoft/mdatp/managed/mdatp_managed.json" = {
+            text = builtins.toJSON cfg.managedSettings;
+            mode = "0644";
+          };
+        })
+        (mkIf (cfg.onboardingFile != null) {
+          "opt/microsoft/mdatp/mdatp_onboard.json" = {
+            source = cfg.onboardingFile;
+            mode = "0600";
+          };
+        })
+      ];
 
-        groups.mdatp = { };
+      # Add helpful CLI aliases
+      shellAliases = {
+        mdatp-health = "${cfg.package}/bin/mdatp health";
+        mdatp-scan = "${cfg.package}/bin/mdatp scan quick";
+        mdatp-status = "systemctl status mdatp";
+        mdatp-logs = "journalctl -u mdatp -f";
+      };
+    };
 
-        # Security warnings in system message of the day
-        motd = mkAfter ''
+    # User configuration
+    users = {
+      # Create required system user and group
+      users.mdatp = {
+        isSystemUser = true;
+        group = "mdatp";
+        description = "Microsoft Defender for Endpoint";
+        home = "/var/opt/microsoft/mdatp";
+      };
+
+      groups.mdatp = { };
+
+      # Security warnings in system message of the day
+      motd = mkAfter ''
 
         Microsoft Defender for Endpoint is active on this system.
         - Service status: systemctl status mdatp
@@ -156,60 +182,29 @@ in
 
         Documentation: https://learn.microsoft.com/en-us/defender-endpoint/microsoft-defender-endpoint-linux
       '';
-      };
+    };
 
-      # Systemd configuration
-      systemd = {
-        # Set up required directories with proper permissions
-        tmpfiles.rules = [
-          # Main configuration directory
-          "d /etc/opt/microsoft 0755 root root -"
-          "d /etc/opt/microsoft/mdatp 0755 root root -"
-          "d /etc/opt/microsoft/mdatp/managed 0755 root root -"
+    # Systemd configuration
+    systemd = {
+      # Set up required directories with proper permissions
+      tmpfiles.rules = [
+        # Main configuration directory
+        "d /etc/opt/microsoft 0755 root root -"
+        "d /etc/opt/microsoft/mdatp 0755 root root -"
+        "d /etc/opt/microsoft/mdatp/managed 0755 root root -"
 
-          # Application directory
-          "d /opt/microsoft 0755 root root -"
-          "d /opt/microsoft/mdatp 0755 root root -"
+        # Application directory
+        "d /opt/microsoft 0755 root root -"
+        "d /opt/microsoft/mdatp 0755 root root -"
 
-          # State and data directory
-          "d /var/opt/microsoft 0755 root root -"
-          "d /var/opt/microsoft/mdatp 0750 mdatp mdatp -"
+        # State and data directory
+        "d /var/opt/microsoft 0755 root root -"
+        "d /var/opt/microsoft/mdatp 0750 mdatp mdatp -"
 
-          # Log directory
-          "d /var/log/microsoft 0755 root root -"
-          "d /var/log/microsoft/mdatp 0750 mdatp mdatp -"
-        ];
-
-        # Write managed settings if configured
-        etc = mkMerge [
-          (mkIf (cfg.managedSettings != null) {
-            "opt/microsoft/mdatp/managed/mdatp_managed.json" = {
-              text = builtins.toJSON cfg.managedSettings;
-              mode = "0644";
-            };
-          })
-          (mkIf (cfg.onboardingFile != null) {
-            "opt/microsoft/mdatp/mdatp_onboard.json" = {
-              source = cfg.onboardingFile;
-              mode = "0600";
-            };
-          })
-        ];
-
-        # Add helpful CLI aliases
-        shellAliases = {
-          mdatp-health = "${cfg.package}/bin/mdatp health";
-          mdatp-scan = "${cfg.package}/bin/mdatp scan quick";
-          mdatp-status = "systemctl status mdatp";
-          mdatp-logs = "journalctl -u mdatp -f";
-        };
-      };
-
-      # Bind mount the FHS environment to /opt/microsoft/mdatp
-      fileSystems."/opt/microsoft/mdatp" = {
-        device = "${cfg.package}/opt/microsoft/mdatp";
-        options = [ "bind" "ro" ];
-      };
+        # Log directory
+        "d /var/log/microsoft 0755 root root -"
+        "d /var/log/microsoft/mdatp 0750 mdatp mdatp -"
+      ];
 
       # Main systemd service
       services.mdatp = {
@@ -332,6 +327,12 @@ in
           NoNewPrivileges = true;
         };
       };
+    };
+
+    # Bind mount the FHS environment to /opt/microsoft/mdatp
+    fileSystems."/opt/microsoft/mdatp" = {
+      device = "${cfg.package}/opt/microsoft/mdatp";
+      options = [ "bind" "ro" ];
     };
 
     # Firewall configuration for Microsoft Defender endpoints
