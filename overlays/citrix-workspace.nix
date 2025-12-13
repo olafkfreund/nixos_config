@@ -2,49 +2,47 @@ _final: prev:
 let
   version = "25.08.10.111";
   tarballName = "linuxx64-${version}.tar.gz";
-  configDir = builtins.getEnv "PWD";
-  localTarball = "${configDir}/pkgs/citrix-workspace/${tarballName}";
-  tarballExists = builtins.pathExists localTarball;
 in
 {
-  citrix_workspace =
-    if tarballExists then
-    # Use local tarball if it exists
-      prev.citrix_workspace.overrideAttrs
-        (_oldAttrs: {
-          inherit version;
-          src = prev.requireFile {
-            name = tarballName;
-            path = localTarball;
-            sha256 = "sha256-bd3ClxBRJgvjJW+waKBE31k9ePam+n2pHeSjlkvkDRo="; # Placeholder - will be updated after download
-            message = ''
-              Citrix Workspace package found at: ${localTarball}
+  # Override citrix_workspace with local tarball
+  citrix_workspace = prev.citrix_workspace.overrideAttrs (_oldAttrs: {
+    inherit version;
+    src = prev.requireFile {
+      name = tarballName;
+      url = "https://www.citrix.com/downloads/workspace-app/linux/workspace-app-for-linux-latest.html";
+      sha256 = "sha256-bd3ClxBRJgvjJW+waKBE31k9ePam+n2pHeSjlkvkDRo=";
+      message = ''
+        ❌ Citrix Workspace ${version} tarball not found in Nix store!
 
-              If hash verification fails, run:
-                ./pkgs/citrix-workspace/fetch-citrix.sh
-            '';
-          };
-        })
-    else
-    # Provide helpful error message if tarball not found
-      throw ''
-        ❌ Citrix Workspace package not found!
+        📥 To install Citrix Workspace:
 
-        📥 To install Citrix Workspace version ${version}:
+        1. Download manually from Citrix:
+           https://www.citrix.com/downloads/workspace-app/linux/workspace-app-for-linux-latest.html
 
-        1. Run the download helper:
-           cd /home/olafkfreund/.config/nixos
-           ./pkgs/citrix-workspace/fetch-citrix.sh
+        2. Accept the EULA and download: ${tarballName}
+           (USB support is included - do NOT download separate .deb)
 
-        2. Follow the instructions to download ${tarballName}
-           (USB support is included in the main package)
+        3. Place the tarball in your config directory:
+           /home/olafkfreund/.config/nixos/pkgs/citrix-workspace/${tarballName}
 
-        3. Place the tarball in: pkgs/citrix-workspace/
+        4. Add to Nix store:
+           nix-store --add-fixed sha256 /home/olafkfreund/.config/nixos/pkgs/citrix-workspace/${tarballName}
 
-        4. Rebuild your system
+        5. Rebuild your system:
+           sudo nixos-rebuild switch
 
         See docs/CITRIX-WORKSPACE-SETUP.md for detailed instructions.
-
-        Expected file: ${localTarball}
       '';
+    };
+
+    # Ignore webkit2gtk and fuse3 dependencies
+    # webkit2gtk is bundled in Citrix 25.08.10.111+
+    # fuse3 is for filesystem redirection (optional feature)
+    # See: https://docs.citrix.com/en-us/citrix-workspace-app-for-linux/system-requirements.html
+    autoPatchelfIgnoreMissingDeps = [
+      "libwebkit2gtk-4.0.so.37"
+      "libjavascriptcoregtk-4.0.so.18"
+      "libfuse3.so.3"
+    ];
+  });
 }

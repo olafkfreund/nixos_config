@@ -52,7 +52,7 @@ in
         gtk2
         gtk3
         libva
-        libjson_c
+        json_c # JSON-C library for configuration parsing
         curl # Required for cloud authentication (7.68+ with OpenSSL)
 
         # Audio codecs (Speex and Vorbis)
@@ -89,9 +89,6 @@ in
 
       # Desktop integration
       xserver.desktopManager.xterm.enable = mkDefault true;
-
-      # PulseAudio for audio support (required by Citrix)
-      pulseaudio.enable = mkDefault true;
     };
 
     # USB support (udev is enabled by default in NixOS)
@@ -101,9 +98,6 @@ in
     hardware = {
       # OpenGL/Video acceleration (required for HDX)
       graphics.enable = true;
-
-      # PulseAudio hardware support
-      pulseaudio.enable = mkDefault true;
     };
 
     # Add Citrix certificates if needed
