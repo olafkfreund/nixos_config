@@ -39,6 +39,35 @@ nix-store --add-fixed sha256 linuxx64-25.08.10.111.tar.gz
 # /nix/store/xxxxx-linuxx64-25.08.10.111.tar.gz
 ```
 
+⚠️ **IMPORTANT FOR MULTI-HOST DEPLOYMENTS:**
+
+If deploying to multiple hosts (e.g., p620, razer, samsung), you must add the tarball to the Nix store on EACH host
+individually. The Nix store is host-specific and the tarball is not automatically shared between hosts.
+
+```bash
+# For each additional host, SSH in and run:
+ssh HOST "cd ~/.config/nixos/pkgs/citrix-workspace && nix-store --add-fixed sha256 linuxx64-25.08.10.111.tar.gz"
+
+# Example for razer:
+ssh razer "cd ~/.config/nixos/pkgs/citrix-workspace && nix-store --add-fixed sha256 linuxx64-25.08.10.111.tar.gz"
+
+# Example for samsung:
+ssh samsung "cd ~/.config/nixos/pkgs/citrix-workspace && nix-store --add-fixed sha256 linuxx64-25.08.10.111.tar.gz"
+```
+
+**Why is this needed?**
+
+- The tarball is manually downloaded (EULA requirement)
+- NixOS uses `requireFile` which checks the local Nix store
+- Each host has its own `/nix/store/` directory
+- The tarball must exist in each host's store before building
+
+**When does this apply?**
+
+- Initial deployment to a new host
+- After rebuilding a host from scratch
+- When the Nix store is cleared or corrupted
+
 ### **Step 3: Enable on Your Host**
 
 Citrix Workspace is already enabled on p620 and razer. To enable on additional hosts:
