@@ -143,7 +143,14 @@ in
     # Enable Obsidian MCP server for knowledge base access
     obsidian = {
       enable = true;
-      vaultPath = "/home/olafkfreund/Documents/Caliti";
+      implementation = "rest-api"; # Use REST API mode for full CRUD operations
+      vaultPath = "/home/olafkfreund/Documents/Caliti"; # Used for zero-dependency mode
+      restApi = {
+        apiKeyFile = config.age.secrets."obsidian-api-key".path;
+        host = "localhost";
+        port = 27123;
+        verifySsl = true;
+      };
     };
     # Enable additional MCP servers
     servers = {

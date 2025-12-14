@@ -149,6 +149,27 @@ in
       ollama = true;
       gemini-cli = true;
       claude-desktop = true; # Enable Claude Desktop GUI with MCP server support
+
+      # Enable MCP (Model Context Protocol) servers for AI integration
+      mcp = {
+        enable = true;
+        # Enable Obsidian MCP server for knowledge base access
+        obsidian = {
+          enable = true;
+          implementation = "rest-api"; # Use REST API mode for full CRUD operations
+          vaultPath = "/home/olafkfreund/Documents/Caliti"; # Used for zero-dependency mode
+          restApi = {
+            apiKeyFile = config.age.secrets."obsidian-api-key".path;
+            host = "localhost";
+            port = 27123;
+            verifySsl = true;
+          };
+        };
+        # Enable additional MCP servers
+        servers = {
+          terraform = true; # Infrastructure as Code support
+        };
+      };
     };
 
     programs = {
