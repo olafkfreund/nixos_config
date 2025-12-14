@@ -56,11 +56,11 @@ in
           # GitHub MCP server (if GitHub token available)
           // (lib.optionalAttrs (osConfig.age.secrets."api-github-token" or null != null) {
             github = {
-              command = "github-mcp-server";
+              command = "${pkgs.writeShellScript "github-mcp-wrapper" ''
+                export GITHUB_PERSONAL_ACCESS_TOKEN=$(cat ${osConfig.age.secrets."api-github-token".path})
+                exec ${pkgs.github-mcp-server}/bin/github-mcp-server "$@"
+              ''}";
               args = [ "stdio" ];
-              env = {
-                GITHUB_TOKEN_FILE = osConfig.age.secrets."api-github-token".path;
-              };
               description = "GitHub repository integration";
             };
           });
