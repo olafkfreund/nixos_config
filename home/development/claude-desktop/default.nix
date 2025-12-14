@@ -4,6 +4,10 @@ let
   cfg = config.features.development;
 in
 {
+  imports = [
+    ./mcp-config.nix # Claude Desktop MCP server configuration
+  ];
+
   # Claude Desktop Application
   # Provides a locally-built version of Anthropic's Claude Desktop GUI application
   # Only enabled when development productivity features are enabled

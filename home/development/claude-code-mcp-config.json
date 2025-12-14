@@ -3,7 +3,18 @@
     "obsidian": {
       "command": "obsidian-mcp",
       "args": ["${OBSIDIAN_VAULT_PATH:-/home/olafkfreund/Documents/Caliti}"],
-      "description": "Obsidian vault knowledge base - read/write/search notes in your Caliti vault"
+      "description": "Obsidian vault knowledge base - read/write/search notes in your Caliti vault (zero-dependency mode)"
+    },
+    "obsidian-rest": {
+      "command": "obsidian-mcp-rest",
+      "args": [],
+      "env": {
+        "OBSIDIAN_API_KEY_FILE": "${OBSIDIAN_API_KEY_FILE:-/run/agenix/obsidian-api-key}",
+        "OBSIDIAN_HOST": "${OBSIDIAN_HOST:-localhost}",
+        "OBSIDIAN_PORT": "${OBSIDIAN_PORT:-27123}",
+        "VERIFY_SSL": "${VERIFY_SSL:-true}"
+      },
+      "description": "Obsidian vault with full CRUD via REST API plugin - requires Local REST API plugin installed"
     },
     "nixos": {
       "command": "mcp-nixos",

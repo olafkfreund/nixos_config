@@ -4,6 +4,7 @@
   chrome-gruvbox-theme = pkgs.callPackage ./chrome-gruvbox-theme { };
   linux-command-mcp = pkgs.callPackage ./linux-command-mcp { };
   obsidian-mcp = pkgs.callPackage ./obsidian-mcp { };
+  obsidian-mcp-rest = pkgs.callPackage ./obsidian-mcp-rest { };
   mpris-album-art = pkgs.callPackage ./mpris-album-art { };
   weather-popup = pkgs.callPackage ./weather-popup { };
   gemini-cli = pkgs.callPackage ../home/development/gemini-cli { };

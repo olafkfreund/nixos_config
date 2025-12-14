@@ -4,6 +4,10 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.features.ai.mcp;
+
+  # Get the main user from host variables
+  vars = import ../../hosts/${config.networking.hostName}/variables.nix { };
+  inherit (vars) username;
 in
 {
   options.features.ai.mcp = {
@@ -28,11 +32,48 @@ in
         description = "Enable Obsidian MCP server for vault access";
       };
 
+      implementation = lib.mkOption {
+        type = lib.types.enum [ "rest-api" "zero-dependency" ];
+        default = "zero-dependency";
+        description = ''
+          MCP implementation type:
+          - rest-api: Uses Obsidian Local REST API plugin (requires plugin installation, provides full CRUD)
+          - zero-dependency: Uses @mauricio.wolff/mcp-obsidian (no plugin needed, read-only)
+        '';
+      };
+
       vaultPath = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
         example = "/home/user/Documents/ObsidianVault";
-        description = "Path to Obsidian vault (can also use OBSIDIAN_VAULT_PATH env var)";
+        description = "Path to Obsidian vault (zero-dependency mode only)";
+      };
+
+      restApi = {
+        apiKeyFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          example = lib.literalExpression "config.age.secrets.\"obsidian-api-key\".path";
+          description = "Path to API key file (runtime loading, REST API mode only)";
+        };
+
+        host = lib.mkOption {
+          type = lib.types.str;
+          default = "localhost";
+          description = "Obsidian REST API host";
+        };
+
+        port = lib.mkOption {
+          type = lib.types.port;
+          default = 27123;
+          description = "Obsidian REST API port";
+        };
+
+        verifySsl = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Verify SSL certificates for HTTPS connections";
+        };
       };
     };
   };
@@ -54,7 +95,8 @@ in
       ++ lib.optionals (cfg.servers.terraform or cfg.enableAll) [ terraform-mcp-server ]
       ++ lib.optionals (cfg.servers.gitea or cfg.enableAll) [ gitea-mcp-server ]
       ++ lib.optionals (cfg.servers.proxy or cfg.enableAll) [ mcp-proxy ]
-      ++ lib.optionals (cfg.obsidian.enable or cfg.enableAll) [ customPkgs.obsidian-mcp ];
+      ++ lib.optionals ((cfg.obsidian.enable or cfg.enableAll) && cfg.obsidian.implementation == "zero-dependency") [ customPkgs.obsidian-mcp ]
+      ++ lib.optionals ((cfg.obsidian.enable or cfg.enableAll) && cfg.obsidian.implementation == "rest-api") [ customPkgs.obsidian-mcp-rest ];
 
     # MCP servers documentation and usage information
     environment.etc."mcp-servers-info.txt".text = ''
@@ -84,5 +126,13 @@ in
       - Server List: nix search nixpkgs mcp
       - Configuration: cat /etc/mcp-servers-info.txt
     '';
+
+    # Agenix secret for Obsidian REST API mode
+    age.secrets."obsidian-api-key" = lib.mkIf (cfg.obsidian.enable && cfg.obsidian.implementation == "rest-api") {
+      file = ../../secrets/obsidian-api-key.age;
+      mode = "0400";
+      owner = username;
+      group = "users";
+    };
   };
 }
