@@ -148,6 +148,7 @@ in
       enable = true;
       ollama = true;
       gemini-cli = true;
+      claude-desktop = true; # Enable Claude Desktop GUI with MCP server support
     };
 
     programs = {
