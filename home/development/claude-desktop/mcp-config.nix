@@ -57,7 +57,7 @@ in
           // (lib.optionalAttrs (osConfig.age.secrets."api-github-token" or null != null) {
             github = {
               command = "github-mcp-server";
-              args = [ ];
+              args = [ "stdio" ];
               env = {
                 GITHUB_TOKEN_FILE = osConfig.age.secrets."api-github-token".path;
               };
