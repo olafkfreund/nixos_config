@@ -7,7 +7,8 @@
   mpris-album-art = pkgs.callPackage ./mpris-album-art { };
   weather-popup = pkgs.callPackage ./weather-popup { };
   gemini-cli = pkgs.callPackage ../home/development/gemini-cli { };
-  claude-desktop = pkgs.callPackage ./claude-desktop { };
+  # Claude Desktop - using working Linux build from k3d3/claude-desktop-linux-flake
+  claude-desktop = pkgs.claude-desktop-linux or (pkgs.callPackage ./claude-desktop { });
   neuwaita-icon-theme = pkgs.callPackage ./neuwaita-icon-theme { };
   kosli-cli = pkgs.callPackage ./kosli-cli { };
 

@@ -80,6 +80,7 @@
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
     zjstatus.url = "github:dj95/zjstatus";
+    claude-desktop-linux.url = "github:k3d3/claude-desktop-linux-flake";
 
     # Terminal YouTube browser
     yt-x = {
@@ -180,6 +181,10 @@
         })
         (_final: prev: {
           zjstatus = inputs.zjstatus.packages.${prev.stdenv.hostPlatform.system}.default;
+        })
+        # Claude Desktop from k3d3/claude-desktop-linux-flake (FHS version with MCP server support)
+        (_final: prev: {
+          claude-desktop-linux = inputs.claude-desktop-linux.packages.${prev.stdenv.hostPlatform.system}.claude-desktop-with-fhs;
         })
         # Custom package: glim - GitLab CI/CD TUI
         (final: _prev: {
