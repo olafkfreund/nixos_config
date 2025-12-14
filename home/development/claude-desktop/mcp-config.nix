@@ -9,14 +9,14 @@ let
   obsidianEnabled = mcpCfg.obsidian.enable or false;
 in
 {
-  config = lib.mkIf (enabled && obsidianEnabled) {
+  config = lib.mkIf enabled {
     # Claude Desktop MCP configuration file
     # Location: ~/.config/Claude/claude_desktop_config.json
     xdg.configFile."Claude/claude_desktop_config.json" = {
       text = builtins.toJSON {
         mcpServers = {
           # Obsidian MCP - conditional configuration based on implementation
-          obsidian = lib.mkMerge [
+          obsidian = lib.mkIf obsidianEnabled (lib.mkMerge [
             # Zero-dependency mode configuration
             (lib.mkIf (mcpCfg.obsidian.implementation == "zero-dependency") {
               command = "obsidian-mcp";
@@ -36,7 +36,7 @@ in
               };
               description = "Obsidian vault with full CRUD via REST API plugin";
             })
-          ];
+          ]);
 
           # NixOS MCP server (always enabled)
           nixos = {

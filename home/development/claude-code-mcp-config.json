@@ -25,7 +25,7 @@
       "command": "github-mcp-server",
       "args": [],
       "env": {
-        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+        "GITHUB_TOKEN_FILE": "${GITHUB_TOKEN_FILE:-/run/agenix/api-github-token}"
       },
       "description": "GitHub repository integration - PR automation, issue management, repository queries"
     },
