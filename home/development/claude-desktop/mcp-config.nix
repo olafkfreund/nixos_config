@@ -14,55 +14,56 @@ in
     # Location: ~/.config/Claude/claude_desktop_config.json
     xdg.configFile."Claude/claude_desktop_config.json" = {
       text = builtins.toJSON {
-        mcpServers = {
-          # Obsidian MCP - conditional configuration based on implementation
-          obsidian = lib.mkIf obsidianEnabled (lib.mkMerge [
-            # Zero-dependency mode configuration
-            (lib.mkIf (mcpCfg.obsidian.implementation == "zero-dependency") {
-              command = "obsidian-mcp";
-              args = [ mcpCfg.obsidian.vaultPath ];
-              description = "Obsidian vault knowledge base (zero-dependency, read-only)";
-            })
+        mcpServers =
+          # Always enabled MCP servers
+          {
+            # NixOS MCP server
+            nixos = {
+              command = "mcp-nixos";
+              args = [ ];
+              description = "NixOS package and option queries";
+            };
 
-            # REST API mode configuration
-            (lib.mkIf (mcpCfg.obsidian.implementation == "rest-api") {
-              command = "obsidian-mcp-rest";
+            # Context7 for up-to-date library documentation
+            context7 = {
+              type = "stdio";
+              command = "${pkgs.nodejs}/bin/npx";
+              args = [ "-y" "@upstash/context7-mcp@latest" ];
+              description = "Up-to-date library documentation";
+            };
+          }
+          # Obsidian MCP - conditional configuration based on implementation
+          // (lib.optionalAttrs obsidianEnabled {
+            obsidian =
+              if mcpCfg.obsidian.implementation == "zero-dependency"
+              then {
+                command = "obsidian-mcp";
+                args = [ mcpCfg.obsidian.vaultPath ];
+                description = "Obsidian vault knowledge base (zero-dependency, read-only)";
+              }
+              else {
+                command = "obsidian-mcp-rest";
+                args = [ ];
+                env = {
+                  OBSIDIAN_API_KEY_FILE = mcpCfg.obsidian.restApi.apiKeyFile;
+                  OBSIDIAN_HOST = mcpCfg.obsidian.restApi.host;
+                  OBSIDIAN_PORT = toString mcpCfg.obsidian.restApi.port;
+                  VERIFY_SSL = if mcpCfg.obsidian.restApi.verifySsl then "true" else "false";
+                };
+                description = "Obsidian vault with full CRUD via REST API plugin";
+              };
+          })
+          # GitHub MCP server (if GitHub token available)
+          // (lib.optionalAttrs (osConfig.age.secrets."api-github-token" or null != null) {
+            github = {
+              command = "github-mcp-server";
               args = [ ];
               env = {
-                OBSIDIAN_API_KEY_FILE = mcpCfg.obsidian.restApi.apiKeyFile;
-                OBSIDIAN_HOST = mcpCfg.obsidian.restApi.host;
-                OBSIDIAN_PORT = toString mcpCfg.obsidian.restApi.port;
-                VERIFY_SSL = if mcpCfg.obsidian.restApi.verifySsl then "true" else "false";
+                GITHUB_TOKEN_FILE = osConfig.age.secrets."api-github-token".path;
               };
-              description = "Obsidian vault with full CRUD via REST API plugin";
-            })
-          ]);
-
-          # NixOS MCP server (always enabled)
-          nixos = {
-            command = "mcp-nixos";
-            args = [ ];
-            description = "NixOS package and option queries";
-          };
-
-          # GitHub MCP server (if GitHub token available)
-          github = lib.mkIf (osConfig.age.secrets."api-github-token" or null != null) {
-            command = "github-mcp-server";
-            args = [ ];
-            env = {
-              GITHUB_TOKEN_FILE = osConfig.age.secrets."api-github-token".path;
+              description = "GitHub repository integration";
             };
-            description = "GitHub repository integration";
-          };
-
-          # Context7 for up-to-date library documentation
-          context7 = {
-            type = "stdio";
-            command = "${pkgs.nodejs}/bin/npx";
-            args = [ "-y" "@upstash/context7-mcp@latest" ];
-            description = "Up-to-date library documentation";
-          };
-        };
+          });
       };
 
       # Generate JSON configuration with proper formatting
