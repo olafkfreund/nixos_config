@@ -15,6 +15,7 @@ I'll automatically analyze your entire configuration and provide specific optimi
 ### 1. Build Performance (HIGH IMPACT)
 
 **Import From Derivation (IFD) Detection:**
+
 ```nix
 # ❌ SLOW - Forces build during evaluation
 let configValue = builtins.readFile (pkgs.writeText "config" "value");
@@ -26,6 +27,7 @@ let configValue = "value";  # Or use JSON config files
 **Impact**: IFD blocks evaluation, adds 10-60s per occurrence
 
 **Evaluation Efficiency:**
+
 ```nix
 # ❌ SLOW - Deep recursion, multiple traversals
 modules = map (f: import f) (readDir ./modules);
@@ -42,6 +44,7 @@ imports = [
 ### 2. Store Optimization (DISK SPACE)
 
 **Garbage Collection:**
+
 ```nix
 # ❌ WASTEFUL - Manual GC, no automation
 # Store grows to 100GB+
@@ -65,6 +68,7 @@ boot.loader.grub.configurationLimit = 10;  # Keep last 10 generations
 **Impact**: Saves 20-80GB disk space
 
 **Store Optimization:**
+
 ```nix
 nix.settings = {
   auto-optimise-store = true;  # Hardlink identical files
@@ -79,6 +83,7 @@ nix-store --optimise  # Can save 10-30GB
 ### 3. Build Caching (SPEED)
 
 **Binary Cache Configuration:**
+
 ```nix
 # ❌ SLOW - No caching, rebuild everything
 nix.settings.substituters = [ "https://cache.nixos.org" ];
@@ -111,6 +116,7 @@ nix.settings = {
 ### 4. Memory Optimization
 
 **Swap Configuration:**
+
 ```nix
 # ❌ SLOW - No swap or excessive swappiness
 swapDevices = [ ];
@@ -130,6 +136,7 @@ boot.kernel.sysctl = {
 **Impact**: Prevents OOM kills, smoother performance
 
 **Kernel Memory Management:**
+
 ```nix
 boot.kernel.sysctl = {
   "vm.dirty_background_ratio" = 5;
@@ -143,6 +150,7 @@ boot.kernel.sysctl = {
 ### 5. Network Performance
 
 **TCP/IP Tuning:**
+
 ```nix
 # ✅ OPTIMIZED - Modern congestion control
 boot.kernel.sysctl = {
@@ -162,6 +170,7 @@ boot.kernel.sysctl = {
 ### 6. Boot Performance
 
 **systemd Service Optimization:**
+
 ```nix
 # ❌ SLOW - Sequential service startup
 systemd.services.myservice = {
@@ -186,6 +195,7 @@ systemd.services.myservice = {
 **Impact**: 10-30s faster boot time
 
 **fstrim Optimization (SSD):**
+
 ```nix
 # ❌ SLOW - fstrim at boot (8+ min delay)
 services.fstrim.enable = true;  # Default: weekly at boot
@@ -202,6 +212,7 @@ services.fstrim = {
 ### 7. Module Evaluation
 
 **Feature Flag Efficiency:**
+
 ```nix
 # ❌ SLOW - Complex conditionals, deep nesting
 config = mkMerge [
@@ -226,6 +237,7 @@ config = mkIf cfg.enable {
 ### 8. Package Management
 
 **Overlay Optimization:**
+
 ```nix
 # ❌ SLOW - Rebuilds entire package set
 nixpkgs.overlays = [
@@ -360,6 +372,7 @@ Expected results:
 ## Performance Comparison
 
 **Before Optimization:**
+
 ```
 Build Times:
   Clean build: 8m 45s
@@ -376,6 +389,7 @@ Memory: 8.2GB baseline
 ```
 
 **After Optimization:**
+
 ```
 Build Times:
   Clean build: 4m 10s (-52%)
@@ -392,6 +406,7 @@ Memory: 7.4GB baseline (-800MB)
 ```
 
 **Total Improvement:**
+
 - ⚡ 50% faster builds
 - 💾 37GB disk savings
 - 🚀 47s faster boots
@@ -400,35 +415,201 @@ Memory: 7.4GB baseline (-800MB)
 ## Usage Modes
 
 **Full Analysis:**
+
 ```
 /nix-optimize
 ```
+
 Analyzes everything, provides complete report
 
 **Quick Check:**
+
 ```
 /nix-optimize
 Quick check only
 ```
+
 High-impact optimizations only (30s)
 
 **Specific Area:**
+
 ```
 /nix-optimize
 Check build performance
 ```
+
 Focus on specific optimization area
 
 **Auto-Apply:**
+
 ```
 /nix-optimize
 Apply safe optimizations automatically
 ```
+
 Applies optimizations that can't break anything
+
+## Performance Analysis Modes (NEW!)
+
+Run specific performance tests to measure and benchmark your configuration:
+
+### Full Performance Test
+
+```
+/nix-optimize
+Run full performance test
+```
+
+**What it does**:
+
+- Runs comprehensive performance analysis across all areas
+- Measures build times, memory usage, evaluation speed
+- Tests cache efficiency and parallel build performance
+- Generates complete performance report with baselines
+  **Time**: ~5-10 minutes
+  **Output**: Complete metrics across all categories
+
+### Build Time Analysis
+
+```
+/nix-optimize
+Analyze build times
+```
+
+**What it does**:
+
+- Measures build times for all hosts
+- Compares clean vs cached builds
+- Identifies slow derivations and bottlenecks
+- Provides per-host performance breakdown
+  **Time**: ~2-3 minutes
+  **Output**: Build time comparison table with recommendations
+
+### Memory Usage Analysis
+
+```
+/nix-optimize
+Analyze memory usage
+```
+
+**What it does**:
+
+- Monitors memory usage during builds
+- Identifies memory-intensive derivations
+- Checks for potential OOM conditions
+- Recommends memory optimization strategies
+  **Time**: ~3-5 minutes
+  **Output**: Memory usage graphs and recommendations
+
+### Evaluation Performance
+
+```
+/nix-optimize
+Test evaluation performance
+```
+
+**What it does**:
+
+- Measures flake evaluation time
+- Identifies slow module imports
+- Detects evaluation inefficiencies
+- Tests lazy evaluation effectiveness
+  **Time**: ~1-2 minutes
+  **Output**: Evaluation timing breakdown with bottlenecks
+
+### Parallel Build Efficiency
+
+```
+/nix-optimize
+Test parallel builds
+```
+
+**What it does**:
+
+- Tests parallel build efficiency across cores
+- Measures job distribution and utilization
+- Identifies serialization bottlenecks
+- Recommends optimal parallel build settings
+  **Time**: ~3-5 minutes
+  **Output**: Parallel efficiency metrics and core utilization
+
+### Cache Performance
+
+```
+/nix-optimize
+Test cache performance
+```
+
+**What it does**:
+
+- Tests binary cache hit rates
+- Measures cache download speeds
+- Identifies uncached frequently-built derivations
+- Recommends cache configuration improvements
+  **Time**: ~2-3 minutes
+  **Output**: Cache performance report with optimization suggestions
+
+### Configuration Efficiency Report (NEW!)
+
+```
+/nix-optimize
+Show efficiency report
+```
+
+**What it does**:
+
+- Analyzes configuration code duplication
+- Counts total .nix files and default.nix usage
+- Detects potential duplicate files (via md5sum)
+- Shows commented code statistics
+- Reports feature flag usage patterns
+- Lists host and user configuration counts
+  **Time**: ~30 seconds
+  **Output**: Complete efficiency metrics
+
+**Example Output**:
+
+```
+📊 Configuration Efficiency Report
+==================================
+📁 Total .nix files: 247
+📄 Default.nix files: 18
+🔄 Potential duplicates: 3 files
+💀 Commented code blocks: 1,247 lines
+🏗️  Feature flag usage: 89 explicit enables
+📦 Host configurations: 4
+👤 User configurations: 6
+
+Recommendations:
+• Review 3 potential duplicate files for consolidation
+• Consider reducing commented code (1,247 lines)
+• Good feature flag usage (89 enables across 141 modules)
+```
+
+## Performance Testing Scripts
+
+All performance tests use `./scripts/performance-test.sh` with specific modes:
+
+- **full** - Comprehensive performance testing
+- **build-times** - Build time measurements
+- **memory** - Memory usage analysis
+- **eval** - Evaluation performance
+- **parallel** - Parallel build efficiency
+- **cache** - Cache performance testing
+
+**Benchmark specific host**:
+
+```
+/nix-optimize
+Benchmark p620 build time
+```
+
+Runs multiple build iterations (default: 3 runs) and provides average build time
 
 ## Safety Levels
 
 ### 🟢 Safe (Auto-Apply)
+
 - Auto-optimise store
 - Garbage collection automation
 - Generation limits
@@ -436,11 +617,13 @@ Applies optimizations that can't break anything
 - TCP/IP tuning
 
 ### 🟡 Review Recommended
+
 - Binary cache changes
 - Module restructuring
 - Service dependency changes
 
 ### 🔴 Requires Testing
+
 - Kernel parameter changes
 - Service architecture changes
 - Major configuration refactoring
@@ -448,6 +631,7 @@ Applies optimizations that can't break anything
 ## Integration
 
 Runs as part of:
+
 - Weekly performance review (automatic)
 - Before major deployments (suggested)
 - After adding new hosts (recommended)

@@ -2,199 +2,172 @@
 
 > **Fast, Easy, Reliable NixOS Development with Claude Code**
 
-## 🚀 Quick Start Workflows
+## Quick Overview
 
-### Daily Development Workflow
+This is a sophisticated multi-host NixOS configuration managing 4 active hosts (P620, Razer, P510, Samsung) with 141+ modular components, template-based architecture achieving 95% code deduplication, and comprehensive automation through slash commands, agents, and skills.
 
-```bash
-# Morning: Check what needs attention
-/check_tasks
+**Key Stats:**
 
-# Start new work: Create issue + branch
-/new_task "Add PostgreSQL monitoring"
+- 4 Active Hosts (workstation, server, 2 laptops)
+- 141+ Modules (feature-based architecture)
+- 95% Code Deduplication (template system)
+- Zero Anti-Patterns (best practices implementation)
 
-# Implementation: Use optimized commands
-/nix-module            # Create new module
-/nix-deploy            # Deploy changes
-/nix-security          # Security audit
+## 🚀 Getting Started
 
-# Code review before commit
-/review
+### Your Development Tools
 
-# Close the loop
-git commit && gh pr create
-/check_tasks           # Verify issue closed
-```
-
-### Emergency Fix Workflow
+**Commands** - Use `/nix-help` for full reference:
 
 ```bash
-/nix-fix               # Auto-fix anti-patterns
-/nix-deploy            # Emergency deploy
-Emergency deploy to p620
+/nix-help                 # Complete command reference
+/nix-module               # Create new module (2min)
+/nix-deploy               # Smart deployment (2.5min)
+/nix-fix                  # Auto-fix anti-patterns (1min)
+/nix-security             # Security audit (1min)
+/nix-optimize             # Performance analysis (2min)
+/nix-review               # Code review (1min)
 ```
 
-## 📋 Powerful Slash Commands
+**Workflows** - Complete guided processes:
 
-### Module Development
-
-**`/nix-module`** - Create new NixOS module
-
-- ⚡ Automatically follows best practices
-- 🔒 Includes security hardening
-- ✅ Validates syntax and patterns
-- 📚 Provides usage examples
-- ⏱️ Complete in ~2 minutes
-
-```
-/nix-module
-Create monitoring/postgres-exporter module
+```bash
+/nix-workflow-feature     # Feature development (5-10min)
+/nix-workflow-bugfix      # Bug fix (2-5min)
+/nix-workflow-security    # Security audit (3-5min)
 ```
 
-### Code Quality
+**GitHub Integration**:
 
-**`/nix-fix`** - Fix anti-patterns automatically
-
-- Detects mkIf true patterns
-- Removes trivial wrappers
-- Fixes secret handling
-- Hardens service security
-- Shows before/after diffs
-
-```
-/nix-fix
-Fix all files in modules/services/
+```bash
+/nix-new-task             # Create GitHub issue (2min)
+/nix-check-tasks          # Review open tasks (30s)
 ```
 
-**`/review`** - Comprehensive code review
+**Full command list**: `/nix-help`
 
-- Checks against PATTERNS.md
-- Detects anti-patterns
-- Security analysis
-- Performance review
-- Actionable fixes with code
+## 🤖 Agents & Skills
 
-```
-/review
-Review hosts/p620/configuration.nix
-```
+### Agents (Automatic Activation)
 
-### Security
+**System Agents** (`.claude/agents/`):
 
-**`/nix-security`** - Security audit
+- **issue-checker** - GitHub issue analysis
+- **local-logs** - System log parsing
+- **nix-check** - Configuration validation
+- **update** - Package updates
 
-- Service isolation check
-- Systemd hardening review
-- Secret management audit
-- Firewall configuration
-- SSH hardening
-- Generates security score
+**Built-in Agents**:
 
-```
-/nix-security
-# Returns detailed security report
-```
+- **nixos-pro** - NixOS development (modules, packages, optimization)
+- **code-reviewer** - Code review against best practices
+- **debugger** - Error analysis and debugging
+- **security-auditor** - Security vulnerability detection
 
-### Deployment
+Agents trigger automatically based on your request. See `/nix-help agents` for details.
 
-**`/nix-deploy`** - Smart deployment
+### Skills (Automatic Knowledge)
 
-- Automatic validation
-- Change detection
-- Security checks
-- Smart rollback
-- Post-deployment verification
+**NixOS Tools** (`.claude/skills/`):
 
-```
-/nix-deploy
-Deploy to p620
+- **agenix** - Secret management
+- **home-manager** - User environments
+- **devenv** - Development setup
 
-# Fast mode (skip tests)
-/nix-deploy
-Fast deploy to razer
+**Package Tools**:
 
-# Emergency mode
-/nix-deploy
-Emergency deploy to p510
+- **cargo2nix**, **node2nix**, **uv2nix** - Language package integration
 
-# All hosts
-/nix-deploy
-Deploy to all hosts
-```
+**Desktop**:
 
-### Optimization
+- **gnome**, **cosmic-de**, **stylix** - Desktop environments and theming
 
-**`/nix-optimize`** - Performance analysis
+Skills activate when you mention the technology. See `/nix-help skills` for details.
 
-- Build performance
-- Disk usage optimization
-- Memory tuning
-- Network optimization
-- Boot performance
-- Generates specific fixes
+## 🏗️ Project Architecture
 
-```
-/nix-optimize
-# Returns complete optimization report
+### Critical Patterns (REQUIRED)
+
+#### 1. Module Creation (REQUIRED)
+
+All services MUST be in `modules/` directory:
+
+```nix
+# All services MUST be in modules/ directory
+modules/
+├── services/
+│   └── myservice.nix    # Feature-based module
+└── default.nix          # Explicit imports
+
+# Enable via feature flags in host config
+features.myservice.enable = true;
 ```
 
-### GitHub Integration
+**Use `/nix-module` to create modules automatically with best practices.**
 
-**`/new_task`** - Create GitHub issue
+#### 2. Security Hardening (REQUIRED)
 
-- Guides through issue creation
-- Conducts technical research
-- Creates formatted issue
-- Generates implementation plan
-- Provides branch name
+All services MUST use systemd hardening:
 
-```
-/new_task
-# Walks through issue creation
-```
-
-**`/check_tasks`** - Review open issues
-
-- Shows all open tasks
-- Categorizes by priority
-- Identifies blockers
-- Progress tracking
-- Recommended actions
-
-```
-/check_tasks
-# Shows comprehensive task status
+```nix
+systemd.services.myservice = {
+  serviceConfig = {
+    DynamicUser = true;           # REQUIRED - No root services
+    ProtectSystem = "strict";     # REQUIRED - Read-only system
+    NoNewPrivileges = true;       # REQUIRED - No privilege escalation
+    ProtectHome = true;           # REQUIRED - Protect user directories
+  };
+};
 ```
 
-## 🤖 Proactive Agent Usage
+**Use `/nix-fix` to automatically add missing hardening.**
 
-Claude Code will **automatically** use specialized agents for:
+#### 3. Secret Management (REQUIRED)
 
-### NixOS Development (nixos-pro agent)
+Secrets MUST use runtime loading only:
 
-- Creating or modifying NixOS modules
-- Writing package derivations
-- System optimization tasks
-- Security hardening implementations
-- Complex NixOS patterns
+```nix
+# ❌ WRONG - Evaluation time (secrets in Nix store!)
+password = builtins.readFile "/secrets/pass";
 
-### Example
-
-```
-"Create a comprehensive monitoring module with Prometheus and Grafana"
-# Automatically uses nixos-pro agent for implementation
+# ✅ CORRECT - Runtime loading (secure)
+passwordFile = config.age.secrets.password.path;
 ```
 
-## 📚 Required Documentation
+**Use `/nix-fix` to automatically fix secret handling.**
 
-**ALWAYS read before coding:**
+## 🎯 Best Practices
 
-### Essential References
+### DO ✅
+
+1. **Use Slash Commands** - Faster and more reliable than manual processes
+2. **Read Documentation First** - Check docs/PATTERNS.md before coding
+3. **Security First** - Always use DynamicUser for services
+4. **Test Locally** - Validate before deploying (`just validate`)
+5. **Track Issues** - Use GitHub workflow (`/nix-new-task`, `/nix-check-tasks`)
+6. **Review Code** - Always run `/nix-review` before committing
+7. **Use Workflows** - `/nix-workflow-*` for complete processes
+8. **Follow Patterns** - Check docs/NIXOS-ANTI-PATTERNS.md
+
+### DON'T ❌
+
+1. **Skip Validation** - Always validate before deploy
+2. **Commit Directly** - Use issue-driven workflow
+3. **Root Services** - Always use DynamicUser
+4. **Evaluation Secrets** - Use runtime loading only
+5. **Manual Fixes** - Use `/nix-fix` for anti-patterns
+6. **Skip Security** - Run `/nix-security` regularly
+7. **Ignore Warnings** - Address all issues promptly
+8. **Create Modules Manually** - Use `/nix-module`
+
+## 📚 Essential Documentation
+
+**Always Read Before Coding:**
 
 - **docs/PATTERNS.md** - NixOS best practices and patterns
 - **docs/NIXOS-ANTI-PATTERNS.md** - Critical anti-patterns to avoid
 
-### When to Read
+**When to Read:**
 
 **Before Creating Modules:**
 
@@ -217,302 +190,95 @@ then create package derivation for myapp"
 and docs/PATTERNS.md"
 ```
 
-## 🏗️ Project Architecture
-
-### Infrastructure Overview
-
-- **4 Active Hosts**: p620 (workstation), p510 (server), razer/samsung (laptops)
-- **141+ Modules**: Feature-based modular architecture
-- **Template System**: 95% code deduplication through templates
-- **Multi-User**: Per-host user configurations with Home Manager
-
-### Critical Patterns
-
-#### 1. Module Creation (REQUIRED)
-
-```nix
-# All services MUST be in modules/ directory
-modules/
-├── services/
-│   └── myservice.nix    # Feature-based module
-└── default.nix          # Explicit imports
-
-# Enable via feature flags in host config
-features.myservice.enable = true;
-```
-
-#### 2. Security Hardening (REQUIRED)
-
-```nix
-systemd.services.myservice = {
-  serviceConfig = {
-    DynamicUser = true;           # REQUIRED
-    ProtectSystem = "strict";     # REQUIRED
-    NoNewPrivileges = true;       # REQUIRED
-    ProtectHome = true;           # REQUIRED
-  };
-};
-```
-
-#### 3. Secret Management (REQUIRED)
-
-```nix
-# ❌ WRONG - Evaluation time
-password = builtins.readFile "/secrets/pass";
-
-# ✅ CORRECT - Runtime loading
-passwordFile = config.age.secrets.password.path;
-```
-
-## ⚡ Fast Development Tips
-
-### 1. Use Slash Commands for Everything
-
-- `/nix-module` instead of manually creating modules
-- `/nix-deploy` instead of manual deployment
-- `/nix-fix` instead of manual anti-pattern fixes
-- `/nix-security` for comprehensive security audit
-
-### 2. Leverage Smart Detection
-
-```bash
-# Smart deploy only if changed
-/nix-deploy
-Deploy to p620
-# Automatically skips if no changes
-```
-
-### 3. Parallel Operations
-
-```bash
-# Deploy to all hosts simultaneously
-/nix-deploy
-Deploy to all hosts
-# Completes in ~3 minutes vs 12 minutes sequential
-```
-
-### 4. Quick Validation
-
-```bash
-# Fast syntax check
-just check-syntax
-
-# Quick validation (30s)
-just validate-quick
-
-# Smart test (only if changed)
-just quick-test
-```
-
-## 🔄 Complete Development Cycle
-
-### Feature Development (5-10 minutes)
-
-```bash
-# 1. Create issue (2min)
-/new_task "Add Redis monitoring"
-
-# 2. Create module (2min)
-/nix-module
-Create monitoring/redis-exporter
-
-# 3. Deploy (2min)
-/nix-deploy
-Deploy to p620
-
-# 4. Review (1min)
-/review
-
-# 5. Commit & PR (2min)
-git commit -m "feat(monitoring): add redis exporter (#45)"
-gh pr create --fill
-
-# 6. Verify (30s)
-/check_tasks
-```
-
-**Total Time**: ~10 minutes for complete feature
-
-### Bug Fix (2-5 minutes)
-
-```bash
-# 1. Quick fix (1min)
-# Edit file
-
-# 2. Auto-fix patterns (30s)
-/nix-fix
-
-# 3. Fast deploy (1min)
-/nix-deploy
-Fast deploy to p620
-
-# 4. Verify (30s)
-systemctl status service
-```
-
-**Total Time**: ~3 minutes for bug fix
-
-### Security Audit (3-5 minutes)
-
-```bash
-# 1. Run audit (1min)
-/nix-security
-
-# 2. Review report (1min)
-# Check critical issues
-
-# 3. Apply fixes (2min)
-# Implement suggested fixes
-
-# 4. Validate (1min)
-/nix-security
-# Verify score improved
-```
-
-**Total Time**: ~5 minutes for security review
-
-## 🎯 Best Practices
-
-### DO ✅
-
-1. **Use Slash Commands**: Faster and more reliable
-2. **Read Documentation**: Before writing code
-3. **Security First**: Always use DynamicUser
-4. **Test Locally**: Before deploying
-5. **Smart Deploy**: Use change detection
-6. **Track Issues**: Use GitHub workflow
-7. **Review Code**: Always run /review
-8. **Optimize**: Run /nix-optimize monthly
-
-### DON'T ❌
-
-1. **Skip Validation**: Always validate before deploy
-2. **Commit Directly**: Use issue-driven workflow
-3. **Root Services**: Always use DynamicUser
-4. **Evaluation Secrets**: Use runtime loading
-5. **Manual Anti-pattern Fixes**: Use /nix-fix
-6. **Skip Security**: Run /nix-security regularly
-7. **Ignore Warnings**: Address all issues
-
-## 📊 Performance Targets
-
-### Build Times
-
-- Syntax check: < 5s
-- Quick validation: < 30s
-- Host test: < 60s
-- Full deployment: < 2.5min
-- Parallel all-hosts: < 3min
-
-### Deployment Safety
-
-- Pre-deployment validation: 100%
-- Automatic rollback: Enabled
-- Service verification: All services
-- Network connectivity: Verified
-
-### Code Quality
-
-- Anti-patterns: Zero tolerance
-- Security score: > 85/100
-- Test coverage: All modules
-- Documentation: Required
-
-## 🚨 Emergency Procedures
-
-### Quick Fix
-
-```bash
-/nix-fix              # Auto-fix patterns
-/nix-deploy           # Emergency deploy
-Emergency deploy to HOST
-```
-
-### Rollback
-
-```bash
-# Automatic rollback on failure
-# Or manual:
-sudo nixos-rebuild switch --rollback
-```
-
-### Debug
-
-```bash
-journalctl -u SERVICE -f    # Follow logs
-systemctl status SERVICE    # Check status
-just validate              # Full validation
-```
-
-## 🔗 Integration Points
-
-### GitHub Workflow
-
-- **Issues**: Track all work with /new_task
-- **Branches**: Auto-generate from issues
-- **PRs**: Link to issues automatically
-- **Tracking**: Monitor with /check_tasks
-
-### Just Commands
-
-- **validate**: Full validation
-- **test-host**: Build test
-- **quick-deploy**: Smart deployment
-- **check-syntax**: Syntax validation
+## 🔗 Quick Links
+
+### Help & Commands
+
+- **Full Command Reference**: `/nix-help`
+- **Agents Documentation**: `/nix-help agents`
+- **Skills Documentation**: `/nix-help skills`
+- **Workflow Guide**: `/nix-help workflows`
+- **Pro Tips**: `/nix-help tips`
+- **Emergency Procedures**: `/nix-help emergency`
 
 ### Documentation
 
-- **PATTERNS.md**: Best practices guide
-- **NIXOS-ANTI-PATTERNS.md**: What to avoid
-- **CLAUDE.md**: This guide (project context)
-- **GITHUB-WORKFLOW.md**: Complete workflow guide
+- **Patterns Guide**: docs/PATTERNS.md
+- **Anti-Patterns**: docs/NIXOS-ANTI-PATTERNS.md
+- **GitHub Workflow**: docs/GITHUB-WORKFLOW.md
+- **Main README**: README.md (in CLAUDE.md)
+
+### Quick Validation
+
+```bash
+just check-syntax         # Syntax validation (5s)
+just validate-quick       # Quick validation (30s)
+just test-host HOST       # Build test (60s)
+just validate             # Full validation (2min)
+```
+
+## 🚨 Emergency Quick Reference
+
+```bash
+# Quick fix
+/nix-fix                  # Auto-fix anti-patterns
+/nix-deploy               # Emergency deploy
+Emergency deploy to HOST
+
+# Rollback
+sudo nixos-rebuild switch --rollback
+
+# Debug
+journalctl -u SERVICE -f  # Follow logs
+systemctl status SERVICE  # Check status
+just validate            # Full validation
+```
+
+**Full emergency guide**: `/nix-help emergency`
 
 ## 💡 Pro Tips
 
-1. **Chain Commands**: Use multiple slash commands in sequence
-2. **Context Aware**: Slash commands understand your codebase
-3. **Automatic Research**: Commands read docs automatically
-4. **Smart Defaults**: Commands choose best options
-5. **Comprehensive Output**: Detailed reports with actionable fixes
+1. **Start with `/nix-check-tasks`** every morning
+2. **Use `/nix-workflow-*`** for complete guided processes
+3. **Run `/nix-fix`** before every commit
+4. **Deploy with `/nix-deploy`** (smarter than manual)
+5. **Review with `/nix-review`** (automated quality checks)
+6. **Weekly `/nix-security`** for security audits
+7. **Monthly `/nix-optimize`** for performance tuning
 
-## 📖 Quick Reference
+**Full tips list**: `/nix-help tips`
 
-```bash
-# Module Development
-/nix-module           # Create new module (2min)
+## 📊 Infrastructure Details
 
-# Code Quality
-/nix-fix             # Fix anti-patterns (1min)
-/review              # Code review (1min)
+### Active Hosts
 
-# Security
-/nix-security        # Security audit (1min)
+- **P620**: AMD workstation (primary development, monitoring server)
+- **P510**: Intel Xeon server (media server, headless)
+- **Razer**: Intel/NVIDIA laptop (mobile development)
+- **Samsung**: Intel laptop (mobile)
 
-# Deployment
-/nix-deploy          # Smart deploy (2.5min)
+### Template Architecture
 
-# Optimization
-/nix-optimize        # Performance analysis (2min)
+- **workstation.nix** - Full desktop development (P620)
+- **laptop.nix** - Mobile-optimized (Razer, Samsung)
+- **server.nix** - Headless server (P510)
 
-# GitHub
-/new_task            # Create issue (2min)
-/check_tasks         # Review tasks (30s)
+### Code Deduplication
 
-# Validation
-just check-syntax    # Syntax (5s)
-just validate-quick  # Quick check (30s)
-just test-host HOST  # Build test (60s)
-```
-
-## 🎓 Learning Resources
-
-- **Interactive**: Use slash commands and learn from output
-- **Documentation**: Read docs/PATTERNS.md for deep understanding
-- **Examples**: All slash commands provide example code
-- **Anti-patterns**: Learn what NOT to do from NIXOS-ANTI-PATTERNS.md
+- **95% shared code** through template system
+- **141+ modules** with feature flags
+- **Zero anti-patterns** (best practices implementation)
+- **Explicit imports only** (no magic auto-discovery)
 
 ---
 
-**Remember**: Claude Code is optimized for speed, ease, and reliability. Use slash commands for everything - they're faster and more reliable than manual processes!
+**Remember**: Claude Code is optimized for speed, ease, and reliability. Use `/nix-help` for complete documentation and `/nix-workflow-*` commands for guided processes!
 
-For complete workflow details, see: **docs/GITHUB-WORKFLOW.md**
+**Need help?** Just ask:
+
+- "How do I create a new module?"
+- "What's the fastest way to deploy?"
+- "How do I fix security issues?"
+- "Show me the complete workflow"
+
+Claude Code will guide you through any task! 🚀

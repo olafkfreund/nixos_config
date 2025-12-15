@@ -75,12 +75,12 @@ Every code change, bug fix, or improvement must:
 3. Have clear acceptance criteria
 4. Follow the implementation checklist
 
-### Creating Issues with `/new_task`
+### Creating Issues with `/nix-new-task`
 
-Use the `/new_task` Claude command to create well-structured issues:
+Use the `/nix-new-task` Claude command to create well-structured issues:
 
 ```
-User: "/new_task"
+User: "/nix-new-task"
 ```
 
 The command will:
@@ -169,12 +169,12 @@ M (1 week)
 - `needs-research` - Requires technical research
 - `good-first-issue` - Good for beginners
 
-### Checking Issues with `/check_tasks`
+### Checking Issues with `/nix-check-tasks`
 
-Use the `/check_tasks` Claude command to review open issues:
+Use the `/nix-check-tasks` Claude command to review open issues:
 
 ```
-User: "/check_tasks"
+User: "/nix-check-tasks"
 ```
 
 The command provides:
@@ -486,10 +486,10 @@ Co-authored-by: Claude <noreply@anthropic.com>
 
 ### Review Checklist
 
-Use the `/review` command for automated code review:
+Use the `/nix-review` command for automated code review:
 
 ```
-User: "/review"
+User: "/nix-review"
 ```
 
 #### Manual Review Checklist
@@ -739,19 +739,19 @@ gh repo view
 
 ### Claude Commands
 
-Use Claude's `/new_task` and `/check_tasks` commands:
+Use Claude's `/nix-new-task` and `/nix-check-tasks` commands:
 
 ```bash
 # Create new task
-"/new_task"
+"/nix-new-task"
 # Guides through issue creation with research
 
 # Check tasks
-"/check_tasks"
+"/nix-check-tasks"
 # Shows all open issues with priorities
 
 # Review code
-"/review"
+"/nix-review"
 # Comprehensive code review based on PATTERNS.md
 ```
 
@@ -801,7 +801,7 @@ git commit --no-verify
 
 ```bash
 # 1. Create issue with research
-/new_task
+/nix-new-task
 # Type: feature
 # Priority: high
 # Description: Add PostgreSQL monitoring
@@ -845,7 +845,7 @@ grafana-status
 
 ```bash
 # 1. Check for existing issue
-/check_tasks
+/nix-check-tasks
 # Issue #67 exists: P510 boot delay
 
 # 2. Create branch
@@ -871,7 +871,7 @@ git push -u origin fix/67-p510-boot-delay
 gh pr create --fill
 
 # 7. Self-review (if personal repo)
-/review
+/nix-review
 
 # 8. Merge
 gh pr merge 67 --squash --delete-branch
@@ -885,7 +885,7 @@ just quick-deploy p510
 
 ```bash
 # 1. Create quick task
-/new_task
+/nix-new-task
 # Type: docs
 # Priority: medium
 # Description: Document GitHub workflow
@@ -919,7 +919,7 @@ gh pr merge 145 --squash --delete-branch
 - ✅ Include comprehensive PR descriptions
 - ✅ Request reviews (or self-review thoroughly)
 - ✅ Update documentation with code changes
-- ✅ Use `/new_task` and `/check_tasks` commands
+- ✅ Use `/nix-new-task` and `/nix-check-tasks` commands
 - ✅ Follow PATTERNS.md best practices
 - ✅ Avoid anti-patterns from NIXOS-ANTI-PATTERNS.md
 - ✅ Delete branches after merging
@@ -1023,9 +1023,9 @@ gh pr view <number>                # View PR
 gh pr merge <number>               # Merge PR
 
 # Claude Commands
-/new_task                          # Create new task
-/check_tasks                       # Check open tasks
-/review                            # Code review
+/nix-new-task                          # Create new task
+/nix-check-tasks                       # Check open tasks
+/nix-review                            # Code review
 
 # Justfile Commands
 just validate                      # Validate configuration
@@ -1042,7 +1042,7 @@ just format                        # Format code
 
 - Initial GitHub workflow documentation
 - Defined GitHub Flow strategy
-- Created `/new_task` and `/check_tasks` commands
+- Created `/nix-new-task` and `/nix-check-tasks` commands
 - Integrated with existing NixOS patterns
 - Added comprehensive examples and troubleshooting
 
