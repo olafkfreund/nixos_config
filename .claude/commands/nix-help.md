@@ -397,6 +397,10 @@ Skills provide specialized knowledge automatically when you mention the technolo
 - **cosmic-de** - System76 COSMIC desktop setup
 - **stylix** - Unified theming and styling framework
 
+**Development Tools**:
+
+- **github** - Git and GitHub CLI (gh) integration, issue-driven development, PR workflows
+
 ### Using Skills
 
 Skills activate automatically when you mention the technology:
@@ -406,6 +410,8 @@ Skills activate automatically when you mention the technology:
 "Set up home-manager for new user"       → Uses home-manager skill
 "Create cargo2nix derivation for myapp"  → Uses cargo2nix skill
 "Apply stylix theme to all applications" → Uses stylix skill
+"Create GitHub issue with gh CLI"        → Uses github skill
+"Set up git hooks for NixOS validation"  → Uses github skill
 ```
 
 ## 💡 Pro Tips
