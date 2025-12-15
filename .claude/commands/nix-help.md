@@ -7,6 +7,7 @@ Quick reference for all available NixOS development commands.
 ```bash
 /nix-deploy          # Smart deployment with validation
 /nix-module          # Create new module with best practices
+/nix-manix-search    # Search NixOS options and packages
 /nix-fix             # Auto-fix anti-patterns
 /nix-security        # Security audit
 /nix-review          # Code review
@@ -121,6 +122,16 @@ Quick reference for all available NixOS development commands.
 - Validates syntax and patterns
 - Provides usage examples
 - Time: ~2 minutes
+
+**`/nix-manix-search`** - Search NixOS options and packages (NEW!)
+
+- Fast local documentation search with manix
+- Search NixOS options, packages, lib functions
+- Interactive search with fzf integration
+- Shows option types, defaults, and descriptions
+- Combines with online NixOS Search
+- Use before adding/configuring services
+- Time: ~30 seconds
 
 ### Code Quality & Review
 
@@ -303,25 +314,26 @@ Fast deploy to p620
 
 **Choose command based on task:**
 
-| Task                     | Command            | Time               |
-| ------------------------ | ------------------ | ------------------ |
-| Validate configuration   | `/nix-validate`    | 30s-2min           |
-| Test builds              | `/nix-test`        | 1-2min             |
-| Clean up disk            | `/nix-clean`       | 30s-5min           |
-| Check system info        | `/nix-info`        | 5-30s              |
-| Manage pre-commit hooks  | `/nix-precommit`   | 5-30s              |
-| Build live USB installer | `/nix-live`        | 5-10min            |
-| Manage MicroVMs          | `/nix-microvm`     | 5-30s              |
-| Manage secrets           | `/nix-secrets`     | 5s-1min            |
-| Network diagnostics      | `/nix-network`     | instant-continuous |
-| Create new module        | `/nix-module`      | 2min               |
-| Fix code issues          | `/nix-fix`         | 15s-1min           |
-| Review code              | `/nix-review`      | 1min               |
-| Security check           | `/nix-security`    | 1min               |
-| Deploy changes           | `/nix-deploy`      | 1-3min             |
-| Optimize performance     | `/nix-optimize`    | 2-10min            |
-| Create issue             | `/nix-new-task`    | 2min               |
-| Check tasks              | `/nix-check-tasks` | 30s                |
+| Task                     | Command             | Time               |
+| ------------------------ | ------------------- | ------------------ |
+| Validate configuration   | `/nix-validate`     | 30s-2min           |
+| Test builds              | `/nix-test`         | 1-2min             |
+| Clean up disk            | `/nix-clean`        | 30s-5min           |
+| Check system info        | `/nix-info`         | 5-30s              |
+| Manage pre-commit hooks  | `/nix-precommit`    | 5-30s              |
+| Build live USB installer | `/nix-live`         | 5-10min            |
+| Manage MicroVMs          | `/nix-microvm`      | 5-30s              |
+| Manage secrets           | `/nix-secrets`      | 5s-1min            |
+| Network diagnostics      | `/nix-network`      | instant-continuous |
+| Create new module        | `/nix-module`       | 2min               |
+| Search options/packages  | `/nix-manix-search` | 30s                |
+| Fix code issues          | `/nix-fix`          | 15s-1min           |
+| Review code              | `/nix-review`       | 1min               |
+| Security check           | `/nix-security`     | 1min               |
+| Deploy changes           | `/nix-deploy`       | 1-3min             |
+| Optimize performance     | `/nix-optimize`     | 2-10min            |
+| Create issue             | `/nix-new-task`     | 2min               |
+| Check tasks              | `/nix-check-tasks`  | 30s                |
 
 ## 🔧 Just Commands (Shell)
 
