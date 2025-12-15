@@ -339,6 +339,7 @@ in
       kdePackages.qt6ct
       # Custom packages
       (callPackage ../../home/development/qwen-code/default.nix { })
+      nix-doc # Interactive Nix documentation tool
 
       # Power management (from power.nix)
       cpupower-gui # GUI for CPU frequency scaling

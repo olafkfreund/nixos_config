@@ -161,6 +161,9 @@
 
     # Glim - GitLab CI/CD TUI monitoring
     pkgs.glim
+
+    # Wayfarer - Screen recorder for GNOME/Wayland/pipewire
+    pkgs.wayfarer
   ];
 
   # Optional: Add additional packages to the Windsurf environment

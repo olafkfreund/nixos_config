@@ -568,6 +568,7 @@ in
     scream
     vim
     wally-cli
+    nix-doc # Interactive Nix documentation tool
     # Qt theme control tools for Stylix
     libsForQt5.qt5ct
     kdePackages.qt6ct

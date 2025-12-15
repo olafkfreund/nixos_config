@@ -131,6 +131,11 @@ in
     };
   };
 
+  # Additional packages
+  home.packages = with pkgs; [
+    wayfarer # Screen recorder for GNOME/Wayland/pipewire
+  ];
+
   # GitLab development configuration for Razer (mobile development)
   development.gitlab = {
     enable = true;
