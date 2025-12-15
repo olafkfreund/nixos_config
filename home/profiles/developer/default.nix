@@ -192,5 +192,17 @@
       enable = true;
       nix-direnv.enable = true;
     };
+
+    # Claude Powerline - AI-powered statusline for Claude Code
+    claude-powerline = {
+      enable = true;
+      theme = "custom"; # Use Gruvbox Dark theme
+      style = "powerline"; # Vim-style powerline separators
+      budget = {
+        session = 10.0; # Conservative: $10 per 5-hour session
+        daily = 25.0; # Conservative: $25 per day
+        block = 15.0; # Conservative: $15 per block
+      };
+    };
   };
 }

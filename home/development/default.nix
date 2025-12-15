@@ -17,6 +17,7 @@ _: {
     # AI-powered development tools
     ./codex-cli.nix
     ./claude-desktop
+    ./claude-powerline.nix
 
     # Version control and CI/CD
     ./gitlab/default.nix
