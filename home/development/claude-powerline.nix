@@ -160,20 +160,38 @@ in
     #   "enabledPlugins": { ... },  // Keep existing plugin settings
     #   "statusLine": {
     #     "type": "command",
-    #     "command": "npx -y @owloops/claude-powerline@latest --style=powerline"
+    #     "command": "$HOME/.claude/statusline-powerline.sh"
     #   }
     # }
 
-    # Ensure Node.js is available for npx
-    home.packages = with pkgs; [
-      nodejs_22
-    ];
+    home = {
+      # Create wrapper script for Claude Code statusLine
+      file.".claude/statusline-powerline.sh" = {
+        text = ''
+          #!/usr/bin/env bash
+          # Claude Powerline statusline wrapper
+          # Ensures proper environment and paths for npx
 
-    # Environment variables for Claude Powerline configuration
-    home.sessionVariables = {
-      CLAUDE_POWERLINE_THEME = cfg.theme;
-      CLAUDE_POWERLINE_STYLE = cfg.style;
-      CLAUDE_POWERLINE_CONFIG = "${config.xdg.configHome}/claude-powerline/config.json";
+          # Set PATH to include nix profile binaries
+          export PATH="${pkgs.nodejs_22}/bin:$PATH"
+
+          # Pass stdin to claude-powerline with built-in gruvbox theme
+          ${pkgs.nodejs_22}/bin/npx -y @owloops/claude-powerline@latest --style=${cfg.style} --theme=gruvbox
+        '';
+        executable = true;
+      };
+
+      # Ensure Node.js is available for npx
+      packages = with pkgs; [
+        nodejs_22
+      ];
+
+      # Environment variables for Claude Powerline configuration
+      sessionVariables = {
+        CLAUDE_POWERLINE_THEME = cfg.theme;
+        CLAUDE_POWERLINE_STYLE = cfg.style;
+        CLAUDE_POWERLINE_CONFIG = "${config.xdg.configHome}/claude-powerline/config.json";
+      };
     };
   };
 }
