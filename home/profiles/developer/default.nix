@@ -194,15 +194,11 @@
     };
 
     # Claude Powerline - AI-powered statusline for Claude Code
+    # Single-line layout: Directory | Git | Model (budget monitoring disabled for MAX subscription)
     claude-powerline = {
       enable = true;
-      theme = "custom"; # Use Gruvbox Dark theme
+      theme = "custom"; # Gruvbox Dark theme
       style = "powerline"; # Vim-style powerline separators
-      budget = {
-        session = 10.0; # Conservative: $10 per 5-hour session
-        daily = 25.0; # Conservative: $25 per day
-        block = 15.0; # Conservative: $15 per block
-      };
     };
   };
 }

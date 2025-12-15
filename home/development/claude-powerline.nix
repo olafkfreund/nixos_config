@@ -45,7 +45,7 @@ let
       charset = "unicode";
       autoWrap = true;
 
-      # Multi-line layout for comprehensive information display
+      # Single-line layout focused on development context (MAX subscription - no budget monitoring needed)
       lines = [
         {
           segments = {
@@ -72,50 +72,10 @@ let
             };
           };
         }
-        {
-          segments = {
-            session = {
-              enabled = true;
-              style = {
-                background = "#d79921"; # Yellow - session budget
-                foreground = "#282828";
-              };
-            };
-            today = {
-              enabled = true;
-              style = {
-                background = "#689d6a"; # Aqua - daily budget
-                foreground = "#282828";
-              };
-            };
-            context = {
-              enabled = true;
-              style = {
-                background = "#d65d0e"; # Orange - context usage
-                foreground = "#282828";
-              };
-            };
-          };
-        }
       ];
     };
 
-    # Budget monitoring configuration
-    budget = {
-      session = {
-        amount = cfg.budget.session;
-        warningThreshold = 80;
-      };
-      today = {
-        amount = cfg.budget.daily;
-        warningThreshold = 80;
-      };
-      block = {
-        amount = cfg.budget.block;
-        type = "cost";
-        warningThreshold = 80;
-      };
-    };
+    # Budget monitoring disabled (MAX subscription with unlimited usage)
   };
 
   # Write theme configuration to JSON file
