@@ -252,7 +252,7 @@ git commit && gh pr create          # Commit
 /nix-check-tasks                    # Verify
 ```
 
-**Total: ~10 minutes**
+### Total: ~10 minutes
 
 ### Quick Fix
 
@@ -265,7 +265,7 @@ git commit && gh pr create          # Commit
 Fast deploy to p620
 ```
 
-**Total: ~3 minutes**
+### Total: ~3 minutes
 
 ### Security Audit
 
@@ -277,7 +277,7 @@ Fast deploy to p620
 /nix-security                       # Verify
 ```
 
-**Total: ~5 minutes**
+### Total: ~5 minutes
 
 ## 📊 Time Savings
 
@@ -297,7 +297,7 @@ Fast deploy to p620
 - Deployment: 2.5 minutes
 - **Total: 6.5 minutes**
 
-**Time Saved: 92-96% reduction**
+### Time Saved: 92-96% reduction
 
 ## 🎯 Command Selection Guide
 
@@ -369,7 +369,7 @@ Agents activate automatically based on your request:
 
 You can explicitly request an agent:
 
-```
+```text
 "Use nixos-pro agent to create a monitoring module"
 "Have the security-auditor review this configuration"
 "Ask the debugger to analyze this error"
@@ -381,6 +381,7 @@ Skills provide specialized knowledge automatically when you mention the technolo
 
 **NixOS Tools** (`.claude/skills/`):
 
+- **nixcore** - Nix language, derivations, imports, options, module system best practices
 - **agenix** - Age-encrypted secret management
 - **home-manager** - User environment configuration and dotfiles
 - **devenv** - Development environment setup and tooling
@@ -405,7 +406,10 @@ Skills provide specialized knowledge automatically when you mention the technolo
 
 Skills activate automatically when you mention the technology:
 
-```
+```text
+"Create NixOS module with proper options" → Uses nixcore skill
+"Write package derivation for myapp"     → Uses nixcore skill
+"Debug NixOS module evaluation error"    → Uses nixcore skill
 "Configure agenix for API keys"          → Uses agenix skill
 "Set up home-manager for new user"       → Uses home-manager skill
 "Create cargo2nix derivation for myapp"  → Uses cargo2nix skill
