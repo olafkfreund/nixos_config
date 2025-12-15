@@ -152,8 +152,8 @@ in
     # Create theme configuration file in XDG config directory
     xdg.configFile."claude-powerline/config.json".source = themeFile;
 
-    # Claude Code settings integration
-    xdg.configFile."claude/settings.json".text = builtins.toJSON {
+    # Claude Code settings integration (uses ~/.config/claude-code/)
+    xdg.configFile."claude-code/settings.json".text = builtins.toJSON {
       statusLine = {
         type = "command";
         command = "npx -y @owloops/claude-powerline@latest --style=${cfg.style}";
