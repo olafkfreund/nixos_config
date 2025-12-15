@@ -149,16 +149,20 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Create theme configuration file in XDG config directory
+    # Create theme configuration file
     xdg.configFile."claude-powerline/config.json".source = themeFile;
 
-    # Claude Code settings integration (uses ~/.config/claude-code/)
-    xdg.configFile."claude-code/settings.json".text = builtins.toJSON {
-      statusLine = {
-        type = "command";
-        command = "npx -y @owloops/claude-powerline@latest --style=${cfg.style}";
-      };
-    };
+    # NOTE: ~/.claude/settings.json is NOT managed by Home Manager
+    # It contains user-specific plugin settings that should not be overwritten.
+    # Users must manually add the statusLine configuration to their existing settings.json:
+    #
+    # {
+    #   "enabledPlugins": { ... },  // Keep existing plugin settings
+    #   "statusLine": {
+    #     "type": "command",
+    #     "command": "npx -y @owloops/claude-powerline@latest --style=powerline"
+    #   }
+    # }
 
     # Ensure Node.js is available for npx
     home.packages = with pkgs; [
