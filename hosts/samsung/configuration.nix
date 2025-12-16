@@ -231,7 +231,7 @@ in
   services = {
     playerctld.enable = true;
     fwupd.enable = true;
-    ollama.package = pkgs.ollama; # CPU-based inference for Intel integrated graphics
+    # ollama.package = pkgs.ollama; # Disabled - Ollama not needed on Samsung laptop
     nfs.server = lib.mkIf vars.services.nfs.enable {
       enable = true;
       inherit (vars.services.nfs) exports;

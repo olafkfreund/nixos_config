@@ -146,7 +146,7 @@ in
 
     ai = {
       enable = true;
-      ollama = true;
+      ollama = false; # Disabled on Razer laptop for battery life and resource optimization
       gemini-cli = true;
       claude-desktop = true; # Enable Claude Desktop GUI with MCP server support
 
@@ -271,7 +271,7 @@ in
   services = {
     playerctld.enable = true;
     fwupd.enable = true;
-    ollama.package = pkgs.ollama-cuda; # NVIDIA GPU acceleration
+    # ollama.package = pkgs.ollama-cuda; # Disabled - Ollama not needed on Razer laptop
     nfs.server = lib.mkIf vars.services.nfs.enable {
       enable = true;
       inherit (vars.services.nfs) exports;
