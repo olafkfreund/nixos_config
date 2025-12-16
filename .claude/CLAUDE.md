@@ -52,7 +52,9 @@ This is a sophisticated multi-host NixOS configuration managing 4 active hosts (
 
 **System Agents** (`.claude/agents/`):
 
+- **config-drift-detective** - Configuration drift detection and state enforcement (NEW)
 - **deployment-coordinator** - Intelligent multi-host deployment orchestration (NEW)
+- **documentation-sync** - Automated documentation generation and sync (NEW)
 - **issue-checker** - GitHub issue analysis and task tracking
 - **local-logs** - System log parsing and analysis
 - **module-refactor** - Intelligent code refactoring and anti-pattern detection (NEW)
@@ -60,6 +62,7 @@ This is a sophisticated multi-host NixOS configuration managing 4 active hosts (
 - **package-resolver** - Automatic package conflict resolution (NEW)
 - **performance-analyzer** - Build time and evaluation profiling (NEW)
 - **security-patrol** - Proactive security monitoring and hardening (NEW)
+- **test-generator** - Automatic test suite creation and coverage analysis (NEW)
 - **update** - Package update management and review
 
 **Built-in Agents**:
