@@ -52,6 +52,7 @@ This is a sophisticated multi-host NixOS configuration managing 4 active hosts (
 
 **System Agents** (`.claude/agents/`):
 
+- **deployment-coordinator** - Intelligent multi-host deployment orchestration (NEW)
 - **issue-checker** - GitHub issue analysis
 - **local-logs** - System log parsing
 - **nix-check** - Configuration validation
