@@ -55,6 +55,7 @@ This is a sophisticated multi-host NixOS configuration managing 4 active hosts (
 - **issue-checker** - GitHub issue analysis
 - **local-logs** - System log parsing
 - **nix-check** - Configuration validation
+- **security-patrol** - Proactive security monitoring and hardening (NEW)
 - **update** - Package updates
 
 **Built-in Agents**:

@@ -34,7 +34,7 @@ This repository implements a sophisticated **template-based NixOS configuration 
 | **Justfile Commands**    | 140+ automation commands           |
 | **Claude Code Skills**   | 16 specialized skills              |
 | **Claude Code Commands** | 20+ workflow commands              |
-| **Claude Code Agents**   | 4 specialized agents               |
+| **Claude Code Agents**   | 5 specialized agents               |
 | **Anti-Patterns**        | Zero (100% compliance)             |
 
 ### Core Architecture Components
@@ -233,13 +233,14 @@ Skills provide automatic knowledge injection when relevant technologies are ment
 - **mangowc** - MangoHud gaming overlay
 - **dankms** - DKMS kernel module management
 
-### Agents (4 Specialized)
+### Agents (5 Specialized)
 
 Agents automatically activate based on your request context:
 
 - **issue-checker** - GitHub issue analysis and task tracking
 - **local-logs** - System log parsing and analysis
 - **nix-check** - Configuration validation and testing
+- **security-patrol** - Proactive security monitoring and hardening (NEW)
 - **update** - Package update management and review
 
 ### Built-in Agents
