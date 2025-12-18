@@ -48,6 +48,23 @@
     powertop.enable = false;
   };
 
+  # Prevent systemd-rfkill from blocking Bluetooth
+  systemd.services.systemd-rfkill.enable = lib.mkForce false;
+
+  # Ensure Bluetooth is always unblocked at boot
+  systemd.services.bluetooth-unblock = {
+    description = "Unblock Bluetooth adapter at boot";
+    wantedBy = [ "bluetooth.service" ];
+    before = [ "bluetooth.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      ${pkgs.util-linux}/bin/rfkill unblock bluetooth
+    '';
+  };
+
   # Systemd service to force all USB devices to stay powered on
   systemd.services.usb-power-on = {
     description = "Force all USB devices to stay powered on";
