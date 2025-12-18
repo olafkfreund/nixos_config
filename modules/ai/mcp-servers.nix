@@ -90,6 +90,7 @@ in
       ]
 
       # Optional MCP servers based on configuration
+      ++ lib.optionals (cfg.servers.browsermcp or cfg.enableAll) [ customPkgs.browser-mcp ]
       ++ lib.optionals (cfg.servers.grafana or cfg.enableAll) [ mcp-grafana ]
       ++ lib.optionals (cfg.servers.kubernetes or cfg.enableAll) [ mcp-k8s-go ]
       ++ lib.optionals (cfg.servers.terraform or cfg.enableAll) [ terraform-mcp-server ]
@@ -110,6 +111,7 @@ in
       - chatmcp: AI chat client with MCP support
 
       Optional Servers (Configured):
+      ${lib.optionalString (cfg.servers.browsermcp or cfg.enableAll) "- browser-mcp: Browser automation with privacy (requires Chrome extension)"}
       ${lib.optionalString (cfg.obsidian.enable or cfg.enableAll) "- obsidian-mcp: Obsidian vault knowledge base integration"}
       ${lib.optionalString (cfg.servers.grafana or cfg.enableAll) "- mcp-grafana: Grafana dashboard and metrics integration"}
       ${lib.optionalString (cfg.servers.kubernetes or cfg.enableAll) "- mcp-k8s-go: Kubernetes cluster management"}

@@ -128,25 +128,26 @@ in
       droidcam = false; # Disabled due to v4l2loopback build failures on P510
     };
 
-    # COSMIC Desktop with COSMIC Greeter enabled
+    # COSMIC Desktop disabled - using GNOME for better headless RDP support
     desktop.cosmic = {
-      enable = true;
-      useCosmicGreeter = false; # Disabled due to libEGL.so.1 bug (nixpkgs #464392)
-      defaultSession = true; # Set COSMIC as default session
-      installAllApps = true;
-      disableOsd = true; # Workaround for polkit agent crashes in COSMIC beta
+      enable = false; # Disabled: compositor not starting properly for headless operation
+      useCosmicGreeter = false;
+      defaultSession = false;
+      installAllApps = false;
+      disableOsd = true;
     };
 
-    # Remote Desktop support for COSMIC
+    # Remote Desktop support using GNOME Remote Desktop (native RDP support)
+    # Note: cosmic-remote-desktop disabled in favor of native GNOME RDP
     desktop.cosmic-remote-desktop = {
-      enable = true;
-      protocol = "both"; # Enable both RDP and VNC
+      enable = false; # Disabled: using native GNOME Remote Desktop instead
+      protocol = "both";
       rdpPort = 3389;
       vncPort = 5900;
-      vncPassword = "p510remote"; # Change this to a secure password!
-      allowedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ]; # Tailscale and local network
-      disableScreenLock = false; # Keep screen lock for security
-      disablePowerManagement = true; # Prevent sleep for remote access
+      vncPassword = "p510remote";
+      allowedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ];
+      disableScreenLock = false;
+      disablePowerManagement = true;
     };
   };
 
@@ -215,14 +216,21 @@ in
   # Display manager configuration - Use GDM (COSMIC greeter disabled due to libEGL.so.1 bug)
   services.displayManager.gdm.enable = true;
 
-  # Desktop manager configuration - minimal GNOME for login only
+  # Enable auto-login for headless RDP access (override cosmic-remote-desktop module)
+  services.displayManager.autoLogin = {
+    enable = lib.mkOverride 0 true; # Highest priority override (overrides module's mkForce)
+    user = "olafkfreund";
+  };
+
+  # Desktop manager configuration - Full GNOME for headless RDP access
   services.desktopManager.gnome.enable = true;
 
-  # Essential GNOME services for login screen schemas (minimal set)
+  # GNOME services for full desktop functionality
   services.gnome = {
     gnome-settings-daemon.enable = true;
     gnome-keyring.enable = true;
     gnome-initial-setup.enable = false;
+    gnome-remote-desktop.enable = true; # Enable GNOME Remote Desktop for RDP support
   };
 
   # Ensure display manager is enabled in systemd

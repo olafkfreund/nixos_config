@@ -167,6 +167,7 @@ in
         };
         # Enable additional MCP servers
         servers = {
+          browsermcp = true; # Browser automation with privacy
           terraform = true; # Infrastructure as Code support
         };
       };

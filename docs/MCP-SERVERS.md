@@ -5,13 +5,18 @@
 
 ## Overview
 
-The infrastructure now includes comprehensive MCP (Model Context Protocol) server support, enabling AI agents to interact with external tools and data sources through a standardized protocol.
+The infrastructure now includes comprehensive MCP (Model Context Protocol) server support,
+enabling AI agents to interact with external tools and data sources through a standardized
+protocol.
 
-**MCP is "USB-C for AI"** - a revolutionary standard that enables AI agents to seamlessly interact with tools, databases, APIs, and services without custom integration code.
+**MCP is "USB-C for AI"** - a revolutionary standard that enables AI agents to seamlessly
+interact with tools, databases, APIs, and services without custom integration code.
 
 ## What is MCP?
 
-The Model Context Protocol (MCP) is an open protocol released by Anthropic in November 2024 that standardizes how AI applications connect to external tools and data sources. It uses a three-core architecture:
+The Model Context Protocol (MCP) is an open protocol released by Anthropic in November 2024
+that standardizes how AI applications connect to external tools and data sources. It uses a
+three-core architecture:
 
 1. **MCP Hosts**: AI applications (Claude Code, VS Code, etc.)
 2. **MCP Clients**: Protocol handlers within applications
@@ -203,6 +208,94 @@ terraform-mcp-server
 - Protocol debugging
 
 **Enable**: Set `features.ai.mcp.servers.proxy = true;`
+
+#### 10. **browser-mcp** (v0.1.0)
+
+**Purpose**: AI-powered browser automation with privacy
+**Benefits**:
+
+- Local browser control (no cloud dependencies)
+- Uses your existing browser profile (stay logged into services)
+- Avoids bot detection using real browser fingerprint
+- AI-assisted web automation, testing, and data extraction
+- Seamless integration with Claude Code and other AI tools
+
+**Configuration**:
+
+```nix
+# Enable BrowserMCP server
+features.ai.mcp.servers.browsermcp = true;
+```
+
+**Claude Code MCP Config**:
+
+```json
+"browsermcp": {
+  "command": "npx",
+  "args": ["@browsermcp/mcp@latest"],
+  "description": "Browser automation with privacy"
+}
+```
+
+**Chrome Extension Installation (Required)**:
+
+1. **Install Extension**:
+   - Open Chrome/Chromium browser
+   - Go to Chrome Web Store
+   - Search for "Browser MCP"
+   - Click "Add to Chrome" to install
+
+2. **Pin Extension**:
+   - Click the puzzle icon (extensions) in Chrome toolbar
+   - Find "Browser MCP" in the list
+   - Click the pin icon to pin it to the toolbar
+
+3. **Connect Extension**:
+   - Click the Browser MCP extension icon
+   - Click "Connect" button
+   - The extension will link the active tab to the MCP server
+
+**Usage**:
+
+```bash
+# Ask Claude Code to automate browser tasks
+"Open GitHub in the browser"
+"Navigate to my repositories"
+"Fill out this form with the following data..."
+"Take a screenshot of this page"
+"Extract all links from this page"
+```
+
+**Example Use Cases**:
+
+- Automated web testing and QA
+- Form filling and data entry automation
+- Web scraping with AI understanding
+- Browser-based workflow automation
+- Interactive debugging of web applications
+- Accessibility testing and analysis
+
+**How It Works**:
+
+```text
+AI Client (Claude Code) → MCP Server (npx @browsermcp/mcp) → Chrome Extension → Browser Actions
+```
+
+The system uses three components:
+
+1. **MCP Client**: AI tools send natural language instructions
+2. **MCP Server**: Translates instructions into browser commands
+3. **Chrome Extension**: Executes commands in your actual browser session
+
+**Security & Privacy**:
+
+- ✅ Runs completely locally on your machine
+- ✅ Uses your existing browser profile and cookies
+- ✅ No data sent to external services
+- ✅ Full control over what actions are performed
+- ✅ No API keys or authentication required
+
+**Documentation**: <https://docs.browsermcp.io/setup-server>
 
 ## Additional Recommended MCP Servers (Not Yet in Nixpkgs)
 

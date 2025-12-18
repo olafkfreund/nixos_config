@@ -16,6 +16,11 @@
       },
       "description": "Obsidian vault with full CRUD via REST API plugin - requires Local REST API plugin installed"
     },
+    "browsermcp": {
+      "command": "npx",
+      "args": ["@browsermcp/mcp@latest"],
+      "description": "Browser automation with privacy - AI-powered web automation (requires Chrome extension)"
+    },
     "nixos": {
       "command": "mcp-nixos",
       "args": [],

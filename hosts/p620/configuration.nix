@@ -154,6 +154,7 @@ in
     };
     # Enable additional MCP servers
     servers = {
+      browsermcp = true; # Browser automation with privacy
       grafana = true; # Integration with monitoring stack
       terraform = true; # Infrastructure as Code support
     };
