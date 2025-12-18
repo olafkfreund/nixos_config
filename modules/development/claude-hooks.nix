@@ -30,9 +30,9 @@ let
   '';
 
   # Claude hooks configuration
-  claudeHooksConfig = {
-    hooks = mkMerge [
-      (mkIf cfg.enablePermissionNotifications {
+  claudeHooksConfig =
+    let
+      permissionHooks = optionalAttrs cfg.enablePermissionNotifications {
         PermissionRequest = [{
           matcher = "*";
           hooks = [{
@@ -40,17 +40,19 @@ let
             command = toString needsPermissionsScript;
           }];
         }];
-      })
-      (mkIf cfg.enableReadyNotifications {
+      };
+      readyHooks = optionalAttrs cfg.enableReadyNotifications {
         Stop = [{
           hooks = [{
             type = "command";
             command = toString notifyReadyScript;
           }];
         }];
-      })
-    ];
-  };
+      };
+    in
+    {
+      hooks = permissionHooks // readyHooks;
+    };
 in
 {
   options.features.claude-hooks = {
