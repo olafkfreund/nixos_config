@@ -160,6 +160,13 @@ in
     };
   };
 
+  # Enable Claude Code hooks for desktop notifications
+  features.claude-hooks = {
+    enable = true;
+    enablePermissionNotifications = true;
+    enableReadyNotifications = true;
+  };
+
   # Re-enable Claude Desktop with local package
   # features.ai.claude-desktop = true;
 
