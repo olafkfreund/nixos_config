@@ -1,5 +1,14 @@
 {
   "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"],
+      "env": {
+        "PLAYWRIGHT_BROWSERS_PATH": "${PLAYWRIGHT_BROWSERS_PATH}",
+        "PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS": "true"
+      },
+      "description": "Browser automation using Playwright - AI-powered web testing, form filling, and DOM interaction"
+    },
     "obsidian": {
       "command": "obsidian-mcp",
       "args": ["${OBSIDIAN_VAULT_PATH:-/home/olafkfreund/Documents/Caliti}"],

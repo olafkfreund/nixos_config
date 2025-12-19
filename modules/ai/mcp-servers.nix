@@ -79,55 +79,66 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # Always include core MCP servers when enabled
-    environment.systemPackages = with pkgs;
-      # Core MCP servers (essential for AI-assisted development)
-      [
-        playwright-mcp # Browser automation
-        mcp-nixos # NixOS package/option queries
-        github-mcp-server # GitHub integration
-        chatmcp # AI chat client
-      ]
+    environment = {
+      # Always include core MCP servers when enabled
+      systemPackages = with pkgs;
+        # Core MCP servers (essential for AI-assisted development)
+        [
+          playwright-mcp # Browser automation
+          playwright-driver.browsers # NixOS-compatible Playwright browsers
+          mcp-nixos # NixOS package/option queries
+          github-mcp-server # GitHub integration
+          chatmcp # AI chat client
+        ]
 
-      # Optional MCP servers based on configuration
-      ++ lib.optionals (cfg.servers.browsermcp or cfg.enableAll) [ customPkgs.browser-mcp ]
-      ++ lib.optionals (cfg.servers.grafana or cfg.enableAll) [ mcp-grafana ]
-      ++ lib.optionals (cfg.servers.kubernetes or cfg.enableAll) [ mcp-k8s-go ]
-      ++ lib.optionals (cfg.servers.terraform or cfg.enableAll) [ terraform-mcp-server ]
-      ++ lib.optionals (cfg.servers.gitea or cfg.enableAll) [ gitea-mcp-server ]
-      ++ lib.optionals (cfg.servers.proxy or cfg.enableAll) [ mcp-proxy ]
-      ++ lib.optionals ((cfg.obsidian.enable or cfg.enableAll) && cfg.obsidian.implementation == "zero-dependency") [ customPkgs.obsidian-mcp ]
-      ++ lib.optionals ((cfg.obsidian.enable or cfg.enableAll) && cfg.obsidian.implementation == "rest-api") [ customPkgs.obsidian-mcp-rest ];
+        # Optional MCP servers based on configuration
+        ++ lib.optionals (cfg.servers.browsermcp or cfg.enableAll) [ customPkgs.browser-mcp ]
+        ++ lib.optionals (cfg.servers.grafana or cfg.enableAll) [ mcp-grafana ]
+        ++ lib.optionals (cfg.servers.kubernetes or cfg.enableAll) [ mcp-k8s-go ]
+        ++ lib.optionals (cfg.servers.terraform or cfg.enableAll) [ terraform-mcp-server ]
+        ++ lib.optionals (cfg.servers.gitea or cfg.enableAll) [ gitea-mcp-server ]
+        ++ lib.optionals (cfg.servers.proxy or cfg.enableAll) [ mcp-proxy ]
+        ++ lib.optionals ((cfg.obsidian.enable or cfg.enableAll) && cfg.obsidian.implementation == "zero-dependency") [ customPkgs.obsidian-mcp ]
+        ++ lib.optionals ((cfg.obsidian.enable or cfg.enableAll) && cfg.obsidian.implementation == "rest-api") [ customPkgs.obsidian-mcp-rest ];
 
-    # MCP servers documentation and usage information
-    environment.etc."mcp-servers-info.txt".text = ''
-      MCP (Model Context Protocol) Servers Installed
-      ================================================
+      # NixOS-specific Playwright environment variables
+      # These are required because Playwright expects browsers in ~/.cache/ms-playwright
+      # but NixOS stores them in the Nix store
+      sessionVariables = {
+        PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers}";
+        PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true";
+      };
 
-      Core Servers (Always Enabled):
-      - playwright-mcp: Browser automation for AI agents
-      - mcp-nixos: NixOS package and configuration queries
-      - github-mcp-server: GitHub repository integration
-      - chatmcp: AI chat client with MCP support
+      # MCP servers documentation and usage information
+      etc."mcp-servers-info.txt".text = ''
+        MCP (Model Context Protocol) Servers Installed
+        ================================================
 
-      Optional Servers (Configured):
-      ${lib.optionalString (cfg.servers.browsermcp or cfg.enableAll) "- browser-mcp: Browser automation with privacy (requires Chrome extension)"}
-      ${lib.optionalString (cfg.obsidian.enable or cfg.enableAll) "- obsidian-mcp: Obsidian vault knowledge base integration"}
-      ${lib.optionalString (cfg.servers.grafana or cfg.enableAll) "- mcp-grafana: Grafana dashboard and metrics integration"}
-      ${lib.optionalString (cfg.servers.kubernetes or cfg.enableAll) "- mcp-k8s-go: Kubernetes cluster management"}
-      ${lib.optionalString (cfg.servers.terraform or cfg.enableAll) "- terraform-mcp-server: Infrastructure as Code automation"}
-      ${lib.optionalString (cfg.servers.gitea or cfg.enableAll) "- gitea-mcp-server: Gitea repository management"}
-      ${lib.optionalString (cfg.servers.proxy or cfg.enableAll) "- mcp-proxy: Protocol proxy (stdio <-> SSE)"}
+        Core Servers (Always Enabled):
+        - playwright-mcp: Browser automation for AI agents
+        - mcp-nixos: NixOS package and configuration queries
+        - github-mcp-server: GitHub repository integration
+        - chatmcp: AI chat client with MCP support
 
-      Usage:
-      Configure these servers in your AI client's MCP configuration.
-      For Claude Code, add to .claude/settings.local.json or use claude-code CLI.
+        Optional Servers (Configured):
+        ${lib.optionalString (cfg.servers.browsermcp or cfg.enableAll) "- browser-mcp: Browser automation with privacy (requires Chrome extension)"}
+        ${lib.optionalString (cfg.obsidian.enable or cfg.enableAll) "- obsidian-mcp: Obsidian vault knowledge base integration"}
+        ${lib.optionalString (cfg.servers.grafana or cfg.enableAll) "- mcp-grafana: Grafana dashboard and metrics integration"}
+        ${lib.optionalString (cfg.servers.kubernetes or cfg.enableAll) "- mcp-k8s-go: Kubernetes cluster management"}
+        ${lib.optionalString (cfg.servers.terraform or cfg.enableAll) "- terraform-mcp-server: Infrastructure as Code automation"}
+        ${lib.optionalString (cfg.servers.gitea or cfg.enableAll) "- gitea-mcp-server: Gitea repository management"}
+        ${lib.optionalString (cfg.servers.proxy or cfg.enableAll) "- mcp-proxy: Protocol proxy (stdio <-> SSE)"}
 
-      Documentation:
-      - MCP Protocol: https://modelcontextprotocol.io/
-      - Server List: nix search nixpkgs mcp
-      - Configuration: cat /etc/mcp-servers-info.txt
-    '';
+        Usage:
+        Configure these servers in your AI client's MCP configuration.
+        For Claude Code, add to .claude/settings.local.json or use claude-code CLI.
+
+        Documentation:
+        - MCP Protocol: https://modelcontextprotocol.io/
+        - Server List: nix search nixpkgs mcp
+        - Configuration: cat /etc/mcp-servers-info.txt
+      '';
+    };
 
     # Agenix secret for Obsidian REST API mode
     age.secrets."obsidian-api-key" = lib.mkIf (cfg.obsidian.enable && cfg.obsidian.implementation == "rest-api") {

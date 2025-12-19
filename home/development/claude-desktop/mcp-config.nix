@@ -17,6 +17,17 @@ in
         mcpServers =
           # Always enabled MCP servers
           {
+            # Playwright MCP for browser automation
+            playwright = {
+              command = "${pkgs.nodejs}/bin/npx";
+              args = [ "-y" "@playwright/mcp@latest" ];
+              env = {
+                PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers}";
+                PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true";
+              };
+              description = "Browser automation using Playwright";
+            };
+
             # NixOS MCP server
             nixos = {
               command = "mcp-nixos";
@@ -86,6 +97,12 @@ in
       Generated: ~/.config/Claude/claude_desktop_config.json
 
       ## Enabled MCP Servers
+
+      ### Playwright
+      - Browser automation using Playwright accessibility tree
+      - NixOS-compatible browser paths configured
+      - Supports web testing, form filling, and DOM interaction
+      - Example: "Open browser to example.com and take a screenshot"
 
       ${lib.optionalString obsidianEnabled ''
       ### Obsidian (${mcpCfg.obsidian.implementation})
