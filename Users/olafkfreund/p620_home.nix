@@ -26,8 +26,9 @@
   # AI-powered shell command suggestions
   programs.zshAiCmd = {
     enable = true;
-    # Uses default: claude-3-5-haiku-20241022 (fast, cost-effective)
-    # Or use: claude-3-5-sonnet-20241022 (more powerful)
+    # Uses default: claude-haiku-4-5 (Claude 4.5 - Latest, fast, cost-effective)
+    # Or use: claude-sonnet-4-5 (Claude 4.5 - More powerful)
+    # Legacy: claude-3-5-haiku-20241022, claude-3-5-sonnet-20241022
     triggerKey = "^G"; # Ctrl+G
     debug = true; # Temporarily enable for debugging
   };

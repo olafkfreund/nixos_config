@@ -76,15 +76,20 @@ in
 
     model = mkOption {
       type = types.str;
-      default = "claude-3-5-haiku-20241022";
-      example = "claude-3-5-sonnet-20241022";
+      default = "claude-haiku-4-5";
+      example = "claude-sonnet-4-5";
       description = ''
         Claude model to use for command suggestions.
 
-        Available models:
-        - claude-3-5-haiku-20241022 (default, fast and cost-effective)
-        - claude-3-5-sonnet-20241022 (more powerful, higher quality)
-        - claude-3-opus-20240229 (most capable, highest cost)
+        Available models (Claude 4.5 - Latest):
+        - claude-haiku-4-5 (default, fast and cost-effective)
+        - claude-sonnet-4-5 (more powerful, higher quality)
+        - claude-opus-4-5 (most capable, highest cost)
+
+        Legacy models (Claude 3.5):
+        - claude-3-5-haiku-20241022
+        - claude-3-5-sonnet-20241022
+        - claude-3-opus-20240229
 
         See https://docs.anthropic.com/claude/docs/models-overview for details.
       '';
@@ -160,7 +165,7 @@ in
         fi
 
         # Configure Claude model (if not using default)
-        ${optionalString (cfg.model != "claude-haiku-4-5-20251001") ''
+        ${optionalString (cfg.model != "claude-haiku-4-5") ''
         export ZSH_AI_CMD_MODEL="${cfg.model}"
         ''}
 
