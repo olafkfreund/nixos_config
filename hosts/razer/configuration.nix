@@ -173,8 +173,10 @@ in
           };
         };
         # Enable LinkedIn MCP server for professional networking
+        # NOTE: Disabled until secret is created (see docs/LINKEDIN-MCP.md)
+        # To enable: ./scripts/manage-secrets.sh create api-linkedin-cookie
         linkedin = {
-          enable = true;
+          enable = false; # TODO: Enable after creating secret
           cookieFile = config.age.secrets."api-linkedin-cookie".path;
         };
         # Enable additional MCP servers
