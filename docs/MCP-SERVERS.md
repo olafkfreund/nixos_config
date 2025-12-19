@@ -35,24 +35,64 @@ three-core architecture:
 - Automated testing and web scraping
 - DOM manipulation and screenshot capabilities
 - Form filling and web automation
+- Accessibility tree analysis (not pixel-based)
+- Fast and lightweight automation
+
+**NixOS-Specific Configuration**:
+
+The infrastructure includes proper NixOS support for Playwright with:
+
+- `playwright-driver.browsers` package for NixOS-compatible browsers
+- Environment variables: `PLAYWRIGHT_BROWSERS_PATH` and `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS`
+- Automatic configuration in both Claude Code and Claude Desktop
+
+**Claude Code Configuration** (`home/development/claude-code-mcp-config.json`):
+
+```json
+"playwright": {
+  "command": "npx",
+  "args": ["-y", "@playwright/mcp@latest"],
+  "env": {
+    "PLAYWRIGHT_BROWSERS_PATH": "${PLAYWRIGHT_BROWSERS_PATH}",
+    "PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS": "true"
+  },
+  "description": "Browser automation using Playwright"
+}
+```
+
+**Claude Desktop Configuration** (`home/development/claude-desktop/mcp-config.nix`):
+
+```nix
+playwright = {
+  command = "${pkgs.nodejs}/bin/npx";
+  args = [ "-y" "@playwright/mcp@latest" ];
+  env = {
+    PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers}";
+    PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true";
+  };
+  description = "Browser automation using Playwright";
+};
+```
 
 **Usage**:
 
 ```bash
-# Launched automatically by claude-code
-# Configure in .claude/settings.local.json:
-"playwright": {
-  "command": "playwright-mcp",
-  "args": ["--browser", "chromium"]
-}
+# From Claude Code or Claude Desktop:
+"Use playwright to open a browser to example.com"
+"Navigate to GitHub and take a screenshot"
+"Fill out this form with the following data"
+"Extract all links from this page"
+"Generate tests for this web application"
 ```
 
 **Example Use Cases**:
 
-- Automated web testing
+- Automated web testing and QA
 - Data extraction from websites
 - Filling out forms programmatically
 - Taking accessibility-tree snapshots
+- AI-generated test creation (70% time reduction)
+- Interactive debugging of web applications
 
 #### 2. **mcp-nixos**
 
