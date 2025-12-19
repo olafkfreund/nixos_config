@@ -168,11 +168,9 @@ in
   };
 
   # Enable AI-powered shell command suggestions
-  features.zsh-ai-cmd = {
-    enable = true;
-    # Uses default: claude-haiku-4-5-20251001 (fast and cost-effective)
-    debug = false; # Disable debug logging in production
-  };
+  # Note: Configured via Home Manager (Users/olafkfreund/p620_home.nix)
+  # System-level configuration disabled in favor of per-user configuration
+  features.zsh-ai-cmd.enable = false;
 
   # Re-enable Claude Desktop with local package
   # features.ai.claude-desktop = true;
