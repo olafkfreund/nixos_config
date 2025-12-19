@@ -28,7 +28,7 @@
     enable = true;
     # Uses default claude-haiku-4-5-20251001 (fast and cost-effective)
     triggerKey = "^G"; # Ctrl+G
-    debug = false;
+    debug = true; # Temporarily enable for debugging
   };
 
   # GNOME desktop environment (optional - can be enabled/disabled)
