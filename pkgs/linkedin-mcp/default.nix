@@ -3,14 +3,14 @@
 # Repository: https://github.com/stickerdaniel/linkedin-mcp-server
 # Follows docs/NIXOS-ANTI-PATTERNS.md and docs/PATTERNS.md
 { writeShellScriptBin
-, docker
+, uv
 , ...
 }:
 
 writeShellScriptBin "linkedin-mcp" ''
   #!/bin/sh
-  # Wrapper script for LinkedIn MCP server (Docker method)
-  # Uses official Docker image: stickerdaniel/linkedin-mcp-server:latest
+  # Wrapper script for LinkedIn MCP server (native uvx method)
+  # Uses uvx to run linkedin-mcp-server directly from PyPI/GitHub
 
   set -euo pipefail
 
@@ -41,17 +41,10 @@ writeShellScriptBin "linkedin-mcp" ''
     exit 1
   fi
 
-  # Run LinkedIn MCP server via Docker with cookie as environment variable
-  # Docker container runs isolated with minimal permissions
-  # tmpfs for /home/mcpuser/.cache allows caching while keeping root readonly
-  exec ${docker}/bin/docker run \
-    --rm \
-    -i \
-    --read-only \
-    --tmpfs /home/mcpuser/.cache:rw,noexec,nosuid,size=100m \
-    --security-opt=no-new-privileges \
-    --cap-drop=ALL \
-    -e LINKEDIN_COOKIE="$LINKEDIN_COOKIE" \
-    stickerdaniel/linkedin-mcp-server:latest \
-    "$@"
+  # Set LinkedIn cookie as environment variable
+  export LINKEDIN_COOKIE="$LINKEDIN_COOKIE"
+
+  # Run LinkedIn MCP server via uvx from GitHub
+  # uvx automatically handles Python dependencies and virtual environments
+  exec ${uv}/bin/uvx --from git+https://github.com/stickerdaniel/linkedin-mcp-server.git linkedin-mcp-server "$@"
 ''

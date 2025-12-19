@@ -19,18 +19,21 @@ LinkedIn data for professional networking tasks including:
 
 ### Implementation Method
 
-The LinkedIn MCP server is deployed using **Docker** (recommended approach):
+The LinkedIn MCP server is deployed using **native uvx** (recommended approach):
 
-- **Official Image**: `stickerdaniel/linkedin-mcp-server:latest`
-- **Security**: Container runs with read-only filesystem, no-new-privileges, and all capabilities dropped
+- **Package Manager**: `uvx` (uv's command execution tool)
+- **Distribution**: Official `linkedin-mcp-server` from PyPI/GitHub
+- **Dependencies**: Automatically managed by uv (Python virtual environments)
 - **Authentication**: Uses LinkedIn `li_at` cookie for session management
+- **Security**: No Docker overhead, native NixOS integration with minimal dependencies
 
 ### NixOS Integration
 
-- **Package**: `pkgs/linkedin-mcp/default.nix` - Wrapper script for Docker container
+- **Package**: `pkgs/linkedin-mcp/default.nix` - Native wrapper script using uvx
 - **Module**: `modules/ai/mcp-servers.nix` - Feature flag and configuration management
 - **Claude Desktop**: `home/development/claude-desktop/mcp-config.nix` - Claude Desktop integration
 - **Secrets**: Agenix-encrypted cookie stored in `/run/agenix/api-linkedin-cookie`
+- **Runtime**: Pure NixOS with uv package manager for Python dependencies
 
 ## LinkedIn Cookie Management
 
