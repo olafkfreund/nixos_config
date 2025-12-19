@@ -26,7 +26,7 @@
   # AI-powered shell command suggestions
   programs.zshAiCmd = {
     enable = true;
-    # Uses default claude-haiku-4-5-20251001 (fast and cost-effective)
+    model = "claude-3-5-haiku-20241022"; # Use known valid model
     triggerKey = "^G"; # Ctrl+G
     debug = true; # Temporarily enable for debugging
   };
