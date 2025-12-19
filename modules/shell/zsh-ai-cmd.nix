@@ -18,7 +18,7 @@
 #    list files in this directory
 #    ```
 #
-# 2. Press Ctrl+Z (or configured trigger key) to get AI suggestion:
+# 2. Press Ctrl+G (or configured trigger key) to get AI suggestion:
 #    ```
 #    list files in this directory  ⇥  ls -la
 #    ```
@@ -31,7 +31,7 @@
 # features.zsh-ai-cmd = {
 #   enable = true;
 #   model = "claude-3-5-sonnet-20241022";  # Optional: more powerful model
-#   triggerKey = "^Z";                      # Default: Ctrl+Z
+#   triggerKey = "^G";                      # Default: Ctrl+G (recommended)
 #   debug = false;                          # Optional: enable logging
 # };
 # ```
@@ -92,15 +92,15 @@ in
 
     triggerKey = mkOption {
       type = types.str;
-      default = "^Z";
+      default = "^G";
       example = "^X";
       description = ''
         Key binding to trigger AI command suggestions.
 
-        Format: zsh key binding syntax (e.g., ^Z for Ctrl+Z, ^X for Ctrl+X).
-        Default: Ctrl+Z
+        Format: zsh key binding syntax (e.g., ^G for Ctrl+G, ^X for Ctrl+X).
+        Default: Ctrl+G (recommended - doesn't conflict with job control)
 
-        Note: Choose a key that doesn't conflict with existing bindings.
+        Note: Avoid ^Z (job control) and ^C (interrupt) as they're reserved by the shell.
       '';
     };
 
@@ -164,10 +164,8 @@ in
         export ZSH_AI_CMD_MODEL="${cfg.model}"
         ''}
 
-        # Configure trigger key (if not using default)
-        ${optionalString (cfg.triggerKey != "^Z") ''
-        ZSH_AI_CMD_KEY="${cfg.triggerKey}"
-        ''}
+        # Configure trigger key (always set to ensure correct binding)
+        export ZSH_AI_CMD_KEY="${cfg.triggerKey}"
 
         # Enable debug logging (if requested)
         ${optionalString cfg.debug ''

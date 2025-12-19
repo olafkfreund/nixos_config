@@ -170,7 +170,7 @@ in
   # Enable AI-powered shell command suggestions
   features.zsh-ai-cmd = {
     enable = true;
-    model = "claude-3-5-sonnet-20241022"; # Use more powerful model for better suggestions
+    # Uses default: claude-haiku-4-5-20251001 (fast and cost-effective)
     debug = false; # Disable debug logging in production
   };
 
