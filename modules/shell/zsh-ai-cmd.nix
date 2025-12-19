@@ -38,7 +38,7 @@
 #
 # ## Requirements
 #
-# - Anthropic API key configured via agenix (/run/secrets/api-anthropic)
+# - Anthropic API key configured via agenix (config.age.secrets."api-anthropic")
 # - curl and jq in system PATH (provided automatically)
 # - Modern zsh with ZLE widget support
 #
@@ -152,10 +152,10 @@ in
 
         # Load Anthropic API key from agenix secret
         # This provides secure runtime loading without storing the key in Nix store
-        if [[ -f "/run/secrets/api-anthropic" ]]; then
-          export ANTHROPIC_API_KEY="$(cat /run/secrets/api-anthropic)"
+        if [[ -f "${config.age.secrets."api-anthropic".path}" ]]; then
+          export ANTHROPIC_API_KEY="$(cat ${config.age.secrets."api-anthropic".path})"
         else
-          echo "WARNING: Anthropic API key not found at /run/secrets/api-anthropic" >&2
+          echo "WARNING: Anthropic API key not found at ${config.age.secrets."api-anthropic".path}" >&2
           echo "zsh-ai-cmd will not function without an API key" >&2
         fi
 
@@ -195,12 +195,12 @@ in
         message = "zsh-ai-cmd requires programs.zsh.enable = true";
       }
       {
-        assertion = config.age.secrets ? "api-anthropic" || builtins.pathExists "/run/secrets/api-anthropic";
+        assertion = config.age.secrets ? "api-anthropic";
         message = ''
           zsh-ai-cmd requires Anthropic API key configured via agenix.
 
-          Ensure /run/secrets/api-anthropic exists and is readable.
-          Configure the secret using: ./scripts/manage-secrets.sh create api-anthropic
+          Ensure the api-anthropic secret is configured in modules/secrets/api-keys.nix.
+          The secret will be decrypted to: ${config.age.secrets."api-anthropic".path}
         '';
       }
     ];
