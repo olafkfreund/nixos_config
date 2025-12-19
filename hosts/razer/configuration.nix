@@ -112,6 +112,13 @@ in
       nodejs = true;
     };
 
+    # Enable Claude Code hooks for desktop notifications
+    claude-hooks = {
+      enable = true;
+      enablePermissionNotifications = true;
+      enableReadyNotifications = true;
+    };
+
     gnome-remote-desktop = {
       enable = true;
     };

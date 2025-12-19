@@ -14,5 +14,6 @@ _: {
     ./pre-commit.nix
     ./copilot-cli.nix
     ./spec-kit.nix
+    ./claude-hooks.nix
   ];
 }
