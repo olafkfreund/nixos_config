@@ -167,6 +167,13 @@ in
     enableReadyNotifications = true;
   };
 
+  # Enable AI-powered shell command suggestions
+  features.zsh-ai-cmd = {
+    enable = true;
+    model = "claude-3-5-sonnet-20241022"; # Use more powerful model for better suggestions
+    debug = false; # Disable debug logging in production
+  };
+
   # Re-enable Claude Desktop with local package
   # features.ai.claude-desktop = true;
 
