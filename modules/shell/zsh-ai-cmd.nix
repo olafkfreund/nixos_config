@@ -76,15 +76,15 @@ in
 
     model = mkOption {
       type = types.str;
-      default = "claude-haiku-4-5-20251001";
+      default = "claude-3-5-haiku-20241022";
       example = "claude-3-5-sonnet-20241022";
       description = ''
         Claude model to use for command suggestions.
 
         Available models:
-        - claude-haiku-4-5-20251001 (default, fast and cost-effective)
-        - claude-3-5-sonnet-20241022 (more powerful, higher cost)
-        - claude-3-5-haiku-20241022 (balanced performance)
+        - claude-3-5-haiku-20241022 (default, fast and cost-effective)
+        - claude-3-5-sonnet-20241022 (more powerful, higher quality)
+        - claude-3-opus-20240229 (most capable, highest cost)
 
         See https://docs.anthropic.com/claude/docs/models-overview for details.
       '';
