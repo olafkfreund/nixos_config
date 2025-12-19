@@ -3,6 +3,7 @@
   rofi-blocks = pkgs.callPackage ./rofi-blocks { };
   chrome-gruvbox-theme = pkgs.callPackage ./chrome-gruvbox-theme { };
   linux-command-mcp = pkgs.callPackage ./linux-command-mcp { };
+  linkedin-mcp = pkgs.callPackage ./linkedin-mcp { };
   obsidian-mcp = pkgs.callPackage ./obsidian-mcp { };
   obsidian-mcp-rest = pkgs.callPackage ./obsidian-mcp-rest { };
   browser-mcp = pkgs.callPackage ./browser-mcp { };

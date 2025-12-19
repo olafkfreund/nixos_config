@@ -152,6 +152,11 @@ in
         verifySsl = true;
       };
     };
+    # Enable LinkedIn MCP server for professional networking
+    linkedin = {
+      enable = true;
+      cookieFile = config.age.secrets."api-linkedin-cookie".path;
+    };
     # Enable additional MCP servers
     servers = {
       browsermcp = true; # Browser automation with privacy
