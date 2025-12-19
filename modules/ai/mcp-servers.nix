@@ -76,6 +76,25 @@ in
         };
       };
     };
+
+    linkedin = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable LinkedIn MCP server for professional networking and job search";
+      };
+
+      cookieFile = lib.mkOption {
+        type = lib.types.nullOr lib.types.path;
+        default = null;
+        example = lib.literalExpression "config.age.secrets.\"api-linkedin-cookie\".path";
+        description = ''
+          Path to LinkedIn li_at cookie file (runtime loading only).
+          Cookie expires approximately every 30 days and requires refresh.
+          NEVER set cookie value directly - use file path for runtime loading.
+        '';
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -99,7 +118,8 @@ in
         ++ lib.optionals (cfg.servers.gitea or cfg.enableAll) [ gitea-mcp-server ]
         ++ lib.optionals (cfg.servers.proxy or cfg.enableAll) [ mcp-proxy ]
         ++ lib.optionals ((cfg.obsidian.enable or cfg.enableAll) && cfg.obsidian.implementation == "zero-dependency") [ customPkgs.obsidian-mcp ]
-        ++ lib.optionals ((cfg.obsidian.enable or cfg.enableAll) && cfg.obsidian.implementation == "rest-api") [ customPkgs.obsidian-mcp-rest ];
+        ++ lib.optionals ((cfg.obsidian.enable or cfg.enableAll) && cfg.obsidian.implementation == "rest-api") [ customPkgs.obsidian-mcp-rest ]
+        ++ lib.optionals (cfg.linkedin.enable or cfg.enableAll) [ customPkgs.linkedin-mcp ];
 
       # NixOS-specific Playwright environment variables
       # These are required because Playwright expects browsers in ~/.cache/ms-playwright
@@ -123,6 +143,7 @@ in
         Optional Servers (Configured):
         ${lib.optionalString (cfg.servers.browsermcp or cfg.enableAll) "- browser-mcp: Browser automation with privacy (requires Chrome extension)"}
         ${lib.optionalString (cfg.obsidian.enable or cfg.enableAll) "- obsidian-mcp: Obsidian vault knowledge base integration"}
+        ${lib.optionalString (cfg.linkedin.enable or cfg.enableAll) "- linkedin-mcp: LinkedIn professional networking and job search"}
         ${lib.optionalString (cfg.servers.grafana or cfg.enableAll) "- mcp-grafana: Grafana dashboard and metrics integration"}
         ${lib.optionalString (cfg.servers.kubernetes or cfg.enableAll) "- mcp-k8s-go: Kubernetes cluster management"}
         ${lib.optionalString (cfg.servers.terraform or cfg.enableAll) "- terraform-mcp-server: Infrastructure as Code automation"}
@@ -143,6 +164,15 @@ in
     # Agenix secret for Obsidian REST API mode
     age.secrets."obsidian-api-key" = lib.mkIf (cfg.obsidian.enable && cfg.obsidian.implementation == "rest-api") {
       file = ../../secrets/obsidian-api-key.age;
+      mode = "0400";
+      owner = username;
+      group = "users";
+    };
+
+    # Agenix secret for LinkedIn cookie (li_at)
+    # Cookie expires approximately every 30 days and requires refresh
+    age.secrets."api-linkedin-cookie" = lib.mkIf cfg.linkedin.enable {
+      file = ../../secrets/api-linkedin-cookie.age;
       mode = "0400";
       owner = username;
       group = "users";

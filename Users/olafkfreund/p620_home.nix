@@ -23,6 +23,16 @@
   programs.claude-code.desktopEntry.enable = lib.mkForce true;
   programs.neovim.desktopEntry.enable = lib.mkForce true;
 
+  # AI-powered shell command suggestions
+  programs.zshAiCmd = {
+    enable = true;
+    # Uses default: claude-haiku-4-5 (Claude 4.5 - Latest, fast, cost-effective)
+    # Or use: claude-sonnet-4-5 (Claude 4.5 - More powerful)
+    # Legacy: claude-3-5-haiku-20241022, claude-3-5-sonnet-20241022
+    triggerKey = "^G"; # Ctrl+G
+    debug = true; # Temporarily enable for debugging
+  };
+
   # GNOME desktop environment (optional - can be enabled/disabled)
   desktop.gnome = {
     enable = true; # Set to true to enable GNOME

@@ -194,6 +194,10 @@
         (final: _prev: {
           intune-portal = final.callPackage ./pkgs/intune-portal { };
         })
+        # Custom package: zsh-ai-cmd - AI-powered shell command suggestions using Anthropic Claude
+        (final: _prev: {
+          zsh-ai-cmd = final.callPackage ./pkgs/zsh-ai-cmd { };
+        })
         # Custom package: citrix-workspace - Citrix Workspace with USB support and local tarball management
         (import ./overlays/citrix-workspace.nix)
         # Fix CMake version compatibility issues for packages requiring CMake < 3.5

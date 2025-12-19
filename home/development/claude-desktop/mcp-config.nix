@@ -7,6 +7,7 @@ let
   mcpCfg = osConfig.features.ai.mcp or { };
   enabled = mcpCfg.enable or false;
   obsidianEnabled = mcpCfg.obsidian.enable or false;
+  linkedinEnabled = mcpCfg.linkedin.enable or false;
 in
 {
   config = lib.mkIf enabled {
@@ -74,6 +75,22 @@ in
               args = [ "stdio" ];
               description = "GitHub repository integration";
             };
+          })
+          # LinkedIn MCP server (if LinkedIn cookie available)
+          // (lib.optionalAttrs linkedinEnabled {
+            linkedin = {
+              command = "${pkgs.writeShellScript "linkedin-mcp-wrapper" ''
+                export LINKEDIN_COOKIE_FILE=${osConfig.age.secrets."api-linkedin-cookie".path}
+                exec ${pkgs.docker}/bin/docker run --rm -i \
+                  --read-only \
+                  --security-opt=no-new-privileges \
+                  --cap-drop=ALL \
+                  -e LINKEDIN_COOKIE="$(cat $LINKEDIN_COOKIE_FILE)" \
+                  stickerdaniel/linkedin-mcp-server:latest "$@"
+              ''}";
+              args = [ ];
+              description = "LinkedIn professional networking and job search";
+            };
           });
       };
 
@@ -127,6 +144,15 @@ in
       ### GitHub
       - Repository integration
       - PR automation and issue management
+      ''}
+
+      ${lib.optionalString linkedinEnabled ''
+      ### LinkedIn
+      - Professional networking and job search
+      - Profile scraping and company research
+      - Job searches with keyword/location filters
+      - Personalized job recommendations
+      - Note: Cookie expires ~30 days, requires periodic refresh
       ''}
 
       ### Context7

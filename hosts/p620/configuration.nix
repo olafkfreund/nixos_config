@@ -152,6 +152,13 @@ in
         verifySsl = true;
       };
     };
+    # Enable LinkedIn MCP server for professional networking
+    # NOTE: Disabled until secret is created (see docs/LINKEDIN-MCP.md)
+    # To enable: ./scripts/manage-secrets.sh create api-linkedin-cookie
+    linkedin = {
+      enable = false; # TODO: Enable after creating secret
+      cookieFile = config.age.secrets."api-linkedin-cookie".path;
+    };
     # Enable additional MCP servers
     servers = {
       browsermcp = true; # Browser automation with privacy
@@ -166,6 +173,11 @@ in
     enablePermissionNotifications = true;
     enableReadyNotifications = true;
   };
+
+  # Enable AI-powered shell command suggestions
+  # Note: Configured via Home Manager (Users/olafkfreund/p620_home.nix)
+  # System-level configuration disabled in favor of per-user configuration
+  features.zsh-ai-cmd.enable = false;
 
   # Re-enable Claude Desktop with local package
   # features.ai.claude-desktop = true;

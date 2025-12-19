@@ -4,6 +4,7 @@ _: {
     ./lf/default.nix
     ./bash.nix
     ./zsh.nix
+    ./zsh-ai-cmd.nix # AI-powered shell command suggestions
     ./starship/default.nix
     ./mail/default.nix
     ./fzf/default.nix
