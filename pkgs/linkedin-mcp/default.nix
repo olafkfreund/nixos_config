@@ -43,10 +43,12 @@ writeShellScriptBin "linkedin-mcp" ''
 
   # Run LinkedIn MCP server via Docker with cookie as environment variable
   # Docker container runs isolated with minimal permissions
+  # tmpfs for /home/mcpuser/.cache allows caching while keeping root readonly
   exec ${docker}/bin/docker run \
     --rm \
     -i \
     --read-only \
+    --tmpfs /home/mcpuser/.cache:rw,noexec,nosuid,size=100m \
     --security-opt=no-new-privileges \
     --cap-drop=ALL \
     -e LINKEDIN_COOKIE="$LINKEDIN_COOKIE" \
