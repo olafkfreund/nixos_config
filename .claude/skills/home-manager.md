@@ -962,7 +962,7 @@ home-manager switch
 
 ```nix
 # Ensure sourcing in shell config
-programs.zsh.initExtra = ''
+programs.zsh.initContent = ''
   if [ -f ~/.nix-profile/etc/profile.d/hm-session-vars.sh ]; then
     . ~/.nix-profile/etc/profile.d/hm-session-vars.sh
   fi
