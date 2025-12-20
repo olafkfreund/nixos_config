@@ -26,6 +26,7 @@ in
   "secrets/api-anthropic.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-github-token.age".publicKeys = allUsers ++ allHosts;
   "secrets/obsidian-api-key.age".publicKeys = allUsers ++ workstations;
+  "secrets/api-linkedin-cookie.age".publicKeys = allUsers ++ workstations;
 
   # System secrets
   "secrets/wifi-password.age".publicKeys = allUsers ++ workstations;
