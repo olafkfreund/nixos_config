@@ -71,7 +71,7 @@ in
     ];
 
     # Configure zsh to load and initialize the plugin
-    programs.zsh.initExtra = mkAfter ''
+    programs.zsh.initContent = mkAfter ''
       # ========================================
       # ZSH AI Command Suggestions Configuration
       # ========================================
