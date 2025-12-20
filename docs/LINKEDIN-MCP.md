@@ -19,42 +19,18 @@ LinkedIn data for professional networking tasks including:
 
 ### Implementation Method
 
-The LinkedIn MCP server is deployed using **native uvx** (pragmatic approach):
+The LinkedIn MCP server is deployed using **Docker** (recommended approach):
 
-- **Package Manager**: `uvx` (uv's command execution tool)
-- **Distribution**: Official `linkedin-mcp-server` from GitHub
-- **Dependencies**: Automatically managed by uv (102 Python packages)
+- **Official Image**: `stickerdaniel/linkedin-mcp-server:latest`
+- **Security**: Container runs with read-only filesystem, no-new-privileges, and all capabilities dropped
 - **Authentication**: Uses LinkedIn `li_at` cookie for session management
-- **Performance**: First run ~15-20s (downloads deps), subsequent runs instant (cached)
-
-### Why uvx Instead of Full Nix Packaging?
-
-This is a **deliberate pragmatic decision** with documented trade-offs:
-
-**Reasons for uvx:**
-
-1. **Complex Dependencies**: Requires 20+ Python packages, many not in nixpkgs
-2. **Maintenance Burden**: Full Nix packaging would require maintaining all upstream deps
-3. **Rapid Evolution**: MCP ecosystem is new and fast-moving
-4. **Proper Caching**: uv caches in `~/.cache/uv` (persistent across reboots)
-5. **Deterministic**: `uv.lock` pins exact versions (reproducible builds)
-6. **Isolated**: Creates virtual environments (no system pollution)
-
-**Trade-offs Accepted:**
-
-- Network dependency on first run (~15-20 seconds)
-- Runtime dependency download (impure but cached)
-- Not fully offline (requires internet for initial setup)
-
-This pattern is similar to other nixpkgs packages (VSCode extensions, npm/cargo caches) where full packaging is impractical.
 
 ### NixOS Integration
 
-- **Package**: `pkgs/linkedin-mcp/default.nix` - Native wrapper script using uvx
+- **Package**: `pkgs/linkedin-mcp/default.nix` - Wrapper script for Docker container
 - **Module**: `modules/ai/mcp-servers.nix` - Feature flag and configuration management
 - **Claude Desktop**: `home/development/claude-desktop/mcp-config.nix` - Claude Desktop integration
 - **Secrets**: Agenix-encrypted cookie stored in `/run/agenix/api-linkedin-cookie`
-- **Runtime**: Pure NixOS with uv package manager for Python dependencies
 
 ## LinkedIn Cookie Management
 

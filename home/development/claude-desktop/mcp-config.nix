@@ -81,10 +81,15 @@ in
             linkedin = {
               command = "${pkgs.writeShellScript "linkedin-mcp-wrapper" ''
                 export LINKEDIN_COOKIE_FILE=${osConfig.age.secrets."api-linkedin-cookie".path}
-                exec linkedin-mcp "$@"
+                exec ${pkgs.docker}/bin/docker run --rm -i \
+                  --read-only \
+                  --security-opt=no-new-privileges \
+                  --cap-drop=ALL \
+                  -e LINKEDIN_COOKIE="$(cat $LINKEDIN_COOKIE_FILE)" \
+                  stickerdaniel/linkedin-mcp-server:latest "$@"
               ''}";
               args = [ ];
-              description = "LinkedIn professional networking and job search (native uvx)";
+              description = "LinkedIn professional networking and job search";
             };
           });
       };
