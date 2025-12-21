@@ -1,6 +1,6 @@
 {
   "name": "@anthropic-ai/claude-code",
-  "version": "2.0.74",
+  "version": "2.0.75",
   "bin": {
     "claude": "cli.js"
   },
