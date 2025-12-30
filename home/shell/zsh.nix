@@ -547,6 +547,9 @@ with lib; {
         export EDITOR="nvim"
         export VISUAL="$EDITOR"
 
+        # Enable Claude Code LSP tools
+        export ENABLE_LSP_TOOLS=1
+
         # Performance optimizations
         export KEYTIMEOUT=1
         export REPORTTIME=10

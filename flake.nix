@@ -23,6 +23,7 @@
       "https://cache.saumon.network/proxmox-nixos/"
       "https://walker-git.cachix.org/"
       "https://walker.cachix.org/"
+      "https://vicinae.cachix.org/"
       "http://192.168.1.97:5000/"
     ];
     extra-trusted-public-keys = [
@@ -32,6 +33,7 @@
       "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
       "walker-git.cachix.org-1:vmC0ocfPWh0S/vRAQGtChuiZBTAe4wiKDeyyXM0/7pM="
       "walker.cachix.org-1:fG8q+uAaMqhsMxWjwvk0IMb4mFPFLqHjuvfwQxE4oJM="
+      "vicinae.cachix.org-1:1kDrfienkGHPYbkpNj1mWTr7Fm1+zcenzgTizIcI3oc="
       "p620-nix-serve:mZR6o5z5KcWeu4PVXgjHA7vb1sHQgRdWMKQt8x3a4rU="
     ];
   };
@@ -88,6 +90,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Vicinae spatial file manager
+    vicinae.url = "github:vicinaehq/vicinae";
+    vicinae-extensions = {
+      url = "github:vicinaehq/extensions";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Hardware specific (removed unused razer-laptop-control)
 
     # Package collections
@@ -118,6 +127,8 @@
     , nix-index-database
     , zjstatus
     , antigravity-nix
+    , vicinae
+    , vicinae-extensions
     , ...
     } @ inputs:
     let
@@ -292,6 +303,7 @@
               nix-index-database.nixosModules.nix-index
               ./home/shell/zellij/zjstatus.nix
               nixai.nixosModules.default
+              vicinae.homeManagerModules.default
             ]
             ++ stylixModule
             ++ [
@@ -310,6 +322,8 @@
                       spicetify-nix
                       agenix
                       antigravity-nix
+                      vicinae
+                      vicinae-extensions
                       host
                       ;
                     username = primaryUser;

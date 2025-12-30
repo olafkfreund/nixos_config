@@ -34,9 +34,75 @@ in
         gtk-application-prefer-dark-theme = cfg.theme.variant == "dark";
       };
 
+      gtk3.extraCss = ''
+        /* Custom Gruvbox styling */
+        .titlebar {
+          background: #282828;
+          color: #ebdbb2;
+        }
+
+        .sidebar {
+          background: #32302f;
+        }
+
+        .view {
+          background: #282828;
+          color: #ebdbb2;
+        }
+
+        /* Dark variant specific */
+        @define-color theme_fg_color #ebdbb2;
+        @define-color theme_bg_color #282828;
+        @define-color theme_selected_bg_color #458588;
+        @define-color theme_selected_fg_color #ebdbb2;
+        @define-color insensitive_bg_color #3c3836;
+        @define-color insensitive_fg_color #928374;
+        @define-color insensitive_base_color #32302f;
+        @define-color theme_unfocused_fg_color #a89984;
+        @define-color theme_unfocused_bg_color #32302f;
+        @define-color theme_unfocused_base_color #282828;
+        @define-color theme_unfocused_selected_bg_color #458588;
+        @define-color theme_unfocused_selected_fg_color #ebdbb2;
+        @define-color borders #504945;
+        @define-color unfocused_borders #3c3836;
+      '';
+
       gtk4.extraConfig = {
         gtk-application-prefer-dark-theme = cfg.theme.variant == "dark";
       };
+
+      gtk4.extraCss = ''
+        /* Custom Gruvbox styling for GTK 4 */
+        .titlebar {
+          background: #282828;
+          color: #ebdbb2;
+        }
+
+        .sidebar {
+          background: #32302f;
+        }
+
+        .view {
+          background: #282828;
+          color: #ebdbb2;
+        }
+
+        /* Dark variant specific */
+        @define-color theme_fg_color #ebdbb2;
+        @define-color theme_bg_color #282828;
+        @define-color theme_selected_bg_color #458588;
+        @define-color theme_selected_fg_color #ebdbb2;
+        @define-color insensitive_bg_color #3c3836;
+        @define-color insensitive_fg_color #928374;
+        @define-color insensitive_base_color #32302f;
+        @define-color theme_unfocused_fg_color #a89984;
+        @define-color theme_unfocused_bg_color #32302f;
+        @define-color theme_unfocused_base_color #282828;
+        @define-color theme_unfocused_selected_bg_color #458588;
+        @define-color theme_unfocused_selected_fg_color #ebdbb2;
+        @define-color borders #504945;
+        @define-color unfocused_borders #3c3836;
+      '';
     };
 
     # Ensure required fonts are available
@@ -137,40 +203,5 @@ in
     #   };
     # };
 
-    # Custom CSS for GNOME applications (only if Stylix is not managing GTK)
-    home.file.".config/gtk-3.0/gtk.css" = mkIf (!(config.stylix.targets.gtk.enable or true)) {
-      text = ''
-        /* Custom Gruvbox styling */
-        .titlebar {
-          background: #282828;
-          color: #ebdbb2;
-        }
-
-        .sidebar {
-          background: #32302f;
-        }
-
-        .view {
-          background: #282828;
-          color: #ebdbb2;
-        }
-
-        /* Dark variant specific */
-        @define-color theme_fg_color #ebdbb2;
-        @define-color theme_bg_color #282828;
-        @define-color theme_selected_bg_color #458588;
-        @define-color theme_selected_fg_color #ebdbb2;
-        @define-color insensitive_bg_color #3c3836;
-        @define-color insensitive_fg_color #928374;
-        @define-color insensitive_base_color #32302f;
-        @define-color theme_unfocused_fg_color #a89984;
-        @define-color theme_unfocused_bg_color #32302f;
-        @define-color theme_unfocused_base_color #282828;
-        @define-color theme_unfocused_selected_bg_color #458588;
-        @define-color theme_unfocused_selected_fg_color #ebdbb2;
-        @define-color borders #504945;
-        @define-color unfocused_borders #3c3836;
-      '';
-    };
   };
 }

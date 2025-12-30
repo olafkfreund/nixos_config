@@ -25,6 +25,9 @@ _: {
     # Core language support and tooling
     ./languages.nix
 
+    # LSP servers for Claude Code and other editors
+    ./lsp-servers.nix
+
     # Development workflow enhancements (conflicts resolved)
     ./workflow.nix
     ./productivity.nix
