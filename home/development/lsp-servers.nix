@@ -120,7 +120,6 @@ with lib;
       # === DEVELOPMENT TOOLS ===
 
       # Code navigation and analysis
-      ctags
       universal-ctags
 
       # Performance profilers
