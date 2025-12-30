@@ -1,6 +1,7 @@
 { lib
 , pkgs
 , antigravity-nix
+, vicinae
 , ...
 }: {
   imports = [
@@ -11,6 +12,9 @@
     ../../home/default.nix
     ../../home/games/steam.nix
     ./private.nix
+
+    # Vicinae spatial file manager Home Manager module
+    vicinae.homeManagerModules.default
   ];
 
   # Fix Stylix Firefox profile warnings

@@ -303,7 +303,6 @@
               nix-index-database.nixosModules.nix-index
               ./home/shell/zellij/zjstatus.nix
               nixai.nixosModules.default
-              vicinae.homeManagerModules.default
             ]
             ++ stylixModule
             ++ [
