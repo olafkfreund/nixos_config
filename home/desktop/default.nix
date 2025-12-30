@@ -24,6 +24,7 @@
     ./evince/default.nix
     ./lanmouse/default.nix
     ./obsidian/default.nix
+    ./vicinae/default.nix
     ./proton/default.nix # Proton applications suite (optional)
     ./gnome # GNOME desktop environment (optional)
   ];

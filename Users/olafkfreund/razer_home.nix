@@ -97,6 +97,9 @@ in
       evince = true;
       kdeconnect = true;
       slack = true;
+
+      # File managers
+      vicinae = true;
     };
 
     cli = {

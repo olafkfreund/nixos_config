@@ -16,6 +16,9 @@
   # Fix Stylix Firefox profile warnings
   stylix.targets.firefox.profileNames = [ "default" ];
 
+  # Disable Stylix GTK management to prevent conflicts with GNOME theme
+  stylix.targets.gtk.enable = false;
+
   # Enable Walker launcher when feature flag is set
 
   # Terminal app desktop entries
@@ -104,6 +107,9 @@
       evince = true;
       kdeconnect = true;
       slack = true;
+
+      # File managers
+      vicinae = true;
     };
 
     cli = {

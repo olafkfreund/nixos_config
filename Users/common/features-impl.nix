@@ -62,6 +62,9 @@ in
         kdeconnect.enable = cfg.desktop.kdeconnect;
         slack.enable = cfg.desktop.slack;
       };
+
+      # File managers
+      desktop.vicinae.enable = cfg.desktop.vicinae;
     })
 
     # CLI tool implementations
