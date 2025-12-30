@@ -53,24 +53,24 @@ in
       # Note: 'dbus' and 'systemd' are excluded from Nix packages
       extensions = with vicinae-extensions.packages.${pkgs.stdenv.hostPlatform.system}; [
         # Productivity
-        agenda                 # Calendar and agenda viewer
+        agenda # Calendar and agenda viewer
 
         # Development
-        nix                    # Nix package search and information
-        vscode-recents         # Recent VS Code projects
+        nix # Nix package search and information
+        vscode-recents # Recent VS Code projects
 
         # Bookmarks and browsing
-        chromium-bookmarks     # Chromium/Chrome bookmarks
-        firefox                # Firefox bookmarks
+        chromium-bookmarks # Chromium/Chrome bookmarks
+        firefox # Firefox bookmarks
 
         # System management
-        power-profile          # Power profile switcher
-        process-manager        # Process management
+        power-profile # Power profile switcher
+        process-manager # Process management
 
         # Additional useful extensions
-        bluetooth              # Bluetooth device management
-        wifi-commander         # WiFi network management
-        ssh                    # SSH connection manager
+        bluetooth # Bluetooth device management
+        wifi-commander # WiFi network management
+        ssh # SSH connection manager
       ];
     };
   };
