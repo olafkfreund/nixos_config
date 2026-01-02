@@ -6,6 +6,15 @@
 with lib; let
   username = "olafkfreund";
   cfg = config.services.print;
+
+  # Override SANE packages to use GCC 14 for compatibility (GCC 15 fails on old C code)
+  sane-frontends-gcc14 = pkgs.sane-frontends.override {
+    stdenv = pkgs.gcc14Stdenv;
+  };
+  xsane-gcc14 = pkgs.xsane.override {
+    sane-frontends = sane-frontends-gcc14;
+    stdenv = pkgs.gcc14Stdenv;
+  };
 in
 {
   options.services.print = {
@@ -42,7 +51,7 @@ in
     users.users.${username}.extraGroups = [ "scanner" "lp" ];
     environment.systemPackages = [
       pkgs.hplip
-      pkgs.xsane
+      xsane-gcc14 # Using GCC 14 override for compatibility
       pkgs.sane-airscan
       pkgs.simple-scan
       pkgs.system-config-printer

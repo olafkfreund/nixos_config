@@ -64,6 +64,8 @@
     packages = with pkgs; [ lact ];
     services.lactd = {
       wantedBy = [ "multi-user.target" ];
+      # Trigger auto-profile after lactd starts (breaks cyclic dependency)
+      wants = [ "lact-auto-profile.service" ];
       # Add restart-on-failure for better reliability
       serviceConfig = {
         Restart = "on-failure";
@@ -71,14 +73,16 @@
       };
     };
 
-    # Auto-apply high-performance GPU profile on boot
+    # Auto-apply GPU profile on boot (currently using Default profile)
+    # To create custom profiles, use the LACT GUI or CLI: lact cli profile set <profile-name>
     services.lact-auto-profile = {
-      description = "Apply LACT GPU high-performance profile";
+      description = "Apply LACT GPU profile";
       after = [ "lactd.service" ];
-      wantedBy = [ "multi-user.target" ];
+      # Removed wantedBy to break cycle - lactd.wants triggers this instead
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "${pkgs.bash}/bin/bash -c 'sleep 5 && ${pkgs.lact}/bin/lact cli set-performance-level high || true'";
+        # Apply Default profile (change profile name after creating custom profiles)
+        ExecStart = "${pkgs.bash}/bin/bash -c 'sleep 5 && ${pkgs.lact}/bin/lact cli profile set Default || true'";
         RemainAfterExit = true;
       };
     };
