@@ -20,6 +20,8 @@ in
         alejandra
         deadnix
         statix
+        hadolint # Dockerfile linter
+        hadolint-sarif # Convert hadolint diagnostics to SARIF format
         icu # Required for .NET globalization support (MCP servers)
       ];
 
@@ -33,6 +35,15 @@ in
         CHROME_NET_TCP_SOCKET_CONNECT_TIMEOUT_MS = "60000";
         CHROME_NET_TCP_SOCKET_CONNECT_ATTEMPT_DELAY_MS = "2000";
       };
+
+      # Clean up backup files BEFORE Home Manager checks for conflicts
+      activation.vscodeCleanup = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
+        # Remove any existing backup files that would cause conflicts
+        rm -f "$HOME/.config/Code/User/settings.json.backup"
+        rm -f "$HOME/.config/Code/User/settings.json.hm-backup"
+        rm -f "$HOME/.claude/settings.json.backup"
+        rm -f "$HOME/.claude/settings.json.hm-backup"
+      '';
 
       # Initialize VS Code settings and MCP files as mutable (remove any Home Manager symlinks)
       activation.vscodeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -49,6 +60,10 @@ in
         if [ -f "$SETTINGS_DIR/settings.json.backup" ]; then
           echo "Removing conflicting settings.json.backup file..."
           rm "$SETTINGS_DIR/settings.json.backup"
+        fi
+        if [ -f "$SETTINGS_DIR/settings.json.hm-backup" ]; then
+          echo "Removing conflicting settings.json.hm-backup file..."
+          rm "$SETTINGS_DIR/settings.json.hm-backup"
         fi
 
         # Handle settings.json
