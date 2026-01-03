@@ -40,12 +40,12 @@ in
         };
         theme = {
           dark = {
-            name = "gruvbox-dark";
+            name = mkForce "gruvbox-dark";
             icon_theme = "default";
           };
         };
         launcher_window = {
-          opacity = 0.98;
+          opacity = mkForce 0.98;
         };
       };
       # Configure extensions declaratively
