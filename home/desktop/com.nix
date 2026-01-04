@@ -11,7 +11,7 @@
     # pkgs.element-desktop  # Disabled: depends on insecure jitsi-meet package (CVE-2024-45191, CVE-2024-45192, CVE-2024-45193)
     pkgs.imagemagick
     # pkgs.fractal
-    pkgs.vesktop
+    # pkgs.vesktop  # Temporarily disabled: build failing with permission error
     # pkgs.telegram-desktop
     pkgs.wasistlos
     # pkgs.ferdium  # Removed: no longer needed
