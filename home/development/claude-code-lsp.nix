@@ -103,70 +103,106 @@ in
     }
 
     (mkIf cfg.enable {
-      # Create the custom marketplace directory structure
-      home.file = {
-        # Marketplace configuration
-        ".claude/plugins/custom-marketplace/.claude-plugin/marketplace.json".source = marketplaceJson;
+      # Create the custom marketplace directory structure and manage settings
+      home = {
+        file = {
+          # Marketplace configuration
+          ".claude/plugins/custom-marketplace/.claude-plugin/marketplace.json".source = marketplaceJson;
 
-        # Plugin README
-        ".claude/plugins/custom-marketplace/plugins/nix-lsp/README.md".source = pluginReadme;
-      };
+          # Plugin README
+          ".claude/plugins/custom-marketplace/plugins/nix-lsp/README.md".source = pluginReadme;
 
-      # Add shell command to install the marketplace and plugin on first activation
-      # This uses a script that only runs if the marketplace isn't already installed
-      home.activation.claudeCodeLspSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        # Check if Claude Code is available
-        if command -v claude &>/dev/null; then
-          $DRY_RUN_CMD echo "Setting up Claude Code LSP plugins..."
-
-          # Function to check if marketplace exists
-          marketplace_exists() {
-            claude plugin marketplace list 2>/dev/null | grep -q "nixos-lsp-marketplace"
-          }
-
-          # Function to check if plugin is installed
-          plugin_installed() {
-            claude plugin marketplace list 2>/dev/null | grep -q "nix-lsp@nixos-lsp-marketplace" || \
-            [ -f "$HOME/.claude/plugins/installed_plugins.json" ] && \
-            grep -q "nix-lsp@nixos-lsp-marketplace" "$HOME/.claude/plugins/installed_plugins.json"
-          }
-
-          # Add marketplace if it doesn't exist
-          if ! marketplace_exists; then
-            $DRY_RUN_CMD echo "Adding nixos-lsp-marketplace..."
-            $DRY_RUN_CMD claude plugin marketplace add "${cfg.customMarketplacePath}" 2>/dev/null || true
-          fi
-
-          # Install plugin if not already installed
-          if ! plugin_installed; then
-            $DRY_RUN_CMD echo "Installing nix-lsp plugin..."
-            $DRY_RUN_CMD claude plugin install nix-lsp@nixos-lsp-marketplace 2>/dev/null || true
-          fi
-
-          $DRY_RUN_CMD echo "Claude Code LSP setup complete!"
-        else
-          $DRY_RUN_CMD echo "Claude Code not found, skipping LSP setup"
-        fi
-      '';
-
-      # Ensure the plugin is enabled in settings.json through home.file
-      # Note: This will be merged with existing settings by Home Manager
-      home.file.".claude/settings.json" = mkIf cfg.enableNixLsp {
-        text = builtins.toJSON {
-          enabledPlugins = {
-            "nix-lsp@nixos-lsp-marketplace" = true;
+          # Ensure the plugin is enabled in settings.json
+          # Note: This will be merged with existing settings by Home Manager
+          ".claude/settings.json" = mkIf cfg.enableNixLsp {
+            text = builtins.toJSON {
+              enabledPlugins = {
+                "nix-lsp@nixos-lsp-marketplace" = true;
+              };
+              # Claude Code status line with powerline theme
+              statusLine = {
+                type = "command";
+                command = "${config.home.homeDirectory}/.claude/statusline-powerline.sh";
+              };
+            };
+            onChange = ''
+              # Merge with existing settings if they exist
+              if [ -f "$HOME/.claude/settings.json.backup" ]; then
+                ${pkgs.jq}/bin/jq -s '.[0] * .[1]' \
+                  "$HOME/.claude/settings.json.backup" \
+                  "$HOME/.claude/settings.json" \
+                  > "$HOME/.claude/settings.json.tmp" && \
+                mv "$HOME/.claude/settings.json.tmp" "$HOME/.claude/settings.json"
+              fi
+            '';
           };
         };
-        onChange = ''
-          # Merge with existing settings if they exist
-          if [ -f "$HOME/.claude/settings.json.backup" ]; then
-            ${pkgs.jq}/bin/jq -s '.[0] * .[1]' \
-              "$HOME/.claude/settings.json.backup" \
-              "$HOME/.claude/settings.json" \
-              > "$HOME/.claude/settings.json.tmp" && \
-            mv "$HOME/.claude/settings.json.tmp" "$HOME/.claude/settings.json"
-          fi
-        '';
+
+        activation = {
+          # Add shell command to install the marketplace and plugin on first activation
+          # This uses a script that only runs if the marketplace isn't already installed
+          claudeCodeLspSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            # Check if Claude Code is available
+            if command -v claude &>/dev/null; then
+              $DRY_RUN_CMD echo "Setting up Claude Code LSP plugins..."
+
+              # Function to check if marketplace exists
+              marketplace_exists() {
+                claude plugin marketplace list 2>/dev/null | grep -q "nixos-lsp-marketplace"
+              }
+
+              # Function to check if plugin is installed
+              plugin_installed() {
+                claude plugin marketplace list 2>/dev/null | grep -q "nix-lsp@nixos-lsp-marketplace" || \
+                [ -f "$HOME/.claude/plugins/installed_plugins.json" ] && \
+                grep -q "nix-lsp@nixos-lsp-marketplace" "$HOME/.claude/plugins/installed_plugins.json"
+              }
+
+              # Add marketplace if it doesn't exist
+              if ! marketplace_exists; then
+                $DRY_RUN_CMD echo "Adding nixos-lsp-marketplace..."
+                $DRY_RUN_CMD claude plugin marketplace add "${cfg.customMarketplacePath}" 2>/dev/null || true
+              fi
+
+              # Install plugin if not already installed
+              if ! plugin_installed; then
+                $DRY_RUN_CMD echo "Installing nix-lsp plugin..."
+                $DRY_RUN_CMD claude plugin install nix-lsp@nixos-lsp-marketplace 2>/dev/null || true
+              fi
+
+              $DRY_RUN_CMD echo "Claude Code LSP setup complete!"
+            else
+              $DRY_RUN_CMD echo "Claude Code not found, skipping LSP setup"
+            fi
+          '';
+
+          # Populate settings.local.json with MCP server configuration
+          # This file is NOT managed by Home Manager and won't be overwritten
+          # Claude Code merges settings.local.json with settings.json at runtime
+          claudeCodeMcpSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            MCP_TEMPLATE="${../development/claude-code-mcp-config.json}"
+            SETTINGS_LOCAL="$HOME/.claude/settings.local.json"
+
+            # Only initialize if settings.local.json doesn't exist or doesn't have mcpServers
+            if [ ! -f "$SETTINGS_LOCAL" ] || ! ${pkgs.jq}/bin/jq -e '.mcpServers' "$SETTINGS_LOCAL" >/dev/null 2>&1; then
+              $DRY_RUN_CMD echo "Initializing Claude Code MCP server configuration..."
+
+              # Merge existing settings.local.json with MCP template
+              if [ -f "$SETTINGS_LOCAL" ]; then
+                $DRY_RUN_CMD ${pkgs.jq}/bin/jq -s '.[0] * .[1]' \
+                  "$SETTINGS_LOCAL" \
+                  "$MCP_TEMPLATE" \
+                  > "$SETTINGS_LOCAL.tmp" && \
+                mv "$SETTINGS_LOCAL.tmp" "$SETTINGS_LOCAL"
+              else
+                # No existing settings.local.json, copy template
+                $DRY_RUN_CMD cp "$MCP_TEMPLATE" "$SETTINGS_LOCAL"
+              fi
+
+              $DRY_RUN_CMD echo "MCP servers configured in $SETTINGS_LOCAL"
+            fi
+          '';
+        };
       };
     })
   ];
