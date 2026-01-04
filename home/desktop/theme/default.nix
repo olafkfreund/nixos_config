@@ -3,6 +3,7 @@ with lib;
 {
   imports = [
     ./qt.nix
+    ./dark-mode.nix # Global dark mode configuration for all desktop environments
   ];
 
   home.packages = with pkgs; [

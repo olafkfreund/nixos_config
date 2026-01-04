@@ -201,9 +201,12 @@
     enable = true;
     package = lib.mkDefault pkgs.google-chrome;
     commandLineArgs = [
-      # Wayland support
-      "--enable-features=UseOzonePlatform,WaylandWindowDecorations"
+      # Wayland support + Dark mode (combined features)
+      "--enable-features=UseOzonePlatform,WaylandWindowDecorations,WebUIDarkMode"
       "--ozone-platform=wayland"
+
+      # Dark mode enforcement
+      "--force-dark-mode"
 
       # Hardware acceleration
       "--enable-gpu-rasterization"

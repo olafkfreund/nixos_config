@@ -201,10 +201,13 @@
   programs.chromium = {
     package = lib.mkForce pkgs.google-chrome;
     commandLineArgs = lib.mkForce [
-      # Modern Wayland support
-      "--enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer"
+      # Modern Wayland support + Dark Mode (combined features)
+      "--enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer,WebUIDarkMode"
       "--ozone-platform=wayland"
       "--disable-features=VizDisplayCompositor"
+
+      # Dark mode enforcement
+      "--force-dark-mode"
 
       # Modern AMD GPU acceleration
       "--use-gl=desktop"
