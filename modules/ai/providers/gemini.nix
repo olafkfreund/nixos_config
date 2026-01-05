@@ -19,7 +19,8 @@ in
     # Enhanced Google Gemini tools
     environment.systemPackages = with pkgs; [
       # Custom Gemini CLI from the existing configuration
-      gemini-cli
+      # Temporarily disabled - npm deps hash issue
+      # gemini-cli
 
       # Tools that support Gemini API
       # aichat REMOVED due to extremely slow pyrate-limiter build dependency (2+ hours)

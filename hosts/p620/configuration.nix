@@ -422,11 +422,6 @@ in
 
   # Consolidated services configuration
   services = {
-    # Nixai
-    nixai = {
-      enable = true;
-      mcp.enable = true;
-    };
 
     # NixOS Update Checker - Safe update detection and management
     nixos-update-checker = {
@@ -592,8 +587,8 @@ in
     # Qt theme control tools for Stylix
     libsForQt5.qt5ct
     kdePackages.qt6ct
-    # Custom qwen-code package
-    (callPackage ../../home/development/qwen-code/default.nix { })
+    # Custom qwen-code package - disabled due to npm registry network errors (HTTP/2 framing layer issue)
+    # (callPackage ../../home/development/qwen-code/default.nix { })
     # yt-x terminal YouTube browser
     inputs.yt-x.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];

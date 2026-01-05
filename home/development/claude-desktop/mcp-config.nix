@@ -30,11 +30,12 @@ in
             };
 
             # NixOS MCP server
-            nixos = {
-              command = "mcp-nixos";
-              args = [ ];
-              description = "NixOS package and option queries";
-            };
+            # Temporarily disabled - fastmcp version conflict with mcp 1.25.0
+            # nixos = {
+            #   command = "mcp-nixos";
+            #   args = [ ];
+            #   description = "NixOS package and option queries";
+            # };
 
             # Context7 for up-to-date library documentation
             context7 = {

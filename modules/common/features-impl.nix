@@ -29,7 +29,8 @@ in
     modules = {
       development.python.enable = mkIf cfg.development.enable cfg.development.python;
       containers.docker.enable = mkIf cfg.virtualization.enable cfg.virtualization.docker;
-      ai.gemini-cli.enable = mkIf cfg.ai.enable cfg.ai.gemini-cli;
+      # Temporarily disabled - npm deps hash issue
+      # ai.gemini-cli.enable = mkIf cfg.ai.enable cfg.ai.gemini-cli;
       ai.chatgpt.enable = mkIf cfg.ai.enable (cfg.ai.chatgpt or false);
     };
 

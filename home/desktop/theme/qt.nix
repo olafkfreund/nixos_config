@@ -24,11 +24,8 @@ in
         else pkgs.qt6Packages.qt6ct
       );
     };
-    # Let Stylix handle Qt styling instead of forcing a specific style
-    # style = {
-    #   name = lib.mkForce "adwaita-dark";
-    #   package = lib.mkForce pkgs.adwaita-qt;
-    # };
+    # Let Stylix handle Qt styling - it's already configured for dark mode
+    # Stylix will manage qt.style based on stylix.polarity = "dark"
   };
 
   home.packages = with pkgs; [
@@ -44,5 +41,6 @@ in
   home.sessionVariables = lib.mkIf (!isPlasmaEnabled) {
     # Use qt6ct by default except in KDE Plasma
     QT_QPA_PLATFORMTHEME = lib.mkForce "qtct";
+    # Stylix will set the appropriate Qt style based on polarity = "dark"
   };
 }

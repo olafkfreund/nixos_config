@@ -1,12 +1,11 @@
 { config
 , lib
-, pkgs
 , ...
 }:
 with lib; let
   cfg = config.modules.ai.gemini-cli;
-  # Import our custom gemini-cli package
-  geminiCliPkg = pkgs.callPackage ../../pkgs/gemini-cli { };
+  # Temporarily disabled - npm deps hash issue
+  # geminiCliPkg = pkgs.gemini-cli;
 in
 {
   options.modules.ai.gemini-cli = {
@@ -14,7 +13,7 @@ in
 
     package = mkOption {
       type = types.package;
-      default = geminiCliPkg;
+      # default = geminiCliPkg;  # Temporarily disabled
       description = "The gemini-cli package to use";
     };
 
@@ -36,9 +35,13 @@ in
   };
 
   config = mkIf cfg.enable {
+    # Temporarily disabled - npm deps hash issue needs to be fixed
+    warnings = [
+      "gemini-cli is temporarily disabled due to build issues. The npm dependencies hash needs to be recalculated."
+    ];
     environment = {
       # Add the package to system packages
-      systemPackages = [ cfg.package ];
+      # systemPackages = [ cfg.package ];
 
       # Set environment variables if provided
       variables = cfg.environmentVariables;
@@ -50,19 +53,20 @@ in
       };
 
       # Create a desktop entry for GUI environments
-      etc."applications/gemini-cli.desktop" = mkIf cfg.enableShellIntegration {
-        text = ''
-          [Desktop Entry]
-          Name=Gemini CLI
-          Comment=Google Gemini AI Command Line Interface
-          Exec=${cfg.package}/bin/gemini
-          Icon=terminal
-          Type=Application
-          Terminal=true
-          Categories=Development;Utility;ConsoleOnly;
-          Keywords=AI;Gemini;CLI;Google;
-        '';
-      };
+      # Temporarily disabled - npm deps hash issue
+      # etc."applications/gemini-cli.desktop" = mkIf cfg.enableShellIntegration {
+      #   text = ''
+      #     [Desktop Entry]
+      #     Name=Gemini CLI
+      #     Comment=Google Gemini AI Command Line Interface
+      #     Exec=${cfg.package}/bin/gemini
+      #     Icon=terminal
+      #     Type=Application
+      #     Terminal=true
+      #     Categories=Development;Utility;ConsoleOnly;
+      #     Keywords=AI;Gemini;CLI;Google;
+      #   '';
+      # };
     };
   };
 }

@@ -127,6 +127,11 @@ in
           cosmic-ext-tweaks # Advanced tweaking tool
           cosmic-ext-ctl # Extension control tool
 
+          # Applets
+          cosmic-ext-applet-minimon # System monitor applet
+          cosmic-ext-applet-caffeine # Prevent screen sleep applet
+          cosmic-ext-applet-privacy-indicator # Privacy indicator applet
+
           # Visual assets
           cosmic-icons # COSMIC icon theme
           cosmic-wallpapers # Wallpaper collection

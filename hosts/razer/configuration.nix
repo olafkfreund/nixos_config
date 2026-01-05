@@ -254,11 +254,6 @@ in
 
   # Consolidated services configuration
   services = {
-    # Nixai
-    nixai = {
-      enable = true;
-      mcp.enable = true;
-    };
 
     # GNOME Remote Desktop configuration moved to features.gnome-remote-desktop
 
@@ -353,7 +348,8 @@ in
       libsForQt5.qt5ct
       kdePackages.qt6ct
       # Custom packages
-      (callPackage ../../home/development/qwen-code/default.nix { })
+      # qwen-code disabled due to npm registry network errors (HTTP/2 framing layer issue)
+      # (callPackage ../../home/development/qwen-code/default.nix { })
       nix-doc # Interactive Nix documentation tool
 
       # Power management (from power.nix)

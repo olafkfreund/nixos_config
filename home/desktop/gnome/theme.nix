@@ -112,6 +112,17 @@ in
       nerd-fonts.fira-code
     ];
 
+    # Session environment variables for dark mode enforcement
+    home.sessionVariables = mkIf (cfg.theme.variant == "dark") {
+      # GTK dark mode enforcement
+      GTK_THEME = "Gruvbox-Dark-Medium:dark";
+      GTK_APPLICATION_PREFER_DARK_THEME = "1";
+
+      # Cursor theme
+      XCURSOR_THEME = "Bibata-Modern-Classic";
+      XCURSOR_SIZE = "16";
+    };
+
     # GNOME-specific theming via dconf (use mkForce to override Stylix)
     dconf.settings = mkIf cfg.theme.enable {
       "org/gnome/desktop/interface" = {

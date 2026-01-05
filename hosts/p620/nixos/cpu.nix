@@ -7,7 +7,8 @@
 
   # CPU monitoring tools
   environment.systemPackages = with pkgs; [
-    zenmonitor
+    # Temporarily disabled - upstream compilation error with start_gui function signature
+    # zenmonitor
     lm_sensors
     s-tui
   ];

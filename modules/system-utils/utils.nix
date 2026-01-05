@@ -10,7 +10,7 @@
     appimage-run
     fftw
     iniparser
-    openapi-tui
+    # openapi-tui  # Temporarily disabled - build fails with GCC 15 (onig_sys compatibility issue)
     fast-ssh
     lazycli
     systemctl-tui

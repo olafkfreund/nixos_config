@@ -106,7 +106,6 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixai.url = "github:olafkfreund/nix-ai-help";
 
     # Google Antigravity package
     antigravity-nix = {
@@ -120,7 +119,6 @@
     , nixpkgs-stable
     , nixpkgs-unstable
     , nur
-    , nixai
     , agenix
     , spicetify-nix
     , home-manager
@@ -302,7 +300,6 @@
               inputs.lanzaboote.nixosModules.lanzaboote
               nix-index-database.nixosModules.nix-index
               ./home/shell/zellij/zjstatus.nix
-              nixai.nixosModules.default
             ]
             ++ stylixModule
             ++ [
@@ -310,7 +307,9 @@
                 home-manager = {
                   useGlobalPkgs = true;
                   useUserPackages = true;
-                  backupFileExtension = "backup";
+                  # Use a script to move conflicting files to timestamped backups
+                  # This prevents conflicts when .backup files already exist
+                  backupFileExtension = "hm-backup";
                   extraSpecialArgs = {
                     pkgs-stable = import nixpkgs-stable (mkPkgs nixpkgs-stable system);
                     pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable system);
@@ -383,7 +382,7 @@
           codex-cli = pkgs.callPackage ./home/development/codex-cli {
             inherit (pkgs) nodejs_22;
           };
-          gemini-cli = pkgs.callPackage ./pkgs/gemini-cli { };
+          # gemini-cli provided by pkgs/default.nix overlay (version 0.8.0-preview.1)
           glim = pkgs.callPackage ./overlays/glim { };
           intune-portal = pkgs.callPackage ./pkgs/intune-portal { };
           kosli-cli = pkgs.callPackage ./pkgs/kosli-cli { };

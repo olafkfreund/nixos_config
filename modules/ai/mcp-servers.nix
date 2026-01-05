@@ -105,7 +105,8 @@ in
         [
           playwright-mcp # Browser automation
           playwright-driver.browsers # NixOS-compatible Playwright browsers
-          mcp-nixos # NixOS package/option queries
+          # Temporarily disabled - fastmcp version conflict with mcp 1.25.0
+          # mcp-nixos # NixOS package/option queries
           github-mcp-server # GitHub integration
           chatmcp # AI chat client
         ]
@@ -136,9 +137,10 @@ in
 
         Core Servers (Always Enabled):
         - playwright-mcp: Browser automation for AI agents
-        - mcp-nixos: NixOS package and configuration queries
         - github-mcp-server: GitHub repository integration
         - chatmcp: AI chat client with MCP support
+
+        Note: mcp-nixos temporarily disabled due to version conflict
 
         Optional Servers (Configured):
         ${lib.optionalString (cfg.servers.browsermcp or cfg.enableAll) "- browser-mcp: Browser automation with privacy (requires Chrome extension)"}

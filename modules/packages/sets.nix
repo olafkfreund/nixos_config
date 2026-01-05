@@ -230,7 +230,8 @@
   mcp = with pkgs; [
     # Core MCP servers - recommended for all systems
     playwright-mcp # Browser automation for AI agents
-    mcp-nixos # NixOS package and option queries
+    # Temporarily disabled - fastmcp version conflict with mcp 1.25.0
+    # mcp-nixos # NixOS package and option queries
     github-mcp-server # GitHub integration
     chatmcp # AI chat client (already in use)
 

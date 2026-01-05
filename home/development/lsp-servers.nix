@@ -5,7 +5,8 @@
 { pkgs, lib, ... }:
 with lib;
 {
-  home.packages = with pkgs; [
+  home = {
+    packages = with pkgs; [
       # === CLAUDE CODE SUPPORTED LSP SERVERS (11 Languages) ===
 
       # 1. Python - Pyright (Claude Code: pyright@claude-code-lsps)
@@ -128,10 +129,10 @@ with lib;
       # Debugging tools
       gdb
       lldb
-  ];
+    ];
 
-  # Environment variables for LSP servers
-  home.sessionVariables = {
+    # Environment variables for LSP servers
+    sessionVariables = {
       # Enable Claude Code LSP support
       ENABLE_LSP_TOOLS = "1";
 
@@ -143,13 +144,13 @@ with lib;
       CARGO_HOME = "$HOME/.cargo";
       RUSTUP_HOME = "$HOME/.rustup";
 
-    # Python optimization
-    PYTHONDONTWRITEBYTECODE = "1";
-    PYTHONUNBUFFERED = "1";
-  };
+      # Python optimization
+      PYTHONDONTWRITEBYTECODE = "1";
+      PYTHONUNBUFFERED = "1";
+    };
 
-  # LSP server configuration file for editors to reference
-  home.file.".config/lsp-servers/config.json".text = builtins.toJSON {
+    # LSP server configuration file for editors to reference
+    file.".config/lsp-servers/config.json".text = builtins.toJSON {
       servers = {
         # Claude Code supported servers
         pyright = {
@@ -274,10 +275,11 @@ with lib;
           filetypes = [ "dockerfile" ];
         };
 
-      marksman = {
-        command = "${pkgs.marksman}/bin/marksman";
-        args = [ "server" ];
-        filetypes = [ "markdown" ];
+        marksman = {
+          command = "${pkgs.marksman}/bin/marksman";
+          args = [ "server" ];
+          filetypes = [ "markdown" ];
+        };
       };
     };
   };

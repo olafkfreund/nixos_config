@@ -20,7 +20,7 @@ buildNpmPackage (finalAttrs: {
     hash = "sha256-hvm6CMDZTuT5yaKfsG8ZImjwabfaWAwyph8FtFu6nrw=";
   };
 
-  npmDepsHash = "sha256-nSNGWjRbAR2IFod3yC7d30Siui7N4Z0KZVxtsJ01UX8=";
+  npmDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
 
   nativeBuildInputs = [
     jq

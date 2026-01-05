@@ -197,11 +197,6 @@ in
 
   # Consolidated services configuration
   services = {
-    # Nixai
-    nixai = {
-      enable = true;
-      mcp.enable = true;
-    };
 
     # GNOME Remote Desktop configuration moved to features.gnome-remote-desktop
 
