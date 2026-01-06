@@ -5,7 +5,7 @@ let
   inherit (lib) types;
   cfg = config.programs.codex-cli;
 
-  codex-cli = pkgs.callPackage ./. { inherit (pkgs) nodejs_22; };
+  codex-cli = pkgs.callPackage ./. { inherit (pkgs) nodejs_24; };
 
   # Note: Configuration template available but using inline generation instead
   # configFile = pkgs.writeText "codex-config.json" (builtins.toJSON {

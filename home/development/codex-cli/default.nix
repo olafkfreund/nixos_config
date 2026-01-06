@@ -1,4 +1,4 @@
-{ lib, pkgs, fetchurl, buildNpmPackage, nodejs_22 }:
+{ lib, pkgs, fetchurl, buildNpmPackage, nodejs_24 }:
 
 buildNpmPackage rec {
   pname = "openai-codex";
@@ -14,7 +14,7 @@ buildNpmPackage rec {
   npmDepsHash = "sha256-TKQ4ZL68ZsOEnKl/BQBiSUh2UO7yv2dYxp9vDluWIEI=";
   makeCacheWritable = true;
 
-  nodejs = nodejs_22;
+  nodejs = nodejs_24;
 
   # Copy the required package-lock.json during patch phase
   postPatch = ''
@@ -29,7 +29,7 @@ buildNpmPackage rec {
 
   # OpenAI Codex requires Node.js 22+ and npm 10+
   nativeBuildInputs = [
-    pkgs.nodejs_22
+    pkgs.nodejs_24
     pkgs.makeWrapper
   ];
 
@@ -45,11 +45,11 @@ buildNpmPackage rec {
     cp -r . $out/lib/node_modules/@openai/codex/
 
     # Create the main wrapper
-    makeWrapper ${nodejs_22}/bin/node $out/bin/codex \
+    makeWrapper ${nodejs_24}/bin/node $out/bin/codex \
       --add-flags "$out/lib/node_modules/@openai/codex/bin/codex.js"
 
     # Create convenience aliases
-    makeWrapper ${nodejs_22}/bin/node $out/bin/codex-cli \
+    makeWrapper ${nodejs_24}/bin/node $out/bin/codex-cli \
       --add-flags "$out/lib/node_modules/@openai/codex/bin/codex.js"
 
     # Make the native binaries executable (they are in vendor/ subdirectories by arch)

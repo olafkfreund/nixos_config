@@ -173,17 +173,17 @@ in
           # Ensures proper environment and paths for npx
 
           # Set PATH to include nix profile binaries
-          export PATH="${pkgs.nodejs_22}/bin:$PATH"
+          export PATH="${pkgs.nodejs_24}/bin:$PATH"
 
           # Pass stdin to claude-powerline with built-in gruvbox theme
-          ${pkgs.nodejs_22}/bin/npx -y @owloops/claude-powerline@latest --style=${cfg.style} --theme=gruvbox
+          ${pkgs.nodejs_24}/bin/npx -y @owloops/claude-powerline@latest --style=${cfg.style} --theme=gruvbox
         '';
         executable = true;
       };
 
       # Ensure Node.js is available for npx
       packages = with pkgs; [
-        nodejs_22
+        nodejs_24
       ];
 
       # Environment variables for Claude Powerline configuration

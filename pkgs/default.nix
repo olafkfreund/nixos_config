@@ -4,9 +4,9 @@
   chrome-gruvbox-theme = pkgs.callPackage ./chrome-gruvbox-theme { };
   linux-command-mcp = pkgs.callPackage ./linux-command-mcp { };
   linkedin-mcp = pkgs.callPackage ./linkedin-mcp { };
-  obsidian-mcp = pkgs.callPackage ./obsidian-mcp { };
-  obsidian-mcp-rest = pkgs.callPackage ./obsidian-mcp-rest { };
-  browser-mcp = pkgs.callPackage ./browser-mcp { };
+  obsidian-mcp = pkgs.callPackage ./obsidian-mcp { nodejs = pkgs.nodejs_24; };
+  obsidian-mcp-rest = pkgs.callPackage ./obsidian-mcp-rest { nodejs = pkgs.nodejs_24; };
+  browser-mcp = pkgs.callPackage ./browser-mcp { nodejs = pkgs.nodejs_24; };
   mpris-album-art = pkgs.callPackage ./mpris-album-art { };
   weather-popup = pkgs.callPackage ./weather-popup { };
   # gemini-cli temporarily disabled due to npm deps hash issue
