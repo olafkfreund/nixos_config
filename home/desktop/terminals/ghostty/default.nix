@@ -17,7 +17,7 @@ in
       package = pkgs.ghostty;
       settings = {
         # Appearance
-        theme = "GruvboxDark";
+        # theme = "GruvboxDark"; # Disabled - let Stylix manage the theme
         font-family = "JetBrainsMono Nerd Font";
         font-size = 15;
 

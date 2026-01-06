@@ -303,10 +303,10 @@ in
       enable = true;
     };
 
-    # Enable COSMIC Desktop with all applications
+    # Enable COSMIC Desktop with all applications and COSMIC Greeter
     desktop.cosmic = {
       enable = true;
-      useCosmicGreeter = false; # Disabled due to libEGL.so.1 bug (nixpkgs #464392)
+      useCosmicGreeter = true; # Using COSMIC Greeter as display manager
       defaultSession = true; # Set COSMIC as default session
       installAllApps = true;
       disableOsd = true; # Workaround for polkit agent crashes in COSMIC beta
@@ -326,9 +326,6 @@ in
     enable = true; # Enabled with version 25.08.10.111
     acceptLicense = true; # Accept Citrix EULA for client project work
   };
-
-  # Use GDM instead of COSMIC greeter until bug is fixed
-  services.displayManager.gdm.enable = true;
 
   # AI service-level configuration (for ai.ollama module options)
   ai.ollama = {

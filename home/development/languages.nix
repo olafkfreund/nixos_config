@@ -149,7 +149,7 @@ with lib; let
             python313Packages.mypy
             python313Packages.flake8
           ]))
-          ++ (optionals (name == "javascript") (with pkgs; [ nodejs yarn ]))
+          ++ (optionals (name == "javascript") (with pkgs; [ nodejs_24 yarn ]))
           ++ (optionals (name == "go") (with pkgs; [ go delve gore gotests ]))
           ++ (optionals (name == "rust") (with pkgs; [ cargo rustc clippy ]))
         )

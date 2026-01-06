@@ -155,15 +155,12 @@ in
     # COSMIC Desktop with COSMIC Greeter enabled
     desktop.cosmic = {
       enable = true;
-      useCosmicGreeter = false; # Disabled due to libEGL.so.1 bug (nixpkgs #464392)
+      useCosmicGreeter = true; # Using COSMIC Greeter as display manager
       defaultSession = true; # Set COSMIC as default session
       installAllApps = true; # Install full Cosmic app suite
       disableOsd = true; # Workaround for polkit agent crashes in COSMIC beta
     };
   };
-
-  # Use GDM instead of COSMIC greeter until bug is fixed
-  # Note: Using new services.displayManager.gdm.enable below (line 228)
 
   # Enable NixOS package monitoring tools
   tools.nixpkgs-monitors = {
@@ -218,9 +215,6 @@ in
     # Desktop environment
     desktopManager.gnome.enable = true;
   };
-
-  # Display manager - Use GDM (COSMIC greeter disabled due to libEGL.so.1 bug)
-  services.displayManager.gdm.enable = true;
 
   # Hardware and service specific configurations
   services = {

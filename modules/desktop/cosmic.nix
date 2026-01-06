@@ -183,6 +183,19 @@ in
       font-awesome
     ];
 
+    # Systemd-logind configuration for proper session management
+    # Fix for COSMIC logout button issue (https://github.com/pop-os/cosmic-epoch/issues/795)
+    services.logind.settings.Login = {
+      # Enable killing user processes on logout to prevent black screen
+      KillUserProcesses = true;
+
+      # Additional session cleanup settings
+      RemoveIPC = "yes";
+      InhibitDelayMaxSec = 5;
+      HandlePowerKey = "poweroff";
+      IdleAction = "ignore";
+    };
+
     # Systemd configuration for COSMIC
     systemd = {
       # Workaround for cosmic-osd polkit agent crashes
@@ -204,6 +217,19 @@ in
           EOF
           chmod +x $HOME/.local/bin/cosmic-osd
         '';
+      };
+
+      # Fix for COSMIC logout button black screen issue
+      # Ensures proper session cleanup via systemd-logind
+      user.services.cosmic-session-cleanup = {
+        description = "COSMIC session cleanup on logout";
+        wantedBy = [ "graphical-session.target" ];
+        partOf = [ "graphical-session.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStop = "${pkgs.systemd}/bin/loginctl terminate-session $XDG_SESSION_ID";
+        };
       };
 
       services = {

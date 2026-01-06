@@ -100,13 +100,17 @@ with lib; let
   };
 in
 {
+  imports = [
+    ./ghostty
+    ./wezterm
+  ];
+
   # Backward compatibility options for individual terminals
   options = {
     alacritty.enable = mkEnableOption "Alacritty terminal (legacy compatibility)";
     foot.enable = mkEnableOption "Foot terminal (legacy compatibility)";
     kitty.enable = mkEnableOption "Kitty terminal (legacy compatibility)";
-    wezterm.enable = mkEnableOption "WezTerm terminal (legacy compatibility)";
-    ghostty.enable = mkEnableOption "Ghostty terminal (legacy compatibility)";
+    # wezterm and ghostty options are defined in their respective imported modules
   };
 
   config = {

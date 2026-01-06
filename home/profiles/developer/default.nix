@@ -118,7 +118,7 @@
     helm
 
     # Language-specific tools
-    nodejs
+    nodejs_24 # Use nodejs_24 to match system-wide installation
     python3
     go
     rustc

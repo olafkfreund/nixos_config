@@ -62,7 +62,7 @@
     ];
 
     nodejs = with pkgs; [
-      nodejs
+      nodejs_24 # Use nodejs_24 to match system-wide installation
       nodePackages.npm
       nodePackages.yarn
       nodePackages.pnpm

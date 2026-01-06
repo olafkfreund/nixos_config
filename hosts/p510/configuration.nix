@@ -46,8 +46,8 @@ in
     # Note: Tailscale is enabled via services.tailscale (built-in NixOS module)
     # Custom networking.tailscale module was removed during anti-pattern cleanup
 
-    # DNS configuration
-    nameservers = [ "192.168.1.254" ];
+    # DNS configuration - using 192.168.1.1 (router DNS server)
+    nameservers = [ "192.168.1.1" "1.1.1.1" ];
   };
 
   # Tailscale VPN using built-in NixOS service
@@ -77,7 +77,7 @@ in
       shell = true;
       devshell = true; # Enable devenv development environment
       python = true;
-      nodejs = true;
+      nodejs = false; # Temporarily disabled due to version conflict - fix DNS first
     };
 
     virtualization = {
@@ -151,9 +151,6 @@ in
     };
   };
 
-  # Use GDM instead of COSMIC greeter until bug is fixed
-  # Note: Using new services.displayManager.gdm.enable below
-
   # Enable NixOS package monitoring tools
   tools.nixpkgs-monitors = {
     enable = true;
@@ -213,7 +210,7 @@ in
     };
   };
 
-  # Display manager configuration - Use GDM (COSMIC greeter disabled due to libEGL.so.1 bug)
+  # Display manager - GDM for headless GNOME desktop (COSMIC not used on this server)
   services.displayManager.gdm.enable = true;
 
   # Enable auto-login for headless RDP access (override cosmic-remote-desktop module)
@@ -314,6 +311,11 @@ in
     allowUnfree = true; # Required for NVIDIA drivers
     allowBroken = true;
     permittedInsecurePackages = [ "olm-3.2.16" "dotnet-sdk-6.0.428" "python3.12-youtube-dl-2021.12.17" ];
+
+    # Override nodejs to use nodejs_24 to avoid version conflicts
+    packageOverrides = pkgs: {
+      nodejs = pkgs.nodejs_24;
+    };
   };
   system.stateVersion = "25.11";
 }

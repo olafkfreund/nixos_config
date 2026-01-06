@@ -20,8 +20,9 @@
   # Fix Stylix Firefox profile warnings
   stylix.targets.firefox.profileNames = [ "default" ];
 
-  # Disable Stylix GTK management to prevent conflicts with GNOME theme
-  stylix.targets.gtk.enable = false;
+  # Enable Stylix GTK and Qt management for common theme across all apps
+  stylix.targets.gtk.enable = true;
+  stylix.targets.qt.enable = true;
 
   # Enable Walker launcher when feature flag is set
 
@@ -37,7 +38,7 @@
     # Or use: claude-sonnet-4-5 (Claude 4.5 - More powerful)
     # Legacy: claude-3-5-haiku-20241022, claude-3-5-sonnet-20241022
     triggerKey = "^G"; # Ctrl+G
-    debug = true; # Temporarily enable for debugging
+    debug = false;
   };
 
   # GNOME desktop environment (optional - can be enabled/disabled)
@@ -184,6 +185,8 @@
 
     # Wayfarer - Screen recorder for GNOME/Wayland/pipewire
     pkgs.wayfarer
+
+    # Note: Caprine is already installed via home/desktop/com.nix
   ];
 
   # Optional: Add additional packages to the Windsurf environment

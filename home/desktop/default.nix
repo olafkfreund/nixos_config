@@ -24,7 +24,7 @@
     ./evince/default.nix
     ./lanmouse/default.nix
     ./obsidian/default.nix
-    ./vicinae/default.nix
+    # ./vicinae/default.nix # Temporarily disabled due to home-manager module availability issues
     ./proton/default.nix # Proton applications suite (optional)
     ./gnome # GNOME desktop environment (optional)
   ];

@@ -64,7 +64,7 @@ in
       };
 
       # File managers
-      desktop.vicinae.enable = cfg.desktop.vicinae;
+      # desktop.vicinae.enable = cfg.desktop.vicinae; # Temporarily disabled - module not imported
     })
 
     # CLI tool implementations
