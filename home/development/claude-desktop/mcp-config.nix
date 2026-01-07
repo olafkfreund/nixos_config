@@ -45,6 +45,13 @@ in
               args = [ "-y" "@upstash/context7-mcp@latest" ];
               description = "Up-to-date library documentation";
             };
+
+            # Sequential Thinking for systematic problem-solving
+            sequential-thinking = {
+              command = "${pkgs.nodejs}/bin/npx";
+              args = [ "-y" "@modelcontextprotocol/server-sequential-thinking" ];
+              description = "Dynamic and reflective problem-solving through systematic thinking";
+            };
           }
           # Obsidian MCP - conditional configuration based on implementation
           // (lib.optionalAttrs obsidianEnabled {
@@ -224,6 +231,12 @@ in
       ### Context7
       - Up-to-date library documentation
       - Prevents coding hallucinations
+
+      ### Sequential Thinking
+      - Dynamic and reflective problem-solving
+      - Breaks down complex problems into systematic steps
+      - Helps with thorough analysis and planning
+      - Example: "Think through the architecture for this feature step by step"
 
       ## Applying Changes
 

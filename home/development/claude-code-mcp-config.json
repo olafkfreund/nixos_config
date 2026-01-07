@@ -9,11 +9,6 @@
       },
       "description": "Browser automation using Playwright - AI-powered web testing, form filling, and DOM interaction"
     },
-    "obsidian": {
-      "command": "obsidian-mcp",
-      "args": ["${OBSIDIAN_VAULT_PATH:-/home/olafkfreund/Documents/Caliti}"],
-      "description": "Obsidian vault knowledge base - read/write/search notes in your Caliti vault (zero-dependency mode)"
-    },
     "obsidian-rest": {
       "command": "obsidian-mcp-rest",
       "args": [],
@@ -82,6 +77,11 @@
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@latest"],
       "description": "Up-to-date library documentation - prevents coding hallucinations with current docs"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "description": "Dynamic and reflective problem-solving through systematic thinking - helps break down complex problems into steps"
     }
   }
 }

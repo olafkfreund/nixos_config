@@ -269,51 +269,54 @@ in
       '';
     };
 
-    # Agenix secret for Obsidian REST API mode
-    age.secrets."obsidian-api-key" = lib.mkIf (cfg.obsidian.enable && cfg.obsidian.implementation == "rest-api") {
-      file = ../../secrets/obsidian-api-key.age;
-      mode = "0400";
-      owner = username;
-      group = "users";
-    };
+    # Agenix secrets for MCP servers
+    # Group all age.secrets together to avoid repeated key warnings
+    age.secrets = {
+      # Obsidian REST API mode secret
+      "obsidian-api-key" = lib.mkIf (cfg.obsidian.enable && cfg.obsidian.implementation == "rest-api") {
+        file = ../../secrets/obsidian-api-key.age;
+        mode = "0400";
+        owner = username;
+        group = "users";
+      };
 
-    # Agenix secret for LinkedIn cookie (li_at)
-    # Cookie expires approximately every 30 days and requires refresh
-    age.secrets."api-linkedin-cookie" = lib.mkIf cfg.linkedin.enable {
-      file = ../../secrets/api-linkedin-cookie.age;
-      mode = "0400";
-      owner = username;
-      group = "users";
-    };
+      # LinkedIn cookie (li_at) - expires approximately every 30 days
+      "api-linkedin-cookie" = lib.mkIf cfg.linkedin.enable {
+        file = ../../secrets/api-linkedin-cookie.age;
+        mode = "0400";
+        owner = username;
+        group = "users";
+      };
 
-    # Agenix secrets for Atlassian (cloud mode)
-    age.secrets."api-jira-token" = lib.mkIf (cfg.atlassian.enable && cfg.atlassian.jira.enable && cfg.atlassian.mode == "cloud") {
-      file = ../../secrets/api-jira-token.age;
-      mode = "0400";
-      owner = username;
-      group = "users";
-    };
+      # Atlassian cloud mode secrets
+      "api-jira-token" = lib.mkIf (cfg.atlassian.enable && cfg.atlassian.jira.enable && cfg.atlassian.mode == "cloud") {
+        file = ../../secrets/api-jira-token.age;
+        mode = "0400";
+        owner = username;
+        group = "users";
+      };
 
-    age.secrets."api-confluence-token" = lib.mkIf (cfg.atlassian.enable && cfg.atlassian.confluence.enable && cfg.atlassian.mode == "cloud") {
-      file = ../../secrets/api-confluence-token.age;
-      mode = "0400";
-      owner = username;
-      group = "users";
-    };
+      "api-confluence-token" = lib.mkIf (cfg.atlassian.enable && cfg.atlassian.confluence.enable && cfg.atlassian.mode == "cloud") {
+        file = ../../secrets/api-confluence-token.age;
+        mode = "0400";
+        owner = username;
+        group = "users";
+      };
 
-    # Agenix secrets for Atlassian (self-hosted mode)
-    age.secrets."api-jira-pat" = lib.mkIf (cfg.atlassian.enable && cfg.atlassian.jira.enable && cfg.atlassian.mode == "self-hosted") {
-      file = ../../secrets/api-jira-pat.age;
-      mode = "0400";
-      owner = username;
-      group = "users";
-    };
+      # Atlassian self-hosted mode secrets
+      "api-jira-pat" = lib.mkIf (cfg.atlassian.enable && cfg.atlassian.jira.enable && cfg.atlassian.mode == "self-hosted") {
+        file = ../../secrets/api-jira-pat.age;
+        mode = "0400";
+        owner = username;
+        group = "users";
+      };
 
-    age.secrets."api-confluence-pat" = lib.mkIf (cfg.atlassian.enable && cfg.atlassian.confluence.enable && cfg.atlassian.mode == "self-hosted") {
-      file = ../../secrets/api-confluence-pat.age;
-      mode = "0400";
-      owner = username;
-      group = "users";
+      "api-confluence-pat" = lib.mkIf (cfg.atlassian.enable && cfg.atlassian.confluence.enable && cfg.atlassian.mode == "self-hosted") {
+        file = ../../secrets/api-confluence-pat.age;
+        mode = "0400";
+        owner = username;
+        group = "users";
+      };
     };
   };
 }

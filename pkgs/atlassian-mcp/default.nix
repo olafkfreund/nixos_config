@@ -2,9 +2,7 @@
 # Model Context Protocol server for Jira and Confluence
 # Repository: https://github.com/sooperset/mcp-atlassian
 # Follows docs/NIXOS-ANTI-PATTERNS.md and docs/PATTERNS.md
-{ lib
-, writeShellScriptBin
-, python3
+{ writeShellScriptBin
 , uv
 , ...
 }:
