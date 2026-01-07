@@ -588,6 +588,252 @@ The system uses three components:
 
 **Documentation**: <https://docs.browsermcp.io/setup-server>
 
+#### 11. **atlassian-mcp** - Jira and Confluence Integration
+
+**Purpose**: AI-assisted interaction with Atlassian Jira and Confluence through natural language
+**Repository**: <https://github.com/sooperset/mcp-atlassian>
+**Status**: ✅ **FULLY INTEGRATED** (Phase 120)
+
+**Benefits**:
+
+- **Natural Language Jira Queries**: "Find all critical bugs assigned to me"
+- **Issue Management**: Create, update, and transition issues through AI
+- **JQL Support**: Advanced filtering with Jira Query Language
+- **Confluence Documentation**: Search and manage documentation pages
+- **CQL Support**: Confluence Query Language for advanced searches
+- **Workflow Automation**: Automate issue transitions and updates
+- **Dual Mode Support**: Both cloud and self-hosted Atlassian instances
+
+**Capabilities**:
+
+**Jira Features**:
+
+- Natural language issue search and JQL queries
+- Issue creation, updates, and status transitions
+- Comment management and user assignment
+- Project insights and metrics queries
+- Sprint and epic management
+- Advanced filtering and sorting
+
+**Confluence Features**:
+
+- Natural language documentation search
+- Page creation and updates with rich content
+- Comment management and collaboration
+- CQL queries for advanced content discovery
+- Space and page hierarchy navigation
+- Content analytics and insights
+
+**Configuration**:
+
+The Atlassian MCP server supports two authentication modes:
+
+**Cloud Mode** (Atlassian Cloud - yourDomain.atlassian.net):
+
+```nix
+# In hosts/HOSTNAME/configuration.nix
+features.ai.mcp = {
+  enable = true;
+
+  atlassian = {
+    enable = true;
+    mode = "cloud";  # Atlassian Cloud
+
+    jira = {
+      enable = true;
+      url = "https://your-domain.atlassian.net";
+      username = "your-email@example.com";
+      tokenFile = config.age.secrets."api-jira-token".path;
+    };
+
+    confluence = {
+      enable = true;
+      url = "https://your-domain.atlassian.net/wiki";
+      username = "your-email@example.com";
+      tokenFile = config.age.secrets."api-confluence-token".path;
+    };
+  };
+};
+```
+
+**Self-Hosted Mode** (Jira Server v8.14+ / Confluence Server v6.0+):
+
+```nix
+features.ai.mcp = {
+  enable = true;
+
+  atlassian = {
+    enable = true;
+    mode = "self-hosted";  # Self-hosted Atlassian
+
+    jira = {
+      enable = true;
+      url = "https://jira.your-company.com";
+      patFile = config.age.secrets."api-jira-pat".path;
+    };
+
+    confluence = {
+      enable = true;
+      url = "https://confluence.your-company.com";
+      patFile = config.age.secrets."api-confluence-pat".path;
+    };
+  };
+};
+```
+
+**Jira-Only or Confluence-Only Setup**:
+
+```nix
+# Only Jira
+features.ai.mcp.atlassian = {
+  enable = true;
+  mode = "cloud";
+  jira.enable = true;
+  confluence.enable = false;  # Disable Confluence
+};
+
+# Only Confluence
+features.ai.mcp.atlassian = {
+  enable = true;
+  mode = "cloud";
+  jira.enable = false;  # Disable Jira
+  confluence.enable = true;
+};
+```
+
+**Secret Management**:
+
+```bash
+# Cloud mode - Generate API token from:
+# https://id.atlassian.com/manage-profile/security/api-tokens
+
+# Encrypt Jira token
+echo "your-jira-api-token" > /tmp/jira-token.txt
+agenix -e secrets/api-jira-token.age
+# Paste token, save, exit
+rm /tmp/jira-token.txt
+
+# Encrypt Confluence token (or use same token)
+echo "your-confluence-api-token" > /tmp/confluence-token.txt
+agenix -e secrets/api-confluence-token.age
+rm /tmp/confluence-token.txt
+
+# Self-hosted mode - Generate Personal Access Tokens (PATs)
+# From your Jira/Confluence instance: Profile → Personal Access Tokens
+
+# Encrypt Jira PAT
+agenix -e secrets/api-jira-pat.age
+
+# Encrypt Confluence PAT
+agenix -e secrets/api-confluence-pat.age
+```
+
+**Usage Examples**:
+
+**Jira Interactions**:
+
+```bash
+# Natural language search
+"Find all issues assigned to me"
+"Show critical bugs in the BACKEND project"
+"List issues in sprint 'Sprint 42' that are in progress"
+
+# Issue creation
+"Create a bug ticket: Login fails with OAuth"
+"Create a story in PROJECT-123: Add dark mode support"
+
+# Issue updates
+"Update issue PROJ-456 status to In Progress"
+"Add comment to PROJ-789: This is fixed in PR #123"
+"Change priority of PROJ-222 to High"
+
+# Advanced JQL queries
+"Search Jira: project = PROJ AND status != Done ORDER BY priority DESC"
+"Find issues: assignee = currentUser() AND duedate < now()"
+```
+
+**Confluence Interactions**:
+
+```bash
+# Documentation search
+"Find pages about API authentication in the Tech space"
+"Search Confluence for pages containing 'deployment process'"
+"Show recent pages in the PROJ space"
+
+# Content creation
+"Create a Confluence page titled 'New Feature Design' in the DESIGN space"
+"Update page 12345 with the new architecture diagram"
+"Add a comment to page 'API Documentation': Needs updating for v2.0"
+
+# Advanced CQL queries
+"Search Confluence: type = page AND space = TECH ORDER BY lastmodified DESC"
+"Find: label = 'api' AND creator = currentUser()"
+```
+
+**Integration Status**:
+
+- **P620 (Primary Workstation)**: ⏸️ Available (enable in configuration as needed)
+- **Razer (Laptop)**: ⏸️ Available (enable in configuration as needed)
+- **Other Hosts**: ⏸️ Available (workstation access only due to secret permissions)
+
+**Security Features**:
+
+- ✅ Runtime secret loading (never evaluation-time)
+- ✅ Agenix encrypted credential storage
+- ✅ File permissions: 0400 (read-only by owner)
+- ✅ Workstation-only access control
+- ✅ Comprehensive credential validation
+- ✅ Support for both cloud and self-hosted authentication
+
+**Technical Implementation**:
+
+- **Package**: Custom NixOS derivation using uvx for Python package execution
+- **Server**: mcp-atlassian Python package from PyPI
+- **Authentication**: File-based credential loading with runtime validation
+- **Mode Detection**: Automatic cloud vs self-hosted credential handling
+- **Error Handling**: Clear error messages for missing or invalid credentials
+
+**Documentation**: See [docs/ATLASSIAN-MCP.md](./ATLASSIAN-MCP.md) for complete setup guide
+
+**Quick Start**:
+
+1. **Enable in host configuration** (see Configuration section above)
+2. **Generate API tokens** from Atlassian (cloud) or PATs (self-hosted)
+3. **Encrypt secrets** using agenix (see Secret Management above)
+4. **Deploy configuration**: `just quick-deploy HOSTNAME`
+5. **Use in Claude**: "Find all issues assigned to me in project PROJ"
+
+**Example Workflow**:
+
+```plaintext
+You: "Find all high-priority bugs in the BACKEND project that need review"
+Claude with atlassian-mcp:
+1. Executes JQL: "project = BACKEND AND type = Bug AND priority = High AND status = 'Needs Review'"
+2. Returns: List of matching issues with details
+3. Can follow up with: "Create a summary document" or "Transition these to In Progress"
+```
+
+**Troubleshooting**:
+
+```bash
+# Check if package is installed
+which atlassian-mcp
+
+# Verify secrets are decrypted
+ls -la /run/agenix/api-jira-token
+ls -la /run/agenix/api-confluence-token
+
+# Test server manually
+export ATLASSIAN_MODE=cloud
+export JIRA_URL=https://your-domain.atlassian.net
+export JIRA_USERNAME=your-email@example.com
+export JIRA_TOKEN_FILE=/run/agenix/api-jira-token
+atlassian-mcp
+
+# Check MCP configuration
+cat ~/.config/Claude/claude_desktop_config.json | grep -A 10 atlassian
+```
+
 ## Additional Recommended MCP Servers (Not Yet in Nixpkgs)
 
 Based on research of the MCP ecosystem, these servers would be highly beneficial:

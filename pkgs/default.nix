@@ -4,6 +4,7 @@
   chrome-gruvbox-theme = pkgs.callPackage ./chrome-gruvbox-theme { };
   linux-command-mcp = pkgs.callPackage ./linux-command-mcp { };
   linkedin-mcp = pkgs.callPackage ./linkedin-mcp { };
+  atlassian-mcp = pkgs.callPackage ./atlassian-mcp { };
   obsidian-mcp = pkgs.callPackage ./obsidian-mcp { nodejs = pkgs.nodejs_24; };
   obsidian-mcp-rest = pkgs.callPackage ./obsidian-mcp-rest { nodejs = pkgs.nodejs_24; };
   browser-mcp = pkgs.callPackage ./browser-mcp { nodejs = pkgs.nodejs_24; };

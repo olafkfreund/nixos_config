@@ -43,6 +43,20 @@
       },
       "description": "GitHub repository integration - PR automation, issue management, repository queries"
     },
+    "atlassian": {
+      "command": "atlassian-mcp",
+      "args": [],
+      "env": {
+        "ATLASSIAN_MODE": "${ATLASSIAN_MODE:-cloud}",
+        "JIRA_URL": "${JIRA_URL:-}",
+        "JIRA_USERNAME": "${JIRA_USERNAME:-}",
+        "JIRA_TOKEN_FILE": "${JIRA_TOKEN_FILE:-/run/agenix/api-jira-token}",
+        "CONFLUENCE_URL": "${CONFLUENCE_URL:-}",
+        "CONFLUENCE_USERNAME": "${CONFLUENCE_USERNAME:-}",
+        "CONFLUENCE_TOKEN_FILE": "${CONFLUENCE_TOKEN_FILE:-/run/agenix/api-confluence-token}"
+      },
+      "description": "Atlassian Jira and Confluence integration - issue tracking, project management, and documentation (cloud/self-hosted)"
+    },
     "grafana": {
       "command": "mcp-grafana",
       "args": [

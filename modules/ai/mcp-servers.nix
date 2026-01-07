@@ -95,6 +95,110 @@ in
         '';
       };
     };
+
+    atlassian = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable Atlassian MCP server for Jira and Confluence integration";
+      };
+
+      mode = lib.mkOption {
+        type = lib.types.enum [ "cloud" "self-hosted" ];
+        default = "cloud";
+        description = ''
+          Atlassian deployment mode:
+          - cloud: Atlassian Cloud (requires username + API token)
+          - self-hosted: Self-hosted instance (requires Personal Access Token)
+        '';
+      };
+
+      jira = {
+        enable = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Enable Jira integration";
+        };
+
+        url = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          example = "https://your-domain.atlassian.net";
+          description = "Jira instance URL (cloud or self-hosted)";
+        };
+
+        username = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          example = "user@example.com";
+          description = "Jira username/email (cloud mode only)";
+        };
+
+        tokenFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          example = lib.literalExpression "config.age.secrets.\"api-jira-token\".path";
+          description = ''
+            Path to Jira API token file (runtime loading only, cloud mode).
+            Generate token at: https://id.atlassian.com/manage-profile/security/api-tokens
+            NEVER set token value directly - use file path for runtime loading.
+          '';
+        };
+
+        patFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          example = lib.literalExpression "config.age.secrets.\"api-jira-pat\".path";
+          description = ''
+            Path to Jira Personal Access Token file (runtime loading only, self-hosted mode).
+            NEVER set PAT value directly - use file path for runtime loading.
+          '';
+        };
+      };
+
+      confluence = {
+        enable = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Enable Confluence integration";
+        };
+
+        url = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          example = "https://your-domain.atlassian.net/wiki";
+          description = "Confluence instance URL (cloud or self-hosted)";
+        };
+
+        username = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          example = "user@example.com";
+          description = "Confluence username/email (cloud mode only)";
+        };
+
+        tokenFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          example = lib.literalExpression "config.age.secrets.\"api-confluence-token\".path";
+          description = ''
+            Path to Confluence API token file (runtime loading only, cloud mode).
+            Generate token at: https://id.atlassian.com/manage-profile/security/api-tokens
+            NEVER set token value directly - use file path for runtime loading.
+          '';
+        };
+
+        patFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          example = lib.literalExpression "config.age.secrets.\"api-confluence-pat\".path";
+          description = ''
+            Path to Confluence Personal Access Token file (runtime loading only, self-hosted mode).
+            NEVER set PAT value directly - use file path for runtime loading.
+          '';
+        };
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -120,7 +224,8 @@ in
         ++ lib.optionals (cfg.servers.proxy or cfg.enableAll) [ mcp-proxy ]
         ++ lib.optionals ((cfg.obsidian.enable or cfg.enableAll) && cfg.obsidian.implementation == "zero-dependency") [ customPkgs.obsidian-mcp ]
         ++ lib.optionals ((cfg.obsidian.enable or cfg.enableAll) && cfg.obsidian.implementation == "rest-api") [ customPkgs.obsidian-mcp-rest ]
-        ++ lib.optionals (cfg.linkedin.enable or cfg.enableAll) [ customPkgs.linkedin-mcp ];
+        ++ lib.optionals (cfg.linkedin.enable or cfg.enableAll) [ customPkgs.linkedin-mcp ]
+        ++ lib.optionals (cfg.atlassian.enable or cfg.enableAll) [ customPkgs.atlassian-mcp ];
 
       # NixOS-specific Playwright environment variables
       # These are required because Playwright expects browsers in ~/.cache/ms-playwright
@@ -146,6 +251,7 @@ in
         ${lib.optionalString (cfg.servers.browsermcp or cfg.enableAll) "- browser-mcp: Browser automation with privacy (requires Chrome extension)"}
         ${lib.optionalString (cfg.obsidian.enable or cfg.enableAll) "- obsidian-mcp: Obsidian vault knowledge base integration"}
         ${lib.optionalString (cfg.linkedin.enable or cfg.enableAll) "- linkedin-mcp: LinkedIn professional networking and job search"}
+        ${lib.optionalString (cfg.atlassian.enable or cfg.enableAll) "- atlassian-mcp: Jira and Confluence integration (project management and documentation)"}
         ${lib.optionalString (cfg.servers.grafana or cfg.enableAll) "- mcp-grafana: Grafana dashboard and metrics integration"}
         ${lib.optionalString (cfg.servers.kubernetes or cfg.enableAll) "- mcp-k8s-go: Kubernetes cluster management"}
         ${lib.optionalString (cfg.servers.terraform or cfg.enableAll) "- terraform-mcp-server: Infrastructure as Code automation"}
@@ -175,6 +281,36 @@ in
     # Cookie expires approximately every 30 days and requires refresh
     age.secrets."api-linkedin-cookie" = lib.mkIf cfg.linkedin.enable {
       file = ../../secrets/api-linkedin-cookie.age;
+      mode = "0400";
+      owner = username;
+      group = "users";
+    };
+
+    # Agenix secrets for Atlassian (cloud mode)
+    age.secrets."api-jira-token" = lib.mkIf (cfg.atlassian.enable && cfg.atlassian.jira.enable && cfg.atlassian.mode == "cloud") {
+      file = ../../secrets/api-jira-token.age;
+      mode = "0400";
+      owner = username;
+      group = "users";
+    };
+
+    age.secrets."api-confluence-token" = lib.mkIf (cfg.atlassian.enable && cfg.atlassian.confluence.enable && cfg.atlassian.mode == "cloud") {
+      file = ../../secrets/api-confluence-token.age;
+      mode = "0400";
+      owner = username;
+      group = "users";
+    };
+
+    # Agenix secrets for Atlassian (self-hosted mode)
+    age.secrets."api-jira-pat" = lib.mkIf (cfg.atlassian.enable && cfg.atlassian.jira.enable && cfg.atlassian.mode == "self-hosted") {
+      file = ../../secrets/api-jira-pat.age;
+      mode = "0400";
+      owner = username;
+      group = "users";
+    };
+
+    age.secrets."api-confluence-pat" = lib.mkIf (cfg.atlassian.enable && cfg.atlassian.confluence.enable && cfg.atlassian.mode == "self-hosted") {
+      file = ../../secrets/api-confluence-pat.age;
       mode = "0400";
       owner = username;
       group = "users";
