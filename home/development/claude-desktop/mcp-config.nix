@@ -8,6 +8,7 @@ let
   enabled = mcpCfg.enable or false;
   obsidianEnabled = mcpCfg.obsidian.enable or false;
   linkedinEnabled = mcpCfg.linkedin.enable or false;
+  atlassianEnabled = mcpCfg.atlassian.enable or false;
 in
 {
   config = lib.mkIf enabled {
@@ -92,7 +93,48 @@ in
               args = [ ];
               description = "LinkedIn professional networking and job search";
             };
-          });
+          })
+          # Atlassian MCP server (Jira and Confluence)
+          // (lib.optionalAttrs atlassianEnabled (
+            let
+              mode = mcpCfg.atlassian.mode or "cloud";
+              jiraEnabled = mcpCfg.atlassian.jira.enable or false;
+              confluenceEnabled = mcpCfg.atlassian.confluence.enable or false;
+            in
+            {
+              atlassian = {
+                command = "${pkgs.writeShellScript "atlassian-mcp-wrapper" (
+                  if mode == "cloud" then ''
+                    ${lib.optionalString jiraEnabled ''
+                      export JIRA_URL="${mcpCfg.atlassian.jira.url}"
+                      export JIRA_USERNAME="${mcpCfg.atlassian.jira.username}"
+                      export JIRA_TOKEN_FILE="${mcpCfg.atlassian.jira.tokenFile}"
+                    ''}
+                    ${lib.optionalString confluenceEnabled ''
+                      export CONFLUENCE_URL="${mcpCfg.atlassian.confluence.url}"
+                      export CONFLUENCE_USERNAME="${mcpCfg.atlassian.confluence.username}"
+                      export CONFLUENCE_TOKEN_FILE="${mcpCfg.atlassian.confluence.tokenFile}"
+                    ''}
+                    export ATLASSIAN_MODE="cloud"
+                    exec ${pkgs.customPkgs.atlassian-mcp}/bin/atlassian-mcp "$@"
+                  '' else ''
+                    ${lib.optionalString jiraEnabled ''
+                      export JIRA_URL="${mcpCfg.atlassian.jira.url}"
+                      export JIRA_PAT_FILE="${mcpCfg.atlassian.jira.patFile}"
+                    ''}
+                    ${lib.optionalString confluenceEnabled ''
+                      export CONFLUENCE_URL="${mcpCfg.atlassian.confluence.url}"
+                      export CONFLUENCE_PAT_FILE="${mcpCfg.atlassian.confluence.patFile}"
+                    ''}
+                    export ATLASSIAN_MODE="self-hosted"
+                    exec ${pkgs.customPkgs.atlassian-mcp}/bin/atlassian-mcp "$@"
+                  ''
+                )}";
+                args = [ ];
+                description = "Atlassian Jira and Confluence integration (${mode} mode)";
+              };
+            }
+          ));
       };
 
       # Generate JSON configuration with proper formatting
@@ -154,6 +196,29 @@ in
       - Job searches with keyword/location filters
       - Personalized job recommendations
       - Note: Cookie expires ~30 days, requires periodic refresh
+      ''}
+
+      ${lib.optionalString atlassianEnabled ''
+      ### Atlassian (${mcpCfg.atlassian.mode or "cloud"} mode)
+      ${lib.optionalString (mcpCfg.atlassian.jira.enable or false) ''
+      - **Jira Integration**:
+        - URL: ${mcpCfg.atlassian.jira.url or "Not configured"}
+        - JQL search with natural language
+        - Issue creation, updates, and transitions
+        - Project management automation
+      ''}
+      ${lib.optionalString (mcpCfg.atlassian.confluence.enable or false) ''
+      - **Confluence Integration**:
+        - URL: ${mcpCfg.atlassian.confluence.url or "Not configured"}
+        - CQL search for documentation
+        - Page creation, updates, and comments
+        - Content discovery and management
+      ''}
+      - Examples:
+        - "Find all issues assigned to me in project PROJ"
+        - "Create a bug ticket for the login issue"
+        - "Search Confluence for API documentation"
+        - "Update issue PROJ-123 status to In Progress"
       ''}
 
       ### Context7

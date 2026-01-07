@@ -28,8 +28,8 @@
     # Modesetting is required for most Wayland compositors
     modesetting.enable = true;
 
-    # Try open-source drivers for RTX 30 series (may work better with newer kernels)
-    open = true;
+    # Use proprietary drivers for better RTX 30 series stability
+    open = false;
 
     # Power management settings (disabled for server stability)
     powerManagement.enable = false;
@@ -38,8 +38,8 @@
     # Nvidia settings GUI (disabled for headless server)
     nvidiaSettings = true;
 
-    # Use beta driver for RTX 30 series with open-source drivers
-    package = config.boot.kernelPackages.nvidiaPackages.beta;
+    # Use stable production driver for RTX 30 series
+    package = config.boot.kernelPackages.nvidiaPackages.production;
 
     # Enable persistence daemon for headless operation
     nvidiaPersistenced = true;

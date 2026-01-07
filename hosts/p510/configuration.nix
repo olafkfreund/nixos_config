@@ -18,6 +18,7 @@ in
       ./nixos/boot.nix
       ./nixos/nvidia.nix
       ./nixos/network.nix # Network configuration with dual-port Intel card
+      ./nixos/tailscale-serve.nix # Tailscale Serve for media services
       ../common/nixos/i18n.nix
       ../common/nixos/envvar.nix
       ./nixos/cpu.nix

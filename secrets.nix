@@ -28,6 +28,14 @@ in
   "secrets/obsidian-api-key.age".publicKeys = allUsers ++ workstations;
   "secrets/api-linkedin-cookie.age".publicKeys = allUsers ++ workstations;
 
+  # Atlassian MCP secrets (cloud mode - API tokens)
+  "secrets/api-jira-token.age".publicKeys = allUsers ++ workstations;
+  "secrets/api-confluence-token.age".publicKeys = allUsers ++ workstations;
+
+  # Atlassian MCP secrets (self-hosted mode - Personal Access Tokens)
+  "secrets/api-jira-pat.age".publicKeys = allUsers ++ workstations;
+  "secrets/api-confluence-pat.age".publicKeys = allUsers ++ workstations;
+
   # System secrets
   "secrets/wifi-password.age".publicKeys = allUsers ++ workstations;
   "secrets/tailscale-auth-key.age".publicKeys = allUsers ++ allHosts;

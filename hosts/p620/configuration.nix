@@ -11,32 +11,30 @@ let
 in
 {
   # Use workstation template and add P620-specific modules
-  imports =
-    hostTypes.workstation.imports
-    ++ [
-      # Hardware-specific imports
-      ./nixos/hardware-configuration.nix
-      ./nixos/screens.nix
-      ./nixos/power.nix
-      ./nixos/boot.nix
-      ./nixos/amd.nix
-      ./nixos/usb-power-fix.nix # Fix USB mouse freezing issues
-      ../common/nixos/i18n.nix
-      ../common/nixos/hosts.nix
-      ../common/nixos/envvar.nix
-      ./nixos/cpu.nix
-      ./nixos/memory.nix
-      ./nixos/load.nix
-      ./themes/stylix.nix
+  imports = hostTypes.workstation.imports ++ [
+    # Hardware-specific imports
+    ./nixos/hardware-configuration.nix
+    ./nixos/screens.nix
+    ./nixos/power.nix
+    ./nixos/boot.nix
+    ./nixos/amd.nix
+    ./nixos/usb-power-fix.nix # Fix USB mouse freezing issues
+    ../common/nixos/i18n.nix
+    ../common/nixos/hosts.nix
+    ../common/nixos/envvar.nix
+    ./nixos/cpu.nix
+    ./nixos/memory.nix
+    ./nixos/load.nix
+    ./themes/stylix.nix
 
-      # P620-specific additional modules
-      ../../modules/development/default.nix
-      ../../modules/security/secrets.nix
-      ../../modules/secrets/api-keys.nix
-      ../../modules/containers/docker.nix
-      ../../modules/scrcpy/default.nix
-      ../../modules/system/logging.nix
-    ];
+    # P620-specific additional modules
+    ../../modules/development/default.nix
+    ../../modules/security/secrets.nix
+    ../../modules/secrets/api-keys.nix
+    ../../modules/containers/docker.nix
+    ../../modules/scrcpy/default.nix
+    ../../modules/system/logging.nix
+  ];
   # Consolidated networking configuration
   networking = {
     # Set hostname from variables
@@ -152,6 +150,23 @@ in
         verifySsl = true;
       };
     };
+    # Enable Atlassian MCP server for Jira and Confluence integration
+    atlassian = {
+      enable = true;
+      mode = "cloud";
+      jira = {
+        enable = true;
+        url = "https://synecloud.atlassian.net";
+        username = "olaf.krasicki-freund@calitii.com";
+        tokenFile = config.age.secrets."api-jira-token".path;
+      };
+      confluence = {
+        enable = true;
+        url = "https://synecloud.atlassian.net/wiki";
+        username = "olaf.krasicki-freund@calitii.com";
+        tokenFile = config.age.secrets."api-confluence-token".path;
+      };
+    };
     # Enable LinkedIn MCP server for professional networking
     # NOTE: Disabled until secret is created (see docs/LINKEDIN-MCP.md)
     # To enable: ./scripts/manage-secrets.sh create api-linkedin-cookie
@@ -191,7 +206,10 @@ in
     maxAuthTries = 3;
     enableFail2Ban = true;
     enableKeyOnlyAccess = true;
-    trustedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ];
+    trustedNetworks = [
+      "192.168.1.0/24"
+      "10.0.0.0/8"
+    ];
   };
 
   # AI production dashboard and load testing removed - were non-functional services consuming resources
@@ -390,28 +408,35 @@ in
   };
 
   # Create system users for all host users + gitlab-runner
-  users.users = (lib.genAttrs hostUsers (username: {
-    isNormalUser = true;
-    description = "User ${username}";
-    extraGroups = [ "wheel" "networkmanager" "render" ];
-    shell = pkgs.zsh;
-    # Only use secret-managed password if the secret exists
-    hashedPasswordFile =
-      lib.mkIf
-        (config.modules.security.secrets.enable
-          && builtins.hasAttr "user-password-${username}" config.age.secrets)
+  users.users =
+    (lib.genAttrs hostUsers (username: {
+      isNormalUser = true;
+      description = "User ${username}";
+      extraGroups = [
+        "wheel"
+        "networkmanager"
+        "render"
+      ];
+      shell = pkgs.zsh;
+      # Only use secret-managed password if the secret exists
+      hashedPasswordFile = lib.mkIf
+        (
+          config.modules.security.secrets.enable
+          && builtins.hasAttr "user-password-${username}" config.age.secrets
+        )
         config.age.secrets."user-password-${username}".path;
-  })) // {
-    # GitLab Runner user (for manual runner registration)
-    gitlab-runner = {
-      isSystemUser = true;
-      group = "gitlab-runner";
-      home = "/var/lib/gitlab-runner";
-      createHome = true;
-      description = "GitLab Runner user";
-      extraGroups = [ "docker" ];
+    }))
+    // {
+      # GitLab Runner user (for manual runner registration)
+      gitlab-runner = {
+        isSystemUser = true;
+        group = "gitlab-runner";
+        home = "/var/lib/gitlab-runner";
+        createHome = true;
+        description = "GitLab Runner user";
+        extraGroups = [ "docker" ];
+      };
     };
-  };
   users.groups.gitlab-runner = { };
 
   # Remove duplicate user configuration - use the one above that handles all hostUsers
@@ -521,7 +546,10 @@ in
   # GitLab Runner systemd service (outside services block)
   systemd.services.gitlab-runner = {
     description = "GitLab Runner";
-    after = [ "network.target" "docker.service" ];
+    after = [
+      "network.target"
+      "docker.service"
+    ];
     wants = [ "docker.service" ];
     wantedBy = [ "multi-user.target" ];
 
@@ -539,7 +567,10 @@ in
       NoNewPrivileges = true;
       ProtectSystem = "strict";
       ProtectHome = true;
-      ReadWritePaths = [ "/var/lib/gitlab-runner" "/etc/gitlab-runner" ];
+      ReadWritePaths = [
+        "/var/lib/gitlab-runner"
+        "/etc/gitlab-runner"
+      ];
 
       # Resource limits
       MemoryMax = "4G";
@@ -598,9 +629,12 @@ in
 
   # File systems
   fileSystems."/mnt/media" = {
-    device = "192.168.1.127:/mnt/media";
+    device = "p510.lan:/mnt/media";
     fsType = "nfs";
-    options = [ "x-systemd.automount" "noauto" ];
+    options = [
+      "x-systemd.automount"
+      "noauto"
+    ];
   };
 
   # Consolidated systemd configuration
@@ -687,8 +721,8 @@ in
     (_final: prev: {
       gnome-shell = prev.gnome-shell.overrideAttrs (oldAttrs: {
         patches = builtins.filter
-          (patch:
-            !(builtins.match ".*shell_remove_dark_mode.*" (toString patch) != null)
+          (
+            patch: !(builtins.match ".*shell_remove_dark_mode.*" (toString patch) != null)
           )
           (oldAttrs.patches or [ ]);
       });
