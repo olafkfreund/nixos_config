@@ -10,6 +10,7 @@
   browser-mcp = pkgs.callPackage ./browser-mcp { nodejs = pkgs.nodejs_24; };
   mpris-album-art = pkgs.callPackage ./mpris-album-art { };
   weather-popup = pkgs.callPackage ./weather-popup { };
+  cosmic-ext-applet-music-player = pkgs.callPackage ./cosmic-applets/music-player { };
   # gemini-cli temporarily disabled due to npm deps hash issue
   # Nixpkgs version 0.22.4 also has build issues, mark as broken
   gemini-cli = pkgs.gemini-cli.overrideAttrs (old: {
