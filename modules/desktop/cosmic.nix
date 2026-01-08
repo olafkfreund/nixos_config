@@ -39,6 +39,12 @@ in
       default = true;
       description = "Enable Tailscale management applet for COSMIC panel. Requires Tailscale to be installed and users to have operator privileges.";
     };
+
+    enableNextMeetingApplet = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Enable next meeting calendar applet for COSMIC panel. Shows upcoming meetings with one-click join for video calls. Requires Evolution Data Server.";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -147,7 +153,15 @@ in
         ]
         ++ optional cfg.enableTailscaleApplet
           # Tailscale VPN management applet (wrapped for proper Wayland library loading)
-          (wrapCosmicApp "gui-scale-applet" pkgs.customPkgs.cosmic-ext-applet-tailscale);
+          (wrapCosmicApp "gui-scale-applet" pkgs.customPkgs.cosmic-ext-applet-tailscale)
+        ++ optional cfg.enableNextMeetingApplet
+          # Next meeting calendar applet (wrapped for proper Wayland library loading)
+          (wrapCosmicApp "cosmic-next-meeting" pkgs.customPkgs.cosmic-ext-applet-next-meeting)
+        ++ optionals cfg.enableNextMeetingApplet [
+          # Evolution Data Server for calendar access
+          pkgs.evolution-data-server
+          pkgs.gnome-online-accounts # For Google Calendar integration
+        ];
 
       # COSMIC-specific environment variables
       sessionVariables = {
