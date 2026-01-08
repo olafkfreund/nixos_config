@@ -241,6 +241,7 @@ in
   environment.sessionVariables.GSETTINGS_SCHEMA_DIR = "${pkgs.gdm}/share/gsettings-schemas/gdm-${pkgs.gdm.version}/glib-2.0/schemas";
 
   # Add minimal GNOME packages for login screen functionality
+  # Note: gnome-remote-desktop schemas will be automatically included via services.gnome config
   environment.systemPackages = with pkgs; [
     gdm # Provides the Gdm-1.0 typelib required by GNOME Shell
     gnome-control-center # Provides login-screen schema
