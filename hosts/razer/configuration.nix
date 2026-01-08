@@ -62,9 +62,10 @@ in
     useNetworkd = false;
 
     # Set custom nameservers as fallback
-    nameservers = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
+    nameservers = [ "1.1.1.1" "8.8.8.8" ];
 
-    # Firewall configuration for remote desktop moved to features.gnome-remote-desktop
+    # Firewall configuration for headless remote desktop
+    firewall.allowedTCPPorts = [ 3389 ]; # RDP port for gnome-remote-desktop-headless
   };
 
   # Tailscale VPN using built-in NixOS service
@@ -119,8 +120,9 @@ in
       enableReadyNotifications = true;
     };
 
+    # GNOME Remote Desktop disabled - using headless service instead
     gnome-remote-desktop = {
-      enable = true;
+      enable = false;
     };
 
     virtualization = {
@@ -358,6 +360,7 @@ in
       cosmic-ext-applet-weather
       # Remote desktop
       rustdesk-flutter
+      gnome-remote-desktop # For headless RDP service
 
       # Power management (from power.nix)
       cpupower-gui # GUI for CPU frequency scaling

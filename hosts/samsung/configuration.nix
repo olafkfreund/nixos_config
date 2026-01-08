@@ -57,7 +57,7 @@ in
     useNetworkd = false;
 
     # Set custom nameservers as fallback
-    nameservers = [ "192.168.1.222" "1.1.1.1" "8.8.8.8" ];
+    nameservers = [ "1.1.1.1" "8.8.8.8" ];
 
     # Firewall configuration for remote desktop moved to features.gnome-remote-desktop
   };
