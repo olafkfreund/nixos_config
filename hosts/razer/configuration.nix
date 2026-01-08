@@ -353,6 +353,11 @@ in
       # qwen-code disabled due to npm registry network errors (HTTP/2 framing layer issue)
       # (callPackage ../../home/development/qwen-code/default.nix { })
       nix-doc # Interactive Nix documentation tool
+      # COSMIC desktop extensions
+      cosmic-ext-applet-external-monitor-brightness
+      cosmic-ext-applet-weather
+      # Remote desktop
+      rustdesk-flutter
 
       # Power management (from power.nix)
       cpupower-gui # GUI for CPU frequency scaling

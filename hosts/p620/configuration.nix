@@ -620,6 +620,11 @@ in
     vim
     wally-cli
     nix-doc # Interactive Nix documentation tool
+    # COSMIC desktop extensions
+    cosmic-ext-applet-external-monitor-brightness
+    cosmic-ext-applet-weather
+    # Remote desktop
+    rustdesk-flutter
     # Qt theme control tools for Stylix
     libsForQt5.qt5ct
     kdePackages.qt6ct

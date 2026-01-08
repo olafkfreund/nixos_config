@@ -357,6 +357,12 @@ in
 
     # Login manager
     tuigreet
+
+    # COSMIC desktop extensions
+    cosmic-ext-applet-external-monitor-brightness
+    cosmic-ext-applet-weather
+    # Remote desktop
+    rustdesk-flutter
   ];
 
   # Docker configuration
