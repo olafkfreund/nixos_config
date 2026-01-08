@@ -157,6 +157,12 @@
     "d /mnt/media/audiobookshelf 0755 olafkfreund users -"
   ];
 
+  # Fix Overseerr to bind to all interfaces, not just Tailscale
+  systemd.services.overseerr.environment.HOST = "0.0.0.0";
+
+  # Fix AudioBookshelf to bind to all interfaces, not just Tailscale
+  systemd.services.audiobookshelf.environment.HOST = "0.0.0.0";
+
   networking.firewall.allowedTCPPorts = [
     2049 # NFS server
     4000 # NFS status daemon
