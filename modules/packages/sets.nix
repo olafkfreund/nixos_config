@@ -86,7 +86,7 @@
     nix = with pkgs; [
       nil
       nixd
-      nixfmt-rfc-style
+      nixfmt
       nix-tree
       nix-diff
       nix-index

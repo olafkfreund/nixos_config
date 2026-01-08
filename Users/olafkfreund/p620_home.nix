@@ -233,10 +233,6 @@
       "--process-per-site"
       "--max_old_space_size=4096"
       "--memory-pressure-off"
-
-      # Fix zygote/sandbox error
-      "--no-zygote"
-      "--no-sandbox"
     ];
   };
 

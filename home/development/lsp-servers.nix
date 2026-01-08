@@ -96,7 +96,7 @@ with lib;
       # Nix formatters
       alejandra
       nixpkgs-fmt
-      nixfmt-rfc-style
+      nixfmt
       deadnix
       statix
 
