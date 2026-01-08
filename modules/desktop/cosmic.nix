@@ -33,6 +33,12 @@ in
       default = false;
       description = "Disable cosmic-osd (on-screen display) to work around polkit agent crashes";
     };
+
+    enableTailscaleApplet = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Enable Tailscale management applet for COSMIC panel. Requires Tailscale to be installed and users to have operator privileges.";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -138,7 +144,10 @@ in
 
           # Development/Design tools
           cosmic-design-demo # Design system demo
-        ];
+        ]
+        ++ optional cfg.enableTailscaleApplet
+          # Tailscale VPN management applet (wrapped for proper Wayland library loading)
+          (wrapCosmicApp "gui-scale-applet" pkgs.customPkgs.cosmic-ext-applet-tailscale);
 
       # COSMIC-specific environment variables
       sessionVariables = {
@@ -198,6 +207,27 @@ in
 
     # Systemd configuration for COSMIC
     systemd = {
+      # Configure Tailscale operator privileges for GUI applet
+      services.tailscale-operator-setup = mkIf cfg.enableTailscaleApplet {
+        description = "Configure Tailscale operator for COSMIC GUI applet";
+        after = [ "tailscaled.service" ];
+        wants = [ "tailscaled.service" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
+        script = ''
+          # Configure operator privileges for all users in the users group
+          for user in $(getent group users | cut -d: -f4 | tr ',' ' '); do
+            if id "$user" >/dev/null 2>&1; then
+              echo "Setting Tailscale operator privileges for $user"
+              ${pkgs.tailscale}/bin/tailscale set --operator="$user" 2>/dev/null || true
+            fi
+          done
+        '';
+      };
+
       # Workaround for cosmic-osd polkit agent crashes
       user.services.cosmic-osd-blocker = mkIf cfg.disableOsd {
         description = "Block cosmic-osd from starting (workaround for polkit crashes)";

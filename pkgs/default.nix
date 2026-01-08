@@ -24,4 +24,7 @@
   awscli2 = pkgs.awscli2.overrideAttrs (_oldAttrs: {
     doCheck = false; # Disable tests - 44 tests failing in wizard/test_app.py
   });
+
+  # COSMIC applets
+  cosmic-ext-applet-tailscale = pkgs.callPackage ./cosmic-applets/tailscale { };
 }
