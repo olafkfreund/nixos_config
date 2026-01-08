@@ -2,6 +2,7 @@
 # This reduces redundant package declarations across modules
 { pkgs
 , pkgs-stable
+, mcp-nixos-pkg
 , ...
 }: {
   # Core system packages - always needed
@@ -227,11 +228,9 @@
   ];
 
   # AI and MCP (Model Context Protocol) servers
-  mcp = with pkgs; [
+  mcp = (with pkgs; [
     # Core MCP servers - recommended for all systems
     playwright-mcp # Browser automation for AI agents
-    # Temporarily disabled - fastmcp version conflict with mcp 1.25.0
-    # mcp-nixos # NixOS package and option queries
     github-mcp-server # GitHub integration
     chatmcp # AI chat client (already in use)
 
@@ -245,5 +244,8 @@
 
     # Utility MCP servers
     mcp-proxy # Proxy for stdio <-> SSE conversion
+  ]) ++ [
+    # From flakes (v2.1.0 - conflict resolved)
+    mcp-nixos-pkg # NixOS package and option queries
   ];
 }

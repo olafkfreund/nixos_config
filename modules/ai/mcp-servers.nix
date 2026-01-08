@@ -1,7 +1,7 @@
 # MCP (Model Context Protocol) Servers Module
 # Provides AI agents with standardized tool access
 # Compliant with NIXOS-ANTI-PATTERNS.md
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, mcp-nixos-pkg, ... }:
 let
   cfg = config.features.ai.mcp;
 
@@ -204,28 +204,29 @@ in
   config = lib.mkIf cfg.enable {
     environment = {
       # Always include core MCP servers when enabled
-      systemPackages = with pkgs;
+      systemPackages = (with pkgs;
         # Core MCP servers (essential for AI-assisted development)
         [
           playwright-mcp # Browser automation
           playwright-driver.browsers # NixOS-compatible Playwright browsers
-          # Temporarily disabled - fastmcp version conflict with mcp 1.25.0
-          # mcp-nixos # NixOS package/option queries
           github-mcp-server # GitHub integration
           chatmcp # AI chat client
-        ]
+        ])
+      ++ [
+        mcp-nixos-pkg # NixOS package/option queries (v2.1.0 from flake - conflict resolved)
+      ]
 
-        # Optional MCP servers based on configuration
-        ++ lib.optionals (cfg.servers.browsermcp or cfg.enableAll) [ customPkgs.browser-mcp ]
-        ++ lib.optionals (cfg.servers.grafana or cfg.enableAll) [ mcp-grafana ]
-        ++ lib.optionals (cfg.servers.kubernetes or cfg.enableAll) [ mcp-k8s-go ]
-        ++ lib.optionals (cfg.servers.terraform or cfg.enableAll) [ terraform-mcp-server ]
-        ++ lib.optionals (cfg.servers.gitea or cfg.enableAll) [ gitea-mcp-server ]
-        ++ lib.optionals (cfg.servers.proxy or cfg.enableAll) [ mcp-proxy ]
-        ++ lib.optionals ((cfg.obsidian.enable or cfg.enableAll) && cfg.obsidian.implementation == "zero-dependency") [ customPkgs.obsidian-mcp ]
-        ++ lib.optionals ((cfg.obsidian.enable or cfg.enableAll) && cfg.obsidian.implementation == "rest-api") [ customPkgs.obsidian-mcp-rest ]
-        ++ lib.optionals (cfg.linkedin.enable or cfg.enableAll) [ customPkgs.linkedin-mcp ]
-        ++ lib.optionals (cfg.atlassian.enable or cfg.enableAll) [ customPkgs.atlassian-mcp ];
+      # Optional MCP servers based on configuration
+      ++ lib.optionals (cfg.servers.browsermcp or cfg.enableAll) [ pkgs.customPkgs.browser-mcp ]
+      ++ lib.optionals (cfg.servers.grafana or cfg.enableAll) [ pkgs.mcp-grafana ]
+      ++ lib.optionals (cfg.servers.kubernetes or cfg.enableAll) [ pkgs.mcp-k8s-go ]
+      ++ lib.optionals (cfg.servers.terraform or cfg.enableAll) [ pkgs.terraform-mcp-server ]
+      ++ lib.optionals (cfg.servers.gitea or cfg.enableAll) [ pkgs.gitea-mcp-server ]
+      ++ lib.optionals (cfg.servers.proxy or cfg.enableAll) [ pkgs.mcp-proxy ]
+      ++ lib.optionals ((cfg.obsidian.enable or cfg.enableAll) && cfg.obsidian.implementation == "zero-dependency") [ pkgs.customPkgs.obsidian-mcp ]
+      ++ lib.optionals ((cfg.obsidian.enable or cfg.enableAll) && cfg.obsidian.implementation == "rest-api") [ pkgs.customPkgs.obsidian-mcp-rest ]
+      ++ lib.optionals (cfg.linkedin.enable or cfg.enableAll) [ pkgs.customPkgs.linkedin-mcp ]
+      ++ lib.optionals (cfg.atlassian.enable or cfg.enableAll) [ pkgs.customPkgs.atlassian-mcp ];
 
       # NixOS-specific Playwright environment variables
       # These are required because Playwright expects browsers in ~/.cache/ms-playwright
@@ -244,8 +245,7 @@ in
         - playwright-mcp: Browser automation for AI agents
         - github-mcp-server: GitHub repository integration
         - chatmcp: AI chat client with MCP support
-
-        Note: mcp-nixos temporarily disabled due to version conflict
+        - mcp-nixos: NixOS packages and configuration options queries
 
         Optional Servers (Configured):
         ${lib.optionalString (cfg.servers.browsermcp or cfg.enableAll) "- browser-mcp: Browser automation with privacy (requires Chrome extension)"}
