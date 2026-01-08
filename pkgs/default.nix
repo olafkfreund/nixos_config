@@ -28,4 +28,5 @@
   # COSMIC applets
   cosmic-ext-applet-tailscale = pkgs.callPackage ./cosmic-applets/tailscale { };
   cosmic-ext-applet-next-meeting = pkgs.callPackage ./cosmic-applets/next-meeting { };
+  cosmic-ext-applet-music-player = pkgs.callPackage ./cosmic-applets/music-player { };
 }
