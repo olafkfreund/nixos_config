@@ -157,6 +157,12 @@
     "d /mnt/media/audiobookshelf 0755 olafkfreund users -"
   ];
 
+  # Ensure media services start before Tailscale Serve to prevent port conflicts
+  systemd.services.tailscale-serve = {
+    after = [ "overseerr.service" "audiobookshelf.service" ];
+    wants = [ "overseerr.service" "audiobookshelf.service" ];
+  };
+
   networking.firewall.allowedTCPPorts = [
     2049 # NFS server
     4000 # NFS status daemon
