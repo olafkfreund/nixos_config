@@ -38,5 +38,8 @@ _: {
 
     # Citrix Workspace for remote access
     ./citrix-workspace.nix
+
+    # MCP servers for Claude Desktop
+    ./rescreenshot-mcp.nix
   ];
 }

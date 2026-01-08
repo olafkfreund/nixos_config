@@ -345,6 +345,14 @@ in
     acceptLicense = true; # Accept Citrix EULA for client project work
   };
 
+  # MCP screenshot server for Claude Desktop
+  services.rescreenshot-mcp = {
+    enable = true;
+    user = vars.username;
+    logLevel = "info";
+    autoConfigureClaudeDesktop = true;
+  };
+
   # AI service-level configuration (for ai.ollama module options)
   ai.ollama = {
     enableRag = false; # Temporarily disabled due to ChromaDB 1.0.12 startup bug

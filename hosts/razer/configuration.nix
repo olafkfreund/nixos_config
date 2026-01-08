@@ -223,6 +223,14 @@ in
     acceptLicense = true; # Accept Citrix EULA for client project work
   };
 
+  # MCP screenshot server for Claude Desktop
+  services.rescreenshot-mcp = {
+    enable = true;
+    user = vars.username;
+    logLevel = "info";
+    autoConfigureClaudeDesktop = true;
+  };
+
   # Enable NixOS package monitoring tools
   tools.nixpkgs-monitors = {
     enable = true;

@@ -82,6 +82,14 @@ in
     enableScreencast = true;
   };
 
+  # MCP screenshot server for Claude Desktop
+  services.rescreenshot-mcp = {
+    enable = true;
+    user = vars.username;
+    logLevel = "info";
+    autoConfigureClaudeDesktop = true;
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {
