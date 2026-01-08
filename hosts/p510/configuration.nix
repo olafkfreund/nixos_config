@@ -25,7 +25,7 @@ in
       ./nixos/memory.nix
       ../common/nixos/hosts.nix
       ./nixos/plex.nix
-      # ./flaresolverr.nix  # Temporarily disabled due to xvfbwrapper Python 3.13 build error
+      ./flaresolverr.nix # Re-enabled: Testing fix for xvfbwrapper Python 3.13 build error
 
       # P510-specific server modules (media server)
       ../../modules/development/default.nix
