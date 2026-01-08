@@ -1,12 +1,13 @@
 # Intel Integrated Graphics Hardware Profile
 # For hosts: samsung, dex5550
 # Provides Intel-specific GPU configurations and environment variables
+# Uses modesetting driver for modern Intel GPUs (12th gen and newer)
 
 # No parameters needed - pure data structure
 {
-  gpu = "intel";
+  gpu = "modesetting";
   acceleration = "vaapi"; # Intel video acceleration
-  videoDrivers = [ "intel" ];
+  videoDrivers = [ "modesetting" ];
 
   # Intel-specific environment variables
   extraEnvironment = {

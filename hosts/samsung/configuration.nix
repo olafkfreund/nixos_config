@@ -101,6 +101,13 @@ in
       nodejs = true;
     };
 
+    # Enable Claude Code hooks for desktop notifications
+    claude-hooks = {
+      enable = true;
+      enablePermissionNotifications = true;
+      enableReadyNotifications = true;
+    };
+
     gnome-remote-desktop = {
       enable = true;
     };
@@ -137,6 +144,53 @@ in
       enable = true;
       ollama = false; # Intel GPU - no local inference
       gemini-cli = true;
+      claude-desktop = true; # Enable Claude Desktop GUI with MCP server support
+
+      # Enable MCP (Model Context Protocol) servers for AI integration
+      mcp = {
+        enable = true;
+        # Enable Obsidian MCP server for knowledge base access
+        obsidian = {
+          enable = true;
+          implementation = "rest-api"; # Use REST API mode for full CRUD operations
+          vaultPath = "/home/olafkfreund/Documents/Caliti"; # Used for zero-dependency mode
+          restApi = {
+            apiKeyFile = config.age.secrets."obsidian-api-key".path;
+            host = "localhost";
+            port = 27123;
+            verifySsl = true;
+          };
+        };
+        # Enable Atlassian MCP server for Jira and Confluence integration
+        atlassian = {
+          enable = true;
+          mode = "cloud"; # Atlassian Cloud mode
+          jira = {
+            enable = true;
+            url = "https://synecloud.atlassian.net";
+            username = "olaf.krasicki-freund@calitii.com";
+            tokenFile = config.age.secrets."api-jira-token".path;
+          };
+          confluence = {
+            enable = true;
+            url = "https://synecloud.atlassian.net/wiki";
+            username = "olaf.krasicki-freund@calitii.com";
+            tokenFile = config.age.secrets."api-confluence-token".path;
+          };
+        };
+        # Enable LinkedIn MCP server for professional networking
+        # NOTE: Disabled until secret is created (see docs/LINKEDIN-MCP.md)
+        # To enable: ./scripts/manage-secrets.sh create api-linkedin-cookie
+        linkedin = {
+          enable = false; # TODO: Enable after creating secret
+          cookieFile = config.age.secrets."api-linkedin-cookie".path;
+        };
+        # Enable additional MCP servers
+        servers = {
+          browsermcp = true; # Browser automation with privacy
+          terraform = true; # Infrastructure as Code support
+        };
+      };
     };
 
     programs = {
