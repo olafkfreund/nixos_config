@@ -245,6 +245,7 @@ in
     gdm # Provides the Gdm-1.0 typelib required by GNOME Shell
     gnome-control-center # Provides login-screen schema
     gnome-settings-daemon # Additional GNOME schemas
+    gnome-remote-desktop # RDP and VNC remote access
     # Qt theme control tools for Stylix
     libsForQt5.qt5ct
     kdePackages.qt6ct
