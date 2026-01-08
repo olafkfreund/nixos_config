@@ -3,6 +3,13 @@
 , ...
 }: {
   services = {
+    # Overseerr - Request management and media discovery for Plex
+    overseerr = {
+      enable = true;
+      port = 5055;
+      openFirewall = true;
+      package = pkgs-unstable.overseerr;
+    };
     plex = {
       enable = true;
       user = "olafkfreund";
@@ -60,6 +67,16 @@
       package = pkgs-unstable.lidarr;
     };
 
+    audiobookshelf = {
+      enable = true;
+      user = "olafkfreund";
+      group = "users";
+      port = 13378;
+      host = "0.0.0.0";
+      dataDir = "audiobookshelf"; # Relative path under /var/lib
+      package = pkgs-unstable.audiobookshelf;
+    };
+
     transmission = {
       enable = true;
       user = "olafkfreund";
@@ -84,12 +101,12 @@
       package = pkgs-unstable.prowlarr;
     };
 
-    jackett = {
-      enable = true;
-      user = "olafkfreund";
-      dataDir = "/mnt/media/jackett";
-      package = pkgs-unstable.jackett;
-    };
+    # jackett = {
+    #   enable = true;
+    #   user = "olafkfreund";
+    #   dataDir = "/mnt/media/jackett";
+    #   package = pkgs-unstable.jackett;
+    # };
 
     nfs.server = {
       enable = true;
@@ -127,13 +144,17 @@
   };
 
   systemd.tmpfiles.rules = [
-    "d /mnt/media/jackett 0755 olafkfreund users -"
+    # "d /mnt/media/jackett 0755 olafkfreund users -"  # Removed - no longer in use
     "d /mnt/media/prowlarr 0755 olafkfreund users -"
     "d /mnt/media/nzbget 0755 olafkfreund users -"
     "d /mnt/media/nzbget/intermediate 0755 olafkfreund users -"
     "d /mnt/media/nzbget/queue 0755 olafkfreund users -"
     "d /mnt/media/nzbget/tmp 0755 olafkfreund users -"
     "d /mnt/media/Media/Downloads 0755 olafkfreund users -"
+    # AudioBookshelf directories
+    "d /mnt/media/Media/Audiobooks 0755 olafkfreund users -"
+    "d /mnt/media/Media/Podcasts 0755 olafkfreund users -"
+    "d /mnt/media/audiobookshelf 0755 olafkfreund users -"
   ];
 
   networking.firewall.allowedTCPPorts = [
@@ -146,8 +167,9 @@
     8181 # Tautulli
     9103 # NZBGet-exporter
     9104 # Plex-exporter
-    9117 # Jackett
+    # 9117 # Jackett (removed - no longer in use)
     9696 # Prowlarr
+    13378 # AudioBookshelf
   ];
   networking.firewall.allowedUDPPorts = [
     111 # RPC portmapper

@@ -45,8 +45,14 @@
         # Lidarr (music)
         ${pkgs.tailscale}/bin/tailscale serve --bg --https=8686 --set-path=/lidarr http://localhost:8686
 
-        # Jackett (torrent indexer)
-        ${pkgs.tailscale}/bin/tailscale serve --bg --https=9117 --set-path=/jackett http://localhost:9117
+        # AudioBookshelf (audiobooks and podcasts)
+        ${pkgs.tailscale}/bin/tailscale serve --bg --https=13378 --set-path=/audiobookshelf http://localhost:13378
+
+        # Overseerr (request management for Plex)
+        ${pkgs.tailscale}/bin/tailscale serve --bg --https=5055 --set-path=/overseerr http://localhost:5055
+
+        # Jackett removed - no longer in use
+        # ${pkgs.tailscale}/bin/tailscale serve --bg --https=9117 --set-path=/jackett http://localhost:9117
 
         echo "Tailscale Serve configured for all media services"
       '';
