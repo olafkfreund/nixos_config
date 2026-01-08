@@ -283,6 +283,9 @@ in
 
   # Hardware and service specific configurations
   services = {
+    # Explicitly disable gnome-remote-desktop system service (using headless instead)
+    gnome.gnome-remote-desktop.enable = lib.mkForce false;
+
     playerctld.enable = true;
     fwupd.enable = true;
     # ollama.package = pkgs.ollama-cuda; # Disabled - Ollama not needed on Razer laptop
