@@ -1,3 +1,7 @@
+---
+context: fork
+---
+
 # Security Patrol Agent
 
 > **Proactive Security Monitoring and Hardening for NixOS Infrastructure**

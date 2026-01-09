@@ -1,3 +1,7 @@
+---
+context: fork
+---
+
 # Deployment Coordinator Agent
 
 > **Intelligent Multi-Host Deployment Orchestration for NixOS Infrastructure**
@@ -139,23 +143,22 @@ Overall: 2/3 complete | Elapsed: 1m 35s | ETA: 45s
 Failure Scenarios:
 
 1. Build Failure (pre-deployment):
-   Action: Stop deployment, no rollback needed
-   Impact: No systems affected
+  Action: Stop deployment, no rollback needed
+  Impact: No systems affected
 
 2. Single Host Failure (during deployment):
-   Action: Rollback failed host only
-   Decision: Continue with other hosts or abort all
+  Action: Rollback failed host only
+  Decision: Continue with other hosts or abort all
 
 3. Service Failure (post-deployment):
-   Action: Automatic rollback if critical service fails
-   Monitoring: Check service health for 60s
+  Action: Automatic rollback if critical service fails
+  Monitoring: Check service health for 60s
 
 4. Multiple Host Failure:
-   Action: Halt deployment, rollback all deployed
-   Notification: Alert user of widespread issue
+  Action: Halt deployment, rollback all deployed
+  Notification: Alert user of widespread issue
 
-Rollback Execution:
-  sudo nixos-rebuild switch --rollback
+Rollback Execution: sudo nixos-rebuild switch --rollback
   Verify service health
   Report rollback status
 ```
@@ -223,31 +226,31 @@ Failure Action: Automatic rollback
 
 ```yaml
 1. Blue-Green Deployment:
-   - Build new generation
-   - Test in isolated environment
-   - Switch atomically
-   - Keep old generation for instant rollback
+  - Build new generation
+  - Test in isolated environment
+  - Switch atomically
+  - Keep old generation for instant rollback
 
 2. Canary Deployment:
-   - Deploy to one host first (canary)
-   - Monitor for 5 minutes
-   - If healthy, deploy to remaining hosts
-   - If issues, rollback canary
+  - Deploy to one host first (canary)
+  - Monitor for 5 minutes
+  - If healthy, deploy to remaining hosts
+  - If issues, rollback canary
 
 3. Rolling Deployment:
-   - Deploy hosts sequentially with validation
-   - Stop on first failure
-   - Maintain service availability
+  - Deploy hosts sequentially with validation
+  - Stop on first failure
+  - Maintain service availability
 
 4. Parallel Deployment:
-   - Deploy all hosts simultaneously
-   - Fastest but higher risk
-   - Best for independent hosts
+  - Deploy all hosts simultaneously
+  - Fastest but higher risk
+  - Best for independent hosts
 
 5. Smart Deployment (DEFAULT):
-   - Automatic strategy selection
-   - Based on changes and dependencies
-   - Balances speed and safety
+  - Automatic strategy selection
+  - Based on changes and dependencies
+  - Balances speed and safety
 ```
 
 ## Workflow
@@ -307,51 +310,60 @@ Failure Action: Automatic rollback
 
 ```markdown
 # Deployment Execution: 4 hosts
+
 Started: 2025-01-15 15:30:00
 
 ## Pre-Flight Checks ✅
+
 - Configuration syntax: PASSED (all hosts)
 - Build tests: PASSED (4/4 hosts)
 - SSH connectivity: PASSED (p620, razer, samsung)
 - Disk space: PASSED (all >20GB free)
 
 ## Phase 1: Infrastructure (1 host)
+
 🔄 p620 (monitoring server)
-  - Building generation 246... ✅ (45s)
-  - Deploying via SSH... ✅ (20s)
-  - Switching generation... ✅ (5s)
-  - Validating services... ✅ (15s)
-    - prometheus: active ✅
-    - grafana: active ✅
-    - alertmanager: active ✅
-  - Generation: 245 → 246
-  - Status: ✅ DEPLOYED (1m 25s)
+
+- Building generation 246... ✅ (45s)
+- Deploying via SSH... ✅ (20s)
+- Switching generation... ✅ (5s)
+- Validating services... ✅ (15s)
+  - prometheus: active ✅
+  - grafana: active ✅
+  - alertmanager: active ✅
+- Generation: 245 → 246
+- Status: ✅ DEPLOYED (1m 25s)
 
 ## Phase 2: Client Systems (3 hosts, parallel)
+
 🔄 p510 (media server)
-  - Status: ⏭️ SKIPPED (no configuration changes)
+
+- Status: ⏭️ SKIPPED (no configuration changes)
 
 🔄 razer (mobile)
-  - Building generation 156... ✅ (55s)
-  - Deploying via SSH... ✅ (18s)
-  - Switching generation... ✅ (6s)
-  - Validating services... ✅ (12s)
-    - node-exporter: active ✅
-    - systemd-exporter: active ✅
-  - Generation: 155 → 156
-  - Status: ✅ DEPLOYED (1m 31s)
+
+- Building generation 156... ✅ (55s)
+- Deploying via SSH... ✅ (18s)
+- Switching generation... ✅ (6s)
+- Validating services... ✅ (12s)
+  - node-exporter: active ✅
+  - systemd-exporter: active ✅
+- Generation: 155 → 156
+- Status: ✅ DEPLOYED (1m 31s)
 
 🔄 samsung (mobile)
-  - Building generation 190... ✅ (50s)
-  - Deploying via SSH... ✅ (17s)
-  - Switching generation... ✅ (5s)
-  - Validating services... ✅ (10s)
-    - node-exporter: active ✅
-    - systemd-exporter: active ✅
-  - Generation: 189 → 190
-  - Status: ✅ DEPLOYED (1m 22s)
+
+- Building generation 190... ✅ (50s)
+- Deploying via SSH... ✅ (17s)
+- Switching generation... ✅ (5s)
+- Validating services... ✅ (10s)
+  - node-exporter: active ✅
+  - systemd-exporter: active ✅
+- Generation: 189 → 190
+- Status: ✅ DEPLOYED (1m 22s)
 
 ## Deployment Summary
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Total Time: 2m 56s
 Hosts Deployed: 3/4 (p510 skipped)
@@ -360,6 +372,7 @@ Rollbacks: 0
 Strategy: Smart (parallel phase 2)
 
 ## Next Steps
+
 - Monitor services: http://p620:3001 (Grafana)
 - Review logs: journalctl -u SERVICE
 - Verify metrics: curl http://p620:9090 (Prometheus)

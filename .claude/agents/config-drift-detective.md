@@ -1,3 +1,7 @@
+---
+context: fork
+---
+
 # Config Drift Detective Agent
 
 > **Configuration Drift Detection and Declarative State Enforcement**
@@ -88,40 +92,40 @@ State Comparison Categories:
 Imperative Change Detection:
 
 1. nix-env Usage:
-   Command history:
-     - nix-env -iA nixpkgs.spotify (2025-01-14 10:23)
-     - nix-env -iA nixpkgs.discord (2025-01-13 15:45)
+  Command history:
+    - nix-env -iA nixpkgs.spotify (2025-01-14 10:23)
+    - nix-env -iA nixpkgs.discord (2025-01-13 15:45)
 
-   Issue: Packages installed imperatively
-   Impact: Not tracked in configuration
-   Fix: Add to user packages in configuration.nix
+  Issue: Packages installed imperatively
+  Impact: Not tracked in configuration
+  Fix: Add to user packages in configuration.nix
 
 2. systemctl Modifications:
-   Manual changes:
-     - systemctl enable nginx.service (2025-01-12 08:30)
-     - systemctl mask bluetooth.service (2025-01-10 14:20)
+  Manual changes:
+    - systemctl enable nginx.service (2025-01-12 08:30)
+    - systemctl mask bluetooth.service (2025-01-10 14:20)
 
-   Issue: Service state changed manually
-   Impact: Overridden on next nixos-rebuild
-   Fix: Declare in configuration.nix
+  Issue: Service state changed manually
+  Impact: Overridden on next nixos-rebuild
+  Fix: Declare in configuration.nix
 
 3. Direct File Edits:
-   Modified files:
-     - /etc/hosts (2025-01-15 09:15)
-     - /etc/resolv.conf (2025-01-14 16:40)
+  Modified files:
+    - /etc/hosts (2025-01-15 09:15)
+    - /etc/resolv.conf (2025-01-14 16:40)
 
-   Issue: System files edited directly
-   Impact: Lost on next generation switch
-   Fix: Use networking.extraHosts and networking.nameservers
+  Issue: System files edited directly
+  Impact: Lost on next generation switch
+  Fix: Use networking.extraHosts and networking.nameservers
 
 4. User/Group Changes:
-   Manual commands:
-     - usermod -aG video olafkfreund (2025-01-11 11:30)
-     - groupadd developers (2025-01-09 13:45)
+  Manual commands:
+    - usermod -aG video olafkfreund (2025-01-11 11:30)
+    - groupadd developers (2025-01-09 13:45)
 
-   Issue: User/group management outside NixOS
-   Impact: Not reproducible
-   Fix: Declare in users.users.* configuration
+  Issue: User/group management outside NixOS
+  Impact: Not reproducible
+  Fix: Declare in users.users.* configuration
 ```
 
 ### 3. Configuration File Tracking
@@ -180,8 +184,7 @@ Current System Hash:
 
 Drift detected: System hash doesn't match declared config
 
-Possible causes:
-  1. Uncommitted changes applied
+Possible causes: 1. Uncommitted changes applied
   2. Manual system modifications
   3. Out-of-sync with git repository
 
@@ -309,22 +312,22 @@ NFS Mounts:
 Drift Remediation:
 
 1. Auto-Fix (Safe):
-   - Remove imperative packages (nix-env -e)
-   - Reset service states to declared
-   - Remove untracked system files
-   - Rebuild from clean configuration
+  - Remove imperative packages (nix-env -e)
+  - Reset service states to declared
+  - Remove untracked system files
+  - Rebuild from clean configuration
 
 2. Suggest Fix (Review Required):
-   - Add manual changes to configuration
-   - Update declared state to match actual
-   - Document acceptable drift
-   - Create override configuration
+  - Add manual changes to configuration
+  - Update declared state to match actual
+  - Document acceptable drift
+  - Create override configuration
 
 3. Alert Only (Complex):
-   - Major configuration discrepancies
-   - Security-sensitive changes
-   - Multi-host drift patterns
-   - Require manual investigation
+  - Major configuration discrepancies
+  - Security-sensitive changes
+  - Multi-host drift patterns
+  - Require manual investigation
 ```
 
 ## Workflow
@@ -374,8 +377,9 @@ Drift Remediation:
 
 ### Example Drift Report
 
-```markdown
+````markdown
 # Configuration Drift Report
+
 Generated: 2025-01-15 19:00:00
 Host: p620
 
@@ -399,6 +403,7 @@ Recommended Action: Review and remediate
 **Actual State**: Active and listening on 0.0.0.0:80 ⚠️
 
 **Details**:
+
 ```yaml
 Manual Enable:
   Command: systemctl enable nginx.service
@@ -411,11 +416,13 @@ Security Impact:
   - No SSL/TLS configured
   - Listening on all interfaces
 ```
+````
 
 **Risk**: Unauthorized web service exposure
 **Priority**: Fix immediately
 
 **Remediation**:
+
 ```bash
 # Option A: Disable if not needed
 systemctl stop nginx.service
@@ -433,6 +440,7 @@ networking.firewall.allowedTCPPorts = [ 80 443 ];
 ### 2. Imperative Package Installation
 
 **Packages Installed via nix-env**:
+
 ```yaml
 - spotify (2025-01-14 10:23)
 - discord (2025-01-13 15:45)
@@ -443,6 +451,7 @@ networking.firewall.allowedTCPPorts = [ 80 443 ];
 **Impact**: Lost on profile cleanup, not reproducible
 
 **Remediation**:
+
 ```nix
 # Add to users.users.olafkfreund.packages:
 users.users.olafkfreund.packages = with pkgs; [
@@ -458,12 +467,14 @@ nix-env -e spotify discord slack
 ### 3. Uncommitted Configuration Changes
 
 **Modified Files**:
+
 ```yaml
 - hosts/p620/configuration.nix (5 uncommitted changes)
 - modules/features/development.nix (2 uncommitted changes)
 ```
 
 **Uncommitted Changes**:
+
 ```diff
 # hosts/p620/configuration.nix
 + services.ollama.enable = true;
@@ -475,6 +486,7 @@ nix-env -e spotify discord slack
 **Recommendation**: Review and commit
 
 **Remediation**:
+
 ```bash
 # Review changes
 git diff
@@ -497,11 +509,13 @@ git checkout hosts/p620/configuration.nix
 **Actual Groups**: wheel, docker, video ⚠️
 
 **Manual Change**:
+
 ```bash
 usermod -aG video olafkfreund (2025-01-11 11:30)
 ```
 
 **Remediation**:
+
 ```nix
 # Add to configuration.nix:
 users.users.olafkfreund.extraGroups = [
@@ -518,6 +532,7 @@ users.users.olafkfreund.extraGroups = [
 **Size**: 125 lines
 
 **Contents**:
+
 ```nix
 # Local testing overrides
 { config, lib, pkgs, ... }:
@@ -532,6 +547,7 @@ users.users.olafkfreund.extraGroups = [
 **Recommendation**: Review and integrate or delete
 
 **Remediation**:
+
 ```bash
 # Option A: Integrate into main config
 mv /etc/nixos/local-override.nix hosts/p620/testing.nix
@@ -555,6 +571,7 @@ echo "local-override.nix" >> .gitignore
 **Impact**: Reverted on network restart
 
 **Remediation**:
+
 ```nix
 # If router DNS is preferred:
 networking.nameservers = [ "192.168.1.1" ];
@@ -566,6 +583,7 @@ networking.nameservers = [ "192.168.1.1" ];
 ## Drift Summary
 
 **Total Issues**: 12
+
 - CRITICAL: 1 (security exposure)
 - HIGH: 3 (imperative changes)
 - MEDIUM: 5 (configuration inconsistencies)
@@ -578,20 +596,24 @@ networking.nameservers = [ "192.168.1.1" ];
 ## Recommended Actions
 
 ### Immediate (CRITICAL)
+
 1. ✅ Disable nginx or declare properly
 2. ✅ Review security implications
 
 ### Today (HIGH)
+
 3. ✅ Remove imperative packages, add to config
 4. ✅ Commit or discard uncommitted changes
 5. ✅ Review untracked configuration files
 
 ### This Week (MEDIUM)
+
 6. ⏭️ Add video group to user declaration
 7. ⏭️ Clean up local override files
 8. ⏭️ Document acceptable drift
 
 ### Optional (LOW)
+
 9. ⏭️ Fix DNS configuration
 10. ⏭️ Review and update network settings
 
@@ -629,7 +651,8 @@ echo "Safe drift fixes applied. Review HIGH priority issues manually."
 
 **Last Drift Scan**: 2025-01-15 19:00:00
 **Next Scan**: 2025-01-16 19:00:00 (daily)
-```
+
+````
 
 ## Integration with Existing Tools
 
@@ -641,7 +664,7 @@ echo "Safe drift fixes applied. Review HIGH priority issues manually."
 /nix-fix                  # Includes drift checks
 /nix-fix --drift          # Focus on drift only
 /nix-fix --auto-remediate # Auto-fix safe drift
-```
+````
 
 ### With Deployment Coordinator
 
@@ -753,6 +776,7 @@ usermod -aG group user
 **Issue**: Legitimate changes flagged as drift
 
 **Solution**:
+
 ```nix
 # Document acceptable drift
 claude.drift-detective.exceptions = [
@@ -765,6 +789,7 @@ claude.drift-detective.exceptions = [
 **Issue**: Continuous drift detected
 
 **Solution**:
+
 ```bash
 # Identify root cause
 /nix-check-drift --verbose

@@ -1,3 +1,7 @@
+---
+context: fork
+---
+
 # Performance Analyzer Agent
 
 > **Build Time and Evaluation Profiling for NixOS Infrastructure Optimization**
@@ -308,8 +312,9 @@ Dependency Chain Analysis:
 
 ### Example Performance Report
 
-```markdown
+````markdown
 # Performance Analysis Report
+
 Generated: 2025-01-15 16:45:00
 Hosts Analyzed: p620, razer, p510, samsung
 
@@ -327,6 +332,7 @@ Storage Recovery: 50GB (59%)
 ## Build Performance (p620)
 
 ### Current Metrics
+
 - Total build time: 3m 45s
 - Evaluation: 45s (20%)
 - Fetching: 80s (35.6%)
@@ -334,6 +340,7 @@ Storage Recovery: 50GB (59%)
 - Copying: 20s (8.9%)
 
 ### Slowest Components
+
 1. **linux-6.6.1**: 45s
    - Issue: Building kernel from source
    - Fix: Enable binary cache or use prebuilt kernel
@@ -354,13 +361,17 @@ Storage Recovery: 50GB (59%)
 #### 🔴 HIGH IMPACT - Implement Immediately
 
 **1. Enable Kernel Binary Cache**
+
 ```nix
 # configuration.nix
 boot.kernelPackages = pkgs.linuxPackages;  # Use cached kernels
 ```
+````
+
 Impact: -45s (20% faster builds)
 
 **2. Use Binary Packages**
+
 ```nix
 # packages.nix
 - firefox           # 30s build
@@ -369,9 +380,11 @@ Impact: -45s (20% faster builds)
 - vscode            # 25s build
 + vscode-bin        # 3s download
 ```
+
 Impact: -50s (22% faster builds)
 
 **3. Increase Parallel Jobs**
+
 ```nix
 # configuration.nix
 nix.settings = {
@@ -380,11 +393,13 @@ nix.settings = {
   keep-going = true;  # Continue on failures
 };
 ```
+
 Impact: -20s (8.9% faster builds)
 
 #### 🟡 MEDIUM IMPACT - Implement This Week
 
 **4. Optimize Binary Caches**
+
 ```nix
 # configuration.nix
 nix.settings = {
@@ -400,24 +415,29 @@ nix.settings = {
   ];
 };
 ```
+
 Impact: -15s (6.7% faster builds)
 
 **5. Garbage Collection**
+
 ```bash
 # Clean up old generations and unused packages
 nix-collect-garbage --delete-older-than 30d
 nix-store --optimise
 ```
+
 Impact: 50GB disk space recovery
 
 #### 🟢 LOW IMPACT - Nice to Have
 
 **6. Optimize Module Imports**
+
 ```nix
 # Split large modules into smaller focused modules
 # Use explicit imports instead of auto-discovery
 # Cache heavy computations with let expressions
 ```
+
 Impact: -5s evaluation time
 
 ## Evaluation Performance
@@ -425,11 +445,13 @@ Impact: -5s evaluation time
 ### Bottlenecks Detected
 
 **1. Excessive Module Imports (12s)**
+
 - Issue: Loading 141+ modules sequentially
 - Fix: Implement lazy module loading
 - Impact: -8s (67% faster evaluation)
 
 **2. Home Manager Profile Composition (8s)**
+
 - Issue: Complex profile merging
 - Fix: Optimize profile structure
 - Impact: -4s (50% faster evaluation)
@@ -437,16 +459,19 @@ Impact: -5s evaluation time
 ## Resource Utilization
 
 ### CPU
+
 - Current: 75% average utilization
 - Recommendation: Increase max-jobs to 12
 - Expected: 92% utilization (better efficiency)
 
 ### Memory
+
 - Used: 12GB / 32GB (37.5%)
 - Peak: 18GB
 - Status: ✅ Sufficient headroom
 
 ### Disk
+
 - /nix/store: 85GB / 250GB (34%)
 - Recommendation: Run garbage collection
 - Recovery: 50GB available
@@ -454,6 +479,7 @@ Impact: -5s evaluation time
 ## Overall Optimization Plan
 
 ### Phase 1: Quick Wins (15 minutes)
+
 1. Enable kernel binary cache (-45s)
 2. Switch to binary packages (-50s)
 3. Run garbage collection (-50GB)
@@ -461,6 +487,7 @@ Impact: -5s evaluation time
 **Total Impact**: -95s (42% faster), 50GB recovered
 
 ### Phase 2: Configuration (30 minutes)
+
 4. Increase parallel jobs (-20s)
 5. Optimize binary caches (-15s)
 6. Configure automated cleanup
@@ -468,6 +495,7 @@ Impact: -5s evaluation time
 **Total Impact**: -35s additional (15% faster)
 
 ### Phase 3: Deep Optimization (2 hours)
+
 7. Refactor slow modules (-5s eval)
 8. Implement lazy loading (-8s eval)
 9. Optimize dependency chains
@@ -475,6 +503,7 @@ Impact: -5s evaluation time
 **Total Impact**: -13s additional (5.8% faster)
 
 ### Combined Impact
+
 - Build time: 3m 45s → 2m 02s (46% improvement)
 - Evaluation: 45s → 32s (29% improvement)
 - Storage: 85GB → 35GB (59% reduction)
@@ -482,12 +511,14 @@ Impact: -5s evaluation time
 ## Monitoring and Tracking
 
 ### Performance Metrics to Track
+
 - Build time (target: <2m 30s)
 - Evaluation time (target: <30s)
 - Cache hit rate (target: >85%)
 - Store size (target: <60GB)
 
 ### Automated Alerts
+
 - Build time >3 minutes: Investigate
 - Store size >100GB: Run cleanup
 - Cache hit rate <70%: Check cache config
@@ -505,7 +536,8 @@ Impact: -5s evaluation time
 
 **Performance Baseline Updated**: 2025-01-15
 **Next Analysis**: 2025-02-15 (monthly)
-```
+
+````
 
 ## Integration with Existing Tools
 
@@ -519,7 +551,7 @@ Impact: -5s evaluation time
 /nix-optimize --deep       # Deep evaluation analysis
 /nix-optimize --suggest    # Recommendations only
 /nix-optimize --apply      # Auto-apply safe fixes
-```
+````
 
 ### With Justfile Commands
 
@@ -677,6 +709,7 @@ nix build .#package --verbose --show-trace
 **Issue**: Optimization recommendations didn't improve build time
 
 **Solution**:
+
 ```bash
 # Check if changes were applied
 nix show-config | grep -E "max-jobs|cores"
@@ -694,6 +727,7 @@ curl -I http://p620:5000
 **Issue**: Builds failing due to out of memory
 
 **Solution**:
+
 ```nix
 # Reduce parallel jobs
 nix.settings.max-jobs = 4;  # Instead of 12
@@ -707,6 +741,7 @@ nix.settings.cores = 2;     # Balance parallelism
 **Issue**: Garbage collection not reclaiming space
 
 **Solution**:
+
 ```bash
 # Aggressive cleanup
 nix-collect-garbage -d     # Delete all old generations

@@ -1,3 +1,7 @@
+---
+context: fork
+---
+
 # Test Generator Agent
 
 > **Automatic Test Generation for NixOS Configurations and Modules**
@@ -31,35 +35,35 @@ The Test Generator agent automatically creates comprehensive test suites for Nix
 Module Unit Tests:
 
 1. Option Validation Tests:
-   Module: modules/services/prometheus.nix
+  Module: modules/services/prometheus.nix
 
-   Generated Tests:
-     # Test option types
-     - verify_enable_option_is_boolean
-     - verify_port_option_is_integer
-     - verify_retention_option_is_string
+  Generated Tests:
+    # Test option types
+    - verify_enable_option_is_boolean
+    - verify_port_option_is_integer
+    - verify_retention_option_is_string
 
-     # Test option defaults
-     - verify_default_port_is_9090
-     - verify_default_retention_is_30d
-     - verify_service_disabled_by_default
+    # Test option defaults
+    - verify_default_port_is_9090
+    - verify_default_retention_is_30d
+    - verify_service_disabled_by_default
 
-     # Test option constraints
-     - verify_port_in_valid_range
-     - verify_retention_format_valid
+    # Test option constraints
+    - verify_port_in_valid_range
+    - verify_retention_format_valid
 
 2. Service Definition Tests:
-   # Test service configuration
-     - verify_systemd_service_defined
-     - verify_service_has_dynamic_user
-     - verify_service_has_security_hardening
-     - verify_service_dependencies_correct
+  # Test service configuration
+  - verify_systemd_service_defined
+  - verify_service_has_dynamic_user
+  - verify_service_has_security_hardening
+  - verify_service_dependencies_correct
 
 3. Module Isolation Tests:
-   # Test module doesn't affect others
-     - verify_module_loads_without_errors
-     - verify_no_conflicts_with_other_modules
-     - verify_explicit_dependencies_only
+  # Test module doesn't affect others
+  - verify_module_loads_without_errors
+  - verify_no_conflicts_with_other_modules
+  - verify_explicit_dependencies_only
 ```
 
 ### 2. Integration Test Generation
@@ -72,41 +76,41 @@ Module Unit Tests:
 Integration Tests:
 
 1. Host Configuration Tests:
-   Host: p620
+  Host: p620
 
-   Generated Tests:
-     # Build tests
-     - test_p620_builds_successfully
-     - test_p620_no_syntax_errors
-     - test_p620_all_services_defined
+  Generated Tests:
+    # Build tests
+    - test_p620_builds_successfully
+    - test_p620_no_syntax_errors
+    - test_p620_all_services_defined
 
-     # Service interaction tests
-     - test_prometheus_scrapes_node_exporter
-     - test_grafana_connects_to_prometheus
-     - test_alertmanager_receives_alerts
+    # Service interaction tests
+    - test_prometheus_scrapes_node_exporter
+    - test_grafana_connects_to_prometheus
+    - test_alertmanager_receives_alerts
 
-     # Network tests
-     - test_firewall_allows_required_ports
-     - test_tailscale_dns_resolution
-     - test_services_accessible_on_network
+    # Network tests
+    - test_firewall_allows_required_ports
+    - test_tailscale_dns_resolution
+    - test_services_accessible_on_network
 
 2. Multi-Host Tests:
-   Scenario: Monitoring Infrastructure
+  Scenario: Monitoring Infrastructure
 
-   Generated Tests:
-     - test_p620_monitoring_server_running
-     - test_clients_connect_to_p620
-     - test_metrics_flow_end_to_end
-     - test_all_exporters_reachable
+  Generated Tests:
+    - test_p620_monitoring_server_running
+    - test_clients_connect_to_p620
+    - test_metrics_flow_end_to_end
+    - test_all_exporters_reachable
 
 3. Feature Flag Tests:
-   Feature: features.development.enable = true;
+  Feature: features.development.enable = true;
 
-   Generated Tests:
-     - test_development_packages_installed
-     - test_development_services_running
-     - test_language_tools_available
-     - test_dev_shells_functional
+  Generated Tests:
+    - test_development_packages_installed
+    - test_development_services_running
+    - test_language_tools_available
+    - test_dev_shells_functional
 ```
 
 ### 3. Smoke Test Generation
@@ -119,29 +123,29 @@ Integration Tests:
 Deployment Smoke Tests:
 
 1. System Boot Tests:
-   # Generated for each host
-     - test_system_boots_successfully
-     - test_no_failed_services
-     - test_essential_services_running
-     - test_network_connectivity
+  # Generated for each host
+  - test_system_boots_successfully
+  - test_no_failed_services
+  - test_essential_services_running
+  - test_network_connectivity
 
 2. Service Health Tests:
-   Service: prometheus
+  Service: prometheus
 
-   Generated Tests:
-     - test_prometheus_service_active
-     - test_prometheus_port_listening
-     - test_prometheus_api_responds
-     - test_prometheus_targets_up
+  Generated Tests:
+    - test_prometheus_service_active
+    - test_prometheus_port_listening
+    - test_prometheus_api_responds
+    - test_prometheus_targets_up
 
 3. User Environment Tests:
-   User: olafkfreund
+  User: olafkfreund
 
-   Generated Tests:
-     - test_user_can_login
-     - test_user_shell_works
-     - test_user_packages_available
-     - test_user_home_directory_exists
+  Generated Tests:
+    - test_user_can_login
+    - test_user_shell_works
+    - test_user_packages_available
+    - test_user_home_directory_exists
 ```
 
 ### 4. Regression Test Generation
@@ -184,30 +188,28 @@ Based on: Past Issues and Fixes
 Property-Based Tests:
 
 1. Configuration Validity:
-   Property: All valid configurations should build
+  Property: All valid configurations should build
 
-   Generated Test:
-     property_test_config_builds:
-       for config_variant in [minimal, full, custom]:
-         assert builds_successfully(config_variant)
+  Generated Test:
+    property_test_config_builds:
+      for config_variant in [minimal, full, custom]: assert builds_successfully(config_variant)
 
 2. Service Isolation:
-   Property: Disabling a service shouldn't affect others
+  Property: Disabling a service shouldn't affect others
 
-   Generated Test:
-     property_test_service_isolation:
-       for service in all_services:
-         config_without_service = disable(service)
-         assert other_services_still_work(config_without_service)
+  Generated Test:
+    property_test_service_isolation:
+      for service in all_services: config_without_service = disable(service)
+        assert other_services_still_work(config_without_service)
 
 3. Resource Constraints:
-   Property: System should work within resource limits
+  Property: System should work within resource limits
 
-   Generated Test:
-     property_test_resource_limits:
-       for host in [p620, p510, razer, samsung]:
-         assert memory_usage_within_limits(host)
-         assert cpu_usage_reasonable(host)
+  Generated Test:
+    property_test_resource_limits:
+      for host in [p620, p510, razer, samsung]:
+        assert memory_usage_within_limits(host)
+        assert cpu_usage_reasonable(host)
 ```
 
 ### 6. NixOS VM Test Generation
@@ -216,7 +218,7 @@ Property-Based Tests:
 
 **VM test examples**:
 
-```yaml
+````yaml
 NixOS VM Tests:
 
 1. Service Interaction Test:
@@ -261,9 +263,10 @@ NixOS VM Tests:
        grafana.succeed("curl -f http://server:9090/api/v1/targets")
      '';
    })
-   ```
+````
 
 2. Multi-Host Network Test:
+
    ```python
    # Generated test: tests/multi-host-network.nix
    import <nixpkgs/nixos/tests/make-test-python.nix> ({ pkgs, ... }: {
@@ -297,7 +300,8 @@ NixOS VM Tests:
      '';
    })
    ```
-```
+
+````
 
 ### 7. Test Coverage Analysis
 
@@ -342,7 +346,7 @@ Recommendation:
   - Generate tests for 15 high-priority untested features
   - Add VM integration tests for samsung host
   - Create regression tests for recent fixes
-```
+````
 
 ### 8. Automated Test Execution
 
@@ -430,8 +434,9 @@ Test Execution Strategy:
 
 ### Example Test Generation Report
 
-```markdown
+````markdown
 # Test Generation Report
+
 Generated: 2025-01-15 20:00:00
 
 ## Summary
@@ -446,6 +451,7 @@ Estimated Execution Time: 8 minutes
 ### 1. Module Unit Tests (25 tests)
 
 **modules/services/prometheus.nix** (8 tests):
+
 ```nix
 # tests/modules/services/prometheus_test.nix
 { pkgs, lib, ... }:
@@ -475,8 +481,10 @@ Estimated Execution Time: 8 minutes
   };
 }
 ```
+````
 
 **modules/features/development.nix** (12 tests):
+
 - test_python_packages_available
 - test_go_tools_installed
 - test_rust_toolchain_works
@@ -486,6 +494,7 @@ Estimated Execution Time: 8 minutes
 ### 2. Integration Tests (15 tests)
 
 **Host Build Tests** (4 tests):
+
 ```bash
 # tests/integration/host_builds_test.sh
 
@@ -511,6 +520,7 @@ test_samsung_builds() {
 ```
 
 **Service Interaction Tests** (11 tests):
+
 - test_prometheus_grafana_integration
 - test_node_exporter_prometheus_connection
 - test_alertmanager_email_notifications
@@ -519,6 +529,7 @@ test_samsung_builds() {
 ### 3. VM Tests (3 test files)
 
 **tests/vm/monitoring_test.nix**:
+
 ```python
 import <nixpkgs/nixos/tests/make-test-python.nix> ({ pkgs, ... }: {
   name = "monitoring-infrastructure";
@@ -550,6 +561,7 @@ import <nixpkgs/nixos/tests/make-test-python.nix> ({ pkgs, ... }: {
 ### 4. Smoke Tests (2 test scripts)
 
 **tests/smoke/post_deployment_test.sh**:
+
 ```bash
 #!/usr/bin/env bash
 # Post-deployment smoke test
@@ -577,11 +589,13 @@ echo "✅ Smoke tests passed for $HOST"
 ## Test Coverage Improvement
 
 **Before**:
+
 - Modules tested: 85/141 (60%)
 - Hosts tested: 3/4 (75%)
 - Features tested: 30/45 (67%)
 
 **After**:
+
 - Modules tested: 120/141 (85%) ✅ (+25%)
 - Hosts tested: 4/4 (100%) ✅ (+25%)
 - Features tested: 40/45 (89%) ✅ (+22%)
@@ -589,12 +603,14 @@ echo "✅ Smoke tests passed for $HOST"
 ## Usage
 
 ### Run All Tests
+
 ```bash
 just test                # Run all test suites
 just test-parallel       # Run tests in parallel
 ```
 
 ### Run Specific Tests
+
 ```bash
 just test-modules        # Unit tests only
 just test-integration    # Integration tests
@@ -603,6 +619,7 @@ just smoke-test p620     # Smoke test specific host
 ```
 
 ### Coverage Analysis
+
 ```bash
 just test-coverage       # Show coverage report
 just test-coverage-html  # Generate HTML report
@@ -620,7 +637,8 @@ just test-coverage-html  # Generate HTML report
 
 **Tests Generated**: 2025-01-15 20:00:00
 **Next Generation**: On module addition
-```
+
+````
 
 ## Integration with Existing Tools
 
@@ -633,7 +651,7 @@ just test-coverage-html  # Generate HTML report
 /nix-test --generate     # Generate tests only
 /nix-test --module MODULE # Test specific module
 /nix-test --coverage     # Show coverage report
-```
+````
 
 ### With Deployment Coordinator
 
@@ -750,6 +768,7 @@ just smoke-test HOST
 **Issue**: Generated tests don't pass
 
 **Solution**:
+
 ```bash
 # Review failing tests
 just test --verbose
@@ -764,6 +783,7 @@ just test --verbose
 **Issue**: Coverage below threshold
 
 **Solution**:
+
 ```bash
 # Analyze uncovered code
 just test-coverage --detailed

@@ -1,3 +1,7 @@
+---
+context: fork
+---
+
 # Module Refactor Agent
 
 > **Intelligent Code Refactoring and Anti-Pattern Detection for NixOS Modules**
@@ -31,34 +35,34 @@ The Module Refactor agent automatically detects code duplication, anti-patterns,
 Anti-Pattern Categories:
 
 1. mkIf true Pattern (CRITICAL):
-   Pattern: mkIf condition true
-   Fix: Direct boolean assignment
-   Instances: 0 (target achieved ✅)
+  Pattern: mkIf condition true
+  Fix: Direct boolean assignment
+  Instances: 0 (target achieved ✅)
 
 2. Excessive 'with' Usage (HIGH):
-   Pattern: Multiple nested 'with' statements
-   Fix: Explicit imports with limited scope
-   Instances: 15 detected
+  Pattern: Multiple nested 'with' statements
+  Fix: Explicit imports with limited scope
+  Instances: 15 detected
 
 3. Dangerous 'rec' Usage (HIGH):
-   Pattern: rec { ... } with self-reference
-   Fix: Explicit let bindings
-   Instances: 3 detected
+  Pattern: rec { ... } with self-reference
+  Fix: Explicit let bindings
+  Instances: 3 detected
 
 4. Import From Derivation (CRITICAL):
-   Pattern: Evaluation-time builds
-   Fix: Separate evaluation and building
-   Instances: 0 (good! ✅)
+  Pattern: Evaluation-time builds
+  Fix: Separate evaluation and building
+  Instances: 0 (good! ✅)
 
 5. Evaluation-Time Secret Reading (CRITICAL):
-   Pattern: builtins.readFile for secrets
-   Fix: Runtime loading with passwordFile
-   Instances: 0 (secure ✅)
+  Pattern: builtins.readFile for secrets
+  Fix: Runtime loading with passwordFile
+  Instances: 0 (secure ✅)
 
 6. Trivial Function Wrappers (MEDIUM):
-   Pattern: Unnecessary abstraction layers
-   Fix: Direct function calls
-   Instances: 8 detected
+  Pattern: Unnecessary abstraction layers
+  Fix: Direct function calls
+  Instances: 8 detected
 ```
 
 ### 2. Code Duplication Detection
@@ -327,24 +331,24 @@ Build Performance:
 Automated Fixes Available:
 
 1. Critical Fixes (Auto-apply safe):
-   - Remove 'mkIf condition true' (0 instances)
-   - Fix evaluation-time secret reads (0 instances)
-   - Remove Import From Derivation (0 instances)
+  - Remove 'mkIf condition true' (0 instances)
+  - Fix evaluation-time secret reads (0 instances)
+  - Remove Import From Derivation (0 instances)
 
 2. High Priority Fixes (Review recommended):
-   - Reduce excessive 'with' usage (15 instances)
-   - Fix dangerous 'rec' usage (3 instances)
-   - Add missing service hardening (3 instances)
+  - Reduce excessive 'with' usage (15 instances)
+  - Fix dangerous 'rec' usage (3 instances)
+  - Add missing service hardening (3 instances)
 
 3. Code Quality Fixes (Optional):
-   - Remove trivial wrappers (8 instances)
-   - Extract duplicated code (12 patterns)
-   - Improve type definitions (5 instances)
+  - Remove trivial wrappers (8 instances)
+  - Extract duplicated code (12 patterns)
+  - Improve type definitions (5 instances)
 
 4. Organizational Fixes (Manual):
-   - Resolve circular dependencies (2 instances)
-   - Move misplaced modules (3 instances)
-   - Remove unused modules (2 instances)
+  - Resolve circular dependencies (2 instances)
+  - Move misplaced modules (3 instances)
+  - Remove unused modules (2 instances)
 ```
 
 ## Workflow
@@ -400,8 +404,9 @@ Automated Fixes Available:
 
 ### Example Refactoring Report
 
-```markdown
+````markdown
 # Module Refactoring Report
+
 Generated: 2025-01-15 17:15:00
 Modules Analyzed: 141
 
@@ -426,6 +431,7 @@ Effort Required: 2-3 hours
 ### 1. Excessive 'with' Usage (15 instances)
 
 **Example (modules/packages/development.nix:45)**:
+
 ```nix
 # ❌ BEFORE - Unclear variable origins
 with pkgs; with lib; with stdenv;
@@ -437,18 +443,21 @@ let
 in
 buildInputs = [ curl jq python3 ];
 ```
+````
 
 **Impact**: Improved code clarity and maintainability
 **Effort**: 5 minutes per instance
 **Auto-fix**: ✅ Available
 
 **Files affected**:
+
 - modules/packages/development.nix (5 instances)
 - modules/packages/desktop.nix (4 instances)
 - modules/features/gaming.nix (3 instances)
 - modules/features/virtualization.nix (3 instances)
 
 **Fix command**:
+
 ```bash
 /nix-fix --apply excessive-with
 ```
@@ -456,6 +465,7 @@ buildInputs = [ curl jq python3 ];
 ### 2. Dangerous 'rec' Usage (3 instances)
 
 **Example (modules/lib/helpers.nix:23)**:
+
 ```nix
 # ❌ BEFORE - Risk of infinite recursion
 rec {
@@ -481,6 +491,7 @@ in helpers
 ### 3. Missing Service Hardening (3 instances)
 
 **Example (modules/services/legacy-app.nix)**:
+
 ```nix
 # ❌ BEFORE - No security hardening
 systemd.services.legacy-app = {
@@ -508,6 +519,7 @@ systemd.services.legacy-app = {
 **Auto-fix**: ✅ Available
 
 **Services needing hardening**:
+
 - modules/services/legacy-app.nix
 - modules/services/custom-daemon.nix
 - modules/services/testing-service.nix
@@ -538,6 +550,7 @@ systemd.services.SERVICE.serviceConfig = {
 ### 5. Trivial Function Wrappers (8 instances)
 
 **Example (modules/lib/package-helpers.nix:67)**:
+
 ```nix
 # ❌ BEFORE - Unnecessary wrapper
 installPackage = pkg: [ pkg ];
@@ -555,6 +568,7 @@ installPackage = pkg: [ pkg ];
 ### 6. Inconsistent Module Naming
 
 **Modules with non-standard names**:
+
 - modules/misc/temp-fix.nix → modules/fixes/boot-delay.nix
 - modules/old-monitoring.nix → DELETE (deprecated)
 - modules/test.nix → DELETE (test file)
@@ -566,6 +580,7 @@ installPackage = pkg: [ pkg ];
 ## Recommended Fix Sequence
 
 ### Phase 1: Automated Fixes (30 minutes)
+
 ```bash
 # Apply all safe automated fixes
 /nix-fix --apply all-safe
@@ -578,6 +593,7 @@ installPackage = pkg: [ pkg ];
 ```
 
 ### Phase 2: Code Extraction (1 hour)
+
 ```bash
 # Extract systemd hardening pattern
 1. Create lib/systemd-hardening.nix
@@ -586,6 +602,7 @@ installPackage = pkg: [ pkg ];
 ```
 
 ### Phase 3: Organizational Cleanup (30 minutes)
+
 ```bash
 # Rename and remove modules
 1. Rename temp-fix.nix → boot-delay.nix
@@ -595,6 +612,7 @@ installPackage = pkg: [ pkg ];
 ```
 
 ### Phase 4: Validation (30 minutes)
+
 ```bash
 # Verify all changes
 just check-syntax      # Syntax validation
@@ -605,16 +623,19 @@ just validate          # Full validation
 ## Total Impact
 
 **Code Changes**:
+
 - Lines removed: 85
 - Lines added: 35
 - Net reduction: 50 lines (3.5%)
 
 **Quality Improvements**:
+
 - Anti-patterns eliminated: 26 → 0
 - Code duplication: 75% reduction
 - Security coverage: 94% → 100%
 
 **Effort Required**:
+
 - Automated fixes: 30 minutes
 - Manual refactoring: 1.5 hours
 - Testing: 30 minutes
@@ -633,7 +654,8 @@ just validate          # Full validation
 
 **Last Refactoring**: 2025-01-15
 **Next Review**: 2025-02-15 (monthly)
-```
+
+````
 
 ## Integration with Existing Tools
 
@@ -646,7 +668,7 @@ just validate          # Full validation
 /nix-fix --auto          # Auto-apply safe fixes
 /nix-fix --preview       # Preview changes only
 /nix-fix --type=anti-patterns  # Focus on specific issues
-```
+````
 
 ### With `/nix-review` Command
 
@@ -769,6 +791,7 @@ Module Refactor suggests:
 **Issue**: Module-refactor flags correct code as problematic
 
 **Solution**:
+
 ```nix
 # Add exceptions in configuration
 claude.module-refactor.exceptions = [
@@ -781,6 +804,7 @@ claude.module-refactor.exceptions = [
 **Issue**: Applied fixes cause build failures
 
 **Solution**:
+
 ```bash
 # Revert specific fix
 git revert HEAD
@@ -795,6 +819,7 @@ git revert HEAD
 **Issue**: Too many issues to fix at once
 
 **Solution**:
+
 ```bash
 # Prioritize critical issues only
 /nix-fix --priority=critical

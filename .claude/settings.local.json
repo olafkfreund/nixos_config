@@ -237,11 +237,21 @@
       "Bash(ssh-add:*)",
       "Bash(gh auth:*)",
       "Bash(git remote set-url:*)",
-      "Bash(gh ssh-key:*)"
+      "Bash(gh ssh-key:*)",
+      "Bash(* --help)",
+      "Bash(* --version)",
+      "Bash(npm *)",
+      "Bash(git * main)",
+      "Bash(* status)",
+      "Bash(nix *)",
+      "Bash(* install)",
+      "Bash(gh *)",
+      "Bash(* --dry-run)",
+      "Bash(* test)",
+      "Bash(systemctl status *)",
+      "Bash(journalctl -u *)"
     ],
-    "additionalDirectories": [
-      "/"
-    ]
+    "additionalDirectories": ["/"]
   },
   "enableAllProjectMcpServers": false
 }

@@ -183,6 +183,9 @@ with lib; {
         # MCP (Model Context Protocol) Environment Variables
         export OBSIDIAN_VAULT_PATH="$HOME/Documents/Caliti"
 
+        # Claude Code 2.1.2+ Environment Variables
+        export FORCE_AUTOUPDATE_PLUGINS=true  # Force plugin autoupdate even when main autoupdater is disabled
+
         # Modern history with atuin
         if command -v atuin >/dev/null 2>&1; then
           eval "$(atuin init zsh)"

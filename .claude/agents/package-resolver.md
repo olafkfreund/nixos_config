@@ -1,3 +1,7 @@
+---
+context: fork
+---
+
 # Package Resolver Agent
 
 > **Automatic Package Conflict Resolution and Dependency Management**
@@ -125,38 +129,38 @@ Circular Dependencies:
 Version Compatibility:
 
 1. Language Version Mismatch:
-   Package: django
-   Version: 4.2.1
-   Requires: python >= 3.10
+  Package: django
+  Version: 4.2.1
+  Requires: python >= 3.10
 
-   Current Python: 3.9
-   Issue: Version too old
+  Current Python: 3.9
+  Issue: Version too old
 
-   Resolution:
-     # Upgrade Python
-     python = pkgs.python311;
+  Resolution:
+    # Upgrade Python
+    python = pkgs.python311;
 
 2. Library ABI Incompatibility:
-   Package: proprietary-app
-   Linked against: libssl 1.1
+  Package: proprietary-app
+  Linked against: libssl 1.1
 
-   System provides: libssl 3.0
-   Issue: ABI break
+  System provides: libssl 3.0
+  Issue: ABI break
 
-   Resolution:
-     # Provide compat layer
-     LD_LIBRARY_PATH = "${pkgs.openssl_1_1}/lib";
+  Resolution:
+    # Provide compat layer
+    LD_LIBRARY_PATH = "${pkgs.openssl_1_1}/lib";
 
 3. Kernel Module Mismatch:
-   Module: nvidia-driver
-   Version: 535.54.03
-   Kernel: 6.6.1
+  Module: nvidia-driver
+  Version: 535.54.03
+  Kernel: 6.6.1
 
-   Issue: Driver not built for kernel
-   Resolution:
-     # Match kernel and driver versions
-     boot.kernelPackages = pkgs.linuxPackages;
-     hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
+  Issue: Driver not built for kernel
+  Resolution:
+    # Match kernel and driver versions
+    boot.kernelPackages = pkgs.linuxPackages;
+    hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
 ```
 
 ### 4. Package Duplication Detection
@@ -255,9 +259,9 @@ Misplaced System Packages:
   Resolution:
     # Move to user configuration
     users.users.username.packages = [
-      pkgs.firefox
-      pkgs.vscode
-      pkgs.spotify
+    pkgs.firefox
+    pkgs.vscode
+    pkgs.spotify
     ];
 
 Misplaced User Packages:
@@ -267,11 +271,10 @@ Misplaced User Packages:
     - htop (system utility)
 
   Issue: Should be in system packages
-  Resolution:
-    environment.systemPackages = [
-      pkgs.git
-      pkgs.curl
-      pkgs.htop
+  Resolution: environment.systemPackages = [
+    pkgs.git
+    pkgs.curl
+    pkgs.htop
     ];
 
 Best Practice Separation:
@@ -350,22 +353,22 @@ Strategy 5: Binary Substitution
 Automated Fixes:
 
 1. Safe Fixes (Auto-apply):
-   - Remove duplicate packages
-   - Consolidate compatible versions
-   - Fix package placement (system vs user)
-   - Add missing dependencies
+  - Remove duplicate packages
+  - Consolidate compatible versions
+  - Fix package placement (system vs user)
+  - Add missing dependencies
 
 2. Suggested Fixes (User approval):
-   - Change package versions
-   - Modify overlays
-   - Split into dev shells
-   - Use package overrides
+  - Change package versions
+  - Modify overlays
+  - Split into dev shells
+  - Use package overrides
 
 3. Manual Fixes (Complex):
-   - Resolve circular dependencies
-   - Fix ABI incompatibilities
-   - Custom overlay composition
-   - Major version migrations
+  - Resolve circular dependencies
+  - Fix ABI incompatibilities
+  - Custom overlay composition
+  - Major version migrations
 ```
 
 ## Workflow
@@ -415,8 +418,9 @@ Automated Fixes:
 
 ### Example Resolution Report
 
-```markdown
+````markdown
 # Package Conflict Resolution Report
+
 Generated: 2025-01-15 18:00:00
 
 ## Summary
@@ -437,6 +441,7 @@ Manual Review Required: 4
 **Issue**: Multiple incompatible Python versions
 
 **Conflict Details**:
+
 ```yaml
 Versions:
   - python39 (modules/development.nix:45)
@@ -448,8 +453,10 @@ Path conflicts:
   - /bin/python3 → python310
   - python311 shadowed
 ```
+````
 
 **Resolution (RECOMMENDED)**:
+
 ```nix
 # Consolidate to python311
 # modules/development.nix
@@ -464,6 +471,7 @@ Path conflicts:
 ```
 
 **Impact**:
+
 - Removed: python39, python310
 - Added: python311 (single version)
 - Disk space saved: 450MB
@@ -476,6 +484,7 @@ Path conflicts:
 **Issue**: proprietary-app requires old OpenSSL
 
 **Conflict Details**:
+
 ```yaml
 Package: proprietary-app
 Requires: libssl.so.1.1
@@ -485,6 +494,7 @@ Error: "libssl.so.1.1: cannot open shared object file"
 ```
 
 **Resolution**:
+
 ```nix
 # Provide compatibility layer
 nixpkgs.config.permittedInsecurePackages = [
@@ -499,6 +509,7 @@ environment.systemPackages = [
 ```
 
 **Impact**:
+
 - Added: openssl-1.1 (security warning)
 - Recommendation: Contact vendor for libssl 3.0 build
 
@@ -511,6 +522,7 @@ environment.systemPackages = [
 **Issue**: yq command conflict
 
 **Conflict Details**:
+
 ```yaml
 Package: yq
 Versions:
@@ -522,6 +534,7 @@ Last wins: yq-go
 ```
 
 **Resolution**:
+
 ```nix
 # Use explicit naming
 let
@@ -549,9 +562,9 @@ environment.shellAliases = {
 **Issue**: Firefox installed multiple times
 
 **Duplication Details**:
+
 ```yaml
-Instances:
-  1. pkgs.firefox (stable)
+Instances: 1. pkgs.firefox (stable)
   2. pkgs-unstable.firefox (unstable)
   3. firefox-nightly (input)
 
@@ -560,6 +573,7 @@ Wasted space: 550MB (duplicates)
 ```
 
 **Resolution**:
+
 ```nix
 # Use single version (unstable recommended)
 - firefox = pkgs.firefox;
@@ -577,6 +591,7 @@ Wasted space: 550MB (duplicates)
 **Issue**: User applications in system packages
 
 **Misplaced Packages**:
+
 ```yaml
 In environment.systemPackages:
   - firefox (should be user)
@@ -585,6 +600,7 @@ In environment.systemPackages:
 ```
 
 **Resolution**:
+
 ```nix
 # Move to user packages
 users.users.username.packages = [
@@ -599,6 +615,7 @@ users.users.username.packages = [
 ## Resolution Summary
 
 ### Automated Fixes Applied (12)
+
 - Python version consolidation → python311
 - Package name collision resolved (yq)
 - Firefox duplication removed
@@ -606,12 +623,14 @@ users.users.username.packages = [
 - Missing dependencies added (3 packages)
 
 ### Manual Review Required (4)
+
 - OpenSSL compatibility layer (security review)
 - Custom app ABI incompatibility (vendor contact)
 - Overlay composition order (architecture decision)
 - Kernel module version matching (hardware specific)
 
 ### Impact
+
 - Disk space saved: 1.2GB
 - Build time improvement: -45s
 - Conflicts resolved: 12/16 (75%)
@@ -630,7 +649,8 @@ users.users.username.packages = [
 
 **Last Resolution**: 2025-01-15
 **Next Check**: On flake update or package changes
-```
+
+````
 
 ## Integration with Existing Tools
 
@@ -642,7 +662,7 @@ users.users.username.packages = [
 /nix-fix                  # Includes package resolver
 /nix-fix --packages       # Focus on package conflicts
 /nix-fix --auto           # Auto-apply safe package fixes
-```
+````
 
 ### With Module Refactor
 
@@ -719,6 +739,7 @@ nix flake update
 **Issue**: Conflicts remain after resolution
 
 **Solution**:
+
 ```bash
 # Deep analysis
 /nix-fix --packages --verbose --deep
@@ -732,6 +753,7 @@ nix show-config | grep overlays
 **Issue**: Resolved conflicts but build fails
 
 **Solution**:
+
 ```bash
 # Verify resolution applied
 git diff
