@@ -199,6 +199,29 @@ in
         };
       };
     };
+
+    whatsapp = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable WhatsApp MCP server for AI-assisted messaging";
+      };
+
+      dataDir = lib.mkOption {
+        type = lib.types.path;
+        default = "/var/lib/whatsapp-mcp";
+        description = ''
+          Directory for WhatsApp session database and message history.
+          Managed by systemd StateDirectory for proper permissions.
+        '';
+      };
+
+      enableVoiceMessages = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable FFmpeg for voice message conversion to .ogg Opus format";
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -226,7 +249,8 @@ in
       ++ lib.optionals ((cfg.obsidian.enable or cfg.enableAll) && cfg.obsidian.implementation == "zero-dependency") [ pkgs.customPkgs.obsidian-mcp ]
       ++ lib.optionals ((cfg.obsidian.enable or cfg.enableAll) && cfg.obsidian.implementation == "rest-api") [ pkgs.customPkgs.obsidian-mcp-rest ]
       ++ lib.optionals (cfg.linkedin.enable or cfg.enableAll) [ pkgs.customPkgs.linkedin-mcp ]
-      ++ lib.optionals (cfg.atlassian.enable or cfg.enableAll) [ pkgs.customPkgs.atlassian-mcp ];
+      ++ lib.optionals (cfg.atlassian.enable or cfg.enableAll) [ pkgs.customPkgs.atlassian-mcp ]
+      ++ lib.optionals (cfg.whatsapp.enable or cfg.enableAll) [ pkgs.customPkgs.whatsapp-mcp ];
 
       # NixOS-specific Playwright environment variables
       # These are required because Playwright expects browsers in ~/.cache/ms-playwright
@@ -252,6 +276,7 @@ in
         ${lib.optionalString (cfg.obsidian.enable or cfg.enableAll) "- obsidian-mcp: Obsidian vault knowledge base integration"}
         ${lib.optionalString (cfg.linkedin.enable or cfg.enableAll) "- linkedin-mcp: LinkedIn professional networking and job search"}
         ${lib.optionalString (cfg.atlassian.enable or cfg.enableAll) "- atlassian-mcp: Jira and Confluence integration (project management and documentation)"}
+        ${lib.optionalString (cfg.whatsapp.enable or cfg.enableAll) "- whatsapp-mcp: WhatsApp messaging integration with AI-assisted interaction"}
         ${lib.optionalString (cfg.servers.grafana or cfg.enableAll) "- mcp-grafana: Grafana dashboard and metrics integration"}
         ${lib.optionalString (cfg.servers.kubernetes or cfg.enableAll) "- mcp-k8s-go: Kubernetes cluster management"}
         ${lib.optionalString (cfg.servers.terraform or cfg.enableAll) "- terraform-mcp-server: Infrastructure as Code automation"}

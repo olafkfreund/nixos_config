@@ -101,6 +101,25 @@ in
               description = "LinkedIn professional networking and job search";
             };
           })
+          # WhatsApp MCP server
+          // (lib.optionalAttrs (mcpCfg.whatsapp.enable or false) {
+            whatsapp = {
+              command = "${pkgs.writeShellScript "whatsapp-mcp-wrapper" ''
+                # Ensure WhatsApp bridge service is running
+                if ! systemctl is-active --quiet whatsapp-bridge; then
+                  echo "ERROR: WhatsApp bridge service is not running"
+                  echo "Start service: systemctl start whatsapp-bridge"
+                  echo "View QR code for authentication: journalctl -u whatsapp-bridge -f"
+                  exit 1
+                fi
+
+                # Launch MCP server
+                exec ${pkgs.customPkgs.whatsapp-mcp.whatsappMcpServer}/bin/whatsapp-mcp-server "$@"
+              ''}";
+              args = [ ];
+              description = "WhatsApp messaging integration (requires bridge service)";
+            };
+          })
           # Atlassian MCP server (Jira and Confluence)
           // (lib.optionalAttrs atlassianEnabled (
             let
@@ -203,6 +222,22 @@ in
       - Job searches with keyword/location filters
       - Personalized job recommendations
       - Note: Cookie expires ~30 days, requires periodic refresh
+      ''}
+
+      ${lib.optionalString (mcpCfg.whatsapp.enable or false) ''
+      ### WhatsApp
+      - AI-assisted WhatsApp messaging
+      - Send/receive messages via natural language
+      - Query message history and conversations
+      - Group chat support
+      - Media file support${lib.optionalString mcpCfg.whatsapp.enableVoiceMessages " (voice messages enabled)"}
+      - Requires: whatsapp-bridge service running
+      - Authentication: QR code scan (expires ~20 days)
+      - View QR: journalctl -u whatsapp-bridge -f
+      - Examples:
+        - "Send a message to John saying I'll be late"
+        - "Find messages from Sarah containing 'meeting'"
+        - "Send document.pdf to the team group"
       ''}
 
       ${lib.optionalString atlassianEnabled ''
