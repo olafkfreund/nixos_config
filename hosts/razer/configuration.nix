@@ -233,6 +233,15 @@ in
       disableOsd = true; # Workaround for polkit agent crashes in COSMIC beta
     };
 
+    # COSMIC Package Updater Applet - NixOS update notifications
+    desktop.cosmic-applet-package-updater = {
+      enable = true;
+      autoCheck = true;
+      checkIntervalMinutes = 60;
+      nixosMode = "auto"; # Auto-detect flakes vs channels mode
+      enablePasswordlessChecks = false; # Require password for security
+    };
+
     # Microsoft Intune Company Portal (custom package with version control)
     intune = {
       enable = true;

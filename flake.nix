@@ -115,6 +115,12 @@
       url = "github:jacopone/antigravity-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # COSMIC Desktop applets
+    cosmic-package-updater = {
+      url = "github:olafkfreund/cosmic-applet-package-updater";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
