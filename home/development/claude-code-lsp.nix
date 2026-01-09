@@ -176,32 +176,9 @@ in
             fi
           '';
 
-          # Populate settings.local.json with MCP server configuration
-          # This file is NOT managed by Home Manager and won't be overwritten
-          # Claude Code merges settings.local.json with settings.json at runtime
-          claudeCodeMcpSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-            MCP_TEMPLATE="${../development/claude-code-mcp-config.json}"
-            SETTINGS_LOCAL="$HOME/.claude/settings.local.json"
-
-            # Only initialize if settings.local.json doesn't exist or doesn't have mcpServers
-            if [ ! -f "$SETTINGS_LOCAL" ] || ! ${pkgs.jq}/bin/jq -e '.mcpServers' "$SETTINGS_LOCAL" >/dev/null 2>&1; then
-              $DRY_RUN_CMD echo "Initializing Claude Code MCP server configuration..."
-
-              # Merge existing settings.local.json with MCP template
-              if [ -f "$SETTINGS_LOCAL" ]; then
-                $DRY_RUN_CMD ${pkgs.jq}/bin/jq -s '.[0] * .[1]' \
-                  "$SETTINGS_LOCAL" \
-                  "$MCP_TEMPLATE" \
-                  > "$SETTINGS_LOCAL.tmp" && \
-                mv "$SETTINGS_LOCAL.tmp" "$SETTINGS_LOCAL"
-              else
-                # No existing settings.local.json, copy template
-                $DRY_RUN_CMD cp "$MCP_TEMPLATE" "$SETTINGS_LOCAL"
-              fi
-
-              $DRY_RUN_CMD echo "MCP servers configured in $SETTINGS_LOCAL"
-            fi
-          '';
+          # MCP server configuration is now handled by claude-code-mcp.nix module
+          # The module generates ~/.claude/settings.local.json automatically
+          # This provides Nix-based conditional MCP server configuration
         };
       };
     })

@@ -174,6 +174,23 @@ in
             verifySsl = true;
           };
         };
+        # Enable Atlassian MCP server for Jira and Confluence integration
+        atlassian = {
+          enable = true;
+          mode = "cloud"; # Atlassian Cloud mode
+          jira = {
+            enable = true;
+            url = "https://synecloud.atlassian.net";
+            username = "olaf.krasicki-freund@calitii.com";
+            tokenFile = config.age.secrets."api-jira-token".path;
+          };
+          confluence = {
+            enable = true;
+            url = "https://synecloud.atlassian.net/wiki";
+            username = "olaf.krasicki-freund@calitii.com";
+            tokenFile = config.age.secrets."api-confluence-token".path;
+          };
+        };
         # Enable LinkedIn MCP server for professional networking
         # NOTE: Disabled until secret is created (see docs/LINKEDIN-MCP.md)
         # To enable: ./scripts/manage-secrets.sh create api-linkedin-cookie

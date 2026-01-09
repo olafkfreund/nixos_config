@@ -28,6 +28,7 @@ _: {
     # LSP servers for Claude Code and other editors
     ./lsp-servers.nix
     ./claude-code-lsp.nix
+    ./claude-code-mcp.nix # Claude Code MCP server configuration
 
     # Development workflow enhancements (conflicts resolved)
     ./workflow.nix
