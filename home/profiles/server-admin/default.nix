@@ -40,7 +40,6 @@
       cursor = false; # GUI editor - disabled
       neovim = true; # CLI editor - essential for server admin
       vscode = false; # GUI editor - disabled
-      zed = false; # GUI editor - disabled
       windsurf = false; # GUI editor - disabled
     };
 

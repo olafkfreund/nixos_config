@@ -26,7 +26,6 @@ in
         cursor.enable = cfg.editors.cursor;
         neovim.enable = cfg.editors.neovim;
         vscode.enable = cfg.editors.vscode;
-        zed-editor.enable = cfg.editors.zed;
         windsurf.enable = cfg.editors.windsurf;
       };
     })

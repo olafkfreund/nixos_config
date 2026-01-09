@@ -42,7 +42,6 @@
       cursor = false; # Resource-intensive AI editor
       neovim = true; # Essential terminal editor
       vscode = true; # Primary GUI editor (essential for development)
-      zed = true; # Lightweight modern editor
       windsurf = false; # Web-based, less suitable for mobile
     };
 

@@ -6,7 +6,6 @@ _: {
     ./vscode.nix
     ./nvim.nix
     ./emacs.nix
-    ./zed.nix
     ./cursor-code.nix
     ./windsurf.nix
 

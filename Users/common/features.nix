@@ -15,7 +15,6 @@ with lib; {
       cursor = mkEnableOption "Enable Cursor editor";
       neovim = mkEnableOption "Enable Neovim editor";
       vscode = mkEnableOption "Enable VS Code editor";
-      zed = mkEnableOption "Enable Zed editor";
       windsurf = mkEnableOption "Enable Windsurf editor";
     };
 

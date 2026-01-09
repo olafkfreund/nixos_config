@@ -41,7 +41,6 @@
       cursor = true; # AI-powered coding
       neovim = true; # Terminal-based editing
       vscode = true; # Primary IDE
-      zed = true; # Modern editor
       windsurf = true; # Web-based development
     };
 

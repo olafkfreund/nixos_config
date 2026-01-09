@@ -29,7 +29,6 @@
       cursor = true; # AI-powered editing
       neovim = true; # Terminal editor
       vscode = true; # Primary GUI editor
-      zed = true; # Modern editor
       windsurf = true; # Web-based editor
     };
 

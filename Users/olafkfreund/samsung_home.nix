@@ -67,7 +67,6 @@
       cursor = true;
       neovim = true;
       vscode = true;
-      zed = true;
       windsurf = true;
     };
 
