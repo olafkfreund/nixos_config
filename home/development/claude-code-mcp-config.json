@@ -52,6 +52,14 @@
       },
       "description": "Atlassian Jira and Confluence integration - issue tracking, project management, and documentation (cloud/self-hosted)"
     },
+    "whatsapp": {
+      "command": "sh",
+      "args": [
+        "-c",
+        "systemctl is-active --quiet whatsapp-bridge || (echo 'ERROR: WhatsApp bridge not running. Start: systemctl start whatsapp-bridge, Auth: journalctl -u whatsapp-bridge -f' >&2 && exit 1); whatsapp-mcp-server"
+      ],
+      "description": "WhatsApp messaging integration - AI-assisted WhatsApp send/receive, message history queries (requires bridge service + QR auth)"
+    },
     "grafana": {
       "command": "mcp-grafana",
       "args": [

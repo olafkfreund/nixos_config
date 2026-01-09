@@ -24,6 +24,9 @@ _: {
     # Network stability modules (service merged into main module)
     ./network-stability.nix
 
+    # AI/MCP services
+    ./whatsapp-bridge.nix
+
     # CI/CD services
     ./gitlab-runner.nix
 

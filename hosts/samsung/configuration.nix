@@ -193,6 +193,11 @@ in
           enable = false; # TODO: Enable after creating secret
           cookieFile = config.age.secrets."api-linkedin-cookie".path;
         };
+        # Enable WhatsApp MCP server for AI-assisted messaging
+        whatsapp = {
+          enable = true;
+          enableVoiceMessages = true; # Enable FFmpeg for voice message conversion
+        };
         # Enable additional MCP servers
         servers = {
           browsermcp = true; # Browser automation with privacy

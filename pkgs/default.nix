@@ -8,6 +8,7 @@
   obsidian-mcp = pkgs.callPackage ./obsidian-mcp { nodejs = pkgs.nodejs_24; };
   obsidian-mcp-rest = pkgs.callPackage ./obsidian-mcp-rest { nodejs = pkgs.nodejs_24; };
   browser-mcp = pkgs.callPackage ./browser-mcp { nodejs = pkgs.nodejs_24; };
+  whatsapp-mcp = pkgs.callPackage ./whatsapp-mcp { };
   mpris-album-art = pkgs.callPackage ./mpris-album-art { };
   weather-popup = pkgs.callPackage ./weather-popup { };
   # gemini-cli temporarily disabled due to npm deps hash issue
