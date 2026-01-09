@@ -48,14 +48,12 @@ in
 
     enableMusicPlayerApplet = mkOption {
       type = types.bool;
-      default = false; # Disabled by default due to upstream Cargo.lock duplicate entries issue
+      default = true; # Now enabled by default - Cargo.lock issue resolved with Crane
       description = ''
         Enable music player applet for COSMIC panel with MPRIS control.
 
-        Note: Currently disabled by default due to upstream Cargo.lock duplicate entries issue.
-        See: https://github.com/olafkfreund/nixos_config/issues/128
-
         Provides play/pause, track navigation, album artwork, and volume control for MPRIS-compatible music players.
+        Works with Spotify, VLC, MPD, and other MPRIS-compatible applications.
       '';
     };
   };
@@ -177,7 +175,7 @@ in
         ]
         ++ optional cfg.enableMusicPlayerApplet
           # Music player applet with MPRIS control (wrapped for proper Wayland library loading)
-          (wrapCosmicApp "cosmic-ext-applet-music-player" pkgs.customPkgs.cosmic-ext-applet-music-player);
+          (wrapCosmicApp "cosmic-ext-applet-music-player" pkgs.cosmic-ext-applet-music-player);
 
       # COSMIC-specific environment variables
       sessionVariables = {

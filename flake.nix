@@ -121,6 +121,10 @@
       url = "github:olafkfreund/cosmic-applet-package-updater";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    cosmic-music-player = {
+      url = "github:olafkfreund/cosmic-applet-music-player";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -204,6 +208,10 @@
         # Claude Desktop from k3d3/claude-desktop-linux-flake (FHS version with MCP server support)
         (_final: prev: {
           claude-desktop-linux = inputs.claude-desktop-linux.packages.${prev.stdenv.hostPlatform.system}.claude-desktop-with-fhs;
+        })
+        # COSMIC applets from flakes
+        (_final: prev: {
+          cosmic-ext-applet-music-player = inputs.cosmic-music-player.packages.${prev.stdenv.hostPlatform.system}.default;
         })
         # Custom package: glim - GitLab CI/CD TUI
         (final: _prev: {
