@@ -363,6 +363,8 @@ in
     cosmic-ext-applet-weather
     # Remote desktop
     rustdesk-flutter
+    # Messaging applications
+    karere # GTK4 WhatsApp client
   ];
 
   # Docker configuration

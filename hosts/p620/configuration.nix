@@ -625,6 +625,8 @@ in
     cosmic-ext-applet-weather
     # Remote desktop
     rustdesk-flutter
+    # Messaging applications
+    karere # GTK4 WhatsApp client
     # Qt theme control tools for Stylix
     libsForQt5.qt5ct
     kdePackages.qt6ct

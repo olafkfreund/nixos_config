@@ -364,6 +364,8 @@ in
       # Remote desktop
       rustdesk-flutter
       gnome-remote-desktop # For headless RDP service
+      # Messaging applications
+      karere # GTK4 WhatsApp client
 
       # Power management (from power.nix)
       cpupower-gui # GUI for CPU frequency scaling
