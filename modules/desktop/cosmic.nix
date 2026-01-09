@@ -243,17 +243,18 @@ in
         after = [ "tailscaled.service" ];
         wants = [ "tailscaled.service" ];
         wantedBy = [ "multi-user.target" ];
+        path = with pkgs; [ getent coreutils gawk ];
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
         };
         script = ''
-          # Configure operator privileges for all users in the users group
-          for user in $(getent group users | cut -d: -f4 | tr ',' ' '); do
-            if id "$user" >/dev/null 2>&1; then
-              echo "Setting Tailscale operator privileges for $user"
-              ${pkgs.tailscale}/bin/tailscale set --operator="$user" 2>/dev/null || true
-            fi
+          # Configure operator privileges for all human users (UID 1000-29999)
+          # In NixOS, users typically have primary GID 100 (users group) but aren't listed in group members
+          # Excludes nixbld users (30000+) and system users (<1000)
+          for user in $(${pkgs.getent}/bin/getent passwd | ${pkgs.gawk}/bin/awk -F: '$3 >= 1000 && $3 < 30000 {print $1}'); do
+            echo "Setting Tailscale operator privileges for $user"
+            ${pkgs.tailscale}/bin/tailscale set --operator="$user" 2>/dev/null || true
           done
         '';
       };

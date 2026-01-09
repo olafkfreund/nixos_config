@@ -44,7 +44,12 @@ rustPlatform.buildRustPackage rec {
     runHook preInstall
 
     install -Dm0755 target/${stdenv.hostPlatform.rust.cargoShortTarget}/release/${pname} $out/bin/${pname}
+
+    # Install and patch desktop file with correct Exec path for NixOS
     install -Dm0644 data/com.bhh32.GUIScaleApplet.desktop $out/share/applications/com.bhh32.GUIScaleApplet.desktop
+    substituteInPlace $out/share/applications/com.bhh32.GUIScaleApplet.desktop \
+      --replace-fail "Exec=/usr/bin/gui-scale-applet" "Exec=$out/bin/${pname}"
+
     install -Dm0644 data/com.github.bhh32.GUIScaleApplet.metainfo.xml $out/share/metainfo/com.github.bhh32.GUIScaleApplet.metainfo.xml
     install -Dm0644 data/icons/scalable/apps/tailscale-icon.png $out/share/icons/hicolor/scalable/status/tailscale-icon.png
 
