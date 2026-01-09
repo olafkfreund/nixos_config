@@ -125,6 +125,10 @@
       url = "github:olafkfreund/cosmic-applet-music-player";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    cosmic-applet-spotify = {
+      url = "github:nomoth/cosmic-applet-spotify";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -212,6 +216,7 @@
         # COSMIC applets from flakes
         (_final: prev: {
           cosmic-ext-applet-music-player = inputs.cosmic-music-player.packages.${prev.stdenv.hostPlatform.system}.default;
+          cosmic-applet-spotify = inputs.cosmic-applet-spotify.packages.${prev.stdenv.hostPlatform.system}.default;
         })
         # Custom package: glim - GitLab CI/CD TUI
         (final: _prev: {

@@ -56,6 +56,18 @@ in
         Works with Spotify, VLC, MPD, and other MPRIS-compatible applications.
       '';
     };
+
+    enableSpotifyApplet = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Enable Spotify applet for COSMIC panel.
+
+        Displays currently playing Spotify track information (artist and title) in the system panel.
+        Shows playback status indicators (playing, paused, stopped) with 500ms refresh intervals.
+        Requires Spotify with MPRIS support on Wayland.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -175,7 +187,10 @@ in
         ]
         ++ optional cfg.enableMusicPlayerApplet
           # Music player applet with MPRIS control (wrapped for proper Wayland library loading)
-          (wrapCosmicApp "cosmic-ext-applet-music-player" pkgs.cosmic-ext-applet-music-player);
+          (wrapCosmicApp "cosmic-ext-applet-music-player" pkgs.cosmic-ext-applet-music-player)
+        ++ optional cfg.enableSpotifyApplet
+          # Spotify applet for displaying currently playing track information (wrapped for proper Wayland library loading)
+          (wrapCosmicApp "cosmic-applet-spotify" pkgs.cosmic-applet-spotify);
 
       # COSMIC-specific environment variables
       sessionVariables = {
