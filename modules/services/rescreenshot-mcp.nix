@@ -97,19 +97,8 @@ in
       '';
     };
 
-    # Add a user service to ensure portal is running
-    systemd.user.services.xdg-desktop-portal = {
-      description = "Portal service for desktop integration";
-      wantedBy = [ "default.target" ];
-      after = [ "graphical-session.target" ];
-
-      serviceConfig = {
-        Type = "dbus";
-        BusName = "org.freedesktop.portal.Desktop";
-        ExecStart = "${pkgs.xdg-desktop-portal}/libexec/xdg-desktop-portal";
-        Restart = "on-failure";
-      };
-    };
+    # Note: xdg-desktop-portal service is automatically managed by xdg.portal.enable
+    # No need for manual systemd service definition
 
     # Security hardening for any potential helper services
     # (Currently rescreenshot-mcp doesn't need a daemon, but following best practices)
