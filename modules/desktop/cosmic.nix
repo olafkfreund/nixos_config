@@ -68,6 +68,17 @@ in
         Requires Spotify with MPRIS support on Wayland.
       '';
     };
+
+    enableForecastApp = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Enable Forecast weather application for COSMIC desktop.
+
+        Weather app written in Rust and libcosmic providing weather information display.
+        Integrates with COSMIC desktop environment for native experience.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -190,7 +201,10 @@ in
           (wrapCosmicApp "cosmic-ext-applet-music-player" pkgs.cosmic-ext-applet-music-player)
         ++ optional cfg.enableSpotifyApplet
           # Spotify applet for displaying currently playing track information (wrapped for proper Wayland library loading)
-          (wrapCosmicApp "cosmic-applet-spotify" pkgs.cosmic-applet-spotify);
+          (wrapCosmicApp "cosmic-applet-spotify" pkgs.cosmic-applet-spotify)
+        ++ optional cfg.enableForecastApp
+          # Forecast weather application for COSMIC desktop
+          pkgs.forecast;
 
       # COSMIC-specific environment variables
       sessionVariables = {
