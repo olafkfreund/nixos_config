@@ -41,11 +41,15 @@ in
         # Remove any existing backup files that would cause conflicts
         rm -f "$HOME/.config/Code/User/settings.json.backup"
         rm -f "$HOME/.config/Code/User/settings.json.hm-backup"
+        rm -f "$HOME/.config/Code/User/mcp.json.backup"
+        rm -f "$HOME/.config/Code/User/mcp.json.hm-backup"
         rm -f "$HOME/.claude/settings.json.backup"
         rm -f "$HOME/.claude/settings.json.hm-backup"
       '';
 
-      # Initialize VS Code settings and MCP files as mutable (remove any Home Manager symlinks)
+      # Initialize VS Code settings and MCP files as mutable
+      # This runs AFTER home-manager creates symlinks (writeBoundary)
+      # We remove any symlinks created by programs.vscode.profiles to keep files mutable
       activation.vscodeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         SETTINGS_DIR="$HOME/.config/Code/User"
         SETTINGS_FILE="$SETTINGS_DIR/settings.json"
@@ -66,7 +70,7 @@ in
           rm "$SETTINGS_DIR/settings.json.hm-backup"
         fi
 
-        # Handle settings.json
+        # Handle settings.json - convert symlink to mutable file
         if [ -L "$SETTINGS_FILE" ]; then
           echo "Removing Home Manager symlink for VS Code settings..."
           rm "$SETTINGS_FILE"
@@ -81,7 +85,7 @@ in
           echo "VS Code settings.json file exists and is already mutable - leaving it alone."
         fi
 
-        # Handle mcp.json
+        # Handle mcp.json - convert symlink to mutable file
         if [ -L "$MCP_FILE" ]; then
           echo "Removing Home Manager symlink for MCP configuration..."
           rm "$MCP_FILE"
@@ -105,9 +109,10 @@ in
       # Enable mutable extensions and settings
       mutableExtensionsDir = true;
 
-      # Use the new profiles structure
+      # Use the new profiles structure (fixes deprecation warning)
+      # NOTE: We intentionally do NOT define any settings here
+      # Settings are managed by our activation script to remain mutable
       profiles.default = {
-        # Essential extensions that should always be available
         extensions = with pkgs.vscode-extensions; [
           # Core Nix development (critical for our workflow)
           bbenoist.nix
@@ -126,7 +131,8 @@ in
           golang.go
         ];
 
-        # NO userSettings here - let activation script handle it completely
+        # IMPORTANT: No settings defined here - activation script handles settings.json
+        # This allows settings to remain mutable (editable by VS Code itself)
       };
     };
 

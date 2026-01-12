@@ -55,7 +55,7 @@ in
     (mkIf cfg.enable {
       # Install the COSMIC package updater applet
       environment.systemPackages = [
-        inputs.cosmic-package-updater.packages.${pkgs.system}.default
+        inputs.cosmic-package-updater.packages.${pkgs.stdenv.hostPlatform.system}.default
       ];
 
       # XDG desktop database needs to be updated for applet discovery

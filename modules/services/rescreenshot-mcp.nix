@@ -5,12 +5,52 @@ with lib;
 let
   cfg = config.services.rescreenshot-mcp;
 
+  # Wrapper script to ensure environment variables are set
+  wrapperScript = pkgs.writeShellScript "rescreenshot-mcp-wrapper" ''
+    # Debug: Log environment for troubleshooting
+    if [ "${cfg.logLevel}" = "debug" ] || [ "${cfg.logLevel}" = "trace" ]; then
+      echo "Environment check:" >&2
+      echo "  WAYLAND_DISPLAY=$WAYLAND_DISPLAY" >&2
+      echo "  DISPLAY=$DISPLAY" >&2
+      echo "  XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR" >&2
+      echo "  XDG_SESSION_TYPE=$XDG_SESSION_TYPE" >&2
+    fi
+
+    # Set required environment variables if not already set
+    # Use runtime directory based on actual user
+    if [ -z "$XDG_RUNTIME_DIR" ]; then
+      export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+    fi
+
+    # Set Wayland display if we're in a Wayland session
+    if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+      export WAYLAND_DISPLAY="wayland-0"
+    fi
+
+    # Set X11 display if we're in an X11 session
+    if [ -z "$DISPLAY" ] && [ "$XDG_SESSION_TYPE" = "x11" ]; then
+      export DISPLAY=":0"
+    fi
+
+    # Set default DISPLAY if nothing else is set (fallback)
+    if [ -z "$WAYLAND_DISPLAY" ] && [ -z "$DISPLAY" ]; then
+      # Try to detect which display server is available
+      if [ -e "$XDG_RUNTIME_DIR/wayland-0" ]; then
+        export WAYLAND_DISPLAY="wayland-0"
+      else
+        export DISPLAY=":0"
+      fi
+    fi
+
+    export RUST_LOG=${cfg.logLevel}
+
+    # Launch the actual rescreenshot-mcp binary
+    exec ${cfg.package}/bin/rescreenshot-mcp "$@"
+  '';
+
   claudeDesktopConfig = {
     mcpServers.screenshot = {
-      command = "${cfg.package}/bin/rescreenshot-mcp";
-      env = {
-        RUST_LOG = cfg.logLevel;
-      };
+      command = toString wrapperScript;
     };
   };
 

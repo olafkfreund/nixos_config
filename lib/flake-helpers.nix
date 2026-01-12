@@ -8,7 +8,8 @@ let
   # Create a system-specific package set with our overlays
   mkPkgs = system: overlays:
     import nixpkgs {
-      inherit system overlays;
+      localSystem = system; # Modern replacement for deprecated 'system' parameter
+      inherit overlays;
       config = {
         allowUnfree = true;
         # SECURITY: Remove global allowInsecure - let individual systems specify permittedInsecurePackages

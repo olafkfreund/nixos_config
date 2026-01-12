@@ -15,6 +15,7 @@ in
     # Claude Desktop MCP configuration file
     # Location: ~/.config/Claude/claude_desktop_config.json
     xdg.configFile."Claude/claude_desktop_config.json" = {
+      force = true; # Overwrite existing file
       text = builtins.toJSON {
         mcpServers =
           # Always enabled MCP servers

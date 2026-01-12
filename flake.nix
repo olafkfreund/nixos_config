@@ -194,9 +194,11 @@
 
       # Helper function for package imports
       mkPkgs = _pkgs: system: {
-        inherit system;
-        config.allowUnfree = true;
-        # config.allowInsecure = true; # REMOVED for security - using targeted permissions
+        localSystem = system; # Modern replacement for deprecated 'system' parameter
+        config = {
+          allowUnfree = true;
+          # allowInsecure = false; # REMOVED for security - using targeted permissions
+        };
       };
 
       # Import custom packages and overlays
@@ -332,8 +334,7 @@
                 home-manager = {
                   useGlobalPkgs = true;
                   useUserPackages = true;
-                  # Use a script to move conflicting files to timestamped backups
-                  # This prevents conflicts when .backup files already exist
+                  # Use backup extension for conflicting files
                   backupFileExtension = "hm-backup";
                   extraSpecialArgs = {
                     pkgs-stable = import nixpkgs-stable (mkPkgs nixpkgs-stable system);

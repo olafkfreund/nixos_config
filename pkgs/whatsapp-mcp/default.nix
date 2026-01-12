@@ -96,7 +96,7 @@ let
       mkdir -p $out/bin
       makeWrapper ${python3}/bin/python3 $out/bin/whatsapp-mcp-server \
         --add-flags "$out/lib/whatsapp-mcp-server/main.py" \
-        --prefix PYTHONPATH : "$out/lib/whatsapp-mcp-server:${python3.pkgs.httpx}/${python3.sitePackages}:${python3.pkgs.mcp}/${python3.sitePackages}:${python3.pkgs.requests}/${python3.sitePackages}"
+        --prefix PYTHONPATH : "$out/lib/whatsapp-mcp-server:${python3.pkgs.httpx}/${python3.sitePackages}:${python3.pkgs.mcp}/${python3.sitePackages}:${python3.pkgs.requests}/${python3.sitePackages}:${python3.pkgs.anyio}/${python3.sitePackages}"
 
       runHook postInstall
     '';
