@@ -1319,11 +1319,11 @@
         "nixpkgs": "nixpkgs_10"
       },
       "locked": {
-        "lastModified": 1768304790,
-        "narHash": "sha256-sDr7VvgQ2HTBaT057xKw3Ck5MzkihaD4EUJgDEAr1aQ=",
+        "lastModified": 1768312260,
+        "narHash": "sha256-ztSP5kDw+DuxJ4DG/3tW7YK3cu3U8YAqXv6uAOwNyIs=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "01813915b9ed21cada383d4b6fa1d8546500921d",
+        "rev": "dc41fee43b5bebb55bc9df70b2201b4cd52bfc16",
         "type": "github"
       },
       "original": {

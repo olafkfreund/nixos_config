@@ -25,6 +25,7 @@ in
         gnome-disk-utility # Disk management
         gnome-connections # Remote desktop client
         gnome-firmware # Firmware updates
+        valent # Phone connectivity (KDE Connect/GSConnect for GNOME)
         boxbuddy # Manage distrobox containers
         rewaita
         embellish
