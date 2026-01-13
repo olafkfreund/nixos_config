@@ -163,24 +163,7 @@
     wants = [ "overseerr.service" "audiobookshelf.service" ];
   };
 
-  networking.firewall.allowedTCPPorts = [
-    2049 # NFS server
-    4000 # NFS status daemon
-    4001 # NFS lock daemon
-    4002 # NFS mount daemon
-    5055 # Overseerr
-    6789 # NZBGet
-    8181 # Tautulli
-    9103 # NZBGet-exporter
-    9104 # Plex-exporter
-    # 9117 # Jackett (removed - no longer in use)
-    9696 # Prowlarr
-    13378 # AudioBookshelf
-  ];
-  networking.firewall.allowedUDPPorts = [
-    111 # RPC portmapper
-    2049 # NFS server
-    4000 # NFS status daemon
-    4002 # NFS mount daemon
-  ];
+  # Note: Firewall ports are now comprehensively configured in configuration.nix
+  # This includes all media services, Plex discovery, NFS, and monitoring exporters
+  # with Tailscale trustedInterfaces configuration
 }

@@ -61,35 +61,36 @@
   #   };
   # };
 
-  # Firewall configuration for the new interfaces
-  networking.firewall = {
-    # Allow specific services on the new interfaces
-    interfaces = {
-      ens6f0 = {
-        # Storage/Backup network - allow NFS, SMB, etc.
-        allowedTCPPorts = [
-          111 # NFS portmapper
-          2049 # NFS
-          445 # SMB
-          22 # SSH for backup operations
-        ];
-        allowedUDPPorts = [
-          111 # NFS portmapper
-          2049 # NFS
-        ];
-      };
-
-      ens6f1 = {
-        # Management network - allow management protocols
-        allowedTCPPorts = [
-          22 # SSH
-          443 # HTTPS for web management
-          623 # IPMI
-        ];
-        allowedUDPPorts = [
-          623 # IPMI
-        ];
-      };
-    };
-  };
+  # Firewall configuration disabled - using Tailscale for security
+  # If you need to enable firewall for specific interfaces in the future, uncomment below
+  # networking.firewall = {
+  #   # Allow specific services on the new interfaces
+  #   interfaces = {
+  #     ens6f0 = {
+  #       # Storage/Backup network - allow NFS, SMB, etc.
+  #       allowedTCPPorts = [
+  #         111 # NFS portmapper
+  #         2049 # NFS
+  #         445 # SMB
+  #         22 # SSH for backup operations
+  #       ];
+  #       allowedUDPPorts = [
+  #         111 # NFS portmapper
+  #         2049 # NFS
+  #       ];
+  #     };
+  #
+  #     ens6f1 = {
+  #       # Management network - allow management protocols
+  #       allowedTCPPorts = [
+  #         22 # SSH
+  #         443 # HTTPS for web management
+  #         623 # IPMI
+  #       ];
+  #       allowedUDPPorts = [
+  #         623 # IPMI
+  #       ];
+  #     };
+  #   };
+  # };
 }

@@ -51,11 +51,18 @@ in
     nameservers = [ "192.168.1.1" "1.1.1.1" ];
   };
 
-  # Tailscale VPN using built-in NixOS service
+  # Tailscale VPN using built-in NixOS service with subnet routing
+  # Security is provided by Tailscale - no need for additional firewall
   services.tailscale = {
     enable = true;
-    useRoutingFeatures = "client"; # Accept routes from other nodes
-    openFirewall = true;
+    useRoutingFeatures = "server"; # Enable subnet routing features
+    openFirewall = false; # No firewall needed - Tailscale provides security
+    # Allow the Tailscale daemon to expose local subnet and accept routes
+    extraUpFlags = [
+      "--advertise-routes=192.168.1.0/24" # Advertise local subnet
+      "--accept-routes" # Accept routes from other nodes
+      "--accept-dns=false" # Disable Tailscale DNS - use local DNS only
+    ];
   };
 
   # Use AI provider defaults with workstation profile (now with desktop environment)
@@ -167,7 +174,11 @@ in
     maxAuthTries = 3;
     enableFail2Ban = true;
     enableKeyOnlyAccess = true;
-    trustedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ];
+    trustedNetworks = [
+      "192.168.1.0/24" # Local network
+      "10.0.0.0/8" # Private network
+      "100.64.0.0/10" # Tailscale CGNAT range
+    ];
   };
 
   # Enable encrypted API keys
