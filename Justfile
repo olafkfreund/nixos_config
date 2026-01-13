@@ -365,7 +365,7 @@ check-syntax:
 
 # Deploy to razer laptop (Intel/NVIDIA) - OPTIMIZED
 razer:
-    nixos-rebuild switch --flake .#razer --target-host razer --build-host razer --sudo --no-reexec --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#razer --target-host razer.lan --build-host razer.lan --sudo --no-reexec --keep-going --accept-flake-config
 
 # Deploy to p620 workstation (AMD) - OPTIMIZED
 p620:
@@ -373,18 +373,18 @@ p620:
 
 # Deploy to p510 workstation (Intel Xeon/NVIDIA) - OPTIMIZED
 p510:
-    nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --sudo --no-reexec --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#p510 --target-host p510.lan --build-host p510.lan --sudo --no-reexec --keep-going --accept-flake-config
 
 # Deploy to dex5550 SFF system (Intel integrated) - OPTIMIZED
 dex5550:
-    nixos-rebuild switch --flake .#dex5550 --target-host dex5550 --build-host dex5550 --sudo --no-reexec --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#dex5550 --target-host dex5550.lan --build-host dex5550.lan --sudo --no-reexec --keep-going --accept-flake-config
 
 # Deploy to samsung system (Intel integrated) - requires special handling
 samsung:
     @echo "🖥️  Deploying to Samsung system..."
     @echo "⚠️  Samsung requires special handling due to network configuration"
     @echo "📡 Testing connection first..."
-    @ping -c 1 samsung > /dev/null 2>&1 || (echo "❌ Samsung not reachable via hostname, trying IP..."; ping -c 1 192.168.1.90 > /dev/null 2>&1 || (echo "❌ Samsung not reachable at all"; exit 1))
+    @ping -c 1 samsung.lan > /dev/null 2>&1 || (echo "❌ Samsung not reachable via hostname, trying IP..."; ping -c 1 192.168.1.90 > /dev/null 2>&1 || (echo "❌ Samsung not reachable at all"; exit 1))
     @echo "✅ Samsung is reachable, proceeding with deployment..."
     NIX_SSHOPTS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -F /dev/null" NIXOS_REBUILD_REMOTE_SUDO_USE_AGENT=1 nixos-rebuild switch --flake .#samsung --target-host 192.168.1.90 --build-host 192.168.1.90 --sudo --impure --accept-flake-config --show-trace
 
@@ -784,7 +784,7 @@ emergency-deploy HOST:
     @echo "🚨 EMERGENCY deployment to {{HOST}} (skipping tests)..."
     @echo "This will skip ALL safety checks and validation!"
     @read -p "Are you absolutely sure? (type 'emergency'): " confirm && [ "$$confirm" = "emergency" ] || exit 1
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}}.lan --build-host {{HOST}}.lan --sudo --no-reexec --keep-going --accept-flake-config
 
 # =============================================================================
 # UTILITIES AND HELPERS
@@ -857,16 +857,16 @@ secrets-status:
 # Check secrets status on specific host
 secrets-status-host HOST:
     @echo "🔑 Checking secrets status on {{HOST}}..."
-    ssh {{HOST}} "sudo ls -la /run/agenix/ || echo 'Agenix directory not found'"
-    ssh {{HOST}} "sudo systemctl status agenix --no-pager || echo 'Agenix service not running'"
+    ssh {{HOST}}.lan "sudo ls -la /run/agenix/ || echo 'Agenix directory not found'"
+    ssh {{HOST}}.lan "sudo systemctl status agenix --no-pager || echo 'Agenix service not running'"
 
 # Fix agenix issues on remote host
 fix-agenix-remote HOST:
     @echo "🔧 Attempting to fix agenix issues on {{HOST}}..."
-    ssh {{HOST}} "sudo systemctl stop agenix || true"
-    ssh {{HOST}} "sudo rm -rf /run/agenix.d || true"
-    ssh {{HOST}} "sudo systemctl start agenix || echo 'Agenix service failed to start'"
-    ssh {{HOST}} "sudo systemctl status agenix --no-pager"
+    ssh {{HOST}}.lan "sudo systemctl stop agenix || true"
+    ssh {{HOST}}.lan "sudo rm -rf /run/agenix.d || true"
+    ssh {{HOST}}.lan "sudo systemctl start agenix || echo 'Agenix service failed to start'"
+    ssh {{HOST}}.lan "sudo systemctl status agenix --no-pager"
 
 # =============================================================================
 # NETWORKING AND MONITORING
@@ -909,18 +909,18 @@ deploy-all-parallel:
 # Fast deployment with minimal builds
 deploy-fast HOST:
     @echo "⚡ Fast deployment to {{HOST}}..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --no-build-nix --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}}.lan --build-host {{HOST}}.lan --sudo --no-reexec --keep-going --no-build-nix --accept-flake-config
 
 # Build locally, deploy remotely (for slow remote hosts)
 deploy-local-build HOST:
     @echo "🏗️ Building {{HOST}} locally, deploying remotely..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --sudo --no-reexec --keep-going --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}}.lan --sudo --no-reexec --keep-going --accept-flake-config
 
 # Deploy only if changed (smart deployment)
 deploy-smart HOST:
     @echo "🧠 Smart deployment to {{HOST}}..."
     @if nix build .#nixosConfigurations.{{HOST}}.config.system.build.toplevel --no-link --print-out-paths | \
-     grep -q "$(ssh {{HOST}} readlink /run/current-system 2>/dev/null || echo 'no-current')"; then \
+     grep -q "$(ssh {{HOST}}.lan readlink /run/current-system 2>/dev/null || echo 'no-current')"; then \
         echo "🔄 No changes detected for {{HOST}}, skipping deployment"; \
     else \
         echo "📝 Changes detected, deploying to {{HOST}}..."; \
@@ -940,14 +940,14 @@ build-all-parallel:
 # Deploy with binary cache optimization
 deploy-cached HOST:
     @echo "💾 Deploying {{HOST}} with cache optimization..."
-    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --option binary-caches "https://cache.nixos.org/ http://p620:5000" --accept-flake-config
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}}.lan --build-host {{HOST}}.lan --sudo --no-reexec --keep-going --option binary-caches "https://cache.nixos.org/ http://p620.lan:5000" --accept-flake-config
 
 # Test all hosts can be reached
 ping-hosts:
     @echo "🏓 Pinging all hosts..."
     @for host in p620 razer p510 dex5550 samsung; do \
         echo -n "$$host: "; \
-        ping -c 1 -W 2 $$host >/dev/null 2>&1 && echo "✅ reachable" || echo "❌ unreachable"; \
+        ping -c 1 -W 2 $$host.lan >/dev/null 2>&1 && echo "✅ reachable" || echo "❌ unreachable"; \
     done
 
 # Show status of all hosts

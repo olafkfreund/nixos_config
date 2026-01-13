@@ -626,12 +626,7 @@ with lib; {
     };
 
     # Additional programs for enhanced shell experience
-
-    # Modern directory navigation
-    zoxide = {
-      enable = true;
-      enableZshIntegration = true;
-    };
+    # Note: zoxide configuration is in home/shell/zoxide/default.nix
 
     # Enhanced directory listing
     eza = {
