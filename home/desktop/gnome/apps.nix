@@ -55,6 +55,7 @@ in
         gnome-music # Music player
         gnome-photos # Photo manager
         gnome-sound-recorder # Audio recording
+        easyeffects # Audio effects and noise canceling for Teams/meeting tools
         showtime # Media center application
         upscaler # Re-enabled: pysdl2 Python 3.13 compatibility fixed (issue #30 closed)
         gnvim

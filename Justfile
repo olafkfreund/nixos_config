@@ -942,6 +942,26 @@ deploy-cached HOST:
     @echo "💾 Deploying {{HOST}} with cache optimization..."
     nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}}.lan --build-host {{HOST}}.lan --sudo --no-reexec --keep-going --option binary-caches "https://cache.nixos.org/ http://p620.lan:5000" --accept-flake-config
 
+# Build on P620, deploy to target host (recommended for Samsung)
+deploy-via-p620 HOST:
+    @echo "🏗️ Building {{HOST}} on P620 cache server, deploying to {{HOST}}..."
+    @echo "📡 Step 1: Building on P620..."
+    nixos-rebuild build --flake .#{{HOST}} --build-host p620.lan --accept-flake-config
+    @echo "📦 Step 2: Deploying to {{HOST}}..."
+    nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}}.lan --sudo --no-reexec --keep-going --accept-flake-config
+    @echo "✅ Deployment complete! {{HOST}} is using P620's cache."
+
+# Build on P620 for target host (build only, no deployment)
+build-on-p620 HOST:
+    @echo "🏗️ Building {{HOST}} on P620 (build only)..."
+    nixos-rebuild build --flake .#{{HOST}} --build-host p620.lan --accept-flake-config
+    @echo "✅ Build complete! Deploy with: just deploy-via-p620 {{HOST}}"
+
+# Quick Samsung deployment (uses P620 cache)
+samsung-deploy:
+    @echo "📱 Deploying Samsung laptop via P620 cache..."
+    just deploy-via-p620 samsung
+
 # Test all hosts can be reached
 ping-hosts:
     @echo "🏓 Pinging all hosts..."

@@ -10,6 +10,7 @@ with lib; {
     ./core.nix # Core system configuration
     ./performance.nix # Performance optimization
     ./server.nix # Server-specific configurations
+    ./nix/default.nix # Nix configuration and binary cache settings
 
     # Feature modules (conditional functionality)
     ./development.nix # Development tools and environments
