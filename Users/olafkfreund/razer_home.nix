@@ -139,6 +139,9 @@ in
 
   # Additional packages
   home.packages = with pkgs; [
+    # Kosli CLI - Compliance monitoring and DevOps workflows
+    customPkgs.kosli-cli
+
     wayfarer # Screen recorder for GNOME/Wayland/pipewire
   ];
 

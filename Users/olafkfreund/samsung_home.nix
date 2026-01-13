@@ -143,7 +143,10 @@
     authenticator.enable = true;
   };
 
-  home.packages = [
+  home.packages = with pkgs; [
+    # Kosli CLI - Compliance monitoring and DevOps workflows
+    customPkgs.kosli-cli
+
     # pkgs.customPkgs.rofi-blocks
     # pkgs.msty
     # pkgs.aider-chat-env
