@@ -86,7 +86,9 @@
       settings = {
         trash-original-torrent-files = true;
         rpc-bind-address = "0.0.0.0";
-        rpc-whitelist = "127.0.0.1,192.168.1.*";
+        rpc-whitelist = "127.0.0.1,192.168.1.*,100.*.*.*";
+        rpc-whitelist-enabled = true;
+        rpc-authentication-required = false;
         watch-dir-enabled = true;
         watch-dir = "${config.services.transmission.home}/watchdir";
         download-dir = "/mnt/media/Media/Audiobooks/Downloads";
