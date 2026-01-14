@@ -4,7 +4,9 @@
 
 ## Quick Overview
 
-This is a sophisticated multi-host NixOS configuration managing 4 active hosts (P620, Razer, P510, Samsung) with 141+ modular components, template-based architecture achieving 95% code deduplication, and comprehensive automation through slash commands, agents, and skills.
+This is a sophisticated multi-host NixOS configuration managing 4 active hosts (P620, Razer, P510, Samsung) with
+141+ modular components, template-based architecture achieving 95% code deduplication, and comprehensive automation
+through slash commands, agents, and skills.
 
 **Key Stats:**
 
@@ -65,12 +67,47 @@ This is a sophisticated multi-host NixOS configuration managing 4 active hosts (
 - **test-generator** - Automatic test suite creation and coverage analysis (NEW)
 - **update** - Package update management and review
 
-**Built-in Agents**:
+**Built-in Agents (Claude Code Provides 60+ Agents)**:
 
-- **nixos-pro** - NixOS development (modules, packages, optimization)
+Only the most relevant agents for NixOS development are listed below. Claude Code includes 60+ built-in agents, but
+most are for other domains (sales, gaming, mobile apps, etc.) and can be ignored.
+
+**NixOS & Infrastructure** (Highly Relevant):
+
+- **nixos-pro** - NixOS modules, packages, best practices
+- **devops-troubleshooter** - Infrastructure debugging and automation
+- **deployment-engineer** - Deployment strategies and CI/CD
+- **cloud-architect** - Cloud infrastructure design
+- **network-engineer** - Network configuration and troubleshooting
+
+**Development Languages** (Relevant for Your Stack):
+
+- **rust-pro** - Rust development (you have Rust modules)
+- **python-pro** - Python development (scripts and tools)
+- **golang-pro** - Go development (if used)
+- **javascript-pro** - JavaScript development (frontend)
+- **typescript-pro** - TypeScript development (frontend)
+
+**Code Quality & Security** (Highly Relevant):
+
 - **code-reviewer** - Code review against best practices
-- **debugger** - Error analysis and debugging
 - **security-auditor** - Security vulnerability detection
+- **debugger** - Error analysis and debugging
+- **performance-engineer** - Performance optimization and profiling
+- **test-automator** - Test suite creation and coverage
+
+**Documentation** (Relevant):
+
+- **docs-architect** - Technical documentation creation
+- **mermaid-expert** - Diagram creation for documentation
+- **reference-builder** - API and configuration references
+
+**Plugins**:
+
+- **code-simplifier:code-simplifier** - Code duplication analysis and refactoring
+
+**Note**: Claude Code includes 40+ other built-in agents (sales-automator, minecraft-bukkit-pro, ios-developer, etc.)
+that are irrelevant for NixOS development. They cannot be uninstalled but can be safely ignored.
 
 Agents trigger automatically based on your request. See `/nix-help agents` for details.
 
@@ -179,21 +216,21 @@ passwordFile = config.age.secrets.password.path;
 
 **Before Creating Modules:**
 
-```
+```text
 "Read docs/PATTERNS.md Module System Patterns section,
 then create a new monitoring module"
 ```
 
 **Before Writing Packages:**
 
-```
+```text
 "Check docs/PATTERNS.md Package Writing Patterns,
 then create package derivation for myapp"
 ```
 
 **Before Code Review:**
 
-```
+```text
 "Review this code against docs/NIXOS-ANTI-PATTERNS.md
 and docs/PATTERNS.md"
 ```
@@ -280,7 +317,8 @@ just validate            # Full validation
 
 ---
 
-**Remember**: Claude Code is optimized for speed, ease, and reliability. Use `/nix-help` for complete documentation and `/nix-workflow-*` commands for guided processes!
+**Remember**: Claude Code is optimized for speed, ease, and reliability. Use `/nix-help` for complete documentation and
+`/nix-workflow-*` commands for guided processes!
 
 **Need help?** Just ask:
 
