@@ -6,6 +6,7 @@ _: {
     ./virt/spice.nix
     ./virt/incus.nix
     ./virt/podman.nix
+    ./virt/waydroid.nix
     ./containers/default.nix
   ];
 }
