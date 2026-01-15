@@ -132,6 +132,12 @@ in
       podman = true;
       spice = true;
       libvirt = true;
+      # Waydroid Android emulation (NVIDIA GPU - requires GBM disable)
+      waydroid = {
+        enable = true;
+        disableGbm = true; # Required for NVIDIA hybrid graphics
+        enableWaydroidHelper = true;
+      };
     };
 
     cloud = {

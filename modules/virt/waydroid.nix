@@ -80,12 +80,12 @@ in
     # Assertions for common configuration issues
     assertions = [
       {
-        assertion = config.services.xserver.enable -> (config.services.xserver.displayManager.gdm.wayland or true);
+        assertion = config.services.xserver.enable -> (config.services.displayManager.gdm.wayland or true);
         message = ''
           Waydroid requires a Wayland session to function properly.
 
           If using GDM, ensure Wayland is not disabled. Check that
-          services.xserver.displayManager.gdm.wayland is not set to false.
+          services.displayManager.gdm.wayland is not set to false.
 
           Waydroid cannot run in X11 sessions directly, but can run in
           a nested Wayland session using cage or weston.
