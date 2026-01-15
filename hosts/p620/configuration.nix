@@ -257,6 +257,13 @@ in
       podman = true;
       spice = true;
       libvirt = true;
+
+      # Waydroid Android emulation (AMD GPU - standard configuration)
+      waydroid = {
+        enable = true;
+        disableGbm = false; # AMD GPU - standard config
+        enableWaydroidHelper = true;
+      };
     };
 
     cloud = {
