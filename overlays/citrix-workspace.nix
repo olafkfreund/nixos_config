@@ -43,7 +43,7 @@ in
       woff2
       harfbuzzFull # Provides libharfbuzz-icu.so.0 needed by bundled webkit
       libjpeg8 # Provides libjpeg.so.8 needed by bundled webkit (not libjpeg which is v62)
-      enchant2
+      enchant_2
       hyphen
       libseccomp
       libmanette # Provides libmanette-0.2.so.0 needed by bundled webkit

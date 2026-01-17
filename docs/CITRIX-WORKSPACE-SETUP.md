@@ -127,7 +127,7 @@ The overlay provides these specific library versions required by bundled webkit2
 | `libxslt.so`           | `libxslt`      | XSLT transformations           |
 | `lcms2.so`             | `lcms2`        | Color management               |
 | `libwoff2common.so`    | `woff2`        | Web font support               |
-| `libenchant-2.so`      | `enchant2`     | Spell checking                 |
+| `libenchant-2.so`      | `enchant_2`    | Spell checking                 |
 | `libhyphen.so`         | `hyphen`       | Text hyphenation               |
 | `libseccomp.so`        | `libseccomp`   | Sandboxing                     |
 
