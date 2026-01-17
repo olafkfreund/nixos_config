@@ -20,8 +20,9 @@
   # Fix Stylix Firefox profile warnings
   stylix.targets.firefox.profileNames = [ "default" ];
 
-  # Enable Stylix GTK and Qt management for common theme across all apps
-  stylix.targets.gtk.enable = true;
+  # Disable Stylix GTK management to avoid conflicts with COSMIC theme
+  # COSMIC manages its own GTK themes and creates symlinks that conflict with Stylix
+  stylix.targets.gtk.enable = false;
   stylix.targets.qt.enable = true;
 
   # Enable Walker launcher when feature flag is set
