@@ -353,7 +353,7 @@ in
 
     # Microsoft Intune Company Portal (custom package with version control)
     intune = {
-      enable = true;
+      enable = false; # Disabled - no longer needed
       autoStart = false; # Manual launch - start from application menu as needed
       enableDesktopIntegration = true;
     };
