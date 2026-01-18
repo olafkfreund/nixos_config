@@ -329,10 +329,7 @@
               inputs.nix-snapd.nixosModules.default
               inputs.agenix.nixosModules.default
               inputs.lanzaboote.nixosModules.lanzaboote
-              # cosmic-connect module temporarily disabled due to missing module.md documentation
-              # Issue: https://github.com/olafkfreund/cosmic-connect-desktop-app/issues/78
-              # Uncomment when upstream issue is resolved:
-              # inputs.cosmic-connect.nixosModules.default
+              # inputs.cosmic-connect.nixosModules.default # TEMPORARILY DISABLED: Rust compilation errors (issue #79)
               nix-index-database.nixosModules.nix-index
               ./home/shell/zellij/zjstatus.nix
             ]
