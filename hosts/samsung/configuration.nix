@@ -56,10 +56,23 @@ in
     };
     useNetworkd = false;
 
+    # Disable nftables to use iptables (required for security.sshHardening)
+    nftables.enable = lib.mkForce false;
+
     # Set custom nameservers as fallback
     nameservers = [ "1.1.1.1" "8.8.8.8" ];
 
-    # Firewall configuration for remote desktop moved to features.gnome-remote-desktop
+    # Firewall configuration - explicit SSH access
+    # Override common networking module which disables firewall
+    firewall = {
+      enable = lib.mkForce true;
+      allowedTCPPorts = [
+        22    # SSH - critical for remote access
+        3389  # RDP - for remote desktop (also set by features.gnome-remote-desktop)
+        5900  # VNC - for remote desktop (also set by features.gnome-remote-desktop)
+      ];
+      allowPing = true;  # Enable ICMP for network diagnostics
+    };
   };
 
   # Tailscale VPN using built-in NixOS service

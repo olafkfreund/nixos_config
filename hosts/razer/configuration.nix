@@ -61,14 +61,22 @@ in
     };
     useNetworkd = false;
 
+    # Disable nftables to use iptables (required for security.sshHardening)
+    nftables.enable = lib.mkForce false;
+
     # Set custom nameservers as fallback
     nameservers = [ "1.1.1.1" "8.8.8.8" ];
 
-    # Firewall TEMPORARILY DISABLED for connectivity troubleshooting
-    # TODO: Re-enable with proper SSH access after regaining connectivity
-    # Recommended: firewall.enable = true; allowedTCPPorts = [ 22 3389 ];
+    # Firewall configuration - explicit SSH access
+    # NOTE: Change enable to lib.mkForce true after regaining physical/network access
+    # Override common networking module which disables firewall
     firewall = {
-      enable = false;
+      enable = lib.mkForce false;  # TEMPORARILY DISABLED - change to lib.mkForce true after SSH access restored
+      allowedTCPPorts = [
+        22    # SSH - critical for remote access
+        3389  # RDP - for headless remote desktop
+      ];
+      allowPing = true;  # Enable ICMP for network diagnostics
     };
   };
 
