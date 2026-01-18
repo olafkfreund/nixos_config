@@ -2,6 +2,9 @@
 , lib
 , ...
 }: {
+  # Enable System76 power daemon for intelligent power management
+  hardware.system76.power-daemon.enable = true;
+
   # Thermal and power management services
   services = {
     # CPU temperature monitoring and management
