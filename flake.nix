@@ -129,6 +129,10 @@
       url = "github:nomoth/cosmic-applet-spotify";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    cosmic-connect = {
+      url = "github:olafkfreund/cosmic-connect-desktop-app";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -325,6 +329,10 @@
               inputs.nix-snapd.nixosModules.default
               inputs.agenix.nixosModules.default
               inputs.lanzaboote.nixosModules.lanzaboote
+              # cosmic-connect module temporarily disabled due to missing module.md documentation
+              # Issue: https://github.com/olafkfreund/cosmic-connect-desktop-app/issues/78
+              # Uncomment when upstream issue is resolved:
+              # inputs.cosmic-connect.nixosModules.default
               nix-index-database.nixosModules.nix-index
               ./home/shell/zellij/zjstatus.nix
             ]
