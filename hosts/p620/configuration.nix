@@ -93,33 +93,8 @@ in
     #   };
     # };
 
-    # Firewall configuration for SSH and remote desktop
-    firewall = {
-      allowedTCPPorts = [
-        22 # SSH port from hardening config
-        3389 # RDP port for GNOME Remote Desktop
-        5900 # VNC port for GNOME Remote Desktop
-      ];
-
-      # Extra rules for SSH protection
-      extraCommands = ''
-        # Rate limiting for SSH connections
-        iptables -I INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --set --name SSH_LIMIT
-        iptables -I INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name SSH_LIMIT -j DROP
-
-        # Allow established SSH connections
-        iptables -A INPUT -p tcp --dport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-
-        # Log dropped SSH attempts
-        iptables -A INPUT -p tcp --dport 22 -j LOG --log-prefix "SSH-DROP: " --log-level 4
-      '';
-
-      extraStopCommands = ''
-        # Clean up SSH rules
-        iptables -D INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --set --name SSH_LIMIT 2>/dev/null || true
-        iptables -D INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name SSH_LIMIT -j DROP 2>/dev/null || true
-      '';
-    };
+    # Firewall disabled - P620 is inside a secure network
+    firewall.enable = lib.mkForce false;
   };
 
   # Tailscale VPN using built-in NixOS service
