@@ -176,11 +176,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1768699728,
-        "narHash": "sha256-8jrJ+aGNh8zDRQLxdU+WmpzGZz1EKPyCDCHKz3mQ/IQ=",
+        "lastModified": 1768701904,
+        "narHash": "sha256-gn4jfTJrFY6lTYGGNvVuqrQIwR1V4ShfYGdz87aTRhM=",
         "owner": "olafkfreund",
         "repo": "cosmic-connect-desktop-app",
-        "rev": "eaa49b6853392a3db5757381d6b332cc137c05a9",
+        "rev": "224c8594d1beeecc080f6940adfbc2ad0ae33c8e",
         "type": "github"
       },
       "original": {
