@@ -64,8 +64,12 @@ in
     # Set custom nameservers as fallback
     nameservers = [ "1.1.1.1" "8.8.8.8" ];
 
-    # Firewall configuration for headless remote desktop
-    firewall.allowedTCPPorts = [ 3389 ]; # RDP port for gnome-remote-desktop-headless
+    # Firewall TEMPORARILY DISABLED for connectivity troubleshooting
+    # TODO: Re-enable with proper SSH access after regaining connectivity
+    # Recommended: firewall.enable = true; allowedTCPPorts = [ 22 3389 ];
+    firewall = {
+      enable = false;
+    };
   };
 
   # Tailscale VPN using built-in NixOS service
