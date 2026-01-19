@@ -1645,6 +1645,7 @@ This GitHub skill provides comprehensive knowledge for:
 - **Best Practices**: Commit conventions, branch naming, security, workflows
 
 Use this skill whenever working with:
+
 - Version control operations
 - GitHub issue management
 - Pull request workflows

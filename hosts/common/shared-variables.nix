@@ -23,8 +23,7 @@
   };
 
   # Centralized network mappings (100% identical across all hosts)
-  network = {
-  };
+  network = { };
 
   # Base environment variables (85% common across hosts)
   baseEnvironment = {

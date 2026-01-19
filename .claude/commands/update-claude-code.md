@@ -19,11 +19,13 @@ Update the Claude Code package derivation with proper hash calculation, testing,
 ```
 
 **Search for:**
-1. NPM package page: https://www.npmjs.com/package/@anthropic-ai/claude-code
-2. GitHub releases: https://github.com/anthropics/claude-code/releases
+
+1. NPM package page: <https://www.npmjs.com/package/@anthropic-ai/claude-code>
+2. GitHub releases: <https://github.com/anthropics/claude-code/releases>
 3. Changelog: Check for breaking changes
 
 **Record:**
+
 - Latest version number: `X.X.X`
 - Release date
 - Notable changes from changelog
@@ -37,6 +39,7 @@ cat home/development/claude-code/default.nix
 ```
 
 **Note current:**
+
 - Version number
 - npmDepsHash value
 - Any custom patches or modifications
@@ -134,10 +137,12 @@ Use the `/new_task` command:
 ```
 
 **Issue details:**
+
 - **Type:** chore
 - **Priority:** medium
 - **Title:** "Update Claude Code to version X.X.X"
 - **Description:**
+
   ```
   Update claude-code package from vOLD to vNEW
 
@@ -198,7 +203,7 @@ gh pr create --fill --base main
 
 **PR Template:**
 
-```markdown
+````markdown
 ## Summary
 
 Update Claude Code to version X.X.X
@@ -223,12 +228,14 @@ claude-code X.X.X ✅
 # All hosts tested
 just quick-test ✅
 ```
+````
 
 ## Release Notes
 
 [Link to release notes]
 
 **Notable changes:**
+
 - Feature 1
 - Feature 2
 - Bug fixes
@@ -246,7 +253,8 @@ just quick-test ✅
 - [x] No anti-patterns introduced (checked against @docs/NIXOS-ANTI-PATTERNS.md)
 
 Closes #${ISSUE_NUM}
-```
+
+````
 
 ## Step 8: Code Review
 
@@ -254,9 +262,10 @@ Run code review before merging:
 
 ```bash
 /review
-```
+````
 
 **Review focus:**
+
 - Package derivation follows @docs/PATTERNS.md
 - No anti-patterns from @docs/NIXOS-ANTI-PATTERNS.md
 - Hash calculations are correct

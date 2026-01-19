@@ -5,6 +5,7 @@ Perform comprehensive security audit of your NixOS configuration.
 ## Quick Audit
 
 Just run:
+
 ```
 /nix-security
 ```
@@ -16,6 +17,7 @@ I'll automatically check all hosts and services for security issues.
 ### 1. Service Isolation ⚠️ CRITICAL
 
 **DynamicUser Check:**
+
 ```nix
 # ❌ INSECURE
 systemd.services.myservice = {
@@ -37,6 +39,7 @@ systemd.services.myservice = {
 ### 2. Systemd Hardening ⚠️ CRITICAL
 
 **Required Options:**
+
 ```nix
 serviceConfig = {
   # Isolation (REQUIRED)
@@ -64,6 +67,7 @@ serviceConfig = {
 ### 3. Secret Management ⚠️ CRITICAL
 
 **Evaluation-Time Secret Reads:**
+
 ```nix
 # ❌ INSECURE - Secret exposed in Nix store!
 password = builtins.readFile "/secrets/password";
@@ -79,6 +83,7 @@ apiKeyFile = config.age.secrets.api-key.path;
 ### 4. Firewall Configuration
 
 **Port Security:**
+
 ```nix
 # ❌ INSECURE
 networking.firewall.enable = false;  # Firewall disabled!
@@ -99,6 +104,7 @@ networking.firewall = {
 ### 5. SSH Hardening
 
 **SSH Security:**
+
 ```nix
 # ❌ INSECURE
 services.openssh = {
@@ -124,6 +130,7 @@ services.openssh = {
 ### 6. Agenix Secret Access
 
 **Secret File Permissions:**
+
 ```nix
 # ⚠️ REVIEW
 age.secrets."api-key" = {
@@ -179,12 +186,14 @@ age.secrets."api-key" = {
 ## Automated Fixes
 
 For each issue, I'll provide:
+
 1. **Location**: Exact file and line number
 2. **Issue**: What's wrong and why it's dangerous
 3. **Fix**: Complete code replacement
 4. **Explanation**: Security reasoning
 
 **Example:**
+
 ```
 Issue: Service running as root
 Location: hosts/p620/configuration.nix:245
@@ -214,23 +223,27 @@ isolated user with minimal permissions.
 ## Usage Modes
 
 **Full Audit (All Hosts):**
+
 ```
 /nix-security
 ```
 
 **Specific Host:**
+
 ```
 /nix-security
 Audit p620 configuration
 ```
 
 **Specific Service:**
+
 ```
 /nix-security
 Check myservice security
 ```
 
 **Quick Check (Critical Only):**
+
 ```
 /nix-security
 Quick check for critical issues only
@@ -247,6 +260,7 @@ Quick check for critical issues only
 ## Integration
 
 Automatically runs as part of:
+
 - `/review` command (security section)
 - `just validate` (security checks)
 - Pre-commit hooks (optional)

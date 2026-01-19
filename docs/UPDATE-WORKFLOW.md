@@ -399,10 +399,10 @@ just quick-deploy p620     # Deploy after informed review
 
 ## Additional Resources
 
-- **nvd Documentation**: https://sr.ht/~khumba/nvd/
-- **NixOS Releases**: https://nixos.org/manual/nixos/stable/release-notes.html
-- **Nixpkgs Updates**: https://github.com/NixOS/nixpkgs/commits/nixos-unstable
-- **Package Search**: https://search.nixos.org/packages
+- **nvd Documentation**: <https://sr.ht/~khumba/nvd/>
+- **NixOS Releases**: <https://nixos.org/manual/nixos/stable/release-notes.html>
+- **Nixpkgs Updates**: <https://github.com/NixOS/nixpkgs/commits/nixos-unstable>
+- **Package Search**: <https://search.nixos.org/packages>
 
 ## Summary
 

@@ -71,12 +71,12 @@ in
     # NOTE: Change enable to lib.mkForce true after regaining physical/network access
     # Override common networking module which disables firewall
     firewall = {
-      enable = lib.mkForce false;  # TEMPORARILY DISABLED - change to lib.mkForce true after SSH access restored
+      enable = lib.mkForce false; # TEMPORARILY DISABLED - change to lib.mkForce true after SSH access restored
       allowedTCPPorts = [
-        22    # SSH - critical for remote access
-        3389  # RDP - for headless remote desktop
+        22 # SSH - critical for remote access
+        3389 # RDP - for headless remote desktop
       ];
-      allowPing = true;  # Enable ICMP for network diagnostics
+      allowPing = true; # Enable ICMP for network diagnostics
     };
   };
 

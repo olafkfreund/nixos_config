@@ -11,6 +11,7 @@ You now have a comprehensive system to preview updates and track new packages be
 **Purpose**: Show detailed package changes BEFORE building with `nh os build`
 
 **Key Features**:
+
 - Uses **nvd** for human-readable package version diffs
 - Backs up flake.lock automatically
 - Shows commit ranges with GitHub comparison links
@@ -20,6 +21,7 @@ You now have a comprehensive system to preview updates and track new packages be
 - Safe rollback with automatic backup
 
 **Usage**:
+
 ```bash
 just preview-updates           # Current host
 just preview-updates p620      # Specific host
@@ -30,6 +32,7 @@ just preview-updates p620      # Specific host
 **Purpose**: Discover newly added packages in nixpkgs between revisions
 
 **Key Features**:
+
 - Compares old and new nixpkgs commits
 - Lists all newly added packages
 - Shows package categories
@@ -37,6 +40,7 @@ just preview-updates p620      # Specific host
 - Works with git history as fallback
 
 **Usage**:
+
 ```bash
 just new-packages
 ```
@@ -58,10 +62,12 @@ just update-workflow [HOST]    # Complete interactive workflow
 #### nvd (Nix Version Diff)
 
 **Already installed** in your configuration:
+
 - Location: `modules/development/nix.nix:34`
 - Enabled when: `nix.development.enable = true`
 
 **What nvd provides**:
+
 - Inspired by Gentoo's `emerge -pv` output
 - Compares two Nix store paths (system closures)
 - Shows version changes in human-readable format
@@ -93,11 +99,13 @@ just update-workflow [HOST]    # Complete interactive workflow
 ### Integration with Your Infrastructure
 
 **Your Existing Tools** (unchanged):
+
 - `just check-updates` - Shows flake input commit changes
 - `just diff HOST` - Uses `nix store diff-closures` (built-in)
 - `just update-flake` - Updates and deploys immediately
 
 **New Enhanced Tools**:
+
 - `just preview-updates` - Uses nvd for detailed package visibility
 - `just new-packages` - Git-based package discovery
 - `just update-workflow` - Complete interactive workflow
@@ -114,6 +122,7 @@ just update-workflow [HOST]    # Complete interactive workflow
 ```
 
 **Legend**:
+
 - `[U.]` = Updated package
 - `[A.]` = Added package (new to your system)
 - `[R.]` = Removed package
@@ -182,6 +191,7 @@ just quick-deploy p620     # Deploy without knowing details
 ```
 
 **Problems**:
+
 - ❌ No package version visibility
 - ❌ Can't see what's being updated until after build
 - ❌ No way to track new packages
@@ -202,6 +212,7 @@ just quick-deploy p620     # Deploy with confidence
 ```
 
 **Benefits**:
+
 - ✅ Exact package versions before building
 - ✅ Clear reboot requirements
 - ✅ Size impact visibility
@@ -213,6 +224,7 @@ just quick-deploy p620     # Deploy with confidence
 ### Requirements
 
 **Already Met**:
+
 - ✅ nvd installed (`modules/development/nix.nix:34`)
 - ✅ jq available (for JSON parsing)
 - ✅ Git repository (for package tracking)
@@ -292,22 +304,22 @@ git show HEAD:flake.lock
 
 ### vs. Built-in `nix store diff-closures`
 
-| Feature | nix store diff-closures | nvd |
-|---------|------------------------|-----|
-| Human-readable | Basic | Excellent |
-| Version display | Limited | Full versions |
-| Color coding | Minimal | Rich colors |
-| Installation | Built-in | Package install |
-| Output format | Technical | User-friendly |
+| Feature         | nix store diff-closures | nvd             |
+| --------------- | ----------------------- | --------------- |
+| Human-readable  | Basic                   | Excellent       |
+| Version display | Limited                 | Full versions   |
+| Color coding    | Minimal                 | Rich colors     |
+| Installation    | Built-in                | Package install |
+| Output format   | Technical               | User-friendly   |
 
 ### vs. `nix-diff`
 
-| Feature | nix-diff | nvd |
-|---------|----------|-----|
-| Purpose | Derivation analysis | System updates |
-| Use case | Debugging builds | Preview changes |
-| Output level | Very technical | User-friendly |
-| Speed | Medium | Fast |
+| Feature      | nix-diff            | nvd             |
+| ------------ | ------------------- | --------------- |
+| Purpose      | Derivation analysis | System updates  |
+| Use case     | Debugging builds    | Preview changes |
+| Output level | Very technical      | User-friendly   |
+| Speed        | Medium              | Fast            |
 
 **Recommendation**: Use nvd for update previews (human focus)
 
@@ -316,12 +328,14 @@ git show HEAD:flake.lock
 ### Fits Your Existing Patterns
 
 **Your Multi-Host Setup**:
+
 - 4 active hosts (p620, razer, p510, samsung)
 - Feature flag system (141+ modules)
 - Sophisticated monitoring
 - GitHub workflow
 
 **How These Scripts Help**:
+
 - Preview before deploying to each host
 - Understand feature module updates
 - Track changes to monitoring components
@@ -330,6 +344,7 @@ git show HEAD:flake.lock
 ### Works with Your Justfile Automation
 
 **Existing Commands** (60+ commands):
+
 ```bash
 just validate              # Still works
 just test-host p620        # Still works
@@ -337,6 +352,7 @@ just quick-deploy p620     # Still works
 ```
 
 **New Commands** (3 additions):
+
 ```bash
 just preview-updates       # Add before quick-deploy
 just new-packages         # Run after updates
@@ -366,6 +382,7 @@ just new-packages
 ### Customize for Your Workflow
 
 **Weekly Update Routine**:
+
 ```bash
 #!/usr/bin/env bash
 # weekly-updates.sh
@@ -381,6 +398,7 @@ done
 ```
 
 **Add to GitHub Actions** (optional):
+
 ```yaml
 # .github/workflows/update-check.yml
 - name: Check for updates

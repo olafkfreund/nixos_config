@@ -27,7 +27,7 @@ The Documentation Sync agent automatically generates and maintains up-to-date do
 
 **Documentation includes**:
 
-```yaml
+````yaml
 Module Documentation:
 
 For: modules/services/prometheus.nix
@@ -66,52 +66,55 @@ Generated Documentation:
     port = 9090;
     retention = "90d";
   };
-  ```
+````
 
-  ### Examples
+### Examples
 
-  #### Minimal Setup
-  ```nix
-  services.prometheus.enable = true;
-  ```
+#### Minimal Setup
 
-  #### Full Configuration
-  ```nix
-  services.prometheus = {
-    enable = true;
-    port = 9090;
-    retention = "1y";
-    scrapeConfigs = [
-      {
-        job_name = "node";
-        static_configs = [{
-          targets = [ "localhost:9100" ];
-        }];
-      }
-    ];
-  };
-  ```
-
-  ### Related Modules
-
-  - modules/monitoring/grafana.nix - Visualization
-  - modules/monitoring/alertmanager.nix - Alerting
-  - modules/monitoring/node-exporter.nix - Metrics
-
-  ### Troubleshooting
-
-  **Issue**: Service fails to start
-  **Solution**: Check port availability with `ss -tlnp | grep 9090`
-
-  **Issue**: No metrics displayed
-  **Solution**: Verify scrape targets configuration
-
-  ### Security
-
-  - Runs with DynamicUser (non-root)
-  - Systemd security hardening enabled
-  - Firewall integration available
+```nix
+services.prometheus.enable = true;
 ```
+
+#### Full Configuration
+
+```nix
+services.prometheus = {
+  enable = true;
+  port = 9090;
+  retention = "1y";
+  scrapeConfigs = [
+    {
+      job_name = "node";
+      static_configs = [{
+        targets = [ "localhost:9100" ];
+      }];
+    }
+  ];
+};
+```
+
+### Related Modules
+
+- modules/monitoring/grafana.nix - Visualization
+- modules/monitoring/alertmanager.nix - Alerting
+- modules/monitoring/node-exporter.nix - Metrics
+
+### Troubleshooting
+
+**Issue**: Service fails to start
+**Solution**: Check port availability with `ss -tlnp | grep 9090`
+
+**Issue**: No metrics displayed
+**Solution**: Verify scrape targets configuration
+
+### Security
+
+- Runs with DynamicUser (non-root)
+- Systemd security hardening enabled
+- Firewall integration available
+
+````
 
 ### 2. Configuration Reference Generation
 
@@ -183,19 +186,20 @@ Generated Documentation:
 
   # Or use smart deployment
   just quick-deploy p620
-  ```
+````
 
-  ### Monitoring
+### Monitoring
 
-  - Grafana: http://p620:3001
-  - Prometheus: http://p620:9090
+- Grafana: <http://p620:3001>
+- Prometheus: <http://p620:9090>
 
-  ### Maintenance
+### Maintenance
 
-  - Boot time target: <2 minutes
-  - Monitoring: Self-monitored
-  - Backups: Manual (planned automation)
-```
+- Boot time target: <2 minutes
+- Monitoring: Self-monitored
+- Backups: Manual (planned automation)
+
+````
 
 ### 3. API Documentation Generation
 
@@ -220,15 +224,17 @@ Generated Documentation:
   **Type**:
   ```nix
   mkHardenedService :: String -> AttrSet -> AttrSet
-  ```
+````
 
-  **Arguments**:
-  - `name`: Service name (string)
-  - `config`: Service configuration (attrset)
+**Arguments**:
+
+- `name`: Service name (string)
+- `config`: Service configuration (attrset)
 
   **Returns**: Hardened systemd service configuration
 
   **Example**:
+
   ```nix
   myService = mkHardenedService "myservice" {
     description = "My custom service";
@@ -237,17 +243,20 @@ Generated Documentation:
   ```
 
   **Security Features Applied**:
-  - DynamicUser = true
-  - ProtectSystem = "strict"
-  - ProtectHome = true
-  - NoNewPrivileges = true
-  - PrivateTmp = true
+
+- DynamicUser = true
+- ProtectSystem = "strict"
+- ProtectHome = true
+- NoNewPrivileges = true
+- PrivateTmp = true
 
   **Usage Notes**:
-  - Automatically applies security best practices
-  - Override individual settings as needed
-  - Suitable for most services
-```
+
+- Automatically applies security best practices
+- Override individual settings as needed
+- Suitable for most services
+
+````
 
 ### 4. Changelog Generation
 
@@ -295,7 +304,7 @@ Generated Changelog:
   - Documentation restructure
 
   **Full Changelog**: https://github.com/.../compare/v1.0.0...v2.0.0
-```
+````
 
 ### 5. Architecture Diagrams
 
@@ -303,7 +312,7 @@ Generated Changelog:
 
 **Diagram generation**:
 
-```yaml
+````yaml
 Architecture Documentation:
 
 Generated Mermaid Diagrams:
@@ -327,35 +336,38 @@ Generated Mermaid Diagrams:
     P510 -->|Metrics| P620
     Razer -->|Metrics| P620
     Samsung -->|Metrics| P620
-  ```
+````
 
-  ### Module Dependencies
-  ```mermaid
-  graph LR
-    Desktop[Desktop Module]
-    Hyprland[Hyprland]
-    Wayland[Wayland Support]
-    Stylix[Stylix Theme]
+### Module Dependencies
 
-    Desktop --> Hyprland
-    Hyprland --> Wayland
-    Desktop --> Stylix
-  ```
+```mermaid
+graph LR
+  Desktop[Desktop Module]
+  Hyprland[Hyprland]
+  Wayland[Wayland Support]
+  Stylix[Stylix Theme]
 
-  ### Data Flow
-  ```mermaid
-  sequenceDiagram
-    participant App
-    participant NodeExp as Node Exporter
-    participant Prom as Prometheus
-    participant Graf as Grafana
-
-    App->>NodeExp: Expose metrics
-    Prom->>NodeExp: Scrape (15s interval)
-    Graf->>Prom: Query metrics
-    Graf-->>User: Display dashboard
-  ```
+  Desktop --> Hyprland
+  Hyprland --> Wayland
+  Desktop --> Stylix
 ```
+
+### Data Flow
+
+```mermaid
+sequenceDiagram
+  participant App
+  participant NodeExp as Node Exporter
+  participant Prom as Prometheus
+  participant Graf as Grafana
+
+  App->>NodeExp: Expose metrics
+  Prom->>NodeExp: Scrape (15s interval)
+  Graf->>Prom: Query metrics
+  Graf-->>User: Display dashboard
+```
+
+````
 
 ### 6. Documentation Synchronization
 
@@ -390,7 +402,7 @@ Outdated Documentation:
    Status: MISSING ENTRIES
 
    Action: Generate changelog for recent commits
-```
+````
 
 ### 7. Example Collection
 
@@ -398,7 +410,7 @@ Outdated Documentation:
 
 **Example documentation**:
 
-```yaml
+````yaml
 Examples Collection:
 
 From: Live configurations
@@ -417,49 +429,53 @@ Generated Examples:
     enable = true;
     mode = "server";
   };
-  ```
+````
 
-  #### Multi-Host Monitoring
-  ```nix
-  # Monitoring server (p620)
-  features.monitoring = {
-    enable = true;
-    mode = "server";
-  };
+#### Multi-Host Monitoring
 
-  # Clients (razer, p510, samsung)
-  features.monitoring = {
-    enable = true;
-    mode = "client";
-    serverHost = "p620";
-  };
-  ```
+```nix
+# Monitoring server (p620)
+features.monitoring = {
+  enable = true;
+  mode = "server";
+};
 
-  ### Development Environment
-
-  #### Full Stack Development
-  ```nix
-  features.development = {
-    enable = true;
-    languages = {
-      python = true;
-      go = true;
-      rust = true;
-      javascript = true;
-    };
-  };
-  ```
-
-  #### Language-Specific
-  ```nix
-  features.development.languages.python = true;
-  environment.systemPackages = with pkgs; [
-    python311
-    python311Packages.pip
-    python311Packages.virtualenv
-  ];
-  ```
+# Clients (razer, p510, samsung)
+features.monitoring = {
+  enable = true;
+  mode = "client";
+  serverHost = "p620";
+};
 ```
+
+### Development Environment
+
+#### Full Stack Development
+
+```nix
+features.development = {
+  enable = true;
+  languages = {
+    python = true;
+    go = true;
+    rust = true;
+    javascript = true;
+  };
+};
+```
+
+#### Language-Specific
+
+```nix
+features.development.languages.python = true;
+environment.systemPackages = with pkgs; [
+  python311
+  python311Packages.pip
+  python311Packages.virtualenv
+];
+```
+
+````
 
 ### 8. Quick Reference Cards
 
@@ -495,28 +511,31 @@ Quick Reference Generation:
   # Monitoring
   just grafana-status    # Check Grafana
   just prometheus-status # Check Prometheus
-  ```
+````
 
-  ### Port Reference
-  | Service     | Port | Host | Access         |
-  |-------------|------|------|----------------|
-  | SSH         | 22   | All  | External       |
-  | Prometheus  | 9090 | P620 | VPN only       |
-  | Grafana     | 3001 | P620 | VPN only       |
-  | Node Exp    | 9100 | All  | Internal       |
+### Port Reference
 
-  ### Emergency Procedures
-  ```bash
-  # Rollback
-  sudo nixos-rebuild switch --rollback
+| Service    | Port | Host | Access   |
+| ---------- | ---- | ---- | -------- |
+| SSH        | 22   | All  | External |
+| Prometheus | 9090 | P620 | VPN only |
+| Grafana    | 3001 | P620 | VPN only |
+| Node Exp   | 9100 | All  | Internal |
 
-  # Emergency deploy
-  just emergency-deploy HOST
+### Emergency Procedures
 
-  # Check logs
-  journalctl -u SERVICE -f
-  ```
+```bash
+# Rollback
+sudo nixos-rebuild switch --rollback
+
+# Emergency deploy
+just emergency-deploy HOST
+
+# Check logs
+journalctl -u SERVICE -f
 ```
+
+````
 
 ## Workflow
 
@@ -549,12 +568,13 @@ Quick Reference Generation:
    - Add missing sections
    - Fix broken links
    - Commit changes
-```
+````
 
 ### Example Documentation Report
 
 ```markdown
 # Documentation Generation Report
+
 Generated: 2025-01-15 21:00:00
 
 ## Summary
@@ -567,18 +587,21 @@ Coverage: 95%
 ## Generated Documentation
 
 ### Module Documentation (15 files)
+
 - modules/services/prometheus/README.md ✅
 - modules/services/grafana/README.md ✅
 - modules/monitoring/node-exporter/README.md ✅
 - ... (12 more)
 
 ### Host Documentation (4 files)
+
 - hosts/p620/README.md ✅
 - hosts/p510/README.md ✅
 - hosts/razer/README.md ✅
 - hosts/samsung/README.md ✅
 
 ### Reference Documentation (6 files)
+
 - lib/README.md ✅
 - docs/ARCHITECTURE.md ✅
 - docs/EXAMPLES.md ✅
@@ -589,16 +612,19 @@ Coverage: 95%
 ## Documentation Coverage
 
 **Module Documentation**:
+
 - Total modules: 141
 - Documented: 134 (95%)
 - Missing docs: 7 (5%)
 
 **Code Examples**:
+
 - Total examples: 45
 - Tested: 45 (100%)
 - Working: 45 (100%)
 
 **Architecture Diagrams**:
+
 - Host relationships: ✅
 - Module dependencies: ✅
 - Data flows: ✅
@@ -736,6 +762,7 @@ just check-doc-links
 **Issue**: Documentation doesn't reflect code
 
 **Solution**:
+
 ```bash
 # Force regeneration
 /nix-docs --force --sync
@@ -749,6 +776,7 @@ just doc-status
 **Issue**: Documentation contains broken links
 
 **Solution**:
+
 ```bash
 # Find broken links
 just check-doc-links

@@ -51,12 +51,14 @@ nixos-system-upgrade
 ### Detection Mechanism
 
 **Hash-Based Change Detection:**
+
 - Calculates SHA256 hash of `flake.lock`
 - Compares with cached hash
 - Detects when inputs have changed
 - No external dependencies required
 
 **Why Hash-Based?**
+
 - Works with any Nix version
 - No network access needed during check
 - Deterministic and reliable
@@ -97,6 +99,7 @@ nixos-check-updates --details
 ```
 
 **Output Example:**
+
 ```
 === NixOS Update Checker Status ===
 
@@ -121,12 +124,14 @@ nixos-upgrade-test
 ```
 
 **What It Does:**
+
 1. Updates flake inputs (`nix flake update`)
 2. Builds new configuration
 3. Applies temporarily (`nixos-rebuild test`)
 4. **Changes lost on reboot** ✅
 
 **Perfect For:**
+
 - Testing new packages
 - Verifying compatibility
 - Checking for breaking changes
@@ -139,6 +144,7 @@ nixos-system-upgrade
 ```
 
 **What It Does:**
+
 1. Asks for confirmation (type "yes")
 2. Updates flake inputs
 3. Builds new configuration
@@ -194,6 +200,7 @@ sudo nixos-rebuild --rollback switch
 After testing updates:
 
 1. **Check Services:**
+
    ```bash
    systemctl status
    journalctl -p err -b  # Check for errors
@@ -205,6 +212,7 @@ After testing updates:
    - Verify custom scripts work
 
 3. **Check System:**
+
    ```bash
    nix-store --verify --check-contents
    df -h  # Check disk space
@@ -228,11 +236,13 @@ sudo journalctl -u nixos-update-checker.service -n 50
 ### Log Files
 
 **Check Log:**
+
 ```bash
 tail -f /var/lib/nixos-update-checker/check.log
 ```
 
 **Notification File:**
+
 ```bash
 cat /var/lib/nixos-update-checker/updates-available
 ```
@@ -254,6 +264,7 @@ nixos-check-updates --details
 **Symptom:** `nixos-check-updates` shows "up to date" but you know there are updates.
 
 **Solution:**
+
 ```bash
 # 1. Check cache file
 cat /var/lib/nixos-update-checker/flake.lock.cache
@@ -270,6 +281,7 @@ sudo systemctl start nixos-update-checker.service
 **Symptom:** Service logs show "Permission denied" or "No flake.lock found"
 
 **Solution:**
+
 ```bash
 # 1. Check permissions
 ls -ld /home/olafkfreund/ /home/olafkfreund/.config/
@@ -287,6 +299,7 @@ sudo -u nixos-update-checker ls /home/olafkfreund/.config/nixos/flake.lock
 **Symptom:** Service exits with errors
 
 **Debug Steps:**
+
 ```bash
 # 1. Check service status
 systemctl status nixos-update-checker.service
@@ -449,11 +462,13 @@ fi
 ## Support
 
 **Logs Location:**
+
 - Service logs: `journalctl -u nixos-update-checker.service`
 - Check log: `/var/lib/nixos-update-checker/check.log`
 - State directory: `/var/lib/nixos-update-checker/`
 
 **Configuration Files:**
+
 - Module: `modules/services/nixos-update-checker/default.nix`
 - Host config: `hosts/p620/configuration.nix` (line 428)
 - Service imports: `modules/services/default.nix` (line 31)

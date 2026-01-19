@@ -46,14 +46,14 @@ claude
 
 ## Command Syntax
 
-| Command | Purpose | Duration | Risk |
-|---------|---------|----------|------|
-| `/flake-update` | Update flake inputs | 10-15m | Med |
-| `/system-health-check` | Infrastructure audit | 5-10m | None |
-| `/update-claude-code` | Update Claude Code | 8-12m | Low |
-| `/update-package` | Update any package | 10-20m | Med |
-| `/deploy-all` | Deploy to all hosts | 5-15m | Med-High |
-| `/config-audit` | Quality audit | 15-25m | None |
+| Command                | Purpose              | Duration | Risk     |
+| ---------------------- | -------------------- | -------- | -------- |
+| `/flake-update`        | Update flake inputs  | 10-15m   | Med      |
+| `/system-health-check` | Infrastructure audit | 5-10m    | None     |
+| `/update-claude-code`  | Update Claude Code   | 8-12m    | Low      |
+| `/update-package`      | Update any package   | 10-20m   | Med      |
+| `/deploy-all`          | Deploy to all hosts  | 5-15m    | Med-High |
+| `/config-audit`        | Quality audit        | 15-25m   | None     |
 
 ## Common Workflows
 
@@ -273,22 +273,24 @@ docs/GITHUB-WORKFLOW.md       # GitHub workflow
 
 ## Host Information
 
-| Host | Role | Hardware | IP |
-|------|------|----------|-----|
-| P620 | Workstation/Monitoring | AMD Ryzen/ROCm | 192.168.1.x |
-| Razer | Mobile/Development | Intel/NVIDIA | 192.168.1.x |
-| P510 | Media Server | Intel Xeon/NVIDIA | 192.168.1.x |
-| Samsung | Mobile/Backup | Intel | 192.168.1.x |
+| Host    | Role                   | Hardware          | IP          |
+| ------- | ---------------------- | ----------------- | ----------- |
+| P620    | Workstation/Monitoring | AMD Ryzen/ROCm    | 192.168.1.x |
+| Razer   | Mobile/Development     | Intel/NVIDIA      | 192.168.1.x |
+| P510    | Media Server           | Intel Xeon/NVIDIA | 192.168.1.x |
+| Samsung | Mobile/Backup          | Intel             | 192.168.1.x |
 
 ### Critical Services
 
 **P620 (Monitoring Server):**
+
 - Prometheus (9090)
 - Grafana (3001)
 - Alertmanager (9093)
 - AI Services (Ollama)
 
 **P510 (Media Server):**
+
 - Plex
 - NZBGet
 - Tautulli

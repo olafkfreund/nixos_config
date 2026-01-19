@@ -26,13 +26,14 @@ This package provides Microsoft Defender for Endpoint for Linux systems running 
 ### Licensing Requirements
 
 Microsoft Defender for Endpoint requires one of:
+
 - Microsoft Defender for Endpoint subscription ($5-10/user/month)
 - Microsoft Defender for Servers (included with Azure Defender)
 - Microsoft 365 E5 or equivalent license
 
 ### Onboarding Requirements
 
-1. Access to Microsoft Defender portal (https://security.microsoft.com)
+1. Access to Microsoft Defender portal (<https://security.microsoft.com>)
 2. Onboarding package downloaded from portal
 3. Organizational ID for registration
 
@@ -76,16 +77,19 @@ See `modules/services/security/mdatp.nix` for complete service integration.
    - Download: `WindowsDefenderATPOnboardingPackage.zip`
 
 2. **Extract onboarding package**:
+
    ```bash
    unzip WindowsDefenderATPOnboardingPackage.zip
    ```
 
 3. **Run onboarding script**:
+
    ```bash
    sudo python3 MicrosoftDefenderATPOnboardingLinuxServer.py
    ```
 
 4. **Verify onboarding**:
+
    ```bash
    mdatp health --field healthy
    ```
@@ -144,25 +148,27 @@ Edit `/etc/opt/microsoft/mdatp/managed/mdatp_managed.json` for managed configura
 This package uses Nix's `buildFHSUserEnv` to create a complete Linux Standard Base environment. This approach:
 
 **Advantages:**
+
 - ✅ Maximum compatibility with Microsoft's binary
 - ✅ Minimal patching required
 - ✅ Works with hardcoded paths (`/opt/`, `/etc/opt/`)
 - ✅ Proven pattern for proprietary software
 
 **Trade-offs:**
+
 - ⚠️ Heavier resource usage (full FHS environment)
 - ⚠️ Less integrated with NixOS ecosystem
 - ⚠️ Isolated environment
 
 ### File Locations
 
-| Component | Location in FHS Environment |
-|---|---|
-| Main daemon | `/opt/microsoft/mdatp/sbin/wdavdaemon` |
-| Client tool | `/usr/bin/mdatp` (symlink) |
-| Configuration | `/etc/opt/microsoft/mdatp/` |
-| Logs | `/var/log/microsoft/mdatp/` |
-| Systemd service | `/lib/systemd/system/mdatp.service` |
+| Component       | Location in FHS Environment            |
+| --------------- | -------------------------------------- |
+| Main daemon     | `/opt/microsoft/mdatp/sbin/wdavdaemon` |
+| Client tool     | `/usr/bin/mdatp` (symlink)             |
+| Configuration   | `/etc/opt/microsoft/mdatp/`            |
+| Logs            | `/var/log/microsoft/mdatp/`            |
+| Systemd service | `/lib/systemd/system/mdatp.service`    |
 
 ## Troubleshooting
 
@@ -329,6 +335,7 @@ This package wrapper is licensed under the MIT License.
 ## Changelog
 
 ### Version 101.25102.0003-insiderfast (2025-01-10)
+
 - Initial NixOS package implementation
 - FHSUserEnv wrapper for binary compatibility
 - SHA256: `7723720b990d1e890eeba5e2a6beb4c92b04bde011359a96e2537ad85af5c9b2`
@@ -336,6 +343,7 @@ This package wrapper is licensed under the MIT License.
 ## Contributing
 
 Contributions welcome! Please ensure:
+
 - Follow NixOS packaging best practices
 - Test on multiple NixOS versions
 - Document any changes
@@ -344,6 +352,7 @@ Contributions welcome! Please ensure:
 ## Support
 
 For issues related to:
+
 - **NixOS package**: Open issue in this repository
 - **Microsoft Defender itself**: Contact Microsoft support
 - **General questions**: NixOS Discourse or Matrix channels

@@ -10,24 +10,24 @@ Custom slash commands automate complex NixOS workflows, embedding best practices
 
 ### Core Maintenance Commands
 
-| Command | Purpose | Frequency | Priority |
-|---------|---------|-----------|----------|
-| `/flake-update` | Update and deploy flake inputs | Weekly | High |
-| `/system-health-check` | Comprehensive infrastructure audit | Weekly | High |
-| `/deploy-all` | Deploy to all hosts with testing | As needed | High |
+| Command                | Purpose                            | Frequency | Priority |
+| ---------------------- | ---------------------------------- | --------- | -------- |
+| `/flake-update`        | Update and deploy flake inputs     | Weekly    | High     |
+| `/system-health-check` | Comprehensive infrastructure audit | Weekly    | High     |
+| `/deploy-all`          | Deploy to all hosts with testing   | As needed | High     |
 
 ### Package Management Commands
 
-| Command | Purpose | Frequency | Priority |
-|---------|---------|-----------|----------|
-| `/update-package` | Update specific package | As needed | Medium |
-| `/update-claude-code` | Update Claude Code specifically | Monthly | Medium |
+| Command               | Purpose                         | Frequency | Priority |
+| --------------------- | ------------------------------- | --------- | -------- |
+| `/update-package`     | Update specific package         | As needed | Medium   |
+| `/update-claude-code` | Update Claude Code specifically | Monthly   | Medium   |
 
 ### Quality Assurance Commands
 
-| Command | Purpose | Frequency | Priority |
-|---------|---------|-----------|----------|
-| `/config-audit` | Audit for anti-patterns | Monthly | Medium |
+| Command         | Purpose                 | Frequency | Priority |
+| --------------- | ----------------------- | --------- | -------- |
+| `/config-audit` | Audit for anti-patterns | Monthly   | Medium   |
 
 ## Quick Start
 
@@ -44,15 +44,18 @@ claude
 ## Command Categories
 
 ### 1. System Maintenance
+
 - **`/flake-update`** - Safe flake updates with testing and rollback
 - **`/system-health-check`** - Comprehensive health monitoring
 - **`/deploy-all`** - Coordinated multi-host deployment
 
 ### 2. Package Updates
+
 - **`/update-package`** - Generic package update workflow
 - **`/update-claude-code`** - Specialized Claude Code updates
 
 ### 3. Quality Control
+
 - **`/config-audit`** - Configuration quality and compliance
 
 ## Why Use Custom Commands?
@@ -108,17 +111,20 @@ docs/Nixos/
 ### First Time Setup
 
 1. **Verify commands are available:**
+
    ```bash
    ls -la .claude/commands/
    ```
 
 2. **Test a command:**
+
    ```bash
    claude
    /system-health-check
    ```
 
 3. **Review command documentation:**
+
    ```bash
    cat .claude/commands/flake-update.md
    ```
@@ -305,6 +311,7 @@ cat .claude/commands/COMMAND_NAME.md
 ## Future Enhancements
 
 Planned command additions:
+
 - `/backup-verify` - Backup status and verification
 - `/security-audit` - Security-focused audit
 - `/performance-analysis` - Performance optimization

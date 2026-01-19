@@ -67,11 +67,11 @@ in
     firewall = {
       enable = lib.mkForce true;
       allowedTCPPorts = [
-        22    # SSH - critical for remote access
-        3389  # RDP - for remote desktop (also set by features.gnome-remote-desktop)
-        5900  # VNC - for remote desktop (also set by features.gnome-remote-desktop)
+        22 # SSH - critical for remote access
+        3389 # RDP - for remote desktop (also set by features.gnome-remote-desktop)
+        5900 # VNC - for remote desktop (also set by features.gnome-remote-desktop)
       ];
-      allowPing = true;  # Enable ICMP for network diagnostics
+      allowPing = true; # Enable ICMP for network diagnostics
     };
   };
 

@@ -54,12 +54,14 @@ graph TD
 **Purpose**: Safely update NixOS flake inputs with testing and deployment
 
 **When to Use**:
+
 - Weekly maintenance schedule
 - After upstream security updates
 - When new features needed from nixpkgs
 - Before major infrastructure changes
 
 **Key Features**:
+
 - Pre-update system checks
 - Parallel host testing
 - Smart deployment (only changed hosts)
@@ -76,12 +78,14 @@ graph TD
 **Purpose**: Comprehensive health assessment across all infrastructure
 
 **When to Use**:
+
 - Weekly scheduled checks
 - After major deployments
 - When investigating issues
 - Before starting new projects
 
 **Key Features**:
+
 - Multi-host connectivity testing
 - Service status verification
 - Resource utilization analysis
@@ -99,12 +103,14 @@ graph TD
 **Purpose**: Update Claude Code package with proper testing
 
 **When to Use**:
+
 - New release available
 - Bug fixes needed
 - Feature updates desired
 - Monthly maintenance
 
 **Key Features**:
+
 - Automatic version research
 - Hash calculation
 - Multi-host testing
@@ -120,12 +126,14 @@ graph TD
 **Purpose**: Update any package in the configuration
 
 **When to Use**:
+
 - Security updates
 - Bug fixes
 - Feature requirements
 - Dependency updates
 
 **Key Features**:
+
 - Flexible package selection
 - Multiple update strategies
 - Comprehensive testing
@@ -141,12 +149,14 @@ graph TD
 **Purpose**: Deploy configuration changes to all hosts
 
 **When to Use**:
+
 - After configuration changes
 - Post-testing deployment
 - System-wide updates
 - Coordinated rollouts
 
 **Key Features**:
+
 - Pre-deployment validation
 - Multiple deployment strategies
 - Post-deployment verification
@@ -163,12 +173,14 @@ graph TD
 **Purpose**: Audit configuration for anti-patterns and quality
 
 **When to Use**:
+
 - Monthly quality checks
 - Before major releases
 - After large changes
 - Code review processes
 
 **Key Features**:
+
 - Anti-pattern detection
 - Security audit
 - Module system review
@@ -183,14 +195,14 @@ graph TD
 
 ## Command Comparison Matrix
 
-| Command | Frequency | Duration | Risk | Auto-Deploy | GitHub Integration |
-|---------|-----------|----------|------|-------------|-------------------|
-| `/flake-update` | Weekly | 10-15m | Medium | Yes | Yes |
-| `/system-health-check` | Weekly | 5-10m | None | No | Optional |
-| `/update-claude-code` | Monthly | 8-12m | Low | Yes | Yes |
-| `/update-package` | As needed | 10-20m | Medium | Yes | Yes |
-| `/deploy-all` | As needed | 5-15m | Med-High | Yes | Optional |
-| `/config-audit` | Monthly | 15-25m | None | No | Yes |
+| Command                | Frequency | Duration | Risk     | Auto-Deploy | GitHub Integration |
+| ---------------------- | --------- | -------- | -------- | ----------- | ------------------ |
+| `/flake-update`        | Weekly    | 10-15m   | Medium   | Yes         | Yes                |
+| `/system-health-check` | Weekly    | 5-10m    | None     | No          | Optional           |
+| `/update-claude-code`  | Monthly   | 8-12m    | Low      | Yes         | Yes                |
+| `/update-package`      | As needed | 10-20m   | Medium   | Yes         | Yes                |
+| `/deploy-all`          | As needed | 5-15m    | Med-High | Yes         | Optional           |
+| `/config-audit`        | Monthly   | 15-25m   | None     | No          | Yes                |
 
 ## Integration with Infrastructure
 
@@ -255,6 +267,7 @@ Commands reference infrastructure documentation:
 ### Creating New Commands
 
 1. **Identify Need**
+
    ```bash
    # What repetitive task needs automation?
    # What workflow needs documentation?
@@ -262,8 +275,10 @@ Commands reference infrastructure documentation:
    ```
 
 2. **Design Command**
+
    ```markdown
    # Command structure:
+
    - Task overview
    - Prerequisites
    - Step-by-step workflow
@@ -274,6 +289,7 @@ Commands reference infrastructure documentation:
    ```
 
 3. **Implement Command**
+
    ```bash
    # Create command file
    vim .claude/commands/new-command.md
@@ -284,6 +300,7 @@ Commands reference infrastructure documentation:
    ```
 
 4. **Test Command**
+
    ```bash
    # Test execution
    claude
@@ -295,6 +312,7 @@ Commands reference infrastructure documentation:
    ```
 
 5. **Document Command**
+
    ```bash
    # Add to docs/Nixos/
    vim docs/Nixos/New-Command-Guide.md
@@ -304,6 +322,7 @@ Commands reference infrastructure documentation:
    ```
 
 6. **Create GitHub Issue**
+
    ```bash
    /new_task
    # Track command creation
@@ -339,6 +358,7 @@ git commit -m "feat(commands): improve /COMMAND workflow"
 ### Command Usage
 
 ✅ **Do:**
+
 - Read command documentation first
 - Review command output carefully
 - Follow all validation steps
@@ -347,6 +367,7 @@ git commit -m "feat(commands): improve /COMMAND workflow"
 - Keep commands up-to-date
 
 ❌ **Don't:**
+
 - Skip prerequisite checks
 - Ignore warning messages
 - Deploy without testing
@@ -356,6 +377,7 @@ git commit -m "feat(commands): improve /COMMAND workflow"
 ### Command Development
 
 ✅ **Do:**
+
 - Follow existing patterns
 - Include comprehensive error handling
 - Add rollback procedures
@@ -364,6 +386,7 @@ git commit -m "feat(commands): improve /COMMAND workflow"
 - Keep commands maintainable
 
 ❌ **Don't:**
+
 - Create overly complex commands
 - Skip error handling
 - Forget rollback procedures
@@ -375,6 +398,7 @@ git commit -m "feat(commands): improve /COMMAND workflow"
 ### Built-in Safeguards
 
 1. **Prerequisites Checks**
+
    ```bash
    # Commands verify before executing:
    - Git status clean
@@ -384,6 +408,7 @@ git commit -m "feat(commands): improve /COMMAND workflow"
    ```
 
 2. **Validation Steps**
+
    ```bash
    # Commands validate at each stage:
    just check-syntax     # Syntax errors
@@ -392,6 +417,7 @@ git commit -m "feat(commands): improve /COMMAND workflow"
    ```
 
 3. **Rollback Procedures**
+
    ```bash
    # Every command includes:
    - Generation rollback: nixos-rebuild switch --rollback
@@ -400,6 +426,7 @@ git commit -m "feat(commands): improve /COMMAND workflow"
    ```
 
 4. **Monitoring Integration**
+
    ```bash
    # Commands verify deployment health:
    - Service status checks
@@ -410,15 +437,15 @@ git commit -m "feat(commands): improve /COMMAND workflow"
 
 ### Risk Mitigation
 
-| Risk | Mitigation |
-|------|------------|
-| Syntax errors | Pre-deployment syntax validation |
-| Build failures | Comprehensive testing before deploy |
-| Service failures | Post-deployment verification |
-| Configuration drift | Declarative configuration + git |
-| Security issues | Secrets management + hardening checks |
-| Performance issues | Resource monitoring + alerts |
-| Human error | Automated workflows + validation |
+| Risk                | Mitigation                            |
+| ------------------- | ------------------------------------- |
+| Syntax errors       | Pre-deployment syntax validation      |
+| Build failures      | Comprehensive testing before deploy   |
+| Service failures    | Post-deployment verification          |
+| Configuration drift | Declarative configuration + git       |
+| Security issues     | Secrets management + hardening checks |
+| Performance issues  | Resource monitoring + alerts          |
+| Human error         | Automated workflows + validation      |
 
 ## Troubleshooting
 
@@ -472,12 +499,12 @@ git log --oneline -10
 
 ### Command Execution Speed
 
-| Optimization | Impact |
-|--------------|--------|
-| Parallel testing | 75% faster |
+| Optimization     | Impact               |
+| ---------------- | -------------------- |
+| Parallel testing | 75% faster           |
 | Smart deployment | Skip unchanged hosts |
-| Binary caching | Faster builds |
-| Local testing | No network overhead |
+| Binary caching   | Faster builds        |
+| Local testing    | No network overhead  |
 
 ### Workflow Efficiency
 
@@ -618,6 +645,7 @@ The NixOS custom command system provides:
 ---
 
 **Next Steps:**
+
 1. Review individual command guides
 2. Try commands in your workflow
 3. Customize commands for your needs

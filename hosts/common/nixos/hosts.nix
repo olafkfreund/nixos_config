@@ -9,9 +9,10 @@ let
   # Format: "ip hostname"
   hostsString = with builtins;
     if (sharedVars.network ? hostMappings && sharedVars.network.hostMappings != { }) then
-      concatStringsSep "\n" (
-        attrValues (mapAttrs (ip: hostname: "${ip} ${hostname}") sharedVars.network.hostMappings)
-      )
+      concatStringsSep "\n"
+        (
+          attrValues (mapAttrs (ip: hostname: "${ip} ${hostname}") sharedVars.network.hostMappings)
+        )
     else "";
 in
 {

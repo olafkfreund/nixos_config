@@ -12,6 +12,7 @@ Your Claude Code setup has been completely optimized with **5 powerful slash com
 ### Time Savings
 
 **Before:**
+
 - Module creation: 30-60 minutes
 - Deployment: 10-20 minutes
 - Code review: 15-30 minutes
@@ -19,6 +20,7 @@ Your Claude Code setup has been completely optimized with **5 powerful slash com
 - **Total: 85-170 minutes per task**
 
 **After (with slash commands):**
+
 - Module creation: 2 minutes (`/nix-module`)
 - Deployment: 2.5 minutes (`/nix-deploy`)
 - Code review: 1 minute (`/review`)
@@ -90,28 +92,33 @@ All slash commands are already installed and ready to use. No setup required!
 ### Your First Commands
 
 **1. See available commands:**
+
 ```
 /nix-help
 ```
 
 **2. Check your tasks:**
+
 ```
 /check_tasks
 ```
 
 **3. Create a new module:**
+
 ```
 /nix-module
 Create monitoring/example-exporter
 ```
 
 **4. Deploy to a host:**
+
 ```
 /nix-deploy
 Deploy to p620
 ```
 
 **5. Run security audit:**
+
 ```
 /nix-security
 ```
@@ -123,12 +130,14 @@ That's it! You're using optimized Claude Code for NixOS! 🎉
 ### Module Development
 
 **`/nix-module`**
+
 ```
 /nix-module
 Create services/myservice module
 ```
 
 **Features:**
+
 - ✅ Automatic best practices
 - ✅ Security hardening included
 - ✅ Syntax validation
@@ -138,12 +147,14 @@ Create services/myservice module
 ### Code Quality
 
 **`/nix-fix`**
+
 ```
 /nix-fix
 Fix modules/services/myservice.nix
 ```
 
 **Fixes:**
+
 - ❌ mkIf true → direct assignment
 - ❌ Trivial wrappers → lib functions
 - ❌ Evaluation secrets → runtime loading
@@ -151,12 +162,14 @@ Fix modules/services/myservice.nix
 - ⏱️ 1 minute total
 
 **`/review`**
+
 ```
 /review
 Review hosts/p620/configuration.nix
 ```
 
 **Checks:**
+
 - ✅ Best practices (PATTERNS.md)
 - ❌ Anti-patterns (NIXOS-ANTI-PATTERNS.md)
 - 🔒 Security issues
@@ -166,11 +179,13 @@ Review hosts/p620/configuration.nix
 ### Security
 
 **`/nix-security`**
+
 ```
 /nix-security
 ```
 
 **Audits:**
+
 - 🔒 Service isolation (DynamicUser)
 - 🛡️ Systemd hardening
 - 🔑 Secret management
@@ -182,6 +197,7 @@ Review hosts/p620/configuration.nix
 ### Deployment
 
 **`/nix-deploy`**
+
 ```
 # Standard deployment
 /nix-deploy
@@ -201,6 +217,7 @@ Deploy to all hosts
 ```
 
 **Features:**
+
 - ✅ Automatic validation
 - ✅ Change detection (skips if unchanged)
 - ✅ Security checks
@@ -211,11 +228,13 @@ Deploy to all hosts
 ### Optimization
 
 **`/nix-optimize`**
+
 ```
 /nix-optimize
 ```
 
 **Analyzes:**
+
 - ⚡ Build performance (IFD, evaluation)
 - 💾 Disk usage (GC, store optimization)
 - 🧠 Memory (swap, kernel tuning)
@@ -227,12 +246,14 @@ Deploy to all hosts
 ### GitHub Integration
 
 **`/new_task`** - Create issue
+
 ```
 /new_task
 Add PostgreSQL monitoring
 ```
 
 **`/check_tasks`** - Review tasks
+
 ```
 /check_tasks
 ```
@@ -240,6 +261,7 @@ Add PostgreSQL monitoring
 ### Help
 
 **`/nix-help`** - Show all commands
+
 ```
 /nix-help
 ```
@@ -361,14 +383,14 @@ Deploy to p620
 
 ### Command Performance
 
-| Command | Time | Improvement |
-|---------|------|-------------|
-| `/nix-module` | 2 min | 93% faster |
-| `/nix-fix` | 1 min | 95% faster |
-| `/review` | 1 min | 93% faster |
-| `/nix-security` | 1 min | 97% faster |
-| `/nix-deploy` | 2.5 min | 87% faster |
-| `/nix-optimize` | 2 min | 95% faster |
+| Command         | Time    | Improvement |
+| --------------- | ------- | ----------- |
+| `/nix-module`   | 2 min   | 93% faster  |
+| `/nix-fix`      | 1 min   | 95% faster  |
+| `/review`       | 1 min   | 93% faster  |
+| `/nix-security` | 1 min   | 97% faster  |
+| `/nix-deploy`   | 2.5 min | 87% faster  |
+| `/nix-optimize` | 2 min   | 95% faster  |
 
 ### Overall Improvement
 
@@ -382,17 +404,20 @@ Deploy to p620
 ### With Existing Tools
 
 **GitHub CLI (`gh`):**
+
 - `/new_task` creates GitHub issues
 - `/check_tasks` reviews open issues
 - Auto-links commits to issues
 - PR creation integrated
 
 **Just Commands:**
+
 - Slash commands use `just` internally
 - Compatible with all existing commands
 - Adds smart detection and validation
 
 **Documentation:**
+
 - All commands reference docs/PATTERNS.md
 - Checks against docs/NIXOS-ANTI-PATTERNS.md
 - Uses .claude/CLAUDE.md for context
@@ -426,6 +451,7 @@ Run multiple commands in sequence:
 ### Smart Defaults
 
 Commands choose best options automatically:
+
 - `/nix-deploy` detects changes
 - `/nix-module` follows best practices
 - `/nix-security` runs comprehensive audit
@@ -434,6 +460,7 @@ Commands choose best options automatically:
 ### Context Awareness
 
 Commands understand your codebase:
+
 - Know your architecture (141+ modules)
 - Understand your patterns (template system)
 - Reference your documentation (PATTERNS.md)
@@ -457,11 +484,13 @@ cat .claude/commands/nix-help.md
 ### Command Takes Too Long
 
 All commands have target times:
+
 - `/nix-module`: 2 min
 - `/nix-fix`: 1 min
 - `/nix-deploy`: 2.5 min
 
 If slower, check:
+
 - Network connectivity (for deployment)
 - Disk space (for builds)
 - System resources (memory, CPU)
@@ -469,6 +498,7 @@ If slower, check:
 ### Command Output Unexpected
 
 Commands reference documentation:
+
 - Read docs/PATTERNS.md for best practices
 - Check docs/NIXOS-ANTI-PATTERNS.md for issues
 - Review .claude/CLAUDE.md for context
@@ -582,6 +612,7 @@ You'll know the optimization is successful when:
 ### Specific Questions
 
 Just ask Claude Code:
+
 - "How do I create a new module?"
 - "What's the fastest way to deploy?"
 - "How do I fix security issues?"
@@ -596,7 +627,7 @@ Just ask Claude Code:
 
 ---
 
-## 🚀 You're Ready!
+## 🚀 You're Ready
 
 Your Claude Code setup is now fully optimized for NixOS development. Start with:
 

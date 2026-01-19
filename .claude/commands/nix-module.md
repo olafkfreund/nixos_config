@@ -5,6 +5,7 @@ Create a new NixOS module following best practices with automatic validation.
 ## Quick Start
 
 Just tell me:
+
 1. Module name (e.g., "monitoring/postgres-exporter" or "services/myservice")
 2. Brief description of what it does
 
@@ -13,14 +14,17 @@ I'll handle the rest automatically.
 ## What I'll Do
 
 ### 1. Read Best Practices (Automatic)
+
 - Read @docs/PATTERNS.md → Module System Patterns
 - Read @docs/NIXOS-ANTI-PATTERNS.md → What to avoid
 - Understand your repository structure
 
 ### 2. Create Module File
+
 Location: `modules/{type}/{name}.nix`
 
 Using this proven template:
+
 ```nix
 { config, lib, pkgs, ... }:
 with lib; let
@@ -81,12 +85,15 @@ in {
 ```
 
 ### 3. Update Module Imports
+
 Add to `modules/default.nix` in appropriate section.
 
 ### 4. Validate Automatically
+
 Run: `just check-syntax` and `just test-modules`
 
 ### 5. Provide Usage Example
+
 Show example in host configuration with all options.
 
 ## Anti-Patterns I'll Avoid
@@ -111,6 +118,7 @@ Show example in host configuration with all options.
 ## Speed Optimization
 
 This command completes in **under 2 minutes**:
+
 - 30s: Read documentation and understand context
 - 60s: Generate module with proper patterns
 - 30s: Validate and test

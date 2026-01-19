@@ -15,17 +15,20 @@ This document provides a complete index of all available custom commands with qu
 ### First Time Setup
 
 1. **Verify installation:**
+
    ```bash
    ls -la .claude/commands/
    # Should show 10 command files
    ```
 
 2. **Read documentation:**
+
    ```bash
    cat docs/Nixos/README.md
    ```
 
 3. **Try your first command:**
+
    ```bash
    claude
    /system-health-check
@@ -52,18 +55,20 @@ This document provides a complete index of all available custom commands with qu
 ### System Maintenance Commands
 
 #### `/flake-update` - Flake Input Management
+
 **File:** `.claude/commands/flake-update.md`
 **Purpose:** Safely update NixOS flake inputs with testing and deployment
 
-| Attribute | Value |
-|-----------|-------|
-| **Frequency** | Weekly |
-| **Duration** | 10-15 minutes |
-| **Risk Level** | Medium |
-| **Auto-Deploy** | Yes |
-| **GitHub Integration** | Yes |
+| Attribute              | Value         |
+| ---------------------- | ------------- |
+| **Frequency**          | Weekly        |
+| **Duration**           | 10-15 minutes |
+| **Risk Level**         | Medium        |
+| **Auto-Deploy**        | Yes           |
+| **GitHub Integration** | Yes           |
 
 **Key Features:**
+
 - Pre-update system checks
 - Parallel host testing
 - Smart deployment (only changed hosts)
@@ -72,6 +77,7 @@ This document provides a complete index of all available custom commands with qu
 - Detailed commit documentation
 
 **When to Use:**
+
 - Weekly maintenance schedule
 - After upstream security updates
 - When new features needed from nixpkgs
@@ -80,18 +86,20 @@ This document provides a complete index of all available custom commands with qu
 ---
 
 #### `/system-health-check` - Infrastructure Monitoring
+
 **File:** `.claude/commands/system-health-check.md`
 **Purpose:** Comprehensive health assessment across all infrastructure
 
-| Attribute | Value |
-|-----------|-------|
-| **Frequency** | Weekly |
-| **Duration** | 5-10 minutes |
-| **Risk Level** | None (read-only) |
-| **Auto-Deploy** | No |
-| **GitHub Integration** | Optional |
+| Attribute              | Value            |
+| ---------------------- | ---------------- |
+| **Frequency**          | Weekly           |
+| **Duration**           | 5-10 minutes     |
+| **Risk Level**         | None (read-only) |
+| **Auto-Deploy**        | No               |
+| **GitHub Integration** | Optional         |
 
 **Key Features:**
+
 - Multi-host connectivity testing
 - Service status verification
 - Resource utilization analysis
@@ -101,6 +109,7 @@ This document provides a complete index of all available custom commands with qu
 - Comprehensive report generation
 
 **When to Use:**
+
 - Weekly scheduled checks
 - After major deployments
 - When investigating issues
@@ -109,18 +118,20 @@ This document provides a complete index of all available custom commands with qu
 ---
 
 #### `/deploy-all` - Multi-Host Deployment
+
 **File:** `.claude/commands/deploy-all.md`
 **Purpose:** Deploy configuration changes to all hosts with comprehensive testing
 
-| Attribute | Value |
-|-----------|-------|
-| **Frequency** | As needed |
-| **Duration** | 5-15 minutes |
-| **Risk Level** | Medium-High |
-| **Auto-Deploy** | Yes |
-| **GitHub Integration** | Optional |
+| Attribute              | Value        |
+| ---------------------- | ------------ |
+| **Frequency**          | As needed    |
+| **Duration**           | 5-15 minutes |
+| **Risk Level**         | Medium-High  |
+| **Auto-Deploy**        | Yes          |
+| **GitHub Integration** | Optional     |
 
 **Key Features:**
+
 - Pre-deployment validation
 - Multiple deployment strategies (parallel/sequential/phased)
 - Post-deployment verification
@@ -129,6 +140,7 @@ This document provides a complete index of all available custom commands with qu
 - Deployment documentation
 
 **When to Use:**
+
 - After configuration changes
 - Post-testing deployment
 - System-wide updates
@@ -139,18 +151,20 @@ This document provides a complete index of all available custom commands with qu
 ### Package Management Commands
 
 #### `/update-claude-code` - Claude Code Updates
+
 **File:** `.claude/commands/update-claude-code.md`
 **Purpose:** Update Claude Code package with proper testing
 
-| Attribute | Value |
-|-----------|-------|
-| **Frequency** | Monthly |
-| **Duration** | 8-12 minutes |
-| **Risk Level** | Low |
-| **Auto-Deploy** | Yes |
-| **GitHub Integration** | Yes |
+| Attribute              | Value        |
+| ---------------------- | ------------ |
+| **Frequency**          | Monthly      |
+| **Duration**           | 8-12 minutes |
+| **Risk Level**         | Low          |
+| **Auto-Deploy**        | Yes          |
+| **GitHub Integration** | Yes          |
 
 **Key Features:**
+
 - Automatic version research
 - Hash calculation
 - Multi-host testing
@@ -158,6 +172,7 @@ This document provides a complete index of all available custom commands with qu
 - Deployment verification
 
 **When to Use:**
+
 - New release available
 - Bug fixes needed
 - Feature updates desired
@@ -166,18 +181,20 @@ This document provides a complete index of all available custom commands with qu
 ---
 
 #### `/update-package` - Generic Package Updates
+
 **File:** `.claude/commands/update-package.md`
 **Purpose:** Update any package in the configuration
 
-| Attribute | Value |
-|-----------|-------|
-| **Frequency** | As needed |
-| **Duration** | 10-20 minutes |
-| **Risk Level** | Medium |
-| **Auto-Deploy** | Yes |
-| **GitHub Integration** | Yes |
+| Attribute              | Value         |
+| ---------------------- | ------------- |
+| **Frequency**          | As needed     |
+| **Duration**           | 10-20 minutes |
+| **Risk Level**         | Medium        |
+| **Auto-Deploy**        | Yes           |
+| **GitHub Integration** | Yes           |
 
 **Key Features:**
+
 - Flexible package selection
 - Multiple update strategies
 - Comprehensive testing
@@ -185,6 +202,7 @@ This document provides a complete index of all available custom commands with qu
 - Rollback procedures
 
 **When to Use:**
+
 - Security updates
 - Bug fixes
 - Feature requirements
@@ -195,18 +213,20 @@ This document provides a complete index of all available custom commands with qu
 ### Quality Assurance Commands
 
 #### `/config-audit` - Configuration Quality Audit
+
 **File:** `.claude/commands/config-audit.md`
 **Purpose:** Audit configuration for anti-patterns and quality
 
-| Attribute | Value |
-|-----------|-------|
-| **Frequency** | Monthly |
-| **Duration** | 15-25 minutes |
-| **Risk Level** | None (analysis only) |
-| **Auto-Deploy** | No |
-| **GitHub Integration** | Yes |
+| Attribute              | Value                |
+| ---------------------- | -------------------- |
+| **Frequency**          | Monthly              |
+| **Duration**           | 15-25 minutes        |
+| **Risk Level**         | None (analysis only) |
+| **Auto-Deploy**        | No                   |
+| **GitHub Integration** | Yes                  |
 
 **Key Features:**
+
 - Anti-pattern detection
 - Security audit
 - Module system review
@@ -216,6 +236,7 @@ This document provides a complete index of all available custom commands with qu
 - Issue creation for findings
 
 **When to Use:**
+
 - Monthly quality checks
 - Before major releases
 - After large changes
@@ -228,10 +249,12 @@ This document provides a complete index of all available custom commands with qu
 ### Core Documentation Files
 
 #### `README.md`
+
 **Location:** `docs/Nixos/README.md`
 **Size:** 7.8 KB
 
 **Contents:**
+
 - Command system overview
 - Quick start guide
 - Command categories
@@ -246,10 +269,12 @@ This document provides a complete index of all available custom commands with qu
 ---
 
 #### `Command-System-Overview.md`
+
 **Location:** `docs/Nixos/Command-System-Overview.md`
 **Size:** 15 KB
 
 **Contents:**
+
 - Complete architecture explanation
 - Command catalog with detailed descriptions
 - Integration with infrastructure
@@ -265,10 +290,12 @@ This document provides a complete index of all available custom commands with qu
 ---
 
 #### `Quick-Reference.md`
+
 **Location:** `docs/Nixos/Quick-Reference.md`
 **Size:** 7.6 KB
 
 **Contents:**
+
 - Command cheat sheet
 - Common workflows
 - Just commands reference
@@ -283,10 +310,12 @@ This document provides a complete index of all available custom commands with qu
 ---
 
 #### `COMMANDS-INDEX.md`
+
 **Location:** `docs/Nixos/COMMANDS-INDEX.md` (this file)
 **Size:** Variable
 
 **Contents:**
+
 - Complete command index
 - Command details and attributes
 - Documentation index
@@ -443,14 +472,14 @@ Commands reference:
 
 ## Command Comparison Matrix
 
-| Command | Weekly | Monthly | As Needed | Duration | Risk | GitHub |
-|---------|--------|---------|-----------|----------|------|--------|
-| `/flake-update` | ✅ | | | 10-15m | Med | ✅ |
-| `/system-health-check` | ✅ | | | 5-10m | None | Optional |
-| `/update-claude-code` | | ✅ | | 8-12m | Low | ✅ |
-| `/update-package` | | | ✅ | 10-20m | Med | ✅ |
-| `/deploy-all` | | | ✅ | 5-15m | Med-High | Optional |
-| `/config-audit` | | ✅ | | 15-25m | None | ✅ |
+| Command                | Weekly | Monthly | As Needed | Duration | Risk     | GitHub   |
+| ---------------------- | ------ | ------- | --------- | -------- | -------- | -------- |
+| `/flake-update`        | ✅     |         |           | 10-15m   | Med      | ✅       |
+| `/system-health-check` | ✅     |         |           | 5-10m    | None     | Optional |
+| `/update-claude-code`  |        | ✅      |           | 8-12m    | Low      | ✅       |
+| `/update-package`      |        |         | ✅        | 10-20m   | Med      | ✅       |
+| `/deploy-all`          |        |         | ✅        | 5-15m    | Med-High | Optional |
+| `/config-audit`        |        | ✅      |           | 15-25m   | None     | ✅       |
 
 ## Productivity Metrics
 
@@ -510,6 +539,7 @@ Commands reference:
 ### Command Usage
 
 ✅ **Do:**
+
 - Read command documentation first
 - Follow all validation steps
 - Monitor after deployment
@@ -517,6 +547,7 @@ Commands reference:
 - Review command output
 
 ❌ **Don't:**
+
 - Skip prerequisite checks
 - Ignore warnings
 - Deploy without testing
@@ -525,12 +556,14 @@ Commands reference:
 ### Customization
 
 ✅ **Do:**
+
 - Customize for your needs
 - Add new commands
 - Improve existing workflows
 - Share improvements
 
 ❌ **Don't:**
+
 - Remove safety checks
 - Skip validation steps
 - Bypass GitHub integration
