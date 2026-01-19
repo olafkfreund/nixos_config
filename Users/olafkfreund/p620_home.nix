@@ -180,6 +180,9 @@
     # Kosli CLI - Compliance monitoring and DevOps workflows
     pkgs.customPkgs.kosli-cli
 
+    # Aurynk - Android Device Manager
+    pkgs.customPkgs.aurynk
+
     # Glim - GitLab CI/CD TUI monitoring
     pkgs.glim
 

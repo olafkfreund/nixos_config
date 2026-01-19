@@ -142,6 +142,9 @@ in
     # Kosli CLI - Compliance monitoring and DevOps workflows
     customPkgs.kosli-cli
 
+    # Aurynk - Android Device Manager
+    customPkgs.aurynk
+
     wayfarer # Screen recorder for GNOME/Wayland/pipewire
   ];
 
