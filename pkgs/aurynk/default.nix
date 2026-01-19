@@ -52,6 +52,19 @@ python3.pkgs.buildPythonApplication rec {
     makeWrapperArgs+=(" --prefix PATH : ${lib.makeBinPath [ android-tools scrcpy ]}")
   '';
 
+  postInstall = ''
+    # Replace the upstream shell script with a proper python entry point
+    # This ensures the python environment is correctly resolved by the wrapper
+    cat > $out/bin/aurynk <<EOF
+    #!/usr/bin/env python3
+    import sys
+    from aurynk.application import main
+    if __name__ == "__main__":
+        sys.exit(main())
+    EOF
+    chmod +x $out/bin/aurynk
+  '';
+
   meta = with lib; {
     description = "Android Device Manager for Linux with wireless pairing and device management";
     homepage = "https://github.com/IshuSinghSE/aurynk";
