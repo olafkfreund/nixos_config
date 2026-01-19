@@ -37,6 +37,7 @@ pkgs.mkShell {
   ];
 
   shellHook = ''
+    export PATH=$PWD/scripts:$PATH
     echo "🚀 NixOS Development Environment v2.0"
     echo ""
     echo "📋 Available Commands:"

@@ -24,14 +24,6 @@
 
   # Centralized network mappings (100% identical across all hosts)
   network = {
-    hostMappings = {
-      "192.168.1.127" = "p510";
-      "192.168.1.188" = "razer"; # Updated to current wired IP
-      "192.168.1.97" = "p620";
-      "192.168.1.90" = "samsung"; # Samsung host
-      "192.168.1.246" = "hp";
-      "192.168.1.222" = "dex5550";
-    };
   };
 
   # Base environment variables (85% common across hosts)

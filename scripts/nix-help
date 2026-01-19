@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+# nix-help - Display NixOS development commands help
+
+# Colors
+BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BOLD='\033[1m'
+NC='\033[0m' # No Color
+
+# Determine the directory where the script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+HELP_FILE="$PROJECT_ROOT/.gemini/commands/nix-help.md"
+
+if [ -f "$HELP_FILE" ]; then
+    # If glow is installed, use it for markdown rendering
+    if command -v glow &> /dev/null; then
+        glow "$HELP_FILE"
+    else
+        # Fallback to cat
+        cat "$HELP_FILE"
+    fi
+else
+    echo -e "${YELLOW}Help file not found at: $HELP_FILE${NC}"
+    echo -e "Displaying basic help:"
+    echo
+    echo -e "${BOLD}NixOS Development Commands${NC}"
+    echo -e "${GREEN}nix-deploy${NC}          Smart deployment"
+    echo -e "${GREEN}nix-module${NC}          Create new module"
+    echo -e "${GREEN}nix-fix${NC}             Fix anti-patterns"
+    echo -e "${GREEN}nix-security${NC}        Security audit"
+    echo -e "${GREEN}nix-review${NC}          Code review"
+    echo -e "${GREEN}nix-validate${NC}        Validate configuration"
+    echo -e "${GREEN}nix-test${NC}            Run tests"
+    echo -e "${GREEN}nix-info${NC}            System info"
+    echo -e "${GREEN}nix-clean${NC}           System cleanup"
+fi
