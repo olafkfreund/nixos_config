@@ -11,11 +11,7 @@
   whatsapp-mcp = pkgs.callPackage ./whatsapp-mcp { };
   mpris-album-art = pkgs.callPackage ./mpris-album-art { };
   weather-popup = pkgs.callPackage ./weather-popup { };
-  # gemini-cli temporarily disabled due to npm deps hash issue
-  # Nixpkgs version 0.22.4 also has build issues, mark as broken
-  gemini-cli = pkgs.gemini-cli.overrideAttrs (old: {
-    meta = old.meta // { broken = true; };
-  });
+  # gemini-cli provided via flake overlay (version 0.24.0)
   # Claude Desktop - using working Linux build from k3d3/claude-desktop-linux-flake
   claude-desktop = pkgs.claude-desktop-linux or (pkgs.callPackage ./claude-desktop { });
   neuwaita-icon-theme = pkgs.callPackage ./neuwaita-icon-theme { };

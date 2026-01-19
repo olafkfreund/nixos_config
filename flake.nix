@@ -236,6 +236,10 @@
         (final: _prev: {
           zsh-ai-cmd = final.callPackage ./pkgs/zsh-ai-cmd { };
         })
+        # Custom package: gemini-cli - Google Gemini AI CLI tool with version 0.24.0
+        (final: _prev: {
+          gemini-cli = final.callPackage ./home/development/gemini-cli { };
+        })
         # Custom package: citrix-workspace - Citrix Workspace with USB support and local tarball management
         (import ./overlays/citrix-workspace.nix)
         # Fix CMake version compatibility issues for packages requiring CMake < 3.5
