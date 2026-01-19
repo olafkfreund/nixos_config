@@ -54,6 +54,16 @@ python3.pkgs.buildPythonApplication rec {
     )
   '';
 
+  postPatch = ''
+    # Fix resource loading path
+    substituteInPlace aurynk/application.py \
+      --replace-fail "/usr/share/aurynk/io.github.IshuSinghSE.aurynk.gresource" "$out/share/aurynk/io.github.IshuSinghSE.aurynk.gresource"
+    
+    # Fix tray helper interpreter to use the same python environment
+    substituteInPlace aurynk/application.py \
+      --replace-fail 'subprocess.Popen(["python3", script_path]' 'subprocess.Popen([sys.executable, script_path]'
+  '';
+
   postInstall = ''
     # Replace the upstream shell script with a proper python entry point
     # This ensures the python environment is correctly resolved by the wrapper
