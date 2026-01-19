@@ -27,4 +27,6 @@
   cosmic-ext-applet-next-meeting = pkgs.callPackage ./cosmic-applets/next-meeting { };
 
   aurynk = pkgs.callPackage ./aurynk { };
+
+  quick-webapps = pkgs.callPackage ./quick-webapps { };
 }
