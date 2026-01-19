@@ -236,7 +236,7 @@
         (final: _prev: {
           zsh-ai-cmd = final.callPackage ./pkgs/zsh-ai-cmd { };
         })
-        # Custom package: gemini-cli - Google Gemini AI CLI tool with version 0.24.0
+        # Custom package: gemini-cli - Google Gemini AI CLI tool with version 0.24.4
         (final: _prev: {
           gemini-cli = final.callPackage ./home/development/gemini-cli { };
         })
