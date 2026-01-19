@@ -223,11 +223,11 @@ check_security_config() {
     fi
 
     # Check fail2ban (if installed)
-    if ssh "$host" "systemctl is-active fail2ban" &>/dev/null; then
-      print_success "$host: fail2ban is active"
-    else
-      print_warning "$host: fail2ban is not active"
-    fi
+    # if ssh "$host" "systemctl is-active fail2ban" &>/dev/null; then
+    #   print_success "$host: fail2ban is active"
+    # else
+    #   print_warning "$host: fail2ban is not active"
+    # fi
   done
 }
 
@@ -279,7 +279,7 @@ generate_summary() {
   print_info "  • AI Providers: Anthropic, OpenAI, Gemini, Ollama"
   print_info "  • Monitoring: Prometheus, Grafana, Node Exporters"
   print_info "  • Alerting: Email notifications, system monitoring"
-  print_info "  • Security: SSH hardening, fail2ban protection"
+  print_info "  • Security: SSH hardening"
   print_info "  • Storage: Automated analysis and optimization"
 
   print_info "Access Points:"

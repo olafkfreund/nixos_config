@@ -5,7 +5,6 @@
   # Server-specific packages (headless-compatible only)
   environment.systemPackages = with pkgs; [
     # Server monitoring and administration
-    fail2ban
     logrotate
     rsync
 

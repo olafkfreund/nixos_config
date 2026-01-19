@@ -194,7 +194,7 @@ in
     allowPasswordAuthentication = false;
     allowRootLogin = false;
     maxAuthTries = 3;
-    enableFail2Ban = true;
+    enableFail2Ban = false;
     enableKeyOnlyAccess = true;
     trustedNetworks = [
       "192.168.1.0/24"

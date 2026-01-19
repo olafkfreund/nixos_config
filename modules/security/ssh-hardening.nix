@@ -377,7 +377,7 @@ in
     # SSH key management script
     environment.systemPackages = with pkgs; [
       openssh
-      fail2ban
+    ] ++ lib.optional cfg.enableFail2Ban fail2ban ++ [
       (writeShellScriptBin "ssh-security-check" ''
         #!/bin/bash
 

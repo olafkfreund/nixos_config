@@ -256,7 +256,6 @@ in
     environment.systemPackages = with pkgs; [
       iptables
       nftables # Keep available as backup
-      fail2ban
       (writeShellScriptBin "firewall-status" ''
         #!/bin/bash
 
