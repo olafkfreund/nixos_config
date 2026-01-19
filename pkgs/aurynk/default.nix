@@ -49,7 +49,9 @@ python3.pkgs.buildPythonApplication rec {
 
   # Wrapper args to ensure adb and scrcpy are available at runtime
   preFixup = ''
-    makeWrapperArgs+=(" --prefix PATH : ${lib.makeBinPath [ android-tools scrcpy ]}")
+    makeWrapperArgs+=(
+      "--prefix" "PATH" ":" "${lib.makeBinPath [ android-tools scrcpy ]}"
+    )
   '';
 
   postInstall = ''
