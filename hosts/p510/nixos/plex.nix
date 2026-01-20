@@ -1,5 +1,4 @@
 { pkgs-unstable
-, config
 , ...
 }: {
   services = {
@@ -24,11 +23,11 @@
       user = "olafkfreund";
       package = pkgs-unstable.nzbget;
       settings = {
-        MainDir = "/mnt/media/nzbget";
-        DestDir = "/mnt/media/Media/Downloads";
-        InterDir = "/mnt/media/nzbget/intermediate";
-        QueueDir = "/mnt/media/nzbget/queue";
-        TempDir = "/mnt/media/nzbget/tmp";
+        MainDir = "/mnt/media/downloads/usenet";
+        DestDir = "/mnt/media/downloads/usenet/complete";
+        InterDir = "/mnt/media/downloads/usenet/incomplete";
+        QueueDir = "/mnt/media/downloads/usenet/queue";
+        TempDir = "/mnt/media/downloads/usenet/tmp";
         ControlIP = "0.0.0.0";
         ControlPort = 6789;
         ControlUsername = "nzbget";
@@ -80,7 +79,7 @@
     transmission = {
       enable = true;
       user = "olafkfreund";
-      home = "/mnt/media/transmission";
+      home = "/mnt/media/downloads/torrents";
       package = pkgs-unstable.transmission_4;
       downloadDirPermissions = "0775";
       settings = {
@@ -90,10 +89,10 @@
         rpc-whitelist-enabled = true;
         rpc-authentication-required = false;
         watch-dir-enabled = true;
-        watch-dir = "${config.services.transmission.home}/watchdir";
-        download-dir = "/mnt/media/Media/Audiobooks/Downloads";
+        watch-dir = "/mnt/media/downloads/torrents/watch";
+        download-dir = "/mnt/media/downloads/torrents/complete";
         incomplete-dir-enabled = true;
-        incomplete-dir = "/mnt/media/Media/Audiobooks/incomplete";
+        incomplete-dir = "/mnt/media/downloads/torrents/incomplete";
       };
     };
 
@@ -146,12 +145,17 @@
   };
 
   systemd.tmpfiles.rules = [
-    # "d /mnt/media/jackett 0755 olafkfreund users -"  # Removed - no longer in use
     "d /mnt/media/prowlarr 0755 olafkfreund users -"
-    "d /mnt/media/nzbget 0755 olafkfreund users -"
-    "d /mnt/media/nzbget/intermediate 0755 olafkfreund users -"
-    "d /mnt/media/nzbget/queue 0755 olafkfreund users -"
-    "d /mnt/media/nzbget/tmp 0755 olafkfreund users -"
+    "d /mnt/media/downloads 0775 olafkfreund users -"
+    "d /mnt/media/downloads/torrents 0775 olafkfreund users -"
+    "d /mnt/media/downloads/torrents/complete 0775 olafkfreund users -"
+    "d /mnt/media/downloads/torrents/incomplete 0775 olafkfreund users -"
+    "d /mnt/media/downloads/torrents/watch 0775 olafkfreund users -"
+    "d /mnt/media/downloads/usenet 0775 olafkfreund users -"
+    "d /mnt/media/downloads/usenet/complete 0775 olafkfreund users -"
+    "d /mnt/media/downloads/usenet/incomplete 0775 olafkfreund users -"
+    "d /mnt/media/downloads/usenet/queue 0775 olafkfreund users -"
+    "d /mnt/media/downloads/usenet/tmp 0775 olafkfreund users -"
     "d /mnt/media/Media/Downloads 0755 olafkfreund users -"
     # AudioBookshelf directories
     "d /mnt/media/Media/Audiobooks 0755 olafkfreund users -"
