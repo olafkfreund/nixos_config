@@ -1,4 +1,5 @@
 { pkgs
+, lib
 , ...
 }: {
   # greetd display manager
