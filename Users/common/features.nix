@@ -44,7 +44,6 @@ with lib; {
       kdeconnect = mkEnableOption "Enable KDE Connect";
       slack = mkEnableOption "Enable Slack";
       lanmouse = mkEnableOption "Enable LAN Mouse";
-      vicinae = mkEnableOption "Enable Vicinae spatial file manager";
 
       # Desktop shell (experimental)
       quickshell = mkEnableOption "Enable QuickShell desktop shell (runs alongside Waybar for testing)";
