@@ -176,11 +176,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1768823938,
-        "narHash": "sha256-v8sdBqQGpZS67MdaPQf5slp87OjKx1yeV5i+PAThwx4=",
+        "lastModified": 1768943937,
+        "narHash": "sha256-Cpgvr56YNFoH6309hKI6l5vhZaxuvD0wuuOC8XPKzY0=",
         "owner": "olafkfreund",
         "repo": "cosmic-connect-desktop-app",
-        "rev": "49d96dd2abe841d91fdb182b5868bd6a0f4e8f4d",
+        "rev": "4c97608849fc1e41de7358739d034152b84beffc",
         "type": "github"
       },
       "original": {
@@ -789,11 +789,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1768927746,
-        "narHash": "sha256-zyMpWHqcpKVmRc1W2NEK7DAuyVJZV62Jdjqudg70b1k=",
+        "lastModified": 1768942641,
+        "narHash": "sha256-i25tkhqjsfo0YKz8To/+gzazW1v4f8qUGqJQ8OLrkqE=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "63a87808f5f9b6e4195a1d33f6ea25d23f4aa0df",
+        "rev": "9997de2f62d1875644f02ddf96cf485a4baecb6f",
         "type": "github"
       },
       "original": {
@@ -1359,11 +1359,11 @@
         "nixpkgs": "nixpkgs_11"
       },
       "locked": {
-        "lastModified": 1768928782,
-        "narHash": "sha256-GHL4HZfyIQRbDrzRJO3Xulb2SYlm+erTt/eKHmR00vs=",
+        "lastModified": 1768942740,
+        "narHash": "sha256-dkp3JYf8qd0ZOctx6+Ycw8xERnulxqekn7n9/U9BHyU=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "d787c45d0224a5d8d245ad628352a192388d5357",
+        "rev": "b928656a712d209c29f8243165c370d9385dd425",
         "type": "github"
       },
       "original": {
