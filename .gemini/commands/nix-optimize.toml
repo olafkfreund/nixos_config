@@ -1,0 +1,18 @@
+description = "Analyze and optimize NixOS configuration"
+prompt = """
+Optimize NixOS Performance.
+
+**Target**: "{{args}}" (Default: Full Analysis)
+
+**Modes:**
+*   **Full**: Run `./scripts/performance-test.sh full`.
+*   **Quick**: Check for high-impact items (Store optimization, GC).
+*   **Build**: `./scripts/performance-test.sh build-times`.
+*   **Memory**: `./scripts/performance-test.sh memory`.
+*   **Efficiency**: Show config efficiency report (duplication, dead code).
+
+**Actions:**
+*   If "Apply" is requested, enable safe optimizations (auto-optimise-store, etc.) by editing config files.
+
+Report findings and recommended actions.
+"""

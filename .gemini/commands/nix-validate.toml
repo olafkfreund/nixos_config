@@ -1,0 +1,15 @@
+description = "Validation suite (syntax, features, security)"
+prompt = """
+Validate NixOS Configuration.
+
+**Mode**: "{{args}}" (Default: Standard)
+
+**Modes:**
+*   **Quick**: `just check-syntax` + Basic feature check.
+*   **Standard**: Feature dependency + Security checks + Module structure.
+*   **Full**: Code quality + Deprecation + Anti-patterns + Documentation.
+
+**Execution:**
+Run the corresponding `just` commands or `nix eval` expressions (e.g., `.lib.validateFeatures`).
+Report any errors or warnings clearly.
+"""

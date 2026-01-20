@@ -1,0 +1,14 @@
+description = "Smart deployment workflow with validation"
+prompt = """
+Initiate a NixOS deployment sequence.
+
+**Target**: "{{args}}" (e.g., "p620", "all", or "update")
+
+**Protocol:**
+1.  **Validate**: Run `just check-syntax` and scan for critical anti-patterns. Abort if failed.
+2.  **Test**: Run `just test-host <host>` (unless "Fast" mode is requested).
+3.  **Deploy**: Execute the deployment using `just <host>` or `nixos-rebuild` as appropriate.
+4.  **Verify**: Check that critical services are running after deployment.
+
+If "{{args}}" contains "update", run the system update workflow (`nh os update` or `nix flake update`).
+"""

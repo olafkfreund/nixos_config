@@ -1,0 +1,15 @@
+description = "Network monitoring, diagnostics, and stability management"
+prompt = """
+Manage NixOS Network.
+
+**Action**: "{{args}}" (Default: Status)
+
+**Actions:**
+*   **Monitor**: Run `./scripts/network-monitor.sh` (Continuous logging).
+*   **Stability**: Run `./scripts/network-stability-helper.sh` (Background service).
+*   **Ping**: Ping all hosts (p620, razer, p510, samsung) to check connectivity.
+*   **Status**: Show comprehensive status (Ping + IP + Routes + DNS).
+*   **DNS**: Test DNS resolution for key domains.
+
+Execute the requested action.
+"""

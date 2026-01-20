@@ -1,0 +1,14 @@
+description = "Show help for NixOS commands"
+prompt = """
+Display the NixOS development environment help reference.
+
+List all available custom slash commands (e.g., `/nix-deploy`, `/nix-test`, `/nix-module`) with brief descriptions of what they do and how to use them.
+Group them by category:
+- Validation & Testing
+- Cleanup & Maintenance
+- System Information
+- Development
+- Deployment
+
+Refer to `.gemini/GEMINI.md` or `docs/` for details if needed.
+"""

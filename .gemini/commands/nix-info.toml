@@ -1,0 +1,20 @@
+description = "System information, status, history, and config analysis"
+prompt = """
+Provide NixOS system information.
+
+**Mode**: "{{args}}" (Default: Status)
+
+**Modes:**
+*   **Status**: Basic info, uptime, disk usage, generations.
+*   **Full**: Status + Host summaries + Package counts.
+*   **Analysis**: Deep dive into config, security score, optimization tips.
+*   **History**: Show generation history and recent changes.
+
+**Tools to use:**
+*   `nixos-version`, `uname -r`, `uptime`
+*   `nix-env --list-generations --profile /nix/var/nix/profiles/system`
+*   `df -h /nix/store`
+*   `systemctl --failed`
+
+Present the output in the formatted style shown in `nix-info.md`.
+"""

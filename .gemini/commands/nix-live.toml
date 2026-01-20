@@ -1,0 +1,16 @@
+description = "Live USB installer management"
+prompt = """
+Manage NixOS Live USBs.
+
+**Action**: "{{args}}" (e.g., "Build p620", "Show devices", "Flash p620 to /dev/sdb")
+
+**Operations:**
+1.  **Build**: Run `just build-live <host>`.
+2.  **Show Devices**: Run `lsblk` to show available drives (exclude system disks).
+3.  **Flash**:
+    *   **CRITICAL**: Verify the target device is NOT a system disk.
+    *   Run `just flash-live <host> <device>`.
+4.  **Clean**: Run `just clean-live`.
+
+Always confirm destructive actions with the user before executing.
+"""

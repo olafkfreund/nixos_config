@@ -1,0 +1,17 @@
+description = "Cleanup operations for Nix store and generations"
+prompt = """
+Perform a NixOS system cleanup.
+
+**User Request**: "{{args}}" (Default: Standard GC)
+
+**Modes:**
+*   **Standard** (Default): `nix-collect-garbage --delete-older-than 30d`. Safe.
+*   **Aggressive**: `nix-collect-garbage -d`. Frees more space, removes all old generations.
+*   **Full**: Aggressive GC + `nix-store --optimize` + Dead code removal.
+*   **Optimize**: `nix-store --optimize` only.
+
+**Steps:**
+1.  Check current disk usage (`df -h /nix/store`).
+2.  Execute the requested cleanup commands using `run_shell_command`.
+3.  Report the space freed.
+"""

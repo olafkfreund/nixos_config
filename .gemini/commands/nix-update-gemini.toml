@@ -1,0 +1,16 @@
+description = "Update Gemini CLI to latest version"
+prompt = """
+Update the Gemini CLI package.
+
+**Steps:**
+1.  **Research**: Find the latest version of `gemini-cli` (npm/github).
+2.  **Update**: Edit `home/development/gemini-cli/default.nix`.
+    *   Update `version`.
+    *   Update `hash` (use `nix-prefetch-url`).
+    *   Update `npmDepsHash`.
+3.  **Test**:
+    *   `just check-syntax`.
+    *   `nix-build -A packages.x86_64-linux.gemini-cli`.
+    *   Verify version: `./result/bin/gemini --version`.
+4.  **Commit**: Commit changes if successful.
+"""

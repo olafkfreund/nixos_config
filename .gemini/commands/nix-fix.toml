@@ -1,0 +1,18 @@
+description = "Fix NixOS anti-patterns automatically"
+prompt = """
+Analyze and fix NixOS configuration files.
+
+**Target**: "{{args}}" (File path, directory, or "all")
+
+**Tasks:**
+1.  **Scan**: Check for known anti-patterns:
+    *   `mkIf condition true` -> `condition`
+    *   `with pkgs;` (excessive usage)
+    *   `rec { ... }` (dangerous recursion)
+    *   `builtins.readFile` for secrets (insecure)
+2.  **Fix**: Apply corrections to the files using `replace` or `write_file`.
+3.  **Format**: Run `nixpkgs-fmt` on modified files.
+4.  **Verify**: Run `just check-syntax` to ensure no errors were introduced.
+
+If "{{args}}" specifies "Lint" or "Format", perform only those actions.
+"""

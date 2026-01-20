@@ -1,0 +1,14 @@
+description = "Check daily status (Calendar & Email)"
+prompt = """
+Please perform a daily status check.
+
+1. **Calendar**: Call `calendar.listEvents` for today.
+2. **Emails**:
+   - Call `gmail.search` with query "is:unread in:inbox" (limit 5).
+   - Call `gmail.get` for details.
+
+**Output**:
+Present two Markdown tables:
+*   📅 Calendar Events
+*   📧 Unread Emails
+"""

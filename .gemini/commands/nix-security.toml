@@ -1,0 +1,19 @@
+description = "Security audit of NixOS configuration"
+prompt = """
+Perform a NixOS Security Audit.
+
+**Target**: "{{args}}" (Default: Full)
+
+**Checks:**
+1.  **Service Isolation**: Check for `DynamicUser = true` in all services.
+2.  **Hardening**: Check for `ProtectSystem`, `NoNewPrivileges`, etc.
+3.  **Secrets**: Scan for `builtins.readFile` usage on secret paths.
+4.  **Firewall**: Verify firewall is enabled and ports are minimal.
+5.  **SSH**: Check for `PasswordAuthentication = false` and `PermitRootLogin = "no"`.
+
+**Output:**
+*   List Critical Issues (Must Fix).
+*   List Warnings (Should Fix).
+*   Calculate a Security Score (0-100).
+*   Provide auto-fix suggestions using `/nix-fix`.
+"""

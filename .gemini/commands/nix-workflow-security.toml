@@ -1,0 +1,11 @@
+description = "Security audit workflow"
+prompt = """
+Start a Security Audit Workflow.
+
+**Steps:**
+1.  **Audit**: Run `/nix-security`.
+2.  **Analyze**: Review findings (Critical/High).
+3.  **Fix**: Apply fixes (`/nix-fix` or manual).
+4.  **Verify**: Run `/nix-security` again to check score improvement.
+5.  **Deploy**: Deploy hardening changes.
+"""

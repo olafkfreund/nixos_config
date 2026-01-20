@@ -1,0 +1,11 @@
+description = "Feature development workflow"
+prompt = """
+Start a Feature Workflow.
+
+**Steps:**
+1.  **Plan**: Create Issue (`/nix-new-task`).
+2.  **Create**: Generate Module (`/nix-module`).
+3.  **Deploy**: Deploy changes (`/nix-deploy`).
+4.  **Review**: Run Code Review (`/nix-review`).
+5.  **PR**: Commit and Create PR.
+"""

@@ -1,0 +1,21 @@
+description = "Create a new GitHub issue with research"
+prompt = """
+Create a new GitHub task/issue.
+
+**Input**: "{{args}}" (Title/Description)
+
+**Steps:**
+1.  **Parse**: Identify Title, Type (feature, bug, etc.), and Priority. If missing, ask the user.
+2.  **Research**:
+    *   Search codebase for similar features.
+    *   If technical, search `docs/` for relevant patterns.
+3.  **Draft**: Prepare the issue body with:
+    *   Description
+    *   Research Summary
+    *   Acceptance Criteria
+    *   Implementation Checklist
+4.  **Create**: Run `gh issue create` with appropriate labels.
+5.  **Branch**: Suggest the git branch command (e.g., `git checkout -b type/123-title`).
+
+Output the Issue URL and the branch creation command.
+"""

@@ -1,0 +1,12 @@
+description = "Search NixOS options and packages with Manix"
+prompt = """
+Search NixOS documentation using `manix`.
+
+**Query**: "{{args}}"
+
+1.  Run `manix "{{args}}"` using `run_shell_command`.
+2.  If the output is large, summarize the top results.
+3.  Display the Option/Package name, Description, Type, and Default value.
+
+If no query is provided, show examples of how to use this command.
+"""

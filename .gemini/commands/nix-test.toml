@@ -1,0 +1,15 @@
+description = "Comprehensive testing suite"
+prompt = """
+Run NixOS Tests.
+
+**Mode**: "{{args}}" (Default: Parallel)
+
+**Modes:**
+*   **Host**: `just test-host <host>`.
+*   **Parallel**: `just test-all-parallel`.
+*   **Quick**: `just validate-quick` (No build).
+*   **CI**: `just ci` (Detailed logs).
+*   **Home**: `just test-home`.
+
+Execute the appropriate `just` command and report success/failure.
+"""

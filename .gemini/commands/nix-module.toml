@@ -1,0 +1,17 @@
+description = "Create a new NixOS module following best practices"
+prompt = """
+Create a new NixOS module.
+
+**Input**: "{{args}}" (Name and Description)
+
+**Steps:**
+1.  **Analyze**: Determine the module name and purpose from the input.
+2.  **Read Patterns**: Review `docs/PATTERNS.md` for the correct module structure.
+3.  **Create File**: Generate a new `.nix` file in `modules/` (e.g., `modules/services/my-service.nix`).
+    *   Use `mkEnableOption`, `mkPackageOption`, `types.submodule`.
+    *   Include security hardening (`DynamicUser`, `ProtectSystem`, etc.).
+4.  **Register**: Add the new module to `modules/default.nix` imports.
+5.  **Verify**: Run `just check-syntax` to ensure it parses.
+
+Output the path of the created file and a snippet of how to enable it.
+"""

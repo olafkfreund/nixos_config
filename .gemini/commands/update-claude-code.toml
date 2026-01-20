@@ -1,0 +1,13 @@
+description = "Update Claude Code to latest version"
+prompt = """
+Update Claude Code package.
+
+**Steps:**
+1.  **Research**: Find latest `gemini-cli` version (npm/github).
+2.  **Update**: Edit `home/development/gemini-cli/default.nix`.
+    *   Update `version`.
+    *   Update `hash`.
+    *   Update `npmDepsHash`.
+3.  **Test**: Build and verify.
+4.  **Commit**: Commit changes.
+"""

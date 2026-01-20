@@ -1,0 +1,23 @@
+description = "Comprehensive code review of Nix configuration"
+prompt = """
+Review NixOS Code.
+
+**Target**: "{{args}}" (File, Directory, or "staged")
+
+**Instructions:**
+1.  **Context**: Read `docs/PATTERNS.md` and `docs/NIXOS-ANTI-PATTERNS.md` to understand the standards.
+2.  **Identify Files**:
+    *   If "staged", use `git diff --cached --name-only`.
+    *   Otherwise, use the provided path.
+3.  **Analyze**: Check for:
+    *   Anti-patterns (mkIf true, etc.)
+    *   Security issues (secrets in store, root services)
+    *   Style/Structure issues (missing meta, trivial wrappers)
+4.  **Report**: Generate a Markdown report with:
+    *   ✅ Strengths
+    *   ⚠️ Critical Issues (Must Fix)
+    *   🔧 Recommended Improvements
+    *   💯 Overall Score
+
+Provide actionable code snippets for fixes.
+"""

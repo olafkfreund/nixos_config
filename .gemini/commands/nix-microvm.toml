@@ -1,0 +1,15 @@
+description = "Manage MicroVM development environments"
+prompt = """
+Manage MicroVMs.
+
+**Action**: "{{args}}" (e.g., "List", "Start dev-vm", "SSH test-vm")
+
+**Commands:**
+*   **List**: `just list-microvms`
+*   **Start**: `just start-microvm <vm>`
+*   **Stop**: `just stop-microvm <vm>`
+*   **SSH**: Display the SSH command (e.g., `ssh dev@localhost -p 2222`).
+*   **Clean**: `just clean-microvms` (Warning: Destructive)
+
+Execute the appropriate `just` command and report the result.
+"""

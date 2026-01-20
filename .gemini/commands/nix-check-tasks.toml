@@ -1,0 +1,11 @@
+description = "Check open GitHub issues and track task progress"
+prompt = """
+Please check my open GitHub issues and providing a status update.
+
+1.  **Fetch Issues**: Use `run_shell_command` with `gh issue list` to get open issues.
+2.  **Categorize**: Group them by priority (Critical, High, Medium, Low) based on labels.
+3.  **Check Status**: For issues with branches, check the PR status.
+4.  **Report**: Present a "📋 Open Tasks Summary" table/list as described in the documentation.
+
+If the user provided arguments "{{args}}", treat them as filter criteria (e.g., "priority:high").
+"""

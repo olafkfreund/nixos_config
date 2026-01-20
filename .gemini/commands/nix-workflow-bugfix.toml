@@ -1,0 +1,12 @@
+description = "Quick bug fix workflow"
+prompt = """
+Start a Bug Fix Workflow.
+
+**Steps:**
+1.  **Identify**: Check existing tasks (`/nix-check-tasks`) or create new (`/nix-new-task`).
+2.  **Branch**: Create a fix branch (`gh issue develop`).
+3.  **Fix**: User edits code. Run `/nix-fix` to clean up.
+4.  **Deploy**: Run `/nix-deploy` (Fast mode).
+5.  **Verify**: Check service status.
+6.  **PR**: Commit and create PR (`gh pr create`).
+"""

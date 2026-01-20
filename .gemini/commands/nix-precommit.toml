@@ -1,0 +1,15 @@
+description = "Manage pre-commit hooks"
+prompt = """
+Manage Pre-commit Hooks.
+
+**Action**: "{{args}}" (Default: Run Staged)
+
+**Commands:**
+*   **Install**: `pre-commit install`.
+*   **Run All**: `pre-commit run --all-files`.
+*   **Run Staged**: `pre-commit run`.
+*   **Update**: `pre-commit autoupdate`.
+*   **Clean**: `pre-commit clean`.
+
+Execute the requested command.
+"""
