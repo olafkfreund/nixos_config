@@ -18,7 +18,9 @@ _: {
     ./sysprof/default.nix
     ./mandb/default.nix
     ./appimage/default.nix
-    ./dns/secure-dns.nix
+    ./greetd/greetd.nix
+    ./home-assistant.nix
+    ./libinput/default.nix
     # ./flaresolverr/default.nix  # Commented out - NixOS has built-in FlareSolverr module
 
     # Network stability modules (service merged into main module)

@@ -117,6 +117,17 @@ in
       enable = true;
     };
 
+    homeAssistant = {
+      enable = true;
+      port = 8123;
+      enableCloud = true;
+      enableCLI = true;
+      tailscaleIntegration = true;
+      extraComponents = [
+        # Additional integrations
+      ];
+    };
+
     ai = {
       enable = true;
       ollama = true;
@@ -329,6 +340,9 @@ in
     "/etc/ssh/ssh_host_ed25519_key" # Host key (Ed25519)
     "/etc/ssh/ssh_host_rsa_key" # Host key (RSA fallback)
   ];
+
+  # Home Assistant port for local network access
+  networking.firewall.allowedTCPPorts = [ 8123 ];
 
   nixpkgs.config = {
     allowUnfree = true; # Required for NVIDIA drivers

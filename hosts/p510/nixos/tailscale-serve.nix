@@ -66,6 +66,9 @@
         # Overseerr (request management for Plex) - accessible at /overseerr
         ${pkgs.tailscale}/bin/tailscale serve --bg --https=443 --set-path=/overseerr http://localhost:5055
 
+        # Home Assistant - accessible at separate port https://p510:8123
+        ${pkgs.tailscale}/bin/tailscale serve --bg --https=8123 http://localhost:8123
+
         # All services now accessible at:
         # https://p510.tail833f7.ts.net/plex
         # https://p510.tail833f7.ts.net/sonarr

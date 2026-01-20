@@ -1,6 +1,6 @@
 # P510 Host Configuration
 
-This directory contains the NixOS configuration for the P510 system, which appears to be a server/workstation with virtualization capabilities.
+This directory contains the NixOS configuration for the P510 system, a server/workstation with virtualization.
 
 ## Configuration Structure
 
@@ -26,6 +26,7 @@ This directory contains the NixOS configuration for the P510 system, which appea
 ## Features
 
 - Media server capabilities with Plex, Sonarr, Radarr, etc.
+- Home Assistant for home automation
 - Kubernetes cluster using K3s in MicroVMs
 - NVIDIA GPU support for transcoding and compute
 - Music streaming with MPD
