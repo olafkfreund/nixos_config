@@ -240,7 +240,7 @@
         (final: _prev: {
           quick-webapps = final.callPackage ./pkgs/quick-webapps { };
         })
-        # Custom package: gemini-cli - Google Gemini AI CLI tool with version 0.24.4
+        # Custom package: gemini-cli - Google Gemini AI CLI tool with version 0.24.5
         (final: _prev: {
           gemini-cli = final.callPackage ./home/development/gemini-cli { };
         })
