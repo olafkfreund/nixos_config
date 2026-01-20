@@ -5,7 +5,7 @@
   services.greetd =
     let
       session_gnome = {
-        command = "${pkgs.gnome-session}/bin/gnome-session";
+        command = lib.mkDefault "${pkgs.gnome-session}/bin/gnome-session";
         user = "olafkfreund";
       };
     in
