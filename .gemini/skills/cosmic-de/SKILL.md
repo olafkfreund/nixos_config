@@ -11,7 +11,9 @@ description: COSMIC Desktop Environment Skill
 
 ## Overview
 
-COSMIC (Computer Operating System Main Interface Components) is System76's next-generation desktop environment written entirely in Rust. Built using the iced cross-platform GUI library and Smithay compositor framework, COSMIC provides a modern, performant, and customizable desktop experience on NixOS.
+COSMIC (Computer Operating System Main Interface Components) is System76's next-generation desktop environment written
+entirely in Rust. Built using the iced cross-platform GUI library and Smithay compositor framework, COSMIC provides a
+modern, performant, and customizable desktop experience on NixOS.
 
 **Key Features**:
 
@@ -168,7 +170,7 @@ COSMIC can be managed via Home Manager for user-specific configurations:
 
 COSMIC uses RON (Rusty Object Notation) files for configuration:
 
-```
+```text
 ~/.config/cosmic/
 ├── com.system76.CosmicPanel.Panel/
 │   ├── v1/
@@ -1333,4 +1335,5 @@ cp -r ~/.config/cosmic ~/.config/cosmic.backup.$(date +%Y%m%d)
 
 ---
 
-**Remember**: COSMIC is actively developed. Configuration patterns may change. Always check the official NixOS wiki and nixos-cosmic repository for the latest information.
+**Remember**: COSMIC is actively developed. Configuration patterns may change. Always check the official NixOS wiki and
+nixos-cosmic repository for the latest information.

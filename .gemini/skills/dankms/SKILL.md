@@ -6,11 +6,13 @@ description: DankMaterialShell (DMS) Skill
 
 # DankMaterialShell (DMS) Skill
 
-A specialized skill for configuring and customizing DankMaterialShell with Wayland compositors (MangoWC, Niri, Hyprland, Sway, labwc), providing expert guidance on this complete desktop shell replacement built with Quickshell & Go.
+A specialized skill for configuring and customizing DankMaterialShell with Wayland compositors (MangoWC, Niri, Hyprland,
+Sway, labwc), providing expert guidance on this complete desktop shell replacement built with Quickshell & Go.
 
 ## Skill Overview
 
-**Purpose**: Provide comprehensive support for DankMaterialShell configuration, theming, and integration with Wayland compositors in NixOS.
+**Purpose**: Provide comprehensive support for DankMaterialShell configuration, theming, and integration with Wayland
+compositors in NixOS.
 
 **Invoke When**:
 
@@ -28,14 +30,16 @@ A specialized skill for configuring and customizing DankMaterialShell with Wayla
 
 ### 1. What is DankMaterialShell?
 
-**DankMaterialShell (DMS)** is a complete desktop shell for Wayland compositors that **replaces waybar, swaylock, swayidle, mako, fuzzel, polkit, and everything else** you'd normally stitch together to make a desktop.
+**DankMaterialShell (DMS)** is a complete desktop shell for Wayland compositors that **replaces waybar, swaylock,
+swayidle, mako, fuzzel, polkit, and everything else** you'd normally stitch together to make a desktop.
 
 **Built With:**
 
 - **Quickshell**: QML-based UI framework for panels and widgets
 - **Go**: Backend for CLI tools and system integration
 
-**Key Philosophy**: Instead of combining multiple separate tools (waybar + mako + fuzzel + swaylock + etc.), DMS provides a unified, cohesive desktop experience.
+**Key Philosophy**: Instead of combining multiple separate tools (waybar + mako + fuzzel + swaylock + etc.), DMS provides
+a unified, cohesive desktop experience.
 
 **Project**: [AvengeMedia/DankMaterialShell](https://github.com/AvengeMedia/DankMaterialShell)
 **Website**: [danklinux.com](https://danklinux.com)
@@ -75,7 +79,7 @@ A specialized skill for configuring and customizing DankMaterialShell with Wayla
 
 ### 3. Installation
 
-**Method 1: Quick Install (One-Command)**
+#### Method 1: Quick Install (One-Command)
 
 ```bash
 # Automatic installation for most distros
@@ -84,7 +88,7 @@ curl -fsSL https://install.danklinux.com | sh
 # Supports: Arch, Fedora, Debian, Ubuntu, openSUSE, Gentoo
 ```
 
-**Method 2: NixOS Flake (Recommended for NixOS)**
+#### Method 2: NixOS Flake (Recommended for NixOS)
 
 ```nix
 # flake.nix
@@ -146,7 +150,7 @@ curl -fsSL https://install.danklinux.com | sh
 }
 ```
 
-**Method 3: Arch Linux (AUR)**
+#### Method 3: Arch Linux (AUR)
 
 ```bash
 # Binary package
@@ -156,7 +160,7 @@ yay -S dms-shell-bin
 yay -S dms-shell-git
 ```
 
-**Method 4: Manual Build from Source**
+#### Method 4: Manual Build from Source
 
 ```bash
 # Clone repository
@@ -175,7 +179,7 @@ quickshell -p quickshell/
 
 ### 4. Compositor Integration
 
-**Fully Supported Compositors:**
+#### Fully Supported Compositors
 
 DMS works best with these compositors (full workspace switching, overview integration, monitor management):
 
@@ -188,7 +192,7 @@ DMS works best with these compositors (full workspace switching, overview integr
 
 **Other Wayland compositors** work with reduced features.
 
-**Niri Integration Example:**
+#### Niri Integration Example
 
 ```nix
 # home.nix
@@ -236,7 +240,7 @@ DMS works best with these compositors (full workspace switching, overview integr
 }
 ```
 
-**Hyprland Integration Example:**
+#### Hyprland Integration Example
 
 ```nix
 # home.nix
@@ -296,7 +300,7 @@ DMS works best with these compositors (full workspace switching, overview integr
 }
 ```
 
-**MangoWC Integration Example:**
+#### MangoWC Integration Example
 
 ```bash
 # ~/.config/mango/config.conf
@@ -321,7 +325,7 @@ bind=,XF86MonBrightnessDown,spawn,dms brightness set -10
 
 ### 5. CLI Usage & IPC System
 
-**DMS CLI Commands:**
+#### DMS CLI Commands
 
 ```bash
 # ============ Shell Management ============
@@ -403,7 +407,7 @@ dms debug status                  # Show system status
 dms debug reload                  # Reload configuration
 ```
 
-**IPC in Scripts:**
+#### IPC in Scripts
 
 ```bash
 #!/bin/bash
@@ -424,7 +428,7 @@ esac
 
 ### 6. Dynamic Theming System
 
-**Matugen Integration:**
+#### Matugen Integration
 
 DMS automatically generates color schemes from your wallpaper using **matugen** and **dank16**.
 
@@ -522,7 +526,7 @@ programs.dankMaterialShell.theming = {
 
 ### 7. DMS Components
 
-**7.1 Spotlight (Launcher)**
+#### 7.1 Spotlight (Launcher)
 
 Powerful search supporting:
 
@@ -573,7 +577,7 @@ dms ipc call spotlight toggle
 # Or use keybind (default: Super+Space)
 ```
 
-**7.2 Control Center**
+#### 7.2 Control Center
 
 Unified interface for system settings:
 
@@ -608,7 +612,7 @@ programs.dankMaterialShell.controlCenter = {
 };
 ```
 
-**7.3 Notifications**
+#### 7.3 Notifications
 
 Rich notification system with:
 
@@ -647,7 +651,7 @@ programs.dankMaterialShell.notifications = {
 };
 ```
 
-**7.4 Session Management**
+#### 7.4 Session Management
 
 Handles:
 
@@ -692,7 +696,7 @@ programs.dankMaterialShell.session = {
 };
 ```
 
-**7.5 Panels**
+#### 7.5 Panels
 
 Status panels with widgets:
 
@@ -745,7 +749,7 @@ programs.dankMaterialShell.panels = {
 };
 ```
 
-**7.6 Media Integration**
+#### 7.6 Media Integration
 
 MPRIS player controls:
 
@@ -772,7 +776,7 @@ programs.dankMaterialShell.media = {
 };
 ```
 
-**7.7 Calendar & Weather**
+#### 7.7 Calendar & Weather
 
 Calendar synchronization and weather widgets.
 
@@ -796,7 +800,7 @@ programs.dankMaterialShell = {
 };
 ```
 
-**7.8 Clipboard Manager**
+#### 7.8 Clipboard Manager
 
 Clipboard history with:
 
@@ -825,7 +829,7 @@ programs.dankMaterialShell.clipboard = {
 
 ### 8. Plugin System
 
-**Browse Plugin Registry:**
+#### Browse Plugin Registry
 
 ```bash
 # Search plugins
@@ -838,7 +842,7 @@ dms plugins categories
 dms plugins info spotify-control
 ```
 
-**Install Plugins:**
+#### Install Plugins
 
 ```bash
 # Install plugin
@@ -851,7 +855,7 @@ dms plugins update
 dms plugins remove spotify-control
 ```
 
-**Declarative Plugin Management (NixOS):**
+#### Declarative Plugin Management (NixOS)
 
 ```nix
 programs.dankMaterialShell.plugins = {
@@ -875,7 +879,7 @@ programs.dankMaterialShell.plugins = {
 };
 ```
 
-**Plugin Development:**
+#### Plugin Development
 
 ```qml
 // ~/.local/share/dms/plugins/my-plugin/main.qml
@@ -899,7 +903,7 @@ DmsPlugin {
 
 ### 9. NixOS-Specific Configuration
 
-**Complete NixOS Example:**
+#### Complete NixOS Example
 
 ```nix
 # home.nix
@@ -1014,7 +1018,7 @@ DmsPlugin {
 }
 ```
 
-**System-Level Configuration:**
+#### System-Level Configuration
 
 ```nix
 # configuration.nix
@@ -1055,7 +1059,7 @@ DmsPlugin {
 
 ### 10. Common Patterns and Solutions
 
-**Pattern 1: Multi-Compositor Setup**
+#### Pattern 1: Multi-Compositor Setup
 
 ```nix
 # Switch between compositors easily
@@ -1074,7 +1078,7 @@ in
 }
 ```
 
-**Pattern 2: Custom Keybindings per Compositor**
+#### Pattern 2: Custom Keybindings per Compositor
 
 ```nix
 # Compositor-specific keybinds for DMS
@@ -1086,7 +1090,7 @@ wayland.windowManager.hyprland.settings.bind =
   ];
 ```
 
-**Pattern 3: Theming Integration**
+#### Pattern 3: Theming Integration
 
 ```nix
 # Sync DMS theme with system theme
@@ -1101,7 +1105,7 @@ stylix = {
 };
 ```
 
-**Pattern 4: Systemd Integration**
+#### Pattern 4: Systemd Integration
 
 ```nix
 # Ensure DMS starts with compositor
@@ -1121,7 +1125,7 @@ systemd.user.services.dankMaterialShell = {
 };
 ```
 
-**Pattern 5: Plugin Development Workflow**
+#### Pattern 5: Plugin Development Workflow
 
 ```bash
 # Create plugin directory

@@ -10,7 +10,8 @@ A specialized skill for creating fast, declarative, reproducible development env
 
 ## Skill Overview
 
-**Purpose**: Provide comprehensive support for devenv configuration, environment setup, language configuration, service management, and development workflow automation.
+**Purpose**: Provide comprehensive support for devenv configuration, environment setup, language configuration, service
+management, and development workflow automation.
 
 **Invoke When**:
 
@@ -27,7 +28,7 @@ A specialized skill for creating fast, declarative, reproducible development env
 
 ### 1. Installation & Setup
 
-**Prerequisites**
+#### Prerequisites
 
 ```bash
 # Install Nix first (if not already installed)
@@ -36,7 +37,7 @@ curl -L https://nixos.org/nix/install | sh
 # Or on NixOS - already installed
 ```
 
-**Install devenv**
+#### Install devenv
 
 ```bash
 # Using nix-env
@@ -49,7 +50,7 @@ nix profile install nixpkgs#devenv
 devenv version
 ```
 
-**On NixOS/home-manager**
+#### On NixOS/home-manager
 
 ```nix
 # NixOS configuration.nix
@@ -63,7 +64,7 @@ home.packages = with pkgs; [
 ];
 ```
 
-**Optional: Cachix for faster builds**
+#### Optional: Cachix for faster builds
 
 ```bash
 # Install cachix
@@ -75,7 +76,7 @@ cachix use devenv
 
 ### 2. Project Initialization
 
-**Initialize New Project**
+#### Initialize New Project
 
 ```bash
 # Create project directory
@@ -91,7 +92,7 @@ devenv init
 # - .gitignore (devenv-specific ignores)
 ```
 
-**Generated Files**
+#### Generated Files
 
 **devenv.nix** - Main configuration:
 
@@ -152,7 +153,7 @@ use devenv
 
 ### 3. Core Commands
 
-**Essential Commands**
+#### Essential Commands
 
 ```bash
 # Enter development shell
@@ -183,7 +184,7 @@ devenv info
 devenv container
 ```
 
-**Using with direnv**
+#### Using with direnv
 
 ```bash
 # Allow direnv (first time)
@@ -195,9 +196,9 @@ cd my-project  # Automatically activates devenv
 
 ### 4. Language Configuration
 
-**55+ Languages Supported**
+#### 55+ Languages Supported
 
-**Python**
+#### Python
 
 ```nix
 languages.python = {
@@ -222,7 +223,7 @@ packages = with pkgs; [
 ];
 ```
 
-**JavaScript/Node.js**
+#### JavaScript/Node.js
 
 ```nix
 languages.javascript = {
@@ -249,7 +250,7 @@ languages.javascript = {
 };
 ```
 
-**TypeScript**
+#### TypeScript
 
 ```nix
 languages.typescript = {
@@ -262,7 +263,7 @@ packages = with pkgs; [
 ];
 ```
 
-**Rust**
+#### Rust
 
 ```nix
 languages.rust = {
@@ -277,7 +278,7 @@ languages.rust = {
 };
 ```
 
-**Go**
+#### Go
 
 ```nix
 languages.go = {
@@ -289,7 +290,7 @@ env.GOPATH = "${config.env.DEVENV_ROOT}/.go";
 env.GOBIN = "${config.env.DEVENV_ROOT}/.go/bin";
 ```
 
-**Ruby**
+#### Ruby
 
 ```nix
 languages.ruby = {
@@ -301,7 +302,7 @@ languages.ruby = {
 };
 ```
 
-**PHP**
+#### PHP
 
 ```nix
 languages.php = {
@@ -324,7 +325,7 @@ languages.php = {
 packages = [ pkgs.php82Packages.composer ];
 ```
 
-**Java**
+#### Java
 
 ```nix
 languages.java = {
@@ -339,7 +340,7 @@ languages.java = {
 };
 ```
 
-**Elixir**
+#### Elixir
 
 ```nix
 languages.elixir = {
@@ -354,7 +355,7 @@ languages.erlang = {
 };
 ```
 
-**Haskell**
+#### Haskell
 
 ```nix
 languages.haskell = {
@@ -366,7 +367,7 @@ languages.haskell = {
 };
 ```
 
-**Terraform/OpenTofu**
+#### Terraform/OpenTofu
 
 ```nix
 languages.terraform = {
@@ -379,7 +380,7 @@ languages.opentofu = {
 };
 ```
 
-**Nix**
+#### Nix
 
 ```nix
 languages.nix = {
@@ -395,9 +396,9 @@ packages = with pkgs; [
 
 ### 5. Services Configuration
 
-**30+ Pre-configured Services**
+#### 30+ Pre-configured Services
 
-**PostgreSQL**
+#### PostgreSQL
 
 ```nix
 services.postgres = {
@@ -439,7 +440,7 @@ services.postgres = {
 env.DATABASE_URL = "postgresql://localhost:5432/myapp_dev";
 ```
 
-**MySQL**
+#### MySQL
 
 ```nix
 services.mysql = {
@@ -463,7 +464,7 @@ services.mysql = {
 env.DATABASE_URL = "mysql://root@localhost:3306/myapp";
 ```
 
-**Redis**
+#### Redis
 
 ```nix
 services.redis = {
@@ -477,7 +478,7 @@ services.redis = {
 env.REDIS_URL = "redis://localhost:6379";
 ```
 
-**MongoDB**
+#### MongoDB
 
 ```nix
 services.mongodb = {
@@ -492,7 +493,7 @@ services.mongodb = {
 };
 ```
 
-**Elasticsearch**
+#### Elasticsearch
 
 ```nix
 services.elasticsearch = {
@@ -507,7 +508,7 @@ services.elasticsearch = {
 };
 ```
 
-**RabbitMQ**
+#### RabbitMQ
 
 ```nix
 services.rabbitmq = {
@@ -521,7 +522,7 @@ services.rabbitmq = {
 env.RABBITMQ_URL = "amqp://localhost:5672";
 ```
 
-**Kafka**
+#### Kafka
 
 ```nix
 services.kafka = {
@@ -533,7 +534,7 @@ services.kafka = {
 };
 ```
 
-**Nginx**
+#### Nginx
 
 ```nix
 services.nginx = {
@@ -553,7 +554,7 @@ services.nginx = {
 };
 ```
 
-**Caddy**
+#### Caddy
 
 ```nix
 services.caddy = {
@@ -567,7 +568,7 @@ services.caddy = {
 };
 ```
 
-**MinIO (S3-compatible storage)**
+#### MinIO (S3-compatible storage)
 
 ```nix
 services.minio = {
@@ -586,7 +587,7 @@ env.AWS_ACCESS_KEY_ID = "minioadmin";
 env.AWS_SECRET_ACCESS_KEY = "minioadmin";
 ```
 
-**Mailhog (Email testing)**
+#### Mailhog (Email testing)
 
 ```nix
 services.mailhog = {
@@ -603,7 +604,7 @@ env.SMTP_HOST = "localhost";
 env.SMTP_PORT = "1025";
 ```
 
-**Vault (Secrets management)**
+#### Vault (Secrets management)
 
 ```nix
 services.vault = {
@@ -616,7 +617,7 @@ services.vault = {
 
 ### 6. Process Management
 
-**Define Processes**
+#### Define Processes
 
 ```nix
 # Simple processes
@@ -635,7 +636,7 @@ processes = {
 };
 ```
 
-**Advanced Process Configuration**
+#### Advanced Process Configuration
 
 ```nix
 processes = {
@@ -685,7 +686,7 @@ processes = {
 };
 ```
 
-**Start Processes**
+#### Start Processes
 
 ```bash
 # Start all processes with TUI
@@ -704,7 +705,7 @@ tail -f .devenv/state/process-compose/*.log
 
 ### 7. Scripts & Tasks
 
-**Define Scripts**
+#### Define Scripts
 
 ```nix
 scripts = {
@@ -744,7 +745,7 @@ scripts = {
 };
 ```
 
-**Use Scripts**
+#### Use Scripts
 
 ```bash
 # Inside devenv shell
@@ -756,7 +757,7 @@ migrate
 seed
 ```
 
-**Tasks (Entertest/Entersh hooks)**
+#### Tasks (Entertest/Entersh hooks)
 
 ```nix
 # Run on shell entry
@@ -782,7 +783,7 @@ enterTest = ''
 
 ### 8. Environment Variables
 
-**Configuration**
+#### Configuration
 
 ```nix
 # Simple variables
@@ -807,7 +808,7 @@ env.GIT_ROOT = config.git.root;
 env.DEVENV_STATE = config.devenv.state;
 ```
 
-**Dotenv Support**
+#### Dotenv Support
 
 ```nix
 # Load from .env file
@@ -818,7 +819,7 @@ dotenv.filename = ".env.local";
 dotenv.disableHint = true;
 ```
 
-**Secret Management**
+#### Secret Management
 
 ```nix
 # Use sops-nix or similar for real secrets
@@ -840,7 +841,7 @@ env.API_KEY = "$(cat ${config.env.DEVENV_ROOT}/.secrets/api_key)";
 
 ### 9. Pre-commit Hooks
 
-**Common Hooks**
+#### Common Hooks
 
 ```nix
 pre-commit.hooks = {
@@ -882,7 +883,7 @@ pre-commit.hooks = {
 };
 ```
 
-**Custom Hooks**
+#### Custom Hooks
 
 ```nix
 pre-commit.hooks = {
@@ -903,7 +904,7 @@ pre-commit.hooks = {
 };
 ```
 
-**Install Hooks**
+#### Install Hooks
 
 ```bash
 # Inside devenv shell
@@ -913,7 +914,7 @@ devenv shell  # Hooks auto-install on shell entry
 
 ### 10. Containers & Deployment
 
-**Generate Container Image**
+#### Generate Container Image
 
 ```nix
 # Enable container support
@@ -935,7 +936,7 @@ containers.myapp.copyToRoot = [
 ];
 ```
 
-**Build Container**
+#### Build Container
 
 ```bash
 # Generate container
@@ -949,7 +950,7 @@ docker run -p 8000:8000 myapp
 
 ### 11. Packages & Dependencies
 
-**System Packages**
+#### System Packages
 
 ```nix
 packages = with pkgs; [
@@ -988,7 +989,7 @@ packages = with pkgs; [
 ];
 ```
 
-**Language-specific packages**
+#### Language-specific packages
 
 ```nix
 # Python
@@ -1011,7 +1012,7 @@ packages = with pkgs.nodePackages; [
 
 ### 12. Composition & Imports
 
-**Shared Configuration**
+#### Shared Configuration
 
 ```nix
 # shared/common.nix
@@ -1029,7 +1030,7 @@ packages = with pkgs.nodePackages; [
 }
 ```
 
-**Import in Project**
+#### Import in Project
 
 ```nix
 # devenv.nix
@@ -1045,7 +1046,7 @@ packages = with pkgs.nodePackages; [
 }
 ```
 
-**Using devenv.yaml**
+#### Using devenv.yaml
 
 ```yaml
 # devenv.yaml
@@ -1065,7 +1066,7 @@ imports:
 
 ### 13. Testing Integration
 
-**devenv test**
+#### devenv test
 
 ```nix
 # Define tests
@@ -1089,7 +1090,7 @@ enterTest = ''
 '';
 ```
 
-**Run Tests**
+#### Run Tests
 
 ```bash
 # Run all tests
@@ -1099,11 +1100,11 @@ devenv test
 nix develop --command devenv test
 ```
 
-**CI Integration**
+#### CI Integration
 
 ```yaml
 # .github/workflows/test.yml
-name: Test
+name: CI
 on: [push, pull_request]
 
 jobs:
@@ -1545,7 +1546,7 @@ scripts.install.exec = "npm install";
 
 ### Custom Modules
 
-**Create Module**
+#### Create Module
 
 ```nix
 # modules/my-service.nix
@@ -1572,7 +1573,7 @@ in {
 }
 ```
 
-**Use Module**
+#### Use Module
 
 ```nix
 {
@@ -1619,7 +1620,7 @@ in {
 
 ### VSCode Integration
 
-**.vscode/settings.json**
+#### .vscode/settings.json
 
 ```json
 {
@@ -1635,7 +1636,7 @@ Use the Nix IDE plugin and point it to your devenv.nix file.
 
 ### CI/CD Integration
 
-**GitHub Actions**
+#### GitHub Actions
 
 ```yaml
 name: CI
@@ -1654,7 +1655,7 @@ jobs:
       - run: devenv test
 ```
 
-**GitLab CI**
+#### GitLab CI
 
 ```yaml
 test:

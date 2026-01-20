@@ -8,7 +8,8 @@ description: Gemini CLI Hooks Skill
 
 ## Overview
 
-**Gemini CLI Hooks** allow you to customize the behavior of the CLI at specific points in its lifecycle. Hooks can be used to set up environments, perform cleanup, log activity, or intercept tool calls.
+**Gemini CLI Hooks** allow you to customize the behavior of the CLI at specific points in its lifecycle. Hooks can be used
+to set up environments, perform cleanup, log activity, or intercept tool calls.
 
 ### Key Features
 
@@ -105,8 +106,10 @@ You can manage hooks directly from the Gemini prompt:
 ## Best Practices
 
 1. **Keep Scripts Fast**: Hooks run blocking; slow scripts will lag the CLI.
-2. **Use Project Scope**: Define project-specific setup (like `SessionStart` for repo-specific envs) in `.gemini/settings.json`.
-3. **Handle Errors**: Ensure your scripts have proper error handling and return `0` unless you intend to stop the session/tool.
+2. **Use Project Scope**: Define project-specific setup (like `SessionStart` for repo-specific envs) in
+   `.gemini/settings.json`.
+3. **Handle Errors**: Ensure your scripts have proper error handling and return `0` unless you intend to stop the
+   session/tool.
 4. **Security**: Only use trusted scripts, especially in project-scoped settings.
 
 This skill provides the foundation for automating your Gemini CLI environment using lifecycle hooks.

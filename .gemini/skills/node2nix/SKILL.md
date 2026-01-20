@@ -6,11 +6,13 @@ description: node2nix Skill
 
 # node2nix Skill
 
-A specialized skill for converting NPM packages to Nix expressions using node2nix, enabling declarative and reproducible Node.js package management with Nix.
+A specialized skill for converting NPM packages to Nix expressions using node2nix, enabling declarative and reproducible
+Node.js package management with Nix.
 
 ## Skill Overview
 
-**Purpose**: Provide comprehensive support for using node2nix to generate Nix expressions from NPM packages, handle dependencies, and integrate Node.js projects with Nix/NixOS.
+**Purpose**: Provide comprehensive support for using node2nix to generate Nix expressions from NPM packages, handle
+dependencies, and integrate Node.js projects with Nix/NixOS.
 
 **Invoke When**:
 
@@ -26,7 +28,7 @@ A specialized skill for converting NPM packages to Nix expressions using node2ni
 
 ### 1. Installation
 
-**Via Nix (Recommended)**
+#### Via Nix (Recommended)
 
 ```bash
 # Install node2nix from nixpkgs
@@ -39,7 +41,7 @@ nix profile install nixpkgs#nodePackages.node2nix
 node2nix --version
 ```
 
-**On NixOS**
+#### On NixOS
 
 ```nix
 # /etc/nixos/configuration.nix
@@ -48,7 +50,7 @@ environment.systemPackages = with pkgs; [
 ];
 ```
 
-**Via home-manager**
+#### Via home-manager
 
 ```nix
 # home.nix
@@ -57,7 +59,7 @@ home.packages = with pkgs; [
 ];
 ```
 
-**Via npm (Alternative)**
+#### Via npm (Alternative)
 
 ```bash
 # Global installation
@@ -69,7 +71,7 @@ npx node2nix
 
 ### 2. Basic Usage
 
-**Quick Start - Generate from package.json**
+#### Quick Start - Generate from package.json
 
 ```bash
 # Navigate to your Node.js project
@@ -84,7 +86,7 @@ node2nix
 # - default.nix (composition expression)
 ```
 
-**Build the Package**
+#### Build the Package
 
 ```bash
 # Build the package
@@ -97,7 +99,7 @@ nix-build -A package
 nix-env -f default.nix -iA package
 ```
 
-**Generated Files Explained**
+#### Generated Files Explained
 
 **default.nix** - Main entry point:
 
@@ -143,7 +145,7 @@ in
 
 ### 3. Lock File Support
 
-**Using package-lock.json (npm 5+)**
+#### Using package-lock.json (npm 5+)
 
 ```bash
 # Generate with package-lock.json
@@ -155,14 +157,14 @@ node2nix --lock package-lock.json
 # Ensures exact dependency versions
 ```
 
-**Using npm-shrinkwrap.json**
+#### Using npm-shrinkwrap.json
 
 ```bash
 # Generate with shrinkwrap file
 node2nix -l npm-shrinkwrap.json
 ```
 
-**Using yarn.lock**
+#### Using yarn.lock
 
 ```bash
 # Generate with yarn lock file
@@ -180,7 +182,7 @@ node2nix -l yarn.lock
 
 ### 4. Development vs Production Dependencies
 
-**Production Mode (Default)**
+#### Production Mode (Default)
 
 ```bash
 # Only install production dependencies
@@ -190,7 +192,7 @@ node2nix
 node2nix --production
 ```
 
-**Development Mode**
+#### Development Mode
 
 ```bash
 # Include devDependencies
@@ -200,7 +202,7 @@ node2nix --development
 node2nix --development -i package.json
 ```
 
-**Example: Building a Tool with Dev Dependencies**
+#### Example: Building a Tool with Dev Dependencies
 
 ```bash
 # For tools like TypeScript compiler
@@ -212,14 +214,14 @@ nix-build -A package
 
 ### 5. Node.js Version Targeting
 
-**Default (Node.js 12+)**
+#### Default (Node.js 12+)
 
 ```bash
 # Uses latest LTS Node.js
 node2nix
 ```
 
-**Node.js 4.x Compatibility**
+#### Node.js 4.x Compatibility
 
 ```bash
 # Enable Node.js 4.x mode
@@ -229,19 +231,19 @@ node2nix -4
 node2nix --nodejs-4
 ```
 
-**Node.js 6.x**
+#### Node.js 6.x
 
 ```bash
 node2nix -6
 ```
 
-**Node.js 8.x**
+#### Node.js 8.x
 
 ```bash
 node2nix -8
 ```
 
-**Custom Node.js Version in Generated Package**
+#### Custom Node.js Version in Generated Package
 
 ```nix
 # Override Node.js version in default.nix
@@ -262,7 +264,7 @@ in
 
 ### 6. Input Files
 
-**Custom Input File**
+#### Custom Input File
 
 ```bash
 # Use custom package.json location
@@ -275,7 +277,7 @@ node2nix -i package.json -o node-packages.nix
 node2nix -c my-composition.nix
 ```
 
-**Multiple Packages**
+#### Multiple Packages
 
 ```bash
 # Create a node-packages.json file
@@ -293,7 +295,7 @@ node2nix -i node-packages.json
 # Builds packages without package.json
 ```
 
-**Supplement File**
+#### Supplement File
 
 ```bash
 # Add extra packages not in dependencies
@@ -312,7 +314,7 @@ node2nix --supplement-input supplement.json
 
 ### 7. Private Registries & Authentication
 
-**Private Registry**
+#### Private Registry
 
 ```bash
 # Configure private registry
@@ -326,7 +328,7 @@ node2nix \
   --registry-scope "@mycompany"
 ```
 
-**Multiple Registries**
+#### Multiple Registries
 
 ```bash
 # Different registries for different scopes
@@ -337,7 +339,7 @@ node2nix \
   --registry-auth-token "TOKEN"
 ```
 
-**Using .npmrc**
+#### Using .npmrc
 
 ```bash
 # node2nix respects .npmrc settings
@@ -349,7 +351,7 @@ EOF
 node2nix
 ```
 
-**Private Git Repositories**
+#### Private Git Repositories
 
 ```bash
 # Enable SSH for private git deps
@@ -361,7 +363,7 @@ node2nix --use-fetchgit-private
 
 ### 8. Dependency Handling
 
-**Peer Dependencies**
+#### Peer Dependencies
 
 ```bash
 # Include peer dependencies
@@ -370,7 +372,7 @@ node2nix --include-peer-dependencies
 # Useful for plugin systems
 ```
 
-**Strip Optional Dependencies**
+#### Strip Optional Dependencies
 
 ```bash
 # Remove optional dependencies
@@ -379,7 +381,7 @@ node2nix --strip-optional-dependencies
 # Helps when optional deps cause build failures
 ```
 
-**Bypass Cache**
+#### Bypass Cache
 
 ```bash
 # Force fresh package metadata fetch
@@ -388,7 +390,7 @@ node2nix --bypass-cache
 # Useful when registry data is stale
 ```
 
-**No Copy DevDependencies**
+#### No Copy DevDependencies
 
 ```bash
 # Don't copy devDependencies to store
@@ -399,7 +401,7 @@ node2nix --no-copy-node-env
 
 ### 9. Override Mechanism
 
-**Basic Override**
+#### Basic Override
 
 ```nix
 # default.nix
@@ -431,7 +433,7 @@ in
 }
 ```
 
-**Override Specific Package**
+#### Override Specific Package
 
 ```nix
 { pkgs ? import <nixpkgs> {} }:
@@ -465,7 +467,7 @@ in
 }
 ```
 
-**Global Override**
+#### Global Override
 
 ```nix
 # Override all packages
@@ -488,7 +490,7 @@ nodePackages
 
 ### 10. Development Shell
 
-**Generate Shell Environment**
+#### Generate Shell Environment
 
 ```bash
 # Generate with shell support
@@ -503,7 +505,7 @@ nix-shell -A shell
 # - Test without rebuilding
 ```
 
-**Enhanced Shell**
+#### Enhanced Shell
 
 ```nix
 # shell.nix
@@ -544,7 +546,7 @@ nodePackages.shell.override {
 }
 ```
 
-**Using the Shell**
+#### Using the Shell
 
 ```bash
 # Enter shell
@@ -562,7 +564,7 @@ npm run build
 
 ### 11. Common Patterns
 
-**Pattern 1: Simple CLI Tool**
+#### Pattern 1: Simple CLI Tool
 
 ```bash
 # Project structure:
@@ -586,7 +588,7 @@ nix-build -A package
 nix-env -f default.nix -iA package
 ```
 
-**Pattern 2: Web Application**
+#### Pattern 2: Web Application
 
 ```bash
 # Express.js app with dependencies
@@ -630,7 +632,7 @@ in
 }
 ```
 
-**Pattern 3: Monorepo Package**
+#### Pattern 3: Monorepo Package
 
 ```bash
 # Workspace project
@@ -650,7 +652,7 @@ cd packages/app
 node2nix -l ../../package-lock.json
 ```
 
-**Pattern 4: TypeScript Project**
+#### Pattern 4: TypeScript Project
 
 ```bash
 # Include dev dependencies for TypeScript
@@ -687,7 +689,7 @@ in
 }
 ```
 
-**Pattern 5: Electron App**
+#### Pattern 5: Electron App
 
 ```bash
 # Electron requires development dependencies
@@ -730,7 +732,7 @@ in
 
 ### 12. NixOS Integration
 
-**Package in NixOS Configuration**
+#### Package in NixOS Configuration
 
 ```nix
 # /etc/nixos/configuration.nix
@@ -772,7 +774,7 @@ in
 }
 ```
 
-**Module for Node.js App**
+#### Module for Node.js App
 
 ```nix
 # modules/my-app.nix
@@ -829,7 +831,7 @@ in
 
 ### 13. Flake Integration
 
-**flake.nix for Node.js Project**
+#### flake.nix for Node.js Project
 
 ```nix
 {
@@ -872,7 +874,7 @@ in
 }
 ```
 
-**Use Flake**
+#### Use Flake
 
 ```bash
 # Build
@@ -891,7 +893,7 @@ nix flake lock --update-input nixpkgs
 
 ### 14. Troubleshooting
 
-**Issue 1: Native Module Build Failures**
+#### Issue 1: Native Module Build Failures
 
 **Problem**: Package with native dependencies fails to build
 
@@ -927,7 +929,7 @@ in
 }
 ```
 
-**Issue 2: Plugin Discovery Failures**
+#### Issue 2: Plugin Discovery Failures
 
 **Problem**: Application can't find plugins/modules
 
@@ -946,7 +948,7 @@ shellHook = ''
 '';
 ```
 
-**Issue 3: Package Not Found in Registry**
+#### Issue 3: Package Not Found in Registry
 
 **Problem**: node2nix can't fetch package
 
@@ -962,7 +964,7 @@ npm update
 node2nix -l package-lock.json
 ```
 
-**Issue 4: Peer Dependency Issues**
+#### Issue 4: Peer Dependency Issues
 
 **Problem**: Missing peer dependencies
 
@@ -973,7 +975,7 @@ node2nix -l package-lock.json
 node2nix --include-peer-dependencies -l package-lock.json
 ```
 
-**Issue 5: Private Git Repository Access**
+#### Issue 5: Private Git Repository Access
 
 **Problem**: Can't fetch from private git repos
 
@@ -987,7 +989,7 @@ node2nix --use-fetchgit-private
 # For declarative builds, use fetchgit with SSH URL override
 ```
 
-**Issue 6: Large Closure Size**
+#### Issue 6: Large Closure Size
 
 **Problem**: Generated package has large closure
 
@@ -1019,7 +1021,7 @@ node2nix --strip-optional-dependencies
 
 ### 15. Advanced Usage
 
-**Custom Composition**
+#### Custom Composition
 
 ```bash
 # Generate with custom composition file
@@ -1028,7 +1030,7 @@ node2nix -c my-composition.nix
 # Allows custom package structure
 ```
 
-**Patch Packages**
+#### Patch Packages
 
 ```nix
 { pkgs ? import <nixpkgs> {} }:
@@ -1054,7 +1056,7 @@ in
 }
 ```
 
-**Multi-Platform Support**
+#### Multi-Platform Support
 
 ```nix
 { pkgs ? import <nixpkgs> {} }:
@@ -1080,7 +1082,7 @@ in
 }
 ```
 
-**Development vs Production Builds**
+#### Development vs Production Builds
 
 ```nix
 # default.nix

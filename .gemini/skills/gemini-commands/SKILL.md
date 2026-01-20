@@ -8,7 +8,8 @@ description: Gemini Custom Slash Commands Skill
 
 ## Overview
 
-**Gemini Custom Slash Commands** allow you to extend the Gemini CLI with your own reusable workflows. These commands are defined in `.toml` files and can execute complex prompts, run shell commands, and read file contents.
+**Gemini Custom Slash Commands** allow you to extend the Gemini CLI with your own reusable workflows. These commands are
+defined in `.toml` files and can execute complex prompts, run shell commands, and read file contents.
 
 ### Key Features
 

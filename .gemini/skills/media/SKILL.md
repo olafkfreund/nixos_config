@@ -8,7 +8,10 @@ description: Media Management (\*arr Stack) Skill
 
 ## Overview
 
-The **\*arr stack** (Radarr, Sonarr, Lidarr, Prowlarr, and related applications) is a comprehensive suite of media automation tools for managing, downloading, and organizing movies, TV shows, music, and other media content. These applications work together to provide automated media acquisition, organization, and integration with media servers like Plex and Jellyfin.
+The **\*arr stack** (Radarr, Sonarr, Lidarr, Prowlarr, and related applications) is a comprehensive suite of media
+automation tools for managing, downloading, and organizing movies, TV shows, music, and other media content. These
+applications work together to provide automated media acquisition, organization, and integration with media servers like
+Plex and Jellyfin.
 
 ### Key Applications
 
@@ -52,14 +55,14 @@ The **\*arr stack** (Radarr, Sonarr, Lidarr, Prowlarr, and related applications)
 
 ### How It Works
 
-```
-User Request → *arr Application → Prowlarr → Indexers
-                     ↓
-              Download Client (NZBGet/Transmission)
-                     ↓
-              Downloaded Media → Organized & Renamed
-                     ↓
-              Media Server (Plex/Jellyfin)
+```mermaid
+graph TD
+    User[User Request] --> Arr[*arr Application]
+    Arr --> Prowlarr
+    Prowlarr --> Indexers
+    Arr --> Client[Download Client NZBGet/Transmission]
+    Client --> Media[Downloaded Media]
+    Media --> Server[Media Server Plex/Jellyfin]
 ```
 
 1. **Add Content**: Add movies (Radarr), TV shows (Sonarr), or music (Lidarr) to your library
@@ -655,7 +658,7 @@ Prowlarr is the central indexer manager that feeds all other \*arr applications.
 
 ### Quality Upgrading
 
-```nix
+```yaml
 # Configure in Settings → Profiles:
 # 1. Set quality progression: WEBDL-720p → WEBDL-1080p → BluRay-1080p
 # 2. Enable "Upgrade until" quality
@@ -877,7 +880,7 @@ Automatically sync TRaSH Guides quality profiles:
 
 ### 1. Directory Structure
 
-```
+```text
 /mnt/media/
 ├── Downloads/          # Completed downloads
 ├── Movies/            # Radarr root folder
@@ -928,21 +931,21 @@ Configure consistent file naming in each app:
 
 **Radarr** - Settings → Media Management → File Management:
 
-```
+```text
 Movie Format: {Movie Title} ({Release Year}) - {Quality Full}
 Movie Folder: {Movie Title} ({Release Year})
 ```
 
 **Sonarr** - Settings → Media Management → Episode Naming:
 
-```
+```text
 Standard Episode Format: {Series Title} - S{season:00}E{episode:00} - {Episode Title} [{Quality Full}]
 Season Folder Format: Season {season:00}
 ```
 
 **Lidarr** - Settings → Media Management → File Management:
 
-```
+```text
 Album Format: {Album Title} ({Release Year})
 Track Format: {track:00} - {Track Title}
 ```
@@ -951,7 +954,7 @@ Track Format: {track:00} - {Track Title}
 
 Create realistic quality profiles:
 
-```
+```yaml
 # Example HD Quality Profile:
 - Minimum: WEBDL-720p
 - Preferred: WEBDL-1080p, BluRay-1080p
@@ -1255,7 +1258,7 @@ du -sh /mnt/media/*/radarr.db
 
 **Enable built-in authentication:**
 
-```
+```text
 Settings → General → Security
 - Authentication: Forms (Basic) or Forms (Login Page)
 - Username: admin
@@ -1424,7 +1427,7 @@ nixos-rebuild test --flake .#mediaserver
 
 ### Service URLs
 
-```
+```text
 Radarr:    http://server:7878
 Sonarr:    http://server:8989
 Lidarr:    http://server:8686
@@ -1454,7 +1457,7 @@ nixos-rebuild test --flake .#mediaserver
 
 ### Directory Structure
 
-```
+```text
 /mnt/media/
 ├── radarr/          # Radarr config
 ├── sonarr/          # Sonarr config
@@ -1466,4 +1469,5 @@ nixos-rebuild test --flake .#mediaserver
 └── Music/           # Organized music
 ```
 
-This comprehensive skill covers everything you need to set up and manage a complete media automation system with the \*arr stack on NixOS!
+This comprehensive skill covers everything you need to set up and manage a complete media automation system with the \*arr
+stack on NixOS!

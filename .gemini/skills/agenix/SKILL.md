@@ -8,7 +8,9 @@ description: Agenix Skill
 
 ## Overview
 
-**agenix** is a lightweight, SSH-based secrets management solution for NixOS that uses age encryption to securely store and deploy sensitive information. It provides a CLI tool for encrypting secrets and a NixOS/Home Manager module for automated decryption and deployment.
+**agenix** is a lightweight, SSH-based secrets management solution for NixOS that uses age encryption to securely store
+and deploy sensitive information. It provides a CLI tool for encrypting secrets and a NixOS/Home Manager module for
+automated decryption and deployment.
 
 ### Key Features
 
@@ -29,7 +31,8 @@ description: Agenix Skill
 - Manual secret deployment is error-prone and doesn't scale
 - Need reproducible, declarative secret management
 
-**Solution**: agenix encrypts secrets with SSH/age public keys, stores them in your Nix configuration, and automatically decrypts them on target systems using SSH private keys during activation.
+**Solution**: agenix encrypts secrets with SSH/age public keys, stores them in your Nix configuration, and automatically
+decrypts them on target systems using SSH private keys during activation.
 
 ### How It Works
 
@@ -63,15 +66,16 @@ Add agenix to your `flake.nix`:
     # agenix.url = "github:ryantm/agenix/0.15.0";
   };
 
-  outputs = { self, nixpkgs, agenix, ... }: {
-    nixosConfigurations.hostname = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      modules = [
-        ./configuration.nix
-        agenix.nixosModules.default
-      ];
+  outputs = { self, nixpkgs, agenix, ... }:
+    {
+      nixosConfigurations.hostname = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./configuration.nix
+          agenix.nixosModules.default
+        ];
+      };
     };
-  };
 }
 ```
 
@@ -139,10 +143,7 @@ let
   agenixSha256 = "0000000000000000000000000000000000000000000000000000";
 in {
   imports = [
-    "${builtins.fetchTarball {
-      url = "https://github.com/ryantm/agenix/archive/${agenixCommit}.tar.gz";
-      sha256 = agenixSha256;
-    }}/modules/age.nix"
+    "${builtins.fetchTarball { url = \"https://github.com/ryantm/agenix/archive/${agenixCommit}.tar.gz\"; sha256 = agenixSha256; }}"/modules/age.nix"
   ];
 }
 ```
@@ -255,7 +256,8 @@ export EDITOR=vim
 agenix -e api-key.age
 ```
 
-This opens your editor. Type the secret content, save, and exit. The file is encrypted with the public keys defined in `secrets.nix`.
+This opens your editor. Type the secret content, save, and exit. The file is encrypted with the public keys defined in
+`secrets.nix`.
 
 ### Step 4: Add Secret to NixOS Configuration
 
@@ -480,7 +482,7 @@ mkpasswd -m sha-512 | agenix -e alice-password.age
 
 ### NixOS Module Options
 
-#### age.secrets.<name>.file
+#### age.secrets.&lt;name&gt;.file
 
 **Type**: `path`
 **Required**: Yes
@@ -493,7 +495,7 @@ Path to the encrypted `.age` file.
 }
 ```
 
-#### age.secrets.<name>.path
+#### age.secrets.&lt;name&gt;.path
 
 **Type**: `string`
 **Default**: `/run/agenix/<name>`
@@ -509,7 +511,7 @@ Path where the decrypted secret will be available.
 }
 ```
 
-#### age.secrets.<name>.mode
+#### age.secrets.&lt;name&gt;.mode
 
 **Type**: `string`
 **Default**: `"0400"`
@@ -532,7 +534,7 @@ Common modes:
 - `"0600"`: Owner read/write
 - `"0640"`: Owner read/write, group read
 
-#### age.secrets.<name>.owner
+#### age.secrets.&lt;name&gt;.owner
 
 **Type**: `string`
 **Default**: `"root"`
@@ -548,7 +550,7 @@ Username of the file owner.
 }
 ```
 
-#### age.secrets.<name>.group
+#### age.secrets.&lt;name&gt;.group
 
 **Type**: `string`
 **Default**: `"root"`
@@ -565,7 +567,7 @@ Group name of the file.
 }
 ```
 
-#### age.secrets.<name>.symlink
+#### age.secrets.&lt;name&gt;.symlink
 
 **Type**: `boolean`
 **Default**: `true`
@@ -583,7 +585,7 @@ Whether to use a symlink or copy the file.
 
 **Note**: Symlinks are recommended for security (automatic cleanup). Disable only if an application cannot follow symlinks.
 
-#### age.secrets.<name>.name
+#### age.secrets.&lt;name&gt;.name
 
 **Type**: `string`
 **Default**: `<attribute name>`
@@ -1381,7 +1383,8 @@ home-manager switch --show-trace
     description = "Production deployment with secrets";
   };
 
-  webserver = { config, pkgs, ... }: {
+  webserver = { config, pkgs, ... }:
+    {
     deployment.targetHost = "web.example.com";
 
     imports = [ inputs.agenix.nixosModules.default ];
@@ -1411,7 +1414,8 @@ home-manager switch --show-trace
     };
   };
 
-  server = { config, pkgs, ... }: {
+  server = { config, pkgs, ... }:
+    {
     deployment = {
       targetHost = "server.example.com";
       targetUser = "deploy";
@@ -1537,13 +1541,13 @@ After:
 sops -d secrets.yaml > secrets.txt
 ```
 
-2. Convert to agenix:
+1. Convert to agenix:
 
 ```bash
 agenix -e secret.age < secrets.txt
 ```
 
-3. Update configuration:
+1. Update configuration:
 
 ```nix
 # Before (sops)
@@ -1566,14 +1570,14 @@ git-crypt unlock
 cat secrets/api-key > /tmp/api-key
 ```
 
-2. Encrypt with agenix:
+1. Encrypt with agenix:
 
 ```bash
 agenix -e api-key.age < /tmp/api-key
 shred -u /tmp/api-key
 ```
 
-3. Update configuration to use agenix
+1. Update configuration to use agenix
 
 ## Best Practices Summary
 
@@ -1685,11 +1689,12 @@ As of 2024, age is **not post-quantum safe**:
 ```nix
 {
   inputs.agenix.url = "github:ryantm/agenix";
-  outputs = { nixpkgs, agenix, ... }: {
-    nixosConfigurations.host = nixpkgs.lib.nixosSystem {
-      modules = [ agenix.nixosModules.default ];
+  outputs = { nixpkgs, agenix, ... }:
+    {
+      nixosConfigurations.host = nixpkgs.lib.nixosSystem {
+        modules = [ agenix.nixosModules.default ];
+      };
     };
-  };
 }
 ```
 
@@ -1709,11 +1714,23 @@ As of 2024, age is **not post-quantum safe**:
 
 ### CLI Commands
 
-```bash
-agenix -e secret.age          # Create/edit secret
-agenix --rekey                # Re-encrypt all secrets
-agenix -d secret.age          # Decrypt to stdout
-```
+1. **Edit Secret**
+
+   ```bash
+   agenix -e secret.age          # Create/edit secret
+   ```
+
+2. **Rekey Secrets**
+
+   ```bash
+   agenix --rekey                # Re-encrypt all secrets
+   ```
+
+3. **Decrypt Secret**
+
+   ```bash
+   agenix -d secret.age          # Decrypt to stdout
+   ```
 
 ### Common Options
 
@@ -1731,10 +1748,22 @@ agenix -d secret.age          # Decrypt to stdout
 
 ### Finding SSH Keys
 
-```bash
-cat ~/.ssh/id_ed25519.pub            # Local user key
-ssh-keyscan hostname                 # Remote host key
-curl https://github.com/user.keys    # GitHub user keys
-```
+1. **Local user key**
+
+   ```bash
+   cat ~/.ssh/id_ed25519.pub
+   ```
+
+2. **Remote host key**
+
+   ```bash
+   ssh-keyscan hostname
+   ```
+
+3. **GitHub user keys**
+
+   ```bash
+   curl https://github.com/user.keys
+   ```
 
 This comprehensive skill covers everything you need to securely manage secrets in NixOS with agenix!

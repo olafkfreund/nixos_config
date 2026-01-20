@@ -6,7 +6,9 @@ description: Niri Skill
 
 # Niri Skill
 
-A specialized skill for configuring and customizing niri Wayland compositor in NixOS using Home Manager, providing expert guidance on scrollable-tiling window management, dynamic workspaces, declarative configuration, and the unique infinite horizontal desktop paradigm.
+A specialized skill for configuring and customizing niri Wayland compositor in NixOS using Home Manager, providing expert
+guidance on scrollable-tiling window management, dynamic workspaces, declarative configuration, and the unique infinite
+horizontal desktop paradigm.
 
 ## Skill Overview
 
@@ -46,7 +48,7 @@ A specialized skill for configuring and customizing niri Wayland compositor in N
 
 ### 2. Installation and Configuration
 
-**Method 1: NixOS Packages (Simple)**
+#### Method 1: NixOS Packages (Simple)
 
 ```nix
 # configuration.nix
@@ -56,12 +58,12 @@ A specialized skill for configuring and customizing niri Wayland compositor in N
   programs.niri.enable = true;
 
   # Essential packages
-  environment.systemPackages = with pkgs; [
-    alacritty  # Terminal (required for default config)
-    fuzzel     # Launcher (required for default config)
-    mako       # Notifications
-    waybar     # Status bar
-  ];
+  environment.systemPackages = with pkgs;
+    [ alacritty  # Terminal (required for default config)
+      fuzzel     # Launcher (required for default config)
+      mako       # Notifications
+      waybar     # Status bar
+    ];
 }
 ```
 
@@ -76,7 +78,7 @@ A specialized skill for configuring and customizing niri Wayland compositor in N
 }
 ```
 
-**Method 2: niri-flake (Declarative with Validation)**
+#### Method 2: niri-flake (Declarative with Validation)
 
 ```nix
 # flake.nix
@@ -99,7 +101,8 @@ A specialized skill for configuring and customizing niri Wayland compositor in N
     };
   };
 
-  outputs = { nixpkgs, home-manager, niri, ... }: {
+  outputs = { nixpkgs, home-manager, niri, ... }:
+  {
     nixosConfigurations.hostname = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
 
@@ -118,12 +121,12 @@ A specialized skill for configuring and customizing niri Wayland compositor in N
           };
 
           # Essential packages
-          environment.systemPackages = with pkgs; [
-            alacritty
-            fuzzel
-            mako
-            waybar
-          ];
+          environment.systemPackages = with pkgs;
+            [ alacritty
+              fuzzel
+              mako
+              waybar
+            ];
         }
 
         # Home Manager with niri
@@ -167,7 +170,7 @@ A specialized skill for configuring and customizing niri Wayland compositor in N
 
 ### 3. Declarative Configuration (programs.niri.settings)
 
-**Complete Nix Configuration Example**:
+#### Complete Nix Configuration Example
 
 ```nix
 # home.nix
@@ -442,7 +445,8 @@ A specialized skill for configuring and customizing niri Wayland compositor in N
     ];
 
     # ============ Keybindings ============
-    binds = with config.lib.niri.actions; {
+    binds = with config.lib.niri.actions;
+    {
       # IMPORTANT: Niri has NO default keybindings!
       # You must define all bindings explicitly.
 
@@ -774,110 +778,110 @@ animations {
 
 ### 5. Essential Packages
 
-**Complete Package Set**:
+#### Complete Package Set
 
 ```nix
 { config, pkgs, ... }:
 {
-  home.packages = with pkgs; [
-    # ============ Required (for default config) ============
-    alacritty       # Terminal
-    fuzzel          # Launcher
+  home.packages = with pkgs;
+    [ # ============ Required (for default config) ============
+      alacritty       # Terminal
+      fuzzel          # Launcher
 
-    # ============ Terminals ============
-    foot            # Lightweight
-    kitty           # GPU-accelerated
-    wezterm         # Feature-rich
+      # ============ Terminals ============
+      foot            # Lightweight
+      kitty           # GPU-accelerated
+      wezterm         # Feature-rich
 
-    # ============ Launchers ============
-    rofi-wayland    # Feature-rich
-    bemenu          # Dmenu alternative
-    tofi            # Minimal launcher
-    wofi            # Wayland native
+      # ============ Launchers ============
+      rofi-wayland    # Feature-rich
+      bemenu          # Dmenu alternative
+      tofi            # Minimal launcher
+      wofi            # Wayland native
 
-    # ============ Status Bars ============
-    waybar          # Highly customizable (recommended)
-    yambar          # Minimal
-    i3status-rust   # Rust-based
+      # ============ Status Bars ============
+      waybar          # Highly customizable (recommended)
+      yambar          # Minimal
+      i3status-rust   # Rust-based
 
-    # ============ Notifications ============
-    mako            # Minimal (recommended)
-    dunst           # Feature-rich
-    swaync          # Notification center
+      # ============ Notifications ============
+      mako            # Minimal (recommended)
+      dunst           # Feature-rich
+      swaync          # Notification center
 
-    # ============ Wallpaper ============
-    swaybg          # Static wallpapers
-    swww            # Animated wallpapers
-    hyprpaper       # Alternative
+      # ============ Wallpaper ============
+      swaybg          # Static wallpapers
+      swww            # Animated wallpapers
+      hyprpaper       # Alternative
 
-    # ============ Screen Locking ============
-    swaylock        # Screen lock
-    swaylock-effects  # Swaylock with effects
-    hyprlock        # Alternative
+      # ============ Screen Locking ============
+      swaylock        # Screen lock
+      swaylock-effects  # Swaylock with effects
+      hyprlock        # Alternative
 
-    # ============ Idle Management ============
-    swayidle        # Idle daemon
-    hypridle        # Alternative
+      # ============ Idle Management ============
+      swayidle        # Idle daemon
+      hypridle        # Alternative
 
-    # ============ File Managers ============
-    thunar          # GTK file manager
-    pcmanfm         # Lightweight
-    dolphin         # KDE
-    nautilus        # GNOME
-    yazi            # Terminal file manager
+      # ============ File Managers ============
+      thunar          # GTK file manager
+      pcmanfm         # Lightweight
+      dolphin         # KDE
+      nautilus        # GNOME
+      yazi            # Terminal file manager
 
-    # ============ System Utilities ============
-    brightnessctl   # Screen brightness
-    playerctl       # Media control
-    pamixer         # Audio control (CLI)
-    pavucontrol     # Audio control (GUI)
+      # ============ System Utilities ============
+      brightnessctl   # Screen brightness
+      playerctl       # Media control
+      pamixer         # Audio control (CLI)
+      pavucontrol     # Audio control (GUI)
 
-    # ============ Network Management ============
-    networkmanagerapplet  # Network manager
+      # ============ Network Management ============
+      networkmanagerapplet  # Network manager
 
-    # ============ Bluetooth ============
-    blueman         # Bluetooth manager
+      # ============ Bluetooth ============
+      blueman         # Bluetooth manager
 
-    # ============ Authentication ============
-    polkit-kde-agent  # Polkit (automatically installed)
+      # ============ Authentication ============
+      polkit-kde-agent  # Polkit (automatically installed)
 
-    # ============ GNOME Keyring ============
-    # Automatically enabled by niri-flake
+      # ============ GNOME Keyring ============
+      # Automatically enabled by niri-flake
 
-    # ============ Wayland Utilities ============
-    wl-clipboard    # CLI clipboard
-    cliphist        # Clipboard history
-    wtype           # xdotool for Wayland
-    wev             # Event viewer
-    wlr-randr       # Display config
+      # ============ Wayland Utilities ============
+      wl-clipboard    # CLI clipboard
+      cliphist        # Clipboard history
+      wtype           # xdotool for Wayland
+      wev             # Event viewer
+      wlr-randr       # Display config
 
-    # ============ Screenshot/Screencast ============
-    # Built into niri! No external tools needed.
-    # Optional: swappy for annotation
-    swappy          # Screenshot editor
-    satty           # Screenshot annotation
+      # ============ Screenshot/Screencast ============
+      # Built into niri! No external tools needed.
+      # Optional: swappy for annotation
+      swappy          # Screenshot editor
+      satty           # Screenshot annotation
 
-    # ============ Color Temperature ============
-    wlsunset        # Redshift for Wayland
-    gammastep       # Alternative
+      # ============ Color Temperature ============
+      wlsunset        # Redshift for Wayland
+      gammastep       # Alternative
 
-    # ============ System Monitoring ============
-    btop            # Resource monitor
-    htop            # Process viewer
+      # ============ System Monitoring ============
+      btop            # Resource monitor
+      htop            # Process viewer
 
-    # ============ Fonts ============
-    (nerdfonts.override { fonts = [ "JetBrainsMono" "FiraCode" ]; })
+      # ============ Fonts ============
+      (nerdfonts.override { fonts = [ "JetBrainsMono" "FiraCode" ]; })
 
-    # ============ Xwayland Support ============
-    # From v25.08+: use xwayland-satellite
-    xwayland-satellite  # X11 support (future)
-  ];
+      # ============ Xwayland Support ============
+      # From v25.08+: use xwayland-satellite
+      xwayland-satellite  # X11 support (future)
+    ];
 }
 ```
 
 ### 6. Waybar Configuration for Niri
 
-**waybar config.json**:
+#### waybar config.json
 
 ```json
 {
@@ -902,7 +906,7 @@ animations {
   ],
 
   "custom/niri-workspaces": {
-    "exec": "niri msg --json workspaces | jq -r '.[] | \"\\(.name) \\(.is-active)\"'",
+    "exec": "niri msg --json workspaces | jq -r '.[] | \"\(.name) \(.is-active)\" '",
     "interval": 1,
     "format": "{}",
     "on-click": "niri msg workspace {}"
@@ -934,7 +938,7 @@ animations {
   },
 
   "memory": {
-    "format": " {}%"
+    "format": " {} %"
   },
 
   "temperature": {
@@ -964,7 +968,7 @@ animations {
 }
 ```
 
-**Home Manager Integration**:
+#### Home Manager Integration
 
 ```nix
 programs.waybar = {
@@ -1016,16 +1020,16 @@ programs.waybar = {
 
 ### 7. Understanding Scrollable Tiling
 
-**Key Concepts:**
+#### Key Concepts
 
 1. **Infinite Horizontal Strip**: Windows arranged in columns from left to right
 2. **Per-Monitor Independence**: Each monitor has its own separate strip
 3. **Dynamic Workspaces**: Workspaces stack vertically (GNOME-style)
 4. **No Window Resizing**: Opening windows never resizes existing ones
 
-**Scrollable Tiling Workflow**:
+#### Scrollable Tiling Workflow
 
-```
+```text
 Monitor 1:                    Monitor 2:
 ┌─────────────────────┐      ┌─────────────────────┐
 │ Workspace 1         │      │ Workspace 1         │
@@ -1039,13 +1043,13 @@ Monitor 1:                    Monitor 2:
 └─────────────────────┘      └─────────────────────┘
 ```
 
-**Navigation**:
+#### Navigation
 
 - **Horizontal** (Mod+H/L): Scroll left/right through columns
 - **Vertical** (Mod+J/K): Move between windows in a column
 - **Workspace** (Mod+U/I): Switch between workspaces vertically
 
-**Column Management**:
+#### Column Management
 
 ```bash
 # Consume window into column (stack vertically)
@@ -1060,14 +1064,14 @@ Mod+Minus / Mod+Equal
 
 ### 8. Dynamic Workspaces
 
-**How It Works:**
+#### How It Works
 
 - Workspaces created automatically as needed
 - Always one empty workspace available
 - Removing last window destroys workspace
 - Workspaces preserved per-monitor across reconnects
 
-**Workspace Management**:
+#### Workspace Management
 
 ```nix
 binds = {
@@ -1090,7 +1094,7 @@ binds = {
 };
 ```
 
-**Named Workspaces**:
+#### Named Workspaces
 
 ```nix
 window-rules = [
@@ -1107,9 +1111,9 @@ window-rules = [
 
 ### 9. Built-in Screenshot & Screencast
 
-**Niri has native screenshot/screencast support!**
+#### Niri has native screenshot/screencast support
 
-**Screenshot Bindings**:
+#### Screenshot Bindings
 
 ```nix
 binds = {
@@ -1130,7 +1134,7 @@ binds = {
 screenshot-path = "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png";
 ```
 
-**Features:**
+#### Features
 
 - Interactive region selection
 - Full screen capture
@@ -1138,7 +1142,7 @@ screenshot-path = "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 - Screen recording (screencast)
 - Privacy: Block sensitive content with window rules
 
-**Privacy Controls**:
+#### Privacy Controls
 
 ```nix
 window-rules = [
@@ -1154,7 +1158,7 @@ window-rules = [
 
 ### 10. Multi-Monitor Management
 
-**Configuration**:
+#### Configuration
 
 ```nix
 outputs = {
@@ -1188,7 +1192,7 @@ outputs = {
 };
 ```
 
-**Monitor Navigation**:
+#### Monitor Navigation
 
 ```nix
 binds = {
@@ -1202,7 +1206,7 @@ binds = {
 };
 ```
 
-**Per-Monitor Workspace Persistence**:
+#### Per-Monitor Workspace Persistence
 
 - Each monitor maintains independent workspace list
 - Workspaces remember their monitor assignment
@@ -1332,7 +1336,8 @@ niri --version
 
 ```nix
 # You MUST define all bindings in configuration
-programs.niri.settings.binds = with config.lib.niri.actions; {
+programs.niri.settings.binds = with config.lib.niri.actions;
+{
   "Mod+Return".action = spawn "alacritty";
   "Mod+Q".action = close-window;
   # ... etc

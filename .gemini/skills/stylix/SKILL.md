@@ -8,7 +8,9 @@ description: Stylix Skill
 
 ## Overview
 
-**Stylix** is a comprehensive theming framework for NixOS-based systems that applies color schemes, wallpapers, and fonts across a wide range of applications. Unlike similar tools like base16.nix or nix-colors that only provide color definitions, Stylix follows an "it just works" philosophy by automatically implementing themes across supported programs.
+**Stylix** is a comprehensive theming framework for NixOS-based systems that applies color schemes, wallpapers, and fonts
+across a wide range of applications. Unlike similar tools like base16.nix or nix-colors that only provide color
+definitions, Stylix follows an "it just works" philosophy by automatically implementing themes across supported programs.
 
 ### Key Features
 
@@ -558,7 +560,8 @@ Configure base font sizes:
 
 ### What are Targets?
 
-Targets are individual applications or system components that Stylix can theme. Each target can be enabled or disabled independently.
+Targets are individual applications or system components that Stylix can theme. Each target can be enabled or disabled
+independently.
 
 ### Auto-Enable Behavior
 
@@ -710,7 +713,8 @@ Override Stylix settings per user:
   stylix.enable = true;
   stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
 
-  home-manager.users.alice = { pkgs, ... }: {
+  home-manager.users.alice = { pkgs, ... }:
+    {
     # Alice uses a different theme
     stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/nord.yaml";
   };
@@ -1124,7 +1128,8 @@ nix run github:nix-community/stylix#testbed:gnome:dark
   };
 
   # Home Manager
-  home-manager.users.user = { pkgs, config, ... }: {
+  home-manager.users.user = { pkgs, config, ... }:
+    {
     # Wayland compositor
     wayland.windowManager.hyprland.enable = true;
 
@@ -1165,13 +1170,15 @@ nix run github:nix-community/stylix#testbed:gnome:dark
   };
 
   # Bob: Custom theme
-  home-manager.users.bob = { pkgs, ... }: {
+  home-manager.users.bob = { pkgs, ... }:
+    {
     stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/nord.yaml";
     stylix.image = ./bob-wallpaper.png;
   };
 
   # Charlie: Fully custom
-  home-manager.users.charlie = { pkgs, ... }: {
+  home-manager.users.charlie = { pkgs, ... }:
+    {
     stylix.base16Scheme = {
       base00 = "1e1e2e";
       base01 = "181825";
@@ -1195,7 +1202,8 @@ nix run github:nix-community/stylix#testbed:gnome:dark
   stylix.enable = true;
   stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/one-dark.yaml";
 
-  home-manager.users.dev = { pkgs, ... }: {
+  home-manager.users.dev = { pkgs, ... }:
+    {
     # Developer tools with consistent theming
     stylix.targets = {
       neovim.enable = true;
@@ -1901,11 +1909,14 @@ nix run github:nix-community/stylix#testbed:gnome:light
 - **Manual theming**: Configure each application individually
 - **System theme managers**: GNOME Tweaks, lxappearance, qt5ct
 
-Stylix excels at providing a unified, declarative theming experience across your entire NixOS system while maintaining the flexibility to customize per-application when needed.
+Stylix excels at providing a unified, declarative theming experience across your entire NixOS system while maintaining
+the flexibility to customize per-application when needed.
 
 ## Summary
 
-Stylix is a powerful theming framework that brings consistency and ease to NixOS system appearance management. By leveraging base16 color schemes, automatic wallpaper analysis, and comprehensive application support, it enables declarative, reproducible theming across your entire system.
+Stylix is a powerful theming framework that brings consistency and ease to NixOS system appearance management. By
+leveraging base16 color schemes, automatic wallpaper analysis, and comprehensive application support, it enables
+declarative, reproducible theming across your entire system.
 
 Key advantages:
 
@@ -1916,4 +1927,5 @@ Key advantages:
 - **Automatic**: Smart defaults with manual override capability
 - **Community-driven**: Active development and support
 
-Start with a simple configuration and expand as needed. Stylix makes it easy to maintain a beautiful, consistent system appearance across all your NixOS machines.
+Start with a simple configuration and expand as needed. Stylix makes it easy to maintain a beautiful, consistent system
+appearance across all your NixOS machines.

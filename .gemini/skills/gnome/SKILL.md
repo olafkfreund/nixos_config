@@ -8,7 +8,9 @@ description: GNOME Skill
 
 ## Overview
 
-**GNOME** is a modern, full-featured desktop environment for NixOS. This skill provides comprehensive guidance for configuring GNOME declaratively using NixOS and Home Manager, with deep integration of Stylix theming, extension management, and best practices for a reproducible desktop experience.
+**GNOME** is a modern, full-featured desktop environment for NixOS. This skill provides comprehensive guidance for
+configuring GNOME declaratively using NixOS and Home Manager, with deep integration of Stylix theming, extension
+management, and best practices for a reproducible desktop experience.
 
 ### Key Capabilities
 
@@ -22,7 +24,8 @@ description: GNOME Skill
 
 ### Why This Matters
 
-Traditional GNOME configuration is **imperative** (click settings, install extensions manually). NixOS enables **declarative** GNOME configuration, making your desktop environment:
+Traditional GNOME configuration is **imperative** (click settings, install extensions manually). NixOS enables
+**declarative** GNOME configuration, making your desktop environment:
 
 - ✅ Reproducible across machines
 - ✅ Version controlled

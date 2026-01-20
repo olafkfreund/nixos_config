@@ -37,25 +37,25 @@ double = x: x * 2
 add = x: y: x + y
 
 # Attribute set argument
-mkService = { name, port }: {
+mkService = { name, port }:
   services.${name}.enable = true;
   services.${name}.port = port;
 }
 
 # Attribute set with defaults
-mkService = { name, port ? 8080 }: {
+mkService = { name, port ? 8080 }:
   services.${name}.enable = true;
   services.${name}.port = port;
 }
 
 # Pattern matching (destructuring)
-mkService = { name, port, ... }@args: {
+mkService = { name, port, ... }@args:
   # args contains all attributes
   # name and port are extracted
 }
 
 # Variadic arguments
-mkService = args: {
+mkService = args:
   # All arguments in 'args' attribute set
 }
 ```
@@ -99,27 +99,28 @@ result = addThenDouble 3  # (3 + 5) * 2 = 16
 **Library Functions:**
 
 ```nix
-with lib; {
-  # String manipulation
-  upperName = toUpper "nixos";  # "NIXOS"
-  hasPrefix = hasPrefix "nix" "nixos";  # true
+with lib;
+  {
+    # String manipulation
+    upperName = toUpper "nixos";  # "NIXOS"
+    hasPrefix = hasPrefix "nix" "nixos";  # true
 
-  # List operations
-  uniqueList = unique [1 2 2 3 3 3];  # [1 2 3]
-  flatList = flatten [[1 2] [3 4]];  # [1 2 3 4]
+    # List operations
+    uniqueList = unique [1 2 2 3 3 3];  # [1 2 3]
+    flatList = flatten [[1 2] [3 4]];  # [1 2 3 4]
 
-  # Attribute set operations
-  merged = recursiveUpdate { a = 1; } { b = 2; };  # { a = 1; b = 2; }
-  filtered = filterAttrs (n: v: v > 5) { a = 3; b = 7; };  # { b = 7; }
+    # Attribute set operations
+    merged = recursiveUpdate { a = 1; } { b = 2; };  # { a = 1; b = 2; }
+    filtered = filterAttrs (n: v: v > 5) { a = 3; b = 7; };  # { b = 7; }
 
-  # Optional values
-  value = optional (condition) "value";  # ["value"] or []
-  values = optionals (condition) ["a" "b"];  # ["a" "b"] or []
+    # Optional values
+    value = optional (condition) "value";  # ["value"] or []
+    values = optionals (condition) ["a" "b"];  # ["a" "b"] or []
 
-  # String conversion
-  int = toInt "42";  # 42
-  str = toString 42;  # "42"
-}
+    # String conversion
+    int = toInt "42";  # 42
+    str = toString 42;  # "42"
+  }
 ```
 
 ### Let-In Expressions
@@ -204,9 +205,10 @@ with pkgs; [
 ]
 
 # Nested with
-with lib; with pkgs; {
-  # Can use both lib and pkgs functions
-}
+with lib; with pkgs;
+  {
+    # Can use both lib and pkgs functions
+  }
 ```
 
 **Anti-Pattern (Avoid):**
@@ -229,16 +231,18 @@ with pkgs; buildInputs = [ curl jq ];  # Clear: from pkgs
 
 ```nix
 # ✅ GOOD - Limited scope, clear context
-environment.systemPackages = with pkgs; [
-  # List of packages (obvious they're from pkgs)
-  git vim neovim tmux
-];
+environment.systemPackages = with pkgs;
+  [
+    # List of packages (obvious they're from pkgs)
+    git vim neovim tmux
+  ];
 
 # ✅ GOOD - Single attribute set
 let cfg = config.services.myservice; in
-with cfg; {
-  # Using cfg attributes frequently
-}
+with cfg;
+  {
+    # Using cfg attributes frequently
+  }
 
 # ❌ BAD - Multiple attribute sets, unclear origins
 with pkgs; with lib; with stdenv;
@@ -281,13 +285,14 @@ in {
 **In Function Arguments:**
 
 ```nix
-{ config, lib, pkgs, ... }: {
-  # Bring lib functions into scope
-  inherit (lib) mkIf mkEnableOption mkOption types;
-  inherit (pkgs) writeScript;
+{ config, lib, pkgs, ... }:
+  {
+    # Bring lib functions into scope
+    inherit (lib) mkIf mkEnableOption mkOption types;
+    inherit (pkgs) writeScript;
 
-  # Now can use: mkIf, mkOption, etc. directly
-}
+    # Now can use: mkIf, mkOption, etc. directly
+  }
 ```
 
 **Best Practices:**
@@ -300,13 +305,15 @@ let
   inherit (pkgs) writeScript;
   cfg = config.services.myservice;
 in {
-  options.services.myservice = {
-    enable = mkEnableOption "MyService";
-  };
+  options.services.myservice =
+    {
+      enable = mkEnableOption "MyService";
+    };
 
-  config = mkIf cfg.enable {
-    # ...
-  };
+  config = mkIf cfg.enable
+    {
+      # ...
+    };
 }
 
 # ❌ BAD - Unclear, manual assignment
@@ -429,13 +436,14 @@ stdenv.mkDerivation rec {
   };
 
   # Essential metadata
-  meta = with lib; {
-    description = "My application";
-    homepage = "https://example.com";
-    license = licenses.mit;
-    maintainers = with maintainers; [ username ];
-    platforms = platforms.linux;
-  };
+  meta = with lib;
+    {
+      description = "My application";
+      homepage = "https://example.com";
+      license = licenses.mit;
+      maintainers = with maintainers; [ username ];
+      platforms = platforms.linux;
+    };
 }
 ```
 
@@ -593,19 +601,20 @@ stdenv.mkDerivation rec {
   '';
 
   # Comprehensive meta
-  meta = with lib; {
-    description = "Advanced application";
-    longDescription = ''
-      Detailed description of the application,
-      its features, and use cases.
-    '';
-    homepage = "https://example.com";
-    changelog = "https://example.com/changelog";
-    license = licenses.mit;
-    maintainers = with maintainers; [ username ];
-    platforms = platforms.unix;
-    broken = stdenv.isDarwin;  # Mark broken platforms
-  };
+  meta = with lib;
+    {
+      description = "Advanced application";
+      longDescription = ''
+        Detailed description of the application,
+        its features, and use cases.
+      '';
+      homepage = "https://example.com";
+      changelog = "https://example.com/changelog";
+      license = licenses.mit;
+      maintainers = with maintainers; [ username ];
+      platforms = platforms.unix;
+      broken = stdenv.isDarwin;  # Mark broken platforms
+    };
 }
 ```
 
@@ -702,48 +711,53 @@ imported = import ./directory/default.nix;
 **NixOS Module Structure:**
 
 ```nix
-{ config, lib, pkgs, ... }: {
-  # Imports: Load other modules
-  imports = [
-    ./module1.nix
-    ./module2.nix
-  ];
+{ config, lib, pkgs, ... }:
+  {
+    # Imports: Load other modules
+    imports = [
+      ./module1.nix
+      ./module2.nix
+    ];
 
-  # Options: Declare what can be configured
-  options = {
-    services.myservice.enable = lib.mkEnableOption "MyService";
-  };
+    # Options: Declare what can be configured
+    options =
+      {
+        services.myservice.enable = lib.mkEnableOption "MyService";
+      };
 
-  # Config: Actual configuration
-  config = {
-    # ... configuration based on options
-  };
-}
+    # Config: Actual configuration
+    config =
+      {
+        # ... configuration based on options
+      };
+  }
 ```
 
 **Import Patterns:**
 
 ```nix
 # ✅ GOOD - Explicit imports
-{ config, lib, pkgs, ... }: {
-  imports = [
-    ./hardware-configuration.nix
-    ./modules/services
-    ./modules/desktop
-    ./users
-  ];
-}
+{ config, lib, pkgs, ... }:
+  {
+    imports = [
+      ./hardware-configuration.nix
+      ./modules/services
+      ./modules/desktop
+      ./users
+    ];
+  }
 
 # ✅ GOOD - Conditional imports
-{ config, lib, pkgs, ... }: {
-  imports = [
-    ./common.nix
-  ] ++ lib.optionals config.features.desktop.enable [
-    ./desktop.nix
-  ] ++ lib.optionals config.features.development.enable [
-    ./development.nix
-  ];
-}
+{ config, lib, pkgs, ... }:
+  {
+    imports = [
+      ./common.nix
+    ] ++ lib.optionals config.features.desktop.enable [
+      ./desktop.nix
+    ] ++ lib.optionals config.features.development.enable [
+      ./development.nix
+    ];
+  }
 
 # ❌ BAD - Magic auto-discovery
 { config, lib, pkgs, ... }:
@@ -816,49 +830,52 @@ mypackage-custom = callPackage ./package.nix {
 
 ```nix
 # overlay.nix
-final: prev: {
-  # Add new package
-  mypackage = final.callPackage ./mypackage.nix { };
+final: prev:
+  {
+    # Add new package
+    mypackage = final.callPackage ./mypackage.nix { };
 
-  # Override existing package
-  git = prev.git.overrideAttrs (old: {
-    version = "2.43.0";
-    src = final.fetchurl {
-      url = "https://...";
-      sha256 = "...";
+    # Override existing package
+    git = prev.git.overrideAttrs (old: {
+      version = "2.43.0";
+      src = final.fetchurl {
+        url = "https://...";
+        sha256 = "...";
+      };
+    });
+
+    # Modify package
+    vim-custom = prev.vim.override {
+      python = final.python311;
     };
-  });
-
-  # Modify package
-  vim-custom = prev.vim.override {
-    python = final.python311;
-  };
-}
+  }
 ```
 
 **Applying Overlays:**
 
 ```nix
 # In configuration.nix
-{ config, lib, pkgs, ... }: {
-  nixpkgs.overlays = [
-    (import ./overlays/custom-packages.nix)
-    (import ./overlays/version-overrides.nix)
-  ];
-}
+{ config, lib, pkgs, ... }:
+  {
+    nixpkgs.overlays = [
+      (import ./overlays/custom-packages.nix)
+      (import ./overlays/version-overrides.nix)
+    ];
+  }
 
 # Or in flake.nix
 {
-  outputs = { self, nixpkgs }: {
-    overlays.default = import ./overlay.nix;
+  outputs = { self, nixpkgs }:
+    {
+      overlays.default = import ./overlay.nix;
 
-    nixosConfigurations.myhost = nixpkgs.lib.nixosSystem {
-      modules = [
-        { nixpkgs.overlays = [ self.overlays.default ]; }
-        ./configuration.nix
-      ];
+      nixosConfigurations.myhost = nixpkgs.lib.nixosSystem {
+        modules = [
+          { nixpkgs.overlays = [ self.overlays.default ]; }
+          ./configuration.nix
+        ];
+      };
     };
-  };
 }
 ```
 
@@ -866,28 +883,32 @@ final: prev: {
 
 ```nix
 # ✅ GOOD - Use final for dependencies
-final: prev: {
-  myapp = final.callPackage ./myapp.nix {
-    # Uses modified git from this overlay
-    inherit (final) git;
-  };
-}
+final: prev:
+  {
+    myapp = final.callPackage ./myapp.nix {
+      # Uses modified git from this overlay
+      inherit (final) git;
+    };
+  }
 
 # ❌ BAD - Use prev for dependencies (can miss overrides)
-final: prev: {
-  myapp = final.callPackage ./myapp.nix {
-    inherit (prev) git;  # Won't see overlay changes
-  };
-}
+final: prev:
+  {
+    myapp = final.callPackage ./myapp.nix {
+      inherit (prev) git;  # Won't see overlay changes
+    };
+  }
 
 # ✅ GOOD - Organized by purpose
-final: prev: {
-  # Group related packages
-  myPackages = {
-    tool1 = final.callPackage ./tool1.nix { };
-    tool2 = final.callPackage ./tool2.nix { };
-  };
-}
+final: prev:
+  {
+    # Group related packages
+    myPackages =
+      {
+        tool1 = final.callPackage ./tool1.nix { };
+        tool2 = final.callPackage ./tool2.nix { };
+      };
+  }
 ```
 
 ## Option System
@@ -898,183 +919,194 @@ final: prev: {
 
 ```nix
 { config, lib, pkgs, ... }:
-with lib; {
-  options.services.myservice = {
-    # Simple enable option
-    enable = mkEnableOption "MyService daemon";
+with lib;
+  {
+    options.services.myservice =
+      {
+        # Simple enable option
+        enable = mkEnableOption "MyService daemon";
 
-    # String option with default
-    host = mkOption {
-      type = types.str;
-      default = "localhost";
-      description = "Host to bind to";
-    };
+        # String option with default
+        host = mkOption {
+          type = types.str;
+          default = "localhost";
+          description = "Host to bind to";
+        };
 
-    # Integer option with validation
-    port = mkOption {
-      type = types.port;
-      default = 8080;
-      description = "Port to listen on";
-    };
+        # Integer option with validation
+        port = mkOption {
+          type = types.port;
+          default = 8080;
+          description = "Port to listen on";
+        };
 
-    # List of strings
-    allowedUsers = mkOption {
-      type = types.listOf types.str;
-      default = [];
-      description = "List of allowed users";
-    };
-  };
-}
+        # List of strings
+        allowedUsers = mkOption {
+          type = types.listOf types.str;
+          default = [];
+          description = "List of allowed users";
+        };
+      };
+  }
 ```
 
 **Option Types:**
 
 ```nix
-with types; {
-  # Primitive types
-  bool-opt = mkOption { type = types.bool; };
-  int-opt = mkOption { type = types.int; };
-  float-opt = mkOption { type = types.float; };
-  str-opt = mkOption { type = types.str; };
-  path-opt = mkOption { type = types.path; };
+with types;
+  {
+    # Primitive types
+    bool-opt = mkOption { type = types.bool; };
+    int-opt = mkOption { type = types.int; };
+    float-opt = mkOption { type = types.float; };
+    str-opt = mkOption { type = types.str; };
+    path-opt = mkOption { type = types.path; };
 
-  # Special string types
-  port-opt = mkOption { type = types.port; };  # 0-65535
+    # Special string types
+    port-opt = mkOption { type = types.port; };  # 0-65535
 
-  # Containers
-  list-opt = mkOption { type = types.listOf types.str; };
-  attrs-opt = mkOption { type = types.attrsOf types.int; };
+    # Containers
+    list-opt = mkOption { type = types.listOf types.str; };
+    attrs-opt = mkOption { type = types.attrsOf types.int; };
 
-  # Complex types
-  enum-opt = mkOption {
-    type = types.enum [ "debug" "info" "warn" "error" ];
-  };
+    # Complex types
+    enum-opt = mkOption {
+      type = types.enum [ "debug" "info" "warn" "error" ];
+    };
 
-  nullOr-opt = mkOption {
-    type = types.nullOr types.str;
-    default = null;
-  };
+    nullOr-opt = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+    };
 
-  either-opt = mkOption {
-    type = types.either types.str types.int;
-  };
+    either-opt = mkOption {
+      type = types.either types.str types.int;
+    };
 
-  # Package type
-  package-opt = mkOption {
-    type = types.package;
-    default = pkgs.nginx;
-  };
-}
+    # Package type
+    package-opt = mkOption {
+      type = types.package;
+      default = pkgs.nginx;
+    };
+  }
 ```
 
 **Submodules (Structured Options):**
 
 ```nix
 { config, lib, pkgs, ... }:
-with lib; {
-  options.services.myservice = {
-    enable = mkEnableOption "MyService";
+with lib;
+  {
+    options.services.myservice =
+      {
+        enable = mkEnableOption "MyService";
 
-    # Submodule for structured config
-    settings = mkOption {
-      type = types.submodule {
-        freeformType = types.attrsOf types.anything;
+        # Submodule for structured config
+        settings = mkOption {
+          type = types.submodule {
+            freeformType = types.attrsOf types.anything;
 
-        options = {
-          server = {
-            host = mkOption {
-              type = types.str;
-              default = "localhost";
-            };
+            options =
+              {
+                server =
+                  {
+                    host = mkOption {
+                      type = types.str;
+                      default = "localhost";
+                    };
 
-            port = mkOption {
-              type = types.port;
-              default = 8080;
-            };
+                    port = mkOption {
+                      type = types.port;
+                      default = 8080;
+                    };
+                  };
+
+                database =
+                  {
+                    url = mkOption {
+                      type = types.str;
+                      description = "Database connection URL";
+                    };
+
+                    pool = mkOption {
+                      type = types.int;
+                      default = 10;
+                      description = "Connection pool size";
+                    };
+                  };
+              };
           };
 
-          database = {
-            url = mkOption {
-              type = types.str;
-              description = "Database connection URL";
-            };
-
-            pool = mkOption {
-              type = types.int;
-              default = 10;
-              description = "Connection pool size";
-            };
-          };
+          default = {};
+          description = "Configuration for MyService";
         };
       };
-
-      default = {};
-      description = "Configuration for MyService";
-    };
-  };
-}
+  }
 ```
 
 **Advanced Option Patterns:**
 
 ```nix
 { config, lib, pkgs, ... }:
-with lib; {
-  options.services.myservice = {
-    enable = mkEnableOption "MyService";
-
-    # Package option with example
-    package = mkPackageOption pkgs "myservice" {
-      default = pkgs.myservice;
-      example = literalExpression "pkgs.myservice.override { enableFeature = true; }";
-    };
-
-    # Option with assertion
-    port = mkOption {
-      type = types.port;
-      default = 8080;
-      description = "Port to listen on";
-    };
-
-    # Derived option (read-only)
-    connectionString = mkOption {
-      type = types.str;
-      readOnly = true;
-      default = "http://${cfg.host}:${toString cfg.port}";
-      description = "Auto-generated connection string";
-    };
-
-    # Option with validation
-    logLevel = mkOption {
-      type = types.enum [ "debug" "info" "warn" "error" ];
-      default = "info";
-      description = "Logging level";
-    };
-
-    # Complex validation
-    replicas = mkOption {
-      type = types.int;
-      default = 1;
-      description = "Number of replicas";
-      check = x: x > 0 && x <= 10;
-      # Or custom assertion in config
-    };
-  };
-
-  # Assertions based on options
-  config = mkIf cfg.enable {
-    assertions = [
+with lib;
+  {
+    options.services.myservice =
       {
-        assertion = cfg.replicas > 0 && cfg.replicas <= 10;
-        message = "replicas must be between 1 and 10";
-      }
+        enable = mkEnableOption "MyService";
+
+        # Package option with example
+        package = mkPackageOption pkgs "myservice" {
+          default = pkgs.myservice;
+          example = literalExpression "pkgs.myservice.override { enableFeature = true; }";
+        };
+
+        # Option with assertion
+        port = mkOption {
+          type = types.port;
+          default = 8080;
+          description = "Port to listen on";
+        };
+
+        # Derived option (read-only)
+        connectionString = mkOption {
+          type = types.str;
+          readOnly = true;
+          default = "http://${cfg.host}:${toString cfg.port}";
+          description = "Auto-generated connection string";
+        };
+
+        # Option with validation
+        logLevel = mkOption {
+          type = types.enum [ "debug" "info" "warn" "error" ];
+          default = "info";
+          description = "Logging level";
+        };
+
+        # Complex validation
+        replicas = mkOption {
+          type = types.int;
+          default = 1;
+          description = "Number of replicas";
+          check = x: x > 0 && x <= 10;
+          # Or custom assertion in config
+        };
+      };
+
+    # Assertions based on options
+    config = mkIf cfg.enable
       {
-        assertion = cfg.database.url != "";
-        message = "database.url must be configured";
-      }
-    ];
-  };
-}
+        assertions = [
+          {
+            assertion = cfg.replicas > 0 && cfg.replicas <= 10;
+            message = "replicas must be between 1 and 10";
+          }
+          {
+            assertion = cfg.database.url != "";
+            message = "database.url must be configured";
+          }
+        ];
+      };
+  }
 ```
 
 ### Using Options
@@ -1086,22 +1118,27 @@ with lib; {
 let
   cfg = config.services.myservice;
 in {
-  config = lib.mkIf cfg.enable {
-    # Use option values
-    systemd.services.myservice = {
-      serviceConfig = {
-        ExecStart = "${cfg.package}/bin/myservice --port ${toString cfg.port}";
-      };
-    };
+  config = lib.mkIf cfg.enable
+    {
+      # Use option values
+      systemd.services.myservice =
+        {
+          serviceConfig =
+            {
+              ExecStart = "${cfg.package}/bin/myservice --port ${toString cfg.port}";
+            };
+        };
 
-    # Access nested options
-    environment.etc."myservice/config.json".text = builtins.toJSON {
-      server = {
-        host = cfg.settings.server.host;
-        port = cfg.settings.server.port;
-      };
+      # Access nested options
+      environment.etc."myservice/config.json".text = builtins.toJSON
+        {
+          server =
+            {
+              host = cfg.settings.server.host;
+              port = cfg.settings.server.port;
+            };
+        };
     };
-  };
 }
 ```
 
@@ -1109,46 +1146,51 @@ in {
 
 ```nix
 { config, lib, pkgs, ... }:
-with lib; {
-  # Default priority (1000)
-  services.myservice.port = 8080;
+with lib;
+  {
+    # Default priority (1000)
+    services.myservice.port = 8080;
 
-  # Lower number = higher priority
-  services.myservice.port = mkForce 9090;        # Priority 50
-  services.myservice.port = mkOverride 500 9090; # Priority 500
-  services.myservice.port = mkDefault 8080;      # Priority 1500
+    # Lower number = higher priority
+    services.myservice.port = mkForce 9090;        # Priority 50
+    services.myservice.port = mkOverride 500 9090; # Priority 500
+    services.myservice.port = mkDefault 8080;      # Priority 1500
 
-  # Conditional with default
-  services.myservice.host = mkDefault "localhost";
-  services.myservice.host = mkIf config.features.public.enable "0.0.0.0";
-}
+    # Conditional with default
+    services.myservice.host = mkDefault "localhost";
+    services.myservice.host = mkIf config.features.public.enable "0.0.0.0";
+  }
 ```
 
 **Merging Strategies:**
 
 ```nix
 { config, lib, pkgs, ... }:
-with lib; {
-  # List merging (concatenates)
-  services.myservice.allowedUsers = [ "alice" ];
-  services.myservice.allowedUsers = [ "bob" ];
-  # Result: [ "alice" "bob" ]
+with lib;
+  {
+    # List merging (concatenates)
+    services.myservice.allowedUsers = [ "alice" ];
+    services.myservice.allowedUsers = [ "bob" ];
+    # Result: [ "alice" "bob" ]
 
-  # Attribute set merging (recursive)
-  services.myservice.settings = {
-    server.host = "localhost";
-  };
-  services.myservice.settings = {
-    server.port = 8080;
-  };
-  # Result: { server = { host = "localhost"; port = 8080; }; }
+    # Attribute set merging (recursive)
+    services.myservice.settings =
+      {
+        server.host = "localhost";
+      };
+    services.myservice.settings =
+      {
+        server.port = 8080;
+      };
+    # Result: { server = { host = "localhost"; port = 8080; }; }
 
-  # Override merging with mkMerge
-  services.myservice.config = mkMerge [
-    { base = "config"; }
-    (mkIf condition { extra = "value"; })
-  ];
-}
+    # Override merging with mkMerge
+    services.myservice.config = mkMerge
+      [
+        { base = "config"; }
+        (mkIf condition { extra = "value"; })
+      ];
+  }
 ```
 
 ## Module System Best Practices
@@ -1164,65 +1206,72 @@ let
   cfg = config.services.myservice;
 in {
   # 1. Options declaration
-  options.services.myservice = {
-    enable = mkEnableOption "MyService";
+  options.services.myservice =
+    {
+      enable = mkEnableOption "MyService";
 
-    package = mkPackageOption pkgs "myservice" {};
+      package = mkPackageOption pkgs "myservice" {};
 
-    settings = mkOption {
-      type = types.submodule {
-        freeformType = types.attrsOf types.anything;
-        options = {
-          # Structured options
+      settings = mkOption {
+        type = types.submodule {
+          freeformType = types.attrsOf types.anything;
+          options =
+            {
+              # Structured options
+            };
         };
+        default = {};
       };
-      default = {};
     };
-  };
 
   # 2. Configuration implementation
-  config = mkIf cfg.enable {
-    # Assertions
-    assertions = [
-      {
-        assertion = cfg.settings.database.url != "";
-        message = "database.url must be configured";
-      }
-    ];
+  config = mkIf cfg.enable
+    {
+      # Assertions
+      assertions = [
+        {
+          assertion = cfg.settings.database.url != "";
+          message = "database.url must be configured";
+        }
+      ];
 
-    # Warnings
-    warnings = optional (cfg.settings.debug) [
-      "Debug mode is enabled - not recommended for production"
-    ];
+      # Warnings
+      warnings = optional (cfg.settings.debug) [
+        "Debug mode is enabled - not recommended for production"
+      ];
 
-    # System configuration
-    systemd.services.myservice = {
-      description = "MyService daemon";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      # System configuration
+      systemd.services.myservice =
+        {
+          description = "MyService daemon";
+          wantedBy = [ "multi-user.target" ];
+          after = [ "network.target" ];
 
-      serviceConfig = {
-        ExecStart = "${cfg.package}/bin/myservice";
-        DynamicUser = true;
-        # ... security hardening
-      };
+          serviceConfig =
+            {
+              ExecStart = "${cfg.package}/bin/myservice";
+              DynamicUser = true;
+              # ... security hardening
+            };
+        };
+
+      # Environment configuration
+      environment.systemPackages = [ cfg.package ];
+
+      # File generation
+      environment.etc."myservice/config.json" =
+        {
+          text = builtins.toJSON cfg.settings;
+          mode = "0644";
+        };
     };
-
-    # Environment configuration
-    environment.systemPackages = [ cfg.package ];
-
-    # File generation
-    environment.etc."myservice/config.json" = {
-      text = builtins.toJSON cfg.settings;
-      mode = "0644";
-    };
-  };
 
   # 3. Metadata
-  meta = {
-    maintainers = with maintainers; [ username ];
-    doc = ./myservice.md;
-  };
+  meta =
+    {
+      maintainers = with maintainers; [ username ];
+      doc = ./myservice.md;
+    };
 }
 ```
 
@@ -1258,45 +1307,50 @@ with lib;
 let
   cfg = config.features.myfeature;
 in {
-  options.features.myfeature = {
-    enable = mkEnableOption "MyFeature functionality";
+  options.features.myfeature =
+    {
+      enable = mkEnableOption "MyFeature functionality";
 
-    # Feature-specific options
-    mode = mkOption {
-      type = types.enum [ "basic" "advanced" ];
-      default = "basic";
+      # Feature-specific options
+      mode = mkOption {
+        type = types.enum [ "basic" "advanced" ];
+        default = "basic";
+      };
     };
-  };
 
-  config = mkIf cfg.enable {
-    # Enable underlying services
-    services.required-service.enable = true;
-    services.optional-service.enable = cfg.mode == "advanced";
+  config = mkIf cfg.enable
+    {
+      # Enable underlying services
+      services.required-service.enable = true;
+      services.optional-service.enable = cfg.mode == "advanced";
 
-    # Feature-specific configuration
-    environment.systemPackages = with pkgs; [
-      feature-tool
-    ] ++ optionals (cfg.mode == "advanced") [
-      advanced-tool
-    ];
-  };
+      # Feature-specific configuration
+      environment.systemPackages = with pkgs;
+        [
+          feature-tool
+        ] ++ optionals (cfg.mode == "advanced")
+          [
+            advanced-tool
+          ];
+    };
 }
 ```
 
 **Conditional Module Loading:**
 
 ```nix
-{ config, lib, pkgs, ... }: {
-  imports = [
-    ./base.nix
-  ] ++ lib.optionals config.features.desktop.enable [
-    ./desktop.nix
-    ./gui-apps.nix
-  ] ++ lib.optionals config.features.development.enable [
-    ./development.nix
-    ./devtools.nix
-  ];
-}
+{ config, lib, pkgs, ... }:
+  {
+    imports = [
+      ./base.nix
+    ] ++ lib.optionals config.features.desktop.enable [
+      ./desktop.nix
+      ./gui-apps.nix
+    ] ++ lib.optionals config.features.development.enable [
+      ./development.nix
+      ./devtools.nix
+    ];
+  }
 ```
 
 ### Security Patterns
@@ -1309,53 +1363,57 @@ with lib;
 let
   cfg = config.services.myservice;
 in {
-  config = mkIf cfg.enable {
-    systemd.services.myservice = {
-      serviceConfig = {
-        # User isolation
-        DynamicUser = true;
-        User = "myservice";
-        Group = "myservice";
+  config = mkIf cfg.enable
+    {
+      systemd.services.myservice =
+        {
+          serviceConfig =
+            {
+              # User isolation
+              DynamicUser = true;
+              User = "myservice";
+              Group = "myservice";
 
-        # Filesystem protection
-        ProtectSystem = "strict";
-        ProtectHome = true;
-        PrivateTmp = true;
-        PrivateDevices = true;
-        ProtectKernelTunables = true;
-        ProtectKernelModules = true;
-        ProtectControlGroups = true;
-        RestrictSUIDSGID = true;
+              # Filesystem protection
+              ProtectSystem = "strict";
+              ProtectHome = true;
+              PrivateTmp = true;
+              PrivateDevices = true;
+              ProtectKernelTunables = true;
+              ProtectKernelModules = true;
+              ProtectControlGroups = true;
+              RestrictSUIDSGID = true;
 
-        # Capability restrictions
-        NoNewPrivileges = true;
-        CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
-        AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
+              # Capability restrictions
+              NoNewPrivileges = true;
+              CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
+              AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
 
-        # Namespace isolation
-        PrivateNetwork = false;  # Needs network
-        RestrictNamespaces = true;
+              # Namespace isolation
+              PrivateNetwork = false;  # Needs network
+              RestrictNamespaces = true;
 
-        # System call filtering
-        SystemCallFilter = [ "@system-service" "~@privileged" ];
-        SystemCallErrorNumber = "EPERM";
+              # System call filtering
+              SystemCallFilter = [ "@system-service" "~@privileged" ];
+              SystemCallErrorNumber = "EPERM";
 
-        # Resource limits
-        MemoryMax = "1G";
-        TasksMax = 1000;
+              # Resource limits
+              MemoryMax = "1G";
+              TasksMax = 1000;
 
-        # Working directory
-        WorkingDirectory = "/var/lib/myservice";
-        StateDirectory = "myservice";
-        ReadWritePaths = [ "/var/lib/myservice" ];
-      };
+              # Working directory
+              WorkingDirectory = "/var/lib/myservice";
+              StateDirectory = "myservice";
+              ReadWritePaths = [ "/var/lib/myservice" ];
+            };
+        };
+
+      # State directory
+      systemd.tmpfiles.rules =
+        [
+          "d /var/lib/myservice 0750 myservice myservice -"
+        ];
     };
-
-    # State directory
-    systemd.tmpfiles.rules = [
-      "d /var/lib/myservice 0750 myservice myservice -"
-    ];
-  };
 }
 ```
 
@@ -1367,28 +1425,32 @@ with lib;
 let
   cfg = config.services.myservice;
 in {
-  config = mkIf cfg.enable {
-    # ❌ WRONG - Reads secret during evaluation
-    # services.myservice.password = builtins.readFile "/secrets/pass";
+  config = mkIf cfg.enable
+    {
+      # ❌ WRONG - Reads secret during evaluation
+      # services.myservice.password = builtins.readFile "/secrets/pass";
 
-    # ✅ CORRECT - Runtime loading
-    services.myservice.passwordFile = config.age.secrets.myservice-password.path;
+      # ✅ CORRECT - Runtime loading
+      services.myservice.passwordFile = config.age.secrets.myservice-password.path;
 
-    # ✅ CORRECT - Environment file
-    systemd.services.myservice = {
-      serviceConfig = {
-        EnvironmentFile = config.age.secrets.myservice-env.path;
-      };
+      # ✅ CORRECT - Environment file
+      systemd.services.myservice =
+        {
+          serviceConfig =
+            {
+              EnvironmentFile = config.age.secrets.myservice-env.path;
+            };
+        };
+
+      # Agenix secret definition
+      age.secrets.myservice-password =
+        {
+          file = ../secrets/myservice-password.age;
+          mode = "0400";
+          owner = "myservice";
+          group = "myservice";
+        };
     };
-
-    # Agenix secret definition
-    age.secrets.myservice-password = {
-      file = ../secrets/myservice-password.age;
-      mode = "0400";
-      owner = "myservice";
-      group = "myservice";
-    };
-  };
 }
 ```
 
@@ -1565,40 +1627,45 @@ let
   cfg = config.services.myservice;
 in {
   # ✅ Clear option structure
-  options.services.myservice = {
-    enable = mkEnableOption "MyService";
-    package = mkPackageOption pkgs "myservice" {};
-    settings = mkOption { /* ... */ };
-  };
-
-  # ✅ Conditional config with mkIf
-  config = mkIf cfg.enable {
-    # ✅ Assertions for validation
-    assertions = [
-      {
-        assertion = cfg.settings.required != "";
-        message = "required setting must be configured";
-      }
-    ];
-
-    # ✅ Security hardening
-    systemd.services.myservice = {
-      serviceConfig = {
-        DynamicUser = true;
-        ProtectSystem = "strict";
-        NoNewPrivileges = true;
-        # ... full hardening
-      };
+  options.services.myservice =
+    {
+      enable = mkEnableOption "MyService";
+      package = mkPackageOption pkgs "myservice" {};
+      settings = mkOption { /* ... */ };
     };
 
-    # ✅ Runtime secret loading
-    serviceConfig.EnvironmentFile = config.age.secrets.myservice.path;
-  };
+  # ✅ Conditional config with mkIf
+  config = mkIf cfg.enable
+    {
+      # ✅ Assertions for validation
+      assertions = [
+        {
+          assertion = cfg.settings.required != "";
+          message = "required setting must be configured";
+        }
+      ];
+
+      # ✅ Security hardening
+      systemd.services.myservice =
+        {
+          serviceConfig =
+            {
+              DynamicUser = true;
+              ProtectSystem = "strict";
+              NoNewPrivileges = true;
+              # ... full hardening
+            };
+        };
+
+      # ✅ Runtime secret loading
+      serviceConfig.EnvironmentFile = config.age.secrets.myservice.path;
+    };
 
   # ✅ Metadata
-  meta = {
-    maintainers = with maintainers; [ username ];
-  };
+  meta =
+    {
+      maintainers = with maintainers; [ username ];
+    };
 }
 ```
 

@@ -11,7 +11,10 @@ description: cargo2nix Skill
 
 ## Overview
 
-cargo2nix is a tool that brings Nix dependency management to Rust projects, enabling reproducible builds, efficient per-crate caching, and complete control over the build environment. Unlike simpler approaches, cargo2nix creates individual Nix derivations for each crate, allowing fine-grained dependency sharing across projects and optimal build caching.
+cargo2nix is a tool that brings Nix dependency management to Rust projects, enabling reproducible builds, efficient
+per-crate caching, and complete control over the build environment. Unlike simpler approaches, cargo2nix creates
+individual Nix derivations for each crate, allowing fine-grained dependency sharing across projects and optimal build
+caching.
 
 **Key Features**:
 
@@ -1145,7 +1148,7 @@ RUSTFLAGS = "-D warnings"  # Deny warnings
 
 **Project Structure**:
 
-```
+```text
 my-cli/
 ├── Cargo.toml
 ├── Cargo.lock
@@ -1235,7 +1238,7 @@ cargo run -- --help
 
 **Project Structure**:
 
-```
+```text
 my-workspace/
 ├── Cargo.toml         # Workspace root
 ├── Cargo.lock
@@ -1417,4 +1420,6 @@ my-workspace/
 
 ---
 
-**Remember**: cargo2nix provides fine-grained per-crate builds at the cost of maintaining Cargo.nix. For simpler projects, consider buildRustPackage or crane. For maximum caching and shared dependencies across projects, cargo2nix is the right choice.
+**Remember**: cargo2nix provides fine-grained per-crate builds at the cost of maintaining Cargo.nix. For simpler projects,
+consider buildRustPackage or crane. For maximum caching and shared dependencies across projects, cargo2nix is the right
+choice.

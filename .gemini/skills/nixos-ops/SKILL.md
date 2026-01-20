@@ -8,7 +8,8 @@ description: "NixOS Operations: Multi-Host Architecture, Deployment & Tooling"
 
 > **Operator's Manual for this NixOS Infrastructure**
 >
-> This skill covers the operational aspects of managing this multi-host NixOS repository: architecture, deployment workflows, testing strategies, and tooling integration.
+> This skill covers the operational aspects of managing this multi-host NixOS repository: architecture, deployment
+> workflows, testing strategies, and tooling integration.
 
 ## 🏗️ Project Architecture
 

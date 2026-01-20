@@ -6,7 +6,8 @@ description: Hyprland Skill
 
 # Hyprland Skill
 
-A specialized skill for configuring and customizing Hyprland window manager in NixOS using Home Manager, providing expert guidance on Wayland compositor setup, essential packages, plugins, and declarative configuration.
+A specialized skill for configuring and customizing Hyprland window manager in NixOS using Home Manager, providing expert
+guidance on Wayland compositor setup, essential packages, plugins, and declarative configuration.
 
 ## Skill Overview
 
@@ -27,7 +28,7 @@ A specialized skill for configuring and customizing Hyprland window manager in N
 
 ### 1. Installation and Configuration
 
-**Two-Module Approach (Recommended)**
+#### Two-Module Approach (Recommended)
 
 The best practice is using both NixOS and Home Manager modules for optimal integration.
 
@@ -115,7 +116,8 @@ The best practice is using both NixOS and Home Manager modules for optimal integ
     hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
   };
 
-  outputs = { nixpkgs, home-manager, hyprland, ... }: {
+  outputs = { nixpkgs, home-manager, hyprland, ... }:
+  {
     nixosConfigurations.hostname = nixpkgs.lib.nixosSystem {
       modules = [
         # Import Hyprland NixOS module
@@ -146,7 +148,7 @@ The best practice is using both NixOS and Home Manager modules for optimal integ
 
 ### 2. Declarative Configuration (Settings)
 
-**Complete Settings Example**:
+#### Complete Settings Example
 
 ```nix
 wayland.windowManager.hyprland.settings = {
@@ -312,7 +314,7 @@ wayland.windowManager.hyprland.settings = {
 
 ### 3. Keybindings Configuration
 
-**Essential Keybindings**:
+#### Essential Keybindings
 
 ```nix
 wayland.windowManager.hyprland.settings = {
@@ -439,7 +441,7 @@ wayland.windowManager.hyprland.settings = {
 
 ### 4. Essential Packages
 
-**Complete Package Set**:
+#### Complete Package Set
 
 ```nix
 { config, pkgs, ... }:
@@ -529,7 +531,7 @@ wayland.windowManager.hyprland.settings = {
 
 ### 5. Waybar Configuration
 
-**Complete Waybar Setup**:
+#### Complete Waybar Setup
 
 ```nix
 programs.waybar = {
@@ -617,7 +619,7 @@ programs.waybar = {
 
       backlight = {
         format = "{icon} {percent}%";
-        format-icons = ["" "" "" "" "" "" "" "" ""];
+        format-icons = ["" "" "" "" "" "" "" ""];
       };
 
       battery = {
@@ -733,7 +735,7 @@ programs.waybar = {
 
 ### 6. Rofi Configuration
 
-**Rofi-Wayland Setup**:
+#### Rofi-Wayland Setup
 
 ```nix
 programs.rofi = {
@@ -827,7 +829,7 @@ xdg.configFile."rofi/themes/custom.rasi".text = ''
 
 ### 7. Additional Components
 
-**Hyprpaper (Wallpaper)**:
+#### Hyprpaper (Wallpaper)
 
 ```nix
 services.hyprpaper = {
@@ -851,7 +853,7 @@ services.hyprpaper = {
 };
 ```
 
-**Hypridle (Idle Management)**:
+#### Hypridle (Idle Management)
 
 ```nix
 services.hypridle = {
@@ -888,7 +890,7 @@ services.hypridle = {
 };
 ```
 
-**Hyprlock (Screen Lock)**:
+#### Hyprlock (Screen Lock)
 
 ```nix
 programs.hyprlock = {
@@ -929,7 +931,7 @@ programs.hyprlock = {
 };
 ```
 
-**Dunst (Notifications)**:
+#### Dunst (Notifications)
 
 ```nix
 services.dunst = {
@@ -944,7 +946,7 @@ services.dunst = {
       transparency = 10;
       frame_color = "#89b4fa";
       font = "JetBrainsMono Nerd Font 10";
-      format = "<b>%s</b>\\n%b";
+      format = "<b>%s</b>\n%b";
       alignment = "left";
       word_wrap = true;
       show_age_threshold = 60;
@@ -978,7 +980,7 @@ services.dunst = {
 
 ### 8. Plugins (Hyprland-Plugins)
 
-**Plugin Installation (NixOS)**:
+#### Plugin Installation (NixOS)
 
 ```nix
 { inputs, pkgs, ... }:
@@ -1000,7 +1002,7 @@ services.dunst = {
 
 **Note**: hyprpm is **not supported** on NixOS. Use the home-manager module for plugins.
 
-**Available Plugins**:
+#### Available Plugins
 
 - **borders-plus-plus**: Enhanced border customization
 - **hyprbars**: Window title bars for floating windows
@@ -1008,7 +1010,7 @@ services.dunst = {
 - **hyprtrails**: Mouse trail effects
 - **hyprwinwrap**: Xwinwrap equivalent for Hyprland
 
-**Plugin Configuration Example (hyprbars)**:
+#### Plugin Configuration Example (hyprbars)
 
 ```nix
 wayland.windowManager.hyprland.settings = {
@@ -1027,7 +1029,7 @@ wayland.windowManager.hyprland.settings = {
 
 ### 9. Per-Device Configuration
 
-**Multi-Monitor Setup**:
+#### Multi-Monitor Setup
 
 ```nix
 { lib, ... }:
@@ -1063,7 +1065,7 @@ in
 }
 ```
 
-**Performance Tuning (Per-Device)**:
+#### Performance Tuning (Per-Device)
 
 ```nix
 wayland.windowManager.hyprland.settings = {
@@ -1087,7 +1089,7 @@ wayland.windowManager.hyprland.settings = {
 
 ### Pattern 1: Systemd User Services
 
-**Custom Service for Hyprland**:
+#### Custom Service for Hyprland
 
 ```nix
 systemd.user.services.hyprland-startup = {
@@ -1100,7 +1102,7 @@ systemd.user.services.hyprland-startup = {
     Type = "oneshot";
     ExecStart = toString (pkgs.writeShellScript "hyprland-startup" ''
       # Wait for Hyprland
-      until hyprctl monitors > /dev/null 2>&1; do
+      until hyprctl monitors > /dev/null 2>&1;
         sleep 1
       done
 
@@ -1153,7 +1155,7 @@ services.kanshi = {
 
 **With UWSM enabled**:
 
-```nix
+```bash
 # In home.nix with programs.hyprland.withUWSM = true
 xdg.configFile."uwsm/env".text = ''
   export QT_QPA_PLATFORM=wayland
@@ -1504,7 +1506,8 @@ systemctl --user status xdg-desktop-portal-hyprland
 - **[Hyprland Wiki](https://wiki.hypr.land/)** - Complete Hyprland documentation
 - **[Hyprland on NixOS](https://wiki.hypr.land/Nix/Hyprland-on-NixOS/)** - NixOS integration guide
 - **[Hyprland on Home Manager](https://wiki.hypr.land/Nix/Hyprland-on-Home-Manager/)** - Home Manager module docs
-- **[Home Manager Options](https://github.com/nix-community/home-manager/blob/master/modules/services/window-managers/hyprland.nix)** - All available options
+- **[Home Manager Options](https://github.com/nix-community/home-manager/blob/master/modules/services/window-managers/hyprland.nix)**
+  - All available options
 
 ### Community Resources
 

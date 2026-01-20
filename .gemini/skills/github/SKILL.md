@@ -8,7 +8,8 @@ description: GitHub & Git Integration Skill
 
 > **Comprehensive Git and GitHub CLI Reference for NixOS Infrastructure**
 >
-> This skill provides deep knowledge of Git version control and GitHub CLI (gh) commands, specifically tailored for NixOS configuration management, issue-driven development, and automated workflows.
+> This skill provides deep knowledge of Git version control and GitHub CLI (gh) commands, specifically tailored for NixOS
+> configuration management, issue-driven development, and automated workflows.
 
 ## Overview
 
@@ -887,7 +888,7 @@ gh label create "high priority" --color FF0000 --description "Urgent"
 
 # Edit label
 gh label edit "bug" --color FF0000
-gh label edit "bug" --description "Something isn't working"
+gh label edit "bug" --description "Something isn\'t working"
 
 # Delete label
 gh label delete "wontfix"
@@ -1390,9 +1391,11 @@ echo "# Changelog for $CURRENT_TAG"
 echo ""
 echo "## Features"
 git log $LAST_TAG..HEAD --oneline --grep="^feat" | sed 's/^/- /'
+
 echo ""
 echo "## Fixes"
 git log $LAST_TAG..HEAD --oneline --grep="^fix" | sed 's/^/- /'
+
 echo ""
 echo "## Documentation"
 git log $LAST_TAG..HEAD --oneline --grep="^docs" | sed 's/^/- /'
@@ -1404,7 +1407,7 @@ git log $LAST_TAG..HEAD --oneline --grep="^docs" | sed 's/^/- /'
 
 **Conventional Commits Format:**
 
-```
+```text
 <type>(<scope>): <subject>
 
 <body>
@@ -1659,4 +1662,5 @@ Use this skill whenever working with:
 - Repository automation
 - Multi-repository coordination
 
-The skill seamlessly integrates with existing NixOS infrastructure commands and enables efficient issue-driven development workflows.
+The skill seamlessly integrates with existing NixOS infrastructure commands and enables efficient issue-driven development
+workflows.
