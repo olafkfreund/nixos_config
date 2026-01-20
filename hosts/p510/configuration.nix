@@ -19,6 +19,7 @@ in
       ./nixos/nvidia.nix
       ./nixos/network.nix # Network configuration with dual-port Intel card
       ./nixos/tailscale-serve.nix # Tailscale Serve for media services
+      ./nixos/recyclarr.nix # Recyclarr Trash Guides sync
       ../common/nixos/i18n.nix
       ../common/nixos/envvar.nix
       ./nixos/cpu.nix
@@ -204,6 +205,9 @@ in
     minFreeSpace = 20; # Keep at least 20GB free
     aggressiveCleanup = false;
   };
+
+  # Enable Recyclarr synchronization
+  services.recyclarr-sync.enable = true;
 
   # Specific service configurations
   # StreamDeck UI disabled for headless operation
