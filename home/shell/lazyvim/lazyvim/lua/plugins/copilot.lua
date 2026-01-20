@@ -67,16 +67,7 @@ return {
       -- copilot_node_command = vim.fn.expand("$HOME") .. "/.nvm/versions/node/v20.10.0/bin/node",
     },
     -- Recommended dependencies
-    dependencies = {
-      -- Add copilot-cmp for completion integration
-      {
-        "zbirenbaum/copilot-cmp",
-        dependencies = { "hrsh7th/nvim-cmp" },
-        config = function()
-          require("copilot_cmp").setup()
-        end,
-      },
-    },
+    dependencies = {},
   },
   -- Optional status indicator in your statusline
   {
