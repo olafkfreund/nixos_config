@@ -1,5 +1,6 @@
 { lib
 , pkgs
+, antigravity-nix
 , ...
 }: {
   imports = [
@@ -144,6 +145,9 @@
   };
 
   home.packages = with pkgs; [
+    # Google Antigravity - AI coding assistant
+    antigravity-nix.packages.${stdenv.hostPlatform.system}.default
+
     # Kosli CLI - Compliance monitoring and DevOps workflows
     customPkgs.kosli-cli
 
