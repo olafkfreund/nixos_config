@@ -20,6 +20,7 @@ in
       [
         pkgs.shellcheck
         pkgs.shfmt
+        pkgs.yamllint
         pkgs.ncurses
         pkgs.cmakeCurses
         pkgs.upbound
