@@ -44,6 +44,10 @@ in
     services.home-assistant = {
       enable = true;
 
+      extraPackages = python3Packages: with python3Packages; [
+        python-otbr-api
+      ];
+
       # Declarative configuration
       config = {
         # Default configuration includes common integrations
