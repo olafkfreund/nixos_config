@@ -24,10 +24,29 @@ in
       # Markdown linting
       markdownlint-cli
 
-      # General purpose formatter
-      nodePackages.prettier
+      # Lua formatting
+      stylua
 
-      # YAML/JSON/TOML validation tools are included in pre-commit-hooks repo
+      # TOML formatting
+      taplo
+
+      # YAML linting
+      yamllint
+
+      # Python formatting and linting (modern, fast)
+      ruff
+
+      # Spell checking for code
+      typos
+
+      # GitHub Actions linting
+      actionlint
+
+      # JSON formatting (jq is usually available, but ensure it)
+      jq
+
+      # General purpose formatter (kept for edge cases)
+      nodePackages.prettier
     ];
 
     # Enable git system-wide configuration for pre-commit

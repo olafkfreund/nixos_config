@@ -1,0 +1,48 @@
+# taplo TOML formatter configuration
+# https://taplo.tamasfe.dev/configuration/
+
+[formatting]
+# Align consecutive entries vertically
+align_entries = false
+
+# Put arrays on a single line if they fit
+array_auto_collapse = true
+
+# Maximum line width before wrapping
+column_width = 100
+
+# Indent tables
+indent_tables = true
+
+# Use 2-space indentation
+indent_string = "  "
+
+# Inline table collapse
+inline_table_expand = false
+
+# Reorder keys alphabetically
+reorder_keys = false
+
+# Allowed blank lines between entries
+allowed_blank_lines = 1
+
+# Trailing newline
+trailing_newline = true
+
+# Remove trailing comma from arrays
+array_trailing_comma = true
+
+# Use compact arrays
+compact_arrays = false
+
+# Compact inline tables
+compact_inline_tables = false
+
+[[rule]]
+# Apply to all TOML files
+include = ["**/*.toml"]
+# Skip certain files
+exclude = ["flake.lock"]
+
+keys = ["dependencies", "dev-dependencies", "build-dependencies"]
+formatting = { reorder_keys = true }

@@ -1,0 +1,48 @@
+# yamllint configuration
+# Uses relaxed rules suitable for NixOS configuration files
+
+extends: relaxed
+
+rules:
+  # Line length - allow longer lines for complex configurations
+  line-length:
+    max: 150
+    allow-non-breakable-words: true
+    allow-non-breakable-inline-mappings: true
+
+  # Allow multiple documents in a file
+  document-start: disable
+
+  # Comments formatting
+  comments:
+    require-starting-space: true
+    min-spaces-from-content: 1
+
+  # Indentation - consistent 2-space
+  indentation:
+    spaces: 2
+    indent-sequences: true
+
+  # Allow truthy values like 'yes', 'no', etc.
+  truthy:
+    allowed-values: ['true', 'false', 'yes', 'no', 'on', 'off']
+    check-keys: false
+
+  # Brackets formatting
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+
+  # Braces formatting
+  braces:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+
+  # Trailing spaces
+  trailing-spaces: enable
+
+  # Empty lines
+  empty-lines:
+    max: 2
+    max-start: 0
+    max-end: 1

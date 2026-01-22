@@ -1,0 +1,24 @@
+# stylua Lua formatter configuration
+# https://github.com/JohnnyMorganz/StyLua
+
+# Use 2-space indentation
+indent_type = "Spaces"
+indent_width = 2
+
+# Maximum line width
+column_width = 120
+
+# Line endings
+line_endings = "Unix"
+
+# Quote style - prefer double quotes
+quote_style = "AutoPreferDouble"
+
+# Call parentheses - keep current style
+call_parentheses = "Always"
+
+# Collapse simple statements
+collapse_simple_statement = "Never"
+
+# Sort requires
+sort_requires = { enabled = false }

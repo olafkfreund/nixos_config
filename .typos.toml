@@ -1,0 +1,96 @@
+# typos configuration
+# Spell checking for code and documentation
+# https://github.com/crate-ci/typos
+
+[default]
+extend-ignore-re = [
+  # Ignore hex color codes
+  "#[0-9a-fA-F]{6}",
+  "#[0-9a-fA-F]{8}",
+  # Ignore base64 encoded strings
+  "[A-Za-z0-9+/]{40,}={0,2}",
+  # Ignore SHA256 hashes
+  "sha256-[A-Za-z0-9+/=]{43,}",
+  # Ignore UUIDs
+  "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
+]
+
+[default.extend-words]
+# NixOS-specific terms
+nixos = "nixos"
+nixpkgs = "nixpkgs"
+flake = "flake"
+derivation = "derivation"
+mkif = "mkif"
+
+# Common technical terms that might be flagged
+coreutils = "coreutils"
+systemd = "systemd"
+tailscale = "tailscale"
+cachix = "cachix"
+agenix = "agenix"
+hyprland = "hyprland"
+
+# Package names
+neovim = "neovim"
+lazyvim = "lazyvim"
+starship = "starship"
+zellij = "zellij"
+tmux = "tmux"
+
+# File/directory names
+nix = "nix"
+usr = "usr"
+var = "var"
+etc = "etc"
+tmp = "tmp"
+
+# Common abbreviations
+env = "env"
+cfg = "cfg"
+pkgs = "pkgs"
+lib = "lib"
+attr = "attr"
+fn = "fn"
+
+# Hardware terms
+amd = "amd"
+rocm = "rocm"
+nvidia = "nvidia"
+intel = "intel"
+
+# User-specific
+olafkfreund = "olafkfreund"
+freundcloud = "freundcloud"
+
+[files]
+extend-exclude = [
+  # Lock files
+  "*.lock",
+  "flake.lock",
+  "package-lock.json",
+  # Generated files
+  "result",
+  "result-*",
+  # Git
+  ".git/",
+  # Build artifacts
+  "node_modules/",
+  ".direnv/",
+  # Binary and asset files
+  "*.png",
+  "*.jpg",
+  "*.svg",
+  "*.ico",
+  "*.woff",
+  "*.woff2",
+  # Secrets
+  "secrets/",
+  "*.age",
+]
+
+[type.nix]
+extend-glob = ["*.nix"]
+
+[type.shell]
+extend-glob = ["*.sh", "*.bash"]

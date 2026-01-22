@@ -1,12 +1,23 @@
+# Pre-commit hooks configuration
+# All hooks use Nix-packaged tools only - no external dependencies
+#
+# Install: pre-commit install
+# Run all: pre-commit run --all-files
+# Run one: pre-commit run HOOK_ID --all-files
+
 repos:
   - repo: local
     hooks:
+      # =============================================================================
+      # Nix Formatting and Linting
+      # =============================================================================
       - id: nixpkgs-fmt
         name: Format Nix files
         entry: nixpkgs-fmt
         language: system
         files: '\.nix$'
         description: Format Nix files using nixpkgs-fmt
+
       - id: statix
         name: Lint Nix files
         entry: statix check
@@ -14,6 +25,7 @@ repos:
         files: '\.nix$'
         pass_filenames: false
         description: Lint Nix files for common issues
+
       - id: deadnix
         name: Check for dead Nix code
         entry: deadnix --fail
@@ -21,6 +33,10 @@ repos:
         files: '\.nix$'
         pass_filenames: false
         description: Check for dead/unused Nix code
+
+      # =============================================================================
+      # Shell Script Formatting and Linting
+      # =============================================================================
       - id: shellcheck
         name: Lint shell scripts
         entry: shellcheck
@@ -28,6 +44,7 @@ repos:
         files: '\.sh$'
         args: [-e, SC1091, -e, SC2034, -e, SC2086]
         description: Lint shell scripts with shellcheck
+
       - id: shfmt
         name: Format shell scripts
         entry: shfmt
@@ -35,43 +52,132 @@ repos:
         files: '\.sh$'
         args: [-w, -i, "2", -bn, -ci]
         description: Format shell scripts with shfmt
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
-    hooks:
-      - id: trailing-whitespace
-        description: Remove trailing whitespace
-      - id: end-of-file-fixer
-        description: Ensure files end with newline
-      - id: check-merge-conflict
-        description: Check for merge conflict markers
-      - id: check-yaml
-        description: Validate YAML files
-      - id: check-json
-        description: Validate JSON files
-      - id: check-toml
-        description: Validate TOML files
-      - id: mixed-line-ending
-        description: Check for mixed line endings
-      - id: check-executables-have-shebangs
-        description: Ensure executables have shebangs
-      - id: check-shebang-scripts-are-executable
-        description: Ensure shebang scripts are executable
-  - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.38.0
-    hooks:
+
+      # =============================================================================
+      # Lua Formatting
+      # =============================================================================
+      - id: stylua
+        name: Format Lua files
+        entry: stylua
+        language: system
+        files: '\.lua$'
+        description: Format Lua files with stylua
+
+      # =============================================================================
+      # TOML Formatting
+      # =============================================================================
+      - id: taplo
+        name: Format TOML files
+        entry: taplo fmt
+        language: system
+        files: '\.toml$'
+        description: Format TOML files with taplo
+
+      # =============================================================================
+      # YAML Linting
+      # =============================================================================
+      - id: yamllint
+        name: Lint YAML files
+        entry: yamllint
+        language: system
+        files: '\.(yaml|yml)$'
+        args: [-d, relaxed]
+        description: Lint YAML files with yamllint
+
+      # =============================================================================
+      # JSON Formatting
+      # =============================================================================
+      - id: json-format
+        name: Format JSON files
+        entry: bash -c 'for f in "$@"; do jq . "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done'
+        language: system
+        files: '\.json$'
+        exclude: 'package-lock\.json|flake\.lock'
+        description: Format JSON files with jq
+
+      # =============================================================================
+      # Markdown Linting
+      # =============================================================================
       - id: markdownlint
         name: Lint Markdown files
-        args: [--fix, --config, .markdownlint.json]
+        entry: markdownlint
+        language: system
+        files: '\.md$'
+        args: [--fix]
         description: Lint and fix Markdown files
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v4.0.0-alpha.8
-    hooks:
-      - id: prettier
-        name: Format files with Prettier
-        types_or: [json, yaml, markdown]
-        description: Format JSON, YAML, and Markdown files
-  - repo: local
-    hooks:
+
+      # =============================================================================
+      # Python Formatting and Linting
+      # =============================================================================
+      - id: ruff-format
+        name: Format Python files
+        entry: ruff format
+        language: system
+        files: '\.py$'
+        description: Format Python files with ruff
+
+      - id: ruff-check
+        name: Lint Python files
+        entry: ruff check
+        language: system
+        files: '\.py$'
+        args: [--fix]
+        description: Lint Python files with ruff
+
+      # =============================================================================
+      # Spell Checking
+      # =============================================================================
+      - id: typos
+        name: Check spelling
+        entry: typos
+        language: system
+        pass_filenames: false
+        description: Check for typos in code and documentation
+
+      # =============================================================================
+      # GitHub Actions Linting
+      # =============================================================================
+      - id: actionlint
+        name: Lint GitHub Actions
+        entry: actionlint
+        language: system
+        files: '^\.github/workflows/.*\.(yml|yaml)$'
+        description: Lint GitHub Actions workflows
+
+      # =============================================================================
+      # General File Hygiene
+      # =============================================================================
+      - id: trailing-whitespace
+        name: Trim trailing whitespace
+        entry: bash -c 'for f in "$@"; do sed -i "s/[[:space:]]*$//" "$f"; done'
+        language: system
+        files: '\.(nix|sh|lua|toml|yaml|yml|json|md|py)$'
+        description: Remove trailing whitespace
+
+      - id: end-of-file
+        name: Fix end of file
+        entry: bash -c 'for f in "$@"; do [ -n "$(tail -c1 "$f")" ] && echo >> "$f"; done'
+        language: system
+        files: '\.(nix|sh|lua|toml|yaml|yml|json|md|py)$'
+        description: Ensure files end with newline
+
+      - id: check-merge-conflict
+        name: Check for merge conflicts
+        entry: bash -c 'for f in "$@"; do ! grep -qE "^(<<<<<<<|=======|>>>>>>>)" "$f" || { echo "Merge conflict in $f"; exit 1; }; done'
+        language: system
+        files: '\.(nix|sh|lua|toml|yaml|yml|json|md|py)$'
+        description: Check for merge conflict markers
+
+      - id: check-executables-have-shebangs
+        name: Check executables have shebangs
+        entry: bash -c 'for f in "$@"; do if [ -x "$f" ] && ! head -1 "$f" | grep -qE "^#!"; then echo "Missing shebang in $f"; exit 1; fi; done'
+        language: system
+        files: '\.sh$'
+        description: Ensure executables have shebangs
+
+      # =============================================================================
+      # Nix Flake Validation
+      # =============================================================================
       - id: flake-check
         name: Check Nix flake
         entry: nix flake check --no-build
@@ -79,6 +185,7 @@ repos:
         files: 'flake\.(nix|lock)$'
         pass_filenames: false
         description: Validate Nix flake configuration
+
       - id: just-validate
         name: Validate justfile
         entry: just --list
