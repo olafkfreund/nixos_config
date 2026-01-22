@@ -46,13 +46,13 @@ in
 
       extraPackages = python3Packages: with python3Packages; [
         python-otbr-api
+        pychromecast
+        androidtvremote2
       ];
 
       # Declarative configuration
       config = {
-        # Default configuration includes common integrations
-        default_config = { };
-
+        # Minimal base configuration
         # HTTP configuration
         http = {
           server_host = "0.0.0.0";
@@ -82,6 +82,35 @@ in
         "met"
         "radio_browser"
         "shopping_list"
+
+        # Essential components usually in default_config
+        "assist_pipeline"
+        "backup"
+        "bluetooth"
+        "config"
+        "conversation"
+        "dhcp"
+        "energy"
+        "history"
+        "homeassistant_alerts"
+        "image_upload"
+        "logbook"
+        "media_source"
+        "mobile_app"
+        "my"
+        "network"
+        "person"
+        "repairs"
+        "scene"
+        "script"
+        "ssdp"
+        "sun"
+        "system_health"
+        "tag"
+        "usb"
+        "webhook"
+        "zeroconf"
+        "zone"
       ] ++ optional cfg.enableCloud "cloud"
       ++ cfg.extraComponents;
     };
