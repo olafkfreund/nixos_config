@@ -47,7 +47,6 @@ with lib;
     ] ++ optionals (config.networking.hostName != "p620") [
       # Non-P620 hosts: use P620 as primary cache (try both LAN and IP)
       "http://p620.lan:5000" # Local LAN hostname
-      "http://192.168.1.97:5000" # Direct LAN IP (fastest on local network)
     ];
 
     trusted-public-keys = [

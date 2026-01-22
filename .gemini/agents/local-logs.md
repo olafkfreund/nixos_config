@@ -1,3 +1,8 @@
+---
+name: local-logs
+description: Intelligent diagnostic and problem-solving agent that analyzes system logs
+---
+
 # Local Logs Subagent
 
 ## Overview
@@ -130,13 +135,13 @@ Create `scripts/local-logs.sh`:
 set -euo pipefail
 
 # Colors
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-MAGENTA='\033[0;35m'
-CYAN='\033[0;36m'
-NC='\033[0m'
+RED=\'\033[0;31m' # Escaped backslash for literal
+YELLOW=\'\033[1;33m' # Escaped backslash for literal
+GREEN=\'\033[0;32m' # Escaped backslash for literal
+BLUE=\'\033[0;34m' # Escaped backslash for literal
+MAGENTA=\'\033[0;35m' # Escaped backslash for literal
+CYAN=\'\033[0;36m' # Escaped backslash for literal
+NC=\'\033[0m' # Escaped backslash for literal
 
 # Configuration
 TIME_RANGE="${TIME_RANGE:-24h}"
@@ -443,8 +448,7 @@ generate_fix_code() {
       host all all ::1/128 md5
     '\'';
     # Ensure database users
-    ensureUsers = [{
-      name = "myapp";
+    ensureUsers = [{"name" = "myapp";
       ensureDBOwnership = true;
     }];
   };'
@@ -820,7 +824,7 @@ research_with_ai() {
 
     echo "$claude_response"
 }
-````
+```
 
 ### Pattern Learning
 
@@ -915,8 +919,7 @@ journalctl -u postgresql -p err --since "1 hour ago"
       local all all trust
       host all all 127.0.0.1/32 md5
     '';
-    ensureUsers = [{
-      name = "myapp";
+    ensureUsers = [{"name" = "myapp";
       ensureDBOwnership = true;
     }];
   };
@@ -1343,3 +1346,4 @@ The local-logs subagent provides intelligent system diagnostics by analyzing log
 - ✅ Actionable recommendations
 
 Use this subagent regularly to maintain system health and quickly resolve issues when they occur!
+````

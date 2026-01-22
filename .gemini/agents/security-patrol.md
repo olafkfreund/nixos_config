@@ -1,5 +1,6 @@
 ---
-context: fork
+name: security-patrol
+description: Proactive Security Monitoring and Hardening for NixOS Infrastructure
 ---
 
 # Security Patrol Agent
@@ -35,14 +36,14 @@ The Security Patrol agent continuously monitors NixOS infrastructure for securit
 # ❌ SECURITY GAP - Missing hardening
 systemd.services.myservice = {
   serviceConfig = {
-    ExecStart = "${pkgs.myapp}/bin/myapp";
+    ExecStart = "\${pkgs.myapp}/bin/myapp";
   };
 };
 
 # ✅ PROPERLY HARDENED
 systemd.services.myservice = {
   serviceConfig = {
-    ExecStart = "${pkgs.myapp}/bin/myapp";
+    ExecStart = "\${pkgs.myapp}/bin/myapp";
     DynamicUser = true;
     ProtectSystem = "strict";
     ProtectHome = true;

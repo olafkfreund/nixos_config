@@ -1,5 +1,6 @@
 ---
-context: fork
+name: config-drift-detective
+description: Configuration Drift Detection and Declarative State Enforcement
 ---
 
 # Config Drift Detective Agent

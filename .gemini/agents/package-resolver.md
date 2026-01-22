@@ -1,5 +1,6 @@
 ---
-context: fork
+name: package-resolver
+description: Automatic Package Conflict Resolution and Dependency Management
 ---
 
 # Package Resolver Agent

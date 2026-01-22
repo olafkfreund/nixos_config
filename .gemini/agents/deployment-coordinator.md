@@ -1,5 +1,6 @@
 ---
-context: fork
+name: deployment-coordinator
+description: Intelligent Multi-Host Deployment Orchestration for NixOS Infrastructure
 ---
 
 # Deployment Coordinator Agent

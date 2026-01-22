@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-01-21T17:36:19+00:00",
+  "status": "clean",
+  "checked_count": 35,
+  "issues": {
+    "critical": [],
+    "high": [],
+    "medium": []
+  }
+}

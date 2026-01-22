@@ -1,0 +1,6 @@
+{ ... }:
+{
+  imports = [
+    ./temp-dashboard.nix
+  ];
+}

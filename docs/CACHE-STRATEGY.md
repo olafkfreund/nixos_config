@@ -45,8 +45,8 @@ Samsung/Razer/P510 (clients)
 
 **Access Points:**
 
-- Tailscale: `http://p620.freundcloud.com:5000`
-- LAN: `http://192.168.1.97:5000`
+- Tailscale: `http://p620.lan:5000`
+- LAN: `http://p620.lan:5000`
 
 ## 🚀 Deployment Strategies
 

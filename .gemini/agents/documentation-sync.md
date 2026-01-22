@@ -1,3 +1,8 @@
+---
+name: documentation-sync
+description: Automated Documentation Generation and Synchronization
+---
+
 # Documentation Sync Agent
 
 > **Automated Documentation Generation and Synchronization**

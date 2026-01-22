@@ -1,0 +1,1 @@
+{ ... }: { imports = [ ./nixpkgs-monitors.nix ]; }

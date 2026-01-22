@@ -415,6 +415,7 @@
           opencode = pkgs.callPackage ./home/development/opencode { };
           aurynk = pkgs.callPackage ./pkgs/aurynk { };
           quick-webapps = pkgs.callPackage ./pkgs/quick-webapps { };
+          # add-skill = pkgs.callPackage ./pkgs/add-skill { };
 
           # Security tools
           mdatp = pkgs.callPackage ./pkgs/microsoft-defender-for-endpoint {

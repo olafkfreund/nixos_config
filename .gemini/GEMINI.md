@@ -328,3 +328,15 @@ just validate            # Full validation
 - "Show me the complete workflow"
 
 Gemini Code will guide you through any task! 🚀
+
+# Reflection & Verification Hook
+
+Whenever I give you a task, you must follow this internal loop before providing the final answer:
+
+1. **Analysis:** Deconstruct the user's request into specific constraints.
+2. **Drafting:** Mentally generate the first solution.
+3. **Self-Critique:** Act as a secondary "Reviewer" persona. Check the draft for logic errors, missing constraints, or edge cases.
+4. **Correction:** If the Reviewer finds issues, rewrite the solution.
+5. **Final Output:** Only provide the finalized, verified result.
+
+If the task involves code or shell commands, simulate the execution in your head to ensure the logic is finished and correct before you output a single line.

@@ -1,3 +1,8 @@
+---
+name: issue-checker
+description: Proactively monitors NixOS/nixpkgs GitHub issues to identify known bugs
+---
+
 # Issue Checker Subagent
 
 ## Overview
@@ -34,9 +39,12 @@ The **issue-checker** subagent proactively monitors NixOS/nixpkgs GitHub issues 
 ### Add to NixOS Configuration
 
 ```nix
-{ pkgs, ... }:
 {
-  environment.systemPackages = with pkgs; [
+  pkgs, ...
+}:
+{
+  environment.systemPackages = with pkgs;
+  [
     gh           # GitHub CLI for API access
     jq           # JSON processing
     nix          # For querying installed packages
@@ -315,7 +323,7 @@ generate_report() {
                 "\n📦 Package: \(.name)-\(.version)\n" +
                 "   Issues (\(.issues | length)):\n" +
                 (.issues[] | "   • #\(.number): \(.title)\n     \(.url)") +
-                ""'
+                ""
         fi
     done
 
@@ -366,7 +374,9 @@ chmod +x scripts/issue-checker.sh
 Automatically check before updates:
 
 ```nix
-{ pkgs, ... }:
+{
+  pkgs, ...
+}:
 {
   # Create wrapper for nixos-rebuild
   environment.systemPackages = [
@@ -402,7 +412,9 @@ safe-rebuild switch --upgrade
 Regular automated checks:
 
 ```nix
-{ pkgs, config, ... }:
+{
+  pkgs, config, ...
+}:
 {
   systemd.services.nixos-issue-check = {
     description = "Check NixOS packages for known issues";
@@ -432,7 +444,9 @@ Regular automated checks:
 Send alerts when critical issues are found:
 
 ```nix
-{ pkgs, config, ... }:
+{
+  pkgs, config, ...
+}:
 {
   systemd.services.nixos-issue-check-notify = {
     description = "Check and notify about NixOS issues";
@@ -483,7 +497,9 @@ diff /tmp/unstable-report.txt /tmp/stable-report.txt
 Only show critical/high severity issues:
 
 ```nix
-{ pkgs, ... }:
+{
+  pkgs, ...
+}:
 {
   environment.systemPackages = [
     (pkgs.writeShellScriptBin "check-critical-issues" ''
@@ -534,8 +550,7 @@ $(for pkg in $AFFECTED; do
     echo "    # Pinned due to critical issue - $(date)"
     echo "  });"
 done)
-}
-EOF
+}EOF
 
 echo "Generated overlay: /tmp/pin-overlay.nix"
 ```
@@ -788,7 +803,7 @@ EOF
 
 # Add issues
 jq -r '.[] |
-    "<div class=\"\(.severity)\">" +
+    "<div class=\""(.severity)"\">" +
     "<h2>\(.name) - \(.version)</h2>" +
     "<ul>" +
     (.issues[] | "<li><a href=\"\(.url)\">#\(.number)</a>: \(.title)</li>") +

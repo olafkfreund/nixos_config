@@ -212,6 +212,18 @@ with lib; {
           zle -N _aichat_zsh
           bindkey '\ee' _aichat_zsh
         fi
+
+        # Gemini Logic Sanity Wrapper
+        function sane-ask() {
+            gemini query --command sane "$@"
+        }
+        # Optional alias
+        alias ask='sane-ask'
+
+        # Gemini Reflection & Verification Wrapper
+        function gcheck() {
+            gemini query --command verify "$@"
+        }
       '';
 
       # Enhanced completion system with performance optimizations

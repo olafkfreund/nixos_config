@@ -1,3 +1,8 @@
+---
+name: update
+description: Automated NixOS system updates with safety checks and notifications
+---
+
 # Update Subagent
 
 > **Automated NixOS system updates with safety checks and notifications**
@@ -183,7 +188,8 @@ send_notification() {
 
     if [ "$NOTIFICATION_ENABLED" = true ]; then
         # Send to all logged-in users
-        for user in $(who | awk '{print $1}' | sort -u); do
+        for user in $(who | awk '{print $1}' | sort -u);
+        do
             user_id=$(id -u "$user")
             sudo -u "$user" DISPLAY=:0 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$user_id/bus \
                 notify-send --urgency="$urgency" --icon="$icon" "$title" "$message"
@@ -395,14 +401,14 @@ system_switch() {
             if nixos-rebuild switch --rollback 2>&1; then
                 log_success "Rollback successful"
                 send_notification "NixOS Update Failed" \
-                    "System switch failed but rollback succeeded. System is stable." \
-                    "critical" \
+                    "System switch failed but rollback succeeded. System is stable."
+                    "critical"
                     "dialog-error"
             else
                 log_error "Rollback failed - manual intervention required!"
                 send_notification "NixOS Update CRITICAL" \
-                    "System switch AND rollback failed! Manual intervention required!" \
-                    "critical" \
+                    "System switch AND rollback failed! Manual intervention required!"
+                    "critical"
                     "dialog-error"
             fi
         fi
@@ -447,8 +453,8 @@ send_final_notification() {
         local old_gen=$(jq -r '.pre_update_generation' "$STATE_FILE" 2>/dev/null || echo "unknown")
 
         send_notification "NixOS Update Complete" \
-            "System successfully updated from generation $old_gen to $new_gen" \
-            "normal" \
+            "System successfully updated from generation $old_gen to $new_gen"
+            "normal"
             "system-software-update"
 
         log_success "Update process completed successfully"
@@ -470,8 +476,8 @@ EOF
 
     else
         send_notification "NixOS Update Failed" \
-            "System update encountered errors. Check logs for details." \
-            "critical" \
+            "System update encountered errors. Check logs for details."
+            "critical"
             "dialog-error"
 
         log_error "Update process failed"
@@ -713,10 +719,9 @@ if [ "$critical_count" -gt 0 ]; then
         log_error "Aborting due to critical issues"
         send_notification "Update Aborted" \
             "Critical issues detected. Update cancelled for safety."
-        exit 1
     else
-        # Proceed with warnings
-        log_warning "Proceeding despite critical issues"
+    # Proceed with warnings
+    log_warning "Proceeding despite critical issues"
     fi
 fi
 ```
@@ -835,7 +840,7 @@ systemctl start nixos-auto-update
 
 ```bash
 # Test notification manually
-notify-send "Test" "Testing notifications"
+notify-send "Test" "Testing update notifications"
 
 # Check DBUS session
 echo $DBUS_SESSION_BUS_ADDRESS

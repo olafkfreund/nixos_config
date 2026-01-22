@@ -1,0 +1,11 @@
+description = "Runs a task with an explicit self-correction and verification loop."
+prompt = """
+You are in 'Verification Loop' mode.
+TASK: {{args}}
+
+INSTRUCTIONS:
+1. Create a draft solution.
+2. Run a critical logic check against the original TASK.
+3. If any part of the logic is unfinished or incorrect, loop back and fix it.
+4. Output the final, verified result only when you are 100% certain it is finished correctly.
+"""

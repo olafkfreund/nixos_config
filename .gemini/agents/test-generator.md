@@ -1,5 +1,6 @@
 ---
-context: fork
+name: test-generator
+description: Automatic Test Generation for NixOS Configurations and Modules
 ---
 
 # Test Generator Agent
@@ -531,7 +532,7 @@ test_samsung_builds() {
 **tests/vm/monitoring_test.nix**:
 
 ```python
-import <nixpkgs/nixos/tests/make-test-python.nix> ({ pkgs, ... }: {
+import <nixpkgs/nixos/tests/make-test-python.nix> ({ pkgs, ... }): {
   name = "monitoring-infrastructure";
 
   nodes.server = { ... }: {
@@ -553,7 +554,7 @@ import <nixpkgs/nixos/tests/make-test-python.nix> ({ pkgs, ... }: {
     server.succeed("curl -f http://localhost:3000/api/health")
 
     # Test metrics collection
-    server.succeed("curl -s http://localhost:9090/api/v1/targets | grep -q '\"health\":\"up\"'")
+    server.succeed("curl -s http://localhost:9090/api/v1/targets | grep -q '"health":"up"'")
   '';
 })
 ```

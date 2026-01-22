@@ -884,15 +884,6 @@ network-check:
 # HOST MANAGEMENT
 # =============================================================================
 
-# Deploy to all active hosts (be careful!)
-deploy-all:
-    @echo "🚨 Deploying to ALL active hosts..."
-    @read -p "Are you sure? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
-    just p620
-    just razer
-    just p510
-    just dex5550
-    @echo "⚠️  Note: Samsung requires manual deployment due to network configuration"
 
 # Deploy to all hosts in parallel (FASTEST)
 deploy-all-parallel:
@@ -1433,3 +1424,25 @@ microvm-help:
     @echo "  - VMs have 8GB RAM and 4 CPU cores each"
     @echo "  - P620 (32GB) can run all VMs simultaneously"
     @echo "  - Razer (16GB) should run 1-2 VMs at a time"
+
+# =============================================================================
+# AGENT-INTEGRATED DEPLOYMENT
+# =============================================================================
+
+# Deployment orchestration used by the 'deployment-coordinator' agent
+deploy-all:
+    @echo "🤖 Starting Agent-Integrated Deployment..."
+    @./scripts/generate-topology.sh
+    @./scripts/issue-checker.sh
+    @if [ -f .gemini/state/issues.json ]; then \
+        if grep -q '"status": "critical"' .gemini/state/issues.json; then \
+            echo "❌ CRITICAL ISSUES DETECTED. Aborting deployment."; \
+            exit 1; \
+        fi; \
+    fi
+    @echo "🚀 Proceeding with deployment sequence..."
+    @echo "🔹 Phase 1: Infrastructure (P620)"
+    @just p620
+    @echo "🔹 Phase 2: Clients (Razer, P510, DEX5550)"
+    @just deploy-all-parallel
+    @echo "✅ Deployment Coordinator finished successfully."

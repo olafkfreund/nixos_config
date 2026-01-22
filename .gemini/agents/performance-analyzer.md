@@ -1,5 +1,6 @@
 ---
-context: fork
+name: performance-analyzer
+description: Build Time and Evaluation Profiling for NixOS Infrastructure Optimization
 ---
 
 # Performance Analyzer Agent
