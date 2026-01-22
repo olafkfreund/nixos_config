@@ -176,11 +176,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1768951424,
-        "narHash": "sha256-yWcbgyyv8Zc9KEwqPYXyrwvaeNMxEq+xmK6J1ZZSH5w=",
+        "lastModified": 1769084368,
+        "narHash": "sha256-HmnEufvtp2xu/Cko1ZC6LrfGBxpsRdQn83uO5BZJMyA=",
         "owner": "olafkfreund",
         "repo": "cosmic-connect-desktop-app",
-        "rev": "a18147a989154303bb6aaa0e33d6ec42144e652d",
+        "rev": "69692d17b39c8d2ab5f8b0b51ad8676025d0ca51",
         "type": "github"
       },
       "original": {
@@ -1359,11 +1359,11 @@
         "nixpkgs": "nixpkgs_11"
       },
       "locked": {
-        "lastModified": 1769056321,
-        "narHash": "sha256-BR4ACqZEfFivkJutgeZeG8Sip/LlvmQgBbkT9eKZeIQ=",
+        "lastModified": 1769083075,
+        "narHash": "sha256-nGhrYO29Ijt2GkIsacVptMv1UF0Wwf4r6RYqbUKPk2Y=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "6dd879dc2cb51262567d8b2b49b2d24f256fa343",
+        "rev": "30f81811eeee1543fcf5c754f48cebe411ea11d4",
         "type": "github"
       },
       "original": {
