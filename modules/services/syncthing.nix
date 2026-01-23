@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, ... }:
 
 with lib;
 let
@@ -8,7 +8,7 @@ let
   # Run `syncthing --device-id` or check Web UI to get the ID
   # After first deployment, update these with actual device IDs
   defaultDeviceIds = {
-    p620 = "XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX";
+    p620 = "SQ6SDI7-NVAXUP2-RN3EEGN-YK7Q7P5-LEXKIJK-QJHJTFR-NJ7WMEQ-HOOSIAX";
     razer = "XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX";
     p510 = "XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX";
     samsung = "XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX";
@@ -151,12 +151,12 @@ in
     # Syncthing service configuration
     services.syncthing = {
       enable = true;
-      user = cfg.user;
+      inherit (cfg) user;
       group = "users";
       dataDir = "/home/${cfg.user}";
       configDir = "/home/${cfg.user}/.config/syncthing";
       openDefaultPorts = cfg.openFirewall;
-      guiAddress = cfg.guiAddress;
+      inherit (cfg) guiAddress;
 
       # Declarative configuration
       overrideDevices = true;
