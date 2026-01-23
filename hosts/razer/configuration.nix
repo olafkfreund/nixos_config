@@ -182,6 +182,14 @@ in
       enable = true;
     };
 
+    # Syncthing for ~/.claude and ~/.gemini sync across hosts
+    syncthing = {
+      enable = true;
+      syncClaude = true;
+      syncGemini = true;
+      masterHost = "p620";
+    };
+
     ai = {
       enable = true;
       ollama = false; # Disabled on Razer laptop for battery life and resource optimization

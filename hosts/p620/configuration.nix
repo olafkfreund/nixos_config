@@ -272,6 +272,14 @@ in
       enable = true;
     };
 
+    # Syncthing for ~/.claude and ~/.gemini sync across hosts
+    syncthing = {
+      enable = true;
+      syncClaude = true;
+      syncGemini = true;
+      masterHost = "p620"; # This host is the primary
+    };
+
     ai = {
       enable = true;
       ollama = true;

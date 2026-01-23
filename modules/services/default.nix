@@ -45,5 +45,8 @@ _: {
 
     # MCP servers for Claude Desktop
     ./rescreenshot-mcp.nix
+
+    # File synchronization
+    ./syncthing.nix
   ];
 }

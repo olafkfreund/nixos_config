@@ -117,6 +117,14 @@ in
       enable = true;
     };
 
+    # Syncthing for ~/.claude and ~/.gemini sync across hosts
+    syncthing = {
+      enable = true;
+      syncClaude = true;
+      syncGemini = true;
+      masterHost = "p620";
+    };
+
     homeAssistant = {
       enable = true;
       port = 8123;
