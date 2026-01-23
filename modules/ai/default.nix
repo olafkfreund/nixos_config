@@ -21,7 +21,7 @@ in
       pkgs.chatgpt-cli
       pkgs.rPackages.chatgpt
       pkgs.tgpt
-      pkgs.gh-copilot
+      # pkgs.gh-copilot REMOVED - deprecated and archived upstream
       pkgs.yai
       # pkgs.shell-gpt REMOVED due to dependency conflict with openai>=2.0.0
       # aichat REMOVED due to extremely slow pyrate-limiter build dependency (2+ hours)

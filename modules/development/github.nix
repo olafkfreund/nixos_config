@@ -22,7 +22,7 @@ in
         pkgs.actionlint
         pkgs.action-validator
         pkgs.gitea-actions-runner
-        pkgs.gh-copilot
+        # pkgs.gh-copilot REMOVED - deprecated and archived upstream
         pkgs.gh-notify
         pkgs.ghfetch
         pkgs.gh-dash

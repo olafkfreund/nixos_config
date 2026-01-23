@@ -30,7 +30,7 @@ in
     environment.systemPackages = with pkgs; [
       docker-compose
       docker-client
-      docui
+      # docui REMOVED - deprecated, using lazydocker instead
       docker-gc
       lazydocker
       earthly

@@ -1,3 +1,19 @@
+# MANDATORY: PARR Protocol
+
+**For EVERY task, you MUST use this structure:**
+
+| Phase | Output Required |
+|-------|-----------------|
+| 🎯 **PLAN** | Goal, steps with checkpoints, approach, assumptions, risks |
+| ⚡ **ACT** | Execute ONE step, show output, verify checkpoint |
+| 🔍 **REFLECT** | Result, expected vs actual, side effects, plan validity |
+| 🔄 **REVISE** | (If needed) Issue, root cause, options, decision |
+| ✅ **COMPLETE** | Summary, files changed, follow-up needed |
+
+**Rules:** Never skip PLAN. Never chain commands without REFLECT. Stop if unexpected. Ask after 2 failures.
+
+---
+
 # NixOS Infrastructure Hub - Claude Code Guide
 
 > **Fast, Easy, Reliable NixOS Development with Claude Code**

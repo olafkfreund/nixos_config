@@ -4,7 +4,7 @@ with lib;
 let
   cfg = config.features.claude-hooks;
 
-  # Create the hook scripts
+  # Create the hook scripts for desktop notifications
   needsPermissionsScript = pkgs.writeShellScript "needs-permissions.sh" ''
     #!/usr/bin/env bash
 
@@ -28,31 +28,6 @@ let
       ${pkgs.libnotify}/bin/notify-send "Claude" "Waiting for input." -t 3000
     fi
   '';
-
-  # Claude hooks configuration
-  claudeHooksConfig =
-    let
-      permissionHooks = optionalAttrs cfg.enablePermissionNotifications {
-        PermissionRequest = [{
-          matcher = "*";
-          hooks = [{
-            type = "command";
-            command = toString needsPermissionsScript;
-          }];
-        }];
-      };
-      readyHooks = optionalAttrs cfg.enableReadyNotifications {
-        Stop = [{
-          hooks = [{
-            type = "command";
-            command = toString notifyReadyScript;
-          }];
-        }];
-      };
-    in
-    {
-      hooks = permissionHooks // readyHooks;
-    };
 in
 {
   options.features.claude-hooks = {
@@ -79,14 +54,17 @@ in
     ];
 
     # Configure Home Manager for all users
+    # Note: PARR protocol hooks are configured in home/development/claude-code-lsp.nix
+    # which manages the ~/.claude/settings.json file directly
     home-manager.sharedModules = [{
-      # Configure Claude settings with hooks
-      xdg.configFile."claude/settings.json" = mkIf (cfg.enablePermissionNotifications || cfg.enableReadyNotifications) {
-        text = builtins.toJSON claudeHooksConfig;
-      };
-
       # Ensure tmux is available for session detection
       programs.tmux.enable = mkDefault true;
+
+      # Make notification scripts available in the user environment
+      home.packages = mkIf (cfg.enablePermissionNotifications || cfg.enableReadyNotifications) [
+        (pkgs.writeScriptBin "claude-notify-permissions" (builtins.readFile needsPermissionsScript))
+        (pkgs.writeScriptBin "claude-notify-ready" (builtins.readFile notifyReadyScript))
+      ];
     }];
   };
 }

@@ -20,11 +20,7 @@ in
         gh-dash
         gh-markdown-preview
         gh-notify
-        gh-copilot # github copilot cli
-        github-desktop # github desktop
-        gh # github cli
-        octofetch # github repository summary on your terminal
-        lazygit
+        # gh-copilot removed - deprecated and archived upstream
       ];
     };
   };

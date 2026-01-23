@@ -5,6 +5,64 @@
 }:
 with lib; let
   cfg = config.programs.claudeCode.lsp;
+  hooksCfg = config.programs.claudeCode.hooks;
+
+  # PARR Protocol Reminder Hook - Enforces structured reasoning for every task
+  parrReminderScript = pkgs.writeShellScript "parr-reminder.sh" ''
+        #!/usr/bin/env bash
+        cat << 'PARR_EOF'
+    <system-reminder>
+    ## MANDATORY: Follow PARR Protocol for This Task
+
+    You MUST structure your response using these phases:
+
+    ### 🎯 PLAN (Before ANY action)
+    - State the goal in one sentence
+    - List steps with verification criteria
+    - Identify approach, assumptions, and risks
+
+    ### ⚡ ACT (Execute ONE step at a time)
+    - Announce what you're doing
+    - Execute exactly ONE step
+    - Show output and verify checkpoint
+    - NEVER chain commands without checking results
+
+    ### 🔍 REFLECT (After EACH step)
+    - Did it work? Compare expected vs actual
+    - Any side effects?
+    - Is the plan still valid?
+
+    ### 🔄 REVISE (When needed)
+    - If something failed, diagnose root cause
+    - Update plan with new information
+    - Consider alternative approaches
+
+    ### ✅ COMPLETE (When done)
+    - Summarize what was achieved
+    - List files changed
+    - Note any follow-up needed
+
+    CRITICAL RULES:
+    - NEVER skip the PLAN phase
+    - NEVER execute multiple steps without reflection
+    - STOP immediately if something unexpected happens
+    - Ask for clarification if stuck after 2 attempts
+    </system-reminder>
+    PARR_EOF
+  '';
+
+  # Build hooks configuration based on enabled options
+  hooksConfig = {
+    hooks = { }
+      // optionalAttrs hooksCfg.enableParrProtocol {
+      UserPromptSubmit = [{
+        hooks = [{
+          type = "command";
+          command = toString parrReminderScript;
+        }];
+      }];
+    };
+  };
 
   # Marketplace configuration for Nix LSP
   marketplaceJson = pkgs.writeTextFile {
@@ -80,19 +138,35 @@ with lib; let
   };
 in
 {
-  options.programs.claudeCode.lsp = {
-    enable = mkEnableOption "Claude Code LSP plugin configuration";
+  options.programs.claudeCode = {
+    lsp = {
+      enable = mkEnableOption "Claude Code LSP plugin configuration";
 
-    enableNixLsp = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Enable Nix language server support in Claude Code";
+      enableNixLsp = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable Nix language server support in Claude Code";
+      };
+
+      customMarketplacePath = mkOption {
+        type = types.str;
+        default = "${config.home.homeDirectory}/.claude/plugins/custom-marketplace";
+        description = "Path to custom Claude Code plugin marketplace";
+      };
     };
 
-    customMarketplacePath = mkOption {
-      type = types.str;
-      default = "${config.home.homeDirectory}/.claude/plugins/custom-marketplace";
-      description = "Path to custom Claude Code plugin marketplace";
+    hooks = {
+      enableParrProtocol = mkOption {
+        type = types.bool;
+        default = true;
+        description = ''
+          Enable PARR (Plan, Act, Reflect, Revise) protocol enforcement.
+          When enabled, Claude Code will receive a system reminder on every
+          user prompt submission to follow the structured reasoning protocol.
+          This ensures consistent, high-quality responses with proper planning
+          and verification for every task.
+        '';
+      };
     };
   };
 
@@ -113,9 +187,9 @@ in
           ".claude/plugins/custom-marketplace/plugins/nix-lsp/README.md".source = pluginReadme;
 
           # Ensure the plugin is enabled in settings.json
-          # Note: This will be merged with existing settings by Home Manager
+          # Note: This includes LSP settings, statusLine, and hooks configuration
           ".claude/settings.json" = mkIf cfg.enableNixLsp {
-            text = builtins.toJSON {
+            text = builtins.toJSON ({
               enabledPlugins = {
                 "nix-lsp@nixos-lsp-marketplace" = true;
               };
@@ -124,7 +198,7 @@ in
                 type = "command";
                 command = "${config.home.homeDirectory}/.claude/statusline-powerline.sh";
               };
-            };
+            } // hooksConfig);
             onChange = ''
               # Merge with existing settings if they exist
               if [ -f "$HOME/.claude/settings.json.backup" ]; then
