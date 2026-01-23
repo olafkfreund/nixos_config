@@ -34,7 +34,7 @@ in
       # Desktop-specific imports (needed for GNOME):
       # ./nixos/greetd.nix      # Display manager - using GDM instead
       ./nixos/screens.nix # Display configuration - needed for desktop
-      ./themes/stylix.nix # Theming
+      ./themes/stylix.nix # Re-enabled after upstream cache fix
       # ../../home/desktop/gnome/default.nix # Home Manager module - can't import here
     ];
 

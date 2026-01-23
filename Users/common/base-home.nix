@@ -1,5 +1,4 @@
-{ inputs
-, pkgs ? { }
+{ pkgs ? { }
 , username ? "olafkfreund"
 , # Default fallback
   ...
@@ -48,11 +47,21 @@
 
   programs.home-manager.enable = true;
 
-  # Stylix configuration (Home Manager level)
-  stylix.enableReleaseChecks = false; # Disable version mismatch warnings between Stylix and Home Manager
+  # Stylix configuration (Home Manager level) - re-enabled after upstream cache fix
+  stylix.enableReleaseChecks = false;
 
-  # Set default Nix colorscheme
-  colorScheme = inputs.nix-colors.colorSchemes.gruvbox-dark-medium;
+  # Stylix theming targets configuration
+  # - Enable for terminals (wezterm, ghostty)
+  # - Disable GTK to let COSMIC desktop manage gtk.css files at runtime
+  #   (COSMIC generates ~/.config/gtk-{3,4}.0/gtk.css dynamically for its theme system)
+  stylix.targets = {
+    wezterm.enable = true;
+    ghostty.enable = true;
+    gtk.enable = false; # Let COSMIC manage GTK theming
+  };
+
+  # Note: nix-colors uses old base16-schemes - use stylix for theming instead
+  # colorScheme = inputs.nix-colors.colorSchemes.gruvbox-dark-medium;
 
   # Common programs for all users
   programs = {

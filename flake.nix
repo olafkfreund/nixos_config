@@ -299,7 +299,7 @@
         let
           primaryUser = getPrimaryUser host;
           allUsers = getHostUsers host;
-          # Import stylix for all hosts (removed dex5550 check as host no longer exists)
+          # Stylix theming module - re-enabled after upstream cache fix
           stylixModule = [ inputs.stylix.nixosModules.stylix ];
           system = "x86_64-linux";
         in
@@ -322,7 +322,7 @@
               ./hosts/${host}/configuration.nix
               nur.modules.nixos.default
               home-manager.nixosModules.home-manager
-              inputs.nix-colors.homeManagerModules.default
+              # inputs.nix-colors.homeManagerModules.default # DISABLED: uses old base16-schemes causing store corruption
               inputs.nix-snapd.nixosModules.default
               inputs.agenix.nixosModules.default
               inputs.lanzaboote.nixosModules.lanzaboote
@@ -338,6 +338,12 @@
                   useUserPackages = true;
                   # Use backup extension for conflicting files
                   backupFileExtension = "hm-backup";
+                  # Shared modules for all users
+                  sharedModules = [
+                    {
+                      stylix.targets.firefox.enable = false;
+                    }
+                  ];
                   extraSpecialArgs = {
                     pkgs-stable = import nixpkgs-stable (mkPkgs nixpkgs-stable system);
                     pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable system);

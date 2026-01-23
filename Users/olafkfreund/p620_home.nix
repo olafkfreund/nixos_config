@@ -13,13 +13,11 @@
     ./private.nix
   ];
 
-  # Fix Stylix Firefox profile warnings
-  stylix.targets.firefox.profileNames = [ "default" ];
-
-  # Disable Stylix GTK management to avoid conflicts with COSMIC theme
-  # COSMIC manages its own GTK themes and creates symlinks that conflict with Stylix
-  stylix.targets.gtk.enable = false;
-  stylix.targets.qt.enable = true;
+  # DISABLED: stylix theming - module temporarily disabled due to cachix corruption
+  # stylix.targets.firefox.profileNames = [ "default" ];
+  # stylix.targets.firefox.enable = false;
+  # stylix.targets.gtk.enable = false;
+  # stylix.targets.qt.enable = true;
 
   # Enable Walker launcher when feature flag is set
 

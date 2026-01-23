@@ -25,7 +25,7 @@ in
     ./nixos/cpu.nix
     ./nixos/memory.nix
     ./nixos/load.nix
-    ./themes/stylix.nix
+    ./themes/stylix.nix # Re-enabled after upstream cache fix
 
     # P620-specific additional modules
     ../../modules/development/default.nix

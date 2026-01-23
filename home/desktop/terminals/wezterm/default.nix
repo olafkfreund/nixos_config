@@ -35,8 +35,7 @@ in
         local act = wezterm.action
         local config = {}
 
-        -- Appearance
-        config.color_scheme = 'Gruvbox dark, medium (base16)'
+        -- Appearance (color_scheme managed by Stylix)
         config.font = wezterm.font_with_fallback {
           'JetBrainsMono Nerd Font',
           'Noto Color Emoji',
@@ -173,7 +172,6 @@ in
             config.enable_wayland = true
 
             -- Wayland-specific optimizations
-            config.webgpu_preferred_adapter = config.webgpu_preferred_adapter or wezterm.default_webgpu_adapter()
             config.front_end = "WebGpu"  -- Better performance on modern systems with Wayland
             config.enable_wayland_ime = true  -- Improved input method support
 

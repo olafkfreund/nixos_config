@@ -24,23 +24,50 @@ in
         else pkgs.qt6Packages.qt6ct
       );
     };
-    # Let Stylix handle Qt styling - it's already configured for dark mode
-    # Stylix will manage qt.style based on stylix.polarity = "dark"
+    # Set Breeze dark style for consistent KDE/Qt dark mode
+    style = {
+      name = lib.mkForce "breeze";
+      package = lib.mkForce pkgs.kdePackages.breeze;
+    };
   };
 
-  home.packages = with pkgs; [
-    # Qt theming packages
-    libsForQt5.qtstyleplugin-kvantum
-    qt6Packages.qtstyleplugin-kvantum
-    adwaita-qt
-    adwaita-qt6
-    qt6Packages.qt6ct
-  ];
+  # GNOME/GTK dark mode via dconf (for KDE apps that respect it)
+  dconf.settings."org/gnome/desktop/interface" = {
+    color-scheme = lib.mkDefault "prefer-dark";
+    gtk-theme = lib.mkDefault "Adwaita-dark";
+  };
 
-  # Add environment variables for Qt application integration
-  home.sessionVariables = lib.mkIf (!isPlasmaEnabled) {
-    # Use qt6ct by default except in KDE Plasma
-    QT_QPA_PLATFORMTHEME = lib.mkForce "qtct";
-    # Stylix will set the appropriate Qt style based on polarity = "dark"
+  # Combine all home.* attributes into a single block
+  home = {
+    packages = with pkgs; [
+      # Qt theming packages
+      libsForQt5.qtstyleplugin-kvantum
+      qt6Packages.qtstyleplugin-kvantum
+      adwaita-qt
+      adwaita-qt6
+      qt6Packages.qt6ct
+
+      # KDE/Breeze theming packages (breeze supports both Qt5 and Qt6)
+      # Note: breeze-icons removed to avoid conflict with gruvbox-plus-icons
+      kdePackages.breeze
+    ];
+
+    # KDE globals configuration for dark mode
+    # This ensures KDE applications use dark theme even outside Plasma
+    file.".config/kdeglobals" = {
+      text = ''
+        ${builtins.readFile "${pkgs.kdePackages.breeze}/share/color-schemes/BreezeDark.colors"}
+      '';
+    };
+
+    # Add environment variables for Qt application integration
+    sessionVariables = {
+      # Use qt6ct by default except in KDE Plasma
+      QT_QPA_PLATFORMTHEME = lib.mkForce (if isPlasmaEnabled then "kde" else "qtct");
+      # KDE color scheme for Qt apps
+      KDE_COLOR_SCHEME = "BreezeDark";
+      # Ensure Qt apps use dark mode
+      QT_STYLE_OVERRIDE = lib.mkDefault "breeze";
+    };
   };
 }

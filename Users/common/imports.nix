@@ -1,9 +1,7 @@
-{ inputs, ... }: {
+{ ... }: {
   # Common imports for all user configurations
   imports = [
-    inputs.nix-colors.homeManagerModules.default
-    inputs.spicetify-nix.homeManagerModules.default
-    # inputs.walker.homeManagerModules.default # Temporarily disabled - broken commit
+    # Note: nix-colors, spicetify-nix, walker modules disabled due to upstream issues
 
     # Internal modules
     ./base-home.nix

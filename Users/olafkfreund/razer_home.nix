@@ -17,8 +17,9 @@ in
     ./private.nix
   ];
 
-  # Fix Stylix Firefox profile warnings
-  stylix.targets.firefox.profileNames = [ "default" ];
+  # DISABLED: stylix theming - module temporarily disabled due to cachix corruption
+  # stylix.targets.firefox.profileNames = [ "default" ];
+  # stylix.targets.firefox.enable = false;
 
   # Enable Walker launcher when feature flag is set
 

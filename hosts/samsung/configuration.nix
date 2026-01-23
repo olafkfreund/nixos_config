@@ -23,7 +23,7 @@ in
     ./nixos/cpu.nix
     ./nixos/laptop.nix
     ./nixos/memory.nix
-    ./themes/stylix.nix
+    ./themes/stylix.nix # Re-enabled after upstream cache fix
 
     # Samsung-specific additional modules
     ../../modules/development/default.nix
