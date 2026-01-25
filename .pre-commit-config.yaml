@@ -182,9 +182,9 @@ repos:
         name: Check Nix flake
         entry: nix flake check --no-build
         language: system
-        files: 'flake\.(nix|lock)$'
+        files: '\.nix$'
         pass_filenames: false
-        description: Validate Nix flake configuration
+        description: Validate Nix flake configuration (runs on all .nix file changes)
 
       - id: just-validate
         name: Validate justfile
