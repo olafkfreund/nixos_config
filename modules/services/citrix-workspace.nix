@@ -126,12 +126,6 @@ in
         Citrix Workspace requires accepting the EULA.
         Set services.citrix-workspace.acceptLicense = true after reviewing the license.
       ''
-      ++ optional (config.programs.hyprland.enable or false) ''
-        WARNING: Citrix Workspace officially supports X11 only.
-        Wayland (including Hyprland) is NOT officially supported and may have issues.
-        Consider using XWayland or a pure X11 session for Citrix.
-        See: https://docs.citrix.com/en-us/citrix-workspace-app-for-linux/system-requirements.html
-      ''
       ++ optional (config.services.displayManager.gdm.wayland or false) ''
         WARNING: GDM Wayland session detected.
         Citrix Workspace requires X11. Switch to X11 session or use XWayland.
@@ -139,8 +133,8 @@ in
 
     assertions = [
       {
-        assertion = cfg.enable -> (config.services.xserver.enable || config.programs.hyprland.enable);
-        message = "Citrix Workspace requires a desktop environment (X11 or XWayland)";
+        assertion = cfg.enable -> config.services.xserver.enable;
+        message = "Citrix Workspace requires a desktop environment (X11)";
       }
       {
         assertion = cfg.enable -> cfg.acceptLicense;

@@ -15,7 +15,6 @@ This directory contains declarative, modular configurations for desktop environm
 - `flameshot/` — 🔥 Screenshot tool configuration
 - `gaming/` — 🎮 Gaming-related desktop utilities
 - `git-sync/` — 🔄 Git synchronization utilities
-- `hyprland/` — 🌀 Hyprland window manager configuration
 - `kdeconnect/` — 📱 KDE Connect for device integration
 - `kooha/` — 🎥 Screen recording tool configuration
 - `lanmouse/` — 🖱️ LAN mouse sharing configuration
@@ -24,14 +23,12 @@ This directory contains declarative, modular configurations for desktop environm
 - `obs/` — 📹 Open Broadcaster Software configuration
 - `plasma/` — 💠 KDE Plasma desktop environment configuration
 - `remotedesktop/` — 🌐 Remote desktop utilities
-- `rofi/` — 🚀 Application launcher configuration
 - `slack/` — 💬 Slack desktop client configuration
 - `sound/` — 🔊 Audio configuration utilities
 - `terminals/` — 🖥️ Terminal emulator configurations
 - `theme/` — 🎨 Desktop theme configurations
 - `thunderbird/` — 🦅 Email client configuration
 - `walker/` — 🚶 Walker launcher configuration
-- `waybar/` — 📊 Status bar for Wayland
 - `waypipe/` — 🛤️ Remote application forwarding
 - `zathura/` — 📚 Document viewer configuration
 

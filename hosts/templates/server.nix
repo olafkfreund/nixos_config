@@ -31,6 +31,5 @@
 
     # Disable GUI components
     services.xserver.enable = lib.mkDefault false;
-    programs.hyprland.enable = lib.mkDefault false;
   };
 }
