@@ -20,7 +20,6 @@
       "https://hyprland.cachix.org/"
       "https://devenv.cachix.org/"
       "https://cosmic.cachix.org/"
-      "https://cache.saumon.network/proxmox-nixos/"
       "http://p620.lan:5000/"
     ];
     extra-trusted-public-keys = [
