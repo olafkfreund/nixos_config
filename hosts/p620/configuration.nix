@@ -431,37 +431,24 @@ in
     };
   };
 
-  # Create system users for all host users + gitlab-runner
-  users.users =
-    (lib.genAttrs hostUsers (username: {
-      isNormalUser = true;
-      description = "User ${username}";
-      extraGroups = [
-        "wheel"
-        "networkmanager"
-        "render"
-      ];
-      shell = pkgs.zsh;
-      # Only use secret-managed password if the secret exists
-      hashedPasswordFile = lib.mkIf
-        (
-          config.modules.security.secrets.enable
-          && builtins.hasAttr "user-password-${username}" config.age.secrets
-        )
-        config.age.secrets."user-password-${username}".path;
-    }))
-    // {
-      # GitLab Runner user (for manual runner registration)
-      gitlab-runner = {
-        isSystemUser = true;
-        group = "gitlab-runner";
-        home = "/var/lib/gitlab-runner";
-        createHome = true;
-        description = "GitLab Runner user";
-        extraGroups = [ "docker" ];
-      };
-    };
-  users.groups.gitlab-runner = { };
+  # Create system users for all host users
+  users.users = lib.genAttrs hostUsers (username: {
+    isNormalUser = true;
+    description = "User ${username}";
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+      "render"
+    ];
+    shell = pkgs.zsh;
+    # Only use secret-managed password if the secret exists
+    hashedPasswordFile = lib.mkIf
+      (
+        config.modules.security.secrets.enable
+        && builtins.hasAttr "user-password-${username}" config.age.secrets
+      )
+      config.age.secrets."user-password-${username}".path;
+  });
 
   # Remove duplicate user configuration - use the one above that handles all hostUsers
   # users.users.${vars.username} is now handled by the genAttrs above
@@ -544,11 +531,6 @@ in
       };
     };
 
-    # GitLab Runner for CI/CD (manually registered runners)
-    # Runners are registered using: ./scripts/setup-gitlab-runner.sh
-    # Disabled NixOS module - using native gitlab-runner service instead
-    # gitlab-runner-local.enable = false;
-
     # Hardware-specific configurations
     udev = {
       packages = [ pkgs.via ];
@@ -559,68 +541,9 @@ in
     };
   };
 
-  # GitLab Runner systemd service (outside services block)
-  systemd.services.gitlab-runner = {
-    description = "GitLab Runner";
-    after = [
-      "network.target"
-      "docker.service"
-    ];
-    wants = [ "docker.service" ];
-    wantedBy = [ "multi-user.target" ];
-
-    serviceConfig = {
-      Type = "simple";
-      User = "gitlab-runner";
-      Group = "gitlab-runner";
-      WorkingDirectory = "/var/lib/gitlab-runner";
-      ExecStart = "${pkgs.gitlab-runner}/bin/gitlab-runner run --config /etc/gitlab-runner/config.toml --working-directory /var/lib/gitlab-runner";
-      Restart = "always";
-      RestartSec = 10;
-
-      # Security hardening
-      PrivateTmp = true;
-      NoNewPrivileges = true;
-      ProtectSystem = "strict";
-      ProtectHome = true;
-      ReadWritePaths = [
-        "/var/lib/gitlab-runner"
-        "/etc/gitlab-runner"
-      ];
-
-      # Resource limits
-      MemoryMax = "4G";
-      TasksMax = 1000;
-    };
-
-    preStart = ''
-            # Create directories if they don't exist
-            mkdir -p /etc/gitlab-runner
-            mkdir -p /var/lib/gitlab-runner
-
-            # Only create minimal config if it doesn't exist
-            if [ ! -f /etc/gitlab-runner/config.toml ]; then
-              cat > /etc/gitlab-runner/config.toml <<EOF
-      concurrent = 4
-      check_interval = 0
-      log_level = "info"
-
-      [session_server]
-        session_timeout = 1800
-      EOF
-            fi
-
-            # Set proper permissions
-            chown -R gitlab-runner:gitlab-runner /etc/gitlab-runner
-            chown -R gitlab-runner:gitlab-runner /var/lib/gitlab-runner
-            chmod 700 /var/lib/gitlab-runner
-            chmod 600 /etc/gitlab-runner/config.toml || true
-    '';
-  };
 
   # System packages
   environment.systemPackages = with pkgs; [
-    gitlab-runner # For manual runner registration
     rocmPackages.llvm.libcxx
     via
     looking-glass-client
