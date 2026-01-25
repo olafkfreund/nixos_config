@@ -51,7 +51,7 @@
 
 ### Development Environment
 
-- **Editors:** VS Code, Neovim (LazyVim/LunarVim), Emacs
+- **Editors:** VS Code, Neovim (LazyVim/LunarVim), Cursor, Windsurf
 - **Languages:** Python, Go, Rust, Node.js, Java, Lua
 - **Shells:** Zsh with Starship, advanced multiplexers (tmux, Zellij)
 - **AI Integration:** Claude Code, multiple LLM providers

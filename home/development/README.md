@@ -8,7 +8,6 @@ This directory contains configurations for development tools and environments ma
 - `cursor-code.nix` - Cursor editor configuration
 - `default.nix` - Main entry point that imports all development configurations
 - `distrobox.nix` - Distrobox container configurations for different Linux distributions
-- `emacs.nix` - Emacs editor configuration
 - `nvim.nix` - Neovim editor configuration
 - `vscode.nix` - Visual Studio Code configuration with extensions and settings
 - `windsurf.nix` - Windsurf Nix development tool configuration

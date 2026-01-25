@@ -5,7 +5,6 @@ _: {
     # Editor configurations (enhanced)
     ./vscode.nix
     ./nvim.nix
-    ./emacs.nix
     ./cursor-code.nix
     ./windsurf.nix
 

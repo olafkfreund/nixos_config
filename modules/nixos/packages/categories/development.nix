@@ -45,7 +45,6 @@ in
 
       # Editors (mix of headless and GUI)
       ++ lib.optionals (cfg.editors.neovim or false) [ neovim ]
-      ++ lib.optionals (cfg.editors.emacs or false) [ emacs ]
       # GUI editors only if desktop is enabled
       ++ lib.optionals ((cfg.editors.vscode or false) && (config.packages.desktop.enable or false)) [ code-cursor ]
 
