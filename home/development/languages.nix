@@ -92,7 +92,6 @@ with lib; let
 
       cloud = {
         terraform = true;
-        ansible = false;
         aws = false;
         gcp = false;
       };
@@ -190,7 +189,6 @@ with lib; let
           (optionals (category == "cloud") (
             with pkgs;
             (optional utils.terraform terraform)
-            ++ (optional utils.ansible ansible)
             ++ (optional utils.aws awscli2)
             ++ (optional utils.gcp google-cloud-sdk)
           ))

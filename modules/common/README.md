@@ -44,7 +44,7 @@ The system currently supports the following feature categories:
 
 1. **Development Tools**
    - Python, Go, Node.js, Java, Lua, Nix
-   - Shell, Ansible, Cargo/Rust, GitHub, Devshell
+   - Shell, Cargo/Rust, GitHub, Devshell
 
 2. **Virtualization**
    - Docker, Podman, Incus containers

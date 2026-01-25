@@ -8,7 +8,6 @@
   terraform.packages.enable = true;
 
   # Development tools
-  ansible.development.enable = true;
   cargo.development.enable = true;
   github.development.enable = true;
   go.development.enable = true;

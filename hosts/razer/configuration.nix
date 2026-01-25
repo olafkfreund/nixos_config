@@ -121,7 +121,6 @@ in
   features = {
     development = {
       enable = true;
-      ansible = true;
       cargo = true;
       copilot-cli = true; # GitHub Copilot CLI
       spec-kit = true; # GitHub spec-kit for Spec-Driven Development

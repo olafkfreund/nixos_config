@@ -12,7 +12,6 @@ with lib; {
       lua = mkEnableOption "Lua development";
       nix = mkEnableOption "Nix development";
       shell = mkEnableOption "Shell development";
-      ansible = mkEnableOption "Ansible development";
       cargo = mkEnableOption "Cargo/Rust development";
       copilot-cli = mkEnableOption "GitHub Copilot CLI";
       github = mkEnableOption "GitHub development";

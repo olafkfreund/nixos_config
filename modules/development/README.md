@@ -5,7 +5,6 @@ This directory contains NixOS modules for various development environments and t
 ## Available Modules
 
 - `default.nix` - Main entry point that imports all development modules
-- `ansible.nix` - Ansible configuration management tools
 - `cargo.nix` - Rust development tools and Cargo package manager
 - `cue.nix` - CUE language support
 - `devshell.nix` - Development shell environments

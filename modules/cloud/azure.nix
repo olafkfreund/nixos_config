@@ -20,7 +20,7 @@ in
       blobfuse
       rsync
       dotnetCorePackages.sdk_9_0
-      #Python packages needed by ansible
+      # Python packages for Azure management
       python312Packages.azure-mgmt-authorization
       python312Packages.azure-mgmt-apimanagement
       python312Packages.azure-mgmt-batch
@@ -68,8 +68,6 @@ in
       python312Packages.xmltodict
       python312Packages.jmespath
       python312Packages.packaging
-      python312Packages.ansible
-      python312Packages.ansible-compat
       python312Packages.setuptools
       python312Packages.msrestazure
       python312Packages.virtualenv

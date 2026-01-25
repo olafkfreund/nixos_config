@@ -2,7 +2,6 @@ _: {
   imports = [
     ./cargo.nix
     ./python.nix
-    ./ansible.nix
     ./go.nix
     ./java.nix
     ./lua.nix

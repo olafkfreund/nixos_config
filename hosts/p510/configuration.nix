@@ -76,7 +76,6 @@ in
   features = {
     development = {
       enable = true;
-      ansible = false;
       cargo = true;
       github = true;
       go = true;
