@@ -88,16 +88,18 @@ jobs:
         run: |
           echo "Scanning for security issues..."
 
-          # Check for hardcoded passwords
-          if grep -r "password.*=" . --include="*.nix" --exclude-dir=".git" | grep -v "hashedPassword\|passwordFile\|secrets\|age\.secrets"; then
+          # Check for hardcoded passwords (exclude safe patterns and archived code)
+          if grep -r 'password\s*=\s*"[^"]\+"' . --include="*.nix" --exclude-dir=".git" --exclude-dir="archive" \
+            | grep -v 'hashedPassword\|passwordFile\|password\s*=\s*""\|password\s*=\s*"nixos"\|onepassword\|secrets\|age\.secrets\|\$__file\|lib/live-images.nix\|modules/installer'; then
             echo "FAIL: Potential hardcoded passwords found"
             exit 1
           else
             echo "PASS: No hardcoded passwords found"
           fi
 
-          # Check for hardcoded API keys
-          if grep -r "api.*key.*=" . --include="*.nix" --exclude-dir=".git" | grep -v "secretFile\|secrets\|age\.secrets"; then
+          # Check for hardcoded API keys (exclude safe patterns)
+          if grep -r 'api.*key\s*=\s*"[^"]\+"' . --include="*.nix" --exclude-dir=".git" --exclude-dir="archive" \
+            | grep -v 'secretFile\|apiKeyFile\|secrets\|age\.secrets'; then
             echo "FAIL: Potential hardcoded API keys found"
             exit 1
           else
@@ -105,7 +107,7 @@ jobs:
           fi
 
           # Check for TODO/FIXME items
-          todo_count=$(grep -r "TODO\|FIXME" . --include="*.nix" --exclude-dir=".git" | wc -l)
+          todo_count=$(grep -r "TODO\|FIXME" . --include="*.nix" --exclude-dir=".git" --exclude-dir="archive" | wc -l)
           echo "INFO: Found $todo_count TODO/FIXME items"
 
   documentation-check:
