@@ -327,8 +327,13 @@
                 home-manager = {
                   useGlobalPkgs = true;
                   useUserPackages = true;
-                  # Use backup extension for conflicting files
-                  backupFileExtension = "hm-backup";
+                  # Use backup command to move files to timestamped directory
+                  # This prevents backup file collisions by using unique directories
+                  backupCommand = ''
+                    backup_dir="$HOME/.hm-backups/$(date +%Y-%m-%d-%H%M%S)"
+                    mkdir -p "$(dirname "$backup_dir/$1")"
+                    mv "$1" "$backup_dir/$1"
+                  '';
                   # Shared modules for all users
                   sharedModules = [
                     {
