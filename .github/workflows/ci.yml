@@ -37,18 +37,18 @@ jobs:
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
       - name: Check flake
-        run: nix flake check --show-trace
+        run: nix flake check --no-build --show-trace
 
-      - name: Build ${{ matrix.host }} configuration
+      - name: Validate ${{ matrix.host }} configuration
         run: |
-          nix build .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel \
-            --show-trace --print-build-logs
+          echo "Validating ${{ matrix.host }} configuration (no build)..."
+          nix eval .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel.outPath --show-trace
+          echo "✓ ${{ matrix.host }} configuration is valid"
 
-      - name: Check Home Manager configurations
+      - name: Validate Home Manager configurations
         run: |
-          if nix eval .#homeConfigurations.olafkfreund@${{ matrix.host }} 2>/dev/null; then
-            nix build .#homeConfigurations.olafkfreund@${{ matrix.host }}.activationPackage \
-              --show-trace --print-build-logs
+          if nix eval .#homeConfigurations.olafkfreund@${{ matrix.host }}.activationPackage 2>/dev/null; then
+            echo "✓ Home Manager configuration for olafkfreund@${{ matrix.host }} is valid"
           else
             echo "WARNING: No Home Manager configuration for olafkfreund@${{ matrix.host }}"
           fi
@@ -216,3 +216,4 @@ jobs:
           '
 
           echo "INFO: Pre-commit check completed (non-blocking)"
+

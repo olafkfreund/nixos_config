@@ -1,3 +1,4 @@
+# Test comment to verify pre-commit flake-check hook
 { pkgs
 , lib
 , ...
