@@ -1,7 +1,7 @@
 { ... }: {
   # Common imports for all user configurations
   imports = [
-    # Note: nix-colors, spicetify-nix, walker modules disabled due to upstream issues
+    # Note: nix-colors, spicetify-nix modules disabled due to upstream issues
 
     # Internal modules
     ./base-home.nix

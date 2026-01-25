@@ -19,8 +19,6 @@
   # stylix.targets.gtk.enable = false;
   # stylix.targets.qt.enable = true;
 
-  # Enable Walker launcher when feature flag is set
-
   # Terminal app desktop entries
   programs.k9s.desktopEntry.enable = lib.mkForce true;
   programs.claude-code.desktopEntry.enable = lib.mkForce true;

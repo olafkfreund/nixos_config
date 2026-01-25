@@ -28,7 +28,6 @@ This directory contains declarative, modular configurations for desktop environm
 - `terminals/` — 🖥️ Terminal emulator configurations
 - `theme/` — 🎨 Desktop theme configurations
 - `thunderbird/` — 🦅 Email client configuration
-- `walker/` — 🚶 Walker launcher configuration
 - `waypipe/` — 🛤️ Remote application forwarding
 - `zathura/` — 📚 Document viewer configuration
 

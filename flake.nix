@@ -21,8 +21,6 @@
       "https://devenv.cachix.org/"
       "https://cosmic.cachix.org/"
       "https://cache.saumon.network/proxmox-nixos/"
-      "https://walker-git.cachix.org/"
-      "https://walker.cachix.org/"
       "http://p620.lan:5000/"
     ];
     extra-trusted-public-keys = [
@@ -30,8 +28,6 @@
       "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
       "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
       "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
-      "walker-git.cachix.org-1:vmC0ocfPWh0S/vRAQGtChuiZBTAe4wiKDeyyXM0/7pM="
-      "walker.cachix.org-1:fG8q+uAaMqhsMxWjwvk0IMb4mFPFLqHjuvfwQxE4oJM="
       "p620-nix-serve:mZR6o5z5KcWeu4PVXgjHA7vb1sHQgRdWMKQt8x3a4rU="
     ];
   };
