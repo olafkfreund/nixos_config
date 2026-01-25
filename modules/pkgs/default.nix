@@ -33,7 +33,6 @@
     devbox # faster nix-shells
     shellify # faster nix-shells
     github-desktop
-    swayosd
     v4l-utils
     sops
   ];

@@ -7,8 +7,6 @@
   imports = [
     # Import full home manager module suite
     ../../default.nix # Base home manager configuration
-    ../../desktop/sway/default.nix # Window manager
-    ../../desktop/sway/swayosd.nix # System OSD
     ../../desktop/gnome # GNOME desktop environment (optional)
     ../../games/steam.nix # Gaming support
   ];

@@ -14,10 +14,6 @@ _: {
     # This ensures sudo doesn't get the "no new privs" flag
     unprivilegedUsernsClone = true;
 
-    pam.services = {
-      swaylock = { };
-    };
-
     polkit = {
       enable = true;
       extraConfig = ''

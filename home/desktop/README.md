@@ -27,9 +27,6 @@ This directory contains declarative, modular configurations for desktop environm
 - `rofi/` — 🚀 Application launcher configuration
 - `slack/` — 💬 Slack desktop client configuration
 - `sound/` — 🔊 Audio configuration utilities
-- `sway/` — 🌿 Sway window manager configuration
-- `swaylock/` — 🔒 Screen locker for Wayland
-- `swaync/` — 🗞️ Notification center for Sway
 - `terminals/` — 🖥️ Terminal emulator configurations
 - `theme/` — 🎨 Desktop theme configurations
 - `thunderbird/` — 🦅 Email client configuration
@@ -58,3 +55,4 @@ These modules are imported by the main desktop configuration file (`default.nix`
 ---
 
 For more details, see the main repository [README.md](../README.md) and individual module documentation.
+

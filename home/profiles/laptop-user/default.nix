@@ -11,8 +11,6 @@
     ../../files.nix # File associations
 
     # Desktop modules for mobile desktop environment
-    ../../desktop/sway/default.nix # Lightweight window manager
-    ../../desktop/sway/swayosd.nix # System OSD for laptops
     ../../desktop/gnome # GNOME desktop environment (optional)
     ../../desktop/zathura/default.nix # Lightweight PDF viewer
     ../../desktop/obsidian/default.nix # Note-taking (can sync across devices)

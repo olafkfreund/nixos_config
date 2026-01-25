@@ -11,7 +11,6 @@
 
     # Desktop modules for development workflows
     ../../desktop/terminals/default.nix # Multiple terminal options
-    ../../desktop/sway/default.nix # Window manager support
     ../../desktop/zathura/default.nix # PDF viewer for documentation
     ../../desktop/obsidian/default.nix # Note-taking for project docs
     ../../desktop/flameshot/default.nix # Screenshots for documentation

@@ -27,10 +27,10 @@
               reboot
               ;;
             $lock)
-              swaylock&
+              loginctl lock-session&
               ;;
             $suspend)
-              swaylock&
+              loginctl lock-session&
               systemctl suspend
               ;;
             $log_out)

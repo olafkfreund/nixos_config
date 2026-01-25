@@ -24,7 +24,6 @@
 
     # Desktop environment features
     desktop = {
-      sway.enable = false;
       zathura.enable = true;
       screenshots.flameshot.enable = true;
     };
