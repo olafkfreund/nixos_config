@@ -2,7 +2,7 @@
 
 > **Research-based comparison for optimal NixOS caching strategy**
 
-## 📊 Quick Verdict
+##  Quick Verdict
 
 **For your setup: P620 + Optional Cachix Hybrid = BEST**
 
@@ -12,7 +12,7 @@
 
 ---
 
-## 🔍 Cachix Overview
+##  Cachix Overview
 
 ### What Is Cachix?
 
@@ -27,19 +27,19 @@ Cachix is a hosted binary cache service (SaaS) that provides:
 
 | Tier         | Storage | Cost    | Private Caches | Best For             |
 | ------------ | ------- | ------- | -------------- | -------------------- |
-| **Free**     | 5 GB    | Free    | ❌ Public only | Open source projects |
-| **Starter**  | 50 GB   | Contact | ✅ Yes         | Small teams          |
-| **Standard** | 250 GB  | Contact | ✅ Yes         | Medium teams         |
-| **Pro**      | 1500 GB | Contact | ✅ Yes         | Large enterprises    |
+| **Free**     | 5 GB    | Free    |  Public only | Open source projects |
+| **Starter**  | 50 GB   | Contact |  Yes         | Small teams          |
+| **Standard** | 250 GB  | Contact |  Yes         | Medium teams         |
+| **Pro**      | 1500 GB | Contact |  Yes         | Large enterprises    |
 
 **Key Features:**
 
-- ✅ Unlimited bandwidth (all tiers)
-- ✅ Cloudflare CDN (global performance)
-- ✅ Compression (saves 90% storage)
-- ✅ 14-day free trial (paid tiers)
-- ✅ Watch-store automatic pushing
-- ❌ Free tier is PUBLIC ONLY
+-  Unlimited bandwidth (all tiers)
+-  Cloudflare CDN (global performance)
+-  Compression (saves 90% storage)
+-  14-day free trial (paid tiers)
+-  Watch-store automatic pushing
+-  Free tier is PUBLIC ONLY
 
 ---
 
@@ -49,48 +49,48 @@ Cachix is a hosted binary cache service (SaaS) that provides:
 
 | Scenario           | P620 (LAN)      | P620 (Tailscale) | Cachix (Free)  | Cachix (Paid)  |
 | ------------------ | --------------- | ---------------- | -------------- | -------------- |
-| **Samsung on LAN** | ⚡ ~50-100 MB/s | ~10-30 MB/s      | ~5-20 MB/s     | ~5-20 MB/s     |
-| **Samsung remote** | ❌ No access    | ⚡ ~10-30 MB/s   | ⚡ ~10-50 MB/s | ⚡ ~10-50 MB/s |
-| **Razer on LAN**   | ⚡ ~50-100 MB/s | ~10-30 MB/s      | ~5-20 MB/s     | ~5-20 MB/s     |
-| **P510 on LAN**    | ⚡ ~50-100 MB/s | ~10-30 MB/s      | ~5-20 MB/s     | ~5-20 MB/s     |
+| **Samsung on LAN** |  ~50-100 MB/s | ~10-30 MB/s      | ~5-20 MB/s     | ~5-20 MB/s     |
+| **Samsung remote** |  No access    |  ~10-30 MB/s   |  ~10-50 MB/s |  ~10-50 MB/s |
+| **Razer on LAN**   |  ~50-100 MB/s | ~10-30 MB/s      | ~5-20 MB/s     | ~5-20 MB/s     |
+| **P510 on LAN**    |  ~50-100 MB/s | ~10-30 MB/s      | ~5-20 MB/s     | ~5-20 MB/s     |
 
-**Winner**: P620 on LAN (5-10x faster) 🏆
+**Winner**: P620 on LAN (5-10x faster) 
 
 ### Privacy & Security
 
 | Feature            | P620             | Cachix Free       | Cachix Paid        |
 | ------------------ | ---------------- | ----------------- | ------------------ |
-| **Private caches** | ✅ Unlimited     | ❌ Public only    | ✅ Yes             |
-| **Data location**  | ✅ Your hardware | ❌ Cloud (public) | ❌ Cloud (private) |
-| **Signing keys**   | ✅ Your control  | ⚠️ Shared         | ⚠️ Shared          |
-| **Access control** | ✅ Network-based | ❌ Public read    | ✅ Token-based     |
-| **Secrets safety** | ✅ Stays local   | ⚠️ Could leak     | ⚠️ Could leak      |
+| **Private caches** |  Unlimited     |  Public only    |  Yes             |
+| **Data location**  |  Your hardware |  Cloud (public) |  Cloud (private) |
+| **Signing keys**   |  Your control  | ️ Shared         | ️ Shared          |
+| **Access control** |  Network-based |  Public read    |  Token-based     |
+| **Secrets safety** |  Stays local   | ️ Could leak     | ️ Could leak      |
 
-**Winner**: P620 (full privacy control) 🏆
+**Winner**: P620 (full privacy control) 
 
 ### Storage Capacity
 
 | Solution            | Storage    | Cost          | Expandable   |
 | ------------------- | ---------- | ------------- | ------------ |
-| **P620**            | ~500GB-2TB | $0 (existing) | ✅ Add disks |
-| **Cachix Free**     | 5 GB       | $0            | ❌ No        |
-| **Cachix Starter**  | 50 GB      | ~$10-20/mo?   | ✅ Upgrade   |
-| **Cachix Standard** | 250 GB     | ~$50-100/mo?  | ✅ Upgrade   |
-| **Cachix Pro**      | 1500 GB    | ~$200+/mo?    | ✅ Upgrade   |
+| **P620**            | ~500GB-2TB | $0 (existing) |  Add disks |
+| **Cachix Free**     | 5 GB       | $0            |  No        |
+| **Cachix Starter**  | 50 GB      | ~$10-20/mo?   |  Upgrade   |
+| **Cachix Standard** | 250 GB     | ~$50-100/mo?  |  Upgrade   |
+| **Cachix Pro**      | 1500 GB    | ~$200+/mo?    |  Upgrade   |
 
-**Winner**: P620 (unlimited free storage) 🏆
+**Winner**: P620 (unlimited free storage) 
 
 ### Maintenance & Complexity
 
 | Aspect                  | P620               | Cachix              |
 | ----------------------- | ------------------ | ------------------- |
-| **Setup complexity**    | ⚠️ Moderate (done) | ✅ 5 minutes        |
-| **Ongoing maintenance** | ⚠️ Manual updates  | ✅ Zero             |
-| **Uptime dependency**   | ⚠️ P620 must run   | ✅ Always available |
-| **Configuration**       | ⚠️ Nix knowledge   | ✅ CLI tool         |
-| **Team sharing**        | ⚠️ VPN required    | ✅ Internet access  |
+| **Setup complexity**    |  Moderate (done) |  5 minutes        |
+| **Ongoing maintenance** |  Manual updates  |  Zero             |
+| **Uptime dependency**   |  P620 must run   |  Always available |
+| **Configuration**       |  Nix knowledge   |  CLI tool         |
+| **Team sharing**        |  VPN required    |  Internet access  |
 
-**Winner**: Cachix (less maintenance) 🏆
+**Winner**: Cachix (less maintenance) 
 
 ### Cost Analysis
 
@@ -108,11 +108,11 @@ Cachix is a hosted binary cache service (SaaS) that provides:
 | **Cachix Standard**    | ~$50-100             | ~$600-1200  |
 | **P620 + Cachix Free** | ~$5                  | ~$60        |
 
-**Winner**: P620 + Cachix Free hybrid (best value) 🏆
+**Winner**: P620 + Cachix Free hybrid (best value) 
 
 ---
 
-## 🎯 Recommended Strategy: Hybrid Approach
+##  Recommended Strategy: Hybrid Approach
 
 ### Architecture
 
@@ -165,67 +165,67 @@ nix build .#packages.x86_64-linux.some-tool --print-out-paths | \
 
 # DON'T push full system closures (may contain secrets)
 # nix build .#nixosConfigurations.samsung --print-out-paths | \
-#   cachix push olafkfreund-nixos  # ⚠️ AVOID THIS
+#   cachix push olafkfreund-nixos  #  AVOID THIS
 ```
 
 ---
 
-## 🚫 When NOT to Use Cachix
+##  When NOT to Use Cachix
 
 ### Don't Use Cachix If
 
-1. **All hosts on your network** ✅ (your situation)
+1. **All hosts on your network**  (your situation)
    - P620 LAN cache is 5-10x faster
    - No benefit from Cloudflare CDN
 
-2. **Private configurations** ✅ (your situation)
+2. **Private configurations**  (your situation)
    - Free tier is PUBLIC ONLY
    - Your NixOS configs contain secrets/private data
 
-3. **Large builds** ✅ (your situation)
+3. **Large builds**  (your situation)
    - 5GB free tier fills up quickly
    - System closures are 10-20GB each
 
-4. **Cost-sensitive** ✅ (your situation)
+4. **Cost-sensitive**  (your situation)
    - P620 is free (you already own it)
    - Paid Cachix: $180-1200/year
 
 ### Use Cachix If
 
-1. **Open source project** ❌ (private infrastructure)
+1. **Open source project**  (private infrastructure)
    - Share builds with community
    - Public cache is acceptable
 
-2. **Remote teams** ❌ (single user, maybe family)
+2. **Remote teams**  (single user, maybe family)
    - Team members outside your network
    - Need internet-accessible cache
 
-3. **No local server** ❌ (you have P620)
+3. **No local server**  (you have P620)
    - Can't run nix-serve
    - Need hosted solution
 
-4. **CI/CD pipelines** ⚠️ (potential future use)
+4. **CI/CD pipelines**  (potential future use)
    - GitHub Actions builds
    - External build machines
 
 ---
 
-## 📝 Practical Recommendations
+##  Practical Recommendations
 
-### Option 1: P620 Only (RECOMMENDED) ⭐
+### Option 1: P620 Only (RECOMMENDED) 
 
 **Best for**: Your current setup
 
 **Why**:
 
-- ✅ You already have it configured
-- ✅ Fastest on your LAN (50-100 MB/s)
-- ✅ Unlimited private storage
-- ✅ No ongoing costs
-- ✅ Full privacy control
-- ✅ Works with Tailscale everywhere
+-  You already have it configured
+-  Fastest on your LAN (50-100 MB/s)
+-  Unlimited private storage
+-  No ongoing costs
+-  Full privacy control
+-  Works with Tailscale everywhere
 
-**Setup**: Already done! ✨
+**Setup**: Already done! 
 
 **Deploy commands**:
 
@@ -245,10 +245,10 @@ just deploy-via-p620 samsung
 
 **Why**:
 
-- ✅ P620 for LAN (fast, private)
-- ✅ Cachix for remote access (when not on VPN)
-- ✅ Free 5GB (for common packages)
-- ⚠️ Only public cache (careful what you push)
+-  P620 for LAN (fast, private)
+-  Cachix for remote access (when not on VPN)
+-  Free 5GB (for common packages)
+-  Only public cache (careful what you push)
 
 **Setup**:
 
@@ -302,8 +302,8 @@ nix-env -qaP | grep -E "firefox|vscode" | \
   xargs -I{} nix-build '<nixpkgs>' -A {} --no-out-link --print-out-paths | \
   cachix push olafkfreund-nixos
 
-# ⚠️ NEVER push system closures (contain secrets/config)
-# ⚠️ NEVER push custom modules (private logic)
+#  NEVER push system closures (contain secrets/config)
+#  NEVER push custom modules (private logic)
 ```
 
 **Step 5: Automatic Pushing** (optional, use carefully!)
@@ -323,10 +323,10 @@ cachix watch-exec olafkfreund-nixos -- nix build .#packages.x86_64-linux.some-to
 
 **Why skip**:
 
-- ❌ P620 already provides private caching (free)
-- ❌ Your hosts are on same network (LAN is faster)
-- ❌ Storage on P620 is unlimited
-- ❌ Cost doesn't justify benefits
+-  P620 already provides private caching (free)
+-  Your hosts are on same network (LAN is faster)
+-  Storage on P620 is unlimited
+-  Cost doesn't justify benefits
 
 **Only consider if**:
 
@@ -336,7 +336,7 @@ cachix watch-exec olafkfreund-nixos -- nix build .#packages.x86_64-linux.some-to
 
 ---
 
-## 🛠️ Cachix Setup (Optional)
+## ️ Cachix Setup (Optional)
 
 If you decide to add Cachix free tier for remote access:
 
@@ -368,91 +368,91 @@ Add to your Justfile:
 ```bash
 # Push to Cachix (selective, non-sensitive only)
 cachix-push PACKAGE:
-    @echo "📤 Pushing {{PACKAGE}} to Cachix..."
+    @echo " Pushing {{PACKAGE}} to Cachix..."
     nix build .#packages.x86_64-linux.{{PACKAGE}} --print-out-paths | \
       cachix push olafkfreund-nixos
-    @echo "✅ Pushed to Cachix!"
+    @echo " Pushed to Cachix!"
 
 # Push common tools to Cachix
 cachix-push-common:
-    @echo "📤 Pushing common tools to Cachix..."
+    @echo " Pushing common tools to Cachix..."
     for pkg in firefox vscode git neovim; do \
       nix build nixpkgs#$$pkg --print-out-paths | cachix push olafkfreund-nixos; \
     done
-    @echo "✅ Common tools cached!"
+    @echo " Common tools cached!"
 ```
 
 ### Security Considerations
 
-**⚠️ CRITICAL: Cachix Free Tier is PUBLIC**
+** CRITICAL: Cachix Free Tier is PUBLIC**
 
 **NEVER push**:
 
-- ❌ System configurations (`nixosConfigurations.*`)
-- ❌ Home-manager configurations (may contain secrets)
-- ❌ Custom modules (private logic)
-- ❌ API keys, tokens, passwords
-- ❌ Private data or configurations
+-  System configurations (`nixosConfigurations.*`)
+-  Home-manager configurations (may contain secrets)
+-  Custom modules (private logic)
+-  API keys, tokens, passwords
+-  Private data or configurations
 
 **Safe to push**:
 
-- ✅ Common nixpkgs packages (firefox, vscode, etc.)
-- ✅ Public development tools
-- ✅ Open source projects
-- ✅ Generic build artifacts
+-  Common nixpkgs packages (firefox, vscode, etc.)
+-  Public development tools
+-  Open source projects
+-  Generic build artifacts
 
 ---
 
-## 📊 Decision Matrix
+##  Decision Matrix
 
 | Factor            | Weight | P620 Only  | P620 + Cachix | Cachix Only |
 | ----------------- | ------ | ---------- | ------------- | ----------- |
-| **Speed (LAN)**   | High   | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐    | ⭐⭐        |
-| **Privacy**       | High   | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐      | ⭐⭐        |
-| **Cost**          | High   | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐    | ⭐⭐        |
-| **Storage**       | Medium | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐    | ⭐          |
-| **Remote Access** | Low    | ⭐⭐⭐⭐   | ⭐⭐⭐⭐⭐    | ⭐⭐⭐⭐⭐  |
-| **Maintenance**   | Medium | ⭐⭐⭐     | ⭐⭐⭐        | ⭐⭐⭐⭐⭐  |
+| **Speed (LAN)**   | High   | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐    | ⭐⭐        |
+| **Privacy**       | High   | ⭐⭐⭐⭐ | ⭐⭐⭐⭐      | ⭐⭐        |
+| **Cost**          | High   | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐    | ⭐⭐        |
+| **Storage**       | Medium | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐    | ⭐          |
+| **Remote Access** | Low    | ⭐⭐⭐   | ⭐⭐⭐⭐⭐    | ⭐⭐⭐⭐⭐  |
+| **Maintenance**   | Medium | ⭐⭐     | ⭐⭐⭐        | ⭐⭐⭐⭐⭐  |
 | **Total Score**   | -      | **26/30**  | **27/30**     | **16/30**   |
 
-**Winner**: P620 + Optional Cachix Free (27/30) 🏆
+**Winner**: P620 + Optional Cachix Free (27/30) 
 
 ---
 
-## 🎯 Final Recommendation
+##  Final Recommendation
 
 ### For Your Setup: P620 Primary + Cachix Optional
 
 **Keep using P620 as your primary cache:**
 
-- ✅ Already configured and working
-- ✅ Fastest for your use case (LAN + Tailscale)
-- ✅ Unlimited private storage
-- ✅ Zero ongoing costs
-- ✅ Full privacy control
+-  Already configured and working
+-  Fastest for your use case (LAN + Tailscale)
+-  Unlimited private storage
+-  Zero ongoing costs
+-  Full privacy control
 
 **Optionally add Cachix free tier for:**
 
-- ✅ Remote access backup (when Tailscale down)
-- ✅ Sharing common packages (non-sensitive)
-- ✅ 5GB of commonly-used packages
-- ⚠️ Only if you need external access
+-  Remote access backup (when Tailscale down)
+-  Sharing common packages (non-sensitive)
+-  5GB of commonly-used packages
+-  Only if you need external access
 
 **Skip Cachix paid tiers:**
 
-- ❌ Not cost-effective ($180-1200/year)
-- ❌ P620 already provides private caching
-- ❌ Your hosts are on same network
+-  Not cost-effective ($180-1200/year)
+-  P620 already provides private caching
+-  Your hosts are on same network
 
 ### Implementation Priority
 
-1. **Now**: Use P620 cache (already done!) ✅
+1. **Now**: Use P620 cache (already done!) 
 2. **Optional**: Add Cachix free for external access
 3. **Skip**: Cachix paid tiers
 
 ---
 
-## 📚 Sources
+##  Sources
 
 - [Cachix Official Site](https://www.cachix.org)
 - [Cachix Pricing](https://www.cachix.org/pricing)

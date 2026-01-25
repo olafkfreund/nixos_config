@@ -1,10 +1,10 @@
 # NixOS Package Management System - Usage Guide
 
-> **Status**: ✅ **FULLY IMPLEMENTED**
+> **Status**:  **FULLY IMPLEMENTED**
 > **Compliance**: NIXOS-ANTI-PATTERNS.md
 > **Architecture**: Three-tier package management with GUI/headless separation
 
-## 📋 **System Overview**
+##  **System Overview**
 
 ### **Architecture Components**
 
@@ -25,7 +25,7 @@ modules/nixos/packages/
 └── default.nix               # Main integration module
 ```
 
-## 🎯 **Host Type Templates**
+##  **Host Type Templates**
 
 ### **Server Template** (`hostTypes.server`)
 
@@ -85,7 +85,7 @@ packages = {
 
 **Result**: ~700 packages, optimized for mobility and battery life
 
-## 🏗️ **Implementation Examples**
+## ️ **Implementation Examples**
 
 ### **Server Conversion** (P510 Media Server)
 
@@ -111,10 +111,10 @@ imports = hostTypes.server.imports ++ [
 
 **Benefits:**
 
-- ✅ **Performance**: 2-4GB memory savings, lower CPU usage
-- ✅ **Security**: Reduced attack surface (no GUI applications)
-- ✅ **Maintenance**: ~150 fewer packages to update
-- ✅ **Functionality**: All media server features preserved
+-  **Performance**: 2-4GB memory savings, lower CPU usage
+-  **Security**: Reduced attack surface (no GUI applications)
+-  **Maintenance**: ~150 fewer packages to update
+-  **Functionality**: All media server features preserved
 
 ### **Custom Package Configuration**
 
@@ -144,7 +144,7 @@ environment.systemPackages = with pkgs; [
 ];
 ```
 
-## 📦 **Package Categories**
+##  **Package Categories**
 
 ### **Core Packages** (Tier 1 - Always Installed)
 
@@ -217,7 +217,7 @@ packages.virtualization = {
 };
 ```
 
-## 🛠️ **Management Commands**
+## ️ **Management Commands**
 
 ### **Testing Package Changes**
 
@@ -245,11 +245,11 @@ just quick-deploy HOSTNAME
 sudo nixos-rebuild switch --rollback
 ```
 
-## 🔧 **Configuration Patterns**
+##  **Configuration Patterns**
 
 ### **Anti-Pattern Compliance**
 
-✅ **Correct Usage:**
+ **Correct Usage:**
 
 ```nix
 # Direct assignment (no mkIf condition true)
@@ -257,7 +257,7 @@ packages.desktop.enable = false;
 environment.systemPackages = lib.optionals cfg.enable packageList;
 ```
 
-❌ **Avoid:**
+ **Avoid:**
 
 ```nix
 # Don't use mkIf condition true
@@ -275,7 +275,7 @@ features = {
 };
 ```
 
-## 📊 **Package Count Comparison**
+##  **Package Count Comparison**
 
 | Host Type       | GUI Packages | Total Packages | Memory Usage |
 | --------------- | ------------ | -------------- | ------------ |
@@ -283,7 +283,7 @@ features = {
 | **Workstation** | ~150         | ~800+          | 4-8GB        |
 | **Laptop**      | ~100         | ~700           | 3-6GB        |
 
-## 🚀 **Migration Guide**
+##  **Migration Guide**
 
 ### **Step-by-Step Server Conversion**
 
@@ -319,30 +319,30 @@ nix eval .#nixosConfigurations.HOSTNAME.config.environment.systemPackages --appl
 systemctl status plex ollama  # Media services
 ```
 
-## 🛡️ **Security and Maintenance**
+##  **Security and Maintenance**
 
 ### **Security Benefits**
 
-- ✅ **Reduced Attack Surface**: No GUI applications on servers
-- ✅ **Fewer Updates**: Less packages = fewer security updates
-- ✅ **Better Isolation**: Headless operation improves security
+-  **Reduced Attack Surface**: No GUI applications on servers
+-  **Fewer Updates**: Less packages = fewer security updates
+-  **Better Isolation**: Headless operation improves security
 
 ### **Maintenance Advantages**
 
-- ✅ **Faster Updates**: Fewer packages to build and download
-- ✅ **Simpler Debugging**: Less complexity, fewer moving parts
-- ✅ **Resource Efficiency**: More resources for core services
+-  **Faster Updates**: Fewer packages to build and download
+-  **Simpler Debugging**: Less complexity, fewer moving parts
+-  **Resource Efficiency**: More resources for core services
 
 ---
 
-## 📋 **Ready for Production**
+##  **Ready for Production**
 
 The package management system is **fully implemented** and ready for use:
 
-- ✅ **Anti-Pattern Compliant**: Follows all NixOS best practices
-- ✅ **GUI/Headless Separation**: Clear separation for server conversion
-- ✅ **Backward Compatible**: Existing configurations continue working
-- ✅ **Well Tested**: Current host configurations validated
-- ✅ **Easy Migration**: Simple template changes enable conversions
+-  **Anti-Pattern Compliant**: Follows all NixOS best practices
+-  **GUI/Headless Separation**: Clear separation for server conversion
+-  **Backward Compatible**: Existing configurations continue working
+-  **Well Tested**: Current host configurations validated
+-  **Easy Migration**: Simple template changes enable conversions
 
 **Next Steps**: Choose hosts for server conversion and apply the new templates for optimized package management.

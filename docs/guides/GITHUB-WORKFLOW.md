@@ -27,11 +27,11 @@ This document defines the complete GitHub-based development workflow for the Nix
 
 **GitHub Flow** is chosen for this project because:
 
-- ✅ **Simplicity**: Single main branch with feature branches
-- ✅ **Continuous Delivery**: Deploy from main at any time
-- ✅ **Fast Iteration**: Quick feedback loops
-- ✅ **Collaboration**: Easy code review and discussion
-- ✅ **NixOS Compatibility**: Atomic deployments align with NixOS generations
+-  **Simplicity**: Single main branch with feature branches
+-  **Continuous Delivery**: Deploy from main at any time
+-  **Fast Iteration**: Quick feedback loops
+-  **Collaboration**: Easy code review and discussion
+-  **NixOS Compatibility**: Atomic deployments align with NixOS generations
 
 ### Core Principles
 
@@ -85,11 +85,11 @@ User: "/nix-new-task"
 
 The command will:
 
-1. ✅ Guide you through issue creation
-2. ✅ Conduct technical research if needed
-3. ✅ Create formatted GitHub issue
-4. ✅ Assign appropriate labels and priority
-5. ✅ Provide next steps for implementation
+1.  Guide you through issue creation
+2.  Conduct technical research if needed
+3.  Create formatted GitHub issue
+4.  Assign appropriate labels and priority
+5.  Provide next steps for implementation
 
 ### Issue Structure
 
@@ -179,10 +179,10 @@ User: "/nix-check-tasks"
 
 The command provides:
 
-1. 📋 Summary of all open issues by priority
-2. 🎯 Recommended next actions
-3. ⏸️ Blocked issues requiring attention
-4. 📊 Statistics and progress tracking
+1.  Summary of all open issues by priority
+2.  Recommended next actions
+3. ⏸ Blocked issues requiring attention
+4.  Statistics and progress tracking
 
 ---
 
@@ -264,12 +264,12 @@ main
 
 **Main Branch Protection**:
 
-- ✅ Require pull request reviews before merging
-- ✅ Require status checks to pass before merging
-- ✅ Require branches to be up to date before merging
-- ✅ Require conversation resolution before merging
-- ❌ Do not allow force pushes
-- ❌ Do not allow deletions
+-  Require pull request reviews before merging
+-  Require status checks to pass before merging
+-  Require branches to be up to date before merging
+-  Require conversation resolution before merging
+-  Do not allow force pushes
+-  Do not allow deletions
 
 ---
 
@@ -313,10 +313,10 @@ Implements comprehensive PostgreSQL monitoring with prometheus_postgres_exporter
 - Add documentation
 
 ## Testing
-- ✅ Validated with `just validate`
-- ✅ Tested on p620 and dex5550
-- ✅ All tests pass
-- ✅ Grafana dashboard loads correctly
+-  Validated with `just validate`
+-  Tested on p620 and dex5550
+-  All tests pass
+-  Grafana dashboard loads correctly
 
 ## Screenshots
 [Dashboard screenshot]
@@ -346,10 +346,10 @@ Brief description of the changes and their purpose.
 
 ## Testing
 
-- ✅ Validation checks passed
-- ✅ Tested on specific hosts
-- ✅ All tests pass
-- ✅ Manual testing completed
+-  Validation checks passed
+-  Tested on specific hosts
+-  All tests pass
+-  Manual testing completed
 
 ## Screenshots (if applicable)
 
@@ -415,27 +415,27 @@ chore(deps): update flake inputs (#199)
 
 PRs must pass:
 
-- ✅ Nix syntax validation
-- ✅ Build tests for all affected hosts
-- ✅ Code review checklist from NIXOS-ANTI-PATTERNS.md
-- ✅ No breaking changes detected
+-  Nix syntax validation
+-  Build tests for all affected hosts
+-  Code review checklist from NIXOS-ANTI-PATTERNS.md
+-  No breaking changes detected
 
 #### 2. Human Review
 
 All PRs require:
 
-- ✅ At least one approval (can be self-reviewed for personal repo)
-- ✅ All conversations resolved
-- ✅ No requested changes outstanding
+-  At least one approval (can be self-reviewed for personal repo)
+-  All conversations resolved
+-  No requested changes outstanding
 
 #### 3. Final Validation
 
 Before merge:
 
-- ✅ Branch is up to date with main
-- ✅ All checks pass
-- ✅ Documentation is updated
-- ✅ Changelog is updated (if applicable)
+-  Branch is up to date with main
+-  All checks pass
+-  Documentation is updated
+-  Changelog is updated (if applicable)
 
 ### Merging Pull Requests
 
@@ -641,10 +641,10 @@ jobs:
 
 **Test Coverage**:
 
-- ✅ All new features have tests
-- ✅ Bug fixes include regression tests
-- ✅ Configuration changes tested on affected hosts
-- ✅ Documentation includes testing procedures
+-  All new features have tests
+-  Bug fixes include regression tests
+-  Configuration changes tested on affected hosts
+-  Documentation includes testing procedures
 
 ---
 
@@ -910,33 +910,33 @@ gh pr merge 145 --squash --delete-branch
 
 ## Best Practices Summary
 
-### Do's ✅
+### Do's
 
-- ✅ Create an issue for every change
-- ✅ Use descriptive branch names with issue numbers
-- ✅ Write clear commit messages following Conventional Commits
-- ✅ Test locally before creating PR
-- ✅ Include comprehensive PR descriptions
-- ✅ Request reviews (or self-review thoroughly)
-- ✅ Update documentation with code changes
-- ✅ Use `/nix-new-task` and `/nix-check-tasks` commands
-- ✅ Follow PATTERNS.md best practices
-- ✅ Avoid anti-patterns from NIXOS-ANTI-PATTERNS.md
-- ✅ Delete branches after merging
-- ✅ Monitor deployments after merge
+-  Create an issue for every change
+-  Use descriptive branch names with issue numbers
+-  Write clear commit messages following Conventional Commits
+-  Test locally before creating PR
+-  Include comprehensive PR descriptions
+-  Request reviews (or self-review thoroughly)
+-  Update documentation with code changes
+-  Use `/nix-new-task` and `/nix-check-tasks` commands
+-  Follow PATTERNS.md best practices
+-  Avoid anti-patterns from NIXOS-ANTI-PATTERNS.md
+-  Delete branches after merging
+-  Monitor deployments after merge
 
-### Don'ts ❌
+### Don'ts
 
-- ❌ Commit directly to main
-- ❌ Create PRs without linked issues
-- ❌ Merge without testing
-- ❌ Leave PRs open for extended periods
-- ❌ Force push to main
-- ❌ Skip code review
-- ❌ Deploy without validation
-- ❌ Ignore automated check failures
-- ❌ Leave branches undeleted after merge
-- ❌ Forget to update documentation
+-  Commit directly to main
+-  Create PRs without linked issues
+-  Merge without testing
+-  Leave PRs open for extended periods
+-  Force push to main
+-  Skip code review
+-  Deploy without validation
+-  Ignore automated check failures
+-  Leave branches undeleted after merge
+-  Forget to update documentation
 
 ---
 
@@ -1048,4 +1048,4 @@ just format                        # Format code
 
 ---
 
-**Remember**: Good workflow practices make development faster, safer, and more enjoyable. When in doubt, create an issue, make a branch, and submit a PR! 🚀
+**Remember**: Good workflow practices make development faster, safer, and more enjoyable. When in doubt, create an issue, make a branch, and submit a PR!

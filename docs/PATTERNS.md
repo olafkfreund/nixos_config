@@ -2,7 +2,7 @@
 
 > **Comprehensive best practices guide** for writing idiomatic Nix code, based on official documentation from [nix.dev](https://nix.dev/tutorials/module-system/deep-dive) and the [Nixpkgs Manual](https://nixos.org/manual/nixpkgs/stable/).
 
-## 📚 Table of Contents
+##  Table of Contents
 
 - [Module System Patterns](#module-system-patterns)
 - [Package Writing Patterns](#package-writing-patterns)
@@ -1091,17 +1091,17 @@ systemd.services.myservice = {
 **Pattern: Never Include Secrets in Store**
 
 ```nix
-# ❌ NEVER DO THIS
+#  NEVER DO THIS
 services.myservice = {
   password = "hardcoded-password";  # INSECURE!
 };
 
-# ✅ Use file references
+#  Use file references
 services.myservice = {
   passwordFile = "/run/secrets/myservice-password";
 };
 
-# ✅ Or use agenix/sops-nix
+#  Or use agenix/sops-nix
 age.secrets.myservice-password = {
   file = ./secrets/myservice-password.age;
   mode = "0400";
@@ -1113,7 +1113,7 @@ services.myservice = {
   passwordFile = config.age.secrets.myservice-password.path;
 };
 
-# ✅ systemd credentials
+#  systemd credentials
 systemd.services.myservice = {
   serviceConfig = {
     LoadCredential = "password:/etc/myservice/password";
@@ -1217,7 +1217,7 @@ boot.loader.grub.configurationLimit = 10;
 **Pattern: Lazy Evaluation and Minimal IFD**
 
 ```nix
-# ✅ GOOD - Lazy evaluation, no IFD
+#  GOOD - Lazy evaluation, no IFD
 let
   # Only evaluated if used
   expensiveComputation = /* ... */;
@@ -1229,7 +1229,7 @@ in
   };
 }
 
-# ❌ BAD - Import From Derivation
+#  BAD - Import From Derivation
 let
   generatedConfig = pkgs.runCommand "config" {} ''
     echo "value=42" > $out

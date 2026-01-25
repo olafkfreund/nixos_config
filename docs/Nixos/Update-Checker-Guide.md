@@ -105,10 +105,10 @@ nixos-check-updates --details
 
 Last check: 2025-12-03 19:01:14
 
-Status: Updates available ✓
+Status: Updates available
 
 NixOS Updates Available
-======================
+----------------------
 Checked: 2025-12-03 19:01:14
 
 Flake inputs have been updated.
@@ -128,7 +128,7 @@ nixos-upgrade-test
 1. Updates flake inputs (`nix flake update`)
 2. Builds new configuration
 3. Applies temporarily (`nixos-rebuild test`)
-4. **Changes lost on reboot** ✅
+4. **Changes lost on reboot**
 
 **Perfect For:**
 

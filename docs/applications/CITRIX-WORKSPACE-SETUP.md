@@ -1,24 +1,24 @@
 # Citrix Workspace Setup Guide
 
-> **Status**: ✅ Fully Operational on NixOS 25.11
+> **Status**:  Fully Operational on NixOS 25.11
 > **Version**: 25.08.10.111
 > **Last Updated**: 2025-01-12
 > **Implementation**: Native client with custom overlay
 
-## 🎉 **Success! Native Client Working on NixOS 25.11**
+##  **Success! Native Client Working on NixOS 25.11**
 
 This implementation successfully overcomes the "broken" nixpkgs Citrix package using a custom overlay with
 comprehensive webkit2gtk dependency resolution. This provides **full native client functionality** including USB
 passthrough and optimal performance.
 
-## 🚀 **Quick Start** (30 minutes)
+##  **Quick Start** (30 minutes)
 
 ### **Step 1: Download Citrix Workspace Tarball**
 
 1. Navigate to: <https://www.citrix.com/downloads/workspace-app/linux/workspace-app-for-linux-latest.html>
 2. Accept the EULA
 3. Download **Debian Packages (Full)**: `linuxx64-25.08.10.111.tar.gz`
-   - ⚠️ **Do NOT** download separate USB support (it's included in main tarball)
+   -  **Do NOT** download separate USB support (it's included in main tarball)
 4. Place tarball in: `/home/olafkfreund/.config/nixos/pkgs/citrix-workspace/`
 
 ```bash
@@ -39,7 +39,7 @@ nix-store --add-fixed sha256 linuxx64-25.08.10.111.tar.gz
 # /nix/store/xxxxx-linuxx64-25.08.10.111.tar.gz
 ```
 
-⚠️ **IMPORTANT FOR MULTI-HOST DEPLOYMENTS:**
+ **IMPORTANT FOR MULTI-HOST DEPLOYMENTS:**
 
 If deploying to multiple hosts (e.g., p620, razer, samsung), you must add the tarball to the Nix store on EACH host
 individually. The Nix store is host-specific and the tarball is not automatically shared between hosts.
@@ -101,7 +101,7 @@ storebrowse --help
 # Both should show usage information without any library errors
 ```
 
-## 📋 **What Makes This Work**
+##  **What Makes This Work**
 
 ### **Custom Overlay Implementation**
 
@@ -161,7 +161,7 @@ Provides:
 - **Certificate Management**: Custom CA certificates if needed
 - **Wayland Warnings**: Alerts for unsupported desktop environments
 
-## 🎯 **Command-Line Usage**
+##  **Command-Line Usage**
 
 ### **storebrowse** - Main Citrix Client Interface
 
@@ -225,7 +225,7 @@ storebrowse --launch "Windows Desktop" https://your-citrix-server.com
 storebrowse --reconnect r https://your-citrix-server.com
 ```
 
-## 🖥️ **Desktop Integration**
+## ️ **Desktop Integration**
 
 After adding a Citrix store, applications appear in your application menu:
 
@@ -235,7 +235,7 @@ After adding a Citrix store, applications appear in your application menu:
 
 Launch from GUI or command line as preferred.
 
-## 🔧 **Technical Architecture**
+##  **Technical Architecture**
 
 ### **Files and Modules**
 
@@ -270,7 +270,7 @@ Launch from GUI or command line as preferred.
 ICAROOT=/nix/store/.../opt/Citrix/ICAClient
 ```
 
-## 🐛 **Troubleshooting**
+##  **Troubleshooting**
 
 ### **Missing Library Errors**
 
@@ -368,7 +368,7 @@ DesktopComposite=0
 EnableSessionReliability=True
 ```
 
-## 🔐 **Security Considerations**
+##  **Security Considerations**
 
 ### **EULA Acceptance**
 
@@ -376,7 +376,7 @@ EnableSessionReliability=True
 services.citrix-workspace.acceptLicense = true;
 ```
 
-⚠️ **Warning**: This explicitly accepts the Citrix End User License Agreement. Review the EULA before enabling.
+ **Warning**: This explicitly accepts the Citrix End User License Agreement. Review the EULA before enabling.
 
 ### **Allowed Insecure Packages**
 
@@ -403,19 +403,19 @@ security.pki.certificateFiles = [
 ];
 ```
 
-## 🖥️ **Desktop Environment Compatibility**
+## ️ **Desktop Environment Compatibility**
 
 ### **Officially Supported**
 
-- ✅ GNOME (X11 and XWayland)
-- ✅ KDE Plasma (X11 and XWayland)
-- ✅ Xfce (X11)
+-  GNOME (X11 and XWayland)
+-  KDE Plasma (X11 and XWayland)
+-  Xfce (X11)
 
 ### **Tested Configurations**
 
-- ✅ **GNOME** (X11) on p620 - Full functionality
-- ✅ **Hyprland** (Wayland with XWayland) on razer - Works with XWayland
-- ⚠️ **Pure Wayland** - Not officially supported
+-  **GNOME** (X11) on p620 - Full functionality
+-  **Hyprland** (Wayland with XWayland) on razer - Works with XWayland
+-  **Pure Wayland** - Not officially supported
 
 ### **Wayland Notes**
 
@@ -429,7 +429,7 @@ Consider using XWayland or a pure X11 session for Citrix.
 
 **Recommendation**: Use XWayland (enabled by default in most Wayland compositors).
 
-## 📦 **Version Information**
+##  **Version Information**
 
 ### **Current Version**: 25.08.10.111
 
@@ -476,7 +476,7 @@ Consider using XWayland or a pure X11 session for Citrix.
    just quick-deploy HOST
    ```
 
-## 📚 **References**
+##  **References**
 
 ### **Official Citrix Documentation**
 
@@ -507,44 +507,44 @@ Consider using XWayland or a pure X11 session for Citrix.
   - `hosts/p620/configuration.nix`
   - `hosts/razer/configuration.nix`
 
-## ✅ **Success Criteria** (ALL COMPLETED)
+##  **Success Criteria** (ALL COMPLETED)
 
-- [x] ~~Tarball downloaded from Citrix~~ ✅
-- [x] ~~Tarball added to nix store~~ ✅
-- [x] ~~Custom overlay created with dependency resolution~~ ✅
-- [x] ~~All webkit2gtk runtime dependencies resolved~~ ✅
-- [x] ~~Command-line tools functional (selfservice, storebrowse)~~ ✅
-- [x] ~~P620 deployed successfully~~ ✅
-- [x] ~~Razer deployment ready~~ ✅
-- [x] ~~Documentation created~~ ✅
+- [x] ~~Tarball downloaded from Citrix~~
+- [x] ~~Tarball added to nix store~~
+- [x] ~~Custom overlay created with dependency resolution~~
+- [x] ~~All webkit2gtk runtime dependencies resolved~~
+- [x] ~~Command-line tools functional (selfservice, storebrowse)~~
+- [x] ~~P620 deployed successfully~~
+- [x] ~~Razer deployment ready~~
+- [x] ~~Documentation created~~
 - [ ] Connection to client environment tested (requires client credentials)
 - [ ] Performance validated for client work (requires client access)
 
-## 🎉 **Achievement Summary**
+##  **Achievement Summary**
 
 This implementation successfully demonstrates that the **native Citrix Workspace client works on NixOS 25.11**,
 contrary to the widespread belief that it's "broken" and requires browser-based HTML5 access.
 
 **Key Success Factors**:
 
-1. ✅ Manual tarball installation with explicit EULA handling
-2. ✅ Comprehensive webkit2gtk dependency resolution
-3. ✅ Extracting and utilizing bundled webkit2gtk-4.0
-4. ✅ Systematic library discovery using `nix-locate`
-5. ✅ Declarative configuration following NixOS best practices
-6. ✅ Zero anti-patterns in implementation
+1.  Manual tarball installation with explicit EULA handling
+2.  Comprehensive webkit2gtk dependency resolution
+3.  Extracting and utilizing bundled webkit2gtk-4.0
+4.  Systematic library discovery using `nix-locate`
+5.  Declarative configuration following NixOS best practices
+6.  Zero anti-patterns in implementation
 
 **Result**: Full native client functionality including:
 
-- ✅ USB passthrough support
-- ✅ Optimal performance (native vs. HTML5)
-- ✅ All command-line tools working
-- ✅ Complete desktop integration
-- ✅ Production-ready deployment
+-  USB passthrough support
+-  Optimal performance (native vs. HTML5)
+-  All command-line tools working
+-  Complete desktop integration
+-  Production-ready deployment
 
 This solution provides a **superior experience** compared to browser-based HTML5 access and serves as a reference
 implementation for handling "broken" packages on NixOS through custom overlays and proper dependency management.
 
 ---
 
-**Status**: 🎉 **Production Ready** - Native Citrix Workspace fully operational on NixOS 25.11!
+**Status**:  **Production Ready** - Native Citrix Workspace fully operational on NixOS 25.11!

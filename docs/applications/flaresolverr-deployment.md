@@ -20,20 +20,20 @@ that caused it to be disabled on 2025-09-02.
 
 The issues have been resolved in current nixpkgs:
 
-- ✅ **xvfbwrapper-0.2.16** now builds successfully with Python 3.13
-- ✅ **Chromium 143.0.7499.192** is being used (beyond problematic Chromium 127)
-- ✅ **FlareSolverr 3.4.6** package builds without errors
-- ✅ **Selenium 4.29.0** has Python 3.13 support
+-  **xvfbwrapper-0.2.16** now builds successfully with Python 3.13
+-  **Chromium 143.0.7499.192** is being used (beyond problematic Chromium 127)
+-  **FlareSolverr 3.4.6** package builds without errors
+-  **Selenium 4.29.0** has Python 3.13 support
 
 ### Build Verification
 
 ```bash
 # Build completed successfully with all dependencies:
-- python3.13-xvfbwrapper-0.2.16 ✅
-- chromium-143.0.7499.192 ✅
-- flaresolverr-3.4.6 ✅
-- python3.13-selenium-4.29.0 ✅
-- All Python 3.13 dependencies available ✅
+- python3.13-xvfbwrapper-0.2.16
+- chromium-143.0.7499.192
+- flaresolverr-3.4.6
+- python3.13-selenium-4.29.0
+- All Python 3.13 dependencies available
 ```
 
 ## Configuration Details
@@ -283,7 +283,7 @@ sudo journalctl -u flaresolverr -f
 
 ### FlareSolverr Deprecation
 
-⚠️ **Important**: FlareSolverr was deprecated by its maintainers in 2024:
+ **Important**: FlareSolverr was deprecated by its maintainers in 2024:
 
 - No longer actively maintained
 - May not work with newest Cloudflare protections
@@ -292,18 +292,18 @@ sudo journalctl -u flaresolverr -f
 
 ### Compatibility
 
-- ✅ Works with current Cloudflare challenges (as of 2026-01-08)
-- ⚠️ May break with future Cloudflare updates
-- ⚠️ Limited to specific Cloudflare versions
-- ⚠️ Can fail with highly protected websites
-- ⚠️ Selenium/Chromium compatibility issues may recur
+-  Works with current Cloudflare challenges (as of 2026-01-08)
+-  May break with future Cloudflare updates
+-  Limited to specific Cloudflare versions
+-  Can fail with highly protected websites
+-  Selenium/Chromium compatibility issues may recur
 
 ## Success Criteria
 
-- [x] ✅ Configuration enabled in P510
-- [x] ✅ Build succeeds without xvfbwrapper errors
-- [x] ✅ All Python 3.13 dependencies available
-- [x] ✅ Chromium 143 compatibility verified
+- [x]  Configuration enabled in P510
+- [x]  Build succeeds without xvfbwrapper errors
+- [x]  All Python 3.13 dependencies available
+- [x]  Chromium 143 compatibility verified
 - [ ] ⏳ Service deployed and running on P510
 - [ ] ⏳ API endpoint accessible on port 8191
 - [ ] ⏳ Cloudflare bypass tested and working

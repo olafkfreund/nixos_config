@@ -66,16 +66,16 @@ just preview-updates p620
   NixOS Update Preview for: p620
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-[1/5] 📦 Backing up current flake.lock...
-[2/5] 🔄 Checking for nixpkgs updates...
-  ✓ Found updates available
-[3/5] 📊 Analyzing nixpkgs changes...
+[1/5]  Backing up current flake.lock...
+[2/5]  Checking for nixpkgs updates...
+   Found updates available
+[3/5]  Analyzing nixpkgs changes...
   Previous: 7e9b0dff974c
   Latest:   8a3354191c6e
   GitHub:   https://github.com/NixOS/nixpkgs/compare/7e9b0dff...8a3354191c6e
-[4/5] 🔨 Building new system configuration...
-  ✓ Build successful
-[5/5] 📋 Package changes:
+[4/5]  Building new system configuration...
+   Build successful
+[5/5]  Package changes:
 
 [U.]  #1 gcc: 13.2.0 -> 13.3.0, -12.3 MiB
 [U.]  #2 firefox: 122.0 -> 123.0, +45.2 MiB
@@ -91,7 +91,7 @@ Next steps:
   • To apply: just quick-deploy p620
   • To revert: mv flake.lock.backup flake.lock
 
-⚠️  System reboot recommended (kernel or systemd updated)
+  System reboot recommended (kernel or systemd updated)
 ```
 
 **Legend:**
@@ -127,10 +127,10 @@ just new-packages
 Previous revision: 7e9b0dff974c
 Current revision:  8a3354191c6e
 
-[1/4] 📥 Fetching nixpkgs repository...
-[2/4] 🔍 Fetching specific commits...
+[1/4]  Fetching nixpkgs repository...
+[2/4]  Fetching specific commits...
 [3/4] 🆕 Finding new packages...
-[4/4] 📊 Analyzing results...
+[4/4]  Analyzing results...
 
 Found 42 new packages:
 
@@ -391,11 +391,11 @@ just quick-deploy p620     # Deploy after informed review
 
 **Benefits:**
 
-- ✅ See exact package versions before building
-- ✅ Understand size impacts
-- ✅ Identify new packages added to your system
-- ✅ Discover new packages available in nixpkgs
-- ✅ Make informed deployment decisions
+-  See exact package versions before building
+-  Understand size impacts
+-  Identify new packages added to your system
+-  Discover new packages available in nixpkgs
+-  Make informed deployment decisions
 
 ## Additional Resources
 

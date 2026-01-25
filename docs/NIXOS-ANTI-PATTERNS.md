@@ -2,26 +2,26 @@
 
 > **Important**: These patterns were identified through community feedback, code review in GitHub issues #10, #11, and #12, and official Nix documentation from [nix.dev](https://nix.dev/tutorials/module-system/deep-dive) and the [Nixpkgs Manual](https://nixos.org/manual/nixpkgs/stable/).
 
-## 📚 Background
+##  Background
 
 This document captures critical lessons learned from real community feedback and official Nix documentation about anti-patterns in NixOS configurations. These patterns were found in this repository and fixed based on expert review, helping establish guidelines for future development.
 
 **Companion Document**: See [PATTERNS.md](./PATTERNS.md) for comprehensive best practices and recommended patterns.
 
-## ❌ **Critical Anti-Patterns to Avoid**
+##  **Critical Anti-Patterns to Avoid**
 
 ### **1. Nix Language Anti-Patterns**
 
 #### **Unquoted URLs (Deprecated)**
 
 ```nix
-# ❌ BAD - Unquoted URL
+#  BAD - Unquoted URL
 fetchurl {
   url = https://example.com/file.tar.gz;
   sha256 = "...";
 }
 
-# ✅ GOOD - Always quote URLs
+#  GOOD - Always quote URLs
 fetchurl {
   url = "https://example.com/file.tar.gz";
   sha256 = "...";
@@ -33,13 +33,13 @@ fetchurl {
 #### **Excessive `with` Usage**
 
 ```nix
-# ❌ BAD - Unclear variable origins
+#  BAD - Unclear variable origins
 with (import <nixpkgs> {});
 with lib;
 with stdenv;
 buildInputs = [ curl jq ];  # Where do these come from?
 
-# ✅ GOOD - Explicit imports
+#  GOOD - Explicit imports
 let
   pkgs = import <nixpkgs> {};
   inherit (pkgs) lib stdenv;
@@ -52,13 +52,13 @@ buildInputs = with pkgs; [ curl jq ];  # Limited, clear scope
 #### **Dangerous `rec` Usage**
 
 ```nix
-# ❌ BAD - Infinite recursion risk
+#  BAD - Infinite recursion risk
 rec {
   a = 1;
   b = let a = a + 1; in a;  # Infinite recursion!
 }
 
-# ✅ GOOD - Explicit self-reference
+#  GOOD - Explicit self-reference
 let
   attrset = { a = 1; b = attrset.a + 1; };
 in attrset
@@ -67,7 +67,7 @@ in attrset
 #### **Import From Derivation (IFD)**
 
 ```nix
-# ❌ BAD - IFD blocks evaluation
+#  BAD - IFD blocks evaluation
 let
   generatedConfig = pkgs.runCommand "config" {} ''
     echo "some_value = 42" > $out
@@ -76,7 +76,7 @@ let
 in
 pkgs.writeText "app-config" configValue
 
-# ✅ GOOD - Keep evaluation and building separate
+#  GOOD - Keep evaluation and building separate
 let
   generatedConfig = pkgs.runCommand "config" {} ''
     echo "some_value = 42" > $out
@@ -92,7 +92,7 @@ pkgs.runCommand "app-config" { inherit generatedConfig; } ''
 #### **Incorrect Type Usage**
 
 ```nix
-# ❌ BAD - Using wrong type with wrong merging behavior
+#  BAD - Using wrong type with wrong merging behavior
 options.myList = lib.mkOption {
   type = lib.types.str;  # String can't be merged!
   default = "";
@@ -101,7 +101,7 @@ options.myList = lib.mkOption {
 config.myList = "item1";
 config.myList = "item2";  # ERROR: multiple definitions
 
-# ✅ GOOD - Use appropriate type for data
+#  GOOD - Use appropriate type for data
 options.myList = lib.mkOption {
   type = lib.types.listOf lib.types.str;
   default = [];
@@ -124,7 +124,7 @@ config.myList = [ "item2" ];  # Automatically merged to [ "item1" "item2" ]
 #### **Misunderstanding config vs. options**
 
 ```nix
-# ❌ BAD - Confusing the two uses of 'config'
+#  BAD - Confusing the two uses of 'config'
 { config, ... }:  # This is the argument containing all evaluated config
 {
   config = {      # This is the attribute exposing this module's values
@@ -133,7 +133,7 @@ config.myList = [ "item2" ];  # Automatically merged to [ "item1" "item2" ]
   };
 }
 
-# ✅ GOOD - Clear understanding of config argument vs. attribute
+#  GOOD - Clear understanding of config argument vs. attribute
 { config, lib, ... }:
 
 let
@@ -155,17 +155,17 @@ in
 #### **Reading Secrets During Evaluation**
 
 ```nix
-# ❌ BAD - Exposes password in store
+#  BAD - Exposes password in store
 services.myservice = {
   password = builtins.readFile "/secrets/password";  # INSECURE!
 }
 
-# ✅ GOOD - Reference paths for runtime loading
+#  GOOD - Reference paths for runtime loading
 services.myservice = {
   passwordFile = "/secrets/password";  # Read at runtime
 }
 
-# ✅ BETTER - Use secret management
+#  BETTER - Use secret management
 age.secrets.myservice-password.file = ../secrets/password.age;
 services.myservice.passwordFile = config.age.secrets.myservice-password.path;
 ```
@@ -173,12 +173,12 @@ services.myservice.passwordFile = config.age.secrets.myservice-password.path;
 ### **2. The `mkIf true` Anti-Pattern**
 
 ```nix
-# ❌ WRONG - Unnecessary abstraction
+#  WRONG - Unnecessary abstraction
 services.myservice.enable = mkIf cfg.enable true;
 light.enable = mkIf (cfg.profile == "laptop") true;
 qemuGuest.enable = mkIf (cfg.type == "qemu" || cfg.type == "auto") true;
 
-# ✅ CORRECT - Direct assignment
+#  CORRECT - Direct assignment
 services.myservice.enable = cfg.enable;
 light.enable = cfg.profile == "laptop";
 qemuGuest.enable = cfg.type == "qemu" || cfg.type == "auto";
@@ -194,7 +194,7 @@ qemuGuest.enable = cfg.type == "qemu" || cfg.type == "auto";
 ### **2. Trivial Function Wrappers**
 
 ```nix
-# ❌ WRONG - Pointless re-exports that add no value
+#  WRONG - Pointless re-exports that add no value
 mkMerge = lib.mkMerge;
 mkIf = condition: config: lib.mkIf condition config;
 
@@ -207,7 +207,7 @@ mkService = { name, enable ? true, config ? { } }:
     ];
   };
 
-# ✅ CORRECT - Use library functions directly
+#  CORRECT - Use library functions directly
 lib.mkMerge [...]
 lib.mkIf condition config
 
@@ -228,7 +228,7 @@ services.${name} = lib.mkMerge [
 ### **3. Magic Auto-Discovery**
 
 ```nix
-# ❌ WRONG - Complex auto-discovery that hides behavior
+#  WRONG - Complex auto-discovery that hides behavior
 discoverModules = dir:
   let
     entries = builtins.readDir dir;
@@ -250,7 +250,7 @@ discoverModules = dir:
   in
   modulePaths;
 
-# ✅ CORRECT - Explicit imports are clear and obvious
+#  CORRECT - Explicit imports are clear and obvious
 imports = [
   ./core
   ./desktop
@@ -279,7 +279,7 @@ imports = [
 #### **Running Services as Root Unnecessarily**
 
 ```nix
-# ❌ BAD - Service runs as root by default
+#  BAD - Service runs as root by default
 systemd.services.myservice = {
   serviceConfig = {
     ExecStart = "${pkgs.myapp}/bin/myapp";
@@ -287,7 +287,7 @@ systemd.services.myservice = {
   };
 };
 
-# ✅ GOOD - Dedicated user with hardening
+#  GOOD - Dedicated user with hardening
 users.users.myservice = {
   isSystemUser = true;
   group = "myservice";
@@ -317,12 +317,12 @@ systemd.services.myservice = {
 #### **Poor Firewall Configuration**
 
 ```nix
-# ❌ BAD - Security nightmare
+#  BAD - Security nightmare
 networking.firewall.enable = false;
 # OR
 networking.firewall.allowedTCPPorts = [ 1-65535 ];
 
-# ✅ GOOD - Minimal port opening
+#  GOOD - Minimal port opening
 networking.firewall = {
   enable = true;
   allowedTCPPorts = [ 80 443 ];  # Only what's needed
@@ -339,12 +339,12 @@ networking.firewall = {
 #### **Using `nix-env` for System Packages**
 
 ```bash
-# ❌ BAD - Imperative installation
+#  BAD - Imperative installation
 nix-env -i firefox vim git
 ```
 
 ```nix
-# ✅ GOOD - Declarative in configuration.nix
+#  GOOD - Declarative in configuration.nix
 environment.systemPackages = with pkgs; [
   firefox
   vim
@@ -357,14 +357,14 @@ environment.systemPackages = with pkgs; [
 #### **Misusing `environment.systemPackages`**
 
 ```nix
-# ❌ BAD - Everything system-wide
+#  BAD - Everything system-wide
 environment.systemPackages = with pkgs; [
   firefox      # Should be user-specific
   vscode       # Development tool
   spotify      # Personal application
 ];
 
-# ✅ GOOD - Proper separation
+#  GOOD - Proper separation
 environment.systemPackages = with pkgs; [
   wget curl git vim  # System essentials only
 ];
@@ -377,7 +377,7 @@ users.users.alice.packages = with pkgs; [
 #### **Monolithic Configuration File**
 
 ```nix
-# ❌ BAD - 500+ line configuration.nix
+#  BAD - 500+ line configuration.nix
 { config, pkgs, ... }: {
   boot.loader.grub.enable = true;
   networking.hostName = "myhost";
@@ -387,7 +387,7 @@ users.users.alice.packages = with pkgs; [
 ```
 
 ```
-# ✅ GOOD - Modular structure
+#  GOOD - Modular structure
 /etc/nixos/
 ├── configuration.nix        # Main entry point
 ├── hardware-configuration.nix
@@ -405,9 +405,9 @@ users.users.alice.packages = with pkgs; [
 #### **Never Running Garbage Collection**
 
 ```nix
-# ❌ BAD - No automated cleanup
+#  BAD - No automated cleanup
 
-# ✅ GOOD - Automated management
+#  GOOD - Automated management
 nix.gc = {
   automatic = true;
   dates = "weekly";
@@ -425,13 +425,13 @@ nix.optimise = {
 #### **Poor Binary Cache Configuration**
 
 ```nix
-# ❌ BAD - Wrong public key
+#  BAD - Wrong public key
 nix.settings = {
   substituters = [ "https://cache.example.org" ];
   trusted-public-keys = [ "wrong-key" ];  # Breaks everything!
 };
 
-# ✅ GOOD - Proper cache setup
+#  GOOD - Proper cache setup
 nix.settings = {
   substituters = [
     "https://cache.nixos.org/"
@@ -447,10 +447,10 @@ nix.settings = {
 #### **Unsafe System Updates**
 
 ```bash
-# ❌ BAD - Risky
+#  BAD - Risky
 nixos-rebuild switch --upgrade
 
-# ✅ GOOD - Test first
+#  GOOD - Test first
 nixos-rebuild build       # Build only
 nixos-rebuild test        # Test without making permanent
 nixos-rebuild build-vm    # Test in VM
@@ -462,13 +462,13 @@ nixos-rebuild switch      # Apply when confident
 #### **Missing stateVersion**
 
 ```nix
-# ❌ BAD - No stateVersion
+#  BAD - No stateVersion
 {
   programs.git.enable = true;
   # Error: The option 'home.stateVersion' is used but not defined
 }
 
-# ✅ GOOD - Set once, don't change
+#  GOOD - Set once, don't change
 {
   home.stateVersion = "24.05";  # Set to current version when starting
   programs.git.enable = true;
@@ -478,14 +478,14 @@ nixos-rebuild switch      # Apply when confident
 #### **Duplicate Package Management**
 
 ```nix
-# ❌ BAD - Duplication
+#  BAD - Duplication
 # /etc/nixos/configuration.nix
 environment.systemPackages = with pkgs; [ neovim git ];
 
 # ~/.config/home-manager/home.nix
 home.packages = with pkgs; [ neovim git ];  # Conflict!
 
-# ✅ GOOD - Clear separation
+#  GOOD - Clear separation
 # System: only system-wide essentials
 # Home Manager: user-specific packages
 ```
@@ -493,7 +493,7 @@ home.packages = with pkgs; [ neovim git ];  # Conflict!
 ### **8. Unnecessary Template Functions**
 
 ```nix
-# ❌ WRONG - Redundant wrappers for every possible variant
+#  WRONG - Redundant wrappers for every possible variant
 mkWorkstation = { hostname, system ? "x86_64-linux", extraModules ? [ ] }:
   mkSystem { inherit hostname system extraModules; profile = "workstation"; };
 
@@ -508,7 +508,7 @@ mkGaming = { hostname, system ? "x86_64-linux", extraModules ? [ ] }:
 
 # ... 5 more similar functions
 
-# ✅ CORRECT - Direct usage with explicit parameters
+#  CORRECT - Direct usage with explicit parameters
 nixosConfigurations = {
   my-workstation = mkSystem {
     hostname = "my-workstation";
@@ -535,7 +535,7 @@ nixosConfigurations = {
 #### **Ignoring strictDeps**
 
 ```nix
-# ❌ BAD - No dependency separation
+#  BAD - No dependency separation
 stdenv.mkDerivation {
   pname = "myapp";
   version = "1.0.0";
@@ -547,7 +547,7 @@ stdenv.mkDerivation {
   ];
 }
 
-# ✅ GOOD - Proper dependency categorization
+#  GOOD - Proper dependency categorization
 stdenv.mkDerivation {
   pname = "myapp";
   version = "1.0.0";
@@ -572,13 +572,13 @@ stdenv.mkDerivation {
 #### **Using override Instead of overrideAttrs**
 
 ```nix
-# ❌ SUBOPTIMAL - override changes function arguments
+#  SUBOPTIMAL - override changes function arguments
 myPackage = originalPackage.override {
   # Can only override function parameters
   someInput = modifiedInput;
 };
 
-# ✅ PREFERRED - overrideAttrs modifies derivation
+#  PREFERRED - overrideAttrs modifies derivation
 myPackage = originalPackage.overrideAttrs (oldAttrs: {
   # Can modify any derivation attribute
   patches = (oldAttrs.patches or []) ++ [ ./my-patch.patch ];
@@ -594,7 +594,7 @@ myPackage = originalPackage.overrideAttrs (oldAttrs: {
 #### **Missing Meta Attributes**
 
 ```nix
-# ❌ BAD - No metadata
+#  BAD - No metadata
 stdenv.mkDerivation {
   pname = "myapp";
   version = "1.0.0";
@@ -602,7 +602,7 @@ stdenv.mkDerivation {
   # No meta!
 }
 
-# ✅ GOOD - Comprehensive metadata
+#  GOOD - Comprehensive metadata
 stdenv.mkDerivation {
   pname = "myapp";
   version = "1.0.0";
@@ -629,7 +629,7 @@ stdenv.mkDerivation {
 #### **Missing Phase Hooks**
 
 ```nix
-# ❌ BAD - Custom phases without hooks
+#  BAD - Custom phases without hooks
 stdenv.mkDerivation {
   pname = "myapp";
 
@@ -639,7 +639,7 @@ stdenv.mkDerivation {
   '';
 }
 
-# ✅ GOOD - Use phase hooks
+#  GOOD - Use phase hooks
 stdenv.mkDerivation {
   pname = "myapp";
 
@@ -659,7 +659,7 @@ stdenv.mkDerivation {
 #### **Improper Use of pkgs.extend**
 
 ```nix
-# ❌ BAD - Using extend for large-scale changes
+#  BAD - Using extend for large-scale changes
 let
   customPkgs = pkgs.extend (final: prev: {
     # Many package overrides
@@ -669,7 +669,7 @@ in
   environment.systemPackages = with customPkgs; [ /* ... */ ];
 }
 
-# ✅ GOOD - Use overlays for package set modifications
+#  GOOD - Use overlays for package set modifications
 nixpkgs.overlays = [
   (final: prev: {
     # Package overrides here
@@ -684,7 +684,7 @@ nixpkgs.overlays = [
 #### **Not Using Assertions**
 
 ```nix
-# ❌ BAD - Silent misconfiguration
+#  BAD - Silent misconfiguration
 { config, lib, ... }:
 
 let
@@ -699,7 +699,7 @@ in
   };
 }
 
-# ✅ GOOD - Validate configuration early
+#  GOOD - Validate configuration early
 { config, lib, ... }:
 
 let
@@ -730,13 +730,13 @@ in
 #### **Ignoring Priority System**
 
 ```nix
-# ❌ BAD - Hard-coded values that can't be overridden
+#  BAD - Hard-coded values that can't be overridden
 config = {
   services.nginx.user = "nginx";  # Normal priority
   # User can't easily override this without lib.mkForce
 }
 
-# ✅ GOOD - Use mkDefault for overridable defaults
+#  GOOD - Use mkDefault for overridable defaults
 config = {
   services.nginx.user = lib.mkDefault "nginx";  # Low priority
   # User can easily override without mkForce
@@ -753,7 +753,7 @@ config = {
 #### **Missing Option Descriptions**
 
 ```nix
-# ❌ BAD - No documentation
+#  BAD - No documentation
 options.services.myservice = {
   port = lib.mkOption {
     type = lib.types.port;
@@ -761,7 +761,7 @@ options.services.myservice = {
   };
 }
 
-# ✅ GOOD - Clear documentation
+#  GOOD - Clear documentation
 options.services.myservice = {
   port = lib.mkOption {
     type = lib.types.port;
@@ -782,7 +782,7 @@ options.services.myservice = {
 ### **11. Code Duplication Without Extraction**
 
 ```nix
-# ❌ WRONG - Repeated definitions across configurations
+#  WRONG - Repeated definitions across configurations
 programs.bash.shellAliases = {
   ll = "ls -alF";
   la = "ls -A";
@@ -809,7 +809,7 @@ programs.zsh.shellAliases = {
   # ... same aliases repeated
 };
 
-# ✅ CORRECT - Shared definition with proper extraction
+#  CORRECT - Shared definition with proper extraction
 let
   commonAliases = {
     # System shortcuts
@@ -853,7 +853,7 @@ in {
 - Easy to have definitions drift apart over time
 - 25+ lines of duplication eliminated by proper extraction
 
-## ✅ **Required Patterns for NixOS**
+##  **Required Patterns for NixOS**
 
 ### **1. Always Use Explicit Imports**
 

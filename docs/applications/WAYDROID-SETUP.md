@@ -17,13 +17,13 @@ near-native Android application performance with full Android compatibility.
 
 ### P620 (AMD Workstation)
 
-- **Status**: ✅ Enabled
+- **Status**:  Enabled
 - **Configuration**: Standard AMD GPU configuration
 - **Desktop**: COSMIC (Wayland-native) + GNOME (Wayland support)
 
 ### Razer (Intel/NVIDIA Laptop)
 
-- **Status**: ⏸️ Available (not yet enabled)
+- **Status**: ⏸ Available (not yet enabled)
 - **Configuration**: Requires `disableGbm = true` for NVIDIA GPU
 - **Desktop**: COSMIC (Wayland-native) + GNOME (Wayland support)
 

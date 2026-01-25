@@ -474,12 +474,12 @@ Commands reference:
 
 | Command                | Weekly | Monthly | As Needed | Duration | Risk     | GitHub   |
 | ---------------------- | ------ | ------- | --------- | -------- | -------- | -------- |
-| `/flake-update`        | ✅     |         |           | 10-15m   | Med      | ✅       |
-| `/system-health-check` | ✅     |         |           | 5-10m    | None     | Optional |
-| `/update-claude-code`  |        | ✅      |           | 8-12m    | Low      | ✅       |
-| `/update-package`      |        |         | ✅        | 10-20m   | Med      | ✅       |
-| `/deploy-all`          |        |         | ✅        | 5-15m    | Med-High | Optional |
-| `/config-audit`        |        | ✅      |           | 15-25m   | None     | ✅       |
+| `/flake-update`        |      |         |           | 10-15m   | Med      |        |
+| `/system-health-check` |      |         |           | 5-10m    | None     | Optional |
+| `/update-claude-code`  |        |       |           | 8-12m    | Low      |        |
+| `/update-package`      |        |         |         | 10-20m   | Med      |        |
+| `/deploy-all`          |        |         |         | 5-15m    | Med-High | Optional |
+| `/config-audit`        |        |       |           | 15-25m   | None     |        |
 
 ## Productivity Metrics
 
@@ -538,7 +538,7 @@ Commands reference:
 
 ### Command Usage
 
-✅ **Do:**
+ **Do:**
 
 - Read command documentation first
 - Follow all validation steps
@@ -546,7 +546,7 @@ Commands reference:
 - Create GitHub issues
 - Review command output
 
-❌ **Don't:**
+ **Don't:**
 
 - Skip prerequisite checks
 - Ignore warnings
@@ -555,14 +555,14 @@ Commands reference:
 
 ### Customization
 
-✅ **Do:**
+ **Do:**
 
 - Customize for your needs
 - Add new commands
 - Improve existing workflows
 - Share improvements
 
-❌ **Don't:**
+ **Don't:**
 
 - Remove safety checks
 - Skip validation steps

@@ -150,7 +150,7 @@ You will find one of these settings (names vary by BIOS version):
 
 ### Recommended Settings by Use Case
 
-#### **🎯 Best for Most Users: NPS2 (or "Channel" Interleaving)**
+#### ** Best for Most Users: NPS2 (or "Channel" Interleaving)**
 
 **Settings:**
 
@@ -164,7 +164,7 @@ You will find one of these settings (names vary by BIOS version):
 - Compatible with all software
 - Recommended for daily use
 
-#### **⚡ Maximum Performance: NPS4**
+#### ** Maximum Performance: NPS4**
 
 **Settings:**
 
@@ -177,7 +177,7 @@ You will find one of these settings (names vary by BIOS version):
 - Requires application support
 - May reduce performance for non-NUMA workloads
 
-#### **🔧 Conservative: NPS1 (UMA Mode)**
+#### ** Conservative: NPS1 (UMA Mode)**
 
 **Settings:**
 
@@ -208,7 +208,7 @@ While in AMD CBS, consider these performance settings:
 2. **Confirm changes**: Select "Yes" or "OK"
 3. **System will reboot** automatically
 
-**⏱️ First boot after NUMA enable may take longer** (30-60 seconds extra) - this is normal!
+**⏱ First boot after NUMA enable may take longer** (30-60 seconds extra) - this is normal!
 
 ---
 

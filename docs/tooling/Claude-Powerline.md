@@ -10,12 +10,12 @@ context directly in your Claude Code environment.
 
 ### Key Features
 
-- ⏱️ **Real-time API Usage Tracking**: Monitor costs and token usage within 5-hour billing windows
-- 💰 **Budget Monitoring**: Track session, daily, and block budgets with configurable alerts
-- 🌳 **Git Integration**: Display branch status, commits, and working tree changes
-- 📊 **Performance Analytics**: Track API response times, session duration, and code impact
-- 🎨 **Custom Gruvbox Dark Theme**: Beautiful, eye-friendly color scheme matching your development environment
-- ⚡ **Lightweight Performance**: < 250ms statusline updates with minimal resource usage
+- ⏱ **Real-time API Usage Tracking**: Monitor costs and token usage within 5-hour billing windows
+-  **Budget Monitoring**: Track session, daily, and block budgets with configurable alerts
+-  **Git Integration**: Display branch status, commits, and working tree changes
+-  **Performance Analytics**: Track API response times, session duration, and code impact
+-  **Custom Gruvbox Dark Theme**: Beautiful, eye-friendly color scheme matching your development environment
+-  **Lightweight Performance**: < 250ms statusline updates with minimal resource usage
 
 ## Installation
 
@@ -42,10 +42,10 @@ programs.claude-powerline = {
 
 Claude Powerline is available on all hosts using the developer profile:
 
-- ✅ **P620** (primary workstation)
-- ✅ **Razer** (laptop)
-- ✅ **P510** (media server with development mode)
-- ✅ **Samsung** (laptop)
+-  **P620** (primary workstation)
+-  **Razer** (laptop)
+-  **P510** (media server with development mode)
+-  **Samsung** (laptop)
 
 ## Configuration
 
@@ -146,10 +146,10 @@ block = 30.0;
 
 Budget warnings are triggered at **80%** of configured limits:
 
-- 🟢 **Green** (< 70%): Under budget, normal operation
-- 🟡 **Yellow** (70-80%): Approaching limit, monitor usage
-- 🟠 **Orange** (80-90%): Warning threshold exceeded
-- 🔴 **Red** (> 90%): Critical, approaching limit
+-  **Green** (< 70%): Under budget, normal operation
+-  **Yellow** (70-80%): Approaching limit, monitor usage
+-  **Orange** (80-90%): Warning threshold exceeded
+-  **Red** (> 90%): Critical, approaching limit
 
 ## Usage
 
@@ -208,7 +208,7 @@ Shows 5-hour rolling window costs:
 
 ```text
 $2.45 / $10.00       # $2.45 spent, $10 limit
-$8.90 / $10.00 ⚠️    # Warning: 89% of budget
+$8.90 / $10.00     # Warning: 89% of budget
 ```
 
 #### **Daily Segment** (Aqua)
@@ -217,7 +217,7 @@ Displays daily total spending:
 
 ```text
 $12.50 / $25.00      # $12.50 spent today, $25 limit
-$21.00 / $25.00 ⚠️   # Warning: 84% of daily budget
+$21.00 / $25.00    # Warning: 84% of daily budget
 ```
 
 #### **Context Segment** (Orange)
@@ -226,7 +226,7 @@ Shows context window usage for the active model:
 
 ```text
 45K / 200K           # 45K tokens used of 200K limit
-180K / 200K ⚠️       # Warning: 90% of context used
+180K / 200K        # Warning: 90% of context used
 ```
 
 **Context Limits by Model:**

@@ -357,7 +357,7 @@ git commit -m "feat(commands): improve /COMMAND workflow"
 
 ### Command Usage
 
-✅ **Do:**
+ **Do:**
 
 - Read command documentation first
 - Review command output carefully
@@ -366,7 +366,7 @@ git commit -m "feat(commands): improve /COMMAND workflow"
 - Create GitHub issues for tracking
 - Keep commands up-to-date
 
-❌ **Don't:**
+ **Don't:**
 
 - Skip prerequisite checks
 - Ignore warning messages
@@ -376,7 +376,7 @@ git commit -m "feat(commands): improve /COMMAND workflow"
 
 ### Command Development
 
-✅ **Do:**
+ **Do:**
 
 - Follow existing patterns
 - Include comprehensive error handling
@@ -385,7 +385,7 @@ git commit -m "feat(commands): improve /COMMAND workflow"
 - Test thoroughly before use
 - Keep commands maintainable
 
-❌ **Don't:**
+ **Don't:**
 
 - Create overly complex commands
 - Skip error handling
@@ -632,13 +632,13 @@ Each command has:
 
 The NixOS custom command system provides:
 
-✅ **Automation**: Complex workflows become one-line commands
-✅ **Safety**: Built-in validation and rollback procedures
-✅ **Documentation**: Living documentation of procedures
-✅ **Quality**: Automatic adherence to best practices
-✅ **Efficiency**: 10x productivity improvement
-✅ **Integration**: Seamless GitHub and monitoring integration
-✅ **Learning**: Clear workflows for team members
+ **Automation**: Complex workflows become one-line commands
+ **Safety**: Built-in validation and rollback procedures
+ **Documentation**: Living documentation of procedures
+ **Quality**: Automatic adherence to best practices
+ **Efficiency**: 10x productivity improvement
+ **Integration**: Seamless GitHub and monitoring integration
+ **Learning**: Clear workflows for team members
 
 **Result:** Professional, maintainable, and safe NixOS infrastructure management.
 
