@@ -1,0 +1,155 @@
+name: Update Flake Inputs
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Daily at 6 AM UTC
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-flake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Setup Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v7
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v15
+        with:
+          name: nix-community
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
+      - name: Update flake inputs
+        id: update
+        run: |
+          echo "Updating flake inputs..."
+
+          # Capture current lock file
+          cp flake.lock flake.lock.old
+
+          # Update all inputs
+          nix flake update
+
+          # Check if anything changed
+          if diff -q flake.lock flake.lock.old > /dev/null; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No updates available"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Updates found"
+
+            # Show what changed
+            echo "Changes:"
+            diff flake.lock.old flake.lock || true
+          fi
+
+      - name: Build test configurations
+        if: steps.update.outputs.changed == 'true'
+        run: |
+          echo "Testing updated configurations..."
+
+          # Test build each host to ensure updates don't break anything
+          for host in p620 razer p510 samsung; do
+            echo "Testing $host..."
+            nix build .#nixosConfigurations.$host.config.system.build.toplevel \
+              --show-trace --no-link || {
+                echo "ERROR: Build failed for $host"
+                exit 1
+              }
+          done
+
+          echo "PASS: All configurations build successfully with updates"
+
+      - name: Generate update summary
+        if: steps.update.outputs.changed == 'true'
+        id: summary
+        run: |
+          echo "Generating update summary..."
+
+          # Extract updated inputs from flake.lock diff
+          summary=$(nix flake metadata --json | jq -r '
+            .locks.nodes |
+            to_entries[] |
+            select(.value.locked.type != null) |
+            "- **\(.key)**: \(.value.locked.rev // .value.locked.narHash // "updated")[0:7]"
+          ' | head -20)
+
+          # Save to output
+          echo "summary<<EOF" >> $GITHUB_OUTPUT
+          echo "$summary" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request
+        if: steps.update.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore(deps): update flake inputs - daily automatic update'
+          title: 'chore(deps): daily flake input updates'
+          body: |
+            ## Automated Daily Flake Update
+
+            This PR updates all flake inputs to their latest versions.
+
+            ### Updated Inputs
+
+            ${{ steps.summary.outputs.summary }}
+
+            ### Testing Status
+
+            All host configurations have been built and tested successfully:
+            - P620 (AMD workstation)
+            - Razer (Intel/NVIDIA laptop)
+            - P510 (Intel Xeon server)
+            - Samsung (Intel laptop)
+
+            ### Review Checklist
+
+            - [ ] Check flake.lock changes
+            - [ ] Review any breaking changes in changelogs
+            - [ ] Test on at least one host before merging
+            - [ ] Verify all services still work after update
+
+            ### Deployment
+
+            After merge, deploy with:
+            ```bash
+            just quick-deploy HOST
+            ```
+
+            Co-Authored-By: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+          branch: chore/flake-update-daily
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
+          assignees: olafkfreund
+          draft: false
+
+      - name: Auto-merge if CI passes
+        if: steps.update.outputs.changed == 'true'
+        run: |
+          echo "INFO: Pull request created successfully"
+          echo "INFO: Review and merge after CI checks pass"
+          echo "INFO: The PR is assigned to you for review"
+
+      - name: Report no updates
+        if: steps.update.outputs.changed == 'false'
+        run: |
+          echo "INFO: No flake updates available today"
+          echo "INFO: All inputs are already at latest versions"

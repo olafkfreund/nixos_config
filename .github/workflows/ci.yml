@@ -1,10 +1,10 @@
 name: NixOS Configuration CI
 
 on:
-  #   push:
-  #     branches: [ main, develop ]
-  #   pull_request:
-  #     branches: [ main ]
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        host: [p620, razer, p510, dex5550]
+        host: [p620, razer, p510, samsung]
       fail-fast: false
 
     steps:
@@ -20,18 +20,21 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v23
+        uses: cachix/install-nix-action@v27
         with:
           nix_path: nixpkgs=channel:nixos-unstable
           extra_nix_config: |
             experimental-features = nix-command flakes
             accept-flake-config = true
 
+      - name: Setup Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v7
+
       - name: Setup Cachix
-        uses: cachix/cachix-action@v12
+        uses: cachix/cachix-action@v15
         with:
           name: nix-community
-          # authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}' # Optional
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
       - name: Check flake
         run: nix flake check --show-trace
@@ -47,7 +50,7 @@ jobs:
             nix build .#homeConfigurations.olafkfreund@${{ matrix.host }}.activationPackage \
               --show-trace --print-build-logs
           else
-            echo "⚠️ No Home Manager configuration for olafkfreund@${{ matrix.host }}"
+            echo "WARNING: No Home Manager configuration for olafkfreund@${{ matrix.host }}"
           fi
 
   security-check:
@@ -57,51 +60,53 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v23
+        uses: cachix/install-nix-action@v27
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
             accept-flake-config = true
 
+      - name: Setup Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v7
+
       - name: Validate secrets structure
         run: |
-          # Check that secrets.nix is properly formatted
           if [ -f "secrets.nix" ]; then
-            echo "🔍 Validating secrets configuration..."
+            echo "Validating secrets configuration..."
             if nix eval .#nixosConfigurations.p620.config.age.secrets --json > /dev/null 2>&1; then
-              echo "✅ Secrets configuration is valid"
+              echo "PASS: Secrets configuration is valid"
             else
-              echo "❌ Secrets configuration has errors"
+              echo "FAIL: Secrets configuration has errors"
               nix eval .#nixosConfigurations.p620.config.age.secrets --json
               exit 1
             fi
           else
-            echo "⚠️ No secrets.nix found, skipping secrets validation"
+            echo "WARNING: No secrets.nix found, skipping secrets validation"
           fi
 
       - name: Security scan
         run: |
-          echo "🔍 Scanning for security issues..."
+          echo "Scanning for security issues..."
 
           # Check for hardcoded passwords
           if grep -r "password.*=" . --include="*.nix" --exclude-dir=".git" | grep -v "hashedPassword\|passwordFile\|secrets\|age\.secrets"; then
-            echo "❌ Potential hardcoded passwords found"
+            echo "FAIL: Potential hardcoded passwords found"
             exit 1
           else
-            echo "✅ No hardcoded passwords found"
+            echo "PASS: No hardcoded passwords found"
           fi
 
           # Check for hardcoded API keys
           if grep -r "api.*key.*=" . --include="*.nix" --exclude-dir=".git" | grep -v "secretFile\|secrets\|age\.secrets"; then
-            echo "❌ Potential hardcoded API keys found"
+            echo "FAIL: Potential hardcoded API keys found"
             exit 1
           else
-            echo "✅ No hardcoded API keys found"
+            echo "PASS: No hardcoded API keys found"
           fi
 
           # Check for TODO/FIXME items
           todo_count=$(grep -r "TODO\|FIXME" . --include="*.nix" --exclude-dir=".git" | wc -l)
-          echo "📝 Found $todo_count TODO/FIXME items"
+          echo "INFO: Found $todo_count TODO/FIXME items"
 
   documentation-check:
     runs-on: ubuntu-latest
@@ -111,32 +116,25 @@ jobs:
 
       - name: Check documentation completeness
         run: |
-          echo "📚 Checking documentation..."
+          echo "Checking documentation..."
 
           # Check if README exists and has minimum content
           if [ -f "README.md" ] && [ $(wc -l < README.md) -gt 50 ]; then
-            echo "✅ README.md is present and substantial"
+            echo "PASS: README.md is present and substantial"
           else
-            echo "⚠️ README.md is missing or too short"
+            echo "WARNING: README.md is missing or too short"
           fi
 
           # Check for module documentation
           module_count=$(find modules/ -name "*.nix" 2>/dev/null | wc -l)
-          doc_count=$(find modules/ -name "README.md" -o -name "*.md" 2>/dev/null | wc -l)
-          echo "📊 Found $module_count modules and $doc_count documentation files"
+          doc_count=$(find docs/ -name "*.md" 2>/dev/null | wc -l)
+          echo "INFO: Found $module_count modules and $doc_count documentation files"
 
-          # Check project plan exists
-          if [ -f "PROJECT_PLAN.md" ]; then
-            echo "✅ Project plan exists"
+          # Check docs folder structure
+          if [ -d "docs" ] && [ -f "docs/README.md" ]; then
+            echo "PASS: Documentation structure exists"
           else
-            echo "⚠️ PROJECT_PLAN.md missing"
-          fi
-
-          # Check secrets documentation
-          if [ -f "docs/SECRETS_MANAGEMENT.md" ]; then
-            echo "✅ Secrets management documentation exists"
-          else
-            echo "⚠️ Secrets management documentation missing"
+            echo "WARNING: Documentation structure incomplete"
           fi
 
   lint-check:
@@ -146,21 +144,73 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v23
+        uses: cachix/install-nix-action@v27
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
 
+      - name: Setup Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v7
+
       - name: Nix formatting check
         run: |
-          echo "🔍 Checking Nix code formatting..."
+          echo "Checking Nix code formatting..."
 
-          # Check if nixpkgs-fmt is available and run it
-          if command -v nixpkgs-fmt >/dev/null 2>&1; then
-            find . -name "*.nix" -not -path "./.git/*" | xargs nixpkgs-fmt --check
-          else
-            echo "⚠️ nixpkgs-fmt not available, installing..."
-            nix shell nixpkgs#nixpkgs-fmt -c bash -c '
-              find . -name "*.nix" -not -path "./.git/*" | head -10 | xargs nixpkgs-fmt --check
-            '
-          fi
+          nix shell nixpkgs#nixpkgs-fmt -c bash -c '
+            if find . -name "*.nix" -not -path "./.git/*" -exec nixpkgs-fmt --check {} + ; then
+              echo "PASS: All Nix files are properly formatted"
+            else
+              echo "FAIL: Some Nix files need formatting"
+              echo "Run: nixpkgs-fmt ."
+              exit 1
+            fi
+          '
+
+      - name: Nix linting check
+        run: |
+          echo "Linting Nix code..."
+
+          nix shell nixpkgs#statix -c bash -c '
+            if statix check . ; then
+              echo "PASS: No linting issues found"
+            else
+              echo "WARNING: Linting issues detected"
+            fi
+          '
+
+      - name: Dead code check
+        run: |
+          echo "Checking for dead code..."
+
+          nix shell nixpkgs#deadnix -c bash -c '
+            if deadnix --fail ; then
+              echo "PASS: No dead code found"
+            else
+              echo "WARNING: Dead code detected"
+            fi
+          '
+
+  pre-commit-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Setup Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v7
+
+      - name: Run pre-commit hooks
+        run: |
+          echo "Running pre-commit hooks..."
+
+          nix shell nixpkgs#pre-commit -c bash -c '
+            pre-commit run --all-files || true
+          '
+
+          echo "INFO: Pre-commit check completed (non-blocking)"
