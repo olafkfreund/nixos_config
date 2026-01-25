@@ -143,7 +143,6 @@ in
           libxkbcommon
 
           #Applications for COSMIC core functionality
-          quick-webapps # Web application integration
           tasks
 
           # Wayland utilities

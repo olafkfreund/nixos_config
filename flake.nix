@@ -225,10 +225,6 @@
         (final: _prev: {
           zsh-ai-cmd = final.callPackage ./pkgs/zsh-ai-cmd { };
         })
-        # Custom package: quick-webapps - Override upstream with version 2.0.1
-        (final: _prev: {
-          quick-webapps = final.callPackage ./pkgs/quick-webapps { };
-        })
         # Custom package: gemini-cli - Google Gemini AI CLI tool with version 0.25.1
         (final: _prev: {
           gemini-cli = final.callPackage ./home/development/gemini-cli { };
@@ -420,7 +416,6 @@
           kosli-cli = pkgs.callPackage ./pkgs/kosli-cli { };
           opencode = pkgs.callPackage ./home/development/opencode { };
           aurynk = pkgs.callPackage ./pkgs/aurynk { };
-          quick-webapps = pkgs.callPackage ./pkgs/quick-webapps { };
           # add-skill = pkgs.callPackage ./pkgs/add-skill { };
 
           # Security tools

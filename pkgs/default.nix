@@ -29,6 +29,4 @@
   aurynk = pkgs.callPackage ./aurynk { };
 
   add-skill = pkgs.callPackage ./add-skill { };
-
-  quick-webapps = pkgs.callPackage ./quick-webapps { };
 }
