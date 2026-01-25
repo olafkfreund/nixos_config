@@ -116,7 +116,8 @@ with lib;
       yamlfmt
 
       # Markdown formatters
-      mdformat
+      # mdformat # Disabled: version conflict with markdown-it-py (requires <4.0.0, nixpkgs has 4.0.0)
+      # Alternative: use prettier for Markdown formatting (already included above)
 
       # === DEVELOPMENT TOOLS ===
 
