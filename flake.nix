@@ -111,10 +111,6 @@
       url = "github:nomoth/cosmic-applet-spotify";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    cosmic-connect = {
-      url = "github:olafkfreund/cosmic-connect-desktop-app";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
@@ -313,7 +309,6 @@
               inputs.nix-snapd.nixosModules.default
               inputs.agenix.nixosModules.default
               inputs.lanzaboote.nixosModules.lanzaboote
-              inputs.cosmic-connect.nixosModules.default
               nix-index-database.nixosModules.nix-index
               ./home/shell/zellij/zjstatus.nix
             ]
