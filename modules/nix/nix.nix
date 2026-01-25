@@ -40,20 +40,15 @@ with lib;
     fallback = true; # Build locally if substitute not available
 
     # Multi-tier binary cache configuration
-    # Priority order: P620 local cache → NixOS official → Nix community
+    # Priority order: NixOS official → Nix community
     substituters = [
       "https://cache.nixos.org" # Official NixOS cache (always available)
       "https://nix-community.cachix.org" # Community cache
-    ] ++ optionals (config.networking.hostName != "p620") [
-      # Non-P620 hosts: use P620 as primary cache (try both LAN and IP)
-      "http://p620.lan:5000" # Local LAN hostname
     ];
 
     trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" # Official NixOS
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" # Nix community
-    ] ++ optionals (config.networking.hostName != "p620") [
-      "p620-nix-serve:mZR6o5z5KcWeu4PVXgjHA7vb1sHQgRdWMKQt8x3a4rU=" # P620 local cache
     ];
 
     # Optional: Add Cachix personal cache (free tier: 5GB storage, unlimited downloads)

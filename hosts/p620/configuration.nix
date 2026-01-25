@@ -531,14 +531,6 @@ in
       updater.enable = true; # Enable freshclam (virus database updater)
     };
 
-    # Nix-serve configuration
-    nix-serve = {
-      enable = true;
-      port = 5000; # Default port for nix-serve
-      secretKeyFile = "/etc/nix/secret-key"; # Path to the secret key file
-      openFirewall = true; # Automatically open the firewall port
-    };
-
     # Ollama specific configurations for AMD GPU
     ollama = {
       enable = true;
@@ -689,9 +681,6 @@ in
       requires = [ "pulseaudio.service" ];
     };
   };
-
-  # Nix configuration
-  nix.settings.allowed-users = [ "nix-serve" ];
 
   # Storage performance optimization
   storage.performanceOptimization = {
