@@ -58,7 +58,7 @@ in
         gnome-sound-recorder # Audio recording
         easyeffects # Audio effects and noise canceling for Teams/meeting tools
         showtime # Media center application
-        upscaler # Re-enabled: pysdl2 Python 3.13 compatibility fixed (issue #30 closed)
+        # upscaler # Disabled: pysdl2 test failure in sandbox (SDL_SetWindowMouseRect not supported without display)
         gnvim
         amberol
         hydrapaper
