@@ -53,12 +53,9 @@ update-workflow HOST="$(hostname)":
 # Run comprehensive validation suite
 validate:
     @echo "🧪 Running comprehensive validation..."
-    @echo "📋 Feature validation..."
-    nix eval .#lib.validateFeatures --json | jq '.isValid'
-    @echo "🔒 Security validation..."
-    nix eval .#lib.validateSecurity --json | jq '.hasErrors'
-    @echo "📝 Configuration syntax check..."
-    nix flake check --no-build
+    @echo "📝 Full flake check (includes all hosts, modules, and derivations)..."
+    @echo "⚠️  Note: This takes ~4 minutes but catches module system errors"
+    nix flake check
     @echo "✅ All validations complete!"
 
 # Quick validation (faster, less comprehensive)
