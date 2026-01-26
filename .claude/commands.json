@@ -1,0 +1,20 @@
+{
+  "commands": {
+    "subtask": {
+      "description": "Break task into subtasks and execute in parallel",
+      "usage": "/subtask <task description>",
+      "script": ".claude/commands/subtask.sh",
+      "prompt": "Break down the task into independent subtasks and execute them in parallel"
+    },
+    "parallel": {
+      "description": "Execute multiple Claude Code tasks in parallel",
+      "usage": "/parallel <task1> | <task2> | <task3>",
+      "script": ".claude/commands/parallel.sh"
+    },
+    "spawn": {
+      "description": "Spawn a new Claude Code agent for a specific task",
+      "usage": "/spawn <task description>",
+      "script": ".claude/commands/spawn.sh"
+    }
+  }
+}
