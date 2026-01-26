@@ -172,6 +172,9 @@
     # Aurynk - Android Device Manager
     pkgs.customPkgs.aurynk
 
+    # Newelle - AI Virtual Assistant (GTK4/Libadwaita)
+    pkgs.customPkgs.newelle
+
     # Glim - GitLab CI/CD TUI monitoring
     pkgs.glim
 
