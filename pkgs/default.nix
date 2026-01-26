@@ -27,5 +27,8 @@
 
   aurynk = pkgs.callPackage ./aurynk { };
 
+  # Newelle - AI Virtual Assistant (GTK4/Libadwaita)
+  newelle = pkgs.callPackage ./newelle { };
+
   add-skill = pkgs.callPackage ./add-skill { };
 }
