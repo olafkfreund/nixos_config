@@ -31,4 +31,7 @@
   newelle = pkgs.callPackage ./newelle { };
 
   add-skill = pkgs.callPackage ./add-skill { };
+
+  # Claude Code native binary (alternative to npm-based package)
+  claude-code-native = pkgs.callPackage ./claude-code-native { };
 }
