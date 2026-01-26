@@ -210,6 +210,10 @@
         (final: _prev: {
           zsh-ai-cmd = final.callPackage ./pkgs/zsh-ai-cmd { };
         })
+        # Custom package: claude-code-native - Native binary alternative to npm-based claude-code
+        (final: _prev: {
+          claude-code-native = final.callPackage ./pkgs/claude-code-native { };
+        })
         # Custom package: gemini-cli - Google Gemini AI CLI tool with version 0.25.1
         (final: _prev: {
           gemini-cli = final.callPackage ./home/development/gemini-cli { };
@@ -396,6 +400,7 @@
           claude-code = import ./home/development/claude-code {
             inherit (pkgs) lib buildNpmPackage fetchurl nodejs makeWrapper writeShellScriptBin;
           };
+          claude-code-native = pkgs.callPackage ./pkgs/claude-code-native { };
           codex-cli = pkgs.callPackage ./home/development/codex-cli {
             inherit (pkgs) nodejs_24;
           };
