@@ -15,7 +15,7 @@ LOG_FILE="$LOG_DIR/spawn_${TIMESTAMP}.log"
 echo "🚀 Spawning new agent for: $TASK"
 echo "   Log: $LOG_FILE"
 
-npx @anthropic-ai/claude-code@latest "$TASK" >"$LOG_FILE" 2>&1 &
+claude -p "$TASK" >"$LOG_FILE" 2>&1 &
 
 SPAWN_PID=$!
 echo "   PID: $SPAWN_PID"

@@ -22,7 +22,7 @@ for i in "${!TASKS[@]}"; do
 
   (
     log_file="$LOG_DIR/task_$i.log"
-    if npx @anthropic-ai/claude-code@latest "$task" >"$log_file" 2>&1; then
+    if claude -p "$task" >"$log_file" 2>&1; then
       echo "[$i] ✅ Completed: $task"
     else
       echo "[$i] ❌ Failed: $task (see $log_file)"

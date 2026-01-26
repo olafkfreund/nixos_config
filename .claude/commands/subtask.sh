@@ -37,7 +37,7 @@ EOF
 
 # Get subtask breakdown
 echo "📋 Breaking down into subtasks..."
-SUBTASKS=$(npx @anthropic-ai/claude-code@latest --task "$BREAKDOWN_PROMPT" 2>/dev/null | grep -E '^[0-9]+\.')
+SUBTASKS=$(claude -p "$BREAKDOWN_PROMPT" 2>/dev/null | grep -E '^[0-9]+\.')
 
 echo ""
 echo "Subtasks identified:"
@@ -63,7 +63,7 @@ run_subtask() {
 
   echo "[Task $task_num] Starting: $task_desc"
 
-  if npx @anthropic-ai/claude-code@latest "$task_desc" >"$log_file" 2>&1; then
+  if claude -p "$task_desc" >"$log_file" 2>&1; then
     echo "[Task $task_num] ✅ Completed"
     echo "success" >"$WORK_DIR/task_${task_num}.status"
   else
