@@ -49,8 +49,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Editor
-
     # Development and utilities
     sops-nix = {
       url = "github:mic92/sops-nix";
