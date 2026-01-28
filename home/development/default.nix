@@ -16,6 +16,7 @@ _: {
     ./codex-cli.nix
     ./claude-desktop
     ./claude-powerline.nix
+    ./moltbot # Moltbot AI assistant gateway for Telegram
 
     # Version control and CI/CD
     ./gitlab/default.nix

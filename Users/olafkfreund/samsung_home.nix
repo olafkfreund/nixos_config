@@ -143,6 +143,16 @@
     authenticator.enable = true;
   };
 
+  # Moltbot AI assistant gateway for Telegram
+  # NOTE: Set your Telegram user ID(s) to enable the bot
+  # Get your ID by messaging @userinfobot on Telegram
+  programs.moltbot = {
+    enable = true;
+    telegram.userIds = [ ]; # TODO: Add your Telegram user ID(s)
+    # Plugins disabled by default - enable individually if needed
+    # enabledPlugins = { summarize = true; peekaboo = true; };
+  };
+
   home.packages = with pkgs; [
     # Google Antigravity - AI coding assistant
     antigravity-nix.packages.${stdenv.hostPlatform.system}.default

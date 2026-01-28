@@ -39,4 +39,8 @@ in
   # System secrets
   "secrets/wifi-password.age".publicKeys = allUsers ++ workstations;
   "secrets/tailscale-auth-key.age".publicKeys = allUsers ++ allHosts;
+
+  # Moltbot AI assistant gateway secrets
+  "secrets/moltbot-telegram-token.age".publicKeys = allUsers ++ workstations;
+  "secrets/moltbot-telegram-user-id.age".publicKeys = allUsers ++ workstations;
 }

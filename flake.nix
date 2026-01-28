@@ -80,6 +80,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Moltbot AI assistant gateway for Telegram/Discord
+    nix-moltbot = {
+      url = "github:moltbot/nix-moltbot";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Hardware specific (removed unused razer-laptop-control)
 
     # Package collections
@@ -181,6 +187,8 @@
 
       # Import custom packages and overlays
       overlays = [
+        # Moltbot overlay for AI assistant gateway
+        inputs.nix-moltbot.overlays.default
         (final: _prev: {
           customPkgs = import ./pkgs {
             pkgs = final;
