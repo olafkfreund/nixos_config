@@ -214,7 +214,7 @@
         (final: _prev: {
           claude-code-native = final.callPackage ./pkgs/claude-code-native { };
         })
-        # Custom package: gemini-cli - Google Gemini AI CLI tool with version 0.25.1
+        # Custom package: gemini-cli - Google Gemini AI CLI tool with version 0.26.0
         (final: _prev: {
           gemini-cli = final.callPackage ./home/development/gemini-cli { };
         })
@@ -404,7 +404,6 @@
           codex-cli = pkgs.callPackage ./home/development/codex-cli {
             inherit (pkgs) nodejs_24;
           };
-          # gemini-cli provided by pkgs/default.nix overlay (version 0.8.0-preview.1)
           glim = pkgs.callPackage ./overlays/glim { };
           intune-portal = pkgs.callPackage ./pkgs/intune-portal { };
           kosli-cli = pkgs.callPackage ./pkgs/kosli-cli { };

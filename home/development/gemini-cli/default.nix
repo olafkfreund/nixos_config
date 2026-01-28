@@ -14,16 +14,16 @@
 
 buildNpmPackage (finalAttrs: {
   pname = "gemini-cli";
-  version = "0.25.2";
+  version = "0.26.0";
 
   src = fetchFromGitHub {
     owner = "google-gemini";
     repo = "gemini-cli";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-2Fl6bkoAgu+KvwVIkQEIAPYKQRYyEQPWMRv3vsfnNA4=";
+    hash = "sha256-wvCSYr5BUS5gggTFHfG+SRvgAyRE63nYdaDwH98wurI=";
   };
 
-  npmDepsHash = "sha256-4peAAxCws5IjWaiNwkRBiaL+n1fE+zsK0qbk1owueeY=";
+  npmDepsHash = "sha256-nfmIt+wUelhz3KiW4/pp/dGE71f2jsPbxwpBRT8gtYc=";
 
   nodejs = nodejs_22;
 
@@ -55,16 +55,10 @@ buildNpmPackage (finalAttrs: {
     substituteInPlace packages/core/src/tools/ripGrep.ts \
       --replace-fail "await ensureRgPath();" "'${lib.getExe ripgrep}';"
 
-    # Ideal method to disable auto-update
-    sed -i '/disableAutoUpdate: {/,/}/ s/default: false/default: true/' packages/cli/src/config/settingsSchema.ts
-
-    # Disable auto-update for real because the default value in settingsSchema isn't cleanly applied
-    # https://github.com/google-gemini/gemini-cli/issues/13569
-    substituteInPlace packages/cli/src/utils/handleAutoUpdate.ts \
-      --replace-fail "settings.merged.general?.disableAutoUpdate ?? false" "settings.merged.general?.disableAutoUpdate ?? true" \
-      --replace-fail "settings.merged.general?.disableAutoUpdate" "(settings.merged.general?.disableAutoUpdate ?? true)"
-    substituteInPlace packages/cli/src/ui/utils/updateCheck.ts \
-      --replace-fail "settings.merged.general?.disableUpdateNag" "(settings.merged.general?.disableUpdateNag ?? true)"
+    # Disable auto-update and update notifications by changing defaults in settingsSchema
+    # (API changed in 0.26.0 from disableAutoUpdate to enableAutoUpdate)
+    sed -i '/enableAutoUpdate: {/,/default: true/ s/default: true/default: false/' packages/cli/src/config/settingsSchema.ts
+    sed -i '/enableAutoUpdateNotification: {/,/default: true/ s/default: true/default: false/' packages/cli/src/config/settingsSchema.ts
   '';
 
   installPhase = ''
