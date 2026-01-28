@@ -158,6 +158,16 @@
     authenticator.enable = true;
   };
 
+  # Moltbot AI assistant gateway for Telegram
+  # NOTE: Temporarily disabled due to npm binary conflict with nodejs
+  # TODO: Re-enable after upstream fix or when telegram userIds configured
+  # programs.moltbot = {
+  #   enable = true;
+  #   telegram.userIds = [ ]; # TODO: Add your Telegram user ID(s)
+  #   # Plugins disabled by default - enable individually if needed
+  #   # enabledPlugins = { summarize = true; peekaboo = true; };
+  # };
+
   home.packages = [
     # pkgs.customPkgs.rofi-blocks
     # pkgs.msty
