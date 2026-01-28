@@ -159,14 +159,14 @@
   };
 
   # Moltbot AI assistant gateway for Telegram
-  # NOTE: Set your Telegram user ID(s) to enable the bot
-  # Get your ID by messaging @userinfobot on Telegram
-  programs.moltbot = {
-    enable = true;
-    telegram.userIds = [ ]; # TODO: Add your Telegram user ID(s)
-    # Plugins disabled by default - enable individually if needed
-    # enabledPlugins = { summarize = true; peekaboo = true; };
-  };
+  # NOTE: Temporarily disabled due to npm binary conflict with nodejs
+  # TODO: Re-enable after upstream fix or when telegram userIds configured
+  # programs.moltbot = {
+  #   enable = true;
+  #   telegram.userIds = [ ]; # TODO: Add your Telegram user ID(s)
+  #   # Plugins disabled by default - enable individually if needed
+  #   # enabledPlugins = { summarize = true; peekaboo = true; };
+  # };
 
   home.packages = [
     # pkgs.customPkgs.rofi-blocks
