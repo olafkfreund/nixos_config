@@ -99,16 +99,49 @@ in
         fi
 
         ${optionalString cfg.autoInstall ''
-          # Step 2: Install GeForce NOW app
+          # Step 2: Ensure flathub remote is available for runtimes
+          echo "Ensuring flathub remote is available..."
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || true
+
+          # Wait for remote metadata to be fetched
+          sleep 3
+
+          # Step 3: Install required runtimes from flathub
+          echo "Installing required Freedesktop runtimes..."
+          attempt=1
+          runtimes_installed=false
+
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt to install runtimes..."
+
+            if flatpak install -y --user --from https://dl.flathub.org/repo/appstream/org.freedesktop.Platform.flatpakref 2>/dev/null || \
+               flatpak install -y --user flathub org.freedesktop.Platform//24.08 2>/dev/null; then
+              echo "Freedesktop Platform runtime installed."
+              runtimes_installed=true
+              break
+            fi
+
+            if [ $attempt -lt $max_attempts ]; then
+              sleep_time=$((attempt * ${toString cfg.remoteSetup.retryDelay}))
+              echo "Failed to install runtimes. Retrying in $sleep_time seconds..."
+              sleep $sleep_time
+            fi
+
+            attempt=$((attempt + 1))
+          done
+
+          if [ "$runtimes_installed" = "false" ]; then
+            echo "Warning: Could not install Freedesktop runtimes automatically."
+            echo "GeForce NOW may not work until runtimes are installed."
+            echo "Try manually: flatpak install --user flathub org.freedesktop.Platform//24.08"
+          fi
+
+          # Step 4: Install GeForce NOW app
           echo "Installing NVIDIA GeForce NOW..."
           attempt=1
 
           while [ $attempt -le $max_attempts ]; do
             echo "Attempt $attempt to install GeForce NOW..."
-
-            # Install required runtimes first
-            flatpak install -y --user flathub org.freedesktop.Sdk//24.08 || true
-            flatpak install -y --user flathub org.freedesktop.Platform//24.08 || true
 
             if flatpak install -y --user GeForceNOW com.nvidia.geforcenow; then
               echo "Successfully installed GeForce NOW."
