@@ -48,5 +48,8 @@ _: {
 
     # File synchronization
     ./syncthing.nix
+
+    # Gaming - Cloud streaming
+    ./geforcenow/default.nix
   ];
 }

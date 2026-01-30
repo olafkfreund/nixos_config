@@ -163,6 +163,12 @@ in
 
   # AI alerting removed - was non-functional, handled by DEX5550 monitoring server via Prometheus/Grafana/Alertmanager
 
+  # NVIDIA GeForce NOW cloud gaming (official Flatpak)
+  modules.services.geforcenow = {
+    enable = true;
+    autoInstall = true;
+  };
+
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {
