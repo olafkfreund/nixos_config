@@ -16,7 +16,7 @@ _: {
     ./codex-cli.nix
     ./claude-desktop
     ./claude-powerline.nix
-    ./moltbot # Moltbot AI assistant gateway for Telegram
+    # ./moltbot # DISABLED: nix-moltbot flake structure changed, needs update
 
     # Version control and CI/CD
     ./gitlab/default.nix
