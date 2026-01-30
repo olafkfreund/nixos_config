@@ -44,7 +44,7 @@ in
     targets = {
       chromium.enable = false; # Exclude browser theming
       gnome.enable = false; # Disable GNOME theming - let Home Manager handle it
-      gtk.enable = false; # Disable GTK theming - let Home Manager handle it
+      gtk.enable = false; # Let COSMIC manage GTK theming at runtime
       qt = {
         enable = true; # Enable Qt theming for consistent styling
         platform = lib.mkForce "qtct"; # Use qtct platform (supported by stylix)

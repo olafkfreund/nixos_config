@@ -12,6 +12,7 @@ in
     polarity = "dark";
     targets = {
       chromium.enable = false;
+      gtk.enable = false; # Let COSMIC manage GTK theming at runtime
       qt = {
         enable = true; # Enable Qt theming for consistent styling
         platform = lib.mkForce "qtct"; # Use qtct platform (supported by stylix)

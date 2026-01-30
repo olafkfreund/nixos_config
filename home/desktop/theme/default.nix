@@ -4,6 +4,7 @@ with lib;
   imports = [
     ./qt.nix
     ./dark-mode.nix # Global dark mode configuration for all desktop environments
+    ./gtk-cosmic-fix.nix # Auto-patch COSMIC GTK CSS with Gruvbox theme
   ];
 
   home.packages = with pkgs; [

@@ -53,12 +53,16 @@
   # Stylix theming targets configuration
   # - Enable for terminals (wezterm, ghostty)
   # - Disable GTK to let COSMIC desktop manage gtk.css files at runtime
-  #   (COSMIC generates ~/.config/gtk-{3,4}.0/gtk.css dynamically for its theme system)
+  #   COSMIC generates ~/.config/gtk-{3,4}.0/cosmic/dark.css and symlinks gtk.css to it
   stylix.targets = {
     wezterm.enable = true;
     ghostty.enable = true;
-    gtk.enable = false; # Let COSMIC manage GTK theming
+    gtk.enable = false; # Let COSMIC manage GTK theming (writes to cosmic/dark.css)
   };
+
+  # COSMIC GTK theme fix - auto-patches COSMIC's gtk.css with Gruvbox theme
+  # This ensures proper GTK4 styling while preserving COSMIC's color customizations
+  gtk-cosmic-fix.enable = true;
 
   # Note: nix-colors uses old base16-schemes - use stylix for theming instead
   # colorScheme = inputs.nix-colors.colorSchemes.gruvbox-dark-medium;

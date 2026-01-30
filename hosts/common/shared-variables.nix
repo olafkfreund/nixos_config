@@ -58,8 +58,8 @@
     };
     opacity = {
       desktop = 1.0;
-      terminal = 0.95;
-      popups = 0.95;
+      terminal = 1.0; # No transparency - fixes COSMIC/GTK issues
+      popups = 1.0; # No transparency
     };
   };
 

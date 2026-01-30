@@ -155,6 +155,9 @@ in
 
           # Notifications
           libnotify
+
+          # GTK theme manager for non-GNOME desktops
+          nwg-look
         ]
         ++ optionals cfg.installAllApps [
           # Productivity applications

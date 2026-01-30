@@ -19,10 +19,11 @@ in
         # Appearance
         # theme = "GruvboxDark"; # Disabled - let Stylix manage the theme
         font-family = "JetBrainsMono Nerd Font";
-        font-size = 15;
+        font-size = 12;
 
         # Window settings
-        window-decoration = false;
+        # NOTE: COSMIC desktop handles CSD properly, Hyprland may have issues
+        window-decoration = true;
         window-padding-x = 12;
         window-padding-y = 12;
         window-width = 120;
