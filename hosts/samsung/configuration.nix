@@ -100,6 +100,12 @@ in
     profile = "laptop";
   };
 
+  # NVIDIA GeForce NOW cloud gaming (official Flatpak)
+  modules.services.geforcenow = {
+    enable = true;
+    autoInstall = true;
+  };
+
   # Enable XDG portal for GNOME screen sharing
   modules.services.xdg-portal = {
     enable = true;
