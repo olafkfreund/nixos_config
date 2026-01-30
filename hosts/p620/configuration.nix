@@ -164,10 +164,9 @@ in
   # AI alerting removed - was non-functional, handled by DEX5550 monitoring server via Prometheus/Grafana/Alertmanager
 
   # NVIDIA GeForce NOW cloud gaming (official Flatpak)
-  modules.services.geforcenow = {
-    enable = true;
-    autoInstall = true;
-  };
+  # DISABLED: GeForce NOW Linux beta doesn't support AMD GPUs (p620 has RX 7900)
+  # Use browser instead: chromium --app=https://play.geforcenow.com
+  modules.services.geforcenow.enable = false;
 
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
