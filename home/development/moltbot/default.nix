@@ -1,26 +1,28 @@
+# Openclaw AI Assistant Gateway (formerly Moltbot)
+# Homepage: https://github.com/moltbot/nix-moltbot (now nix-openclaw)
 { config, lib, inputs, ... }:
 
 with lib;
 
 let
-  cfg = config.programs.moltbot;
+  cfg = config.programs.openclaw;
 in
 {
-  # Import the nix-moltbot Home Manager module
+  # Import the nix-openclaw Home Manager module
   imports = [
-    inputs.nix-moltbot.homeManagerModules.moltbot
+    inputs.nix-moltbot.homeManagerModules.openclaw
   ];
 
-  options.programs.moltbot = {
-    # Wrapper option to control whether we configure moltbot with our defaults
+  options.programs.openclaw = {
+    # Wrapper option to control whether we configure openclaw with our defaults
     configureWithDefaults = mkOption {
       type = types.bool;
       default = true;
       description = ''
-        When enabled, configures moltbot with sensible defaults for this NixOS
+        When enabled, configures Openclaw with sensible defaults for this NixOS
         infrastructure including Agenix secret paths and recommended plugins.
 
-        Set to false if you want to configure moltbot manually using the
+        Set to false if you want to configure Openclaw manually using the
         upstream options directly.
       '';
     };
@@ -47,20 +49,20 @@ in
       peekaboo = mkOption {
         type = types.bool;
         default = false;
-        description = "Enable the peekaboo plugin for image analysis";
+        description = "Enable the peekaboo plugin for image analysis (screenshots)";
       };
 
       oracle = mkOption {
         type = types.bool;
         default = false;
-        description = "Enable the oracle plugin for predictions";
+        description = "Enable the oracle plugin for web search predictions";
       };
     };
   };
 
   config = mkIf (cfg.enable && cfg.configureWithDefaults) {
-    # Configure moltbot with our Agenix-managed secrets
-    programs.moltbot = {
+    # Configure Openclaw with our Agenix-managed secrets
+    programs.openclaw = {
       # Telegram provider configuration - only if user IDs are set
       providers.telegram = mkIf (cfg.telegram.userIds != [ ]) {
         enable = true;
@@ -86,15 +88,15 @@ in
       instances.default = {
         systemd = {
           enable = true;
-          unitName = "moltbot-gateway";
+          unitName = "openclaw-gateway";
         };
       };
     };
 
     # Add warning if Telegram user IDs not configured
     warnings = optional (cfg.telegram.userIds == [ ]) ''
-      Moltbot is enabled but no Telegram user IDs are configured.
-      The bot won't respond to anyone. Set programs.moltbot.telegram.userIds
+      Openclaw is enabled but no Telegram user IDs are configured.
+      The bot won't respond to anyone. Set programs.openclaw.telegram.userIds
       to a list of authorized Telegram user IDs.
     '';
   };

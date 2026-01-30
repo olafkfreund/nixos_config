@@ -16,7 +16,7 @@ _: {
     ./codex-cli.nix
     ./claude-desktop
     ./claude-powerline.nix
-    # ./moltbot # DISABLED: nix-moltbot flake structure changed, needs update
+    ./moltbot # Openclaw AI assistant gateway (renamed from moltbot)
 
     # Version control and CI/CD
     ./gitlab/default.nix
