@@ -78,7 +78,7 @@ in
         while [ $attempt -le $max_attempts ]; do
           echo "Attempt $attempt to add GeForce NOW repository..."
 
-          if flatpak remote-add --user --if-not-exists GeForceNOW \
+          if flatpak remote-add --system --if-not-exists GeForceNOW \
                https://international.download.nvidia.com/GFNLinux/flatpak/geforcenow.flatpakrepo; then
             echo "Successfully added GeForce NOW repository."
             break
@@ -101,7 +101,7 @@ in
         ${optionalString cfg.autoInstall ''
           # Step 2: Ensure flathub remote is available for runtimes
           echo "Ensuring flathub remote is available..."
-          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || true
+          flatpak remote-add --system --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || true
 
           # Wait for remote metadata to be fetched
           sleep 3
@@ -114,8 +114,8 @@ in
           while [ $attempt -le $max_attempts ]; do
             echo "Attempt $attempt to install runtimes..."
 
-            if flatpak install -y --user --from https://dl.flathub.org/repo/appstream/org.freedesktop.Platform.flatpakref 2>/dev/null || \
-               flatpak install -y --user flathub org.freedesktop.Platform//24.08 2>/dev/null; then
+            if flatpak install -y --system --from https://dl.flathub.org/repo/appstream/org.freedesktop.Platform.flatpakref 2>/dev/null || \
+               flatpak install -y --system flathub org.freedesktop.Platform//24.08 2>/dev/null; then
               echo "Freedesktop Platform runtime installed."
               runtimes_installed=true
               break
@@ -133,7 +133,7 @@ in
           if [ "$runtimes_installed" = "false" ]; then
             echo "Warning: Could not install Freedesktop runtimes automatically."
             echo "GeForce NOW may not work until runtimes are installed."
-            echo "Try manually: flatpak install --user flathub org.freedesktop.Platform//24.08"
+            echo "Try manually: flatpak install --system flathub org.freedesktop.Platform//24.08"
           fi
 
           # Step 4: Install GeForce NOW app
@@ -143,7 +143,7 @@ in
           while [ $attempt -le $max_attempts ]; do
             echo "Attempt $attempt to install GeForce NOW..."
 
-            if flatpak install -y --user GeForceNOW com.nvidia.geforcenow; then
+            if flatpak install -y --system GeForceNOW com.nvidia.geforcenow; then
               echo "Successfully installed GeForce NOW."
               break
             fi
@@ -159,14 +159,14 @@ in
 
           if [ $attempt -gt $max_attempts ]; then
             echo "Warning: Failed to install GeForce NOW after $max_attempts attempts."
-            echo "You can try manually: flatpak install --user GeForceNOW com.nvidia.geforcenow"
+            echo "You can try manually: flatpak install --system GeForceNOW com.nvidia.geforcenow"
           fi
         ''}
 
         ${optionalString cfg.waylandFix ''
           # Step 3: Apply Wayland fix if enabled
           echo "Applying Wayland fix for GeForce NOW..."
-          flatpak override --user --nosocket=wayland com.nvidia.geforcenow || true
+          flatpak override --system --nosocket=wayland com.nvidia.geforcenow || true
           echo "Wayland fix applied."
         ''}
 
@@ -191,7 +191,7 @@ in
       ''
         GeForce NOW module is enabled but autoInstall is disabled.
         The GeForce NOW remote will be added, but you need to install manually:
-          flatpak install --user GeForceNOW com.nvidia.geforcenow
+          flatpak install --system GeForceNOW com.nvidia.geforcenow
       ''
     ];
   };
