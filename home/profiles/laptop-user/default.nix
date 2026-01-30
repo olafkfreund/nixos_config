@@ -63,7 +63,7 @@
       # Communication optimized for mobile
       obs = false; # Skip resource-intensive recording
       evince = true; # Lightweight document viewer
-      kdeconnect = true; # Essential mobile integration
+      kdeconnect = false; # Disabled - using COSMIC Connect instead
       slack = true; # Communication (can be battery-optimized)
     };
 

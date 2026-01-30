@@ -10,7 +10,7 @@
     # Program features
     programs = {
       obs.enable = true;
-      kdeconnect.enable = true;
+      kdeconnect.enable = false; # Disabled - using COSMIC Connect
       slack.enable = true;
     };
 

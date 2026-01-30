@@ -94,7 +94,7 @@ in
       # Communication and media
       obs = true;
       evince = true;
-      kdeconnect = true;
+      kdeconnect = false; # Disabled - using COSMIC Connect instead
       slack = true;
     };
 

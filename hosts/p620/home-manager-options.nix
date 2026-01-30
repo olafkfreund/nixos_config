@@ -1,6 +1,6 @@
 { lib, ... }: {
   programs.obs.enable = lib.mkForce true;
-  programs.kdeconnect.enable = lib.mkForce true;
+  programs.kdeconnect.enable = lib.mkForce false; # Disabled - using COSMIC Connect
   programs.slack.enable = lib.mkForce true;
 
   # Terminal app desktop entries

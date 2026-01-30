@@ -51,7 +51,7 @@
       # Communication and media
       obs = true; # Content creation
       evince = true; # PDF viewer
-      kdeconnect = true; # Mobile integration
+      kdeconnect = false; # Disabled - using COSMIC Connect instead
       slack = true; # Communication
     };
 

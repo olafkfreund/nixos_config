@@ -63,7 +63,7 @@
       # Communication and media for development
       obs = true; # Screen recording for presentations
       evince = true; # Alternative PDF viewer
-      kdeconnect = true; # Mobile integration for notifications
+      kdeconnect = false; # Disabled - using COSMIC Connect instead
       slack = true; # Team communication
     };
 
