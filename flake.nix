@@ -80,6 +80,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # COSMIC Connect - KDE Connect alternative for COSMIC Desktop
+    cosmic-connect = {
+      url = "github:olafkfreund/cosmic-connect-desktop-app";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Hardware specific (removed unused razer-laptop-control)
 
     # Package collections
@@ -198,6 +204,8 @@
           cosmic-ext-applet-music-player = inputs.cosmic-music-player.packages.${prev.stdenv.hostPlatform.system}.default;
           cosmic-applet-spotify = inputs.cosmic-applet-spotify.packages.${prev.stdenv.hostPlatform.system}.default;
         })
+        # COSMIC Connect - KDE Connect alternative for COSMIC Desktop
+        inputs.cosmic-connect.overlays.default
         # Custom package: glim - GitLab CI/CD TUI
         (final: _prev: {
           glim = final.callPackage ./overlays/glim { };
@@ -312,6 +320,7 @@
               inputs.agenix.nixosModules.default
               inputs.lanzaboote.nixosModules.lanzaboote
               nix-index-database.nixosModules.nix-index
+              inputs.cosmic-connect.nixosModules.default
               ./home/shell/zellij/zjstatus.nix
             ]
             ++ stylixModule

@@ -79,6 +79,28 @@ in
         Integrates with COSMIC desktop environment for native experience.
       '';
     };
+
+    enableConnect = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Enable COSMIC Connect for device connectivity (KDE Connect alternative).
+
+        Provides device synchronization, file sharing, clipboard sharing, notifications,
+        media control, and remote input capabilities across devices.
+        Includes daemon service and panel applet for COSMIC Desktop.
+      '';
+    };
+
+    connectOpenFirewall = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Open firewall ports for COSMIC Connect device discovery and file transfer.
+
+        Opens TCP/UDP 1814-1864 for discovery and TCP 1739-1764 for file transfer.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -353,6 +375,12 @@ in
           };
         };
       };
+    };
+
+    # COSMIC Connect - KDE Connect alternative for device connectivity
+    services.cosmic-connect = mkIf cfg.enableConnect {
+      enable = true;
+      openFirewall = cfg.connectOpenFirewall;
     };
   };
 }
