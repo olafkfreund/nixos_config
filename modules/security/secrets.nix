@@ -92,14 +92,6 @@ in
         group = "postgres";
         mode = "0400";
       }))
-
-      # Moltbot AI assistant gateway secrets (workstations only)
-      (mkIf (builtins.elem config.networking.hostName [ "p620" "razer" "samsung" ]) (mkSecret "moltbot-telegram-token" {
-        file = ../../secrets/moltbot-telegram-token.age;
-        owner = "olafkfreund";
-        group = "users";
-        mode = "0400";
-      }))
     ];
 
     # Warning when secrets directory doesn't exist
