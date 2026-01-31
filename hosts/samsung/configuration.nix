@@ -63,9 +63,8 @@ in
     nameservers = [ "1.1.1.1" "8.8.8.8" ];
 
     # Firewall configuration - explicit SSH access
-    # Override common networking module which disables firewall
     firewall = {
-      enable = lib.mkForce true;
+      enable = true;
       allowedTCPPorts = [
         22 # SSH - critical for remote access
         3389 # RDP - for remote desktop (also set by features.gnome-remote-desktop)

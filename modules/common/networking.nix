@@ -44,7 +44,7 @@ with lib; {
         useDHCP = false;
         useNetworkd = false;
         useHostResolvConf = false;
-        firewall.enable = false;
+        firewall.enable = lib.mkDefault true; # Allow hosts to override
         nftables.enable = true;
         timeServers = [ "pool.ntp.org" ];
       };
@@ -65,7 +65,7 @@ with lib; {
         useDHCP = false;
         useNetworkd = true;
         useHostResolvConf = false;
-        firewall.enable = false;
+        firewall.enable = lib.mkDefault true; # Allow hosts to override
         nftables.enable = true;
         timeServers = [ "pool.ntp.org" ];
       };
@@ -99,7 +99,7 @@ with lib; {
       # Minimal networking configuration with just DHCP
       networking = {
         useDHCP = true;
-        firewall.enable = false;
+        firewall.enable = lib.mkDefault true; # Allow hosts to override
         timeServers = [ "pool.ntp.org" ];
       };
     })

@@ -68,10 +68,8 @@ in
     nameservers = [ "1.1.1.1" "8.8.8.8" ];
 
     # Firewall configuration - explicit SSH access
-    # Firewall enabled for proper security with explicit SSH and RDP access
-    # Override common networking module which disables firewall
     firewall = {
-      enable = lib.mkForce true; # Enabled for security with explicit port access
+      enable = true;
       allowedTCPPorts = [
         22 # SSH - critical for remote access
         3389 # RDP - for headless remote desktop
