@@ -10,8 +10,11 @@
   # '';
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.plymouth.enable = true;
-  boot.blacklistedKernelModules = [ "v4l2loopback" ];
 
-  # Force empty extraModulePackages to prevent any automatic inclusion
-  boot.extraModulePackages = lib.mkForce [ ];
+  # OBS Virtual Cam Support - v4l2loopback setup
+  boot.kernelModules = [ "v4l2loopback" ];
+  boot.extraModulePackages = with pkgs.linuxPackages_latest; [ v4l2loopback ];
+  boot.extraModprobeConfig = ''
+    options v4l2loopback devices=2 video_nr=1,2 card_label="OBS Virtual Cam 1","OBS Virtual Cam 2" exclusive_caps=1
+  '';
 }

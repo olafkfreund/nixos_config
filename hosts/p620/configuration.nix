@@ -325,7 +325,7 @@ in
     };
 
     media = {
-      droidcam = true;
+      droidcam = false; # Disabled - building custom solution
     };
 
     # Enable QuickShell for testing (experimental - runs alongside Waybar)

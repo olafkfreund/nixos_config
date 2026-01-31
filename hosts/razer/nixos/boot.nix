@@ -31,17 +31,10 @@
   # boot.kernel.sysctl = {
   #   "vm.max_map_count" = 1048576; # Helps with memory-mapped files for large models
   # };
-  # This is for OBS Virtual Cam Support - v4l2loopback setup
-  # boot.kernelPackages = pkgs.linuxPackages_default;
-  # Temporarily disabled due to build failures
-  # boot.kernelModules = [ "v4l2loopback" ];
-  # boot.extraModulePackages = with config.boot.kernelPackages; [
-  #   v4l2loopback
-  # ];
-  # boot.extraModprobeConfig = ''
-  #   options v4l2loopback devices=2 video_nr=1,2 card_label="OBS Cam1","OBS Cam2" exclusive_caps=1
-  # '';
-
-  # Fix for v4l2loopback build failures
-  boot.blacklistedKernelModules = [ "v4l2loopback" ];
+  # OBS Virtual Cam Support - v4l2loopback setup
+  boot.kernelModules = [ "v4l2loopback" ];
+  boot.extraModulePackages = with pkgs.linuxPackages_6_18; [ v4l2loopback ];
+  boot.extraModprobeConfig = ''
+    options v4l2loopback devices=2 video_nr=1,2 card_label="OBS Virtual Cam 1","OBS Virtual Cam 2" exclusive_caps=1
+  '';
 }

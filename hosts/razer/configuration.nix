@@ -258,12 +258,12 @@ in
       thunderbird = true;
       obsidian = true;
       office = true;
-      webcam = false; # Disabled due to v4l2loopback build failures
+      webcam = true; # OBS Virtual Camera support
       print = true;
     };
 
     media = {
-      droidcam = false; # Disabled due to v4l2loopback dependency
+      droidcam = false; # Disabled - building custom solution
     };
 
     # COSMIC Desktop with COSMIC Greeter enabled

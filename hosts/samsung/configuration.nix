@@ -254,7 +254,7 @@ in
     };
 
     media = {
-      droidcam = true;
+      droidcam = false; # Disabled - building custom solution
     };
 
     # COSMIC Desktop with COSMIC Greeter enabled

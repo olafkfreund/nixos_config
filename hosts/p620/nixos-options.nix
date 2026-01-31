@@ -25,7 +25,7 @@
     thunderbird.enable = lib.mkForce true;
     obsidian.enable = lib.mkForce true;
     office.enable = lib.mkForce true;
-    webcam.enable = lib.mkForce false; # Temporarily disabled due to v4l2loopback build failure
+    webcam.enable = lib.mkForce true; # OBS Virtual Camera support
   };
 
   # Virtualization tools and services

@@ -10,11 +10,10 @@
     useTmpfs = true;
     tmpfsSize = "32G"; # Allocate 32GB of RAM for /tmp (increased for LibreOffice and large builds)
   };
-  # This is for OBS Virtual Cam Support - v4l2loopback setup
-  # boot.kernelPackages = pkgs.linuxPackages_default;
-  # boot.kernelModules = ["v4l2loopback"];
+  # OBS Virtual Cam Support - v4l2loopback setup
+  boot.kernelModules = [ "v4l2loopback" ];
   boot.initrd.kernelModules = [ "amdgpu" ];
-  boot.blacklistedKernelModules = [ "nvidia" "nouveau" "v4l2loopback" ];
+  boot.blacklistedKernelModules = [ "nvidia" "nouveau" ];
   boot.kernelParams = [
     "amdgpu.gpu_recovery=1"
     "amd_iommu=on"
@@ -22,8 +21,11 @@
     "rcu_nocbs=0-127" # Optimize RCU callbacks
     "numa_balancing=disable" # Can improve performance for some workloads
   ];
-  # Force empty extraModulePackages to prevent any automatic inclusion
-  boot.extraModulePackages = lib.mkForce [ ];
+  # v4l2loopback for OBS Virtual Camera support
+  boot.extraModulePackages = with pkgs.linuxPackages_latest; [ v4l2loopback ];
+  boot.extraModprobeConfig = ''
+    options v4l2loopback devices=2 video_nr=1,2 card_label="OBS Virtual Cam 1","OBS Virtual Cam 2" exclusive_caps=1
+  '';
   systemd.tmpfiles.rules = [
     "f /dev/shm/scream 0660 olafkfreund qemu-libvirtd -"
     "f /dev/shm/looking-glass 0660 olafkfreund qemu-libvirtd -"
