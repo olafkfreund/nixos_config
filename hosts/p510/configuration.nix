@@ -348,8 +348,11 @@ in
     "/etc/ssh/ssh_host_rsa_key" # Host key (RSA fallback)
   ];
 
-  # Home Assistant port for local network access
-  networking.firewall.allowedTCPPorts = [ 8123 ];
+  # Firewall ports for local network access
+  networking.firewall.allowedTCPPorts = [
+    22 # SSH - critical for remote access
+    8123 # Home Assistant
+  ];
 
   nixpkgs.config = {
     allowUnfree = true; # Required for NVIDIA drivers
