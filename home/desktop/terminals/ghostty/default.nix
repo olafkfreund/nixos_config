@@ -22,10 +22,7 @@ in
         font-size = 12;
 
         # Window settings
-        # Use server-side decorations (window manager's titlebar) instead of
-        # GTK/Adwaita CSD which has oversized buttons that can't be reduced
-        # See: https://github.com/ghostty-org/ghostty/discussions/3784
-        window-decoration = "server";
+        window-decoration = true;
         window-padding-x = 12;
         window-padding-y = 12;
         window-width = 120;
