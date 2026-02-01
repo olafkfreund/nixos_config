@@ -4,53 +4,60 @@ with lib;
 let
   cfg = config.gtk-cosmic-fix;
 
-  # Button fixes CSS content
+  # Button fixes CSS content - uses !important to override Adwaita defaults
   buttonFixCSS = ''
-    /* Window control button sizing fix for GTK4 apps */
-    /* Fixes oversized Adwaita CSD buttons */
-    windowcontrols button {
-      min-height: 24px;
-      min-width: 24px;
-      max-height: 24px;
-      max-width: 24px;
-      padding: 4px;
-      margin: 2px;
-      border-radius: 50%;
+    /* Window control button sizing fix for GTK4/libadwaita apps */
+    /* Forces smaller buttons to override Adwaita defaults */
+
+    /* Target all window control buttons */
+    windowcontrols button,
+    windowcontrols > button,
+    headerbar windowcontrols button,
+    .titlebar windowcontrols button {
+      min-height: 24px !important;
+      min-width: 24px !important;
+      max-height: 24px !important;
+      max-width: 24px !important;
+      padding: 2px !important;
+      margin: 2px !important;
+      border-radius: 50% !important;
     }
 
+    /* Specific button types */
     windowcontrols button.close,
     windowcontrols button.maximize,
     windowcontrols button.minimize {
-      min-height: 24px;
-      min-width: 24px;
-      max-height: 24px;
-      max-width: 24px;
-      padding: 4px;
+      min-height: 24px !important;
+      min-width: 24px !important;
+      max-height: 24px !important;
+      max-width: 24px !important;
+      padding: 2px !important;
     }
 
-    headerbar windowcontrols button,
-    .titlebar windowcontrols button {
-      min-height: 24px;
-      min-width: 24px;
-      max-height: 24px;
-      max-width: 24px;
-      padding: 4px;
-      margin: 2px;
-    }
-
-    /* Ensure icons inside buttons don't overflow */
+    /* Icon sizing inside buttons */
     windowcontrols button image,
-    windowcontrols button > image {
-      min-width: 16px;
-      min-height: 16px;
-      max-width: 16px;
-      max-height: 16px;
+    windowcontrols button > image,
+    windowcontrols > button > image {
+      -gtk-icon-size: 16px !important;
+      min-width: 16px !important;
+      min-height: 16px !important;
+      max-width: 16px !important;
+      max-height: 16px !important;
     }
 
-    /* Reduce headerbar padding for compact look */
-    headerbar {
-      min-height: 36px;
-      padding: 2px 6px;
+    /* Reduce headerbar height */
+    headerbar,
+    .titlebar,
+    headerbar.titlebar {
+      min-height: 38px !important;
+      padding-top: 2px !important;
+      padding-bottom: 2px !important;
+    }
+
+    /* Box containing window controls */
+    windowcontrols {
+      margin: 0 !important;
+      padding: 0 !important;
     }
   '';
 

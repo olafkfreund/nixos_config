@@ -232,8 +232,8 @@ in
         };
         # Enable WhatsApp MCP server for AI-assisted messaging
         whatsapp = {
-          enable = true;
-          enableVoiceMessages = true; # Enable FFmpeg for voice message conversion
+          enable = false; # Disabled - not working
+          enableVoiceMessages = false;
         };
         # Enable additional MCP servers
         servers = {
