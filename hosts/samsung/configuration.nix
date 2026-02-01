@@ -81,6 +81,12 @@ in
     openFirewall = true;
   };
 
+  # COSMIC Notifications NG - Enhanced notifications with rich content support
+  # DISABLED: Module has bug - uses xdg.configFile (Home Manager option) in NixOS module
+  # TODO: Fix upstream at github:olafkfreund/cosmic-notifications-ng/nix/module.nix
+  # The overlay still provides the package via nixpkgs.overlays
+  # services.cosmic-notifications-ng.enable = true;
+
   # COSMIC Connect - Device connectivity solution for COSMIC Desktop
   # DISABLED: webkit2gtk dependency issue in upstream package
   # TODO: Re-enable when cosmic-connect package is fixed
@@ -264,6 +270,7 @@ in
       installAllApps = true; # Install full Cosmic app suite
       disableOsd = true; # Workaround for polkit agent crashes in COSMIC beta
     };
+
 
     # COSMIC Package Updater Applet - NixOS update notifications
     desktop.cosmic-applet-package-updater = {
