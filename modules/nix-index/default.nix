@@ -20,7 +20,7 @@
           text = ''
             mkdir -p ~/.cache/nix-index
             cd ~/.cache/nix-index
-            name="index-${pkgs.stdenv.system}"
+            name="index-${pkgs.stdenv.hostPlatform.system}"
             wget -N "https://github.com/Mic92/nix-index-database/releases/latest/download/$name"
             ln -sf "$name" "files"
           '';
