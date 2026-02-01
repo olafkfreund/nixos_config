@@ -115,6 +115,12 @@
       url = "github:nomoth/cosmic-applet-spotify";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # COSMIC Notifications NG - Enhanced notifications with rich content support
+    cosmic-notifications-ng = {
+      url = "github:olafkfreund/cosmic-notifications-ng";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -206,6 +212,8 @@
         })
         # COSMIC Connect - KDE Connect alternative for COSMIC Desktop
         inputs.cosmic-connect.overlays.default
+        # COSMIC Notifications NG - Enhanced notifications with images, links, progress
+        inputs.cosmic-notifications-ng.overlays.default
         # Custom package: glim - GitLab CI/CD TUI
         (final: _prev: {
           glim = final.callPackage ./overlays/glim { };
