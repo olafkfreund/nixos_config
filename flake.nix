@@ -329,10 +329,7 @@
               inputs.lanzaboote.nixosModules.lanzaboote
               nix-index-database.nixosModules.nix-index
               inputs.cosmic-connect.nixosModules.default
-              # DISABLED: cosmic-notifications-ng module uses xdg.configFile (Home Manager only)
-              # TODO: Fix upstream at github:olafkfreund/cosmic-notifications-ng/nix/module.nix
-              # The overlay still provides the package via nixpkgs.overlays
-              # inputs.cosmic-notifications-ng.nixosModules.default
+              inputs.cosmic-notifications-ng.nixosModules.default
               ./home/shell/zellij/zjstatus.nix
             ]
             ++ stylixModule

@@ -82,10 +82,7 @@ in
   };
 
   # COSMIC Notifications NG - Enhanced notifications with rich content support
-  # DISABLED: Module has bug - uses xdg.configFile (Home Manager option) in NixOS module
-  # TODO: Fix upstream at github:olafkfreund/cosmic-notifications-ng/nix/module.nix
-  # The overlay still provides the package via nixpkgs.overlays
-  # services.cosmic-notifications-ng.enable = true;
+  services.cosmic-notifications-ng.enable = true;
 
   # COSMIC Connect - Device connectivity solution for COSMIC Desktop
   # DISABLED: webkit2gtk dependency issue in upstream package

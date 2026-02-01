@@ -222,11 +222,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1769973210,
-        "narHash": "sha256-QIul73VcSPkBiEkR2l33Q3DXN9Qp+8ZREg+OTIXt77c=",
+        "lastModified": 1769976460,
+        "narHash": "sha256-X76LAG+BepvOhaaw4cJrggJm3IbqfS67r7Fq3+V6Yh0=",
         "owner": "olafkfreund",
         "repo": "cosmic-notifications-ng",
-        "rev": "31a129998cd7e3de9980b9e701729988367c4d44",
+        "rev": "d1fc5ea07453dfa2c42e29a64baadd0d1063c137",
         "type": "github"
       },
       "original": {
