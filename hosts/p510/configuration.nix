@@ -45,6 +45,9 @@ in
     # Disable IPv6
     enableIPv6 = false;
 
+    # Disable nftables to use iptables (required for security.sshHardening)
+    nftables.enable = lib.mkForce false;
+
     # Note: Tailscale is enabled via services.tailscale (built-in NixOS module)
     # Custom networking.tailscale module was removed during anti-pattern cleanup
 
