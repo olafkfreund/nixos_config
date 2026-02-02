@@ -49,6 +49,11 @@ in
     # Enable real-time kit for audio performance
     security.rtkit.enable = true;
 
+    # GStreamer PipeWire plugin for audio integration
+    environment.systemPackages = with pkgs.gst_all_1; [
+      gst-plugin-pipewire # PipeWire plugin for GStreamer
+    ];
+
     # Configure audio services
     services = {
       # Disable PulseAudio in favor of PipeWire
