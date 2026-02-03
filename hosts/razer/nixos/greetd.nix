@@ -2,19 +2,24 @@
 , pkgs
 , ...
 }: {
-  services.greetd = {
-    enable = true;
-    settings = {
-      terminal.vt = 1;
-      default_session = {
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-user-session --asterisks --power-shutdown 'systemctl poweroff' --power-reboot 'systemctl reboot' --greeting 'Welcome to Razer Gaming Laptop'";
-        user = "greeter";
-      };
-    };
-  };
-
-  # Install greetd-related packages
-  # greetd packages moved to main configuration.nix for consolidation
+  # NOTE: greetd display manager disabled - using COSMIC Greeter instead
+  # COSMIC Greeter is enabled via features.desktop.cosmic.useCosmicGreeter = true
+  # which provides proper lock/logout functionality for COSMIC Desktop
+  #
+  # If you need to fall back to tuigreet, disable cosmic-greeter first:
+  # features.desktop.cosmic.useCosmicGreeter = false;
+  # Then uncomment the greetd configuration below:
+  #
+  # services.greetd = {
+  #   enable = true;
+  #   settings = {
+  #     terminal.vt = 1;
+  #     default_session = {
+  #       command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-user-session --asterisks --power-shutdown 'systemctl poweroff' --power-reboot 'systemctl reboot' --greeting 'Welcome to Razer Gaming Laptop'";
+  #       user = "greeter";
+  #     };
+  #   };
+  # };
 
   # Security and authentication configuration
   security = {

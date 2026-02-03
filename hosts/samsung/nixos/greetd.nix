@@ -1,17 +1,24 @@
 { pkgs, ... }: {
-  # Enhanced greetd display manager with tuigreet
-  services.greetd = {
-    enable = true;
-    settings = {
-      terminal.vt = 1;
-      default_session = {
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-user-session --asterisks --greeting 'Welcome to P620 AMD Workstation'";
-        user = "greeter";
-      };
-    };
-  };
+  # NOTE: greetd display manager disabled - using COSMIC Greeter instead
+  # COSMIC Greeter is enabled via features.desktop.cosmic.useCosmicGreeter = true
+  # which provides proper lock/logout functionality for COSMIC Desktop
+  #
+  # If you need to fall back to tuigreet, disable cosmic-greeter first:
+  # features.desktop.cosmic.useCosmicGreeter = false;
+  # Then uncomment the greetd configuration below:
+  #
+  # services.greetd = {
+  #   enable = true;
+  #   settings = {
+  #     terminal.vt = 1;
+  #     default_session = {
+  #       command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-user-session --asterisks --greeting 'Welcome to Samsung Laptop'";
+  #       user = "greeter";
+  #     };
+  #   };
+  # };
 
-  # Install greetd-related packages
+  # Install greetd-related packages (kept for potential fallback)
   environment.systemPackages = with pkgs; [
     tuigreet
   ];

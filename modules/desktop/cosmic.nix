@@ -111,6 +111,9 @@ in
         cosmic-greeter.enable = cfg.useCosmicGreeter;
         defaultSession = mkIf cfg.defaultSession "cosmic";
       };
+      # Disable greetd when using cosmic-greeter to prevent display manager conflicts
+      # cosmic-greeter handles lock/logout - greetd would interfere with these functions
+      greetd.enable = mkIf cfg.useCosmicGreeter (lib.mkForce false);
     };
 
     # Wrap cosmic-comp with proper library paths to fix libEGL.so.1 loading

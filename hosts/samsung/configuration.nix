@@ -84,6 +84,9 @@ in
   # COSMIC Notifications NG - Enhanced notifications with rich content support
   services.cosmic-notifications-ng.enable = true;
 
+  # COSMIC BG NG - Enhanced backgrounds with animated, video, and shader wallpaper support
+  services.cosmic-bg-ng.enable = true;
+
   # COSMIC Connect - Device connectivity solution for COSMIC Desktop
   # DISABLED: webkit2gtk dependency issue in upstream package
   # TODO: Re-enable when cosmic-connect package is fixed

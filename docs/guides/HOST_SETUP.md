@@ -178,7 +178,7 @@ nixos-rebuild switch --flake .#new-hostname
   hardware.graphics.extraPackages = with pkgs; [
     intel-media-driver
     vaapiIntel
-    vaapiVdpau
+    libva-vdpau-driver # Renamed from vaapiVdpau
   ];
 }
 ```
