@@ -356,7 +356,8 @@ in
 
         # Fix for greetd service not inheriting LD_LIBRARY_PATH
         # This ensures cosmic-comp can find libEGL.so.1 from libglvnd
-        greetd = mkIf cfg.useCosmicGreeter {
+        # Only apply when NOT using cosmic-greeter (i.e., when greetd is actually enabled)
+        greetd = mkIf (!cfg.useCosmicGreeter) {
           path = [ pkgs.libglvnd pkgs.mesa ];
           serviceConfig = {
             Environment = [
