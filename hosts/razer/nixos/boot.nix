@@ -35,6 +35,6 @@
   boot.kernelModules = [ "v4l2loopback" ];
   boot.extraModulePackages = with pkgs.linuxPackages_6_18; [ v4l2loopback ];
   boot.extraModprobeConfig = ''
-    options v4l2loopback devices=2 video_nr=1,2 card_label="OBS Virtual Cam 1","OBS Virtual Cam 2" exclusive_caps=1
+    options v4l2loopback devices=3 video_nr=1,2,10 card_label="OBS Virtual Cam 1","OBS Virtual Cam 2","COSMIC Camera" exclusive_caps=1,1,1
   '';
 }

@@ -91,7 +91,7 @@
         extraPackages = with pkgs; [
           intel-media-driver
           vaapiIntel
-          vaapiVdpau
+          libva-vdpau-driver # Renamed from vaapiVdpau
           # libvdpau-va-gl removed - old unmaintained package with CMake compatibility issues
           # Modern Intel systems work perfectly with intel-media-driver and vaapiIntel
         ];

@@ -121,6 +121,12 @@
       url = "github:olafkfreund/cosmic-notifications-ng";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # COSMIC BG NG - Enhanced background service with animated, video, and shader wallpaper support
+    cosmic-bg-ng = {
+      url = "github:olafkfreund/cosmic-bg-ng";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -214,6 +220,8 @@
         inputs.cosmic-connect.overlays.default
         # COSMIC Notifications NG - Enhanced notifications with images, links, progress
         inputs.cosmic-notifications-ng.overlays.default
+        # COSMIC BG NG - Enhanced backgrounds with animated, video, and shader support
+        inputs.cosmic-bg-ng.overlays.default
         # Custom package: glim - GitLab CI/CD TUI
         (final: _prev: {
           glim = final.callPackage ./overlays/glim { };
@@ -330,6 +338,7 @@
               nix-index-database.nixosModules.nix-index
               inputs.cosmic-connect.nixosModules.default
               inputs.cosmic-notifications-ng.nixosModules.default
+              inputs.cosmic-bg-ng.nixosModules.default
               ./home/shell/zellij/zjstatus.nix
             ]
             ++ stylixModule
