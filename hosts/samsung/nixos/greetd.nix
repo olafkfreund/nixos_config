@@ -26,7 +26,7 @@
   # Enhanced security and authentication configuration
   security = {
     # Unlock GNOME keyring on login
-    pam.services.greetd = {
+    pam.services.cosmic-greeter = {
       enableGnomeKeyring = true;
     };
 
