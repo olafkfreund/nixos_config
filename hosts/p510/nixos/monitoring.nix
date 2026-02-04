@@ -203,14 +203,9 @@ _: {
     };
   };
 
-  # Open required ports in the firewall
-  networking.firewall.allowedTCPPorts = [
-    3000 # Grafana
-    3100 # Loki
-    9090 # Prometheus
-    9100 # Node Exporter
-    28183 # Promtail
-  ];
+  # Firewall disabled on P510 - no port configuration needed
+  # Services accessible on internal network: Grafana (3000), Loki (3100),
+  # Prometheus (9090), Node Exporter (9100), Promtail (28183)
 
   # Create required directories with correct permissions
   systemd.tmpfiles.rules = [
