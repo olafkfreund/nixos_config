@@ -350,15 +350,19 @@ in
     # X server and desktop environment
     xserver = {
       enable = true;
-      displayManager.xserverArgs = [
-        "-nolisten tcp"
-        "-dpi 96"
-      ];
+      displayManager = {
+        xserverArgs = [
+          "-nolisten tcp"
+          "-dpi 96"
+        ];
+        # Explicitly disable LightDM - using COSMIC Greeter instead
+        lightdm.enable = lib.mkForce false;
+      };
       videoDrivers = [ vars.gpu ];
     };
 
-    # Desktop environment
-    desktopManager.gnome.enable = true;
+    # Desktop environment - GNOME disabled, using COSMIC instead
+    desktopManager.gnome.enable = false;
   };
 
   # Hardware and service specific configurations

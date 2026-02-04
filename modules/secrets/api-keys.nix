@@ -105,7 +105,9 @@ in
         fi
 
         if [ -r "/run/agenix/api-github-token" ]; then
-          echo "export GITHUB_TOKEN=\"$(cat /run/agenix/api-github-token)\""
+          # Export as GITHUB_API_TOKEN to avoid conflict with gh CLI credential management
+          # gh CLI expects to manage its own credentials via 'gh auth login'
+          echo "export GITHUB_API_TOKEN=\"$(cat /run/agenix/api-github-token)\""
         fi
 
         # If no secrets are available, output nothing (safe for eval)
@@ -122,7 +124,7 @@ in
         [ -n "$GEMINI_API_KEY" ] && echo "✅ Gemini: Available" || echo "❌ Gemini: Not available"
         [ -n "$ANTHROPIC_API_KEY" ] && echo "✅ Anthropic: Available" || echo "❌ Anthropic: Not available"
         [ -n "$LANGCHAIN_API_KEY" ] && echo "✅ LangChain: Available" || echo "❌ LangChain: Not available"
-        [ -n "$GITHUB_TOKEN" ] && echo "✅ GitHub Token: Available" || echo "❌ GitHub Token: Not available"
+        [ -n "$GITHUB_API_TOKEN" ] && echo "✅ GitHub API Token: Available" || echo "❌ GitHub API Token: Not available"
 
         echo ""
         echo "Secret Files:"
