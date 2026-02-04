@@ -351,11 +351,10 @@ in
     "/etc/ssh/ssh_host_rsa_key" # Host key (RSA fallback)
   ];
 
-  # Firewall ports for local network access
-  networking.firewall.allowedTCPPorts = [
-    22 # SSH - critical for remote access
-    8123 # Home Assistant
-  ];
+  # Disable firewall - P510 is on trusted internal network
+  # Security is provided by Tailscale ACLs and router firewall
+  # Services: Plex, Sonarr, Radarr, NZBGet, Tautulli, etc. need unrestricted access
+  networking.firewall.enable = false;
 
   nixpkgs.config = {
     allowUnfree = true; # Required for NVIDIA drivers
