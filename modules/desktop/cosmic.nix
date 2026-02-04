@@ -107,13 +107,17 @@ in
     # Enable COSMIC Desktop Environment and display manager configuration
     services = {
       desktopManager.cosmic.enable = true;
+
+      # Enable cosmic-greeter display manager
+      # NixOS's displayManager.cosmic-greeter handles all the complexity:
+      #   - Creates cosmic-greeter user automatically
+      #   - Configures greetd with cosmic-greeter-start command
+      #   - Sets up proper environment variables (XCURSOR_THEME, etc.)
+      #   - Manages all dependencies and services
       displayManager = {
         cosmic-greeter.enable = cfg.useCosmicGreeter;
         defaultSession = mkIf cfg.defaultSession "cosmic";
       };
-      # Disable greetd when using cosmic-greeter to prevent display manager conflicts
-      # cosmic-greeter handles lock/logout - greetd would interfere with these functions
-      greetd.enable = mkIf cfg.useCosmicGreeter (lib.mkForce false);
     };
 
     # Wrap cosmic-comp with proper library paths to fix libEGL.so.1 loading
@@ -354,20 +358,6 @@ in
           SYSTEMD_LOG_LEVEL = "info";
         };
 
-        # Fix for greetd service not inheriting LD_LIBRARY_PATH
-        # This ensures cosmic-comp can find libEGL.so.1 from libglvnd
-        # Only apply when NOT using cosmic-greeter (i.e., when greetd is actually enabled)
-        greetd = mkIf (!cfg.useCosmicGreeter) {
-          path = [ pkgs.libglvnd pkgs.mesa ];
-          serviceConfig = {
-            Environment = [
-              "LD_LIBRARY_PATH=${pkgs.libglvnd}/lib:/run/opengl-driver/lib:/run/opengl-driver-32/lib"
-            ];
-          };
-          # Also ensure hardware graphics drivers are loaded before greeter starts
-          after = [ "systemd-udev-settle.service" ];
-          wants = [ "systemd-udev-settle.service" ];
-        };
 
         # Ensure cosmic-greeter-daemon has access to EGL libraries as well
         cosmic-greeter-daemon = mkIf cfg.useCosmicGreeter {
