@@ -25,7 +25,7 @@
   security = {
     # Unlock GNOME keyring on login
     pam.services = {
-      greetd = {
+      cosmic-greeter = {
         enableGnomeKeyring = true;
         # Enable fingerprint authentication if available
         fprintAuth = config.services.fprintd.enable;

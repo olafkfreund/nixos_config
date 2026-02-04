@@ -1,6 +1,9 @@
 { pkgs, ... }: {
   # Bootloader.
-  boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot = {
+    enable = true;
+    configurationLimit = 3; # Keep at least 3 generations for easy rollback
+  };
   boot.loader.efi.canTouchEfiVariables = true;
   # boot.kernelParams = [ "mitigations=off" "systemd.unified_cgroup_hierarchy=0" "SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1"];
   boot.kernelParams = [ "mitigations=off" ];
