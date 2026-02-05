@@ -67,15 +67,8 @@ in
     # Set custom nameservers as fallback
     nameservers = [ "1.1.1.1" "8.8.8.8" ];
 
-    # Firewall configuration - explicit SSH access
-    firewall = {
-      enable = true;
-      allowedTCPPorts = [
-        22 # SSH - critical for remote access
-        3389 # RDP - for headless remote desktop
-      ];
-      allowPing = true; # Enable ICMP for network diagnostics
-    };
+    # Firewall disabled to allow all network access including SSH
+    firewall.enable = false;
   };
 
   # Tailscale VPN using built-in NixOS service
