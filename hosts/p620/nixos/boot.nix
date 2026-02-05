@@ -1,6 +1,7 @@
 { pkgs, ... }: {
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot.configurationLimit = 10; # Limit boot entries to prevent /boot from filling up
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages_latest; # Use the beta kernel for better hardware support
   boot.plymouth.enable = true;
