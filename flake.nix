@@ -116,6 +116,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # COSMIC Radio Applet - Internet radio player for COSMIC Desktop
+    cosmic-radio-applet = {
+      url = "github:olafkfreund/cosmic-radio-applet";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # COSMIC Notifications NG - Enhanced notifications with rich content support
     cosmic-notifications-ng = {
       url = "github:olafkfreund/cosmic-notifications-ng";
@@ -215,6 +221,7 @@
         (_final: prev: {
           cosmic-ext-applet-music-player = inputs.cosmic-music-player.packages.${prev.stdenv.hostPlatform.system}.default;
           cosmic-applet-spotify = inputs.cosmic-applet-spotify.packages.${prev.stdenv.hostPlatform.system}.default;
+          cosmic-radio-applet = inputs.cosmic-radio-applet.packages.${prev.stdenv.hostPlatform.system}.default;
         })
         # COSMIC Connect - KDE Connect alternative for COSMIC Desktop
         inputs.cosmic-connect.overlays.default
@@ -339,6 +346,8 @@
               inputs.cosmic-connect.nixosModules.default
               inputs.cosmic-notifications-ng.nixosModules.default
               inputs.cosmic-bg-ng.nixosModules.default
+              # cosmic-radio-applet: using local module (./modules/services/cosmic-radio-applet) due to upstream mkPackageOption bug
+              ./modules/services/cosmic-radio-applet
               ./home/shell/zellij/zjstatus.nix
             ]
             ++ stylixModule
