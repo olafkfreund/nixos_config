@@ -113,6 +113,12 @@ in
   # COSMIC BG NG - Enhanced backgrounds with animated, video, and shader wallpaper support
   services.cosmic-bg-ng.enable = true;
 
+  # COSMIC Radio Applet - Internet radio player for COSMIC Desktop panel
+  programs.cosmic-radio-applet = {
+    enable = true;
+    autostart = true;
+  };
+
   # COSMIC Connect - Device connectivity solution for COSMIC Desktop
   # DISABLED: webkit2gtk dependency issue in upstream package
   # TODO: Re-enable when cosmic-connect package is fixed
