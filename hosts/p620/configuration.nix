@@ -120,16 +120,14 @@ in
   };
 
   # COSMIC Connect - Device connectivity solution for COSMIC Desktop
-  # DISABLED: webkit2gtk dependency issue in upstream package
-  # TODO: Re-enable when cosmic-connect package is fixed
-  # services.cosmic-connect = {
-  #   enable = true;
-  #   openFirewall = true; # Ports 1814-1864 (discovery), 1739-1764 (transfers), 5900 (VNC)
-  #   daemon = {
-  #     enable = true;
-  #     autoStart = true;
-  #   };
-  # };
+  services.cosmic-connect = {
+    enable = true;
+    openFirewall = true; # Ports 1814-1864 (discovery), 1739-1764 (transfers), 5900 (VNC)
+    daemon = {
+      enable = true;
+      autoStart = true;
+    };
+  };
 
   # Use AI provider defaults with workstation profile
   aiDefaults = {
