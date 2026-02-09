@@ -309,6 +309,21 @@
             buildInputs = (oldAttrs.buildInputs or [ ]) ++ [ prev.cxxopts prev.icu ];
           });
         })
+        # Fix nix-prefetch-git binary name (nixpkgs-unstable regression: binary named
+        # "nix-prefetch-git-VERSION" instead of "nix-prefetch-git", breaking fetchCargoVendor)
+        (_final: prev: {
+          nix-prefetch-git = prev.nix-prefetch-git.overrideAttrs (_oldAttrs: {
+            postFixup =
+              let
+                versionedName = prev.nix-prefetch-git.name;
+              in
+              ''
+                if [ ! -e "$out/bin/nix-prefetch-git" ] && [ -e "$out/bin/${versionedName}" ]; then
+                  ln -s "${versionedName}" "$out/bin/nix-prefetch-git"
+                fi
+              '';
+          });
+        })
       ];
 
       makeNixosSystem = host:
