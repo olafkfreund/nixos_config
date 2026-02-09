@@ -81,7 +81,7 @@ in
   # COSMIC Notifications NG - Enhanced notifications with rich content support
   services.cosmic-notifications-ng = {
     enable = true;
-    settings.max_image_size = 64;
+    settings.max_image_size = 32;
   };
 
   # COSMIC BG NG - Enhanced backgrounds with animated, video, and shader wallpaper support
