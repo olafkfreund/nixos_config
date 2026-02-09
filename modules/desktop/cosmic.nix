@@ -199,6 +199,9 @@ in
           cosmic-screenshot # Screenshot tool
           cosmic-randr # Display configuration
 
+          # Web applications
+          cosmic-web-apps # Web app manager for COSMIC Desktop
+
           # Extensions and tweaks
           cosmic-ext-calculator # Calculator application
           cosmic-ext-tweaks # Advanced tweaking tool
