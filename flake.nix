@@ -122,6 +122,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # COSMIC Web Apps - Web application manager for COSMIC Desktop
+    cosmic-web-apps = {
+      url = "github:olafkfreund/cosmic-web-apps";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # COSMIC Notifications NG - Enhanced notifications with rich content support
     cosmic-notifications-ng = {
       url = "github:olafkfreund/cosmic-notifications-ng";
@@ -222,6 +228,7 @@
           cosmic-ext-applet-music-player = inputs.cosmic-music-player.packages.${prev.stdenv.hostPlatform.system}.default;
           cosmic-applet-spotify = inputs.cosmic-applet-spotify.packages.${prev.stdenv.hostPlatform.system}.default;
           cosmic-radio-applet = inputs.cosmic-radio-applet.packages.${prev.stdenv.hostPlatform.system}.default;
+          cosmic-web-apps = inputs.cosmic-web-apps.packages.${prev.stdenv.hostPlatform.system}.default;
         })
         # COSMIC Connect - KDE Connect alternative for COSMIC Desktop
         inputs.cosmic-connect.overlays.default
