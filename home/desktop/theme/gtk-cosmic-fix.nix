@@ -123,47 +123,51 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Systemd path unit to watch for changes to dark.css
-    systemd.user.paths.cosmic-gtk-watcher = {
-      Unit = {
-        Description = "Watch COSMIC GTK CSS for changes";
+    systemd.user = {
+      # Watch for changes to dark.css
+      paths.cosmic-gtk-watcher = {
+        Unit = {
+          Description = "Watch COSMIC GTK CSS for changes";
+        };
+        Path = {
+          PathChanged = "%h/.config/gtk-4.0/cosmic/dark.css";
+          Unit = "cosmic-gtk-patcher.service";
+        };
+        Install = {
+          WantedBy = [ "default.target" ];
+        };
       };
-      Path = {
-        PathChanged = "%h/.config/gtk-4.0/cosmic/dark.css";
-        Unit = "cosmic-gtk-patcher.service";
-      };
-      Install = {
-        WantedBy = [ "default.target" ];
-      };
-    };
 
-    # Systemd service to patch the CSS
-    systemd.user.services.cosmic-gtk-patcher = {
-      Unit = {
-        Description = "Patch COSMIC GTK CSS with Gruvbox theme";
-      };
-      Service = {
-        Type = "oneshot";
-        ExecStart = "${patchScript}";
-        # Small delay to ensure COSMIC finished writing
-        ExecStartPre = "${pkgs.coreutils}/bin/sleep 1";
-      };
-    };
+      services = {
+        # Patch the CSS when dark.css changes
+        cosmic-gtk-patcher = {
+          Unit = {
+            Description = "Patch COSMIC GTK CSS with Gruvbox theme";
+          };
+          Service = {
+            Type = "oneshot";
+            ExecStart = "${patchScript}";
+            # Small delay to ensure COSMIC finished writing
+            ExecStartPre = "${pkgs.coreutils}/bin/sleep 1";
+          };
+        };
 
-    # Also run on login to ensure it's patched
-    systemd.user.services.cosmic-gtk-patcher-init = {
-      Unit = {
-        Description = "Initial patch of COSMIC GTK CSS with Gruvbox theme";
-        After = [ "graphical-session.target" ];
-      };
-      Service = {
-        Type = "oneshot";
-        ExecStart = "${patchScript}";
-        # Delay to let COSMIC initialize
-        ExecStartPre = "${pkgs.coreutils}/bin/sleep 3";
-      };
-      Install = {
-        WantedBy = [ "graphical-session.target" ];
+        # Also run on login to ensure it's patched
+        cosmic-gtk-patcher-init = {
+          Unit = {
+            Description = "Initial patch of COSMIC GTK CSS with Gruvbox theme";
+            After = [ "graphical-session.target" ];
+          };
+          Service = {
+            Type = "oneshot";
+            ExecStart = "${patchScript}";
+            # Delay to let COSMIC initialize
+            ExecStartPre = "${pkgs.coreutils}/bin/sleep 3";
+          };
+          Install = {
+            WantedBy = [ "graphical-session.target" ];
+          };
+        };
       };
     };
   };

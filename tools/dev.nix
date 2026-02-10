@@ -21,6 +21,8 @@ pkgs.mkShell {
     statix # Advanced linting
     deadnix # Dead code detection
     nixpkgs-fmt # Code formatting
+    typos # Spell checking
+    taplo # TOML formatting
 
     # Documentation and analysis
     mdbook # Documentation generation

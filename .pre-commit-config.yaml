@@ -156,7 +156,7 @@ repos:
 
       - id: end-of-file
         name: Fix end of file
-        entry: bash -c 'for f in "$@"; do [ -n "$(tail -c1 "$f")" ] && echo >> "$f"; done'
+        entry: "bash -c 'r=0; for f in \"$@\"; do if [ -s \"$f\" ] && [ -n \"$(tail -c1 \"$f\")\" ]; then echo >> \"$f\"; echo \"Fixed: $f\"; r=1; fi; done; exit $r' _"
         language: system
         files: '\.(nix|sh|lua|toml|yaml|yml|json|md|py)$'
         description: Ensure files end with newline
