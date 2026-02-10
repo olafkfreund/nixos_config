@@ -90,6 +90,28 @@ in
   # COSMIC BG NG - Enhanced backgrounds with animated, video, and shader wallpaper support
   services.cosmic-bg-ng.enable = true;
 
+  # COSMIC RDP Server - Remote desktop access via standard RDP clients
+  services.cosmic-comp.enable = true;
+  services.xdg-desktop-portal-cosmic.enable = true;
+  services.cosmic-rdp-server = {
+    enable = true;
+    openFirewall = true;
+    settings.bind = "0.0.0.0:3389";
+    auth = {
+      enable = true;
+      username = "olafkfreund";
+      domain = ""; # Required: nullOr str default breaks TOML generation
+      passwordFile = config.age.secrets.rdp-password.path;
+    };
+  };
+
+  # Agenix secret for RDP server password
+  age.secrets.rdp-password = {
+    file = ../../secrets/rdp-password.age;
+    mode = "0400";
+    owner = "olafkfreund";
+  };
+
   # COSMIC Radio Applet - Internet radio player for COSMIC Desktop panel
   programs.cosmic-radio-applet = {
     enable = true;
@@ -385,7 +407,7 @@ in
     maxAuthTries = 3;
     enableFail2Ban = false;
     enableKeyOnlyAccess = true;
-    trustedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ];
+    trustedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" "100.64.0.0/10" ];
   };
 
   # Enable secrets management

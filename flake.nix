@@ -139,6 +139,13 @@
       url = "github:olafkfreund/cosmic-bg-ng";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # COSMIC RDP Server - Remote desktop for COSMIC Desktop (Samsung only)
+    # Note: no nixpkgs.follows - these crane-based Rust builds require
+    # their own tested nixpkgs to avoid cargo vendor hash mismatches
+    cosmic-rdp-server.url = "github:olafkfreund/cosmic-rdp-server";
+    cosmic-portal-rdp.url = "github:olafkfreund/xdg-desktop-portal-cosmic";
+    cosmic-comp-rdp.url = "github:olafkfreund/cosmic-comp-rdp";
   };
 
   outputs =
@@ -373,6 +380,29 @@
               ./home/shell/zellij/zjstatus.nix
             ]
             ++ stylixModule
+            # COSMIC RDP Server stack (Samsung only) - replaces cosmic-comp and
+            # xdg-desktop-portal-cosmic with RDP-capable forks
+            ++ nixpkgs.lib.optionals (host == "samsung") [
+              inputs.cosmic-rdp-server.nixosModules.default
+              inputs.cosmic-portal-rdp.nixosModules.default
+              inputs.cosmic-comp-rdp.nixosModules.default
+              {
+                nixpkgs.overlays = [
+                  inputs.cosmic-rdp-server.overlays.default
+                  inputs.cosmic-portal-rdp.overlays.default
+                  inputs.cosmic-comp-rdp.overlays.default
+                  # Fix: cosmic-comp-rdp overlay lacks meta.platforms, which
+                  # cosmic-ext-ctl inherits via cosmic-comp.meta.platforms
+                  (_final: prev: {
+                    cosmic-comp = prev.cosmic-comp.overrideAttrs (old: {
+                      meta = (old.meta or { }) // {
+                        platforms = old.meta.platforms or prev.lib.platforms.linux;
+                      };
+                    });
+                  })
+                ];
+              }
+            ]
             ++ [
               {
                 home-manager = {
