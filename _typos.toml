@@ -1,0 +1,68 @@
+# typos configuration - exclude false positives
+# See: https://github.com/crate-ci/typos/blob/master/docs/reference.md
+
+[default.extend-words]
+# AMD HSA (Heterogeneous System Architecture) - valid technical term
+HSA = "HSA"
+hsa = "hsa"
+
+# k3sserver is a hostname, not a typo
+sserver = "sserver"
+
+# nitch is a system info tool package name
+nitch = "nitch"
+
+# dbe is a shell alias for "distrobox enter"
+dbe = "dbe"
+
+# AGS is "Aylur's GTK Shell" - valid acronym
+AGS = "AGS"
+
+# serie is a valid Nix package name (system info tool)
+serie = "serie"
+
+# darcula is a valid theme name (different from dracula)
+darcula = "darcula"
+
+# exportfs is a valid NFS command/config option
+exportfs = "exportfs"
+
+# enew is a valid Neovim buffer function
+enew = "enew"
+
+# hdinsight is Azure HDInsight service name
+hdinsight = "hdinsight"
+
+# styl is a valid file extension (Stylus CSS)
+styl = "styl"
+
+# edn is a valid file extension (Extensible Data Notation)
+edn = "edn"
+
+# toogle is a GNOME extension config key (upstream typo)
+toogle = "toogle"
+
+# usig is in a third-party plugin comment
+usig = "usig"
+
+# nd is a valid lsblk flag (-nd = no headings, no dependents)
+nd = "nd"
+
+[default.extend-identifiers]
+# Santa Claus - not "Clause"
+Claus = "Claus"
+
+[files]
+# Skip archive directory and binary/data files
+extend-exclude = [
+  "archive/",
+  "assets/",
+  "home/files/emoji",
+  "home/files/base16-themes",
+  "home/shell/lf/icons",
+  "home/shell/lazyvim/",
+  "*.age",
+  "*.lock",
+  "*.svg",
+  "result",
+]
