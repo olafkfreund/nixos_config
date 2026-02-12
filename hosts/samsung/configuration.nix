@@ -82,7 +82,7 @@ in
   };
 
   # COSMIC Notifications NG - Enhanced notifications with rich content support
-  services.cosmic-notifications-ng = {
+  services.cosmic-ext-notifications = {
     enable = true;
     settings.max_image_size = 32;
   };
@@ -421,6 +421,7 @@ in
     description = "User ${username}";
     extraGroups = [ "wheel" "networkmanager" ];
     shell = pkgs.zsh;
+    linger = true;
     # Only use secret-managed password if the secret exists
     hashedPasswordFile =
       lib.mkIf

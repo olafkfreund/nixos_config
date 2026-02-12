@@ -105,7 +105,7 @@ in
   };
 
   # COSMIC Notifications NG - Enhanced notifications with rich content support
-  services.cosmic-notifications-ng = {
+  services.cosmic-ext-notifications = {
     enable = true;
     settings.max_image_size = 32;
   };

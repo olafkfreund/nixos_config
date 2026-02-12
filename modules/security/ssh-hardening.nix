@@ -244,25 +244,6 @@ in
     # Firewall configuration for SSH
     networking.firewall = {
       allowedTCPPorts = [ cfg.listenPort ];
-
-      # Extra rules for SSH protection
-      extraCommands = ''
-        # Rate limiting for SSH connections
-        iptables -I INPUT -p tcp --dport ${toString cfg.listenPort} -m conntrack --ctstate NEW -m recent --set --name SSH_LIMIT
-        iptables -I INPUT -p tcp --dport ${toString cfg.listenPort} -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name SSH_LIMIT -j DROP
-
-        # Allow established SSH connections
-        iptables -A INPUT -p tcp --dport ${toString cfg.listenPort} -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-
-        # Log dropped SSH attempts
-        iptables -A INPUT -p tcp --dport ${toString cfg.listenPort} -j LOG --log-prefix "SSH-DROP: " --log-level 4
-      '';
-
-      extraStopCommands = ''
-        # Clean up SSH rules
-        iptables -D INPUT -p tcp --dport ${toString cfg.listenPort} -m conntrack --ctstate NEW -m recent --set --name SSH_LIMIT 2>/dev/null || true
-        iptables -D INPUT -p tcp --dport ${toString cfg.listenPort} -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name SSH_LIMIT -j DROP 2>/dev/null || true
-      '';
     };
 
     # SSH client hardening
