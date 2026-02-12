@@ -167,34 +167,10 @@
         "type": "github"
       }
     },
-    "cosmic-bg-ng": {
-      "inputs": {
-        "crane": "crane",
-        "fenix": "fenix",
-        "flake-utils": "flake-utils_4",
-        "nix-filter": "nix-filter",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1770915915,
-        "narHash": "sha256-4QTkpOXgx/8tbdBOfKM7kKBHrlZBFzHT+EF/5O3bjCE=",
-        "owner": "olafkfreund",
-        "repo": "cosmic-bg-ng",
-        "rev": "d64851362d80e4a2c0ab35c6c19d0934bd1a4b3f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "olafkfreund",
-        "repo": "cosmic-bg-ng",
-        "type": "github"
-      }
-    },
     "cosmic-comp-rdp": {
       "inputs": {
-        "crane": "crane_2",
-        "nix-filter": "nix-filter_2",
+        "crane": "crane",
+        "nix-filter": "nix-filter",
         "nixpkgs": "nixpkgs_3",
         "parts": "parts",
         "rust": "rust"
@@ -210,6 +186,30 @@
       "original": {
         "owner": "olafkfreund",
         "repo": "cosmic-comp-rdp",
+        "type": "github"
+      }
+    },
+    "cosmic-ext-bg-ng": {
+      "inputs": {
+        "crane": "crane_2",
+        "fenix": "fenix",
+        "flake-utils": "flake-utils_4",
+        "nix-filter": "nix-filter_2",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1770915915,
+        "narHash": "sha256-4QTkpOXgx/8tbdBOfKM7kKBHrlZBFzHT+EF/5O3bjCE=",
+        "owner": "olafkfreund",
+        "repo": "cosmic-bg-ng",
+        "rev": "d64851362d80e4a2c0ab35c6c19d0934bd1a4b3f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "cosmic-bg-ng",
         "type": "github"
       }
     },
@@ -259,10 +259,53 @@
         "type": "github"
       }
     },
-    "cosmic-music-player": {
+    "cosmic-ext-radio-applet": {
+      "inputs": {
+        "flake-utils": "flake-utils_7",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay_3"
+      },
+      "locked": {
+        "lastModified": 1770918791,
+        "narHash": "sha256-J3QxmPgcFreUukkbcRFejaTFQt85DUv9m6d8lIgGeDY=",
+        "owner": "olafkfreund",
+        "repo": "cosmic-ext-radio-applet",
+        "rev": "9d08d2728040bc8ec9f46ce7996acd98e349529b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "cosmic-ext-radio-applet",
+        "type": "github"
+      }
+    },
+    "cosmic-ext-rdp-server": {
       "inputs": {
         "crane": "crane_4",
-        "flake-utils": "flake-utils_7",
+        "flake-utils": "flake-utils_8",
+        "nix-filter": "nix-filter_4",
+        "nixpkgs": "nixpkgs_5"
+      },
+      "locked": {
+        "lastModified": 1770918715,
+        "narHash": "sha256-/5EWQ9C3iXX18rPZ2V19PRjftHL2v88uKsWuDG+jQdw=",
+        "owner": "olafkfreund",
+        "repo": "cosmic-ext-rdp-server",
+        "rev": "5616e9d392bd0595eb31b6f32ec534e90313bf6f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "cosmic-ext-rdp-server",
+        "type": "github"
+      }
+    },
+    "cosmic-music-player": {
+      "inputs": {
+        "crane": "crane_5",
+        "flake-utils": "flake-utils_9",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -283,12 +326,12 @@
     },
     "cosmic-package-updater": {
       "inputs": {
-        "crane": "crane_5",
-        "flake-utils": "flake-utils_8",
+        "crane": "crane_6",
+        "flake-utils": "flake-utils_10",
         "nixpkgs": [
           "nixpkgs"
         ],
-        "rust-overlay": "rust-overlay_3"
+        "rust-overlay": "rust-overlay_4"
       },
       "locked": {
         "lastModified": 1770884949,
@@ -306,11 +349,11 @@
     },
     "cosmic-portal-rdp": {
       "inputs": {
-        "crane": "crane_6",
+        "crane": "crane_7",
         "fenix": "fenix_3",
-        "flake-utils": "flake-utils_9",
-        "nix-filter": "nix-filter_4",
-        "nixpkgs": "nixpkgs_5"
+        "flake-utils": "flake-utils_11",
+        "nix-filter": "nix-filter_5",
+        "nixpkgs": "nixpkgs_6"
       },
       "locked": {
         "lastModified": 1770843691,
@@ -323,49 +366,6 @@
       "original": {
         "owner": "olafkfreund",
         "repo": "xdg-desktop-portal-cosmic",
-        "type": "github"
-      }
-    },
-    "cosmic-radio-applet": {
-      "inputs": {
-        "flake-utils": "flake-utils_10",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "rust-overlay": "rust-overlay_4"
-      },
-      "locked": {
-        "lastModified": 1770897836,
-        "narHash": "sha256-IjVQay2c4at/3iSYznmky5vt8qF6Y4jkrPs8ZlOJDJ8=",
-        "owner": "olafkfreund",
-        "repo": "cosmic-radio-applet",
-        "rev": "29e68c4ddb795e9137151a15673b09d26762ac9e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "olafkfreund",
-        "repo": "cosmic-radio-applet",
-        "type": "github"
-      }
-    },
-    "cosmic-rdp-server": {
-      "inputs": {
-        "crane": "crane_7",
-        "flake-utils": "flake-utils_11",
-        "nix-filter": "nix-filter_5",
-        "nixpkgs": "nixpkgs_6"
-      },
-      "locked": {
-        "lastModified": 1770848531,
-        "narHash": "sha256-zNgesX3CTjUxjk28lB4L3b5q5byBl0llrzOGI5Gei7M=",
-        "owner": "olafkfreund",
-        "repo": "cosmic-rdp-server",
-        "rev": "90045b327ad41760b96fc5ea405443409f909c0f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "olafkfreund",
-        "repo": "cosmic-rdp-server",
         "type": "github"
       }
     },
@@ -393,11 +393,11 @@
     },
     "crane": {
       "locked": {
-        "lastModified": 1769737823,
-        "narHash": "sha256-DrBaNpZ+sJ4stXm+0nBX7zqZT9t9P22zbk6m5YhQxS4=",
+        "lastModified": 1770419512,
+        "narHash": "sha256-o8Vcdz6B6bkiGUYkZqFwH3Pv1JwZyXht3dMtS7RchIo=",
         "owner": "ipetkov",
         "repo": "crane",
-        "rev": "b2f45c3830aa96b7456a4c4bc327d04d7a43e1ba",
+        "rev": "2510f2cbc3ccd237f700bb213756a8f35c32d8d7",
         "type": "github"
       },
       "original": {
@@ -423,11 +423,11 @@
     },
     "crane_2": {
       "locked": {
-        "lastModified": 1770419512,
-        "narHash": "sha256-o8Vcdz6B6bkiGUYkZqFwH3Pv1JwZyXht3dMtS7RchIo=",
+        "lastModified": 1769737823,
+        "narHash": "sha256-DrBaNpZ+sJ4stXm+0nBX7zqZT9t9P22zbk6m5YhQxS4=",
         "owner": "ipetkov",
         "repo": "crane",
-        "rev": "2510f2cbc3ccd237f700bb213756a8f35c32d8d7",
+        "rev": "b2f45c3830aa96b7456a4c4bc327d04d7a43e1ba",
         "type": "github"
       },
       "original": {
@@ -453,11 +453,11 @@
     },
     "crane_4": {
       "locked": {
-        "lastModified": 1767744144,
-        "narHash": "sha256-9/9ntI0D+HbN4G0TrK3KmHbTvwgswz7p8IEJsWyef8Q=",
+        "lastModified": 1770419512,
+        "narHash": "sha256-o8Vcdz6B6bkiGUYkZqFwH3Pv1JwZyXht3dMtS7RchIo=",
         "owner": "ipetkov",
         "repo": "crane",
-        "rev": "2fb033290bf6b23f226d4c8b32f7f7a16b043d7e",
+        "rev": "2510f2cbc3ccd237f700bb213756a8f35c32d8d7",
         "type": "github"
       },
       "original": {
@@ -483,11 +483,11 @@
     },
     "crane_6": {
       "locked": {
-        "lastModified": 1770419512,
-        "narHash": "sha256-o8Vcdz6B6bkiGUYkZqFwH3Pv1JwZyXht3dMtS7RchIo=",
+        "lastModified": 1767744144,
+        "narHash": "sha256-9/9ntI0D+HbN4G0TrK3KmHbTvwgswz7p8IEJsWyef8Q=",
         "owner": "ipetkov",
         "repo": "crane",
-        "rev": "2510f2cbc3ccd237f700bb213756a8f35c32d8d7",
+        "rev": "2fb033290bf6b23f226d4c8b32f7f7a16b043d7e",
         "type": "github"
       },
       "original": {
@@ -591,7 +591,7 @@
     "fenix": {
       "inputs": {
         "nixpkgs": [
-          "cosmic-bg-ng",
+          "cosmic-ext-bg-ng",
           "nixpkgs"
         ],
         "rust-analyzer-src": "rust-analyzer-src"
@@ -2013,15 +2013,15 @@
         "antigravity-nix": "antigravity-nix",
         "claude-desktop-linux": "claude-desktop-linux",
         "cosmic-applet-spotify": "cosmic-applet-spotify",
-        "cosmic-bg-ng": "cosmic-bg-ng",
         "cosmic-comp-rdp": "cosmic-comp-rdp",
+        "cosmic-ext-bg-ng": "cosmic-ext-bg-ng",
         "cosmic-ext-connect": "cosmic-ext-connect",
         "cosmic-ext-notifications": "cosmic-ext-notifications",
+        "cosmic-ext-radio-applet": "cosmic-ext-radio-applet",
+        "cosmic-ext-rdp-server": "cosmic-ext-rdp-server",
         "cosmic-music-player": "cosmic-music-player",
         "cosmic-package-updater": "cosmic-package-updater",
         "cosmic-portal-rdp": "cosmic-portal-rdp",
-        "cosmic-radio-applet": "cosmic-radio-applet",
-        "cosmic-rdp-server": "cosmic-rdp-server",
         "cosmic-web-apps": "cosmic-web-apps",
         "flake-utils": "flake-utils_13",
         "home-manager": "home-manager_2",
@@ -2176,16 +2176,16 @@
     "rust-overlay_3": {
       "inputs": {
         "nixpkgs": [
-          "cosmic-package-updater",
+          "cosmic-ext-radio-applet",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1767926800,
-        "narHash": "sha256-x0n73J6ufD/EhDlVdcoAmF0OQHZ+b0a2cKDc8RZyt+o=",
+        "lastModified": 1770174315,
+        "narHash": "sha256-GUaMxDmJB1UULsIYpHtfblskVC6zymAaQ/Zqfo+13jc=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "499e9eed88ff9494b6604205b42847e847dfeb91",
+        "rev": "095c394bb91342882f27f6c73f64064fb9de9f2a",
         "type": "github"
       },
       "original": {
@@ -2197,16 +2197,16 @@
     "rust-overlay_4": {
       "inputs": {
         "nixpkgs": [
-          "cosmic-radio-applet",
+          "cosmic-package-updater",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1770174315,
-        "narHash": "sha256-GUaMxDmJB1UULsIYpHtfblskVC6zymAaQ/Zqfo+13jc=",
+        "lastModified": 1767926800,
+        "narHash": "sha256-x0n73J6ufD/EhDlVdcoAmF0OQHZ+b0a2cKDc8RZyt+o=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "095c394bb91342882f27f6c73f64064fb9de9f2a",
+        "rev": "499e9eed88ff9494b6604205b42847e847dfeb91",
         "type": "github"
       },
       "original": {

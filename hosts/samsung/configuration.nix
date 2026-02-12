@@ -87,13 +87,13 @@ in
     settings.max_image_size = 32;
   };
 
-  # COSMIC BG NG - Enhanced backgrounds with animated, video, and shader wallpaper support
-  services.cosmic-bg-ng.enable = true;
+  # COSMIC BG - Enhanced backgrounds with animated, video, and shader wallpaper support
+  services.cosmic-ext-bg.enable = true;
 
   # COSMIC RDP Server - Remote desktop access via standard RDP clients
   services.cosmic-comp.enable = true;
   services.xdg-desktop-portal-cosmic.enable = true;
-  services.cosmic-rdp-server = {
+  services.cosmic-ext-rdp-server = {
     enable = true;
     openFirewall = true;
     settings.bind = "0.0.0.0:3389";
@@ -113,7 +113,7 @@ in
   };
 
   # COSMIC Radio Applet - Internet radio player for COSMIC Desktop panel
-  programs.cosmic-radio-applet = {
+  programs.cosmic-ext-radio-applet = {
     enable = true;
     autostart = true;
   };

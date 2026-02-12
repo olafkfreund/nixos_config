@@ -5,17 +5,17 @@
 with lib;
 
 let
-  cfg = config.programs.cosmic-radio-applet;
+  cfg = config.programs.cosmic-ext-radio-applet;
 in
 {
-  options.programs.cosmic-radio-applet = {
+  options.programs.cosmic-ext-radio-applet = {
     enable = mkEnableOption "COSMIC Radio Applet - internet radio player for COSMIC Desktop panel";
 
     package = mkOption {
       type = types.package;
-      default = pkgs.cosmic-radio-applet;
-      defaultText = literalExpression "pkgs.cosmic-radio-applet";
-      description = "The cosmic-radio-applet package to use.";
+      default = pkgs.cosmic-ext-radio-applet;
+      defaultText = literalExpression "pkgs.cosmic-ext-radio-applet";
+      description = "The cosmic-ext-radio-applet package to use.";
     };
 
     autostart = mkOption {
