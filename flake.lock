@@ -200,11 +200,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1770923990,
-        "narHash": "sha256-UMoI4e8F6v4BrHG4z/VqqPqcox6qK0Dgccr3EdjFp8g=",
+        "lastModified": 1770938672,
+        "narHash": "sha256-cHIrwiqxJHwgUVL9hYLDugf544HEPHFSFRtii50SFec=",
         "owner": "olafkfreund",
         "repo": "cosmic-ext-bg",
-        "rev": "d800d922dde1eed5f8f91fd984723705184b562a",
+        "rev": "e76cc28fadaf9848889c197f7b9afb4293f56065",
         "type": "github"
       },
       "original": {
