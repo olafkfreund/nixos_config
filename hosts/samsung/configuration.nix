@@ -82,7 +82,7 @@ in
   };
 
   # COSMIC Notifications NG - Enhanced notifications with rich content support
-  services.cosmic-notifications-ng = {
+  services.cosmic-ext-notifications = {
     enable = true;
     settings.max_image_size = 32;
   };
@@ -120,8 +120,8 @@ in
 
   # COSMIC Connect - Device connectivity solution for COSMIC Desktop
   # DISABLED: webkit2gtk dependency issue in upstream package
-  # TODO: Re-enable when cosmic-connect package is fixed
-  # services.cosmic-connect = {
+  # TODO: Re-enable when cosmic-ext-connect package is fixed
+  # services.cosmic-ext-connect = {
   #   enable = true;
   #   openFirewall = true; # Ports 1814-1864 (discovery), 1739-1764 (transfers), 5900 (VNC)
   #   daemon = {
@@ -421,6 +421,7 @@ in
     description = "User ${username}";
     extraGroups = [ "wheel" "networkmanager" ];
     shell = pkgs.zsh;
+    linger = true;
     # Only use secret-managed password if the secret exists
     hashedPasswordFile =
       lib.mkIf

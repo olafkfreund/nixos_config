@@ -34,11 +34,7 @@ in
         enable = true;
         package = lib.mkDefault pkgs.ollama-cuda; # Default to CUDA, can be overridden per-host
         host = "0.0.0.0";
-        loadModels = [
-          "mistral-small3.1"
-          "GandalfBaum/llama3.2-claude3.7"
-          "nomic-embed-text"
-        ];
+        loadModels = [ ];
         user = "ollama";
       };
 

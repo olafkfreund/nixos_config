@@ -79,7 +79,7 @@ in
   };
 
   # COSMIC Notifications NG - Enhanced notifications with rich content support
-  services.cosmic-notifications-ng = {
+  services.cosmic-ext-notifications = {
     enable = true;
     settings.max_image_size = 32;
   };
@@ -94,8 +94,8 @@ in
   };
 
   # COSMIC Connect - Device connectivity solution for COSMIC Desktop
-  # TEMPORARILY DISABLED: Rust compilation errors in cosmic-connect-protocol (issue #79)
-  # services.cosmic-connect = {
+  # TEMPORARILY DISABLED: Rust compilation errors in cosmic-ext-connect-protocol (issue #79)
+  # services.cosmic-ext-connect = {
   #   enable = true;
   #   openFirewall = true; # Ports 1814-1864 (discovery), 1739-1764 (transfers), 5900 (VNC)
   #   daemon = {

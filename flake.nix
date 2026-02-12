@@ -81,8 +81,8 @@
     };
 
     # COSMIC Connect - KDE Connect alternative for COSMIC Desktop
-    cosmic-connect = {
-      url = "github:olafkfreund/cosmic-connect-desktop-app";
+    cosmic-ext-connect = {
+      url = "github:olafkfreund/cosmic-ext-connect-desktop-app";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -129,7 +129,7 @@
     };
 
     # COSMIC Notifications NG - Enhanced notifications with rich content support
-    cosmic-notifications-ng = {
+    cosmic-ext-notifications = {
       url = "github:olafkfreund/cosmic-notifications-ng";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -142,7 +142,8 @@
 
     # COSMIC RDP Server - Remote desktop for COSMIC Desktop (Samsung only)
     # Note: no nixpkgs.follows - these crane-based Rust builds require
-    # their own tested nixpkgs to avoid cargo vendor hash mismatches
+    # their own tested nixpkgs to avoid cargo vendor hash mismatches.
+    # cosmic-comp-rdp's flake.lock is updated separately to track mesa versions.
     cosmic-rdp-server.url = "github:olafkfreund/cosmic-rdp-server";
     cosmic-portal-rdp.url = "github:olafkfreund/xdg-desktop-portal-cosmic";
     cosmic-comp-rdp.url = "github:olafkfreund/cosmic-comp-rdp";
@@ -238,9 +239,9 @@
           cosmic-web-apps = inputs.cosmic-web-apps.packages.${prev.stdenv.hostPlatform.system}.default;
         })
         # COSMIC Connect - KDE Connect alternative for COSMIC Desktop
-        inputs.cosmic-connect.overlays.default
+        inputs.cosmic-ext-connect.overlays.default
         # COSMIC Notifications NG - Enhanced notifications with images, links, progress
-        inputs.cosmic-notifications-ng.overlays.default
+        inputs.cosmic-ext-notifications.overlays.default
         # COSMIC BG NG - Enhanced backgrounds with animated, video, and shader support
         inputs.cosmic-bg-ng.overlays.default
         # Custom package: glim - GitLab CI/CD TUI
@@ -372,8 +373,8 @@
               inputs.agenix.nixosModules.default
               inputs.lanzaboote.nixosModules.lanzaboote
               nix-index-database.nixosModules.nix-index
-              inputs.cosmic-connect.nixosModules.default
-              inputs.cosmic-notifications-ng.nixosModules.default
+              inputs.cosmic-ext-connect.nixosModules.default
+              inputs.cosmic-ext-notifications.nixosModules.default
               inputs.cosmic-bg-ng.nixosModules.default
               # cosmic-radio-applet: using local module (./modules/services/cosmic-radio-applet) due to upstream mkPackageOption bug
               ./modules/services/cosmic-radio-applet

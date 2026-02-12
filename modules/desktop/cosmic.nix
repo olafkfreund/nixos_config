@@ -375,7 +375,7 @@ in
     };
 
     # COSMIC Connect - KDE Connect alternative for device connectivity
-    services.cosmic-connect = mkIf cfg.enableConnect {
+    services.cosmic-ext-connect = mkIf cfg.enableConnect {
       enable = true;
       openFirewall = cfg.connectOpenFirewall;
     };
