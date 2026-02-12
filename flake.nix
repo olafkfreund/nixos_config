@@ -235,7 +235,7 @@
         (_final: prev: {
           cosmic-ext-applet-music-player = inputs.cosmic-music-player.packages.${prev.stdenv.hostPlatform.system}.default;
           cosmic-applet-spotify = inputs.cosmic-applet-spotify.packages.${prev.stdenv.hostPlatform.system}.default;
-          cosmic-ext-radio-applet = inputs.cosmic-ext-radio-applet.packages.${prev.stdenv.hostPlatform.system}.default;
+          inherit (inputs.cosmic-ext-radio-applet.packages.${prev.stdenv.hostPlatform.system}) cosmic-ext-applet-radio;
           cosmic-web-apps = inputs.cosmic-web-apps.packages.${prev.stdenv.hostPlatform.system}.default;
         })
         # COSMIC Connect - KDE Connect alternative for COSMIC Desktop
@@ -376,7 +376,7 @@
               inputs.cosmic-ext-connect.nixosModules.default
               inputs.cosmic-ext-notifications.nixosModules.default
               inputs.cosmic-ext-bg-ng.nixosModules.default
-              # cosmic-ext-radio-applet: using local module (./modules/services/cosmic-ext-radio-applet) due to upstream mkPackageOption bug
+              # cosmic-ext-applet-radio: local module workaround for upstream mkPackageOption 'description' arg bug
               ./modules/services/cosmic-ext-radio-applet
               ./home/shell/zellij/zjstatus.nix
             ]

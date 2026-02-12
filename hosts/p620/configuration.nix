@@ -114,7 +114,7 @@ in
   services.cosmic-ext-bg.enable = true;
 
   # COSMIC Radio Applet - Internet radio player for COSMIC Desktop panel
-  programs.cosmic-ext-radio-applet = {
+  programs.cosmic-ext-applet-radio = {
     enable = true;
     autostart = true;
   };
