@@ -117,26 +117,26 @@
     };
 
     # COSMIC Radio Applet - Internet radio player for COSMIC Desktop
-    cosmic-radio-applet = {
-      url = "github:olafkfreund/cosmic-radio-applet";
+    cosmic-ext-radio-applet = {
+      url = "github:olafkfreund/cosmic-ext-radio-applet";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # COSMIC Web Apps - Web application manager for COSMIC Desktop
-    cosmic-web-apps = {
-      url = "github:olafkfreund/cosmic-web-apps";
+    cosmic-ext-web-apps = {
+      url = "github:olafkfreund/cosmic-ext-web-apps";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # COSMIC Notifications NG - Enhanced notifications with rich content support
     cosmic-ext-notifications = {
-      url = "github:olafkfreund/cosmic-notifications-ng";
+      url = "github:olafkfreund/cosmic-ext-notifications-ng";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # COSMIC BG NG - Enhanced background service with animated, video, and shader wallpaper support
-    cosmic-bg-ng = {
-      url = "github:olafkfreund/cosmic-bg-ng";
+    # COSMIC BG - Enhanced background service with animated, video, and shader wallpaper support
+    cosmic-ext-bg = {
+      url = "github:olafkfreund/cosmic-ext-bg";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -144,7 +144,7 @@
     # Note: no nixpkgs.follows - these crane-based Rust builds require
     # their own tested nixpkgs to avoid cargo vendor hash mismatches.
     # cosmic-comp-rdp's flake.lock is updated separately to track mesa versions.
-    cosmic-rdp-server.url = "github:olafkfreund/cosmic-rdp-server";
+    cosmic-ext-rdp-server.url = "github:olafkfreund/cosmic-ext-rdp-server";
     cosmic-portal-rdp.url = "github:olafkfreund/xdg-desktop-portal-cosmic";
     cosmic-comp-rdp.url = "github:olafkfreund/cosmic-comp-rdp";
   };
@@ -235,15 +235,15 @@
         (_final: prev: {
           cosmic-ext-applet-music-player = inputs.cosmic-music-player.packages.${prev.stdenv.hostPlatform.system}.default;
           cosmic-applet-spotify = inputs.cosmic-applet-spotify.packages.${prev.stdenv.hostPlatform.system}.default;
-          cosmic-radio-applet = inputs.cosmic-radio-applet.packages.${prev.stdenv.hostPlatform.system}.default;
-          cosmic-web-apps = inputs.cosmic-web-apps.packages.${prev.stdenv.hostPlatform.system}.default;
+          inherit (inputs.cosmic-ext-radio-applet.packages.${prev.stdenv.hostPlatform.system}) cosmic-ext-applet-radio;
+          cosmic-ext-web-apps = inputs.cosmic-ext-web-apps.packages.${prev.stdenv.hostPlatform.system}.default;
         })
         # COSMIC Connect - KDE Connect alternative for COSMIC Desktop
         inputs.cosmic-ext-connect.overlays.default
         # COSMIC Notifications NG - Enhanced notifications with images, links, progress
         inputs.cosmic-ext-notifications.overlays.default
         # COSMIC BG NG - Enhanced backgrounds with animated, video, and shader support
-        inputs.cosmic-bg-ng.overlays.default
+        inputs.cosmic-ext-bg.overlays.default
         # Custom package: glim - GitLab CI/CD TUI
         (final: _prev: {
           glim = final.callPackage ./overlays/glim { };
@@ -375,21 +375,21 @@
               nix-index-database.nixosModules.nix-index
               inputs.cosmic-ext-connect.nixosModules.default
               inputs.cosmic-ext-notifications.nixosModules.default
-              inputs.cosmic-bg-ng.nixosModules.default
-              # cosmic-radio-applet: using local module (./modules/services/cosmic-radio-applet) due to upstream mkPackageOption bug
-              ./modules/services/cosmic-radio-applet
+              inputs.cosmic-ext-bg.nixosModules.default
+              # cosmic-ext-applet-radio: local module workaround for upstream mkPackageOption 'description' arg bug
+              ./modules/services/cosmic-ext-radio-applet
               ./home/shell/zellij/zjstatus.nix
             ]
             ++ stylixModule
             # COSMIC RDP Server stack (Samsung only) - replaces cosmic-comp and
             # xdg-desktop-portal-cosmic with RDP-capable forks
             ++ nixpkgs.lib.optionals (host == "samsung") [
-              inputs.cosmic-rdp-server.nixosModules.default
+              inputs.cosmic-ext-rdp-server.nixosModules.default
               inputs.cosmic-portal-rdp.nixosModules.default
               inputs.cosmic-comp-rdp.nixosModules.default
               {
                 nixpkgs.overlays = [
-                  inputs.cosmic-rdp-server.overlays.default
+                  inputs.cosmic-ext-rdp-server.overlays.default
                   inputs.cosmic-portal-rdp.overlays.default
                   inputs.cosmic-comp-rdp.overlays.default
                   # Fix: cosmic-comp-rdp overlay lacks meta.platforms, which

@@ -110,11 +110,11 @@ in
     settings.max_image_size = 32;
   };
 
-  # COSMIC BG NG - Enhanced backgrounds with animated, video, and shader wallpaper support
-  services.cosmic-bg-ng.enable = true;
+  # COSMIC BG - Enhanced backgrounds with animated, video, and shader wallpaper support
+  services.cosmic-ext-bg.enable = true;
 
   # COSMIC Radio Applet - Internet radio player for COSMIC Desktop panel
-  programs.cosmic-radio-applet = {
+  programs.cosmic-ext-applet-radio = {
     enable = true;
     autostart = true;
   };

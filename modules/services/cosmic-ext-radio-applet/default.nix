@@ -1,21 +1,21 @@
 # COSMIC Radio Applet - Internet radio player for COSMIC Desktop panel
-# Local module to work around upstream mkPackageOption issue
+# Local module to work around upstream mkPackageOption 'description' arg bug
 { config, lib, pkgs, ... }:
 
 with lib;
 
 let
-  cfg = config.programs.cosmic-radio-applet;
+  cfg = config.programs.cosmic-ext-applet-radio;
 in
 {
-  options.programs.cosmic-radio-applet = {
+  options.programs.cosmic-ext-applet-radio = {
     enable = mkEnableOption "COSMIC Radio Applet - internet radio player for COSMIC Desktop panel";
 
     package = mkOption {
       type = types.package;
-      default = pkgs.cosmic-radio-applet;
-      defaultText = literalExpression "pkgs.cosmic-radio-applet";
-      description = "The cosmic-radio-applet package to use.";
+      default = pkgs.cosmic-ext-applet-radio;
+      defaultText = literalExpression "pkgs.cosmic-ext-applet-radio";
+      description = "The cosmic-ext-applet-radio package to use.";
     };
 
     autostart = mkOption {

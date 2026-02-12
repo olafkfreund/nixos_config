@@ -200,7 +200,7 @@ in
           cosmic-randr # Display configuration
 
           # Web applications
-          cosmic-web-apps # Web app manager for COSMIC Desktop
+          cosmic-ext-web-apps # Web app manager for COSMIC Desktop
 
           # Extensions and tweaks
           cosmic-ext-calculator # Calculator application
