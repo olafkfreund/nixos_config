@@ -176,11 +176,11 @@
         "rust": "rust"
       },
       "locked": {
-        "lastModified": 1770933235,
-        "narHash": "sha256-RVvgf2vNaui2t6UjVFstNAntYb0Afi2Rx4DS7rewb2g=",
+        "lastModified": 1770935289,
+        "narHash": "sha256-fOX8LHDVkhUuJBydIzV5b6H1Ie+Za5u0Pf3BKs4VVwg=",
         "owner": "olafkfreund",
         "repo": "cosmic-ext-comp-rdp",
-        "rev": "24764d6138fc4aea2d1b1f39368bdfa86963dd3a",
+        "rev": "9549a16b531685bd449ad0bf9210f1f3b60b2668",
         "type": "github"
       },
       "original": {
