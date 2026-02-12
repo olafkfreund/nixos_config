@@ -146,7 +146,7 @@
     # cosmic-comp-rdp's flake.lock is updated separately to track mesa versions.
     cosmic-ext-rdp-server.url = "github:olafkfreund/cosmic-ext-rdp-server";
     cosmic-portal-rdp.url = "github:olafkfreund/xdg-desktop-portal-cosmic";
-    cosmic-comp-rdp.url = "github:olafkfreund/cosmic-comp-rdp";
+    cosmic-comp-rdp.url = "github:olafkfreund/cosmic-ext-comp-rdp";
   };
 
   outputs =
