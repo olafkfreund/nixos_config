@@ -81,8 +81,8 @@
     };
 
     # COSMIC Connect - KDE Connect alternative for COSMIC Desktop
-    cosmic-connect = {
-      url = "github:olafkfreund/cosmic-connect-desktop-app";
+    cosmic-ext-connect = {
+      url = "github:olafkfreund/cosmic-ext-connect-desktop-app";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -239,7 +239,7 @@
           cosmic-web-apps = inputs.cosmic-web-apps.packages.${prev.stdenv.hostPlatform.system}.default;
         })
         # COSMIC Connect - KDE Connect alternative for COSMIC Desktop
-        inputs.cosmic-connect.overlays.default
+        inputs.cosmic-ext-connect.overlays.default
         # COSMIC Notifications NG - Enhanced notifications with images, links, progress
         inputs.cosmic-ext-notifications.overlays.default
         # COSMIC BG NG - Enhanced backgrounds with animated, video, and shader support
@@ -373,7 +373,7 @@
               inputs.agenix.nixosModules.default
               inputs.lanzaboote.nixosModules.lanzaboote
               nix-index-database.nixosModules.nix-index
-              inputs.cosmic-connect.nixosModules.default
+              inputs.cosmic-ext-connect.nixosModules.default
               inputs.cosmic-ext-notifications.nixosModules.default
               inputs.cosmic-bg-ng.nixosModules.default
               # cosmic-radio-applet: using local module (./modules/services/cosmic-radio-applet) due to upstream mkPackageOption bug

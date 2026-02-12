@@ -178,11 +178,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1770886164,
-        "narHash": "sha256-Zxz1FE4jNIw41xS2inh+SNPWWiDtyr50GWM7n3o1YpU=",
+        "lastModified": 1770915915,
+        "narHash": "sha256-4QTkpOXgx/8tbdBOfKM7kKBHrlZBFzHT+EF/5O3bjCE=",
         "owner": "olafkfreund",
         "repo": "cosmic-bg-ng",
-        "rev": "397beda5ab7c876a0d23b8225369195d2ee2c255",
+        "rev": "d64851362d80e4a2c0ab35c6c19d0934bd1a4b3f",
         "type": "github"
       },
       "original": {
@@ -213,7 +213,7 @@
         "type": "github"
       }
     },
-    "cosmic-connect": {
+    "cosmic-ext-connect": {
       "inputs": {
         "flake-utils": "flake-utils_5",
         "nixpkgs": [
@@ -222,16 +222,16 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1770896612,
-        "narHash": "sha256-2MBRqYmZrHhhejhr9ohso13XfYgbBSw5R36KDxERfDk=",
+        "lastModified": 1770917463,
+        "narHash": "sha256-KbqDhLieO/PjLDNGcG8r9L0SkANgD3ohZeGkJFUKXoo=",
         "owner": "olafkfreund",
-        "repo": "cosmic-connect-desktop-app",
-        "rev": "056c460b300138dc010420e3065fa873d77b24f1",
+        "repo": "cosmic-ext-connect-desktop-app",
+        "rev": "5ee390431a22f3264489531d205871bc032973fc",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
-        "repo": "cosmic-connect-desktop-app",
+        "repo": "cosmic-ext-connect-desktop-app",
         "type": "github"
       }
     },
@@ -335,11 +335,11 @@
         "rust-overlay": "rust-overlay_4"
       },
       "locked": {
-        "lastModified": 1770292824,
-        "narHash": "sha256-U+gmiNsfp0CI6OIK7CefuEWlcgrHtPrmc6o68kFviOE=",
+        "lastModified": 1770897836,
+        "narHash": "sha256-IjVQay2c4at/3iSYznmky5vt8qF6Y4jkrPs8ZlOJDJ8=",
         "owner": "olafkfreund",
         "repo": "cosmic-radio-applet",
-        "rev": "9b5de96f74edca4805ad6a7fd800b8a1d3bd6863",
+        "rev": "29e68c4ddb795e9137151a15673b09d26762ac9e",
         "type": "github"
       },
       "original": {
@@ -378,11 +378,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1770648314,
-        "narHash": "sha256-+INzDS3l9Oo5IIj7y/eduCyDmoAFmBiV2DozWV0SUYY=",
+        "lastModified": 1770914938,
+        "narHash": "sha256-bY2BeyUqL1dHHSK7ihuSRmucDjrBVkV76RCw49OvcsU=",
         "owner": "olafkfreund",
         "repo": "cosmic-web-apps",
-        "rev": "817d7c4d86bad7965c67b0a4efe03dff649474bb",
+        "rev": "331ac0cc1659eb9dad785a0d58bf75a5ca86404e",
         "type": "github"
       },
       "original": {
@@ -1210,11 +1210,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1770818644,
-        "narHash": "sha256-DYS4jIRpRoKOzJjnR/QqEd/MlT4OZZpt8CrBLv+cjsE=",
+        "lastModified": 1770915843,
+        "narHash": "sha256-ZwU5wXKNqpOQvjNz6aBp1j5peiBZow1++6pLnk5VAhs=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "0acbd1180697de56724821184ad2c3e6e7202cd7",
+        "rev": "6a1f7101d2c3ee87d485a87880d73b4665c6a4bd",
         "type": "github"
       },
       "original": {
@@ -1903,11 +1903,11 @@
         "nixpkgs": "nixpkgs_14"
       },
       "locked": {
-        "lastModified": 1770889794,
-        "narHash": "sha256-Edd0AK62uDWzeJdnFXiKzW55otl90Wb5P+PwvIBzo74=",
+        "lastModified": 1770916537,
+        "narHash": "sha256-z7MoZD93tk4EyJsnhDAXFsaWIb7uz0bGapP0DNkji34=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "0d31a4b334e61b0db2e0d2edf6eff196405802e7",
+        "rev": "fdf290b8841ebbd9202b52c466e9a5e9fe58e2f9",
         "type": "github"
       },
       "original": {
@@ -2015,7 +2015,7 @@
         "cosmic-applet-spotify": "cosmic-applet-spotify",
         "cosmic-bg-ng": "cosmic-bg-ng",
         "cosmic-comp-rdp": "cosmic-comp-rdp",
-        "cosmic-connect": "cosmic-connect",
+        "cosmic-ext-connect": "cosmic-ext-connect",
         "cosmic-ext-notifications": "cosmic-ext-notifications",
         "cosmic-music-player": "cosmic-music-player",
         "cosmic-package-updater": "cosmic-package-updater",
@@ -2358,11 +2358,11 @@
         "tinted-zed": "tinted-zed"
       },
       "locked": {
-        "lastModified": 1770587906,
-        "narHash": "sha256-N9ZTG3ia7l4iQO+9JlOj+sX4yu6gl7a3aozrlhSIJwQ=",
+        "lastModified": 1770914701,
+        "narHash": "sha256-QHFYyngohNhih4w+3IqQty5DV+p1txsx1kkk6XJWar8=",
         "owner": "danth",
         "repo": "stylix",
-        "rev": "72e6483a88d51471a6c55e1d43e7ed2bc47a76a4",
+        "rev": "db03fed72e5ca02be34e1d24789345a943329738",
         "type": "github"
       },
       "original": {
