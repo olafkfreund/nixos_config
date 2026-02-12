@@ -87,8 +87,9 @@ in
     settings.max_image_size = 32;
   };
 
-  # COSMIC BG - Enhanced backgrounds with animated, video, and shader wallpaper support
-  services.cosmic-ext-bg.enable = true;
+  # COSMIC BG - Disabled pending upstream fix for startup race condition
+  # See: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
+  # services.cosmic-ext-bg.enable = true;
 
   # COSMIC RDP Server - Remote desktop access via standard RDP clients
   services.cosmic-comp.enable = true;
