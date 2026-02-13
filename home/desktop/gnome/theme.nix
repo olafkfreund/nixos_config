@@ -11,7 +11,7 @@ in
 
       theme = {
         package = mkDefault pkgs.gruvbox-gtk-theme;
-        name = mkDefault (if cfg.theme.variant == "dark" then "Gruvbox-Dark-Medium" else "Gruvbox-Light-BL");
+        name = mkDefault (if cfg.theme.variant == "dark" then "Gruvbox-Dark" else "Gruvbox-Light");
       };
 
       iconTheme = {
@@ -64,7 +64,7 @@ in
     # Session environment variables for dark mode enforcement
     home.sessionVariables = mkIf (cfg.theme.variant == "dark") {
       # GTK dark mode enforcement
-      GTK_THEME = "Gruvbox-Dark-Medium:dark";
+      GTK_THEME = "Gruvbox-Dark:dark";
       GTK_APPLICATION_PREFER_DARK_THEME = "1";
 
       # Cursor theme
@@ -75,7 +75,7 @@ in
     # GNOME-specific theming via dconf (use mkForce to override Stylix)
     dconf.settings = mkIf cfg.theme.enable {
       "org/gnome/desktop/interface" = {
-        gtk-theme = mkForce (if cfg.theme.variant == "dark" then "Gruvbox-Dark-Medium" else "Gruvbox-Light-BL");
+        gtk-theme = mkForce (if cfg.theme.variant == "dark" then "Gruvbox-Dark" else "Gruvbox-Light");
         icon-theme = mkForce "Gruvbox-Material-Dark";
         cursor-theme = mkForce "Bibata-Modern-Classic";
         cursor-size = mkForce 16;
@@ -120,15 +120,12 @@ in
 
       # Set Gruvbox wallpaper if available (defaults - can be overridden by Stylix)
       "org/gnome/desktop/background" = {
-        picture-uri = mkDefault "file://${pkgs.gruvbox-gtk-theme}/share/themes/Gruvbox-Dark-BL/wallpaper.jpg";
-        picture-uri-dark = mkDefault "file://${pkgs.gruvbox-gtk-theme}/share/themes/Gruvbox-Dark-BL/wallpaper.jpg";
         picture-options = mkDefault "zoom";
         primary-color = mkDefault "#282828";
         secondary-color = mkDefault "#1d2021";
       };
 
       "org/gnome/desktop/screensaver" = {
-        picture-uri = mkDefault "file://${pkgs.gruvbox-gtk-theme}/share/themes/Gruvbox-Dark-BL/wallpaper.jpg";
         primary-color = mkDefault "#282828";
         secondary-color = mkDefault "#1d2021";
       };
