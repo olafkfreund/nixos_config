@@ -8,9 +8,9 @@
       powerManagement.enable = true;
       powerManagement.finegrained = false;
       nvidiaPersistenced = false;
-      open = false; # Use proprietary drivers for better Wayland compatibility
-      nvidiaSettings = false;
-      package = config.boot.kernelPackages.nvidiaPackages.beta; # Use beta for cutting edge support
+      open = true; # NVIDIA 590+ requires open kernel modules for Turing GPUs (RTX 2070 Super)
+      nvidiaSettings = true;
+      package = config.boot.kernelPackages.nvidiaPackages.beta;
 
       prime = {
         sync.enable = true;
@@ -29,8 +29,7 @@
         vulkan-loader
         vulkan-tools
 
-        # Video acceleration - proper order matters
-        libva-vdpau-driver
+        # Video acceleration
         libva-vdpau-driver
         nvidia-vaapi-driver
 
