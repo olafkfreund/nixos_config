@@ -242,8 +242,9 @@
         inputs.cosmic-ext-connect.overlays.default
         # COSMIC Notifications NG - Enhanced notifications with images, links, progress
         inputs.cosmic-ext-notifications.overlays.default
-        # COSMIC BG NG - Enhanced backgrounds with animated, video, and shader support
-        inputs.cosmic-ext-bg.overlays.default
+        # COSMIC BG NG - Disabled pending upstream fix for startup race condition
+        # See: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
+        # inputs.cosmic-ext-bg.overlays.default
         # Custom package: glim - GitLab CI/CD TUI
         (final: _prev: {
           glim = final.callPackage ./overlays/glim { };
@@ -375,7 +376,7 @@
               nix-index-database.nixosModules.nix-index
               inputs.cosmic-ext-connect.nixosModules.default
               inputs.cosmic-ext-notifications.nixosModules.default
-              inputs.cosmic-ext-bg.nixosModules.default
+              # inputs.cosmic-ext-bg.nixosModules.default  # Disabled: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
               # cosmic-ext-applet-radio: local module workaround for upstream mkPackageOption 'description' arg bug
               ./modules/services/cosmic-ext-radio-applet
               ./home/shell/zellij/zjstatus.nix
