@@ -11,7 +11,7 @@
 , openssl
 , sqlite
 , webkitgtk_4_1
-, xorg
+, libX11
 , zlib
 , glib
 , gtk3
@@ -44,7 +44,7 @@ stdenv.mkDerivation rec {
     openssl
     sqlite
     webkitgtk_4_1
-    xorg.libX11
+    libX11
     zlib
     glib
     gtk3
