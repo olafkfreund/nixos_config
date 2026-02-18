@@ -56,9 +56,6 @@ in
     };
     useNetworkd = false;
 
-    # Disable nftables to use iptables (required for security.sshHardening)
-    nftables.enable = lib.mkForce false;
-
     # Set custom nameservers as fallback
     nameservers = [ "1.1.1.1" "8.8.8.8" ];
 
@@ -398,18 +395,6 @@ in
     // {
       NH_FLAKE = vars.paths.flakeDir;
     };
-
-  # Enable SSH security hardening
-  security.sshHardening = {
-    enable = true;
-    allowedUsers = hostUsers;
-    allowPasswordAuthentication = false;
-    allowRootLogin = false;
-    maxAuthTries = 3;
-    enableFail2Ban = false;
-    enableKeyOnlyAccess = true;
-    trustedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" "100.64.0.0/10" ];
-  };
 
   # Enable secrets management
   modules.security.secrets = {

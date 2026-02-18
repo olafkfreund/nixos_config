@@ -45,9 +45,6 @@ in
     # Disable IPv6
     enableIPv6 = false;
 
-    # Disable nftables to use iptables (required for security.sshHardening)
-    nftables.enable = lib.mkForce false;
-
     # Note: Tailscale is enabled via services.tailscale (built-in NixOS module)
     # Custom networking.tailscale module was removed during anti-pattern cleanup
 
@@ -185,22 +182,6 @@ in
   tools.nixpkgs-monitors = {
     enable = true;
     installAll = true;
-  };
-
-  # Enable SSH security hardening
-  security.sshHardening = {
-    enable = true;
-    allowedUsers = hostUsers;
-    allowPasswordAuthentication = false;
-    allowRootLogin = false;
-    maxAuthTries = 3;
-    enableFail2Ban = false;
-    enableKeyOnlyAccess = true;
-    trustedNetworks = [
-      "192.168.1.0/24" # Local network
-      "10.0.0.0/8" # Private network
-      "100.64.0.0/10" # Tailscale CGNAT range
-    ];
   };
 
   # Enable encrypted API keys
