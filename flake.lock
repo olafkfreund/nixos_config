@@ -268,11 +268,11 @@
         "rust-overlay": "rust-overlay_3"
       },
       "locked": {
-        "lastModified": 1770997168,
-        "narHash": "sha256-9s4USXD7kMy9CzHVnK8rpOFWYJBRe5BqBmJ8kTwH56E=",
+        "lastModified": 1771408769,
+        "narHash": "sha256-7EZbG6FDuy59MHejPMnRJiRHOt/cXJrtXoZOgjTrHdY=",
         "owner": "olafkfreund",
         "repo": "cosmic-ext-radio-applet",
-        "rev": "53e74527297e20b8cffd5af90a64727184dd9041",
+        "rev": "c595113c212db1ccc3db32dfd95871e7eb60b186",
         "type": "github"
       },
       "original": {

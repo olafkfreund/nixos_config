@@ -111,10 +111,8 @@ in
   };
 
   # COSMIC Radio Applet - Internet radio player for COSMIC Desktop panel
-  programs.cosmic-ext-applet-radio = {
-    enable = true;
-    autostart = true;
-  };
+  # Add to panel via: COSMIC Settings > Panel > Applets
+  programs.cosmic-ext-applet-radio.enable = true;
 
   # COSMIC Connect - Device connectivity solution for COSMIC Desktop
   # DISABLED: webkit2gtk dependency issue in upstream package
