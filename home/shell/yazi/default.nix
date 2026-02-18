@@ -16,6 +16,7 @@ in
   config = mkIf cfg.enable {
     programs.yazi = {
       enable = true;
+      shellWrapperName = "y";
       package = pkgs.yazi;
       enableBashIntegration = true;
       enableZshIntegration = true;
