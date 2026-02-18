@@ -178,7 +178,10 @@
         p510 = [ "olafkfreund" ];
       };
 
-      # Note: MicroVM packages and live images temporarily disabled during refactoring
+      # Live image builder
+      liveImages = import ./lib/live-images.nix {
+        inherit nixpkgs inputs hostUsers;
+      };
 
       # ========================================
       # HELPER FUNCTIONS
@@ -541,12 +544,8 @@
             };
           };
 
-          # Live ISO images (temporarily disabled during flake restructuring)
-          # live-iso-p620 = liveImages.liveImages.p620.config.system.build.isoImage;
-          # live-iso-razer = liveImages.liveImages.razer.config.system.build.isoImage;
-          # live-iso-p510 = liveImages.liveImages.p510.config.system.build.isoImage;
-          # live-iso-dex5550 = liveImages.liveImages.dex5550.config.system.build.isoImage;
-          # live-iso-samsung = liveImages.liveImages.samsung.config.system.build.isoImage;
+          # Live ISO images
+          live-iso-razer = liveImages.liveImages.live-iso-razer.config.system.build.isoImage;
 
           # Development and deployment tools available as packages
           # (Apps are available separately via apps.x86_64-linux)

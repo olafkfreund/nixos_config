@@ -27,7 +27,7 @@ let
       networking = {
         hostName = lib.mkDefault "${host}-installer";
         networkmanager.enable = true;
-        wireless.enable = false; # Disable wpa_supplicant in favor of NetworkManager
+        wireless.enable = lib.mkForce false; # Disable wpa_supplicant in favor of NetworkManager
         firewall.enable = false; # Disable for installation convenience
       };
 
@@ -90,8 +90,8 @@ let
         # Hardware tools
         inputs.nixpkgs.legacyPackages.x86_64-linux.lshw
         inputs.nixpkgs.legacyPackages.x86_64-linux.dmidecode
-        inputs.nixpkgs.legacyPackages.x86_64-linux.lscpu
-        inputs.nixpkgs.legacyPackages.x86_64-linux.lsusb
+        inputs.nixpkgs.legacyPackages.x86_64-linux.util-linux
+        inputs.nixpkgs.legacyPackages.x86_64-linux.usbutils
         inputs.nixpkgs.legacyPackages.x86_64-linux.pciutils
 
         # Network tools
@@ -183,6 +183,7 @@ let
         boot.kernelModules = [ "i915" "nvidia" ];
         services.xserver.videoDrivers = [ "nvidia" ];
         hardware.nvidia.modesetting.enable = true;
+        hardware.nvidia.open = true; # Required for >= 560 drivers, Razer has RTX GPU
       };
 
     p510 =
