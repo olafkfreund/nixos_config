@@ -86,10 +86,8 @@ in
   # services.cosmic-ext-bg.enable = true;
 
   # COSMIC Radio Applet - Internet radio player for COSMIC Desktop panel
-  programs.cosmic-ext-applet-radio = {
-    enable = true;
-    autostart = true;
-  };
+  # Add to panel via: COSMIC Settings > Panel > Applets
+  programs.cosmic-ext-applet-radio.enable = true;
 
   # COSMIC Connect - Device connectivity solution for COSMIC Desktop
   # TEMPORARILY DISABLED: Rust compilation errors in cosmic-ext-connect-protocol (issue #79)
