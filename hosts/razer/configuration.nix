@@ -396,19 +396,6 @@ in
       NH_FLAKE = vars.paths.flakeDir;
     };
 
-  # SSH security hardening DISABLED - blocking remote access
-  # TODO: Re-enable with proper network configuration after testing
-  security.sshHardening = {
-    enable = false; # DISABLED to restore SSH access
-    allowedUsers = hostUsers;
-    allowPasswordAuthentication = false;
-    allowRootLogin = false;
-    maxAuthTries = 3;
-    enableFail2Ban = false;
-    enableKeyOnlyAccess = true;
-    trustedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" "100.64.0.0/10" ];
-  };
-
   # Enable secrets management
   modules.security.secrets = {
     enable = true;
