@@ -6,11 +6,13 @@
 with lib; let
   cfg = config.modules.development.python;
 
-  # Override sse-starlette to disable flaky tests (timing issues cause failures)
+  # Override sse-starlette: fix missing starlette runtime dependency (nixpkgs-unstable
+  # regression) and disable flaky tests (timing issues cause failures)
   # See: https://github.com/olafkfreund/nixos_config/issues/118
-  sse-starlette-nocheck = pkgs.python312Packages.sse-starlette.overridePythonAttrs (_old: {
+  sse-starlette-nocheck = pkgs.python312Packages.sse-starlette.overridePythonAttrs (old: {
     doCheck = false; # Disable flaky timing tests
     pythonImportsCheck = [ ]; # Disable import check (has test-time dependency issues)
+    dependencies = (old.dependencies or [ ]) ++ [ pkgs.python312Packages.starlette ];
   });
 
   # Override mcp to use our fixed sse-starlette
