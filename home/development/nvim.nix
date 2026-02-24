@@ -50,8 +50,8 @@ with lib; let
       pkgs.libuv # libuv (libluv dependency)
       pkgs.unibilium # Terminal info library
 
-      # Ruby gems for Neovim
-      pkgs.ruby_3_3 # Ruby 3.3 interpreter
+      # Ruby for Neovim (use default ruby, same as line 84 to avoid version conflict)
+      # pkgs.ruby included via home.packages below
 
       # Additional Python dependencies
       pkgs.python313Packages.tomlkit # TOML parsing for Python
