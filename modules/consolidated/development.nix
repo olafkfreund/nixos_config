@@ -29,7 +29,7 @@ with lib; let
     ];
 
     python = with pkgs; [
-      python311Full
+      python311
       python311Packages.pip
       python311Packages.virtualenv
       python311Packages.poetry
