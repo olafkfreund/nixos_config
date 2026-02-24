@@ -56,6 +56,13 @@ in
               description = "Dynamic and reflective problem-solving through systematic thinking - helps break down complex problems into steps";
             };
 
+            # NotebookLM MCP for Google NotebookLM interaction
+            notebooklm = {
+              command = "${pkgs.uv}/bin/uvx";
+              args = [ "--from" "notebooklm-mcp-cli" "notebooklm-mcp" ];
+              description = "Google NotebookLM interaction - create notebooks, add sources, generate audio/video overviews, query content via AI";
+            };
+
             # Terraform MCP for Infrastructure as Code
             terraform = {
               command = if pkgs ? terraform-mcp-server then "${pkgs.terraform-mcp-server}/bin/terraform-mcp-server" else "${pkgs.writeShellScript "terraform-mcp-placeholder" "echo 'Terraform MCP not available'"}";

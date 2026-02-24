@@ -328,6 +328,21 @@
             buildInputs = (oldAttrs.buildInputs or [ ]) ++ [ prev.cxxopts prev.icu ];
           });
         })
+        # Fix azure-cli k8s-extension: pinned kubernetes==24.2.0 and oras==0.2.25
+        # are not satisfied by newer versions in nixpkgs-unstable
+        (_final: prev: {
+          azure-cli-extensions = prev.azure-cli-extensions // {
+            k8s-extension = prev.azure-cli-extensions.k8s-extension.overridePythonAttrs (oldAttrs: {
+              pythonRelaxDeps = (oldAttrs.pythonRelaxDeps or [ ]) ++ [
+                "kubernetes"
+                "oras"
+              ];
+              nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [
+                prev.python3Packages.pythonRelaxDepsHook
+              ];
+            });
+          };
+        })
         # Fix nix-prefetch-git binary name (nixpkgs-unstable regression: binary named
         # "nix-prefetch-git-VERSION" instead of "nix-prefetch-git", breaking fetchCargoVendor)
         (_final: prev: {
