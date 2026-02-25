@@ -45,7 +45,6 @@ with lib; {
         useNetworkd = false;
         useHostResolvConf = false;
         firewall.enable = lib.mkDefault true; # Allow hosts to override
-        nftables.enable = true;
         timeServers = [ "pool.ntp.org" ];
       };
 
@@ -66,7 +65,6 @@ with lib; {
         useNetworkd = true;
         useHostResolvConf = false;
         firewall.enable = lib.mkDefault true; # Allow hosts to override
-        nftables.enable = true;
         timeServers = [ "pool.ntp.org" ];
       };
 

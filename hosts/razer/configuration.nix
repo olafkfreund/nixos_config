@@ -65,7 +65,7 @@ in
     nameservers = [ "1.1.1.1" "8.8.8.8" ];
 
     # Firewall disabled to allow all network access including SSH
-    firewall.enable = false;
+    firewall.enable = lib.mkForce false;
   };
 
   # Tailscale VPN using built-in NixOS service
