@@ -413,6 +413,19 @@
               '';
           });
         })
+        # Fix python312Packages.sse-starlette missing starlette in propagatedBuildInputs
+        # nixpkgs regression: sse-starlette-3.2.0 fails runtime dep check without starlette
+        (_final: prev: {
+          python312Packages = prev.python312Packages.overrideScope (
+            _pySelf: pyPrev: {
+              sse-starlette = pyPrev.sse-starlette.overrideAttrs (oldAttrs: {
+                propagatedBuildInputs = (oldAttrs.propagatedBuildInputs or [ ]) ++ [
+                  prev.python312Packages.starlette
+                ];
+              });
+            }
+          );
+        })
       ];
 
       makeNixosSystem = host:
