@@ -29,12 +29,12 @@ with lib; let
     ];
 
     python = with pkgs; [
-      python311
-      python311Packages.pip
-      python311Packages.virtualenv
-      python311Packages.poetry
-      python311Packages.numpy
-      python311Packages.requests
+      python313 # python311Full removed from nixpkgs; upgrade to current default
+      python313Packages.pip
+      python313Packages.virtualenv
+      python313Packages.poetry
+      python313Packages.numpy
+      python313Packages.requests
     ];
 
     javascript = with pkgs; [

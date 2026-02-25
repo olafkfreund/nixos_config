@@ -10,12 +10,12 @@ with lib; let
   # This avoids the complexity of full uv2nix packaging while remaining reasonably declarative
   spec-kit-wrapper = pkgs.writeShellScriptBin "specify" ''
     # Ensure we have required dependencies
-    export PATH="${pkgs.git}/bin:${pkgs.uv}/bin:${pkgs.python311}/bin:$PATH"
+    export PATH="${pkgs.git}/bin:${pkgs.uv}/bin:${pkgs.python313}/bin:$PATH"
 
     # Use uv to run spec-kit directly from GitHub
     exec ${pkgs.uv}/bin/uv tool run \
       --from git+https://github.com/github/spec-kit.git \
-      --python ${pkgs.python311}/bin/python \
+      --python ${pkgs.python313}/bin/python \
       specify "$@"
   '';
 in
@@ -27,7 +27,7 @@ in
     environment.systemPackages = [
       spec-kit-wrapper
       pkgs.uv # Required for running spec-kit
-      pkgs.python311 # Required by spec-kit
+      pkgs.python313 # Required by spec-kit (updated from 3.11 - broken doc build)
       pkgs.git # Required by spec-kit for repository operations
     ];
 
