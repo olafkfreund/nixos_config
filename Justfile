@@ -131,7 +131,7 @@ lint-all:
 # Test all configurations build successfully
 test-all:
     @echo "🧪 Testing all NixOS configurations..."
-    @for host in p620 razer p510 dex5550 samsung; do \
+    @for host in p620 razer p510 samsung; do \
         echo "Testing $host..."; \
         nix build .#nixosConfigurations.$host.config.system.build.toplevel --show-trace || exit 1; \
     done
@@ -143,7 +143,6 @@ test-all-parallel:
     @( nix build .#nixosConfigurations.p620.config.system.build.toplevel --no-link --show-trace && echo "✅ P620" || echo "❌ P620" ) & \
     ( nix build .#nixosConfigurations.razer.config.system.build.toplevel --no-link --show-trace && echo "✅ Razer" || echo "❌ Razer" ) & \
     ( nix build .#nixosConfigurations.p510.config.system.build.toplevel --no-link --show-trace && echo "✅ P510" || echo "❌ P510" ) & \
-    ( nix build .#nixosConfigurations.dex5550.config.system.build.toplevel --no-link --show-trace && echo "✅ DEX5550" || echo "❌ DEX5550" ) & \
     ( nix build .#nixosConfigurations.samsung.config.system.build.toplevel --no-link --show-trace && echo "✅ Samsung" || echo "❌ Samsung" ) & \
     wait && echo "✅ All parallel tests completed!"
 
@@ -153,9 +152,9 @@ test-build-all:
     echo "🔨 Test building all host configurations with detailed reporting..."
     failed_hosts=()
     success_count=0
-    total_hosts=5
+    total_hosts=4
 
-    for host in p620 razer p510 dex5550 samsung; do
+    for host in p620 razer p510 samsung; do
         echo ""
         echo "🔨 Building $host..."
         start_time=$(date +%s)
@@ -209,9 +208,6 @@ test-build-all-parallel:
     (nixos-rebuild build --flake .#p510 --show-trace > /tmp/build-p510.log 2>&1 && echo "✅ P510: Build successful" || echo "❌ P510: Build failed") &
     p510_pid=$!
 
-    (nixos-rebuild build --flake .#dex5550 --show-trace > /tmp/build-dex5550.log 2>&1 && echo "✅ DEX5550: Build successful" || echo "❌ DEX5550: Build failed") &
-    dex5550_pid=$!
-
     (nixos-rebuild build --flake .#samsung --show-trace > /tmp/build-samsung.log 2>&1 && echo "✅ Samsung: Build successful" || echo "❌ Samsung: Build failed") &
     samsung_pid=$!
 
@@ -220,7 +216,6 @@ test-build-all-parallel:
     wait $p620_pid; p620_result=$?
     wait $razer_pid; razer_result=$?
     wait $p510_pid; p510_result=$?
-    wait $dex5550_pid; dex5550_result=$?
     wait $samsung_pid; samsung_result=$?
 
     # Count results
@@ -230,14 +225,13 @@ test-build-all-parallel:
     if [ $p620_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("p620"); fi
     if [ $razer_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("razer"); fi
     if [ $p510_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("p510"); fi
-    if [ $dex5550_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("dex5550"); fi
     if [ $samsung_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("samsung"); fi
 
     echo ""
     echo "📊 Parallel Build Summary:"
     echo "========================="
-    echo "✅ Successful: $success_count/5"
-    echo "❌ Failed: ${#failed_hosts[@]}/5"
+    echo "✅ Successful: $success_count/4"
+    echo "❌ Failed: ${#failed_hosts[@]}/4"
 
     if [ ${#failed_hosts[@]} -gt 0 ]; then
         echo ""
@@ -286,7 +280,7 @@ test-build-verbose HOST:
 # Validate Home Manager configurations
 test-home:
     @echo "🏠 Testing Home Manager configurations..."
-    @for host in p620 razer p510 dex5550 samsung; do \
+    @for host in p620 razer p510 samsung; do \
         echo "Testing Home Manager for olafkfreund@$host..."; \
         nix build .#homeConfigurations.\"olafkfreund@$host\".activationPackage --show-trace || echo "⚠️  Home Manager config for $host failed"; \
     done
@@ -371,10 +365,6 @@ p620:
 # Deploy to p510 workstation (Intel Xeon/NVIDIA) - OPTIMIZED
 p510:
     nixos-rebuild switch --flake .#p510 --target-host p510.lan --build-host p510.lan --sudo --no-reexec --keep-going --accept-flake-config
-
-# Deploy to dex5550 SFF system (Intel integrated) - OPTIMIZED
-dex5550:
-    nixos-rebuild switch --flake .#dex5550 --target-host dex5550.lan --build-host dex5550.lan --sudo --no-reexec --keep-going --accept-flake-config
 
 # Deploy to samsung system (Intel integrated) - requires special handling
 samsung:
@@ -732,7 +722,7 @@ test-all-users:
     @for user_dir in Users/*/; do \
         user=$$(basename "$$user_dir"); \
         echo "Testing user: $$user"; \
-        for host in p620 razer p510 dex5550 samsung; do \
+        for host in p620 razer p510 samsung; do \
             if [ -f "Users/$$user/$${host}_home.nix" ]; then \
                 echo "  Testing $$user@$$host..."; \
                 nix build .#homeConfigurations.\"$$user@$$host\".activationPackage --no-link 2>/dev/null || echo "    ⚠️  Failed: $$user@$$host"; \
@@ -821,7 +811,7 @@ restore BACKUP_PATH:
 deploy-interactive:
     @echo "🎯 Interactive deployment"
     @echo "Available hosts:"
-    @select host in razer dex5550 p510 p620 samsung "Cancel"; do \
+    @select host in razer p510 p620 samsung "Cancel"; do \
         case $$host in \
             "Cancel") echo "Deployment cancelled"; break ;; \
             "") echo "Invalid selection" ;; \
@@ -890,7 +880,6 @@ deploy-all-parallel:
     ( just p620 & echo "P620 started" ) & \
     ( just razer & echo "Razer started" ) & \
     ( just p510 & echo "P510 started" ) & \
-    ( just dex5550 & echo "DEX5550 started" ) & \
     wait && echo "✅ All deployments completed!"
     @echo "⚠️  Note: Samsung requires manual deployment due to network configuration"
 
@@ -921,7 +910,6 @@ build-all-parallel:
     ( nix build .#nixosConfigurations.p620.config.system.build.toplevel --no-link & echo "Building P620..." ) & \
     ( nix build .#nixosConfigurations.razer.config.system.build.toplevel --no-link & echo "Building Razer..." ) & \
     ( nix build .#nixosConfigurations.p510.config.system.build.toplevel --no-link & echo "Building P510..." ) & \
-    ( nix build .#nixosConfigurations.dex5550.config.system.build.toplevel --no-link & echo "Building DEX5550..." ) & \
     ( nix build .#nixosConfigurations.samsung.config.system.build.toplevel --no-link & echo "Building Samsung..." ) & \
     wait && echo "✅ All builds completed!"
 
@@ -953,7 +941,7 @@ samsung-deploy:
 # Test all hosts can be reached
 ping-hosts:
     @echo "🏓 Pinging all hosts..."
-    @for host in p620 razer p510 dex5550 samsung; do \
+    @for host in p620 razer p510 samsung; do \
         echo -n "$$host: "; \
         ping -c 1 -W 2 $$host.lan >/dev/null 2>&1 && echo "✅ reachable" || echo "❌ unreachable"; \
     done
@@ -1010,7 +998,7 @@ summary:
     #!/usr/bin/env bash
     echo "📋 NixOS Configuration Summary"
     echo "=============================="
-    echo "Active hosts: p620 (AMD workstation), razer (Intel/NVIDIA laptop), p510 (Intel Xeon server), dex5550 (Intel SFF monitoring), samsung (Intel laptop)"
+    echo "Active hosts: p620 (AMD workstation), razer (Intel/NVIDIA laptop), p510 (Intel Xeon server), samsung (Intel laptop)"
     echo "Users: $(ls Users/ | grep -v README | tr '\n' ' ')"
     echo "Modules: $(find modules -name '*.nix' -not -name 'default.nix' | wc -l) modules"
     echo "Last update: $(stat -c %y flake.lock | cut -d' ' -f1)"
@@ -1043,7 +1031,7 @@ build-live host:
 build-all-live:
     #!/usr/bin/env bash
     echo "🔧 Building all live USB installer images..."
-    hosts=("p620" "razer" "p510" "dex5550" "samsung")
+    hosts=("p620" "razer" "p510" "samsung")
     failed=()
 
     for host in "${hosts[@]}"; do
@@ -1170,7 +1158,7 @@ live-help:
     @echo "  4. Boot from USB and run: sudo install-p620"
     @echo ""
     @echo "🎯 Available Hosts:"
-    @echo "  p620, razer, p510, dex5550, samsung"
+    @echo "  p620, razer, p510, samsung"
     @echo ""
     @echo "⚠️  WARNING: flash-live will ERASE the target device!"
 
@@ -1440,6 +1428,6 @@ deploy-all:
     @echo "🚀 Proceeding with deployment sequence..."
     @echo "🔹 Phase 1: Infrastructure (P620)"
     @just p620
-    @echo "🔹 Phase 2: Clients (Razer, P510, DEX5550)"
+    @echo "🔹 Phase 2: Clients (Razer, P510, Samsung)"
     @just deploy-all-parallel
     @echo "✅ Deployment Coordinator finished successfully."
