@@ -8,7 +8,6 @@ _: {
     ./security/default.nix
     ./pkgs/default.nix
     ./overlays/default.nix
-    ./system-scripts/default.nix
     ./scripts/temp-dashboard.nix
 
     # System utilities - always useful
@@ -16,9 +15,8 @@ _: {
     ./system-utils/unpack.nix
     ./system-utils/system_util.nix
 
-    # Basic tools and SSH
+    # Basic tools
     ./tools/nixpkgs-monitors.nix
-    ./ssh/ssh.nix
 
     # Basic services that most hosts need
     ./services/default.nix

@@ -142,14 +142,6 @@ in
     enableReadyNotifications = true;
   };
 
-  # Enable AI-powered shell command suggestions
-  # Note: Configured via Home Manager (Users/olafkfreund/p620_home.nix)
-  # System-level configuration disabled in favor of per-user configuration
-  features.zsh-ai-cmd.enable = false;
-
-  # Re-enable Claude Desktop with local package
-  # features.ai.claude-desktop = true;
-
   # AI production dashboard and load testing removed - were non-functional services consuming resources
 
   # Enable NixOS package monitoring tools

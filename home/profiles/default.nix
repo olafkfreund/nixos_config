@@ -9,7 +9,7 @@ let
     # Base server administration profile
     server-admin = {
       description = "Minimal headless configuration for server administration";
-      targetHosts = [ "dex5550" "p510" ];
+      targetHosts = [ "p510" ];
       features = {
         desktop = false;
         gaming = false;
@@ -31,73 +31,10 @@ let
       };
     };
 
-    # Desktop user profile
-    desktop-user = {
-      description = "Full GUI configuration for desktop environments";
-      targetHosts = [ "p620" ];
-      inherits = [ ]; # Standalone profile
-      features = {
-        desktop = "full";
-        gaming = true;
-        development = "basic";
-        multimedia = "full";
-      };
-    };
-
-    # Laptop user profile
-    laptop-user = {
-      description = "Mobile-optimized configuration with power management";
-      targetHosts = [ "razer" "samsung" ];
-      inherits = [ ]; # Standalone profile
-      features = {
-        desktop = "mobile";
-        gaming = "limited";
-        development = "portable";
-        multimedia = "efficient";
-        powerManagement = true;
-      };
-    };
   };
 
-  # Profile composition system - allows combining profiles
-  compositions = {
-
-    # Developer + Desktop User (P620 primary configuration)
-    full-workstation = {
-      description = "Full workstation combining development and desktop capabilities";
-      combines = [ "developer" "desktop-user" ];
-      targetHosts = [ "p620" ];
-      overrides = {
-        gaming.enable = true;
-        development.languages = "all";
-        desktop.quickshell = true; # P620-specific feature
-      };
-    };
-
-    # Developer + Laptop User (Mobile development)
-    mobile-developer = {
-      description = "Mobile development setup with power optimization";
-      combines = [ "developer" "laptop-user" ];
-      targetHosts = [ "razer" ];
-      overrides = {
-        development.languages = "essential";
-        editors.resource_intensive = false;
-        powerManagement.aggressive = true;
-      };
-    };
-
-    # Server Admin + Developer (Server with development tools)
-    dev-server = {
-      description = "Server with development capabilities for remote work";
-      combines = [ "server-admin" "developer" ];
-      targetHosts = [ "p510" ];
-      overrides = {
-        desktop.enable = false; # Force headless
-        development.gui_tools = false;
-        terminals.enable = false; # CLI only
-      };
-    };
-  };
+  # Profile compositions removed - hosts import profiles directly
+  compositions = { };
 
   # Profile resolution function
   resolveProfile = _hostName: _userName: profileName:

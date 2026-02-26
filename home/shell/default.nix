@@ -13,7 +13,6 @@ _: {
     ./zoxide/default.nix
     ./zellij/default.nix
     ./bat/default.nix
-    # ./lunarvim/default.nix
     ./tmux/default.nix
     ./lazyvim/default.nix
     ./markdown/default.nix
