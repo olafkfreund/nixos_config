@@ -264,7 +264,7 @@
         (final: _prev: {
           claude-code-native = final.callPackage ./pkgs/claude-code-native { };
         })
-        # Custom package: gemini-cli - Google Gemini AI CLI tool with version 0.27.0
+        # Custom package: gemini-cli - Google Gemini AI CLI tool
         (final: _prev: {
           gemini-cli = final.callPackage ./home/development/gemini-cli { };
         })

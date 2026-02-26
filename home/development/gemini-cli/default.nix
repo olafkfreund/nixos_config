@@ -14,16 +14,16 @@
 
 buildNpmPackage (finalAttrs: {
   pname = "gemini-cli";
-  version = "0.28.2";
+  version = "0.30.0";
 
   src = fetchFromGitHub {
     owner = "google-gemini";
     repo = "gemini-cli";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-IOc4Y8U2J4Dpl0A5gfffAayiHKISlFiHU2qg61fR1Tw=";
+    hash = "sha256-+w4w1cftPSj0gJ23Slw8Oexljmu0N/PZWH4IDjw75rs=";
   };
 
-  npmDepsHash = "sha256-XfD+PmmeLsbb9rC7DCmqu08/+cXZpGewMN5olrHhH4M=";
+  npmDepsHash = "sha256-Nkd5Q2ugRqsTqaFbCSniC3Obl++uEjVUmoa8MVT5++8=";
 
   nodejs = nodejs_22;
 
@@ -45,11 +45,11 @@ buildNpmPackage (finalAttrs: {
   '';
 
   postPatch = ''
-    # Remove node-pty dependency from package.json
-    ${jq}/bin/jq 'del(.optionalDependencies."node-pty")' package.json > package.json.tmp && mv package.json.tmp package.json
+    # Remove node-pty and native optional dependencies from package.json
+    ${jq}/bin/jq 'del(.optionalDependencies."node-pty", .optionalDependencies."@lydell/node-pty", .optionalDependencies."@lydell/node-pty-darwin-arm64", .optionalDependencies."@lydell/node-pty-darwin-x64", .optionalDependencies."@lydell/node-pty-linux-x64", .optionalDependencies."@lydell/node-pty-win32-arm64", .optionalDependencies."@lydell/node-pty-win32-x64", .optionalDependencies."keytar")' package.json > package.json.tmp && mv package.json.tmp package.json
 
-    # Remove node-pty dependency from packages/core/package.json
-    ${jq}/bin/jq 'del(.optionalDependencies."node-pty")' packages/core/package.json > packages/core/package.json.tmp && mv packages/core/package.json.tmp packages/core/package.json
+    # Remove node-pty and native optional dependencies from packages/core/package.json
+    ${jq}/bin/jq 'del(.optionalDependencies."node-pty", .optionalDependencies."@lydell/node-pty", .optionalDependencies."@lydell/node-pty-darwin-arm64", .optionalDependencies."@lydell/node-pty-darwin-x64", .optionalDependencies."@lydell/node-pty-linux-x64", .optionalDependencies."@lydell/node-pty-win32-arm64", .optionalDependencies."@lydell/node-pty-win32-x64", .optionalDependencies."keytar")' packages/core/package.json > packages/core/package.json.tmp && mv packages/core/package.json.tmp packages/core/package.json
 
     # Fix ripgrep path for SearchText; ensureRgPath() on its own may return the path to a dynamically-linked ripgrep binary without required libraries
     substituteInPlace packages/core/src/tools/ripGrep.ts \
@@ -72,11 +72,13 @@ buildNpmPackage (finalAttrs: {
     rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli
     rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-core
     rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-a2a-server
+    rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-sdk
     rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-test-utils
     rm -f $out/share/gemini-cli/node_modules/gemini-cli-vscode-ide-companion
     cp -r packages/cli $out/share/gemini-cli/node_modules/@google/gemini-cli
     cp -r packages/core $out/share/gemini-cli/node_modules/@google/gemini-cli-core
     cp -r packages/a2a-server $out/share/gemini-cli/node_modules/@google/gemini-cli-a2a-server
+    cp -r packages/sdk $out/share/gemini-cli/node_modules/@google/gemini-cli-sdk
 
     rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-core/dist/docs/CONTRIBUTING.md
 
