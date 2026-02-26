@@ -346,12 +346,14 @@
         # Fix azure-mgmt-network: msrest not declared as runtime dependency
         # (nixpkgs-unstable regression caught by pythonRuntimeDepsCheckHook)
         (_final: prev: {
-          python312Packages = prev.python312Packages // {
-            azure-mgmt-network = prev.python312Packages.azure-mgmt-network.overridePythonAttrs (oldAttrs: {
-              dependencies = (oldAttrs.dependencies or [ ]) ++ [
-                prev.python312Packages.msrest
-              ];
-            });
+          python312 = prev.python312.override {
+            packageOverrides = _pyFinal: pyPrev: {
+              azure-mgmt-network = pyPrev.azure-mgmt-network.overridePythonAttrs (oldAttrs: {
+                dependencies = (oldAttrs.dependencies or [ ]) ++ [
+                  pyPrev.msrest
+                ];
+              });
+            };
           };
         })
         # Fix python3.11 doc build failure (Sphinx 9.1.0 + docutils 0.22.4 incompatibility)
