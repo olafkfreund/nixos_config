@@ -318,6 +318,10 @@
           ltrace = prev.ltrace.overrideAttrs (_oldAttrs: {
             doCheck = false;
           });
+          # Skip mu tests - test_index_move has timing-dependent assertion that fails in sandbox
+          mu = prev.mu.overrideAttrs (_oldAttrs: {
+            doCheck = false;
+          });
           # Fix cxxopts missing icu dependency
           cxxopts = prev.cxxopts.overrideAttrs (oldAttrs: {
             buildInputs = (oldAttrs.buildInputs or [ ]) ++ [ prev.icu ];
