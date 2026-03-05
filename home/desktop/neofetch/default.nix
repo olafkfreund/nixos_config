@@ -1,5 +1,5 @@
 # Enhanced System Information and Monitoring
-# Includes neofetch configuration plus system monitoring utilities
+# System monitoring utilities with fastfetch
 { pkgs
 , lib
 , ...
@@ -7,18 +7,12 @@
 with lib; let
   # Feature flags for system monitoring
   cfg = {
-    neofetch = {
-      enable = true;
-      customLogo = true;
-      imageSupport = true;
-    };
-
     systemMonitors = {
       btop = true;
       htop = true;
       nvtop = true;
       iotop = true;
-      fastfetch = true; # Modern neofetch alternative
+      fastfetch = true;
     };
 
     utilities = {
@@ -34,7 +28,6 @@ in
   home.packages = with pkgs;
     flatten [
       # Core system info
-      (optionals cfg.neofetch.enable [ neofetch ])
       (optionals cfg.systemMonitors.fastfetch [ fastfetch ])
 
       # System monitors
@@ -102,7 +95,6 @@ in
           # System info
           echo "📊 System Information:"
           ${optionalString cfg.systemMonitors.fastfetch "${pkgs.fastfetch}/bin/fastfetch --config small"}
-          ${optionalString (!cfg.systemMonitors.fastfetch && cfg.neofetch.enable) "${pkgs.neofetch}/bin/neofetch --disable packages"}
           echo
 
           # Resource usage
@@ -130,40 +122,9 @@ in
           #!/bin/sh
           # Quick system information
           ${optionalString cfg.systemMonitors.fastfetch "${pkgs.fastfetch}/bin/fastfetch"}
-          ${optionalString (!cfg.systemMonitors.fastfetch && cfg.neofetch.enable) "${pkgs.neofetch}/bin/neofetch"}
         '';
         executable = true;
       };
-    }
-
-    # Neofetch configuration
-    {
-      ".config/neofetch/config.conf".text = ''
-        print_info() {
-            prin "$(color 6)  NIXOS "
-            info underline
-            info "$(color 7)  VER" kernel
-            info "$(color 2)  UP " uptime
-            info "$(color 4)  PKG" packages
-            info "$(color 6)  DE " de
-            info "$(color 5)  TER" term
-            info "$(color 3)  CPU" cpu
-            info "$(color 7)  GPU" gpu
-            info "$(color 5)  MEM" memory
-            prin " "
-            prin "$(color 1) $(color 2) $(color 3) $(color 4) $(color 5) $(color 6) $(color 7) $(color 8)"
-        }
-        distro_shorthand="on"
-        memory_unit="gib"
-        cpu_temp="C"
-        separator=" $(color 4)>"
-        stdout="off"
-        image_backend="kitty"
-        image_source=$HOME/Pictures/assets/wallpapers/gruvbox/finalizer.png
-        image_size="100px"
-        crop_mode="normal"
-        crop_offset="west"
-      '';
     }
   ];
 }

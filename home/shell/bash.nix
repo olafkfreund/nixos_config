@@ -46,7 +46,7 @@
       gitp = "git push";
       gitc = "git checkout";
       #icat = "kitty +kitten icat";
-      neofetch = "neofetch --iterm2 ~/Pictures/1_d2RiMW4zoHLUK-751E38gQ.png --size 200";
+      neofetch = "fastfetch";
       nri = "sudo nixos-rebuild switch --impure|& nom";
       nr = "sudo nixos-rebuild switch|& nom";
       today = "curl -s https://wttr.in/London?1";
