@@ -50,7 +50,7 @@
   };
 
   # Backlight control
-  programs.light.enable = true;
+  programs.brightnessctl.enable = true;
 
   # Fan control and thermal management for Razer
   boot.extraModprobeConfig = ''

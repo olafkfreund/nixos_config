@@ -3,7 +3,7 @@
 , ...
 }: {
   # Backlight control
-  programs.light.enable = true;
+  programs.brightnessctl.enable = true;
 
   # Fan control and thermal management for Samsung laptop
   boot.extraModprobeConfig = ''
