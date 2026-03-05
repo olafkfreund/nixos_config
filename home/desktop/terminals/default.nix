@@ -463,8 +463,7 @@ in
 
         # Terminal utilities
         btop # System monitor
-        neofetch # System info
-        fastfetch # Fast system info
+        fastfetch # System info
 
         # File managers
         lf # Terminal file manager
