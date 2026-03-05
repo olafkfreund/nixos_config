@@ -3,7 +3,7 @@
 , ...
 }: {
   # Backlight control
-  programs.light.enable = true;
+  environment.systemPackages = [ pkgs.brightnessctl ];
 
   # Fan control and thermal management for Samsung laptop
   boot.extraModprobeConfig = ''
@@ -32,12 +32,12 @@
         {
           keys = [ 224 ];
           events = [ "key" ];
-          command = "${pkgs.light}/bin/light -U 5";
+          command = "${pkgs.brightnessctl}/bin/brightnessctl set 5%-";
         }
         {
           keys = [ 225 ];
           events = [ "key" ];
-          command = "${pkgs.light}/bin/light -A 5";
+          command = "${pkgs.brightnessctl}/bin/brightnessctl set 5%+";
         }
       ];
     };
