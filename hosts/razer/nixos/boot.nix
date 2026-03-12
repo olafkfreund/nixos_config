@@ -37,4 +37,7 @@
   boot.extraModprobeConfig = ''
     options v4l2loopback devices=3 video_nr=1,2,10 card_label="OBS Virtual Cam 1","OBS Virtual Cam 2","COSMIC Camera" exclusive_caps=1,1,1
   '';
+
+  # Blacklist nova_core to prevent conflicts with proprietary NVIDIA drivers (nixpkgs #473350)
+  boot.blacklistedKernelModules = [ "nova_core" ];
 }
