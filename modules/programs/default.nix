@@ -10,6 +10,7 @@ _: {
     ./wshowkeys.nix
     ./droidcam.nix
     ./yt-x.nix # Terminal YouTube browser
+    ./reddix.nix # Reddit TUI client
     # ./streamcontroller.nix
     # ./thunar.nix
   ];
