@@ -125,6 +125,8 @@ in
 
     # Ensure Ollama service integration
     systemd.services.ollama = mkIf config.services.ollama.enable {
+      after = [ "systemd-modules-load.service" ];
+      wants = [ "systemd-modules-load.service" ];
       environment = {
         OLLAMA_HOST = "0.0.0.0:11434";
         OLLAMA_ORIGINS = "*";
