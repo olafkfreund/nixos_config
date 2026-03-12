@@ -32,6 +32,9 @@
 
   add-skill = pkgs.callPackage ./add-skill { };
 
+  # Reddit TUI client
+  reddix = pkgs.callPackage ./reddix { };
+
   # Claude Code native binary (alternative to npm-based package)
   claude-code-native = pkgs.callPackage ./claude-code-native { };
 }

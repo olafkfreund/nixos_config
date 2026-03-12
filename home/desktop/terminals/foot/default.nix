@@ -49,30 +49,9 @@ in
           find-prev = "Control+r";
           find-next = "Control+s";
         };
-        # Color scheme
-        colors = {
-          foreground = "${config.colorScheme.palette.base06}";
-          background = "${config.colorScheme.palette.base00}";
-          ## Normal/regular colors (color palette 0-7)
-          regular0 = "${config.colorScheme.palette.base00}"; # black
-          regular1 = "${config.colorScheme.palette.base08}";
-          regular2 = "${config.colorScheme.palette.base0B}";
-          regular3 = "${config.colorScheme.palette.base09}";
-          regular4 = "${config.colorScheme.palette.base0D}";
-          regular5 = "${config.colorScheme.palette.base0E}";
-          regular6 = "${config.colorScheme.palette.base0C}";
-          regular7 = "${config.colorScheme.palette.base06}";
-
-          # Bright colors (color palette 8-15)
-          bright0 = "${config.colorScheme.palette.base01}"; # bright black
-          bright1 = "${config.colorScheme.palette.base08}"; # bright red
-          bright2 = "${config.colorScheme.palette.base0B}"; # bright green
-          bright3 = "${config.colorScheme.palette.base09}"; # bright yellow
-          bright4 = "${config.colorScheme.palette.base0D}"; # bright blue
-          bright5 = "${config.colorScheme.palette.base0E}"; # bright magenta
-          bright6 = "${config.colorScheme.palette.base0C}"; # bright cyan
-          bright7 = "${config.colorScheme.palette.base07}"; # bright white
-        };
+        # foot deprecated [colors] in favor of [colors-dark]
+        # Stylix injects colors.alpha and the include file uses [colors]
+        # This is an upstream issue in Stylix/tinted-theming templates
       };
     };
   };

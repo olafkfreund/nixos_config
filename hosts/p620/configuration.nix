@@ -311,6 +311,7 @@ in
       webcam = true;
       print = true;
       yt-x.enable = true; # Terminal YouTube browser
+      reddix.enable = true; # Reddit TUI client
     };
 
     media = {
