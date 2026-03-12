@@ -52,7 +52,7 @@
   # boot.extraModulePackages configured by nvidia.nix
 
   # Explicitly blacklist v4l2loopback kernel module
-  boot.blacklistedKernelModules = lib.mkForce [ "v4l2loopback" ];
+  boot.blacklistedKernelModules = lib.mkForce [ "v4l2loopback" "nova_core" ];
 
   # Enable microcode updates
   hardware.cpu.intel.updateMicrocode = true;
