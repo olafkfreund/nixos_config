@@ -432,6 +432,31 @@
             }
           );
         })
+        # Fix electron 39 build: upstream 39-angle-patchdir.patch targets patches/config.json
+        # but the file is at src/electron/patches/config.json in the Chromium source tree.
+        # Replace the broken patch with a corrected version using the right path.
+        (_final: prev: {
+          electron_39 = prev.electron_39.override {
+            electron-unwrapped = prev.electron_39.unwrapped.overrideAttrs (oldAttrs: {
+              patches =
+                let
+                  isAnglePatch = p:
+                    let
+                      name =
+                        if builtins.isPath p then
+                          builtins.baseNameOf (toString p)
+                        else if builtins.isString p then
+                          p
+                        else
+                          (p.name or "");
+                    in
+                    builtins.match ".*39-angle-patchdir.*" name != null;
+                in
+                (builtins.filter (p: !(isAnglePatch p)) (oldAttrs.patches or [ ]))
+                ++ [ ./overlays/39-angle-patchdir-fixed.patch ];
+            });
+          };
+        })
       ];
 
       makeNixosSystem = host:
