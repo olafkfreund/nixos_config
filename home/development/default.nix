@@ -31,5 +31,8 @@ _: {
     # Development workflow enhancements (conflicts resolved)
     ./workflow.nix
     ./productivity.nix
+
+    # Agent skills management (vercel-labs/skills CLI)
+    ./skills-cli.nix
   ];
 }
