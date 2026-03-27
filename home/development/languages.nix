@@ -108,7 +108,6 @@ with lib; let
     ai = {
       copilot = true;
       codeium = true;
-      ollama = false;
     };
   };
 
@@ -205,7 +204,7 @@ with lib; let
     )
     enabledUtilities);
 
-  aiPackages = with pkgs; (optional cfg.ai.ollama ollama);
+  aiPackages = [ ];
 in
 {
   # Git configuration enhancement

@@ -108,7 +108,6 @@
     # Common GUI applications
     apps = with pkgs; [
       firefox
-      thunderbird
       obsidian
       code-cursor
       discord

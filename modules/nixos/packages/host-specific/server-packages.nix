@@ -19,8 +19,7 @@
     iperf3
     bandwhich
 
-    # Backup and maintenance
-    rclone
+    # Backup and maintenance (rclone is in desktop/cloud-sync)
     duplicity
 
     # Headless text editors

@@ -1,13 +1,13 @@
 return {
   {
-    "DreamMaoMao/yazi.nvim",
-    dependencies = {
-      "nvim-telescope/telescope.nvim",
-      "nvim-lua/plenary.nvim",
-    },
-
+    "mikavilpas/yazi.nvim",
+    event = "VeryLazy",
     keys = {
-      { "<leader>gy", "<cmd>Yazi<CR>", desc = "Toggle Yazi" },
+      { "<leader>gy", "<cmd>Yazi<CR>", desc = "Open Yazi (current file)" },
+      { "<leader>gY", "<cmd>Yazi cwd<CR>", desc = "Open Yazi (cwd)" },
+    },
+    opts = {
+      open_for_directories = false,
     },
   },
 }

@@ -208,7 +208,6 @@ in
 
     # GUI applications
     firefox
-    thunderbird
     #libreoffice
     vlc
 

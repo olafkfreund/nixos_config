@@ -163,8 +163,8 @@
     # pkgs.msty
     # pkgs.aider-chat-env
 
-    # Google Antigravity - AI coding assistant
-    antigravity-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
+    # Google Antigravity - AI coding assistant (no-fhs avoids bwrap opengl-driver symlink issue)
+    antigravity-nix.packages.${pkgs.stdenv.hostPlatform.system}.google-antigravity-no-fhs
 
     # Kosli CLI - Compliance monitoring and DevOps workflows
     pkgs.customPkgs.kosli-cli

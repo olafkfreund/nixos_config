@@ -22,13 +22,6 @@ with lib; {
       openai.enable = mkDefault true;
       anthropic.enable = mkDefault true;
       gemini.enable = mkDefault true;
-
-      # Local inference - profile-dependent defaults
-      ollama.enable = mkDefault (
-        if config.aiDefaults.profile == "server" || config.aiDefaults.profile == "laptop"
-        then false  # Disable on resource-constrained systems
-        else true   # Enable on workstations
-      );
     };
   };
 }

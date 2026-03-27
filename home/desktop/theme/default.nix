@@ -7,10 +7,8 @@ with lib;
     ./gtk-cosmic-fix.nix # Auto-patch COSMIC GTK CSS with Gruvbox theme
   ];
 
-  home.packages = with pkgs; [
-    wallust
-    # Only include papirus-icon-theme if GNOME is not enabled (GNOME uses gruvbox-plus-icons)
-  ] ++ optionals (!config.desktop.gnome.enable or false) [
-    papirus-icon-theme
+  # Only include papirus-icon-theme if GNOME is not enabled (GNOME uses gruvbox-plus-icons)
+  home.packages = optionals (!config.desktop.gnome.enable or false) [
+    pkgs.papirus-icon-theme
   ];
 }

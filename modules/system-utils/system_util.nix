@@ -1,26 +1,18 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   environment.systemPackages = with pkgs; [
-    # Core utilities (from consolidated sets)
-    coreutils
-    findutils
-    gnugrep
-    gnused
-    gawk
-    which
-    tree
-    file
-    iproute2
-    inetutils
-    git
-    curl
-    wget
-    unzip
-    zip
+    # Note: Core packages (coreutils, findutils, gnugrep, gnused, gawk, which, tree,
+    # file, iproute2, inetutils, git, curl, wget, unzip, htop, btop, iotop, bc,
+    # lsof, pciutils, usbutils, procps, psmisc, jq) are defined in
+    # modules/nixos/packages/core.nix — do not duplicate here.
 
-    # Network utilities
+    # Archive tools
+    zip
+    zstd
+
+    # Network utilities (beyond core)
     mtr
     iperf3
-    dnsutils
     ldns
     nmap
     ipcalc
@@ -29,47 +21,39 @@
     pkg-config
     gtk4-layer-shell
 
-    # System monitoring
-    htop
-    btop
-    iotop
-
-    # Additional system-specific packages
-    bc
-    zstd
+    # System diagnostics (beyond core)
     strace
     ltrace
-    lsof
     sysstat
     lm_sensors
     ethtool
-    pciutils
-    usbutils
     ncurses
-    psmisc
-    w3m
-    dmenu-wayland
-    qtpass
-    rofi-pass
     qjournalctl
     fwupd
+    acpi
+
+    # Android/USB tools
     android-tools
     scrcpy
     libusb1
-    acpi
+
+    # Audio/Bluetooth
     bluez-tools
     brightnessctl
     mpc
     alsa-utils
-    # pamixer  # Temporarily disabled due to build failures with cxxopts/icu dependencies
     playerctl
-    getent
     pavucontrol
     pulseaudio
     wireplumber
+
+    # Network management
     networkmanager
     networkmanagerapplet
     networkmanager_dmenu
+
+    # System tools
+    getent
     keychain
     netscanner
     dbus

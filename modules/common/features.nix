@@ -49,7 +49,6 @@ with lib; {
 
     ai = {
       enable = mkEnableOption "Enable AI tools";
-      ollama = mkEnableOption "Enable Ollama AI";
       gemini-cli = mkEnableOption "Enable Google Gemini CLI";
       claude-desktop = mkOption {
         type = types.bool;
@@ -62,7 +61,7 @@ with lib; {
         enable = mkEnableOption "Enable unified AI provider support";
 
         defaultProvider = mkOption {
-          type = types.enum [ "openai" "anthropic" "gemini" "ollama" ];
+          type = types.enum [ "openai" "anthropic" "gemini" ];
           default = "openai";
           description = "Default AI provider to use";
         };
@@ -106,14 +105,6 @@ with lib; {
           };
         };
 
-        ollama = {
-          enable = mkEnableOption "Ollama local provider";
-          priority = mkOption {
-            type = types.int;
-            default = 4;
-            description = "Provider priority (1 = highest)";
-          };
-        };
       };
     };
 

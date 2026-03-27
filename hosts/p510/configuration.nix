@@ -137,7 +137,6 @@ in
 
     ai = {
       enable = true;
-      ollama = true;
       gemini-cli = true;
       claude-desktop = false; # Disable GUI app on media server
     };
@@ -321,9 +320,6 @@ in
 
   # NVIDIA specific configurations
   hardware.keyboard.zsa.enable = true;
-
-  # Ollama with CUDA acceleration for NVIDIA GPU
-  services.ollama.package = pkgs.ollama-cuda;
 
   # Agenix identity configuration - specify where to find decryption keys
   age.identityPaths = [

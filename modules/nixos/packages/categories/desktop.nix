@@ -67,7 +67,7 @@ in
     # Productivity applications (GUI-only)
     ++ lib.optionals (cfg.productivity.obsidian or false) [ obsidian ]
     ++ lib.optionals (cfg.productivity.libreoffice or false) [ libreoffice ]
-    ++ lib.optionals (cfg.productivity.thunderbird or false) [ thunderbird ]
+    # thunderbird removed
     ++ lib.optionals (cfg.productivity.vscode or false) [ code-cursor ]
 
     # Communication applications (GUI-only)

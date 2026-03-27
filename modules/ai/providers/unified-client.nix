@@ -33,7 +33,7 @@ with lib; let
     Usage: ai-cli [OPTIONS] "prompt"
 
     OPTIONS:
-        -p, --provider PROVIDER    Use specific provider (openai|anthropic|gemini|ollama)
+        -p, --provider PROVIDER    Use specific provider (openai|anthropic|gemini)
         -m, --model MODEL         Use specific model
         -f, --fallback            Enable fallback to other providers on failure
         -c, --cost-optimize       Use cost optimization for provider selection
@@ -50,7 +50,7 @@ with lib; let
         ai-cli -m gpt-4o "Write a Python function"
         ai-cli -f -c "Complex analysis task"
         ai-cli -l
-        ai-cli -p ollama -M
+        ai-cli -p anthropic -M
 
     ENVIRONMENT:
         AI_PROVIDERS_CONFIG       Path to providers config file
@@ -153,15 +153,6 @@ with lib; let
         echo "System Status:"
         echo "=============="
 
-        # Check Ollama if enabled
-        if is_provider_enabled "ollama"; then
-            if systemctl is-active ollama >/dev/null 2>&1; then
-                echo "Ollama service: Running"
-            else
-                echo "Ollama service: Stopped"
-            fi
-        fi
-
         # Check API keys
         echo ""
         echo "API Keys:"
@@ -227,19 +218,6 @@ with lib; let
                     fi
                 else
                     log_error "Gemini API key not found"
-                    return 1
-                fi
-                ;;
-            "ollama")
-                if command -v ollama >/dev/null 2>&1; then
-                    if ollama list >/dev/null 2>&1; then
-                        timeout "$TIMEOUT" ollama run "$model" "$prompt"
-                    else
-                        log_error "Ollama service not running"
-                        return 1
-                    fi
-                else
-                    log_error "Ollama not available"
                     return 1
                 fi
                 ;;
@@ -398,7 +376,7 @@ with lib; let
 
     Usage: ai-switch [provider]
 
-    Available providers: openai, anthropic, gemini, ollama
+    Available providers: openai, anthropic, gemini
 
     Examples:
         ai-switch openai     # Switch to OpenAI
@@ -414,7 +392,7 @@ with lib; let
     provider="$1"
 
     case "$provider" in
-        openai|anthropic|gemini|ollama)
+        openai|anthropic|gemini)
             export AI_DEFAULT_PROVIDER="$provider"
             echo "Switched to provider: $provider"
             echo "This change is only for the current session."

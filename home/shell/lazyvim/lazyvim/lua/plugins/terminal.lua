@@ -48,7 +48,7 @@ return {
       {
         "<leader>TT",
         function()
-          require("toggleterm").toggle(1, 100, vim.loop.cwd(), "tab")
+          require("toggleterm").toggle(1, 100, vim.uv.cwd(), "tab")
         end,
         desc = "ToggleTerm (tab cwd_dir)",
       },

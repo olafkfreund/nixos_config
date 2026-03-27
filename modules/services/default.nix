@@ -14,7 +14,6 @@ _: {
     ./cron/cron.nix
     ./atuin/default.nix
     ./logind/default.nix
-    ./ollama/default.nix
     ./sysprof/default.nix
     ./mandb/default.nix
     ./appimage/default.nix

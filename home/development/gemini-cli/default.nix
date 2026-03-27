@@ -14,16 +14,16 @@
 
 buildNpmPackage (finalAttrs: {
   pname = "gemini-cli";
-  version = "0.30.0";
+  version = "0.34.0";
 
   src = fetchFromGitHub {
     owner = "google-gemini";
     repo = "gemini-cli";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-+w4w1cftPSj0gJ23Slw8Oexljmu0N/PZWH4IDjw75rs=";
+    hash = "sha256-/HmcLnScZ2pmzGnRLsNHoqrakyt++1fCv/P2IeE8pGo=";
   };
 
-  npmDepsHash = "sha256-Nkd5Q2ugRqsTqaFbCSniC3Obl++uEjVUmoa8MVT5++8=";
+  npmDepsHash = "sha256-3Y9QJC4dqvnCH3qFSsvFMK+XtHnZyYPBP1voLpHpHA4=";
 
   nodejs = nodejs_22;
 
@@ -59,6 +59,10 @@ buildNpmPackage (finalAttrs: {
     # (API changed in 0.26.0 from disableAutoUpdate to enableAutoUpdate)
     sed -i '/enableAutoUpdate: {/,/default: true/ s/default: true/default: false/' packages/cli/src/config/settingsSchema.ts
     sed -i '/enableAutoUpdateNotification: {/,/default: true/ s/default: true/default: false/' packages/cli/src/config/settingsSchema.ts
+
+    # Fix: devtools package builds after cli in workspace order, causing TS2307.
+    # Add @ts-expect-error to suppress the type error on the dynamic import.
+    sed -i "s|const mod = await import('@google/gemini-cli-devtools');|// @ts-expect-error devtools is an optional peer workspace\n    const mod = await import('@google/gemini-cli-devtools');|" packages/cli/src/utils/devtoolsService.ts
   '';
 
   installPhase = ''
@@ -73,11 +77,13 @@ buildNpmPackage (finalAttrs: {
     rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-core
     rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-a2a-server
     rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-sdk
+    rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-devtools
     rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-test-utils
     rm -f $out/share/gemini-cli/node_modules/gemini-cli-vscode-ide-companion
     cp -r packages/cli $out/share/gemini-cli/node_modules/@google/gemini-cli
     cp -r packages/core $out/share/gemini-cli/node_modules/@google/gemini-cli-core
     cp -r packages/a2a-server $out/share/gemini-cli/node_modules/@google/gemini-cli-a2a-server
+    cp -r packages/devtools $out/share/gemini-cli/node_modules/@google/gemini-cli-devtools
     cp -r packages/sdk $out/share/gemini-cli/node_modules/@google/gemini-cli-sdk
 
     rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-core/dist/docs/CONTRIBUTING.md
