@@ -224,7 +224,6 @@ in
 
     ai = {
       enable = true;
-      ollama = true;
       gemini-cli = true;
       claude-desktop = true;
 
@@ -238,7 +237,6 @@ in
         openai.enable = true;
         anthropic.enable = true;
         gemini.enable = true;
-        ollama.enable = false; # Disabled to reduce resource usage
       };
 
       # Enable MCP (Model Context Protocol) servers for AI integration
@@ -296,7 +294,7 @@ in
 
     email = {
       enable = true;
-      neomutt.enable = true;
+      neomutt.enable = false;
       ai.enable = true;
       ai.provider = "openai";
       notifications.enable = true;
@@ -305,7 +303,7 @@ in
 
     programs = {
       lazygit = true;
-      thunderbird = true;
+      thunderbird = false;
       obsidian = true;
       office = true;
       webcam = true;
@@ -362,13 +360,6 @@ in
     user = vars.username;
     logLevel = "info";
     autoConfigureClaudeDesktop = true;
-  };
-
-  # AI service-level configuration (for ai.ollama module options)
-  ai.ollama = {
-    enableRag = false; # Temporarily disabled due to ChromaDB 1.0.12 startup bug
-    ragDirectory = "/home/${vars.username}/documents/rag-files";
-    allowBrokenPackages = false;
   };
 
   # Enable encrypted API keys
@@ -514,18 +505,6 @@ in
       updater.enable = true; # Enable freshclam (virus database updater)
     };
 
-    # Ollama specific configurations for AMD GPU
-    ollama = {
-      enable = true;
-      package = pkgs.ollama-rocm; # Use ROCm-enabled package for AMD GPU
-      rocmOverrideGfx = lib.mkForce "11.0.0";
-      environmentVariables = {
-        HCC_AMDGPU_TARGET = lib.mkForce "gfx1100";
-        ROC_ENABLE_PRE_VEGA = lib.mkForce "1";
-        HSA_OVERRIDE_GFX_VERSION = lib.mkForce "11.0.0";
-      };
-    };
-
     # Hardware-specific configurations
     udev = {
       packages = [ pkgs.via ];
@@ -652,7 +631,7 @@ in
   ];
 
   # Windows app integration - Re-enabled after upstream fix (v0.9.0)
-  programs.winboat.enable = true;
+  # programs.winboat.enable = true; # DISABLED: Go 1.26 cross-compilation broken with mingw32 GCC 15
 
   # Fix broken GNOME Shell patch in nixpkgs (shell_remove_dark_mode.patch failing on 49.1)
   nixpkgs.overlays = [

@@ -39,7 +39,6 @@ in
         youtube-dl
         yt-dlp
         rsync
-        rclone
       ]
 
       # Media processing tools (headless-compatible)

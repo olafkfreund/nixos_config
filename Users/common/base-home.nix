@@ -45,6 +45,10 @@
     ];
   };
 
+  # Adopt new Home Manager defaults (silence deprecation warnings)
+  gtk.gtk4.theme = null;
+  programs.git.signing.format = null;
+
   programs.home-manager.enable = true;
 
   # Stylix configuration (Home Manager level) - re-enabled after upstream cache fix

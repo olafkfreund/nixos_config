@@ -18,11 +18,11 @@ with lib; let
     # Task and project management
     tasks = {
       # CLI task management
-      taskwarrior = true; # Advanced task management
+      taskwarrior = false; # Disabled
       todo_txt = false; # Simple todo.txt format
 
       # Time tracking
-      timewarrior = true; # Time tracking companion to taskwarrior
+      timewarrior = false; # Disabled (taskwarrior removed)
       toggl_cli = false; # Toggl time tracking
     };
 
@@ -34,7 +34,7 @@ with lib; let
       telegram = true; # Personal messaging
 
       # Email
-      thunderbird = true; # Email client
+      thunderbird = false; # Disabled
       mailutils = false; # Command-line email tools
     };
 

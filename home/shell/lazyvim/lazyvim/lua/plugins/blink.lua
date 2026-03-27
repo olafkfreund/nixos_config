@@ -1,15 +1,12 @@
 return {
   {
     "saghen/blink.cmp",
-    lazy = false, -- blink.cmp should be loaded early
+    lazy = false,
     dependencies = {
       "rafamadriz/friendly-snippets",
-      -- Add copilot source for blink
-      "giuxtaposition/blink-cmp-copilot",
-      -- Add codeium source for blink if used
       "folke/lazydev.nvim",
     },
-    version = "v0.*",
+    version = false, -- use latest git commit for stability with LazyVim
     opts = {
       keymap = {
         preset = "enter",
@@ -27,15 +24,7 @@ return {
         nerd_font_variant = "mono",
       },
       sources = {
-        default = { "lsp", "path", "snippets", "buffer", "copilot" },
-        providers = {
-          copilot = {
-            name = "copilot",
-            module = "blink-cmp-copilot",
-            score_offset = 100,
-            async = true,
-          },
-        },
+        default = { "lsp", "path", "snippets", "buffer" },
       },
       completion = {
         accept = { auto_brackets = { enabled = true } },

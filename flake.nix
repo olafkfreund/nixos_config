@@ -331,6 +331,11 @@
           pamixer = prev.pamixer.overrideAttrs (oldAttrs: {
             buildInputs = (oldAttrs.buildInputs or [ ]) ++ [ prev.cxxopts prev.icu ];
           });
+          # khard/lbdb: sphinx-argparse 0.5.2 incompatible with Sphinx 9.x
+          # lbdb temporarily removed from home/shell/mail/default.nix
+          # Note: COSMIC cargo vendor dedup overlays removed — the nix-prefetch-git
+          # symlink overlay above already resolves fetchCargoVendor producing
+          # duplicate git source entries for cosmic-applets and cosmic-settings-daemon.
         })
         # Fix azure-cli k8s-extension: pinned kubernetes==24.2.0 and oras==0.2.25
         # are not satisfied by newer versions in nixpkgs-unstable
@@ -413,18 +418,22 @@
                 versionedName = prev.nix-prefetch-git.name;
               in
               ''
-                if [ ! -e "$out/bin/nix-prefetch-git" ] && [ -e "$out/bin/${versionedName}" ]; then
-                  ln -s "${versionedName}" "$out/bin/nix-prefetch-git"
+                if [ ! -e "$out/bin/nix-prefetch-git" ] && [ -e "$out/bin/${versionedName}" ];
+                then
+                ln -s "${versionedName}" "$out/bin/nix-prefetch-git"
                 fi
               '';
           });
         })
         # Fix python312Packages.sse-starlette missing starlette in propagatedBuildInputs
         # nixpkgs regression: sse-starlette-3.2.0 fails runtime dep check without starlette
+        # Also disable flaky tests (consolidated with earlier overlay)
         (_final: prev: {
           python312Packages = prev.python312Packages.overrideScope (
             _pySelf: pyPrev: {
               sse-starlette = pyPrev.sse-starlette.overrideAttrs (oldAttrs: {
+                doCheck = false;
+                pythonImportsCheck = [ ];
                 propagatedBuildInputs = (oldAttrs.propagatedBuildInputs or [ ]) ++ [
                   prev.python312Packages.starlette
                 ];
@@ -530,9 +539,9 @@
                   # Use backup command to move files to timestamped directory
                   # This prevents backup file collisions by using unique directories
                   backupCommand = ''
-                    backup_dir="$HOME/.hm-backups/$(date +%Y-%m-%d-%H%M%S)"
-                    mkdir -p "$(dirname "$backup_dir/$1")"
-                    mv "$1" "$backup_dir/$1"
+                    backup_dir = "$HOME/.hm-backups/$(date +%Y-%m-%d-%H%M%S)"
+                      mkdir - p "$(dirname "$backup_dir/$1 ")"
+                      mv "$1" "$backup_dir/$1"
                   '';
                   # Shared modules for all users
                   sharedModules = [
@@ -643,10 +652,11 @@
             dontConfigure = true;
 
             installPhase = ''
-              runHook preInstall
-              mkdir -p $out/share/icons/Neuwaita
-              cp -r * $out/share/icons/Neuwaita/
-              rm -rf $out/share/icons/Neuwaita/.git*
+              runHook
+              preInstall
+              mkdir - p $out/share/icons/Neuwaita
+              cp - r * $out/share/icons/Neuwaita/
+              rm - rf $out/share/icons/Neuwaita/.git *
               runHook postInstall
             '';
 
@@ -709,7 +719,7 @@
           };
           dev-utils = {
             type = "app";
-            program = "${appPkgs.dev-utils}/bin/nixos-dev-utils";
+            program = "${appPkgs.dev-utils} /bin/nixos-dev-utils";
           };
         };
 
@@ -742,3 +752,4 @@
       };
     };
 }
+

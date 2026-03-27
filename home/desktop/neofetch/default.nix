@@ -47,7 +47,7 @@ in
       (optionals cfg.utilities.networkTools [ bandwhich nethogs iftop nload speedtest-cli ])
 
       # Text processing
-      (optionals cfg.utilities.textTools [ ripgrep fd jq yq-go hyperfine tokei ])
+      (optionals cfg.utilities.textTools [ ripgrep fd jq yq-go tokei ])
     ];
 
   # Enhanced btop configuration

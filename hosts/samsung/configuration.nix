@@ -220,7 +220,6 @@ in
 
     ai = {
       enable = true;
-      ollama = false; # Intel GPU - no local inference
       gemini-cli = true;
       claude-desktop = true; # Enable Claude Desktop GUI with MCP server support
 
@@ -278,7 +277,7 @@ in
 
     programs = {
       lazygit = true;
-      thunderbird = true;
+      thunderbird = false;
       obsidian = true;
       office = true;
       webcam = true;
@@ -371,7 +370,6 @@ in
   services = {
     playerctld.enable = true;
     fwupd.enable = true;
-    # ollama.package = pkgs.ollama; # Disabled - Ollama not needed on Samsung laptop
     nfs.server = lib.mkIf vars.services.nfs.enable {
       enable = true;
       inherit (vars.services.nfs) exports;

@@ -22,7 +22,7 @@
   # Git tools
   programs = {
     lazygit.enable = lib.mkForce true;
-    thunderbird.enable = lib.mkForce true;
+    thunderbird.enable = lib.mkForce false;
     obsidian.enable = lib.mkForce true;
     office.enable = lib.mkForce true;
     webcam.enable = lib.mkForce true; # OBS Virtual Camera support
@@ -47,6 +47,5 @@
   # VPN
   vpn.tailscale.enable = lib.mkForce true;
 
-  # AI
-  ai.ollama.enable = lib.mkForce true;
+  # AI providers configured in configuration.nix
 }

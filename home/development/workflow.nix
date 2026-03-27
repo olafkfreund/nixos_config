@@ -20,7 +20,7 @@ with lib; let
     testing = {
       # Multi-language testing
       act = true; # GitHub Actions local testing
-      hyperfine = true; # Benchmarking tool
+      hyperfine = false; # Disabled
       tokei = true; # Code statistics
 
       # Language-specific testing

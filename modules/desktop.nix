@@ -6,7 +6,6 @@ _: {
     ./desktop/wlr/default.nix
     ./desktop/remote/default.nix
     ./desktop/cloud-sync/default.nix
-    ./desktop/vnc/default.nix
     ./desktop/gtk/default.nix
     ./desktop/cosmic.nix
     ./desktop/cosmic-applet-package-updater.nix

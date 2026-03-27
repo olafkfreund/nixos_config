@@ -134,6 +134,7 @@ Agents trigger automatically based on your request. See `/nix-help agents` for d
 - **agenix** - Secret management
 - **home-manager** - User environments
 - **devenv** - Development setup
+- **nix-skills** - Skills CLI management reference
 
 **Package Tools**:
 
@@ -142,6 +143,34 @@ Agents trigger automatically based on your request. See `/nix-help agents` for d
 **Desktop**:
 
 - **gnome**, **cosmic-de**, **stylix** - Desktop environments and theming
+
+**Global Skills** (`~/.claude/skills/` — from AbsolutelySkilled):
+
+- **super-brainstorm** - Structured design interviews before implementation
+- **superhuman** - Task decomposition with parallel wave execution
+- **second-brain** - Persistent memory system across sessions
+- **codedocs** - AI-friendly codebase documentation generation
+- **skill-forge** - Create new skills from repos, docs, or topics
+- **backend-engineering** - Backend architecture and API design
+- **docker-kubernetes** - Container orchestration patterns
+- **ci-cd-pipelines** - CI/CD workflow automation
+- **observability** - Logging, metrics, tracing, alerting
+- **incident-management** - Incident response and post-mortems
+- **git-advanced** - Advanced git operations and workflows
+- **linux-admin** - Linux system administration
+- **clean-code** - Code quality and SOLID principles
+- **code-review-mastery** - Local change review before commits
+
+**Skills Management** (via `skills` CLI):
+
+```bash
+skills list                    # List installed skills
+skills add owner/repo          # Install from GitHub
+skills update                  # Update all skills
+skills remove skill-name       # Remove a skill
+skills find "query"            # Search for skills
+skills init my-skill           # Create new skill template
+```
 
 Skills activate when you mention the technology. See `/nix-help skills` for details.
 

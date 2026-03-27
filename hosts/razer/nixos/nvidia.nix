@@ -1,5 +1,6 @@
 { config
 , pkgs
+, lib
 , ...
 }: {
   hardware = {
@@ -67,6 +68,16 @@
     # Early load NVIDIA modules
     initrd.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
   };
+
+  # nvidia-container-toolkit CDI generator fails during switch when driver version
+  # mismatches (old kernel module vs new userspace). It succeeds after reboot.
+  # Wrap ExecStart so failure doesn't block deployment.
+  systemd.services.nvidia-container-toolkit-cdi-generator.serviceConfig.ExecStart = lib.mkForce
+    (pkgs.writeShellScript "nvidia-cdi-generator-safe" ''
+      ${pkgs.nvidia-container-toolkit}/bin/nvidia-ctk cdi generate \
+        --output=/var/run/cdi/nvidia.yaml --device-name-strategy=type-index 2>&1 || \
+        echo "nvidia-cdi-generator: skipped (driver mismatch, will retry after reboot)"
+    '');
 
   # Create proper device nodes for NVIDIA
   services.udev.extraRules = ''

@@ -29,7 +29,6 @@ in
       development.python.enable = mkIf cfg.development.enable cfg.development.python;
       containers.docker.enable = mkIf cfg.virtualization.enable cfg.virtualization.docker;
       ai.gemini-cli.enable = mkIf cfg.ai.enable cfg.ai.gemini-cli;
-      ai.chatgpt.enable = mkIf cfg.ai.enable (cfg.ai.chatgpt or false);
     };
 
     # Services configuration
@@ -54,9 +53,6 @@ in
 
     # Networking (conditional enables)
 
-    # AI tools (conditional enables)
-    ai.ollama.enable = mkIf cfg.ai.enable cfg.ai.ollama;
-
     # Enhanced AI provider support
     ai.providers = mkIf cfg.ai.providers.enable {
       enable = true;
@@ -77,11 +73,6 @@ in
       gemini = {
         inherit (cfg.ai.providers.gemini) enable;
         inherit (cfg.ai.providers.gemini) priority;
-      };
-
-      ollama = {
-        inherit (cfg.ai.providers.ollama) enable;
-        inherit (cfg.ai.providers.ollama) priority;
       };
     };
 

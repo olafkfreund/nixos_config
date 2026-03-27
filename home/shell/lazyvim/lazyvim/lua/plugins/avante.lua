@@ -7,16 +7,16 @@ return {
     opts = {
       -- Enhanced options based on current documentation
       mappings = {
-        ask = "<leader>aa",    -- Key to trigger the ask functionality
-        edit = "<leader>ae",   -- Key to edit prompt/response
-        refresh = "<leader>ar" -- Key to refresh the response
+        ask = "<leader>aa", -- Key to trigger the ask functionality
+        edit = "<leader>ae", -- Key to edit prompt/response
+        refresh = "<leader>ar", -- Key to refresh the response
       },
       -- Using Claude (Anthropic) as the provider
       provider = "claude",
       providers = {
         claude = {
           endpoint = "https://api.anthropic.com",
-          model = "claude-3-5-sonnet-20241022",
+          model = "claude-sonnet-4-6",
           extra_request_body = {
             temperature = 0,
             max_tokens = 4096,
@@ -30,16 +30,35 @@ return {
 
     -- You can use keys to define custom mappings if desired
     keys = {
-      { "<leader>aa", function() require("avante.api").ask() end, desc = "Avante: Ask AI" },
-      { "<leader>ae", function() require("avante.api").edit() end, desc = "Avante: Edit" },
-      { "<leader>ar", function() require("avante.api").refresh() end, desc = "Avante: Refresh" },
-      -- Image paste shortcut that works both in normal buffers and Avante input
-      { "<leader>ip", function()
-          return vim.bo.filetype == "AvanteInput" and
-            require("avante.clipboard").paste_image() or
-            require("img-clip").paste_image()
+      {
+        "<leader>aa",
+        function()
+          require("avante.api").ask()
         end,
-        desc = "Paste image (works in Avante too)"
+        desc = "Avante: Ask AI",
+      },
+      {
+        "<leader>ae",
+        function()
+          require("avante.api").edit()
+        end,
+        desc = "Avante: Edit",
+      },
+      {
+        "<leader>ar",
+        function()
+          require("avante.api").refresh()
+        end,
+        desc = "Avante: Refresh",
+      },
+      -- Image paste shortcut that works both in normal buffers and Avante input
+      {
+        "<leader>ip",
+        function()
+          return vim.bo.filetype == "AvanteInput" and require("avante.clipboard").paste_image()
+            or require("img-clip").paste_image()
+        end,
+        desc = "Paste image (works in Avante too)",
       },
     },
 

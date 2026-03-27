@@ -138,7 +138,6 @@
     xmlstarlet
 
     # Performance and monitoring
-    hyperfine
     tokei
 
     # File operations optimized for development

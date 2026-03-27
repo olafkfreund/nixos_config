@@ -1,20 +1,12 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   home.packages = with pkgs; [
-    mutt-ics
-    mutt-wizard
-    notmuch
-    lieer
-    neomutt
     goobook
     urlscan
     libnotify
-    html2text
-    isync
-    msmtp
-    openldap
     abook
     gcalcli
-    lbdb
+    # lbdb  # temporarily disabled: khard dep broken (sphinx-argparse vs Sphinx 9.x)
     python312Packages.vobject
     python312Packages.icalendar
     python312Packages.pytz
