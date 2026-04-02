@@ -46,7 +46,7 @@ in
       jq
 
       # General purpose formatter (kept for edge cases)
-      nodePackages.prettier
+      prettier
     ];
 
     # Enable git system-wide configuration for pre-commit

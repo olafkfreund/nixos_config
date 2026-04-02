@@ -14,7 +14,7 @@ with lib;
 
       # 2. TypeScript/JavaScript - vtsls (Claude Code: vtsls@claude-code-lsps)
       vtsls
-      nodePackages.typescript
+      typescript
       typescript-language-server
 
       # 3. Go - gopls (Claude Code: gopls@claude-code-lsps)
@@ -43,7 +43,7 @@ with lib;
       omnisharp-roslyn
 
       # 8. PHP - Intelephense (Claude Code: intelephense@claude-code-lsps)
-      nodePackages.intelephense
+      intelephense
 
       # 9. Kotlin - kotlin-language-server (Claude Code: kotlin-language-server@claude-code-lsps)
       kotlin-language-server
@@ -52,7 +52,7 @@ with lib;
       rubyPackages.solargraph
 
       # 11. HTML/CSS/JSON - vscode-langservers (Claude Code: vscode-html-css@claude-code-lsps)
-      nodePackages.vscode-langservers-extracted
+      vscode-langservers-extracted
 
       # === ADDITIONAL IMPORTANT LSP SERVERS ===
 
@@ -64,10 +64,10 @@ with lib;
       terraform-ls
 
       # YAML - yaml-language-server
-      nodePackages.yaml-language-server
+      yaml-language-server
 
       # Bash - bash-language-server
-      nodePackages.bash-language-server
+      bash-language-server
 
       # Docker - dockerfile-language-server
       dockerfile-language-server
@@ -90,8 +90,8 @@ with lib;
       ruff # Modern Python linter/formatter
 
       # JavaScript/TypeScript formatters
-      nodePackages.prettier
-      nodePackages.eslint
+      prettier
+      eslint
 
       # Nix formatters
       alejandra
@@ -204,7 +204,7 @@ with lib;
         };
 
         intelephense = {
-          command = "${pkgs.nodePackages.intelephense}/bin/intelephense";
+          command = "${pkgs.intelephense}/bin/intelephense";
           args = [ "--stdio" ];
           filetypes = [ "php" ];
           root_patterns = [ "composer.json" ".git" ];
@@ -225,13 +225,13 @@ with lib;
         };
 
         html = {
-          command = "${pkgs.nodePackages.vscode-langservers-extracted}/bin/vscode-html-language-server";
+          command = "${pkgs.vscode-langservers-extracted}/bin/vscode-html-language-server";
           args = [ "--stdio" ];
           filetypes = [ "html" ];
         };
 
         cssls = {
-          command = "${pkgs.nodePackages.vscode-langservers-extracted}/bin/vscode-css-language-server";
+          command = "${pkgs.vscode-langservers-extracted}/bin/vscode-css-language-server";
           args = [ "--stdio" ];
           filetypes = [ "css" "scss" "less" ];
         };
@@ -259,13 +259,13 @@ with lib;
         };
 
         yamlls = {
-          command = "${pkgs.nodePackages.yaml-language-server}/bin/yaml-language-server";
+          command = "${pkgs.yaml-language-server}/bin/yaml-language-server";
           args = [ "--stdio" ];
           filetypes = [ "yaml" "yml" ];
         };
 
         bashls = {
-          command = "${pkgs.nodePackages.bash-language-server}/bin/bash-language-server";
+          command = "${pkgs.bash-language-server}/bin/bash-language-server";
           args = [ "start" ];
           filetypes = [ "sh" "bash" ];
         };

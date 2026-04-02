@@ -123,7 +123,7 @@ with lib; let
           # LSP servers
           (optional (lang.lsp == "nixd") pkgs.nixd)
           ++ (optional (lang.lsp == "pylsp") pkgs.python313Packages.python-lsp-server)
-          ++ (optional (lang.lsp == "typescript-language-server") pkgs.nodePackages.typescript-language-server)
+          ++ (optional (lang.lsp == "typescript-language-server") pkgs.typescript-language-server)
           ++ (optional (lang.lsp == "gopls") pkgs.gopls)
           ++ (optional (lang.lsp == "rust-analyzer") pkgs.rust-analyzer)
           ++ (optional (lang.lsp == "clangd") pkgs.clang-tools)
@@ -134,8 +134,8 @@ with lib; let
           ++ (optional (elem "statix" lang.formatters) pkgs.statix)
           ++ (optional (elem "black" lang.formatters) pkgs.python313Packages.black)
           ++ (optional (elem "isort" lang.formatters) pkgs.python313Packages.isort)
-          ++ (optional (elem "prettier" lang.formatters) pkgs.nodePackages.prettier)
-          ++ (optional (elem "eslint" lang.formatters) pkgs.nodePackages.eslint)
+          ++ (optional (elem "prettier" lang.formatters) pkgs.prettier)
+          ++ (optional (elem "eslint" lang.formatters) pkgs.eslint)
           ++ (optional (elem "gofmt" lang.formatters) pkgs.go)
           ++ (optional (elem "rustfmt" lang.formatters) pkgs.rustfmt)
           ++
@@ -333,7 +333,7 @@ in
       paths = {
         nixd = "${pkgs.nixd}/bin/nixd";
         pylsp = "${pkgs.python313Packages.python-lsp-server}/bin/pylsp";
-        typescript-language-server = "${pkgs.nodePackages.typescript-language-server}/bin/typescript-language-server";
+        typescript-language-server = "${pkgs.typescript-language-server}/bin/typescript-language-server";
         gopls = "${pkgs.gopls}/bin/gopls";
         rust-analyzer = "${pkgs.rust-analyzer}/bin/rust-analyzer";
         clangd = "${pkgs.clang-tools}/bin/clangd";

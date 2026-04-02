@@ -64,11 +64,11 @@
 
     nodejs = with pkgs; [
       nodejs_24 # Use nodejs_24 to match system-wide installation
-      nodePackages.npm
-      nodePackages.yarn
-      nodePackages.pnpm
-      nodePackages.typescript
-      nodePackages.typescript-language-server
+      # npm is bundled with nodejs_24
+      yarn
+      pnpm
+      typescript
+      typescript-language-server
     ];
 
     go = with pkgs; [
