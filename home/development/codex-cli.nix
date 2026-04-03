@@ -63,8 +63,8 @@
     # Additional packages that work well with Codex
     packages = with pkgs; [
       # Code formatting and linting tools that complement AI code generation
-      nodePackages.prettier
-      nodePackages.eslint
+      prettier
+      eslint
       black # Python formatter
       rustfmt # Rust formatter
       nixpkgs-fmt # Nix formatter

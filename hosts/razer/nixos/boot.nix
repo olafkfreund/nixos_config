@@ -2,7 +2,7 @@
   # Boot optimizations
   boot.loader.systemd-boot = {
     enable = true;
-    configurationLimit = 3; # Keep at least 3 generations for easy rollback
+    configurationLimit = 5; # Keep 5 generations for easy rollback
     editor = false; # Disable bootloader editing for security
   };
   boot.loader.efi.canTouchEfiVariables = true;

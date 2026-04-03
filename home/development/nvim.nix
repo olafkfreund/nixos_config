@@ -14,7 +14,7 @@ with lib; let
     lsp = [
       pkgs.nixd # Nix LSP
       pkgs.lua-language-server # Lua LSP
-      pkgs.nodePackages.typescript-language-server # TS/JS LSP
+      pkgs.typescript-language-server # TS/JS LSP
       pkgs.python313Packages.python-lsp-server # Python LSP
       pkgs.gopls # Go LSP
       pkgs.rust-analyzer # Rust LSP
@@ -24,7 +24,7 @@ with lib; let
     formatters = [
       pkgs.alejandra # Nix formatter
       pkgs.stylua # Lua formatter
-      pkgs.nodePackages.prettier # JS/TS formatter
+      pkgs.prettier # JS/TS formatter
       pkgs.python313Packages.black # Python formatter
       pkgs.python313Packages.isort # Python import sorter
       pkgs.go # Go (includes gofmt)
@@ -101,14 +101,14 @@ in
         NIXD_PATH = "${pkgs.nixd}/bin/nixd";
         RUST_ANALYZER_PATH = "${pkgs.rust-analyzer}/bin/rust-analyzer";
         GOPLS_PATH = "${pkgs.gopls}/bin/gopls";
-        TYPESCRIPT_LANGUAGE_SERVER_PATH = "${pkgs.nodePackages.typescript-language-server}/bin/typescript-language-server";
+        TYPESCRIPT_LANGUAGE_SERVER_PATH = "${pkgs.typescript-language-server}/bin/typescript-language-server";
         PYLSP_PATH = "${pkgs.python313Packages.python-lsp-server}/bin/pylsp";
         LUA_LANGUAGE_SERVER_PATH = "${pkgs.lua-language-server}/bin/lua-language-server";
 
         # Make formatters available to LazyVim
         ALEJANDRA_PATH = "${pkgs.alejandra}/bin/alejandra";
         STYLUA_PATH = "${pkgs.stylua}/bin/stylua";
-        PRETTIER_PATH = "${pkgs.nodePackages.prettier}/bin/prettier";
+        PRETTIER_PATH = "${pkgs.prettier}/bin/prettier";
         BLACK_PATH = "${pkgs.python313Packages.black}/bin/black";
         ISORT_PATH = "${pkgs.python313Packages.isort}/bin/isort";
       };
@@ -154,7 +154,7 @@ in
           nixd = "${pkgs.nixd}/bin/nixd",
           rust_analyzer = "${pkgs.rust-analyzer}/bin/rust-analyzer",
           gopls = "${pkgs.gopls}/bin/gopls",
-          tsserver = "${pkgs.nodePackages.typescript-language-server}/bin/typescript-language-server",
+          tsserver = "${pkgs.typescript-language-server}/bin/typescript-language-server",
           pylsp = "${pkgs.python313Packages.python-lsp-server}/bin/pylsp",
           lua_ls = "${pkgs.lua-language-server}/bin/lua-language-server",
         }
@@ -163,7 +163,7 @@ in
         M.formatter_paths = {
           alejandra = "${pkgs.alejandra}/bin/alejandra",
           stylua = "${pkgs.stylua}/bin/stylua",
-          prettier = "${pkgs.nodePackages.prettier}/bin/prettier",
+          prettier = "${pkgs.prettier}/bin/prettier",
           black = "${pkgs.python313Packages.black}/bin/black",
           isort = "${pkgs.python313Packages.isort}/bin/isort",
         }

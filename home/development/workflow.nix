@@ -101,7 +101,8 @@ with lib; let
       (optional cfg.testing.hyperfine hyperfine)
       (optional cfg.testing.tokei tokei)
       (optional cfg.testing.pytest python313Packages.pytest)
-      (optional cfg.testing.jest nodePackages.jest)
+      # jest: removed from nixpkgs nodePackages - install via npm if needed
+      # (optional cfg.testing.jest nodePackages.jest)
       # Note: cargo test and go test are included with their respective language packages
     ];
 
