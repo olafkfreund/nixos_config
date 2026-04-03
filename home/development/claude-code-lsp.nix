@@ -193,7 +193,7 @@ in
               enabledPlugins = {
                 "nix-lsp@nixos-lsp-marketplace" = true;
               };
-              # Claude Code status line - Gruvbox Dark theme
+              # Claude Code status line with gruvbox theme
               statusLine = {
                 type = "command";
                 command = "${config.home.homeDirectory}/.claude/statusline-gruvbox.sh";
