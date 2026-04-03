@@ -165,7 +165,7 @@ in
     # }
 
     home = {
-      # Create wrapper script for Claude Code statusLine (kept for compatibility)
+      # Create wrapper script for Claude Code statusLine
       file.".claude/statusline-powerline.sh" = {
         text = ''
           #!/usr/bin/env bash
@@ -181,66 +181,74 @@ in
         executable = true;
       };
 
-      # Gruvbox Dark native statusline script (no npm dependency)
+      # Gruvbox statusline script (pure bash, no npx dependency)
       file.".claude/statusline-gruvbox.sh" = {
+        executable = true;
         text = ''
           #!/usr/bin/env bash
           # Claude Code status line - Gruvbox Dark theme
-          # Pure bash implementation, no external npm dependencies
-          #
-          # Gruvbox dark (256-color ANSI palette):
-          #   bg0=235  bg1=237  bg2=239
-          #   fg1=223  fg4=246
-          #   bright: red=167 green=142 yellow=214 blue=109 aqua=108 orange=208 purple=175
 
-          GRV_BG1="\e[48;5;237m"
-          GRV_BG2="\e[48;5;239m"
-          GRV_FG2="\e[38;5;246m"
-          GRV_YELLOW="\e[38;5;214m"
-          GRV_ORANGE="\e[38;5;208m"
-          GRV_GREEN="\e[38;5;142m"
-          GRV_BLUE="\e[38;5;109m"
-          GRV_AQUA="\e[38;5;108m"
-          GRV_RED="\e[38;5;167m"
-          GRV_PURPLE="\e[38;5;175m"
+          # Gruvbox dark ANSI 256-color escapes
+          GRV_BG1="\e[48;5;237m"    # bg1
+          GRV_BG2="\e[48;5;239m"    # bg2
+          GRV_YELLOW="\e[38;5;214m" # bright yellow
+          GRV_ORANGE="\e[38;5;208m" # bright orange
+          GRV_GREEN="\e[38;5;142m"  # bright green
+          GRV_BLUE="\e[38;5;109m"   # bright blue
+          GRV_AQUA="\e[38;5;108m"   # bright aqua
+          GRV_RED="\e[38;5;167m"    # bright red
+          GRV_PURPLE="\e[38;5;175m" # bright purple
+          GRV_FG2="\e[38;5;246m"    # fg4 (dimmed)
           RESET="\e[0m"
           BOLD="\e[1m"
 
           input=$(cat)
 
-          cwd=$(echo "$input"          | ${pkgs.jq}/bin/jq -r '.cwd // empty')
-          model=$(echo "$input"        | ${pkgs.jq}/bin/jq -r '.model.display_name // empty')
-          session=$(echo "$input"      | ${pkgs.jq}/bin/jq -r '.session_name // empty')
-          used_pct=$(echo "$input"     | ${pkgs.jq}/bin/jq -r '.context_window.used_percentage // empty')
-          vim_mode=$(echo "$input"     | ${pkgs.jq}/bin/jq -r '.vim.mode // empty')
+          cwd=$(echo "$input"        | ${pkgs.jq}/bin/jq -r '.cwd // empty')
+          model=$(echo "$input"      | ${pkgs.jq}/bin/jq -r '.model.display_name // empty')
+          session=$(echo "$input"    | ${pkgs.jq}/bin/jq -r '.session_name // empty')
+          used_pct=$(echo "$input"   | ${pkgs.jq}/bin/jq -r '.context_window.used_percentage // empty')
+          remain_pct=$(echo "$input" | ${pkgs.jq}/bin/jq -r '.context_window.remaining_percentage // empty')
+          vim_mode=$(echo "$input"   | ${pkgs.jq}/bin/jq -r '.vim.mode // empty')
           output_style=$(echo "$input" | ${pkgs.jq}/bin/jq -r '.output_style.name // empty')
-          five_h=$(echo "$input"       | ${pkgs.jq}/bin/jq -r '.rate_limits.five_hour.used_percentage // empty')
-          seven_d=$(echo "$input"      | ${pkgs.jq}/bin/jq -r '.rate_limits.seven_day.used_percentage // empty')
+          five_h=$(echo "$input"     | ${pkgs.jq}/bin/jq -r '.rate_limits.five_hour.used_percentage // empty')
+          seven_d=$(echo "$input"    | ${pkgs.jq}/bin/jq -r '.rate_limits.seven_day.used_percentage // empty')
+
+          # Git branch (from cwd if available)
+          git_branch=""
+          if [ -n "$cwd" ] && [ -d "$cwd/.git" ] || git -C "$cwd" rev-parse --git-dir >/dev/null 2>&1; then
+            git_branch=$(git -C "$cwd" symbolic-ref --short HEAD 2>/dev/null || git -C "$cwd" rev-parse --short HEAD 2>/dev/null)
+          fi
 
           segments=""
 
-          # CWD: bg1 + aqua
+          # CWD (bg1, aqua)
           if [ -n "$cwd" ]; then
             short_cwd="''${cwd/#$HOME/~}"
             segments+="''${GRV_BG1}''${GRV_AQUA}''${BOLD} ''${short_cwd} ''${RESET}"
           fi
 
-          # Model: bg2 + yellow
+          # Git branch (bg2, green)
+          if [ -n "$git_branch" ]; then
+            segments+="''${GRV_BG2}''${GRV_GREEN} ⎇ ''${git_branch} ''${RESET}"
+          fi
+
+          # Model (bg2, yellow)
           if [ -n "$model" ]; then
             segments+="''${GRV_BG2}''${GRV_YELLOW} ''${model} ''${RESET}"
           fi
 
-          # Session name: bg1 + orange (only if set)
+          # Session name (bg1, orange)
           if [ -n "$session" ]; then
             segments+="''${GRV_BG1}''${GRV_ORANGE} ''${session} ''${RESET}"
           fi
 
-          # Output style: bg2 + purple (only if non-default)
+          # Output style (bg2, purple) — only if non-default
           if [ -n "$output_style" ] && [ "$output_style" != "default" ] && [ "$output_style" != "Default" ]; then
             segments+="''${GRV_BG2}''${GRV_PURPLE} ''${output_style} ''${RESET}"
           fi
 
-          # Vim mode: bg1 + green (INSERT) or blue (NORMAL)
+          # Vim mode (bg1, green/blue)
           if [ -n "$vim_mode" ]; then
             case "$vim_mode" in
               INSERT) segments+="''${GRV_BG1}''${GRV_GREEN}''${BOLD} INSERT ''${RESET}" ;;
@@ -249,31 +257,28 @@ in
             esac
           fi
 
-          # Context usage: color-coded green/yellow/red
-          if [ -n "$used_pct" ]; then
+          # Context window usage
+          if [ -n "$used_pct" ] && [ -n "$remain_pct" ]; then
             used_int=$(printf '%.0f' "$used_pct")
-            if [ "$used_int" -ge 80 ]; then
-              ctx_color="''${GRV_RED}"
-            elif [ "$used_int" -ge 50 ]; then
-              ctx_color="''${GRV_YELLOW}"
-            else
-              ctx_color="''${GRV_GREEN}"
+            if   [ "$used_int" -ge 80 ]; then ctx_color="''${GRV_RED}"
+            elif [ "$used_int" -ge 50 ]; then ctx_color="''${GRV_YELLOW}"
+            else                               ctx_color="''${GRV_GREEN}"
             fi
             segments+="''${GRV_BG2}''${ctx_color} ctx:''${used_int}% ''${RESET}"
           fi
 
-          # Rate limits (5h and 7d, shown only when present)
+          # Rate limits
           rate_seg=""
           if [ -n "$five_h" ]; then
             five_int=$(printf '%.0f' "$five_h")
-            [ "$five_int" -ge 80 ] && rl_c="''${GRV_RED}" || rl_c="''${GRV_ORANGE}"
-            rate_seg+="''${rl_c}5h:''${five_int}%''${RESET}"
+            [ "$five_int" -ge 80 ] && rl_color="''${GRV_RED}" || rl_color="''${GRV_ORANGE}"
+            rate_seg+="''${rl_color}5h:''${five_int}%''${RESET}"
           fi
           if [ -n "$seven_d" ]; then
             seven_int=$(printf '%.0f' "$seven_d")
-            [ "$seven_int" -ge 80 ] && rl_c="''${GRV_RED}" || rl_c="''${GRV_FG2}"
+            [ "$seven_int" -ge 80 ] && rl_color="''${GRV_RED}" || rl_color="''${GRV_FG2}"
             [ -n "$rate_seg" ] && rate_seg+=" "
-            rate_seg+="''${rl_c}7d:''${seven_int}%''${RESET}"
+            rate_seg+="''${rl_color}7d:''${seven_int}%''${RESET}"
           fi
           if [ -n "$rate_seg" ]; then
             segments+="''${GRV_BG1} ''${rate_seg} ''${RESET}"
@@ -281,7 +286,6 @@ in
 
           printf "%b" "''${segments}"
         '';
-        executable = true;
       };
 
       # Ensure Node.js is available for npx
