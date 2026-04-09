@@ -44,7 +44,7 @@ in
     home.packages = with pkgs;
       # VPN packages
       (optionals cfg.vpn.enable [
-        protonvpn-gui
+        proton-vpn # renamed from protonvpn-gui
         # NOTE: protonvpn-cli was removed upstream, use GUI instead
       ])
       # Password manager
