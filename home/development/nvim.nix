@@ -138,6 +138,8 @@ in
       defaultEditor = true;
       viAlias = true;
       vimAlias = true;
+      withRuby = false; # Adopt new 26.05 default; Ruby provided via system packages
+      withPython3 = false; # Adopt new 26.05 default; Python LSP provided via system packages
     };
 
     # XDG configuration for LazyVim
