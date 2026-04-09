@@ -24,6 +24,13 @@
   programs.claude-code.desktopEntry.enable = lib.mkForce true;
   programs.neovim.desktopEntry.enable = lib.mkForce true;
 
+  # Claude Code statusline with Gruvbox Dark theme
+  programs.claude-powerline = {
+    enable = true;
+    theme = "custom";
+    style = "powerline";
+  };
+
   # AI-powered shell command suggestions
   programs.zshAiCmd = {
     enable = true;
