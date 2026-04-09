@@ -19,7 +19,7 @@
       # Obsidian MCP server vault path
       OBSIDIAN_VAULT_PATH = "\${HOME}/Documents/Caliti";
     };
-    stateVersion = "24.11";
+    stateVersion = "26.05";
 
     # Common packages for all users
     packages = with pkgs; [
