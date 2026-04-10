@@ -312,19 +312,6 @@ in
         '';
       };
 
-      # Fix for COSMIC logout button black screen issue
-      # Ensures proper session cleanup via systemd-logind
-      user.services.cosmic-session-cleanup = {
-        description = "COSMIC session cleanup on logout";
-        wantedBy = [ "graphical-session.target" ];
-        partOf = [ "graphical-session.target" ];
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          ExecStop = "${pkgs.systemd}/bin/loginctl terminate-session $XDG_SESSION_ID";
-        };
-      };
-
       services = {
         # Filter out harmless KDE notification hint warnings from logs
         systemd-journald.environment = {
