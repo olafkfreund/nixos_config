@@ -294,7 +294,6 @@ in
       useCosmicGreeter = true; # Using COSMIC Greeter as display manager
       defaultSession = true; # Set COSMIC as default session
       installAllApps = true; # Install full Cosmic app suite
-      disableOsd = true; # Workaround for polkit agent crashes in COSMIC beta
     };
 
 

@@ -160,7 +160,6 @@ in
       useCosmicGreeter = false;
       defaultSession = false;
       installAllApps = false;
-      disableOsd = true;
     };
 
     # Remote Desktop support using GNOME Remote Desktop (native RDP support)
