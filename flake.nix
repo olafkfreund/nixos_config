@@ -103,10 +103,11 @@
     };
 
     # COSMIC Desktop applets
-    cosmic-package-updater = {
-      url = "github:olafkfreund/cosmic-applet-package-updater";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # cosmic-package-updater - Disabled: removed from active config
+    # cosmic-package-updater = {
+    #   url = "github:olafkfreund/cosmic-applet-package-updater";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
     cosmic-music-player = {
       url = "github:olafkfreund/cosmic-applet-music-player";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -128,25 +129,23 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # COSMIC Notifications NG - Enhanced notifications with rich content support
-    cosmic-ext-notifications = {
-      url = "github:olafkfreund/cosmic-ext-notifications-ng";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # COSMIC Notifications NG - Disabled: removed from active config
+    # cosmic-ext-notifications = {
+    #   url = "github:olafkfreund/cosmic-ext-notifications-ng";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
 
-    # COSMIC BG - Enhanced background service with animated, video, and shader wallpaper support
-    cosmic-ext-bg = {
-      url = "github:olafkfreund/cosmic-ext-bg";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # COSMIC BG - Disabled: pending upstream fix for startup race condition
+    # See: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
+    # cosmic-ext-bg = {
+    #   url = "github:olafkfreund/cosmic-ext-bg";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
 
-    # COSMIC RDP Server - Remote desktop for COSMIC Desktop (Samsung only)
-    # Note: no nixpkgs.follows - these crane-based Rust builds require
-    # their own tested nixpkgs to avoid cargo vendor hash mismatches.
-    # cosmic-comp-rdp's flake.lock is updated separately to track mesa versions.
-    cosmic-ext-rdp-server.url = "github:olafkfreund/cosmic-ext-rdp-server";
-    cosmic-portal-rdp.url = "github:olafkfreund/xdg-desktop-portal-cosmic";
-    cosmic-comp-rdp.url = "github:olafkfreund/cosmic-ext-comp-rdp";
+    # COSMIC RDP Server - Disabled: removed from active config (Samsung only)
+    # cosmic-ext-rdp-server.url = "github:olafkfreund/cosmic-ext-rdp-server";
+    # cosmic-portal-rdp.url = "github:olafkfreund/xdg-desktop-portal-cosmic";
+    # cosmic-comp-rdp.url = "github:olafkfreund/cosmic-ext-comp-rdp";
   };
 
   outputs =
@@ -243,8 +242,8 @@
         })
         # COSMIC Connect - KDE Connect alternative for COSMIC Desktop
         inputs.cosmic-ext-connect.overlays.default
-        # COSMIC Notifications NG - Enhanced notifications with images, links, progress
-        inputs.cosmic-ext-notifications.overlays.default
+        # COSMIC Notifications NG - Disabled: removed from active config
+        # inputs.cosmic-ext-notifications.overlays.default
         # COSMIC BG NG - Disabled pending upstream fix for startup race condition
         # See: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
         # inputs.cosmic-ext-bg.overlays.default
@@ -501,7 +500,7 @@
               inputs.lanzaboote.nixosModules.lanzaboote
               nix-index-database.nixosModules.nix-index
               inputs.cosmic-ext-connect.nixosModules.default
-              inputs.cosmic-ext-notifications.nixosModules.default
+              # inputs.cosmic-ext-notifications.nixosModules.default  # Disabled: removed from active config
               # inputs.cosmic-ext-bg.nixosModules.default  # Disabled: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
               # cosmic-ext-applet-radio: local module workaround for upstream mkPackageOption 'description' arg bug
               ./modules/services/cosmic-ext-radio-applet
@@ -510,27 +509,28 @@
             ++ stylixModule
             # COSMIC RDP Server stack (Samsung only) - replaces cosmic-comp and
             # xdg-desktop-portal-cosmic with RDP-capable forks
-            ++ nixpkgs.lib.optionals (host == "samsung") [
-              inputs.cosmic-ext-rdp-server.nixosModules.default
-              inputs.cosmic-portal-rdp.nixosModules.default
-              inputs.cosmic-comp-rdp.nixosModules.default
-              {
-                nixpkgs.overlays = [
-                  inputs.cosmic-ext-rdp-server.overlays.default
-                  inputs.cosmic-portal-rdp.overlays.default
-                  inputs.cosmic-comp-rdp.overlays.default
-                  # Fix: cosmic-comp-rdp overlay lacks meta.platforms, which
-                  # cosmic-ext-ctl inherits via cosmic-comp.meta.platforms
-                  (_final: prev: {
-                    cosmic-comp = prev.cosmic-comp.overrideAttrs (old: {
-                      meta = (old.meta or { }) // {
-                        platforms = old.meta.platforms or prev.lib.platforms.linux;
-                      };
-                    });
-                  })
-                ];
-              }
-            ]
+            # COSMIC RDP Server stack (Samsung only) - Disabled: removed from active config
+            # ++ nixpkgs.lib.optionals (host == "samsung") [
+            #   inputs.cosmic-ext-rdp-server.nixosModules.default
+            #   inputs.cosmic-portal-rdp.nixosModules.default
+            #   inputs.cosmic-comp-rdp.nixosModules.default
+            #   {
+            #     nixpkgs.overlays = [
+            #       inputs.cosmic-ext-rdp-server.overlays.default
+            #       inputs.cosmic-portal-rdp.overlays.default
+            #       inputs.cosmic-comp-rdp.overlays.default
+            #       # Fix: cosmic-comp-rdp overlay lacks meta.platforms, which
+            #       # cosmic-ext-ctl inherits via cosmic-comp.meta.platforms
+            #       (_final: prev: {
+            #         cosmic-comp = prev.cosmic-comp.overrideAttrs (old: {
+            #           meta = (old.meta or { }) // {
+            #             platforms = old.meta.platforms or prev.lib.platforms.linux;
+            #           };
+            #         });
+            #       })
+            #     ];
+            #   }
+            # ]
             ++ [
               {
                 home-manager = {

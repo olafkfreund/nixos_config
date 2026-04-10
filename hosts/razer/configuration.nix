@@ -10,30 +10,28 @@ let
 in
 {
   # Use laptop template and add Razer-specific modules
-  imports =
-    hostTypes.laptop.imports
-    ++ [
-      # Hardware-specific imports
-      ./nixos/hardware-configuration.nix
-      ./nixos/screens.nix
-      ./nixos/power.nix
-      ./nixos/boot.nix
-      # ./nixos/secure-boot.nix # Secure Boot enabled with lanzaboote
-      ./nixos/nvidia.nix
-      ../common/nixos/i18n.nix
-      ../common/nixos/hosts.nix
-      ../common/nixos/envvar.nix
-      ./nixos/cpu.nix
-      ./nixos/laptop.nix
-      ./nixos/memory.nix
-      ./themes/stylix.nix # Re-enabled after upstream cache fix
+  imports = hostTypes.laptop.imports ++ [
+    # Hardware-specific imports
+    ./nixos/hardware-configuration.nix
+    ./nixos/screens.nix
+    ./nixos/power.nix
+    ./nixos/boot.nix
+    # ./nixos/secure-boot.nix # Secure Boot enabled with lanzaboote
+    ./nixos/nvidia.nix
+    ../common/nixos/i18n.nix
+    ../common/nixos/hosts.nix
+    ../common/nixos/envvar.nix
+    ./nixos/cpu.nix
+    ./nixos/laptop.nix
+    ./nixos/memory.nix
+    ./themes/stylix.nix # Re-enabled after upstream cache fix
 
-      # Razer-specific additional modules
-      ../../modules/development/default.nix
-      ../../modules/security/secrets.nix
-      ../../modules/secrets/api-keys.nix
-      ../../modules/containers/docker.nix
-    ];
+    # Razer-specific additional modules
+    ../../modules/development/default.nix
+    ../../modules/security/secrets.nix
+    ../../modules/secrets/api-keys.nix
+    ../../modules/containers/docker.nix
+  ];
 
   # Consolidated networking configuration
   networking = {
@@ -62,7 +60,10 @@ in
     useNetworkd = false;
 
     # Set custom nameservers as fallback
-    nameservers = [ "1.1.1.1" "8.8.8.8" ];
+    nameservers = [
+      "1.1.1.1"
+      "8.8.8.8"
+    ];
 
     # Firewall disabled to allow all network access including SSH
     firewall.enable = lib.mkForce false;
@@ -75,11 +76,11 @@ in
     openFirewall = true;
   };
 
-  # COSMIC Notifications NG - Enhanced notifications with rich content support
-  services.cosmic-ext-notifications = {
-    enable = true;
-    settings.max_image_size = 32;
-  };
+  # COSMIC Notifications NG - Disabled: removed from active config
+  # services.cosmic-ext-notifications = {
+  #   enable = true;
+  #   settings.max_image_size = 32;
+  # };
 
   # COSMIC BG - Disabled pending upstream fix for startup race condition
   # See: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
@@ -279,7 +280,7 @@ in
 
     # COSMIC Package Updater Applet - NixOS update notifications
     desktop.cosmic-applet-package-updater = {
-      enable = true;
+      enable = false;
       autoCheck = true;
       checkIntervalMinutes = 60;
       nixosMode = "auto"; # Auto-detect flakes vs channels mode
@@ -389,11 +390,9 @@ in
   # Use standard NetworkManager for laptop - useNetworkd already set above
   networking.useHostResolvConf = false;
 
-  environment.sessionVariables =
-    vars.environmentVariables
-    // {
-      NH_FLAKE = vars.paths.flakeDir;
-    };
+  environment.sessionVariables = vars.environmentVariables // {
+    NH_FLAKE = vars.paths.flakeDir;
+  };
 
   # Enable secrets management
   modules.security.secrets = {
@@ -404,18 +403,23 @@ in
   users.users = lib.genAttrs hostUsers (username: {
     isNormalUser = true;
     description = "User ${username}";
-    extraGroups = [ "wheel" "networkmanager" ];
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+    ];
     shell = pkgs.zsh;
     # Only use secret-managed password if the secret exists
-    hashedPasswordFile =
-      lib.mkIf
-        (config.modules.security.secrets.enable
-          && builtins.hasAttr "user-password-${username}" config.age.secrets)
-        config.age.secrets."user-password-${username}".path;
+    hashedPasswordFile = lib.mkIf
+      (
+        config.modules.security.secrets.enable
+        && builtins.hasAttr "user-password-${username}" config.age.secrets
+      )
+      config.age.secrets."user-password-${username}".path;
   });
 
   # System packages - consolidated from individual nixos modules
-  environment.systemPackages = with pkgs;
+  environment.systemPackages =
+    with pkgs;
     [
       # Qt theme control tools for Stylix
       libsForQt5.qt5ct
@@ -473,9 +477,9 @@ in
   nixpkgs.overlays = [
     (_final: prev: {
       gnome-shell = prev.gnome-shell.overrideAttrs (old: {
-        patches = builtins.filter
-          (patch: !lib.hasSuffix "shell_remove_dark_mode.patch" (toString patch))
-          (old.patches or [ ]);
+        patches = builtins.filter (patch: !lib.hasSuffix "shell_remove_dark_mode.patch" (toString patch)) (
+          old.patches or [ ]
+        );
       });
     })
   ];

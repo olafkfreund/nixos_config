@@ -104,11 +104,11 @@ in
     openFirewall = true;
   };
 
-  # COSMIC Notifications NG - Enhanced notifications with rich content support
-  services.cosmic-ext-notifications = {
-    enable = true;
-    settings.max_image_size = 32;
-  };
+  # COSMIC Notifications NG - Disabled: removed from active config
+  # services.cosmic-ext-notifications = {
+  #   enable = true;
+  #   settings.max_image_size = 32;
+  # };
 
   # COSMIC BG - Disabled pending upstream fix for startup race condition
   # See: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
