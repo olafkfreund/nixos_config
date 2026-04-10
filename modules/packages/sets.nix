@@ -231,7 +231,6 @@
     # Core MCP servers - recommended for all systems
     playwright-mcp # Browser automation for AI agents
     github-mcp-server # GitHub integration
-    chatmcp # AI chat client (already in use)
 
     # Infrastructure MCP servers - optional but valuable
     mcp-grafana # Grafana integration

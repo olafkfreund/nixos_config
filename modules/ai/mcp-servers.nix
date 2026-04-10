@@ -233,7 +233,6 @@ in
           playwright-mcp # Browser automation
           playwright-driver.browsers # NixOS-compatible Playwright browsers
           github-mcp-server # GitHub integration
-          chatmcp # AI chat client
         ])
       ++ [
         mcp-nixos-pkg # NixOS package/option queries (v2.1.0 from flake - conflict resolved)
@@ -268,7 +267,6 @@ in
         Core Servers (Always Enabled):
         - playwright-mcp: Browser automation for AI agents
         - github-mcp-server: GitHub repository integration
-        - chatmcp: AI chat client with MCP support
         - mcp-nixos: NixOS packages and configuration options queries
 
         Optional Servers (Configured):
