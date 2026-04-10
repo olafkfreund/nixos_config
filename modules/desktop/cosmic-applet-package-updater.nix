@@ -54,9 +54,11 @@ in
     # Main configuration when enabled
     (mkIf cfg.enable {
       # Install the COSMIC package updater applet
-      environment.systemPackages = [
-        inputs.cosmic-package-updater.packages.${pkgs.stdenv.hostPlatform.system}.default
-      ];
+      # Disabled: cosmic-package-updater input removed from flake
+      # environment.systemPackages = [
+      #   inputs.cosmic-package-updater.packages.${pkgs.stdenv.hostPlatform.system}.default
+      # ];
+      environment.systemPackages = [ ];
 
       # XDG desktop database needs to be updated for applet discovery
       # This is handled automatically by NixOS
