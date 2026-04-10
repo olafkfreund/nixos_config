@@ -17,7 +17,6 @@ in
   config = mkIf cfg.enable {
     environment.systemPackages = [
       pkgs.yai
-      pkgs.chatmcp
     ]
     ++ optionals cfg.claude-desktop [ pkgs.customPkgs.claude-desktop ];
   };
