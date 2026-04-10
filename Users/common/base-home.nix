@@ -62,6 +62,7 @@
     wezterm.enable = true;
     ghostty.enable = true;
     gtk.enable = false; # Let COSMIC manage GTK theming (writes to cosmic/dark.css)
+    qt.enable = false; # Let home/desktop/theme/qt.nix manage Qt theming
   };
 
   # COSMIC GTK theme fix - auto-patches COSMIC's gtk.css with Gruvbox theme
