@@ -28,12 +28,6 @@ in
       description = "Install all COSMIC applications and extensions";
     };
 
-    disableOsd = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Disable cosmic-osd (on-screen display) to work around polkit agent crashes";
-    };
-
     enableTailscaleApplet = mkOption {
       type = types.bool;
       default = true;
@@ -246,8 +240,6 @@ in
         NIXOS_OZONE_WL = "1";
         MOZ_ENABLE_WAYLAND = "1";
         QT_QPA_PLATFORM = "wayland";
-        # Disable cosmic-osd if requested (workaround for polkit crashes)
-        COSMIC_DISABLE_OSD = mkIf cfg.disableOsd "1";
       };
 
       # Set environment variable to suppress KDE hint warnings in cosmic-notifications
@@ -317,27 +309,6 @@ in
             echo "Setting Tailscale operator privileges for $user"
             ${pkgs.tailscale}/bin/tailscale set --operator="$user" 2>/dev/null || true
           done
-        '';
-      };
-
-      # Workaround for cosmic-osd polkit agent crashes
-      user.services.cosmic-osd-blocker = mkIf cfg.disableOsd {
-        description = "Block cosmic-osd from starting (workaround for polkit crashes)";
-        wantedBy = [ "cosmic-session.target" ];
-        before = [ "cosmic-session.target" ];
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-        };
-        # Create a dummy cosmic-osd that does nothing
-        script = ''
-          mkdir -p $HOME/.local/bin
-          cat > $HOME/.local/bin/cosmic-osd << 'EOF'
-          #!/bin/sh
-          # Dummy cosmic-osd to prevent crashes - does nothing
-          exit 0
-          EOF
-          chmod +x $HOME/.local/bin/cosmic-osd
         '';
       };
 
