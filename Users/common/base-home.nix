@@ -1,4 +1,5 @@
 { pkgs ? { }
+, lib
 , username ? "olafkfreund"
 , # Default fallback
   ...
@@ -20,6 +21,16 @@
       OBSIDIAN_VAULT_PATH = "\${HOME}/Documents/Caliti";
     };
     stateVersion = "26.05";
+
+    # One-time cleanup: remove dummy cosmic-osd left by the now-removed
+    # cosmic-osd-blocker workaround (fixed in COSMIC 1.0, PR #296).
+    # Safe to keep permanently - idempotent, does nothing if file is absent.
+    activation.removeCosmicOsdDummy = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      if [ -f "$HOME/.local/bin/cosmic-osd" ]; then
+        $DRY_RUN_CMD rm "$HOME/.local/bin/cosmic-osd"
+        echo "Removed leftover dummy cosmic-osd from ~/.local/bin/"
+      fi
+    '';
 
     # Common packages for all users
     packages = with pkgs; [
