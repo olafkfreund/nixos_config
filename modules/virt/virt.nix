@@ -56,25 +56,27 @@ in
     };
 
     # Make sure the problematic libvirt drop-in isn't picked up anymore
-    systemd.tmpfiles.rules = [
-      "r /etc/ssh/ssh_config.d/30-libvirt-ssh-proxy.conf"
-      "L+ /var/lib/qemu/firmware - - - - ${pkgs.qemu}/share/qemu/firmware"
-    ];
-    systemd.services.libvirtd.restartIfChanged = false;
-    # Fix virt-secret-init-encryption crash on hosts without working TPM2
-    # systemd-creds encrypt fails with assertion error when TPM2 is unavailable.
-    # Generate a raw 256-bit key file directly instead.
-    systemd.services.virt-secret-init-encryption.serviceConfig.ExecStart = lib.mkForce
-      (
-        let
-          script = pkgs.writeShellScript "virt-secret-init-encryption" ''
-            umask 0077
-            mkdir -p /var/lib/libvirt/secrets
-            dd if=/dev/random of=/var/lib/libvirt/secrets/secrets-encryption-key bs=32 count=1 status=none
-          '';
-        in
-        "${script}"
-      );
+    systemd = {
+      tmpfiles.rules = [
+        "r /etc/ssh/ssh_config.d/30-libvirt-ssh-proxy.conf"
+        "L+ /var/lib/qemu/firmware - - - - ${pkgs.qemu}/share/qemu/firmware"
+      ];
+      services.libvirtd.restartIfChanged = false;
+      # Fix virt-secret-init-encryption crash on hosts without working TPM2
+      # systemd-creds encrypt fails with assertion error when TPM2 is unavailable.
+      # Generate a raw 256-bit key file directly instead.
+      services.virt-secret-init-encryption.serviceConfig.ExecStart = lib.mkForce
+        (
+          let
+            script = pkgs.writeShellScript "virt-secret-init-encryption" ''
+              umask 0077
+              mkdir -p /var/lib/libvirt/secrets
+              dd if=/dev/random of=/var/lib/libvirt/secrets/secrets-encryption-key bs=32 count=1 status=none
+            '';
+          in
+          "${script}"
+        );
+    };
     boot.kernelParams = [
       "cgroup_enable=cpuset"
       "cgroup_memory=1"
