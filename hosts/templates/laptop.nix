@@ -1,5 +1,5 @@
 # Laptop Template - Mobile Configuration with Power Management
-# Used by: Razer (Intel/NVIDIA laptop), Samsung, portable systems
+# Used by: Razer (Intel/NVIDIA laptop), portable systems
 { lib, ... }:
 {
   imports = [

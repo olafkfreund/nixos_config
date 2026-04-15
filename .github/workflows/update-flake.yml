@@ -64,7 +64,7 @@ jobs:
           echo "Testing updated configurations..."
 
           # Test build each host to ensure updates don't break anything
-          for host in p620 razer p510 samsung; do
+          for host in p620 razer p510; do
             echo "Testing $host..."
             nix build .#nixosConfigurations.$host.config.system.build.toplevel \
               --show-trace --no-link || {
@@ -116,7 +116,6 @@ jobs:
             - P620 (AMD workstation)
             - Razer (Intel/NVIDIA laptop)
             - P510 (Intel Xeon server)
-            - Samsung (Intel laptop)
 
             ### Review Checklist
 

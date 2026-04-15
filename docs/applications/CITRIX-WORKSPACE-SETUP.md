@@ -41,7 +41,7 @@ nix-store --add-fixed sha256 linuxx64-25.08.10.111.tar.gz
 
  **IMPORTANT FOR MULTI-HOST DEPLOYMENTS:**
 
-If deploying to multiple hosts (e.g., p620, razer, samsung), you must add the tarball to the Nix store on EACH host
+If deploying to multiple hosts (e.g., p620, razer), you must add the tarball to the Nix store on EACH host
 individually. The Nix store is host-specific and the tarball is not automatically shared between hosts.
 
 ```bash
@@ -50,9 +50,6 @@ ssh HOST "cd ~/.config/nixos/pkgs/citrix-workspace && nix-store --add-fixed sha2
 
 # Example for razer:
 ssh razer "cd ~/.config/nixos/pkgs/citrix-workspace && nix-store --add-fixed sha256 linuxx64-25.08.10.111.tar.gz"
-
-# Example for samsung:
-ssh samsung "cd ~/.config/nixos/pkgs/citrix-workspace && nix-store --add-fixed sha256 linuxx64-25.08.10.111.tar.gz"
 ```
 
 **Why is this needed?**

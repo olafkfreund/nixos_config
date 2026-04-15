@@ -142,7 +142,7 @@
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
-    # COSMIC RDP Server - Disabled: removed from active config (Samsung only)
+    # COSMIC RDP Server - Disabled: removed from active config
     # cosmic-ext-rdp-server.url = "github:olafkfreund/cosmic-ext-rdp-server";
     # cosmic-portal-rdp.url = "github:olafkfreund/xdg-desktop-portal-cosmic";
     # cosmic-comp-rdp.url = "github:olafkfreund/cosmic-ext-comp-rdp";
@@ -172,7 +172,6 @@
       # Define users per host (can be customized per host if needed)
       hostUsers = {
         p620 = [ "olafkfreund" ];
-        samsung = [ "olafkfreund" ];
         razer = [ "olafkfreund" ];
         p510 = [ "olafkfreund" ];
       };
@@ -507,30 +506,6 @@
               ./home/shell/zellij/zjstatus.nix
             ]
             ++ stylixModule
-            # COSMIC RDP Server stack (Samsung only) - replaces cosmic-comp and
-            # xdg-desktop-portal-cosmic with RDP-capable forks
-            # COSMIC RDP Server stack (Samsung only) - Disabled: removed from active config
-            # ++ nixpkgs.lib.optionals (host == "samsung") [
-            #   inputs.cosmic-ext-rdp-server.nixosModules.default
-            #   inputs.cosmic-portal-rdp.nixosModules.default
-            #   inputs.cosmic-comp-rdp.nixosModules.default
-            #   {
-            #     nixpkgs.overlays = [
-            #       inputs.cosmic-ext-rdp-server.overlays.default
-            #       inputs.cosmic-portal-rdp.overlays.default
-            #       inputs.cosmic-comp-rdp.overlays.default
-            #       # Fix: cosmic-comp-rdp overlay lacks meta.platforms, which
-            #       # cosmic-ext-ctl inherits via cosmic-comp.meta.platforms
-            #       (_final: prev: {
-            #         cosmic-comp = prev.cosmic-comp.overrideAttrs (old: {
-            #           meta = (old.meta or { }) // {
-            #             platforms = old.meta.platforms or prev.lib.platforms.linux;
-            #           };
-            #         });
-            #       })
-            #     ];
-            #   }
-            # ]
             ++ [
               {
                 home-manager = {
@@ -588,7 +563,6 @@
 
         # Laptops (portable systems with power management)
         razer = nixpkgs.lib.nixosSystem (makeNixosSystem "razer"); # Intel/NVIDIA laptop (mobile dev)
-        samsung = nixpkgs.lib.nixosSystem (makeNixosSystem "samsung"); # Intel laptop (mobile)
 
         # MicroVM configurations (temporarily disabled for flake restructuring)
         # dev-vm = microvms.dev-vm;

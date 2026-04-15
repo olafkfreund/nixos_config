@@ -70,12 +70,6 @@ creation_rules:
           - *olafkfreund
           - *dex5550
 
-  - path_regex: secrets/hosts/samsung/[^/]+\.(yaml|json|env|ini)$
-    key_groups:
-      - age:
-          - *olafkfreund
-          - *samsung
-
   # Binary files (for certificates, keys, etc.)
   - path_regex: secrets/[^/]+\.bin$
     key_groups:

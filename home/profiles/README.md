@@ -34,7 +34,7 @@ The Home Manager Profile System provides a sophisticated way to organize user co
 #### `laptop-user`
 
 - **Purpose**: Mobile-optimized configuration with power management
-- **Target Hosts**: Razer, Samsung, portable systems
+- **Target Hosts**: Razer, portable systems
 - **Features**: Battery optimization, mobile-friendly applications
 - **Use Case**: Mobile computing with power efficiency focus
 

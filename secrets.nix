@@ -40,6 +40,4 @@ in
   "secrets/wifi-password.age".publicKeys = allUsers ++ workstations;
   "secrets/tailscale-auth-key.age".publicKeys = allUsers ++ allHosts;
 
-  # COSMIC RDP Server password (Samsung only)
-  "secrets/rdp-password.age".publicKeys = allUsers ++ [ samsung ];
 }

@@ -249,11 +249,12 @@ You can invoke Agent OS commands directly:
 
 ## Repository Overview
 
-This is a sophisticated multi-host NixOS Infrastructure Hub featuring a revolutionary **template-based architecture** that achieves unprecedented 95% code deduplication through systematic use of host templates, Home Manager profiles, and 141+ modular components. The repository manages 4 active hosts (P620, Razer, P510, Samsung) with different hardware profiles, supports multi-user environments, and provides AI integration, development environments, and follows comprehensive NixOS best practices with zero anti-patterns.
+This is a sophisticated multi-host NixOS Infrastructure Hub featuring a revolutionary **template-based architecture** that achieves unprecedented 95% code deduplication through systematic use of host templates, Home Manager profiles, and 141+ modular components. The repository manages 3 active hosts (P620, Razer, P510) with different hardware profiles, supports multi-user environments, and provides AI integration, development environments, and follows comprehensive NixOS best practices with zero anti-patterns.
 
 **Infrastructure Changes**:
 
 - **DEX5550**: Offline and no longer in use
+- **Samsung**: Decommissioned and archived
 - **Monitoring Stack**: Prometheus/Grafana/Loki removed from configuration (infrastructure simplified)
 
 ### Architecture Philosophy
@@ -776,13 +777,11 @@ just deploy
 just quick-deploy p620    # Deploy P620 only if configuration changed
 just quick-deploy razer   # Deploy Razer only if configuration changed
 just quick-deploy p510    # Deploy P510 only if configuration changed
-just quick-deploy samsung # Deploy Samsung only if configuration changed
 
 # Standard optimized deployment to specific hosts
 just p620    # AMD workstation with ROCm (optimized)
 just razer   # Intel/NVIDIA laptop (optimized)
 just p510    # Intel Xeon/NVIDIA workstation (optimized)
-just samsung # Intel laptop (optimized)
 
 # Advanced deployment options
 just deploy-fast p620        # Fast deployment with minimal builds
@@ -830,7 +829,6 @@ just quick-test
 just quick-deploy p620
 just quick-deploy razer
 just quick-deploy p510
-just quick-deploy samsung
 
 # 3. Or do both in one command
 just quick-all
@@ -890,7 +888,6 @@ just deploy-cached HOST
 just build-live p620              # Build P620 installer
 just build-live razer             # Build Razer installer
 just build-live p510              # Build P510 installer
-just build-live samsung           # Build Samsung installer
 just build-all-live               # Build all host installers
 
 # Flash to USB device (DESTRUCTIVE!)
@@ -943,7 +940,6 @@ just live-help                    # Show comprehensive help
 │   ├── p620/                         # AMD workstation (primary AI host, development system)
 │   ├── p510/                         # Intel Xeon server (media server)
 │   ├── razer/                        # Intel/NVIDIA laptop (mobile)
-│   ├── samsung/                      # Intel laptop (mobile)
 │   └── common/                       # Shared host configurations
 ├── home/                             # Home Manager configurations and profiles
 │   └── profiles/                     # Home Manager role-based profiles
@@ -959,7 +955,6 @@ just live-help                    # Show comprehensive help
 │   ├── p620/                         # AMD workstation (uses workstation template)
 │   ├── p510/                         # Intel Xeon server (uses server template, media server)
 │   ├── razer/                        # Intel/NVIDIA laptop (uses laptop template)
-│   ├── samsung/                      # Intel laptop (uses laptop template)
 │   └── common/                       # Shared host configurations
 ├── Users/                            # Per-user configurations with profile compositions
 ├── assets/                           # Centralized asset management (NEW)
@@ -984,7 +979,7 @@ Three hardware-optimized templates provide base configurations:
   - Includes: Desktop environments, development tools, media, gaming support
 
 - **`laptop.nix`**: Mobile-optimized with power management
-  - Used by: Razer, Samsung (mobile systems)
+  - Used by: Razer (mobile system)
   - Includes: Power management, mobile hardware support, battery optimization
 
 - **`server.nix`**: Headless server configuration
@@ -1005,7 +1000,7 @@ Four role-based profiles provide user environment configurations:
 Sophisticated profile combinations for specific use cases:
 
 - **P620**: `developer` + `desktop-user` (full workstation)
-- **Razer/Samsung**: `developer` + `laptop-user` (mobile development)
+- **Razer**: `developer` + `laptop-user` (mobile development)
 - **P510**: `server-admin` + `developer` (dev-server composition)
 
 ### Feature Module Architecture
@@ -1111,7 +1106,7 @@ The repository includes a comprehensive live USB installer system for automated 
 
 **Key Features:**
 
-- **Host-specific live USB images** for each system (P620, Razer, P510, Samsung)
+- **Host-specific live USB images** for each system (P620, Razer, P510)
 - **Hardware configuration auto-detection** reusing existing `hardware-configuration.nix` files
 - **TUI-based installation wizard** with guided workflow and safety confirmations
 - **SSH access enabled** (root/nixos) for remote installation
@@ -1400,7 +1395,6 @@ When you notice duplication:
 - **P620**: AMD GPU requires ROCm support, uses `amdgpu` driver (Workstation template, monitoring server)
 - **Razer**: Hybrid Intel/NVIDIA graphics needs Optimus configuration (Laptop template)
 - **P510**: Intel Xeon with NVIDIA, configured as headless media server (Server template)
-- **Samsung**: Intel laptop with power management (Laptop template)
 
 ## Testing Workflow
 
@@ -1637,7 +1631,7 @@ A comprehensive monitoring infrastructure deployed on P620 as the monitoring ser
 **Dashboards Available:**
 
 - NixOS System Overview: Global system metrics
-- Host-specific dashboards: p620 (AMD), razer (NVIDIA), p510 (NVIDIA), samsung (Intel)
+- Host-specific dashboards: p620 (AMD), razer (NVIDIA), p510 (NVIDIA)
 - Hardware-specific panels for GPU metrics
 
 **Management Commands:**
@@ -1657,7 +1651,7 @@ node-exporter-status    # All exporters status and metrics
 **Configuration:**
 
 - Server mode on P620 (monitoring server)
-- Client mode deployed on P510, Razer, and Samsung
+- Client mode deployed on P510 and Razer
 - 30-day metrics retention
 - 15-second scrape intervals for real-time monitoring
 - Comprehensive alerting rules for system health
@@ -1667,7 +1661,6 @@ node-exporter-status    # All exporters status and metrics
 - P620: ✅ Prometheus, Grafana, Alertmanager, Node exporter, systemd exporter, AI metrics (monitoring server)
 - P510: ✅ Node exporter, systemd exporter, storage metrics, Plex monitoring, NZBGet monitoring
 - Razer: ✅ Node exporter, systemd exporter, mobile metrics
-- Samsung: ✅ Node exporter, systemd exporter, mobile metrics
 
 ### Advanced Media Server Monitoring (Phase 10.1 - FULLY DEPLOYED)
 
@@ -1824,7 +1817,7 @@ The implementation provides professional-grade media server analytics comparable
 
 ### Enterprise-Grade AI Infrastructure
 
-A complete, production-ready AI infrastructure deployed across all 4 hosts with comprehensive monitoring, alerting, and automation capabilities.
+A complete, production-ready AI infrastructure deployed across all 3 active hosts with comprehensive monitoring, alerting, and automation capabilities.
 
 **Deployment Status**: ✅ **FULLY DEPLOYED AND OPERATIONAL**
 
@@ -1833,11 +1826,10 @@ A complete, production-ready AI infrastructure deployed across all 4 hosts with 
 - **P620** (Primary AI Host & Monitoring Server): AI providers, Prometheus, Grafana, alerting, load testing, local inference
 - **P510** (High Performance Client): Storage analysis, automated remediation, media server
 - **Razer** (Mobile Client): Basic monitoring and system analysis
-- **Samsung** (Mobile Client): Basic monitoring and system analysis
 
 ### Deployment Validation Results
 
-✅ **All 4 hosts fully operational**
+✅ **All 3 active hosts fully operational**
 ✅ **Multi-provider AI system active**
 ✅ **Comprehensive monitoring integrated**
 ✅ **Advanced alerting system functional**
@@ -2528,7 +2520,6 @@ features = {
 - **P620**: ✅ Available (enable in configuration as needed)
 - **Razer**: ✅ Available (enable in configuration as needed)
 - **P510**: ✅ Available (enable in configuration as needed)
-- **Samsung**: ✅ Available (enable in configuration as needed)
 
 ### **🚨 Troubleshooting:**
 
@@ -2594,13 +2585,13 @@ The MicroVM system provides enterprise-grade virtualization capabilities with mi
 - **Anti-Patterns**: Zero - comprehensive best practices implementation completed
 - **Security**: All services hardened with DynamicUser and minimal privileges
 - **Performance**: Optimized builds, automated garbage collection, binary caches
-- **Hosts**: 4 active (P620, P510, Razer, Samsung) using appropriate templates
+- **Hosts**: 3 active (P620, P510, Razer) using appropriate templates
 
 ### 📊 **Monitoring & Services Status**
 
 - **P620**: Workstation and monitoring server (AI infrastructure, Prometheus, Grafana, Loki, Alertmanager) ✅
 - **P510**: Headless media server (Plex, NZBGet) with comprehensive analytics ✅
-- **Razer/Samsung**: Mobile systems with monitoring clients ✅
+- **Razer**: Mobile system with monitoring client ✅
 - **All Hosts**: Centralized logging, performance monitoring, security hardening ✅
 
 ## Agent OS Documentation

@@ -60,7 +60,7 @@
 
 ### Host Architecture
 
-- **Multi-Host Management:** 4 active hosts (p620, p510, razer, samsung) - **DEX5550 offline**, HP decommissioned
+- **Multi-Host Management:** 3 active hosts (p620, p510, razer) - **DEX5550 offline**, **Samsung archived**, HP decommissioned
 - **Hardware Profiles:** AMD, Intel, NVIDIA configurations
 - **Desktop Environment:** Hyprland (Wayland), with Plasma fallback
 - **Live Installers:** Hardware-specific USB installation images
@@ -86,10 +86,10 @@
 ### Application Hosting
 
 - **Platform:** Self-hosted on NixOS infrastructure
-- **Primary Hosts:** p620 (primary workstation), p510 (media server), razer/samsung (mobile)
+- **Primary Hosts:** p620 (primary workstation), p510 (media server), razer (mobile)
 - **Network:** Tailscale VPN mesh with DNS management
 
-**Note**: DEX5550 is **offline**. Monitoring infrastructure (Prometheus/Grafana/Loki) has been **removed**.
+**Note**: DEX5550 is **offline**. Samsung is **archived**. Monitoring infrastructure (Prometheus/Grafana/Loki) has been **removed**.
 
 ### Automation
 

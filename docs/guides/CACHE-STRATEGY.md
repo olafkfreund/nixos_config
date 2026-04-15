@@ -16,7 +16,7 @@ Your NixOS infrastructure uses a sophisticated three-tier cache strategy:
 ### Current Setup
 
 ```
-Samsung/Razer/P510 (clients)
+Razer/P510 (clients)
     ↓
     1. Check P620 cache (local network) - FASTEST
     ↓

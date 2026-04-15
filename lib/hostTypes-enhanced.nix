@@ -220,7 +220,7 @@
     };
   };
 
-  # Laptop configuration (Razer, Samsung - portable systems with power management)
+  # Laptop configuration (Razer - portable system with power management)
   laptop = {
     imports = [
       ../modules/core.nix

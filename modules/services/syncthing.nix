@@ -11,7 +11,6 @@ let
     p620 = "SQ6SDI7-NVAXUP2-RN3EEGN-YK7Q7P5-LEXKIJK-QJHJTFR-NJ7WMEQ-HOOSIAX";
     razer = "XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX";
     p510 = "XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX";
-    samsung = "XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX";
   };
 
   # Merge user-provided device IDs with defaults
@@ -100,7 +99,7 @@ in
 
     syncHosts = mkOption {
       type = types.listOf types.str;
-      default = [ "p620" "razer" "p510" "samsung" ];
+      default = [ "p620" "razer" "p510" ];
       description = "List of hosts to sync with";
     };
 

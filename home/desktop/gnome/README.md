@@ -35,10 +35,10 @@ desktop.gnome = {
 };
 ```
 
-#### Razer/Samsung (Laptops)
+#### Razer (Laptop)
 
 ```nix
-# In Users/olafkfreund/razer_home.nix or samsung_home.nix
+# In Users/olafkfreund/razer_home.nix
 desktop.gnome = {
   enable = true;  # Set to true to enable GNOME
   theme = {
@@ -117,7 +117,7 @@ desktop.gnome.keybindings.enable = true;  # Enable custom keybindings
 - Vitals (system monitoring)
 - Blur My Shell (visual effects)
 
-#### Laptops (Razer/Samsung)
+#### Laptops (Razer)
 
 - Dash to Dock
 - AppIndicator support
