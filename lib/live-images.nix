@@ -200,12 +200,6 @@ let
         services.xserver.videoDrivers = [ "intel" ];
       };
 
-    samsung =
-      _: {
-        # Intel integrated graphics (laptop)
-        boot.kernelModules = [ "i915" ];
-        services.xserver.videoDrivers = [ "intel" ];
-      };
   };
 
   # Function to create a live image for a specific host
@@ -237,5 +231,5 @@ in
     (hostName: {
       name = "live-iso-${hostName}";
       value = mkLiveImage hostName;
-    }) [ "p620" "razer" "p510" "dex5550" "samsung" ]);
+    }) [ "p620" "razer" "p510" "dex5550" ]);
 }

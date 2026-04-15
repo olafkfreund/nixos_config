@@ -221,7 +221,7 @@
           echo "To start installation:"
           echo "sudo /etc/nixos-config/scripts/install-helpers/install-wizard.sh <hostname>"
           echo ""
-          echo "Available hosts: p620, razer, p510, samsung"
+          echo "Available hosts: p620, razer, p510"
         }
 
         # Show help on login

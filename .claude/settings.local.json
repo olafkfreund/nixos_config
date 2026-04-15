@@ -19,13 +19,13 @@
       "Bash(ln:*)",
       "Bash(cp:*)",
       "Bash(echo)",
-      "Bash(for host in p620 p510 hp samsung dex5550)",
+      "Bash(for host in p620 p510 hp dex5550)",
       "Bash(do rm hosts/$host/nixos/envvar.nix)",
       "Bash(done)",
       "Bash(do rm hosts/$host/nixos/hosts.nix)",
-      "Bash(for host in hp samsung dex5550)",
+      "Bash(for host in hp dex5550)",
       "Bash(do rm hosts/$host/nixos/screens.nix)",
-      "Bash(for host in razer p620 p510 hp samsung dex5550)",
+      "Bash(for host in razer p620 p510 hp dex5550)",
       "Bash(do cp hosts/common/envvar.nix hosts/$host/nixos/)",
       "Bash(do cp:*)",
       "Bash(just check-syntax:*)",
@@ -165,7 +165,7 @@
       "Bash(fi)",
       "Bash(bluetoothctl:*)",
       "Bash(/nix/store/ibpqb5xy2h0c4lm82plngbi49jj9h0nl-nixos-system-p620-25.11.20251007.c9b6fb7/bin/switch-to-configuration switch:*)",
-      "Bash(for host in p620 p510 razer samsung hp dex5550)",
+      "Bash(for host in p620 p510 razer hp dex5550)",
       "Bash(do echo \"=== $host ===\")",
       "Bash(git log:*)",
       "Bash(git reset:*)",
@@ -251,7 +251,9 @@
       "Bash(systemctl status *)",
       "Bash(journalctl -u *)"
     ],
-    "additionalDirectories": ["/"]
+    "additionalDirectories": [
+      "/"
+    ]
   },
   "enableAllProjectMcpServers": false
 }

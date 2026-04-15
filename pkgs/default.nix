@@ -11,8 +11,8 @@
   mpris-album-art = pkgs.callPackage ./mpris-album-art { };
   weather-popup = pkgs.callPackage ./weather-popup { };
   # gemini-cli provided via flake overlay (version 0.26.0)
-  # Claude Desktop - using working Linux build from k3d3/claude-desktop-linux-flake
-  claude-desktop = pkgs.claude-desktop-linux or (pkgs.callPackage ./claude-desktop { });
+  # Claude Desktop - native Linux build from k3d3/claude-desktop-linux-flake (see flake.nix overlay)
+  claude-desktop = pkgs.claude-desktop-linux;
   neuwaita-icon-theme = pkgs.callPackage ./neuwaita-icon-theme { };
   kosli-cli = pkgs.callPackage ./kosli-cli { };
 

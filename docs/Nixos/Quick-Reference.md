@@ -118,7 +118,6 @@ just deploy-all-parallel    # Deploy all (parallel)
 just p620                   # Deploy to p620
 just razer                  # Deploy to razer
 just p510                   # Deploy to p510
-just samsung                # Deploy to samsung
 ```
 
 ### Monitoring
@@ -138,7 +137,7 @@ node-exporter-status     # Exporter status
 ssh HOST "sudo nixos-rebuild switch --rollback"
 
 # Rollback all hosts
-for host in p620 razer p510 samsung; do
+for host in p620 razer p510; do
   ssh $host "sudo nixos-rebuild switch --rollback"
 done
 ```
@@ -278,7 +277,6 @@ docs/GITHUB-WORKFLOW.md       # GitHub workflow
 | P620    | Workstation/Monitoring | AMD Ryzen/ROCm    | 192.168.1.x |
 | Razer   | Mobile/Development     | Intel/NVIDIA      | 192.168.1.x |
 | P510    | Media Server           | Intel Xeon/NVIDIA | 192.168.1.x |
-| Samsung | Mobile/Backup          | Intel             | 192.168.1.x |
 
 ### Critical Services
 
@@ -365,7 +363,7 @@ just HOST
 # Already configured in flake.nix
 
 # Garbage collection
-for host in p620 razer p510 samsung; do
+for host in p620 razer p510; do
   ssh $host "nix-collect-garbage -d"
 done
 ```
@@ -416,17 +414,17 @@ Ctrl+B d        # Detach session
 /system-health-check
 
 # Disk usage
-for host in p620 razer p510 samsung; do
+for host in p620 razer p510; do
   ssh $host "df -h / /nix/store"
 done
 
 # Service status
-for host in p620 razer p510 samsung; do
+for host in p620 razer p510; do
   ssh $host "systemctl --failed"
 done
 
 # Recent errors
-for host in p620 razer p510 samsung; do
+for host in p620 razer p510; do
   ssh $host "journalctl -p err -n 10 --no-pager"
 done
 ```

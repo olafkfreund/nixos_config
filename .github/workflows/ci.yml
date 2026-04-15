@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        host: [p620, razer, p510, samsung]
+        host: [p620, razer, p510]
       fail-fast: false
 
     steps:

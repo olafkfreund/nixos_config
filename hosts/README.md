@@ -7,11 +7,11 @@ This directory contains system configurations for different machines. Each subdi
 - `p620/` - Configuration for the P620 workstation (AMD-based system, primary development)
 - `p510/` - Configuration for the P510 system (media server, includes MicroVM configurations)
 - `razer/` - Configuration for the Razer laptop
-- `samsung/` - Configuration for the Samsung laptop
 
 ## Offline/Archived Hosts
 
 - `dex5550/` - **OFFLINE** - Dell Dex5550 SFF (monitoring infrastructure removed)
+- `samsung/` - **ARCHIVED** - Samsung laptop (decommissioned)
 - `hp/` - **ARCHIVED** - HP server/workstation (decommissioned)
 - `lms/` - **ARCHIVED** - LMS system (decommissioned)
 

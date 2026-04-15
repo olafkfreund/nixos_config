@@ -131,7 +131,7 @@ lint-all:
 # Test all configurations build successfully
 test-all:
     @echo "🧪 Testing all NixOS configurations..."
-    @for host in p620 razer p510 samsung; do \
+    @for host in p620 razer p510; do \
         echo "Testing $host..."; \
         nix build .#nixosConfigurations.$host.config.system.build.toplevel --show-trace || exit 1; \
     done
@@ -143,7 +143,6 @@ test-all-parallel:
     @( nix build .#nixosConfigurations.p620.config.system.build.toplevel --no-link --show-trace && echo "✅ P620" || echo "❌ P620" ) & \
     ( nix build .#nixosConfigurations.razer.config.system.build.toplevel --no-link --show-trace && echo "✅ Razer" || echo "❌ Razer" ) & \
     ( nix build .#nixosConfigurations.p510.config.system.build.toplevel --no-link --show-trace && echo "✅ P510" || echo "❌ P510" ) & \
-    ( nix build .#nixosConfigurations.samsung.config.system.build.toplevel --no-link --show-trace && echo "✅ Samsung" || echo "❌ Samsung" ) & \
     wait && echo "✅ All parallel tests completed!"
 
 # Test build all hosts with detailed error reporting
@@ -152,9 +151,9 @@ test-build-all:
     echo "🔨 Test building all host configurations with detailed reporting..."
     failed_hosts=()
     success_count=0
-    total_hosts=4
+    total_hosts=3
 
-    for host in p620 razer p510 samsung; do
+    for host in p620 razer p510; do
         echo ""
         echo "🔨 Building $host..."
         start_time=$(date +%s)
@@ -208,15 +207,11 @@ test-build-all-parallel:
     (nixos-rebuild build --flake .#p510 --show-trace > /tmp/build-p510.log 2>&1 && echo "✅ P510: Build successful" || echo "❌ P510: Build failed") &
     p510_pid=$!
 
-    (nixos-rebuild build --flake .#samsung --show-trace > /tmp/build-samsung.log 2>&1 && echo "✅ Samsung: Build successful" || echo "❌ Samsung: Build failed") &
-    samsung_pid=$!
-
     # Wait for all builds to complete
     echo "⏳ Waiting for all builds to complete..."
     wait $p620_pid; p620_result=$?
     wait $razer_pid; razer_result=$?
     wait $p510_pid; p510_result=$?
-    wait $samsung_pid; samsung_result=$?
 
     # Count results
     failed_hosts=()
@@ -225,13 +220,12 @@ test-build-all-parallel:
     if [ $p620_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("p620"); fi
     if [ $razer_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("razer"); fi
     if [ $p510_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("p510"); fi
-    if [ $samsung_result -eq 0 ]; then success_count=$((success_count + 1)); else failed_hosts+=("samsung"); fi
 
     echo ""
     echo "📊 Parallel Build Summary:"
     echo "========================="
-    echo "✅ Successful: $success_count/4"
-    echo "❌ Failed: ${#failed_hosts[@]}/4"
+    echo "✅ Successful: $success_count/3"
+    echo "❌ Failed: ${#failed_hosts[@]}/3"
 
     if [ ${#failed_hosts[@]} -gt 0 ]; then
         echo ""
@@ -280,7 +274,7 @@ test-build-verbose HOST:
 # Validate Home Manager configurations
 test-home:
     @echo "🏠 Testing Home Manager configurations..."
-    @for host in p620 razer p510 samsung; do \
+    @for host in p620 razer p510; do \
         echo "Testing Home Manager for olafkfreund@$host..."; \
         nix build .#homeConfigurations.\"olafkfreund@$host\".activationPackage --show-trace || echo "⚠️  Home Manager config for $host failed"; \
     done
@@ -366,26 +360,6 @@ p620:
 p510:
     nixos-rebuild switch --flake .#p510 --target-host p510.lan --build-host p510.lan --sudo --no-reexec --keep-going --accept-flake-config
 
-# Deploy to samsung system (Intel integrated) - requires special handling
-samsung:
-    @echo "🖥️  Deploying to Samsung system..."
-    @echo "⚠️  Samsung requires special handling due to network configuration"
-    @echo "📡 Testing connection first..."
-    @ping -c 1 samsung.lan > /dev/null 2>&1 || (echo "❌ Samsung not reachable via hostname, trying IP..."; ping -c 1 192.168.1.90 > /dev/null 2>&1 || (echo "❌ Samsung not reachable at all"; exit 1))
-    @echo "✅ Samsung is reachable, proceeding with deployment..."
-    NIX_SSHOPTS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -F /dev/null" NIXOS_REBUILD_REMOTE_SUDO_USE_AGENT=1 nixos-rebuild switch --flake .#samsung --target-host 192.168.1.90 --build-host 192.168.1.90 --sudo --impure --accept-flake-config --show-trace
-
-# Deploy to samsung system with debug mode (for troubleshooting)
-samsung-debug:
-    @echo "🐛 Deploying to Samsung system with debug mode..."
-    @echo "📡 Testing SSH connection..."
-    ssh -o ConnectTimeout=10 192.168.1.90 "echo 'SSH connection successful'"
-    @echo "🔐 Testing sudo access..."
-    ssh 192.168.1.90 "sudo -n echo 'Sudo access confirmed' || echo 'Sudo password required'"
-    @echo "🔑 Checking agenix status on remote..."
-    ssh 192.168.1.90 "sudo systemctl status agenix --no-pager || echo 'Agenix service not active'"
-    @echo "🚀 Starting deployment with extra verbosity..."
-    NIX_SSHOPTS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -F /dev/null" NIXOS_REBUILD_REMOTE_SUDO_USE_AGENT=1 nixos-rebuild switch --flake .#samsung --target-host 192.168.1.90 --build-host 192.168.1.90 --sudo --impure --accept-flake-config --show-trace --verbose
 
 # =============================================================================
 # MODERN CONFIGURATION MANAGEMENT
@@ -722,7 +696,7 @@ test-all-users:
     @for user_dir in Users/*/; do \
         user=$$(basename "$$user_dir"); \
         echo "Testing user: $$user"; \
-        for host in p620 razer p510 samsung; do \
+        for host in p620 razer p510; do \
             if [ -f "Users/$$user/$${host}_home.nix" ]; then \
                 echo "  Testing $$user@$$host..."; \
                 nix build .#homeConfigurations.\"$$user@$$host\".activationPackage --no-link 2>/dev/null || echo "    ⚠️  Failed: $$user@$$host"; \
@@ -811,7 +785,7 @@ restore BACKUP_PATH:
 deploy-interactive:
     @echo "🎯 Interactive deployment"
     @echo "Available hosts:"
-    @select host in razer p510 p620 samsung "Cancel"; do \
+    @select host in razer p510 p620 "Cancel"; do \
         case $$host in \
             "Cancel") echo "Deployment cancelled"; break ;; \
             "") echo "Invalid selection" ;; \
@@ -881,7 +855,6 @@ deploy-all-parallel:
     ( just razer & echo "Razer started" ) & \
     ( just p510 & echo "P510 started" ) & \
     wait && echo "✅ All deployments completed!"
-    @echo "⚠️  Note: Samsung requires manual deployment due to network configuration"
 
 # Fast deployment with minimal builds
 deploy-fast HOST:
@@ -910,7 +883,6 @@ build-all-parallel:
     ( nix build .#nixosConfigurations.p620.config.system.build.toplevel --no-link & echo "Building P620..." ) & \
     ( nix build .#nixosConfigurations.razer.config.system.build.toplevel --no-link & echo "Building Razer..." ) & \
     ( nix build .#nixosConfigurations.p510.config.system.build.toplevel --no-link & echo "Building P510..." ) & \
-    ( nix build .#nixosConfigurations.samsung.config.system.build.toplevel --no-link & echo "Building Samsung..." ) & \
     wait && echo "✅ All builds completed!"
 
 # Deploy with binary cache optimization
@@ -918,7 +890,7 @@ deploy-cached HOST:
     @echo "💾 Deploying {{HOST}} with cache optimization..."
     nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}}.lan --build-host {{HOST}}.lan --sudo --no-reexec --keep-going --option binary-caches "https://cache.nixos.org/ http://p620.lan:5000" --accept-flake-config
 
-# Build on P620, deploy to target host (recommended for Samsung)
+# Build on P620, deploy to target host
 deploy-via-p620 HOST:
     @echo "🏗️ Building {{HOST}} on P620 cache server, deploying to {{HOST}}..."
     @echo "📡 Step 1: Building on P620..."
@@ -933,15 +905,10 @@ build-on-p620 HOST:
     nixos-rebuild build --flake .#{{HOST}} --build-host p620.lan --accept-flake-config
     @echo "✅ Build complete! Deploy with: just deploy-via-p620 {{HOST}}"
 
-# Quick Samsung deployment (uses P620 cache)
-samsung-deploy:
-    @echo "📱 Deploying Samsung laptop via P620 cache..."
-    just deploy-via-p620 samsung
-
 # Test all hosts can be reached
 ping-hosts:
     @echo "🏓 Pinging all hosts..."
-    @for host in p620 razer p510 samsung; do \
+    @for host in p620 razer p510; do \
         echo -n "$$host: "; \
         ping -c 1 -W 2 $$host.lan >/dev/null 2>&1 && echo "✅ reachable" || echo "❌ unreachable"; \
     done
@@ -998,7 +965,7 @@ summary:
     #!/usr/bin/env bash
     echo "📋 NixOS Configuration Summary"
     echo "=============================="
-    echo "Active hosts: p620 (AMD workstation), razer (Intel/NVIDIA laptop), p510 (Intel Xeon server), samsung (Intel laptop)"
+    echo "Active hosts: p620 (AMD workstation), razer (Intel/NVIDIA laptop), p510 (Intel Xeon server)"
     echo "Users: $(ls Users/ | grep -v README | tr '\n' ' ')"
     echo "Modules: $(find modules -name '*.nix' -not -name 'default.nix' | wc -l) modules"
     echo "Last update: $(stat -c %y flake.lock | cut -d' ' -f1)"
@@ -1031,7 +998,7 @@ build-live host:
 build-all-live:
     #!/usr/bin/env bash
     echo "🔧 Building all live USB installer images..."
-    hosts=("p620" "razer" "p510" "samsung")
+    hosts=("p620" "razer" "p510")
     failed=()
 
     for host in "${hosts[@]}"; do
@@ -1158,7 +1125,7 @@ live-help:
     @echo "  4. Boot from USB and run: sudo install-p620"
     @echo ""
     @echo "🎯 Available Hosts:"
-    @echo "  p620, razer, p510, samsung"
+    @echo "  p620, razer, p510"
     @echo ""
     @echo "⚠️  WARNING: flash-live will ERASE the target device!"
 
@@ -1428,6 +1395,6 @@ deploy-all:
     @echo "🚀 Proceeding with deployment sequence..."
     @echo "🔹 Phase 1: Infrastructure (P620)"
     @just p620
-    @echo "🔹 Phase 2: Clients (Razer, P510, Samsung)"
+    @echo "🔹 Phase 2: Clients (Razer, P510)"
     @just deploy-all-parallel
     @echo "✅ Deployment Coordinator finished successfully."

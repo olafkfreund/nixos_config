@@ -9,7 +9,6 @@ Multi-host NixOS configuration using flakes, template-based architecture, and Ho
 | p620 | workstation | AMD | Primary development |
 | p510 | server | Intel Xeon | Media server (Plex) |
 | razer | laptop | Intel/NVIDIA | Mobile development |
-| samsung | laptop | Intel | Mobile |
 
 ## Quick Start
 
@@ -18,7 +17,7 @@ git clone https://github.com/olafkfreund/nixos_config.git
 cd nixos_config
 just validate        # Validate configuration
 just deploy          # Deploy to current host
-just HOST            # Deploy to specific host (p620/p510/razer/samsung)
+just HOST            # Deploy to specific host (p620/p510/razer)
 ```
 
 ## Directory Structure
@@ -29,7 +28,7 @@ justfile                      Automation commands
 modules/                      Feature modules
 hosts/
   templates/                  Host type templates (workstation/laptop/server)
-  p620/, p510/, razer/, samsung/
+  p620/, p510/, razer/
   common/
 home/profiles/                Home Manager profiles
 Users/                        Per-user configurations
