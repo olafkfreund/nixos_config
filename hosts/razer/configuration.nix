@@ -72,7 +72,13 @@ in
   # Tailscale VPN using built-in NixOS service
   services.tailscale = {
     enable = true;
-    useRoutingFeatures = "client"; # Accept routes from other nodes
+    # "none": do not accept subnet routes. razer is directly on 192.168.1.0/24,
+    # and p510 advertises that same /24 as a subnet route. With accept-routes on,
+    # razer's routing table 52 sent LAN-destined replies back through tailscale0,
+    # causing asymmetric routing that broke TCP/ICMP to LAN peers (e.g. p620).
+    # Note: flipping this flag in Nix does not rewrite tailscale's persisted
+    # prefs; run `sudo tailscale set --accept-routes=false` once after switch.
+    useRoutingFeatures = "none";
     openFirewall = true;
   };
 
