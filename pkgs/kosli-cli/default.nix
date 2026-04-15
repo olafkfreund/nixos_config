@@ -5,17 +5,17 @@
 
 buildGoModule rec {
   pname = "kosli-cli";
-  version = "2.11.37";
+  version = "2.15.3";
 
   src = fetchFromGitHub {
     owner = "kosli-dev";
     repo = "cli";
     rev = "v${version}";
-    hash = "sha256-WUFOt306P8gomcg5WWbbCKoAgs7Q+PXq3TFufXaiRak=";
+    hash = "sha256-hBs3ZCDq1j4MH2O6GWGjsEFNjCutS/YGrpt/BiK5Ys0=";
   };
 
   # Vendor hash calculated from go.mod dependencies
-  vendorHash = "sha256-POG6l82VIpD98d4hKscyBBmcTIw6ykpicRbLiY9rbW4=";
+  vendorHash = "sha256-6+X9r8akAZ/sc+LR+9sPcinfL6/biTXU3UyhhtvQJbQ=";
 
   # Enable strict dependency separation for cross-compilation
   strictDeps = true;
