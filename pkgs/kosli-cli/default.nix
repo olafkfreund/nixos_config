@@ -5,13 +5,13 @@
 
 buildGoModule rec {
   pname = "kosli-cli";
-  version = "2.15.3";
+  version = "2.16.0";
 
   src = fetchFromGitHub {
     owner = "kosli-dev";
     repo = "cli";
     rev = "v${version}";
-    hash = "sha256-hBs3ZCDq1j4MH2O6GWGjsEFNjCutS/YGrpt/BiK5Ys0=";
+    hash = "sha256-WzpBKbU1B+vDTUO/SgT40JUWbAPJgQO1fhFVPiDT4TY=";
   };
 
   # Vendor hash calculated from go.mod dependencies
