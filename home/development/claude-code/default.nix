@@ -9,11 +9,11 @@
 let
   claudeCode = buildNpmPackage rec {
     pname = "claude-code";
-    version = "2.1.104";
+    version = "2.1.109";
 
     src = fetchurl {
       url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-      hash = "sha256-yUFU2t646V/sq/JVwfCPC+IIWycx3B+q+gjCccSP0vc=";
+      hash = "sha256-BEm50FshQbpRx6UmKnxi5oxzCYuH5PyXteGlF6qvcSg=";
       curlOptsList = [ "--http1.1" ]; # Force HTTP/1.1 to avoid HTTP/2 protocol errors
     };
 
