@@ -72,7 +72,7 @@
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
     zjstatus.url = "github:dj95/zjstatus";
-    claude-desktop-linux.url = "github:k3d3/claude-desktop-linux-flake";
+    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian";
 
     # Terminal YouTube browser
     yt-x = {
@@ -228,9 +228,10 @@
         (_final: prev: {
           zjstatus = inputs.zjstatus.packages.${prev.stdenv.hostPlatform.system}.default;
         })
-        # Claude Desktop from k3d3/claude-desktop-linux-flake (FHS version with MCP server support)
+        # Claude Desktop from aaddrick/claude-desktop-debian (FHS variant; tracks latest
+        # upstream version with Cowork/Local Agent Mode via bubblewrap sandbox).
         (_final: prev: {
-          claude-desktop-linux = inputs.claude-desktop-linux.packages.${prev.stdenv.hostPlatform.system}.claude-desktop-with-fhs;
+          claude-desktop-linux = inputs.claude-desktop-linux.packages.${prev.stdenv.hostPlatform.system}.claude-desktop-fhs;
         })
         # COSMIC applets from flakes
         (_final: prev: {

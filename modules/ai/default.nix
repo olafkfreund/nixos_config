@@ -18,6 +18,9 @@ in
     environment.systemPackages = [
       pkgs.yai
     ]
-    ++ optionals cfg.claude-desktop [ pkgs.customPkgs.claude-desktop ];
+    ++ optionals cfg.claude-desktop [
+      pkgs.customPkgs.claude-desktop
+      pkgs.bubblewrap # required by Claude Desktop's Cowork/Local Agent Mode
+    ];
   };
 }
