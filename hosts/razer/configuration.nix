@@ -295,9 +295,11 @@ in
   };
 
   # Citrix Workspace for client project remote access
+  # Disabled — no longer needed. Module + overlay + package retained so this
+  # can be flipped back to true without re-installing anything.
   services.citrix-workspace = {
-    enable = true; # Enabled with version 25.08.10.111
-    acceptLicense = true; # Accept Citrix EULA for client project work
+    enable = false;
+    acceptLicense = true;
   };
 
   # MCP screenshot server for Claude Desktop
