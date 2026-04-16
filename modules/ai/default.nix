@@ -20,7 +20,9 @@ in
     ]
     ++ optionals cfg.claude-desktop [
       pkgs.customPkgs.claude-desktop
-      pkgs.bubblewrap # required by Claude Desktop's Cowork/Local Agent Mode
+      # Claude Desktop's Cowork/Local Agent Mode runtime deps (aaddrick --doctor)
+      pkgs.bubblewrap # namespace sandbox (default backend)
+      pkgs.socat # Unix-socket relay the cowork daemon uses for IPC
     ];
   };
 }
