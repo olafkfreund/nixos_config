@@ -72,7 +72,10 @@
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
     zjstatus.url = "github:dj95/zjstatus";
-    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian";
+    # Pinned to v1.3.30+claude1.2278.0 — v1.3.31+claude1.2773.0 has a
+    # regression (upstream #408) where _svcLaunched guard never clears,
+    # breaking Cowork VM daemon respawn after any failure/crash.
+    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/89208a596a3e876a74f865fb5267996f666f4a09";
 
     # Terminal YouTube browser
     yt-x = {
