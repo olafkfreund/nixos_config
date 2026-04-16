@@ -356,8 +356,9 @@ in
       videoDrivers = [ vars.gpu ];
     };
 
-    # Desktop environment - GNOME disabled, using COSMIC instead
-    desktopManager.gnome.enable = false;
+    # Desktop environments — COSMIC is the primary session; GNOME is also
+    # available as a choice in the login greeter.
+    desktopManager.gnome.enable = true;
   };
 
   # Hardware and service specific configurations
