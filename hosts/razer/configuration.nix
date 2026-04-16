@@ -456,7 +456,12 @@ in
     ]
     ++ lib.optionals (config.boot.lanzaboote.enable or false) [
       sbctl # For managing Secure Boot keys
-    ];
+    ]
+    # Every DE registered via services.xserver.desktopManager.*.enable —
+    # needed so their share/wayland-sessions/*.desktop files land in
+    # /run/current-system/sw/share/wayland-sessions where COSMIC Greeter
+    # (and other display managers) actually look for session choices.
+    ++ config.services.displayManager.sessionPackages;
 
   hardware.nvidia-container-toolkit.enable = vars.gpu == "nvidia";
 
