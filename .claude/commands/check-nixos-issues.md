@@ -72,8 +72,12 @@ Build the list of things to match issues against. Do this once, cache the
 output.
 
 ```bash
-# 1. Pinned nixpkgs commit + last bump date
-jq -r '.nodes.nixpkgs.locked | "\(.rev)  \(.lastModified | todate)"' flake.lock
+# 1. Pinned nixpkgs commit + last bump date.
+#    IMPORTANT: `.nodes.nixpkgs` is usually a TRANSITIVE dep (e.g. agenix's
+#    pinned nixpkgs). The flake input you actually build against is whatever
+#    root.inputs.nixpkgs points to (often `nixpkgs_<N>`). Resolve that first.
+NIXPKGS_NODE=$(jq -r '.nodes.root.inputs.nixpkgs' flake.lock)
+jq -r --arg n "$NIXPKGS_NODE" '.nodes[$n].locked | "\(.rev)  \(.lastModified | todate)"' flake.lock
 
 # 2. NixOS release identifier (e.g. 25.05, 25.11)
 nix eval --raw .#nixosConfigurations.p620.config.system.nixos.release 2>/dev/null
@@ -122,7 +126,10 @@ rate limits). Pull two windows:
 
 ```bash
 # Cutoff = the date our nixpkgs lock was bumped. Use ISO-8601.
-SINCE=$(jq -r '.nodes.nixpkgs.locked.lastModified | todate' flake.lock)
+# Resolve the actual root nixpkgs node (see Step 1 note re: transitive deps).
+NIXPKGS_NODE=$(jq -r '.nodes.root.inputs.nixpkgs' flake.lock)
+SINCE=$(jq -r --arg n "$NIXPKGS_NODE" '.nodes[$n].locked.lastModified | todate' flake.lock)
+OUR_REV=$(jq -r --arg n "$NIXPKGS_NODE" '.nodes[$n].locked.rev' flake.lock)
 
 # Recently-OPENED issues (potential new bugs we may hit)
 gh api --paginate "repos/NixOS/nixpkgs/issues?state=open&since=$SINCE&per_page=100" \
@@ -207,9 +214,58 @@ For every match, determine:
   background noise?
 - **Severity**:
   - 🔴 Security advisory, data loss, or boot failure on a config we run
+    AND a fix is actually shipped in a reachable nixpkgs branch (see
+    "Cross-check before 🔴" below).
   - 🟠 Regression in a package/module we have enabled
-  - 🟡 Open bug we may hit but haven't yet
+  - 🟡 Open bug we may hit but haven't yet, OR known exposure with no fix
+    yet merged in nixpkgs (cannot be acted on by a lock bump)
   - 🟢 Already fixed in our lock — informational only
+
+#### Cross-check before 🔴 (MANDATORY for closed security/regression issues)
+
+`nixpkgs-security-tracker[bot]` closes tracker issues based on **upstream
+CVE DB publication**, not on a merged nixpkgs PR. A closed security issue
+is NOT evidence that a fix is reachable via `nix flake update`. Before you
+mark any closed security issue as 🔴 actionable, verify:
+
+```bash
+# Identify the affected nixpkgs attribute (e.g. "imagemagick", "openssh")
+PKG=<attrname>
+
+# 1) What version does OUR lock ship?
+OUR_VERSION=$(nix eval --raw "github:NixOS/nixpkgs/$OUR_REV#$PKG.version" 2>/dev/null)
+
+# 2) What is master shipping right now?
+MASTER_SHA=$(gh api repos/NixOS/nixpkgs/commits/master --jq '.sha')
+MASTER_VERSION=$(nix eval --raw "github:NixOS/nixpkgs/$MASTER_SHA#$PKG.version" 2>/dev/null)
+
+# 3) What is the nixos-unstable channel shipping (what a lock bump would pull)?
+UNSTABLE_SHA=$(gh api repos/NixOS/nixpkgs/commits/nixos-unstable --jq '.sha')
+UNSTABLE_VERSION=$(nix eval --raw "github:NixOS/nixpkgs/$UNSTABLE_SHA#$PKG.version" 2>/dev/null)
+
+# 4) Did any PR bumping this attribute merge since our lock date?
+gh search prs --repo NixOS/nixpkgs --state=closed --merged \
+  --match=title "$PKG" --json number,title,mergedAt,mergeCommit --limit 20 \
+  | jq -r '.[] | select(.mergedAt > "'"$SINCE"'") | "\(.mergedAt)  #\(.number)  \(.title)"'
+
+echo "Ours:     $OUR_VERSION"
+echo "Unstable: $UNSTABLE_VERSION  (what a lock bump would pull)"
+echo "Master:   $MASTER_VERSION"
+```
+
+**Interpretation:**
+- `UNSTABLE_VERSION > OUR_VERSION` → **true 🔴** — lock bump is actionable.
+- `UNSTABLE_VERSION == OUR_VERSION == MASTER_VERSION` → **downgrade to 🟡**
+  ("exposure present, no fix in nixpkgs yet"). Lock bump is a no-op.
+- `MASTER_VERSION > UNSTABLE_VERSION > OUR_VERSION` → **🟠** — fix on master,
+  not yet cascaded. Wait or pin an overlay.
+- No PR listed AND all three versions match → **🟡** — tracker bot closure
+  only; no shipped fix. Don't recommend `nix flake update`.
+
+This check caught a false-positive 🔴 for ImageMagick 2026-04-17: CVE
+tracker issues were closed same day as our lock, but nixpkgs still pinned
+`imagemagick 7.1.2-17` while upstream released `7.1.2-19` with fixes. A
+lock bump would have done nothing.
 
 ### Step 5 — For each finding, draft the recommendation
 
@@ -217,8 +273,10 @@ The recommendation MUST include a concrete next step, not just "review this":
 
 | Finding type | Recommendation template |
 |---|---|
-| Closed bug, fix merged AFTER our lock | `nix flake update nixpkgs && just test-host p620 razer` |
-| Closed bug, fix in commit X, X is in our lock | "Already fixed — no action" |
+| Closed bug, fix merged in PR, PR landed on nixos-unstable AFTER our lock (per cross-check) | `nix flake update nixpkgs && just test-host p620 razer p510` |
+| Closed bug, fix in commit X, X is in our lock (per cross-check) | "Already fixed — no action" |
+| Closed security tracker, **no corresponding PR merged** (cross-check fails) | 🟡 "Exposure present, no fix in nixpkgs yet. Watch upstream PR." — **do NOT recommend `nix flake update`** |
+| Closed security tracker, fix on master only (not nixos-unstable yet) | 🟠 "Wait for channel cascade, or pin the package via overlay to master rev." |
 | Open security issue affecting enabled service | "Disable `services.<x>` on <host> until fixed" + diff snippet |
 | Open regression in enabled package | "Pin to last-known-good version: `<flake.nix snippet>`" |
 | Open bug, low impact | "Watch upstream. Open tracking issue (#cmd suggestion)" |
@@ -264,6 +322,16 @@ we're committing to action.
 - ❌ Querying without a `since=` cutoff (returns 10000+ irrelevant issues)
 - ❌ Editing files based on the report without explicit user approval
 - ❌ Running `nix flake update` automatically — always show the diff first
+- ❌ **Reading `.nodes.nixpkgs.locked` directly** — that node is usually a
+  transitive dep pinned by agenix/home-manager/etc. Always resolve via
+  `.nodes[<root.inputs.nixpkgs>]` to get the node your system actually
+  builds against.
+- ❌ **Treating a closed CVE tracker issue as proof of a merged fix.** The
+  `nixpkgs-security-tracker[bot]` closes issues based on upstream CVE DB
+  publication, NOT on a nixpkgs PR. Always run the Step 4 cross-check
+  (`gh search prs --merged --match=title "<pkg>"` and `nix eval --raw
+  #<pkg>.version` against our lock vs. nixos-unstable) before recommending
+  a lock bump.
 
 ## When to invoke
 
