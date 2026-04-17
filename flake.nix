@@ -233,9 +233,63 @@
         })
         # Claude Desktop from aaddrick/claude-desktop-debian (FHS variant; tracks latest
         # upstream version with Cowork/Local Agent Mode via bubblewrap sandbox).
-        (_final: prev: {
-          claude-desktop-linux = inputs.claude-desktop-linux.packages.${prev.stdenv.hostPlatform.system}.claude-desktop-fhs;
-        })
+        (_final: prev:
+          let
+            system = prev.stdenv.hostPlatform.system;
+            upstream = inputs.claude-desktop-linux.packages.${system};
+            # Upstream ships Windows node-pty binaries packed inside app.asar,
+            # shadowing the Linux ELF pty.node in app.asar.unpacked/. Electron
+            # then tries to dlopen the Windows DLL from the packed asar and fails
+            # with "Failed to load native module: pty.node". Fix by re-packing
+            # app.asar with the Linux pty.node swapped in, stripping Windows-only
+            # binaries, and marking *.node entries as unpacked so Electron
+            # redirects lookups to app.asar.unpacked/ at runtime.
+            # Upstream tracking: https://github.com/aaddrick/claude-desktop-debian/issues/401
+            claude-desktop-patched = upstream.claude-desktop.overrideAttrs (old: {
+              nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.asar ];
+              postInstall = (old.postInstall or "") + ''
+                ASAR_DIR=$out/lib/claude-desktop/electron/resources
+                WORK=$(mktemp -d)
+                asar extract "$ASAR_DIR/app.asar" "$WORK/extracted"
+
+                # Replace Windows pty.node (PE32) with Linux pty.node (ELF) from .unpacked/
+                cp -f "$ASAR_DIR/app.asar.unpacked/node_modules/node-pty/build/Release/pty.node" \
+                      "$WORK/extracted/node_modules/node-pty/build/Release/pty.node"
+
+                # Strip Windows-only companion binaries (unused on Linux, cleanup)
+                rm -f "$WORK/extracted/node_modules/node-pty/build/Release/conpty.node" \
+                      "$WORK/extracted/node_modules/node-pty/build/Release/conpty_console_list.node" \
+                      "$WORK/extracted/node_modules/node-pty/build/Release/winpty-agent.exe" \
+                      "$WORK/extracted/node_modules/node-pty/build/Release/winpty.dll"
+
+                # Provide prebuilds/linux-x64/ path (node-pty fallback when
+                # process.versions.modules is empty in Electron -> "//" lookup)
+                mkdir -p "$WORK/extracted/node_modules/node-pty/prebuilds/linux-x64"
+                ln -sf ../../build/Release/pty.node \
+                  "$WORK/extracted/node_modules/node-pty/prebuilds/linux-x64/node.napi.node"
+                ln -sf ../../build/Release/pty.node \
+                  "$WORK/extracted/node_modules/node-pty/prebuilds/linux-x64/electron.napi.node"
+
+                # Repack: --unpack "*.node" marks every *.node entry as unpacked
+                # in the asar header, so Electron redirects to app.asar.unpacked/
+                chmod -R u+w "$ASAR_DIR"
+                rm -rf "$ASAR_DIR/app.asar" "$ASAR_DIR/app.asar.unpacked"
+                asar pack "$WORK/extracted" "$ASAR_DIR/app.asar" --unpack "*.node"
+
+                # Sanity: Linux ELF must be in the post-repack .unpacked/ tree
+                PTY_OUT="$ASAR_DIR/app.asar.unpacked/node_modules/node-pty/build/Release/pty.node"
+                [ -f "$PTY_OUT" ] || { echo "ERROR: Linux pty.node missing after repack"; exit 1; }
+                file "$PTY_OUT" | grep -q ELF || { echo "ERROR: $PTY_OUT is not ELF"; exit 1; }
+
+                rm -rf "$WORK"
+              '';
+            });
+          in
+          {
+            claude-desktop-linux = upstream.claude-desktop-fhs.override {
+              claude-desktop = claude-desktop-patched;
+            };
+          })
         # COSMIC applets from flakes
         (_final: prev: {
           cosmic-ext-applet-music-player = inputs.cosmic-music-player.packages.${prev.stdenv.hostPlatform.system}.default;
