@@ -1,414 +1,186 @@
-# Update Claude Code to Latest Version
+# Update Claude Code (native binary)
 
-You are a NixOS package update specialist. Update the claude-code package to the latest version following NixOS best practices.
+Update the `claude-code-native` package to a given version (or `latest` /
+`stable` channel). This tracks Anthropic's official GCS distribution, not
+the npm registry — so it's **immune to the npm-side packaging refactors**
+(e.g. the 2.1.113 optionalDependencies split) that break `buildNpmPackage`.
 
-## Task Overview
+The npm-based `home/development/claude-code/` derivation is **deprecated**
+and may be removed in a follow-up chore.
 
-Update the Claude Code package derivation with proper hash calculation, testing, and GitHub workflow integration.
+## When to invoke
+
+- When the claude-code watcher opens a "new version available" issue
+  (label: `claude-code-update`).
+- On explicit request: `/update-claude-code 2.1.114` or `/update-claude-code latest`.
 
 ## Prerequisites
 
-- [ ] Check for existing issues: `/check_tasks`
-- [ ] Ensure clean git state: `git status`
-- [ ] Review current version: `claude --version`
+- [ ] `git status` clean (no unrelated dirty files that would land in the PR)
+- [ ] `gh auth status` OK
+- [ ] Current `claude --version` (for the commit body): `claude --version`
 
-## Step 1: Research Latest Version
-
-```bash
-# Use WebSearch to find latest release
-```
-
-**Search for:**
-
-1. NPM package page: <https://www.npmjs.com/package/@anthropic-ai/claude-code>
-2. GitHub releases: <https://github.com/anthropics/claude-code/releases>
-3. Changelog: Check for breaking changes
-
-**Record:**
-
-- Latest version number: `X.X.X`
-- Release date
-- Notable changes from changelog
-- Breaking changes (if any)
-
-## Step 2: Read Current Package Configuration
+## Step 1 — Pick the version
 
 ```bash
-# Read the current derivation
-cat home/development/claude-code/default.nix
+# Show both channels, do nothing
+./scripts/update-claude-code-native.sh
+# → Channels:
+#     stable  = 2.1.98
+#     latest  = 2.1.114
 ```
 
-**Note current:**
+If the user passed an arg to the command, use that. Otherwise default to
+**`latest`** — that's the channel this infra tracks per policy decision
+2026-04-18. If you have a reason to pick `stable` instead, tell the user
+before doing it.
 
-- Version number
-- npmDepsHash value
-- Any custom patches or modifications
+## Step 2 — Fetch hashes and preview Nix snippet
 
-## Step 3: Update Package Derivation
+```bash
+./scripts/update-claude-code-native.sh <version>   # e.g. 2.1.114 or latest
+```
 
-### Update Version Number
+The script:
+- Resolves `latest`/`stable` → concrete version
+- Prefetches both Linux binaries (x86_64 + aarch64) via `nix store prefetch-file`
+- Prints SRI hashes and a ready-to-paste Nix snippet
+- **Does NOT edit any file** — it's read-only
 
-Edit `home/development/claude-code/default.nix`:
+Capture the script output. You need exactly three values:
+- `version`
+- x86_64-linux `hash`
+- aarch64-linux `hash`
+
+## Step 3 — Edit `pkgs/claude-code-native/default.nix`
+
+Update three lines:
 
 ```nix
-{
-  lib,
-  buildNpmPackage,
-  fetchFromGitHub,
+  version = "<NEW_VERSION>";
   ...
-}:
-buildNpmPackage rec {
-  pname = "claude-code";
-  version = "X.X.X";  # <-- Update this
-
-  src = fetchFromGitHub {
-    owner = "anthropics";
-    repo = "claude-code";
-    rev = "v${version}";
-    hash = "sha256-AAAA...";  # May need update
+  sources = {
+    x86_64-linux = {
+      url = "${gcs_bucket}/${version}/linux-x64/claude";
+      hash = "<NEW_X64_HASH>";
+    };
+    aarch64-linux = {
+      url = "${gcs_bucket}/${version}/linux-arm64/claude";
+      hash = "<NEW_ARM64_HASH>";
+    };
   };
-
-  npmDepsHash = "sha256-TEMP...";  # <-- Will update next
-
-  # ... rest of derivation
-}
 ```
 
-### Calculate New npmDepsHash
+**Do NOT change anything else** in the derivation.
+
+## Step 4 — Build and sanity-check
 
 ```bash
-# Method 1: Set empty hash and get correct one from error
-# Edit default.nix and set: npmDepsHash = "";
+nix build --no-link --print-out-paths .#claude-code-native
+# Take the printed path, verify:
+$(nix build --no-link --print-out-paths .#claude-code-native)/bin/claude --version
+# → 2.1.114 (Claude Code)
 
-# Try to build
-nix-build -A packages.x86_64-linux.claude-code 2>&1 | grep "got:" | awk '{print $2}'
-
-# Method 2: Use nix-prefetch-url
-cd /tmp
-git clone https://github.com/anthropics/claude-code --branch vX.X.X --depth 1
-cd claude-code
-nix hash convert --to sri $(nix-prefetch-url --unpack "file://$(npm pack)")
-
-# Method 3: Use prefetch-npm-deps (if available)
-nix run nixpkgs#prefetch-npm-deps home/development/claude-code/package-lock.json
+ldd $(nix build --no-link --print-out-paths .#claude-code-native)/bin/claude \
+  | grep -E "not found|missing" && echo "MISSING LIBS" || echo "libs OK"
 ```
 
-### Update the Hash
+If `--version` mismatches the target, abort and re-check the hash.
 
-Edit `home/development/claude-code/default.nix` with correct hash:
+## Step 5 — Full host build matrix
 
-```nix
-npmDepsHash = "sha256-ACTUAL_HASH_HERE";
+```bash
+# Parallel. Any failure → stop; fix before proceeding.
+just quick-test   # builds all 3 host closures
+# OR individually:
+nix build --no-link .#nixosConfigurations.p620.config.system.build.toplevel
+nix build --no-link .#nixosConfigurations.razer.config.system.build.toplevel
+nix build --no-link .#nixosConfigurations.p510.config.system.build.toplevel
 ```
 
-## Step 4: Test the Update
-
-### Syntax Check
+## Step 6 — Issue → branch → commit → PR
 
 ```bash
-just check-syntax
-```
+# Check for an existing auto-opened watcher issue first.
+gh issue list -l claude-code-update --search "$VERSION" --state open
 
-### Build Test
+# If an issue exists, reference it as $ISSUE. If not, create one:
+gh issue create \
+  --label claude-code-update \
+  --title "chore(claude-code): update to $VERSION" \
+  --body "Bump claude-code-native from <OLD> to $VERSION.
 
-```bash
-# Test on primary host
-just test-host p620
+Source: https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/$VERSION/manifest.json
+Release notes: https://github.com/anthropics/claude-code/releases/tag/v$VERSION"
 
-# If successful, test on other hosts
-just quick-test
-```
+# Standard issue-driven flow
+git checkout -b chore/<ISSUE>-claude-code-$VERSION
+git add pkgs/claude-code-native/default.nix
+git commit -m "chore(claude-code): update to $VERSION (#$ISSUE)
 
-### Verify Binary Works
+Bump claude-code-native from <OLD> to $VERSION via the GCS
+distribution channel (\`latest\`).
 
-```bash
-# Build and test the package
-result/bin/claude --version
+- x86_64-linux hash refreshed
+- aarch64-linux hash refreshed
+- Verified: claude --version = $VERSION
+- Built all 3 host closures
 
-# Should show: X.X.X
-```
+Closes #$ISSUE
 
-## Step 5: Create GitHub Issue
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 
-Use the `/new_task` command:
-
-```bash
-/new_task
-```
-
-**Issue details:**
-
-- **Type:** chore
-- **Priority:** medium
-- **Title:** "Update Claude Code to version X.X.X"
-- **Description:**
-
-  ```
-  Update claude-code package from vOLD to vNEW
-
-  Changes:
-  - Updated version from OLD → NEW
-  - Recalculated npmDepsHash
-  - Tested on all hosts
-
-  Breaking changes: [None/List them]
-
-  Release notes: [Link to changelog]
-  ```
-
-## Step 6: Create Branch and Commit
-
-```bash
-# Get issue number from /new_task output
-ISSUE_NUM=123
-
-# Create feature branch
-git checkout -b chore/${ISSUE_NUM}-update-claude-code-X.X.X
-
-# Stage changes
-git add home/development/claude-code/default.nix
-
-# Commit with detailed message
-git commit -m "chore(claude-code): update to version X.X.X (#${ISSUE_NUM})
-
-Update Claude Code package derivation:
-- Version: OLD → X.X.X
-- npmDepsHash: recalculated for new version
-- Source hash: [updated/unchanged]
-
-Changes in this release:
-- [Notable feature 1]
-- [Notable feature 2]
-- [Bug fixes]
-
-Testing:
-- Built successfully on all hosts
-- Binary verified: claude --version shows X.X.X
-- No breaking changes detected
-
-Closes #${ISSUE_NUM}"
-
-# Push branch
-git push -u origin chore/${ISSUE_NUM}-update-claude-code-X.X.X
-```
-
-## Step 7: Create Pull Request
-
-```bash
-# Create PR with GitHub CLI
-gh pr create --fill --base main
-
-# Or use web interface with pre-filled template
-```
-
-**PR Template:**
-
-````markdown
-## Summary
-
-Update Claude Code to version X.X.X
-
-## Changes
-
-- ✅ Updated version from OLD → X.X.X
-- ✅ Recalculated npmDepsHash
-- ✅ Tested on all hosts (p620, razer, p510, samsung)
-- ✅ Verified binary functionality
-
-## Testing Evidence
-
-```bash
-# Build successful
-just test-host p620 ✅
-
-# Version check
-$ result/bin/claude --version
-claude-code X.X.X ✅
-
-# All hosts tested
-just quick-test ✅
-```
-````
-
-## Release Notes
-
-[Link to release notes]
-
-**Notable changes:**
-
-- Feature 1
-- Feature 2
-- Bug fixes
-
-**Breaking changes:** None
-
-## Checklist
-
-- [x] Version updated in default.nix
-- [x] npmDepsHash recalculated
-- [x] Build tested on all hosts
-- [x] Binary verified functional
-- [x] GitHub issue created
-- [x] Commit message follows conventional commits
-- [x] No anti-patterns introduced (checked against @docs/NIXOS-ANTI-PATTERNS.md)
-
-Closes #${ISSUE_NUM}
-
-````
-
-## Step 8: Code Review
-
-Run code review before merging:
-
-```bash
-/review
-````
-
-**Review focus:**
-
-- Package derivation follows @docs/PATTERNS.md
-- No anti-patterns from @docs/NIXOS-ANTI-PATTERNS.md
-- Hash calculations are correct
-- Testing was comprehensive
-
-## Step 9: Merge and Deploy
-
-```bash
-# After PR approval
-gh pr merge ${ISSUE_NUM} --squash --delete-branch
-
-# Deploy to hosts
-just quick-deploy p620
-just quick-deploy razer
-just quick-deploy p510
-just quick-deploy samsung
-```
-
-## Step 10: Verify Deployment
-
-```bash
-# Check version on each host
-ssh p620 "claude --version"
-ssh razer "claude --version"
-ssh p510 "claude --version"
-ssh samsung "claude --version"
-
-# All should show: X.X.X
-```
-
-## Success Criteria
-
-- [ ] Latest version identified from npm/GitHub
-- [ ] npmDepsHash calculated correctly
-- [ ] Build succeeds on all hosts
-- [ ] Binary verified functional
-- [ ] GitHub issue created and linked
-- [ ] Branch created following naming convention
-- [ ] Commit message follows conventional commits
-- [ ] PR created with comprehensive description
-- [ ] Code review passed
-- [ ] PR merged to main
-- [ ] Deployed to all hosts
-- [ ] Version verified on all hosts
-
-## Rollback Procedure
-
-If issues occur after deployment:
-
-```bash
-# Revert the commit
-git revert COMMIT_HASH
-
-# Or rollback system generation
-sudo nixos-rebuild switch --rollback
-
-# Report issue on GitHub
-gh issue create --title "Claude Code X.X.X causing issues" --body "Description of issue..."
-```
-
-## Common Issues
-
-### Hash Mismatch
-
-```bash
-# Clear cache and retry
-nix-collect-garbage -d
-nix-store --verify --check-contents
-
-# Recalculate hash
-nix-prefetch-url --unpack "URL"
-```
-
-### Build Failure
-
-```bash
-# Check build logs
-nix-build -A packages.x86_64-linux.claude-code --show-trace
-
-# Check for missing dependencies
-nix-build -A packages.x86_64-linux.claude-code --keep-failed
-
-# Review failed build directory
-cd /tmp/nix-build-*
-cat build.log
-```
-
-### Binary Not Working
-
-```bash
-# Test in nix-shell
-nix-shell -p packages.x86_64-linux.claude-code
-claude --version
-
-# Check for missing runtime dependencies
-ldd result/bin/claude
-```
-
-## Documentation References
-
-- @docs/PATTERNS.md - Package writing patterns
-- @docs/NIXOS-ANTI-PATTERNS.md - Avoid these
-- @docs/GITHUB-WORKFLOW.md - PR workflow
-- @home/development/claude-code/default.nix - Current derivation
-
-## Notes
-
-- Always test on all hosts before deploying
-- Document breaking changes in commit message
-- Update roadmap if significant features added
-- Keep old generation for rollback capability
-- Monitor for issues after deployment (24h)
-
-## Example Complete Workflow
-
-```bash
-# 1. Research
-# Use WebSearch for latest version
-
-# 2. Update
-vim home/development/claude-code/default.nix
-# Update version and calculate hash
-
-# 3. Test
-just test-host p620
-
-# 4. GitHub workflow
-/new_task
-git checkout -b chore/123-update-claude-code-X.X.X
-git add home/development/claude-code/default.nix
-git commit -m "chore(claude-code): update to X.X.X (#123)"
-git push -u origin chore/123-update-claude-code-X.X.X
+git push -u origin chore/<ISSUE>-claude-code-$VERSION
 gh pr create --fill
+gh pr merge --squash --delete-branch
+```
 
-# 5. Review and merge
-/review
-gh pr merge 123 --squash
+If pre-commit hook hangs on statix (established precedent), use
+`git commit --no-verify` — this project has that as a known workaround.
 
-# 6. Deploy
-just deploy-all-parallel
+## Step 7 — Deploy
 
-# 7. Verify
-for host in p620 razer p510 samsung; do
-  ssh $host "claude --version"
+```bash
+# Local host (p620)
+sudo nixos-rebuild switch --flake ~/.config/nixos#p620
+
+# Remote hosts (SSH aliases in ~/.ssh/config)
+ssh razer 'cd ~/.config/nixos && git pull && sudo nixos-rebuild switch --flake .#razer'
+ssh p510  'cd ~/.config/nixos && git pull && sudo nixos-rebuild switch --flake .#p510'
+
+# Verify each
+for h in "" razer p510; do
+  out=$( [ -z "$h" ] && claude --version || ssh "$h" claude --version )
+  echo "${h:-local}: $out"
 done
 ```
+
+## Rollback
+
+```bash
+# Option A: revert the commit, re-deploy
+git revert <COMMIT_SHA>
+git push
+
+# Option B: NixOS generation rollback (no git change)
+sudo nixos-rebuild switch --rollback
+```
+
+## Anti-patterns to avoid
+
+- ❌ Do NOT use `buildNpmPackage` — that's the deprecated path. Upstream
+  npm packaging changes (e.g. 2.1.113) will silently break your build.
+- ❌ Do NOT hand-compute hashes with `nix-prefetch-url` — use the script
+  (`nix store prefetch-file` is the modern, authenticated route).
+- ❌ Do NOT commit without running `claude --version` on the built binary.
+  A wrong hash produces a valid but stale binary.
+- ❌ Do NOT skip host builds. The 2 minutes you save loses 2 hours if
+  razer's NVIDIA stack regresses against the new binary.
+
+## Related files
+
+- `pkgs/claude-code-native/default.nix` — the package
+- `scripts/update-claude-code-native.sh` — the prefetch helper
+- `home/default.nix` — `programs.claude-code.package = pkgs.claude-code-native;`
+- `.github/workflows/claude-code-watch.yml` — hourly watcher that opens
+  issues when `/latest` advances
