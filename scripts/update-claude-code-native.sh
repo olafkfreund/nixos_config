@@ -1,197 +1,93 @@
 #!/usr/bin/env bash
-# Update script for claude-code-native package
-# Usage: ./scripts/update-claude-code-native.sh [version]
+# Update claude-code-native package to a given version.
+# Usage:
+#   ./scripts/update-claude-code-native.sh            # prints channels, does nothing
+#   ./scripts/update-claude-code-native.sh <version>  # prints Nix snippet for that version
+#   ./scripts/update-claude-code-native.sh latest     # resolves and uses the /latest channel
+#   ./scripts/update-claude-code-native.sh stable     # resolves and uses the /stable channel
 #
-# This script fetches the latest version and calculates hashes for the native binary.
-# If no version is specified, it uses the stable version.
+# Read-only: prints version + hashes. Does NOT edit default.nix — paste the
+# output yourself or pipe through sed.
 
-set -euo pipefail
+set -u
+# NB: intentionally no `set -e` — curl on a miss should not abort the whole
+# script; we handle failure explicitly. Also no `pipefail` — jq-less is fine.
 
-GCS_BUCKET="https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases"
-PKG_DIR="$(dirname "$0")/../pkgs/claude-code-native"
+GCS="https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases"
+PKG_FILE="$(dirname "$0")/../pkgs/claude-code-native/default.nix"
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-info() {
-  echo -e "${GREEN}[INFO]${NC} $1"
-}
-
-warn() {
-  echo -e "${YELLOW}[WARN]${NC} $1"
-}
-
-error() {
-  echo -e "${RED}[ERROR]${NC} $1"
+die() {
+  echo "error: $*" >&2
   exit 1
 }
+log() { echo ">> $*" >&2; }
 
-# Get stable version from distribution channel
-get_stable_version() {
-  info "Fetching stable version..."
-  curl -fsSL "$GCS_BUCKET/stable" 2>/dev/null || error "Failed to fetch stable version"
+resolve_channel() {
+  local ch="$1"
+  curl -fsSL --max-time 10 "$GCS/$ch" 2>/dev/null \
+    || die "could not resolve channel '$ch' (404 or network)"
 }
 
-# Get latest version from distribution channel
-get_latest_version() {
-  info "Fetching latest version..."
-  curl -fsSL "$GCS_BUCKET/latest" 2>/dev/null || error "Failed to fetch latest version"
+prefetch_hash() {
+  # Returns SRI hash, or empty string on failure (stderr shows why).
+  local url="$1" platform="$2"
+  local json
+  if ! json=$(nix store prefetch-file --json --hash-type sha256 "$url" 2>&1); then
+    log "prefetch failed for $platform: $json"
+    return 1
+  fi
+  printf '%s' "$json" | jq -r '.hash' 2>/dev/null \
+    || {
+      log "jq failed parsing prefetch output for $platform"
+      return 1
+    }
 }
 
-# Get manifest for a version
-get_manifest() {
-  local version="$1"
-  info "Fetching manifest for version $version..."
-  curl -fsSL "$GCS_BUCKET/$version/manifest.json" 2>/dev/null || error "Failed to fetch manifest"
-}
+# Banner + channel summary (always, for context).
+echo "Channels:"
+echo "  stable  = $(resolve_channel stable)"
+echo "  latest  = $(resolve_channel latest)"
+echo
 
-# Calculate SRI hash for a URL
-calculate_hash() {
-  local url="$1"
-  local platform="$2"
+version="${1-}"
+if [ -z "$version" ]; then
+  log "no version given. Rerun with a version number, 'latest', or 'stable'."
+  exit 0
+fi
 
-  info "Downloading $platform binary..."
+# Shorthand: `latest` / `stable` → resolve to actual version.
+case "$version" in
+  latest | stable) version=$(resolve_channel "$version") ;;
+esac
 
-  # Create temp file
-  local tmpfile
-  tmpfile=$(mktemp)
-  trap 'rm -f "$tmpfile"' RETURN
+log "resolving hashes for $version ..."
 
-  if curl -fsSL "$url" -o "$tmpfile" 2>/dev/null; then
-    # Calculate SRI hash
-    local hash
-    hash=$(nix hash file --sri "$tmpfile" 2>/dev/null)
-    local size
-    size=$(stat -c %s "$tmpfile" 2>/dev/null || stat -f %z "$tmpfile" 2>/dev/null)
-    echo "$hash|$size"
-  else
-    warn "Failed to download $platform binary"
-    echo ""
-  fi
-}
+x64_hash=$(prefetch_hash "$GCS/$version/linux-x64/claude" x86_64-linux) \
+  || die "could not hash linux-x64 binary for $version"
+arm64_hash=$(prefetch_hash "$GCS/$version/linux-arm64/claude" aarch64-linux) \
+  || die "could not hash linux-arm64 binary for $version"
 
-# Main update logic
-main() {
-  local version="${1:-}"
+current=$(sed -nE 's/^[[:space:]]*version = "([^"]+)";.*$/\1/p' "$PKG_FILE" | head -1)
 
-  echo -e "${BLUE}=========================================="
-  echo "Claude Code Native Binary Update Tool"
-  echo -e "==========================================${NC}"
-  echo ""
+cat <<EOF
+Current pinned: $current
+Target:         $version
 
-  # Show available versions
-  local stable_ver latest_ver
-  stable_ver=$(get_stable_version)
-  latest_ver=$(get_latest_version)
+Paste into $PKG_FILE:
 
-  echo ""
-  echo "Available versions:"
-  echo "  Stable: $stable_ver"
-  echo "  Latest: $latest_ver"
-  echo ""
+  version = "$version";
+  ...
+  sources = {
+    x86_64-linux = {
+      url = "\${gcs_bucket}/\${version}/linux-x64/claude";
+      hash = "$x64_hash";
+    };
+    aarch64-linux = {
+      url = "\${gcs_bucket}/\${version}/linux-arm64/claude";
+      hash = "$arm64_hash";
+    };
+  };
 
-  # Use provided version or default to stable
-  if [ -z "$version" ]; then
-    version="$stable_ver"
-    info "Using stable version: $version"
-  else
-    info "Using specified version: $version"
-  fi
-
-  echo ""
-
-  # Get manifest to verify version exists
-  local manifest
-  manifest=$(get_manifest "$version")
-  if [ -z "$manifest" ]; then
-    error "Version $version not found"
-  fi
-
-  # Extract checksums from manifest (for verification)
-  local x64_manifest_checksum arm64_manifest_checksum
-  x64_manifest_checksum=$(echo "$manifest" | jq -r '.platforms["linux-x64"].checksum // empty' 2>/dev/null)
-  arm64_manifest_checksum=$(echo "$manifest" | jq -r '.platforms["linux-arm64"].checksum // empty' 2>/dev/null)
-
-  echo "Manifest checksums (SHA256):"
-  echo "  linux-x64:   ${x64_manifest_checksum:-NOT AVAILABLE}"
-  echo "  linux-arm64: ${arm64_manifest_checksum:-NOT AVAILABLE}"
-  echo ""
-
-  # Calculate SRI hashes
-  local x64_url="${GCS_BUCKET}/${version}/linux-x64/claude"
-  local arm64_url="${GCS_BUCKET}/${version}/linux-arm64/claude"
-
-  local x64_result arm64_result
-  x64_result=$(calculate_hash "$x64_url" "x86_64-linux")
-  arm64_result=$(calculate_hash "$arm64_url" "aarch64-linux")
-
-  # Parse results
-  local x64_hash x64_size arm64_hash arm64_size
-  x64_hash=$(echo "$x64_result" | cut -d'|' -f1)
-  x64_size=$(echo "$x64_result" | cut -d'|' -f2)
-  arm64_hash=$(echo "$arm64_result" | cut -d'|' -f1)
-  arm64_size=$(echo "$arm64_result" | cut -d'|' -f2)
-
-  echo ""
-  echo -e "${GREEN}=========================================="
-  echo "Update Results"
-  echo -e "==========================================${NC}"
-  echo ""
-  echo "Version: $version"
-  echo ""
-
-  if [ -n "$x64_hash" ]; then
-    echo "x86_64-linux:"
-    echo "  URL:  $x64_url"
-    echo "  Hash: $x64_hash"
-    echo "  Size: $x64_size bytes"
-  else
-    echo "x86_64-linux: NOT AVAILABLE"
-  fi
-  echo ""
-
-  if [ -n "$arm64_hash" ]; then
-    echo "aarch64-linux:"
-    echo "  URL:  $arm64_url"
-    echo "  Hash: $arm64_hash"
-    echo "  Size: $arm64_size bytes"
-  else
-    echo "aarch64-linux: NOT AVAILABLE"
-  fi
-  echo ""
-
-  # Generate Nix snippet
-  if [ -n "$x64_hash" ] || [ -n "$arm64_hash" ]; then
-    echo -e "${BLUE}=========================================="
-    echo "Nix Expression Update"
-    echo -e "==========================================${NC}"
-    echo ""
-    echo "Update pkgs/claude-code-native/default.nix with:"
-    echo ""
-    echo "  version = \"$version\";"
-    echo ""
-    echo "  sources = {"
-    if [ -n "$x64_hash" ]; then
-      echo "    x86_64-linux = {"
-      echo "      url = \"\${gcs_bucket}/\${version}/linux-x64/claude\";"
-      echo "      hash = \"$x64_hash\";"
-      echo "    };"
-    fi
-    if [ -n "$arm64_hash" ]; then
-      echo "    aarch64-linux = {"
-      echo "      url = \"\${gcs_bucket}/\${version}/linux-arm64/claude\";"
-      echo "      hash = \"$arm64_hash\";"
-      echo "    };"
-    fi
-    echo "  };"
-    echo ""
-  else
-    error "No binaries found for version $version"
-  fi
-}
-
-main "$@"
+Next:
+  nix build .#claude-code-native && result/bin/claude --version
+EOF

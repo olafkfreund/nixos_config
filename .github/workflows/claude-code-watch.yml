@@ -1,0 +1,112 @@
+# Poll Anthropic's GCS distribution for a new claude-code `latest` channel
+# version. When it advances past the version we have pinned in
+# pkgs/claude-code-native/default.nix, open a single tracking issue so we
+# can review the release (manifest, GitHub notes, any breaking changes)
+# before running /update-claude-code.
+#
+# Policy: we track `latest`, not `stable` (see 2026-04-18 decision). The
+# `latest` channel ships multiple times per day — this workflow dedups by
+# version number in the issue title, so at most one open issue per new
+# version.
+#
+# Related: .claude/commands/update-claude-code.md describes the bump flow.
+
+name: claude-code watch
+
+on:
+  schedule:
+    # Every hour. `latest` can advance multiple times per day; hourly is
+    # a reasonable floor. Slip is harmless — dedup handles it.
+    - cron: "0 * * * *"
+  workflow_dispatch:    # manual trigger for testing
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve upstream + pinned versions
+        id: v
+        run: |
+          set -euo pipefail
+          GCS="https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases"
+
+          upstream=$(curl -fsSL --max-time 20 "$GCS/latest")
+          pinned=$(sed -nE 's/^[[:space:]]*version = "([^"]+)";.*$/\1/p' \
+            pkgs/claude-code-native/default.nix | head -1)
+
+          if [ -z "$upstream" ] || [ -z "$pinned" ]; then
+            echo "Could not determine versions (upstream=$upstream, pinned=$pinned)" >&2
+            exit 1
+          fi
+
+          echo "upstream=$upstream" >>"$GITHUB_OUTPUT"
+          echo "pinned=$pinned"     >>"$GITHUB_OUTPUT"
+          echo "upstream=$upstream  pinned=$pinned"
+
+      - name: Exit if already up to date
+        if: steps.v.outputs.upstream == steps.v.outputs.pinned
+        run: echo "pinned == upstream (${{ steps.v.outputs.pinned }}) — nothing to do"
+
+      - name: Dedup — skip if an issue for this version already exists
+        if: steps.v.outputs.upstream != steps.v.outputs.pinned
+        id: dedup
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPSTREAM: ${{ steps.v.outputs.upstream }}
+        run: |
+          set -euo pipefail
+          # Match by title substring — covers both open and closed-but-same-version.
+          existing=$(gh issue list \
+            --label claude-code-update \
+            --state all \
+            --search "in:title \"claude-code: update to $UPSTREAM\"" \
+            --json number,title \
+            --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            echo "Issue #$existing already tracks $UPSTREAM — skipping"
+            echo "skip=true" >>"$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >>"$GITHUB_OUTPUT"
+          fi
+
+      - name: Open tracking issue
+        if: steps.v.outputs.upstream != steps.v.outputs.pinned && steps.dedup.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPSTREAM: ${{ steps.v.outputs.upstream }}
+          PINNED:   ${{ steps.v.outputs.pinned }}
+        run: |
+          set -euo pipefail
+          GCS="https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases"
+
+          # Best-effort manifest fetch for build date (may fail; harmless)
+          build_date=$(curl -fsSL --max-time 10 "$GCS/$UPSTREAM/manifest.json" 2>/dev/null \
+            | jq -r '.buildDate // "(unknown)"' 2>/dev/null || echo "(unknown)")
+
+          gh issue create \
+            --label claude-code-update \
+            --title "chore(claude-code): update to $UPSTREAM" \
+            --body "Anthropic has published **claude-code $UPSTREAM** on the \`latest\` channel.
+
+- Currently pinned: **$PINNED**
+- Upstream latest:  **$UPSTREAM**
+- Upstream build date: $build_date
+
+Links:
+- Manifest: ${GCS}/${UPSTREAM}/manifest.json
+- Release notes (if any): https://github.com/anthropics/claude-code/releases/tag/v$UPSTREAM
+- npm page: https://www.npmjs.com/package/@anthropic-ai/claude-code/v/$UPSTREAM
+
+## To act on this
+
+Run \`/update-claude-code $UPSTREAM\` in Claude Code. The slash command
+will fetch hashes, edit \`pkgs/claude-code-native/default.nix\`, build,
+test, and open the PR.
+
+This issue will auto-close when that PR merges."
