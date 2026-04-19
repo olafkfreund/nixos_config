@@ -1,0 +1,146 @@
+# Poll aaddrick/claude-desktop-debian for a new release. When the latest
+# release tag's commit differs from the commit we pinned in flake.lock,
+# open a single tracking issue so the release notes can be reviewed
+# BEFORE running /update-claude-code.
+#
+# We compare by COMMIT SHA, not tag name, because upstream retags in
+# place when re-releasing with the same wrapper version + new claude
+# binary (e.g. v1.3.31+claude1.2773.0 → v1.3.31+claude1.3109.0). A
+# commit-level compare catches both new versions AND retags.
+#
+# Dedup: one issue per {upstream-commit, pinned-commit} pair. An already-
+# open tracking issue silences subsequent runs for that same drift.
+#
+# Related:
+#   .claude/commands/update-claude-code.md — bump workflow
+#   .github/workflows/claude-code-watch.yml — sibling for the CLI
+
+name: claude-desktop watch
+
+on:
+  schedule:
+    - cron: "17 * * * *"    # hourly at :17, offset from claude-code-watch
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve latest upstream release + pinned commit
+        id: v
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Latest release on aaddrick/claude-desktop-debian (any kind,
+          # including pre-releases — upstream uses semver tags like
+          # v1.3.32+claude1.3109.0 and doesn't mark pre-releases).
+          latest_tag=$(gh api repos/aaddrick/claude-desktop-debian/releases \
+            --jq '.[0].tag_name')
+          latest_commit=$(gh api "repos/aaddrick/claude-desktop-debian/git/ref/tags/$latest_tag" \
+            --jq '.object.sha' 2>/dev/null \
+            || gh api "repos/aaddrick/claude-desktop-debian/commits/$latest_tag" \
+            --jq '.sha')
+
+          # What we have pinned
+          pinned_commit=$(jq -r '.nodes."claude-desktop-linux".locked.rev' flake.lock)
+          pinned_date=$(jq -r '.nodes."claude-desktop-linux".locked.lastModified' flake.lock \
+            | xargs -I{} date -u -d @{} +%Y-%m-%dT%H:%M:%SZ)
+
+          if [ -z "$latest_tag" ] || [ -z "$latest_commit" ] || [ -z "$pinned_commit" ]; then
+            echo "Could not determine versions (tag=$latest_tag commit=$latest_commit pin=$pinned_commit)" >&2
+            exit 1
+          fi
+
+          echo "latest_tag=$latest_tag"       >>"$GITHUB_OUTPUT"
+          echo "latest_commit=$latest_commit" >>"$GITHUB_OUTPUT"
+          echo "pinned_commit=$pinned_commit" >>"$GITHUB_OUTPUT"
+          echo "pinned_date=$pinned_date"     >>"$GITHUB_OUTPUT"
+          echo "latest=$latest_tag ($latest_commit) pinned=$pinned_commit"
+
+      - name: Exit if no drift
+        if: steps.v.outputs.latest_commit == steps.v.outputs.pinned_commit
+        run: echo "pinned == latest ($pinned_commit) — nothing to do"
+
+      - name: Dedup — skip if an issue for this upstream commit already exists
+        if: steps.v.outputs.latest_commit != steps.v.outputs.pinned_commit
+        id: dedup
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.v.outputs.latest_tag }}
+        run: |
+          set -euo pipefail
+          existing=$(gh issue list \
+            --label claude-desktop-update \
+            --state all \
+            --search "in:title \"claude-desktop: update to $TAG\"" \
+            --json number \
+            --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            echo "Issue #$existing already tracks $TAG — skipping"
+            echo "skip=true" >>"$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >>"$GITHUB_OUTPUT"
+          fi
+
+      - name: Fetch release notes for context
+        if: steps.v.outputs.latest_commit != steps.v.outputs.pinned_commit && steps.dedup.outputs.skip != 'true'
+        id: notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.v.outputs.latest_tag }}
+        run: |
+          set -euo pipefail
+          notes=$(gh release view "$TAG" -R aaddrick/claude-desktop-debian \
+            --json body --jq '.body // ""' 2>/dev/null | head -40)
+          # Multi-line output via heredoc syntax
+          {
+            echo 'body<<EOF'
+            echo "$notes"
+            echo 'EOF'
+          } >>"$GITHUB_OUTPUT"
+
+      - name: Open tracking issue
+        if: steps.v.outputs.latest_commit != steps.v.outputs.pinned_commit && steps.dedup.outputs.skip != 'true'
+        env:
+          GH_TOKEN:      ${{ secrets.GITHUB_TOKEN }}
+          TAG:           ${{ steps.v.outputs.latest_tag }}
+          LATEST_COMMIT: ${{ steps.v.outputs.latest_commit }}
+          PINNED_COMMIT: ${{ steps.v.outputs.pinned_commit }}
+          PINNED_DATE:   ${{ steps.v.outputs.pinned_date }}
+          NOTES:         ${{ steps.notes.outputs.body }}
+        run: |
+          set -euo pipefail
+          gh issue create \
+            --label claude-desktop-update \
+            --title "chore(claude-desktop): update to $TAG" \
+            --body "Upstream \`aaddrick/claude-desktop-debian\` has a new release: **$TAG**.
+
+- Currently pinned commit: \`${PINNED_COMMIT:0:10}\` (locked $PINNED_DATE)
+- Latest release commit:   \`${LATEST_COMMIT:0:10}\` (tag \`$TAG\`)
+
+### Release notes
+
+$NOTES
+
+### Links
+
+- Release: https://github.com/aaddrick/claude-desktop-debian/releases/tag/$TAG
+- Compare: https://github.com/aaddrick/claude-desktop-debian/compare/${PINNED_COMMIT}...${LATEST_COMMIT}
+- Open issues (regression watch): https://github.com/aaddrick/claude-desktop-debian/issues?q=is%3Aissue+is%3Aopen+label%3Abug
+
+### To act on this
+
+Run \`/update-claude-code\` in Claude Code and follow the **B. Update
+claude-desktop** section. **Read the release notes first** — upstream
+occasionally ships regressions (e.g. v1.3.31 broke Cowork daemon recovery)
+and our overlay may need a patch rev.
+
+This issue will auto-close when that PR merges."

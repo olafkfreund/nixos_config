@@ -72,10 +72,12 @@
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
     zjstatus.url = "github:dj95/zjstatus";
-    # Pinned to v1.3.30+claude1.2278.0 — v1.3.31+claude1.2773.0 has a
-    # regression (upstream #408) where _svcLaunched guard never clears,
-    # breaking Cowork VM daemon respawn after any failure/crash.
-    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/89208a596a3e876a74f865fb5267996f666f4a09";
+    # = main @ 4cc6cc2183 (2026-04-19), includes post-v1.3.32 fixes: AppArmor
+    # bwrap probe diagnosis, cowork daemon recovery backport (#408), bwrap
+    # home-dir ordering, SDK binary routing. Upstream commit 3150477 fixed
+    # the node-pty asar-manifest bug that our overlay previously patched; no
+    # overlay is needed from v1.3.32 on. Bump via /update-claude-code.
+    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/4cc6cc2183";
 
     # Terminal YouTube browser
     yt-x = {
@@ -231,58 +233,42 @@
         (_final: prev: {
           zjstatus = inputs.zjstatus.packages.${prev.stdenv.hostPlatform.system}.default;
         })
-        # Claude Desktop from aaddrick/claude-desktop-debian (FHS variant; tracks latest
-        # upstream version with Cowork/Local Agent Mode via bubblewrap sandbox).
+        # Claude Desktop from aaddrick/claude-desktop-debian (FHS variant;
+        # bubblewrap-sandboxed Cowork / Local Agent Mode).
+        #
+        # Upstream v1.3.32+ fixed the node-pty asar-manifest bug in 3150477, so
+        # we no longer need the full asar-repack overlay. However, they kept a
+        # legacy "copy node-pty natives to .unpacked/" cp step in build.sh that
+        # races the new `asar pack --unpack "**/*.node"` path: asar creates
+        # .unpacked/ read-only, then the legacy cp fails in Nix sandbox with
+        # "Permission denied". We patch it out in postPatch.
+        # See /update-claude-code for the bump workflow.
         (_final: prev:
           let
             system = prev.stdenv.hostPlatform.system;
             upstream = inputs.claude-desktop-linux.packages.${system};
-            # Upstream ships Windows node-pty binaries packed inside app.asar,
-            # shadowing the Linux ELF pty.node in app.asar.unpacked/. Electron
-            # then tries to dlopen the Windows DLL from the packed asar and fails
-            # with "Failed to load native module: pty.node". Fix by re-packing
-            # app.asar with the Linux pty.node swapped in, stripping Windows-only
-            # binaries, and marking *.node entries as unpacked so Electron
-            # redirects lookups to app.asar.unpacked/ at runtime.
-            # Upstream tracking: https://github.com/aaddrick/claude-desktop-debian/issues/401
+            # A standalone derivation producing a patched build.sh. The
+            # original comes from the flake input's root. We strip the
+            # legacy cp-to-.unpacked/ block that `finalize_app_asar()`
+            # leaves in place — redundant since upstream's
+            # `asar pack --unpack "**/*.node"` already placed the .node
+            # files, AND failing in Nix sandbox because .unpacked/ is
+            # read-only post-pack. Upstream commit 3150477 acknowledged
+            # this step as "redundant but harmless" — for Nix, not harmless.
+            patchedBuildSh = prev.runCommand "claude-desktop-build-sh-patched" { } ''
+              cp ${inputs.claude-desktop-linux}/build.sh $out
+              chmod +w $out
+              sed -i '/Copying node-pty native binaries to unpacked directory/,/node-pty native binaries copied/c\		echo "skipped legacy .unpacked/ cp (handled by --unpack; Nix patch)"' $out
+            '';
             claude-desktop-patched = upstream.claude-desktop.overrideAttrs (old: {
-              nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.asar ];
-              postInstall = (old.postInstall or "") + ''
-                ASAR_DIR=$out/lib/claude-desktop/electron/resources
-                WORK=$(mktemp -d)
-                asar extract "$ASAR_DIR/app.asar" "$WORK/extracted"
-
-                # Replace Windows pty.node (PE32) with Linux pty.node (ELF) from .unpacked/
-                cp -f "$ASAR_DIR/app.asar.unpacked/node_modules/node-pty/build/Release/pty.node" \
-                      "$WORK/extracted/node_modules/node-pty/build/Release/pty.node"
-
-                # Strip Windows-only companion binaries (unused on Linux, cleanup)
-                rm -f "$WORK/extracted/node_modules/node-pty/build/Release/conpty.node" \
-                      "$WORK/extracted/node_modules/node-pty/build/Release/conpty_console_list.node" \
-                      "$WORK/extracted/node_modules/node-pty/build/Release/winpty-agent.exe" \
-                      "$WORK/extracted/node_modules/node-pty/build/Release/winpty.dll"
-
-                # Provide prebuilds/linux-x64/ path (node-pty fallback when
-                # process.versions.modules is empty in Electron -> "//" lookup)
-                mkdir -p "$WORK/extracted/node_modules/node-pty/prebuilds/linux-x64"
-                ln -sf ../../build/Release/pty.node \
-                  "$WORK/extracted/node_modules/node-pty/prebuilds/linux-x64/node.napi.node"
-                ln -sf ../../build/Release/pty.node \
-                  "$WORK/extracted/node_modules/node-pty/prebuilds/linux-x64/electron.napi.node"
-
-                # Repack: --unpack "*.node" marks every *.node entry as unpacked
-                # in the asar header, so Electron redirects to app.asar.unpacked/
-                chmod -R u+w "$ASAR_DIR"
-                rm -rf "$ASAR_DIR/app.asar" "$ASAR_DIR/app.asar.unpacked"
-                asar pack "$WORK/extracted" "$ASAR_DIR/app.asar" --unpack "*.node"
-
-                # Sanity: Linux ELF must be in the post-repack .unpacked/ tree
-                PTY_OUT="$ASAR_DIR/app.asar.unpacked/node_modules/node-pty/build/Release/pty.node"
-                [ -f "$PTY_OUT" ] || { echo "ERROR: Linux pty.node missing after repack"; exit 1; }
-                file "$PTY_OUT" | grep -q ELF || { echo "ERROR: $PTY_OUT is not ELF"; exit 1; }
-
-                rm -rf "$WORK"
-              '';
+              # Replace the reference to upstream's build.sh with our patched one.
+              # Upstream's cleanSourceWith(src = ./..) evaluates to the input's
+              # raw outPath for this repo's filter set, so the string match is
+              # deterministic as long as upstream keeps that pattern.
+              buildPhase = prev.lib.replaceStrings
+                [ "bash ${inputs.claude-desktop-linux}/build.sh" ]
+                [ "bash ${patchedBuildSh}" ]
+                old.buildPhase;
             });
           in
           {
