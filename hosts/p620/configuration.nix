@@ -51,6 +51,15 @@ in
       dns = lib.mkForce "default"; # Force NetworkManager to handle DNS directly
     };
 
+    # Pin this host's own Tailscale MagicDNS name. Tailscale's DNS resolver is
+    # not accepted on p620 (conflicts with NetworkManager DNS), so without this
+    # entry the host cannot resolve its own .ts.net hostname to its tailnet
+    # IPv4 — local dev tools whose auth callbacks redirect to the tailnet
+    # hostname would otherwise time out.
+    extraHosts = ''
+      100.69.100.115 p620.tail833f7.ts.net
+    '';
+
     # Network performance tuning - removed (module deleted during anti-pattern cleanup)
     # performanceTuning = {
     #   enable = false;

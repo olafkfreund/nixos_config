@@ -4,17 +4,17 @@ with lib;
 let
   cfg = config.features.syncthing;
 
-  # Host device IDs - these are generated on first run of Syncthing
-  # Run `syncthing --device-id` or check Web UI to get the ID
-  # After first deployment, update these with actual device IDs
+  # Host device IDs - obtained from each host's Syncthing installation
+  # (via REST API /rest/system/status "myID"). Override per-host via
+  # features.syncthing.deviceIds if needed.
   defaultDeviceIds = {
     p620 = "SQ6SDI7-NVAXUP2-RN3EEGN-YK7Q7P5-LEXKIJK-QJHJTFR-NJ7WMEQ-HOOSIAX";
-    razer = "XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX";
-    p510 = "XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX";
+    razer = "3DBBL3V-HEBXQBY-JIGONAD-YPLTHXH-D755LG7-2YQY6P6-3YVSXL2-D57YUQA";
+    p510 = "YTQD3GO-4XDKZ7E-MXDSOID-7VYSTGY-BTNOIVB-SQAFZ6Q-XGUOQVD-4AWMLQX";
   };
 
-  # Merge user-provided device IDs with defaults
-  deviceIds = cfg.deviceIds // defaultDeviceIds;
+  # Merge defaults with user-provided IDs (user overrides win)
+  deviceIds = defaultDeviceIds // cfg.deviceIds;
 
   # Get list of other hosts (excluding current host)
   otherHosts = filter (h: h != config.networking.hostName) cfg.syncHosts;
