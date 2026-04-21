@@ -6,7 +6,12 @@ return {
       "rafamadriz/friendly-snippets",
       "folke/lazydev.nvim",
     },
-    version = false, -- use latest git commit for stability with LazyVim
+    -- Pin to 1.x releases so lazy.nvim picks up upstream's prebuilt Rust
+    -- matcher binary (linux-x86_64.gz asset on each release). Using `false`
+    -- (main HEAD) means no prebuilt is available, and since this is
+    -- Nix-managed nvim — no cargo in the runtime — blink falls back to the
+    -- Lua matcher and emits a loud warning on every startup.
+    version = "1.*",
     opts = {
       keymap = {
         preset = "enter",
