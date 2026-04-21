@@ -100,73 +100,111 @@ case "$SCOPE" in
     ;;
 esac
 
-# --- 4. No-op exit ----------------------------------------------------------
-if git diff --quiet flake.lock; then
-  ok "no lock changes — nothing to commit or deploy."
+# --- 4. Determine LOCK_CHANGED flag -----------------------------------------
+LOCK_CHANGED=0
+if ! git diff --quiet flake.lock; then
+  LOCK_CHANGED=1
+fi
+
+# --- 5. Freshness check: is HOST already on the closure our lock would build?
+# Use `nix eval --raw` to get the expected outPath WITHOUT triggering a build —
+# cheap probe that tells us if the target is stale. We only do the expensive
+# full build if we actually need to deploy.
+log "freshness check: evaluating expected closure for ${HOST}"
+expected=$(nix eval --raw \
+  ".#nixosConfigurations.${HOST}.config.system.build.toplevel.outPath" 2>/dev/null) \
+  || err "could not eval target closure outPath. Is ${HOST} listed in nixosConfigurations?"
+
+case "$MODE" in
+  local) current=$(readlink /run/current-system 2>/dev/null || echo "") ;;
+  remote) current=$(ssh "$HOST" 'readlink /run/current-system' 2>/dev/null || echo "") ;;
+esac
+
+HOST_STALE=0
+if [ -z "$current" ]; then
+  warn "could not read ${HOST}'s /run/current-system (first-time deploy?); will deploy anyway"
+  HOST_STALE=1
+elif [ "$expected" != "$current" ]; then
+  HOST_STALE=1
+fi
+
+# --- 6. Nothing-to-do exit --------------------------------------------------
+if [ $LOCK_CHANGED -eq 0 ] && [ $HOST_STALE -eq 0 ]; then
+  ok "no lock changes AND ${HOST} already on ${expected##*/} — nothing to do."
   exit 0
 fi
 
-# --- 5. Show delta summary --------------------------------------------------
-new_rev=$(jq -r --arg n "$nixpkgs_node" '.nodes[$n].locked.rev' flake.lock)
-new_date=$(jq -r --arg n "$nixpkgs_node" '.nodes[$n].locked.lastModified | todate' flake.lock)
-
-if [ "$old_rev" != "$new_rev" ]; then
-  log "nixpkgs: ${old_rev:0:10} (${old_date}) → ${new_rev:0:10} (${new_date})"
+# --- 7. Show what's happening -----------------------------------------------
+if [ $LOCK_CHANGED -eq 1 ]; then
+  new_rev=$(jq -r --arg n "$nixpkgs_node" '.nodes[$n].locked.rev' flake.lock)
+  new_date=$(jq -r --arg n "$nixpkgs_node" '.nodes[$n].locked.lastModified | todate' flake.lock)
+  if [ "$old_rev" != "$new_rev" ]; then
+    log "nixpkgs: ${old_rev:0:10} (${old_date}) → ${new_rev:0:10} (${new_date})"
+  else
+    log "nixpkgs unchanged (other inputs moved)"
+  fi
+  log "flake.lock diff summary:"
+  git diff --stat flake.lock | head -20
+  log "inputs bumped:"
+  git show HEAD:flake.lock >/tmp/.pre-update-lock.json
+  jq -r --slurpfile orig /tmp/.pre-update-lock.json \
+    '.nodes | to_entries[]
+     | select(.value.locked.type == "github")
+     | . as $n
+     | ($orig[0].nodes[$n.key].locked.rev // "none") as $orig_rev
+     | select($n.value.locked.rev != $orig_rev)
+     | "  \($n.key)  \($orig_rev[0:8]) → \($n.value.locked.rev[0:8])  \($n.value.locked.lastModified | todate)"' \
+    flake.lock | sort
+  rm -f /tmp/.pre-update-lock.json
 else
-  log "nixpkgs unchanged (other inputs moved)"
+  new_rev="$old_rev"
+  new_date="$old_date"
+  log "lock unchanged — but ${HOST} is stale (running ${current##*/}); deploying current state"
 fi
 
-log "flake.lock diff summary:"
-git diff --stat flake.lock | head -20
-
-# List which inputs bumped (vs HEAD's lock)
-log "inputs bumped:"
-git show HEAD:flake.lock >/tmp/.pre-update-lock.json
-jq -r --slurpfile orig /tmp/.pre-update-lock.json \
-  '.nodes | to_entries[]
-   | select(.value.locked.type == "github")
-   | . as $n
-   | ($orig[0].nodes[$n.key].locked.rev // "none") as $orig_rev
-   | select($n.value.locked.rev != $orig_rev)
-   | "  \($n.key)  \($orig_rev[0:8]) → \($n.value.locked.rev[0:8])  \($n.value.locked.lastModified | todate)"' \
-  flake.lock | sort
-rm -f /tmp/.pre-update-lock.json
-
-# --- 6. Test-build target host ---------------------------------------------
-log "test-building .#nixosConfigurations.${HOST}.config.system.build.toplevel"
+# --- 8. Full build of target closure (validates + warms cache) --------------
+log "building .#nixosConfigurations.${HOST}.config.system.build.toplevel"
 if ! nix build --no-link --print-out-paths \
   ".#nixosConfigurations.${HOST}.config.system.build.toplevel"; then
-  err "build failed — lock left dirty for inspection. Fix the issue and retry, or \`git checkout flake.lock\` to cancel."
+  if [ $LOCK_CHANGED -eq 1 ]; then
+    err "build failed — lock left dirty for inspection. Fix the issue and retry, or \`git checkout flake.lock\` to cancel."
+  else
+    err "build failed — nothing was committed; investigate before retrying."
+  fi
 fi
 ok "build succeeded"
 
-# --- 7. Commit + push on main ----------------------------------------------
-log "committing flake.lock to main"
+# --- 9. Commit + push (ONLY if lock actually changed) ----------------------
+if [ $LOCK_CHANGED -eq 1 ]; then
+  log "committing flake.lock to main"
 
-# Build a commit message with the nixpkgs delta + scope
-msg_subject="chore(flake): bump ${SCOPE} — nixpkgs ${old_rev:0:8} → ${new_rev:0:8}"
-if [ "$old_rev" = "$new_rev" ]; then
-  msg_subject="chore(flake): bump ${SCOPE} (nixpkgs unchanged)"
+  # Build a commit message with the nixpkgs delta + scope
+  msg_subject="chore(flake): bump ${SCOPE} — nixpkgs ${old_rev:0:8} → ${new_rev:0:8}"
+  if [ "$old_rev" = "$new_rev" ]; then
+    msg_subject="chore(flake): bump ${SCOPE} (nixpkgs unchanged)"
+  fi
+
+  git add flake.lock
+
+  # --no-verify: pre-commit statix scan hangs on this repo (documented in prior
+  # PRs); safe because this commit only touches flake.lock.
+  if ! git commit --no-verify -m "${msg_subject}" \
+    -m "Auto-commit from scripts/update-commit-deploy.sh (${HOST}, scope=${SCOPE})." \
+    -m "Built and verified against nixosConfigurations.${HOST}." \
+    -m "Co-Authored-By: update-commit-deploy <noreply@anthropic.com>"; then
+    err "commit failed — aborting before deploy."
+  fi
+
+  log "git push origin main"
+  if ! git push origin main; then
+    err "push failed — abort before deploy so the lock doesn't get orphaned. Fix the push (pull/rebase?) and re-run."
+  fi
+  ok "lock committed as $(git rev-parse --short HEAD) and pushed"
+else
+  log "skipping commit/push (lock unchanged); deploying existing state to ${HOST}"
 fi
 
-git add flake.lock
-
-# --no-verify: pre-commit statix scan hangs on this repo (documented in prior
-# PRs); safe because this commit only touches flake.lock.
-if ! git commit --no-verify -m "${msg_subject}" \
-  -m "Auto-commit from scripts/update-commit-deploy.sh (${HOST}, scope=${SCOPE})." \
-  -m "Built and verified against nixosConfigurations.${HOST}." \
-  -m "Co-Authored-By: update-commit-deploy <noreply@anthropic.com>"; then
-  err "commit failed — aborting before deploy."
-fi
-
-log "git push origin main"
-if ! git push origin main; then
-  err "push failed — abort before deploy so the lock doesn't get orphaned. Fix the push (pull/rebase?) and re-run."
-fi
-ok "lock committed as $(git rev-parse --short HEAD) and pushed"
-
-# --- 8. Switch (via nh — nice progress UI, unified local/remote) -----------
+# --- 10. Switch (via nh — nice progress UI, unified local/remote) ----------
 # `nh os switch` handles:
 #   - local deploy with colored progress + automatic closure diff
 #   - remote deploy via --target-host (SSH + sudo over the wire)
