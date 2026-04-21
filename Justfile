@@ -21,6 +21,26 @@ update-flake:
     nix flake update
     just deploy
 
+# Idiot-proof update + commit + deploy (local OR remote). Does:
+#   1. nix flake update (scope = nixpkgs by default, or 'all' or any input name)
+#   2. no-op exit if nothing moved
+#   3. test-build target host closure (aborts if fails)
+#   4. commit flake.lock to main + git push (lock never gets orphaned)
+#   5. nh os switch (local) OR nh os switch --target-host HOST (remote via SSH)
+#
+# HOST defaults to the local hostname; any SSH-reachable host in ~/.ssh/config
+# works too. SCOPE defaults to 'nixpkgs' — use 'all' to bump every input, or
+# pass a specific input name (e.g. 'home-manager', 'claude-desktop-linux').
+#
+# Examples:
+#   just update-commit-deploy                     # local, nixpkgs only
+#   just update-commit-deploy p620                # explicit local host
+#   just update-commit-deploy razer               # remote via SSH
+#   just update-commit-deploy p510 all            # remote, update all inputs
+#   just update-commit-deploy razer home-manager  # remote, single input
+update-commit-deploy HOST="$(hostname)" SCOPE="nixpkgs":
+    ./scripts/update-commit-deploy.sh {{HOST}} {{SCOPE}}
+
 # Preview updates with detailed package changes (before building)
 preview-updates HOST="$(hostname)":
     @echo "🔍 Previewing updates for {{HOST}}..."
