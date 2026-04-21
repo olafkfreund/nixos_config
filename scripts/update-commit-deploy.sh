@@ -212,10 +212,16 @@ fi
 #
 # We pass "." as the flake path (current dir). --hostname selects which
 # nixosConfigurations.<name> to build.
+# All our hosts (p620, razer, p510) are configured with NOPASSWD: ALL for
+# olafkfreund. Pass --elevation-strategy passwordless so nh never tries to
+# prompt for a sudo password on the remote — otherwise nh's default 'auto'
+# strategy can still block on a TTY prompt even with NOPASSWD configured.
+ELEV=(--elevation-strategy passwordless)
+
 case "$MODE" in
   local)
     log "nh os switch --hostname ${HOST} .  (local)"
-    if ! nh os switch --hostname "$HOST" .; then
+    if ! nh os switch "${ELEV[@]}" --hostname "$HOST" .; then
       err "local switch failed — commit is on origin/main. Investigate via \`journalctl -xe\` or rollback via \`nh os rollback\`."
     fi
     ;;
@@ -224,8 +230,8 @@ case "$MODE" in
     # locally (this machine, typically p620) and ship the closure rather
     # than burn remote CPU — faster and lets slow hosts (p510) off easy.
     # The --build-host flag is omitted so nh defaults to local build.
-    log "nh os switch --hostname ${HOST} --target-host ${HOST} .  (remote, build local)"
-    if ! nh os switch --hostname "$HOST" --target-host "$HOST" .; then
+    log "nh os switch --hostname ${HOST} --target-host ${HOST} .  (remote, build local, passwordless sudo)"
+    if ! nh os switch "${ELEV[@]}" --hostname "$HOST" --target-host "$HOST" .; then
       err "remote switch on ${HOST} failed — commit is on origin/main. SSH in and investigate: \`ssh ${HOST} 'journalctl -xe'\` or rollback via \`ssh ${HOST} 'nh os rollback'\`."
     fi
     ;;
