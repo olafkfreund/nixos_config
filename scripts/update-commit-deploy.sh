@@ -163,6 +163,10 @@ else
 fi
 
 # --- 8. Full build of target closure (validates + warms cache) --------------
+#
+# Build where the command is run — if you want p620's beefy CPU, just run
+# `nhs` or `just update-commit-deploy` from p620. Running from razer/p510
+# builds locally on that host (no cross-host routing).
 log "building .#nixosConfigurations.${HOST}.config.system.build.toplevel"
 if ! nix build --no-link --print-out-paths \
   ".#nixosConfigurations.${HOST}.config.system.build.toplevel"; then
@@ -218,19 +222,22 @@ fi
 # strategy can still block on a TTY prompt even with NOPASSWD configured.
 ELEV=(--elevation-strategy passwordless)
 
+# Build-host policy: always build on the LOCAL machine (wherever the command
+# was invoked from). Intentionally NOT routing builds through p620, because
+# you might run this from razer while traveling with no network to p620.
+# If you want p620 to do the heavy lifting, run `nhs` from p620.
+
 case "$MODE" in
   local)
-    log "nh os switch --hostname ${HOST} .  (local)"
+    log "nh os switch --hostname ${HOST} .  (local target, local build)"
     if ! nh os switch "${ELEV[@]}" --hostname "$HOST" .; then
       err "local switch failed — commit is on origin/main. Investigate via \`journalctl -xe\` or rollback via \`nh os rollback\`."
     fi
     ;;
   remote)
-    # For remote, --target-host routes the activation over SSH. We build
-    # locally (this machine, typically p620) and ship the closure rather
-    # than burn remote CPU — faster and lets slow hosts (p510) off easy.
-    # The --build-host flag is omitted so nh defaults to local build.
-    log "nh os switch --hostname ${HOST} --target-host ${HOST} .  (remote, build local, passwordless sudo)"
+    # For remote targets, --target-host routes the activation over SSH.
+    # Build happens on this machine, closure ships via SSH.
+    log "nh os switch --hostname ${HOST} --target-host ${HOST} .  (remote target, local build)"
     if ! nh os switch "${ELEV[@]}" --hostname "$HOST" --target-host "$HOST" .; then
       err "remote switch on ${HOST} failed — commit is on origin/main. SSH in and investigate: \`ssh ${HOST} 'journalctl -xe'\` or rollback via \`ssh ${HOST} 'nh os rollback'\`."
     fi
