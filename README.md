@@ -20,6 +20,26 @@ just deploy          # Deploy to current host
 just HOST            # Deploy to specific host (p620/p510/razer)
 ```
 
+### Routine updates: one command does everything
+
+For the common case — bump flake inputs, commit the new lock, build, and
+switch — use the idiot-proof recipe. It works for local AND remote hosts,
+refuses to run with a dirty working tree, commits before switching so the
+lock can never get orphaned, and handles the stale-host case (deploy even
+if the lock didn't move).
+
+```bash
+nhs                  # current host, nixpkgs scope (zsh shortcut)
+nhs razer            # remote deploy via SSH/nh
+nhs p510 all         # update all inputs
+nhs razer home-manager   # single-input scope
+
+# Same thing without the alias:
+just update-commit-deploy [HOST] [SCOPE]
+```
+
+Full reference: **[docs/UPDATE-DEPLOY.md](./docs/UPDATE-DEPLOY.md)**.
+
 ## Directory Structure
 
 ```
@@ -48,10 +68,12 @@ just test-host HOST           # Test specific host
 just deploy                   # Deploy locally
 just HOST                     # Deploy to host
 just quick-deploy HOST        # Deploy only if changed
+just update-commit-deploy HOST [SCOPE]   # Full flow: update → commit → push → switch (docs/UPDATE-DEPLOY.md)
+nhs [HOST] [SCOPE]            # zsh shortcut for `just update-commit-deploy`
 
 # Maintenance
 just cleanup                  # Clean old generations
-just update-flake             # Update inputs
+just update-flake             # Update inputs (no commit)
 just secrets                  # Manage secrets
 
 # All commands
@@ -93,9 +115,10 @@ services.myapp.password = builtins.readFile "/secrets/password";
 
 ## Documentation
 
-- docs/PATTERNS.md - Best practices
-- docs/NIXOS-ANTI-PATTERNS.md - Common mistakes
-- docs/GITHUB-WORKFLOW.md - Development workflow
+- [docs/UPDATE-DEPLOY.md](./docs/UPDATE-DEPLOY.md) - `nhs` / `just update-commit-deploy` — idiot-proof update+deploy flow (local + remote)
+- [docs/PATTERNS.md](./docs/PATTERNS.md) - Best practices
+- [docs/NIXOS-ANTI-PATTERNS.md](./docs/NIXOS-ANTI-PATTERNS.md) - Common mistakes
+- [docs/GITHUB-WORKFLOW.md](./docs/GITHUB-WORKFLOW.md) - Development workflow
 
 ## Development
 
