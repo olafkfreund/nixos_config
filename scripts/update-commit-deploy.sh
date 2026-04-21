@@ -166,10 +166,14 @@ fi
 #
 # Build where the command is run — if you want p620's beefy CPU, just run
 # `nhs` or `just update-commit-deploy` from p620. Running from razer/p510
-# builds locally on that host (no cross-host routing).
-log "building .#nixosConfigurations.${HOST}.config.system.build.toplevel"
-if ! nix build --no-link --print-out-paths \
-  ".#nixosConfigurations.${HOST}.config.system.build.toplevel"; then
+# builds locally on that host (no cross-host routing — see docs/UPDATE-DEPLOY.md).
+#
+# Use `nh os build` (not plain `nix build`) so the user sees nh's progress
+# UI consistently with the later deploy step. --dry (exists) would be too
+# light; we need a real build to catch eval + build-time failures BEFORE
+# committing the lock.
+log "nh os build --hostname ${HOST} .  (validates closure before commit)"
+if ! nh os build --hostname "$HOST" .; then
   if [ $LOCK_CHANGED -eq 1 ]; then
     err "build failed — lock left dirty for inspection. Fix the issue and retry, or \`git checkout flake.lock\` to cancel."
   else
