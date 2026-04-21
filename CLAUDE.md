@@ -769,6 +769,8 @@ just perf-test
 
 ### Fast Deployment (Optimized)
 
+**For lock bumps + deploy in one idiot-proof command, see [docs/UPDATE-DEPLOY.md](./docs/UPDATE-DEPLOY.md).** TL;DR: `nhs [HOST] [SCOPE]` or `just update-commit-deploy [HOST] [SCOPE]` handles `nix flake update → test-build → commit + push → nh switch` atomically, works for local AND remote hosts, and refuses to run if the working tree is dirty.
+
 ```bash
 # Deploy to local system
 just deploy
@@ -777,6 +779,12 @@ just deploy
 just quick-deploy p620    # Deploy P620 only if configuration changed
 just quick-deploy razer   # Deploy Razer only if configuration changed
 just quick-deploy p510    # Deploy P510 only if configuration changed
+
+# RECOMMENDED for routine lock bumps: idiot-proof flow (see docs/UPDATE-DEPLOY.md)
+nhs                        # update+deploy current host, nixpkgs scope
+nhs razer                  # remote deploy via nh --target-host
+nhs p510 all               # update all inputs, deploy p510
+just update-commit-deploy razer home-manager  # single-input scope
 
 # Standard optimized deployment to specific hosts
 just p620    # AMD workstation with ROCm (optimized)

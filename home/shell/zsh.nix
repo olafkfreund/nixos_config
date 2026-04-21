@@ -584,6 +584,21 @@ with lib; {
         # Modern tool configurations
         export BAT_THEME="gruvbox-dark"
         export EZA_COLORS="da=1;34:gm=1;34"
+
+        # nhs: idiot-proof NixOS update+switch.
+        # Wraps `just update-commit-deploy` so muscle-memory `nhs [HOST] [SCOPE]`
+        # now does the full flow: nix flake update → commit + push → build →
+        # switch (local OR remote via nh --target-host). Runs in a subshell so
+        # the user's cwd isn't affected. See docs/UPDATE-DEPLOY.md for details.
+        #
+        # Usage:
+        #   nhs                   # current host, nixpkgs scope
+        #   nhs razer             # remote deploy to razer
+        #   nhs p620 all          # update all inputs
+        #   nhs razer home-manager  # bump one specific input
+        nhs() {
+          (cd ~/.config/nixos && just update-commit-deploy "$@")
+        }
       '';
 
       # Optimized Oh My Zsh configuration with essential plugins only
@@ -623,8 +638,11 @@ with lib; {
         lr = "eza --icons=auto --color=auto --long --reverse --sort=modified --group-directories-first";
         lz = "eza --icons=auto --color=auto --long --sort=size --group-directories-first";
 
-        # NixOS management aliases
-        nhs = "nh os switch";
+        # NixOS management aliases.
+        # NOTE: `nhs` is deliberately NOT an alias here — it's defined as a
+        # zsh function in initContent below so it can wrap `just update-commit-deploy`
+        # (the idiot-proof update flow). The function preserves the "nhs HOST"
+        # muscle memory while adding lock-commit + freshness-aware deploy.
         nhu = "nh home switch";
 
         # Safe unique aliases
