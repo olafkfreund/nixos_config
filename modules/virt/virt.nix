@@ -62,16 +62,26 @@ in
         "L+ /var/lib/qemu/firmware - - - - ${pkgs.qemu}/share/qemu/firmware"
       ];
       services.libvirtd.restartIfChanged = false;
-      # Fix virt-secret-init-encryption crash on hosts without working TPM2
-      # systemd-creds encrypt fails with assertion error when TPM2 is unavailable.
-      # Generate a raw 256-bit key file directly instead.
+      # Fix virt-secret-init-encryption on hosts without working TPM2.
+      # Upstream runs `systemd-creds encrypt` which defaults to TPM2+host and
+      # fails when TPM2 is unavailable/broken. Force --with-key=host so the
+      # key is encrypted with /var/lib/systemd/credential.secret only.
+      # The libvirtd unit uses LoadCredentialEncrypted= which requires this
+      # file to be in systemd-creds encrypted format (not raw bytes).
       services.virt-secret-init-encryption.serviceConfig.ExecStart = lib.mkForce
         (
           let
             script = pkgs.writeShellScript "virt-secret-init-encryption" ''
+              set -eu
               umask 0077
               mkdir -p /var/lib/libvirt/secrets
-              dd if=/dev/random of=/var/lib/libvirt/secrets/secrets-encryption-key bs=32 count=1 status=none
+              out=/var/lib/libvirt/secrets/secrets-encryption-key
+              if [ ! -s "$out" ] || ! ${pkgs.systemd}/bin/systemd-creds --with-key=host decrypt --name=secrets-encryption-key "$out" /dev/null >/dev/null 2>&1; then
+                tmp=$(${pkgs.coreutils}/bin/mktemp)
+                ${pkgs.coreutils}/bin/dd if=/dev/random of="$tmp" bs=32 count=1 status=none
+                ${pkgs.systemd}/bin/systemd-creds --with-key=host encrypt --name=secrets-encryption-key "$tmp" "$out"
+                ${pkgs.coreutils}/bin/rm -f "$tmp"
+              fi
             '';
           in
           "${script}"
