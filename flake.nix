@@ -238,16 +238,44 @@
         # Claude Desktop from aaddrick/claude-desktop-debian (FHS variant;
         # bubblewrap-sandboxed Cowork / Local Agent Mode).
         #
-        # As of v2.0.0 (2026-04-20) upstream:
-        #   - split build.sh into scripts/ modules (the legacy
-        #     "copy node-pty natives to .unpacked/" string is gone),
-        #   - fixed the Nix-sandbox chmod issue our old overlay worked
-        #     around (#432, #438).
-        # No custom patching needed — just expose the FHS wrapper.
+        # Overlay needs:
+        # 1. As of v2.0.0 (2026-04-20) upstream split build.sh into scripts/
+        #    modules and fixed the Nix-sandbox chmod issue our previous
+        #    overlay worked around (PRs #432, #438). No build.sh patch needed.
+        #
+        # 2. `cowork-plugin-shim.sh` is extracted from the Windows .exe and
+        #    ships with CRLF line endings. bash can't exec a CRLF script
+        #    (every line has a trailing \r that becomes part of command
+        #    names) — causing "Claude Code process exited with code 1" when
+        #    claude-desktop spawns the shim for Cowork/Local Agent Mode
+        #    sessions. Strip CRLF in a postInstall of the inner package,
+        #    then override the FHS wrapper to use the patched inner.
+        #    (Upstream bug — unfiled as of 2026-04-23.)
         # See /update-claude-code for the bump workflow.
-        (_final: prev: {
-          claude-desktop-linux = inputs.claude-desktop-linux.packages.${prev.stdenv.hostPlatform.system}.claude-desktop-fhs;
-        })
+        (_final: prev:
+          let
+            system = prev.stdenv.hostPlatform.system;
+            upstream = inputs.claude-desktop-linux.packages.${system};
+            claude-desktop-patched = upstream.claude-desktop.overrideAttrs (old: {
+              postInstall = (old.postInstall or "") + ''
+                # Strip CRLF from cowork-plugin-shim.sh — shipped with
+                # Windows line endings from the upstream .exe extraction.
+                SHIM="$out/lib/claude-desktop/electron/resources/cowork-plugin-shim.sh"
+                if [ -f "$SHIM" ]; then
+                  # chmod first so sed -i can modify it in-place
+                  chmod +w "$SHIM"
+                  sed -i 's/\r$//' "$SHIM"
+                  chmod 555 "$SHIM"
+                  echo "CRLF stripped from cowork-plugin-shim.sh"
+                fi
+              '';
+            });
+          in
+          {
+            claude-desktop-linux = upstream.claude-desktop-fhs.override {
+              claude-desktop = claude-desktop-patched;
+            };
+          })
         # COSMIC applets from flakes
         (_final: prev: {
           cosmic-ext-applet-music-player = inputs.cosmic-music-player.packages.${prev.stdenv.hostPlatform.system}.default;
