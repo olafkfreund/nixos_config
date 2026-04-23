@@ -132,17 +132,17 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1776580440,
-        "narHash": "sha256-RbyLmh3dO+WVsLk1AP9BB8McN3yxMRgbqjrTAuUCfKw=",
+        "lastModified": 1776908116,
+        "narHash": "sha256-LT+KrzVmHIEv8ZVi9flL8H36sPWFcaZl3mnBD1Mk2hg=",
         "owner": "aaddrick",
         "repo": "claude-desktop-debian",
-        "rev": "4cc6cc2183fec7160963a774944d77b6a8c12c2d",
+        "rev": "52899114d3bdf7b817155d15a77b6c59bea98e25",
         "type": "github"
       },
       "original": {
         "owner": "aaddrick",
-        "ref": "4cc6cc2183",
         "repo": "claude-desktop-debian",
+        "rev": "52899114d3bdf7b817155d15a77b6c59bea98e25",
         "type": "github"
       }
     },
@@ -1281,11 +1281,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1775888245,
-        "narHash": "sha256-nwASzrRDD1JBEu/o8ekKYEXm/oJW6EMCzCRdrwcLe90=",
+        "lastModified": 1776329215,
+        "narHash": "sha256-a8BYi3mzoJ/AcJP8UldOx8emoPRLeWqALZWu4ZvjPXw=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "13043924aaa7375ce482ebe2494338e058282925",
+        "rev": "b86751bc4085f48661017fa226dee99fab6c651b",
         "type": "github"
       },
       "original": {
