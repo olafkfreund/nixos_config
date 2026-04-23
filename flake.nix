@@ -72,12 +72,14 @@
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
     zjstatus.url = "github:dj95/zjstatus";
-    # = main @ 4cc6cc2183 (2026-04-19), includes post-v1.3.32 fixes: AppArmor
-    # bwrap probe diagnosis, cowork daemon recovery backport (#408), bwrap
-    # home-dir ordering, SDK binary routing. Upstream commit 3150477 fixed
-    # the node-pty asar-manifest bug that our overlay previously patched; no
-    # overlay is needed from v1.3.32 on. Bump via /update-claude-code.
-    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/4cc6cc2183";
+    # = tag v2.0.2+claude1.3883.0 (2026-04-23). Major version bump (v1→v2)
+    # is wrapper-only per upstream release notes — claude-desktop binary
+    # refresh + build.sh refactored into scripts/ modules. Upstream fixed
+    # the node-pty chmod-on-Nix issue (PRs #432, #438) that our legacy
+    # build.sh sed patched; the sed target string no longer exists in
+    # upstream, so the overlay simplifies to a direct FHS pass-through.
+    # Bump via /update-claude-code.
+    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/52899114d3bdf7b817155d15a77b6c59bea98e25";
 
     # Terminal YouTube browser
     yt-x = {
@@ -236,46 +238,16 @@
         # Claude Desktop from aaddrick/claude-desktop-debian (FHS variant;
         # bubblewrap-sandboxed Cowork / Local Agent Mode).
         #
-        # Upstream v1.3.32+ fixed the node-pty asar-manifest bug in 3150477, so
-        # we no longer need the full asar-repack overlay. However, they kept a
-        # legacy "copy node-pty natives to .unpacked/" cp step in build.sh that
-        # races the new `asar pack --unpack "**/*.node"` path: asar creates
-        # .unpacked/ read-only, then the legacy cp fails in Nix sandbox with
-        # "Permission denied". We patch it out in postPatch.
+        # As of v2.0.0 (2026-04-20) upstream:
+        #   - split build.sh into scripts/ modules (the legacy
+        #     "copy node-pty natives to .unpacked/" string is gone),
+        #   - fixed the Nix-sandbox chmod issue our old overlay worked
+        #     around (#432, #438).
+        # No custom patching needed — just expose the FHS wrapper.
         # See /update-claude-code for the bump workflow.
-        (_final: prev:
-          let
-            system = prev.stdenv.hostPlatform.system;
-            upstream = inputs.claude-desktop-linux.packages.${system};
-            # A standalone derivation producing a patched build.sh. The
-            # original comes from the flake input's root. We strip the
-            # legacy cp-to-.unpacked/ block that `finalize_app_asar()`
-            # leaves in place — redundant since upstream's
-            # `asar pack --unpack "**/*.node"` already placed the .node
-            # files, AND failing in Nix sandbox because .unpacked/ is
-            # read-only post-pack. Upstream commit 3150477 acknowledged
-            # this step as "redundant but harmless" — for Nix, not harmless.
-            patchedBuildSh = prev.runCommand "claude-desktop-build-sh-patched" { } ''
-              cp ${inputs.claude-desktop-linux}/build.sh $out
-              chmod +w $out
-              sed -i '/Copying node-pty native binaries to unpacked directory/,/node-pty native binaries copied/c\		echo "skipped legacy .unpacked/ cp (handled by --unpack; Nix patch)"' $out
-            '';
-            claude-desktop-patched = upstream.claude-desktop.overrideAttrs (old: {
-              # Replace the reference to upstream's build.sh with our patched one.
-              # Upstream's cleanSourceWith(src = ./..) evaluates to the input's
-              # raw outPath for this repo's filter set, so the string match is
-              # deterministic as long as upstream keeps that pattern.
-              buildPhase = prev.lib.replaceStrings
-                [ "bash ${inputs.claude-desktop-linux}/build.sh" ]
-                [ "bash ${patchedBuildSh}" ]
-                old.buildPhase;
-            });
-          in
-          {
-            claude-desktop-linux = upstream.claude-desktop-fhs.override {
-              claude-desktop = claude-desktop-patched;
-            };
-          })
+        (_final: prev: {
+          claude-desktop-linux = inputs.claude-desktop-linux.packages.${prev.stdenv.hostPlatform.system}.claude-desktop-fhs;
+        })
         # COSMIC applets from flakes
         (_final: prev: {
           cosmic-ext-applet-music-player = inputs.cosmic-music-player.packages.${prev.stdenv.hostPlatform.system}.default;
