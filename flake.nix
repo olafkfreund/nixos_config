@@ -72,14 +72,13 @@
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
     zjstatus.url = "github:dj95/zjstatus";
-    # = tag v2.0.2+claude1.3883.0 (2026-04-23). Major version bump (v1→v2)
-    # is wrapper-only per upstream release notes — claude-desktop binary
-    # refresh + build.sh refactored into scripts/ modules. Upstream fixed
-    # the node-pty chmod-on-Nix issue (PRs #432, #438) that our legacy
-    # build.sh sed patched; the sed target string no longer exists in
-    # upstream, so the overlay simplifies to a direct FHS pass-through.
+    # = tag v2.0.5+claude1.4758.0 (2026-04-25). Wrapper at v2.0.5 includes
+    # upstream's own CRLF-strip fix for cowork-plugin-shim.sh (PRs #499,
+    # #505) — our overlay's postInstall workaround is now unneeded; the
+    # overlay below simplifies to a direct FHS pass-through.
+    # claude binary at 1.4758.0.
     # Bump via /update-claude-code.
-    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/52899114d3bdf7b817155d15a77b6c59bea98e25";
+    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/f9841bd81e79e1d42970a0b5b92b8d8e35a6b6d9";
 
     # Terminal YouTube browser
     yt-x = {
@@ -238,44 +237,18 @@
         # Claude Desktop from aaddrick/claude-desktop-debian (FHS variant;
         # bubblewrap-sandboxed Cowork / Local Agent Mode).
         #
-        # Overlay needs:
-        # 1. As of v2.0.0 (2026-04-20) upstream split build.sh into scripts/
-        #    modules and fixed the Nix-sandbox chmod issue our previous
-        #    overlay worked around (PRs #432, #438). No build.sh patch needed.
+        # No overlay patches needed at v2.0.5+:
+        #   - v2.0.0 (2026-04-20) refactored build.sh into scripts/ and fixed
+        #     the Nix-sandbox chmod issue (PRs #432, #438).
+        #   - v2.0.5+ strips CRLF from cowork-plugin-shim.sh during staging
+        #     (PRs #499, #505), retiring our previous postInstall workaround.
         #
-        # 2. `cowork-plugin-shim.sh` is extracted from the Windows .exe and
-        #    ships with CRLF line endings. bash can't exec a CRLF script
-        #    (every line has a trailing \r that becomes part of command
-        #    names) — causing "Claude Code process exited with code 1" when
-        #    claude-desktop spawns the shim for Cowork/Local Agent Mode
-        #    sessions. Strip CRLF in a postInstall of the inner package,
-        #    then override the FHS wrapper to use the patched inner.
-        #    (Upstream bug — unfiled as of 2026-04-23.)
-        # See /update-claude-code for the bump workflow.
-        (_final: prev:
-          let
-            system = prev.stdenv.hostPlatform.system;
-            upstream = inputs.claude-desktop-linux.packages.${system};
-            claude-desktop-patched = upstream.claude-desktop.overrideAttrs (old: {
-              postInstall = (old.postInstall or "") + ''
-                # Strip CRLF from cowork-plugin-shim.sh — shipped with
-                # Windows line endings from the upstream .exe extraction.
-                SHIM="$out/lib/claude-desktop/electron/resources/cowork-plugin-shim.sh"
-                if [ -f "$SHIM" ]; then
-                  # chmod first so sed -i can modify it in-place
-                  chmod +w "$SHIM"
-                  sed -i 's/\r$//' "$SHIM"
-                  chmod 555 "$SHIM"
-                  echo "CRLF stripped from cowork-plugin-shim.sh"
-                fi
-              '';
-            });
-          in
-          {
-            claude-desktop-linux = upstream.claude-desktop-fhs.override {
-              claude-desktop = claude-desktop-patched;
-            };
-          })
+        # See /update-claude-code for the bump workflow. If a future bump
+        # reintroduces a Nix-incompatible step, re-add the overrideAttrs
+        # block here.
+        (_final: prev: {
+          claude-desktop-linux = inputs.claude-desktop-linux.packages.${prev.stdenv.hostPlatform.system}.claude-desktop-fhs;
+        })
         # COSMIC applets from flakes
         (_final: prev: {
           cosmic-ext-applet-music-player = inputs.cosmic-music-player.packages.${prev.stdenv.hostPlatform.system}.default;
