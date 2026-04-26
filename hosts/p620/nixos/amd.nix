@@ -94,10 +94,18 @@
 
   # Performance tuning
   boot = {
-    # Kernel parameters for better GPU performance
+    # Kernel parameters for better GPU performance.
+    #
+    # NOTE: amdgpu.dcfeaturemask=1 was REMOVED 2026-04-26. Bit 0 is
+    # DC_FBC_MASK (Frame Buffer Compression), which causes screen
+    # flickering / corruption on RDNA3 (RX 7900 XTX) — diagnosed after
+    # heavy "screen glitches" reports under cosmic-comp 1.0.10 on Mesa
+    # 26.0.5 / kernel 7.0. The kernel default leaves FBC off on this
+    # silicon for a reason; do not re-enable without a confirmed fix
+    # in mainline kernel + Mesa. If you bring it back, retest under
+    # mixed Chrome (XWayland) + native Wayland workloads first.
     kernelParams = [
-      "amdgpu.ppfeaturemask=0xffffffff" # Enable power management features
-      "amdgpu.dcfeaturemask=1" # Enable display core features
+      "amdgpu.ppfeaturemask=0xffffffff" # Enable power management features (LACT/undervolt)
     ];
     # Blacklist incompatible modules
     blacklistedKernelModules = [ "radeon" ];
