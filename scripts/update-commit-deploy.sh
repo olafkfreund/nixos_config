@@ -5,9 +5,12 @@
 #   1) pre-flight: must be on main, working tree clean (flake.lock OK),
 #      and remote target (if any) reachable via SSH
 #   2) nix flake update <SCOPE>         (default SCOPE=nixpkgs)
-#   3) no-op exit if lock unchanged
+#   3) no-op exit if lock unchanged AND host already current
 #   4) test-build target host closure   (abort commit on build failure)
-#   5) commit flake.lock to main + push (ensures lock never gets orphaned)
+#   5) feature-branch + PR-merge of flake.lock → main
+#      (`main` is branch-protected; direct push is rejected. The script
+#      opens a PR via `gh pr create`, squash-merges it via `gh pr merge`,
+#      and pulls main back down. Net effect == old direct-push flow.)
 #   6) switch via `nh os switch` (nice progress UI + auto closure diff):
 #        - local  (HOST == $(hostname)): nh os switch --hostname HOST
 #        - remote (otherwise): nh os switch --hostname HOST --target-host HOST
@@ -182,15 +185,25 @@ if ! nh os build --hostname "$HOST" .; then
 fi
 ok "build succeeded"
 
-# --- 9. Commit + push (ONLY if lock actually changed) ----------------------
+# --- 9. Commit + PR-merge (ONLY if lock actually changed) ------------------
+# Branch protection on `main` requires changes to land via PR. Direct push
+# was rejected starting 2026-04-26 (PR #359 / #361 / #362 all hit this).
+# We branch, commit, push the branch, open a PR, squash-merge it, and pull
+# main back down. Net effect for the user is identical to the old direct-
+# push flow, but gets through the protection rule.
 if [ $LOCK_CHANGED -eq 1 ]; then
-  log "committing flake.lock to main"
-
   # Build a commit message with the nixpkgs delta + scope
   msg_subject="chore(flake): bump ${SCOPE} — nixpkgs ${old_rev:0:8} → ${new_rev:0:8}"
   if [ "$old_rev" = "$new_rev" ]; then
     msg_subject="chore(flake): bump ${SCOPE} (nixpkgs unchanged)"
   fi
+
+  branch_name="chore/lock-bump-${SCOPE//\//-}-${new_rev:0:8}"
+  log "creating branch ${branch_name}"
+  if git show-ref --quiet "refs/heads/${branch_name}"; then
+    err "branch ${branch_name} already exists locally. Delete it (\`git branch -D ${branch_name}\`) and retry."
+  fi
+  git checkout -b "${branch_name}"
 
   git add flake.lock
 
@@ -200,14 +213,43 @@ if [ $LOCK_CHANGED -eq 1 ]; then
     -m "Auto-commit from scripts/update-commit-deploy.sh (${HOST}, scope=${SCOPE})." \
     -m "Built and verified against nixosConfigurations.${HOST}." \
     -m "Co-Authored-By: update-commit-deploy <noreply@anthropic.com>"; then
+    git checkout main
+    git branch -D "${branch_name}" 2>/dev/null || true
     err "commit failed — aborting before deploy."
   fi
 
-  log "git push origin main"
-  if ! git push origin main; then
-    err "push failed — abort before deploy so the lock doesn't get orphaned. Fix the push (pull/rebase?) and re-run."
+  log "pushing branch ${branch_name}"
+  if ! git push -u origin "${branch_name}"; then
+    git checkout main
+    git branch -D "${branch_name}" 2>/dev/null || true
+    err "branch push failed (maybe an orphan branch with the same name exists on origin? \`gh api -X DELETE repos/:owner/:repo/git/refs/heads/${branch_name}\` to clean up)."
   fi
-  ok "lock committed as $(git rev-parse --short HEAD) and pushed"
+
+  log "opening PR"
+  if ! pr_url=$(gh pr create --base main --head "${branch_name}" \
+    --title "${msg_subject}" \
+    --body "Auto-PR from \`scripts/update-commit-deploy.sh\` (target=${HOST}, scope=${SCOPE}).
+
+Built and verified locally against nixosConfigurations.${HOST} before opening this PR.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)" 2>&1 | tail -1); then
+    git checkout main
+    err "gh pr create failed: ${pr_url}"
+  fi
+  log "PR opened: ${pr_url}"
+
+  log "squash-merging PR (waits for required checks if any)"
+  if ! gh pr merge "${pr_url}" --squash --delete-branch; then
+    git checkout main
+    err "PR merge failed — PR is open at ${pr_url}, deploy aborted. Resolve any required-check failure or merge conflict and re-run."
+  fi
+
+  log "syncing local main"
+  git checkout main
+  if ! git pull --ff-only origin main; then
+    err "could not fast-forward local main after merge. Resolve manually and re-run."
+  fi
+  ok "lock committed as $(git rev-parse --short HEAD) (via merged ${pr_url})"
 else
   log "skipping commit/push (lock unchanged); deploying existing state to ${HOST}"
 fi
