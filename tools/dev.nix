@@ -18,7 +18,8 @@ pkgs.mkShell {
     commitizen # Conventional commits
 
     # Quality assurance
-    statix # Advanced linting
+    nixpkgs-lint-community # Primary linter (tree-sitter, fast, whole-tree-safe)
+    statix # Secondary linter (rule-based, run per-file: `statix check FILE`)
     deadnix # Dead code detection
     nixpkgs-fmt # Code formatting
     typos # Spell checking
@@ -51,7 +52,8 @@ pkgs.mkShell {
     echo ""
     echo "🔧 Development Tools:"
     echo "  nixd                - Start LSP server"
-    echo "  statix check        - Lint all Nix files"
+    echo "  nixpkgs-lint .      - Fast tree-sitter lint (whole tree)"
+    echo "  statix check FILE   - Rule-based lint (single file)"
     echo "  deadnix             - Check for dead code"
     echo "  nix-tree            - Visualize dependencies"
     echo "  nix-diff .#old .#new - Compare configurations"

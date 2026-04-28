@@ -144,10 +144,10 @@ format-all:
     pre-commit run prettier --all-files || true
     @echo "✅ All files formatted!"
 
-# Lint all files using pre-commit
+# Lint all files (whole-tree nixpkgs-lint-community + per-file deadnix)
 lint-all:
     @echo "🔍 Linting all files..."
-    pre-commit run statix --all-files || true
+    nixpkgs-lint . || true
     pre-commit run deadnix --all-files || true
     pre-commit run shellcheck --all-files || true
     pre-commit run markdownlint --all-files || true

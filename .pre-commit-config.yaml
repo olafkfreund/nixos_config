@@ -18,21 +18,21 @@ repos:
         files: '\.nix$'
         description: Format Nix files using nixpkgs-fmt
 
-      - id: statix
-        name: Lint Nix files
-        entry: statix check
+      - id: nixpkgs-lint
+        name: Lint Nix files (nixpkgs-lint-community, tree-sitter)
+        entry: nixpkgs-lint
         language: system
         files: '\.nix$'
-        pass_filenames: false
-        description: Lint Nix files for common issues
+        pass_filenames: true
+        description: Fast semantic linter for Nix; runs only on changed files
 
       - id: deadnix
         name: Check for dead Nix code
-        entry: deadnix --fail
+        entry: bash -c 'for f in "$@"; do deadnix --fail "$f" || exit 1; done' --
         language: system
         files: '\.nix$'
-        pass_filenames: false
-        description: Check for dead/unused Nix code
+        pass_filenames: true
+        description: Check changed Nix files for dead/unused code
 
       # =============================================================================
       # Shell Script Formatting and Linting
