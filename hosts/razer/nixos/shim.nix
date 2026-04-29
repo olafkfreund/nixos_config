@@ -73,7 +73,19 @@ in
 
       # Step 1: lanzaboote's standard install. Writes signed BOOTX64.EFI
       # (= lanzaboote-stub) and per-generation UKIs in /EFI/Linux/.
-      ${config.boot.lanzaboote.installCommand} "$@"
+      #
+      # boot.lanzaboote.installCommand is the *partial* lzbt invocation —
+      # the lanzaboote module's own bootinstall script appends --public-key
+      # and --private-key flags from publicKeyFile/privateKeyFile config
+      # before forwarding the toplevel/boot args. We replicate that here.
+      # Match upstream bootinstall.sh: hardcoded `/boot` + glob over all
+      # system profiles (lanzaboote needs to see them all to install one
+      # UKI per generation).
+      ${config.boot.lanzaboote.installCommand} \
+        --public-key ${config.boot.lanzaboote.publicKeyFile} \
+        --private-key ${config.boot.lanzaboote.privateKeyFile} \
+        /boot \
+        /nix/var/nix/profiles/system-*-link
 
       # Step 2: shim swap. Move lanzaboote-stub aside as grubx64.efi (the
       # hardcoded name shim chainloads by default — even though we're chain-
