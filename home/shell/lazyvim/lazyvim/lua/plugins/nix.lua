@@ -17,17 +17,18 @@ return {
                 command = { "alejandra" },
                 timeout_ms = 5000,
               },
-              options = {
-                enable = true,
-                target = { "all" },
-                offline = true,
-                nixos = {
-                  expr = '(builtins.getFlake ("git+file://" + toString /home/olafkfreund/.config/nixos)).nixosConfigurations.p620.options',
-                },
-                home_manager = {
-                  expr = '(builtins.getFlake ("git+file://" + toString /home/olafkfreund/.config/nixos)).homeConfigurations."olafkfreund@p620".options',
-                },
-              },
+              options = (function()
+                local host = vim.fn.hostname()
+                local flake = '(builtins.getFlake ("git+file://" + toString /home/olafkfreund/.config/nixos))'
+                return {
+                  enable = true,
+                  target = { "all" },
+                  offline = true,
+                  nixos = {
+                    expr = flake .. ".nixosConfigurations." .. host .. ".options",
+                  },
+                }
+              end)(),
               diagnostics = {
                 enable = true,
                 ignored = {},
