@@ -17,6 +17,7 @@ in
     ./nixos/power.nix
     ./nixos/boot.nix
     ./nixos/secure-boot.nix # Secure Boot enabled with lanzaboote (issue #376)
+    ./nixos/shim.nix # Microsoft-signed shim + MOK enrollment for Razer's locked PK (issue #376)
     ./nixos/nvidia.nix
     ../common/nixos/i18n.nix
     ../common/nixos/hosts.nix
