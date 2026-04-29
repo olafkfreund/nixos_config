@@ -304,6 +304,41 @@ ELEV=(--elevation-strategy passwordless)
 # you might run this from razer while traveling with no network to p620.
 # If you want p620 to do the heavy lifting, run `nhs` from p620.
 
+# Try `nh os switch`. If it fails specifically because a critical-component
+# change (e.g. dbus → dbus-broker, init system swap, kernel ABI break) tripped
+# the NixOS pre-switch inhibitor, fall back to `nh os boot` so the new system
+# is staged for next boot — and tell the user to reboot.
+#
+# Without this fallback, the deploy fails AFTER the lock is already on main,
+# leaving the user to run a separate `nh os boot` manually. After the user
+# reboots once, the inhibiting change is "done" and future `switch` calls
+# work normally — this is a one-time pain per critical change.
+nh_switch_or_boot() {
+  # Args: nh os switch arguments (e.g. --hostname razer [--target-host razer] .)
+  local out rc
+  out=$(mktemp)
+  set +e
+  nh os switch "${ELEV[@]}" "$@" 2>&1 | tee "$out"
+  rc=${PIPESTATUS[0]}
+  set -e
+  if [ "$rc" -ne 0 ] && grep -qE "switchInhibitors|Pre-switch checks failed" "$out"; then
+    warn "switch refused: a critical-component change requires a reboot."
+    log "falling back to: nh os boot $*"
+    if ! nh os boot "${ELEV[@]}" "$@"; then
+      rm -f "$out"
+      err "boot fallback also failed — investigate."
+    fi
+    rm -f "$out"
+    warn "============================================================"
+    warn "REBOOT REQUIRED on ${HOST} to complete this deployment."
+    warn "Run:  ssh ${HOST} 'sudo systemctl reboot'   (or local reboot)"
+    warn "============================================================"
+    return 0
+  fi
+  rm -f "$out"
+  return "$rc"
+}
+
 # --no-deploy: lock is committed and closure is built+cached locally. Skip
 # the activation step and tell the user how to finish later. The cached
 # closure means stage 2 is a fast copy+activate (no rebuild).
@@ -317,7 +352,7 @@ fi
 case "$MODE" in
   local)
     log "nh os switch --hostname ${HOST} .  (local target, local build)"
-    if ! nh os switch "${ELEV[@]}" --hostname "$HOST" .; then
+    if ! nh_switch_or_boot --hostname "$HOST" .; then
       err "local switch failed — commit is on origin/main. Investigate via \`journalctl -xe\` or rollback via \`nh os rollback\`."
     fi
     ;;
@@ -325,7 +360,7 @@ case "$MODE" in
     # For remote targets, --target-host routes the activation over SSH.
     # Build happens on this machine, closure ships via SSH.
     log "nh os switch --hostname ${HOST} --target-host ${HOST} .  (remote target, local build)"
-    if ! nh os switch "${ELEV[@]}" --hostname "$HOST" --target-host "$HOST" .; then
+    if ! nh_switch_or_boot --hostname "$HOST" --target-host "$HOST" .; then
       err "remote switch on ${HOST} failed — commit is on origin/main. SSH in and investigate: \`ssh ${HOST} 'journalctl -xe'\` or rollback via \`ssh ${HOST} 'nh os rollback'\`."
     fi
     ;;
