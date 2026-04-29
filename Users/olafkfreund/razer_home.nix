@@ -86,7 +86,7 @@ in
     desktop = {
       enable = true;
       zathura = true;
-      obsidian = true;
+      obsidian = false; # disabled — see #370 (electron-39 build broken upstream); per-user override that PR #371 missed
       flameshot = true;
       kooha = true;
       remotedesktop = true;
