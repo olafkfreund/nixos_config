@@ -23,6 +23,18 @@
   boot.initrd.compressor = "zstd";
   boot.initrd.compressorArgs = [ "-19" "-T0" ];
 
+  # Use systemd-based initrd. The legacy script-based initrd was timing out
+  # waiting for /dev/disk/by-uuid/<root> to appear on kernel 7.0.1 — udev
+  # ordering changes between 6.18 and 7.0 made the script-based wait fragile.
+  # systemd-initrd listens on udev events directly instead of polling, and is
+  # the recommended path for modern NVMe + NVIDIA setups.
+  boot.initrd.systemd.enable = true;
+
+  # Belt-and-braces: ensure NVMe-core is available in initrd. Linux 7.0
+  # split some functionality from the main `nvme` module into `nvme_core`;
+  # `nvme` (already from hardware-config) handles PCIe transport.
+  boot.initrd.availableKernelModules = [ "nvme_core" ];
+
   # Kernel: trying linuxPackages_latest (7.0.1) on razer because 6.18.24 has a
   # boot regression with nvidia-open-595.58.03 + RTX 3080 Laptop (Ampere) — gen
   # 2443 was built with 6.18.24 + nvidia-open and failed to boot. 6.18.22 is
