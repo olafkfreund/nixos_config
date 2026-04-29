@@ -16,7 +16,7 @@ in
     ./nixos/screens.nix
     ./nixos/power.nix
     ./nixos/boot.nix
-    # ./nixos/secure-boot.nix # Secure Boot enabled with lanzaboote
+    ./nixos/secure-boot.nix # Secure Boot enabled with lanzaboote (issue #376)
     ./nixos/nvidia.nix
     ../common/nixos/i18n.nix
     ../common/nixos/hosts.nix
