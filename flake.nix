@@ -63,9 +63,10 @@
     nix-snapd.url = "github:io12/nix-snapd";
     microvm.url = "github:astro/microvm.nix";
 
-    # Secure Boot
+    # Secure Boot — v0.4.1 broke against current nixpkgs (rust-1.78 toolchain
+    # fetch failure). v1.0.0 (released 2025-12-10) is the latest stable.
     lanzaboote = {
-      url = "github:nix-community/lanzaboote/v0.4.1";
+      url = "github:nix-community/lanzaboote/v1.0.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
