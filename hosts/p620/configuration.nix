@@ -251,18 +251,9 @@ in
       # Enable MCP (Model Context Protocol) servers for AI integration
       mcp = {
         enable = true;
-        # Enable Obsidian MCP server for knowledge base access
-        obsidian = {
-          enable = true;
-          implementation = "rest-api"; # Use REST API mode for full CRUD operations
-          vaultPath = "/home/olafkfreund/Documents/Caliti"; # Used for zero-dependency mode
-          restApi = {
-            apiKeyFile = config.age.secrets."obsidian-api-key".path;
-            host = "localhost";
-            port = 27123;
-            verifySsl = true;
-          };
-        };
+        # Obsidian MCP server — disabled while pkgs.obsidian is unavailable (see #370).
+        # Re-enable with the surrounding hosts/p620/configuration.nix obsidian = true flip.
+        obsidian.enable = false;
         # Enable Atlassian MCP server for Jira and Confluence integration
         atlassian = {
           enable = true;
@@ -313,7 +304,7 @@ in
     programs = {
       lazygit = true;
       thunderbird = false;
-      obsidian = true;
+      obsidian = false; # disabled — see #370 (electron-39 build broken upstream)
       office = true;
       webcam = true;
       print = true;

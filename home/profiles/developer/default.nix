@@ -55,7 +55,7 @@
     desktop = {
       enable = true; # Full desktop environment for development
       zathura = true; # PDF viewer for documentation
-      obsidian = true; # Note-taking and project documentation
+      obsidian = false; # disabled — see #370 (electron-39 build broken upstream)
       flameshot = true; # Screenshots for documentation
       kooha = true; # Screen recording for demos
       remotedesktop = true; # Remote development access
