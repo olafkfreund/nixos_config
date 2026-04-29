@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ config, pkgs, ... }: {
   # Boot optimizations
   boot.loader.systemd-boot = {
     enable = true;
@@ -23,8 +23,13 @@
   boot.initrd.compressor = "zstd";
   boot.initrd.compressorArgs = [ "-19" "-T0" ];
 
-  # Use kernel 6.18 for NVIDIA driver compatibility and newer hardware support
-  boot.kernelPackages = pkgs.linuxPackages_6_18;
+  # Kernel: trying linuxPackages_latest (7.0.1) on razer because 6.18.24 has a
+  # boot regression with nvidia-open-595.58.03 + RTX 3080 Laptop (Ampere) — gen
+  # 2443 was built with 6.18.24 + nvidia-open and failed to boot. 6.18.22 is
+  # known-good (gen 2438, currently running). 6.17/6.19 are EOL'd in nixpkgs.
+  # If 7.0.1 also fails to boot, fall back to pinning 6.18.22 via a separate
+  # nixpkgs flake input. See: https://github.com/nixos/nixpkgs/issues/493618
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   boot.plymouth.enable = true;
   boot.kernel.sysctl."vm.nr_hugepages" = 1024;
@@ -33,7 +38,7 @@
   # };
   # OBS Virtual Cam Support - v4l2loopback setup
   boot.kernelModules = [ "v4l2loopback" ];
-  boot.extraModulePackages = with pkgs.linuxPackages_6_18; [ v4l2loopback ];
+  boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
   boot.extraModprobeConfig = ''
     options v4l2loopback devices=3 video_nr=1,2,10 card_label="OBS Virtual Cam 1","OBS Virtual Cam 2","COSMIC Camera" exclusive_caps=1,1,1
   '';
