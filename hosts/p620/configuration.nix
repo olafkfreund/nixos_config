@@ -182,6 +182,7 @@ in
       devshell = true; # Temporarily disabled due to patch issue
       python = true;
       nodejs = true;
+      precommit = true; # Activates modules/development/pre-commit.nix — installs markdownlint, statix, taplo, yamllint, ruff, etc. system-wide.
     };
 
     gnome-remote-desktop = {

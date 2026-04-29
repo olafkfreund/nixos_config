@@ -599,6 +599,18 @@ with lib; {
         nhs() {
           (cd ~/.config/nixos && just update-commit-deploy "$@")
         }
+
+        # nhsb: stage 1 of split deploy — build + commit + PR-merge without
+        # switching. Use when the target is offline (e.g. razer is off-network).
+        # Later run `nhs HOST` to deploy — build will be a cache hit, only
+        # copy + activate over SSH remains.
+        #
+        # Usage:
+        #   nhsb razer            # bump nixpkgs, build razer, commit, no deploy
+        #   nhsb razer all        # update all inputs, prebuild razer, no deploy
+        nhsb() {
+          (cd ~/.config/nixos && just update-commit "$@")
+        }
       '';
 
       # Optimized Oh My Zsh configuration with essential plugins only

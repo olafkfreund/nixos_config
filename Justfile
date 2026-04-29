@@ -41,6 +41,11 @@ update-flake:
 update-commit-deploy HOST="$(hostname)" SCOPE="nixpkgs":
     ./scripts/update-commit-deploy.sh {{HOST}} {{SCOPE}}
 
+# Stage 1 of split deploy: bump lock + build + commit + PR-merge, no switch.
+# Use when the target host is offline; later `nhs HOST` does the deploy.
+update-commit HOST="$(hostname)" SCOPE="nixpkgs":
+    ./scripts/update-commit-deploy.sh {{HOST}} {{SCOPE}} --no-deploy
+
 # Preview updates with detailed package changes (before building)
 preview-updates HOST="$(hostname)":
     @echo "🔍 Previewing updates for {{HOST}}..."

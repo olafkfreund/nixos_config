@@ -65,20 +65,25 @@ Both invoke the same script: `scripts/update-commit-deploy.sh`.
 
 - **Never orphan a lock.** Commit + push happen BEFORE switch. If push fails, abort before any deploy.
 - **Dirty-tree safety.** Refuses to run if unrelated dirty files exist — forces you to clean up first.
-- **Build-first.** Test-build must succeed before any commit. Build failure = lock stays dirty, nothing committed, nothing deployed.
+- **Build-first.** Test-build must succeed before any commit. Build failure = lock stays dirty, nothing committed,
+  nothing deployed.
 - **Freshness-aware.** If the lock is unchanged but the target host is behind, deploys anyway.
 - **Fails loud.** Every failure path prints a clear remediation hint and rolls back to a sane state.
 
 ## Remote host requirements
 
 - SSH alias in `~/.ssh/config` (or fully-qualified name)
-- `~/.config/nixos` on the remote is a git clone of this repo with no local edits (the script's freshness check only reads `/run/current-system`; the actual deploy is handled by `nh os switch --target-host`, which ships the closure over SSH from your local machine)
-- Passwordless sudo for your user OR `nh`'s elevation strategy kicks in (we already have `NOPASSWD: ALL` on p620/razer/p510)
+- `~/.config/nixos` on the remote is a git clone of this repo with no local edits (the script's freshness check only
+  reads `/run/current-system`; the actual deploy is handled by `nh os switch --target-host`, which ships the closure
+  over SSH from your local machine)
+- Passwordless sudo for your user OR `nh`'s elevation strategy kicks in (we already have `NOPASSWD: ALL` on
+  p620/razer/p510)
 - SSH key loaded in `ssh-agent` (no password prompts)
 
 ## The `nhs` shortcut
 
-`nhs` is a zsh function defined in `home/shell/zsh.nix`. It wraps `just update-commit-deploy` so the muscle-memory alias works the same way from any directory:
+`nhs` is a zsh function defined in `home/shell/zsh.nix`. It wraps `just update-commit-deploy` so the muscle-memory
+alias works the same way from any directory:
 
 ```zsh
 nhs() {
@@ -86,7 +91,8 @@ nhs() {
 }
 ```
 
-Before 2026-04-21 `nhs` was `alias nhs="nh os switch"` — a raw `nh` invocation. The new form adds lock commit + freshness check + push safety.
+Before 2026-04-21 `nhs` was `alias nhs="nh os switch"` — a raw `nh` invocation. The new form adds lock commit +
+freshness check + push safety.
 
 ## Examples
 
@@ -112,11 +118,39 @@ $ nhs razer home-manager
 $ nhs $(hostname) all
 ```
 
+## Split deploy: build now, deploy later (`nhsb` / `--no-deploy`)
+
+If the target host is offline (e.g. razer is off-network), you can still bump
+the lock and pre-build its closure on this machine, then deploy when the host
+comes back. Two stages:
+
+```bash
+# Stage 1 (now, target offline): bump lock + build + commit + PR-merge.
+# Skips the SSH reachability check and the final `nh os switch`.
+nhsb razer                  # or: just update-commit razer
+
+# Stage 2 (later, target online): cache-hit build + copy + activate.
+nhs razer
+```
+
+Why this works: Nix is content-addressed, so the closure built in stage 1 lives
+in your local `/nix/store`. In stage 2, `nh os switch` re-evaluates and finds
+every derivation already built — no rebuild, only `nix copy` over SSH and
+activation.
+
+Stage 1 still commits `flake.lock` to `main` via the same PR-merge flow as the
+full command, so your tree is clean afterwards and you can deploy other hosts
+in between without dirty-lock drift.
+
+If the lock is unchanged when you run `nhsb`, it exits "nothing to prebuild"
+without doing wasted work — there's no point pre-building a closure for an
+unreachable host when nothing changed.
+
 ## Files
 
-- `scripts/update-commit-deploy.sh` — the script
-- `Justfile` — `update-commit-deploy` recipe
-- `home/shell/zsh.nix` — `nhs` function
+- `scripts/update-commit-deploy.sh` — the script (`--no-deploy` flag for stage 1)
+- `Justfile` — `update-commit-deploy` and `update-commit` recipes
+- `home/shell/zsh.nix` — `nhs` and `nhsb` functions
 
 ## Related
 
