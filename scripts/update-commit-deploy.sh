@@ -35,8 +35,27 @@
 
 set -euo pipefail
 
-HOST="${1:-$(hostname)}"
-SCOPE="${2:-nixpkgs}"
+# --- Argument parsing -------------------------------------------------------
+# Positional args: HOST [SCOPE]. Flag --no-deploy can appear anywhere.
+# --no-deploy: run update + build + commit + PR-merge but skip the final
+# `nh os switch`. Use this to prepare a deploy while the target host is
+# offline; later run `nhs HOST` (or this same script without --no-deploy)
+# when it's reachable — the build will be a cache hit, only copy+activate
+# remains. See docs/UPDATE-DEPLOY.md.
+NO_DEPLOY=0
+positional=()
+for arg in "$@"; do
+  case "$arg" in
+    --no-deploy) NO_DEPLOY=1 ;;
+    --*)
+      printf "!! unknown flag: %s\n" "$arg" >&2
+      exit 2
+      ;;
+    *) positional+=("$arg") ;;
+  esac
+done
+HOST="${positional[0]:-$(hostname)}"
+SCOPE="${positional[1]:-nixpkgs}"
 
 # Resolve repo root from script location.
 cd "$(dirname "$0")/.."
@@ -74,11 +93,15 @@ if [ "$HOST" = "$(hostname)" ]; then
   MODE=local
 else
   MODE=remote
-  log "pre-flight: SSH reachability check for remote host '$HOST'"
-  if ! ssh -o ConnectTimeout=5 -o BatchMode=yes "$HOST" true 2>/dev/null; then
-    err "cannot reach '$HOST' via SSH. Fix DNS / SSH config / host availability and retry."
+  if [ $NO_DEPLOY -eq 0 ]; then
+    log "pre-flight: SSH reachability check for remote host '$HOST'"
+    if ! ssh -o ConnectTimeout=5 -o BatchMode=yes "$HOST" true 2>/dev/null; then
+      err "cannot reach '$HOST' via SSH. Fix DNS / SSH config / host availability and retry."
+    fi
+    ok "SSH to $HOST works"
+  else
+    log "skipping SSH reachability check (--no-deploy: target may be offline)"
   fi
-  ok "SSH to $HOST works"
 fi
 
 # --- 2. Snapshot pre-update state -------------------------------------------
@@ -134,6 +157,14 @@ fi
 # --- 6. Nothing-to-do exit --------------------------------------------------
 if [ $LOCK_CHANGED -eq 0 ] && [ $HOST_STALE -eq 0 ]; then
   ok "no lock changes AND ${HOST} already on ${expected##*/} — nothing to do."
+  exit 0
+fi
+
+# In --no-deploy mode the deploy isn't happening, so HOST_STALE alone isn't
+# reason to do work — only the lock matters. (Without this, an unreachable
+# host short-circuits to HOST_STALE=1, which would trigger a wasted build.)
+if [ $NO_DEPLOY -eq 1 ] && [ $LOCK_CHANGED -eq 0 ]; then
+  ok "no lock changes — nothing to prebuild (--no-deploy)."
   exit 0
 fi
 
@@ -272,6 +303,16 @@ ELEV=(--elevation-strategy passwordless)
 # was invoked from). Intentionally NOT routing builds through p620, because
 # you might run this from razer while traveling with no network to p620.
 # If you want p620 to do the heavy lifting, run `nhs` from p620.
+
+# --no-deploy: lock is committed and closure is built+cached locally. Skip
+# the activation step and tell the user how to finish later. The cached
+# closure means stage 2 is a fast copy+activate (no rebuild).
+if [ $NO_DEPLOY -eq 1 ]; then
+  ok "prebuild complete. lock is on origin/main; closure cached in local /nix/store."
+  log "to deploy when ${HOST} is reachable, run:  nhs ${HOST}"
+  log "  (build will be a cache hit; only copy + activate over SSH remains)"
+  exit 0
+fi
 
 case "$MODE" in
   local)

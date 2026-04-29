@@ -6,7 +6,12 @@
     "tables": false
   },
   "MD033": {
-    "allowed_elements": ["kbd", "br", "details", "summary"]
+    "allowed_elements": [
+      "kbd",
+      "br",
+      "details",
+      "summary"
+    ]
   },
   "MD041": false,
   "MD024": {
@@ -14,5 +19,8 @@
   },
   "MD029": {
     "style": "ordered"
+  },
+  "MD060": {
+    "style": "leading_and_trailing"
   }
 }
