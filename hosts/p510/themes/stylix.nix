@@ -1,44 +1,11 @@
-{ pkgs, lib, ... }:
-let
-  vars = import ../variables.nix { };
-in
-{
-  stylix = {
-    enable = true;
-    enableReleaseChecks = false; # Disable version mismatch warnings
-    autoEnable = true;
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/${vars.theme.scheme}.yaml";
-    image = vars.theme.wallpaper;
-    polarity = "dark";
-    targets = {
-      chromium.enable = false;
-      gtk.enable = false; # Let COSMIC manage GTK theming at runtime
-      qt = {
-        enable = true; # Enable Qt theming for consistent styling
-        platform = lib.mkForce "qtct"; # Use qtct platform (supported by stylix)
-      };
-    };
-    fonts = {
-      monospace = {
-        # Use the specific nerd-fonts package to ensure proper icons
-        package = pkgs.nerd-fonts.jetbrains-mono;
-        name = vars.theme.font.mono;
-      };
-      sansSerif = {
-        package = pkgs.noto-fonts;
-        name = vars.theme.font.sans;
-      };
-      serif = {
-        package = pkgs.noto-fonts;
-        name = vars.theme.font.serif;
-      };
-      sizes = vars.theme.font.sizes;
-    };
-    opacity = vars.theme.opacity;
-    cursor = {
-      name = vars.theme.cursor.name;
-      package = pkgs.bibata-cursors;
-      size = vars.theme.cursor.size;
-    };
-  };
+{ lib, ... }: {
+  # System-level Stylix configuration is shared across hosts via
+  # modules/desktop/stylix-theme.nix. p510 is a headless server so the
+  # GNOME target is overridden back to false.
+  imports = [ ../../../modules/desktop/stylix-theme.nix ];
+
+  host.theme.wallpaper = ./orange-desert.jpg;
+
+  # Headless server — no GNOME session to theme.
+  stylix.targets.gnome.enable = lib.mkForce false;
 }

@@ -42,15 +42,15 @@
   baseTheme = {
     scheme = "gruvbox-dark-medium";
     cursor = {
-      name = "Bibata-Modern-Ice";
-      size = 26;
+      name = "Bibata-Modern-Classic";
+      size = 16;
     };
     font = {
       mono = "Adwaita Mono";
       sans = "Noto Sans";
       serif = "Noto Serif";
       sizes = {
-        applications = 12;
+        applications = 11;
         terminal = 13;
         desktop = 12;
         popups = 12;
