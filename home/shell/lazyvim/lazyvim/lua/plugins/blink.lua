@@ -6,12 +6,12 @@ return {
       "rafamadriz/friendly-snippets",
       "folke/lazydev.nvim",
     },
-    -- Pin to 1.x releases so lazy.nvim picks up upstream's prebuilt Rust
-    -- matcher binary (linux-x86_64.gz asset on each release). Using `false`
-    -- (main HEAD) means no prebuilt is available, and since this is
-    -- Nix-managed nvim — no cargo in the runtime — blink falls back to the
-    -- Lua matcher and emits a loud warning on every startup.
-    version = "1.*",
+    -- Use the Nix-built plugin (vimPlugins.blink-cmp), which ships the
+    -- prebuilt libblink_cmp_fuzzy.so. The path is materialized by
+    -- home/shell/lazyvim/default.nix. Avoids lazy.nvim's release-binary
+    -- download (which fails in this env) and the Lua-fallback warning.
+    dir = vim.fn.expand("~/.local/share/nix-vim-plugins/blink.cmp"),
+    build = false,
     opts = {
       keymap = {
         preset = "enter",
