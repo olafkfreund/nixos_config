@@ -318,6 +318,15 @@ in
     user = vars.username;
   };
 
+  # Claude Code managed-settings.json — read-only baseline (issue #398).
+  # PARR hook lives here (highest precedence, cannot be disabled by the
+  # user via `claude` CLI). User-scope ~/.claude/settings.json remains
+  # writable for plugin installs and runtime mutations.
+  modules.programs.claude-code-managed = {
+    enable = true;
+    parrProtocol.enable = true;
+  };
+
   # Enable NixOS package monitoring tools
   tools.nixpkgs-monitors = {
     enable = true;

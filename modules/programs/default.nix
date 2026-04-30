@@ -12,6 +12,7 @@ _: {
     ./yt-x.nix # Terminal YouTube browser
     ./reddix.nix # Reddit TUI client
     ./chrome-pwa-icons.nix # Sync Chrome PWA icons into XDG hicolor (issue #397)
+    ./claude-code-managed.nix # Read-only Claude Code baseline at /etc/claude-code (issue #398)
     # ./streamcontroller.nix
     # ./thunar.nix
   ];
