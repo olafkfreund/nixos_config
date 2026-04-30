@@ -1,0 +1,108 @@
+name: Update Warp Terminal
+
+on:
+  schedule:
+    - cron: '0 7 * * *'  # Daily at 07:00 UTC (one hour after update-flake.yml)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-warp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Setup Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v7
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v15
+        with:
+          name: nix-community
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
+      - name: Run update script
+        id: update
+        run: |
+          set -e
+          ./scripts/update-warp-terminal.sh
+
+          versions_json=pkgs/warp-terminal/versions.json
+          if git diff --quiet -- "$versions_json"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Already on the latest stable Warp release."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Updated $versions_json:"
+            git --no-pager diff -- "$versions_json"
+            new_version=$(jq -r '.linux_x86_64.version' "$versions_json")
+            echo "version=$new_version" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build-test p620
+        if: steps.update.outputs.changed == 'true'
+        run: |
+          # Single-host build — warp-terminal is identical on all
+          # x86_64-linux hosts and does not interact with host config.
+          nix build \
+            .#nixosConfigurations.p620.config.system.build.toplevel \
+            --show-trace --no-link
+
+      - name: Create Pull Request
+        if: steps.update.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: >-
+            chore(warp-terminal): bump to
+            v${{ steps.update.outputs.version }}
+          title: >-
+            chore(warp-terminal): bump to
+            v${{ steps.update.outputs.version }}
+          body: |
+            ## Automated Warp Terminal Update
+
+            Bumps `pkgs/warp-terminal/versions.json` to
+            `v${{ steps.update.outputs.version }}`.
+
+            ### Source
+
+            Resolved via the redirect chain from
+            `app.warp.dev/download?package=pacman` (and `pacman_arm64`).
+            Hashes prefetched with `nix store prefetch-file`.
+
+            ### Verification
+
+            - [x] `nix build` of the p620 toplevel passed in CI
+
+            ### Deployment
+
+            After merge:
+            ```bash
+            just quick-deploy p620
+            ```
+          branch: chore/warp-terminal-update
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
+          assignees: olafkfreund
+          draft: false
+
+      - name: Report no updates
+        if: steps.update.outputs.changed == 'false'
+        run: |
+          echo "warp-terminal is already at the latest stable release."

@@ -280,6 +280,13 @@
         (final: _prev: {
           claude-code-native = final.callPackage ./pkgs/claude-code-native { };
         })
+        # Custom package: warp-terminal — track latest stable independently of nixpkgs.
+        # Bumped by .github/workflows/update-warp-terminal.yml (daily). Replaces the
+        # nixpkgs attribute by the same name so consumers (notably
+        # home/desktop/terminals/warp/default.nix) get our version transparently.
+        (final: _prev: {
+          warp-terminal = final.callPackage ./pkgs/warp-terminal { };
+        })
         # Custom package: gemini-cli - Google Gemini AI CLI tool
         (final: _prev: {
           gemini-cli = final.callPackage ./home/development/gemini-cli { };
