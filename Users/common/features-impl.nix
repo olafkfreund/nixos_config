@@ -18,6 +18,7 @@ in
       wezterm.enable = cfg.terminals.wezterm;
       kitty.enable = cfg.terminals.kitty;
       ghostty.enable = cfg.terminals.ghostty;
+      warp.enable = cfg.terminals.warp;
     })
 
     # Editor implementations

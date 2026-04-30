@@ -8,6 +8,7 @@ with lib; {
       wezterm = mkEnableOption "Enable Wezterm terminal";
       kitty = mkEnableOption "Enable Kitty terminal";
       ghostty = mkEnableOption "Enable Ghostty terminal";
+      warp = mkEnableOption "Enable Warp terminal";
     };
 
     editors = {

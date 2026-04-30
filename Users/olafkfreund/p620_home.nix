@@ -78,6 +78,7 @@
       wezterm = true;
       kitty = true;
       ghostty = true;
+      warp = true;
     };
 
     editors = {
