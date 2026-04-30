@@ -77,6 +77,7 @@ jobs:
           echo "Scanning for security issues..."
 
           # Check for hardcoded passwords (exclude safe patterns and archived code)
+          # shellcheck disable=SC2016 # backslash-dollar is intentional regex literal, not parameter expansion
           if grep -r 'password\s*=\s*"[^"]\+"' . --include="*.nix" --exclude-dir=".git" --exclude-dir="archive" \
             | grep -v 'hashedPassword\|passwordFile\|password\s*=\s*""\|password\s*=\s*"nixos"\|onepassword\|secrets\|age\.secrets\|\$__file\|lib/live-images.nix\|modules/installer'; then
             echo "FAIL: Potential hardcoded passwords found"
@@ -109,7 +110,7 @@ jobs:
           echo "Checking documentation..."
 
           # Check if README exists and has minimum content
-          if [ -f "README.md" ] && [ $(wc -l < README.md) -gt 50 ]; then
+          if [ -f "README.md" ] && [ "$(wc -l < README.md)" -gt 50 ]; then
             echo "PASS: README.md is present and substantial"
           else
             echo "WARNING: README.md is missing or too short"
@@ -155,10 +156,10 @@ jobs:
 
       - name: Nix linting check
         run: |
-          echo "Linting Nix code..."
+          echo "Linting Nix code with nixpkgs-lint-community (tree-sitter)..."
 
-          nix shell nixpkgs#statix -c bash -c '
-            if statix check . ; then
+          nix shell nixpkgs#nixpkgs-lint-community -c bash -c '
+            if nixpkgs-lint . ; then
               echo "PASS: No linting issues found"
             else
               echo "WARNING: Linting issues detected"

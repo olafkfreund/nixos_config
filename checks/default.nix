@@ -5,14 +5,14 @@
 }:
 with lib; {
   # Syntax and style validation
-  statix-lint =
-    pkgs.runCommand "statix-validation"
+  nixpkgs-lint-check =
+    pkgs.runCommand "nixpkgs-lint-validation"
       {
         src = cleanSource ../.;
       } ''
-      echo "Running statix lint checks..."
-      ${pkgs.statix}/bin/statix check $src --format=stderr || {
-        echo "Statix found linting issues (warnings allowed)"
+      echo "Running nixpkgs-lint-community (tree-sitter) checks..."
+      ${pkgs.nixpkgs-lint-community}/bin/nixpkgs-lint $src || {
+        echo "nixpkgs-lint found linting issues (warnings allowed)"
       }
       touch $out
     '';
