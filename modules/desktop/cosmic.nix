@@ -139,7 +139,7 @@ in
           wrapCosmicApp = name: pkg: pkgs.symlinkJoin {
             name = "${name}-wrapped";
             paths = [ pkg ];
-            buildInputs = [ pkgs.makeWrapper ];
+            nativeBuildInputs = [ pkgs.makeWrapper ];
             postBuild = ''
               wrapProgram $out/bin/${name} \
                 --prefix LD_LIBRARY_PATH : "${waylandLibs}"

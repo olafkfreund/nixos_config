@@ -247,7 +247,7 @@
   # Development utilities
   dev-utils = pkgs.writeShellApplication {
     name = "nixos-dev-utils";
-    runtimeInputs = with pkgs; [ nix git nixpkgs-fmt statix deadnix ];
+    runtimeInputs = with pkgs; [ nix git nixpkgs-fmt nixpkgs-lint-community deadnix ];
     text = ''
       #!/bin/bash
 
@@ -277,8 +277,8 @@
           echo "✅ Formatting completed"
           ;;
         lint)
-          echo "Running linting checks..."
-          statix check --format=stderr || echo "Linting completed with warnings"
+          echo "Running linting checks (nixpkgs-lint, tree-sitter)..."
+          nixpkgs-lint . || echo "Linting completed with warnings"
           ;;
         check-dead)
           echo "Checking for dead code..."

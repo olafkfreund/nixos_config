@@ -48,7 +48,7 @@ in
     ];
 
     # Warnings for deprecated options
-    warnings = optional (cfg.extraConfig != "") [
+    warnings = optionals (cfg.extraConfig != "") [
       "extraConfig option is deprecated, use settings instead"
     ];
   };
