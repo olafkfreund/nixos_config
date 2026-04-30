@@ -21,7 +21,7 @@ let
   wrappedPackage = pkgs.symlinkJoin {
     name = "cosmic-ext-applet-radio-wrapped";
     paths = [ cfg.package ];
-    buildInputs = [ pkgs.makeWrapper ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
       wrapProgram $out/bin/cosmic-ext-applet-radio \
         --prefix LD_LIBRARY_PATH : "${waylandLibs}"
