@@ -22,7 +22,7 @@
   # Git tools
   programs.lazygit.enable = lib.mkForce true;
   programs.thunderbird.enable = lib.mkForce false;
-  programs.obsidian.enable = lib.mkForce false; # disabled — see #370 (electron-39 build broken upstream)
+  programs.obsidian.enable = lib.mkForce true;
   programs.office.enable = lib.mkForce true;
   programs.webcam.enable = lib.mkForce true;
 

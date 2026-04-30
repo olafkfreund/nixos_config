@@ -252,9 +252,11 @@ in
       # Enable MCP (Model Context Protocol) servers for AI integration
       mcp = {
         enable = true;
-        # Obsidian MCP server — disabled while pkgs.obsidian is unavailable (see #370).
-        # Re-enable with the surrounding hosts/p620/configuration.nix obsidian = true flip.
-        obsidian.enable = false;
+        obsidian = {
+          enable = true;
+          implementation = "rest-api";
+          restApi.apiKeyFile = config.age.secrets."obsidian-api-key".path;
+        };
         # Enable Atlassian MCP server for Jira and Confluence integration
         atlassian = {
           enable = true;
@@ -305,7 +307,7 @@ in
     programs = {
       lazygit = true;
       thunderbird = false;
-      obsidian = false; # disabled — see #370 (electron-39 build broken upstream)
+      obsidian = true;
       office = true;
       webcam = true;
       print = true;
