@@ -62,18 +62,20 @@
 
   programs.home-manager.enable = true;
 
-  # Stylix configuration (Home Manager level) - re-enabled after upstream cache fix
-  stylix.enableReleaseChecks = false;
-
-  # Stylix theming targets configuration
-  # - Enable for terminals (wezterm, ghostty)
-  # - Disable GTK to let COSMIC desktop manage gtk.css files at runtime
-  #   COSMIC generates ~/.config/gtk-{3,4}.0/cosmic/dark.css and symlinks gtk.css to it
+  # Stylix theming targets (Home Manager level).
+  # `enableReleaseChecks = false` is set once in modules/desktop/stylix-theme.nix
+  # at the system level — no need to repeat it here.
+  #
+  # COSMIC firewall: gtk.enable stays false so HM never writes
+  # ~/.config/gtk-{3,4}.0/gtk.css. cosmic-comp owns that path at runtime
+  # (symlinks gtk.css to its own ~/.config/gtk-4.0/cosmic/dark.css). GNOME
+  # themes correctly without it via Stylix's targets.gnome (gsettings + theme
+  # package).
   stylix.targets = {
     wezterm.enable = true;
     ghostty.enable = true;
-    gtk.enable = false; # Let COSMIC manage GTK theming (writes to cosmic/dark.css)
-    qt.enable = false; # Let home/desktop/theme/qt.nix manage Qt theming
+    gtk.enable = false; # COSMIC firewall — see comment above
+    qt.enable = false; # Qt theming handled by home/desktop/theme/qt.nix
   };
 
   # COSMIC GTK theme fix - auto-patches COSMIC's gtk.css with Gruvbox theme
