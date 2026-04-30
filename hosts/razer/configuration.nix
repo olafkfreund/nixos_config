@@ -310,6 +310,14 @@ in
     autoConfigureClaudeDesktop = true;
   };
 
+  # Auto-sync Chrome PWA icons into the XDG hicolor tree (issue #397).
+  # Chrome stores PWA PNG files inside its profile dir, which no launcher indexes;
+  # this module symlinks them where COSMIC/GNOME can find them.
+  modules.programs.chrome-pwa-icons = {
+    enable = true;
+    user = vars.username;
+  };
+
   # Enable NixOS package monitoring tools
   tools.nixpkgs-monitors = {
     enable = true;

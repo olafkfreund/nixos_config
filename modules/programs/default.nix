@@ -11,6 +11,7 @@ _: {
     ./droidcam.nix
     ./yt-x.nix # Terminal YouTube browser
     ./reddix.nix # Reddit TUI client
+    ./chrome-pwa-icons.nix # Sync Chrome PWA icons into XDG hicolor (issue #397)
     # ./streamcontroller.nix
     # ./thunar.nix
   ];
