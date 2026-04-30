@@ -12,8 +12,8 @@
 #
 # Hashes: nix store prefetch-file --json | jq -r '.hash' (SRI-format).
 #
-# Wired into the derivation as passthru.updateScript and called daily by
-# .github/workflows/update-warp-terminal.yml.
+# Wired into the derivation as passthru.updateScript. Typical workflow:
+#   ./scripts/update-warp-terminal.sh && nhs p620   # bump + deploy
 
 set -euo pipefail
 

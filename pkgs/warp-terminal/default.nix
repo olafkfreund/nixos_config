@@ -1,9 +1,10 @@
 # warp-terminal — custom-tracked latest stable.
 #
 # Mirrors upstream nixpkgs pkgs/by-name/wa/warp-terminal/package.nix, minus
-# Darwin (we don't run macOS hosts). versions.json is bumped daily by
-# ../../scripts/update-warp-terminal.sh (also wired via passthru.updateScript)
-# and a GitHub Actions workflow at .github/workflows/update-warp-terminal.yml.
+# Darwin (we don't run macOS hosts). versions.json is bumped by
+# ../../scripts/update-warp-terminal.sh, which is also wired in as
+# passthru.updateScript. Run it before `nhs <host>` whenever you want the
+# latest Warp release.
 #
 # Registered as an overlay in flake.nix so pkgs.warp-terminal everywhere in
 # the repo (notably home/desktop/terminals/warp/default.nix) resolves here.
