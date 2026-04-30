@@ -9,7 +9,7 @@ with lib; let
   cfg = {
     # Note-taking and knowledge management
     notes = {
-      obsidian = false; # disabled — see #370 (electron-39 build broken upstream)
+      obsidian = true;
       logseq = false; # Block-based notes
       zettlr = false; # Academic writing
       notable = false; # Markdown notes

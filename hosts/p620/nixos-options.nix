@@ -23,7 +23,7 @@
   programs = {
     lazygit.enable = lib.mkForce true;
     thunderbird.enable = lib.mkForce false;
-    obsidian.enable = lib.mkForce false; # disabled — see #370 (electron-39 build broken upstream)
+    obsidian.enable = lib.mkForce true;
     office.enable = lib.mkForce true;
     webcam.enable = lib.mkForce true; # OBS Virtual Camera support
   };
