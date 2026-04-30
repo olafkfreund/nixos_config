@@ -103,6 +103,7 @@ in
   imports = [
     ./ghostty
     ./wezterm
+    ./warp
   ];
 
   # Backward compatibility options for individual terminals

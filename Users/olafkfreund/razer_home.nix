@@ -64,6 +64,7 @@ in
       wezterm = true;
       kitty = false;
       ghostty = false;
+      warp = true;
     };
 
     editors = {
