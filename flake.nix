@@ -110,11 +110,6 @@
     };
 
     # COSMIC Desktop applets
-    # cosmic-package-updater - Disabled: removed from active config
-    # cosmic-package-updater = {
-    #   url = "github:olafkfreund/cosmic-applet-package-updater";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
     cosmic-music-player = {
       url = "github:olafkfreund/cosmic-applet-music-player";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -136,23 +131,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # COSMIC Notifications NG - Disabled: removed from active config
-    # cosmic-ext-notifications = {
-    #   url = "github:olafkfreund/cosmic-ext-notifications-ng";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
-    # COSMIC BG - Disabled: pending upstream fix for startup race condition
-    # See: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
-    # cosmic-ext-bg = {
-    #   url = "github:olafkfreund/cosmic-ext-bg";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
-    # COSMIC RDP Server - Disabled: removed from active config
-    # cosmic-ext-rdp-server.url = "github:olafkfreund/cosmic-ext-rdp-server";
-    # cosmic-portal-rdp.url = "github:olafkfreund/xdg-desktop-portal-cosmic";
-    # cosmic-comp-rdp.url = "github:olafkfreund/cosmic-ext-comp-rdp";
   };
 
   outputs =
@@ -259,11 +237,6 @@
         })
         # COSMIC Connect - KDE Connect alternative for COSMIC Desktop
         inputs.cosmic-ext-connect.overlays.default
-        # COSMIC Notifications NG - Disabled: removed from active config
-        # inputs.cosmic-ext-notifications.overlays.default
-        # COSMIC BG NG - Disabled pending upstream fix for startup race condition
-        # See: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
-        # inputs.cosmic-ext-bg.overlays.default
         # Custom package: glim - GitLab CI/CD TUI
         (final: _prev: {
           glim = final.callPackage ./overlays/glim { };
@@ -499,8 +472,6 @@
               inputs.lanzaboote.nixosModules.lanzaboote
               nix-index-database.nixosModules.nix-index
               inputs.cosmic-ext-connect.nixosModules.default
-              # inputs.cosmic-ext-notifications.nixosModules.default  # Disabled: removed from active config
-              # inputs.cosmic-ext-bg.nixosModules.default  # Disabled: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
               # cosmic-ext-applet-radio: local module workaround for upstream mkPackageOption 'description' arg bug
               ./modules/services/cosmic-ext-radio-applet
               ./home/shell/zellij/zjstatus.nix
