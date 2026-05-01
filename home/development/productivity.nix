@@ -4,7 +4,8 @@
 , lib
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf mkDefault mkMerge optional optionalString flatten;
   # Productivity configuration
   cfg = {
     # Note-taking and knowledge management

@@ -1,8 +1,7 @@
 { config, lib, pkgs, ... }:
 
-with lib;
-
 let
+  inherit (lib) mkOption mkIf mkEnableOption types optional optionalString;
   cfg = config.services.nixos-update-checker;
 
   # Update checker script
@@ -326,7 +325,7 @@ in
   };
 
   meta = {
-    maintainers = with maintainers; [ ];
+    maintainers = with lib.maintainers; [ ];
     # Documentation available in README.md
   };
 }

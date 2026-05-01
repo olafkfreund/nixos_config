@@ -4,7 +4,8 @@
 , host ? "default"
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf mkEnableOption mkDefault optionals optionalString;
   # Import host-specific variables if available
   hostVars =
     if builtins.pathExists ../../../hosts/${host}/variables.nix

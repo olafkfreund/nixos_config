@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
-with lib;
 let
+  inherit (lib) mkOption mkIf mkEnableOption types;
   cfg = config.gtk-cosmic-fix;
 
   # Button fixes CSS content - uses !important to override Adwaita defaults

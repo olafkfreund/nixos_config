@@ -2,7 +2,8 @@
 , lib
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption types;
   cfg = config.ai.providers;
 in
 {

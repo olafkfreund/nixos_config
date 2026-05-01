@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption types optionals;
   cfg = config.features.email.auth;
   emailCfg = config.features.email;
 in

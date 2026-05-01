@@ -3,7 +3,9 @@
 , nixpkgs
 ,
 }:
-with lib;
+let
+  inherit (lib) mapAttrs genAttrs hasAttr;
+in
 let
   # Create a system-specific package set with our overlays
   mkPkgs = system: overlays:

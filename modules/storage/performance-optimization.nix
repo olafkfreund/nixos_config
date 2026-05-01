@@ -4,7 +4,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption mkDefault types optionalString;
   cfg = config.storage.performanceOptimization;
 in
 {

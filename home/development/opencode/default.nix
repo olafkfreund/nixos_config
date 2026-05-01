@@ -41,10 +41,10 @@ stdenv.mkDerivation rec {
     runHook postInstall
   '';
 
-  meta = with lib; {
+  meta = {
     description = "AI coding agent for the terminal";
     homepage = "https://opencode.ai";
-    license = licenses.mit;
+    license = lib.licenses.mit;
     maintainers = [ ];
     platforms = [ "x86_64-linux" ];
     mainProgram = "opencode";

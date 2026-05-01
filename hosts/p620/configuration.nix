@@ -101,12 +101,6 @@ in
 
   # AI production dashboard and load testing removed - were non-functional services consuming resources
 
-  # Enable NixOS package monitoring tools
-  tools.nixpkgs-monitors = {
-    enable = true;
-    installAll = true;
-  };
-
   # AI alerting removed - was non-functional, handled by DEX5550 monitoring server via Prometheus/Grafana/Alertmanager
 
   # NVIDIA GeForce NOW cloud gaming (official Flatpak)
@@ -260,7 +254,6 @@ in
       webcam = true;
       print = true;
       yt-x.enable = true; # Terminal YouTube browser
-      reddix.enable = true; # Reddit TUI client
     };
 
     media = {
@@ -278,15 +271,6 @@ in
       useCosmicGreeter = true; # Using COSMIC Greeter as display manager
       defaultSession = true; # Set COSMIC as default session
       installAllApps = true;
-    };
-
-    # COSMIC Package Updater Applet - NixOS update notifications
-    desktop.cosmic-applet-package-updater = {
-      enable = true;
-      autoCheck = true;
-      checkIntervalMinutes = 60;
-      nixosMode = "auto"; # Auto-detect flakes vs channels mode
-      enablePasswordlessChecks = false; # Require password for security
     };
 
     # Microsoft Intune Company Portal (custom package with version control)

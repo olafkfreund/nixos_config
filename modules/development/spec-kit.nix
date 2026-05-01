@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf mkEnableOption;
   cfg = config.features.development;
 
   # Create a wrapper script that uses uv to run spec-kit

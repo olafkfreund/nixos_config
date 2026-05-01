@@ -2,7 +2,8 @@
 , lib
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf mkMerge;
   cfg = config.features;
 in
 {

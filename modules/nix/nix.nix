@@ -1,9 +1,7 @@
-# Test comment to verify pre-commit flake-check hook
 { pkgs
 , lib
 , ...
 }:
-with lib;
 {
   system.autoUpgrade = {
     enable = true;

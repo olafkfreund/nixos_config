@@ -1,5 +1,5 @@
 { lib, ... }:
-with lib; {
+let inherit (lib) mkOption mkEnableOption types; in {
   options.features = {
     development = {
       enable = mkEnableOption "Enable development tools";

@@ -2,8 +2,7 @@
 # All 11+ language servers supported by Claude Code LSP (v2.0.74+)
 # Reference: https://www.aifreeapi.com/en/posts/claude-code-lsp
 
-{ pkgs, lib, ... }:
-with lib;
+{ pkgs, ... }:
 {
   home = {
     packages = with pkgs; [

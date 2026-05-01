@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption mkMerge types;
   cfg = config.editor.windsurf;
 
   # Helper function to format TOML manually since generators.toTOML is not available

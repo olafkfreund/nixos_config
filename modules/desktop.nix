@@ -8,7 +8,6 @@ _: {
     ./desktop/cloud-sync/default.nix
     ./desktop/gtk/default.nix
     ./desktop/cosmic.nix
-    ./desktop/cosmic-applet-package-updater.nix
     ./fonts/fonts.nix
   ];
 }

@@ -3,8 +3,8 @@
 , pkgs
 , ...
 }:
-with lib;
 let
+  inherit (lib) mkIf optionals;
   cfg = config.features.ai;
 in
 {

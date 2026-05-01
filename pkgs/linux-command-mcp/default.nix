@@ -64,11 +64,11 @@ stdenv.mkDerivation rec {
     chmod +x $out/lib/${pname}/dist/index.js
   '';
 
-  meta = with lib; {
+  meta = {
     description = "Linux Command MCP (Model Context Protocol) for secure command execution";
     homepage = "https://github.com/xkiranj/linux-command-mcp";
-    license = licenses.mit;
+    license = lib.licenses.mit;
     maintainers = [ ];
-    platforms = platforms.linux;
+    platforms = lib.platforms.linux;
   };
 }

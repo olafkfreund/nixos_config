@@ -5,7 +5,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption mkMerge types optionals;
   cfg = config.modules.fonts;
 in
 {

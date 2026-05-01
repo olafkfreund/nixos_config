@@ -122,7 +122,7 @@ stdenv.mkDerivation rec {
     runHook postInstall
   '';
 
-  meta = with lib; {
+  meta = {
     description = "Microsoft Intune Company Portal for Linux";
     longDescription = ''
       Microsoft Intune Company Portal allows you to enroll and manage Linux
@@ -149,8 +149,8 @@ stdenv.mkDerivation rec {
     '';
     homepage = "https://learn.microsoft.com/en-us/intune/intune-service/user-help/microsoft-intune-app-linux";
     changelog = "https://learn.microsoft.com/en-us/intune/intune-service/fundamentals/whats-new";
-    license = licenses.unfree;
-    maintainers = with maintainers; [ ];
+    license = lib.licenses.unfree;
+    maintainers = with lib.maintainers; [ ];
     platforms = [ "x86_64-linux" ];
     mainProgram = "intune-portal";
   };

@@ -1,6 +1,6 @@
 { config, lib, ... }:
-with lib;
 let
+  inherit (lib) mkIf mkEnableOption mkForce;
   cfg = config.features.gnome-remote-desktop;
 in
 {

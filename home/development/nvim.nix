@@ -5,7 +5,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf mkEnableOption flatten;
   cfg = config.editor.neovim;
 
   # Enhanced package support for LazyVim

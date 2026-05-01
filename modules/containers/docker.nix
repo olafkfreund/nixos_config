@@ -4,7 +4,8 @@
 , hostUsers ? [ ]
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption types genAttrs;
   cfg = config.modules.containers.docker;
 in
 {

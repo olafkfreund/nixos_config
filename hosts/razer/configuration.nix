@@ -262,7 +262,6 @@ in
       office = true;
       webcam = true; # OBS Virtual Camera support
       print = true;
-      reddix.enable = true; # Reddit TUI client
     };
 
     media = {
@@ -275,15 +274,6 @@ in
       useCosmicGreeter = true; # Using COSMIC Greeter as display manager
       defaultSession = true;
       installAllApps = true;
-    };
-
-    # COSMIC Package Updater Applet - NixOS update notifications
-    desktop.cosmic-applet-package-updater = {
-      enable = false;
-      autoCheck = true;
-      checkIntervalMinutes = 60;
-      nixosMode = "auto"; # Auto-detect flakes vs channels mode
-      enablePasswordlessChecks = false; # Require password for security
     };
 
     # Microsoft Intune Company Portal (custom package with version control)
@@ -325,12 +315,6 @@ in
   modules.programs.claude-code-managed = {
     enable = true;
     parrProtocol.enable = true;
-  };
-
-  # Enable NixOS package monitoring tools
-  tools.nixpkgs-monitors = {
-    enable = true;
-    installAll = true;
   };
 
   # Enable encrypted API keys

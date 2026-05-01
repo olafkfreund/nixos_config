@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption types;
   cfg = config.scrcpyWifi;
   # Script to automate adb Wi-Fi connection and launch scrcpy
   scrcpyWifiScript = pkgs.writeShellScriptBin "scrcpy-wifi" ''

@@ -3,7 +3,7 @@
 , username ? "olafkfreund"
 , ...
 }:
-with lib; {
+let inherit (lib) mkDefault; in {
   users.users.${username} = {
     isNormalUser = true;
     description = mkDefault "Olaf K-Freund";

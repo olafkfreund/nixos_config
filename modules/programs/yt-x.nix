@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
-with lib;
 let
+  inherit (lib) mkIf mkEnableOption;
   cfg = config.features.programs.yt-x;
 in
 {

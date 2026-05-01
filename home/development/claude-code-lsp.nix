@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption mkDefault mkMerge types;
   cfg = config.programs.claudeCode.lsp;
 
   # Init-template content for ~/.claude/settings.json. Written ONCE on

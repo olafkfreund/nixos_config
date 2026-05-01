@@ -3,7 +3,8 @@
 , lib
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf mkEnableOption;
   cfg = config.wezterm;
 in
 {

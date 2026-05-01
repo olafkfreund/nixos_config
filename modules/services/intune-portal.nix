@@ -1,8 +1,7 @@
 { config, lib, pkgs, ... }:
 
-with lib;
-
 let
+  inherit (lib) mkOption mkIf mkEnableOption types literalExpression;
   cfg = config.features.intune;
 in
 {

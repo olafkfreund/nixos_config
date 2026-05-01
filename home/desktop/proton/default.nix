@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
-with lib;
 let
+  inherit (lib) mkOption mkIf mkEnableOption types optionals;
   cfg = config.programs.proton;
 in
 {

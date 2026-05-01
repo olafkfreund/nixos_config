@@ -1,8 +1,7 @@
 { config, lib, pkgs, ... }:
 
-with lib;
-
 let
+  inherit (lib) mkIf mkEnableOption mkMerge;
   cfg = config.programs;
 in
 {

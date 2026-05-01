@@ -5,7 +5,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf mkEnableOption;
   cfg = config.multiplexer.tmux;
 
   # Modern Gruvbox theme with enhanced icons and performance

@@ -4,7 +4,7 @@
 , host ? null
 , ...
 }:
-with lib; {
+let inherit (lib) mkDefault optionalString; in {
   imports = [
     <nixpkgs/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix>
     ./installer-tools.nix

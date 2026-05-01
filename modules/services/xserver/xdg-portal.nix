@@ -5,7 +5,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption mkMerge types optionals optionalAttrs;
   cfg = config.modules.services.xdg-portal;
 in
 {
