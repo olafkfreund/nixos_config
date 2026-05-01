@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkAfter types;
   cfg = config.ai.providers.gemini;
 in
 {

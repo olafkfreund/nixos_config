@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption mkDefault types;
   cfg = config.modules.ai.gemini-cli;
   geminiCliPkg = pkgs.gemini-cli;
 in

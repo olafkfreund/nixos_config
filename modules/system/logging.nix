@@ -4,7 +4,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption types;
   cfg = config.system.logging;
 in
 {

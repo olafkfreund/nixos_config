@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf mkEnableOption;
   # Temperature dashboard script with proper dependencies
   tempDashboard = pkgs.writeShellScriptBin "temp-dashboard" ''
         #!/usr/bin/env bash

@@ -4,7 +4,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption types optionals elem;
   cfg = config.tools.nixpkgs-monitors;
 
   # Git-based comprehensive update checker

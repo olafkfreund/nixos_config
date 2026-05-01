@@ -2,8 +2,8 @@
 # Template for creating modules that manage systemd services
 { config, lib, pkgs, ... }:
 
-with lib;
 let
+  inherit (lib) mkOption mkIf mkEnableOption mkPackageOption types concatStringsSep;
   cfg = config.modules.services.service-name;
 in
 {

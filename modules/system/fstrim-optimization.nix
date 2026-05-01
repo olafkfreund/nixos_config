@@ -4,7 +4,8 @@
 , lib
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption types;
   cfg = config.services.fstrim-optimization;
 in
 {

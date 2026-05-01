@@ -2,8 +2,8 @@
 # Copy this template and customize for new modules
 { config, lib, pkgs, ... }:
 
-with lib;
 let
+  inherit (lib) mkOption mkIf mkEnableOption mkPackageOption types optionals;
   cfg = config.modules.category.module-name;
 in
 {
