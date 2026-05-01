@@ -27,11 +27,11 @@ buildNpmPackage rec {
   makeCacheWritable = true;
   npmFlags = [ "--legacy-peer-deps" ];
 
-  meta = with lib; {
+  meta = {
     description = "CLI tool for installing skills from Git repositories to AI coding agents";
     homepage = "https://github.com/vercel-labs/add-skill";
-    license = licenses.mit; # Assuming MIT, check repo
-    maintainers = with maintainers; [ ];
+    license = lib.licenses.mit; # Assuming MIT, check repo
+    maintainers = with lib.maintainers; [ ];
     mainProgram = "add-skill";
     broken = true;
   };

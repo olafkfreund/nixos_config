@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption mkMerge types optionals concatMapStringsSep;
   cfg = config.features.desktop.cosmic-remote-desktop;
 in
 {

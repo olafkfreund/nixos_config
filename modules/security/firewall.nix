@@ -4,7 +4,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption mkForce mkMerge types optionalString concatMapStringsSep hasAttr getAttr flatten;
   cfg = config.security.firewall;
 
   # Define service port groups for better organization

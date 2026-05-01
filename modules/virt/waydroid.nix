@@ -48,12 +48,12 @@ in
       inherit (cfg) package;
     };
 
-    # Install Waydroid and helper packages
-    environment.systemPackages = with pkgs; [
-      waydroid
-    ] ++ lib.optionals cfg.enableWaydroidHelper [
-      waydroid-helper
-    ];
+    # Use cfg.package (e.g. waydroid-nftables) so it matches the daemon
+    # installed by virtualisation.waydroid.enable; pkgs.waydroid is a
+    # different store path with the same name and collides on /share.
+    environment.systemPackages =
+      [ cfg.package ]
+      ++ lib.optionals cfg.enableWaydroidHelper [ pkgs.waydroid-helper ];
 
     # Enable waydroid-helper systemd service
     systemd = lib.mkIf cfg.enableWaydroidHelper {

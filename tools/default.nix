@@ -13,7 +13,7 @@
         echo "Usage: nix run .#deploy [COMMAND] [OPTIONS]"
         echo ""
         echo "Commands:"
-        echo "  host <name>     Deploy to specific host (p620, p510, razer, dex5550, samsung)"
+        echo "  host <name>     Deploy to specific host (p620, p510, razer)"
         echo "  all             Deploy to all hosts sequentially"
         echo "  parallel        Deploy to all hosts in parallel"
         echo "  quick <host>    Quick deploy (only if configuration changed)"
@@ -34,13 +34,13 @@
             exit 1
           fi
           case "$2" in
-            p620|p510|razer|dex5550|samsung)
+            p620|p510|razer)
               echo "Deploying to host: $2"
               just "$2"
               ;;
             *)
               echo "Error: Invalid host '$2'"
-              echo "Available hosts: p620, p510, razer, dex5550, samsung"
+              echo "Available hosts: p620, p510, razer"
               exit 1
               ;;
           esac
@@ -177,7 +177,7 @@
         echo "  all             Build live USB images for all hosts"
         echo "  list            List available host configurations"
         echo ""
-        echo "Available hosts: p620, p510, razer, dex5550, samsung"
+        echo "Available hosts: p620, p510, razer"
         echo ""
         echo "Examples:"
         echo "  nix run .#build-live build p620"
@@ -185,7 +185,7 @@
         echo ""
       }
 
-      available_hosts="p620 p510 razer dex5550 samsung"
+      available_hosts="p620 p510 razer"
 
       case "''${1:-}" in
         build)

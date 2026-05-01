@@ -98,7 +98,7 @@ stdenv.mkDerivation {
     runHook postInstall
   '';
 
-  meta = with lib; {
+  meta = {
     description = "Claude Code CLI - Native binary (Anthropic's AI coding assistant)";
     longDescription = ''
       Claude Code is Anthropic's official CLI tool for AI-assisted coding.
@@ -112,10 +112,10 @@ stdenv.mkDerivation {
       Both packages track the latest version (${version}).
     '';
     homepage = "https://github.com/anthropics/claude-code";
-    license = licenses.unfree; # Anthropic proprietary
+    license = lib.licenses.unfree; # Anthropic proprietary
     maintainers = [ ];
     platforms = [ "x86_64-linux" "aarch64-linux" ];
     mainProgram = "claude";
-    sourceProvenance = [ sourceTypes.binaryNativeCode ];
+    sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
   };
 }

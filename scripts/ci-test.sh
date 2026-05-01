@@ -17,7 +17,7 @@ BOLD='\033[1m'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_DIR="$(dirname "$SCRIPT_DIR")"
-ACTIVE_HOSTS=("razer" "dex5550" "p510" "p620")
+ACTIVE_HOSTS=("razer" "p510" "p620")
 
 # Configuration
 CI_LOG_DIR="/tmp/nixos-ci-$(date +%Y%m%d-%H%M%S)"

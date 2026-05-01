@@ -49,9 +49,9 @@ stdenv.mkDerivation rec {
       --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [stdenv.cc.cc.lib zlib libffi]}
   '';
 
-  meta = with lib; {
+  meta = {
     description = "Python environment with aider-chat";
-    license = licenses.mit;
-    platforms = platforms.all;
+    license = lib.licenses.mit;
+    platforms = lib.platforms.all;
   };
 }

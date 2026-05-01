@@ -31,7 +31,7 @@ rustPlatform.buildRustPackage rec {
     openssl
   ];
 
-  meta = with lib; {
+  meta = {
     description = "Terminal user interface for GitLab CI/CD pipeline monitoring";
     longDescription = ''
       glim is a TUI application for monitoring GitLab CI/CD pipelines and projects.
@@ -40,9 +40,9 @@ rustPlatform.buildRustPackage rec {
     '';
     homepage = "https://github.com/junkdog/glim";
     changelog = "https://github.com/junkdog/glim/releases/tag/v${version}";
-    license = licenses.mit;
-    maintainers = with maintainers; [ ];
-    platforms = platforms.linux;
+    license = lib.licenses.mit;
+    maintainers = with lib.maintainers; [ ];
+    platforms = lib.platforms.linux;
     mainProgram = "glim";
   };
 }

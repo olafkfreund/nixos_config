@@ -60,7 +60,7 @@ let
       runHook postInstall
     '';
 
-    meta = with lib; {
+    meta = {
       description = "WhatsApp Web API bridge for MCP servers";
       longDescription = ''
         Go application that connects to WhatsApp Web API,
@@ -68,9 +68,9 @@ let
         operations through a SQLite database backend.
       '';
       homepage = "https://github.com/lharries/whatsapp-mcp";
-      license = licenses.mit;
+      license = lib.licenses.mit;
       maintainers = [ ];
-      platforms = platforms.linux;
+      platforms = lib.platforms.linux;
       mainProgram = "whatsapp-bridge";
     };
   };
@@ -101,7 +101,7 @@ let
       runHook postInstall
     '';
 
-    meta = with lib; {
+    meta = {
       description = "MCP server for WhatsApp messaging integration";
       longDescription = ''
         Python server implementing the Model Context Protocol
@@ -109,9 +109,9 @@ let
         language commands into WhatsApp operations.
       '';
       homepage = "https://github.com/lharries/whatsapp-mcp";
-      license = licenses.mit;
+      license = lib.licenses.mit;
       maintainers = [ ];
-      platforms = platforms.linux;
+      platforms = lib.platforms.linux;
       mainProgram = "whatsapp-mcp-server";
     };
   };
@@ -156,7 +156,7 @@ stdenv.mkDerivation {
     inherit whatsappBridge whatsappMcpServer;
   };
 
-  meta = with lib; {
+  meta = {
     description = "WhatsApp MCP server for AI-assisted messaging";
     longDescription = ''
       Complete WhatsApp MCP integration consisting of:
@@ -166,8 +166,8 @@ stdenv.mkDerivation {
       - Optional FFmpeg support for voice messages
     '';
     homepage = "https://github.com/lharries/whatsapp-mcp";
-    license = licenses.mit;
+    license = lib.licenses.mit;
     maintainers = [ ];
-    platforms = platforms.linux;
+    platforms = lib.platforms.linux;
   };
 }

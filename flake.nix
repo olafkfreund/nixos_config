@@ -110,11 +110,6 @@
     };
 
     # COSMIC Desktop applets
-    # cosmic-package-updater - Disabled: removed from active config
-    # cosmic-package-updater = {
-    #   url = "github:olafkfreund/cosmic-applet-package-updater";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
     cosmic-music-player = {
       url = "github:olafkfreund/cosmic-applet-music-player";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -136,23 +131,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # COSMIC Notifications NG - Disabled: removed from active config
-    # cosmic-ext-notifications = {
-    #   url = "github:olafkfreund/cosmic-ext-notifications-ng";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
-    # COSMIC BG - Disabled: pending upstream fix for startup race condition
-    # See: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
-    # cosmic-ext-bg = {
-    #   url = "github:olafkfreund/cosmic-ext-bg";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
-    # COSMIC RDP Server - Disabled: removed from active config
-    # cosmic-ext-rdp-server.url = "github:olafkfreund/cosmic-ext-rdp-server";
-    # cosmic-portal-rdp.url = "github:olafkfreund/xdg-desktop-portal-cosmic";
-    # cosmic-comp-rdp.url = "github:olafkfreund/cosmic-ext-comp-rdp";
   };
 
   outputs =
@@ -225,246 +203,7 @@
         };
       };
 
-      # Import custom packages and overlays
-      overlays = [
-        (final: _prev: {
-          customPkgs = import ./pkgs {
-            pkgs = final;
-          };
-        })
-        (_final: prev: {
-          zjstatus = inputs.zjstatus.packages.${prev.stdenv.hostPlatform.system}.default;
-        })
-        # Claude Desktop from aaddrick/claude-desktop-debian (FHS variant;
-        # bubblewrap-sandboxed Cowork / Local Agent Mode).
-        #
-        # No overlay patches needed at v2.0.5+:
-        #   - v2.0.0 (2026-04-20) refactored build.sh into scripts/ and fixed
-        #     the Nix-sandbox chmod issue (PRs #432, #438).
-        #   - v2.0.5+ strips CRLF from cowork-plugin-shim.sh during staging
-        #     (PRs #499, #505), retiring our previous postInstall workaround.
-        #
-        # See /update-claude-code for the bump workflow. If a future bump
-        # reintroduces a Nix-incompatible step, re-add the overrideAttrs
-        # block here.
-        (_final: prev: {
-          claude-desktop-linux = inputs.claude-desktop-linux.packages.${prev.stdenv.hostPlatform.system}.claude-desktop-fhs;
-        })
-        # COSMIC applets from flakes
-        (_final: prev: {
-          cosmic-ext-applet-music-player = inputs.cosmic-music-player.packages.${prev.stdenv.hostPlatform.system}.default;
-          cosmic-applet-spotify = inputs.cosmic-applet-spotify.packages.${prev.stdenv.hostPlatform.system}.default;
-          inherit (inputs.cosmic-ext-radio-applet.packages.${prev.stdenv.hostPlatform.system}) cosmic-ext-applet-radio;
-          cosmic-ext-web-apps = inputs.cosmic-ext-web-apps.packages.${prev.stdenv.hostPlatform.system}.default;
-        })
-        # COSMIC Connect - KDE Connect alternative for COSMIC Desktop
-        inputs.cosmic-ext-connect.overlays.default
-        # COSMIC Notifications NG - Disabled: removed from active config
-        # inputs.cosmic-ext-notifications.overlays.default
-        # COSMIC BG NG - Disabled pending upstream fix for startup race condition
-        # See: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
-        # inputs.cosmic-ext-bg.overlays.default
-        # Custom package: glim - GitLab CI/CD TUI
-        (final: _prev: {
-          glim = final.callPackage ./overlays/glim { };
-        })
-        # Custom package: intune-portal - Microsoft Intune Company Portal with version control
-        (final: _prev: {
-          intune-portal = final.callPackage ./pkgs/intune-portal { };
-        })
-        # Custom package: zsh-ai-cmd - AI-powered shell command suggestions using Anthropic Claude
-        (final: _prev: {
-          zsh-ai-cmd = final.callPackage ./pkgs/zsh-ai-cmd { };
-        })
-        # Custom package: claude-code-native - Native binary alternative to npm-based claude-code
-        (final: _prev: {
-          claude-code-native = final.callPackage ./pkgs/claude-code-native { };
-        })
-        # Custom package: warp-terminal — track latest stable independently of nixpkgs.
-        # Bumped by .github/workflows/update-warp-terminal.yml (daily). Replaces the
-        # nixpkgs attribute by the same name so consumers (notably
-        # home/desktop/terminals/warp/default.nix) get our version transparently.
-        (final: _prev: {
-          warp-terminal = final.callPackage ./pkgs/warp-terminal { };
-        })
-        # Custom package: gemini-cli - Google Gemini AI CLI tool
-        (final: _prev: {
-          gemini-cli = final.callPackage ./home/development/gemini-cli { };
-        })
-        # Custom package: citrix-workspace - Citrix Workspace with USB support and local tarball management
-        (import ./overlays/citrix-workspace.nix)
-        # Fix CMake version compatibility issues for packages requiring CMake < 3.5
-        (_final: prev: {
-          clblast = prev.clblast.overrideAttrs (oldAttrs: {
-            cmakeFlags =
-              (oldAttrs.cmakeFlags or [ ])
-              ++ [
-                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-              ];
-          });
-          cld2 = prev.cld2.overrideAttrs (oldAttrs: {
-            cmakeFlags =
-              (oldAttrs.cmakeFlags or [ ])
-              ++ [
-                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-              ];
-          });
-          ctranslate2 = prev.ctranslate2.overrideAttrs (oldAttrs: {
-            cmakeFlags =
-              (oldAttrs.cmakeFlags or [ ])
-              ++ [
-                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-              ];
-          });
-          rofi-file-browser-extended = prev.rofi-file-browser-extended.overrideAttrs (oldAttrs: {
-            cmakeFlags =
-              (oldAttrs.cmakeFlags or [ ])
-              ++ [
-                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-              ];
-          });
-          birdtray = prev.birdtray.overrideAttrs (oldAttrs: {
-            cmakeFlags =
-              (oldAttrs.cmakeFlags or [ ])
-              ++ [
-                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-              ];
-          });
-          allegro = prev.allegro.overrideAttrs (oldAttrs: {
-            cmakeFlags =
-              (oldAttrs.cmakeFlags or [ ])
-              ++ [
-                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-              ];
-          });
-          # Skip ltrace tests that fail on newer kernels
-          ltrace = prev.ltrace.overrideAttrs (_oldAttrs: {
-            doCheck = false;
-          });
-          # Skip mu tests - test_index_move has timing-dependent assertion that fails in sandbox
-          mu = prev.mu.overrideAttrs (_oldAttrs: {
-            doCheck = false;
-          });
-          # Fix cxxopts missing icu dependency
-          cxxopts = prev.cxxopts.overrideAttrs (oldAttrs: {
-            buildInputs = (oldAttrs.buildInputs or [ ]) ++ [ prev.icu ];
-            propagatedBuildInputs = (oldAttrs.propagatedBuildInputs or [ ]) ++ [ prev.icu ];
-          });
-          # Fix pamixer missing cxxopts dependency
-          pamixer = prev.pamixer.overrideAttrs (oldAttrs: {
-            buildInputs = (oldAttrs.buildInputs or [ ]) ++ [ prev.cxxopts prev.icu ];
-          });
-          # khard/lbdb: sphinx-argparse 0.5.2 incompatible with Sphinx 9.x
-          # lbdb temporarily removed from home/shell/mail/default.nix
-          # Note: COSMIC cargo vendor dedup overlays removed — the nix-prefetch-git
-          # symlink overlay above already resolves fetchCargoVendor producing
-          # duplicate git source entries for cosmic-applets and cosmic-settings-daemon.
-        })
-        # Fix azure-cli k8s-extension: pinned kubernetes==24.2.0 and oras==0.2.25
-        # are not satisfied by newer versions in nixpkgs-unstable
-        (_final: prev: {
-          azure-cli-extensions = prev.azure-cli-extensions // {
-            k8s-extension = prev.azure-cli-extensions.k8s-extension.overridePythonAttrs (oldAttrs: {
-              pythonRelaxDeps = (oldAttrs.pythonRelaxDeps or [ ]) ++ [
-                "kubernetes"
-                "oras"
-              ];
-              nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [
-                prev.python3Packages.pythonRelaxDepsHook
-              ];
-            });
-          };
-        })
-        # Fix azure-mgmt-network: msrest not declared as runtime dependency
-        # (nixpkgs-unstable regression caught by pythonRuntimeDepsCheckHook)
-        (_final: prev: {
-          python312 = prev.python312.override {
-            packageOverrides = _pyFinal: pyPrev: {
-              azure-mgmt-network = pyPrev.azure-mgmt-network.overridePythonAttrs (oldAttrs: {
-                dependencies = (oldAttrs.dependencies or [ ]) ++ [
-                  pyPrev.msrest
-                ];
-              });
-            };
-          };
-        })
-        # Fix python3.11 doc build failure (Sphinx 9.1.0 + docutils 0.22.4 incompatibility)
-        # Skip building the broken doc output - it's a passthru attribute that some packages pull in
-        (_final: prev: {
-          python311 = prev.python311.overrideAttrs (oldAttrs: {
-            passthru = (oldAttrs.passthru or { }) // {
-              doc = prev.emptyDirectory;
-            };
-          });
-        })
-        # Fix sse-starlette: disable flaky timing tests and add missing starlette dependency
-        # (nixpkgs-unstable regression - applied globally so all consumers get the fix)
-        (_final: prev: {
-          python312Packages = prev.python312Packages // {
-            sse-starlette = prev.python312Packages.sse-starlette.overridePythonAttrs (old: {
-              doCheck = false;
-              pythonImportsCheck = [ ];
-              dependencies = (old.dependencies or [ ]) ++ [ prev.python312Packages.starlette ];
-            });
-          };
-        })
-        # Fix python3.13 package test failures in nixpkgs-unstable:
-        # - plotly: pytest 9 deprecation of py.path.local breaks test collection
-        # - wandb: flaky async spinner test (MockDynamicTextPrinter.captured_text empty)
-        # Both affect newelle → llama-index-core → spacy → wandb/plotly chain
-        # Must use packageOverrides to propagate through Python's scope-based resolution
-        (_final: prev: {
-          python313 = prev.python313.override {
-            packageOverrides = _pyFinal: pyPrev: {
-              plotly = pyPrev.plotly.overridePythonAttrs (_old: {
-                doCheck = false;
-              });
-              wandb = pyPrev.wandb.overridePythonAttrs (_old: {
-                doCheck = false;
-              });
-            };
-          };
-        })
-        # Fix azure-cli: azure-mgmt-web missing v2024_11_01 subpackage breaks installCheck
-        # (nixpkgs-unstable regression - azure-cli 2.81.0 expects newer azure-mgmt-web)
-        (_final: prev: {
-          azure-cli = prev.azure-cli.overrideAttrs (_old: {
-            doInstallCheck = false;
-          });
-        })
-        # Fix nix-prefetch-git binary name (nixpkgs-unstable regression: binary named
-        # "nix-prefetch-git-VERSION" instead of "nix-prefetch-git", breaking fetchCargoVendor)
-        (_final: prev: {
-          nix-prefetch-git = prev.nix-prefetch-git.overrideAttrs (_oldAttrs: {
-            postFixup =
-              let
-                versionedName = prev.nix-prefetch-git.name;
-              in
-              ''
-                if [ ! -e "$out/bin/nix-prefetch-git" ] && [ -e "$out/bin/${versionedName}" ];
-                then
-                ln -s "${versionedName}" "$out/bin/nix-prefetch-git"
-                fi
-              '';
-          });
-        })
-        # Fix python312Packages.sse-starlette missing starlette in propagatedBuildInputs
-        # nixpkgs regression: sse-starlette-3.2.0 fails runtime dep check without starlette
-        # Also disable flaky tests (consolidated with earlier overlay)
-        (_final: prev: {
-          python312Packages = prev.python312Packages.overrideScope (
-            _pySelf: pyPrev: {
-              sse-starlette = pyPrev.sse-starlette.overrideAttrs (oldAttrs: {
-                doCheck = false;
-                pythonImportsCheck = [ ];
-                propagatedBuildInputs = (oldAttrs.propagatedBuildInputs or [ ]) ++ [
-                  prev.python312Packages.starlette
-                ];
-              });
-            }
-          );
-        })
-      ];
+      overlays = import ./overlays { inherit inputs; };
 
       makeNixosSystem = host:
         let
@@ -499,8 +238,6 @@
               inputs.lanzaboote.nixosModules.lanzaboote
               nix-index-database.nixosModules.nix-index
               inputs.cosmic-ext-connect.nixosModules.default
-              # inputs.cosmic-ext-notifications.nixosModules.default  # Disabled: removed from active config
-              # inputs.cosmic-ext-bg.nixosModules.default  # Disabled: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
               # cosmic-ext-applet-radio: local module workaround for upstream mkPackageOption 'description' arg bug
               ./modules/services/cosmic-ext-radio-applet
               ./home/shell/zellij/zjstatus.nix
@@ -699,31 +436,6 @@
 
       # Code formatter for consistent formatting
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;
-
-      # ========================================
-      # MODULE EXPORTS
-      # ========================================
-
-      # Module exports for reuse by other flakes
-      nixosModules = {
-        # Core module categories
-        monitoring = ./modules/monitoring;
-        ai-providers = ./modules/ai;
-        development = ./modules/development;
-        desktop = ./modules/desktop;
-
-        # Feature modules
-        features = ./modules/features;
-        packages = ./modules/packages;
-
-        # System modules
-        core = ./modules/core.nix;
-        security = ./modules/security;
-
-        # Utility modules
-        network = ./modules/network;
-        virtualization = ./modules/virtualization;
-      };
     };
 }
 

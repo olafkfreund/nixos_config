@@ -4,9 +4,8 @@
 # to the panel via COSMIC Settings > Panel > Applets, not via XDG autostart.
 { config, lib, pkgs, ... }:
 
-with lib;
-
 let
+  inherit (lib) mkOption mkIf mkEnableOption types literalExpression;
   cfg = config.programs.cosmic-ext-applet-radio;
 
   # Wayland library path required for all libcosmic/COSMIC applets

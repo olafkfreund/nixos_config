@@ -78,13 +78,12 @@ let
   p620 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... root@p620";
   razer = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... root@razer";
   p510 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... root@p510";
-  dex5550 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... root@dex5550";
 
   # Key groups
   allUsers = [ olafkfreund ];
-  allHosts = [ p620 razer p510 dex5550 ];
+  allHosts = [ p620 razer p510 ];
   workstations = [ p620 razer ];
-  servers = [ p510 dex5550 ];
+  servers = [ p510 ];
 in
 {
   # Paths are relative to this file (project root)
@@ -167,9 +166,7 @@ rekey_secrets() {
   log "The following secrets will be rekeyed:"
   list_secrets
 
-  run_agenix -r
-
-  if [[ $? -eq 0 ]]; then
+  if run_agenix -r; then
     log "✅ All secrets successfully rekeyed!"
   else
     error "❌ Rekeying failed. Check your secrets.nix configuration."
@@ -198,7 +195,8 @@ status() {
   fi
 
   # Check available secrets
-  local secret_count=$(find "$SECRETS_DIR" -name "*.age" 2>/dev/null | wc -l)
+  local secret_count
+  secret_count=$(find "$SECRETS_DIR" -name "*.age" 2>/dev/null | wc -l)
   log "📁 Found $secret_count secret files"
 
   # Show current configuration

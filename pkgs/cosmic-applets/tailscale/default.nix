@@ -56,7 +56,7 @@ rustPlatform.buildRustPackage rec {
     runHook postInstall
   '';
 
-  meta = with lib; {
+  meta = {
     description = "COSMIC panel applet for Tailscale VPN management";
     longDescription = ''
       A Tailscale management applet for the COSMIC desktop environment.
@@ -72,9 +72,9 @@ rustPlatform.buildRustPackage rec {
       privileges. Run: sudo tailscale set --operator=$USER
     '';
     homepage = "https://github.com/cosmic-utils/gui-scale-applet";
-    license = licenses.gpl3Only;
-    maintainers = with maintainers; [ ];
-    platforms = platforms.linux;
+    license = lib.licenses.gpl3Only;
+    maintainers = with lib.maintainers; [ ];
+    platforms = lib.platforms.linux;
     mainProgram = "gui-scale-applet";
   };
 }

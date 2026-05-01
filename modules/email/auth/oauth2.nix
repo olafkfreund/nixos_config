@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption types concatStringsSep mapAttrsToList;
   cfg = config.features.email.auth.oauth2;
   emailCfg = config.features.email;
 in

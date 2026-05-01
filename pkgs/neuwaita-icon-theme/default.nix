@@ -29,11 +29,11 @@ stdenvNoCC.mkDerivation rec {
     runHook postInstall
   '';
 
-  meta = with lib; {
+  meta = {
     description = "A different take on the Adwaita icon theme";
     homepage = "https://github.com/RusticBard/Neuwaita";
-    license = licenses.gpl3Plus; # Assuming GPL3+, verify from repository
-    platforms = platforms.linux;
-    maintainers = [ maintainers.olafkfreund or "olafkfreund" ];
+    license = lib.licenses.gpl3Plus; # Assuming GPL3+, verify from repository
+    platforms = lib.platforms.linux;
+    maintainers = [ lib.maintainers.olafkfreund or "olafkfreund" ];
   };
 }

@@ -4,7 +4,8 @@
 , # pkgs-unstable,
   ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf mkEnableOption;
   cfg = config.editor.vscode;
   # Custom extensions not available in nixpkgs
   # Note: Uncomment and add proper sha256 hashes when needed

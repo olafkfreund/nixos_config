@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
-with lib;
 let
+  inherit (lib) mkOption mkIf mkEnableOption types;
   cfg = config.programs.claude-powerline;
 
   # Gruvbox Dark theme configuration

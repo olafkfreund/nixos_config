@@ -3,8 +3,8 @@
 , pkgs
 , ...
 }:
-with lib;
 let
+  inherit (lib) mkIf mkDefault;
   cfg = config.desktop.gnome;
   vars = import ../../../hosts/common/shared-variables.nix;
 in

@@ -123,7 +123,7 @@ buildFHSEnv {
   # Run script for entering the FHS environment
   runScript = "bash";
 
-  meta = with lib; {
+  meta = {
     description = "Microsoft Defender for Endpoint - Enterprise-grade endpoint detection and response";
     longDescription = ''
       Microsoft Defender for Endpoint (MDE) is a commercial security product that provides:
@@ -145,10 +145,10 @@ buildFHSEnv {
     '';
     homepage = "https://learn.microsoft.com/en-us/defender-endpoint/microsoft-defender-endpoint-linux";
     changelog = "https://learn.microsoft.com/en-us/defender-endpoint/linux-whatsnew";
-    sourceProvenance = with sourceTypes; [ binaryNativeCode ];
-    license = licenses.unfree;
+    sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
+    license = lib.licenses.unfree;
     maintainers = [ ]; # Add maintainer info
-    platforms = platforms.linux;
+    platforms = lib.platforms.linux;
     mainProgram = "mdatp";
 
     # Security and usage warnings

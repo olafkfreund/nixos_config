@@ -4,7 +4,8 @@
 , pkgs-stable
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf mkEnableOption;
   cfg = config.services.libvirt;
 in
 {
@@ -96,6 +97,7 @@ in
       pkgs.OVMFFull
       pkgs.kvmtool
       pkgs.libvirt
+      pkgs.virtiofsd # virtio-fs daemon for host/VM file sharing
       pkgs-stable.multipass
       pkgs.spice
       pkgs.spice-gtk

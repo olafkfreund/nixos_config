@@ -96,12 +96,10 @@
   # P510 development server specific packages
   home.packages = with pkgs; [
     # Server development essentials
+    # docker, docker-compose, kubectl, k9s: installed system-wide.
+    # Re-declaring at user level produces buildEnv collisions.
     git
     gh
-    docker
-    docker-compose
-    kubectl
-    k9s
 
     # Intel Xeon + NVIDIA specific tools
     intel-gpu-tools

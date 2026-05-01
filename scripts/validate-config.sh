@@ -18,7 +18,7 @@ BOLD='\033[1m'
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_DIR="$(dirname "$SCRIPT_DIR")"
-ACTIVE_HOSTS=("razer" "dex5550" "p510" "p620")
+ACTIVE_HOSTS=("razer" "p510" "p620")
 ARCHIVED_HOSTS=("hp" "lms" "pvm")
 TEST_TIMEOUT=300 # 5 minutes
 

@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption types;
   packageSets = import ./sets.nix { inherit pkgs lib; };
 in
 {

@@ -5,7 +5,7 @@
 , pkgs
 , ...
 }:
-with lib; {
+let inherit (lib) mkOption mkIf mkEnableOption mkForce mkMerge types; in {
   options.networking.profile = mkOption {
     type = types.enum [ "desktop" "server" "minimal" ];
     default = "desktop";

@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf;
   cfg = config.desktop.gnome;
 in
 {

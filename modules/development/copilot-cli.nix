@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption types;
   cfg = config.development.copilot-cli;
 
   # Import the copilot-cli package derivation

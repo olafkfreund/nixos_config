@@ -3,7 +3,7 @@ _: {
   # Only load on hosts that do development work
   imports = [
     ./ai/default.nix
-    ./helpers/helpers.nix
+    ./helpers
     # Note: ./development/default.nix is imported separately in hosts
   ];
 }

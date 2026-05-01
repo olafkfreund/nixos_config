@@ -27,12 +27,12 @@ rustPlatform.buildRustPackage rec {
     sqlite
   ];
 
-  meta = with lib; {
+  meta = {
     description = "A Reddit TUI client written in Rust";
     homepage = "https://github.com/ck-zhang/reddix";
-    license = licenses.mit;
+    license = lib.licenses.mit;
     maintainers = [ ];
-    platforms = platforms.linux;
+    platforms = lib.platforms.linux;
     mainProgram = "reddix";
   };
 }

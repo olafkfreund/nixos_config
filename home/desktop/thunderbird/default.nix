@@ -3,7 +3,8 @@
 , pkgs-unstable
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf;
   cfg = config.programs.thunderbird.enable;
 in
 {

@@ -1,7 +1,6 @@
 # Home Manager Profiles System
 # Provides profile-based user configurations with inheritance and composition
 { lib, ... }:
-with lib;
 let
   # Profile definitions with inheritance capabilities
   profiles = {

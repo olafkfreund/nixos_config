@@ -68,12 +68,12 @@ rustPlatform.buildRustPackage rec {
     mv $out/bin/screenshot-mcp $out/bin/rescreenshot-mcp
   '';
 
-  meta = with lib; {
+  meta = {
     description = "Cross-platform screenshot MCP server for Wayland, X11, and Windows";
     homepage = "https://github.com/becksclair/rescreenshot-mcp";
-    license = licenses.mit;
+    license = lib.licenses.mit;
     maintainers = [ ];
-    platforms = platforms.linux;
+    platforms = lib.platforms.linux;
     mainProgram = "rescreenshot-mcp";
   };
 }

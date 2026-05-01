@@ -17,7 +17,7 @@ BOLD='\033[1m'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_DIR="$(dirname "$SCRIPT_DIR")"
-ACTIVE_HOSTS=("razer" "dex5550" "p510" "p620")
+ACTIVE_HOSTS=("razer" "p510" "p620")
 
 log() {
   echo "$(date '+%Y-%m-%d %H:%M:%S'): $*"
@@ -251,7 +251,8 @@ test_cache_performance() {
 generate_performance_report() {
   info "Generating performance report..."
 
-  local report_file="/tmp/nixos-performance-report-$(date +%Y%m%d-%H%M%S).md"
+  local report_file
+  report_file="/tmp/nixos-performance-report-$(date +%Y%m%d-%H%M%S).md"
 
   cat >"$report_file" <<EOF
 # NixOS Configuration Performance Report

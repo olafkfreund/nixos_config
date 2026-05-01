@@ -77,12 +77,12 @@ python3.pkgs.buildPythonApplication rec {
     chmod +x $out/bin/aurynk
   '';
 
-  meta = with lib; {
+  meta = {
     description = "Android Device Manager for Linux with wireless pairing and device management";
     homepage = "https://github.com/IshuSinghSE/aurynk";
-    license = licenses.gpl3Plus;
-    maintainers = with maintainers; [ ];
-    platforms = platforms.linux;
+    license = lib.licenses.gpl3Plus;
+    maintainers = with lib.maintainers; [ ];
+    platforms = lib.platforms.linux;
     mainProgram = "aurynk";
   };
 }

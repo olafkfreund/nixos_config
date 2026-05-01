@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf mkEnableOption;
   username = "olafkfreund";
   cfg = config.services.print;
 

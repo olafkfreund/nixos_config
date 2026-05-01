@@ -4,7 +4,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf mkEnableOption mkDefault mkMerge;
   commonDeps = import ./common-deps.nix { inherit pkgs; };
 in
 {

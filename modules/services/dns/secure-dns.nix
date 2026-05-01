@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption mkForce types;
   cfg = config.services.secure-dns;
 in
 {

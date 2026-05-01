@@ -1,8 +1,7 @@
 { config, lib, pkgs, ... }:
 
-with lib;
-
 let
+  inherit (lib) mkOption mkIf mkEnableOption mkAfter types optionalString;
   cfg = config.programs.zshAiCmd;
 in
 {

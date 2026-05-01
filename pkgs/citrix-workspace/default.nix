@@ -75,11 +75,11 @@ let
             cp -r * $out/
           '';
 
-          meta = with lib; {
+          meta = {
             description = "Citrix Workspace USB support package for device redirection";
             homepage = "https://www.citrix.com/";
-            license = licenses.unfree;
-            platforms = platforms.linux;
+            license = lib.licenses.unfree;
+            platforms = lib.platforms.linux;
           };
         }
     else

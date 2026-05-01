@@ -76,7 +76,7 @@ just update-workflow [HOST]    # Complete interactive workflow
 
 #### Preview Updates Script Flow
 
-```
+```text
 1. Backup flake.lock → flake.lock.backup
 2. Update nixpkgs input (nix flake lock --update-input nixpkgs)
 3. Extract old and new commit hashes with jq
@@ -87,7 +87,7 @@ just update-workflow [HOST]    # Complete interactive workflow
 
 #### New Packages Script Flow
 
-```
+```text
 1. Read flake.lock.backup and flake.lock
 2. Extract nixpkgs commit hashes (old and new)
 3. Clone nixpkgs repository to temp directory
@@ -96,7 +96,7 @@ just update-workflow [HOST]    # Complete interactive workflow
 6. Display with statistics
 ```
 
-### Integration with Your Infrastructure
+### Existing Tool Compatibility
 
 **Your Existing Tools** (unchanged):
 
@@ -114,7 +114,7 @@ just update-workflow [HOST]    # Complete interactive workflow
 
 ### nvd Output (preview-updates)
 
-```
+```text
 [U.]  #1 gcc: 13.2.0 -> 13.3.0, -12.3 MiB
 [U.]  #2 firefox: 122.0 -> 123.0, +45.2 MiB
 [U.]  #3 linux: 6.6.15 -> 6.6.18, +2.1 MiB
@@ -130,7 +130,7 @@ just update-workflow [HOST]    # Complete interactive workflow
 
 ### New Packages Output
 
-```
+```text
 Found 42 new packages:
 
   1. applications/editors/zed-editor
@@ -234,7 +234,7 @@ just quick-deploy p620     # Deploy with confidence
 
 ### Key Files Created
 
-```
+```text
 scripts/preview-updates.sh      # Main preview script (executable)
 scripts/find-new-packages.sh    # Package discovery script (executable)
 docs/UPDATE-WORKFLOW.md         # Complete usage guide
@@ -288,7 +288,6 @@ Restoring previous flake.lock...
 just preview-updates p620
 just preview-updates razer
 just preview-updates p510
-just preview-updates samsung
 ```
 
 ### Git History Fallback
@@ -329,9 +328,8 @@ git show HEAD:flake.lock
 
 **Your Multi-Host Setup**:
 
-- 4 active hosts (p620, razer, p510, samsung)
+- 3 active hosts (p620, razer, p510)
 - Feature flag system (141+ modules)
-- Sophisticated monitoring
 - GitHub workflow
 
 **How These Scripts Help**:
@@ -388,7 +386,7 @@ just new-packages
 # weekly-updates.sh
 
 # Monday: Preview all hosts
-for host in p620 razer p510 samsung; do
+for host in p620 razer p510; do
   echo "Checking $host..."
   just preview-updates $host | tee "update-preview-$host.txt"
 done
@@ -427,7 +425,7 @@ done
 
 ### The Workflow
 
-```
+```text
 📋 Check Updates
     ↓
 🔍 Preview Changes (nvd)
@@ -464,10 +462,12 @@ mv flake.lock.backup flake.lock
 
 ### "Does this work with my existing commands?"
 
-Yes! Your existing commands (`check-updates`, `diff`, `quick-deploy`) all still work. These are enhancements that provide additional visibility.
+Yes! Your existing commands (`check-updates`, `diff`, `quick-deploy`) all still work. These are
+enhancements that provide additional visibility.
 
 ## Conclusion
 
-You now have enterprise-grade update tracking for your NixOS infrastructure. Use `just preview-updates` before every deployment to understand exactly what's changing in your system.
+You now have enterprise-grade update tracking for your NixOS infrastructure. Use
+`just preview-updates` before every deployment to understand exactly what's changing in your system.
 
 **Start with**: `just preview-updates` and see the detailed output!

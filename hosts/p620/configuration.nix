@@ -60,48 +60,6 @@ in
       100.69.100.115 p620.tail833f7.ts.net
     '';
 
-    # Network performance tuning - removed (module deleted during anti-pattern cleanup)
-    # performanceTuning = {
-    #   enable = false;
-    #   profile = "throughput";
-    #
-    #   tcpOptimization = {
-    #     enable = true;
-    #     congestionControl = "bbr";
-    #     windowScaling = true;
-    #     fastOpen = true;
-    #     lowLatency = false; # Prioritize throughput over latency
-    #   };
-    #
-    #   bufferOptimization = {
-    #     enable = true;
-    #     receiveBuffer = 33554432; # 32MB for high-throughput AI workloads
-    #     sendBuffer = 33554432; # 32MB for high-throughput AI workloads
-    #     autotuning = true;
-    #   };
-    #
-    #   interHostOptimization = {
-    #     enable = true;
-    #     hosts = [ "dex5550" "p510" "razer" ];
-    #     jumboFrames = false; # Keep disabled for compatibility
-    #     routeOptimization = true;
-    #   };
-    #
-    #   dnsOptimization = {
-    #     enable = true;
-    #     caching = true;
-    #     parallelQueries = true;
-    #     customServers = [ "192.168.1.222" "1.1.1.1" ];
-    #   };
-    #
-    #   monitoringOptimization = {
-    #     enable = true;
-    #     compression = true;
-    #     batchingInterval = 5; # More frequent for performance workstation
-    #     prioritization = true;
-    #   };
-    # };
-
     # Firewall disabled - P620 is inside a secure network
     firewall.enable = lib.mkForce false;
   };
@@ -112,16 +70,6 @@ in
     useRoutingFeatures = "both"; # Can route and accept routes
     openFirewall = true;
   };
-
-  # COSMIC Notifications NG - Disabled: removed from active config
-  # services.cosmic-ext-notifications = {
-  #   enable = true;
-  #   settings.max_image_size = 32;
-  # };
-
-  # COSMIC BG - Disabled pending upstream fix for startup race condition
-  # See: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
-  # services.cosmic-ext-bg.enable = true;
 
   # COSMIC Radio Applet - Internet radio player for COSMIC Desktop panel
   # Add to panel via: COSMIC Settings > Panel > Applets
@@ -152,12 +100,6 @@ in
   };
 
   # AI production dashboard and load testing removed - were non-functional services consuming resources
-
-  # Enable NixOS package monitoring tools
-  tools.nixpkgs-monitors = {
-    enable = true;
-    installAll = true;
-  };
 
   # AI alerting removed - was non-functional, handled by DEX5550 monitoring server via Prometheus/Grafana/Alertmanager
 
@@ -312,7 +254,6 @@ in
       webcam = true;
       print = true;
       yt-x.enable = true; # Terminal YouTube browser
-      reddix.enable = true; # Reddit TUI client
     };
 
     media = {
@@ -330,15 +271,6 @@ in
       useCosmicGreeter = true; # Using COSMIC Greeter as display manager
       defaultSession = true; # Set COSMIC as default session
       installAllApps = true;
-    };
-
-    # COSMIC Package Updater Applet - NixOS update notifications
-    desktop.cosmic-applet-package-updater = {
-      enable = true;
-      autoCheck = true;
-      checkIntervalMinutes = 60;
-      nixosMode = "auto"; # Auto-detect flakes vs channels mode
-      enablePasswordlessChecks = false; # Require password for security
     };
 
     # Microsoft Intune Company Portal (custom package with version control)

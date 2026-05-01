@@ -15,9 +15,6 @@ _: {
     ./system-utils/unpack.nix
     ./system-utils/system_util.nix
 
-    # Basic tools
-    ./tools/nixpkgs-monitors.nix
-
     # Basic services that most hosts need
     ./services/default.nix
 

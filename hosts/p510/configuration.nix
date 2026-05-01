@@ -176,12 +176,6 @@ in
     };
   };
 
-  # Enable NixOS package monitoring tools
-  tools.nixpkgs-monitors = {
-    enable = true;
-    installAll = true;
-  };
-
   # Enable encrypted API keys
   secrets.apiKeys = {
     enable = true;
@@ -255,13 +249,11 @@ in
   # Add GSettings schema path for GDM login screen
   environment.sessionVariables.GSETTINGS_SCHEMA_DIR = "${pkgs.gdm}/share/gsettings-schemas/gdm-${pkgs.gdm.version}/glib-2.0/schemas";
 
-  # Add minimal GNOME packages for login screen functionality
-  # Note: gnome-remote-desktop schemas will be automatically included via services.gnome config
+  # gnome-remote-desktop is installed by services.gnome.gnome-remote-desktop.enable
   environment.systemPackages = with pkgs; [
     gdm # Provides the Gdm-1.0 typelib required by GNOME Shell
     gnome-control-center # Provides login-screen schema
     gnome-settings-daemon # Additional GNOME schemas
-    gnome-remote-desktop # RDP and VNC remote access
     # Qt theme control tools for Stylix
     libsForQt5.qt5ct
     kdePackages.qt6ct

@@ -33,26 +33,24 @@
     systemPackages = with pkgs; [
       libva
       libva-utils
-      # driversi686Linux.amdvlk removed - RADV is now default
       lact
       mesa-demos
-      clinfo
+      # rocmPackages.clr provides bin/clinfo (ROCm-aware); pkgs.clinfo collides
       rocmPackages.rocm-smi
       rocmPackages.rocminfo
-      rocmPackages.rocsolver # Temporarily disabled: depends on rocblas->hipblaslt (not in cache, build fails)
+      rocmPackages.rocsolver
       rocmPackages.rocsparse
       rocmPackages.rocm-runtime
       rocmPackages.rpp-hip
-      rocmPackages.rpp-cpu
+      # rocmPackages.rpp-cpu shares share/rpp/test/* with rpp-hip; on GPU host rpp-hip wins
       rocmPackages.clr
       rocmPackages.clr.icd
       rocmPackages.rocm-cmake
       rocmPackages.rocm-device-libs
-      rocmPackages.hipblas # Temporarily disabled: depends on hipblaslt (not in cache, build fails)
-      rocmPackages.rocblas # Temporarily disabled: depends on hipblaslt (not in cache, build fails)
-      rocmPackages.hip-common
+      rocmPackages.hipblas
+      rocmPackages.rocblas
+      # rocmPackages.hip-common overlaps with clr on include/hip; clr is sufficient
       radeontop
-      # virtualglLib
       vulkan-loader
       vulkan-tools
       microcode-amd
