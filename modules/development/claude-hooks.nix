@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
-with lib;
 let
+  inherit (lib) mkOption mkIf mkEnableOption mkDefault types;
   cfg = config.features.claude-hooks;
 
   # Create the hook scripts for desktop notifications
