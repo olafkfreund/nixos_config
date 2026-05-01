@@ -153,12 +153,6 @@ in
 
   # AI production dashboard and load testing removed - were non-functional services consuming resources
 
-  # Enable NixOS package monitoring tools
-  tools.nixpkgs-monitors = {
-    enable = true;
-    installAll = true;
-  };
-
   # AI alerting removed - was non-functional, handled by DEX5550 monitoring server via Prometheus/Grafana/Alertmanager
 
   # NVIDIA GeForce NOW cloud gaming (official Flatpak)

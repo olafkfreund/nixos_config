@@ -1,5 +1,6 @@
 { config
 , lib
+, pkgs
 , ...
 }:
 let
@@ -13,6 +14,15 @@ in
 
   # Optimized config - reduced mkMerge complexity for better performance
   config = {
+    # Baseline tools available on any host enabling features.development.
+    # Without this, hosts with development features but no other package-set
+    # trigger would lack git/curl/jq at the system level.
+    environment.systemPackages = mkIf cfg.development.enable [
+      pkgs.git
+      pkgs.curl
+      pkgs.jq
+    ];
+
     # Development tools (conditional enables)
     cargo.development.enable = mkIf cfg.development.enable cfg.development.cargo;
     development.copilot-cli.enable = mkIf cfg.development.enable cfg.development.copilot-cli;
