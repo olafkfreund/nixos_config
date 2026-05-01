@@ -10,7 +10,6 @@ let
   modules = {
     mkModule = import ./mkModule.nix;
     features = import ./features.nix;
-    hostTemplate = import ./hostTemplate.nix;
     validation = import ./validation.nix;
     secrets = import ./secrets.nix;
   };
