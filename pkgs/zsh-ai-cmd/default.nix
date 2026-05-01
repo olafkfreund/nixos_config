@@ -42,7 +42,7 @@ stdenv.mkDerivation rec {
     runtimeDeps = [ curl jq ];
   };
 
-  meta = with lib; {
+  meta = {
     description = "AI-powered shell command suggestions using Anthropic Claude";
     longDescription = ''
       zsh-ai-cmd provides intelligent command suggestions powered by Claude AI,
@@ -63,9 +63,9 @@ stdenv.mkDerivation rec {
       - curl and jq for API communication
     '';
     homepage = "https://github.com/kylesnowschwartz/zsh-ai-cmd";
-    license = licenses.mit;
-    maintainers = with maintainers; [ ];
-    platforms = platforms.unix;
+    license = lib.licenses.mit;
+    maintainers = with lib.maintainers; [ ];
+    platforms = lib.platforms.unix;
     mainProgram = "zsh-ai-cmd.plugin.zsh";
   };
 }

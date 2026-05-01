@@ -121,7 +121,7 @@ python3.pkgs.buildPythonApplication rec {
     patchShebangs $out/bin/newelle
   '';
 
-  meta = with lib; {
+  meta = {
     description = "Your Ultimate Virtual Assistant - AI chat interface for Linux";
     longDescription = ''
       Newelle is a GTK4/Libadwaita-based AI virtual assistant for Linux that
@@ -131,9 +131,9 @@ python3.pkgs.buildPythonApplication rec {
     '';
     homepage = "https://github.com/qwersyk/Newelle";
     changelog = "https://github.com/qwersyk/Newelle/releases/tag/${version}";
-    license = licenses.gpl3Plus;
-    maintainers = with maintainers; [ ];
-    platforms = platforms.linux;
+    license = lib.licenses.gpl3Plus;
+    maintainers = with lib.maintainers; [ ];
+    platforms = lib.platforms.linux;
     mainProgram = "newelle";
   };
 }

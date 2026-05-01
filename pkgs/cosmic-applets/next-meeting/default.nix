@@ -53,7 +53,7 @@ rustPlatform.buildRustPackage rec {
     runHook postInstall
   '';
 
-  meta = with lib; {
+  meta = {
     description = "COSMIC panel applet showing next meeting with one-click join for video calls";
     longDescription = ''
       A COSMIC desktop panel applet that displays upcoming calendar events with
@@ -70,9 +70,9 @@ rustPlatform.buildRustPackage rec {
       via GNOME Online Accounts or Evolution directly.
     '';
     homepage = "https://github.com/dangrover/next-meeting-for-cosmic";
-    license = licenses.gpl3Only;
-    maintainers = with maintainers; [ ];
-    platforms = platforms.linux;
+    license = lib.licenses.gpl3Only;
+    maintainers = with lib.maintainers; [ ];
+    platforms = lib.platforms.linux;
     mainProgram = "cosmic-next-meeting";
   };
 }

@@ -9,8 +9,7 @@ in
 , config
 , ...
 }: {
-  options.vfio.enable = with lib;
-    mkEnableOption "Configure the machine for VFIO";
+  options.vfio.enable = lib.mkEnableOption "Configure the machine for VFIO";
 
   config =
     let

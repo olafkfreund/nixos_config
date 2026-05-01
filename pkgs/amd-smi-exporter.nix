@@ -61,7 +61,7 @@ stdenv.mkDerivation rec {
   # Tests require actual AMD hardware
   doCheck = false;
 
-  meta = with lib; {
+  meta = {
     description = "AMD SMI Exporter for Prometheus - exports AMD EPYC CPU and Datacenter GPU metrics";
     longDescription = ''
       The AMD SMI Exporter is a standalone application written in GO that exports
@@ -71,9 +71,9 @@ stdenv.mkDerivation rec {
       and utilization metrics.
     '';
     homepage = "https://github.com/amd/amd_smi_exporter";
-    license = licenses.mit;
-    maintainers = with maintainers; [ ];
-    platforms = platforms.linux;
+    license = lib.licenses.mit;
+    maintainers = with lib.maintainers; [ ];
+    platforms = lib.platforms.linux;
     mainProgram = "amd_smi_exporter";
   };
 }
