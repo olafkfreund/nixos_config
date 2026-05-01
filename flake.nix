@@ -670,31 +670,6 @@
 
       # Code formatter for consistent formatting
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;
-
-      # ========================================
-      # MODULE EXPORTS
-      # ========================================
-
-      # Module exports for reuse by other flakes
-      nixosModules = {
-        # Core module categories
-        monitoring = ./modules/monitoring;
-        ai-providers = ./modules/ai;
-        development = ./modules/development;
-        desktop = ./modules/desktop;
-
-        # Feature modules
-        features = ./modules/features;
-        packages = ./modules/packages;
-
-        # System modules
-        core = ./modules/core.nix;
-        security = ./modules/security;
-
-        # Utility modules
-        network = ./modules/network;
-        virtualization = ./modules/virtualization;
-      };
     };
 }
 
