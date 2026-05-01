@@ -295,29 +295,7 @@
         (import ./overlays/citrix-workspace.nix)
         (import ./overlays/cmake-compat.nix)
         (import ./overlays/python-compat.nix)
-        # Fix azure-cli: azure-mgmt-web missing v2024_11_01 subpackage breaks installCheck
-        # (nixpkgs-unstable regression - azure-cli 2.81.0 expects newer azure-mgmt-web)
-        (_final: prev: {
-          azure-cli = prev.azure-cli.overrideAttrs (_old: {
-            doInstallCheck = false;
-          });
-        })
-        # Fix nix-prefetch-git binary name (nixpkgs-unstable regression: binary named
-        # "nix-prefetch-git-VERSION" instead of "nix-prefetch-git", breaking fetchCargoVendor)
-        (_final: prev: {
-          nix-prefetch-git = prev.nix-prefetch-git.overrideAttrs (_oldAttrs: {
-            postFixup =
-              let
-                versionedName = prev.nix-prefetch-git.name;
-              in
-              ''
-                if [ ! -e "$out/bin/nix-prefetch-git" ] && [ -e "$out/bin/${versionedName}" ];
-                then
-                ln -s "${versionedName}" "$out/bin/nix-prefetch-git"
-                fi
-              '';
-          });
-        })
+        (import ./overlays/upstream-fixes.nix)
       ];
 
       makeNixosSystem = host:
