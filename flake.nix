@@ -225,78 +225,7 @@
         };
       };
 
-      # Import custom packages and overlays
-      overlays = [
-        (final: _prev: {
-          customPkgs = import ./pkgs {
-            pkgs = final;
-          };
-        })
-        (_final: prev: {
-          zjstatus = inputs.zjstatus.packages.${prev.stdenv.hostPlatform.system}.default;
-        })
-        # Claude Desktop from aaddrick/claude-desktop-debian (FHS variant;
-        # bubblewrap-sandboxed Cowork / Local Agent Mode).
-        #
-        # No overlay patches needed at v2.0.5+:
-        #   - v2.0.0 (2026-04-20) refactored build.sh into scripts/ and fixed
-        #     the Nix-sandbox chmod issue (PRs #432, #438).
-        #   - v2.0.5+ strips CRLF from cowork-plugin-shim.sh during staging
-        #     (PRs #499, #505), retiring our previous postInstall workaround.
-        #
-        # See /update-claude-code for the bump workflow. If a future bump
-        # reintroduces a Nix-incompatible step, re-add the overrideAttrs
-        # block here.
-        (_final: prev: {
-          claude-desktop-linux = inputs.claude-desktop-linux.packages.${prev.stdenv.hostPlatform.system}.claude-desktop-fhs;
-        })
-        # COSMIC applets from flakes
-        (_final: prev: {
-          cosmic-ext-applet-music-player = inputs.cosmic-music-player.packages.${prev.stdenv.hostPlatform.system}.default;
-          cosmic-applet-spotify = inputs.cosmic-applet-spotify.packages.${prev.stdenv.hostPlatform.system}.default;
-          inherit (inputs.cosmic-ext-radio-applet.packages.${prev.stdenv.hostPlatform.system}) cosmic-ext-applet-radio;
-          cosmic-ext-web-apps = inputs.cosmic-ext-web-apps.packages.${prev.stdenv.hostPlatform.system}.default;
-        })
-        # COSMIC Connect - KDE Connect alternative for COSMIC Desktop
-        inputs.cosmic-ext-connect.overlays.default
-        # COSMIC Notifications NG - Disabled: removed from active config
-        # inputs.cosmic-ext-notifications.overlays.default
-        # COSMIC BG NG - Disabled pending upstream fix for startup race condition
-        # See: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
-        # inputs.cosmic-ext-bg.overlays.default
-        # Custom package: glim - GitLab CI/CD TUI
-        (final: _prev: {
-          glim = final.callPackage ./overlays/glim { };
-        })
-        # Custom package: intune-portal - Microsoft Intune Company Portal with version control
-        (final: _prev: {
-          intune-portal = final.callPackage ./pkgs/intune-portal { };
-        })
-        # Custom package: zsh-ai-cmd - AI-powered shell command suggestions using Anthropic Claude
-        (final: _prev: {
-          zsh-ai-cmd = final.callPackage ./pkgs/zsh-ai-cmd { };
-        })
-        # Custom package: claude-code-native - Native binary alternative to npm-based claude-code
-        (final: _prev: {
-          claude-code-native = final.callPackage ./pkgs/claude-code-native { };
-        })
-        # Custom package: warp-terminal — track latest stable independently of nixpkgs.
-        # Bumped by .github/workflows/update-warp-terminal.yml (daily). Replaces the
-        # nixpkgs attribute by the same name so consumers (notably
-        # home/desktop/terminals/warp/default.nix) get our version transparently.
-        (final: _prev: {
-          warp-terminal = final.callPackage ./pkgs/warp-terminal { };
-        })
-        # Custom package: gemini-cli - Google Gemini AI CLI tool
-        (final: _prev: {
-          gemini-cli = final.callPackage ./home/development/gemini-cli { };
-        })
-        # Custom package: citrix-workspace - Citrix Workspace with USB support and local tarball management
-        (import ./overlays/citrix-workspace.nix)
-        (import ./overlays/cmake-compat.nix)
-        (import ./overlays/python-compat.nix)
-        (import ./overlays/upstream-fixes.nix)
-      ];
+      overlays = import ./overlays { inherit inputs; };
 
       makeNixosSystem = host:
         let
