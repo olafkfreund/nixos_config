@@ -130,6 +130,10 @@ in
         kubectx
         k8sgpt
         kubetail
+        # Local k8s clusters (moved from deleted modules/{virt,containers}/kubernetes.nix)
+        minikube
+        kind
+        werf
       ];
     })
 

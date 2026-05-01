@@ -115,7 +115,11 @@ in
       };
     };
 
-    # Wrap cosmic-comp with proper library paths to fix libEGL.so.1 loading
+    # Wrap cosmic-comp at the package level for libEGL.so.1 loading.
+    # The four core apps are wrapped via symlinkJoin in systemPackages
+    # below (with lib.hiPrio) instead of overrideAttrs here, because the
+    # latter forces a full from-source rebuild of every cosmic app
+    # (cargo vendor + compile takes hours).
     nixpkgs.overlays = mkIf cfg.useCosmicGreeter [
       (_final: prev: {
         cosmic-comp = prev.cosmic-comp.overrideAttrs (old: {
@@ -130,13 +134,14 @@ in
 
     # COSMIC environment configuration
     environment = {
-      # COSMIC applications and utilities
       systemPackages = with pkgs;
         let
-          # Wayland library path for COSMIC applications
           waylandLibs = lib.makeLibraryPath [ pkgs.wayland pkgs.libxkbcommon pkgs.vulkan-loader pkgs.libglvnd ];
 
-          # Helper function to wrap COSMIC apps with Wayland libraries
+          # Wrap cosmic apps with Wayland library paths via symlinkJoin
+          # (cheap; doesn't trigger from-source rebuild). lib.hiPrio is
+          # applied at the use site so the wrapped variant beats the
+          # unwrapped copy services.desktopManager.cosmic also installs.
           wrapCosmicApp = name: pkg: pkgs.symlinkJoin {
             name = "${name}-wrapped";
             paths = [ pkg ];
@@ -146,41 +151,31 @@ in
                 --prefix LD_LIBRARY_PATH : "${waylandLibs}"
             '';
           };
-
-          # Wrap essential COSMIC applications with proper Wayland library paths
-          cosmic-settings-wrapped = wrapCosmicApp "cosmic-settings" pkgs.cosmic-settings;
-          cosmic-term-wrapped = wrapCosmicApp "cosmic-term" pkgs.cosmic-term;
-          cosmic-edit-wrapped = wrapCosmicApp "cosmic-edit" pkgs.cosmic-edit;
-          cosmic-files-wrapped = wrapCosmicApp "cosmic-files" pkgs.cosmic-files;
         in
         [
-          # Essential applications (always installed) - all wrapped with Wayland libs
-          cosmic-edit-wrapped # Text editor
-          cosmic-files-wrapped # File manager
-          cosmic-term-wrapped # Terminal emulator
-          cosmic-settings-wrapped # System settings
+          # Wrapped variants win the buildEnv merge over the unwrapped
+          # copies installed by services.desktopManager.cosmic.enable.
+          (lib.hiPrio (wrapCosmicApp "cosmic-edit" pkgs.cosmic-edit))
+          (lib.hiPrio (wrapCosmicApp "cosmic-files" pkgs.cosmic-files))
+          (lib.hiPrio (wrapCosmicApp "cosmic-term" pkgs.cosmic-term))
+          (lib.hiPrio (wrapCosmicApp "cosmic-settings" pkgs.cosmic-settings))
 
-          # Fix for missing libEGL.so.1
+          # libEGL.so.1 + Wayland runtime libs needed by COSMIC apps
           libglvnd
           mesa
           wayland
           libxkbcommon
 
-          #Applications for COSMIC core functionality
           tasks
 
-          # Wayland utilities
           wl-clipboard
           wl-clipboard-x11
 
-          # Screenshot and screen recording support
           grim
           slurp
 
-          # Notifications
           libnotify
 
-          # GTK theme manager for non-GNOME desktops
           nwg-look
         ]
         ++ optionals cfg.installAllApps [
@@ -220,10 +215,13 @@ in
         ++ optional cfg.enableNextMeetingApplet
           # Next meeting calendar applet (wrapped for proper Wayland library loading)
           (wrapCosmicApp "cosmic-next-meeting" pkgs.customPkgs.cosmic-ext-applet-next-meeting)
-        ++ optionals cfg.enableNextMeetingApplet [
-          # Evolution Data Server for calendar access
+        # Evolution Data Server / GOA for calendar — gnome already provides
+        # these via evolution-with-plugins; only install when gnome is off.
+        ++ optionals
+          (cfg.enableNextMeetingApplet
+          && !config.services.desktopManager.gnome.enable) [
           pkgs.evolution-data-server
-          pkgs.gnome-online-accounts # For Google Calendar integration
+          pkgs.gnome-online-accounts
         ]
         ++ optional cfg.enableMusicPlayerApplet
           # Music player applet with MPRIS control (wrapped for proper Wayland library loading)

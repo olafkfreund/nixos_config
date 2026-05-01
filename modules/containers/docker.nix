@@ -27,11 +27,10 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Docker packages
+    # docker itself is provided by virtualisation.docker.enable; listing
+    # docker-client here collides with it on /bin/docker and completions.
     environment.systemPackages = with pkgs; [
       docker-compose
-      docker-client
-      # docui REMOVED - deprecated, using lazydocker instead
       docker-gc
       lazydocker
       earthly
