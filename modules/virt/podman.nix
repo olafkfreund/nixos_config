@@ -15,11 +15,13 @@ in
     };
   };
   config = mkIf cfg.enable {
+    # podman itself is installed by virtualisation.podman.enable (below)
+    # with the systemd integration wrapper. Listing pkgs.podman here would
+    # collide against that wrapper in buildEnv.
     environment.systemPackages = with pkgs; [
       podman-compose
       podman-tui
       podman-desktop
-      podman
       pods
     ];
     virtualisation = {

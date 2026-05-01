@@ -109,11 +109,9 @@
     difftastic
 
     # Development tools
-    docker
-    docker-compose
-    kubectl
-    k9s
-    helm
+    # docker, docker-compose, kubectl, k9s, helm: installed system-wide via
+    # virtualisation.docker.enable + modules/containers/kubernetes.nix.
+    # Re-declaring at user level produces buildEnv collisions.
 
     # Language-specific tools
     nodejs_24 # Use nodejs_24 to match system-wide installation
@@ -156,7 +154,7 @@
     graphviz
 
     # Container and virtualization
-    podman
+    # podman: installed system-wide via virtualisation.podman.enable.
     buildah
 
     # Cloud development
