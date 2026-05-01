@@ -276,15 +276,6 @@ in
       installAllApps = true;
     };
 
-    # COSMIC Package Updater Applet - NixOS update notifications
-    desktop.cosmic-applet-package-updater = {
-      enable = false;
-      autoCheck = true;
-      checkIntervalMinutes = 60;
-      nixosMode = "auto"; # Auto-detect flakes vs channels mode
-      enablePasswordlessChecks = false; # Require password for security
-    };
-
     # Microsoft Intune Company Portal (custom package with version control)
     intune = {
       enable = false; # Disabled - no longer needed
