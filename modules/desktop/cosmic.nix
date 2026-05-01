@@ -115,28 +115,46 @@ in
       };
     };
 
-    # Wrap cosmic-comp with proper library paths to fix libEGL.so.1 loading
+    # Wrap cosmic-comp + the four core apps at the package level so the
+    # only copy in the system path has Wayland libs baked in. Listing
+    # wrapped variants alongside services.desktopManager.cosmic's unwrapped
+    # copies in systemPackages would otherwise collide on /bin/cosmic-*.
     nixpkgs.overlays = mkIf cfg.useCosmicGreeter [
-      (_final: prev: {
-        cosmic-comp = prev.cosmic-comp.overrideAttrs (old: {
-          nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.makeWrapper ];
-          postInstall = (old.postInstall or "") + ''
-            wrapProgram $out/bin/cosmic-comp \
-              --prefix LD_LIBRARY_PATH : "${prev.libglvnd}/lib:${prev.mesa}/lib:/run/opengl-driver/lib"
-          '';
-        });
-      })
+      (_final: prev:
+        let
+          waylandLibs = lib.makeLibraryPath [ prev.wayland prev.libxkbcommon prev.vulkan-loader prev.libglvnd ];
+          wrapCosmicBin = pkg: bin: pkg.overrideAttrs (old: {
+            nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.makeWrapper ];
+            postFixup = (old.postFixup or "") + ''
+              wrapProgram $out/bin/${bin} \
+                --prefix LD_LIBRARY_PATH : "${waylandLibs}"
+            '';
+          });
+        in
+        {
+          cosmic-comp = prev.cosmic-comp.overrideAttrs (old: {
+            nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.makeWrapper ];
+            postInstall = (old.postInstall or "") + ''
+              wrapProgram $out/bin/cosmic-comp \
+                --prefix LD_LIBRARY_PATH : "${prev.libglvnd}/lib:${prev.mesa}/lib:/run/opengl-driver/lib"
+            '';
+          });
+          cosmic-edit = wrapCosmicBin prev.cosmic-edit "cosmic-edit";
+          cosmic-files = wrapCosmicBin prev.cosmic-files "cosmic-files";
+          cosmic-settings = wrapCosmicBin prev.cosmic-settings "cosmic-settings";
+          cosmic-term = wrapCosmicBin prev.cosmic-term "cosmic-term";
+        })
     ];
 
     # COSMIC environment configuration
     environment = {
-      # COSMIC applications and utilities
+      # cosmic-edit/files/settings/term are installed by
+      # services.desktopManager.cosmic.enable; the overlay above wraps them
+      # in-place so we don't need (and must not) list them here too.
       systemPackages = with pkgs;
         let
-          # Wayland library path for COSMIC applications
           waylandLibs = lib.makeLibraryPath [ pkgs.wayland pkgs.libxkbcommon pkgs.vulkan-loader pkgs.libglvnd ];
 
-          # Helper function to wrap COSMIC apps with Wayland libraries
           wrapCosmicApp = name: pkg: pkgs.symlinkJoin {
             name = "${name}-wrapped";
             paths = [ pkg ];
@@ -146,41 +164,24 @@ in
                 --prefix LD_LIBRARY_PATH : "${waylandLibs}"
             '';
           };
-
-          # Wrap essential COSMIC applications with proper Wayland library paths
-          cosmic-settings-wrapped = wrapCosmicApp "cosmic-settings" pkgs.cosmic-settings;
-          cosmic-term-wrapped = wrapCosmicApp "cosmic-term" pkgs.cosmic-term;
-          cosmic-edit-wrapped = wrapCosmicApp "cosmic-edit" pkgs.cosmic-edit;
-          cosmic-files-wrapped = wrapCosmicApp "cosmic-files" pkgs.cosmic-files;
         in
         [
-          # Essential applications (always installed) - all wrapped with Wayland libs
-          cosmic-edit-wrapped # Text editor
-          cosmic-files-wrapped # File manager
-          cosmic-term-wrapped # Terminal emulator
-          cosmic-settings-wrapped # System settings
-
-          # Fix for missing libEGL.so.1
+          # libEGL.so.1 + Wayland runtime libs needed by COSMIC apps
           libglvnd
           mesa
           wayland
           libxkbcommon
 
-          #Applications for COSMIC core functionality
           tasks
 
-          # Wayland utilities
           wl-clipboard
           wl-clipboard-x11
 
-          # Screenshot and screen recording support
           grim
           slurp
 
-          # Notifications
           libnotify
 
-          # GTK theme manager for non-GNOME desktops
           nwg-look
         ]
         ++ optionals cfg.installAllApps [
@@ -220,10 +221,13 @@ in
         ++ optional cfg.enableNextMeetingApplet
           # Next meeting calendar applet (wrapped for proper Wayland library loading)
           (wrapCosmicApp "cosmic-next-meeting" pkgs.customPkgs.cosmic-ext-applet-next-meeting)
-        ++ optionals cfg.enableNextMeetingApplet [
-          # Evolution Data Server for calendar access
+        # Evolution Data Server / GOA for calendar — gnome already provides
+        # these via evolution-with-plugins; only install when gnome is off.
+        ++ optionals
+          (cfg.enableNextMeetingApplet
+          && !config.services.desktopManager.gnome.enable) [
           pkgs.evolution-data-server
-          pkgs.gnome-online-accounts # For Google Calendar integration
+          pkgs.gnome-online-accounts
         ]
         ++ optional cfg.enableMusicPlayerApplet
           # Music player applet with MPRIS control (wrapped for proper Wayland library loading)

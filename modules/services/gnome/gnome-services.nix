@@ -33,8 +33,6 @@
     gnomeExtensions.user-themes
     gnomeExtensions.appindicator
     gimp
-    cameractrls
     cameractrls-gtk4
-    # alpaca  # Disabled due to Python 3.13 compatibility issues with mercantile dependency
   ];
 }
