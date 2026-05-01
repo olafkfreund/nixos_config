@@ -1,8 +1,7 @@
 { config, lib, pkgs, ... }:
 
-with lib;
 let
-  inherit (lib) types;
+  inherit (lib) mkOption mkIf mkEnableOption types;
   cfg = config.programs.codex-cli;
 
   codex-cli = pkgs.callPackage ./. { inherit (pkgs) nodejs_24; };

@@ -4,7 +4,8 @@
 , lib
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf mkMerge optional optionalString flatten;
   # Workflow configuration
   cfg = {
     # Task runners and build systems

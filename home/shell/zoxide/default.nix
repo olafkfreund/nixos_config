@@ -2,7 +2,8 @@
 , lib
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf mkEnableOption mkAfter;
   cfg = config.cli.zoxide;
 in
 {

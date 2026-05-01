@@ -4,7 +4,8 @@
 , lib
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf mkDefault mkMerge optionals optionalString flatten;
   # Feature flags for system monitoring
   cfg = {
     systemMonitors = {

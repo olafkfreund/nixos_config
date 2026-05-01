@@ -1,5 +1,5 @@
 { pkgs, config, lib, ... }:
-with lib;
+let inherit (lib) optionals; in
 {
   imports = [
     ./qt.nix

@@ -99,12 +99,12 @@ let
       runHook postInstall
     '';
 
-    meta = with lib; {
+    meta = {
       description = "Claude Code CLI tool";
       homepage = "https://github.com/anthropics/claude-code";
-      license = licenses.mit;
+      license = lib.licenses.mit;
       maintainers = [ ];
-      platforms = platforms.all;
+      platforms = lib.platforms.all;
     };
   };
 

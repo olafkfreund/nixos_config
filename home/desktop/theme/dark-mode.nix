@@ -2,7 +2,7 @@
 # Works across all desktop environments: COSMIC, GNOME, Hyprland, Sway, etc.
 # Focus: GTK dark mode enforcement only
 { lib, ... }:
-with lib; {
+let inherit (lib) mkDefault; in {
   # GTK dark mode enforcement - the critical part for dark mode
   gtk = {
     gtk3.extraConfig = {

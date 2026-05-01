@@ -4,7 +4,7 @@
 , lib
 , ...
 }:
-with lib; {
+{
   imports = [
     ./claude-integration.nix
   ];

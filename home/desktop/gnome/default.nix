@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption mkDefault types literalExpression;
   cfg = config.desktop.gnome;
 in
 {

@@ -4,7 +4,8 @@
 , lib
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkIf mkMerge optional optionals attrValues filterAttrs mapAttrs mapAttrsToList any elem flatten;
   # Language support configuration
   cfg = {
     # Core programming languages
