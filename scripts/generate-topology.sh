@@ -43,9 +43,7 @@ cat <<EOF >/tmp/topology_input.json
     "structure": {
         "p620": { "role": "workstation", "type": "amd" },
         "p510": { "role": "server", "type": "intel" },
-        "razer": { "role": "laptop", "type": "intel-nvidia" },
-        "samsung": { "role": "laptop", "type": "intel" },
-        "dex5550": { "role": "sff", "type": "intel" }
+        "razer": { "role": "laptop", "type": "intel-nvidia" }
     }
 }
 EOF

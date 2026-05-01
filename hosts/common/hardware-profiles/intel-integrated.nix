@@ -1,5 +1,5 @@
 # Intel Integrated Graphics Hardware Profile
-# For hosts with Intel integrated graphics (e.g. dex5550)
+# For hosts with Intel integrated graphics
 # Provides Intel-specific GPU configurations and environment variables
 # Uses modesetting driver for modern Intel GPUs (12th gen and newer)
 

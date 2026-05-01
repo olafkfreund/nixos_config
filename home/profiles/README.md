@@ -2,7 +2,9 @@
 
 ## Overview
 
-The Home Manager Profile System provides a sophisticated way to organize user configurations based on roles and use cases rather than individual hosts. This eliminates configuration duplication and provides consistent experiences across similar environments.
+The Home Manager Profile System provides a sophisticated way to organize user configurations based
+on roles and use cases rather than individual hosts. This eliminates configuration duplication and
+provides consistent experiences across similar environments.
 
 ## Available Profiles
 
@@ -63,7 +65,7 @@ The Home Manager Profile System provides a sophisticated way to organize user co
 
 ## Profile Structure
 
-```
+```text
 home/profiles/
 ├── default.nix              # Profile system definitions and logic
 ├── server-admin/
@@ -127,13 +129,6 @@ features = {
 ```
 
 ## Migration Guide
-
-### Current Host Files
-
-The existing host-specific files remain as:
-
-- `dex5550_home.nix` → Legacy configuration
-- `dex5550_home_profile.nix` → New profile-based configuration
 
 ### Gradual Migration
 

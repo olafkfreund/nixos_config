@@ -2,9 +2,9 @@
 
 > **Research-based comparison for optimal NixOS caching strategy**
 
-##  Quick Verdict
+## Quick Verdict
 
-**For your setup: P620 + Optional Cachix Hybrid = BEST**
+> For your setup: P620 + Optional Cachix Hybrid = BEST
 
 - **Primary**: P620 local cache (unlimited, private, fastest on LAN)
 - **Optional**: Cachix free tier (5GB public, external access)
@@ -12,7 +12,7 @@
 
 ---
 
-##  Cachix Overview
+## Cachix Overview
 
 ### What Is Cachix?
 
@@ -34,12 +34,12 @@ Cachix is a hosted binary cache service (SaaS) that provides:
 
 **Key Features:**
 
--  Unlimited bandwidth (all tiers)
--  Cloudflare CDN (global performance)
--  Compression (saves 90% storage)
--  14-day free trial (paid tiers)
--  Watch-store automatic pushing
--  Free tier is PUBLIC ONLY
+- Unlimited bandwidth (all tiers)
+- Cloudflare CDN (global performance)
+- Compression (saves 90% storage)
+- 14-day free trial (paid tiers)
+- Watch-store automatic pushing
+- Free tier is PUBLIC ONLY
 
 ---
 
@@ -54,7 +54,7 @@ Cachix is a hosted binary cache service (SaaS) that provides:
 | **Razer on LAN**   |  ~50-100 MB/s | ~10-30 MB/s      | ~5-20 MB/s     | ~5-20 MB/s     |
 | **P510 on LAN**    |  ~50-100 MB/s | ~10-30 MB/s      | ~5-20 MB/s     | ~5-20 MB/s     |
 
-**Winner**: P620 on LAN (5-10x faster) 
+**Winner**: P620 on LAN (5-10x faster)
 
 ### Privacy & Security
 
@@ -66,7 +66,7 @@ Cachix is a hosted binary cache service (SaaS) that provides:
 | **Access control** |  Network-based |  Public read    |  Token-based     |
 | **Secrets safety** |  Stays local   | ️ Could leak     | ️ Could leak      |
 
-**Winner**: P620 (full privacy control) 
+**Winner**: P620 (full privacy control)
 
 ### Storage Capacity
 
@@ -78,7 +78,7 @@ Cachix is a hosted binary cache service (SaaS) that provides:
 | **Cachix Standard** | 250 GB     | ~$50-100/mo?  |  Upgrade   |
 | **Cachix Pro**      | 1500 GB    | ~$200+/mo?    |  Upgrade   |
 
-**Winner**: P620 (unlimited free storage) 
+**Winner**: P620 (unlimited free storage)
 
 ### Maintenance & Complexity
 
@@ -90,7 +90,7 @@ Cachix is a hosted binary cache service (SaaS) that provides:
 | **Configuration**       |  Nix knowledge   |  CLI tool         |
 | **Team sharing**        |  VPN required    |  Internet access  |
 
-**Winner**: Cachix (less maintenance) 
+**Winner**: Cachix (less maintenance)
 
 ### Cost Analysis
 
@@ -108,15 +108,15 @@ Cachix is a hosted binary cache service (SaaS) that provides:
 | **Cachix Standard**    | ~$50-100             | ~$600-1200  |
 | **P620 + Cachix Free** | ~$5                  | ~$60        |
 
-**Winner**: P620 + Cachix Free hybrid (best value) 
+**Winner**: P620 + Cachix Free hybrid (best value)
 
 ---
 
-##  Recommended Strategy: Hybrid Approach
+## Recommended Strategy: Hybrid Approach
 
 ### Architecture
 
-```
+```text
 Primary: P620 Local Cache (unlimited, private, fastest)
     ↓
 Fallback: Cachix Free (5GB, public, remote access)
@@ -164,13 +164,13 @@ nix build .#packages.x86_64-linux.some-tool --print-out-paths | \
   cachix push olafkfreund-nixos
 
 # DON'T push full system closures (may contain secrets)
-# nix build .#nixosConfigurations.samsung --print-out-paths | \
+# nix build .#nixosConfigurations.p510 --print-out-paths | \
 #   cachix push olafkfreund-nixos  #  AVOID THIS
 ```
 
 ---
 
-##  When NOT to Use Cachix
+## When NOT to Use Cachix
 
 ### Don't Use Cachix If
 
@@ -210,31 +210,29 @@ nix build .#packages.x86_64-linux.some-tool --print-out-paths | \
 
 ---
 
-##  Practical Recommendations
+## Practical Recommendations
 
-### Option 1: P620 Only (RECOMMENDED) 
+### Option 1: P620 Only (RECOMMENDED)
 
 **Best for**: Your current setup
 
 **Why**:
 
--  You already have it configured
--  Fastest on your LAN (50-100 MB/s)
--  Unlimited private storage
--  No ongoing costs
--  Full privacy control
--  Works with Tailscale everywhere
+- You already have it configured
+- Fastest on your LAN (50-100 MB/s)
+- Unlimited private storage
+- No ongoing costs
+- Full privacy control
+- Works with Tailscale everywhere
 
-**Setup**: Already done! 
+**Setup**: Already done!
 
 **Deploy commands**:
 
 ```bash
-# Use P620 cache for Samsung (already configured)
-just samsung-deploy
-
-# P620 builds, Samsung downloads from cache
-just deploy-via-p620 samsung
+# Use P620 cache for any client (already configured)
+just deploy-via-p620 razer
+just deploy-via-p620 p510
 ```
 
 ---
@@ -245,21 +243,21 @@ just deploy-via-p620 samsung
 
 **Why**:
 
--  P620 for LAN (fast, private)
--  Cachix for remote access (when not on VPN)
--  Free 5GB (for common packages)
--  Only public cache (careful what you push)
+- P620 for LAN (fast, private)
+- Cachix for remote access (when not on VPN)
+- Free 5GB (for common packages)
+- Only public cache (careful what you push)
 
 **Setup**:
 
-**Step 1: Install Cachix**
+#### Step 1: Install Cachix
 
 ```bash
 # Already installed via development.nix
 which cachix  # Should work
 ```
 
-**Step 2: Create Account & Cache**
+#### Step 2: Create Account & Cache
 
 ```bash
 # 1. Sign up: https://cachix.org (free)
@@ -270,7 +268,7 @@ which cachix  # Should work
 cachix authtoken YOUR_TOKEN
 ```
 
-**Step 3: Add to Configuration**
+#### Step 3: Add to Configuration
 
 ```nix
 # Add to modules/nix/nix.nix
@@ -323,10 +321,10 @@ cachix watch-exec olafkfreund-nixos -- nix build .#packages.x86_64-linux.some-to
 
 **Why skip**:
 
--  P620 already provides private caching (free)
--  Your hosts are on same network (LAN is faster)
--  Storage on P620 is unlimited
--  Cost doesn't justify benefits
+- P620 already provides private caching (free)
+- Your hosts are on same network (LAN is faster)
+- Storage on P620 is unlimited
+- Cost doesn't justify benefits
 
 **Only consider if**:
 
@@ -384,26 +382,26 @@ cachix-push-common:
 
 ### Security Considerations
 
-** CRITICAL: Cachix Free Tier is PUBLIC**
+#### CRITICAL: Cachix Free Tier is PUBLIC
 
 **NEVER push**:
 
--  System configurations (`nixosConfigurations.*`)
--  Home-manager configurations (may contain secrets)
--  Custom modules (private logic)
--  API keys, tokens, passwords
--  Private data or configurations
+- System configurations (`nixosConfigurations.*`)
+- Home-manager configurations (may contain secrets)
+- Custom modules (private logic)
+- API keys, tokens, passwords
+- Private data or configurations
 
 **Safe to push**:
 
--  Common nixpkgs packages (firefox, vscode, etc.)
--  Public development tools
--  Open source projects
--  Generic build artifacts
+- Common nixpkgs packages (firefox, vscode, etc.)
+- Public development tools
+- Open source projects
+- Generic build artifacts
 
 ---
 
-##  Decision Matrix
+## Decision Matrix
 
 | Factor            | Weight | P620 Only  | P620 + Cachix | Cachix Only |
 | ----------------- | ------ | ---------- | ------------- | ----------- |
@@ -415,44 +413,44 @@ cachix-push-common:
 | **Maintenance**   | Medium | ⭐⭐     | ⭐⭐⭐        | ⭐⭐⭐⭐⭐  |
 | **Total Score**   | -      | **26/30**  | **27/30**     | **16/30**   |
 
-**Winner**: P620 + Optional Cachix Free (27/30) 
+**Winner**: P620 + Optional Cachix Free (27/30)
 
 ---
 
-##  Final Recommendation
+## Final Recommendation
 
 ### For Your Setup: P620 Primary + Cachix Optional
 
 **Keep using P620 as your primary cache:**
 
--  Already configured and working
--  Fastest for your use case (LAN + Tailscale)
--  Unlimited private storage
--  Zero ongoing costs
--  Full privacy control
+- Already configured and working
+- Fastest for your use case (LAN + Tailscale)
+- Unlimited private storage
+- Zero ongoing costs
+- Full privacy control
 
 **Optionally add Cachix free tier for:**
 
--  Remote access backup (when Tailscale down)
--  Sharing common packages (non-sensitive)
--  5GB of commonly-used packages
--  Only if you need external access
+- Remote access backup (when Tailscale down)
+- Sharing common packages (non-sensitive)
+- 5GB of commonly-used packages
+- Only if you need external access
 
 **Skip Cachix paid tiers:**
 
--  Not cost-effective ($180-1200/year)
--  P620 already provides private caching
--  Your hosts are on same network
+- Not cost-effective ($180-1200/year)
+- P620 already provides private caching
+- Your hosts are on same network
 
 ### Implementation Priority
 
-1. **Now**: Use P620 cache (already done!) 
+1. **Now**: Use P620 cache (already done!)
 2. **Optional**: Add Cachix free for external access
 3. **Skip**: Cachix paid tiers
 
 ---
 
-##  Sources
+## Sources
 
 - [Cachix Official Site](https://www.cachix.org)
 - [Cachix Pricing](https://www.cachix.org/pricing)

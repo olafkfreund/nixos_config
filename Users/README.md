@@ -9,14 +9,12 @@ This directory contains user-specific Home Manager configurations that define th
   - `razer_home.nix` - User configuration for the Razer laptop
   - `p620_home.nix` - User configuration for the P620 workstation
   - `p510_home.nix` - User configuration for the P510 system
-  - `hp_home.nix` - User configuration for the HP server/workstation
-  - `dex5550_home.nix` - User configuration for the Dell Dex5550 laptop
-  - `lms_home.nix` - User configuration for the LMS system
-  - `archive/` - Archived user configurations for systems no longer in active use
 
 ## Usage
 
-These user configurations are imported by the host configurations in `flake.nix` through the Home Manager module. Each user configuration imports relevant modules from the `home/` directory to define the user's environment.
+These user configurations are imported by the host configurations in `flake.nix` through the Home
+Manager module. Each user configuration imports relevant modules from the `home/` directory to
+define the user's environment.
 
 The user configurations typically include:
 

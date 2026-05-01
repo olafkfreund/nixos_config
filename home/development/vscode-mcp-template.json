@@ -30,14 +30,6 @@
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
       }
-    },
-    "grafana": {
-      "type": "stdio",
-      "command": "mcp-grafana",
-      "args": ["--url", "http://dex5550:3001"],
-      "env": {
-        "GRAFANA_API_TOKEN": "${GRAFANA_API_TOKEN}"
-      }
     }
   }
 }

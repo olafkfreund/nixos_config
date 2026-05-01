@@ -17,10 +17,8 @@ echo ""
 
 # Section 1: Remove inactive users
 echo "1. Inactive user configurations (SAFE TO DELETE):"
-echo "   - Users/htpcuser/dex5550_home.nix"
 echo "   - Users/serveruser/p510_home.nix"
 echo "   - Users/workuser/p620_home.nix"
-# rm -v Users/htpcuser/dex5550_home.nix
 # rm -v Users/serveruser/p510_home.nix
 # rm -v Users/workuser/p620_home.nix
 

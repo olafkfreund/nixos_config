@@ -193,13 +193,6 @@ let
         services.xserver.videoDrivers = [ "nvidia" ];
       };
 
-    dex5550 =
-      _: {
-        # Intel integrated graphics
-        boot.kernelModules = [ "i915" ];
-        services.xserver.videoDrivers = [ "intel" ];
-      };
-
   };
 
   # Function to create a live image for a specific host
@@ -231,5 +224,5 @@ in
     (hostName: {
       name = "live-iso-${hostName}";
       value = mkLiveImage hostName;
-    }) [ "p620" "razer" "p510" "dex5550" ]);
+    }) [ "p620" "razer" "p510" ]);
 }

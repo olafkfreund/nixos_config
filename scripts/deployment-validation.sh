@@ -13,8 +13,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Hosts to validate
-HOSTS=("p620" "dex5550" "p510" "razer")
-MONITORING_SERVER="dex5550"
+HOSTS=("p620" "p510" "razer")
 
 # Function to print colored output
 print_status() {
@@ -94,9 +93,6 @@ check_ai_services() {
     "p620")
       local ai_services=("ollama" "ai-alert-manager" "ai-production-dashboard")
       ;;
-    "dex5550")
-      local ai_services=("prometheus" "grafana")
-      ;;
     "p510" | "razer")
       local ai_services=("ai-memory-optimization")
       ;;
@@ -109,38 +105,6 @@ check_ai_services() {
       print_warning "$host: $service is not active (may be timer-based)"
     fi
   done
-}
-
-# Function to check monitoring integration
-check_monitoring_integration() {
-  print_info "Checking monitoring integration..."
-
-  # Check Prometheus targets
-  local prometheus_url="http://${MONITORING_SERVER}.home.freundcloud.com:9090"
-  if curl -s -f "$prometheus_url/api/v1/targets" &>/dev/null; then
-    print_success "Prometheus server is accessible"
-
-    # Check specific targets
-    local targets=$(curl -s "$prometheus_url/api/v1/targets" | jq -r '.data.activeTargets[] | select(.health=="up") | .labels.instance')
-
-    for host in "${HOSTS[@]}"; do
-      if echo "$targets" | grep -q "$host"; then
-        print_success "Monitoring target $host is UP"
-      else
-        print_warning "Monitoring target $host may be DOWN"
-      fi
-    done
-  else
-    print_error "Prometheus server is not accessible"
-  fi
-
-  # Check Grafana
-  local grafana_url="http://${MONITORING_SERVER}.home.freundcloud.com:3001"
-  if curl -s -f "$grafana_url/api/health" &>/dev/null; then
-    print_success "Grafana server is accessible"
-  else
-    print_error "Grafana server is not accessible"
-  fi
 }
 
 # Function to check AI provider functionality
@@ -169,7 +133,8 @@ check_ai_providers() {
     print_success "P620: Ollama API is responding"
 
     # Get model count
-    local model_count=$(ssh p620 "ollama list | wc -l")
+    local model_count
+    model_count=$(ssh p620 "ollama list | wc -l")
     print_info "P620: Ollama has $((model_count - 1)) models available"
   else
     print_error "P620: Ollama API is not responding"
@@ -195,8 +160,9 @@ check_alerting_system() {
   fi
 
   # Check alert thresholds
-  local disk_usage=$(ssh p620 "df / | tail -1 | awk '{print \$5}' | sed 's/%//'")
-  local memory_usage=$(ssh p620 "free | grep Mem | awk '{printf \"%.0f\", \$3/\$2 * 100.0}'")
+  local disk_usage memory_usage
+  disk_usage=$(ssh p620 "df / | tail -1 | awk '{print \$5}' | sed 's/%//'")
+  memory_usage=$(ssh p620 "free | grep Mem | awk '{printf \"%.0f\", \$3/\$2 * 100.0}'")
 
   print_info "P620: Current disk usage: ${disk_usage}%"
   print_info "P620: Current memory usage: ${memory_usage}%"
@@ -253,14 +219,14 @@ check_system_resources() {
   print_info "Checking system resources..."
 
   for host in "${HOSTS[@]}"; do
-    local disk_usage=$(ssh "$host" "df / | tail -1 | awk '{print \$5}'")
-    local memory_usage=$(ssh "$host" "free | grep Mem | awk '{printf \"%.1f%%\", \$3/\$2 * 100.0}'")
-    local load_avg=$(ssh "$host" "uptime | awk -F'load average:' '{print \$2}' | awk '{print \$1}' | sed 's/,//'")
+    local disk_usage memory_usage load_avg disk_num
+    disk_usage=$(ssh "$host" "df / | tail -1 | awk '{print \$5}'")
+    memory_usage=$(ssh "$host" "free | grep Mem | awk '{printf \"%.1f%%\", \$3/\$2 * 100.0}'")
+    load_avg=$(ssh "$host" "uptime | awk -F'load average:' '{print \$2}' | awk '{print \$1}' | sed 's/,//'")
 
     print_info "$host: Disk: $disk_usage, Memory: $memory_usage, Load: $load_avg"
 
-    # Check for concerning resource usage
-    local disk_num=$(echo "$disk_usage" | sed 's/%//')
+    disk_num=${disk_usage//%/}
     if [ "$disk_num" -gt 90 ]; then
       print_warning "$host: High disk usage ($disk_usage)"
     fi
@@ -273,19 +239,12 @@ generate_summary() {
 
   echo "Validation completed at: $(date)"
   echo "Hosts validated: ${HOSTS[*]}"
-  echo "Monitoring server: $MONITORING_SERVER"
 
   print_info "Key Infrastructure Components:"
   print_info "  • AI Providers: Anthropic, OpenAI, Gemini, Ollama"
-  print_info "  • Monitoring: Prometheus, Grafana, Node Exporters"
   print_info "  • Alerting: Email notifications, system monitoring"
   print_info "  • Security: SSH hardening"
   print_info "  • Storage: Automated analysis and optimization"
-
-  print_info "Access Points:"
-  print_info "  • Grafana: http://dex5550.home.freundcloud.com:3001"
-  print_info "  • Prometheus: http://dex5550.home.freundcloud.com:9090"
-  print_info "  • Alertmanager: http://dex5550.home.freundcloud.com:9093"
 
   print_success "AI Infrastructure deployment validation complete!"
 }
@@ -314,10 +273,6 @@ main() {
   for host in "${HOSTS[@]}"; do
     check_ai_services "$host"
   done
-
-  # Monitoring integration
-  print_header "MONITORING INTEGRATION"
-  check_monitoring_integration
 
   # AI provider functionality
   print_header "AI PROVIDER TESTING"
