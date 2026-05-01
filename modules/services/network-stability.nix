@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkOption mkIf mkEnableOption mkDefault mkMerge types;
   cfg = config.services.network-stability;
 in
 {

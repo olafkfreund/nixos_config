@@ -1,8 +1,7 @@
 { config, lib, pkgs, ... }:
 
-with lib;
-
 let
+  inherit (lib) mkOption mkIf mkEnableOption mkMerge mkAfter types literalExpression;
   cfg = config.services.mdatp;
 in
 {

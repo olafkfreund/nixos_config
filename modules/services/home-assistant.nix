@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
-with lib;
 let
+  inherit (lib) mkOption mkIf mkEnableOption types optional elem;
   cfg = config.features.homeAssistant;
 in
 {

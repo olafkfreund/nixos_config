@@ -1,8 +1,7 @@
 { config, lib, pkgs, ... }:
 
-with lib;
-
 let
+  inherit (lib) mkOption mkIf mkEnableOption mkDefault types;
   cfg = config.services.rescreenshot-mcp;
 
   # Wrapper script to ensure environment variables are set

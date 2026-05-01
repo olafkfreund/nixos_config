@@ -1,7 +1,7 @@
 { config, lib, ... }:
 
-with lib;
 let
+  inherit (lib) mkOption mkIf mkEnableOption types optionalString listToAttrs filter;
   cfg = config.features.syncthing;
 
   # Host device IDs - obtained from each host's Syncthing installation
