@@ -1,5 +1,5 @@
 { lib, ... }:
-with lib; {
+let inherit (lib) mkEnableOption; in {
   options.features = {
     terminals = {
       enable = mkEnableOption "Enable terminal emulators";

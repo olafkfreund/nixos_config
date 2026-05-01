@@ -3,7 +3,10 @@
 , lib
 , ...
 }:
-with lib; {
+let
+  inherit (lib) cleanSource;
+in
+{
   # Syntax and style validation
   nixpkgs-lint-check =
     pkgs.runCommand "nixpkgs-lint-validation"
