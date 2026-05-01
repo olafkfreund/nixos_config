@@ -262,7 +262,6 @@ in
       office = true;
       webcam = true; # OBS Virtual Camera support
       print = true;
-      reddix.enable = true; # Reddit TUI client
     };
 
     media = {
