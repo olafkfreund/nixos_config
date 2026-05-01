@@ -1,4 +1,4 @@
-{ lib, ... }: {
+_: {
   aws.packages.enable = true;
   azure.packages.enable = true; # Re-enabled Azure CLI
   cloud-tools.packages.enable = true;
@@ -20,28 +20,28 @@
   nodejs.development.enable = true;
 
   # Git tools
-  programs.lazygit.enable = lib.mkForce true;
-  programs.thunderbird.enable = lib.mkForce false;
-  programs.obsidian.enable = lib.mkForce true;
-  programs.office.enable = lib.mkForce true;
-  programs.webcam.enable = lib.mkForce true;
+  programs.lazygit.enable = true;
+  programs.thunderbird.enable = false;
+  programs.obsidian.enable = true;
+  programs.office.enable = true;
+  programs.webcam.enable = true;
 
   # Virtualization tools
-  services.docker.enable = lib.mkForce true;
-  services.incus.enable = lib.mkForce true;
-  services.podman.enable = lib.mkForce true;
-  services.spice.enable = lib.mkForce true;
-  services.libvirt.enable = lib.mkForce true;
+  services.docker.enable = true;
+  services.incus.enable = true;
+  services.podman.enable = true;
+  services.spice.enable = true;
+  services.libvirt.enable = true;
 
   # Password management
-  security.onepassword.enable = lib.mkForce true;
-  security.gnupg.enable = lib.mkForce true;
+  security.onepassword.enable = true;
+  security.gnupg.enable = true;
 
   # VPN
-  vpn.tailscale.enable = lib.mkForce true;
+  vpn.tailscale.enable = true;
 
   # AI providers configured in configuration.nix
 
   # Printing
-  services.print.enable = lib.mkForce true;
+  services.print.enable = true;
 }

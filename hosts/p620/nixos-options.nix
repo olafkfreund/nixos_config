@@ -1,4 +1,4 @@
-{ lib, ... }: {
+_: {
   aws.packages.enable = true;
   azure.packages.enable = true; # Re-enabled Azure CLI
   cloud-tools.packages.enable = true;
@@ -21,31 +21,31 @@
 
   # Git tools
   programs = {
-    lazygit.enable = lib.mkForce true;
-    thunderbird.enable = lib.mkForce false;
-    obsidian.enable = lib.mkForce true;
-    office.enable = lib.mkForce true;
-    webcam.enable = lib.mkForce true; # OBS Virtual Camera support
+    lazygit.enable = true;
+    thunderbird.enable = false;
+    obsidian.enable = true;
+    office.enable = true;
+    webcam.enable = true; # OBS Virtual Camera support
   };
 
   # Virtualization tools and services
   services = {
-    docker.enable = lib.mkForce true;
-    incus.enable = lib.mkForce true;
-    podman.enable = lib.mkForce true;
-    spice.enable = lib.mkForce true;
-    libvirt.enable = lib.mkForce true;
-    print.enable = lib.mkForce true;
+    docker.enable = true;
+    incus.enable = true;
+    podman.enable = true;
+    spice.enable = true;
+    libvirt.enable = true;
+    print.enable = true;
   };
 
   # Password management
   security = {
-    onepassword.enable = lib.mkForce true;
-    gnupg.enable = lib.mkForce true;
+    onepassword.enable = true;
+    gnupg.enable = true;
   };
 
   # VPN
-  vpn.tailscale.enable = lib.mkForce true;
+  vpn.tailscale.enable = true;
 
   # AI providers configured in configuration.nix
 }
