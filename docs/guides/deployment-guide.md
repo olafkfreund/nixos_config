@@ -2,7 +2,8 @@
 
 ## Overview
 
-This repository uses an optimized Just-based deployment system for managing 4 NixOS hosts with advanced performance optimizations, parallel operations, and smart change detection.
+This repository uses an optimized Just-based deployment system for managing 3 NixOS hosts with
+advanced performance optimizations, parallel operations, and smart change detection.
 
 ## Quick Reference
 
@@ -22,7 +23,6 @@ just quick-all           # Test all + deploy all (~3 min total)
 just quick-deploy p620    # Deploy P620 only if configuration changed
 just quick-deploy razer   # Deploy Razer only if configuration changed
 just quick-deploy p510    # Deploy P510 only if configuration changed
-just quick-deploy dex5550 # Deploy DEX5550 only if configuration changed
 ```
 
 #### Standard Optimized Deployment
@@ -31,7 +31,6 @@ just quick-deploy dex5550 # Deploy DEX5550 only if configuration changed
 just p620     # Deploy to P620 workstation (AMD/ROCm)
 just razer    # Deploy to Razer laptop (Intel/NVIDIA)
 just p510     # Deploy to P510 media server (Intel Xeon/NVIDIA)
-just dex5550  # Deploy to DEX5550 server (Intel integrated)
 ```
 
 #### Advanced Deployment Options
@@ -187,7 +186,7 @@ just deploy-cached HOST
 just test-all-parallel
 
 # Smart deployment to skip unchanged hosts
-for host in p620 razer p510 dex5550; do
+for host in p620 razer p510; do
     just quick-deploy $host
 done
 ```
@@ -285,14 +284,6 @@ All hosts are connected via Tailscale mesh VPN:
 - **Exit Node**: DEX5550 provides internet access
 - **Subnet Routing**: Access to 192.168.1.0/24 network
 - **Security**: All SSH access secured via Tailscale
-
-### Monitoring Integration
-
-Comprehensive monitoring via DEX5550:
-
-- **Grafana**: <http://dex5550:3001> (or via Tailscale)
-- **Prometheus**: <http://dex5550:9090>
-- **Metrics**: All deployment performance tracked
 
 ## Best Practices
 

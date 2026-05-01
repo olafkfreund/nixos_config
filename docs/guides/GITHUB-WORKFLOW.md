@@ -6,7 +6,9 @@
 
 ## Overview
 
-This document defines the complete GitHub-based development workflow for the NixOS Infrastructure Hub project. It follows **GitHub Flow** principles optimized for continuous delivery and rapid iteration while maintaining code quality and stability.
+This document defines the complete GitHub-based development workflow for the NixOS Infrastructure
+Hub project. It follows **GitHub Flow** principles optimized for continuous delivery and rapid
+iteration while maintaining code quality and stability.
 
 ## Table of Contents
 
@@ -27,11 +29,11 @@ This document defines the complete GitHub-based development workflow for the Nix
 
 **GitHub Flow** is chosen for this project because:
 
--  **Simplicity**: Single main branch with feature branches
--  **Continuous Delivery**: Deploy from main at any time
--  **Fast Iteration**: Quick feedback loops
--  **Collaboration**: Easy code review and discussion
--  **NixOS Compatibility**: Atomic deployments align with NixOS generations
+- **Simplicity**: Single main branch with feature branches
+- **Continuous Delivery**: Deploy from main at any time
+- **Fast Iteration**: Quick feedback loops
+- **Collaboration**: Easy code review and discussion
+- **NixOS Compatibility**: Atomic deployments align with NixOS generations
 
 ### Core Principles
 
@@ -66,7 +68,7 @@ This document defines the complete GitHub-based development workflow for the Nix
 
 ### Philosophy
 
-**"No code without an issue, no issue without a plan"**
+> "No code without an issue, no issue without a plan"
 
 Every code change, bug fix, or improvement must:
 
@@ -79,17 +81,17 @@ Every code change, bug fix, or improvement must:
 
 Use the `/nix-new-task` Claude command to create well-structured issues:
 
-```
+```text
 User: "/nix-new-task"
 ```
 
 The command will:
 
-1.  Guide you through issue creation
-2.  Conduct technical research if needed
-3.  Create formatted GitHub issue
-4.  Assign appropriate labels and priority
-5.  Provide next steps for implementation
+1. Guide you through issue creation
+2. Conduct technical research if needed
+3. Create formatted GitHub issue
+4. Assign appropriate labels and priority
+5. Provide next steps for implementation
 
 ### Issue Structure
 
@@ -173,16 +175,16 @@ M (1 week)
 
 Use the `/nix-check-tasks` Claude command to review open issues:
 
-```
+```text
 User: "/nix-check-tasks"
 ```
 
 The command provides:
 
-1.  Summary of all open issues by priority
-2.  Recommended next actions
+1. Summary of all open issues by priority
+2. Recommended next actions
 3. ⏸ Blocked issues requiring attention
-4.  Statistics and progress tracking
+4. Statistics and progress tracking
 
 ---
 
@@ -244,7 +246,7 @@ git checkout -b feature/123-postgres-monitoring
 
 ### Branch Lifecycle
 
-```
+```text
 main
  │
  ├─→ feature/123-description    [Create from issue]
@@ -264,12 +266,12 @@ main
 
 **Main Branch Protection**:
 
--  Require pull request reviews before merging
--  Require status checks to pass before merging
--  Require branches to be up to date before merging
--  Require conversation resolution before merging
--  Do not allow force pushes
--  Do not allow deletions
+- Require pull request reviews before merging
+- Require status checks to pass before merging
+- Require branches to be up to date before merging
+- Require conversation resolution before merging
+- Do not allow force pushes
+- Do not allow deletions
 
 ---
 
@@ -314,9 +316,8 @@ Implements comprehensive PostgreSQL monitoring with prometheus_postgres_exporter
 
 ## Testing
 -  Validated with `just validate`
--  Tested on p620 and dex5550
+-  Tested on p620 and p510
 -  All tests pass
--  Grafana dashboard loads correctly
 
 ## Screenshots
 [Dashboard screenshot]
@@ -379,7 +380,7 @@ Relates to #45
 
 Follow **Conventional Commits** specification:
 
-```
+```text
 <type>(<scope>): <description> (#issue)
 
 Examples:
@@ -415,27 +416,27 @@ chore(deps): update flake inputs (#199)
 
 PRs must pass:
 
--  Nix syntax validation
--  Build tests for all affected hosts
--  Code review checklist from NIXOS-ANTI-PATTERNS.md
--  No breaking changes detected
+- Nix syntax validation
+- Build tests for all affected hosts
+- Code review checklist from NIXOS-ANTI-PATTERNS.md
+- No breaking changes detected
 
 #### 2. Human Review
 
 All PRs require:
 
--  At least one approval (can be self-reviewed for personal repo)
--  All conversations resolved
--  No requested changes outstanding
+- At least one approval (can be self-reviewed for personal repo)
+- All conversations resolved
+- No requested changes outstanding
 
 #### 3. Final Validation
 
 Before merge:
 
--  Branch is up to date with main
--  All checks pass
--  Documentation is updated
--  Changelog is updated (if applicable)
+- Branch is up to date with main
+- All checks pass
+- Documentation is updated
+- Changelog is updated (if applicable)
 
 ### Merging Pull Requests
 
@@ -456,7 +457,7 @@ gh pr merge 45 --squash --delete-branch
 
 #### Merge Commit Message
 
-```
+```text
 feat(monitoring): add PostgreSQL monitoring (#123)
 
 Implements comprehensive PostgreSQL monitoring with:
@@ -467,7 +468,7 @@ Implements comprehensive PostgreSQL monitoring with:
 - Database size metrics
 
 Testing:
-- Validated on p620 and dex5550
+- Validated on p620 and p510
 - All dashboards loading correctly
 - Metrics collection verified
 
@@ -488,7 +489,7 @@ Co-authored-by: Claude <noreply@anthropic.com>
 
 Use the `/nix-review` command for automated code review:
 
-```
+```text
 User: "/nix-review"
 ```
 
@@ -533,7 +534,7 @@ User: "/nix-review"
 
 ### Review Workflow
 
-```
+```text
 1. Author creates PR
    ↓
 2. Automated checks run
@@ -641,10 +642,10 @@ jobs:
 
 **Test Coverage**:
 
--  All new features have tests
--  Bug fixes include regression tests
--  Configuration changes tested on affected hosts
--  Documentation includes testing procedures
+- All new features have tests
+- Bug fixes include regression tests
+- Configuration changes tested on affected hosts
+- Documentation includes testing procedures
 
 ---
 
@@ -652,7 +653,7 @@ jobs:
 
 ### Deployment Workflow
 
-```
+```text
 1. PR Merged to Main
    ↓
 2. Automated build triggered
@@ -912,31 +913,31 @@ gh pr merge 145 --squash --delete-branch
 
 ### Do's
 
--  Create an issue for every change
--  Use descriptive branch names with issue numbers
--  Write clear commit messages following Conventional Commits
--  Test locally before creating PR
--  Include comprehensive PR descriptions
--  Request reviews (or self-review thoroughly)
--  Update documentation with code changes
--  Use `/nix-new-task` and `/nix-check-tasks` commands
--  Follow PATTERNS.md best practices
--  Avoid anti-patterns from NIXOS-ANTI-PATTERNS.md
--  Delete branches after merging
--  Monitor deployments after merge
+- Create an issue for every change
+- Use descriptive branch names with issue numbers
+- Write clear commit messages following Conventional Commits
+- Test locally before creating PR
+- Include comprehensive PR descriptions
+- Request reviews (or self-review thoroughly)
+- Update documentation with code changes
+- Use `/nix-new-task` and `/nix-check-tasks` commands
+- Follow PATTERNS.md best practices
+- Avoid anti-patterns from NIXOS-ANTI-PATTERNS.md
+- Delete branches after merging
+- Monitor deployments after merge
 
 ### Don'ts
 
--  Commit directly to main
--  Create PRs without linked issues
--  Merge without testing
--  Leave PRs open for extended periods
--  Force push to main
--  Skip code review
--  Deploy without validation
--  Ignore automated check failures
--  Leave branches undeleted after merge
--  Forget to update documentation
+- Commit directly to main
+- Create PRs without linked issues
+- Merge without testing
+- Leave PRs open for extended periods
+- Force push to main
+- Skip code review
+- Deploy without validation
+- Ignore automated check failures
+- Leave branches undeleted after merge
+- Forget to update documentation
 
 ---
 
@@ -1048,4 +1049,5 @@ just format                        # Format code
 
 ---
 
-**Remember**: Good workflow practices make development faster, safer, and more enjoyable. When in doubt, create an issue, make a branch, and submit a PR!
+**Remember**: Good workflow practices make development faster, safer, and more enjoyable. When in
+doubt, create an issue, make a branch, and submit a PR!
