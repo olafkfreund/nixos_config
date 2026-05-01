@@ -358,7 +358,6 @@ in
 
     # GNOME Remote Desktop configuration moved to features.gnome-remote-desktop
 
-    # Disable secure-dns to use dex5550 DNS server for internal domains
     secure-dns.enable = false;
 
     # X server and desktop environment
