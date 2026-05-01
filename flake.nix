@@ -294,71 +294,7 @@
         # Custom package: citrix-workspace - Citrix Workspace with USB support and local tarball management
         (import ./overlays/citrix-workspace.nix)
         (import ./overlays/cmake-compat.nix)
-        # Fix azure-cli k8s-extension: pinned kubernetes==24.2.0 and oras==0.2.25
-        # are not satisfied by newer versions in nixpkgs-unstable
-        (_final: prev: {
-          azure-cli-extensions = prev.azure-cli-extensions // {
-            k8s-extension = prev.azure-cli-extensions.k8s-extension.overridePythonAttrs (oldAttrs: {
-              pythonRelaxDeps = (oldAttrs.pythonRelaxDeps or [ ]) ++ [
-                "kubernetes"
-                "oras"
-              ];
-              nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [
-                prev.python3Packages.pythonRelaxDepsHook
-              ];
-            });
-          };
-        })
-        # Fix azure-mgmt-network: msrest not declared as runtime dependency
-        # (nixpkgs-unstable regression caught by pythonRuntimeDepsCheckHook)
-        (_final: prev: {
-          python312 = prev.python312.override {
-            packageOverrides = _pyFinal: pyPrev: {
-              azure-mgmt-network = pyPrev.azure-mgmt-network.overridePythonAttrs (oldAttrs: {
-                dependencies = (oldAttrs.dependencies or [ ]) ++ [
-                  pyPrev.msrest
-                ];
-              });
-            };
-          };
-        })
-        # Fix python3.11 doc build failure (Sphinx 9.1.0 + docutils 0.22.4 incompatibility)
-        # Skip building the broken doc output - it's a passthru attribute that some packages pull in
-        (_final: prev: {
-          python311 = prev.python311.overrideAttrs (oldAttrs: {
-            passthru = (oldAttrs.passthru or { }) // {
-              doc = prev.emptyDirectory;
-            };
-          });
-        })
-        # Fix sse-starlette: disable flaky timing tests and add missing starlette dependency
-        # (nixpkgs-unstable regression - applied globally so all consumers get the fix)
-        (_final: prev: {
-          python312Packages = prev.python312Packages // {
-            sse-starlette = prev.python312Packages.sse-starlette.overridePythonAttrs (old: {
-              doCheck = false;
-              pythonImportsCheck = [ ];
-              dependencies = (old.dependencies or [ ]) ++ [ prev.python312Packages.starlette ];
-            });
-          };
-        })
-        # Fix python3.13 package test failures in nixpkgs-unstable:
-        # - plotly: pytest 9 deprecation of py.path.local breaks test collection
-        # - wandb: flaky async spinner test (MockDynamicTextPrinter.captured_text empty)
-        # Both affect newelle → llama-index-core → spacy → wandb/plotly chain
-        # Must use packageOverrides to propagate through Python's scope-based resolution
-        (_final: prev: {
-          python313 = prev.python313.override {
-            packageOverrides = _pyFinal: pyPrev: {
-              plotly = pyPrev.plotly.overridePythonAttrs (_old: {
-                doCheck = false;
-              });
-              wandb = pyPrev.wandb.overridePythonAttrs (_old: {
-                doCheck = false;
-              });
-            };
-          };
-        })
+        (import ./overlays/python-compat.nix)
         # Fix azure-cli: azure-mgmt-web missing v2024_11_01 subpackage breaks installCheck
         # (nixpkgs-unstable regression - azure-cli 2.81.0 expects newer azure-mgmt-web)
         (_final: prev: {
@@ -381,22 +317,6 @@
                 fi
               '';
           });
-        })
-        # Fix python312Packages.sse-starlette missing starlette in propagatedBuildInputs
-        # nixpkgs regression: sse-starlette-3.2.0 fails runtime dep check without starlette
-        # Also disable flaky tests (consolidated with earlier overlay)
-        (_final: prev: {
-          python312Packages = prev.python312Packages.overrideScope (
-            _pySelf: pyPrev: {
-              sse-starlette = pyPrev.sse-starlette.overrideAttrs (oldAttrs: {
-                doCheck = false;
-                pythonImportsCheck = [ ];
-                propagatedBuildInputs = (oldAttrs.propagatedBuildInputs or [ ]) ++ [
-                  prev.python312Packages.starlette
-                ];
-              });
-            }
-          );
         })
       ];
 
