@@ -3,7 +3,8 @@
 , pkgs
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkEnableOption mkIf;
   cfg = config.cloud-tools.packages;
 in
 {

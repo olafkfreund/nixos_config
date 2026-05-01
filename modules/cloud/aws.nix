@@ -4,7 +4,8 @@
 , pkgs-stable
 , ...
 }:
-with lib; let
+let
+  inherit (lib) mkEnableOption mkIf;
   cfg = config.aws.packages;
 in
 {
