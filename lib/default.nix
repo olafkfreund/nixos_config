@@ -1,6 +1,5 @@
 # Library functions and utilities
 { lib
-, inputs
 , ...
 }:
 let
@@ -22,23 +21,6 @@ modules
 
   # Custom utility functions
   mkFeatureModule = name: config: self.mkModule { inherit lib; } name config;
-
-  # Host creation helper
-  mkNixosHost = _hostName: config:
-    let
-      system = "x86_64-linux";
-    in
-    inputs.nixpkgs.lib.nixosSystem {
-      inherit system;
-      specialArgs = { inherit inputs lib system; };
-      modules = [
-        config
-        ../modules
-        self.features
-        self.validation
-        self.secrets
-      ];
-    };
 
   # Import helpers
   importModules = path:
