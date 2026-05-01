@@ -1,21 +1,16 @@
 # Host Type Templates
 # Provides standard import lists and configurations for different host types
 # Eliminates duplicate import statements across host configurations
-{ lib, ... }: {
-
+{ lib, ... }:
+let
+  desktopTemplate = profile: import ../hosts/templates/desktop.nix { inherit profile; };
+in
+{
   # Workstation configuration (P620, P510 - powerful desktop systems)
   workstation = {
-    imports = [
-      ../hosts/templates/workstation.nix
-    ];
-
-    # Workstation defaults
+    imports = [ (desktopTemplate "workstation") ];
     config = {
-      aiDefaults = {
-        enable = lib.mkDefault true;
-        profile = "workstation";
-      };
-
+      aiDefaults.profile = "workstation";
       features = {
         development.enable = lib.mkDefault true;
         desktop.enable = lib.mkDefault true;
@@ -26,34 +21,18 @@
 
   # Laptop configuration (Razer - portable system with power management)
   laptop = {
-    imports = [
-      ../hosts/templates/laptop.nix
-    ];
-
-    # Laptop-specific defaults
+    imports = [ (desktopTemplate "laptop") ];
     config = {
-      aiDefaults = {
-        enable = lib.mkDefault true;
-        profile = "laptop"; # Disables Ollama for battery life
-      };
-
+      aiDefaults.profile = "laptop";
       features = {
         development.enable = lib.mkDefault true;
         desktop.enable = lib.mkDefault true;
         virtualization = {
           enable = lib.mkDefault true;
-          docker = lib.mkDefault false; # Prefer Podman for battery life
+          docker = lib.mkDefault false;
         };
         powerManagement.enable = lib.mkDefault true;
       };
-
-      # Laptop-specific power optimizations
-      services.thermald.enable = lib.mkDefault true;
-      powerManagement = {
-        enable = lib.mkDefault true;
-        cpuFreqGovernor = lib.mkDefault "powersave";
-      };
     };
   };
-
 }
