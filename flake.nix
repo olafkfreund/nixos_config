@@ -293,73 +293,7 @@
         })
         # Custom package: citrix-workspace - Citrix Workspace with USB support and local tarball management
         (import ./overlays/citrix-workspace.nix)
-        # Fix CMake version compatibility issues for packages requiring CMake < 3.5
-        (_final: prev: {
-          clblast = prev.clblast.overrideAttrs (oldAttrs: {
-            cmakeFlags =
-              (oldAttrs.cmakeFlags or [ ])
-              ++ [
-                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-              ];
-          });
-          cld2 = prev.cld2.overrideAttrs (oldAttrs: {
-            cmakeFlags =
-              (oldAttrs.cmakeFlags or [ ])
-              ++ [
-                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-              ];
-          });
-          ctranslate2 = prev.ctranslate2.overrideAttrs (oldAttrs: {
-            cmakeFlags =
-              (oldAttrs.cmakeFlags or [ ])
-              ++ [
-                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-              ];
-          });
-          rofi-file-browser-extended = prev.rofi-file-browser-extended.overrideAttrs (oldAttrs: {
-            cmakeFlags =
-              (oldAttrs.cmakeFlags or [ ])
-              ++ [
-                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-              ];
-          });
-          birdtray = prev.birdtray.overrideAttrs (oldAttrs: {
-            cmakeFlags =
-              (oldAttrs.cmakeFlags or [ ])
-              ++ [
-                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-              ];
-          });
-          allegro = prev.allegro.overrideAttrs (oldAttrs: {
-            cmakeFlags =
-              (oldAttrs.cmakeFlags or [ ])
-              ++ [
-                "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-              ];
-          });
-          # Skip ltrace tests that fail on newer kernels
-          ltrace = prev.ltrace.overrideAttrs (_oldAttrs: {
-            doCheck = false;
-          });
-          # Skip mu tests - test_index_move has timing-dependent assertion that fails in sandbox
-          mu = prev.mu.overrideAttrs (_oldAttrs: {
-            doCheck = false;
-          });
-          # Fix cxxopts missing icu dependency
-          cxxopts = prev.cxxopts.overrideAttrs (oldAttrs: {
-            buildInputs = (oldAttrs.buildInputs or [ ]) ++ [ prev.icu ];
-            propagatedBuildInputs = (oldAttrs.propagatedBuildInputs or [ ]) ++ [ prev.icu ];
-          });
-          # Fix pamixer missing cxxopts dependency
-          pamixer = prev.pamixer.overrideAttrs (oldAttrs: {
-            buildInputs = (oldAttrs.buildInputs or [ ]) ++ [ prev.cxxopts prev.icu ];
-          });
-          # khard/lbdb: sphinx-argparse 0.5.2 incompatible with Sphinx 9.x
-          # lbdb temporarily removed from home/shell/mail/default.nix
-          # Note: COSMIC cargo vendor dedup overlays removed — the nix-prefetch-git
-          # symlink overlay above already resolves fetchCargoVendor producing
-          # duplicate git source entries for cosmic-applets and cosmic-settings-daemon.
-        })
+        (import ./overlays/cmake-compat.nix)
         # Fix azure-cli k8s-extension: pinned kubernetes==24.2.0 and oras==0.2.25
         # are not satisfied by newer versions in nixpkgs-unstable
         (_final: prev: {
