@@ -28,7 +28,6 @@ in
         pkgs.crossplane-cli
         pkgs.just
         pkgs.atac
-        pkgs.termshark
       ]
       ++ cfg.packages;
   };

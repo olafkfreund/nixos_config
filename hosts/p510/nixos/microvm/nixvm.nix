@@ -215,7 +215,6 @@ in
     gparted
     ethtool
     tcpdump
-    wireshark
 
     # Graphics tools
     gimp
