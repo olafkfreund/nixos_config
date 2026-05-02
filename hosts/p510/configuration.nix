@@ -22,6 +22,7 @@ in
       ./nixos/recyclarr.nix # Recyclarr Trash Guides sync
       ../common/nixos/i18n.nix
       ../common/nixos/envvar.nix
+      ../common/nixos/host-class.nix
       ./nixos/cpu.nix
       ./nixos/memory.nix
       ../common/nixos/hosts.nix
@@ -37,6 +38,8 @@ in
       ./themes/stylix.nix # Re-enabled after upstream cache fix
       # ../../home/desktop/gnome/default.nix # Home Manager module - can't import here
     ];
+
+  host.class = "headless-rdp";
 
   # Basic networking configuration (detailed config in ./nixos/network.nix)
   networking = {

@@ -22,6 +22,7 @@ in
     ../common/nixos/i18n.nix
     ../common/nixos/hosts.nix
     ../common/nixos/envvar.nix
+    ../common/nixos/host-class.nix
     ./nixos/cpu.nix
     ./nixos/laptop.nix
     ./nixos/memory.nix
@@ -33,6 +34,8 @@ in
     ../../modules/secrets/api-keys.nix
     ../../modules/containers/docker.nix
   ];
+
+  host.class = "laptop";
 
   # Consolidated networking configuration
   networking = {
