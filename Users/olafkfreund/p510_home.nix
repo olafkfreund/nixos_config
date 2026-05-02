@@ -119,7 +119,6 @@
     netcat
     socat
     nmap
-    wireshark
     tcpdump
 
     # Performance analysis for server optimization

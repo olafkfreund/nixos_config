@@ -147,7 +147,6 @@
     # Network development tools
     netcat
     socat
-    wireshark
 
     # Documentation and writing
     pandoc

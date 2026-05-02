@@ -216,7 +216,6 @@
   # Network tools
   network = with pkgs; [
     nmap
-    wireshark
     tcpdump
     iperf3
     mtr
