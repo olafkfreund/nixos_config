@@ -1,184 +1,34 @@
 { lib
 , pkgs
-, antigravity-nix
 , ...
 }:
 let
   vars = import ../../hosts/razer/variables.nix { };
 in
 {
-  imports = [
-    # Import common modules
-    ../common/default.nix
+  imports = [ ./profile.nix ];
 
-    # Host-specific imports
-    ../../home/default.nix
-    ../../home/games/steam.nix
-    ./private.nix
-  ];
+  desktop.gnome.profile = "laptop";
 
-  # DISABLED: stylix theming - module temporarily disabled due to cachix corruption
-  # stylix.targets.firefox.profileNames = [ "default" ];
-  # stylix.targets.firefox.enable = false;
+  # Laptop: enable zellij (session management for mobile use)
+  features.multiplexers.zellij = true;
 
-  # Terminal app desktop entries
-  programs.k9s.desktopEntry.enable = lib.mkForce true;
-  programs.claude-code.desktopEntry.enable = lib.mkForce true;
-  programs.neovim.desktopEntry.enable = lib.mkForce true;
+  # Laptop: flameshot works fine on Razer (single-monitor Wayland)
+  features.desktop.flameshot = true;
 
-  # GNOME desktop environment (optional - can be enabled/disabled)
-  desktop.gnome = {
-    enable = true; # Set to true to enable GNOME
-    theme = {
-      enable = true;
-      variant = "dark";
-    };
-    extensions = {
-      enable = true;
-      packages = with pkgs.gnomeExtensions; [
-        # Laptop-optimized extensions
-        dash-to-dock
-        appindicator
-        battery-health-charging # Battery management
-        caffeine # Prevent sleep
-        clipboard-indicator
-      ];
-    };
-    apps = {
-      enable = true;
-      packages = with pkgs; [
-        # Essential GNOME apps for laptop
-        gnome-power-manager
-        gnome-system-monitor
-      ];
-    };
-    keybindings.enable = true;
-  };
+  # obsidian stays disabled — see #370 (electron-39 build broken upstream)
 
-  # Use the new features system instead of multiple lib.mkForce calls
-  features = {
-    terminals = {
-      enable = true;
-      alacritty = true;
-      foot = true;
-      wezterm = true;
-      kitty = false;
-      ghostty = false;
-      warp = true;
-    };
-
-    editors = {
-      enable = true;
-      cursor = true;
-      neovim = true;
-      vscode = true;
-      windsurf = true;
-    };
-
-    browsers = {
-      enable = true;
-      chrome = true;
-      firefox = true;
-      edge = false;
-      brave = false;
-      opera = false;
-    };
-
-    desktop = {
-      enable = true;
-      zathura = true;
-      obsidian = false; # disabled — see #370 (electron-39 build broken upstream); per-user override that PR #371 missed
-      flameshot = true;
-      kooha = true;
-      remotedesktop = true;
-
-      # Communication and media
-      obs = true;
-      evince = true;
-      kdeconnect = false; # Disabled - using COSMIC Connect instead
-      slack = true;
-    };
-
-    cli = {
-      enable = true;
-      bat = true;
-      direnv = true;
-      fzf = true;
-      lf = true;
-      starship = true;
-      yazi = true;
-      zoxide = true;
-      gh = true;
-      markdown = true;
-    };
-
-    multiplexers = {
-      enable = true;
-      tmux = true;
-      zellij = true;
-    };
-
-    gaming = {
-      enable = true;
-      steam = true;
-    };
-
-    development = {
-      enable = true;
-      languages = true;
-      workflow = true;
-      productivity = true;
-    };
-  };
-
-  # Additional packages
-  home.packages = with pkgs; [
-    # Google Antigravity - AI coding assistant (no-fhs avoids bwrap opengl-driver symlink issue)
-    antigravity-nix.packages.${stdenv.hostPlatform.system}.google-antigravity-no-fhs
-
-    # Kosli CLI - Compliance monitoring and DevOps workflows
-    customPkgs.kosli-cli
-
-    # Aurynk - Android Device Manager
-    customPkgs.aurynk
-
-    wayfarer # Screen recorder for GNOME/Wayland/pipewire
-  ];
-
-  # GitLab development configuration for Razer (mobile development)
-  development.gitlab = {
-    enable = true;
-    runner.enable = false; # Disable runner on laptop for battery savings
-    fluxcd.enable = true;
-    ciLocal.enable = true;
-  };
-
-  # Enable Proton applications suite for Razer (mobile/laptop usage)
-  programs.proton = {
-    enable = true;
-    vpn.enable = true;
-    pass.enable = true;
-    mail.enable = true;
-    authenticator.enable = true;
-  };
-
-  # Host-specific Windsurf configuration
-  editor.windsurf.extraPackages = with pkgs; [
-    nixpkgs-fmt
-    nil
-  ];
-
+  # Windsurf theme derived from host variables (razer uses orange-desert variant)
   editor.windsurf.settings = {
     theme = lib.removePrefix "gruvbox-" vars.theme.scheme;
   };
 
-  # Chrome with GPU completely disabled for stability
+  # Razer Chrome — GPU completely disabled for stability on Optimus hybrid
   programs.chromium = {
     commandLineArgs = lib.mkForce [
       "--enable-features=UseOzonePlatform"
       "--ozone-platform=wayland"
       "--disable-features=VizDisplayCompositor"
-      # "--disable-gpu"
     ];
   };
 }
