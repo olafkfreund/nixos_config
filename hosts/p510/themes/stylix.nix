@@ -1,10 +1,9 @@
 { lib, ... }: {
-  # System-level Stylix configuration is shared across hosts via
+  # System-level Stylix configuration is fully shared via
   # modules/desktop/stylix-theme.nix. p510 is a headless server so the
-  # GNOME target is overridden back to false.
+  # GNOME target is overridden back to false. (Phase 3 will replace this
+  # mkForce with a `host.class = "headless-rdp"` gate.)
   imports = [ ../../../modules/desktop/stylix-theme.nix ];
-
-  host.theme.wallpaper = ../../../assets/wallpapers/orange-desert.jpg;
 
   # Headless server — no GNOME session to theme.
   stylix.targets.gnome.enable = lib.mkForce false;
