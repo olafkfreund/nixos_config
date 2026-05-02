@@ -4,7 +4,7 @@
   # GNOME target is overridden back to false.
   imports = [ ../../../modules/desktop/stylix-theme.nix ];
 
-  host.theme.wallpaper = ./orange-desert.jpg;
+  host.theme.wallpaper = ../../../assets/wallpapers/orange-desert.jpg;
 
   # Headless server — no GNOME session to theme.
   stylix.targets.gnome.enable = lib.mkForce false;
