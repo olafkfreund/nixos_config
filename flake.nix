@@ -43,7 +43,6 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nix-colors.url = "github:misterio77/nix-colors";
     stylix = {
       url = "github:danth/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -232,7 +231,6 @@
               ./hosts/${host}/configuration.nix
               nur.modules.nixos.default
               home-manager.nixosModules.home-manager
-              # inputs.nix-colors.homeManagerModules.default # DISABLED: uses old base16-schemes causing store corruption
               inputs.nix-snapd.nixosModules.default
               inputs.agenix.nixosModules.default
               inputs.lanzaboote.nixosModules.lanzaboote

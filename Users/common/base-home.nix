@@ -82,9 +82,6 @@
   # This ensures proper GTK4 styling while preserving COSMIC's color customizations
   gtk-cosmic-fix.enable = true;
 
-  # Note: nix-colors uses old base16-schemes - use stylix for theming instead
-  # colorScheme = inputs.nix-colors.colorSchemes.gruvbox-dark-medium;
-
   # Common programs for all users
   programs = {
     # Enable direnv for development environments
