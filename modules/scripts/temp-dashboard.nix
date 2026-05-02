@@ -6,6 +6,23 @@
 let
   inherit (lib) mkIf mkEnableOption;
   inherit (config.lib.stylix) colors;
+
+  # Gate the per-GPU tool path interpolations on what the host actually
+  # uses. Without this, every host pulls BOTH rocm-smi and nvidia-x11
+  # into its closure (~150MB+ of unused driver downloads on hosts that
+  # don't have the matching GPU), because Nix records string-interpolated
+  # store paths as build-time dependencies regardless of runtime checks.
+  drivers = config.services.xserver.videoDrivers;
+  hasAmd = builtins.elem "amdgpu" drivers;
+  hasNvidia = builtins.elem "nvidia" drivers;
+
+  # On the matching-GPU host: use the resolved store path (works at
+  # runtime). On the other host: bare binary name — `command -v` will
+  # always fail (the binary isn't on PATH) AND no nvidia-x11/rocm-smi
+  # gets dragged into the closure.
+  rocmSmi = if hasAmd then "${pkgs.rocmPackages.rocm-smi}/bin/rocm-smi" else "rocm-smi";
+  nvidiaSmi = if hasNvidia then "${pkgs.linuxPackages.nvidia_x11}/bin/nvidia-smi" else "nvidia-smi";
+
   # Temperature dashboard script with proper dependencies
   tempDashboard = pkgs.writeShellScriptBin "temp-dashboard" ''
         #!/usr/bin/env bash
@@ -39,8 +56,8 @@ let
 
         get_gpu_temp() {
             # Try AMD GPU first
-            if command -v ${pkgs.rocmPackages.rocm-smi}/bin/rocm-smi >/dev/null 2>&1; then
-                local temp=$(${pkgs.rocmPackages.rocm-smi}/bin/rocm-smi --showtemp 2>/dev/null | grep -oP '\d+(?=°C)' | head -1)
+            if command -v ${rocmSmi} >/dev/null 2>&1; then
+                local temp=$(${rocmSmi} --showtemp 2>/dev/null | grep -oP '\d+(?=°C)' | head -1)
                 if [[ -n "$temp" ]]; then
                     echo "$temp"
                     return
@@ -48,8 +65,8 @@ let
             fi
 
             # Try NVIDIA GPU
-            if command -v ${pkgs.linuxPackages.nvidia_x11}/bin/nvidia-smi >/dev/null 2>&1; then
-                local temp=$(${pkgs.linuxPackages.nvidia_x11}/bin/nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null)
+            if command -v ${nvidiaSmi} >/dev/null 2>&1; then
+                local temp=$(${nvidiaSmi} --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null)
                 if [[ -n "$temp" && "$temp" != "N/A" ]]; then
                     echo "$temp"
                     return
