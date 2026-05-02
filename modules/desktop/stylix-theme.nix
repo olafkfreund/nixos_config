@@ -7,14 +7,6 @@ let
   vars = import ../../hosts/common/shared-variables.nix;
 in
 {
-  options.host.theme.wallpaper = lib.mkOption {
-    type = lib.types.path;
-    description = ''
-      Per-host wallpaper image. Set in the importing host module
-      (e.g. `host.theme.wallpaper = ./orange-desert.jpg;`).
-    '';
-  };
-
   config = {
     stylix = {
       enable = true;
@@ -23,7 +15,7 @@ in
       autoEnable = true;
       base16Scheme =
         "${pkgs.base16-schemes}/share/themes/${vars.baseTheme.scheme}.yaml";
-      image = config.host.theme.wallpaper;
+      image = vars.baseTheme.wallpaper;
 
       fonts = {
         monospace = {

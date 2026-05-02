@@ -38,9 +38,13 @@
     QT_QPA_PLATFORMTHEME = "qt5ct";
   };
 
-  # Base theme structure (95% common - only wallpaper differs)
+  # Base theme structure (100% common — single wallpaper across hosts).
+  # If per-host wallpaper divergence is ever needed again, re-introduce
+  # `host.theme.wallpaper` in modules/desktop/stylix-theme.nix as an
+  # override that defaults to baseTheme.wallpaper.
   baseTheme = {
     scheme = "gruvbox-dark-medium";
+    wallpaper = ../../assets/wallpapers/orange-desert.jpg;
     cursor = {
       name = "Bibata-Modern-Classic";
       size = 16;

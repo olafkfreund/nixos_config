@@ -1,7 +1,7 @@
 _: {
-  # System-level Stylix configuration is shared across hosts via
-  # modules/desktop/stylix-theme.nix. Only the per-host wallpaper differs.
+  # System-level Stylix configuration is fully shared via
+  # modules/desktop/stylix-theme.nix. Wallpaper now lives in baseTheme
+  # (hosts/common/shared-variables.nix). This file remains as the
+  # per-host attach point for any future host-specific theming overrides.
   imports = [ ../../../modules/desktop/stylix-theme.nix ];
-
-  host.theme.wallpaper = ../../../assets/wallpapers/orange-desert.jpg;
 }
