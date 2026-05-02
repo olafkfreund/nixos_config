@@ -22,6 +22,7 @@ in
     ../common/nixos/i18n.nix
     ../common/nixos/hosts.nix
     ../common/nixos/envvar.nix
+    ../common/nixos/host-class.nix
     ./nixos/cpu.nix
     ./nixos/memory.nix
     ./nixos/load.nix
@@ -35,6 +36,8 @@ in
     ../../modules/scrcpy/default.nix
     ../../modules/system/logging.nix
   ];
+  host.class = "workstation";
+
   # Consolidated networking configuration
   networking = {
     # Set hostname from variables

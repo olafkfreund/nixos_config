@@ -57,7 +57,7 @@ in
         # ships a generated GTK theme package. COSMIC stores its own theme in
         # ~/.config/cosmic/com.system76.CosmicTheme.* and ignores these
         # gsettings keys, so the two desktops stay isolated.
-        gnome.enable = true;
+        gnome.enable = config.host.class != "headless-rdp";
 
         qt = {
           enable = true;
