@@ -410,14 +410,10 @@ in
     # X server configuration
     xserver = {
       enable = true;
-      displayManager = {
-        xserverArgs = [
-          "-nolisten tcp"
-          "-dpi 96"
-        ];
-        # Disable LightDM to prevent conflicts with COSMIC Greeter
-        lightdm.enable = lib.mkForce false;
-      };
+      displayManager.xserverArgs = [
+        "-nolisten tcp"
+        "-dpi 96"
+      ];
       videoDrivers = [ "${vars.gpu}gpu" ]; # Correct way to set the video driver
     };
 

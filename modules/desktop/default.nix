@@ -1,5 +1,6 @@
 { pkgs, ... }: {
   imports = [
+    ./display-manager.nix
     ./gnome-remote-desktop.nix
     ./cosmic-remote-desktop.nix
   ];

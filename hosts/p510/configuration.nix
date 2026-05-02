@@ -213,23 +213,19 @@ in
   # Enable X server (NVIDIA drivers configured in nvidia.nix)
   services.xserver = {
     enable = true;
-    displayManager = {
-      xserverArgs = [
-        "-nolisten tcp"
-        "-dpi 96"
-      ];
-      # Disable LightDM to prevent conflicts with COSMIC Greeter
-      lightdm.enable = lib.mkForce false;
-    };
+    displayManager.xserverArgs = [
+      "-nolisten tcp"
+      "-dpi 96"
+    ];
   };
 
-  # Display manager - GDM for headless GNOME desktop (COSMIC not used on this server)
-  services.displayManager.gdm.enable = true;
-
-  # Enable auto-login for headless RDP access (override cosmic-remote-desktop module)
-  services.displayManager.autoLogin = {
-    enable = lib.mkOverride 0 true; # Highest priority override (overrides module's mkForce)
-    user = "olafkfreund";
+  # Display manager: GDM for headless GNOME RDP access
+  desktop.displayManager = {
+    backend = "gdm";
+    autoLogin = {
+      enable = true;
+      user = "olafkfreund";
+    };
   };
 
   # Desktop manager configuration - Full GNOME for headless RDP access
