@@ -350,14 +350,10 @@ in
     # X server and desktop environment
     xserver = {
       enable = true;
-      displayManager = {
-        xserverArgs = [
-          "-nolisten tcp"
-          "-dpi 96"
-        ];
-        # Explicitly disable LightDM - using COSMIC Greeter instead
-        lightdm.enable = lib.mkForce false;
-      };
+      displayManager.xserverArgs = [
+        "-nolisten tcp"
+        "-dpi 96"
+      ];
       videoDrivers = [ vars.gpu ];
     };
 

@@ -102,18 +102,13 @@ in
     # Enable COSMIC Desktop Environment and display manager configuration
     services = {
       desktopManager.cosmic.enable = true;
-
-      # Enable cosmic-greeter display manager
-      # NixOS's displayManager.cosmic-greeter handles all the complexity:
-      #   - Creates cosmic-greeter user automatically
-      #   - Configures greetd with cosmic-greeter-start command
-      #   - Sets up proper environment variables (XCURSOR_THEME, etc.)
-      #   - Manages all dependencies and services
-      displayManager = {
-        cosmic-greeter.enable = cfg.useCosmicGreeter;
-        defaultSession = mkIf cfg.defaultSession "cosmic";
-      };
+      displayManager.defaultSession = mkIf cfg.defaultSession "cosmic";
     };
+
+    # Delegate DM backend to the unified display-manager module.
+    # cosmic-greeter handles all complexity (cosmic-greeter user, greetd
+    # wiring, XCURSOR_THEME, etc.) via services.displayManager.cosmic-greeter.
+    desktop.displayManager.backend = mkIf cfg.useCosmicGreeter "cosmic-greeter";
 
     # Wrap cosmic-comp at the package level for libEGL.so.1 loading.
     # The four core apps are wrapped via symlinkJoin in systemPackages
