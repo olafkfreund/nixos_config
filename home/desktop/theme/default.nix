@@ -4,7 +4,7 @@ let inherit (lib) optionals; in
   imports = [
     ./qt.nix
     ./dark-mode.nix # Global dark mode configuration for all desktop environments
-    ./gtk-cosmic-fix.nix # Auto-patch COSMIC GTK CSS with Gruvbox theme
+    ./cosmic-theme.nix # COSMIC accent colour from central base16 scheme
   ];
 
   # Only include papirus-icon-theme if GNOME is not enabled (GNOME uses gruvbox-plus-icons)
