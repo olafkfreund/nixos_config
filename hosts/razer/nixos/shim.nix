@@ -26,15 +26,20 @@ let
   # 3rd Party UEFI CA — what our firmware trusts) and Canonical, plus mmx64.efi
   # (MokManager).
   #
-  # Pin to a specific .deb on launchpad: launchpad URLs are immutable per file,
-  # so this hash is stable forever. Bump only after verifying a newer version
-  # also boots on this hardware.
+  # Pin to a specific .deb. Same file, same sha256 across mirrors; archive.ubuntu.com
+  # listed first because it's the distributed CDN (resilient to attacks on
+  # launchpad.net's centralised infra — e.g. May 2026 313-Team DDoS), with launchpad
+  # as fallback in case a mirror prunes the version. Both URLs serve byte-identical
+  # files; the hash check is the integrity gate either way.
   shimUbuntu = pkgs.stdenvNoCC.mkDerivation {
     pname = "shim-ubuntu-signed";
     version = "1.59+15.8-0ubuntu2";
 
     src = pkgs.fetchurl {
-      url = "https://launchpad.net/ubuntu/+archive/primary/+files/shim-signed_1.59+15.8-0ubuntu2_amd64.deb";
+      urls = [
+        "http://archive.ubuntu.com/ubuntu/pool/main/s/shim-signed/shim-signed_1.59+15.8-0ubuntu2_amd64.deb"
+        "https://launchpad.net/ubuntu/+archive/primary/+files/shim-signed_1.59+15.8-0ubuntu2_amd64.deb"
+      ];
       hash = "sha256-+O1xzi2RowS21euEmX+EbzMbVUV4vALb/njhOtisgak=";
     };
 
