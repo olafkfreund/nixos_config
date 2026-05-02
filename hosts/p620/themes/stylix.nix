@@ -3,5 +3,5 @@ _: {
   # modules/desktop/stylix-theme.nix. Only the per-host wallpaper differs.
   imports = [ ../../../modules/desktop/stylix-theme.nix ];
 
-  host.theme.wallpaper = ./orange-desert.jpg;
+  host.theme.wallpaper = ../../../assets/wallpapers/orange-desert.jpg;
 }
