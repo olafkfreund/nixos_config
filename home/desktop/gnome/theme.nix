@@ -35,27 +35,35 @@ in
         titlebar-font = "${vars.baseTheme.font.sans} Bold ${toString vars.baseTheme.font.sizes.applications}";
       };
 
-      # GNOME Terminal palette — Stylix has no GNOME Terminal target.
+      # GNOME Terminal palette — Stylix has no GNOME Terminal target,
+      # so wire up the 16 ANSI slots from the active base16 scheme
+      # exposed at config.lib.stylix.colors.baseNN. Trade-off: base16
+      # only defines the *bright* gruvbox accents (base08..base0F). The
+      # normal ANSI slots therefore reuse the bright values too, so the
+      # dim/bright distinction other terminals show (e.g. cc241d vs
+      # fb4934 for red) collapses here. In return the palette now
+      # follows whatever base16Scheme is set in shared-variables.nix
+      # — no more silent drift.
       "org/gnome/terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9" = {
-        background-color = "#282828";
-        foreground-color = "#ebdbb2";
-        palette = [
-          "#282828" # black
-          "#cc241d" # red
-          "#98971a" # green
-          "#d79921" # yellow
-          "#458588" # blue
-          "#b16286" # magenta
-          "#689d6a" # cyan
-          "#a89984" # white
-          "#928374" # bright black
-          "#fb4934" # bright red
-          "#b8bb26" # bright green
-          "#fabd2f" # bright yellow
-          "#83a598" # bright blue
-          "#d3869b" # bright magenta
-          "#8ec07c" # bright cyan
-          "#ebdbb2" # bright white
+        background-color = "#${config.lib.stylix.colors.base00}";
+        foreground-color = "#${config.lib.stylix.colors.base05}";
+        palette = with config.lib.stylix.colors; [
+          "#${base00}" # 0  black
+          "#${base08}" # 1  red
+          "#${base0B}" # 2  green
+          "#${base0A}" # 3  yellow
+          "#${base0D}" # 4  blue
+          "#${base0E}" # 5  magenta
+          "#${base0C}" # 6  cyan
+          "#${base05}" # 7  white
+          "#${base03}" # 8  bright black
+          "#${base08}" # 9  bright red
+          "#${base0B}" # 10 bright green
+          "#${base0A}" # 11 bright yellow
+          "#${base0D}" # 12 bright blue
+          "#${base0E}" # 13 bright magenta
+          "#${base0C}" # 14 bright cyan
+          "#${base07}" # 15 bright white
         ];
         use-theme-colors = false;
         use-system-font = false;
