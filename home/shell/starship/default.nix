@@ -5,6 +5,7 @@
 let
   inherit (lib) mkIf mkEnableOption;
   cfg = config.cli.starship;
+  inherit (config.lib.stylix) colors;
 in
 {
   options.cli.starship = {
@@ -44,17 +45,17 @@ in
         palette = lib.mkForce "gruvbox_dark";
 
         palettes.gruvbox_dark = {
-          color_fg0 = "#fbf1c7";
-          color_bg1 = "#3c3836";
-          color_bg0 = "#282828";
-          color_bg3 = "#665c54";
-          color_blue = "#83a598";
-          color_aqua = "#689d6a";
-          color_green = "#98971a";
-          color_orange = "#d65d0e";
-          color_purple = "#b16286";
-          color_red = "#cc241d";
-          color_yellow = "#d79921";
+          color_fg0 = "#${colors.base07}";
+          color_bg1 = "#${colors.base01}";
+          color_bg0 = "#${colors.base00}";
+          color_bg3 = "#${colors.base03}";
+          color_blue = "#${colors.base0D}";
+          color_aqua = "#${colors.base0C}";
+          color_green = "#${colors.base0B}";
+          color_orange = "#${colors.base0F}";
+          color_purple = "#${colors.base0E}";
+          color_red = "#${colors.base08}";
+          color_yellow = "#${colors.base0A}";
         };
 
         azure = {

@@ -5,6 +5,7 @@
 let
   inherit (lib) mkIf mkEnableOption;
   cfg = config.cli.fzf;
+  inherit (config.lib.stylix) colors;
 in
 {
   options.cli.fzf = {
@@ -31,10 +32,10 @@ in
 
       ## Theme
       defaultOptions = [
-        "--color=fg:-1,fg+:#FBF1C7,bg:-1,bg+:#282828"
-        "--color=hl:#98971A,hl+:#B8BB26,info:#928374,marker:#D65D0E"
-        "--color=prompt:#CC241D,spinner:#689D6A,pointer:#D65D0E,header:#458588"
-        "--color=border:#665C54,label:#aeaeae,query:#FBF1C7"
+        "--color=fg:-1,fg+=#${colors.base07},bg:-1,bg+=#${colors.base00}"
+        "--color=hl=#${colors.base0B},hl+=#${colors.base0B},info=#${colors.base03},marker=#${colors.base0F}"
+        "--color=prompt=#${colors.base08},spinner=#${colors.base0C},pointer=#${colors.base0F},header=#${colors.base0D}"
+        "--color=border=#${colors.base03},label=#${colors.base04},query=#${colors.base07}"
         "--border='double' --border-label='' --preview-window='border-sharp' --prompt='> '"
         "--marker='>' --pointer='>' --separator='─' --scrollbar='│'"
         "--info='right'"

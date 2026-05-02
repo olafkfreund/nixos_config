@@ -8,6 +8,7 @@
 let
   inherit (lib) mkIf mkEnableOption;
   cfg = config.multiplexer.tmux;
+  inherit (config.lib.stylix) colors;
 
   # Modern Gruvbox theme with enhanced icons and performance
   tmux-gruvbox =
@@ -280,8 +281,8 @@ in
 
         # ========== Remove Round Corners and Fix Powerline ==========
         # Force flat separators and prevent powerline curve characters
-        set -g status-left "#{?client_prefix,#[bg=#fabd2f]#[fg=#1d2021],#[bg=#458588]#[fg=#1d2021]} #S #[fg=default,bg=default] "
-        set -g status-right " #[fg=#a89984]#{s|$HOME|~|:pane_current_path} │ %H:%M │ %d-%b "
+        set -g status-left "#{?client_prefix,#[bg=#${colors.base0A}]#[fg=#${colors.base00}],#[bg=#${colors.base0D}]#[fg=#${colors.base00}]} #S #[fg=default,bg=default] "
+        set -g status-right " #[fg=#${colors.base04}]#{s|$HOME|~|:pane_current_path} │ %H:%M │ %d-%b "
 
         # Override window status format to ensure clean appearance
         set -g window-status-format " #I #W "
@@ -289,7 +290,7 @@ in
 
         # Ensure no powerline characters are used
         set -g window-status-separator " │ "
-        set -g status-style "bg=#1d2021,fg=#a89984"
+        set -g status-style "bg=#${colors.base00},fg=#${colors.base04}"
       '';
     };
   };

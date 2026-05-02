@@ -76,13 +76,13 @@ in
       # wallpaper image but not these solid-color gradient stops).
       "org/gnome/desktop/background" = {
         picture-options = mkDefault "zoom";
-        primary-color = mkDefault "#282828";
-        secondary-color = mkDefault "#1d2021";
+        primary-color = mkDefault "#${config.lib.stylix.colors.base00}";
+        secondary-color = mkDefault "#${config.lib.stylix.colors.base00}";
       };
 
       "org/gnome/desktop/screensaver" = {
-        primary-color = mkDefault "#282828";
-        secondary-color = mkDefault "#1d2021";
+        primary-color = mkDefault "#${config.lib.stylix.colors.base00}";
+        secondary-color = mkDefault "#${config.lib.stylix.colors.base00}";
       };
     };
   };

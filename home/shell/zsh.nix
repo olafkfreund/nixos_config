@@ -2,8 +2,12 @@
 # Optimized for performance, maintainability, and developer experience
 { pkgs
 , lib
+, config
 , ...
 }:
+let
+  inherit (config.lib.stylix) colors;
+in
 {
   imports = [
     ./claude-integration.nix
@@ -63,13 +67,13 @@
       syntaxHighlighting = {
         enable = true;
         styles = {
-          comment = "fg=#928374";
-          string = "fg=#b8bb26";
-          keyword = "fg=#fb4934";
-          builtin = "fg=#fabd2f";
-          function = "fg=#83a598";
-          command = "fg=#8ec07c";
-          unknown-token = "fg=#cc241d";
+          comment = "fg=#${colors.base03}";
+          string = "fg=#${colors.base0B}";
+          keyword = "fg=#${colors.base08}";
+          builtin = "fg=#${colors.base0A}";
+          function = "fg=#${colors.base0D}";
+          command = "fg=#${colors.base0C}";
+          unknown-token = "fg=#${colors.base08}";
         };
       };
 
@@ -77,7 +81,7 @@
       autosuggestion = {
         enable = true;
         strategy = [ "history" "completion" ];
-        highlight = "fg=#665c54";
+        highlight = "fg=#${colors.base03}";
       };
 
       # Optimized zplug configuration with lazy loading
@@ -275,15 +279,15 @@
         typeset -gA BOX_COLORS
         BOX_COLORS=(
           [reset]='\033[0m'
-          [bg]='\033[48;2;40;40;40m'          # #282828 - material dark
-          [bg1]='\033[48;2;60;56;54m'         # #3c3836 - material bg1
-          [fg]='\033[38;2;220;215;186m'       # #dcd7ba - material foreground
-          [aqua]='\033[38;2;131;192;146m'     # #83c092 - material aqua
-          [green]='\033[38;2;167;192;128m'    # #a7c080 - material green
-          [yellow]='\033[38;2;219;188;127m'   # #dbbc7f - material yellow
-          [red]='\033[38;2;230;126;128m'      # #e67e80 - material red
-          [blue]='\033[38;2;127;187;179m'     # #7fbbb3 - material blue
-          [gray]='\033[38;2;146;131;116m'     # #928374 - material gray
+          [bg]='\033[48;2;40;40;40m'          # base00 - material dark
+          [bg1]='\033[48;2;60;56;54m'         # base01 - material bg1
+          [fg]='\033[38;2;220;215;186m'       # base06 - material foreground
+          [aqua]='\033[38;2;131;192;146m'     # base0C - material aqua
+          [green]='\033[38;2;167;192;128m'    # base0B - material green
+          [yellow]='\033[38;2;219;188;127m'   # base0A - material yellow
+          [red]='\033[38;2;230;126;128m'      # base08 - material red
+          [blue]='\033[38;2;127;187;179m'     # base0D - material blue
+          [gray]='\033[38;2;146;131;116m'     # base03 - material gray
         )
 
         # Unicode box drawing characters

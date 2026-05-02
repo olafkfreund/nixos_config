@@ -3,41 +3,42 @@
 let
   inherit (lib) mkOption mkIf mkEnableOption types;
   cfg = config.programs.claude-powerline;
+  inherit (config.lib.stylix) colors;
 
   # Gruvbox Dark theme configuration
   themeConfig = {
     theme = "custom";
     colors = {
       # Background colors
-      background = "#282828"; # dark0 (main background)
-      backgroundAlt = "#3c3836"; # dark1
-      backgroundDark = "#1d2021"; # dark0_hard
+      background = "#${colors.base00}"; # dark0 (main background)
+      backgroundAlt = "#${colors.base01}"; # dark1
+      backgroundDark = "#${colors.base00}"; # dark0_hard
 
       # Foreground colors
-      foreground = "#ebdbb2"; # light1 (main foreground)
-      foregroundAlt = "#d5c4a1"; # light2
-      foregroundDark = "#bdae93"; # light3
+      foreground = "#${colors.base06}"; # light1 (main foreground)
+      foregroundAlt = "#${colors.base05}"; # light2
+      foregroundDark = "#${colors.base04}"; # light3
 
       # Accent colors (bright variants)
-      red = "#fb4934"; # bright_red
-      redDim = "#cc241d"; # normal_red
-      green = "#b8bb26"; # bright_green
-      greenDim = "#98971a"; # normal_green
-      yellow = "#fabd2f"; # bright_yellow
-      yellowDim = "#d79921"; # normal_yellow
-      blue = "#83a598"; # bright_blue
-      blueDim = "#458588"; # normal_blue
-      purple = "#d3869b"; # bright_purple
-      purpleDim = "#b16286"; # normal_purple
-      aqua = "#8ec07c"; # bright_aqua
-      aquaDim = "#689d6a"; # normal_aqua
-      orange = "#fe8019"; # bright_orange
-      orangeDim = "#d65d0e"; # normal_orange
-      gray = "#928374"; # gray
+      red = "#${colors.base08}"; # bright_red
+      redDim = "#${colors.base08}"; # normal_red
+      green = "#${colors.base0B}"; # bright_green
+      greenDim = "#${colors.base0B}"; # normal_green
+      yellow = "#${colors.base0A}"; # bright_yellow
+      yellowDim = "#${colors.base0A}"; # normal_yellow
+      blue = "#${colors.base0D}"; # bright_blue
+      blueDim = "#${colors.base0D}"; # normal_blue
+      purple = "#${colors.base0E}"; # bright_purple
+      purpleDim = "#${colors.base0E}"; # normal_purple
+      aqua = "#${colors.base0C}"; # bright_aqua
+      aquaDim = "#${colors.base0C}"; # normal_aqua
+      orange = "#${colors.base09}"; # bright_orange
+      orangeDim = "#${colors.base0F}"; # normal_orange
+      gray = "#${colors.base03}"; # gray
 
       # UI elements
-      separator = "#504945"; # dark2
-      border = "#665c54"; # dark3
+      separator = "#${colors.base02}"; # dark2
+      border = "#${colors.base03}"; # dark3
     };
 
     display = {
@@ -52,22 +53,22 @@ let
             directory = {
               enabled = true;
               style = {
-                background = "#458588"; # Blue - current directory
-                foreground = "#282828"; # Dark background for contrast
+                background = "#${colors.base0D}"; # Blue - current directory
+                foreground = "#${colors.base00}"; # Dark background for contrast
               };
             };
             git = {
               enabled = true;
               style = {
-                background = "#98971a"; # Green - git status
-                foreground = "#282828";
+                background = "#${colors.base0B}"; # Green - git status
+                foreground = "#${colors.base00}";
               };
             };
             model = {
               enabled = true;
               style = {
-                background = "#b16286"; # Purple - Claude model
-                foreground = "#282828";
+                background = "#${colors.base0E}"; # Purple - Claude model
+                foreground = "#${colors.base00}";
               };
             };
           };
