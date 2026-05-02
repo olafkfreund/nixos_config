@@ -8,6 +8,7 @@
 let
   inherit (lib) mkIf mkEnableOption;
   cfg = config.multiplexer.zellij;
+  inherit (config.lib.stylix) colors;
 in
 {
   options.multiplexer.zellij = {
@@ -92,17 +93,17 @@ in
         # Enhanced theming
         themes = {
           gruvbox-dark = {
-            bg = "#282828";
-            fg = "#ebdbb2";
-            red = "#cc241d";
-            green = "#98971a";
-            yellow = "#d79921";
-            blue = "#458588";
-            magenta = "#b16286";
-            orange = "#d65d0e";
-            cyan = "#689d6a";
-            black = "#1d2021";
-            white = "#ebdbb2";
+            bg = "#${colors.base00}";
+            fg = "#${colors.base06}";
+            red = "#${colors.base08}";
+            green = "#${colors.base0B}";
+            yellow = "#${colors.base0A}";
+            blue = "#${colors.base0D}";
+            magenta = "#${colors.base0E}";
+            orange = "#${colors.base0F}";
+            cyan = "#${colors.base0C}";
+            black = "#${colors.base00}";
+            white = "#${colors.base06}";
           };
         };
       };

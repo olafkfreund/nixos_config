@@ -5,6 +5,7 @@
 }:
 let
   inherit (lib) mkIf mkEnableOption;
+  inherit (config.lib.stylix) colors;
   # Temperature dashboard script with proper dependencies
   tempDashboard = pkgs.writeShellScriptBin "temp-dashboard" ''
         #!/usr/bin/env bash
@@ -102,13 +103,13 @@ let
         get_temp_color() {
             local temp=$1
             if [[ "$temp" == "N/A" ]]; then
-                echo "#ebdbb2"  # Default color
+                echo "#${colors.base06}"  # Default color
             elif (( $(echo "$temp < 50" | ${pkgs.bc}/bin/bc -l) )); then
-                echo "#8ec07c"  # Good (green)
+                echo "#${colors.base0C}"  # Good (green)
             elif (( $(echo "$temp < 70" | ${pkgs.bc}/bin/bc -l) )); then
-                echo "#fabd2f"  # Warning (yellow)
+                echo "#${colors.base0A}"  # Warning (yellow)
             else
-                echo "#fb4934"  # Critical (red)
+                echo "#${colors.base08}"  # Critical (red)
             fi
         }
 
@@ -148,8 +149,8 @@ let
             --timeout-indicator=bottom \
             --text-align=center \
             --fontname="JetBrainsMono Nerd Font 12" \
-            --fore="#ebdbb2" \
-            --back="#282828" \
+            --fore="#${colors.base06}" \
+            --back="#${colors.base00}" \
             --text="<big><b>🌡️ System Temperatures</b></big>
 
     <span font='JetBrainsMono Nerd Font 16' foreground='$cpu_color'><b>🔥 CPU: $cpu_display</b></span>
