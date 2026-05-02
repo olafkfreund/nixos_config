@@ -78,10 +78,6 @@
     qt.enable = false; # Qt theming handled by home/desktop/theme/qt.nix
   };
 
-  # COSMIC GTK theme fix - auto-patches COSMIC's gtk.css with Gruvbox theme
-  # This ensures proper GTK4 styling while preserving COSMIC's color customizations
-  gtk-cosmic-fix.enable = true;
-
   # Common programs for all users
   programs = {
     # Enable direnv for development environments
