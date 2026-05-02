@@ -61,6 +61,7 @@ in
   };
 
   imports = [
+    ./host-profile.nix
     ./theme.nix
     ./extensions.nix
     ./apps.nix
