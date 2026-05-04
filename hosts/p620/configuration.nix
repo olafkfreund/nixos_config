@@ -19,6 +19,7 @@ in
     ./nixos/boot.nix
     ./nixos/amd.nix
     ./nixos/usb-power-fix.nix # Fix USB mouse freezing issues
+    ./nixos/aqc107-link-pin.nix # Pin Aquantia AQC107 to 1G to dodge AER flapping
     ../common/nixos/i18n.nix
     ../common/nixos/hosts.nix
     ../common/nixos/envvar.nix
@@ -482,12 +483,39 @@ in
   };
 
   # File systems
+  #
+  # /mnt/media is hosted on p510 over NFSv3. The previous default of
+  # `hard` mount semantics meant every process touching this path
+  # (file managers, COSMIC indexers, mpd, etc.) blocked indefinitely
+  # whenever the link to p510 hiccuped. The on-board AQC107 has been
+  # emitting bursts of corrected PCIe AER errors, which manifested as
+  # 50%+ IO-pressure stalls and a sluggish desktop.
+  #
+  # New options:
+  #   soft+timeo+retrans  - fail an RPC after 5 s × 3 instead of blocking forever
+  #   bg                  - background-mount on first attempt; don't stall boot
+  #   noauto+automount    - mount on first access, not at boot
+  #   idle-timeout        - auto-unmount after 5 min idle so a flap can't
+  #                         poison long-running sessions
+  #   rsize/wsize         - 1 MiB I/O units (matches what the server already serves)
+  #   noatime             - skip atime updates over the wire
+  #
+  # Read-mostly media share, so `soft` is acceptable here - data
+  # corruption from a half-finished write is not in scope.
   fileSystems."/mnt/media" = {
     device = "p510.lan:/mnt/media";
     fsType = "nfs";
     options = [
-      "x-systemd.automount"
       "noauto"
+      "x-systemd.automount"
+      "x-systemd.idle-timeout=300"
+      "soft"
+      "timeo=50"
+      "retrans=3"
+      "bg"
+      "noatime"
+      "rsize=1048576"
+      "wsize=1048576"
     ];
   };
 
