@@ -48,6 +48,9 @@ usig = "usig"
 # nd is a valid lsblk flag (-nd = no headings, no dependents)
 nd = "nd"
 
+# AER is the PCIe Advanced Error Reporting acronym
+AER = "AER"
+
 [default.extend-identifiers]
 # Santa Claus - not "Clause"
 Claus = "Claus"
