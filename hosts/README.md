@@ -1,30 +1,51 @@
-# Hosts Configurations
+# Host Configurations
 
-This directory contains system configurations for different machines. Each subdirectory represents
-a different host with its specific hardware configuration and system settings.
+System configurations for each machine. Every host imports the
+parameterised desktop template (`templates/desktop.nix`) via
+`lib/hostTypes.nix` and adds host-specific modules on top.
 
 ## Active Hosts
 
-- `p620/` - Configuration for the P620 workstation (AMD-based system, primary development)
-- `p510/` - Configuration for the P510 system (media server, includes MicroVM configurations)
-- `razer/` - Configuration for the Razer laptop
+- `p620/` — AMD RX 7900 workstation, primary development and AI host.
+  Workstation template; full COSMIC/GNOME desktop.
+- `p510/` — Intel Xeon system, headless media server (Plex, NZBGet,
+  FlareSolverr). Workstation template; no display manager. MicroVM
+  guest config lives in `p510/microvm.nix`.
+- `razer/` — Intel + NVIDIA laptop. Laptop template; lanzaboote Secure
+  Boot with shim+MOK.
+
+## Templates
+
+There is a single parameterised template:
+
+- `templates/desktop.nix` — accepts `profile = "workstation" | "laptop"`.
+  Adds thermald and `cpuFreqGovernor = "powersave"` for the laptop
+  profile. Surfaced through `lib/hostTypes.nix` as
+  `hostTypes.workstation` and `hostTypes.laptop`. The previous
+  `server`, `hybrid`, and `base` templates have been removed; headless
+  hosts use the workstation template with `host.class = "workstation"`
+  and no display manager.
 
 ## Host Directory Structure
 
 Each host typically contains:
 
-- `configuration.nix` - Main system configuration
-- `nixos/` - NixOS-specific configurations:
-  - `hardware-configuration.nix` - Generated hardware configuration
-  - `boot.nix` - Boot loader configuration
-  - `power.nix` - Power management settings
-  - `i18n.nix` - Internationalization settings
-  - `greetd.nix` - Login manager configuration
-  - Other system-specific configurations
-- `themes/` - Host-specific theme settings
-- `services/` - Host-specific services
-- `guests/` - MicroVM and container configurations (when applicable)
+- `configuration.nix` — Top-level host config; imports the template
+  plus host-specific modules.
+- `variables.nix` — Hostname, primary user, feature toggles.
+- `nixos/` — Host-local NixOS fragments:
+  - `hardware-configuration.nix` — Generated hardware config.
+  - `boot.nix`, `power.nix`, `cpu.nix`, `memory.nix`, etc.
+  - GPU vendor file (`amd.nix`, `nvidia.nix`, ...).
+- `themes/stylix.nix` — Host theme wiring (Stylix + base16 + wallpaper).
+- Optional host-only modules (e.g. `microvm.nix`, `flaresolverr.nix`).
 
-## Archive
+## Common Layer
 
-- `archive/` - Historical configurations for systems no longer in active use
+`common/` holds fragments shared across hosts:
+
+- `common/nixos/` — `i18n.nix`, `hosts.nix`, `envvar.nix`,
+  `host-class.nix`.
+- `common/hardware-profiles/` — GPU profiles (`amd-gpu.nix`,
+  `nvidia-gpu.nix`, `intel-integrated.nix`).
+- `common/shared-variables.nix` — User mappings consumed by `flake.nix`.
