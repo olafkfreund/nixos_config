@@ -1,229 +1,173 @@
 # NixOS Infrastructure Documentation
 
-Last Updated: 2026-01-25
+Last Updated: 2026-05-04
 
 ## Overview
 
-This directory contains comprehensive documentation for the NixOS infrastructure configuration. Documentation is organized by category for easy navigation.
+Documentation index for the NixOS configuration. Files are grouped by
+purpose. All docs are plain technical Markdown.
 
 ## Core Documentation
 
-Essential documentation for NixOS development and best practices.
+`PATTERNS.md`
+Comprehensive NixOS patterns and best practices. Module system, package
+writing conventions, security patterns, performance considerations.
+Read before writing modules or packages.
 
-**PATTERNS.md**
-- NixOS best practices and patterns
-- Module system usage
-- Package writing conventions
-- Security patterns
-- Performance optimization
-- Read this before writing any Nix code
+`NIXOS-ANTI-PATTERNS.md`
+Anti-patterns to avoid, review checklist, and community-aligned
+practices. Read before opening a PR.
 
-**NIXOS-ANTI-PATTERNS.md**
-- Critical anti-patterns to avoid
-- Common mistakes and their fixes
-- Code review checklist
-- Community standards alignment
-- Read this to avoid common pitfalls
+`UPDATE-DEPLOY.md`
+Reference for `just update-commit-deploy` and the `nhs` / `nhsb` zsh
+shortcuts. Idiot-proof flake-lock bump + commit + push + build + switch
+flow, including remote hosts and offline-host pre-builds.
 
-**MCP-GUIDE.md**
-- Model Context Protocol server integration
-- Available MCP servers and features
-- Setup and configuration
-- Service integrations (Atlassian, LinkedIn, WhatsApp, Obsidian)
-- Troubleshooting guide
+`MCP-GUIDE.md`
+Model Context Protocol server integration: enabled servers, setup, and
+troubleshooting.
 
 ## Guides
 
-Procedural guides for system setup, deployment, and workflows.
+Procedural guides for setup, deployment, and routine workflows.
 
-**guides/HOST_SETUP.md**
-- Host configuration procedures
-- Initial setup steps
-- Hardware-specific considerations
+`guides/HOST_SETUP.md`
+Procedure for adding a new host (directory layout, host SSH key,
+variables, secrets wiring).
 
-**guides/deployment-guide.md**
-- Deployment procedures
-- Build and test workflows
-- Production deployment strategy
+`guides/deployment-guide.md`
+Full deployment reference: smart deploy, parallel deploy, fast/cached
+modes, build-locally-deploy-remotely, emergency deploy.
 
-**guides/UPDATE-WORKFLOW.md**
-- System update procedures
-- Package update management
-- Testing and validation
+`guides/UPDATE-WORKFLOW.md`
+Update preview workflow with `nvd` (Nix Version Diff): preview-updates,
+new-package discovery, integrated `just update-workflow`.
 
-**guides/GITHUB-WORKFLOW.md**
-- Issue-driven development process
-- Branch management
-- Pull request procedures
-- Code review standards
+`guides/GITHUB-WORKFLOW.md`
+Issue-driven development workflow: branch naming, conventional commits,
+PR process, review standards.
 
-**guides/CACHE-STRATEGY.md**
-- Binary cache configuration
-- Cache optimization
-- Multi-tier caching setup
+`guides/CACHE-STRATEGY.md`
+Multi-tier binary cache strategy (local nix-serve on p620, official
+NixOS cache, Nix community cache).
 
-**guides/CACHIX-ANALYSIS.md**
-- Cachix integration analysis
-- Performance considerations
-- Setup procedures
+`guides/CACHIX-ANALYSIS.md`
+Cachix integration analysis and optional setup.
 
-**guides/PACKAGE-SYSTEM-USAGE.md**
-- Three-tier package architecture
-- Package categorization
-- System vs user packages
-- Conditional package loading
+`guides/PACKAGE-SYSTEM-USAGE.md`
+Package categorisation: system vs user, conditional package loading,
+template-driven defaults.
 
-**guides/GEMINI_CLI_FEATURE.md**
-- Gemini CLI integration
-- Features and capabilities
-- Configuration guide
+`guides/GEMINI_CLI_FEATURE.md`
+Gemini CLI integration and configuration.
 
 ## Applications
 
-Application-specific setup and configuration guides.
+Application-specific setup notes.
 
-**applications/CITRIX-WORKSPACE-SETUP.md**
-- Citrix Workspace installation
-- Configuration procedures
-- Troubleshooting
+`applications/CITRIX-WORKSPACE-SETUP.md`
+Citrix Workspace install and configuration. Requires manual tarball
+download (see `pkgs/citrix-workspace/fetch-citrix.sh`); the package is
+provided via overlay.
 
-**applications/WAYDROID-SETUP.md**
-- Waydroid Android container setup
-- Configuration and usage
-- Known issues
+`applications/WAYDROID-SETUP.md`
+Waydroid Android container setup.
 
-**applications/flaresolverr-deployment.md**
-- FlareSolverr proxy deployment
-- Configuration and integration
-- Usage guide
+`applications/flaresolverr-deployment.md`
+FlareSolverr proxy deployment.
 
-**applications/GITLAB-RUNNER-SETUP.md**
-- GitLab Runner configuration
-- NixOS integration
-- Job execution setup
+`applications/GITLAB-RUNNER-SETUP.md`
+GitLab Runner configuration on NixOS.
 
-**applications/VSCODE_EXTENSIONS.md**
-- VS Code extension management
-- NixOS configuration
-- Recommended extensions
+`applications/VSCODE_EXTENSIONS.md`
+Declarative VS Code extension management.
 
-**applications/screensharing_cosmic.md**
-- Screen sharing in COSMIC desktop
-- Wayland configuration
-- Troubleshooting guide
+`applications/screensharing_cosmic.md`
+Screen sharing under COSMIC desktop with Wayland.
 
-**applications/P620-BIOS-NUMA-Configuration.md**
-- P620 BIOS settings
-- NUMA configuration
-- Performance tuning
+`applications/P620-BIOS-NUMA-Configuration.md`
+P620 BIOS and NUMA tuning.
 
 ## Tooling
 
 Development tooling and Claude Code documentation.
 
-**tooling/CLAUDE-CODE-OPTIMIZATION.md**
-- Claude Code performance optimization
-- Configuration tuning
-- Best practices
+`tooling/CLAUDE-CODE-OPTIMIZATION.md`
+Claude Code performance and configuration tuning.
 
-**tooling/claude-code-update-2.0.54.md**
-- Claude Code 2.0.54 update notes
-- New features
-- Migration guide
+`tooling/claude-code-update-2.0.54.md`
+Update notes for Claude Code 2.0.54.
 
-**tooling/Claude-Powerline.md**
-- Powerline shell integration
-- Theme configuration
-- Claude Code integration
+`tooling/Claude-Powerline.md`
+Powerline integration for Claude Code.
 
-**tooling/Github-spec-kit.md**
-- GitHub specification toolkit
-- Template usage
-- Workflow automation
+`tooling/Github-spec-kit.md`
+GitHub spec-kit for Spec-Driven Development.
 
 ## NixOS Command System
 
-Command system documentation and reference guides.
+`Nixos/README.md`
+Command system overview.
 
-**Nixos/README.md**
-- Command system overview
-- Usage instructions
+`Nixos/COMMANDS-INDEX.md`
+Full command index by category.
 
-**Nixos/COMMANDS-INDEX.md**
-- Complete command index
-- Command categories
-- Quick reference
+`Nixos/Command-System-Overview.md`
+Architecture and extension model.
 
-**Nixos/Command-System-Overview.md**
-- Architecture overview
-- Command implementation
-- Extension guide
+`Nixos/Quick-Reference.md`
+Common commands at a glance.
 
-**Nixos/Quick-Reference.md**
-- Common commands
-- Quick lookup guide
-- Usage examples
-
-**Nixos/Update-Checker-Guide.md**
-- Update checking system
-- Automation procedures
-- Configuration guide
+`Nixos/Update-Checker-Guide.md`
+Automated update checking and configuration.
 
 ## Documentation Standards
 
-All documentation follows these standards:
+Format
 
-**Format:**
-- Markdown format (.md)
-- No emojis or decorative icons
-- Clear section headers
-- Code blocks for examples
-- Professional technical writing
+- Markdown (`.md`), CommonMark.
+- No emojis or decorative icons.
+- Code blocks for examples.
+- Concise technical prose.
 
-**Organization:**
-- Categorized by purpose
-- Logical folder structure
-- Consistent naming conventions
-- Cross-referenced where appropriate
+Organisation
 
-**Maintenance:**
-- Last Updated date at top of each file
-- Status indicator (Active, Deprecated, etc.)
-- Regular reviews for accuracy
-- Obsolete docs removed promptly
+- One topic per file.
+- Cross-reference using relative paths.
+- Filenames: `UPPERCASE-WITH-DASHES.md` for top-level, descriptive
+  lowercase for application notes.
+
+Maintenance
+
+- Top-of-file `Last Updated:` date.
+- Remove obsolete docs rather than letting them rot.
+- Reflect repository state (templates, hosts, modules) accurately.
 
 ## Contributing
 
-When adding new documentation:
+When adding documentation:
 
-1. Choose appropriate category folder
-2. Follow naming conventions (UPPERCASE-WITH-DASHES.md)
-3. Include Last Updated date
-4. No emojis or icons
-5. Update this README index
-6. Cross-reference related documentation
+1. Pick the right category folder.
+2. Add a `Last Updated:` line at the top.
+3. No emojis or icons.
+4. Update this index in the same change.
+5. Cross-reference related docs.
 
 ## Quick Navigation
 
-**New to NixOS?**
-Start with PATTERNS.md and NIXOS-ANTI-PATTERNS.md
+New to the repo
+Start with `PATTERNS.md`, then `NIXOS-ANTI-PATTERNS.md`, then the root
+`README.md`.
 
-**Setting up a host?**
-See guides/HOST_SETUP.md and guides/deployment-guide.md
+Deploying changes
+`UPDATE-DEPLOY.md` for the routine flow; `guides/deployment-guide.md`
+for advanced cases.
 
-**Working with AI tools?**
-See MCP-GUIDE.md and tooling/ folder
+Adding a host
+`guides/HOST_SETUP.md`.
 
-**Deploying applications?**
-See applications/ folder for specific guides
+Reviewing or contributing
+`guides/GITHUB-WORKFLOW.md` and `NIXOS-ANTI-PATTERNS.md`.
 
-**Need command reference?**
-See Nixos/COMMANDS-INDEX.md
-
-## Support
-
-For infrastructure questions or documentation issues:
-- Check relevant documentation first
-- Review PATTERNS.md for best practices
-- Consult NIXOS-ANTI-PATTERNS.md for common issues
-- Reference GitHub workflow for contribution process
+Command reference
+`Nixos/COMMANDS-INDEX.md` and `just --list`.
