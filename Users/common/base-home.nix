@@ -64,17 +64,13 @@
 
   # Stylix theming targets (Home Manager level).
   # `enableReleaseChecks = false` is set once in modules/desktop/stylix-theme.nix
-  # at the system level — no need to repeat it here.
-  #
-  # COSMIC firewall: gtk.enable stays false so HM never writes
-  # ~/.config/gtk-{3,4}.0/gtk.css. cosmic-comp owns that path at runtime
-  # (symlinks gtk.css to its own ~/.config/gtk-4.0/cosmic/dark.css). GNOME
-  # themes correctly without it via Stylix's targets.gnome (gsettings + theme
-  # package).
+  # at the system level — no need to repeat it here. GTK is enabled fleet-wide
+  # because COSMIC's GTK theme sync is off on every host; cosmic-comp does not
+  # clobber ~/.config/gtk-{3,4}.0/gtk.css at runtime.
   stylix.targets = {
     wezterm.enable = true;
     ghostty.enable = true;
-    gtk.enable = false; # COSMIC firewall — see comment above
+    gtk.enable = true;
     qt.enable = false; # Qt theming handled by home/desktop/theme/qt.nix
   };
 

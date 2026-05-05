@@ -10,17 +10,9 @@ let
 in
 {
   config = mkIf (cfg.enable && cfg.theme.enable) {
-    # COSMIC firewall: keep ~/.config/gtk-{3,4}.0/gtk.css free for cosmic-comp's
-    # runtime symlink (gtk.css -> ~/.config/gtk-4.0/cosmic/dark.css). With
-    # `stylix.targets.gtk.enable = false` system-wide, GNOME themes from
-    # gsettings + the GTK theme package on PATH and does not need this file.
-    #
-    # libadwaita constraint: even if Stylix wrote gtk.css here, native GNOME
-    # apps (Nautilus, GNOME Console, Settings) intentionally ignore third-
-    # party themes by upstream policy. Stylix theming for GNOME apps is
-    # unfixable on this side; do not chase it.
-    xdg.configFile."gtk-3.0/gtk.css".enable = false;
-    xdg.configFile."gtk-4.0/gtk.css".enable = false;
+    # libadwaita constraint: native GNOME apps (Nautilus, GNOME Console,
+    # Settings) intentionally ignore third-party themes by upstream policy.
+    # Stylix's GTK target themes everything else; don't chase libadwaita.
 
     # Fonts that GNOME-specific bits rely on. Stylix already supplies the
     # mono/sans/serif packages declared in modules/desktop/stylix-theme.nix.

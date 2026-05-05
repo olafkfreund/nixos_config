@@ -47,11 +47,12 @@ in
       targets = {
         chromium.enable = false;
 
-        # COSMIC firewall: Stylix must NOT write ~/.config/gtk-{3,4}.0/gtk.css.
-        # cosmic-comp owns that path at runtime (symlinks gtk.css to its own
-        # ~/.config/gtk-4.0/cosmic/dark.css). GNOME themes correctly without
-        # gtk.css from the GTK theme package referenced in gsettings.
-        gtk.enable = false;
+        # COSMIC's GTK theme sync is disabled on this fleet, so cosmic-comp
+        # does NOT clobber ~/.config/gtk-{3,4}.0/gtk.css at runtime. Stylix
+        # can own that file safely and theme GTK3 / non-libadwaita GTK4 apps
+        # everywhere. libadwaita apps still ignore third-party themes by
+        # upstream policy regardless of gtk.css contents.
+        gtk.enable = true;
 
         # GNOME target writes org.gnome.desktop.interface/* via gsettings and
         # ships a generated GTK theme package. COSMIC stores its own theme in
