@@ -14,27 +14,27 @@ in
       # Enable installed extensions
       "org/gnome/shell" = {
         disable-user-extensions = false;
+        # UUIDs verified against gnomeExtensions.<name>.passthru.extensionUuid.
+        # Each UUID must have a matching package in home.packages below or in
+        # cfg.extensions.packages (per-profile). Adding a UUID without its
+        # package makes gnome-shell silently skip it on session start.
         enabled-extensions = [
-          # Essential extensions UUIDs
           "user-theme@gnome-shell-extensions.gcampax.github.com"
           "dash-to-dock@micxgx.gmail.com"
           "appindicatorsupport@rgcjonas.gmail.com"
           "auto-accent-colour@Wartybix"
           "auto-move-windows@gnome-shell-extensions.gcampax.github.com"
-          "bring-out-submenu-of-power-offlogout-button@gnome-shell-extensions.gcampax.github.com"
+          "BringOutSubmenuOfPowerOffLogoutButton@pratap.fastmail.fm"
           "blur-my-shell@aunetx"
           "top-panel-logo@jmpegi.github.com"
           "workspace-indicator@gnome-shell-extensions.gcampax.github.com"
           "emoji-copy@felipeftn"
-          "Gnofi@aylur"
           "windowsNavigator@gnome-shell-extensions.gcampax.github.com"
           "caffeine@patapon.info"
           "clipboard-indicator@tudmotu.com"
-          "panel-osd@berend.de.schouwer.gmail.com"
           "tailscale-status@maxgallup.github.com"
-          "user-themes@gnome-shell-extensions.gcampax.github.com"
-          "bluetooth-battery@michalw.github.com"
-          "BringOutSubmenuOfPowerOffLogoutButton@pratap.fastmail.fm"
+          "Bluetooth-Battery-Meter@maniacx.github.com"
+          "dim-background-windows@stephane-13.github.com"
         ];
       };
 
@@ -115,11 +115,6 @@ in
         toogle-shortcut = "<Super>g";
       };
 
-      # Gnofi configuration
-      "org/gnome/shell/extensions/gnofi" = {
-        window-hotkey = "<Super>space ";
-      };
-
       # Clipboard Indicator configuration
       "org/gnome/shell/extensions/clipboard-indicator" = {
         cache-size = 50;
@@ -138,28 +133,34 @@ in
 
     # Note: Custom keybindings are defined in keybindings.nix to avoid conflicts
 
-    # Install GNOME Shell extensions and extension-specific packages
+    # Install every extension whose UUID is in enabled-extensions above.
+    # Profile-specific extras live in cfg.extensions.packages (see
+    # Users/<user>/profile.nix).
     home.packages = with pkgs;
       [
-        # Essential extensions (always installed when extensions are enabled)
         gnomeExtensions.user-themes
-        # gnomeExtensions.ascii-emoji
-        gnomeExtensions.dim-background-windows
-        gnomeExtensions.just-perfection
-        # gnomeExtensions.paperwm
-        gnomeExtensions.tailscale-status
+        gnomeExtensions.dash-to-dock
+        gnomeExtensions.appindicator
         gnomeExtensions.auto-accent-colour
         gnomeExtensions.auto-move-windows
         gnomeExtensions.bring-out-submenu-of-power-offlogout-button
+        gnomeExtensions.blur-my-shell
+        gnomeExtensions.top-panel-logo
+        gnomeExtensions.workspace-indicator
+        gnomeExtensions.emoji-copy
+        gnomeExtensions.windownavigator
+        gnomeExtensions.caffeine
+        gnomeExtensions.clipboard-indicator
+        gnomeExtensions.tailscale-status
+        gnomeExtensions.bluetooth-battery-meter
+        gnomeExtensions.dim-background-windows
 
-        # Extension-specific packages that might be needed
-        lm_sensors # For system monitoring extensions
-        curl # For weather extensions
-        jq # For data processing
-        xclip # For clipboard extensions
-        wl-clipboard # For Wayland clipboard
-
-        # Extensions from user configuration
+        # Helpers used by various extensions at runtime.
+        lm_sensors
+        curl
+        jq
+        xclip
+        wl-clipboard
       ]
       ++ cfg.extensions.packages;
   };

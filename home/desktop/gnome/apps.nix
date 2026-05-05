@@ -81,7 +81,7 @@ in
         distroshelf # Manage Linux distributions
 
         # Fonts for better GNOME app experience
-        cantarell-fonts
+        adwaita-fonts # GNOME 48+ default; replaced cantarell-fonts
         source-sans-pro
         source-serif-pro
         dejavu_fonts
