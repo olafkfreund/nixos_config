@@ -1,16 +1,54 @@
-{ pkgs, ... }: {
+{ pkgs, spicetify-nix, ... }:
+let
+  spicePkgs = spicetify-nix.legacyPackages.${pkgs.system};
+in
+{
   home.packages = [
-    pkgs.spotify # Official Spotify client
-    pkgs.plexamp # Plex
-    pkgs.vlc # video player
-    pkgs.cava # audio visualizer
-    pkgs.castero # Podcasts - Re-enabled: Python 3.13.9 compatibility fixed (issue #35 closed)
-    pkgs.gnome-podcasts # Podcasts
+    # Spotify provided by programs.spicetify below
+    pkgs.plexamp
+    pkgs.vlc
+    pkgs.cava
+    pkgs.castero
+    pkgs.gnome-podcasts
     pkgs.hypnotix
-    pkgs.wiremix # Music streaming
+    pkgs.wiremix
     pkgs.parabolic
     pkgs.musicpod
-    pkgs.playerctl # Required dependency for our script
-    (pkgs.callPackage ../../pkgs/mpris-album-art { }) # Our album art script
+    pkgs.playerctl
+    (pkgs.callPackage ../../pkgs/mpris-album-art { })
   ];
+
+  # Opt out of stylix's auto-generated spicetify theme so the explicit
+  # Gruvbox choice below wins (same pattern as stylix.targets.firefox).
+  stylix.targets.spicetify.enable = false;
+
+  programs.spicetify = {
+    enable = true;
+    theme = spicePkgs.themes.text;
+    colorScheme = "Gruvbox";
+    # Force Xwayland so mutter draws server-side decorations.
+    wayland = false;
+    enabledExtensions = with spicePkgs.extensions; [
+      adblock
+      hidePodcasts
+      shuffle
+      fullAppDisplay
+    ];
+  };
+
+  # spicetify-nix's spotifyLaunchFlags only writes to config-xpui.ini and
+  # never reaches the runtime wrapper. Override the desktop entry instead
+  # so Chromium delegates decoration drawing to the compositor (combined
+  # with --ozone-platform=x11 from `wayland = false` above).
+  xdg.desktopEntries.spotify = {
+    name = "Spotify";
+    genericName = "Music Player";
+    exec = "spotify --enable-features=WaylandWindowDecorations %U";
+    icon = "spotify";
+    terminal = false;
+    type = "Application";
+    categories = [ "Audio" "Music" "Player" "AudioVideo" ];
+    mimeType = [ "x-scheme-handler/spotify" ];
+    settings.StartupWMClass = "Spotify";
+  };
 }
