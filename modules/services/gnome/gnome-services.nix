@@ -28,8 +28,6 @@
     gnome-tweaks
     gnome-control-center
     gnome-boxes
-    gnomeExtensions.gtile
-    gnomeExtensions.gmeet
     gnomeExtensions.user-themes
     gnomeExtensions.appindicator
     gimp
