@@ -105,6 +105,9 @@ in
       "org/gnome/desktop/interface" = {
         clock-format = "24h";
         show-battery-percentage = true;
+        # libadwaita accent (GNOME 47+). Picks the gruvbox-orange tone that
+        # matches the wallpaper / base16 scheme set in shared-variables.nix.
+        accent-color = "orange";
         gtk-theme = mkDefault (
           if cfg.theme.enable
           then "Adwaita-dark"

@@ -14,6 +14,11 @@ in
     # runtime symlink (gtk.css -> ~/.config/gtk-4.0/cosmic/dark.css). With
     # `stylix.targets.gtk.enable = false` system-wide, GNOME themes from
     # gsettings + the GTK theme package on PATH and does not need this file.
+    #
+    # libadwaita constraint: even if Stylix wrote gtk.css here, native GNOME
+    # apps (Nautilus, GNOME Console, Settings) intentionally ignore third-
+    # party themes by upstream policy. Stylix theming for GNOME apps is
+    # unfixable on this side; do not chase it.
     xdg.configFile."gtk-3.0/gtk.css".enable = false;
     xdg.configFile."gtk-4.0/gtk.css".enable = false;
 
