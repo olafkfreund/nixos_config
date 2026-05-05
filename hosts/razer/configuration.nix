@@ -479,17 +479,6 @@ in
     "/etc/ssh/ssh_host_rsa_key" # Host key (RSA fallback)
   ];
 
-  # Override GNOME Shell to remove problematic dark mode patch
-  nixpkgs.overlays = [
-    (_final: prev: {
-      gnome-shell = prev.gnome-shell.overrideAttrs (old: {
-        patches = builtins.filter (patch: !lib.hasSuffix "shell_remove_dark_mode.patch" (toString patch)) (
-          old.patches or [ ]
-        );
-      });
-    })
-  ];
-
   nixpkgs.config = {
     allowBroken = true;
     permittedInsecurePackages = [

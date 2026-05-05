@@ -5,6 +5,14 @@ _final: prev: {
     doInstallCheck = false;
   });
 
+  # gnome-shell's shell_remove_dark_mode.patch fails to apply on GNOME 49.1.
+  # Strip it until nixpkgs catches up. Keep the rest of nixpkgs' patches.
+  gnome-shell = prev.gnome-shell.overrideAttrs (oldAttrs: {
+    patches = builtins.filter
+      (patch: builtins.match ".*shell_remove_dark_mode.*" (toString patch) == null)
+      (oldAttrs.patches or [ ]);
+  });
+
   # nixpkgs-unstable ships nix-prefetch-git as `nix-prefetch-git-VERSION`,
   # breaking fetchCargoVendor which calls the binary by its short name.
   # Symlink the short name to the versioned binary.

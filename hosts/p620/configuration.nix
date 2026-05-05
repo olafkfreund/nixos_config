@@ -595,19 +595,6 @@ in
   # Windows app integration - Re-enabled after upstream fix (v0.9.0)
   # programs.winboat.enable = true; # DISABLED: Go 1.26 cross-compilation broken with mingw32 GCC 15
 
-  # Fix broken GNOME Shell patch in nixpkgs (shell_remove_dark_mode.patch failing on 49.1)
-  nixpkgs.overlays = [
-    (_final: prev: {
-      gnome-shell = prev.gnome-shell.overrideAttrs (oldAttrs: {
-        patches = builtins.filter
-          (
-            patch: !(builtins.match ".*shell_remove_dark_mode.*" (toString patch) != null)
-          )
-          (oldAttrs.patches or [ ]);
-      });
-    })
-  ];
-
   # Package configurations
   nixpkgs.config = {
     allowBroken = true;
