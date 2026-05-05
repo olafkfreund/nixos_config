@@ -143,12 +143,9 @@ in
         send-software-usage-stats = false;
       };
 
-      # Power settings
-      "org/gnome/settings-daemon/plugins/power" = {
-        sleep-inactive-ac-type = "nothing";
-        sleep-inactive-battery-type = "suspend";
-        sleep-inactive-battery-timeout = 1200; # 20 minutes
-      };
+      # Power settings live in apps.nix under the Remote Desktop block —
+      # GNOME RDP is enabled on every host so the no-sleep policy applies
+      # uniformly there.
 
       # Window management
       "org/gnome/desktop/wm/keybindings" = {

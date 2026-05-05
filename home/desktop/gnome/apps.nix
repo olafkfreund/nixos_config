@@ -4,7 +4,7 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkForce mkMerge;
+  inherit (lib) mkIf mkMerge;
   cfg = config.desktop.gnome;
 in
 {
@@ -263,8 +263,10 @@ in
 
       # Disable power management for remote desktop sessions
       "org/gnome/settings-daemon/plugins/power" = {
+        sleep-inactive-ac-type = "nothing";
         sleep-inactive-ac-timeout = 0;
-        sleep-inactive-battery-timeout = mkForce 0; # Override default 1200 setting
+        sleep-inactive-battery-type = "nothing";
+        sleep-inactive-battery-timeout = 0;
       };
 
       "org/gnome/desktop/peripherals/touchpad" = {

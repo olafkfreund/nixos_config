@@ -13,6 +13,20 @@
     };
     gvfs.enable = true;
   };
+
+  # Trim GNOME defaults that survive `core-apps.enable = false` via transitive
+  # deps. The packages we *do* want (gnome-calendar, gnome-contacts, etc.) are
+  # listed in environment.systemPackages below.
+  environment.gnome.excludePackages = with pkgs; [
+    gnome-tour
+    epiphany
+    geary
+    gnome-music
+    gnome-photos
+    yelp
+    cheese
+  ];
+
   environment.systemPackages = with pkgs; [
     gnome-themes-extra
     nautilus

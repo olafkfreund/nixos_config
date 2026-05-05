@@ -44,8 +44,11 @@ in
         gnome-remote-desktop.wantedBy = [ "graphical.target" ];
       };
 
-      # Disable power management for remote desktop sessions
-      targets = {
+      # Disable systemd sleep/suspend on hosts that should always be reachable
+      # (workstations, headless servers). Laptops keep suspend so lid-close
+      # behaves; the dconf no-sleep policy in home/desktop/gnome/apps.nix
+      # already prevents idle suspend during active RDP sessions.
+      targets = mkIf (config.host.class or "workstation" != "laptop") {
         sleep.enable = mkForce false;
         suspend.enable = mkForce false;
       };
