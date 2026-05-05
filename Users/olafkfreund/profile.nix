@@ -34,18 +34,10 @@ in
     };
     extensions = {
       enable = true;
+      # Shared extensions live in home/desktop/gnome/extensions.nix.
+      # Only profile-specific additions go here.
       packages = with pkgs.gnomeExtensions;
-        [
-          # Extensions shared by both interactive profiles
-          dash-to-dock
-          appindicator
-          caffeine
-          clipboard-indicator
-        ]
-        ++ optionals (gnomeProfile == "workstation") [
-          blur-my-shell
-        ]
-        ++ optionals (gnomeProfile == "laptop") [
+        optionals (gnomeProfile == "laptop") [
           battery-health-charging
         ];
     };
