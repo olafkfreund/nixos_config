@@ -61,8 +61,9 @@
   # Disable USB autosuspend to prevent keyboard/mouse from turning off
   boot.kernelParams = [
     "mem_sleep_default=deep" # Prefer deep sleep modes
-    "nvme.noacpi=1" # Avoid ACPI conflicts with NVMe
     "usbcore.autosuspend=-1" # Disable USB autosuspend globally
+    # Note: nvme.noacpi=1 was removed in issue #464 — see boot.nix for
+    # rationale. NVMe-related kernel params are now consolidated in boot.nix.
   ];
 
   # Fix systemd sleep targets

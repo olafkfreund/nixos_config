@@ -13,8 +13,19 @@
     "intel_idle.max_cstate=2" # Limit C-states for better responsiveness when needed
     "i915.enable_fbc=1" # Enable framebuffer compression
     "i915.enable_guc=2" # Enable graphics microcontroller
-    "nvme.noacpi=1" # Try if having NVMe issues
-    "pcie_aspm=default" # PCIe Active State Power Management
+    # NVMe boot-race mitigations for kernel 7.0.x (issue #464):
+    #   - pcie_aspm=off prevents L1 substates from delaying PCIe link training
+    #     during the concurrent reset of two NVMe controllers (Samsung +
+    #     Kingston). =default proved insufficient on 7.0.3 — Kingston's 8s
+    #     D3 entry latency lost the race and triggered "Device not ready".
+    #   - nvme_core.io_timeout=60 doubles the wait for CSTS.RDY so a slow
+    #     controller becomes benign rather than fatal.
+    # Removed: nvme.noacpi=1 — historically a Razer suspend workaround, but
+    # actively harmful on 7.0.x because it suppresses the ACPI _PS0/_PR3
+    # notifications the new pci_dev_wait() needs to know D3cold→D0 finished
+    # before the NVMe driver issues its reset sequence.
+    "pcie_aspm=off"
+    "nvme_core.io_timeout=60"
     "button.lid_init_state=open" # Lid open state on boot
     "mitigations=off" # Disable all CPU mitigations for performance (use with caution)
   ];
