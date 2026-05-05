@@ -43,7 +43,6 @@ in
           clipboard-indicator
         ]
         ++ optionals (gnomeProfile == "workstation") [
-          vitals
           blur-my-shell
         ]
         ++ optionals (gnomeProfile == "laptop") [

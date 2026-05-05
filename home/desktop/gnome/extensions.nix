@@ -17,16 +17,11 @@ in
         enabled-extensions = [
           # Essential extensions UUIDs
           "user-theme@gnome-shell-extensions.gcampax.github.com"
-          "gsconnect@andyholmes.github.io" # Re-enabled: Build failure fixed in nixpkgs (issue #27 closed)
           "dash-to-dock@micxgx.gmail.com"
           "appindicatorsupport@rgcjonas.gmail.com"
           "auto-accent-colour@Wartybix"
           "auto-move-windows@gnome-shell-extensions.gcampax.github.com"
           "bring-out-submenu-of-power-offlogout-button@gnome-shell-extensions.gcampax.github.com"
-          "coverflow-alt-tab@gnome-shell-extensions.gcampax.github.com"
-          "foresight@gnome-shell-extensions.gcampax.github.com"
-          "move-to-next-screen@gnome-shell-extensions.gcampax.github.com"
-          "Vitals@CoreCoding.com"
           "blur-my-shell@aunetx"
           "top-panel-logo@jmpegi.github.com"
           "workspace-indicator@gnome-shell-extensions.gcampax.github.com"
@@ -36,9 +31,7 @@ in
           "caffeine@patapon.info"
           "clipboard-indicator@tudmotu.com"
           "panel-osd@berend.de.schouwer.gmail.com"
-          "quake-terminal@diegodario88.github.io"
           "tailscale-status@maxgallup.github.com"
-          "tilingshell@ferrarodomenico.com"
           "user-themes@gnome-shell-extensions.gcampax.github.com"
           "bluetooth-battery@michalw.github.com"
           "BringOutSubmenuOfPowerOffLogoutButton@pratap.fastmail.fm"
@@ -54,14 +47,6 @@ in
       #     else "Adwaita"
       #   );
       # };
-
-      # GSConnect configuration
-      "org/gnome/shell/extensions/gsconnect" = {
-        enabled = true;
-        show-indicators = true;
-      };
-
-      # Example configurations for popular extensions (commented out)
 
       # Dash to Dock configuration
       "org/gnome/shell/extensions/dash-to-dock" = {
@@ -92,21 +77,6 @@ in
         icon-size = 0;
         legacy-tray-enabled = true;
         tray-pos = "right";
-      };
-
-      # Vitals extension configuration
-      "org/gnome/shell/extensions/vitals" = {
-        hot-sensors = [
-          "_processor_usage_"
-          "_memory_usage_"
-          "_temperature_processor_0_"
-          "_network-rx_in_bytes_"
-        ];
-        position-in-panel = 2; # 0: left, 1: center, 2: right
-        use-higher-precision = false;
-        alphabetize = true;
-        include-public-ip = true;
-        include-static-info = false;
       };
 
       # Blur My Shell configuration
@@ -145,26 +115,6 @@ in
         toogle-shortcut = "<Super>g";
       };
 
-      # Quake Terminal configuration
-      "org/gnome/shell/extensions/quake-terminal" = {
-        always-on-top = true;
-        auto-hide-window = true;
-        render-on-primary-monitor = true;
-        render-on-current-monitor = false;
-        terminal-id = "Alacritty.desktop";
-        terminal-shortcut = "<Super>Return";
-        vertical-size = 80;
-      };
-
-      # Tilling Shell configuration
-      "org/gnome/shell/extensions/tilingshell" = {
-        enable-autotilling = true;
-        enable-snap-assist = false;
-        enable-window-border = true;
-        inner-gabs = 4;
-        window-border-color = "rgb(154,153,150)";
-      };
-
       # Gnofi configuration
       "org/gnome/shell/extensions/gnofi" = {
         window-hotkey = "<Super>space ";
@@ -193,24 +143,16 @@ in
       [
         # Essential extensions (always installed when extensions are enabled)
         gnomeExtensions.user-themes
-        gnomeExtensions.gsconnect # Re-enabled: Build failure fixed in nixpkgs (issue #27 closed)
-        gnomeExtensions.tiling-shell
         # gnomeExtensions.ascii-emoji
         gnomeExtensions.dim-background-windows
         gnomeExtensions.just-perfection
         # gnomeExtensions.paperwm
-        gnomeExtensions.quake-terminal
         gnomeExtensions.tailscale-status
         gnomeExtensions.auto-accent-colour
         gnomeExtensions.auto-move-windows
         gnomeExtensions.bring-out-submenu-of-power-offlogout-button
-        gnomeExtensions.coverflow-alt-tab
-        gnomeExtensions.foresight
-        gnomeExtensions.move-to-next-screen
-        gnomeExtensions.top-bar-organizer
 
         # Extension-specific packages that might be needed
-        libnotify # For GSConnect
         lm_sensors # For system monitoring extensions
         curl # For weather extensions
         jq # For data processing
