@@ -228,6 +228,18 @@ in
     };
   };
 
+  # GDM greeter visual baseline (only shown when autoLogin can't proceed,
+  # e.g. after a session crash). Keeps clock 24h and forces dark colour
+  # scheme so the greeter doesn't flash light during boot transitions.
+  programs.dconf.profiles.gdm.databases = [{
+    settings = {
+      "org/gnome/desktop/interface" = {
+        clock-format = "24h";
+        color-scheme = "prefer-dark";
+      };
+    };
+  }];
+
   # Desktop manager configuration - Full GNOME for headless RDP access
   services.desktopManager.gnome.enable = true;
 
