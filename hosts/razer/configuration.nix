@@ -161,9 +161,8 @@ in
       enableReadyNotifications = true;
     };
 
-    # GNOME Remote Desktop disabled - using headless service instead
     gnome-remote-desktop = {
-      enable = false;
+      enable = true;
     };
 
     virtualization = {
@@ -364,9 +363,6 @@ in
 
   # Hardware and service specific configurations
   services = {
-    # Explicitly disable gnome-remote-desktop system service (using headless instead)
-    gnome.gnome-remote-desktop.enable = lib.mkForce false;
-
     playerctld.enable = true;
     fwupd.enable = true;
     nfs.server = lib.mkIf vars.services.nfs.enable {
@@ -434,7 +430,6 @@ in
       cosmic-ext-applet-weather
       # Remote desktop
       rustdesk-flutter
-      gnome-remote-desktop # For headless RDP service
       # Messaging applications
       karere # GTK4 WhatsApp client
 
