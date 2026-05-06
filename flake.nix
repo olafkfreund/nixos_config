@@ -72,13 +72,13 @@
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
     zjstatus.url = "github:dj95/zjstatus";
-    # = tag v2.0.5+claude1.5354.0 (2026-04-30). Wrapper at v2.0.5 includes
-    # upstream's own CRLF-strip fix for cowork-plugin-shim.sh (PRs #499,
-    # #505) — our overlay's postInstall workaround is now unneeded; the
-    # overlay below simplifies to a direct FHS pass-through.
-    # claude binary at 1.5354.0.
+    # = tag v2.0.6+claude1.5354.0 (2026-05-01). Bumped from ≈v2.0.5 for
+    # X-button-to-tray (#451), persistent autostart toggle (#450), tray
+    # icon in-place updates (#515), and window visibility fix (#496).
+    # Stayed on v2.0.6 (not v2.0.7+) to avoid the frame-fix-wrapper.js
+    # syslog flood (upstream #582). claude binary unchanged at 1.5354.0.
     # Bump via /update-claude-code.
-    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/dc762a35a02782415fcaa84f0d7ed9d2a6064215";
+    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/c973f4922bac6b5b5b4d07929ee4a98a69cb71a9";
 
     # Terminal YouTube browser
     yt-x = {
