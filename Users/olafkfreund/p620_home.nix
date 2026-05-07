@@ -48,7 +48,7 @@
   programs.openclaw = {
     enable = true;
     environment.GEMINI_API_KEY = "/run/agenix/api-gemini";
-    config.agents.defaults.model.primary = "google/gemini-2.5-pro";
+    config.agents.defaults.model.primary = "google/gemini-3.1-pro-preview";
   };
 
   # Workstation-specific additional packages
