@@ -130,6 +130,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # OpenClaw — personal AI assistant (official Nix flake, HM module).
+    # Used on P620 only; backed by the existing api-gemini.age agenix secret.
+    nix-openclaw = {
+      url = "github:openclaw/nix-openclaw";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
   outputs =
