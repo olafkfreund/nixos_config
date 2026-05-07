@@ -57,6 +57,29 @@
       # responsive when 3.1 stalls.
       fallbacks = [ "google/gemini-2.5-flash" ];
     };
+
+    # Expose plugin CLIs on the user's interactive PATH (off by default). The
+    # gateway wrapper has them either way; this is so `gog auth credentials`
+    # and `gog auth add …` (one-time browser-based OAuth) can be run from a
+    # normal shell after deploy.
+    exposePluginPackages = true;
+
+    # Bundled plugins. Each puts its CLI on the gateway wrapper's PATH so the
+    # already-loaded matching `gog` / `summarize` / `qmd` skills can call it.
+    # `goplaces` is defaultEnable=true upstream — no need to list it here.
+    bundledPlugins = {
+      # Google Workspace — Gmail, Calendar, Drive, Contacts, Sheets, Docs.
+      # OAuth setup is one-time and interactive (browser flow): after deploy run
+      #   gog auth credentials /path/to/client_secret.json    # from GCP console
+      #   gog auth add olaf@freundcloud.com --services gmail,calendar,drive,contacts,docs,sheets
+      gogcli.enable = true;
+
+      # URL / PDF / YouTube summarisation — useful for inbox triage and reading.
+      summarize.enable = true;
+
+      # Local markdown KB search (Obsidian-friendly).
+      qmd.enable = true;
+    };
   };
 
   # Workstation-specific additional packages
