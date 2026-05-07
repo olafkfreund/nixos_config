@@ -48,7 +48,15 @@
   programs.openclaw = {
     enable = true;
     environment.GEMINI_API_KEY = "/run/agenix/api-gemini";
-    config.agents.defaults.model.primary = "google/gemini-3.1-pro-preview";
+    config.agents.defaults.model = {
+      primary = "google/gemini-3.1-pro-preview";
+      # Fall back to Flash on watchdog timeout — the agent harness sends ~26
+      # tools + ~20 skills in the initial prompt, and 3.1-pro-preview's
+      # first-token latency frequently exceeds the gateway's idle watchdog.
+      # Flash (1M ctx, reasoning) starts streaming fast and keeps the agent
+      # responsive when 3.1 stalls.
+      fallbacks = [ "google/gemini-2.5-flash" ];
+    };
   };
 
   # Workstation-specific additional packages
