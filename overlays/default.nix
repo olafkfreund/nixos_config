@@ -23,6 +23,12 @@
 
   inputs.cosmic-ext-connect.overlays.default
 
+  # Replace nixpkgs `pkgs.openclaw` (marked insecure due to default unsandboxed
+  # tool access) with the upstream flake's repackaged build. The HM module
+  # defaults `programs.openclaw.package` to `pkgs.openclaw`, so the overlay is
+  # how the flake author intends consumers to wire it up.
+  inputs.nix-openclaw.overlays.default
+
   (import ./custom-packages.nix)
   (import ./citrix-workspace.nix)
   (import ./cmake-compat.nix)

@@ -1,8 +1,12 @@
 { lib
 , pkgs
+, inputs
 , ...
 }: {
-  imports = [ ./profile.nix ];
+  imports = [
+    ./profile.nix
+    inputs.nix-openclaw.homeManagerModules.openclaw
+  ];
 
   desktop.gnome.profile = "workstation";
 
@@ -33,6 +37,18 @@
     enable = true;
     theme = "custom";
     style = "powerline";
+  };
+
+  # OpenClaw — personal AI assistant gateway (systemd user service).
+  # The wrapper reads /run/agenix/api-gemini at runtime and exports the contents
+  # as $GEMINI_API_KEY (see nix-openclaw config.nix wrapper logic). OpenClaw
+  # honours GEMINI_API_KEY as the Google provider fallback per
+  # docs.openclaw.ai/providers/google, so no models.providers.google.apiKey is
+  # set declaratively — keeps the key out of the Nix store.
+  programs.openclaw = {
+    enable = true;
+    environment.GEMINI_API_KEY = "/run/agenix/api-gemini";
+    config.agents.defaults.model.primary = "google/gemini-2.5-pro";
   };
 
   # Workstation-specific additional packages
