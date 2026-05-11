@@ -37,6 +37,8 @@ pkgs.mkShell {
     # Linting and formatting
     markdownlint-cli # Markdown linting
     vale # Prose linting
+    typos # Spell checking (moved out of the slim default shell)
+    taplo # TOML formatting (moved out of the slim default shell)
   ];
 
   shellHook = ''

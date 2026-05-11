@@ -1,82 +1,78 @@
 # Primary Development Shell Environment
+#
+# Intentionally slim. Anything you'd reach for during ordinary edit / build /
+# commit work lives here. Tools used only occasionally (mdbook, graphviz,
+# typos, taplo, nix-tree, nix-diff, nix-eval-jobs, commitizen, …) were moved
+# out because each drags in a hefty closure (Haskell GHC for nix-tree,
+# python+toolchains for commitizen, full LLVM/clang for some build-time deps,
+# even an arm64 .NET runtime via transitives) — collectively ~9 GB the
+# direnv-loaded shell doesn't need on a daily basis. Reach for them via:
+#
+#   nix develop .#docs                # mdbook, graphviz, typos, taplo, ...
+#   nix shell nixpkgs#nix-tree        # one-off nix introspection
+#   nix shell nixpkgs#nix-diff
+#   nix shell nixpkgs#nix-eval-jobs
+#   nix shell nixpkgs#commitizen
+#
 { pkgs, ... }:
 pkgs.mkShell {
   name = "nixos-dev-environment";
 
   packages = with pkgs; [
-    # Modern Nix tooling
-    nixd # Advanced LSP server
-    nil # Alternative LSP
-    nix-output-monitor # Beautiful build output
-    nix-tree # Dependency visualization
-    nix-diff # Configuration comparison
-    nix-eval-jobs # Parallel evaluation
+    # Nix LSP + build UX
+    nixd # Advanced LSP server (nil dropped — nixd is the better LSP)
+    nix-output-monitor # prettier build output
 
-    # Development workflow
-    just # Command runner (already using)
-    pre-commit # Git hooks
-    commitizen # Conventional commits
+    # Linters + formatter (run on every edit / pre-commit)
+    nixpkgs-lint-community # Primary linter (tree-sitter, whole-tree-safe)
+    statix # Secondary linter (rule-based: `statix check FILE`)
+    deadnix # Dead-code detection
+    nixpkgs-fmt # Formatter
 
-    # Quality assurance
-    nixpkgs-lint-community # Primary linter (tree-sitter, fast, whole-tree-safe)
-    statix # Secondary linter (rule-based, run per-file: `statix check FILE`)
-    deadnix # Dead code detection
-    nixpkgs-fmt # Code formatting
-    typos # Spell checking
-    taplo # TOML formatting
+    # Workflow
+    just # Command runner
+    pre-commit # Git hooks (pre-commit hook fires on every commit)
 
-    # Documentation and analysis
-    mdbook # Documentation generation
-    graphviz # Dependency graphs
+    # System tools any shell command in this repo expects
+    git
+    curl
+    jq
 
-    # System tools
-    git # Version control
-    curl # HTTP requests
-    jq # JSON processing
-
-    # Development utilities
-    direnv # Environment management
-    nix-direnv # Nix integration for direnv
+    # direnv integration
+    direnv
+    nix-direnv
   ];
 
   shellHook = ''
     export PATH=$PWD/scripts:$PATH
-    echo "🚀 NixOS Development Environment v2.0"
+    echo "🚀 NixOS Development Environment v2.1 (slim)"
     echo ""
-    echo "📋 Available Commands:"
+    echo "📋 Common commands:"
     echo "  just validate        - Complete validation suite"
     echo "  just test-host X     - Test specific host config"
-    echo "  just deploy-all      - Deploy all hosts"
-    echo "  just quick-test      - Fast parallel testing"
-    echo "  just quick-all       - Test and deploy all"
+    echo "  just quick-deploy X  - Smart deploy (only if changed)"
+    echo "  just update-commit   - update + build + commit (no switch)"
     echo ""
-    echo "🔧 Development Tools:"
-    echo "  nixd                - Start LSP server"
-    echo "  nixpkgs-lint .      - Fast tree-sitter lint (whole tree)"
-    echo "  statix check FILE   - Rule-based lint (single file)"
-    echo "  deadnix             - Check for dead code"
-    echo "  nix-tree            - Visualize dependencies"
-    echo "  nix-diff .#old .#new - Compare configurations"
+    echo "🔧 Linters / formatter (in this shell):"
+    echo "  nixpkgs-lint .       - Fast tree-sitter lint (whole tree)"
+    echo "  statix check FILE    - Rule-based lint (single file)"
+    echo "  deadnix              - Dead-code detection"
+    echo "  nixpkgs-fmt          - Format"
     echo ""
-    echo "📚 Documentation:"
-    echo "  mdbook build        - Generate documentation"
-    echo "  nix flake show      - Show flake outputs"
+    echo "📦 Occasional tools (NOT in this shell — reach via):"
+    echo "  nix develop .#docs           # mdbook, graphviz, typos, taplo"
+    echo "  nix shell nixpkgs#nix-tree   # dependency visualisation"
+    echo "  nix shell nixpkgs#nix-diff   # closure comparison"
     echo ""
 
-    # Initialize pre-commit if not already done
+    # Initialise pre-commit if the hook isn't installed
     if [ ! -f .git/hooks/pre-commit ]; then
-      echo "🔨 Initializing pre-commit hooks..."
+      echo "🔨 Initialising pre-commit hooks..."
       pre-commit install --install-hooks 2>/dev/null || echo "Pre-commit setup skipped"
-    fi
-
-    # Setup direnv if .envrc doesn't exist
-    if [ ! -f .envrc ] && command -v direnv >/dev/null 2>&1; then
-      echo "use flake" > .envrc
-      echo "📂 Created .envrc for automatic environment loading"
     fi
   '';
 
-  # Environment variables for development
+  # Environment
   NIX_CONFIG = "experimental-features = nix-command flakes";
   NIXPKGS_ALLOW_UNFREE = "1";
   DIRENV_LOG_FORMAT = "";
