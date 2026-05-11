@@ -366,6 +366,10 @@ in
       "render"
     ];
     shell = pkgs.zsh;
+    # Run user services even when not logged in — needed so the openclaw
+    # gateway (and any other systemd user units) keep working at boot
+    # before someone logs in via TTY/SSH/desktop session.
+    linger = true;
     # Only use secret-managed password if the secret exists
     hashedPasswordFile = lib.mkIf
       (
