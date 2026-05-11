@@ -8,6 +8,14 @@ result-*
 .tmp/
 *.tmp
 
+# direnv cache + atomic-swap temp dirs.
+# direnv writes .direnv.tmp-<suffix>/ while rebuilding the cache, then renames
+# it over .direnv/. Without ignoring it, scripts/update-commit-deploy.sh's
+# pre-flight dirty-tree check (`git status --porcelain | awk '$2 != "flake.lock"'`)
+# trips and aborts.
+.direnv/
+.direnv.tmp-*/
+
 # Editor files
 .vscode/
 *.swp
