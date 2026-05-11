@@ -27,7 +27,7 @@ Both invoke the same script: `scripts/update-commit-deploy.sh`.
    - Must be on branch `main`
    - Working tree must be clean — only `flake.lock` may be dirty
    - If HOST is remote: check SSH reachability. Abort early if not.
-2. **Update** — `nix flake update <SCOPE>` (default `nixpkgs`; accepts `all` or any input name)
+2. **Update** — `nix flake update <SCOPE>` (default `all`; accepts `nixpkgs` or any specific input name)
 3. **Freshness check** — cheap `nix eval --raw` to compute what the target's
    closure should be, compared against its current `/run/current-system`.
    If lock didn't change AND host already on latest → exit "nothing to do".
@@ -53,12 +53,12 @@ Both invoke the same script: `scripts/update-commit-deploy.sh`.
 | Position | Name | Default | Values |
 |---|---|---|---|
 | 1 | `HOST` | `$(hostname)` | any name in `flake.nix` `nixosConfigurations.*` |
-| 2 | `SCOPE` | `nixpkgs` | `all`, `nixpkgs`, or any specific input name |
+| 2 | `SCOPE` | `all` | `all`, `nixpkgs`, or any specific input name |
 
 ### Common scopes
 
-- `nixpkgs` — only the root nixpkgs input (default, most common)
-- `all` — update every input in the flake
+- `all` — update every input in the flake (default; the most common case)
+- `nixpkgs` — only the root nixpkgs input (use for targeted security-driven bumps)
 - `home-manager`, `claude-desktop-linux`, `sops-nix`, ... — any input name from `flake.nix`
 
 ## Idiot-proofing guarantees

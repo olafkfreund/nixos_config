@@ -4,7 +4,7 @@
 # Idiot-proof update flow for NixOS (works for local AND remote targets):
 #   1) pre-flight: must be on main, working tree clean (flake.lock OK),
 #      and remote target (if any) reachable via SSH
-#   2) nix flake update <SCOPE>         (default SCOPE=nixpkgs)
+#   2) nix flake update <SCOPE>         (default SCOPE=all)
 #   3) no-op exit if lock unchanged AND host already current
 #   4) test-build target host closure   (abort commit on build failure)
 #   5) feature-branch + PR-merge of flake.lock → main
@@ -55,7 +55,7 @@ for arg in "$@"; do
   esac
 done
 HOST="${positional[0]:-$(hostname)}"
-SCOPE="${positional[1]:-nixpkgs}"
+SCOPE="${positional[1]:-all}"
 
 # Resolve repo root from script location.
 cd "$(dirname "$0")/.."
