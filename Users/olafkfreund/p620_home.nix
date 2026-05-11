@@ -82,6 +82,13 @@
     };
   };
 
+  # Add an [Install] section to the openclaw-gateway user service so it auto-
+  # starts at boot (the upstream nix-openclaw HM module deliberately omits it
+  # so the gateway is opt-in). Combined with `users.users.olafkfreund.linger
+  # = true` at the system level, this means heartbeats / scheduled agent runs
+  # keep working even when no shell session is active.
+  systemd.user.services.openclaw-gateway.Install.WantedBy = [ "default.target" ];
+
   # Workstation-specific additional packages
   home.packages = [
     # Newelle — AI Virtual Assistant (GTK4/Libadwaita)
