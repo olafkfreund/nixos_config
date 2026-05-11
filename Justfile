@@ -22,28 +22,32 @@ update-flake:
     just deploy
 
 # Idiot-proof update + commit + deploy (local OR remote). Does:
-#   1. nix flake update (scope = nixpkgs by default, or 'all' or any input name)
+#   1. nix flake update (scope = 'all' by default; pass 'nixpkgs' or any input name to scope down)
 #   2. no-op exit if nothing moved
 #   3. test-build target host closure (aborts if fails)
 #   4. commit flake.lock to main + git push (lock never gets orphaned)
 #   5. nh os switch (local) OR nh os switch --target-host HOST (remote via SSH)
 #
 # HOST defaults to the local hostname; any SSH-reachable host in ~/.ssh/config
-# works too. SCOPE defaults to 'nixpkgs' — use 'all' to bump every input, or
-# pass a specific input name (e.g. 'home-manager', 'claude-desktop-linux').
+# works too. SCOPE defaults to 'all' (every input). Pass 'nixpkgs' to scope it
+# down to just the nixpkgs pin, or pass a specific input name (e.g.
+# 'home-manager', 'claude-desktop-linux') to bump one input.
 #
 # Examples:
-#   just update-commit-deploy                     # local, nixpkgs only
-#   just update-commit-deploy p620                # explicit local host
-#   just update-commit-deploy razer               # remote via SSH
-#   just update-commit-deploy p510 all            # remote, update all inputs
+#   just update-commit-deploy                     # local, all inputs
+#   just update-commit-deploy p620                # explicit local host, all inputs
+#   just update-commit-deploy razer               # remote via SSH, all inputs
+#   just update-commit-deploy p510 nixpkgs        # remote, nixpkgs only
 #   just update-commit-deploy razer home-manager  # remote, single input
-update-commit-deploy HOST="$(hostname)" SCOPE="nixpkgs":
+update-commit-deploy HOST="$(hostname)" SCOPE="all":
     ./scripts/update-commit-deploy.sh {{HOST}} {{SCOPE}}
 
 # Stage 1 of split deploy: bump lock + build + commit + PR-merge, no switch.
-# Use when the target host is offline; later `nhs HOST` does the deploy.
-update-commit HOST="$(hostname)" SCOPE="nixpkgs":
+# Use when you want to update + build + commit but defer the actual switch
+# (e.g. target host is offline, or you want to switch on your own schedule
+# with `nhs HOST` later). SCOPE defaults to 'all'; pass 'nixpkgs' or an input
+# name to scope it down.
+update-commit HOST="$(hostname)" SCOPE="all":
     ./scripts/update-commit-deploy.sh {{HOST}} {{SCOPE}} --no-deploy
 
 # Preview updates with detailed package changes (before building)
