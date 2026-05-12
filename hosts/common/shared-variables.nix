@@ -44,7 +44,7 @@
   # override that defaults to baseTheme.wallpaper.
   baseTheme = {
     scheme = "gruvbox-dark";
-    wallpaper = ../../assets/wallpapers/orange-desert.jpg;
+    wallpaper = ../../assets/wallpapers/amdgruvorange.png;
     cursor = {
       name = "Bibata-Modern-Classic";
       size = 16;

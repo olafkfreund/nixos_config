@@ -96,6 +96,19 @@ in
 
     # GNOME applications configuration via dconf
     dconf.settings = {
+      # Dock favorites — snapshot of p620's live state (2026-05). Both razer
+      # and p620 have these .desktop files in their HM closure (Warp is
+      # included for both via the terminals module chain). If a future host
+      # drops Warp, replace dev.warp.Warp.desktop here or override per-host.
+      "org/gnome/shell" = {
+        favorite-apps = [
+          "org.gnome.Nautilus.desktop"
+          "google-chrome.desktop"
+          "org.gnome.Settings.desktop"
+          "dev.warp.Warp.desktop"
+        ];
+      };
+
       # Nautilus (File Manager) configuration
       "org/gnome/nautilus/preferences" = {
         default-folder-viewer = "list-view";

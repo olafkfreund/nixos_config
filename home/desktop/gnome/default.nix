@@ -130,15 +130,10 @@ in
         experimental-features = [ "variable-refresh-rate" ];
       };
 
-      "org/gnome/shell" = {
-        favorite-apps = [
-          "org.gnome.Nautilus.desktop"
-          "google-chrome.desktop"
-          "org.gnome.Terminal.desktop"
-          "code.desktop"
-          "org.gnome.Settings.desktop"
-        ];
-      };
+      # Note: org/gnome/shell.favorite-apps is declared once in apps.nix
+      # (snapshot of p620 live state). Don't re-declare here — HM merges
+      # rather than replaces dconf array values, which produces a dock
+      # with duplicate entries.
 
       # Privacy settings
       "org/gnome/desktop/privacy" = {

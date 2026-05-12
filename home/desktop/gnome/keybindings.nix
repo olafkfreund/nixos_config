@@ -59,6 +59,16 @@ in
         move-to-workspace-up = [ "<Super><Shift><Ctrl>Up" ];
         move-to-workspace-down = [ "<Super><Shift><Ctrl>Down" ];
 
+        # Move windows between monitors (multi-display setups)
+        move-to-monitor-left = [ "<Super><Shift>Left" ];
+        move-to-monitor-right = [ "<Super><Shift>Right" ];
+        move-to-monitor-up = [ "<Super><Shift>Up" ];
+        move-to-monitor-down = [ "<Super><Shift>Down" ];
+
+        # Switch among windows of the same application (Alt+Tab-style group)
+        switch-group = [ "<Super>Above_Tab" "<Alt>Above_Tab" ];
+        switch-group-backward = [ "<Shift><Super>Above_Tab" "<Shift><Alt>Above_Tab" ];
+
         # Window tiling (GNOME 45+)
         toggle-tiled-left = [ "<Super>Left" ];
         toggle-tiled-right = [ "<Super>Right" ];
