@@ -118,29 +118,42 @@ jobs:
           NOTES:         ${{ steps.notes.outputs.body }}
         run: |
           set -euo pipefail
+          # Build the issue body in a heredoc so the markdown bullets
+          # (- foo) live inside the shell heredoc instead of at YAML
+          # column 0, which would break out of the `run: |` block
+          # scalar (caused a 'expected <block end>, but found ''-''
+          # YAML parse error on every run).
+          body=$(cat <<EOF
+          Upstream \`aaddrick/claude-desktop-debian\` has a new release: **$TAG**.
+
+          - Currently pinned commit: \`${PINNED_COMMIT:0:10}\` (locked $PINNED_DATE)
+          - Latest release commit:   \`${LATEST_COMMIT:0:10}\` (tag \`$TAG\`)
+
+          ### Release notes
+
+          $NOTES
+
+          ### Links
+
+          - Release: https://github.com/aaddrick/claude-desktop-debian/releases/tag/$TAG
+          - Compare: https://github.com/aaddrick/claude-desktop-debian/compare/${PINNED_COMMIT}...${LATEST_COMMIT}
+          - Open issues (regression watch): https://github.com/aaddrick/claude-desktop-debian/issues?q=is%3Aissue+is%3Aopen+label%3Abug
+
+          ### To act on this
+
+          Run \`/update-claude-code\` in Claude Code and follow the **B. Update
+          claude-desktop** section. **Read the release notes first** — upstream
+          occasionally ships regressions (e.g. v1.3.31 broke Cowork daemon recovery)
+          and our overlay may need a patch rev.
+
+          This issue will auto-close when that PR merges.
+          EOF
+          )
+          # Strip the YAML-required leading 10 spaces so bullet points
+          # render at column 0 in the GitHub issue body.
+          body=$(printf '%s\n' "$body" | sed 's/^          //')
+
           gh issue create \
             --label claude-desktop-update \
             --title "chore(claude-desktop): update to $TAG" \
-            --body "Upstream \`aaddrick/claude-desktop-debian\` has a new release: **$TAG**.
-
-- Currently pinned commit: \`${PINNED_COMMIT:0:10}\` (locked $PINNED_DATE)
-- Latest release commit:   \`${LATEST_COMMIT:0:10}\` (tag \`$TAG\`)
-
-### Release notes
-
-$NOTES
-
-### Links
-
-- Release: https://github.com/aaddrick/claude-desktop-debian/releases/tag/$TAG
-- Compare: https://github.com/aaddrick/claude-desktop-debian/compare/${PINNED_COMMIT}...${LATEST_COMMIT}
-- Open issues (regression watch): https://github.com/aaddrick/claude-desktop-debian/issues?q=is%3Aissue+is%3Aopen+label%3Abug
-
-### To act on this
-
-Run \`/update-claude-code\` in Claude Code and follow the **B. Update
-claude-desktop** section. **Read the release notes first** — upstream
-occasionally ships regressions (e.g. v1.3.31 broke Cowork daemon recovery)
-and our overlay may need a patch rev.
-
-This issue will auto-close when that PR merges."
+            --body "$body"

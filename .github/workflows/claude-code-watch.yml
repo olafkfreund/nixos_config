@@ -89,24 +89,38 @@ jobs:
           build_date=$(curl -fsSL --max-time 10 "$GCS/$UPSTREAM/manifest.json" 2>/dev/null \
             | jq -r '.buildDate // "(unknown)"' 2>/dev/null || echo "(unknown)")
 
+          # Build the issue body in a heredoc so the markdown bullet
+          # points (- foo) live inside the shell heredoc instead of at
+          # YAML column 0, which would break out of the `run: |` block
+          # scalar (caused a 'expected <block end>, but found ''-''
+          # YAML parse error on every run).
+          body=$(cat <<EOF
+          Anthropic has published **claude-code $UPSTREAM** on the \`latest\` channel.
+
+          - Currently pinned: **$PINNED**
+          - Upstream latest:  **$UPSTREAM**
+          - Upstream build date: $build_date
+
+          Links:
+          - Manifest: ${GCS}/${UPSTREAM}/manifest.json
+          - Release notes (if any): https://github.com/anthropics/claude-code/releases/tag/v$UPSTREAM
+          - npm page: https://www.npmjs.com/package/@anthropic-ai/claude-code/v/$UPSTREAM
+
+          ## To act on this
+
+          Run \`/update-claude-code $UPSTREAM\` in Claude Code. The slash command
+          will fetch hashes, edit \`pkgs/claude-code-native/default.nix\`, build,
+          test, and open the PR.
+
+          This issue will auto-close when that PR merges.
+          EOF
+          )
+          # Strip the leading 10 spaces YAML required for the heredoc body
+          # so the rendered GitHub issue renders bullet points at column 0
+          # rather than as a code block.
+          body=$(printf '%s\n' "$body" | sed 's/^          //')
+
           gh issue create \
             --label claude-code-update \
             --title "chore(claude-code): update to $UPSTREAM" \
-            --body "Anthropic has published **claude-code $UPSTREAM** on the \`latest\` channel.
-
-- Currently pinned: **$PINNED**
-- Upstream latest:  **$UPSTREAM**
-- Upstream build date: $build_date
-
-Links:
-- Manifest: ${GCS}/${UPSTREAM}/manifest.json
-- Release notes (if any): https://github.com/anthropics/claude-code/releases/tag/v$UPSTREAM
-- npm page: https://www.npmjs.com/package/@anthropic-ai/claude-code/v/$UPSTREAM
-
-## To act on this
-
-Run \`/update-claude-code $UPSTREAM\` in Claude Code. The slash command
-will fetch hashes, edit \`pkgs/claude-code-native/default.nix\`, build,
-test, and open the PR.
-
-This issue will auto-close when that PR merges."
+            --body "$body"

@@ -27,18 +27,29 @@ jobs:
             experimental-features = nix-command flakes
             accept-flake-config = true
 
+      # --no-write-lock-file: a transitive flake (nix-openclaw-tools's
+      # `tools/gogcli` sub-flake) has an unlocked `root.url = "../.."`
+      # path input. Nix 2.20+ refuses to update the lock for such inputs,
+      # so any flake-eval that tries to lock it dies with `lock file
+      # contains unlocked input '{"path":"../..","type":"path"}'`. Local
+      # builds avoid this because the eval cache is already populated;
+      # CI starts fresh and hits it on every run. Telling Nix not to
+      # write the lock skips that attempt and uses our already-resolved
+      # state from flake.lock.
       - name: Check flake
-        run: nix flake check --show-trace
+        run: nix flake check --show-trace --no-write-lock-file
 
       - name: Validate ${{ matrix.host }} configuration
         run: |
           echo "Validating ${{ matrix.host }} configuration (no build)..."
-          nix eval .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel.outPath --show-trace
+          nix eval --no-write-lock-file --show-trace \
+            .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel.outPath
           echo "✓ ${{ matrix.host }} configuration is valid"
 
       - name: Validate Home Manager configurations
         run: |
-          if nix eval .#homeConfigurations.olafkfreund@${{ matrix.host }}.activationPackage 2>/dev/null; then
+          if nix eval --no-write-lock-file \
+              .#homeConfigurations.olafkfreund@${{ matrix.host }}.activationPackage 2>/dev/null; then
             echo "✓ Home Manager configuration for olafkfreund@${{ matrix.host }} is valid"
           else
             echo "WARNING: No Home Manager configuration for olafkfreund@${{ matrix.host }}"
@@ -61,11 +72,16 @@ jobs:
         run: |
           if [ -f "secrets.nix" ]; then
             echo "Validating secrets configuration..."
-            if nix eval .#nixosConfigurations.p620.config.age.secrets --json > /dev/null 2>&1; then
+            # --no-write-lock-file: same reason as the check-configurations
+            # job — avoid the unlocked-path-input failure in transitive
+            # flake locks (nix-openclaw-tools/tools/gogcli's root path).
+            if nix eval --no-write-lock-file \
+                .#nixosConfigurations.p620.config.age.secrets --json > /dev/null 2>&1; then
               echo "PASS: Secrets configuration is valid"
             else
               echo "FAIL: Secrets configuration has errors"
-              nix eval .#nixosConfigurations.p620.config.age.secrets --json
+              nix eval --no-write-lock-file \
+                .#nixosConfigurations.p620.config.age.secrets --json
               exit 1
             fi
           else
