@@ -43,7 +43,7 @@
   # `host.theme.wallpaper` in modules/desktop/stylix-theme.nix as an
   # override that defaults to baseTheme.wallpaper.
   baseTheme = {
-    scheme = "gruvbox-dark-medium";
+    scheme = "gruvbox-dark";
     wallpaper = ../../assets/wallpapers/orange-desert.jpg;
     cursor = {
       name = "Bibata-Modern-Classic";
