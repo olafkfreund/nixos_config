@@ -14,16 +14,16 @@
 
 buildNpmPackage (finalAttrs: {
   pname = "gemini-cli";
-  version = "0.34.0";
+  version = "0.41.2";
 
   src = fetchFromGitHub {
     owner = "google-gemini";
     repo = "gemini-cli";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-/HmcLnScZ2pmzGnRLsNHoqrakyt++1fCv/P2IeE8pGo=";
+    hash = "sha256-4jwEviWYzan97pVn0RWfWU4XS8c27L4ZJUwa2iGlFxY=";
   };
 
-  npmDepsHash = "sha256-3Y9QJC4dqvnCH3qFSsvFMK+XtHnZyYPBP1voLpHpHA4=";
+  npmDepsHash = "sha256-4znN1YR3AX2SKeCJjUS8cm6WGcOGPXI27xrQCotBjgQ=";
 
   nodejs = nodejs_22;
 
@@ -39,56 +39,96 @@ buildNpmPackage (finalAttrs: {
     libsecret
   ];
 
+  # `scripts/generate-git-commit-info.js` is invoked very early by the
+  # `bundle` script and calls `git` — not available in the sandbox. Pre-
+  # generate the file at both locations the script writes to (it moved
+  # between 0.34 and 0.41), so the script becomes a no-op.
   preConfigure = ''
-    mkdir -p packages/generated
-    echo "export const GIT_COMMIT_INFO = { commitHash: '${finalAttrs.src.rev}' };" > packages/generated/git-commit.ts
+    mkdir -p packages/cli/src/generated packages/core/src/generated packages/generated
+    for f in packages/cli/src/generated/git-commit.ts \
+             packages/core/src/generated/git-commit.ts \
+             packages/generated/git-commit.ts; do
+      echo "export const GIT_COMMIT_INFO = { commitHash: '${finalAttrs.src.rev}' };" > "$f"
+    done
   '';
 
   postPatch = ''
-    # Remove node-pty and native optional dependencies from package.json
-    ${jq}/bin/jq 'del(.optionalDependencies."node-pty", .optionalDependencies."@lydell/node-pty", .optionalDependencies."@lydell/node-pty-darwin-arm64", .optionalDependencies."@lydell/node-pty-darwin-x64", .optionalDependencies."@lydell/node-pty-linux-x64", .optionalDependencies."@lydell/node-pty-win32-arm64", .optionalDependencies."@lydell/node-pty-win32-x64", .optionalDependencies."keytar")' package.json > package.json.tmp && mv package.json.tmp package.json
+    # Drop node-pty and friends — they're native modules we can't build,
+    # and gemini-cli already falls back gracefully when they're absent.
+    ${jq}/bin/jq 'del(
+      .optionalDependencies."node-pty",
+      .optionalDependencies."@lydell/node-pty",
+      .optionalDependencies."@lydell/node-pty-darwin-arm64",
+      .optionalDependencies."@lydell/node-pty-darwin-x64",
+      .optionalDependencies."@lydell/node-pty-linux-x64",
+      .optionalDependencies."@lydell/node-pty-win32-arm64",
+      .optionalDependencies."@lydell/node-pty-win32-x64",
+      .optionalDependencies."keytar"
+    )' package.json > package.json.tmp && mv package.json.tmp package.json
 
-    # Remove node-pty and native optional dependencies from packages/core/package.json
-    ${jq}/bin/jq 'del(.optionalDependencies."node-pty", .optionalDependencies."@lydell/node-pty", .optionalDependencies."@lydell/node-pty-darwin-arm64", .optionalDependencies."@lydell/node-pty-darwin-x64", .optionalDependencies."@lydell/node-pty-linux-x64", .optionalDependencies."@lydell/node-pty-win32-arm64", .optionalDependencies."@lydell/node-pty-win32-x64", .optionalDependencies."keytar")' packages/core/package.json > packages/core/package.json.tmp && mv packages/core/package.json.tmp packages/core/package.json
+    ${jq}/bin/jq 'del(
+      .optionalDependencies."node-pty",
+      .optionalDependencies."@lydell/node-pty",
+      .optionalDependencies."@lydell/node-pty-darwin-arm64",
+      .optionalDependencies."@lydell/node-pty-darwin-x64",
+      .optionalDependencies."@lydell/node-pty-linux-x64",
+      .optionalDependencies."@lydell/node-pty-win32-arm64",
+      .optionalDependencies."@lydell/node-pty-win32-x64",
+      .optionalDependencies."keytar"
+    )' packages/core/package.json > packages/core/package.json.tmp && mv packages/core/package.json.tmp packages/core/package.json
 
-    # Fix ripgrep path for SearchText; ensureRgPath() on its own may return the path to a dynamically-linked ripgrep binary without required libraries
+    # Fix ripgrep path for SearchText; ensureRgPath() on its own may return
+    # a dynamically-linked binary without the required libraries.
     substituteInPlace packages/core/src/tools/ripGrep.ts \
       --replace-fail "await ensureRgPath();" "'${lib.getExe ripgrep}';"
 
-    # Disable auto-update and update notifications by changing defaults in settingsSchema
-    # (API changed in 0.26.0 from disableAutoUpdate to enableAutoUpdate)
-    sed -i '/enableAutoUpdate: {/,/default: true/ s/default: true/default: false/' packages/cli/src/config/settingsSchema.ts
-    sed -i '/enableAutoUpdateNotification: {/,/default: true/ s/default: true/default: false/' packages/cli/src/config/settingsSchema.ts
+    # Disable auto-update and notifications (we deliver new versions via
+    # the /update-gemini slash command, not in-process self-updates).
+    sed -i '/enableAutoUpdate:/,/default: true/ s/default: true/default: false/' \
+      packages/cli/src/config/settingsSchema.ts
+    sed -i '/enableAutoUpdateNotification:/,/default: true/ s/default: true/default: false/' \
+      packages/cli/src/config/settingsSchema.ts
 
-    # Fix: devtools package builds after cli in workspace order, causing TS2307.
-    # Add @ts-expect-error to suppress the type error on the dynamic import.
-    sed -i "s|const mod = await import('@google/gemini-cli-devtools');|// @ts-expect-error devtools is an optional peer workspace\n    const mod = await import('@google/gemini-cli-devtools');|" packages/cli/src/utils/devtoolsService.ts
+    # Belt-and-braces — also pin the runtime checks to false so even if
+    # someone's existing settings.json has the keys set true, no update
+    # action fires.
+    substituteInPlace packages/cli/src/utils/handleAutoUpdate.ts \
+      --replace-fail "if (!settings.merged.general.enableAutoUpdateNotification) {" "if (false) {" \
+      --replace-fail "settings.merged.general.enableAutoUpdate," "false," \
+      --replace-fail "!settings.merged.general.enableAutoUpdate" "!false"
   '';
+
+  # Use upstream's `bundle` script — it produces a single esbuild output
+  # rather than building each workspace package, which avoids the
+  # devtools / workspace-order TS errors that hit us on 0.34→0.41.
+  npmBuildScript = "bundle";
+
+  # Keep python (a transitive of npm) out of the closure.
+  disallowedReferences = [
+    finalAttrs.npmDeps
+    finalAttrs.nodejs.python
+  ];
 
   installPhase = ''
     runHook preInstall
-    mkdir -p $out/{bin,share/gemini-cli}
 
+    mkdir -p $out/{bin,share}
+    cp -r bundle $out/share/gemini-cli
+
+    # bundle/docs/CONTRIBUTING.md is a symlink into /build/source/ and
+    # trips the noBrokenSymlinks postFixup check. Drop it — docs aren't
+    # runtime-relevant.
+    rm -f $out/share/gemini-cli/docs/CONTRIBUTING.md
+
+    # Reduce closure: drop devDependencies + non-optional bundled deps.
+    # Only optionalDependencies (the platform-specific native bits we
+    # didn't already strip in postPatch) remain on disk.
+    ${jq}/bin/jq '.dependencies = {} | del(.devDependencies) | del(.workspaces)' \
+      package.json > package.json.tmp && mv package.json.tmp package.json
     npm prune --omit=dev
-    rm node_modules/shell-quote/print.py # remove python demo to prevent python from getting into the closure
-    cp -r node_modules $out/share/gemini-cli/
+    rm -rf node_modules/.bin
 
-    rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli
-    rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-core
-    rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-a2a-server
-    rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-sdk
-    rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-devtools
-    rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-test-utils
-    rm -f $out/share/gemini-cli/node_modules/gemini-cli-vscode-ide-companion
-    cp -r packages/cli $out/share/gemini-cli/node_modules/@google/gemini-cli
-    cp -r packages/core $out/share/gemini-cli/node_modules/@google/gemini-cli-core
-    cp -r packages/a2a-server $out/share/gemini-cli/node_modules/@google/gemini-cli-a2a-server
-    cp -r packages/devtools $out/share/gemini-cli/node_modules/@google/gemini-cli-devtools
-    cp -r packages/sdk $out/share/gemini-cli/node_modules/@google/gemini-cli-sdk
-
-    rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-core/dist/docs/CONTRIBUTING.md
-
-    ln -s $out/share/gemini-cli/node_modules/@google/gemini-cli/dist/index.js $out/bin/gemini
+    ln -s $out/share/gemini-cli/gemini.js $out/bin/gemini
     chmod +x "$out/bin/gemini"
 
     runHook postInstall
