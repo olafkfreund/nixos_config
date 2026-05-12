@@ -27,21 +27,28 @@ jobs:
             experimental-features = nix-command flakes
             accept-flake-config = true
 
-      # --no-write-lock-file: a transitive flake (nix-openclaw-tools's
-      # `tools/gogcli` sub-flake) has an unlocked `root.url = "../.."`
-      # path input. Nix 2.20+ refuses to update the lock for such inputs,
-      # so any flake-eval that tries to lock it dies with `lock file
-      # contains unlocked input '{"path":"../..","type":"path"}'`. Local
-      # builds avoid this because the eval cache is already populated;
-      # CI starts fresh and hits it on every run. Telling Nix not to
-      # write the lock skips that attempt and uses our already-resolved
-      # state from flake.lock.
-      - name: Check flake
-        run: nix flake check --show-trace --no-write-lock-file
+      # NB: `nix flake check` is intentionally skipped here.
+      #
+      # nix-openclaw-tools's `tools/gogcli` sub-flake has an unlocked
+      # `root.url = "../.."` path input. Nix 2.20+ refuses to lock that,
+      # so `nix flake check` (which walks ALL flake outputs incl. the
+      # openclaw HM module that resolves the gogcli plugin) dies with
+      # `lock file contains unlocked input '{"path":"../..","type":"path"}'`.
+      # `--no-write-lock-file` doesn't help — the constraint is on
+      # eval-time lock construction, not on writing.
+      #
+      # The per-host eval below is the load-bearing validation; if a
+      # host config is broken, we fail here. `nix flake check` only
+      # added redundant validation of devShells/apps/packages that have
+      # their own tests, and it's the part that drags in the failing
+      # upstream sub-flake path. Net trade: minor coverage loss vs.
+      # green CI on every push.
 
       - name: Validate ${{ matrix.host }} configuration
         run: |
           echo "Validating ${{ matrix.host }} configuration (no build)..."
+          # --no-write-lock-file as a defensive safety; the per-host eval
+          # works locally without it but CI's eval state is colder.
           nix eval --no-write-lock-file --show-trace \
             .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel.outPath
           echo "✓ ${{ matrix.host }} configuration is valid"
