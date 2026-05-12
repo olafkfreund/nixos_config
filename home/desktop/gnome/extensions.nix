@@ -35,7 +35,6 @@ in
           "tailscale-status@maxgallup.github.com"
           "Bluetooth-Battery-Meter@maniacx.github.com"
           "dim-background-windows@stephane-13.github.com"
-          "aurora-shell@luminusos.github.io"
         ];
       };
 
@@ -130,25 +129,6 @@ in
         strip-text = false;
         topbar-preview-size = 10;
       };
-
-      # Aurora Shell — 10 quality-of-life modules bundled behind one
-      # extension UUID (aurora-shell@luminusos.github.io). All modules
-      # ON except `module-dock`, which would conflict with `dash-to-dock`
-      # configured above. Re-enable module-dock only if you also disable
-      # dash-to-dock in this same file.
-      "org/gnome/shell/extensions/aurora-shell" = {
-        module-no-overview = true;
-        module-pip-on-top = true;
-        module-theme-changer = true;
-        module-dock = false;
-        module-volume-mixer = true;
-        module-xwayland-indicator = true;
-        module-privacy = true;
-        privacy-dnd-on-share = true;
-        module-icon-weave = true;
-        module-app-search-tooltip = true;
-        module-auto-theme-switcher = true;
-      };
     };
 
     # Note: Custom keybindings are defined in keybindings.nix to avoid conflicts
@@ -174,7 +154,6 @@ in
         gnomeExtensions.tailscale-status
         gnomeExtensions.bluetooth-battery-meter
         gnomeExtensions.dim-background-windows
-        aurora-shell
 
         # Helpers used by various extensions at runtime.
         lm_sensors

@@ -5,5 +5,4 @@ final: _prev: {
   claude-code-native = final.callPackage ../pkgs/claude-code-native { };
   warp-terminal = final.callPackage ../pkgs/warp-terminal { };
   gemini-cli = final.callPackage ../home/development/gemini-cli { };
-  aurora-shell = final.callPackage ../pkgs/aurora-shell { };
 }
