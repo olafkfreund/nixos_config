@@ -4,6 +4,11 @@
 # https://splashboard.unhappychoice.com/guides/configuration/
 #
 # Managed by home-manager: edit this file in the repo, not in ~/.splashboard/.
+#
+# Notes on widgets we deliberately DON'T include in the default:
+#  - github_action_status — fetcher requires `[widget.options] repo = "owner/name"`
+#    and can't auto-detect from cwd. Add it in ./.splashboard/dashboard.toml
+#    on a per-repo basis if you want the CI badge.
 
 # ---------------- Widgets ----------------
 
@@ -13,7 +18,7 @@ fetcher = "git_repo_name"
   [widget.render]
   type = "text_ascii"
   style = "figlet"
-  font = "small"
+  font = "standard"
   align = "center"
 
 [[widget]]
@@ -24,10 +29,6 @@ fetcher = "git_status"
 id = "age"
 fetcher = "git_age"
 format = "full"
-
-[[widget]]
-id = "ci"
-fetcher = "github_action_status"
 
 [[widget]]
 id = "commits"
@@ -45,7 +46,7 @@ fetcher = "git_contributors"
 id = "loc"
 fetcher = "code_loc"
   [widget.options]
-  unit = "raw"
+  unit = "loc"
 
 [[widget]]
 id = "todos"
@@ -61,14 +62,14 @@ fetcher = "github_my_prs"
 
   # ---------------- Layout ----------------
 
-# Banner — repo name as figlet
+# Banner — repo name as figlet (standard font, recognisable across widths)
 [[row]]
-height = { length = 5 }
+height = { length = 6 }
   [[row.child]]
   widget = "repo_banner"
   width = { fill = 1 }
 
-# Quick status: branch + age + CI
+# Quick status row — branch info + repo age (no CI by default)
 [[row]]
 height = { length = 3 }
 gap = 2
@@ -84,26 +85,21 @@ gap = 2
   border = "rounded"
   title = " Age "
   title_align = "center"
-  [[row.child]]
-  widget = "ci"
-  width = { fill = 1 }
-  border = "rounded"
-  title = " CI "
-  title_align = "center"
 
-# Activity row — recent commits + contributors
+# Activity row — recent commits + contributors bar chart.
+# Contributors gets 2/5 width so author names aren't clipped.
 [[row]]
-height = { length = 10 }
+height = { length = 9 }
 gap = 2
   [[row.child]]
   widget = "commits"
-  width = { fill = 2 }
+  width = { fill = 3 }
   border = "rounded"
   title = " Recent commits "
   title_align = "center"
   [[row.child]]
   widget = "contributors"
-  width = { fill = 1 }
+  width = { fill = 2 }
   border = "rounded"
   title = " Top contributors "
   title_align = "center"
