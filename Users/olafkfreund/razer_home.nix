@@ -18,6 +18,9 @@ in
 
   # obsidian stays disabled — see #370 (electron-39 build broken upstream)
 
+  # splashboard — terminal splash screen on shell startup + cd. Same as p620.
+  programs.splashboard.enable = true;
+
   # Windsurf theme derived from host variables (razer uses orange-desert variant)
   editor.windsurf.settings = {
     theme = lib.removePrefix "gruvbox-" vars.theme.scheme;

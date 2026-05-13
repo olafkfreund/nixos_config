@@ -137,6 +137,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Rust toolchain overlay — pulls in newer rustc than current nixpkgs
+    # ships. Required by splashboard (needs rustc 1.95+ via sysinfo 0.39).
+    # Consumed only by overlays/custom-packages.nix when wiring splashboard.
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
   outputs =
