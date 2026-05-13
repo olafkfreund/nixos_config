@@ -14,7 +14,7 @@ fetcher = "system_info_host"
   [widget.render]
   type = "text_ascii"
   style = "figlet"
-  font = "small"
+  font = "standard"
   align = "center"
 
 [[widget]]
@@ -76,7 +76,7 @@ fetcher = "github_contributions"
 
 # Banner row — hostname rendered as figlet
 [[row]]
-height = { length = 5 }
+height = { length = 6 }
   [[row.child]]
   widget = "hostname_banner"
   width = { fill = 1 }
