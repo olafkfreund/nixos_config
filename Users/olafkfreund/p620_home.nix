@@ -32,6 +32,11 @@
     debug = false;
   };
 
+  # splashboard — terminal splash screen on shell startup + cd. User config
+  # under ~/.splashboard/ (not nix-managed). Opt out per-shell with
+  # SPLASHBOARD_SILENT=1 or globally with NO_SPLASHBOARD=1.
+  programs.splashboard.enable = true;
+
   # Claude Code statusline with Gruvbox Dark theme
   programs.claude-powerline = {
     enable = true;
