@@ -1,0 +1,153 @@
+# home.dashboard.toml — rendered when splashboard runs outside any git
+# repository. Schema reference:
+# https://splashboard.unhappychoice.com/guides/configuration/
+#
+# Managed by home-manager: edit this file in the repo, not in ~/.splashboard/.
+
+# ---------------- Widgets ----------------
+
+[[widget]]
+id = "hostname_banner"
+fetcher = "system_info_host"
+  [widget.options]
+  kind = "hostname"
+  [widget.render]
+  type = "text_ascii"
+  style = "figlet"
+  font = "small"
+  align = "center"
+
+[[widget]]
+id = "clock"
+fetcher = "clock"
+format = "%A, %d %B %Y · %H:%M"
+
+[[widget]]
+id = "os"
+fetcher = "system_info_host"
+  [widget.options]
+  kind = "os"
+
+[[widget]]
+id = "shell"
+fetcher = "system_info_host"
+  [widget.options]
+  kind = "shell"
+
+[[widget]]
+id = "uptime"
+fetcher = "system_monitor_uptime"
+
+[[widget]]
+id = "load"
+fetcher = "system_monitor_load"
+
+[[widget]]
+id = "memory"
+fetcher = "system_monitor_memory"
+
+[[widget]]
+id = "cpu"
+fetcher = "system_monitor_cpu"
+
+[[widget]]
+id = "moon"
+fetcher = "clock_derived"
+  [widget.options]
+  kind = "moon"
+
+[[widget]]
+id = "gh_prs"
+fetcher = "github_my_prs"
+  [widget.options]
+  limit = 5
+
+[[widget]]
+id = "gh_issues"
+fetcher = "github_assigned_issues"
+  [widget.options]
+  limit = 5
+
+[[widget]]
+id = "gh_heatmap"
+fetcher = "github_contributions"
+
+# ---------------- Layout ----------------
+
+# Banner row — hostname rendered as figlet
+[[row]]
+height = { length = 5 }
+  [[row.child]]
+  widget = "hostname_banner"
+  width = { fill = 1 }
+
+# Clock under the banner
+[[row]]
+height = { length = 1 }
+flex = "center"
+  [[row.child]]
+  widget = "clock"
+  width = { fill = 1 }
+
+# System info row — 4 columns
+[[row]]
+height = { length = 3 }
+gap = 2
+  [[row.child]]
+  widget = "uptime"
+  width = { fill = 1 }
+  border = "rounded"
+  title = " Uptime "
+  title_align = "center"
+  [[row.child]]
+  widget = "load"
+  width = { fill = 1 }
+  border = "rounded"
+  title = " Load "
+  title_align = "center"
+  [[row.child]]
+  widget = "memory"
+  width = { fill = 1 }
+  border = "rounded"
+  title = " Memory "
+  title_align = "center"
+  [[row.child]]
+  widget = "cpu"
+  width = { fill = 1 }
+  border = "rounded"
+  title = " CPU "
+  title_align = "center"
+
+# GitHub row — open PRs + assigned issues side by side
+[[row]]
+height = { length = 8 }
+gap = 2
+  [[row.child]]
+  widget = "gh_prs"
+  width = { fill = 1 }
+  border = "rounded"
+  title = " Open PRs "
+  title_align = "center"
+  [[row.child]]
+  widget = "gh_issues"
+  width = { fill = 1 }
+  border = "rounded"
+  title = " Assigned Issues "
+  title_align = "center"
+
+# Contribution heatmap + moon phase
+[[row]]
+height = { length = 9 }
+gap = 2
+  [[row.child]]
+  widget = "gh_heatmap"
+  width = { fill = 4 }
+  border = "rounded"
+  title = " Contributions "
+  title_align = "center"
+  [[row.child]]
+  widget = "moon"
+  width = { fill = 1 }
+  border = "rounded"
+  title = " Moon "
+  title_align = "center"

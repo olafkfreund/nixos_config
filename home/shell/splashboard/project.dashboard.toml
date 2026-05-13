@@ -1,0 +1,136 @@
+# project.dashboard.toml — rendered when splashboard runs inside a git
+# repository (and the repo has no ./.splashboard/dashboard.toml override).
+# Schema reference:
+# https://splashboard.unhappychoice.com/guides/configuration/
+#
+# Managed by home-manager: edit this file in the repo, not in ~/.splashboard/.
+
+# ---------------- Widgets ----------------
+
+[[widget]]
+id = "repo_banner"
+fetcher = "git_repo_name"
+  [widget.render]
+  type = "text_ascii"
+  style = "figlet"
+  font = "small"
+  align = "center"
+
+[[widget]]
+id = "status"
+fetcher = "git_status"
+
+[[widget]]
+id = "age"
+fetcher = "git_age"
+format = "full"
+
+[[widget]]
+id = "ci"
+fetcher = "github_action_status"
+
+[[widget]]
+id = "commits"
+fetcher = "git_recent_commits"
+  [widget.options]
+  limit = 8
+
+[[widget]]
+id = "contributors"
+fetcher = "git_contributors"
+  [widget.options]
+  limit = 6
+
+[[widget]]
+id = "loc"
+fetcher = "code_loc"
+  [widget.options]
+  unit = "raw"
+
+[[widget]]
+id = "todos"
+fetcher = "code_todos"
+  [widget.options]
+  limit = 6
+
+[[widget]]
+id = "my_prs"
+fetcher = "github_my_prs"
+  [widget.options]
+  limit = 5
+
+  # ---------------- Layout ----------------
+
+# Banner — repo name as figlet
+[[row]]
+height = { length = 5 }
+  [[row.child]]
+  widget = "repo_banner"
+  width = { fill = 1 }
+
+# Quick status: branch + age + CI
+[[row]]
+height = { length = 3 }
+gap = 2
+  [[row.child]]
+  widget = "status"
+  width = { fill = 2 }
+  border = "rounded"
+  title = " Status "
+  title_align = "center"
+  [[row.child]]
+  widget = "age"
+  width = { fill = 1 }
+  border = "rounded"
+  title = " Age "
+  title_align = "center"
+  [[row.child]]
+  widget = "ci"
+  width = { fill = 1 }
+  border = "rounded"
+  title = " CI "
+  title_align = "center"
+
+# Activity row — recent commits + contributors
+[[row]]
+height = { length = 10 }
+gap = 2
+  [[row.child]]
+  widget = "commits"
+  width = { fill = 2 }
+  border = "rounded"
+  title = " Recent commits "
+  title_align = "center"
+  [[row.child]]
+  widget = "contributors"
+  width = { fill = 1 }
+  border = "rounded"
+  title = " Top contributors "
+  title_align = "center"
+
+# Codebase row — LOC by language + TODO hotspots
+[[row]]
+height = { length = 8 }
+gap = 2
+  [[row.child]]
+  widget = "loc"
+  width = { fill = 1 }
+  border = "rounded"
+  title = " Lines of code "
+  title_align = "center"
+  [[row.child]]
+  widget = "todos"
+  width = { fill = 1 }
+  border = "rounded"
+  title = " TODOs "
+  title_align = "center"
+
+# My PRs across all repos (filtered by the GH fetcher)
+[[row]]
+height = { length = 7 }
+  [[row.child]]
+  widget = "my_prs"
+  width = { fill = 1 }
+  border = "rounded"
+  title = " My open PRs "
+  title_align = "center"

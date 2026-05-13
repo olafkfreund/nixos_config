@@ -5,7 +5,7 @@ _: {
     ./bash.nix
     ./zsh.nix
     ./zsh-ai-cmd.nix # AI-powered shell command suggestions
-    ./splashboard.nix # Terminal splash screen on shell startup
+    ./splashboard # Terminal splash screen on shell startup
     ./starship/default.nix
     ./mail/default.nix
     ./fzf/default.nix
