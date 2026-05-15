@@ -1,18 +1,28 @@
-# project_github — per-repo preset. Hero is the repo name as a figlet banner
-# (fetched dynamically via `git_repo_name` → git remote origin), subtitle shows the repo
-# slug / description / license. Header band sits on `bg = "subtle"` so it reads as a
-# distinct panel; body pairs languages / releases, PRs / issues, commits / contributors
-# into 2-column rows so the dashboard reads as a tight grid rather than a tall stack.
+# Per-repo dashboard for this nixos config repo. Overrides the bundled
+# project.dashboard.toml from ~/.splashboard/project.dashboard.toml when
+# splashboard runs inside this directory.
 #
-# Drop this file in as `./.splashboard/dashboard.toml` at a repo root. Nothing here is
-# repo-specific — every widget discovers the repo at fetch time, so the same template
-# produces a tailored dashboard for whichever project the user cd's into.
+# Schema: https://splashboard.unhappychoice.com/guides/configuration/
 #
-# Source: https://splashboard.unhappychoice.com/guides/presets/#project_github--repo-hero--activity-grid
+# Tuned for an infrastructure-as-code repo:
+#   • Hero band on `bg = "subtle"` with the repo name in `ansi_shadow` figlet
+#   • Subtitle: slug / description / license from github_repo
+#   • Inline stats table (stars / forks / watchers / issues) — kept as
+#     grid_table since github_repo_stars emits `entries`, not `badge`
+#   • Status badges row underneath: age, working-tree state, stash count
+#   • Full-width 12-month GitHub contributions heatmap (border = "thick")
+#   • Codebase split: github_languages as a pie chart | largest files ranking
+#   • GitHub work split: open PRs | open issues (border = "top")
+#   • Closer: releases timeline | monthly contributors ranking
 #
-# Trust: on first cd into the repo, splashboard will prompt to trust this file
-# (or `splashboard trust` ahead of time). The hash is stored in ~/.splashboard/trust.toml.
-# Editing this file invalidates the entry — re-run `splashboard trust`.
+# Trust: this dashboard wires Network-class widgets (github_*). On first
+# `cd` into the repo splashboard prompts for trust; run `splashboard trust`
+# ahead of time to skip the prompt. The hash is stored in
+# ~/.splashboard/trust.toml; editing this file invalidates the entry.
+#
+# Contributor dedup is handled at the git layer via ./.mailmap, which
+# collapses four committer identities into one canonical author before
+# `git_contributors` ever sees them.
 
 # ── Widgets ────────────────────────────────────────────────────────
 
@@ -21,20 +31,61 @@ id = "hero"
 fetcher = "git_repo_name"
 render = { type = "text_ascii", style = "figlet", font = "ansi_shadow", color = "panel_title", align = "center" }
 
-# Subtitle: `github_repo` emits TextBlock (slug / description / license on their own rows).
-# `list_plain` renders via ratatui's `Paragraph` which centers each line individually,
-# so short lines like "ISC" still sit under the hero centreline instead of hugging the
-# block's left edge.
+# Subtitle — slug / description / license, three stacked lines via the
+# `text_block` shape that github_repo emits.
 [[widget]]
 id = "subtitle"
 fetcher = "github_repo"
 render = { type = "list_plain", align = "center" }
 
+# Inline repo stats — stars / forks / watchers / open issues, all on one row.
 [[widget]]
 id = "repo_stats"
 fetcher = "github_repo_stars"
 render = { type = "grid_table", layout = "inline", align = "center" }
 
+# Status badges — three pills mirroring the bundled project dashboard so
+# both layouts share visual vocabulary.
+[[widget]]
+id = "badge_age"
+fetcher = "git_age"
+render = { type = "status_badge", shape = "rounded", align = "center" }
+
+[[widget]]
+id = "badge_status"
+fetcher = "git_status"
+render = { type = "status_badge", shape = "rounded", align = "center" }
+
+[[widget]]
+id = "badge_stash"
+fetcher = "git_stash_count"
+render = { type = "status_badge", shape = "rounded", align = "center" }
+
+# Centerpiece — 12-month GitHub contributions heatmap. Uses the
+# GitHub-mirrored view (one square per day, normalized contributor list)
+# rather than the local git_commits_activity so the heatmap reads as
+# "what does this project look like on GitHub" rather than "what's in my
+# local mirror".
+[[widget]]
+id = "contributions"
+fetcher = "github_contributions"
+render = { type = "grid_heatmap", align = "center" }
+
+# Codebase — languages as a pie, largest files as a numbered ranking with
+# medal glyphs on the top three.
+[[widget]]
+id = "languages"
+fetcher = "github_languages"
+render = { type = "chart_pie", legend = "right" }
+
+[[widget]]
+id = "largest_files"
+fetcher = "code_largest_files"
+render = { type = "list_ranking", style = "medal" }
+  [widget.options]
+  limit = 6
+
+# GitHub work — open PRs and open issues for this repo.
 [[widget]]
 id = "repo_prs"
 fetcher = "github_repo_prs"
@@ -45,42 +96,41 @@ id = "repo_issues"
 fetcher = "github_repo_issues"
 render = { type = "list_links", max_items = 5 }
 
-[[widget]]
-id = "commits_heatmap"
-fetcher = "git_commits_activity"
-render = "grid_heatmap"
-
-[[widget]]
-id = "top_contributors"
-fetcher = "git_contributors"
-render = { type = "chart_bar", max_bars = 5 }
-
-[[widget]]
-id = "languages"
-fetcher = "github_languages"
-render = { type = "chart_bar", horizontal = true }
-
+# Closer — releases as a timeline (date column + title), monthly
+# contributors as a ranking. Using github_contributors_monthly (which
+# honors GitHub's normalized contributor identities) for the closer
+# instead of git_contributors so the two contributor visualisations
+# bring different vocabularies — bars on the bundled default, ranking
+# here.
 [[widget]]
 id = "releases"
 fetcher = "github_recent_releases"
-render = { type = "list_links", max_items = 3 }
+render = { type = "list_timeline", bullet = "●", max_items = 5, date_format = "relative" }
 
-# ── Layout ──────────────────────────────────────────────────────────
+[[widget]]
+id = "monthly_contributors"
+fetcher = "github_contributors_monthly"
+render = { type = "list_ranking", style = "medal" }
+  [widget.options]
+  limit = 6
 
+  # ── Layout ─────────────────────────────────────────────────────────
+
+# Hero band — figlet repo name lifted on `bg = "subtle"`. Spacer row above
+# the figlet so the banner breathes inside the band.
 [[row]]
 height = { length = 1 }
 bg = "subtle"
 
-# Hero gets the full band width — `ansi_shadow` figlet is 7 rows tall, with the
-# inner `align = "center"` in the render options recentring the glyphs.
 [[row]]
 height = { length = 7 }
 bg = "subtle"
   [[row.child]]
   widget = "hero"
+  width = { fill = 1 }
 
-# Subtitle: 3 stacked lines (slug / description / license) via github_repo's TextBlock
-# shape. Centered on a 70-cell column inside the band.
+# Subtitle — slug / description / license, centered on a 70-cell column
+# so short lines like "ISC" sit under the hero centreline.
 [[row]]
 height = { length = 3 }
 bg = "subtle"
@@ -89,6 +139,7 @@ flex = "center"
   widget = "subtitle"
   width = { length = 70 }
 
+# Inline stats — stars / forks / watchers / issues table.
 [[row]]
 height = { length = 1 }
 bg = "subtle"
@@ -97,71 +148,98 @@ flex = "center"
   widget = "repo_stats"
   width = { length = 70 }
 
+# Status badges row — still on the hero band, three pills flex-centered.
+[[row]]
+height = { length = 1 }
+bg = "subtle"
+flex = "center"
+gap = 2
+  [[row.child]]
+  widget = "badge_age"
+  width = { length = 22 }
+  [[row.child]]
+  widget = "badge_status"
+  width = { length = 28 }
+  [[row.child]]
+  widget = "badge_stash"
+  width = { length = 18 }
+
 [[row]]
 height = { length = 1 }
 bg = "subtle"
 
+# Break out of the hero band.
 [[row]]
 height = { length = 1 }
 
-# Row 1: languages horizontal bar chart | releases timeline.
+# Centerpiece — GitHub contributions heatmap, full width, thick border.
 [[row]]
-height = { length = 6 }
-flex = "center"
+height = { length = 7 }
+  [[row.child]]
+  widget = "contributions"
+  width = { fill = 1 }
+  border = "thick"
+  title = "  12 months of commits  "
+  title_align = "center"
+
+[[row]]
+height = { length = 1 }
+
+# Codebase split — languages pie | largest files ranking.
+[[row]]
+height = { length = 8 }
 gap = 2
   [[row.child]]
   widget = "languages"
-  width = { length = 34 }
-  border = "top"
+  width = { fill = 1 }
+  border = "rounded"
   title = "  languages  "
   title_align = "center"
   [[row.child]]
-  widget = "releases"
-  width = { length = 34 }
-  border = "top"
-  title = "  released  "
+  widget = "largest_files"
+  width = { fill = 1 }
+  border = "rounded"
+  title = "  largest files  "
   title_align = "center"
 
 [[row]]
 height = { length = 1 }
 
-# Row 2: PRs | issues — two list_plain columns.
+# GitHub work — open PRs | open issues. Top border (lighter than rounded)
+# marks this as the most heavily-loaded data row visually.
 [[row]]
 height = { length = 9 }
-flex = "center"
 gap = 2
   [[row.child]]
   widget = "repo_prs"
-  width = { length = 34 }
+  width = { fill = 1 }
   border = "top"
-  title = "  PRs  "
+  title = "  open PRs  "
   title_align = "center"
   [[row.child]]
   widget = "repo_issues"
-  width = { length = 34 }
+  width = { fill = 1 }
   border = "top"
-  title = "  issues  "
+  title = "  open issues  "
   title_align = "center"
 
 [[row]]
 height = { length = 1 }
 
-# Row 3: commits heatmap | top contributors. Heatmap shows the 52-week contribution
-# grid (repo-level, not viewer-level). Top contributors is a horizontal bar chart
-# capped at 5.
+# Closer — releases timeline | monthly contributors ranking. Rounded
+# borders mirror the codebase split so the bottom echoes the middle.
 [[row]]
-height = { length = 10 }
-flex = "center"
+height = { length = 9 }
 gap = 2
   [[row.child]]
-  widget = "commits_heatmap"
-  width = { length = 34 }
-  border = "top"
-  title = "  commits  "
+  widget = "releases"
+  width = { fill = 1 }
+  border = "rounded"
+  title = "  recent releases  "
   title_align = "center"
   [[row.child]]
-  widget = "top_contributors"
-  width = { length = 34 }
-  border = "top"
-  title = "  top contributors  "
+  widget = "monthly_contributors"
+  width = { fill = 1 }
+  border = "rounded"
+  title = "  monthly contributors  "
   title_align = "center"

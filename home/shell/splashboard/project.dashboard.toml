@@ -1,132 +1,209 @@
 # project.dashboard.toml — rendered when splashboard runs inside a git
-# repository (and the repo has no ./.splashboard/dashboard.toml override).
-# Schema reference:
-# https://splashboard.unhappychoice.com/guides/configuration/
+# repository that has no ./.splashboard/dashboard.toml override.
 #
-# Managed by home-manager: edit this file in the repo, not in ~/.splashboard/.
+# Schema: https://splashboard.unhappychoice.com/guides/configuration/
+# Managed by home-manager — edit this file in the repo, not in ~/.splashboard/.
 #
-# Notes on widgets we deliberately DON'T include in the default:
-#  - github_action_status — fetcher requires `[widget.options] repo = "owner/name"`
-#    and can't auto-detect from cwd. Add it in ./.splashboard/dashboard.toml
-#    on a per-repo basis if you want the CI badge.
+# Design vocabulary (gruvbox_dark theme):
+#   • Hero band on `bg = "subtle"` with chunky `ansi_shadow` figlet repo name
+#   • Status badges strip — git_age / git_status / git_stash_count in one row
+#   • Full-width 12-month activity heatmap as the centerpiece (border = "thick")
+#   • Mixed widget vocabulary: heatmap + chart_pie + list_ranking +
+#     list_timeline + chart_bar + list_links — no two adjacent panels share
+#     the same renderer, so the eye keeps moving
+#   • Border hierarchy: thick (hero anchor) → rounded (body panels) → top
+#     (light sub-sections) → rounded (footer pair)
+#
+# Network widgets gated behind `github_my_prs` will show a 🔒 trust placeholder
+# in untrusted repos; safe widgets always render. Run `splashboard trust` once
+# inside a repo to unlock them.
 
-# ---------------- Widgets ----------------
+# ── Widgets ────────────────────────────────────────────────────────
 
+# Hero — repo name as ansi_shadow figlet, colored panel_title (theme accent).
 [[widget]]
 id = "repo_banner"
 fetcher = "git_repo_name"
-  [widget.render]
-  type = "text_ascii"
-  style = "figlet"
-  font = "standard"
-  align = "center"
+render = { type = "text_ascii", style = "figlet", font = "ansi_shadow", color = "panel_title", align = "center" }
 
+# Status badges — three single-line pills under the hero. All three fetchers
+# emit the `badge` shape natively, so `status_badge` is the canonical renderer.
 [[widget]]
-id = "status"
-fetcher = "git_status"
-
-[[widget]]
-id = "age"
+id = "badge_age"
 fetcher = "git_age"
-format = "full"
+render = { type = "status_badge", shape = "rounded", align = "center" }
 
 [[widget]]
-id = "commits"
-fetcher = "git_recent_commits"
-  [widget.options]
-  limit = 8
+id = "badge_status"
+fetcher = "git_status"
+render = { type = "status_badge", shape = "rounded", align = "center" }
 
 [[widget]]
-id = "contributors"
-fetcher = "git_contributors"
-  [widget.options]
-  limit = 6
+id = "badge_stash"
+fetcher = "git_stash_count"
+render = { type = "status_badge", shape = "rounded", align = "center" }
 
+# Centerpiece — 52-week commit heatmap. Renders the repo's commit cadence as a
+# year-at-a-glance grid; the highest-impact visual element on the dashboard.
 [[widget]]
-id = "loc"
+id = "activity"
+fetcher = "git_commits_activity"
+render = { type = "grid_heatmap", align = "center" }
+
+# Codebase split — LOC by language as a pie chart (more striking than yet
+# another bar chart) | largest files as a numbered ranking.
+[[widget]]
+id = "loc_pie"
 fetcher = "code_loc"
+render = { type = "chart_pie", legend = "right" }
   [widget.options]
   unit = "loc"
 
 [[widget]]
-id = "todos"
-fetcher = "code_todos"
+id = "largest_files"
+fetcher = "code_largest_files"
+render = { type = "list_ranking", style = "number" }
   [widget.options]
   limit = 6
+
+# Activity split — recent commits as a real timeline (time column + bullet) |
+# top contributors as a horizontal bar chart. Contributors honors the repo's
+# .mailmap, so a single developer with multiple git identities collapses to
+# one bar instead of two-three identical "ola | ola" entries.
+[[widget]]
+id = "commits"
+fetcher = "git_recent_commits"
+render = { type = "list_timeline", bullet = "●", max_items = 6, date_format = "relative" }
+
+[[widget]]
+id = "contributors"
+fetcher = "git_contributors"
+render = { type = "chart_bar", horizontal = true }
+  [widget.options]
+  limit = 5
+
+# Footer pair — TODO hotspots | my open PRs across all repos (GitHub-scoped).
+[[widget]]
+id = "todos"
+fetcher = "code_todos"
+render = { type = "list_links", max_items = 6 }
 
 [[widget]]
 id = "my_prs"
 fetcher = "github_my_prs"
-  [widget.options]
-  limit = 5
+render = { type = "list_links", max_items = 5 }
 
-  # ---------------- Layout ----------------
+# ── Layout ─────────────────────────────────────────────────────────
 
-# Banner — repo name as figlet (standard font, recognisable across widths)
+# Hero band — lifted on bg=subtle. Spacer row above the figlet so the banner
+# breathes inside the band rather than hugging the terminal edge.
 [[row]]
-height = { length = 6 }
+height = { length = 1 }
+bg = "subtle"
+
+[[row]]
+height = { length = 7 }
+bg = "subtle"
   [[row.child]]
   widget = "repo_banner"
   width = { fill = 1 }
 
-# Quick status row — branch info + repo age (no CI by default)
+# Status badge strip — three pills, flex-centered, still on the subtle band so
+# they read as part of the hero unit. Each badge sized to fit a typical label
+# ("1d 12h" / "main · clean" / "0 stashes") plus the rounded ( … ) frame.
 [[row]]
-height = { length = 3 }
+height = { length = 1 }
+bg = "subtle"
+flex = "center"
 gap = 2
   [[row.child]]
-  widget = "status"
-  width = { fill = 2 }
-  border = "rounded"
-  title = " Status "
-  title_align = "center"
+  widget = "badge_age"
+  width = { length = 22 }
   [[row.child]]
-  widget = "age"
+  widget = "badge_status"
+  width = { length = 28 }
+  [[row.child]]
+  widget = "badge_stash"
+  width = { length = 18 }
+
+[[row]]
+height = { length = 1 }
+bg = "subtle"
+
+# Clean break out of the hero band.
+[[row]]
+height = { length = 1 }
+
+# Activity heatmap centerpiece — full width, thick border anchors the dashboard.
+[[row]]
+height = { length = 7 }
+  [[row.child]]
+  widget = "activity"
   width = { fill = 1 }
-  border = "rounded"
-  title = " Age "
+  border = "thick"
+  title = "  activity · 12 months  "
   title_align = "center"
 
-# Activity row — recent commits + contributors bar chart.
-# Contributors gets 2/5 width so author names aren't clipped.
+[[row]]
+height = { length = 1 }
+
+# Codebase split — pie chart (LOC) | numbered ranking (largest files).
+[[row]]
+height = { length = 8 }
+gap = 2
+  [[row.child]]
+  widget = "loc_pie"
+  width = { fill = 1 }
+  border = "rounded"
+  title = "  languages  "
+  title_align = "center"
+  [[row.child]]
+  widget = "largest_files"
+  width = { fill = 1 }
+  border = "rounded"
+  title = "  largest files  "
+  title_align = "center"
+
+[[row]]
+height = { length = 1 }
+
+# Activity split — commits timeline (3/5 width) | contributors bars (2/5).
+# Commits gets more room because timeline entries have a time column + title
+# that benefit from horizontal space; contributors gets less because the bars
+# are horizontal and read cleanly at narrower widths.
 [[row]]
 height = { length = 9 }
 gap = 2
   [[row.child]]
   widget = "commits"
   width = { fill = 3 }
-  border = "rounded"
-  title = " Recent commits "
+  border = "top"
+  title = "  recent commits  "
   title_align = "center"
   [[row.child]]
   widget = "contributors"
   width = { fill = 2 }
-  border = "rounded"
-  title = " Top contributors "
+  border = "top"
+  title = "  top contributors  "
   title_align = "center"
 
-# Codebase row — LOC by language + TODO hotspots
 [[row]]
-height = { length = 8 }
+height = { length = 1 }
+
+# Footer pair — TODOs | my open PRs. Rounded borders mirror the codebase split
+# so the bottom of the dashboard echoes its top half.
+[[row]]
+height = { length = 7 }
 gap = 2
-  [[row.child]]
-  widget = "loc"
-  width = { fill = 1 }
-  border = "rounded"
-  title = " Lines of code "
-  title_align = "center"
   [[row.child]]
   widget = "todos"
   width = { fill = 1 }
   border = "rounded"
-  title = " TODOs "
+  title = "  TODOs  "
   title_align = "center"
-
-# My PRs across all repos (filtered by the GH fetcher)
-[[row]]
-height = { length = 7 }
   [[row.child]]
   widget = "my_prs"
   width = { fill = 1 }
   border = "rounded"
-  title = " My open PRs "
+  title = "  my open PRs  "
   title_align = "center"
