@@ -51,6 +51,9 @@ nd = "nd"
 # AER is the PCIe Advanced Error Reporting acronym
 AER = "AER"
 
+# ratatui is the Rust TUI library splashboard is built on
+ratatui = "ratatui"
+
 [default.extend-identifiers]
 # Santa Claus - not "Clause"
 Claus = "Claus"

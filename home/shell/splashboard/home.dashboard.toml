@@ -19,7 +19,7 @@
 id = "hero_date"
 fetcher = "clock"
 format = "%a %e %b"
-render = { type = "text_ascii", style = "blocks", pixel_size = "quadrant", color = "panel_title", align = "center" }
+render = { type = "text_ascii", style = "blocks", pixel_size = "quadrant", color = "accent", align = "center" }
 
 # Footer flourish — daily fortune. `length = "auto"` row sizes itself to whatever cookie was
 # drawn so 1-line fortunes hug the closing line and 4-line ones get the room they need.
@@ -272,11 +272,14 @@ height = { length = 1 }
 [[row]]
 # `height = "auto"` — text_plain's `natural_height` returns the TextBlock line count, so
 # 1-line fortunes hug the closing line and multi-line cookies get the room they need.
+# `border = "top"` adds a closing seam under the body grid so the fortune reads as a
+# deliberate footer flourish rather than a stray line of text.
 height = "auto"
 flex = "center"
   [[row.child]]
   widget = "fortune"
   width = { length = 80 }
+  border = "top"
 
 [[row]]
 height = { length = 1 }
