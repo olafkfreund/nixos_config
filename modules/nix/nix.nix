@@ -38,15 +38,17 @@
     fallback = true; # Build locally if substitute not available
 
     # Multi-tier binary cache configuration
-    # Priority order: NixOS official → Nix community
+    # Priority order: NixOS official → Nix community → Garnix (upstream openclaw)
     substituters = [
       "https://cache.nixos.org" # Official NixOS cache (always available)
       "https://nix-community.cachix.org" # Community cache
+      "https://cache.garnix.io" # Upstream openclaw / nix-openclaw binary cache
     ];
 
     trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" # Official NixOS
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" # Nix community
+      "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=" # Garnix
     ];
 
     # Optional: Add Cachix personal cache (free tier: 5GB storage, unlimited downloads)
