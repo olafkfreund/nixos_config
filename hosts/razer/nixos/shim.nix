@@ -76,6 +76,11 @@ in
     system.build.installBootLoader = lib.mkForce (pkgs.writeShellScript "install-bootloader-with-shim" ''
       set -euo pipefail
 
+      # `nixos-rebuild` invokes us via `systemd-run --pipe` with `env -i`, so
+      # PATH is empty and bare `cp` / `install` fail with "command not found".
+      # Inject coreutils explicitly.
+      export PATH=${lib.makeBinPath [ pkgs.coreutils ]}:''${PATH:-}
+
       # Step 1: lanzaboote's standard install. Writes signed BOOTX64.EFI
       # (= lanzaboote-stub) and per-generation UKIs in /EFI/Linux/.
       #
