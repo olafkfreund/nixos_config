@@ -249,7 +249,9 @@
       "Bash(* --dry-run)",
       "Bash(* test)",
       "Bash(systemctl status *)",
-      "Bash(journalctl -u *)"
+      "Bash(journalctl -u *)",
+      "Bash(sudo nix-env *)",
+      "Bash(sudo mokutil *)"
     ],
     "additionalDirectories": [
       "/"
