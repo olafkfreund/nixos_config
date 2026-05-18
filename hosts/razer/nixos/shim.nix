@@ -21,6 +21,19 @@
 #
 # Reference: working setup posted by user "Mareo" on
 # https://github.com/nix-community/lanzaboote/issues/165
+#
+# ─── Recovery: MokManager re-prompts to enrol keys on boot ───
+# Means shim's MokList lost /var/lib/sbctl/keys/db/db.cer (firmware NVRAM
+# cleared by BIOS reset, CMOS battery pull, or vendor firmware update).
+# Operator action, not a config change. Run on this host:
+#
+#   sudo mokutil --revoke-import 2>/dev/null; sudo mokutil --list-new   # empty
+#   printf 'enrolnow\nenrolnow\n' | sudo mokutil --import /var/lib/sbctl/keys/db/db.cer
+#   sudo reboot
+#   # MokManager: Enroll MOK → View key 0 (verify CN=Database Key,
+#   #   SHA-1 6a:c5:0c:66:ee:ee:5f:af:f8:b0:0a:42:38:b8:aa:5c:7c:90:83:02)
+#   #   → Continue → Yes → password "enrolnow" → Reboot
+#   sudo mokutil --list-enrolled | grep "CN=Database Key"   # must print cert
 let
   # Ubuntu's shim-signed package — ships shim signed by both Microsoft (via the
   # 3rd Party UEFI CA — what our firmware trusts) and Canonical, plus mmx64.efi
