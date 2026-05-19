@@ -105,6 +105,7 @@ in
     ./ghostty
     ./wezterm
     ./warp
+    ./wave
   ];
 
   # Backward compatibility options for individual terminals
