@@ -1,59 +1,60 @@
-{
-  lib,
-  stdenv,
-  fetchurl,
-  buildFHSEnv,
-  autoPatchelfHook,
-  makeDesktopItem,
-  copyDesktopItems,
-  makeWrapper,
-  writeShellScript,
-  asar,
-  bash,
-  alsa-lib,
-  at-spi2-atk,
-  at-spi2-core,
-  atk,
-  cairo,
-  chromium,
-  cups,
-  dbus,
-  expat,
-  glib,
-  gtk3,
-  libdrm,
-  libgbm,
-  libglvnd,
-  libnotify,
-  libsecret,
-  libuuid,
-  libxkbcommon,
-  nspr,
-  nss,
-  pango,
-  systemdLibs,
-  vulkan-loader,
-  libx11,
-  libxscrnsaver,
-  libxcomposite,
-  libxcursor,
-  libxdamage,
-  libxext,
-  libxfixes,
-  libxi,
-  libxrandr,
-  libxrender,
-  libxtst,
-  libxcb,
-  libxshmfence,
-  libxkbfile,
-  zlib,
-  useFHS ? true,
-  useSystemChromeProfile ? true,
-  google-chrome ? null,
-  extraBwrapArgs ? [],
-  srcOverride ? null,
-}: let
+{ lib
+, stdenv
+, fetchurl
+, buildFHSEnv
+, autoPatchelfHook
+, makeDesktopItem
+, copyDesktopItems
+, makeWrapper
+, writeShellScript
+, asar
+, bash
+, alsa-lib
+, at-spi2-atk
+, at-spi2-core
+, atk
+, cairo
+, chromium
+, cups
+, dbus
+, expat
+, glib
+, gtk3
+, libdrm
+, libgbm
+, libglvnd
+, libnotify
+, libsecret
+, libuuid
+, libxkbcommon
+, nspr
+, nss
+, pango
+, systemdLibs
+, vulkan-loader
+, libx11
+, libxscrnsaver
+, libxcomposite
+, libxcursor
+, libxdamage
+, libxext
+, libxfixes
+, libxi
+, libxrandr
+, libxrender
+, libxtst
+, libxcb
+, libxshmfence
+, libxkbfile
+, zlib
+, useFHS ? true
+, useSystemChromeProfile ? true
+, google-chrome ? null
+, extraBwrapArgs ? [ ]
+, srcOverride ? null
+,
+}:
+let
   pname = "google-antigravity";
   # Antigravity 2.0.0 — Google's 2026-05-19 major release. Vendored locally
   # because upstream jacopone/antigravity-nix is still on 1.23.2 and 2.0
@@ -171,7 +172,7 @@
     comment = "Next-generation agentic IDE";
     exec = "antigravity --enable-features=UseOzonePlatform,WaylandWindowDecorations --ozone-platform-hint=auto --enable-wayland-ime=true --wayland-text-input-version=3 %U";
     icon = "antigravity";
-    categories = ["Development" "IDE"];
+    categories = [ "Development" "IDE" ];
     startupNotify = true;
     startupWMClass = "Antigravity";
     mimeTypes = [
@@ -184,7 +185,7 @@
     homepage = "https://antigravity.google";
     license = licenses.unfree;
     platforms = platforms.linux;
-    maintainers = [];
+    maintainers = [ ];
     mainProgram = "antigravity";
   };
 
@@ -200,7 +201,7 @@
     dontPatchELF = true;
     dontStrip = true;
 
-    nativeBuildInputs = [asar];
+    nativeBuildInputs = [ asar ];
 
     # 2.0: standard Electron asar layout, no sudo-prompt to patch.
 
@@ -251,9 +252,9 @@
     dontUnpack = true;
     dontBuild = true;
 
-    nativeBuildInputs = [copyDesktopItems asar];
+    nativeBuildInputs = [ copyDesktopItems asar ];
 
-    desktopItems = [desktopItem];
+    desktopItems = [ desktopItem ];
 
     installPhase = ''
       runHook preInstall
@@ -310,7 +311,7 @@
     # layout (resources/app.asar + resources/app.asar.unpacked/). No patching
     # required — Electron handles the layout natively at runtime.
 
-    desktopItems = [desktopItem];
+    desktopItems = [ desktopItem ];
 
     installPhase = ''
       runHook preInstall
@@ -357,6 +358,6 @@
     '';
   };
 in
-  if useFHS
-  then fhs-package
-  else no-fhs-package
+if useFHS
+then fhs-package
+else no-fhs-package
