@@ -20,6 +20,7 @@ in
       kitty.enable = cfg.terminals.kitty;
       ghostty.enable = cfg.terminals.ghostty;
       warp.enable = cfg.terminals.warp;
+      wave.enable = cfg.terminals.wave;
     })
 
     # Editor implementations

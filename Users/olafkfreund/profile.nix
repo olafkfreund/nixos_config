@@ -61,6 +61,7 @@ in
       kitty = mkDefault false;
       ghostty = mkDefault false;
       warp = true;
+      wave = true;
     };
 
     editors = {

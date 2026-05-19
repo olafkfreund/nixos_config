@@ -9,6 +9,7 @@ let inherit (lib) mkEnableOption; in {
       kitty = mkEnableOption "Enable Kitty terminal";
       ghostty = mkEnableOption "Enable Ghostty terminal";
       warp = mkEnableOption "Enable Warp terminal";
+      wave = mkEnableOption "Enable Wave terminal";
     };
 
     editors = {
