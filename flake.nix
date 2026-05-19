@@ -72,13 +72,21 @@
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
     zjstatus.url = "github:dj95/zjstatus";
-    # = tag v2.0.6+claude1.5354.0 (2026-05-01). Bumped from ≈v2.0.5 for
-    # X-button-to-tray (#451), persistent autostart toggle (#450), tray
-    # icon in-place updates (#515), and window visibility fix (#496).
-    # Stayed on v2.0.6 (not v2.0.7+) to avoid the frame-fix-wrapper.js
-    # syslog flood (upstream #582). claude binary unchanged at 1.5354.0.
+    # = main HEAD ba2846c8 (2026-05-19), release tag v2.0.12+claude1.7196.3.
+    # Bumped from v2.0.6 (53 commits, 11 releases). Picks up:
+    #   - #581 fix(nix): make electron binary executable (Nix-specific)
+    #   - #583/#585 GPU FATAL mitigations (CLAUDE_DISABLE_GPU=1 opt-in;
+    #     electron pinned to 41.5.0 to match app.asar ABI)
+    #   - #555 cowork.sh defensive lastIndexOf
+    #   - _svcLaunched cowork daemon recovery (closed #408, #236)
+    #   - claude binary 1.5354.0 → 1.7196.3 (~1842-version advance)
+    # Held-back blocker #582 (syslog flood) turned out to be Ubuntu
+    # apport-specific (no apport on NixOS), so safe to leave behind.
+    # Known caveat carried in: #605 (Electron holds systemd-inhibit
+    # forever, blocking suspend while app runs). Razer-relevant.
+    # Workaround: close claude-desktop entirely to release inhibitor.
     # Bump via /update-claude-code.
-    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/c973f4922bac6b5b5b4d07929ee4a98a69cb71a9";
+    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/ba2846c8b3e99ac35563e6c2184dd999b19bbc95";
 
     # Terminal YouTube browser
     yt-x = {
