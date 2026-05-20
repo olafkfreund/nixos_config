@@ -88,6 +88,16 @@
     # Bump via /update-claude-code.
     claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/ba2846c8b3e99ac35563e6c2184dd999b19bbc95";
 
+    # Claude Code skill catalogue (borghei). flake = false because it's a
+    # plain markdown/assets catalogue, not a Nix flake. We symlink one
+    # subdirectory (engineering/claude-code-mastery) into ~/.claude/skills/
+    # via home/development/claude-code-skills. Bump with `nix flake update
+    # claude-skills-borghei` to pull in upstream skill updates.
+    claude-skills-borghei = {
+      url = "github:borghei/Claude-Skills";
+      flake = false;
+    };
+
     # Terminal YouTube browser
     yt-x = {
       url = "github:Benexl/yt-x";
