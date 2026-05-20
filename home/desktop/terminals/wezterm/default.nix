@@ -173,9 +173,18 @@ in
                           os.getenv("NIXOS_WAYLAND") == "1"
 
           if wayland then
-            config.enable_wayland = true
+            -- Force XWayland instead of native Wayland. GNOME Mutter does
+            -- not implement xdg-decoration (no server-side decorations on
+            -- Wayland), and WezTerm's client-side decoration renderer is
+            -- broken on Mutter — issues wezterm/wezterm#4962, #7134, #1659.
+            -- Result: with `enable_wayland = true`, the window has NO
+            -- titlebar/borders in GNOME no matter what `window_decorations`
+            -- is set to. XWayland delegates decorations to GNOME's X11 path
+            -- which works correctly. Negligible perf cost for a terminal.
+            config.enable_wayland = false
 
-            -- Wayland-specific optimizations
+            -- Wayland-specific optimizations (still applied under XWayland;
+            -- WebGpu works fine on X11)
             config.front_end = "WebGpu"  -- Better performance on modern systems with Wayland
             -- Note: WezTerm has no `enable_wayland_ime` option (it errors
             -- at startup with "not a valid Config field"). IME on Wayland
