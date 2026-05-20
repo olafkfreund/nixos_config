@@ -30,6 +30,18 @@ stdenvNoCC.mkDerivation {
   dontBuild = true;
   dontConfigure = true;
 
+  # The upstream bin/tmux-palette.sh runs `bun src/cli.ts` in two places.
+  # The first call inherits PATH from the wrapper, so it works. The second
+  # call is passed as a string to `tmux display-popup -E "... exec bun ..."`
+  # — tmux spawns a FRESH shell to execute that string, which does NOT
+  # inherit our wrapper's PATH augmentation, so `bun` is not found and the
+  # popup exits 127. Substitute the bare `bun` token with the absolute path.
+  postPatch = ''
+    substituteInPlace bin/tmux-palette.sh \
+      --replace-fail "exec bun " "exec ${bun}/bin/bun " \
+      --replace-fail "MEASURE=\"\$(bun " "MEASURE=\"\$(${bun}/bin/bun "
+  '';
+
   installPhase = ''
     runHook preInstall
 
@@ -37,8 +49,9 @@ stdenvNoCC.mkDerivation {
     cp -r ./. $out/share/tmux-palette/
 
     # The shell entry already calculates DIR relative to itself, so it
-    # works from any location as long as the layout is preserved. We just
-    # need `bun` on PATH at runtime.
+    # works from any location as long as the layout is preserved.
+    # Wrapper kept (despite postPatch) so anyone calling tmux-palette
+    # directly from a shell without bun on PATH still works.
     makeWrapper $out/share/tmux-palette/bin/tmux-palette.sh $out/bin/tmux-palette \
       --prefix PATH : ${lib.makeBinPath [ bun ]}
 
