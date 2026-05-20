@@ -150,11 +150,10 @@ in
 
   # Packages common to all interactive (non-headless) hosts
   home.packages = [
-    # Antigravity 2.0.0 — local fork in pkgs/antigravity-2x/ while
-    # upstream jacopone/antigravity-nix is still on 1.23.2. Switch back to
-    # `antigravity-nix.packages.${...}.google-antigravity-no-fhs` once upstream
-    # handles the 2.0 layout. See pkgs/default.nix for the rationale.
-    pkgs.customPkgs.antigravity-2x
+    # Antigravity IDE 2.0.1 — Google's rebranded Antigravity Desktop.
+    # Local derivation in pkgs/antigravity-ide/. See pkgs/default.nix
+    # for the rationale (upstream antigravity-nix is still on 1.x).
+    pkgs.customPkgs.antigravity-ide
     pkgs.customPkgs.kosli-cli
     pkgs.customPkgs.aurynk
     pkgs.wayfarer

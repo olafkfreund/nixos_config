@@ -38,11 +38,11 @@
   # Claude Code native binary (alternative to npm-based package)
   claude-code-native = pkgs.callPackage ./claude-code-native { };
 
-  # Antigravity 2.x — local fork of jacopone/antigravity-nix until upstream
-  # handles Google's 2026-05-19 v2.0 release (new CDN path, new asar layout,
-  # different launcher location, icon now packed inside app.asar). Revert to
-  # the antigravity-nix flake input once upstream catches up.
-  antigravity-2x = pkgs.callPackage ./antigravity-2x/package.nix { useFHS = false; };
+  # Antigravity IDE (2.0.1+) — Google's rebranded Antigravity Desktop.
+  # Standalone derivation in pkgs/antigravity-ide/ because upstream
+  # jacopone/antigravity-nix is still on 1.x and 2.0.x changed everything
+  # (URL, layout, binary location, product name). Pinned to 2.0.1-4861014…
+  antigravity-ide = pkgs.callPackage ./antigravity-ide/package.nix { };
 
   # FlyCrys — GTK4-native GUI for Claude Code (Rust). Not in nixpkgs yet;
   # custom buildRustPackage derivation. Wraps the local `claude` binary.
