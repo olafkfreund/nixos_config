@@ -318,12 +318,34 @@ in
       '';
     };
 
-    # tmux-palette active theme — match the rest of our stylix gruvbox
-    # config. Slug `gruvbox-dark` is one of the 12 bundled themes
-    # (src/themes-bundled.ts). Read by the palette on each invocation;
-    # no tmux reload needed after `nh switch`.
+    # tmux-palette active theme — full color override sourced from our
+    # active stylix base16 scheme, so the palette popup is BYTE-IDENTICAL
+    # to the rest of our terminal/UI gruvbox theming (not just close-ish
+    # to the tmux-palette-bundled gruvbox-dark, which uses slightly
+    # different panel/selected/muted/accent values).
+    #
+    # Schema discovered from src/theme.ts:
+    #   { name: "<slug>" }              → look up bundled/user slug
+    #   { bg, panel, selected, fg, muted, accent }  → full Theme override
+    #   partial Theme                   → merged onto default theme
+    # Note: the field is `name`, NOT `theme` — earlier `theme.json` of
+    # `{ "theme": "gruvbox-dark" }` was silently ignored (treated as a
+    # Partial<Theme>) and crashed the palette with exit 1.
+    #
+    # base16 → tmux-palette Theme mapping:
+    #   bg       = base00 (default background)
+    #   panel    = base01 (lighter background)
+    #   selected = base02 (selection / line-highlight)
+    #   fg       = base05 (default foreground)
+    #   muted    = base03 (comments / dim)
+    #   accent   = base0B (green — gruvbox's classic positive accent)
     xdg.configFile."tmux-palette/theme.json".text = builtins.toJSON {
-      theme = "gruvbox-dark";
+      bg = "#${colors.base00}";
+      panel = "#${colors.base01}";
+      selected = "#${colors.base02}";
+      fg = "#${colors.base05}";
+      muted = "#${colors.base03}";
+      accent = "#${colors.base0B}";
     };
 
     # tmux-palette AI launcher: triggered by the M-a bind defined above.
