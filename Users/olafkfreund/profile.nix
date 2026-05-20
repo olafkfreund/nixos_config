@@ -160,6 +160,11 @@ in
     # FlyCrys — GTK4-native Claude Code GUI. Wraps the local `claude`
     # binary (installed via programs.claude-code.enable in home/default.nix).
     pkgs.customPkgs.flycrys
+
+    # Google Antigravity Python SDK — Python env with `google.antigravity`
+    # importable for building Gemini-powered AI agents. See
+    # pkgs/google-antigravity-py/ for the platform-wheel install.
+    pkgs.customPkgs.google-antigravity-py
   ];
 
   # Windsurf LSP/formatter packages (identical across interactive hosts)
