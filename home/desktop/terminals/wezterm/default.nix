@@ -52,7 +52,10 @@ in
         config.hide_tab_bar_if_only_one_tab = true
         config.use_fancy_tab_bar = false
         config.tab_bar_at_bottom = false
-        config.window_decorations = "RESIZE"
+        -- "TITLE | RESIZE" gives a GNOME-friendly window: titlebar with
+        -- min/max/close buttons plus resize edges. Previously "RESIZE"
+        -- alone hid the titlebar entirely (no way to move/close via WM).
+        config.window_decorations = "TITLE | RESIZE"
 
         -- Behavior
         config.scrollback_lines = 10000
@@ -174,13 +177,17 @@ in
 
             -- Wayland-specific optimizations
             config.front_end = "WebGpu"  -- Better performance on modern systems with Wayland
-            config.enable_wayland_ime = true  -- Improved input method support
+            -- Note: WezTerm has no `enable_wayland_ime` option (it errors
+            -- at startup with "not a valid Config field"). IME on Wayland
+            -- is automatic via the text-input-v3 protocol — no toggle needed.
 
             -- Fix clipboard issues on Wayland
             config.selection_word_boundary = " \t\n{}[]()\"'`,;:"
 
-            -- Use native Wayland decorations when available
-            config.window_decorations = "RESIZE"
+            -- Use native Wayland decorations (GNOME-friendly: titlebar
+            -- with WM controls + resize edges). See note on the top-level
+            -- window_decorations setting above.
+            config.window_decorations = "TITLE | RESIZE"
 
             -- DPI handling (let Wayland handle this)
             config.adjust_window_size_when_changing_font_size = false

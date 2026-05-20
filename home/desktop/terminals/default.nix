@@ -193,9 +193,12 @@ in
           repaint_delay = cfg.performance.repaintDelay;
           sync_to_monitor = cfg.performance.enableVsync;
 
-          # Appearance
+          # Appearance — keep native GNOME window decorations so the window
+          # has a titlebar + min/max/close buttons. Previously this was
+          # `true` which left Kitty borderless and hard to manage in GNOME.
           window_margin_width = 8;
-          hide_window_decorations = true;
+          hide_window_decorations = false;
+          placement_strategy = "center";
           background_opacity = mkDefault (
             if cfg.features.transparency
             then 0.95
