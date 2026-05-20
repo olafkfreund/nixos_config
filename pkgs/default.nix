@@ -43,4 +43,8 @@
   # different launcher location, icon now packed inside app.asar). Revert to
   # the antigravity-nix flake input once upstream catches up.
   antigravity-2x = pkgs.callPackage ./antigravity-2x/package.nix { useFHS = false; };
+
+  # FlyCrys — GTK4-native GUI for Claude Code (Rust). Not in nixpkgs yet;
+  # custom buildRustPackage derivation. Wraps the local `claude` binary.
+  flycrys = pkgs.callPackage ./flycrys { };
 }

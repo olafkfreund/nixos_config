@@ -158,6 +158,9 @@ in
     pkgs.customPkgs.kosli-cli
     pkgs.customPkgs.aurynk
     pkgs.wayfarer
+    # FlyCrys — GTK4-native Claude Code GUI. Wraps the local `claude`
+    # binary (installed via programs.claude-code.enable in home/default.nix).
+    pkgs.customPkgs.flycrys
   ];
 
   # Windsurf LSP/formatter packages (identical across interactive hosts)
