@@ -130,6 +130,22 @@
         "type": "github"
       }
     },
+    "claude-skills-borghei": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1779100952,
+        "narHash": "sha256-+4gsVag/OG8pNYUad79p5GvVAAcyavWaXKHp/ZJfr+w=",
+        "owner": "borghei",
+        "repo": "Claude-Skills",
+        "rev": "b3f2d35b273bfc9621122c45e034c214ddd06f9e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "borghei",
+        "repo": "Claude-Skills",
+        "type": "github"
+      }
+    },
     "cosmic-applet-spotify": {
       "inputs": {
         "flake-utils": "flake-utils_2",
@@ -1505,6 +1521,7 @@
         "agenix": "agenix",
         "antigravity-nix": "antigravity-nix",
         "claude-desktop-linux": "claude-desktop-linux",
+        "claude-skills-borghei": "claude-skills-borghei",
         "cosmic-applet-spotify": "cosmic-applet-spotify",
         "cosmic-ext-connect": "cosmic-ext-connect",
         "cosmic-ext-radio-applet": "cosmic-ext-radio-applet",

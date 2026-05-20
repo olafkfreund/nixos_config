@@ -16,6 +16,7 @@ _: {
     ./codex-cli.nix
     ./claude-desktop
     ./claude-powerline.nix
+    ./claude-code-skills
 
     # Version control and CI/CD
     ./gitlab/default.nix
@@ -35,4 +36,9 @@ _: {
     # Agent skills management (vercel-labs/skills CLI)
     ./skills-cli.nix
   ];
+
+  # Always-on declarative skill: claude-code-mastery from borghei/Claude-Skills.
+  # Symlinks into ~/.claude/skills/, complementing the ~18 imperatively
+  # installed catalogues already there.
+  programs.claude-code-skills.enable = true;
 }
