@@ -9,7 +9,7 @@ let
 in
 {
   imports = [
-    ./gemini-cli.nix
+    ./antigravity-cli.nix
     ./providers/default.nix
     ./mcp-servers.nix
   ];

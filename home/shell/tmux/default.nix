@@ -373,11 +373,11 @@ in
           action.tmux = "send-keys 'claude agents --dangerously-skip-permissions' Enter";
         }
         {
-          icon = "💎";
+          icon = "🛸";
           iconColor = "#22aaff";
-          title = "Gemini CLI";
-          subtitle = "Google AI CLI";
-          action.tmux = "send-keys 'gemini' Enter";
+          title = "Antigravity CLI";
+          subtitle = "Google AI CLI (agy — replaced Gemini CLI on 2026-05-20)";
+          action.tmux = "send-keys 'agy' Enter";
         }
       ]);
     };

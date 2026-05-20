@@ -140,7 +140,7 @@ in
 
     ai = {
       enable = true;
-      gemini-cli = true;
+      antigravity-cli = true;
       claude-desktop = false; # Disable GUI app on media server
     };
 

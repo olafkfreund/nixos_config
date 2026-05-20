@@ -10,7 +10,7 @@
   whatsapp-mcp = pkgs.callPackage ./whatsapp-mcp { };
   mpris-album-art = pkgs.callPackage ./mpris-album-art { };
   weather-popup = pkgs.callPackage ./weather-popup { };
-  # gemini-cli provided via flake overlay (version 0.26.0)
+  # gemini-cli removed in #560 (replaced by pkgs.customPkgs.antigravity-cli)
   # Claude Desktop - native Linux build from k3d3/claude-desktop-linux-flake (see flake.nix overlay)
   claude-desktop = pkgs.claude-desktop-linux;
   neuwaita-icon-theme = pkgs.callPackage ./neuwaita-icon-theme { };
@@ -43,6 +43,11 @@
   # jacopone/antigravity-nix is still on 1.x and 2.0.x changed everything
   # (URL, layout, binary location, product name). Pinned to 2.0.1-4861014…
   antigravity-ide = pkgs.callPackage ./antigravity-ide/package.nix { };
+
+  # Antigravity CLI (agy) — Gemini CLI's successor per Google's
+  # 2026-05-20 transition. Single Go binary fetched from Google's manifest
+  # URL. Replaces the npm-based gemini-cli package we used until #560.
+  antigravity-cli = pkgs.callPackage ./antigravity-cli { };
 
   # FlyCrys — GTK4-native GUI for Claude Code (Rust). Not in nixpkgs yet;
   # custom buildRustPackage derivation. Wraps the local `claude` binary.

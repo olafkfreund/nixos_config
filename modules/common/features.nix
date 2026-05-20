@@ -49,7 +49,7 @@ let inherit (lib) mkOption mkEnableOption types; in {
 
     ai = {
       enable = mkEnableOption "Enable AI tools";
-      gemini-cli = mkEnableOption "Enable Google Gemini CLI";
+      antigravity-cli = mkEnableOption "Enable Google Antigravity CLI (agy) — replaces gemini-cli (EOL 2026-06-18)";
       claude-desktop = mkOption {
         type = types.bool;
         default = true;
