@@ -30,6 +30,16 @@
     package = pkgs.claude-code-native;
   };
 
+  # Enable Claude Code "Agent Teams" — experimental feature that lets one
+  # Claude session spawn a team of coordinated teammates (separate sessions
+  # with their own context windows that can talk to each other).
+  # Requires Claude Code v2.1.32+ (we're on 2.1.145). Per the docs, setting
+  # this env var or putting it under "env" in settings.json both work; the
+  # env-var route lets ~/.claude/settings.json remain runtime-mutable for
+  # plugin/theme changes via /config.
+  # https://code.claude.com/docs/en/agent-teams
+  home.sessionVariables.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+
   home.packages = [
     inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.opencode
     (pkgs.callPackage ../pkgs/weather-popup/default.nix { })
