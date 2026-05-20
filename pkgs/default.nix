@@ -49,6 +49,13 @@
   # URL. Replaces the npm-based gemini-cli package we used until #560.
   antigravity-cli = pkgs.callPackage ./antigravity-cli { };
 
+  # Google Antigravity Python SDK — installs the platform-specific
+  # PyPI wheel (binary runtime bundled inside; cannot build from source).
+  # Wrapped as a Python env so `python` on PATH can `import google.antigravity`.
+  google-antigravity-py = pkgs.python3.withPackages (ps: [
+    (ps.callPackage ./google-antigravity-py { })
+  ]);
+
   # FlyCrys — GTK4-native GUI for Claude Code (Rust). Not in nixpkgs yet;
   # custom buildRustPackage derivation. Wraps the local `claude` binary.
   flycrys = pkgs.callPackage ./flycrys { };
