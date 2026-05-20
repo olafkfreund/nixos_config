@@ -30,7 +30,6 @@
   inputs = {
     # Core
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     flake-utils.url = "github:numtide/flake-utils";
@@ -167,7 +166,6 @@
 
   outputs =
     { nixpkgs
-    , nixpkgs-stable
     , nixpkgs-unstable
     , nur
     , agenix
@@ -248,7 +246,6 @@
         {
           inherit system;
           specialArgs = {
-            pkgs-stable = import nixpkgs-stable (mkPkgs nixpkgs-stable system);
             pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable system);
             inherit inputs host hostTypes;
             username = primaryUser; # Primary user for backward compatibility
@@ -293,7 +290,6 @@
                     }
                   ];
                   extraSpecialArgs = {
-                    pkgs-stable = import nixpkgs-stable (mkPkgs nixpkgs-stable system);
                     pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable system);
                     inherit
                       inputs

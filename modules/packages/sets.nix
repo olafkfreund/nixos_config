@@ -1,7 +1,6 @@
 # Consolidated package sets for performance optimization
 # This reduces redundant package declarations across modules
 { pkgs
-, pkgs-stable
 , mcp-nixos-pkg
 , ...
 }: {
@@ -160,7 +159,7 @@
 
   # Cloud and infrastructure tools
   cloud = {
-    aws = with pkgs-stable; [
+    aws = with pkgs; [
       awscli2
       aws-sam-cli
       ssm-session-manager-plugin

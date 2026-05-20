@@ -1,7 +1,6 @@
 { config
 , lib
 , pkgs
-, pkgs-stable
 , ...
 }:
 let
@@ -20,7 +19,7 @@ in
   config = mkMerge [
     (mkIf config.aws.packages.enable {
       environment.systemPackages = [
-        pkgs-stable.awscli2
+        pkgs.customPkgs.awscli2 # local override disables flaky doCheck
         pkgs.awsrm
         pkgs.awsls
         pkgs.awsume
