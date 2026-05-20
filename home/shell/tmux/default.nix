@@ -138,6 +138,14 @@ in
 
       # Enhanced configuration for modern terminal workflows
       extraConfig = ''
+        # ========== tmux-expose ==========
+        # Mission Control-style session switcher with live previews.
+        # Binary lives at ${pkgs.customPkgs.tmux-expose}/bin/tmux-expose.
+        # Default trigger M-e (matches upstream tmux.expose.tmux defaults).
+        # Inlined here rather than via mkTmuxPlugin because the upstream
+        # .tmux file is a thin 5-line keybinder we can replicate directly.
+        bind-key -T root M-e display-popup -w "100%" -h "100%" -E "${pkgs.customPkgs.tmux-expose}/bin/tmux-expose"
+
         # ========== Terminal and Display Settings ==========
         set-option -g default-terminal 'tmux-256color'
         set-option -g terminal-overrides ',xterm-256color:RGB,alacritty:RGB,kitty:RGB,foot:RGB,wezterm:RGB'

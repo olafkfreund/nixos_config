@@ -47,4 +47,9 @@
   # FlyCrys — GTK4-native GUI for Claude Code (Rust). Not in nixpkgs yet;
   # custom buildRustPackage derivation. Wraps the local `claude` binary.
   flycrys = pkgs.callPackage ./flycrys { };
+
+  # tmux-expose — Rust binary providing a Mission Control-style session
+  # switcher inside tmux. Wired into home/shell/tmux/default.nix via a
+  # display-popup bind-key (M-e by default).
+  tmux-expose = pkgs.callPackage ./tmux-expose { };
 }
