@@ -147,12 +147,19 @@ in
         bind-key -T root M-e display-popup -w "100%" -h "100%" -E "${pkgs.customPkgs.tmux-expose}/bin/tmux-expose"
 
         # ========== tmux-palette ==========
-        # Raycast-style command palette. M-Space opens the default
-        # `commands` palette (built-in tmux actions + windows + sessions).
-        # M-a opens our custom `ai-tools` palette (Claude Code + Gemini CLI
-        # launcher — see xdg.configFile."tmux-palette/palettes/ai-tools.json"
+        # Raycast-style command palette. M-p opens the default `commands`
+        # palette (built-in tmux actions + windows + sessions). M-a opens
+        # our custom `ai-tools` palette (Claude Code, Claude Agents,
+        # Gemini CLI — see xdg.configFile."tmux-palette/palettes/ai-tools.json"
         # below).
+        #
+        # Note on M-Space: GNOME (Mutter) reserves Alt+Space by default
+        # for the Window Menu shortcut. Disable it in
+        # Settings → Keyboard → View and Customise Shortcuts → Windows
+        # → "Activate window menu" (or via dconf). Both M-Space and M-p
+        # are bound here so either works regardless of DE config.
         bind-key -n M-Space run-shell '${pkgs.customPkgs.tmux-palette}/bin/tmux-palette'
+        bind-key -n M-p     run-shell '${pkgs.customPkgs.tmux-palette}/bin/tmux-palette'
         bind-key -n M-a     run-shell '${pkgs.customPkgs.tmux-palette}/bin/tmux-palette ai-tools'
 
         # ========== Terminal and Display Settings ==========
