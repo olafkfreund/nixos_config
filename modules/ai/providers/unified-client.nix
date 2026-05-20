@@ -209,8 +209,8 @@ let
             "gemini")
                 if [[ -f "/run/agenix/api-gemini" ]]; then
                     export GEMINI_API_KEY="$(cat /run/agenix/api-gemini)"
-                    if command -v gemini-cli >/dev/null 2>&1; then
-                        timeout "$TIMEOUT" gemini-cli --model "$model" "$prompt"
+                    if command -v agy >/dev/null 2>&1; then
+                        timeout "$TIMEOUT" agy --model "$model" "$prompt"
                     elif command -v aichat >/dev/null 2>&1; then
                         timeout "$TIMEOUT" aichat --model "gemini:$model" "$prompt"
                     else

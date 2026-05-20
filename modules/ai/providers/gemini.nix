@@ -21,7 +21,7 @@ in
     environment.systemPackages = with pkgs; [
       # Custom Gemini CLI from the existing configuration
       # Temporarily disabled - npm deps hash issue
-      # gemini-cli
+      # agy
 
       # Tools that support Gemini API
       # aichat REMOVED due to extremely slow pyrate-limiter build dependency (2+ hours)
@@ -41,11 +41,11 @@ in
         local prompt="''${2:-}"
         if [[ -f "/run/secrets/api-gemini" ]]; then
           export GEMINI_API_KEY="$(cat /run/secrets/api-gemini)"
-          if command -v gemini-cli >/dev/null 2>&1; then
+          if command -v agy >/dev/null 2>&1; then
             if [[ -n "$prompt" ]]; then
-              gemini-cli --model "$model" "$prompt"
+              agy --model "$model" "$prompt"
             else
-              gemini-cli --model "$model"
+              agy --model "$model"
             fi
           elif command -v aichat >/dev/null 2>&1; then
             if [[ -n "$prompt" ]]; then
@@ -88,8 +88,8 @@ in
         if [[ -f "$image" && -f "/run/secrets/api-gemini" ]]; then
           export GEMINI_API_KEY="$(cat /run/secrets/api-gemini)"
           echo "Analyzing image: $image with Gemini Vision"
-          if command -v gemini-cli >/dev/null 2>&1; then
-            gemini-cli --model "$model" --image "$image" "$prompt"
+          if command -v agy >/dev/null 2>&1; then
+            agy --model "$model" --image "$image" "$prompt"
           else
             echo "Gemini CLI not available for vision tasks"
           fi

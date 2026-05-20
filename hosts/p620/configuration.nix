@@ -180,7 +180,7 @@ in
 
     ai = {
       enable = true;
-      gemini-cli = true;
+      antigravity-cli = true;
       claude-desktop = true;
 
       # Enable unified AI provider support

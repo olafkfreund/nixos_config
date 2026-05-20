@@ -209,7 +209,7 @@ in
 
     ai = {
       enable = true;
-      gemini-cli = true;
+      antigravity-cli = true;
       claude-desktop = true; # Enable Claude Desktop GUI with MCP server support
 
       # Enable MCP (Model Context Protocol) servers for AI integration
