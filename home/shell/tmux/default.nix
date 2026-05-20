@@ -318,6 +318,14 @@ in
       '';
     };
 
+    # tmux-palette active theme — match the rest of our stylix gruvbox
+    # config. Slug `gruvbox-dark` is one of the 12 bundled themes
+    # (src/themes-bundled.ts). Read by the palette on each invocation;
+    # no tmux reload needed after `nh switch`.
+    xdg.configFile."tmux-palette/theme.json".text = builtins.toJSON {
+      theme = "gruvbox-dark";
+    };
+
     # tmux-palette AI launcher: triggered by the M-a bind defined above.
     # The palette runs `command` and parses its JSON output as a list of
     # items, each with its own action. We emit a static JSON array via
