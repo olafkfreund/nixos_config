@@ -1,7 +1,6 @@
 { config
 , lib
 , pkgs
-, pkgs-stable
 , ...
 }:
 let
@@ -98,7 +97,8 @@ in
       pkgs.kvmtool
       pkgs.libvirt
       pkgs.virtiofsd # virtio-fs daemon for host/VM file sharing
-      pkgs-stable.multipass
+      # multipass: removed 2026-05-20 (dropped from nixpkgs as unmaintained;
+      # we never actually used it for any active VM workflow).
       pkgs.spice
       pkgs.spice-gtk
       pkgs.spice-protocol
@@ -109,7 +109,8 @@ in
       pkgs.virt-viewer
       pkgs.win-spice
       pkgs.virtio-win
-      pkgs-stable.virtualbox # Using stable version to avoid libcurl proxy enum build errors in unstable
+      pkgs.virtualbox # 7.2.8: old libcurl-proxy-enum build break on unstable
+      # has been resolved upstream; safe to use main pkgs again.
       pkgs.btrfs-progs
       pkgs.quickemu
       # pkgs.vmware-workstation
