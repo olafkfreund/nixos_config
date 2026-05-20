@@ -17,6 +17,7 @@ _: {
     ./claude-desktop
     ./claude-powerline.nix
     ./claude-code-skills
+    ./claude-code-commands
 
     # Version control and CI/CD
     ./gitlab/default.nix
@@ -41,4 +42,5 @@ _: {
   # Symlinks into ~/.claude/skills/, complementing the ~18 imperatively
   # installed catalogues already there.
   programs.claude-code-skills.enable = true;
+  programs.claude-code-commands.enable = true;
 }
