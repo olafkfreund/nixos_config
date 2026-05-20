@@ -52,4 +52,10 @@
   # switcher inside tmux. Wired into home/shell/tmux/default.nix via a
   # display-popup bind-key (M-e by default).
   tmux-expose = pkgs.callPackage ./tmux-expose { };
+
+  # tmux-palette — Raycast-style command palette for tmux. Bun + TypeScript.
+  # Wired via two bind-keys in home/shell/tmux/default.nix: M-Space for the
+  # general commands palette, M-a for the AI launcher (Claude Code +
+  # Gemini CLI). The AI palette JSON is declared in the tmux module too.
+  tmux-palette = pkgs.callPackage ./tmux-palette { };
 }

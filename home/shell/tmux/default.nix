@@ -146,6 +146,15 @@ in
         # .tmux file is a thin 5-line keybinder we can replicate directly.
         bind-key -T root M-e display-popup -w "100%" -h "100%" -E "${pkgs.customPkgs.tmux-expose}/bin/tmux-expose"
 
+        # ========== tmux-palette ==========
+        # Raycast-style command palette. M-Space opens the default
+        # `commands` palette (built-in tmux actions + windows + sessions).
+        # M-a opens our custom `ai-tools` palette (Claude Code + Gemini CLI
+        # launcher — see xdg.configFile."tmux-palette/palettes/ai-tools.json"
+        # below).
+        bind-key -n M-Space run-shell '${pkgs.customPkgs.tmux-palette}/bin/tmux-palette'
+        bind-key -n M-a     run-shell '${pkgs.customPkgs.tmux-palette}/bin/tmux-palette ai-tools'
+
         # ========== Terminal and Display Settings ==========
         set-option -g default-terminal 'tmux-256color'
         set-option -g terminal-overrides ',xterm-256color:RGB,alacritty:RGB,kitty:RGB,foot:RGB,wezterm:RGB'
@@ -300,6 +309,40 @@ in
         set -g window-status-separator " │ "
         set -g status-style "bg=#${colors.base00},fg=#${colors.base04}"
       '';
+    };
+
+    # tmux-palette AI launcher: triggered by the M-a bind defined above.
+    # The palette runs `command` and parses its JSON output as a list of
+    # items, each with its own action. We emit a static JSON array via
+    # `echo` of a Nix-generated string — keeps the keystrokes/args
+    # bullet-proof (Nix handles all shell escaping) and makes it trivial
+    # to add more AI tools later without touching the .nix file.
+    xdg.configFile."tmux-palette/palettes/ai-tools.json".text = builtins.toJSON {
+      title = "AI Tools";
+      icon = "🤖";
+      command = "echo " + lib.escapeShellArg (builtins.toJSON [
+        {
+          icon = "⚡";
+          iconColor = "#cc8822";
+          title = "Claude Code";
+          subtitle = "Anthropic CLI — skip-perms, resume last session, remote-control";
+          action.tmux = "send-keys 'claude --dangerously-skip-permissions --resume --remote-control' Enter";
+        }
+        {
+          icon = "🛰";
+          iconColor = "#a48ec3";
+          title = "Claude Agents";
+          subtitle = "Anthropic CLI in agent-orchestration mode (skip-perms)";
+          action.tmux = "send-keys 'claude agents --dangerously-skip-permissions' Enter";
+        }
+        {
+          icon = "💎";
+          iconColor = "#22aaff";
+          title = "Gemini CLI";
+          subtitle = "Google AI CLI";
+          action.tmux = "send-keys 'gemini' Enter";
+        }
+      ]);
     };
   };
 }
