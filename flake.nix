@@ -103,12 +103,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # COSMIC Connect - KDE Connect alternative for COSMIC Desktop
-    cosmic-ext-connect = {
-      url = "github:olafkfreund/cosmic-ext-connect-desktop-app";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # Hardware specific (removed unused razer-laptop-control)
 
     # Package collections
@@ -144,13 +138,6 @@
     # COSMIC Web Apps - Web application manager for COSMIC Desktop
     cosmic-ext-web-apps = {
       url = "github:olafkfreund/cosmic-ext-web-apps";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # OpenClaw — personal AI assistant (official Nix flake, HM module).
-    # Used on P620 only; backed by the existing api-gemini.age agenix secret.
-    nix-openclaw = {
-      url = "github:openclaw/nix-openclaw";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -273,7 +260,6 @@
               inputs.agenix.nixosModules.default
               inputs.lanzaboote.nixosModules.lanzaboote
               nix-index-database.nixosModules.nix-index
-              inputs.cosmic-ext-connect.nixosModules.default
               # cosmic-ext-applet-radio: local module workaround for upstream mkPackageOption 'description' arg bug
               ./modules/services/cosmic-ext-radio-applet
               ./home/shell/zellij/zjstatus.nix

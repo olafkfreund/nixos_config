@@ -78,16 +78,6 @@ in
   # Add to panel via: COSMIC Settings > Panel > Applets
   programs.cosmic-ext-applet-radio.enable = true;
 
-  # COSMIC Connect - Device connectivity solution for COSMIC Desktop
-  services.cosmic-ext-connect = {
-    enable = true;
-    openFirewall = true; # Ports 1814-1864 (discovery), 1739-1764 (transfers), 5900 (VNC)
-    daemon = {
-      enable = true;
-      autoStart = true;
-    };
-  };
-
   # Use AI provider defaults with workstation profile
   aiDefaults = {
     enable = true;
@@ -365,8 +355,9 @@ in
       "render"
     ];
     shell = pkgs.zsh;
-    # Run user services even when not logged in — needed so the openclaw
-    # gateway (and any other systemd user units) keep working at boot
+    # Run user services even when not logged in so headless user units
+    # (e.g. the GNOME Remote Desktop headless service wired by
+    # modules/desktop/gnome-remote-desktop.nix) keep working at boot
     # before someone logs in via TTY/SSH/desktop session.
     linger = true;
     # Only use secret-managed password if the secret exists
