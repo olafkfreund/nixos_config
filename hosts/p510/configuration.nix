@@ -177,6 +177,10 @@ in
       disableScreenLock = false;
       disablePowerManagement = true;
     };
+
+    gnome-remote-desktop = {
+      enable = true;
+    };
   };
 
   # Enable encrypted API keys
