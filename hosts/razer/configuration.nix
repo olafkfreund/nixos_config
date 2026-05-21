@@ -100,17 +100,6 @@ in
   # Add to panel via: COSMIC Settings > Panel > Applets
   programs.cosmic-ext-applet-radio.enable = true;
 
-  # COSMIC Connect - Device connectivity solution for COSMIC Desktop
-  # TEMPORARILY DISABLED: Rust compilation errors in cosmic-ext-connect-protocol (issue #79)
-  # services.cosmic-ext-connect = {
-  #   enable = true;
-  #   openFirewall = true; # Ports 1814-1864 (discovery), 1739-1764 (transfers), 5900 (VNC)
-  #   daemon = {
-  #     enable = true;
-  #     autoStart = true;
-  #   };
-  # };
-
   # Use AI provider defaults with laptop profile (disables Ollama for battery life)
   aiDefaults = {
     enable = true;
