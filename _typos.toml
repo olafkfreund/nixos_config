@@ -1,62 +1,67 @@
 # typos configuration - exclude false positives
 # See: https://github.com/crate-ci/typos/blob/master/docs/reference.md
 
-[default.extend-words]
-# AMD HSA (Heterogeneous System Architecture) - valid technical term
-HSA = "HSA"
-hsa = "hsa"
+[default]
+# Skip git short/full SHAs in comments and pinning notes (4-40 hex chars).
+# Stops typos misreading e.g. ba2846c8 as 'ba should be by/be'.
+extend-ignore-re = [ "\\b[0-9a-f]{4,40}\\b" ]
 
-# k3sserver is a hostname, not a typo
-sserver = "sserver"
+  [default.extend-words]
+  # AMD HSA (Heterogeneous System Architecture) - valid technical term
+  HSA = "HSA"
+  hsa = "hsa"
 
-# nitch is a system info tool package name
-nitch = "nitch"
+  # k3sserver is a hostname, not a typo
+  sserver = "sserver"
 
-# dbe is a shell alias for "distrobox enter"
-dbe = "dbe"
+  # nitch is a system info tool package name
+  nitch = "nitch"
 
-# AGS is "Aylur's GTK Shell" - valid acronym
-AGS = "AGS"
+  # dbe is a shell alias for "distrobox enter"
+  dbe = "dbe"
 
-# serie is a valid Nix package name (system info tool)
-serie = "serie"
+  # AGS is "Aylur's GTK Shell" - valid acronym
+  AGS = "AGS"
 
-# darcula is a valid theme name (different from dracula)
-darcula = "darcula"
+  # serie is a valid Nix package name (system info tool)
+  serie = "serie"
 
-# exportfs is a valid NFS command/config option
-exportfs = "exportfs"
+  # darcula is a valid theme name (different from dracula)
+  darcula = "darcula"
 
-# enew is a valid Neovim buffer function
-enew = "enew"
+  # exportfs is a valid NFS command/config option
+  exportfs = "exportfs"
 
-# hdinsight is Azure HDInsight service name
-hdinsight = "hdinsight"
+  # enew is a valid Neovim buffer function
+  enew = "enew"
 
-# styl is a valid file extension (Stylus CSS)
-styl = "styl"
+  # hdinsight is Azure HDInsight service name
+  hdinsight = "hdinsight"
 
-# edn is a valid file extension (Extensible Data Notation)
-edn = "edn"
+  # styl is a valid file extension (Stylus CSS)
+  styl = "styl"
 
-# toogle is a GNOME extension config key (upstream typo)
-toogle = "toogle"
+  # edn is a valid file extension (Extensible Data Notation)
+  edn = "edn"
 
-# usig is in a third-party plugin comment
-usig = "usig"
+  # toogle is a GNOME extension config key (upstream typo)
+  toogle = "toogle"
 
-# nd is a valid lsblk flag (-nd = no headings, no dependents)
-nd = "nd"
+  # usig is in a third-party plugin comment
+  usig = "usig"
 
-# AER is the PCIe Advanced Error Reporting acronym
-AER = "AER"
+  # nd is a valid lsblk flag (-nd = no headings, no dependents)
+  nd = "nd"
 
-# ratatui is the Rust TUI library splashboard is built on
-ratatui = "ratatui"
+  # AER is the PCIe Advanced Error Reporting acronym
+  AER = "AER"
 
-[default.extend-identifiers]
-# Santa Claus - not "Clause"
-Claus = "Claus"
+  # ratatui is the Rust TUI library splashboard is built on
+  ratatui = "ratatui"
+
+  [default.extend-identifiers]
+  # Santa Claus - not "Clause"
+  Claus = "Claus"
 
 [files]
 # Skip archive directory and binary/data files

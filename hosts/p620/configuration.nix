@@ -20,6 +20,7 @@ in
     ./nixos/amd.nix
     ./nixos/usb-power-fix.nix # Fix USB mouse freezing issues
     ./nixos/aqc107-link-pin.nix # Pin Aquantia AQC107 to 1G to dodge AER flapping
+    ./nixos/dns-fallback.nix # systemd-resolved with public DNS fallback (issue #564)
     ../common/nixos/i18n.nix
     ../common/nixos/hosts.nix
     ../common/nixos/envvar.nix
@@ -50,16 +51,13 @@ in
     # Note: Tailscale is enabled via services.tailscale (built-in NixOS module)
     # Custom networking.tailscale module was removed during anti-pattern cleanup
 
-    # NetworkManager configuration with explicit DNS management
-    networkmanager = {
-      dns = lib.mkForce "default"; # Force NetworkManager to handle DNS directly
-    };
+    # NetworkManager DNS handoff to systemd-resolved configured in
+    # ./nixos/dns-fallback.nix (issue #564).
 
-    # Pin this host's own Tailscale MagicDNS name. Tailscale's DNS resolver is
-    # not accepted on p620 (conflicts with NetworkManager DNS), so without this
-    # entry the host cannot resolve its own .ts.net hostname to its tailnet
-    # IPv4 — local dev tools whose auth callbacks redirect to the tailnet
-    # hostname would otherwise time out.
+    # Pin this host's own Tailscale MagicDNS name as a safety net in case the
+    # tailscaled→resolved D-Bus push hasn't fired yet at boot (e.g. during
+    # nixos-rebuild switch). Local dev tools whose auth callbacks redirect to
+    # the tailnet hostname would otherwise time out.
     extraHosts = ''
       100.69.100.115 p620.tail833f7.ts.net
     '';
