@@ -1,4 +1,7 @@
-{ config, lib, ... }:
+{ config
+, lib
+, ...
+}:
 let
   inherit (lib) mkIf mkEnableOption mkForce;
   cfg = config.features.gnome-remote-desktop;
@@ -43,6 +46,15 @@ in
         # Ensure GNOME Remote Desktop service starts with the graphical target
         gnome-remote-desktop.wantedBy = [ "graphical.target" ];
       };
+
+      # Auto-start the user-scope headless RDP listener on GNOME login.
+      # Why: nixpkgs ships the unit but doesn't wire it into gnome-session.target.
+      # Without this, the listener only starts if someone toggles RDP in GNOME
+      # Settings, and any such enable creates a `~/.config/systemd/user/` symlink
+      # to the current store path — which becomes a dangling "bad" unit after the
+      # next package bump. Declaratively wiring via /etc/systemd/user/ avoids that
+      # interop trap entirely. The headless daemon binds port 3389 directly.
+      user.services.gnome-remote-desktop-headless.wantedBy = [ "gnome-session.target" ];
 
       # Disable systemd sleep/suspend on hosts that should always be reachable
       # (workstations, headless servers). Laptops keep suspend so lid-close
