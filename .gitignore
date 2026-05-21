@@ -28,6 +28,10 @@ result-*
 .claude/scheduled_tasks.lock
 .claude/*.lock
 
+# aifactory / agent tooling local state (contains .env with secrets,
+# PR scratch state, and spec drafts — must never be committed)
+.aifactory/
+
 # OS generated files
 .DS_Store
 Thumbs.db
