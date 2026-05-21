@@ -37,6 +37,7 @@ in
     ../../modules/containers/docker.nix
     ../../modules/scrcpy/default.nix
     ../../modules/system/logging.nix
+    ../../modules/services/skill-pool.nix # local skill-pool registry portal
   ];
   host.class = "workstation";
 
