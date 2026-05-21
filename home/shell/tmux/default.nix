@@ -315,6 +315,14 @@ in
         # Ensure no powerline characters are used
         set -g window-status-separator " │ "
         set -g status-style "bg=#${colors.base00},fg=#${colors.base04}"
+
+        # Popup chrome — match the Stylix base16 scheme so display-popup
+        # (tmux-palette, tmux-expose, choose-tree -Z, etc.) blends into the
+        # terminal instead of using tmux's terminal-default fill which
+        # renders darker than gruvbox bg on kitty/ghostty.
+        set -g popup-style "bg=#${colors.base00}"
+        set -g popup-border-style "fg=#${colors.base0B},bg=#${colors.base00}"
+        set -g popup-border-lines rounded
       '';
     };
 
