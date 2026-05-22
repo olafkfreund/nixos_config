@@ -308,6 +308,11 @@ in
     parrProtocol.enable = true;
   };
 
+  # /use-ollama, /use-claude, /use-default slash commands + apiKeyHelper
+  # that auto-selects router (p620 over Tailscale) or Anthropic cloud key
+  # based on ANTHROPIC_BASE_URL. Phase 3 of Ollama+LiteLLM design.
+  modules.programs.claude-router-cli.enable = true;
+
   # Enable encrypted API keys
   secrets.apiKeys = {
     enable = true;

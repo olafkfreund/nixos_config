@@ -114,6 +114,17 @@ in
     listenLanInterface = "enp1s0";
   };
 
+  # Claude Code managed-settings baseline (read-only at /etc/claude-code).
+  # Enables PARR hook + lets the router CLI inject apiKeyHelper (Phase 3).
+  modules.programs.claude-code-managed = {
+    enable = true;
+    parrProtocol.enable = true;
+  };
+
+  # /use-ollama, /use-claude, /use-default slash commands + apiKeyHelper
+  # that auto-selects router or Anthropic key based on ANTHROPIC_BASE_URL.
+  modules.programs.claude-router-cli.enable = true;
+
   # AI production dashboard and load testing removed - were non-functional services consuming resources
 
   # AI alerting removed - was non-functional, handled by DEX5550 monitoring server via Prometheus/Grafana/Alertmanager

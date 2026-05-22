@@ -41,4 +41,10 @@ in
   # LiteLLM router master key (p620 only — self-hosted Anthropic-compat
   # proxy for Ollama coding models). Plaintext rotation: see docs/plans/2026-05-22-ollama-p620-litellm-design.md §5.
   "secrets/litellm-master-key.age".publicKeys = allUsers ++ [ p620 ];
+
+  # Per-host virtual bearer keys for the LiteLLM router. Same plaintext as
+  # the master, encrypted to each client host so the apiKeyHelper script
+  # on that host can read it. (Phase 3 of the Ollama+LiteLLM design.)
+  "secrets/api-router-p620.age".publicKeys = allUsers ++ [ p620 ];
+  "secrets/api-router-razer.age".publicKeys = allUsers ++ [ razer ];
 }
