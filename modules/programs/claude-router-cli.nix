@@ -138,13 +138,14 @@ let
   # positives from other p620 URLs (e.g. binary cache on :5000).
   claudeRouterKey = pkgs.writeShellApplication {
     name = "claude-router-key";
+    runtimeInputs = with pkgs; [ coreutils ];
     text = ''
       set -euo pipefail
       url="''${ANTHROPIC_BASE_URL:-}"
       if [[ "$url" == *:4000* ]] || [[ "$url" == *p620.*ts.net/router* ]]; then
-        cat "/run/agenix/api-router-$(hostname)"
+        tr -d '\n' < "/run/agenix/api-router-$(hostname)"
       else
-        cat "/run/agenix/api-anthropic"
+        tr -d '\n' < "/run/agenix/api-anthropic"
       fi
     '';
   };
@@ -208,7 +209,9 @@ in
   config = lib.mkIf cfg.enable {
     age.secrets.${cfg.routerHostKey} = {
       file = ../../secrets/${cfg.routerHostKey}.age;
-      mode = "0400";
+      mode = "0640";
+      owner = "root";
+      group = "users";
     };
 
     environment.systemPackages = [ claudeRouter claudeRouterKey ];
