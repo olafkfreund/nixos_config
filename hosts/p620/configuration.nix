@@ -38,6 +38,7 @@ in
     ../../modules/scrcpy/default.nix
     ../../modules/system/logging.nix
     ../../modules/services/skill-pool.nix # local skill-pool registry portal
+    ../../modules/services/ollama.nix # local Ollama coding-model server (RX 7900 XTX, ROCm)
   ];
   host.class = "workstation";
 
@@ -90,6 +91,17 @@ in
     enable = true;
     enablePermissionNotifications = true;
     enableReadyNotifications = true;
+  };
+
+  # Local Ollama coding-model server on RX 7900 XTX (loopback only, ROCm).
+  # Phase 1 of docs/plans/2026-05-22-ollama-p620-litellm-design.md.
+  # Defaults: qwen3.6:27b persistent + gemma4:26b on-demand (5min unload).
+  # Reachable from same host only at http://127.0.0.1:11434; the LiteLLM
+  # proxy (Phase 2) will be the Anthropic-compat front-end for Claude Code.
+  # Model blobs land on /mnt/data (938GB ext4 disk) instead of root /.
+  features.ollama-server = {
+    enable = true;
+    modelsDir = "/mnt/data/ollama/models";
   };
 
   # AI production dashboard and load testing removed - were non-functional services consuming resources
