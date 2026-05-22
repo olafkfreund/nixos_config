@@ -104,6 +104,8 @@ in
   features.ollama-server = {
     enable = true;
     modelsDir = "/mnt/data/ollama/models";
+    persistentModels = [ "qwen2.5-coder:14b" ];
+    onDemandModels = [ "gemma4:e4b" ];
   };
 
   # LiteLLM router — Anthropic-compat proxy fronting Ollama (Phase 2).
