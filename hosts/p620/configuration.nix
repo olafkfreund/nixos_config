@@ -21,6 +21,7 @@ in
     ./nixos/usb-power-fix.nix # Fix USB mouse freezing issues
     ./nixos/aqc107-link-pin.nix # Pin Aquantia AQC107 to 1G to dodge AER flapping
     ./nixos/dns-fallback.nix # systemd-resolved with public DNS fallback (issue #564)
+    ./nixos/tailscale-serve.nix # Tailscale Serve for /router (LiteLLM, Phase 2)
     ../common/nixos/i18n.nix
     ../common/nixos/hosts.nix
     ../common/nixos/envvar.nix
@@ -39,6 +40,7 @@ in
     ../../modules/system/logging.nix
     ../../modules/services/skill-pool.nix # local skill-pool registry portal
     ../../modules/services/ollama.nix # local Ollama coding-model server (RX 7900 XTX, ROCm)
+    ../../modules/services/litellm-router.nix # Anthropic-compat proxy → Ollama (Phase 2)
   ];
   host.class = "workstation";
 
@@ -102,6 +104,14 @@ in
   features.ollama-server = {
     enable = true;
     modelsDir = "/mnt/data/ollama/models";
+  };
+
+  # LiteLLM router — Anthropic-compat proxy fronting Ollama (Phase 2).
+  # Loopback + tailscale0 + enp1s0 (LAN) reachable; global :4000 closed.
+  # Master key stored in agenix (secrets/litellm-master-key.age).
+  features.litellm-router = {
+    enable = true;
+    listenLanInterface = "enp1s0";
   };
 
   # AI production dashboard and load testing removed - were non-functional services consuming resources
