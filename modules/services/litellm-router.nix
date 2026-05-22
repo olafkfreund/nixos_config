@@ -95,7 +95,7 @@ in
 
       serviceConfig = {
         ExecStart = pkgs.writeShellScript "litellm-router-start" ''
-          export LITELLM_MASTER_KEY="$(cat "${config.age.secrets."litellm-master-key".path}")"
+          export LITELLM_MASTER_KEY="$(cat "$CREDENTIALS_DIRECTORY/litellm-master-key")"
           exec ${pkgs.litellm}/bin/litellm \
             --config ${configFile} \
             --port ${toString cfg.port} \
@@ -103,7 +103,7 @@ in
         '';
 
         DynamicUser = true;
-        SupplementaryGroups = [ "agenix" ];
+        LoadCredential = [ "litellm-master-key:${config.age.secrets."litellm-master-key".path}" ];
 
         # Hardening (matches docs/PATTERNS.md security baseline)
         ProtectSystem = "strict";
@@ -141,7 +141,7 @@ in
         "tailscale0".allowedTCPPorts = [ cfg.port ];
       }
       (lib.mkIf (cfg.listenLanInterface != null) {
-        ${cfg.listenLanInterface}.allowedTCPPorts = [ cfg.port ];
+        "${cfg.listenLanInterface}".allowedTCPPorts = [ cfg.port ];
       })
     ];
   };

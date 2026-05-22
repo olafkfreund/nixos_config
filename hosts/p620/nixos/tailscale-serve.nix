@@ -8,8 +8,12 @@
 #
 # Currently only exposes /router. Add new paths here if other p620
 # services need tailnet HTTPS exposure later.
-{ pkgs, ... }: {
-  systemd.services.tailscale-serve = {
+{ config, pkgs, lib, ... }:
+let
+  routerCfg = config.features.litellm-router;
+in
+{
+  systemd.services.tailscale-serve = lib.mkIf routerCfg.enable {
     description = "Tailscale Serve — Expose LiteLLM Router";
     after = [ "tailscaled.service" "network-online.target" "litellm-router.service" ];
     wants = [ "network-online.target" "litellm-router.service" ];
@@ -26,7 +30,12 @@
 
         # LiteLLM router — accessible at https://p620.<tailnet>.ts.net/router
         ${pkgs.tailscale}/bin/tailscale serve --bg --https=443 \
-          --set-path=/router http://localhost:4000
+          --set-path=/router http://localhost:${toString routerCfg.port}
+      '';
+
+      ExecStop = pkgs.writeShellScript "tailscale-serve-stop" ''
+        # Remove all serve configurations
+        ${pkgs.tailscale}/bin/tailscale serve reset || true
       '';
     };
   };
