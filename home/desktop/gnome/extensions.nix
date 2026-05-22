@@ -9,44 +9,42 @@ let
 in
 {
   config = mkIf (cfg.enable && cfg.extensions.enable) {
-    # GNOME Shell extensions configuration via dconf
+    # GNOME Shell extensions configuration via dconf.
+    #
+    # Snapshot policy: the enabled-extensions list captures the exact set of
+    # extensions ACTIVE on p620 today (2026-05). Anything that was declared
+    # but in state INITIALIZED/INACTIVE was dropped — see git log for the
+    # cull. aurora-shell is included here without a matching nix package
+    # because the binary lives in ~/.local/share/gnome-shell/extensions/
+    # from a manual install; including the UUID prevents this dconf block
+    # from stripping it on activation. razer doesn't have the binary, so
+    # GNOME will silently skip aurora-shell there.
     dconf.settings = {
-      # Enable installed extensions
       "org/gnome/shell" = {
         disable-user-extensions = false;
-        # UUIDs verified against gnomeExtensions.<name>.passthru.extensionUuid.
-        # Each UUID must have a matching package in home.packages below or in
-        # cfg.extensions.packages (per-profile). Adding a UUID without its
-        # package makes gnome-shell silently skip it on session start.
+        # UUIDs verified against gnomeExtensions.<name>.passthru.extensionUuid
+        # (for nixpkgs entries) or against metadata.json of the manual zips
+        # we re-package in pkgs/gnome-ext-*. Each UUID must have either a
+        # matching package in home.packages below, or be an explicit
+        # user-managed drift entry (aurora-shell — see policy comment above).
         enabled-extensions = [
           "user-theme@gnome-shell-extensions.gcampax.github.com"
           "dash-to-dock@micxgx.gmail.com"
           "appindicatorsupport@rgcjonas.gmail.com"
-          "auto-accent-colour@Wartybix"
-          "auto-move-windows@gnome-shell-extensions.gcampax.github.com"
-          "BringOutSubmenuOfPowerOffLogoutButton@pratap.fastmail.fm"
-          "blur-my-shell@aunetx"
-          "top-panel-logo@jmpegi.github.com"
-          "workspace-indicator@gnome-shell-extensions.gcampax.github.com"
-          "emoji-copy@felipeftn"
-          "windowsNavigator@gnome-shell-extensions.gcampax.github.com"
           "caffeine@patapon.info"
-          "clipboard-indicator@tudmotu.com"
           "tailscale-status@maxgallup.github.com"
           "Bluetooth-Battery-Meter@maniacx.github.com"
           "dim-background-windows@stephane-13.github.com"
+          "allowlockedremotedesktop@kamens.us"
+          "claude-code-usage@haletran.com"
+          "otp-keys@osmank3.net"
+          "rudra@narkagni"
+          "spotify-controller@narkagni"
+          "accent-directories@taiwbi.com"
+          # User-managed drift — see policy comment above.
+          "aurora-shell@luminusos.github.io"
         ];
       };
-
-      # User Themes extension configuration
-      # Note: Disabled until Gruvbox Shell theme is properly installed
-      # "org/gnome/shell/extensions/user-theme" = {
-      #   name = mkDefault (
-      #     if cfg.theme.enable
-      #     then "Gruvbox-Dark-BL"
-      #     else "Adwaita"
-      #   );
-      # };
 
       # Dash to Dock configuration
       "org/gnome/shell/extensions/dash-to-dock" = {
@@ -79,21 +77,6 @@ in
         tray-pos = "right";
       };
 
-      # Blur My Shell configuration
-      "org/gnome/shell/extensions/blur-my-shell" = {
-        brightness = 0.75;
-        dash-opacity = 0.25;
-        sigma = 30;
-        static-blur = true;
-      };
-
-      # Accent-gtk-theme configuration
-      "org/gnome/shell/extensions/accent-gtk-theme" = {
-        blue-theme-light = "Gruvbox";
-        set-link-gtk4 = true;
-        set-theme-path = "home/olafkfreund/.local/share/themes";
-      };
-
       # Caffeine configuration
       "org/gnome/shell/extensions/caffeine" = {
         enable-fullscreen = true;
@@ -102,32 +85,11 @@ in
         show-notification = false;
       };
 
-      # Auto Accent Colour configuration
-      "org/gnome/shell/extensions/auto-accent-colour" = {
-        hide-indicator = false;
-        highlight-mode = true;
-      };
-
       # Dim Background Windows configuration
       "org/gnome/shell/extensions/dim-background-windows" = {
         dim-background = true;
         dimming-enabled = true;
         toogle-shortcut = "<Super>g";
-      };
-
-      # Clipboard Indicator configuration
-      "org/gnome/shell/extensions/clipboard-indicator" = {
-        cache-size = 50;
-        clear-history = [ ];
-        confirm-clear = false;
-        display-mode = 0;
-        enable-keybindings = true;
-        history-size = 30;
-        move-item-first = true;
-        notify-on-copy = false;
-        preview-size = 30;
-        strip-text = false;
-        topbar-preview-size = 10;
       };
     };
 
@@ -138,22 +100,23 @@ in
     # Users/<user>/profile.nix).
     home.packages = with pkgs;
       [
+        # nixpkgs entries
         gnomeExtensions.user-themes
         gnomeExtensions.dash-to-dock
         gnomeExtensions.appindicator
-        gnomeExtensions.auto-accent-colour
-        gnomeExtensions.auto-move-windows
-        gnomeExtensions.bring-out-submenu-of-power-offlogout-button
-        gnomeExtensions.blur-my-shell
-        gnomeExtensions.top-panel-logo
-        gnomeExtensions.workspace-indicator
-        gnomeExtensions.emoji-copy
-        gnomeExtensions.windownavigator
         gnomeExtensions.caffeine
-        gnomeExtensions.clipboard-indicator
         gnomeExtensions.tailscale-status
         gnomeExtensions.bluetooth-battery-meter
         gnomeExtensions.dim-background-windows
+
+        # Manually-packaged extensions (extensions.gnome.org pinned ZIPs,
+        # see pkgs/gnome-ext-*). Not in nixpkgs.
+        gnome-ext-allow-locked-remote-desktop
+        gnome-ext-claude-code-usage
+        gnome-ext-otp-keys
+        gnome-ext-rudra
+        gnome-ext-spotify-controller
+        gnome-ext-accent-directories
 
         # Helpers used by various extensions at runtime.
         lm_sensors

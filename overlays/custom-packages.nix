@@ -4,7 +4,6 @@ final: _prev: {
   zsh-ai-cmd = final.callPackage ../pkgs/zsh-ai-cmd { };
   claude-code-native = final.callPackage ../pkgs/claude-code-native { };
   warp-terminal = final.callPackage ../pkgs/warp-terminal { };
-
   # splashboard — Rust TUI splash screen for shell startup. Needs rustc
   # 1.95+ (sysinfo 0.39 transitive), which nixpkgs doesn't ship yet, so
   # we build with the latest stable from rust-overlay via a custom
@@ -18,4 +17,17 @@ final: _prev: {
       };
     in
     final.callPackage ../pkgs/splashboard { inherit rustPlatform; };
+
+  gemini-cli = final.callPackage ../home/development/gemini-cli { };
+
+  # GNOME Shell extensions not packaged in nixpkgs. Pinned to the
+  # extensions.gnome.org ZIP for the exact version currently active on
+  # p620, so the snapshot is byte-stable. Source-of-truth for the UUID +
+  # version is the metadata.json inside each zip.
+  gnome-ext-claude-code-usage = final.callPackage ../pkgs/gnome-ext-claude-code-usage { };
+  gnome-ext-otp-keys = final.callPackage ../pkgs/gnome-ext-otp-keys { };
+  gnome-ext-rudra = final.callPackage ../pkgs/gnome-ext-rudra { };
+  gnome-ext-spotify-controller = final.callPackage ../pkgs/gnome-ext-spotify-controller { };
+  gnome-ext-accent-directories = final.callPackage ../pkgs/gnome-ext-accent-directories { };
+  gnome-ext-allow-locked-remote-desktop = final.callPackage ../pkgs/gnome-ext-allow-locked-remote-desktop { };
 }
