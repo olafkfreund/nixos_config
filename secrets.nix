@@ -38,4 +38,7 @@ in
   "secrets/wifi-password.age".publicKeys = allUsers ++ workstations;
   "secrets/tailscale-auth-key.age".publicKeys = allUsers ++ allHosts;
 
+  # LiteLLM router master key (p620 only — self-hosted Anthropic-compat
+  # proxy for Ollama coding models). Plaintext rotation: see Phase 2 PR.
+  "secrets/litellm-master-key.age".publicKeys = allUsers ++ [ p620 ];
 }
