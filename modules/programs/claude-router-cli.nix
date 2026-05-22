@@ -138,10 +138,24 @@ let
   # positives from other p620 URLs (e.g. binary cache on :5000).
   claudeRouterKey = pkgs.writeShellApplication {
     name = "claude-router-key";
-    runtimeInputs = with pkgs; [ coreutils ];
+    runtimeInputs = with pkgs; [ coreutils jq ];
     text = ''
       set -euo pipefail
       url="''${ANTHROPIC_BASE_URL:-}"
+      if [[ -z "$url" ]]; then
+        curr_dir="$PWD"
+        while [[ "$curr_dir" != "/" ]]; do
+          if [[ -f "$curr_dir/.claude/settings.json" ]]; then
+            if url_extracted=$(jq -r '.env.ANTHROPIC_BASE_URL // empty' "$curr_dir/.claude/settings.json"); then
+              if [[ -n "$url_extracted" ]]; then
+                url="$url_extracted"
+                break
+              fi
+            fi
+          fi
+          curr_dir="$(dirname "$curr_dir")"
+        done
+      fi
       if [[ "$url" == *:4000* ]] || [[ "$url" == *p620.*ts.net/router* ]]; then
         tr -d '\n' < "/run/agenix/api-router-$(hostname)"
       else
