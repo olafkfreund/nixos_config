@@ -63,7 +63,10 @@ let
     bind l select-pane -R
 
     # ----- Reload key -----
-    bind r source-file ${rmuxConf} \; display-message "rmux config reloaded"
+    # Use the stable XDG path (HM symlinks it to this rmux.conf store entry).
+    # Cannot use $${rmuxConf} here — would self-reference and cause an
+    # infinite-recursion error during module evaluation.
+    bind r source-file ~/.config/rmux/rmux.conf \; display-message "rmux config reloaded"
   '';
 in
 {
