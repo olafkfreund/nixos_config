@@ -85,7 +85,7 @@
     # forever, blocking suspend while app runs). Razer-relevant.
     # Workaround: close claude-desktop entirely to release inhibitor.
     # Bump via /update-claude-code.
-    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/ba2846c8b3e99ac35563e6c2184dd999b19bbc95";
+    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/b8fe6b850266c25b6e588ac82202ea9cfb9294e3";
 
     # Claude Code skill catalogue (borghei). flake = false because it's a
     # plain markdown/assets catalogue, not a Nix flake. We symlink one
