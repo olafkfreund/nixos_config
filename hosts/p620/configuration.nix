@@ -488,6 +488,7 @@ in
     vim
     wally-cli
     nix-doc # Interactive Nix documentation tool
+    customPkgs.rmux # Rust tmux-compatible multiplexer + typed SDK for agent orchestration
     # Remote desktop
     rustdesk-flutter
     # Messaging applications

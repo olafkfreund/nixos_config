@@ -418,6 +418,7 @@ in
       # qwen-code disabled due to npm registry network errors (HTTP/2 framing layer issue)
       # (callPackage ../../home/development/qwen-code/default.nix { })
       nix-doc # Interactive Nix documentation tool
+      customPkgs.rmux # Rust tmux-compatible multiplexer + typed SDK for agent orchestration
       # Remote desktop
       rustdesk-flutter
       # Messaging applications
