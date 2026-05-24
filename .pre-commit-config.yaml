@@ -191,7 +191,10 @@ repos:
 
       - id: typos
         name: Check spelling
-        entry: typos
+        # --config required: typos auto-discovers `typos.toml` (no dot
+        # prefix), not `.typos.toml`. Without --config the project's
+        # extend-ignore-re rules silently don't apply.
+        entry: typos --config .typos.toml
         language: system
         pass_filenames: false
         stages: [pre-push]
