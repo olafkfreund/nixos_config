@@ -93,7 +93,7 @@ let
 
     litellm_settings:
       drop_params: true      # silently drop Anthropic-only params (cache_control etc.)
-      set_verbose: true
+      set_verbose: false
   '';
 in
 {
