@@ -260,10 +260,6 @@ in
     # pkgs/cosmic-applets/ for easy re-enable.
     desktop.cosmic.enable = false;
 
-    # Display manager: GDM (was previously delegated to cosmic-greeter by
-    # the cosmic module; the unified module defaults to "none" without it).
-    desktop.displayManager.backend = "gdm";
-
     # Microsoft Intune Company Portal (custom package with version control)
     intune = {
       enable = false; # Disabled - no longer needed
@@ -271,6 +267,12 @@ in
       enableDesktopIntegration = true;
     };
   };
+
+  # Display manager: GDM (was previously delegated to cosmic-greeter by the
+  # cosmic module; the unified DM module defaults to "none" without it).
+  # NOTE: must live at top-level, NOT inside the features = {...} block above —
+  # the option path is `desktop.displayManager`, not `features.desktop.displayManager`.
+  desktop.displayManager.backend = "gdm";
 
   # Citrix Workspace for client project remote access
   # Disabled — no longer needed. Module + overlay + package retained so this
