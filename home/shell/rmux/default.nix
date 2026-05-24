@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 let
-  inherit (lib) mkEnableOption mkIf;
+  inherit (lib) mkOption mkIf types;
   cfg = config.multiplexer.rmux;
 
   # rmux config file. tmux-style syntax (rmux is tmux-compatible at the
@@ -68,7 +68,13 @@ let
 in
 {
   options.multiplexer.rmux = {
-    enable = mkEnableOption {
+    # Using mkOption (not mkEnableOption { default = true; ... }) because
+    # the latter's `default = true` doesn't take effect in our HM context —
+    # observed empirically: cfg.enable evaluated to `false` despite the
+    # attrset arg, so the whole config block never fired. Plain mkOption
+    # always honors default.
+    enable = mkOption {
+      type = types.bool;
       default = true;
       description = "rmux multiplexer config + shell alias auto-loading it";
     };
