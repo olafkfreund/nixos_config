@@ -9,59 +9,61 @@ extend-ignore-re = [
   "#[0-9a-fA-F]{8}",
   # Ignore base64 encoded strings
   "[A-Za-z0-9+/]{40,}={0,2}",
-  # Ignore SHA256 hashes
+  # Ignore SHA256 hashes (SRI format, e.g. sha256-XXXX...)
   "sha256-[A-Za-z0-9+/=]{43,}",
+  # Ignore Nix-base32 SHA256 hashes (older 52-char format, alphabet excludes e/o/t/u)
+  "[0-9a-df-np-svwxyz]{52}",
   # Ignore UUIDs
   "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
 ]
 
-[default.extend-words]
-# NixOS-specific terms
-nixos = "nixos"
-nixpkgs = "nixpkgs"
-flake = "flake"
-derivation = "derivation"
-mkif = "mkif"
+  [default.extend-words]
+  # NixOS-specific terms
+  nixos = "nixos"
+  nixpkgs = "nixpkgs"
+  flake = "flake"
+  derivation = "derivation"
+  mkif = "mkif"
 
-# Common technical terms that might be flagged
-coreutils = "coreutils"
-systemd = "systemd"
-tailscale = "tailscale"
-cachix = "cachix"
-agenix = "agenix"
-hyprland = "hyprland"
+  # Common technical terms that might be flagged
+  coreutils = "coreutils"
+  systemd = "systemd"
+  tailscale = "tailscale"
+  cachix = "cachix"
+  agenix = "agenix"
+  hyprland = "hyprland"
 
-# Package names
-neovim = "neovim"
-lazyvim = "lazyvim"
-starship = "starship"
-zellij = "zellij"
-tmux = "tmux"
+  # Package names
+  neovim = "neovim"
+  lazyvim = "lazyvim"
+  starship = "starship"
+  zellij = "zellij"
+  tmux = "tmux"
 
-# File/directory names
-nix = "nix"
-usr = "usr"
-var = "var"
-etc = "etc"
-tmp = "tmp"
+  # File/directory names
+  nix = "nix"
+  usr = "usr"
+  var = "var"
+  etc = "etc"
+  tmp = "tmp"
 
-# Common abbreviations
-env = "env"
-cfg = "cfg"
-pkgs = "pkgs"
-lib = "lib"
-attr = "attr"
-fn = "fn"
+  # Common abbreviations
+  env = "env"
+  cfg = "cfg"
+  pkgs = "pkgs"
+  lib = "lib"
+  attr = "attr"
+  fn = "fn"
 
-# Hardware terms
-amd = "amd"
-rocm = "rocm"
-nvidia = "nvidia"
-intel = "intel"
+  # Hardware terms
+  amd = "amd"
+  rocm = "rocm"
+  nvidia = "nvidia"
+  intel = "intel"
 
-# User-specific
-olafkfreund = "olafkfreund"
-freundcloud = "freundcloud"
+  # User-specific
+  olafkfreund = "olafkfreund"
+  freundcloud = "freundcloud"
 
 [files]
 extend-exclude = [
@@ -90,7 +92,7 @@ extend-exclude = [
 ]
 
 [type.nix]
-extend-glob = ["*.nix"]
+extend-glob = [ "*.nix" ]
 
 [type.shell]
-extend-glob = ["*.sh", "*.bash"]
+extend-glob = [ "*.sh", "*.bash" ]
