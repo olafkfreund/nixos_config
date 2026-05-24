@@ -275,6 +275,7 @@ in
     kdePackages.qt6ct
     # Custom qwen-code package temporarily disabled due to npm registry network errors
     # (callPackage ../../home/development/qwen-code/default.nix { })
+    customPkgs.rmux # Rust tmux-compatible multiplexer + typed SDK for agent orchestration
     # Remote desktop
     rustdesk-flutter
   ];

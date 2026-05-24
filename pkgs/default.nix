@@ -70,4 +70,10 @@
   # general commands palette, M-a for the AI launcher (Claude Code +
   # Gemini CLI). The AI palette JSON is declared in the tmux module too.
   tmux-palette = pkgs.callPackage ./tmux-palette { };
+
+  # rmux — Universal Rust terminal multiplexer with typed SDK. Runs
+  # alongside tmux (separate daemon, different socket). Primarily added
+  # for agent-orchestration scripting via rmux-sdk; for interactive
+  # multiplexing tmux still owns the ergonomics here.
+  rmux = pkgs.callPackage ./rmux { };
 }
