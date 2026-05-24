@@ -1,0 +1,12 @@
+description = "Ask Claude Code to perform an engineering review of the current NixOS implementation plan"
+
+prompt = """
+You are the cloud Orchestrator (Antigravity). Your task is to delegate the review of the current NixOS implementation plan to Claude Code.
+
+Execute the local claude CLI tool with the plan context:
+!{claude "You are a Senior Systems Engineer. Review the following implementation plan and highlight any flaws, logical gaps, or missing test cases. Be extremely thorough: @{implementation_plan.md}"}
+
+Once Claude has executed:
+1. Summarize Claude's engineering feedback and recommendations.
+2. Present any actionable adjustments suggested by Claude directly to the user.
+"""

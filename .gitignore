@@ -32,6 +32,12 @@ result-*
 # PR scratch state, and spec drafts — must never be committed)
 .aifactory/
 
+# antigravity CLI local state (UUID-named JSON cache files)
+.antigravitycli/
+
+# Throwaway local experiments — never ship
+scratch/
+
 # OS generated files
 .DS_Store
 Thumbs.db

@@ -1,0 +1,14 @@
+description = "Delegate heavy raw coding and self-correcting Nix validation to the local Qwen developer crew"
+
+prompt = """
+You are the cloud Manager orchestrator (Antigravity). Your task is to delegate the raw file generation, coding, and initial syntax validation to the local Qwen developer crew.
+
+Execute the crew script with the user's task description:
+!{python3 scripts/run_crew.py "{{args}}"}
+
+Once the script has executed, perform the following actions:
+1. Review the generated code and the local validation output from the terminal execution above.
+2. Confirm the syntax checks passed successfully.
+3. Review the changes for architectural soundness and compliance with NixOS best practices.
+4. Present the verified git diff to the user for final deployment approval.
+"""
