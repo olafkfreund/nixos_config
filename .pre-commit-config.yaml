@@ -1,16 +1,37 @@
-# Pre-commit hooks configuration
-# All hooks use Nix-packaged tools only - no external dependencies
+# Pre-commit hooks — split into two stages for speed:
 #
-# Install: pre-commit install
-# Run all: pre-commit run --all-files
-# Run one: pre-commit run HOOK_ID --all-files
+#   pre-commit (runs on every `git commit`):    formatters + cheap hygiene
+#                                               target: < 3 seconds wall time
+#   pre-push   (runs only on `git push`):       linters and slower checks
+#                                               target: < 30 seconds wall time
+#
+# Whole-flake validation (`nix flake check`) and the full linter sweep are
+# NOT in either stage — they're CI's job (check-configurations, lint-check
+# jobs run on every PR). Doing them locally on every commit was duplicating
+# work and adding 30s–7min to every commit (nixpkgs-lint-community was
+# pathologically slow on files with large embedded heredocs).
+#
+# Install both stages locally:
+#   pre-commit install --hook-type pre-commit --hook-type pre-push
+#
+# Run all hooks manually:
+#   pre-commit run --all-files                       # pre-commit stage
+#   pre-commit run --all-files --hook-stage pre-push # pre-push stage
+#
+# Run a single hook on the whole tree:
+#   pre-commit run HOOK_ID --all-files
+
+default_stages: [pre-commit]
 
 repos:
   - repo: local
     hooks:
-      # =============================================================================
-      # Nix Formatting and Linting
-      # =============================================================================
+      # ========================================================================
+      # PRE-COMMIT STAGE — formatters + cheap hygiene checks
+      # Everything here MUST be fast (< 1s per file). No linters.
+      # ========================================================================
+
+      # --- Nix ---
       - id: nixpkgs-fmt
         name: Format Nix files
         entry: nixpkgs-fmt
@@ -18,38 +39,7 @@ repos:
         files: '\.nix$'
         description: Format Nix files using nixpkgs-fmt
 
-      - id: nixpkgs-lint
-        name: Lint Nix files (nixpkgs-lint-community, tree-sitter)
-        entry: nixpkgs-lint
-        language: system
-        files: '\.nix$'
-        pass_filenames: true
-        description: Fast semantic linter for Nix; runs only on changed files
-
-      - id: deadnix
-        name: Check for dead Nix code
-        entry: bash -c 'for f in "$@"; do deadnix --fail "$f" || exit 1; done' --
-        language: system
-        files: '\.nix$'
-        pass_filenames: true
-        description: Check changed Nix files for dead/unused code
-
-      # =============================================================================
-      # Shell Script Formatting and Linting
-      # =============================================================================
-      - id: shellcheck
-        name: Lint shell scripts
-        entry: shellcheck
-        language: system
-        files: '\.sh$'
-        # SC1091: external sourced files; SC2034: vars used externally;
-        # SC2086: word-splitting (often intentional in our scripts);
-        # SC2329/SC2317: false positives for functions called via case dispatch;
-        # SC2029: ssh client-side expansion is intentional in our admin scripts;
-        # SC2009: pgrep not always available in minimal live envs.
-        args: [-e, SC1091, -e, SC2034, -e, SC2086, -e, SC2329, -e, SC2317, -e, SC2029, -e, SC2009]
-        description: Lint shell scripts with shellcheck
-
+      # --- Shell ---
       - id: shfmt
         name: Format shell scripts
         entry: shfmt
@@ -58,9 +48,7 @@ repos:
         args: [-w, -i, "2", -bn, -ci]
         description: Format shell scripts with shfmt
 
-      # =============================================================================
-      # Lua Formatting
-      # =============================================================================
+      # --- Lua ---
       - id: stylua
         name: Format Lua files
         entry: stylua
@@ -68,9 +56,7 @@ repos:
         files: '\.lua$'
         description: Format Lua files with stylua
 
-      # =============================================================================
-      # TOML Formatting
-      # =============================================================================
+      # --- TOML ---
       - id: taplo
         name: Format TOML files
         entry: taplo fmt
@@ -78,20 +64,7 @@ repos:
         files: '\.toml$'
         description: Format TOML files with taplo
 
-      # =============================================================================
-      # YAML Linting
-      # =============================================================================
-      - id: yamllint
-        name: Lint YAML files
-        entry: yamllint
-        language: system
-        files: '\.(yaml|yml)$'
-        args: [-d, relaxed]
-        description: Lint YAML files with yamllint
-
-      # =============================================================================
-      # JSON Formatting
-      # =============================================================================
+      # --- JSON ---
       - id: json-format
         name: Format JSON files
         entry: bash -c 'for f in "$@"; do jq . "$f" > "$f.tmp" && mv "$f.tmp" "$f"; done'
@@ -100,20 +73,7 @@ repos:
         exclude: 'package-lock\.json|flake\.lock'
         description: Format JSON files with jq
 
-      # =============================================================================
-      # Markdown Linting
-      # =============================================================================
-      - id: markdownlint
-        name: Lint Markdown files
-        entry: markdownlint
-        language: system
-        files: '\.md$'
-        args: [--fix]
-        description: Lint and fix Markdown files
-
-      # =============================================================================
-      # Python Formatting and Linting
-      # =============================================================================
+      # --- Python ---
       - id: ruff-format
         name: Format Python files
         entry: ruff format
@@ -121,27 +81,7 @@ repos:
         files: '\.py$'
         description: Format Python files with ruff
 
-      - id: ruff-check
-        name: Lint Python files
-        entry: ruff check
-        language: system
-        files: '\.py$'
-        args: [--fix]
-        description: Lint Python files with ruff
-
-      # =============================================================================
-      # Spell Checking
-      # =============================================================================
-      - id: typos
-        name: Check spelling
-        entry: typos
-        language: system
-        pass_filenames: false
-        description: Check for typos in code and documentation
-
-      # =============================================================================
-      # GitHub Actions Linting
-      # =============================================================================
+      # --- GitHub Actions (scoped to workflow files only — fast even when it runs) ---
       - id: actionlint
         name: Lint GitHub Actions
         entry: actionlint
@@ -149,9 +89,7 @@ repos:
         files: '^\.github/workflows/.*\.(yml|yaml)$'
         description: Lint GitHub Actions workflows
 
-      # =============================================================================
-      # General File Hygiene
-      # =============================================================================
+      # --- Generic file hygiene ---
       - id: trailing-whitespace
         name: Trim trailing whitespace
         entry: bash -c 'for f in "$@"; do sed -i "s/[[:space:]]*$//" "$f"; done'
@@ -168,7 +106,14 @@ repos:
 
       - id: check-merge-conflict
         name: Check for merge conflicts
-        entry: bash -c 'for f in "$@"; do ! grep -qE "^(<<<<<<<|=======|>>>>>>>)" "$f" || { echo "Merge conflict in $f"; exit 1; }; done'
+        # Match real git conflict markers exactly:
+        #   <<<<<<< <ref>     (7 chevrons + space)
+        #   =======           (exactly 7 equals, alone on the line)
+        #   >>>>>>> <ref>     (7 chevrons + space)
+        # The previous regex matched any line starting with 7+ equals, which
+        # gave false positives on markdown setext-style headings (`====...`)
+        # and visual section dividers.
+        entry: bash -c 'for f in "$@"; do ! grep -qE "^(<{7} |={7}$|>{7} )" "$f" || { echo "Merge conflict in $f"; exit 1; }; done'
         language: system
         files: '\.(nix|sh|lua|toml|yaml|yml|json|md|py)$'
         description: Check for merge conflict markers
@@ -180,17 +125,7 @@ repos:
         files: '\.sh$'
         description: Ensure executables have shebangs
 
-      # =============================================================================
-      # Nix Flake Validation
-      # =============================================================================
-      - id: flake-check
-        name: Check Nix flake
-        entry: nix flake check --no-build
-        language: system
-        files: '\.nix$'
-        pass_filenames: false
-        description: Validate Nix flake configuration (runs on all .nix file changes)
-
+      # --- Justfile validation (instant) ---
       - id: just-validate
         name: Validate justfile
         entry: just --list
@@ -198,3 +133,86 @@ repos:
         files: "justfile$"
         pass_filenames: false
         description: Validate justfile syntax
+
+      # ========================================================================
+      # PRE-PUSH STAGE — linters that may take a few seconds.
+      # Runs only on `git push`, not every commit. CI runs equivalents too,
+      # but these catch problems before they hit the PR.
+      # ========================================================================
+
+      - id: deadnix
+        name: Check for dead Nix code
+        entry: bash -c 'for f in "$@"; do deadnix --fail "$f" || exit 1; done' --
+        language: system
+        files: '\.nix$'
+        stages: [pre-push]
+        description: Check changed Nix files for dead/unused code
+
+      - id: shellcheck
+        name: Lint shell scripts
+        entry: shellcheck
+        language: system
+        files: '\.sh$'
+        # SC1091: external sourced files; SC2034: vars used externally;
+        # SC2086: word-splitting (often intentional in our scripts);
+        # SC2329/SC2317: false positives for functions called via case dispatch;
+        # SC2029: ssh client-side expansion is intentional in our admin scripts;
+        # SC2009: pgrep not always available in minimal live envs.
+        args: [-e, SC1091, -e, SC2034, -e, SC2086, -e, SC2329, -e, SC2317, -e, SC2029, -e, SC2009]
+        stages: [pre-push]
+        description: Lint shell scripts with shellcheck
+
+      - id: yamllint
+        name: Lint YAML files
+        entry: yamllint
+        language: system
+        files: '\.(yaml|yml)$'
+        args: [-d, relaxed]
+        stages: [pre-push]
+        description: Lint YAML files with yamllint
+
+      - id: markdownlint
+        name: Lint Markdown files
+        entry: markdownlint
+        language: system
+        files: '\.md$'
+        args: [--fix]
+        stages: [pre-push]
+        description: Lint and fix Markdown files
+
+      - id: ruff-check
+        name: Lint Python files
+        entry: ruff check
+        language: system
+        files: '\.py$'
+        args: [--fix]
+        stages: [pre-push]
+        description: Lint Python files with ruff
+
+      - id: typos
+        name: Check spelling
+        # --config required: typos auto-discovers `typos.toml` (no dot
+        # prefix), not `.typos.toml`. Without --config the project's
+        # extend-ignore-re rules silently don't apply.
+        entry: typos --config .typos.toml
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+        description: Check for typos in code and documentation
+
+      # ========================================================================
+      # DROPPED HOOKS — left here as comments so the rationale is discoverable.
+      #
+      # - nixpkgs-lint (was: nixpkgs-lint-community, Perl + tree-sitter)
+      #   Pathologically slow on files with large embedded heredocs (e.g.
+      #   modules/services/litellm-router.nix wedged for 7+ minutes on a
+      #   single 145-line file in one observed run). CI's `lint-check` job
+      #   already runs nixpkgs-fmt + deadnix + shellcheck across the whole
+      #   tree, so we lose nothing actionable.
+      #
+      # - flake-check (was: `nix flake check --no-build` on every .nix change)
+      #   Evaluates the entire flake across all 3 hosts + 141 modules on
+      #   every commit — 30–120s wall time. CI runs `check-configurations`
+      #   per host on every PR, which is the same thing. Locally,
+      #   `just validate-quick` or `just test-host HOST` covers it on demand.
+      # ========================================================================
