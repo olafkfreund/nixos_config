@@ -275,9 +275,6 @@ in
     kdePackages.qt6ct
     # Custom qwen-code package temporarily disabled due to npm registry network errors
     # (callPackage ../../home/development/qwen-code/default.nix { })
-    # COSMIC desktop extensions
-    cosmic-ext-applet-external-monitor-brightness
-    cosmic-ext-applet-weather
     # Remote desktop
     rustdesk-flutter
   ];

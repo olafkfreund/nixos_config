@@ -77,10 +77,6 @@ in
     openFirewall = true;
   };
 
-  # COSMIC Radio Applet - Internet radio player for COSMIC Desktop panel
-  # Add to panel via: COSMIC Settings > Panel > Applets
-  programs.cosmic-ext-applet-radio.enable = true;
-
   # Use AI provider defaults with workstation profile
   aiDefaults = {
     enable = true;
@@ -293,13 +289,14 @@ in
       enable = true;
     };
 
-    # Enable COSMIC Desktop with all applications and COSMIC Greeter
-    desktop.cosmic = {
-      enable = true;
-      useCosmicGreeter = true; # Using COSMIC Greeter as display manager
-      defaultSession = true; # Set COSMIC as default session
-      installAllApps = true;
-    };
+    # COSMIC disabled — sticking with GNOME only until COSMIC is more
+    # production-ready. Module + packages parked under modules/desktop/cosmic.nix
+    # and pkgs/cosmic-applets/ for easy re-enable.
+    desktop.cosmic.enable = false;
+
+    # Display manager: GDM (was previously delegated to cosmic-greeter by
+    # the cosmic module; the unified module defaults to "none" without it).
+    desktop.displayManager.backend = "gdm";
 
     # Microsoft Intune Company Portal (custom package with version control)
     intune = {
@@ -489,9 +486,6 @@ in
     vim
     wally-cli
     nix-doc # Interactive Nix documentation tool
-    # COSMIC desktop extensions
-    cosmic-ext-applet-external-monitor-brightness
-    cosmic-ext-applet-weather
     # Remote desktop
     rustdesk-flutter
     # Messaging applications
