@@ -248,12 +248,13 @@ in
   # Desktop manager configuration - Full GNOME for headless RDP access
   services.desktopManager.gnome.enable = true;
 
-  # GNOME services for full desktop functionality
+  # GNOME services for full desktop functionality.
+  # Note: gnome-remote-desktop is enabled (with the headless-listener wiring
+  # fix) by features.gnome-remote-desktop above — no need to repeat it here.
   services.gnome = {
     gnome-settings-daemon.enable = true;
     gnome-keyring.enable = true;
     gnome-initial-setup.enable = false;
-    gnome-remote-desktop.enable = true; # Enable GNOME Remote Desktop for RDP support
   };
 
   # Ensure display manager is enabled in systemd
@@ -265,7 +266,6 @@ in
   # Add GSettings schema path for GDM login screen
   environment.sessionVariables.GSETTINGS_SCHEMA_DIR = "${pkgs.gdm}/share/gsettings-schemas/gdm-${pkgs.gdm.version}/glib-2.0/schemas";
 
-  # gnome-remote-desktop is installed by services.gnome.gnome-remote-desktop.enable
   environment.systemPackages = with pkgs; [
     gdm # Provides the Gdm-1.0 typelib required by GNOME Shell
     gnome-control-center # Provides login-screen schema
