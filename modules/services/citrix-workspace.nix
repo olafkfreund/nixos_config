@@ -120,15 +120,10 @@ in
     xdg.mime.enable = true;
 
     # Warnings and assertions
-    warnings =
-      optional (!cfg.acceptLicense) ''
-        Citrix Workspace requires accepting the EULA.
-        Set services.citrix-workspace.acceptLicense = true after reviewing the license.
-      ''
-      ++ optional (config.services.displayManager.gdm.wayland or false) ''
-        WARNING: GDM Wayland session detected.
-        Citrix Workspace requires X11. Switch to X11 session or use XWayland.
-      '';
+    warnings = optional (!cfg.acceptLicense) ''
+      Citrix Workspace requires accepting the EULA.
+      Set services.citrix-workspace.acceptLicense = true after reviewing the license.
+    '';
 
     assertions = [
       {

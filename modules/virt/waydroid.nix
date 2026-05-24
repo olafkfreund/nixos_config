@@ -77,22 +77,6 @@ in
     # Security: Waydroid requires access to certain device nodes
     # This is managed automatically by the Waydroid package
 
-    # Assertions for common configuration issues
-    assertions = [
-      {
-        assertion = config.services.xserver.enable -> (config.services.displayManager.gdm.wayland or true);
-        message = ''
-          Waydroid requires a Wayland session to function properly.
-
-          If using GDM, ensure Wayland is not disabled. Check that
-          services.displayManager.gdm.wayland is not set to false.
-
-          Waydroid cannot run in X11 sessions directly, but can run in
-          a nested Wayland session using cage or weston.
-        '';
-      }
-    ];
-
     # Warnings for optimal configuration
     warnings = lib.optional (!cfg.enableWaydroidHelper) ''
       Waydroid-helper is disabled. You will need to manually manage
