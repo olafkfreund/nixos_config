@@ -77,53 +77,74 @@ let
         use-ollama)
           url="$(router_url)"
           mkdir -p "$root/.claude"
-          # Preserve any existing settings; just set/override the env block.
+          # Preserve any existing settings; just set/override the env block and apiKeyHelper.
           if [[ -f "$settings_file" ]]; then
-            jq --arg url "$url" \
-              '.env = (.env // {}) | .env.ANTHROPIC_BASE_URL = $url | .model = "claude-sonnet-4-6"' \
+            jq --arg url "$url" --arg helper "${lib.getExe claudeRouterKey}" \
+              '.env = (.env // {}) | .env.ANTHROPIC_BASE_URL = $url | del(.env.CLAUDE_ROUTER_MODE) | .apiKeyHelper = $helper | .model = "claude-sonnet-4-6"' \
               "$settings_file" > "$settings_file.tmp"
             mv "$settings_file.tmp" "$settings_file"
           else
-            jq -n --arg url "$url" \
-              '{env: {ANTHROPIC_BASE_URL: $url}, model: "claude-sonnet-4-6"}' \
+            jq -n --arg url "$url" --arg helper "${lib.getExe claudeRouterKey}" \
+              '{env: {ANTHROPIC_BASE_URL: $url}, apiKeyHelper: $helper, model: "claude-sonnet-4-6"}' \
               > "$settings_file"
           fi
           echo "✓ $root now uses Ollama via $url"
           ;;
 
-        use-claude|use-default)
+        use-subscription|use-default)
           if [[ -f "$settings_file" ]]; then
-            # Remove just the router-related keys; keep anything else the user added.
-            jq 'if .env then del(.env.ANTHROPIC_BASE_URL) | (if (.env | length) == 0 then del(.env) else . end) else . end | del(.model)' \
+            # Revert to default behavior (subscription) by removing overrides and the apiKeyHelper
+            jq 'del(.apiKeyHelper) | if .env then del(.env.ANTHROPIC_BASE_URL) | del(.env.CLAUDE_ROUTER_MODE) | (if (.env | length) == 0 then del(.env) else . end) else . end | del(.model)' \
               "$settings_file" > "$settings_file.tmp"
             # If the file is now {}, remove it entirely.
             if [[ "$(jq -c . "$settings_file.tmp")" == "{}" ]]; then
               rm -f "$settings_file" "$settings_file.tmp"
-              echo "✓ $root now uses default (cloud Anthropic) — settings file removed"
+              echo "✓ $root reset to default (Cloud Subscription) — settings file removed"
             else
               mv "$settings_file.tmp" "$settings_file"
-              echo "✓ $root now uses default (cloud Anthropic) — router override cleared"
+              echo "✓ $root reset to default (Cloud Subscription) — router overrides cleared"
             fi
           else
-            echo "✓ $root already uses default (no override present)"
+            echo "✓ $root already uses default (Cloud Subscription)"
           fi
           ;;
 
-        status)
+        use-api|use-claude)
+          mkdir -p "$root/.claude"
           if [[ -f "$settings_file" ]]; then
-            url=$(jq -r '.env.ANTHROPIC_BASE_URL // empty' "$settings_file")
-            if [[ -n "$url" ]]; then
-              echo "ollama via $url"
-            else
-              echo "default (cloud Anthropic) — settings file exists but no router override"
-            fi
+            jq --arg helper "${lib.getExe claudeRouterKey}" \
+              '.env = (.env // {}) | .env.CLAUDE_ROUTER_MODE = "api" | del(.env.ANTHROPIC_BASE_URL) | .apiKeyHelper = $helper | del(.model)' \
+              "$settings_file" > "$settings_file.tmp"
+            mv "$settings_file.tmp" "$settings_file"
           else
-            echo "default (cloud Anthropic) — no settings override"
+            jq -n --arg helper "${lib.getExe claudeRouterKey}" \
+              '{env: {CLAUDE_ROUTER_MODE: "api"}, apiKeyHelper: $helper}' > "$settings_file"
+          fi
+          echo "✓ $root now uses Anthropic Cloud API key (usage-based billing)"
+          ;;
+
+        status)
+          url="''${ANTHROPIC_BASE_URL:-}"
+          mode="''${CLAUDE_ROUTER_MODE:-}"
+          if [[ -f "$settings_file" ]]; then
+            if [[ -z "$url" ]]; then
+              url=$(jq -r '.env.ANTHROPIC_BASE_URL // empty' "$settings_file")
+            fi
+            if [[ -z "$mode" ]]; then
+              mode=$(jq -r '.env.CLAUDE_ROUTER_MODE // empty' "$settings_file")
+            fi
+          fi
+          if [[ -n "$url" ]]; then
+            echo "ollama via $url"
+          elif [[ "$mode" == "api" ]]; then
+            echo "api key (cloud Anthropic) — usage-based billing"
+          else
+            echo "subscription (cloud Anthropic) — default"
           fi
           ;;
 
         *)
-          echo "usage: claude-router {use-ollama|use-claude|use-default|status}" >&2
+          echo "usage: claude-router {use-ollama|use-api|use-claude|use-subscription|use-default|status}" >&2
           exit 2
           ;;
       esac
@@ -142,24 +163,40 @@ let
     text = ''
       set -euo pipefail
       url="''${ANTHROPIC_BASE_URL:-}"
-      if [[ -z "$url" ]]; then
-        curr_dir="$PWD"
-        while [[ "$curr_dir" != "/" ]]; do
-          if [[ -f "$curr_dir/.claude/settings.json" ]]; then
-            if url_extracted=$(jq -r '.env.ANTHROPIC_BASE_URL // empty' "$curr_dir/.claude/settings.json"); then
-              if [[ -n "$url_extracted" ]]; then
-                url="$url_extracted"
-                break
-              fi
-            fi
+      mode="''${CLAUDE_ROUTER_MODE:-}"
+
+      # Search up the directory tree if either var is empty
+      curr_dir="$PWD"
+      while [[ "$curr_dir" != "/" ]]; do
+        if [[ -f "$curr_dir/.claude/settings.json" ]]; then
+          if [[ -z "$url" ]]; then
+            url=$(jq -r '.env.ANTHROPIC_BASE_URL // empty' "$curr_dir/.claude/settings.json")
           fi
-          curr_dir="$(dirname "$curr_dir")"
-        done
-      fi
+          if [[ -z "$mode" ]]; then
+            mode=$(jq -r '.env.CLAUDE_ROUTER_MODE // empty' "$curr_dir/.claude/settings.json")
+          fi
+        fi
+        curr_dir="$(dirname "$curr_dir")"
+      done
+
       if [[ "$url" == *:4000* ]] || [[ "$url" == *p620.*ts.net/router* ]]; then
-        tr -d '\n' < "/run/agenix/api-router-$(hostname)"
+        if [[ -f "/run/agenix/api-router-$(hostname)" ]]; then
+          tr -d '\n' < "/run/agenix/api-router-$(hostname)"
+        else
+          echo "Error: Router key secret not found" >&2
+          exit 1
+        fi
+      elif [[ "$mode" == "api" ]]; then
+        # API key mode explicitly requested
+        if [[ -f "/run/agenix/api-anthropic" ]]; then
+          tr -d '\n' < "/run/agenix/api-anthropic"
+        else
+          # Fallback if no API key exists
+          exit 0
+        fi
       else
-        tr -d '\n' < "/run/agenix/api-anthropic"
+        # Default behavior: Cloud Subscription mode (output nothing, exit 0)
+        exit 0
       fi
     '';
   };
@@ -178,9 +215,18 @@ let
     !`claude-router use-ollama`
     EOF
 
+    cat > "$out/commands/use-subscription.md" <<'EOF'
+    ---
+    description: Switch this repo to Anthropic Cloud Subscription (default)
+    allowed-tools: Bash(claude-router:*)
+    ---
+
+    !`claude-router use-subscription`
+    EOF
+
     cat > "$out/commands/use-claude.md" <<'EOF'
     ---
-    description: Switch this repo back to cloud Anthropic API
+    description: Switch this repo to cloud Anthropic API key (usage-based billing)
     allowed-tools: Bash(claude-router:*)
     ---
 
@@ -189,7 +235,7 @@ let
 
     cat > "$out/commands/use-default.md" <<'EOF'
     ---
-    description: Reset this repo to the default backend (alias for use-claude)
+    description: Reset this repo to default backend (Cloud Subscription)
     allowed-tools: Bash(claude-router:*)
     ---
 
@@ -232,13 +278,5 @@ in
 
     environment.etc."claude-code/commands".source = "${slashCommands}/commands";
 
-    # When claude-code-managed is enabled, auto-inject apiKeyHelper. The
-    # user can still override per-session via ~/.claude/settings.json
-    # (lower precedence than managed-settings.json by design).
-    modules.programs.claude-code-managed.settings = lib.mkIf
-      config.modules.programs.claude-code-managed.enable
-      {
-        apiKeyHelper = lib.getExe claudeRouterKey;
-      };
   };
 }

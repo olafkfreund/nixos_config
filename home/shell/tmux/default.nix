@@ -42,6 +42,9 @@ in
       escapeTime = 0;
       secureSocket = true;
       mouse = true;
+      terminal = "tmux-256color";
+      keyMode = "vi";
+      focusEvents = true;
 
       # Curated plugin selection for optimal performance and functionality
       plugins = with pkgs; [
@@ -163,8 +166,7 @@ in
         bind-key -n M-a     run-shell '${pkgs.customPkgs.tmux-palette}/bin/tmux-palette ai-tools'
 
         # ========== Terminal and Display Settings ==========
-        set-option -g default-terminal 'tmux-256color'
-        set-option -g terminal-overrides ',xterm-256color:RGB,alacritty:RGB,kitty:RGB,foot:RGB,wezterm:RGB'
+        set-option -g terminal-overrides ',xterm-256color:RGB,alacritty:RGB,kitty:RGB,foot:RGB,wezterm:RGB,ghostty:RGB'
         set-option -g status-position top
         set-option -ga terminal-overrides ',*:Tc' # True color support
 
@@ -174,9 +176,7 @@ in
         set-option -g status-justify left # Ensure left alignment
 
         # Performance optimizations
-        set -s escape-time 0              # Remove delay for ESC key
         set -g repeat-time 600            # Increase repeat timeout
-        set -g focus-events on            # Enable focus events
         set -g aggressive-resize on       # Aggressive resizing
 
         # Modern terminal features
@@ -221,6 +221,16 @@ in
         bind C new-window                                 # New window at home
 
         # ========== Vim-Style Navigation ==========
+        # Smart pane switching with awareness of Vim splits.
+        # Integrates with nvim-tmux-navigation Lua plugin.
+        is_vim="ps -o state= -o comm= -t '#{pane_tty}' \
+            | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|l?n?vim?x?|fzf)(diff)?$'"
+        bind-key -n 'C-h' if-shell "$is_vim" 'send-keys C-h'  'select-pane -L'
+        bind-key -n 'C-j' if-shell "$is_vim" 'send-keys C-j'  'select-pane -D'
+        bind-key -n 'C-k' if-shell "$is_vim" 'send-keys C-k'  'select-pane -U'
+        bind-key -n 'C-l' if-shell "$is_vim" 'send-keys C-l'  'select-pane -R'
+        bind-key -n 'C-\' if-shell "$is_vim" 'send-keys C-\\' 'select-pane -l'
+
         # Pane navigation (vim-style with fallback)
         bind h select-pane -L
         bind j select-pane -D
@@ -261,10 +271,9 @@ in
 
         # ========== Copy Mode Enhancements ==========
         # Vim-style copy mode
-        set-window-option -g mode-keys vi
         bind Enter copy-mode
         bind -T copy-mode-vi 'v' send -X begin-selection
-        bind -T copy-mode-vi 'y' send -X copy-selection-and-cancel
+        bind -T copy-mode-vi 'y' send -X copy-pipe-and-cancel "${pkgs.wl-clipboard}/bin/wl-copy"
         bind -T copy-mode-vi 'r' send -X rectangle-toggle
         bind -T copy-mode-vi Escape send -X cancel
 
@@ -369,23 +378,37 @@ in
         {
           icon = "⚡";
           iconColor = "#cc8822";
-          title = "Claude Code";
-          subtitle = "Anthropic CLI — skip-perms, resume last session, remote-control";
-          action.tmux = "send-keys 'claude --dangerously-skip-permissions --resume --remote-control' Enter";
+          title = "Claude Code (Popup)";
+          subtitle = "Launch Claude overlay in floating window";
+          action.tmux = "display-popup -w 85% -h 85% -d '#{pane_current_path}' -E 'claude --dangerously-skip-permissions --resume --remote-control'";
+        }
+        {
+          icon = "⚡";
+          iconColor = "#cc8822";
+          title = "Claude Code (Split Right)";
+          subtitle = "Open Claude in a 35% side split";
+          action.tmux = "split-window -h -l 35% -c '#{pane_current_path}' 'claude --dangerously-skip-permissions --resume --remote-control'";
         }
         {
           icon = "🛰";
           iconColor = "#a48ec3";
-          title = "Claude Agents";
-          subtitle = "Anthropic CLI in agent-orchestration mode (skip-perms)";
-          action.tmux = "send-keys 'claude agents --dangerously-skip-permissions' Enter";
+          title = "Claude Agents (Popup)";
+          subtitle = "Launch agents overlay in floating window";
+          action.tmux = "display-popup -w 85% -h 85% -d '#{pane_current_path}' -E 'claude agents --dangerously-skip-permissions'";
         }
         {
           icon = "🛸";
           iconColor = "#22aaff";
-          title = "Antigravity CLI";
-          subtitle = "Google AI CLI (agy — replaced Gemini CLI on 2026-05-20)";
-          action.tmux = "send-keys 'agy' Enter";
+          title = "Antigravity CLI (Popup)";
+          subtitle = "Launch agy overlay in floating window";
+          action.tmux = "display-popup -w 85% -h 85% -d '#{pane_current_path}' -E 'agy'";
+        }
+        {
+          icon = "🛸";
+          iconColor = "#22aaff";
+          title = "Antigravity CLI (Split Right)";
+          subtitle = "Open agy in a 35% side split";
+          action.tmux = "split-window -h -l 35% -c '#{pane_current_path}' 'agy'";
         }
       ]);
     };

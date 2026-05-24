@@ -32,6 +32,7 @@ in
       # P510-specific server modules (media server)
       ../../modules/development/default.nix
       ../../modules/secrets/api-keys.nix
+      ../../modules/services/ollama.nix
       # Desktop-specific imports (needed for GNOME):
       # ./nixos/greetd.nix      # Display manager - using GDM instead
       ./nixos/screens.nix # Display configuration - needed for desktop
@@ -350,4 +351,14 @@ in
     };
   };
   system.stateVersion = "25.11";
+
+  # Local Ollama model server on NVIDIA GPU (CUDA, loopback only)
+  features.ollama-server = {
+    enable = true;
+    package = pkgs.ollama-cuda; # NVIDIA CUDA GPU package
+    modelsDir = "/mnt/media/ollama/models"; # Stored on the large media pool disk
+    persistentModels = [ ]; # No persistent models to save VRAM
+    onDemandModels = [ "gemma4:e4b" ]; # Only Gemma 4 model for n8n
+    keepAlive = "5m"; # Evict from VRAM after 5 minutes of idle
+  };
 }
