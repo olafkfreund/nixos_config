@@ -34,4 +34,9 @@ final: _prev: {
   # for rationale). Source-of-truth for UUID + version is the metadata.json
   # baked into the upstream commit we pin.
   gnome-ext-forge = final.callPackage ../pkgs/gnome-ext-forge { };
+
+  # YAMIS — monochrome icon theme with FollowsColorScheme + multi-theme
+  # fallback chain. Wired via Stylix in modules/desktop/stylix-theme.nix
+  # so it applies wherever Stylix's GTK / GNOME targets are enabled.
+  yet-another-monochrome-icons = final.callPackage ../pkgs/yet-another-monochrome-icons { };
 }
