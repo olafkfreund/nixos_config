@@ -41,6 +41,7 @@ in
           "rudra@narkagni"
           "spotify-controller@narkagni"
           "accent-directories@taiwbi.com"
+          "forge@jmmaranan.com"
           # User-managed drift — see policy comment above.
           "aurora-shell@luminusos.github.io"
         ];
@@ -117,6 +118,7 @@ in
         gnome-ext-rudra
         gnome-ext-spotify-controller
         gnome-ext-accent-directories
+        gnome-ext-forge
 
         # Helpers used by various extensions at runtime.
         lm_sensors

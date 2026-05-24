@@ -76,4 +76,11 @@
   # for agent-orchestration scripting via rmux-sdk; for interactive
   # multiplexing tmux still owns the ergonomics here.
   rmux = pkgs.callPackage ./rmux { };
+
+  # gnome-ext-forge — i3/sway-style tiling and window manager for GNOME
+  # Shell. Pinned to a master commit (not a release tag) because the
+  # latest release v49-89 predates GNOME 50; master has the "50"/"50.1"
+  # metadata + API-shim updates. Swap to a release tag when upstream
+  # cuts one with GNOME 50 baked in.
+  gnome-ext-forge = pkgs.callPackage ./gnome-ext-forge { };
 }
