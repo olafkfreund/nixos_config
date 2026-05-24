@@ -22,6 +22,12 @@ in
     dconf.settings = {
       "org/gnome/shell" = {
         disable-user-extensions = false;
+        # Restore the logout entry in the system menu on single-user GNOME 50+.
+        # GNOME 50 hid logout by default on single-user systems ("nothing to log
+        # out to"), but it's still useful for forcing a fresh shell session
+        # after extension changes / login-time tweaks. Re-enabling here makes
+        # the entry visible in the power menu next to Restart / Shut Down.
+        always-show-log-out = true;
         # UUIDs verified against gnomeExtensions.<name>.passthru.extensionUuid
         # (for nixpkgs entries) or against metadata.json of the manual zips
         # we re-package in pkgs/gnome-ext-*. Each UUID must have either a
