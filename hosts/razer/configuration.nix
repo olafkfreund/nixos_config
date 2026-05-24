@@ -96,10 +96,6 @@ in
   # See: https://github.com/olafkfreund/cosmic-ext-bg/issues/32
   # services.cosmic-ext-bg.enable = true;
 
-  # COSMIC Radio Applet - Internet radio player for COSMIC Desktop panel
-  # Add to panel via: COSMIC Settings > Panel > Applets
-  programs.cosmic-ext-applet-radio.enable = true;
-
   # Use AI provider defaults with laptop profile (disables Ollama for battery life)
   aiDefaults = {
     enable = true;
@@ -259,13 +255,10 @@ in
       droidcam = false; # Disabled - building custom solution
     };
 
-    # COSMIC Desktop with COSMIC Greeter enabled
-    desktop.cosmic = {
-      enable = true;
-      useCosmicGreeter = true; # Using COSMIC Greeter as display manager
-      defaultSession = true;
-      installAllApps = true;
-    };
+    # COSMIC disabled — GNOME only until COSMIC is more production-ready.
+    # Module + packages parked under modules/desktop/cosmic.nix and
+    # pkgs/cosmic-applets/ for easy re-enable.
+    desktop.cosmic.enable = false;
 
     # Microsoft Intune Company Portal (custom package with version control)
     intune = {
@@ -274,6 +267,12 @@ in
       enableDesktopIntegration = true;
     };
   };
+
+  # Display manager: GDM (was previously delegated to cosmic-greeter by the
+  # cosmic module; the unified DM module defaults to "none" without it).
+  # NOTE: must live at top-level, NOT inside the features = {...} block above —
+  # the option path is `desktop.displayManager`, not `features.desktop.displayManager`.
+  desktop.displayManager.backend = "gdm";
 
   # Citrix Workspace for client project remote access
   # Disabled — no longer needed. Module + overlay + package retained so this
@@ -419,9 +418,6 @@ in
       # qwen-code disabled due to npm registry network errors (HTTP/2 framing layer issue)
       # (callPackage ../../home/development/qwen-code/default.nix { })
       nix-doc # Interactive Nix documentation tool
-      # COSMIC desktop extensions
-      cosmic-ext-applet-external-monitor-brightness
-      cosmic-ext-applet-weather
       # Remote desktop
       rustdesk-flutter
       # Messaging applications
