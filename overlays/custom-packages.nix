@@ -30,4 +30,8 @@ final: _prev: {
   gnome-ext-spotify-controller = final.callPackage ../pkgs/gnome-ext-spotify-controller { };
   gnome-ext-accent-directories = final.callPackage ../pkgs/gnome-ext-accent-directories { };
   gnome-ext-allow-locked-remote-desktop = final.callPackage ../pkgs/gnome-ext-allow-locked-remote-desktop { };
+  # gnome-ext-forge — pinned to master commit (see pkgs/gnome-ext-forge
+  # for rationale). Source-of-truth for UUID + version is the metadata.json
+  # baked into the upstream commit we pin.
+  gnome-ext-forge = final.callPackage ../pkgs/gnome-ext-forge { };
 }
