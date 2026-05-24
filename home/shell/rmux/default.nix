@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 let
-  inherit (lib) mkEnableOption mkIf;
+  inherit (lib) mkOption mkIf types;
   cfg = config.multiplexer.rmux;
 
   # rmux config file. tmux-style syntax (rmux is tmux-compatible at the
@@ -63,12 +63,21 @@ let
     bind l select-pane -R
 
     # ----- Reload key -----
-    bind r source-file ${rmuxConf} \; display-message "rmux config reloaded"
+    # Use the stable XDG path (HM symlinks it to this rmux.conf store entry).
+    # Cannot use $${rmuxConf} here — would self-reference and cause an
+    # infinite-recursion error during module evaluation.
+    bind r source-file ~/.config/rmux/rmux.conf \; display-message "rmux config reloaded"
   '';
 in
 {
   options.multiplexer.rmux = {
-    enable = mkEnableOption {
+    # Using mkOption (not mkEnableOption { default = true; ... }) because
+    # the latter's `default = true` doesn't take effect in our HM context —
+    # observed empirically: cfg.enable evaluated to `false` despite the
+    # attrset arg, so the whole config block never fired. Plain mkOption
+    # always honors default.
+    enable = mkOption {
+      type = types.bool;
       default = true;
       description = "rmux multiplexer config + shell alias auto-loading it";
     };
