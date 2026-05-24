@@ -15,6 +15,7 @@ _: {
     ./zellij/default.nix
     ./bat/default.nix
     ./tmux/default.nix
+    ./rmux/default.nix # multiplexer config + alias auto-loading it
     ./lazyvim/default.nix
     ./markdown/default.nix
     ./gh/default.nix
