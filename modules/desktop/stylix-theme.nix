@@ -44,6 +44,20 @@ in
         size = vars.baseTheme.cursor.size;
       };
 
+      # YAMIS — monochrome icon theme with FollowsColorScheme=true, so the
+      # same theme name works for both light and dark polarity (Stylix flips
+      # the polarity via dconf; the theme adapts automatically).
+      # Falls back to Papirus-Dark / breeze-dark / Cosmic / Adwaita for any
+      # icon YAMIS doesn't ship — see pkgs/yet-another-monochrome-icons.
+      # Note: use the modern `stylix.icons` namespace; the old
+      # `stylix.iconTheme` is deprecated and emits a warning.
+      icons = {
+        enable = true;
+        package = pkgs.yet-another-monochrome-icons;
+        dark = "yet-another-monochrome-icon-set";
+        light = "yet-another-monochrome-icon-set";
+      };
+
       targets = {
         chromium.enable = false;
 
