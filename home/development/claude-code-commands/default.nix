@@ -3,7 +3,7 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption;
+  inherit (lib) mkIf mkEnableOption mkOption types;
   cfg = config.programs.claude-code-commands;
 
   # /team — global slash command. Takes a task as $ARGUMENTS, decomposes
@@ -123,16 +123,92 @@ let
     - Use `/tasks` from inside any teammate's session to see the shared
       task list.
   '';
+  # /crew — global slash command. Hands a task description to a fleet
+  # LLM (default: p620's LiteLLM router, which proxies local Ollama
+  # models), parses the model's `<file path="…">…</file>` tags into
+  # actual files resolved against the user's current cwd, runs
+  # `nix-instantiate --parse` for any .nix files it wrote, then prints
+  # a git diff.
+  #
+  # Why LiteLLM and not bare Ollama? Bare ollama only binds to 127.0.0.1
+  # on p620, so razer + p510 can't reach it. LiteLLM is already exposed
+  # on tailscale0:4000 with per-host bearer-key auth (api-router-<host>
+  # agenix secret), so the same /crew works on every host without any
+  # network-exposure changes to the ollama daemon itself.
+  #
+  # The bundled run_crew.py reads four env knobs:
+  #   CREW_ENDPOINT     — chat-completion URL (default p620's LiteLLM)
+  #   CREW_MODEL        — model alias (default qwen3:14b)
+  #   CREW_API_KEY_FILE — path to bearer-token file
+  #                       (default /run/agenix/api-router-<hostname>)
+  #   CREW_REPO_ROOT    — where <file> tag paths land (default cwd)
+  runCrewPy = ./run_crew.py;
+
+  crewCommand = ''
+    ---
+    description: Run the local Qwen developer crew to generate, modify, and self-correct files locally.
+    argument-hint: <task description>
+    allowed-tools: Bash(*)
+    ---
+    # Local Developer Crew Orchestration
+
+    You are the cloud Manager orchestrator (Claude). Your task is to
+    delegate the raw file generation, coding, and initial syntax
+    validation to the local Qwen developer crew via the LiteLLM router
+    on p620.
+
+    Execute the crew script with the user's task description (the
+    script resolves file paths against the current working directory,
+    so files land where the user is working):
+
+    !CREW_ENDPOINT=${cfg.endpoint} CREW_MODEL=${cfg.model} python3 ${runCrewPy} "$ARGUMENTS"
+
+    ## Review Protocol
+    Once the script has executed:
+    1. Parse the output and any git diff printed by the local worker.
+    2. Confirm the syntax checks passed successfully.
+    3. Review the changes for architectural soundness and compliance
+       with the project's conventions.
+    4. Present the verified git diff to the user for final approval.
+  '';
 in
 {
   options.programs.claude-code-commands = {
     enable = mkEnableOption ''
       Declarative Claude Code user-level slash commands at
-      ~/.claude/commands/. Adds /team — see source file for details.
+      ~/.claude/commands/. Adds /team and /crew — see source file for
+      details.
     '';
+
+    endpoint = mkOption {
+      type = types.str;
+      default = "http://p620:4000/v1/chat/completions";
+      example = "http://127.0.0.1:11434/v1/chat/completions";
+      description = ''
+        OpenAI-compatible chat-completion endpoint that /crew talks to.
+        Defaults to p620's LiteLLM router on the tailnet, which proxies
+        the local Ollama service and accepts the per-host
+        `api-router-<host>` bearer key. Override only if you have a
+        different proxy in front of your model.
+      '';
+    };
+
+    model = mkOption {
+      type = types.str;
+      default = "qwen3:14b";
+      example = "claude-sonnet-4-6";
+      description = ''
+        Model name as the configured endpoint advertises it. For our
+        LiteLLM router these are the aliases in model_list (qwen3:14b,
+        qwen3, claude-sonnet-4-6, gemma4, …). Pick whichever balance
+        of speed/quality you want — the default qwen3:14b matches the
+        previous bare-ollama behaviour.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
     home.file.".claude/commands/team.md".text = teamCommand;
+    home.file.".claude/commands/crew.md".text = crewCommand;
   };
 }

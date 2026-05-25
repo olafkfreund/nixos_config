@@ -1,33 +1,93 @@
 #!/usr/bin/env python3
+"""Local developer crew — delegate file generation to a local LLM.
+
+Talks to the LiteLLM router (default) which proxies Ollama models, so the
+same script works from every host on the tailnet without needing a local
+ollama or local model pull. Designed to run from any working directory.
+
+Reads four environment knobs:
+
+  CREW_ENDPOINT     Full chat-completion endpoint URL. Must be the
+                    OpenAI-compat path (LiteLLM serves it at
+                    `/v1/chat/completions`).
+                    Default: http://p620:4000/v1/chat/completions
+
+  CREW_MODEL        Model name as exposed by the endpoint. With
+                    LiteLLM that's the alias from model_list (e.g.
+                    `qwen3:14b`, `qwen3`, `claude-sonnet-4-6`).
+                    Default: qwen3:14b
+
+  CREW_API_KEY_FILE Path to a file containing the bearer token to
+                    send in `Authorization: Bearer …`. Auto-falls
+                    back to `/run/agenix/api-router-<hostname>`,
+                    which is where agenix-decrypted per-host LiteLLM
+                    keys land on this fleet. The file is read at
+                    runtime — token never enters argv or env.
+
+  CREW_REPO_ROOT    Directory the model's `<file path=…>` tags are
+                    resolved against. Default: the current working
+                    directory.
+"""
+
 import sys
 import os
+import socket
 import json
 import urllib.request
 import urllib.error
 import subprocess
 import re
 
-OLLAMA_URL = "http://127.0.0.1:11434/api/chat"
-MODEL_NAME = "qwen3:14b"
+ENDPOINT = os.environ.get(
+    "CREW_ENDPOINT",
+    "http://p620:4000/v1/chat/completions",
+)
+MODEL_NAME = os.environ.get("CREW_MODEL", "qwen3:14b")
+DEFAULT_KEY_FILE = f"/run/agenix/api-router-{socket.gethostname()}"
+API_KEY_FILE = os.environ.get("CREW_API_KEY_FILE", DEFAULT_KEY_FILE)
 
 
-def query_ollama(messages):
+def load_api_key():
+    try:
+        with open(API_KEY_FILE) as fh:
+            return fh.read().strip()
+    except OSError as e:
+        print(
+            f"[-] Cannot read CREW_API_KEY_FILE ({API_KEY_FILE}): {e}.\n"
+            f"    Either set CREW_API_KEY_FILE to a readable file containing\n"
+            f"    the bearer token, or make sure the per-host agenix secret\n"
+            f"    is deployed and readable."
+        )
+        sys.exit(1)
+
+
+def query_llm(messages):
     payload = {
         "model": MODEL_NAME,
         "messages": messages,
         "stream": False,
-        "options": {"temperature": 0.2},
+        "temperature": 0.2,
     }
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
-        OLLAMA_URL, data=data, headers={"Content-Type": "application/json"}
+        ENDPOINT,
+        data=data,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {load_api_key()}",
+        },
     )
     try:
         with urllib.request.urlopen(req) as response:
             res = json.loads(response.read().decode("utf-8"))
-            return res["message"]["content"]
+            # OpenAI-compat: choices[0].message.content
+            return res["choices"][0]["message"]["content"]
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")[:500]
+        print(f"[-] LLM HTTP {e.code} from {ENDPOINT}: {body}")
+        sys.exit(1)
     except urllib.error.URLError as e:
-        print(f"[-] Ollama connection error: {e}. Is Ollama running on {OLLAMA_URL}?")
+        print(f"[-] LLM connection error: {e}. Endpoint reachable? ({ENDPOINT})")
         sys.exit(1)
 
 
@@ -75,7 +135,15 @@ def main():
         sys.exit(1)
 
     task = sys.argv[1]
-    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    # Resolve where file-tagged paths land. Order:
+    #   1. CREW_REPO_ROOT env override (lets the user drive crew from
+    #      one repo while it edits another, useful when this script
+    #      is installed globally).
+    #   2. Current working directory — the natural default once the
+    #      script lives outside any specific repo. Was previously
+    #      `dirname(__file__)/..` which only worked when invoked as
+    #      `./scripts/run_crew.py` from a specific repo's root.
+    repo_root = os.path.abspath(os.environ.get("CREW_REPO_ROOT", os.getcwd()))
 
     system_prompt = (
         "You are an expert NixOS systems engineer. Your task is to output the requested file changes.\n"
@@ -94,8 +162,11 @@ def main():
 
     retries = 3
     for attempt in range(retries):
-        print(f"[*] Querying {MODEL_NAME} (Attempt {attempt + 1}/{retries})...")
-        response_content = query_ollama(messages)
+        print(
+            f"[*] Querying {MODEL_NAME} via {ENDPOINT} "
+            f"(Attempt {attempt + 1}/{retries})..."
+        )
+        response_content = query_llm(messages)
         messages.append({"role": "assistant", "content": response_content})
 
         written_files = parse_and_write_files(response_content, repo_root)
