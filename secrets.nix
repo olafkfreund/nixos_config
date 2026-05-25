@@ -38,6 +38,13 @@ in
   "secrets/wifi-password.age".publicKeys = allUsers ++ workstations;
   "secrets/tailscale-auth-key.age".publicKeys = allUsers ++ allHosts;
 
+  # GNOME Remote Desktop RDP password. Plaintext, applied to grdctl at
+  # user login via the systemd-user oneshot in
+  # modules/desktop/gnome-remote-desktop.nix. Single shared password
+  # across hosts — each host has its own libsecret keyring entry, but
+  # the source-of-truth here means we don't hand-type per host.
+  "secrets/grd-rdp-password.age".publicKeys = allUsers ++ allHosts;
+
   # LiteLLM router master key (p620 only — self-hosted Anthropic-compat
   # proxy for Ollama coding models). Plaintext rotation: see docs/plans/2026-05-22-ollama-p620-litellm-design.md §5.
   "secrets/litellm-master-key.age".publicKeys = allUsers ++ [ p620 ];
