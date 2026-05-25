@@ -101,11 +101,25 @@ in
       ];
     };
 
-    # Configure Claude Desktop for the user
+    # Configure Claude Desktop for the user.
+    # systemd.user.services are loaded for EVERY user's systemd-user instance
+    # by default — including system users like gdm-greeter. Without the
+    # ConditionUser gate, gdm-greeter's systemd-user (UID 60578) tries to
+    # start this unit, fails with exit 216/GROUP because it can't switch
+    # to User=cfg.user, and spams the journal once per gdm display attempt:
+    #   configure-rescreenshot-mcp.service: Failed to determine supplementary
+    #   groups: Operation not permitted
+    #   Failed at step GROUP spawning ...: Operation not permitted
+    #   Main process exited, code=exited, status=216/GROUP
+    # ConditionUser=cfg.user skips the unit cleanly for any user except the
+    # configured one, so only the intended user's systemd-user instance ever
+    # tries to run it.
     systemd.user.services.configure-rescreenshot-mcp = mkIf cfg.autoConfigureClaudeDesktop {
       description = "Configure Claude Desktop with rescreenshot-mcp";
       wantedBy = [ "default.target" ];
       after = [ "graphical-session.target" ];
+
+      unitConfig.ConditionUser = cfg.user;
 
       serviceConfig = {
         Type = "oneshot";
