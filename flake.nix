@@ -150,10 +150,10 @@
     };
 
     # skill-pool — self-hosted Claude Code skill/agent/command registry.
-    # Pinned to the v0.3.2 tagged release; consumed by
+    # Pinned to the v0.3.4 tagged release; consumed by
     # modules/services/skill-pool.nix on p620.
     skill-pool = {
-      url = "github:olafkfreund/skill_pool/v0.3.2";
+      url = "github:olafkfreund/skill_pool/v0.3.4";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

@@ -1521,16 +1521,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1779718025,
-        "narHash": "sha256-F1v5cETdgTqkPq/Tv8BTQAaz/EogdrCLk5PFlfGLHPc=",
+        "lastModified": 1779719595,
+        "narHash": "sha256-SiD2ZAPuH2abWZ3g24Xnr6gqcq8ovMQSNHq1Y21kA0c=",
         "owner": "olafkfreund",
         "repo": "skill_pool",
-        "rev": "3839972f9ca7c5e60f9686d3203ae5b76652b691",
+        "rev": "9688e052ac5006a4a2a3a91701afd7cbbcc807d0",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
-        "ref": "v0.3.2",
+        "ref": "v0.3.4",
         "repo": "skill_pool",
         "type": "github"
       }
