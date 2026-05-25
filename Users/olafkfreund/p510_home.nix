@@ -28,7 +28,11 @@
       enable = lib.mkForce false; # Completely disable desktop framework for headless server
     };
 
-    # Disable GUI terminals for headless operation - override profile conflicts
+    # Disable GUI terminals for headless operation - override profile conflicts.
+    # Ghostty is kept available below (via direct ghostty.enable) so SSH'd
+    # users that occasionally open a graphical session over RDP / X11
+    # forwarding have a modern terminal; the feature gate stays off so we
+    # don't drag in the full GUI terminal stack.
     terminals = {
       enable = lib.mkForce false;
       alacritty = lib.mkForce false;
@@ -92,6 +96,12 @@
       zellij = true;
     };
   };
+
+  # Ghostty: bypass the disabled terminals feature gate above to install
+  # ghostty directly. Useful for occasional graphical sessions over RDP /
+  # X11-forwarding, and for shipping the same primary terminal across
+  # every host without flipping the whole headless-mode posture.
+  ghostty.enable = lib.mkForce true;
 
   # P510 development server specific packages
   home.packages = with pkgs; [
