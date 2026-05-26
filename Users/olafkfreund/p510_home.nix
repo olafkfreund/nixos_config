@@ -198,4 +198,15 @@
     enable = true;
     nix-direnv.enable = true;
   };
+
+  # splashboard — renders on SSH shell startup. Headless server still benefits
+  # from the agenda panels when the admin logs in.
+  programs.splashboard.enable = true;
+
+  # gogcli-fed splashboard panels: Gmail unread, Google Tasks, Calendar events.
+  # Token provisioned headless via agenix (gog auth keyring=file import).
+  programs.gogDashboard = {
+    enable = true;
+    account = "olaf@freundcloud.com";
+  };
 }

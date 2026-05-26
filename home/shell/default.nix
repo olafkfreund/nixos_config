@@ -6,6 +6,7 @@ _: {
     ./zsh.nix
     ./zsh-ai-cmd.nix # AI-powered shell command suggestions
     ./splashboard # Terminal splash screen on shell startup
+    ./gogcli # gogcli collector feeding splashboard email/tasks/events widgets
     ./starship/default.nix
     ./mail/default.nix
     ./fzf/default.nix

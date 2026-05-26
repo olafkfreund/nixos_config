@@ -129,6 +129,28 @@ id = "on_this_day"
 fetcher = "wikipedia_on_this_day"
 render = { type = "list_links", max_items = 5 }
 
+# Personal agenda — fed by the gog-dashboard systemd user timer (gogcli).
+# basic_read_store reads $HOME/.splashboard/store/<id>.txt; file_format="text"
+# turns one line into one TextBlock row. Files are absent until the gog OAuth
+# token is provisioned, in which case the panels render empty (quiet).
+[[widget]]
+id = "gog_events"
+fetcher = "basic_read_store"
+file_format = "text"
+render = { type = "list_plain", max_items = 6 }
+
+[[widget]]
+id = "gog_tasks"
+fetcher = "basic_read_store"
+file_format = "text"
+render = { type = "list_plain", max_items = 6 }
+
+[[widget]]
+id = "gog_email"
+fetcher = "basic_read_store"
+file_format = "text"
+render = { type = "list_plain", max_items = 6 }
+
 # ── Layout ─────────────────────────────────────────────────────────
 #
 # Hero band sits on `bg = "subtle"` so the date masthead / greeting / almanac strip read as
@@ -194,6 +216,34 @@ flex = "center"
 [[row]]
 height = { length = 1 }
 bg = "subtle"
+
+[[row]]
+height = { length = 1 }
+
+# Agenda row — Events | Tasks | Email from gogcli. 100-cell band (32×3 + gap2×2);
+# 6 items + 1 border = 7. Sits above the news feeds as the daily briefing.
+[[row]]
+height = { length = 7 }
+flex = "center"
+gap = 2
+  [[row.child]]
+  widget = "gog_events"
+  width = { length = 32 }
+  border = "top"
+  title = "  TODAY  "
+  title_align = "center"
+  [[row.child]]
+  widget = "gog_tasks"
+  width = { length = 32 }
+  border = "top"
+  title = "  TASKS  "
+  title_align = "center"
+  [[row.child]]
+  widget = "gog_email"
+  width = { length = 32 }
+  border = "top"
+  title = "  UNREAD  "
+  title_align = "center"
 
 [[row]]
 height = { length = 1 }

@@ -35,6 +35,13 @@
   # SPLASHBOARD_SILENT=1 or globally with NO_SPLASHBOARD=1.
   programs.splashboard.enable = true;
 
+  # gogcli-fed splashboard panels: Gmail unread, Google Tasks, Calendar events.
+  # Account email — confirm/adjust if your Google account differs.
+  programs.gogDashboard = {
+    enable = true;
+    account = "olaf@freundcloud.com";
+  };
+
   # Claude Code statusline with Gruvbox Dark theme
   programs.claude-powerline = {
     enable = true;

@@ -81,6 +81,18 @@ in
         owner = "root";
         group = "root";
       };
+    }
+    # gogcli refresh-token export — wired only once the encrypted file exists
+    # (the user runs `gog login` + `gog auth tokens export` first), so builds
+    # pass before the one-time OAuth. Owned by the user so the gog-token-import
+    # user service can read it.
+    // lib.optionalAttrs (builtins.pathExists ../../secrets/gogcli-token.age) {
+      gogcli-token = {
+        file = ../../secrets/gogcli-token.age;
+        mode = "0600";
+        owner = username;
+        group = "users";
+      };
     };
 
     # Note: System environment variables removed - use shell initialization instead
