@@ -115,10 +115,30 @@ in
             fi
           }
 
-          # Today's events: "HH:MM  Summary" for timed, bare "Summary" for all-day.
-          emit gog_events \
-            '.events[]? | (.start.dateTime // "") as $dt | (if $dt != "" then ($dt[11:16] + "  ") else "" end) + (.summary // "(no title)")' \
-            calendar events --today
+          # Events — today's, across all *selected* (visible) calendars, each
+          # prefixed with a per-calendar colour bullet so items from different
+          # calendars are distinguishable. Queried per-calendar (not --all)
+          # because --all events carry no reliable calendarId for attribution.
+          # workingLocation entries (Google's Home/Office markers) are skipped.
+          # Output is sorted chronologically across calendars.
+          events_out="$STORE/gog_events.txt"
+          events_tmp="$events_out.tmp.$$"
+          : > "$events_tmp"
+          "$GOG" --no-input -j calendar calendars 2>/dev/null \
+            | "$JQ" -r '.calendars | map(select(.selected == true)) | sort_by(.id) | to_entries[]
+                | "\(.value.id)\t\(["🔴","🟢","🔵","🟡","🟣","🟠","🟤","⚪"][.key % 8])"' \
+            | while IFS=$'\t' read -r cid bullet; do
+                [ -n "$cid" ] || continue
+                "$GOG" -a "$ACCT" --no-input -j calendar events "$cid" --today 2>/dev/null \
+                  | "$JQ" -r --arg e "$bullet" '.events[]? | select(.eventType != "workingLocation")
+                      | (.start.dateTime // .start.date // "") as $s
+                      | (if ((.start.dateTime // "") != "") then (.start.dateTime[11:16] + " ") else "" end) as $t
+                      | "\($s)\t\($e) \($t)\(.summary // "(no title)")"' >> "$events_tmp" 2>/dev/null || true
+              done
+          if [ -s "$events_tmp" ]; then
+            sort "$events_tmp" | cut -f2- | head -n "$N" > "$events_out.new" && mv -f "$events_out.new" "$events_out"
+          fi
+          rm -f "$events_tmp"
 
           # Active tasks from the default list: "☐ Title"
           emit gog_tasks \
