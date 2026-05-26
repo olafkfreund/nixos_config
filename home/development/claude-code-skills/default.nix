@@ -26,5 +26,9 @@ in
     # then test-build and deploy.
     home.file.".claude/skills/claude-code-mastery".source =
       "${inputs.claude-skills-borghei}/engineering/claude-code-mastery";
+
+    # Local gog skill — /gog playbook for Gmail/Tasks/Calendar/Chat/Meet/etc.
+    # via the gogcli (`gog`) CLI. Sourced from this repo, not a flake input.
+    home.file.".claude/skills/gog/SKILL.md".source = ./gog/SKILL.md;
   };
 }
