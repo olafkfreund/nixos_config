@@ -8,6 +8,12 @@ description: >-
   `/gog tasks`, `/gog events`, `/gog chat`, `/gog meet`, or any request to
   check/read/reply/send email, list or add tasks, see today's agenda, or
   message someone on Chat for the user's Google account.
+version: 0.1.0
+category: communication
+tags: [google, gmail, calendar, tasks, cli, workspace]
+recommended_skills: []
+platforms:
+  - claude-code
 ---
 
 # gog — Google Workspace in the terminal
@@ -71,6 +77,10 @@ gog -a "$ACCT" --no-input gmail drafts create --thread <threadId> \
 gog -a "$ACCT" --no-input gmail send ...     # only after the user says go
 ```
 
+> **Gotcha:** there is **no `gmail reply` verb** — replying is `gmail send`
+> (or `gmail drafts create`) targeting the original `--thread <threadId>`.
+> Always `gog gmail send --help` first to confirm the exact thread/reply flags.
+
 **Organise:** `gmail archive|mark-read|unread|trash <messageId>`,
 `gmail labels list`, `gmail forward --to <addr> <messageId>`.
 
@@ -104,6 +114,11 @@ For an agenda, query each `.selected==true` calendar and label by calendar.
 Skip `.eventType == "workingLocation"` (Home/Office markers) unless asked.
 Show as `HH:MM Summary` (bare summary for all-day).
 
+> **Gotcha:** `calendar events --all` returns events **without a usable
+> `.calendarId`** — you can't attribute them to a calendar. To colour/group
+> by calendar (or restrict to visible ones), query each selected calendar id
+> individually instead of using `--all`.
+
 ## chat — `gog chat`
 
 ```bash
@@ -131,8 +146,27 @@ gog -a "$ACCT" --no-input -j meet history <meeting-code>  # past conferences
 - **auth (read-only inspection):** `gog auth status`, `gog auth doctor`,
   `gog auth list` — never print token values.
 
+> **Gotcha (auth setup):** gog needs an OAuth client JSON registered via
+> `gog auth credentials <file>` *before* it can refresh tokens — a stored
+> refresh token alone is not enough. The client **must be a "Desktop app"**
+> type (loopback redirect); a "Web application" client causes
+> `Error 400: redirect_uri_mismatch` at consent. This setup needs a human +
+> browser; an agent can diagnose with `gog auth doctor` but not complete it.
+
 ## Output discipline
 
 1. Run with `-j`, parse with `jq`, present a clean table/list to the user.
 2. Lead with the answer (e.g. "3 unread"), then details.
 3. For writes: show exactly what will change and get a yes before executing.
+
+---
+
+## Related skills
+
+> When this skill is activated, check if the following companion skills are installed.
+> For any that are missing, mention them to the user and offer to install before proceeding
+> with the task.
+
+No registry companions — `gog` is a self-contained Google Workspace playbook.
+It pairs naturally with the host's `gog-dashboard` splashboard collector
+(`home/shell/gogcli`), which surfaces the same data at shell startup.
