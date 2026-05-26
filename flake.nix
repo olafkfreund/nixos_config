@@ -71,21 +71,23 @@
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
     zjstatus.url = "github:dj95/zjstatus";
-    # = main HEAD ba2846c8 (2026-05-19), release tag v2.0.12+claude1.7196.3.
-    # Bumped from v2.0.6 (53 commits, 11 releases). Picks up:
-    #   - #581 fix(nix): make electron binary executable (Nix-specific)
-    #   - #583/#585 GPU FATAL mitigations (CLAUDE_DISABLE_GPU=1 opt-in;
-    #     electron pinned to 41.5.0 to match app.asar ABI)
-    #   - #555 cowork.sh defensive lastIndexOf
-    #   - _svcLaunched cowork daemon recovery (closed #408, #236)
-    #   - claude binary 1.5354.0 → 1.7196.3 (~1842-version advance)
-    # Held-back blocker #582 (syslog flood) turned out to be Ubuntu
-    # apport-specific (no apport on NixOS), so safe to leave behind.
+    # = tag v2.0.14+claude1.8555.2, commit 98232dbd (2026-05-25).
+    # Wrapper/packaging-only bump from v2.0.12+claude1.8555.2 (b8fe6b85);
+    # the claude binary is unchanged at 1.8555.2. Picks up:
+    #   - #401 fix(node-pty): clean upstream Windows binaries before
+    #     staging the Linux build
+    #   - #645 powerSaveBlocker logging shim + CLAUDE_KEEP_AWAKE=0 escape
+    #     hatch (mitigates the #605 inhibitor caveat below)
+    #   - #424 exec before Electron to fix signal forwarding
+    #   - #580 F11 fullscreen toggle for Linux parity
+    #   - #643 preserve mcpServers across config writes
+    #   - #648 align WM_CLASS / StartupWMClass to claude-desktop
     # Known caveat carried in: #605 (Electron holds systemd-inhibit
     # forever, blocking suspend while app runs). Razer-relevant.
-    # Workaround: close claude-desktop entirely to release inhibitor.
+    # Workaround: close claude-desktop entirely to release inhibitor,
+    # or set CLAUDE_KEEP_AWAKE=0 (new in #645).
     # Bump via /update-claude-code.
-    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/b8fe6b850266c25b6e588ac82202ea9cfb9294e3";
+    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/98232dbd81591eae64d565fff856e80c5c6ef08b";
 
     # Claude Code skill catalogue (borghei). flake = false because it's a
     # plain markdown/assets catalogue, not a Nix flake. We symlink one
