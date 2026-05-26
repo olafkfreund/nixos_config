@@ -24,6 +24,12 @@ in
   # splashboard — terminal splash screen on shell startup + cd. Same as p620.
   programs.splashboard.enable = true;
 
+  # gogcli-fed splashboard panels: Gmail unread, Google Tasks, Calendar events.
+  programs.gogDashboard = {
+    enable = true;
+    account = "olaf@freundcloud.com";
+  };
+
   # Windsurf theme derived from host variables (razer uses orange-desert variant)
   editor.windsurf.settings = {
     theme = lib.removePrefix "gruvbox-" vars.theme.scheme;

@@ -23,6 +23,9 @@ in
   "secrets/api-gemini.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-anthropic.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-github-token.age".publicKeys = allUsers ++ allHosts;
+  # gogcli refresh-token export (gog auth tokens export). Decrypted to
+  # /run/agenix/gogcli-token, imported into gog's file keyring on every host.
+  "secrets/gogcli-token.age".publicKeys = allUsers ++ allHosts;
   "secrets/obsidian-api-key.age".publicKeys = allUsers ++ workstations;
   "secrets/api-linkedin-cookie.age".publicKeys = allUsers ++ workstations;
 
