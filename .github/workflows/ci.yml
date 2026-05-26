@@ -26,6 +26,7 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
             accept-flake-config = true
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       # NB: `nix flake check` is intentionally skipped here.
       #
@@ -101,6 +102,7 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
             accept-flake-config = true
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: Validate secrets structure
         run: |
@@ -195,6 +197,7 @@ jobs:
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: Nix formatting check
         run: |
@@ -245,6 +248,7 @@ jobs:
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: Run pre-commit hooks
         run: |
