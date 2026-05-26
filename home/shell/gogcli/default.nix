@@ -80,10 +80,9 @@ in
     };
 
     # Collector: pull the three feeds and write store files atomically.
-    # NOTE: the jq field paths below are a best-effort mapping; confirm them
-    # against real `gog … -j` output once the account is authorized (one-line
-    # tweak each). Lenient jq → on shape mismatch it emits nothing, leaving the
-    # prior file so splashboard stays quiet.
+    # jq field paths verified against gogcli 0.19.0 JSON output (events under
+    # .events, tasks under .tasks, threads under .threads). On any error or
+    # empty result the prior file is left in place so splashboard stays quiet.
     systemd.user.services.gog-dashboard = {
       Unit = {
         Description = "Refresh splashboard gog store (gmail/tasks/events)";
@@ -116,19 +115,19 @@ in
             fi
           }
 
-          # Upcoming events: "HH:MM  Summary"
+          # Today's events: "HH:MM  Summary" for timed, bare "Summary" for all-day.
           emit gog_events \
-            '(.result // .events // .items // .) | (if type=="array" then .[] else empty end) | "\((.start.dateTime // .start.date // .start // "")|tostring|.[11:16]) \(.summary // .title // "(no title)")"' \
-            calendar events
+            '.events[]? | (.start.dateTime // "") as $dt | (if $dt != "" then ($dt[11:16] + "  ") else "" end) + (.summary // "(no title)")' \
+            calendar events --today
 
-          # Tasks from the default list: "☐ Title"
+          # Active tasks from the default list: "☐ Title"
           emit gog_tasks \
-            '(.result // .tasks // .items // .) | (if type=="array" then .[] else empty end) | select((.status // "") != "completed") | "☐ \(.title // .name // "(untitled)")"' \
+            '.tasks[]? | select((.status // "") != "completed") | "☐ \(.title // "(untitled)")"' \
             tasks list @default
 
           # Unread inbox: "● Subject"
           emit gog_email \
-            '(.result // .messages // .threads // .items // .) | (if type=="array" then .[] else empty end) | "● \(.subject // .snippet // .title // "(no subject)")"' \
+            '.threads[]? | "● \(.subject // "(no subject)")"' \
             gmail search "is:unread in:inbox"
         '');
       };
