@@ -52,7 +52,18 @@
   # known-good (gen 2438, currently running). 6.17/6.19 are EOL'd in nixpkgs.
   # If 7.0.1 also fails to boot, fall back to pinning 6.18.22 via a separate
   # nixpkgs flake input. See: https://github.com/nixos/nixpkgs/issues/493618
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # Patch openrazer's kernel module: 3.12.2 calls hid_report_raw_event() with
+  # 5 args, but kernel 7.0.9+ added a bufsize argument (torvalds/linux@2c85c61,
+  # backported to 7.0.9). Apply the upstream fix (openrazer@ff30624) until it
+  # lands in nixpkgs. The version-gated #if matches our 7.0.10 kernel.
+  # See: https://github.com/openrazer/openrazer/issues/2808
+  boot.kernelPackages = pkgs.linuxPackages_latest.extend (_kfinal: kprev: {
+    openrazer = kprev.openrazer.overrideAttrs (old: {
+      patches = (old.patches or [ ]) ++ [
+        ./patches/openrazer-kernel-7.0.9-hid-report-raw-event.patch
+      ];
+    });
+  });
 
   boot.plymouth.enable = true;
   boot.kernel.sysctl."vm.nr_hugepages" = 1024;
