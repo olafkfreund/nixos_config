@@ -82,6 +82,10 @@ in
       wants = [ "network-online.target" ];
       wantedBy = [ "multi-user.target" ];
 
+      # Restart when the encrypted env (API keys) changes, so rotating a key
+      # and redeploying actually reloads it (EnvironmentFile alone won't).
+      restartTriggers = [ config.age.secrets."audiobook-mcp-env".file ];
+
       environment = {
         ABB_APP_URL = cfg.abbAppUrl;
         PROWLARR_URL = cfg.prowlarrUrl;
