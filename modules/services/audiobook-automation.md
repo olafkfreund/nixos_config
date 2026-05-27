@@ -23,7 +23,7 @@ chaptering, and a natural-language MCP interface.
 
 ### Flow
 
-```
+```text
  NL request (Claude → audiobook MCP)        Web UI (/audiobooks-dl)
          │                                          │
    search_abb / search_usenet              search + "send"
