@@ -71,23 +71,17 @@
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
     zjstatus.url = "github:dj95/zjstatus";
-    # = tag v2.0.14+claude1.8555.2, commit 98232dbd (2026-05-25).
-    # Wrapper/packaging-only bump from v2.0.12+claude1.8555.2 (b8fe6b85);
-    # the claude binary is unchanged at 1.8555.2. Picks up:
-    #   - #401 fix(node-pty): clean upstream Windows binaries before
-    #     staging the Linux build
-    #   - #645 powerSaveBlocker logging shim + CLAUDE_KEEP_AWAKE=0 escape
-    #     hatch (mitigates the #605 inhibitor caveat below)
-    #   - #424 exec before Electron to fix signal forwarding
-    #   - #580 F11 fullscreen toggle for Linux parity
-    #   - #643 preserve mcpServers across config writes
-    #   - #648 align WM_CLASS / StartupWMClass to claude-desktop
+    # = tag v2.0.15+claude1.9255.0, commit 5b2fb414 (2026-05-27).
+    # Claude binary bump 1.8555.2 -> 1.9255.0. Picks up:
+    #   - #657 anchor tray-var extraction on .Tray() literal, resolving
+    #     the 1.9255.0 nix build failure reported in #654
+    #   - #650 filter .asar paths from --add-dir dispatch + session restore
     # Known caveat carried in: #605 (Electron holds systemd-inhibit
     # forever, blocking suspend while app runs). Razer-relevant.
     # Workaround: close claude-desktop entirely to release inhibitor,
-    # or set CLAUDE_KEEP_AWAKE=0 (new in #645).
+    # or set CLAUDE_KEEP_AWAKE=0 (#645).
     # Bump via /update-claude-code.
-    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/98232dbd81591eae64d565fff856e80c5c6ef08b";
+    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/5b2fb4141bccfc621da2356b5f978cd71cf96a51";
 
     # Claude Code skill catalogue (borghei). flake = false because it's a
     # plain markdown/assets catalogue, not a Nix flake. We symlink one
