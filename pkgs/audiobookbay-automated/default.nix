@@ -26,7 +26,7 @@ let
     transmission-rpc
   ]);
 in
-stdenvNoCC.mkDerivation (finalAttrs: {
+stdenvNoCC.mkDerivation {
   pname = "audiobookbay-automated";
   version = "0-unstable-2026-01-23";
 
@@ -68,4 +68,4 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     mainProgram = "audiobookbay-automated";
     platforms = lib.platforms.linux;
   };
-})
+}
