@@ -1,4 +1,5 @@
-{ pkgs-unstable
+{ config
+, pkgs-unstable
 , ...
 }: {
   services = {
@@ -34,6 +35,60 @@
         ControlPassword = "Xs4monly4e!!";
         # API access for monitoring
         AuthorizedIP = "127.0.0.1,192.168.1.*";
+      };
+    };
+
+    # SABnzbd — running side-by-side with NZBGet for evaluation before
+    # cutover. Mirrors the NZBGet setup (Easynews server, same categories)
+    # but uses fully isolated download dirs under /mnt/media/downloads/sabnzbd
+    # so it can't collide with NZBGet's in-flight downloads. NZBGet remains
+    # the active download client for Sonarr/Radarr; add SABnzbd as a second
+    # client in the *arr UIs when ready to test.
+    #
+    # Non-secret config is declarative below; the Easynews username/password
+    # come from agenix via secretFiles (never in the Nix store). allowConfigWrite
+    # is on for the trial so settings can also be tweaked in the SABnzbd UI.
+    # Access during the trial: http://p510:8080 (LAN + tailnet, firewall is off).
+    sabnzbd = {
+      enable = true;
+      user = "olafkfreund";
+      group = "users";
+      package = pkgs-unstable.sabnzbd;
+      # P510 is on stateVersion 25.11, where configFile defaults to the legacy
+      # /var/lib path — which makes the module IGNORE `settings`. Force null so
+      # our declarative settings + secretFiles are actually used.
+      configFile = null;
+      allowConfigWrite = true;
+      secretFiles = [ config.age.secrets."sabnzbd-secrets".path ];
+      settings = {
+        misc = {
+          host = "0.0.0.0";
+          port = 8080;
+          download_dir = "/mnt/media/downloads/sabnzbd/incomplete";
+          complete_dir = "/mnt/media/downloads/sabnzbd/complete";
+          dirscan_dir = "/mnt/media/downloads/sabnzbd/watch";
+          permissions = "775";
+          # Allow access via LAN + tailnet hostnames (SABnzbd blocks unknown Host headers).
+          host_whitelist = "p510,p510.lan,p510.local,p510.home.freundcloud.com,p510.tail833f7.ts.net,localhost";
+        };
+        # Easynews — mirrors NZBGet Server1 (plaintext, port 119, 20 conns).
+        # username/password are supplied by secretFiles (agenix); they are
+        # intentionally absent from the typed schema here.
+        servers.Easynews = {
+          name = "Easynews";
+          displayname = "Easynews";
+          host = "news.eu.easynews.com";
+          port = 119;
+          ssl = false;
+          connections = 20;
+          enable = true;
+        };
+        categories = {
+          Movies = { name = "Movies"; order = 0; pp = 3; script = "None"; dir = "Movies"; priority = -100; };
+          TV = { name = "TV"; order = 1; pp = 3; script = "None"; dir = "TV"; priority = -100; };
+          Music = { name = "Music"; order = 2; pp = 3; script = "None"; dir = "Music"; priority = -100; };
+          Prowlarr = { name = "Prowlarr"; order = 3; pp = 3; script = "None"; dir = "Prowlarr"; priority = -100; };
+        };
       };
     };
 
@@ -161,12 +216,26 @@
     "d /mnt/media/Media/Audiobooks 0755 olafkfreund users -"
     "d /mnt/media/Media/Podcasts 0755 olafkfreund users -"
     "d /mnt/media/audiobookshelf 0755 olafkfreund users -"
+    # SABnzbd isolated working dirs (side-by-side trial with NZBGet)
+    "d /mnt/media/downloads/sabnzbd 0775 olafkfreund users -"
+    "d /mnt/media/downloads/sabnzbd/incomplete 0775 olafkfreund users -"
+    "d /mnt/media/downloads/sabnzbd/complete 0775 olafkfreund users -"
+    "d /mnt/media/downloads/sabnzbd/watch 0775 olafkfreund users -"
   ];
+
+  # Easynews credentials for SABnzbd, merged into its config at runtime via
+  # services.sabnzbd.secretFiles. Readable by the sabnzbd service user.
+  age.secrets."sabnzbd-secrets" = {
+    file = ../../../secrets/sabnzbd-secrets.age;
+    mode = "0400";
+    owner = "olafkfreund";
+    group = "users";
+  };
 
   # Ensure media services start before Tailscale Serve to prevent port conflicts
   systemd.services.tailscale-serve = {
-    after = [ "overseerr.service" "audiobookshelf.service" ];
-    wants = [ "overseerr.service" "audiobookshelf.service" ];
+    after = [ "overseerr.service" "audiobookshelf.service" "sabnzbd.service" ];
+    wants = [ "overseerr.service" "audiobookshelf.service" "sabnzbd.service" ];
   };
 
   # Note: Firewall ports are now comprehensively configured in configuration.nix
