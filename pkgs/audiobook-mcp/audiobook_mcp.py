@@ -13,8 +13,11 @@ come from an agenix EnvironmentFile):
   SABNZBD_URL  / SABNZBD_API_KEY
   ABS_URL      / ABS_API_KEY        (Audiobookshelf; key optional if open)
   USENET_CATEGORIES    Prowlarr category ids (default "3030" = Audiobook)
+  OLLAMA_URL / OLLAMA_MODEL          local LLM for bestseller suggestions
 """
 
+import base64
+import json
 import os
 
 import httpx
@@ -30,6 +33,8 @@ SABNZBD_API_KEY = os.environ.get("SABNZBD_API_KEY", "")
 ABS_URL = os.environ.get("ABS_URL", "http://127.0.0.1:13378").rstrip("/")
 ABS_API_KEY = os.environ.get("ABS_API_KEY", "")
 USENET_CATEGORIES = os.environ.get("USENET_CATEGORIES", "3030")
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434").rstrip("/")
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5:7b")
 
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 audiobook-mcp"
 
@@ -44,9 +49,12 @@ def _abs_headers():
 def search_abb(query: str, max_pages: int = 1) -> list[dict]:
     """Search AudioBookBay (torrent source) for audiobooks.
 
-    Returns a list of {title, link} where link is the detail-page URL to pass
-    to add_abb. Use this for torrent releases; results are not pre-filtered.
+    Returns a list of {title, link, language} where link is the detail-page URL
+    to pass to add_abb and language is parsed from the post when present. Use
+    this for torrent releases; results are not pre-filtered.
     """
+    import re
+
     results: list[dict] = []
     q = query.lower().replace(" ", "+")
     with httpx.Client(timeout=20, headers={"User-Agent": UA}) as client:
@@ -66,10 +74,21 @@ def search_abb(query: str, max_pages: int = 1) -> list[dict]:
                 a = post.select_one(".postTitle > h2 > a")
                 if not a or not a.get("href"):
                     continue
+                info = post.select_one(".postInfo")
+                lang = "N/A"
+                if info:
+                    m = re.search(
+                        r"Language:\s*(.*?)(?:\s*Keywords:|$)",
+                        info.get_text(" ", strip=True),
+                        re.DOTALL,
+                    )
+                    if m:
+                        lang = m.group(1).strip()
                 results.append(
                     {
                         "title": a.text.strip(),
                         "link": f"https://{ABB_HOSTNAME}{a['href']}",
+                        "language": lang,
                     }
                 )
     return results or [{"info": "no results"}]
@@ -226,6 +245,111 @@ def recent_library_items(limit: int = 10) -> list[dict]:
         md = item.get("media", {}).get("metadata", {})
         out.append({"title": md.get("title"), "author": md.get("authorName")})
     return out or [{"info": "library empty"}]
+
+
+def _abs_filterdata(client):
+    lib_id = _abs_library_id(client)
+    if not lib_id:
+        return None, None
+    r = client.get(
+        f"{ABS_URL}/api/libraries/{lib_id}/filterdata", headers=_abs_headers()
+    )
+    r.raise_for_status()
+    return lib_id, r.json()
+
+
+@mcp.tool()
+def list_library_genres() -> list[str]:
+    """List the genres present in the Audiobookshelf library (for browsing)."""
+    try:
+        with httpx.Client(timeout=30) as client:
+            _, fd = _abs_filterdata(client)
+            if fd is None:
+                return ["error: no Audiobookshelf library found"]
+            return sorted(fd.get("genres", [])) or ["info: no genres tagged"]
+    except Exception as exc:  # noqa: BLE001
+        return [f"error: {exc}"]
+
+
+@mcp.tool()
+def list_library_languages() -> list[str]:
+    """List the languages present in the Audiobookshelf library."""
+    try:
+        with httpx.Client(timeout=30) as client:
+            _, fd = _abs_filterdata(client)
+            if fd is None:
+                return ["error: no Audiobookshelf library found"]
+            return sorted(fd.get("languages", [])) or ["info: no languages tagged"]
+    except Exception as exc:  # noqa: BLE001
+        return [f"error: {exc}"]
+
+
+@mcp.tool()
+def library_by_genre(genre: str, limit: int = 25) -> list[dict]:
+    """List owned audiobooks in a given genre (use list_library_genres first)."""
+    try:
+        with httpx.Client(timeout=30) as client:
+            lib_id = _abs_library_id(client)
+            if not lib_id:
+                return [{"error": "no Audiobookshelf library found"}]
+            enc = base64.b64encode(genre.encode()).decode()
+            r = client.get(
+                f"{ABS_URL}/api/libraries/{lib_id}/items",
+                params={"filter": f"genres.{enc}", "limit": limit},
+                headers=_abs_headers(),
+            )
+            r.raise_for_status()
+            data = r.json()
+    except Exception as exc:  # noqa: BLE001
+        return [{"error": f"Audiobookshelf request failed: {exc}"}]
+    out = []
+    for item in data.get("results", [])[:limit]:
+        md = item.get("media", {}).get("metadata", {})
+        out.append({"title": md.get("title"), "author": md.get("authorName")})
+    return out or [{"info": f"no owned audiobooks in genre {genre!r}"}]
+
+
+@mcp.tool()
+def recommend_bestsellers(genre: str = "", count: int = 10) -> list[dict]:
+    """Suggest popular/bestselling audiobook titles via the local LLM.
+
+    Optionally scoped to a genre. Returns [{title, author}] you can then pass to
+    search_usenet/search_abb and grab. NOTE: these are LLM suggestions bounded
+    by the model's knowledge cutoff — not a live bestseller chart.
+    """
+    scope = f" in the {genre} genre" if genre.strip() else ""
+    prompt = (
+        f"List {count} popular, widely-acclaimed or bestselling audiobooks{scope}. "
+        "Prefer well-known titles likely to be available as audiobooks. "
+        "Return only title and author for each; do not invent obscure titles."
+    )
+    schema = {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {"title": {"type": "string"}, "author": {"type": "string"}},
+            "required": ["title", "author"],
+        },
+    }
+    try:
+        with httpx.Client(timeout=180) as client:
+            r = client.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "format": schema,
+                    "options": {"temperature": 0.4},
+                },
+            )
+            r.raise_for_status()
+            items = json.loads(r.json().get("response", "[]"))
+    except Exception as exc:  # noqa: BLE001
+        return [{"error": f"LLM suggestion failed: {exc}"}]
+    if not isinstance(items, list):
+        return [{"error": "unexpected LLM response"}]
+    return items[:count] or [{"info": "no suggestions"}]
 
 
 def main():

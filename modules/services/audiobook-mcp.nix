@@ -52,6 +52,18 @@ in
       description = "Audiobookshelf base URL (library lookups).";
     };
 
+    ollamaUrl = lib.mkOption {
+      type = lib.types.str;
+      default = "http://127.0.0.1:11434";
+      description = "Local Ollama base URL (recommend_bestsellers tool).";
+    };
+
+    ollamaModel = lib.mkOption {
+      type = lib.types.str;
+      default = "qwen2.5:7b";
+      description = "Ollama model used for bestseller suggestions.";
+    };
+
     environmentFile = lib.mkOption {
       type = lib.types.path;
       default = config.age.secrets."audiobook-mcp-env".path;
@@ -91,6 +103,8 @@ in
         PROWLARR_URL = cfg.prowlarrUrl;
         SABNZBD_URL = cfg.sabnzbdUrl;
         ABS_URL = cfg.audiobookshelfUrl;
+        OLLAMA_URL = cfg.ollamaUrl;
+        OLLAMA_MODEL = cfg.ollamaModel;
       };
 
       serviceConfig = {
