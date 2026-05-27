@@ -58,9 +58,20 @@ server (see `home/development/claude-code-mcp.nix`). Ask Claude things like:
 - *"Search Usenet for the Stormlight Archive and grab the first M4B result."*
 - *"Is Dune already in my Audiobookshelf library?"*
 
-Tools exposed: `search_abb`, `add_abb`, `search_usenet`, `grab_usenet`,
-`search_library`, `recent_library_items`. The agent searches, you pick, it
-grabs; the import pipeline finishes the job.
+Tools exposed: `search_abb` (with language), `add_abb`, `search_usenet`,
+`grab_usenet`, `search_library`, `recent_library_items`, plus discovery tools:
+`recommend_bestsellers` (genre-aware, via the local qwen2.5), `list_library_genres`,
+`list_library_languages`, and `library_by_genre`. The agent searches, you pick,
+it grabs; the import pipeline finishes the job.
+
+Discovery examples:
+
+- *"Recommend some bestselling fantasy audiobooks, then grab the top one."*
+- *"What genres are in my library?"* / *"Show my sci-fi audiobooks."*
+
+> `recommend_bestsellers` returns LLM suggestions bounded by the model's
+> knowledge cutoff — not a live bestseller chart. ABB/NZBGeek searches remain
+> keyword/title-based; genre/language filtering applies to the owned library.
 
 ### 3. Fully automatic import
 
