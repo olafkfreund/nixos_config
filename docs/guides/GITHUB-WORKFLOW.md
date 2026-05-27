@@ -997,9 +997,9 @@ gh issue close 123
 
 ### Documentation
 
-- [PATTERNS.md](./PATTERNS.md) - NixOS best practices
-- [NIXOS-ANTI-PATTERNS.md](./NIXOS-ANTI-PATTERNS.md) - Anti-patterns to avoid
-- [CLAUDE.md](../CLAUDE.md) - Project configuration
+- [PATTERNS.md](../PATTERNS.md) - NixOS best practices
+- [NIXOS-ANTI-PATTERNS.md](../NIXOS-ANTI-PATTERNS.md) - Anti-patterns to avoid
+- [CLAUDE.md](https://github.com/olafkfreund/nixos_config/blob/main/CLAUDE.md) - Project configuration
 
 ### External Resources
 

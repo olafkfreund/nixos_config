@@ -23,6 +23,9 @@ in
   "secrets/api-gemini.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-anthropic.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-github-token.age".publicKeys = allUsers ++ allHosts;
+  # Synechron GitHub API token (PAT). All hosts; exported as
+  # SYNECHRON_GITHUB_API_TOKEN via load-api-keys. Edit: agenix -e secrets/synechron-github-api.age
+  "secrets/synechron-github-api.age".publicKeys = allUsers ++ allHosts;
   # gogcli refresh-token export (gog auth tokens export). Decrypted to
   # /run/agenix/gogcli-token, imported into gog's file keyring on every host.
   "secrets/gogcli-token.age".publicKeys = allUsers ++ allHosts;

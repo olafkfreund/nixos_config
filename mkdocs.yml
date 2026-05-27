@@ -1,0 +1,173 @@
+site_name: NixOS Infrastructure Hub
+site_description: >-
+  Multi-host NixOS configuration — flakes, a single parameterised host
+  template, Home Manager as a flake module, and Stylix-driven theming.
+  Documentation for every module, package, and host, with the reasoning
+  behind each architectural choice.
+site_author: olafkfreund
+site_url: https://olafkfreund.github.io/nixos_config/
+
+repo_url: https://github.com/olafkfreund/nixos_config
+repo_name: olafkfreund/nixos_config
+edit_uri: edit/main/docs/
+
+docs_dir: docs
+
+copyright: >-
+  Built with MkDocs Material · Generated reproducibly with Nix
+  (<code>nix build .#docs</code>)
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tooltips
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to system preference
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+
+plugins:
+  - search
+  - gen-files:
+      scripts:
+        - docs_gen/gen_reference.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      permalink_title: Anchor link to this section
+  - pymdownx.betterem
+  - pymdownx.caret
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.smartsymbols
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+# README.md duplicates index.md at the docs root; keep it on disk for repo
+# browsing but exclude it from the built site. Design plans are source notes.
+exclude_docs: |
+  /README.md
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - getting-started/index.md
+      - Overview: getting-started/overview.md
+      - Quick Start: getting-started/quick-start.md
+      - Repository Layout: getting-started/repository-layout.md
+  - Architecture:
+      - architecture/index.md
+      - Philosophy & Why: architecture/philosophy.md
+      - Host Template System: architecture/template-system.md
+      - Feature Flags: architecture/feature-flags.md
+      - Hardware Profiles: architecture/hardware-profiles.md
+      - Overlays: architecture/overlays.md
+      - Theming (Stylix): architecture/theming.md
+      - Secrets (agenix): architecture/secrets.md
+      - Home Manager: architecture/home-manager.md
+  - Hosts:
+      - hosts/index.md
+      - "p620 — AMD Workstation": hosts/p620.md
+      - "p510 — Media Server": hosts/p510.md
+      - "razer — Laptop": hosts/razer.md
+  - Reference: reference/
+  - Guides:
+      - Deployment: guides/deployment-guide.md
+      - Update & Deploy: UPDATE-DEPLOY.md
+      - Update Workflow: guides/UPDATE-WORKFLOW.md
+      - Adding a Host: guides/HOST_SETUP.md
+      - GitHub Workflow: guides/GITHUB-WORKFLOW.md
+      - Cache Strategy: guides/CACHE-STRATEGY.md
+      - Cachix Analysis: guides/CACHIX-ANALYSIS.md
+      - Package System: guides/PACKAGE-SYSTEM-USAGE.md
+      - Gemini CLI: guides/GEMINI_CLI_FEATURE.md
+  - Patterns:
+      - Best Practices: PATTERNS.md
+      - Anti-Patterns: NIXOS-ANTI-PATTERNS.md
+      - MCP Servers: MCP-GUIDE.md
+  - Applications:
+      - Citrix Workspace: applications/CITRIX-WORKSPACE-SETUP.md
+      - Waydroid: applications/WAYDROID-SETUP.md
+      - FlareSolverr: applications/flaresolverr-deployment.md
+      - GitLab Runner: applications/GITLAB-RUNNER-SETUP.md
+      - VS Code Extensions: applications/VSCODE_EXTENSIONS.md
+      - COSMIC Screen Sharing: applications/screensharing_cosmic.md
+      - P620 BIOS / NUMA: applications/P620-BIOS-NUMA-Configuration.md
+  - Command System:
+      - Overview: Nixos/README.md
+      - Commands Index: Nixos/COMMANDS-INDEX.md
+      - System Overview: Nixos/Command-System-Overview.md
+      - Quick Reference: Nixos/Quick-Reference.md
+      - Update Checker: Nixos/Update-Checker-Guide.md
+  - Tooling:
+      - Claude Code Optimization: tooling/CLAUDE-CODE-OPTIMIZATION.md
+      - Claude Powerline: tooling/Claude-Powerline.md
+      - GitHub Spec-Kit: tooling/Github-spec-kit.md
+      - Claude Code 2.0.54: tooling/claude-code-update-2.0.54.md
+  - Design Notes:
+      - "Ollama / LiteLLM (p620)": plans/2026-05-22-ollama-p620-litellm-design.md

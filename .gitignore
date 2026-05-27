@@ -4,6 +4,10 @@ themes/gruvbox-material-gtk/
 result
 result-*
 
+# MkDocs build output (site is built reproducibly via `nix build .#docs`)
+site/
+public/
+
 # Temporary files
 .tmp/
 *.tmp

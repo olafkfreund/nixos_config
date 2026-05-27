@@ -1,10 +1,14 @@
 # NixOS Custom Commands Documentation
 
-Welcome to the NixOS custom commands documentation. This directory contains comprehensive guides for using specialized Claude Code slash commands designed for NixOS infrastructure management.
+Welcome to the NixOS custom commands documentation. This directory contains
+comprehensive guides for using specialized Claude Code slash commands designed
+for NixOS infrastructure management.
 
 ## Overview
 
-Custom slash commands automate complex NixOS workflows, embedding best practices, safety checks, and GitHub integration into repeatable, documented procedures.
+Custom slash commands automate complex NixOS workflows, embedding best
+practices, safety checks, and GitHub integration into repeatable, documented
+procedures.
 
 ## Available Commands
 
@@ -93,7 +97,7 @@ claude
 
 ## Documentation Structure
 
-```
+```text
 docs/Nixos/
 ├── README.md                          # This file
 ├── Command-System-Overview.md         # Complete command system guide
@@ -169,24 +173,24 @@ Commands integrate seamlessly with:
 
 ## Best Practices
 
-### Do's 
+### Do's
 
--  Use commands for all routine maintenance
--  Read command output carefully
--  Follow recommended schedules
--  Review generated documentation
--  Create GitHub issues for tracking
--  Monitor after deployments
--  Keep commands up-to-date
+- Use commands for all routine maintenance
+- Read command output carefully
+- Follow recommended schedules
+- Review generated documentation
+- Create GitHub issues for tracking
+- Monitor after deployments
+- Keep commands up-to-date
 
-### Don'ts 
+### Don'ts
 
--  Skip testing steps in commands
--  Ignore command warnings
--  Deploy without validation
--  Forget to monitor after changes
--  Skip GitHub workflow integration
--  Ignore rollback procedures
+- Skip testing steps in commands
+- Ignore command warnings
+- Deploy without validation
+- Forget to monitor after changes
+- Skip GitHub workflow integration
+- Ignore rollback procedures
 
 ## Common Workflows
 
@@ -274,8 +278,8 @@ cat .claude/commands/COMMAND_NAME.md
 
 - **Patterns**: [@docs/PATTERNS.md](../PATTERNS.md)
 - **Anti-patterns**: [@docs/NIXOS-ANTI-PATTERNS.md](../NIXOS-ANTI-PATTERNS.md)
-- **GitHub Workflow**: [@docs/GITHUB-WORKFLOW.md](../GITHUB-WORKFLOW.md)
-- **Roadmap**: [@.agent-os/product/roadmap.md](../../.agent-os/product/roadmap.md)
+- **GitHub Workflow**: [@docs/guides/GITHUB-WORKFLOW.md](../guides/GITHUB-WORKFLOW.md)
+- **Roadmap**: [@.agent-os/product/roadmap.md](https://github.com/olafkfreund/nixos_config/blob/main/.agent-os/product/roadmap.md)
 
 ## Support and Feedback
 
@@ -320,4 +324,5 @@ Planned command additions:
 
 ---
 
-**Remember**: Commands are tools to enhance your workflow, not replace understanding. Always know what the commands are doing and why.
+**Remember**: Commands are tools to enhance your workflow, not replace
+understanding. Always know what the commands are doing and why.
