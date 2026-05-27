@@ -398,6 +398,13 @@ in
   # under /mnt/media/Media/Audiobooks/<Author>/[<Series>/]<Title>/.
   features.audiobook-import = {
     enable = true;
+    # ABB torrents land here; SABnzbd (audiobook-only on p510 — the *arr stack
+    # uses NZBGet/Transmission) completes Usenet grabs here. Both are watched
+    # so NZBGeek audiobooks import too.
+    watchDirs = [
+      "/mnt/media/downloads/torrents/audiobooks"
+      "/mnt/media/downloads/sabnzbd/complete"
+    ];
   };
 
   # Audiobook acquisition + library MCP (SSE on :3012). Exposes search_abb,
