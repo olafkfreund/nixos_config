@@ -4,6 +4,16 @@ pkgs.mkShell {
   name = "nixos-docs-environment";
 
   packages = with pkgs; [
+    # MkDocs Material site (matches `nix build .#docs`)
+    # Use `mkdocs serve` for live preview, `just docs-serve` as a shortcut.
+    (python3.withPackages (ps: [
+      ps.mkdocs
+      ps.mkdocs-material
+      ps.mkdocs-gen-files
+      ps.mkdocs-literate-nav
+      ps.pymdown-extensions
+    ]))
+
     # Documentation generation
     mdbook # Rust-based documentation
     mdbook-mermaid # Mermaid diagram support

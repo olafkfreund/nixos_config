@@ -2,13 +2,13 @@
 
 This guide covers adding new hosts to the NixOS configuration with proper secrets management and user access.
 
-##  Prerequisites
+## Prerequisites
 
 - NixOS installed on the target system
 - SSH access to the new host
-- Secrets management already initialized (see [SECRETS_MANAGEMENT.md](SECRETS_MANAGEMENT.md))
+- Secrets management already initialized (see [Secrets (agenix)](../architecture/secrets.md))
 
-##  Quick Setup
+## Quick Setup
 
 ### 1. Create Host Configuration
 
@@ -127,7 +127,7 @@ nixos-rebuild switch --flake .#new-hostname --target-host root@new-hostname
 nixos-rebuild switch --flake .#new-hostname
 ```
 
-##  Hardware-Specific Configuration
+## Hardware-Specific Configuration
 
 ### AMD Systems (like P620)
 
@@ -202,7 +202,7 @@ nixos-rebuild switch --flake .#new-hostname
 }
 ```
 
-##  User Management for New Hosts
+## User Management for New Hosts
 
 ### Adding Users to New Host
 
@@ -245,7 +245,7 @@ nixos-rebuild switch --flake .#new-hostname
    ./scripts/manage-secrets.sh rekey
    ```
 
-##  Network Configuration
+## Network Configuration
 
 ### Standard Network Setup
 
@@ -297,7 +297,7 @@ nixos-rebuild switch --flake .#new-hostname
 }
 ```
 
-##  Security Configuration
+## Security Configuration
 
 ### SSH Hardening
 
@@ -337,7 +337,7 @@ nixos-rebuild switch --flake .#new-hostname
 }
 ```
 
-##  Monitoring and Logging
+## Monitoring and Logging
 
 ### Basic Monitoring
 
@@ -361,7 +361,7 @@ nixos-rebuild switch --flake .#new-hostname
 }
 ```
 
-##  Testing New Host
+## Testing New Host
 
 ### Pre-deployment Tests
 
@@ -395,7 +395,7 @@ ping 1.1.1.1
 lspci | grep -i gpu
 ```
 
-##  Host Migration
+## Host Migration
 
 ### Migrating from Existing Host
 
@@ -424,7 +424,7 @@ lspci | grep -i gpu
    # Update any hardcoded IP addresses or hostnames
    ```
 
-##  Reference
+## Reference
 
 ### Common Host Patterns
 
@@ -486,4 +486,6 @@ lspci | grep -i gpu
 - Check secret file permissions
 - Run recovery script: `./scripts/recover-secrets.sh`
 
-This guide should help you successfully add new hosts to your NixOS configuration with proper integration into the secrets management and user systems.
+This guide should help you successfully add new hosts to your NixOS
+configuration with proper integration into the secrets management and user
+systems.

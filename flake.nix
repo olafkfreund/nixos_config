@@ -396,6 +396,9 @@
             };
           };
 
+          # Documentation site (MkDocs Material, built reproducibly)
+          docs = pkgs.callPackage ./docs_gen/site.nix { };
+
           # Live ISO images
           live-iso-razer = liveImages.liveImages.live-iso-razer.config.system.build.isoImage;
 

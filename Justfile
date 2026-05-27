@@ -1427,3 +1427,22 @@ deploy-all:
     @echo "🔹 Phase 2: Clients (Razer, P510)"
     @just deploy-all-parallel
     @echo "✅ Deployment Coordinator finished successfully."
+
+# === Documentation site (MkDocs Material) ===
+
+# Build the documentation site reproducibly with Nix (-> ./result)
+docs-build:
+    @echo "📚 Building documentation site with Nix..."
+    nix build .#docs --print-build-logs
+    @echo "✅ Site built. Open: file://$(readlink -f result)/index.html"
+
+# Serve the docs locally with live reload (requires: nix develop .#docs)
+docs-serve:
+    @echo "📚 Serving docs at http://127.0.0.1:8000 (Ctrl+C to stop)..."
+    nix develop .#docs --command mkdocs serve
+
+# Strict build to catch broken links / nav issues (used as a quality gate)
+docs-check:
+    @echo "🔍 Strict documentation build (fails on warnings)..."
+    nix develop .#docs --command mkdocs build --strict --site-dir /tmp/nixos-docs-check
+    @echo "✅ Strict build passed."

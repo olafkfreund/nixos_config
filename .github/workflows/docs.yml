@@ -1,0 +1,78 @@
+name: Documentation
+
+# Builds the MkDocs Material site reproducibly with Nix (`nix build .#docs`)
+# and publishes it to GitHub Pages. Pages source must be set to "GitHub
+# Actions" — the configure-pages step below enables this automatically.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "mkdocs.yml"
+      - "docs/**"
+      - "docs_gen/**"
+      - "modules/**"
+      - "pkgs/**"
+      - "hosts/**"
+      - "lib/**"
+      - "overlays/**"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+# Least-privilege token plus the OIDC/pages permissions Pages deploy needs.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; let in-progress runs finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build documentation site
+        run: nix build .#docs --print-build-logs
+
+      - name: Stage site artifact
+        # Dereference the /nix/store symlink into a real, writable directory
+        # so upload-pages-artifact can package it.
+        run: |
+          cp -rL result public
+          chmod -R u+w public
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
