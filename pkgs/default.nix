@@ -8,6 +8,8 @@
   obsidian-mcp-rest = pkgs.callPackage ./obsidian-mcp-rest { nodejs = pkgs.nodejs_24; };
   browser-mcp = pkgs.callPackage ./browser-mcp { nodejs = pkgs.nodejs_24; };
   whatsapp-mcp = pkgs.callPackage ./whatsapp-mcp { };
+  plex-mcp-server = pkgs.callPackage ./plex-mcp-server { };
+  arr-suite-mcp = pkgs.callPackage ./arr-suite-mcp { };
   mpris-album-art = pkgs.callPackage ./mpris-album-art { };
   weather-popup = pkgs.callPackage ./weather-popup { };
   # gemini-cli removed in #560 (replaced by pkgs.customPkgs.antigravity-cli)

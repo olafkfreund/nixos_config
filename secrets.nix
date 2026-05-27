@@ -57,4 +57,19 @@ in
   # on that host can read it. (Phase 3 of the Ollama+LiteLLM design.)
   "secrets/api-router-p620.age".publicKeys = allUsers ++ [ p620 ];
   "secrets/api-router-razer.age".publicKeys = allUsers ++ [ razer ];
+
+  # Plex auth token for the Plex MCP server (features.plex-mcp on p510).
+  # Contains ONLY the X-Plex-Token value. Set the real token with:
+  #   agenix -e secrets/plex-token.age
+  "secrets/plex-token.age".publicKeys = allUsers ++ [ p510 ];
+
+  # SABnzbd confidential settings (ConfigObj INI) merged via
+  # services.sabnzbd.secretFiles on p510 — holds the Easynews news-server
+  # username/password. Edit with: agenix -e secrets/sabnzbd-secrets.age
+  "secrets/sabnzbd-secrets.age".publicKeys = allUsers ++ [ p510 ];
+
+  # arr-suite-mcp environment file (EnvironmentFile) on p510 — *arr API keys
+  # (SONARR/RADARR/PROWLARR/OVERSEERR_API_KEY) for the MCP daemon. Refresh with:
+  #   agenix -e secrets/arr-suite-mcp-env.age
+  "secrets/arr-suite-mcp-env.age".publicKeys = allUsers ++ [ p510 ];
 }

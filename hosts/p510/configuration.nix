@@ -33,6 +33,8 @@ in
       ../../modules/development/default.nix
       ../../modules/secrets/api-keys.nix
       ../../modules/services/ollama.nix
+      ../../modules/services/plex-mcp.nix # Plex MCP server (HTTP transport, tailnet-only)
+      ../../modules/services/arr-suite-mcp.nix # *arr suite MCP server (SSE bridge, tailnet-only)
       # Desktop-specific imports (needed for GNOME):
       # ./nixos/greetd.nix      # Display manager - using GDM instead
       ./nixos/screens.nix # Display configuration - needed for desktop
@@ -358,5 +360,21 @@ in
     persistentModels = [ ]; # No persistent models to save VRAM
     onDemandModels = [ "gemma4:e4b" ]; # Only Gemma 4 model for n8n
     keepAlive = "5m"; # Evict from VRAM after 5 minutes of idle
+  };
+
+  # Plex MCP server — exposes the local Plex server to AI clients over MCP
+  # (Streamable HTTP at http://p510:3010/mcp). Reachable only over the tailnet
+  # + LAN; the Plex token is loaded at runtime from agenix (secrets/plex-token.age).
+  features.plex-mcp = {
+    enable = true;
+    listenLanInterface = "eno1"; # P510 onboard Intel I218-LM
+  };
+
+  # arr-suite MCP server — exposes Sonarr/Radarr/Prowlarr/Overseerr (and Plex)
+  # to AI clients over SSE at http://p510:3011/sse. NZBGeek is reachable via
+  # Prowlarr. *arr API keys come from agenix (secrets/arr-suite-mcp-env.age).
+  features.arr-suite-mcp = {
+    enable = true;
+    listenLanInterface = "eno1";
   };
 }

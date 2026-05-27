@@ -48,6 +48,11 @@
         # NZBGet (download manager) - accessible at /nzbget
         ${pkgs.tailscale}/bin/tailscale serve --bg --https=443 --set-path=/nzbget http://localhost:6789
 
+        # SABnzbd (download manager, side-by-side trial) - accessible at /sabnzbd
+        # NOTE: for the /sabnzbd path to work fully, set misc.url_base=/sabnzbd in
+        # the SABnzbd UI. Direct access at http://p510:8080 works without it.
+        ${pkgs.tailscale}/bin/tailscale serve --bg --https=443 --set-path=/sabnzbd http://localhost:8080
+
         # Sonarr (TV shows) - accessible at /sonarr
         ${pkgs.tailscale}/bin/tailscale serve --bg --https=443 --set-path=/sonarr http://localhost:8989
 

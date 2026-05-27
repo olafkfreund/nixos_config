@@ -76,6 +76,22 @@ let
             args = [ ];
             description = "Terraform Infrastructure as Code - manage and query terraform configurations";
           };
+
+          # Plex MCP server on p510 (SSE via mcp-proxy). Remote daemon —
+          # reachable over LAN/tailnet; no local secret needed on the client.
+          plex-mcp = {
+            type = "sse";
+            url = "http://p510:3010/sse";
+            description = "Plex library, watch stats, recommendations, and Sonarr/Radarr control (p510)";
+          };
+
+          # *arr suite MCP on p510 (SSE via mcp-proxy). Sonarr/Radarr/Prowlarr/
+          # Overseerr automation; NZBGeek is reached through Prowlarr.
+          arr-suite = {
+            type = "sse";
+            url = "http://p510:3011/sse";
+            description = "Sonarr/Radarr/Prowlarr/Overseerr automation; NZBGeek via Prowlarr (p510)";
+          };
         }
         # Obsidian MCP - conditional configuration based on implementation
         // (lib.optionalAttrs obsidianEnabled {
