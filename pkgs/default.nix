@@ -12,6 +12,7 @@
   arr-suite-mcp = pkgs.callPackage ./arr-suite-mcp { };
   audiobookbay-automated = pkgs.callPackage ./audiobookbay-automated { };
   m4b-tool = pkgs.callPackage ./m4b-tool { };
+  audiobook-mcp = pkgs.callPackage ./audiobook-mcp { };
   mpris-album-art = pkgs.callPackage ./mpris-album-art { };
   weather-popup = pkgs.callPackage ./weather-popup { };
   # gemini-cli removed in #560 (replaced by pkgs.customPkgs.antigravity-cli)

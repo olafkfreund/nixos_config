@@ -37,6 +37,7 @@ in
       ../../modules/services/arr-suite-mcp.nix # *arr suite MCP server (SSE bridge, tailnet-only)
       ../../modules/services/audiobookbay-automated.nix # AudioBookBay search → Transmission
       ../../modules/services/audiobook-import.nix # Completed downloads → Audiobookshelf (LLM + m4b)
+      ../../modules/services/audiobook-mcp.nix # Audiobook acquisition + library MCP (SSE)
       # Desktop-specific imports (needed for GNOME):
       # ./nixos/greetd.nix      # Display manager - using GDM instead
       ./nixos/screens.nix # Display configuration - needed for desktop
@@ -397,5 +398,13 @@ in
   # under /mnt/media/Media/Audiobooks/<Author>/[<Series>/]<Title>/.
   features.audiobook-import = {
     enable = true;
+  };
+
+  # Audiobook acquisition + library MCP (SSE on :3012). Exposes search_abb,
+  # add_abb, search_usenet (NZBGeek via Prowlarr), grab_usenet (SABnzbd), and
+  # Audiobookshelf library lookups for an LLM/Claude agent over the tailnet.
+  features.audiobook-mcp = {
+    enable = true;
+    listenLanInterface = "eno1";
   };
 }
