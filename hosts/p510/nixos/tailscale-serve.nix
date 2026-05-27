@@ -71,6 +71,9 @@
         # Overseerr (request management for Plex) - accessible at /overseerr
         ${pkgs.tailscale}/bin/tailscale serve --bg --https=443 --set-path=/overseerr http://localhost:5055
 
+        # AudioBookBay search UI (audiobookbay-automated) - accessible at /audiobooks-dl
+        ${pkgs.tailscale}/bin/tailscale serve --bg --https=443 --set-path=/audiobooks-dl http://localhost:5078
+
         # Note: Home Assistant is NOT configured here to avoid port conflicts.
         # It is accessible directly at http://p510.lan:8123 via subnet routing.
 

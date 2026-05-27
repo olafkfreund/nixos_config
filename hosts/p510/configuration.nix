@@ -35,6 +35,7 @@ in
       ../../modules/services/ollama.nix
       ../../modules/services/plex-mcp.nix # Plex MCP server (HTTP transport, tailnet-only)
       ../../modules/services/arr-suite-mcp.nix # *arr suite MCP server (SSE bridge, tailnet-only)
+      ../../modules/services/audiobookbay-automated.nix # AudioBookBay search → Transmission
       # Desktop-specific imports (needed for GNOME):
       # ./nixos/greetd.nix      # Display manager - using GDM instead
       ./nixos/screens.nix # Display configuration - needed for desktop
@@ -374,6 +375,15 @@ in
   # to AI clients over SSE at http://p510:3011/sse. NZBGeek is reachable via
   # Prowlarr. *arr API keys come from agenix (secrets/arr-suite-mcp-env.age).
   features.arr-suite-mcp = {
+    enable = true;
+    listenLanInterface = "eno1";
+  };
+
+  # AudioBookBay search UI → existing Transmission daemon. Downloads land in
+  # /mnt/media/downloads/torrents/audiobooks/<Title>/ (watched by the
+  # audiobook-import pipeline). Reachable over the tailnet + LAN, and exposed
+  # at https://p510.<tailnet>/audiobooks-dl via tailscale-serve.
+  features.audiobookbay-automated = {
     enable = true;
     listenLanInterface = "eno1";
   };

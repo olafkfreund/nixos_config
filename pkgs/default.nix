@@ -10,6 +10,7 @@
   whatsapp-mcp = pkgs.callPackage ./whatsapp-mcp { };
   plex-mcp-server = pkgs.callPackage ./plex-mcp-server { };
   arr-suite-mcp = pkgs.callPackage ./arr-suite-mcp { };
+  audiobookbay-automated = pkgs.callPackage ./audiobookbay-automated { };
   mpris-album-art = pkgs.callPackage ./mpris-album-art { };
   weather-popup = pkgs.callPackage ./weather-popup { };
   # gemini-cli removed in #560 (replaced by pkgs.customPkgs.antigravity-cli)
