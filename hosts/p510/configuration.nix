@@ -35,6 +35,9 @@ in
       ../../modules/services/ollama.nix
       ../../modules/services/plex-mcp.nix # Plex MCP server (HTTP transport, tailnet-only)
       ../../modules/services/arr-suite-mcp.nix # *arr suite MCP server (SSE bridge, tailnet-only)
+      ../../modules/services/audiobookbay-automated.nix # AudioBookBay search → Transmission
+      ../../modules/services/audiobook-import.nix # Completed downloads → Audiobookshelf (LLM + m4b)
+      ../../modules/services/audiobook-mcp.nix # Audiobook acquisition + library MCP (SSE)
       # Desktop-specific imports (needed for GNOME):
       # ./nixos/greetd.nix      # Display manager - using GDM instead
       ./nixos/screens.nix # Display configuration - needed for desktop
@@ -358,7 +361,9 @@ in
     package = pkgs.ollama-cuda; # NVIDIA CUDA GPU package
     modelsDir = "/mnt/media/ollama/models"; # Stored on the large media pool disk
     persistentModels = [ ]; # No persistent models to save VRAM
-    onDemandModels = [ "gemma4:e4b" ]; # Only Gemma 4 model for n8n
+    # gemma4 for n8n; qwen2.5:7b for reliable strict-JSON audiobook metadata
+    # extraction + tool-calling (audiobook-import / audiobook-mcp).
+    onDemandModels = [ "gemma4:e4b" "qwen2.5:7b" ];
     keepAlive = "5m"; # Evict from VRAM after 5 minutes of idle
   };
 
@@ -374,6 +379,31 @@ in
   # to AI clients over SSE at http://p510:3011/sse. NZBGeek is reachable via
   # Prowlarr. *arr API keys come from agenix (secrets/arr-suite-mcp-env.age).
   features.arr-suite-mcp = {
+    enable = true;
+    listenLanInterface = "eno1";
+  };
+
+  # AudioBookBay search UI → existing Transmission daemon. Downloads land in
+  # /mnt/media/downloads/torrents/audiobooks/<Title>/ (watched by the
+  # audiobook-import pipeline). Reachable over the tailnet + LAN, and exposed
+  # at https://p510.<tailnet>/audiobooks-dl via tailscale-serve.
+  features.audiobookbay-automated = {
+    enable = true;
+    listenLanInterface = "eno1";
+  };
+
+  # Completed audiobook downloads → Audiobookshelf library. Scans the ABB
+  # download dir every 5 min, parses release names with the local qwen2.5:7b,
+  # merges multi-file books into chaptered M4B via m4b-tool, and places them
+  # under /mnt/media/Media/Audiobooks/<Author>/[<Series>/]<Title>/.
+  features.audiobook-import = {
+    enable = true;
+  };
+
+  # Audiobook acquisition + library MCP (SSE on :3012). Exposes search_abb,
+  # add_abb, search_usenet (NZBGeek via Prowlarr), grab_usenet (SABnzbd), and
+  # Audiobookshelf library lookups for an LLM/Claude agent over the tailnet.
+  features.audiobook-mcp = {
     enable = true;
     listenLanInterface = "eno1";
   };

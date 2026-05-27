@@ -206,6 +206,7 @@
     "d /mnt/media/downloads/torrents/complete 0775 olafkfreund users -"
     "d /mnt/media/downloads/torrents/incomplete 0775 olafkfreund users -"
     "d /mnt/media/downloads/torrents/watch 0775 olafkfreund users -"
+    "d /mnt/media/downloads/torrents/audiobooks 0775 olafkfreund users -"
     "d /mnt/media/downloads/usenet 0775 olafkfreund users -"
     "d /mnt/media/downloads/usenet/complete 0775 olafkfreund users -"
     "d /mnt/media/downloads/usenet/incomplete 0775 olafkfreund users -"

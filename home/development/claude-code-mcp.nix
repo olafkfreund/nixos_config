@@ -92,6 +92,14 @@ let
             url = "http://p510:3011/sse";
             description = "Sonarr/Radarr/Prowlarr/Overseerr automation; NZBGeek via Prowlarr (p510)";
           };
+
+          # Audiobook MCP on p510 (SSE via mcp-proxy). AudioBookBay search/add
+          # (torrent) + NZBGeek search/grab (Usenet) + Audiobookshelf library.
+          audiobook = {
+            type = "sse";
+            url = "http://p510:3012/sse";
+            description = "Audiobook acquisition: AudioBookBay + NZBGeek search/grab, Audiobookshelf library (p510)";
+          };
         }
         # Obsidian MCP - conditional configuration based on implementation
         // (lib.optionalAttrs obsidianEnabled {

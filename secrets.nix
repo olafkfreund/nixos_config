@@ -72,4 +72,10 @@ in
   # (SONARR/RADARR/PROWLARR/OVERSEERR_API_KEY) for the MCP daemon. Refresh with:
   #   agenix -e secrets/arr-suite-mcp-env.age
   "secrets/arr-suite-mcp-env.age".publicKeys = allUsers ++ [ p510 ];
+
+  # audiobook-mcp environment file (EnvironmentFile) on p510 — backend API
+  # keys for the audiobook MCP server: PROWLARR_API_KEY, SABNZBD_API_KEY and
+  # (optional) ABS_API_KEY for Audiobookshelf library lookups. Edit with:
+  #   agenix -e secrets/audiobook-mcp-env.age
+  "secrets/audiobook-mcp-env.age".publicKeys = allUsers ++ [ p510 ];
 }
