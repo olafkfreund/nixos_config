@@ -75,6 +75,13 @@ in
         group = "users";
       };
 
+      synechron-github-api = {
+        file = ../../secrets/synechron-github-api.age;
+        mode = "0600";
+        owner = username;
+        group = "users";
+      };
+
       tailscale-auth-key = {
         file = ../../secrets/tailscale-auth-key.age;
         mode = "0600";
@@ -121,6 +128,10 @@ in
           # Export as GITHUB_API_TOKEN to avoid conflict with gh CLI credential management
           # gh CLI expects to manage its own credentials via 'gh auth login'
           echo "export GITHUB_API_TOKEN=\"$(cat /run/agenix/api-github-token)\""
+        fi
+
+        if [ -r "/run/agenix/synechron-github-api" ]; then
+          echo "export SYNECHRON_GITHUB_API_TOKEN=\"$(cat /run/agenix/synechron-github-api)\""
         fi
 
         # If no secrets are available, output nothing (safe for eval)
