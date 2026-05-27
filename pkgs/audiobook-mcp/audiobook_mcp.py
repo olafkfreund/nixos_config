@@ -96,8 +96,10 @@ def add_abb(link: str, title: str) -> str:
 def search_usenet(query: str, limit: int = 25) -> list[dict]:
     """Search Usenet indexers (e.g. NZBGeek) for audiobooks via Prowlarr.
 
-    Searches the audiobook category. Returns releases with the downloadUrl to
-    pass to grab_usenet. Requires Prowlarr to be reachable with an API key.
+    Searches the audiobook category and returns ONLY Usenet (NZB) releases —
+    torrent-protocol results from the same category are dropped so every
+    result is grab_usenet/SABnzbd-compatible. For torrents use search_abb.
+    Requires Prowlarr to be reachable with an API key.
     """
     if not PROWLARR_API_KEY:
         return [{"error": "PROWLARR_API_KEY not configured"}]
@@ -118,13 +120,15 @@ def search_usenet(query: str, limit: int = 25) -> list[dict]:
         return [{"error": f"Prowlarr search failed: {exc}"}]
     out = []
     for it in items:
+        if it.get("protocol") != "usenet":
+            continue  # drop torrent results; use search_abb for those
         size = it.get("size") or 0
         out.append(
             {
                 "title": it.get("title"),
                 "indexer": it.get("indexer"),
                 "size_mb": round(size / (1024 * 1024), 1) if size else None,
-                "seeders": it.get("seeders"),
+                "grabs": it.get("grabs"),
                 "protocol": it.get("protocol"),
                 "downloadUrl": it.get("downloadUrl")
                 or it.get("magnetUrl")
