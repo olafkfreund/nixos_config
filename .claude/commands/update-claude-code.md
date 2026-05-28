@@ -5,7 +5,7 @@ Two packages, two sources, two workflows — both start here. Default to
 
 | Package | Source | Enabled on | Update target |
 |---|---|---|---|
-| `claude-code` (CLI) | Anthropic GCS binary channel | p620, razer, p510 | `pkgs/claude-code-native/default.nix` |
+| `claude-code` (CLI) | Anthropic GCS binary channel | **p620 + razer only** (p510 doesn't ship it; package not in its closure) | `pkgs/claude-code-native/default.nix` |
 | `claude-desktop` (Electron app) | `aaddrick/claude-desktop-debian` flake input | **razer + p620 only** (NOT p510 — headless server) | `flake.nix` input URL |
 
 Which package? Ask yourself:
@@ -30,27 +30,32 @@ like the 2.1.113 optionalDependencies split.
 - [ ] `gh auth status` OK
 - [ ] Current `claude --version` captured for the commit body
 
-### Steps
+### Steps (claude-code)
 
 1. **Pick the version.**
+
    ```bash
    ./scripts/update-claude-code-native.sh           # just show channels
    ./scripts/update-claude-code-native.sh latest    # shorthand
    ./scripts/update-claude-code-native.sh 2.1.114   # explicit
    ```
+
    Default is `latest`. The script prints SRI hashes + a ready-to-paste Nix
    snippet. It does NOT edit files.
 
 2. **Edit `pkgs/claude-code-native/default.nix`** — three lines only:
+
    ```nix
    version = "<NEW>";
    ...
    sources.x86_64-linux.hash = "<NEW_X64_HASH>";
    sources.aarch64-linux.hash = "<NEW_ARM64_HASH>";
    ```
+
    Nothing else.
 
 3. **Build + sanity.**
+
    ```bash
    OUT=$(nix build --no-link --print-out-paths .#claude-code-native)
    $OUT/bin/claude --version          # must match target
@@ -58,6 +63,7 @@ like the 2.1.113 optionalDependencies split.
    ```
 
 4. **Host matrix.** Any failure → stop.
+
    ```bash
    for h in p620 razer p510; do
      nix build --no-link .#nixosConfigurations.$h.config.system.build.toplevel
@@ -71,7 +77,7 @@ like the 2.1.113 optionalDependencies split.
 
 6. **Deploy.** p620 = local; razer/p510 = via SSH.
 
-### Rollback
+### Rollback (claude-code)
 
 - `sudo nixos-rebuild switch --rollback` (per-host) OR `git revert`.
 
@@ -95,9 +101,10 @@ there.
       cp -a ~/.config/Claude ~/.config/Claude.bak-$(date +%Y%m%d)
       ```
 
-### Steps
+### Steps (claude-desktop)
 
 1. **Inspect upstream.** Read BEFORE bumping:
+
    ```bash
    # Latest releases
    gh api repos/aaddrick/claude-desktop-debian/releases --jq '.[:5] | .[] | {tag: .tag_name, published: .published_at, body_lines: (.body | split("\n") | .[0:5])}'
@@ -118,24 +125,29 @@ there.
    - New `optionalDependencies` changes in claude npm → may require overlay rework
 
 2. **Resolve target → commit SHA.**
+
    ```bash
    TAG=v1.3.32+claude1.3109.0                       # pick from releases list
    TARGET=$(gh api "repos/aaddrick/claude-desktop-debian/git/ref/tags/$TAG" --jq '.object.sha')
    echo "Will pin to: $TARGET"
    ```
+
    Or, if tracking `main` HEAD (for post-release fixes):
+
    ```bash
    TARGET=$(gh api repos/aaddrick/claude-desktop-debian/commits/main --jq '.sha')
    ```
 
 3. **Edit `flake.nix`** — update the input URL AND its comment so future-you
    knows what tag this SHA corresponds to:
+
    ```nix
    # = tag v1.3.32+claude1.3109.0 (2026-04-17) [or: main @ 4cc6cc21 (2026-04-19)]
    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/<TARGET>";
    ```
 
 4. **Lock + sanity-eval.**
+
    ```bash
    nix flake lock --update-input claude-desktop-linux
    # Confirm the resolved rev
@@ -143,6 +155,7 @@ there.
    ```
 
 5. **Verify our overlay's sed pattern still matches upstream build.sh.**
+
    ```bash
    SRC=$(nix build --print-out-paths --no-link ".#inputs.claude-desktop-linux.outPath" 2>/dev/null \
          || jq -r '.nodes."claude-desktop-linux".locked | "github:\(.owner)/\(.repo)/\(.rev)"' flake.lock \
@@ -153,6 +166,7 @@ there.
    ```
 
 6. **Build + verify the asar is correctly packed.**
+
    ```bash
    # Build the FHS wrapper (exposed via nixosConfigurations.razer.pkgs)
    FHS=$(nix build --no-link --print-out-paths '.#nixosConfigurations.razer.pkgs.claude-desktop-linux')
@@ -166,6 +180,7 @@ there.
 
 7. **Host matrix.** claude-desktop only runs on razer + p620; p510 still
    needs to BUILD (it's in the closure via overlay) but won't install UI.
+
    ```bash
    for h in p620 razer p510; do
      nix build --no-link .#nixosConfigurations.$h.config.system.build.toplevel
@@ -176,11 +191,13 @@ there.
    Branch naming: `feat/<N>-claude-desktop-<tag>`.
 
 9. **Deploy — razer first** (primary claude-desktop host):
+
    ```bash
    ssh razer 'cd ~/.config/nixos && git pull && sudo nixos-rebuild switch --flake .#razer'
    # Verify on razer:
    ssh razer 'pgrep -af "claude-desktop-1\.[0-9]"'
    ```
+
    Then p620 (user confirmation on timing — desktop requires quit-and-relaunch
    to pick up the new binary; see "Idiot-proofing" below).
 
@@ -192,17 +209,19 @@ there.
 - To use the new version: `pkill -f claude-desktop` then relaunch from app
   menu. Warn the user before doing this — they'll lose in-flight state.
 - Always check the post-deploy process tree:
+
   ```bash
   ssh razer 'pgrep -af "claude-desktop-1\.[0-9]" | head -3'
   # Should show the NEW inner hash. If OLD hash → user hasn't restarted.
   ```
+
 - `~/.config/Claude/vm_bundles/` state is version-sensitive. After a major
   bump (e.g. claude binary 1.2278→1.3109, ~800 version advance), a stale
   bundle can cause "VM service not running" — see upstream issue #408.
   First thing to try after a failed launch: `rm -rf ~/.config/Claude/vm_bundles/`
   and relaunch.
 
-### Rollback
+### Rollback (claude-desktop)
 
 - `sudo nixos-rebuild switch --rollback` OR `git revert` + redeploy.
 
