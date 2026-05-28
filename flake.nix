@@ -71,17 +71,19 @@
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
     zjstatus.url = "github:dj95/zjstatus";
-    # = tag v2.0.15+claude1.9255.0, commit 5b2fb414 (2026-05-27).
-    # Claude binary bump 1.8555.2 -> 1.9255.0. Picks up:
-    #   - #657 anchor tray-var extraction on .Tray() literal, resolving
-    #     the 1.9255.0 nix build failure reported in #654
+    # = tag v2.0.16+claude1.9255.2, commit 5dd948e9 (2026-05-28).
+    # Claude binary bump 1.9255.0 -> 1.9255.2. Picks up:
+    #   - #660 capture $-prefixed minified names in cowork spawn guard
+    #     (refinement to cowork patch from v2.0.15)
+    # Carries forward from v2.0.15:
+    #   - #657 anchor tray-var extraction on .Tray() literal
     #   - #650 filter .asar paths from --add-dir dispatch + session restore
     # Known caveat carried in: #605 (Electron holds systemd-inhibit
     # forever, blocking suspend while app runs). Razer-relevant.
     # Workaround: close claude-desktop entirely to release inhibitor,
     # or set CLAUDE_KEEP_AWAKE=0 (#645).
     # Bump via /update-claude-code.
-    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/5b2fb4141bccfc621da2356b5f978cd71cf96a51";
+    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/5dd948e96d853ed37636bc0e2368fc2665cd1104";
 
     # Claude Code skill catalogue (borghei). flake = false because it's a
     # plain markdown/assets catalogue, not a Nix flake. We symlink one
