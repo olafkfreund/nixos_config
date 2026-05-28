@@ -1,7 +1,7 @@
 { config, lib, ... }:
 
 let
-  inherit (lib) mkOption mkIf mkEnableOption types optionalString listToAttrs filter;
+  inherit (lib) mkOption mkIf mkEnableOption types listToAttrs filter;
   cfg = config.features.syncthing;
 
   # Host device IDs - obtained from each host's Syncthing installation
@@ -29,62 +29,6 @@ let
       };
     })
     otherHosts);
-
-  # Common ignore patterns for Claude config
-  claudeIgnorePatterns = ''
-    // Sensitive files - never sync
-    .credentials.json
-
-    // Large/runtime files - per machine
-    history.jsonl
-    stats-cache.json
-
-    // Cache and temporary directories
-    cache
-    debug
-    shell-snapshots
-    session-env
-    paste-cache
-    file-history
-    statsig
-    telemetry
-    todos
-    ide
-
-    // Home Manager managed files (symlinks to nix store)
-    settings.json
-    settings.local.json
-    MCP-README.md
-    plugins/custom-marketplace
-
-    // Backup files
-    *.bak
-    *.backup
-    *~
-    .*.swp
-  '';
-
-  # Common ignore patterns for Gemini config
-  geminiIgnorePatterns = ''
-    // Sensitive files - never sync
-    oauth_creds.json
-    google_accounts.json
-
-    // Per-machine identifiers
-    installation_id
-    user_id
-    state.json
-
-    // Browser profile and temp
-    antigravity-browser-profile
-    tmp
-
-    // Backup files
-    *.bak
-    *.backup
-    *~
-    .*.swp
-  '';
 
 in
 {
@@ -225,32 +169,8 @@ in
       };
     };
 
-    # Create .stignore files for each synced folder
-    systemd.services.syncthing-stignore = {
-      description = "Create Syncthing ignore files";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "syncthing.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-        User = cfg.user;
-        Group = "users";
-      };
-      script = ''
-        # Create .stignore for Claude config
-        ${optionalString cfg.syncClaude ''
-          cat > /home/${cfg.user}/.claude/.stignore << 'EOF'
-        ${claudeIgnorePatterns}
-        EOF
-        ''}
-
-        # Create .stignore for Gemini config
-        ${optionalString cfg.syncGemini ''
-          cat > /home/${cfg.user}/.gemini/.stignore << 'EOF'
-        ${geminiIgnorePatterns}
-        EOF
-        ''}
-      '';
-    };
+    # NOTE: .stignore files are now managed declaratively by Home Manager
+    # via home/syncthing-stignore.nix — no oneshot writer here.
 
     # Firewall configuration
     networking.firewall = mkIf cfg.openFirewall {
