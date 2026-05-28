@@ -13,5 +13,10 @@
 
     # Development environment modules
     ../../home/development/default.nix
+
+    # Syncthing .stignore — managed declaratively for every host
+    # (p510 doesn't import home/default.nix via profile.nix, so this
+    # is the common bind site that reaches all three host_home.nix files).
+    ../../home/syncthing-stignore.nix
   ];
 }
