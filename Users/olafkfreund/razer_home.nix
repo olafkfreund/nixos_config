@@ -19,6 +19,8 @@ in
   # Laptop: flameshot works fine on Razer (single-monitor Wayland)
   features.desktop.flameshot = true;
 
+  features.desktop.aerion = true;
+
   # obsidian stays disabled — see #370 (electron-39 build broken upstream)
 
   # splashboard — terminal splash screen on shell startup + cd. Same as p620.

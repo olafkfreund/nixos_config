@@ -15,6 +15,7 @@
     ./neofetch/default.nix
     ./kdeconnect/default.nix
     ./slack/default.nix
+    ./aerion/default.nix
     ./obs/default.nix
     ./flameshot/default.nix
     ./screenshots/wayland-native.nix

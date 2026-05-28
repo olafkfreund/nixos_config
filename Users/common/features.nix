@@ -45,6 +45,7 @@ let inherit (lib) mkEnableOption; in {
       evince = mkEnableOption "Enable Evince document viewer";
       kdeconnect = mkEnableOption "Enable KDE Connect";
       slack = mkEnableOption "Enable Slack";
+      aerion = mkEnableOption "Enable Aerion email client";
       lanmouse = mkEnableOption "Enable LAN Mouse";
 
       # Desktop shell (experimental)

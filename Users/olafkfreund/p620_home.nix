@@ -14,6 +14,7 @@
 
   # Workstation-specific desktop flags
   features.desktop.obsidian = true;
+  features.desktop.aerion = true;
   features.desktop.waylandScreenshots = true;
   features.desktop.quickshell = true;
 
