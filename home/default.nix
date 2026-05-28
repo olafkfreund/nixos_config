@@ -11,6 +11,7 @@
     ./media/music.nix
     ./media/spice_themes.nix
     ./files.nix
+    ./syncthing-stignore.nix
   ];
 
   # Enable Claude Code via home-manager's built-in module.
