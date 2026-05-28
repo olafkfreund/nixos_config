@@ -63,6 +63,7 @@ in
         evince.enable = cfg.desktop.evince;
         kdeconnect.enable = cfg.desktop.kdeconnect;
         slack.enable = cfg.desktop.slack;
+        aerion.enable = cfg.desktop.aerion;
       };
 
       # File managers

@@ -1,4 +1,5 @@
 final: _prev: {
+  aerion = final.callPackage ../pkgs/aerion { };
   glim = final.callPackage ./glim { };
   intune-portal = final.callPackage ../pkgs/intune-portal { };
   zsh-ai-cmd = final.callPackage ../pkgs/zsh-ai-cmd { };

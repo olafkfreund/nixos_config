@@ -341,6 +341,7 @@
         in
         {
           # Custom applications
+          aerion = pkgs.callPackage ./pkgs/aerion { };
           claude-code = import ./home/development/claude-code {
             inherit (pkgs) lib buildNpmPackage fetchurl nodejs makeWrapper writeShellScriptBin;
           };
