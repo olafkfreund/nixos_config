@@ -5,7 +5,7 @@ site_description: >-
   Documentation for every module, package, and host, with the reasoning
   behind each architectural choice.
 site_author: olafkfreund
-site_url: https://olafkfreund.github.io/nixos_config/
+site_url: https://nixos.freundcloud.com/
 
 repo_url: https://github.com/olafkfreund/nixos_config
 repo_name: olafkfreund/nixos_config
