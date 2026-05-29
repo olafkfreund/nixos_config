@@ -1,0 +1,488 @@
+/* ============================================================
+   Terminal theme overlay for MkDocs Material.
+   Ported from olafkfreund/skill_pool's site/css/terminal.css.
+
+   Scope: applies only when the `slate` (dark) scheme is active.
+   Light scheme stays Material default so users who prefer light
+   get a readable experience.
+   ============================================================ */
+
+/* ---------- Terminal palette variables (slate only) ---------- */
+
+[data-md-color-scheme="slate"] {
+  /* Source palette: pure black + phosphor green */
+  --term-bg:           #000000;
+  --term-bg-elev:      #050805;
+  --term-fg:           #d5ffd5;
+  --term-fg-dim:       #6fa86f;
+  --term-fg-muted:     #3d6a3d;
+  --term-accent:       #00ff88;
+  --term-accent-dim:   #00b860;
+  --term-accent-warn:  #ffd200;
+  --term-accent-err:   #ff5577;
+  --term-border:       #144a14;
+  --term-border-bright:#2a8a2a;
+  --term-glow:         0 0 14px rgba(0, 255, 136, 0.35);
+  --term-glow-soft:    0 0 4px rgba(0, 255, 136, 0.15);
+
+  /* Map onto Material's CSS custom properties.
+     These names come from material/templates/assets/stylesheets/main.*.min.css. */
+  --md-default-bg-color:        var(--term-bg);
+  --md-default-bg-color--light: var(--term-bg-elev);
+  --md-default-fg-color:        var(--term-fg);
+  --md-default-fg-color--light: var(--term-fg-dim);
+  --md-default-fg-color--lighter: var(--term-fg-muted);
+  --md-default-fg-color--lightest: var(--term-border);
+
+  --md-primary-fg-color:        var(--term-bg);
+  --md-primary-bg-color:        var(--term-accent);
+  --md-primary-bg-color--light: var(--term-fg-dim);
+
+  --md-accent-fg-color:         var(--term-accent);
+  --md-accent-fg-color--transparent: rgba(0, 255, 136, 0.1);
+  --md-accent-bg-color:         var(--term-bg);
+
+  --md-typeset-color:           var(--term-fg);
+  --md-typeset-a-color:         var(--term-accent);
+  --md-typeset-mark-color:      rgba(0, 255, 136, 0.18);
+
+  --md-code-bg-color:           var(--term-bg-elev);
+  --md-code-fg-color:           var(--term-fg);
+  --md-code-hl-color:           rgba(0, 255, 136, 0.18);
+  --md-code-hl-number-color:    var(--term-accent-warn);
+  --md-code-hl-keyword-color:   var(--term-accent);
+  --md-code-hl-string-color:    #aaffaa;
+  --md-code-hl-comment-color:   var(--term-fg-muted);
+  --md-code-hl-operator-color:  var(--term-fg-dim);
+  --md-code-hl-name-color:      var(--term-fg);
+  --md-code-hl-function-color:  var(--term-accent);
+  --md-code-hl-variable-color:  var(--term-fg-dim);
+  --md-code-hl-constant-color:  var(--term-accent-warn);
+  --md-code-hl-punctuation-color: var(--term-fg-dim);
+
+  --md-footer-bg-color:         var(--term-bg-elev);
+  --md-footer-bg-color--dark:   var(--term-bg);
+  --md-footer-fg-color:         var(--term-fg-dim);
+  --md-footer-fg-color--light:  var(--term-fg-muted);
+  --md-footer-fg-color--lighter: var(--term-border);
+
+  --md-admonition-bg-color:     rgba(0, 255, 136, 0.04);
+  --md-admonition-fg-color:     var(--term-fg);
+
+  /* Force JetBrains Mono for body text too, not just code (skill_pool look).
+     Overrides Material's `body { font-family: var(--md-text-font-family) }`
+     without specificity wrestling. */
+  --md-text-font-family: "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Consolas, monospace;
+  --md-code-font-family: "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* ---------- CRT scanlines + vignette overlay ---------- */
+
+[data-md-color-scheme="slate"]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 255, 136, 0.025) 0,
+    rgba(0, 255, 136, 0.025) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: screen;
+}
+
+[data-md-color-scheme="slate"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 55%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+}
+
+/* ---------- Body sizing (font family handled via --md-text-font-family above) ---------- */
+
+[data-md-color-scheme="slate"] .md-typeset {
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+
+/* ---------- Header / top nav ---------- */
+
+[data-md-color-scheme="slate"] .md-header {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--term-border);
+  box-shadow: none;
+  color: var(--term-fg);
+}
+
+[data-md-color-scheme="slate"] .md-tabs {
+  background: rgba(0, 0, 0, 0.85);
+  border-bottom: 1px solid var(--term-border);
+  color: var(--term-fg-dim);
+}
+
+[data-md-color-scheme="slate"] .md-tabs__link {
+  color: var(--term-fg-dim);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 1;
+  transition: color 120ms ease, text-shadow 120ms ease;
+}
+
+[data-md-color-scheme="slate"] .md-tabs__link:hover,
+[data-md-color-scheme="slate"] .md-tabs__link--active {
+  color: var(--term-accent);
+  text-shadow: var(--term-glow-soft);
+}
+
+/* Brand: prefix `> ` and append blinking cursor span (cursor.js injects it) */
+[data-md-color-scheme="slate"] .md-header__title {
+  color: var(--term-accent);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-shadow: var(--term-glow-soft);
+}
+
+[data-md-color-scheme="slate"] .md-header__topic > .md-ellipsis::before {
+  content: "> ";
+  color: var(--term-fg-dim);
+}
+
+[data-md-color-scheme="slate"] .md-header__topic .term-cursor {
+  display: inline-block;
+  width: 7px;
+  background: var(--term-accent);
+  height: 1em;
+  vertical-align: text-bottom;
+  margin-left: 4px;
+  animation: term-blink 1.1s steps(2) infinite;
+}
+
+@keyframes term-blink {
+  50% { opacity: 0; }
+}
+
+/* ---------- Sidebar nav ---------- */
+
+[data-md-color-scheme="slate"] .md-nav {
+  font-size: 13px;
+}
+
+[data-md-color-scheme="slate"] .md-nav__title {
+  color: var(--term-fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+[data-md-color-scheme="slate"] .md-nav__link {
+  color: var(--term-fg-dim);
+  border-left: 1px solid transparent;
+  padding-left: 8px;
+  transition: color 100ms ease, border-color 100ms ease;
+}
+
+[data-md-color-scheme="slate"] .md-nav__link:hover {
+  color: var(--term-accent);
+  border-left-color: var(--term-accent);
+}
+
+[data-md-color-scheme="slate"] .md-nav__link--active,
+[data-md-color-scheme="slate"] .md-nav__item--active > .md-nav__link {
+  color: var(--term-accent);
+  border-left-color: var(--term-accent);
+  text-shadow: var(--term-glow-soft);
+}
+
+/* ---------- Content area ---------- */
+
+[data-md-color-scheme="slate"] .md-main__inner {
+  background: var(--term-bg);
+}
+
+[data-md-color-scheme="slate"] .md-typeset h1 {
+  color: var(--term-fg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+[data-md-color-scheme="slate"] .md-typeset h1::before {
+  content: "$ ";
+  color: var(--term-accent);
+}
+
+[data-md-color-scheme="slate"] .md-typeset h2 {
+  color: var(--term-fg);
+  letter-spacing: -0.02em;
+  border-bottom: 1px solid var(--term-border);
+  padding-bottom: 6px;
+  margin-top: 2.2em;
+}
+
+[data-md-color-scheme="slate"] .md-typeset h2::before {
+  content: "// ";
+  color: var(--term-fg-muted);
+  font-weight: normal;
+}
+
+[data-md-color-scheme="slate"] .md-typeset h3 {
+  color: var(--term-fg);
+}
+
+[data-md-color-scheme="slate"] .md-typeset h3::before {
+  content: "▸ ";
+  color: var(--term-accent);
+}
+
+[data-md-color-scheme="slate"] .md-typeset h4,
+[data-md-color-scheme="slate"] .md-typeset h5,
+[data-md-color-scheme="slate"] .md-typeset h6 {
+  color: var(--term-fg);
+}
+
+[data-md-color-scheme="slate"] .md-typeset p {
+  color: var(--term-fg-dim);
+}
+
+[data-md-color-scheme="slate"] .md-typeset p strong,
+[data-md-color-scheme="slate"] .md-typeset li strong {
+  color: var(--term-fg);
+}
+
+[data-md-color-scheme="slate"] .md-typeset li::marker {
+  color: var(--term-accent);
+}
+
+[data-md-color-scheme="slate"] .md-typeset a {
+  color: var(--term-accent);
+  border-bottom: 1px dotted var(--term-accent-dim);
+  text-decoration: none;
+  transition: color 120ms ease, border-color 120ms ease, text-shadow 120ms ease;
+}
+
+[data-md-color-scheme="slate"] .md-typeset a:hover {
+  color: #fff;
+  border-bottom-color: #fff;
+  text-shadow: var(--term-glow);
+}
+
+[data-md-color-scheme="slate"] ::selection {
+  background: var(--term-accent);
+  color: #000;
+}
+
+/* ---------- Code blocks ---------- */
+
+[data-md-color-scheme="slate"] .md-typeset pre > code,
+[data-md-color-scheme="slate"] .md-typeset .highlight pre {
+  background: var(--term-bg-elev);
+  border-left: 3px solid var(--term-accent);
+  border-top: 1px solid var(--term-border);
+  border-right: 1px solid var(--term-border);
+  border-bottom: 1px solid var(--term-border);
+  font-size: 13px;
+}
+
+[data-md-color-scheme="slate"] .md-typeset code {
+  background: var(--term-bg-elev);
+  border: 1px solid var(--term-border);
+  color: var(--term-accent);
+  padding: 1px 6px;
+  font-size: 0.9em;
+}
+
+[data-md-color-scheme="slate"] .md-typeset pre code {
+  background: transparent;
+  border: none;
+  color: var(--term-fg);
+  padding: 0;
+}
+
+/* ---------- Tables ---------- */
+
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) {
+  background: var(--term-bg);
+  border: 1px solid var(--term-border);
+  font-size: 13px;
+}
+
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) th {
+  background: var(--term-bg-elev);
+  color: var(--term-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--term-border);
+}
+
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) td {
+  color: var(--term-fg-dim);
+  border-bottom: 1px solid var(--term-border);
+}
+
+/* ---------- Admonitions (Material) styled as callouts ---------- */
+
+[data-md-color-scheme="slate"] .md-typeset .admonition,
+[data-md-color-scheme="slate"] .md-typeset details {
+  background: rgba(0, 255, 136, 0.04);
+  border: none;
+  border-left: 3px solid var(--term-accent);
+  box-shadow: none;
+  font-size: 14px;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .admonition-title,
+[data-md-color-scheme="slate"] .md-typeset summary {
+  background: transparent;
+  color: var(--term-accent);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .admonition-title::before,
+[data-md-color-scheme="slate"] .md-typeset summary::before {
+  background-color: var(--term-accent);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .admonition.warning,
+[data-md-color-scheme="slate"] .md-typeset .admonition.caution {
+  border-left-color: var(--term-accent-warn);
+  background: rgba(255, 210, 0, 0.04);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .admonition.warning .admonition-title,
+[data-md-color-scheme="slate"] .md-typeset .admonition.caution .admonition-title {
+  color: var(--term-accent-warn);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .admonition.warning .admonition-title::before,
+[data-md-color-scheme="slate"] .md-typeset .admonition.caution .admonition-title::before {
+  background-color: var(--term-accent-warn);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .admonition.danger,
+[data-md-color-scheme="slate"] .md-typeset .admonition.failure,
+[data-md-color-scheme="slate"] .md-typeset .admonition.bug {
+  border-left-color: var(--term-accent-err);
+  background: rgba(255, 85, 119, 0.04);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .admonition.danger .admonition-title,
+[data-md-color-scheme="slate"] .md-typeset .admonition.failure .admonition-title,
+[data-md-color-scheme="slate"] .md-typeset .admonition.bug .admonition-title {
+  color: var(--term-accent-err);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .admonition.danger .admonition-title::before,
+[data-md-color-scheme="slate"] .md-typeset .admonition.failure .admonition-title::before,
+[data-md-color-scheme="slate"] .md-typeset .admonition.bug .admonition-title::before {
+  background-color: var(--term-accent-err);
+}
+
+/* ---------- Search ---------- */
+
+[data-md-color-scheme="slate"] .md-search__form {
+  background: var(--term-bg-elev);
+  border: 1px solid var(--term-border);
+}
+
+[data-md-color-scheme="slate"] .md-search__form:hover,
+[data-md-color-scheme="slate"] .md-search__form:focus-within {
+  border-color: var(--term-accent);
+  box-shadow: var(--term-glow-soft);
+}
+
+[data-md-color-scheme="slate"] .md-search__input {
+  color: var(--term-fg);
+  caret-color: var(--term-accent);
+}
+
+[data-md-color-scheme="slate"] .md-search__input::placeholder {
+  color: var(--term-fg-muted);
+}
+
+[data-md-color-scheme="slate"] .md-search__input + .md-search__icon {
+  color: var(--term-accent);
+}
+
+[data-md-color-scheme="slate"] .md-search-result__meta {
+  background: var(--term-bg-elev);
+  color: var(--term-fg-muted);
+  border-bottom: 1px solid var(--term-border);
+}
+
+[data-md-color-scheme="slate"] .md-search-result__article {
+  background: var(--term-bg);
+  border-left: 2px solid transparent;
+}
+
+[data-md-color-scheme="slate"] .md-search-result__article:hover,
+[data-md-color-scheme="slate"] [data-md-state="active"] {
+  background: rgba(0, 255, 136, 0.05);
+  border-left-color: var(--term-accent);
+}
+
+[data-md-color-scheme="slate"] .md-search-result__title {
+  color: var(--term-accent);
+}
+
+[data-md-color-scheme="slate"] .md-search-result__teaser {
+  color: var(--term-fg-muted);
+}
+
+/* ---------- Footer ---------- */
+
+[data-md-color-scheme="slate"] .md-footer {
+  background: var(--term-bg-elev);
+  border-top: 1px solid var(--term-border);
+}
+
+[data-md-color-scheme="slate"] .md-footer-meta {
+  background: var(--term-bg);
+  color: var(--term-fg-muted);
+}
+
+[data-md-color-scheme="slate"] .md-footer-copyright,
+[data-md-color-scheme="slate"] .md-footer-meta__inner {
+  color: var(--term-fg-muted);
+}
+
+[data-md-color-scheme="slate"] .md-footer a {
+  color: var(--term-fg-dim);
+}
+
+[data-md-color-scheme="slate"] .md-footer a:hover {
+  color: var(--term-accent);
+}
+
+/* ---------- Mermaid (scoped to slate) ---------- */
+
+[data-md-color-scheme="slate"] .mermaid {
+  background: var(--term-bg-elev);
+  border: 1px solid var(--term-border);
+  padding: 24px;
+  text-align: center;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 768px) {
+  [data-md-color-scheme="slate"] .md-typeset {
+    font-size: 14px;
+  }
+}
