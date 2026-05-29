@@ -51,8 +51,10 @@ theme:
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: indigo
-      accent: indigo
+      # `custom` so terminal.css can set --md-{primary,accent}-* without
+      # Material's preset palette winning the cascade.
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-sunny
         name: Switch to system preference
@@ -71,6 +73,14 @@ plugins:
         - docs_gen/gen_reference.py
   - literate-nav:
       nav_file: SUMMARY.md
+
+# Terminal-theme overlay (skill_pool aesthetic). Applies only in the slate
+# scheme; light scheme stays Material default.
+extra_css:
+  - stylesheets/terminal.css
+
+extra_javascript:
+  - javascripts/cursor.js
 
 markdown_extensions:
   - abbr
