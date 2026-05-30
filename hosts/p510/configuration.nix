@@ -39,6 +39,7 @@ in
       ../../modules/services/audiobook-import.nix # Completed downloads → Audiobookshelf (LLM + m4b)
       ../../modules/services/audiobook-mcp.nix # Audiobook acquisition + library MCP (SSE)
       ../../modules/services/media-bot.nix # Household media Telegram bot (Ollama NL + webhooks)
+      ../../modules/services/bazarr.nix # Subtitle automation for Sonarr/Radarr/Lidarr
       # Desktop-specific imports (needed for GNOME):
       # ./nixos/greetd.nix      # Display manager - using GDM instead
       ./nixos/screens.nix # Display configuration - needed for desktop
@@ -432,5 +433,15 @@ in
   # then `sudo systemctl reload media-bot` on p510 to hot-reload.
   features.media-bot = {
     enable = true;
+  };
+
+  # Bazarr — subtitle manager for Sonarr/Radarr/Lidarr. Runs on :6767;
+  # exposed on tailnet0 + eno1 LAN. First-deploy: open the UI, wire it
+  # to Sonarr/Radarr by hand (one-time), set Default Language Profile
+  # to Norwegian Bokmål (nb) + English (en) fallback. See the module
+  # for the full first-run checklist.
+  features.bazarr = {
+    enable = true;
+    listenLanInterface = "eno1";
   };
 }
