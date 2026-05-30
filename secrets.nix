@@ -95,4 +95,13 @@ in
   # `systemctl reload media-bot` (SIGHUP). Edit with:
   #   agenix -e secrets/media-bot-users.age
   "secrets/media-bot-users.age".publicKeys = allUsers ++ [ p510 ];
+
+  # Kometa (Plex Meta Manager) environment file (EnvironmentFile) for the
+  # oci-containers.containers.kometa unit on p510. Contains
+  # TMDB_API_KEY + PLEX_TOKEN (latter duplicated from plex-token.age for
+  # single-EnvironmentFile simplicity; rotate in both places). Edit with:
+  #   agenix -e secrets/kometa-env.age
+  # Once you've filled in the real TMDB key:
+  #   sudo systemctl restart podman-kometa.service
+  "secrets/kometa-env.age".publicKeys = allUsers ++ [ p510 ];
 }
