@@ -38,6 +38,7 @@ in
       ../../modules/services/audiobookbay-automated.nix # AudioBookBay search → Transmission
       ../../modules/services/audiobook-import.nix # Completed downloads → Audiobookshelf (LLM + m4b)
       ../../modules/services/audiobook-mcp.nix # Audiobook acquisition + library MCP (SSE)
+      ../../modules/services/media-bot.nix # Household media Telegram bot (Ollama NL + webhooks) — disabled until secrets exist
       # Desktop-specific imports (needed for GNOME):
       # ./nixos/greetd.nix      # Display manager - using GDM instead
       ./nixos/screens.nix # Display configuration - needed for desktop
