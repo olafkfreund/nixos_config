@@ -1,0 +1,103 @@
+# Kometa (Plex Meta Manager) — Phase 1a config.
+#
+# This file is read-only inside the container (bind-mounted from the Nix
+# store via the kometa module). To change collections, edit this file in
+# the repo, then `just quick-deploy p510`.
+#
+# Placeholders <<...>> are substituted by Kometa at startup from the
+# environment (passed in via EnvironmentFile from secrets/kometa-env.age).
+#
+# CURRENT STATE: dry-run is ON. Kometa will produce a report of what it
+# would do without touching Plex. Review the log under
+#   /var/lib/kometa/logs/meta.log
+# Once happy, flip `dry_run: false` in this file and redeploy.
+
+plex:
+  url: http://localhost:32400  # container shares host network (--network=host)
+  token: <<PLEX_TOKEN>>
+  timeout: 60
+  db_cache: 40
+  clean_bundles: false
+  empty_trash: false
+  optimize: false
+  verify_ssl: false
+
+tmdb:
+  apikey: <<TMDB_API_KEY>>
+  language: en
+  cache_expiration: 60
+  region: GB
+
+settings:
+  cache: true
+  cache_expiration: 60
+  asset_directory: /config/assets
+  asset_folders: false
+  asset_depth: 0
+  create_asset_folders: false
+  prioritize_assets: false
+  dimensional_asset_rename: false
+  download_url_assets: false
+  show_missing_season_assets: false
+  show_missing_episode_assets: false
+  show_asset_not_needed: true
+  sync_mode: append
+  default_collection_order:
+  minimum_items: 1
+  delete_below_minimum: false
+  delete_not_scheduled: false
+  run_again_delay: 2
+  missing_only_released: true
+  only_filter_missing: false
+  show_unmanaged: true
+  show_unconfigured: true
+  show_filtered: false
+  show_options: false
+  show_missing: true
+  show_missing_assets: true
+  save_report: true
+  tvdb_language: eng
+  ignore_ids:
+  ignore_imdb_ids:
+  item_refresh_delay: 0
+  playlist_sync_to_user: all
+  playlist_exclude_users:
+  playlist_report: false
+  custom_repo:
+  overlay_artwork_filetype: jpg
+  overlay_artwork_quality: 75
+  dry_run: true   # <-- Phase 1a: dry-run only. Flip to false for live runs.
+  verify_ssl: false
+  delete_unmanaged_collections: false
+
+webhooks:
+  error:
+  version:
+  run_start:
+  run_end:
+  changes:
+  delete:
+
+# ----------------------------------------------------------------------
+# Libraries — Phase 1a covers Movies only. TV/Anime/Music can be added
+# under their own keys with separate `collection_files` once Movies is
+# proven out.
+# ----------------------------------------------------------------------
+libraries:
+  Movies:                     # <-- must match the exact Plex library name
+    report_path: /config/movies-report.yml
+    operations:
+      mass_critic_rating_update: tmdb
+      mass_audience_rating_update: tmdb
+      mass_imdb_parental_labels: with_descriptions
+    collection_files:
+      # IMDb Top 250 — the single most useful starter collection.
+      # Pulled from Kometa Defaults; no further config needed.
+      - default: imdb
+
+# ----------------------------------------------------------------------
+# Schedule — Kometa runs its internal scheduler when the container is up.
+# `weekly(monday)` keeps load light during the dry-run learning period;
+# bump to `daily(05:30)` once you're confident in the config.
+# ----------------------------------------------------------------------
+schedule: weekly(monday)

@@ -40,6 +40,7 @@ in
       ../../modules/services/audiobook-mcp.nix # Audiobook acquisition + library MCP (SSE)
       ../../modules/services/media-bot.nix # Household media Telegram bot (Ollama NL + webhooks)
       ../../modules/services/bazarr.nix # Subtitle automation for Sonarr/Radarr/Lidarr
+      ../../modules/services/kometa # Plex Meta Manager — collections, posters, metadata
       # Desktop-specific imports (needed for GNOME):
       # ./nixos/greetd.nix      # Display manager - using GDM instead
       ./nixos/screens.nix # Display configuration - needed for desktop
@@ -443,5 +444,14 @@ in
   features.bazarr = {
     enable = true;
     listenLanInterface = "eno1";
+  };
+
+  # Kometa (Plex Meta Manager) — collections + metadata for Plex.
+  # Phase 1a: dry-run mode, IMDb Top 250 only. Will fail TMDB auth until
+  # you grab a free key from themoviedb.org and `agenix -e secrets/
+  # kometa-env.age` to fill it in. See modules/services/kometa/default.nix
+  # for the full first-run flow.
+  features.kometa = {
+    enable = true;
   };
 }
