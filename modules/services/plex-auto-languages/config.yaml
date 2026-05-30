@@ -1,0 +1,35 @@
+# Plex-Auto-Languages — Phase 1 config TEMPLATE.
+#
+# Substituted into /var/lib/plex-auto-languages/config.yaml at every
+# nixos-rebuild activation by plex-auto-languages-config-render.service.
+# Container reads the rendered file at /config/config.yaml.
+#
+# To change behaviour: edit this file in the repo, then
+# `just quick-deploy p510` to re-render and restart the container.
+#
+# Docs: https://github.com/RemiRigal/Plex-Auto-Languages/wiki/Configuration
+
+plexauto:
+  # We trust the local Plex on the host network; container shares
+  # netns via --network=host, so localhost reaches Plex directly.
+  update_level: "stable"
+  update_strategy: "console"
+
+# Per-user track preference tracking. PAL watches what each Plex user
+# selects on play; future episodes of the same series get that user's
+# preferred audio + subtitle tracks automatically. Multi-user: the
+# household's kids/partners each get their own learned preferences.
+trigger_on_play: true
+trigger_on_scan: true
+trigger_on_activity: false
+refresh_library_on_scan: true
+
+# Notify on every change in the systemd journal (no external webhook
+# needed). Useful when you're verifying the tool is doing its thing.
+notifications:
+  apprise: []
+
+# Don't filter to a subset of libraries — apply to everything Plex
+# has shows in. PAL is read-only on libraries it doesn't have matches
+# in, so this is safe to leave broad.
+ignore_labels: []
