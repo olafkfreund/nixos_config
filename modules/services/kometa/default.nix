@@ -87,8 +87,9 @@ in
       description = "Render Kometa config.yml from template + agenix secrets";
       wantedBy = [ "podman-kometa.service" ];
       before = [ "podman-kometa.service" ];
-      requires = [ "agenix.service" ];
-      after = [ "agenix.service" ];
+      # agenix on NixOS decrypts secrets in an activation script (not a
+      # systemd unit), so /run/agenix/<name> is already present by the
+      # time any service starts. No explicit dependency needed.
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = false;
