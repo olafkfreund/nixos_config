@@ -86,12 +86,14 @@ webhooks:
 # proven out.
 # ----------------------------------------------------------------------
 libraries:
-  Movies:                     # <-- must match the exact Plex library name
-    report_path: /config/movies-report.yml
+  Films:                      # <-- matches the actual Plex library name
+    report_path: /config/films-report.yml
     operations:
       mass_critic_rating_update: tmdb
       mass_audience_rating_update: tmdb
-      mass_imdb_parental_labels: with_descriptions
+      # Drop mass_imdb_parental_labels — `with_descriptions` is an invalid
+      # input value in this Kometa version; can re-enable later with a
+      # correct value if you want age-rating labels on movies.
     collection_files:
       # IMDb Top 250 — the single most useful starter collection.
       # Pulled from Kometa Defaults; no further config needed.
