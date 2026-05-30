@@ -49,6 +49,13 @@ in
         image = "kometateam/kometa:latest";
         autoStart = true;
         environmentFiles = [ config.age.secrets."kometa-env".path ];
+        environment = {
+          # Tell Kometa NOT to write back to config.yml during validation.
+          # Our config.yml is bind-mounted read-only from the Nix store
+          # (source of truth lives in the repo); without this flag Kometa
+          # tries to persist migrated defaults and crashes with EROFS.
+          KOMETA_READ_ONLY_CONFIG = "true";
+        };
         volumes = [
           # /config is Kometa's writable working dir (logs, cache, assets,
           # generated report YAMLs).
