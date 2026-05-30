@@ -27,7 +27,7 @@ in
       ./nixos/memory.nix
       ../common/nixos/hosts.nix
       ./nixos/plex.nix
-      ./flaresolverr.nix # Re-enabled: Testing fix for xvfbwrapper Python 3.13 build error
+      ./flaresolverr.nix # Cloudflare-bypass proxy for Prowlarr (used by 1337x and any other CF-protected indexer)
 
       # P510-specific server modules (media server)
       ../../modules/development/default.nix
