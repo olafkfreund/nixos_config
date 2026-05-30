@@ -164,6 +164,19 @@ def place_files(files, dest):
             shutil.copy2(p, tgt)
 
 
+def _notify_media_bot(title, author):
+    """Best-effort POST to the media-bot webhook on successful import.
+    Failure is logged and swallowed — notification down ≠ import down."""
+    url = os.environ.get("MEDIA_BOT_URL", "http://localhost:8090/audiobook")
+    payload = json.dumps({"title": title, "author": author}).encode()
+    try:
+        req = urllib.request.Request(url, payload, {"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=5):
+            pass
+    except Exception as exc:  # noqa: BLE001
+        log("media-bot notify failed (ignored):", exc)
+
+
 def process(folder):
     files = audio_files(folder)
     if not files:
@@ -189,6 +202,7 @@ def process(folder):
     write_abs_metadata(dest, m)
     pathlib.Path(os.path.join(folder, ".imported")).touch()
     log("imported:", folder, "->", dest)
+    _notify_media_bot(m["title"], m["author"])
 
 
 def main():

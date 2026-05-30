@@ -81,4 +81,18 @@ in
   # (optional) ABS_API_KEY for Audiobookshelf library lookups. Edit with:
   #   agenix -e secrets/audiobook-mcp-env.age
   "secrets/audiobook-mcp-env.age".publicKeys = allUsers ++ [ p510 ];
+
+  # media-bot environment file (EnvironmentFile) on p510 — household
+  # Telegram bot. Contains: TELEGRAM_BOT_TOKEN, OLLAMA_BASE_URL,
+  # OLLAMA_MODEL, plus *arr API keys and PLEX_TOKEN (duplicated from
+  # arr-suite-mcp-env + plex-token for single-EnvironmentFile simplicity;
+  # rotate in both places). Edit with:
+  #   agenix -e secrets/media-bot-env.age
+  "secrets/media-bot-env.age".publicKeys = allUsers ++ [ p510 ];
+
+  # media-bot user whitelist (YAML) on p510 — maps Telegram user IDs to
+  # display names and Plex usernames. Reloadable at runtime via
+  # `systemctl reload media-bot` (SIGHUP). Edit with:
+  #   agenix -e secrets/media-bot-users.age
+  "secrets/media-bot-users.age".publicKeys = allUsers ++ [ p510 ];
 }
