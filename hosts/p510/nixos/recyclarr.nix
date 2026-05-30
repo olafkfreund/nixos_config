@@ -30,6 +30,12 @@ in
         Group = "users";
         StateDirectory = "recyclarr";
         RuntimeDirectory = "recyclarr";
+        # API keys come from agenix (same env file arr-suite-mcp uses).
+        # Loaded by systemd as root before exec, then exposed to the
+        # user-owned recyclarr process via the environment — keeps the
+        # values out of /proc and avoids the brittle config.xml regex
+        # extraction we used to do here.
+        EnvironmentFile = config.age.secrets."arr-suite-mcp-env".path;
         # Path to temporary config
         Environment = "RECYCLARR_CONFIG_DIR=/run/recyclarr";
       };
@@ -37,12 +43,11 @@ in
       script = ''
         set -euo pipefail
 
-        # Extract API Keys from config files
-        RADARR_KEY=$(grep -oP '(?<=<ApiKey>).*(?=</ApiKey>)' /mnt/media/radarr/config.xml)
-        SONARR_KEY=$(grep -oP '(?<=<ApiKey>).*(?=</ApiKey>)' /mnt/media/sonarr/config.xml)
-
-        if [ -z "$RADARR_KEY" ] || [ -z "$SONARR_KEY" ]; then
-          echo "Error: Could not extract API keys from Radarr/Sonarr config files."
+        # Sanity-check: arr-suite-mcp-env.age must supply these.
+        if [ -z "''${SONARR_API_KEY:-}" ] || [ -z "''${RADARR_API_KEY:-}" ]; then
+          echo "Error: SONARR_API_KEY / RADARR_API_KEY not set." >&2
+          echo "Check secrets/arr-suite-mcp-env.age and that the EnvironmentFile" >&2
+          echo "directive on this unit points at /run/agenix/arr-suite-mcp-env." >&2
           exit 1
         fi
 
@@ -54,7 +59,7 @@ in
         radarr:
           movies:
             base_url: http://localhost:7878
-            api_key: $RADARR_KEY
+            api_key: $RADARR_API_KEY
             include:
               - template: radarr-quality-definition-movie
               - template: radarr-quality-profile-remux-web-1080p
@@ -63,7 +68,7 @@ in
         sonarr:
           tv:
             base_url: http://localhost:8989
-            api_key: $SONARR_KEY
+            api_key: $SONARR_API_KEY
             include:
               - template: sonarr-quality-definition-series
               - template: sonarr-v4-quality-profile-web-1080p
