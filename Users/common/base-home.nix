@@ -60,11 +60,17 @@
   gtk.gtk4.theme = null;
   programs.git.signing.format = null;
 
+  # We intentionally chase nixos-unstable for nixpkgs; HM/Stylix master often
+  # advance to the next release cycle before nixpkgs unstable does, producing
+  # "mismatched versions" nags at HM profile evaluation. The system-level
+  # stylix.enableReleaseChecks in modules/desktop/stylix-theme.nix only silences
+  # the NixOS-level check; the HM-profile check needs its own opt-out here.
+  home.enableNixpkgsReleaseCheck = false;
+  stylix.enableReleaseChecks = false;
+
   programs.home-manager.enable = true;
 
-  # Stylix theming targets (Home Manager level).
-  # `enableReleaseChecks = false` is set once in modules/desktop/stylix-theme.nix
-  # at the system level — no need to repeat it here. GTK is enabled fleet-wide
+  # Stylix theming targets (Home Manager level). GTK is enabled fleet-wide
   # because COSMIC's GTK theme sync is off on every host; cosmic-comp does not
   # clobber ~/.config/gtk-{3,4}.0/gtk.css at runtime.
   stylix.targets = {

@@ -176,8 +176,8 @@ in
   options.programs.claude-code-commands = {
     enable = mkEnableOption ''
       Declarative Claude Code user-level slash commands at
-      ~/.claude/commands/. Adds /team and /crew — see source file for
-      details.
+      ~/.claude/commands/. Adds /team, /crew and /blog — see source file
+      for details.
     '';
 
     endpoint = mkOption {
@@ -210,5 +210,10 @@ in
   config = mkIf cfg.enable {
     home.file.".claude/commands/team.md".text = teamCommand;
     home.file.".claude/commands/crew.md".text = crewCommand;
+    # /blog — bundled as a source file rather than inline text because the
+    # command body is full of shell ${...} and Liquid {{ }} braces that a
+    # Nix '' string would try to interpolate. Deploys to every host that
+    # enables this module (p620, p510, razer).
+    home.file.".claude/commands/blog.md".source = ./blog.md;
   };
 }
