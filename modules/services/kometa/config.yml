@@ -68,7 +68,7 @@ settings:
   custom_repo:
   overlay_artwork_filetype: jpg
   overlay_artwork_quality: 75
-  dry_run: true   # <-- Phase 1a: dry-run only. Flip to false for live runs.
+  dry_run: false  # <-- Phase 1b: live. Collections are actually created in Plex.
   verify_ssl: false
   delete_unmanaged_collections: false
 
