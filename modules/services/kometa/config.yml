@@ -1,11 +1,13 @@
-# Kometa (Plex Meta Manager) — Phase 1a config.
+# Kometa (Plex Meta Manager) — Phase 1a config TEMPLATE.
 #
-# This file is read-only inside the container (bind-mounted from the Nix
-# store via the kometa module). To change collections, edit this file in
-# the repo, then `just quick-deploy p510`.
+# This file is the source of truth. The kometa-config-render.service
+# systemd one-shot envsubst's it into /var/lib/kometa/config.yml on every
+# activation, substituting ${TMDB_API_KEY} and ${PLEX_TOKEN} from the
+# agenix-decrypted env file. Kometa then reads the rendered file
+# read-only (KOMETA_READ_ONLY_CONFIG=true in the module).
 #
-# Placeholders <<...>> are substituted by Kometa at startup from the
-# environment (passed in via EnvironmentFile from secrets/kometa-env.age).
+# To change collections / settings: edit this file in the repo, then
+# `just quick-deploy p510` to re-render and restart the container.
 #
 # CURRENT STATE: dry-run is ON. Kometa will produce a report of what it
 # would do without touching Plex. Review the log under
@@ -14,7 +16,7 @@
 
 plex:
   url: http://localhost:32400  # container shares host network (--network=host)
-  token: <<PLEX_TOKEN>>
+  token: ${PLEX_TOKEN}         # substituted by kometa-config-render.service
   timeout: 60
   db_cache: 40
   clean_bundles: false
@@ -23,7 +25,7 @@ plex:
   verify_ssl: false
 
 tmdb:
-  apikey: <<TMDB_API_KEY>>
+  apikey: ${TMDB_API_KEY}      # substituted by kometa-config-render.service
   language: en
   cache_expiration: 60
   region: GB
