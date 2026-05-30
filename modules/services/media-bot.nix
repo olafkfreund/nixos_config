@@ -92,17 +92,20 @@ in
       wantedBy = [ "multi-user.target" ];
 
       environment = {
-        # Non-secret paths handed to the bot. (BOT_USERS_FILE intentionally
-        # NOT in the env file: the path is module-controlled, not a secret,
-        # and pointing it at the agenix-decrypted location decouples the
-        # bot from where agenix happens to write the file.)
-        BOT_USERS_FILE = cfg.usersFile;
+        # BOT_USERS_FILE points into the systemd Credentials Directory
+        # populated by LoadCredential below — agenix decrypts the YAML
+        # as root to /run/agenix/media-bot-users (0400 root-owned), then
+        # systemd copies it into /run/credentials/media-bot.service/
+        # readable by the DynamicUser-spawned bot process. Same pattern
+        # plex-mcp uses for PLEX_TOKEN.
+        BOT_USERS_FILE = "/run/credentials/media-bot.service/users-file";
         WEBHOOK_PORT = toString cfg.port;
       };
 
       serviceConfig = {
         ExecStart = "${lib.getExe pkgs.customPkgs.media-bot}";
         EnvironmentFile = cfg.environmentFile;
+        LoadCredential = [ "users-file:${cfg.usersFile}" ];
 
         DynamicUser = true;
         StateDirectory = "media-bot";
