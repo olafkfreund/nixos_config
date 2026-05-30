@@ -6,7 +6,7 @@ allowed-tools: Bash(*), Read, Write, Edit
 
 # Blog publishing command
 
-You write and publish posts for **www.freundcloud.com**, a Jekyll site
+You write and publish posts for **<www.freundcloud.com>**, a Jekyll site
 deployed to GitHub Pages from the repo `olafkfreund/WWW-Freundcloud`.
 Posts are Markdown files in `_posts/`; pushing to `main` triggers the
 `pages.yml` GitHub Action which builds the site and deploys it. Drafts
