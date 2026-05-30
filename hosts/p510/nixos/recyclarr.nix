@@ -61,18 +61,21 @@ in
             base_url: http://localhost:7878
             api_key: $RADARR_API_KEY
             include:
-              - template: radarr-quality-definition-movie
-              - template: radarr-quality-profile-remux-web-1080p
-              - template: radarr-custom-formats-hd-bluray-web
+              # Upstream TRaSH renamed/consolidated templates: one bundle
+              # per service now packs quality-definition + quality-profile
+              # + matching custom-formats together. "remux-web-1080p"
+              # matches the previous three templates' combined intent.
+              # See: https://trash-guides.info/Radarr/radarr-setup-quality-profiles/#remux-web-1080p
+              - template: remux-web-1080p
 
         sonarr:
           tv:
             base_url: http://localhost:8989
             api_key: $SONARR_API_KEY
             include:
-              - template: sonarr-quality-definition-series
-              - template: sonarr-v4-quality-profile-web-1080p
-              - template: sonarr-v4-custom-formats-web-1080p
+              # Same upstream rename: one bundle per service.
+              # See: https://trash-guides.info/Sonarr/sonarr-setup-quality-profiles/#web-1080p
+              - template: web-1080p
         EOF
 
         # Run synchronization
