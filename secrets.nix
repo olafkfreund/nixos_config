@@ -109,4 +109,12 @@ in
   # duplicated from plex-token.age). Edit with:
   #   agenix -e secrets/plex-auto-languages-env.age
   "secrets/plex-auto-languages-env.age".publicKeys = allUsers ++ [ p510 ];
+
+  # NZBGet ControlPassword. Loaded into a MainConfigInclude file at
+  # service preStart so the value never appears in the systemd unit's
+  # ExecStart (where the previous plaintext was visible via /proc).
+  # Sonarr/Radarr/audiobook-import-import are configured against the
+  # current value — DO NOT rotate without updating those callers too.
+  # Edit with: agenix -e secrets/nzbget-password.age
+  "secrets/nzbget-password.age".publicKeys = allUsers ++ [ p510 ];
 }

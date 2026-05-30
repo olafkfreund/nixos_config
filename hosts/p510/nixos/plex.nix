@@ -32,7 +32,14 @@
         ControlIP = "0.0.0.0";
         ControlPort = 6789;
         ControlUsername = "nzbget";
-        ControlPassword = "Xs4monly4e!!";
+        # ControlPassword intentionally NOT here — it would render into
+        # the systemd unit's ExecStart as `-o ControlPassword=...`
+        # (visible to anyone who can read /proc). Instead, the password
+        # is loaded from agenix at service preStart into the file
+        # referenced by MainConfigInclude below. NZBGet's config-load
+        # priority is: main config < include < `-o` flags — so a value
+        # in the include sticks as long as no `-o` flag overrides it.
+        MainConfigInclude = "/var/lib/nzbget/nzbget-secret.conf";
         # API access for monitoring
         AuthorizedIP = "127.0.0.1,192.168.1.*";
       };
@@ -231,6 +238,29 @@
     mode = "0400";
     owner = "olafkfreund";
     group = "users";
+  };
+
+  # NZBGet ControlPassword. Loaded via EnvironmentFile on the nzbget unit
+  # and rendered into a MainConfigInclude at preStart — keeps the value
+  # out of the systemd unit's command-line and therefore out of /proc.
+  age.secrets."nzbget-password" = {
+    file = ../../../secrets/nzbget-password.age;
+    mode = "0400";
+    owner = "olafkfreund";
+    group = "users";
+  };
+
+  # Render NZBGet's secret include file at preStart, populated from the
+  # agenix-decrypted env. NZBGet then reads it as part of its config-load
+  # chain. ControlPassword stays out of the systemd ExecStart.
+  systemd.services.nzbget = {
+    serviceConfig.EnvironmentFile = config.age.secrets."nzbget-password".path;
+    preStart = ''
+      install -d -m 0700 -o olafkfreund -g users /var/lib/nzbget
+      install -m 0600 -o olafkfreund -g users /dev/null /var/lib/nzbget/nzbget-secret.conf
+      echo "ControlPassword=$NZBGET_CONTROL_PASSWORD" \
+        > /var/lib/nzbget/nzbget-secret.conf
+    '';
   };
 
   # Ensure media services start before Tailscale Serve to prevent port conflicts
