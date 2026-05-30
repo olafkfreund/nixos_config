@@ -49,7 +49,11 @@ in
       backend = "podman";
 
       containers."kometa" = {
-        image = "kometateam/kometa:latest";
+        # Pinned to a specific digest for reproducibility + supply-chain
+        # safety. Bump by running on p510 and grabbing the new digest:
+        #   sudo podman pull kometateam/kometa:latest
+        #   sudo podman inspect kometateam/kometa:latest --format '{{.Digest}}'
+        image = "kometateam/kometa@sha256:b265e952fcc3931ac378601faf9e6e0d90bee104fc70d9002f59c8678bf00b87";
         autoStart = true;
         environmentFiles = [ config.age.secrets."kometa-env".path ];
         environment = {

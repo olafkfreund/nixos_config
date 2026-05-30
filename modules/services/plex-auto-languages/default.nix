@@ -40,7 +40,11 @@ in
       backend = "podman";
 
       containers."plex-auto-languages" = {
-        image = "remirigal/plex-auto-languages:latest";
+        # Pinned to a specific digest for reproducibility + supply-chain
+        # safety. Bump by running on p510 and grabbing the new digest:
+        #   sudo podman pull remirigal/plex-auto-languages:latest
+        #   sudo podman inspect remirigal/plex-auto-languages:latest --format '{{.Digest}}'
+        image = "remirigal/plex-auto-languages@sha256:54bd9cf5d399514b8ed3052ce1d01a14375825a429653cb06da129685740889e";
         autoStart = true;
         environmentFiles = [ config.age.secrets."plex-auto-languages-env".path ];
         volumes = [
