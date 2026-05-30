@@ -41,6 +41,7 @@ in
       ../../modules/services/media-bot.nix # Household media Telegram bot (Ollama NL + webhooks)
       ../../modules/services/bazarr.nix # Subtitle automation for Sonarr/Radarr/Lidarr
       ../../modules/services/kometa # Plex Meta Manager — collections, posters, metadata
+      ../../modules/services/plex-auto-languages # Per-show audio/sub track memorization
       # Desktop-specific imports (needed for GNOME):
       # ./nixos/greetd.nix      # Display manager - using GDM instead
       ./nixos/screens.nix # Display configuration - needed for desktop
@@ -452,6 +453,13 @@ in
   # kometa-env.age` to fill it in. See modules/services/kometa/default.nix
   # for the full first-run flow.
   features.kometa = {
+    enable = true;
+  };
+
+  # Plex-Auto-Languages — learns each Plex user's per-show audio + subtitle
+  # preferences and applies them to future episodes automatically. Watches
+  # Plex via its websocket API (no Plex Pass needed for this path).
+  features.plex-auto-languages = {
     enable = true;
   };
 }

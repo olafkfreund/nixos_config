@@ -104,4 +104,9 @@ in
   # Once you've filled in the real TMDB key:
   #   sudo systemctl restart podman-kometa.service
   "secrets/kometa-env.age".publicKeys = allUsers ++ [ p510 ];
+
+  # Plex-Auto-Languages container env file. PLEX_URL + PLEX_TOKEN (token
+  # duplicated from plex-token.age). Edit with:
+  #   agenix -e secrets/plex-auto-languages-env.age
+  "secrets/plex-auto-languages-env.age".publicKeys = allUsers ++ [ p510 ];
 }
