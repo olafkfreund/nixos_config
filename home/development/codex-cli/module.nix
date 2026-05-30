@@ -4,7 +4,11 @@ let
   inherit (lib) mkOption mkIf mkEnableOption types;
   cfg = config.programs.codex-cli;
 
-  codex-cli = pkgs.callPackage ./. { inherit (pkgs) nodejs_24; };
+  # Use nixpkgs's `codex` package (Rust-based, upstream-maintained).
+  # We previously vendored an npm-based @openai/codex 0.46.0 derivation;
+  # OpenAI rewrote codex in Rust mid-2025 and nixpkgs tracks it, so we
+  # just consume that and stop maintaining our own packaging.
+  codex-cli = pkgs.codex;
 
   # Note: Configuration template available but using inline generation instead
   # configFile = pkgs.writeText "codex-config.json" (builtins.toJSON {
@@ -81,11 +85,12 @@ in
     shellAliases = mkOption {
       type = types.attrsOf types.str;
       default = {
-        codex = "codex-cli";
-        ai-code = "codex-cli";
-        openai-codex = "codex-cli";
+        # `codex` is the real binary name in nixpkgs#codex; keep the rest
+        # as convenience aliases so existing muscle memory still works.
+        ai-code = "codex";
+        openai-codex = "codex";
       };
-      description = "Shell aliases for codex-cli";
+      description = "Shell aliases for codex";
     };
 
     extraConfig = mkOption {
@@ -116,7 +121,7 @@ in
 
           set -euo pipefail
 
-          CODEX_BIN="${cfg.package}/bin/codex-cli"
+          CODEX_BIN="${cfg.package}/bin/codex"
           PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 
           # Function to analyze project context

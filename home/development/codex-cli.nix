@@ -20,13 +20,14 @@
     # API key integration (use agenix secret)
     apiKeyFile = "/run/agenix/api-openai";
 
-    # Enhanced shell aliases for convenience
+    # Enhanced shell aliases for convenience. `codex` is the real binary
+    # name from nixpkgs#codex — no need to alias it. The rest stay so
+    # existing muscle memory keeps working.
     shellAliases = {
-      codex = "codex-cli";
-      ai-code = "codex-cli";
-      openai-codex = "codex-cli";
-      cx = "codex-cli"; # Short alias
-      code-ai = "codex-cli";
+      ai-code = "codex";
+      openai-codex = "codex";
+      cx = "codex"; # Short alias
+      code-ai = "codex";
 
       # Project-specific aliases
       codex-project = "codex-project";
