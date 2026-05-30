@@ -86,8 +86,11 @@ class WebhookServer:
         if event == "Test":
             await self._broadcast("✅ Sonarr webhook test received.")
             return web.Response(text="ok")
-        # Quiet set: only EpisodeImported
-        if event != "EpisodeImported":
+        # Quiet set: only the on-import event. Sonarr v3/v4 names this
+        # "Download" in the payload — the corresponding notification flag
+        # is `onDownload`. "ImportComplete" (newer release-batch event)
+        # is intentionally not handled here to avoid duplicate pings.
+        if event != "Download":
             return web.Response(text="ignored")
 
         series_title = (payload.get("series") or {}).get("title", "?")
@@ -128,7 +131,9 @@ class WebhookServer:
         if event == "Test":
             await self._broadcast("✅ Radarr webhook test received.")
             return web.Response(text="ok")
-        if event != "MovieImported":
+        # Quiet set: only the on-import event. Radarr's "Download" eventType
+        # matches `onDownload` on the webhook config (movie imported).
+        if event != "Download":
             return web.Response(text="ignored")
 
         movie = payload.get("movie") or {}
