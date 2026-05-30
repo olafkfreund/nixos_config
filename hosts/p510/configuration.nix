@@ -38,6 +38,7 @@ in
       ../../modules/services/audiobookbay-automated.nix # AudioBookBay search → Transmission
       ../../modules/services/audiobook-import.nix # Completed downloads → Audiobookshelf (LLM + m4b)
       ../../modules/services/audiobook-mcp.nix # Audiobook acquisition + library MCP (SSE)
+      ../../modules/services/media-bot.nix # Household media Telegram bot (Ollama NL + webhooks)
       # Desktop-specific imports (needed for GNOME):
       # ./nixos/greetd.nix      # Display manager - using GDM instead
       ./nixos/screens.nix # Display configuration - needed for desktop
@@ -413,5 +414,23 @@ in
   features.audiobook-mcp = {
     enable = true;
     listenLanInterface = "eno1";
+  };
+
+  # Household media Telegram bot — Phase 1.
+  # Menu commands (/search /add /queue /status /wanted) + local-LLM
+  # natural-language fallback via Ollama (qwen2.5:7b default) + webhook
+  # receiver on :8090 ingesting Sonarr/Radarr/Overseerr/audiobook-import
+  # events with Telegram inline action buttons.
+  #
+  # Tailscale-only by design: every webhook source runs on this same host
+  # (loopback POSTs); LAN exposure would only widen the attack surface for
+  # spoofed notifications. Add `listenLanInterface = "eno1"` here if a
+  # future webhook source ever lives off-host.
+  #
+  # Whitelist (secrets/media-bot-users.age) — edit with:
+  #   agenix -e secrets/media-bot-users.age
+  # then `sudo systemctl reload media-bot` on p510 to hot-reload.
+  features.media-bot = {
+    enable = true;
   };
 }

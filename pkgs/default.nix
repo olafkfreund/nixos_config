@@ -13,6 +13,11 @@
   audiobookbay-automated = pkgs.callPackage ./audiobookbay-automated { };
   m4b-tool = pkgs.callPackage ./m4b-tool { };
   audiobook-mcp = pkgs.callPackage ./audiobook-mcp { };
+
+  # media-bot — Telegram bot front-end for the *arr stack on p510.
+  # Hybrid menu commands + local-LLM (Ollama) natural-language fallback.
+  # Spec: docs/plans/2026-05-30-media-bot-design.md.
+  media-bot = pkgs.callPackage ./media-bot { };
   mpris-album-art = pkgs.callPackage ./mpris-album-art { };
   weather-popup = pkgs.callPackage ./weather-popup { };
   # gemini-cli removed in #560 (replaced by pkgs.customPkgs.antigravity-cli)

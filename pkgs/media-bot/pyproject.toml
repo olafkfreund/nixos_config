@@ -1,0 +1,15 @@
+[project]
+name = "media-bot"
+version = "0.1.0"
+description = "Household media Telegram bot — *arr stack control + local-LLM NL fallback"
+requires-python = ">=3.11"
+
+  [project.scripts]
+  media-bot = "media_bot.main:main"
+
+[build-system]
+requires = [ "setuptools>=64" ]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = [ "src" ]
