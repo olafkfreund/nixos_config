@@ -17,13 +17,12 @@ keep working independently.
 
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 import time
 from collections import defaultdict, deque
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import aiofiles
 import httpx
