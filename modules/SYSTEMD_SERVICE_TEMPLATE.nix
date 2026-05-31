@@ -3,7 +3,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  inherit (lib) mkOption mkIf mkEnableOption mkPackageOption types concatStringsSep;
+  inherit (lib) mkOption mkIf mkEnableOption mkPackageOption types concatStringsSep generators;
   cfg = config.modules.services.service-name;
 in
 {

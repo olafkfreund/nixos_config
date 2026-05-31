@@ -3,7 +3,7 @@
 , ...
 }:
 let
-  inherit (lib) mkOption mkIf mkEnableOption types;
+  inherit (lib) mkOption mkIf mkEnableOption types hasInfix;
   cfg = config.modules.system.performance;
 in
 {
