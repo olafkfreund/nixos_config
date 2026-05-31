@@ -41,6 +41,7 @@ in
     ../../modules/services/skill-pool.nix # local skill-pool registry portal
     ../../modules/services/ollama.nix # local Ollama coding-model server (RX 7900 XTX, ROCm)
     ../../modules/services/litellm-router.nix # Anthropic-compat proxy → Ollama (Phase 2)
+    ../../modules/services/whisper-server.nix # voice-input transcription HTTP API (port 9300, tailnet only)
   ];
   host.class = "workstation";
 
@@ -110,6 +111,14 @@ in
   features.litellm-router = {
     enable = true;
     listenLanInterface = "enp1s0";
+  };
+
+  # Whisper.cpp HTTP transcription server — backend for the `voice-input`
+  # client on razer + p620. Reachable on tailnet only (port 9300).
+  # First-start downloads ggml-base.en (~150MB) into /var/lib/whisper.
+  features.whisper-server = {
+    enable = true;
+    model = "base.en";
   };
 
   # Claude Code managed-settings baseline (read-only at /etc/claude-code).
