@@ -13,6 +13,7 @@ in
     ../../home/default.nix
     ../../home/games/steam.nix
     ../../home/media/reddit.nix
+    ../../home/applications/voice-input.nix
     ./private.nix
   ];
 
