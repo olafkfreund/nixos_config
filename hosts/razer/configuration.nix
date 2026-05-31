@@ -469,6 +469,7 @@ in
   # voice-input client to type transcripts on GNOME Wayland where wtype
   # fails (Mutter doesn't implement virtual_keyboard_v1).
   programs.ydotool.enable = true;
+  users.users.olafkfreund.extraGroups = [ "ydotool" ];
 
   nixpkgs.config = {
     allowBroken = true;
