@@ -58,7 +58,10 @@ let
       sox # mic recording with VAD
       curl
       libnotify # notify-send
-      wtype # Wayland keyboard typing
+      ydotool # kernel-level (/dev/uinput) keystroke injection — works on
+      # GNOME Wayland where wtype fails (Mutter declines to implement the
+      # virtual_keyboard_v1 protocol). ydotoold must be running; enabled
+      # via `programs.ydotool.enable = true;` on the host.
       coreutils # mktemp, tr
     ];
     text = ''
@@ -104,8 +107,10 @@ let
 
       # Type into the focused window. 50 ms warm-up gives the focused widget
       # time to receive keystrokes cleanly after the notification dismisses.
+      # ydotool requires ydotoold running; the script picks up YDOTOOL_SOCKET
+      # if exported, otherwise uses the default /tmp/.ydotool_socket.
       sleep 0.05
-      wtype -- "$TEXT"
+      ydotool type --delay 5 -- "$TEXT"
       notify-send -t 2000 -a voice-input "🎙️ Typed" "$TEXT"
     '';
   };
@@ -174,25 +179,10 @@ in
 
     home.packages = [ voiceInputScript ];
 
-    # GNOME custom keybinding — additive (home-manager merges dconf settings
-    # across modules). Named slot "voice-input" avoids colliding with the
-    # numeric custom0..N list in home/desktop/gnome/keybindings.nix.
-    dconf.settings = {
-      "org/gnome/settings-daemon/plugins/media-keys" = {
-        custom-keybindings = [
-          "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
-          "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/"
-          "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/"
-          "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/"
-          "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/voice-input/"
-        ];
-      };
-
-      "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/voice-input" = {
-        name = "Voice input (whisper → wtype, ${cfg.backend})";
-        binding = cfg.hotkey;
-        command = "${voiceInputScript}/bin/voice-input";
-      };
-    };
+    # The GNOME custom keybinding for SUPER+SHIFT+SPACE → `voice-input` is
+    # defined in `home/desktop/gnome/keybindings.nix` (slot custom4). It's
+    # owned there because that file is the single source of truth for the
+    # `custom-keybindings` list — two modules writing to the same dconf
+    # list-valued key was previously dropping entries silently.
   };
 }

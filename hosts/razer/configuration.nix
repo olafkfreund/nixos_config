@@ -465,6 +465,11 @@ in
     "/etc/ssh/ssh_host_rsa_key" # Host key (RSA fallback)
   ];
 
+  # ydotoold — kernel-level keystroke injection daemon. Used by the
+  # voice-input client to type transcripts on GNOME Wayland where wtype
+  # fails (Mutter doesn't implement virtual_keyboard_v1).
+  programs.ydotool.enable = true;
+
   nixpkgs.config = {
     allowBroken = true;
     permittedInsecurePackages = [

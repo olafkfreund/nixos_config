@@ -630,6 +630,12 @@ in
   # Windows app integration - Re-enabled after upstream fix (v0.9.0)
   # programs.winboat.enable = true; # DISABLED: Go 1.26 cross-compilation broken with mingw32 GCC 15
 
+  # ydotoold — kernel-level keystroke injection daemon. Used by the
+  # voice-input client to type transcripts into focused windows on GNOME
+  # Wayland (Mutter doesn't implement the virtual_keyboard_v1 protocol that
+  # wtype needs). NixOS adds the user to the ydotool group automatically.
+  programs.ydotool.enable = true;
+
   # Package configurations
   nixpkgs.config = {
     allowBroken = true;
