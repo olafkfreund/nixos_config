@@ -33,6 +33,7 @@ in
     ../../modules/security/secrets.nix
     ../../modules/secrets/api-keys.nix
     ../../modules/containers/docker.nix
+    ../../modules/services/meeting-transcribe.nix # meet CLI (client; offloads processing to p620)
   ];
 
   host.class = "laptop";
@@ -472,6 +473,17 @@ in
   programs.ydotool.enable = true;
   # User group membership for /run/ydotoold/socket access is added in the
   # `users.users = lib.genAttrs hostUsers ...` block above.
+
+  # Meeting transcribe — razer is client-only. Records the meeting locally,
+  # then rsyncs the .opus over Tailscale to p620 and SSHes to run
+  # meet-process there. The brief comes back as ~/meetings/TS.md.
+  features.meetingTranscribe = {
+    enable = true;
+    processHost = "p620";
+    installProcessor = false;
+    userName = "Olaf";
+    userEmail = "olaf@freundcloud.com";
+  };
 
   nixpkgs.config = {
     allowBroken = true;

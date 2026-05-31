@@ -42,6 +42,7 @@ in
     ../../modules/services/ollama.nix # local Ollama coding-model server (RX 7900 XTX, ROCm)
     ../../modules/services/litellm-router.nix # Anthropic-compat proxy → Ollama (Phase 2)
     ../../modules/services/whisper-server.nix # voice-input transcription HTTP API (port 9300, tailnet only)
+    ../../modules/services/meeting-transcribe.nix # meet CLI: record → whisperX → Ollama summary
   ];
   host.class = "workstation";
 
@@ -119,6 +120,26 @@ in
   features.whisper-server = {
     enable = true;
     model = "base.en";
+  };
+
+  # Meeting transcribe — p620 is BOTH a client (records its own meetings)
+  # AND the processor (whisperX + Ollama run here, razer offloads via SSH).
+  # Diarization auto-enables once `secrets/api-huggingface.age` exists;
+  # until then meet-process falls back to plain transcription.
+  age.secrets = lib.mkIf (builtins.pathExists ../../secrets/api-huggingface.age) {
+    api-huggingface.file = ../../secrets/api-huggingface.age;
+  };
+  features.meetingTranscribe = {
+    enable = true;
+    processHost = "local";
+    installProcessor = true;
+    huggingfaceTokenFile =
+      if builtins.pathExists ../../secrets/api-huggingface.age
+      then config.age.secrets."api-huggingface".path
+      else null;
+    ollamaUrl = "http://localhost:11434";
+    userName = "Olaf";
+    userEmail = "olaf@freundcloud.com";
   };
 
   # Claude Code managed-settings baseline (read-only at /etc/claude-code).

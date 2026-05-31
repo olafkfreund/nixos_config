@@ -165,6 +165,7 @@ in
           "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/"
           "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/"
           "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/"
+          "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5/"
         ];
       };
 
@@ -204,6 +205,18 @@ in
         binding = "<Super><Shift>space";
         command = "voice-input";
         name = "Voice input (whisper → ydotool)";
+      };
+
+      # Meeting record/transcribe/summarize. Configured by
+      # modules/services/meeting-transcribe.nix; this slot wires the
+      # GNOME keybind. First SUPER+SHIFT+M starts recording mic + system
+      # audio; second press stops + dispatches the whisperX/Ollama
+      # pipeline. ~2-5 min later notify-send announces the brief at
+      # ~/meetings/YYYY-MM-DD-HHMM.md.
+      "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5" = {
+        binding = "<Super><Shift>m";
+        command = "meet toggle";
+        name = "Meeting record/transcribe/summarize";
       };
 
       # # Input method keybindings
