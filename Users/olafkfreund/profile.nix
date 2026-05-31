@@ -1,7 +1,6 @@
 { config
 , lib
 , pkgs
-, antigravity-nix
 , ...
 }:
 let
@@ -13,6 +12,7 @@ in
     ../common/default.nix
     ../../home/default.nix
     ../../home/games/steam.nix
+    ../../home/media/reddit.nix
     ./private.nix
   ];
 
