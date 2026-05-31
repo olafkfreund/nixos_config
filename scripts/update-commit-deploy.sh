@@ -126,6 +126,45 @@ case "$SCOPE" in
     ;;
 esac
 
+# --- 3b. Regression guard: nixpkgs + nixpkgs-unstable must move forward -----
+#
+# Why: a local nix tooling quirk (probably a stale entry in
+# ~/.cache/nix/binary-cache-v7.sqlite or similar) can make
+# `nix flake update` silently rewrite the nixpkgs lock entry to a much
+# older commit. We caught this once when `nix flake update` happily wrote
+# a rev from 2025-08 over a perfectly-current 2026-05 pin.
+#
+# Strategy: for each of {nixpkgs, nixpkgs-unstable}, compare the new
+# lastModified epoch against the old one. If it went backward, restore
+# that node's locked value from HEAD's flake.lock and continue.
+restore_node_from_head() {
+  local node="$1"
+  # Use jq to splice HEAD's value back into the working flake.lock.
+  local head_locked
+  head_locked=$(git show HEAD:flake.lock | jq -c --arg n "$node" '.nodes[$n].locked')
+  jq --arg n "$node" --argjson locked "$head_locked" \
+    '.nodes[$n].locked = $locked' flake.lock >flake.lock.tmp \
+    && mv flake.lock.tmp flake.lock
+}
+
+guard_node() {
+  local node="$1"
+  local actual_node
+  # Resolve top-level input alias to the concrete node name (some inputs
+  # follow others — handle both shapes).
+  actual_node=$(jq -r --arg n "$node" '.nodes.root.inputs[$n] // $n' flake.lock)
+  local old_lm new_lm
+  old_lm=$(git show HEAD:flake.lock | jq -r --arg n "$actual_node" '.nodes[$n].locked.lastModified // 0')
+  new_lm=$(jq -r --arg n "$actual_node" '.nodes[$n].locked.lastModified // 0' flake.lock)
+  if [ "$new_lm" -lt "$old_lm" ]; then
+    warn "regression: ${node} went backward ($(date -u -d @${new_lm} +%Y-%m-%d) < $(date -u -d @${old_lm} +%Y-%m-%d)); restoring HEAD's value"
+    restore_node_from_head "$actual_node"
+  fi
+}
+
+guard_node nixpkgs
+guard_node nixpkgs-unstable
+
 # --- 4. Determine LOCK_CHANGED flag -----------------------------------------
 LOCK_CHANGED=0
 if ! git diff --quiet flake.lock; then
