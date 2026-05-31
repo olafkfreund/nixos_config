@@ -6,7 +6,7 @@
 , ...
 }:
 let
-  inherit (lib) mkOption mkIf mkEnableOption types literalExpression;
+  inherit (lib) mkOption mkIf mkEnableOption types literalExpression toInt;
   cfg = config.services.flaresolverr;
 in
 {

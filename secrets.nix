@@ -62,6 +62,16 @@ in
   "secrets/api-router-p620.age".publicKeys = allUsers ++ [ p620 ];
   "secrets/api-router-razer.age".publicKeys = allUsers ++ [ razer ];
 
+  # HuggingFace read token for the meeting-transcribe pipeline (p620 only —
+  # only the processor needs it; whisperX uses it to download the
+  # pyannote/speaker-diarization-3.1 weights on first run). Setup:
+  #   1. Create account at https://huggingface.co/join
+  #   2. Accept terms at https://huggingface.co/pyannote/speaker-diarization-3.1
+  #      AND https://huggingface.co/pyannote/segmentation-3.0
+  #   3. Generate read token at https://huggingface.co/settings/tokens
+  #   4. ./scripts/manage-secrets.sh create api-huggingface  (paste token)
+  "secrets/api-huggingface.age".publicKeys = allUsers ++ [ p620 ];
+
   # Plex auth token for the Plex MCP server (features.plex-mcp on p510).
   # Contains ONLY the X-Plex-Token value. Set the real token with:
   #   agenix -e secrets/plex-token.age

@@ -7,6 +7,10 @@ let
   inherit (lib) mapAttrs genAttrs hasAttr;
 in
 let
+  # Get supported systems (currently just x86_64-linux). Bound here so
+  # `forAllSystems` below can reference it; re-exported as an attribute.
+  supportedSystems = [ "x86_64-linux" ];
+
   # Create a system-specific package set with our overlays
   mkPkgs = system: overlays:
     import nixpkgs {
@@ -26,8 +30,8 @@ let
     };
 in
 {
-  # Export mkPkgs function
-  inherit mkPkgs;
+  # Export mkPkgs + supportedSystems
+  inherit mkPkgs supportedSystems;
 
   # Helper to create shell environments for all systems
   mkShells =
@@ -96,9 +100,6 @@ in
     then hostUsers.${host}
     else throw "Host '${host}' not found in hostUsers configuration";
 
-  # Get supported systems (currently just x86_64-linux)
-  supportedSystems = [ "x86_64-linux" ];
-
-  # Flake-utils compatible forAllSystems
+  # Flake-utils compatible forAllSystems (reads supportedSystems from let)
   forAllSystems = f: genAttrs supportedSystems f;
 }
