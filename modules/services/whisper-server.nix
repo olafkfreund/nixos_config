@@ -92,9 +92,13 @@ in
         NoNewPrivileges = true;
         SystemCallFilter = [ "@system-service" "~@privileged" ];
 
-        # Sized for base.en — bump if you switch to small/medium.
+        # Sized for base.en — bump MemoryMax if you switch to small/medium.
+        # TasksMax needs to be generous: whisper-server spawns a thread
+        # pool for HTTP serving plus worker threads; a tight cap (e.g. 64)
+        # causes std::terminate("Resource temporarily unavailable") when
+        # pthread_create returns EAGAIN.
         MemoryMax = "1G";
-        TasksMax = 64;
+        TasksMax = 256;
 
         Restart = "on-failure";
         RestartSec = 5;
