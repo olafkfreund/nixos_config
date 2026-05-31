@@ -633,8 +633,12 @@ in
   # ydotoold — kernel-level keystroke injection daemon. Used by the
   # voice-input client to type transcripts into focused windows on GNOME
   # Wayland (Mutter doesn't implement the virtual_keyboard_v1 protocol that
-  # wtype needs). NixOS adds the user to the ydotool group automatically.
+  # wtype needs).
   programs.ydotool.enable = true;
+  # The NixOS programs.ydotool module does NOT auto-add users to the
+  # ydotool group; we have to do it explicitly. Without this the user
+  # can't write to /run/ydotoold/socket (mode 0660 root:ydotool).
+  users.users.olafkfreund.extraGroups = [ "ydotool" ];
 
   # Package configurations
   nixpkgs.config = {

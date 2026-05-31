@@ -107,10 +107,12 @@ let
 
       # Type into the focused window. 50 ms warm-up gives the focused widget
       # time to receive keystrokes cleanly after the notification dismisses.
-      # ydotool requires ydotoold running; the script picks up YDOTOOL_SOCKET
-      # if exported, otherwise uses the default /tmp/.ydotool_socket.
+      # YDOTOOL_SOCKET is set explicitly here because the system-managed
+      # ydotoold (programs.ydotool.enable) listens at /run/ydotoold/socket,
+      # not the per-user XDG default the client looks for. The user must be
+      # in the `ydotool` group (added via host configs) to access the socket.
       sleep 0.05
-      ydotool type --delay 5 -- "$TEXT"
+      YDOTOOL_SOCKET=/run/ydotoold/socket ydotool type --delay 5 -- "$TEXT"
       notify-send -t 2000 -a voice-input "🎙️ Typed" "$TEXT"
     '';
   };
