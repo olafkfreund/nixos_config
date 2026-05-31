@@ -111,28 +111,51 @@ old_date=$(jq -r --arg n "$nixpkgs_node" '.nodes[$n].locked.lastModified | todat
 log "current nixpkgs pin: ${old_rev:0:10} (${old_date})"
 
 # --- 3. Update --------------------------------------------------------------
+# Why we do nixpkgs + nixpkgs-unstable separately with --refresh:
+#
+# `nix flake update` consults `~/.cache/nix/fetcher-cache-v4.sqlite` for the
+# URL→storepath mapping of github branch endpoints. That cache has a TTL —
+# within it, nix uses the cached resolution rather than re-querying github.
+# If the cached entry was written when nixos-unstable HEAD was X, every
+# subsequent update inside the TTL window returns X even if upstream has
+# moved on.
+#
+# Empirically observed on this machine: the TTL window held a 10-month-old
+# nixos-unstable rev (59e69648, Aug 2025) when actual HEAD was 64c08a7c
+# (May 2026). Bulk `nix flake update` honored the cache; only a NAMED
+# `nix flake update <input> --refresh` bypassed it.
+#
+# So for the `all` scope we do the bulk update FIRST (efficient for the
+# many small inputs, fine when they're already current), then explicitly
+# re-update nixpkgs + nixpkgs-unstable with --refresh to overwrite any
+# cached-stale rev the bulk step would otherwise leave behind.
 case "$SCOPE" in
   all)
-    log "nix flake update  (all inputs)"
+    log "nix flake update  (all inputs, bulk)"
     nix flake update
+    log "nix flake update nixpkgs --refresh        (overwrite cache-regression)"
+    nix flake update nixpkgs --refresh
+    log "nix flake update nixpkgs-unstable --refresh"
+    nix flake update nixpkgs-unstable --refresh
     ;;
   nixpkgs)
-    log "nix flake update nixpkgs"
-    nix flake update nixpkgs
+    log "nix flake update nixpkgs --refresh"
+    nix flake update nixpkgs --refresh
     ;;
   *)
-    log "nix flake lock --update-input $SCOPE"
-    nix flake lock --update-input "$SCOPE"
+    log "nix flake update $SCOPE --refresh"
+    nix flake update "$SCOPE" --refresh
     ;;
 esac
 
 # --- 3b. Regression guard: nixpkgs + nixpkgs-unstable must move forward -----
 #
-# Why: a local nix tooling quirk (probably a stale entry in
-# ~/.cache/nix/binary-cache-v7.sqlite or similar) can make
-# `nix flake update` silently rewrite the nixpkgs lock entry to a much
-# older commit. We caught this once when `nix flake update` happily wrote
-# a rev from 2025-08 over a perfectly-current 2026-05 pin.
+# Belt-and-braces on top of --refresh above. Even with the targeted refresh
+# step, the fetcher cache could in theory still serve a stale resolution if
+# the cache invalidation logic itself has a bug, or if a future code path
+# stops honoring --refresh. If EITHER of {nixpkgs, nixpkgs-unstable} comes
+# out of the update step with an older lastModified than HEAD's, restore
+# that node from HEAD. Cheap and bulletproof.
 #
 # Strategy: for each of {nixpkgs, nixpkgs-unstable}, compare the new
 # lastModified epoch against the old one. If it went backward, restore
