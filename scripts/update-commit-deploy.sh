@@ -111,82 +111,72 @@ old_date=$(jq -r --arg n "$nixpkgs_node" '.nodes[$n].locked.lastModified | todat
 log "current nixpkgs pin: ${old_rev:0:10} (${old_date})"
 
 # --- 3. Update --------------------------------------------------------------
-# Why we do nixpkgs + nixpkgs-unstable separately with --refresh:
+# Two-stage update because `nix flake update` cannot be trusted with the
+# nixpkgs family on this machine. Empirically:
 #
-# `nix flake update` consults `~/.cache/nix/fetcher-cache-v4.sqlite` for the
-# URL→storepath mapping of github branch endpoints. That cache has a TTL —
-# within it, nix uses the cached resolution rather than re-querying github.
-# If the cached entry was written when nixos-unstable HEAD was X, every
-# subsequent update inside the TTL window returns X even if upstream has
-# moved on.
+#  - Bulk `nix flake update` may rewrite BOTH nixpkgs.locked.rev AND
+#    nixpkgs.original.ref to stale values (saw "nixos-unstable" silently
+#    revert to "nixos-25.05" with locked.rev sliding back 10 months).
+#  - `nix flake update nixpkgs --refresh` (named + refresh) sometimes works
+#    sometimes doesn't, depending on what's in ~/.cache/nix/fetcher-cache-v4.
+#  - Even a regression-guard against HEAD's lastModified couldn't reliably
+#    catch every shape of regression because it doesn't cover `original.ref`.
 #
-# Empirically observed on this machine: the TTL window held a 10-month-old
-# nixos-unstable rev (59e69648, Aug 2025) when actual HEAD was 64c08a7c
-# (May 2026). Bulk `nix flake update` honored the cache; only a NAMED
-# `nix flake update <input> --refresh` bypassed it.
-#
-# So for the `all` scope we do the bulk update FIRST (efficient for the
-# many small inputs, fine when they're already current), then explicitly
-# re-update nixpkgs + nixpkgs-unstable with --refresh to overwrite any
-# cached-stale rev the bulk step would otherwise leave behind.
+# So: run bulk update for the cheap inputs, then forcibly splice nixpkgs +
+# nixpkgs-unstable with GROUND TRUTH from github via `gh api` (bypasses
+# every nix cache). This is bulletproof regardless of nix's internal state.
 case "$SCOPE" in
   all)
     log "nix flake update  (all inputs, bulk)"
     nix flake update
-    log "nix flake update nixpkgs --refresh        (overwrite cache-regression)"
-    nix flake update nixpkgs --refresh
-    log "nix flake update nixpkgs-unstable --refresh"
-    nix flake update nixpkgs-unstable --refresh
     ;;
   nixpkgs)
-    log "nix flake update nixpkgs --refresh"
-    nix flake update nixpkgs --refresh
-    ;;
+    :
+    ;; # nixpkgs ground-truth splice below covers it
+  nixpkgs-unstable)
+    :
+    ;; # ditto
   *)
     log "nix flake update $SCOPE --refresh"
     nix flake update "$SCOPE" --refresh
     ;;
 esac
 
-# --- 3b. Regression guard: nixpkgs + nixpkgs-unstable must move forward -----
+# --- 3b. Force nixpkgs + nixpkgs-unstable to GitHub ground truth ------------
 #
-# Belt-and-braces on top of --refresh above. Even with the targeted refresh
-# step, the fetcher cache could in theory still serve a stale resolution if
-# the cache invalidation logic itself has a bug, or if a future code path
-# stops honoring --refresh. If EITHER of {nixpkgs, nixpkgs-unstable} comes
-# out of the update step with an older lastModified than HEAD's, restore
-# that node from HEAD. Cheap and bulletproof.
-#
-# Strategy: for each of {nixpkgs, nixpkgs-unstable}, compare the new
-# lastModified epoch against the old one. If it went backward, restore
-# that node's locked value from HEAD's flake.lock and continue.
-restore_node_from_head() {
+# Always do this after the bulk update — overwrites any cache-stale rev,
+# wrong `original.ref`, or quietly-reverted owner casing.
+splice_nixpkgs_node() {
   local node="$1"
-  # Use jq to splice HEAD's value back into the working flake.lock.
-  local head_locked
-  head_locked=$(git show HEAD:flake.lock | jq -c --arg n "$node" '.nodes[$n].locked')
-  jq --arg n "$node" --argjson locked "$head_locked" \
-    '.nodes[$n].locked = $locked' flake.lock >flake.lock.tmp \
-    && mv flake.lock.tmp flake.lock
+  local sha
+  sha=$(gh api 'repos/NixOS/nixpkgs/branches/nixos-unstable' --jq '.commit.sha' 2>/dev/null) \
+    || {
+      warn "could not fetch github nixos-unstable HEAD via gh api; skipping splice for ${node}"
+      return 0
+    }
+  # Get a fresh narHash via the explicit-SHA URL (always works regardless of cache).
+  local meta nar lm
+  meta=$(nix flake metadata "github:NixOS/nixpkgs/${sha}" --refresh --json 2>/dev/null) \
+    || {
+      warn "nix flake metadata failed for ${sha}; skipping splice for ${node}"
+      return 0
+    }
+  nar=$(printf '%s' "$meta" | jq -r '.locked.narHash')
+  lm=$(printf '%s' "$meta" | jq -r '.locked.lastModified')
+  log "splicing ${node} = github:nixos/nixpkgs/${sha:0:10} (lastModified $(date -u -d @${lm} +%Y-%m-%d))"
+  jq --arg n "$node" --arg sha "$sha" --arg nar "$nar" --argjson lm "$lm" '
+    .nodes[$n].locked = {
+      lastModified: $lm, narHash: $nar,
+      owner: "nixos", repo: "nixpkgs", rev: $sha, type: "github"
+    } |
+    .nodes[$n].original = {
+      owner: "nixos", ref: "nixos-unstable", repo: "nixpkgs", type: "github"
+    }
+  ' flake.lock >flake.lock.tmp && mv flake.lock.tmp flake.lock
 }
 
-guard_node() {
-  local node="$1"
-  local actual_node
-  # Resolve top-level input alias to the concrete node name (some inputs
-  # follow others — handle both shapes).
-  actual_node=$(jq -r --arg n "$node" '.nodes.root.inputs[$n] // $n' flake.lock)
-  local old_lm new_lm
-  old_lm=$(git show HEAD:flake.lock | jq -r --arg n "$actual_node" '.nodes[$n].locked.lastModified // 0')
-  new_lm=$(jq -r --arg n "$actual_node" '.nodes[$n].locked.lastModified // 0' flake.lock)
-  if [ "$new_lm" -lt "$old_lm" ]; then
-    warn "regression: ${node} went backward ($(date -u -d @${new_lm} +%Y-%m-%d) < $(date -u -d @${old_lm} +%Y-%m-%d)); restoring HEAD's value"
-    restore_node_from_head "$actual_node"
-  fi
-}
-
-guard_node nixpkgs
-guard_node nixpkgs-unstable
+splice_nixpkgs_node nixpkgs
+splice_nixpkgs_node nixpkgs-unstable
 
 # --- 4. Determine LOCK_CHANGED flag -----------------------------------------
 LOCK_CHANGED=0
