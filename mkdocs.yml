@@ -161,6 +161,7 @@ nav:
       - Anti-Patterns: NIXOS-ANTI-PATTERNS.md
       - MCP Servers: MCP-GUIDE.md
   - Applications:
+      - "Meeting transcription (meet)": applications/meet.md
       - Citrix Workspace: applications/CITRIX-WORKSPACE-SETUP.md
       - Waydroid: applications/WAYDROID-SETUP.md
       - FlareSolverr: applications/flaresolverr-deployment.md
