@@ -396,6 +396,7 @@ in
       "wheel"
       "networkmanager"
       "render"
+      "ydotool" # /run/ydotoold/socket access for the voice-input client
     ];
     shell = pkgs.zsh;
     # Run user services even when not logged in so headless user units
@@ -635,10 +636,10 @@ in
   # Wayland (Mutter doesn't implement the virtual_keyboard_v1 protocol that
   # wtype needs).
   programs.ydotool.enable = true;
-  # The NixOS programs.ydotool module does NOT auto-add users to the
-  # ydotool group; we have to do it explicitly. Without this the user
-  # can't write to /run/ydotoold/socket (mode 0660 root:ydotool).
-  users.users.olafkfreund.extraGroups = [ "ydotool" ];
+  # User membership in the `ydotool` group (required for
+  # /run/ydotoold/socket mode 0660 root:ydotool access) is added to the
+  # `users.users = lib.genAttrs hostUsers ...` block earlier in this file —
+  # programs.ydotool.enable does NOT auto-add users.
 
   # Package configurations
   nixpkgs.config = {

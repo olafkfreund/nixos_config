@@ -396,6 +396,7 @@ in
     extraGroups = [
       "wheel"
       "networkmanager"
+      "ydotool" # /run/ydotoold/socket access for the voice-input client
     ];
     shell = pkgs.zsh;
     # Only use secret-managed password if the secret exists
@@ -469,7 +470,8 @@ in
   # voice-input client to type transcripts on GNOME Wayland where wtype
   # fails (Mutter doesn't implement virtual_keyboard_v1).
   programs.ydotool.enable = true;
-  users.users.olafkfreund.extraGroups = [ "ydotool" ];
+  # User group membership for /run/ydotoold/socket access is added in the
+  # `users.users = lib.genAttrs hostUsers ...` block above.
 
   nixpkgs.config = {
     allowBroken = true;
