@@ -153,13 +153,18 @@ in
         search = [ "XF86Search" "<Super>f" ];
       };
 
-      # Custom keybindings
-      "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings" = {
-        custom-keybinding-list = [
+      # Custom keybindings — list of slot paths that gnome-settings-daemon
+      # actually reads. The correct schema key is `custom-keybindings`
+      # under `.../media-keys` (NOT `custom-keybinding-list` under
+      # `.../media-keys/custom-keybindings` — that was a previous bug that
+      # silently dropped the list, leaving only whatever dconf had cached).
+      "org/gnome/settings-daemon/plugins/media-keys" = {
+        custom-keybindings = [
           "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
           "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/"
           "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/"
           "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/"
+          "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/"
         ];
       };
 
@@ -189,6 +194,16 @@ in
         binding = "<Super>comma";
         command = "gnome-control-center";
         name = "Open Settings";
+      };
+
+      # Voice input — hold-to-talk dictation. Configured by
+      # home/applications/voice-input.nix; this slot just wires the GNOME
+      # keybind. SUPER+SHIFT+SPACE is push-to-start (sox VAD auto-stops
+      # the recording on 2s of silence).
+      "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4" = {
+        binding = "<Super><Shift>space";
+        command = "voice-input";
+        name = "Voice input (whisper → ydotool)";
       };
 
       # # Input method keybindings
