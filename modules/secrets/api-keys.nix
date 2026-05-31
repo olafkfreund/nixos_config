@@ -54,6 +54,13 @@ in
         group = "users";
       };
 
+      api-groq = {
+        file = ../../secrets/api-groq.age;
+        mode = "0644";
+        owner = "root";
+        group = "users";
+      };
+
       # api-qwen = {
       #   file = ../../secrets/api-qwen.age;
       #   mode = "0644";
@@ -124,6 +131,10 @@ in
           echo "export GEMINI_API_KEY=\"$(cat /run/agenix/api-gemini)\""
         fi
 
+        if [ -r "/run/agenix/api-groq" ]; then
+          echo "export GROQ_API_KEY=\"$(cat /run/agenix/api-groq)\""
+        fi
+
         if [ -r "/run/agenix/api-github-token" ]; then
           # Export as GITHUB_API_TOKEN to avoid conflict with gh CLI credential management
           # gh CLI expects to manage its own credentials via 'gh auth login'
@@ -147,6 +158,7 @@ in
         [ -n "$OPENAI_API_KEY" ] && echo "✅ OpenAI: Available" || echo "❌ OpenAI: Not available"
         [ -n "$GEMINI_API_KEY" ] && echo "✅ Gemini: Available" || echo "❌ Gemini: Not available"
         [ -n "$ANTHROPIC_API_KEY" ] && echo "✅ Anthropic: Available" || echo "❌ Anthropic: Not available"
+        [ -n "$GROQ_API_KEY" ] && echo "✅ Groq: Available" || echo "❌ Groq: Not available"
         [ -n "$LANGCHAIN_API_KEY" ] && echo "✅ LangChain: Available" || echo "❌ LangChain: Not available"
         [ -n "$GITHUB_API_TOKEN" ] && echo "✅ GitHub API Token: Available" || echo "❌ GitHub API Token: Not available"
 
