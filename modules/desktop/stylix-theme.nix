@@ -61,6 +61,12 @@ in
       targets = {
         chromium.enable = false;
 
+        # kmscon: stylix's kmscon target still sets the removed-in-nixpkgs-50
+        # `services.kmscon.fonts` option, which now fails the build. We don't
+        # theme the Linux text console anyway (Wayland sessions are what
+        # matters here), so disable the target until upstream stylix updates.
+        kmscon.enable = false;
+
         # COSMIC's GTK theme sync is disabled on this fleet, so cosmic-comp
         # does NOT clobber ~/.config/gtk-{3,4}.0/gtk.css at runtime. Stylix
         # can own that file safely and theme GTK3 / non-libadwaita GTK4 apps
