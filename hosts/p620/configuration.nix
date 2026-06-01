@@ -43,6 +43,7 @@ in
     ../../modules/services/litellm-router.nix # Anthropic-compat proxy → Ollama (Phase 2)
     ../../modules/services/whisper-server.nix # voice-input transcription HTTP API (port 9300, tailnet only)
     ../../modules/services/meeting-transcribe.nix # meet CLI: record → whisperX → Ollama summary
+    ../../modules/services/audible-sync.nix # audible-sync: download + decrypt Audible library to .m4b
   ];
   host.class = "workstation";
 
@@ -141,6 +142,10 @@ in
     userName = "Olaf";
     userEmail = "olaf@freundcloud.com";
   };
+
+  # Audible-sync — download + decrypt your Audible library locally on p620.
+  # One-time setup after deploy: `audible quickstart`, then `audible-sync`.
+  features.audibleSync.enable = true;
 
   # Claude Code managed-settings baseline (read-only at /etc/claude-code).
   # Enables PARR hook + lets the router CLI inject apiKeyHelper (Phase 3).
@@ -671,6 +676,7 @@ in
       "python3.13-youtube-dl-2021.12.17" # newsboat (RSS reader) pulls youtube-dl for URL extraction
       "libsoup-2.74.3" # Temporary: Required by some GNOME packages until migration to libsoup-3
       "electron-35.7.5" # Temporary: Required until upstream packages migrate to newer electron
+      "electron-39.8.10" # Newly marked EOL after nixpkgs bump on 2026-06-01 — still pulled in by some upstream package, audit + drop later
     ];
   };
 }
