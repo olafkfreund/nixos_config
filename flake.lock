@@ -734,6 +734,26 @@
         "type": "github"
       }
     },
+    "gscratch": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1780320187,
+        "narHash": "sha256-Z7pvZGhYtoPXzv7eXC3Ws8RJ+81DgP17OpWDdHWnCNE=",
+        "owner": "olafkfreund",
+        "repo": "gscratch",
+        "rev": "2a8245a862eed1f02bc4e2caaa7d31542ef64710",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "gscratch",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -1366,6 +1386,7 @@
         "cosmic-ext-web-apps": "cosmic-ext-web-apps",
         "cosmic-music-player": "cosmic-music-player",
         "flake-utils": "flake-utils_5",
+        "gscratch": "gscratch",
         "home-manager": "home-manager_2",
         "lan-mouse": "lan-mouse",
         "lanzaboote": "lanzaboote",
