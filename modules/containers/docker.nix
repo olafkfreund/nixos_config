@@ -47,6 +47,7 @@ in
       # Explicitly disable Docker Swarm
       daemon.settings = {
         swarm-default-advertise-addr = "";
+        data-root = "/mnt/data/docker";
       };
     };
 
