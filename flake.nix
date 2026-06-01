@@ -155,6 +155,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # gscratch — i3/Sway-style scratchpad for GNOME Shell (any window, toggle
+    # via global shortcut). Consumed by Users/olafkfreund/razer_home.nix.
+    gscratch = {
+      url = "github:olafkfreund/gscratch";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
   outputs =

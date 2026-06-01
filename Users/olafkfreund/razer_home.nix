@@ -1,4 +1,6 @@
 { lib
+, pkgs
+, inputs
 , ...
 }:
 let
@@ -8,6 +10,15 @@ in
   imports = [ ./profile.nix ];
 
   desktop.gnome.profile = "laptop";
+
+  # gscratch — i3/Sway-style scratchpad for GNOME (testing on razer first).
+  # Configure bindings via: gnome-extensions prefs scratchpad@wastedintelligence.com
+  programs.gnome-shell = {
+    enable = true;
+    extensions = [
+      { package = inputs.gscratch.packages.${pkgs.system}.default; }
+    ];
+  };
 
   # Laptop: enable zellij (session management for mobile use)
   features.multiplexers.zellij = true;

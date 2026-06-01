@@ -273,7 +273,42 @@ in
   # cosmic module; the unified DM module defaults to "none" without it).
   # NOTE: must live at top-level, NOT inside the features = {...} block above —
   # the option path is `desktop.displayManager`, not `features.desktop.displayManager`.
+  # No autoLogin here — this is NVIDIA Optimus PRIME-sync hardware where any
+  # greeter respawn after first boot ("Unable to run session" → GdmLocal-
+  # DisplayFactory gives up after 8 retries → black screen) is broken.
+  # Keeping the boot-time greeter alive is the only reliable local UX, so
+  # autologin loops are off. Trade-off: cold-RDP needs a physical login
+  # first (see comment on `gnome.gnome-remote-desktop` below). p510 enables
+  # autoLogin because p510 is pure NVIDIA without PRIME — greeter respawn
+  # works there; not here.
   desktop.displayManager.backend = "gdm";
+
+  # GDM greeter visual baseline — dark colour scheme + 24h clock so it
+  # doesn't render as a near-blank Adwaita-light surface over RDP.
+  programs.dconf.profiles.gdm.databases = [{
+    settings = {
+      "org/gnome/desktop/interface" = {
+        clock-format = "24h";
+        color-scheme = "prefer-dark";
+      };
+    };
+  }];
+
+  # Disable system-mode GRD on razer. The GDM-greeter spawn path it uses
+  # (`gdm-wayland-session: Unable to run session`) is broken on this host's
+  # NVIDIA Optimus PRIME-sync hardware — verified by side-by-side journal
+  # comparison with p510 (pure NVIDIA), where the same path succeeds. With
+  # system-mode off, port 3389 frees up and the user-mode GRD daemon
+  # binds it instead. User-mode requires a live olafkfreund session, so
+  # the RDP flow is: physically log in once after each boot, then `razer:3389`
+  # serves your desktop for the rest of that uptime.
+  services.gnome.gnome-remote-desktop.enable = lib.mkForce false;
+  systemd.services.grd-bootstrap.enable = lib.mkForce false;
+  # The shared module unconditionally adds wantedBy=[graphical.target] to
+  # gnome-remote-desktop.service; with the service body gone (line above),
+  # that orphan wantedBy makes systemd reject the partial unit ("bad unit
+  # file setting"). Clear it.
+  systemd.services.gnome-remote-desktop.wantedBy = lib.mkForce [ ];
 
   # Citrix Workspace for client project remote access
   # Disabled — no longer needed. Module + overlay + package retained so this
