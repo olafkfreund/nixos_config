@@ -22,6 +22,12 @@ in
       options = [ "--cmd cd" ];
     };
 
+    # Silence the `zoxide doctor` periodic-nag that prints multi-line
+    # warnings on every shell invocation when it detects "issues" (newer
+    # db version, missing shell hook, etc). Documented escape hatch in
+    # zoxide's source: https://github.com/ajeetdsouza/zoxide
+    home.sessionVariables._ZO_DOCTOR = "0";
+
     # Manually initialize zoxide at the very end of zsh configuration
     # This ensures it loads after all hooks and other integrations
     programs.zsh.initContent = mkAfter ''
