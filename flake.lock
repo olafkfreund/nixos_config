@@ -743,11 +743,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1780412935,
-        "narHash": "sha256-5lT3ehEJitgjL37hMejwt4BNT4TYfTcXN0jJTYHYZHY=",
+        "lastModified": 1780430294,
+        "narHash": "sha256-66I1KTEMTSA0APOo5OfGuM2hIVY4pxIEfK6wS7WihEI=",
         "owner": "olafkfreund",
         "repo": "gnome-quick-web-apps",
-        "rev": "7601a63a00092708bee6746af1c6361a75cfbef9",
+        "rev": "6689512660b2bf5ae8d6812dfded0d132dbe19b8",
         "type": "github"
       },
       "original": {
