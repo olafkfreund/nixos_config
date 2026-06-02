@@ -1,5 +1,6 @@
 { lib
 , pkgs
+, inputs
 , ...
 }: {
   imports = [
@@ -57,6 +58,11 @@
 
     # Glim — GitLab CI/CD TUI monitoring
     pkgs.glim
+
+    # gnome-quick-web-apps — GTK4 web-app manager (PWA install, scope
+    # confinement, CEF rendering). Native GNOME alternative to
+    # cosmic-utils/web-apps.
+    inputs.gnome-quick-web-apps.packages.${pkgs.system}.default
   ];
 
   # Optional: Add additional packages to the Windsurf environment
