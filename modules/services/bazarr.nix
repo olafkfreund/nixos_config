@@ -55,6 +55,30 @@ in
       # We open the firewall ourselves below (tailnet + optional LAN);
       # nixpkgs's `openFirewall = true` would open it on every interface.
       openFirewall = false;
+      # Run as olafkfreund:users — same as services.sonarr / services.radarr
+      # on this host. The TV/Movies dirs are owned by olafkfreund:users with
+      # 755 perms; Bazarr writes .srt files next to videos and would hit
+      # PermissionError(13) under the nixpkgs-default `bazarr` system user.
+      user = "olafkfreund";
+      group = "users";
+    };
+
+    # After flipping bazarr's runtime user we need its state dir (default
+    # /var/lib/bazarr — SQLite DB, cache, log) re-owned. Idempotent oneshot
+    # so future deploys are no-ops.
+    systemd.services.bazarr-chown = {
+      description = "Reclaim ownership of /var/lib/bazarr after user switch";
+      wantedBy = [ "multi-user.target" ];
+      before = [ "bazarr.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+      script = ''
+        if [ -d /var/lib/bazarr ]; then
+          chown -R olafkfreund:users /var/lib/bazarr
+        fi
+      '';
     };
 
     networking.firewall.interfaces = lib.mkMerge [
