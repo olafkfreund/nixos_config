@@ -121,6 +121,22 @@ in
   #   agenix -e secrets/plex-auto-languages-env.age
   "secrets/plex-auto-languages-env.age".publicKeys = allUsers ++ [ p510 ];
 
+  # GoDaddy account login (sign-in name, password, customer-service PIN,
+  # service email). Plain account credentials — NOT an API key. Stored here
+  # for safekeeping / disaster recovery. To enable scripted DNS management
+  # you separately need an API key+secret from https://developer.godaddy.com/keys
+  # (gated behind the paid tier as of 2024). Edit with:
+  #   ./scripts/manage-secrets.sh edit godaddy-account
+  "secrets/godaddy-account.age".publicKeys = allUsers ++ [ p620 ];
+
+  # GoDaddy Production API key + secret (developer.godaddy.com/keys).
+  # Format: 4 lines — "Key" / <key> / "Secret" / <secret>. Used for scripted
+  # DNS management (Terraform n3integration/godaddy provider, ad-hoc curl).
+  # Endpoint: https://api.godaddy.com/  (NOT api.ote-godaddy.com — that's the
+  # test sandbox). Edit with:
+  #   ./scripts/manage-secrets.sh edit api-godaddy
+  "secrets/api-godaddy.age".publicKeys = allUsers ++ [ p620 ];
+
   # NZBGet ControlPassword. Loaded into a MainConfigInclude file at
   # service preStart so the value never appears in the systemd unit's
   # ExecStart (where the previous plaintext was visible via /proc).
