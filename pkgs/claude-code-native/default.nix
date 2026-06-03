@@ -27,7 +27,7 @@
 let
   # Version from Anthropic's latest channel (matches npm)
   # Run `curl -fsSL "$GCS_BUCKET/latest"` to check latest
-  version = "2.1.160";
+  version = "2.1.161";
 
   # Anthropic's official distribution bucket
   gcs_bucket = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases";
@@ -37,11 +37,11 @@ let
   sources = {
     x86_64-linux = {
       url = "${gcs_bucket}/${version}/linux-x64/claude";
-      hash = "sha256-K4TMLgRjNhnqsCufd+0ApWtkaCtPp7MmcUnunrH+z8c=";
+      hash = "sha256-H2oi84ejvOSWtthpOJo13/taacl9mDGDPzvW3A5sbCg=";
     };
     aarch64-linux = {
       url = "${gcs_bucket}/${version}/linux-arm64/claude";
-      hash = "sha256-H88oUZSg6gxeCZc8TFkQ9xxav0UZMPC5x5RB11Aawik=";
+      hash = "sha256-ffoKeaL8nzMgV83AMC+AjLpj33t14sy1p8GrYmOYBOM=";
     };
   };
 
