@@ -516,7 +516,7 @@ in
 
 
   # System packages
-  environment.systemPackages = with pkgs; [
+  environment.systemPackages = (with pkgs; [
     rocmPackages.llvm.libcxx
     via
     looking-glass-client
@@ -536,7 +536,24 @@ in
     # (callPackage ../../home/development/qwen-code/default.nix { })
     # yt-x terminal YouTube browser
     inputs.yt-x.packages.${pkgs.stdenv.hostPlatform.system}.default
-  ];
+  ]) ++ (with pkgs.gst_all_1; [
+    # GStreamer full plugin set — explicit system-level install so
+    # gst-inspect-1.0 / gst-launch-1.0 and ad-hoc media tooling find
+    # codecs reliably (GNOME pulls these in transitively but only
+    # exposes them inside app wrappers, not on the system GST_PLUGIN_PATH).
+    # Tracks nixpkgs-unstable's current GStreamer 1.26.x stable.
+    gstreamer
+    gst-plugins-base
+    gst-plugins-good
+    gst-plugins-bad
+    gst-plugins-ugly
+    gst-libav
+    # gst-plugin-pipewire is NOT in gst_all_1 — the PipeWire GStreamer
+    # plugin ships inside the pipewire package itself (libgstpipewire.so
+    # under pipewire's lib output). The active services.pipewire wires it.
+    gst-vaapi
+    gst-plugins-rs
+  ]);
 
   # Hardware features
   hardware = {

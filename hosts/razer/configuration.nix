@@ -38,6 +38,16 @@ in
 
   host.class = "laptop";
 
+  # NOPASSWD sudo for wheel members on razer.
+  # `just razer` runs `nixos-rebuild switch --target-host razer.lan --sudo
+  # --no-reexec`, which invokes the post-switch activation via `sudo
+  # systemd-run ... switch-to-configuration switch`. Without NOPASSWD the
+  # remote sudo step fails with exit 4 ("did you forget --ask-sudo-password?")
+  # — the system DOES activate fully (via the early non-sudo path), but
+  # `just razer` returns non-zero noise. Single-user personal laptop:
+  # acceptable trade-off for a clean idempotent deploy.
+  security.sudo.wheelNeedsPassword = false;
+
   # Consolidated networking configuration
   networking = {
     # Set hostname from variables
@@ -445,8 +455,24 @@ in
   });
 
   # System packages - consolidated from individual nixos modules
-  environment.systemPackages =
-    with pkgs;
+  environment.systemPackages = (with pkgs.gst_all_1; [
+    # GStreamer full plugin set — explicit system-level install so
+    # gst-inspect-1.0 / gst-launch-1.0 and ad-hoc media tooling find
+    # codecs reliably (GNOME pulls these in transitively but only
+    # exposes them inside app wrappers, not on the system GST_PLUGIN_PATH).
+    # Tracks nixpkgs-unstable's current GStreamer 1.26.x stable.
+    gstreamer
+    gst-plugins-base
+    gst-plugins-good
+    gst-plugins-bad
+    gst-plugins-ugly
+    gst-libav
+    # gst-plugin-pipewire is NOT in gst_all_1 — the PipeWire GStreamer
+    # plugin ships inside the pipewire package itself (libgstpipewire.so
+    # under pipewire's lib output). The active services.pipewire wires it.
+    gst-vaapi
+    gst-plugins-rs
+  ]) ++ (with pkgs;
     [
       # Qt theme control tools for Stylix
       libsForQt5.qt5ct
@@ -485,7 +511,7 @@ in
     # needed so their share/wayland-sessions/*.desktop files land in
     # /run/current-system/sw/share/wayland-sessions where COSMIC Greeter
     # (and other display managers) actually look for session choices.
-    ++ config.services.displayManager.sessionPackages;
+    ++ config.services.displayManager.sessionPackages);
 
   hardware.nvidia-container-toolkit.enable = vars.gpu == "nvidia";
 
