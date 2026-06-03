@@ -31,5 +31,14 @@ in
     # via the gogcli (`gog`) CLI. Sourced from this repo, not a flake input.
     home.file.".claude/skills/gog/SKILL.md".source = ./gog/SKILL.md;
     home.file.".claude/skills/gog/evals.json".source = ./gog/evals.json;
+
+    # Local dns skill — /dns playbook for GoDaddy DNS management.
+    # The companion shell CLI lives next to SKILL.md and self-decrypts
+    # the GoDaddy API secret from agenix at invocation time.
+    home.file.".claude/skills/dns/SKILL.md".source = ./dns/SKILL.md;
+    home.file.".claude/skills/dns/scripts/dns.sh" = {
+      source = ./dns/scripts/dns.sh;
+      executable = true;
+    };
   };
 }

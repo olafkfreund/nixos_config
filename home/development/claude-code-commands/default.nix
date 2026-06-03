@@ -215,5 +215,10 @@ in
     # Nix '' string would try to interpolate. Deploys to every host that
     # enables this module (p620, p510, razer).
     home.file.".claude/commands/blog.md".source = ./blog.md;
+
+    # /dns — GoDaddy DNS management. Source-file mode so the body's $ARGUMENTS
+    # and bash invocations aren't touched by Nix string interpolation. Pairs
+    # with the `dns` skill at home/development/claude-code-skills/dns/.
+    home.file.".claude/commands/dns.md".source = ./dns.md;
   };
 }

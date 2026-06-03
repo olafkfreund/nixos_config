@@ -14,6 +14,7 @@ in
     pkgs.wiremix
     pkgs.parabolic
     pkgs.musicpod
+    pkgs.pear-desktop # YouTube Music desktop client (formerly th-ch/youtube-music)
     pkgs.playerctl
     (pkgs.callPackage ../../pkgs/mpris-album-art { })
   ];
