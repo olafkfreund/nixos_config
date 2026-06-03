@@ -461,7 +461,16 @@ in
     # codecs reliably (GNOME pulls these in transitively but only
     # exposes them inside app wrappers, not on the system GST_PLUGIN_PATH).
     # Tracks nixpkgs-unstable's current GStreamer 1.26.x stable.
+    #
+    # NOTE: `gstreamer` itself has `meta.outputsToInstall = ["bin"]` —
+    # the default add gives ONLY the gst-* CLI tools, NOT the core
+    # plugins (coreelements: fakesink, identity, queue, tee, …). We must
+    # explicitly add `gstreamer.out` to get libgstcoreelements.so onto
+    # GST_PLUGIN_SYSTEM_PATH_1_0. Without it, anything using `fakesink`
+    # (e.g. YetAnotherRadio's playbin3 video-sink stub) fails with
+    # "GStreamer plugin missing".
     gstreamer
+    gstreamer.out
     gst-plugins-base
     gst-plugins-good
     gst-plugins-bad
