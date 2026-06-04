@@ -23,6 +23,7 @@ in
     ../common/nixos/hosts.nix
     ../common/nixos/envvar.nix
     ../common/nixos/host-class.nix
+    ../common/nixos/inotify-limits.nix
     ./nixos/cpu.nix
     ./nixos/laptop.nix
     ./nixos/memory.nix
