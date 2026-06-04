@@ -35,6 +35,7 @@ in
       ../../modules/secrets/api-keys.nix
       ../../modules/services/ollama.nix
       ../../modules/services/plex-mcp.nix # Plex MCP server (HTTP transport, tailnet-only)
+      ../../modules/services/backstage.nix # Backstage developer portal (epic #731, disabled by default)
       ../../modules/services/arr-suite-mcp.nix # *arr suite MCP server (SSE bridge, tailnet-only)
       ../../modules/services/audiobookbay-automated.nix # AudioBookBay search → Transmission
       ../../modules/services/audiobook-import.nix # Completed downloads → Audiobookshelf (LLM + m4b)
