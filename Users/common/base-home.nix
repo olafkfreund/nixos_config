@@ -57,7 +57,6 @@
   };
 
   # Adopt new Home Manager defaults (silence deprecation warnings)
-  gtk.gtk4.theme = null;
   programs.git.signing.format = null;
 
   # We intentionally chase nixos-unstable for nixpkgs; HM/Stylix master often
