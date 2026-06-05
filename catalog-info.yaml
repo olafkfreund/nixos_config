@@ -1,0 +1,56 @@
+# Backstage seed catalog for the freundcloud home lab.
+#
+# Backstage on p510 reads this via a Location declared in
+# app-config.production.yaml of olafkfreund/backstage. It contains the
+# entities that aren't auto-discovered from per-repo catalog-info.yaml
+# files:
+#   - User entity for olafkfreund (so GitHub OAuth sign-in finds a
+#     matching User on first login)
+#   - System entities grouping related infrastructure
+#   - Component entity for nixos_config itself
+#
+# All other Components come from per-repo catalog-info.yaml files via
+# Backstage's GitHubEntityProvider (catalog.providers.github in
+# app-config.production.yaml).
+#
+# Editing: hand-edit this file. After committing, Backstage's catalog
+# processor refreshes within ~5 minutes.
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: olafkfreund
+  description: Olaf K. Freund — primary operator of the freundcloud home lab
+spec:
+  profile:
+    displayName: Olaf K. Freund
+    email: olaf@freundcloud.com
+  memberOf: []
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: freundcloud-infra
+  description: Multi-host NixOS infrastructure (p620, p510, razer) + supporting services
+spec:
+  owner: olafkfreund
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: nixos_config
+  description: Multi-host NixOS infrastructure as code. Manages p620, p510, razer.
+  annotations:
+    github.com/project-slug: olafkfreund/nixos_config
+  tags:
+    - nixos
+    - infrastructure
+    - declarative
+spec:
+  type: infrastructure
+  lifecycle: production
+  owner: olafkfreund
+  system: freundcloud-infra
