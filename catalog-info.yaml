@@ -43,6 +43,23 @@ spec:
   members: [olafkfreund]
 
 ---
+# Same-name Group as the User so `spec.owner: olafkfreund` in any
+# catalog-info.yaml (without a `user:` prefix) resolves cleanly to
+# group:default/olafkfreund. Backstage interprets bare owner names as
+# Group refs by default, and every onboarded repo's catalog-info.yaml
+# uses `owner: olafkfreund` without a namespace prefix. Adding this
+# Group is an alias rather than retroactively editing 48 PRs.
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: olafkfreund
+  description: Owner alias — one-member group containing the User of the same name.
+spec:
+  type: team
+  children: []
+  members: [olafkfreund]
+
+---
 apiVersion: backstage.io/v1alpha1
 kind: System
 metadata:
