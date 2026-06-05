@@ -26,7 +26,21 @@ spec:
   profile:
     displayName: Olaf K. Freund
     email: olaf@freundcloud.com
-  memberOf: []
+  memberOf: [admins]
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: admins
+  description: Backstage administrators (currently a one-member group — the
+    permission policy is allow-all, but plugins that filter by Group will
+    respect this; future per-permission policies should reference
+    group:default/admins).
+spec:
+  type: team
+  children: []
+  members: [olafkfreund]
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -35,7 +49,7 @@ metadata:
   name: freundcloud-infra
   description: Multi-host NixOS infrastructure (p620, p510, razer) + supporting services
 spec:
-  owner: olafkfreund
+  owner: admins
 
 ---
 apiVersion: backstage.io/v1alpha1
