@@ -74,6 +74,11 @@
         # AudioBookBay search UI (audiobookbay-automated) - accessible at /audiobooks-dl
         ${pkgs.tailscale}/bin/tailscale serve --bg --https=443 --set-path=/audiobooks-dl http://localhost:5078
 
+        # Backstage developer portal (features.backstage) - accessible at /backstage
+        # GitHub OAuth callback URL on the OAuth App MUST be:
+        # https://p510.tail833f7.ts.net/backstage/api/auth/github/handler/frame
+        ${pkgs.tailscale}/bin/tailscale serve --bg --https=443 --set-path=/backstage http://localhost:7007
+
         # Note: Home Assistant is NOT configured here to avoid port conflicts.
         # It is accessible directly at http://p510.lan:8123 via subnet routing.
 

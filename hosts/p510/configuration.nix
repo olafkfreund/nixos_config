@@ -35,6 +35,7 @@ in
       ../../modules/secrets/api-keys.nix
       ../../modules/services/ollama.nix
       ../../modules/services/plex-mcp.nix # Plex MCP server (HTTP transport, tailnet-only)
+      ../../modules/services/backstage.nix # Backstage developer portal (epic #731, disabled by default)
       ../../modules/services/arr-suite-mcp.nix # *arr suite MCP server (SSE bridge, tailnet-only)
       ../../modules/services/audiobookbay-automated.nix # AudioBookBay search → Transmission
       ../../modules/services/audiobook-import.nix # Completed downloads → Audiobookshelf (LLM + m4b)
@@ -379,6 +380,13 @@ in
     enable = true;
     listenLanInterface = "eno1"; # P510 onboard Intel I218-LM
   };
+
+  # Backstage developer portal — see docs/backstage.md.
+  # Image SHA pinned in modules/services/backstage.nix; bump by editing
+  # the module's `image` default after each Freundcloud/backstage CI run.
+  # OAuth callback URL on the GitHub OAuth App must match publicUrl:
+  #   https://p510.tail833f7.ts.net/backstage/api/auth/github/handler/frame
+  features.backstage.enable = true;
 
   # arr-suite MCP server — exposes Sonarr/Radarr/Prowlarr/Overseerr (and Plex)
   # to AI clients over SSE at http://p510:3011/sse. NZBGeek is reachable via
