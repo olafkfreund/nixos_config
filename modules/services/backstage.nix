@@ -37,7 +37,7 @@
 #   3. Phase 4 Tailscale Serve route is added
 # See olafkfreund/nixos_config epic #731.
 
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   cfg = config.features.backstage;
   pgDataDir = "/var/lib/backstage-postgres";
@@ -51,7 +51,7 @@ in
 
     image = lib.mkOption {
       type = lib.types.str;
-      default = "ghcr.io/olafkfreund/backstage@sha256:49f4e8ef59665afbcbec9e37c94b9396363c3ef1c05413afaf50742a1e35fb0b";
+      default = "ghcr.io/olafkfreund/backstage@sha256:e2110e1945e69a6be8b8931010347f77987668654ebd5960acd0196e8c8b0ac0";
       example = "ghcr.io/olafkfreund/backstage@sha256:abc123...";
       description = ''
         OCI image to pull for the Backstage backend. MUST be pinned to a
@@ -139,12 +139,30 @@ in
       file = ../../secrets/backstage-postgres-password.age;
       mode = "0400";
     };
+    age.secrets.backstage-gitlab-token = {
+      file = ../../secrets/backstage-gitlab-token.age;
+      mode = "0400";
+    };
 
     # ---------------------------------------------------------------------
     # Persistent state.
     # ---------------------------------------------------------------------
     systemd.tmpfiles.rules = [
-      "d ${pgDataDir} 0700 root root - -"
+      # UID 70 is the postgres user inside the postgres:16-alpine image.
+      # Don't use `root root` — systemd-tmpfiles-resetup re-applies
+      # ownership on every activation, and a root-owned 0700 dir blocks
+      # the in-container postgres user from traversing into its own
+      # data files (`could not open file global/pg_filenode.map`).
+      "d ${pgDataDir} 0700 70 70 - -"
+      # /run is tmpfs and systemd-tmpfiles-clean periodically removes
+      # undeclared paths under /run. Declare /run/backstage so it
+      # survives activations + cleanups; env-setup re-emits files into it.
+      "d ${envDir} 0700 root root - -"
+      # TechDocs render cache (publisher=local). Mounted into the
+      # backstage container at /tmp/techdocs so mkdocs build output
+      # survives container restarts. Owned by uid 1000 (node user
+      # inside the container).
+      "d /var/lib/backstage-techdocs 0700 1000 1000 - -"
     ];
 
     # ---------------------------------------------------------------------
@@ -161,12 +179,18 @@ in
         "podman-backstage.service"
         "podman-backstage-postgres.service"
       ];
-      after = [ "agenix.service" ];
-      requires = [ "agenix.service" ];
+      # agenix populates /run/agenix/* during NixOS activation (before
+      # systemd reaches multi-user.target), so no explicit ordering on an
+      # agenix.service is needed — and indeed agenix isn't a systemd unit.
 
       serviceConfig = {
         Type = "oneshot";
-        RemainAfterExit = true;
+        # NOT RemainAfterExit: we want this to re-run on every dependent
+        # service start (e.g. after `systemctl restart podman-backstage`)
+        # so the env files in /run/backstage are always fresh. Otherwise
+        # systemd considers env-setup "active (exited) success" and skips
+        # it, leaving podman to fail on missing env files after an
+        # unrelated activation cleared /run/backstage/*.
       };
 
       script = ''
@@ -178,6 +202,7 @@ in
         GH_TOKEN=$(cat ${agenixPath "backstage-github-token"})
         GH_OAUTH_ID=$(cat ${agenixPath "backstage-github-oauth-client-id"})
         GH_OAUTH_SECRET=$(cat ${agenixPath "backstage-github-oauth-client-secret"})
+        GL_TOKEN=$(cat ${agenixPath "backstage-gitlab-token"})
 
         cat > ${envDir}/env-postgres <<EOF
         POSTGRES_USER=${cfg.pgUser}
@@ -187,14 +212,19 @@ in
 
         cat > ${envDir}/env-backstage <<EOF
         BACKSTAGE_PUBLIC_URL=${cfg.publicUrl}
-        POSTGRES_HOST=host.containers.internal
-        POSTGRES_PORT=${toString cfg.pgPort}
+        # Container-to-container DNS on the shared backstage-net podman
+        # network — Postgres is reachable by container name, NOT via the
+        # host's loopback port (which 127.0.0.1:5435 binds to but the
+        # podman bridge gateway can't traverse).
+        POSTGRES_HOST=backstage-postgres
+        POSTGRES_PORT=5432
         POSTGRES_USER=${cfg.pgUser}
         POSTGRES_PASSWORD=$PG_PASSWORD
         POSTGRES_DB=${cfg.pgDatabase}
         GITHUB_TOKEN=$GH_TOKEN
         AUTH_GITHUB_CLIENT_ID=$GH_OAUTH_ID
         AUTH_GITHUB_CLIENT_SECRET=$GH_OAUTH_SECRET
+        GITLAB_TOKEN=$GL_TOKEN
         EOF
 
         chmod 0400 ${envDir}/env-postgres ${envDir}/env-backstage
@@ -206,15 +236,38 @@ in
     # ---------------------------------------------------------------------
     virtualisation.podman.enable = lib.mkDefault true;
 
+    # Shared podman network so the backstage container can reach Postgres
+    # by container name (DNS-resolved on the bridge). Created idempotently
+    # before either container starts. `|| true` so re-runs don't fail.
+    systemd.services.backstage-network = {
+      description = "Create podman network for Backstage containers";
+      wantedBy = [ "multi-user.target" ];
+      before = [
+        "podman-backstage.service"
+        "podman-backstage-postgres.service"
+      ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+      script = ''
+        ${pkgs.podman}/bin/podman network exists backstage-net \
+          || ${pkgs.podman}/bin/podman network create backstage-net
+      '';
+    };
+
     virtualisation.oci-containers = {
       backend = lib.mkDefault "podman";
 
       containers."backstage-postgres" = {
         image = cfg.postgresImage;
-        ports = [ "127.0.0.1:${toString cfg.pgPort}:5432" ];
+        # No host port mapping — Postgres is only consumed by the sibling
+        # backstage container via the shared backstage-net network. Keeps
+        # postgres entirely off the host's port table.
         environmentFiles = [ "${envDir}/env-postgres" ];
         volumes = [ "${pgDataDir}:/var/lib/postgresql/data" ];
         autoStart = true;
+        extraOptions = [ "--network=backstage-net" ];
       };
 
       containers."backstage" = {
@@ -223,20 +276,29 @@ in
         environmentFiles = [ "${envDir}/env-backstage" ];
         dependsOn = [ "backstage-postgres" ];
         autoStart = true;
-        # Soft memory cap — see options.memoryHigh.
-        extraOptions = [ "--memory=${cfg.memoryHigh}" ];
+        # /var/lib/backstage-techdocs persists the rendered MkDocs output
+        # (publisher=local) across container restarts.
+        volumes = [ "/var/lib/backstage-techdocs:/tmp/techdocs" ];
+        extraOptions = [
+          "--network=backstage-net"
+          "--memory=${cfg.memoryHigh}"
+        ];
       };
     };
 
-    # Chain the container units onto our env-setup so they don't race the
-    # agenix → /run/backstage emission on cold boot.
+    # Chain the container units onto env-setup + network creation so they
+    # don't race on cold boot.
     systemd.services.podman-backstage-postgres = {
-      after = [ "backstage-env-setup.service" ];
-      requires = [ "backstage-env-setup.service" ];
+      after = [ "backstage-env-setup.service" "backstage-network.service" ];
+      requires = [ "backstage-env-setup.service" "backstage-network.service" ];
     };
     systemd.services.podman-backstage = {
-      after = [ "backstage-env-setup.service" "podman-backstage-postgres.service" ];
-      requires = [ "backstage-env-setup.service" ];
+      after = [
+        "backstage-env-setup.service"
+        "backstage-network.service"
+        "podman-backstage-postgres.service"
+      ];
+      requires = [ "backstage-env-setup.service" "backstage-network.service" ];
     };
   };
 }
