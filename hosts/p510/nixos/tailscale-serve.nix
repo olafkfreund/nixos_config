@@ -93,7 +93,15 @@
         #
         # GitHub webhook URL: https://bs.freundcloud.com:8443/api/events/http/github
         #   (or https://p510.tail833f7.ts.net:8443/api/events/http/github)
-        ${pkgs.tailscale}/bin/tailscale funnel --bg --https=8443 --set-path=/api/events/http/github http://localhost:7007
+        #
+        # IMPORTANT: --set-path STRIPS the matched prefix on forward, so
+        # a bare http://localhost:7007 target would send the request to
+        # localhost:7007/ — Backstage's React-app root — instead of the
+        # events handler. Including the path in the target URL means
+        # Tailscale forwards to localhost:7007/api/events/http/github,
+        # which is where the @backstage/plugin-events-backend-module-
+        # github router is actually mounted.
+        ${pkgs.tailscale}/bin/tailscale funnel --bg --https=8443 --set-path=/api/events/http/github http://localhost:7007/api/events/http/github
 
         # Note: Home Assistant is NOT configured here to avoid port conflicts.
         # It is accessible directly at http://p510.lan:8123 via subnet routing.
