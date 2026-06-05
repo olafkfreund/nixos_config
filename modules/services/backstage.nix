@@ -51,7 +51,7 @@ in
 
     image = lib.mkOption {
       type = lib.types.str;
-      default = "ghcr.io/olafkfreund/backstage@sha256:334ad656d32671ac711179d7c0b3f326837be024cca5fa3a309f91c0ed1604c4";
+      default = "ghcr.io/olafkfreund/backstage@sha256:34c311caaa7c5e19f81980bc48c0ad5ecd733e4e3368b3a868e9c98ddc64f8b2";
       example = "ghcr.io/olafkfreund/backstage@sha256:abc123...";
       description = ''
         OCI image to pull for the Backstage backend. MUST be pinned to a
@@ -153,6 +153,11 @@ in
       # undeclared paths under /run. Declare /run/backstage so it
       # survives activations + cleanups; env-setup re-emits files into it.
       "d ${envDir} 0700 root root - -"
+      # TechDocs render cache (publisher=local). Mounted into the
+      # backstage container at /tmp/techdocs so mkdocs build output
+      # survives container restarts. Owned by uid 1000 (node user
+      # inside the container).
+      "d /var/lib/backstage-techdocs 0700 1000 1000 - -"
     ];
 
     # ---------------------------------------------------------------------
@@ -266,6 +271,9 @@ in
         environmentFiles = [ "${envDir}/env-backstage" ];
         dependsOn = [ "backstage-postgres" ];
         autoStart = true;
+        # /var/lib/backstage-techdocs persists the rendered MkDocs output
+        # (publisher=local) across container restarts.
+        volumes = [ "/var/lib/backstage-techdocs:/tmp/techdocs" ];
         extraOptions = [
           "--network=backstage-net"
           "--memory=${cfg.memoryHigh}"
