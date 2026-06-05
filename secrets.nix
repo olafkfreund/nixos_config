@@ -77,6 +77,14 @@ in
   #   agenix -e secrets/plex-token.age
   "secrets/plex-token.age".publicKeys = allUsers ++ [ p510 ];
 
+  # Backstage developer portal (features.backstage on p510 — epic #731).
+  # Each file holds a single value, no leading/trailing whitespace.
+  # Rotation procedure: docs/backstage.md "Secret rotation" section.
+  "secrets/backstage-postgres-password.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/backstage-github-token.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/backstage-github-oauth-client-id.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/backstage-github-oauth-client-secret.age".publicKeys = allUsers ++ [ p510 ];
+
   # SABnzbd confidential settings (ConfigObj INI) merged via
   # services.sabnzbd.secretFiles on p510 — holds the Easynews news-server
   # username/password. Edit with: agenix -e secrets/sabnzbd-secrets.age
