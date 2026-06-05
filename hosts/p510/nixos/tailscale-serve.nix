@@ -79,6 +79,22 @@
         # https://p510.tail833f7.ts.net/backstage/api/auth/github/handler/frame
         ${pkgs.tailscale}/bin/tailscale serve --bg --https=443 --set-path=/backstage http://localhost:7007
 
+        # Public webhook ingress for GitHub event delivery (Phase D
+        # real-time freshness). Funnel exposes this to the public
+        # internet on 8443 ONLY for the /api/events/http/github path.
+        # HMAC-SHA256 signature validation in the Backstage events
+        # backend is the only gate, so the agenix-encrypted webhook
+        # secret must remain high-entropy.
+        #
+        # Tailscale Funnel only supports 443/8443/10000. We can't use
+        # 443 because that's already serving all the media services
+        # tailnet-only (Plex, Sonarr, etc) and Funnel can't selectively
+        # apply per-path — it would expose everything.
+        #
+        # GitHub webhook URL: https://bs.freundcloud.com:8443/api/events/http/github
+        #   (or https://p510.tail833f7.ts.net:8443/api/events/http/github)
+        ${pkgs.tailscale}/bin/tailscale funnel --bg --https=8443 --set-path=/api/events/http/github http://localhost:7007
+
         # Note: Home Assistant is NOT configured here to avoid port conflicts.
         # It is accessible directly at http://p510.lan:8123 via subnet routing.
 
