@@ -26,7 +26,33 @@ spec:
   profile:
     displayName: Olaf K. Freund
     email: olaf@freundcloud.com
-  memberOf: []
+  memberOf: [admins]
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: admins
+  description: Backstage administrators — currently a one-member group.
+spec:
+  type: team
+  children: []
+  members: [olafkfreund]
+
+---
+# Same-name Group as the User so `spec.owner: olafkfreund` in any
+# onboarded catalog-info.yaml resolves cleanly. Backstage interprets
+# bare owner names as Group refs, and the catalog-onboard workflow
+# emits `owner: olafkfreund` without a namespace prefix.
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: olafkfreund
+  description: Owner alias for olafkfreund — one-member group containing the User of the same name.
+spec:
+  type: team
+  children: []
+  members: [olafkfreund]
 
 ---
 apiVersion: backstage.io/v1alpha1
