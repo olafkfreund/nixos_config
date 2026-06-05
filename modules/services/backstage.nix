@@ -148,7 +148,12 @@ in
     # Persistent state.
     # ---------------------------------------------------------------------
     systemd.tmpfiles.rules = [
-      "d ${pgDataDir} 0700 root root - -"
+      # UID 70 is the postgres user inside the postgres:16-alpine image.
+      # Don't use `root root` — systemd-tmpfiles-resetup re-applies
+      # ownership on every activation, and a root-owned 0700 dir blocks
+      # the in-container postgres user from traversing into its own
+      # data files (`could not open file global/pg_filenode.map`).
+      "d ${pgDataDir} 0700 70 70 - -"
       # /run is tmpfs and systemd-tmpfiles-clean periodically removes
       # undeclared paths under /run. Declare /run/backstage so it
       # survives activations + cleanups; env-setup re-emits files into it.
