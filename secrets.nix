@@ -84,6 +84,7 @@ in
   "secrets/backstage-github-token.age".publicKeys = allUsers ++ [ p510 ];
   "secrets/backstage-github-oauth-client-id.age".publicKeys = allUsers ++ [ p510 ];
   "secrets/backstage-github-oauth-client-secret.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/backstage-gitlab-token.age".publicKeys = allUsers ++ [ p510 ];
 
   # SABnzbd confidential settings (ConfigObj INI) merged via
   # services.sabnzbd.secretFiles on p510 — holds the Easynews news-server
