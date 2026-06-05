@@ -1,8 +1,8 @@
 # Backstage developer portal.
 #
-# Runs Freundcloud/backstage (a customised Spotify Backstage app) on p510
+# Runs olafkfreund/backstage (a customised Spotify Backstage app) on p510
 # alongside a sibling Postgres container. Image is consumed from
-# ghcr.io/freundcloud/backstage, pinned to a SHA digest (NEVER :latest —
+# ghcr.io/olafkfreund/backstage, pinned to a SHA digest (NEVER :latest —
 # that's a supply-chain risk: a leaked GHCR token could quietly swap the
 # running image).
 #
@@ -51,8 +51,8 @@ in
 
     image = lib.mkOption {
       type = lib.types.str;
-      default = "ghcr.io/freundcloud/backstage@sha256:REPLACE_AFTER_FIRST_CI_BUILD";
-      example = "ghcr.io/freundcloud/backstage@sha256:abc123...";
+      default = "ghcr.io/olafkfreund/backstage@sha256:e0284ab7d1d119ae96c32949a982618a5e137a92cd741f786a696f1122a2f888";
+      example = "ghcr.io/olafkfreund/backstage@sha256:abc123...";
       description = ''
         OCI image to pull for the Backstage backend. MUST be pinned to a
         SHA256 digest (the @sha256:... form). Do NOT use :latest — updates

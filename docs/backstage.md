@@ -2,7 +2,7 @@
 
 Operator-facing reference for the Backstage developer portal running on
 **p510**. Module source: `modules/services/backstage.nix`. App source:
-[`Freundcloud/backstage`](https://github.com/Freundcloud/backstage).
+[`olafkfreund/backstage`](https://github.com/olafkfreund/backstage).
 Tracking epic: [#731](https://github.com/olafkfreund/nixos_config/issues/731).
 
 ## Overview
@@ -39,8 +39,8 @@ runbooks.
               └────────────────────────────────────────────┘
 ```
 
-- **Image**: built from `Freundcloud/backstage` by GitHub Actions, pushed
-  to `ghcr.io/freundcloud/backstage`, pinned by SHA digest in
+- **Image**: built from `olafkfreund/backstage` by GitHub Actions, pushed
+  to `ghcr.io/olafkfreund/backstage`, pinned by SHA digest in
   `features.backstage.image`. NEVER `:latest`.
 - **Postgres**: sibling podman container, localhost-only, volume at
   `/var/lib/backstage-postgres`. Not exposed off p510.
@@ -56,7 +56,7 @@ runbooks.
 | Option | Type | Default | Purpose |
 |---|---|---|---|
 | `enable` | bool | `false` | Master switch. |
-| `image` | str | `ghcr.io/freundcloud/backstage@sha256:REPLACE...` | SHA-pinned image. Bump by editing this string. |
+| `image` | str | `ghcr.io/olafkfreund/backstage@sha256:e0284ab...` | SHA-pinned image. Bump by editing this string. |
 | `postgresImage` | str | `docker.io/postgres:16-alpine` | Postgres sidecar. |
 | `port` | port | `7007` | Localhost backend port. |
 | `pgPort` | port | `5435` | Localhost Postgres port (avoids skill-pool's 5434). |
@@ -70,8 +70,8 @@ runbooks.
 This module is disabled by default. To enable it, all of the following
 must already be true:
 
-1. **Phase 1 image exists** — `Freundcloud/backstage` has a green CI run
-   and an image is published to `ghcr.io/freundcloud/backstage`. Capture
+1. **Phase 1 image exists** — `olafkfreund/backstage` has a green CI run
+   and an image is published to `ghcr.io/olafkfreund/backstage`. Capture
    the SHA digest from the workflow's "Print SHA digest" step.
 2. **Phase 2 agenix secrets exist** — these four `.age` files are present
    in `secrets/` and registered in `secrets/secrets.nix`:
@@ -91,7 +91,7 @@ Then on p510 in `hosts/p510/configuration.nix`:
 ```nix
 features.backstage = {
   enable = true;
-  image = "ghcr.io/freundcloud/backstage@sha256:<paste-from-CI>";
+  image = "ghcr.io/olafkfreund/backstage@sha256:<paste-from-CI>";
 };
 ```
 
@@ -150,7 +150,7 @@ data persists in the volume.
 
 ## Upgrade procedure
 
-1. **In `Freundcloud/backstage`**: `yarn backstage-cli versions:bump`,
+1. **In `olafkfreund/backstage`**: `yarn backstage-cli versions:bump`,
    resolve any breaking changes (read upstream release notes for major
    bumps), `yarn dev` to verify locally
 2. Commit, push, wait for the green CI run
@@ -202,7 +202,7 @@ for all fields.
 ## Adding a plugin
 
 Plugin add/upgrade lives in the app repo. See
-[`Freundcloud/backstage/docs/PLUGINS.md`](https://github.com/Freundcloud/backstage/blob/main/docs/PLUGINS.md).
+[`olafkfreund/backstage/docs/PLUGINS.md`](https://github.com/olafkfreund/backstage/blob/main/docs/PLUGINS.md).
 After landing a plugin and CI publishing the new image, bump the digest in
 this repo per the Upgrade procedure above.
 
