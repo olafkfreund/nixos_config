@@ -41,17 +41,6 @@ in
       description = "Enable next meeting calendar applet for COSMIC panel. Shows upcoming meetings with one-click join for video calls. Requires Evolution Data Server.";
     };
 
-    enableMusicPlayerApplet = mkOption {
-      type = types.bool;
-      default = true; # Now enabled by default - Cargo.lock issue resolved with Crane
-      description = ''
-        Enable music player applet for COSMIC panel with MPRIS control.
-
-        Provides play/pause, track navigation, album artwork, and volume control for MPRIS-compatible music players.
-        Works with Spotify, VLC, MPD, and other MPRIS-compatible applications.
-      '';
-    };
-
     enableSpotifyApplet = mkOption {
       type = types.bool;
       default = true;
@@ -163,9 +152,6 @@ in
           cosmic-screenshot # Screenshot tool
           cosmic-randr # Display configuration
 
-          # Web applications
-          cosmic-ext-web-apps # Web app manager for COSMIC Desktop
-
           # Extensions and tweaks
           cosmic-ext-calculator # Calculator application
           cosmic-ext-tweaks # Advanced tweaking tool
@@ -197,9 +183,6 @@ in
           pkgs.evolution-data-server
           pkgs.gnome-online-accounts
         ]
-        ++ optional cfg.enableMusicPlayerApplet
-          # Music player applet with MPRIS control (wrapped for proper Wayland library loading)
-          (wrapCosmicApp "cosmic-ext-applet-music-player" pkgs.cosmic-ext-applet-music-player)
         ++ optional cfg.enableSpotifyApplet
           # Spotify applet for displaying currently playing track information (wrapped for proper Wayland library loading)
           (wrapCosmicApp "cosmic-applet-spotify" pkgs.cosmic-applet-spotify)
