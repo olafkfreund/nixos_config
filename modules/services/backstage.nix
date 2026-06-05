@@ -139,6 +139,10 @@ in
       file = ../../secrets/backstage-postgres-password.age;
       mode = "0400";
     };
+    age.secrets.backstage-gitlab-token = {
+      file = ../../secrets/backstage-gitlab-token.age;
+      mode = "0400";
+    };
 
     # ---------------------------------------------------------------------
     # Persistent state.
@@ -188,6 +192,7 @@ in
         GH_TOKEN=$(cat ${agenixPath "backstage-github-token"})
         GH_OAUTH_ID=$(cat ${agenixPath "backstage-github-oauth-client-id"})
         GH_OAUTH_SECRET=$(cat ${agenixPath "backstage-github-oauth-client-secret"})
+        GL_TOKEN=$(cat ${agenixPath "backstage-gitlab-token"})
 
         cat > ${envDir}/env-postgres <<EOF
         POSTGRES_USER=${cfg.pgUser}
@@ -209,6 +214,7 @@ in
         GITHUB_TOKEN=$GH_TOKEN
         AUTH_GITHUB_CLIENT_ID=$GH_OAUTH_ID
         AUTH_GITHUB_CLIENT_SECRET=$GH_OAUTH_SECRET
+        GITLAB_TOKEN=$GL_TOKEN
         EOF
 
         chmod 0400 ${envDir}/env-postgres ${envDir}/env-backstage
