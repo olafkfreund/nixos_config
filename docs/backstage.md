@@ -56,7 +56,7 @@ runbooks.
 | Option | Type | Default | Purpose |
 |---|---|---|---|
 | `enable` | bool | `false` | Master switch. |
-| `image` | str | `ghcr.io/olafkfreund/backstage@sha256:e0284ab...` | SHA-pinned image. Bump by editing this string. |
+| `image` | str | `ghcr.io/olafkfreund/backstage@sha256:49f4e8e...` | SHA-pinned image. Bump by editing this string. |
 | `postgresImage` | str | `docker.io/postgres:16-alpine` | Postgres sidecar. |
 | `port` | port | `7007` | Localhost backend port. |
 | `pgPort` | port | `5435` | Localhost Postgres port (avoids skill-pool's 5434). |
