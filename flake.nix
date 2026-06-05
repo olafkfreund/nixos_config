@@ -119,24 +119,8 @@
     };
 
     # COSMIC Desktop applets
-    cosmic-music-player = {
-      url = "github:olafkfreund/cosmic-applet-music-player";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     cosmic-applet-spotify = {
       url = "github:nomoth/cosmic-applet-spotify";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # COSMIC Radio Applet - Internet radio player for COSMIC Desktop
-    cosmic-ext-radio-applet = {
-      url = "github:olafkfreund/cosmic-ext-radio-applet";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # COSMIC Web Apps - Web application manager for COSMIC Desktop
-    cosmic-ext-web-apps = {
-      url = "github:olafkfreund/cosmic-ext-web-apps";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -274,8 +258,6 @@
               inputs.agenix.nixosModules.default
               inputs.lanzaboote.nixosModules.lanzaboote
               nix-index-database.nixosModules.nix-index
-              # cosmic-ext-applet-radio: local module workaround for upstream mkPackageOption 'description' arg bug
-              ./modules/services/cosmic-ext-radio-applet
               ./home/shell/zellij/zjstatus.nix
             ]
             ++ stylixModule
