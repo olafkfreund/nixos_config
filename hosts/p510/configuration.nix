@@ -381,6 +381,13 @@ in
     listenLanInterface = "eno1"; # P510 onboard Intel I218-LM
   };
 
+  # Backstage developer portal — see docs/backstage.md.
+  # Image SHA pinned in modules/services/backstage.nix; bump by editing
+  # the module's `image` default after each Freundcloud/backstage CI run.
+  # OAuth callback URL on the GitHub OAuth App must match publicUrl:
+  #   https://p510.tail833f7.ts.net/backstage/api/auth/github/handler/frame
+  features.backstage.enable = true;
+
   # arr-suite MCP server — exposes Sonarr/Radarr/Prowlarr/Overseerr (and Plex)
   # to AI clients over SSE at http://p510:3011/sse. NZBGeek is reachable via
   # Prowlarr. *arr API keys come from agenix (secrets/arr-suite-mcp-env.age).
