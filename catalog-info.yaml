@@ -73,15 +73,45 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: nixos_config
-  description: Multi-host NixOS infrastructure as code. Manages p620, p510, razer.
+  title: NixOS Infrastructure Hub
+  description: |
+    Multi-host NixOS infrastructure-as-code. Flake-based, template-driven,
+    deployed across three hosts (p620 AMD workstation, p510 Intel/NVIDIA
+    media server, razer Intel/NVIDIA laptop). Drives Backstage, Plex stack,
+    AI providers, monitoring, and ~141 feature modules.
   annotations:
     github.com/project-slug: olafkfreund/nixos_config
+    backstage.io/techdocs-ref: dir:.
+    backstage.io/source-location: url:https://github.com/olafkfreund/nixos_config
+    backstage.io/view-url: https://github.com/olafkfreund/nixos_config
+    backstage.io/edit-url: https://github.com/olafkfreund/nixos_config/edit/main/
+    github.com/project-readme-path: README.md
   tags:
     - nixos
     - infrastructure
     - declarative
+    - flake
+    - home-manager
+    - agenix
+    - tailscale
+    - podman
+  links:
+    - url: https://nixos.freundcloud.com/
+      title: TechDocs (mkdocs-built)
+      icon: docs
+    - url: https://p510.tail833f7.ts.net/backstage
+      title: Backstage portal (consumes this catalog)
+      icon: dashboard
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/docs/UPDATE-DEPLOY.md
+      title: Update + deploy guide
+      icon: rocket
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/CLAUDE.md
+      title: Agent conventions (CLAUDE.md)
+      icon: book
 spec:
   type: infrastructure
   lifecycle: production
   owner: olafkfreund
   system: freundcloud-infra
+  dependsOn:
+    - component:default/backstage
