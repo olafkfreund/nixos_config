@@ -51,7 +51,7 @@ in
 
     image = lib.mkOption {
       type = lib.types.str;
-      default = "ghcr.io/olafkfreund/backstage@sha256:8ad50a3479b6b6a08037bc01cdaa17212f25a783ac6cd59a9ecc6b82ef71e59c";
+      default = "ghcr.io/olafkfreund/backstage@sha256:a5af10f004e7aee92acd8543e08f859927306af39a873f5930c9678a4ff20810";
       example = "ghcr.io/olafkfreund/backstage@sha256:abc123...";
       description = ''
         OCI image to pull for the Backstage backend. MUST be pinned to a
@@ -143,6 +143,10 @@ in
       file = ../../secrets/backstage-gitlab-token.age;
       mode = "0400";
     };
+    age.secrets.backstage-mcp-token = {
+      file = ../../secrets/backstage-mcp-token.age;
+      mode = "0400";
+    };
 
     # ---------------------------------------------------------------------
     # Persistent state.
@@ -203,6 +207,7 @@ in
         GH_OAUTH_ID=$(cat ${agenixPath "backstage-github-oauth-client-id"})
         GH_OAUTH_SECRET=$(cat ${agenixPath "backstage-github-oauth-client-secret"})
         GL_TOKEN=$(cat ${agenixPath "backstage-gitlab-token"})
+        MCP_TOKEN=$(cat ${agenixPath "backstage-mcp-token"})
 
         cat > ${envDir}/env-postgres <<EOF
         POSTGRES_USER=${cfg.pgUser}
@@ -225,6 +230,7 @@ in
         AUTH_GITHUB_CLIENT_ID=$GH_OAUTH_ID
         AUTH_GITHUB_CLIENT_SECRET=$GH_OAUTH_SECRET
         GITLAB_TOKEN=$GL_TOKEN
+        MCP_TOKEN=$MCP_TOKEN
         EOF
 
         chmod 0400 ${envDir}/env-postgres ${envDir}/env-backstage
