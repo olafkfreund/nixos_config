@@ -51,7 +51,7 @@ in
 
     image = lib.mkOption {
       type = lib.types.str;
-      default = "ghcr.io/olafkfreund/backstage@sha256:adefc7778b7695cfd054bbcfd837384c187c45488ab34c46ac040223d0815bdb";
+      default = "ghcr.io/olafkfreund/backstage@sha256:c707f8d912965459fb5faa3bc653a54adb31516bc2de651232989a52dbc6f969";
       example = "ghcr.io/olafkfreund/backstage@sha256:abc123...";
       description = ''
         OCI image to pull for the Backstage backend. MUST be pinned to a
