@@ -45,6 +45,7 @@ in
       ../../modules/services/bazarr.nix # Subtitle automation for Sonarr/Radarr/Lidarr
       ../../modules/services/kometa # Plex Meta Manager — collections, posters, metadata
       ../../modules/services/plex-auto-languages # Per-show audio/sub track memorization
+      ../../modules/services/n8n.nix # Workflow automation (media-recommendation engine)
       # Desktop-specific imports (needed for GNOME):
       # ./nixos/greetd.nix      # Display manager - using GDM instead
       ./nixos/screens.nix # Display configuration - needed for desktop
@@ -510,4 +511,9 @@ in
   features.plex-auto-languages = {
     enable = true;
   };
+
+  # n8n workflow runtime (localhost:5678) — hosts the "just-finished"
+  # media-recommendation workflow that calls Overseerr/Tautulli + local gemma.
+  # See docs/plans/2026-05-26-plex-llm-recommendations-design.md.
+  features.n8n.enable = true;
 }

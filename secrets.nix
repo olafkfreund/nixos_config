@@ -165,4 +165,10 @@ in
   # current value — DO NOT rotate without updating those callers too.
   # Edit with: agenix -e secrets/nzbget-password.age
   "secrets/nzbget-password.age".publicKeys = allUsers ++ [ p510 ];
+
+  # n8n encryption key (p510 only). Encrypts n8n's own credential store so the
+  # Overseerr/Tautulli/Home-Assistant API keys entered in the n8n UI survive
+  # rebuilds and never land in the Nix store. Random value, not hand-typed.
+  # See docs/plans/2026-05-26-plex-llm-recommendations-design.md.
+  "secrets/n8n-encryption-key.age".publicKeys = allUsers ++ [ p510 ];
 }
