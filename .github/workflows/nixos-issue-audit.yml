@@ -31,6 +31,12 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # GH_TOKEN at job scope: every step shells out to `gh` (audit script
+    # uses it for nixpkgs queries; later steps use it for issue writes).
+    # Per-step env was an easy thing to miss — first dispatched run on
+    # 2026-06-06 failed exactly here.
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -42,8 +48,6 @@ jobs:
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: Ensure required labels exist
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           # Idempotent: gh label create fails if exists; suppress that.
@@ -63,8 +67,6 @@ jobs:
           head -30 audit-out/report.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upsert rolling Nightly Audit issue
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           # Find the most recent open issue with label nightly-audit. If
@@ -89,8 +91,6 @@ jobs:
           fi
 
       - name: Open tracking issues for CRITICAL + REGRESSION findings
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           # Iterate over the JSONL findings. Dedup by the upstream issue
