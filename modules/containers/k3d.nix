@@ -62,6 +62,11 @@ let
       jq
       coreutils
       docker-client
+      # `kubectl apply -k` against a remote git URL shells out to `git`.
+      # Without this, the bootstrap fails the GitOps step with
+      # "no 'git' program on path: exec: \"git\": executable file not
+      # found in $PATH" — observed in first deploy.
+      git
     ];
     text = ''
       set -euo pipefail
