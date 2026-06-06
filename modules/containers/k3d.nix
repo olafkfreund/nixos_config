@@ -83,6 +83,7 @@ let
       if ! k3d cluster list -o json | jq -e --arg n "$CLUSTER" '.[] | select(.name==$n)' >/dev/null; then
         echo "[k3d-bootstrap] Creating cluster $CLUSTER (api ${cfg.apiHostBind}:$API_PORT, storage $STORAGE_DIR)"
         k3d cluster create "$CLUSTER" \
+          --image "${cfg.k3sImage}" \
           --api-port "${cfg.apiHostBind}:$API_PORT" \
           --servers 1 \
           --agents 0 \
@@ -165,6 +166,27 @@ in
     enable = mkEnableOption "k3d (k3s in Docker) cluster bootstrap";
 
     package = mkPackageOption pkgs "k3d" { };
+
+    k3sImage = mkOption {
+      type = types.str;
+      default = "rancher/k3s:v1.31.5-k3s1";
+      description = ''
+        k3s node image k3d boots the cluster from (passed to
+        `k3d cluster create --image`).
+
+        Pin this explicitly rather than relying on the k3d binary's
+        built-in default: that default was an ancient `v1.21.7-k3s1`
+        whose bundled containerd/runc mishandles shared-memory page
+        faults on modern host kernels, making every PostgreSQL pod die
+        during `initdb` with `Bus error (core dumped)`. A current k3s
+        ships a runc that handles this correctly.
+
+        NOTE: this only takes effect on cluster *creation*. To adopt a
+        new image on an existing cluster, delete and recreate it:
+        `k3d cluster delete ${"$"}{clusterName}` then re-run the
+        bootstrap unit (`systemctl start k3d-cluster-bootstrap`).
+      '';
+    };
 
     clusterName = mkOption {
       type = types.str;
