@@ -83,8 +83,10 @@
     # Workaround: close claude-desktop entirely to release inhibitor,
     # or set CLAUDE_KEEP_AWAKE=0 (#645).
     # Bump via /update-claude-code.
-    # = tag v2.0.18+claude1.11187.1 (commit 4b6ff35236, 2026-06-05)
-    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/4b6ff35236598725ba02bfb5acd57b4e531ee07f";
+    # = tag v2.0.18+claude1.11187.4 (commit d99cdbd0e0, 2026-06-06)
+    # Delta from previous pin: bubblewrap added to FHS targetPkgs for cowork
+    # sandbox + Claude binary URLs bumped to 1.11187.4.
+    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/d99cdbd0e054fc04eb2ccfaf31777f11e89416c3";
 
     # Claude Code skill catalogue (borghei). flake = false because it's a
     # plain markdown/assets catalogue, not a Nix flake. We symlink one
