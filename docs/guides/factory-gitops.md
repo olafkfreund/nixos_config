@@ -119,7 +119,7 @@ spec:
             - containerPort: 8080
         # ── Tailscale sidecar ──────────────────────────────────────
         - name: tailscale
-          image: ghcr.io/tailscale/tailscale:v1.74.0
+          image: docker.io/tailscale/tailscale:v1.98.4
           env:
             - name: TS_AUTHKEY
               valueFrom:
@@ -236,7 +236,7 @@ spec:
           image: ghcr.io/olafkfreund/aifactory:0.1.0
           ports: [ { containerPort: 8080 } ]
         - name: tailscale
-          image: ghcr.io/tailscale/tailscale:v1.74.0
+          image: docker.io/tailscale/tailscale:v1.98.4
           env:
             - { name: TS_AUTHKEY, valueFrom: { secretKeyRef: { name: tailscale-auth-key, key: TS_AUTHKEY } } }
             - { name: TS_HOSTNAME, value: aifactory }
