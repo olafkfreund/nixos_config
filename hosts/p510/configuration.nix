@@ -326,11 +326,15 @@ in
     enable = true;
     argocd.enable = true;
     tailscaleAuthKey.enable = true;
-    # Bind kube API to all interfaces so kubectl from the laptop (over
-    # the tailnet) can drive the cluster directly. Default-open ACL +
-    # host firewall disabled make this equivalent posture to loopback.
-    # Auth is the bearer token in the kubeconfig.
-    apiHostBind = "0.0.0.0";
+    # Bind kube API to p510's tailnet IP so kubectl from any tailnet
+    # device can drive the cluster directly (`kubectl get nodes` against
+    # https://100.118.96.32:6443). k3d 5.x's port-publishing logic
+    # doesn't honour `0.0.0.0` correctly (empty Docker PortBindings),
+    # so an explicit IP is required. Posture: tailnet ACL is default-
+    # open + host firewall disabled; auth gates on the kubeconfig
+    # bearer token. p510's tailnet IP is stable per-device — Tailscale
+    # doesn't renumber unless you delete + re-add the node.
+    apiHostBind = "100.118.96.32";
   };
 
   # Claude Code managed-settings baseline (mirrors p620 + razer): PARR
