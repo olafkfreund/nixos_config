@@ -22,7 +22,11 @@ let
   src = lib.fileset.toSource {
     root = ../.;
     fileset = lib.fileset.unions [
-      ../mkdocs.yml
+      # mkdocs-full.yml is the canonical local-build config (full plugin
+      # stack incl. mkdocs-gen-files + mkdocs-literate-nav). The slim
+      # mkdocs.yml exists for Backstage TechDocs, which can't load those
+      # plugins; we don't need it in this derivation's source.
+      ../mkdocs-full.yml
       ../docs
       ../docs_gen
       ../modules
@@ -47,7 +51,7 @@ stdenvNoCC.mkDerivation {
   buildPhase = ''
     runHook preBuild
     export HOME=$TMPDIR
-    mkdocs build --site-dir $out
+    mkdocs build -f mkdocs-full.yml --site-dir $out
     runHook postBuild
   '';
 
