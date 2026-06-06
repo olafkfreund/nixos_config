@@ -47,7 +47,12 @@ in
       # Explicitly disable Docker Swarm
       daemon.settings = {
         swarm-default-advertise-addr = "";
-        data-root = "/mnt/data/docker";
+        # Docker data-root on /mnt/img_pool — the 870GB pool — so container
+        # layers + volumes don't eat the 226GB system disk. Especially
+        # important for k3d (modules/containers/k3d.nix) whose cluster
+        # state lives in Docker volumes; before this move, an idle 226GB
+        # disk would fill up over weeks of cluster operation.
+        data-root = "/mnt/img_pool/docker";
       };
     };
 
