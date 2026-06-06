@@ -1589,12 +1589,12 @@ ai.providers = {
 };
 ```
 
-2. **Ensure API keys are available in secrets:**
+1. **Ensure API keys are available in secrets:**
    - API keys must be created using `./scripts/manage-secrets.sh`
    - Keys: `api-openai`, `api-anthropic`, `api-gemini`
    - Ollama requires no API key (local inference)
 
-3. **Test and deploy:**
+2. **Test and deploy:**
 
 ```bash
 just test-host HOSTNAME
@@ -2601,6 +2601,25 @@ The MicroVM system provides enterprise-grade virtualization capabilities with mi
 - **P510**: Headless media server (Plex, NZBGet) with comprehensive analytics ✅
 - **Razer**: Mobile system with monitoring client ✅
 - **All Hosts**: Centralized logging, performance monitoring, security hardening ✅
+
+### 🚢 **Kubernetes on p510 (k3d + ArgoCD + Tailscale sidecars)**
+
+- **Module**: `modules/containers/k3d.nix` — single-node k3s-in-Docker cluster,
+  opt-in per host (NOT in `modules/containers/default.nix`).
+- **GitOps**: ArgoCD watches `github.com/olafkfreund/factory-gitops` (App-of-Apps).
+  Bootstrap kustomization installs ArgoCD on first run.
+- **Tailnet exposure**: Tailscale **sidecar** pattern. Each Pod that needs a
+  tailnet hostname runs an in-pod `tailscale` container; the bootstrap unit
+  seeds a `tailscale-auth-key` Secret (key `TS_AUTHKEY`) into each consuming
+  namespace (`argocd`, `factory`) from the agenix-encrypted auth key. The
+  host-level `tailscale serve` setup for the media stack on `:443` is
+  untouched. (We use sidecars not the Tailscale K8s Operator because the
+  operator needs OAuth client credentials; this homelab has an auth key.)
+- **Docs**: `docs/architecture/k3d-architecture.md` (design),
+  `docs/applications/k3d-cluster.md` (ops),
+  `docs/guides/factory-gitops.md` (how to ship a service).
+- **Backstage**: `k3d-factory` Resource, `argocd` Component,
+  `tailscale-sidecar-pattern` Resource in `catalog-info.yaml`.
 
 ## Agent OS Documentation
 

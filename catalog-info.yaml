@@ -115,3 +115,151 @@ spec:
   system: freundcloud-infra
   dependsOn:
     - component:default/backstage
+  providesApis: []
+
+---
+# k3d cluster on p510 — the Kubernetes environment that hosts ArgoCD, the
+# Tailscale Operator, and (planned) every Factory component. Modelled as a
+# Resource because the cluster itself is infrastructure, not a deployable
+# unit. ArgoCD and the Tailscale Operator are separate Components below
+# that "depend on" this Resource.
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: k3d-factory
+  title: k3d Factory Cluster (p510)
+  description: |
+    Single-node k3s-in-Docker Kubernetes cluster running on p510. Hosts
+    ArgoCD (GitOps controller) and the Tailscale Kubernetes Operator
+    (per-service tailnet hostnames). Bootstrapped declaratively by the
+    NixOS module modules/containers/k3d.nix; persistent volumes live on
+    /mnt/img_pool/k3d/storage. kube API bound to 127.0.0.1:6443.
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    backstage.io/source-location: url:https://github.com/olafkfreund/nixos_config/tree/main/modules/containers/k3d.nix
+    backstage.io/view-url: https://github.com/olafkfreund/nixos_config/blob/main/modules/containers/k3d.nix
+    backstage.io/edit-url: https://github.com/olafkfreund/nixos_config/edit/main/modules/containers/k3d.nix
+    github.com/project-slug: olafkfreund/nixos_config
+  tags:
+    - kubernetes
+    - k3s
+    - k3d
+    - gitops
+    - tailscale
+    - p510
+  links:
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/docs/architecture/k3d-architecture.md
+      title: Architecture (rationale, decisions, diagrams)
+      icon: docs
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/docs/applications/k3d-cluster.md
+      title: Operations runbook
+      icon: docs
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/docs/guides/factory-gitops.md
+      title: GitOps workflow guide
+      icon: docs
+    - url: https://github.com/olafkfreund/factory-gitops
+      title: GitOps source repo (App-of-Apps)
+      icon: github
+spec:
+  type: kubernetes-cluster
+  owner: olafkfreund
+  system: freundcloud-infra
+  dependsOn:
+    - component:default/nixos_config
+
+---
+# ArgoCD — GitOps controller running inside k3d-factory. Watches the
+# factory-gitops repo and applies whatever it finds. Self-managed via an
+# App-of-Apps Application checked into the bootstrap kustomization.
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: argocd
+  title: ArgoCD (factory cluster)
+  description: |
+    GitOps continuous-delivery controller for the k3d-factory cluster on
+    p510. Bootstrapped by the k3d-cluster-bootstrap systemd unit from
+    factory-gitops/bootstrap/. Watches factory-gitops/apps/* (App-of-Apps
+    pattern) and reconciles whatever Applications it finds.
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    backstage.io/source-location: url:https://github.com/olafkfreund/factory-gitops/tree/main/
+    backstage.io/view-url: https://github.com/olafkfreund/factory-gitops
+    backstage.io/edit-url: https://github.com/olafkfreund/factory-gitops/edit/main/
+    github.com/project-slug: olafkfreund/factory-gitops
+  tags:
+    - argocd
+    - gitops
+    - kubernetes
+    - factory
+  links:
+    - url: https://argocd.tail833f7.ts.net
+      title: ArgoCD UI (tailnet — requires operator to be running)
+      icon: dashboard
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/docs/guides/factory-gitops.md
+      title: How to add a service via GitOps
+      icon: docs
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/docs/applications/k3d-cluster.md
+      title: Cluster ops (bootstrap, rotation, reset)
+      icon: docs
+spec:
+  type: service
+  lifecycle: production
+  owner: olafkfreund
+  system: freundcloud-infra
+  dependsOn:
+    - resource:default/k3d-factory
+
+---
+# Tailscale sidecar pattern — the pattern (not a deployed component) by
+# which Pods in the k3d cluster get tailnet hostnames. Each Pod runs an
+# in-pod `tailscale` container alongside its main container; the sidecar
+# joins the tailnet using the shared auth-key Secret seeded by the
+# k3d-cluster-bootstrap unit. Modelled as a Resource (a pattern + a
+# Secret + a tag of Pod-shape, not a deployable thing).
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: tailscale-sidecar-pattern
+  title: Tailscale sidecar pattern (factory cluster)
+  description: |
+    The mechanism by which Pods in the k3d-factory cluster reach the
+    freundcloud tailnet. Each Pod runs a `tailscale` sidecar container in
+    its own network namespace, using a shared auth key seeded into each
+    consuming namespace as the `tailscale-auth-key` Secret (key
+    TS_AUTHKEY). The auth key lives in agenix
+    (tailscale-k8s-operator-oauth.age — name kept for back-compat;
+    contents are now a raw tskey-auth-…).
+
+    Why sidecars and not the Tailscale Kubernetes Operator: the operator
+    requires OAuth client credentials, and this homelab is wired with a
+    plain auth key. See docs/architecture/k3d-architecture.md for the
+    full rationale.
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    backstage.io/source-location: url:https://github.com/olafkfreund/nixos_config/tree/main/modules/containers/k3d.nix
+    backstage.io/view-url: https://github.com/olafkfreund/nixos_config/blob/main/modules/containers/k3d.nix
+    backstage.io/edit-url: https://github.com/olafkfreund/nixos_config/edit/main/modules/containers/k3d.nix
+    github.com/project-slug: olafkfreund/nixos_config
+  tags:
+    - tailscale
+    - kubernetes
+    - networking
+    - sidecar
+    - factory
+  links:
+    - url: https://tailscale.com/kb/1185/kubernetes
+      title: Upstream Tailscale on Kubernetes guide
+      icon: docs
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/docs/guides/factory-gitops.md#pod-exposed-on-the-tailnet-via-a-sidecar
+      title: Sidecar usage pattern (Deployment template)
+      icon: docs
+    - url: https://login.tailscale.com/admin/settings/keys
+      title: Auth-key management (Tailscale admin)
+      icon: dashboard
+spec:
+  type: pattern
+  owner: olafkfreund
+  system: freundcloud-infra
+  dependsOn:
+    - resource:default/k3d-factory
