@@ -148,6 +148,16 @@ in
   #   ./scripts/manage-secrets.sh edit api-godaddy
   "secrets/api-godaddy.age".publicKeys = allUsers ++ [ p620 ];
 
+  # Tailscale Kubernetes Operator OAuth client credentials. JSON blob:
+  #   {"client_id":"…","client_secret":"…"}
+  # Create the OAuth client at https://login.tailscale.com/admin/settings/oauth
+  # with scopes: Devices Core, Auth Keys, Services (write); tag tag:k8s-operator.
+  # Then: ./scripts/manage-secrets.sh create tailscale-k8s-operator-oauth
+  # Consumed by modules/containers/k3d.nix on p510; the k3d bootstrap unit
+  # turns it into the tailscale/operator-oauth Secret the Tailscale operator
+  # Helm chart expects (keys: client_id, client_secret).
+  "secrets/tailscale-k8s-operator-oauth.age".publicKeys = allUsers ++ [ p510 ];
+
   # NZBGet ControlPassword. Loaded into a MainConfigInclude file at
   # service preStart so the value never appears in the systemd unit's
   # ExecStart (where the previous plaintext was visible via /proc).

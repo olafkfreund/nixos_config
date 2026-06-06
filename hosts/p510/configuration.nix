@@ -36,6 +36,7 @@ in
       ../../modules/services/ollama.nix
       ../../modules/services/plex-mcp.nix # Plex MCP server (HTTP transport, tailnet-only)
       ../../modules/services/backstage.nix # Backstage developer portal (epic #731, disabled by default)
+      ../../modules/containers/k3d.nix # k3d (k3s in Docker) cluster — ArgoCD + Tailscale operator (see docs/applications/k3d-cluster.md)
       ../../modules/services/arr-suite-mcp.nix # *arr suite MCP server (SSE bridge, tailnet-only)
       ../../modules/services/audiobookbay-automated.nix # AudioBookBay search → Transmission
       ../../modules/services/audiobook-import.nix # Completed downloads → Audiobookshelf (LLM + m4b)
@@ -307,6 +308,20 @@ in
     enable = true;
     users = hostUsers; # Use all users for this host
     rootless = false;
+  };
+
+  # k3d cluster — runs ArgoCD, watches github.com/olafkfreund/factory-gitops
+  # for App-of-Apps manifests. Tailnet exposure for in-cluster services uses
+  # the Tailscale SIDECAR pattern (not the operator): the bootstrap unit
+  # seeds a `tailscale-auth-key` Secret into each consuming namespace
+  # (argocd, factory) so Pods can mount `TS_AUTHKEY` into a sidecar
+  # `tailscale` container that registers a tailnet node.
+  # See docs/applications/k3d-cluster.md for ops, docs/architecture/k3d-architecture.md
+  # for the design, and docs/guides/factory-gitops.md for the sidecar pattern.
+  modules.containers.k3d = {
+    enable = true;
+    argocd.enable = true;
+    tailscaleAuthKey.enable = true;
   };
 
   # Network-specific overrides that go beyond the network profile
