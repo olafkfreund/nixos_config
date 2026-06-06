@@ -1,0 +1,145 @@
+# Nightly audit of NixOS/nixpkgs against our pinned flake.
+#
+# Runs scripts/nixos-issue-audit.sh, then:
+#   - upserts a single rolling "Nightly Audit" issue with the full report
+#     (label: `nightly-audit`, dedup by label, body rewritten each run)
+#   - opens one tracking issue per CRITICAL or REGRESSION finding,
+#     dedup'd by upstream number in the title (label: `upstream-audit`)
+#
+# WATCH findings stay in the rolling report but never produce their own
+# issue — design choice driven by /check-nixos-issues + AskUserQuestion
+# 2026-06-06.
+#
+# Related:
+#   - scripts/nixos-issue-audit.sh (the actual audit)
+#   - .claude/commands/check-nixos-issues.md (manual equivalent)
+#   - .github/workflows/claude-code-watch.yml (dedup pattern reused)
+
+name: nixos issue audit
+
+on:
+  schedule:
+    # 02:00 UTC daily. ~1–2 min runtime + ~3 min nix-install.
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v30
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Ensure required labels exist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Idempotent: gh label create fails if exists; suppress that.
+          gh label create nightly-audit \
+            --description "Rolling daily nixpkgs upstream-issue audit report" \
+            --color "0E8A16" 2>/dev/null || true
+          gh label create upstream-audit \
+            --description "Tracking issue auto-opened by the nightly nixos-issue audit" \
+            --color "FBCA04" 2>/dev/null || true
+
+      - name: Run audit
+        run: |
+          set -euo pipefail
+          mkdir -p audit-out
+          bash scripts/nixos-issue-audit.sh --out audit-out
+          echo "## Audit summary" >> "$GITHUB_STEP_SUMMARY"
+          head -30 audit-out/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upsert rolling Nightly Audit issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Find the most recent open issue with label nightly-audit. If
+          # one exists, edit its body. Otherwise create a new one.
+          existing=$(gh issue list \
+            --label nightly-audit \
+            --state open \
+            --limit 1 \
+            --json number \
+            --jq '.[0].number // empty')
+          title="NixOS upstream audit — $(date -u +%Y-%m-%d)"
+          if [ -n "$existing" ]; then
+            gh issue edit "$existing" \
+              --title "$title" \
+              --body-file audit-out/report.md
+            echo "edited existing issue #$existing"
+          else
+            gh issue create \
+              --label nightly-audit \
+              --title "$title" \
+              --body-file audit-out/report.md
+          fi
+
+      - name: Open tracking issues for CRITICAL + REGRESSION findings
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Iterate over the JSONL findings. Dedup by the upstream issue
+          # number in the title — that key survives the rolling audit and
+          # captures "we've already filed this in a prior night".
+          while IFS= read -r f; do
+            sev=$(jq -r '.severity' <<<"$f")
+            case "$sev" in CRITICAL|REGRESSION) ;; *) continue;; esac
+            n=$(jq -r '.n' <<<"$f")
+            t=$(jq -r '.title' <<<"$f")
+            why=$(jq -r '.why' <<<"$f")
+            rec=$(jq -r '.recommendation' <<<"$f")
+            url=$(jq -r '.url' <<<"$f")
+            # Title format both human-readable and dedup-safe.
+            issue_title="Track upstream nixpkgs#${n}: ${t}"
+            existing=$(gh issue list \
+              --label upstream-audit \
+              --state all \
+              --search "in:title \"nixpkgs#${n}\"" \
+              --json number \
+              --jq '.[0].number // empty')
+            if [ -n "$existing" ]; then
+              echo "nixpkgs#${n} already tracked in our issue #${existing} — skipping"
+              continue
+            fi
+            sev_label=$(case "$sev" in CRITICAL) echo "🔴 CRITICAL";; REGRESSION) echo "🟠 REGRESSION";; esac)
+            body=$(cat <<EOF
+          Auto-filed by the nightly NixOS upstream-issue audit.
+
+          - **Severity:** ${sev_label}
+          - **Upstream issue:** ${url}
+          - **Why it touches us:** ${why}
+          - **Recommended action:** ${rec}
+
+          ## To act on this
+
+          1. Open the upstream issue and read the full thread.
+          2. Cross-reference with \`docs/PATTERNS.md\` / \`docs/NIXOS-ANTI-PATTERNS.md\` for our conventions.
+          3. If the recommendation says to bump nixpkgs, run \`nix flake update nixpkgs && just test-all-parallel\` and open a PR.
+          4. If it says workaround only, apply the workaround in the relevant module and reference this issue in the commit.
+
+          Close this issue when the upstream is fixed in our lock, the workaround is in place, or it turns out to not affect us. The nightly audit will not re-file it because the dedup matches state=all.
+          EOF
+          )
+            body=$(printf '%s\n' "$body" | sed 's/^          //')
+            gh issue create \
+              --label upstream-audit \
+              --label "priority:high" \
+              --title "$issue_title" \
+              --body "$body"
+            echo "filed: $issue_title"
+          done < audit-out/findings.jsonl
