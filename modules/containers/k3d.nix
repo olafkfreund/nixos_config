@@ -81,9 +81,9 @@ let
 
       # 1. Create cluster if missing
       if ! k3d cluster list -o json | jq -e --arg n "$CLUSTER" '.[] | select(.name==$n)' >/dev/null; then
-        echo "[k3d-bootstrap] Creating cluster $CLUSTER (api 127.0.0.1:$API_PORT, storage $STORAGE_DIR)"
+        echo "[k3d-bootstrap] Creating cluster $CLUSTER (api ${cfg.apiHostBind}:$API_PORT, storage $STORAGE_DIR)"
         k3d cluster create "$CLUSTER" \
-          --api-port "127.0.0.1:$API_PORT" \
+          --api-port "${cfg.apiHostBind}:$API_PORT" \
           --servers 1 \
           --agents 0 \
           --k3s-arg "--disable=traefik@server:*" \
@@ -176,9 +176,26 @@ in
       type = types.port;
       default = 6443;
       description = ''
-        Host port for the kube API server. Bound to 127.0.0.1 only — never
-        published to the LAN or tailnet directly. Use `kubectl --kubeconfig
-        ${"$"}{kubeconfigPath}` from the host or `kubectl port-forward`.
+        Host port for the kube API server. Use `kubectl --kubeconfig
+        ${"$"}{kubeconfigPath}` from the host, or set `apiHostBind` to
+        a non-loopback address to reach it from elsewhere.
+      '';
+    };
+
+    apiHostBind = mkOption {
+      type = types.str;
+      default = "127.0.0.1";
+      example = "0.0.0.0";
+      description = ''
+        Host IP the kube API server binds to.
+
+        Defaults to `127.0.0.1` — loopback only, requires SSH tunnel /
+        port-forward for off-host kubectl. Set to `0.0.0.0` (or a
+        specific interface IP) to expose the API to the LAN/tailnet so
+        kubectl can connect directly. With a default-open Tailscale
+        ACL and a disabled host firewall, `0.0.0.0` and `127.0.0.1`
+        are equivalent reachability-wise — the API is gated by the
+        bearer token in the kubeconfig regardless.
       '';
     };
 

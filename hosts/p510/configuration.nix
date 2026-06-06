@@ -154,7 +154,11 @@ in
     ai = {
       enable = true;
       antigravity-cli = true;
-      claude-desktop = false; # Disable GUI app on media server
+      # claude-desktop is a GUI app — p510 has GNOME via the workstation
+      # template (RDP'd, since host.class = "headless-rdp"), so it CAN
+      # run here and is useful for driving the k3d cluster from p510 via
+      # RDP when off-LAN.
+      claude-desktop = true;
     };
 
     programs = {
@@ -322,6 +326,19 @@ in
     enable = true;
     argocd.enable = true;
     tailscaleAuthKey.enable = true;
+    # Bind kube API to all interfaces so kubectl from the laptop (over
+    # the tailnet) can drive the cluster directly. Default-open ACL +
+    # host firewall disabled make this equivalent posture to loopback.
+    # Auth is the bearer token in the kubeconfig.
+    apiHostBind = "0.0.0.0";
+  };
+
+  # Claude Code managed-settings baseline (mirrors p620 + razer): PARR
+  # protocol reminder hook + apiKeyHelper baseline. Read-only at
+  # /etc/claude-code; user ~/.claude/settings.json remains writable.
+  modules.programs.claude-code-managed = {
+    enable = true;
+    parrProtocol.enable = true;
   };
 
   # Network-specific overrides that go beyond the network profile
@@ -380,7 +397,10 @@ in
   features.ollama-server = {
     enable = true;
     package = pkgs.ollama-cuda; # NVIDIA CUDA GPU package
-    modelsDir = "/mnt/media/ollama/models"; # Stored on the large media pool disk
+    # Stored on the dedicated 916GB compute pool (870GB free), not the
+    # media pool. Models share IOPS with nothing else, and we leave
+    # /mnt/media for Plex transcodes + library scans.
+    modelsDir = "/mnt/img_pool/ollama/models";
     persistentModels = [ ]; # No persistent models to save VRAM
     # gemma4 for n8n; qwen2.5:7b for reliable strict-JSON audiobook metadata
     # extraction + tool-calling (audiobook-import / audiobook-mcp).
