@@ -66,7 +66,7 @@ without ArgoCD installed — the cluster itself is still healthy.
 
 Minimum layout for the bootstrap apply to succeed:
 
-```
+```text
 factory-gitops/
 ├── bootstrap/
 │   ├── kustomization.yaml                  # inlines upstream argo-cd v2.13.1 URL
@@ -182,7 +182,9 @@ Auth keys expire (default 90d cap). When yours is close to expiry:
 
 1. Generate a new auth key in the admin console (same settings: reusable, non-ephemeral, 90d).
 2. `./scripts/manage-secrets.sh edit tailscale-k8s-operator-oauth`, replace the contents with the new `tskey-auth-…` token.
-3. `just quick-deploy p510` — agenix decrypts the new key, but the in-cluster `tailscale-auth-key` Secrets won't refresh until you bounce the bootstrap unit:
+3. `just quick-deploy p510` — agenix decrypts the new key, but the
+   in-cluster `tailscale-auth-key` Secrets won't refresh until you
+   bounce the bootstrap unit:
 
    ```bash
    sudo systemctl restart k3d-cluster-bootstrap

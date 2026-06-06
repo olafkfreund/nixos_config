@@ -76,7 +76,7 @@ Deployments.
 
 ## High-level shape
 
-```
+```text
 ┌─────────────────────────────── p510 host ────────────────────────────────┐
 │                                                                           │
 │  existing services (untouched)        new k3d cluster (Docker)            │
@@ -169,7 +169,9 @@ Auth key setup (one-time, in the Tailscale admin console):
 4. **Expiry**: 90 days (Tailscale's maximum)
 5. Description: e.g. `k3d-factory sidecar pool`
 6. Paste the resulting `tskey-auth-…` token into the agenix slot
-7. ACL: **no changes required**. The default open ACL allows the sidecar-registered nodes to be reached from your other tailnet devices.
+7. ACL: **no changes required**. The default open ACL allows the
+   sidecar-registered nodes to be reached from your other tailnet
+   devices.
 
 ## Decision log
 

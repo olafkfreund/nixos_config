@@ -2651,7 +2651,7 @@ When asked to work on this codebase:
    - For tasks execution: @.agent-os/instructions/execute-tasks.md
 3. **Always**, adhere to the standards in the files listed above
 
-## Important Notes
+## Agent OS Notes
 
 ### 🚨 **Critical Development Guidelines**
 

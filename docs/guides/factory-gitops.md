@@ -11,7 +11,7 @@ For cluster lifecycle / troubleshooting see
 
 ## Repo layout
 
-```
+```text
 factory-gitops/
 ├── README.md
 ├── catalog-info.yaml                ← Backstage discovers this
