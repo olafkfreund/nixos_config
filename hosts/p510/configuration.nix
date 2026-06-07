@@ -558,6 +558,32 @@ in
       # https://backstage.freundcloud.org.uk/api/auth/github/handler/frame
       # at github.com/settings/applications/<your-app>.
       "backstage.freundcloud.org.uk" = "http://localhost:7007";
+
+      # Media stack — every service listed below already binds 127.0.0.1
+      # (or 0.0.0.0 on eno1 LAN) on p510. cloudflared proxies inbound
+      # from Cloudflare's edge straight to each loopback port. Each
+      # hostname needs a matching Cloudflare DNS CNAME — created with:
+      #   cloudflared tunnel route dns p510-home <hostname>
+      # (on any host that has access to the agenix-decrypted cert.pem;
+      # p510 itself works post-deploy.)
+      #
+      # NOTE on auth: Cloudflare Tunnel does NOT add an auth layer; each
+      # service's own auth applies (NZBGet ControlPassword, Sonarr API
+      # key, Plex login, etc.). For services that ship no auth (some of
+      # the *arr UIs in default mode), exposure to the public internet
+      # means anyone with the URL has full UI access. If that matters,
+      # gate with Cloudflare Access at the zone level (free, click-only
+      # config in the Zero Trust dashboard).
+      "plex.freundcloud.org.uk" = "http://localhost:32400";
+      "overseerr.freundcloud.org.uk" = "http://localhost:5055";
+      "tautulli.freundcloud.org.uk" = "http://localhost:8181";
+      "sonarr.freundcloud.org.uk" = "http://localhost:8989";
+      "radarr.freundcloud.org.uk" = "http://localhost:7878";
+      "lidarr.freundcloud.org.uk" = "http://localhost:8686";
+      "bazarr.freundcloud.org.uk" = "http://localhost:6767";
+      "nzbget.freundcloud.org.uk" = "http://localhost:6789";
+      "sabnzbd.freundcloud.org.uk" = "http://localhost:8080";
+      "audiobookshelf.freundcloud.org.uk" = "http://localhost:13378";
     };
   };
 }
