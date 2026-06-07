@@ -24,6 +24,10 @@ in
   "secrets/api-anthropic.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-groq.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-github-token.age".publicKeys = allUsers ++ allHosts;
+  # n8n personal API key (JWT) for the self-hosted instance at
+  # https://n8n.freundcloud.org.uk. Exported as N8N_API_KEY system-wide via
+  # load-api-keys; used by scripts/MCP servers/CLI tools that drive n8n.
+  "secrets/api-n8n.age".publicKeys = allUsers ++ allHosts;
   # Synechron GitHub API token (PAT). All hosts; exported as
   # SYNECHRON_GITHUB_API_TOKEN via load-api-keys. Edit: agenix -e secrets/synechron-github-api.age
   "secrets/synechron-github-api.age".publicKeys = allUsers ++ allHosts;
