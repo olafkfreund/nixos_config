@@ -554,6 +554,11 @@ in
     keepAlive = "5m"; # Evict from VRAM after 5 minutes of idle
   };
 
+  # Bind Ollama to all interfaces (incl. Tailscale 100.118.96.32) so the AIFactory
+  # portal at aifactory.freundcloud.org.uk can reach it. Firewall disabled on p510;
+  # access is gated by Tailscale ACLs.
+  services.ollama.host = lib.mkForce "0.0.0.0";
+
   # Plex MCP server — exposes the local Plex server to AI clients over MCP
   # (Streamable HTTP at http://p510:3010/mcp). Reachable only over the tailnet
   # + LAN; the Plex token is loaded at runtime from agenix (secrets/plex-token.age).
