@@ -31,6 +31,11 @@
     package = pkgs.claude-code-native;
   };
 
+  # `claude /doctor` checks the literal path ~/.local/bin/claude and warns
+  # if it's missing — independent of whether `claude` is already on PATH.
+  # Point the path at the same nix-managed binary so /doctor stays quiet.
+  home.file.".local/bin/claude".source = "${pkgs.claude-code-native}/bin/claude";
+
   # Enable Claude Code "Agent Teams" — experimental feature that lets one
   # Claude session spawn a team of coordinated teammates (separate sessions
   # with their own context windows that can talk to each other).
