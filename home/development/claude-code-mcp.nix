@@ -100,6 +100,20 @@ let
             url = "http://p510:3012/sse";
             description = "Audiobook acquisition: AudioBookBay + NZBGeek search/grab, Audiobookshelf library (p510)";
           };
+
+          # n8n MCP server — built-in streamable-http endpoint on the public
+          # tunnel. Bearer token comes from the user's shell env (N8N_MCP_TOKEN,
+          # set by load-api-keys from /run/agenix/api-n8n-mcp). Provides tools
+          # for programmatic workflow construction via the n8n Workflow SDK
+          # (search_nodes, get_sdk_reference, create_workflow, …).
+          n8n = {
+            type = "http";
+            url = "https://n8n.freundcloud.org.uk/mcp-server/http";
+            headers = {
+              Authorization = "Bearer \${N8N_MCP_TOKEN}";
+            };
+            description = "n8n workflow automation — build and run workflows via the n8n Workflow SDK (public tunnel)";
+          };
         }
         # Obsidian MCP - conditional configuration based on implementation
         // (lib.optionalAttrs obsidianEnabled {

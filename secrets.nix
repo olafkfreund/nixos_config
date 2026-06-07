@@ -28,6 +28,11 @@ in
   # https://n8n.freundcloud.org.uk. Exported as N8N_API_KEY system-wide via
   # load-api-keys; used by scripts/MCP servers/CLI tools that drive n8n.
   "secrets/api-n8n.age".publicKeys = allUsers ++ allHosts;
+  # n8n MCP-server Bearer token (distinct from the personal REST API JWT).
+  # Issued via n8n's MCP Server settings UI; auths the streamable-http endpoint
+  # at https://n8n.freundcloud.org.uk/mcp-server/http. Exposed to Claude Code as
+  # N8N_MCP_TOKEN by the MCP client wrapper, never as a system-wide env var.
+  "secrets/api-n8n-mcp.age".publicKeys = allUsers ++ allHosts;
   # Synechron GitHub API token (PAT). All hosts; exported as
   # SYNECHRON_GITHUB_API_TOKEN via load-api-keys. Edit: agenix -e secrets/synechron-github-api.age
   "secrets/synechron-github-api.age".publicKeys = allUsers ++ allHosts;
