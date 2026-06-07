@@ -41,6 +41,7 @@ in
           "tailscale-status@maxgallup.github.com"
           "Bluetooth-Battery-Meter@maniacx.github.com"
           "dim-background-windows@stephane-13.github.com"
+          "yetanotherradio@io.github.buddysirjava"
           "allowlockedremotedesktop@kamens.us"
           "claude-code-usage@haletran.com"
           "otp-keys@osmank3.net"
@@ -115,6 +116,7 @@ in
         gnomeExtensions.tailscale-status
         gnomeExtensions.bluetooth-battery-meter
         gnomeExtensions.dim-background-windows
+        gnomeExtensions.yet-another-radio
 
         # Manually-packaged extensions (extensions.gnome.org pinned ZIPs,
         # see pkgs/gnome-ext-*). Not in nixpkgs.
