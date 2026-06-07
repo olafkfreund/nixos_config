@@ -184,4 +184,25 @@ in
   #   ./scripts/manage-secrets.sh edit cloudflared-credentials
   "secrets/cloudflared-cert.age".publicKeys = allUsers ++ [ p510 ];
   "secrets/cloudflared-credentials.age".publicKeys = allUsers ++ [ p510 ];
+
+  # ── Factory k8s namespace bootstrap secrets (#807) ───────────────────────
+  # Each .age file holds a complete kubectl-applicable Secret manifest. The
+  # k3d-cluster-bootstrap unit on p510 reads these via age and
+  # `kubectl apply -f` each one, so a cluster delete + recreate restores
+  # SkillAI / rolehunter / shared factory-secrets durably (no out-of-band
+  # `kubectl create secret` step required).
+  #
+  # Edit any of these by hand if you need to rotate a value:
+  #   ./scripts/manage-secrets.sh edit factory-secret-<name>
+  # The value MUST remain a valid k8s Secret YAML (metadata.namespace must
+  # be `factory`, .data values must be base64). On next k3d-cluster-bootstrap
+  # restart, kubectl apply picks up the change idempotently.
+  "secrets/factory-secret-cloudflared-factory.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-factory-secrets.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-factory-cli-creds.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-ghcr-pull.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-skillai-db.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-skillai-app.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-rolehunter-db.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-rolehunter-app.age".publicKeys = allUsers ++ [ p510 ];
 }

@@ -328,6 +328,7 @@ in
     enable = true;
     argocd.enable = true;
     tailscaleAuthKey.enable = true;
+    factorySecrets.enable = true; # #807: durably seed all factory ns Secrets from agenix
     # Bind kube API to p510's tailnet IP so kubectl from any tailnet
     # device can drive the cluster directly (`kubectl get nodes` against
     # https://100.118.96.32:6443). k3d 5.x's port-publishing logic
