@@ -46,6 +46,7 @@ in
       ../../modules/services/kometa # Plex Meta Manager — collections, posters, metadata
       ../../modules/services/plex-auto-languages # Per-show audio/sub track memorization
       ../../modules/services/n8n.nix # Workflow automation (media-recommendation engine)
+      ../../modules/services/cloudflared.nix # Cloudflare Tunnel — public ingress (CGNAT-safe)
       # Desktop-specific imports (needed for GNOME):
       # ./nixos/greetd.nix      # Display manager - using GDM instead
       ./nixos/screens.nix # Display configuration - needed for desktop
@@ -516,4 +517,27 @@ in
   # media-recommendation workflow that calls Overseerr/Tautulli + local gemma.
   # See docs/plans/2026-05-26-plex-llm-recommendations-design.md.
   features.n8n.enable = true;
+
+  # Cloudflare Tunnel — public ingress under freundcloud.org.uk.
+  # Bootstrap (one-time):
+  #   1. On a workstation with browser: `cloudflared login` (need
+  #      freundcloud.org.uk added to Cloudflare account first)
+  #   2. `cloudflared tunnel create p510-home` — note the printed UUID;
+  #      update the tunnelId below.
+  #   3. Copy ~/.cloudflared/cert.pem and ~/.cloudflared/<UUID>.json
+  #      into agenix (manage-secrets.sh edit cloudflared-cert / -credentials).
+  #   4. `cloudflared tunnel route dns p510-home backstage.freundcloud.org.uk`
+  #      (and same for each other hostname below) — creates the
+  #      Cloudflare DNS CNAMEs once.
+  # Module documentation: modules/services/cloudflared.nix
+  features.cloudflared = {
+    enable = false; # Flip to true after the bootstrap steps above are done.
+    tunnelId = "REPLACE-WITH-TUNNEL-UUID";
+    ingress = {
+      # Backstage is the safest first route — it's already a clean HTTP
+      # service on this host (podman, port 7007). Cluster services come
+      # in round 2 once a Traefik Ingress lands inside k3d.
+      "backstage.freundcloud.org.uk" = "http://localhost:7007";
+    };
+  };
 }
