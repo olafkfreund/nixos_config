@@ -154,6 +154,137 @@ in
         "ffmpeg"
         "stream"
       ];
+      dashboards = {
+        starlink-status = {
+          title = "Starlink";
+          icon = "mdi:satellite-uplink";
+          yaml = ''
+            title: Starlink
+            views:
+              - title: Overview
+                path: overview
+                icon: mdi:satellite-uplink
+                cards:
+                  - type: glance
+                    title: Status
+                    columns: 4
+                    entities:
+                      - entity: binary_sensor.starlink_connectivity
+                        name: Online
+                      - entity: binary_sensor.starlink_obstructed
+                        name: Obstructed
+                      - entity: binary_sensor.starlink_heating
+                        name: Heating
+                      - entity: binary_sensor.starlink_thermal_throttle
+                        name: Throttled
+                  - type: entities
+                    title: Throughput & Latency
+                    entities:
+                      - sensor.starlink_downlink_throughput
+                      - sensor.starlink_uplink_throughput
+                      - sensor.starlink_ping
+                      - sensor.starlink_ping_drop_rate
+                  - type: history-graph
+                    title: Throughput (24h)
+                    hours_to_show: 24
+                    entities:
+                      - sensor.starlink_downlink_throughput
+                      - sensor.starlink_uplink_throughput
+                  - type: history-graph
+                    title: Latency (24h)
+                    hours_to_show: 24
+                    entities:
+                      - sensor.starlink_ping
+                  - type: entities
+                    title: Data & Power
+                    entities:
+                      - sensor.starlink_download
+                      - sensor.starlink_upload
+                      - sensor.starlink_power
+                      - sensor.starlink_energy
+                  - type: entities
+                    title: Dish Status
+                    entities:
+                      - sensor.starlink_last_restart
+                      - binary_sensor.starlink_mast_near_vertical
+                      - binary_sensor.starlink_motors_stuck
+                      - binary_sensor.starlink_ethernet_speeds
+                      - binary_sensor.starlink_update
+                      - binary_sensor.starlink_unexpected_location
+                      - binary_sensor.starlink_roaming_mode
+                      - binary_sensor.starlink_sleep
+                  - type: entities
+                    title: Sleep Schedule
+                    entities:
+                      - switch.starlink_sleep_schedule
+                      - time.starlink_sleep_start
+                      - time.starlink_sleep_end
+                  - type: horizontal-stack
+                    cards:
+                      - type: button
+                        name: Stow
+                        entity: switch.starlink_stowed
+                        icon: mdi:satellite
+                        tap_action:
+                          action: toggle
+                      - type: button
+                        name: Restart
+                        entity: button.starlink_restart
+                        icon: mdi:restart
+                        tap_action:
+                          action: call-service
+                          service: button.press
+                          service_data:
+                            entity_id: button.starlink_restart
+                          confirmation:
+                            text: "Restart Starlink dish? Internet will drop for ~2 minutes."
+          '';
+        };
+
+        nest-cameras = {
+          title = "Cameras";
+          icon = "mdi:cctv";
+          yaml = ''
+            title: Cameras
+            views:
+              - title: Live
+                path: live
+                icon: mdi:cctv
+                cards:
+                  - type: picture-glance
+                    title: Front Door
+                    camera_image: camera.front_door_doorbell
+                    camera_view: auto
+                    entities:
+                      - event.front_door_doorbell_chime
+                      - event.front_door_doorbell_motion
+                  - type: picture-glance
+                    title: Kitchen
+                    camera_image: camera.kitchentop
+                    camera_view: auto
+                    entities:
+                      - event.kitchentop_motion
+                  - type: picture-glance
+                    title: Master Bedroom
+                    camera_image: camera.master_bedroom
+                    camera_view: auto
+                    entities:
+                      - event.master_bedroom_motion
+              - title: Events
+                path: events
+                icon: mdi:bell-alert
+                cards:
+                  - type: logbook
+                    title: Recent Camera Events (24h)
+                    hours_to_show: 24
+                    entities:
+                      - event.front_door_doorbell_chime
+                      - event.front_door_doorbell_motion
+                      - event.kitchentop_motion
+                      - event.master_bedroom_motion
+          '';
+        };
+      };
     };
 
     ai = {

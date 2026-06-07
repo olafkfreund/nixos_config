@@ -37,6 +37,42 @@ in
       default = true;
       description = "Configure trusted proxies for Tailscale access";
     };
+
+    dashboards = mkOption {
+      type = types.attrsOf (types.submodule {
+        options = {
+          title = mkOption {
+            type = types.str;
+            description = "Sidebar display title";
+          };
+          icon = mkOption {
+            type = types.str;
+            default = "mdi:view-dashboard";
+            description = "Material Design Icons name for the sidebar entry";
+          };
+          showInSidebar = mkOption {
+            type = types.bool;
+            default = true;
+            description = "Show this dashboard in the HA sidebar";
+          };
+          yaml = mkOption {
+            type = types.lines;
+            description = ''
+              Raw Lovelace dashboard YAML. Must define `title:` and `views:`.
+              Written to /etc/home-assistant/dashboards/<name>.yaml at activation;
+              referenced from configuration.yaml via lovelace.dashboards.
+            '';
+          };
+        };
+      });
+      default = { };
+      description = ''
+        Declarative Lovelace dashboards. Each attr key becomes the URL slug
+        (/<key>) and the corresponding YAML is rendered into a read-only file
+        under /etc/home-assistant/dashboards/. The default Overview dashboard
+        remains in storage mode and is unaffected.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -80,6 +116,18 @@ in
           external_url = "https://p510.home.freundcloud.com:8123"; # Adjust based on Tailscale hostname
         };
       };
+
+      # Declarative Lovelace dashboards (in addition to the default storage-mode one)
+      config.lovelace.dashboards = lib.mapAttrs
+        (name: d: {
+          mode = "yaml";
+          filename = "/etc/home-assistant/dashboards/${name}.yaml";
+          title = d.title;
+          icon = d.icon;
+          show_in_sidebar = d.showInSidebar;
+          require_admin = false;
+        })
+        cfg.dashboards;
 
       # Components required for onboarding + optional cloud
       extraComponents = [
@@ -146,6 +194,16 @@ in
       };
     };
 
+    # Materialize each declared dashboard as a read-only file under /etc.
+    # HA reads /etc as read-only under ProtectSystem=strict, so this works
+    # without weakening the service hardening or touching /var/lib/hass.
+    environment.etc = lib.mapAttrs'
+      (name: d: lib.nameValuePair "home-assistant/dashboards/${name}.yaml" {
+        text = d.yaml;
+        mode = "0444";
+      })
+      cfg.dashboards;
+
     # Home Assistant CLI tool
     environment.systemPackages = mkIf cfg.enableCLI [
       pkgs.home-assistant-cli
@@ -161,6 +219,17 @@ in
       {
         assertion = cfg.enableCloud -> elem "cloud" config.services.home-assistant.extraComponents;
         message = "Home Assistant Cloud requires 'cloud' component in extraComponents";
+      }
+      {
+        assertion = lib.all (n: lib.hasInfix "-" n) (lib.attrNames cfg.dashboards);
+        message = ''
+          Each features.homeAssistant.dashboards attribute name (the URL slug)
+          must contain a hyphen — Home Assistant's lovelace integration rejects
+          single-word slugs at runtime. Offenders: ${
+            lib.concatStringsSep ", "
+              (lib.filter (n: !(lib.hasInfix "-" n)) (lib.attrNames cfg.dashboards))
+          }
+        '';
       }
     ];
   };
