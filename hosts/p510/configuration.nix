@@ -426,8 +426,20 @@ in
   # Image SHA pinned in modules/services/backstage.nix; bump by editing
   # the module's `image` default after each Freundcloud/backstage CI run.
   # OAuth callback URL on the GitHub OAuth App must match publicUrl:
-  #   https://p510.tail833f7.ts.net/backstage/api/auth/github/handler/frame
-  features.backstage.enable = true;
+  #   https://backstage.freundcloud.org.uk/api/auth/github/handler/frame
+  # (was https://p510.tail833f7.ts.net/backstage/api/auth/github/handler/frame
+  #  when the tailnet path-routed setup was the only ingress; that URL still
+  #  works for the host-level tailscale-serve path but won't be the OAuth
+  #  callback target anymore.)
+  features.backstage = {
+    enable = true;
+    # Cloudflare Tunnel public ingress — see features.cloudflared below.
+    # Backstage uses this for app.baseUrl, backend.baseUrl, CORS origin,
+    # and OAuth callback construction; the running container must be
+    # told to serve at root (no /backstage prefix) so cloudflared can
+    # proxy `Host: backstage.freundcloud.org.uk` straight through.
+    publicUrl = "https://backstage.freundcloud.org.uk";
+  };
 
   # arr-suite MCP server — exposes Sonarr/Radarr/Prowlarr/Overseerr (and Plex)
   # to AI clients over SSE at http://p510:3011/sse. NZBGeek is reachable via
@@ -539,6 +551,12 @@ in
       # Backstage is the safest first route — it's already a clean HTTP
       # service on this host (podman, port 7007). Cluster services come
       # in round 2 once a Traefik Ingress lands inside k3d.
+      #
+      # Note: features.backstage.publicUrl was changed to match this URL,
+      # so Backstage serves at root (no /backstage path prefix). The
+      # GitHub OAuth App's callback URL must be updated to
+      # https://backstage.freundcloud.org.uk/api/auth/github/handler/frame
+      # at github.com/settings/applications/<your-app>.
       "backstage.freundcloud.org.uk" = "http://localhost:7007";
     };
   };
