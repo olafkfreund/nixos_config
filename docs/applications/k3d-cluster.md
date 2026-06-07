@@ -1,5 +1,16 @@
 # k3d Cluster on p510 — Operations
 
+> **Public ingress note (2026-06-07):** services on this cluster are
+> now exposed via **Cloudflare Tunnel** under our home domain
+> (`<name>.<home-domain>`), not via Tailscale sidecars or tailnet
+> hostnames. The Tailscale auth-key / sidecar machinery described
+> further down this page is being decommissioned. For current public
+> ingress design + how to add a new service, see
+> [Public Ingress Architecture](../architecture/public-ingress.md)
+> and [Cloudflared Tunnel](cloudflared-tunnel.md). The rest of this
+> page covers cluster substrate (k3d, storage, bootstrap unit,
+> kubeconfig) which is unchanged.
+
 Single-node k3s-in-Docker cluster on p510, running ArgoCD + the Tailscale
 Kubernetes Operator. For design rationale see
 [architecture/k3d-architecture.md](../architecture/k3d-architecture.md).
@@ -110,17 +121,15 @@ kubectl -n argocd get secret argocd-initial-admin-secret \
   -o jsonpath='{.data.password}' | base64 -d; echo
 ```
 
-Once the Tailscale sidecar on `argocd-server` has registered (≈ 30 s
-after the Pod is Ready):
+Once the in-cluster Cloudflare Tunnel has the ArgoCD route in its
+ConfigMap and the matching DNS record exists:
 
-- ArgoCD UI: `https://argocd.tail833f7.ts.net`
+- ArgoCD UI: `argocd.<home-domain>`
 - Login: `admin` + the password from above
 
-Confirm registration:
-
-```bash
-kubectl -n argocd logs deploy/argocd-server -c tailscale | grep -iE 'success|registered|hostname'
-```
+(The Tailscale-sidecar exposure path that this section previously
+described is deprecated; see the public-ingress note at the top of
+this page.)
 
 If the sidecar isn't running yet (first cluster bring-up takes a few
 minutes), fall back to a port-forward:

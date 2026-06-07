@@ -153,6 +153,7 @@ nav:
       - Secrets (agenix): architecture/secrets.md
       - Home Manager: architecture/home-manager.md
       - "k3d Cluster (p510)": architecture/k3d-architecture.md
+      - "Public Ingress": architecture/public-ingress.md
   - Hosts:
       - hosts/index.md
       - "p620 — AMD Workstation": hosts/p620.md
@@ -184,6 +185,7 @@ nav:
       - COSMIC Screen Sharing: applications/screensharing_cosmic.md
       - P620 BIOS / NUMA: applications/P620-BIOS-NUMA-Configuration.md
       - "k3d Cluster (ops)": applications/k3d-cluster.md
+      - "Cloudflared Tunnel (host)": applications/cloudflared-tunnel.md
   - Command System:
       - Overview: Nixos/README.md
       - Commands Index: Nixos/COMMANDS-INDEX.md
