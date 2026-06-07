@@ -61,6 +61,13 @@ in
         group = "users";
       };
 
+      api-n8n = {
+        file = ../../secrets/api-n8n.age;
+        mode = "0644";
+        owner = "root";
+        group = "users";
+      };
+
       # api-qwen = {
       #   file = ../../secrets/api-qwen.age;
       #   mode = "0644";
@@ -135,6 +142,10 @@ in
           echo "export GROQ_API_KEY=\"$(cat /run/agenix/api-groq)\""
         fi
 
+        if [ -r "/run/agenix/api-n8n" ]; then
+          echo "export N8N_API_KEY=\"$(cat /run/agenix/api-n8n)\""
+        fi
+
         if [ -r "/run/agenix/api-github-token" ]; then
           # Export as GITHUB_API_TOKEN to avoid conflict with gh CLI credential management
           # gh CLI expects to manage its own credentials via 'gh auth login'
@@ -159,6 +170,7 @@ in
         [ -n "$GEMINI_API_KEY" ] && echo "✅ Gemini: Available" || echo "❌ Gemini: Not available"
         [ -n "$ANTHROPIC_API_KEY" ] && echo "✅ Anthropic: Available" || echo "❌ Anthropic: Not available"
         [ -n "$GROQ_API_KEY" ] && echo "✅ Groq: Available" || echo "❌ Groq: Not available"
+        [ -n "$N8N_API_KEY" ] && echo "✅ n8n: Available" || echo "❌ n8n: Not available"
         [ -n "$LANGCHAIN_API_KEY" ] && echo "✅ LangChain: Available" || echo "❌ LangChain: Not available"
         [ -n "$GITHUB_API_TOKEN" ] && echo "✅ GitHub API Token: Available" || echo "❌ GitHub API Token: Not available"
 
