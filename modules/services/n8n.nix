@@ -28,6 +28,21 @@ in
       default = 5678;
       description = "Loopback HTTP port n8n listens on. Never exposed to the network (no firewall opening).";
     };
+
+    publicUrl = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "https://n8n.example.com";
+      description = ''
+        External base URL when fronting n8n with a reverse proxy (cloudflared,
+        Tailscale Serve, Caddy, …). When set, n8n is told its public hostname
+        and protocol so webhook URLs, OAuth callbacks, and Secure cookies all
+        reference the proxy address instead of localhost. The listen address
+        stays loopback — wire the proxy separately.
+
+        Leave null for loopback-only operation (the original module behavior).
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -52,7 +67,28 @@ in
         N8N_PERSONALIZATION_ENABLED = false;
         # GENERIC_TIMEZONE defaults to config.time.timeZone; diagnostics and
         # version-notifications already default to false upstream.
-      };
+      } // lib.optionalAttrs (cfg.publicUrl != null) (
+        let
+          # Parse "scheme://host[:port][/path]" into the pieces n8n wants.
+          # cfg.publicUrl is the externally-visible base URL.
+          parts = builtins.match "(https?)://([^/:]+)(:[0-9]+)?(/.*)?" cfg.publicUrl;
+          scheme = builtins.elemAt parts 0;
+          host = builtins.elemAt parts 1;
+        in
+        {
+          N8N_HOST = host;
+          N8N_PROTOCOL = scheme;
+          # Trailing slash matters: n8n appends webhook paths to this verbatim.
+          WEBHOOK_URL = "${cfg.publicUrl}/";
+          # One reverse proxy in front (cloudflared / Tailscale Serve / nginx).
+          N8N_PROXY_HOPS = 1;
+        }
+      );
+    };
+
+    assertions = lib.optional (cfg.publicUrl != null) {
+      assertion = builtins.match "https?://[^/:]+(:[0-9]+)?(/.*)?" cfg.publicUrl != null;
+      message = "features.n8n.publicUrl must be of the form http(s)://host[:port][/path]; got: ${cfg.publicUrl}";
     };
   };
 }

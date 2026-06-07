@@ -663,7 +663,14 @@ in
   # n8n workflow runtime (localhost:5678) — hosts the "just-finished"
   # media-recommendation workflow that calls Overseerr/Tautulli + local gemma.
   # See docs/plans/2026-05-26-plex-llm-recommendations-design.md.
-  features.n8n.enable = true;
+  features.n8n = {
+    enable = true;
+    # Public UI via Cloudflare Tunnel — n8n's listen address stays loopback;
+    # cloudflared proxies HTTPS edge traffic to 127.0.0.1:5678 from within p510.
+    # Setting publicUrl makes n8n emit correct webhook URLs and Secure cookies
+    # under the public hostname.
+    publicUrl = "https://n8n.freundcloud.org.uk";
+  };
 
   # Cloudflare Tunnel — public ingress under freundcloud.org.uk.
   # Bootstrap (one-time):
@@ -719,6 +726,10 @@ in
       "nzbget.freundcloud.org.uk" = "http://localhost:6789";
       "sabnzbd.freundcloud.org.uk" = "http://localhost:8080";
       "audiobookshelf.freundcloud.org.uk" = "http://localhost:13378";
+      # n8n holds the encryption key for every workflow's credentials — its
+      # own login is the only thing protecting them once this is public.
+      # Use a strong password (or front with Cloudflare Access if doubting).
+      "n8n.freundcloud.org.uk" = "http://localhost:5678";
     };
   };
 }
