@@ -9,6 +9,17 @@ For cluster lifecycle / troubleshooting see
 [applications/k3d-cluster.md](../applications/k3d-cluster.md). For the
 "why" see [architecture/k3d-architecture.md](../architecture/k3d-architecture.md).
 
+> **Public ingress update (2026-06-07):** services are now reached from
+> the public internet via **Cloudflare Tunnel** under our home domain
+> (`<name>.<home-domain>`), via an in-cluster `cloudflared` Deployment.
+> The Tailscale-sidecar pattern this guide originally described is
+> deprecated. The "expose this service" step is now a 2-line entry in
+> `infra/cloudflared/` plus one `cloudflared tunnel route dns` command —
+> not a sidecar container + Secret + ConfigMap per Pod. The Deployment
+> templates further down are kept for reference but should not be
+> copied for new services. Full design: [Public Ingress
+> Architecture](../architecture/public-ingress.md).
+
 ## Repo layout
 
 ```text
@@ -42,7 +53,7 @@ The root Application (`bootstrap/argocd-root-app.yaml`) points at `apps/`
 recursively. **Anything you commit under `apps/` becomes a managed
 service automatically** — no extra registration step.
 
-## The "add a new service" checklist
+## The "add a new service" checklist (current)
 
 1. Write k8s manifests for the service somewhere ArgoCD can reach. The
    conventions:
@@ -52,13 +63,36 @@ service automatically** — no extra registration step.
      CR that points there.
    - Or, for one-off tools without a dedicated repo, commit them straight
      under `factory-gitops/apps/<name>/manifests/`.
+   - The Deployment must declare an in-cluster `Service` on a stable
+     port. **No Tailscale sidecar.** Public reachability is handled by
+     the in-cluster `cloudflared` Deployment.
 2. Add `factory-gitops/apps/<name>/application.yaml` (template below).
-3. In the product repo's Deployment, add a Tailscale sidecar container
-   (template below) — that's how a Pod becomes reachable on the tailnet.
-4. `git push`. ArgoCD picks it up within ~3 minutes (or trigger a sync
-   from the UI).
-5. Verify: `https://<hostname>.tail833f7.ts.net` resolves once the
-   sidecar has registered (~30 s after the Pod starts).
+3. Add one route entry in `factory-gitops/infra/cloudflared/cloudflared.yaml`
+   under `ingress:`:
+
+   ```yaml
+   - hostname: <name>.<home-domain>
+     service: http://<svc>.<ns>.svc.cluster.local:<port>
+   ```
+
+4. `git push`. ArgoCD picks up the new Application and the updated
+   cloudflared ConfigMap within ~3 min (or trigger a sync from the UI).
+5. Create the Cloudflare DNS record for the new hostname (one-off, from
+   any host that has the tunnel's cert.pem — p510 itself works post-deploy):
+
+   ```bash
+   sudo TUNNEL_ORIGIN_CERT=/run/agenix/cloudflared-cert \
+     cloudflared tunnel route dns <in-cluster-tunnel-name> <name>.<home-domain>
+   ```
+
+6. Verify: `curl -sI https://<name>.<home-domain>` returns the service's
+   normal response (`200`, `302`, `401`, etc. — anything that isn't `5xx`).
+
+If the route is reaching but the service responds with a redirect
+loop, the upstream is doing HTTP→HTTPS rewrites at the application
+layer. Either configure the service to trust `X-Forwarded-Proto:
+https`, or point cloudflared at its HTTPS port and set
+`originRequest.noTLSVerify = true`.
 
 ## Templates
 
@@ -90,7 +124,14 @@ spec:
       - CreateNamespace=true
 ```
 
-### Pod exposed on the tailnet via a sidecar
+### Pod exposed on the tailnet via a sidecar (deprecated, kept for reference)
+
+> **Deprecated as of 2026-06-07.** Do not use for new services. Public
+> exposure is now handled by an in-cluster `cloudflared` Deployment
+> with a route entry in `infra/cloudflared/`. The sidecar pattern
+> below is preserved only to make sense of any old YAML you might
+> encounter in the repo history or in still-unmigrated Deployments.
+> Migration to remove the last sidecar (on `argocd-server`) is queued.
 
 Patch your Deployment to add a `tailscale` sidecar in the same Pod. The
 sidecar shares the Pod's network namespace, registers a tailnet node

@@ -36,7 +36,31 @@ path-based routing (`p510.tail833f7.ts.net/sonarr`, etc.). The k3d cluster
 - Persistent volumes live under `/mnt/img_pool/k3d/storage` — off
   `/mnt/media` so PVCs don't fight Plex for IOPS.
 
-## Why sidecars and not the Tailscale Kubernetes Operator
+## Public exposure: Cloudflare Tunnel (current)
+
+Services running in the cluster are exposed to the public internet by
+an **in-cluster `cloudflared` Deployment** living in the `factory`
+namespace, with routes managed via the GitOps repo's
+`infra/cloudflared/` ConfigMap. Each route maps one hostname under
+our home domain (`<name>.<home-domain>`) to one in-cluster Service by
+FQDN (`<svc>.<ns>.svc.cluster.local:<port>`).
+
+The full architecture — why Cloudflare over Tailscale, what we
+accept by routing through someone else's edge, how to add a new
+service — lives in [Public Ingress Architecture](public-ingress.md).
+That's the canonical reference for anything touching public URLs.
+
+The remainder of this file documents the cluster substrate (k3d,
+storage, bootstrap unit, etc.). Tailscale sidecars — described
+below — are deprecated and being decommissioned.
+
+## Why sidecars and not the Tailscale Kubernetes Operator (legacy)
+
+> **Deprecated.** This section documents the original design decision
+> from the cluster's first iteration. The cluster has since moved to
+> Cloudflare Tunnel for public exposure (see
+> [Public Ingress Architecture](public-ingress.md)). The sidecar
+> still wraps `argocd-server` at time of writing but is being removed.
 
 The operator is the "obviously right" answer in most Kubernetes contexts —
 one annotation on a Service and the operator handles everything. We
@@ -199,9 +223,23 @@ Auth key setup (one-time, in the Tailscale admin console):
   `secrets.nix`; the contents are now a raw auth key. Future
   migration to the operator is a value-shape change + module option
   swap; nothing structural breaks.
+- **2026-06-07** — **Pivoted again, from Tailscale sidecars to Cloudflare
+  Tunnel.** Sidecar pattern bit us three times: (1) every pod restart
+  rotated the tailnet identity, suffixing the canonical hostname; (2)
+  deleting stale devices in the admin orphaned the cached node key
+  and tailscaled wedged in a `404 node not found` retry loop; (3) per-Pod
+  boilerplate didn't scale. Two `cloudflared` connectors (one
+  host-side, one in-cluster) now route `<name>.<home-domain>` to local
+  services and in-cluster Service FQDNs respectively. TLS terminates at
+  Cloudflare's edge with real Let's Encrypt certs for our domain. Sidecar
+  still wraps `argocd-server` while decommission is queued. Full design
+  rationale + decision matrix in
+  [Public Ingress Architecture](public-ingress.md).
 
 ## Cross-references
 
+- Public ingress design: [Public Ingress Architecture](public-ingress.md)
+- Cloudflare Tunnel host-side ops: [Cloudflared Tunnel](../applications/cloudflared-tunnel.md)
 - Ops + troubleshooting: [k3d Cluster](../applications/k3d-cluster.md)
 - Adding services via GitOps: [Factory GitOps](../guides/factory-gitops.md)
 - Module source: `modules/containers/k3d.nix`
