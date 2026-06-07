@@ -169,7 +169,12 @@ let
       ; do
         f="/run/agenix/$slot"
         if [ -r "$f" ]; then
-          kubectl apply -f "$f" >/dev/null \
+          # -n factory pins the target namespace; the extracted Secret
+          # manifests have metadata.namespace stripped (yq during
+          # extraction), so without this flag kubectl would default to
+          # whichever namespace the kubeconfig has set (`default`),
+          # silently creating duplicates outside factory.
+          kubectl apply -n factory -f "$f" >/dev/null \
             && echo "[k3d-bootstrap] Applied factory/$slot from agenix" \
             || echo "[k3d-bootstrap] WARN: apply of $slot failed (continuing)"
         else
