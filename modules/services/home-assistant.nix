@@ -52,7 +52,13 @@ in
 
       # Declarative configuration
       config = {
-        # Minimal base configuration
+        # Enable the default_config meta-component which activates the essential
+        # components listed in extraComponents below (my, mobile_app, network,
+        # automation, scene, script, etc). Without this, those components are
+        # installed but never loaded — breaking my.home-assistant.io redirects
+        # and many integrations that depend on application_credentials.
+        default_config = { };
+
         # HTTP configuration
         http = {
           server_host = "0.0.0.0";

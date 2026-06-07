@@ -149,7 +149,10 @@ in
       enableCLI = true;
       tailscaleIntegration = true;
       extraComponents = [
-        # Additional integrations
+        "starlink"
+        "nest"
+        "ffmpeg"
+        "stream"
       ];
     };
 
