@@ -49,5 +49,12 @@
   home.packages = [
     inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.opencode
     (pkgs.callPackage ../pkgs/weather-popup/default.nix { })
+
+    # tesseract OCR with explicit language packs only — passing
+    # enableLanguages = null bundles all ~130 languages (~500MB).
+    # Bokmål covers most Norwegian use; tesseract has no separate Nynorsk.
+    (pkgs.tesseract.override {
+      enableLanguages = [ "eng" "pol" "nor" ];
+    })
   ];
 }
