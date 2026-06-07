@@ -531,8 +531,10 @@ in
   #      Cloudflare DNS CNAMEs once.
   # Module documentation: modules/services/cloudflared.nix
   features.cloudflared = {
-    enable = false; # Flip to true after the bootstrap steps above are done.
-    tunnelId = "REPLACE-WITH-TUNNEL-UUID";
+    enable = true;
+    # Tunnel created via `cloudflared tunnel create p510-home`; the matching
+    # credentials.json is stored as agenix `cloudflared-credentials`.
+    tunnelId = "db4e80d3-d24b-4bb0-8bfd-3cffcb6c628f";
     ingress = {
       # Backstage is the safest first route — it's already a clean HTTP
       # service on this host (podman, port 7007). Cluster services come
