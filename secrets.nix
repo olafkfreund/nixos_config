@@ -171,4 +171,17 @@ in
   # rebuilds and never land in the Nix store. Random value, not hand-typed.
   # See docs/plans/2026-05-26-plex-llm-recommendations-design.md.
   "secrets/n8n-encryption-key.age".publicKeys = allUsers ++ [ p510 ];
+
+  # Cloudflare Tunnel credentials for p510 — public ingress under
+  # freundcloud.org.uk (Cloudflare-managed zone), behind Starlink CGNAT.
+  # One-time bootstrap procedure documented in
+  # modules/services/cloudflared.nix header. Both files are produced by the
+  # cloudflared CLI:
+  #   cert.pem       — from `cloudflared login` (zone-scoped Cloudflare API token)
+  #   credentials.json — from `cloudflared tunnel create p510-home` (tunnel-specific)
+  # Edit with:
+  #   ./scripts/manage-secrets.sh edit cloudflared-cert
+  #   ./scripts/manage-secrets.sh edit cloudflared-credentials
+  "secrets/cloudflared-cert.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/cloudflared-credentials.age".publicKeys = allUsers ++ [ p510 ];
 }
