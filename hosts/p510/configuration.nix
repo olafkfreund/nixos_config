@@ -411,7 +411,7 @@ in
     persistentModels = [ ]; # No persistent models to save VRAM
     # gemma4 for n8n; qwen2.5:7b for reliable strict-JSON audiobook metadata
     # extraction + tool-calling (audiobook-import / audiobook-mcp).
-    onDemandModels = [ "gemma4:e4b" "qwen2.5:7b" "gemma4:12b" ];
+    onDemandModels = [ "gemma4:e4b" "qwen2.5:7b" "gemma4:12b" "qwen2.5-coder:14b" ];
     keepAlive = "5m"; # Evict from VRAM after 5 minutes of idle
   };
 
