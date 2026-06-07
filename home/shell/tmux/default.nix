@@ -23,6 +23,18 @@ let
           sha256 = "sha256-wBhOKM85aOcV4jD7wdyB/zXKDdhODE5k1iud+cm6Wk0=";
         };
       };
+
+  # tmux-ccm plugin wrapper — home-manager enforces pname starts with
+  # "tmuxplugins", so we wrap the CLI package's src via mkTmuxPlugin for
+  # the plugin role while pkgs.customPkgs.tmux-ccm stays the CLI bin. Both
+  # share the same fetched source via Nix dedup.
+  tmux-ccm-plugin =
+    pkgs.tmuxPlugins.mkTmuxPlugin
+      {
+        pluginName = "tmux-ccm";
+        version = pkgs.customPkgs.tmux-ccm.version;
+        src = pkgs.customPkgs.tmux-ccm.src;
+      };
 in
 {
   options.multiplexer.tmux = {
@@ -137,6 +149,21 @@ in
         # Development productivity plugins
         tmuxPlugins.tmux-thumbs # Quick text copying
         tmuxPlugins.extrakto # Enhanced text extraction
+
+        # tmux-ccm — attention manager for parallel Claude Code sessions.
+        # One tmux window = one project = one claude pane (state-tagged).
+        # `prefix + Tab` opens the popup dashboard. Menu/Tree bindings stay
+        # opt-in (set @ccm-key-menu / @ccm-key-tree) to avoid colliding with
+        # other plugins above.
+        {
+          plugin = tmux-ccm-plugin;
+          extraConfig = ''
+            # Default binding is prefix+Tab (set by plugin). To opt into
+            # menu/tree, uncomment:
+            # set -g @ccm-key-menu C
+            # set -g @ccm-key-tree t
+          '';
+        }
       ];
 
       # Enhanced configuration for modern terminal workflows
@@ -334,6 +361,11 @@ in
         set -g popup-border-lines rounded
       '';
     };
+
+    # Expose `ccm` (tmux-ccm's CLI) on user PATH so commands like
+    # `ccm add`, `ccm status`, `ccm send <project> <msg>` work from any
+    # shell, not just from inside the tmux popup that the plugin opens.
+    home.packages = [ pkgs.customPkgs.tmux-ccm ];
 
     # tmux-palette active theme — full color override sourced from our
     # active stylix base16 scheme, so the palette popup is BYTE-IDENTICAL
