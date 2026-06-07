@@ -48,7 +48,7 @@
 , ...
 }:
 let
-  inherit (lib) mkOption mkIf mkEnableOption mkPackageOption types optionalString;
+  inherit (lib) mkOption mkIf mkMerge mkEnableOption mkPackageOption types optionalString concatStringsSep;
   cfg = config.modules.containers.k3d;
 
   # Bootstrap script — idempotent. Safe to re-run; safe to fail partially
@@ -142,6 +142,41 @@ let
         echo "[k3d-bootstrap] WARN: ${cfg.tailscaleAuthKey.authKeyFile} not readable yet;" \
              "create the agenix secret, then: systemctl restart k3d-cluster-bootstrap"
       fi
+      ''}
+
+      ${optionalString cfg.factorySecrets.enable ''
+      # 4b. Seed all factory-namespace Secret manifests from agenix.
+      #     Each .age file decrypts to a full kubectl-applicable Secret
+      #     YAML (`apiVersion: v1, kind: Secret, metadata.namespace:
+      #     factory, data: …`). kubectl apply -f is idempotent: when the
+      #     decrypted content matches the live Secret's content, this is
+      #     a no-op; when it differs (e.g. after rotation via
+      #     `./scripts/manage-secrets.sh edit factory-secret-<name>`),
+      #     the new value takes effect on the next bootstrap restart.
+      #     See #807 for design rationale.
+      kubectl create namespace factory --dry-run=client -o yaml | kubectl apply -f -
+      for slot in \
+        ${concatStringsSep " " (map (n: "factory-secret-${n}") [
+          "cloudflared-factory"
+          "factory-secrets"
+          "factory-cli-creds"
+          "ghcr-pull"
+          "skillai-db"
+          "skillai-app"
+          "rolehunter-db"
+          "rolehunter-app"
+        ])} \
+      ; do
+        f="/run/agenix/$slot"
+        if [ -r "$f" ]; then
+          kubectl apply -f "$f" >/dev/null \
+            && echo "[k3d-bootstrap] Applied factory/$slot from agenix" \
+            || echo "[k3d-bootstrap] WARN: apply of $slot failed (continuing)"
+        else
+          echo "[k3d-bootstrap] WARN: $f not readable; skipping $slot." \
+               "Run: ./scripts/manage-secrets.sh edit $slot"
+        fi
+      done
       ''}
 
       ${optionalString cfg.argocd.enable ''
@@ -314,6 +349,20 @@ in
         '';
       };
     };
+
+    # ── Factory app secrets (#807) ───────────────────────────────────────
+    # Each agenix `factory-secret-<name>.age` file contains a complete
+    # kubectl-applicable Secret manifest for the `factory` namespace. The
+    # bootstrap unit `kubectl apply -f`s each one on every run so a fresh
+    # cluster (or one rebuilt from scratch) gets SkillAI / rolehunter /
+    # shared factory-secrets durably restored from declarative source
+    # rather than out-of-band `kubectl create secret` commands.
+    #
+    # All 8 secrets are seeded as a single block (no per-secret enable);
+    # add or remove from the `apply each one` loop below to evolve scope.
+    factorySecrets = {
+      enable = mkEnableOption "Apply all factory-namespace agenix-encrypted Secret manifests during cluster bootstrap";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -378,13 +427,38 @@ in
     # have to manage it host-side. The filename keeps its historical
     # `-operator-oauth` suffix to avoid breaking existing secrets.nix
     # entries; the *contents* are now a raw auth key, not OAuth JSON.
-    age.secrets = mkIf cfg.tailscaleAuthKey.enable {
-      tailscale-k8s-operator-oauth = {
-        file = ../../secrets/tailscale-k8s-operator-oauth.age;
-        mode = "0400";
-        owner = "root";
-        group = "root";
-      };
-    };
+    age.secrets = mkMerge [
+      (mkIf cfg.tailscaleAuthKey.enable {
+        tailscale-k8s-operator-oauth = {
+          file = ../../secrets/tailscale-k8s-operator-oauth.age;
+          mode = "0400";
+          owner = "root";
+          group = "root";
+        };
+      })
+      (mkIf cfg.factorySecrets.enable (
+        let
+          mkSecret = n: {
+            name = "factory-secret-${n}";
+            value = {
+              file = ../../secrets/factory-secret-${n}.age;
+              mode = "0400";
+              owner = "root";
+              group = "root";
+            };
+          };
+        in
+        builtins.listToAttrs (map mkSecret [
+          "cloudflared-factory"
+          "factory-secrets"
+          "factory-cli-creds"
+          "ghcr-pull"
+          "skillai-db"
+          "skillai-app"
+          "rolehunter-db"
+          "rolehunter-app"
+        ])
+      ))
+    ];
   };
 }
