@@ -67,6 +67,7 @@ in
     ./apps.nix
     ./authenticator.nix
     ./keybindings.nix
+    ./wl-clipboard-hide.nix
   ];
 
   config = mkIf cfg.enable {
