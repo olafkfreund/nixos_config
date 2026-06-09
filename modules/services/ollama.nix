@@ -11,8 +11,11 @@
 #   On-demand:  gemma4:26b — MoE with ~3.8B active params, very fast
 #     (~80-100 tok/s) for raw code-gen bursts.
 #
-# Always loopback-only — never exposes :11434 to any network interface.
-# Reachable only via a same-host LiteLLM proxy (or local `ollama` CLI).
+# Bind address is configurable via `host` (default 127.0.0.1). Set to
+# "0.0.0.0" to expose on all interfaces — note Ollama has no built-in
+# auth, so restrict access via firewall / tailnet ACLs when bound wider.
+# OLLAMA_ORIGINS="*" is set so browser UIs from any origin can call the
+# API; this only matters once the bind is non-loopback.
 #
 # See docs/plans/2026-05-22-ollama-p620-litellm-design.md for the full
 # design and the dual-tier model + GPU-contention rationale.
@@ -90,13 +93,49 @@ in
         integrated GPU on hybrid-graphics systems.
       '';
     };
+
+    host = lib.mkOption {
+      type = lib.types.str;
+      default = "127.0.0.1";
+      example = "0.0.0.0";
+      description = ''
+        Bind address for Ollama's HTTP API. Default 127.0.0.1 (loopback
+        only). Set to "0.0.0.0" to expose on all interfaces — Ollama has
+        no auth, so combine with firewall / tailnet ACLs when widening.
+      '';
+    };
+
+    origins = lib.mkOption {
+      type = lib.types.str;
+      default = "*";
+      description = ''
+        Value for OLLAMA_ORIGINS — comma-separated list of allowed
+        browser origins for CORS. Defaults to "*" so any local or remote
+        web UI can call the API. Tighten if you want browser-origin
+        restriction (network exposure is controlled by `host`, not this).
+      '';
+    };
+
+    cloudApiKeyFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      example = lib.literalExpression ''config.age.secrets."api-ollama".path'';
+      description = ''
+        Runtime path to a file containing the raw Ollama cloud-models API key
+        (no `OLLAMA_API_KEY=` prefix — just the token). When set, the daemon
+        starts with OLLAMA_API_KEY in its environment, enabling access to
+        Ollama's hosted cloud models. The key is composed into an
+        EnvironmentFile under /run/ollama at preStart, so it never lands in
+        the Nix store. When null, the daemon runs local-only.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
     services.ollama = {
       enable = true;
       inherit (cfg) package;
-      host = "127.0.0.1";
+      inherit (cfg) host;
       port = 11434;
       loadModels = cfg.persistentModels ++ cfg.onDemandModels;
       models = lib.mkIf (cfg.modelsDir != null) cfg.modelsDir;
@@ -110,6 +149,7 @@ in
         OLLAMA_NUM_PARALLEL = "1";
         OLLAMA_MAX_LOADED_MODELS = "1";
         OLLAMA_FLASH_ATTENTION = "1";
+        OLLAMA_ORIGINS = cfg.origins;
       };
     };
 
@@ -120,6 +160,27 @@ in
       Nice = 10;
       IOSchedulingClass = "best-effort";
       IOSchedulingPriority = 5;
+    } // lib.optionalAttrs (cfg.cloudApiKeyFile != null) {
+      # systemd creates /run/ollama as ollama:ollama mode 0750 *before*
+      # ExecStartPre fires, so preStart doesn't need to mkdir or chown.
+      RuntimeDirectory = "ollama";
+      RuntimeDirectoryMode = "0750";
+
+      # Composed by preStart below; never enters the Nix store. The leading
+      # `-` marks it optional: systemd applies EnvironmentFile= to every
+      # Exec*= in the unit including ExecStartPre=, so on first start (before
+      # preStart has created the file) the load must not fail. preStart runs
+      # without the env var (doesn't need it), creates the file, then
+      # ExecStart re-reads EnvironmentFile= and picks up OLLAMA_API_KEY.
+      EnvironmentFile = "-/run/ollama/cloud-env";
     };
+
+    # Compose the OLLAMA_API_KEY env file at service start from the agenix
+    # path. /run/ollama already exists (RuntimeDirectory above). umask 027
+    # makes the file 0640 owned by the unit's User=/Group= (ollama:ollama).
+    systemd.services.ollama.preStart = lib.mkIf (cfg.cloudApiKeyFile != null) (lib.mkAfter ''
+      umask 027
+      printf 'OLLAMA_API_KEY=%s\n' "$(tr -d '\r\n' < ${cfg.cloudApiKeyFile})" > /run/ollama/cloud-env
+    '');
   };
 }

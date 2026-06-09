@@ -23,6 +23,11 @@ in
   "secrets/api-gemini.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-anthropic.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-groq.age".publicKeys = allUsers ++ allHosts;
+  # Ollama cloud-models API key (Ollama Turbo / hosted models). Exposed to the
+  # ollama systemd daemon on hosts that opt in via
+  # `features.ollama-server.cloudApiKeyFile`, and to interactive shells as
+  # OLLAMA_API_KEY via load-api-keys. Edit: agenix -e secrets/api-ollama.age
+  "secrets/api-ollama.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-github-token.age".publicKeys = allUsers ++ allHosts;
   # n8n personal API key (JWT) for the self-hosted instance at
   # https://n8n.freundcloud.org.uk. Exported as N8N_API_KEY system-wide via
