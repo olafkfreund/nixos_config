@@ -5,6 +5,7 @@ final: _prev: {
   zsh-ai-cmd = final.callPackage ../pkgs/zsh-ai-cmd { };
   claude-code-native = final.callPackage ../pkgs/claude-code-native { };
   warp-terminal = final.callPackage ../pkgs/warp-terminal { };
+  waveterm = final.callPackage ../pkgs/waveterm { };
   # splashboard — Rust TUI splash screen for shell startup. Needs rustc
   # 1.95+ (sysinfo 0.39 transitive), which nixpkgs doesn't ship yet, so
   # we build with the latest stable from rust-overlay via a custom
