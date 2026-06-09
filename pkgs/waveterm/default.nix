@@ -13,6 +13,7 @@
 , fetchurl
 , dpkg
 , autoPatchelfHook
+, python3
 , atk
 , at-spi2-atk
 , cups
@@ -59,6 +60,7 @@ stdenv.mkDerivation (finalAttrs: {
     dpkg
     autoPatchelfHook
     makeWrapper
+    python3
   ];
 
   buildInputs = [
@@ -104,9 +106,23 @@ stdenv.mkDerivation (finalAttrs: {
   '';
 
   preFixup = ''
-    patchelf --add-needed libGL.so.1 \
-      --add-rpath ${lib.makeLibraryPath [ libGL udev ]} \
-      $out/app/waveterm/waveterm
+        patchelf --add-needed libGL.so.1 \
+          --add-rpath ${lib.makeLibraryPath [ libGL udev ]} \
+          $out/app/waveterm/waveterm
+
+        # Replace WaveTerm brand green (#58c142) with Gruvbox bg4 (#665c54).
+        # Same-length substitution — asar JSON header offsets stay valid.
+        # autoPatchelfHook already brings python3 into the build env.
+        python3 -c "
+    import sys
+    path = sys.argv[1]
+    data = open(path, 'rb').read()
+    data = data.replace(b'#58c142', b'#665c54')
+    data = data.replace(b'#58C142', b'#665c54')
+    data = data.replace(b'rgb(88, 193, 66)', b'rgb(102, 92, 84)')
+    open(path, 'wb').write(data)
+    print('waveterm: patched accent green -> gruvbox-bg4')
+    " "$out/app/waveterm/resources/app.asar"
   '';
 
   passthru.updateScript = ../../scripts/update-waveterm.sh;
