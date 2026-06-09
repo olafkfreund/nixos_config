@@ -263,3 +263,162 @@ spec:
   system: freundcloud-infra
   dependsOn:
     - resource:default/k3d-factory
+
+---
+# p620 — AMD workstation. Primary development host + binary cache server +
+# AI inference (Ollama on ROCm). Source of truth for the nix-serve substituter
+# the other hosts pull from.
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: p620
+  title: p620 — AMD workstation (primary dev + nix cache + AI)
+  description: |
+    AMD Ryzen + Radeon workstation. Roles: primary development environment
+    (Hyprland desktop, full toolchain), nix binary cache (nix-serve on :5000
+    consumed by p510 + razer), local LLM inference (Ollama with ROCm
+    acceleration, 6 models), NFS server exporting /extdisk. Configured via
+    the workstation template — see hosts/p620/.
+  annotations:
+    backstage.io/source-location: url:https://github.com/olafkfreund/nixos_config/tree/main/hosts/p620/
+    backstage.io/view-url: https://github.com/olafkfreund/nixos_config/tree/main/hosts/p620
+    backstage.io/edit-url: https://github.com/olafkfreund/nixos_config/edit/main/hosts/p620/configuration.nix
+    github.com/project-slug: olafkfreund/nixos_config
+  tags:
+    - nixos
+    - host
+    - workstation
+    - amd
+    - amdgpu
+    - rocm
+    - ollama
+    - nix-cache
+    - hyprland
+  links:
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/hosts/p620/configuration.nix
+      title: configuration.nix
+      icon: github
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/hosts/p620/variables.nix
+      title: variables.nix (host metadata)
+      icon: github
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/hosts/templates/workstation.nix
+      title: workstation template (base)
+      icon: docs
+spec:
+  type: physical-host
+  owner: olafkfreund
+  system: freundcloud-infra
+  dependsOn:
+    - component:default/nixos_config
+
+---
+# p510 — Intel Xeon + NVIDIA headless media server. Hosts Backstage itself,
+# the k3d cluster, Plex/Tautulli/Sonarr/Radarr/NZBGet stack. No desktop.
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: p510
+  title: p510 — Intel/NVIDIA media server (Backstage host)
+  description: |
+    Headless Intel Xeon + NVIDIA server. Roles: media server (Plex + the *arr
+    stack + NZBGet, with Tautulli for analytics), Backstage developer-portal
+    host (this very Backstage instance), k3d Kubernetes host (ArgoCD,
+    Tailscale sidecars). Configured via the server template — see
+    hosts/p510/.
+  annotations:
+    backstage.io/source-location: url:https://github.com/olafkfreund/nixos_config/tree/main/hosts/p510/
+    backstage.io/view-url: https://github.com/olafkfreund/nixos_config/tree/main/hosts/p510
+    backstage.io/edit-url: https://github.com/olafkfreund/nixos_config/edit/main/hosts/p510/configuration.nix
+    github.com/project-slug: olafkfreund/nixos_config
+  tags:
+    - nixos
+    - host
+    - server
+    - headless
+    - intel
+    - nvidia
+    - plex
+    - media-server
+    - backstage-host
+    - k3d
+  links:
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/hosts/p510/configuration.nix
+      title: configuration.nix
+      icon: github
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/hosts/p510/variables.nix
+      title: variables.nix (host metadata)
+      icon: github
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/hosts/templates/server.nix
+      title: server template (base)
+      icon: docs
+    - url: https://p510.tail833f7.ts.net/backstage
+      title: Backstage (hosted here)
+      icon: dashboard
+spec:
+  type: physical-host
+  owner: olafkfreund
+  system: freundcloud-infra
+  dependsOn:
+    - component:default/nixos_config
+  dependencyOf:
+    - component:default/backstage
+    - resource:default/k3d-factory
+
+---
+# razer — Intel + NVIDIA hybrid-graphics laptop. Mobile dev environment;
+# pulls builds from p620's nix cache rather than building locally.
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: razer
+  title: razer — Intel/NVIDIA mobile dev laptop
+  description: |
+    Razer laptop with hybrid Intel + NVIDIA (Optimus) graphics. Role: mobile
+    development environment. Heavy rebuilds offloaded to p620 via
+    `nixos-rebuild --build-host olafkfreund@p620` (root has no SSH key for
+    p620, so split build/switch). Configured via the laptop template — see
+    hosts/razer/.
+  annotations:
+    backstage.io/source-location: url:https://github.com/olafkfreund/nixos_config/tree/main/hosts/razer/
+    backstage.io/view-url: https://github.com/olafkfreund/nixos_config/tree/main/hosts/razer
+    backstage.io/edit-url: https://github.com/olafkfreund/nixos_config/edit/main/hosts/razer/configuration.nix
+    github.com/project-slug: olafkfreund/nixos_config
+  tags:
+    - nixos
+    - host
+    - laptop
+    - mobile
+    - intel
+    - nvidia
+    - optimus
+    - openrazer
+  links:
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/hosts/razer/configuration.nix
+      title: configuration.nix
+      icon: github
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/hosts/razer/variables.nix
+      title: variables.nix (host metadata)
+      icon: github
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/hosts/templates/laptop.nix
+      title: laptop template (base)
+      icon: docs
+spec:
+  type: physical-host
+  owner: olafkfreund
+  system: freundcloud-infra
+  dependsOn:
+    - component:default/nixos_config
+    - resource:default/p620
+
+---
+# Location entity — tells Backstage to load the nixos-module Scaffolder
+# Template from this repo. Backstage follows Location entities transitively,
+# so we don't need to register the template URL in app-config.production.yaml.
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: nixos-module-scaffolder-template
+  description: Software Template — scaffold a new feature-flagged NixOS module
+spec:
+  type: url
+  target: https://github.com/olafkfreund/nixos_config/blob/main/catalog/templates/nixos-module/template.yaml

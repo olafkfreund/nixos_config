@@ -1,0 +1,100 @@
+# ${{ values.description }}
+#
+# Scaffolded via Backstage `nixos-module` template.
+# Owner: ${{ values.owner }}
+#
+# Hosts opt in with:
+#   features.${{ values.name }}.enable = true;
+#
+# Conventions enforced by this skeleton (see docs/PATTERNS.md):
+#   - feature flag (no direct service config in host files)
+#   - systemd hardening (DynamicUser, ProtectSystem, NoNewPrivileges)
+#   - runtime secrets only (agenix path reference, never builtins.readFile)
+#
+# Anti-patterns this skeleton avoids (docs/NIXOS-ANTI-PATTERNS.md):
+#   - no `mkIf true` — boolean values assigned directly
+#   - no `with pkgs;` over the whole config — explicit `pkgs.foo` refs
+#   - no Import-From-Derivation — pure evaluation
+{ config, lib, pkgs, ... }:
+let
+  cfg = config.features.${{ values.name }};
+in
+{
+  options.features.${{ values.name }} = {
+    enable = lib.mkEnableOption "${{ values.description }}";
+{%- if values.defaultPort %}
+
+    port = lib.mkOption {
+      type = lib.types.port;
+      default = ${{ values.defaultPort }};
+      description = ''
+        TCP port the service listens on. Bound to localhost by default —
+        expose via tailscale-serve or a reverse proxy rather than opening
+        the firewall.
+      '';
+    };
+{%- endif %}
+  };
+
+  config = lib.mkIf cfg.enable {
+{%- if values.needsSecret %}
+
+    # ----------------------------------------------------------------------
+    # Runtime secret. Never read at evaluation time — the service reads the
+    # path at startup. Create the .age file with:
+    #   ./scripts/manage-secrets.sh create ${{ values.name }}
+    # ----------------------------------------------------------------------
+    age.secrets.${{ values.name }} = {
+      file = ../../secrets/${{ values.name }}.age;
+      mode = "0400";
+    };
+{%- endif %}
+{%- if values.needsSystemdService %}
+
+    # ----------------------------------------------------------------------
+    # Hardened systemd service. Defaults follow docs/PATTERNS.md — adjust
+    # ExecStart and any path-permission options the workload genuinely needs.
+    # ----------------------------------------------------------------------
+    systemd.services.${{ values.name }} = {
+      description = "${{ values.description }}";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
+
+      serviceConfig = {
+        # Identity — DynamicUser allocates a transient UID per start.
+        DynamicUser = true;
+
+        # Filesystem isolation.
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        PrivateTmp = true;
+
+        # Capability and privilege limits.
+        NoNewPrivileges = true;
+        RestrictSUIDSGID = true;
+        ProtectKernelTunables = true;
+        ProtectKernelModules = true;
+        ProtectControlGroups = true;
+
+        # Network — narrow this if the service is purely local.
+        RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
+
+        # TODO: replace this stub with the real ExecStart. /bin/true exits
+        # successfully so the unit can be loaded for review without crashing
+        # on first deploy.
+        ExecStart = "${pkgs.coreutils}/bin/true";
+{%- if values.needsSecret %}
+
+        # Load the agenix secret as an environment variable (or use
+        # LoadCredential= for a credentialed file). Path is resolved at
+        # service start, not at Nix evaluation.
+        EnvironmentFile = config.age.secrets.${{ values.name }}.path;
+{%- endif %}
+
+        Restart = "on-failure";
+        RestartSec = "5s";
+      };
+    };
+{%- endif %}
+  };
+}

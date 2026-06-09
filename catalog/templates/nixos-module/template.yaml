@@ -1,0 +1,163 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: nixos-module
+  title: New NixOS feature module
+  description: |
+    Scaffold a new feature-flagged NixOS module under
+    `modules/<category>/<name>.nix` following `docs/PATTERNS.md`:
+
+      - feature-flag (`features.<name>.enable`) so hosts opt in
+      - optional systemd service with hardening (DynamicUser, ProtectSystem,
+        NoNewPrivileges, PrivateTmp)
+      - optional agenix runtime secret (never read at evaluation time)
+      - optional default port option
+
+    Output is a Pull Request against `olafkfreund/nixos_config`. Review the
+    hardening choices and adjust the `ExecStart` before merging.
+  tags:
+    - nixos
+    - module
+    - infrastructure
+    - feature-flag
+spec:
+  owner: group:default/admins
+  type: nixos-module
+
+  # -------------------------------------------------------------------------
+  # Inputs the operator fills in via the Backstage UI.
+  # -------------------------------------------------------------------------
+  parameters:
+    - title: Module identity
+      required:
+        - name
+        - description
+        - category
+        - owner
+      properties:
+        name:
+          title: Module name
+          type: string
+          description: >-
+            kebab-case, used as the filename AND the feature-flag key
+            (e.g. "myservice" → modules/services/myservice.nix,
+            features.myservice.enable). Letters, digits, hyphens only.
+          pattern: "^[a-z][a-z0-9-]*$"
+          maxLength: 40
+        description:
+          title: One-line description
+          type: string
+          description: Shown in the module header comment and the option description.
+          maxLength: 120
+        category:
+          title: Category (subdir under modules/)
+          type: string
+          description: >-
+            Which subdirectory of modules/ should hold the file. Pick the one
+            that matches the layer the module operates at.
+          enum:
+            - services
+            - desktop
+            - hardware
+            - security
+            - containers
+            - common
+            - development
+          default: services
+        owner:
+          title: Owner
+          type: string
+          description: Backstage entity that owns the module (Group or User).
+          default: group:default/admins
+          ui:field: OwnerPicker
+          ui:options:
+            allowedKinds:
+              - Group
+              - User
+
+    - title: Service shape
+      properties:
+        needsSystemdService:
+          title: Generate a systemd service block?
+          type: boolean
+          default: true
+          description: Adds a hardened `systemd.services.<name>` stub.
+        defaultPort:
+          title: Default TCP port (leave blank if none)
+          type: integer
+          minimum: 1
+          maximum: 65535
+          description: >-
+            If the service listens on a TCP port, adds a `port` option with
+            this default. Localhost-only by convention — expose via
+            tailscale-serve or a reverse proxy.
+        needsSecret:
+          title: Needs a runtime secret (agenix)?
+          type: boolean
+          default: false
+          description: >-
+            Adds an `age.secrets.<name>` declaration. You must create the
+            corresponding `secrets/<name>.age` file separately with
+            `./scripts/manage-secrets.sh create <name>` before deploying.
+
+  # -------------------------------------------------------------------------
+  # Steps Backstage runs on submit.
+  # -------------------------------------------------------------------------
+  steps:
+    - id: fetch
+      name: Render module skeleton
+      action: fetch:template
+      input:
+        url: ./skeleton
+        targetPath: .
+        # Skeleton files end in `.nix.njk`. Backstage processes Nunjucks
+        # syntax (`${{ values.foo }}`) inside them, strips the `.njk` suffix,
+        # and writes the result as plain `.nix`. The suffix keeps the
+        # repo-wide Nix formatter from mangling the templated placeholders.
+        templateFileExtension: '.njk'
+        values:
+          name: ${{ parameters.name }}
+          description: ${{ parameters.description }}
+          category: ${{ parameters.category }}
+          owner: ${{ parameters.owner }}
+          needsSystemdService: ${{ parameters.needsSystemdService }}
+          defaultPort: ${{ parameters.defaultPort }}
+          needsSecret: ${{ parameters.needsSecret }}
+
+    - id: pr
+      name: Open Pull Request against nixos_config
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?owner=olafkfreund&repo=nixos_config
+        branchName: feat/scaffold-${{ parameters.name }}
+        title: "feat(${{ parameters.category }}): scaffold ${{ parameters.name }} module"
+        description: |
+          Scaffolded via Backstage Software Template **nixos-module**.
+
+          | Field | Value |
+          |---|---|
+          | Module | `${{ parameters.name }}` |
+          | Path | `modules/${{ parameters.category }}/${{ parameters.name }}.nix` |
+          | Owner | ${{ parameters.owner }} |
+          | systemd service | ${{ parameters.needsSystemdService }} |
+          | Default port | ${{ parameters.defaultPort }} |
+          | Runtime secret | ${{ parameters.needsSecret }} |
+
+          ### Reviewer checklist (`docs/PATTERNS.md` + `docs/NIXOS-ANTI-PATTERNS.md`)
+
+          - [ ] `ExecStart` replaced with the real command (skeleton uses `/bin/true`)
+          - [ ] `description` and option docs make sense
+          - [ ] If `needsSecret`, the `.age` file exists in `secrets/` and is registered in `secrets.nix`
+          - [ ] No `mkIf true` patterns introduced
+          - [ ] Module is imported from `modules/default.nix` (or the relevant category index)
+          - [ ] Tested on at least one host (`just test-host <host>`)
+        targetBranchName: main
+
+  # -------------------------------------------------------------------------
+  # Output shown in Backstage after the run completes.
+  # -------------------------------------------------------------------------
+  output:
+    links:
+      - title: Open pull request
+        url: ${{ steps['pr'].output.remoteUrl }}
+        icon: github
