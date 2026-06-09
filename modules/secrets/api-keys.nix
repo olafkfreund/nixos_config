@@ -61,6 +61,16 @@ in
         group = "users";
       };
 
+      # Ollama cloud-models API key. Read by the ollama systemd daemon (when
+      # features.ollama-server.cloudApiKeyFile points here) and by interactive
+      # shells via load-api-keys → OLLAMA_API_KEY.
+      api-ollama = {
+        file = ../../secrets/api-ollama.age;
+        mode = "0644";
+        owner = "root";
+        group = "users";
+      };
+
       api-n8n = {
         file = ../../secrets/api-n8n.age;
         mode = "0644";
@@ -152,6 +162,14 @@ in
           echo "export GROQ_API_KEY=\"$(cat /run/agenix/api-groq)\""
         fi
 
+        if [ -r "/run/agenix/api-ollama" ]; then
+          # Ollama cloud-models token (Ollama Turbo / hosted models). The local
+          # ollama daemon picks this up from its own EnvironmentFile, but
+          # exporting here lets `ollama` CLI invocations and curl against
+          # api.ollama.com authenticate from the shell too.
+          echo "export OLLAMA_API_KEY=\"$(cat /run/agenix/api-ollama)\""
+        fi
+
         if [ -r "/run/agenix/api-n8n" ]; then
           echo "export N8N_API_KEY=\"$(cat /run/agenix/api-n8n)\""
         fi
@@ -187,6 +205,7 @@ in
         [ -n "$GEMINI_API_KEY" ] && echo "✅ Gemini: Available" || echo "❌ Gemini: Not available"
         [ -n "$ANTHROPIC_API_KEY" ] && echo "✅ Anthropic: Available" || echo "❌ Anthropic: Not available"
         [ -n "$GROQ_API_KEY" ] && echo "✅ Groq: Available" || echo "❌ Groq: Not available"
+        [ -n "$OLLAMA_API_KEY" ] && echo "✅ Ollama Cloud: Available" || echo "❌ Ollama Cloud: Not available"
         [ -n "$N8N_API_KEY" ] && echo "✅ n8n: Available" || echo "❌ n8n: Not available"
         [ -n "$N8N_MCP_TOKEN" ] && echo "✅ n8n MCP: Available" || echo "❌ n8n MCP: Not available"
         [ -n "$LANGCHAIN_API_KEY" ] && echo "✅ LangChain: Available" || echo "❌ LangChain: Not available"

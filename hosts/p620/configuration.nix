@@ -95,17 +95,22 @@ in
     enableReadyNotifications = true;
   };
 
-  # Local Ollama coding-model server on RX 7900 XTX (loopback only, ROCm).
+  # Local Ollama coding-model server on RX 7900 XTX (ROCm).
   # Phase 1 of docs/plans/2026-05-22-ollama-p620-litellm-design.md.
   # Defaults: qwen3.6:27b persistent + gemma4:26b on-demand (5min unload).
-  # Reachable from same host only at http://127.0.0.1:11434; the LiteLLM
-  # proxy (Phase 2) will be the Anthropic-compat front-end for Claude Code.
+  # Bound to 0.0.0.0:11434 (all interfaces) with OLLAMA_ORIGINS=* so other
+  # hosts on the LAN/tailnet can hit it. p620's firewall is disabled —
+  # exposure is controlled at the network edge, not on the host.
   # Model blobs land on /mnt/data (938GB ext4 disk) instead of root /.
   features.ollama-server = {
     enable = true;
+    host = "0.0.0.0";
     modelsDir = "/mnt/data/ollama/models";
     persistentModels = [ "qwen3:14b" ];
     onDemandModels = [ "qwen2.5-coder:14b" "gemma4:e4b" "gemma4:12b" ];
+    # Ollama cloud-models access (Ollama Turbo / hosted). Raw key in agenix;
+    # the daemon's preStart composes /run/ollama/cloud-env at unit start.
+    cloudApiKeyFile = config.age.secrets."api-ollama".path;
   };
 
   # LiteLLM router — Anthropic-compat proxy fronting Ollama (Phase 2).
