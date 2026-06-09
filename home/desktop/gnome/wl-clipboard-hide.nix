@@ -16,16 +16,22 @@ in
   #
   #   1. This file — a NoDisplay .desktop entry mapped to the wl-clipboard
   #      app_id, which keeps the entry out of the app grid / Activities
-  #      overview / launcher.
+  #      overview / launcher. It does NOT hide running windows from the
+  #      dock's running-apps section (#808's original commit message
+  #      hoped it would; on GNOME 50 it doesn't).
   #
-  #   2. wl-paste-watch.nix — a user systemd service that runs
-  #      `wl-paste --watch` so each wl-copy's data is consumed
-  #      immediately, the supersession event fires deterministically,
-  #      and the dummy toplevel exits. This is what actually keeps the
-  #      dock clean. On GNOME 50+ at least, NoDisplay does NOT hide
-  #      running windows from the dock's running-apps section —
-  #      contrary to what the original commit message of this file
-  #      (#808) hoped for.
+  #   2. The real fix: tmux is configured to use OSC-52 instead of
+  #      wl-copy for clipboard sync (see home/shell/tmux/default.nix —
+  #      `set -g set-clipboard on` + `copy-pipe-and-cancel` without a
+  #      wl-copy target). The outer terminal (kitty) handles the actual
+  #      clipboard write, so wl-copy is never spawned by tmux and the
+  #      dummy toplevels never appear.
+  #
+  # Why not `wl-paste --watch` to drain selections? That requires the
+  # wlr-data-control / ext-data-control Wayland protocol, which Mutter
+  # has declined to implement — the exact same root cause. `wl-paste`
+  # one-shot reads still work (used for middle-click paste in tmux),
+  # only the `--watch` mode requires data-control.
   #
   # Filename matters: GNOME maps app_id -> <app_id>.desktop, so the entry
   # key here must be the literal `io.github.bugaevc.wl-clipboard` string.
