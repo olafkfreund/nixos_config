@@ -68,7 +68,6 @@ in
     ./authenticator.nix
     ./keybindings.nix
     ./wl-clipboard-hide.nix
-    ./wl-paste-watch.nix
   ];
 
   config = mkIf cfg.enable {

@@ -309,15 +309,30 @@ in
         bind -n M-5 select-window -t 5
 
         # ========== Copy Mode Enhancements ==========
-        # Vim-style copy mode
+        # Vim-style copy mode.
+        #
+        # Clipboard strategy: OSC-52 instead of wl-copy. `set-clipboard on`
+        # makes tmux forward selections to the outer terminal via the
+        # OSC-52 escape sequence; the terminal (kitty here) then writes
+        # the system clipboard on its own terms. This avoids the wl-copy
+        # zombie / dock-icon problem on GNOME/Mutter (Mutter doesn't
+        # implement wlr-data-control, so each wl-copy is forced to create
+        # a dummy xdg_toplevel that GNOME Shell tracks as a running
+        # window — they accumulate in the dock per yank). See
+        # home/desktop/gnome/wl-clipboard-hide.nix for full context.
+        set -g set-clipboard on
         bind Enter copy-mode
         bind -T copy-mode-vi 'v' send -X begin-selection
-        bind -T copy-mode-vi 'y' send -X copy-pipe-and-cancel "${pkgs.wl-clipboard}/bin/wl-copy"
+        bind -T copy-mode-vi 'y' send -X copy-pipe-and-cancel
         bind -T copy-mode-vi 'r' send -X rectangle-toggle
         bind -T copy-mode-vi Escape send -X cancel
 
-        # Mouse support with modern clipboard integration
-        bind -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "${pkgs.wl-clipboard}/bin/wl-copy"
+        # Mouse selection → system clipboard (same OSC-52 path).
+        bind -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel
+        # Middle-click paste reads the system clipboard via a one-shot
+        # wl-paste — fine on GNOME (only `wl-paste --watch` requires
+        # data-control; a single read works via the regular wl_data_offer
+        # path that any paste uses).
         bind -n MouseDown2Pane run "${pkgs.wl-clipboard}/bin/wl-paste | tmux load-buffer - && tmux paste-buffer"
 
         # ========== Session Management ==========
