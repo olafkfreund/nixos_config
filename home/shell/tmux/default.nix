@@ -10,36 +10,6 @@ let
   cfg = config.multiplexer.tmux;
   inherit (config.lib.stylix) colors;
 
-  # Modern Gruvbox theme with enhanced icons and performance
-  tmux-gruvbox =
-    pkgs.tmuxPlugins.mkTmuxPlugin
-      {
-        pluginName = "tmux-gruvbox";
-        version = "unstable-2024-06-17";
-        src = pkgs.fetchFromGitHub {
-          owner = "z3z1ma";
-          repo = "tmux-gruvbox";
-          rev = "master";
-          sha256 = "sha256-wBhOKM85aOcV4jD7wdyB/zXKDdhODE5k1iud+cm6Wk0=";
-        };
-      };
-
-  # tmux-ccm plugin wrapper — home-manager enforces pname starts with
-  # "tmuxplugins", so we wrap the CLI package's src via mkTmuxPlugin for
-  # the plugin role while pkgs.customPkgs.tmux-ccm stays the CLI bin. Both
-  # share the same fetched source via Nix dedup.
-  tmux-ccm-plugin =
-    pkgs.tmuxPlugins.mkTmuxPlugin
-      {
-        pluginName = "tmux-ccm";
-        version = pkgs.customPkgs.tmux-ccm.version;
-        src = pkgs.customPkgs.tmux-ccm.src;
-        # Upstream (yohasebe/tmux-ccm) names the entrypoint `ccm.tmux`, not
-        # the mkTmuxPlugin default of `tmux_ccm.tmux` (derived from
-        # pluginName). Without this override the plugin loader silently fails
-        # with exit 127 and no ccm keybindings ever land.
-        rtpFilePath = "ccm.tmux";
-      };
 in
 {
   options.multiplexer.tmux = {
@@ -111,75 +81,47 @@ in
           '';
         }
 
-        # Enhanced Gruvbox theme with modern icons
-        {
-          plugin = tmux-gruvbox;
-          extraConfig = ''
-            # Modern icon set for better visual feedback
-            set -g @gruvbox_window_status_icon_enable "yes"
-            set -g @gruvbox_icon_window_last "󰖰"
-            set -g @gruvbox_icon_window_current "󰖯"
-            set -g @gruvbox_icon_window_zoom "󰁌"
-            set -g @gruvbox_icon_window_mark "󰃀"
-            set -g @gruvbox_icon_window_silent "󰂛"
-            set -g @gruvbox_icon_window_activity "󰖲"
-            set -g @gruvbox_icon_window_bell "󰂞"
-
-            # Theme configuration for consistency with Starship
-            set -g @gruvbox_flavour 'dark'
-            set -g @gruvbox_window_left_separator "│"
-            set -g @gruvbox_window_right_separator "│"
-            set -g @gruvbox_window_middle_separator "│"
-            set -g @gruvbox_window_number_position "right"
-
-            # Window display settings
-            set -g @gruvbox_window_default_fill "number"
-            set -g @gruvbox_window_default_text "#W#{?window_zoomed_flag, 󰁌,}"
-            set -g @gruvbox_window_current_fill "number"
-            set -g @gruvbox_window_current_text "#W#{?window_zoomed_flag, 󰁌,}"
-
-            # Status line modules for development workflow
-            set -g @gruvbox_status_modules_right "directory session date_time"
-            set -g @gruvbox_status_left_separator "│"
-            set -g @gruvbox_status_right_separator "│"
-            set -g @gruvbox_status_right_separator_inverse "no"
-            set -g @gruvbox_status_fill "icon"
-            set -g @gruvbox_status_connect_separator "no"
-
-            # Smart directory display
-            set -g @gruvbox_directory_text "#{s|$HOME|~|:pane_current_path}"
-          '';
-        }
+        # tmux-gruvbox removed — its mkTmuxPlugin wrapper points at
+        # `tmux_gruvbox.tmux` while upstream ships `gruvbox.tmux`, so the
+        # plugin loader returned exit 127 every conf reload. We never
+        # actually used the gruvbox theme — the status bar is fully
+        # hand-styled via the explicit `set -g status-*` lines below using
+        # Stylix base16 colours. Re-adding gruvbox would require
+        # `rtpFilePath = "gruvbox.tmux"` AND the explicit overrides would
+        # still win, so the plugin was net negative.
 
         # Development productivity plugins
         tmuxPlugins.tmux-thumbs # Quick text copying
         tmuxPlugins.extrakto # Enhanced text extraction
 
-        # tmux-ccm — attention manager for parallel Claude Code sessions.
-        # One tmux window = one project = one claude pane (state-tagged).
-        # `prefix + Tab` opens the popup dashboard. Menu/Tree bindings stay
-        # opt-in (set @ccm-key-menu / @ccm-key-tree) to avoid colliding with
-        # other plugins above.
-        {
-          plugin = tmux-ccm-plugin;
-          extraConfig = ''
-            # Override the default dashboard binding (prefix+Tab) because
-            # tmux-plugins.extrakto already binds prefix+Tab and wins the
-            # load order. C-Space rarely collides with other tmux plugins
-            # or shell readline bindings, so the dashboard chord becomes
-            # `prefix C-Space`.
-            set -g @ccm-key-dashboard C-Space
-
-            # Menu/tree/search stay opt-in. Uncomment to enable:
-            # set -g @ccm-key-menu C
-            # set -g @ccm-key-tree t
-            # set -g @ccm-key-search /
-          '';
-        }
+        # tmux-ccm removed from the plugin list — its ccm.tmux script
+        # installs an inject-status hook that, ~1 second after every
+        # conf reload, asynchronously CLEARS window-status-format and
+        # window-status-current-format to commandeer the status bar for
+        # ccm's own project list. The `@ccm-status-line` option offers
+        # modes 0/1/2 but ALL of them overwrite the user's window-status
+        # format (Mode 0 unsets to tmux default; Mode 1/2 set to ""). With
+        # ccm.tmux not running, the keybind it would have installed is
+        # re-created manually in the top-level extraConfig below —
+        # `prefix C-Space` → `display-popup -E "ccm dashboard"`. ccm CLI
+        # invocations (`ccm add`, `ccm status`, etc.) still work because
+        # pkgs.customPkgs.tmux-ccm is on PATH via home.packages.
       ];
 
       # Enhanced configuration for modern terminal workflows
       extraConfig = ''
+        # ========== ccm dashboard (manual, replaces ccm.tmux plugin) ==========
+        # The tmux-ccm plugin used to bind this and also set up
+        # status-bar injection that clobbered window-status-format
+        # (see the comment in the plugins list above). Manual bind
+        # keeps the popup-dashboard workflow without the side effects.
+        # `ccm` is on PATH via home.packages (pkgs.customPkgs.tmux-ccm).
+        bind C-Space display-popup -E -w 80% -h 60% -T "  ccm  " "ccm dashboard"
+
+        # Reduce Claude Code UI flicker in tmux (alt-screen rendering).
+        # ccm.tmux used to set this; preserve the behaviour.
+        set-environment -g CLAUDE_CODE_NO_FLICKER 1
+
         # ========== tmux-expose ==========
         # Mission Control-style session switcher with live previews.
         # Binary lives at ${pkgs.customPkgs.tmux-expose}/bin/tmux-expose.
