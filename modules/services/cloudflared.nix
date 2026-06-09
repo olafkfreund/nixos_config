@@ -30,6 +30,7 @@
 #   https://nixos.wiki/wiki/Cloudflare_tunnel
 { config
 , lib
+, pkgs
 , ...
 }:
 let
@@ -71,6 +72,43 @@ in
         rather than leaking that the tunnel exists.
       '';
     };
+
+    keepalive = {
+      enable = lib.mkEnableOption ''
+        Periodic GET against each ingress origin to keep apps warm.
+
+        Cloudflare opens a fresh TCP connection to the origin per request,
+        so any app behind the tunnel that idles aggressively (Node SPAs,
+        gunicorn workers, JVMs, podman containers without --keepalive)
+        will cold-start on the first hit and the SPA may render blank
+        while it boots. A 2-minute heartbeat sidesteps this entirely.
+
+        Hits the LOCAL origin URLs directly — does not exercise the
+        cloudflared edge path, just the origin app, which is what needs
+        keeping warm.
+      '';
+
+      interval = lib.mkOption {
+        type = lib.types.str;
+        default = "2min";
+        example = "5min";
+        description = ''
+          systemd `OnUnitActiveSec` interval between keepalive runs.
+          Default 2min is comfortably under typical idle-recycle windows
+          (Node `keepAliveTimeout`, gunicorn worker recycling, k8s HPA
+          scale-to-zero) without generating meaningful load.
+        '';
+      };
+
+      timeout = lib.mkOption {
+        type = lib.types.int;
+        default = 10;
+        description = ''
+          Per-origin curl timeout in seconds. Kept short so a single
+          slow origin doesn't delay the rest of the sweep.
+        '';
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -98,6 +136,43 @@ in
         # No matching hostname → quiet 404. Don't leak that the tunnel is up.
         default = "http_status:404";
         ingress = cfg.ingress;
+      };
+    };
+
+    # Origin keepalive — sweep each ingress URL on a timer so idle apps
+    # (Node SPAs, gunicorn, JVMs) don't cold-start on the first public
+    # hit and render a blank page while they boot. Hits LOCAL origins
+    # only; doesn't exercise the cloudflared edge path.
+    systemd.services.cloudflared-keepalive = lib.mkIf cfg.keepalive.enable {
+      description = "Warm-ping cloudflared tunnel origins";
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        DynamicUser = true;
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        NoNewPrivileges = true;
+        PrivateTmp = true;
+      };
+      script = lib.concatMapStringsSep "\n"
+        (host: ''
+          ${pkgs.curl}/bin/curl -sS -o /dev/null \
+            --max-time ${toString cfg.keepalive.timeout} \
+            -H 'User-Agent: cloudflared-keepalive/1.0' \
+            '${cfg.ingress.${host}}' \
+            || true
+        '')
+        (lib.attrNames cfg.ingress);
+    };
+
+    systemd.timers.cloudflared-keepalive = lib.mkIf cfg.keepalive.enable {
+      description = "Periodic warm-ping of cloudflared tunnel origins";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "5min";
+        OnUnitActiveSec = cfg.keepalive.interval;
+        Unit = "cloudflared-keepalive.service";
       };
     };
   };
