@@ -4,17 +4,31 @@
 # Idiot-proof update flow for NixOS (works for local AND remote targets):
 #   1) pre-flight: must be on main, working tree clean (flake.lock OK),
 #      and remote target (if any) reachable via SSH
-#   2) nix flake update <SCOPE>         (default SCOPE=all)
-#   3) no-op exit if lock unchanged AND host already current
-#   4) test-build target host closure   (abort commit on build failure)
-#   5) feature-branch + PR-merge of flake.lock → main
-#      (`main` is branch-protected; direct push is rejected. The script
-#      opens a PR via `gh pr create`, squash-merges it via `gh pr merge`,
-#      and pulls main back down. Net effect == old direct-push flow.)
-#   6) switch via `nh os switch` (nice progress UI + auto closure diff):
+#   2) nix flake update <SCOPE>         (default SCOPE=all — recommended;
+#      always pull latest of every input, otherwise you risk shipping a
+#      stale lock from a checkout that's behind main)
+#   3) splice nixpkgs + nixpkgs-unstable from GitHub ground truth
+#   4) no-op exit if lock unchanged AND host already current
+#   5) test-build target host closure   (abort commit on build failure)
+#   6) feature-branch + OPEN PR for flake.lock (NOT YET MERGED — merge is
+#      deferred until the host passes the post-deploy health check below)
+#   7) snapshot target's current generation symlink (for potential rollback)
+#   8) switch via `nh os switch` (nice progress UI + auto closure diff):
 #        - local  (HOST == $(hostname)): nh os switch --hostname HOST
 #        - remote (otherwise): nh os switch --hostname HOST --target-host HOST
 #          (builds locally, activates over SSH)
+#   9) post-deploy health check via scripts/health-checks/${HOST}.sh
+#       (executed on the target — locally or piped over SSH for remote)
+#  10) IF health passed: squash-merge the open PR + pull main
+#      IF health failed: rollback target to the snapshotted generation
+#                        AND close the PR + delete branch
+#                        AND discard the local flake.lock change so the
+#                        next deploy re-fetches upstream fresh
+#
+# Step 9 is the layer that catches upstream regressions that build cleanly
+# AND activate cleanly but leave the host non-functional — the 2026-06-08
+# mesa 26.1.1 / GNOME 50.0 silent compositor crash on Optimus PRIME-sync
+# is the motivating case (see commit d62a86f80 + post-mortem).
 #
 # Refuses to run if the working tree has dirty files other than flake.lock —
 # that forces unrelated drift to be handled first, avoiding the accidental
@@ -268,12 +282,14 @@ if ! nh os build --hostname "$HOST" .; then
 fi
 ok "build succeeded"
 
-# --- 9. Commit + PR-merge (ONLY if lock actually changed) ------------------
+# --- 9. Commit + open PR (NOT MERGED YET — merge is step 12) ---------------
 # Branch protection on `main` requires changes to land via PR. Direct push
 # was rejected starting 2026-04-26 (PR #359 / #361 / #362 all hit this).
-# We branch, commit, push the branch, open a PR, squash-merge it, and pull
-# main back down. Net effect for the user is identical to the old direct-
-# push flow, but gets through the protection rule.
+# We branch, commit, push the branch, and open a PR via `gh pr create`.
+# The squash-merge is deferred to step 12 — it only fires after the post-
+# deploy health check (step 11) passes. If health fails, step 12 instead
+# closes this PR and discards the local lock change, so a broken upstream
+# never lands on main.
 if [ $LOCK_CHANGED -eq 1 ]; then
   # Build a commit message with the nixpkgs delta + scope
   msg_subject="chore(flake): bump ${SCOPE} — nixpkgs ${old_rev:0:8} → ${new_rev:0:8}"
@@ -320,21 +336,15 @@ Built and verified locally against nixosConfigurations.${HOST} before opening th
     err "gh pr create failed: ${pr_url}"
   fi
   log "PR opened: ${pr_url}"
+  log "merge deferred until post-deploy health check passes"
 
-  log "squash-merging PR (waits for required checks if any)"
-  if ! gh pr merge "${pr_url}" --squash --delete-branch; then
-    git checkout main
-    err "PR merge failed — PR is open at ${pr_url}, deploy aborted. Resolve any required-check failure or merge conflict and re-run."
-  fi
-
-  log "syncing local main"
-  git checkout main
-  if ! git pull --ff-only origin main; then
-    err "could not fast-forward local main after merge. Resolve manually and re-run."
-  fi
-  ok "lock committed as $(git rev-parse --short HEAD) (via merged ${pr_url})"
+  # Surface PR + branch handles to the rollback/finalize code below.
+  PR_URL="${pr_url}"
+  BRANCH_NAME="${branch_name}"
 else
   log "skipping commit/push (lock unchanged); deploying existing state to ${HOST}"
+  PR_URL=""
+  BRANCH_NAME=""
 fi
 
 # --- 10. Switch (via nh — nice progress UI, unified local/remote) ----------
@@ -391,21 +401,95 @@ nh_switch_or_boot() {
   return "$rc"
 }
 
-# --no-deploy: lock is committed and closure is built+cached locally. Skip
-# the activation step and tell the user how to finish later. The cached
-# closure means stage 2 is a fast copy+activate (no rebuild).
+# --no-deploy: build is done, lock is on a feature branch + PR is OPEN but
+# UNMERGED (since merge is gated on the post-deploy health check that we're
+# now skipping). Tell the user. The cached closure means stage 2 — the
+# follow-up `nhs HOST` run when the target is reachable — is a fast copy +
+# activate + health-check + merge.
 if [ $NO_DEPLOY -eq 1 ]; then
-  ok "prebuild complete. lock is on origin/main; closure cached in local /nix/store."
+  ok "prebuild complete; closure cached locally."
+  if [ -n "${PR_URL:-}" ]; then
+    warn "PR ${PR_URL} is OPEN but UNMERGED (merge happens after a passing health check on a real deploy)."
+    log "branch: ${BRANCH_NAME}"
+  fi
   log "to deploy when ${HOST} is reachable, run:  nhs ${HOST}"
-  log "  (build will be a cache hit; only copy + activate over SSH remains)"
+  log "  (build will be a cache hit; only copy + activate + health-check + merge remains)"
   exit 0
 fi
 
+# --- 10b. Snapshot current generation for rollback -------------------------
+# `readlink -f /nix/var/nix/profiles/system` resolves to the absolute store
+# path of the active system derivation. We use that path directly with
+# switch-to-configuration if we need to revert — bypassing nh/nixos-rebuild
+# entirely so the rollback can't fail on stale flake state.
+log "snapshotting current generation on ${HOST} (for potential rollback)"
+case "$MODE" in
+  local) OLD_GEN_PATH=$(readlink -f /nix/var/nix/profiles/system) ;;
+  remote) OLD_GEN_PATH=$(ssh "$HOST" 'readlink -f /nix/var/nix/profiles/system') ;;
+esac
+if [ -z "${OLD_GEN_PATH:-}" ]; then
+  err "could not read ${HOST}'s current generation symlink — refusing to deploy without a rollback anchor"
+fi
+log "current generation: ${OLD_GEN_PATH##*/}"
+
+# Rollback path. Used both when nh os switch itself returns non-zero AND
+# when the post-deploy health check fails. Restores the target to
+# OLD_GEN_PATH, closes the unmerged PR, returns the local checkout to main,
+# discards the dirty flake.lock so the next run re-pulls upstream fresh,
+# then exits 1.
+rollback_and_close_pr() {
+  local reason="$1"
+  local rc=0
+  warn "============================================================"
+  warn "DEPLOY FAILED: ${reason}"
+  warn "============================================================"
+
+  if [ -n "${OLD_GEN_PATH:-}" ]; then
+    log "rolling back ${HOST} → ${OLD_GEN_PATH##*/}"
+    set +e
+    case "$MODE" in
+      local) sudo "${OLD_GEN_PATH}/bin/switch-to-configuration" switch ;;
+      remote) ssh "$HOST" "sudo ${OLD_GEN_PATH}/bin/switch-to-configuration switch" ;;
+    esac
+    rc=$?
+    set -e
+    if [ "$rc" -ne 0 ]; then
+      warn "rollback switch-to-configuration returned ${rc} — a reboot of ${HOST} will still recover (boot default is unchanged because we used \`nh os switch\`, not \`nh os boot\`, only when switch succeeded)"
+    else
+      ok "${HOST} rolled back"
+    fi
+  fi
+
+  if [ -n "${PR_URL:-}" ]; then
+    log "closing unmerged PR ${PR_URL}"
+    set +e
+    gh pr close "${PR_URL}" --delete-branch \
+      --comment "Auto-closed: post-deploy health check failed on ${HOST}. Lock NOT landed on main; the next \`nhs ${HOST}\` will re-pull upstream from scratch."
+    set -e
+    PR_URL=""
+  fi
+
+  # Return checkout to clean main. We're sitting on ${BRANCH_NAME} with a
+  # dirty flake.lock (the bump that just got rejected). Discard both so a
+  # re-run is genuinely fresh.
+  log "discarding local flake.lock change and returning to main"
+  set +e
+  git checkout main 2>/dev/null
+  if [ -n "${BRANCH_NAME:-}" ]; then
+    git branch -D "${BRANCH_NAME}" 2>/dev/null
+  fi
+  git checkout -- flake.lock 2>/dev/null
+  set -e
+
+  err "deploy aborted; ${HOST} rolled back. Re-run after upstream regression clears."
+}
+
+# --- 10c. Switch -----------------------------------------------------------
 case "$MODE" in
   local)
     log "nh os switch --hostname ${HOST} .  (local target, local build)"
     if ! nh_switch_or_boot --hostname "$HOST" .; then
-      err "local switch failed — commit is on origin/main. Investigate via \`journalctl -xe\` or rollback via \`nh os rollback\`."
+      rollback_and_close_pr "local nh os switch failed (see output above)"
     fi
     ;;
   remote)
@@ -413,9 +497,73 @@ case "$MODE" in
     # Build happens on this machine, closure ships via SSH.
     log "nh os switch --hostname ${HOST} --target-host ${HOST} .  (remote target, local build)"
     if ! nh_switch_or_boot --hostname "$HOST" --target-host "$HOST" .; then
-      err "remote switch on ${HOST} failed — commit is on origin/main. SSH in and investigate: \`ssh ${HOST} 'journalctl -xe'\` or rollback via \`ssh ${HOST} 'nh os rollback'\`."
+      rollback_and_close_pr "remote nh os switch on ${HOST} failed (see output above)"
     fi
     ;;
 esac
+
+# --- 11. Post-deploy health check -----------------------------------------
+#
+# Catches upstream regressions that pass build + activate but leave the host
+# non-functional (the motivating 2026-06-08 mesa/GNOME silent crash). Health
+# check scripts live in scripts/health-checks/<HOST>.sh and exit 0 = healthy.
+#
+# Skip if `nh os switch` fell back to `nh os boot` (the new gen isn't
+# running, only staged for next boot) — detected by comparing the running
+# /run/current-system against the expected closure path.
+log "verifying which generation is now running on ${HOST}"
+case "$MODE" in
+  local) current_now=$(readlink /run/current-system) ;;
+  remote) current_now=$(ssh "$HOST" 'readlink /run/current-system') ;;
+esac
+
+RUN_HEALTH_CHECK=1
+if [ "$current_now" != "$expected" ]; then
+  warn "running gen (${current_now##*/}) != expected (${expected##*/})"
+  warn "  → switch was deferred to next boot (pre-switch inhibitor)"
+  warn "  → skipping health check; PR will merge anyway because the BUILD is good"
+  warn "  → reboot ${HOST} and verify manually, then run the next deploy"
+  RUN_HEALTH_CHECK=0
+fi
+
+if [ "$RUN_HEALTH_CHECK" -eq 1 ]; then
+  HEALTH_SCRIPT="${REPO_ROOT}/scripts/health-checks/${HOST}.sh"
+  if [ -x "$HEALTH_SCRIPT" ]; then
+    log "post-deploy: waiting 15s for services to settle before health check"
+    sleep 15
+    log "running scripts/health-checks/${HOST}.sh on ${HOST}"
+    set +e
+    case "$MODE" in
+      local) bash "$HEALTH_SCRIPT" ;;
+      remote) ssh "$HOST" 'bash -s' <"$HEALTH_SCRIPT" ;;
+    esac
+    health_rc=$?
+    set -e
+    if [ "$health_rc" -ne 0 ]; then
+      rollback_and_close_pr "scripts/health-checks/${HOST}.sh returned ${health_rc} on ${HOST}"
+    fi
+    ok "health check passed"
+  else
+    warn "no health check script at scripts/health-checks/${HOST}.sh"
+    warn "  → deploy cannot be verified; consider adding one (see existing scripts as templates)"
+  fi
+fi
+
+# --- 12. Finalize: squash-merge the PR (lock lands on main) ---------------
+if [ -n "${PR_URL:-}" ]; then
+  log "health check passed (or skipped) — squash-merging PR ${PR_URL}"
+  if ! gh pr merge "${PR_URL}" --squash --delete-branch; then
+    warn "PR merge failed — ${HOST} is on the new generation but the lock is NOT on main."
+    warn "  PR still open at: ${PR_URL}"
+    warn "  Manual fix: merge via the UI, then  git checkout main && git pull --ff-only origin main"
+  else
+    log "syncing local main"
+    git checkout main
+    if ! git pull --ff-only origin main; then
+      err "could not fast-forward local main after merge. Resolve manually and re-run."
+    fi
+    ok "lock landed as $(git rev-parse --short HEAD) (via merged ${PR_URL})"
+  fi
+fi
 
 ok "done. ${HOST} is now on ${new_rev:0:10} (${new_date})."
