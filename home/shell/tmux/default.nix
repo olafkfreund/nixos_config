@@ -94,6 +94,57 @@ in
         tmuxPlugins.tmux-thumbs # Quick text copying
         tmuxPlugins.extrakto # Enhanced text extraction
 
+        # Session persistence — save layouts + restore after reboot.
+        # Pairs with t-smart-tmux-session-manager: smart-session creates
+        # them, resurrect/continuum keeps them alive across host restarts
+        # (kernel updates, p510 panics, etc). Continuum auto-restores on
+        # tmux start and saves every @continuum-save-interval minutes.
+        # @resurrect-strategy-nvim=session also persists nvim :mksession
+        # state so `vim -S` restores buffers/splits.
+        {
+          plugin = tmuxPlugins.resurrect;
+          extraConfig = ''
+            set -g @resurrect-strategy-nvim 'session'
+            set -g @resurrect-capture-pane-contents 'on'
+          '';
+        }
+        {
+          plugin = tmuxPlugins.continuum;
+          extraConfig = ''
+            set -g @continuum-restore 'on'
+            set -g @continuum-save-interval '15'
+          '';
+        }
+
+        # Floating scratchpad pane — complements display-popup uses
+        # already wired (ccm, expose, palette). Toggleable terminal
+        # overlay you can throw transient commands into without
+        # touching layout. Default trigger prefix-p collides with
+        # previous-window, so rebound to prefix-F (capital).
+        {
+          plugin = tmuxPlugins.tmux-floax;
+          extraConfig = ''
+            set -g @floax-bind 'F'
+            set -g @floax-width  '85%'
+            set -g @floax-height '85%'
+            set -g @floax-border-color '#${colors.base0B}'
+            set -g @floax-text-color   '#${colors.base05}'
+            set -g @floax-change-path 'true'
+            set -g @floax-session-name 'scratch'
+          '';
+        }
+
+        # Discoverable keybindings — like which-key in nvim. Default
+        # trigger is prefix-Space (i.e. b-Space here), opens a menu of
+        # all user-defined bindings. Complements tmux-palette: palette
+        # is fuzzy-search-then-act, which-key is browse-by-prefix.
+        {
+          plugin = tmuxPlugins.tmux-which-key;
+          extraConfig = ''
+            set -g @tmux-which-key-xdg-enable 1
+          '';
+        }
+
         # tmux-ccm removed from the plugin list — its ccm.tmux script
         # installs an inject-status hook that, ~1 second after every
         # conf reload, asynchronously CLEARS window-status-format and
@@ -145,6 +196,9 @@ in
         bind-key -n M-Space run-shell '${pkgs.customPkgs.tmux-palette}/bin/tmux-palette'
         bind-key -n M-p     run-shell '${pkgs.customPkgs.tmux-palette}/bin/tmux-palette'
         bind-key -n M-a     run-shell '${pkgs.customPkgs.tmux-palette}/bin/tmux-palette ai-tools'
+        # M-c → PIM palette (Calendar + Tasks + Mail via gog).
+        # See xdg.configFile."tmux-palette/palettes/pim.json" below.
+        bind-key -n M-c     run-shell '${pkgs.customPkgs.tmux-palette}/bin/tmux-palette pim'
 
         # ========== Terminal and Display Settings ==========
         set-option -g terminal-overrides ',xterm-256color:RGB,alacritty:RGB,kitty:RGB,foot:RGB,wezterm:RGB,ghostty:RGB'
@@ -311,17 +365,30 @@ in
         # finished). The explicit settings below define the entire theme
         # we actually want; gruvbox.tmux adds nothing.
         set -g status-left-length 40      # Override theme left length
-        set -g status-right-length 120    # Override theme right length
+        set -g status-right-length 200    # Override theme right length
         set -g window-status-separator " " # Clean separator between windows
 
         # ========== Remove Round Corners and Fix Powerline ==========
         # Force flat separators and prevent powerline curve characters
         set -g status-left "#{?client_prefix,#[bg=#${colors.base0A}]#[fg=#${colors.base00}],#[bg=#${colors.base0D}]#[fg=#${colors.base00}]} #S #[fg=default,bg=default] "
-        set -g status-right " #[fg=#${colors.base04}]#{s|$HOME|~|:pane_current_path} │ %H:%M │ %d-%b "
+        # Status-right reads cached gog (Google Workspace) output from
+        # ~/.cache/gog-status/{event,tasks}.txt — populated by the
+        # gog-status-cache systemd user timer every 5 min (definitions
+        # later in this file). Files may not exist on first tmux start;
+        # `2>/dev/null || true` keeps the status bar quiet until the
+        # first cache write. Bumped status-right-length to 200 above
+        # to fit the new segments without truncation.
+        set -g status-right " #[fg=#${colors.base0B}]#(cat $HOME/.cache/gog-status/event.txt 2>/dev/null || true)#[fg=default] #[fg=#${colors.base0A}]#(cat $HOME/.cache/gog-status/tasks.txt 2>/dev/null || true)#[fg=default] │ #[fg=#${colors.base04}]#{s|$HOME|~|:pane_current_path} │ %H:%M │ %d-%b "
 
-        # Override window status format to ensure clean appearance
-        set -g window-status-format " #I #W "
-        set -g window-status-current-format " #I #W "
+        # Override window status format to ensure clean appearance.
+        # Prefix with an AI-tool glyph when the pane's foreground
+        # process matches claude*, agy* (Antigravity / Gemini), or
+        # gemini* — gives visual at-a-glance window state for the AI
+        # workflow without having to read window names. #{m:pattern,str}
+        # is tmux's glob-match; pane_current_command is the immediate
+        # foreground process in the active pane of that window.
+        set -g window-status-format         " #{?#{m:claude*,#{pane_current_command}},⚡ ,#{?#{m:agy*,#{pane_current_command}},🛸 ,#{?#{m:gemini*,#{pane_current_command}},♊ ,}}}#I #W "
+        set -g window-status-current-format " #{?#{m:claude*,#{pane_current_command}},⚡ ,#{?#{m:agy*,#{pane_current_command}},🛸 ,#{?#{m:gemini*,#{pane_current_command}},♊ ,}}}#I #W "
 
         # Ensure no powerline characters are used
         set -g window-status-separator " │ "
@@ -340,7 +407,8 @@ in
     # Expose `ccm` (tmux-ccm's CLI) on user PATH so commands like
     # `ccm add`, `ccm status`, `ccm send <project> <msg>` work from any
     # shell, not just from inside the tmux popup that the plugin opens.
-    home.packages = [ pkgs.customPkgs.tmux-ccm ];
+    # The second list further below adds `gog-status-cache` (timer-fed
+    # status bar helper); module-system list merging keeps both.
 
     # tmux-palette active theme — full color override sourced from our
     # active stylix base16 scheme, so the palette popup is BYTE-IDENTICAL
@@ -418,6 +486,137 @@ in
           action.tmux = "split-window -h -l 35% -c '#{pane_current_path}' 'agy'";
         }
       ]);
+    };
+
+    # tmux-palette PIM launcher: triggered by M-c (defined above).
+    # Same shape as ai-tools.json — items wrap `gog` subcommands in
+    # tmux popups so calendar/tasks/mail are one keystroke away from
+    # any pane. Long-running TUI views (events watcher etc) use
+    # split-window instead so they survive popup dismissal.
+    xdg.configFile."tmux-palette/palettes/pim.json".text = builtins.toJSON {
+      title = "Personal (Gmail / Calendar / Tasks)";
+      icon = "📬";
+      command = "echo " + lib.escapeShellArg (builtins.toJSON [
+        {
+          icon = "📅";
+          iconColor = "#8ec07c";
+          title = "Calendar — Today";
+          subtitle = "Today's events (gog calendar events --today)";
+          action.tmux = "display-popup -w 85% -h 75% -E 'gog calendar events --today; echo; read -r -p \"[enter]\"'";
+        }
+        {
+          icon = "📆";
+          iconColor = "#8ec07c";
+          title = "Calendar — Next 7 days";
+          subtitle = "Upcoming events this week";
+          action.tmux = "display-popup -w 85% -h 85% -E 'gog calendar events --days 7; echo; read -r -p \"[enter]\"'";
+        }
+        {
+          icon = "✓";
+          iconColor = "#fabd2f";
+          title = "Tasks — Open list";
+          subtitle = "List open Google Tasks";
+          action.tmux = "display-popup -w 80% -h 75% -E 'gog tasks lists; echo; gog tasks list \"$(gog -j -p tasks lists 2>/dev/null | awk \"NR==1{print \\$1}\")\" 2>/dev/null; echo; read -r -p \"[enter]\"'";
+        }
+        {
+          icon = "📥";
+          iconColor = "#83a598";
+          title = "Gmail — Inbox";
+          subtitle = "Recent inbox (gog gmail)";
+          action.tmux = "display-popup -w 90% -h 90% -E 'gog gmail threads --label INBOX --max 25; echo; read -r -p \"[enter]\"'";
+        }
+        {
+          icon = "🔍";
+          iconColor = "#83a598";
+          title = "Gmail — Search";
+          subtitle = "Search threads (prompts for query)";
+          action.tmux = "command-prompt -p 'gmail search:' \"display-popup -w 90% -h 90% -E 'gog gmail threads --search %%; echo; read -r -p \\\"[enter]\\\"'\"";
+        }
+        {
+          icon = "💬";
+          iconColor = "#d3869b";
+          title = "Chat — Spaces";
+          subtitle = "List Google Chat spaces";
+          action.tmux = "display-popup -w 80% -h 70% -E 'gog chat spaces; echo; read -r -p \"[enter]\"'";
+        }
+      ]);
+    };
+
+    # gog status cache — populates ~/.cache/gog-status/{event,tasks}.txt
+    # for the status-right cat reads. Refreshed by a systemd user timer
+    # every 5 min (definition below). Empty output ⇒ no segment shown.
+    # Truncates titles to 30 chars to keep status bar tidy.
+    home.packages = [
+      pkgs.customPkgs.tmux-ccm
+      (pkgs.writeShellApplication {
+        name = "gog-status-cache";
+        runtimeInputs = with pkgs; [ gogcli jq coreutils ];
+        text = ''
+          # Cache dir + atomic writes via temp + mv. Failures leave the
+          # previous cache in place — tmux keeps showing the last good
+          # value instead of flickering empty on transient API blips.
+          cache="$HOME/.cache/gog-status"
+          mkdir -p "$cache"
+
+          # Next event in the next 24h, skipping all-day and
+          # workingLocation entries (those are calendar metadata, not
+          # meetings). Format: "📅 SUMMARY HH:MM" (24h time).
+          tmp_event="$(mktemp)"
+          if gog -j calendar events primary --days 1 --max 20 \
+               --select 'summary,start,eventType' --results-only \
+               2>/dev/null \
+             | jq -r '[ .[]
+                       | select(.eventType != "workingLocation")
+                       | select(.start.dateTime != null) ]
+                      | sort_by(.start.dateTime)
+                      | .[0]
+                      | if . == null then ""
+                        else "📅 " + (.summary // "(no title)" | .[0:30]) + " "
+                             + (.start.dateTime | fromdateiso8601 | strftime("%H:%M"))
+                        end' \
+               > "$tmp_event" 2>/dev/null; then
+            mv -f "$tmp_event" "$cache/event.txt"
+          else
+            rm -f "$tmp_event"
+          fi
+
+          # Open task count across the default tasks list. Renders as
+          # "✓ N" if N>0, empty otherwise.
+          tmp_tasks="$(mktemp)"
+          tasklist_id="$(gog -j tasks lists --select id --results-only 2>/dev/null \
+                         | jq -r '.[0].id // empty')"
+          if [ -n "$tasklist_id" ] \
+             && gog -j tasks list "$tasklist_id" --select status --results-only 2>/dev/null \
+                | jq -r 'map(select(.status == "needsAction")) | length
+                         | if . > 0 then "✓ \(.)" else "" end' \
+                > "$tmp_tasks"; then
+            mv -f "$tmp_tasks" "$cache/tasks.txt"
+          else
+            rm -f "$tmp_tasks"
+          fi
+        '';
+      })
+    ];
+
+    # 5-minute timer that refreshes the status cache. OnBootSec=30s
+    # gives the desktop session time to settle (gog OAuth cache, dbus,
+    # network) before the first run. RemainAfterExit=false because it's
+    # oneshot — the timer re-fires it on the schedule.
+    systemd.user.services.gog-status-cache = {
+      Unit.Description = "Refresh gog (Google Tasks/Calendar) status cache for tmux";
+      Service = {
+        Type = "oneshot";
+        ExecStart = "${config.home.profileDirectory}/bin/gog-status-cache";
+      };
+    };
+    systemd.user.timers.gog-status-cache = {
+      Unit.Description = "Periodic refresh of gog status cache";
+      Timer = {
+        OnBootSec = "30s";
+        OnUnitActiveSec = "5min";
+        Unit = "gog-status-cache.service";
+      };
+      Install.WantedBy = [ "timers.target" ];
     };
   };
 }
