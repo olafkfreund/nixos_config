@@ -158,10 +158,17 @@ in
         {
           plugin = tmux-ccm-plugin;
           extraConfig = ''
-            # Default binding is prefix+Tab (set by plugin). To opt into
-            # menu/tree, uncomment:
+            # Override the default dashboard binding (prefix+Tab) because
+            # tmux-plugins.extrakto already binds prefix+Tab and wins the
+            # load order. C-Space rarely collides with other tmux plugins
+            # or shell readline bindings, so the dashboard chord becomes
+            # `prefix C-Space`.
+            set -g @ccm-key-dashboard C-Space
+
+            # Menu/tree/search stay opt-in. Uncomment to enable:
             # set -g @ccm-key-menu C
             # set -g @ccm-key-tree t
+            # set -g @ccm-key-search /
           '';
         }
       ];
