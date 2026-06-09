@@ -46,6 +46,7 @@ in
       ../../modules/services/kometa # Plex Meta Manager — collections, posters, metadata
       ../../modules/services/plex-auto-languages # Per-show audio/sub track memorization
       ../../modules/services/n8n.nix # Workflow automation (media-recommendation engine)
+      ../../modules/services/ntfy.nix # Push notification server (ntfy-sh)
       ../../modules/services/cloudflared.nix # Cloudflare Tunnel — public ingress (CGNAT-safe)
       # Desktop-specific imports (needed for GNOME):
       # ./nixos/greetd.nix      # Display manager - using GDM instead
@@ -676,6 +677,22 @@ in
     publicUrl = "https://n8n.freundcloud.org.uk";
   };
 
+  features.ntfy = {
+    enable = true;
+    baseUrl = "https://ntfy.freundcloud.org.uk";
+    # port defaults to 2586; attachmentSizeLimit to 15M; attachmentTotalLimit to 2G
+    #
+    # After first deploy, create an admin account:
+    #   ssh p510 -- sudo ntfy user add --role=admin olafkfreund
+    #   ssh p510 -- sudo ntfy user change-pass olafkfreund
+    #
+    # Then subscribe at https://ntfy.freundcloud.org.uk (web app) or the
+    # ntfy mobile app (iOS / Android) using the same credentials.
+    #
+    # The Cloudflare DNS CNAME must be created once:
+    #   cloudflared tunnel route dns p510-home ntfy.freundcloud.org.uk
+  };
+
   # Cloudflare Tunnel — public ingress under freundcloud.org.uk.
   # Bootstrap (one-time):
   #   1. On a workstation with browser: `cloudflared login` (need
@@ -734,6 +751,10 @@ in
       # own login is the only thing protecting them once this is public.
       # Use a strong password (or front with Cloudflare Access if doubting).
       "n8n.freundcloud.org.uk" = "http://localhost:5678";
+      # ntfy-sh — self-hosted push notifications. Runs on loopback; auth enforced
+      # via deny-all default (agenix ntfy-env). Create the DNS CNAME once:
+      #   cloudflared tunnel route dns p510-home ntfy.freundcloud.org.uk
+      "ntfy.freundcloud.org.uk" = "http://localhost:2586";
     };
 
     # Warm-ping each origin every 2 minutes so idle apps (Backstage Node

@@ -118,6 +118,13 @@ in
   #   agenix -e secrets/audiobook-mcp-env.age
   "secrets/audiobook-mcp-env.age".publicKeys = allUsers ++ [ p510 ];
 
+  # ntfy-sh environment file (EnvironmentFile) on p510 — push notification
+  # server. Contains: NTFY_AUTH_DEFAULT_ACCESS (deny-all for public instance).
+  # Add admin user post-deploy with: ssh p510 -- sudo ntfy user add --role=admin <user>
+  # Edit with:
+  #   agenix -e secrets/ntfy-env.age
+  "secrets/ntfy-env.age".publicKeys = allUsers ++ [ p510 ];
+
   # media-bot environment file (EnvironmentFile) on p510 — household
   # Telegram bot. Contains: TELEGRAM_BOT_TOKEN, OLLAMA_BASE_URL,
   # OLLAMA_MODEL, plus *arr API keys and PLEX_TOKEN (duplicated from
