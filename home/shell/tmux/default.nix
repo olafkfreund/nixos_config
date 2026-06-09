@@ -625,10 +625,16 @@ in
       # the window indicator when output stops). Combined they cover
       # ~80% of the "task done" signal a real hook would provide. Drop
       # both in one commit when agy ships a hook system.
+      #
+      # Icon bundled in repo at assets/icons/antigravity.svg — the
+      # official Antigravity IDE logo, lands in the nix store as a
+      # reproducible path that notify-send -i resolves.
       (pkgs.writeShellScriptBin "agy-notify" ''
         ${pkgs.coreutils}/bin/env agy "$@"
         rc=$?
-        ${pkgs.libnotify}/bin/notify-send -u normal -i dialog-information \
+        ${pkgs.libnotify}/bin/notify-send -u normal \
+          -i ${../../../assets/icons/antigravity.svg} \
+          -a "Antigravity" \
           "🛸 Antigravity" "Session ended (exit=$rc)" 2>/dev/null || true
         exit "$rc"
       '')

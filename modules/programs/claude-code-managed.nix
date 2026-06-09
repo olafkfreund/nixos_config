@@ -91,10 +91,16 @@ let
   # returning quickly. Rate limiting is per-event-type via a tiny file in
   # XDG_RUNTIME_DIR so Stop spam (every assistant turn) doesn't drown the
   # status bar.
+  # Claude / Anthropic brand icon — bundled in repo at assets/icons/
+  # so it lands in the nix store as a reproducible path the notify-send
+  # `-i` flag can resolve. SVG has the Anthropic #D77655 orange baked in.
+  claudeIcon = ../../assets/icons/claude.svg;
+
   notifyScript = pkgs.writeShellApplication {
     name = "claude-notify";
     runtimeInputs = with pkgs; [ jq libnotify tmux coreutils ];
     text = ''
+      icon_path=${claudeIcon}
       cmd="''${1:-help}"
       payload="$(cat)"
       state_dir="''${XDG_RUNTIME_DIR:-/tmp}/claude-notify"
@@ -112,7 +118,7 @@ let
         notification)
           text="''${msg:-Claude needs your attention}"
           if [ "$use_desktop" = "1" ] && command -v notify-send >/dev/null 2>&1; then
-            notify-send -u normal -i dialog-information "✻ Claude · $cwd" "$text" &
+            notify-send -u normal -i "$icon_path" -a "Claude Code" "✻ Claude · $cwd" "$text" &
           fi
           if [ "$use_tmux" = "1" ] && [ -n "''${TMUX:-}" ]; then
             # Small top-right corner popup so it reads as a notification,
