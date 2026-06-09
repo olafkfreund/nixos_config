@@ -357,11 +357,17 @@ in
         # Clear screen and history
         bind C-l send-keys 'clear' Enter \; clear-history
 
-        # ========== Apply Theme ==========
-        run-shell "${tmux-gruvbox}/share/tmux-plugins/tmux-gruvbox/gruvbox.tmux"
-
-        # ========== Override Theme Settings for Alignment ==========
-        # Apply our alignment fixes after theme loads
+        # ========== Status-bar theme (explicit, no gruvbox.tmux) ==========
+        # Used to call gruvbox.tmux here as a workaround for the home-manager
+        # mkTmuxPlugin auto-loader pointing at the wrong filename
+        # (tmux_gruvbox.tmux vs upstream's gruvbox.tmux). Removed because the
+        # workaround re-ran gruvbox AFTER the explicit overrides below, and
+        # gruvbox's $window_format computation produced an empty
+        # window-status-format that overrode the intended " #I #W " string
+        # async, leaving every window's name as an empty box in the status
+        # bar (visible briefly after reload, then gone once gruvbox
+        # finished). The explicit settings below define the entire theme
+        # we actually want; gruvbox.tmux adds nothing.
         set -g status-left-length 40      # Override theme left length
         set -g status-right-length 120    # Override theme right length
         set -g window-status-separator " " # Clean separator between windows
