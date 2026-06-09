@@ -115,8 +115,14 @@ let
             notify-send -u normal -i dialog-information "✻ Claude · $cwd" "$text" &
           fi
           if [ "$use_tmux" = "1" ] && [ -n "''${TMUX:-}" ]; then
+            # Pipe through `less -R` so the popup waits on `q` (native
+            # less dismiss key) and tolerates long messages (paginates).
+            # Earlier `read -r _` was line-mode + needed Enter — bare
+            # `q` did nothing; only ESC worked, because tmux intercepts
+            # it at the popup level. Consistent with the pim-popup
+            # pattern elsewhere in the config.
             tmux display-popup -w 70% -h 40% -E \
-              "printf '\\033[1;33m✻ Claude · %s\\033[0m\\n\\n%s\\n\\nPress q to dismiss.\\n' '$cwd' '$text'; read -r _" &
+              "printf '\\033[1;33m✻ Claude · %s\\033[0m\\n\\n%s\\n' '$cwd' '$text' | less -R" &
           fi
           ;;
 
