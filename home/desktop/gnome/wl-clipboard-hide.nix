@@ -12,11 +12,20 @@ in
   # app" and shows it in the dock — once per wl-copy invocation. This
   # also tends to steal focus, breaking copy/paste workflows in practice.
   #
-  # We can't fix the underlying protocol mismatch from NixOS, but we can
-  # provide a NoDisplay .desktop entry mapped to the same app_id via
-  # StartupWMClass. GNOME Shell then associates the dummy toplevel with
-  # this entry and suppresses it from the app grid (and on most GNOME
-  # versions, from the dock's running-apps list too).
+  # Two complementary defences are wired in this repo:
+  #
+  #   1. This file — a NoDisplay .desktop entry mapped to the wl-clipboard
+  #      app_id, which keeps the entry out of the app grid / Activities
+  #      overview / launcher.
+  #
+  #   2. wl-paste-watch.nix — a user systemd service that runs
+  #      `wl-paste --watch` so each wl-copy's data is consumed
+  #      immediately, the supersession event fires deterministically,
+  #      and the dummy toplevel exits. This is what actually keeps the
+  #      dock clean. On GNOME 50+ at least, NoDisplay does NOT hide
+  #      running windows from the dock's running-apps section —
+  #      contrary to what the original commit message of this file
+  #      (#808) hoped for.
   #
   # Filename matters: GNOME maps app_id -> <app_id>.desktop, so the entry
   # key here must be the literal `io.github.bugaevc.wl-clipboard` string.
