@@ -115,13 +115,13 @@ let
             notify-send -u normal -i dialog-information "✻ Claude · $cwd" "$text" &
           fi
           if [ "$use_tmux" = "1" ] && [ -n "''${TMUX:-}" ]; then
-            # Pipe through `less -R` so the popup waits on `q` (native
-            # less dismiss key) and tolerates long messages (paginates).
-            # Earlier `read -r _` was line-mode + needed Enter — bare
-            # `q` did nothing; only ESC worked, because tmux intercepts
-            # it at the popup level. Consistent with the pim-popup
-            # pattern elsewhere in the config.
-            tmux display-popup -w 70% -h 40% -E \
+            # Small top-right corner popup so it reads as a notification,
+            # not a takeover. `-x R` aligns the popup's right edge to
+            # the terminal's right edge; `-y S` aligns it to the status
+            # line (status is at top here → popup sits just below it).
+            # Piped through `less -R` so `q` dismisses (vim-style) and
+            # long messages paginate. ANSI title color survives -R.
+            tmux display-popup -w 60 -h 10 -x R -y S -E \
               "printf '\\033[1;33m✻ Claude · %s\\033[0m\\n\\n%s\\n' '$cwd' '$text' | less -R" &
           fi
           ;;
