@@ -49,6 +49,13 @@ in
           "spotify-controller@narkagni"
           "accent-directories@taiwbi.com"
           "forge@jmmaranan.com"
+          # Clipboard Indicator — panel-bar clipboard history. Paired with
+          # the wl-paste --watch user service (home/desktop/gnome/wl-paste-watch.nix)
+          # which actually drains wl_data_source ownership so wl-copy
+          # zombies stop piling up in the dock. The extension itself
+          # only provides the UI; without the watcher daemon the
+          # dock-icon problem persists.
+          "clipboard-indicator@tudmotu.com"
           # User-managed drift — see policy comment above.
           "aurora-shell@luminusos.github.io"
         ];
@@ -117,6 +124,7 @@ in
         gnomeExtensions.bluetooth-battery-meter
         gnomeExtensions.dim-background-windows
         gnomeExtensions.yet-another-radio
+        gnomeExtensions.clipboard-indicator
 
         # Manually-packaged extensions (extensions.gnome.org pinned ZIPs,
         # see pkgs/gnome-ext-*). Not in nixpkgs.
