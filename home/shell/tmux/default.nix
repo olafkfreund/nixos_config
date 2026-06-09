@@ -34,6 +34,11 @@ let
         pluginName = "tmux-ccm";
         version = pkgs.customPkgs.tmux-ccm.version;
         src = pkgs.customPkgs.tmux-ccm.src;
+        # Upstream (yohasebe/tmux-ccm) names the entrypoint `ccm.tmux`, not
+        # the mkTmuxPlugin default of `tmux_ccm.tmux` (derived from
+        # pluginName). Without this override the plugin loader silently fails
+        # with exit 127 and no ccm keybindings ever land.
+        rtpFilePath = "ccm.tmux";
       };
 in
 {
