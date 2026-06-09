@@ -387,8 +387,8 @@ in
         # workflow without having to read window names. #{m:pattern,str}
         # is tmux's glob-match; pane_current_command is the immediate
         # foreground process in the active pane of that window.
-        set -g window-status-format         " #{?#{m:claude*,#{pane_current_command}},⚡ ,#{?#{m:agy*,#{pane_current_command}},🛸 ,#{?#{m:gemini*,#{pane_current_command}},♊ ,}}}#I #W "
-        set -g window-status-current-format " #{?#{m:claude*,#{pane_current_command}},⚡ ,#{?#{m:agy*,#{pane_current_command}},🛸 ,#{?#{m:gemini*,#{pane_current_command}},♊ ,}}}#I #W "
+        set -g window-status-format         " #{?#{m:claude*,#{pane_current_command}},✻ ,#{?#{m:agy*,#{pane_current_command}},🛸 ,#{?#{m:gemini*,#{pane_current_command}},♊ ,}}}#I #W "
+        set -g window-status-current-format " #{?#{m:claude*,#{pane_current_command}},✻ ,#{?#{m:agy*,#{pane_current_command}},🛸 ,#{?#{m:gemini*,#{pane_current_command}},♊ ,}}}#I #W "
 
         # Ensure no powerline characters are used
         set -g window-status-separator " │ "
@@ -451,14 +451,14 @@ in
       icon = "🤖";
       command = "echo " + lib.escapeShellArg (builtins.toJSON [
         {
-          icon = "⚡";
+          icon = "✻";
           iconColor = "#cc8822";
           title = "Claude Code (Popup)";
           subtitle = "Launch Claude overlay in floating window";
           action.tmux = "display-popup -w 85% -h 85% -d '#{pane_current_path}' -E 'claude --dangerously-skip-permissions --resume --remote-control'";
         }
         {
-          icon = "⚡";
+          icon = "✻";
           iconColor = "#cc8822";
           title = "Claude Code (Split Right)";
           subtitle = "Open Claude in a 35% side split";
@@ -489,55 +489,117 @@ in
     };
 
     # tmux-palette PIM launcher: triggered by M-c (defined above).
-    # Same shape as ai-tools.json — items wrap `gog` subcommands in
-    # tmux popups so calendar/tasks/mail are one keystroke away from
-    # any pane. Long-running TUI views (events watcher etc) use
-    # split-window instead so they survive popup dismissal.
+    # All actions defer to the `pim-popup` helper (writeShellApplication
+    # below) which wraps gog subcommands and pipes through `less -R` so
+    # the popup waits for `q` instead of closing on a POSIX sh failure
+    # (the previous design embedded bash-only `read -r -p` which broke
+    # under tmux's /bin/sh -c — popups appeared empty). Chat entry was
+    # dropped because the Google Chat API isn't enabled on the account
+    # (`gog chat spaces list` returns 404 notFound).
     xdg.configFile."tmux-palette/palettes/pim.json".text = builtins.toJSON {
       title = "Personal (Gmail / Calendar / Tasks)";
       icon = "📬";
       command = "echo " + lib.escapeShellArg (builtins.toJSON [
+        # ---------- Calendar ----------
         {
           icon = "📅";
           iconColor = "#8ec07c";
           title = "Calendar — Today";
-          subtitle = "Today's events (gog calendar events --today)";
-          action.tmux = "display-popup -w 85% -h 75% -E 'gog calendar events --today; echo; read -r -p \"[enter]\"'";
+          subtitle = "Today's events";
+          action.tmux = "display-popup -w 85% -h 75% -E 'pim-popup events-today'";
+        }
+        {
+          icon = "📅";
+          iconColor = "#8ec07c";
+          title = "Calendar — Tomorrow";
+          subtitle = "Tomorrow's events";
+          action.tmux = "display-popup -w 85% -h 75% -E 'pim-popup events-tomorrow'";
         }
         {
           icon = "📆";
           iconColor = "#8ec07c";
           title = "Calendar — Next 7 days";
           subtitle = "Upcoming events this week";
-          action.tmux = "display-popup -w 85% -h 85% -E 'gog calendar events --days 7; echo; read -r -p \"[enter]\"'";
+          action.tmux = "display-popup -w 85% -h 85% -E 'pim-popup events-week'";
         }
+        {
+          icon = "🎯";
+          iconColor = "#fabd2f";
+          title = "Calendar — Next meeting";
+          subtitle = "Next timed event, full description (Teams/Zoom/Meet links)";
+          action.tmux = "display-popup -w 90% -h 90% -E 'pim-popup events-next'";
+        }
+        # ---------- Tasks ----------
         {
           icon = "✓";
           iconColor = "#fabd2f";
-          title = "Tasks — Open list";
-          subtitle = "List open Google Tasks";
-          action.tmux = "display-popup -w 80% -h 75% -E 'gog tasks lists; echo; gog tasks list \"$(gog -j -p tasks lists 2>/dev/null | awk \"NR==1{print \\$1}\")\" 2>/dev/null; echo; read -r -p \"[enter]\"'";
+          title = "Tasks — Open";
+          subtitle = "Open Google Tasks";
+          action.tmux = "display-popup -w 85% -h 80% -E 'pim-popup tasks'";
         }
+        {
+          icon = "⚠️";
+          iconColor = "#fb4934";
+          title = "Tasks — Overdue";
+          subtitle = "Tasks past their due date";
+          action.tmux = "display-popup -w 85% -h 75% -E 'pim-popup tasks-overdue'";
+        }
+        {
+          icon = "📋";
+          iconColor = "#fabd2f";
+          title = "Tasks — All (incl. completed)";
+          subtitle = "Open + completed, last 100";
+          action.tmux = "display-popup -w 85% -h 85% -E 'pim-popup tasks-all'";
+        }
+        # ---------- Gmail ----------
         {
           icon = "📥";
           iconColor = "#83a598";
           title = "Gmail — Inbox";
-          subtitle = "Recent inbox (gog gmail)";
-          action.tmux = "display-popup -w 90% -h 90% -E 'gog gmail threads --label INBOX --max 25; echo; read -r -p \"[enter]\"'";
+          subtitle = "Latest 25 threads in:inbox";
+          action.tmux = "display-popup -w 95% -h 90% -E 'pim-popup inbox'";
+        }
+        {
+          icon = "🔴";
+          iconColor = "#fb4934";
+          title = "Gmail — Unread";
+          subtitle = "Unread inbox (is:unread label:INBOX)";
+          action.tmux = "display-popup -w 95% -h 90% -E 'pim-popup unread'";
+        }
+        {
+          icon = "⭐";
+          iconColor = "#fabd2f";
+          title = "Gmail — Starred";
+          subtitle = "Starred messages";
+          action.tmux = "display-popup -w 95% -h 90% -E 'pim-popup starred'";
+        }
+        {
+          icon = "❗";
+          iconColor = "#fb4934";
+          title = "Gmail — Important";
+          subtitle = "Important messages";
+          action.tmux = "display-popup -w 95% -h 90% -E 'pim-popup important'";
         }
         {
           icon = "🔍";
           iconColor = "#83a598";
           title = "Gmail — Search";
-          subtitle = "Search threads (prompts for query)";
-          action.tmux = "command-prompt -p 'gmail search:' \"display-popup -w 90% -h 90% -E 'gog gmail threads --search %%; echo; read -r -p \\\"[enter]\\\"'\"";
+          subtitle = "Prompts for a Gmail query (from:foo, has:attachment, …)";
+          action.tmux = "command-prompt -p 'gmail search:' 'display-popup -w 95% -h 90% -E \"pim-popup search %%\"'";
         }
         {
-          icon = "💬";
+          icon = "🏷️";
           iconColor = "#d3869b";
-          title = "Chat — Spaces";
-          subtitle = "List Google Chat spaces";
-          action.tmux = "display-popup -w 80% -h 70% -E 'gog chat spaces; echo; read -r -p \"[enter]\"'";
+          title = "Gmail — Labels";
+          subtitle = "Browse all Gmail labels";
+          action.tmux = "display-popup -w 70% -h 80% -E 'pim-popup labels'";
+        }
+        {
+          icon = "📖";
+          iconColor = "#83a598";
+          title = "Gmail — Read message";
+          subtitle = "Prompts for a message id (copy from inbox view)";
+          action.tmux = "command-prompt -p 'message id:' 'display-popup -w 95% -h 90% -E \"pim-popup read %%\"'";
         }
       ]);
     };
@@ -548,6 +610,186 @@ in
     # Truncates titles to 30 chars to keep status bar tidy.
     home.packages = [
       pkgs.customPkgs.tmux-ccm
+
+      # PIM popup helper — called by the M-c palette. Each subcommand
+      # wraps a gog query and pipes through less so the popup waits for
+      # `q` instead of closing on a POSIX `sh` failure (the previous
+      # design embedded `read -r -p` which is bash-only; tmux's
+      # display-popup -E runs through /bin/sh and exited immediately,
+      # making popups appear empty). All output is ANSI-passthrough
+      # (less -R) so gog colors survive. Adding new subcommands here
+      # is the only change needed when extending the palette.
+      (pkgs.writeShellApplication {
+        name = "pim-popup";
+        runtimeInputs = with pkgs; [ gogcli jq less coreutils ];
+        text = ''
+          cmd="''${1:-help}"
+          shift || true
+
+          first_tasklist_id() {
+            gog -j tasks lists --select id --results-only 2>/dev/null \
+              | jq -r '.[0].id // empty'
+          }
+
+          case "$cmd" in
+            # ---------- Calendar ----------
+            events-today)
+              { echo "── Today's events ──"; echo;
+                gog calendar events --today 2>&1 || echo "(error)"; } \
+                | less -R
+              ;;
+            events-tomorrow)
+              { echo "── Tomorrow's events ──"; echo;
+                gog calendar events --tomorrow 2>&1 || echo "(error)"; } \
+                | less -R
+              ;;
+            events-week)
+              { echo "── Upcoming events (next 7 days) ──"; echo;
+                gog calendar events --days 7 2>&1 || echo "(error)"; } \
+                | less -R
+              ;;
+            events-next)
+              # Next timed (non-workingLocation) event in next 7 days.
+              # Rendered via `event get` so the popup shows the full
+              # description with Teams/Zoom/Meet links intact.
+              next_id="$(gog -j calendar events --days 7 --max 50 \
+                          --select 'id,start,eventType' --results-only 2>/dev/null \
+                         | jq -r '[ .[]
+                                    | select(.eventType != "workingLocation")
+                                    | select(.start.dateTime != null) ]
+                                  | sort_by(.start.dateTime) | .[0].id // empty')"
+              { echo "── Next meeting ──"; echo;
+                if [ -n "$next_id" ]; then
+                  gog calendar event primary "$next_id" 2>&1 || echo "(error)"
+                else
+                  echo "(no upcoming timed events in the next 7 days)"
+                fi; } \
+                | less -R
+              ;;
+
+            # ---------- Tasks ----------
+            tasks)
+              list_id="$(first_tasklist_id)"
+              { echo "── Open tasks ──"; echo;
+                if [ -n "$list_id" ]; then
+                  gog tasks list "$list_id" 2>&1 || echo "(error)"
+                else
+                  echo "(could not auto-discover a tasklist id)"
+                fi; } \
+                | less -R
+              ;;
+            tasks-overdue)
+              # Overdue = needsAction + due < now-utc. All date math in jq
+              # so we don't depend on locale-tz parsing in the shell.
+              list_id="$(first_tasklist_id)"
+              { echo "── Overdue tasks ──"; echo;
+                if [ -n "$list_id" ]; then
+                  now_epoch="$(date -u +%s)"
+                  gog -j tasks list "$list_id" --results-only 2>/dev/null \
+                    | jq -r --argjson now "$now_epoch" '
+                        # Google Tasks emits due as "...000Z" — jq
+                        # fromdateiso8601 rejects fractional seconds,
+                        # so normalize ".000Z" → "Z" before parsing.
+                        def to_epoch: sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601;
+                        [ .[]
+                          | select(.status == "needsAction")
+                          | select(.due != null)
+                          | select((.due | to_epoch) < $now) ]
+                        | if length == 0 then "(none — nice)"
+                          else
+                            "DUE         TITLE",
+                            (.[] | "\(.due[0:10])  \(.title)")
+                          end'
+                else
+                  echo "(could not auto-discover a tasklist id)"
+                fi; } \
+                | less -R
+              ;;
+            tasks-all)
+              list_id="$(first_tasklist_id)"
+              { echo "── All tasks (incl. completed) ──"; echo;
+                if [ -n "$list_id" ]; then
+                  gog tasks list "$list_id" --show-completed --max 100 2>&1 || echo "(error)"
+                else
+                  echo "(could not auto-discover a tasklist id)"
+                fi; } \
+                | less -R
+              ;;
+
+            # ---------- Gmail ----------
+            inbox)
+              { echo "── Inbox (latest 25) ──"; echo;
+                gog gmail search "in:inbox" --max 25 2>&1 || echo "(error)"; } \
+                | less -R
+              ;;
+            unread)
+              { echo "── Unread inbox ──"; echo;
+                gog gmail search "is:unread label:INBOX" --max 25 2>&1 || echo "(error)"; } \
+                | less -R
+              ;;
+            starred)
+              { echo "── Starred ──"; echo;
+                gog gmail search "is:starred" --max 25 2>&1 || echo "(error)"; } \
+                | less -R
+              ;;
+            important)
+              { echo "── Important ──"; echo;
+                gog gmail search "is:important" --max 25 2>&1 || echo "(error)"; } \
+                | less -R
+              ;;
+            search)
+              query="''${*:-}"
+              if [ -z "$query" ]; then
+                echo "usage: pim-popup search <query>" >&2; exit 2
+              fi
+              { echo "── Gmail search: $query ──"; echo;
+                gog gmail search "$query" --max 25 2>&1 || echo "(error)"; } \
+                | less -R
+              ;;
+            labels)
+              { echo "── Labels ──"; echo;
+                gog gmail labels list 2>&1 || echo "(error)"; } \
+                | less -R
+              ;;
+            read)
+              msg_id="''${1:-}"
+              if [ -z "$msg_id" ]; then
+                echo "usage: pim-popup read <messageId>" >&2; exit 2
+              fi
+              { echo "── Message $msg_id ──"; echo;
+                gog gmail get "$msg_id" 2>&1 || echo "(error)"; } \
+                | less -R
+              ;;
+
+            help | *)
+              cat <<'USAGE'
+          pim-popup — tmux M-c palette helper around gog
+
+          Calendar:
+            events-today        today's events
+            events-tomorrow     tomorrow's events
+            events-week         next 7 days
+            events-next         next meeting with full description (Teams/Zoom links)
+
+          Tasks:
+            tasks               open tasks
+            tasks-overdue       overdue tasks (needsAction + due<now)
+            tasks-all           open + completed (last 100)
+
+          Gmail:
+            inbox               latest 25 inbox threads
+            unread              unread inbox
+            starred             starred
+            important           important
+            search <query>      Gmail search syntax (from:, has:attachment, …)
+            labels              list all labels
+            read <messageId>    read a message
+          USAGE
+              ;;
+          esac
+        '';
+      })
+
       (pkgs.writeShellApplication {
         name = "gog-status-cache";
         runtimeInputs = with pkgs; [ gogcli jq coreutils ];
