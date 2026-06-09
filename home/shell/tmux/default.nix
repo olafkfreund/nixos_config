@@ -485,6 +485,13 @@ in
           subtitle = "Open agy in a 35% side split";
           action.tmux = "split-window -h -l 35% -c '#{pane_current_path}' 'agy'";
         }
+        {
+          icon = "🛸";
+          iconColor = "#22aaff";
+          title = "Antigravity (Window + Alerts)";
+          subtitle = "agy in a named window; tmux flashes on 20s idle, desktop toast on exit";
+          action.tmux = "run-shell agy-window-launcher";
+        }
       ]);
     };
 
@@ -610,6 +617,25 @@ in
     # Truncates titles to 30 chars to keep status bar tidy.
     home.packages = [
       pkgs.customPkgs.tmux-ccm
+
+      # agy lifecycle wrappers — agy has no hook system (unlike Claude
+      # Code), so the only signals we can wire are session-end (via a
+      # trailing notify-send when the wrapped process exits) and
+      # per-task idle (via tmux's per-window monitor-silence flashing
+      # the window indicator when output stops). Combined they cover
+      # ~80% of the "task done" signal a real hook would provide. Drop
+      # both in one commit when agy ships a hook system.
+      (pkgs.writeShellScriptBin "agy-notify" ''
+        ${pkgs.coreutils}/bin/env agy "$@"
+        rc=$?
+        ${pkgs.libnotify}/bin/notify-send -u normal -i dialog-information \
+          "🛸 Antigravity" "Session ended (exit=$rc)" 2>/dev/null || true
+        exit "$rc"
+      '')
+      (pkgs.writeShellScriptBin "agy-window-launcher" ''
+        ${pkgs.tmux}/bin/tmux new-window -n agy 'agy-notify'
+        ${pkgs.tmux}/bin/tmux set-window-option monitor-silence 20
+      '')
 
       # PIM popup helper — called by the M-c palette. Each subcommand
       # wraps a gog query and pipes through less so the popup waits for

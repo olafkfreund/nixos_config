@@ -158,6 +158,11 @@ in
   modules.programs.claude-code-managed = {
     enable = true;
     parrProtocol.enable = true;
+    # Surface Notification (popup+toast), Stop and SubagentStop (status
+    # flash, rate-limited) via the claude-notify helper. See module for
+    # tunables (events.{notification,stop,subagentStop}, desktopToasts,
+    # tmuxPopups, rateLimitSeconds).
+    notifications.enable = true;
   };
 
   # /use-ollama, /use-claude, /use-default slash commands + apiKeyHelper
