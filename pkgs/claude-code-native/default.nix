@@ -21,6 +21,8 @@
 , openssl
 , zlib
 , glibc
+, wl-clipboard
+, writeScriptBin
 ,
 }:
 
@@ -28,6 +30,20 @@ let
   # Version from Anthropic's latest channel (matches npm)
   # Run `curl -fsSL "$GCS_BUCKET/latest"` to check latest
   version = "2.1.170";
+
+  # Shim that intercepts wl-paste's `-l`/`--list-types` call used by Claude
+  # Code's background clipboard-image polling.  Returning an empty type list
+  # tells Claude no images are in the clipboard so it never spawns persistent
+  # wl-paste processes — those create xdg_toplevel windows visible in GNOME's
+  # dock.  All other wl-paste calls (e.g. text paste) forward to the real binary.
+  wlPasteShim = writeScriptBin "wl-paste" ''
+    for arg in "$@"; do
+      case "$arg" in
+        -l|--list-types) exit 0 ;;
+      esac
+    done
+    exec ${wl-clipboard}/bin/wl-paste "$@"
+  '';
 
   # Anthropic's official distribution bucket
   gcs_bucket = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases";
@@ -90,10 +106,13 @@ stdenv.mkDerivation {
     cp $src $out/lib/claude-code/claude
     chmod +x $out/lib/claude-code/claude
 
-    # Create wrapper with environment variables to disable auto-update
+    # Create wrapper: disable auto-update and prepend wl-paste shim so the
+    # clipboard-image polling returns an empty type list instead of spawning
+    # real wl-paste processes (which create GNOME dock windows on Wayland).
     makeWrapper $out/lib/claude-code/claude $out/bin/claude \
       --set DISABLE_AUTOUPDATER "1" \
-      --set CLAUDE_CODE_SKIP_UPDATE_CHECK "1"
+      --set CLAUDE_CODE_SKIP_UPDATE_CHECK "1" \
+      --prefix PATH : ${wlPasteShim}/bin
 
     runHook postInstall
   '';
