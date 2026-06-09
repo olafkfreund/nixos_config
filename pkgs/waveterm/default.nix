@@ -35,6 +35,8 @@
 , vips
 , udev
 , libGL
+, libsecret
+, makeWrapper
 ,
 }:
 
@@ -56,6 +58,7 @@ stdenv.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     dpkg
     autoPatchelfHook
+    makeWrapper
   ];
 
   buildInputs = [
@@ -79,6 +82,11 @@ stdenv.mkDerivation (finalAttrs: {
     nss
     nspr
     vips
+    # Electron safeStorage on Linux requires libsecret to back the keyring.
+    # Without this, WaveTerm 0.14+ throws "encryption is not available" when
+    # saving API keys. GNOME Keyring provides the org.freedesktop.secrets
+    # DBus service at runtime; libsecret is the client library Electron links.
+    libsecret
   ];
 
   installPhase = ''
@@ -89,7 +97,8 @@ stdenv.mkDerivation (finalAttrs: {
     cp -r usr/share $out/share
     substituteInPlace $out/share/applications/waveterm.desktop \
       --replace-fail "/opt/Wave/" ""
-    ln -s $out/app/waveterm/waveterm $out/bin/waveterm
+    makeWrapper $out/app/waveterm/waveterm $out/bin/waveterm \
+      --prefix LD_LIBRARY_PATH : ${libsecret}/lib
 
     runHook postInstall
   '';
