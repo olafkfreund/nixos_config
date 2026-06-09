@@ -534,10 +534,14 @@ in
   };
   system.stateVersion = "25.11";
 
-  # Local Ollama model server on NVIDIA GPU (CUDA, loopback only)
+  # Local Ollama model server on NVIDIA GPU (CUDA).
+  # Bound to 0.0.0.0:11434 with OLLAMA_ORIGINS=* so tailnet/LAN clients
+  # and browser UIs can hit it directly. p510's firewall is disabled —
+  # exposure is gated at the network edge (Tailscale ACLs + router).
   features.ollama-server = {
     enable = true;
     package = pkgs.ollama-cuda; # NVIDIA CUDA GPU package
+    host = "0.0.0.0"; # Tailnet + LAN reachable
     # Stored on the dedicated 916GB compute pool (870GB free), not the
     # media pool. Models share IOPS with nothing else, and we leave
     # /mnt/media for Plex transcodes + library scans.
@@ -731,5 +735,11 @@ in
       # Use a strong password (or front with Cloudflare Access if doubting).
       "n8n.freundcloud.org.uk" = "http://localhost:5678";
     };
+
+    # Warm-ping each origin every 2 minutes so idle apps (Backstage Node
+    # runtime, n8n, *arr UIs) don't cold-start on the first public hit
+    # and render a blank page while they boot. Hits localhost origins
+    # only; never touches Cloudflare's edge.
+    keepalive.enable = true;
   };
 }
