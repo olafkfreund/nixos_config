@@ -654,120 +654,232 @@ in
       (pkgs.writeShellApplication {
         name = "pim-popup";
         runtimeInputs = with pkgs; [ gogcli jq less coreutils ];
+        excludeShellChecks = [ "SC2016" ];
         text = ''
+          # Reset LESS: -F (quit-if-one-screen) in the user environment causes
+          # display-popup -E to exit immediately when output fits one screen.
+          # -R passes ANSI colour escapes through less unchanged.
+          export LESS="-R"
+
           cmd="''${1:-help}"
           shift || true
 
+          # Run gog in JSON mode; on any error emit [] so jq sees an empty array.
+          gog_json() { gog "$@" 2>/dev/null || echo '[]'; }
+
           first_tasklist_id() {
-            gog -j tasks lists --select id --results-only 2>/dev/null \
+            gog_json -j tasks lists --select id --results-only \
               | jq -r '.[0].id // empty'
           }
 
+          # ── Gruvbox palette (shell vars, prepended into every jq filter) ──
+          # bash $VAR (no braces) is kept literal in Nix indented strings
+          JQ_G='
+            def R:"[0m";def bold:"[1m";def dim:"[2m";
+            def blue:"[38;5;109m";def aqua:"[38;5;108m";
+            def yellow:"[38;5;214m";def orange:"[38;5;208m";
+            def red:"[38;5;167m";def green:"[38;5;142m";
+            def gray:"[38;5;245m";def purple:"[38;5;175m";'
+
+          # Calendar colour + formatting helpers.
+          # primary / @gmail = blue, holidays = green, birthdays = purple,
+          # everything else = orange.
+          JQ_CAL='
+            def cal_color:
+              if . == null then blue
+              elif test("primary|@gmail\\.com") then blue
+              elif test("holiday|holidays") then green
+              elif test("birthday|birthdays") then purple
+              else orange end;
+            def hhmm: fromdateiso8601 | strftime("%H:%M");
+            def timespan:
+              if .start.dateTime then
+                (.start.dateTime | hhmm) + "–" + (.end.dateTime | hhmm)
+              else "all-day   " end;
+            def fmt_event:
+              ((.calendarId // "") | cal_color) as $c
+              | $c + "▪" + R + "  " + $c + timespan + R + "  "
+                + bold + (.summary // "(no title)") + R
+                + (if .location and (.location | length > 0)
+                   then "\n           " + gray + "@ " + .location + R
+                   else "" end);'
+
+          # Format a flat list of events (single-day view).
+          fmt_events_flat() {
+            jq -r "$JQ_G $JQ_CAL"'
+              [ .[] | select(.eventType != "workingLocation") ]
+              | if length == 0 then gray + "(no events)" + R
+                else .[] | fmt_event end'
+          }
+
+          # Format events grouped by date (multi-day view).
+          fmt_events_dated() {
+            jq -r "$JQ_G $JQ_CAL"'
+              [ .[] | select(.eventType != "workingLocation") ]
+              | if length == 0 then gray + "(no upcoming events)" + R
+                else
+                  group_by(
+                    if .start.dateTime then
+                      (.start.dateTime | fromdateiso8601 | strftime("%Y-%m-%d"))
+                    else (.start.date // "") end)
+                  | .[]
+                  | (.[0].start.dateTime // .[0].start.date) as $d
+                  | (if ($d | test("T"))
+                     then ($d | fromdateiso8601 | strftime("%a %b %d"))
+                     else $d end) as $label
+                  | (yellow + "── " + $label + " ──" + R),
+                    (.[] | fmt_event)
+                end'
+          }
+
+          # Format task objects.  $1 = current epoch from date -u +%s.
+          fmt_tasks() {
+            now_epoch="$1"
+            jq -r --argjson now "$now_epoch" "$JQ_G"'
+              def to_epoch: sub("\\.[0-9]+Z$";"Z") | fromdateiso8601;
+              def fmt_task:
+                if .status == "completed" then
+                  dim + "  ✓  "
+                    + (if .due then .due[0:10] else "          " end)
+                    + "  " + .title + R
+                elif (.due != null) and ((.due | to_epoch) < $now) then
+                  red + "  ✗  " + .due[0:10] + "  " + bold + .title + R
+                else
+                  yellow + "  ○  "
+                    + (if .due then .due[0:10] else "          " end)
+                    + "  " + .title + R
+                end;
+              if length == 0 then gray + "(none)" + R
+              else .[] | fmt_task end'
+          }
+
+          # Format Gmail message objects.
+          fmt_email() {
+            jq -r "$JQ_G"'
+              def has_lbl(l):
+                .labels != null
+                and (.labels | map(ascii_upcase) | index(l) != null);
+              def msg_color:
+                if has_lbl("UNREAD") and has_lbl("IMPORTANT") then yellow + bold
+                elif has_lbl("UNREAD") then bold
+                elif has_lbl("IMPORTANT") then yellow
+                elif has_lbl("STARRED") then orange
+                elif has_lbl("CATEGORY_PROMOTIONS") then dim
+                elif has_lbl("CATEGORY_SOCIAL") then blue
+                elif has_lbl("CATEGORY_UPDATES") then aqua
+                else "" end;
+              def fmt_msg:
+                msg_color as $p
+                | $p
+                  + ((.date // "") | .[0:10])
+                  + "  "
+                  + ((.from // "(?)") | .[0:28] | . + (" " * (28 - length)))
+                  + "  "
+                  + (.subject // "(no subject)")
+                  + R;
+              if length == 0 then gray + "(no messages)" + R
+              else .[] | fmt_msg end'
+          }
+
           case "$cmd" in
-            # ---------- Calendar ----------
+            # ── Calendar ─────────────────────────────────────────────────
             events-today)
               { echo "── Today's events ──"; echo;
-                gog calendar events --today 2>&1 || echo "(error)"; } \
-                | less -R
+                gog_json -j calendar events --today --results-only \
+                  | fmt_events_flat; } | less -R
               ;;
             events-tomorrow)
               { echo "── Tomorrow's events ──"; echo;
-                gog calendar events --tomorrow 2>&1 || echo "(error)"; } \
-                | less -R
+                gog_json -j calendar events --tomorrow --results-only \
+                  | fmt_events_flat; } | less -R
               ;;
             events-week)
               { echo "── Upcoming events (next 7 days) ──"; echo;
-                gog calendar events --days 7 2>&1 || echo "(error)"; } \
-                | less -R
+                gog_json -j calendar events --days 7 --results-only \
+                  | fmt_events_dated; } | less -R
               ;;
             events-next)
               # Next timed (non-workingLocation) event in next 7 days.
-              # Rendered via `event get` so the popup shows the full
-              # description with Teams/Zoom/Meet links intact.
-              next_id="$(gog -j calendar events --days 7 --max 50 \
-                          --select 'id,start,eventType' --results-only 2>/dev/null \
+              # Rendered via `event get` for full description with Meet/Teams links.
+              next_id="$(gog_json -j calendar events --days 7 --max 50 \
+                          --select 'id,start,eventType' --results-only \
                          | jq -r '[ .[]
                                     | select(.eventType != "workingLocation")
                                     | select(.start.dateTime != null) ]
-                                  | sort_by(.start.dateTime) | .[0].id // empty')"
+                                  | sort_by(.start.dateTime)
+                                  | .[0].id // empty')"
               { echo "── Next meeting ──"; echo;
                 if [ -n "$next_id" ]; then
                   gog calendar event primary "$next_id" 2>&1 || echo "(error)"
                 else
                   echo "(no upcoming timed events in the next 7 days)"
-                fi; } \
-                | less -R
+                fi; } | less -R
               ;;
 
-            # ---------- Tasks ----------
+            # ── Tasks ─────────────────────────────────────────────────────
             tasks)
               list_id="$(first_tasklist_id)"
+              now_epoch="$(date -u +%s)"
               { echo "── Open tasks ──"; echo;
                 if [ -n "$list_id" ]; then
-                  gog tasks list "$list_id" 2>&1 || echo "(error)"
+                  gog_json -j tasks list "$list_id" --results-only \
+                    | jq '[.[] | select(.status == "needsAction")]' \
+                    | fmt_tasks "$now_epoch"
                 else
                   echo "(could not auto-discover a tasklist id)"
-                fi; } \
-                | less -R
+                fi; } | less -R
               ;;
             tasks-overdue)
-              # Overdue = needsAction + due < now-utc. All date math in jq
-              # so we don't depend on locale-tz parsing in the shell.
               list_id="$(first_tasklist_id)"
+              now_epoch="$(date -u +%s)"
               { echo "── Overdue tasks ──"; echo;
                 if [ -n "$list_id" ]; then
-                  now_epoch="$(date -u +%s)"
-                  gog -j tasks list "$list_id" --results-only 2>/dev/null \
-                    | jq -r --argjson now "$now_epoch" '
-                        # Google Tasks emits due as "...000Z" — jq
-                        # fromdateiso8601 rejects fractional seconds,
-                        # so normalize ".000Z" → "Z" before parsing.
-                        def to_epoch: sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601;
-                        [ .[]
-                          | select(.status == "needsAction")
-                          | select(.due != null)
-                          | select((.due | to_epoch) < $now) ]
-                        | if length == 0 then "(none — nice)"
-                          else
-                            "DUE         TITLE",
-                            (.[] | "\(.due[0:10])  \(.title)")
-                          end'
+                  gog_json -j tasks list "$list_id" --results-only \
+                    | jq --argjson now "$now_epoch" \
+                        '[.[] | select(.status == "needsAction")
+                              | select(.due != null)
+                              | select((.due | sub("\\.[0-9]+Z$";"Z")
+                                            | fromdateiso8601) < $now)]' \
+                    | fmt_tasks "$now_epoch"
                 else
                   echo "(could not auto-discover a tasklist id)"
-                fi; } \
-                | less -R
+                fi; } | less -R
               ;;
             tasks-all)
               list_id="$(first_tasklist_id)"
+              now_epoch="$(date -u +%s)"
               { echo "── All tasks (incl. completed) ──"; echo;
                 if [ -n "$list_id" ]; then
-                  gog tasks list "$list_id" --show-completed --max 100 2>&1 || echo "(error)"
+                  gog_json -j tasks list "$list_id" \
+                    --show-completed --max 100 --results-only \
+                    | fmt_tasks "$now_epoch"
                 else
                   echo "(could not auto-discover a tasklist id)"
-                fi; } \
-                | less -R
+                fi; } | less -R
               ;;
 
-            # ---------- Gmail ----------
+            # ── Gmail ─────────────────────────────────────────────────────
             inbox)
               { echo "── Inbox (latest 25) ──"; echo;
-                gog gmail search "in:inbox" --max 25 2>&1 || echo "(error)"; } \
-                | less -R
+                gog_json -j gmail search "in:inbox" --max 25 --results-only \
+                  | fmt_email; } | less -R
               ;;
             unread)
               { echo "── Unread inbox ──"; echo;
-                gog gmail search "is:unread label:INBOX" --max 25 2>&1 || echo "(error)"; } \
-                | less -R
+                gog_json -j gmail search "is:unread label:INBOX" \
+                  --max 25 --results-only \
+                  | fmt_email; } | less -R
               ;;
             starred)
               { echo "── Starred ──"; echo;
-                gog gmail search "is:starred" --max 25 2>&1 || echo "(error)"; } \
-                | less -R
+                gog_json -j gmail search "is:starred" --max 25 --results-only \
+                  | fmt_email; } | less -R
               ;;
             important)
               { echo "── Important ──"; echo;
-                gog gmail search "is:important" --max 25 2>&1 || echo "(error)"; } \
-                | less -R
+                gog_json -j gmail search "is:important" \
+                  --max 25 --results-only \
+                  | fmt_email; } | less -R
               ;;
             search)
               query="''${*:-}"
@@ -775,13 +887,12 @@ in
                 echo "usage: pim-popup search <query>" >&2; exit 2
               fi
               { echo "── Gmail search: $query ──"; echo;
-                gog gmail search "$query" --max 25 2>&1 || echo "(error)"; } \
-                | less -R
+                gog_json -j gmail search "$query" --max 25 --results-only \
+                  | fmt_email; } | less -R
               ;;
             labels)
               { echo "── Labels ──"; echo;
-                gog gmail labels list 2>&1 || echo "(error)"; } \
-                | less -R
+                gog gmail labels list 2>&1 || echo "(error)"; } | less -R
               ;;
             read)
               msg_id="''${1:-}"
@@ -789,26 +900,25 @@ in
                 echo "usage: pim-popup read <messageId>" >&2; exit 2
               fi
               { echo "── Message $msg_id ──"; echo;
-                gog gmail get "$msg_id" 2>&1 || echo "(error)"; } \
-                | less -R
+                gog gmail get "$msg_id" 2>&1 || echo "(error)"; } | less -R
               ;;
 
             help | *)
               cat <<'USAGE'
           pim-popup — tmux M-c palette helper around gog
 
-          Calendar:
+          Calendar:  blue=primary  green=holidays  purple=birthdays  orange=other
             events-today        today's events
             events-tomorrow     tomorrow's events
-            events-week         next 7 days
+            events-week         next 7 days (grouped by date)
             events-next         next meeting with full description (Teams/Zoom links)
 
-          Tasks:
+          Tasks:  yellow=pending  red=overdue  dim=completed
             tasks               open tasks
-            tasks-overdue       overdue tasks (needsAction + due<now)
+            tasks-overdue       overdue tasks only
             tasks-all           open + completed (last 100)
 
-          Gmail:
+          Gmail:  bold=unread  yellow=important  orange=starred  dim=promotions
             inbox               latest 25 inbox threads
             unread              unread inbox
             starred             starred
