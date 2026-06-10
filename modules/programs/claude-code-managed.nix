@@ -109,6 +109,17 @@ let
       rate_limit_seconds=${toString cfg.notifications.rateLimitSeconds}
       use_desktop=${if cfg.notifications.desktopToasts then "1" else "0"}
       use_tmux=${if cfg.notifications.tmuxPopups then "1" else "0"}
+      use_bell=${if cfg.notifications.terminalBell then "1" else "0"}
+
+      # Ring the terminal bell in Claude's own pane so tmux (monitor-bell)
+      # flashes that window's status-bar cell. Writes straight to the
+      # controlling terminal (/dev/tty), bypassing Claude's captured hook
+      # stdout, so the BEL reaches the pty tmux watches. No-ops cleanly
+      # outside a tty (headless / CI). Paired with `monitor-bell on` +
+      # `bell-action none` in home/shell/tmux — visual flash, no audible beep.
+      ring_bell() {
+        [ "$use_bell" = "1" ] && printf '\a' > /dev/tty 2>/dev/null || true
+      }
 
       msg=$(printf '%s' "$payload" | jq -r '.message // ""' 2>/dev/null || echo "")
       cwd_path=$(printf '%s' "$payload" | jq -r '.cwd // ""' 2>/dev/null || echo "")
@@ -117,6 +128,7 @@ let
       case "$cmd" in
         notification)
           text="''${msg:-Claude needs your attention}"
+          ring_bell
           if [ "$use_desktop" = "1" ] && command -v notify-send >/dev/null 2>&1; then
             notify-send -u normal -i "$icon_path" -a "Claude Code" "✻ Claude · $cwd" "$text" &
           fi
@@ -142,6 +154,7 @@ let
             fi
           fi
           echo "$now" > "$rate_file"
+          ring_bell
 
           label="✻ Claude"
           [ "$cmd" = "subagent-stop" ] && label="✻ subagent"
@@ -283,6 +296,20 @@ in
           Fire a tmux display-popup for Notification events and
           display-message status flash for Stop/SubagentStop. No-ops
           gracefully if $TMUX isn't set.
+        '';
+      };
+
+      terminalBell = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Emit a terminal BEL into Claude's own pane on Notification and
+          (rate-limited) Stop/SubagentStop events, written to /dev/tty.
+          With `monitor-bell on` + `bell-action none` in the tmux config
+          (home/shell/tmux), tmux flashes that window's status-bar cell
+          (red + 🔔) when Claude is in a background window — a quiet,
+          visual-only "needs attention" indicator with no audible beep.
+          No-ops outside a tty (headless / CI).
         '';
       };
 
