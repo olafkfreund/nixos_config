@@ -691,7 +691,8 @@ in
               elif test("holiday|holidays") then green
               elif test("birthday|birthdays") then purple
               else orange end;
-            def hhmm: fromdateiso8601 | strftime("%H:%M");
+            def hhmm: .[11:16];
+            def norm_tz: gsub("[+-][0-9]{2}:[0-9]{2}$"; "Z");
             def timespan:
               if .start.dateTime then
                 (.start.dateTime | hhmm) + "–" + (.end.dateTime | hhmm)
@@ -719,13 +720,12 @@ in
               | if length == 0 then gray + "(no upcoming events)" + R
                 else
                   group_by(
-                    if .start.dateTime then
-                      (.start.dateTime | fromdateiso8601 | strftime("%Y-%m-%d"))
+                    if .start.dateTime then .start.dateTime[0:10]
                     else (.start.date // "") end)
                   | .[]
                   | (.[0].start.dateTime // .[0].start.date) as $d
                   | (if ($d | test("T"))
-                     then ($d | fromdateiso8601 | strftime("%a %b %d"))
+                     then ($d | norm_tz | fromdateiso8601 | strftime("%a %b %d"))
                      else $d end) as $label
                   | (yellow + "── " + $label + " ──" + R),
                     (.[] | fmt_event)
@@ -956,7 +956,7 @@ in
                       | .[0]
                       | if . == null then ""
                         else "📅 " + (.summary // "(no title)" | .[0:30]) + " "
-                             + (.start.dateTime | fromdateiso8601 | strftime("%H:%M"))
+                             + (.start.dateTime | .[11:16])
                         end' \
                > "$tmp_event" 2>/dev/null; then
             mv -f "$tmp_event" "$cache/event.txt"
