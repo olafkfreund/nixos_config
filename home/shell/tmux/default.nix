@@ -458,6 +458,51 @@ in
     #   fg       = base05 (default foreground)
     #   muted    = base03 (comments / dim)
     #   accent   = base0B (green — gruvbox's classic positive accent)
+    # tmux-which-key menu (prefix+Space). The upstream default menu covers
+    # built-in tmux commands (./which-key-base.yaml); we append a +Tools
+    # submenu (key P) exposing our plugin/custom bindings so they're
+    # discoverable from one place. Generated rather than shipped static
+    # because the +Tools commands embed nix-store paths that change on every
+    # rebuild. NOTE: which-key is a *curated* menu — it is NOT auto-synced
+    # with `list-keys`. For the complete live list use tmux-fzf
+    # (prefix C-f → keybinding) or the built-in `?` entry (list-keys -N).
+    xdg.configFile."tmux/plugins/tmux-which-key/config.yaml".text =
+      let
+        palette = "${pkgs.customPkgs.tmux-palette}/bin/tmux-palette";
+        expose = "${pkgs.customPkgs.tmux-expose}/bin/tmux-expose";
+        floax = "${pkgs.tmuxPlugins.tmux-floax}/share/tmux-plugins/tmux-floax/scripts/floax.sh";
+        tsm = "${pkgs.tmuxPlugins.t-smart-tmux-session-manager}/share/tmux-plugins/t-smart-tmux-session-manager/bin/t";
+        toolsMenu = lib.concatStringsSep "\n" [
+          "  - separator: true"
+          "  - name: +Tools"
+          "    key: P"
+          "    menu:"
+          "      - name: AI tools (palette)"
+          "        key: a"
+          "        command: run-shell \"${palette} ai-tools\""
+          "      - name: Command palette"
+          "        key: p"
+          "        command: run-shell ${palette}"
+          "      - name: Mail / Calendar / Tasks"
+          "        key: m"
+          "        command: run-shell \"${palette} pim\""
+          "      - separator: true"
+          "      - name: Session expose"
+          "        key: e"
+          "        command: display-popup -E -w \"100%\" -h \"100%\" ${expose}"
+          "      - name: Floating pane"
+          "        key: f"
+          "        command: run-shell ${floax}"
+          "      - name: Smart session switch"
+          "        key: s"
+          "        command: run-shell ${tsm}"
+          "      - name: ccm dashboard"
+          "        key: C"
+          "        command: display-popup -E -w \"80%\" -h \"60%\" -T \"  ccm  \" \"ccm dashboard\""
+        ] + "\n";
+      in
+      builtins.readFile ./which-key-base.yaml + toolsMenu;
+
     xdg.configFile."tmux-palette/theme.json".text = builtins.toJSON {
       bg = "#${colors.base00}";
       panel = "#${colors.base01}";
