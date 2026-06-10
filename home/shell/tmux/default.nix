@@ -387,12 +387,39 @@ in
         # workflow without having to read window names. #{m:pattern,str}
         # is tmux's glob-match; pane_current_command is the immediate
         # foreground process in the active pane of that window.
-        set -g window-status-format         " #{?#{m:claude*,#{pane_current_command}},✻ ,#{?#{m:agy*,#{pane_current_command}},🛸 ,#{?#{m:gemini*,#{pane_current_command}},♊ ,}}}#I #W "
+        # Trailing alert glyphs are flag-driven and only render on
+        # *background* windows (the current window never carries bell/
+        # silence flags): 🔔 = bell (Claude wants attention — see the
+        # terminal-bell emitted by claude-notify), 💤 = monitor-silence
+        # fired (agy idle, via agy-window-launcher). Deterministic markers
+        # that don't depend on tmux's per-build alert-styling internals;
+        # the window-status-{bell,activity}-style below add a colour flash
+        # on top. Only the non-current format needs them.
+        set -g window-status-format         " #{?#{m:claude*,#{pane_current_command}},✻ ,#{?#{m:agy*,#{pane_current_command}},🛸 ,#{?#{m:gemini*,#{pane_current_command}},♊ ,}}}#I #W#{?window_bell_flag, 🔔,}#{?window_silence_flag, 💤,} "
         set -g window-status-current-format " #{?#{m:claude*,#{pane_current_command}},✻ ,#{?#{m:agy*,#{pane_current_command}},🛸 ,#{?#{m:gemini*,#{pane_current_command}},♊ ,}}}#I #W "
 
         # Ensure no powerline characters are used
         set -g window-status-separator " │ "
         set -g status-style "bg=#${colors.base00},fg=#${colors.base04}"
+
+        # ========== Attention alerts (Claude / agy) ==========
+        # Flash a *background* window's status cell when its pane signals
+        # it wants attention. Two signal sources feed this:
+        #   • Claude Code → claude-notify emits a terminal BEL into the
+        #     pane (modules/programs/claude-code-managed.nix, terminalBell)
+        #     which trips the bell flag → red flash + 🔔.
+        #   • agy → agy-window-launcher sets `monitor-silence 20`; a window
+        #     idle that long trips the silence flag → yellow flash + 💤.
+        # Kept audibly silent on purpose: `bell-action none` suppresses the
+        # client terminal beep, and `visual-bell off` suppresses the
+        # takeover "Bell in window" message — yet `monitor-bell on` still
+        # sets window_bell_flag, so the cell still flashes (verified on
+        # tmux 3.6a). The result is a quiet, visual-only indicator.
+        set -g monitor-bell on
+        set -g bell-action none
+        set -g visual-bell off
+        set -g window-status-bell-style     "bg=#${colors.base08},fg=#${colors.base00},bold"
+        set -g window-status-activity-style "bg=#${colors.base0A},fg=#${colors.base00},bold"
 
         # Popup chrome — match the Stylix base16 scheme so display-popup
         # (tmux-palette, tmux-expose, choose-tree -Z, etc.) blends into the
