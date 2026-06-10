@@ -513,28 +513,28 @@ in
           iconColor = "#8ec07c";
           title = "Calendar — Today";
           subtitle = "Today's events";
-          action.tmux = "display-popup -w 85% -h 75% -E 'pim-popup events-today'";
+          action.tmux = "display-popup -w 60% -h 45% -E 'pim-popup events-today'";
         }
         {
           icon = "📅";
           iconColor = "#8ec07c";
           title = "Calendar — Tomorrow";
           subtitle = "Tomorrow's events";
-          action.tmux = "display-popup -w 85% -h 75% -E 'pim-popup events-tomorrow'";
+          action.tmux = "display-popup -w 60% -h 45% -E 'pim-popup events-tomorrow'";
         }
         {
           icon = "📆";
           iconColor = "#8ec07c";
           title = "Calendar — Next 7 days";
           subtitle = "Upcoming events this week";
-          action.tmux = "display-popup -w 85% -h 85% -E 'pim-popup events-week'";
+          action.tmux = "display-popup -w 70% -h 60% -E 'pim-popup events-week'";
         }
         {
           icon = "🎯";
           iconColor = "#fabd2f";
           title = "Calendar — Next meeting";
           subtitle = "Next timed event, full description (Teams/Zoom/Meet links)";
-          action.tmux = "display-popup -w 90% -h 90% -E 'pim-popup events-next'";
+          action.tmux = "display-popup -w 75% -h 70% -E 'pim-popup events-next'";
         }
         # ---------- Tasks ----------
         {
@@ -542,21 +542,21 @@ in
           iconColor = "#fabd2f";
           title = "Tasks — Open";
           subtitle = "Open Google Tasks";
-          action.tmux = "display-popup -w 85% -h 80% -E 'pim-popup tasks'";
+          action.tmux = "display-popup -w 65% -h 50% -E 'pim-popup tasks'";
         }
         {
           icon = "⚠️";
           iconColor = "#fb4934";
           title = "Tasks — Overdue";
           subtitle = "Tasks past their due date";
-          action.tmux = "display-popup -w 85% -h 75% -E 'pim-popup tasks-overdue'";
+          action.tmux = "display-popup -w 60% -h 45% -E 'pim-popup tasks-overdue'";
         }
         {
           icon = "📋";
           iconColor = "#fabd2f";
           title = "Tasks — All (incl. completed)";
           subtitle = "Open + completed, last 100";
-          action.tmux = "display-popup -w 85% -h 85% -E 'pim-popup tasks-all'";
+          action.tmux = "display-popup -w 70% -h 60% -E 'pim-popup tasks-all'";
         }
         # ---------- Gmail ----------
         {
@@ -564,49 +564,49 @@ in
           iconColor = "#83a598";
           title = "Gmail — Inbox";
           subtitle = "Latest 25 threads in:inbox";
-          action.tmux = "display-popup -w 95% -h 90% -E 'pim-popup inbox'";
+          action.tmux = "display-popup -w 80% -h 65% -E 'pim-popup inbox'";
         }
         {
           icon = "🔴";
           iconColor = "#fb4934";
           title = "Gmail — Unread";
           subtitle = "Unread inbox (is:unread label:INBOX)";
-          action.tmux = "display-popup -w 95% -h 90% -E 'pim-popup unread'";
+          action.tmux = "display-popup -w 80% -h 60% -E 'pim-popup unread'";
         }
         {
           icon = "⭐";
           iconColor = "#fabd2f";
           title = "Gmail — Starred";
           subtitle = "Starred messages";
-          action.tmux = "display-popup -w 95% -h 90% -E 'pim-popup starred'";
+          action.tmux = "display-popup -w 80% -h 60% -E 'pim-popup starred'";
         }
         {
           icon = "❗";
           iconColor = "#fb4934";
           title = "Gmail — Important";
           subtitle = "Important messages";
-          action.tmux = "display-popup -w 95% -h 90% -E 'pim-popup important'";
+          action.tmux = "display-popup -w 80% -h 60% -E 'pim-popup important'";
         }
         {
           icon = "🔍";
           iconColor = "#83a598";
           title = "Gmail — Search";
           subtitle = "Prompts for a Gmail query (from:foo, has:attachment, …)";
-          action.tmux = "command-prompt -p 'gmail search:' 'display-popup -w 95% -h 90% -E \"pim-popup search %%\"'";
+          action.tmux = "command-prompt -p 'gmail search:' 'display-popup -w 80% -h 65% -E \"pim-popup search %%\"'";
         }
         {
           icon = "🏷️";
           iconColor = "#d3869b";
           title = "Gmail — Labels";
           subtitle = "Browse all Gmail labels";
-          action.tmux = "display-popup -w 70% -h 80% -E 'pim-popup labels'";
+          action.tmux = "display-popup -w 55% -h 55% -E 'pim-popup labels'";
         }
         {
           icon = "📖";
           iconColor = "#83a598";
           title = "Gmail — Read message";
           subtitle = "Prompts for a message id (copy from inbox view)";
-          action.tmux = "command-prompt -p 'message id:' 'display-popup -w 95% -h 90% -E \"pim-popup read %%\"'";
+          action.tmux = "command-prompt -p 'message id:' 'display-popup -w 80% -h 75% -E \"pim-popup read %%\"'";
         }
       ]);
     };
@@ -653,13 +653,43 @@ in
       # is the only change needed when extending the palette.
       (pkgs.writeShellApplication {
         name = "pim-popup";
-        runtimeInputs = with pkgs; [ gogcli jq less coreutils ];
+        runtimeInputs = with pkgs; [ gogcli jq less coreutils ncurses ];
         excludeShellChecks = [ "SC2016" ];
         text = ''
           # Reset LESS: -F (quit-if-one-screen) in the user environment causes
           # display-popup -E to exit immediately when output fits one screen.
           # -R passes ANSI colour escapes through less unchanged.
           export LESS="-R"
+
+          # Popup rendering helper.  The global `smcup@:rmcup@` terminal
+          # override (see terminal-overrides above) forces less out of the
+          # alternate screen, which bottom-anchors short pages inside a
+          # display-popup.  `pager` prints content that fits at the TOP and
+          # holds for a keypress; taller content falls back to less so it
+          # stays scrollable.
+          pager() {
+            local body rows
+            body="$(cat)"
+            rows="$(tput lines 2>/dev/null || echo 40)"
+            if [ "$(printf '%s\n' "$body" | wc -l)" -lt "$(( rows - 1 ))" ]; then
+              printf '%s\n' "$body"
+              printf '\n%s── press any key to close ──%s' \
+                "$(tput dim 2>/dev/null || true)" "$(tput sgr0 2>/dev/null || true)"
+              read -rsn1 </dev/tty || true
+            else
+              less -R <<< "$body"
+            fi
+          }
+
+          # Centre one line across the current popup width.
+          center() {
+            local s width pad
+            s="$1"
+            width="$(tput cols 2>/dev/null || echo 80)"
+            pad=$(( (width - ''${#s}) / 2 ))
+            [ "$pad" -lt 0 ] && pad=0
+            printf '%*s%s\n' "$pad" "" "$s"
+          }
 
           cmd="''${1:-help}"
           shift || true
@@ -784,19 +814,19 @@ in
           case "$cmd" in
             # ── Calendar ─────────────────────────────────────────────────
             events-today)
-              { echo "── Today's events ──"; echo;
+              { center "── Today's events ──"; echo;
                 gog_json -j calendar events --today --results-only \
-                  | fmt_events_flat; } | less -R
+                  | fmt_events_flat; } | pager
               ;;
             events-tomorrow)
-              { echo "── Tomorrow's events ──"; echo;
+              { center "── Tomorrow's events ──"; echo;
                 gog_json -j calendar events --tomorrow --results-only \
-                  | fmt_events_flat; } | less -R
+                  | fmt_events_flat; } | pager
               ;;
             events-week)
-              { echo "── Upcoming events (next 7 days) ──"; echo;
+              { center "── Upcoming events (next 7 days) ──"; echo;
                 gog_json -j calendar events --days 7 --results-only \
-                  | fmt_events_dated; } | less -R
+                  | fmt_events_dated; } | pager
               ;;
             events-next)
               # Next timed (non-workingLocation) event in next 7 days.
@@ -808,31 +838,31 @@ in
                                     | select(.start.dateTime != null) ]
                                   | sort_by(.start.dateTime)
                                   | .[0].id // empty')"
-              { echo "── Next meeting ──"; echo;
+              { center "── Next meeting ──"; echo;
                 if [ -n "$next_id" ]; then
                   gog calendar event primary "$next_id" 2>&1 || echo "(error)"
                 else
                   echo "(no upcoming timed events in the next 7 days)"
-                fi; } | less -R
+                fi; } | pager
               ;;
 
             # ── Tasks ─────────────────────────────────────────────────────
             tasks)
               list_id="$(first_tasklist_id)"
               now_epoch="$(date -u +%s)"
-              { echo "── Open tasks ──"; echo;
+              { center "── Open tasks ──"; echo;
                 if [ -n "$list_id" ]; then
                   gog_json -j tasks list "$list_id" --results-only \
                     | jq '[.[] | select(.status == "needsAction")]' \
                     | fmt_tasks "$now_epoch"
                 else
                   echo "(could not auto-discover a tasklist id)"
-                fi; } | less -R
+                fi; } | pager
               ;;
             tasks-overdue)
               list_id="$(first_tasklist_id)"
               now_epoch="$(date -u +%s)"
-              { echo "── Overdue tasks ──"; echo;
+              { center "── Overdue tasks ──"; echo;
                 if [ -n "$list_id" ]; then
                   gog_json -j tasks list "$list_id" --results-only \
                     | jq --argjson now "$now_epoch" \
@@ -843,64 +873,64 @@ in
                     | fmt_tasks "$now_epoch"
                 else
                   echo "(could not auto-discover a tasklist id)"
-                fi; } | less -R
+                fi; } | pager
               ;;
             tasks-all)
               list_id="$(first_tasklist_id)"
               now_epoch="$(date -u +%s)"
-              { echo "── All tasks (incl. completed) ──"; echo;
+              { center "── All tasks (incl. completed) ──"; echo;
                 if [ -n "$list_id" ]; then
                   gog_json -j tasks list "$list_id" \
                     --show-completed --max 100 --results-only \
                     | fmt_tasks "$now_epoch"
                 else
                   echo "(could not auto-discover a tasklist id)"
-                fi; } | less -R
+                fi; } | pager
               ;;
 
             # ── Gmail ─────────────────────────────────────────────────────
             inbox)
-              { echo "── Inbox (latest 25) ──"; echo;
+              { center "── Inbox (latest 25) ──"; echo;
                 gog_json -j gmail search "in:inbox" --max 25 --results-only \
-                  | fmt_email; } | less -R
+                  | fmt_email; } | pager
               ;;
             unread)
-              { echo "── Unread inbox ──"; echo;
+              { center "── Unread inbox ──"; echo;
                 gog_json -j gmail search "is:unread label:INBOX" \
                   --max 25 --results-only \
-                  | fmt_email; } | less -R
+                  | fmt_email; } | pager
               ;;
             starred)
-              { echo "── Starred ──"; echo;
+              { center "── Starred ──"; echo;
                 gog_json -j gmail search "is:starred" --max 25 --results-only \
-                  | fmt_email; } | less -R
+                  | fmt_email; } | pager
               ;;
             important)
-              { echo "── Important ──"; echo;
+              { center "── Important ──"; echo;
                 gog_json -j gmail search "is:important" \
                   --max 25 --results-only \
-                  | fmt_email; } | less -R
+                  | fmt_email; } | pager
               ;;
             search)
               query="''${*:-}"
               if [ -z "$query" ]; then
                 echo "usage: pim-popup search <query>" >&2; exit 2
               fi
-              { echo "── Gmail search: $query ──"; echo;
+              { center "── Gmail search: $query ──"; echo;
                 gog_json -j gmail search "$query" --max 25 --results-only \
-                  | fmt_email; } | less -R
+                  | fmt_email; } | pager
               ;;
             labels)
-              { echo "── Labels ──"; echo;
-                gog gmail labels list 2>&1 || echo "(error)"; } | less -R
+              { center "── Labels ──"; echo;
+                gog gmail labels list 2>&1 || echo "(error)"; } | pager
               ;;
             read)
               msg_id="''${1:-}"
               if [ -z "$msg_id" ]; then
                 echo "usage: pim-popup read <messageId>" >&2; exit 2
               fi
-              { echo "── Message $msg_id ──"; echo;
-                gog gmail get "$msg_id" 2>&1 || echo "(error)"; } | less -R
+              { center "── Message $msg_id ──"; echo;
+                gog gmail get "$msg_id" 2>&1 || echo "(error)"; } | pager
               ;;
 
             help | *)
