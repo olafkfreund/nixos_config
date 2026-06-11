@@ -203,11 +203,52 @@ let
     })
   );
 
-  mergedSettings = lib.recursiveUpdate
+  # Baseline auto-approved commands — read-only / build / test / format only.
+  # Enforced from managed scope so safe repo operations never prompt. Anything
+  # that mutates the system (deploys, nixos-rebuild, git commit/push, sudo, rm)
+  # is deliberately EXCLUDED and still requires explicit approval.
+  baselineAllow = lib.optionals cfg.baselineAllow.enable [
+    # Nix evaluation / build / format
+    "Bash(nix build:*)"
+    "Bash(nix flake check:*)"
+    "Bash(nix flake show:*)"
+    "Bash(nix flake metadata:*)"
+    "Bash(nix eval:*)"
+    "Bash(nix fmt:*)"
+    "Bash(nix-instantiate:*)"
+    "Bash(nixpkgs-fmt:*)"
+    "Bash(alejandra:*)"
+    "Bash(statix check:*)"
+    "Bash(deadnix:*)"
+    # just recipes — validation / test / inspection only (no deploys)
+    "Bash(just validate)"
+    "Bash(just validate-quick)"
+    "Bash(just check-syntax)"
+    "Bash(just quick-test)"
+    "Bash(just test-host:*)"
+    "Bash(just test-all:*)"
+    "Bash(just test-all-parallel)"
+    "Bash(just format)"
+    "Bash(just ci)"
+    "Bash(just diff:*)"
+    "Bash(just ping-hosts)"
+    # read-only git
+    "Bash(git status:*)"
+    "Bash(git diff:*)"
+    "Bash(git log:*)"
+    "Bash(git show:*)"
+    "Bash(git branch:*)"
+  ];
+
+  mergedSettings =
     (cfg.settings // {
       hooks = (cfg.settings.hooks or { }) // parrHooks // notifyHooks;
     })
-    { };
+    // lib.optionalAttrs (baselineAllow != [ ]) {
+      permissions = (cfg.settings.permissions or { }) // {
+        allow = (cfg.settings.permissions.allow or [ ]) ++ baselineAllow;
+      };
+    };
 
   managedJson = pkgs.writeText "claude-code-managed-settings.json"
     (builtins.toJSON mergedSettings);
@@ -240,6 +281,19 @@ in
         Equivalent to the previous programs.claudeCode.hooks.enableParrProtocol
         option, but enforced from managed scope so the user cannot disable it
         by editing ~/.claude/settings.json.
+      '';
+    };
+
+    baselineAllow.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Auto-approve a curated baseline of safe, read-only / build / test /
+        format commands (nix build/eval/fmt, just validate/test-*, read-only
+        git, statix/deadnix/alejandra) via managed-scope permissions.allow, so
+        routine repo operations never trigger a permission prompt. System-
+        mutating commands (deploys, nixos-rebuild, git commit/push, sudo, rm)
+        are deliberately excluded and still require explicit approval.
       '';
     };
 
