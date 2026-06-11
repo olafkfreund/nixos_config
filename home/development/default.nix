@@ -30,6 +30,7 @@ _: {
     ./claude-code-lsp.nix
     ./claude-code-mcp.nix # Claude Code MCP server configuration
     ./antigravity-config.nix # Declarative Antigravity rules + MCP sync
+    ./claude-code-output-styles.nix # Declarative Claude Code output styles
 
     # Development workflow enhancements (conflicts resolved)
     ./workflow.nix

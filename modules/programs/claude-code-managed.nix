@@ -240,9 +240,32 @@ let
     "Bash(git branch:*)"
   ];
 
+  # Auto-format edited .nix files with nixpkgs-fmt (the repo's pre-commit
+  # formatter), so files Claude touches stay commit-clean. PostToolUse fires
+  # after Write/Edit/MultiEdit; the script no-ops on non-.nix paths and never
+  # fails the tool.
+  formatScript = pkgs.writeShellScript "claude-nix-format.sh" ''
+    payload="$(cat)"
+    fp="$(${pkgs.jq}/bin/jq -r '.tool_input.file_path // empty' <<<"$payload" 2>/dev/null)"
+    case "$fp" in
+      *.nix) [ -f "$fp" ] && ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt "$fp" >/dev/null 2>&1 || true ;;
+    esac
+    exit 0
+  '';
+
+  formatHooks = lib.optionalAttrs cfg.formatOnEdit.enable {
+    PostToolUse = [{
+      matcher = "Write|Edit|MultiEdit";
+      hooks = [{
+        type = "command";
+        command = toString formatScript;
+      }];
+    }];
+  };
+
   mergedSettings =
     (cfg.settings // {
-      hooks = (cfg.settings.hooks or { }) // parrHooks // notifyHooks;
+      hooks = (cfg.settings.hooks or { }) // parrHooks // notifyHooks // formatHooks;
     })
     // lib.optionalAttrs (baselineAllow != [ ]) {
       permissions = (cfg.settings.permissions or { }) // {
@@ -294,6 +317,17 @@ in
         routine repo operations never trigger a permission prompt. System-
         mutating commands (deploys, nixos-rebuild, git commit/push, sudo, rm)
         are deliberately excluded and still require explicit approval.
+      '';
+    };
+
+    formatOnEdit.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Run nixpkgs-fmt (the repo's pre-commit formatter) on any .nix file
+        Claude Code edits, via a managed-scope PostToolUse hook. Keeps touched
+        files commit-clean automatically. No-ops on non-.nix paths and never
+        fails the tool.
       '';
     };
 
