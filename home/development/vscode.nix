@@ -7,8 +7,14 @@
 let
   inherit (lib) mkIf mkEnableOption;
   cfg = config.editor.vscode;
-  # Custom extensions not available in nixpkgs
-  # Note: Uncomment and add proper sha256 hashes when needed
+
+  # Stylix's theming and our own keys both land in programs.vscode userSettings.
+  # Rendered to a store file so the activation script can merge them into a
+  # MUTABLE settings.json (Stylix/we *add*, but never own the file — the Factory
+  # extension and the user can still write to it).
+  declarativeSettingsFile =
+    (pkgs.formats.json { }).generate "vscode-settings.json"
+      config.programs.vscode.profiles.default.userSettings;
 in
 {
   options.editor.vscode = {
@@ -16,6 +22,11 @@ in
   };
 
   config = mkIf cfg.enable {
+    # Stop Home Manager (and therefore Stylix) from owning settings.json as a
+    # read-only store symlink. The activation script below renders the same
+    # declarative settings into a mutable, hand-editable file instead.
+    home.file."${config.xdg.configHome}/Code/User/settings.json".enable = lib.mkForce false;
+
     home = {
       packages = with pkgs; [
         alejandra
@@ -48,57 +59,39 @@ in
         rm -f "$HOME/.claude/settings.json.hm-backup"
       '';
 
-      # Initialize VS Code settings and MCP files as mutable
-      # This runs AFTER home-manager creates symlinks (writeBoundary)
-      # We remove any symlinks created by programs.vscode.profiles to keep files mutable
+      # Keep settings.json MUTABLE (Factory extension + user can write it) while
+      # merging in our declarative keys (Stylix theming + factory.cfactoryUrl) on
+      # every switch. Existing keys the extension wrote (e.g. cfactoryToken) are
+      # preserved; declarative keys win on conflict.
       activation.vscodeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         SETTINGS_DIR="$HOME/.config/Code/User"
         SETTINGS_FILE="$SETTINGS_DIR/settings.json"
         MCP_FILE="$SETTINGS_DIR/mcp.json"
-        SETTINGS_TEMPLATE_FILE="${./vscode-settings-template.json}"
+        DECLARATIVE_SETTINGS="${declarativeSettingsFile}"
         MCP_TEMPLATE_FILE="${./vscode-mcp-template.json}"
 
-        # Create VS Code config directory if it doesn't exist
         mkdir -p "$SETTINGS_DIR"
 
-        # Remove any existing backup files that cause conflicts
-        if [ -f "$SETTINGS_DIR/settings.json.backup" ]; then
-          echo "Removing conflicting settings.json.backup file..."
-          rm "$SETTINGS_DIR/settings.json.backup"
-        fi
-        if [ -f "$SETTINGS_DIR/settings.json.hm-backup" ]; then
-          echo "Removing conflicting settings.json.hm-backup file..."
-          rm "$SETTINGS_DIR/settings.json.hm-backup"
-        fi
-
-        # Handle settings.json - convert symlink to mutable file
-        if [ -L "$SETTINGS_FILE" ]; then
-          echo "Removing Home Manager symlink for VS Code settings..."
-          rm "$SETTINGS_FILE"
-        fi
+        # Drop any leftover Home Manager symlink / backups so the file is writable.
+        rm -f "$SETTINGS_DIR/settings.json.backup" "$SETTINGS_DIR/settings.json.hm-backup"
+        [ -L "$SETTINGS_FILE" ] && rm "$SETTINGS_FILE"
 
         if [ ! -f "$SETTINGS_FILE" ]; then
-          echo "Creating initial mutable VS Code settings file..."
-          cp "$SETTINGS_TEMPLATE_FILE" "$SETTINGS_FILE"
+          install -m 644 "$DECLARATIVE_SETTINGS" "$SETTINGS_FILE"
+          echo "✅ VS Code settings.json initialized (mutable)."
+        elif MERGED=$(${pkgs.jq}/bin/jq -s '.[0] * .[1]' "$SETTINGS_FILE" "$DECLARATIVE_SETTINGS" 2>/dev/null); then
+          printf '%s\n' "$MERGED" > "$SETTINGS_FILE"
           chmod 644 "$SETTINGS_FILE"
-          echo "✅ VS Code settings.json initialized as mutable file."
+          echo "✅ VS Code settings.json updated (declarative keys merged, edits preserved)."
         else
-          echo "VS Code settings.json file exists and is already mutable - leaving it alone."
+          echo "⚠️  settings.json is not valid JSON; left untouched."
         fi
 
-        # Handle mcp.json - convert symlink to mutable file
-        if [ -L "$MCP_FILE" ]; then
-          echo "Removing Home Manager symlink for MCP configuration..."
-          rm "$MCP_FILE"
-        fi
-
+        [ -L "$MCP_FILE" ] && rm "$MCP_FILE"
         if [ ! -f "$MCP_FILE" ]; then
-          echo "Creating initial mutable MCP configuration file..."
           cp "$MCP_TEMPLATE_FILE" "$MCP_FILE"
           chmod 644 "$MCP_FILE"
-          echo "✅ VS Code mcp.json initialized as mutable file."
-        else
-          echo "VS Code mcp.json file exists and is already mutable - leaving it alone."
+          echo "✅ VS Code mcp.json initialized (mutable)."
         fi
       '';
     };
@@ -132,8 +125,12 @@ in
           golang.go
         ];
 
-        # IMPORTANT: No settings defined here - activation script handles settings.json
-        # This allows settings to remain mutable (editable by VS Code itself)
+        # settings.json is a Stylix-owned store symlink (theming/fonts), so it
+        # cannot be edited by hand. Persistent keys go here and merge with
+        # Stylix's userSettings.
+        userSettings = {
+          "factory.cfactoryUrl" = "https://cfactory.freundcloud.org.uk";
+        };
       };
     };
 
