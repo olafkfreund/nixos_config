@@ -326,7 +326,10 @@ in
         # Global variables for command tracking
         typeset -g COMMAND_START_TIME
         typeset -g CURRENT_COMMAND
-        typeset -g BOX_ENABLED=1
+        # Command/result boxes OFF by default — they ate vertical space and the
+        # "✔ Command completed" confirmation wasn't wanted. Run `toggle_boxes`
+        # to turn them on for a session.
+        typeset -g BOX_ENABLED=0
 
         # Function to calculate terminal width dynamically
         get_term_width() {
