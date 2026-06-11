@@ -11,14 +11,13 @@ in
 {
   imports = [
     ./claude-integration.nix
+    ./zsh-enhancements.nix
   ];
 
   # Optimized package selection - only essential packages
   home.packages = with pkgs; [
     # Core shell
     zsh
-    oh-my-zsh
-    zplug
 
     # Essential lightweight plugins
     zsh-edit
@@ -84,16 +83,10 @@ in
         highlight = "fg=#${colors.base03}";
       };
 
-      # Optimized zplug configuration with lazy loading
-      zplug = {
-        enable = true;
-        plugins = [
-          {
-            name = "loiccoyle/zsh-github-copilot";
-            tags = [ "defer:2" ]; # Lazy load for better startup performance
-          }
-        ];
-      };
+      # zplug removed (2026-06): it cost ~290ms of startup just to load the one
+      # github-copilot plugin, which is now loaded natively via the `plugins`
+      # list below (pinned by the flake). No external plugin manager needed
+      # under Nix.
 
       # Optimized plugin selection - removed redundancies and conflicts
       plugins = [
@@ -137,6 +130,20 @@ in
           name = "zsh-you-should-use";
           src = pkgs.zsh-you-should-use;
           file = "share/zsh/plugins/you-should-use/you-should-use.plugin.zsh";
+        }
+
+        # GitHub Copilot CLI helpers (Alt+\ suggest, Alt+Shift+\ explain).
+        # Loaded directly from the source instead of via zplug — zplug cost
+        # ~290ms of startup for this one plugin. fetched + pinned by the flake.
+        {
+          name = "zsh-github-copilot";
+          src = pkgs.fetchFromGitHub {
+            owner = "loiccoyle";
+            repo = "zsh-github-copilot";
+            rev = "7c4157f8a28047bbd3b55be59b1df54dcc1f4ab0";
+            hash = "sha256-TQViWTiZucjSOlFeFfqbzq7QJ9Ou33Awe/T/N759JRg=";
+          };
+          file = "zsh-github-copilot.plugin.zsh";
         }
 
         # Note: Removed zsh-syntax-highlighting plugin since we use built-in syntaxHighlighting
@@ -240,12 +247,20 @@ in
         # Initialize colors
         autoload -Uz colors && colors
 
-        # Smart completion cache management for better performance
-        autoload -U compinit
-        if [[ -n "''${ZDOTDIR}/.zcompdump"(#qN.mh+24) ]]; then
-          compinit
+        # Cache the completion dump; only rebuild it once a day. `-C` trusts the
+        # dump and skips the slow security audit AND the per-run rebuild — the
+        # latter was costing ~620ms every shell because ZDOTDIR was empty and the
+        # freshness check globbed a non-existent path. On NixOS fpath store paths
+        # churn each generation, so a fresh dump may lag new completions for up to
+        # 24h after a deploy — an acceptable trade for fast startup.
+        autoload -Uz compinit
+        _zcompdump="''${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump-$ZSH_VERSION"
+        if [[ -f "$_zcompdump"(#qNmh-24) ]]; then
+          compinit -C -d "$_zcompdump"
         else
-          compinit -C
+          mkdir -p "''${_zcompdump:h}"
+          compinit -d "$_zcompdump"
+          touch "$_zcompdump"
         fi
 
         # Include hidden files in completion
@@ -617,24 +632,14 @@ in
         }
       '';
 
-      # Optimized Oh My Zsh configuration with essential plugins only
-      oh-my-zsh = {
-        enable = true;
-        plugins = [
-          "sudo" # Essential utility
-          "direnv" # Development environment
-          "history" # History management
-          "starship" # Prompt integration
-          "git" # Git integration
-          "terraform" # Infrastructure
-          "aws" # Cloud
-          "azure" # Cloud
-          "1password" # Productivity
-          "emoji-clock" # Fun utility
-          "lxd" # Containers
-        ];
-        theme = "gruvbox";
-      };
+      # oh-my-zsh removed (2026-06): it added ~500ms startup and its plugins were
+      # all redundant with home-manager modules (direnv/starship), atuin, or our
+      # own config. Replacements:
+      #   - sudo plugin (Esc-Esc)     → zle widget in zsh-enhancements.nix
+      #   - direnv/starship/history   → programs.direnv / programs.starship / atuin
+      #   - git aliases               → zsh-abbr in zsh-enhancements.nix
+      #   - terraform/aws/azure/lxd   → carapace (optional) / native completions
+      #   - theme=gruvbox             → stylix owns the palette (config.lib.stylix)
 
       # Enhanced shell aliases - only forcing critical improvements where needed
       shellAliases = {
