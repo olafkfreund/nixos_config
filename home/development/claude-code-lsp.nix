@@ -186,35 +186,37 @@ in
           #
           # Runs after claudeUserSettingsInit so the settings file exists
           # before `claude plugin install` tries to write to it.
+          # NOTE: never `exit` from an activation entry — entries are concatenated
+          # into one activate script, so `exit` aborts ALL later entries. Guard
+          # with if/else instead so only this block is skipped.
           claudeCodeLspSetup = lib.hm.dag.entryAfter [ "claudeUserSettingsInit" ] ''
             if ! command -v claude >/dev/null 2>&1; then
               $DRY_RUN_CMD echo "Claude Code not found, skipping LSP setup"
-              exit 0
+            else
+              $DRY_RUN_CMD echo "Setting up Claude Code LSP plugins..."
+
+              marketplace_exists() {
+                claude plugin marketplace list | grep -q "nixos-lsp-marketplace"
+              }
+
+              plugin_installed() {
+                claude plugin marketplace list | grep -q "nix-lsp@nixos-lsp-marketplace" \
+                  || ( [ -f "$HOME/.claude/plugins/installed_plugins.json" ] \
+                       && grep -q "nix-lsp@nixos-lsp-marketplace" "$HOME/.claude/plugins/installed_plugins.json" )
+              }
+
+              if ! marketplace_exists; then
+                $DRY_RUN_CMD echo "Adding nixos-lsp-marketplace..."
+                $DRY_RUN_CMD claude plugin marketplace add "${cfg.customMarketplacePath}"
+              fi
+
+              if ! plugin_installed; then
+                $DRY_RUN_CMD echo "Installing nix-lsp plugin..."
+                $DRY_RUN_CMD claude plugin install nix-lsp@nixos-lsp-marketplace
+              fi
+
+              $DRY_RUN_CMD echo "Claude Code LSP setup complete!"
             fi
-
-            $DRY_RUN_CMD echo "Setting up Claude Code LSP plugins..."
-
-            marketplace_exists() {
-              claude plugin marketplace list | grep -q "nixos-lsp-marketplace"
-            }
-
-            plugin_installed() {
-              claude plugin marketplace list | grep -q "nix-lsp@nixos-lsp-marketplace" \
-                || ( [ -f "$HOME/.claude/plugins/installed_plugins.json" ] \
-                     && grep -q "nix-lsp@nixos-lsp-marketplace" "$HOME/.claude/plugins/installed_plugins.json" )
-            }
-
-            if ! marketplace_exists; then
-              $DRY_RUN_CMD echo "Adding nixos-lsp-marketplace..."
-              $DRY_RUN_CMD claude plugin marketplace add "${cfg.customMarketplacePath}"
-            fi
-
-            if ! plugin_installed; then
-              $DRY_RUN_CMD echo "Installing nix-lsp plugin..."
-              $DRY_RUN_CMD claude plugin install nix-lsp@nixos-lsp-marketplace
-            fi
-
-            $DRY_RUN_CMD echo "Claude Code LSP setup complete!"
           '';
 
           # MCP server configuration is now handled by claude-code-mcp.nix module
