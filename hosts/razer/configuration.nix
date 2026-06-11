@@ -352,10 +352,11 @@ in
   modules.programs.claude-code-managed = {
     enable = true;
     parrProtocol.enable = true;
-    # Top-right desktop toasts (with Claude icon) + tmux popups on
-    # Notification, status-line flashes on Stop/SubagentStop. Same
-    # defaults as p620; tunables in modules/programs/claude-code-managed.nix.
-    notifications.enable = true;
+    # Notifications are handled by the tmux-ccm plugin (status-bar
+    # attention flag + rate-limited completion ping). Our claude-notify
+    # hooks stay OFF to avoid a duplicate, un-throttled toaster on the
+    # same Notification events. Same rationale as p620.
+    notifications.enable = false;
   };
 
   # /use-ollama, /use-claude, /use-default slash commands + apiKeyHelper
