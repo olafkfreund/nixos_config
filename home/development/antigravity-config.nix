@@ -36,8 +36,10 @@ let
     then (osConfig.age.secrets."api-github-token" or null)
     else null;
 
+  # github-mcp-server only reads GITHUB_PERSONAL_ACCESS_TOKEN (not
+  # GITHUB_TOKEN_FILE) and requires the `stdio` subcommand to start.
   githubWrapper = pkgs.writeShellScript "antigravity-github-mcp" ''
-    export GITHUB_TOKEN_FILE=${if ghToken != null then ghToken.path else "/dev/null"}
+    export GITHUB_PERSONAL_ACCESS_TOKEN="$(cat ${if ghToken != null then ghToken.path else "/dev/null"})"
     exec ${pkgs.github-mcp-server}/bin/github-mcp-server stdio
   '';
 
