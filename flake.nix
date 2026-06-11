@@ -143,14 +143,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # skill-pool — self-hosted Claude Code skill/agent/command registry.
-    # Pinned to the v0.3.4 tagged release; consumed by
-    # modules/services/skill-pool.nix on p620.
-    skill-pool = {
-      url = "github:olafkfreund/skill_pool/v0.3.4";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # gscratch — i3/Sway-style scratchpad for GNOME Shell (any window, toggle
     # via global shortcut). Consumed by Users/olafkfreund/razer_home.nix.
     gscratch = {
