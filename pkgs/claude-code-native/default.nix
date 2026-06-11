@@ -22,6 +22,8 @@
 , zlib
 , glibc
 , wl-clipboard
+, xclip
+, coreutils
 , writeScriptBin
 ,
 }:
@@ -31,18 +33,26 @@ let
   # Run `curl -fsSL "$GCS_BUCKET/latest"` to check latest
   version = "2.1.170";
 
-  # Shim that intercepts wl-paste's `-l`/`--list-types` call used by Claude
-  # Code's background clipboard-image polling.  Returning an empty type list
-  # tells Claude no images are in the clipboard so it never spawns persistent
-  # wl-paste processes — those create xdg_toplevel windows visible in GNOME's
-  # dock.  All other wl-paste calls (e.g. text paste) forward to the real binary.
+  # Claude Code reads clipboard images by shelling out to:
+  #   xclip -selection clipboard -t TARGETS -o ... || wl-paste -l ...   (detect)
+  #   wl-paste --type image/png  /  xclip ... -t image/bmp -o           (retrieve)
+  #
+  # On GNOME/Mutter (no wlr-data-control / ext-data-control protocol) wl-paste
+  # has to fake an xdg_toplevel and wait for keyboard focus. It frequently never
+  # gets focus and BLOCKS FOREVER — the hung process shows up as a persistent
+  # "wl-clipboard" window in the GNOME dock and steals focus from the terminal.
+  #
+  # The previous shim avoided that by forcing `wl-paste -l` to return an empty
+  # type list — but that also told Claude "no image in clipboard", which is why
+  # image paste was completely broken (#XXX).
+  #
+  # New approach: forward EVERY call to the real wl-paste but wrap it in a 2s
+  # timeout. Detection (`-l`) and retrieval (`--type ...`) return real data when
+  # Mutter cooperates, but can never hang — worst case the dummy dock window
+  # flashes for <=2s during an actual paste, then disappears. Claude still tries
+  # xclip (XWayland) first, so this fallback usually isn't even reached.
   wlPasteShim = writeScriptBin "wl-paste" ''
-    for arg in "$@"; do
-      case "$arg" in
-        -l|--list-types) exit 0 ;;
-      esac
-    done
-    exec ${wl-clipboard}/bin/wl-paste "$@"
+    exec ${coreutils}/bin/timeout 2 ${wl-clipboard}/bin/wl-paste "$@"
   '';
 
   # Anthropic's official distribution bucket
@@ -106,13 +116,15 @@ stdenv.mkDerivation {
     cp $src $out/lib/claude-code/claude
     chmod +x $out/lib/claude-code/claude
 
-    # Create wrapper: disable auto-update and prepend wl-paste shim so the
-    # clipboard-image polling returns an empty type list instead of spawning
-    # real wl-paste processes (which create GNOME dock windows on Wayland).
+    # Create wrapper: disable auto-update and prepend the clipboard tools.
+    # - xclip: Claude's preferred (XWayland) image-paste path; reliable and never
+    #   spawns a GNOME dock window. Put it first so detection short-circuits here.
+    # - wlPasteShim: timeout-guarded wl-paste fallback that can detect/retrieve
+    #   images without hanging the dock (see comment above).
     makeWrapper $out/lib/claude-code/claude $out/bin/claude \
       --set DISABLE_AUTOUPDATER "1" \
       --set CLAUDE_CODE_SKIP_UPDATE_CHECK "1" \
-      --prefix PATH : ${wlPasteShim}/bin
+      --prefix PATH : ${lib.makeBinPath [ xclip wlPasteShim ]}
 
     runHook postInstall
   '';
