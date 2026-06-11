@@ -31,6 +31,7 @@ _: {
     ./claude-code-mcp.nix # Claude Code MCP server configuration
     ./antigravity-config.nix # Declarative Antigravity rules + MCP sync
     ./claude-code-output-styles.nix # Declarative Claude Code output styles
+    ./claude-code-agents.nix # Declarative agent curation (hide irrelevant agents)
 
     # Development workflow enhancements (conflicts resolved)
     ./workflow.nix
