@@ -1044,38 +1044,50 @@ in
           cache="$HOME/.cache/gog-status"
           mkdir -p "$cache"
 
-          # Next event in the next 24h, skipping all-day and
+          # Next event that has NOT finished yet, skipping all-day and
           # workingLocation entries (those are calendar metadata, not
-          # meetings). Format: "📅 SUMMARY HH:MM" (24h, Europe/London).
+          # meetings). Rendered in the host's local timezone (whatever
+          # /etc/localtime is set to — BST/GMT here). Once an event's end
+          # time passes it drops off the display and the next one takes
+          # over. Format: "📅 SUMMARY HH:MM" (24h).
           #
-          # Extract the raw RFC3339 start + summary as TSV, then let GNU
-          # date convert the absolute instant to London wall-clock. Never
-          # string-slice the timestamp — that prints whatever UTC offset
-          # the feed happens to carry instead of the local time.
+          # jq emits every timed event as "start<TAB>end<TAB>summary"
+          # sorted by start; the shell picks the first whose end instant
+          # is still in the future, then lets GNU date convert that start
+          # to local wall-clock. Never string-slice the timestamp — that
+          # prints whatever UTC offset the feed carries, not local time.
           tmp_event="$(mktemp)"
-          next_line="$(gog -j calendar events primary --days 1 --max 20 \
-                         --select 'summary,start,eventType' --results-only 2>/dev/null \
-                       | jq -r '[ .[]
-                                 | select(.eventType != "workingLocation")
-                                 | select(.start.dateTime != null) ]
-                                | sort_by(.start.dateTime)
-                                | .[0] // empty
-                                | [ (.summary // "(no title)" | .[0:30]), .start.dateTime ]
-                                | @tsv' 2>/dev/null || true)"
-          if [ -n "$next_line" ]; then
-            IFS=$'\t' read -r ev_summary ev_dt <<< "$next_line"
-            ev_time="$(TZ=Europe/London date -d "$ev_dt" +%H:%M 2>/dev/null || true)"
-            if [ -n "$ev_time" ]; then
-              printf '📅 %s %s' "$ev_summary" "$ev_time" > "$tmp_event"
-              mv -f "$tmp_event" "$cache/event.txt"
-            else
-              rm -f "$tmp_event"
-            fi
-          else
-            # No upcoming timed event → clear the segment.
-            : > "$tmp_event"
-            mv -f "$tmp_event" "$cache/event.txt"
+          events_tsv="$(gog -j calendar events primary --days 1 --max 20 \
+                          --select 'summary,start,end,eventType' --results-only 2>/dev/null \
+                        | jq -r '[ .[]
+                                  | select(.eventType != "workingLocation")
+                                  | select(.start.dateTime != null) ]
+                                 | sort_by(.start.dateTime)
+                                 | .[]
+                                 | [ .start.dateTime, (.end.dateTime // ""),
+                                     (.summary // "(no title)" | .[0:30]) ]
+                                 | @tsv' 2>/dev/null || true)"
+          chosen=""
+          if [ -n "$events_tsv" ]; then
+            now_epoch="$(date +%s)"
+            while IFS=$'\t' read -r ev_start ev_end ev_summary; do
+              [ -n "$ev_start" ] || continue
+              end_ref="''${ev_end:-$ev_start}"
+              end_epoch="$(date -d "$end_ref" +%s 2>/dev/null || echo 0)"
+              # Skip anything already finished; first still-running or
+              # upcoming event wins.
+              if [ "$end_epoch" -gt "$now_epoch" ]; then
+                ev_time="$(date -d "$ev_start" +%H:%M 2>/dev/null || true)"
+                if [ -n "$ev_time" ]; then
+                  chosen="📅 $ev_summary $ev_time"
+                fi
+                break
+              fi
+            done <<< "$events_tsv"
           fi
+          # Empty string clears the segment when nothing is live/upcoming.
+          printf '%s' "$chosen" > "$tmp_event"
+          mv -f "$tmp_event" "$cache/event.txt"
 
           # Open task count across the default tasks list. Renders as
           # "✓ N" if N>0, empty otherwise.
