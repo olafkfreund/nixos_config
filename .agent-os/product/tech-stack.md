@@ -1,7 +1,7 @@
 # Technical Stack
 
-> Last Updated: 2025-01-29
-> Version: 1.1.0
+> Last Updated: 2026-06-10
+> Version: 1.2.0
 > Status: Updated with NixOS Best Practices
 
 ## Core Technologies
@@ -9,7 +9,8 @@
 ### Application Framework
 
 - **Framework:** NixOS with Flakes
-- **Version:** 25.11 (nixos-unstable)
+- **Version:** 26.11 (nixos-unstable rolling branch; flake input `github:nixos/nixpkgs/nixos-unstable`)
+- **Desktop:** GNOME 50.1 (gnome-shell 50.1 from current unstable)
 - **Language:** Nix expression language
 - **Code Standards:** Follow NixOS anti-patterns documentation (docs/NIXOS-ANTI-PATTERNS.md)
 - **Configuration Pattern:** Template-based architecture with feature flags
@@ -89,7 +90,8 @@
 - **Primary Hosts:** p620 (primary workstation), p510 (media server), razer (mobile)
 - **Network:** Tailscale VPN mesh with DNS management
 
-**Note**: DEX5550 is **offline**. Samsung is **archived**. Monitoring infrastructure (Prometheus/Grafana/Loki) has been **removed**.
+**Note**: DEX5550 is **offline**. Samsung is **archived**.
+Monitoring infrastructure (Prometheus/Grafana/Loki) has been **removed**.
 
 ### Automation
 
