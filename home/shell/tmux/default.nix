@@ -1046,24 +1046,35 @@ in
 
           # Next event in the next 24h, skipping all-day and
           # workingLocation entries (those are calendar metadata, not
-          # meetings). Format: "📅 SUMMARY HH:MM" (24h time).
+          # meetings). Format: "📅 SUMMARY HH:MM" (24h, Europe/London).
+          #
+          # Extract the raw RFC3339 start + summary as TSV, then let GNU
+          # date convert the absolute instant to London wall-clock. Never
+          # string-slice the timestamp — that prints whatever UTC offset
+          # the feed happens to carry instead of the local time.
           tmp_event="$(mktemp)"
-          if gog -j calendar events primary --days 1 --max 20 \
-               --select 'summary,start,eventType' --results-only \
-               2>/dev/null \
-             | jq -r '[ .[]
-                       | select(.eventType != "workingLocation")
-                       | select(.start.dateTime != null) ]
-                      | sort_by(.start.dateTime)
-                      | .[0]
-                      | if . == null then ""
-                        else "📅 " + (.summary // "(no title)" | .[0:30]) + " "
-                             + (.start.dateTime | .[11:16])
-                        end' \
-               > "$tmp_event" 2>/dev/null; then
-            mv -f "$tmp_event" "$cache/event.txt"
+          next_line="$(gog -j calendar events primary --days 1 --max 20 \
+                         --select 'summary,start,eventType' --results-only 2>/dev/null \
+                       | jq -r '[ .[]
+                                 | select(.eventType != "workingLocation")
+                                 | select(.start.dateTime != null) ]
+                                | sort_by(.start.dateTime)
+                                | .[0] // empty
+                                | [ (.summary // "(no title)" | .[0:30]), .start.dateTime ]
+                                | @tsv' 2>/dev/null || true)"
+          if [ -n "$next_line" ]; then
+            IFS=$'\t' read -r ev_summary ev_dt <<< "$next_line"
+            ev_time="$(TZ=Europe/London date -d "$ev_dt" +%H:%M 2>/dev/null || true)"
+            if [ -n "$ev_time" ]; then
+              printf '📅 %s %s' "$ev_summary" "$ev_time" > "$tmp_event"
+              mv -f "$tmp_event" "$cache/event.txt"
+            else
+              rm -f "$tmp_event"
+            fi
           else
-            rm -f "$tmp_event"
+            # No upcoming timed event → clear the segment.
+            : > "$tmp_event"
+            mv -f "$tmp_event" "$cache/event.txt"
           fi
 
           # Open task count across the default tasks list. Renders as
