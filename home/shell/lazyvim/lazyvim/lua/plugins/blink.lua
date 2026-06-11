@@ -29,7 +29,17 @@ return {
         nerd_font_variant = "mono",
       },
       sources = {
-        default = { "lsp", "path", "snippets", "buffer" },
+        default = { "lsp", "path", "snippets", "buffer", "minuet" },
+        providers = {
+          -- Local Ollama FIM completion (minuet-ai.nvim → qwen2.5-coder:7b)
+          minuet = {
+            name = "minuet",
+            module = "minuet.blink",
+            async = true,
+            timeout_ms = 4000,
+            score_offset = 50, -- rank AI suggestions above buffer/snippets
+          },
+        },
       },
       completion = {
         accept = { auto_brackets = { enabled = true } },
