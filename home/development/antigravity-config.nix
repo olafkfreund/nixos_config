@@ -20,12 +20,42 @@
 { config
 , lib
 , pkgs
+, osConfig ? null
 , ...
 }:
 let
   cfg = config.programs.antigravityConfig;
 
   geminiDir = "${config.home.homeDirectory}/.gemini";
+
+  # GitHub PAT — sourced from agenix at runtime instead of sitting in plaintext
+  # in mcp_config.json. Mirrors the Claude Code github-mcp wrapper. Only applied
+  # if the host actually decrypts api-github-token.
+  ghToken =
+    if osConfig != null
+    then (osConfig.age.secrets."api-github-token" or null)
+    else null;
+
+  # github-mcp-server only reads GITHUB_PERSONAL_ACCESS_TOKEN (not
+  # GITHUB_TOKEN_FILE) and requires the `stdio` subcommand to start.
+  githubWrapper = pkgs.writeShellScript "antigravity-github-mcp" ''
+    export GITHUB_PERSONAL_ACCESS_TOKEN="$(cat ${if ghToken != null then ghToken.path else "/dev/null"})"
+    exec ${pkgs.github-mcp-server}/bin/github-mcp-server stdio
+  '';
+
+  # Override layer (mine wins): replaces any plaintext-token github-mcp-server
+  # entry with the agenix-backed wrapper. Empty if the secret isn't available
+  # or the feature is off — the existing entry is then left untouched.
+  overrideMcpServers = lib.optionalAttrs (cfg.secureGithubMcp && ghToken != null) {
+    github-mcp-server = {
+      command = toString githubWrapper;
+      args = [ ];
+    };
+  };
+
+  overrideMcpFile = (pkgs.formats.json { }).generate "antigravity-override-mcp.json" {
+    mcpServers = overrideMcpServers;
+  };
 
   # Clean, secret-free stdio MCP servers to share into Antigravity. These map
   # 1:1 onto Antigravity's command/args/env schema. SSE/secret-bound servers
@@ -99,6 +129,17 @@ in
         this only fills gaps and never removes anything.
       '';
     };
+
+    secureGithubMcp = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Replace any github-mcp-server entry in mcp_config.json (which Antigravity
+        stores with the PAT in plaintext) with an agenix-backed wrapper that
+        sources the token from api-github-token at runtime. No-op if the secret
+        isn't decrypted on this host.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -110,17 +151,26 @@ in
       lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         cfgfile="${geminiDir}/config/mcp_config.json"
         shared="${sharedMcpFile}"
+        override="${overrideMcpFile}"
         mkdir -p "$(dirname "$cfgfile")"
 
         if [ ! -f "$cfgfile" ]; then
-          $DRY_RUN_CMD install -m 0644 "$shared" "$cfgfile"
-          $DRY_RUN_CMD echo "Antigravity: seeded mcp_config.json from shared MCP set"
+          # Seed = shared servers, with the secure github override applied.
+          if seeded=$(${pkgs.jq}/bin/jq -s \
+              '.[0] + {mcpServers: ((.[0].mcpServers // {}) + (.[1].mcpServers // {}))}' \
+              "$shared" "$override" 2>/dev/null); then
+            $DRY_RUN_CMD printf '%s\n' "$seeded" > "$cfgfile"
+            $DRY_RUN_CMD chmod 0644 "$cfgfile"
+            $DRY_RUN_CMD echo "Antigravity: seeded mcp_config.json (shared + secure github)"
+          fi
         elif merged=$(${pkgs.jq}/bin/jq -s \
-            '.[1] + {mcpServers: ((.[0].mcpServers // {}) + (.[1].mcpServers // {}))}' \
-            "$shared" "$cfgfile" 2>/dev/null); then
-          # Existing user servers (.[1]) win over shared (.[0]); only gaps filled.
+            '.[1] + {mcpServers: ((.[0].mcpServers // {}) + (.[1].mcpServers // {}) + (.[2].mcpServers // {}))}' \
+            "$shared" "$cfgfile" "$override" 2>/dev/null); then
+          # Precedence: override (.[2]) > existing (.[1]) > shared (.[0]).
+          # Existing servers preserved; gaps filled by shared; github-mcp-server
+          # replaced by the agenix-backed wrapper (drops the plaintext token).
           $DRY_RUN_CMD printf '%s\n' "$merged" > "$cfgfile"
-          $DRY_RUN_CMD echo "Antigravity: synced shared MCP servers (existing preserved)"
+          $DRY_RUN_CMD echo "Antigravity: synced MCP (existing preserved, github secured)"
         else
           $DRY_RUN_CMD echo "Antigravity: mcp_config.json not valid JSON — left untouched"
         fi

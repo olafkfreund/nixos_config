@@ -145,8 +145,10 @@ let
         // (lib.optionalAttrs (osConfig.age.secrets."api-github-token" or null != null) {
           github = {
             command = "${mkWrapper "github-mcp-wrapper" ''
-              export GITHUB_TOKEN_FILE=${osConfig.age.secrets."api-github-token".path}
-              exec ${pkgs.github-mcp-server}/bin/github-mcp-server "$@"
+              # github-mcp-server only reads GITHUB_PERSONAL_ACCESS_TOKEN (not
+              # GITHUB_TOKEN_FILE) and needs the `stdio` subcommand to start.
+              export GITHUB_PERSONAL_ACCESS_TOKEN="$(cat ${osConfig.age.secrets."api-github-token".path})"
+              exec ${pkgs.github-mcp-server}/bin/github-mcp-server stdio "$@"
             ''}";
             args = [ ];
             description = "GitHub repository integration - PR automation, issue management, repository queries";
