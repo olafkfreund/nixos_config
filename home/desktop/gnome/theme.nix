@@ -26,6 +26,17 @@ in
     # document-font-name, monospace-font-name, color-scheme). Only keep
     # dconf entries here for things Stylix does not manage.
     dconf.settings = {
+      # Keep the user's named gruvbox themes — Stylix's GNOME target otherwise
+      # resets gtk-theme → adw-gtk3 and the shell user-theme → "Stylix" on every
+      # rebuild. mkForce wins over Stylix's dconf entries. (Icons + cursor are
+      # driven through Stylix itself in modules/desktop/stylix-theme.nix.)
+      "org/gnome/desktop/interface" = {
+        gtk-theme = lib.mkForce "Gruvbox-Dark";
+      };
+      "org/gnome/shell/extensions/user-theme" = {
+        name = lib.mkForce "Gruvbox-Dark";
+      };
+
       "org/gnome/desktop/wm/preferences" = {
         # Stylix doesn't theme the WM titlebar font; follow the Stylix sans
         # so the titlebar matches the rest of the GNOME UI.
