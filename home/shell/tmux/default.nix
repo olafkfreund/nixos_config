@@ -523,14 +523,14 @@ in
       icon = "🤖";
       command = "echo " + lib.escapeShellArg (builtins.toJSON [
         {
-          icon = "✻";
+          icon = "󰚩";
           iconColor = "#cc8822";
           title = "Claude Code (Popup)";
           subtitle = "Launch Claude overlay in floating window";
           action.tmux = "display-popup -w 85% -h 85% -d '#{pane_current_path}' -E 'claude --dangerously-skip-permissions --resume --remote-control'";
         }
         {
-          icon = "✻";
+          icon = "󰚩";
           iconColor = "#cc8822";
           title = "Claude Code (Split Right)";
           subtitle = "Open Claude in a 35% side split";
@@ -544,21 +544,21 @@ in
           action.tmux = "display-popup -w 85% -h 85% -d '#{pane_current_path}' -E 'claude agents --dangerously-skip-permissions'";
         }
         {
-          icon = "🛸";
+          icon = "󰔷";
           iconColor = "#22aaff";
           title = "Antigravity CLI (Popup)";
           subtitle = "Launch agy overlay in floating window";
           action.tmux = "display-popup -w 85% -h 85% -d '#{pane_current_path}' -E 'agy'";
         }
         {
-          icon = "🛸";
+          icon = "󰔷";
           iconColor = "#22aaff";
           title = "Antigravity CLI (Split Right)";
           subtitle = "Open agy in a 35% side split";
           action.tmux = "split-window -h -l 35% -c '#{pane_current_path}' 'agy'";
         }
         {
-          icon = "🛸";
+          icon = "󰔷";
           iconColor = "#22aaff";
           title = "Antigravity (Window + Alerts)";
           subtitle = "agy in a named window; tmux flashes on 20s idle, desktop toast on exit";
