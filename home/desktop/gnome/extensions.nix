@@ -43,8 +43,17 @@ in
           "dim-background-windows@stephane-13.github.com"
           "yetanotherradio@io.github.buddysirjava"
           "allowlockedremotedesktop@kamens.us"
-          "claude-code-usage@haletran.com"
+          # Claude Code Usage Monitor — dvdstelt's variant (the one actually
+          # installed). Replaces the older claude-code-usage@haletran.com.
+          "claude-usage@dvdstelt.github.io"
           "otp-keys@osmank3.net"
+          # Added 2026-06 from the user's installed set:
+          "docker-manager@omerfarukgungor"
+          "dynamic-calendar-and-clocks-icons-reborn@thecalamityjoe87.github.com"
+          "notification-configurator@exposedcat"
+          "screencast.extra.feature@wissle.me"
+          "shotzy@SamkitJain660.github.io"
+          "slider-percentages@imdarktom"
           "rudra@narkagni"
           "spotify-controller@narkagni"
           "accent-directories@taiwbi.com"
@@ -125,11 +134,17 @@ in
         gnomeExtensions.dim-background-windows
         gnomeExtensions.yet-another-radio
         gnomeExtensions.clipboard-indicator
+        gnomeExtensions.notification-configurator
+        gnomeExtensions.shotzy
+        gnomeExtensions.screencast-extra-feature
 
         # Manually-packaged extensions (extensions.gnome.org pinned ZIPs,
         # see pkgs/gnome-ext-*). Not in nixpkgs.
         gnome-ext-allow-locked-remote-desktop
-        gnome-ext-claude-code-usage
+        gnome-ext-claude-usage-dvdstelt
+        gnome-ext-docker-manager
+        gnome-ext-slider-percentages
+        gnome-ext-dynamic-calendar-reborn
         gnome-ext-otp-keys
         gnome-ext-rudra
         gnome-ext-spotify-controller
