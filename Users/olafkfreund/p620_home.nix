@@ -63,6 +63,15 @@
     # confinement, CEF rendering). Native GNOME alternative to
     # cosmic-utils/web-apps.
     inputs.gnome-quick-web-apps.packages.${pkgs.system}.default
+
+    # Libation — Audible library downloader/DRM-decrypter. Books location is set
+    # to /mnt/media/Media/Audiobooks (P510 ABS library, NFS-mounted here) so
+    # decrypted m4b land straight in Audiobookshelf. nixpkgs wraps it without
+    # webkitgtk, so the Avalonia login/setup WebView crashes with "Unable to
+    # initialize GTK"; add the gtk3-ABI webkit (4.1) back to its runtime libs.
+    (pkgs.libation.overrideAttrs (old: {
+      dotnetRuntimeDeps = (old.dotnetRuntimeDeps or [ ]) ++ [ pkgs.webkitgtk_4_1 ];
+    }))
   ];
 
   # Optional: Add additional packages to the Windsurf environment
