@@ -5,7 +5,7 @@
     nix-prefetch-scripts
     polkit
     kdePackages.polkit-kde-agent-1
-    libsForQt5.qt5.qtgraphicaleffects
+    qt5.qtgraphicaleffects
 
     # Development tools (core tools like git, curl, jq are in nixos/packages/core.nix)
     openssl
