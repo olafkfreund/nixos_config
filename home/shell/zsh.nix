@@ -132,19 +132,9 @@ in
           file = "share/zsh/plugins/you-should-use/you-should-use.plugin.zsh";
         }
 
-        # GitHub Copilot CLI helpers (Alt+\ suggest, Alt+Shift+\ explain).
-        # Loaded directly from the source instead of via zplug — zplug cost
-        # ~290ms of startup for this one plugin. fetched + pinned by the flake.
-        {
-          name = "zsh-github-copilot";
-          src = pkgs.fetchFromGitHub {
-            owner = "loiccoyle";
-            repo = "zsh-github-copilot";
-            rev = "7c4157f8a28047bbd3b55be59b1df54dcc1f4ab0";
-            hash = "sha256-TQViWTiZucjSOlFeFfqbzq7QJ9Ou33Awe/T/N759JRg=";
-          };
-          file = "zsh-github-copilot.plugin.zsh";
-        }
+        # Note: zsh-github-copilot removed — it printed "gh copilot extension
+        # not found" on every shell (the gh-copilot CLI isn't installed and
+        # isn't wanted; the AI stack here is Claude / Antigravity / Ollama).
 
         # Note: Removed zsh-syntax-highlighting plugin since we use built-in syntaxHighlighting
         # Note: Removed zsh-autosuggestions plugin since we use built-in autosuggestion
@@ -274,9 +264,6 @@ in
         bindkey "^[[OH" beginning-of-line     # Home
         bindkey "^[[OF" end-of-line           # End
 
-        # AI integration keybindings
-        bindkey '^[|' zsh_gh_copilot_explain  # Alt+Shift+\
-        bindkey '^[\\' zsh_gh_copilot_suggest  # Alt+\
 
         # Productivity keybindings
         bindkey -s ^f "tmux-sessionizer\n"    # Ctrl+F for session manager
