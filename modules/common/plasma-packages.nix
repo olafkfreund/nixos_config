@@ -13,7 +13,7 @@
 
   # Additional packages only for home-manager
   plasmaHomePackages = with pkgs; [
-    libsForQt5.qt5.qtwayland
+    qt5.qtwayland
     kdePackages.qtwayland
   ];
 }
