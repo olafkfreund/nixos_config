@@ -55,8 +55,9 @@ in
       type = types.str;
       default = "/run/agenix/gogcli-credentials-json";
       description = ''
-        Path to the agenix-decrypted gog OAuth client credentials JSON. Copied
-        into GOG_HOME/credentials.json by the import service so gog can mint
+        Path to the agenix-decrypted gog OAuth client credentials in Google
+        "installed" JSON format. Registered via `gog auth credentials set` by
+        the import service (client secret lands in the keyring) so gog can mint
         access tokens from the refresh token. Runtime only.
       '';
     };
@@ -96,19 +97,22 @@ in
           [ -r "$tok" ] || { echo "gog token not present at $tok; skipping import"; exit 0; }
           mkdir -p "$home"
 
-          # OAuth client credentials → GOG_HOME/credentials.json (gog needs
-          # these to exchange the refresh token for access tokens).
-          if [ -r "${cfg.credentialsFile}" ]; then
-            install -m600 "${cfg.credentialsFile}" "$home/credentials.json"
-          fi
-
           # The file keyring backend refuses to write without a password in a
-          # non-interactive context — provide it so the import actually seeds.
+          # non-interactive context — provide it so import + credentials-set
+          # (client secret is stored in the keyring) actually succeed.
           if [ -r "${cfg.keyringPasswordFile}" ]; then
             GOG_KEYRING_PASSWORD="$(cat "${cfg.keyringPasswordFile}")"
             export GOG_KEYRING_PASSWORD
           fi
           "$gog" auth keyring set file >/dev/null 2>&1 || true
+
+          # Register the OAuth client (Google "installed" JSON) so gog can
+          # exchange the refresh token for access tokens. `set` stores the
+          # client secret in the keyring — not a plain file copy.
+          if [ -r "${cfg.credentialsFile}" ]; then
+            "$gog" auth credentials set "${cfg.credentialsFile}" >/dev/null 2>&1 || true
+          fi
+
           "$gog" auth tokens import "$tok" >/dev/null 2>&1 || true
         '');
       };
