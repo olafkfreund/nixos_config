@@ -84,10 +84,11 @@
     # Workaround: close claude-desktop entirely to release inhibitor,
     # or set CLAUDE_KEEP_AWAKE=0 (#645).
     # Bump via /update-claude-code.
-    # = tag v2.0.18+claude1.11187.4 (commit d99cdbd0e0, 2026-06-06)
-    # Delta from previous pin: bubblewrap added to FHS targetPkgs for cowork
-    # sandbox + Claude binary URLs bumped to 1.11187.4.
-    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/d99cdbd0e054fc04eb2ccfaf31777f11e89416c3";
+    # = tag v2.0.19+claude1.11847.5 (commit f56421294d, 2026-06-12)
+    # Delta from previous pin: AppArmor profiles for Ubuntu 24.04+ user
+    # namespaces, GPU-crash auto-recovery, software-center AppStream metainfo,
+    # no more app.asar open prompt; tracks Claude Desktop 1.11847.5.
+    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/f56421294d46f5db61fba0f833215d18d8c7fa2f";
 
     # Claude Code skill catalogue (borghei). flake = false because it's a
     # plain markdown/assets catalogue, not a Nix flake. We symlink one
