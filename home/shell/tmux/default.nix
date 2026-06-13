@@ -199,7 +199,7 @@ in
         # M-c → GogMail TUI (Gmail / Calendar / Tasks / Drive / Contacts /
         # Chat) in a floating popup. Direct launch, same pattern as the AI
         # tools — also available from the M-a ai-tools palette.
-        bind-key -n M-c     display-popup -w 90% -h 90% -d '#{pane_current_path}' -E 'gogmail'
+        bind-key -n M-c     display-popup -w 90% -h 90% -d '#{pane_current_path}' -E 'gogmail-tmux'
 
         # ========== Terminal and Display Settings ==========
         set-option -g terminal-overrides ',xterm-256color:RGB,alacritty:RGB,kitty:RGB,foot:RGB,wezterm:RGB,ghostty:RGB'
@@ -481,7 +481,7 @@ in
           "        command: run-shell ${palette}"
           "      - name: GogMail (Google Workspace TUI)"
           "        key: m"
-          "        command: display-popup -w 90% -h 90% -d '#{pane_current_path}' -E 'gogmail'"
+          "        command: display-popup -w 90% -h 90% -d '#{pane_current_path}' -E 'gogmail-tmux'"
           "      - separator: true"
           "      - name: Session expose"
           "        key: e"
@@ -561,7 +561,7 @@ in
           icon = "󰇮";
           title = "GogMail (Popup)";
           subtitle = "Google Workspace TUI — Gmail, Calendar, Tasks, Drive, Contacts, Chat";
-          action.tmux = "display-popup -w 90% -h 90% -d '#{pane_current_path}' -E 'gogmail'";
+          action.tmux = "display-popup -w 90% -h 90% -d '#{pane_current_path}' -E 'gogmail-tmux'";
         }
       ]);
     };
@@ -572,6 +572,22 @@ in
       # from the M-a ai-tools palette and the M-c keybind. Wraps the gog
       # CLI + clipboard/browser tools onto its own PATH.
       pkgs.gogmail
+
+      # gogmail launch wrapper for the tmux popups: pins GOG_HOME and sources
+      # GOG_KEYRING_PASSWORD from the agenix file so gog can unlock its file
+      # keyring regardless of the (possibly older) tmux server environment.
+      (pkgs.writeShellApplication {
+        name = "gogmail-tmux";
+        runtimeInputs = [ pkgs.gogmail pkgs.coreutils ];
+        text = ''
+          export GOG_HOME="$HOME/.config/gogcli"
+          if [ -r /run/agenix/gogcli-keyring-password ]; then
+            GOG_KEYRING_PASSWORD="$(cat /run/agenix/gogcli-keyring-password)"
+            export GOG_KEYRING_PASSWORD
+          fi
+          exec gogmail "$@"
+        '';
+      })
 
       pkgs.customPkgs.tmux-ccm
 

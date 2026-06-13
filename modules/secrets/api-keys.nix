@@ -134,6 +134,26 @@ in
         owner = username;
         group = "users";
       };
+    }
+    # Password for gog's file keyring backend — read by gog-token-import (to
+    # seed the keyring) and the gogmail launcher (to read it at runtime).
+    // lib.optionalAttrs (builtins.pathExists ../../secrets/gogcli-keyring-password.age) {
+      gogcli-keyring-password = {
+        file = ../../secrets/gogcli-keyring-password.age;
+        mode = "0600";
+        owner = username;
+        group = "users";
+      };
+    }
+    # gog OAuth client credentials JSON — dropped into GOG_HOME by the
+    # gog-token-import service so gog can mint access tokens.
+    // lib.optionalAttrs (builtins.pathExists ../../secrets/gogcli-credentials.json.age) {
+      gogcli-credentials-json = {
+        file = ../../secrets/gogcli-credentials.json.age;
+        mode = "0600";
+        owner = username;
+        group = "users";
+      };
     };
 
     # Note: System environment variables removed - use shell initialization instead
