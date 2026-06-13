@@ -90,6 +90,13 @@
     # no more app.asar open prompt; tracks Claude Desktop 1.11847.5.
     claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/f56421294d46f5db61fba0f833215d18d8c7fa2f";
 
+    # GogMail — keyboard-driven Google Workspace TUI (Gmail/Calendar/Tasks/
+    # Drive/Contacts/Chat) built on the gog CLI. Consumed via overlays as
+    # pkgs.gogmail; launched from the tmux ai-tools palette + M-c. Uses its
+    # own locked nixpkgs (no follows) so the tested Python closure builds
+    # as-released. Bump with `nix flake update gogmail`.
+    gogmail.url = "github:olafkfreund/gogmail";
+
     # Claude Code skill catalogue (borghei). flake = false because it's a
     # plain markdown/assets catalogue, not a Nix flake. We symlink one
     # subdirectory (engineering/claude-code-mastery) into ~/.claude/skills/
