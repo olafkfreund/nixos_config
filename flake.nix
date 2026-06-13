@@ -32,14 +32,6 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    # Surgical pin for ollama 0.30.5 — nixos-unstable channel still ships
-    # 0.24.0 (Hydra hasn't blessed the bump yet) but master has had it
-    # since 2026-06-04 (commit bba51cb2 = 0.30.5 + darwin fix). Used by
-    # overlays/default.nix to override ONLY ollama-rocm / ollama-cuda;
-    # nothing else evaluates against this input. Remove when nixos-unstable
-    # catches up (verify with: `nix eval --raw nixpkgs-unstable#ollama-rocm.version`).
-    # See #784 for tracking.
-    nixpkgs-ollama.url = "github:NixOS/nixpkgs/bba51cb2";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     flake-utils.url = "github:numtide/flake-utils";
 
