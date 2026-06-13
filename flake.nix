@@ -48,6 +48,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # niri — scrollable-tiling Wayland compositor. niri-flake provides the
+    # NixOS module (programs.niri) + the home-manager config option
+    # (programs.niri.settings). We pin the package to pkgs.niri (nixpkgs) and
+    # disable niri-flake's binary cache, so no extra substituter/rebuild dance.
+    niri-flake = {
+      url = "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Development and utilities
     sops-nix = {
       url = "github:mic92/sops-nix";
@@ -260,6 +269,7 @@
               inputs.nix-snapd.nixosModules.default
               inputs.agenix.nixosModules.default
               inputs.lanzaboote.nixosModules.lanzaboote
+              inputs.niri-flake.nixosModules.niri
               nix-index-database.nixosModules.nix-index
               ./home/shell/zellij/zjstatus.nix
             ]

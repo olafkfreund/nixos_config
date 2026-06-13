@@ -353,6 +353,11 @@ in
   # the option path is `desktop.displayManager`, not `features.desktop.displayManager`.
   desktop.displayManager.backend = "gdm";
 
+  # Phase 1: niri + labwc as selectable login sessions (alongside GNOME).
+  # Login manager stays GDM for now; greetd/Noctalia greeter is a later phase.
+  desktop.niri.enable = true;
+  desktop.labwc.enable = true;
+
   # Citrix Workspace for client project remote access
   # Disabled — no longer needed. Module + overlay + package retained so this
   # can be flipped back to true without re-installing anything.
