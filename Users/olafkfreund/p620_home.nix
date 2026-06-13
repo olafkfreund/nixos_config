@@ -5,6 +5,7 @@
 }: {
   imports = [
     ./profile.nix
+    ../../home/desktop/noctalia # Noctalia shell for niri/labwc sessions
   ];
 
   desktop.gnome.profile = "workstation";
