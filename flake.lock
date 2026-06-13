@@ -963,22 +963,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-ollama": {
-      "locked": {
-        "lastModified": 1780615177,
-        "narHash": "sha256-Xr+OvVyOkESPtnTOARUvOo2aZkqrKfyYvQgCSCSfLw0=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "bba51cb2479b7a23134f69b932811df999b892e1",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "bba51cb2",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs-stable": {
       "locked": {
         "lastModified": 1780902259,
@@ -1301,7 +1285,6 @@
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_8",
         "nixpkgs-f2k": "nixpkgs-f2k",
-        "nixpkgs-ollama": "nixpkgs-ollama",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nur": "nur",
         "rust-overlay": "rust-overlay_4",
