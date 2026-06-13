@@ -7,7 +7,10 @@ let
   vars = import ../../hosts/razer/variables.nix { };
 in
 {
-  imports = [ ./profile.nix ];
+  imports = [
+    ./profile.nix
+    ../../home/desktop/noctalia # Noctalia shell for niri/labwc sessions
+  ];
 
   desktop.gnome.profile = "laptop";
 

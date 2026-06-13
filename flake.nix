@@ -48,6 +48,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Noctalia — Quickshell-based Wayland desktop shell (bar, launcher,
+    # notifications, lock). Used on niri + labwc (not GNOME). homeModules.default
+    # provides programs.noctalia. Follows nixpkgs: the package is a light QML
+    # wrapper over pkgs.quickshell (already cached in nixpkgs), so this avoids
+    # duplicating the Qt closure and needs no extra cachix.
+    noctalia = {
+      url = "github:noctalia-dev/noctalia";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # niri — scrollable-tiling Wayland compositor. niri-flake provides the
     # NixOS module (programs.niri) + the home-manager config option
     # (programs.niri.settings). We pin the package to pkgs.niri (nixpkgs) and
@@ -291,6 +301,9 @@
                     {
                       stylix.targets.firefox.enable = false;
                     }
+                    # Noctalia shell (programs.noctalia). Enabled per-user only
+                    # where the niri/labwc home profile turns it on.
+                    inputs.noctalia.homeModules.default
                   ];
                   extraSpecialArgs = {
                     pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable system);
