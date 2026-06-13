@@ -1093,7 +1093,7 @@ in
           # "✓ N" if N>0, empty otherwise.
           tmp_tasks="$(mktemp)"
           tasklist_id="$(gog -j tasks lists --select id --results-only 2>/dev/null \
-                         | jq -r '.[0].id // empty')"
+                         | jq -r '.[0].id // empty' || true)"
           if [ -n "$tasklist_id" ] \
              && gog -j tasks list "$tasklist_id" --select status --results-only 2>/dev/null \
                 | jq -r 'map(select(.status == "needsAction")) | length
@@ -1115,6 +1115,10 @@ in
       Unit.Description = "Refresh gog (Google Tasks/Calendar) status cache for tmux";
       Service = {
         Type = "oneshot";
+        # gog refuses non-interactive API calls when >1 token is stored
+        # ("missing --account"); pin the account so the timer-driven run
+        # can pick one without a TTY.
+        Environment = "GOG_ACCOUNT=olaf@freundcloud.com";
         ExecStart = "${config.home.profileDirectory}/bin/gog-status-cache";
       };
     };
