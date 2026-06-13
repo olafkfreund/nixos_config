@@ -3,6 +3,8 @@
     ./display-manager.nix
     ./gnome-remote-desktop.nix
     ./cosmic-remote-desktop.nix
+    ./niri.nix
+    ./labwc.nix
   ];
 
   # Make sure the adwaita-qt packages are installed

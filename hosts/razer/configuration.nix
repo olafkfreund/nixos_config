@@ -294,6 +294,11 @@ in
   # works there; not here.
   desktop.displayManager.backend = "gdm";
 
+  # Phase 1: niri + labwc as selectable login sessions (alongside GNOME).
+  # Login manager stays GDM for now; greetd/Noctalia greeter is a later phase.
+  desktop.niri.enable = true;
+  desktop.labwc.enable = true;
+
   # GDM greeter visual baseline — dark colour scheme + 24h clock so it
   # doesn't render as a near-blank Adwaita-light surface over RDP.
   programs.dconf.profiles.gdm.databases = [{
