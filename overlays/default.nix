@@ -8,6 +8,10 @@
     zjstatus = inputs.zjstatus.packages.${prev.stdenv.hostPlatform.system}.default;
   })
 
+  (_final: prev: {
+    gogmail = inputs.gogmail.packages.${prev.stdenv.hostPlatform.system}.gogmail;
+  })
+
   # Claude Desktop (FHS variant from aaddrick/claude-desktop-debian).
   # See /update-claude-code for the bump workflow.
   (_final: prev: {
