@@ -44,6 +44,13 @@ in
   # gogcli refresh-token export (gog auth tokens export). Decrypted to
   # /run/agenix/gogcli-token, imported into gog's file keyring on every host.
   "secrets/gogcli-token.age".publicKeys = allUsers ++ allHosts;
+  # Password for gog's file keyring backend (headless-friendly). Without it
+  # the non-interactive token import fails ("no TTY for password prompt").
+  "secrets/gogcli-keyring-password.age".publicKeys = allUsers ++ allHosts;
+  # gog OAuth client credentials (client_id/secret JSON). Dropped into
+  # GOG_HOME/credentials.json so gog can mint access tokens from the refresh
+  # token on every host.
+  "secrets/gogcli-credentials.json.age".publicKeys = allUsers ++ allHosts;
   "secrets/obsidian-api-key.age".publicKeys = allUsers ++ workstations;
   "secrets/api-linkedin-cookie.age".publicKeys = allUsers ++ workstations;
 

@@ -41,6 +41,26 @@ in
       '';
     };
 
+    keyringPasswordFile = mkOption {
+      type = types.str;
+      default = "/run/agenix/gogcli-keyring-password";
+      description = ''
+        Path to the agenix-decrypted password for gog's file keyring backend.
+        Exported as GOG_KEYRING_PASSWORD by the import service (to seed the
+        keyring) and by the gogmail launcher (to read it). Runtime only.
+      '';
+    };
+
+    credentialsFile = mkOption {
+      type = types.str;
+      default = "/run/agenix/gogcli-credentials-json";
+      description = ''
+        Path to the agenix-decrypted gog OAuth client credentials JSON. Copied
+        into GOG_HOME/credentials.json by the import service so gog can mint
+        access tokens from the refresh token. Runtime only.
+      '';
+    };
+
     interval = mkOption {
       type = types.str;
       default = "10m";
@@ -70,10 +90,26 @@ in
         Environment = [ "GOG_HOME=${config.home.homeDirectory}/.config/gogcli" ];
         ExecStart = getExe (pkgs.writeShellScriptBin "gog-token-import" ''
           set -u
+          gog="${getExe cfg.package}"
+          home="${config.home.homeDirectory}/.config/gogcli"
           tok="${cfg.tokenFile}"
           [ -r "$tok" ] || { echo "gog token not present at $tok; skipping import"; exit 0; }
-          ${getExe cfg.package} auth keyring set file >/dev/null 2>&1 || true
-          ${getExe cfg.package} auth tokens import "$tok" >/dev/null 2>&1 || true
+          mkdir -p "$home"
+
+          # OAuth client credentials → GOG_HOME/credentials.json (gog needs
+          # these to exchange the refresh token for access tokens).
+          if [ -r "${cfg.credentialsFile}" ]; then
+            install -m600 "${cfg.credentialsFile}" "$home/credentials.json"
+          fi
+
+          # The file keyring backend refuses to write without a password in a
+          # non-interactive context — provide it so the import actually seeds.
+          if [ -r "${cfg.keyringPasswordFile}" ]; then
+            GOG_KEYRING_PASSWORD="$(cat "${cfg.keyringPasswordFile}")"
+            export GOG_KEYRING_PASSWORD
+          fi
+          "$gog" auth keyring set file >/dev/null 2>&1 || true
+          "$gog" auth tokens import "$tok" >/dev/null 2>&1 || true
         '');
       };
       Install.WantedBy = [ "default.target" ];
