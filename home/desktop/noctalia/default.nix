@@ -35,7 +35,10 @@
   programs.niri.settings.binds = with config.lib.niri.actions; {
     "Mod+Return".action = spawn "ghostty";
     "Mod+T".action = spawn "ghostty";
-    "Mod+D".action = spawn "noctalia" "ipc" "call" "launcher" "toggle";
+    "Mod+D".action = spawn "noctalia" "msg" "panel-toggle" "launcher";
+    "Mod+Space".action = spawn "noctalia" "msg" "panel-toggle" "launcher";
+    "Mod+C".action = spawn "noctalia" "msg" "panel-toggle" "control-center";
+    "Mod+Backspace".action = spawn "noctalia" "msg" "session" "lock";
     "Mod+E".action = spawn "nautilus";
     "Mod+Q".action = close-window;
     "Mod+Shift+E".action = quit; # niri asks for confirmation
@@ -77,7 +80,10 @@
     "Mod+Comma".action = consume-window-into-column;
     "Mod+Period".action = expel-window-from-column;
 
-    # Overlay (Mod+Shift+/ lists all binds)
+    # Screenshots (via Noctalia) + overlay (Mod+Shift+/ lists all binds)
+    "Print".action = spawn "noctalia" "msg" "screenshot-region";
+    "Mod+Shift+S".action = spawn "noctalia" "msg" "screenshot-region";
+    "Mod+Print".action = spawn "noctalia" "msg" "screenshot-fullscreen";
     "Mod+Shift+Slash".action = show-hotkey-overlay;
 
     # Media / brightness keys
@@ -105,7 +111,10 @@
     <labwc_config>
       <keyboard>
         <keybind key="W-Return"><action name="Execute" command="ghostty"/></keybind>
-        <keybind key="W-d"><action name="Execute" command="noctalia ipc call launcher toggle"/></keybind>
+        <keybind key="W-d"><action name="Execute" command="noctalia msg panel-toggle launcher"/></keybind>
+        <keybind key="W-c"><action name="Execute" command="noctalia msg panel-toggle control-center"/></keybind>
+        <keybind key="W-BackSpace"><action name="Execute" command="noctalia msg session lock"/></keybind>
+        <keybind key="Print"><action name="Execute" command="noctalia msg screenshot-region"/></keybind>
         <keybind key="W-e"><action name="Execute" command="nautilus"/></keybind>
         <keybind key="W-q"><action name="Close"/></keybind>
         <keybind key="A-Tab"><action name="NextWindow"/></keybind>
