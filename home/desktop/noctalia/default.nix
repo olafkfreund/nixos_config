@@ -44,10 +44,12 @@
     "Mod+Shift+E".action = quit; # niri asks for confirmation
 
     # Focus (arrows + vim hjkl)
+    # Super+Left/Right = move between columns; Super+Up/Down = switch workspace.
     "Mod+Left".action = focus-column-left;
     "Mod+Right".action = focus-column-right;
-    "Mod+Down".action = focus-window-down;
-    "Mod+Up".action = focus-window-up;
+    "Mod+Up".action = focus-workspace-up;
+    "Mod+Down".action = focus-workspace-down;
+    # vim keys: h/l columns, j/k window-within-column
     "Mod+H".action = focus-column-left;
     "Mod+L".action = focus-column-right;
     "Mod+J".action = focus-window-down;
@@ -109,6 +111,9 @@
   xdg.configFile."labwc/rc.xml".text = ''
     <?xml version="1.0"?>
     <labwc_config>
+      <desktops>
+        <number>4</number>
+      </desktops>
       <keyboard>
         <keybind key="W-Return"><action name="Execute" command="ghostty"/></keybind>
         <keybind key="W-d"><action name="Execute" command="noctalia msg panel-toggle launcher"/></keybind>
@@ -122,6 +127,10 @@
         <keybind key="W-f"><action name="ToggleMaximize"/></keybind>
         <keybind key="W-S-f"><action name="ToggleFullscreen"/></keybind>
         <keybind key="W-Space"><action name="ShowMenu" menu="client-menu"/></keybind>
+        <keybind key="W-Left"><action name="GoToDesktop" to="left" wrap="yes"/></keybind>
+        <keybind key="W-Right"><action name="GoToDesktop" to="right" wrap="yes"/></keybind>
+        <keybind key="W-Up"><action name="GoToDesktop" to="left" wrap="yes"/></keybind>
+        <keybind key="W-Down"><action name="GoToDesktop" to="right" wrap="yes"/></keybind>
         <keybind key="W-1"><action name="GoToDesktop" to="1"/></keybind>
         <keybind key="W-2"><action name="GoToDesktop" to="2"/></keybind>
         <keybind key="W-3"><action name="GoToDesktop" to="3"/></keybind>
