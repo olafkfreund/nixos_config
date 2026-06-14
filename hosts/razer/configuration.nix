@@ -3,6 +3,7 @@
 , lib
 , hostUsers
 , hostTypes
+, inputs
 , ...
 }:
 let
@@ -292,10 +293,24 @@ in
   # first (see comment on `gnome.gnome-remote-desktop` below). p510 enables
   # autoLogin because p510 is pure NVIDIA without PRIME — greeter respawn
   # works there; not here.
-  desktop.displayManager.backend = "gdm";
+  # Login manager: Noctalia greeter (greetd). backend="none" turns GDM off; the
+  # noctalia-greeter module below auto-enables greetd + its bundled wlroots
+  # compositor — which sidesteps GDM's broken greeter-respawn on this Optimus
+  # PRIME-sync NVIDIA hardware (see note above). niri already runs wlroots fine
+  # here, so the greeter's compositor does too. GNOME/niri/labwc stay selectable.
+  desktop.displayManager.backend = "none";
+
+  programs.noctalia-greeter = {
+    enable = true;
+    package = inputs.noctalia-greeter.packages.${pkgs.system}.default;
+    settings.cursor = {
+      theme = config.stylix.cursor.name;
+      size = config.stylix.cursor.size;
+      package = config.stylix.cursor.package;
+    };
+  };
 
   # Phase 1: niri + labwc as selectable login sessions (alongside GNOME).
-  # Login manager stays GDM for now; greetd/Noctalia greeter is a later phase.
   desktop.niri.enable = true;
   desktop.labwc.enable = true;
 
