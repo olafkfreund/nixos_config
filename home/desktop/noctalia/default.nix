@@ -1,12 +1,31 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, osConfig, ... }:
 # Noctalia desktop shell + niri/labwc session config (keybinds, layout, UK
 # keyboard) for the niri and labwc sessions. Noctalia is launched only from the
 # niri/labwc startup hooks (NOT via its systemd service, which binds to the
 # graphical-session target that GNOME also reaches → would spawn a second shell
 # over gnome-shell).
 #
+# Session companion tools (wallpaper, idle, night-light) follow the SAME rule:
+# they are spawned from the niri/labwc startup hooks, never as systemd user
+# services, so they don't also start under GNOME and fight its equivalents.
+#
 # Theming: builtin Catppuccin for now. TODO (fast-follow): bridge Stylix's
 # base16 palette into programs.noctalia.customPalettes + theme.source="custom".
+let
+  # Wallpaper shared with Stylix (the system sets stylix.image to this same
+  # path); swaybg paints it on the niri/labwc sessions, which Stylix does not.
+  wallpaper = (import ../../../hosts/common/shared-variables.nix).baseTheme.wallpaper;
+
+  # Only laptops auto-suspend on idle; the workstation stays up (RDP / AI host).
+  isLaptop = (osConfig.host.class or "") == "laptop";
+
+  # Reused for the idle lock action and the manual Mod+Backspace bind.
+  lockCmd = "noctalia msg session lock";
+
+  # Fixed UK coordinates (London) so gammastep adjusts colour temperature by
+  # sun position without pulling in geoclue2.
+  geo = "51.5:-0.13";
+in
 {
   # wl-mirror: mirror an output to a window (niri has no native mirroring).
   # jq: parse `niri msg --json`. wl-screenrec/slurp: HW-encoded screen recording.
@@ -15,6 +34,12 @@
     jq
     wl-screenrec
     slurp
+    swaybg # static wallpaper for niri/labwc (Stylix only themes GNOME's bg)
+    swayidle # idle → lock / screen-off / (laptop) suspend
+    gammastep # night-light / colour temperature by sun position
+    wlopm # labwc DPMS off/on (niri has a native power-off-monitors action)
+    kanshi # output-profile daemon; per-host profiles are a TODO (niri does
+    #         output config natively in config.kdl, so this is mainly for labwc)
     # Screen-recording toggle bound to Mod+Shift+R / Mod+Alt+R. Records the
     # focused output (or a slurp-selected region) to ~/Videos; re-run to stop.
     (writeShellScriptBin "niri-screenrecord" ''
@@ -148,9 +173,29 @@
       focus-ring.enable = false;
     };
 
-  # Launch the shell at session start (inherits the niri session env).
+  # Launch the shell + companion daemons at session start (inherit the niri
+  # session env). swayidle works on niri (ext-idle-notify-v1): lock at 5 min,
+  # monitors off at 10 min, and — laptops only — suspend at 30 min.
   programs.niri.settings.spawn-at-startup = lib.mkAfter [
     { command = [ "noctalia" ]; }
+    { command = [ "swaybg" "-m" "fill" "-i" "${wallpaper}" ]; }
+    { command = [ "gammastep" "-l" geo ]; }
+    {
+      command = [
+        "swayidle"
+        "-w"
+        "timeout"
+        "300"
+        lockCmd
+        "timeout"
+        "600"
+        "niri msg action power-off-monitors"
+        "resume"
+        "niri msg action power-on-monitors"
+      ]
+      ++ lib.optionals isLaptop [ "timeout" "1800" "systemctl suspend" ]
+      ++ [ "before-sleep" lockCmd ];
+    }
   ];
 
   # Keybinds. Mod = Super/logo. Press Mod+Shift+/ for niri's hotkey overlay.
@@ -243,8 +288,16 @@
   };
 
   # ── labwc ──────────────────────────────────────────────────────────────
-  # Launch the shell from labwc's autostart hook.
+  # Launch the shell + companion daemons from labwc's autostart hook. labwc has
+  # no native DPMS action, so swayidle drives wlopm for screen-off. Same idle
+  # timings as niri; suspend only on laptops.
   xdg.configFile."labwc/autostart".text = ''
+    swaybg -m fill -i ${wallpaper} &
+    gammastep -l ${geo} &
+    swayidle -w \
+      timeout 300 '${lockCmd}' \
+      timeout 600 "wlopm --off '*'" resume "wlopm --on '*'" \
+      ${lib.optionalString isLaptop "timeout 1800 'systemctl suspend' \\\n      "}before-sleep '${lockCmd}' &
     noctalia &
   '';
 
@@ -296,6 +349,9 @@
         <keybind key="W-c"><action name="Execute" command="noctalia msg panel-toggle control-center"/></keybind>
         <keybind key="W-BackSpace"><action name="Execute" command="noctalia msg session lock"/></keybind>
         <keybind key="Print"><action name="Execute" command="noctalia msg screenshot-region"/></keybind>
+        <!-- Region screen recording (re-press to stop). niri-screenrecord's
+             region branch is compositor-agnostic (slurp + wl-screenrec). -->
+        <keybind key="W-S-r"><action name="Execute" command="niri-screenrecord region"/></keybind>
         <keybind key="W-e"><action name="Execute" command="nautilus"/></keybind>
         <keybind key="W-q"><action name="Close"/></keybind>
         <keybind key="A-Tab"><action name="NextWindow"/></keybind>
