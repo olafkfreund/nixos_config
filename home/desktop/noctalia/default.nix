@@ -107,6 +107,36 @@
     XKB_DEFAULT_LAYOUT=gb
   '';
 
+  # Gruvbox-dark theming for labwc's OSD (window-switcher / workspace overlays
+  # are white by default), window borders, and menus. themerc-override patches
+  # the active theme's colors without needing a full theme. Colors come from
+  # the system Stylix base16 scheme (gruvbox-dark), so this matches GNOME/tmux.
+  xdg.configFile."labwc/themerc-override".text =
+    let inherit (config.lib.stylix) colors; in ''
+      # Window decorations
+      window.active.border.color: #${colors.base0B}
+      window.active.title.bg.color: #${colors.base00}
+      window.active.label.text.color: #${colors.base05}
+      window.inactive.border.color: #${colors.base01}
+      window.inactive.title.bg.color: #${colors.base01}
+      window.inactive.label.text.color: #${colors.base04}
+
+      # Right-click / client menus
+      menu.items.bg.color: #${colors.base00}
+      menu.items.text.color: #${colors.base05}
+      menu.items.active.bg.color: #${colors.base02}
+      menu.items.active.text.color: #${colors.base05}
+
+      # OSD overlays (the white window-switcher / workspace popups)
+      osd.bg.color: #${colors.base00}
+      osd.border.color: #${colors.base0B}
+      osd.border.width: 2
+      osd.label.text.color: #${colors.base05}
+      osd.window-switcher.item.active.border.color: #${colors.base0B}
+      osd.workspace-switcher.boxes.active.bg.color: #${colors.base0B}
+      osd.workspace-switcher.boxes.inactive.bg.color: #${colors.base02}
+    '';
+
   # Keybinds (labwc ships only sparse compiled-in defaults). W = Super/logo.
   xdg.configFile."labwc/rc.xml".text = ''
     <?xml version="1.0"?>
