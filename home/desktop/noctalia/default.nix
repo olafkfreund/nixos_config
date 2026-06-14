@@ -30,4 +30,11 @@
   xdg.configFile."labwc/autostart".text = ''
     noctalia &
   '';
+
+  # labwc keyboard layout. wlroots compositors don't inherit the system
+  # xkb.layout (gb, set in hosts/common/nixos/i18n.nix); labwc reads XKB_*
+  # from ~/.config/labwc/environment at startup, before keyboard init.
+  xdg.configFile."labwc/environment".text = ''
+    XKB_DEFAULT_LAYOUT=gb
+  '';
 }
