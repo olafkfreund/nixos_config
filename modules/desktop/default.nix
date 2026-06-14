@@ -5,6 +5,7 @@
     ./cosmic-remote-desktop.nix
     ./niri.nix
     ./labwc.nix
+    ./ddcutil.nix
   ];
 
   # Make sure the adwaita-qt packages are installed

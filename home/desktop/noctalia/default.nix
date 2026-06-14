@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 # Noctalia desktop shell + niri/labwc session config (keybinds, layout, UK
 # keyboard) for the niri and labwc sessions. Noctalia is launched only from the
 # niri/labwc startup hooks (NOT via its systemd service, which binds to the
@@ -8,23 +8,145 @@
 # Theming: builtin Catppuccin for now. TODO (fast-follow): bridge Stylix's
 # base16 palette into programs.noctalia.customPalettes + theme.source="custom".
 {
+  # wl-mirror: mirror an output to a window (niri has no native mirroring).
+  # jq: parse `niri msg --json`. wl-screenrec/slurp: HW-encoded screen recording.
+  home.packages = with pkgs; [
+    wl-mirror
+    jq
+    wl-screenrec
+    slurp
+    # Screen-recording toggle bound to Mod+Shift+R / Mod+Alt+R. Records the
+    # focused output (or a slurp-selected region) to ~/Videos; re-run to stop.
+    (writeShellScriptBin "niri-screenrecord" ''
+      set -euo pipefail
+      out="$HOME/Videos"; mkdir -p "$out"
+      if ${procps}/bin/pgrep -x wl-screenrec >/dev/null 2>&1; then
+        ${procps}/bin/pkill -INT -x wl-screenrec
+        ${libnotify}/bin/notify-send "Screen recording" "Saved to $out"
+      else
+        f="$out/rec-$(date +%Y%m%d-%H%M%S).mp4"
+        if [ "''${1:-}" = "region" ]; then
+          geom="$(${slurp}/bin/slurp)" || exit 0
+          ${wl-screenrec}/bin/wl-screenrec -g "$geom" -f "$f" &
+        else
+          name="$(${niri}/bin/niri msg --json focused-output | ${jq}/bin/jq -r .name)"
+          ${wl-screenrec}/bin/wl-screenrec -o "$name" -f "$f" &
+        fi
+        ${libnotify}/bin/notify-send "Screen recording" "Recording… Mod+Shift+R to stop"
+      fi
+    '')
+  ];
+
   programs.noctalia = {
     enable = true;
     systemd.enable = false;
     settings = {
       shell.font = "JetBrainsMono Nerd Font";
+      # Enable the calendar service. The Google account + OAuth tokens are added
+      # once via the GUI (Settings → Services → Calendar → Google) and stored in
+      # the runtime state.toml — not here.
+      calendar = {
+        enabled = true;
+        refresh_minutes = 15;
+      };
+      # Use the custom Gruvbox palette generated below (palettes/Gruvbox.json)
+      # so the Noctalia shell matches Stylix/GNOME/tmux instead of Catppuccin.
       theme = {
         mode = "dark";
-        source = "builtin";
-        builtin = "Catppuccin";
+        source = "custom";
+        custom_palette = "Gruvbox";
       };
     };
   };
+
+  # Gruvbox palette for the Noctalia shell, derived from the Stylix base16
+  # scheme so the bar/launcher/control-center match the rest of the system.
+  # Selected via theme.source="custom" + custom_palette="Gruvbox" above.
+  xdg.configFile."noctalia/palettes/Gruvbox.json".source =
+    let
+      inherit (config.lib.stylix) colors;
+      c = n: "#${colors.${n}}";
+      palette = {
+        mPrimary = c "base0B"; # green accent (same as window borders)
+        mOnPrimary = c "base00";
+        mSecondary = c "base0D"; # blue
+        mOnSecondary = c "base00";
+        mTertiary = c "base0E"; # purple
+        mOnTertiary = c "base00";
+        mError = c "base08"; # red
+        mOnError = c "base00";
+        mSurface = c "base00"; # background
+        mOnSurface = c "base05"; # foreground
+        mSurfaceVariant = c "base01";
+        mOnSurfaceVariant = c "base04";
+        mOutline = c "base03";
+        mShadow = c "base00";
+        mHover = c "base02";
+        mOnHover = c "base05";
+        terminal = {
+          background = c "base00";
+          foreground = c "base05";
+          cursor = c "base05";
+          cursorText = c "base00";
+          selectionBg = c "base02";
+          selectionFg = c "base05";
+          normal = {
+            black = c "base01";
+            red = c "base08";
+            green = c "base0B";
+            yellow = c "base0A";
+            blue = c "base0D";
+            magenta = c "base0E";
+            cyan = c "base0C";
+            white = c "base05";
+          };
+          bright = {
+            black = c "base03";
+            red = c "base08";
+            green = c "base0B";
+            yellow = c "base0A";
+            blue = c "base0D";
+            magenta = c "base0E";
+            cyan = c "base0C";
+            white = c "base07";
+          };
+        };
+      };
+    in
+    (pkgs.formats.json { }).generate "Gruvbox.json" {
+      dark = palette;
+      light = palette;
+    };
 
   # ── niri ───────────────────────────────────────────────────────────────
   # UK keyboard for the niri session (wlroots compositors don't inherit the
   # system xkb.layout).
   programs.niri.settings.input.keyboard.xkb.layout = "gb";
+
+  # Layout: open windows full-width (niri's default is half) and draw a themed
+  # border around EVERY window. Colours come from the Stylix base16 scheme
+  # (gruvbox-dark) so niri matches labwc/GNOME/tmux — active border = accent
+  # (base0B, same as labwc's window.active.border), inactive = dim (base01).
+  programs.niri.settings.layout =
+    let inherit (config.lib.stylix) colors; in {
+      gaps = 4;
+      default-column-width.proportion = 1.0;
+      preset-column-widths = [
+        { proportion = 0.5; }
+        { proportion = 0.666667; }
+        { proportion = 1.0; }
+      ];
+
+      border = {
+        enable = true;
+        width = 2;
+        active.color = "#${colors.base0B}";
+        inactive.color = "#${colors.base01}";
+      };
+
+      # One outline only: the per-window border replaces niri's focus-ring.
+      focus-ring.enable = false;
+    };
 
   # Launch the shell at session start (inherits the niri session env).
   programs.niri.settings.spawn-at-startup = lib.mkAfter [
@@ -77,16 +199,40 @@
     # Window/column sizing & state
     "Mod+F".action = maximize-column;
     "Mod+Shift+F".action = fullscreen-window;
+    # Windowed/"fake" fullscreen: tells the app it's fullscreen while keeping it
+    # a normal resizable window. Great for Google Slides / browser presentations.
+    "Mod+Ctrl+Shift+F".action = toggle-windowed-fullscreen;
     "Mod+R".action = switch-preset-column-width;
     "Mod+V".action = toggle-window-floating;
     "Mod+Comma".action = consume-window-into-column;
     "Mod+Period".action = expel-window-from-column;
+    # Overview (zoomed-out workspace/column view) — great for many editors open.
+    "Mod+O".action = toggle-overview;
+    # Fine column-width nudge.
+    "Mod+Minus".action = set-column-width "-10%";
+    "Mod+Equal".action = set-column-width "+10%";
+    # Mouse: Mod+scroll switches workspaces (cooldown avoids over-scrolling).
+    "Mod+WheelScrollDown" = { cooldown-ms = 150; action = focus-workspace-down; };
+    "Mod+WheelScrollUp" = { cooldown-ms = 150; action = focus-workspace-up; };
 
-    # Screenshots (via Noctalia) + overlay (Mod+Shift+/ lists all binds)
-    "Print".action = spawn "noctalia" "msg" "screenshot-region";
-    "Mod+Shift+S".action = spawn "noctalia" "msg" "screenshot-region";
-    "Mod+Print".action = spawn "noctalia" "msg" "screenshot-fullscreen";
+    # Screenshots — this keyboard has NO Print key, so everything is Mod-based.
+    # Saved to ~/Pictures/Screenshots/ AND the clipboard.
+    "Mod+S".action = spawn "niri" "msg" "action" "screenshot"; # interactive picker (region/window/output)
+    "Mod+Shift+S".action = spawn "niri" "msg" "action" "screenshot-window"; # focused window
+    "Mod+Ctrl+S".action = spawn "niri" "msg" "action" "screenshot-screen"; # whole focused output
     "Mod+Shift+Slash".action = show-hotkey-overlay;
+
+    # Screen recording (wl-screenrec, hardware-encoded) → ~/Videos. Re-press to
+    # stop. Mod+Shift+R = focused output; Mod+Alt+R = slurp-selected region.
+    "Mod+Shift+R".action = spawn "niri-screenrecord";
+    "Mod+Alt+R".action = spawn "niri-screenrecord" "region";
+
+    # Screen mirroring (wl-mirror): mirror the focused output into a window.
+    # Move that window to the target output and Mod+Shift+F it to fullscreen.
+    "Mod+P" = {
+      repeat = false;
+      action = spawn-sh "wl-mirror \"$(niri msg --json focused-output | jq -r .name)\"";
+    };
 
     # Media / brightness keys
     "XF86AudioRaiseVolume".action = spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+";
