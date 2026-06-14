@@ -299,6 +299,9 @@ in
   desktop.niri.enable = true;
   desktop.labwc.enable = true;
 
+  # ddcutil: software brightness/contrast control of external monitors (DDC/CI).
+  modules.hardware.ddcutil.enable = true;
+
   # GDM greeter visual baseline — dark colour scheme + 24h clock so it
   # doesn't render as a near-blank Adwaita-light surface over RDP.
   programs.dconf.profiles.gdm.databases = [{

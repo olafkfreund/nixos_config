@@ -58,6 +58,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Noctalia greeter — greetd login screen matching the Noctalia shell. Ships
+    # nixosModules.default (programs.noctalia-greeter) which auto-wires
+    # services.greetd + the bundled wlroots compositor. Enabled per-host where
+    # we replace GDM with greetd.
+    noctalia-greeter = {
+      url = "github:noctalia-dev/noctalia-greeter";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # niri — scrollable-tiling Wayland compositor. niri-flake provides the
     # NixOS module (programs.niri) + the home-manager config option
     # (programs.niri.settings). We pin the package to pkgs.niri (nixpkgs) and
@@ -280,6 +289,7 @@
               inputs.agenix.nixosModules.default
               inputs.lanzaboote.nixosModules.lanzaboote
               inputs.niri-flake.nixosModules.niri
+              inputs.noctalia-greeter.nixosModules.default
               nix-index-database.nixosModules.nix-index
               ./home/shell/zellij/zjstatus.nix
             ]

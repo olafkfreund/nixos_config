@@ -351,12 +351,28 @@ in
   # cosmic module; the unified DM module defaults to "none" without it).
   # NOTE: must live at top-level, NOT inside the features = {...} block above —
   # the option path is `desktop.displayManager`, not `features.desktop.displayManager`.
-  desktop.displayManager.backend = "gdm";
+  # Login manager: Noctalia greeter (greetd). backend="none" turns GDM off; the
+  # noctalia-greeter module below auto-enables greetd + its bundled wlroots
+  # compositor. GNOME/niri/labwc remain selectable SESSIONS in the greeter.
+  desktop.displayManager.backend = "none";
+
+  programs.noctalia-greeter = {
+    enable = true;
+    package = inputs.noctalia-greeter.packages.${pkgs.system}.default;
+    # Match the login cursor to the Stylix (bibata) theme used everywhere else.
+    settings.cursor = {
+      theme = config.stylix.cursor.name;
+      size = config.stylix.cursor.size;
+      package = config.stylix.cursor.package;
+    };
+  };
 
   # Phase 1: niri + labwc as selectable login sessions (alongside GNOME).
-  # Login manager stays GDM for now; greetd/Noctalia greeter is a later phase.
   desktop.niri.enable = true;
   desktop.labwc.enable = true;
+
+  # ddcutil: software brightness/contrast control of external monitors (DDC/CI).
+  modules.hardware.ddcutil.enable = true;
 
   # Citrix Workspace for client project remote access
   # Disabled — no longer needed. Module + overlay + package retained so this
