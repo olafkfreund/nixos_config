@@ -173,6 +173,12 @@ in
       focus-ring.enable = false;
     };
 
+  # Ask clients to drop their own (white) client-side decorations so niri draws
+  # the themed server-side border instead. Without this, CSD apps like kitty
+  # render a white titlebar *inside* niri's green border. labwc is unaffected
+  # (its SSD titlebars are themed via themerc-override above).
+  programs.niri.settings.prefer-no-csd = true;
+
   # Launch the shell + companion daemons at session start (inherit the niri
   # session env). swayidle works on niri (ext-idle-notify-v1): lock at 5 min,
   # monitors off at 10 min, and — laptops only — suspend at 30 min.
