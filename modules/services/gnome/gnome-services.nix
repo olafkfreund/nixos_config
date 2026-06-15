@@ -45,6 +45,8 @@
     gnomeExtensions.user-themes
     gnomeExtensions.appindicator
     gimp
+    krita # Qt-based image editor / GIMP alternative
+    darktable # RAW photo workflow (Lightroom-like)
     cameractrls-gtk4
   ];
 }
