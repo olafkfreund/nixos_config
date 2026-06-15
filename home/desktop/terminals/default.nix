@@ -198,6 +198,11 @@ in
           # `true` which left Kitty borderless and hard to manage in GNOME.
           window_margin_width = 8;
           hide_window_decorations = false;
+          # Theme the CSD titlebar to the terminal background (Stylix gruvbox)
+          # instead of the default white "system" colour. Applies wherever Kitty
+          # draws its own decorations (GNOME, and niri/labwc for clients that
+          # ignore prefer-no-csd).
+          wayland_titlebar_color = "background";
           placement_strategy = "center";
           background_opacity = mkDefault (
             if cfg.features.transparency
