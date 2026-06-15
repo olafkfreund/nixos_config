@@ -402,4 +402,115 @@ in
       </keyboard>
     </labwc_config>
   '';
+
+  # ── mango ──────────────────────────────────────────────────────────────
+  # mango (dwl-based) session config. Gated on the host enabling the compositor
+  # because the mango home-manager module pulls the mango package into
+  # home.packages — without the gate it would compile mango on headless p510,
+  # which also evaluates this shared profile. Same Super-based keybinds,
+  # gruvbox colours and companion daemons as niri/labwc; mango's native
+  # `env=` directive (applied via setenv in the compositor) is its equivalent
+  # of niri's environment block, so Electron apps get NIXOS_OZONE_WL=1.
+  wayland.windowManager.mango = lib.mkIf (osConfig.desktop.mangowm.enable or false) (
+    let
+      inherit (config.lib.stylix) colors;
+      c = n: "0x${colors.${n}}ff"; # mango wants 0xRRGGBBAA
+    in
+    {
+      enable = true;
+
+      extraConfig = ''
+        # Electron apps → Wayland (same fix as niri/labwc).
+        env=NIXOS_OZONE_WL,1
+        env=ELECTRON_OZONE_PLATFORM_HINT,auto
+
+        # UK keyboard
+        xkb_rules_layout=gb
+
+        # Appearance — gruvbox via Stylix (active border = accent base0B).
+        borderpx=2
+        rootcolor=${c "base00"}
+        bordercolor=${c "base01"}
+        focuscolor=${c "base0B"}
+        urgentcolor=${c "base08"}
+        gappih=4
+        gappiv=4
+        gappoh=4
+        gappov=4
+
+        # Apps
+        bind=SUPER,Return,spawn,ghostty
+        bind=SUPER,t,spawn,ghostty
+        bind=SUPER,d,spawn,noctalia msg panel-toggle launcher
+        bind=SUPER,space,spawn,noctalia msg panel-toggle launcher
+        bind=SUPER,c,spawn,noctalia msg panel-toggle control-center
+        bind=SUPER,BackSpace,spawn,noctalia msg session lock
+        bind=SUPER,e,spawn,nautilus
+        bind=SUPER,q,killclient,
+        bind=SUPER+SHIFT,e,quit
+
+        # Focus (arrows + vim hjkl)
+        bind=SUPER,Left,focusdir,left
+        bind=SUPER,Right,focusdir,right
+        bind=SUPER,Up,focusdir,up
+        bind=SUPER,Down,focusdir,down
+        bind=SUPER,h,focusdir,left
+        bind=SUPER,l,focusdir,right
+        bind=SUPER,j,focusdir,down
+        bind=SUPER,k,focusdir,up
+
+        # Move / swap
+        bind=SUPER+SHIFT,Left,exchange_client,left
+        bind=SUPER+SHIFT,Right,exchange_client,right
+        bind=SUPER+SHIFT,Up,exchange_client,up
+        bind=SUPER+SHIFT,Down,exchange_client,down
+        bind=SUPER+SHIFT,h,exchange_client,left
+        bind=SUPER+SHIFT,l,exchange_client,right
+        bind=SUPER+SHIFT,j,exchange_client,down
+        bind=SUPER+SHIFT,k,exchange_client,up
+
+        # Window state
+        bind=SUPER,f,togglemaximizescreen,
+        bind=SUPER+SHIFT,f,togglefullscreen,
+        bind=SUPER,v,togglefloating,
+        bind=SUPER,o,toggleoverview,
+        bind=SUPER,n,switch_layout
+
+        # Tags 1-5: view (switch) / tag (move window to)
+        bind=SUPER,1,view,1,0
+        bind=SUPER,2,view,2,0
+        bind=SUPER,3,view,3,0
+        bind=SUPER,4,view,4,0
+        bind=SUPER,5,view,5,0
+        bind=SUPER+SHIFT,1,tag,1,0
+        bind=SUPER+SHIFT,2,tag,2,0
+        bind=SUPER+SHIFT,3,tag,3,0
+        bind=SUPER+SHIFT,4,tag,4,0
+        bind=SUPER+SHIFT,5,tag,5,0
+
+        # Screenshot (noctalia) + region recording (compositor-agnostic helper)
+        bind=none,Print,spawn,noctalia msg screenshot-region
+        bind=SUPER+SHIFT,r,spawn,niri-screenrecord region
+
+        # Media / brightness
+        bind=none,XF86AudioRaiseVolume,spawn,wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
+        bind=none,XF86AudioLowerVolume,spawn,wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
+        bind=none,XF86AudioMute,spawn,wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+        bind=none,XF86MonBrightnessUp,spawn,brightnessctl set 5%+
+        bind=none,XF86MonBrightnessDown,spawn,brightnessctl set 5%-
+      '';
+
+      # Companion daemons (same as niri/labwc). mango has no native DPMS action,
+      # so swayidle drives wlopm for screen-off, like labwc. Suspend on laptops.
+      autostart_sh = ''
+        swaybg -m fill -i ${wallpaper} &
+        gammastep -l ${geo} &
+        swayidle -w \
+          timeout 300 '${lockCmd}' \
+          timeout 600 "wlopm --off '*'" resume "wlopm --on '*'" \
+          ${lib.optionalString isLaptop "timeout 1800 'systemctl suspend' \\\n      "}before-sleep '${lockCmd}' &
+        noctalia &
+      '';
+    }
+  );
 }

@@ -5,6 +5,7 @@
     ./cosmic-remote-desktop.nix
     ./niri.nix
     ./labwc.nix
+    ./mangowm.nix
     ./ddcutil.nix
   ];
 
