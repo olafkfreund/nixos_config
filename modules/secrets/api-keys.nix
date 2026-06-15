@@ -116,6 +116,17 @@ in
         group = "users";
       };
 
+      # AWS long-lived IAM key for synechron-terraform-cli (migration/Terraform
+      # provisioning). Decrypts to /run/agenix/aws-synechron-terraform on every
+      # host; the file is an AWS credentials-file block under [synechron-tf],
+      # consumed via AWS_SHARED_CREDENTIALS_FILE. Rotate/delete after migration.
+      aws-synechron-terraform = {
+        file = ../../secrets/aws-synechron-terraform.age;
+        mode = "0600";
+        owner = username;
+        group = "users";
+      };
+
       tailscale-auth-key = {
         file = ../../secrets/tailscale-auth-key.age;
         mode = "0600";
