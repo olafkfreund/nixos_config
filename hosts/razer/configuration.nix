@@ -310,9 +310,10 @@ in
     };
   };
 
-  # Phase 1: niri + labwc as selectable login sessions (alongside GNOME).
+  # Phase 1: niri + labwc + mango as selectable login sessions (alongside GNOME).
   desktop.niri.enable = true;
   desktop.labwc.enable = true;
+  desktop.mangowm.enable = true;
 
   # ddcutil: software brightness/contrast control of external monitors (DDC/CI).
   modules.hardware.ddcutil.enable = true;

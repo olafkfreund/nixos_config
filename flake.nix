@@ -76,6 +76,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # mango — dwl-based Wayland compositor (wlroots + scenefx). Its flake
+    # provides the NixOS module (programs.mango, wired below) and the
+    # home-manager config option (wayland.windowManager.mango, added to
+    # home-manager.sharedModules). Third Noctalia session alongside niri/labwc.
+    mango = {
+      url = "github:mangowm/mango";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Development and utilities
     sops-nix = {
       url = "github:mic92/sops-nix";
@@ -292,6 +301,7 @@
               inputs.agenix.nixosModules.default
               inputs.lanzaboote.nixosModules.lanzaboote
               inputs.niri-flake.nixosModules.niri
+              inputs.mango.nixosModules.mango
               inputs.noctalia-greeter.nixosModules.default
               nix-index-database.nixosModules.nix-index
               ./home/shell/zellij/zjstatus.nix
@@ -317,6 +327,9 @@
                     # Noctalia shell (programs.noctalia). Enabled per-user only
                     # where the niri/labwc home profile turns it on.
                     inputs.noctalia.homeModules.default
+                    # mango compositor config (wayland.windowManager.mango),
+                    # enabled per-user in the same niri/labwc home profile.
+                    inputs.mango.hmModules.mango
                   ];
                   extraSpecialArgs = {
                     pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable system);
