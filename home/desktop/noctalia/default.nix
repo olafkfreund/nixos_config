@@ -144,6 +144,17 @@ in
     };
 
   # ── niri ───────────────────────────────────────────────────────────────
+  # Session environment for everything niri spawns. NIXOS_OZONE_WL=1 makes
+  # Electron apps (claude-desktop, VS Code, …) use the Wayland backend instead
+  # of falling back to XWayland. The system sets this in environment.session-
+  # Variables, but greetd launches `exec niri` without a login shell, so those
+  # never reach the session — niri's own environment block is what propagates
+  # it to child processes here.
+  programs.niri.settings.environment = {
+    NIXOS_OZONE_WL = "1";
+    ELECTRON_OZONE_PLATFORM_HINT = "auto";
+  };
+
   # UK keyboard for the niri session (wlroots compositors don't inherit the
   # system xkb.layout).
   programs.niri.settings.input.keyboard.xkb.layout = "gb";
@@ -307,9 +318,14 @@ in
     noctalia &
   '';
 
-  # UK keyboard (read at labwc startup, before keyboard init).
+  # Session environment, read at labwc startup. XKB layout for the keyboard,
+  # plus NIXOS_OZONE_WL=1 so Electron apps (claude-desktop, VS Code, …) use the
+  # Wayland backend rather than XWayland — greetd's `exec labwc` doesn't source
+  # the system environment.sessionVariables, so labwc exports them from here.
   xdg.configFile."labwc/environment".text = ''
     XKB_DEFAULT_LAYOUT=gb
+    NIXOS_OZONE_WL=1
+    ELECTRON_OZONE_PLATFORM_HINT=auto
   '';
 
   # Gruvbox-dark theming for labwc's OSD (window-switcher / workspace overlays
