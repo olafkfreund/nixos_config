@@ -25,6 +25,13 @@ let
   # Fixed UK coordinates (London) so gammastep adjusts colour temperature by
   # sun position without pulling in geoclue2.
   geo = "51.5:-0.13";
+
+  # GTK3's GSettings schema dir. GNOME exposes these to its session, but a bare
+  # greetd-launched niri/labwc/mango session does not, so unwrapped GTK apps
+  # (GIMP, darktable, …) abort with "Settings schema 'org.gtk.Settings.
+  # FileChooser' is not installed". GSETTINGS_SCHEMA_DIR is additive — GLib
+  # still reads XDG_DATA_DIRS too — so this just makes the GTK schemas findable.
+  gtkSchemas = "${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}/glib-2.0/schemas";
 in
 {
   # wl-mirror: mirror an output to a window (niri has no native mirroring).
@@ -153,6 +160,7 @@ in
   programs.niri.settings.environment = {
     NIXOS_OZONE_WL = "1";
     ELECTRON_OZONE_PLATFORM_HINT = "auto";
+    GSETTINGS_SCHEMA_DIR = gtkSchemas;
   };
 
   # UK keyboard for the niri session (wlroots compositors don't inherit the
@@ -326,6 +334,7 @@ in
     XKB_DEFAULT_LAYOUT=gb
     NIXOS_OZONE_WL=1
     ELECTRON_OZONE_PLATFORM_HINT=auto
+    GSETTINGS_SCHEMA_DIR=${gtkSchemas}
   '';
 
   # Gruvbox-dark theming for labwc's OSD (window-switcher / workspace overlays
@@ -423,6 +432,8 @@ in
         # Electron apps → Wayland (same fix as niri/labwc).
         env=NIXOS_OZONE_WL,1
         env=ELECTRON_OZONE_PLATFORM_HINT,auto
+        # GTK GSettings schemas so GTK apps (GIMP, darktable) don't abort.
+        env=GSETTINGS_SCHEMA_DIR,${gtkSchemas}
 
         # UK keyboard
         xkb_rules_layout=gb
