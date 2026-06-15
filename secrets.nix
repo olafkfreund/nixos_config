@@ -41,6 +41,13 @@ in
   # Synechron GitHub API token (PAT). All hosts; exported as
   # SYNECHRON_GITHUB_API_TOKEN via load-api-keys. Edit: agenix -e secrets/synechron-github-api.age
   "secrets/synechron-github-api.age".publicKeys = allUsers ++ allHosts;
+  # Synechron AWS long-lived IAM key for the `synechron-terraform-cli` user
+  # (account 796973489124, AdministratorAccess) used for migration/Terraform
+  # provisioning. Contents: an AWS credentials-file block under [synechron-tf].
+  # Consume via AWS_SHARED_CREDENTIALS_FILE=/run/agenix/aws-synechron-terraform.
+  # ROTATE/DELETE when migration provisioning is done. Edit:
+  #   agenix -e secrets/aws-synechron-terraform.age
+  "secrets/aws-synechron-terraform.age".publicKeys = allUsers ++ allHosts;
   # gogcli refresh-token export (gog auth tokens export). Decrypted to
   # /run/agenix/gogcli-token, imported into gog's file keyring on every host.
   "secrets/gogcli-token.age".publicKeys = allUsers ++ allHosts;
