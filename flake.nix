@@ -116,6 +116,9 @@
     # Delta from previous pin: AppArmor profiles for Ubuntu 24.04+ user
     # namespaces, GPU-crash auto-recovery, software-center AppStream metainfo,
     # no more app.asar open prompt; tracks Claude Desktop 1.11847.5.
+    # NOTE: main HEAD (d2ce0466, Claude 1.12603.1) does NOT build — upstream
+    # build.sh aborts on the #649 .asar --add-dir patch (upstream issue #718).
+    # Stay on the latest *release* until that's fixed. Bump via /update-claude-code.
     claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/f56421294d46f5db61fba0f833215d18d8c7fa2f";
 
     # GogMail — keyboard-driven Google Workspace TUI (Gmail/Calendar/Tasks/
