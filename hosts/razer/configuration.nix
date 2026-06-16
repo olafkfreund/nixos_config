@@ -99,6 +99,26 @@ in
     openFirewall = true;
   };
 
+  # Time sync. razer roams onto networks (e.g. corporate/guest WiFi) that
+  # block public NTP on UDP 123, which left the clock free-running and
+  # drifting. Sync from p620 over Tailscale instead — tunnelled inside
+  # WireGuard/DERP (443), so the UDP-123 block never applies. Public pool
+  # kept as fallback for networks that do allow NTP when the tailnet is down.
+  services.timesyncd = {
+    enable = true;
+    servers = [ "100.69.100.115" ]; # p620 (stable tailnet IP, chrony server)
+    fallbackServers = [
+      "0.pool.ntp.org"
+      "1.pool.ntp.org"
+      "2.pool.ntp.org"
+    ];
+  };
+
+  # Last-resort fallback: if NTP is unreachable (UDP 123 blocked AND Tailscale
+  # down), step the clock from HTTPS Date headers over 443. Only acts when
+  # timesyncd has not synchronised, so it never fights normal NTP discipline.
+  services.httpTimeFallback.enable = true;
+
   # COSMIC Notifications NG - Disabled: removed from active config
   # services.cosmic-ext-notifications = {
   #   enable = true;
