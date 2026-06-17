@@ -567,7 +567,7 @@ in
         else
           export TERM=xterm-256color
         fi
-        export BROWSER="firefox"
+        export BROWSER="google-chrome-stable"
         export EDITOR="nvim"
         export VISUAL="$EDITOR"
 
