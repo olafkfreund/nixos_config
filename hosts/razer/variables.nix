@@ -28,7 +28,8 @@ let
 
     # NFS server configuration for external disk sharing
     nfsConfig = {
-      enable = true;
+      # Disabled: /extdisk now holds ~/Source (private code), not LAN-shared.
+      enable = false;
       exports = "/extdisk         192.168.1.*(rw,fsid=0,no_subtree_check)";
     };
 
