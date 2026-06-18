@@ -52,7 +52,7 @@
   # Antigravity IDE (2.0.1+) — Google's rebranded Antigravity Desktop.
   # Standalone derivation in pkgs/antigravity-ide/ because upstream
   # jacopone/antigravity-nix is still on 1.x and 2.0.x changed everything
-  # (URL, layout, binary location, product name). Pinned to 2.0.1-4861014…
+  # (URL, layout, binary location, product name). Pinned to 2.0.4-6381998…
   antigravity-ide = pkgs.callPackage ./antigravity-ide/package.nix { };
 
   # Antigravity CLI (agy) — Gemini CLI's successor per Google's
