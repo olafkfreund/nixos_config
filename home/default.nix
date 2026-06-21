@@ -34,7 +34,17 @@
   # `claude /doctor` checks the literal path ~/.local/bin/claude and warns
   # if it's missing — independent of whether `claude` is already on PATH.
   # Point the path at the same nix-managed binary so /doctor stays quiet.
-  home.file.".local/bin/claude".source = "${pkgs.claude-code-native}/bin/claude";
+  #
+  # force = true is REQUIRED: Claude's native installer (~/.local/share/claude)
+  # keeps self-updating and rewriting this symlink to its own build, even with
+  # DISABLE_AUTOUPDATER=1 set — the updater process ignores it. Without force,
+  # HM activation fails ("Existing file ... would be clobbered") and rolls back
+  # the whole deploy. force lets HM reclaim the path unconditionally so a stray
+  # self-update can never break a deploy again.
+  home.file.".local/bin/claude" = {
+    source = "${pkgs.claude-code-native}/bin/claude";
+    force = true;
+  };
 
   # Enable Claude Code "Agent Teams" — experimental feature that lets one
   # Claude session spawn a team of coordinated teammates (separate sessions
