@@ -165,6 +165,16 @@ let
           "skillai-app"
           "rolehunter-db"
           "rolehunter-app"
+          "factory-db-aifactory"
+          "factory-db-pfactory"
+          "factory-db-tfactory"
+          "minio-creds"
+          "oauth2-proxy-cfactory"
+          "oauth2-proxy-observe"
+          "oauth2-proxy-odin"
+          "observe-root"
+          "otel-otlp-auth"
+          "cfactory-api-keys"
         ])} \
       ; do
         f="/run/agenix/$slot"
@@ -462,6 +472,16 @@ in
           "skillai-app"
           "rolehunter-db"
           "rolehunter-app"
+          "factory-db-aifactory"
+          "factory-db-pfactory"
+          "factory-db-tfactory"
+          "minio-creds"
+          "oauth2-proxy-cfactory"
+          "oauth2-proxy-observe"
+          "oauth2-proxy-odin"
+          "observe-root"
+          "otel-otlp-auth"
+          "cfactory-api-keys"
         ])
       ))
     ];
