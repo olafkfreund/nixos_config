@@ -233,9 +233,18 @@ If the key is correctly seeded but the sidecar still fails, the key is expired/r
 
 ### Cluster won't start after host reboot
 
+Since the 2026-06-25 hardening this is **handled automatically** — the
+bootstrap unit verifies the host API is reachable and self-heals the
+serverlb port-publish race with a non-destructive `stop`/`start` cycle.
+See [Disaster Recovery & Resilience](#disaster-recovery--resilience).
+
+If the API is still unreachable from the host after boot:
+
 ```bash
 docker ps -a --filter "name=k3d-${CLUSTER:-factory}"
-# Should show server + tools containers; if not:
+# Did the self-heal run?
+sudo journalctl -u k3d-cluster-bootstrap -b | grep -iE "self-heal|unreachable|reachable"
+# Force a clean, NON-DESTRUCTIVE re-run (preserves all state):
 sudo systemctl restart k3d-cluster-bootstrap
 ```
 
@@ -256,6 +265,182 @@ sudo systemctl start k3d-cluster-bootstrap
 sudo journalctl -u k3d-cluster-bootstrap -f
 ```
 
+## Disaster Recovery & Resilience
+
+> Captures the 2026-06-25 p510 incident and the hardening that followed, so
+> this is on file for the next time. **A normal reboot now self-recovers with
+> no manual steps** — the procedures below are for the rarer cases.
+
+### Background: the 2026-06-25 incident
+
+After a p510 reboot the factory cluster failed to recover cleanly and a
+cascade followed. Root causes:
+
+1. **serverlb port-publish race.** The k3d load balancer publishes the kube
+   API on the host's tailnet IP (`100.118.96.32:6443`). On boot, Docker's
+   `unless-stopped` restart policy resurrected the serverlb *before*
+   `tailscale0` was up, so the port silently never published and
+   `k3d cluster start` no-op'd on the "already running" containers → API
+   unreachable from the host.
+2. **Destructive recovery.** A `systemctl restart docker` taken to fix the LB
+   instead tore the whole cluster down (force-stopped containers + a
+   concurrent `Restart=on-failure` `k3d cluster create`).
+3. **Non-declarative secrets lost on recreate.** Ten factory Secrets had been
+   created out-of-band (`kubectl create secret`) — never in agenix or GitOps —
+   so the forced recreate wiped them: `oauth2-proxy-{cfactory,observe,odin}`,
+   `cfactory-api-keys`, `minio-creds`, `factory-db-{ai,p,t}factory`,
+   `observe-root`, `otel-otlp-auth`, `odin-ssh-key`.
+4. **Keycloak realm on ephemeral H2.** Keycloak runs `start-dev` (embedded
+   H2) on a dynamic local-path PVC; a recreate gives it a fresh empty
+   directory, so the `factory` realm + all OAuth clients were lost (recovered
+   only because the previous H2 file lingered orphaned on disk).
+5. **Keycloak liveness probe too aggressive.** Under post-reboot load the
+   Quarkus `start-dev` build exceeded the liveness budget (~180s) and the pod
+   was killed mid-start in an infinite crash-loop.
+
+### What's now in place (hardening)
+
+| Fix | Where | Guarantee |
+|---|---|---|
+| Bootstrap reboot self-heal | `modules/containers/k3d.nix` | After `k3d cluster start`, verifies the **host** API answers (`/readyz` via the published serverlb port); if not, non-destructive `stop`/`start` cycle (×5) rebuilds the LB port mapping. **No delete** — PVCs/etcd/realm preserved. |
+| Order after tailscale + bind-IP wait | same | Unit ordered `after = tailscaled`; waits for the API bind IP to appear on an interface before cluster ops — kills the race at the source. |
+| All factory Secrets in agenix | `secrets/factory-secret-*.age` + the `factorySecrets` seed loop in `k3d.nix` | The bootstrap `kubectl apply`s all 19 Secrets every run → a recreate self-restores them. |
+| Keycloak startupProbe | `factory-gitops/infra/keycloak/keycloak.yaml` | 600s startup budget (`failureThreshold: 60 × 10s`) gates liveness → no crash-loop on slow start. |
+| Keycloak realm backup | `keycloak-realm-backup.timer` (daily) | Copies the live realm H2 DB to `/mnt/img_pool/k3d/backups/keycloak/`. |
+
+### Normal reboot — what happens automatically (no action needed)
+
+On boot, `k3d-cluster-bootstrap` (after `tailscaled`):
+
+1. waits for the tailnet bind IP, then `k3d cluster start`;
+2. **verifies the host API answers** (`/readyz`); self-heals the LB with a
+   non-destructive `stop`/`start` cycle if not;
+3. **re-seeds all 19 agenix Secrets** (idempotent);
+4. Keycloak restarts under the **startupProbe** with its realm intact.
+
+A graceful reboot preserves all PVCs/etcd/realm — recovery is in-place.
+
+### Post-reboot verification checklist
+
+```bash
+KC=/tmp/kc; sudo k3d kubeconfig get factory > "$KC"
+# 1. cluster API reachable from the host (the serverlb race fix)
+KUBECONFIG=$KC kubectl get nodes
+# 2. did the self-heal run? (only logs if it had to act)
+sudo journalctl -u k3d-cluster-bootstrap -b | grep -iE "self-heal|unreachable|reachable"
+# 3. Keycloak back with realm, RESTARTS should stay 0
+KUBECONFIG=$KC kubectl get pods -n factory -l app=keycloak
+# 4. anything unhealthy?
+KUBECONFIG=$KC kubectl get pods -n factory | grep -vE "Running|Completed"
+```
+
+### Manual recovery procedures
+
+#### A. API unreachable after boot (self-heal didn't catch it)
+
+Non-destructive — preserves all state:
+
+```bash
+sudo systemctl restart k3d-cluster-bootstrap        # re-runs the self-heal loop
+# or drive it by hand:
+sudo $(which k3d) cluster stop factory && sudo $(which k3d) cluster start factory
+sudo docker inspect k3d-factory-serverlb --format '{{json .NetworkSettings.Ports}}'  # 6443 must be published
+```
+
+#### B. Restore the Keycloak realm (empty realm after a full recreate)
+
+The realm/clients/users live in `keycloakdb.mv.db`. Restore it from the daily
+backup (or an orphaned old PVC dir). **Disable ArgoCD auto-sync first** or it
+will fight the scale-down:
+
+```bash
+KC=/tmp/kc; sudo k3d kubeconfig get factory > "$KC"; export KUBECONFIG=$KC
+# 1. stop ArgoCD reverting us, then scale Keycloak down
+kubectl patch application root     -n argocd --type json -p '[{"op":"remove","path":"/spec/syncPolicy/automated"}]'
+kubectl patch application keycloak -n argocd --type json -p '[{"op":"remove","path":"/spec/syncPolicy/automated"}]'
+kubectl scale deploy -n factory keycloak --replicas=0
+kubectl wait --for=delete pod -n factory -l app=keycloak --timeout=60s
+# 2. find the live PVC dir and drop the backup H2 into it
+VOL=$(kubectl get pvc keycloak-data -n factory -o jsonpath='{.spec.volumeName}')
+DST="/mnt/img_pool/k3d/storage/$(kubectl get pv "$VOL" -o jsonpath='{.spec.local.path}' | xargs basename)/h2"
+sudo mkdir -p "$DST"
+sudo cp /mnt/img_pool/k3d/backups/keycloak/keycloakdb-latest.mv.db "$DST/keycloakdb.mv.db"
+sudo chown -R 1000:1000 "$(dirname "$DST")"
+# 3. bring it back, then re-enable ArgoCD
+kubectl scale deploy -n factory keycloak --replicas=1
+kubectl patch application root     -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}'
+kubectl patch application keycloak -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}'
+```
+
+Verify the realm came back:
+
+```bash
+kubectl exec -n factory deploy/keycloak -- sh -c '
+  /opt/keycloak/bin/kcadm.sh config credentials --server http://localhost:8080 \
+    --realm master --user "$KC_BOOTSTRAP_ADMIN_USERNAME" --password "$KC_BOOTSTRAP_ADMIN_PASSWORD" &&
+  /opt/keycloak/bin/kcadm.sh get realms --fields realm'
+```
+
+#### C. A missing/incorrect oauth2-proxy Secret (proxy 502/403, pod `CreateContainerConfigError`)
+
+These are now in agenix, so the durable fix is just:
+
+```bash
+sudo systemctl restart k3d-cluster-bootstrap   # re-seeds all factory Secrets from agenix
+```
+
+To rebuild one by hand from the live Keycloak client (e.g. odin → client
+`odin-dashboard`), the Secret needs `client-id`, `client-secret`,
+`cookie-secret`:
+
+```bash
+ID=$(kubectl get clients ... )   # internal id of the client in realm factory via kcadm
+SECRET=$(kubectl exec -n factory deploy/keycloak -- /opt/keycloak/bin/kcadm.sh get clients/$ID/client-secret -r factory | jq -r .value)
+COOKIE=$(openssl rand -hex 16)   # MUST decode to 16/24/32 bytes; -base64 32 (=44 chars) is INVALID
+kubectl create secret generic oauth2-proxy-odin -n factory \
+  --from-literal=client-id=odin-dashboard --from-literal=client-secret="$SECRET" \
+  --from-literal=cookie-secret="$COOKIE" --dry-run=client -o yaml | kubectl apply -f -
+```
+
+> ⚠️ `cookie-secret` gotcha: oauth2-proxy requires exactly **16, 24, or 32
+> bytes**. `openssl rand -base64 32` yields a 44-char string (44 bytes) and
+> crash-loops with `cookie_secret must be 16, 24, or 32 bytes`. Use
+> `openssl rand -hex 16` (32 chars) or `openssl rand -base64 24` (32 chars).
+
+#### D. Re-capture a live Secret into agenix (make it durable)
+
+Run on p510 (it holds both the live Secrets and the agenix recipient keys).
+Encrypt to recipients `olafkfreund` + `p510` (see `secrets.nix`), copy the
+`.age` into `secrets/`, add it to `secrets.nix` and the `factorySecrets` seed
+loop in `modules/containers/k3d.nix`:
+
+```bash
+kubectl get secret <name> -n factory -o json \
+  | jq '{apiVersion, kind, type, data, metadata:{name:.metadata.name}}' \
+  | age -r "<olafkfreund pubkey>" -r "<p510 pubkey>" -o factory-secret-<name>.age
+```
+
+### Backups
+
+- **Daily** via `keycloak-realm-backup.timer` →
+  `/mnt/img_pool/k3d/backups/keycloak/keycloakdb-{TIMESTAMP,latest}.mv.db`
+  (14 timestamped copies kept).
+- **On demand:** `sudo systemctl start keycloak-realm-backup.service`
+- ⚠️ Backups live on the **same disk** as the cluster — fine for
+  recreate/corruption recovery, **not** full disk loss. Add an off-host copy
+  (rsync/restic to p620 or object storage) for true DR.
+
+### Known residual gaps
+
+- **App databases** (postgres/minio PVCs) have **no restore automation** — a
+  full cluster *recreate* rebuilds them empty. The hardened bootstrap now
+  *avoids* recreate (it self-heals in place), so this is a rare-catastrophe
+  gap, not an everyday one. Adding per-DB dump timers + restore-on-bootstrap
+  would close it.
+- The reboot self-heal logic is deployed but was **not yet validated with a
+  live reboot** (deferred). Run the verification checklist after the next
+  natural reboot.
+
 ## What's running where
 
 | Component | Namespace | How it got there | Owner |
@@ -272,8 +457,11 @@ sudo journalctl -u k3d-cluster-bootstrap -f
 
 ## Related files
 
-- Module: `modules/containers/k3d.nix`
+- Module: `modules/containers/k3d.nix` (bootstrap, reboot self-heal, backup timer)
 - Host enable: `hosts/p510/configuration.nix` (search for `modules.containers.k3d`)
-- Secrets: `secrets.nix` → `tailscale-k8s-operator-oauth`
+- Secrets: `secrets.nix` → `tailscale-k8s-operator-oauth` + `factory-secret-*` slots
+- Encrypted Secret manifests: `secrets/factory-secret-*.age` (19 slots, seeded by the bootstrap)
+- Keycloak manifest (startupProbe): `factory-gitops/infra/keycloak/keycloak.yaml`
+- Realm backups: `/mnt/img_pool/k3d/backups/keycloak/` (daily `keycloak-realm-backup.timer`)
 - Architecture: [k3d Architecture](../architecture/k3d-architecture.md)
 - GitOps workflow: [Factory GitOps](../guides/factory-gitops.md)
