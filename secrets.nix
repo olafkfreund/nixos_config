@@ -253,4 +253,5 @@ in
   "secrets/factory-secret-observe-root.age".publicKeys = allUsers ++ [ p510 ];
   "secrets/factory-secret-otel-otlp-auth.age".publicKeys = allUsers ++ [ p510 ];
   "secrets/factory-secret-cfactory-api-keys.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-odin-ssh-key.age".publicKeys = allUsers ++ [ p510 ];
 }

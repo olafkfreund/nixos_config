@@ -175,6 +175,7 @@ let
           "observe-root"
           "otel-otlp-auth"
           "cfactory-api-keys"
+          "odin-ssh-key"
         ])} \
       ; do
         f="/run/agenix/$slot"
@@ -482,6 +483,7 @@ in
           "observe-root"
           "otel-otlp-auth"
           "cfactory-api-keys"
+          "odin-ssh-key"
         ])
       ))
     ];
