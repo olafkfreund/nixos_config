@@ -122,14 +122,17 @@
     # Workaround: close claude-desktop entirely to release inhibitor,
     # or set CLAUDE_KEEP_AWAKE=0 (#645).
     # Bump via /update-claude-code.
-    # = tag v2.0.19+claude1.11847.5 (commit f56421294d, 2026-06-12)
-    # Delta from previous pin: AppArmor profiles for Ubuntu 24.04+ user
-    # namespaces, GPU-crash auto-recovery, software-center AppStream metainfo,
-    # no more app.asar open prompt; tracks Claude Desktop 1.11847.5.
-    # NOTE: main HEAD (d2ce0466, Claude 1.12603.1) does NOT build — upstream
-    # build.sh aborts on the #649 .asar --add-dir patch (upstream issue #718).
-    # Stay on the latest *release* until that's fixed. Bump via /update-claude-code.
-    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/f56421294d46f5db61fba0f833215d18d8c7fa2f";
+    # = tag v2.0.22+claude1.15200.0 (commit cdf934a061, 2026-06-25)
+    # Delta from previous pin (v2.0.19+claude1.11847.5): cowork renderer
+    # support-gate fix (#743) and upstream tracking up to Claude Desktop
+    # 1.15200.0.
+    # NOTE: pin to the latest *release* tag, NOT main HEAD — historically main
+    # can fail to build (e.g. upstream issue #718). Bump via /update-claude-code.
+    # Known open upstream runtime bugs at this pin (UI-only, not build blockers):
+    # menu-bar icon glitch on 1.15200.0 (#746), launcher.log O(n²) hang on large
+    # logs (#726/#747). We consume upstream's claude-desktop-fhs as-is (no local
+    # patch); node-pty/asar handling lives in upstream build.sh.
+    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/cdf934a06185f7f6564606071044139760cae090";
 
     # GogMail — keyboard-driven Google Workspace TUI (Gmail/Calendar/Tasks/
     # Drive/Contacts/Chat) built on the gog CLI. Consumed via overlays as
