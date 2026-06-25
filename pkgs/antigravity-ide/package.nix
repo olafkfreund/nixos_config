@@ -103,11 +103,11 @@ let
 in
 stdenv.mkDerivation {
   pname = "antigravity-ide";
-  version = "2.0.4-6381998290370560";
+  version = "2.1.1-6123990880747520";
 
   src = fetchurl {
-    url = "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/2.0.4-6381998290370560/linux-x64/Antigravity%20IDE.tar.gz";
-    hash = "sha256-ZjN9RfJHLOXonzlOd67HSQmqG+C7M8n3MpmpX0WOZ3A=";
+    url = "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/2.1.1-6123990880747520/linux-x64/Antigravity%20IDE.tar.gz";
+    hash = "sha256-Wyzr99M6aNAD/Y8fqYjRYAkFrOIlBKCF5ThCFCkIeL0=";
   };
 
   nativeBuildInputs = [
