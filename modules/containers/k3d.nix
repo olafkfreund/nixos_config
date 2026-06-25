@@ -503,8 +503,11 @@ in
           mkdir -p "$BACKUP_DIR"
           vol=$(kubectl get pvc keycloak-data -n factory -o jsonpath='{.spec.volumeName}' 2>/dev/null) || exit 0
           [ -n "$vol" ] || { echo "[keycloak-backup] no keycloak-data PVC yet; skipping" >&2; exit 0; }
-          src=$(kubectl get pv "$vol" -o jsonpath='{.spec.hostPath.path}{.spec.local.path}' 2>/dev/null)
-          h2="$src/h2/keycloakdb.mv.db"
+          pvpath=$(kubectl get pv "$vol" -o jsonpath='{.spec.hostPath.path}{.spec.local.path}' 2>/dev/null)
+          # The PV path is the IN-k3d-NODE path (/var/lib/rancher/k3s/storage/<dir>).
+          # The matching HOST path is ${toString cfg.storageDir}/<dir>, since that
+          # directory is bind-mounted into the k3d server node.
+          h2="${toString cfg.storageDir}/$(basename "$pvpath")/h2/keycloakdb.mv.db"
           if [ -f "$h2" ]; then
             ts=$(date +%Y%m%d-%H%M%S)
             cp -f "$h2" "$BACKUP_DIR/keycloakdb-$ts.mv.db"
