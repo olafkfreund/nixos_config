@@ -532,6 +532,56 @@ in
       };
     };
 
+    # skillai application database backup. skillai-db is a PostgreSQL
+    # StatefulSet on a dynamic local-path PVC; a full cluster recreate
+    # re-points it at a fresh empty PVC and the data is lost (incident
+    # 2026-06-25, recovered only because the previous PVC dir lingered
+    # orphaned on disk). Unlike Keycloak's raw H2 copy, a logical pg_dump
+    # (-Fc custom format) is consistent and version-independent — restore
+    # with `pg_restore -U skillai -d skillai --clean --if-exists`.
+    systemd.services.skillai-db-backup = mkIf cfg.argocd.enable {
+      description = "Backup skillai PostgreSQL database (pg_dump) to durable storage";
+      after = [ "k3d-cluster-bootstrap.service" ];
+      path = with pkgs; [ kubectl coreutils ];
+      environment.KUBECONFIG = cfg.kubeconfigPath;
+      serviceConfig = {
+        Type = "oneshot";
+        User = "root";
+        ExecStart = pkgs.writeShellScript "skillai-db-backup" ''
+          set -uo pipefail
+          BACKUP_DIR="${builtins.dirOf (toString cfg.storageDir)}/backups/skillai"
+          mkdir -p "$BACKUP_DIR"
+          # Only dump when the DB pod is actually Running; skip cleanly
+          # otherwise (mid-start, scaled down, cluster not up yet).
+          phase=$(kubectl get pod skillai-db-0 -n factory -o jsonpath='{.status.phase}' 2>/dev/null) || exit 0
+          [ "$phase" = "Running" ] || { echo "[skillai-backup] skillai-db-0 not Running ($phase); skipping" >&2; exit 0; }
+          ts=$(date +%Y%m%d-%H%M%S)
+          out="$BACKUP_DIR/skillai-$ts.dump"
+          # -Fc emits binary; no TTY (-t) so the stream stays clean.
+          if kubectl exec -n factory skillai-db-0 -- pg_dump -U skillai -d skillai -Fc > "$out" 2>/dev/null && [ -s "$out" ]; then
+            cp -f "$out" "$BACKUP_DIR/skillai-latest.dump"
+            # keep the 14 most recent timestamped dumps
+            ls -1t "$BACKUP_DIR"/skillai-2*.dump 2>/dev/null | tail -n +15 | xargs -r rm -f
+            echo "[skillai-backup] saved -> $out ($(wc -c < "$out") bytes)"
+          else
+            rm -f "$out"
+            echo "[skillai-backup] pg_dump failed (db mid-start?); skipping" >&2
+            exit 0
+          fi
+        '';
+      };
+    };
+
+    systemd.timers.skillai-db-backup = mkIf cfg.argocd.enable {
+      description = "Periodic skillai database backup";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "daily";
+        Persistent = true;
+        RandomizedDelaySec = "30m";
+      };
+    };
+
     # Make `kubectl` Just Work for wheel users without manual KUBECONFIG
     # exports. This is a host-wide env var; harmless when the file doesn't
     # exist yet (kubectl errors clearly), and Just Right once the bootstrap

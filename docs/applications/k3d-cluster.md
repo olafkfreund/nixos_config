@@ -422,21 +422,49 @@ kubectl get secret <name> -n factory -o json \
 
 ### Backups
 
-- **Daily** via `keycloak-realm-backup.timer` →
+- **Keycloak realm — daily** via `keycloak-realm-backup.timer` →
   `/mnt/img_pool/k3d/backups/keycloak/keycloakdb-{TIMESTAMP,latest}.mv.db`
   (14 timestamped copies kept).
+- **skillai database — daily** via `skillai-db-backup.timer` →
+  `/mnt/img_pool/k3d/backups/skillai/skillai-{TIMESTAMP,latest}.dump`
+  (logical `pg_dump -Fc`, 14 timestamped copies kept).
 - **On demand:** `sudo systemctl start keycloak-realm-backup.service`
+  / `sudo systemctl start skillai-db-backup.service`
 - ⚠️ Backups live on the **same disk** as the cluster — fine for
   recreate/corruption recovery, **not** full disk loss. Add an off-host copy
   (rsync/restic to p620 or object storage) for true DR.
 
+#### Restore the skillai database from a dump
+
+The `pg_dump -Fc` archive restores into a live (possibly empty) `skillai-db`:
+
+```bash
+KC=/tmp/kc; sudo k3d kubeconfig get factory > "$KC"; export KUBECONFIG=$KC
+# pipe the latest dump into pg_restore inside the running DB pod
+kubectl exec -i -n factory skillai-db-0 -- \
+  pg_restore -U skillai -d skillai --clean --if-exists --no-owner \
+  < /mnt/img_pool/k3d/backups/skillai/skillai-latest.dump
+# verify
+kubectl exec -n factory skillai-db-0 -- psql -U skillai -d skillai \
+  -tAc 'SELECT count(*) FROM candidates;'
+```
+
+> For recovery from an **orphaned pre-crash PVC dir** (no dump available — the
+> 2026-06-25 case), the data lives under
+> `/mnt/img_pool/k3d/storage/pvc-*_factory_data-skillai-db-0/pgdata`. Identify
+> the pre-crash dir by newest internal file mtime, scale `skillai-db`/`skillai-app`
+> to 0 (disable ArgoCD auto-sync first), `cp -a` its `pgdata` over the live PVC's
+> `pgdata`, then scale back up — PostgreSQL crash-recovers on start.
+
 ### Known residual gaps
 
-- **App databases** (postgres/minio PVCs) have **no restore automation** — a
-  full cluster *recreate* rebuilds them empty. The hardened bootstrap now
-  *avoids* recreate (it self-heals in place), so this is a rare-catastrophe
-  gap, not an everyday one. Adding per-DB dump timers + restore-on-bootstrap
-  would close it.
+- **App databases** — `skillai-db` now has a daily logical-dump timer
+  (`skillai-db-backup.timer`). The remaining app DBs (`postgres`, `minio`,
+  `rolehunter-db`) still have **no restore automation** — a full cluster
+  *recreate* rebuilds them empty. The hardened bootstrap now *avoids* recreate
+  (it self-heals in place), so this is a rare-catastrophe gap. Extending the
+  same per-DB dump-timer pattern (+ restore-on-bootstrap) would close it
+  fully.
 - The reboot self-heal logic is deployed but was **not yet validated with a
   live reboot** (deferred). Run the verification checklist after the next
   natural reboot.
