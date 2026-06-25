@@ -240,4 +240,18 @@ in
   "secrets/factory-secret-skillai-app.age".publicKeys = allUsers ++ [ p510 ];
   "secrets/factory-secret-rolehunter-db.age".publicKeys = allUsers ++ [ p510 ];
   "secrets/factory-secret-rolehunter-app.age".publicKeys = allUsers ++ [ p510 ];
+  # Per-factory postgres DATABASE_URLs, minio S3 creds, oauth2-proxy clients,
+  # observability + cockpit API keys — previously seeded out-of-band and lost on
+  # a cluster reset; now durable so k3d-cluster-bootstrap restores them.
+  "secrets/factory-secret-factory-db-aifactory.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-factory-db-pfactory.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-factory-db-tfactory.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-minio-creds.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-oauth2-proxy-cfactory.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-oauth2-proxy-observe.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-oauth2-proxy-odin.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-observe-root.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-otel-otlp-auth.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-cfactory-api-keys.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-odin-ssh-key.age".publicKeys = allUsers ++ [ p510 ];
 }
