@@ -62,6 +62,9 @@ let
       jq
       coreutils
       docker-client
+      # `ip` (iproute2) — the reboot path waits for the API bind IP to appear
+      # on an interface before (re)starting the cluster.
+      iproute2
       # `kubectl apply -k` against a remote git URL shells out to `git`.
       # Without this, the bootstrap fails the GitOps step with
       # "no 'git' program on path: exec: \"git\": executable file not
@@ -75,9 +78,34 @@ let
       CLUSTER="${cfg.clusterName}"
       KUBECONFIG_OUT="${cfg.kubeconfigPath}"
       API_PORT="${toString cfg.apiPort}"
+      API_BIND="${cfg.apiHostBind}"
       STORAGE_DIR="${cfg.storageDir}"
 
       mkdir -p "$(dirname "$KUBECONFIG_OUT")" "$STORAGE_DIR"
+
+      # Host-side API reachability check: pulls a fresh kubeconfig (which points
+      # at ${cfg.apiHostBind}:$API_PORT — i.e. the serverlb's PUBLISHED host
+      # port) and hits /readyz. This verifies the port-publish actually works
+      # from the host, not just that the in-container API is up.
+      api_reachable() {
+        k3d kubeconfig get "$CLUSTER" > /tmp/k3d-bootstrap-healthcheck 2>/dev/null || return 1
+        KUBECONFIG=/tmp/k3d-bootstrap-healthcheck kubectl get --raw=/readyz >/dev/null 2>&1
+      }
+
+      # The API binds to ${cfg.apiHostBind}. On a host reboot that interface
+      # (e.g. tailscale0) can come up AFTER docker, so wait for the address to
+      # exist before (re)starting the cluster — otherwise the serverlb fails to
+      # publish the port. Skip for wildcard/loopback binds.
+      case "$API_BIND" in
+        0.0.0.0 | 127.0.0.1) ;;
+        *)
+          for i in $(seq 1 30); do
+            ip -o addr show 2>/dev/null | grep -qw "$API_BIND" && break
+            echo "[k3d-bootstrap] waiting for API bind IP $API_BIND ($i/30)…"
+            sleep 2
+          done
+          ;;
+      esac
 
       # 1. Create cluster if missing
       if ! k3d cluster list -o json | jq -e --arg n "$CLUSTER" '.[] | select(.name==$n)' >/dev/null; then
@@ -92,9 +120,31 @@ let
           --volume "$STORAGE_DIR:/var/lib/rancher/k3s/storage@server:*" \
           --wait
       else
-        echo "[k3d-bootstrap] Cluster $CLUSTER already exists; skipping create"
-        # Ensure it's running (host reboot path)
+        echo "[k3d-bootstrap] Cluster $CLUSTER already exists (reboot path); ensuring API reachable"
         k3d cluster start "$CLUSTER" >/dev/null 2>&1 || true
+
+        # Self-heal the serverlb port-publish race. After a reboot Docker's
+        # restart-policy can resurrect the serverlb before the bind interface is
+        # up, so its host port silently never publishes and `k3d cluster start`
+        # no-ops on the "already running" containers — API unreachable from the
+        # host. Fix with a clean, NON-DESTRUCTIVE stop/start cycle (re-creates
+        # the LB's port mapping). No delete: PVCs, etcd and the Keycloak realm
+        # are all preserved.
+        healed=0
+        for attempt in $(seq 1 5); do
+          for i in $(seq 1 15); do api_reachable && break; sleep 2; done
+          if api_reachable; then
+            [ "$attempt" -gt 1 ] && echo "[k3d-bootstrap] API reachable after self-heal (attempt $attempt)"
+            healed=1; break
+          fi
+          echo "[k3d-bootstrap] host API $API_BIND:$API_PORT unreachable — clean stop/start (attempt $attempt/5)"
+          k3d cluster stop "$CLUSTER" >/dev/null 2>&1 || true
+          docker rm -f "k3d-$CLUSTER-tools" >/dev/null 2>&1 || true
+          k3d cluster start "$CLUSTER" >/dev/null 2>&1 || true
+        done
+        if [ "$healed" != 1 ]; then
+          echo "[k3d-bootstrap] WARNING: host API still unreachable after 5 self-heal cycles" >&2
+        fi
       fi
 
       # 2. Materialise host-side kubeconfig
@@ -408,9 +458,9 @@ in
     systemd.services.k3d-cluster-bootstrap = {
       description = "k3d cluster bootstrap (create cluster, write kubeconfig, apply GitOps)";
       wantedBy = [ "multi-user.target" ];
-      after = [ "docker.service" "network-online.target" ];
+      after = [ "docker.service" "network-online.target" "tailscaled.service" ];
       requires = [ "docker.service" ];
-      wants = [ "network-online.target" ];
+      wants = [ "network-online.target" "tailscaled.service" ];
 
       serviceConfig = {
         Type = "oneshot";
@@ -430,6 +480,52 @@ in
         KUBECONFIG = cfg.kubeconfigPath;
         # Make sure docker.sock is reachable
         DOCKER_HOST = "unix:///var/run/docker.sock";
+      };
+    };
+
+    # Keycloak realm backup. The realm/clients/users live in an H2 database on
+    # the keycloak-data PVC. A full cluster recreate gives that PVC a fresh
+    # empty directory (realm lost — incident 2026-06-25, recovered only because
+    # the previous H2 happened to linger orphaned on disk). This timer copies
+    # the live H2 to durable, stable storage so a recovery point always exists,
+    # independent of the churning per-recreate PVC directory.
+    systemd.services.keycloak-realm-backup = mkIf cfg.argocd.enable {
+      description = "Backup Keycloak realm (H2 database) to durable storage";
+      after = [ "k3d-cluster-bootstrap.service" ];
+      path = with pkgs; [ kubectl jq coreutils ];
+      environment.KUBECONFIG = cfg.kubeconfigPath;
+      serviceConfig = {
+        Type = "oneshot";
+        User = "root";
+        ExecStart = pkgs.writeShellScript "keycloak-realm-backup" ''
+          set -uo pipefail
+          BACKUP_DIR="${builtins.dirOf (toString cfg.storageDir)}/backups/keycloak"
+          mkdir -p "$BACKUP_DIR"
+          vol=$(kubectl get pvc keycloak-data -n factory -o jsonpath='{.spec.volumeName}' 2>/dev/null) || exit 0
+          [ -n "$vol" ] || { echo "[keycloak-backup] no keycloak-data PVC yet; skipping" >&2; exit 0; }
+          src=$(kubectl get pv "$vol" -o jsonpath='{.spec.hostPath.path}{.spec.local.path}' 2>/dev/null)
+          h2="$src/h2/keycloakdb.mv.db"
+          if [ -f "$h2" ]; then
+            ts=$(date +%Y%m%d-%H%M%S)
+            cp -f "$h2" "$BACKUP_DIR/keycloakdb-$ts.mv.db"
+            cp -f "$h2" "$BACKUP_DIR/keycloakdb-latest.mv.db"
+            # keep the 14 most recent timestamped backups
+            ls -1t "$BACKUP_DIR"/keycloakdb-2*.mv.db 2>/dev/null | tail -n +15 | xargs -r rm -f
+            echo "[keycloak-backup] saved -> $BACKUP_DIR/keycloakdb-$ts.mv.db ($(wc -c < "$h2") bytes)"
+          else
+            echo "[keycloak-backup] H2 not found at $h2 (keycloak may be mid-start); skipping" >&2
+          fi
+        '';
+      };
+    };
+
+    systemd.timers.keycloak-realm-backup = mkIf cfg.argocd.enable {
+      description = "Periodic Keycloak realm backup";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "daily";
+        Persistent = true;
+        RandomizedDelaySec = "30m";
       };
     };
 
