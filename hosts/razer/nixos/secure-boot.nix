@@ -3,9 +3,6 @@
 { lib, ... }: {
   # Boot configuration for Secure Boot
   boot = {
-    # Enable bootspec for lanzaboote (required for Secure Boot)
-    bootspec.enable = true;
-
     # Enable Lanzaboote for Secure Boot.
     # pkiBundle path changed from /etc/secureboot to /var/lib/sbctl in
     # sbctl 0.14+ (lanzaboote v1.0.0 ships sbctl 0.18). Keys live at

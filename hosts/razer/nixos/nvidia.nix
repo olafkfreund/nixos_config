@@ -11,7 +11,9 @@
       nvidiaPersistenced = false;
       open = true; # NVIDIA 590+ requires open kernel modules for Turing GPUs (RTX 2070 Super)
       nvidiaSettings = true;
-      package = config.boot.kernelPackages.nvidiaPackages.beta;
+      # beta (595.45.04) fails to build against kernel 7.1 — it includes
+      # linux/of_gpio.h, removed in 7.x. latest (610.43.02) handles the removal.
+      package = config.boot.kernelPackages.nvidiaPackages.latest;
 
       prime = {
         sync.enable = true;

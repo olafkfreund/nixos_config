@@ -454,6 +454,8 @@ in
   services = {
     playerctld.enable = true;
     fwupd.enable = true;
+    # Quiet sshd preauth-reset spam from Odin's :22 liveness probes (p510).
+    openssh.settings.LogLevel = "ERROR";
     nfs.server = lib.mkIf vars.services.nfs.enable {
       enable = true;
       inherit (vars.services.nfs) exports;

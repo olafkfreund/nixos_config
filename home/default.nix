@@ -34,7 +34,17 @@
   # `claude /doctor` checks the literal path ~/.local/bin/claude and warns
   # if it's missing — independent of whether `claude` is already on PATH.
   # Point the path at the same nix-managed binary so /doctor stays quiet.
-  home.file.".local/bin/claude".source = "${pkgs.claude-code-native}/bin/claude";
+  #
+  # force = true is REQUIRED: Claude's native installer (~/.local/share/claude)
+  # keeps self-updating and rewriting this symlink to its own build, even with
+  # DISABLE_AUTOUPDATER=1 set — the updater process ignores it. Without force,
+  # HM activation fails ("Existing file ... would be clobbered") and rolls back
+  # the whole deploy. force lets HM reclaim the path unconditionally so a stray
+  # self-update can never break a deploy again.
+  home.file.".local/bin/claude" = {
+    source = "${pkgs.claude-code-native}/bin/claude";
+    force = true;
+  };
 
   # Enable Claude Code "Agent Teams" — experimental feature that lets one
   # Claude session spawn a team of coordinated teammates (separate sessions
@@ -45,6 +55,15 @@
   # plugin/theme changes via /config.
   # https://code.claude.com/docs/en/agent-teams
   home.sessionVariables.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+
+  # Version is controlled declaratively via pkgs.claude-code-native; the
+  # built-in self-updater must stay off. The nix wrapper already sets these,
+  # but a stray native install (~/.local/share/claude) self-updates and
+  # reclaims ~/.local/bin/claude, breaking the next HM activation. Setting
+  # them in the session environment disables the updater for ANY claude
+  # binary, not just the wrapper. Bump with ./scripts/update-claude-code-native.sh.
+  home.sessionVariables.DISABLE_AUTOUPDATER = "1";
+  home.sessionVariables.CLAUDE_CODE_SKIP_UPDATE_CHECK = "1";
 
   home.packages = [
     inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.opencode
