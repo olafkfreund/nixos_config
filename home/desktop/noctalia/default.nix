@@ -367,42 +367,62 @@ in
       osd.workspace-switcher.boxes.inactive.bg.color: #${colors.base02}
     '';
 
-  # Keybinds (labwc ships only sparse compiled-in defaults). W = Super/logo.
+  # Keybinds — kept in lockstep with the niri binds above (W = Super/logo) so
+  # the same keys do the same thing across WMs. labwc is a *stacking* compositor,
+  # so niri's tiling-only binds have no equivalent and are intentionally absent:
+  #   Mod+H/L/J/K (column/window focus) → use A-Tab; arrows switch desktops
+  #   Mod+R, Mod+Comma/Period, Mod+Minus/Equal (columns)  — N/A (no tiling)
+  #   Mod+V (float, labwc windows always float), Mod+O (overview)  — N/A
+  #   Mod+Ctrl+Shift+F (windowed-fullscreen), Mod+P (mirror),
+  #   Mod+Shift+Slash (hotkey overlay), Mod+Shift+S (window shot)  — niri-only
   xdg.configFile."labwc/rc.xml".text = ''
     <?xml version="1.0"?>
     <labwc_config>
       <desktops>
-        <number>4</number>
+        <number>5</number>
       </desktops>
       <keyboard>
+        <!-- Apps / system (identical keys to niri) -->
         <keybind key="W-Return"><action name="Execute" command="ghostty"/></keybind>
+        <keybind key="W-t"><action name="Execute" command="ghostty"/></keybind>
         <keybind key="W-d"><action name="Execute" command="noctalia msg panel-toggle launcher"/></keybind>
+        <keybind key="W-Space"><action name="Execute" command="noctalia msg panel-toggle launcher"/></keybind>
         <keybind key="W-c"><action name="Execute" command="noctalia msg panel-toggle control-center"/></keybind>
         <keybind key="W-BackSpace"><action name="Execute" command="noctalia msg session lock"/></keybind>
-        <keybind key="Print"><action name="Execute" command="noctalia msg screenshot-region"/></keybind>
-        <!-- Region screen recording (re-press to stop). niri-screenrecord's
-             region branch is compositor-agnostic (slurp + wl-screenrec). -->
-        <keybind key="W-S-r"><action name="Execute" command="niri-screenrecord region"/></keybind>
         <keybind key="W-e"><action name="Execute" command="nautilus"/></keybind>
         <keybind key="W-q"><action name="Close"/></keybind>
+        <keybind key="W-S-e"><action name="Exit"/></keybind>
+        <!-- Window focus/switching (stacking-native: A-Tab + desktop arrows) -->
         <keybind key="A-Tab"><action name="NextWindow"/></keybind>
         <keybind key="A-S-Tab"><action name="PreviousWindow"/></keybind>
-        <keybind key="W-f"><action name="ToggleMaximize"/></keybind>
-        <keybind key="W-S-f"><action name="ToggleFullscreen"/></keybind>
-        <keybind key="W-Space"><action name="ShowMenu" menu="client-menu"/></keybind>
         <keybind key="W-Left"><action name="GoToDesktop" to="left" wrap="yes"/></keybind>
         <keybind key="W-Right"><action name="GoToDesktop" to="right" wrap="yes"/></keybind>
         <keybind key="W-Up"><action name="GoToDesktop" to="left" wrap="yes"/></keybind>
         <keybind key="W-Down"><action name="GoToDesktop" to="right" wrap="yes"/></keybind>
+        <!-- Window state (Mod+F maximize, Mod+Shift+F fullscreen — same as niri) -->
+        <keybind key="W-f"><action name="ToggleMaximize"/></keybind>
+        <keybind key="W-S-f"><action name="ToggleFullscreen"/></keybind>
+        <!-- Desktops 1-5 (identical to niri Mod+1..5) -->
         <keybind key="W-1"><action name="GoToDesktop" to="1"/></keybind>
         <keybind key="W-2"><action name="GoToDesktop" to="2"/></keybind>
         <keybind key="W-3"><action name="GoToDesktop" to="3"/></keybind>
         <keybind key="W-4"><action name="GoToDesktop" to="4"/></keybind>
+        <keybind key="W-5"><action name="GoToDesktop" to="5"/></keybind>
         <keybind key="W-S-1"><action name="SendToDesktop" to="1"/></keybind>
         <keybind key="W-S-2"><action name="SendToDesktop" to="2"/></keybind>
         <keybind key="W-S-3"><action name="SendToDesktop" to="3"/></keybind>
         <keybind key="W-S-4"><action name="SendToDesktop" to="4"/></keybind>
-        <keybind key="W-S-e"><action name="Exit"/></keybind>
+        <keybind key="W-S-5"><action name="SendToDesktop" to="5"/></keybind>
+        <!-- Screenshots: Mod+S region, Mod+Ctrl+S whole output (+ Print alias) -->
+        <keybind key="W-s"><action name="Execute" command="noctalia msg screenshot-region"/></keybind>
+        <keybind key="W-C-s"><action name="Execute" command="noctalia msg screenshot-fullscreen"/></keybind>
+        <keybind key="Print"><action name="Execute" command="noctalia msg screenshot-region"/></keybind>
+        <!-- Screen recording (region; re-press to stop). Mod+Alt+R matches niri's
+             region key; Mod+Shift+R kept as an alias. niri-screenrecord's region
+             branch is compositor-agnostic (slurp + wl-screenrec). -->
+        <keybind key="W-A-r"><action name="Execute" command="niri-screenrecord region"/></keybind>
+        <keybind key="W-S-r"><action name="Execute" command="niri-screenrecord region"/></keybind>
+        <!-- Media / brightness (identical to niri) -->
         <keybind key="XF86_AudioRaiseVolume"><action name="Execute" command="wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"/></keybind>
         <keybind key="XF86_AudioLowerVolume"><action name="Execute" command="wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"/></keybind>
         <keybind key="XF86_AudioMute"><action name="Execute" command="wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"/></keybind>
@@ -449,6 +469,13 @@ in
         gappoh=4
         gappov=4
 
+        # Keys are kept in lockstep with the niri binds above. niri-only actions
+        # with no mango equivalent are intentionally absent:
+        #   Mod+Comma/Period (consume/expel into column), Mod+Minus/Equal (width
+        #   nudge — use Mod+R presets), Mod+P (mirror), Mod+Shift+Slash (hotkey
+        #   overlay), Mod+WheelScroll (workspace). Per-WM natural focus is kept,
+        #   so arrows/hjkl are directional focus here (niri uses Up/Down=workspace).
+
         # Apps
         bind=SUPER,Return,spawn,ghostty
         bind=SUPER,t,spawn,ghostty
@@ -480,11 +507,16 @@ in
         bind=SUPER+SHIFT,j,exchange_client,down
         bind=SUPER+SHIFT,k,exchange_client,up
 
-        # Window state
+        # Window state (aligned with niri)
         bind=SUPER,f,togglemaximizescreen,
         bind=SUPER+SHIFT,f,togglefullscreen,
+        # Mod+Ctrl+Shift+F → windowed/"fake" fullscreen (niri toggle-windowed-fullscreen)
+        bind=SUPER+CTRL+SHIFT,f,togglefakefullscreen,
         bind=SUPER,v,togglefloating,
         bind=SUPER,o,toggleoverview,
+        # Mod+R → cycle preset column widths (niri switch-preset-column-width);
+        # mango's scroller_proportion_preset=0.5,0.8,1.0 mirrors niri's presets.
+        bind=SUPER,r,switch_proportion_preset,
         bind=SUPER,n,switch_layout
 
         # Tags 1-5: view (switch) / tag (move window to)
@@ -499,8 +531,14 @@ in
         bind=SUPER+SHIFT,4,tag,4,0
         bind=SUPER+SHIFT,5,tag,5,0
 
-        # Screenshot (noctalia) + region recording (compositor-agnostic helper)
+        # Screenshots: Mod+S region, Mod+Ctrl+S whole output (Print kept as alias).
+        # niri's Mod+Shift+S (per-window) has no noctalia equivalent — use Mod+S.
+        bind=SUPER,s,spawn,noctalia msg screenshot-region
+        bind=SUPER+CTRL,s,spawn,noctalia msg screenshot-fullscreen
         bind=none,Print,spawn,noctalia msg screenshot-region
+        # Region recording (re-press to stop). Mod+Alt+R matches niri's region key;
+        # Mod+Shift+R kept as alias (niri's Mod+Shift+R focused-output is niri-only).
+        bind=SUPER+ALT,r,spawn,niri-screenrecord region
         bind=SUPER+SHIFT,r,spawn,niri-screenrecord region
 
         # Media / brightness
