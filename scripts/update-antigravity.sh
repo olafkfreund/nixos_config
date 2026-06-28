@@ -78,7 +78,7 @@ PY
 # --- component definitions -------------------------------------------------
 # Each: tracker-key | nix file | url template (uses $V) | tracker hash path
 declare -A FILE URLT HASHKEY
-COMPONENTS=(cli ide sdk)
+COMPONENTS=(cli ide hub sdk)
 
 # URLT[*] carry a literal `__V__` token, replaced with the resolved version
 # below via bash substitution (no eval).
@@ -89,6 +89,10 @@ HASHKEY[cli]='.cli.hashes."x86_64-linux"'
 FILE[ide]="pkgs/antigravity-ide/package.nix"
 URLT[ide]="https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/__V__/linux-x64/Antigravity%20IDE.tar.gz"
 HASHKEY[ide]='.ide.hashes."x86_64-linux"'
+
+FILE[hub]="pkgs/antigravity-hub/default.nix"
+URLT[hub]="https://storage.googleapis.com/antigravity-public/antigravity-hub/__V__/linux-x64/Antigravity.tar.gz"
+HASHKEY[hub]='.hub.hashes."x86_64-linux"'
 
 FILE[sdk]="pkgs/google-antigravity-py/default.nix"
 URLT[sdk]='' # sdk url comes straight from the tracker (PyPI wheel)
@@ -132,10 +136,6 @@ for c in "${COMPONENTS[@]}"; do
   NEWSRI[$c]="$sri"
 done
 echo
-
-# tracker also tracks `hub` (not packaged here) — surface it as info only
-HUB="$(jq -r '.hub.version // empty' <<<"$VJSON")"
-[ -n "$HUB" ] && log "tracker also lists hub=$HUB (not packaged in this repo — ignored)"
 
 if [ "$updates" -eq 0 ]; then
   ok "all packaged antigravity components are current — nothing to do"

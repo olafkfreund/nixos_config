@@ -164,6 +164,8 @@ in
     # Local derivation in pkgs/antigravity-ide/. See pkgs/default.nix
     # for the rationale (upstream antigravity-nix is still on 1.x).
     pkgs.customPkgs.antigravity-ide
+    # Antigravity Hub — Google's Antigravity desktop launcher (`antigravity-hub`).
+    pkgs.customPkgs.antigravity-hub
     pkgs.customPkgs.kosli-cli
     pkgs.customPkgs.aurynk
     pkgs.wayfarer
