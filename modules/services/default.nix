@@ -24,6 +24,9 @@ _: {
     # Network stability modules (service merged into main module)
     ./network-stability.nix
 
+    # HTTPS time-sync fallback for networks that block NTP (UDP 123)
+    ./http-time-fallback.nix
+
     # AI/MCP services
     ./whatsapp-bridge.nix
 
