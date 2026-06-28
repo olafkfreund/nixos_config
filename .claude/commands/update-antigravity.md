@@ -10,18 +10,14 @@ Packaged components (all live under `pkgs/`):
 | Key | Package | Binary / module | Source |
 |---|---|---|---|
 | `cli` | `pkgs/antigravity-cli/default.nix` | `agy` | GCS tarball |
-| `ide` | `pkgs/antigravity-ide/package.nix` | `antigravity-ide` (the desktop app) | edgedl CDN |
+| `ide` | `pkgs/antigravity-ide/package.nix` | `antigravity-ide` (the IDE app) | edgedl CDN |
+| `hub` | `pkgs/antigravity-hub/default.nix` | `antigravity-hub` (desktop launcher) | GCS tarball |
 | `sdk` | `pkgs/google-antigravity-py/default.nix` | `google.antigravity` (Python) | PyPI wheel |
 
 Single source of truth for versions+hashes is the community tracker
 `Hy4ri/antigravity-flake` (`version.json`), which mirrors the official
 auto-updater manifests and carries cli/ide/hub/sdk in one file. The repo has
 referenced this tracker since the 2.1.1 IDE bump (#962).
-
-> The tracker also lists `hub` (antigravity-hub). This repo does **not**
-> package hub — the script reports it as info and ignores it. If hub is ever
-> added under `pkgs/antigravity-hub`, extend the `COMPONENTS` table in
-> `scripts/update-antigravity.sh`.
 
 ## When to use
 
@@ -56,14 +52,15 @@ referenced this tracker since the 2.1.1 IDE bump (#962).
    ```
 
    Rewrites `version` + `url` + `hash` in place for each out-of-date
-   component (cli/ide use the tracker's nix32 hash converted to SRI; sdk uses
-   the tracker's PyPI url + SRI directly). Idempotent — safe to re-run. Does
-   NOT build, commit, or deploy.
+   component (cli/ide/hub use the tracker's nix32 hash converted to SRI; sdk
+   uses the tracker's PyPI url + SRI directly). Idempotent — safe to re-run.
+   Does NOT build, commit, or deploy.
 
 3. **Show the diff.**
 
    ```bash
-   git --no-pager diff -- pkgs/antigravity-cli pkgs/antigravity-ide pkgs/google-antigravity-py
+   git --no-pager diff -- pkgs/antigravity-cli pkgs/antigravity-ide \
+     pkgs/antigravity-hub pkgs/google-antigravity-py
    ```
 
    Sanity check: only `version`, `url`, and `hash` should change. Anything
@@ -77,6 +74,7 @@ referenced this tracker since the 2.1.1 IDE bump (#962).
    nix build --no-link --print-out-paths \
      ".#nixosConfigurations.${HOST}.pkgs.customPkgs.antigravity-cli" \
      ".#nixosConfigurations.${HOST}.pkgs.customPkgs.antigravity-ide" \
+     ".#nixosConfigurations.${HOST}.pkgs.customPkgs.antigravity-hub" \
      ".#nixosConfigurations.${HOST}.pkgs.customPkgs.google-antigravity-py"
    # full closure composes:
    nix build --no-link .#nixosConfigurations.${HOST}.config.system.build.toplevel
@@ -98,7 +96,8 @@ referenced this tracker since the 2.1.1 IDE bump (#962).
 
    ```bash
    git checkout -b chore/antigravity-bump
-   git add pkgs/antigravity-cli pkgs/antigravity-ide pkgs/google-antigravity-py
+   git add pkgs/antigravity-cli pkgs/antigravity-ide pkgs/antigravity-hub \
+     pkgs/google-antigravity-py
    git commit --no-verify -m "chore(antigravity): bump packages to latest"
    git push -u origin chore/antigravity-bump
    gh pr create --fill
@@ -139,7 +138,7 @@ referenced this tracker since the 2.1.1 IDE bump (#962).
 - ❌ Do NOT chain a `switch`/deploy into this command — bump + build only.
 - ❌ Do NOT skip the `--check` early-exit.
 - ❌ Do NOT build/deploy p510 — it doesn't ship Antigravity.
-- ❌ Do NOT hand-edit the three package files when the script can do it —
+- ❌ Do NOT hand-edit the package files when the script can do it —
    keep the blast radius to `pkgs/antigravity-*` + `pkgs/google-antigravity-py`.
 
 ## Related files
@@ -147,8 +146,9 @@ referenced this tracker since the 2.1.1 IDE bump (#962).
 - `scripts/update-antigravity.sh` — the worker this command drives.
 - `pkgs/antigravity-cli/default.nix` — `agy` CLI derivation.
 - `pkgs/antigravity-ide/package.nix` — Electron IDE derivation.
+- `pkgs/antigravity-hub/default.nix` — Electron Hub (desktop launcher) derivation.
 - `pkgs/google-antigravity-py/default.nix` — Python SDK wheel.
-- `pkgs/default.nix` — exposes all three as `customPkgs.*`.
+- `pkgs/default.nix` — exposes all four as `customPkgs.*`.
 - `Users/olafkfreund/profile.nix` — home-manager consumer (p620 + razer).
 
 ## Why this exists

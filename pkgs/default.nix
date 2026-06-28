@@ -55,6 +55,11 @@
   # (URL, layout, binary location, product name). Pinned to 2.0.4-6381998…
   antigravity-ide = pkgs.callPackage ./antigravity-ide/package.nix { };
 
+  # Antigravity Hub — Google's Antigravity desktop launcher (`antigravity-hub`).
+  # Separate product line from the IDE, still on the original GCS bucket.
+  # Version/hash tracked via Hy4ri/antigravity-flake (see /update-antigravity).
+  antigravity-hub = pkgs.callPackage ./antigravity-hub { };
+
   # Antigravity CLI (agy) — Gemini CLI's successor per Google's
   # 2026-05-20 transition. Single Go binary fetched from Google's manifest
   # URL. Replaces the npm-based gemini-cli package we used until #560.
