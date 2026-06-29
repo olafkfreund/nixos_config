@@ -72,6 +72,11 @@
     (ps.callPackage ./google-antigravity-py { })
   ]);
 
+  # GitHub Copilot desktop app — agent-native desktop experience from the
+  # public github/app release repo (Tauri AppImage). Bump via the latest
+  # github/app release tag (see header comment in the derivation).
+  github-copilot-app = pkgs.callPackage ./github-copilot-app { };
+
   # FlyCrys — GTK4-native GUI for Claude Code (Rust). Not in nixpkgs yet;
   # custom buildRustPackage derivation. Wraps the local `claude` binary.
   flycrys = pkgs.callPackage ./flycrys { };
