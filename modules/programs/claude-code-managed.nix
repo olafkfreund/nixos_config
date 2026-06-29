@@ -263,9 +263,51 @@ let
     }];
   };
 
+  # tmux-ccm (Claude Code Monitor) lifecycle hooks, rendered from the package
+  # store path so every rebuild tracks the current ${cfg.tmuxCcm.package}. This
+  # replaces the previously seed-once ~/.claude/settings.json entries that
+  # pinned a /nix/store path which broke after the package was rebuilt + GC'd.
+  ccmHooksDir = "${cfg.tmuxCcm.package}/share/tmux-plugins/tmux-ccm/hooks";
+  mkCcmHook = script: [{
+    hooks = [{ type = "command"; command = "${ccmHooksDir}/${script}"; timeout = 5000; }];
+  }];
+  mkCcmNotify = matcher: {
+    inherit matcher;
+    hooks = [{ type = "command"; command = "${ccmHooksDir}/on-notification.sh"; timeout = 5000; }];
+  };
+  tmuxCcmHooks = lib.optionalAttrs cfg.tmuxCcm.enable {
+    UserPromptSubmit = mkCcmHook "on-prompt-submit.sh";
+    Stop = mkCcmHook "on-stop.sh";
+    StopFailure = mkCcmHook "on-stop.sh";
+    PreToolUse = mkCcmHook "on-pre-tool-use.sh";
+    PostToolUse = mkCcmHook "on-pre-tool-use.sh";
+    PostToolUseFailure = mkCcmHook "on-pre-tool-use.sh";
+    SubagentStart = mkCcmHook "on-pre-tool-use.sh";
+    SubagentStop = mkCcmHook "on-pre-tool-use.sh";
+    PreCompact = mkCcmHook "on-pre-tool-use.sh";
+    PostCompact = mkCcmHook "on-pre-tool-use.sh";
+    PermissionRequest = mkCcmHook "on-permission-request.sh";
+    PermissionDenied = mkCcmHook "on-permission-denied.sh";
+    Notification = [
+      (mkCcmNotify "permission_prompt")
+      (mkCcmNotify "idle_prompt")
+      (mkCcmNotify "elicitation_dialog")
+    ];
+    SessionEnd = mkCcmHook "on-session-end.sh";
+  };
+
   mergedSettings =
     (cfg.settings // {
-      hooks = (cfg.settings.hooks or { }) // parrHooks // notifyHooks // formatHooks;
+      # Per-event list concatenation (NOT shallow //) so hook sets that share
+      # an event — e.g. tmux-ccm + parr on UserPromptSubmit, tmux-ccm + notify
+      # on Stop/Notification — all survive instead of clobbering each other.
+      hooks = lib.zipAttrsWith (_event: lib.concatLists) [
+        (cfg.settings.hooks or { })
+        parrHooks
+        notifyHooks
+        formatHooks
+        tmuxCcmHooks
+      ];
     })
     // lib.optionalAttrs (baselineAllow != [ ]) {
       permissions = (cfg.settings.permissions or { }) // {
@@ -329,6 +371,28 @@ in
         files commit-clean automatically. No-ops on non-.nix paths and never
         fails the tool.
       '';
+    };
+
+    tmuxCcm = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Render the tmux-ccm (Claude Code Monitor) lifecycle hooks into
+          managed scope, pointing at the package's hook scripts in the nix
+          store. Replaces the legacy seed-once ~/.claude/settings.json entries
+          that pinned a stale /nix/store path (broke after rebuild + GC).
+          Defaults on because every host enabling this module previously had
+          these hooks; set false per-host to opt out.
+        '';
+      };
+
+      package = lib.mkOption {
+        type = lib.types.package;
+        default = pkgs.customPkgs.tmux-ccm;
+        defaultText = lib.literalExpression "pkgs.customPkgs.tmux-ccm";
+        description = "The tmux-ccm package providing share/tmux-plugins/tmux-ccm/hooks/*.sh.";
+      };
     };
 
     # Notification submodule — surfaces Claude Code lifecycle events as
