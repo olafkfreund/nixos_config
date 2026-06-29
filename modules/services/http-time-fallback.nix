@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 let
-  inherit (lib) mkEnableOption mkOption mkIf types concatStringsSep escapeShellArgs;
+  inherit (lib) mkEnableOption mkOption mkIf types escapeShellArgs;
   cfg = config.services.httpTimeFallback;
 
   syncScript = pkgs.writeShellScript "http-time-fallback" ''
