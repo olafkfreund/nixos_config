@@ -166,6 +166,8 @@ in
     pkgs.customPkgs.antigravity-ide
     # Antigravity Hub — Google's Antigravity desktop launcher (`antigravity-hub`).
     pkgs.customPkgs.antigravity-hub
+    # GitHub Copilot desktop app — agent-native desktop experience (Tauri).
+    pkgs.customPkgs.github-copilot-app
     pkgs.customPkgs.kosli-cli
     pkgs.customPkgs.aurynk
     pkgs.wayfarer
