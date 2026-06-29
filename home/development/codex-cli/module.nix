@@ -9,18 +9,6 @@ let
   # OpenAI rewrote codex in Rust mid-2025 and nixpkgs tracks it, so we
   # just consume that and stop maintaining our own packaging.
   codex-cli = pkgs.codex;
-
-  # Note: Configuration template available but using inline generation instead
-  # configFile = pkgs.writeText "codex-config.json" (builtins.toJSON {
-  #   model = cfg.defaultModel;
-  #   temperature = cfg.temperature;
-  #   max_tokens = cfg.maxTokens;
-  #   timeout = cfg.timeout;
-  #   auto_save = cfg.autoSave;
-  #   syntax_highlighting = cfg.syntaxHighlighting;
-  #   interactive_mode = cfg.interactiveMode;
-  # });
-
 in
 {
   options.programs.codex-cli = {
@@ -30,49 +18,6 @@ in
       type = types.package;
       default = codex-cli;
       description = "The codex-cli package to use";
-    };
-
-    defaultModel = mkOption {
-      type = types.str;
-      default = "gpt-4";
-      description = "Default model to use for code generation";
-      example = "gpt-3.5-turbo";
-    };
-
-    temperature = mkOption {
-      type = types.float;
-      default = 0.1;
-      description = "Temperature setting for code generation (0.0-1.0)";
-    };
-
-    maxTokens = mkOption {
-      type = types.int;
-      default = 2048;
-      description = "Maximum tokens per response";
-    };
-
-    timeout = mkOption {
-      type = types.int;
-      default = 30;
-      description = "Request timeout in seconds";
-    };
-
-    autoSave = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Automatically save generated code";
-    };
-
-    syntaxHighlighting = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Enable syntax highlighting in output";
-    };
-
-    interactiveMode = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Enable interactive mode by default";
     };
 
     apiKeyFile = mkOption {
@@ -91,16 +36,6 @@ in
         openai-codex = "codex";
       };
       description = "Shell aliases for codex";
-    };
-
-    extraConfig = mkOption {
-      type = types.attrs;
-      default = { };
-      description = "Additional configuration options";
-      example = {
-        editor = "nvim";
-        project_templates = true;
-      };
     };
   };
 
@@ -160,7 +95,9 @@ in
               echo "Query: $query"
             } > "$context_file"
 
-            "$CODEX_BIN" --context-file "$context_file" "$query"
+            # Rust codex has no --context-file; it appends piped stdin to the
+            # prompt as a <stdin> block. Feed the gathered context that way.
+            "$CODEX_BIN" exec "$query" < "$context_file"
             rm "$context_file"
           }
 
@@ -191,20 +128,11 @@ in
       sessionPath = [ "$HOME/.local/bin" ];
     };
 
-    # Create configuration directory and file
-    xdg.configFile."codex/config.json" = {
-      source = pkgs.writeText "codex-config.json" (builtins.toJSON (
-        {
-          model = cfg.defaultModel;
-          inherit (cfg) temperature;
-          max_tokens = cfg.maxTokens;
-          inherit (cfg) timeout;
-          auto_save = cfg.autoSave;
-          syntax_highlighting = cfg.syntaxHighlighting;
-          interactive_mode = cfg.interactiveMode;
-        } // cfg.extraConfig
-      ));
-    };
+    # NOTE: codex (the Rust CLI) self-manages its config + state under
+    # $CODEX_HOME (~/.codex/config.toml), which it writes itself (personality,
+    # per-project trust_level, sessions, auth.json). We deliberately do NOT
+    # generate a config file here — the old ~/.config/codex/config.json was
+    # silently ignored by this codex. Settings belong in ~/.codex/config.toml.
 
     # Shell aliases
     programs = {

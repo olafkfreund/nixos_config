@@ -402,9 +402,6 @@
             inherit (pkgs) lib buildNpmPackage fetchurl nodejs makeWrapper writeShellScriptBin;
           };
           claude-code-native = pkgs.callPackage ./pkgs/claude-code-native { };
-          codex-cli = pkgs.callPackage ./home/development/codex-cli {
-            inherit (pkgs) nodejs_24;
-          };
           glim = pkgs.callPackage ./overlays/glim { };
           intune-portal = pkgs.callPackage ./pkgs/intune-portal { };
           kosli-cli = pkgs.callPackage ./pkgs/kosli-cli { };
