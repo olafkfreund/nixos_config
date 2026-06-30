@@ -616,6 +616,7 @@ in
       "libsoup-2.74.3" # Temporary: Required by some GNOME packages until migration to libsoup-3
       "electron-35.7.5" # Temporary: Required until upstream packages migrate to newer electron
       "electron-39.8.10" # Newly marked EOL after nixpkgs bump on 2026-06-01 — still pulled in by some upstream package, audit + drop later
+      "pnpm-10.29.2" # Newly marked insecure after nixpkgs bump on 2026-06-30 — pulled in by dev package set (modules/packages/sets.nix), audit + drop later
     ];
   };
   system.stateVersion = "25.11";
