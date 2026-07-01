@@ -110,29 +110,10 @@
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
     zjstatus.url = "github:dj95/zjstatus";
-    # = tag v2.0.16+claude1.9255.2, commit 5dd948e9 (2026-05-28).
-    # Claude binary bump 1.9255.0 -> 1.9255.2. Picks up:
-    #   - #660 capture $-prefixed minified names in cowork spawn guard
-    #     (refinement to cowork patch from v2.0.15)
-    # Carries forward from v2.0.15:
-    #   - #657 anchor tray-var extraction on .Tray() literal
-    #   - #650 filter .asar paths from --add-dir dispatch + session restore
-    # Known caveat carried in: #605 (Electron holds systemd-inhibit
-    # forever, blocking suspend while app runs). Razer-relevant.
-    # Workaround: close claude-desktop entirely to release inhibitor,
-    # or set CLAUDE_KEEP_AWAKE=0 (#645).
-    # Bump via /update-claude-code.
-    # = tag v2.0.22+claude1.15200.0 (commit cdf934a061, 2026-06-25)
-    # Delta from previous pin (v2.0.19+claude1.11847.5): cowork renderer
-    # support-gate fix (#743) and upstream tracking up to Claude Desktop
-    # 1.15200.0.
-    # NOTE: pin to the latest *release* tag, NOT main HEAD — historically main
-    # can fail to build (e.g. upstream issue #718). Bump via /update-claude-code.
-    # Known open upstream runtime bugs at this pin (UI-only, not build blockers):
-    # menu-bar icon glitch on 1.15200.0 (#746), launcher.log O(n²) hang on large
-    # logs (#726/#747). We consume upstream's claude-desktop-fhs as-is (no local
-    # patch); node-pty/asar handling lives in upstream build.sh.
-    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/cdf934a06185f7f6564606071044139760cae090";
+    # NOTE: Claude Desktop is no longer a flake input — as of #986 we package
+    # Anthropic's OFFICIAL Linux beta .deb ourselves (pkgs/claude-desktop-beta,
+    # exposed via overlays/default.nix as pkgs.claude-desktop-linux). The old
+    # aaddrick/claude-desktop-debian Windows-repackage input was removed.
 
     # GogMail — keyboard-driven Google Workspace TUI (Gmail/Calendar/Tasks/
     # Drive/Contacts/Chat) built on the gog CLI. Consumed via overlays as
