@@ -141,9 +141,13 @@ stdenv.mkDerivation {
 
     # Wrapper: Wayland-aware ozone, GApps/GTK env (gappsWrapperArgs), and PATH
     # for the Cowork helper's subprocesses (qemu/virtiofsd/ovmf/bwrap).
+    # --password-store=gnome-libsecret: Electron picks its secret backend from
+    # XDG_CURRENT_DESKTOP; under non-GNOME/KDE compositors (niri/labwc/mango)
+    # it falls back to the plaintext "basic" store and reports "sign-in won't
+    # be saved". Force libsecret so it uses the (unlocked) gnome-keyring.
     makeWrapper $out/lib/claude-desktop/claude-desktop $out/bin/claude-desktop \
       "''${gappsWrapperArgs[@]}" \
-      --add-flags "--ozone-platform-hint=auto" \
+      --add-flags "--ozone-platform-hint=auto --password-store=gnome-libsecret" \
       --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath runtimeLibs}" \
       --prefix PATH : "${lib.makeBinPath [ qemu_kvm virtiofsd bubblewrap ]}" \
       --set-default OVMF_PATH "${OVMF.fd}/FV"
