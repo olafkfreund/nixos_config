@@ -14,6 +14,16 @@ let inherit (lib) mkDefault; in {
     # (nixpkgs#451). The vim package is still in environment.systemPackages
     # via modules/nixos/packages/core.nix for sudo / root / other users.
     packages = with pkgs; [ wally-cli ];
+
+    # SSH keys authorized to log in as this user across the fleet.
+    # odin-dashboard@factory: the Odin homelab portal pod (k3s/factory ns)
+    # SSHes into p510/p620/razer to collect host metrics. Without this key
+    # authorized, sshd PerSourcePenalties penalises the pod's repeated auth
+    # failures and drops its connections ("Not allowed at this time"),
+    # making every host render OFFLINE in the dashboard.
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAXf9GfUzBSKmfIQcDmaEcG3rmorOzGSOFXqMbHvlWSH odin-dashboard@factory"
+    ];
   };
 
   # Common shell setup
