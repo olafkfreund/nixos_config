@@ -46,6 +46,9 @@
   # Reddit TUI client
   reddix = pkgs.callPackage ./reddix { };
 
+  # GitLab TUI — terminal UI on top of the `glab` CLI (rcieri/glab-tui).
+  glab-tui = pkgs.callPackage ./glab-tui { };
+
   # Claude Code native binary (alternative to npm-based package)
   claude-code-native = pkgs.callPackage ./claude-code-native { };
 
