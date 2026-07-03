@@ -517,7 +517,9 @@ rollback_and_close_pr() {
 case "$MODE" in
   local)
     log "nh os switch --hostname ${HOST} .  (local target, local build)"
-    if ! nh_switch_or_boot --hostname "$HOST" .; then
+    # -d always: force nh's native package+version diff (correct baseline for
+    # local — compares this host's current-system vs the new closure).
+    if ! nh_switch_or_boot --diff always --hostname "$HOST" .; then
       rollback_and_close_pr "local nh os switch failed (see output above)"
     fi
     ;;
@@ -525,15 +527,23 @@ case "$MODE" in
     # For remote targets, --target-host routes the activation over SSH.
     # Build happens on this machine, closure ships via SSH.
     log "nh os switch --hostname ${HOST} --target-host ${HOST} .  (remote target, local build)"
-    if ! nh_switch_or_boot --hostname "$HOST" --target-host "$HOST" .; then
+    # -d never: nh's remote diff compares the LOCAL system against the remote
+    # closure (wrong baseline — shows this host's packages as removed). Suppress
+    # it; the correct remote diff (target-old vs target-new) is done by nvd in
+    # show_pkg_diff below.
+    if ! nh_switch_or_boot --diff never --hostname "$HOST" --target-host "$HOST" .; then
       rollback_and_close_pr "remote nh os switch on ${HOST} failed (see output above)"
     fi
     ;;
 esac
 
 # --- 10d. Package diff: what was installed / upgraded / removed ------------
-# Explicit nvd report (works local AND remote, unlike nh's auto diff).
-show_pkg_diff "$current" "$expected"
+# LOCAL deploys already got nh's native diff (-d always above). For REMOTE,
+# nh's diff is suppressed (wrong baseline), so produce the correct one here:
+# nvd on the TARGET, comparing its old generation ($current) vs the new closure.
+if [ "$MODE" = "remote" ]; then
+  show_pkg_diff "$current" "$expected"
+fi
 
 # --- 11. Post-deploy health check -----------------------------------------
 #
