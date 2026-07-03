@@ -620,6 +620,19 @@ in
         nhsb() {
           (cd ~/.config/nixos && just update-commit "$@")
         }
+
+        # sysdiff: show what the last NixOS update changed — Added / Removed /
+        # Upgraded packages between the two most recent system generations
+        # (nvd-backed; works local AND remote, unlike nh's built-in diff which
+        # is version-level only and skips remote --target-host deploys).
+        #
+        # Usage:
+        #   sysdiff                # this host, last two generations
+        #   sysdiff razer          # remote host over SSH
+        #   sysdiff razer 40 41    # explicit generation numbers
+        sysdiff() {
+          (cd ~/.config/nixos && ./scripts/system-diff.sh "$@")
+        }
       '';
 
       # oh-my-zsh removed (2026-06): it added ~500ms startup and its plugins were

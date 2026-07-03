@@ -401,6 +401,35 @@ nh_switch_or_boot() {
   return "$rc"
 }
 
+# Print an explicit Added / Removed / Upgraded package report via nvd.
+#
+# nh's own `--diff` is `auto`: it prints a version-level table for LOCAL
+# switches but SKIPS it entirely for remote (--target-host) deploys, and it
+# only lists name-version changes (a nixpkgs-unchanged lock bump shows just a
+# size delta). We want a reliable "what was installed / upgraded / removed"
+# view on EVERY deploy — so diff the pre-switch generation ($1) against the new
+# closure ($2) with nvd directly. Both paths exist on the target after the
+# switch (nh --target-host copies the closure across), and nvd ships in every
+# host's system closure.
+show_pkg_diff() {
+  local old="$1" new="$2"
+  if [ -z "$old" ]; then
+    warn "no previous generation captured — skipping package diff (first-time deploy?)"
+    return 0
+  fi
+  if [ "$old" = "$new" ]; then
+    log "package diff: closure unchanged (nothing added / removed / upgraded)."
+    return 0
+  fi
+  log "package changes on ${HOST} (nvd — added / removed / upgraded):"
+  printf '\033[2m%s\033[0m\n' "------------------------------------------------------------"
+  case "$MODE" in
+    local) nvd diff "$old" "$new" || warn "nvd diff failed (non-fatal)" ;;
+    remote) ssh "$HOST" "nvd diff '$old' '$new'" || warn "remote nvd diff failed (non-fatal)" ;;
+  esac
+  printf '\033[2m%s\033[0m\n' "------------------------------------------------------------"
+}
+
 # --no-deploy: build is done, lock is on a feature branch + PR is OPEN but
 # UNMERGED (since merge is gated on the post-deploy health check that we're
 # now skipping). Tell the user. The cached closure means stage 2 — the
@@ -501,6 +530,10 @@ case "$MODE" in
     fi
     ;;
 esac
+
+# --- 10d. Package diff: what was installed / upgraded / removed ------------
+# Explicit nvd report (works local AND remote, unlike nh's auto diff).
+show_pkg_diff "$current" "$expected"
 
 # --- 11. Post-deploy health check -----------------------------------------
 #

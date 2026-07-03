@@ -55,6 +55,15 @@ preview-updates HOST="$(hostname)":
     @echo "🔍 Previewing updates for {{HOST}}..."
     ./scripts/preview-updates.sh {{HOST}}
 
+# Show what the LAST update changed: Added / Removed / Upgraded packages
+# between the two most recent system generations (nvd-backed; local or remote).
+# Complements nh's built-in diff, which is version-level only and skips remote
+# --target-host deploys.
+#   just system-diff            # this host, last two generations
+#   just system-diff razer      # remote host over SSH
+system-diff HOST="-":
+    ./scripts/system-diff.sh {{HOST}}
+
 # Find newly added packages in nixpkgs
 new-packages:
     @echo "🆕 Finding new packages in nixpkgs..."
