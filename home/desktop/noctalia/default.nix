@@ -86,7 +86,10 @@ in
       theme = {
         mode = "dark";
         source = "custom";
-        custom_palette = "Gruvbox";
+        # mkForce: noctalia's HM module (>= 2026-07-04) now defaults
+        # custom_palette to "stylix" at normal priority; force our custom
+        # Gruvbox palette (palettes/Gruvbox.json below) to win the conflict.
+        custom_palette = lib.mkForce "Gruvbox";
       };
     };
   };
