@@ -10,7 +10,12 @@
 # Upstream ships no LICENSE ("built for personal use") — treated as unfree.
 rustPlatform.buildRustPackage rec {
   pname = "glab-tui";
-  version = "2.3.0";
+  # Upstream reset its git tags: the old `v2.3.0` tag was deleted and the same
+  # commit re-published as `v0.4.0` (identical source tree, so the src hash and
+  # cargoHash below are unchanged). The in-tree Cargo.toml still reads 2.3.0,
+  # but we track the git release tag here. Bump against the tags list:
+  #   gh api repos/rcieri/glab-tui/tags --jq '.[].name'
+  version = "0.4.0";
 
   src = fetchFromGitHub {
     owner = "rcieri";
