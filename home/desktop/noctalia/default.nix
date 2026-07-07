@@ -229,21 +229,38 @@ in
     }
   ];
 
-  # ── DankMaterialShell niri session ──────────────────────────────────────────
-  # A SEPARATE niri config used only by the "Niri (DankMaterialShell)" login
-  # session (modules/desktop/dms-shell.nix points niri at it via NIRI_CONFIG).
-  # It shares niri's base with the Noctalia config but its shell keybinds call
-  # `dms ipc …` instead of `noctalia msg …`, and it pulls in DMS's own theming
-  # fragments (dms/*.kdl, written at runtime by `dms setup` into ~/.config/niri/
-  # dms/). optional=true so a missing fragment only warns. The read-only store
-  # path means DMS never has to edit it — fixing the "binds.kdl not included /
-  # permission denied" error. Keybinds here are intentionally distinct from the
-  # Noctalia session's.
-  xdg.configFile."niri/config-dms.kdl".text = ''
-    include optional=true "${config.home.homeDirectory}/.config/niri/dms/colors.kdl"
-    include optional=true "${config.home.homeDirectory}/.config/niri/dms/layout.kdl"
-    include optional=true "${config.home.homeDirectory}/.config/niri/dms/alttab.kdl"
-    include optional=true "${config.home.homeDirectory}/.config/niri/dms/wpblur.kdl"
+  # ── Session config split: DMS owns config.kdl, Noctalia moves aside ─────────
+  # DankMaterialShell hardcodes ~/.config/niri/config.kdl as the file it inspects
+  # (via `dms config resolve-include`) and rewrites (its "Fix Now" buttons), and
+  # it IGNORES NIRI_CONFIG. So for DMS's include checks to pass — and for its
+  # display / window-rule / cursor / keybind changes to actually persist —
+  # config.kdl must BE the DMS session's config, carrying the dms/*.kdl includes
+  # DMS greps for. We therefore retarget niri-flake's generated Noctalia config to
+  # config-noctalia.kdl (the plain "Niri" session loads it via NIRI_CONFIG — see
+  # modules/desktop/dms-shell.nix) and hand-write config.kdl as the DMS session's
+  # config below. The two sessions then share NO niri settings: Noctalia never
+  # sees dms/*.kdl and DMS never sees the Noctalia keybinds.
+  xdg.configFile.niri-config.target = lib.mkForce "niri/config-noctalia.kdl";
+
+  # config.kdl — the "Niri (DankMaterialShell)" session's config (dms-shell.nix
+  # points that session here; it is also niri's default path, which is exactly
+  # what DMS greps). Includes use niri's RELATIVE form `include "dms/…"`: current
+  # niri resolves these against the config file's own directory (~/.config/niri),
+  # so the store-symlinked config.kdl still finds the runtime dms/*.kdl fragments,
+  # and the relative string is what DMS's resolve-include matches — clearing the
+  # "… not included" banners. optional=true keeps niri happy before `dms setup`
+  # has written a given fragment. The includes sit ABOVE the inline binds{} block,
+  # so on any keybind conflict the inline scheme wins — keeping these keybinds
+  # distinct from (and never leaking into) the Noctalia session.
+  xdg.configFile."niri/config.kdl".text = ''
+    include optional=true "dms/colors.kdl"
+    include optional=true "dms/layout.kdl"
+    include optional=true "dms/alttab.kdl"
+    include optional=true "dms/wpblur.kdl"
+    include optional=true "dms/outputs.kdl"
+    include optional=true "dms/windowrules.kdl"
+    include optional=true "dms/cursor.kdl"
+    include optional=true "dms/binds.kdl"
 
     input {
         keyboard {
@@ -259,6 +276,10 @@ in
         "NIXOS_OZONE_WL" "1"
         "ELECTRON_OZONE_PLATFORM_HINT" "auto"
         "GSETTINGS_SCHEMA_DIR" "${gtkSchemas}"
+        // DMS only recognises "gtk3"/"qt6ct" here (not the system-wide "qtct"),
+        // so set qt6ct for this session — qt6ct-kde is installed, so Qt apps keep
+        // their existing theming and DMS's "Missing Environment Variables" clears.
+        "QT_QPA_PLATFORMTHEME" "qt6ct"
     }
 
     binds {

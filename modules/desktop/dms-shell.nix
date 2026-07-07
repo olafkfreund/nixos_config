@@ -1,27 +1,29 @@
 { config, lib, pkgs, ... }:
 # DankMaterialShell (DMS) as extra selectable login sessions, one per WM we run
-# (niri, labwc, mango), alongside the stock Noctalia sessions. Each compositor's
-# shell launch reads ${DESK_SHELL:-noctalia}: the stock session leaves it unset
-# → Noctalia; the "(DankMaterialShell)" session sets it → DMS. Only one shell
-# ever runs per session, so Noctalia and DMS never collide.
+# (niri, labwc, mango), alongside the stock Noctalia sessions.
 #
-# niri has systemd session integration (graphical-session.target + env import),
-# so its DMS session prefers the managed dms.service (doctor-clean, restart on
-# failure, journald logs) and only falls back to a direct `dms run` spawn if the
-# service can't start. labwc/mango launch bare (no systemd session), so their
-# DMS sessions run `dms run` directly — a fully supported DMS launch mode.
+# niri session split (see home/desktop/noctalia): DMS hardcodes niri's default
+# ~/.config/niri/config.kdl as the file it inspects/edits and ignores NIRI_CONFIG,
+# so config.kdl IS the DMS session's config (carrying the dms/*.kdl includes), and
+# the Noctalia config is moved to config-noctalia.kdl. Each niri launcher selects
+# its file via NIRI_CONFIG. We also shadow niri-flake's stock niri.desktop with a
+# hiPrio "Niri" session so the plain "Niri" entry keeps loading the Noctalia config
+# rather than the DMS config.kdl.
 #
-# Pairs with the ${DESK_SHELL:-noctalia} switch in home/desktop/noctalia
-# (niri spawn-at-startup, labwc autostart, mango autostart_sh).
+# labwc/mango have no systemd session and no per-file config split here; their DMS
+# entries just set DESK_SHELL="dms run" (the ${DESK_SHELL:-noctalia} switch in
+# home/desktop/noctalia's labwc autostart / mango autostart_sh) so DMS launches
+# instead of Noctalia. `dms run` is a fully supported DMS launch mode.
 let
-  inherit (lib) mkEnableOption mkIf optional;
+  inherit (lib) mkEnableOption mkIf optional hiPrio;
   cfg = config.desktop.dmsShell;
 
-  # niri: point at the dedicated DMS niri config (home/desktop/noctalia writes
-  # ~/.config/niri/config-dms.kdl) — its own keybinds (distinct from Noctalia),
-  # DMS theming includes, and a service-first `dms` spawn.
-  niriLauncher = pkgs.writeShellScript "niri-dms-session" ''
-    export NIRI_CONFIG="$HOME/.config/niri/config-dms.kdl"
+  niriDmsLauncher = pkgs.writeShellScript "niri-dms-session" ''
+    export NIRI_CONFIG="$HOME/.config/niri/config.kdl"
+    exec niri-session
+  '';
+  niriNoctaliaLauncher = pkgs.writeShellScript "niri-noctalia-session" ''
+    export NIRI_CONFIG="$HOME/.config/niri/config-noctalia.kdl"
     exec niri-session
   '';
   labwcLauncher = pkgs.writeShellScript "labwc-dms-session" ''
@@ -35,23 +37,29 @@ let
 
   # services.displayManager.sessionPackages requires passthru.providedSessions to
   # match the .desktop basename.
-  mkDmsSession = { name, label, exec }:
+  mkSession = { name, label, comment, exec }:
     (pkgs.writeTextFile {
       name = "${name}-wayland-session";
       destination = "/share/wayland-sessions/${name}.desktop";
       text = ''
         [Desktop Entry]
         Name=${label}
-        Comment=${label} with the DankMaterialShell desktop shell
+        Comment=${comment}
         Exec=${exec}
         Type=Application
         DesktopNames=${name}
       '';
     }).overrideAttrs (_: { passthru.providedSessions = [ name ]; });
 
-  niriDmsSession = mkDmsSession { name = "niri-dms"; label = "Niri (DankMaterialShell)"; exec = "${niriLauncher}"; };
-  labwcDmsSession = mkDmsSession { name = "labwc-dms"; label = "labwc (DankMaterialShell)"; exec = "${labwcLauncher}"; };
-  mangoDmsSession = mkDmsSession { name = "mango-dms"; label = "mango (DankMaterialShell)"; exec = "${mangoLauncher}"; };
+  niriDmsSession = mkSession { name = "niri-dms"; label = "Niri (DankMaterialShell)"; comment = "Niri with the DankMaterialShell desktop shell"; exec = "${niriDmsLauncher}"; };
+  labwcDmsSession = mkSession { name = "labwc-dms"; label = "labwc (DankMaterialShell)"; comment = "labwc with the DankMaterialShell desktop shell"; exec = "${labwcLauncher}"; };
+  mangoDmsSession = mkSession { name = "mango-dms"; label = "mango (DankMaterialShell)"; comment = "mango with the DankMaterialShell desktop shell"; exec = "${mangoLauncher}"; };
+
+  # Shadow niri-flake's stock niri.desktop (which runs niri-session against the
+  # default config.kdl — now the DMS config) so the plain "Niri" session stays
+  # Noctalia, loading config-noctalia.kdl. hiPrio wins the wayland-sessions/
+  # niri.desktop buildEnv collision with the niri package's own entry.
+  niriNoctaliaSession = mkSession { name = "niri"; label = "Niri"; comment = "Niri scrollable-tiling compositor with the Noctalia shell"; exec = "${niriNoctaliaLauncher}"; };
 
   dmsSessions =
     [ niriDmsSession ]
@@ -65,7 +73,7 @@ in
   config = mkIf cfg.enable {
     programs.dms-shell = {
       enable = true;
-      # The unit ships with the package (linked); niri's DMS session starts it on
+      # The unit ships with the package (linked); the DMS niri session starts it on
       # demand. NOT wantedBy graphical-session.target (systemd.enable = false) so
       # it never auto-starts inside the Noctalia session.
       systemd.enable = false;
@@ -74,13 +82,13 @@ in
       enableDynamicTheming = false;
     };
 
-    # Add a "(DankMaterialShell)" entry per enabled WM. The stock niri/labwc/mango
-    # entries stay as the Noctalia sessions. These packages must also be in
-    # environment.systemPackages so their share/wayland-sessions/*.desktop files
-    # land in /run/current-system/sw/share/wayland-sessions, where greetd greeters
+    # DMS sessions + the Noctalia shadow of niri.desktop. sessionPackages registers
+    # the DMS entries; environment.systemPackages lands every .desktop in
+    # /run/current-system/sw/share/wayland-sessions, where greetd greeters
     # (dms-greeter / noctalia-greeter) actually look — sessionPackages alone does
-    # not populate that dir on NixOS.
+    # not populate that dir on NixOS. The niri shadow uses hiPrio so it wins the
+    # collision with niri-flake's stock niri.desktop in that dir.
     services.displayManager.sessionPackages = dmsSessions;
-    environment.systemPackages = dmsSessions;
+    environment.systemPackages = dmsSessions ++ [ (hiPrio niriNoctaliaSession) ];
   };
 }
