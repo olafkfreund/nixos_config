@@ -335,6 +335,10 @@ in
   desktop.labwc.enable = true;
   desktop.mangowm.enable = true;
 
+  # Adds a "Niri (DankMaterialShell)" login session next to the stock "Niri"
+  # (Noctalia) one — pick per login in the greeter. Trial on razer only.
+  desktop.dmsShell.enable = true;
+
   # ddcutil: software brightness/contrast control of external monitors (DDC/CI).
   modules.hardware.ddcutil.enable = true;
 

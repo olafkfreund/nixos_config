@@ -205,7 +205,10 @@ in
   # session env). swayidle works on niri (ext-idle-notify-v1): lock at 5 min,
   # monitors off at 10 min, and — laptops only — suspend at 30 min.
   programs.niri.settings.spawn-at-startup = lib.mkAfter [
-    { command = [ "noctalia" ]; }
+    # Which shell launches is chosen by the login session: the stock "Niri"
+    # session leaves DESK_SHELL unset → Noctalia; the "Niri (DankMaterialShell)"
+    # session (modules/desktop/dms-shell.nix) sets DESK_SHELL="dms run" → DMS.
+    { command = [ "sh" "-c" "exec \${DESK_SHELL:-noctalia}" ]; }
     { command = [ "swaybg" "-m" "fill" "-i" "${wallpaper}" ]; }
     { command = [ "gammastep" "-l" geo ]; }
     {
