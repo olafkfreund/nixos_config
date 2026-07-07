@@ -138,7 +138,7 @@ in
       inherit (cfg) host;
       port = 11434;
       loadModels = cfg.persistentModels ++ cfg.onDemandModels;
-      models = lib.mkIf (cfg.modelsDir != null) cfg.modelsDir;
+      modelsDir = lib.mkIf (cfg.modelsDir != null) cfg.modelsDir;
       environmentVariables = {
         # Required for RX 7900 XTX (gfx1100) ROCm — also set globally in
         # hosts/p620/nixos/amd.nix, restated here for unit-local clarity.
