@@ -313,21 +313,18 @@ in
   # first (see comment on `gnome.gnome-remote-desktop` below). p510 enables
   # autoLogin because p510 is pure NVIDIA without PRIME — greeter respawn
   # works there; not here.
-  # Login manager: Noctalia greeter (greetd). backend="none" turns GDM off; the
-  # noctalia-greeter module below auto-enables greetd + its bundled wlroots
-  # compositor — which sidesteps GDM's broken greeter-respawn on this Optimus
-  # PRIME-sync NVIDIA hardware (see note above). niri already runs wlroots fine
-  # here, so the greeter's compositor does too. GNOME/niri/labwc stay selectable.
+  # Login manager: DankMaterialShell greeter (greetd). backend="none" turns GDM
+  # off; the dms-greeter module auto-enables greetd and runs the greeter inside
+  # a niri compositor — which sidesteps GDM's broken greeter-respawn on this
+  # Optimus PRIME-sync NVIDIA hardware (see note above). Chosen over
+  # noctalia-greeter (more mature); it enumerates the same wayland-sessions, so
+  # GNOME/niri/niri-dms/labwc/labwc-dms/mango/mango-dms all stay selectable.
+  # noctalia-greeter input is kept available for an easy revert.
   desktop.displayManager.backend = "none";
 
-  programs.noctalia-greeter = {
+  services.displayManager.dms-greeter = {
     enable = true;
-    package = inputs.noctalia-greeter.packages.${pkgs.system}.default;
-    settings.cursor = {
-      theme = config.stylix.cursor.name;
-      size = config.stylix.cursor.size;
-      package = config.stylix.cursor.package;
-    };
+    compositor.name = "niri";
   };
 
   # Phase 1: niri + labwc + mango as selectable login sessions (alongside GNOME).
