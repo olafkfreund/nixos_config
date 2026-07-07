@@ -52,6 +52,11 @@ let
   niriDmsSession = mkDmsSession { name = "niri-dms"; label = "Niri (DankMaterialShell)"; exec = "${niriLauncher}"; };
   labwcDmsSession = mkDmsSession { name = "labwc-dms"; label = "labwc (DankMaterialShell)"; exec = "${labwcLauncher}"; };
   mangoDmsSession = mkDmsSession { name = "mango-dms"; label = "mango (DankMaterialShell)"; exec = "${mangoLauncher}"; };
+
+  dmsSessions =
+    [ niriDmsSession ]
+    ++ optional config.desktop.labwc.enable labwcDmsSession
+    ++ optional config.desktop.mangowm.enable mangoDmsSession;
 in
 {
   options.desktop.dmsShell.enable =
@@ -70,10 +75,12 @@ in
     };
 
     # Add a "(DankMaterialShell)" entry per enabled WM. The stock niri/labwc/mango
-    # entries stay as the Noctalia sessions.
-    services.displayManager.sessionPackages =
-      [ niriDmsSession ]
-      ++ optional config.desktop.labwc.enable labwcDmsSession
-      ++ optional config.desktop.mangowm.enable mangoDmsSession;
+    # entries stay as the Noctalia sessions. These packages must also be in
+    # environment.systemPackages so their share/wayland-sessions/*.desktop files
+    # land in /run/current-system/sw/share/wayland-sessions, where greetd greeters
+    # (dms-greeter / noctalia-greeter) actually look — sessionPackages alone does
+    # not populate that dir on NixOS.
+    services.displayManager.sessionPackages = dmsSessions;
+    environment.systemPackages = dmsSessions;
   };
 }
