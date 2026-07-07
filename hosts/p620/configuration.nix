@@ -367,26 +367,30 @@ in
   # cosmic module; the unified DM module defaults to "none" without it).
   # NOTE: must live at top-level, NOT inside the features = {...} block above —
   # the option path is `desktop.displayManager`, not `features.desktop.displayManager`.
-  # Login manager: Noctalia greeter (greetd). backend="none" turns GDM off; the
-  # noctalia-greeter module below auto-enables greetd + its bundled wlroots
-  # compositor. GNOME/niri/labwc remain selectable SESSIONS in the greeter.
+  # Login manager: DankMaterialShell greeter (greetd). backend="none" turns GDM
+  # off; the dms-greeter module auto-enables greetd and runs the greeter inside
+  # a niri compositor. Chosen over noctalia-greeter (more mature); it enumerates
+  # the same wayland-sessions, so GNOME + all niri/labwc/mango (stock + -dms)
+  # entries stay selectable. noctalia-greeter input kept available for revert.
   desktop.displayManager.backend = "none";
 
-  programs.noctalia-greeter = {
+  services.displayManager.dms-greeter = {
     enable = true;
-    package = inputs.noctalia-greeter.packages.${pkgs.system}.default;
-    # Match the login cursor to the Stylix (bibata) theme used everywhere else.
-    settings.cursor = {
-      theme = config.stylix.cursor.name;
-      size = config.stylix.cursor.size;
-      package = config.stylix.cursor.package;
-    };
+    compositor.name = "niri";
   };
+
+  # Don't restart greetd on rebuild — a switch shouldn't tear down the login
+  # manager mid-session. The new greeter applies at next reboot/logout.
+  systemd.services.greetd.restartIfChanged = false;
 
   # Phase 1: niri + labwc + mango as selectable login sessions (alongside GNOME).
   desktop.niri.enable = true;
   desktop.labwc.enable = true;
   desktop.mangowm.enable = true;
+
+  # Adds "(DankMaterialShell)" login sessions for niri/labwc/mango next to the
+  # stock (Noctalia) ones — pick per login in the greeter.
+  desktop.dmsShell.enable = true;
 
   # ddcutil: software brightness/contrast control of external monitors (DDC/CI).
   modules.hardware.ddcutil.enable = true;
