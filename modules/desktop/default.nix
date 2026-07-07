@@ -6,6 +6,7 @@
     ./niri.nix
     ./labwc.nix
     ./mangowm.nix
+    ./dms-shell.nix
     ./ddcutil.nix
   ];
 
