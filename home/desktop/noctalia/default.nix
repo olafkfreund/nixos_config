@@ -329,7 +329,7 @@ in
       timeout 300 '${lockCmd}' \
       timeout 600 "wlopm --off '*'" resume "wlopm --on '*'" \
       ${lib.optionalString isLaptop "timeout 1800 'systemctl suspend' \\\n      "}before-sleep '${lockCmd}' &
-    noctalia &
+    ''${DESK_SHELL:-noctalia} &
   '';
 
   # Session environment, read at labwc startup. XKB layout for the keyboard,
@@ -564,7 +564,7 @@ in
           timeout 300 '${lockCmd}' \
           timeout 600 "wlopm --off '*'" resume "wlopm --on '*'" \
           ${lib.optionalString isLaptop "timeout 1800 'systemctl suspend' \\\n      "}before-sleep '${lockCmd}' &
-        noctalia &
+        ''${DESK_SHELL:-noctalia} &
       '';
     }
   );
