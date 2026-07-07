@@ -17,14 +17,11 @@ let
   inherit (lib) mkEnableOption mkIf optional;
   cfg = config.desktop.dmsShell;
 
-  # niri: try the managed service first (keeps `dms doctor` clean), fall back to
-  # a direct spawn if graphical-session.target isn't ready.
-  dmsNiriShell = pkgs.writeShellScript "dms-niri-shell" ''
-    if systemctl --user start dms.service 2>/dev/null; then exit 0; fi
-    exec dms run
-  '';
+  # niri: point at the dedicated DMS niri config (home/desktop/noctalia writes
+  # ~/.config/niri/config-dms.kdl) — its own keybinds (distinct from Noctalia),
+  # DMS theming includes, and a service-first `dms` spawn.
   niriLauncher = pkgs.writeShellScript "niri-dms-session" ''
-    export DESK_SHELL="${dmsNiriShell}"
+    export NIRI_CONFIG="$HOME/.config/niri/config-dms.kdl"
     exec niri-session
   '';
   labwcLauncher = pkgs.writeShellScript "labwc-dms-session" ''
