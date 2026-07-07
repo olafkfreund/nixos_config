@@ -229,6 +229,110 @@ in
     }
   ];
 
+  # ── DankMaterialShell niri session ──────────────────────────────────────────
+  # A SEPARATE niri config used only by the "Niri (DankMaterialShell)" login
+  # session (modules/desktop/dms-shell.nix points niri at it via NIRI_CONFIG).
+  # It shares niri's base with the Noctalia config but its shell keybinds call
+  # `dms ipc …` instead of `noctalia msg …`, and it pulls in DMS's own theming
+  # fragments (dms/*.kdl, written at runtime by `dms setup` into ~/.config/niri/
+  # dms/). optional=true so a missing fragment only warns. The read-only store
+  # path means DMS never has to edit it — fixing the "binds.kdl not included /
+  # permission denied" error. Keybinds here are intentionally distinct from the
+  # Noctalia session's.
+  xdg.configFile."niri/config-dms.kdl".text = ''
+    include optional=true "${config.home.homeDirectory}/.config/niri/dms/colors.kdl"
+    include optional=true "${config.home.homeDirectory}/.config/niri/dms/layout.kdl"
+    include optional=true "${config.home.homeDirectory}/.config/niri/dms/alttab.kdl"
+    include optional=true "${config.home.homeDirectory}/.config/niri/dms/wpblur.kdl"
+
+    input {
+        keyboard {
+            xkb { layout "gb"; }
+            repeat-delay 600
+            repeat-rate 25
+        }
+        touchpad { tap; natural-scroll; }
+    }
+    prefer-no-csd
+    screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+    environment {
+        "NIXOS_OZONE_WL" "1"
+        "ELECTRON_OZONE_PLATFORM_HINT" "auto"
+        "GSETTINGS_SCHEMA_DIR" "${gtkSchemas}"
+    }
+
+    binds {
+        // Window management — niri-native, shared with the Noctalia session.
+        Mod+Return { spawn "ghostty"; }
+        Mod+T { spawn "ghostty"; }
+        Mod+E { spawn "nautilus"; }
+        Mod+Q { close-window; }
+        Mod+H { focus-column-left; }
+        Mod+L { focus-column-right; }
+        Mod+J { focus-window-down; }
+        Mod+K { focus-window-up; }
+        Mod+Left { focus-column-left; }
+        Mod+Right { focus-column-right; }
+        Mod+Down { focus-workspace-down; }
+        Mod+Up { focus-workspace-up; }
+        Mod+Shift+H { move-column-left; }
+        Mod+Shift+L { move-column-right; }
+        Mod+Shift+J { move-window-down; }
+        Mod+Shift+K { move-window-up; }
+        Mod+Shift+Left { move-column-left; }
+        Mod+Shift+Right { move-column-right; }
+        Mod+1 { focus-workspace 1; }
+        Mod+2 { focus-workspace 2; }
+        Mod+3 { focus-workspace 3; }
+        Mod+4 { focus-workspace 4; }
+        Mod+5 { focus-workspace 5; }
+        "Mod+Page_Down" { focus-workspace-down; }
+        "Mod+Page_Up" { focus-workspace-up; }
+        "Mod+Shift+Page_Down" { move-column-to-workspace-down; }
+        "Mod+Shift+Page_Up" { move-column-to-workspace-up; }
+        Mod+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
+        Mod+WheelScrollUp cooldown-ms=150 { focus-workspace-up; }
+        Mod+F { maximize-column; }
+        Mod+Shift+F { fullscreen-window; }
+        Mod+Ctrl+Shift+F { toggle-windowed-fullscreen; }
+        Mod+R { switch-preset-column-width; }
+        Mod+Equal { set-column-width "+10%"; }
+        Mod+Minus { set-column-width "-10%"; }
+        Mod+Comma { consume-window-into-column; }
+        Mod+Period { expel-window-from-column; }
+        Mod+V { toggle-window-floating; }
+        Mod+O { toggle-overview; }
+        Mod+S { spawn "niri" "msg" "action" "screenshot"; }
+        Mod+Ctrl+S { spawn "niri" "msg" "action" "screenshot-screen"; }
+        Mod+Shift+S { spawn "niri" "msg" "action" "screenshot-window"; }
+        Mod+Shift+R { spawn "niri-screenrecord"; }
+        Mod+Alt+R { spawn "niri-screenrecord" "region"; }
+        Mod+Shift+Slash { show-hotkey-overlay; }
+        Mod+Shift+E { quit; }
+        XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; }
+        XF86AudioLowerVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
+        XF86AudioMute { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+        XF86MonBrightnessUp { spawn "brightnessctl" "set" "5%+"; }
+        XF86MonBrightnessDown { spawn "brightnessctl" "set" "5%-"; }
+
+        // Shell actions — DankMaterialShell (distinct from the Noctalia session,
+        // which uses `noctalia msg …` for these).
+        Mod+D { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
+        Mod+Space { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
+        Mod+C { spawn "dms" "ipc" "call" "control-center" "toggle"; }
+        Mod+N { spawn "dms" "ipc" "call" "notifications" "toggle"; }
+        Mod+X { spawn "dms" "ipc" "call" "powermenu" "toggle"; }
+        Mod+Backspace { spawn "dms" "ipc" "call" "lock" "lock"; }
+    }
+
+    // Start DMS (prefer the managed service; fall back to a direct spawn), plus
+    // the same companion daemons as the Noctalia session. Idle lock uses DMS.
+    spawn-at-startup "sh" "-c" "if systemctl --user start dms.service 2>/dev/null; then exit 0; fi; exec dms run"
+    spawn-at-startup "swaybg" "-m" "fill" "-i" "${wallpaper}"
+    spawn-at-startup "gammastep" "-l" "${geo}"
+    spawn-at-startup "swayidle" "-w" "timeout" "300" "dms ipc call lock lock" "timeout" "600" "niri msg action power-off-monitors" "resume" "niri msg action power-on-monitors" ${lib.optionalString isLaptop ''"timeout" "1800" "systemctl suspend" ''}"before-sleep" "dms ipc call lock lock"
+  '';
+
   # Keybinds. Mod = Super/logo. Press Mod+Shift+/ for niri's hotkey overlay.
   programs.niri.settings.binds = with config.lib.niri.actions; {
     "Mod+Return".action = spawn "ghostty";
