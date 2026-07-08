@@ -578,6 +578,10 @@ in
     in
     {
       enable = true;
+      # Reuse the scenefx-0.5-overridden package from the NixOS module
+      # (modules/desktop/mangowm.nix) so the HM side doesn't rebuild mango
+      # against scenefx 0.4.1 (which fails: "scenefx-0.5 not found").
+      package = osConfig.programs.mango.package;
 
       extraConfig = ''
         # Electron apps → Wayland (same fix as niri/labwc).

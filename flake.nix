@@ -53,8 +53,12 @@
     # provides programs.noctalia. Follows nixpkgs: the package is a light QML
     # wrapper over pkgs.quickshell (already cached in nixpkgs), so this avoids
     # duplicating the Qt closure and needs no extra cachix.
+    # Pinned to a known-good rev: noctalia HEAD (b87c8acf) fails to compile — its
+    # mango workspace backend has a type error (mango_workspace_backend.cpp:162,
+    # `TagInfo` vs `uint32_t`). Unpin (back to a bare branch url) once upstream
+    # noctalia fixes the mango backend build.
     noctalia = {
-      url = "github:noctalia-dev/noctalia";
+      url = "github:noctalia-dev/noctalia/b9b4bc3408a906f392a8d277d172ef440debc5cc";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -82,6 +86,18 @@
     # home-manager.sharedModules). Third Noctalia session alongside niri/labwc.
     mango = {
       url = "github:mangowm/mango";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # scenefx 0.5 — mango's meson.build requires scenefx-0.5, but mango's own
+    # flake pins/exposes scenefx 0.4.1 (its `inherit (inputs.scenefx.packages.*)
+    # scenefx` only resolves against the 0.4.1 output layout, which 0.5 renamed
+    # to `default`). So we can't just make mango follow this; instead we build
+    # scenefx 0.5 here and inject it via `programs.mango.package.override`
+    # (see modules/desktop/mangowm.nix). Pinned to tag 0.5; revisit when mango
+    # upstream wires scenefx 0.5 itself.
+    scenefx = {
+      url = "github:wlrfx/scenefx/0.5";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
