@@ -6,7 +6,6 @@ _: {
     ./xserver/xdg-portal.nix
     ./xserver/xdg.nix
     ./bluetooth/bluetooth.nix
-    ./sound/sound.nix
     ./openssh/openssh.nix
     ./gnome/gnome-services.nix
     ./systemd/default.nix
@@ -31,13 +30,11 @@ _: {
     ./whatsapp-bridge.nix
 
     # CI/CD services
-    ./gitlab-runner.nix
 
     # System management services
     ./nixos-update-checker/default.nix
 
     # Security services
-    ./security/mdatp.nix
 
     # Microsoft Intune Company Portal (custom package with version control)
     ./intune-portal.nix
