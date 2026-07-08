@@ -379,10 +379,6 @@ in
     compositor.name = "niri";
   };
 
-  # Don't restart greetd on rebuild — a switch shouldn't tear down the login
-  # manager mid-session. The new greeter applies at next reboot/logout.
-  systemd.services.greetd.restartIfChanged = false;
-
   # Phase 1: niri + labwc + mango as selectable login sessions (alongside GNOME).
   desktop.niri.enable = true;
   desktop.labwc.enable = true;
@@ -667,6 +663,10 @@ in
     services = {
       # Network wait services now handled by desktop profile
       fwupd.serviceConfig.LimitNOFILE = 524288;
+
+      # Don't restart greetd on rebuild — a switch shouldn't tear down the login
+      # manager mid-session. The new greeter applies at next reboot/logout.
+      greetd.restartIfChanged = false;
     };
 
     # User services
