@@ -144,12 +144,20 @@
       home = "/mnt/media/downloads/torrents";
       package = pkgs-unstable.transmission_4;
       downloadDirPermissions = "0775";
+      # rpc-password is injected at runtime from agenix via credentialsFile
+      # (merged into settings.json at preStart). Auth is required so the public
+      # transmission.freundcloud.org.uk Cloudflare-tunnel endpoint is protected;
+      # host-whitelist is disabled because reverse-proxied requests carry the
+      # public Host header, which Transmission's DNS-rebind guard would reject.
+      credentialsFile = config.age.secrets."transmission-rpc".path;
       settings = {
         trash-original-torrent-files = true;
         rpc-bind-address = "0.0.0.0";
         rpc-whitelist = "127.0.0.1,192.168.1.*,100.*.*.*";
         rpc-whitelist-enabled = true;
-        rpc-authentication-required = false;
+        rpc-authentication-required = true;
+        rpc-username = "olafkfreund";
+        rpc-host-whitelist-enabled = false;
         watch-dir-enabled = true;
         watch-dir = "/mnt/media/downloads/torrents/watch";
         download-dir = "/mnt/media/downloads/torrents/complete";
@@ -245,6 +253,16 @@
   # out of the systemd unit's command-line and therefore out of /proc.
   age.secrets."nzbget-password" = {
     file = ../../../secrets/nzbget-password.age;
+    mode = "0400";
+    owner = "olafkfreund";
+    group = "users";
+  };
+
+  # Transmission RPC password — {"rpc-password":"…"} JSON merged into
+  # settings.json at preStart via services.transmission.credentialsFile.
+  # The merge runs as root (ExecStartPre "+"), so 0400 olafkfreund is fine.
+  age.secrets."transmission-rpc" = {
+    file = ../../../secrets/transmission-rpc.age;
     mode = "0400";
     owner = "olafkfreund";
     group = "users";
