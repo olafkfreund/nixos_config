@@ -26,6 +26,7 @@ in
       ../common/nixos/inotify-limits.nix
       ./nixos/cpu.nix
       ./nixos/memory.nix
+      ./nixos/resilience.nix # Watchdog + sshd limits + oomd (post-2026-07-08 freeze)
       ../common/nixos/hosts.nix
       ./nixos/plex.nix
       ./flaresolverr.nix # Cloudflare-bypass proxy for Prowlarr (used by 1337x and any other CF-protected indexer)
