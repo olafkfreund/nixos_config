@@ -201,6 +201,13 @@ in
   # Edit with: agenix -e secrets/nzbget-password.age
   "secrets/nzbget-password.age".publicKeys = allUsers ++ [ p510 ];
 
+  # Transmission RPC password (p510 only). JSON blob {"rpc-password":"…"} merged
+  # into settings.json at service preStart via services.transmission.credentialsFile.
+  # Guards the public transmission.freundcloud.org.uk Cloudflare-tunnel endpoint
+  # (rpc-authentication-required = true). Rotate with:
+  #   agenix -e secrets/transmission-rpc.age
+  "secrets/transmission-rpc.age".publicKeys = allUsers ++ [ p510 ];
+
   # n8n encryption key (p510 only). Encrypts n8n's own credential store so the
   # Overseerr/Tautulli/Home-Assistant API keys entered in the n8n UI survive
   # rebuilds and never land in the Nix store. Random value, not hand-typed.

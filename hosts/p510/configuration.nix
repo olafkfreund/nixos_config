@@ -747,6 +747,10 @@ in
       "tautulli.freundcloud.org.uk" = "http://localhost:8181";
       "sonarr.freundcloud.org.uk" = "http://localhost:8989";
       "radarr.freundcloud.org.uk" = "http://localhost:7878";
+      # Transmission RPC/web — protected by rpc-authentication (agenix
+      # transmission-rpc). One-time DNS route needed to publish the CNAME:
+      #   cloudflared tunnel route dns p510-home transmission.freundcloud.org.uk
+      "transmission.freundcloud.org.uk" = "http://localhost:9091";
       "lidarr.freundcloud.org.uk" = "http://localhost:8686";
       "bazarr.freundcloud.org.uk" = "http://localhost:6767";
       "nzbget.freundcloud.org.uk" = "http://localhost:6789";
