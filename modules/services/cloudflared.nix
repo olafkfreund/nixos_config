@@ -139,6 +139,14 @@ in
       };
     };
 
+    # Make the cloudflared CLI available on hosts running the tunnel, for
+    # tunnel/route management and debugging — e.g.
+    #   cloudflared tunnel route dns <tunnel> <hostname>
+    # (route dns also needs the origin cert; on this host it lives at
+    # config.age.secrets.cloudflared-cert.path, exported as TUNNEL_ORIGIN_CERT).
+    # Version-matched to the running daemon via services.cloudflared.package.
+    environment.systemPackages = [ config.services.cloudflared.package ];
+
     # Origin keepalive — sweep each ingress URL on a timer so idle apps
     # (Node SPAs, gunicorn, JVMs) don't cold-start on the first public
     # hit and render a blank page while they boot. Hits LOCAL origins
