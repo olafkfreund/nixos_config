@@ -1,7 +1,5 @@
 _: {
-  imports = [
-    ./firewall.nix
-  ];
+  imports = [ ];
 
   # Consolidated security configuration
   security = {
