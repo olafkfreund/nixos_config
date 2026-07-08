@@ -101,17 +101,6 @@ in
 
         # Toggle message tray
         toggle-message-tray = [ "<Super>v" ];
-
-        # # Switch to application shortcuts
-        # switch-to-application-1 = [ "<Super>1" ];
-        # switch-to-application-2 = [ "<Super>2" ];
-        # switch-to-application-3 = [ "<Super>3" ];
-        # switch-to-application-4 = [ "<Super>4" ];
-        # switch-to-application-5 = [ "<Super>5" ];
-        # switch-to-application-6 = [ "<Super>6" ];
-        # switch-to-application-7 = [ "<Super>7" ];
-        # switch-to-application-8 = [ "<Super>8" ];
-        # switch-to-application-9 = [ "<Super>9" ];
       };
 
       # Media keys
@@ -218,13 +207,6 @@ in
         command = "meet toggle";
         name = "Meeting record/transcribe/summarize";
       };
-
-      # # Input method keybindings
-      # "org/gnome/desktop/input-sources" = {
-      #   # Switch input source
-      #   switch-input-source = [ "<Super>space" ];
-      #   switch-input-source-backward = [ "<Shift><Super>space" ];
-      # };
 
       # Accessibility keybindings
       "org/gnome/settings-daemon/plugins/media-keys" = {
