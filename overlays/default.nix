@@ -8,6 +8,14 @@
     zjstatus = inputs.zjstatus.packages.${prev.stdenv.hostPlatform.system}.default;
   })
 
+  # ponytail: temporary graft. dms-shell 1.5.0 is on nixpkgs master but not yet
+  # in the nixos-unstable channel. Pull the whole derivation from master (correct
+  # inputs, no hash maintenance). Drop this + the nixpkgs-master input once unstable
+  # ships 1.5.0 — check with: nix eval nixpkgs#dms-shell.version
+  (_final: prev: {
+    dms-shell = inputs.nixpkgs-master.legacyPackages.${prev.stdenv.hostPlatform.system}.dms-shell;
+  })
+
   (_final: prev: {
     gogmail = inputs.gogmail.packages.${prev.stdenv.hostPlatform.system}.gogmail;
   })

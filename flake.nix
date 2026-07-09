@@ -31,6 +31,10 @@
     # Core
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    # Temporary: dms-shell 1.5.0 landed on master (PR #539682, 2026-07-09) but
+    # hasn't reached the nixos-unstable channel yet. Grafted in via overlay
+    # (overlays/default.nix). Remove this input + the graft once unstable catches up.
+    nixpkgs-master.url = "github:nixos/nixpkgs/master";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     flake-utils.url = "github:numtide/flake-utils";
