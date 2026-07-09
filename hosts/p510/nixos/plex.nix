@@ -31,7 +31,7 @@
         TempDir = "/mnt/media/downloads/usenet/tmp";
         ControlIP = "0.0.0.0";
         ControlPort = 6789;
-        ControlUsername = "nzbget";
+        ControlUsername = "olafkfreund";
         # ControlPassword intentionally NOT here — it would render into
         # the systemd unit's ExecStart as `-o ControlPassword=...`
         # (visible to anyone who can read /proc). Instead, the password
