@@ -8,7 +8,8 @@
     enable32Bit = true;
     extraPackages = with pkgs; [
       # Vulkan support
-      vulkan-validation-layers
+      # vulkan-validation-layers dropped: debug-only layer, broken build on
+      # nixpkgs 1.4.350.0 (update_deps.py git-clones in the sandbox).
       vulkan-loader
       vulkan-tools
 
