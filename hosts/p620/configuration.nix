@@ -608,7 +608,8 @@ in
     # gst-plugin-pipewire is NOT in gst_all_1 — the PipeWire GStreamer
     # plugin ships inside the pipewire package itself (libgstpipewire.so
     # under pipewire's lib output). The active services.pipewire wires it.
-    gst-vaapi
+    # gst-vaapi removed in GStreamer 1.28 — VAAPI HW accel now lives in the
+    # `va` plugin inside gst-plugins-bad (already listed above).
     gst-plugins-rs
   ]);
 
@@ -752,6 +753,7 @@ in
       "olm-3.2.16"
       "python3.12-youtube-dl-2021.12.17"
       "python3.13-youtube-dl-2021.12.17" # newsboat (RSS reader) pulls youtube-dl for URL extraction
+      "python3.14-youtube-dl-2021.12.17" # newsboat (RSS reader) pulls youtube-dl for URL extraction
       "libsoup-2.74.3" # Temporary: Required by some GNOME packages until migration to libsoup-3
       "electron-35.7.5" # Temporary: Required until upstream packages migrate to newer electron
       "electron-39.8.10" # Newly marked EOL after nixpkgs bump on 2026-06-01 — still pulled in by some upstream package, audit + drop later
