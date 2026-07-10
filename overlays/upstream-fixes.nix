@@ -5,6 +5,14 @@ _final: prev: {
     doInstallCheck = false;
   });
 
+  # ollama 0.31.1: the Go scheduler test suite fails in the sandbox — it mocks
+  # GPU memory (library=Metal on Linux, simulated cudaMalloc OOM) and is
+  # environment-sensitive, not a real defect. Skip checks. Override both the
+  # base package and ollama-rocm (p620 uses ollama-rocm; p510 ollama-cuda).
+  ollama = prev.ollama.overrideAttrs (_old: { doCheck = false; });
+  ollama-rocm = prev.ollama-rocm.overrideAttrs (_old: { doCheck = false; });
+  ollama-cuda = prev.ollama-cuda.overrideAttrs (_old: { doCheck = false; });
+
   # gnome-shell's shell_remove_dark_mode.patch fails to apply on GNOME 49.1.
   # Strip it until nixpkgs catches up. Keep the rest of nixpkgs' patches.
   gnome-shell = prev.gnome-shell.overrideAttrs (oldAttrs: {

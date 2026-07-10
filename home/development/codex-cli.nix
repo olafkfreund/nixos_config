@@ -30,7 +30,7 @@
   home.packages = with pkgs; [
     prettier
     eslint
-    black # Python formatter
+    python313Packages.black # Python formatter (pin py3.13 to match languages.nix/nvim.nix; bare `black` is py3.14 now and collides in home-manager-path)
     rustfmt # Rust formatter
     nixpkgs-fmt # Nix formatter
     jq # JSON processing for API responses
