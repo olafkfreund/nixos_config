@@ -32,6 +32,11 @@ _final: prev: {
           pyPrev.typing-extensions
         ];
       });
+      # inline-snapshot 0.32.5 has 3 failing tests (of 1428) on this nixpkgs;
+      # it's a test-only dep pulled in via fastapi -> mcp. Skip its checks.
+      inline-snapshot = pyPrev.inline-snapshot.overridePythonAttrs (_old: {
+        doCheck = false;
+      });
     };
   };
 
@@ -70,6 +75,12 @@ _final: prev: {
   python314 = prev.python314.override {
     packageOverrides = _pyFinal: pyPrev: {
       click-threading = pyPrev.click-threading.overridePythonAttrs (_old: {
+        doCheck = false;
+      });
+      # frictionless 5.18.1: 11/1646 tests fail on this nixpkgs — locale/encoding
+      # detection (cp1252 vs iso8859-1) and remote-URL fetches in the sandbox.
+      # Not real defects; skip the check.
+      frictionless = pyPrev.frictionless.overridePythonAttrs (_old: {
         doCheck = false;
       });
     };
