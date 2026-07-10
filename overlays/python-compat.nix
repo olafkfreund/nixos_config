@@ -24,6 +24,14 @@ _final: prev: {
           pyPrev.msrest
         ];
       });
+      # icalendar 7.2.0 requires typing-extensions on python < 3.13, but the
+      # python3.12 derivation omits it so pythonRuntimeDepsCheckHook fails.
+      # Add it (consumed via python312Packages in home/shell/mail).
+      icalendar = pyPrev.icalendar.overridePythonAttrs (oldAttrs: {
+        dependencies = (oldAttrs.dependencies or [ ]) ++ [
+          pyPrev.typing-extensions
+        ];
+      });
     };
   };
 
