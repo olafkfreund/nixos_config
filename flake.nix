@@ -123,7 +123,7 @@
     # boot.bootspec.enable option, which throws against current nixpkgs
     # (bootspec is now always-on). Pinned to master past that fix.
     lanzaboote = {
-      url = "github:nix-community/lanzaboote/001e560fffc8f0235e9db20ebeb4ccde0ade1caf";
+      url = "github:nix-community/lanzaboote/v1.1.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
