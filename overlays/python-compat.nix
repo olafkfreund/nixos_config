@@ -53,4 +53,17 @@ _final: prev: {
       });
     };
   };
+
+  # python3 default advanced to 3.14 (nixpkgs 0bb7ec54c8). click-threading's
+  # pytestCheckPhase collects docs/conf.py, which imports pkg_resources —
+  # removed from setuptools on 3.14 — so the test errors out. Skip the check;
+  # the pythonImportsCheck (import click_threading) still passes. Unblocks
+  # vdirsyncer -> khal. Drop once nixpkgs fixes the test collection upstream.
+  python314 = prev.python314.override {
+    packageOverrides = _pyFinal: pyPrev: {
+      click-threading = pyPrev.click-threading.overridePythonAttrs (_old: {
+        doCheck = false;
+      });
+    };
+  };
 }
