@@ -86,16 +86,12 @@
     commandLineArgs = lib.mkForce [
       "--enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer,WebUIDarkMode"
       "--ozone-platform=wayland"
-      "--disable-features=VizDisplayCompositor"
       "--force-dark-mode"
-      "--use-gl=desktop"
+      # ANGLE-on-OpenGL (Mesa/AMD). Replaces the removed --use-gl=desktop;
+      # do NOT disable VizDisplayCompositor — that kills GPU compositing and WebGL.
+      "--use-angle=gl"
       "--enable-gpu-rasterization"
       "--enable-zero-copy"
-      "--ignore-gpu-blocklist"
-      "--disable-gpu-driver-bug-workarounds"
-      "--enable-accelerated-2d-canvas"
-      "--enable-accelerated-video-decode"
-      "--use-vulkan"
       "--enable-quic"
       "--enable-tcp-fast-open"
       "--aggressive-cache-discard"
