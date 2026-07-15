@@ -40,6 +40,15 @@ stdenvNoCC.mkDerivation {
     substituteInPlace bin/tmux-palette.sh \
       --replace-fail "exec bun " "exec ${bun}/bin/bun " \
       --replace-fail "MEASURE=\"\$(bun " "MEASURE=\"\$(${bun}/bin/bun "
+
+    # Unselected item titles are painted with `muted`, which also colours
+    # descriptions and the footer — so theme.json alone can't make titles match
+    # the terminal foreground without dragging that secondary text along with
+    # them. Point unselected titles at `fg`; `muted` stays dim for the rest.
+    substituteInPlace src/render.ts \
+      --replace-fail \
+        "const titleStyle = active ? colors.bold + colors.fg : colors.muted" \
+        "const titleStyle = active ? colors.bold + colors.fg : colors.fg"
   '';
 
   installPhase = ''
