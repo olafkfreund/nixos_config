@@ -80,22 +80,6 @@ in
     openFirewall = true;
   };
 
-  # NTP server for the tailnet. Roaming hosts (razer) frequently land on
-  # networks that block public NTP (UDP 123); they sync from here instead,
-  # tunnelled inside Tailscale (WireGuard/DERP on 443) so the block never
-  # applies. p620 itself disciplines from the public pool over its home LAN.
-  # Firewall is disabled on this host, so UDP 123 is already reachable on
-  # tailscale0. chronyd replaces systemd-timesyncd automatically.
-  services.chrony = {
-    enable = true;
-    extraConfig = ''
-      # Serve time to tailnet clients (Tailscale CGNAT range).
-      allow 100.64.0.0/10
-      # Serve from the local clock if upstream is briefly unreachable.
-      local stratum 10
-    '';
-  };
-
   # Use AI provider defaults with workstation profile
   aiDefaults = {
     enable = true;

@@ -3,6 +3,7 @@
 , lib
 , hostUsers
 , hostTypes
+, inputs
 , ...
 }:
 let
@@ -99,23 +100,22 @@ in
   };
 
   # Time sync. razer roams onto networks (e.g. corporate/guest WiFi) that
-  # block public NTP on UDP 123, which left the clock free-running and
-  # drifting. Sync from p620 over Tailscale instead — tunnelled inside
-  # WireGuard/DERP (443), so the UDP-123 block never applies. Public pool
-  # kept as fallback for networks that do allow NTP when the tailnet is down.
+  # block public NTP on UDP 123, leaving the clock free-running and drifting.
+  # timesyncd uses the public pool whenever the network allows NTP; the
+  # httpTimeFallback below covers networks that block it.
   services.timesyncd = {
     enable = true;
-    servers = [ "100.69.100.115" ]; # p620 (stable tailnet IP, chrony server)
-    fallbackServers = [
+    servers = [
       "0.pool.ntp.org"
       "1.pool.ntp.org"
       "2.pool.ntp.org"
     ];
   };
 
-  # Last-resort fallback: if NTP is unreachable (UDP 123 blocked AND Tailscale
-  # down), step the clock from HTTPS Date headers over 443. Only acts when
-  # timesyncd has not synchronised, so it never fights normal NTP discipline.
+  # Fallback for networks that block NTP (UDP 123): when timesyncd has not
+  # synchronised, htpdate sets the clock from HTTPS (443) — sampling several
+  # servers with latency compensation. Only acts when NTP is unsynced, so it
+  # never fights normal NTP discipline.
   services.httpTimeFallback.enable = true;
 
   # COSMIC Notifications NG - Disabled: removed from active config
@@ -312,28 +312,27 @@ in
   # first (see comment on `gnome.gnome-remote-desktop` below). p510 enables
   # autoLogin because p510 is pure NVIDIA without PRIME — greeter respawn
   # works there; not here.
-  # Login manager: DankMaterialShell greeter (greetd). backend="none" turns GDM
-  # off; the dms-greeter module auto-enables greetd and runs the greeter inside
-  # a niri compositor — which sidesteps GDM's broken greeter-respawn on this
-  # Optimus PRIME-sync NVIDIA hardware (see note above). Chosen over
-  # noctalia-greeter (more mature); it enumerates the same wayland-sessions, so
-  # GNOME/niri/niri-dms/labwc/labwc-dms/mango/mango-dms all stay selectable.
-  # noctalia-greeter input is kept available for an easy revert.
+  # Login manager: Noctalia greeter (greetd). backend="none" turns GDM off; the
+  # noctalia-greeter module below auto-enables greetd + its bundled wlroots
+  # compositor — which sidesteps GDM's broken greeter-respawn on this Optimus
+  # PRIME-sync NVIDIA hardware (see note above). niri already runs wlroots fine
+  # here, so the greeter's compositor does too. GNOME/niri/labwc stay selectable.
   desktop.displayManager.backend = "none";
 
-  services.displayManager.dms-greeter = {
+  programs.noctalia-greeter = {
     enable = true;
-    compositor.name = "niri";
+    package = inputs.noctalia-greeter.packages.${pkgs.system}.default;
+    settings.cursor = {
+      theme = config.stylix.cursor.name;
+      size = config.stylix.cursor.size;
+      package = config.stylix.cursor.package;
+    };
   };
 
   # Phase 1: niri + labwc + mango as selectable login sessions (alongside GNOME).
   desktop.niri.enable = true;
   desktop.labwc.enable = true;
   desktop.mangowm.enable = true;
-
-  # Adds a "Niri (DankMaterialShell)" login session next to the stock "Niri"
-  # (Noctalia) one — pick per login in the greeter. Trial on razer only.
-  desktop.dmsShell.enable = true;
 
   # ddcutil: software brightness/contrast control of external monitors (DDC/CI).
   modules.hardware.ddcutil.enable = true;
@@ -531,8 +530,7 @@ in
     # gst-plugin-pipewire is NOT in gst_all_1 — the PipeWire GStreamer
     # plugin ships inside the pipewire package itself (libgstpipewire.so
     # under pipewire's lib output). The active services.pipewire wires it.
-    # gst-vaapi removed in GStreamer 1.28 — VAAPI HW accel now lives in the
-    # `va` plugin inside gst-plugins-bad (already listed above).
+    gst-vaapi
     gst-plugins-rs
   ]) ++ (with pkgs;
     [
@@ -614,12 +612,9 @@ in
       "olm-3.2.16"
       "python3.12-youtube-dl-2021.12.17"
       "python3.13-youtube-dl-2021.12.17" # newsboat (RSS reader) pulls youtube-dl for URL extraction
-      "python3.14-youtube-dl-2021.12.17" # newsboat (RSS reader) pulls youtube-dl for URL extraction
       "libsoup-2.74.3" # Temporary: Required by some GNOME packages until migration to libsoup-3
       "electron-35.7.5" # Temporary: Required until upstream packages migrate to newer electron
       "electron-39.8.10" # Newly marked EOL after nixpkgs bump on 2026-06-01 — still pulled in by some upstream package, audit + drop later
-      "electron-40.10.5" # Newly marked insecure after nixpkgs bump on 2026-07-15 — still pulled in by some upstream package, audit + drop later
-      "pnpm-10.29.2" # Newly marked insecure after nixpkgs bump on 2026-06-30 — pulled in by dev package set (modules/packages/sets.nix), audit + drop later
     ];
   };
   system.stateVersion = "25.11";
