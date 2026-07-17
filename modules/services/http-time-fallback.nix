@@ -1,33 +1,37 @@
 { config, lib, pkgs, ... }:
 let
-  inherit (lib) mkEnableOption mkOption mkIf types concatStringsSep escapeShellArgs;
+  inherit (lib) mkEnableOption mkOption mkIf types escapeShellArgs;
   cfg = config.services.httpTimeFallback;
+
+  # nixpkgs builds htpdate HTTP-only; rebuild the Makefile's `https` target
+  # (+ openssl) so the fallback works over TLS/443. Kept local to this module
+  # since only roaming hosts (razer) enable it.
+  htpdateHttps = pkgs.htpdate.overrideAttrs (o: {
+    pname = "htpdate-https";
+    buildInputs = (o.buildInputs or [ ]) ++ [ pkgs.openssl ];
+    buildFlags = [ "https" ];
+    makeFlags = (o.makeFlags or [ ]) ++ [ "SSL_LIBS=-lssl -lcrypto" ];
+  });
 
   syncScript = pkgs.writeShellScript "http-time-fallback" ''
     set -euo pipefail
 
-    # Only act as a fallback: if the primary NTP path (timesyncd over
-    # Tailscale, or the public pool) has already synchronised, do nothing.
+    # Fallback only: if NTP (timesyncd) has already synchronised, do nothing
+    # so we never fight normal NTP discipline.
     if [ "$(${pkgs.systemd}/bin/timedatectl show -p NTPSynchronized --value)" = "yes" ]; then
-      echo "NTP already synchronised; HTTPS time fallback not needed."
+      echo "NTP already synchronised; htpdate fallback not needed."
       exit 0
     fi
 
-    echo "NTP not synchronised — setting clock from HTTPS Date headers."
-    for url in ${escapeShellArgs cfg.urls}; do
-      date_hdr=$(${pkgs.curl}/bin/curl -sf --max-time 10 -I "$url" \
-        | ${pkgs.gnugrep}/bin/grep -i '^date:' \
-        | ${pkgs.gnused}/bin/sed 's/^[Dd]ate: //I' \
-        | ${pkgs.coreutils}/bin/tr -d '\r') || continue
-      if [ -n "$date_hdr" ]; then
-        ${pkgs.coreutils}/bin/date -s "$date_hdr"
-        # --noadjfile avoids writing /etc/adjtime (ProtectSystem=strict makes
-        # /etc read-only); RTC is kept in UTC on this fleet.
-        ${pkgs.util-linux}/bin/hwclock --systohc --noadjfile --utc || true
-        echo "Clock set from $url ($date_hdr)."
-        exit 0
-      fi
-    done
+    echo "NTP not synchronised — setting clock via htpdate over HTTPS."
+    # -s set clock, -4 IPv4, -c verify server certificate. htpdate samples
+    # multiple HTTPS servers and compensates for request round-trip latency.
+    if ${htpdateHttps}/bin/htpdate -s -4 -c ${escapeShellArgs cfg.urls}; then
+      # Persist to RTC so a reboot on a blocked network keeps good time.
+      # --noadjfile: /etc is read-only under ProtectSystem=strict; RTC is UTC.
+      ${pkgs.util-linux}/bin/hwclock --systohc --noadjfile --utc || true
+      exit 0
+    fi
 
     echo "http-time-fallback: no HTTPS time source reachable." >&2
     exit 1
@@ -35,7 +39,7 @@ let
 in
 {
   options.services.httpTimeFallback = {
-    enable = mkEnableOption "HTTPS-based time sync fallback for networks that block NTP (UDP 123)";
+    enable = mkEnableOption "HTTPS-based time sync fallback (htpdate) for networks that block NTP (UDP 123)";
 
     urls = mkOption {
       type = types.listOf types.str;
@@ -44,7 +48,7 @@ in
         "https://www.google.com"
         "https://www.kernel.org"
       ];
-      description = "HTTPS endpoints whose Date response headers set the clock, tried in order.";
+      description = "HTTPS endpoints htpdate samples to set the clock.";
     };
 
     interval = mkOption {
@@ -56,12 +60,14 @@ in
 
   config = mkIf cfg.enable {
     systemd.services.http-time-fallback = {
-      description = "HTTPS time sync fallback (when NTP/UDP 123 is blocked)";
+      description = "HTTPS time sync fallback via htpdate (when NTP/UDP 123 is blocked)";
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];
       serviceConfig = {
         Type = "oneshot";
         ExecStart = syncScript;
+        # htpdate's TLS uses openssl; point it at the system CA bundle.
+        Environment = "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
 
         # Setting the system clock and RTC requires CAP_SYS_TIME and access
         # to /dev/rtc; ProtectClock must stay false for both to work.
@@ -69,7 +75,8 @@ in
         CapabilityBoundingSet = [ "CAP_SYS_TIME" ];
         ProtectClock = false;
 
-        # Hardening otherwise.
+        # Hardening otherwise. AF_UNIX/AF_NETLINK are kept so glibc name
+        # resolution (nss, getaddrinfo) still works.
         NoNewPrivileges = true;
         ProtectSystem = "strict";
         ProtectHome = true;
@@ -77,7 +84,7 @@ in
         ProtectKernelTunables = true;
         ProtectKernelModules = true;
         ProtectControlGroups = true;
-        RestrictAddressFamilies = [ "AF_INET" "AF_INET6" ];
+        RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" "AF_NETLINK" ];
         RestrictNamespaces = true;
         MemoryDenyWriteExecute = true;
       };
