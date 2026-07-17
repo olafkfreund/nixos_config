@@ -46,6 +46,9 @@
   # Reddit TUI client
   reddix = pkgs.callPackage ./reddix { };
 
+  # GitLab TUI — terminal UI on top of the `glab` CLI (rcieri/glab-tui).
+  glab-tui = pkgs.callPackage ./glab-tui { };
+
   # Claude Code native binary (alternative to npm-based package)
   claude-code-native = pkgs.callPackage ./claude-code-native { };
 
@@ -54,6 +57,11 @@
   # jacopone/antigravity-nix is still on 1.x and 2.0.x changed everything
   # (URL, layout, binary location, product name). Pinned to 2.0.4-6381998…
   antigravity-ide = pkgs.callPackage ./antigravity-ide/package.nix { };
+
+  # Antigravity Hub — Google's Antigravity desktop launcher (`antigravity-hub`).
+  # Separate product line from the IDE, still on the original GCS bucket.
+  # Version/hash tracked via Hy4ri/antigravity-flake (see /update-antigravity).
+  antigravity-hub = pkgs.callPackage ./antigravity-hub { };
 
   # Antigravity CLI (agy) — Gemini CLI's successor per Google's
   # 2026-05-20 transition. Single Go binary fetched from Google's manifest
@@ -66,6 +74,11 @@
   google-antigravity-py = pkgs.python3.withPackages (ps: [
     (ps.callPackage ./google-antigravity-py { })
   ]);
+
+  # GitHub Copilot desktop app — agent-native desktop experience from the
+  # public github/app release repo (Tauri AppImage). Bump via the latest
+  # github/app release tag (see header comment in the derivation).
+  github-copilot-app = pkgs.callPackage ./github-copilot-app { };
 
   # FlyCrys — GTK4-native GUI for Claude Code (Rust). Not in nixpkgs yet;
   # custom buildRustPackage derivation. Wraps the local `claude` binary.

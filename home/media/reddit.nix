@@ -43,9 +43,11 @@
 
   # Standalone clients alongside newsboat:
   #   - reddit-tui : modern Go-based read-only browser (uses public JSON)
-  #   - headlines  : GTK4 / Libadwaita GUI client when you want a window
+  #   - headlines  : GTK4 / Libadwaita GUI client (DROPPED — depends on
+  #     youtube-dl 2021.12.17, which fails to build on Python 3.14:
+  #     `spawn() got an unexpected keyword argument 'dry_run'`. Restore once
+  #     nixpkgs fixes youtube-dl for 3.14 or headlines moves to yt-dlp.)
   home.packages = with pkgs; [
     reddit-tui
-    headlines
   ];
 }

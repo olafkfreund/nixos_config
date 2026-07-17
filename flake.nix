@@ -31,6 +31,10 @@
     # Core
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    # Temporary: dms-shell 1.5.0 landed on master (PR #539682, 2026-07-09) but
+    # hasn't reached the nixos-unstable channel yet. Grafted in via overlay
+    # (overlays/default.nix). Remove this input + the graft once unstable catches up.
+    nixpkgs-master.url = "github:nixos/nixpkgs/master";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     flake-utils.url = "github:numtide/flake-utils";
@@ -53,8 +57,12 @@
     # provides programs.noctalia. Follows nixpkgs: the package is a light QML
     # wrapper over pkgs.quickshell (already cached in nixpkgs), so this avoids
     # duplicating the Qt closure and needs no extra cachix.
+    # Pinned to a known-good rev: noctalia HEAD (b87c8acf) fails to compile — its
+    # mango workspace backend has a type error (mango_workspace_backend.cpp:162,
+    # `TagInfo` vs `uint32_t`). Unpin (back to a bare branch url) once upstream
+    # noctalia fixes the mango backend build.
     noctalia = {
-      url = "github:noctalia-dev/noctalia";
+      url = "github:noctalia-dev/noctalia/b9b4bc3408a906f392a8d277d172ef440debc5cc";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -85,6 +93,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # scenefx 0.5 — mango's meson.build requires scenefx-0.5, but mango's own
+    # flake pins/exposes scenefx 0.4.1 (its `inherit (inputs.scenefx.packages.*)
+    # scenefx` only resolves against the 0.4.1 output layout, which 0.5 renamed
+    # to `default`). So we can't just make mango follow this; instead we build
+    # scenefx 0.5 here and inject it via `programs.mango.package.override`
+    # (see modules/desktop/mangowm.nix). Pinned to tag 0.5; revisit when mango
+    # upstream wires scenefx 0.5 itself.
+    scenefx = {
+      url = "github:wlrfx/scenefx/0.5";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Development and utilities
     sops-nix = {
       url = "github:mic92/sops-nix";
@@ -103,33 +123,17 @@
     # boot.bootspec.enable option, which throws against current nixpkgs
     # (bootspec is now always-on). Pinned to master past that fix.
     lanzaboote = {
-      url = "github:nix-community/lanzaboote/001e560fffc8f0235e9db20ebeb4ccde0ade1caf";
+      url = "github:nix-community/lanzaboote/v1.1.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
     zjstatus.url = "github:dj95/zjstatus";
-    # = tag v2.0.16+claude1.9255.2, commit 5dd948e9 (2026-05-28).
-    # Claude binary bump 1.9255.0 -> 1.9255.2. Picks up:
-    #   - #660 capture $-prefixed minified names in cowork spawn guard
-    #     (refinement to cowork patch from v2.0.15)
-    # Carries forward from v2.0.15:
-    #   - #657 anchor tray-var extraction on .Tray() literal
-    #   - #650 filter .asar paths from --add-dir dispatch + session restore
-    # Known caveat carried in: #605 (Electron holds systemd-inhibit
-    # forever, blocking suspend while app runs). Razer-relevant.
-    # Workaround: close claude-desktop entirely to release inhibitor,
-    # or set CLAUDE_KEEP_AWAKE=0 (#645).
-    # Bump via /update-claude-code.
-    # = tag v2.0.19+claude1.11847.5 (commit f56421294d, 2026-06-12)
-    # Delta from previous pin: AppArmor profiles for Ubuntu 24.04+ user
-    # namespaces, GPU-crash auto-recovery, software-center AppStream metainfo,
-    # no more app.asar open prompt; tracks Claude Desktop 1.11847.5.
-    # NOTE: main HEAD (d2ce0466, Claude 1.12603.1) does NOT build — upstream
-    # build.sh aborts on the #649 .asar --add-dir patch (upstream issue #718).
-    # Stay on the latest *release* until that's fixed. Bump via /update-claude-code.
-    claude-desktop-linux.url = "github:aaddrick/claude-desktop-debian/f56421294d46f5db61fba0f833215d18d8c7fa2f";
+    # NOTE: Claude Desktop is no longer a flake input — as of #986 we package
+    # Anthropic's OFFICIAL Linux beta .deb ourselves (pkgs/claude-desktop-beta,
+    # exposed via overlays/default.nix as pkgs.claude-desktop-linux). The old
+    # aaddrick/claude-desktop-debian Windows-repackage input was removed.
 
     # GogMail — keyboard-driven Google Workspace TUI (Gmail/Calendar/Tasks/
     # Drive/Contacts/Chat) built on the gog CLI. Consumed via overlays as
@@ -399,9 +403,6 @@
             inherit (pkgs) lib buildNpmPackage fetchurl nodejs makeWrapper writeShellScriptBin;
           };
           claude-code-native = pkgs.callPackage ./pkgs/claude-code-native { };
-          codex-cli = pkgs.callPackage ./home/development/codex-cli {
-            inherit (pkgs) nodejs_24;
-          };
           glim = pkgs.callPackage ./overlays/glim { };
           intune-portal = pkgs.callPackage ./pkgs/intune-portal { };
           kosli-cli = pkgs.callPackage ./pkgs/kosli-cli { };

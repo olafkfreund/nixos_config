@@ -13,7 +13,9 @@
       # libglvnd - REQUIRED for COSMIC compositor (provides libEGL.so.1)
       libglvnd
       # Vulkan and video acceleration
-      vulkan-validation-layers
+      # vulkan-validation-layers dropped: debug-only layer, broken build on
+      # nixpkgs 1.4.350.0 (update_deps.py git-clones in the sandbox). RADV
+      # Vulkan works via mesa + vulkan-loader without it.
       libva-vdpau-driver
       # amdvlk removed - RADV (Mesa Vulkan) is now default
       rocmPackages.clr.icd

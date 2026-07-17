@@ -95,21 +95,5 @@ in
         type = "Application";
       };
     };
-
-    # NOTE: Shell aliases for CLI tools disabled - protonvpn-cli was removed upstream
-    # Use the ProtonVPN GUI application instead
-    # programs.bash.shellAliases = mkIf cfg.vpn.enable {
-    #   pvpn = "protonvpn-cli";
-    #   pvpn-connect = "protonvpn-cli connect";
-    #   pvpn-disconnect = "protonvpn-cli disconnect";
-    #   pvpn-status = "protonvpn-cli status";
-    # };
-
-    # programs.zsh.shellAliases = mkIf cfg.vpn.enable {
-    #   pvpn = "protonvpn-cli";
-    #   pvpn-connect = "protonvpn-cli connect";
-    #   pvpn-disconnect = "protonvpn-cli disconnect";
-    #   pvpn-status = "protonvpn-cli status";
-    # };
   };
 }

@@ -26,6 +26,7 @@ in
       ../common/nixos/inotify-limits.nix
       ./nixos/cpu.nix
       ./nixos/memory.nix
+      ./nixos/resilience.nix # Watchdog + sshd limits + oomd (post-2026-07-08 freeze)
       ../common/nixos/hosts.nix
       ./nixos/plex.nix
       ./flaresolverr.nix # Cloudflare-bypass proxy for Prowlarr (used by 1337x and any other CF-protected indexer)
@@ -526,7 +527,7 @@ in
   nixpkgs.config = {
     allowUnfree = true; # Required for NVIDIA drivers
     allowBroken = true;
-    permittedInsecurePackages = [ "olm-3.2.16" "dotnet-sdk-6.0.428" "python3.12-youtube-dl-2021.12.17" ];
+    permittedInsecurePackages = [ "olm-3.2.16" "dotnet-sdk-6.0.428" "python3.12-youtube-dl-2021.12.17" "python3.14-youtube-dl-2021.12.17" ];
 
     # Override nodejs to use nodejs_24 to avoid version conflicts
     packageOverrides = pkgs: {
@@ -553,6 +554,11 @@ in
     onDemandModels = [ "gemma4:e4b" "qwen2.5:7b" "gemma4:12b" "qwen2.5-coder:14b" ];
     keepAlive = "5m"; # Evict from VRAM after 5 minutes of idle
   };
+
+  # Bind Ollama to all interfaces (incl. Tailscale 100.118.96.32) so the AIFactory
+  # portal at aifactory.freundcloud.org.uk can reach it. Firewall disabled on p510;
+  # access is gated by Tailscale ACLs.
+  services.ollama.host = lib.mkForce "0.0.0.0";
 
   # Plex MCP server — exposes the local Plex server to AI clients over MCP
   # (Streamable HTTP at http://p510:3010/mcp). Reachable only over the tailnet
@@ -742,6 +748,10 @@ in
       "tautulli.freundcloud.org.uk" = "http://localhost:8181";
       "sonarr.freundcloud.org.uk" = "http://localhost:8989";
       "radarr.freundcloud.org.uk" = "http://localhost:7878";
+      # Transmission RPC/web — protected by rpc-authentication (agenix
+      # transmission-rpc). One-time DNS route needed to publish the CNAME:
+      #   cloudflared tunnel route dns p510-home transmission.freundcloud.org.uk
+      "transmission.freundcloud.org.uk" = "http://localhost:9091";
       "lidarr.freundcloud.org.uk" = "http://localhost:8686";
       "bazarr.freundcloud.org.uk" = "http://localhost:6767";
       "nzbget.freundcloud.org.uk" = "http://localhost:6789";

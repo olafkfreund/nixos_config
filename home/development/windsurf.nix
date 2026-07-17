@@ -56,9 +56,11 @@ in
 
   config = mkIf cfg.enable {
     # Install windsurf and related packages
+    # NOTE: upstream rebranded `windsurf` → `devin-desktop` (same app); the old
+    # attr is now a deprecation-warning alias, so reference the new name directly.
     home.packages = with pkgs;
       [
-        windsurf
+        devin-desktop
         alejandra
         deadnix
         statix

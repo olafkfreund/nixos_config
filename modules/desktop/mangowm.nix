@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, inputs, ... }:
 # mango — dwl-based (wlroots + scenefx) Wayland compositor, exposed as a
 # selectable login session. The mango flake's NixOS module (programs.mango) is
 # wired in flake.nix; this feature module just turns it on. programs.mango
@@ -16,5 +16,12 @@ in
 
   config = mkIf cfg.enable {
     programs.mango.enable = true;
+    # mango's meson.build requires scenefx-0.5, but its flake builds the package
+    # against scenefx 0.4.1. Rebuild the mango package with the scenefx 0.5 we
+    # pin in flake.nix. Drop this override once mango wires scenefx 0.5 upstream.
+    programs.mango.package =
+      inputs.mango.packages.${pkgs.stdenv.hostPlatform.system}.mango.override {
+        scenefx = inputs.scenefx.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      };
   };
 }

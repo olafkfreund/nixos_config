@@ -1,18 +1,20 @@
-# Poll aaddrick/claude-desktop-debian for a new release. When the latest
-# release tag's commit differs from the commit we pinned in flake.lock,
-# open a single tracking issue so the release notes can be reviewed
-# BEFORE running /update-claude-code.
+# Poll Anthropic's official Claude Desktop apt repo for a new release. When
+# the latest version in the apt Packages index differs from the version we
+# pin in pkgs/claude-desktop-beta/default.nix, open a single tracking issue
+# so the bump can be reviewed BEFORE running /update-claude-code.
 #
-# We compare by COMMIT SHA, not tag name, because upstream retags in
-# place when re-releasing with the same wrapper version + new claude
-# binary (e.g. v1.3.31+claude1.2773.0 → v1.3.31+claude1.3109.0). A
-# commit-level compare catches both new versions AND retags.
+# We track the official signed .deb (downloads.claude.ai) — versioning like
+# 1.18286.0. The old aaddrick/claude-desktop-debian Windows-repackage input
+# was removed in #986, so this watcher no longer touches flake.lock or gh
+# releases; it reads the apt index directly, exactly like the bump procedure
+# documented in the package header.
 #
-# Dedup: one issue per {upstream-commit, pinned-commit} pair. An already-
-# open tracking issue silences subsequent runs for that same drift.
+# Dedup: one issue per version string. An already-open (or closed) tracking
+# issue for that version silences subsequent runs.
 #
 # Related:
-#   .claude/commands/update-claude-code.md — bump workflow
+#   .claude/commands/update-claude-code.md — bump workflow (section B)
+#   pkgs/claude-desktop-beta/default.nix    — the package + bump one-liner
 #   .github/workflows/claude-code-watch.yml — sibling for the CLI
 
 name: claude-desktop watch
@@ -26,134 +28,116 @@ permissions:
   contents: read
   issues: write
 
+env:
+  APT_PACKAGES: https://downloads.claude.ai/claude-desktop/apt/stable/dists/stable/main/binary-amd64/Packages
+
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Resolve latest upstream release + pinned commit
+      - name: Resolve latest apt version + pinned version
         id: v
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
-          # Latest release on aaddrick/claude-desktop-debian (any kind,
-          # including pre-releases — upstream uses semver tags like
-          # v1.3.32+claude1.3109.0 and doesn't mark pre-releases).
-          latest_tag=$(gh api repos/aaddrick/claude-desktop-debian/releases \
-            --jq '.[0].tag_name')
-          latest_commit=$(gh api "repos/aaddrick/claude-desktop-debian/git/ref/tags/$latest_tag" \
-            --jq '.object.sha' 2>/dev/null \
-            || gh api "repos/aaddrick/claude-desktop-debian/commits/$latest_tag" \
-            --jq '.sha')
+          # Latest version + SHA256 from the official apt Packages index.
+          # Debian stanzas list Filename: before SHA256:, so print on the
+          # SHA256: line (the version was captured earlier); sort -V picks
+          # the newest since the index only ever grows.
+          read -r latest_ver latest_sha < <(curl -fsSL "$APT_PACKAGES" \
+            | awk '/^Version:/{v=$2} /^SHA256:/{print v, $2}' | sort -V | tail -1)
 
-          # What we have pinned
-          pinned_commit=$(jq -r '.nodes."claude-desktop-linux".locked.rev' flake.lock)
-          pinned_date=$(jq -r '.nodes."claude-desktop-linux".locked.lastModified' flake.lock \
-            | xargs -I{} date -u -d @{} +%Y-%m-%dT%H:%M:%SZ)
+          # What we currently pin (the `version = "..."` line in the let block).
+          pinned_ver=$(grep -oP '^\s*version = "\K[^"]+' \
+            pkgs/claude-desktop-beta/default.nix | head -1)
 
-          if [ -z "$latest_tag" ] || [ -z "$latest_commit" ] || [ -z "$pinned_commit" ]; then
-            echo "Could not determine versions (tag=$latest_tag commit=$latest_commit pin=$pinned_commit)" >&2
+          if [ -z "$latest_ver" ] || [ -z "$latest_sha" ] || [ -z "$pinned_ver" ]; then
+            echo "Could not determine versions (latest=$latest_ver sha=$latest_sha pin=$pinned_ver)" >&2
             exit 1
           fi
 
-          echo "latest_tag=$latest_tag"       >>"$GITHUB_OUTPUT"
-          echo "latest_commit=$latest_commit" >>"$GITHUB_OUTPUT"
-          echo "pinned_commit=$pinned_commit" >>"$GITHUB_OUTPUT"
-          echo "pinned_date=$pinned_date"     >>"$GITHUB_OUTPUT"
-          echo "latest=$latest_tag ($latest_commit) pinned=$pinned_commit"
+          echo "latest_ver=$latest_ver" >>"$GITHUB_OUTPUT"
+          echo "latest_sha=$latest_sha" >>"$GITHUB_OUTPUT"
+          echo "pinned_ver=$pinned_ver" >>"$GITHUB_OUTPUT"
+          echo "latest=$latest_ver pinned=$pinned_ver"
 
       - name: Exit if no drift
-        if: steps.v.outputs.latest_commit == steps.v.outputs.pinned_commit
-        run: echo "pinned == latest ($pinned_commit) — nothing to do"
+        if: steps.v.outputs.latest_ver == steps.v.outputs.pinned_ver
+        run: echo "pinned == latest (${{ steps.v.outputs.pinned_ver }}) — nothing to do"
 
-      - name: Dedup — skip if an issue for this upstream commit already exists
-        if: steps.v.outputs.latest_commit != steps.v.outputs.pinned_commit
+      - name: Dedup — skip if an issue for this version already exists
+        if: steps.v.outputs.latest_ver != steps.v.outputs.pinned_ver
         id: dedup
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.v.outputs.latest_tag }}
+          VERSION: ${{ steps.v.outputs.latest_ver }}
         run: |
           set -euo pipefail
           existing=$(gh issue list \
             --label claude-desktop-update \
             --state all \
-            --search "in:title \"claude-desktop: update to $TAG\"" \
+            --search "in:title \"claude-desktop): update to $VERSION\"" \
             --json number \
             --jq '.[0].number // empty')
           if [ -n "$existing" ]; then
-            echo "Issue #$existing already tracks $TAG — skipping"
+            echo "Issue #$existing already tracks $VERSION — skipping"
             echo "skip=true" >>"$GITHUB_OUTPUT"
           else
             echo "skip=false" >>"$GITHUB_OUTPUT"
           fi
 
-      - name: Fetch release notes for context
-        if: steps.v.outputs.latest_commit != steps.v.outputs.pinned_commit && steps.dedup.outputs.skip != 'true'
-        id: notes
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.v.outputs.latest_tag }}
-        run: |
-          set -euo pipefail
-          notes=$(gh release view "$TAG" -R aaddrick/claude-desktop-debian \
-            --json body --jq '.body // ""' 2>/dev/null | head -40)
-          # Multi-line output via heredoc syntax
-          {
-            echo 'body<<EOF'
-            echo "$notes"
-            echo 'EOF'
-          } >>"$GITHUB_OUTPUT"
-
       - name: Open tracking issue
-        if: steps.v.outputs.latest_commit != steps.v.outputs.pinned_commit && steps.dedup.outputs.skip != 'true'
+        if: steps.v.outputs.latest_ver != steps.v.outputs.pinned_ver && steps.dedup.outputs.skip != 'true'
         env:
-          GH_TOKEN:      ${{ secrets.GITHUB_TOKEN }}
-          TAG:           ${{ steps.v.outputs.latest_tag }}
-          LATEST_COMMIT: ${{ steps.v.outputs.latest_commit }}
-          PINNED_COMMIT: ${{ steps.v.outputs.pinned_commit }}
-          PINNED_DATE:   ${{ steps.v.outputs.pinned_date }}
-          NOTES:         ${{ steps.notes.outputs.body }}
+          GH_TOKEN:    ${{ secrets.GITHUB_TOKEN }}
+          VERSION:     ${{ steps.v.outputs.latest_ver }}
+          LATEST_SHA:  ${{ steps.v.outputs.latest_sha }}
+          PINNED_VER:  ${{ steps.v.outputs.pinned_ver }}
         run: |
           set -euo pipefail
-          # Build the issue body in a heredoc so the markdown bullets
-          # (- foo) live inside the shell heredoc instead of at YAML
-          # column 0, which would break out of the `run: |` block
-          # scalar (caused a 'expected <block end>, but found ''-''
-          # YAML parse error on every run).
+          # Build the body in a heredoc so markdown bullets (- foo) live
+          # inside the shell heredoc rather than at YAML column 0, which
+          # would break out of the `run: |` block scalar.
           body=$(cat <<EOF
-          Upstream \`aaddrick/claude-desktop-debian\` has a new release: **$TAG**.
+          Anthropic's official Claude Desktop apt repo has a new release: **$VERSION**.
 
-          - Currently pinned commit: \`${PINNED_COMMIT:0:10}\` (locked $PINNED_DATE)
-          - Latest release commit:   \`${LATEST_COMMIT:0:10}\` (tag \`$TAG\`)
-
-          ### Release notes
-
-          $NOTES
-
-          ### Links
-
-          - Release: https://github.com/aaddrick/claude-desktop-debian/releases/tag/$TAG
-          - Compare: https://github.com/aaddrick/claude-desktop-debian/compare/${PINNED_COMMIT}...${LATEST_COMMIT}
-          - Open issues (regression watch): https://github.com/aaddrick/claude-desktop-debian/issues?q=is%3Aissue+is%3Aopen+label%3Abug
+          - Currently pinned: \`$PINNED_VER\`
+          - Latest available: \`$VERSION\`
+          - SHA256: \`$LATEST_SHA\`
 
           ### To act on this
 
-          Run \`/update-claude-code\` in Claude Code and follow the **B. Update
-          claude-desktop** section. **Read the release notes first** — upstream
-          occasionally ships regressions (e.g. v1.3.31 broke Cowork daemon recovery)
-          and our overlay may need a patch rev.
+          Bump \`pkgs/claude-desktop-beta/default.nix\` — two lines only:
 
-          This issue will auto-close when that PR merges.
+          \`\`\`nix
+          version = "$VERSION";
+          sha256  = "$LATEST_SHA";
+          \`\`\`
+
+          Then build-verify and deploy (razer + p620 only; p510 is headless):
+
+          \`\`\`
+          nix build .#nixosConfigurations.razer.pkgs.claude-desktop-linux
+          \`\`\`
+
+          Or run \`/update-claude-code\` and follow the **B. Update claude-desktop**
+          section. Claude Desktop is usually running at deploy time — the new
+          binary is picked up only after quit + relaunch.
+
+          ### Links
+
+          - apt index: https://downloads.claude.ai/claude-desktop/apt/stable/dists/stable/main/binary-amd64/Packages
+
+          This issue will auto-close when the bump PR merges.
           EOF
           )
-          # Strip the YAML-required leading 10 spaces so bullet points
-          # render at column 0 in the GitHub issue body.
+          # Strip the YAML-required leading 10 spaces so bullets render at
+          # column 0 in the GitHub issue body.
           body=$(printf '%s\n' "$body" | sed 's/^          //')
 
           gh issue create \
             --label claude-desktop-update \
-            --title "chore(claude-desktop): update to $TAG" \
+            --title "chore(claude-desktop): update to $VERSION" \
             --body "$body"

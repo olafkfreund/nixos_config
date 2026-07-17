@@ -48,7 +48,7 @@ in
         gnome-feeds # RSS feed reader
         typst # Document typesetting system
         turtle # GUI for Git
-        logseq # Knowledge management and note-taking
+        # logseq # Knowledge management - TEMP disabled: yarn release-electron build hangs in nixpkgs e73de5be (2026-06-26 bump)
         lmstudio # AI-assisted coding assistant
 
         # GNOME multimedia

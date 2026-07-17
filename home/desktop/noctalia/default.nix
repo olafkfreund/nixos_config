@@ -86,7 +86,10 @@ in
       theme = {
         mode = "dark";
         source = "custom";
-        custom_palette = "Gruvbox";
+        # mkForce: noctalia's HM module (>= 2026-07-04) now defaults
+        # custom_palette to "stylix" at normal priority; force our custom
+        # Gruvbox palette (palettes/Gruvbox.json below) to win the conflict.
+        custom_palette = lib.mkForce "Gruvbox";
       };
     };
   };
@@ -202,7 +205,10 @@ in
   # session env). swayidle works on niri (ext-idle-notify-v1): lock at 5 min,
   # monitors off at 10 min, and — laptops only — suspend at 30 min.
   programs.niri.settings.spawn-at-startup = lib.mkAfter [
-    { command = [ "noctalia" ]; }
+    # Which shell launches is chosen by the login session: the stock "Niri"
+    # session leaves DESK_SHELL unset → Noctalia; the "Niri (DankMaterialShell)"
+    # session (modules/desktop/dms-shell.nix) sets DESK_SHELL="dms run" → DMS.
+    { command = [ "sh" "-c" "exec \${DESK_SHELL:-noctalia}" ]; }
     { command = [ "swaybg" "-m" "fill" "-i" "${wallpaper}" ]; }
     { command = [ "gammastep" "-l" geo ]; }
     {
@@ -222,6 +228,131 @@ in
       ++ [ "before-sleep" lockCmd ];
     }
   ];
+
+  # ── Session config split: DMS owns config.kdl, Noctalia moves aside ─────────
+  # DankMaterialShell hardcodes ~/.config/niri/config.kdl as the file it inspects
+  # (via `dms config resolve-include`) and rewrites (its "Fix Now" buttons), and
+  # it IGNORES NIRI_CONFIG. So for DMS's include checks to pass — and for its
+  # display / window-rule / cursor / keybind changes to actually persist —
+  # config.kdl must BE the DMS session's config, carrying the dms/*.kdl includes
+  # DMS greps for. We therefore retarget niri-flake's generated Noctalia config to
+  # config-noctalia.kdl (the plain "Niri" session loads it via NIRI_CONFIG — see
+  # modules/desktop/dms-shell.nix) and hand-write config.kdl as the DMS session's
+  # config below. The two sessions then share NO niri settings: Noctalia never
+  # sees dms/*.kdl and DMS never sees the Noctalia keybinds.
+  xdg.configFile.niri-config.target = lib.mkForce "niri/config-noctalia.kdl";
+
+  # config.kdl — the "Niri (DankMaterialShell)" session's config (dms-shell.nix
+  # points that session here; it is also niri's default path, which is exactly
+  # what DMS greps). Includes use niri's RELATIVE form `include "dms/…"`: current
+  # niri resolves these against the config file's own directory (~/.config/niri),
+  # so the store-symlinked config.kdl still finds the runtime dms/*.kdl fragments,
+  # and the relative string is what DMS's resolve-include matches — clearing the
+  # "… not included" banners. optional=true keeps niri happy before `dms setup`
+  # has written a given fragment. The includes sit ABOVE the inline binds{} block,
+  # so on any keybind conflict the inline scheme wins — keeping these keybinds
+  # distinct from (and never leaking into) the Noctalia session.
+  xdg.configFile."niri/config.kdl".text = ''
+    include optional=true "dms/colors.kdl"
+    include optional=true "dms/layout.kdl"
+    include optional=true "dms/alttab.kdl"
+    include optional=true "dms/wpblur.kdl"
+    include optional=true "dms/outputs.kdl"
+    include optional=true "dms/windowrules.kdl"
+    include optional=true "dms/cursor.kdl"
+    include optional=true "dms/binds.kdl"
+
+    input {
+        keyboard {
+            xkb { layout "gb"; }
+            repeat-delay 600
+            repeat-rate 25
+        }
+        touchpad { tap; natural-scroll; }
+    }
+    prefer-no-csd
+    screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+    environment {
+        "NIXOS_OZONE_WL" "1"
+        "ELECTRON_OZONE_PLATFORM_HINT" "auto"
+        "GSETTINGS_SCHEMA_DIR" "${gtkSchemas}"
+        // DMS only recognises "gtk3"/"qt6ct" here (not the system-wide "qtct"),
+        // so set qt6ct for this session — qt6ct-kde is installed, so Qt apps keep
+        // their existing theming and DMS's "Missing Environment Variables" clears.
+        "QT_QPA_PLATFORMTHEME" "qt6ct"
+    }
+
+    binds {
+        // Window management — niri-native, shared with the Noctalia session.
+        Mod+Return { spawn "ghostty"; }
+        Mod+T { spawn "ghostty"; }
+        Mod+E { spawn "nautilus"; }
+        Mod+Q { close-window; }
+        Mod+H { focus-column-left; }
+        Mod+L { focus-column-right; }
+        Mod+J { focus-window-down; }
+        Mod+K { focus-window-up; }
+        Mod+Left { focus-column-left; }
+        Mod+Right { focus-column-right; }
+        Mod+Down { focus-workspace-down; }
+        Mod+Up { focus-workspace-up; }
+        Mod+Shift+H { move-column-left; }
+        Mod+Shift+L { move-column-right; }
+        Mod+Shift+J { move-window-down; }
+        Mod+Shift+K { move-window-up; }
+        Mod+Shift+Left { move-column-left; }
+        Mod+Shift+Right { move-column-right; }
+        Mod+1 { focus-workspace 1; }
+        Mod+2 { focus-workspace 2; }
+        Mod+3 { focus-workspace 3; }
+        Mod+4 { focus-workspace 4; }
+        Mod+5 { focus-workspace 5; }
+        "Mod+Page_Down" { focus-workspace-down; }
+        "Mod+Page_Up" { focus-workspace-up; }
+        "Mod+Shift+Page_Down" { move-column-to-workspace-down; }
+        "Mod+Shift+Page_Up" { move-column-to-workspace-up; }
+        Mod+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
+        Mod+WheelScrollUp cooldown-ms=150 { focus-workspace-up; }
+        Mod+F { maximize-column; }
+        Mod+Shift+F { fullscreen-window; }
+        Mod+Ctrl+Shift+F { toggle-windowed-fullscreen; }
+        Mod+R { switch-preset-column-width; }
+        Mod+Equal { set-column-width "+10%"; }
+        Mod+Minus { set-column-width "-10%"; }
+        Mod+Comma { consume-window-into-column; }
+        Mod+Period { expel-window-from-column; }
+        Mod+V { toggle-window-floating; }
+        Mod+O { toggle-overview; }
+        Mod+S { spawn "niri" "msg" "action" "screenshot"; }
+        Mod+Ctrl+S { spawn "niri" "msg" "action" "screenshot-screen"; }
+        Mod+Shift+S { spawn "niri" "msg" "action" "screenshot-window"; }
+        Mod+Shift+R { spawn "niri-screenrecord"; }
+        Mod+Alt+R { spawn "niri-screenrecord" "region"; }
+        Mod+Shift+Slash { show-hotkey-overlay; }
+        Mod+Shift+E { quit; }
+        XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; }
+        XF86AudioLowerVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
+        XF86AudioMute { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+        XF86MonBrightnessUp { spawn "brightnessctl" "set" "5%+"; }
+        XF86MonBrightnessDown { spawn "brightnessctl" "set" "5%-"; }
+
+        // Shell actions — DankMaterialShell (distinct from the Noctalia session,
+        // which uses `noctalia msg …` for these).
+        Mod+D { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
+        Mod+Space { spawn "dms" "ipc" "call" "spotlight" "toggle"; }
+        Mod+C { spawn "dms" "ipc" "call" "control-center" "toggle"; }
+        Mod+N { spawn "dms" "ipc" "call" "notifications" "toggle"; }
+        Mod+X { spawn "dms" "ipc" "call" "powermenu" "toggle"; }
+        Mod+Backspace { spawn "dms" "ipc" "call" "lock" "lock"; }
+    }
+
+    // Start DMS (prefer the managed service; fall back to a direct spawn), plus
+    // the same companion daemons as the Noctalia session. Idle lock uses DMS.
+    spawn-at-startup "sh" "-c" "if systemctl --user start dms.service 2>/dev/null; then exit 0; fi; exec dms run"
+    spawn-at-startup "swaybg" "-m" "fill" "-i" "${wallpaper}"
+    spawn-at-startup "gammastep" "-l" "${geo}"
+    spawn-at-startup "swayidle" "-w" "timeout" "300" "dms ipc call lock lock" "timeout" "600" "niri msg action power-off-monitors" "resume" "niri msg action power-on-monitors" ${lib.optionalString isLaptop ''"timeout" "1800" "systemctl suspend" ''}"before-sleep" "dms ipc call lock lock"
+  '';
 
   # Keybinds. Mod = Super/logo. Press Mod+Shift+/ for niri's hotkey overlay.
   programs.niri.settings.binds = with config.lib.niri.actions; {
@@ -323,7 +454,7 @@ in
       timeout 300 '${lockCmd}' \
       timeout 600 "wlopm --off '*'" resume "wlopm --on '*'" \
       ${lib.optionalString isLaptop "timeout 1800 'systemctl suspend' \\\n      "}before-sleep '${lockCmd}' &
-    noctalia &
+    ''${DESK_SHELL:-noctalia} &
   '';
 
   # Session environment, read at labwc startup. XKB layout for the keyboard,
@@ -367,42 +498,62 @@ in
       osd.workspace-switcher.boxes.inactive.bg.color: #${colors.base02}
     '';
 
-  # Keybinds (labwc ships only sparse compiled-in defaults). W = Super/logo.
+  # Keybinds — kept in lockstep with the niri binds above (W = Super/logo) so
+  # the same keys do the same thing across WMs. labwc is a *stacking* compositor,
+  # so niri's tiling-only binds have no equivalent and are intentionally absent:
+  #   Mod+H/L/J/K (column/window focus) → use A-Tab; arrows switch desktops
+  #   Mod+R, Mod+Comma/Period, Mod+Minus/Equal (columns)  — N/A (no tiling)
+  #   Mod+V (float, labwc windows always float), Mod+O (overview)  — N/A
+  #   Mod+Ctrl+Shift+F (windowed-fullscreen), Mod+P (mirror),
+  #   Mod+Shift+Slash (hotkey overlay), Mod+Shift+S (window shot)  — niri-only
   xdg.configFile."labwc/rc.xml".text = ''
     <?xml version="1.0"?>
     <labwc_config>
       <desktops>
-        <number>4</number>
+        <number>5</number>
       </desktops>
       <keyboard>
+        <!-- Apps / system (identical keys to niri) -->
         <keybind key="W-Return"><action name="Execute" command="ghostty"/></keybind>
+        <keybind key="W-t"><action name="Execute" command="ghostty"/></keybind>
         <keybind key="W-d"><action name="Execute" command="noctalia msg panel-toggle launcher"/></keybind>
+        <keybind key="W-Space"><action name="Execute" command="noctalia msg panel-toggle launcher"/></keybind>
         <keybind key="W-c"><action name="Execute" command="noctalia msg panel-toggle control-center"/></keybind>
         <keybind key="W-BackSpace"><action name="Execute" command="noctalia msg session lock"/></keybind>
-        <keybind key="Print"><action name="Execute" command="noctalia msg screenshot-region"/></keybind>
-        <!-- Region screen recording (re-press to stop). niri-screenrecord's
-             region branch is compositor-agnostic (slurp + wl-screenrec). -->
-        <keybind key="W-S-r"><action name="Execute" command="niri-screenrecord region"/></keybind>
         <keybind key="W-e"><action name="Execute" command="nautilus"/></keybind>
         <keybind key="W-q"><action name="Close"/></keybind>
+        <keybind key="W-S-e"><action name="Exit"/></keybind>
+        <!-- Window focus/switching (stacking-native: A-Tab + desktop arrows) -->
         <keybind key="A-Tab"><action name="NextWindow"/></keybind>
         <keybind key="A-S-Tab"><action name="PreviousWindow"/></keybind>
-        <keybind key="W-f"><action name="ToggleMaximize"/></keybind>
-        <keybind key="W-S-f"><action name="ToggleFullscreen"/></keybind>
-        <keybind key="W-Space"><action name="ShowMenu" menu="client-menu"/></keybind>
         <keybind key="W-Left"><action name="GoToDesktop" to="left" wrap="yes"/></keybind>
         <keybind key="W-Right"><action name="GoToDesktop" to="right" wrap="yes"/></keybind>
         <keybind key="W-Up"><action name="GoToDesktop" to="left" wrap="yes"/></keybind>
         <keybind key="W-Down"><action name="GoToDesktop" to="right" wrap="yes"/></keybind>
+        <!-- Window state (Mod+F maximize, Mod+Shift+F fullscreen — same as niri) -->
+        <keybind key="W-f"><action name="ToggleMaximize"/></keybind>
+        <keybind key="W-S-f"><action name="ToggleFullscreen"/></keybind>
+        <!-- Desktops 1-5 (identical to niri Mod+1..5) -->
         <keybind key="W-1"><action name="GoToDesktop" to="1"/></keybind>
         <keybind key="W-2"><action name="GoToDesktop" to="2"/></keybind>
         <keybind key="W-3"><action name="GoToDesktop" to="3"/></keybind>
         <keybind key="W-4"><action name="GoToDesktop" to="4"/></keybind>
+        <keybind key="W-5"><action name="GoToDesktop" to="5"/></keybind>
         <keybind key="W-S-1"><action name="SendToDesktop" to="1"/></keybind>
         <keybind key="W-S-2"><action name="SendToDesktop" to="2"/></keybind>
         <keybind key="W-S-3"><action name="SendToDesktop" to="3"/></keybind>
         <keybind key="W-S-4"><action name="SendToDesktop" to="4"/></keybind>
-        <keybind key="W-S-e"><action name="Exit"/></keybind>
+        <keybind key="W-S-5"><action name="SendToDesktop" to="5"/></keybind>
+        <!-- Screenshots: Mod+S region, Mod+Ctrl+S whole output (+ Print alias) -->
+        <keybind key="W-s"><action name="Execute" command="noctalia msg screenshot-region"/></keybind>
+        <keybind key="W-C-s"><action name="Execute" command="noctalia msg screenshot-fullscreen"/></keybind>
+        <keybind key="Print"><action name="Execute" command="noctalia msg screenshot-region"/></keybind>
+        <!-- Screen recording (region; re-press to stop). Mod+Alt+R matches niri's
+             region key; Mod+Shift+R kept as an alias. niri-screenrecord's region
+             branch is compositor-agnostic (slurp + wl-screenrec). -->
+        <keybind key="W-A-r"><action name="Execute" command="niri-screenrecord region"/></keybind>
+        <keybind key="W-S-r"><action name="Execute" command="niri-screenrecord region"/></keybind>
+        <!-- Media / brightness (identical to niri) -->
         <keybind key="XF86_AudioRaiseVolume"><action name="Execute" command="wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"/></keybind>
         <keybind key="XF86_AudioLowerVolume"><action name="Execute" command="wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"/></keybind>
         <keybind key="XF86_AudioMute"><action name="Execute" command="wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"/></keybind>
@@ -427,6 +578,10 @@ in
     in
     {
       enable = true;
+      # Reuse the scenefx-0.5-overridden package from the NixOS module
+      # (modules/desktop/mangowm.nix) so the HM side doesn't rebuild mango
+      # against scenefx 0.4.1 (which fails: "scenefx-0.5 not found").
+      package = osConfig.programs.mango.package;
 
       extraConfig = ''
         # Electron apps → Wayland (same fix as niri/labwc).
@@ -448,6 +603,13 @@ in
         gappiv=4
         gappoh=4
         gappov=4
+
+        # Keys are kept in lockstep with the niri binds above. niri-only actions
+        # with no mango equivalent are intentionally absent:
+        #   Mod+Comma/Period (consume/expel into column), Mod+Minus/Equal (width
+        #   nudge — use Mod+R presets), Mod+P (mirror), Mod+Shift+Slash (hotkey
+        #   overlay), Mod+WheelScroll (workspace). Per-WM natural focus is kept,
+        #   so arrows/hjkl are directional focus here (niri uses Up/Down=workspace).
 
         # Apps
         bind=SUPER,Return,spawn,ghostty
@@ -480,11 +642,16 @@ in
         bind=SUPER+SHIFT,j,exchange_client,down
         bind=SUPER+SHIFT,k,exchange_client,up
 
-        # Window state
+        # Window state (aligned with niri)
         bind=SUPER,f,togglemaximizescreen,
         bind=SUPER+SHIFT,f,togglefullscreen,
+        # Mod+Ctrl+Shift+F → windowed/"fake" fullscreen (niri toggle-windowed-fullscreen)
+        bind=SUPER+CTRL+SHIFT,f,togglefakefullscreen,
         bind=SUPER,v,togglefloating,
         bind=SUPER,o,toggleoverview,
+        # Mod+R → cycle preset column widths (niri switch-preset-column-width);
+        # mango's scroller_proportion_preset=0.5,0.8,1.0 mirrors niri's presets.
+        bind=SUPER,r,switch_proportion_preset,
         bind=SUPER,n,switch_layout
 
         # Tags 1-5: view (switch) / tag (move window to)
@@ -499,8 +666,14 @@ in
         bind=SUPER+SHIFT,4,tag,4,0
         bind=SUPER+SHIFT,5,tag,5,0
 
-        # Screenshot (noctalia) + region recording (compositor-agnostic helper)
+        # Screenshots: Mod+S region, Mod+Ctrl+S whole output (Print kept as alias).
+        # niri's Mod+Shift+S (per-window) has no noctalia equivalent — use Mod+S.
+        bind=SUPER,s,spawn,noctalia msg screenshot-region
+        bind=SUPER+CTRL,s,spawn,noctalia msg screenshot-fullscreen
         bind=none,Print,spawn,noctalia msg screenshot-region
+        # Region recording (re-press to stop). Mod+Alt+R matches niri's region key;
+        # Mod+Shift+R kept as alias (niri's Mod+Shift+R focused-output is niri-only).
+        bind=SUPER+ALT,r,spawn,niri-screenrecord region
         bind=SUPER+SHIFT,r,spawn,niri-screenrecord region
 
         # Media / brightness
@@ -520,7 +693,7 @@ in
           timeout 300 '${lockCmd}' \
           timeout 600 "wlopm --off '*'" resume "wlopm --on '*'" \
           ${lib.optionalString isLaptop "timeout 1800 'systemctl suspend' \\\n      "}before-sleep '${lockCmd}' &
-        noctalia &
+        ''${DESK_SHELL:-noctalia} &
       '';
     }
   );

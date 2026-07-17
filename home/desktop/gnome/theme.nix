@@ -14,6 +14,12 @@ in
     # Settings) intentionally ignore third-party themes by upstream policy.
     # Stylix's GTK target themes everything else; don't chase libadwaita.
 
+    # Stylix sets home.pointerCursor.{name,package,size} but not .enable, so
+    # HM warns about relying on the deprecated auto-enable. Make it explicit
+    # (stylix already auto-enables it — no behavior change, just silences the
+    # warning). Drop once stylix sets .enable itself.
+    home.pointerCursor.enable = true;
+
     # Fonts that GNOME-specific bits rely on. Stylix already supplies the
     # mono/sans/serif packages declared in modules/desktop/stylix-theme.nix.
     home.packages = with pkgs; [

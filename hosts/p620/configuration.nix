@@ -351,26 +351,26 @@ in
   # cosmic module; the unified DM module defaults to "none" without it).
   # NOTE: must live at top-level, NOT inside the features = {...} block above —
   # the option path is `desktop.displayManager`, not `features.desktop.displayManager`.
-  # Login manager: Noctalia greeter (greetd). backend="none" turns GDM off; the
-  # noctalia-greeter module below auto-enables greetd + its bundled wlroots
-  # compositor. GNOME/niri/labwc remain selectable SESSIONS in the greeter.
+  # Login manager: DankMaterialShell greeter (greetd). backend="none" turns GDM
+  # off; the dms-greeter module auto-enables greetd and runs the greeter inside
+  # a niri compositor. Chosen over noctalia-greeter (more mature); it enumerates
+  # the same wayland-sessions, so GNOME + all niri/labwc/mango (stock + -dms)
+  # entries stay selectable. noctalia-greeter input kept available for revert.
   desktop.displayManager.backend = "none";
 
-  programs.noctalia-greeter = {
+  services.displayManager.dms-greeter = {
     enable = true;
-    package = inputs.noctalia-greeter.packages.${pkgs.system}.default;
-    # Match the login cursor to the Stylix (bibata) theme used everywhere else.
-    settings.cursor = {
-      theme = config.stylix.cursor.name;
-      size = config.stylix.cursor.size;
-      package = config.stylix.cursor.package;
-    };
+    compositor.name = "niri";
   };
 
   # Phase 1: niri + labwc + mango as selectable login sessions (alongside GNOME).
   desktop.niri.enable = true;
   desktop.labwc.enable = true;
   desktop.mangowm.enable = true;
+
+  # Adds "(DankMaterialShell)" login sessions for niri/labwc/mango next to the
+  # stock (Noctalia) ones — pick per login in the greeter.
+  desktop.dmsShell.enable = true;
 
   # ddcutil: software brightness/contrast control of external monitors (DDC/CI).
   modules.hardware.ddcutil.enable = true;
@@ -592,7 +592,8 @@ in
     # gst-plugin-pipewire is NOT in gst_all_1 — the PipeWire GStreamer
     # plugin ships inside the pipewire package itself (libgstpipewire.so
     # under pipewire's lib output). The active services.pipewire wires it.
-    gst-vaapi
+    # gst-vaapi removed in GStreamer 1.28 — VAAPI HW accel now lives in the
+    # `va` plugin inside gst-plugins-bad (already listed above).
     gst-plugins-rs
   ]);
 
@@ -647,6 +648,10 @@ in
     services = {
       # Network wait services now handled by desktop profile
       fwupd.serviceConfig.LimitNOFILE = 524288;
+
+      # Don't restart greetd on rebuild — a switch shouldn't tear down the login
+      # manager mid-session. The new greeter applies at next reboot/logout.
+      greetd.restartIfChanged = false;
     };
 
     # User services
@@ -732,9 +737,12 @@ in
       "olm-3.2.16"
       "python3.12-youtube-dl-2021.12.17"
       "python3.13-youtube-dl-2021.12.17" # newsboat (RSS reader) pulls youtube-dl for URL extraction
+      "python3.14-youtube-dl-2021.12.17" # newsboat (RSS reader) pulls youtube-dl for URL extraction
       "libsoup-2.74.3" # Temporary: Required by some GNOME packages until migration to libsoup-3
       "electron-35.7.5" # Temporary: Required until upstream packages migrate to newer electron
       "electron-39.8.10" # Newly marked EOL after nixpkgs bump on 2026-06-01 — still pulled in by some upstream package, audit + drop later
+      "electron-40.10.5" # Newly marked insecure after nixpkgs bump on 2026-07-15 — still pulled in by some upstream package, audit + drop later
+      "pnpm-10.29.2" # Newly marked insecure after nixpkgs bump on 2026-06-30 — pulled in by dev package set (modules/packages/sets.nix), audit + drop later
     ];
   };
 }

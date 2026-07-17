@@ -164,8 +164,14 @@ in
     # Local derivation in pkgs/antigravity-ide/. See pkgs/default.nix
     # for the rationale (upstream antigravity-nix is still on 1.x).
     pkgs.customPkgs.antigravity-ide
+    # Antigravity Hub — Google's Antigravity desktop launcher (`antigravity-hub`).
+    pkgs.customPkgs.antigravity-hub
+    # GitHub Copilot desktop app — agent-native desktop experience (Tauri).
+    pkgs.customPkgs.github-copilot-app
     pkgs.customPkgs.kosli-cli
     pkgs.customPkgs.aurynk
+    # glab-tui — terminal UI for GitLab on top of the `glab` CLI.
+    pkgs.customPkgs.glab-tui
     pkgs.wayfarer
     # FlyCrys — GTK4-native Claude Code GUI. Wraps the local `claude`
     # binary (installed via programs.claude-code.enable in home/default.nix).

@@ -449,11 +449,11 @@ in
     #
     # base16 → tmux-palette Theme mapping:
     #   bg       = base00 (default background)
-    #   panel    = base01 (lighter background)
+    #   panel    = base00 (popup body — flush with terminal bg, not base01)
     #   selected = base02 (selection / line-highlight)
     #   fg       = base05 (default foreground)
     #   muted    = base03 (comments / dim)
-    #   accent   = base0B (green — gruvbox's classic positive accent)
+    #   accent   = base05 (icons/headers/markers — terminal fg, not a colour)
     # tmux-which-key menu (prefix+Space). The upstream default menu covers
     # built-in tmux commands (./which-key-base.yaml); we append a +Tools
     # submenu (key P) exposing our plugin/custom bindings so they're
@@ -501,11 +501,27 @@ in
 
     xdg.configFile."tmux-palette/theme.json".text = builtins.toJSON {
       bg = "#${colors.base00}";
-      panel = "#${colors.base01}";
+      # render.ts paints `panel` onto every body line (header/search/rows/
+      # footer), so it — not sizing.json's bodyStyle — is what's actually
+      # visible. base00 keeps the popup flush with the terminal background.
+      panel = "#${colors.base00}";
       selected = "#${colors.base02}";
       fg = "#${colors.base05}";
       muted = "#${colors.base03}";
-      accent = "#${colors.base0B}";
+      # accent paints icons, section headers and the row/search markers.
+      # base05 keeps them the same colour as surrounding terminal text.
+      accent = "#${colors.base05}";
+    };
+
+    # Popup chrome. bin/tmux-palette.sh passes explicit -b/-s/-S to
+    # display-popup, so the global popup-style/popup-border-* options set in
+    # extraConfig never reach this popup — sizing.json is the only lever.
+    # Upstream defaults (border "none", bodyStyle "bg=<theme.panel>") render
+    # borderless and lighter than the terminal; pin the body to base00 instead.
+    xdg.configFile."tmux-palette/sizing.json".text = builtins.toJSON {
+      border = "rounded";
+      bodyStyle = "bg=#${colors.base00}";
+      borderStyle = "fg=#ffffff,bg=#${colors.base00}";
     };
 
     # tmux-palette AI launcher: triggered by the M-a bind defined above.
