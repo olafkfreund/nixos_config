@@ -530,7 +530,8 @@ in
     # gst-plugin-pipewire is NOT in gst_all_1 — the PipeWire GStreamer
     # plugin ships inside the pipewire package itself (libgstpipewire.so
     # under pipewire's lib output). The active services.pipewire wires it.
-    gst-vaapi
+    # gst-vaapi removed in GStreamer 1.28 — VA-API now lives in the `va`
+    # plugin inside gst-plugins-bad (already installed above).
     gst-plugins-rs
   ]) ++ (with pkgs;
     [
@@ -615,6 +616,7 @@ in
       "libsoup-2.74.3" # Temporary: Required by some GNOME packages until migration to libsoup-3
       "electron-35.7.5" # Temporary: Required until upstream packages migrate to newer electron
       "electron-39.8.10" # Newly marked EOL after nixpkgs bump on 2026-06-01 — still pulled in by some upstream package, audit + drop later
+      "electron-40.10.5" # Newly marked insecure after nixpkgs bump on 2026-07-15 — still pulled in by some upstream package, audit + drop later
     ];
   };
   system.stateVersion = "25.11";
