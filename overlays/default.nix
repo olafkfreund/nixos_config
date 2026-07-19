@@ -33,6 +33,11 @@
     cosmic-applet-spotify = inputs.cosmic-applet-spotify.packages.${prev.stdenv.hostPlatform.system}.default;
   })
 
+  # herdr — TUI agent multiplexer for AI coding agents (see flake input).
+  (_final: prev: {
+    herdr = inputs.herdr.packages.${prev.stdenv.hostPlatform.system}.default;
+  })
+
   # Rust toolchain overlay — exposes `rust-bin.*` on `final` so packages
   # that need a newer rustc than nixpkgs ships (e.g. splashboard) can
   # build with `makeRustPlatform`. Doesn't replace the default `rustc`.

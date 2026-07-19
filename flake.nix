@@ -203,6 +203,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # herdr — TUI "agent multiplexer" (tmux/zellij for AI coding agents).
+    # Single Rust binary, local Unix-socket API, no daemon/root/network.
+    # Its flake builds a vendored libghostty-vt via zig (deps pre-fetched
+    # offline in-repo), exposed as packages.default. Consumed via overlay
+    # as pkgs.herdr on the interactive-host developer profile (p620 + razer).
+    # Bump with `nix flake update herdr`.
+    herdr = {
+      url = "github:ogulcancelik/herdr";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.rust-overlay.follows = "rust-overlay";
+    };
+
   };
 
   outputs =

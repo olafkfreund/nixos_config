@@ -704,6 +704,29 @@
         "type": "github"
       }
     },
+    "herdr": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": [
+          "rust-overlay"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784425797,
+        "narHash": "sha256-4G0GTjPFgmQko5EDeyiRynRVYRzCLM7tWw9pErPDd20=",
+        "owner": "ogulcancelik",
+        "repo": "herdr",
+        "rev": "b580103b956ef9cdf39798947a46ce4e8b78c322",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ogulcancelik",
+        "repo": "herdr",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -1488,6 +1511,7 @@
         "gnome-quick-web-apps": "gnome-quick-web-apps",
         "gogmail": "gogmail",
         "gscratch": "gscratch",
+        "herdr": "herdr",
         "home-manager": "home-manager_2",
         "lan-mouse": "lan-mouse",
         "lanzaboote": "lanzaboote",
