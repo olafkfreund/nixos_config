@@ -172,6 +172,9 @@ in
     pkgs.customPkgs.aurynk
     # glab-tui — terminal UI for GitLab on top of the `glab` CLI.
     pkgs.customPkgs.glab-tui
+    # herdr — TUI "agent multiplexer": run multiple AI coding agents in one
+    # terminal workspace (tmux/zellij-style). From github:ogulcancelik/herdr.
+    pkgs.herdr
     pkgs.wayfarer
     # FlyCrys — GTK4-native Claude Code GUI. Wraps the local `claude`
     # binary (installed via programs.claude-code.enable in home/default.nix).
