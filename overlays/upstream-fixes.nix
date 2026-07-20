@@ -21,24 +21,6 @@ _final: prev: {
       (oldAttrs.patches or [ ]);
   });
 
-  # mesa 26.1.2 regressed the GBM back-buffer path: gnome-shell/mutter on
-  # amdgpu segfaults in gbm_bo_destroy (reached via get_back_bo during
-  # eglMakeCurrent / frame presentation). mesa 26.1.1 + libgbm 26.0.3 ran
-  # crash-free for weeks; the 26.1.1 -> 26.1.2 bump (nixpkgs 14dbea35565,
-  # 2026-06-03) is the regression. Revert mesa to 26.1.1 against current
-  # build deps; libgbm stays 26.0.3 (unchanged, matching the known-good combo).
-  # Remove once a fixed mesa (>= 26.1.3) lands upstream.
-  mesa = prev.mesa.overrideAttrs (_old: {
-    version = "26.1.1";
-    src = prev.fetchFromGitLab {
-      domain = "gitlab.freedesktop.org";
-      owner = "mesa";
-      repo = "mesa";
-      rev = "mesa-26.1.1";
-      hash = "sha256-OmhBmBGR12Tl+5msiyL8lYQ3XYcDYCqUUjQObEqjytI=";
-    };
-  });
-
   # nixpkgs-unstable ships nix-prefetch-git as `nix-prefetch-git-VERSION`,
   # breaking fetchCargoVendor which calls the binary by its short name.
   # Symlink the short name to the versioned binary.
