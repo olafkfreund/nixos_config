@@ -69,7 +69,15 @@
     ignores = [
       "*~"
       "*.swp"
-      "*result*"
+      # Nix build outputs. NOT "*result*": the wildcards also matched source
+      # files such as classify_result_test.go, which then never appeared in
+      # `git status` and were silently left out of commits while local builds
+      # and tests still passed. Unanchored and unwildcarded, so these match a
+      # file named exactly "result" at any depth (nix build from a subdir) but
+      # never a name that merely contains it. "result-*" covers multi-output
+      # derivations (result-1, result-2, ...).
+      "result"
+      "result-*"
       ".direnv"
       "node_modules"
     ];
