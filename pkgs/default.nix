@@ -13,6 +13,7 @@
   audiobookbay-automated = pkgs.callPackage ./audiobookbay-automated { };
   m4b-tool = pkgs.callPackage ./m4b-tool { };
   audiobook-mcp = pkgs.callPackage ./audiobook-mcp { };
+  ollama-mcp = pkgs.callPackage ./ollama-mcp { };
 
   # media-bot — Telegram bot front-end for the *arr stack on p510.
   # Hybrid menu commands + local-LLM (Ollama) natural-language fallback.
