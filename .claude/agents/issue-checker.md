@@ -1,3 +1,11 @@
+---
+name: issue-checker
+description: |
+  Read-only scan of NixOS/nixpkgs GitHub issues for known bugs affecting packages in your closure. Use before a
+  flake bump or when an update feels risky, to surface breaking issues early. Reports only, changes nothing.
+model: haiku
+---
+
 # Issue Checker Subagent
 
 ## Overview

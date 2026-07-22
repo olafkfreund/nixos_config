@@ -1,4 +1,9 @@
 ---
+name: package-resolver
+description: |
+  Diagnoses and resolves package conflicts, version mismatches, and dependency collisions in the config. Use
+  when a build fails on a collision, two modules pull conflicting versions, or an override needs untangling.
+model: sonnet
 context: fork
 ---
 

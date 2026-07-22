@@ -1,4 +1,9 @@
 ---
+name: test-generator
+description: |
+  Generates unit/integration/smoke tests for NixOS modules and configs. Use when a module has no coverage, after
+  adding a feature flag, or to scaffold a NixOS VM test. Produces tests for your review.
+model: sonnet
 context: fork
 ---
 
@@ -265,7 +270,7 @@ NixOS VM Tests:
    })
 ````
 
-2. Multi-Host Network Test:
+1. Multi-Host Network Test:
 
    ```python
    # Generated test: tests/multi-host-network.nix
