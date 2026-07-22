@@ -63,6 +63,23 @@ let
             description = "Dynamic and reflective problem-solving through systematic thinking - helps break down complex problems into steps";
           };
 
+          # Ollama code-delegation: hand isolated, well-specified coding tasks
+          # to a local qwen2.5-coder model and review the output. Claude stays
+          # the supervisor; Ollama is the junior worker. Default backend is
+          # per-host — p620 has local Ollama; other hosts reach p620 over the
+          # tailnet. The tools also accept host="p510" for the bigctx coder.
+          ollama-code = {
+            command = "${pkgs.customPkgs.ollama-mcp}/bin/ollama-mcp";
+            args = [ ];
+            env = {
+              OLLAMA_HOST =
+                if osConfig.networking.hostName == "p620"
+                then "http://localhost:11434"
+                else "http://p620:11434";
+            };
+            description = "Delegate isolated coding tasks to local Ollama coder models (qwen2.5-coder on p620/p510) and review the output — Claude supervises, Ollama drafts";
+          };
+
           # NotebookLM MCP for Google NotebookLM interaction
           notebooklm = {
             command = "${pkgs.uv}/bin/uvx";
