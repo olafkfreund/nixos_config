@@ -1,3 +1,12 @@
+---
+name: documentation-sync
+description: |
+  Generates and refreshes documentation for NixOS modules and infrastructure so docs track the code. Use when
+  module options changed, a README is stale, or you want docs regenerated from the current config. Mechanical
+  sync work.
+model: haiku
+---
+
 # Documentation Sync Agent
 
 > **Automated Documentation Generation and Synchronization**

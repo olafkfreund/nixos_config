@@ -1,3 +1,11 @@
+---
+name: nix-check
+description: |
+  Runs deadnix/statix and related linters on NixOS files and applies mechanical fixes. Use before committing,
+  after editing a module, or to sweep dead code and lint violations. Fast, rule-based checking.
+model: haiku
+---
+
 # nix-check Subagent
 
 A specialized subagent for checking, linting, and correcting NixOS configuration code using deadnix, statix, and other validation tools to ensure best practices.

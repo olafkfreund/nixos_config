@@ -1,4 +1,10 @@
 ---
+name: config-drift-detective
+description: |
+  Detects configuration drift between the declared NixOS config and the actual running system state, and reports
+  how to re-converge. Use when a host behaves oddly after manual changes, before a deploy to confirm the tree
+  matches reality, or when auditing declarative-state integrity. Reports findings; enforce with a deploy.
+model: sonnet
 context: fork
 ---
 
@@ -602,20 +608,20 @@ networking.nameservers = [ "192.168.1.1" ];
 
 ### Today (HIGH)
 
-3. ✅ Remove imperative packages, add to config
-4. ✅ Commit or discard uncommitted changes
-5. ✅ Review untracked configuration files
+1. ✅ Remove imperative packages, add to config
+2. ✅ Commit or discard uncommitted changes
+3. ✅ Review untracked configuration files
 
 ### This Week (MEDIUM)
 
-6. ⏭️ Add video group to user declaration
-7. ⏭️ Clean up local override files
-8. ⏭️ Document acceptable drift
+1. ⏭️ Add video group to user declaration
+2. ⏭️ Clean up local override files
+3. ⏭️ Document acceptable drift
 
 ### Optional (LOW)
 
-9. ⏭️ Fix DNS configuration
-10. ⏭️ Review and update network settings
+1. ⏭️ Fix DNS configuration
+2. ⏭️ Review and update network settings
 
 ## Automated Fix Script
 

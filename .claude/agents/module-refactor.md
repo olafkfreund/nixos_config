@@ -1,4 +1,10 @@
 ---
+name: module-refactor
+description: |
+  Detects duplication and anti-patterns across NixOS modules and proposes/applies refactors following
+  docs/NIXOS-ANTI-PATTERNS.md. Use when consolidating repeated config, cleaning a grown module, or acting on an
+  anti-pattern finding.
+model: sonnet
 context: fork
 ---
 

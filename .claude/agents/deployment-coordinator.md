@@ -1,4 +1,10 @@
 ---
+name: deployment-coordinator
+description: |
+  Plans and orchestrates multi-host NixOS deployments with dependency ordering, parallelism, and rollback
+  awareness. Use when rolling changes across p620/p510/razer, sequencing a dependent rollout, or deciding safe
+  deploy order. Recommends the plan; you run the switch.
+model: sonnet
 context: fork
 ---
 

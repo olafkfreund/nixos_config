@@ -1,3 +1,12 @@
+---
+name: local-logs
+description: |
+  Analyzes systemd/journal logs, traces failures to root cause, and drafts NixOS config fixes. Use when a
+  service is failing, after a bad boot, or when diagnosing an error you can't place. Generates fixes for your
+  review.
+model: sonnet
+---
+
 # Local Logs Subagent
 
 ## Overview

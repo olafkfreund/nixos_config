@@ -1,3 +1,11 @@
+---
+name: update
+description: |
+  Orchestrates a safe NixOS update cycle: flake bump, issue check, test build, and completion alert. Use for a
+  routine guarded update rather than a raw nix flake update. Reports results and stops before the switch.
+model: haiku
+---
+
 # Update Subagent
 
 > **Automated NixOS system updates with safety checks and notifications**

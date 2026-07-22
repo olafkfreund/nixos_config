@@ -1,4 +1,10 @@
 ---
+name: security-patrol
+description: |
+  Audits NixOS hosts for security weaknesses, missing systemd hardening, and exposure, and proposes fixes per
+  the repo's hardening patterns. Use for a periodic security sweep, after adding a service, or before exposing
+  something.
+model: sonnet
 context: fork
 ---
 
