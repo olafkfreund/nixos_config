@@ -24,6 +24,18 @@ let inherit (lib) mkOption mkIf mkEnableOption mkForce mkMerge types; in {
   };
 
   config = mkMerge [
+    # Switch-time DNS stability (all hosts). systemd-resolved / NetworkManager
+    # restarting mid-`nixos-rebuild switch` briefly kills DNS, causing transient
+    # "no such host" failures during activation (the ollama model-pull was the
+    # visible symptom). Keep them running across a switch; new DNS config applies
+    # at next boot/logout. Root fix — supersedes the per-service ollama guard.
+    {
+      systemd.services.systemd-resolved.restartIfChanged =
+        mkIf config.services.resolved.enable false;
+      systemd.services.NetworkManager.restartIfChanged =
+        mkIf config.networking.networkmanager.enable false;
+    }
+
     (mkIf (config.networking.profile == "desktop") {
       # Desktop networking configuration with NetworkManager
       networking = {
