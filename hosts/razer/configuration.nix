@@ -312,27 +312,28 @@ in
   # first (see comment on `gnome.gnome-remote-desktop` below). p510 enables
   # autoLogin because p510 is pure NVIDIA without PRIME — greeter respawn
   # works there; not here.
-  # Login manager: Noctalia greeter (greetd). backend="none" turns GDM off; the
-  # noctalia-greeter module below auto-enables greetd + its bundled wlroots
-  # compositor — which sidesteps GDM's broken greeter-respawn on this Optimus
-  # PRIME-sync NVIDIA hardware (see note above). niri already runs wlroots fine
-  # here, so the greeter's compositor does too. GNOME/niri/labwc stay selectable.
+  # Login manager: DankMaterialShell greeter (greetd), matching p620. backend=
+  # "none" turns GDM off; the dms-greeter module auto-enables greetd and runs the
+  # greeter inside a niri (wlroots) compositor — which sidesteps GDM's broken
+  # greeter-respawn on this Optimus PRIME-sync NVIDIA hardware (see note above),
+  # same non-GDM path the old noctalia-greeter used. It enumerates the same
+  # wayland-sessions, so GNOME + all niri/labwc/mango (stock + -dms) entries stay
+  # selectable. noctalia-greeter input kept available for revert.
   desktop.displayManager.backend = "none";
 
-  programs.noctalia-greeter = {
+  services.displayManager.dms-greeter = {
     enable = true;
-    package = inputs.noctalia-greeter.packages.${pkgs.system}.default;
-    settings.cursor = {
-      theme = config.stylix.cursor.name;
-      size = config.stylix.cursor.size;
-      package = config.stylix.cursor.package;
-    };
+    compositor.name = "niri";
   };
 
   # Phase 1: niri + labwc + mango as selectable login sessions (alongside GNOME).
   desktop.niri.enable = true;
   desktop.labwc.enable = true;
   desktop.mangowm.enable = true;
+
+  # Adds "(DankMaterialShell)" login sessions for niri/labwc/mango next to the
+  # stock (Noctalia) ones — pick per login in the greeter.
+  desktop.dmsShell.enable = true;
 
   # ddcutil: software brightness/contrast control of external monitors (DDC/CI).
   modules.hardware.ddcutil.enable = true;
@@ -448,6 +449,11 @@ in
     # available as a choice in the login greeter.
     desktopManager.gnome.enable = true;
   };
+
+  # Don't restart greetd on rebuild — a switch shouldn't tear down the login
+  # manager mid-session. Matters more here: this host's greeter-respawn is
+  # fragile (see Optimus note above). New greeter applies at next reboot/logout.
+  systemd.services.greetd.restartIfChanged = false;
 
   # Hardware and service specific configurations
   services = {

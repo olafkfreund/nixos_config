@@ -5,6 +5,14 @@ _final: prev: {
     doInstallCheck = false;
   });
 
+  # goobook pins simplejson<4.0.0 but nixpkgs ships 4.1.1; the pin is cosmetic
+  # (goobook uses only the stable json API). Relax it so the runtime-deps check
+  # passes. Drop once goobook loosens its constraint upstream.
+  goobook = prev.goobook.overridePythonAttrs (old: {
+    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.python3Packages.pythonRelaxDepsHook ];
+    pythonRelaxDeps = (old.pythonRelaxDeps or [ ]) ++ [ "simplejson" ];
+  });
+
   # ollama 0.31.1: the Go scheduler test suite fails in the sandbox — it mocks
   # GPU memory (library=Metal on Linux, simulated cudaMalloc OOM) and is
   # environment-sensitive, not a real defect. Skip checks. Override both the
