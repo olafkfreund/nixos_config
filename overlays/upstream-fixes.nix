@@ -11,7 +11,10 @@ _final: prev: {
   #    uses is stable). Relax it so pythonRuntimeDepsCheckHook passes.
   #  - optuna 4.9.0's tests/test_logging.py::test_propagation is flaky (log-
   #    propagation assertion, environment-sensitive). Skip the test suite.
-  # Drop each once upstream loosens the pin / fixes the test.
+  #  - cheetah3 3.4.0 installs .dist-info as "Cheetah3" not pname "cheetah3", so
+  #    pythonMetadataCheckPhase throws PackageNotFoundError (blocks sabnzbd on
+  #    p510). Same class as rewaita/fortune — skip the version cross-check.
+  # Drop each once upstream loosens the pin / fixes the test / renames dist-info.
   python314 = prev.python314.override (old: {
     packageOverrides = prev.lib.composeExtensions
       (old.packageOverrides or (_: _: { }))
@@ -20,6 +23,7 @@ _final: prev: {
           pythonRelaxDeps = (o.pythonRelaxDeps or [ ]) ++ [ "wrapt" ];
         });
         optuna = pyprev.optuna.overridePythonAttrs (_o: { doCheck = false; });
+        cheetah3 = pyprev.cheetah3.overridePythonAttrs (_o: { dontCheckPythonMetadata = true; });
       });
   });
 
