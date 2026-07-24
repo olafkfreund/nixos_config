@@ -5,6 +5,20 @@ _final: prev: {
     doInstallCheck = false;
   });
 
+  # rewaita's python dep `fortune` (1.1.2) installs its .dist-info under a name
+  # that doesn't match pname "fortune", so pythonMetadataCheckPhase throws
+  # PackageNotFoundError under python 3.14. The import check passes; only the
+  # version-metadata cross-check fails. Skip it (dontCheckPythonMetadata) on just
+  # that dep so rewaita builds — heavier deps (numpy/pillow) are untouched.
+  rewaita = prev.rewaita.overridePythonAttrs (old: {
+    dependencies = map
+      (p:
+        if (p.pname or "") == "fortune"
+        then p.overrideAttrs (_: { dontCheckPythonMetadata = true; })
+        else p)
+      (old.dependencies or [ ]);
+  });
+
   # goobook pins simplejson<4.0.0 but nixpkgs ships 4.1.1; the pin is cosmetic
   # (goobook uses only the stable json API). Relax it so the runtime-deps check
   # passes. Drop once goobook loosens its constraint upstream.
