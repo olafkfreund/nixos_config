@@ -268,7 +268,7 @@ in
             repeat-delay 600
             repeat-rate 25
         }
-        touchpad { tap; natural-scroll; }
+        touchpad { tap; natural-scroll; dwt; }
     }
     prefer-no-csd
     screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
