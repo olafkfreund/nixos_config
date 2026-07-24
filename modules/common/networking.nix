@@ -36,6 +36,21 @@ let inherit (lib) mkOption mkIf mkEnableOption mkForce mkMerge types; in {
         mkIf config.networking.networkmanager.enable false;
     }
 
+    # TCP / qdisc baseline for the high-jitter Starlink uplink (all hosts).
+    # BBR + fq handle satellite jitter/random-loss far better than CUBIC; the
+    # latency sysctls pair with BBR on the long-RTT CGNAT path. mkDefault so any
+    # host keeps its own override — this closes the razer gap (was kernel-default
+    # CUBIC) and makes the CLAUDE.md "applied everywhere" claim actually true.
+    {
+      boot.kernel.sysctl = {
+        "net.core.default_qdisc" = lib.mkDefault "fq";
+        "net.ipv4.tcp_congestion_control" = lib.mkDefault "bbr";
+        "net.ipv4.tcp_notsent_lowat" = lib.mkDefault 16384; # cut local send-queue latency
+        "net.ipv4.tcp_mtu_probing" = lib.mkDefault 1; # survive PMTU black holes on CGNAT
+        "net.ipv4.tcp_fastopen" = lib.mkDefault 3; # shave 1 RTT on new connections
+      };
+    }
+
     (mkIf (config.networking.profile == "desktop") {
       # Desktop networking configuration with NetworkManager
       networking = {
