@@ -14,6 +14,14 @@ in
 
   desktop.gnome.profile = "laptop";
 
+  # Laptop touchpad for the niri session: tap-to-click, natural scrolling,
+  # disable-while-typing. Host-scoped (razer only) — p620 has no touchpad.
+  programs.niri.settings.input.touchpad = {
+    tap = true;
+    natural-scroll = true;
+    dwt = true;
+  };
+
   # gscratch — i3/Sway-style scratchpad for GNOME (testing on razer first).
   # Configure bindings via: gnome-extensions prefs scratchpad@wastedintelligence.com
   programs.gnome-shell = {
