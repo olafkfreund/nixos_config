@@ -153,6 +153,16 @@ in
       };
     };
 
+    # nixpkgs' loadModels generates ollama-model-loader.service, which pulls
+    # models over the network (After=ollama.service network-online.target,
+    # Restart=on-failure). During a `switch`, systemd-resolved + NetworkManager
+    # restart mid-activation, so DNS is briefly down and the pulls fail
+    # ("lookup registry.ollama.ai: no such host"). The unit's own Restart=
+    # recovers seconds later, but `nixos-rebuild switch` samples the unit while
+    # it's momentarily failed and aborts the whole deploy (exit 4 → rollback).
+    # Don't re-run it on switch — it loads models at next boot when DNS is up.
+    systemd.services.ollama-model-loader.restartIfChanged = false;
+
     # Lower priority + higher OOM score: the user's interactive desktop
     # wins tiebreaks under contention.
     systemd.services.ollama.serviceConfig = {
