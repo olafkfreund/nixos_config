@@ -3,7 +3,6 @@
 , lib
 , hostUsers
 , hostTypes
-, inputs
 , ...
 }:
 let
