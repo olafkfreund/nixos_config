@@ -60,7 +60,21 @@
       enable = true;
       user = "olafkfreund";
       group = "users";
-      package = pkgs-unstable.sabnzbd;
+      # sabnzbd builds its own python env via python3.withPackages. pkgs-unstable's
+      # cheetah3 installs .dist-info as "Cheetah3" (not pname "cheetah3"), so
+      # pythonMetadataCheckPhase throws PackageNotFoundError under python 3.14 and
+      # the whole p510 build fails. Our overlays only patch `pkgs`, not the
+      # separate `pkgs-unstable` instance — so override sabnzbd's python3 here,
+      # where it's actually consumed. Drop once upstream renames the dist-info.
+      package = pkgs-unstable.sabnzbd.override {
+        python3 = pkgs-unstable.python3.override (old: {
+          packageOverrides = pkgs-unstable.lib.composeExtensions
+            (old.packageOverrides or (_: _: { }))
+            (_pf: pp: {
+              cheetah3 = pp.cheetah3.overridePythonAttrs (_: { dontCheckPythonMetadata = true; });
+            });
+        });
+      };
       # P510 is on stateVersion 25.11, where configFile defaults to the legacy
       # /var/lib path — which makes the module IGNORE `settings`. Force null so
       # our declarative settings + secretFiles are actually used.
