@@ -336,6 +336,16 @@ let
     esac
     printf '%s' "$n" >"$f" 2>/dev/null
 
+    # Small ring-buffered trace in tmpfs. Hook firing order is not documented
+    # and had to be established empirically (SubagentStop turned out not to
+    # mean what its name suggests for backgrounded agents); keep the evidence
+    # trail so the next surprise is diagnosable without a redeploy.
+    log="$dir/trace.log"
+    printf '%s %-5s -> %s\n' "$(date +%H:%M:%S)" "$action" "$n" >>"$log" 2>/dev/null
+    if [ "$(wc -l <"$log" 2>/dev/null || echo 0)" -gt 200 ]; then
+      tail -n 100 "$log" >"$log.tmp" 2>/dev/null && mv "$log.tmp" "$log" 2>/dev/null
+    fi
+
     if [ "$n" -gt 0 ]; then
       herdr pane report-metadata "$HERDR_PANE_ID" \
         --source claude-subagents --token "agents=$n" >/dev/null 2>&1
