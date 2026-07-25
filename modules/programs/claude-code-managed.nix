@@ -297,6 +297,71 @@ let
     }];
   };
 
+  # Claude Code's Task subagents run in-process with no PTY, so herdr cannot
+  # show them as agent rows (it detects exactly one agent per pane). Publish the
+  # live count as a pane-metadata token instead, rendered by the $agents entry
+  # in [ui.sidebar.agents.rows_by_agent] (home/development/herdr.nix).
+  #
+  # `reset` on Stop is what keeps this honest: a subagent killed without firing
+  # PostToolUse would otherwise leak the counter upward forever. When a turn
+  # ends nothing can still be fanned out, so zero is always correct there.
+  #
+  # No-ops entirely outside herdr (HERDR_ENV guard), so p510 and plain terminals
+  # are unaffected.
+  subagentScript = pkgs.writeShellScript "claude-herdr-subagents.sh" ''
+    action="''${1:-}"
+    cat >/dev/null 2>&1 || true   # drain hook stdin; the payload is not needed
+
+    [ "''${HERDR_ENV:-}" = "1" ] || exit 0
+    [ -n "''${HERDR_PANE_ID:-}" ] || exit 0
+    command -v herdr >/dev/null 2>&1 || exit 0
+
+    dir="''${XDG_RUNTIME_DIR:-/tmp}/claude-herdr-subagents"
+    mkdir -p "$dir" 2>/dev/null || exit 0
+    # Pane-scoped so two Claude panes never share a counter.
+    f="$dir/$(printf '%s' "$HERDR_PANE_ID" | tr -c 'A-Za-z0-9_' '_').count"
+
+    # flock: subagents are dispatched in parallel, so a plain read/modify/write
+    # loses updates. Verified with 20 concurrent increments.
+    exec 9>"$f.lock" 2>/dev/null || exit 0
+    ${pkgs.util-linux}/bin/flock -w 2 9 2>/dev/null || exit 0
+
+    n=$(cat "$f" 2>/dev/null)
+    case "$n" in ""|*[!0-9]*) n=0 ;; esac
+    case "$action" in
+      inc)   n=$((n + 1)) ;;
+      dec)   n=$((n - 1)); [ "$n" -lt 0 ] && n=0 ;;
+      reset) n=0 ;;
+      *)     exit 0 ;;
+    esac
+    printf '%s' "$n" >"$f" 2>/dev/null
+
+    if [ "$n" -gt 0 ]; then
+      herdr pane report-metadata "$HERDR_PANE_ID" \
+        --source claude-subagents --token "agents=$n" >/dev/null 2>&1
+    else
+      herdr pane report-metadata "$HERDR_PANE_ID" \
+        --source claude-subagents --clear-token agents >/dev/null 2>&1
+    fi
+    exit 0
+  '';
+
+  # SubagentStart/SubagentStop, NOT PreToolUse/PostToolUse on Task: PostToolUse
+  # fires when the *tool call* returns, which for a backgrounded agent is
+  # immediately — the counter would drop to zero while the agent still had
+  # minutes of work left, i.e. exactly the case this is meant to show.
+  subagentHooks = lib.optionalAttrs cfg.subagentMetadata.enable {
+    SubagentStart = [{
+      hooks = [{ type = "command"; command = "${subagentScript} inc"; timeout = 5; }];
+    }];
+    SubagentStop = [{
+      hooks = [{ type = "command"; command = "${subagentScript} dec"; timeout = 5; }];
+    }];
+    Stop = [{
+      hooks = [{ type = "command"; command = "${subagentScript} reset"; timeout = 5; }];
+    }];
+  };
+
   formatHooks = lib.optionalAttrs cfg.formatOnEdit.enable {
     PostToolUse = [{
       matcher = "Write|Edit|MultiEdit";
@@ -351,6 +416,7 @@ let
         notifyHooks
         formatHooks
         deployGuardHooks
+        subagentHooks
         tmuxCcmHooks
       ];
     })
@@ -404,6 +470,20 @@ in
         routine repo operations never trigger a permission prompt. System-
         mutating commands (deploys, nixos-rebuild, git commit/push, sudo, rm)
         are deliberately excluded and still require explicit approval.
+      '';
+    };
+
+    subagentMetadata.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Publish the live Claude Code Task-subagent count to herdr as a pane
+        metadata token, rendered by the $agents entry in the sidebar row
+        config (home/development/herdr.nix).
+
+        Subagents run in-process with no PTY, so herdr cannot represent them as
+        their own agent rows; this makes an otherwise invisible fan-out visible
+        on the parent pane. No-ops outside a herdr pane.
       '';
     };
 

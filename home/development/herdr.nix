@@ -59,8 +59,15 @@ _: {
 
     # Claude panes get an extra row showing the stripped terminal title, which
     # is where Claude Code reports what it is currently doing.
+    #
+    # $agents is a pane-metadata token published by the managed-scope
+    # PreToolUse/PostToolUse hooks in modules/programs/claude-code-managed.nix.
+    # Claude Code's Task subagents run in-process with no PTY, so herdr can
+    # never show them as their own agent rows (it detects one agent per pane).
+    # This surfaces the live count on the parent row instead. The token is
+    # cleared at zero, so the row stays clean when nothing is fanned out.
     [ui.sidebar.agents.rows_by_agent]
-    claude = [["state_icon", "workspace", "tab"], ["terminal_title_stripped"], ["agent"]]
+    claude = [["state_icon", "workspace", "tab"], ["terminal_title_stripped"], ["agent", "$agents"]]
 
     [worktrees]
     directory = "~/.herdr/worktrees"
