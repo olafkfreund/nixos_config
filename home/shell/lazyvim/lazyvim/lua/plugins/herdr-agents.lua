@@ -10,9 +10,19 @@
 -- namespace", so it cannot collide with the existing <leader>a* claudecode
 -- bindings — nothing here needs re-mapping.
 --
--- codex.nvim is deliberately omitted: the codex CLI is not part of this
--- setup, and listing it would pull an unused plugin plus its snacks
--- dependency on every host.
+-- codex.nvim is deliberately omitted: the codex CLI is not part of this setup,
+-- and listing it would pull an unused plugin plus its snacks dependency onto
+-- every host. Upstream defaults BOTH agents to enabled and hard-errors on a
+-- missing dependency:
+--
+--   opts = vim.tbl_deep_extend("force", {
+--     claude = { enabled = true, opts = {} },
+--     codex  = { enabled = true, opts = {} },
+--   }, opts or {})
+--   if opts.codex.enabled then dependency("codex", "ishiooon/codex.nvim") end
+--
+-- so `opts = {}` fails config with "missing dependency codex". Turning codex
+-- off explicitly is what makes omitting the plugin valid.
 --
 -- Gated on HERDR_SOCKET_PATH (per upstream README) rather than HERDR_ENV: the
 -- socket is what the bridge actually talks to, so this stays inert in a plain
@@ -27,6 +37,9 @@ return {
     dependencies = {
       { "coder/claudecode.nvim", dependencies = { "folke/snacks.nvim" } },
     },
-    opts = {},
+    opts = {
+      claude = { enabled = true },
+      codex = { enabled = false },
+    },
   },
 }
