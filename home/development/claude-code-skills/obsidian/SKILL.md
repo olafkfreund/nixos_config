@@ -49,8 +49,13 @@ Nothing about a vault makes these unsafe. Prefer them.
 
 ## Use `notesmd-cli` for these two things only
 
-Installed as **`notesmd-cli`** (upstream renamed the binary; the repo is still
-called obsidian-cli).
+Installed as **`notesmd-cli`**, with **`ob`** as a short alias (upstream
+renamed the binary; the repo is still called obsidian-cli).
+
+Do not reach for `obsidian-cli` — that name belongs to a *different* tool
+bundled inside `pkgs.obsidian`, which drives the running desktop app and
+currently fails on NixOS with "unable to find Obsidian". Likewise `obs` is OBS
+Studio.
 
 ### 1. Renaming or moving a note
 
