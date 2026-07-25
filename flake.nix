@@ -35,6 +35,11 @@
     # hasn't reached the nixos-unstable channel yet. Grafted in via overlay
     # (overlays/default.nix). Remove this input + the graft once unstable catches up.
     nixpkgs-master.url = "github:nixos/nixpkgs/master";
+    # Pinned solely for ollama 0.31.2 (last version whose CUDA build works in
+    # nixpkgs — 0.32.1's llama.cpp CUDA ExternalProject can't find nvcc, an active
+    # upstream bug). Grafted as pkgs.ollama-cuda for p510 via overlays/default.nix.
+    # Remove this input + the graft once nixpkgs 0.32.x CUDA builds again.
+    nixpkgs-ollama.url = "github:nixos/nixpkgs/6cdc7fc76e8bf7fde9fa43a849fcaaa70e230dee";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     flake-utils.url = "github:numtide/flake-utils";
