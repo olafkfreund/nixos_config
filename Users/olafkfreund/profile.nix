@@ -172,6 +172,12 @@ in
     pkgs.customPkgs.aurynk
     # glab-tui — terminal UI for GitLab on top of the `glab` CLI.
     pkgs.customPkgs.glab-tui
+    # obsidian-cli (binary: `notesmd-cli`) — link-aware vault operations.
+    # Reading/writing notes needs no tool; this is here for `move`, which
+    # rewrites every [[wikilink]], [markdown](link.md) target and #heading
+    # anchor pointing at a renamed note across ~2950 files. Paired with the
+    # `obsidian` Claude Code skill in home/development/claude-code-skills.
+    pkgs.customPkgs.obsidian-cli
     # herdr — TUI "agent multiplexer": run multiple AI coding agents in one
     # terminal workspace (tmux/zellij-style). From github:ogulcancelik/herdr.
     pkgs.herdr

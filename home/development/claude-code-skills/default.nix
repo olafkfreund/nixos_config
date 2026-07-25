@@ -40,5 +40,13 @@ in
       source = ./dns/scripts/dns.sh;
       executable = true;
     };
+
+    # Local obsidian skill — playbook for the three vaults under ~/Documents.
+    # Deliberately steers most work to the plain file tools (a vault is just
+    # Markdown) and reserves notesmd-cli for renames, which must rewrite links
+    # across ~2950 notes. The conventions it documents were measured from the
+    # vaults, not assumed — notably that links here are 6:1 Markdown-style
+    # over [[wikilinks]] and that frontmatter is rare.
+    home.file.".claude/skills/obsidian/SKILL.md".source = ./obsidian/SKILL.md;
   };
 }

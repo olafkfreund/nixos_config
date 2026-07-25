@@ -102,6 +102,11 @@
   # multiplexing tmux still owns the ergonomics here.
   rmux = pkgs.callPackage ./rmux { };
 
+  # obsidian-cli — link-aware vault operations (rename updates every
+  # [[wikilink]] pointing at the note). Installs as `notesmd-cli`; upstream
+  # renamed the binary but kept the repo name. Not in nixpkgs.
+  obsidian-cli = pkgs.callPackage ./obsidian-cli { };
+
   # Note: gnome-ext-* packages are NOT registered here. They're exposed
   # at top-level pkgs.* via overlays/custom-packages.nix so that home
   # configs can reference them with `with pkgs;` (matching the rudra /
