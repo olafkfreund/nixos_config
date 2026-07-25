@@ -14,6 +14,13 @@ in
 
   desktop.gnome.profile = "laptop";
 
+  # razer runs no Ollama of its own, but both Neovim AI plugins default to
+  # http://localhost:11434 — so minuet-ai (which fires on every InsertEnter)
+  # and codecompanion were silently failing here while working fine on p620.
+  # Both already read this variable; it was simply never set. p620 serves
+  # Ollama on 0.0.0.0:11434 and is reachable from razer over the LAN.
+  home.sessionVariables.OLLAMA_ENDPOINT = "http://p620:11434";
+
   # gscratch — i3/Sway-style scratchpad for GNOME (testing on razer first).
   # Configure bindings via: gnome-extensions prefs scratchpad@wastedintelligence.com
   programs.gnome-shell = {

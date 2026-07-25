@@ -87,6 +87,54 @@ _: {
     width = "90%"
     height = "90%"
 
+    # herdr-splits: unified ctrl+hjkl across herdr panes AND Neovim splits,
+    # replacing nvim-tmux-navigation (which crossed into tmux panes that no
+    # longer exist). The editor half is
+    # home/shell/lazyvim/lazyvim/lua/plugins/herdr-splits.lua; this half needs
+    # the plugin itself installed imperatively:
+    #     herdr plugin install lmilojevicc/herdr-splits.nvim
+    # Action ids come from the plugin's own herdr-plugin.toml (id =
+    # "herdr-splits", actions nav-*/resize-*), not from docs.
+    [[keys.command]]
+    key = "ctrl+h"
+    type = "plugin_action"
+    command = "herdr-splits.nav-left"
+
+    [[keys.command]]
+    key = "ctrl+j"
+    type = "plugin_action"
+    command = "herdr-splits.nav-down"
+
+    [[keys.command]]
+    key = "ctrl+k"
+    type = "plugin_action"
+    command = "herdr-splits.nav-up"
+
+    [[keys.command]]
+    key = "ctrl+l"
+    type = "plugin_action"
+    command = "herdr-splits.nav-right"
+
+    [[keys.command]]
+    key = "alt+h"
+    type = "plugin_action"
+    command = "herdr-splits.resize-left"
+
+    [[keys.command]]
+    key = "alt+j"
+    type = "plugin_action"
+    command = "herdr-splits.resize-down"
+
+    [[keys.command]]
+    key = "alt+k"
+    type = "plugin_action"
+    command = "herdr-splits.resize-up"
+
+    [[keys.command]]
+    key = "alt+l"
+    type = "plugin_action"
+    command = "herdr-splits.resize-right"
+
     # Claude Code emits far more output than the 10MB default retains.
     [advanced]
     scrollback_limit_bytes = 50000000
