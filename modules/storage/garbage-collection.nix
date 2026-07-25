@@ -146,6 +146,13 @@ in
         nix-generation-cleanup = mkIf (!cfg.aggressiveCleanup) {
           description = "Clean up old NixOS generations";
           after = [ "nix-gc.service" ];
+          # `after` is ordering ONLY — without this the unit has no timer and
+          # nothing pulling it in, so it never ran. That is why p620 reached 73
+          # system generations despite --delete-older-than 14d: the age rule
+          # cannot bound COUNT when the host is deployed several times a day,
+          # and the count-based cleanup that was supposed to catch it was
+          # never started. Bind it to the GC timer's target.
+          wantedBy = [ "nix-gc.service" ];
           serviceConfig = {
             Type = "oneshot";
             User = "root";
