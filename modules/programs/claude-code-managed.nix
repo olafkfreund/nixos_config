@@ -357,7 +357,13 @@ let
     SubagentStop = [{
       hooks = [{ type = "command"; command = "${subagentScript} dec"; timeout = 5; }];
     }];
-    Stop = [{
+    # Reset on SessionStart, NOT Stop. Stop fires at the end of every assistant
+    # turn, but backgrounded subagents deliberately outlive the turn that
+    # launched them — resetting there cleared the token ~5s into a 10s agent
+    # run, killing the exact case this is meant to show. SessionStart still
+    # heals a counter leaked by a subagent that died without firing
+    # SubagentStop, just at the next session instead of the next turn.
+    SessionStart = [{
       hooks = [{ type = "command"; command = "${subagentScript} reset"; timeout = 5; }];
     }];
   };
