@@ -285,6 +285,22 @@
   # Render NZBGet's secret include file at preStart, populated from the
   # agenix-decrypted env. NZBGet then reads it as part of its config-load
   # chain. ControlPassword stays out of the systemd ExecStart.
+  # Plex relays its transcoder's ffmpeg output back through its own HTTP log
+  # endpoint, and journald records every request/response pair. A single
+  # Android client that stalled mid-transcode on 2026-07-25 produced ~9,200
+  # lines in one burst ("Too many packets buffered for output stream 0:0" /
+  # "Error submitting a packet to the muxer"), which was most of p510's
+  # 25,888 daily journal errors. The transcode itself was not broken — the
+  # client stopped consuming and ffmpeg spammed until the session was reaped.
+  #
+  # Rate-limit the unit's journal so one runaway session can't drown the log
+  # again. 2000 messages per 30s is far above normal Plex chatter and still
+  # caps a burst at a few thousand lines instead of ten thousand.
+  systemd.services.plex.serviceConfig = {
+    LogRateLimitIntervalSec = "30s";
+    LogRateLimitBurst = 2000;
+  };
+
   systemd.services.nzbget = {
     serviceConfig.EnvironmentFile = config.age.secrets."nzbget-password".path;
     preStart = ''
