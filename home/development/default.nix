@@ -18,6 +18,7 @@ _: {
     ./claude-powerline.nix
     ./claude-code-skills
     ./claude-code-commands
+    ./herdr.nix # herdr agent-multiplexer config (p620 + razer)
 
     # Version control and CI/CD
     ./gitlab/default.nix
