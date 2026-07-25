@@ -16,6 +16,19 @@
     dms-shell = inputs.nixpkgs-master.legacyPackages.${prev.stdenv.hostPlatform.system}.dms-shell;
   })
 
+  # ponytail: temporary graft. ollama-cuda 0.32.1's CUDA build is broken in
+  # current nixpkgs (llama.cpp ExternalProject can't find nvcc — active upstream
+  # bug, nixpkgs #303046/#432731). Pin ollama-cuda to 0.31.2 (last working CUDA
+  # build; what p510 already runs) from the nixpkgs-ollama input. allowUnfree is
+  # required because the CUDA closure is unfree. Drop this + the input once
+  # nixpkgs 0.32.x CUDA builds again.
+  (final: _prev: {
+    ollama-cuda = (import inputs.nixpkgs-ollama {
+      inherit (final.stdenv.hostPlatform) system;
+      config.allowUnfree = true;
+    }).ollama-cuda;
+  })
+
   (_final: prev: {
     gogmail = inputs.gogmail.packages.${prev.stdenv.hostPlatform.system}.gogmail;
   })
