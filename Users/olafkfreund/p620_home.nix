@@ -45,12 +45,10 @@
     account = "olaf@freundcloud.com";
   };
 
-  # Claude Code statusline with Gruvbox Dark theme
-  programs.claude-powerline = {
-    enable = true;
-    theme = "custom";
-    style = "powerline";
-  };
+  # Claude Code statusline with Gruvbox Dark theme.
+  # theme/style dropped in #1159 — they only ever configured the removed
+  # @owloops/claude-powerline npx wrapper, never the gruvbox script in use.
+  programs.claude-powerline.enable = true;
 
   # Workstation-specific additional packages
   home.packages = [

@@ -189,10 +189,6 @@
 
     # Claude Powerline - AI-powered statusline for Claude Code
     # Single-line layout: Directory | Git | Model (budget monitoring disabled for MAX subscription)
-    claude-powerline = {
-      enable = true;
-      theme = "custom"; # Gruvbox Dark theme
-      style = "powerline"; # Vim-style powerline separators
-    };
+    claude-powerline.enable = true;
   };
 }

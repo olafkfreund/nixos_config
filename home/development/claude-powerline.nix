@@ -1,187 +1,29 @@
 { config, lib, pkgs, ... }:
 
 let
-  inherit (lib) mkOption mkIf mkEnableOption types;
+  inherit (lib) mkIf mkEnableOption;
   cfg = config.programs.claude-powerline;
-  inherit (config.lib.stylix) colors;
-
-  # Gruvbox Dark theme configuration
-  themeConfig = {
-    theme = "custom";
-    colors = {
-      # Background colors
-      background = "#${colors.base00}"; # dark0 (main background)
-      backgroundAlt = "#${colors.base01}"; # dark1
-      backgroundDark = "#${colors.base00}"; # dark0_hard
-
-      # Foreground colors
-      foreground = "#${colors.base06}"; # light1 (main foreground)
-      foregroundAlt = "#${colors.base05}"; # light2
-      foregroundDark = "#${colors.base04}"; # light3
-
-      # Accent colors (bright variants)
-      red = "#${colors.base08}"; # bright_red
-      redDim = "#${colors.base08}"; # normal_red
-      green = "#${colors.base0B}"; # bright_green
-      greenDim = "#${colors.base0B}"; # normal_green
-      yellow = "#${colors.base0A}"; # bright_yellow
-      yellowDim = "#${colors.base0A}"; # normal_yellow
-      blue = "#${colors.base0D}"; # bright_blue
-      blueDim = "#${colors.base0D}"; # normal_blue
-      purple = "#${colors.base0E}"; # bright_purple
-      purpleDim = "#${colors.base0E}"; # normal_purple
-      aqua = "#${colors.base0C}"; # bright_aqua
-      aquaDim = "#${colors.base0C}"; # normal_aqua
-      orange = "#${colors.base09}"; # bright_orange
-      orangeDim = "#${colors.base0F}"; # normal_orange
-      gray = "#${colors.base03}"; # gray
-
-      # UI elements
-      separator = "#${colors.base02}"; # dark2
-      border = "#${colors.base03}"; # dark3
-    };
-
-    display = {
-      inherit (cfg) style;
-      charset = "unicode";
-      autoWrap = true;
-
-      # Single-line layout focused on development context (MAX subscription - no budget monitoring needed)
-      lines = [
-        {
-          segments = {
-            directory = {
-              enabled = true;
-              style = {
-                background = "#${colors.base0D}"; # Blue - current directory
-                foreground = "#${colors.base00}"; # Dark background for contrast
-              };
-            };
-            git = {
-              enabled = true;
-              style = {
-                background = "#${colors.base0B}"; # Green - git status
-                foreground = "#${colors.base00}";
-              };
-            };
-            model = {
-              enabled = true;
-              style = {
-                background = "#${colors.base0E}"; # Purple - Claude model
-                foreground = "#${colors.base00}";
-              };
-            };
-          };
-        }
-      ];
-    };
-
-    # Budget monitoring disabled (MAX subscription with unlimited usage)
-  };
-
-  # Write theme configuration to JSON file
-  themeFile = pkgs.writeText "claude-powerline-gruvbox.json"
-    (builtins.toJSON themeConfig);
 in
 {
   options.programs.claude-powerline = {
     enable = mkEnableOption "Claude Powerline statusline with Gruvbox Dark theme";
-
-    theme = mkOption {
-      type = types.enum [ "dark" "light" "nord" "tokyo-night" "rose-pine" "gruvbox" "custom" ];
-      default = "custom";
-      description = ''
-        Theme to use for Claude Powerline.
-
-        Built-in themes: dark, light, nord, tokyo-night, rose-pine, gruvbox
-        Custom theme uses Gruvbox Dark color palette defined in this module.
-      '';
-    };
-
-    style = mkOption {
-      type = types.enum [ "minimal" "powerline" "capsule" ];
-      default = "powerline";
-      description = ''
-        Separator style for statusline segments.
-
-        - minimal: Simple separators
-        - powerline: Vim-style powerline separators (recommended)
-        - capsule: Rounded capsule separators
-      '';
-    };
-
-    budget = {
-      session = mkOption {
-        type = types.float;
-        default = 10.0;
-        description = ''
-          Session budget limit in USD (5-hour rolling window).
-
-          Recommended values:
-          - Conservative: 5-10
-          - Moderate: 10-20
-          - Aggressive: 20-50
-        '';
-      };
-
-      daily = mkOption {
-        type = types.float;
-        default = 25.0;
-        description = ''
-          Daily budget limit in USD.
-
-          Recommended values:
-          - Conservative: 10-25
-          - Moderate: 25-50
-          - Aggressive: 50-100
-        '';
-      };
-
-      block = mkOption {
-        type = types.float;
-        default = 15.0;
-        description = ''
-          Block budget limit in USD.
-
-          Used for tracking costs within specific time blocks.
-        '';
-      };
-    };
   };
 
   config = mkIf cfg.enable {
-    # Create theme configuration file
-    xdg.configFile."claude-powerline/config.json".source = themeFile;
-
-    # NOTE: ~/.claude/settings.json is NOT managed by Home Manager
-    # It contains user-specific plugin settings that should not be overwritten.
-    # Users must manually add the statusLine configuration to their existing settings.json:
+    # ~/.claude/settings.json is NOT managed by Home Manager — it is
+    # syncthing-synced and holds runtime plugin state. It points at
+    # statusline-gruvbox.sh below; that wiring is done once, by hand.
     #
-    # {
-    #   "enabledPlugins": { ... },  // Keep existing plugin settings
-    #   "statusLine": {
-    #     "type": "command",
-    #     "command": "$HOME/.claude/statusline-powerline.sh"
-    #   }
-    # }
+    # An @owloops/claude-powerline npx wrapper used to be generated here too,
+    # but nothing ever referenced it: settings.json has always pointed at the
+    # gruvbox script. It was also the wrong tool for this repo — it ran
+    # `npx -y @owloops/claude-powerline@latest` on *every* statusline render,
+    # i.e. an unpinned network fetch in the hot path of a NixOS config, and it
+    # rendered no hostname segment (the one thing that matters most across
+    # p620/razer/p510). Removed in #1159 along with its theme file and
+    # CLAUDE_POWERLINE_CONFIG env var.
 
     home = {
-      # Create wrapper script for Claude Code statusLine
-      file.".claude/statusline-powerline.sh" = {
-        text = ''
-          #!/usr/bin/env bash
-          # Claude Powerline statusline wrapper
-          # Ensures proper environment and paths for npx
-
-          # Set PATH to include nix profile binaries
-          export PATH="${pkgs.nodejs_24}/bin:$PATH"
-
-          # Pass stdin to claude-powerline with built-in gruvbox theme
-          ${pkgs.nodejs_24}/bin/npx -y @owloops/claude-powerline@latest --style=${cfg.style} --theme=gruvbox
-        '';
-        executable = true;
-      };
-
       # Gruvbox statusline script — mirrors your Starship prompt layout:
       # OS icon · hostname · user · dir · shell · git branch/status · model · context
       file.".claude/statusline-gruvbox.sh" = {
@@ -363,17 +205,6 @@ in
         '';
       };
 
-      # Ensure Node.js is available for npx
-      packages = with pkgs; [
-        nodejs_24
-      ];
-
-      # Environment variables for Claude Powerline configuration
-      sessionVariables = {
-        CLAUDE_POWERLINE_THEME = cfg.theme;
-        CLAUDE_POWERLINE_STYLE = cfg.style;
-        CLAUDE_POWERLINE_CONFIG = "${config.xdg.configHome}/claude-powerline/config.json";
-      };
     };
   };
 }

@@ -253,6 +253,50 @@ let
     exit 0
   '';
 
+  # p510 is the headless media server: a bad switch takes Plex/*arr/k3d/
+  # cloudflared down and it is painful to recover remotely (see the 2026-07
+  # disk-full incident). The standing rule is "never deploy p510 unless the
+  # user explicitly asks", which until now lived only in CLAUDE.md and agent
+  # memory — i.e. it held only as long as the model remembered it. PreToolUse
+  # can veto a call, so this turns the convention into an actual guardrail.
+  #
+  # Blocks only *activating* commands (nixos-rebuild switch/boot/test, nh os,
+  # nhs, just deploy) aimed at p510. Deliberately does NOT block `nix build
+  # .#nixosConfigurations.p510...` or plain `ssh p510 <read-only>`, so
+  # testing and inspection stay frictionless. Exit 2 = deny + feed stderr
+  # back to the model so it knows to ask instead of retrying.
+  #
+  # This only constrains Claude Code's own tool calls; the user's interactive
+  # shell is untouched and can always deploy p510 directly.
+  deployGuardScript = pkgs.writeShellScript "claude-p510-deploy-guard.sh" ''
+    payload="$(cat)"
+    cmd="$(${pkgs.jq}/bin/jq -r '.tool_input.command // empty' <<<"$payload" 2>/dev/null)"
+    [ -n "$cmd" ] || exit 0
+
+    # No \b adjacent to the alternation group: GNU grep -E silently fails to
+    # match `\b(switch|boot|test)\b[^|;]*\bp510\b` against
+    # "nixos-rebuild switch --flake .#p510". Verified against 13 cases.
+    deploy_verb='nixos-rebuild[[:space:]]+[^|;]*(switch|boot|test)|nh[[:space:]]+os[[:space:]]+(switch|boot|test)|(^|[[:space:]])nhs([[:space:]]|$)|just[[:space:]]+[a-z-]*deploy'
+    if printf '%s' "$cmd" | ${pkgs.gnugrep}/bin/grep -qE "($deploy_verb)[^|;]*p510|p510[^|;]*($deploy_verb)"; then
+      echo "BLOCKED by managed-settings deploy guard: this command would activate a new generation on p510." >&2
+      echo "p510 is the headless media server (Plex, *arr, k3d, cloudflared). Deploying it requires the user's explicit approval." >&2
+      echo "Ask the user first. Building (nix build .#nixosConfigurations.p510...) and read-only ssh are allowed." >&2
+      exit 2
+    fi
+    exit 0
+  '';
+
+  deployGuardHooks = lib.optionalAttrs cfg.deployGuard.enable {
+    PreToolUse = [{
+      matcher = "Bash";
+      hooks = [{
+        type = "command";
+        command = toString deployGuardScript;
+        timeout = 5;
+      }];
+    }];
+  };
+
   formatHooks = lib.optionalAttrs cfg.formatOnEdit.enable {
     PostToolUse = [{
       matcher = "Write|Edit|MultiEdit";
@@ -306,6 +350,7 @@ let
         parrHooks
         notifyHooks
         formatHooks
+        deployGuardHooks
         tmuxCcmHooks
       ];
     })
@@ -359,6 +404,20 @@ in
         routine repo operations never trigger a permission prompt. System-
         mutating commands (deploys, nixos-rebuild, git commit/push, sudo, rm)
         are deliberately excluded and still require explicit approval.
+      '';
+    };
+
+    deployGuard.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Veto Claude Code Bash calls that would activate a new generation on
+        p510 (the headless media server), via a managed-scope PreToolUse hook.
+        Enforces the standing "never deploy p510 without explicit approval"
+        rule mechanically instead of relying on the model remembering it.
+
+        Building (`nix build .#nixosConfigurations.p510...`) and read-only ssh
+        are unaffected, as is the user's own interactive shell.
       '';
     };
 
