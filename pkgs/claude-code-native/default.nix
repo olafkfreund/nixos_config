@@ -31,7 +31,7 @@
 let
   # Version from Anthropic's latest channel (matches npm)
   # Run `curl -fsSL "$GCS_BUCKET/latest"` to check latest
-  version = "2.1.218";
+  version = "2.1.219";
 
   # Claude Code reads clipboard images by shelling out to:
   #   xclip -selection clipboard -t TARGETS -o ... || wl-paste -l ...   (detect)
@@ -63,11 +63,11 @@ let
   sources = {
     x86_64-linux = {
       url = "${gcs_bucket}/${version}/linux-x64/claude";
-      hash = "sha256-4SBxdRqTNrivEBLBAzWP8ErBj5qv9Kc4z/e6XN+vY/I=";
+      hash = "sha256-Is/W9bMGHAORuoTpz4yd6qN3g6rBiwBNQuwGHpjwBpE=";
     };
     aarch64-linux = {
       url = "${gcs_bucket}/${version}/linux-arm64/claude";
-      hash = "sha256-KV/TBIG9A7OEUP3sKm4lu2RywgdPBLDEpWbNWYjyML8=";
+      hash = "sha256-H4NLMiup0Skcx//v8WpnlaWRRb2iedvVnNfs68e38Vo=";
     };
   };
 
