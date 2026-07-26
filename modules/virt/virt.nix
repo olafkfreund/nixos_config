@@ -59,7 +59,6 @@ in
     systemd = {
       tmpfiles.rules = [
         "r /etc/ssh/ssh_config.d/30-libvirt-ssh-proxy.conf"
-        "L+ /var/lib/qemu/firmware - - - - ${pkgs.qemu}/share/qemu/firmware"
       ];
       services.libvirtd.restartIfChanged = false;
       # Fix virt-secret-init-encryption on hosts without working TPM2.
