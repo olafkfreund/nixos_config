@@ -839,11 +839,11 @@
         "scenefx": "scenefx"
       },
       "locked": {
-        "lastModified": 1785033711,
-        "narHash": "sha256-8NLTWtOMa9FUjEPguV8eHL8fLuNRsY1lAM4uBNZGK+Y=",
+        "lastModified": 1785065615,
+        "narHash": "sha256-I4oKz4lW/yszfA/cZeOSX4RUMuah+vC0dxT9v35cTNs=",
         "owner": "mangowm",
         "repo": "mango",
-        "rev": "1b6e01d72c1985024235be044ad8799ed0f8326a",
+        "rev": "06b417ffb3cf394eada46e8618c7eae53e94e9a3",
         "type": "github"
       },
       "original": {
@@ -1131,11 +1131,11 @@
     },
     "nixpkgs-master": {
       "locked": {
-        "lastModified": 1785065180,
-        "narHash": "sha256-hgT+LDaGnW8MuJgQZQv0mcIsDY9fuEMFIhoFc4SUhbA=",
+        "lastModified": 1785066294,
+        "narHash": "sha256-+tLTybFNRFZ8bFIy1lWoghpTTj1Ihc0e7pS1YqBXE50=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "57b08c35d1aeb80eb90ec95b7ae5b874876d906a",
+        "rev": "9173b71048ea54c5f1d44cfb5d89f5c166525e9a",
         "type": "github"
       },
       "original": {
@@ -1441,11 +1441,11 @@
         "nixpkgs": "nixpkgs_11"
       },
       "locked": {
-        "lastModified": 1785064929,
-        "narHash": "sha256-8Q7uZ4E0IP8gWr+UoCeNmoGp01csRw+dcf7YCNJj0NA=",
+        "lastModified": 1785065941,
+        "narHash": "sha256-mP2WFTWjz/1s6paOneRGWLDd4uF37qjhvDL/Q5P6miA=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "894067dff76b8985d12bf67beeedbed3e8148168",
+        "rev": "7296f6811195a694bd027e15f78e37a4b2ad6e38",
         "type": "github"
       },
       "original": {
