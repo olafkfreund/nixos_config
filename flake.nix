@@ -214,8 +214,18 @@
     # offline in-repo), exposed as packages.default. Consumed via overlay
     # as pkgs.herdr on the interactive-host developer profile (p620 + razer).
     # Bump with `nix flake update herdr`.
+    # ponytail: temporarily pinned to d4e0dd3d (2026-07-25), the last rev whose
+    # own flake builds. Upstream cb2e17a4 ("feat: print bundled agent skill")
+    # added `include_str!("../SKILL.md")` to src/main.rs but did NOT add
+    # ../SKILL.md to the lib.fileset.unions allowlist in nix/package.nix, so the
+    # file never reaches the sandbox:
+    #     error: couldn't read `src/../SKILL.md`: No such file or directory
+    # That breaks any consumer of their packages.default, us included, and it is
+    # upstream's bug — not a packaging problem on our side.
+    # UN-PIN (drop the rev, back to plain `github:ogulcancelik/herdr`) once the
+    # fileset includes SKILL.md; verify with `nix build github:ogulcancelik/herdr`.
     herdr = {
-      url = "github:ogulcancelik/herdr";
+      url = "github:ogulcancelik/herdr/d4e0dd3d903c50d2edb8c3cec71952a83989b310";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.rust-overlay.follows = "rust-overlay";
     };

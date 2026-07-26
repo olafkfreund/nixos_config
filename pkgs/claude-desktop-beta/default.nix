@@ -34,7 +34,19 @@
 , libGL
 , vulkan-loader
 , wayland
-, xorg
+, # X11 libs. Named individually at top level rather than taking the whole
+  # `xorg` set: that set is deprecated and each `xorg.libFoo` access emits an
+  # evaluation warning.
+  libx11
+, libxcomposite
+, libxdamage
+, libxext
+, libxfixes
+, libxrandr
+, libxcb
+, libxtst
+, libxscrnsaver
+, libxshmfence
 , # Cowork (Local Agent Mode) runtime — spawned as subprocesses at runtime
   qemu_kvm
 , virtiofsd
@@ -106,18 +118,22 @@ stdenv.mkDerivation {
     libcap_ng
     wayland
   ]
-  ++ (with xorg; [
-    libX11
-    libXcomposite
-    libXdamage
-    libXext
-    libXfixes
-    libXrandr
+  # Top-level lowercase names, not `with xorg; [ libX11 ... ]`. nixpkgs
+  # flattened the xorg package set and the old attributes now emit one
+  # evaluation warning each ("'xorg.libX11' has been renamed to 'libx11'") —
+  # ten of them, every time anything in the closure is evaluated.
+  ++ [
+    libx11
+    libxcomposite
+    libxdamage
+    libxext
+    libxfixes
+    libxrandr
     libxcb
-    libXtst
-    libXScrnSaver
+    libxtst
+    libxscrnsaver
     libxshmfence
-  ])
+  ]
   ++ runtimeLibs;
 
   runtimeDependencies = map lib.getLib runtimeLibs;
