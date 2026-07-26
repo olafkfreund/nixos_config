@@ -839,11 +839,11 @@
         "scenefx": "scenefx"
       },
       "locked": {
-        "lastModified": 1785065615,
-        "narHash": "sha256-I4oKz4lW/yszfA/cZeOSX4RUMuah+vC0dxT9v35cTNs=",
+        "lastModified": 1785069193,
+        "narHash": "sha256-QzfC7QF4WFSaxgD6uyFKOUF4/iJNSDC+TgZnGYlZYOk=",
         "owner": "mangowm",
         "repo": "mango",
-        "rev": "06b417ffb3cf394eada46e8618c7eae53e94e9a3",
+        "rev": "cc4fdecee677e0b4ea5acb595a5f4a4689e9ab53",
         "type": "github"
       },
       "original": {
@@ -1131,11 +1131,11 @@
     },
     "nixpkgs-master": {
       "locked": {
-        "lastModified": 1785067946,
-        "narHash": "sha256-QCQWJeXxYeqXmu5/rN/tDOXx6376gZNyJoGEGW50XYI=",
+        "lastModified": 1785069230,
+        "narHash": "sha256-NPp2Kek7a323aMfYO0VapRnbQv+KfMMUBoRZY5m9m0o=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "116e3485d174e7123a2b98392c79c4ff62c4720b",
+        "rev": "8209d6666fc0b87d6fb70e0b775ef7dffe785236",
         "type": "github"
       },
       "original": {
