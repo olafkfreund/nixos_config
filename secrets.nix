@@ -261,4 +261,8 @@ in
   "secrets/factory-secret-otel-otlp-auth.age".publicKeys = allUsers ++ [ p510 ];
   "secrets/factory-secret-cfactory-api-keys.age".publicKeys = allUsers ++ [ p510 ];
   "secrets/factory-secret-odin-ssh-key.age".publicKeys = allUsers ++ [ p510 ];
+  # MinIO KMS master key. Encrypted out-of-band in the factory-gitops repo and
+  # imported here, so it was already sealed to olafkfreund + p510 before this
+  # entry existed — declaring it is what makes it rekeyable from now on.
+  "secrets/factory-secret-minio-kms.age".publicKeys = allUsers ++ [ p510 ];
 }
