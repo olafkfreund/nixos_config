@@ -29,15 +29,6 @@ in
   # OLLAMA_API_KEY via load-api-keys. Edit: agenix -e secrets/api-ollama.age
   "secrets/api-ollama.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-github-token.age".publicKeys = allUsers ++ allHosts;
-  # n8n personal API key (JWT) for the self-hosted instance at
-  # https://n8n.freundcloud.org.uk. Exported as N8N_API_KEY system-wide via
-  # load-api-keys; used by scripts/MCP servers/CLI tools that drive n8n.
-  "secrets/api-n8n.age".publicKeys = allUsers ++ allHosts;
-  # n8n MCP-server Bearer token (distinct from the personal REST API JWT).
-  # Issued via n8n's MCP Server settings UI; auths the streamable-http endpoint
-  # at https://n8n.freundcloud.org.uk/mcp-server/http. Exposed to Claude Code as
-  # N8N_MCP_TOKEN by the MCP client wrapper, never as a system-wide env var.
-  "secrets/api-n8n-mcp.age".publicKeys = allUsers ++ allHosts;
   # Synechron GitHub API token (PAT). All hosts; exported as
   # SYNECHRON_GITHUB_API_TOKEN via load-api-keys. Edit: agenix -e secrets/synechron-github-api.age
   "secrets/synechron-github-api.age".publicKeys = allUsers ++ allHosts;
@@ -208,11 +199,12 @@ in
   #   agenix -e secrets/transmission-rpc.age
   "secrets/transmission-rpc.age".publicKeys = allUsers ++ [ p510 ];
 
-  # n8n encryption key (p510 only). Encrypts n8n's own credential store so the
-  # Overseerr/Tautulli/Home-Assistant API keys entered in the n8n UI survive
-  # rebuilds and never land in the Nix store. Random value, not hand-typed.
-  # See docs/plans/2026-05-26-plex-llm-recommendations-design.md.
-  "secrets/n8n-encryption-key.age".publicKeys = allUsers ++ [ p510 ];
+  # ProtonVPN WireGuard PrivateKey (p510 only). Confines Transmission's peer
+  # traffic to a VPN-only network namespace — see features.torrentVpn. Holds the
+  # [Interface] PrivateKey line and nothing else. Downloading a fresh config
+  # from Proton issues a new key, so rotate both together:
+  #   agenix -e secrets/proton-wireguard-key.age
+  "secrets/proton-wireguard-key.age".publicKeys = allUsers ++ [ p510 ];
 
   # Cloudflare Tunnel credentials for p510 — public ingress under
   # freundcloud.org.uk (Cloudflare-managed zone), behind Starlink CGNAT.

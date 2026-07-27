@@ -1,4 +1,5 @@
-{ pkgs
+{ config
+, pkgs
 , lib
 , hostUsers
 , hostTypes
@@ -40,13 +41,13 @@ in
       ../../modules/containers/k3d.nix # k3d (k3s in Docker) cluster — ArgoCD + Tailscale operator (see docs/applications/k3d-cluster.md)
       ../../modules/services/arr-suite-mcp.nix # *arr suite MCP server (SSE bridge, tailnet-only)
       ../../modules/services/audiobookbay-automated.nix # AudioBookBay search → Transmission
+      ../../modules/services/torrent-vpn.nix # Transmission confined to a ProtonVPN namespace
       ../../modules/services/audiobook-import.nix # Completed downloads → Audiobookshelf (LLM + m4b)
       ../../modules/services/audiobook-mcp.nix # Audiobook acquisition + library MCP (SSE)
       ../../modules/services/media-bot.nix # Household media Telegram bot (Ollama NL + webhooks)
       ../../modules/services/bazarr.nix # Subtitle automation for Sonarr/Radarr/Lidarr
       ../../modules/services/kometa # Plex Meta Manager — collections, posters, metadata
       ../../modules/services/plex-auto-languages # Per-show audio/sub track memorization
-      ../../modules/services/n8n.nix # Workflow automation (media-recommendation engine)
       ../../modules/services/ntfy.nix # Push notification server (ntfy-sh)
       ../../modules/services/cloudflared.nix # Cloudflare Tunnel — public ingress (CGNAT-safe)
       # Desktop-specific imports (needed for GNOME):
@@ -549,8 +550,8 @@ in
     # /mnt/media for Plex transcodes + library scans.
     modelsDir = "/mnt/img_pool/ollama/models";
     persistentModels = [ ]; # No persistent models to save VRAM
-    # gemma4 for n8n; qwen2.5:7b for reliable strict-JSON audiobook metadata
-    # extraction + tool-calling (audiobook-import / audiobook-mcp).
+    # qwen2.5:7b for reliable strict-JSON audiobook metadata extraction +
+    # tool-calling (audiobook-import / audiobook-mcp).
     onDemandModels = [ "gemma4:e4b" "qwen2.5:7b" "gemma4:12b" "qwen2.5-coder:14b" ];
     keepAlive = "5m"; # Evict from VRAM after 5 minutes of idle
   };
@@ -602,6 +603,33 @@ in
   features.audiobookbay-automated = {
     enable = true;
     listenLanInterface = "eno1";
+  };
+
+  # Torrent traffic isolation. Transmission runs inside a network namespace
+  # whose only route out is a ProtonVPN WireGuard tunnel, so peer traffic never
+  # carries this host's WAN address and a dropped tunnel stops downloads rather
+  # than leaking them. Nothing else on p510 is routed through the VPN.
+  #
+  # The values below come from a WireGuard config downloaded at
+  # account.protonvpn.com → Downloads → WireGuard configuration. Pick a server
+  # flagged P2P and turn NAT-PMP on, or seeding gets no inbound peers. Only the
+  # PrivateKey is secret; it lives in agenix and is read at service start.
+  features.torrentVpn = {
+    enable = true;
+    address = "10.2.0.2/32"; # [Interface] Address
+    peer = {
+      publicKey = ""; # [Peer] PublicKey
+      endpoint = ""; # [Peer] Endpoint
+    };
+    privateKeyFile = config.age.secrets."proton-wireguard-key".path;
+  };
+
+  # [Interface] PrivateKey from the ProtonVPN WireGuard config, on its own line
+  # with nothing else in the file. Rotate by downloading a fresh config and:
+  #   agenix -e secrets/proton-wireguard-key.age
+  age.secrets."proton-wireguard-key" = {
+    file = ../../secrets/proton-wireguard-key.age;
+    mode = "0400";
   };
 
   # Completed audiobook downloads → Audiobookshelf library. Scans the ABB
@@ -669,18 +697,6 @@ in
   # Plex via its websocket API (no Plex Pass needed for this path).
   features.plex-auto-languages = {
     enable = true;
-  };
-
-  # n8n workflow runtime (localhost:5678) — hosts the "just-finished"
-  # media-recommendation workflow that calls Overseerr/Tautulli + local gemma.
-  # See docs/plans/2026-05-26-plex-llm-recommendations-design.md.
-  features.n8n = {
-    enable = true;
-    # Public UI via Cloudflare Tunnel — n8n's listen address stays loopback;
-    # cloudflared proxies HTTPS edge traffic to 127.0.0.1:5678 from within p510.
-    # Setting publicUrl makes n8n emit correct webhook URLs and Secure cookies
-    # under the public hostname.
-    publicUrl = "https://n8n.freundcloud.org.uk";
   };
 
   features.ntfy = {
@@ -757,10 +773,6 @@ in
       "nzbget.freundcloud.org.uk" = "http://localhost:6789";
       "sabnzbd.freundcloud.org.uk" = "http://localhost:8080";
       "audiobookshelf.freundcloud.org.uk" = "http://localhost:13378";
-      # n8n holds the encryption key for every workflow's credentials — its
-      # own login is the only thing protecting them once this is public.
-      # Use a strong password (or front with Cloudflare Access if doubting).
-      "n8n.freundcloud.org.uk" = "http://localhost:5678";
       # ntfy-sh — self-hosted push notifications. Runs on loopback; auth enforced
       # via deny-all default (agenix ntfy-env). Create the DNS CNAME once:
       #   cloudflared tunnel route dns p510-home ntfy.freundcloud.org.uk
@@ -768,7 +780,7 @@ in
     };
 
     # Warm-ping each origin every 2 minutes so idle apps (Backstage Node
-    # runtime, n8n, *arr UIs) don't cold-start on the first public hit
+    # runtime, *arr UIs) don't cold-start on the first public hit
     # and render a blank page while they boot. Hits localhost origins
     # only; never touches Cloudflare's edge.
     keepalive.enable = true;

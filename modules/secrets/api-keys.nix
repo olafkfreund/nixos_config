@@ -71,13 +71,6 @@ in
         group = "users";
       };
 
-      api-n8n = {
-        file = ../../secrets/api-n8n.age;
-        mode = "0644";
-        owner = "root";
-        group = "users";
-      };
-
       # api-qwen = {
       #   file = ../../secrets/api-qwen.age;
       #   mode = "0644";
@@ -95,16 +88,6 @@ in
       api-github-token = {
         file = ../../secrets/api-github-token.age;
         mode = "0600";
-        owner = username;
-        group = "users";
-      };
-
-      # n8n MCP-server Bearer token (NOT the REST API JWT). Read at MCP
-      # client spawn time by the wrapper script in claude-code-mcp.nix; never
-      # exported as a system-wide env var so it doesn't appear in /proc/*/environ.
-      api-n8n-mcp = {
-        file = ../../secrets/api-n8n-mcp.age;
-        mode = "0400";
         owner = username;
         group = "users";
       };
@@ -201,17 +184,6 @@ in
           echo "export OLLAMA_API_KEY=\"$(cat /run/agenix/api-ollama)\""
         fi
 
-        if [ -r "/run/agenix/api-n8n" ]; then
-          echo "export N8N_API_KEY=\"$(cat /run/agenix/api-n8n)\""
-        fi
-
-        if [ -r "/run/agenix/api-n8n-mcp" ]; then
-          # n8n MCP-server Bearer token — used by Claude Code's `n8n` MCP entry
-          # to authenticate https://n8n.freundcloud.org.uk/mcp-server/http.
-          # Distinct from the REST API JWT (which would go in N8N_API_KEY).
-          echo "export N8N_MCP_TOKEN=\"$(cat /run/agenix/api-n8n-mcp)\""
-        fi
-
         if [ -r "/run/agenix/api-github-token" ]; then
           # Export as GITHUB_API_TOKEN to avoid conflict with gh CLI credential management
           # gh CLI expects to manage its own credentials via 'gh auth login'
@@ -237,8 +209,6 @@ in
         [ -n "$ANTHROPIC_API_KEY" ] && echo "✅ Anthropic: Available" || echo "❌ Anthropic: Not available"
         [ -n "$GROQ_API_KEY" ] && echo "✅ Groq: Available" || echo "❌ Groq: Not available"
         [ -n "$OLLAMA_API_KEY" ] && echo "✅ Ollama Cloud: Available" || echo "❌ Ollama Cloud: Not available"
-        [ -n "$N8N_API_KEY" ] && echo "✅ n8n: Available" || echo "❌ n8n: Not available"
-        [ -n "$N8N_MCP_TOKEN" ] && echo "✅ n8n MCP: Available" || echo "❌ n8n MCP: Not available"
         [ -n "$LANGCHAIN_API_KEY" ] && echo "✅ LangChain: Available" || echo "❌ LangChain: Not available"
         [ -n "$GITHUB_API_TOKEN" ] && echo "✅ GitHub API Token: Available" || echo "❌ GitHub API Token: Not available"
 
