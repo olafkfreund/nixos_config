@@ -89,24 +89,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # mango — dwl-based Wayland compositor (wlroots + scenefx). Its flake
-    # provides the NixOS module (programs.mango, wired below) and the
+    # mango — dwl-based Wayland compositor (wlroots + scenefx). nixpkgs now
+    # ships the NixOS module and package (programs.mango), so we only take the
     # home-manager config option (wayland.windowManager.mango, added to
-    # home-manager.sharedModules). Third Noctalia session alongside niri/labwc.
+    # home-manager.sharedModules) from this flake. Wiring both NixOS modules
+    # collides on the programs.mango option. Third Noctalia session alongside
+    # niri/labwc.
     mango = {
       url = "github:mangowm/mango";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # scenefx 0.5 — mango's meson.build requires scenefx-0.5, but mango's own
-    # flake pins/exposes scenefx 0.4.1 (its `inherit (inputs.scenefx.packages.*)
-    # scenefx` only resolves against the 0.4.1 output layout, which 0.5 renamed
-    # to `default`). So we can't just make mango follow this; instead we build
-    # scenefx 0.5 here and inject it via `programs.mango.package.override`
-    # (see modules/desktop/mangowm.nix). Pinned to tag 0.5; revisit when mango
-    # upstream wires scenefx 0.5 itself.
-    scenefx = {
-      url = "github:wlrfx/scenefx/0.5";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -333,7 +323,6 @@
               inputs.agenix.nixosModules.default
               inputs.lanzaboote.nixosModules.lanzaboote
               inputs.niri-flake.nixosModules.niri
-              inputs.mango.nixosModules.mango
               inputs.noctalia-greeter.nixosModules.default
               nix-index-database.nixosModules.nix-index
               ./home/shell/zellij/zjstatus.nix
