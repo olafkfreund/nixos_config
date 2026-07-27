@@ -451,6 +451,15 @@ in
     enable = true;
     users = hostUsers; # Use all users for this host
     rootless = false;
+
+    # /home lives on the WD10EZEX (CMR, 7200rpm): 156 MB/s synchronous writes
+    # with 850GB free. The previous home, /mnt/img_pool, is an ST1000LM035 —
+    # an SMR laptop drive that sustained only 9.5 MB/s under load and 19.8 MB/s
+    # idle, with ~450ms write latency. That starved containerd image pulls to
+    # ~600 B/s and pushed postgres fsyncs past 70s, so probes killed healthy
+    # pods and the k3d cluster could not converge. Space was never the issue;
+    # write latency was.
+    dataRoot = "/home/docker";
   };
 
   # k3d cluster — runs ArgoCD, watches github.com/olafkfreund/factory-gitops
@@ -463,6 +472,11 @@ in
   # for the design, and docs/guides/factory-gitops.md for the sidecar pattern.
   modules.containers.k3d = {
     enable = true;
+    # PV backing store follows Docker off the SMR pool onto /home. The
+    # module default (/mnt/img_pool/k3d/storage) was chosen to keep cluster
+    # PVCs away from the media library's IOPS, which still holds — /home is
+    # simply the faster of the two non-media disks.
+    storageDir = "/home/k3d/storage";
     argocd.enable = true;
     tailscaleAuthKey.enable = true;
     factorySecrets.enable = true; # #807: durably seed all factory ns Secrets from agenix
@@ -545,9 +559,19 @@ in
     enable = true;
     package = pkgs.ollama-cuda; # NVIDIA CUDA GPU package
     host = "0.0.0.0"; # Tailnet + LAN reachable
-    # Stored on the dedicated 916GB compute pool (870GB free), not the
-    # media pool. Models share IOPS with nothing else, and we leave
-    # /mnt/media for Plex transcodes + library scans.
+    # Deliberately left on /mnt/img_pool despite that pool being the slow SMR
+    # drive. Two reasons it is the right disk for *this* service:
+    #
+    #   1. ollama.service runs DynamicUser with ProtectHome=yes, so /home is
+    #      replaced by an empty tmpfs for it — a modelsDir under /home fails
+    #      with "mkdir: permission denied" no matter what ReadWritePaths says,
+    #      and DynamicUser's uid changes each start so ownership cannot be
+    #      pinned outside systemd's StateDirectory.
+    #   2. Model loading is large sequential reads, which SMR serves at full
+    #      speed. Only sustained random *writes* collapse on shingled media —
+    #      that is what starved containerd and postgres, not this.
+    #
+    # /mnt/media stays reserved for Plex transcodes and library scans.
     modelsDir = "/mnt/img_pool/ollama/models";
     persistentModels = [ ]; # No persistent models to save VRAM
     # qwen2.5:7b for reliable strict-JSON audiobook metadata extraction +

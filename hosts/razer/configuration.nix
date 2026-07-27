@@ -471,6 +471,11 @@ in
     enable = true;
     users = hostUsers; # Use all users for this host
     rootless = false;
+    # Preserves the path this host has always used. Unlike p510, /mnt/img_pool
+    # here is a plain directory on the root filesystem, not a separate disk;
+    # the value is legacy rather than deliberate, but repointing it would
+    # orphan the existing data-root in place.
+    dataRoot = "/mnt/img_pool/docker";
   };
 
   # Use DHCP-provided DNS servers
