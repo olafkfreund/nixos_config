@@ -614,12 +614,15 @@ in
   # account.protonvpn.com → Downloads → WireGuard configuration. Pick a server
   # flagged P2P and turn NAT-PMP on, or seeding gets no inbound peers. Only the
   # PrivateKey is secret; it lives in agenix and is read at service start.
+  # Proton hands out a dual-stack config; only the v4 half is used here. p510
+  # runs with enableIPv6 = false, and omitting the v6 address and ::/0 route
+  # means the namespace has no IPv6 path at all rather than an unrouted one.
   features.torrentVpn = {
     enable = true;
-    address = "10.2.0.2/32"; # [Interface] Address
+    address = "10.2.0.2/32"; # [Interface] Address (v4)
     peer = {
-      publicKey = ""; # [Peer] PublicKey
-      endpoint = ""; # [Peer] Endpoint
+      publicKey = "8/kdhoN9UcJuptbdwaVqfkTGpQDZZC0bOGs5Dr2F2zg="; # NL#733
+      endpoint = "169.150.196.130:51820";
     };
     privateKeyFile = config.age.secrets."proton-wireguard-key".path;
   };
