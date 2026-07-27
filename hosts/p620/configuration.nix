@@ -455,6 +455,7 @@ in
       "networkmanager"
       "render"
       "ydotool" # /run/ydotoold/socket access for the voice-input client
+      "libvirtd" # read-write libvirt socket; without it virt-manager gets "access denied by policy"
     ];
     shell = pkgs.zsh;
     # Run user services even when not logged in so headless user units

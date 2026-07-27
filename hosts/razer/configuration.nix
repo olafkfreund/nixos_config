@@ -499,6 +499,7 @@ in
       "wheel"
       "networkmanager"
       "ydotool" # /run/ydotoold/socket access for the voice-input client
+      "libvirtd" # read-write libvirt socket; without it virt-manager gets "access denied by policy"
     ];
     shell = pkgs.zsh;
     # Only use secret-managed password if the secret exists
