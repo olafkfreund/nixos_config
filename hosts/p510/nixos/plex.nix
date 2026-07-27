@@ -3,12 +3,17 @@
 , ...
 }: {
   services = {
-    # Overseerr - Request management and media discovery for Plex
-    overseerr = {
+    # Seerr - Request management and media discovery for Plex. Overseerr and
+    # Jellyseerr merged upstream into Seerr; nixpkgs dropped services.overseerr
+    # with it. Port is unchanged, so the reverse proxy and tailscale serve
+    # paths still work. State moved: /var/lib/private/overseerr ->
+    # /var/lib/private/jellyseerr/config (seerr keeps the jellyseerr state dir
+    # below stateVersion 26.05).
+    seerr = {
       enable = true;
       port = 5055;
       openFirewall = true;
-      package = pkgs-unstable.overseerr;
+      package = pkgs-unstable.seerr;
     };
     plex = {
       enable = true;
@@ -313,8 +318,8 @@
 
   # Ensure media services start before Tailscale Serve to prevent port conflicts
   systemd.services.tailscale-serve = {
-    after = [ "overseerr.service" "audiobookshelf.service" "sabnzbd.service" ];
-    wants = [ "overseerr.service" "audiobookshelf.service" "sabnzbd.service" ];
+    after = [ "seerr.service" "audiobookshelf.service" "sabnzbd.service" ];
+    wants = [ "seerr.service" "audiobookshelf.service" "sabnzbd.service" ];
   };
 
   # Note: Firewall ports are now comprehensively configured in configuration.nix

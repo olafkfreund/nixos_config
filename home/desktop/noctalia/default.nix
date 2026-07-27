@@ -578,9 +578,8 @@ in
     in
     {
       enable = true;
-      # Reuse the scenefx-0.5-overridden package from the NixOS module
-      # (modules/desktop/mangowm.nix) so the HM side doesn't rebuild mango
-      # against scenefx 0.4.1 (which fails: "scenefx-0.5 not found").
+      # Reuse the system mango (nixpkgs, via programs.mango) so the HM side
+      # doesn't build the mango flake's own package on top of it.
       package = osConfig.programs.mango.package;
 
       extraConfig = ''
