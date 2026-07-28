@@ -178,6 +178,44 @@
         "type": "github"
       }
     },
+    "dank-qml-common": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1784074596,
+        "narHash": "sha256-/rCqHgC39mHvBDxb/dZLWCQ3W4ev94y3/1KtCRSPDp8=",
+        "owner": "AvengeMedia",
+        "repo": "dank-qml-common",
+        "rev": "b50afcf549f7e9c8f07c85b7f3fbba867701650d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "AvengeMedia",
+        "repo": "dank-qml-common",
+        "type": "github"
+      }
+    },
+    "dankcalendar": {
+      "inputs": {
+        "dank-qml-common": "dank-qml-common",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784903686,
+        "narHash": "sha256-mWUBNtlABsMlSoo3b7a5ht8MSOZiCMZt3/78fYpCwhw=",
+        "owner": "AvengeMedia",
+        "repo": "dankcalendar",
+        "rev": "3b221fa14807892c2ec23d4fe362ffa0ad034c53",
+        "type": "github"
+      },
+      "original": {
+        "owner": "AvengeMedia",
+        "ref": "v0.2.7",
+        "repo": "dankcalendar",
+        "type": "github"
+      }
+    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -737,11 +775,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785168662,
-        "narHash": "sha256-kGJTc0oEUQuEwV66lSlMxYtOEtpk9N/HS43k+rFAvs8=",
+        "lastModified": 1785269816,
+        "narHash": "sha256-6JkNDlJ18NY1iAuoSYCPDO7O+yYN/vPwpFmHOHNpVvY=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "cbb77679b3d992c8b62f884cd3a84af534a28621",
+        "rev": "3d25fa94cf355cf7da64c77bb9c3c15806486329",
         "type": "github"
       },
       "original": {
@@ -818,11 +856,11 @@
         "scenefx": "scenefx"
       },
       "locked": {
-        "lastModified": 1785123014,
-        "narHash": "sha256-9TYx3jL6dBNlCTphXeTICNbQ1HkVgFegRC4YHbI3hxw=",
+        "lastModified": 1785238753,
+        "narHash": "sha256-5Ix3bmjxFztiRGQpl/5eeUkSH23KyvA2B1hSSy5EhG0=",
         "owner": "mangowm",
         "repo": "mango",
-        "rev": "a2172525fe066e7ff550f1f4c8dbeb42ab3bff6c",
+        "rev": "9ce833bf5bc27eae0c6d554b09638a366916fe49",
         "type": "github"
       },
       "original": {
@@ -857,11 +895,11 @@
         "spectrum": "spectrum"
       },
       "locked": {
-        "lastModified": 1785157525,
-        "narHash": "sha256-odxXn/03vutxu0aNqbC8f6naVfX5MOfT+fty2HSf5QY=",
+        "lastModified": 1785246989,
+        "narHash": "sha256-7CjGBACbXXIJvGrPed75QI8ytqc48M78GP9aB/h2VSc=",
         "owner": "astro",
         "repo": "microvm.nix",
-        "rev": "0392d9165e0e24d74e8141d16f1bb65f6a52d6ee",
+        "rev": "39a499ab85311b56dddb09ec43351cc3658f22c1",
         "type": "github"
       },
       "original": {
@@ -973,11 +1011,11 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1784723954,
-        "narHash": "sha256-1CfD8ZUjCkTgjsneLZ/lxCHhgDfqxxE7/GX0MmsgiqA=",
+        "lastModified": 1785232496,
+        "narHash": "sha256-65EQYIRRpTdpH8lUiB6Mvo5uBkG60aBIzAJuALfx+O0=",
         "owner": "NixOS",
         "repo": "nixos-hardware",
-        "rev": "a017f5b72210026af5b3ac5949f08d94380a6fbd",
+        "rev": "2e790b0a6be8ec2b76174ac0931b8ff11919ec98",
         "type": "github"
       },
       "original": {
@@ -1110,11 +1148,11 @@
     },
     "nixpkgs-master": {
       "locked": {
-        "lastModified": 1785227066,
-        "narHash": "sha256-HmKXwBDQEe85O6nwMSdn8QheXqBOyPhcs2TFtXbBf1c=",
+        "lastModified": 1785271841,
+        "narHash": "sha256-IvwvF4nvhfbIMzCrB3sVd66trlYD78gxyJkEpq1b5zs=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "d10ce5fd5962dc368e2c4cc8df6c9c645fe8dc68",
+        "rev": "3ac80760431e14c9087c54de2b1914909b862e74",
         "type": "github"
       },
       "original": {
@@ -1401,11 +1439,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785030494,
-        "narHash": "sha256-ck4CpAHRKhwf3w/1+CYh+UISQXD+k+HyjIL9LP9Feis=",
+        "lastModified": 1785264773,
+        "narHash": "sha256-JafMEknD8Z+ZPB//tNkvVg8ouZ57Ahknf+wl8y9PZWA=",
         "owner": "noctalia-dev",
         "repo": "noctalia-greeter",
-        "rev": "32b015ff9d2c8268f9f195e719c150d2c0513814",
+        "rev": "c6a48ead9ddb1d0cfd8d304c7c338eebc937cff7",
         "type": "github"
       },
       "original": {
@@ -1420,11 +1458,11 @@
         "nixpkgs": "nixpkgs_11"
       },
       "locked": {
-        "lastModified": 1785228080,
-        "narHash": "sha256-lDWKa37NXo6gNhjGM0AHJPrB7/ni48sGiAsUw45yBx4=",
+        "lastModified": 1785270993,
+        "narHash": "sha256-TNhUXXZzRrET9fFgpfSaXmW+i7e1cSicvIYKVQ/0B8g=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "cabc104f2d0b90bdf62aa07d61c5775950461566",
+        "rev": "d229d046c0e8989a8a91b3ed40783a973df91486",
         "type": "github"
       },
       "original": {
@@ -1505,6 +1543,7 @@
         "antigravity-nix": "antigravity-nix",
         "claude-skills-borghei": "claude-skills-borghei",
         "cosmic-applet-spotify": "cosmic-applet-spotify",
+        "dankcalendar": "dankcalendar",
         "flake-utils": "flake-utils_3",
         "gnome-quick-web-apps": "gnome-quick-web-apps",
         "gogmail": "gogmail",
@@ -2038,11 +2077,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1784395522,
-        "narHash": "sha256-DLFv8aCzKRboM6UHS7s2XGtenEHKH486DdWnH5fyIOc=",
+        "lastModified": 1785245007,
+        "narHash": "sha256-j8/at3rqbMcq/WjOMnJ+9q6RXz46/D9xW4hNJEladto=",
         "owner": "Benexl",
         "repo": "yt-x",
-        "rev": "efba3dc92af4b8ee8fbddd3cd12ecb18c0156ab0",
+        "rev": "f4f45f39bddb58a251c24645eb3794bbbf0f4611",
         "type": "github"
       },
       "original": {
