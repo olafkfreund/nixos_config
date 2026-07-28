@@ -80,6 +80,24 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # DankCalendar (dcal) — calendar daemon by the DankMaterialShell authors.
+    # Connects Local/Google/Microsoft/CalDAV/iCloud accounts and serves them
+    # over a unix socket; DMS's CalendarDankBackend discovers
+    # $XDG_RUNTIME_DIR/dankcal-*.sock and prefers it over the khal backend,
+    # which is read-only. Provides homeModules.dank-calendar (used by
+    # home/desktop/dank-calendar) and packages.default, a buildGoModule whose
+    # Go version is parsed out of core/go.mod so it cannot drift. The
+    # dank-qml-common git submodule is upstream's own flake input, so nothing
+    # here needs fetchSubmodules.
+    #
+    # Pinned to a release tag: this is a fast-moving 0.x (v0.2.7, 2026-07-24).
+    # Requires DMS >= 1.5 for the dankcal backend to exist at all — do not drop
+    # the nixpkgs-master DMS graft above until unstable carries 1.5+.
+    dankcalendar = {
+      url = "github:AvengeMedia/dankcalendar/v0.2.7";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # niri — scrollable-tiling Wayland compositor. niri-flake provides the
     # NixOS module (programs.niri) + the home-manager config option
     # (programs.niri.settings). We pin the package to pkgs.niri (nixpkgs) and
@@ -348,6 +366,10 @@
                     # Noctalia shell (programs.noctalia). Enabled per-user only
                     # where the niri/labwc home profile turns it on.
                     inputs.noctalia.homeModules.default
+                    # DankCalendar daemon (programs.dank-calendar). Enabled
+                    # per-user via home/desktop/dank-calendar; the module is
+                    # inert until that profile turns it on.
+                    inputs.dankcalendar.homeModules.dank-calendar
                     # mango compositor config (wayland.windowManager.mango),
                     # enabled per-user in the same niri/labwc home profile.
                     inputs.mango.hmModules.mango

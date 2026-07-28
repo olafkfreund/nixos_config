@@ -6,6 +6,7 @@
   imports = [
     ./profile.nix
     ../../home/desktop/noctalia # Noctalia shell for niri/labwc sessions
+    ../../home/desktop/dank-calendar # dcal daemon backing the DMS calendar card
   ];
 
   desktop.gnome.profile = "workstation";
