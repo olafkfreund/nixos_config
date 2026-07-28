@@ -24,6 +24,22 @@ in
       default = false;
       description = "Enable rootless Docker";
     };
+
+    dataRoot = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      example = "/home/docker";
+      description = ''
+        Directory holding image layers, container writable layers and
+        volumes. `null` keeps Docker's own default (/var/lib/docker).
+
+        Pick the filesystem deliberately: this path absorbs every container
+        write on the host, so it wants free space *and* low write latency.
+        An SMR drive is the wrong answer even when it is the emptiest one —
+        shingled rewrites collapse sustained random writes to single-digit
+        MB/s, which starves image pulls and database fsyncs alike.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -47,13 +63,8 @@ in
       # Explicitly disable Docker Swarm
       daemon.settings = {
         swarm-default-advertise-addr = "";
-        # Docker data-root on /mnt/img_pool — the 870GB pool — so container
-        # layers + volumes don't eat the 226GB system disk. Especially
-        # important for k3d (modules/containers/k3d.nix) whose cluster
-        # state lives in Docker volumes; before this move, an idle 226GB
-        # disk would fill up over weeks of cluster operation.
-        data-root = "/mnt/img_pool/docker";
-      };
+      }
+      // lib.optionalAttrs (cfg.dataRoot != null) { data-root = cfg.dataRoot; };
     };
 
     # Add specified users to docker group

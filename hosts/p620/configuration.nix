@@ -437,6 +437,11 @@ in
       enable = true;
       users = hostUsers; # Use all users for this host
       rootless = false;
+      # Preserves the path this host has always used — 81 volumes live here.
+      # Unlike p510, /mnt/img_pool here is a plain directory on the root
+      # filesystem, not a separate disk; the value is legacy rather than
+      # deliberate, but repointing it would orphan the existing data-root.
+      dataRoot = "/mnt/img_pool/docker";
     };
 
     # Enable secrets management

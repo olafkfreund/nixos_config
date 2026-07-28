@@ -1,4 +1,5 @@
-{ pkgs
+{ config
+, pkgs
 , lib
 , hostUsers
 , hostTypes
@@ -40,13 +41,13 @@ in
       ../../modules/containers/k3d.nix # k3d (k3s in Docker) cluster — ArgoCD + Tailscale operator (see docs/applications/k3d-cluster.md)
       ../../modules/services/arr-suite-mcp.nix # *arr suite MCP server (SSE bridge, tailnet-only)
       ../../modules/services/audiobookbay-automated.nix # AudioBookBay search → Transmission
+      ../../modules/services/torrent-vpn.nix # Transmission confined to a ProtonVPN namespace
       ../../modules/services/audiobook-import.nix # Completed downloads → Audiobookshelf (LLM + m4b)
       ../../modules/services/audiobook-mcp.nix # Audiobook acquisition + library MCP (SSE)
       ../../modules/services/media-bot.nix # Household media Telegram bot (Ollama NL + webhooks)
       ../../modules/services/bazarr.nix # Subtitle automation for Sonarr/Radarr/Lidarr
       ../../modules/services/kometa # Plex Meta Manager — collections, posters, metadata
       ../../modules/services/plex-auto-languages # Per-show audio/sub track memorization
-      ../../modules/services/n8n.nix # Workflow automation (media-recommendation engine)
       ../../modules/services/ntfy.nix # Push notification server (ntfy-sh)
       ../../modules/services/cloudflared.nix # Cloudflare Tunnel — public ingress (CGNAT-safe)
       # Desktop-specific imports (needed for GNOME):
@@ -450,6 +451,15 @@ in
     enable = true;
     users = hostUsers; # Use all users for this host
     rootless = false;
+
+    # /home lives on the WD10EZEX (CMR, 7200rpm): 156 MB/s synchronous writes
+    # with 850GB free. The previous home, /mnt/img_pool, is an ST1000LM035 —
+    # an SMR laptop drive that sustained only 9.5 MB/s under load and 19.8 MB/s
+    # idle, with ~450ms write latency. That starved containerd image pulls to
+    # ~600 B/s and pushed postgres fsyncs past 70s, so probes killed healthy
+    # pods and the k3d cluster could not converge. Space was never the issue;
+    # write latency was.
+    dataRoot = "/home/docker";
   };
 
   # k3d cluster — runs ArgoCD, watches github.com/olafkfreund/factory-gitops
@@ -462,6 +472,11 @@ in
   # for the design, and docs/guides/factory-gitops.md for the sidecar pattern.
   modules.containers.k3d = {
     enable = true;
+    # PV backing store follows Docker off the SMR pool onto /home. The
+    # module default (/mnt/img_pool/k3d/storage) was chosen to keep cluster
+    # PVCs away from the media library's IOPS, which still holds — /home is
+    # simply the faster of the two non-media disks.
+    storageDir = "/home/k3d/storage";
     argocd.enable = true;
     tailscaleAuthKey.enable = true;
     factorySecrets.enable = true; # #807: durably seed all factory ns Secrets from agenix
@@ -544,13 +559,23 @@ in
     enable = true;
     package = pkgs.ollama-cuda; # NVIDIA CUDA GPU package
     host = "0.0.0.0"; # Tailnet + LAN reachable
-    # Stored on the dedicated 916GB compute pool (870GB free), not the
-    # media pool. Models share IOPS with nothing else, and we leave
-    # /mnt/media for Plex transcodes + library scans.
+    # Deliberately left on /mnt/img_pool despite that pool being the slow SMR
+    # drive. Two reasons it is the right disk for *this* service:
+    #
+    #   1. ollama.service runs DynamicUser with ProtectHome=yes, so /home is
+    #      replaced by an empty tmpfs for it — a modelsDir under /home fails
+    #      with "mkdir: permission denied" no matter what ReadWritePaths says,
+    #      and DynamicUser's uid changes each start so ownership cannot be
+    #      pinned outside systemd's StateDirectory.
+    #   2. Model loading is large sequential reads, which SMR serves at full
+    #      speed. Only sustained random *writes* collapse on shingled media —
+    #      that is what starved containerd and postgres, not this.
+    #
+    # /mnt/media stays reserved for Plex transcodes and library scans.
     modelsDir = "/mnt/img_pool/ollama/models";
     persistentModels = [ ]; # No persistent models to save VRAM
-    # gemma4 for n8n; qwen2.5:7b for reliable strict-JSON audiobook metadata
-    # extraction + tool-calling (audiobook-import / audiobook-mcp).
+    # qwen2.5:7b for reliable strict-JSON audiobook metadata extraction +
+    # tool-calling (audiobook-import / audiobook-mcp).
     onDemandModels = [ "gemma4:e4b" "qwen2.5:7b" "gemma4:12b" "qwen2.5-coder:14b" ];
     keepAlive = "5m"; # Evict from VRAM after 5 minutes of idle
   };
@@ -602,6 +627,36 @@ in
   features.audiobookbay-automated = {
     enable = true;
     listenLanInterface = "eno1";
+  };
+
+  # Torrent traffic isolation. Transmission runs inside a network namespace
+  # whose only route out is a ProtonVPN WireGuard tunnel, so peer traffic never
+  # carries this host's WAN address and a dropped tunnel stops downloads rather
+  # than leaking them. Nothing else on p510 is routed through the VPN.
+  #
+  # The values below come from a WireGuard config downloaded at
+  # account.protonvpn.com → Downloads → WireGuard configuration. Pick a server
+  # flagged P2P and turn NAT-PMP on, or seeding gets no inbound peers. Only the
+  # PrivateKey is secret; it lives in agenix and is read at service start.
+  # Proton hands out a dual-stack config; only the v4 half is used here. p510
+  # runs with enableIPv6 = false, and omitting the v6 address and ::/0 route
+  # means the namespace has no IPv6 path at all rather than an unrouted one.
+  features.torrentVpn = {
+    enable = true;
+    address = "10.2.0.2/32"; # [Interface] Address (v4)
+    peer = {
+      publicKey = "8/kdhoN9UcJuptbdwaVqfkTGpQDZZC0bOGs5Dr2F2zg="; # NL#733
+      endpoint = "169.150.196.130:51820";
+    };
+    privateKeyFile = config.age.secrets."proton-wireguard-key".path;
+  };
+
+  # [Interface] PrivateKey from the ProtonVPN WireGuard config, on its own line
+  # with nothing else in the file. Rotate by downloading a fresh config and:
+  #   agenix -e secrets/proton-wireguard-key.age
+  age.secrets."proton-wireguard-key" = {
+    file = ../../secrets/proton-wireguard-key.age;
+    mode = "0400";
   };
 
   # Completed audiobook downloads → Audiobookshelf library. Scans the ABB
@@ -669,18 +724,6 @@ in
   # Plex via its websocket API (no Plex Pass needed for this path).
   features.plex-auto-languages = {
     enable = true;
-  };
-
-  # n8n workflow runtime (localhost:5678) — hosts the "just-finished"
-  # media-recommendation workflow that calls Overseerr/Tautulli + local gemma.
-  # See docs/plans/2026-05-26-plex-llm-recommendations-design.md.
-  features.n8n = {
-    enable = true;
-    # Public UI via Cloudflare Tunnel — n8n's listen address stays loopback;
-    # cloudflared proxies HTTPS edge traffic to 127.0.0.1:5678 from within p510.
-    # Setting publicUrl makes n8n emit correct webhook URLs and Secure cookies
-    # under the public hostname.
-    publicUrl = "https://n8n.freundcloud.org.uk";
   };
 
   features.ntfy = {
@@ -757,10 +800,6 @@ in
       "nzbget.freundcloud.org.uk" = "http://localhost:6789";
       "sabnzbd.freundcloud.org.uk" = "http://localhost:8080";
       "audiobookshelf.freundcloud.org.uk" = "http://localhost:13378";
-      # n8n holds the encryption key for every workflow's credentials — its
-      # own login is the only thing protecting them once this is public.
-      # Use a strong password (or front with Cloudflare Access if doubting).
-      "n8n.freundcloud.org.uk" = "http://localhost:5678";
       # ntfy-sh — self-hosted push notifications. Runs on loopback; auth enforced
       # via deny-all default (agenix ntfy-env). Create the DNS CNAME once:
       #   cloudflared tunnel route dns p510-home ntfy.freundcloud.org.uk
@@ -768,7 +807,7 @@ in
     };
 
     # Warm-ping each origin every 2 minutes so idle apps (Backstage Node
-    # runtime, n8n, *arr UIs) don't cold-start on the first public hit
+    # runtime, *arr UIs) don't cold-start on the first public hit
     # and render a blank page while they boot. Hits localhost origins
     # only; never touches Cloudflare's edge.
     keepalive.enable = true;
