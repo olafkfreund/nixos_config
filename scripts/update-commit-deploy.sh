@@ -198,6 +198,13 @@ if ! git diff --quiet flake.lock; then
   LOCK_CHANGED=1
 fi
 
+# Fingerprint the lock we are about to evaluate, build and commit. Everything
+# downstream assumes this exact file. If it changes underneath us mid-run — a
+# concurrent `nix flake update`, an editor, a stray `git checkout -- flake.lock`
+# — we must abort rather than commit a lock we never built. Checked again just
+# before `git add` (step 10).
+LOCK_SHA_AT_UPDATE=$(sha256sum flake.lock | cut -d' ' -f1)
+
 # --- 5. Freshness check: is HOST already on the closure our lock would build?
 # Use `nix eval --raw` to get the expected outPath WITHOUT triggering a build —
 # cheap probe that tells us if the target is stale. We only do the expensive
@@ -291,6 +298,19 @@ ok "build succeeded"
 # closes this PR and discards the local lock change, so a broken upstream
 # never lands on main.
 if [ $LOCK_CHANGED -eq 1 ]; then
+  # Guard: the lock must still be the one we evaluated and built above. Checked
+  # before creating the branch so this failure needs no cleanup. Catches both a
+  # revert (nothing staged -> opaque "commit failed") and, more dangerously, a
+  # DIFFERENT lock written mid-run, which would otherwise be committed and
+  # deployed as though it had been verified.
+  lock_sha_now=$(sha256sum flake.lock | cut -d' ' -f1)
+  if [ "$lock_sha_now" != "$LOCK_SHA_AT_UPDATE" ]; then
+    err "flake.lock changed after the build (expected ${LOCK_SHA_AT_UPDATE:0:12}…, found ${lock_sha_now:0:12}…).
+Something wrote to it mid-run — a concurrent 'nix flake update', an editor, or a
+manual 'git checkout -- flake.lock'. Refusing to commit a lock that was never
+built. Nothing was committed or deployed; re-run from a clean tree."
+  fi
+
   # Build a commit message with the nixpkgs delta + scope
   msg_subject="chore(flake): bump ${SCOPE} — nixpkgs ${old_rev:0:8} → ${new_rev:0:8}"
   if [ "$old_rev" = "$new_rev" ]; then
