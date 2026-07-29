@@ -135,7 +135,7 @@
       docui
       docker-gc
       lazydocker
-      earthly
+      earthbuild
     ];
 
     vm = with pkgs; [

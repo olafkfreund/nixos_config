@@ -93,7 +93,7 @@ let
       (optional cfg.taskRunners.make gnumake)
       (optional cfg.taskRunners.ninja ninja)
       (optional cfg.taskRunners.bazel bazel)
-      (optional cfg.taskRunners.earthly earthly)
+      (optional cfg.taskRunners.earthly earthbuild)
     ];
 
   testingPackages = with pkgs;
