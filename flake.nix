@@ -174,8 +174,14 @@
     # Hardware specific (removed unused razer-laptop-control)
 
     # Package collections
-    nur.url = "github:nix-community/NUR";
-    nixpkgs-f2k.url = "github:moni-dz/nixpkgs-f2k";
+    nur = {
+      url = "github:nix-community/NUR";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nixpkgs-f2k = {
+      url = "github:moni-dz/nixpkgs-f2k";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nix-index-database = {
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";

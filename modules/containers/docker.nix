@@ -49,7 +49,7 @@ in
       docker-compose
       docker-gc
       lazydocker
-      earthly
+      earthbuild
     ];
 
     # Docker configuration

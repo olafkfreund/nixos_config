@@ -1,4 +1,4 @@
-final: prev: {
+_final: prev: {
   # azure-cli 2.81.0 expects azure-mgmt-web v2024_11_01 which isn't packaged yet;
   # disable installCheck until nixpkgs catches up.
   azure-cli = prev.azure-cli.overrideAttrs (_old: {
@@ -64,28 +64,6 @@ final: prev: {
       (patch: builtins.match ".*shell_remove_dark_mode.*" (toString patch) == null)
       (oldAttrs.patches or [ ]);
   });
-
-  # libdisplay-info 0.3.0 -> 0.4.0 (nixpkgs #545480) broke every Rust package
-  # vendoring libdisplay-info-sys 0.3.0, whose build.rs asks pkg-config for
-  # `libdisplay-info < 0.4.0`. niri and lact both fail to build on p620.
-  # Upstream fixed this by adding a versioned libdisplay-info_0_3 attribute and
-  # pinning both packages to it (#546004 for niri, #546155 for lact), but those
-  # landed on master after nixos-unstable's current rev, so reproduce it here.
-  # Drop this whole block once the channel advances past those merges — the
-  # check is `pkgs.libdisplay-info_0_3` existing upstream.
-  libdisplay-info_0_3 = prev.libdisplay-info.overrideAttrs (_oldAttrs: {
-    version = "0.3.0";
-    src = prev.fetchFromGitLab {
-      domain = "gitlab.freedesktop.org";
-      owner = "emersion";
-      repo = "libdisplay-info";
-      rev = "0.3.0";
-      hash = "sha256-nXf2KGovNKvcchlHlzKBkAOeySMJXgxMpbi5z9gLrdc=";
-    };
-  });
-
-  niri = prev.niri.override { libdisplay-info = final.libdisplay-info_0_3; };
-  lact = prev.lact.override { libdisplay-info = final.libdisplay-info_0_3; };
 
   # nixpkgs-unstable ships nix-prefetch-git as `nix-prefetch-git-VERSION`,
   # breaking fetchCargoVendor which calls the binary by its short name.

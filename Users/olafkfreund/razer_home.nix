@@ -26,7 +26,7 @@ in
   programs.gnome-shell = {
     enable = true;
     extensions = [
-      { package = inputs.gscratch.packages.${pkgs.system}.default; }
+      { package = inputs.gscratch.packages.${pkgs.stdenv.hostPlatform.system}.default; }
     ];
   };
 
@@ -34,7 +34,7 @@ in
   # confinement, CEF rendering). Native GNOME alternative to
   # cosmic-utils/web-apps.
   home.packages = [
-    inputs.gnome-quick-web-apps.packages.${pkgs.system}.default
+    inputs.gnome-quick-web-apps.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   # Laptop: enable zellij (session management for mobile use)

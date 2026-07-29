@@ -67,6 +67,14 @@ in
         # matters here), so disable the target until upstream stylix updates.
         kmscon.enable = false;
 
+        # regreet: stylix's regreet target still writes `programs.regreet.*`,
+        # renamed in nixpkgs to `services.displayManager.regreet`, so every
+        # eval prints 8 rename warnings (one per option it sets). The target
+        # auto-enables on all Linux hosts, but this fleet greets with
+        # dms-greeter / cosmic-greeter and never uses regreet. Disable until
+        # upstream stylix migrates to the new option path.
+        regreet.enable = false;
+
         # COSMIC's GTK theme sync is disabled on this fleet, so cosmic-comp
         # does NOT clobber ~/.config/gtk-{3,4}.0/gtk.css at runtime. Stylix
         # can own that file safely and theme GTK3 / non-libadwaita GTK4 apps
