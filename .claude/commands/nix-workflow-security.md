@@ -19,7 +19,6 @@ Complete security review and hardening cycle.
 - **Secret Management Audit**: Finds evaluation-time secret reads
 - **Firewall Configuration**: Reviews open ports and rules
 - **SSH Hardening**: Checks SSH configuration security
-- **Generates Security Score**: 0-100 score with breakdown
 
 **Report includes:**
 
@@ -46,14 +45,6 @@ Complete security review and hardening cycle.
 - Unnecessary open ports
 - Weak SSH configuration
 - Missing secret rotation
-
-**Score Breakdown:**
-
-- **90-100**: Excellent (production-ready)
-- **80-89**: Good (minor improvements)
-- **70-79**: Acceptable (some hardening needed)
-- **60-69**: Weak (significant hardening required)
-- **<60**: Critical (major security issues)
 
 ### 3. Apply Fixes (2 minutes)
 
@@ -140,16 +131,7 @@ services.openssh = {
 
 ```bash
 /nix-security
-# Run again to verify score improved
 ```
-
-**Compare scores:**
-
-- Before: 72/100 (Acceptable)
-- After: 91/100 (Excellent)
-- Improvement: +19 points
-
-**Goal:** Achieve 85+ for production systems
 
 ### 5. Deploy Changes (Optional - if fixes made)
 
@@ -361,43 +343,6 @@ services.openssh.settings = {
   PubkeyAuthentication = true;
 };
 ```
-
-## Security Score Interpretation
-
-### 90-100: Excellent ✅
-
-- Production-ready
-- Minimal risk
-- Best practices followed
-- Regular audits recommended
-
-### 80-89: Good ⚠️
-
-- Acceptable for production
-- Minor improvements needed
-- Some hardening opportunities
-- Review monthly
-
-### 70-79: Acceptable ⚠️
-
-- Usable but needs improvement
-- Security hardening required
-- Review and fix warnings
-- Audit weekly
-
-### 60-69: Weak ❌
-
-- Not recommended for production
-- Significant security issues
-- Immediate hardening required
-- Daily audits until improved
-
-### <60: Critical 🚨
-
-- Do not deploy to production
-- Major security vulnerabilities
-- Immediate remediation required
-- Block deployment until fixed
 
 ## Best Practices
 

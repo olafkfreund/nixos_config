@@ -128,112 +128,6 @@ Aggressive cleanup
 Full cleanup
 ```
 
-## Output Format
-
-### Standard GC Success
-
-```
-🧹 NixOS Cleanup - Standard GC
-
-📊 Before Cleanup
-   Store size: 87.5 GB
-   Generations: 23 (oldest: 45 days)
-   Disk available: 42 GB
-
-🗑️  Removing Old Generations (10s)
-   Deleted 15 generations (older than 30 days)
-   Kept: current + 7 recent generations
-
-♻️  Garbage Collection (20s)
-   Freeing unused store paths...
-   ✅ Freed 12.3 GB
-
-📊 After Cleanup
-   Store size: 75.2 GB
-   Generations: 8
-   Disk available: 54.3 GB
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Cleanup Complete
-Freed: 12.3 GB
-Time: 30 seconds
-```
-
-### Aggressive GC Output
-
-```
-🧹 NixOS Cleanup - Aggressive GC
-
-📊 Before Cleanup
-   Store size: 87.5 GB
-   Generations: 23
-   Build cache: 8.2 GB
-   Disk available: 42 GB
-
-🗑️  Removing Old Generations (15s)
-   Deleted 21 generations (older than 7 days)
-   Kept: current generation only
-
-♻️  Aggressive Garbage Collection (45s)
-   Removing build dependencies...
-   Removing cached downloads...
-   ✅ Freed 28.7 GB
-
-📊 After Cleanup
-   Store size: 58.8 GB
-   Generations: 2
-   Build cache: 0 GB
-   Disk available: 70.7 GB
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Aggressive Cleanup Complete
-Freed: 28.7 GB
-Time: 1min 45s
-```
-
-### Full Cleanup Output
-
-```
-🧹 NixOS Cleanup - Full Cleanup
-
-📊 Before Cleanup
-   Store size: 87.5 GB
-   Duplicates: ~15 GB
-   Generations: 23
-   Dead code files: 147
-   Disk available: 42 GB
-
-🗑️  Removing Old Generations (15s)
-   ✅ Deleted 21 generations
-
-♻️  Aggressive Garbage Collection (45s)
-   ✅ Freed 28.7 GB
-
-🔧 Optimizing Store (120s)
-   Hard-linking identical files...
-   ✅ Deduplicated 14.2 GB
-
-🧹 Cleaning Dead Code (30s)
-   Removed 147 unused import files
-   ✅ Cleaned 0.8 GB
-
-✓  Verifying Store Integrity (45s)
-   Checked 45,231 store paths
-   ✅ No corruption detected
-
-📊 After Cleanup
-   Store size: 43.8 GB
-   Duplicates: 0 GB
-   Generations: 2
-   Dead code files: 0
-   Disk available: 85.7 GB
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Full Cleanup Complete
-Freed: 43.7 GB (50% reduction!)
-Time: 4min 15s
-```
-
 ## Implementation Details
 
 ### Standard GC
@@ -361,7 +255,6 @@ If you need to rollback after cleanup:
 # If generation still exists
 sudo nixos-rebuild switch --rollback
 
-# If generation was deleted
 # You'll need to rebuild from configuration
 sudo nixos-rebuild switch
 ```

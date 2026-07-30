@@ -113,9 +113,6 @@ Status all hosts
 /nix-network
 Monitor network
 
-# Monitor runs in foreground with real-time output
-# Logs everything to ~/network-monitor.log
-
 # 2. Check the log file
 tail -f ~/network-monitor.log
 
@@ -128,10 +125,6 @@ tail -f ~/network-monitor.log
 # 1. Enable network stability checking
 /nix-network
 Check stability
-
-# Service runs in background
-# Automatically restarts DNS on failures
-# Creates /run/network-stability-event for apps
 
 # 2. Check service status
 systemctl status network-stability
@@ -147,9 +140,6 @@ journalctl -u network-stability -f
 /nix-network
 Ping all hosts
 
-# Sample output:
-# p620: ✅ reachable
-# razer: ✅ reachable
 # p510: ✅ reachable
 ```
 
@@ -160,10 +150,6 @@ Ping all hosts
 /nix-network
 Status all hosts
 
-# Shows:
-# - Host reachability
-# - Network interfaces
-# - DNS resolution
 # - Route configuration
 ```
 
@@ -240,77 +226,6 @@ Press Ctrl+C to stop monitoring
 2025-01-15 10:25:35 - DNS check: ✅ All domains resolved
 ```
 
-### Ping All Hosts Output
-
-```
-🏓 Pinging Infrastructure Hosts
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Host Reachability
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-p620:    ✅ reachable (1.2ms)
-razer:   ✅ reachable (2.4ms)
-p510:    ✅ reachable (0.8ms)
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Summary
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Reachable: 3/3 hosts (100%)
-```
-
-### Status All Hosts Output
-
-```
-📊 Infrastructure Network Status
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Host Connectivity
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-p620 (AMD Workstation):
-  Status:      ✅ Online
-  IP:          192.168.1.100
-  Tailscale:   100.64.0.1
-  Latency:     1.2ms
-  Services:    Monitoring server, binary cache
-
-razer (Intel/NVIDIA Laptop):
-  Status:      ✅ Online
-  IP:          192.168.1.101
-  Tailscale:   100.64.0.2
-  Latency:     2.4ms
-  Services:    Mobile development
-
-p510 (Intel Xeon Server):
-  Status:      ✅ Online
-  IP:          192.168.1.127
-  Tailscale:   100.64.0.3
-  Latency:     0.8ms
-  Services:    Media server, headless
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Network Health
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ DNS Resolution: Working
-✅ Default Gateway: 192.168.1.1
-✅ Tailscale VPN: Active
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Interface Status
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-eth0:       UP (192.168.1.100/24)
-tailscale0: UP (100.64.0.1/32)
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Summary
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Total Hosts: 3
-Online: 3 (100%)
-Offline: 0 (0%)
-Network Health: Good
-```
-
 ## Implementation Details
 
 ### Monitor Network Command
@@ -319,11 +234,6 @@ Network Health: Good
 # Run continuous monitoring script
 ./scripts/network-monitor.sh
 
-# What it does:
-# - Logs to ~/network-monitor.log
-# - Checks interfaces every 10s
-# - Verifies DNS every 10s
-# - Tracks route changes
 # - Rotates logs at 10MB
 ```
 
@@ -333,10 +243,6 @@ Network Health: Good
 # Run stability helper as background service
 ./scripts/network-stability-helper.sh &
 
-# What it does:
-# - Monitors interfaces every 5s
-# - Restarts DNS on failures
-# - Creates /run/network-stability-event
 # - Logs to systemd journal
 ```
 
@@ -486,10 +392,6 @@ Check stability
 tail -100 ~/network-monitor.log
 journalctl -u network-stability -n 100
 
-# 3. Check for common issues:
-# - Multiple default routes
-# - Interface flapping
-# - DNS timeouts
 # - Route metric conflicts
 ```
 

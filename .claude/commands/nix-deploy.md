@@ -24,8 +24,6 @@ git status  # Identify changed files
 # 2. Syntax Validation
 just check-syntax  # Fast Nix syntax check
 
-# 3. Anti-Pattern Detection
-# Scan changed files for anti-patterns
 # BLOCKS deployment if critical issues found
 ```
 
@@ -44,8 +42,6 @@ just validate-quick  # Essential checks only
 # 5. Host-Specific Test Build
 just test-host HOST  # Full configuration build test
 
-# 6. Security Audit
-# Run security checks on changed modules
 # WARNS about issues but doesn't block
 ```
 
@@ -58,14 +54,10 @@ just test-host HOST  # Full configuration build test
 ### Phase 3: Smart Deployment (60s)
 
 ```bash
-# 7. Change Detection
-# Compare current vs new configuration
-# SKIPS deployment if no changes
 
 # 8. Deployment
 just quick-deploy HOST  # Optimized deployment
 
-# 9. Service Verification
 # Check critical services started successfully
 systemctl status SERVICE
 ```
@@ -79,13 +71,7 @@ systemctl status SERVICE
 ### Phase 4: Post-Deployment Verification (15s)
 
 ```bash
-# 10. Service Health Check
-# Verify all enabled services running
 
-# 11. Resource Monitoring
-# Check memory, CPU, disk usage
-
-# 12. Network Connectivity
 # Verify SSH, Tailscale, DNS working
 ```
 
@@ -214,36 +200,6 @@ Update workflow for p620
 **Time**: ~4 minutes
 **Safety**: Interactive confirmation with intelligent issue detection
 
-**Example Issue Check Output**:
-
-```
-🔍 Checking for Known Issues (Parallel)...
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📦 Scanning 1,247 installed packages...
-🔍 Querying GitHub issues...
-📊 Correlating with your system...
-
-🚨 CRITICAL SEVERITY (1 package)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📦 Package: systemd-254.6
-   Issue: #250123 - systemd 254.x fails to boot on UEFI
-   https://github.com/NixOS/nixpkgs/issues/250123
-
-⚠️ HIGH SEVERITY (1 package)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📦 Package: linux-6.6.1
-   Issue: #248999 - NVIDIA driver incompatible
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 Recommendation
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⛔ DO NOT UPDATE
-   1 critical issue detected.
-   Wait for fixes or consider pinning systemd to 253.x
-
-Continue anyway? (NOT recommended) [y/N]:
-```
-
 ### Smart Update with Automatic Issue Detection (NEW!)
 
 ```
@@ -284,32 +240,6 @@ The smart update runs multiple checks simultaneously:
 All results combine into a single risk assessment before proceeding.
 
 **Example Workflow**:
-
-```
-📦 Starting Complete Update Workflow for p620
-
-Step 1: Previewing updates...
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-firefox: 120.0 → 121.0
-linux: 6.6.1 → 6.6.3
-... (13 more packages)
-
-Apply these updates? [y/N]: y
-
-Step 2: Backing up flake.lock...
-✓ Backup saved: flake.lock.backup
-
-Step 3: Deploying updates...
-✓ Configuration built
-✓ Activation successful
-✓ Services verified
-
-Step 4: Checking for new packages...
-✨ 3 new packages available in nixpkgs
-
-✅ Update Complete!
-Time: 3min 45s
-```
 
 **Rollback if needed**:
 
@@ -356,26 +286,6 @@ Error: PostgreSQL failed to start
 Check: journalctl -u postgresql -n 50
 ```
 
-### 3. Resource Monitoring
-
-```
-Deployment successful! Monitoring system...
-
-Resource Usage:
-  Memory: 8.2GB / 16GB (51%) [+2% from baseline]
-  CPU: 15% average (normal)
-  Disk: 285GB / 500GB (57%)
-
-Service Status:
-  ✓ All 23 enabled services running
-  ⚠ Warning: myservice using 800MB (limit: 1GB)
-
-Network:
-  ✓ SSH accessible
-  ✓ Tailscale connected
-  ✓ DNS resolving
-```
-
 ## Safety Guarantees
 
 ### Pre-Deployment Checks
@@ -405,55 +315,6 @@ Network:
 
 After each deployment:
 
-```
-╔════════════════════════════════════════════════╗
-║         DEPLOYMENT REPORT: p620                ║
-╚════════════════════════════════════════════════╝
-
-✅ Deployment Status: SUCCESS
-⏱  Total Time: 2m 45s
-🔢 Generation: 1235 → 1236
-
-📝 Changes Applied:
-  • Modified: modules/services/monitoring.nix
-  • Services Affected: prometheus, grafana, alertmanager
-  • Services Restarted: prometheus (0.8s)
-
-🔍 Pre-Deployment:
-  ✓ Syntax validation (5s)
-  ✓ Anti-pattern check (3s)
-  ⚠ Security audit: 1 warning (see below)
-  ✓ Test build (45s)
-  ✓ Change detection: configuration changed
-
-📦 Deployment:
-  ✓ Build time: 38s
-  ✓ Activation: 4s
-  ✓ Service restarts: 1s
-
-✅ Post-Deployment:
-  ✓ All services healthy
-  ✓ Network connectivity verified
-  ✓ Resources within limits
-  ✓ No errors in logs
-
-⚠️  Warnings:
-  1. Prometheus memory usage at 85% (850MB/1GB)
-     Consider: increasing MemoryMax to 2GB
-
-📊 System Status:
-  Memory: 8.2GB / 16GB (51%)
-  CPU: 15% average
-  Disk: 285GB / 500GB (57%)
-  Services: 23/23 running
-
-💡 Recommendations:
-  • Monitor prometheus memory usage
-  • Consider garbage collection (last: 5 days ago)
-
-✅ Deployment completed successfully!
-```
-
 ## Integration with GitHub Workflow
 
 **With Issue Tracking:**
@@ -461,9 +322,6 @@ After each deployment:
 ```
 # 1. Create issue
 /new_task "Add PostgreSQL monitoring"
-
-# 2. Make changes
-# ... edit files ...
 
 # 3. Deploy with issue reference
 /nix-deploy
@@ -494,16 +352,6 @@ gh pr create --fill
 
 2. **Out of Disk Space**
 
-   ```
-   ✗ Build failed: no space left on device
-
-   Automatic Actions:
-   1. Running garbage collection: nix-collect-garbage -d
-   2. Freed: 12.5GB
-   3. Retrying build...
-   ✓ Build succeeded after cleanup
-   ```
-
 3. **Network Timeout**
 
    ```
@@ -528,26 +376,6 @@ gh pr create --fill
 - ✅ Local builds for large changes
 - ✅ Delta deployment (only changed files)
 - ✅ Compressed transfers
-
-### Time Breakdown
-
-```
-Standard Deployment: 2.5 minutes
-├─ Validation: 30s (parallel checks)
-├─ Test Build: 45s (with cache)
-├─ Deployment: 60s (optimized)
-└─ Verification: 15s (health checks)
-
-Fast Deployment: 1 minute
-├─ Syntax Check: 5s
-├─ Smart Detection: 10s
-├─ Deployment: 30s
-└─ Verification: 15s
-
-Emergency: 30 seconds
-├─ Direct Deploy: 20s
-└─ Quick Check: 10s
-```
 
 ## Best Practices
 

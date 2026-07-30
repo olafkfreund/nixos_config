@@ -91,7 +91,6 @@ Build all hosts
 /nix-live
 Build p620
 
-# Wait ~10 minutes
 # Result: result/iso/nixos-p620-live.iso
 ```
 
@@ -101,8 +100,6 @@ Build p620
 /nix-live
 Show devices
 
-# Output shows:
-# /dev/sdb - 32GB USB Drive (unmounted)
 # /dev/sdc - 64GB USB Drive (mounted)
 ```
 
@@ -112,10 +109,6 @@ Show devices
 /nix-live
 Flash p620 to /dev/sdb
 
-# WARNING: This will erase /dev/sdb!
-# Confirm: y
-
-# Wait ~5 minutes
 # USB is ready!
 ```
 
@@ -144,46 +137,12 @@ ip addr  # Get IP address
 
 # From remote computer
 ssh root@<live-system-ip>
-# Password: nixos
 
 # Run installer remotely
 sudo install-p620
 ```
 
 ## Output Format
-
-### Build Success
-
-```
-🔨 Building Live USB ISO: P620
-
-📋 Configuration
-   Host:           p620
-   Architecture:   x86_64-linux
-   Template:       workstation
-   Hardware:       AMD Ryzen + ROCm
-
-🔧 Building ISO (this takes ~10 minutes)...
-   [==========          ] 50% - Building kernel modules
-   [====================] 100% - Creating ISO image
-
-✅ Build Complete
-
-📦 ISO Details
-   File:     result/iso/nixos-p620-live.iso
-   Size:     2.3 GB
-   SHA256:   a1b2c3d4...
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Live USB ISO Built Successfully
-Output: result/iso/nixos-p620-live.iso
-Time: 9min 42s
-
-Next Steps:
-1. /nix-live Show devices (find USB device)
-2. /nix-live Flash p620 to /dev/sdX (flash ISO)
-3. Boot from USB and run: sudo install-p620
-```
 
 ### Show Devices Output
 
@@ -226,59 +185,6 @@ Recommendations
 To flash: /nix-live Flash p620 to /dev/sdb
 ```
 
-### Flash Output
-
-```
-💿 Flashing Live USB ISO
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Configuration
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ISO:      nixos-p620-live.iso (2.3 GB)
-Device:   /dev/sdb (32 GB USB Drive)
-Model:    SanDisk Ultra
-
-⚠️  WARNING: This will ERASE all data on /dev/sdb!
-
-Type 'yes' to continue: yes
-
-🔄 Flashing ISO to /dev/sdb...
-   [==========          ] 50% - Writing data
-   [====================] 100% - Syncing to disk
-
-✅ Verification
-   ✅ Write successful
-   ✅ Data synced to disk
-   ✅ Device safely unmounted
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ USB Drive Ready
-Device: /dev/sdb
-Time: 4min 23s
-
-Next Steps:
-1. Remove USB drive safely
-2. Insert into target computer
-3. Boot from USB (F12/F2/DEL in BIOS)
-4. Run: sudo install-p620
-```
-
-### Clean Output
-
-```
-🧹 Cleaning Live USB Build Artifacts
-
-🗑️  Removing build artifacts...
-   ✅ Removed result/iso/nixos-p620-live.iso (2.3 GB)
-   ✅ Removed result/iso/nixos-razer-live.iso (2.1 GB)
-   ✅ Removed result/iso/nixos-p510-live.iso (1.8 GB)
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Cleanup Complete
-Freed: 8.2 GB
-Time: 2 seconds
-```
-
 ## Implementation Details
 
 ### Build Command
@@ -287,7 +193,6 @@ Time: 2 seconds
 # Build live ISO for specific host
 nix build .#packages.x86_64-linux.live-iso-p620
 
-# Output is a symlink to ISO in nix store
 # Copy to result/iso/ for easy access
 ```
 
@@ -297,17 +202,12 @@ nix build .#packages.x86_64-linux.live-iso-p620
 # List all block devices with details
 lsblk -o NAME,SIZE,TYPE,MODEL,MOUNTPOINT
 
-# Highlight USB devices
-# Show mount status
 # Warn about system disks
 ```
 
 ### Flash Command
 
 ```bash
-# IMPORTANT: Very destructive operation!
-# Verify device is correct USB drive
-# Confirm with user
 
 # Flash ISO to device
 sudo dd if=result/iso/nixos-p620-live.iso \
@@ -371,7 +271,6 @@ rm -f result
 **Enable SSH** (automatic):
 
 ```bash
-# SSH is enabled automatically
 # Connect from remote:
 ssh root@<live-system-ip>
 ```
@@ -392,10 +291,6 @@ ssh root@<live-system-ip>
 # On live system
 sudo install-p620
 
-# Follow prompts:
-# 1. Select disk
-# 2. Confirm partitioning
-# 3. Set passwords
 # 4. Install system
 ```
 
@@ -486,12 +381,6 @@ Flash p620 to /dev/sdX
 # Verify ISO integrity
 sha256sum result/iso/nixos-p620-live.iso
 
-# Try different USB port
-# Try USB 2.0 instead of 3.0
-
-# Check BIOS settings
-# - Disable Secure Boot
-# - Enable Legacy Boot (if needed)
 # - Set USB as first boot device
 ```
 
@@ -554,7 +443,6 @@ Build p620
 # Build recovery USBs
 /nix-live Build all hosts
 
-# Label USBs: "P620 Recovery", "Razer Recovery", etc.
 # Store in safe place
 ```
 
