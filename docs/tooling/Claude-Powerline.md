@@ -11,11 +11,11 @@ context directly in your Claude Code environment.
 ### Key Features
 
 - ⏱ **Real-time API Usage Tracking**: Monitor costs and token usage within 5-hour billing windows
--  **Budget Monitoring**: Track session, daily, and block budgets with configurable alerts
--  **Git Integration**: Display branch status, commits, and working tree changes
--  **Performance Analytics**: Track API response times, session duration, and code impact
--  **Custom Gruvbox Dark Theme**: Beautiful, eye-friendly color scheme matching your development environment
--  **Lightweight Performance**: < 250ms statusline updates with minimal resource usage
+- **Budget Monitoring**: Track session, daily, and block budgets with configurable alerts
+- **Git Integration**: Display branch status, commits, and working tree changes
+- **Performance Analytics**: Track API response times, session duration, and code impact
+- **Custom Gruvbox Dark Theme**: Beautiful, eye-friendly color scheme matching your development environment
+- **Lightweight Performance**: < 250ms statusline updates with minimal resource usage
 
 ## Installation
 
@@ -42,10 +42,9 @@ programs.claude-powerline = {
 
 Claude Powerline is available on all hosts using the developer profile:
 
--  **P620** (primary workstation)
--  **Razer** (laptop)
--  **P510** (media server with development mode)
--  **Samsung** (laptop)
+- **P620** (primary workstation)
+- **Razer** (laptop)
+- **P510** (media server with development mode)
 
 ## Configuration
 
@@ -146,10 +145,10 @@ block = 30.0;
 
 Budget warnings are triggered at **80%** of configured limits:
 
--  **Green** (< 70%): Under budget, normal operation
--  **Yellow** (70-80%): Approaching limit, monitor usage
--  **Orange** (80-90%): Warning threshold exceeded
--  **Red** (> 90%): Critical, approaching limit
+- **Green** (< 70%): Under budget, normal operation
+- **Yellow** (70-80%): Approaching limit, monitor usage
+- **Orange** (80-90%): Warning threshold exceeded
+- **Red** (> 90%): Critical, approaching limit
 
 ## Usage
 

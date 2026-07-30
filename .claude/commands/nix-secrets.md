@@ -453,11 +453,10 @@ let
   p620 = "ssh-ed25519 AAAAC3... root@p620";
   razer = "ssh-ed25519 AAAAC3... root@razer";
   p510 = "ssh-ed25519 AAAAC3... root@p510";
-  samsung = "ssh-ed25519 AAAAC3... root@samsung";
 
   # Key groups
   allUsers = [ olafkfreund ];
-  allHosts = [ p620 razer p510 samsung ];
+  allHosts = [ p620 razer p510 ];
   workstations = [ p620 razer ];
   servers = [ p510 ];
 in

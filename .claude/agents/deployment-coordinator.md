@@ -45,10 +45,9 @@ The Deployment Coordinator agent orchestrates intelligent deployments across mul
 **Example Plan**:
 
 ```yaml
-Deployment Plan: 4 hosts
+Deployment Plan: 3 hosts
 Phase 1 (Parallel):
   - p620 (monitoring server) - CHANGED
-  - samsung (mobile client) - CHANGED
 Phase 2 (After p620):
   - razer (mobile client) - DEPENDS ON p620 monitoring
   - p510 (media server) - NO CHANGES (skip)
@@ -82,7 +81,6 @@ nix build .#nixosConfigurations.p620.config.system.build.toplevel --no-link
 p620:  CHANGED (3 packages, 1 config)
 p510:  UNCHANGED (skip deployment)
 razer: CHANGED (kernel update)
-samsung: UNCHANGED (skip deployment)
 
 Recommendation: Deploy p620 and razer only
 ```
@@ -95,7 +93,7 @@ Recommendation: Deploy p620 and razer only
 
 ```yaml
 Strategy Selection:
-  Independent hosts (p620, samsung):
+  Independent hosts (p620):
     - Deploy in parallel (2 concurrent)
 
   Dependent hosts (razer depends on p620):
@@ -114,7 +112,7 @@ Time saved: 65% vs sequential deployment
 **Status display**:
 
 ```
-Deployment Progress: 4 hosts
+Deployment Progress: 3 hosts
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 p620 (monitoring):
@@ -131,7 +129,6 @@ p510 (media):
   [━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━] 0%
   Status: ⏭️ SKIPPED (no changes)
 
-samsung (mobile):
   [████████████████████████████████████] 100%
   Status: ✅ DEPLOYED (1m 18s)
   Generation: 189 → 190
@@ -190,13 +187,12 @@ razer (mobile):
   - Depends on: p620 (monitoring client)
   - Can deploy parallel with p510
 
-samsung (mobile):
   - Depends on: p620 (monitoring client)
   - Can deploy parallel with razer
 
 Optimal Order:
   Phase 1: p620
-  Phase 2: p510, razer, samsung (parallel)
+  Phase 2: p510, razer (parallel)
 ```
 
 ### 7. Health Validation
@@ -294,7 +290,7 @@ Failure Action: Automatic rollback
      - Checkpoint: p620 healthy
 
    Phase 2: Dependent Systems (parallel)
-     - Deploy to p510, razer, samsung
+     - Deploy to p510, razer
      - Monitor in real-time
      - Validate health checks
      - Report progress
@@ -315,15 +311,14 @@ Failure Action: Automatic rollback
 ### Example Deployment Flow
 
 ```markdown
-# Deployment Execution: 4 hosts
+# Deployment Execution: 3 hosts
 
 Started: 2025-01-15 15:30:00
 
 ## Pre-Flight Checks ✅
 
 - Configuration syntax: PASSED (all hosts)
-- Build tests: PASSED (4/4 hosts)
-- SSH connectivity: PASSED (p620, razer, samsung)
+- Build tests: PASSED (3/3 hosts)
 - Disk space: PASSED (all >20GB free)
 
 ## Phase 1: Infrastructure (1 host)
@@ -357,7 +352,6 @@ Started: 2025-01-15 15:30:00
 - Generation: 155 → 156
 - Status: ✅ DEPLOYED (1m 31s)
 
-🔄 samsung (mobile)
 
 - Building generation 190... ✅ (50s)
 - Deploying via SSH... ✅ (17s)
@@ -372,7 +366,7 @@ Started: 2025-01-15 15:30:00
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Total Time: 2m 56s
-Hosts Deployed: 3/4 (p510 skipped)
+Hosts Deployed: 2/3 (p510 skipped)
 Success Rate: 100%
 Rollbacks: 0
 Strategy: Smart (parallel phase 2)

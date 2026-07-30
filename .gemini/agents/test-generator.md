@@ -208,7 +208,7 @@ Property-Based Tests:
 
   Generated Test:
     property_test_resource_limits:
-      for host in [p620, p510, razer, samsung]:
+      for host in [p620, p510, razer]:
         assert memory_usage_within_limits(host)
         assert cpu_usage_reasonable(host)
 ```
@@ -266,7 +266,7 @@ NixOS VM Tests:
    })
 ````
 
-2. Multi-Host Network Test:
+1. Multi-Host Network Test:
 
    ```python
    # Generated test: tests/multi-host-network.nix
@@ -324,14 +324,8 @@ Module Coverage:
     - modules/packages/custom.nix
 
 Host Coverage:
-  Total Hosts: 4
-  Tested Hosts: 3 (75%)
-  Untested: samsung (25%)
-
-  Missing tests:
-    - Samsung host configuration build test
-    - Samsung-specific hardware tests
-    - Samsung service interaction tests
+  Total Hosts: 3
+  Tested Hosts: 3 (100%)
 
 Feature Coverage:
   Total Features: 45
@@ -345,7 +339,6 @@ Feature Coverage:
 
 Recommendation:
   - Generate tests for 15 high-priority untested features
-  - Add VM integration tests for samsung host
   - Create regression tests for recent fixes
 ````
 
@@ -514,9 +507,9 @@ test_p510_builds() {
   assert_success "P510 should build successfully"
 }
 
-test_samsung_builds() {
-  nix build .#nixosConfigurations.samsung.config.system.build.toplevel
-  assert_success "Samsung should build successfully"
+test_razer_builds() {
+  nix build .#nixosConfigurations.razer.config.system.build.toplevel
+  assert_success "Razer should build successfully"
 }
 ```
 
@@ -592,13 +585,13 @@ echo "✅ Smoke tests passed for $HOST"
 **Before**:
 
 - Modules tested: 85/141 (60%)
-- Hosts tested: 3/4 (75%)
+- Hosts tested: 2/3 (67%)
 - Features tested: 30/45 (67%)
 
 **After**:
 
 - Modules tested: 120/141 (85%) ✅ (+25%)
-- Hosts tested: 4/4 (100%) ✅ (+25%)
+- Hosts tested: 3/3 (100%) ✅ (+25%)
 - Features tested: 40/45 (89%) ✅ (+22%)
 
 ## Usage

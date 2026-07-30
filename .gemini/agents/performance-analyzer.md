@@ -317,7 +317,7 @@ Dependency Chain Analysis:
 # Performance Analysis Report
 
 Generated: 2025-01-15 16:45:00
-Hosts Analyzed: p620, razer, p510, samsung
+Hosts Analyzed: p620, razer, p510
 
 ## Executive Summary
 
@@ -489,17 +489,17 @@ Impact: -5s evaluation time
 
 ### Phase 2: Configuration (30 minutes)
 
-4. Increase parallel jobs (-20s)
-5. Optimize binary caches (-15s)
-6. Configure automated cleanup
+1. Increase parallel jobs (-20s)
+2. Optimize binary caches (-15s)
+3. Configure automated cleanup
 
 **Total Impact**: -35s additional (15% faster)
 
 ### Phase 3: Deep Optimization (2 hours)
 
-7. Refactor slow modules (-5s eval)
-8. Implement lazy loading (-8s eval)
-9. Optimize dependency chains
+1. Refactor slow modules (-5s eval)
+2. Implement lazy loading (-8s eval)
+3. Optimize dependency chains
 
 **Total Impact**: -13s additional (5.8% faster)
 

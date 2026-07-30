@@ -74,7 +74,6 @@ Specific targets are defined for each host to handle remote flags (`--target-hos
 just p620
 just razer
 just p510
-just samsung  # Special handling for network
 ```
 
 ### Update Workflow

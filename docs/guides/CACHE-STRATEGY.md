@@ -2,7 +2,7 @@
 
 > **Complete guide to multi-tier caching for optimal build performance**
 
-##  Overview
+## Overview
 
 Your NixOS infrastructure uses a sophisticated three-tier cache strategy:
 
@@ -48,7 +48,7 @@ Razer/P510 (clients)
 - Tailscale: `http://p620.lan:5000`
 - LAN: `http://p620.lan:5000`
 
-##  Deployment Strategies
+## Deployment Strategies
 
 ### Strategy 1: Direct Deployment (Build on Target)
 
@@ -63,7 +63,7 @@ Razer/P510 (clients)
 # Standard deployment (builds on target host)
 just p620
 just razer
-just samsung
+just razer
 just p510
 ```
 
@@ -72,46 +72,46 @@ just p510
 
 ---
 
-### Strategy 2: Deploy via P620 Cache (RECOMMENDED for Samsung)
+### Strategy 2: Deploy via P620 Cache (RECOMMENDED for Razer)
 
 **When to use:**
 
-- Samsung laptop (save battery!)
+- Razer laptop (save battery!)
 - Razer laptop (when on the go)
 - Any host with slow builds
 
 **How to use:**
 
 ```bash
-# Build on P620, deploy to Samsung
-just deploy-via-p620 samsung
+# Build on P620, deploy to Razer
+just deploy-via-p620 razer
 
-# Quick Samsung-specific command
-just samsung-deploy
+# Same thing, explicit form
+just deploy-via-p620 razer
 
 # Build only (test before deploy)
-just build-on-p620 samsung
-just deploy-via-p620 samsung
+just build-on-p620 razer
+just deploy-via-p620 razer
 ```
 
 **What happens:**
 
-1. ️ **Build Phase**: P620 builds Samsung's configuration
-2.  **Cache Phase**: Build artifacts stored in P620's cache
-3.  **Deploy Phase**: Samsung downloads from P620 cache (fast!)
-4.  **Switch Phase**: Samsung activates new configuration
+1. ️ **Build Phase**: P620 builds Razer's configuration
+2. **Cache Phase**: Build artifacts stored in P620's cache
+3. **Deploy Phase**: Razer downloads from P620 cache (fast!)
+4. **Switch Phase**: Razer activates new configuration
 
 **Pros:**
 
--  Fast deployment (download vs build)
--  Saves battery on laptops
--  Consistent builds across hosts
--  P620 has better cooling/performance
+- Fast deployment (download vs build)
+- Saves battery on laptops
+- Consistent builds across hosts
+- P620 has better cooling/performance
 
 **Cons:**
 
--  Requires P620 to be online
--  Network dependency
+- Requires P620 to be online
+- Network dependency
 
 ---
 
@@ -127,7 +127,7 @@ just deploy-via-p620 samsung
 
 ```bash
 # Only deploy if configuration changed
-just quick-deploy samsung
+just quick-deploy razer
 just quick-deploy razer
 ```
 
@@ -155,9 +155,9 @@ just deploy-all-parallel
 
 ---
 
-##  Performance Comparison
+## Performance Comparison
 
-| Method             | Samsung Build Time | Network Usage | Battery Impact |
+| Method             | Razer Build Time | Network Usage | Battery Impact |
 | ------------------ | ------------------ | ------------- | -------------- |
 | **Direct Deploy**  | ~15-20 min         | Low           | High         |
 | **Via P620 Cache** | ~3-5 min           | Medium        | Low          |
@@ -229,7 +229,7 @@ trusted-public-keys = [
 nix-store -qR --include-outputs $(nix-store -qd $(readlink -f /run/current-system)) | cachix push olafkfreund-nixos
 
 # Or push specific build
-nix build .#nixosConfigurations.samsung.config.system.build.toplevel --json \
+nix build .#nixosConfigurations.razer.config.system.build.toplevel --json \
   | jq -r '.[].outputs.out' \
   | cachix push olafkfreund-nixos
 ```
@@ -250,7 +250,7 @@ nix.settings.post-build-hook = pkgs.writeShellScript "cachix-push" ''
 
 ---
 
-##  Troubleshooting
+## Troubleshooting
 
 ### P620 Cache Not Working
 
@@ -266,7 +266,7 @@ systemctl status nix-serve
 **Test cache access:**
 
 ```bash
-# From Samsung
+# From Razer
 curl http://p620.freundcloud.com:5000/nix-cache-info
 # Should return cache information
 
@@ -287,7 +287,7 @@ sudo nft list ruleset | grep 5000
 **Check substituters configuration:**
 
 ```bash
-# On Samsung
+# On Razer
 nix show-config | grep substituters
 # Should include P620 cache URLs
 
@@ -299,7 +299,7 @@ nix show-config | grep trusted-public-keys
 
 ```bash
 # Test with explicit cache
-nix build .#nixosConfigurations.samsung.config.system.build.toplevel \
+nix build .#nixosConfigurations.razer.config.system.build.toplevel \
   --option substituters "http://p620.freundcloud.com:5000 https://cache.nixos.org" \
   --option trusted-public-keys "p620-nix-serve:mZR6o5z5KcWeu4PVXgjHA7vb1sHQgRdWMKQt8x3a4rU= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
 ```
@@ -328,19 +328,19 @@ ping 192.168.1.97
 
 ---
 
-##  Quick Reference
+## Quick Reference
 
-### Daily Workflow (Samsung)
+### Daily Workflow (Razer)
 
 ```bash
 # Make configuration changes
-vim hosts/samsung/configuration.nix
+vim hosts/razer/configuration.nix
 
 # Validate
 just validate-quick
 
 # Deploy via P620 cache (RECOMMENDED)
-just samsung-deploy
+just deploy-via-p620 razer
 ```
 
 ### Weekly Maintenance
@@ -360,16 +360,16 @@ just deploy-all-parallel
 
 ```bash
 # Direct deploy (bypass cache)
-sudo nixos-rebuild switch --flake .#samsung
+sudo nixos-rebuild switch --flake .#razer
 ```
 
 ---
 
-##  Best Practices
+## Best Practices
 
-1. **Always use P620 cache for Samsung deployments**
+1. **Always use P620 cache for Razer deployments**
    - Saves battery and time
-   - Command: `just samsung-deploy`
+   - Command: `just deploy-via-p620 razer`
 
 2. **Keep P620 running during work hours**
    - Cache only works when P620 is online
@@ -380,8 +380,8 @@ sudo nixos-rebuild switch --flake .#samsung
    - Old builds automatically cleaned up
 
 4. **Test before deploying**
-   - Use `just build-on-p620 samsung` to test
-   - Then `just deploy-via-p620 samsung` if successful
+   - Use `just build-on-p620 razer` to test
+   - Then `just deploy-via-p620 razer` if successful
 
 5. **Monitor cache usage**
 
@@ -393,7 +393,7 @@ sudo nixos-rebuild switch --flake .#samsung
 
 ---
 
-##  Related Documentation
+## Related Documentation
 
 - **Deployment Guide**: `docs/deployment-guide.md`
 - **NixOS Patterns**: `docs/PATTERNS.md`

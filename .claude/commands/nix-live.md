@@ -76,7 +76,7 @@ Clean
 Build all hosts
 ```
 
-- Builds ISOs for all 4 hosts
+- Builds ISOs for all 3 hosts
 - Parallel building supported
 - ~30 minutes total (sequential)
 - ~10 minutes (if parallel)
@@ -272,7 +272,6 @@ Next Steps:
    ✅ Removed result/iso/nixos-p620-live.iso (2.3 GB)
    ✅ Removed result/iso/nixos-razer-live.iso (2.1 GB)
    ✅ Removed result/iso/nixos-p510-live.iso (1.8 GB)
-   ✅ Removed result/iso/nixos-samsung-live.iso (2.0 GB)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ✅ Cleanup Complete

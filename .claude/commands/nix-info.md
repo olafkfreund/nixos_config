@@ -48,7 +48,7 @@ Show history
 **Full Summary** (15 seconds):
 
 - ✅ Everything in Status
-- ✅ All 4 hosts configuration summary
+- ✅ All 3 hosts configuration summary
 - ✅ Module statistics
 - ✅ Package counts
 - ✅ Service status
@@ -186,7 +186,7 @@ Quick Actions
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Infrastructure Overview
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Active Hosts:   4 (P620, Razer, P510, Samsung)
+Active Hosts:   3 (P620, Razer, P510)
 Total Modules:  141 feature modules
 Template Type:  95% code deduplication
 NixOS Version:  25.11 (Warbler)
@@ -216,13 +216,6 @@ P510 (Intel Xeon Server):
   Features:     Media Server, Headless
   Status:       ✅ Healthy
 
-Samsung (Intel Laptop):
-  Template:     laptop
-  Packages:     834
-  Services:     26 active
-  Features:     Development, Desktop, Mobile
-  Status:       ✅ Healthy
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Module Statistics
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -235,8 +228,8 @@ Desktop Modules:     24
 Most Used Features:
   1. development       (3 hosts)
   2. desktop           (3 hosts)
-  3. networking        (4 hosts)
-  4. security          (4 hosts)
+  3. networking        (3 hosts)
+  4. security          (3 hosts)
   5. ai-providers      (2 hosts)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -245,13 +238,11 @@ Storage Summary
 Total Store Size:    287 GB (all hosts)
 Avg per Host:        71.75 GB
 Largest Host:        P620 (92 GB)
-Smallest Host:       Samsung (54 GB)
 
 Generations:
   P620:     142 generations (oldest: 45 days)
   Razer:    98 generations (oldest: 32 days)
   P510:     87 generations (oldest: 28 days)
-  Samsung:  76 generations (oldest: 24 days)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Recommendations
@@ -287,7 +278,7 @@ Development Features:
   ✅ Tools: Git, Docker, Kubernetes (3 hosts)
 
 Desktop Features:
-  ✅ Hyprland: 3 hosts (P620, Razer, Samsung)
+  ✅ Hyprland: 2 hosts (P620, Razer)
   ✅ Plasma: 1 host (fallback on P620)
   ✅ Themes: Stylix unified theming
 
@@ -423,7 +414,7 @@ systemctl list-units --state=running
 
 ```bash
 # All hosts info
-for host in p620 razer p510 samsung; do
+for host in p620 razer p510; do
   nix eval .#nixosConfigurations.$host.config.system.name
   # Count packages, services, etc.
 done
