@@ -129,71 +129,6 @@ CI mode
 # Runs: Syntax + Feature + Security (no quality checks)
 ```
 
-## Output Format
-
-### Success Output
-
-```
-🧪 NixOS Configuration Validation
-
-✅ Syntax Check (5s)
-   - All Nix expressions valid
-   - Flake lock file consistent
-   - No syntax errors found
-
-✅ Feature Validation (10s)
-   - All feature dependencies resolved
-   - No circular dependencies detected
-   - 141 modules validated
-
-✅ Security Validation (15s)
-   - All services properly hardened
-   - No evaluation-time secret reads
-   - Firewall properly configured
-   - Score: 91/100 (Excellent)
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Validation Complete - No Issues Found
-Total Time: 30 seconds
-```
-
-### Warning Output
-
-```
-🧪 NixOS Configuration Validation
-
-✅ Syntax Check (5s)
-
-⚠️  Feature Validation (10s)
-   - Warning: Feature 'monitoring.grafana' enabled but 'monitoring.prometheus' disabled
-   - Suggestion: Enable monitoring.prometheus for full functionality
-
-✅ Security Validation (15s)
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️  Validation Complete - 1 Warning
-Total Time: 30 seconds
-
-Run '/nix-validate Full validation' for detailed quality checks
-```
-
-### Error Output
-
-```
-🧪 NixOS Configuration Validation
-
-❌ Syntax Check (2s)
-   Error: hosts/p620/configuration.nix:45:12
-   - Unexpected token: '}'
-   - Expected: expression
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-❌ Validation Failed
-Total Time: 2 seconds
-
-Fix syntax errors and run validation again.
-```
-
 ## Implementation Details
 
 ### Quick Mode (Default for "Quick validation")
@@ -248,14 +183,6 @@ just _check-deprecated
 
 **Syntax Error**:
 
-```
-❌ Syntax Error in hosts/p620/configuration.nix:45:12
-   Unexpected token: '}'
-   Expected: expression
-
-Fix: Check for missing closing brackets or semicolons
-```
-
 **Feature Dependency Error**:
 
 ```
@@ -280,17 +207,6 @@ Fix: Add systemd hardening:
    };
 
 Or run: /nix-fix
-```
-
-**Deprecated Option Error**:
-
-```
-⚠️  Deprecated Option Used
-   Option: services.xserver.desktopManager.plasma5.enable
-   Location: hosts/p620/configuration.nix:67
-
-Migration: Use services.desktopManager.plasma6.enable instead
-Documentation: https://nixos.org/manual/nixos/stable/release-notes#sec-release-24.11
 ```
 
 ## Integration with Other Commands
@@ -391,9 +307,7 @@ timeout 300 /nix-validate
 # Skip specific validation
 /nix-validate
 Quick validation
-# Skips quality and deprecation checks
 
-# Report false positive
 # Create issue: /new_task "False positive in validation"
 ```
 

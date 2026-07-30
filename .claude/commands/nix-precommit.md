@@ -111,9 +111,6 @@ Install hooks
 # Hooks run automatically when you commit
 git add .
 git commit -m "feat: add new feature"
-# → Pre-commit runs automatically
-# → If passes, commit succeeds
-# → If fails, commit is blocked
 
 # Manual run before commit (optional)
 /nix-precommit
@@ -123,14 +120,9 @@ Run staged
 ### Fixing Hook Failures
 
 ```bash
-# If pre-commit fails during commit:
-
-# 1. Review the errors
-# Pre-commit shows exactly what failed
 
 # 2. Auto-fix if possible
 /nix-fix
-# Fixes many issues automatically
 
 # 3. Run hooks again
 /nix-precommit
@@ -146,9 +138,6 @@ git commit -m "feat: add new feature"
 # Skip hooks (NOT RECOMMENDED)
 git commit --no-verify -m "emergency fix"
 
-# Only use when:
-# - True emergency (production down)
-# - Hooks are broken (need to fix them)
 # - Time-sensitive deployment
 ```
 
@@ -178,58 +167,6 @@ Time: 5 seconds
 
 Hooks will now run automatically before every commit!
 To run manually: /nix-precommit
-```
-
-### Run All Success
-
-```
-🧪 Running All Pre-commit Hooks
-
-nixpkgs-fmt............................Passed (3s)
-statix.................................Passed (5s)
-deadnix................................Passed (4s)
-shfmt..................................Passed (2s)
-shellcheck.............................Passed (6s)
-prettier...............................Passed (4s)
-markdownlint...........................Passed (3s)
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ All Hooks Passed
-Total: 7/7 passed
-Time: 27 seconds
-```
-
-### Hook Failure
-
-```
-🧪 Running Pre-commit Hooks on Staged Files
-
-nixpkgs-fmt............................Failed
-- hosts/p620/configuration.nix
-  Fixed formatting issues (auto-corrected)
-
-statix.................................Failed
-- modules/services/myservice.nix:23
-  Warning: Use of `mkIf condition true`
-  Suggestion: Use direct assignment instead
-
-  # ❌ Bad
-  enable = mkIf cfg.enable true;
-
-  # ✅ Good
-  enable = cfg.enable;
-
-shellcheck.............................Passed (1s)
-prettier...............................Passed (2s)
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-❌ Pre-commit Failed
-Passed: 5/7
-Failed: 2/7
-Time: 8 seconds
-
-Fix the issues above and try again.
-Or run: /nix-fix to auto-fix many issues
 ```
 
 ### Update Output
@@ -355,9 +292,6 @@ repos:
 # Normal development
 git add .
 git commit -m "feat: add feature"
-# → Pre-commit runs automatically
-# → Formats and validates code
-# → Commits if all pass
 
 # Pre-commit fixed formatting
 git add .  # Stage auto-fixes
@@ -439,7 +373,6 @@ Install hooks
 /nix-precommit
 Run staged
 
-# Skip slow hooks in development
 # Edit .pre-commit-config.yaml to disable specific hooks
 ```
 

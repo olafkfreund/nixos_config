@@ -34,8 +34,6 @@ systemd.services.myservice = {
 };
 ```
 
-**Score**: -10 points per root service
-
 ### 2. Systemd Hardening ⚠️ CRITICAL
 
 **Required Options:**
@@ -62,8 +60,6 @@ serviceConfig = {
 };
 ```
 
-**Score**: -5 points per missing critical option, -2 per missing recommended
-
 ### 3. Secret Management ⚠️ CRITICAL
 
 **Evaluation-Time Secret Reads:**
@@ -77,8 +73,6 @@ apiKey = "sk-1234567890";
 passwordFile = "/run/agenix/password";
 apiKeyFile = config.age.secrets.api-key.path;
 ```
-
-**Score**: -20 points per evaluation-time secret read
 
 ### 4. Firewall Configuration
 
@@ -98,8 +92,6 @@ networking.firewall = {
   interfaces."tailscale0".allowedTCPPorts = [ 9090 3000 ];  # Internal only
 };
 ```
-
-**Score**: -50 if firewall disabled, -3 per unnecessary open port
 
 ### 5. SSH Hardening
 
@@ -125,8 +117,6 @@ services.openssh = {
 };
 ```
 
-**Score**: -15 if password auth enabled, -20 if root login enabled
-
 ### 6. Agenix Secret Access
 
 **Secret File Permissions:**
@@ -147,42 +137,6 @@ age.secrets."api-key" = {
 };
 ```
 
-**Score**: -10 per world-readable secret
-
-## Security Report Format
-
-```
-╔════════════════════════════════════════════════╗
-║        NixOS SECURITY AUDIT REPORT             ║
-╚════════════════════════════════════════════════╝
-
-📊 Overall Score: 85/100 (Good)
-
-⚠️  CRITICAL ISSUES (Must Fix Immediately):
-  1. myservice running as root (hosts/p620/configuration.nix:245)
-  2. API key in evaluation (modules/services/api.nix:67)
-
-⚠️  HIGH PRIORITY (Fix Soon):
-  3. Missing ProtectSystem on database service (modules/services/db.nix:123)
-  4. Firewall has 8 open ports (hosts/p620/configuration.nix:89)
-
-ℹ️  MEDIUM PRIORITY (Recommended):
-  5. SSH X11Forwarding enabled (hosts/common/ssh.nix:34)
-  6. Missing resource limits on web service (modules/services/web.nix:56)
-
-✅ STRENGTHS:
-  • All secrets use agenix encryption
-  • Tailscale VPN properly configured
-  • Most services use DynamicUser
-
-📋 CHECKLIST:
-  [❌] All services use DynamicUser (12/15 services)
-  [✅] No evaluation-time secret reads (15/15)
-  [⚠️] Firewall properly configured (3/4 hosts)
-  [✅] SSH hardening enabled (3/3 hosts)
-  [❌] Full systemd hardening (8/15 services)
-```
-
 ## Automated Fixes
 
 For each issue, I'll provide:
@@ -191,34 +145,6 @@ For each issue, I'll provide:
 2. **Issue**: What's wrong and why it's dangerous
 3. **Fix**: Complete code replacement
 4. **Explanation**: Security reasoning
-
-**Example:**
-
-```
-Issue: Service running as root
-Location: hosts/p620/configuration.nix:245
-Severity: CRITICAL
-
-Current code:
-  systemd.services.myservice = {
-    serviceConfig.User = "root";
-  };
-
-Suggested fix:
-  systemd.services.myservice = {
-    serviceConfig = {
-      DynamicUser = true;
-      User = "myservice";
-      Group = "myservice";
-      ProtectSystem = "strict";
-      NoNewPrivileges = true;
-    };
-  };
-
-Why: Running services as root violates least privilege principle.
-If compromised, attacker has full system access. DynamicUser creates
-isolated user with minimal permissions.
-```
 
 ## Usage Modes
 
@@ -264,13 +190,3 @@ Automatically runs as part of:
 - `/review` command (security section)
 - `just validate` (security checks)
 - Pre-commit hooks (optional)
-
-## Scoring System
-
-- **100**: Perfect security (all checks pass)
-- **90-99**: Excellent (minor improvements possible)
-- **80-89**: Good (some hardening needed)
-- **70-79**: Fair (several issues to address)
-- **< 70**: Poor (immediate action required)
-
-Ready to audit your security? Just run `/nix-security`!

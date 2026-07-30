@@ -46,8 +46,6 @@ imports = [
 **Garbage Collection:**
 
 ```nix
-# ❌ WASTEFUL - Manual GC, no automation
-# Store grows to 100GB+
 
 # ✅ OPTIMIZED - Automated cleanup
 nix.gc = {
@@ -262,76 +260,6 @@ nixpkgs.overlays = [
 
 After analysis, you'll get:
 
-```
-╔════════════════════════════════════════════════╗
-║     NIXOS PERFORMANCE OPTIMIZATION REPORT      ║
-╚════════════════════════════════════════════════╝
-
-📊 Current Performance: GOOD (75/100)
-
-⚡ HIGH IMPACT Optimizations (Do First):
-
-1. Enable Auto-Optimise Store [Saves: 15GB, Time: 5min]
-   Location: hosts/common/nix-settings.nix
-
-   Add:
-   nix.settings.auto-optimise-store = true;
-
-   Impact: 15GB disk savings, faster builds
-
-2. Optimize fstrim Schedule [Saves: 8min boot time]
-   Location: hosts/p510/configuration.nix
-
-   Change:
-   services.fstrim.interval = "weekly";
-
-   Impact: Eliminates boot delay
-
-3. Enable Binary Cache [Saves: 20min build time]
-   Location: hosts/common/nix-settings.nix
-
-   Add:
-   nix.settings.substituters = [
-     "https://cache.nixos.org"
-     "http://p620:5000"
-   ];
-
-   Impact: 50-90% faster builds
-
-⚡ MEDIUM IMPACT Optimizations (Do Soon):
-
-4. Tune Swap Configuration [Improves: Responsiveness]
-5. Optimize TCP/IP Settings [Improves: 30% faster transfers]
-6. Reduce Module Evaluation [Saves: 3s per build]
-
-💡 LOW IMPACT Optimizations (Nice to Have):
-
-7. Service Socket Activation [Saves: 5s boot time]
-8. Generation Cleanup Automation [Saves: 2GB/week]
-
-📈 Performance Metrics:
-
-Build Time:
-  Current: 45s (cached), 8min (full)
-  Optimized: 30s (cached), 4min (full)
-  Improvement: 33% faster builds
-
-Disk Usage:
-  Current: 285GB (Nix store: 120GB)
-  Optimized: 250GB (Nix store: 85GB)
-  Savings: 35GB
-
-Boot Time:
-  Current: 2min 15s
-  Optimized: 1min 30s
-  Improvement: 45s faster
-
-Memory:
-  Current: 8.2GB / 16GB (51%)
-  Optimized: 7.5GB / 16GB (47%)
-  Improvement: 700MB freed
-```
-
 ## Automatic Fixes
 
 For each optimization, I'll provide:
@@ -373,37 +301,7 @@ Expected results:
 
 **Before Optimization:**
 
-```
-Build Times:
-  Clean build: 8m 45s
-  Cached build: 45s
-  Evaluation: 12s
-
-Disk Usage:
-  Total: 285GB
-  Nix store: 120GB
-  Generations: 45 (8.5GB)
-
-Boot Time: 2m 15s
-Memory: 8.2GB baseline
-```
-
 **After Optimization:**
-
-```
-Build Times:
-  Clean build: 4m 10s (-52%)
-  Cached build: 28s (-38%)
-  Evaluation: 7s (-42%)
-
-Disk Usage:
-  Total: 248GB (-37GB)
-  Nix store: 85GB (-35GB)
-  Generations: 10 (1.8GB) (-6.7GB)
-
-Boot Time: 1m 28s (-47s)
-Memory: 7.4GB baseline (-800MB)
-```
 
 **Total Improvement:**
 
@@ -566,25 +464,6 @@ Show efficiency report
 - Lists host and user configuration counts
   **Time**: ~30 seconds
   **Output**: Complete efficiency metrics
-
-**Example Output**:
-
-```
-📊 Configuration Efficiency Report
-==================================
-📁 Total .nix files: 247
-📄 Default.nix files: 18
-🔄 Potential duplicates: 3 files
-💀 Commented code blocks: 1,247 lines
-🏗️  Feature flag usage: 89 explicit enables
-📦 Host configurations: 4
-👤 User configurations: 6
-
-Recommendations:
-• Review 3 potential duplicate files for consolidation
-• Consider reducing commented code (1,247 lines)
-• Good feature flag usage (89 enables across 141 modules)
-```
 
 ## Performance Testing Scripts
 

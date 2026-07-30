@@ -143,78 +143,6 @@ CI mode
 /nix-deploy p620
 ```
 
-## Output Format
-
-### Single Host Success
-
-```
-🧪 Testing NixOS Configuration: p620
-
-📋 Validation Phase (10s)
-   ✅ Syntax check passed
-   ✅ Feature validation passed
-   ✅ Security validation passed
-
-🔨 Build Phase (50s)
-   Building nixosConfigurations.p620.config.system.build.toplevel
-   ✅ Build successful
-   📦 Output: /nix/store/xyz...nixos-system-p620-25.11
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ P620 Test Complete - Ready to Deploy
-Total Time: 60 seconds
-```
-
-### All Hosts Parallel Success
-
-```
-🧪 Testing All NixOS Configurations (Parallel)
-
-Starting parallel builds...
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-✅ P620    (AMD Workstation)      - 58s
-✅ Razer   (Intel/NVIDIA Laptop)  - 62s
-✅ P510    (Intel Xeon Server)    - 54s
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ All Hosts Passed - Ready to Deploy
-Total Time: 62 seconds (fastest host time)
-Efficiency: 3.2x faster than sequential
-```
-
-### Build Failure
-
-```
-🧪 Testing NixOS Configuration: p620
-
-📋 Validation Phase (10s)
-   ✅ Syntax check passed
-   ✅ Feature validation passed
-   ⚠️  Security warning: Service 'myservice' missing DynamicUser
-
-🔨 Build Phase (25s)
-   Building nixosConfigurations.p620.config.system.build.toplevel
-
-   ❌ Build Failed
-
-   Error: collision between files:
-   - /nix/store/abc.../bin/tool
-   - /nix/store/def.../bin/tool
-
-   Packages in conflict:
-   - python311Packages.tool
-   - python312Packages.tool
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-❌ P620 Test Failed
-Total Time: 35 seconds
-
-Suggested Fix:
-Remove conflicting package or use environment.systemPackages
-instead of users.users.USER.packages for one of them.
-```
-
 ## Implementation Details
 
 ### Single Host Test
@@ -324,22 +252,7 @@ Run: /nix-test p620 (single host uses less memory)
 
 **Sequential** (test-all):
 
-```
-P620:    60s →
-Razer:   62s →
-P510:    54s →
-Total:   227s (3min 47s)
-```
-
 **Parallel** (test-all-parallel):
-
-```
-P620:    60s ↓
-Razer:   62s ↓
-P510:    54s ↓
-Total:   62s (fastest completes)
-Speedup: 3.7x faster
-```
 
 ### Caching Benefits
 

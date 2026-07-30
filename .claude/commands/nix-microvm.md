@@ -134,7 +134,6 @@ SSH dev-vm
 /nix-microvm
 Start dev-vm
 
-# Wait ~30 seconds
 # VM is ready!
 ```
 
@@ -227,50 +226,6 @@ kubectl apply -f deployment.yaml
 
 ## Output Format
 
-### List VMs Output
-
-```
-🖥️  MicroVM Status
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Running VMs
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-dev-vm (Development Environment)
-  Status:     ✅ Running
-  Uptime:     2h 15m
-  Resources:  8GB RAM, 4 CPU cores
-  CPU Usage:  23%
-  Memory:     3.2GB / 8GB (40%)
-  SSH:        ssh dev@localhost -p 2222
-  Web:        http://localhost:8080, http://localhost:3000
-
-playground-vm (Experimental Sandbox)
-  Status:     ✅ Running
-  Uptime:     45m
-  Resources:  8GB RAM, 4 CPU cores
-  CPU Usage:  12%
-  Memory:     1.8GB / 8GB (22%)
-  SSH:        ssh root@localhost -p 2224
-  Web:        http://localhost:8081
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Stopped VMs
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-test-vm (Testing Environment)
-  Status:     ⏸️  Stopped
-  Resources:  8GB RAM, 4 CPU cores
-  SSH:        ssh test@localhost -p 2223 (when running)
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Quick Actions
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Start VM: /nix-microvm Start test-vm
-• SSH into VM: /nix-microvm SSH dev-vm
-• Stop all: /nix-microvm Stop all VMs
-```
-
 ### Start VM Output
 
 ```
@@ -324,35 +279,6 @@ Data preserved in: /var/lib/microvms/dev-vm
 To restart: /nix-microvm Start dev-vm
 ```
 
-### Test All Output
-
-```
-🧪 Testing MicroVM Configurations
-
-dev-vm (Development Environment)
-  ✅ Configuration valid
-  ✅ Resource allocation: 8GB RAM, 4 cores
-  ✅ Network setup: NAT, ports 2222, 8080, 3000
-  ✅ Storage: /home/dev/projects
-
-test-vm (Testing Environment)
-  ✅ Configuration valid
-  ✅ Resource allocation: 8GB RAM, 4 cores
-  ✅ Network setup: NAT, port 2223
-  ✅ Storage: ephemeral
-
-playground-vm (Experimental Sandbox)
-  ✅ Configuration valid
-  ✅ Resource allocation: 8GB RAM, 4 cores
-  ✅ Network setup: NAT, ports 2224, 8081
-  ✅ Storage: /root/experiments
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ All MicroVM Tests Passed
-Total: 3/3 VMs configured correctly
-Time: 1min 45s
-```
-
 ## Implementation Details
 
 ### List Command
@@ -397,8 +323,6 @@ systemctl is-active microvm@dev-vm.service
 ```bash
 # Determine port from VM type
 PORT=2222  # dev-vm
-# PORT=2223  # test-vm
-# PORT=2224  # playground-vm
 
 # Connect
 ssh -p $PORT user@localhost
@@ -586,7 +510,6 @@ htop
 # Check if persistent storage configured
 ls -la /var/lib/microvms/dev-vm/
 
-# test-vm has no persistence (by design)
 # Use dev-vm or playground-vm for persistent work
 ```
 
