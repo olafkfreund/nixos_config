@@ -589,7 +589,6 @@ npm_hash=$(nix run nixpkgs#prefetch-npm-deps -- package-lock.json)
 
 - [ ] Razer (mobile development laptop)
 - [ ] P510 (if Claude Code used on server)
-- [ ] Samsung (mobile laptop)
 - [ ] DEX5550 (if CLI access needed)
 
 **Deployment Strategy**:

@@ -90,7 +90,7 @@ Access LinkedIn data for professional networking tasks.
 
 AI-assisted WhatsApp integration for messaging automation.
 
-**Deployment Status**: P620, Razer, Samsung
+**Deployment Status**: P620, Razer
 
 **Features:**
 - Send/receive messages
@@ -184,7 +184,6 @@ Ask Claude naturally:
 MCP servers are configured on:
 - **P620**: Full MCP suite (primary workstation)
 - **Razer**: Full MCP suite (laptop)
-- **Samsung**: WhatsApp, core servers (laptop)
 - **P510**: Core servers only (media server)
 
 ## Additional Resources

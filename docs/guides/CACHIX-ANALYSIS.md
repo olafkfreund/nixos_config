@@ -49,8 +49,6 @@ Cachix is a hosted binary cache service (SaaS) that provides:
 
 | Scenario           | P620 (LAN)      | P620 (Tailscale) | Cachix (Free)  | Cachix (Paid)  |
 | ------------------ | --------------- | ---------------- | -------------- | -------------- |
-| **Samsung on LAN** |  ~50-100 MB/s | ~10-30 MB/s      | ~5-20 MB/s     | ~5-20 MB/s     |
-| **Samsung remote** |  No access    |  ~10-30 MB/s   |  ~10-50 MB/s |  ~10-50 MB/s |
 | **Razer on LAN**   |  ~50-100 MB/s | ~10-30 MB/s      | ~5-20 MB/s     | ~5-20 MB/s     |
 | **P510 on LAN**    |  ~50-100 MB/s | ~10-30 MB/s      | ~5-20 MB/s     | ~5-20 MB/s     |
 
@@ -94,7 +92,7 @@ Cachix is a hosted binary cache service (SaaS) that provides:
 
 ### Cost Analysis
 
-**Your setup (4 hosts):**
+**Your setup (3 hosts):**
 
 - Average build size per host: ~10-20 GB
 - Total cache needs: ~40-80 GB (with overlap)

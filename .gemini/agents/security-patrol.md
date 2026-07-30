@@ -227,7 +227,7 @@ rec { a = 1; b = let a = a + 1; in a; }
 # Triggered by: /nix-security command or weekly automation
 
 1. **Inventory Phase**
-   - Enumerate all hosts (p620, p510, razer, samsung)
+   - Enumerate all hosts (p620, p510, razer)
    - List all services on each host
    - Identify all network listeners
    - Map user accounts and permissions
@@ -266,7 +266,7 @@ rec { a = 1; b = let a = a + 1; in a; }
 # Security Patrol Report
 
 Generated: 2025-01-15 14:30:00
-Hosts Scanned: 4 (p620, p510, razer, samsung)
+Hosts Scanned: 3 (p620, p510, razer)
 
 ## 🔴 CRITICAL (2 findings)
 

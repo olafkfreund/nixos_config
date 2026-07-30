@@ -336,15 +336,12 @@ Generated Mermaid Diagrams:
     P620[P620 Workstation<br/>Monitoring Server]
     P510[P510 Server<br/>Media Server]
     Razer[Razer Laptop<br/>Mobile Dev]
-    Samsung[Samsung Laptop<br/>Mobile]
 
     P620 -->|Monitors| P510
     P620 -->|Monitors| Razer
-    P620 -->|Monitors| Samsung
 
     P510 -->|Metrics| P620
     Razer -->|Metrics| P620
-    Samsung -->|Metrics| P620
 ````
 
 ### Module Dependencies
@@ -449,7 +446,7 @@ features.monitoring = {
   mode = "server";
 };
 
-# Clients (razer, p510, samsung)
+# Clients (razer, p510)
 features.monitoring = {
   enable = true;
   mode = "client";
@@ -505,7 +502,6 @@ Quick Reference Generation:
   | P620    | Workstation       | 192.168.1.100   | Prometheus, Grafana   |
   | P510    | Media Server      | 192.168.1.127   | Plex, *arr stack      |
   | Razer   | Mobile Dev        | DHCP            | Development tools     |
-  | Samsung | Mobile            | DHCP            | Basic tools           |
 
   ### Common Commands
   ```bash
@@ -607,7 +603,6 @@ Coverage: 95%
 - hosts/p620/README.md ✅
 - hosts/p510/README.md ✅
 - hosts/razer/README.md ✅
-- hosts/samsung/README.md ✅
 
 ### Reference Documentation (6 files)
 

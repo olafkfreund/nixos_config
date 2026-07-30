@@ -29,7 +29,6 @@ This skill provides expertise in Tailscale VPN configuration on NixOS, covering:
 - **P620**: AMD workstation - `useRoutingFeatures = "both"` (router + client)
 - **P510**: Intel Xeon server - `useRoutingFeatures = "both"` (router + client)
 - **Razer**: Intel/NVIDIA laptop - `useRoutingFeatures = "client"` (client only)
-- **Samsung**: Intel laptop - `useRoutingFeatures = "client"` (client only)
 
 **Common Configuration Pattern:**
 
@@ -513,7 +512,7 @@ echo "=== Tailscale Status ==="
 sudo tailscale status --peers
 
 echo -e "\n=== Connection Health ==="
-for host in p620 p510 razer samsung; do
+for host in p620 p510 razer; do
   echo -n "$host: "
   if sudo tailscale ping --c 1 "$host" &>/dev/null; then
     echo "✓ OK"

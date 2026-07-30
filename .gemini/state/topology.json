@@ -13,17 +13,21 @@
       "role": "laptop",
       "type": "intel-nvidia"
     },
-    "samsung": {
-      "role": "laptop",
-      "type": "intel"
-    },
     "dex5550": {
       "role": "sff",
       "type": "intel"
     }
   },
-  "hosts": ["common", "p510", "p620", "razer", "samsung"],
-  "users": ["common", "olafkfreund"],
+  "hosts": [
+    "common",
+    "p510",
+    "p620",
+    "razer"
+  ],
+  "users": [
+    "common",
+    "olafkfreund"
+  ],
   "modules": [
     "modules/ai/chatgpt.nix",
     "modules/ai/gemini-cli.nix",

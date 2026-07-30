@@ -46,14 +46,14 @@ CI mode
 
 **All Hosts Sequential** (~5 minutes):
 
-- ✅ Tests all 4 hosts one at a time
+- ✅ Tests all 3 hosts one at a time
 - ✅ Clear progress indication
 - ✅ Stops on first failure (fast-fail)
 - ✅ Detailed error reporting
 
 **All Hosts Parallel** (~2 minutes - FASTEST):
 
-- ✅ Tests all 4 hosts simultaneously
+- ✅ Tests all 3 hosts simultaneously
 - ✅ 60% faster than sequential
 - ✅ Utilizes multi-core systems
 - ✅ Aggregated results at end
@@ -176,7 +176,6 @@ Starting parallel builds...
 ✅ P620    (AMD Workstation)      - 58s
 ✅ Razer   (Intel/NVIDIA Laptop)  - 62s
 ✅ P510    (Intel Xeon Server)    - 54s
-✅ Samsung (Intel Laptop)         - 51s
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ✅ All Hosts Passed - Ready to Deploy
@@ -237,7 +236,6 @@ nix build .#nixosConfigurations.p620.config.system.build.toplevel \
 nix build .#nixosConfigurations.p620.config.system.build.toplevel --no-link & \
 nix build .#nixosConfigurations.razer.config.system.build.toplevel --no-link & \
 nix build .#nixosConfigurations.p510.config.system.build.toplevel --no-link & \
-nix build .#nixosConfigurations.samsung.config.system.build.toplevel --no-link & \
 wait
 
 # Aggregate results
@@ -251,7 +249,7 @@ wait
 Quick validation
 
 # Check syntax for all hosts
-for host in p620 razer p510 samsung; do
+for host in p620 razer p510; do
   nix eval .#nixosConfigurations.$host.config.system.name
 done
 ```
@@ -330,7 +328,6 @@ Run: /nix-test p620 (single host uses less memory)
 P620:    60s →
 Razer:   62s →
 P510:    54s →
-Samsung: 51s →
 Total:   227s (3min 47s)
 ```
 
@@ -340,7 +337,6 @@ Total:   227s (3min 47s)
 P620:    60s ↓
 Razer:   62s ↓
 P510:    54s ↓
-Samsung: 51s ↓
 Total:   62s (fastest completes)
 Speedup: 3.7x faster
 ```
@@ -480,7 +476,6 @@ Test all hosts sequentially
 /nix-test p620
 /nix-test razer
 /nix-test p510
-/nix-test samsung
 ```
 
 ### Build Takes Too Long

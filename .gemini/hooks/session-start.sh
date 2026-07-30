@@ -14,7 +14,7 @@ fi
 
 # Infrastructure context
 echo "   📦 Project: NixOS Infrastructure Hub"
-echo "   🖥️  Active Hosts: P620, P510, Razer, Samsung"
+echo "   🖥️  Active Hosts: P620, P510, Razer"
 echo "   🧩 Modules: 141+"
 echo "   📐 Architecture: Template-based (95% code deduplication)"
 echo ""

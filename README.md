@@ -207,7 +207,6 @@ The following are intentionally absent from the current configuration:
 
 - Prometheus / Grafana / Loki / Alertmanager monitoring stack — system
   insight is now via `journalctl`, `systemctl`, and per-service logs.
-- DEX5550, Samsung, HP hosts.
 - `nix-colors` input (replaced by Stylix base16).
 - `termshark`, `wireshark`, `reddix`, `wasistlos`, `steampipe` modules
   and the standalone `cosmic-applet-package-updater` chain.

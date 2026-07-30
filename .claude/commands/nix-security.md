@@ -179,7 +179,7 @@ age.secrets."api-key" = {
   [❌] All services use DynamicUser (12/15 services)
   [✅] No evaluation-time secret reads (15/15)
   [⚠️] Firewall properly configured (3/4 hosts)
-  [✅] SSH hardening enabled (4/4 hosts)
+  [✅] SSH hardening enabled (3/3 hosts)
   [❌] Full systemd hardening (8/15 services)
 ```
 

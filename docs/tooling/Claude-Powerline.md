@@ -45,7 +45,6 @@ Claude Powerline is available on all hosts using the developer profile:
 -  **P620** (primary workstation)
 -  **Razer** (laptop)
 -  **P510** (media server with development mode)
--  **Samsung** (laptop)
 
 ## Configuration
 

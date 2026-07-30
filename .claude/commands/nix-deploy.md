@@ -129,7 +129,7 @@ Deploy to all hosts
 ```
 
 **Time**: ~3 minutes (parallel)
-**Safety**: Full validation, deploys to all 4 hosts simultaneously
+**Safety**: Full validation, deploys to all 3 hosts simultaneously
 
 ## Update Operations (NEW!)
 
@@ -559,7 +559,7 @@ Emergency: 30 seconds
 
 Ready to deploy? Just tell me:
 
-- Which host (p620, p510, razer, samsung, or "all")
+- Which host (p620, p510, razer, or "all")
 - Mode (standard/fast/emergency, or I'll choose best)
 - Issue number (optional, for commit message)
 

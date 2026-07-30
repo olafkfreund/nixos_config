@@ -317,7 +317,7 @@ Dependency Chain Analysis:
 # Performance Analysis Report
 
 Generated: 2025-01-15 16:45:00
-Hosts Analyzed: p620, razer, p510, samsung
+Hosts Analyzed: p620, razer, p510
 
 ## Executive Summary
 

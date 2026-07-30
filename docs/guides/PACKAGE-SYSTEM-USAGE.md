@@ -71,7 +71,6 @@ packages = {
 
 ### **Laptop Template** (`hostTypes.laptop`)
 
-**Purpose**: Mobile systems with power optimization (Razer, Samsung)
 
 ```nix
 # Automatic package configuration (optimized for battery)

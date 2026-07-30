@@ -63,7 +63,7 @@ Status all hosts
 **Ping Hosts** (instant):
 
 - ✅ Check all infrastructure hosts reachability
-- ✅ Tests: p620, razer, p510, samsung
+- ✅ Tests: p620, razer, p510
 - ✅ 2-second timeout per host
 - ✅ Clear reachability status
 - ✅ Parallel ping execution
@@ -151,7 +151,6 @@ Ping all hosts
 # p620: ✅ reachable
 # razer: ✅ reachable
 # p510: ✅ reachable
-# samsung: ❌ unreachable
 ```
 
 ### Comprehensive Status
@@ -253,18 +252,11 @@ Host Reachability
 p620:    ✅ reachable (1.2ms)
 razer:   ✅ reachable (2.4ms)
 p510:    ✅ reachable (0.8ms)
-samsung: ❌ unreachable (timeout)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Summary
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Reachable: 3/4 hosts (75%)
-Unreachable: samsung
-
-Next Steps:
-• Check if samsung is powered on
-• Verify network connectivity on samsung
-• Check Tailscale VPN status on samsung
+Reachable: 3/3 hosts (100%)
 ```
 
 ### Status All Hosts Output
@@ -297,18 +289,12 @@ p510 (Intel Xeon Server):
   Latency:     0.8ms
   Services:    Media server, headless
 
-samsung (Intel Laptop):
-  Status:      ❌ Offline
-  Last Seen:   2 hours ago
-  Services:    Mobile
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Network Health
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ✅ DNS Resolution: Working
 ✅ Default Gateway: 192.168.1.1
 ✅ Tailscale VPN: Active
-⚠️  1 host offline (samsung)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Interface Status
@@ -319,9 +305,9 @@ tailscale0: UP (100.64.0.1/32)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Summary
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Total Hosts: 4
-Online: 3 (75%)
-Offline: 1 (25%)
+Total Hosts: 3
+Online: 3 (100%)
+Offline: 0 (0%)
 Network Health: Good
 ```
 
@@ -358,7 +344,7 @@ Network Health: Good
 
 ```bash
 # Ping all infrastructure hosts
-for host in p620 razer p510 samsung; do
+for host in p620 razer p510; do
   echo -n "$host: "
   ping -c 1 -W 2 $host >/dev/null 2>&1 && \
     echo "✅ reachable" || echo "❌ unreachable"

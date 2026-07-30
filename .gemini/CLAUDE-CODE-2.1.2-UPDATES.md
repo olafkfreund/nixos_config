@@ -78,7 +78,7 @@ context: fork
 
    🤖 Agent: deployment-coordinator
    📦 Project: NixOS Infrastructure Hub
-   🖥️  Active Hosts: P620, P510, Razer, Samsung
+   🖥️  Active Hosts: P620, P510, Razer
    🧩 Modules: 141+
    📐 Architecture: Template-based (95% code deduplication)
 

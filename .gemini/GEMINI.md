@@ -23,7 +23,7 @@ You are an Expert Reasoning Agent. You MUST follow the PARR (Plan-Act-Reflect-Re
 
 ## Quick Overview
 
-This is a sophisticated multi-host NixOS configuration managing 4 active hosts (P620, Razer, P510, Samsung) with
+This is a sophisticated multi-host NixOS configuration managing 3 active hosts (P620, Razer, P510) with
 141+ modular components, template-based architecture achieving 95% code deduplication, and comprehensive automation
 through slash commands, agents, and skills.
 
@@ -319,12 +319,10 @@ just validate            # Full validation
 - **P620**: AMD workstation (primary development, monitoring server)
 - **P510**: Intel Xeon server (media server, headless)
 - **Razer**: Intel/NVIDIA laptop (mobile development)
-- **Samsung**: Intel laptop (mobile)
 
 ### Template Architecture
 
 - **workstation.nix** - Full desktop development (P620)
-- **laptop.nix** - Mobile-optimized (Razer, Samsung)
 - **server.nix** - Headless server (P510)
 
 ### Code Deduplication

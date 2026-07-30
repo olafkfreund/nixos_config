@@ -280,7 +280,6 @@ services.gitlab-runner-local = {
 };
 ```
 
-### Laptop (Razer/Samsung)
 
 ```nix
 services.gitlab-runner-local = {
