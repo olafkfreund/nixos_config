@@ -10,6 +10,7 @@ Agent-OS standards and workflow templates (read on demand, not auto-loaded):
 - Workflows: invoke `/plan-product`, `/create-spec`, `/execute-tasks`, `/analyze-product`
 
 ---
+
 ## Repository Overview
 
 This is a sophisticated multi-host NixOS Infrastructure Hub featuring a revolutionary **template-based architecture** that achieves unprecedented 95% code deduplication through systematic use of host templates, Home Manager profiles, and 141+ modular components. The repository manages 3 active hosts (P620, Razer, P510) with different hardware profiles, supports multi-user environments, and provides AI integration, development environments, and follows comprehensive NixOS best practices with zero anti-patterns.
@@ -212,6 +213,7 @@ Run `just --list` for the full recipe list. Two non-obvious ones:
 **For lock bumps + deploy in one idiot-proof command, see [docs/UPDATE-DEPLOY.md](./docs/UPDATE-DEPLOY.md).** TL;DR: `nhs [HOST] [SCOPE]` or `just update-commit-deploy [HOST] [SCOPE]` handles `nix flake update -> test-build -> commit + push -> nh switch` atomically, works for local AND remote hosts, and refuses to run if the working tree is dirty.
 
 `just quick-deploy HOST` deploys only if the configuration actually changed.
+
 ## Architecture
 
 ### Template-Based Architecture (Revolutionary)
@@ -418,6 +420,7 @@ The repository includes a comprehensive live USB installer system for automated 
 ### DON'T - Critical NixOS Anti-Patterns to Avoid
 
 Full catalogue with wrong/correct examples: **[docs/NIXOS-ANTI-PATTERNS.md](./docs/NIXOS-ANTI-PATTERNS.md)** (zero-tolerance policy). Covers `mkIf true`, excessive `with`, dangerous `rec`, IFD, evaluation-time secrets, root services, `nix-env`, monolithic config, magic auto-discovery, and missing garbage collection.
+
 ### ✅ **Required Patterns for NixOS**
 
 #### **1. Always Use Explicit Imports**
@@ -678,12 +681,12 @@ ai.providers = {
 };
 ```
 
-2. **Ensure API keys are available in secrets:**
+1. **Ensure API keys are available in secrets:**
    - API keys must be created using `./scripts/manage-secrets.sh`
    - Keys: `api-openai`, `api-anthropic`, `api-gemini`
    - Ollama requires no API key (local inference)
 
-3. **Test and deploy:**
+2. **Test and deploy:**
 
 ```bash
 just test-host HOSTNAME
@@ -714,6 +717,7 @@ Project context, read on demand (paths only, deliberately not auto-loaded):
 - `.agent-os/product/mission.md`, `tech-stack.md`, `roadmap.md`, `decisions.md`
 - Active specs: `.agent-os/specs/`
 - Spec planning / task execution: invoke `/create-spec`, `/execute-tasks`
+
 ## Important Notes
 
 ### 🚨 **Critical Development Guidelines**

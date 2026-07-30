@@ -280,7 +280,6 @@ services.gitlab-runner-local = {
 };
 ```
 
-
 ```nix
 services.gitlab-runner-local = {
   enable = true;

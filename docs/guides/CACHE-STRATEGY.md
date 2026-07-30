@@ -2,7 +2,7 @@
 
 > **Complete guide to multi-tier caching for optimal build performance**
 
-##  Overview
+## Overview
 
 Your NixOS infrastructure uses a sophisticated three-tier cache strategy:
 
@@ -48,7 +48,7 @@ Razer/P510 (clients)
 - Tailscale: `http://p620.lan:5000`
 - LAN: `http://p620.lan:5000`
 
-##  Deployment Strategies
+## Deployment Strategies
 
 ### Strategy 1: Direct Deployment (Build on Target)
 
@@ -97,21 +97,21 @@ just deploy-via-p620 razer
 **What happens:**
 
 1. ️ **Build Phase**: P620 builds Razer's configuration
-2.  **Cache Phase**: Build artifacts stored in P620's cache
-3.  **Deploy Phase**: Razer downloads from P620 cache (fast!)
-4.  **Switch Phase**: Razer activates new configuration
+2. **Cache Phase**: Build artifacts stored in P620's cache
+3. **Deploy Phase**: Razer downloads from P620 cache (fast!)
+4. **Switch Phase**: Razer activates new configuration
 
 **Pros:**
 
--  Fast deployment (download vs build)
--  Saves battery on laptops
--  Consistent builds across hosts
--  P620 has better cooling/performance
+- Fast deployment (download vs build)
+- Saves battery on laptops
+- Consistent builds across hosts
+- P620 has better cooling/performance
 
 **Cons:**
 
--  Requires P620 to be online
--  Network dependency
+- Requires P620 to be online
+- Network dependency
 
 ---
 
@@ -155,7 +155,7 @@ just deploy-all-parallel
 
 ---
 
-##  Performance Comparison
+## Performance Comparison
 
 | Method             | Razer Build Time | Network Usage | Battery Impact |
 | ------------------ | ------------------ | ------------- | -------------- |
@@ -250,7 +250,7 @@ nix.settings.post-build-hook = pkgs.writeShellScript "cachix-push" ''
 
 ---
 
-##  Troubleshooting
+## Troubleshooting
 
 ### P620 Cache Not Working
 
@@ -328,7 +328,7 @@ ping 192.168.1.97
 
 ---
 
-##  Quick Reference
+## Quick Reference
 
 ### Daily Workflow (Razer)
 
@@ -365,7 +365,7 @@ sudo nixos-rebuild switch --flake .#razer
 
 ---
 
-##  Best Practices
+## Best Practices
 
 1. **Always use P620 cache for Razer deployments**
    - Saves battery and time
@@ -393,7 +393,7 @@ sudo nixos-rebuild switch --flake .#razer
 
 ---
 
-##  Related Documentation
+## Related Documentation
 
 - **Deployment Guide**: `docs/deployment-guide.md`
 - **NixOS Patterns**: `docs/PATTERNS.md`
