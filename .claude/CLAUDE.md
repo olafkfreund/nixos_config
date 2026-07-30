@@ -1,19 +1,3 @@
-# MANDATORY: PARR Protocol
-
-**For EVERY task, you MUST use this structure:**
-
-| Phase | Output Required |
-|-------|-----------------|
-| 🎯 **PLAN** | Goal, steps with checkpoints, approach, assumptions, risks |
-| ⚡ **ACT** | Execute ONE step, show output, verify checkpoint |
-| 🔍 **REFLECT** | Result, expected vs actual, side effects, plan validity |
-| 🔄 **REVISE** | (If needed) Issue, root cause, options, decision |
-| ✅ **COMPLETE** | Summary, files changed, follow-up needed |
-
-**Rules:** Never skip PLAN. Never chain commands without REFLECT. Stop if unexpected. Ask after 2 failures.
-
----
-
 # NixOS Infrastructure Hub - Claude Code Guide
 
 > **Fast, Easy, Reliable NixOS Development with Claude Code**
@@ -146,20 +130,14 @@ Agents trigger automatically based on your request. See `/nix-help agents` for d
 
 **Global Skills** (`~/.claude/skills/` — from AbsolutelySkilled):
 
+- **nixos-standards** - NixOS module/package/security patterns and anti-patterns
 - **super-brainstorm** - Structured design interviews before implementation
-- **superhuman** - Task decomposition with parallel wave execution
-- **second-brain** - Persistent memory system across sessions
-- **codedocs** - AI-friendly codebase documentation generation
 - **skill-forge** - Create new skills from repos, docs, or topics
-- **backend-engineering** - Backend architecture and API design
-- **docker-kubernetes** - Container orchestration patterns
 - **ci-cd-pipelines** - CI/CD workflow automation
-- **observability** - Logging, metrics, tracing, alerting
-- **incident-management** - Incident response and post-mortems
-- **git-advanced** - Advanced git operations and workflows
-- **linux-admin** - Linux system administration
 - **clean-code** - Code quality and SOLID principles
-- **code-review-mastery** - Local change review before commits
+
+Run `skills list` for the current set — the list above goes stale as skills are added
+and removed.
 
 **Skills Management** (via `skills` CLI):
 
