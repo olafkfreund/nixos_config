@@ -80,7 +80,9 @@ in
       gnome-tweaks
       dconf-editor
       gnome-extension-manager
-      gruvbox-gtk-theme
+      # Was gruvbox-gtk-theme, removed from nixpkgs 2026-07 with
+      # gtk-engine-murrine (GTK2, unmaintained upstream).
+      gruvbox-dark-gtk
 
       # Additional utilities
       gnome-screenshot

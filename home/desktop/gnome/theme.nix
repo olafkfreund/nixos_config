@@ -37,11 +37,10 @@ in
       # rebuild. mkForce wins over Stylix's dconf entries. (Icons + cursor are
       # driven through Stylix itself in modules/desktop/stylix-theme.nix.)
       "org/gnome/desktop/interface" = {
-        gtk-theme = lib.mkForce "Gruvbox-Dark";
+        gtk-theme = lib.mkForce "gruvbox-dark";
       };
-      "org/gnome/shell/extensions/user-theme" = {
-        name = lib.mkForce "Gruvbox-Dark";
-      };
+      # No shell user-theme override: gruvbox-dark-gtk ships no gnome-shell/
+      # subdir, so Stylix's "Stylix" shell theme (same base16 palette) wins.
 
       "org/gnome/desktop/wm/preferences" = {
         # Stylix doesn't theme the WM titlebar font; follow the Stylix sans
