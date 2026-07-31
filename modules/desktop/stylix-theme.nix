@@ -44,18 +44,18 @@ in
         size = vars.baseTheme.cursor.size;
       };
 
-      # Gruvbox-Material icons — shipped in gruvbox-material-gtk-theme as
-      # share/icons/Gruvbox-Material-Dark. Driving the icon theme THROUGH
-      # Stylix (rather than fighting it) is what stops Stylix clobbering the
-      # icon choice on every rebuild. Only a Dark variant ships; polarity is
-      # dark so `light` reuses it harmlessly.
+      # Gruvbox icons. Driving the icon theme THROUGH Stylix (rather than
+      # fighting it) is what stops Stylix clobbering the icon choice on every
+      # rebuild.
       # Note: use the modern `stylix.icons` namespace; the old
       # `stylix.iconTheme` is deprecated and emits a warning.
+      # Was gruvbox-material-gtk-theme, removed from nixpkgs 2026-07 with
+      # gtk-engine-murrine (GTK2, unmaintained upstream).
       icons = {
         enable = true;
-        package = pkgs.gruvbox-material-gtk-theme;
-        dark = "Gruvbox-Material-Dark";
-        light = "Gruvbox-Material-Dark";
+        package = pkgs.gruvbox-plus-icons;
+        dark = "Gruvbox-Plus-Dark";
+        light = "Gruvbox-Plus-Light";
       };
 
       targets = {
