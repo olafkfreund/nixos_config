@@ -155,26 +155,10 @@ in
             find-next = "Control+s";
           };
 
-          colors = mkDefault {
-            inherit (activeColors) foreground;
-            inherit (activeColors) background;
-            regular0 = activeColors.black;
-            regular1 = activeColors.red;
-            regular2 = activeColors.green;
-            regular3 = activeColors.yellow;
-            regular4 = activeColors.blue;
-            regular5 = activeColors.magenta;
-            regular6 = activeColors.cyan;
-            regular7 = activeColors.white;
-            bright0 = activeColors.bright_black;
-            bright1 = activeColors.bright_red;
-            bright2 = activeColors.bright_green;
-            bright3 = activeColors.bright_yellow;
-            bright4 = activeColors.bright_blue;
-            bright5 = activeColors.bright_magenta;
-            bright6 = activeColors.bright_cyan;
-            bright7 = activeColors.bright_white;
-          };
+          # No [colors] block: foot deprecated it in favour of [colors-dark],
+          # which Stylix already writes (with alpha + indices 16-21). Setting
+          # both emitted a deprecation warning per foot launch, and [colors]
+          # lost to [colors-dark] anyway since initial-color-theme=dark.
 
           scrollback = {
             lines = cfg.features.scrollback;
