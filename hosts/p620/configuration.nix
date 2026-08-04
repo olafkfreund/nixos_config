@@ -630,7 +630,10 @@ in
   # Read-mostly media share, so `soft` is acceptable here - data
   # corruption from a half-finished write is not in scope.
   fileSystems."/mnt/media" = {
-    device = "p510.lan:/mnt/media";
+    # LAN IP, not p510.lan: the router change dropped the .lan search domain,
+    # so the name no longer resolves and the automount hangs. Keep a DHCP
+    # reservation for 192.168.1.75 on the router to stop this drifting again.
+    device = "192.168.1.75:/mnt/media";
     fsType = "nfs";
     options = [
       "noauto"
