@@ -40,6 +40,21 @@ stdenvNoCC.mkDerivation rec {
   dontBuild = true;
   dontConfigure = true;
 
+  # Outside tmux every ccm code path is a no-op, but the hooks run under
+  # `set -euo pipefail` and ccm_write_signal does
+  #   win_info=$(tmux list-windows -a ... | awk ...)
+  # With no tmux server that pipeline fails, stderr is already swallowed by
+  # 2>/dev/null, and the assignment aborts the script — so Claude Code reports
+  # "Failed with non-blocking status code: No stderr output" on every single
+  # tool call. Guard the shared init instead of each call site: all seven hook
+  # scripts start with `ccm_hook_init || exit 0`, so returning 1 makes them
+  # exit cleanly. No effect when tmux is running.
+  postPatch = ''
+    substituteInPlace hooks/lib.sh \
+      --replace-fail 'ccm_hook_init() {' 'ccm_hook_init() {
+    tmux has-session 2>/dev/null || return 1'
+  '';
+
   installPhase = ''
     runHook preInstall
 
