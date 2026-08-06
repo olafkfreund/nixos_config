@@ -69,8 +69,11 @@ in
     # Note: Tailscale is enabled via services.tailscale (built-in NixOS module)
     # Custom networking.tailscale module was removed during anti-pattern cleanup
 
-    # DNS configuration - using 192.168.1.1 (router DNS server)
-    nameservers = [ "192.168.1.1" "1.1.1.1" ];
+    # DNS: no static nameservers. NetworkManager + systemd-resolved (nixos/network.nix)
+    # already pick up the router's DHCP-advertised DNS (192.168.1.254, verified working),
+    # and resolved's built-in fallback list covers 1.1.1.1/8.8.8.8/9.9.9.9 if that ever
+    # fails. A hardcoded router IP is exactly what went stale and dead (192.168.1.1) when
+    # the router changed — DHCP tracks that automatically, a static entry does not.
   };
 
   # Tailscale VPN using built-in NixOS service with subnet routing
