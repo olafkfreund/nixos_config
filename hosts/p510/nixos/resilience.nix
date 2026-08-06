@@ -50,4 +50,32 @@ _:
     ManagedOOMMemoryPressure = "kill";
     ManagedOOMMemoryPressureLimit = "80%";
   };
+  # ── 4. Keep k3d alive across a nixos-rebuild ────────────────────────────
+  # nixos-upgrade.timer rebuilds nightly (~04:00). When the docker unit changes
+  # — which it does whenever nvidia-container-toolkit-cdi-generator.service, a
+  # hard `Requires=`, is rebuilt — activation restarts docker.service and takes
+  # every k3d container with it.
+  #
+  # The server and serverlb come back on their `unless-stopped` policy. The
+  # agent does not, because its shutdown deadlocks: a pod holding an open file
+  # on the in-cluster NFS export cannot complete __fput -> nfs_file_release ->
+  # nfs4_do_close without an RPC to a server that docker has just stopped. The
+  # kubelet's mounts are `vers=4.1` with no `soft`, so the RPC retries forever,
+  # the container's PID namespace never drains, and docker reports the corpse
+  # as `Up` with zero processes inside — so `restart: unless-stopped` never
+  # fires and the node sits NotReady.
+  #
+  # That is not theoretical: 2026-08-06, agent killed 04:15, node NotReady for
+  # 7h. It stranded argocd-application-controller (every deploy landed nowhere
+  # while ArgoCD still reported Synced), nfs-provisioner (its local-path PV
+  # pins it to that node), and tfactory (FailedMount x218). The wedge was
+  # SIGKILL-proof kernel state, so recovery meant rebuilding the container by
+  # hand. See Factory#582 and factory-gitops#138.
+  #
+  # Not restarting docker on rebuild removes the trigger entirely. The cost is
+  # that daemon.settings changes need a manual `systemctl restart docker` (or a
+  # reboot) to take effect — the same trade already accepted for libvirtd in
+  # modules/virt/virt.nix. Cheap, because that config changes rarely and the
+  # cluster it carries is expensive to rebuild.
+  systemd.services.docker.restartIfChanged = false;
 }
