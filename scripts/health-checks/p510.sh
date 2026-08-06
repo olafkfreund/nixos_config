@@ -8,7 +8,15 @@
 # Exit 0 = healthy, non-zero = scripts/update-commit-deploy.sh rolls back.
 set -uo pipefail
 
-state=$(systemctl is-system-running 2>/dev/null || echo unknown)
+# `systemctl is-system-running` PRINTS the state and simultaneously exits
+# non-zero for every state except "running" — degraded exits 1. The old
+# `$(... || echo unknown)` therefore appended "unknown" to a perfectly good
+# answer, yielding the two-line value "degraded\nunknown", which matches
+# neither arm of the case below. That made the "degraded" arm unreachable and
+# rolled back every deploy to a host with even one failed unit. Capture the
+# output and ignore the exit status; only an empty result is genuinely unknown.
+state=$(systemctl is-system-running 2>/dev/null) || true
+[ -n "$state" ] || state=unknown
 case "$state" in
   running | degraded) ;;
   *)
