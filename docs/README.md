@@ -48,8 +48,8 @@ Issue-driven development workflow: branch naming, conventional commits,
 PR process, review standards.
 
 `guides/CACHE-STRATEGY.md`
-Multi-tier binary cache strategy (local nix-serve on p620, official
-NixOS cache, Nix community cache).
+Binary cache strategy (official NixOS cache, Nix community cache — no local
+cache server exists despite the doc's original P620 nix-serve claims).
 
 `guides/CACHIX-ANALYSIS.md`
 Cachix integration analysis and optional setup.

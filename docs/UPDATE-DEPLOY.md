@@ -73,7 +73,7 @@ Current checks:
 
 | Host | What it asserts |
 |---|---|
-| `p620` | `display-manager` active, no GDM exhaustion, `nix-serve` active (other hosts depend on it as a binary cache) |
+| `p620` | `display-manager` active, no GDM exhaustion |
 | `razer` | `display-manager` active, no GDM exhaustion (the documented Optimus PRIME-sync failure mode) |
 | `p510` | `is-system-running` ∈ {running, degraded}, `sshd` + `plex` active, `podman-backstage` active if enabled |
 

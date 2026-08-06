@@ -1,21 +1,32 @@
 # NixOS Binary Cache Strategy
 
 > **Complete guide to multi-tier caching for optimal build performance**
+>
+> **Correction (verified against the repo):** There is no P620 binary cache. No
+> nix-serve/harmonia service exists anywhere in this repo, nothing listens on
+> p620:5000, and `modules/nix/nix.nix` only lists cache.nixos.org and
+> nix-community.cachix.org as substituters. Every "P620 cache" claim below
+> (service, port 5000, public key, `deploy-via-p620` "cache phase") is
+> aspirational, not implemented. The real speedup for `just deploy-via-p620`
+> comes from `nixos-rebuild --build-host p620 --target-host <host>` — P620
+> builds and the closure is copied over SSH, no cache server involved.
 
 ## Overview
 
-Your NixOS infrastructure uses a sophisticated three-tier cache strategy:
+Your NixOS infrastructure uses a two-tier cache strategy:
 
-1. **P620 Local Cache** (fastest) - Your own nix-serve cache server
-2. **Official NixOS Cache** (always available) - cache.nixos.org
-3. **Nix Community Cache** (comprehensive) - nix-community.cachix.org
-4. **Optional: Personal Cachix** (5GB free) - your-username.cachix.org
+1. **Official NixOS Cache** (always available) - cache.nixos.org
+2. **Nix Community Cache** (comprehensive) - nix-community.cachix.org
+
+There is no P620 local cache server and no personal Cachix cache configured.
+The sections below describing a P620 nix-serve cache are historical/aspirational
+and do not reflect the current repo — see the correction note above.
 
 ## ️ Cache Architecture
 
 ### Current Setup
 
-```
+```text
 Razer/P510 (clients)
     ↓
     1. Check P620 cache (local network) - FASTEST
@@ -173,34 +184,34 @@ Cachix provides **5GB free storage** with unlimited downloads. Great for:
 
 ### Setup Instructions
 
-**1. Create Cachix Account**
+#### 1. Create Cachix Account
 
 ```bash
 # Sign up at https://cachix.org (free tier)
 ```
 
-**2. Install Cachix**
+#### 2. Install Cachix
 
 ```bash
 # Already installed via development.nix
 which cachix  # Should show: /run/current-system/sw/bin/cachix
 ```
 
-**3. Authenticate**
+#### 3. Authenticate
 
 ```bash
 # Get your auth token from https://app.cachix.org/personal-auth-tokens
 cachix authtoken YOUR_AUTH_TOKEN
 ```
 
-**4. Create Your Cache**
+#### 4. Create Your Cache
 
 ```bash
 # Create a new cache (e.g., "olafkfreund-nixos")
 cachix create olafkfreund-nixos
 ```
 
-**5. Configure Automatic Uploads**
+#### 5. Configure Automatic Uploads
 
 Add to `modules/nix/nix.nix`:
 
@@ -222,7 +233,7 @@ trusted-public-keys = [
 ];
 ```
 
-**6. Upload to Cachix**
+#### 6. Upload to Cachix
 
 ```bash
 # Push current system to Cachix

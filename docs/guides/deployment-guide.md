@@ -64,8 +64,10 @@ just build-all-parallel      # Build all configs in parallel (no deploy)
 
 - **Internal Network**: 192.168.1.0/24
 - **DNS Server**: DEX5550 (192.168.1.222)
-- **Binary Cache**: P620 (<http://p620:5000>)
-- **Monitoring Server**: DEX5550 (Grafana: port 3001, Prometheus: port 9090)
+- **Binary Cache**: none (no nix-serve/harmonia in this repo; substituters are
+  cache.nixos.org and nix-community.cachix.org only — see `modules/nix/nix.nix`)
+- **Monitoring Server**: removed (Prometheus/Grafana/Loki/Alertmanager); use
+  `journalctl`/`systemctl status`
 
 ## Performance Optimizations Applied
 
@@ -92,7 +94,8 @@ just quick-deploy HOST
 ### 4. Binary Cache Integration
 
 ```bash
-# Uses P620's nix-serve cache for faster builds
+# NOTE: this Justfile recipe passes a p620:5000 binary-cache option, but no
+# nix-serve/harmonia service exists there — the option is a no-op today.
 just deploy-cached HOST
 ```
 
@@ -271,11 +274,9 @@ just perf-cache
 
 ### Binary Cache Server
 
-P620 runs a nix-serve binary cache to speed up builds across all hosts:
-
-- **URL**: <http://p620:5000>
-- **Usage**: Automatic in `deploy-cached` commands
-- **Benefits**: Shared build artifacts reduce rebuild times
+There is no local binary cache. No nix-serve/harmonia service exists anywhere in this
+repo, and nothing listens on p620:5000. `modules/nix/nix.nix` only substitutes from
+cache.nixos.org and nix-community.cachix.org.
 
 ### Tailscale VPN Integration
 

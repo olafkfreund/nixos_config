@@ -1,6 +1,12 @@
 # Cachix vs P620 Local Cache - Complete Analysis
 
 > **Research-based comparison for optimal NixOS caching strategy**
+>
+> **Correction (verified against the repo):** the "P620 local cache" side of this
+> comparison does not exist — no nix-serve/harmonia runs anywhere in this repo, and
+> `modules/nix/nix.nix` only substitutes from cache.nixos.org and
+> nix-community.cachix.org. Treat this doc as a historical/hypothetical proposal,
+> not a description of the current setup.
 
 ## Quick Verdict
 
