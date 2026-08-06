@@ -51,6 +51,21 @@ let
   inherit (lib) mkOption mkIf mkMerge mkEnableOption mkPackageOption types optionalString concatStringsSep;
   cfg = config.modules.containers.k3d;
 
+  # Declared resolver for the cluster, mounted into every node and handed to
+  # k3s via --resolv-conf. Docker Engine 29 moved its embedded resolver from
+  # 127.0.0.11 to the bridge gateway (172.18.0.1), which is reachable ONLY from
+  # a node container's own netns via NAT rules Docker installs there. k3s has a
+  # guard that swaps in a public resolver when resolv.conf points at loopback —
+  # 172.18.0.1 is not loopback, so the guard misses it and k3s passes the
+  # address straight to CoreDNS. CoreDNS runs in a pod netns without those NAT
+  # rules, so its upstream became a black hole and every external name
+  # SERVFAILed cluster-wide: ArgoCD could not reach github.com, kyverno could
+  # not reach sigstore, cronjobs failed every run. That outage ran ~16h before
+  # anyone noticed (#1232). Declare the upstream instead of inheriting whatever
+  # Docker chooses this release.
+  nodeResolvConf = pkgs.writeText "k3d-node-resolv.conf"
+    (concatStringsSep "\n" (map (r: "nameserver ${r}") cfg.resolvers) + "\n");
+
   # Bootstrap script — idempotent. Safe to re-run; safe to fail partially
   # and re-run (each step uses `kubectl apply` or `k3d cluster list` checks).
   bootstrapScript = pkgs.writeShellApplication {
@@ -118,6 +133,8 @@ let
           --k3s-arg "--disable=traefik@server:*" \
           --k3s-arg "--disable=servicelb@server:*" \
           --volume "$STORAGE_DIR:/var/lib/rancher/k3s/storage@server:*" \
+          --volume "${nodeResolvConf}:/etc/rancher/k3s/resolv.conf@all:*" \
+          --k3s-arg "--resolv-conf=/etc/rancher/k3s/resolv.conf@all:*" \
           --wait
       else
         echo "[k3d-bootstrap] Cluster $CLUSTER already exists (reboot path); ensuring API reachable"
@@ -259,6 +276,26 @@ let
       fi
       ''}
 
+      # 6. DNS smoke check. Resolve one external name from inside a POD netns
+      #    — not the node's, which has Docker's NAT rules and stays working
+      #    even when the cluster's DNS is dead. #1232 ran ~16h with the whole
+      #    GitOps loop down and was only found while chasing something else.
+      #    Deliberately a WARNING, not a failure: this unit is Restart=-driven,
+      #    so exiting non-zero here would spin the create/rollback loop that
+      #    already cost a day of downtime, and a transient upstream blip must
+      #    not tear a working cluster down.
+      echo "[k3d-bootstrap] DNS smoke check (external name from a pod)"
+      if kubectl run "dns-smoke-$$" --rm -i --restart=Never --quiet \
+           --image=busybox:1.36 --command --timeout=90s \
+           -- nslookup github.com >/dev/null 2>&1; then
+        echo "[k3d-bootstrap] DNS OK"
+      else
+        echo "[k3d-bootstrap] WARN: a pod could NOT resolve github.com." \
+             "CoreDNS's upstream is unreachable from the pod netns — check" \
+             "that the nodes' /etc/rancher/k3s/resolv.conf is in use and not" \
+             "Docker's bridge-gateway address. See #1232."
+      fi
+
       echo "[k3d-bootstrap] Done."
     '';
   };
@@ -294,6 +331,24 @@ in
       type = types.str;
       default = "factory";
       description = "Name of the k3d cluster (used as the docker container prefix and config selector).";
+    };
+
+    resolvers = mkOption {
+      type = types.listOf types.str;
+      default = [ "1.1.1.1" "9.9.9.9" ];
+      description = ''
+        Upstream DNS servers CoreDNS forwards to, written into a resolv.conf
+        that is mounted into every node and passed to k3s as `--resolv-conf`.
+
+        These MUST be reachable from a *pod* network namespace. Do not use a
+        Docker bridge-gateway address (e.g. 172.18.0.1) or a loopback address:
+        both resolve only inside the node container, and CoreDNS does not run
+        there. See the `nodeResolvConf` comment above and #1232.
+
+        NOTE: like `k3sImage`, this only applies on cluster *creation* — the
+        mount is fixed at container-create time. To adopt a change on an
+        existing cluster, recreate it or edit the nodes' resolv.conf by hand.
+      '';
     };
 
     apiPort = mkOption {
