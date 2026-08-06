@@ -210,9 +210,22 @@ LOCK_SHA_AT_UPDATE=$(sha256sum flake.lock | cut -d' ' -f1)
 # cheap probe that tells us if the target is stale. We only do the expensive
 # full build if we actually need to deploy.
 log "freshness check: evaluating expected closure for ${HOST}"
+# Capture nix's stderr instead of discarding it. A failure here is almost never
+# a missing nixosConfigurations entry — it is a real eval error (a removed
+# nixpkgs attribute, a broken module) — and the old message sent people hunting
+# the wrong thing. Route it to a file rather than 2>&1 so that nix warnings can
+# never end up inside $expected, which is compared against /run/current-system.
+eval_err=$(mktemp)
 expected=$(nix eval --raw \
-  ".#nixosConfigurations.${HOST}.config.system.build.toplevel.outPath" 2>/dev/null) \
-  || err "could not eval target closure outPath. Is ${HOST} listed in nixosConfigurations?"
+  ".#nixosConfigurations.${HOST}.config.system.build.toplevel.outPath" 2>"$eval_err") \
+  || {
+    printf '\n--- nix eval error ---\n' >&2
+    cat "$eval_err" >&2
+    printf -- '----------------------\n' >&2
+    rm -f "$eval_err"
+    err "could not eval the ${HOST} closure (see the nix error above)"
+  }
+rm -f "$eval_err"
 
 case "$MODE" in
   local) current=$(readlink /run/current-system 2>/dev/null || echo "") ;;
