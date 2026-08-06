@@ -2,7 +2,16 @@
   # Boot optimizations
   boot.loader.systemd-boot = {
     enable = true;
-    configurationLimit = 10; # Keep 10 generations so known-good kernels stay selectable in the boot menu
+    # Was 10 ("keep known-good kernels selectable"), but this ESP cannot hold
+    # them. razer boots via lanzaboote, which honours this option and writes a
+    # SIGNED kernel + initrd per kernel version into a 511 MiB /boot; each
+    # initrd is ~155 MiB. Ten generations spanning three kernel versions needs
+    # ~510 MiB, so on 2026-08-06 a third kernel (7.1.6) filled the partition
+    # and the deploy died mid-install with ENOSPC — taking the rollback with
+    # it, since that must write the bootloader too. Three bounds the worst
+    # case at ~507 MiB and is ~170 MiB when generations share a kernel.
+    # Raising this again requires a bigger ESP, not just a bigger number.
+    configurationLimit = 3;
     editor = false; # Disable bootloader editing for security
   };
   boot.loader.efi.canTouchEfiVariables = true;
