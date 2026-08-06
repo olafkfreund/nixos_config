@@ -1,4 +1,4 @@
-_:
+{ pkgs, ... }:
 # Resilience hardening for p510 (headless media / k3d-factory server).
 #
 # Added after a 2026-07-08 hard freeze: the Odin metrics pod hammered sshd in a
@@ -78,4 +78,34 @@ _:
   # modules/virt/virt.nix. Cheap, because that config changes rarely and the
   # cluster it carries is expensive to rebuild.
   systemd.services.docker.restartIfChanged = false;
+
+  # ── 5. Disk health monitoring ───────────────────────────────────────────
+  # p510 had NO way to see disk health: smartctl was not installed, so the
+  # state of four drives holding ~4TB of media was pure guesswork. #1194 was
+  # filed against the ST1000LM035 on the strength of dmesg lines that turned
+  # out to be a grep matching "UNC" inside "f-unc-tions"; the drive's own data
+  # is clean (0 reallocated, 0 pending, 0 uncorrectable, no logged errors).
+  #
+  # The drive that IS degrading was never suspected: /dev/sdb, the 12TB
+  # ST12000NM0127 carrying /mnt/media — 2872 reallocated, 624 pending, 624
+  # offline-uncorrectable, 1693 logged ATA errors, at only 14101 power-on
+  # hours. Pending == uncorrectable means those sectors are confirmed
+  # unreadable, not merely queued for remap.
+  #
+  # Note smartctl still reports "PASSED" for it: the overall verdict only
+  # fails when a NORMALISED value crosses its threshold, and
+  # Current_Pending_Sector's threshold is 0, so it can never trip that verdict
+  # however high the raw count climbs. Judge these drives on raw attributes,
+  # not on the headline.
+  environment.systemPackages = [ pkgs.smartmontools ];
+
+  services.smartd = {
+    enable = true;
+    autodetect = true;
+    # -a: all attributes. -o on/-S on: keep offline collection + attribute
+    # autosave enabled so the counters above stay current between reads.
+    # Short self-test nightly, long self-test weekly (Saturday 03:00, before
+    # the 04:00 nixos-upgrade window rather than during it).
+    defaults.monitored = "-a -o on -S on -s (S/../.././02|L/../../6/03)";
+  };
 }
