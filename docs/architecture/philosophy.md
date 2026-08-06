@@ -64,7 +64,8 @@ even at home.
 **Why.** "Works on my machine" is unacceptable for infrastructure.
 
 - `flake.lock` pins every input.
-- Binary caches (including a local `nix-serve` on p620) keep builds fast.
+- Binary caches (cache.nixos.org, nix-community.cachix.org) keep builds fast. No
+  local cache server exists.
 - Even this documentation builds reproducibly via `nix build .#docs`, so the
   published site is a deterministic function of the source.
 

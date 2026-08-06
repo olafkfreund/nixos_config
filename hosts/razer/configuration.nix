@@ -40,13 +40,16 @@ in
   host.class = "laptop";
 
   # NOPASSWD sudo for wheel members on razer.
-  # `just razer` runs `nixos-rebuild switch --target-host razer.lan --sudo
-  # --no-reexec`, which invokes the post-switch activation via `sudo
-  # systemd-run ... switch-to-configuration switch`. Without NOPASSWD the
-  # remote sudo step fails with exit 4 ("did you forget --ask-sudo-password?")
-  # — the system DOES activate fully (via the early non-sudo path), but
-  # `just razer` returns non-zero noise. Single-user personal laptop:
-  # acceptable trade-off for a clean idempotent deploy.
+  # Remote deploys (`nhs razer` / `just update-commit-deploy razer`, see
+  # scripts/update-commit-deploy.sh) run `nh os switch --target-host razer`,
+  # where `razer` resolves via the `Host razer` entry in ~/.ssh/config (the
+  # `.lan` search domain no longer exists after the router change). This
+  # invokes the post-switch activation via `sudo systemd-run ...
+  # switch-to-configuration switch`. Without NOPASSWD the remote sudo step
+  # fails with exit 4 ("did you forget --ask-sudo-password?") — the system
+  # DOES activate fully (via the early non-sudo path), but the deploy
+  # returns non-zero noise. Single-user personal laptop: acceptable
+  # trade-off for a clean idempotent deploy.
   security.sudo.wheelNeedsPassword = false;
 
   # Consolidated networking configuration
