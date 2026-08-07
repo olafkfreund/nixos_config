@@ -7,6 +7,7 @@ _: {
     ./nvim.nix
     ./cursor-code.nix
     ./windsurf.nix
+    ./zed-editor.nix
 
     # Development utilities
     ./distrobox.nix

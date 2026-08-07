@@ -80,6 +80,7 @@ in
       neovim = true;
       vscode = true;
       windsurf = true;
+      zed = true;
     };
 
     browsers = {

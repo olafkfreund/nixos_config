@@ -30,6 +30,7 @@ in
         neovim.enable = cfg.editors.neovim;
         vscode.enable = cfg.editors.vscode;
         windsurf.enable = cfg.editors.windsurf;
+        zed.enable = cfg.editors.zed;
       };
     })
 
