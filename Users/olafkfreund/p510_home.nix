@@ -49,6 +49,7 @@
       neovim = lib.mkForce true; # Primary editor for server development
       vscode = lib.mkForce false; # No GUI editors
       windsurf = lib.mkForce false; # No web-based editors
+      zed = lib.mkForce false; # No GUI editors
     };
 
     # No browsers on headless server
