@@ -48,5 +48,10 @@ in
     # vaults, not assumed — notably that links here are 6:1 Markdown-style
     # over [[wikilinks]] and that frontmatter is rare.
     home.file.".claude/skills/obsidian/SKILL.md".source = ./obsidian/SKILL.md;
+
+    # Local 1password skill — `op` CLI playbook. Pure prose, no companion
+    # script: every useful invocation needs an unlocked desktop-app session,
+    # so there is nothing to automate around.
+    home.file.".claude/skills/1password/SKILL.md".source = ./1password/SKILL.md;
   };
 }
