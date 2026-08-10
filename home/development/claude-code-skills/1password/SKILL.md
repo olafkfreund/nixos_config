@@ -21,7 +21,9 @@ platforms:
 `modules/programs/1password.nix`). Binary is `/run/wrappers/bin/op`.
 Available on **p620** and **razer**.
 
-Account: `my.1password.com` / `olaf@freundcloud.com`.
+Account: `my.1password.com` / `olaf@freundcloud.com`. One vault, **`Personal`**
+(~950 items, overwhelmingly Logins plus a dozen API credentials) — so `--vault
+Personal` is always the right scope and there is no vault to choose between.
 
 ## The one rule
 
@@ -29,40 +31,55 @@ Account: `my.1password.com` / `olaf@freundcloud.com`.
 in the transcript, which is stored and synced. Pipe it, don't echo it:
 
 ```bash
-op read op://Private/GitHub/token | gh auth login --with-token   # good
+op read op://Personal/GitHub/token | gh auth login --with-token   # good
 op run --env-file .env -- ./deploy.sh                            # good
-echo "token is $(op read op://Private/GitHub/token)"             # NEVER
+echo "token is $(op read op://Personal/GitHub/token)"             # NEVER
 ```
 
 If the user genuinely needs to *see* a value, put it on the clipboard instead:
 
 ```bash
-op read op://Private/GitHub/token | wl-copy
+op read op://Personal/GitHub/token | wl-copy
 ```
 
 ...and tell them it's on the clipboard. Only fall back to printing if they
 explicitly ask for the value on screen after being told it will be logged.
 
-## Preflight: is the session unlocked?
+## Preflight: can `op` actually reach the vault?
 
 ```bash
-op whoami
+op vault list
 ```
 
-- Prints account info → good, proceed.
-- `[ERROR] account is not signed in` → the session is locked. **You cannot fix
-  this yourself** — unlocking needs a biometric/system-auth prompt from the
-  1Password desktop app.
+Prints the vault table → good, proceed.
 
-Tell the user to:
+### Do NOT use `op whoami` as the readiness check
 
-1. Unlock the 1Password desktop app.
-2. Settings → Developer → enable **"Integrate with 1Password CLI"** (one-time).
-3. Then re-run whatever they asked for, or run `op signin` themselves via
-   `! op signin` in the prompt.
+On this setup it is a **false negative**. The desktop app integration is on
+(`developers.cliSharedLockState.enabled`), so `op` authenticates by delegating
+each request to the running app over native messaging and never writes a local
+session record. `op whoami` looks for that record, doesn't find one, and prints:
 
-Don't retry `op` commands in a loop against a locked session — every call just
-returns the same error.
+```text
+[ERROR] account is not signed in
+```
+
+...while `op vault list`, `op read` and everything else work perfectly. Verified
+on p620: `whoami` fails and `op read op://Personal/<id>/password` returns the
+secret in the same shell. `op signin` likewise exits 0 without doing anything,
+because there is nothing to do.
+
+If you see the whoami error, **ignore it and run the real command.** Only treat
+1Password as unavailable when `op vault list` itself fails.
+
+### When it genuinely is locked
+
+`op vault list` errors or hangs → the desktop app is locked. You can't fix that;
+unlocking needs a biometric/system-auth prompt on the user's screen. Ask them to
+unlock the 1Password app, then retry once. Don't retry in a loop.
+
+Auto-lock is set to 60 minutes, and the app starts `--silent` at login, so a
+fresh boot with nobody having opened the app is the usual cause.
 
 ## Reading secrets
 
@@ -70,10 +87,10 @@ returns the same error.
 `op://<vault>/<item>/<section>/<field>` when the field lives in a section.
 
 ```bash
-op read op://Private/AWS/access_key_id
-op read "op://Private/db/one-time password?attribute=otp"     # TOTP
-op read --out-file ./key.pem op://Private/server/private_key  # to a file
-op read "op://Private/ssh key/private key?ssh-format=openssh"
+op read op://Personal/AWS/access_key_id
+op read "op://Personal/db/one-time password?attribute=otp"     # TOTP
+op read --out-file ./key.pem op://Personal/server/private_key  # to a file
+op read "op://Personal/ssh key/private key?ssh-format=openssh"
 ```
 
 Vault and item names with spaces need quoting; IDs work anywhere a name does
@@ -85,8 +102,8 @@ Discovery is safe to print — names and metadata aren't secrets.
 
 ```bash
 op vault list
-op item list --vault Private
-op item list --categories Login --vault Private --format json
+op item list --vault Personal
+op item list --categories Login --vault Personal --format json
 op item get GitHub --format json | jq '.fields[].label'   # field names only
 op item get GitHub --fields label=username               # non-secret field
 ```
@@ -104,8 +121,8 @@ safe to commit:
 
 ```bash
 # .env
-AWS_ACCESS_KEY_ID=op://Private/AWS/access_key_id
-AWS_SECRET_ACCESS_KEY=op://Private/AWS/secret_access_key
+AWS_ACCESS_KEY_ID=op://Personal/AWS/access_key_id
+AWS_SECRET_ACCESS_KEY=op://Personal/AWS/secret_access_key
 
 op run --env-file .env -- terraform apply
 ```
@@ -114,7 +131,7 @@ op run --env-file .env -- terraform apply
 
 ```bash
 # config.yml.tpl
-db_password: {{ op://Private/db/password }}
+db_password: {{ op://Personal/db/password }}
 
 op inject -i config.yml.tpl -o config.yml
 ```
@@ -134,10 +151,10 @@ op plugin inspect       # what's already configured
 
 ```bash
 op item create --category login --title "Some Service" \
-  --vault Private username=olaf 'password=...'
+  --vault Personal username=olaf 'password=...'
 
-op item edit "Some Service" --vault Private 'password=...'
-op item delete "Some Service" --vault Private --archive
+op item edit "Some Service" --vault Personal 'password=...'
+op item delete "Some Service" --vault Personal --archive
 ```
 
 Never pass a secret as a literal on the command line in a way that reaches the
@@ -145,7 +162,7 @@ transcript — have the user run the create/edit themselves with `! op item ...`
 or read the value from a file. Prefer `--generate-password` when creating:
 
 ```bash
-op item create --category login --title X --vault Private \
+op item create --category login --title X --vault Personal \
   --generate-password='32,letters,digits,symbols' username=olaf
 ```
 
