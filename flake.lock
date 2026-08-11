@@ -29,11 +29,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786372273,
-        "narHash": "sha256-mAQhJbXzDn+5pKykE4u8tNTtMB20WkTw7vEuMRJahPw=",
+        "lastModified": 1786433467,
+        "narHash": "sha256-YXFF5jJCvYIqeCmMT8oBD2z9l3ErVtxhPJsPYXPwY3E=",
         "owner": "jacopone",
         "repo": "antigravity-nix",
-        "rev": "2d47456864c08ece53ee3cbbd2100e5240236051",
+        "rev": "c56f01183526238eb4f3bd8dc701037883af04ef",
         "type": "github"
       },
       "original": {
@@ -1150,11 +1150,11 @@
     },
     "nixpkgs-master": {
       "locked": {
-        "lastModified": 1786432082,
-        "narHash": "sha256-/4sj+IAkou1vMRjZkHnlguSWZjwk1jYs1kohpcNDelg=",
+        "lastModified": 1786433716,
+        "narHash": "sha256-ckX79flJ15y+1IZM0G5mSoDsA/9LEMrtmmsiZtNbxmI=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "4a72440c3e6bc6707de19ac4989023b43696124b",
+        "rev": "3cf4ec7e314d7d5f5e970e2a835a0def715bd6a9",
         "type": "github"
       },
       "original": {
