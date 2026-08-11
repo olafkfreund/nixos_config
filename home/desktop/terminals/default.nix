@@ -160,13 +160,13 @@ in
           placement_strategy = "center";
           # Same Weyland-Yutani plate as ghostty. Kitty has no opacity knob for
           # it — background_tint fades the image toward the background colour
-          # instead, so 0.96 is the "almost invisible" equivalent of ghostty's
-          # background-image-opacity = 0.05. foot and alacritty are absent here
+          # instead, so 0.98 is the "almost invisible" equivalent of ghostty's
+          # background-image-opacity = 0.02. foot and alacritty are absent here
           # because neither supports background images at all; they get the
           # palette from Stylix and nothing more.
           background_image = "${vars.baseTheme.terminalPlate}";
           background_image_layout = "scaled";
-          background_tint = 0.96;
+          background_tint = 0.98;
           background_opacity = mkDefault (
             if cfg.features.transparency
             then 0.95

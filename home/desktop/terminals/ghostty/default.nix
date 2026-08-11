@@ -25,11 +25,11 @@ in
 
         # Weyland-Yutani plate behind the text. `cover` fills the window at any
         # size; the opacity is what keeps it a ghost rather than a wallpaper —
-        # raise toward 0.10 if it disappears entirely on a bright monitor.
+        # raise toward 0.05 if it disappears entirely on a bright monitor.
         # Colours themselves come from Stylix (theme = stylix in the generated
         # config), so this is purely additive.
         background-image = "${vars.baseTheme.terminalPlate}";
-        background-image-opacity = 0.05;
+        background-image-opacity = 0.02;
         background-image-position = "center";
         background-image-fit = "cover";
 
