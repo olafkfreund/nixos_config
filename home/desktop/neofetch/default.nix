@@ -28,8 +28,10 @@ in
   # Enhanced system monitoring packages
   home.packages = with pkgs;
     flatten [
-      # Core system info
-      (optionals cfg.systemMonitors.fastfetch [ fastfetch ])
+      # fastfetch is deliberately NOT listed here: home/shell/fastfetch owns it
+      # and installs a wrapped package that picks an animated kitty-graphics
+      # logo when the terminal can show one. Adding the bare pkgs.fastfetch
+      # alongside it puts both in the profile and the unwrapped binary wins.
 
       # System monitors
       (optionals cfg.systemMonitors.btop [ btop ])
@@ -95,7 +97,7 @@ in
 
           # System info
           echo "📊 System Information:"
-          ${optionalString cfg.systemMonitors.fastfetch "${pkgs.fastfetch}/bin/fastfetch --config small"}
+          ${optionalString cfg.systemMonitors.fastfetch "fastfetch --config small"}
           echo
 
           # Resource usage
@@ -122,7 +124,7 @@ in
         text = ''
           #!/bin/sh
           # Quick system information
-          ${optionalString cfg.systemMonitors.fastfetch "${pkgs.fastfetch}/bin/fastfetch"}
+          ${optionalString cfg.systemMonitors.fastfetch "fastfetch"}
         '';
         executable = true;
       };

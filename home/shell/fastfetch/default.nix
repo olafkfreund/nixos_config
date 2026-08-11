@@ -77,19 +77,57 @@ let
           --colors full --animate off --polite on frame.png > $out
   '';
 
-  # fastfetch prints one frame and exits — it has no animation of any kind,
-  # for any logo type. The moving tracker lives here instead: chafa plays the
-  # GIF itself. `tracker` loops until interrupted, `tracker 5` runs 5s.
+  # The moving tracker, on demand, in any terminal: chafa plays the GIF
+  # itself. `tracker` loops until interrupted, `tracker 5` runs 5s.
   trackerAnim = pkgs.writeShellScriptBin "tracker" ''
     exec ${pkgs.chafa}/bin/chafa --symbols sextant --colors full \
          --size 40x20 --duration "''${1:-inf}" ${trackerGif}
   '';
+
+  # Animated logo, but only where it actually works.
+  #
+  # fastfetch itself never animates: it renders one frame and exits. In kitty
+  # it does not have to — `kitten icat` uploads the GIF as kitty graphics
+  # frames (verified: 1 a=T + 43 a=f + a=a for this 44-frame file) and the
+  # TERMINAL loops them on its own after icat exits, so fastfetch buffering
+  # icat's output and dumping it still ends up animating. `--loop` defaults to
+  # -1, forever, and fastfetch does not override it.
+  #
+  # Everywhere else the static sextant render stays: foot and ghostty have no
+  # kitty graphics, and fastfetch refuses image logos inside a multiplexer
+  # outright ("Image logo is not supported in terminal multiplexers",
+  # src/logo/image/image.c) — in all those cases asking for kitty-icat would
+  # silently fall back to the built-in NixOS logo, which is worse than static.
+  # Hence the runtime probe rather than a fixed logo.type.
+  #
+  # Caveat: fastfetch's icat path emits \e[2J\e[3J first, so a fastfetch run
+  # in kitty clears the screen AND the scrollback. Harmless at shell start,
+  # noticeable mid-session.
+  fastfetchHud = pkgs.symlinkJoin {
+    name = "fastfetch-hud";
+    paths = [ pkgs.fastfetch ];
+    postBuild = ''
+      rm "$out/bin/fastfetch"
+      cat > "$out/bin/fastfetch" <<'WRAPPER'
+      #!${pkgs.runtimeShell}
+      if [ -z "$TMUX" ] && [ -z "$HERDR_ENV" ] && [ -n "$KITTY_WINDOW_ID" ] \
+         && command -v kitten >/dev/null 2>&1; then
+        exec ${pkgs.fastfetch}/bin/fastfetch \
+             --logo-type kitty-icat --logo ${trackerGif} "$@"
+      fi
+      exec ${pkgs.fastfetch}/bin/fastfetch "$@"
+      WRAPPER
+      sed -i 's/^      //' "$out/bin/fastfetch"
+      chmod +x "$out/bin/fastfetch"
+    '';
+  };
 in
 {
   home.packages = [ trackerAnim ];
 
   programs.fastfetch = {
     enable = true;
+    package = fastfetchHud;
     settings = {
       logo = {
         type = "file-raw";

@@ -385,7 +385,8 @@ in
 
         # Terminal utilities
         btop # System monitor
-        fastfetch # System info
+        # fastfetch comes from home/shell/fastfetch, which installs a wrapped
+        # package; listing the bare one here would win over it in the profile.
 
         # File managers
         lf # Terminal file manager
