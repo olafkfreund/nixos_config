@@ -10,7 +10,7 @@
 #   • Inline stats table (stars / forks / watchers / issues) — kept as
 #     grid_table since github_repo_stars emits `entries`, not `badge`
 #   • Status badges row underneath: age, working-tree state, stash count
-#   • Full-width 12-month GitHub contributions heatmap (border = "thick")
+#   • Full-width 12-month GitHub contributions heatmap (border = "plain")
 #   • Codebase split: github_languages as a pie chart | largest files ranking
 #   • GitHub work split: open PRs | open issues (border = "top")
 #   • Closer: releases timeline | monthly contributors ranking
@@ -178,7 +178,7 @@ height = { length = 7 }
   [[row.child]]
   widget = "contributions"
   width = { fill = 1 }
-  border = "thick"
+  border = "plain"
   title = "  12 months of commits  "
   title_align = "center"
 
@@ -192,13 +192,13 @@ gap = 2
   [[row.child]]
   widget = "languages"
   width = { fill = 1 }
-  border = "rounded"
+  border = "plain"
   title = "  languages  "
   title_align = "center"
   [[row.child]]
   widget = "largest_files"
   width = { fill = 1 }
-  border = "rounded"
+  border = "plain"
   title = "  largest files  "
   title_align = "center"
 
@@ -234,12 +234,12 @@ gap = 2
   [[row.child]]
   widget = "releases"
   width = { fill = 1 }
-  border = "rounded"
+  border = "plain"
   title = "  recent releases  "
   title_align = "center"
   [[row.child]]
   widget = "monthly_contributors"
   width = { fill = 1 }
-  border = "rounded"
+  border = "plain"
   title = "  monthly contributors  "
   title_align = "center"
