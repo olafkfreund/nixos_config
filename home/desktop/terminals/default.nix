@@ -1,16 +1,11 @@
 # Enhanced Terminal Configuration with Unified Theming and Feature Flags
 { lib
 , pkgs
-, host ? "default"
 , ...
 }:
 let
   inherit (lib) mkIf mkEnableOption mkDefault optionals optionalString;
-  # Import host-specific variables if available
-  hostVars =
-    if builtins.pathExists ../../../hosts/${host}/variables.nix
-    then import ../../../hosts/${host}/variables.nix { }
-    else { };
+  vars = import ../../../hosts/common/shared-variables.nix;
 
   # Terminal feature flags
   cfg = {
@@ -44,37 +39,12 @@ let
     };
   };
 
-  # Unified color scheme (compatible with existing stylix)
-  terminalColors = {
-    gruvbox-dark = {
-      foreground = "ebdbb2";
-      background = "282828";
-      cursor = "ebdbb2";
-
-      # Normal colors (0-7)
-      black = "282828";
-      red = "cc241d";
-      green = "98971a";
-      yellow = "d79921";
-      blue = "458588";
-      magenta = "b16286";
-      cyan = "689d6a";
-      white = "a89984";
-
-      # Bright colors (8-15)
-      bright_black = "928374";
-      bright_red = "fb4934";
-      bright_green = "b8bb26";
-      bright_yellow = "fabd2f";
-      bright_blue = "83a598";
-      bright_magenta = "d3869b";
-      bright_cyan = "8ec07c";
-      bright_white = "ebdbb2";
-    };
-  };
-
-  selectedTheme = hostVars.terminal.theme or "gruvbox-dark";
-  activeColors = terminalColors.${selectedTheme} or terminalColors.gruvbox-dark;
+  # No colour table here: Stylix owns every terminal's palette (base16Scheme in
+  # hosts/common/shared-variables.nix). A hardcoded gruvbox table used to live
+  # here — it was dead for foot/alacritty (Stylix outranked it) but silently WON
+  # for kitty, which is why kitty stayed gruvbox after the Alien HUD swap while
+  # every other terminal changed. Re-add per-terminal colours only to override
+  # Stylix deliberately, never as a "default".
 
   # Common keybindings across terminals
   commonKeybinds = {
@@ -188,6 +158,15 @@ in
           # ignore prefer-no-csd).
           wayland_titlebar_color = "background";
           placement_strategy = "center";
+          # Same Weyland-Yutani plate as ghostty. Kitty has no opacity knob for
+          # it — background_tint fades the image toward the background colour
+          # instead, so 0.96 is the "almost invisible" equivalent of ghostty's
+          # background-image-opacity = 0.05. foot and alacritty are absent here
+          # because neither supports background images at all; they get the
+          # palette from Stylix and nothing more.
+          background_image = "${vars.baseTheme.terminalPlate}";
+          background_image_layout = "scaled";
+          background_tint = 0.96;
           background_opacity = mkDefault (
             if cfg.features.transparency
             then 0.95
@@ -248,27 +227,6 @@ in
           tab_activity_symbol = "󰗖 ";
           active_tab_font_style = "bold";
           inactive_tab_font_style = "italic";
-
-          # Colors
-          foreground = mkDefault "#${activeColors.foreground}";
-          background = mkDefault "#${activeColors.background}";
-          cursor = mkDefault "#${activeColors.cursor}";
-          color0 = mkDefault "#${activeColors.black}";
-          color1 = mkDefault "#${activeColors.red}";
-          color2 = mkDefault "#${activeColors.green}";
-          color3 = mkDefault "#${activeColors.yellow}";
-          color4 = mkDefault "#${activeColors.blue}";
-          color5 = mkDefault "#${activeColors.magenta}";
-          color6 = mkDefault "#${activeColors.cyan}";
-          color7 = mkDefault "#${activeColors.white}";
-          color8 = mkDefault "#${activeColors.bright_black}";
-          color9 = mkDefault "#${activeColors.bright_red}";
-          color10 = mkDefault "#${activeColors.bright_green}";
-          color11 = mkDefault "#${activeColors.bright_yellow}";
-          color12 = mkDefault "#${activeColors.bright_blue}";
-          color13 = mkDefault "#${activeColors.bright_magenta}";
-          color14 = mkDefault "#${activeColors.bright_cyan}";
-          color15 = mkDefault "#${activeColors.bright_white}";
         };
 
         keybindings = {
@@ -346,37 +304,6 @@ in
             inherit (fontConfig) size;
           };
 
-          # Colors
-          colors = mkDefault {
-            primary = {
-              background = "#${activeColors.background}";
-              foreground = "#${activeColors.foreground}";
-            };
-            cursor = {
-              text = "#${activeColors.background}";
-              cursor = "#${activeColors.foreground}";
-            };
-            normal = {
-              black = "#${activeColors.black}";
-              red = "#${activeColors.red}";
-              green = "#${activeColors.green}";
-              yellow = "#${activeColors.yellow}";
-              blue = "#${activeColors.blue}";
-              magenta = "#${activeColors.magenta}";
-              cyan = "#${activeColors.cyan}";
-              white = "#${activeColors.white}";
-            };
-            bright = {
-              black = "#${activeColors.bright_black}";
-              red = "#${activeColors.bright_red}";
-              green = "#${activeColors.bright_green}";
-              yellow = "#${activeColors.bright_yellow}";
-              blue = "#${activeColors.bright_blue}";
-              magenta = "#${activeColors.bright_magenta}";
-              cyan = "#${activeColors.bright_cyan}";
-              white = "#${activeColors.bright_white}";
-            };
-          };
 
           # Scrolling
           scrolling = {

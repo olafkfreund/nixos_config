@@ -81,23 +81,23 @@ in
         enabled = true;
         refresh_minutes = 15;
       };
-      # Use the custom Gruvbox palette generated below (palettes/Gruvbox.json)
+      # Use the custom Alien HUD palette generated below (palettes/AlienHud.json)
       # so the Noctalia shell matches Stylix/GNOME/tmux instead of Catppuccin.
       theme = {
         mode = "dark";
         source = "custom";
         # mkForce: noctalia's HM module (>= 2026-07-04) now defaults
         # custom_palette to "stylix" at normal priority; force our custom
-        # Gruvbox palette (palettes/Gruvbox.json below) to win the conflict.
-        custom_palette = lib.mkForce "Gruvbox";
+        # Alien HUD palette (palettes/AlienHud.json below) to win the conflict.
+        custom_palette = lib.mkForce "AlienHud";
       };
     };
   };
 
-  # Gruvbox palette for the Noctalia shell, derived from the Stylix base16
+  # Alien HUD palette for the Noctalia shell, derived from the Stylix base16
   # scheme so the bar/launcher/control-center match the rest of the system.
-  # Selected via theme.source="custom" + custom_palette="Gruvbox" above.
-  xdg.configFile."noctalia/palettes/Gruvbox.json".source =
+  # Selected via theme.source="custom" + custom_palette="AlienHud" above.
+  xdg.configFile."noctalia/palettes/AlienHud.json".source =
     let
       inherit (config.lib.stylix) colors;
       c = n: "#${colors.${n}}";
@@ -148,10 +148,88 @@ in
         };
       };
     in
-    (pkgs.formats.json { }).generate "Gruvbox.json" {
+    (pkgs.formats.json { }).generate "AlienHud.json" {
       dark = palette;
       light = palette;
     };
+
+  # ── DankMaterialShell theme ────────────────────────────────────────────────
+  # DMS reads its palette from its own theme.json (NOT from Stylix), so the DMS
+  # session would otherwise stay Gruvbox while niri and the terminals went Alien.
+  # Same derivation from config.lib.stylix.colors as the Noctalia palette above,
+  # so both shells and the compositor cannot drift apart.
+  #
+  # Schema mirrors the shipped gruvboxMaterial theme: role colours in dark/light,
+  # surface colours only inside a `variants` option (DMS ignores surface keys
+  # placed directly in `dark`). `outline` is the important one — it draws the
+  # hairline edges on every DMS panel, which is what sells the HUD look.
+  xdg.configFile."DankMaterialShell/themes/alienHud/theme.json".source =
+    let
+      inherit (config.lib.stylix) colors;
+      c = n: "#${colors.${n}}";
+      roles = {
+        primary = c "base0B"; # phosphor green
+        primaryContainer = c "base03";
+        secondary = c "base09"; # amber
+        surfaceText = c "base05";
+        surfaceVariantText = c "base04";
+        backgroundText = c "base05";
+        outline = c "base03"; # panel hairlines
+        error = c "base08";
+        warning = c "base09";
+        info = c "base0C";
+      };
+      surfaces = {
+        primaryText = c "base00";
+        surface = c "base00";
+        surfaceVariant = c "base01";
+        surfaceTint = c "base02";
+        background = c "base00";
+        surfaceContainer = c "base01";
+        surfaceContainerHigh = c "base02";
+        surfaceContainerHighest = c "base03";
+      };
+    in
+    (pkgs.formats.json { }).generate "dms-alien-hud.json" {
+      id = "alienHud";
+      name = "Alien HUD";
+      version = "1.0.0";
+      author = "olafkfreund";
+      description = "Weyland-Yutani propulsion-monitor palette, derived from the Stylix base16 scheme";
+      dark = roles;
+      light = roles; # dark-only fleet; light exists to satisfy the schema
+      variants = {
+        default = "standard";
+        options = [
+          {
+            id = "standard";
+            name = "Standard";
+            dark = surfaces;
+            light = surfaces;
+          }
+        ];
+      };
+    };
+
+  # DMS owns settings.json at runtime (it rewrites the file on every UI change),
+  # so it can never be a store symlink. Point the two theme keys at the file
+  # above instead — idempotent, and left alone if DMS is not set up yet. The
+  # font switch is what makes DMS read as an instrument panel rather than a
+  # Material shell; drop the fontFamily line to keep the proportional UI font.
+  home.activation.dmsAlienTheme = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    settings="$HOME/.config/DankMaterialShell/settings.json"
+    theme="$HOME/.config/DankMaterialShell/themes/alienHud/theme.json"
+
+    if [ -f "$settings" ]; then
+      $DRY_RUN_CMD ${pkgs.jq}/bin/jq --arg t "$theme" \
+        '.currentThemeName = "custom"
+         | .currentThemeCategory = "custom"
+         | .customThemeFile = $t
+         | .fontFamily = "JetBrainsMono Nerd Font"
+         | .monoFontFamily = "JetBrainsMono Nerd Font"' \
+        "$settings" > "$settings.tmp" && $DRY_RUN_CMD mv "$settings.tmp" "$settings"
+    fi
+  '';
 
   # ── niri ───────────────────────────────────────────────────────────────
   # Session environment for everything niri spawns. NIXOS_OZONE_WL=1 makes
@@ -171,12 +249,18 @@ in
   programs.niri.settings.input.keyboard.xkb.layout = "gb";
 
   # Layout: open windows full-width (niri's default is half) and draw a themed
-  # border around EVERY window. Colours come from the Stylix base16 scheme
-  # (gruvbox-dark) so niri matches labwc/GNOME/tmux — active border = accent
-  # (base0B, same as labwc's window.active.border), inactive = dim (base01).
+  # hairline around EVERY window. Colours come from the Stylix base16 scheme
+  # (alien-hud) so niri matches labwc/GNOME/tmux — active border = phosphor
+  # green accent (base0B, same as labwc's window.active.border).
+  #
+  # HUD look: 1px lines rather than 2px slabs, and BOTH outlines on — niri draws
+  # the focus-ring immediately outside the border, giving the double-rule frame
+  # of the Weyland-Yutani plates. niri has no gap between the two rings and no
+  # corner brackets, so this is as close as the compositor gets.
   programs.niri.settings.layout =
     let inherit (config.lib.stylix) colors; in {
-      gaps = 4;
+      gaps = 12;
+      background-color = "#${colors.base00}";
       default-column-width.proportion = 1.0;
       preset-column-widths = [
         { proportion = 0.5; }
@@ -184,16 +268,49 @@ in
         { proportion = 1.0; }
       ];
 
+      # Inner rule: accent on focus, dim hairline otherwise.
       border = {
         enable = true;
-        width = 2;
+        width = 1;
         active.color = "#${colors.base0B}";
+        inactive.color = "#${colors.base03}";
+      };
+
+      # Outer rule, drawn just outside the border — the second line of the frame.
+      focus-ring = {
+        enable = true;
+        width = 1;
+        active.color = "#${colors.base03}";
         inactive.color = "#${colors.base01}";
       };
 
-      # One outline only: the per-window border replaces niri's focus-ring.
-      focus-ring.enable = false;
+      # Phosphor bloom around the focused window. Offset 0/0 keeps it a halo
+      # rather than a drop-shadow; the alpha suffix is the glow strength.
+      shadow = {
+        enable = true;
+        softness = 14;
+        spread = 0;
+        offset = { x = 0; y = 0; };
+        draw-behind-window = false;
+        color = "#${colors.base0B}33";
+        inactive-color = "#00000000";
+      };
     };
+
+  # Soft-rounded panel corners, matching the plates. clip-to-geometry rounds the
+  # window surface itself, not just the decorations, so terminals don't poke
+  # square corners through the frame.
+  programs.niri.settings.window-rules = lib.mkAfter [
+    {
+      geometry-corner-radius = {
+        top-left = 6.0;
+        top-right = 6.0;
+        bottom-right = 6.0;
+        bottom-left = 6.0;
+      };
+      clip-to-geometry = true;
+    }
+  ];
 
   # Ask clients to drop their own (white) client-side decorations so niri draws
   # the themed server-side border instead. Without this, CSD apps like kitty
@@ -252,9 +369,18 @@ in
   # has written a given fragment. The includes sit ABOVE the inline binds{} block,
   # so on any keybind conflict the inline scheme wins — keeping these keybinds
   # distinct from (and never leaking into) the Noctalia session.
+  #
+  # dms/colors.kdl and dms/layout.kdl are deliberately NOT included: both are
+  # DMS's way of owning niri's `layout` node, and we own it here instead so the
+  # DMS session gets the same HUD hairlines as the Noctalia one. niri rejects a
+  # duplicate top-level `layout`, so including either alongside the block below
+  # would break the session outright — which is also why colors.kdl is dropped
+  # even though it is currently 0 bytes (it only gains a layout block if
+  # enableDynamicTheming is ever flipped on in modules/desktop/dms-shell.nix).
+  # Cost of this: DMS's gaps / corner-radius / border-size sliders become no-ops
+  # for niri. Multiple `window-rule` nodes ARE legal, so dms/windowrules.kdl
+  # still applies on top of ours.
   xdg.configFile."niri/config.kdl".text = ''
-    include optional=true "dms/colors.kdl"
-    include optional=true "dms/layout.kdl"
     include optional=true "dms/alttab.kdl"
     include optional=true "dms/wpblur.kdl"
     include optional=true "dms/outputs.kdl"
@@ -270,6 +396,43 @@ in
         }
         touchpad { tap; natural-scroll; dwt; }
     }
+
+    // HUD frame — kept byte-for-byte equivalent to the Noctalia session's
+    // programs.niri.settings.layout above, so both sessions look identical.
+    layout {
+        gaps 12
+        background-color "#${config.lib.stylix.colors.base00}"
+        default-column-width { proportion 1.0; }
+        preset-column-widths {
+            proportion 0.5
+            proportion 0.666667
+            proportion 1.0
+        }
+        border {
+            width 1
+            active-color "#${config.lib.stylix.colors.base0B}"
+            inactive-color "#${config.lib.stylix.colors.base03}"
+        }
+        focus-ring {
+            width 1
+            active-color "#${config.lib.stylix.colors.base03}"
+            inactive-color "#${config.lib.stylix.colors.base01}"
+        }
+        shadow {
+            on
+            softness 14
+            spread 0
+            offset x=0 y=0
+            color "#${config.lib.stylix.colors.base0B}33"
+            inactive-color "#00000000"
+        }
+    }
+
+    window-rule {
+        geometry-corner-radius 6
+        clip-to-geometry true
+    }
+
     prefer-no-csd
     screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
     environment {
