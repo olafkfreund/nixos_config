@@ -63,6 +63,15 @@ in
       # Explicitly disable Docker Swarm
       daemon.settings = {
         swarm-default-advertise-addr = "";
+        # Keep containers alive across a docker.service restart. Every
+        # `nixos-rebuild switch` that touches the docker unit restarts it,
+        # and without this that tears down every container. On 2026-08-11
+        # it killed the k3d server node while it held mounts from an NFS
+        # export served by a pod *inside that same cluster*: the unmount
+        # blocked forever, docker never got an exit event, and the node was
+        # left as a phantom container ("Up 4 days", no network endpoint,
+        # unkillable) that only a reboot could clear. Requires swarm off.
+        live-restore = true;
       }
       // lib.optionalAttrs (cfg.dataRoot != null) { data-root = cfg.dataRoot; };
     };
