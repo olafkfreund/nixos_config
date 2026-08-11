@@ -122,8 +122,24 @@ let
           ;;
       esac
 
-      # 1. Create cluster if missing
-      if ! k3d cluster list -o json | jq -e --arg n "$CLUSTER" '.[] | select(.name==$n)' >/dev/null; then
+      # 1. Create cluster if missing.
+      #
+      # `k3d cluster list` FAILING is not the same as the cluster being
+      # ABSENT, and conflating the two is how 2026-08-11 happened: a node
+      # container had lost its docker network endpoint, so k3d died in
+      # ParseAddr("") on the empty IP, the `if !` read that as "no cluster",
+      # and the script drove `k3d cluster create` at a live cluster. It was
+      # saved only by the container-name conflict — had the name been free,
+      # every PVC would have been re-created against the current storageDir
+      # and the existing pvc-* directories orphaned (cf. 2026-06-25).
+      # Enumerate first, and refuse to guess when k3d cannot answer.
+      if ! cluster_json=$(k3d cluster list -o json 2>/dev/null); then
+        echo "[k3d-bootstrap] ERROR: k3d cannot enumerate clusters — refusing to create," \
+             "since existing cluster state may be live. Inspect with:" \
+             "docker ps -a --filter label=k3d.cluster=$CLUSTER" >&2
+        exit 1
+      fi
+      if ! jq -e --arg n "$CLUSTER" '.[] | select(.name==$n)' >/dev/null <<<"$cluster_json"; then
         echo "[k3d-bootstrap] Creating cluster $CLUSTER (api ${cfg.apiHostBind}:$API_PORT, storage $STORAGE_DIR)"
         k3d cluster create "$CLUSTER" \
           --image "${cfg.k3sImage}" \
@@ -530,6 +546,16 @@ in
         # Re-run on transient failure (e.g. docker daemon not ready yet)
         Restart = "on-failure";
         RestartSec = "10s";
+      };
+
+      # Give up after 5 tries rather than retrying forever. On 2026-08-11
+      # this unit logged 34 restarts against a cluster it could not fix,
+      # re-running `k3d cluster create` (and its rollback, which issues
+      # `Deleting cluster`) every 10s over live etcd. A permanent failure
+      # should stay failed and visible, not hammer.
+      unitConfig = {
+        StartLimitIntervalSec = 600;
+        StartLimitBurst = 5;
       };
 
       environment = {
