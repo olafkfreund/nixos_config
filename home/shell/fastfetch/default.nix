@@ -53,21 +53,41 @@ let
     format = "  ${dim}${left}${dashes innerWidth}${right}${reset}";
   };
 
-  # Frame 16 of the tracker loop — the sweep is at full extent with the
-  # contact blip visible, which reads best once it is down to 20 rows.
-  # ImageMagick extracts the frame (chafa has no frame selector), chafa turns
-  # it into half-block truecolor. `--polite on` keeps the cursor-hide/show
-  # escapes out of the file so it can be dumped verbatim.
+  trackerGif = ../../../assets/logos/motion-tracker.gif;
+
+  # Frame 16 of the tracker loop — sweep at full extent with the contact blip
+  # visible. ImageMagick extracts the frame (chafa has no frame selector),
+  # chafa turns it into truecolor symbols. `--polite on` keeps the
+  # cursor-hide/show escapes out of the file so it can be dumped verbatim.
+  #
+  # `--symbols sextant` is what makes it legible. Symbol density sets the
+  # sampling grid, not the cell size: at 40x20 cells half-blocks (1x2 per
+  # cell) sample the image at only 40x40 px, which reduces the scope to a
+  # green triangle with every arc and radial gone. Sextants (2x3) sample the
+  # same 40x20 footprint at 80x60. Octants (2x4) would give 80x80, but they
+  # are Unicode 16 and not reliably drawn yet; sextants are Unicode 13 and
+  # foot/ghostty render them from their built-in glyph tables regardless of
+  # the terminal font.
   trackerLogo = pkgs.runCommand "alien-tracker-logo.ans"
     {
       nativeBuildInputs = [ pkgs.imagemagick pkgs.chafa ];
     } ''
-    magick "${../../../assets/logos/motion-tracker.gif}[16]" frame.png
-    chafa --format symbols --symbols half --size 40x20 \
+    magick "${trackerGif}[16]" frame.png
+    chafa --format symbols --symbols sextant --size 40x20 \
           --colors full --animate off --polite on frame.png > $out
+  '';
+
+  # fastfetch prints one frame and exits — it has no animation of any kind,
+  # for any logo type. The moving tracker lives here instead: chafa plays the
+  # GIF itself. `tracker` loops until interrupted, `tracker 5` runs 5s.
+  trackerAnim = pkgs.writeShellScriptBin "tracker" ''
+    exec ${pkgs.chafa}/bin/chafa --symbols sextant --colors full \
+         --size 40x20 --duration "''${1:-inf}" ${trackerGif}
   '';
 in
 {
+  home.packages = [ trackerAnim ];
+
   programs.fastfetch = {
     enable = true;
     settings = {
