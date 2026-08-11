@@ -87,13 +87,18 @@ in
         "gruvbox_light"
         "catppuccin_mocha"
       ];
-      default = "gruvbox_dark";
+      default = "default";
       example = "tokyo_night";
       description = ''
         Splashboard colour theme preset. Written to ~/.splashboard/settings.toml
         as `[theme] preset = "<this>"`. See
         https://splashboard.unhappychoice.com/showcases/themes/ for the list
         and screenshots.
+
+        Inert in practice: `themeTokens` above pins all 14 colour fields of
+        splashboard's `Theme` struct to the Alien HUD scheme, and per-token
+        entries win over the preset. Kept so a preset is still reachable if
+        those overrides are ever dropped.
       '';
     };
 
