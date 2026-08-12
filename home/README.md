@@ -1,6 +1,8 @@
 # Home Manager & NixOS Modular Configuration
 
-This directory contains Home Manager configurations for user environments and is part of a modular, flake-based NixOS configuration system. The setup is designed for reproducibility, maintainability, and easy onboarding for new users or contributors.
+This directory contains Home Manager configurations for user environments and is part of a modular, flake-based NixOS
+configuration system. The setup is designed for reproducibility, maintainability, and easy onboarding for new users or
+contributors.
 
 ## Onboarding & Usage
 
@@ -26,7 +28,8 @@ This directory contains Home Manager configurations for user environments and is
    - Edit `variables.nix` in your host directory to set user, display, and hardware-specific settings.
 
 4. **Enable or disable features:**
-   - Use the `features` attribute in your host's `configuration.nix` to enable development tools, virtualization, cloud tools, security, and more.
+   - Use the `features` attribute in your host's `configuration.nix` to enable development tools, virtualization,
+     cloud tools, security, and more.
    - Home Manager options can be overridden per host in `home-manager-options.nix`.
 
 5. **Apply the configuration:**

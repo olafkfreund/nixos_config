@@ -2,7 +2,8 @@
 
 ## Overview
 
-This configuration provides a modern, high-performance Zsh environment optimized for developer productivity with AI integration, modern tooling, and seamless workflow management.
+This configuration provides a modern, high-performance Zsh environment optimized for developer productivity with AI
+integration, modern tooling, and seamless workflow management.
 
 ## 🚀 Key Features
 

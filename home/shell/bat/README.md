@@ -1,6 +1,7 @@
 # Bat Configuration
 
-This directory contains configuration for [bat](https://github.com/sharkdp/bat), a cat clone with syntax highlighting and Git integration.
+This directory contains configuration for [bat](https://github.com/sharkdp/bat), a cat clone with syntax highlighting
+and Git integration.
 
 ## Overview
 

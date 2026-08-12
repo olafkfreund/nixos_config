@@ -44,6 +44,12 @@ in
     wl-screenrec
     slurp
     swaybg # static wallpaper for niri/labwc (Stylix only themes GNOME's bg)
+    # mpvpaper — video/live wallpaper on a wlr-layer-shell surface. Installed
+    # but NOT spawned: swaybg is still the startup wallpaper below, and both
+    # painting the same output would stack two background layers. To use it,
+    # stop swaybg first (`pkill swaybg`) and run
+    # `mpvpaper -o "no-audio loop" '*' <video>`.
+    mpvpaper
     swayidle # idle → lock / screen-off / (laptop) suspend
     gammastep # night-light / colour temperature by sun position
     wlopm # labwc DPMS off/on (niri has a native power-off-monitors action)

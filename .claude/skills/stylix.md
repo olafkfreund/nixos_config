@@ -2,7 +2,10 @@
 
 ## Overview
 
-**Stylix** is a comprehensive theming framework for NixOS-based systems that applies color schemes, wallpapers, and fonts across a wide range of applications. Unlike similar tools like base16.nix or nix-colors that only provide color definitions, Stylix follows an "it just works" philosophy by automatically implementing themes across supported programs.
+**Stylix** is a comprehensive theming framework for NixOS-based systems that applies color schemes, wallpapers, and
+fonts across a wide range of applications. Unlike similar tools like base16.nix or nix-colors that only provide color
+definitions, Stylix follows an "it just works" philosophy by automatically implementing themes across supported
+programs.
 
 ### Key Features
 
@@ -1899,11 +1902,14 @@ nix run github:nix-community/stylix#testbed:gnome:light
 - **Manual theming**: Configure each application individually
 - **System theme managers**: GNOME Tweaks, lxappearance, qt5ct
 
-Stylix excels at providing a unified, declarative theming experience across your entire NixOS system while maintaining the flexibility to customize per-application when needed.
+Stylix excels at providing a unified, declarative theming experience across your entire NixOS system while maintaining
+the flexibility to customize per-application when needed.
 
 ## Summary
 
-Stylix is a powerful theming framework that brings consistency and ease to NixOS system appearance management. By leveraging base16 color schemes, automatic wallpaper analysis, and comprehensive application support, it enables declarative, reproducible theming across your entire system.
+Stylix is a powerful theming framework that brings consistency and ease to NixOS system appearance management. By
+leveraging base16 color schemes, automatic wallpaper analysis, and comprehensive application support, it enables
+declarative, reproducible theming across your entire system.
 
 Key advantages:
 
@@ -1914,4 +1920,5 @@ Key advantages:
 - **Automatic**: Smart defaults with manual override capability
 - **Community-driven**: Active development and support
 
-Start with a simple configuration and expand as needed. Stylix makes it easy to maintain a beautiful, consistent system appearance across all your NixOS machines.
+Start with a simple configuration and expand as needed. Stylix makes it easy to maintain a beautiful, consistent
+system appearance across all your NixOS machines.

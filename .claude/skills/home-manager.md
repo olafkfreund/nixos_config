@@ -1,6 +1,7 @@
 # Home Manager Skill
 
-A specialized skill for working with Home Manager in NixOS, providing expert guidance on user environment configuration, dotfile management, and declarative home directory setup.
+A specialized skill for working with Home Manager in NixOS, providing expert guidance on user environment
+configuration, dotfile management, and declarative home directory setup.
 
 ## Skill Overview
 
@@ -20,7 +21,7 @@ A specialized skill for working with Home Manager in NixOS, providing expert gui
 
 ### 1. Configuration Management
 
-**Home Manager Module Structure**
+#### Home Manager Module Structure
 
 ```nix
 { config, pkgs, ... }:
@@ -52,9 +53,9 @@ A specialized skill for working with Home Manager in NixOS, providing expert gui
 }
 ```
 
-**Installation Methods**
+#### Installation Methods
 
-**Method 1: NixOS Module (Recommended)**
+#### Method 1: NixOS Module (Recommended)
 
 ```nix
 # /etc/nixos/configuration.nix
@@ -79,7 +80,7 @@ A specialized skill for working with Home Manager in NixOS, providing expert gui
 }
 ```
 
-**Method 2: Standalone Installation**
+#### Method 2: Standalone Installation
 
 ```bash
 # Add channel
@@ -90,7 +91,7 @@ nix-channel --update
 nix-shell '<home-manager>' -A install
 ```
 
-**Method 3: Flake-based (Modern)**
+#### Method 3: Flake-based (Modern)
 
 ```nix
 {
@@ -119,7 +120,7 @@ nix-shell '<home-manager>' -A install
 
 ### 2. Program Configuration Patterns
 
-**Shell Configuration (Zsh)**
+#### Shell Configuration (Zsh)
 
 ```nix
 programs.zsh = {
@@ -164,7 +165,7 @@ programs.zsh = {
 };
 ```
 
-**Git Configuration**
+#### Git Configuration
 
 ```nix
 programs.git = {
@@ -208,7 +209,7 @@ programs.git = {
 };
 ```
 
-**Neovim/Vim Configuration**
+#### Neovim/Vim Configuration
 
 ```nix
 programs.neovim = {
@@ -257,7 +258,7 @@ programs.neovim = {
 };
 ```
 
-**Terminal Emulator (Alacritty)**
+#### Terminal Emulator (Alacritty)
 
 ```nix
 programs.alacritty = {
@@ -296,7 +297,7 @@ programs.alacritty = {
 };
 ```
 
-**SSH Configuration**
+#### SSH Configuration
 
 ```nix
 programs.ssh = {
@@ -333,7 +334,7 @@ programs.ssh = {
 
 ### 3. Service Management
 
-**GPG Agent**
+#### GPG Agent
 
 ```nix
 services.gpg-agent = {
@@ -348,7 +349,7 @@ services.gpg-agent = {
 };
 ```
 
-**Syncthing**
+#### Syncthing
 
 ```nix
 services.syncthing = {
@@ -357,7 +358,7 @@ services.syncthing = {
 };
 ```
 
-**Dunst (Notification Daemon)**
+#### Dunst (Notification Daemon)
 
 ```nix
 services.dunst = {
@@ -392,7 +393,7 @@ services.dunst = {
 };
 ```
 
-**Systemd User Services**
+#### Systemd User Services
 
 ```nix
 systemd.user.services.my-backup = {
@@ -424,7 +425,7 @@ systemd.user.timers.my-backup = {
 
 ### 4. File Management
 
-**Dotfile Management**
+#### Dotfile Management
 
 ```nix
 home.file = {
@@ -463,7 +464,7 @@ home.file = {
 };
 ```
 
-**XDG Directory Management**
+#### XDG Directory Management
 
 ```nix
 xdg = {
@@ -501,7 +502,7 @@ xdg = {
 
 ### 5. Desktop Environment Integration
 
-**GTK Theming**
+#### GTK Theming
 
 ```nix
 gtk = {
@@ -532,7 +533,7 @@ gtk = {
 };
 ```
 
-**Qt Theming**
+#### Qt Theming
 
 ```nix
 qt = {
@@ -542,7 +543,7 @@ qt = {
 };
 ```
 
-**Cursor Theme**
+#### Cursor Theme
 
 ```nix
 home.pointerCursor = {
@@ -554,7 +555,7 @@ home.pointerCursor = {
 };
 ```
 
-**Font Configuration**
+#### Font Configuration
 
 ```nix
 fonts.fontconfig.enable = true;
@@ -569,7 +570,7 @@ home.packages = with pkgs; [
 
 ### 6. Development Environments
 
-**Direnv Integration**
+#### Direnv Integration
 
 ```nix
 programs.direnv = {
@@ -579,9 +580,9 @@ programs.direnv = {
 };
 ```
 
-**Language-Specific Tools**
+#### Language-Specific Tools
 
-**Node.js/npm**
+#### Node.js/npm
 
 ```nix
 home.packages = with pkgs; [
@@ -596,7 +597,7 @@ home.sessionVariables = {
 };
 ```
 
-**Python**
+#### Python
 
 ```nix
 home.packages = with pkgs; [
@@ -607,7 +608,7 @@ home.packages = with pkgs; [
 ];
 ```
 
-**Rust**
+#### Rust
 
 ```nix
 home.packages = with pkgs; [
@@ -626,7 +627,7 @@ home.sessionVariables = {
 
 ### 7. Session Variables and Environment
 
-**Environment Variables**
+#### Environment Variables
 
 ```nix
 home.sessionVariables = {
@@ -654,7 +655,7 @@ programs.zsh.sessionVariables = {
 };
 ```
 
-**PATH Management**
+#### PATH Management
 
 ```nix
 home.sessionPath = [
@@ -666,7 +667,7 @@ home.sessionPath = [
 
 ### 8. Multi-Machine Configuration
 
-**Shared Configuration Pattern**
+#### Shared Configuration Pattern
 
 ```nix
 # common.nix - Shared across all machines
@@ -721,7 +722,7 @@ home.sessionPath = [
 }
 ```
 
-**Host-Based Configuration**
+#### Host-Based Configuration
 
 ```nix
 { pkgs, lib, ... }:
@@ -740,7 +741,7 @@ in
 
 ### 9. Custom Module Creation
 
-**Simple Custom Module**
+#### Simple Custom Module
 
 ```nix
 # modules/programs/my-tool.nix
@@ -799,7 +800,7 @@ in
 
 ### 10. Activation Scripts
 
-**Custom Activation**
+#### Custom Activation
 
 ```nix
 home.activation = {
@@ -828,7 +829,7 @@ home.activation = {
 
 ### Pattern 1: Secrets Management
 
-**Using sops-nix**
+#### Using sops-nix
 
 ```nix
 {
@@ -850,7 +851,7 @@ home.activation = {
 }
 ```
 
-**Using agenix**
+#### Using agenix
 
 ```nix
 {
@@ -866,7 +867,7 @@ home.activation = {
 
 ### Pattern 2: Conditional Configuration
 
-**Based on hostname**
+#### Based on hostname
 
 ```nix
 { lib, ... }:
@@ -880,7 +881,7 @@ in
 }
 ```
 
-**Based on features**
+#### Based on features
 
 ```nix
 { config, lib, ... }:
@@ -1227,7 +1228,7 @@ nix-collect-garbage
 
 ## Testing Approach
 
-**Incremental Testing**
+### Incremental Testing
 
 1. Start with minimal configuration
 2. Add one program/service at a time
@@ -1235,7 +1236,7 @@ nix-collect-garbage
 4. Use `--dry-run` flag
 5. Keep working generations
 
-**Example Test Workflow**
+#### Example Test Workflow
 
 ```bash
 # 1. Edit configuration

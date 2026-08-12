@@ -2,7 +2,8 @@
 
 ## Overview
 
-Zellij is a modern terminal multiplexer with built-in session management, layouts, and plugins. This configuration provides a seamless alternative to tmux with vim-style navigation and comprehensive developer productivity features.
+Zellij is a modern terminal multiplexer with built-in session management, layouts, and plugins. This configuration
+provides a seamless alternative to tmux with vim-style navigation and comprehensive developer productivity features.
 
 ## 🚀 Key Features
 
@@ -169,7 +170,7 @@ hide_session_name: false # Show context
 
 **Optimized for coding workflows:**
 
-```
+```text
 ┌─────────────────┬───────────┐
 │                 │           │
 │    Editor       │ Terminal  │
@@ -187,7 +188,7 @@ hide_session_name: false # Show context
 
 **For general terminal use:**
 
-```
+```text
 ┌─────────────────────────────┐
 │                             │
 │         Terminal            │

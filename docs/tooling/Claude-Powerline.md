@@ -14,7 +14,8 @@ context directly in your Claude Code environment.
 - **Budget Monitoring**: Track session, daily, and block budgets with configurable alerts
 - **Git Integration**: Display branch status, commits, and working tree changes
 - **Performance Analytics**: Track API response times, session duration, and code impact
-- **Base16-derived theme**: colours generated from the active Stylix scheme, so the statusline always matches the rest of the desktop
+- **Base16-derived theme**: colours generated from the active Stylix scheme, so the statusline always matches the rest
+  of the desktop
 - **Lightweight Performance**: < 250ms statusline updates with minimal resource usage
 
 ## Installation

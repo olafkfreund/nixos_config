@@ -2,7 +2,8 @@
 
 ## Overview
 
-This configuration provides a modern, high-performance tmux environment with vim-style navigation, intelligent session management, and comprehensive developer productivity features.
+This configuration provides a modern, high-performance tmux environment with vim-style navigation, intelligent session
+management, and comprehensive developer productivity features.
 
 ## 🚀 Key Features
 
@@ -131,7 +132,7 @@ tmuxPlugins.tilish               # i3/sway-like tiling
 # - Default layout: main-vertical
 ```
 
-### Session Management
+### Session Management Plugins
 
 ```nix
 tmuxPlugins.t-smart-tmux-session-manager
@@ -305,7 +306,7 @@ tmux-sessionizer --help
 3. **Quick layouts**: `Alt+1-5` for predefined layouts
 4. **Tiling management**: Use tilish commands for i3-like control
 
-### Session Management
+### Session Management Tips
 
 1. **Multiple projects**: Each project gets its own session
 2. **Quick switching**: `Alt+s` for fast session selection
