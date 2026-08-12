@@ -2,16 +2,25 @@
   # Boot optimizations
   boot.loader.systemd-boot = {
     enable = true;
-    # Was 10 ("keep known-good kernels selectable"), but this ESP cannot hold
-    # them. razer boots via lanzaboote, which honours this option and writes a
-    # SIGNED kernel + initrd per kernel version into a 511 MiB /boot; each
-    # initrd is ~155 MiB. Ten generations spanning three kernel versions needs
-    # ~510 MiB, so on 2026-08-06 a third kernel (7.1.6) filled the partition
-    # and the deploy died mid-install with ENOSPC — taking the rollback with
-    # it, since that must write the bootloader too. Three bounds the worst
-    # case at ~507 MiB and is ~170 MiB when generations share a kernel.
-    # Raising this again requires a bigger ESP, not just a bigger number.
-    configurationLimit = 3;
+    # razer boots via lanzaboote, which writes a SIGNED kernel + initrd into a
+    # 511 MiB /boot. Each initrd is ~150 MiB (NVIDIA firmware), and in practice
+    # every nixpkgs bump produces a distinct one even on the same kernel
+    # version — so budget one initrd PER GENERATION, not per kernel.
+    #
+    # The number that matters is limit + 1, not limit: the installer copies the
+    # new kernel+initrd in BEFORE garbage-collecting old ones. This was set to
+    # 3 after the same ENOSPC failure on 2026-08-06, with the note that 3
+    # "bounds the worst case at ~507 MiB" — but that is the steady state, and
+    # the peak is 4 x 150 = 600 MiB. It duly failed again on 2026-08-12,
+    # mid-install, leaving razer running a generation /boot could not boot.
+    #
+    #   peak = (limit + 1) x 150 MiB initrd + ~28 MiB kernels + ~2 MiB stubs
+    #   limit = 2  ->  3 x 150 + 30 = ~480 MiB, fits 511 MiB with ~30 MiB spare
+    #
+    # Two keeps the current generation plus one fallback. Raising it needs a
+    # BIGGER ESP or a smaller initrd, not a bigger number — that lesson has now
+    # cost two failed deploys.
+    configurationLimit = 2;
     editor = false; # Disable bootloader editing for security
   };
   boot.loader.efi.canTouchEfiVariables = true;

@@ -1,7 +1,16 @@
 { pkgs, ... }: {
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
-  boot.loader.systemd-boot.configurationLimit = 10; # Limit boot entries to prevent /boot from filling up
+  # Bound by the ESP, not by taste. The installer writes the new kernel+initrd
+  # BEFORE pruning old ones, so the partition must hold limit + 1 generations:
+  #
+  #   511 MiB ESP, ~69 MiB per initrd, ~28 MiB kernels
+  #   peak = (limit + 1) x 69 + 28;  limit = 5 -> ~442 MiB, fits
+  #   limit = 10 would peak at ~787 MiB and fail mid-install
+  #
+  # razer hit exactly that failure twice (see hosts/razer/nixos/boot.nix).
+  # Raising this needs a bigger ESP, not a bigger number.
+  boot.loader.systemd-boot.configurationLimit = 5;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages_latest; # Use the beta kernel for better hardware support
   boot.plymouth.enable = true;

@@ -284,6 +284,21 @@ test-host HOST:
     @echo "🧪 Testing {{HOST}} configuration..."
     nix build .#nixosConfigurations.{{HOST}}.config.system.build.toplevel --show-trace
 
+# Check a host's EFI System Partition has room for another generation.
+# The bootloader writes the new kernel+initrd BEFORE pruning the old ones, so
+# "not full" is not the same as "can deploy". Read-only by default.
+boot-space HOST="$(hostname)":
+    ./scripts/check-boot-space.sh {{HOST}}
+
+# Same check, but reclaim space when it is short (prunes old generations and
+# lets the bootloader installer garbage-collect the ESP entries).
+boot-space-clean HOST="$(hostname)":
+    ./scripts/check-boot-space.sh {{HOST}} --clean
+
+# ESP headroom across every host, at a glance.
+boot-space-all:
+    @for h in p620 razer p510; do ./scripts/check-boot-space.sh "$h" || true; done
+
 # Validate flake syntax and inputs
 check:
     @echo "🔍 Validating flake configuration..."
