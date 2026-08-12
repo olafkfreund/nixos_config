@@ -49,8 +49,8 @@
     };
   };
 
-  # Backlight control
-  environment.systemPackages = [ pkgs.brightnessctl ];
+  # Backlight control + SMART tooling (see services.smartd below)
+  environment.systemPackages = [ pkgs.brightnessctl pkgs.smartmontools ];
 
   # Fan control and thermal management for Razer
   boot.extraModprobeConfig = ''
@@ -72,4 +72,16 @@
 
   # Add Razer utilities
   # Razer hardware packages moved to main configuration.nix for consolidation
+
+  # SMART monitoring for the NVMe. p620 gets this from
+  # storage.performanceOptimization and p510 from its resilience module, but
+  # that whole storage module is p620-scoped (sysctls, tmpfs sizing), so wire
+  # up just the disk-health bit here rather than dragging the rest onto a
+  # laptop. A dying laptop SSD should not be a surprise.
+  # (smartmontools is added to the systemPackages list above — this file
+  # already defines that attribute, so it cannot be assigned twice.)
+  services.smartd = {
+    enable = true;
+    autodetect = true;
+  };
 }
