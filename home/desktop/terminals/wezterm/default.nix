@@ -223,21 +223,9 @@ in
             config.adjust_window_size_when_changing_font_size = false
             config.pane_focus_follows_mouse = false
 
-            -- Better integration with system theme
-            local success, result = pcall(function()
-              local handle = io.popen("gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null")
-              if handle then
-                local output = handle:read("*a")
-                handle:close()
-                return output:match("'(.-)'")
-              end
-              return nil
-            end)
-
-            local theme = success and result or nil
-            if theme and theme:match("Gruvbox") then
-              -- Already using Gruvbox, no need to change color scheme
-            end
+            -- No GTK-theme probe here. It used to io.popen gsettings on every
+            -- launch and then do nothing with the answer; the colour scheme
+            -- comes from Stylix regardless.
           end
         end
 

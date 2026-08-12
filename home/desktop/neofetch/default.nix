@@ -5,7 +5,7 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkDefault mkMerge optionals optionalString flatten;
+  inherit (lib) mkIf mkMerge optionals optionalString flatten;
   # Feature flags for system monitoring
   cfg = {
     systemMonitors = {
@@ -57,7 +57,9 @@ in
   programs.btop = mkIf cfg.systemMonitors.btop {
     enable = true;
     settings = {
-      color_theme = mkDefault "gruvbox_dark_v2";
+      # No color_theme here: Stylix's btop target writes a "stylix" theme from
+      # the active base16 scheme and wins over this anyway. Naming a bundled
+      # theme only made the intent look gruvbox when the render was not.
       theme_background = false;
       vim_keys = true;
       rounded_corners = true;

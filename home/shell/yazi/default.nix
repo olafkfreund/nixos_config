@@ -31,25 +31,11 @@ in
           sort_dir_first = true;
           sort_reverse = true;
         };
+        # No filetype colour rules here. Stylix's yazi target writes the whole
+        # palette into theme.toml from the active base16 scheme; per-mime `fg`
+        # belongs in theme.toml, not yazi.toml, so hardcoding it here only ever
+        # risked pinning stale colours next to the themed ones.
         filetype = {
-          rules = [
-            {
-              fg = "#7AD9E5";
-              mime = "image/*";
-            }
-            {
-              fg = "#F3D398";
-              mime = "video/*";
-            }
-            {
-              fg = "#F3D398";
-              mime = "audio/*";
-            }
-            {
-              fg = "#CD9EFC";
-              mime = "application/x-bzip";
-            }
-          ];
           previewers = [
             # Code
             {

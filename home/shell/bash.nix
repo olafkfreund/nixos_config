@@ -39,7 +39,7 @@
       vim = "lvim";
       ls = "eza --header --git --classify --long --binary --group --time-style=long-iso --links --all --all --group-directories-first --sort=name --icons";
       la = "eza --all --icons";
-      cat = "bat --theme=gruvbox-dark";
+      cat = "bat"; # theme comes from Stylix via ~/.config/bat/config
       mdless = "glow";
       gita = "git add --all";
       gitm = "git commit -m";

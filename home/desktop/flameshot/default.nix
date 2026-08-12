@@ -5,6 +5,7 @@
 }:
 let
   inherit (lib) mkIf mkEnableOption;
+  inherit (config.lib.stylix) colors;
   cfg = config.desktop.screenshots.flameshot;
 in
 {
@@ -25,8 +26,11 @@ in
         General = {
           showStartupLaunchMessage = false;
           showHelp = false;
-          uiColor = "#ff0000"; # Customize UI color
-          contrastUiColor = "#ffffff";
+          # Stylix has no flameshot target, so drive the two colour knobs it
+          # exposes from the active base16 scheme: phosphor green for the
+          # selection chrome, plate cream for the contrast pass.
+          uiColor = colors.withHashtag.base0B;
+          contrastUiColor = colors.withHashtag.base05;
           saveAsFileExtension = "png";
           savePath = "${config.home.homeDirectory}/Pictures/screenshots";
           copyPathAfterSave = false;

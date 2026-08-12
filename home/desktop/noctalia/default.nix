@@ -9,8 +9,10 @@
 # they are spawned from the niri/labwc startup hooks, never as systemd user
 # services, so they don't also start under GNOME and fight its equivalents.
 #
-# Theming: builtin Catppuccin for now. TODO (fast-follow): bridge Stylix's
-# base16 palette into programs.noctalia.customPalettes + theme.source="custom".
+# Theming: Stylix's base16 palette is bridged into both shells below —
+# noctalia/palettes/AlienHud.json (theme.source="custom") and
+# DankMaterialShell/themes/alienHud/theme.json. Neither shell reads Stylix
+# directly, so both files are generated from config.lib.stylix.colors.
 let
   # Wallpaper shared with Stylix (the system sets stylix.image to this same
   # path); swaybg paints it on the niri/labwc sessions, which Stylix does not.

@@ -54,7 +54,7 @@ in
         "g/" = "/";
 
         ee = "editor-open";
-        V = ''$${pkgs.bat}/bin/bat --paging=always --theme=gruvbox "$f"'';
+        V = ''$${pkgs.bat}/bin/bat --paging=always "$f"'';
 
         # ...
       };
