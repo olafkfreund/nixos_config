@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 # Resilience hardening for p510 (headless media / k3d-factory server).
 #
 # Added after a 2026-07-08 hard freeze: the Odin metrics pod hammered sshd in a
@@ -78,6 +78,53 @@
   # modules/virt/virt.nix. Cheap, because that config changes rarely and the
   # cluster it carries is expensive to rebuild.
   systemd.services.docker.restartIfChanged = false;
+
+  # ...and that was only half the trigger. On 2026-08-12 the k3d SERVER wedged
+  # the same way despite the line above, and the cluster sat dead ~6h. The
+  # nightly upgrade never restarted docker for its own definition — it stopped
+  # docker as a DEPENDENCY:
+  #
+  #   $ systemctl show docker.service -p Requires
+  #   Requires=... nvidia-container-toolkit-cdi-generator.service ...
+  #   $ systemctl show nvidia-container-toolkit-cdi-generator.service -p ActiveState
+  #   ActiveState=failed
+  #
+  # nixpkgs' nvidia-container-toolkit module sets
+  # `requiredBy = mkIf virtualisation.docker.enable [ "docker.service" ]`
+  # (services/hardware/nvidia-container-toolkit/default.nix). A `Requires=` on a
+  # unit that FAILS stops docker, and `restartIfChanged` has no bearing on that
+  # — it governs restart-on-changed-definition only. The knob was applied, and
+  # inert, which is why it looked fixed for six days.
+  #
+  # The generator fails after every driver update until the box reboots:
+  #   "failed to initialize NVML: Driver/library version mismatch"
+  # — new nvidia-x11 in the store, old kernel module still loaded. So the
+  # trigger is not rare, it is EVERY nvidia bump, on a nightly timer.
+  #
+  # A GPU spec generator must not be able to take the cluster down. `wantedBy`
+  # still runs it with docker and `before` orders it properly (upstream has
+  # requiredBy with NO ordering, so docker could already start before the spec
+  # existed — fatal, and not even reliably first). Failing now degrades GPU
+  # containers instead of stopping the container runtime.
+  #
+  # This removes the TRIGGER. The reason a stopped docker is catastrophic here
+  # is the NFS __fput deadlock described above, which is unchanged: any docker
+  # stop can still strand a container holding a file on the in-cluster export.
+  # See Factory#687.
+  # podman is enabled here too and upstream gives it the same fatal `requiredBy`,
+  # so both are re-wired. Dropping podman's without replacing it would quietly
+  # cost it the CDI spec it does want, just not at the price of the runtime.
+  systemd.services.nvidia-container-toolkit-cdi-generator = {
+    requiredBy = lib.mkForce [ ];
+    wantedBy = [
+      "docker.service"
+      "podman.service"
+    ];
+    before = [
+      "docker.service"
+      "podman.service"
+    ];
+  };
 
   # ── 5. Disk health monitoring ───────────────────────────────────────────
   # p510 had NO way to see disk health: smartctl was not installed, so the
