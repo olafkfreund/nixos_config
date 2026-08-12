@@ -2,7 +2,8 @@
 
 ## Overview
 
-This configuration provides a modern, high-performance tmux environment with vim-style navigation, intelligent session management, and comprehensive developer productivity features.
+This configuration provides a modern, high-performance tmux environment with vim-style navigation, intelligent session
+management, and comprehensive developer productivity features.
 
 ## 🚀 Key Features
 
@@ -131,7 +132,7 @@ tmuxPlugins.tilish               # i3/sway-like tiling
 # - Default layout: main-vertical
 ```
 
-### Session Management
+### Session Management Plugins
 
 ```nix
 tmuxPlugins.t-smart-tmux-session-manager
@@ -153,7 +154,6 @@ tmuxPlugins.extrakto            # Enhanced text extraction
 ### Theme
 
 ```nix
-tmux-gruvbox                    # Custom Gruvbox theme
 # Features:
 # - Modern icon set
 # - Consistent with Starship theme
@@ -162,7 +162,7 @@ tmux-gruvbox                    # Custom Gruvbox theme
 
 ## 🎨 Visual Configuration
 
-### Gruvbox Theme Features
+### Theme Features
 
 ```bash
 # Window status icons
@@ -184,9 +184,9 @@ tmux-gruvbox                    # Custom Gruvbox theme
 
 ### Color Scheme
 
-- **Background**: `#282828` (Gruvbox dark)
-- **Foreground**: `#ebdbb2` (Gruvbox light)
-- **Accent colors**: Gruvbox palette for consistent theming
+- **Background**: `base00` from the active base16 scheme
+- **Foreground**: `base05`
+- **Accent colors**: the scheme's `base08`–`base0F`, applied by hand in `extraConfig`
 
 ## 🔧 Configuration Sections
 
@@ -306,7 +306,7 @@ tmux-sessionizer --help
 3. **Quick layouts**: `Alt+1-5` for predefined layouts
 4. **Tiling management**: Use tilish commands for i3-like control
 
-### Session Management
+### Session Management Tips
 
 1. **Multiple projects**: Each project gets its own session
 2. **Quick switching**: `Alt+s` for fast session selection
@@ -357,8 +357,8 @@ bind <key> <command>
 ### Theme Customization
 
 ```nix
-# Modify gruvbox theme settings in plugin configuration
-set -g @gruvbox_option "value"
+# Status-bar colours are set explicitly in extraConfig from the base16
+# scheme — there is no theme plugin to configure.
 ```
 
 ## 🐛 Troubleshooting
@@ -410,5 +410,4 @@ tmux display-message "#{plugin_status}"
 - [Tmux Manual](https://man7.org/linux/man-pages/man1/tmux.1.html)
 - [Tilish Plugin](https://github.com/jabirali/tmux-tilish)
 - [tmux-thumbs](https://github.com/fcsonline/tmux-thumbs)
-- [Gruvbox Theme](https://github.com/morhetz/gruvbox)
 - [Session Manager](https://github.com/joshmedeski/t-smart-tmux-session-manager)

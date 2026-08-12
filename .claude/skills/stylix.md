@@ -2,7 +2,10 @@
 
 ## Overview
 
-**Stylix** is a comprehensive theming framework for NixOS-based systems that applies color schemes, wallpapers, and fonts across a wide range of applications. Unlike similar tools like base16.nix or nix-colors that only provide color definitions, Stylix follows an "it just works" philosophy by automatically implementing themes across supported programs.
+**Stylix** is a comprehensive theming framework for NixOS-based systems that applies color schemes, wallpapers, and
+fonts across a wide range of applications. Unlike similar tools like base16.nix or nix-colors that only provide color
+definitions, Stylix follows an "it just works" philosophy by automatically implementing themes across supported
+programs.
 
 ### Key Features
 
@@ -174,7 +177,7 @@ Or with an explicit color scheme:
 { pkgs, ... }:
 {
   stylix.enable = true;
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+  stylix.base16Scheme = ../../assets/themes/alien-hud.yaml;
 }
 ```
 
@@ -188,7 +191,7 @@ Stylix includes the Tinted Theming (base16) scheme collection via `pkgs.base16-s
 { pkgs, ... }:
 {
   # Popular schemes
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
+  stylix.base16Scheme = ../../assets/themes/alien-hud.yaml;
   # stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/nord.yaml";
   # stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/dracula.yaml";
   # stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
@@ -297,7 +300,7 @@ Modify portions of a color scheme without redefining everything:
 ```nix
 { pkgs, ... }:
 {
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+  stylix.base16Scheme = ../../assets/themes/alien-hud.yaml;
 
   stylix.override = {
     base00 = "1d2021";  # Override background to darker
@@ -357,7 +360,7 @@ in {
 
 ```nix
 {
-  stylix.image = ./wallpapers/gruvbox-dark.png;
+  stylix.image = ../../assets/wallpapers/alien-plate-03.png;
   # Or absolute path
   # stylix.image = /home/user/Pictures/wallpaper.jpg;
 }
@@ -685,7 +688,7 @@ When using Home Manager as a NixOS module, settings are automatically inherited:
 {
   # System-wide Stylix settings
   stylix.enable = true;
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+  stylix.base16Scheme = ../../assets/themes/alien-hud.yaml;
   stylix.image = ./wallpaper.png;
 
   home-manager.users.alice = { ... };
@@ -702,7 +705,7 @@ Override Stylix settings per user:
 { pkgs, ... }:
 {
   stylix.enable = true;
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+  stylix.base16Scheme = ../../assets/themes/alien-hud.yaml;
 
   home-manager.users.alice = { pkgs, ... }: {
     # Alice uses a different theme
@@ -710,7 +713,7 @@ Override Stylix settings per user:
   };
 
   home-manager.users.bob = { ... };
-  # Bob uses the system default (gruvbox)
+  # Bob uses the system default scheme
 }
 ```
 
@@ -784,7 +787,7 @@ Control whether generated themes should be light or dark:
 { pkgs, ... }:
 {
   stylix.enable = true;
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+  stylix.base16Scheme = ../../assets/themes/alien-hud.yaml;
   stylix.image = ./wallpaper.png;
 
   # GNOME-specific
@@ -860,7 +863,7 @@ nix run github:nix-community/stylix#testbed:gnome:dark
 { pkgs, config, ... }:
 {
   stylix.enable = true;
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+  stylix.base16Scheme = ../../assets/themes/alien-hud.yaml;
 
   home-manager.users.user = {
     stylix.targets.i3.enable = true;
@@ -1150,7 +1153,7 @@ nix run github:nix-community/stylix#testbed:gnome:dark
 {
   # System default theme
   stylix.enable = true;
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+  stylix.base16Scheme = ../../assets/themes/alien-hud.yaml;
   stylix.image = ./default-wallpaper.png;
 
   # Alice: Uses system default
@@ -1286,7 +1289,7 @@ Then if you like the result, you can export it as a permanent scheme.
 ```nix
 { pkgs, ... }:
 let
-  workTheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+  workTheme = ../../assets/themes/alien-hud.yaml;
   playTheme = "${pkgs.base16-schemes}/share/themes/synthwave-84.yaml";
 in {
   # Default to work theme
@@ -1437,7 +1440,7 @@ firefox /etc/stylix/palette.html
 { pkgs, ... }:
 {
   # Instead of auto-generation
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+  stylix.base16Scheme = ../../assets/themes/alien-hud.yaml;
 }
 ```
 
@@ -1602,7 +1605,7 @@ in {
 # ✅ Good: Explicit, reproducible
 { pkgs, ... }:
 {
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+  stylix.base16Scheme = ../../assets/themes/alien-hud.yaml;
 }
 
 # ❌ Avoid: Auto-generated can change
@@ -1643,7 +1646,7 @@ in {
 {
   # Document the theme choice
   stylix.base16Scheme = {
-    # Based on Gruvbox Dark with custom adjustments
+    # Based on the Alien HUD scheme with custom adjustments
     # - Darkened background for reduced eye strain
     # - Increased blue saturation for better link visibility
     base00 = "1d2021";  # Background (darker than default)
@@ -1693,7 +1696,7 @@ git commit -m "theme: switch to nord"
 # shared/theme.nix
 { pkgs, ... }:
 {
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+  stylix.base16Scheme = ../../assets/themes/alien-hud.yaml;
   stylix.fonts = {
     monospace = {
       package = pkgs.jetbrains-mono;
@@ -1720,7 +1723,7 @@ git commit -m "theme: switch to nord"
 ```nix
 # ✅ Good: Reproducible
 {
-  stylix.image = ./wallpapers/gruvbox.png;
+  stylix.image = ../../assets/wallpapers/alien-plate-03.png;
 }
 
 # ❌ Avoid: External dependencies
@@ -1736,7 +1739,7 @@ git commit -m "theme: switch to nord"
 # ✅ Good: Minor tweaks
 { pkgs, ... }:
 {
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+  stylix.base16Scheme = ../../assets/themes/alien-hud.yaml;
   stylix.override = {
     base00 = "1d2021";  # Slightly darker background
   };
@@ -1744,7 +1747,7 @@ git commit -m "theme: switch to nord"
 
 # ❌ Avoid: Extensive overrides
 {
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+  stylix.base16Scheme = ../../assets/themes/alien-hud.yaml;
   stylix.override = {
     # Changing 10+ colors defeats purpose of base scheme
     base00 = "...";
@@ -1811,7 +1814,7 @@ in {
 { pkgs, ... }:
 {
   stylix.enable = true;
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+  stylix.base16Scheme = ../../assets/themes/alien-hud.yaml;
   stylix.image = ./wallpaper.png;
 }
 ```
@@ -1831,6 +1834,10 @@ in {
 | `stylix.targets.<app>.enable` | boolean                 | Enable per-app          |
 
 ### Common Color Schemes
+
+This repo does NOT use one of these: it ships its own scheme at
+`assets/themes/alien-hud.yaml` (see `hosts/common/shared-variables.nix`).
+The names below are what `pkgs.base16-schemes` provides, for reference only.
 
 - `gruvbox-dark-medium.yaml`
 - `nord.yaml`
@@ -1895,11 +1902,14 @@ nix run github:nix-community/stylix#testbed:gnome:light
 - **Manual theming**: Configure each application individually
 - **System theme managers**: GNOME Tweaks, lxappearance, qt5ct
 
-Stylix excels at providing a unified, declarative theming experience across your entire NixOS system while maintaining the flexibility to customize per-application when needed.
+Stylix excels at providing a unified, declarative theming experience across your entire NixOS system while maintaining
+the flexibility to customize per-application when needed.
 
 ## Summary
 
-Stylix is a powerful theming framework that brings consistency and ease to NixOS system appearance management. By leveraging base16 color schemes, automatic wallpaper analysis, and comprehensive application support, it enables declarative, reproducible theming across your entire system.
+Stylix is a powerful theming framework that brings consistency and ease to NixOS system appearance management. By
+leveraging base16 color schemes, automatic wallpaper analysis, and comprehensive application support, it enables
+declarative, reproducible theming across your entire system.
 
 Key advantages:
 
@@ -1910,4 +1920,5 @@ Key advantages:
 - **Automatic**: Smart defaults with manual override capability
 - **Community-driven**: Active development and support
 
-Start with a simple configuration and expand as needed. Stylix makes it easy to maintain a beautiful, consistent system appearance across all your NixOS machines.
+Start with a simple configuration and expand as needed. Stylix makes it easy to maintain a beautiful, consistent
+system appearance across all your NixOS machines.

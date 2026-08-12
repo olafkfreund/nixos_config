@@ -12,7 +12,7 @@ This directory contains configurations for various terminal emulators used in th
 
 ## Features
 
-- Integration with system theme (Gruvbox)
+- Integration with the system theme via Stylix
 - Custom key bindings
 - Font configuration with ligatures support
 - Performance optimizations
@@ -20,4 +20,6 @@ This directory contains configurations for various terminal emulators used in th
 
 ## Usage
 
-These terminal configurations are imported by the main terminals configuration file (`default.nix`) and then included in the desktop configuration. Each terminal can be used interchangeably, offering different features and performance characteristics depending on user preference and system capabilities.
+These terminal configurations are imported by the main terminals configuration file (`default.nix`) and then included
+in the desktop configuration. Each terminal can be used interchangeably, offering different features and performance
+characteristics depending on user preference and system capabilities.

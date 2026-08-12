@@ -17,7 +17,25 @@
 # cannot write to a Nix store symlink. Config changes go through this file.
 # Only config.toml is a symlink — herdr still owns the directory for its
 # sockets, logs, session.json and .plugins.lock.
-_: {
+{ config, lib, ... }:
+let
+  inherit (config.lib.stylix) colors;
+  c = n: "#${colors.${n}}";
+
+  # herdr wants four dim tiers (surface_dim < surface0 < surface1, and
+  # overlay0 < overlay1 < subtext0 < text) where base16 only supplies three,
+  # so the two in-between stops are computed from the scheme rather than
+  # hand-picked. Hand-picked values went stale the moment the palette was
+  # re-sampled; these follow it.
+  mix = a: b:
+    let
+      chan = k:
+        let v = (lib.toInt colors."${a}-rgb-${k}" + lib.toInt colors."${b}-rgb-${k}") / 2;
+        in lib.fixedWidthString 2 "0" (lib.toLower (lib.toHexString v));
+    in
+    "#${chan "r"}${chan "g"}${chan "b"}";
+in
+{
   xdg.configFile."herdr/config.toml".text = ''
     onboarding = false
 
@@ -40,8 +58,14 @@ _: {
     # inert. Borders are always ratatui `Plain` (square corners, title in the
     # top rule) — no border-style knob exists, and square is what the plates
     # use anyway.
+    #
+    # "terminal" is the base, not because it shows through but because it is a
+    # real built-in name (src/app/state.rs matches a fixed list and returns
+    # None for anything else) and it does not claim to be a palette we are not
+    # using. Note `herdr config check` does NOT validate this field — it
+    # accepts arbitrary strings — so it cannot catch a typo here.
     [theme]
-    name = "gruvbox"
+    name = "terminal"
     auto_switch = false
 
     # panel_bg = "reset" keeps the host terminal's background, so ghostty's
@@ -53,22 +77,22 @@ _: {
     # surface1, overlay0 < overlay1 < subtext0 < text) and base16 only
     # supplies three.
     [theme.custom]
-    accent = "#8fd694"      # base0B phosphor green — active borders, highlights
+    accent = "${c "base0B"}"      # phosphor green — active borders, highlights
     panel_bg = "reset"
-    surface_dim = "#161d1a" # base01 — separators
-    surface0 = "#1f2a25"    # base02 — selected row
-    surface1 = "#2b3a32"    # interpolated — hover/active row
-    overlay0 = "#3d4f45"    # base03 — hairline rules, dimmest text
-    overlay1 = "#6f8a78"    # base04 — dim labels
-    subtext0 = "#9fb0a3"    # interpolated — subdued text above the dim labels
-    text = "#d8cfae"        # base05 — the plate cream
-    green = "#8fd694"       # base0B — idle / done ("ONLINE")
-    yellow = "#d9a441"      # base0A — working
-    peach = "#d9822b"       # base09 — interrupted, the bar-graph amber
-    red = "#e05c4a"         # base08 — blocked / needs attention
-    teal = "#7fb3c8"        # base0C — notification accents
-    blue = "#6f9fb0"        # base0D
-    mauve = "#a98fb0"       # base0E — branch names
+    surface_dim = "${c "base01"}" # separators
+    surface0 = "${c "base02"}"    # selected row
+    surface1 = "${mix "base02" "base03"}"    # hover/active row
+    overlay0 = "${c "base03"}"    # hairline rules, dimmest text
+    overlay1 = "${c "base04"}"    # dim labels
+    subtext0 = "${mix "base04" "base05"}"    # subdued text above the dim labels
+    text = "${c "base05"}"        # the plate cream
+    green = "${c "base0B"}"       # idle / done ("ONLINE")
+    yellow = "${c "base0A"}"      # working
+    peach = "${c "base09"}"       # interrupted, the bar-graph amber
+    red = "${c "base08"}"         # blocked / needs attention
+    teal = "${c "base0C"}"        # notification accents
+    blue = "${c "base0D"}"
+    mauve = "${c "base0E"}"       # branch names
 
     # "herdr" delivery only draws a toast while herdr is on screen, so an agent
     # blocked on a question goes unnoticed. "system" hands it to the desktop
@@ -84,7 +108,7 @@ _: {
     # Legacy accent, read into `state.accent` for the navigation UI. It is
     # ignored for the palette (theme.custom.accent wins) but still colours the
     # nav paths that read state.accent directly, so keep the two in step.
-    accent = "#8fd694"
+    accent = "${c "base0B"}"
     show_agent_labels_on_pane_borders = true
     # "priority" orders the agent panel as an attention queue, so a blocked
     # agent surfaces above idle ones instead of sorting by workspace.
@@ -100,8 +124,8 @@ _: {
     # cream label, purple branch, dim git counts.
     [ui.sidebar.spaces]
     rows = [
-      [{ token = "state_icon", fg = "#8fd694" }, { token = "workspace", fg = "#d8cfae", bold = true }],
-      [{ token = "branch", fg = "#a98fb0" }, { token = "git_status", fg = "#6f8a78", dim = true }],
+      [{ token = "state_icon", fg = "${c "base0B"}" }, { token = "workspace", fg = "${c "base05"}", bold = true }],
+      [{ token = "branch", fg = "${c "base0E"}" }, { token = "git_status", fg = "${c "base04"}", dim = true }],
     ]
 
     # Claude panes get an extra row showing the stripped terminal title, which
@@ -115,9 +139,9 @@ _: {
     # cleared at zero, so the row stays clean when nothing is fanned out.
     [ui.sidebar.agents.rows_by_agent]
     claude = [
-      [{ token = "state_icon", fg = "#8fd694" }, { token = "workspace", fg = "#d8cfae", bold = true }, { token = "tab", fg = "#6f8a78" }],
-      [{ token = "terminal_title_stripped", fg = "#6f8a78", dim = true }],
-      [{ token = "agent", fg = "#7fb3c8" }, { token = "$agents", fg = "#d9822b" }],
+      [{ token = "state_icon", fg = "${c "base0B"}" }, { token = "workspace", fg = "${c "base05"}", bold = true }, { token = "tab", fg = "${c "base04"}" }],
+      [{ token = "terminal_title_stripped", fg = "${c "base04"}", dim = true }],
+      [{ token = "agent", fg = "${c "base0C"}" }, { token = "$agents", fg = "${c "base09"}" }],
     ]
 
     [worktrees]

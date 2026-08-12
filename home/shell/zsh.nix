@@ -277,7 +277,7 @@ in
         # VISUAL COMMAND BOXES - Enhanced shell experience with command visualization
         # ═══════════════════════════════════════════════════════════════════════════
 
-        # Gruvbox Material color scheme for boxes
+        # Box colours from the active base16 scheme
         typeset -gA BOX_COLORS
         BOX_COLORS=(
           [reset]='\033[0m'
@@ -481,7 +481,7 @@ in
           [[ $SEPARATOR_ENABLED -eq 0 ]] && return
 
           local width=''${COLUMNS:-80}
-          local line_color='\033[38;2;146;131;116m'  # Gruvbox material gray
+          local line_color='\033[38;2;${colors."base03-rgb-r"};${colors."base03-rgb-g"};${colors."base03-rgb-b"}m'  # base03 hairline
           local reset_color='\033[0m'
 
           # Draw a subtle separator line
@@ -590,8 +590,10 @@ in
         export HISTCONTROL="ignoreboth:erasedups"
         export HISTIGNORE="ls:cd:cd -:pwd:exit:date:* --help:man *:history"
 
-        # Modern tool configurations
-        export BAT_THEME="gruvbox-dark"
+        # No BAT_THEME here: Stylix writes --theme=base16-stylix into
+        # ~/.config/bat/config, and bat's env var OUTRANKS its config file, so
+        # exporting a theme name silently defeats Stylix everywhere bat is used
+        # (cat alias, MANPAGER, lf preview, fzf preview).
         export EZA_COLORS="da=1;34:gm=1;34"
 
         # nhs: idiot-proof NixOS update+switch.
@@ -642,7 +644,7 @@ in
       #   - direnv/starship/history   → programs.direnv / programs.starship / atuin
       #   - git aliases               → zsh-abbr in zsh-enhancements.nix
       #   - terraform/aws/azure/lxd   → carapace (optional) / native completions
-      #   - theme=gruvbox             → stylix owns the palette (config.lib.stylix)
+      #   - theme                     → stylix owns the palette (config.lib.stylix)
 
       # Enhanced shell aliases - only forcing critical improvements where needed
       shellAliases = {

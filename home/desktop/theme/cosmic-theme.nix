@@ -81,7 +81,7 @@ let
     in
     "(red: ${toString c.red}, green: ${toString c.green}, blue: ${toString c.blue}, alpha: 1.0)";
 
-  # base0D = primary accent in base16 conventions (blue family in gruvbox).
+  # base0D = primary accent in base16 conventions (the blue slot).
   accent = hexToRgb colors.base0D;
 in
 {

@@ -16,7 +16,7 @@ The shared theme is defined once in `hosts/common/shared-variables.nix`:
 
 ```nix
 baseTheme = {
-  scheme = "gruvbox-dark";
+  scheme = "alien-hud";
   wallpaper = ../../assets/wallpapers/amdgruvorange.png;
   cursor = { name = "Bibata-Modern-Classic"; size = 16; };
   font = {

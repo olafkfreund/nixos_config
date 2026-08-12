@@ -91,7 +91,7 @@ keyboardLayout = "gb";
 
 ```nix
 theme = {
-  scheme = "gruvbox-dark-medium";
+  scheme = "alien-hud";
   wallpaper = ./themes/wallpaper.jpg;
   # ...other theme settings
 };

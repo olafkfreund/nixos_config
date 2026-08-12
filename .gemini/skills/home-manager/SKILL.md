@@ -234,7 +234,7 @@ programs.neovim = {
       vim-commentary
       fzf-vim
       lightline-vim
-      gruvbox
+      habamax
     ];
 
   # Extra configuration
@@ -244,7 +244,7 @@ programs.neovim = {
     set ignorecase smartcase
     set clipboard=unnamedplus
 
-    colorscheme gruvbox
+    colorscheme habamax
     set background=dark
 
     " Leader key

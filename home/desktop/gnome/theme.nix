@@ -32,15 +32,11 @@ in
     # document-font-name, monospace-font-name, color-scheme). Only keep
     # dconf entries here for things Stylix does not manage.
     dconf.settings = {
-      # Keep the user's named gruvbox themes — Stylix's GNOME target otherwise
-      # resets gtk-theme → adw-gtk3 and the shell user-theme → "Stylix" on every
-      # rebuild. mkForce wins over Stylix's dconf entries. (Icons + cursor are
-      # driven through Stylix itself in modules/desktop/stylix-theme.nix.)
-      "org/gnome/desktop/interface" = {
-        gtk-theme = lib.mkForce "gruvbox-dark";
-      };
-      # No shell user-theme override: gruvbox-dark-gtk ships no gnome-shell/
-      # subdir, so Stylix's "Stylix" shell theme (same base16 palette) wins.
+      # Do NOT set gtk-theme here. A named theme set with mkForce beats
+      # Stylix's GNOME target and pins every GTK app to that package's own
+      # colours instead of the scheme. Letting Stylix win means adw-gtk3 plus
+      # the generated base16 gtk.css. (Icons + cursor are driven through
+      # Stylix itself in modules/desktop/stylix-theme.nix.)
 
       "org/gnome/desktop/wm/preferences" = {
         # Stylix doesn't theme the WM titlebar font; follow the Stylix sans
@@ -51,7 +47,7 @@ in
       # GNOME Terminal palette — Stylix has no GNOME Terminal target,
       # so wire up the 16 ANSI slots from the active base16 scheme
       # exposed at config.lib.stylix.colors.baseNN. Trade-off: base16
-      # only defines the *bright* gruvbox accents (base08..base0F). The
+      # only defines one tone per accent (base08..base0F). The
       # normal ANSI slots therefore reuse the bright values too, so the
       # dim/bright distinction other terminals show (e.g. cc241d vs
       # fb4934 for red) collapses here. In return the palette now

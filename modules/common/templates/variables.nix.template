@@ -41,7 +41,7 @@
 
   # Theme settings
   theme = {
-    scheme = "gruvbox-dark-medium"; # Base theme scheme
+    scheme = "alien-hud"; # Base theme scheme (assets/themes/alien-hud.yaml)
     wallpaper = ./themes/wallpaper.jpg; # Path to wallpaper
     cursor = {
       name = "Bibata-Modern-Ice";

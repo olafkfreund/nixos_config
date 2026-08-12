@@ -5,6 +5,8 @@
 }:
 let
   inherit (lib) mkIf mkEnableOption;
+  inherit (config.lib.stylix) colors;
+  c = colors.withHashtag;
   cfg = config.browsers.firefox;
 in
 {
@@ -88,19 +90,21 @@ in
           };
 
           userChrome = ''
-            /* Gruvbox Dark Theme for Firefox */
+            /* Browser chrome, coloured from the active base16 scheme.
+               Stylix's firefox target only themes the new-tab page, not
+               userChrome, so these are wired by hand. */
             :root {
-              --gruvbox-bg: #282828;
-              --gruvbox-bg1: #3c3836;
-              --gruvbox-fg: #ebdbb2;
-              --gruvbox-fg1: #a89984;
-              --gruvbox-red: #cc241d;
-              --gruvbox-green: #98971a;
-              --gruvbox-yellow: #d79921;
-              --gruvbox-blue: #458588;
-              --gruvbox-purple: #b16286;
-              --gruvbox-aqua: #689d6a;
-              --gruvbox-orange: #d65d0e;
+              --hud-bg: ${c.base00};
+              --hud-bg1: ${c.base01};
+              --hud-fg: ${c.base05};
+              --hud-fg1: ${c.base04};
+              --hud-red: ${c.base08};
+              --hud-green: ${c.base0B};
+              --hud-yellow: ${c.base0A};
+              --hud-blue: ${c.base0D};
+              --hud-purple: ${c.base0E};
+              --hud-aqua: ${c.base0C};
+              --hud-orange: ${c.base09};
             }
 
             /* Main window background */
@@ -110,48 +114,48 @@ in
             #PersonalToolbar,
             #navigator-toolbox,
             #sidebar-box {
-              background-color: var(--gruvbox-bg) !important;
-              color: var(--gruvbox-fg) !important;
+              background-color: var(--hud-bg) !important;
+              color: var(--hud-fg) !important;
             }
 
             /* Tabs */
             .tabbrowser-tab {
-              background-color: var(--gruvbox-bg1) !important;
-              color: var(--gruvbox-fg1) !important;
+              background-color: var(--hud-bg1) !important;
+              color: var(--hud-fg1) !important;
             }
 
             .tabbrowser-tab[selected="true"] {
-              background-color: var(--gruvbox-bg) !important;
-              color: var(--gruvbox-fg) !important;
+              background-color: var(--hud-bg) !important;
+              color: var(--hud-fg) !important;
             }
 
             /* URL Bar */
             #urlbar-background {
-              background-color: var(--gruvbox-bg1) !important;
+              background-color: var(--hud-bg1) !important;
             }
 
             #urlbar-input-container {
-              color: var(--gruvbox-fg) !important;
+              color: var(--hud-fg) !important;
             }
 
             /* Buttons */
             .toolbarbutton-1 {
-              color: var(--gruvbox-fg1) !important;
+              color: var(--hud-fg1) !important;
             }
 
             .toolbarbutton-1:hover {
-              background-color: var(--gruvbox-bg1) !important;
+              background-color: var(--hud-bg1) !important;
             }
 
             /* Sidebar */
             #sidebar {
-              background-color: var(--gruvbox-bg) !important;
-              color: var(--gruvbox-fg) !important;
+              background-color: var(--hud-bg) !important;
+              color: var(--hud-fg) !important;
             }
 
             /* Scrollbar */
             :root {
-              scrollbar-color: var(--gruvbox-bg1) var(--gruvbox-bg) !important;
+              scrollbar-color: var(--hud-bg1) var(--hud-bg) !important;
             }
           '';
         };

@@ -16,7 +16,7 @@
 
                     border_enabled  "false"
                     border_char     "─"
-                    border_format   "#[fg=#6C7086]{char}"
+                    border_format   "#[fg=#${config.lib.stylix.colors.base03}]{char}"
                     border_position "top"
 
                     mode_normal        "#[bg=#${config.lib.stylix.colors.base0B},fg=#${config.lib.stylix.colors.base02},bold] NORMAL#[bg=#${config.lib.stylix.colors.base03},fg=#${config.lib.stylix.colors.base0B}]█"
@@ -57,7 +57,7 @@
                     command_git_branch_interval    "10"
                     command_git_branch_rendermode  "static"
 
-                    datetime        "#[fg=#6C7086,bold] {format} "
+                    datetime        "#[fg=#${config.lib.stylix.colors.base04},bold] {format} "
                     datetime_format "%A, %d %b %Y %H:%M"
                     datetime_timezone "Europe/London"
                 }

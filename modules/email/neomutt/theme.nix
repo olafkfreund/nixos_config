@@ -4,70 +4,71 @@
 }:
 let
   inherit (lib) mkIf;
+  inherit (config.lib.stylix) colors;
   cfg = config.features.email;
 in
 {
   config = mkIf (cfg.enable && cfg.neomutt.enable) {
-    # Gruvbox theme for NeoMutt
-    environment.etc."neomutt/colors-gruvbox" = {
+    # Colours come from the active base16 scheme, like every other
+    # surface. NeoMutt needs a truecolor build to honour #rrggbb.
+    environment.etc."neomutt/colors-alien-hud" = {
       text = ''
-        # Gruvbox Dark Theme for NeoMutt
-        # Matching existing system Gruvbox configuration
+        # Generated from assets/themes/alien-hud.yaml via Stylix
 
         # Basic colors
-        color normal     color223 color235   # fg0/bg0
-        color error      color167 color235   # red/bg0
-        color tilde      color246 color235   # gray/bg0
-        color message    color208 color235   # orange/bg0
-        color markers    color243 color235   # gray/bg0
-        color attachment color142 color235   # green/bg0
-        color search     color235 color208   # bg0/orange
+        color normal     #${colors.base05} #${colors.base00}   # fg0/bg0
+        color error      #${colors.base08} #${colors.base00}   # red/bg0
+        color tilde      #${colors.base04} #${colors.base00}   # gray/bg0
+        color message    #${colors.base09} #${colors.base00}   # orange/bg0
+        color markers    #${colors.base03} #${colors.base00}   # gray/bg0
+        color attachment #${colors.base0B} #${colors.base00}   # green/bg0
+        color search     #${colors.base00} #${colors.base09}   # bg0/orange
 
         # Sidebar colors
-        color sidebar_divider    color246 color235   # gray/bg0
-        color sidebar_flagged    color167 color235   # red/bg0
-        color sidebar_highlight  color223 color237   # fg0/bg1
-        color sidebar_indicator  color223 color142   # fg0/green
-        color sidebar_new        color142 color235   # green/bg0
-        color sidebar_ordinary   color246 color235   # gray/bg0
-        color sidebar_spoolfile  color208 color235   # orange/bg0
+        color sidebar_divider    #${colors.base04} #${colors.base00}   # gray/bg0
+        color sidebar_flagged    #${colors.base08} #${colors.base00}   # red/bg0
+        color sidebar_highlight  #${colors.base05} #${colors.base01}   # fg0/bg1
+        color sidebar_indicator  #${colors.base05} #${colors.base0B}   # fg0/green
+        color sidebar_new        #${colors.base0B} #${colors.base00}   # green/bg0
+        color sidebar_ordinary   #${colors.base04} #${colors.base00}   # gray/bg0
+        color sidebar_spoolfile  #${colors.base09} #${colors.base00}   # orange/bg0
 
         # Index colors
-        color index      color246 color235 ".*"                        # default
-        color index_date color246 color235
-        color index_flags color167 color235 "~F"                       # flagged
-        color index_subject color223 color235 "~U"                     # unread
-        color index_author color142 color235 "~U"                      # unread
-        color index      color208 color235 "~T"                        # tagged
-        color index      color167 color235 "~D"                        # deleted
+        color index      #${colors.base04} #${colors.base00} ".*"                        # default
+        color index_date #${colors.base04} #${colors.base00}
+        color index_flags #${colors.base08} #${colors.base00} "~F"                       # flagged
+        color index_subject #${colors.base05} #${colors.base00} "~U"                     # unread
+        color index_author #${colors.base0B} #${colors.base00} "~U"                      # unread
+        color index      #${colors.base09} #${colors.base00} "~T"                        # tagged
+        color index      #${colors.base08} #${colors.base00} "~D"                        # deleted
 
         # Header colors
-        color hdrdefault color246 color235
-        color header     color208 color235 "^(From)"
-        color header     color208 color235 "^(Subject)"
-        color header     color142 color235 "^(Date)"
-        color header     color142 color235 "^(To)"
-        color header     color142 color235 "^(Cc)"
+        color hdrdefault #${colors.base04} #${colors.base00}
+        color header     #${colors.base09} #${colors.base00} "^(From)"
+        color header     #${colors.base09} #${colors.base00} "^(Subject)"
+        color header     #${colors.base0B} #${colors.base00} "^(Date)"
+        color header     #${colors.base0B} #${colors.base00} "^(To)"
+        color header     #${colors.base0B} #${colors.base00} "^(Cc)"
 
         # Body colors
-        color quoted     color108 color235   # green
-        color quoted1    color175 color235   # purple
-        color quoted2    color250 color235   # fg2
-        color quoted3    color108 color235   # green
-        color quoted4    color175 color235   # purple
+        color quoted     #${colors.base0C} #${colors.base00}   # green
+        color quoted1    #${colors.base0E} #${colors.base00}   # purple
+        color quoted2    #${colors.base06} #${colors.base00}   # fg2
+        color quoted3    #${colors.base0C} #${colors.base00}   # green
+        color quoted4    #${colors.base0E} #${colors.base00}   # purple
 
         # URL colors
-        color body       color175 color235 "([a-z][a-z0-9+-]*://(((([a-z0-9_.!~*'();:&=+$,-]|%[0-9a-f][0-9a-f])*@)?((([a-z0-9]([a-z0-9-]*[a-z0-9])?)\\.)*([a-z]([a-z0-9-]*[a-z0-9])?)\\.?|[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)(:[0-9]+)?)|([a-z0-9_.!~*'()$,;:@&=+-]|%[0-9a-f][0-9a-f])+)(/([a-z0-9_.!~*'():@&=+$,-]|%[0-9a-f][0-9a-f])*(;([a-z0-9_.!~*'():@&=+$,-]|%[0-9a-f][0-9a-f])*)*(/([a-z0-9_.!~*'():@&=+$,-]|%[0-9a-f][0-9a-f])*(;([a-z0-9_.!~*'():@&=+$,-]|%[0-9a-f][0-9a-f])*)*)*)?(\\?([a-z0-9_.!~*'();/?:@&=+$,-]|%[0-9a-f][0-9a-f])*)?(#([a-z0-9_.!~*'();/?:@&=+$,-]|%[0-9a-f][0-9a-f])*)?|(www|ftp)\\.(([a-z0-9]([a-z0-9-]*[a-z0-9])?)\\.)*([a-z]([a-z0-9-]*[a-z0-9])?)\\.?(:[0-9]+)?(/([-a-z0-9_.!~*'():@&=+$,]|%[0-9a-f][0-9a-f])*(;([-a-z0-9_.!~*'():@&=+$,]|%[0-9a-f][0-9a-f])*)*(/([-a-z0-9_.!~*'():@&=+$,]|%[0-9a-f][0-9a-f])*(;([-a-z0-9_.!~*'():@&=+$,]|%[0-9a-f][0-9a-f])*)*)*)?(\\?([-a-z0-9_.!~*'();/?:@&=+$,]|%[0-9a-f][0-9a-f])*)?(#([-a-z0-9_.!~*'();/?:@&=+$,]|%[0-9a-f][0-9a-f])*)?)"
+        color body       #${colors.base0E} #${colors.base00} "([a-z][a-z0-9+-]*://(((([a-z0-9_.!~*'();:&=+$,-]|%[0-9a-f][0-9a-f])*@)?((([a-z0-9]([a-z0-9-]*[a-z0-9])?)\\.)*([a-z]([a-z0-9-]*[a-z0-9])?)\\.?|[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)(:[0-9]+)?)|([a-z0-9_.!~*'()$,;:@&=+-]|%[0-9a-f][0-9a-f])+)(/([a-z0-9_.!~*'():@&=+$,-]|%[0-9a-f][0-9a-f])*(;([a-z0-9_.!~*'():@&=+$,-]|%[0-9a-f][0-9a-f])*)*(/([a-z0-9_.!~*'():@&=+$,-]|%[0-9a-f][0-9a-f])*(;([a-z0-9_.!~*'():@&=+$,-]|%[0-9a-f][0-9a-f])*)*)*)?(\\?([a-z0-9_.!~*'();/?:@&=+$,-]|%[0-9a-f][0-9a-f])*)?(#([a-z0-9_.!~*'();/?:@&=+$,-]|%[0-9a-f][0-9a-f])*)?|(www|ftp)\\.(([a-z0-9]([a-z0-9-]*[a-z0-9])?)\\.)*([a-z]([a-z0-9-]*[a-z0-9])?)\\.?(:[0-9]+)?(/([-a-z0-9_.!~*'():@&=+$,]|%[0-9a-f][0-9a-f])*(;([-a-z0-9_.!~*'():@&=+$,]|%[0-9a-f][0-9a-f])*)*(/([-a-z0-9_.!~*'():@&=+$,]|%[0-9a-f][0-9a-f])*(;([-a-z0-9_.!~*'():@&=+$,]|%[0-9a-f][0-9a-f])*)*)*)?(\\?([-a-z0-9_.!~*'();/?:@&=+$,]|%[0-9a-f][0-9a-f])*)?(#([-a-z0-9_.!~*'();/?:@&=+$,]|%[0-9a-f][0-9a-f])*)?)"
 
         # Email addresses
-        color body       color208 color235 "((@(([0-9a-z-]+\\.)*[0-9a-z-]+\\.?|#[0-9]+|\\[[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\]),)*@(([0-9a-z-]+\\.)*[0-9a-z-]+\\.?|#[0-9]+|\\[[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\]):)?[0-9a-z_.+%$-]+@(([0-9a-z-]+\\.)*[0-9a-z-]+\\.?|#[0-9]+|\\[[0-2]?[0-9]?[0-9]\\.[0-2]?[0-9]?[0-9]\\.[0-2]?[0-9]?[0-9]\\.[0-2]?[0-9]?[0-9]\\])"
+        color body       #${colors.base09} #${colors.base00} "((@(([0-9a-z-]+\\.)*[0-9a-z-]+\\.?|#[0-9]+|\\[[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\]),)*@(([0-9a-z-]+\\.)*[0-9a-z-]+\\.?|#[0-9]+|\\[[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\]):)?[0-9a-z_.+%$-]+@(([0-9a-z-]+\\.)*[0-9a-z-]+\\.?|#[0-9]+|\\[[0-2]?[0-9]?[0-9]\\.[0-2]?[0-9]?[0-9]\\.[0-2]?[0-9]?[0-9]\\.[0-2]?[0-9]?[0-9]\\])"
 
         # Compose colors
-        color compose header           color208 color235
-        color compose security_encrypt color175 color235
-        color compose security_sign    color142 color235
-        color compose security_both    color174 color235
-        color compose security_none    color246 color235
+        color compose header           #${colors.base09} #${colors.base00}
+        color compose security_encrypt #${colors.base0E} #${colors.base00}
+        color compose security_sign    #${colors.base0B} #${colors.base00}
+        color compose security_both    #${colors.base0F} #${colors.base00}
+        color compose security_none    #${colors.base04} #${colors.base00}
       '';
       mode = "0644";
     };

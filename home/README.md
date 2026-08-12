@@ -1,6 +1,8 @@
 # Home Manager & NixOS Modular Configuration
 
-This directory contains Home Manager configurations for user environments and is part of a modular, flake-based NixOS configuration system. The setup is designed for reproducibility, maintainability, and easy onboarding for new users or contributors.
+This directory contains Home Manager configurations for user environments and is part of a modular, flake-based NixOS
+configuration system. The setup is designed for reproducibility, maintainability, and easy onboarding for new users or
+contributors.
 
 ## Onboarding & Usage
 
@@ -18,7 +20,7 @@ This directory contains Home Manager configurations for user environments and is
    - `modules/` — Reusable NixOS modules (desktop, development, cloud, security, etc.)
    - `home/` — Home Manager user environment configs (shell, desktop, development, etc.)
    - `pkgs/` — Custom package definitions
-   - `themes/` — Theme files (Gruvbox, etc.)
+   - `themes/` — Theme files (Alien HUD base16 scheme)
    - `scripts/` — Utility scripts for system management
 
 3. **Select or create your host configuration:**
@@ -26,7 +28,8 @@ This directory contains Home Manager configurations for user environments and is
    - Edit `variables.nix` in your host directory to set user, display, and hardware-specific settings.
 
 4. **Enable or disable features:**
-   - Use the `features` attribute in your host's `configuration.nix` to enable development tools, virtualization, cloud tools, security, and more.
+   - Use the `features` attribute in your host's `configuration.nix` to enable development tools, virtualization,
+     cloud tools, security, and more.
    - Home Manager options can be overridden per host in `home-manager-options.nix`.
 
 5. **Apply the configuration:**
@@ -66,7 +69,7 @@ This directory contains Home Manager configurations for user environments and is
 - `modules/` — Modular NixOS and Home Manager modules
 - `home/` — User environment configs (shell, desktop, development, etc.)
 - `pkgs/` — Custom Nix packages
-- `themes/` — Theme files (Gruvbox, etc.)
+- `themes/` — Theme files (Alien HUD base16 scheme)
 - `scripts/` — Utility scripts
 
 ## Best Practices

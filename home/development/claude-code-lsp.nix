@@ -18,7 +18,7 @@ let
       {
         statusLine = {
           type = "command";
-          command = "${config.home.homeDirectory}/.claude/statusline-gruvbox.sh";
+          command = "${config.home.homeDirectory}/.claude/statusline-alien-hud.sh";
         };
       }
       // lib.optionalAttrs cfg.enableNixLsp {

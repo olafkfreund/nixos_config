@@ -38,7 +38,7 @@ Regardless of role, all three hosts enable a common baseline:
 - **Syncthing** for file sync
 - **Tailscale** mesh networking (the local firewall is left to Tailscale's
   trust model)
-- **agenix** secrets and the **gruvbox-dark** Stylix theme
+- **agenix** secrets and the **Alien HUD** Stylix theme
 - User `olafkfreund`, `Europe/London`, `en_GB.UTF-8`
 
 The differences — GPU stack, display layout, which services run — are described

@@ -46,7 +46,7 @@ in
     };
 
     theme = {
-      enable = mkEnableOption "GNOME theming with Gruvbox";
+      enable = mkEnableOption "GNOME theming from the active base16 scheme";
 
       variant = mkOption {
         type = types.enum [ "dark" "light" ];
@@ -80,9 +80,9 @@ in
       gnome-tweaks
       dconf-editor
       gnome-extension-manager
-      # Was gruvbox-gtk-theme, removed from nixpkgs 2026-07 with
-      # gtk-engine-murrine (GTK2, unmaintained upstream).
-      gruvbox-dark-gtk
+      # No named GTK theme package: Stylix generates the GTK theme from the
+      # active base16 scheme. A named GTK theme package used to live here purely to
+      # back the dconf gtk-theme override that theme.nix no longer sets.
 
       # Additional utilities
       gnome-screenshot
@@ -108,9 +108,10 @@ in
       "org/gnome/desktop/interface" = {
         clock-format = "24h";
         show-battery-percentage = true;
-        # libadwaita accent (GNOME 47+). Picks the gruvbox-orange tone that
-        # matches the wallpaper / base16 scheme set in shared-variables.nix.
-        accent-color = "orange";
+        # libadwaita accent (GNOME 47+). This is a fixed enum, not a hex
+        # value, so it cannot track the scheme exactly — "green" is the
+        # closest stop to the Alien HUD phosphor accent (base0B).
+        accent-color = "green";
         gtk-theme = mkDefault (
           if cfg.theme.enable
           then "Adwaita-dark"

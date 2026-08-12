@@ -8,7 +8,7 @@ FZF is configured in this NixOS setup to enhance your command-line experience wi
 
 - Fuzzy search capabilities for files, command history, and processes
 - Integration with shell keybindings for quick access
-- Customized appearance with gruvbox theme integration
+- Customized appearance driven by the active base16 scheme
 
 ## Features
 
@@ -30,7 +30,7 @@ In your configuration, fzf is used in several custom aliases and integrations:
 
 - Integration with zsh fzf-tab for enhanced tab completion
 - Custom preview commands using eza and bat
-- Custom appearance settings matching your gruvbox theme
+- Custom appearance settings matching the active base16 scheme
 
 ```bash
 # Example integration showing file search with preview

@@ -110,18 +110,27 @@ stdenv.mkDerivation (finalAttrs: {
           --add-rpath ${lib.makeLibraryPath [ libGL udev ]} \
           $out/app/waveterm/waveterm
 
-        # Replace WaveTerm brand green (#58c142) with Gruvbox bg4 (#665c54).
-        # Same-length substitution — asar JSON header offsets stay valid.
+        # Replace WaveTerm brand green (#58c142) with the Alien HUD phosphor
+        # accent (#8ec27c, base0B of assets/themes/alien-hud.yaml). Hardcoded
+        # because a package cannot read config.lib.stylix; if the scheme's
+        # base0B changes, change it here too.
+        #
+        # Every substitution MUST be the same byte length as what it replaces
+        # — asar stores a JSON header of absolute offsets, and shifting the
+        # payload corrupts the archive. Hence 'rgb(143,214,148)' without
+        # spaces: it is exactly as long as 'rgb(88, 193, 66)'.
         # autoPatchelfHook already brings python3 into the build env.
         python3 -c "
     import sys
     path = sys.argv[1]
     data = open(path, 'rb').read()
-    data = data.replace(b'#58c142', b'#665c54')
-    data = data.replace(b'#58C142', b'#665c54')
-    data = data.replace(b'rgb(88, 193, 66)', b'rgb(102, 92, 84)')
+    for old, new in ((b'#58c142', b'#8ec27c'),
+                     (b'#58C142', b'#8ec27c'),
+                     (b'rgb(88, 193, 66)', b'rgb(142,194,124)')):
+        assert len(old) == len(new), (old, new)
+        data = data.replace(old, new)
     open(path, 'wb').write(data)
-    print('waveterm: patched accent green -> gruvbox-bg4')
+    print('waveterm: patched accent green -> alien-hud base0B')
     " "$out/app/waveterm/resources/app.asar"
   '';
 

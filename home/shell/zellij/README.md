@@ -2,7 +2,8 @@
 
 ## Overview
 
-Zellij is a modern terminal multiplexer with built-in session management, layouts, and plugins. This configuration provides a seamless alternative to tmux with vim-style navigation and comprehensive developer productivity features.
+Zellij is a modern terminal multiplexer with built-in session management, layouts, and plugins. This configuration
+provides a seamless alternative to tmux with vim-style navigation and comprehensive developer productivity features.
 
 ## 🚀 Key Features
 
@@ -19,7 +20,7 @@ Zellij is a modern terminal multiplexer with built-in session management, layout
 - **File manager integration** with built-in strider
 - **Session management** with advanced persistence
 - **Development layouts** optimized for coding workflows
-- **Gruvbox theming** consistent with the shell ecosystem
+- **Base16 theming** consistent with the shell ecosystem
 
 ### Integration
 
@@ -138,12 +139,12 @@ plugins = [
 
 ## 🎨 Visual Configuration
 
-### Gruvbox Theme
+### Theme
 
 ```bash
 # Color scheme matching shell environment
-bg: "#282828"           # Dark background
-fg: "#ebdbb2"           # Light foreground
+bg: base00              # Dark background
+fg: base05              # Light foreground
 red: "#cc241d"          # Error states
 green: "#98971a"        # Success states
 yellow: "#d79921"       # Warning states
@@ -169,7 +170,7 @@ hide_session_name: false # Show context
 
 **Optimized for coding workflows:**
 
-```
+```text
 ┌─────────────────┬───────────┐
 │                 │           │
 │    Editor       │ Terminal  │
@@ -187,7 +188,7 @@ hide_session_name: false # Show context
 
 **For general terminal use:**
 
-```
+```text
 ┌─────────────────────────────┐
 │                             │
 │         Terminal            │
@@ -220,7 +221,7 @@ settings = {
   session_serialization = true;    # Persist sessions
   pane_frames = true;             # Visual separation
   default_layout = "compact";      # Default layout
-  theme = "gruvbox-dark";         # Consistent theming
+  theme = "alien-hud";           # Consistent theming
   scrollback_editor = "nvim";     # Use Neovim for scrollback
   default_mode = "normal";        # Start in normal mode
   mouse_mode = true;              # Enable mouse support
@@ -465,4 +466,3 @@ zellij attach --create-if-not-exists debug
 - [Zellij Layouts](https://zellij.dev/documentation/layouts.html)
 - [Plugin Development](https://zellij.dev/documentation/plugins.html)
 - [Configuration Guide](https://zellij.dev/documentation/configuration.html)
-- [Gruvbox Theme](https://github.com/morhetz/gruvbox)

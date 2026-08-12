@@ -6,7 +6,6 @@
 let
   inherit (lib) mkIf mkEnableOption;
   cfg = config.wezterm;
-  vars = import ../../../../hosts/common/shared-variables.nix;
 in
 {
   options.wezterm = {
@@ -51,25 +50,6 @@ in
         }
         config.window_background_opacity = 0.95
 
-        -- Weyland-Yutani plate, same as ghostty/kitty. WezTerm's `background`
-        -- is a layer stack that replaces the scheme background, so the Stylix
-        -- base00 goes down first and the plate rides on top at the same
-        -- barely-there 0.02 as ghostty's background-image-opacity.
-        config.background = {
-          {
-            source = { Color = '${config.lib.stylix.colors.withHashtag.base00}' },
-            width = '100%',
-            height = '100%',
-          },
-          {
-            source = { File = '${vars.baseTheme.terminalPlate}' },
-            opacity = 0.02,
-            width = 'Cover',
-            height = 'Cover',
-            horizontal_align = 'Center',
-            vertical_align = 'Middle',
-          },
-        }
         config.hide_tab_bar_if_only_one_tab = true
         config.use_fancy_tab_bar = false
         config.tab_bar_at_bottom = false
@@ -223,21 +203,9 @@ in
             config.adjust_window_size_when_changing_font_size = false
             config.pane_focus_follows_mouse = false
 
-            -- Better integration with system theme
-            local success, result = pcall(function()
-              local handle = io.popen("gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null")
-              if handle then
-                local output = handle:read("*a")
-                handle:close()
-                return output:match("'(.-)'")
-              end
-              return nil
-            end)
-
-            local theme = success and result or nil
-            if theme and theme:match("Gruvbox") then
-              -- Already using Gruvbox, no need to change color scheme
-            end
+            -- No GTK-theme probe here. It used to io.popen gsettings on every
+            -- launch and then do nothing with the answer; the colour scheme
+            -- comes from Stylix regardless.
           end
         end
 

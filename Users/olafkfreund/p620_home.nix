@@ -46,9 +46,9 @@
     account = "olaf@freundcloud.com";
   };
 
-  # Claude Code statusline with Gruvbox Dark theme.
+  # Claude Code statusline, themed from the base16 scheme.
   # theme/style dropped in #1159 — they only ever configured the removed
-  # @owloops/claude-powerline npx wrapper, never the gruvbox script in use.
+  # @owloops/claude-powerline npx wrapper, never the script actually in use.
   programs.claude-powerline.enable = true;
 
   # Workstation-specific additional packages
@@ -74,10 +74,9 @@
     }))
   ];
 
-  # Optional: Add additional packages to the Windsurf environment
-  editor.windsurf.settings = {
-    theme = "gruvbox";
-  };
+  # No windsurf `theme` setting: the value it named was never a real
+  # Windsurf theme id (that needs an installed extension), so it wrote a
+  # no-op. Windsurf uses its own dark default.
 
   # P620 Chrome — Modern flags for AMD GPU systems
   programs.chromium = {

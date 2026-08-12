@@ -77,7 +77,7 @@ in
       # demand. NOT wantedBy graphical-session.target (systemd.enable = false) so
       # it never auto-starts inside the Noctalia session.
       systemd.enable = false;
-      # Keep Stylix/Gruvbox for the trial; set true to let DMS drive matugen
+      # Keep Stylix for the trial; set true to let DMS drive matugen
       # Material You theming from the wallpaper instead.
       enableDynamicTheming = false;
     };
