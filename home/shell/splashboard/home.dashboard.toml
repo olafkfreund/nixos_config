@@ -1,12 +1,7 @@
 # home_feed — morning briefing. Hero band (lifted on `bg = "subtle"`): figlet date as
 # masthead, "good morning" greeting, live `Day · HH:MM`, and an almanac strip
-# (moon · zodiac · day-of-year). Body: 2 cols × 3 rows of curated feeds — HN | r/programming,
-# Wired | BBC Tech, Engadget | Wikipedia on this day. Footer: a daily fortune flourish.
-#
-# Trust: this preset wires Network-class widgets (`rss`, `reddit_subreddit_posts`). When
-# installed to `$HOME/.splashboard/home.dashboard.toml` (global config) it's implicitly
-# trusted; as a per-directory `.splashboard/dashboard.toml` it needs `splashboard trust`
-# before the network panels render.
+# (moon · zodiac · day-of-year). Body: the gogcli agenda band. Footer: a daily fortune
+# flourish. No network feeds — everything renders from local clock and store files.
 #
 # Source: https://splashboard.unhappychoice.com/guides/presets/#home_feed--morning-briefing
 # Managed by home-manager: edit this file in the repo, not in ~/.splashboard/.
@@ -85,49 +80,6 @@ fetcher = "clock_derived"
 render = { type = "text_plain", align = "left" }
   [widget.options]
   kind = "day_of_year"
-
-# Row 1 — Hacker News | Reddit r/programming
-[[widget]]
-id = "hn"
-fetcher = "hackernews_top"
-render = { type = "list_links", max_items = 5 }
-
-[[widget]]
-id = "reddit"
-fetcher = "reddit_subreddit_posts"
-render = { type = "list_links", max_items = 5 }
-  [widget.options]
-  subreddit = "programming"
-  type = "top"
-  period = "day"
-
-# Row 2 — Wired (rss) | BBC Tech (rss)
-[[widget]]
-id = "wired"
-fetcher = "rss"
-render = { type = "list_links", max_items = 5 }
-  [widget.options]
-  url = "https://www.wired.com/feed/rss"
-
-[[widget]]
-id = "bbc"
-fetcher = "rss"
-render = { type = "list_links", max_items = 5 }
-  [widget.options]
-  url = "https://feeds.bbci.co.uk/news/technology/rss.xml"
-
-# Row 3 — Engadget (rss) | Wikipedia on this day
-[[widget]]
-id = "engadget"
-fetcher = "rss"
-render = { type = "list_links", max_items = 5 }
-  [widget.options]
-  url = "https://www.engadget.com/rss.xml"
-
-[[widget]]
-id = "on_this_day"
-fetcher = "wikipedia_on_this_day"
-render = { type = "list_links", max_items = 5 }
 
 # Personal agenda — fed by the gog-dashboard systemd user timer (gogcli).
 # basic_read_store reads $HOME/.splashboard/store/<id>.txt; file_format="text"
@@ -221,7 +173,7 @@ bg = "subtle"
 height = { length = 1 }
 
 # Agenda row — Events | Tasks | Email from gogcli. 100-cell band (32×3 + gap2×2);
-# 6 items + 1 border = 7. Sits above the news feeds as the daily briefing.
+# 6 items + 1 border = 7. The daily briefing, and now the whole body.
 [[row]]
 height = { length = 7 }
 flex = "center"
@@ -247,66 +199,6 @@ gap = 2
 
 [[row]]
 height = { length = 1 }
-
-# Body row 1 — HN | Reddit. 100-cell content band (49+gap2+49); 5 items + 1 border = 6.
-[[row]]
-height = { length = 6 }
-flex = "center"
-gap = 2
-  [[row.child]]
-  widget = "hn"
-  width = { length = 49 }
-  border = "top"
-  title = "  HACKER NEWS  "
-  title_align = "center"
-  [[row.child]]
-  widget = "reddit"
-  width = { length = 49 }
-  border = "top"
-  title = "  R/PROGRAMMING  "
-  title_align = "center"
-
-[[row]]
-height = { length = 1 }
-
-# Body row 2 — Wired | BBC Tech
-[[row]]
-height = { length = 6 }
-flex = "center"
-gap = 2
-  [[row.child]]
-  widget = "wired"
-  width = { length = 49 }
-  border = "top"
-  title = "  WIRED  "
-  title_align = "center"
-  [[row.child]]
-  widget = "bbc"
-  width = { length = 49 }
-  border = "top"
-  title = "  BBC TECH  "
-  title_align = "center"
-
-[[row]]
-height = { length = 1 }
-
-# Body row 3 — Engadget | Wikipedia on this day
-[[row]]
-height = { length = 6 }
-flex = "center"
-gap = 2
-  [[row.child]]
-  widget = "engadget"
-  width = { length = 49 }
-  border = "top"
-  title = "  ENGADGET  "
-  title_align = "center"
-  [[row.child]]
-  widget = "on_this_day"
-  width = { length = 49 }
-  border = "top"
-  title = "  ON THIS DAY  "
-  title_align = "center"
 
 [[row]]
 height = { length = 1 }

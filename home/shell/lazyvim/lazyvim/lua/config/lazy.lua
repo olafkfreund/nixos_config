@@ -25,7 +25,10 @@ require("lazy").setup({
     version = false, -- always use the latest git commit
     -- version = "*", -- try installing the latest stable version for plugins that support semver
   },
-  install = { colorscheme = { "gruvbox" } },
+  -- Only used for the install screen, before plugins are on the rtp. The Alien
+  -- HUD palette is applied by a function (lua/plugins/colorscheme.lua) and has
+  -- no colorscheme name to put here, so fall back to a builtin.
+  install = { colorscheme = { "habamax" } },
   checker = { enabled = true }, -- automatically check for plugin updates
   performance = {
     rtp = {

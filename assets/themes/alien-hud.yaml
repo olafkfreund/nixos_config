@@ -1,0 +1,21 @@
+system: "base16"
+name: "Alien HUD"
+author: "olafkfreund (sampled from the Weyland-Yutani propulsion-monitor plates)"
+variant: "dark"
+palette:
+  base00: "#0d1210" # background — near-black, green-shifted
+  base01: "#161d1a" # panel fill / inactive window border
+  base02: "#1f2a25" # selection
+  base03: "#3d4f45" # hairline rules, dim separators, comments
+  base04: "#6f8a78" # dim label text
+  base05: "#d8cfae" # foreground — the plate cream
+  base06: "#e8dcc0"
+  base07: "#f4ecd8"
+  base08: "#e05c4a" # red — alarm
+  base09: "#d9822b" # orange — bar-graph amber
+  base0A: "#d9a441" # yellow — caution
+  base0B: "#8fd694" # phosphor green — primary accent, active window border
+  base0C: "#7fb3c8" # cyan — MAG FIELD readouts
+  base0D: "#6f9fb0" # blue
+  base0E: "#a98fb0" # purple
+  base0F: "#7a6a4f" # brown

@@ -425,7 +425,50 @@ in
         # renders darker than gruvbox bg on kitty/ghostty.
         set -g popup-style "bg=#${colors.base00}"
         set -g popup-border-style "fg=#${colors.base0B},bg=#${colors.base00}"
-        set -g popup-border-lines rounded
+        # Square corners, not rounded: the Alien HUD plates are drawn with
+        # hard-cornered boxes, and this is the same rule the pane borders and
+        # menus follow below.
+        set -g popup-border-lines single
+
+        # ========== Alien HUD chrome ==========
+        # The tinted-tmux base16 conf sourced above (stylix) already carries
+        # the palette, but its template only maps a handful of options and
+        # picks flat, low-contrast values for them: pane borders land on
+        # base01 (invisible against base00) with a base04 active border, and
+        # the menu/copy-mode styles it does not touch keep tmux's stock ANSI
+        # yellow/cyan/magenta. Everything below is the HUD read of those.
+        #
+        # Panel outlines: base03 is the hairline rule the plates use for
+        # inactive boxes, base0B the phosphor green for the live one.
+        set -g pane-border-style "fg=#${colors.base03}"
+        set -g pane-active-border-style "fg=#${colors.base0B}"
+
+        # Titled top rule — "┤ 1 nvim ├" inset into the border, the plates'
+        # panel-label tab. pane-border-status costs one row per window even
+        # when nothing is split, so the hook below only turns it on once a
+        # window actually has something to label; window-layout-changed fires
+        # on both split and pane close, so one hook covers both directions.
+        set -g pane-border-format "#[fg=#${colors.base03}]┤#{?pane_active,#[fg=#${colors.base0B}#,bold],#[fg=#${colors.base04}]} #{pane_index} #{pane_current_command}#{?window_zoomed_flag, ZOOM,} #[fg=#${colors.base03}#,nobold]├"
+        set -g pane-border-indicators colour
+        set -g pane-border-status off
+        set-hook -g window-layout-changed 'if -F "#{>:#{window_panes},1}" "setw pane-border-status top" "setw pane-border-status off"'
+
+        # Menus (prefix+</>, choose-tree, the right-click menu) default to
+        # square-cornered borders already; the styles are stock ANSI.
+        set -g menu-style "fg=#${colors.base05},bg=#${colors.base00}"
+        set -g menu-selected-style "fg=#${colors.base00},bg=#${colors.base0B},bold"
+        set -g menu-border-style "fg=#${colors.base0B},bg=#${colors.base00}"
+        set -g menu-border-lines single
+
+        # Copy-mode search hits: caution amber for matches, the bar-graph
+        # orange for the one under the cursor (stock is cyan/magenta).
+        set -g copy-mode-match-style "fg=#${colors.base00},bg=#${colors.base0A}"
+        set -g copy-mode-current-match-style "fg=#${colors.base00},bg=#${colors.base09},bold"
+        set -g copy-mode-mark-style "fg=#${colors.base00},bg=#${colors.base0C}"
+
+        # prefix+q pane numbers — the template dims the active one to base04.
+        set -g display-panes-active-colour "#${colors.base0B}"
+        set -g display-panes-colour "#${colors.base04}"
       '';
     };
 

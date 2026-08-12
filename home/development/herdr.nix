@@ -32,9 +32,43 @@ _: {
     # state detection current between herdr releases.
     manifest_check = true
 
+    # Alien HUD — the Weyland-Yutani propulsion-monitor look, same palette the
+    # rest of the desktop wears (assets/themes/alien-hud.yaml, base16 for
+    # Stylix). herdr has no theme-file loader, only `[theme.custom]` token
+    # overrides on top of a built-in, so every one of the 17 palette fields in
+    # `Palette` (src/app/state.rs) is pinned here and the base name below is
+    # inert. Borders are always ratatui `Plain` (square corners, title in the
+    # top rule) — no border-style knob exists, and square is what the plates
+    # use anyway.
     [theme]
     name = "gruvbox"
     auto_switch = false
+
+    # panel_bg = "reset" keeps the host terminal's background, so ghostty's
+    # faint plate image still shows through herdr's panels instead of being
+    # painted over with a flat fill. base00 is that same #0d1210 regardless.
+    #
+    # Tokens map to alien-hud.yaml except surface1 / subtext0, which are
+    # interpolated: herdr wants four dim tiers (surface_dim < surface0 <
+    # surface1, overlay0 < overlay1 < subtext0 < text) and base16 only
+    # supplies three.
+    [theme.custom]
+    accent = "#8fd694"      # base0B phosphor green — active borders, highlights
+    panel_bg = "reset"
+    surface_dim = "#161d1a" # base01 — separators
+    surface0 = "#1f2a25"    # base02 — selected row
+    surface1 = "#2b3a32"    # interpolated — hover/active row
+    overlay0 = "#3d4f45"    # base03 — hairline rules, dimmest text
+    overlay1 = "#6f8a78"    # base04 — dim labels
+    subtext0 = "#9fb0a3"    # interpolated — subdued text above the dim labels
+    text = "#d8cfae"        # base05 — the plate cream
+    green = "#8fd694"       # base0B — idle / done ("ONLINE")
+    yellow = "#d9a441"      # base0A — working
+    peach = "#d9822b"       # base09 — interrupted, the bar-graph amber
+    red = "#e05c4a"         # base08 — blocked / needs attention
+    teal = "#7fb3c8"        # base0C — notification accents
+    blue = "#6f9fb0"        # base0D
+    mauve = "#a98fb0"       # base0E — branch names
 
     # "herdr" delivery only draws a toast while herdr is on screen, so an agent
     # blocked on a question goes unnoticed. "system" hands it to the desktop
@@ -47,6 +81,10 @@ _: {
     enabled = true
 
     [ui]
+    # Legacy accent, read into `state.accent` for the navigation UI. It is
+    # ignored for the palette (theme.custom.accent wins) but still colours the
+    # nav paths that read state.accent directly, so keep the two in step.
+    accent = "#8fd694"
     show_agent_labels_on_pane_borders = true
     # "priority" orders the agent panel as an attention queue, so a blocked
     # agent surfaces above idle ones instead of sorting by workspace.
@@ -54,8 +92,17 @@ _: {
 
     # Space rows carry git context, which is what distinguishes one worktree
     # workspace from another at a glance.
+    #
+    # Rows accept either a bare token string or a styled table
+    # ({ token, fg, bold, dim } — src/config/sidebar.rs RawStyledSidebarToken),
+    # which is the only per-element colour control herdr exposes. Styled the
+    # way the plates read their subsystem lists: phosphor-green status dot,
+    # cream label, purple branch, dim git counts.
     [ui.sidebar.spaces]
-    rows = [["state_icon", "workspace"], ["branch", "git_status"]]
+    rows = [
+      [{ token = "state_icon", fg = "#8fd694" }, { token = "workspace", fg = "#d8cfae", bold = true }],
+      [{ token = "branch", fg = "#a98fb0" }, { token = "git_status", fg = "#6f8a78", dim = true }],
+    ]
 
     # Claude panes get an extra row showing the stripped terminal title, which
     # is where Claude Code reports what it is currently doing.
@@ -67,7 +114,11 @@ _: {
     # This surfaces the live count on the parent row instead. The token is
     # cleared at zero, so the row stays clean when nothing is fanned out.
     [ui.sidebar.agents.rows_by_agent]
-    claude = [["state_icon", "workspace", "tab"], ["terminal_title_stripped"], ["agent", "$agents"]]
+    claude = [
+      [{ token = "state_icon", fg = "#8fd694" }, { token = "workspace", fg = "#d8cfae", bold = true }, { token = "tab", fg = "#6f8a78" }],
+      [{ token = "terminal_title_stripped", fg = "#6f8a78", dim = true }],
+      [{ token = "agent", fg = "#7fb3c8" }, { token = "$agents", fg = "#d9822b" }],
+    ]
 
     [worktrees]
     directory = "~/.herdr/worktrees"

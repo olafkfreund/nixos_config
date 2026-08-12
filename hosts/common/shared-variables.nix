@@ -43,8 +43,15 @@
   # `host.theme.wallpaper` in modules/desktop/stylix-theme.nix as an
   # override that defaults to baseTheme.wallpaper.
   baseTheme = {
-    scheme = "gruvbox-dark";
-    wallpaper = ../../assets/wallpapers/amdgruvorange.png;
+    # `scheme` is a display name only (cosmic-theme.nix stamps it into COSMIC's
+    # theme file). `schemeFile` is what Stylix actually reads — a local base16
+    # yaml rather than a name in pkgs.base16-schemes.
+    scheme = "alien-hud";
+    schemeFile = ../../assets/themes/alien-hud.yaml;
+    wallpaper = ../../assets/wallpapers/alien-plate-03.png;
+    # Faint plate rendered behind terminal text (ghostty/kitty only — foot and
+    # alacritty have no background-image support).
+    terminalPlate = ../../assets/wallpapers/alien-plate-01.png;
     cursor = {
       name = "Bibata-Modern-Classic";
       size = 16;

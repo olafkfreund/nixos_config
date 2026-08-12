@@ -20,6 +20,7 @@ in
     (mkIf config.aws.packages.enable {
       environment.systemPackages = [
         pkgs.customPkgs.awscli2 # local override disables flaky doCheck
+        pkgs.ssm-session-manager-plugin # `aws ssm start-session` (binary: session-manager-plugin)
         pkgs.awsrm
         pkgs.awsls
         pkgs.awsume

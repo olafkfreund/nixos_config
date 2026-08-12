@@ -13,8 +13,7 @@ in
       enableReleaseChecks = false;
       polarity = "dark";
       autoEnable = true;
-      base16Scheme =
-        "${pkgs.base16-schemes}/share/themes/${vars.baseTheme.scheme}.yaml";
+      base16Scheme = vars.baseTheme.schemeFile;
       image = vars.baseTheme.wallpaper;
 
       fonts = {

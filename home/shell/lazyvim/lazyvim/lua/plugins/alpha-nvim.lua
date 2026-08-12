@@ -1,3 +1,11 @@
+-- Start screen as a Weyland-Yutani panel: boxed masthead, bracketed
+-- shortcut keys, and a subsystem-style status footer. Replaces the stock
+-- Neovim block logo (and the ~100 lines of per-character highlight ranges
+-- it needed) — the plates are drawn with box rules, not filled glyphs.
+--
+-- Highlight groups (AlphaHeader / AlphaButtons / AlphaShortcut / AlphaFooter)
+-- are defined in the generated lua/plugins/colorscheme.lua so the palette
+-- stays in one place.
 return {
   {
     "goolord/alpha-nvim",
@@ -6,126 +14,86 @@ return {
     init = false,
     opts = function()
       local dashboard = require("alpha.themes.dashboard")
-      local logo = {
 
-        [[ ███       ███ ]],
-        [[████      ████]],
-        [[██████     █████]],
-        [[███████    █████]],
-        [[████████   █████]],
-        [[█████████  █████]],
-        [[█████ ████ █████]],
-        [[█████  █████████]],
-        [[█████   ████████]],
-        [[█████    ███████]],
-        [[█████     ██████]],
-        [[████      ████]],
-        [[ ███       ███ ]],
-        [[                  ]],
-        [[ N  E  O  V  I  M ]],
+      -- The Weyland-Yutani asset placard, drawn in text. Deliberately not the
+      -- PNG: real image rendering needs the kitty graphics protocol, which
+      -- does not survive tmux or herdr — where this editor actually runs — so
+      -- the placard is redrawn with box characters and works everywhere.
+      -- Column-aligned by construction; keep every line 64 cells wide.
+      dashboard.section.header.val = {
+        [[┌──────────────────────────────────────────────────────────────┐]],
+        [[│                    P R O P E R T Y   O F                     │]],
+        [[│ ASSET  74-2219-B                               REG  NCC-4180 │]],
+        [[│                                                              │]],
+        [[│                 W E Y L A N D - Y U T A N I                  │]],
+        [[├──────────────────────────────────────────────────────────────┤]],
+        [[│                           ________                           │]],
+        [[│                          /        \                          │]],
+        [[│                         /    /\    \                         │]],
+        [[│                        /    /  \    \                        │]],
+        [[│                        \   /____\   /                        │]],
+        [[│                         \   ████   /                         │]],
+        [[│                          \________/                          │]],
+        [[├──────────────────────────────────────────────────────────────┤]],
+        [[│             D E E P   S P A C E   S Y S T E M S              │]],
+        [[│ ISSUE 03 / REV C                                CLASS M HULL │]],
+        [[│                  D O   N O T   R E M O V E                   │]],
+        [[└──────────────────────────────────────────────────────────────┘]],
       }
 
-      -- dashboard.section.header.val = vim.split(logo, "\n")
-      dashboard.section.header.val = logo
+      -- One highlight range per header line. Ranges are {group, start, stop}
+      -- with stop = -1 meaning end-of-line (alpha passes it straight to
+      -- nvim_buf_add_highlight), which avoids hand-counting byte offsets —
+      -- every box character here is 3 bytes wide, so column maths would be a
+      -- trap. AlphaHeaderBar is reversed (dark on green) to read as the
+      -- placard's two solid banner strips.
+      local G, BAR, NAME = "AlphaHeader", "AlphaHeaderBar", "AlphaHeaderName"
+      local DIM, AMBER = "AlphaHeaderDim", "AlphaHeaderAmber"
+      local line_groups = {
+        G,
+        BAR,
+        DIM,
+        G,
+        NAME,
+        G,
+        G,
+        G,
+        G,
+        G,
+        G,
+        G,
+        G,
+        G,
+        AMBER,
+        DIM,
+        BAR,
+        G,
+      }
+      local hl = {}
+      for i, group in ipairs(line_groups) do
+        hl[i] = { { group, 0, -1 } }
+      end
+      dashboard.section.header.opts.hl = hl
+
       -- stylua: ignore
       dashboard.section.buttons.val = {
-        dashboard.button("f", " " .. " Find file",       LazyVim.pick()),
-        dashboard.button("n", " " .. " New file",        [[<cmd> ene <BAR> startinsert <cr>]]),
-        dashboard.button("r", " " .. " Recent files",    LazyVim.pick("oldfiles")),
-        dashboard.button("g", " " .. " Find text",       LazyVim.pick("live_grep")),
-        dashboard.button("c", " " .. " Config",          LazyVim.pick.config_files()),
-        dashboard.button("s", " " .. " Restore Session", [[<cmd> lua require("persistence").load() <cr>]]),
-        dashboard.button("x", " " .. " Lazy Extras",     "<cmd> LazyExtras <cr>"),
-        dashboard.button("l", "󰒲 " .. " Lazy",            "<cmd> Lazy <cr>"),
-        dashboard.button("q", " " .. " Quit",            "<cmd> qa <cr>"),
+        dashboard.button("f", "  FIND FILE",       LazyVim.pick()),
+        dashboard.button("n", "  NEW FILE",        [[<cmd> ene <BAR> startinsert <cr>]]),
+        dashboard.button("r", "  RECENT FILES",    LazyVim.pick("oldfiles")),
+        dashboard.button("g", "  FIND TEXT",       LazyVim.pick("live_grep")),
+        dashboard.button("c", "  CONFIG",          LazyVim.pick.config_files()),
+        dashboard.button("s", "  RESTORE SESSION", [[<cmd> lua require("persistence").load() <cr>]]),
+        dashboard.button("x", "  LAZY EXTRAS",     "<cmd> LazyExtras <cr>"),
+        dashboard.button("l", "󰒲  LAZY",            "<cmd> Lazy <cr>"),
+        dashboard.button("q", "  QUIT",            "<cmd> qa <cr>"),
       }
       for _, button in ipairs(dashboard.section.buttons.val) do
         button.opts.hl = "AlphaButtons"
         button.opts.hl_shortcut = "AlphaShortcut"
       end
-      dashboard.section.header.opts.hl = {
-        {
-          { "AlphaNeovimLogoBlue", 0, 0 },
-          { "AlphaNeovimLogoGreen", 1, 14 },
-          { "AlphaNeovimLogoBlue", 23, 34 },
-        },
-        {
-          { "AlphaNeovimLogoBlue", 0, 2 },
-          { "AlphaNeovimLogoGreenFBlueB", 2, 4 },
-          { "AlphaNeovimLogoGreen", 4, 19 },
-          { "AlphaNeovimLogoBlue", 27, 40 },
-        },
-        {
-          { "AlphaNeovimLogoBlue", 0, 4 },
-          { "AlphaNeovimLogoGreenFBlueB", 4, 7 },
-          { "AlphaNeovimLogoGreen", 7, 22 },
-          { "AlphaNeovimLogoBlue", 29, 42 },
-        },
-        {
-          { "AlphaNeovimLogoBlue", 0, 8 },
-          { "AlphaNeovimLogoGreenFBlueB", 8, 10 },
-          { "AlphaNeovimLogoGreen", 10, 25 },
-          { "AlphaNeovimLogoBlue", 31, 44 },
-        },
-        {
-          { "AlphaNeovimLogoBlue", 0, 10 },
-          { "AlphaNeovimLogoGreenFBlueB", 10, 13 },
-          { "AlphaNeovimLogoGreen", 13, 28 },
-          { "AlphaNeovimLogoBlue", 33, 46 },
-        },
-        {
-          { "AlphaNeovimLogoBlue", 0, 13 },
-          { "AlphaNeovimLogoGreen", 14, 31 },
-          { "AlphaNeovimLogoBlue", 35, 49 },
-        },
-        {
-          { "AlphaNeovimLogoBlue", 0, 13 },
-          { "AlphaNeovimLogoGreen", 16, 32 },
-          { "AlphaNeovimLogoBlue", 35, 49 },
-        },
-        {
-          { "AlphaNeovimLogoBlue", 0, 13 },
-          { "AlphaNeovimLogoGreen", 17, 33 },
-          { "AlphaNeovimLogoBlue", 35, 49 },
-        },
-        {
-          { "AlphaNeovimLogoBlue", 0, 13 },
-          { "AlphaNeovimLogoGreen", 18, 34 },
-          { "AlphaNeovimLogoGreenFBlueB", 33, 35 },
-          { "AlphaNeovimLogoBlue", 35, 49 },
-        },
-        {
-          { "AlphaNeovimLogoBlue", 0, 13 },
-          { "AlphaNeovimLogoGreen", 19, 35 },
-          { "AlphaNeovimLogoGreenFBlueB", 34, 35 },
-          { "AlphaNeovimLogoBlue", 35, 49 },
-        },
-        {
-          { "AlphaNeovimLogoBlue", 0, 13 },
-          { "AlphaNeovimLogoGreen", 20, 36 },
-          { "AlphaNeovimLogoGreenFBlueB", 35, 37 },
-          { "AlphaNeovimLogoBlue", 37, 49 },
-        },
-        {
-          { "AlphaNeovimLogoBlue", 0, 13 },
-          { "AlphaNeovimLogoGreen", 21, 37 },
-          { "AlphaNeovimLogoGreenFBlueB", 36, 37 },
-          { "AlphaNeovimLogoBlue", 37, 49 },
-        },
-        {
-          { "AlphaNeovimLogoBlue", 1, 13 },
-          { "AlphaNeovimLogoGreen", 20, 35 },
-          { "AlphaNeovimLogoBlue", 37, 48 },
-        },
-        {},
-        {
-          { "AlphaNeovimLogoGreen", 0, 9 },
-          { "AlphaNeovimLogoBlue", 9, 18 },
-        },
-      }
-      dashboard.section.buttons.opts.hl = "AlphaButtons"
+
       dashboard.section.footer.opts.hl = "AlphaFooter"
-      dashboard.opts.layout[1].val = 8
+      dashboard.opts.layout[1].val = 2
       return dashboard
     end,
     config = function(_, dashboard)
@@ -149,13 +117,10 @@ return {
         callback = function()
           local stats = require("lazy").stats()
           local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
-          dashboard.section.footer.val = "⚡ Neovim loaded "
-            .. stats.loaded
-            .. "/"
-            .. stats.count
-            .. " plugins in "
-            .. ms
-            .. "ms"
+          -- Subsystem readout: loaded/total and boot time, the plates' way of
+          -- saying "45 ONLINE".
+          dashboard.section.footer.val =
+            string.format("SUBSYSTEMS %d/%d ONLINE   ·   BOOT %sms", stats.loaded, stats.count, ms)
           pcall(vim.cmd.AlphaRedraw)
         end,
       })
