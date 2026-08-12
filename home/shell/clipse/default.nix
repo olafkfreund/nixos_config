@@ -6,9 +6,9 @@ let
   # clipse has no Stylix target and reads a flat colour map from a JSON file
   # named by config.json's `themeFile`. Generating it from the active base16
   # scheme keeps the clipboard picker on the same palette as everything else;
-  # it used to ship a checked-in gruvbox.json that never moved.
+  # it used to ship a checked-in theme file that never moved.
   #
-  # Borders and accents are phosphor green rather than the blue the gruvbox
+  # Borders and accents are phosphor green rather than the blue the old
   # file used, matching the HUD's active-border convention.
   clipseTheme = {
     DimmedDesc = c.base04;

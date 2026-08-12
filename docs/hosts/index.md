@@ -47,7 +47,7 @@ documenting per host:
 - __Development__, __virtualisation__, __AI__ (Ollama + cloud providers),
   __media__ tooling, __Syncthing__
 - __Tailscale__ mesh networking (local firewall delegated to Tailscale)
-- __agenix__ secrets, __gruvbox-dark__ Stylix theme
+- __agenix__ secrets, __Alien HUD__ Stylix theme
 - User `olafkfreund`, `Europe/London`, `en_GB.UTF-8`, UK keyboard
 
 ## What differs (and why)

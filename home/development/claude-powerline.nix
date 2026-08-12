@@ -6,7 +6,7 @@ let
   cfg = config.programs.claude-powerline;
 
   # Truecolor SGR straight from the active base16 scheme. The statusline used
-  # to hardcode gruvbox's ANSI-256 approximations, which drifted from every
+  # to hardcode ANSI-256 approximations, which drifted from every
   # other surface the moment the scheme changed — and 256-colour indices cannot
   # express the palette exactly anyway.
   sgr = layer: name: "\\e[${layer};2;${colors."${name}-rgb-r"};${colors."${name}-rgb-g"};${colors."${name}-rgb-b"}m";
@@ -21,11 +21,11 @@ in
   config = mkIf cfg.enable {
     # ~/.claude/settings.json is NOT managed by Home Manager — it is
     # syncthing-synced and holds runtime plugin state. It points at
-    # statusline-gruvbox.sh below; that wiring is done once, by hand.
+    # statusline-alien-hud.sh below; that wiring is done once, by hand.
     #
     # An @owloops/claude-powerline npx wrapper used to be generated here too,
     # but nothing ever referenced it: settings.json has always pointed at the
-    # gruvbox script. It was also the wrong tool for this repo — it ran
+    # script below. It was also the wrong tool for this repo — it ran
     # `npx -y @owloops/claude-powerline@latest` on *every* statusline render,
     # i.e. an unpinned network fetch in the hot path of a NixOS config, and it
     # rendered no hostname segment (the one thing that matters most across
@@ -36,11 +36,11 @@ in
       # Statusline script — mirrors your Starship prompt layout:
       # OS icon · hostname · user · dir · shell · git branch/status · model · context
       #
-      # The `-gruvbox` in the filename is now only a name. It is kept because
-      # ~/.claude/settings.json points at this exact path, is syncthing-synced
-      # and hand-maintained, so renaming the file blanks the statusline on
-      # every host until settings.json is edited by hand on each one.
-      file.".claude/statusline-gruvbox.sh" = {
+      # ~/.claude/settings.json points at this exact path. That file is
+      # syncthing-synced and hand-maintained (NOT Home Manager's), so renaming
+      # this script means editing settings.json too — once, since syncthing
+      # propagates it to the other hosts.
+      file.".claude/statusline-alien-hud.sh" = {
         executable = true;
         text = ''
           #!/usr/bin/env bash

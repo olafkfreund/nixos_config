@@ -37,7 +37,7 @@ in
         # Modern UI enhancements
         pane_frames = true; # Enable for better visual separation
         default_layout = "compact";
-        theme = lib.mkForce "gruvbox-dark";
+        theme = lib.mkForce "alien-hud";
 
         # Enhanced UI configuration
         ui = {
@@ -92,7 +92,7 @@ in
 
         # Enhanced theming
         themes = {
-          gruvbox-dark = {
+          alien-hud = {
             bg = "#${colors.base00}";
             fg = "#${colors.base06}";
             red = "#${colors.base08}";

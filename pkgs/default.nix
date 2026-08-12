@@ -1,6 +1,5 @@
 { pkgs, ... }: {
   # Define your custom packages here
-  chrome-gruvbox-theme = pkgs.callPackage ./chrome-gruvbox-theme { };
   linux-command-mcp = pkgs.callPackage ./linux-command-mcp { };
   linkedin-mcp = pkgs.callPackage ./linkedin-mcp { };
   atlassian-mcp = pkgs.callPackage ./atlassian-mcp { };

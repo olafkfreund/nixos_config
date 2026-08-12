@@ -153,7 +153,6 @@ tmuxPlugins.extrakto            # Enhanced text extraction
 ### Theme
 
 ```nix
-tmux-gruvbox                    # Custom Gruvbox theme
 # Features:
 # - Modern icon set
 # - Consistent with Starship theme
@@ -162,7 +161,7 @@ tmux-gruvbox                    # Custom Gruvbox theme
 
 ## 🎨 Visual Configuration
 
-### Gruvbox Theme Features
+### Theme Features
 
 ```bash
 # Window status icons
@@ -184,9 +183,9 @@ tmux-gruvbox                    # Custom Gruvbox theme
 
 ### Color Scheme
 
-- **Background**: `#282828` (Gruvbox dark)
-- **Foreground**: `#ebdbb2` (Gruvbox light)
-- **Accent colors**: Gruvbox palette for consistent theming
+- **Background**: `base00` from the active base16 scheme
+- **Foreground**: `base05`
+- **Accent colors**: the scheme's `base08`–`base0F`, applied by hand in `extraConfig`
 
 ## 🔧 Configuration Sections
 
@@ -357,8 +356,8 @@ bind <key> <command>
 ### Theme Customization
 
 ```nix
-# Modify gruvbox theme settings in plugin configuration
-set -g @gruvbox_option "value"
+# Status-bar colours are set explicitly in extraConfig from the base16
+# scheme — there is no theme plugin to configure.
 ```
 
 ## 🐛 Troubleshooting
@@ -410,5 +409,4 @@ tmux display-message "#{plugin_status}"
 - [Tmux Manual](https://man7.org/linux/man-pages/man1/tmux.1.html)
 - [Tilish Plugin](https://github.com/jabirali/tmux-tilish)
 - [tmux-thumbs](https://github.com/fcsonline/tmux-thumbs)
-- [Gruvbox Theme](https://github.com/morhetz/gruvbox)
 - [Session Manager](https://github.com/joshmedeski/t-smart-tmux-session-manager)

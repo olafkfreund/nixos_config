@@ -18,7 +18,7 @@ This directory contains Home Manager configurations for user environments and is
    - `modules/` — Reusable NixOS modules (desktop, development, cloud, security, etc.)
    - `home/` — Home Manager user environment configs (shell, desktop, development, etc.)
    - `pkgs/` — Custom package definitions
-   - `themes/` — Theme files (Gruvbox, etc.)
+   - `themes/` — Theme files (Alien HUD base16 scheme)
    - `scripts/` — Utility scripts for system management
 
 3. **Select or create your host configuration:**
@@ -66,7 +66,7 @@ This directory contains Home Manager configurations for user environments and is
 - `modules/` — Modular NixOS and Home Manager modules
 - `home/` — User environment configs (shell, desktop, development, etc.)
 - `pkgs/` — Custom Nix packages
-- `themes/` — Theme files (Gruvbox, etc.)
+- `themes/` — Theme files (Alien HUD base16 scheme)
 - `scripts/` — Utility scripts
 
 ## Best Practices

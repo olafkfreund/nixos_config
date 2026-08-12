@@ -42,9 +42,9 @@ in
           "$line_break"
           "$character"
         ];
-        palette = lib.mkForce "gruvbox_dark";
+        palette = lib.mkForce "alien_hud";
 
-        palettes.gruvbox_dark = {
+        palettes.alien_hud = {
           color_fg0 = "#${colors.base07}";
           color_bg1 = "#${colors.base01}";
           color_bg0 = "#${colors.base00}";

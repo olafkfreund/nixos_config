@@ -277,7 +277,7 @@ in
         # VISUAL COMMAND BOXES - Enhanced shell experience with command visualization
         # ═══════════════════════════════════════════════════════════════════════════
 
-        # Gruvbox Material color scheme for boxes
+        # Box colours from the active base16 scheme
         typeset -gA BOX_COLORS
         BOX_COLORS=(
           [reset]='\033[0m'
@@ -644,7 +644,7 @@ in
       #   - direnv/starship/history   → programs.direnv / programs.starship / atuin
       #   - git aliases               → zsh-abbr in zsh-enhancements.nix
       #   - terraform/aws/azure/lxd   → carapace (optional) / native completions
-      #   - theme=gruvbox             → stylix owns the palette (config.lib.stylix)
+      #   - theme                     → stylix owns the palette (config.lib.stylix)
 
       # Enhanced shell aliases - only forcing critical improvements where needed
       shellAliases = {

@@ -12,7 +12,7 @@ This directory contains configurations for various terminal emulators used in th
 
 ## Features
 
-- Integration with system theme (Gruvbox)
+- Integration with the system theme via Stylix
 - Custom key bindings
 - Font configuration with ligatures support
 - Performance optimizations

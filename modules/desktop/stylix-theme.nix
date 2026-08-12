@@ -43,18 +43,27 @@ in
         size = vars.baseTheme.cursor.size;
       };
 
-      # Gruvbox icons. Driving the icon theme THROUGH Stylix (rather than
-      # fighting it) is what stops Stylix clobbering the icon choice on every
-      # rebuild.
-      # Note: use the modern `stylix.icons` namespace; the old
-      # `stylix.iconTheme` is deprecated and emits a warning.
-      # Was gruvbox-material-gtk-theme, removed from nixpkgs 2026-07 with
-      # gtk-engine-murrine (GTK2, unmaintained upstream).
+      # Icons are artwork, not base16 colours, so no icon set tracks the
+      # scheme automatically. Papirus is the closest fit available: it is
+      # colour-neutral apart from its folders, and nixpkgs exposes a `color`
+      # argument that runs papirus-folders over the build — "green" is the
+      # stop nearest the HUD's phosphor accent (base0B). It replaces
+      # the previous icon set, whose warm orange folders were the last
+      # obviously off-palette surface left on the desktop.
+      #
+      # Driving the icon theme THROUGH Stylix (rather than fighting it) is what
+      # stops Stylix clobbering the icon choice on every rebuild. Note the
+      # modern `stylix.icons` namespace; the old `stylix.iconTheme` is
+      # deprecated and emits a warning.
+      #
+      # Stylix installs this package itself — do NOT also add
+      # pkgs.papirus-icon-theme to home.packages, or the plain and
+      # green-foldered builds collide on the same share/icons/Papirus* paths.
       icons = {
         enable = true;
-        package = pkgs.gruvbox-plus-icons;
-        dark = "Gruvbox-Plus-Dark";
-        light = "Gruvbox-Plus-Light";
+        package = pkgs.papirus-icon-theme.override { color = "green"; };
+        dark = "Papirus-Dark";
+        light = "Papirus-Light";
       };
 
       targets = {

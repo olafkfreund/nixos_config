@@ -81,14 +81,9 @@ in
           '';
         }
 
-        # tmux-gruvbox removed — its mkTmuxPlugin wrapper points at
-        # `tmux_gruvbox.tmux` while upstream ships `gruvbox.tmux`, so the
-        # plugin loader returned exit 127 every conf reload. We never
-        # actually used the gruvbox theme — the status bar is fully
-        # hand-styled via the explicit `set -g status-*` lines below using
-        # Stylix base16 colours. Re-adding gruvbox would require
-        # `rtpFilePath = "gruvbox.tmux"` AND the explicit overrides would
-        # still win, so the plugin was net negative.
+        # No theme plugin: the status bar is hand-styled from the Stylix
+        # base16 palette in the `set -g status-*` block below. A theme plugin
+        # would load after those lines and undo them.
 
         # Development productivity plugins
         tmuxPlugins.tmux-thumbs # Quick text copying
@@ -354,17 +349,11 @@ in
         # Clear screen and history
         bind C-l send-keys 'clear' Enter \; clear-history
 
-        # ========== Status-bar theme (explicit, no gruvbox.tmux) ==========
-        # Used to call gruvbox.tmux here as a workaround for the home-manager
-        # mkTmuxPlugin auto-loader pointing at the wrong filename
-        # (tmux_gruvbox.tmux vs upstream's gruvbox.tmux). Removed because the
-        # workaround re-ran gruvbox AFTER the explicit overrides below, and
-        # gruvbox's $window_format computation produced an empty
-        # window-status-format that overrode the intended " #I #W " string
-        # async, leaving every window's name as an empty box in the status
-        # bar (visible briefly after reload, then gone once gruvbox
-        # finished). The explicit settings below define the entire theme
-        # we actually want; gruvbox.tmux adds nothing.
+        # ========== Status-bar theme (explicit) ==========
+        # Everything below is set by hand from the Stylix base16 palette.
+        # Don't reintroduce a theme plugin: one used to run *after* these
+        # lines and computed an empty window-status-format, blanking every
+        # window name in the status bar a moment after each reload.
         set -g status-left-length 40      # Override theme left length
         set -g status-right-length 200    # Override theme right length
         set -g window-status-separator " " # Clean separator between windows
@@ -422,7 +411,7 @@ in
         # Popup chrome — match the Stylix base16 scheme so display-popup
         # (tmux-palette, tmux-expose, choose-tree -Z, etc.) blends into the
         # terminal instead of using tmux's terminal-default fill which
-        # renders darker than gruvbox bg on kitty/ghostty.
+        # renders darker than the scheme's background on kitty/ghostty.
         set -g popup-style "bg=#${colors.base00}"
         set -g popup-border-style "fg=#${colors.base0B},bg=#${colors.base00}"
         # Square corners, not rounded: the Alien HUD plates are drawn with
@@ -478,17 +467,17 @@ in
 
     # tmux-palette active theme — full color override sourced from our
     # active stylix base16 scheme, so the palette popup is BYTE-IDENTICAL
-    # to the rest of our terminal/UI gruvbox theming (not just close-ish
-    # to the tmux-palette-bundled gruvbox-dark, which uses slightly
-    # different panel/selected/muted/accent values).
+    # to the rest of the terminal/UI theming (not just close-ish to one of
+    # tmux-palette's bundled themes, which use slightly different
+    # panel/selected/muted/accent values).
     #
     # Schema discovered from src/theme.ts:
     #   { name: "<slug>" }              → look up bundled/user slug
     #   { bg, panel, selected, fg, muted, accent }  → full Theme override
     #   partial Theme                   → merged onto default theme
-    # Note: the field is `name`, NOT `theme` — earlier `theme.json` of
-    # `{ "theme": "gruvbox-dark" }` was silently ignored (treated as a
-    # Partial<Theme>) and crashed the palette with exit 1.
+    # Note: the field is `name`, NOT `theme` — a `theme.json` of
+    # `{ "theme": "<name>" }` is silently ignored (treated as a
+    # Partial<Theme>) and crashes the palette with exit 1.
     #
     # base16 → tmux-palette Theme mapping:
     #   bg       = base00 (default background)

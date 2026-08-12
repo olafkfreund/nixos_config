@@ -157,7 +157,8 @@ in
 
   # ── DankMaterialShell theme ────────────────────────────────────────────────
   # DMS reads its palette from its own theme.json (NOT from Stylix), so the DMS
-  # session would otherwise stay Gruvbox while niri and the terminals went Alien.
+  # session would otherwise keep its own palette while niri and the terminals
+  # follow Stylix.
   # Same derivation from config.lib.stylix.colors as the Noctalia palette above,
   # so both shells and the compositor cannot drift apart.
   #
@@ -633,10 +634,10 @@ in
     GSETTINGS_SCHEMA_DIR=${gtkSchemas}
   '';
 
-  # Gruvbox-dark theming for labwc's OSD (window-switcher / workspace overlays
+  # OSD theming for labwc (window-switcher / workspace overlays
   # are white by default), window borders, and menus. themerc-override patches
   # the active theme's colors without needing a full theme. Colors come from
-  # the system Stylix base16 scheme (gruvbox-dark), so this matches GNOME/tmux.
+  # the system Stylix base16 scheme, so this matches GNOME/tmux.
   xdg.configFile."labwc/themerc-override".text =
     let inherit (config.lib.stylix) colors; in ''
       # Window decorations
@@ -733,7 +734,7 @@ in
   # because the mango home-manager module pulls the mango package into
   # home.packages — without the gate it would compile mango on headless p510,
   # which also evaluates this shared profile. Same Super-based keybinds,
-  # gruvbox colours and companion daemons as niri/labwc; mango's native
+  # colours and companion daemons as niri/labwc; mango's native
   # `env=` directive (applied via setenv in the compositor) is its equivalent
   # of niri's environment block, so Electron apps get NIXOS_OZONE_WL=1.
   wayland.windowManager.mango = lib.mkIf (osConfig.desktop.mangowm.enable or false) (
@@ -757,7 +758,7 @@ in
         # UK keyboard
         xkb_rules_layout=gb
 
-        # Appearance — gruvbox via Stylix (active border = accent base0B).
+        # Appearance — via Stylix (active border = accent base0B).
         borderpx=2
         rootcolor=${c "base00"}
         bordercolor=${c "base01"}

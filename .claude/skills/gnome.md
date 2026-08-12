@@ -185,10 +185,10 @@ Traditional GNOME configuration is **imperative** (click settings, install exten
     enable = true;
 
     # Base16 color scheme
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+    base16Scheme = ../../assets/themes/alien-hud.yaml;
 
     # Wallpaper
-    image = ./wallpapers/gruvbox.png;
+    image = ../../assets/wallpapers/alien-plate-03.png;
 
     # Font configuration
     fonts = {
@@ -688,7 +688,7 @@ programs.dconf.profiles.user.databases = [
 {
   stylix = {
     enable = true;
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+    base16Scheme = ../../assets/themes/alien-hud.yaml;
     targets.gnome.enable = true;
     targets.gtk.enable = true;
   };
@@ -1441,7 +1441,7 @@ nix eval --raw nixpkgs#gnomeExtensions.dash-to-dock.extensionUuid
   # Stylix theming
   stylix = {
     enable = true;
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+    base16Scheme = ../../assets/themes/alien-hud.yaml;
     image = ./wallpaper.png;
 
     fonts = {

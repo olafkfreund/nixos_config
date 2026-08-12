@@ -111,7 +111,7 @@ stdenv.mkDerivation (finalAttrs: {
           $out/app/waveterm/waveterm
 
         # Replace WaveTerm brand green (#58c142) with the Alien HUD phosphor
-        # accent (#8fd694, base0B of assets/themes/alien-hud.yaml). Hardcoded
+        # accent (#8ec27c, base0B of assets/themes/alien-hud.yaml). Hardcoded
         # because a package cannot read config.lib.stylix; if the scheme's
         # base0B changes, change it here too.
         #
@@ -124,9 +124,9 @@ stdenv.mkDerivation (finalAttrs: {
     import sys
     path = sys.argv[1]
     data = open(path, 'rb').read()
-    for old, new in ((b'#58c142', b'#8fd694'),
-                     (b'#58C142', b'#8fd694'),
-                     (b'rgb(88, 193, 66)', b'rgb(143,214,148)')):
+    for old, new in ((b'#58c142', b'#8ec27c'),
+                     (b'#58C142', b'#8ec27c'),
+                     (b'rgb(88, 193, 66)', b'rgb(142,194,124)')):
         assert len(old) == len(new), (old, new)
         data = data.replace(old, new)
     open(path, 'wb').write(data)

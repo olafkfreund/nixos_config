@@ -14,7 +14,7 @@ Your zsh is **feature-rich but heavy**. Measured + audited state:
 |---|---|---|---|
 | Interactive startup | **~660 ms** (warm) | 100–150 ms | 🔴 5–6× too slow |
 | `home/shell/zsh.nix` | 692 lines, ~465-line monolithic `initContent` | modular, `mkOrder` | 🟠 hard to maintain |
-| oh-my-zsh | **enabled, 11 plugins** (aws, azure, terraform, lxd, 1password…) + `theme=gruvbox` | removed | 🔴 prime bloat source |
+| oh-my-zsh | **enabled, 11 plugins** (aws, azure, terraform, lxd, 1password…) + a theme plugin | removed | 🔴 prime bloat source |
 | starship | own module **and** an OMZ plugin (+ OMZ theme) | one source | 🟠 redundant/conflicting |
 | atuin | hand-init `eval "$(atuin init zsh)"` | `programs.atuin` | 🟠 suboptimal ordering/flags |
 | history | hand `export HISTSIZE/SAVEHIST` in initContent | `programs.zsh.history` | 🟠 should be declarative |
@@ -34,7 +34,7 @@ Your zsh is **feature-rich but heavy**. Measured + audited state:
 
 - The **command-box prompt decoration** (`draw_command_box`, `precmd/preexec_command_box`, `toggle_boxes`, separators).
 - `nhs` / `nhsb` deploy helpers, `_aichat_zsh`, `gcheck`, `sane-ask`, `get_term_width`.
-- starship prompt, gruvbox aesthetic, zoxide/fzf/eza/bat/direnv/yazi integrations.
+- starship prompt, base16 aesthetic, zoxide/fzf/eza/bat/direnv/yazi integrations.
 
 ---
 
@@ -48,7 +48,7 @@ Your zsh is **feature-rich but heavy**. Measured + audited state:
    - `git` → you only override `gl`; add the handful of git shortcuts you use as **`zsh-abbr`** (Phase 2). No OMZ needed.
    - `sudo` (Esc-Esc to prepend sudo) → 4-line `zle` widget in `initContent`.
    - `direnv` → already have `programs.direnv` module (drop the OMZ one).
-   - `starship` → already a module (drop the OMZ plugin **and** `theme=gruvbox`; starship owns the prompt).
+   - `starship` → already a module (drop the OMZ plugin **and** its theme setting; starship owns the prompt).
    - `history` → covered by `programs.zsh.history` + atuin.
    - `terraform`/`aws`/`azure`/`lxd` completions → **carapace** (Phase 1) or native completions; most you rarely tab-complete.
    - `1password`/`emoji-clock` → drop (negligible value).

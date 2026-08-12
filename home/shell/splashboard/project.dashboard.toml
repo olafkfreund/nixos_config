@@ -4,7 +4,7 @@
 # Schema: https://splashboard.unhappychoice.com/guides/configuration/
 # Managed by home-manager — edit this file in the repo, not in ~/.splashboard/.
 #
-# Design vocabulary (gruvbox_dark theme):
+# Design vocabulary:
 #   • Hero band on `bg = "subtle"` with chunky `ansi_shadow` figlet repo name
 #   • Status badges strip — git_age / git_status / git_stash_count in one row
 #   • Full-width 12-month activity heatmap as the centerpiece (border = "plain")

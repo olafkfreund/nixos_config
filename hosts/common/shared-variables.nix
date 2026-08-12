@@ -49,9 +49,6 @@
     scheme = "alien-hud";
     schemeFile = ../../assets/themes/alien-hud.yaml;
     wallpaper = ../../assets/wallpapers/alien-plate-03.png;
-    # Faint plate rendered behind terminal text (ghostty/kitty only — foot and
-    # alacritty have no background-image support).
-    terminalPlate = ../../assets/wallpapers/alien-plate-01.png;
     cursor = {
       name = "Bibata-Modern-Classic";
       size = 16;

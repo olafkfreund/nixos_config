@@ -66,7 +66,7 @@ in
         macro index <f3> '<sync-mailbox><enter-command>source ~/.config/neomutt/accounts/gmail<enter><change-folder>!<enter>'
 
         # Include theme
-        source /etc/neomutt/colors-gruvbox
+        source /etc/neomutt/colors-alien-hud
 
         # Include account-specific configurations
         source ~/.config/neomutt/accounts/freundcloud

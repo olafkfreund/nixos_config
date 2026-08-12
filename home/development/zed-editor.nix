@@ -70,7 +70,7 @@ in
         };
 
         # No `theme` here: stylix's own zed target (modules/zed/hm.nix) sets
-        # `theme = "Base16 Gruvbox dark"`, generated from the base16 scheme in
+        # a Base16 theme name, generated from the base16 scheme in
         # shared-variables.nix. Defining it here is a duplicate-definition
         # error, and overriding it would fight stylix — the same mistake the
         # niri and GNOME modules already document.

@@ -81,7 +81,7 @@ in
       dconf-editor
       gnome-extension-manager
       # No named GTK theme package: Stylix generates the GTK theme from the
-      # active base16 scheme. gruvbox-dark-gtk used to live here purely to
+      # active base16 scheme. A named GTK theme package used to live here purely to
       # back the dconf gtk-theme override that theme.nix no longer sets.
 
       # Additional utilities

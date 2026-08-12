@@ -21,7 +21,7 @@ This configuration provides a modern, high-performance Zsh environment optimized
 
 ### Modern Developer Tools
 
-- **Enhanced syntax highlighting** with Gruvbox theme colors
+- **Enhanced syntax highlighting** from the active base16 scheme
 - **Smart autosuggestions** with history and completion strategies
 - **fzf-tab integration** with file previews and fuzzy searching
 - **Modern tool replacements** (eza, bat, ripgrep, fd, etc.)
@@ -116,22 +116,25 @@ myip="curl -s https://ipinfo.io/ip"                  # External IP
 
 ### Syntax Highlighting Colors
 
+Colours are not hardcoded — every style is interpolated from the active
+base16 scheme via `config.lib.stylix.colors`:
+
 ```nix
 styles = {
-  comment = "fg=#928374";        # Gruvbox gray
-  string = "fg=#b8bb26";         # Gruvbox green
-  keyword = "fg=#fb4934";        # Gruvbox red
-  builtin = "fg=#fabd2f";        # Gruvbox yellow
-  function = "fg=#83a598";       # Gruvbox blue
-  command = "fg=#8ec07c";        # Gruvbox aqua
-  unknown-token = "fg=#cc241d";  # Gruvbox dark red
+  comment = "fg=#${colors.base03}";
+  string = "fg=#${colors.base0B}";
+  keyword = "fg=#${colors.base08}";
+  builtin = "fg=#${colors.base0A}";
+  function = "fg=#${colors.base0D}";
+  command = "fg=#${colors.base0C}";
+  unknown-token = "fg=#${colors.base08}";
 }
 ```
 
 ### Autosuggestion Settings
 
 - **Strategy**: History and completion-based
-- **Highlight color**: `fg=#665c54` (Gruvbox gray)
+- **Highlight color**: `base03` from the active scheme
 - **Buffer limit**: 20 characters for performance
 
 ## 🔧 Environment Variables
@@ -152,7 +155,8 @@ export EDITOR="nvim"                   # Default editor
 export VISUAL="$EDITOR"               # Visual editor
 export PAGER="less"                   # Default pager
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"  # Colored man pages
-export BAT_THEME="gruvbox-dark"       # Consistent theming
+# No BAT_THEME export: Stylix writes the theme into ~/.config/bat/config,
+# and the env var would outrank it.
 ```
 
 ### History Management
@@ -276,4 +280,3 @@ Add to the `envExtra` section for shell-specific variables or `sessionVariables`
 - [Oh-My-Zsh Framework](https://ohmyz.sh/)
 - [Starship Prompt](https://starship.rs/)
 - [fzf Fuzzy Finder](https://github.com/junegunn/fzf)
-- [Gruvbox Theme](https://github.com/morhetz/gruvbox)

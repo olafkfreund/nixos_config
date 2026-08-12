@@ -5,7 +5,6 @@
 }:
 let
   inherit (lib) mkIf mkEnableOption mkDefault optionals optionalString;
-  vars = import ../../../hosts/common/shared-variables.nix;
 
   # Terminal feature flags
   cfg = {
@@ -40,9 +39,9 @@ let
   };
 
   # No colour table here: Stylix owns every terminal's palette (base16Scheme in
-  # hosts/common/shared-variables.nix). A hardcoded gruvbox table used to live
+  # hosts/common/shared-variables.nix). A hardcoded colour table used to live
   # here — it was dead for foot/alacritty (Stylix outranked it) but silently WON
-  # for kitty, which is why kitty stayed gruvbox after the Alien HUD swap while
+  # for kitty, which is why kitty kept the old palette after the scheme swap while
   # every other terminal changed. Re-add per-terminal colours only to override
   # Stylix deliberately, never as a "default".
 
@@ -152,21 +151,12 @@ in
           # `true` which left Kitty borderless and hard to manage in GNOME.
           window_margin_width = 8;
           hide_window_decorations = false;
-          # Theme the CSD titlebar to the terminal background (Stylix gruvbox)
+          # Theme the CSD titlebar to the terminal background (Stylix)
           # instead of the default white "system" colour. Applies wherever Kitty
           # draws its own decorations (GNOME, and niri/labwc for clients that
           # ignore prefer-no-csd).
           wayland_titlebar_color = "background";
           placement_strategy = "center";
-          # Same Weyland-Yutani plate as ghostty. Kitty has no opacity knob for
-          # it — background_tint fades the image toward the background colour
-          # instead, so 0.98 is the "almost invisible" equivalent of ghostty's
-          # background-image-opacity = 0.02. foot and alacritty are absent here
-          # because neither supports background images at all; they get the
-          # palette from Stylix and nothing more.
-          background_image = "${vars.baseTheme.terminalPlate}";
-          background_image_layout = "scaled";
-          background_tint = 0.98;
           background_opacity = mkDefault (
             if cfg.features.transparency
             then 0.95

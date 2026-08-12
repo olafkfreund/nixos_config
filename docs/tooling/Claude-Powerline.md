@@ -1,7 +1,7 @@
 # Claude Powerline - Statusline for Claude Code
 
 > **Real-time API monitoring, git integration, and performance analytics** for Claude Code with a beautiful
-> Gruvbox Dark theme.
+> themed from the active base16 scheme.
 
 ## Overview
 
@@ -14,7 +14,7 @@ context directly in your Claude Code environment.
 - **Budget Monitoring**: Track session, daily, and block budgets with configurable alerts
 - **Git Integration**: Display branch status, commits, and working tree changes
 - **Performance Analytics**: Track API response times, session duration, and code impact
-- **Custom Gruvbox Dark Theme**: Beautiful, eye-friendly color scheme matching your development environment
+- **Base16-derived theme**: colours generated from the active Stylix scheme, so the statusline always matches the rest of the desktop
 - **Lightweight Performance**: < 250ms statusline updates with minimal resource usage
 
 ## Installation
@@ -28,7 +28,7 @@ The module is already enabled in the developer profile with these settings:
 ```nix
 programs.claude-powerline = {
   enable = true;
-  theme = "custom";       # Gruvbox Dark theme
+  theme = "custom";       # colours from the base16 scheme
   style = "powerline";    # Vim-style powerline separators
   budget = {
     session = 10.0;       # $10 per 5-hour session
@@ -50,7 +50,8 @@ Claude Powerline is available on all hosts using the developer profile:
 
 ### Theme Customization
 
-The Gruvbox Dark theme is configured with the following color palette:
+The statusline palette is generated from the active base16 scheme (see
+`assets/themes/alien-hud.yaml`) as truecolor SGR escapes:
 
 **Background Colors:**
 
@@ -293,7 +294,7 @@ npx --version   # Should be installed
 cat ~/.config/claude-powerline/config.json
 ```
 
-Should contain the Gruvbox Dark theme configuration.
+Should contain the generated theme configuration.
 
 ### Budget Warnings Not Showing
 
@@ -444,7 +445,6 @@ Monitor context usage to:
 ## References
 
 - **Claude Powerline Repository**: <https://github.com/Owloops/claude-powerline>
-- **Gruvbox Theme**: <https://github.com/morhetz/gruvbox>
 - **NixOS Home Manager**: <https://nix-community.github.io/home-manager/>
 
 ## Updates

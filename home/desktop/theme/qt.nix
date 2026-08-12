@@ -48,7 +48,8 @@ in
       qt6Packages.qt6ct
 
       # KDE/Breeze theming packages (breeze supports both Qt5 and Qt6)
-      # Note: breeze-icons removed to avoid conflict with gruvbox-plus-icons
+      # Note: breeze-icons removed to avoid conflict with the Stylix-installed
+      # icon theme (papirus-icon-theme, see modules/desktop/stylix-theme.nix)
       kdePackages.breeze
     ];
 
