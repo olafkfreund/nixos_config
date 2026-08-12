@@ -546,6 +546,19 @@ rollback_and_close_pr() {
   err "deploy aborted; ${HOST} rolled back. Re-run after upstream regression clears."
 }
 
+# --- 10b2. ESP space guard --------------------------------------------------
+# The bootloader writes the new kernel+initrd BEFORE pruning old generations,
+# so the ESP must briefly hold configurationLimit + 1 of them. When it doesn't
+# fit, activation has already happened by the time the copy fails: the host
+# ends up RUNNING a generation that /boot cannot boot. That happened to razer
+# on 2026-08-12. Check (and reclaim) before switching, not after.
+log "checking ESP space on ${HOST} before switch"
+if ! "${REPO_ROOT:-.}/scripts/check-boot-space.sh" "$HOST" --clean; then
+  err "ESP on ${HOST} is too small to deploy safely — aborting BEFORE activation.
+   Nothing was changed on the host. Lower boot.loader.systemd-boot.configurationLimit
+   for ${HOST} (it must fit limit+1 generations) or grow the partition."
+fi
+
 # --- 10c. Switch -----------------------------------------------------------
 case "$MODE" in
   local)
