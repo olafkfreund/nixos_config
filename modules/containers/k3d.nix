@@ -501,6 +501,25 @@ in
     factorySecrets = {
       enable = mkEnableOption "Apply all factory-namespace agenix-encrypted Secret manifests during cluster bootstrap";
     };
+
+    # A GitOps cluster fed by CI accumulates container images without bound:
+    # every commit pushes a fresh `sha-<commit>` tag, ArgoCD pulls it, and
+    # containerd keeps every previous one. On p510 that reached 349 images /
+    # 465GB inside the server node by 2026-08-13, plus 176GB of anonymous
+    # Docker volumes orphaned by past `k3d cluster delete`s — 83% of a 916GB
+    # disk. kubelet's own image GC never fires because it triggers on the
+    # *host* filesystem crossing its high threshold, which the media server
+    # reaches long after the cluster has starved.
+    imageGc = {
+      enable = mkEnableOption "Periodically drop unreferenced container images and orphaned Docker volumes";
+
+      dates = mkOption {
+        type = types.str;
+        default = "weekly";
+        example = "Sun 04:00";
+        description = "systemd OnCalendar expression for the image GC timer.";
+      };
+    };
   };
 
   config = mkIf cfg.enable {
@@ -661,6 +680,57 @@ in
         OnCalendar = "daily";
         Persistent = true;
         RandomizedDelaySec = "30m";
+      };
+    };
+
+    systemd.services.k3d-image-gc = mkIf cfg.imageGc.enable {
+      description = "Drop unreferenced k3d container images and orphaned Docker volumes";
+      after = [ "docker.service" "k3d-cluster-bootstrap.service" ];
+      requires = [ "docker.service" ];
+      path = with pkgs; [ docker-client coreutils ];
+      serviceConfig = {
+        Type = "oneshot";
+        # Needs the Docker socket and `docker exec` into the k3d nodes, so it
+        # runs as root rather than DynamicUser — same reasoning as the
+        # bootstrap unit above.
+        User = "root";
+        ExecStart = pkgs.writeShellScript "k3d-image-gc" ''
+          set -uo pipefail
+
+          # `crictl rmi --prune` only removes images no pod references, so it is
+          # safe against a live cluster: ArgoCD re-pulls on the next rollout.
+          for node in $(docker ps --filter "label=k3d.cluster=${cfg.clusterName}" --format '{{.Names}}'); do
+            # The serverlb is an nginx container with no containerd. Probe on
+            # exit status, not on output: `docker exec` reports a missing
+            # binary on STDOUT, so counting lines would score it as 1 image.
+            docker exec "$node" crictl version >/dev/null 2>&1 || continue
+            before=$(docker exec "$node" crictl images -q 2>/dev/null | wc -l)
+            docker exec "$node" crictl rmi --prune >/dev/null 2>&1 || true
+            after=$(docker exec "$node" crictl images -q 2>/dev/null | wc -l)
+            echo "[k3d-image-gc] $node: $before -> $after images"
+          done
+
+          # Deliberately NOT `docker system prune` (and hence not
+          # virtualisation.docker.autoPrune): that also removes STOPPED
+          # containers, and this host has a history of k3d nodes wedging
+          # mid-reboot. Deleting such a node would take its state volume with
+          # it. These three only ever touch things no container references.
+          docker volume prune -f | tail -1
+          docker builder prune -f | tail -1
+          docker image prune -f | tail -1
+
+          docker system df
+        '';
+      };
+    };
+
+    systemd.timers.k3d-image-gc = mkIf cfg.imageGc.enable {
+      description = "Periodic k3d image and volume GC";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = cfg.imageGc.dates;
+        Persistent = true;
+        RandomizedDelaySec = "1h";
       };
     };
 

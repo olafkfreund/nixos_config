@@ -483,6 +483,13 @@ in
     argocd.enable = true;
     tailscaleAuthKey.enable = true;
     factorySecrets.enable = true; # #807: durably seed all factory ns Secrets from agenix
+    # Without this /home fills with per-commit factory images: 651GB reclaimed
+    # by hand on 2026-08-13 (83% -> 8%). Sunday 04:00 keeps the churn off the
+    # media server's evening peak.
+    imageGc = {
+      enable = true;
+      dates = "Sun 04:00";
+    };
     # Bind kube API to p510's tailnet IP so kubectl from any tailnet
     # device can drive the cluster directly (`kubectl get nodes` against
     # https://100.118.96.32:6443). k3d 5.x's port-publishing logic
