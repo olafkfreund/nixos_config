@@ -155,4 +155,34 @@
     # the 04:00 nixos-upgrade window rather than during it).
     defaults.monitored = "-a -o on -S on -s (S/../.././02|L/../../6/03)";
   };
+
+  # ── Give docker containers a resolver that actually answers ─────────────
+  # Without this, containers get `nameserver 172.18.0.1` — the bridge gateway,
+  # where NOTHING listens: systemd-resolved binds only 127.0.0.53/127.0.0.54,
+  # so every lookup in every container returns `connection refused`. Docker
+  # picks the gateway because the host's /etc/resolv.conf lists only loopback
+  # addresses, which it cannot copy into a container namespace, so it assumes
+  # the host proxies DNS on the bridge. NixOS does not.
+  #
+  # Found the slow way, 2026-08-13. Generation 512 restarted docker at 04:50,
+  # the k3d nodes came back with the broken resolv.conf, and containerd could
+  # not resolve ghcr.io at all (`lookup ghcr.io: Try again`). Already-running
+  # pods were fine — their images were cached — so the ONLY symptom was new
+  # image tags failing to pull, which reads like a registry or auth fault
+  # rather than a dead resolver. fides sat on a 13-day-old unsigned image
+  # because of it (fides#395).
+  #
+  # Public resolvers rather than the host stub: reachable from any container
+  # namespace with no bridge-address assumption, so this keeps working if the
+  # k3d network is recreated on a different subnet.
+  #
+  # Merges with the daemon.settings block in modules/system/logging.nix.
+  #
+  # NOTE: `daemon.settings` needs a manual `systemctl restart docker` to take
+  # effect — the same trade the restartIfChanged block above accepts, and it
+  # applies only to containers created after that restart.
+  virtualisation.docker.daemon.settings.dns = [
+    "1.1.1.1"
+    "8.8.8.8"
+  ];
 }
