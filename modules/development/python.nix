@@ -20,23 +20,23 @@ in
     environment.systemPackages =
       [
         pkgs.python3
-        pkgs.python312Packages.pip
-        pkgs.python312Packages.pynvim
-        pkgs.python312Packages.pynvim-pp
-        pkgs.python312Packages.dbus-python
-        pkgs.python312Packages.ninja
-        pkgs.python312Packages.material-color-utilities
-        pkgs.python312Packages.numpy
-        pkgs.python312Packages.pyyaml
-        pkgs.python312Packages.google-generativeai
-        pkgs.python312Packages.google
-        pkgs.python312Packages.google-auth
-        pkgs.python312Packages.syncedlyrics
-        pkgs.python312Packages.pygobject3
-        pkgs.python312Packages.pycairo
-        pkgs.python312Packages.pillow
-        pkgs.python312Packages.requests
-        pkgs.python312Packages.mcp # sse-starlette fix applied via overlay in flake.nix
+        pkgs.python3Packages.pip
+        pkgs.python3Packages.pynvim
+        pkgs.python3Packages.pynvim-pp
+        pkgs.python3Packages.dbus-python
+        pkgs.python3Packages.ninja
+        pkgs.python3Packages.material-color-utilities
+        pkgs.python3Packages.numpy
+        pkgs.python3Packages.pyyaml
+        pkgs.python3Packages.google-generativeai
+        pkgs.python3Packages.google
+        pkgs.python3Packages.google-auth
+        pkgs.python3Packages.syncedlyrics
+        pkgs.python3Packages.pygobject3
+        pkgs.python3Packages.pycairo
+        pkgs.python3Packages.pillow
+        pkgs.python3Packages.requests
+        pkgs.python3Packages.mcp
 
       ]
       ++ cfg.packages;
