@@ -7,10 +7,10 @@
     abook
     gcalcli
     # lbdb  # temporarily disabled: khard dep broken (sphinx-argparse vs Sphinx 9.x)
-    python312Packages.vobject
-    python312Packages.icalendar
-    python312Packages.pytz
-    python312Packages.tzlocal
-    python312Packages.imaplib2
+    python3Packages.vobject
+    python3Packages.icalendar
+    python3Packages.pytz
+    python3Packages.tzlocal
+    python3Packages.imaplib2
   ];
 }
