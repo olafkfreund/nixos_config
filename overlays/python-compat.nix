@@ -32,6 +32,30 @@ _final: prev: {
           pyPrev.typing-extensions
         ];
       });
+      # azure-core 1.38.0: tests/conftest.py starts a Flask server and gives it
+      # 5 seconds to bind the port. On a busy builder it doesn't make it, so all
+      # 271 collected tests error at fixture setup with "Didn't start!". Nothing
+      # to do with the library. Blocks azure-identity/-mgmt-core/-keyvault-*.
+      azure-core = pyPrev.azure-core.overridePythonAttrs (_old: {
+        doCheck = false;
+      });
+      # sse-starlette 3.2.0: 69/70 pass; the odd one out asserts an exact
+      # keepalive-ping count (assert 3 == 2) and picks up a stray ping when the
+      # host is loaded. The python312Packages override below already skips this,
+      # but mcp resolves its deps through python312.pkgs, which never sees it —
+      # hence the same skip here.
+      sse-starlette = pyPrev.sse-starlette.overridePythonAttrs (_old: {
+        doCheck = false;
+      });
+      # httplib2 0.32.0: all 76 tests pass, then pytest-timeout 2.4.0 fires its
+      # 17s SIGALRM inside terminalwriter.flush() during pytest_runtest_logstart
+      # and pytest 9.1.1 aborts with INTERNALERROR (exit 3). Load-dependent — it
+      # only trips when the host is building several derivations at once. Skip
+      # the check; it blocks google-api-python-client -> google-generativeai ->
+      # meet-process. Drop once pytest-timeout/pytest stop racing there.
+      httplib2 = pyPrev.httplib2.overridePythonAttrs (_old: {
+        doCheck = false;
+      });
       # inline-snapshot 0.32.5 has 3 failing tests (of 1428) on this nixpkgs;
       # it's a test-only dep pulled in via fastapi -> mcp. Skip its checks.
       inline-snapshot = pyPrev.inline-snapshot.overridePythonAttrs (_old: {

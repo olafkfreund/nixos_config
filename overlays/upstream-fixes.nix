@@ -1,4 +1,14 @@
 _final: prev: {
+  # waypipe 0.11.0's optional video path reads AVVulkanDeviceContext fields
+  # (queue_family_*_index, nb_*_queues) that FFmpeg 8 replaced with the qf[]
+  # array — 10x E0609, build dies at exit 101. with_video defaults to "auto" and
+  # latches on because ffmpeg is in buildInputs, so pin it off. Costs only
+  # waypipe's `--video` lossy-stream option; compression and DMABUF remoting are
+  # unaffected. Drop once waypipe supports the FFmpeg 8 vulkan API.
+  waypipe = prev.waypipe.overrideAttrs (old: {
+    mesonFlags = (old.mesonFlags or [ ]) ++ [ "-Dwith_video=disabled" ];
+  });
+
   # azure-cli 2.81.0 expects azure-mgmt-web v2024_11_01 which isn't packaged yet;
   # disable installCheck until nixpkgs catches up.
   azure-cli = prev.azure-cli.overrideAttrs (_old: {
