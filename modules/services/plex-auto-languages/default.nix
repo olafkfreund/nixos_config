@@ -57,6 +57,16 @@ in
           # no inbound surface — Plex notifies it via its own websocket
           # API, not webhooks-into-PAL — so no port mapping needed.
           "--network=host"
+
+          # The image ships HEALTHCHECK `curl --fail localhost:9880` on a 30s
+          # interval with no start period, and podman runs each probe in its own
+          # transient systemd unit. The first probe fires before PAL is
+          # listening, exits 1, and leaves a failed unit behind — which
+          # `nh os switch` treats as a failed activation and rolls the entire
+          # p510 deploy back. Measured over 3h: 346 healthy, 2 failures, both
+          # the first probe after a container start. Give it a start period so
+          # boot-time failures don't count.
+          "--health-start-period=90s"
         ];
       };
     };
