@@ -35,11 +35,6 @@
     # hasn't reached the nixos-unstable channel yet. Grafted in via overlay
     # (overlays/default.nix). Remove this input + the graft once unstable catches up.
     nixpkgs-master.url = "github:nixos/nixpkgs/master";
-    # Pinned solely for ollama 0.31.2 (last version whose CUDA build works in
-    # nixpkgs — 0.32.1's llama.cpp CUDA ExternalProject can't find nvcc, an active
-    # upstream bug). Grafted as pkgs.ollama-cuda for p510 via overlays/default.nix.
-    # Remove this input + the graft once nixpkgs 0.32.x CUDA builds again.
-    nixpkgs-ollama.url = "github:nixos/nixpkgs/6cdc7fc76e8bf7fde9fa43a849fcaaa70e230dee";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     flake-utils.url = "github:numtide/flake-utils";
@@ -62,12 +57,8 @@
     # provides programs.noctalia. Follows nixpkgs: the package is a light QML
     # wrapper over pkgs.quickshell (already cached in nixpkgs), so this avoids
     # duplicating the Qt closure and needs no extra cachix.
-    # Pinned to a known-good rev: noctalia HEAD (b87c8acf) fails to compile — its
-    # mango workspace backend has a type error (mango_workspace_backend.cpp:162,
-    # `TagInfo` vs `uint32_t`). Unpin (back to a bare branch url) once upstream
-    # noctalia fixes the mango backend build.
     noctalia = {
-      url = "github:noctalia-dev/noctalia/b9b4bc3408a906f392a8d277d172ef440debc5cc";
+      url = "github:noctalia-dev/noctalia";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -228,18 +219,8 @@
     # offline in-repo), exposed as packages.default. Consumed via overlay
     # as pkgs.herdr on the interactive-host developer profile (p620 + razer).
     # Bump with `nix flake update herdr`.
-    # ponytail: temporarily pinned to d4e0dd3d (2026-07-25), the last rev whose
-    # own flake builds. Upstream cb2e17a4 ("feat: print bundled agent skill")
-    # added `include_str!("../SKILL.md")` to src/main.rs but did NOT add
-    # ../SKILL.md to the lib.fileset.unions allowlist in nix/package.nix, so the
-    # file never reaches the sandbox:
-    #     error: couldn't read `src/../SKILL.md`: No such file or directory
-    # That breaks any consumer of their packages.default, us included, and it is
-    # upstream's bug — not a packaging problem on our side.
-    # UN-PIN (drop the rev, back to plain `github:ogulcancelik/herdr`) once the
-    # fileset includes SKILL.md; verify with `nix build github:ogulcancelik/herdr`.
     herdr = {
-      url = "github:ogulcancelik/herdr/d4e0dd3d903c50d2edb8c3cec71952a83989b310";
+      url = "github:ogulcancelik/herdr";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.rust-overlay.follows = "rust-overlay";
     };
