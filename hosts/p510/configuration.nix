@@ -561,6 +561,17 @@ in
   };
   system.stateVersion = "25.11";
 
+  # p510 is a headless media server (Plex, NZBGet, k3s microvms) and is only
+  # ever deployed on explicit request — never unattended. The global
+  # system.autoUpgrade in modules/nix/nix.nix pulled and switched this host
+  # nightly at ~04:00, which is exactly what we don't want here: an unreviewed
+  # switch can restart media services, and its user-activation step fails every
+  # run anyway (switch-to-configuration reloads the user dbus-broker and then
+  # talks over the dead connection, so nixos-upgrade.service reported failure
+  # each morning while having actually applied the upgrade).
+  # Deploy with `just p510` instead.
+  system.autoUpgrade.enable = lib.mkForce false;
+
   # Local Ollama model server on NVIDIA GPU (CUDA).
   # Bound to 0.0.0.0:11434 with OLLAMA_ORIGINS=* so tailnet/LAN clients
   # and browser UIs can hit it directly. p510's firewall is disabled —
