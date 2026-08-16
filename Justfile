@@ -411,7 +411,46 @@ p620:
 
 # Deploy to p510 workstation (Intel Xeon/NVIDIA) - OPTIMIZED
 p510:
+    just p510-clear-sessions
     nixos-rebuild switch --flake .#p510 --target-host p510 --build-host p510 --sudo --no-reexec --keep-going --accept-flake-config
+
+# p510 runs GNOME for gnome-remote-desktop, so a leftover session keeps a
+# systemd --user manager alive with ~47 GUI units that can't start without a
+# display. switch-to-configuration then tries to start them, reloads the user
+# dbus-broker mid-flight, loses its own bus connection and returns exit 4.
+# Clearing idle sessions first removes most of that noise. It does NOT
+# guarantee exit 0 — verify the end state, not the exit code:
+#   readlink -f /run/current-system && systemctl --failed
+# Drop stale olafkfreund sessions on p510 before a switch
+p510-clear-sessions:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    echo "🧹 Clearing stale olafkfreund sessions on p510..."
+    ssh p510 'bash -s' <<'REMOTE'
+    set -uo pipefail
+    # Columns: SESSION UID USER SEAT LEADER CLASS TTY IDLE ...
+    # Only idle, TTY-less user sessions are stale. Never touch a session with a
+    # TTY (a live login / tmux) and never our own ssh session.
+    self="${XDG_SESSION_ID:-none}"
+    killed=0
+    while read -r id uid _user _seat _leader class tty _rest; do
+      [ "$uid" = "1000" ] || continue
+      [ "$class" = "user" ] || continue
+      [ "$tty" = "-" ] || continue
+      [ "$id" = "$self" ] && continue
+      loginctl terminate-session "$id" 2>/dev/null
+      # A session whose leader already died sits in State=closing forever and
+      # terminate-session is a no-op on it — its scope keeps running abandoned
+      # (seen: a wedged `docker run … | head` from an old debug session held one
+      # open for 3 days). Stop the scope directly in that case.
+      if loginctl show-session "$id" -p Id >/dev/null 2>&1; then
+        sudo systemctl stop "session-$id.scope" 2>/dev/null || true
+      fi
+      loginctl show-session "$id" -p Id >/dev/null 2>&1 || killed=$((killed+1))
+    done < <(loginctl list-sessions --no-legend)
+    systemctl --user reset-failed 2>/dev/null || true
+    echo "  terminated $killed stale session(s); user manager: $(systemctl --user is-system-running 2>&1)"
+    REMOTE
 
 
 # =============================================================================
