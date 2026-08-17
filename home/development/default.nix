@@ -26,6 +26,7 @@ _: {
 
     # Core language support and tooling
     ./languages.nix
+    ./npm-prefix.nix # writable npm/npx global prefix (nodejs-slim has no lib/)
 
     # LSP servers for Claude Code and other editors
     ./lsp-servers.nix
