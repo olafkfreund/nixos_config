@@ -31,10 +31,6 @@
     # Core
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
-    # Temporary: dms-shell 1.5.0 landed on master (PR #539682, 2026-07-09) but
-    # hasn't reached the nixos-unstable channel yet. Grafted in via overlay
-    # (overlays/default.nix). Remove this input + the graft once unstable catches up.
-    nixpkgs-master.url = "github:nixos/nixpkgs/master";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     flake-utils.url = "github:numtide/flake-utils";
@@ -82,8 +78,8 @@
     # here needs fetchSubmodules.
     #
     # Pinned to a release tag: this is a fast-moving 0.x (v0.2.7, 2026-07-24).
-    # Requires DMS >= 1.5 for the dankcal backend to exist at all — do not drop
-    # the nixpkgs-master DMS graft above until unstable carries 1.5+.
+    # Requires DMS >= 1.5 for the dankcal backend to exist at all; nixos-unstable
+    # ships dms-shell 1.5.3, so plain pkgs.dms-shell satisfies that.
     dankcalendar = {
       url = "github:AvengeMedia/dankcalendar/v0.2.7";
       inputs.nixpkgs.follows = "nixpkgs";
