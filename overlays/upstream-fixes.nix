@@ -1,22 +1,4 @@
 _final: prev: {
-  # waypipe 0.11.0's optional video path reads AVVulkanDeviceContext fields
-  # (queue_family_*_index, nb_*_queues) that FFmpeg 8 replaced with the qf[]
-  # array — 10x E0609, build dies at exit 101. with_video defaults to "auto" and
-  # latches on because ffmpeg is in buildInputs, so pin it off. Costs only
-  # waypipe's `--video` lossy-stream option; compression and DMABUF remoting are
-  # unaffected. Drop once waypipe supports the FFmpeg 8 vulkan API.
-  waypipe = prev.waypipe.overrideAttrs (old: {
-    mesonFlags = (old.mesonFlags or [ ]) ++ [ "-Dwith_video=disabled" ];
-  });
-
-  # Same FFmpeg 8 break, one package over: moonlight-qt 6.1.0 reads the removed
-  # AVVulkanDeviceContext queue fields *and* AVCodec.pix_fmts (now behind
-  # avcodec_get_supported_config). Both are load-bearing here — the pix_fmts use
-  # is in the core decoder path, so there's no feature to switch off. Build it
-  # against ffmpeg_7 instead, which keeps hardware decode intact. Drop once
-  # moonlight-qt ships FFmpeg 8 support.
-  moonlight-qt = prev.moonlight-qt.override { ffmpeg = prev.ffmpeg_7; };
-
   # azure-cli 2.81.0 expects azure-mgmt-web v2024_11_01 which isn't packaged yet;
   # disable installCheck until nixpkgs catches up.
   azure-cli = prev.azure-cli.overrideAttrs (_old: {
