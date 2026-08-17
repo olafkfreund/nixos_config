@@ -64,12 +64,37 @@ run 'sudo find /boot -name "*.tmp" -type f -print -delete 2>/dev/null || true'
 #    /boot by hand is how people brick a laptop: the installer knows which
 #    kernel/initrd the remaining generations still reference, so let it decide.
 #    +2 keeps the current generation and one fallback.
-run 'sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +2 2>/dev/null || true'
-run 'sudo /run/current-system/bin/switch-to-configuration boot 2>&1 | tail -3'
+prune_to() {
+  run "sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +$1 2>/dev/null || true"
+  run 'sudo /run/current-system/bin/switch-to-configuration boot 2>&1 | tail -3'
+}
+
+prune_to 2
 
 FREE="$(free_mib)"
 if [ "$FREE" -ge "$MIN_FREE_MIB" ]; then
   echo "✅ ${LABEL}: ${FREE}MiB free after cleanup"
+  exit 0
+fi
+
+# Escalate to a single generation.
+#
+# Keeping 2 generations is not always reachable: on razer the initrds are
+# ~150MiB, so 2 generations occupy 312MiB of a 511MiB ESP and leave 198MiB —
+# permanently 2MiB under MIN_FREE_MIB. `--delete-generations +2` therefore
+# "succeeded" while still failing the check, every single deploy.
+#
+# Dropping to 1 frees a full initrd. The fallback is not lost for long: the
+# deploy that follows writes a second generation immediately, so the end state
+# is still current + fallback. The window without a fallback lasts only until
+# that switch completes, which beats refusing to deploy at all.
+echo "🧹 ${LABEL}: ${FREE}MiB still short — escalating to a single generation"
+prune_to 1
+
+FREE="$(free_mib)"
+if [ "$FREE" -ge "$MIN_FREE_MIB" ]; then
+  echo "✅ ${LABEL}: ${FREE}MiB free after pruning to one generation"
+  echo "   (the upcoming switch restores a second, so you keep a fallback)"
   exit 0
 fi
 
