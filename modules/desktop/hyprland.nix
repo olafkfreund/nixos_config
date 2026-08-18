@@ -2,7 +2,7 @@
 # Hyprland — dynamic-tiling Wayland compositor, exposed as a selectable login
 # session alongside niri/labwc/mango. Hyprland 0.55+ dropped hyprlang in favour
 # of an embedded Lua runtime, so the config is ~/.config/hypr/hyprland.lua,
-# written by home-manager (see home/desktop/hyprland).
+# written by home-manager (see home/desktop/wayland/hyprland.nix).
 #
 # programs.hyprland ships its own share/wayland-sessions/hyprland.desktop, so
 # unlike labwc/mango no session file is generated here; the DMS variant lives in

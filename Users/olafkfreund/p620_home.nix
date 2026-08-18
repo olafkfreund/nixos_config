@@ -5,8 +5,7 @@
 }: {
   imports = [
     ./profile.nix
-    ../../home/desktop/noctalia # Noctalia shell for niri/labwc sessions
-    ../../home/desktop/hyprland # Hyprland session config (Lua)
+    ../../home/desktop/wayland # niri/labwc/mango/hyprland sessions + shell theming
     ../../home/desktop/dank-calendar # dcal daemon backing the DMS calendar card
   ];
 
