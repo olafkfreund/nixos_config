@@ -2,7 +2,7 @@
 # DankMaterialShell (DMS) as extra selectable login sessions, one per WM we run
 # (niri, labwc, mango), alongside the stock Noctalia sessions.
 #
-# niri session split (see home/desktop/noctalia): DMS hardcodes niri's default
+# niri session split (see home/desktop/wayland): DMS hardcodes niri's default
 # ~/.config/niri/config.kdl as the file it inspects/edits and ignores NIRI_CONFIG,
 # so config.kdl IS the DMS session's config (carrying the dms/*.kdl includes), and
 # the Noctalia config is moved to config-noctalia.kdl. Each niri launcher selects
@@ -12,7 +12,7 @@
 #
 # labwc/mango have no systemd session and no per-file config split here; their DMS
 # entries just set DESK_SHELL="dms run" (the ${DESK_SHELL:-noctalia} switch in
-# home/desktop/noctalia's labwc autostart / mango autostart_sh) so DMS launches
+# home/desktop/wayland's labwc autostart / mango autostart_sh) so DMS launches
 # instead of Noctalia. `dms run` is a fully supported DMS launch mode.
 let
   inherit (lib) mkEnableOption mkIf optional hiPrio;
@@ -36,7 +36,7 @@ let
   '';
   # Hyprland has no NIRI_CONFIG equivalent — one hyprland.lua serves both
   # sessions and the ${DESK_SHELL:-noctalia} switch in its hyprland.start hook
-  # (home/desktop/hyprland) picks the shell, same as labwc/mango.
+  # (home/desktop/wayland/hyprland.nix) picks the shell, same as labwc/mango.
   hyprlandLauncher = pkgs.writeShellScript "hyprland-dms-session" ''
     export DESK_SHELL="dms run"
     exec ${config.programs.hyprland.package}/bin/start-hyprland

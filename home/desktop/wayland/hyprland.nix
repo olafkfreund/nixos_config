@@ -1,5 +1,5 @@
 { config, lib, pkgs, osConfig, ... }:
-# Hyprland session config — the DMS/Noctalia counterpart to home/desktop/noctalia.
+# Hyprland session config — the DMS/Noctalia counterpart to home/desktop/wayland.
 #
 # Hyprland 0.55+ replaced hyprlang with an embedded Lua runtime, so home-manager
 # writes ~/.config/hypr/hyprland.lua (configType = "lua"): `settings.<name>`
@@ -10,19 +10,11 @@
 # "Hyprland (DankMaterialShell)" session sets DESK_SHELL="dms run" -> DMS
 # (modules/desktop/dms-shell.nix).
 #
-# Binds mirror the niri session (home/desktop/noctalia) wherever Hyprland has
+# Binds mirror the niri session (home/desktop/wayland) wherever Hyprland has
 # an equivalent action; the divergences are commented at the bind (#1367).
 let
   inherit (lib.generators) mkLuaInline;
-
-  # Same wallpaper Stylix uses; swaybg paints it, as on niri/labwc/mango.
-  wallpaper = (import ../../../hosts/common/shared-variables.nix).baseTheme.wallpaper;
-
-  # Only laptops auto-suspend on idle; the workstation stays up (RDP / AI host).
-  isLaptop = (osConfig.host.class or "") == "laptop";
-
-  # Fixed UK coordinates (London), matching the niri session's gammastep.
-  geo = "51.5:-0.13";
+  inherit (import ./common.nix { inherit pkgs osConfig; }) wallpaper isLaptop geo;
 
   c = n: "rgb(${config.lib.stylix.colors.${n}})";
 in
@@ -37,7 +29,7 @@ in
   # binds (niri has a native screenshot UI, Hyprland does not). Everything else
   # the binds and the startup hook call — swaybg, gammastep, swayidle, slurp,
   # wl-screenrec, the shared `screenrecord` script — comes from
-  # home/desktop/noctalia, which every session here shares.
+  # home/desktop/wayland, which every session here shares.
   home.packages = [ pkgs.grimblast ];
 
   wayland.windowManager.hyprland = {
@@ -62,7 +54,7 @@ in
       ];
 
       # `hl.config{...}`. Colours mirror the niri layout block in
-      # home/desktop/noctalia: 1px borders, active base0B, inactive base03,
+      # home/desktop/wayland: 1px borders, active base0B, inactive base03,
       # 12px outer gaps, base0B-tinted shadow.
       config = {
         general = {
@@ -120,7 +112,7 @@ in
     # Binds as plain Lua: hl.bind() calls read better here than nested
     # _args/mkLuaInline attrsets, and this is the form the DMS docs use.
     #
-    # Ported 1:1 from the niri binds block in home/desktop/noctalia where the
+    # Ported 1:1 from the niri binds block in home/desktop/wayland where the
     # action exists in Hyprland. niri is scrollable-tiling and Hyprland is
     # dwindle, so the column actions have no direct equivalent — the mapping is
     # recorded per bind below (#1367).
@@ -200,7 +192,7 @@ in
       hl.bind(mod .. " + CTRL + S", hl.dsp.exec_cmd("grimblast copysave output"))
       hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd("grimblast copysave active"))
 
-      -- Screen recording (shared script, see home/desktop/noctalia)
+      -- Screen recording (shared script, see home/desktop/wayland)
       hl.bind(mod .. " + SHIFT + R", hl.dsp.exec_cmd("screenrecord"))
       hl.bind(mod .. " + ALT + R", hl.dsp.exec_cmd("screenrecord region"))
 

@@ -5,7 +5,7 @@
 # $XDG_RUNTIME_DIR/dankcal-*.sock and prefers it over the khal backend, which
 # is read-only and needs a vdirsyncer pipeline to feed it.
 #
-# Unlike Noctalia (see ../noctalia), this DOES run from its systemd user
+# Unlike Noctalia (see ../wayland), this DOES run from its systemd user
 # service on graphical-session.target, GNOME included. The rule that keeps
 # Noctalia out of systemd is about a *shell* spawning a second time over
 # gnome-shell; dcal is a headless sync daemon, so a GNOME session just keeps
