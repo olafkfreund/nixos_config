@@ -1,4 +1,4 @@
-{ config, lib, osConfig, ... }:
+{ config, lib, pkgs, osConfig, ... }:
 # Hyprland session config — the DMS/Noctalia counterpart to home/desktop/noctalia.
 #
 # Hyprland 0.55+ replaced hyprlang with an embedded Lua runtime, so home-manager
@@ -10,8 +10,8 @@
 # "Hyprland (DankMaterialShell)" session sets DESK_SHELL="dms run" -> DMS
 # (modules/desktop/dms-shell.nix).
 #
-# Phase 1 (#1366): session, colours, essential binds. The full 146-bind niri
-# parity port, screen recorder and window rules are #1367.
+# Binds mirror the niri session (home/desktop/noctalia) wherever Hyprland has
+# an equivalent action; the divergences are commented at the bind (#1367).
 let
   inherit (lib.generators) mkLuaInline;
 
@@ -32,6 +32,13 @@ in
   # its hyprpaper sub-target would start a second wallpaper daemon next to
   # swaybg. We set the same base16 colours by hand below instead.
   stylix.targets.hyprland.enable = false;
+
+  # grimblast: Hyprland-aware grim/slurp/wl-copy wrapper behind the screenshot
+  # binds (niri has a native screenshot UI, Hyprland does not). Everything else
+  # the binds and the startup hook call — swaybg, gammastep, swayidle, slurp,
+  # wl-screenrec, the shared `screenrecord` script — comes from
+  # home/desktop/noctalia, which every session here shares.
+  home.packages = [ pkgs.grimblast ];
 
   wayland.windowManager.hyprland = {
     enable = true;
@@ -110,8 +117,13 @@ in
       };
     };
 
-    # Binds as plain Lua: 30 hl.bind() calls read better here than 30 nested
+    # Binds as plain Lua: hl.bind() calls read better here than nested
     # _args/mkLuaInline attrsets, and this is the form the DMS docs use.
+    #
+    # Ported 1:1 from the niri binds block in home/desktop/noctalia where the
+    # action exists in Hyprland. niri is scrollable-tiling and Hyprland is
+    # dwindle, so the column actions have no direct equivalent — the mapping is
+    # recorded per bind below (#1367).
     #
     # DMS writes ~/.config/hypr/dms/{colors,layout,outputs}.lua at runtime.
     # Only outputs is required: colours and layout are ours (same reasoning as
@@ -130,21 +142,43 @@ in
       hl.bind(mod .. " + E", hl.dsp.exec_cmd("nautilus"))
       hl.bind(mod .. " + Q", hl.dsp.window.close())
       hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-      hl.bind(mod .. " + F", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }))
-      hl.bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }))
-      hl.bind(mod .. " + R", hl.dsp.layout("togglesplit"))
       hl.bind(mod .. " + SHIFT + E", hl.dsp.exit())
 
-      -- Focus / move. HJKL and the arrows both move focus; niri's arrow-based
-      -- workspace switching lives on Page_Up/Down here (see #1367).
+      -- niri maximize-column / fullscreen-window / windowed-fullscreen.
+      hl.bind(mod .. " + F", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }))
+      hl.bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }))
+      hl.bind(mod .. " + CTRL + SHIFT + F", hl.dsp.window.fullscreen_state({ internal = 2, client = 0, action = "toggle" }))
+
+      -- niri switch-preset-column-width has no dwindle equivalent; togglesplit
+      -- is the nearest "change how this window is laid out" action.
+      hl.bind(mod .. " + R", hl.dsp.layout("togglesplit"))
+
+      -- niri set-column-width +-10%. Hyprland resizes in pixels.
+      hl.bind(mod .. " + EQUAL", hl.dsp.window.resize({ x = 100, y = 0, relative = true }))
+      hl.bind(mod .. " + MINUS", hl.dsp.window.resize({ x = -100, y = 0, relative = true }))
+
+      -- niri consume-window-into-column / expel-window-from-column. Groups are
+      -- the closest concept: toggle creates or dissolves one, next cycles
+      -- through its members.
+      hl.bind(mod .. " + COMMA", hl.dsp.group.toggle())
+      hl.bind(mod .. " + PERIOD", hl.dsp.group.next())
+
+      -- Focus / move. HJKL is pure directional focus, as on niri.
       for key, dir in pairs({ H = "left", L = "right", J = "down", K = "up" }) do
         hl.bind(mod .. " + " .. key, hl.dsp.focus({ direction = dir }))
         hl.bind(mod .. " + SHIFT + " .. key, hl.dsp.window.move({ direction = dir }))
       end
-      for key, dir in pairs({ left = "left", right = "right", down = "down", up = "up" }) do
-        hl.bind(mod .. " + " .. key, hl.dsp.focus({ direction = dir }))
-        hl.bind(mod .. " + SHIFT + " .. key, hl.dsp.window.move({ direction = dir }))
-      end
+
+      -- Arrows keep niri's split: left/right move focus, up/down change
+      -- workspace (niri stacks workspaces vertically and columns horizontally).
+      hl.bind(mod .. " + left", hl.dsp.focus({ direction = "left" }))
+      hl.bind(mod .. " + right", hl.dsp.focus({ direction = "right" }))
+      hl.bind(mod .. " + SHIFT + left", hl.dsp.window.move({ direction = "left" }))
+      hl.bind(mod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" }))
+      hl.bind(mod .. " + down", hl.dsp.focus({ workspace = "e+1" }))
+      hl.bind(mod .. " + up", hl.dsp.focus({ workspace = "e-1" }))
+      hl.bind(mod .. " + SHIFT + down", hl.dsp.window.move({ workspace = "e+1" }))
+      hl.bind(mod .. " + SHIFT + up", hl.dsp.window.move({ workspace = "e-1" }))
 
       -- Workspaces
       for i = 1, 5 do
@@ -153,17 +187,34 @@ in
       end
       hl.bind(mod .. " + Page_Down", hl.dsp.focus({ workspace = "e+1" }))
       hl.bind(mod .. " + Page_Up", hl.dsp.focus({ workspace = "e-1" }))
+      hl.bind(mod .. " + SHIFT + Page_Down", hl.dsp.window.move({ workspace = "e+1" }))
+      hl.bind(mod .. " + SHIFT + Page_Up", hl.dsp.window.move({ workspace = "e-1" }))
+      -- niri throttles wheel workspace switching with cooldown-ms=150; Hyprland
+      -- has no equivalent knob.
       hl.bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
       hl.bind(mod .. " + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
 
-      -- Shell actions — DankMaterialShell
+      -- Screenshots. niri has a native screenshot UI; grimblast is the
+      -- Hyprland-aware grim/slurp wrapper. copysave = clipboard + ~/Pictures.
+      hl.bind(mod .. " + S", hl.dsp.exec_cmd("grimblast copysave area"))
+      hl.bind(mod .. " + CTRL + S", hl.dsp.exec_cmd("grimblast copysave output"))
+      hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd("grimblast copysave active"))
+
+      -- Screen recording (shared script, see home/desktop/noctalia)
+      hl.bind(mod .. " + SHIFT + R", hl.dsp.exec_cmd("screenrecord"))
+      hl.bind(mod .. " + ALT + R", hl.dsp.exec_cmd("screenrecord region"))
+
+      -- Shell actions — DankMaterialShell. The overview and the keybind
+      -- cheatsheet go through DMS's Hyprland-specific `hypr` IPC target
+      -- (`dms ipc call hypr ...`), not the niri one.
       hl.bind(mod .. " + D", hl.dsp.exec_cmd("dms ipc call spotlight toggle"))
       hl.bind(mod .. " + SPACE", hl.dsp.exec_cmd("dms ipc call spotlight toggle"))
       hl.bind(mod .. " + C", hl.dsp.exec_cmd("dms ipc call control-center toggle"))
       hl.bind(mod .. " + N", hl.dsp.exec_cmd("dms ipc call notifications toggle"))
       hl.bind(mod .. " + X", hl.dsp.exec_cmd("dms ipc call powermenu toggle"))
-      hl.bind(mod .. " + O", hl.dsp.exec_cmd("dms ipc call overview toggle"))
-      hl.bind(mod .. " + TAB", hl.dsp.exec_cmd("dms ipc call overview toggle"))
+      hl.bind(mod .. " + O", hl.dsp.exec_cmd("dms ipc call hypr toggleOverview"))
+      hl.bind(mod .. " + TAB", hl.dsp.exec_cmd("dms ipc call hypr toggleOverview"))
+      hl.bind(mod .. " + SHIFT + SLASH", hl.dsp.exec_cmd("dms ipc call hypr toggleBinds"))
       hl.bind(mod .. " + BACKSPACE", hl.dsp.exec_cmd("dms ipc call lock lock"), { locked = true })
 
       -- Media / brightness (locked so they work on the lock screen)

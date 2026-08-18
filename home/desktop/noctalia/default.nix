@@ -37,7 +37,7 @@ let
 in
 {
   # wl-mirror: mirror an output to a window (niri has no native mirroring).
-  # jq: parse `niri msg --json`. wl-screenrec/slurp: HW-encoded screen recording.
+  # jq: parse the compositor's JSON IPC. wl-screenrec/slurp: HW-encoded recording.
   home.packages = with pkgs; [
     wl-mirror
     jq
@@ -57,7 +57,7 @@ in
     #         output config natively in config.kdl, so this is mainly for labwc)
     # Screen-recording toggle bound to Mod+Shift+R / Mod+Alt+R. Records the
     # focused output (or a slurp-selected region) to ~/Videos; re-run to stop.
-    (writeShellScriptBin "niri-screenrecord" ''
+    (writeShellScriptBin "screenrecord" ''
       set -euo pipefail
       out="$HOME/Videos"; mkdir -p "$out"
       if ${procps}/bin/pgrep -x wl-screenrec >/dev/null 2>&1; then
@@ -69,7 +69,13 @@ in
           geom="$(${slurp}/bin/slurp)" || exit 0
           ${wl-screenrec}/bin/wl-screenrec -g "$geom" -f "$f" &
         else
-          name="$(${niri}/bin/niri msg --json focused-output | ${jq}/bin/jq -r .name)"
+          # Focused-output lookup is the only compositor-specific bit; labwc and
+          # mango have no such IPC, which is why they bind the region variant.
+          if [ -n "''${NIRI_SOCKET:-}" ]; then
+            name="$(${niri}/bin/niri msg --json focused-output | ${jq}/bin/jq -r .name)"
+          else
+            name="$(${hyprland}/bin/hyprctl -j activeworkspace | ${jq}/bin/jq -r .monitor)"
+          fi
           ${wl-screenrec}/bin/wl-screenrec -o "$name" -f "$f" &
         fi
         ${libnotify}/bin/notify-send "Screen recording" "Recording… Mod+Shift+R to stop"
@@ -498,8 +504,8 @@ in
         Mod+S { spawn "niri" "msg" "action" "screenshot"; }
         Mod+Ctrl+S { spawn "niri" "msg" "action" "screenshot-screen"; }
         Mod+Shift+S { spawn "niri" "msg" "action" "screenshot-window"; }
-        Mod+Shift+R { spawn "niri-screenrecord"; }
-        Mod+Alt+R { spawn "niri-screenrecord" "region"; }
+        Mod+Shift+R { spawn "screenrecord"; }
+        Mod+Alt+R { spawn "screenrecord" "region"; }
         Mod+Shift+Slash { show-hotkey-overlay; }
         Mod+Shift+E { quit; }
         XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; }
@@ -597,8 +603,8 @@ in
 
     # Screen recording (wl-screenrec, hardware-encoded) → ~/Videos. Re-press to
     # stop. Mod+Shift+R = focused output; Mod+Alt+R = slurp-selected region.
-    "Mod+Shift+R".action = spawn "niri-screenrecord";
-    "Mod+Alt+R".action = spawn "niri-screenrecord" "region";
+    "Mod+Shift+R".action = spawn "screenrecord";
+    "Mod+Alt+R".action = spawn "screenrecord" "region";
 
     # Screen mirroring (wl-mirror): mirror the focused output into a window.
     # Move that window to the target output and Mod+Shift+F it to fullscreen.
@@ -721,10 +727,10 @@ in
         <keybind key="W-C-s"><action name="Execute" command="noctalia msg screenshot-fullscreen"/></keybind>
         <keybind key="Print"><action name="Execute" command="noctalia msg screenshot-region"/></keybind>
         <!-- Screen recording (region; re-press to stop). Mod+Alt+R matches niri's
-             region key; Mod+Shift+R kept as an alias. niri-screenrecord's region
+             region key; Mod+Shift+R kept as an alias. screenrecord's region
              branch is compositor-agnostic (slurp + wl-screenrec). -->
-        <keybind key="W-A-r"><action name="Execute" command="niri-screenrecord region"/></keybind>
-        <keybind key="W-S-r"><action name="Execute" command="niri-screenrecord region"/></keybind>
+        <keybind key="W-A-r"><action name="Execute" command="screenrecord region"/></keybind>
+        <keybind key="W-S-r"><action name="Execute" command="screenrecord region"/></keybind>
         <!-- Media / brightness (identical to niri) -->
         <keybind key="XF86_AudioRaiseVolume"><action name="Execute" command="wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"/></keybind>
         <keybind key="XF86_AudioLowerVolume"><action name="Execute" command="wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"/></keybind>
@@ -844,8 +850,8 @@ in
         bind=none,Print,spawn,noctalia msg screenshot-region
         # Region recording (re-press to stop). Mod+Alt+R matches niri's region key;
         # Mod+Shift+R kept as alias (niri's Mod+Shift+R focused-output is niri-only).
-        bind=SUPER+ALT,r,spawn,niri-screenrecord region
-        bind=SUPER+SHIFT,r,spawn,niri-screenrecord region
+        bind=SUPER+ALT,r,spawn,screenrecord region
+        bind=SUPER+SHIFT,r,spawn,screenrecord region
 
         # Media / brightness
         bind=none,XF86AudioRaiseVolume,spawn,wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
