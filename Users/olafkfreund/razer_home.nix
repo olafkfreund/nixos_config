@@ -7,6 +7,7 @@
   imports = [
     ./profile.nix
     ../../home/desktop/noctalia # Noctalia shell for niri/labwc sessions
+    ../../home/desktop/hyprland # Hyprland session config (Lua)
   ];
 
   desktop.gnome.profile = "laptop";

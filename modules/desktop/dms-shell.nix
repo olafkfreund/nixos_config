@@ -34,10 +34,17 @@ let
     export DESK_SHELL="dms run"
     exec mango
   '';
+  # Hyprland has no NIRI_CONFIG equivalent — one hyprland.lua serves both
+  # sessions and the ${DESK_SHELL:-noctalia} switch in its hyprland.start hook
+  # (home/desktop/hyprland) picks the shell, same as labwc/mango.
+  hyprlandLauncher = pkgs.writeShellScript "hyprland-dms-session" ''
+    export DESK_SHELL="dms run"
+    exec ${config.programs.hyprland.package}/bin/start-hyprland
+  '';
 
   # services.displayManager.sessionPackages requires passthru.providedSessions to
   # match the .desktop basename.
-  mkSession = { name, label, comment, exec }:
+  mkSession = { name, label, comment, exec, desktopNames ? name }:
     (pkgs.writeTextFile {
       name = "${name}-wayland-session";
       destination = "/share/wayland-sessions/${name}.desktop";
@@ -47,13 +54,17 @@ let
         Comment=${comment}
         Exec=${exec}
         Type=Application
-        DesktopNames=${name}
+        DesktopNames=${desktopNames}
       '';
     }).overrideAttrs (_: { passthru.providedSessions = [ name ]; });
 
   niriDmsSession = mkSession { name = "niri-dms"; label = "Niri (DankMaterialShell)"; comment = "Niri with the DankMaterialShell desktop shell"; exec = "${niriDmsLauncher}"; };
   labwcDmsSession = mkSession { name = "labwc-dms"; label = "labwc (DankMaterialShell)"; comment = "labwc with the DankMaterialShell desktop shell"; exec = "${labwcLauncher}"; };
   mangoDmsSession = mkSession { name = "mango-dms"; label = "mango (DankMaterialShell)"; comment = "mango with the DankMaterialShell desktop shell"; exec = "${mangoLauncher}"; };
+  # DesktopNames stays "Hyprland" (not the session name): xdg-desktop-portal-hyprland
+  # declares UseIn=wlroots;Hyprland;... and would not bind for "hyprland-dms",
+  # breaking ScreenCast/Screenshot in this session.
+  hyprlandDmsSession = mkSession { name = "hyprland-dms"; label = "Hyprland (DankMaterialShell)"; comment = "Hyprland with the DankMaterialShell desktop shell"; exec = "${hyprlandLauncher}"; desktopNames = "Hyprland"; };
 
   # Shadow niri-flake's stock niri.desktop (which runs niri-session against the
   # default config.kdl — now the DMS config) so the plain "Niri" session stays
@@ -64,7 +75,8 @@ let
   dmsSessions =
     [ niriDmsSession ]
     ++ optional config.desktop.labwc.enable labwcDmsSession
-    ++ optional config.desktop.mangowm.enable mangoDmsSession;
+    ++ optional config.desktop.mangowm.enable mangoDmsSession
+    ++ optional config.desktop.hyprland.enable hyprlandDmsSession;
 in
 {
   options.desktop.dmsShell.enable =

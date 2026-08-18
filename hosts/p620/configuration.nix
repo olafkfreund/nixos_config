@@ -367,6 +367,7 @@ in
   desktop.niri.enable = true;
   desktop.labwc.enable = true;
   desktop.mangowm.enable = true;
+  desktop.hyprland.enable = true;
 
   # Adds "(DankMaterialShell)" login sessions for niri/labwc/mango next to the
   # stock (Noctalia) ones — pick per login in the greeter.
