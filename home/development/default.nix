@@ -1,6 +1,6 @@
 # Enhanced Development Environment
 # Complete development workflow with unified language support and productivity tools
-_: {
+{ pkgs, ... }: {
   imports = [
     # Editor configurations (enhanced)
     ./vscode.nix
@@ -49,4 +49,9 @@ _: {
   # installed catalogues already there.
   programs.claude-code-skills.enable = true;
   programs.claude-code-commands.enable = true;
+
+  # tuios — terminal-based window manager (tmux/zellij-adjacent). Bound here
+  # rather than in Users/olafkfreund/profile.nix so it also reaches p510, which
+  # imports this module via Users/common/imports.nix but not profile.nix.
+  home.packages = [ pkgs.tuios ];
 }
