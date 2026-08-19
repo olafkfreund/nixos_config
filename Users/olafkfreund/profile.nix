@@ -182,6 +182,19 @@ in
     # herdr — TUI "agent multiplexer": run multiple AI coding agents in one
     # terminal workspace (tmux/zellij-style). From github:ogulcancelik/herdr.
     pkgs.herdr
+    # seance — GTK/ghostty terminal multiplexer that tracks AI coding agents.
+    # Upstream flake input (see flake.nix), exposed by overlays/default.nix.
+    #
+    # lowPrio: seance vendors a patched ghostty and installs its resources
+    # (share/ghostty/themes, terminfo, shell-integration, icons) under the same
+    # paths as the real pkgs.ghostty we use as the terminal, so buildEnv fails
+    # with "two given paths contain a conflicting subpath". Deprioritising
+    # seance keeps the stock ghostty's copies and only drops its duplicates —
+    # seance reads its own resources from its store path, not from $HOME.
+    (lib.lowPrio pkgs.seance)
+    # okena — GPUI (Zed's UI framework) terminal multiplexer: tabs, splits,
+    # detachable windows, workspace restore. Local pkg from the release tarball.
+    pkgs.customPkgs.okena
     pkgs.wayfarer
     # FlyCrys — GTK4-native Claude Code GUI. Wraps the local `claude`
     # binary (installed via programs.claude-code.enable in home/default.nix).

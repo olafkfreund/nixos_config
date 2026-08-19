@@ -30,6 +30,11 @@
     herdr = inputs.herdr.packages.${prev.stdenv.hostPlatform.system}.default;
   })
 
+  # seance — Zig terminal multiplexer that tracks AI coding agents (flake input).
+  (_final: prev: {
+    seance = inputs.seance.packages.${prev.stdenv.hostPlatform.system}.default;
+  })
+
   # Rust toolchain overlay — exposes `rust-bin.*` on `final` so packages
   # that need a newer rustc than nixpkgs ships (e.g. splashboard) can
   # build with `makeRustPlatform`. Doesn't replace the default `rustc`.
