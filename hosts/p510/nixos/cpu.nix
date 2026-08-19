@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ lib, pkgs, ... }: {
   # CPU frequency scaling for Xeon workstation
   powerManagement = {
     enable = true;
@@ -24,6 +24,13 @@
     # turbostat # Intel CPU power/frequency statistics
   ];
 
-  # Thermal management for Xeon
-  services.thermald.enable = true;
+  # thermald cannot run on this box. The Xeon E5-2698 v4 (Broadwell-EP,
+  # family 6 model 79) is a server part: thermald wants the Linux PowerCap
+  # sysfs interface, which it does not expose, so every start logs
+  #   Need Linux PowerCap sysfs / Unsupported cpu model or platform
+  # and exits. A permanently-dead unit makes switch-to-configuration report
+  # "units failed" -> exit 4 -> nh rolls the whole deploy back, so this must be
+  # off rather than merely ignored. mkForce beats the Intel-CPU default in
+  # modules/services/system/default.nix, which is true here but not sufficient.
+  services.thermald.enable = lib.mkForce false;
 }
