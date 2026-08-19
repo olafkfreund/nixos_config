@@ -221,6 +221,21 @@
       inputs.rust-overlay.follows = "rust-overlay";
     };
 
+    # seance — Zig terminal multiplexer that tracks AI coding agents. Upstream
+    # ships a working flake (pkg/nix/package.nix), so there is nothing to
+    # package locally; it is consumed via overlay as pkgs.seance.
+    #
+    # The URL must be git+https with submodules=1: seance vendors a patched
+    # ghostty as a git SUBMODULE and its package.nix reads
+    # ghostty/nix/build-support/*. The `github:` fetcher does not fetch
+    # submodules, so `github:no1msd/seance` fails at eval with
+    # "path .../ghostty/nix/build-support/gi-typelib-path.nix does not exist".
+    # Bump by moving the ref= tag.
+    seance = {
+      url = "git+https://github.com/no1msd/seance?submodules=1&ref=refs/tags/v0.1.4";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
   outputs =

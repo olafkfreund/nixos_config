@@ -80,6 +80,9 @@
   # github/app release tag (see header comment in the derivation).
   github-copilot-app = pkgs.callPackage ./github-copilot-app { };
 
+  # okena — GPUI-based native terminal multiplexer (contember/okena).
+  okena = pkgs.callPackage ./okena { };
+
   # FlyCrys — GTK4-native GUI for Claude Code (Rust). Not in nixpkgs yet;
   # custom buildRustPackage derivation. Wraps the local `claude` binary.
   flycrys = pkgs.callPackage ./flycrys { };
