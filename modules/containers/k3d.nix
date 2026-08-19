@@ -163,20 +163,58 @@ let
         # host. Fix with a clean, NON-DESTRUCTIVE stop/start cycle (re-creates
         # the LB's port mapping). No delete: PVCs, etcd and the Keycloak realm
         # are all preserved.
+        # Total read_bytes of every process in the server container. k3s
+        # full-scans the datastore before it opens the API and logs NOTHING
+        # while it does, so this counter is the only evidence that a silent
+        # server is working rather than wedged.
+        server_progress() {
+          docker exec "k3d-$CLUSTER-server-0" sh -c \
+            'cat /proc/[0-9]*/io 2>/dev/null | awk "/^read_bytes/{s+=\$2} END{print s+0}"' \
+            2>/dev/null || echo 0
+        }
+
+        # Wait for the API, restarting ONLY when the server is genuinely
+        # stalled. 2026-08-19: an 11GB state.db needed ~17min to open, the flat
+        # 30s window declared it dead, and the stop/start threw the progress
+        # away — every cycle, so recovery could never finish and the cluster
+        # stayed down for hours. Never restart a server that is still reading.
         healed=0
-        for attempt in $(seq 1 5); do
-          for i in $(seq 1 15); do api_reachable && break; sleep 2; done
+        for attempt in $(seq 1 3); do
+          last_io=$(server_progress); stalled=0
+          for i in $(seq 1 ${toString (cfg.apiWaitSeconds / 2)}); do
+            api_reachable && break
+            sleep 2
+            io=$(server_progress)
+            if [ "$io" -gt "$last_io" ]; then
+              stalled=0
+              # Chatter every ~30 polls, and only while actually grinding.
+              [ $((i % 30)) -eq 0 ] && echo "[k3d-bootstrap] server still opening its datastore ($((io / 1048576)) MiB read) — waiting"
+            else
+              stalled=$((stalled + 1))
+              # 60 consecutive idle polls (a few minutes) with no API:
+              # genuinely stuck rather than slow, so stop waiting.
+              [ "$stalled" -ge 60 ] && break
+            fi
+            last_io=$io
+          done
           if api_reachable; then
             [ "$attempt" -gt 1 ] && echo "[k3d-bootstrap] API reachable after self-heal (attempt $attempt)"
             healed=1; break
           fi
-          echo "[k3d-bootstrap] host API $API_BIND:$API_PORT unreachable — clean stop/start (attempt $attempt/5)"
+          echo "[k3d-bootstrap] host API $API_BIND:$API_PORT unreachable and server not progressing — clean stop/start (attempt $attempt/3)"
           k3d cluster stop "$CLUSTER" >/dev/null 2>&1 || true
           docker rm -f "k3d-$CLUSTER-tools" >/dev/null 2>&1 || true
-          k3d cluster start "$CLUSTER" >/dev/null 2>&1 || true
+          # NOT silenced: `k3d cluster start` aborts FATAL on a broken agent
+          # node BEFORE it starts the serverlb, so the API never publishes even
+          # though the server is fine. Swallowing that output (2026-08-19) left
+          # no trace of why the cluster was unreachable.
+          if ! start_err=$(k3d cluster start "$CLUSTER" 2>&1); then
+            echo "[k3d-bootstrap] k3d cluster start failed:" >&2
+            echo "$start_err" | tail -5 >&2
+          fi
         done
         if [ "$healed" != 1 ]; then
-          echo "[k3d-bootstrap] WARNING: host API still unreachable after 5 self-heal cycles" >&2
+          echo "[k3d-bootstrap] WARNING: host API still unreachable after 3 self-heal cycles" >&2
         fi
       fi
 
@@ -374,6 +412,24 @@ in
         Host port for the kube API server. Use `kubectl --kubeconfig
         ${"$"}{kubeconfigPath}` from the host, or set `apiHostBind` to
         a non-loopback address to reach it from elsewhere.
+      '';
+    };
+
+    apiWaitSeconds = mkOption {
+      type = types.ints.positive;
+      default = 1800;
+      description = ''
+        Roughly how long the bootstrap waits for the kube API before giving
+        up on a self-heal attempt, in seconds. Approximate: the poll costs a
+        `docker exec` plus a readiness probe on top of its 2s sleep, so the
+        real ceiling runs somewhat longer than the number set here.
+
+        This is a CEILING, not a fixed delay: the wait ends as soon as the API
+        answers, and also ends early if the k3s server stops making progress
+        (no datastore reads for ~2min). Generous by design — k3s must open the
+        whole datastore before it serves, logging nothing meanwhile, and
+        restarting it mid-scan discards the work. An 11GB state.db on a
+        spinning disk took ~17min.
       '';
     };
 
