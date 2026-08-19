@@ -330,7 +330,10 @@ built. Nothing was committed or deployed; re-run from a clean tree."
     msg_subject="chore(flake): bump ${SCOPE} (nixpkgs unchanged)"
   fi
 
-  branch_name="chore/lock-bump-${SCOPE//\//-}-${new_rev:0:8}"
+  # Suffix from the new lock content, not the nixpkgs rev: a "nixpkgs unchanged"
+  # bump would otherwise reuse the same branch name on every run and collide.
+  lock_id=$(git hash-object flake.lock | cut -c1-8)
+  branch_name="chore/lock-bump-${SCOPE//\//-}-${lock_id}"
   log "creating branch ${branch_name}"
   if git show-ref --quiet "refs/heads/${branch_name}"; then
     err "branch ${branch_name} already exists locally. Delete it (\`git branch -D ${branch_name}\`) and retry."
