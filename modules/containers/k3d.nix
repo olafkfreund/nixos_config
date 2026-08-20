@@ -705,7 +705,11 @@ in
     systemd.services.keycloak-realm-backup = mkIf cfg.argocd.enable {
       description = "Backup Keycloak realm (H2 database) to durable storage";
       after = [ "k3d-cluster-bootstrap.service" ];
-      path = with pkgs; [ kubectl jq coreutils ];
+      # docker: the script resolves the live storage path from the server
+      # container's bind mount. Without it here the inspect silently fails and
+      # the script falls back to cfg.storageDir — the very trap it exists to
+      # avoid. coreutils supplies stat/date for the staleness guard.
+      path = with pkgs; [ kubectl jq coreutils config.virtualisation.docker.package ];
       environment.KUBECONFIG = cfg.kubeconfigPath;
       serviceConfig = {
         Type = "oneshot";
@@ -717,11 +721,45 @@ in
           vol=$(kubectl get pvc keycloak-data -n factory -o jsonpath='{.spec.volumeName}' 2>/dev/null) || exit 0
           [ -n "$vol" ] || { echo "[keycloak-backup] no keycloak-data PVC yet; skipping" >&2; exit 0; }
           pvpath=$(kubectl get pv "$vol" -o jsonpath='{.spec.hostPath.path}{.spec.local.path}' 2>/dev/null)
-          # The PV path is the IN-k3d-NODE path (/var/lib/rancher/k3s/storage/<dir>).
-          # The matching HOST path is ${toString cfg.storageDir}/<dir>, since that
-          # directory is bind-mounted into the k3d server node.
-          h2="${toString cfg.storageDir}/$(basename "$pvpath")/h2/keycloakdb.mv.db"
+
+          # Resolve the host storage dir from the SERVER CONTAINER'S ACTUAL BIND
+          # MOUNT, not from cfg.storageDir.
+          #
+          # k3d does not re-bind an existing container, so changing storageDir
+          # in Nix does nothing to a cluster that already exists — the running
+          # cluster keeps writing wherever it was created. On p510 the two
+          # diverged (config said /home/k3d/storage, containers bound
+          # /mnt/img_pool/k3d/storage) and BOTH paths held a keycloakdb.mv.db,
+          # so this script happily copied the stale one for 24 days: backups
+          # stamped 2026-08-20 actually contained 2026-07-27 realm state. It
+          # failed silently precisely because the file existed and cp succeeded
+          # — the "H2 not found" guard below never fired.
+          host_storage=$(docker inspect "k3d-${cfg.clusterName}-server-0" \
+            --format '{{range .Mounts}}{{if eq .Destination "/var/lib/rancher/k3s/storage"}}{{.Source}}{{end}}{{end}}' \
+            2>/dev/null)
+          if [ -z "$host_storage" ]; then
+            echo "[keycloak-backup] WARN: cannot read the server container's storage bind mount;" \
+                 "falling back to the configured ${toString cfg.storageDir}" >&2
+            host_storage="${toString cfg.storageDir}"
+          elif [ "$host_storage" != "${toString cfg.storageDir}" ]; then
+            echo "[keycloak-backup] WARN: cluster storage is $host_storage but Nix declares" \
+                 "${toString cfg.storageDir} — backing up the LIVE path. Recreate the cluster to" \
+                 "adopt the configured one." >&2
+          fi
+
+          h2="$host_storage/$(basename "$pvpath")/h2/keycloakdb.mv.db"
           if [ -f "$h2" ]; then
+            # Refuse to record a backup from an H2 nothing has written to
+            # recently. Keycloak touches its database continuously, so a file
+            # older than a day means we are reading an abandoned copy — the
+            # exact failure above. Better a loud gap in the backup series than
+            # a series of confident copies of the wrong file.
+            age_days=$(( ( $(date +%s) - $(stat -c %Y "$h2") ) / 86400 ))
+            if [ "$age_days" -gt 1 ]; then
+              echo "[keycloak-backup] ERROR: $h2 was last modified $age_days days ago." \
+                   "That is not a live Keycloak database — refusing to overwrite the backup series." >&2
+              exit 1
+            fi
             ts=$(date +%Y%m%d-%H%M%S)
             cp -f "$h2" "$BACKUP_DIR/keycloakdb-$ts.mv.db"
             cp -f "$h2" "$BACKUP_DIR/keycloakdb-latest.mv.db"
