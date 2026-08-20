@@ -284,8 +284,6 @@ let
           "ghcr-pull"
           "skillai-db"
           "skillai-app"
-          "rolehunter-db"
-          "rolehunter-app"
           "factory-db-aifactory"
           "factory-db-pfactory"
           "factory-db-tfactory"
@@ -604,7 +602,7 @@ in
     # Each agenix `factory-secret-<name>.age` file contains a complete
     # kubectl-applicable Secret manifest for the `factory` namespace. The
     # bootstrap unit `kubectl apply -f`s each one on every run so a fresh
-    # cluster (or one rebuilt from scratch) gets SkillAI / rolehunter /
+    # cluster (or one rebuilt from scratch) gets SkillAI /
     # shared factory-secrets durably restored from declarative source
     # rather than out-of-band `kubectl create secret` commands.
     #
@@ -922,8 +920,6 @@ in
           "ghcr-pull"
           "skillai-db"
           "skillai-app"
-          "rolehunter-db"
-          "rolehunter-app"
           "factory-db-aifactory"
           "factory-db-pfactory"
           "factory-db-tfactory"
