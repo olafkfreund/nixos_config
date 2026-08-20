@@ -130,7 +130,7 @@ classify_one() {
   # without char-class tricks (the spell-checker can't parse [bB] etc.)
   local tl="${t,,}"
   labels=$(jq -r '.labels | join(",")' <<<"$row")
-  local url="https://github.com/NixOS/nixpkgs/issues/$n"
+  local url="https://redirect.github.com/NixOS/nixpkgs/issues/$n"
 
   # Severity rules — ORDER MATTERS, first match wins. Defaults catch
   # the case where a top-level branch matches but its inner condition
