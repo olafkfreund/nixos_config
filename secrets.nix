@@ -223,7 +223,7 @@ in
   # Each .age file holds a complete kubectl-applicable Secret manifest. The
   # k3d-cluster-bootstrap unit on p510 reads these via age and
   # `kubectl apply -f` each one, so a cluster delete + recreate restores
-  # SkillAI / rolehunter / shared factory-secrets durably (no out-of-band
+  # SkillAI / shared factory-secrets durably (no out-of-band
   # `kubectl create secret` step required).
   #
   # Edit any of these by hand if you need to rotate a value:
@@ -237,8 +237,6 @@ in
   "secrets/factory-secret-ghcr-pull.age".publicKeys = allUsers ++ [ p510 p620 ];
   "secrets/factory-secret-skillai-db.age".publicKeys = allUsers ++ [ p510 p620 ];
   "secrets/factory-secret-skillai-app.age".publicKeys = allUsers ++ [ p510 p620 ];
-  "secrets/factory-secret-rolehunter-db.age".publicKeys = allUsers ++ [ p510 p620 ];
-  "secrets/factory-secret-rolehunter-app.age".publicKeys = allUsers ++ [ p510 p620 ];
   # Per-factory postgres DATABASE_URLs, minio S3 creds, oauth2-proxy clients,
   # observability + cockpit API keys — previously seeded out-of-band and lost on
   # a cluster reset; now durable so k3d-cluster-bootstrap restores them.
