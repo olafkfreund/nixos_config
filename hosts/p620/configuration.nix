@@ -37,6 +37,7 @@ in
     ../../modules/security/secrets.nix
     ../../modules/secrets/api-keys.nix
     ../../modules/containers/docker.nix
+    ../../modules/containers/k3d.nix # k3d (k3s in Docker) cluster — ArgoCD + factory/fides workloads
     ../../modules/scrcpy/default.nix
     ../../modules/system/logging.nix
     ../../modules/services/ollama.nix # local Ollama coding-model server (RX 7900 XTX, ROCm)
@@ -376,6 +377,54 @@ in
   desktop.labwc.enable = true;
   desktop.mangowm.enable = true;
   desktop.hyprland.enable = true;
+
+  # k3d cluster — Phase 2 of docs/plans/2026-08-20-k3d-p510-to-p620-migration.md.
+  # Migrated off p510, whose 490W PSU cannot power its two GPUs (three hard
+  # power cuts on 19/20 Aug 2026). ArgoCD reconstructs all 37 apps from
+  # github.com/olafkfreund/factory-gitops, so only PV data moves.
+  #
+  # p510 keeps running its own copy until Phase 6 — both clusters exist in
+  # parallel during the cutover, which is what makes rollback trivial.
+  modules.containers.k3d = {
+    enable = true;
+
+    # /mnt/games (/dev/sdb1, ext4, 638GB free) is the roomiest filesystem on
+    # this host and a different spindle from both / (nvme0n1, where Docker's
+    # containerd store lives) and /mnt/data (sda1). Keeps PV IOPS off the
+    # root NVMe.
+    #
+    # VERIFY AFTER FIRST CREATE that the containers actually bind this path:
+    #   docker inspect k3d-factory-server-0     #     --format '{{range .Mounts}}{{.Source}} -> {{.Destination}}{{println}}{{end}}'
+    # On p510 this setting never took effect — the containers predate the
+    # change and k3d does not re-bind an existing container, so the cluster
+    # has been writing to the module default the whole time.
+    storageDir = "/mnt/games/k3d/storage";
+
+    argocd.enable = true;
+    tailscaleAuthKey.enable = true;
+    factorySecrets.enable = true; # durably seed factory ns Secrets from agenix
+
+    # Per-commit factory images otherwise fill the disk: 651GB was reclaimed by
+    # hand on p510 on 2026-08-13. This host is tighter than p510 was — Docker's
+    # real store is /var/lib/containerd on /, which had grown to 168GB before a
+    # 143GB build-cache prune on 2026-08-20. Saturday keeps it off p510's
+    # Sunday window so the two hosts do not GC simultaneously.
+    imageGc = {
+      enable = true;
+      dates = "Sat 04:00";
+    };
+
+    # Bind the kube API to p620's tailnet IP so kubectl works from any tailnet
+    # device (https://100.69.100.115:6443). k3d 5.x does not honour "0.0.0.0"
+    # (it produces empty Docker PortBindings), so an explicit IP is required.
+    # Tailnet IPs are stable per-device. Auth gates on the kubeconfig bearer
+    # token, as on p510.
+    #
+    # 6443 is free here: the hecate-dev / hecate-remote demo clusters that used
+    # ephemeral ports were deleted 2026-08-20.
+    apiHostBind = "100.69.100.115";
+    apiPort = 6443;
+  };
 
   # Adds "(DankMaterialShell)" login sessions for niri/labwc/mango next to the
   # stock (Noctalia) ones — pick per login in the greeter.

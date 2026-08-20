@@ -182,7 +182,7 @@ in
   # Consumed by modules/containers/k3d.nix on p510; the k3d bootstrap unit
   # turns it into the tailscale/operator-oauth Secret the Tailscale operator
   # Helm chart expects (keys: client_id, client_secret).
-  "secrets/tailscale-k8s-operator-oauth.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/tailscale-k8s-operator-oauth.age".publicKeys = allUsers ++ [ p510 p620 ];
 
   # NZBGet ControlPassword. Loaded into a MainConfigInclude file at
   # service preStart so the value never appears in the systemd unit's
@@ -231,30 +231,30 @@ in
   # The value MUST remain a valid k8s Secret YAML (metadata.namespace must
   # be `factory`, .data values must be base64). On next k3d-cluster-bootstrap
   # restart, kubectl apply picks up the change idempotently.
-  "secrets/factory-secret-cloudflared-factory.age".publicKeys = allUsers ++ [ p510 ];
-  "secrets/factory-secret-factory-secrets.age".publicKeys = allUsers ++ [ p510 ];
-  "secrets/factory-secret-factory-cli-creds.age".publicKeys = allUsers ++ [ p510 ];
-  "secrets/factory-secret-ghcr-pull.age".publicKeys = allUsers ++ [ p510 ];
-  "secrets/factory-secret-skillai-db.age".publicKeys = allUsers ++ [ p510 ];
-  "secrets/factory-secret-skillai-app.age".publicKeys = allUsers ++ [ p510 ];
-  "secrets/factory-secret-rolehunter-db.age".publicKeys = allUsers ++ [ p510 ];
-  "secrets/factory-secret-rolehunter-app.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-cloudflared-factory.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-factory-secrets.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-factory-cli-creds.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-ghcr-pull.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-skillai-db.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-skillai-app.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-rolehunter-db.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-rolehunter-app.age".publicKeys = allUsers ++ [ p510 p620 ];
   # Per-factory postgres DATABASE_URLs, minio S3 creds, oauth2-proxy clients,
   # observability + cockpit API keys — previously seeded out-of-band and lost on
   # a cluster reset; now durable so k3d-cluster-bootstrap restores them.
-  "secrets/factory-secret-factory-db-aifactory.age".publicKeys = allUsers ++ [ p510 ];
-  "secrets/factory-secret-factory-db-pfactory.age".publicKeys = allUsers ++ [ p510 ];
-  "secrets/factory-secret-factory-db-tfactory.age".publicKeys = allUsers ++ [ p510 ];
-  "secrets/factory-secret-minio-creds.age".publicKeys = allUsers ++ [ p510 ];
-  "secrets/factory-secret-oauth2-proxy-cfactory.age".publicKeys = allUsers ++ [ p510 ];
-  "secrets/factory-secret-oauth2-proxy-observe.age".publicKeys = allUsers ++ [ p510 ];
-  "secrets/factory-secret-oauth2-proxy-odin.age".publicKeys = allUsers ++ [ p510 ];
-  "secrets/factory-secret-observe-root.age".publicKeys = allUsers ++ [ p510 ];
-  "secrets/factory-secret-otel-otlp-auth.age".publicKeys = allUsers ++ [ p510 ];
-  "secrets/factory-secret-cfactory-api-keys.age".publicKeys = allUsers ++ [ p510 ];
-  "secrets/factory-secret-odin-ssh-key.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-factory-db-aifactory.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-factory-db-pfactory.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-factory-db-tfactory.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-minio-creds.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-oauth2-proxy-cfactory.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-oauth2-proxy-observe.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-oauth2-proxy-odin.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-observe-root.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-otel-otlp-auth.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-cfactory-api-keys.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-odin-ssh-key.age".publicKeys = allUsers ++ [ p510 p620 ];
   # MinIO KMS master key. Encrypted out-of-band in the factory-gitops repo and
   # imported here, so it was already sealed to olafkfreund + p510 before this
   # entry existed — declaring it is what makes it rekeyable from now on.
-  "secrets/factory-secret-minio-kms.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/factory-secret-minio-kms.age".publicKeys = allUsers ++ [ p510 p620 ];
 }
