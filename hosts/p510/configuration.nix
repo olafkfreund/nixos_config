@@ -598,14 +598,14 @@ in
     # qwen2.5:7b for reliable strict-JSON audiobook metadata extraction +
     # tool-calling (audiobook-import / audiobook-mcp).
     #
-    # qwen3.8:27b is on-demand ONLY here, unlike p620 where it is the
-    # persistent default. This host has no single GPU that fits it: a
-    # 3070 Ti (8GB) + a 3060 (12GB) means ollama splits an 18GB dense model
-    # across both cards over PCIe, leaving ~1.5GB of the combined 19.5GB for
-    # everything else. Those GPUs also back Plex, so a resident copy would
-    # squat on the whole box. On-demand keeps it a deliberate choice that
-    # unloads itself after `keepAlive`.
-    onDemandModels = [ "gemma4:e4b" "qwen2.5:7b" "gemma4:12b" "qwen2.5-coder:14b" "qwen3.8:27b" ];
+    # qwen3.8:27b is deliberately ABSENT here (it is p620's persistent
+    # default). This host's PSU is rated 490W and already cannot cover a 135W
+    # Xeon plus a 290W-limit 3070 Ti and a 170W-limit 3060 — three hard power
+    # cuts on 19/20 Aug 2026, one of them six seconds into an ollama model
+    # load. An 18GB dense model does not fit either card alone, so ollama
+    # would have to spin up BOTH GPUs to hold it: precisely the transient
+    # that kills the box. See docs/plans/2026-08-20-k3d-p510-to-p620-migration.md.
+    onDemandModels = [ "gemma4:e4b" "qwen2.5:7b" "gemma4:12b" "qwen2.5-coder:14b" ];
     keepAlive = "5m"; # Evict from VRAM after 5 minutes of idle
   };
 
