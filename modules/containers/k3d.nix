@@ -302,14 +302,41 @@ let
       ; do
         f="/run/agenix/$slot"
         if [ -r "$f" ]; then
-          # -n factory pins the target namespace; the extracted Secret
-          # manifests have metadata.namespace stripped (yq during
-          # extraction), so without this flag kubectl would default to
-          # whichever namespace the kubeconfig has set (`default`),
-          # silently creating duplicates outside factory.
-          kubectl apply -n factory -f "$f" >/dev/null \
-            && echo "[k3d-bootstrap] Applied factory/$slot from agenix" \
-            || echo "[k3d-bootstrap] WARN: apply of $slot failed (continuing)"
+          # SEED-ONLY slots: bootstrap when absent, never overwrite when present.
+          #
+          # `factory-cli-creds` holds claude-credentials.json, which the
+          # in-cluster cred-broker CronJob REFRESHES every 4h -- Anthropic
+          # rotates the refresh token on each use, so the cluster copy is the
+          # only current one and the agenix copy is a snapshot of whenever it
+          # was last encrypted. Applying over it on every boot reverted the
+          # fleet to a long-expired token: on 2026-08-20 the live Secret went
+          # back to a credential that had expired on 2026-06-07 -- the same day
+          # the .age file was last written -- and did so again after each p510
+          # recovery. `cred-sync` refused to adopt the stale seed (correctly),
+          # so every task failed to authenticate until it was re-seeded by hand.
+          #
+          # `apply` is right for the other slots: DB passwords and API keys are
+          # operator-rotated through `manage-secrets.sh edit`, agenix is their
+          # source of truth, and a boot-time re-apply is how a rotation lands.
+          # It is wrong for anything the cluster itself rotates. Factory#861.
+          seed_only=false
+          case "$slot" in
+            factory-secret-factory-cli-creds) seed_only=true ;;
+          esac
+          name="''${slot#factory-secret-}"
+
+          if [ "$seed_only" = true ] && kubectl -n factory get secret "$name" >/dev/null 2>&1; then
+            echo "[k3d-bootstrap] factory/$name exists; NOT overwriting (cluster-rotated, seed-only)"
+          else
+            # -n factory pins the target namespace; the extracted Secret
+            # manifests have metadata.namespace stripped (yq during
+            # extraction), so without this flag kubectl would default to
+            # whichever namespace the kubeconfig has set (`default`),
+            # silently creating duplicates outside factory.
+            kubectl apply -n factory -f "$f" >/dev/null \
+              && echo "[k3d-bootstrap] Applied factory/$slot from agenix" \
+              || echo "[k3d-bootstrap] WARN: apply of $slot failed (continuing)"
+          fi
         else
           echo "[k3d-bootstrap] WARN: $f not readable; skipping $slot." \
                "Run: ./scripts/manage-secrets.sh edit $slot"
