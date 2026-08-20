@@ -298,6 +298,7 @@ let
           "otel-otlp-auth"
           "cfactory-api-keys"
           "odin-ssh-key"
+          "odin-api-keys"
         ])} \
       ; do
         f="/run/agenix/$slot"
@@ -337,6 +338,34 @@ let
               && echo "[k3d-bootstrap] Applied factory/$slot from agenix" \
               || echo "[k3d-bootstrap] WARN: apply of $slot failed (continuing)"
           fi
+        else
+          echo "[k3d-bootstrap] WARN: $f not readable; skipping $slot." \
+               "Run: ./scripts/manage-secrets.sh edit $slot"
+        fi
+      done
+
+      # 4b. The same treatment for Secrets that do NOT live in `factory`. The
+      #     loop above hardcodes `-n factory`, but fides and fides-reporter
+      #     need theirs in their own namespaces. Encoded "<namespace>:<slot>";
+      #     the namespace is created first because ArgoCD may not have made it
+      #     yet on a cold bootstrap, and a Secret cannot be applied into a
+      #     namespace that does not exist.
+      #
+      #     These were hand-created on p510 and never captured, so they did not
+      #     survive the move to p620: every referencing pod sat in
+      #     CreateContainerConfigError until they were pulled into agenix.
+      for pair in \
+        "fides:k3d-secret-fides-secrets" \
+        "fides-reporter:k3d-secret-fides-reporter-token" \
+      ; do
+        ns="''${pair%%:*}"
+        slot="''${pair#*:}"
+        f="/run/agenix/$slot"
+        if [ -r "$f" ]; then
+          kubectl create namespace "$ns" --dry-run=client -o yaml | kubectl apply -f - >/dev/null 2>&1 || true
+          kubectl apply -n "$ns" -f "$f" >/dev/null \
+            && echo "[k3d-bootstrap] Applied $ns/$slot from agenix" \
+            || echo "[k3d-bootstrap] WARN: apply of $slot into $ns failed (continuing)"
         else
           echo "[k3d-bootstrap] WARN: $f not readable; skipping $slot." \
                "Run: ./scripts/manage-secrets.sh edit $slot"
@@ -869,7 +898,23 @@ in
           "otel-otlp-auth"
           "cfactory-api-keys"
           "odin-ssh-key"
+          "odin-api-keys"
         ])
+        // {
+          # Non-factory namespaces (see the 4b loop in the bootstrap script).
+          k3d-secret-fides-secrets = {
+            file = ../../secrets/k3d-secret-fides-secrets.age;
+            mode = "0400";
+            owner = "root";
+            group = "root";
+          };
+          k3d-secret-fides-reporter-token = {
+            file = ../../secrets/k3d-secret-fides-reporter-token.age;
+            mode = "0400";
+            owner = "root";
+            group = "root";
+          };
+        }
       ))
     ];
   };

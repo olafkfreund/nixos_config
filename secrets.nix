@@ -253,6 +253,20 @@ in
   "secrets/factory-secret-otel-otlp-auth.age".publicKeys = allUsers ++ [ p510 p620 ];
   "secrets/factory-secret-cfactory-api-keys.age".publicKeys = allUsers ++ [ p510 p620 ];
   "secrets/factory-secret-odin-ssh-key.age".publicKeys = allUsers ++ [ p510 p620 ];
+
+  # Out-of-band cluster Secrets — created by hand on p510 and never captured
+  # declaratively, so they existed only as live objects and did not survive the
+  # move to p620 (every referencing pod sat in CreateContainerConfigError).
+  # factory-gitops references all three by name but deliberately does not carry
+  # their material; agenix keeps that property (encrypted at rest, decrypted
+  # only into /run/agenix at activation) while making them reproducible.
+  #
+  # Each decrypts to a complete kubectl-applicable Secret YAML with
+  # metadata.namespace stripped, exactly like the factory-secret-* slots — the
+  # k3d bootstrap pins the namespace with `kubectl apply -n`.
+  "secrets/factory-secret-odin-api-keys.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/k3d-secret-fides-secrets.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/k3d-secret-fides-reporter-token.age".publicKeys = allUsers ++ [ p510 p620 ];
   # MinIO KMS master key. Encrypted out-of-band in the factory-gitops repo and
   # imported here, so it was already sealed to olafkfreund + p510 before this
   # entry existed — declaring it is what makes it rekeyable from now on.
