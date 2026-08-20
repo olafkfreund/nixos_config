@@ -1,13 +1,18 @@
 # Ollama coding-model server (services.ollama wrapper).
 #
 # Designed for p620's RX 7900 XTX (gfx1100, 24GB VRAM, ROCm). The single
-# GPU comfortably fits each default model individually (qwen3.6:27b ~17GB,
-# gemma4:26b MoE ~18GB) but NOT both at once (~35GB > 24GB), so
+# GPU comfortably fits each default model individually (qwen3.8:27b ~18GB,
+# gemma4:26b MoE ~18GB) but NOT both at once (~36GB > 24GB), so
 # MAX_LOADED_MODELS=1 forces deterministic evict-then-load on switch.
 #
-# Default model choices (May 2026):
-#   Persistent: qwen3.6:27b — strong agentic tool calling (Qwen RL-trained
-#     on 1M agentic envs), good for Claude Code's tool-use loops.
+# Default model choices (Aug 2026):
+#   Persistent: qwen3.8:27b — 18GB Q4, 256K context. DENSE 27B, so unlike a
+#     MoE nothing here is free: everything that spills out of VRAM is paid
+#     for at full width. It stays affordable because the architecture is
+#     hybrid — only 16 of its 64 layers run full attention, the other 48 use
+#     linear attention with a constant recurrent state, so the KV cache
+#     barely grows with context. That is what makes a large `contextLength`
+#     practical on a 24GB card.
 #   On-demand:  gemma4:26b — MoE with ~3.8B active params, very fast
 #     (~80-100 tok/s) for raw code-gen bursts.
 #
@@ -43,11 +48,14 @@ in
 
     persistentModels = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [ "qwen3.6:27b" ];
+      default = [ "qwen3.8:27b" ];
       description = ''
         Models pulled at activation and used as the default coding model.
-        Listed first in the load priority. Default qwen3.6:27b (~17GB,
-        strong agentic tool calling).
+        Listed first in the load priority. Default qwen3.8:27b (~18GB,
+        256K context, strong agentic tool calling).
+
+        Leave empty on hosts whose GPUs are shared with something else — a
+        persistent model holds its VRAM until `keepAlive` expires.
       '';
     };
 
@@ -81,6 +89,22 @@ in
         keep this low so the GPU is released for desktop work (Blender,
         games, video editing) when not actively coding. Use "-1" for
         always-loaded if Ollama is the only GPU consumer.
+      '';
+    };
+
+    contextLength = lib.mkOption {
+      type = lib.types.nullOr lib.types.int;
+      default = null;
+      example = 32768;
+      description = ''
+        Value for OLLAMA_CONTEXT_LENGTH — the context window the server uses
+        for requests that do not set `num_ctx` themselves.
+
+        Ollama defaults to 4096 no matter what the model supports, so a
+        256K-context model like qwen3.8:27b is capped at 4096 unless this is
+        raised. Cost is VRAM for the KV cache on top of the weights, so the
+        ceiling is the card, not the model — raise it only as far as the
+        headroom above the resident model allows.
       '';
     };
 
@@ -150,6 +174,9 @@ in
         OLLAMA_MAX_LOADED_MODELS = "1";
         OLLAMA_FLASH_ATTENTION = "1";
         OLLAMA_ORIGINS = cfg.origins;
+      }
+      // lib.optionalAttrs (cfg.contextLength != null) {
+        OLLAMA_CONTEXT_LENGTH = toString cfg.contextLength;
       };
     };
 

@@ -6,12 +6,17 @@
 #   Claude Code  →  http(s)://p620.../router (LiteLLM)  →  127.0.0.1:11434 (Ollama)
 #
 # Model aliases:
-#   claude-sonnet-4-6  →  qwen3:14b          (default coding model — primary)
+#   claude-sonnet-4-6  →  qwen3.8:27b        (default coding model — primary)
 #   claude-opus-4-6    →  gemma4:e4b         (light/fast on-demand)
-#   qwen3              →  qwen3:14b          (native name passthrough)
-#   qwen3.6            →  qwen3:14b          (backward compatibility alias)
+#   qwen3              →  qwen3.8:27b        (native name passthrough)
+#   qwen3.8            →  qwen3.8:27b        (native name passthrough)
+#   qwen3.6            →  qwen3.8:27b        (backward compatibility alias)
 #   qwen2.5-coder      →  qwen2.5-coder:14b  (previous default, still pulled)
 #   gemma4             →  gemma4:e4b         (backward compatibility alias)
+#
+# The aliases point at whatever host's Ollama is fronted, so they only
+# resolve to a model that host actually pulled — this file is p620's, where
+# qwen3.8:27b is the persistent model (hosts/p620/configuration.nix).
 #
 # Authentication: a single master bearer key loaded at runtime from agenix
 # (/run/agenix/litellm-master-key). Per-host clients hold the same plaintext
@@ -34,7 +39,7 @@ let
       # Anthropic-compatible aliases that Claude Code recognises by name.
       - model_name: claude-sonnet-4-6
         litellm_params:
-          model: ollama_chat/qwen3:14b
+          model: ollama_chat/qwen3.8:27b
           api_base: http://127.0.0.1:11434
           additional_drop_params: ["thinking", "think", "reasoning_effort"]
 
@@ -47,13 +52,19 @@ let
       # Native names for ai-cli / aichat / direct OpenAI-compat clients.
       - model_name: qwen3
         litellm_params:
-          model: ollama_chat/qwen3:14b
+          model: ollama_chat/qwen3.8:27b
           api_base: http://127.0.0.1:11434
           additional_drop_params: ["thinking", "think", "reasoning_effort"]
 
       - model_name: qwen3.6
         litellm_params:
-          model: ollama_chat/qwen3:14b
+          model: ollama_chat/qwen3.8:27b
+          api_base: http://127.0.0.1:11434
+          additional_drop_params: ["thinking", "think", "reasoning_effort"]
+
+      - model_name: qwen3.8
+        litellm_params:
+          model: ollama_chat/qwen3.8:27b
           api_base: http://127.0.0.1:11434
           additional_drop_params: ["thinking", "think", "reasoning_effort"]
 
@@ -70,6 +81,12 @@ let
           additional_drop_params: ["thinking", "think", "reasoning_effort"]
 
       # Explicit model:tag passthroughs (for clients that send the raw Ollama name).
+      - model_name: qwen3.8:27b
+        litellm_params:
+          model: ollama_chat/qwen3.8:27b
+          api_base: http://127.0.0.1:11434
+          additional_drop_params: ["thinking", "think", "reasoning_effort"]
+
       - model_name: qwen3:14b
         litellm_params:
           model: ollama_chat/qwen3:14b
