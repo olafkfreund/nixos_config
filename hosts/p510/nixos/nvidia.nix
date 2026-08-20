@@ -46,6 +46,43 @@
     nvidiaPersistenced = true;
   };
 
+  # Cap board power to fit the PSU.
+  #
+  # dmidecode -t 39 reports a 490W supply. Stock limits are 290W (3070 Ti) +
+  # 170W (3060), which with a 135W Xeon E5-2698 v4 and ~100W of board, RAM,
+  # five disks and fans comes to ~695W. p510 hard-power-cut three times on
+  # 19/20 Aug 2026, every time while a GPU ramped from idle — twice during an
+  # ollama model load, once mid-Plex-NVENC-transcode. No MCE, panic, OOM or
+  # thermal event in any of them: the journal just stops mid-write.
+  #
+  # 130W + 110W brings the worst case to ~475W, under the rating. Both cards
+  # floor at 100W (power.min_limit), so these are valid. Transcoding draws
+  # nowhere near the cap, so the practical cost is nil.
+  #
+  # This runs as root on purpose — setting a power limit needs CAP_SYS_ADMIN
+  # and /dev/nvidiactl, so the usual DynamicUser/ProtectHome hardening cannot
+  # apply. It executes one binary with fixed arguments and exits.
+  systemd.services.nvidia-power-limit = {
+    description = "Cap NVIDIA board power to fit p510's 490W PSU";
+    after = [ "nvidia-persistenced.service" ];
+    wants = [ "nvidia-persistenced.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      # Persistence mode keeps the limit across client detach; -pl is not
+      # sticky across a driver reload, hence re-applying at every boot.
+      ExecStart = [
+        "${config.hardware.nvidia.package.bin}/bin/nvidia-smi -i 0 -pl 130"
+        "${config.hardware.nvidia.package.bin}/bin/nvidia-smi -i 1 -pl 110"
+      ];
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      NoNewPrivileges = true;
+      PrivateTmp = true;
+    };
+  };
+
   # Kernel configuration for NVIDIA
   boot = {
     # Kernel parameters for proper NVIDIA functionality
