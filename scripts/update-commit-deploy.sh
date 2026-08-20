@@ -88,7 +88,15 @@ log "pre-flight: checking working tree state"
 
 branch=$(git branch --show-current)
 if [ "$branch" != "main" ]; then
-  err "not on main (currently '$branch'). Switch to main first, or merge."
+  # This is not a lint: the flow bumps flake.lock, opens a PR against main and
+  # squash-merges it on a green health check. Run from a feature branch it
+  # would mix an unrelated lock bump into that branch's PR. The usual reason
+  # you land here is wanting to DEPLOY the branch you are on, which is a
+  # different job with its own command — so name it rather than just refusing.
+  printf "!! \033[1;31mnot on main (currently '%s') — this is the flake-update flow, not a plain deploy\033[0m\n" "$branch" >&2
+  printf "   to deploy this branch as it stands:  just quick-deploy %s\n" "$HOST" >&2
+  printf "   to run the update flow:              git checkout main && git pull --ff-only\n" >&2
+  exit 1
 fi
 
 # Only flake.lock is allowed to be dirty (it may already be pre-bumped).
