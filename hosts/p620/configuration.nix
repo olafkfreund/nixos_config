@@ -105,8 +105,16 @@ in
     enable = true;
     host = "0.0.0.0";
     modelsDir = "/mnt/data/ollama/models";
-    persistentModels = [ "qwen3:14b" ];
+    # qwen3.8:27b (~18GB Q4) on a 24GB card. Dense, so the whole thing has to
+    # sit in VRAM to be worth running; MAX_LOADED_MODELS=1 (module) evicts it
+    # before loading any on-demand model rather than trying to fit both.
+    persistentModels = [ "qwen3.8:27b" ];
     onDemandModels = [ "qwen2.5-coder:14b" "gemma4:e4b" "gemma4:12b" ];
+    # The model supports 256K but ollama caps every request at 4096 unless
+    # told otherwise. 32K is what the ~6GB left above the weights pays for —
+    # cheap here because qwen3.8 runs full attention on only 16 of 64 layers,
+    # so the KV cache grows far slower with context than a standard 27B.
+    contextLength = 32768;
     # Ollama cloud-models access (Ollama Turbo / hosted). Raw key in agenix;
     # the daemon's preStart composes /run/ollama/cloud-env at unit start.
     cloudApiKeyFile = config.age.secrets."api-ollama".path;

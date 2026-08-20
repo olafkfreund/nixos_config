@@ -138,7 +138,7 @@ let
   #
   # The bundled run_crew.py reads four env knobs:
   #   CREW_ENDPOINT     — chat-completion URL (default p620's LiteLLM)
-  #   CREW_MODEL        — model alias (default qwen3:14b)
+  #   CREW_MODEL        — model alias (default qwen3.8:27b)
   #   CREW_API_KEY_FILE — path to bearer-token file
   #                       (default /run/agenix/api-router-<hostname>)
   #   CREW_REPO_ROOT    — where <file> tag paths land (default cwd)
@@ -195,14 +195,15 @@ in
 
     model = mkOption {
       type = types.str;
-      default = "qwen3:14b";
+      default = "qwen3.8:27b";
       example = "claude-sonnet-4-6";
       description = ''
         Model name as the configured endpoint advertises it. For our
-        LiteLLM router these are the aliases in model_list (qwen3:14b,
+        LiteLLM router these are the aliases in model_list (qwen3.8:27b,
         qwen3, claude-sonnet-4-6, gemma4, …). Pick whichever balance
-        of speed/quality you want — the default qwen3:14b matches the
-        previous bare-ollama behaviour.
+        of speed/quality you want — the default matches the persistent
+        model on p620, so /crew hits an already-loaded model instead of
+        forcing an evict-and-load on every run.
       '';
     };
   };
