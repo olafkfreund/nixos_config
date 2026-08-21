@@ -18,6 +18,15 @@ extend-ignore-re = [
 ]
 
   [default.extend-words]
+  # `evidance-vault_*` is the literal name of a set of Docker volumes on p620.
+  # The misspelling is baked into the volume names themselves, so documenting
+  # them accurately means writing it exactly as it appears on disk.
+  evidance = "evidance"
+
+  # rsync's archive flags: -aHAX = archive, Hardlinks, ACLs, Xattrs. "HAX" is
+  # the flag cluster, not a misspelling of HEX.
+  HAX = "HAX"
+
   # NixOS-specific terms
   nixos = "nixos"
   nixpkgs = "nixpkgs"
