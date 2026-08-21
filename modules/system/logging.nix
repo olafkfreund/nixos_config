@@ -59,13 +59,19 @@ in
       };
     };
 
-    # Configure Docker daemon for better logging
-    virtualisation.docker.daemon.settings = {
-      log-driver = "journald";
-      log-opts = {
-        "labels" = "service";
-      };
-    };
+    # Docker's log driver is deliberately NOT set here.
+    #
+    # This block used to pin daemon.settings.log-driver = "journald", which
+    # silently beat virtualisation.docker.logDriver: daemon.settings IS the
+    # rendered daemon.json, so a raw entry here wins over the typed option no
+    # matter what a host sets. #1412 switched logDriver to "local" to stop k3s
+    # inside k3d filing ~94k INFO lines a boot as host-level errors, and this
+    # line quietly reverted it — the built daemon.json still read "journald"
+    # after that deploy.
+    #
+    # A module whose purpose is noise reduction should not be the thing forcing
+    # every container's stderr into the journal. The driver now comes from
+    # modules/containers/docker.nix, which owns Docker's configuration.
 
     # Environment variables for better log control
     environment.variables = {
