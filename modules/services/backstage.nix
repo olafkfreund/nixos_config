@@ -272,6 +272,14 @@ in
       backend = lib.mkDefault "podman";
 
       containers."backstage-postgres" = {
+        # k8s-file, not the NixOS default of journald. Podman's journald driver
+        # files container stdout AND stderr as host-level errors regardless of
+        # content, so ordinary output shows up under `journalctl -p err`:
+        # kometa's ASCII progress tables and postgres's "checkpoint starting"
+        # LOG lines alone accounted for ~2000 "errors" in one boot on p510.
+        # k8s-file keeps `podman logs` working and leaves the journal for
+        # things that are actually wrong.
+        log-driver = "k8s-file";
         image = cfg.postgresImage;
         # No host port mapping — Postgres is only consumed by the sibling
         # backstage container via the shared backstage-net network. Keeps
@@ -283,6 +291,7 @@ in
       };
 
       containers."backstage" = {
+        log-driver = "k8s-file";
         image = cfg.image;
         ports = [ "127.0.0.1:${toString cfg.port}:7007" ];
         environmentFiles = [ "${envDir}/env-backstage" ];
