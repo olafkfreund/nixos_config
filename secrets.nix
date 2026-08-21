@@ -29,6 +29,15 @@ in
   # OLLAMA_API_KEY via load-api-keys. Edit: agenix -e secrets/api-ollama.age
   "secrets/api-ollama.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-github-token.age".publicKeys = allUsers ++ allHosts;
+  # Factory GitOps PAT. Distinct from api-github-token above ON PURPOSE: that
+  # slot is the general GitHub credential every host reads, and swapping it
+  # would silently change what those hosts authenticate with. This one is the
+  # token the Factory repo stores as the GITOPS_PAT Actions secret, which
+  # cli-freshness.yml uses to open the agent-CLI bump PRs in AIFactory,
+  # PFactory and TFactory (Factory#693 -- that gate had never once passed
+  # before this token existed). Kept here so a host rebuild does not lose it.
+  # Edit: agenix -e secrets/factory-gitops-pat.age
+  "secrets/factory-gitops-pat.age".publicKeys = allUsers ++ allHosts;
   # Synechron GitHub API token (PAT). All hosts; exported as
   # SYNECHRON_GITHUB_API_TOKEN via load-api-keys. Edit: agenix -e secrets/synechron-github-api.age
   "secrets/synechron-github-api.age".publicKeys = allUsers ++ allHosts;
