@@ -94,12 +94,14 @@ in
     # Ensure required runtime dependencies are available
     services.pipewire.enable = mkDefault true;
 
-    xdg.portal = {
-      enable = mkDefault true;
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-gtk
-      ];
-    };
+    # Only assert that a portal stack exists. The gtk backend is NOT added
+    # here: every desktop this runs under already pulls it in (the GNOME module
+    # adds gnome + gtk, Hyprland adds its own), and a second entry does not
+    # deduplicate — xdg.portal.extraPortals is a plain list, so the same
+    # .portal file ends up on the search path twice and dbus logs "Ignoring
+    # duplicate name org.freedesktop.impl.portal.desktop.gtk" on every session
+    # start (78 of them in one boot on p620).
+    xdg.portal.enable = mkDefault true;
 
     # Configure Claude Desktop for the user.
     # systemd.user.services are loaded for EVERY user's systemd-user instance

@@ -56,6 +56,21 @@ in
     virtualisation.docker = {
       enable = true;
       enableOnBoot = true;
+
+      # Container logs go to files, not the host journal.
+      #
+      # nixpkgs defaults this to "journald", and Docker's journald driver
+      # assigns priority by STREAM, not by content: stdout -> info, stderr ->
+      # err. Every component that logs to stderr therefore lands in the host
+      # journal as an error. On p620 that meant k3s inside k3d filing ~94k
+      # INFO-level lines ("enqueueing job", SQL DDL, kubelet chatter) at
+      # priority 3 in a single boot — 95% of all errors on the host — which
+      # makes `journalctl -p err` useless for triage exactly when it matters.
+      #
+      # "local" keeps `docker logs` and `kubectl logs` working (both read the
+      # runtime's own store, not the journal) and rotates on its own, so this
+      # also stops container output counting against journald's SystemMaxUse.
+      logDriver = "local";
       rootless = {
         enable = cfg.rootless;
         setSocketVariable = cfg.rootless;

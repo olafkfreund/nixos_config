@@ -1,20 +1,27 @@
 { pkgs, lib, ... }: {
-  # Fix USB and Bluetooth mouse disconnection issues
+  # Fix USB and Bluetooth mouse disconnection issues.
+  #
+  # ENV{DEVTYPE}=="usb_device" on every rule that sets power/* : udev fires
+  # these for INTERFACES too (1-1:1.0), and an interface has no power/control
+  # or power/autosuspend attribute — only its parent device does. Without the
+  # guard each hotplug logged a pair of "Could not chase sysfs attribute ...
+  # No such file or directory" errors; 176 of them in one boot. The rules
+  # still take effect, because ATTRS{} matches walk up to the parent device.
   services.udev.extraRules = ''
     # Disable autosuspend for TP-Link Bluetooth adapter (causes mouse freezing)
-    ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="2357", ATTRS{idProduct}=="0604", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTRS{idVendor}=="2357", ATTRS{idProduct}=="0604", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
 
     # Disable autosuspend for all Bluetooth class devices
-    ACTION=="add", SUBSYSTEM=="usb", ATTRS{bDeviceClass}=="e0", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTRS{bDeviceClass}=="e0", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
 
     # Disable autosuspend for HID devices (mice, keyboards)
-    ACTION=="add", SUBSYSTEM=="usb", ATTRS{bInterfaceClass}=="03", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTRS{bInterfaceClass}=="03", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
 
     # Disable autosuspend for all Razer devices
-    ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="1532", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTRS{idVendor}=="1532", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
 
     # Razer Basilisk X HyperSpeed - prevent power management issues (both USB and Bluetooth)
-    ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0083", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0083", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
     ACTION=="add", SUBSYSTEM=="bluetooth", ATTRS{name}=="Basilisk X HyperSpeed*", ATTR{power/control}="on"
     ACTION=="add", SUBSYSTEM=="input", ATTRS{name}=="Basilisk X HyperSpeed*", ATTR{power/control}="on"
 
@@ -25,7 +32,7 @@
     ACTION=="add", KERNEL=="hidraw*", ATTRS{name}=="Basilisk X HyperSpeed*", ATTR{power/control}="on"
 
     # Disable autosuspend for ALL USB hubs to prevent downstream devices from disconnecting
-    ACTION=="add", SUBSYSTEM=="usb", ATTR{bDeviceClass}=="09", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
+    ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{bDeviceClass}=="09", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
   '';
 
   # Completely disable USB autosuspend
