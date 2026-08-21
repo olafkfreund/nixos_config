@@ -52,7 +52,7 @@ Audited against:
     ```nix
     <minimal diff snippet if applicable>
     ```
-- **Upstream:** https://github.com/NixOS/nixpkgs/issues/<n>
+- **Upstream:** https://redirect.github.com/NixOS/nixpkgs/issues/<n>
 
 … repeat per finding, ranked by severity …
 
