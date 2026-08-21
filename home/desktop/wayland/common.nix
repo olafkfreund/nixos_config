@@ -10,10 +10,6 @@
   # Only laptops auto-suspend on idle; the workstation stays up (RDP / AI host).
   isLaptop = (osConfig.host.class or "") == "laptop";
 
-  # Reused for the idle lock action and the manual Mod+Backspace bind. Noctalia's
-  # own IPC — the DMS sessions lock with `dms ipc call lock lock` instead.
-  lockCmd = "noctalia msg session lock";
-
   # Fixed UK coordinates (London) so gammastep adjusts colour temperature by
   # sun position without pulling in geoclue2.
   geo = "51.5:-0.13";

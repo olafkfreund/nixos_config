@@ -5,7 +5,7 @@
 }: {
   imports = [
     ./profile.nix
-    ../../home/desktop/wayland # niri/labwc/mango/hyprland sessions + shell theming
+    ../../home/desktop/wayland # niri + Hyprland sessions and DMS theming
     ../../home/desktop/dank-calendar # dcal daemon backing the DMS calendar card
   ];
 

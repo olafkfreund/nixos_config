@@ -6,7 +6,7 @@
 {
   imports = [
     ./profile.nix
-    ../../home/desktop/wayland # niri/labwc/mango/hyprland sessions + shell theming
+    ../../home/desktop/wayland # niri + Hyprland sessions and DMS theming
   ];
 
   desktop.gnome.profile = "laptop";

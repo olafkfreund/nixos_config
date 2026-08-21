@@ -318,9 +318,9 @@ in
   # "none" turns GDM off; the dms-greeter module auto-enables greetd and runs the
   # greeter inside a niri (wlroots) compositor — which sidesteps GDM's broken
   # greeter-respawn on this Optimus PRIME-sync NVIDIA hardware (see note above),
-  # same non-GDM path the old noctalia-greeter used. It enumerates the same
+  # same non-GDM path. It enumerates the same
   # wayland-sessions, so GNOME + all niri/labwc/mango (stock + -dms) entries stay
-  # selectable. noctalia-greeter input kept available for revert.
+  # selectable.
   desktop.displayManager.backend = "none";
 
   services.displayManager.dms-greeter = {
@@ -330,12 +330,9 @@ in
 
   # Phase 1: niri + labwc + mango as selectable login sessions (alongside GNOME).
   desktop.niri.enable = true;
-  desktop.labwc.enable = true;
-  desktop.mangowm.enable = true;
   desktop.hyprland.enable = true;
 
-  # Adds "(DankMaterialShell)" login sessions for niri/labwc/mango next to the
-  # stock (Noctalia) ones — pick per login in the greeter.
+  # Registers the DankMaterialShell login sessions for niri and Hyprland.
   desktop.dmsShell.enable = true;
 
   # ddcutil: software brightness/contrast control of external monitors (DDC/CI).

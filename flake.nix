@@ -48,24 +48,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Noctalia — Quickshell-based Wayland desktop shell (bar, launcher,
-    # notifications, lock). Used on niri + labwc (not GNOME). homeModules.default
-    # provides programs.noctalia. Follows nixpkgs: the package is a light QML
-    # wrapper over pkgs.quickshell (already cached in nixpkgs), so this avoids
-    # duplicating the Qt closure and needs no extra cachix.
-    noctalia = {
-      url = "github:noctalia-dev/noctalia";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # Noctalia greeter — greetd login screen matching the Noctalia shell. Ships
-    # nixosModules.default (programs.noctalia-greeter) which auto-wires
-    # services.greetd + the bundled wlroots compositor. Enabled per-host where
-    # we replace GDM with greetd.
-    noctalia-greeter = {
-      url = "github:noctalia-dev/noctalia-greeter";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     # DankCalendar (dcal) — calendar daemon by the DankMaterialShell authors.
     # Connects Local/Google/Microsoft/CalDAV/iCloud accounts and serves them
@@ -91,17 +73,6 @@
     # disable niri-flake's binary cache, so no extra substituter/rebuild dance.
     niri-flake = {
       url = "github:sodiboo/niri-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # mango — dwl-based Wayland compositor (wlroots + scenefx). nixpkgs now
-    # ships the NixOS module and package (programs.mango), so we only take the
-    # home-manager config option (wayland.windowManager.mango, added to
-    # home-manager.sharedModules) from this flake. Wiring both NixOS modules
-    # collides on the programs.mango option. Third Noctalia session alongside
-    # niri/labwc.
-    mango = {
-      url = "github:mangowm/mango";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -339,7 +310,6 @@
               inputs.agenix.nixosModules.default
               inputs.lanzaboote.nixosModules.lanzaboote
               inputs.niri-flake.nixosModules.niri
-              inputs.noctalia-greeter.nixosModules.default
               nix-index-database.nixosModules.nix-index
               ./home/shell/zellij/zjstatus.nix
             ]
@@ -361,16 +331,10 @@
                     {
                       stylix.targets.firefox.enable = false;
                     }
-                    # Noctalia shell (programs.noctalia). Enabled per-user only
-                    # where the niri/labwc home profile turns it on.
-                    inputs.noctalia.homeModules.default
                     # DankCalendar daemon (programs.dank-calendar). Enabled
                     # per-user via home/desktop/dank-calendar; the module is
                     # inert until that profile turns it on.
                     inputs.dankcalendar.homeModules.dank-calendar
-                    # mango compositor config (wayland.windowManager.mango),
-                    # enabled per-user in the same niri/labwc home profile.
-                    inputs.mango.hmModules.mango
                   ];
                   extraSpecialArgs = {
                     pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable system);
