@@ -124,7 +124,36 @@ in
     '');
 
     # Also add mokutil to system PATH so user can `mokutil --import` etc.
-    # without a nix shell.
-    environment.systemPackages = [ pkgs.mokutil ];
+    # without a nix shell, plus `razer-sb-enroll` — the codified one-command
+    # form of the MOK enrolment runbook in this file's header. Idempotent:
+    # no-ops if the MOK is already enrolled. The MokManager blue-screen confirm
+    # and the BIOS Secure-Boot toggle are firmware-level and cannot be scripted
+    # — that is the security boundary — so the helper does everything up to it.
+    environment.systemPackages = [
+      pkgs.mokutil
+      (pkgs.writeShellScriptBin "razer-sb-enroll" ''
+        set -euo pipefail
+        export PATH=${lib.makeBinPath [ pkgs.mokutil pkgs.gnugrep pkgs.coreutils ]}
+        key=/var/lib/sbctl/keys/db/db.cer
+
+        [ "$(id -u)" = 0 ] || { echo "run as root: sudo razer-sb-enroll"; exit 1; }
+        [ -f "$key" ] || { echo "no db.cer at $key — run a nixos-rebuild first so lanzaboote generates the keys"; exit 1; }
+
+        if mokutil --list-enrolled 2>/dev/null | grep -q "CN=Database Key"; then
+          echo "MOK already enrolled (CN=Database Key)."
+          echo "If Secure Boot is still off, enable it in BIOS, then verify: sbctl status"
+          exit 0
+        fi
+
+        echo "Importing MOK from $key ..."
+        printf 'enrolnow\nenrolnow\n' | mokutil --import "$key"
+        echo
+        echo "Done. Now: sudo reboot"
+        echo "At the blue MokManager screen:"
+        echo "  Enroll MOK -> View key 0 (verify CN=Database Key) -> Continue -> Yes"
+        echo "  -> password: enrolnow -> Reboot"
+        echo "Then enable Secure Boot in BIOS. Verify: sbctl status && bootctl status"
+      '')
+    ];
   };
 }
