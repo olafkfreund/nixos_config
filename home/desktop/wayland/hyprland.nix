@@ -5,10 +5,10 @@
 # writes ~/.config/hypr/hyprland.lua (configType = "lua"): `settings.<name>`
 # renders as `hl.<name>(...)`, `extraConfig` is appended verbatim as Lua.
 #
-# Which shell starts is decided by the login session, exactly as for labwc/mango:
-# the stock "Hyprland" session leaves DESK_SHELL unset -> Noctalia, the
-# "Hyprland (DankMaterialShell)" session sets DESK_SHELL="dms run" -> DMS
-# (modules/desktop/dms-shell.nix).
+# DankMaterialShell is started directly from the hyprland.start hook. It used
+# to go through a ${DESK_SHELL:-noctalia} switch so the session could pick
+# between two shells; Noctalia was removed 2026-08-21 and DMS is the only one
+# left, so the indirection went with it.
 #
 # Binds mirror the niri session (home/desktop/wayland) wherever Hyprland has
 # an equivalent action; the divergences are commented at the bind (#1367).
@@ -99,7 +99,7 @@ in
           "hyprland.start"
           (mkLuaInline ''
             function()
-              hl.exec_cmd("sh -c 'exec ''${DESK_SHELL:-noctalia}'")
+              hl.exec_cmd("dms run")
               hl.exec_cmd("swaybg -m fill -i ${wallpaper}")
               hl.exec_cmd("gammastep -l ${geo}")
               hl.exec_cmd("swayidle -w timeout 300 'dms ipc call lock lock' timeout 600 'hyprctl dispatch dpms off' resume 'hyprctl dispatch dpms on' ${lib.optionalString isLaptop "timeout 1800 'systemctl suspend' "}before-sleep 'dms ipc call lock lock'")

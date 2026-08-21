@@ -362,9 +362,9 @@ in
   # the option path is `desktop.displayManager`, not `features.desktop.displayManager`.
   # Login manager: DankMaterialShell greeter (greetd). backend="none" turns GDM
   # off; the dms-greeter module auto-enables greetd and runs the greeter inside
-  # a niri compositor. Chosen over noctalia-greeter (more mature); it enumerates
+  # a niri compositor. It enumerates
   # the same wayland-sessions, so GNOME + all niri/labwc/mango (stock + -dms)
-  # entries stay selectable. noctalia-greeter input kept available for revert.
+  # entries stay selectable.
   desktop.displayManager.backend = "none";
 
   services.displayManager.dms-greeter = {
@@ -374,8 +374,6 @@ in
 
   # Phase 1: niri + labwc + mango as selectable login sessions (alongside GNOME).
   desktop.niri.enable = true;
-  desktop.labwc.enable = true;
-  desktop.mangowm.enable = true;
   desktop.hyprland.enable = true;
 
   # k3d cluster — Phase 2 of docs/plans/2026-08-20-k3d-p510-to-p620-migration.md.
@@ -426,8 +424,7 @@ in
     apiPort = 6443;
   };
 
-  # Adds "(DankMaterialShell)" login sessions for niri/labwc/mango next to the
-  # stock (Noctalia) ones — pick per login in the greeter.
+  # Registers the DankMaterialShell login sessions for niri and Hyprland.
   desktop.dmsShell.enable = true;
 
   # ddcutil: software brightness/contrast control of external monitors (DDC/CI).
