@@ -40,6 +40,14 @@ in
       backend = "podman";
 
       containers."plex-auto-languages" = {
+        # k8s-file, not the NixOS default of journald. Podman's journald driver
+        # files container stdout AND stderr as host-level errors regardless of
+        # content, so ordinary output shows up under `journalctl -p err`:
+        # kometa's ASCII progress tables and postgres's "checkpoint starting"
+        # LOG lines alone accounted for ~2000 "errors" in one boot on p510.
+        # k8s-file keeps `podman logs` working and leaves the journal for
+        # things that are actually wrong.
+        log-driver = "k8s-file";
         # Pinned to a specific digest for reproducibility + supply-chain
         # safety. Bump by running on p510 and grabbing the new digest:
         #   sudo podman pull remirigal/plex-auto-languages:latest
