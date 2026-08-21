@@ -110,7 +110,11 @@ in
     # sit in VRAM to be worth running; MAX_LOADED_MODELS=1 (module) evicts it
     # before loading any on-demand model rather than trying to fit both.
     persistentModels = [ "qwen3.8:27b" ];
-    onDemandModels = [ "qwen2.5-coder:14b" "gemma4:e4b" "gemma4:12b" ];
+    # qwen2.5:7b is here for p510, not for this host: audiobook-mcp and
+    # audiobook-import use it for strict-JSON metadata extraction, and their
+    # ollama moved here when p510's was switched off (its 490W PSU cannot
+    # carry the GPUs). Dropping it silently breaks audiobook imports.
+    onDemandModels = [ "qwen2.5-coder:14b" "gemma4:e4b" "gemma4:12b" "qwen2.5:7b" ];
     # The model supports 256K but ollama caps every request at 4096 unless
     # told otherwise. 32K is what the ~6GB left above the weights pays for —
     # cheap here because qwen3.8 runs full attention on only 16 of 64 layers,

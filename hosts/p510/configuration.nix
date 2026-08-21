@@ -576,8 +576,19 @@ in
   # Bound to 0.0.0.0:11434 with OLLAMA_ORIGINS=* so tailnet/LAN clients
   # and browser UIs can hit it directly. p510's firewall is disabled —
   # exposure is gated at the network edge (Tailscale ACLs + router).
+  # DISABLED 2026-08-21 — this host cannot power its GPUs.
+  #
+  # The 490W PSU cannot carry a 135W Xeon plus a 290W-limit 3070 Ti and a
+  # 170W-limit 3060: three hard power cuts on 19/20 Aug, two of them within
+  # seconds of ollama loading a model. The 130W/110W caps in nixos/nvidia.nix
+  # brought the worst case under the rating, but ollama was the trigger in
+  # those two and the Factory workload that needed it now runs on p620.
+  #
+  # p620 serves models instead — one 24GB card, reachable over the tailnet.
+  # The consumers below are repointed at it. The block is kept intact so the
+  # service can be switched back on if the PSU is ever replaced.
   features.ollama-server = {
-    enable = true;
+    enable = false;
     package = pkgs.ollama-cuda; # NVIDIA CUDA GPU package
     host = "0.0.0.0"; # Tailnet + LAN reachable
     # Deliberately left on /mnt/img_pool despite that pool being the slow SMR
@@ -694,6 +705,9 @@ in
   # under /mnt/media/Media/Audiobooks/<Author>/[<Series>/]<Title>/.
   features.audiobook-import = {
     enable = true;
+    # p620's ollama by tailnet IP: stable per-device, and does not depend on
+    # MagicDNS resolving for a headless service at boot.
+    ollamaUrl = "http://100.69.100.115:11434";
     # ABB torrents land here; SABnzbd (audiobook-only on p510 — the *arr stack
     # uses NZBGet/Transmission) completes Usenet grabs here. Both are watched
     # so NZBGeek audiobooks import too.
@@ -708,6 +722,7 @@ in
   # Audiobookshelf library lookups for an LLM/Claude agent over the tailnet.
   features.audiobook-mcp = {
     enable = true;
+    ollamaUrl = "http://100.69.100.115:11434";
     listenLanInterface = "eno1";
   };
 
