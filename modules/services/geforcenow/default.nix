@@ -71,6 +71,15 @@ in
       };
 
       script = ''
+        # Already installed? Skip all network work — this service is wantedBy
+        # multi-user.target and otherwise re-runs flatpak remote-add/install on
+        # every boot (~5s on the critical boot path). The install is a one-time
+        # bootstrap, so exit fast once it's done.
+        if flatpak info --system com.nvidia.geforcenow >/dev/null 2>&1; then
+          echo "GeForce NOW already installed; nothing to do."
+          exit 0
+        fi
+
         max_attempts=${toString cfg.remoteSetup.maxRetries}
         attempt=1
 

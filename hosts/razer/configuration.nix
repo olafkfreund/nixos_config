@@ -488,6 +488,15 @@ in
   # Use standard NetworkManager for laptop - useNetworkd already set above
   networking.useHostResolvConf = false;
 
+  # Pin the other hosts to their Tailscale IPs so `p620.lan` / `p510.lan`
+  # resolve even when the router's `.lan` mDNS/DNS is flaky — which broke a
+  # `just deploy-via-p620 razer` (Could not resolve hostname p620.lan).
+  # Tailscale is always up, so these names are always routable.
+  networking.hosts = {
+    "100.69.100.115" = [ "p620" "p620.lan" ];
+    "100.118.96.32" = [ "p510" "p510.lan" ];
+  };
+
   environment.sessionVariables = vars.environmentVariables // {
     NH_FLAKE = vars.paths.flakeDir;
   };

@@ -30,5 +30,13 @@
   # references in host config). Without suppression, the unit fails on every
   # boot and `nh os switch` exits 4 even though activation actually succeeded.
   # The early variant (initrd, sets up SRK) is unaffected and still runs.
-  systemd.suppressedSystemUnits = [ "systemd-tpm2-setup.service" ];
+  #
+  # systemd-pcrlogin@<uid>.service fails the same way (0x921) — it measures the
+  # user record into a TPM PCR, which nothing here consumes either. Masking the
+  # template stops every instance failing on login. (Two units — @1000, @973 —
+  # showed as failed in `systemctl --failed`.)
+  systemd.suppressedSystemUnits = [
+    "systemd-tpm2-setup.service"
+    "systemd-pcrlogin@.service"
+  ];
 }

@@ -45,7 +45,11 @@
     "pcie_aspm=off"
     "nvme_core.io_timeout=60"
     "button.lid_init_state=open" # Lid open state on boot
-    "mitigations=off" # Disable all CPU mitigations for performance (use with caution)
+    # mitigations=auto (kernel default) — not "off". This host runs Secure Boot;
+    # disabling every CPU vulnerability mitigation while hardening the boot chain
+    # is a contradictory posture. Restore mitigations unless a measured perf need
+    # justifies dropping them.
+    "mitigations=auto"
   ];
 
   # For improved boot time
