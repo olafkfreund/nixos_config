@@ -37,6 +37,7 @@ in
       ../../modules/secrets/api-keys.nix
       ../../modules/services/ollama.nix
       ../../modules/services/plex-mcp.nix # Plex MCP server (HTTP transport, tailnet-only)
+      ../../modules/services/sqlite-backup.nix # sqlite snapshots off the failing media disk
       ../../modules/services/backstage.nix # Backstage developer portal (epic #731, disabled by default)
       ../../modules/containers/k3d.nix # k3d (k3s in Docker) cluster — ArgoCD + Tailscale operator (see docs/applications/k3d-cluster.md)
       ../../modules/services/arr-suite-mcp.nix # *arr suite MCP server (SSE bridge, tailnet-only)
@@ -692,6 +693,28 @@ in
   # download dir every 5 min, parses release names with the local qwen2.5:7b,
   # merges multi-file books into chaptered M4B via m4b-tool, and places them
   # under /mnt/media/Media/Audiobooks/<Author>/[<Series>/]<Title>/.
+  # The Plex library database lives on /mnt/media — the 12TB ST12000NM0127
+  # (ZJV2NZE9) with 2896 reallocated and 656 pending sectors, no RAID, and no
+  # other copy. Watch history and curation are the only things here that cannot
+  # be re-downloaded, and they are ~1GB. Snapshot them onto /mnt/img_pool,
+  # which is a different physical disk.
+  features.sqlite-backup = {
+    enable = true;
+    # Plex's two (module default) plus the *arr trio. All of them keep their
+    # state on /mnt/media, and Sonarr/Radarr's own Backups/ directories are on
+    # that same disk — which protects against a bad upgrade, not a dying drive.
+    # ~1.1GB total: library curation, quality profiles, indexer config and
+    # download history that would take days to rebuild by hand.
+    databases = [
+      "${config.services.plex.dataDir}/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.db"
+      "${config.services.plex.dataDir}/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.blobs.db"
+      "/mnt/media/sonarr/sonarr.db"
+      "/mnt/media/radarr/radarr.db"
+      "/mnt/media/lidarr/lidarr.db"
+    ];
+    readPaths = [ "/mnt/media" ];
+  };
+
   features.audiobook-import = {
     enable = true;
     # ABB torrents land here; SABnzbd (audiobook-only on p510 — the *arr stack
