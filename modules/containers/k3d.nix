@@ -913,27 +913,28 @@ in
             };
           };
         in
-        builtins.listToAttrs (map mkSecret [
-          "cloudflared-factory"
-          "factory-secrets"
-          "factory-cli-creds"
-          "ghcr-pull"
-          "skillai-db"
-          "skillai-app"
-          "factory-db-aifactory"
-          "factory-db-pfactory"
-          "factory-db-tfactory"
-          "minio-creds"
-          "minio-kms"
-          "oauth2-proxy-cfactory"
-          "oauth2-proxy-observe"
-          "oauth2-proxy-odin"
-          "observe-root"
-          "otel-otlp-auth"
-          "cfactory-api-keys"
-          "odin-ssh-key"
-          "odin-api-keys"
-        ])
+        builtins.listToAttrs
+          (map mkSecret [
+            "cloudflared-factory"
+            "factory-secrets"
+            "factory-cli-creds"
+            "ghcr-pull"
+            "skillai-db"
+            "skillai-app"
+            "factory-db-aifactory"
+            "factory-db-pfactory"
+            "factory-db-tfactory"
+            "minio-creds"
+            "minio-kms"
+            "oauth2-proxy-cfactory"
+            "oauth2-proxy-observe"
+            "oauth2-proxy-odin"
+            "observe-root"
+            "otel-otlp-auth"
+            "cfactory-api-keys"
+            "odin-ssh-key"
+            "odin-api-keys"
+          ])
         // {
           # Non-factory namespaces (see the 4b loop in the bootstrap script).
           k3d-secret-fides-secrets = {
