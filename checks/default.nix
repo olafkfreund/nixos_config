@@ -33,6 +33,30 @@ in
       touch $out
     '';
 
+  # Formatting — mirrors the CI lint-check job.
+  #
+  # `just validate` runs `nix flake check`, which had deadnix and statix but
+  # not the formatter. CI's lint-check DOES run `nixpkgs-fmt --check`, so a
+  # whitespace drift in modules/containers/k3d.nix sailed through several
+  # local validations and failed twelve consecutive CI runs before anyone
+  # traced it. Local validation that does not cover what CI gates on is worse
+  # than none: it teaches you to trust a green run that proves less than you
+  # think.
+  nix-format-check =
+    pkgs.runCommand "nix-format-validation"
+      {
+        src = cleanSource ../.;
+      } ''
+      echo "Running nixpkgs-fmt formatting check..."
+      cd $src
+      ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt --check . || {
+        echo "FAIL: some Nix files need formatting"
+        echo "Run: nixpkgs-fmt ."
+        exit 1
+      }
+      touch $out
+    '';
+
   # Nix file syntax validation
   nix-syntax-check =
     pkgs.runCommand "nix-syntax-validation"
