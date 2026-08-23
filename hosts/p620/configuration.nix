@@ -489,25 +489,29 @@ in
 
   # Advanced CPU monitoring script for Waybar
 
-  # Consolidated modules configuration
-  modules = {
-    # Docker configuration
-    containers.docker = {
-      enable = true;
-      users = hostUsers; # Use all users for this host
-      rootless = false;
-      # Preserves the path this host has always used — 81 volumes live here.
-      # Unlike p510, /mnt/img_pool here is a plain directory on the root
-      # filesystem, not a separate disk; the value is legacy rather than
-      # deliberate, but repointing it would orphan the existing data-root.
-      dataRoot = "/mnt/img_pool/docker";
-    };
+  # Dotted paths, NOT a `modules = { ... }` block. This file already sets
+  # modules.containers.k3d above, and older Nix rejects mixing the two forms
+  # for the same parent: "attribute 'containers' already defined". Nix 2.34
+  # merges them happily, which is why this evaluated locally while every CI
+  # run failed — CI pins an older Nix via cachix/install-nix-action@v27.
+  # Keeping one style throughout removes the version dependency.
 
-    # Enable secrets management
-    security.secrets = {
-      enable = true;
-      userKeys = [ "/home/${vars.username}/.ssh/id_ed25519" ];
-    };
+  # Docker configuration
+  modules.containers.docker = {
+    enable = true;
+    users = hostUsers; # Use all users for this host
+    rootless = false;
+    # Preserves the path this host has always used — 81 volumes live here.
+    # Unlike p510, /mnt/img_pool here is a plain directory on the root
+    # filesystem, not a separate disk; the value is legacy rather than
+    # deliberate, but repointing it would orphan the existing data-root.
+    dataRoot = "/mnt/img_pool/docker";
+  };
+
+  # Enable secrets management
+  modules.security.secrets = {
+    enable = true;
+    userKeys = [ "/home/${vars.username}/.ssh/id_ed25519" ];
   };
 
   # Create system users for all host users
