@@ -461,18 +461,7 @@ in
   # Consolidated system configuration
   system = {
     # Enable logging configuration for noise reduction
-    logging = {
-      enableFiltering = true;
-      filterRules = [
-        "router dispatching GET /health"
-        "router jsonParser  : /health"
-        "body-parser:json skip empty body"
-        "GET /health"
-        "health check"
-        "connection established"
-        "connection closed"
-      ];
-    };
+    logging.enableFiltering = true;
 
     # Performance Optimization Configuration - REMOVED
     # The system.resourceManager module was removed during anti-pattern cleanup
