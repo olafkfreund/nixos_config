@@ -91,6 +91,20 @@ in
       // lib.optionalAttrs (cfg.dataRoot != null) { data-root = cfg.dataRoot; };
     };
 
+    # nixpkgs puts daemon.json in *reloadTriggers*, so a settings change only
+    # SIGHUPs dockerd. dockerd's SIGHUP handler re-reads a subset of the file —
+    # log-driver is not in it. That is why setting logDriver = "local" above
+    # (#1412) landed in the closure on 2026-08-21 and still had not taken
+    # effect three days later: the running daemon kept its old journald driver
+    # and the k3d node kept filing ~220k INFO lines at priority err per boot.
+    #
+    # Safe to force a real restart because live-restore keeps containers up
+    # across it (see above). Triggering on the settings rather than on the
+    # generated daemon.json path keeps this off nixpkgs internals.
+    systemd.services.docker.restartTriggers = [
+      (builtins.toJSON config.virtualisation.docker.daemon.settings)
+    ];
+
     # Add specified users to docker group
     users.users = genAttrs cfg.users (_username: {
       extraGroups = [ "docker" ];
