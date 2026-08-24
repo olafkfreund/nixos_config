@@ -1,22 +1,15 @@
 # Logging configuration for reduced noise
 { config
 , lib
-, pkgs
 , ...
 }:
 let
-  inherit (lib) mkOption mkIf mkEnableOption types;
+  inherit (lib) mkIf mkEnableOption;
   cfg = config.system.logging;
 in
 {
   options.system.logging = {
     enableFiltering = mkEnableOption "Enable log filtering for noise reduction";
-
-    filterRules = mkOption {
-      type = types.listOf types.str;
-      default = [ ];
-      description = "List of log filtering rules";
-    };
   };
 
   config = mkIf cfg.enableFiltering {
@@ -42,23 +35,6 @@ in
       MaxFileSec=1day
     '';
 
-    # Configure systemd-journald to filter container logs
-    systemd.services.journal-filter = {
-      description = "Journal Log Filter for Container Noise";
-      wantedBy = [ "multi-user.target" ];
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        ExecStart = pkgs.writeShellScript "setup-journal-filter" ''
-          # Create custom journal namespace for filtered logs
-          mkdir -p /var/log/journal-filtered
-
-          # Set up log filtering via systemd-journald
-          systemctl restart systemd-journald
-        '';
-      };
-    };
-
     # Docker's log driver is deliberately NOT set here.
     #
     # This block used to pin daemon.settings.log-driver = "journald", which
@@ -72,15 +48,5 @@ in
     # A module whose purpose is noise reduction should not be the thing forcing
     # every container's stderr into the journal. The driver now comes from
     # modules/containers/docker.nix, which owns Docker's configuration.
-
-    # Environment variables for better log control
-    environment.variables = {
-      # Reduce Docker log verbosity
-      DOCKER_LOG_LEVEL = "warn";
-
-      # Node.js applications log level
-      NODE_ENV = "production";
-      LOG_LEVEL = "info";
-    };
   };
 }
