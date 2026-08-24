@@ -93,6 +93,7 @@ in
 
       # File management
       nautilus
+      nautilus-open-any-terminal # extension: must share nautilus's profile
       file-roller
 
       # Media
