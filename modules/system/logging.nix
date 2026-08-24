@@ -35,6 +35,18 @@ in
       MaxFileSec=1day
     '';
 
+    # Cap coredump storage the same way. systemd's default MaxUse is 10% of
+    # the filesystem, which on p620's 916G root is ~90G of crash dumps before
+    # anything is evicted. It had accumulated 2.1G by 2026-08-24, most of it a
+    # single 968M Chrome core, and nothing was ever going to reclaim it.
+    #
+    # 1G keeps enough history to actually debug a repeat crash while staying
+    # small enough that a browser core cannot quietly eat the disk.
+    systemd.coredump.settings.Coredump = {
+      MaxUse = "1G";
+      KeepFree = "10G";
+    };
+
     # Docker's log driver is deliberately NOT set here.
     #
     # This block used to pin daemon.settings.log-driver = "journald", which
