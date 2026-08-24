@@ -26,7 +26,12 @@ in
         looking-glass-obs # Low-latency VM window capture
         obs-vintage-filter # Vintage video effects
         obs-command-source # Run shell commands from OBS
-        obs-source-switcher # Automatic source switching
+        # OBS 32 deprecated obs_properties_add_button; the plugin builds with
+        # -Werror so the deprecation is fatal. Append -Wno-error to un-fatal it
+        # until upstream migrates the API.
+        (obs-source-switcher.overrideAttrs (prev: {
+          env.NIX_CFLAGS_COMPILE = ((prev.env or { }).NIX_CFLAGS_COMPILE or "") + " -Wno-error=deprecated-declarations";
+        })) # Automatic source switching
         obs-move-transition # Smooth transitions between scenes
         obs-vkcapture # Vulkan/OpenGL game capture
         obs-gstreamer # GStreamer integration
