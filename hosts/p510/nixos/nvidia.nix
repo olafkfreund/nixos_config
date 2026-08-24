@@ -55,9 +55,19 @@
   # ollama model load, once mid-Plex-NVENC-transcode. No MCE, panic, OOM or
   # thermal event in any of them: the journal just stops mid-write.
   #
-  # 130W + 110W brings the worst case to ~475W, under the rating. Both cards
-  # floor at 100W (power.min_limit), so these are valid. Transcoding draws
-  # nowhere near the cap, so the practical cost is nil.
+  # 130W + 110W brought the worst case to ~475W, under the rating. Transcoding
+  # draws nowhere near the cap, so the practical cost is nil.
+  #
+  # The second card was physically removed on 2026-08-24, so only GPU 0 (the
+  # RTX 3070 Ti at 03:00.0) is left. Its `-i 1` line stayed behind and failed
+  # every boot with "No devices found", exiting 2 and leaving the unit failed
+  # — which matters beyond tidiness, because one permanently-failed unit makes
+  # every subsequent switch return exit 4 and can roll the deploy back.
+  #
+  # 130W is deliberately left as-is. The card's stock limit is 290W and the
+  # PSU now has ~110W more headroom, but the freezes above are why this cap
+  # exists at all, so raising it is a separate decision backed by its own
+  # testing rather than a side effect of pulling a card.
   #
   # This runs as root on purpose — setting a power limit needs CAP_SYS_ADMIN
   # and /dev/nvidiactl, so the usual DynamicUser/ProtectHome hardening cannot
@@ -74,7 +84,6 @@
       # sticky across a driver reload, hence re-applying at every boot.
       ExecStart = [
         "${config.hardware.nvidia.package.bin}/bin/nvidia-smi -i 0 -pl 130"
-        "${config.hardware.nvidia.package.bin}/bin/nvidia-smi -i 1 -pl 110"
       ];
       ProtectSystem = "strict";
       ProtectHome = true;
