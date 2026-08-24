@@ -1,5 +1,4 @@
 { config
-, pkgs
 , ...
 }: {
   # NOTE: greetd display manager disabled - using COSMIC Greeter instead
@@ -34,21 +33,6 @@
 
     # Polkit for privilege escalation
     polkit.enable = true;
-  };
-
-  # Session configuration
-  systemd.user.services.polkit-gnome-authentication-agent-1 = {
-    description = "polkit-gnome-authentication-agent-1";
-    wantedBy = [ "graphical-session.target" ];
-    wants = [ "graphical-session.target" ];
-    after = [ "graphical-session.target" ];
-    serviceConfig = {
-      Type = "simple";
-      ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
-      Restart = "on-failure";
-      RestartSec = 1;
-      TimeoutStopSec = 10;
-    };
   };
 
   # NVIDIA and Intel iGPU specific environment variables
