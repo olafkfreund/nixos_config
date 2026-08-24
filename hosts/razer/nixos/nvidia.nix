@@ -75,6 +75,9 @@
   boot = {
     kernelParams = [
       "nvidia-drm.modeset=1" # Required for Wayland
+      "nvidia-drm.fbdev=1" # Fixes external-monitor flicker on niri: without a DRM
+      # fbdev the NVIDIA driver drops the surface in the vblank callback on the
+      # second dGPU-driven CRTC ("missing surface in vblank callback").
       "nvidia.NVreg_PreserveVideoMemoryAllocations=1" # Helps with suspend/resume
       "nvidia.NVreg_TemporaryFilePath=/tmp" # Fix for temp file issues
     ];
