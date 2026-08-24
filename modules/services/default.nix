@@ -8,7 +8,6 @@ _: {
     ./bluetooth/bluetooth.nix
     ./openssh/openssh.nix
     ./gnome/gnome-services.nix
-    ./systemd/default.nix
     ./system/default.nix
     ./cron/cron.nix
     ./atuin/default.nix
