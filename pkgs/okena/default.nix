@@ -7,7 +7,7 @@
 , libglvnd
 , vulkan-loader
 , wayland
-, xorg
+, libxcb
 , dtach
 }:
 # Okena — native terminal multiplexer (tabs, splits, detachable windows) built
@@ -46,7 +46,7 @@ stdenv.mkDerivation (finalAttrs: {
   # DT_NEEDED entries of both binaries.
   buildInputs = [
     libxkbcommon
-    xorg.libxcb
+    libxcb
     stdenv.cc.cc.lib
   ];
 
