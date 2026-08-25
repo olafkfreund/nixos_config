@@ -12,7 +12,7 @@ imports one plus its own hardware config.
 
 | Host  | Type          | Notes |
 | ----- | ------------- | ----- |
-| p620  | `workstation` | AMD GPU / ROCm. Set `services.ollama.package = pkgs.ollama-rocm`; `services.ollama.acceleration` was removed from nixpkgs (unrelated to this repo's own `acceleration` attribute in `hosts/common/hardware-profiles/`). Serves the binary cache. |
+| p620  | `workstation` | AMD GPU / ROCm. Set `services.ollama.package = pkgs.ollama-rocm`; `services.ollama.acceleration` was removed from nixpkgs (unrelated to this repo's own `acceleration` attribute in `hosts/common/hardware-profiles/`). |
 | razer | `laptop`      | Hybrid Intel/NVIDIA (Optimus). Heavy rebuilds: build on p620 via `just deploy-via-p620 razer`. |
 | p510  | `workstation` | Headless media server (Plex, NZBGet, k3s microvms). **Never build or deploy without asking first.** |
 
@@ -75,6 +75,12 @@ Things the code no longer shows, so they are easy to get wrong:
   nix-community.cachix.org. Tailscale mesh is used for remote SSH access, not caching.
 - **Monitoring was removed** (Prometheus/Grafana/Loki/Alertmanager). Use `journalctl`
   and `systemctl status`.
-- **Hyprland was removed.** The desktop is niri with noctalia/DMS.
+- **Two Wayland sessions, both live: niri and Hyprland**, with DankMaterialShell
+  (DMS) as the shell for each. `modules/desktop/dms-shell.nix` builds "Niri (DMS)"
+  always and "Hyprland (DMS)" when `desktop.hyprland.enable` is set — true on p620
+  and razer, false on p510. Packages come from nixpkgs (`pkgs.niri`, `pkgs.hyprland`);
+  the niri-flake input supplies only the `programs.niri` module, not the binary.
+  **Noctalia was removed** (PR #1410, with labwc and mango); stale `${DESK_SHELL:-noctalia}`
+  comments survive in a few files.
 - DEX5550 is offline; Samsung and HP are decommissioned.
 - MicroVMs are per-host files (`hosts/p510/microvm.nix`), not a shared module.
