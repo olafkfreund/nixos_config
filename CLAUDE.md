@@ -70,9 +70,10 @@ Branch `<type>/<issue>-<description>`. Conventional Commits with the issue numbe
 
 Things the code no longer shows, so they are easy to get wrong:
 
-- **No binary cache.** There is no nix-serve/harmonia anywhere in the repo; nothing
-  listens on p620:5000. `modules/nix/nix.nix` only substitutes from cache.nixos.org and
-  nix-community.cachix.org. Tailscale mesh is used for remote SSH access, not caching.
+- **No binary cache of our own.** There is no nix-serve/harmonia anywhere in the repo;
+  nothing listens on p620:5000. `modules/nix/nix.nix` substitutes from cache.nixos.org and
+  nix-community.cachix.org; `flake.nix` adds cuda-maintainers and devenv as flake-level
+  `extra-substituters`. Tailscale mesh is used for remote SSH access, not caching.
 - **Monitoring was removed** (Prometheus/Grafana/Loki/Alertmanager). Use `journalctl`
   and `systemctl status`.
 - **Two Wayland sessions, both live: niri and Hyprland**, with DankMaterialShell
