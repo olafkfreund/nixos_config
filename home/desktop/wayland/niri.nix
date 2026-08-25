@@ -136,6 +136,13 @@ in
         Mod+3 { focus-workspace 3; }
         Mod+4 { focus-workspace 4; }
         Mod+5 { focus-workspace 5; }
+        // Move the focused column to workspace N. The Hyprland session has had
+        // these since #1367; niri only ever got the Page_Up/Down pair.
+        Mod+Shift+1 { move-column-to-workspace 1; }
+        Mod+Shift+2 { move-column-to-workspace 2; }
+        Mod+Shift+3 { move-column-to-workspace 3; }
+        Mod+Shift+4 { move-column-to-workspace 4; }
+        Mod+Shift+5 { move-column-to-workspace 5; }
         "Mod+Page_Down" { focus-workspace-down; }
         "Mod+Page_Up" { focus-workspace-up; }
         "Mod+Shift+Page_Down" { move-column-to-workspace-down; }
@@ -159,11 +166,24 @@ in
         Mod+Alt+R { spawn "screenrecord" "region"; }
         Mod+Shift+Slash { show-hotkey-overlay; }
         Mod+Shift+E { quit; }
-        XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; }
-        XF86AudioLowerVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
-        XF86AudioMute { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
-        XF86MonBrightnessUp { spawn "brightnessctl" "set" "5%+"; }
-        XF86MonBrightnessDown { spawn "brightnessctl" "set" "5%-"; }
+        // allow-when-locked mirrors the Hyprland session, where these carry
+        // locked=true — volume and brightness should work on the lock screen.
+        // -l 1 caps the sink at 100%, matching the Hyprland bind.
+        XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "-l" "1" "@DEFAULT_AUDIO_SINK@" "5%+"; }
+        XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
+        XF86AudioMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+        XF86AudioMicMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+        XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "set" "5%+"; }
+        XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "set" "5%-"; }
+
+        // Media transport. services.playerctld.enable is true on p620 and razer
+        // and playerctl ships in modules/system-utils, but nothing was bound to
+        // it in either session, so these keys did nothing.
+        XF86AudioPlay allow-when-locked=true { spawn "playerctl" "play-pause"; }
+        XF86AudioPause allow-when-locked=true { spawn "playerctl" "play-pause"; }
+        XF86AudioNext allow-when-locked=true { spawn "playerctl" "next"; }
+        XF86AudioPrev allow-when-locked=true { spawn "playerctl" "previous"; }
+        XF86AudioStop allow-when-locked=true { spawn "playerctl" "stop"; }
 
         // Shell actions — DankMaterialShell (distinct from the Noctalia session,
         // (DMS IPC).
@@ -173,6 +193,7 @@ in
         Mod+N { spawn "dms" "ipc" "call" "notifications" "toggle"; }
         Mod+X { spawn "dms" "ipc" "call" "powermenu" "toggle"; }
         Mod+Backspace { spawn "dms" "ipc" "call" "lock" "lock"; }
+        Mod+Shift+V { spawn "dms" "ipc" "call" "clipboard" "toggle"; }
     }
 
     // Start DMS (prefer the managed service; fall back to a direct spawn), plus

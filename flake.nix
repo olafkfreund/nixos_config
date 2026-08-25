@@ -12,18 +12,18 @@
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
     ];
 
-    # Development and specific package caches
+    # Development and specific package caches. Only caches with an actual
+    # consumer belong here: every extra substituter costs a round-trip per
+    # uncached path. hyprland/cosmic were dropped (#1457) — no hyprland flake
+    # input (we build pkgs.hyprland), and desktop.cosmic.enable is false on
+    # every host.
     extra-substituters = [
       "https://cuda-maintainers.cachix.org/"
-      "https://hyprland.cachix.org/"
       "https://devenv.cachix.org/"
-      "https://cosmic.cachix.org/"
     ];
     extra-trusted-public-keys = [
       "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
-      "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
       "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
-      "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
     ];
   };
 
