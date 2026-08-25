@@ -208,6 +208,7 @@ in
       hl.bind(mod .. " + TAB", hl.dsp.exec_cmd("dms ipc call hypr toggleOverview"))
       hl.bind(mod .. " + SHIFT + SLASH", hl.dsp.exec_cmd("dms ipc call hypr toggleBinds"))
       hl.bind(mod .. " + BACKSPACE", hl.dsp.exec_cmd("dms ipc call lock lock"), { locked = true })
+      hl.bind(mod .. " + SHIFT + V", hl.dsp.exec_cmd("dms ipc call clipboard toggle"))
 
       -- Media / brightness (locked so they work on the lock screen)
       hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
@@ -215,6 +216,16 @@ in
       hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true })
       hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl set 5%+"), { locked = true, repeating = true })
       hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 5%-"), { locked = true, repeating = true })
+      hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true })
+
+      -- Media transport. services.playerctld.enable is true on p620 and razer and
+      -- playerctl ships in modules/system-utils, but nothing was bound to it in
+      -- either session, so these keys did nothing.
+      hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+      hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+      hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
+      hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
+      hl.bind("XF86AudioStop", hl.dsp.exec_cmd("playerctl stop"), { locked = true })
     '';
   };
 }
