@@ -14,7 +14,7 @@
 
     # Development and specific package caches. Only caches with an actual
     # consumer belong here: every extra substituter costs a round-trip per
-    # uncached path. hyprland/cosmic were dropped (#1452) — no hyprland flake
+    # uncached path. hyprland/cosmic were dropped (#1457) — no hyprland flake
     # input (we build pkgs.hyprland), and desktop.cosmic.enable is false on
     # every host.
     extra-substituters = [
