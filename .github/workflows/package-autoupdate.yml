@@ -55,12 +55,21 @@ jobs:
             script: ./scripts/update-warp-terminal.sh
             paths: pkgs/warp-terminal
             verify: .#nixosConfigurations.p620.pkgs.warp-terminal
-          # antigravity-hub is bumped by the script but is not in the overlay,
-          # so `verify` builds the cli instead. See issue #1468.
+          # Every component must be verified through customPkgs. Bare
+          # `pkgs.antigravity-cli` is the antigravity-nix FLAKE INPUT's
+          # package, not ours — a different derivation at a different version
+          # — so building it proved nothing about the files this script
+          # rewrites. The hosts install pkgs.customPkgs.antigravity-cli
+          # (modules/ai/antigravity-cli.nix) and Users/olafkfreund/profile.nix
+          # installs the other three. See #1468.
           - pkg: antigravity
             script: ./scripts/update-antigravity.sh
             paths: pkgs/antigravity-cli pkgs/antigravity-ide pkgs/antigravity-hub pkgs/google-antigravity-py
-            verify: .#nixosConfigurations.p620.pkgs.antigravity-cli
+            verify: >-
+              .#nixosConfigurations.p620.pkgs.customPkgs.antigravity-cli
+              .#nixosConfigurations.p620.pkgs.customPkgs.antigravity-ide
+              .#nixosConfigurations.p620.pkgs.customPkgs.antigravity-hub
+              .#nixosConfigurations.p620.pkgs.customPkgs.google-antigravity-py
 
     steps:
       - uses: actions/checkout@v5
@@ -105,7 +114,13 @@ jobs:
 
       - name: Build the bumped package
         if: steps.changed.outputs.changed == 'true'
-        run: nix build --no-link --print-out-paths '${{ matrix.verify }}'
+        env:
+          VERIFY: ${{ matrix.verify }}
+        run: |
+          # VERIFY is a deliberate space-separated list of installables, so it
+          # must word-split — antigravity verifies four components at once.
+          # shellcheck disable=SC2086
+          nix build --no-link --print-out-paths $VERIFY
 
       - name: Open PR
         if: steps.changed.outputs.changed == 'true'
