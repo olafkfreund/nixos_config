@@ -1,0 +1,134 @@
+# Nightly upstream bumps for the packages we track ourselves rather than
+# taking from nixpkgs. For each one: resolve the latest upstream version,
+# rewrite version + hash in place, build it, and merge if it builds.
+#
+# Why this verifies inline instead of gating on ci.yml: pull requests opened
+# with GITHUB_TOKEN do not trigger other workflows, so `gh pr merge --auto`
+# would wait forever on checks that never run. The job that merges is
+# therefore the job that built it.
+#
+# The per-package logic lives in scripts/, not here, so the same bump can be
+# run by hand — `./scripts/update-warp-terminal.sh` etc. Each script is
+# idempotent and writes nothing when already current, which is what the
+# "did anything change" check below relies on.
+#
+# The hourly claude-code-watch / claude-desktop-watch workflows still file
+# their tracking issues; this does not replace them.
+
+name: package autoupdate
+
+on:
+  schedule:
+    # 03:43 UTC — after the nixos issue audit (02:00) and before the flake
+    # update (06:00), so a package bump and a flake bump never race for main.
+    - cron: "43 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# One run at a time. Four packages merging to main concurrently would leave
+# the later ones rebasing against a moved base for no benefit.
+concurrency:
+  group: package-autoupdate
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      # Serial: each job merges to main, so a parallel matrix would race.
+      max-parallel: 1
+      matrix:
+        include:
+          - pkg: claude-code
+            script: ./scripts/update-claude-code-native.sh --write latest
+            paths: pkgs/claude-code-native
+            verify: .#claude-code-native
+          - pkg: claude-desktop
+            script: ./scripts/update-claude-desktop.sh
+            paths: pkgs/claude-desktop-beta
+            verify: .#nixosConfigurations.p620.pkgs.claude-desktop-linux
+          - pkg: warp-terminal
+            script: ./scripts/update-warp-terminal.sh
+            paths: pkgs/warp-terminal
+            verify: .#nixosConfigurations.p620.pkgs.warp-terminal
+          # antigravity-hub is bumped by the script but is not in the overlay,
+          # so `verify` builds the cli instead. See issue #1468.
+          - pkg: antigravity
+            script: ./scripts/update-antigravity.sh
+            paths: pkgs/antigravity-cli pkgs/antigravity-ide pkgs/antigravity-hub pkgs/google-antigravity-py
+            verify: .#nixosConfigurations.p620.pkgs.antigravity-cli
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31.11.1
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Setup Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v7
+
+      - name: Run update script
+        run: ${{ matrix.script }}
+
+      - name: Did anything change?
+        id: changed
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- ${{ matrix.paths }}; then
+            echo "changed=false" >>"$GITHUB_OUTPUT"
+            echo "${{ matrix.pkg }} already current — nothing to do"
+          else
+            echo "changed=true" >>"$GITHUB_OUTPUT"
+            # First bumped version line is enough to title the commit. For
+            # antigravity, which can bump several components at once, this
+            # names the first and the PR body carries the full diff.
+            v=$(git diff -U0 -- ${{ matrix.paths }} \
+              | sed -nE 's/^\+[[:space:]]*version = "([^"]+)";.*/\1/p' | head -1)
+            echo "version=${v:-unknown}" >>"$GITHUB_OUTPUT"
+            git --no-pager diff --stat -- ${{ matrix.paths }}
+          fi
+
+      - name: Build the bumped package
+        if: steps.changed.outputs.changed == 'true'
+        run: nix build --no-link --print-out-paths '${{ matrix.verify }}'
+
+      - name: Open PR
+        if: steps.changed.outputs.changed == 'true'
+        id: pr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: chore/autoupdate-${{ matrix.pkg }}
+          delete-branch: true
+          commit-message: "chore(${{ matrix.pkg }}): auto-update to ${{ steps.changed.outputs.version }}"
+          title: "chore(${{ matrix.pkg }}): auto-update to ${{ steps.changed.outputs.version }}"
+          labels: |
+            dependencies
+            automated
+          body: |
+            Automated nightly bump of **${{ matrix.pkg }}** to `${{ steps.changed.outputs.version }}`.
+
+            Produced by `${{ matrix.script }}` and verified with:
+
+            ```
+            nix build ${{ matrix.verify }}
+            ```
+
+            The build passed before this PR was opened, which is the gate for the
+            auto-merge below — `ci.yml` does not run on GITHUB_TOKEN pull requests.
+
+            Nothing is deployed. Pick it up with `just quick-deploy HOST`.
+
+      - name: Merge
+        if: steps.changed.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr merge ${{ steps.pr.outputs.pull-request-number }} --squash --delete-branch

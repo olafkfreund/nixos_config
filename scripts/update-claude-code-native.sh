@@ -5,9 +5,11 @@
 #   ./scripts/update-claude-code-native.sh <version>  # prints Nix snippet for that version
 #   ./scripts/update-claude-code-native.sh latest     # resolves and uses the /latest channel
 #   ./scripts/update-claude-code-native.sh stable     # resolves and uses the /stable channel
+#   ./scripts/update-claude-code-native.sh --write latest   # edit default.nix in place
 #
-# Read-only: prints version + hashes. Does NOT edit default.nix — paste the
-# output yourself or pipe through sed.
+# Without --write this is read-only: it prints version + hashes for you to
+# paste. With --write it rewrites version and both platform hashes in
+# default.nix, which is what package-autoupdate.yml runs nightly.
 
 set -u
 # NB: intentionally no `set -e` — curl on a miss should not abort the whole
@@ -43,6 +45,33 @@ prefetch_hash() {
     }
 }
 
+# Rewrite version + both platform hashes in default.nix. Anchored on the
+# platform key so the two hashes cannot be swapped, which a positional
+# sed would happily do.
+rewrite_pkg() {
+  python3 - "$@" <<'PY'
+import re, sys
+f, ver, x64, arm64 = sys.argv[1:5]
+s = open(f).read()
+subs = [
+    (r'(\n  version = ")[^"]*(";)', ver),
+    (r'(x86_64-linux = \{\s*url = "[^"]*";\s*hash = ")[^"]*(";)', x64),
+    (r'(aarch64-linux = \{\s*url = "[^"]*";\s*hash = ")[^"]*(";)', arm64),
+]
+for pat, val in subs:
+    s, n = re.subn(pat, lambda m: m.group(1) + val + m.group(2), s, count=1)
+    if n != 1:
+        sys.exit(f"rewrite failed for {f}: pattern {pat!r} matched {n} times")
+open(f, 'w').write(s)
+PY
+}
+
+WRITE=0
+if [ "${1-}" = "--write" ]; then
+  WRITE=1
+  shift
+fi
+
 # Banner + channel summary (always, for context).
 echo "Channels:"
 echo "  stable  = $(resolve_channel stable)"
@@ -68,6 +97,17 @@ arm64_hash=$(prefetch_hash "$GCS/$version/linux-arm64/claude" aarch64-linux) \
   || die "could not hash linux-arm64 binary for $version"
 
 current=$(sed -nE 's/^[[:space:]]*version = "([^"]+)";.*$/\1/p' "$PKG_FILE" | head -1)
+
+if [ "$WRITE" -eq 1 ]; then
+  if [ "$current" = "$version" ]; then
+    echo "up-to-date at $version; no changes written"
+    exit 0
+  fi
+  rewrite_pkg "$PKG_FILE" "$version" "$x64_hash" "$arm64_hash" \
+    || die "could not rewrite $PKG_FILE"
+  echo "wrote $PKG_FILE: $current -> $version"
+  exit 0
+fi
 
 cat <<EOF
 Current pinned: $current
