@@ -709,6 +709,16 @@ in
   # other copy. Watch history and curation are the only things here that cannot
   # be re-downloaded, and they are ~1GB. Snapshot them onto /mnt/img_pool,
   # which is a different physical disk.
+  # systemd-tmpfiles refuses to descend from a user-owned directory into a
+  # root-owned one — a symlink-swap guard — so it created backups/ and stopped,
+  # and the destination below never existed. ReadWritePaths cannot bind-mount a
+  # missing path, so the unit died at namespace setup (226/NAMESPACE) before
+  # ExecStart ever ran. The mountpoint is the only olafkfreund-owned path in
+  # this tree; every child is root or a service uid.
+  systemd.tmpfiles.rules = [
+    "d /mnt/img_pool 0755 root root - -"
+  ];
+
   features.sqlite-backup = {
     enable = true;
     # Plex's two (module default) plus the *arr trio. All of them keep their
