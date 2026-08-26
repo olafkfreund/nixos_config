@@ -63,7 +63,7 @@ jobs:
             verify: .#nixosConfigurations.p620.pkgs.antigravity-cli
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install Nix
         uses: cachix/install-nix-action@v31.11.1
@@ -72,8 +72,15 @@ jobs:
             experimental-features = nix-command flakes
             accept-flake-config = true
 
-      - name: Setup Magic Nix Cache
-        uses: DeterminateSystems/magic-nix-cache-action@v7
+      # Our own binary cache. magic-nix-cache was retired by Determinate
+      # Systems and now fails the job outright with "Cache service responded
+      # with 400" / "Our services aren't available right now".
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v17
+        with:
+          name: olafkfreund
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          extraPullNames: nix-community
 
       - name: Run update script
         run: ${{ matrix.script }}
@@ -103,7 +110,7 @@ jobs:
       - name: Open PR
         if: steps.changed.outputs.changed == 'true'
         id: pr
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: chore/autoupdate-${{ matrix.pkg }}

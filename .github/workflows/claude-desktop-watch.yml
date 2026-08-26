@@ -35,7 +35,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Resolve latest apt version + pinned version
         id: v
@@ -58,9 +58,11 @@ jobs:
             exit 1
           fi
 
-          echo "latest_ver=$latest_ver" >>"$GITHUB_OUTPUT"
-          echo "latest_sha=$latest_sha" >>"$GITHUB_OUTPUT"
-          echo "pinned_ver=$pinned_ver" >>"$GITHUB_OUTPUT"
+          {
+            echo "latest_ver=$latest_ver"
+            echo "latest_sha=$latest_sha"
+            echo "pinned_ver=$pinned_ver"
+          } >>"$GITHUB_OUTPUT"
           echo "latest=$latest_ver pinned=$pinned_ver"
 
       - name: Exit if no drift
