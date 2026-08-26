@@ -227,6 +227,84 @@ gh pr create --fill                # Open PR
 nhs <host>                         # After merge: lock-aware deploy
 ```
 
+## Automated Package Updates
+
+Four packages are tracked here rather than taken from nixpkgs, because we
+follow their upstreams faster than nixpkgs does. Every release used to mean a
+manual version + hash bump.
+
+`.github/workflows/package-autoupdate.yml` does it nightly at 03:43 UTC:
+resolve upstream → rewrite version + hash → build → open PR → merge. The
+config is updated before you wake up. Deploying stays manual.
+
+| Package          | Upstream source                | Update script                       |
+|------------------|--------------------------------|-------------------------------------|
+| `claude-code`    | Anthropic GCS `latest` channel | `update-claude-code-native.sh`      |
+| `claude-desktop` | Anthropic signed apt repo      | `update-claude-desktop.sh`          |
+| `warp-terminal`  | `app.warp.dev` redirect chain  | `update-warp-terminal.sh`           |
+| `antigravity`    | `Hy4ri/antigravity-flake`      | `update-antigravity.sh`             |
+
+### Design
+
+**The logic lives in `scripts/`, not in YAML.** Each script is idempotent,
+writes nothing when already current, and has a `--check` mode. The bump you
+get at 03:43 is one you can run and debug by hand:
+
+```bash
+./scripts/update-warp-terminal.sh --check   # exit 1 if a bump is available
+./scripts/update-antigravity.sh             # apply it
+```
+
+The workflow then reduces to: run script → did `git diff` change anything →
+build → merge. No update logic is trapped in a YAML `run:` block where it can
+only be tested by pushing a commit.
+
+**Verification runs inline, then the same job merges.** Pull requests opened
+with `GITHUB_TOKEN` do not trigger other workflows, so `ci.yml` never runs on
+them and `gh pr merge --auto` would wait forever on checks that never arrive.
+The job that merges is therefore the job that built it.
+
+**`max-parallel: 1`.** Each matrix leg merges to `main`; running them
+concurrently just leaves the later ones rebasing against a moved base.
+
+### Traps worth knowing
+
+Most of these cost real debugging time. If you are building something
+similar, they are the reason this page exists.
+
+- **`magic-nix-cache` is retired.** It fails with `Cache service responded
+  with 400` and `Our services aren't available right now`. Replaced with
+  `cachix/cachix-action` against our own cache.
+- **Check that your cache secret actually exists.** `update-flake.yml` had
+  referenced `secrets.CACHIX_AUTH_TOKEN` since the day it was written, but the
+  secret was never set — so the step was a silent no-op and every CI run
+  rebuilt from source. `cachix-action` does not fail loudly on an empty token.
+- **Actions cannot open PRs by default.** The job dies with `GitHub Actions is
+  not permitted to create or approve pull requests`. It is a repository
+  setting, not a workflow permission:
+
+  ```bash
+  gh api -X PUT repos/OWNER/REPO/actions/permissions/workflow \
+    -f default_workflow_permissions=write \
+    -F can_approve_pull_request_reviews=true
+  ```
+
+- **Verify the attribute you actually changed.** The antigravity job built
+  `pkgs.antigravity-cli`, which resolves to a *flake input's* package —
+  ours is `pkgs.customPkgs.antigravity-cli`, a different derivation at a
+  different version. The gate passed green without touching a single file the
+  script had rewritten. A build gate pointed at the wrong attribute is worse
+  than no gate, because it reads as proof.
+- **Never trust an upstream index to be sorted.** Anthropic's apt `Packages`
+  file lists every historical release in arbitrary order. Reading it top-down
+  returned a version *11,000 releases behind* the one we had pinned — and it
+  would have built fine, silently downgrading the package by more than a year.
+  `sort -V` is load-bearing.
+- **Anchor rewrites on a key, not a position.** The claude-code derivation
+  carries one hash per platform. A positional `sed` will happily swap them,
+  and the mistake only surfaces as a hash mismatch on the architecture you do
+  not build.
+
 ## Troubleshooting
 
 ```bash
