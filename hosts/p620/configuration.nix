@@ -432,6 +432,11 @@ in
   # Registers the DankMaterialShell login sessions for niri and Hyprland.
   desktop.dmsShell.enable = true;
 
+  # Terminals follow whichever shell owns the session: DMS in the DMS sessions,
+  # omarchy in the Omarchy one. p620 only for now — razer and p510 stay on
+  # stylix until this has been lived in. See modules/desktop/theme-owner.nix.
+  features.themeOwner.enable = true;
+
   # ddcutil: software brightness/contrast control of external monitors (DDC/CI).
   modules.hardware.ddcutil.enable = true;
 

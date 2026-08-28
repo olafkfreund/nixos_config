@@ -64,9 +64,10 @@ in
       # demand. NOT wantedBy graphical-session.target (systemd.enable = false) so
       # it never auto-starts inside the Noctalia session.
       systemd.enable = false;
-      # Keep Stylix for the trial; set true to let DMS drive matugen
-      # Material You theming from the wallpaper instead.
-      enableDynamicTheming = false;
+      # Off unless something asks for it: with no consumer for the matugen
+      # output, installing it buys a dependency and nothing else. mkDefault so
+      # features.themeOwner can turn it on for the host that does consume it.
+      enableDynamicTheming = lib.mkDefault false;
     };
 
     # DMS sessions + the Noctalia shadow of niri.desktop. sessionPackages registers
