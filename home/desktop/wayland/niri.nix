@@ -54,6 +54,15 @@ in
     include optional=true "dms/cursor.kdl"
     include optional=true "dms/binds.kdl"
 
+    // Pin the internal panel to scale 1.0. DMS regenerates dms/outputs.kdl at
+    // login and re-derives niri's auto scale (1.5) for the HiDPI eDP-1 panel,
+    // undoing manual changes. This block sits after the DMS include and niri
+    // uses the last output definition, so 1.0 wins on every reload. Harmless on
+    // hosts without an eDP-1 (p620): niri ignores output blocks for absent outputs.
+    output "eDP-1" {
+        scale 1.0
+    }
+
     input {
         keyboard {
             xkb { layout "gb"; }
