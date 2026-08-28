@@ -152,20 +152,40 @@ let
 
   themeOwner = pkgs.writeShellApplication {
     name = "theme-owner";
-    runtimeInputs = [ pkgs.coreutils ];
+    runtimeInputs = [ pkgs.coreutils pkgs.systemd ];
     text = ''
       # Which system owns the colours right now. An explicit argument wins;
-      # otherwise detect the session. hyprland-dms and omarchy both set
-      # XDG_CURRENT_DESKTOP=Hyprland — xdg-desktop-portal-hyprland refuses to
-      # bind for anything else — so the distinguishing variable is
-      # XDG_SESSION_DESKTOP, which uwsm sets to Omarchy for that session.
+      # otherwise detect the session.
+      #
+      # NOT by OMARCHY_PATH. The nixarchy module exports it through
+      # environment.sessionVariables, so it is set in every shell on any host
+      # where nixarchy is installed — an ssh session with no desktop at all
+      # answers to it. It says nixarchy exists, not that Omarchy is running,
+      # and trusting it handed omarchy the colours in every DMS session too.
+      #
+      # XDG_CURRENT_DESKTOP is no good either: hyprland-dms and omarchy both
+      # set it to Hyprland, because xdg-desktop-portal-hyprland refuses to
+      # bind for anything else. XDG_SESSION_DESKTOP carries the session name,
+      # so "omarchy" against "niri-dms" / "hyprland-dms".
+      #
+      # A systemd user unit does not always inherit it, so fall back to
+      # asking logind for the session Desktop directly. If both come up empty
+      # the answer is dms: two of the three sessions are DMS, and being wrong
+      # there costs a stale palette rather than a broken one.
       owner="''${1:-}"
       if [ -z "$owner" ]; then
-        if [ -n "''${OMARCHY_PATH:-}" ] || [ "''${XDG_SESSION_DESKTOP:-}" = "Omarchy" ]; then
-          owner=omarchy
-        else
-          owner=dms
+        desktop="''${XDG_SESSION_DESKTOP:-}"
+        if [ -z "$desktop" ]; then
+          sid=$(loginctl show-user "$(id -u)" -p Display --value 2>/dev/null || true)
+          if [ -n "$sid" ]; then
+            desktop=$(loginctl show-session "$sid" -p Desktop --value 2>/dev/null || true)
+          fi
         fi
+        case "$(printf '%s' "$desktop" | tr '[:upper:]' '[:lower:]')" in
+          *omarchy*) owner=omarchy ;;
+          *)         owner=dms ;;
+        esac
+        echo "theme-owner: session desktop ''${desktop:-unknown} -> $owner" >&2
       fi
 
       case "$owner" in
