@@ -23,6 +23,7 @@
     inputs.nixarchy.nixosModules.nixarchy
     ../../../nixarchy-apps.nix
     ../../common/nixos/omarchy-input.nix
+    ../../common/nixos/omarchy-workspaces.nix
   ];
 
   programs.nixarchy.enable = true;
