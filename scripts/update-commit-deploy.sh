@@ -365,7 +365,7 @@ built. Nothing was committed or deployed; re-run from a clean tree."
   if ! git push -u origin "${branch_name}"; then
     git checkout main
     git branch -D "${branch_name}" 2>/dev/null || true
-    err "branch push failed (maybe an orphan branch with the same name exists on origin? \`gh api -X DELETE repos/:owner/:repo/git/refs/heads/${branch_name}\` to clean up)."
+    err "branch push failed. The name is a hash of flake.lock, so an earlier run that produced this same lock already owns it — usually as a still-open PR, not an orphan. Check \`gh pr list --head ${branch_name}\` first and merge or close it; only if there is no PR, delete the ref with \`gh api -X DELETE repos/:owner/:repo/git/refs/heads/${branch_name}\`."
   fi
 
   log "opening PR"
@@ -656,6 +656,15 @@ if [ -n "${PR_URL:-}" ]; then
     warn "PR merge failed — ${HOST} is on the new generation but the lock is NOT on main."
     warn "  PR still open at: ${PR_URL}"
     warn "  Manual fix: merge via the UI, then  git checkout main && git pull --ff-only origin main"
+    # Return to main even though the merge failed. Leaving the checkout on the
+    # lock-bump branch is how a host ends up silently building the wrong tree:
+    # razer sat on chore/lock-bump-all-676bfa20 for two hours, three merges
+    # behind, and every deploy from it looked like it worked while shipping
+    # neither the module nor the app selection those merges had added.
+    #
+    # The branch is KEPT, unlike the failure paths above: the PR is still open
+    # and still needs it.
+    git checkout main 2>/dev/null || warn "  could not return to main — you are still on ${BRANCH_NAME}"
   else
     log "syncing local main"
     git checkout main
