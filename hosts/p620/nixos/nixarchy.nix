@@ -28,6 +28,11 @@
 
   programs.nixarchy.enable = true;
 
+  # Puts this user in the input group. Omarchy's shell reads the keyboard
+  # device directly for its own key handling, which the group grants; without
+  # it the session starts but never sees a keypress.
+  programs.nixarchy.user = "olafkfreund";
+
   # nixarchy pins its own Hyprland and does not defer -- nixpkgs defines
   # programs.hyprland.package at mkDefault priority, so matching it would tie
   # rather than yield. desktop.hyprland already sets it here, so keep ours.
