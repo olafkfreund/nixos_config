@@ -47,6 +47,31 @@ in
       '';
     };
 
+    optional = mkOption {
+      type = types.listOf types.str;
+      default = [ ];
+      description = ''
+        Databases whose failure must not fail the run. For a source sitting on
+        known-bad media: the read is still attempted every night — a pending
+        sector sometimes becomes readable again, and a reallocation on write
+        can retire it — but an unrecoverable error is logged as a warning
+        rather than turning the unit red. Reserve this for data that can be
+        rebuilt; a database listed here is one nobody is watching.
+      '';
+    };
+
+    readGroups = mkOption {
+      type = types.listOf types.str;
+      default = [ config.services.plex.group ];
+      description = ''
+        Groups the unit joins. Every directory on the path to a listed database
+        must be traversable by one of them: a DynamicUser belongs to no group
+        by default, and a 0700 service data directory turns a perfectly
+        readable database into "not found" from inside the namespace — the
+        stat fails on the directory, not the file.
+      '';
+    };
+
     destination = mkOption {
       type = types.str;
       default = "/mnt/img_pool/backups/sqlite";
@@ -97,12 +122,12 @@ in
       serviceConfig = {
         Type = "oneshot";
 
-        # DynamicUser can read the databases without help: they are mode 0644
-        # under world-traversable directories. The plex group is only needed to
-        # WRITE into the destination, whose owner cannot be pinned to a UID
-        # that changes on every run.
+        # The databases are mode 0644, but not every directory holding one is
+        # traversable by a stranger: the *arr data directories are 0700. The
+        # groups are needed to read those, and to WRITE into the destination,
+        # whose owner cannot be pinned to a UID that changes on every run.
         DynamicUser = true;
-        SupplementaryGroups = [ config.services.plex.group ];
+        SupplementaryGroups = cfg.readGroups;
 
         ProtectSystem = "strict";
         ProtectHome = true;
@@ -113,14 +138,32 @@ in
       };
 
       script = ''
+        # nixpkgs prepends `set -e` to every systemd `script`, and this one is
+        # built the other way round: each database is attempted, failures are
+        # accumulated in rc, and the run reports them at the end. Left on, the
+        # first `ls` in the prune loop that matches nothing exits 2 —
+        # pipefail propagates it, -e aborts — and the unit dies before
+        # `exit "$rc"`, red for a database that has simply never been
+        # snapshotted yet.
+        set +e
         set -uo pipefail
         ts=$(date +%Y%m%d-%H%M%S)
         rc=0
 
+        is_optional() {
+          for o in ${lib.escapeShellArgs cfg.optional}; do
+            [ "$o" = "$1" ] && return 0
+          done
+          return 1
+        }
+
         for src in ${lib.escapeShellArgs cfg.databases}; do
           db=$(basename "$src")
           if [ ! -f "$src" ]; then
-            echo "[sqlite-backup] $src not found; skipping" >&2
+            # Not "not found": -f is equally false when the file is there but
+            # its directory is not traversable from inside the namespace, and a
+            # message claiming absence sends you looking for the wrong bug.
+            echo "[sqlite-backup] $src unreadable (missing, or its directory is not traversable by this unit); skipping" >&2
             continue
           fi
 
@@ -134,6 +177,9 @@ in
           # train you to ignore the one that matters.
           if sqlite3 "$src" ".backup '$out'"; then
             echo "[sqlite-backup] $db -> $(basename "$out") ($(stat -c %s "$out") bytes)"
+          elif is_optional "$src"; then
+            echo "[sqlite-backup] WARNING: $db unreadable, continuing (listed as optional)" >&2
+            rm -f "$out"
           else
             echo "[sqlite-backup] ERROR: backup of $src failed" >&2
             rm -f "$out"

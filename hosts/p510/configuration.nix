@@ -717,6 +717,15 @@ in
   # this tree; every child is root or a service uid.
   systemd.tmpfiles.rules = [
     "d /mnt/img_pool 0755 root root - -"
+    # The *arr data directories are 0700 olafkfreund:<service>, so the backup's
+    # DynamicUser cannot traverse them and the script reports databases that
+    # plainly exist as "not found". 0750 admits group members without exposing
+    # config.xml — and the API key in it — to every local user. Nothing
+    # re-enforces 0700: the units carry no ExecStartPre chmod and no
+    # StateDirectory, only UMask=0022, so this sticks.
+    "z /mnt/media/sonarr 0750 - - - -"
+    "z /mnt/media/radarr 0750 - - - -"
+    "z /mnt/media/lidarr 0750 - - - -"
   ];
 
   features.sqlite-backup = {
@@ -733,7 +742,25 @@ in
       "/mnt/media/radarr/radarr.db"
       "/mnt/media/lidarr/lidarr.db"
     ];
+    # blobs.db is 967MB of posters and thumbnails, and it straddles a sector
+    # sdd can no longer read (sector 4294534448, unrecovered read error, hit on
+    # every attempt since 2026-08-27). Plex regenerates artwork on demand, so
+    # this is the one listed database whose loss is recoverable — keep reading
+    # it nightly in case the sector retires, but do not let the dying disk mask
+    # a real failure in the four databases that matter.
+    optional = [
+      "${config.services.plex.dataDir}/Plex Media Server/Plug-in Support/Databases/com.plexapp.plugins.library.blobs.db"
+    ];
     readPaths = [ "/mnt/media" ];
+    # sonarr/radarr/lidarr run as olafkfreund:<service> and own their data
+    # directories 0700; joining each group is what gets the backup through the
+    # directory to the (already world-readable) database inside.
+    readGroups = [
+      config.services.plex.group
+      "sonarr"
+      "radarr"
+      "lidarr"
+    ];
   };
 
   features.audiobook-import = {
