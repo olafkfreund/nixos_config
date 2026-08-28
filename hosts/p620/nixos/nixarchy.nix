@@ -13,7 +13,16 @@
 , ...
 }:
 {
-  imports = [ inputs.nixarchy.nixosModules.nixarchy ];
+  # nixarchy-apply copies ~/.config/nixarchy/apps.nix to the flake root as
+  # nixarchy-apps.nix and stops there -- a flake cannot read a file outside its
+  # own tree, so the selection has to be copied in, and importing it is left to
+  # us. razer has had this line since #1504; p620 never did, so the selection
+  # landed in the flake and nothing read it. `dictation.enable = true` was
+  # enabled in the menu, copied by apply, and built by nobody.
+  imports = [
+    inputs.nixarchy.nixosModules.nixarchy
+    ../../../nixarchy-apps.nix
+  ];
 
   programs.nixarchy.enable = true;
 
