@@ -59,22 +59,40 @@ jobs:
             diff flake.lock.old flake.lock || true
           fi
 
-      - name: Build test configurations
+      # Evaluate, do not build. Building three full system closures on a
+      # 14GB ubuntu-latest runner is what made every scheduled run of this
+      # workflow fail from 2026-05-20 to 2026-08-27 — 91 failures, zero
+      # successes, so a flake PR was never once opened. Eval catches what a
+      # lock bump actually breaks (removed options, renamed attributes,
+      # changed module interfaces) in about a minute and needs no disk. This
+      # is the same check ci.yml runs, and ci.yml does not run on a
+      # GITHUB_TOKEN pull request, so this step is the only gate there is.
+      - name: Validate configurations
         if: steps.update.outputs.changed == 'true'
         run: |
-          echo "Testing updated configurations..."
-
-          # Test build each host to ensure updates don't break anything
+          set +e
+          rc=0
           for host in p620 razer p510; do
-            echo "Testing $host..."
-            nix build .#nixosConfigurations.$host.config.system.build.toplevel \
-              --show-trace --no-link || {
-                echo "ERROR: Build failed for $host"
-                exit 1
-              }
+            echo "Validating $host..."
+            err=$(nix eval --no-update-lock-file --show-trace \
+              .#nixosConfigurations.$host.config.system.build.toplevel.outPath 2>&1)
+            hrc=$?
+            echo "$err"
+            if [ $hrc -eq 0 ]; then
+              echo "PASS: $host"
+              continue
+            fi
+            # Same carve-out as ci.yml: the nix-openclaw-tools sub-flake
+            # pins itself with path:../.., which nix refuses to lock. The
+            # host evaluated cleanly up to the plugin loader.
+            if echo "$err" | grep -qE 'lock file contains unlocked input.*"path":"\.\./\.\."'; then
+              echo "::warning::Known upstream path:../.. issue in nix-openclaw-tools; treating $host as PASS."
+              continue
+            fi
+            echo "ERROR: $host does not evaluate with the updated lock"
+            rc=1
           done
-
-          echo "PASS: All configurations build successfully with updates"
+          exit $rc
 
       - name: Generate update summary
         if: steps.update.outputs.changed == 'true'
@@ -115,10 +133,10 @@ jobs:
 
             ### Testing Status
 
-            All host configurations have been built and tested successfully:
-            - P620 (AMD workstation)
-            - Razer (Intel/NVIDIA laptop)
-            - P510 (Intel Xeon server)
+            All three host configurations evaluate with the updated lock
+            (p620, razer, p510). Evaluated, not built — a green run here means
+            nothing was renamed or removed out from under us, not that every
+            package compiles.
 
             ### Review Checklist
 

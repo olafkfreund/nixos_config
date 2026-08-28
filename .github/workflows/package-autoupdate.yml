@@ -106,8 +106,13 @@ jobs:
             # First bumped version line is enough to title the commit. For
             # antigravity, which can bump several components at once, this
             # names the first and the PR body carries the full diff.
+            #
+            # Two spellings, because warp-terminal keeps its version in
+            # versions.json ("version": "x") rather than in a Nix attribute
+            # (version = "x";) — matching only the Nix form is what titled
+            # every warp bump "auto-update to unknown".
             v=$(git diff -U0 -- ${{ matrix.paths }} \
-              | sed -nE 's/^\+[[:space:]]*version = "([^"]+)";.*/\1/p' | head -1)
+              | sed -nE 's/^\+[[:space:]]*"?version"?[ :=]+"([^"]+)".*/\1/p' | head -1)
             echo "version=${v:-unknown}" >>"$GITHUB_OUTPUT"
             git --no-pager diff --stat -- ${{ matrix.paths }}
           fi
