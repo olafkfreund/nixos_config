@@ -6,6 +6,7 @@
     ./niri.nix
     ./hyprland.nix
     ./dms-shell.nix
+    ./theme-owner.nix
     ./ddcutil.nix
   ];
 
