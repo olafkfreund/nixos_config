@@ -13,7 +13,16 @@
 , ...
 }:
 {
-  imports = [ inputs.nixarchy.nixosModules.nixarchy ];
+  # nixarchy-apply copies ~/.config/nixarchy/apps.nix to the flake root as
+  # nixarchy-apps.nix and stops there -- a flake cannot read a file outside its
+  # own tree, so the selection has to be copied in, and importing it is left to
+  # you. Without this line the Omarchy menu appears to enable applications and
+  # nothing is ever built. Only razer imports it; p620 has its own nixarchy and
+  # would otherwise inherit this machine's selection.
+  imports = [
+    inputs.nixarchy.nixosModules.nixarchy
+    ../../../nixarchy-apps.nix
+  ];
 
   programs.nixarchy.enable = true;
 
