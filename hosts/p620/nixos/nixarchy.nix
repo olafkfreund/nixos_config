@@ -22,6 +22,7 @@
   imports = [
     inputs.nixarchy.nixosModules.nixarchy
     ../../../nixarchy-apps.nix
+    ../../common/nixos/omarchy-input.nix
   ];
 
   programs.nixarchy.enable = true;
