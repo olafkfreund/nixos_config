@@ -40,23 +40,18 @@ jobs:
         run: |
           echo "Updating flake inputs..."
 
-          # Capture current lock file
-          cp flake.lock flake.lock.old
-
-          # Update all inputs
           nix flake update
 
-          # Check if anything changed
-          if diff -q flake.lock flake.lock.old > /dev/null; then
+          # git is the copy of the old lock — the previous `cp flake.lock
+          # flake.lock.old` left its scratch file in the tree and
+          # create-pull-request committed it alongside the real change (#1495).
+          if git diff --quiet -- flake.lock; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "No updates available"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
             echo "Updates found"
-
-            # Show what changed
-            echo "Changes:"
-            diff flake.lock.old flake.lock || true
+            git --no-pager diff -- flake.lock
           fi
 
       # Evaluate, do not build. Building three full system closures on a
