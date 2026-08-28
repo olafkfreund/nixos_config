@@ -31,6 +31,7 @@ in
     ./nixos/memory.nix
     ./nixos/load.nix
     ./themes/stylix.nix # Re-enabled after upstream cache fix
+    ./nixos/nixarchy.nix # Omarchy desktop, as an extra session
 
     # P620-specific additional modules
     ../../modules/development/default.nix
