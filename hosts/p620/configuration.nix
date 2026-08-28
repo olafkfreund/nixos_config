@@ -129,8 +129,26 @@ in
   # LiteLLM router — Anthropic-compat proxy fronting Ollama (Phase 2).
   # Loopback + tailscale0 + enp1s0 (LAN) reachable; global :4000 closed.
   # Master key stored in agenix (secrets/litellm-master-key.age).
+  #
+  # Off since 2026-08-28: litellm cannot boot under the fastapi nixpkgs now
+  # ships. litellm 1.97.0 (still the newest in nixpkgs AND in unstable) reads
+  # fastapi.dependencies.utils.get_flat_dependant, which fastapi 0.141.1 no
+  # longer exports. The ImportError is caught and the fallback then dies as
+  # `ModuleNotFoundError: No module named 'proxy_server'`, which is what the
+  # journal shows and which hides the real cause.
+  #
+  # Not fixable by moving version. The fastapi>=0.140.7 fix (BerriAI/litellm
+  # PR 35773) merged 2026-08-09 and is already inside 1.97.0; what remains is
+  # issue 36922, whose fix (PR 38080) is unmerged. Pinning an older fastapi
+  # would work but drags a deep, uncached Python rebuild behind it for one
+  # leaf service.
+  #
+  # It had been restart-looping every 5s since the 2026-08-28 08:48 deploy,
+  # burning about half a core, and its exit 4 masked genuine unit failures on
+  # every p620 deploy. tailscale-serve is mkIf'd on this flag and goes with it.
+  # Re-enable once nixpkgs carries a litellm containing PR 38080.
   features.litellm-router = {
-    enable = true;
+    enable = false;
     listenLanInterface = "enp1s0";
   };
 
