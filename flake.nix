@@ -48,6 +48,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Omarchy vendored for NixOS -- adds the Omarchy desktop as an extra
+    # session on razer. Follows this flake's nixpkgs on purpose: the module
+    # takes its package from `pkgs.extend`, so following keeps Omarchy's ~80
+    # runtime dependencies as the same store paths this system already has
+    # rather than a second copy from nixarchy's own nixpkgs.
+    nixarchy = {
+      url = "github:olafkfreund/nixarchy";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
 
     # DankCalendar (dcal) — calendar daemon by the DankMaterialShell authors.
     # Connects Local/Google/Microsoft/CalDAV/iCloud accounts and serves them

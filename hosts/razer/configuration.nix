@@ -28,6 +28,7 @@ in
     ./nixos/laptop.nix
     ./nixos/memory.nix
     ./themes/stylix.nix # Re-enabled after upstream cache fix
+    ./nixos/nixarchy.nix # Omarchy desktop, as an extra session
 
     # Razer-specific additional modules
     ../../modules/development/default.nix
