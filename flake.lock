@@ -1419,11 +1419,11 @@
         "zen-browser": "zen-browser"
       },
       "locked": {
-        "lastModified": 1787913583,
-        "narHash": "sha256-Zaer/BAPkrRga899FW696DHe4IhFxJGyLyDay1Svz1E=",
+        "lastModified": 1787926279,
+        "narHash": "sha256-2ju2P1v6Olgs0Lw9HDqAnZLoleVCtKp9PatIh1ZmExo=",
         "owner": "olafkfreund",
         "repo": "nixarchy",
-        "rev": "89d246e2c55cf28ea4166352fca0937e4c791eb7",
+        "rev": "68c136b33ec693ed05cbddc914fa78db0dab9084",
         "type": "github"
       },
       "original": {
