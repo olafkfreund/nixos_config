@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # omarchy:summary=Upload a file to Google Drive and copy its link
 # omarchy:args=[path]
 # omarchy:examples=omarchy-cmd-upload | omarchy-cmd-upload ~/Pictures/shot.png

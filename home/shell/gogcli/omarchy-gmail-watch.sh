@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # omarchy:summary=Notify on new unread mail; clicking the popup opens the thread
 # omarchy:args=[--seed]
 # omarchy:examples=omarchy-gmail-watch | omarchy-gmail-watch --seed

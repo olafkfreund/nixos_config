@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # omarchy:summary=Capture a quick note into Google Tasks
 # omarchy:args=[note text...]
 # omarchy:examples=omarchy-cmd-note | omarchy-cmd-note "Call the dentist"

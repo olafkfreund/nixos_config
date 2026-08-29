@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # omarchy:summary=Create a Google Meet, copy the link, and join it
 # omarchy:args=[--access open|trusted|restricted]
 # omarchy:examples=omarchy-cmd-meet | omarchy-cmd-meet --access open
