@@ -315,26 +315,16 @@ in
   # first (see comment on `gnome.gnome-remote-desktop` below). p510 enables
   # autoLogin because p510 is pure NVIDIA without PRIME — greeter respawn
   # works there; not here.
-  # Login manager: DankMaterialShell greeter (greetd), matching p620. backend=
-  # "none" turns GDM off; the dms-greeter module auto-enables greetd and runs the
-  # greeter inside a niri (wlroots) compositor — which sidesteps GDM's broken
-  # greeter-respawn on this Optimus PRIME-sync NVIDIA hardware (see note above),
-  # same non-GDM path. It enumerates the same
-  # wayland-sessions, so GNOME + all niri/labwc/mango (stock + -dms) entries stay
+  # Login manager: Omarchy's SDDM greeter, switched on by
+  # programs.nixarchy.displayManager in ./nixos/nixarchy.nix. backend = "none"
+  # keeps GDM off, which still matters here: GDM's greeter respawn is broken on
+  # this Optimus PRIME-sync NVIDIA hardware (see note above), and SDDM stays on
+  # the same non-GDM path the DMS greeter used. SDDM enumerates
+  # wayland-sessions, so the Omarchy Hyprland session and GNOME both stay
   # selectable.
   desktop.displayManager.backend = "none";
 
-  services.displayManager.dms-greeter = {
-    enable = true;
-    compositor.name = "niri";
-  };
-
-  # Phase 1: niri + labwc + mango as selectable login sessions (alongside GNOME).
-  desktop.niri.enable = true;
   desktop.hyprland.enable = true;
-
-  # Registers the DankMaterialShell login sessions for niri and Hyprland.
-  desktop.dmsShell.enable = true;
 
   # Terminals follow whichever shell owns the session: DMS in the DMS sessions,
   # omarchy in the Omarchy one. See modules/desktop/theme-owner.nix.

@@ -5,8 +5,7 @@
 }: {
   imports = [
     ./profile.nix
-    ../../home/desktop/wayland # niri + Hyprland sessions and DMS theming
-    ../../home/desktop/dank-calendar # dcal daemon backing the DMS calendar card
+    ../../home/desktop/wayland # Hyprland session config
   ];
 
   desktop.gnome.profile = "workstation";

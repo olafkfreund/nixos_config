@@ -40,11 +40,11 @@
   programs.hyprland.package = lib.mkForce pkgs.hyprland;
   programs.hyprland.portalPackage = lib.mkForce pkgs.xdg-desktop-portal-hyprland;
 
-  # greetd already greets, through the DankMaterialShell greeter. nixarchy
-  # would otherwise enable SDDM, and two display managers is not a working
-  # configuration. With this off, the existing greeter simply picks the Omarchy
-  # session up from wayland-sessions like any other.
-  programs.nixarchy.displayManager = false;
+  # Omarchy's SDDM greeter is the login manager. It replaced the
+  # DankMaterialShell greetd greeter, which ran inside niri and went away
+  # with niri and DMS. SDDM enumerates wayland-sessions, so GNOME stays
+  # selectable alongside the Omarchy session.
+  programs.nixarchy.displayManager = true;
 
   # ~/.config/hypr/hyprland.lua is managed by home-manager here, so the seed
   # keeps it and Omarchy's own config is never installed. That is what the

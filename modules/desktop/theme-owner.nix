@@ -163,15 +163,14 @@ let
       # answers to it. It says nixarchy exists, not that Omarchy is running,
       # and trusting it handed omarchy the colours in every DMS session too.
       #
-      # XDG_CURRENT_DESKTOP is no good either: hyprland-dms and omarchy both
-      # set it to Hyprland, because xdg-desktop-portal-hyprland refuses to
-      # bind for anything else. XDG_SESSION_DESKTOP carries the session name,
-      # so "omarchy" against "niri-dms" / "hyprland-dms".
+      # XDG_CURRENT_DESKTOP is no good either: it reads Hyprland for the
+      # Omarchy session, because xdg-desktop-portal-hyprland refuses to bind
+      # for anything else. XDG_SESSION_DESKTOP carries the session name.
       #
       # A systemd user unit does not always inherit it, so fall back to
       # asking logind for the session Desktop directly. If both come up empty
-      # the answer is dms: two of the three sessions are DMS, and being wrong
-      # there costs a stale palette rather than a broken one.
+      # the answer is omarchy: since DMS and niri were removed it is the only
+      # shell that owns terminal colours here.
       owner="''${1:-}"
       if [ -z "$owner" ]; then
         desktop="''${XDG_SESSION_DESKTOP:-}"
@@ -182,8 +181,7 @@ let
           fi
         fi
         case "$(printf '%s' "$desktop" | tr '[:upper:]' '[:lower:]')" in
-          *omarchy*) owner=omarchy ;;
-          *)         owner=dms ;;
+          *)         owner=omarchy ;;
         esac
         echo "theme-owner: session desktop ''${desktop:-unknown} -> $owner" >&2
       fi
