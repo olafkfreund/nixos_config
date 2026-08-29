@@ -40,7 +40,6 @@
       cursor = true; # AI-powered coding
       neovim = true; # Terminal-based editing
       vscode = true; # Primary IDE
-      windsurf = true; # Web-based development
     };
 
     browsers = {

@@ -17,7 +17,6 @@ let inherit (lib) mkEnableOption; in {
       cursor = mkEnableOption "Enable Cursor editor";
       neovim = mkEnableOption "Enable Neovim editor";
       vscode = mkEnableOption "Enable VS Code editor";
-      windsurf = mkEnableOption "Enable Windsurf editor";
       zed = mkEnableOption "Enable Zed editor";
     };
 
