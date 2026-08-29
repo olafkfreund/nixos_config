@@ -20,8 +20,12 @@
 #
 # mkForce because the nixpkgs default is a plain assignment, not mkDefault.
 {
+  # Hyprland directly, not start-hyprland: programs.hyprland.withUWSM is on
+  # here, and the wrapper expects a systemd user session the sddm greeter user
+  # does not have. SDDM execs this command itself and needs neither uwsm nor
+  # the `--` separator upstream's config-file form uses.
   services.displayManager.sddm.wayland.compositorCommand = lib.mkForce (
-    "${config.programs.hyprland.package}/bin/start-hyprland -- --config "
+    "${config.programs.hyprland.package}/bin/Hyprland --config "
     + "${config.programs.nixarchy.package}/share/omarchy/default/sddm/hyprland.lua"
   );
 }
