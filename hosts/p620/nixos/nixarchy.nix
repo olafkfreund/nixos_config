@@ -28,6 +28,22 @@
 
   programs.nixarchy.enable = true;
 
+  # Quick capture into Google Tasks / Drive, via the gog wrapper installed by
+  # home/shell/gogcli. The menu jsonc is generated and read-only in the store,
+  # so rows have to be declared here rather than edited in ~/.config.
+  programs.nixarchy.menu.extraEntries = {
+    "capture.note" = {
+      icon = "";
+      label = "Quick Note";
+      action = "omarchy-cmd-note";
+    };
+    "capture.upload" = {
+      icon = "";
+      label = "Upload to Drive";
+      action = "omarchy-cmd-upload";
+    };
+  };
+
   # Puts this user in the input group. Omarchy's shell reads the keyboard
   # device directly for its own key handling, which the group grants; without
   # it the session starts but never sees a keypress.

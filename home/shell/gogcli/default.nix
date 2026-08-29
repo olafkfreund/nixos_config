@@ -18,6 +18,27 @@ let
   inherit (lib) mkOption mkEnableOption mkIf mkPackageOption types getExe;
   cfg = config.programs.gogDashboard;
   storeDir = "${config.home.homeDirectory}/.splashboard/store";
+
+  # `gog` with its keyring unlocked. The file keyring backend refuses to open
+  # without GOG_KEYRING_PASSWORD in any non-TTY context — a bar widget, a hook,
+  # an agent, or the collector below — and the password lives in agenix rather
+  # than the session environment. Same pattern as gogmail-tmux in
+  # home/shell/tmux. Falls through untouched when the secret is absent, so an
+  # interactive shell still gets the normal password prompt.
+  #
+  # Everything that invokes gog must go through this, not cfg.package directly.
+  gogWrapped = pkgs.writeShellApplication {
+    name = "gog";
+    runtimeInputs = [ pkgs.coreutils ];
+    text = ''
+      export GOG_HOME="''${GOG_HOME:-$HOME/.config/gogcli}"
+      if [ -r ${cfg.keyringPasswordFile} ]; then
+        GOG_KEYRING_PASSWORD="$(cat ${cfg.keyringPasswordFile})"
+        export GOG_KEYRING_PASSWORD
+      fi
+      exec ${getExe cfg.package} "$@"
+    '';
+  };
 in
 {
   options.programs.gogDashboard = {
@@ -76,7 +97,18 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.packages = [ cfg.package pkgs.jq ];
+    home.packages = [
+      gogWrapped
+      pkgs.jq
+    ]
+    ++ map
+      # Quick-capture commands, surfaced in the Omarchy menu and bar.
+      (name: pkgs.writeShellApplication {
+        inherit name;
+        runtimeInputs = [ gogWrapped pkgs.gum pkgs.jq pkgs.libnotify pkgs.wl-clipboard ];
+        text = builtins.readFile (./. + "/${name}.sh");
+      })
+      [ "omarchy-cmd-note" "omarchy-cmd-upload" ];
 
     # GOG_HOME keeps gogcli's config/data/state under a stable per-user root so
     # the file-based keyring and the import are deterministic across services.
@@ -133,7 +165,7 @@ in
         Environment = [ "GOG_HOME=${config.home.homeDirectory}/.config/gogcli" ];
         ExecStart = getExe (pkgs.writeShellScriptBin "gog-dashboard-refresh" ''
           set -u
-          GOG=${getExe cfg.package}
+          GOG=${getExe gogWrapped}
           JQ=${getExe pkgs.jq}
           ACCT=${lib.escapeShellArg cfg.account}
           N=${toString cfg.maxItems}
