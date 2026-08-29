@@ -108,10 +108,6 @@
     ncdu
     tree
     rsync
-    curl
-    wget
-    jq
-    yq-go # Use Go version consistently across all configurations
 
     # Network tools
     nmap
@@ -121,13 +117,9 @@
     whois
 
     # File operations
-    ripgrep
-    fd
     sd
 
     # Archive tools
-    unzip
-    p7zip
 
     # Process management
     psmisc

@@ -65,8 +65,6 @@ in
     # Ensure zsh-ai-cmd package is installed
     home.packages = with pkgs; [
       zsh-ai-cmd
-      curl
-      jq
     ];
 
     # Configure zsh to load and initialize the plugin

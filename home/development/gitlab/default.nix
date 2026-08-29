@@ -74,10 +74,6 @@ in
         (mkIf cfg.ciLocal.enable gitlab-ci-local)
 
         # Additional related tools
-        git # Core git functionality
-        jq # JSON processing for API responses
-        curl # HTTP client for GitLab API
-        yq-go # YAML processing for CI/CD files
 
       ] ++ cfg.packages;
 

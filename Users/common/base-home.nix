@@ -36,23 +36,13 @@
     packages = with pkgs; [
       # Essential utilities
       coreutils
-      findutils
-      which
       file
 
       # Network tools
-      wget
-      curl
 
       # Text processing
-      less
-      nano
 
       # Archive tools
-      unzip
-      zip
-      gnutar
-      gzip
     ];
   };
 

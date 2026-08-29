@@ -108,8 +108,6 @@
     # Server development essentials
     # docker, docker-compose, kubectl, k9s: installed system-wide.
     # Re-declaring at user level produces buildEnv collisions.
-    git
-    gh
 
     # Intel Xeon + NVIDIA specific tools
     intel-gpu-tools
@@ -123,7 +121,6 @@
     # Database tools for development
     postgresql
     redis
-    sqlite
 
     # Network development and monitoring
     netcat
@@ -137,24 +134,17 @@
     iotop
 
     # File operations
-    ripgrep
-    fd
     sd
     tree
 
     # Archive and compression
-    unzip
-    p7zip
 
     # System analysis
     lsof
     strace
 
     # API development and testing
-    curl
-    wget
     httpie
-    jq
     # yq-go provided by developer/server-admin profiles
 
     # Text processing

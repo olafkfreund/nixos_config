@@ -19,7 +19,6 @@
   # jq: parse the compositor's JSON IPC. wl-screenrec/slurp: HW-encoded recording.
   home.packages = with pkgs; [
     wl-mirror
-    jq
     wl-screenrec
     slurp
     swaybg # static wallpaper for niri/labwc (Stylix only themes GNOME's bg)

@@ -17,18 +17,12 @@
       typescript-language-server
 
       # 3. Go - gopls (Claude Code: gopls@claude-code-lsps)
-      gopls
-      go
       delve
-      gore
       gotests
 
       # 4. Rust - rust-analyzer (Claude Code: rust-analyzer@claude-code-lsps)
-      rust-analyzer
-      cargo
       rustc
       clippy
-      rustfmt
 
       # 5. Java - jdtls (Claude Code: jdtls@claude-code-lsps)
       jdt-language-server
@@ -56,7 +50,6 @@
       # === ADDITIONAL IMPORTANT LSP SERVERS ===
 
       # Nix - nixd (feature-rich); nil is system-wide via modules/pkgs
-      nixd
 
       # Terraform - terraform-ls
       terraform-ls
@@ -123,7 +116,6 @@
       valgrind
 
       # Debugging tools
-      gdb
       lldb
     ];
 

@@ -43,7 +43,6 @@ in
       # Qt theming packages
       libsForQt5.qtstyleplugin-kvantum
       qt6Packages.qtstyleplugin-kvantum
-      adwaita-qt
       adwaita-qt6
       qt6Packages.qt6ct
 
