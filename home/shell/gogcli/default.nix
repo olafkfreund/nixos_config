@@ -18,6 +18,46 @@ let
   inherit (lib) mkOption mkEnableOption mkIf mkPackageOption types getExe;
   cfg = config.programs.gogDashboard;
   storeDir = "${config.home.homeDirectory}/.splashboard/store";
+
+  # `gog` with its keyring unlocked. The file keyring backend refuses to open
+  # without GOG_KEYRING_PASSWORD in any non-TTY context — a bar widget, a hook,
+  # an agent, or the collector below — and the password lives in agenix rather
+  # than the session environment. Same pattern as gogmail-tmux in
+  # home/shell/tmux. Falls through untouched when the secret is absent, so an
+  # interactive shell still gets the normal password prompt.
+  #
+  # Everything that invokes gog must go through this, not cfg.package directly.
+  gogWrapped = pkgs.writeShellApplication {
+    name = "gog";
+    runtimeInputs = [ pkgs.coreutils ];
+    text = ''
+      export GOG_HOME="''${GOG_HOME:-$HOME/.config/gogcli}"
+      if [ -r ${cfg.keyringPasswordFile} ]; then
+        GOG_KEYRING_PASSWORD="$(cat ${cfg.keyringPasswordFile})"
+        export GOG_KEYRING_PASSWORD
+      fi
+      exec ${getExe cfg.package} "$@"
+    '';
+  };
+
+  # Desktop commands driving gog. xdg-utils is present because the mail
+  # notifier resolves an absolute xdg-open to hand to the notification's exec
+  # hint: that argv is run by the shell, not by this script, so it cannot rely
+  # on the wrapper's PATH.
+  captureCmd = name: pkgs.writeShellApplication {
+    inherit name;
+    runtimeInputs = [
+      gogWrapped
+      pkgs.gum
+      pkgs.jq
+      pkgs.libnotify
+      pkgs.wl-clipboard
+      pkgs.xdg-utils
+    ];
+    text = builtins.readFile (./. + "/${name}.sh");
+  };
+
+  mailWatch = captureCmd "omarchy-gmail-watch";
 in
 {
   options.programs.gogDashboard = {
@@ -68,6 +108,12 @@ in
       description = "How often the collector refreshes the store files (systemd time span).";
     };
 
+    mailInterval = mkOption {
+      type = types.str;
+      default = "90s";
+      description = "How often to poll Gmail for new unread mail (systemd time span).";
+    };
+
     maxItems = mkOption {
       type = types.ints.positive;
       default = 6;
@@ -76,7 +122,12 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.packages = [ cfg.package pkgs.jq ];
+    home.packages = [
+      gogWrapped
+      pkgs.jq
+      mailWatch
+    ]
+    ++ map captureCmd [ "omarchy-cmd-note" "omarchy-cmd-upload" "omarchy-cmd-meet" ];
 
     # GOG_HOME keeps gogcli's config/data/state under a stable per-user root so
     # the file-based keyring and the import are deterministic across services.
@@ -119,6 +170,30 @@ in
       Install.WantedBy = [ "default.target" ];
     };
 
+    # New-mail notifier. Polling, not push: Gmail's push needs a public HTTPS
+    # endpoint via Pub/Sub, which is not worth a desktop notifier. The popup
+    # carries an exec hint, so clicking it opens the thread in the browser.
+    systemd.user.services.gog-mail-watch = {
+      Unit = {
+        Description = "Notify on new unread Gmail";
+        After = [ "gog-token-import.service" ];
+      };
+      Service = {
+        Type = "oneshot";
+        Environment = [ "GOG_HOME=${config.home.homeDirectory}/.config/gogcli" ];
+        ExecStart = getExe mailWatch;
+      };
+    };
+
+    systemd.user.timers.gog-mail-watch = {
+      Unit.Description = "Poll Gmail for new unread mail";
+      Timer = {
+        OnBootSec = "2m";
+        OnUnitActiveSec = cfg.mailInterval;
+      };
+      Install.WantedBy = [ "timers.target" ];
+    };
+
     # Collector: pull the three feeds and write store files atomically.
     # jq field paths verified against gogcli 0.19.0 JSON output (events under
     # .events, tasks under .tasks, threads under .threads). On any error or
@@ -133,7 +208,7 @@ in
         Environment = [ "GOG_HOME=${config.home.homeDirectory}/.config/gogcli" ];
         ExecStart = getExe (pkgs.writeShellScriptBin "gog-dashboard-refresh" ''
           set -u
-          GOG=${getExe cfg.package}
+          GOG=${getExe gogWrapped}
           JQ=${getExe pkgs.jq}
           ACCT=${lib.escapeShellArg cfg.account}
           N=${toString cfg.maxItems}

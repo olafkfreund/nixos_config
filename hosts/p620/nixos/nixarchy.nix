@@ -25,6 +25,7 @@
     ../../common/nixos/omarchy-input.nix
     ../../common/nixos/omarchy-sddm.nix
     ../../common/nixos/omarchy-workspaces.nix
+    ../../common/nixos/omarchy-gog.nix
   ];
 
   programs.nixarchy.enable = true;

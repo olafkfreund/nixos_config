@@ -1323,11 +1323,11 @@
         "zen-browser": "zen-browser"
       },
       "locked": {
-        "lastModified": 1788037684,
-        "narHash": "sha256-9EoX9o4MvpFUz9AlpDITmnXIQDo0p1TA+iLf0i8iCrI=",
+        "lastModified": 1788043158,
+        "narHash": "sha256-3eRRcOQX+njSRi2EaTwxKeRppErOkl2l18LUZtxg4tg=",
         "owner": "olafkfreund",
         "repo": "nixarchy",
-        "rev": "63a5244b2c7aaf3bfe95a7a3bf9d1b25ba5d12d3",
+        "rev": "106d0a95162330290ed945d5130b09ab2715a563",
         "type": "github"
       },
       "original": {
