@@ -16,9 +16,6 @@ in
 
   # Optimized package selection - only essential packages
   home.packages = with pkgs; [
-    # Core shell
-    zsh
-
     # Essential lightweight plugins
     zsh-edit
     zsh-autopair
@@ -26,22 +23,14 @@ in
     any-nix-shell
 
     # Modern shell tools
-    atuin # Better history
     zoxide # Smart directory navigation
-    eza # Better ls
     bat # Better cat
-    ripgrep # Better grep
-    fd # Better find
-    bottom # Better top
     dust # Better du
-    tokei # Code statistics
 
     # Development tools
-    lazygit
     delta # Better git diff
 
     # Productivity
-    glow # Markdown viewer
     # claude-code managed by claude-integration module
   ];
 

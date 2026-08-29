@@ -38,7 +38,6 @@ let
 in
 {
   home.packages = [
-    pkgs.clipse
     pkgs.wl-clipboard
     open-clip
   ];

@@ -101,8 +101,6 @@
   # Developer-specific packages
   home.packages = with pkgs; [
     # Version control and collaboration
-    git
-    gh
     git-lfs
     delta
     difftastic
@@ -115,13 +113,10 @@
     # Language-specific tools
     nodejs_24 # Use nodejs_24 to match system-wide installation
     python3
-    go
     rustc
-    cargo
 
     # Database tools
     postgresql
-    sqlite
     redis
 
     # API development
@@ -130,18 +125,10 @@
     httpie
 
     # Text processing and analysis
-    jq
-    yq-go # Use Go version consistently across all configurations
     xmlstarlet
 
-    # Performance and monitoring
-    tokei
-
     # File operations optimized for development
-    ripgrep
-    fd
     sd
-    eza
 
     # Network development tools
     netcat

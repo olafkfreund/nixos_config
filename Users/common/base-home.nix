@@ -36,23 +36,9 @@
     packages = with pkgs; [
       # Essential utilities
       coreutils
-      findutils
-      which
       file
-
-      # Network tools
-      wget
-      curl
-
-      # Text processing
-      less
-      nano
-
-      # Archive tools
-      unzip
-      zip
-      gnutar
-      gzip
+      # wget/curl, less/nano, archive tools and findutils/which are
+      # system-wide via modules/nixos/packages/core.nix.
     ];
   };
 

@@ -16,10 +16,10 @@
 # on the niri and Hyprland sessions.
 {
   # wl-mirror: mirror an output to a window (niri has no native mirroring).
-  # jq: parse the compositor's JSON IPC. wl-screenrec/slurp: HW-encoded recording.
+  # wl-screenrec/slurp: HW-encoded recording. (jq, used to parse the
+  # compositor's JSON IPC, is system-wide.)
   home.packages = with pkgs; [
     wl-mirror
-    jq
     wl-screenrec
     slurp
     swaybg # static wallpaper for niri/labwc (Stylix only themes GNOME's bg)
