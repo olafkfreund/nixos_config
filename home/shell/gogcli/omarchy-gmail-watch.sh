@@ -17,6 +17,12 @@ mkdir -p "$state_dir"
 seed=0
 [[ ${1:-} == --seed || ! -f $seen ]] && seed=1
 
+# Create the state file now, not after the fetch. A seed run that finds no
+# matching mail would otherwise leave the file absent, so the next run would
+# seed again and swallow the first real new mail -- the one notification that
+# matters most.
+((seed)) && : >>"$seen"
+
 out=$(gog gmail search "$QUERY" --account "$ACCOUNT" --max 25 --json 2>/dev/null) || exit 0
 ids=$(jq -r '.threads[]?.id // empty' <<<"$out")
 [[ -n $ids ]] || exit 0
