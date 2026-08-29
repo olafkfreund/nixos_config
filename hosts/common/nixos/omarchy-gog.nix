@@ -6,8 +6,17 @@
 # so rows have to be declared. The keybinding rides in its own lua file for the
 # same reason bindings.lua does not: bindings.lua is where Omarchy expects
 # personal edits and stays user-owned, so it keeps the one hand-written line
-#   require("hypr.gog-binds")
+#   pcall(require, "hypr.gog-binds")
 # while everything it loads is managed here.
+#
+# pcall, not a bare require. bindings.lua is user-owned and survives deploys
+# untouched, so it outlives any generation that stops providing gog-binds.lua
+# -- a rollback, a host that never imported this module, a branch cut before
+# it existed. A bare require of a missing file does not skip those binds, it
+# fails the WHOLE Hyprland config and drops the session into the error
+# overlay. That happened on razer: a rollback removed the file, bindings.lua
+# still demanded it, and the desktop came up unusable with nothing in the
+# config naming the cause.
 { ... }:
 {
   programs.nixarchy.menu.extraEntries = {
