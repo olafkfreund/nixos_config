@@ -300,7 +300,6 @@ in
       # General development
       {
         EDITOR = "nvim";
-        BROWSER = "google-chrome-stable";
         TERM = "foot";
       }
 
