@@ -20,6 +20,14 @@
   ];
   xdg = {
     mime.enable = true;
+
+    # Home Manager also symlinks the deprecated copy at
+    # ~/.local/share/applications/mimeapps.list. Omarchy writes web-app handler
+    # associations there when a PWA is installed, and a read-only store symlink
+    # makes those writes fail silently. Leave that path unmanaged; the
+    # XDG-spec location (~/.config/mimeapps.list) stays declarative below.
+    dataFile."applications/mimeapps.list".enable = false;
+
     mimeApps = {
       enable = true;
       defaultApplications = {
