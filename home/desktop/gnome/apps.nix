@@ -72,9 +72,6 @@ in
         nautilus # File manager
         file-roller # Archive manager
 
-        # AI assistants
-        # newelle # AI chat client - Temporarily disabled due to pymupdf/llama-index build failures
-
         # GNOME development tools
         gnome-builder # IDE (optional - large package)
         distroshelf # Manage Linux distributions

@@ -53,9 +53,6 @@
 
   # Workstation-specific additional packages
   home.packages = [
-    # Newelle — AI Virtual Assistant (GTK4/Libadwaita)
-    pkgs.customPkgs.newelle
-
     # Glim — GitLab CI/CD TUI monitoring
     pkgs.glim
 
