@@ -16,11 +16,11 @@
       typescript
       typescript-language-server
 
-      # 3. Go - gopls (Claude Code: gopls@claude-code-lsps)
+      # 3. Go - gopls and go are system-wide via modules/pkgs
       delve
       gotests
 
-      # 4. Rust - rust-analyzer (Claude Code: rust-analyzer@claude-code-lsps)
+      # 4. Rust - rust-analyzer, cargo and rustfmt are system-wide
       rustc
       clippy
 
@@ -49,7 +49,7 @@
 
       # === ADDITIONAL IMPORTANT LSP SERVERS ===
 
-      # Nix - nixd (feature-rich); nil is system-wide via modules/pkgs
+      # Nix - nil and nixd are both system-wide
 
       # Terraform - terraform-ls
       terraform-ls

@@ -73,8 +73,7 @@ in
         # GitLab CI local testing
         (mkIf cfg.ciLocal.enable gitlab-ci-local)
 
-        # Additional related tools
-
+        # git, jq, curl and yq-go are system-wide.
       ] ++ cfg.packages;
 
       # GitLab Runner configuration (if enabled)

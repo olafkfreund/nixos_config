@@ -37,12 +37,8 @@
       # Essential utilities
       coreutils
       file
-
-      # Network tools
-
-      # Text processing
-
-      # Archive tools
+      # wget/curl, less/nano, archive tools and findutils/which are
+      # system-wide via modules/nixos/packages/core.nix.
     ];
   };
 

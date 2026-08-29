@@ -137,15 +137,12 @@
     sd
     tree
 
-    # Archive and compression
-
     # System analysis
     lsof
     strace
 
     # API development and testing
     httpie
-    # yq-go provided by developer/server-admin profiles
 
     # Text processing
     gnused

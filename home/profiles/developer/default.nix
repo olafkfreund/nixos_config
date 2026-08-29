@@ -127,8 +127,6 @@
     # Text processing and analysis
     xmlstarlet
 
-    # Performance and monitoring
-
     # File operations optimized for development
     sd
 

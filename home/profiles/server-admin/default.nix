@@ -119,8 +119,6 @@
     # File operations
     sd
 
-    # Archive tools
-
     # Process management
     psmisc
     procps

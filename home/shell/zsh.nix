@@ -16,8 +16,6 @@ in
 
   # Optimized package selection - only essential packages
   home.packages = with pkgs; [
-    # Core shell
-
     # Essential lightweight plugins
     zsh-edit
     zsh-autopair
