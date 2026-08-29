@@ -4,8 +4,6 @@
     shfmt
     ncurses
     cmakeCurses
-    upbound
-    crossplane-cli
     atac
     markdownlint-cli
   ];

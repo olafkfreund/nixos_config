@@ -146,7 +146,7 @@ in
   development.gitlab = {
     enable = true;
     runner.enable = mkDefault false;
-    fluxcd.enable = true;
+    fluxcd.enable = false;
     ciLocal.enable = true;
   };
 

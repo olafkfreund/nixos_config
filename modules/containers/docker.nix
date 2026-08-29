@@ -49,7 +49,6 @@ in
       docker-compose
       docker-gc
       lazydocker
-      earthbuild
     ];
 
     # Docker configuration
