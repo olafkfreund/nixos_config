@@ -3,10 +3,7 @@
   # both. Values common to every session live in ./common.nix.
   #
   # labwc, mango and the Noctalia shell were removed 2026-08-21 — unused. niri
-  # and Hyprland both run DankMaterialShell.
   imports = [
-    ./shell.nix
-    ./niri.nix
     ./hyprland.nix
   ];
 }

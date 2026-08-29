@@ -383,20 +383,12 @@ in
   # cosmic module; the unified DM module defaults to "none" without it).
   # NOTE: must live at top-level, NOT inside the features = {...} block above —
   # the option path is `desktop.displayManager`, not `features.desktop.displayManager`.
-  # Login manager: DankMaterialShell greeter (greetd). backend="none" turns GDM
-  # off; the dms-greeter module auto-enables greetd and runs the greeter inside
-  # a niri compositor. It enumerates
-  # the same wayland-sessions, so GNOME + all niri/labwc/mango (stock + -dms)
-  # entries stay selectable.
+  # Login manager: Omarchy's SDDM greeter, switched on by
+  # programs.nixarchy.displayManager in ./nixos/nixarchy.nix. backend = "none"
+  # keeps GDM off; SDDM enumerates wayland-sessions, so the Omarchy Hyprland
+  # session and GNOME both stay selectable.
   desktop.displayManager.backend = "none";
 
-  services.displayManager.dms-greeter = {
-    enable = true;
-    compositor.name = "niri";
-  };
-
-  # Phase 1: niri + labwc + mango as selectable login sessions (alongside GNOME).
-  desktop.niri.enable = true;
   desktop.hyprland.enable = true;
 
   # k3d cluster — Phase 2 of docs/plans/2026-08-20-k3d-p510-to-p620-migration.md.
@@ -446,9 +438,6 @@ in
     apiHostBind = "100.69.100.115";
     apiPort = 6443;
   };
-
-  # Registers the DankMaterialShell login sessions for niri and Hyprland.
-  desktop.dmsShell.enable = true;
 
   # Terminals follow whichever shell owns the session: DMS in the DMS sessions,
   # omarchy in the Omarchy one. p620 only for now — razer and p510 stay on
