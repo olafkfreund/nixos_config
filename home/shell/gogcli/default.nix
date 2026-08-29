@@ -39,6 +39,25 @@ let
       exec ${getExe cfg.package} "$@"
     '';
   };
+
+  # Desktop commands driving gog. xdg-utils is present because the mail
+  # notifier resolves an absolute xdg-open to hand to the notification's exec
+  # hint: that argv is run by the shell, not by this script, so it cannot rely
+  # on the wrapper's PATH.
+  captureCmd = name: pkgs.writeShellApplication {
+    inherit name;
+    runtimeInputs = [
+      gogWrapped
+      pkgs.gum
+      pkgs.jq
+      pkgs.libnotify
+      pkgs.wl-clipboard
+      pkgs.xdg-utils
+    ];
+    text = builtins.readFile (./. + "/${name}.sh");
+  };
+
+  mailWatch = captureCmd "omarchy-gmail-watch";
 in
 {
   options.programs.gogDashboard = {
@@ -89,6 +108,12 @@ in
       description = "How often the collector refreshes the store files (systemd time span).";
     };
 
+    mailInterval = mkOption {
+      type = types.str;
+      default = "90s";
+      description = "How often to poll Gmail for new unread mail (systemd time span).";
+    };
+
     maxItems = mkOption {
       type = types.ints.positive;
       default = 6;
@@ -100,15 +125,9 @@ in
     home.packages = [
       gogWrapped
       pkgs.jq
+      mailWatch
     ]
-    ++ map
-      # Quick-capture commands, surfaced in the Omarchy menu and bar.
-      (name: pkgs.writeShellApplication {
-        inherit name;
-        runtimeInputs = [ gogWrapped pkgs.gum pkgs.jq pkgs.libnotify pkgs.wl-clipboard ];
-        text = builtins.readFile (./. + "/${name}.sh");
-      })
-      [ "omarchy-cmd-note" "omarchy-cmd-upload" ];
+    ++ map captureCmd [ "omarchy-cmd-note" "omarchy-cmd-upload" "omarchy-cmd-meet" ];
 
     # GOG_HOME keeps gogcli's config/data/state under a stable per-user root so
     # the file-based keyring and the import are deterministic across services.
@@ -149,6 +168,30 @@ in
         '');
       };
       Install.WantedBy = [ "default.target" ];
+    };
+
+    # New-mail notifier. Polling, not push: Gmail's push needs a public HTTPS
+    # endpoint via Pub/Sub, which is not worth a desktop notifier. The popup
+    # carries an exec hint, so clicking it opens the thread in the browser.
+    systemd.user.services.gog-mail-watch = {
+      Unit = {
+        Description = "Notify on new unread Gmail";
+        After = [ "gog-token-import.service" ];
+      };
+      Service = {
+        Type = "oneshot";
+        Environment = [ "GOG_HOME=${config.home.homeDirectory}/.config/gogcli" ];
+        ExecStart = getExe mailWatch;
+      };
+    };
+
+    systemd.user.timers.gog-mail-watch = {
+      Unit.Description = "Poll Gmail for new unread mail";
+      Timer = {
+        OnBootSec = "2m";
+        OnUnitActiveSec = cfg.mailInterval;
+      };
+      Install.WantedBy = [ "timers.target" ];
     };
 
     # Collector: pull the three feeds and write store files atomically.
