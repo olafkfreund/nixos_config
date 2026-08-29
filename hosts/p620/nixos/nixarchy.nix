@@ -52,6 +52,20 @@
   # Plymouth is left alone deliberately: nixarchy only mkDefaults its own
   # splash, so stylix keeps this machine on 'stylix' with no mkForce needed.
 
+  # QtMultimedia for Omarchy shell plugins that want a camera preview
+  # (io.github.kristoferlund.webcam). quickshell's wrapper injects only
+  # qtdeclarative and qtwayland, so `import QtMultimedia` fails with "module is
+  # not installed" and the plugin's whole Panel.qml refuses to load -- the bar
+  # icon appears and clicking it does nothing.
+  #
+  # The wrapper *prefixes* NIXPKGS_QT6_QML_IMPORT_PATH rather than setting it,
+  # so a value set here is preserved and searched. systemPackages is what puts
+  # the multimedia backend under /run/current-system/sw/lib/qt-6/plugins, which
+  # QT_PLUGIN_PATH already covers; only the QML path needs saying out loud.
+  environment.systemPackages = [ pkgs.qt6.qtmultimedia ];
+  environment.sessionVariables.NIXPKGS_QT6_QML_IMPORT_PATH =
+    "${pkgs.qt6.qtmultimedia}/lib/qt-6/qml";
+
   home-manager.users.olafkfreund = {
     imports = [ inputs.nixarchy.homeManagerModules.nixarchy ];
     programs.nixarchy.enable = true;
