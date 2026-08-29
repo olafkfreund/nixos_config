@@ -297,11 +297,15 @@
           # Stylix theming module - re-enabled after upstream cache fix
           stylixModule = [ inputs.stylix.nixosModules.stylix ];
           system = "x86_64-linux";
+          # One instantiation, shared by specialArgs and
+          # home-manager.extraSpecialArgs. Importing it twice cost a
+          # second nixpkgs fixpoint (~1-2s of eval) for nothing.
+          pkgsUnstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable system);
         in
         {
           inherit system;
           specialArgs = {
-            pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable system);
+            pkgs-unstable = pkgsUnstable;
             inherit inputs host hostTypes;
             username = primaryUser; # Primary user for backward compatibility
             hostUsers = allUsers; # All users for this host
@@ -347,7 +351,7 @@
                     inputs.dankcalendar.homeModules.dank-calendar
                   ];
                   extraSpecialArgs = {
-                    pkgs-unstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable system);
+                    pkgs-unstable = pkgsUnstable;
                     inherit
                       inputs
                       nixpkgs

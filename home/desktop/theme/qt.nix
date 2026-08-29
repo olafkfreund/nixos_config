@@ -55,11 +55,11 @@ in
 
     # KDE globals configuration for dark mode
     # This ensures KDE applications use dark theme even outside Plasma
-    file.".config/kdeglobals" = {
-      text = ''
-        ${builtins.readFile "${pkgs.kdePackages.breeze}/share/color-schemes/BreezeDark.colors"}
-      '';
-    };
+    # source, not readFile: reading a built package's output is
+    # import-from-derivation, which forces breeze to be realised in the middle
+    # of evaluation -- a synchronous substitution on a cold store.
+    file.".config/kdeglobals".source =
+      "${pkgs.kdePackages.breeze}/share/color-schemes/BreezeDark.colors";
 
     # Add environment variables for Qt application integration
     sessionVariables = {
