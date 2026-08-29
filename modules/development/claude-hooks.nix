@@ -4,8 +4,10 @@ let
   inherit (lib) mkOption mkIf mkEnableOption mkDefault types;
   cfg = config.features.claude-hooks;
 
-  # Create the hook scripts for desktop notifications
-  needsPermissionsScript = pkgs.writeShellScript "needs-permissions.sh" ''
+  # Hook script bodies. Kept as plain strings: building them with
+  # writeShellScript only to read them back with builtins.readFile is
+  # import-from-derivation, which stalls evaluation on a build.
+  needsPermissionsText = ''
     #!/usr/bin/env bash
 
     # Send notification when Claude needs permissions
@@ -17,7 +19,7 @@ let
     fi
   '';
 
-  notifyReadyScript = pkgs.writeShellScript "notify-ready.sh" ''
+  notifyReadyText = ''
     #!/usr/bin/env bash
 
     # Send notification when Claude is done processing
@@ -62,8 +64,8 @@ in
 
       # Make notification scripts available in the user environment
       home.packages = mkIf (cfg.enablePermissionNotifications || cfg.enableReadyNotifications) [
-        (pkgs.writeScriptBin "claude-notify-permissions" (builtins.readFile needsPermissionsScript))
-        (pkgs.writeScriptBin "claude-notify-ready" (builtins.readFile notifyReadyScript))
+        (pkgs.writeScriptBin "claude-notify-permissions" needsPermissionsText)
+        (pkgs.writeScriptBin "claude-notify-ready" notifyReadyText)
       ];
     }];
   };
