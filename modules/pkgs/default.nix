@@ -18,6 +18,10 @@
     sqlite
     z3
     nil # Nix lsp
+    alejandra # Nix formatter
+    nixpkgs-fmt # Nix formatter (used by `just validate` and CI)
+    deadnix # Dead-code detection
+    statix # Nix anti-pattern linter
     devbox # faster nix-shells
     shellify # faster nix-shells
     github-desktop

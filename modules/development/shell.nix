@@ -24,8 +24,6 @@ in
         pkgs.yamllint
         pkgs.ncurses
         pkgs.cmakeCurses
-        pkgs.upbound
-        pkgs.crossplane-cli
         pkgs.just
         pkgs.atac
       ]

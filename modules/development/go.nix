@@ -24,7 +24,6 @@ in
         pkgs-unstable.gopls
         pkgs-unstable.gore
         pkgs-unstable.go-task
-        pkgs-unstable.timoni
       ]
       ++ cfg.packages;
   };

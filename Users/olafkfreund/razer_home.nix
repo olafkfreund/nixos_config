@@ -57,10 +57,6 @@
     account = "olaf@freundcloud.com";
   };
 
-  # No windsurf `theme` setting: the value it derived was never a real
-  # Windsurf theme id (that needs an installed extension), so it wrote a
-  # no-op. Windsurf uses its own dark default.
-
   # Razer Chrome — GPU completely disabled for stability on Optimus hybrid
   programs.chromium = {
     commandLineArgs = lib.mkForce [

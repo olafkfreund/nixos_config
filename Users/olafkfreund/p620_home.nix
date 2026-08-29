@@ -71,10 +71,6 @@
     }))
   ];
 
-  # No windsurf `theme` setting: the value it named was never a real
-  # Windsurf theme id (that needs an installed extension), so it wrote a
-  # no-op. Windsurf uses its own dark default.
-
   # P620 Chrome — Modern flags for AMD GPU systems
   programs.chromium = {
     package = lib.mkForce pkgs.google-chrome;

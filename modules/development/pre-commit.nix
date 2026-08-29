@@ -13,11 +13,6 @@ in
       # Pre-commit framework
       pre-commit
 
-      # Nix formatting and linting tools
-      nixpkgs-fmt
-      statix
-      deadnix
-
       # Shell script formatting and linting
       shellcheck
       shfmt

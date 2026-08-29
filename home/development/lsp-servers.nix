@@ -55,8 +55,7 @@
 
       # === ADDITIONAL IMPORTANT LSP SERVERS ===
 
-      # Nix - nil (faster, more modern) AND nixd (feature-rich)
-      nil
+      # Nix - nixd (feature-rich); nil is system-wide via modules/pkgs
       nixd
 
       # Terraform - terraform-ls
@@ -92,12 +91,9 @@
       prettier
       eslint
 
-      # Nix formatters
-      alejandra
-      nixpkgs-fmt
+      # Nix formatters (alejandra/nixpkgs-fmt/deadnix/statix are system-wide
+      # via modules/pkgs; nixfmt is not)
       nixfmt
-      deadnix
-      statix
 
       # Go formatters
       gofumpt # Better gofmt

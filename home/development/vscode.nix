@@ -29,9 +29,7 @@ in
 
     home = {
       packages = with pkgs; [
-        alejandra
-        deadnix
-        statix
+        # alejandra, deadnix and statix are system-wide via modules/pkgs.
         hadolint # Dockerfile linter
         hadolint-sarif # Convert hadolint diagnostics to SARIF format
         icu # Required for .NET globalization support (MCP servers)

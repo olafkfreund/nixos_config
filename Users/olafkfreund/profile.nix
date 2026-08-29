@@ -79,7 +79,6 @@ in
       cursor = true;
       neovim = true;
       vscode = true;
-      windsurf = true;
       zed = true;
     };
 
@@ -146,7 +145,7 @@ in
   development.gitlab = {
     enable = true;
     runner.enable = mkDefault false;
-    fluxcd.enable = true;
+    fluxcd.enable = false;
     ciLocal.enable = true;
   };
 
@@ -204,12 +203,6 @@ in
     # importable for building Gemini-powered AI agents. See
     # pkgs/google-antigravity-py/ for the platform-wheel install.
     pkgs.customPkgs.google-antigravity-py
-  ];
-
-  # Windsurf LSP/formatter packages (identical across interactive hosts)
-  editor.windsurf.extraPackages = with pkgs; [
-    nixpkgs-fmt
-    nil
   ];
 
   # Firefox (identical across interactive hosts)

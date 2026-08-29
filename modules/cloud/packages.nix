@@ -22,7 +22,6 @@ in
         pkgs.customPkgs.awscli2 # local override disables flaky doCheck
         pkgs.ssm-session-manager-plugin # `aws ssm start-session` (binary: session-manager-plugin)
         pkgs.awsrm
-        pkgs.awsls
         pkgs.awsume
         pkgs.awslogs
         pkgs.aws-mfa
@@ -30,8 +29,6 @@ in
         pkgs.aws-rotate-key
         pkgs.terraforming
         pkgs.aws-iam-authenticator
-        pkgs.eksctl
-        pkgs.istioctl
       ];
     })
 
@@ -39,7 +36,6 @@ in
       environment.systemPackages = with pkgs; [
         azure-cli
         azure-storage-azcopy
-        kubelogin
         powershell
         sqlcmd
         blobfuse
@@ -120,27 +116,21 @@ in
       environment.systemPackages = with pkgs; [
         kubectl
         tubekit
-        krelay
         tfk8s
-        kubectl-explore
         kubernetes-helm
         kubecolor
         k9s
-        kops
         kubectx
-        k8sgpt
         kubetail
         # Local k8s clusters (moved from deleted modules/{virt,containers}/kubernetes.nix)
         minikube
         kind
-        werf
       ];
     })
 
     (mkIf config.terraform.packages.enable {
       environment.systemPackages = [
         pkgs.terraform
-        pkgs.terraformer
         pkgs.terraform-providers.digitalocean_digitalocean
         pkgs.terraform-providers.oracle_oci
         pkgs.terraform-providers.loafoe_ssh
@@ -160,7 +150,6 @@ in
         pkgs.terraform-providers.tailscale_tailscale
         pkgs.terraform-providers.terraform-provider-openstack_openstack
         pkgs.terraform-providers.hashicorp_kubernetes
-        pkgs.terrascan
         pkgs.terranix
       ];
     })
