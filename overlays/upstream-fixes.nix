@@ -1,4 +1,16 @@
 _final: prev: {
+  # gtksourceview5 5.20.0's meson suite hangs in the build sandbox: 9 of 26
+  # tests (test-vim-*, test-view, test-buffer, ...) TIMEOUT after 50-90s
+  # because there is no locale and no XDG_RUNTIME_DIR. 17 pass, 0 actually
+  # fail. Stylix patches a base16 scheme into this package, so it is never in
+  # cache.nixos.org and every host rebuilds it locally; p510 is slow enough to
+  # hit the timeouts, which takes down pods -> system-path -> the whole
+  # toplevel. Skipping the checks costs no cache hits (there were none).
+  # Drop once nixpkgs makes those tests sandbox-safe (#1525).
+  gtksourceview5 = prev.gtksourceview5.overrideAttrs (_old: {
+    doCheck = false;
+  });
+
   # azure-cli 2.81.0 expects azure-mgmt-web v2024_11_01 which isn't packaged yet;
   # disable installCheck until nixpkgs catches up.
   azure-cli = prev.azure-cli.overrideAttrs (_old: {
