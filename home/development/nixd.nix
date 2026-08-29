@@ -49,12 +49,8 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.packages = with pkgs; [
-      nixd
-      alejandra
-      nixpkgs-fmt
-      statix
-    ];
+    # alejandra, nixpkgs-fmt and statix are system-wide via modules/pkgs.
+    home.packages = with pkgs; [ nixd ];
 
     xdg.configFile."nixd/nixd.json".text = builtins.toJSON {
       nixd = {
