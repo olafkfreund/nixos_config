@@ -324,6 +324,15 @@ in
   # selectable.
   desktop.displayManager.backend = "none";
 
+  # Preselect the Omarchy session. Without this SDDM has no default and falls
+  # through to whatever /var/lib/sddm/state.conf remembers, which was
+  # gnome.desktop -- so every boot came up in GNOME rather than Omarchy.
+  #
+  # A fallback only: SDDM rewrites state.conf on every login and the remembered
+  # session wins, so the first Omarchy login is what makes it stick. GNOME
+  # stays in the session menu either way.
+  services.displayManager.defaultSession = "omarchy";
+
   desktop.hyprland.enable = true;
 
   # Terminals follow whichever shell owns the session: DMS in the DMS sessions,
