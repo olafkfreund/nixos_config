@@ -2,8 +2,9 @@
 , lib
 , ...
 }: {
-  # Enable System76 power daemon for intelligent power management
-  hardware.system76.power-daemon.enable = true;
+  # System76 power daemon disabled: it conflicts with power-profiles-daemon
+  # (both manage CPU power), which is now the chosen profile provider below.
+  hardware.system76.power-daemon.enable = false;
 
   # Thermal and power management services
   services = {
@@ -19,9 +20,11 @@
       percentageAction = 3;
     };
 
-    # Power profiles management
+    # Power profiles management — provides powerprofilesctl + the 3 switchable
+    # profiles the Omarchy bar/power plugins use. intel_pstate is in active mode,
+    # so PPD drives profiles via EPP. Replaces TLP (cpu.nix) + system76-power.
     power-profiles-daemon = {
-      enable = false;
+      enable = true;
       # Set default profile (options: power-saver, balanced, performance)
       # The following line is commented out as the default is 'balanced'
       # extraConfig.defaults.default-profile = "balanced";

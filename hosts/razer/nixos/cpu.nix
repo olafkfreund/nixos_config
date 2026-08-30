@@ -11,8 +11,12 @@ _: {
 
   # Intel-specific power management
   services.thermald.enable = true;
+  # TLP disabled in favour of power-profiles-daemon (see power.nix) so the
+  # Omarchy bar / power plugins get switchable power-saver/balanced/performance
+  # profiles. Settings kept dormant below for an easy revert. Trade-off: loses
+  # TLP's per-AC/BAT CPU caps and the i915 GPU freq bounds; thermald still runs.
   services.tlp = {
-    enable = true;
+    enable = false;
     settings = {
       CPU_SCALING_GOVERNOR_ON_AC = "performance";
       CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
