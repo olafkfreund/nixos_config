@@ -370,8 +370,9 @@ in
   systemd.services.gnome-remote-desktop.wantedBy = lib.mkForce [ ];
 
   # Citrix Workspace for client project remote access
-  # Disabled — no longer needed. Module + overlay + package retained so this
-  # can be flipped back to true without re-installing anything.
+  # Disabled — no longer needed. Module + overlay + package retained, but the
+  # requireFile tarball was deleted: re-enabling needs a fresh manual download
+  # via pkgs/citrix-workspace/fetch-citrix.sh first.
   services.citrix-workspace = {
     enable = false;
     acceptLicense = true;
