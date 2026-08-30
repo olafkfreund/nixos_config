@@ -658,7 +658,14 @@ in
 
     systemd.services.k3d-cluster-bootstrap = {
       description = "k3d cluster bootstrap (create cluster, write kubeconfig, apply GitOps)";
-      wantedBy = [ "multi-user.target" ];
+
+      # Deliberately NOT wantedBy multi-user.target. systemd gives a target an
+      # implicit After= on everything in its Wants=, so a Type=oneshot unit
+      # pulled in that way holds multi-user.target -- and graphical.target
+      # behind it -- until the whole cluster is up. On p620 that gated the
+      # desktop on Kubernetes: uwsm waits for graphical.target, timed out after
+      # its full 60s, and Hyprland started roughly a minute late every boot.
+      # The timer below starts this after boot instead, off the critical path.
       after = [ "docker.service" "network-online.target" "tailscaled.service" ];
       requires = [ "docker.service" ];
       wants = [ "network-online.target" "tailscaled.service" ];
@@ -675,6 +682,11 @@ in
         # Re-run on transient failure (e.g. docker daemon not ready yet)
         Restart = "on-failure";
         RestartSec = "10s";
+        # Not infinity (the systemd default for oneshot). A bootstrap that
+        # never returns used to hang activating forever; on 2026-08-30 it was
+        # still "activating (start)" five minutes after boot with no way to
+        # notice short of reading list-jobs. Fail loudly instead.
+        TimeoutStartSec = "15min";
       };
 
       # Give up after 5 tries rather than retrying forever. On 2026-08-11
@@ -691,6 +703,18 @@ in
         KUBECONFIG = cfg.kubeconfigPath;
         # Make sure docker.sock is reachable
         DOCKER_HOST = "unix:///var/run/docker.sock";
+      };
+    };
+
+    # Starts the bootstrap shortly after boot rather than as part of it, so a
+    # slow or wedged cluster cannot hold up multi-user.target and the desktop.
+    systemd.timers.k3d-cluster-bootstrap = {
+      description = "Start the k3d cluster bootstrap after boot";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "20s";
+        Unit = "k3d-cluster-bootstrap.service";
+        AccuracySec = "1s";
       };
     };
 
