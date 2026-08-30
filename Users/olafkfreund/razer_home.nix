@@ -57,12 +57,16 @@
     account = "olaf@freundcloud.com";
   };
 
-  # Razer Chrome — GPU completely disabled for stability on Optimus hybrid
+  # Razer Chrome — force ANGLE onto native GL. On this Intel-iris + Mesa +
+  # Ozone/Wayland stack, ANGLE's default backend can't import Wayland dmabufs as
+  # EGLImages (eglCreateImage EGL_BAD_MATCH), looping the GPU process and
+  # glitching pages. Native GL uses Mesa's EGL directly and fixes it.
   programs.chromium = {
     commandLineArgs = lib.mkForce [
       "--enable-features=UseOzonePlatform"
       "--ozone-platform=wayland"
       "--disable-features=VizDisplayCompositor"
+      "--use-angle=gl"
     ];
   };
 }
