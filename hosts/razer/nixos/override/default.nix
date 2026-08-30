@@ -1,13 +1,14 @@
 _: {
-  # Overlays for Razer-specific package overrides
-  # nixpkgs.overlays = [
-  #   (final: prev: {
-  #     microsoft-identity-broker = prev.microsoft-identity-broker.overrideAttrs (oldAttrs: {
-  #       src = pkgs.fetchurl {
-  #         url = "https://packages.microsoft.com/ubuntu/22.04/prod/pool/main/m/microsoft-identity-broker/microsoft-identity-broker_2.0.1_amd64.deb";
-  #         sha256 = "18z75zxamp7ss04yqwhclnmv3hjxrkb4r43880zwz9psqjwkm11";
-  #       };
-  #     });
-  #   })
-  # ];
+  # Razer-specific package overrides (this host only; p620/p510 stay stock).
+  nixpkgs.overlays = [
+    # --use-angle=gl: on Razer's Intel-iris + Mesa + Ozone/Wayland stack, ANGLE's
+    # default backend can't import Wayland dmabufs as EGLImages (eglCreateImage
+    # EGL_BAD_MATCH), looping the GPU process and glitching pages. Native GL uses
+    # Mesa's EGL directly and fixes it. AMD (p620) doesn't hit this, so keep it here.
+    (_: prev: {
+      google-chrome = prev.google-chrome.override {
+        commandLineArgs = "--use-angle=gl";
+      };
+    })
+  ];
 }

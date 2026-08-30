@@ -29,6 +29,7 @@ in
     ./nixos/memory.nix
     ./themes/stylix.nix # Re-enabled after upstream cache fix
     ./nixos/nixarchy.nix # Omarchy desktop, as an extra session
+    ./nixos/override # Razer-only package overrides (google-chrome --use-angle=gl)
 
     # Razer-specific additional modules
     ../../modules/development/default.nix
