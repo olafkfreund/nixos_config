@@ -41,16 +41,17 @@
   programs.hyprland.package = lib.mkForce pkgs.hyprland;
   programs.hyprland.portalPackage = lib.mkForce pkgs.xdg-desktop-portal-hyprland;
 
-  # greetd + ReGreet is the login manager (see the host configuration).
-  # nixarchy would otherwise enable SDDM, and two display managers is not a
-  # working configuration -- NixOS gets two definitions of
-  # displayManager.generic.execCmd and refuses to build.
+  # Omarchy's SDDM greeter is the login manager.
   #
-  # SDDM was tried first and does not work on razer: its greeter dies
-  # immediately (sddm-helper HELPER_TTY_ERROR / exit 15) under weston,
-  # start-hyprland and bare Hyprland alike. greetd is the path that already
-  # greets this fleet.
-  programs.nixarchy.displayManager = false;
+  # It failed three times before with sddm-helper HELPER_TTY_ERROR, which
+  # looked like this hardware rejecting the greeter compositor. It was not:
+  # TIOCSCTTY in sddm's UserSession.cpp returns EPERM when the tty is
+  # already another session's controlling terminal, and a greetd session had
+  # been wedged in `closing` on tty1 for two days. sddm's fetchAvailableVt
+  # skips closing sessions, so it claimed VT1 and could not take it. The
+  # check fires before the compositor is exec'd, which is why swapping
+  # weston for Hyprland changed nothing.
+  programs.nixarchy.displayManager = true;
 
   # ~/.config/hypr/hyprland.lua is managed by home-manager here, so the seed
   # keeps it and Omarchy's own config is never installed. That is what the

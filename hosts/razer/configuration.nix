@@ -315,8 +315,8 @@ in
   # first (see comment on `gnome.gnome-remote-desktop` below). p510 enables
   # autoLogin because p510 is pure NVIDIA without PRIME — greeter respawn
   # works there; not here.
-  # Login manager: greetd with ReGreet. backend = "none" keeps GDM off; the
-  # regreet module auto-enables greetd and runs the greeter inside cage.
+  # Login manager: Omarchy's SDDM greeter (programs.nixarchy.displayManager
+  # in ./nixos/nixarchy.nix). backend = "none" keeps GDM off.
   # It enumerates wayland-sessions, so the Omarchy Hyprland session and GNOME
   # both stay selectable.
   #
@@ -329,7 +329,14 @@ in
   # not, is the one compositor that failed outright here.
   desktop.displayManager.backend = "none";
 
-  services.displayManager.regreet.enable = true;
+  # Preselect the Omarchy session. Without this SDDM has no default and falls
+  # back to whatever /var/lib/sddm/state.conf remembers, which on this machine
+  # was gnome.desktop -- so every boot came up in GNOME. GNOME stays in the
+  # session menu; it is just no longer what you get by pressing Enter.
+  #
+  # state.conf still wins once a user has logged in, so this governs a fresh
+  # machine (or one whose state.conf has been reset), not an existing choice.
+  services.displayManager.defaultSession = "omarchy";
 
   desktop.hyprland.enable = true;
 
