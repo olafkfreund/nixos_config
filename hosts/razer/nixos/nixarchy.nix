@@ -23,7 +23,6 @@
     inputs.nixarchy.nixosModules.nixarchy
     ../../../nixarchy-apps.nix
     ../../common/nixos/omarchy-input.nix
-    ../../common/nixos/omarchy-sddm.nix
     ../../common/nixos/omarchy-workspaces.nix
     ../../common/nixos/omarchy-gog.nix
   ];
@@ -42,11 +41,16 @@
   programs.hyprland.package = lib.mkForce pkgs.hyprland;
   programs.hyprland.portalPackage = lib.mkForce pkgs.xdg-desktop-portal-hyprland;
 
-  # Omarchy's SDDM greeter is the login manager. It replaced the
-  # DankMaterialShell greetd greeter, which ran inside niri and went away
-  # with niri and DMS. SDDM enumerates wayland-sessions, so GNOME stays
-  # selectable alongside the Omarchy session.
-  programs.nixarchy.displayManager = true;
+  # greetd + ReGreet is the login manager (see the host configuration).
+  # nixarchy would otherwise enable SDDM, and two display managers is not a
+  # working configuration -- NixOS gets two definitions of
+  # displayManager.generic.execCmd and refuses to build.
+  #
+  # SDDM was tried first and does not work on razer: its greeter dies
+  # immediately (sddm-helper HELPER_TTY_ERROR / exit 15) under weston,
+  # start-hyprland and bare Hyprland alike. greetd is the path that already
+  # greets this fleet.
+  programs.nixarchy.displayManager = false;
 
   # ~/.config/hypr/hyprland.lua is managed by home-manager here, so the seed
   # keeps it and Omarchy's own config is never installed. That is what the

@@ -383,11 +383,21 @@ in
   # cosmic module; the unified DM module defaults to "none" without it).
   # NOTE: must live at top-level, NOT inside the features = {...} block above —
   # the option path is `desktop.displayManager`, not `features.desktop.displayManager`.
-  # Login manager: Omarchy's SDDM greeter, switched on by
-  # programs.nixarchy.displayManager in ./nixos/nixarchy.nix. backend = "none"
-  # keeps GDM off; SDDM enumerates wayland-sessions, so the Omarchy Hyprland
-  # session and GNOME both stay selectable.
+  # Login manager: greetd with ReGreet. backend = "none" keeps GDM off; the
+  # regreet module auto-enables greetd and runs the greeter inside cage.
+  # It enumerates wayland-sessions, so the Omarchy Hyprland session and GNOME
+  # both stay selectable.
+  #
+  # This replaced the DankMaterialShell greeter, which ran inside niri and went
+  # away with DMS. Omarchy's own SDDM greeter was tried first and does not work
+  # on razer: the greeter process dies immediately (sddm-helper
+  # HELPER_TTY_ERROR, then exit 15) under weston, start-hyprland and bare
+  # Hyprland alike. greetd is the path that already greets this fleet, and cage
+  # is wlroots-based like the niri that greeted it before -- weston, which is
+  # not, is the one compositor that failed outright here.
   desktop.displayManager.backend = "none";
+
+  services.displayManager.regreet.enable = true;
 
   desktop.hyprland.enable = true;
 

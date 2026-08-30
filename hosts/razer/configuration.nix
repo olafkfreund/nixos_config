@@ -315,14 +315,21 @@ in
   # first (see comment on `gnome.gnome-remote-desktop` below). p510 enables
   # autoLogin because p510 is pure NVIDIA without PRIME — greeter respawn
   # works there; not here.
-  # Login manager: Omarchy's SDDM greeter, switched on by
-  # programs.nixarchy.displayManager in ./nixos/nixarchy.nix. backend = "none"
-  # keeps GDM off, which still matters here: GDM's greeter respawn is broken on
-  # this Optimus PRIME-sync NVIDIA hardware (see note above), and SDDM stays on
-  # the same non-GDM path the DMS greeter used. SDDM enumerates
-  # wayland-sessions, so the Omarchy Hyprland session and GNOME both stay
-  # selectable.
+  # Login manager: greetd with ReGreet. backend = "none" keeps GDM off; the
+  # regreet module auto-enables greetd and runs the greeter inside cage.
+  # It enumerates wayland-sessions, so the Omarchy Hyprland session and GNOME
+  # both stay selectable.
+  #
+  # This replaced the DankMaterialShell greeter, which ran inside niri and went
+  # away with DMS. Omarchy's own SDDM greeter was tried first and does not work
+  # on razer: the greeter process dies immediately (sddm-helper
+  # HELPER_TTY_ERROR, then exit 15) under weston, start-hyprland and bare
+  # Hyprland alike. greetd is the path that already greets this fleet, and cage
+  # is wlroots-based like the niri that greeted it before -- weston, which is
+  # not, is the one compositor that failed outright here.
   desktop.displayManager.backend = "none";
+
+  services.displayManager.regreet.enable = true;
 
   desktop.hyprland.enable = true;
 
