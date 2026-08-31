@@ -76,12 +76,39 @@ Things the code no longer shows, so they are easy to get wrong:
   `extra-substituters`. Tailscale mesh is used for remote SSH access, not caching.
 - **Monitoring was removed** (Prometheus/Grafana/Loki/Alertmanager). Use `journalctl`
   and `systemctl status`.
-- **Two Wayland sessions, both live: niri and Hyprland**, with DankMaterialShell
-  (DMS) as the shell for each. `modules/desktop/dms-shell.nix` builds "Niri (DMS)"
-  always and "Hyprland (DMS)" when `desktop.hyprland.enable` is set — true on p620
-  and razer, false on p510. Packages come from nixpkgs (`pkgs.niri`, `pkgs.hyprland`);
-  the niri-flake input supplies only the `programs.niri` module, not the binary.
-  **Noctalia was removed** (PR #1410, with labwc and mango); stale `${DESK_SHELL:-noctalia}`
-  comments survive in a few files.
+- **One Wayland session: Nixarchy (Omarchy on Hyprland), plus GNOME.** All three
+  hosts offer exactly `omarchy-wayland-session` and `gnome-session`. niri, labwc,
+  mango, Noctalia and DankMaterialShell are all gone, and so are their flake
+  inputs — anything in the docs or a comment describing `dms-shell.nix`,
+  "Niri (DMS)", "Hyprland (DMS)" or `${DESK_SHELL:-noctalia}` is describing a
+  tree that no longer exists.
+- **`programs.hyprland` is enabled by the nixarchy module, not by us** (#1562).
+  It is what supplies the portal, uwsm and the wayland-session basics, so it
+  cannot be turned off — but it also registers its own Hyprland login entry.
+  `hosts/common/nixos/omarchy-sole-hyprland.nix` forces the module off and
+  restates the parts Nixarchy needs, so only Omarchy's session is offered. Read
+  that file before touching anything Hyprland-adjacent: there is no option to
+  exclude one session, and the two obvious workarounds both fail (a filtered
+  `mkForce` on `sessionPackages` reads the value it defines; a session-less
+  repackage is rejected by the option's type, which demands
+  `providedSessions != [ ]`).
+- **The Omarchy theme is the source of truth for colours** (#1562).
+  `omarchy theme set X` retints Omarchy's own 24 files at once and a
+  `theme-set.d` hook writes X into `nixarchy-theme.nix` at the flake root;
+  `modules/desktop/stylix-theme.nix` maps that theme's `colors.toml` onto base16
+  and feeds Stylix. Everything Omarchy cannot reach at runtime — Plymouth, GRUB,
+  the console, GTK, Qt, fonts, the home-manager targets — follows **at the next
+  rebuild**, not instantly. Two consequences: switching a theme leaves the tree
+  dirty and `nhs` refuses a dirty tree (same as `nixarchy-apply` with
+  `apps.nix`), and p510 follows the same palette because `inputs.nixarchy` is
+  flake-wide. Reach the package through `inputs.nixarchy`, never
+  `config.programs.nixarchy.package` — nixarchy consumes Stylix, so that closes
+  the module fixpoint and evaluation dies with infinite recursion.
+- **p510 carries the Omarchy session too** (#1562), with `displayManager = false`
+  (the module turns SDDM on by default and would swap out the GDM serving RDP),
+  `defaultSession = "gnome"` (adding Omarchy flipped autologin from gnome to
+  omarchy on a headless box) and `preinstalls = false` (4 GiB of desktop
+  software, `cef-binary` alone 1.9 GiB). It is a selectable entry only —
+  `gnome-remote-desktop` serves GNOME, not Hyprland.
 - DEX5550 is offline; Samsung and HP are decommissioned.
 - MicroVMs are per-host files (`hosts/p510/microvm.nix`), not a shared module.
