@@ -1,12 +1,12 @@
 # Omarchy, vendored for NixOS.
 #
-# Same three settings as razer, and here for the same reasons -- this machine
-# and that one are shaped alike: greetd through the DankMaterialShell greeter,
-# niri and Hyprland both enabled, stylix owning the theme.
+# Same settings as razer, and here for the same reasons -- the two machines are
+# shaped alike: SDDM greeting, Omarchy the only Hyprland session, and the
+# Omarchy theme driving stylix (modules/desktop/stylix-theme.nix).
 #
-# Additive. The Omarchy session joins the existing entries and none of them
-# change: greetd keeps greeting, stylix keeps the boot splash, and Hyprland
-# sessions keep running the Hyprland this configuration chose.
+# This host offers exactly two sessions, Omarchy and GNOME. The greetd/
+# DankMaterialShell greeter, niri and the DMS sessions this comment used to
+# describe are all gone.
 { inputs
 , lib
 , pkgs
@@ -41,9 +41,9 @@
   # programs.hyprland.portalPackage at mkDefault priority, so matching it would
   # tie rather than yield, hence the force.
   #
-  # The matching .package force moved to omarchy-sole-hyprland.nix, which sets
-  # it to a session-less repackage so this Hyprland stops showing up as its own
-  # login entry next to Omarchy's.
+  # There is no matching .package force any more: omarchy-sole-hyprland.nix
+  # turns programs.hyprland off outright and restates what Nixarchy needs from
+  # it, which is what stops a second Hyprland entry appearing at login.
   programs.hyprland.portalPackage = lib.mkForce pkgs.xdg-desktop-portal-hyprland;
 
   # Omarchy's SDDM greeter is the login manager. It replaced the
