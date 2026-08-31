@@ -1,5 +1,6 @@
 { config
 , lib
+, pkgs
 , ...
 }:
 # Sunshine: stream this machine's Wayland session to a Moonlight client.
@@ -29,6 +30,42 @@
 let
   inherit (lib) mkIf mkEnableOption mkOption types;
   cfg = config.features.sunshine;
+
+  # Wake the output before a stream starts.
+  #
+  # Sunshine captures whatever the compositor puts on the monitor, so a
+  # DPMS-off output streams as solid black -- with a completely clean log:
+  # CLIENT CONNECTED, capture on the right monitor, encoder running, no
+  # errors, nothing to suggest the picture is missing rather than dark.
+  #
+  # hyprctl comes from /run/current-system/sw/bin deliberately, not from
+  # pkgs.hyprland. omarchy-sole-hyprland.nix puts the Hyprland that nixarchy
+  # pins into the system profile, and that is the build actually running the
+  # session; nixpkgs carries a different version, and the Lua dispatcher API
+  # this calls is version-sensitive.
+  #
+  # The signature is resolved from the runtime directory rather than trusted
+  # from the environment: this runs from a systemd user service that need not
+  # have inherited HYPRLAND_INSTANCE_SIGNATURE from the session.
+  #
+  # It always exits 0. Sunshine aborts the whole stream if a prep command
+  # fails, so a host with no Hyprland running, or a renamed dispatcher after
+  # an upgrade, must degrade to "no wake" and not to "no streaming".
+  wakeDisplayScript = pkgs.writeShellScript "sunshine-wake-display" ''
+    set -u
+    runtime="''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+    sig="''${HYPRLAND_INSTANCE_SIGNATURE:-}"
+    if [ -z "$sig" ]; then
+      newest=$(ls -td "$runtime"/hypr/*/ 2>/dev/null | head -1) || true
+      [ -n "$newest" ] && sig=$(basename "$newest")
+    fi
+    if [ -n "$sig" ]; then
+      HYPRLAND_INSTANCE_SIGNATURE="$sig" XDG_RUNTIME_DIR="$runtime" \
+        /run/current-system/sw/bin/hyprctl dispatch \
+        'hl.dsp.dpms({ action = "enable" })' >/dev/null 2>&1 || true
+    fi
+    exit 0
+  '';
 in
 {
   options.features.sunshine = {
@@ -60,6 +97,29 @@ in
         This is a real privilege on a real binary, and it is the reason this
         option is spelled out instead of hardcoded: a host that would rather
         take the portal route can turn it off in one line.
+      '';
+    };
+
+    wakeDisplay = mkOption {
+      type = types.bool;
+      default = false;
+      description = ''
+        Turn the display back on when a client connects.
+
+        Sunshine streams what the compositor renders to the monitor, so a
+        screen that has been switched off produces a black stream and a
+        completely clean log -- CLIENT CONNECTED, capture on the correct
+        monitor, encoder running, no errors. Nothing distinguishes "the
+        picture is dark" from "the picture is missing", which makes it an
+        expensive half hour to diagnose.
+
+        Sunshine cannot wake an output on its own, and it will not be woken by
+        the client's input either, so without this every session that starts
+        while the screen is off is a black one.
+
+        Implemented as global_prep_cmd, not per-application, so it covers
+        every entry including any still defined in the web UI's own apps
+        list. Hyprland only.
       '';
     };
 
@@ -102,12 +162,27 @@ in
       enable = true;
       inherit (cfg) openFirewall capSysAdmin;
 
-      # Comma-separated, no spaces, as the option's own parser expects; an
-      # entry it cannot read is dropped with "Invalid 'csrf_allowed_origins'
-      # entry rejected" and the origin stays blocked.
-      settings = lib.mkIf (cfg.webOrigins != [ ]) {
-        csrf_allowed_origins = lib.concatStringsSep "," cfg.webOrigins;
-      };
+      settings =
+        # Comma-separated, no spaces, as the option's own parser expects; an
+        # entry it cannot read is dropped with "Invalid 'csrf_allowed_origins'
+        # entry rejected" and the origin stays blocked.
+        lib.optionalAttrs (cfg.webOrigins != [ ])
+          {
+            csrf_allowed_origins = lib.concatStringsSep "," cfg.webOrigins;
+          }
+        # A JSON array of do/undo pairs, which is why this is built with
+        # toJSON rather than written out by hand. No undo: the screen is left
+        # on after a session, because a host that someone also sits at should
+        # not have its monitor switched off by a remote disconnect.
+        // lib.optionalAttrs cfg.wakeDisplay {
+          global_prep_cmd = builtins.toJSON [
+            {
+              "do" = "${wakeDisplayScript}";
+              undo = "";
+              elevated = false;
+            }
+          ];
+        };
 
       # Start with the session rather than waiting for someone to run it.
       # Pointless without autologin on a headless-reboot host; harmless with.

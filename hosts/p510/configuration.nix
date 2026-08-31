@@ -362,6 +362,11 @@ in
       # or the web UI cannot even set its own password. The hostname forms are
       # here too because avahi publishes p510.local and ~/.ssh/config reaches
       # this box by IP.
+      # The monitor on this desk gets switched off, and Sunshine streams
+      # exactly what the compositor shows -- so without this, connecting to a
+      # dark screen gives a black picture and a log with nothing wrong in it.
+      wakeDisplay = true;
+
       webOrigins = [
         "https://192.168.1.75:47990"
         "https://p510:47990"
