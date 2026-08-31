@@ -333,7 +333,6 @@ in
   # stays in the session menu either way.
   services.displayManager.defaultSession = "omarchy";
 
-  desktop.hyprland.enable = true;
 
   # Terminals follow whichever shell owns the session: DMS in the DMS sessions,
   # omarchy in the Omarchy one. See modules/desktop/theme-owner.nix.

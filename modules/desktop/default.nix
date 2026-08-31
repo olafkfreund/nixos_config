@@ -3,7 +3,6 @@
     ./display-manager.nix
     ./gnome-remote-desktop.nix
     ./cosmic-remote-desktop.nix
-    ./hyprland.nix
     ./theme-owner.nix
     ./ddcutil.nix
   ];

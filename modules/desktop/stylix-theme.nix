@@ -1,10 +1,70 @@
 { pkgs
 , lib
 , config
+, inputs
 , ...
 }:
 let
   vars = import ../../hosts/common/shared-variables.nix;
+
+  # The Omarchy theme is the source of truth for the palette.
+  #
+  # `omarchy theme set X` retints the 24 files Omarchy owns immediately and its
+  # hook rewrites nixarchy-theme.nix at the flake root; this reads that name,
+  # loads the theme's colors.toml out of the nixarchy package and hands Stylix
+  # the same colours. So the next rebuild carries the Omarchy theme into
+  # everything Omarchy cannot reach at runtime: Plymouth, GRUB, the console,
+  # GTK, Qt, fonts, and the home-manager targets.
+  #
+  # The flake-root file exists because a flake cannot read outside its own
+  # tree -- the same reason nixarchy-apply copies apps.nix in as
+  # nixarchy-apps.nix.
+  # Reached through `inputs`, NOT through config.programs.nixarchy.package:
+  # nixarchy consumes stylix, so reading its config from the module that
+  # defines stylix.base16Scheme closes the module fixpoint and evaluation dies
+  # with "infinite recursion". The flake input has no such loop.
+  omarchyThemeName = import ../../nixarchy-theme.nix;
+  omarchyPkg = inputs.nixarchy.packages.${pkgs.stdenv.hostPlatform.system}.omarchy or null;
+  omarchyThemeDir = "${omarchyPkg}/share/omarchy/themes/${omarchyThemeName}";
+  omarchyColorsPath = "${omarchyThemeDir}/colors.toml";
+
+  # Omarchy's colors.toml is a named-role palette, not base16, but its roles
+  # cover all sixteen slots one-for-one. Three stock themes (last-horizon,
+  # solitude, white) ship no `orange` or `brown`, hence the two fallbacks:
+  # base09 and base0F are the "constants" and "deprecated" slots, so folding
+  # them onto yellow and muted keeps those themes readable rather than failing
+  # evaluation.
+  omarchyToBase16 = c: {
+    base00 = c.background; # default background
+    base01 = c.lighter_background; # lighter background, status bars
+    base02 = c.selection; # selection background
+    base03 = c.muted; # comments, invisibles
+    base04 = c.dark_foreground; # dark foreground, status bars
+    base05 = c.foreground; # default foreground
+    base06 = c.light_foreground; # light foreground
+    base07 = c.bright_foreground; # light background
+    base08 = c.red; # variables, diff deleted
+    base09 = c.orange or c.yellow; # integers, constants
+    base0A = c.yellow; # classes, search background
+    base0B = c.green; # strings, diff inserted
+    base0C = c.cyan; # support, escape chars
+    base0D = c.blue; # functions, headings
+    base0E = c.magenta; # keywords, diff changed
+    base0F = c.brown or c.muted; # deprecated, closing tags
+  };
+
+  # Stylix wants "rrggbb" with no leading '#'; Omarchy writes "#rrggbb".
+  stripHash = v: lib.removePrefix "#" v;
+
+  # p510 has no nixarchy at all and imports this same module, and a theme name
+  # that is not in the package (a user theme under ~/.config/omarchy/themes,
+  # which the flake cannot see) would be a dead path. Both fall back to the
+  # checked-in yaml rather than failing the build.
+  useOmarchyTheme = omarchyPkg != null && builtins.pathExists omarchyColorsPath;
+
+  omarchyScheme =
+    lib.mapAttrs (_: stripHash)
+      (omarchyToBase16 (builtins.fromTOML (builtins.readFile omarchyColorsPath)));
 in
 {
   config = {
@@ -13,7 +73,7 @@ in
       enableReleaseChecks = false;
       polarity = "dark";
       autoEnable = true;
-      base16Scheme = vars.baseTheme.schemeFile;
+      base16Scheme = if useOmarchyTheme then omarchyScheme else vars.baseTheme.schemeFile;
       image = vars.baseTheme.wallpaper;
 
       fonts = {
