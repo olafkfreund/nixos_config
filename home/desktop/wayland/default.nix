@@ -4,6 +4,5 @@
   #
   # labwc, mango and the Noctalia shell were removed 2026-08-21 — unused. niri
   imports = [
-    ./hyprland.nix
   ];
 }

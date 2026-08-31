@@ -26,6 +26,8 @@
     ../../common/nixos/omarchy-sddm.nix
     ../../common/nixos/omarchy-workspaces.nix
     ../../common/nixos/omarchy-gog.nix
+    ../../common/nixos/omarchy-sole-hyprland.nix
+    ../../common/nixos/omarchy-stylix-theme.nix
   ];
 
   programs.nixarchy.enable = true;
@@ -36,9 +38,12 @@
   programs.nixarchy.user = "olafkfreund";
 
   # nixarchy pins its own Hyprland and does not defer -- nixpkgs defines
-  # programs.hyprland.package at mkDefault priority, so matching it would tie
-  # rather than yield. desktop.hyprland already sets it here, so keep ours.
-  programs.hyprland.package = lib.mkForce pkgs.hyprland;
+  # programs.hyprland.portalPackage at mkDefault priority, so matching it would
+  # tie rather than yield, hence the force.
+  #
+  # The matching .package force moved to omarchy-sole-hyprland.nix, which sets
+  # it to a session-less repackage so this Hyprland stops showing up as its own
+  # login entry next to Omarchy's.
   programs.hyprland.portalPackage = lib.mkForce pkgs.xdg-desktop-portal-hyprland;
 
   # Omarchy's SDDM greeter is the login manager. It replaced the

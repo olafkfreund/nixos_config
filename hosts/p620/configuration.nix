@@ -398,7 +398,6 @@ in
   # stays in the session menu either way.
   services.displayManager.defaultSession = "omarchy";
 
-  desktop.hyprland.enable = true;
 
   # k3d cluster — Phase 2 of docs/plans/2026-08-20-k3d-p510-to-p620-migration.md.
   # Migrated off p510, whose 490W PSU cannot power its two GPUs (three hard
