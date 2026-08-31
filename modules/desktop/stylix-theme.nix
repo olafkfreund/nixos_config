@@ -100,6 +100,19 @@ in
           enable = true;
           platform = lib.mkForce "qtct";
         };
+
+        # Off because it costs a cache miss for no visible gain. The target's
+        # only effect is a postFixup that copies one base16 .xml into
+        # $out/share/gtksourceview-4/styles/stylix.xml -- which changes
+        # gtksourceview4's derivation hash, so it can no longer substitute from
+        # cache.nixos.org and every host compiles it locally. That build then
+        # fails: its test-buffer test aborts with SIGABRT under the sandbox
+        # (22 of 23 pass), taking virt-manager and system-path down with it.
+        #
+        # What is given up is base16 syntax-highlighting colours inside the few
+        # GtkSourceView apps here (virt-manager's XML editor, gedit). The app
+        # chrome around them is still themed through the gtk target above.
+        gtksourceview.enable = false;
       };
     };
   };
