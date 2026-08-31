@@ -1,9 +1,9 @@
 # Omarchy, vendored for NixOS.
 #
-# Added to razer rather than p620 so the desktop this machine runs every day is
-# not the one being experimented on. Everything here is additive: the Omarchy
-# session appears alongside GNOME, niri, niri-dms, Hyprland, hyprland-dms and
-# hyprland-uwsm, and none of those change.
+# Added to razer first, so the desktop p620 runs every day was not the one being
+# experimented on. Both hosts carry it now and offer exactly two sessions,
+# Omarchy and GNOME -- the niri, niri-dms, hyprland-dms and hyprland-uwsm
+# entries this comment used to list are all gone.
 #
 # The three settings below are what `nix run github:olafkfreund/nixarchy#doctor`
 # printed for this machine. Each is here for a reason it named:
@@ -41,9 +41,9 @@
   # programs.hyprland.portalPackage at mkDefault priority, so matching it would
   # tie rather than yield, hence the force.
   #
-  # The matching .package force moved to omarchy-sole-hyprland.nix, which sets
-  # it to a session-less repackage so this Hyprland stops showing up as its own
-  # login entry next to Omarchy's.
+  # There is no matching .package force any more: omarchy-sole-hyprland.nix
+  # turns programs.hyprland off outright and restates what Nixarchy needs from
+  # it, which is what stops a second Hyprland entry appearing at login.
   programs.hyprland.portalPackage = lib.mkForce pkgs.xdg-desktop-portal-hyprland;
 
   # Omarchy's SDDM greeter is the login manager. It replaced the

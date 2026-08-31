@@ -1,13 +1,18 @@
 { config, lib, pkgs, ... }:
 # Session-scoped theme ownership.
 #
-# Three systems want to colour the same applications and disagree about who
-# owns the config FILE, not about the colours:
+# Two systems want to colour the same applications and disagree about who owns
+# the config FILE, not about the colours:
 #
 #   stylix   build time  — generates the whole app config into the store
-#   DMS      runtime     — matugen writes ~/.config/<app>/dank-theme.*
 #   omarchy  runtime     — omarchy-theme-set writes
 #                          ~/.local/state/omarchy/current/theme/<app>.*
+#
+# A third, DMS (matugen writing ~/.config/<app>/dank-theme.*), was the reason
+# this module has an owner concept at all. DMS went away with niri, so omarchy
+# is now the only runtime owner and `theme-owner` always resolves to it. The
+# dms arm below is kept rather than deleted because it is what makes the
+# indirection general: a second runtime owner is a table entry, not a rewrite.
 #
 # Both runtime systems assume the app config is a hand-editable file with an
 # include line. Stylix's model is the opposite, which is why omarchy has been
@@ -226,11 +231,6 @@ in
 
   config = mkIf cfg.enable {
     environment.systemPackages = [ themeOwner ];
-
-    # DMS only installs matugen, and only generates its theme files, when this
-    # is set. Without it the DMS side of every symlink is permanently missing
-    # and the fallback is all you would ever see.
-    programs.dms-shell.enableDynamicTheming = true;
 
     # graphical-session.target is reached by both the niri/Hyprland DMS
     # launchers and by uwsm in the Omarchy session, so one unit covers every
