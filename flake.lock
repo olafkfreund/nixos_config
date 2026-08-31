@@ -1217,11 +1217,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1788166277,
-        "narHash": "sha256-6YD+tFQkPyiA4hghTroA2P8PjDQhjFujQigo98+isvk=",
+        "lastModified": 1788173967,
+        "narHash": "sha256-167IfLWuPygwEG9RJAQuP/X/qoC9GGKEEOjsZucV0NU=",
         "owner": "feschber",
         "repo": "lan-mouse",
-        "rev": "b316af6a8f8d273c7a1a6c5fd682022807d14d64",
+        "rev": "09889cd83923a1715edce4d9c02c7ae1f4142b90",
         "type": "github"
       },
       "original": {
