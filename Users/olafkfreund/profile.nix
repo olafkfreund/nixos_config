@@ -203,6 +203,11 @@ in
     # importable for building Gemini-powered AI agents. See
     # pkgs/google-antigravity-py/ for the platform-wheel install.
     pkgs.customPkgs.google-antigravity-py
+    # Official Proton VPN CLI (binary: `protonvpn`). Drives NetworkManager
+    # directly; no daemon or NM plugin of its own. Here for the OmaProton
+    # VPN bar widget, whose in-panel installer is a pacman call the Nixarchy
+    # shim refuses -- the CLI has to come from the flake instead.
+    pkgs.proton-vpn-cli
   ];
 
   # Firefox (identical across interactive hosts)
