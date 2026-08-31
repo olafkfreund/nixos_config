@@ -419,16 +419,61 @@ ELEV=(--elevation-strategy passwordless)
 # leaving the user to run a separate `nh os boot` manually. After the user
 # reboots once, the inhibiting change is "done" and future `switch` calls
 # work normally — this is a one-time pain per critical change.
+# The second reason a switch cannot finish: the nvidia driver version changed.
+#
+# This one does NOT trip the pre-switch inhibitor. Activation runs to the end
+# and then the GPU units fail, because the new userspace (nvidia-smi,
+# persistenced, the CDI generator) is talking to the kernel module still in
+# memory, which is the old version. The display stack holds that module, so
+# activation cannot reload it -- only a reboot can. Seen on p510 2026-08-31,
+# 595.91.07 loaded against a generation wanting 595.99.02:
+#
+#   warning: the following units failed: nvidia-container-toolkit-cdi-generator.service,
+#     nvidia-persistenced.service, nvidia-power-limit.service
+#
+# nvidia-power-limit exits 18 there, which is nvidia-smi's NVML mismatch code.
+#
+# Left unhandled this reads as a broken deploy and the caller rolls back --
+# which restores matching userspace, so afterwards every one of those units is
+# `active` and the host looks perfectly healthy. That is a genuinely misleading
+# postmortem, and re-running `switch` reproduces it exactly.
+#
+# ALL of the failed units must be nvidia ones. A real failure that happens to
+# include a GPU unit has to stay a failure, so one non-nvidia name in the list
+# disqualifies the whole fallback.
+only_nvidia_units_failed() {
+  local list non_nvidia
+  # Last occurrence: a rollback appends its own line, and the switch attempt's
+  # list is the one being classified.
+  list=$(sed -n 's/.*the following units failed: *//p' "$1" | tail -1)
+  [ -n "$list" ] || return 1
+  non_nvidia=$(printf '%s\n' "${list//,/$'\n'}" \
+    | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' \
+    | grep -v '^$' \
+    | grep -cv '^nvidia-' || true)
+  [ "$non_nvidia" -eq 0 ]
+}
+
 nh_switch_or_boot() {
   # Args: nh os switch arguments (e.g. --hostname razer [--target-host razer] .)
-  local out rc
+  local out rc reason="" note=""
   out=$(mktemp)
   set +e
   nh os switch "${ELEV[@]}" "$@" 2>&1 | tee "$out"
   rc=${PIPESTATUS[0]}
   set -e
-  if [ "$rc" -ne 0 ] && grep -qE "switchInhibitors|Pre-switch checks failed" "$out"; then
-    warn "switch refused: a critical-component change requires a reboot."
+
+  if [ "$rc" -ne 0 ]; then
+    if grep -qE "switchInhibitors|Pre-switch checks failed" "$out"; then
+      reason="a critical-component change requires a reboot"
+    elif only_nvidia_units_failed "$out"; then
+      reason="the nvidia driver version changed and the old kernel module is still loaded"
+      note="Until then anything using the GPU stays degraded: the driver userspace and the loaded kernel module are different versions."
+    fi
+  fi
+
+  if [ -n "$reason" ]; then
+    warn "switch refused: ${reason}."
     log "falling back to: nh os boot $*"
     if ! nh os boot "${ELEV[@]}" "$@"; then
       rm -f "$out"
@@ -438,6 +483,7 @@ nh_switch_or_boot() {
     warn "============================================================"
     warn "REBOOT REQUIRED on ${HOST} to complete this deployment."
     warn "Run:  ssh ${HOST} 'sudo systemctl reboot'   (or local reboot)"
+    if [ -n "$note" ]; then warn "$note"; fi
     warn "============================================================"
     return 0
   fi
