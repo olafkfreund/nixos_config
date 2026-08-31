@@ -17,10 +17,26 @@
     #   peak = (limit + 1) x 150 MiB initrd + ~28 MiB kernels + ~2 MiB stubs
     #   limit = 2  ->  3 x 150 + 30 = ~480 MiB, fits 511 MiB with ~30 MiB spare
     #
-    # Two keeps the current generation plus one fallback. Raising it needs a
-    # BIGGER ESP or a smaller initrd, not a bigger number — that lesson has now
-    # cost two failed deploys.
-    configurationLimit = 2;
+    #   limit = 1  ->  2 x 150 + 30 = ~330 MiB, fits 511 MiB with ~180 MiB spare
+    #
+    # One, because two was never comfortable -- it was merely the largest value
+    # that fit, and ~30 MiB of headroom is not headroom. In practice every
+    # deploy since has stalled on nhs's ESP guard, which wants 200 MiB free and
+    # found 197, and each one had to be unblocked by hand-deleting a
+    # generation. At one, the steady state is ~165 MiB used and ~346 MiB free,
+    # so the guard passes on its own and stops being a recurring chore.
+    #
+    # What this gives up is the second entry in the BOOT MENU. It does not
+    # touch rollback: generations still accumulate in /nix/var/nix/profiles,
+    # and `nixos-rebuild --rollback switch` -- which is what actually recovered
+    # this machine on 2026-08-31 -- reads that profile, not the ESP. The boot
+    # menu only matters when the machine will not boot at all, and that case
+    # wants installer media regardless.
+    #
+    # Raising it back needs a BIGGER ESP or a smaller initrd, not a bigger
+    # number. The initrd is 137-149 MiB because of the NVIDIA firmware; dropping
+    # that takes it to ~46 MiB but costs prime.sync.
+    configurationLimit = 1;
     editor = false; # Disable bootloader editing for security
   };
   boot.loader.efi.canTouchEfiVariables = true;
