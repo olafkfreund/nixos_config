@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs, inputs, ... }:
 # Nixarchy is the only Hyprland session offered at login.
 #
 # programs.hyprland is enabled by the nixarchy module itself, not by us, so
@@ -20,6 +20,10 @@
 # Nixarchy's own session is untouched: it runs the Hyprland its flake pins, a
 # different store path from pkgs.hyprland, launched with --config against
 # Omarchy's own file.
+let
+  # The exact build nixarchy's session script invokes.
+  hyprland = inputs.nixarchy.inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+in
 {
   programs.hyprland.enable = lib.mkForce false;
 
@@ -50,7 +54,33 @@
   services.graphical-desktop.enable = true;
   services.xserver.desktopManager.runXdgAutostartIfNone = lib.mkDefault true;
 
-  # cap_sys_nice for the compositor, and /share/hypr on the path for anything
-  # looking up hyprland data files.
+  # The compositor binaries. programs.hyprland puts these in the system profile
+  # via `environment.systemPackages = [ cfg.package ]`, and forcing the module
+  # off without restating that line is what broke login on razer (#1566):
+  # Omarchy's session script calls start-hyprland by absolute store path, but
+  # start-hyprland then execs `Hyprland` BY NAME, so with nothing on PATH it
+  # failed with
+  #
+  #   ERR from start-hyprland ]: failed to obtain hyprland version string (bad json)
+  #   ERR from start-hyprland ]: fork(): execvp failed: No such file or directory
+  #
+  # and the unit died with result 'protocol'. hyprctl went missing with it,
+  # which breaks every hyprctl-based omarchy command too. The SDDM greeter kept
+  # working throughout because it invokes Hyprland by absolute path.
+  #
+  # This must be the Hyprland NIXARCHY pins, not pkgs.hyprland: they are
+  # different versions (0.56.0 vs 0.56.2) and it is the nixarchy one the
+  # session script runs, so a mismatched start-hyprland and compositor is
+  # exactly what we would be reintroducing.
+  environment.systemPackages = [ hyprland ];
   environment.pathsToLink = [ "/share/hypr" ];
+
+  # cap_sys_nice, as programs.hyprland sets it. /run/wrappers/bin precedes the
+  # system profile on PATH, so this is the Hyprland start-hyprland finds.
+  security.wrappers.Hyprland = {
+    owner = "root";
+    group = "root";
+    capabilities = "cap_sys_nice+ep";
+    source = lib.getExe hyprland;
+  };
 }
