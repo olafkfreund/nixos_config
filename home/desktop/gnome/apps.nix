@@ -54,7 +54,6 @@ in
         eog # Eye of GNOME (image viewer)
         totem # GNOME Videos (video player)
         gnome-music # Music player
-        gnome-photos # Photo manager
         gnome-sound-recorder # Audio recording
         easyeffects # Audio effects and noise canceling for Teams/meeting tools
         showtime # Media center application

@@ -23,7 +23,6 @@
     epiphany
     geary
     gnome-music
-    gnome-photos
     yelp
     cheese
   ];
