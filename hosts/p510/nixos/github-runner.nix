@@ -115,6 +115,25 @@ in
       # successfully before failing to symlink its own _diag into it. So the
       # runner exists in the repository's settings and has never once run.
 
+      # Re-register over a runner that already has this name. Without it the
+      # very first real start fails, because the name was already taken by a
+      # registration left behind while this module was being written:
+      #
+      #   √ Connected to GitHub
+      #   A runner exists with the same name p510-nixarchy.
+      #
+      # Authentication succeeds and registration is refused, so the failure
+      # reads like a token problem and is not one. The module's own note about
+      # the workDir dead end says that runner "exists in the repository's
+      # settings and has never once run" -- this is that runner, still there.
+      #
+      # It is also the steady-state need, not just a one-off cleanup: a
+      # non-ephemeral runner keeps its GitHub-side registration across
+      # rebuilds, and the configure step re-runs whenever the unit's config
+      # changes. Deleting the stale one by hand fixes today; this fixes every
+      # time after it.
+      replace = true;
+
       # Not ephemeral. An ephemeral runner unregisters after every job, which
       # is the right shape for untrusted PRs and the wrong one here: this runs
       # nightly against a repository we own, and re-registering costs a token
