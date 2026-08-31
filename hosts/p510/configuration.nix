@@ -26,6 +26,7 @@ in
       ../common/nixos/envvar.nix
       ../common/nixos/host-class.nix
       ../common/nixos/inotify-limits.nix
+      ./nixos/github-runner.nix # Self-hosted CI for nixarchy's VM checks
       ./nixos/cpu.nix
       ./nixos/memory.nix
       ./nixos/resilience.nix # Watchdog + sshd limits + oomd (post-2026-07-08 freeze)
@@ -917,4 +918,8 @@ in
     # only; never touches Cloudflare's edge.
     keepalive.enable = true;
   };
+
+  # nixarchy's install and ISO checks need KVM, an hour, and 16 GB of
+  # build directory. See hosts/p510/nixos/github-runner.nix.
+  services.nixarchy-runner.enable = true;
 }
