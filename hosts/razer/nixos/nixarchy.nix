@@ -52,6 +52,12 @@
   # selectable alongside the Omarchy session.
   programs.nixarchy.displayManager = true;
 
+  # Boot to Omarchy's splash, not stylix's. The option forces
+  # boot.plymouth.theme and themePackages together on purpose: forcing the
+  # name alone leaves NixOS asserting a theme that is not in the package list,
+  # which fails the build.
+  programs.nixarchy.bootSplash = "force";
+
   # ~/.config/hypr/hyprland.lua is managed by home-manager here, so the seed
   # keeps it and Omarchy's own config is never installed. That is what the
   # Omarchy session entry is for: it runs Hyprland with --config against
