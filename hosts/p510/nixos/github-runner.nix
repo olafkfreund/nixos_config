@@ -11,17 +11,39 @@
 # wall clock and roughly 16 GB of build directory. A GitHub-hosted runner has
 # 14 GB of disk and no nested virtualisation worth the name.
 #
-# p510 has 40 cores, 94 GB of RAM, /dev/kvm, and 840 GB free on /mnt/img_pool.
+# p510 has 40 cores, 94 GB of RAM, /dev/kvm, and 825 GB free on /home.
 #
-# The build directory is the part that is easy to get wrong. Nix builds in
-# TMPDIR, which on this machine is /tmp on the root filesystem with 55 GB free
-# and everything else competing for it. A VM test that runs out of room there
-# does not fail cleanly -- qemu takes an I/O error mid-install and the test
-# hangs until something times out, which reads as flakiness rather than as a
-# full disk. So the daemon is pointed at the pool.
+# The build directory is the part that is easy to get wrong, and it is wrong in
+# two different ways here.
+#
+# Nix builds in TMPDIR, which on this machine is /tmp on the root filesystem
+# with 47 GB free and everything else competing for it. A VM test that runs out
+# of room there does not fail cleanly -- qemu takes an I/O error mid-install and
+# the test hangs until something times out, which reads as flakiness rather than
+# as a full disk. So the daemon has to be pointed somewhere else.
+#
+# Somewhere else is /home (/dev/sdd1, WD10EZEX, 7200 rpm CMR), NOT
+# /mnt/img_pool. The pool has the most free space and is the worst possible
+# target: /dev/sdb1 is an ST1000LM035, a drive-managed SMR disk that collapses
+# to single-digit MB/s once its cache band is full, and a 16 GB VM install is
+# exactly the sustained-write pattern that fills it. Pointing builds there
+# would have reproduced the hang it was meant to prevent, with the disk as the
+# cause instead of the free-space figure. Measured, same host, same day:
+#
+#                    sequential 512M    4M writes, O_DSYNC
+#   /home            125 MB/s           59.4 MB/s
+#   /mnt/img_pool    (SMR)              ~9.5 MB/s previously measured
+#
+# /home has its own history of filling up -- it is where per-commit container
+# images have run away before -- so this shares a filesystem with something that
+# needs watching. 16 GB against 825 GB free is not the thing that will fill it.
+#
+# /nix/store is on the root disk either way, so build output is copied across
+# filesystems rather than renamed at the end. That cost is identical for any
+# TMPDIR that is not on /, and is not a reason to prefer one of these.
 let
   cfg = config.services.nixarchy-runner;
-  pool = "/mnt/img_pool";
+  buildDir = "/home/nix-build";
 in
 {
   options.services.nixarchy-runner = {
@@ -61,12 +83,12 @@ in
     # Where nix builds. Root-owned and 0755: the daemon writes here as root,
     # and nix refuses a world-writable build directory outright.
     systemd.tmpfiles.rules = [
-      "d ${pool}/nix-build 0755 root root -"
+      "d ${buildDir} 0755 root root -"
     ];
 
     # Where nix builds. See the note at the top: this is the setting that
     # decides whether an ISO test finishes or wedges.
-    systemd.services.nix-daemon.environment.TMPDIR = "${pool}/nix-build";
+    systemd.services.nix-daemon.environment.TMPDIR = buildDir;
 
     services.github-runners.nixarchy = {
       inherit (cfg) url tokenFile;
@@ -82,10 +104,9 @@ in
         "big"
       ];
 
-      # No workDir. It is tempting to put this on the pool too and it is the
-      # wrong lever: the work directory holds a git checkout, and the sixteen
+      # No workDir. It is tempting to move this too and it is the wrong lever: the work directory holds a git checkout, and the sixteen
       # gigabytes belong to the nix build, which happens in the daemon's
-      # TMPDIR -- already pointed at the pool above. Left unset, the module
+      # TMPDIR -- already pointed at /home/nix-build above. Left unset, the module
       # uses its StateDirectory, which systemd creates with the right
       # ownership for the dynamic user.
       #
