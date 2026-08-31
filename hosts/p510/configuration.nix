@@ -355,7 +355,19 @@ in
     #
     # Both stay on: RDP for GNOME, Sunshine for Omarchy, and which one answers
     # depends on the session picked at the greeter.
-    sunshine.enable = true;
+    sunshine = {
+      enable = true;
+
+      # Administered from p620 over the LAN, so its address has to be trusted
+      # or the web UI cannot even set its own password. The hostname forms are
+      # here too because avahi publishes p510.local and ~/.ssh/config reaches
+      # this box by IP.
+      webOrigins = [
+        "https://192.168.1.75:47990"
+        "https://p510:47990"
+        "https://p510.local:47990"
+      ];
+    };
   };
 
   # Enable encrypted API keys

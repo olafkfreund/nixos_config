@@ -62,12 +62,52 @@ in
         take the portal route can turn it off in one line.
       '';
     };
+
+    webOrigins = mkOption {
+      type = types.listOf types.str;
+      default = [ ];
+      example = [ "https://192.168.1.75:47990" "https://myhost:47990" ];
+      description = ''
+        Origins allowed to use Sunshine's web UI, as scheme://host:port.
+
+        Sunshine trusts only localhost, 127.0.0.1 and [::1] by default and
+        refuses every POST from anywhere else with
+
+          CSRF Protection Error
+          The request was blocked by CSRF protection.
+
+        That includes the request that creates the first username and
+        password, so reaching the UI across the LAN is not merely restricted
+        -- the page loads and nothing on it can be submitted. Every host that
+        is administered from another machine needs its own address here.
+
+        Include the port: the browser sends it in the Origin header, so
+        "https://host" does not match "https://host:47990".
+
+        Setting this has a side effect worth knowing, and it comes from
+        upstream's module rather than from here: Sunshine is only handed a
+        config file when some setting differs from the default, and that file
+        lives in the Nix store, read-only. So as soon as this list is
+        non-empty the web UI's Configuration tab can no longer save --
+        settings belong in this repository from then on. Credentials and
+        client pairings are not affected; those live in
+        ~/.config/sunshine/sunshine_state.json, which stays writable.
+      '';
+    };
   };
+
 
   config = mkIf cfg.enable {
     services.sunshine = {
       enable = true;
       inherit (cfg) openFirewall capSysAdmin;
+
+      # Comma-separated, no spaces, as the option's own parser expects; an
+      # entry it cannot read is dropped with "Invalid 'csrf_allowed_origins'
+      # entry rejected" and the origin stays blocked.
+      settings = lib.mkIf (cfg.webOrigins != [ ]) {
+        csrf_allowed_origins = lib.concatStringsSep "," cfg.webOrigins;
+      };
 
       # Start with the session rather than waiting for someone to run it.
       # Pointless without autologin on a headless-reboot host; harmless with.
