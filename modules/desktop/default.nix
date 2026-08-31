@@ -5,6 +5,7 @@
     ./cosmic-remote-desktop.nix
     ./theme-owner.nix
     ./ddcutil.nix
+    ./sunshine.nix
   ];
 
   # Make sure the adwaita-qt packages are installed
