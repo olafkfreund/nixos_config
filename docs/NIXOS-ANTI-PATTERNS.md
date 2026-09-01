@@ -1,14 +1,18 @@
 # NixOS Anti-Patterns and Best Practices
 
-> **Important**: These patterns were identified through community feedback, code review in GitHub issues #10, #11, and #12, and official Nix documentation from [nix.dev](https://nix.dev/tutorials/module-system/deep-dive) and the [Nixpkgs Manual](https://nixos.org/manual/nixpkgs/stable/).
+> **Important**: These patterns were identified through community feedback, code review in GitHub issues #10,
+> #11, and #12, and official Nix documentation from [nix.dev](https://nix.dev/tutorials/module-system/deep-dive)
+> and the [Nixpkgs Manual](https://nixos.org/manual/nixpkgs/stable/).
 
-##  Background
+## Background
 
-This document captures critical lessons learned from real community feedback and official Nix documentation about anti-patterns in NixOS configurations. These patterns were found in this repository and fixed based on expert review, helping establish guidelines for future development.
+This document captures critical lessons learned from real community feedback and official Nix documentation
+about anti-patterns in NixOS configurations. These patterns were found in this repository and fixed based on
+expert review, helping establish guidelines for future development.
 
 **Companion Document**: See [PATTERNS.md](./PATTERNS.md) for comprehensive best practices and recommended patterns.
 
-##  **Critical Anti-Patterns to Avoid**
+## **Critical Anti-Patterns to Avoid**
 
 ### **1. Nix Language Anti-Patterns**
 
@@ -47,7 +51,8 @@ in
 buildInputs = with pkgs; [ curl jq ];  # Limited, clear scope
 ```
 
-**Why problematic:** Static analysis tools can't determine variable sources, makes refactoring difficult, and creates ambiguity for newcomers.
+**Why problematic:** Static analysis tools can't determine variable sources, makes refactoring difficult, and
+creates ambiguity for newcomers.
 
 #### **Dangerous `rec` Usage**
 
@@ -111,7 +116,9 @@ config.myList = [ "item1" ];
 config.myList = [ "item2" ];  # Automatically merged to [ "item1" "item2" ]
 ```
 
-**Why problematic:** From [nix.dev](https://nix.dev/tutorials/module-system/deep-dive): "The module system evaluates all modules it receives, and any of them can define a particular option's value" with merging behavior determined by the option's declared type. Using the wrong type prevents proper composition.
+**Why problematic:** From [nix.dev](https://nix.dev/tutorials/module-system/deep-dive): "The module system
+evaluates all modules it receives, and any of them can define a particular option's value" with merging
+behavior determined by the option's declared type. Using the wrong type prevents proper composition.
 
 **Type merging behavior:**
 
@@ -150,7 +157,9 @@ in
 }
 ```
 
-**Official docs explain:** "The `config` argument passed to a module contains lazily-evaluated results from all imported modules, while the module's `config` attribute exposes that specific module's option values to the evaluation system."
+**Official docs explain:** "The `config` argument passed to a module contains lazily-evaluated results from
+all imported modules, while the module's `config` attribute exposes that specific module's option values to
+the evaluation system."
 
 #### **Reading Secrets During Evaluation**
 
@@ -352,7 +361,8 @@ environment.systemPackages = with pkgs; [
 ];
 ```
 
-**Why problematic:** Packages installed via `nix-env` aren't tracked in configuration, persist across rebuilds unexpectedly, and make rollbacks incomplete.
+**Why problematic:** Packages installed via `nix-env` aren't tracked in configuration, persist across rebuilds
+unexpectedly, and make rollbacks incomplete.
 
 #### **Misusing `environment.systemPackages`**
 
@@ -386,7 +396,7 @@ users.users.alice.packages = with pkgs; [
 }
 ```
 
-```
+```text
 #  GOOD - Modular structure
 /etc/nixos/
 ├── configuration.nix        # Main entry point
@@ -567,7 +577,9 @@ stdenv.mkDerivation {
 }
 ```
 
-**Why problematic:** From the [Nixpkgs Manual](https://nixos.org/manual/nixpkgs/stable/): Build helpers should receive dependencies through function arguments for composability. Incorrect categorization breaks cross-compilation and causes unnecessary rebuilds.
+**Why problematic:** From the [Nixpkgs Manual](https://nixos.org/manual/nixpkgs/stable/): Build helpers should
+receive dependencies through function arguments for composability. Incorrect categorization breaks
+cross-compilation and causes unnecessary rebuilds.
 
 #### **Using override Instead of overrideAttrs**
 
@@ -589,7 +601,8 @@ myPackage = originalPackage.overrideAttrs (oldAttrs: {
 });
 ```
 
-**Nixpkgs Manual states:** "overrideAttrs should be preferred in (almost) all cases" because it allows `stdenv.mkDerivation` to process input arguments properly.
+**Nixpkgs Manual states:** "overrideAttrs should be preferred in (almost) all cases" because it allows
+`stdenv.mkDerivation` to process input arguments properly.
 
 #### **Missing Meta Attributes**
 
@@ -624,7 +637,8 @@ stdenv.mkDerivation {
 }
 ```
 
-**Why required:** The manual emphasizes that metadata "enables filtering and discovery" in NixOS's package search and supports automated tooling.
+**Why required:** The manual emphasizes that metadata "enables filtering and discovery" in NixOS's package
+search and supports automated tooling.
 
 #### **Missing Phase Hooks**
 
@@ -654,7 +668,8 @@ stdenv.mkDerivation {
 }
 ```
 
-**Why important:** Phase hooks allow other modules and overlays to inject additional steps without completely overriding your phases.
+**Why important:** Phase hooks allow other modules and overlays to inject additional steps without completely
+overriding your phases.
 
 #### **Improper Use of pkgs.extend**
 
@@ -677,7 +692,8 @@ nixpkgs.overlays = [
 ];
 ```
 
-**Performance issue:** The manual notes that `extend` can cause unnecessary re-evaluation. Prefer explicit overlays in `nixpkgs.overlays` for large-scale changes.
+**Performance issue:** The manual notes that `extend` can cause unnecessary re-evaluation. Prefer explicit
+overlays in `nixpkgs.overlays` for large-scale changes.
 
 ### **10. Module System Anti-Patterns**
 
@@ -725,7 +741,8 @@ in
 }
 ```
 
-**From nix.dev:** "The module system performs type validation during evaluation, producing clear error messages" for type mismatches. Extend this with assertions for business logic validation.
+**From nix.dev:** "The module system performs type validation during evaluation, producing clear error
+messages" for type mismatches. Extend this with assertions for business logic validation.
 
 #### **Ignoring Priority System**
 
@@ -777,7 +794,8 @@ options.services.myservice = {
 }
 ```
 
-**Why essential:** Options form the public API of your module. Comprehensive descriptions enable users to configure your module correctly without reading implementation code.
+**Why essential:** Options form the public API of your module. Comprehensive descriptions enable users to
+configure your module correctly without reading implementation code.
 
 ### **11. Code Duplication Without Extraction**
 
@@ -853,7 +871,7 @@ in {
 - Easy to have definitions drift apart over time
 - 25+ lines of duplication eliminated by proper extraction
 
-##  **Required Patterns for NixOS**
+## **Required Patterns for NixOS**
 
 ### **1. Always Use Explicit Imports**
 
@@ -982,10 +1000,10 @@ Before submitting any NixOS configuration changes, verify:
 ## **When in Doubt - Decision Framework**
 
 1. **Check nixpkgs**: How do official modules handle similar functionality?
-1. **Ask the community**: NixOS Discourse or Matrix channels for guidance
-1. **Prefer explicit**: Make behavior obvious and discoverable, not magical
-1. **Trust the system**: NixOS modules handle most cases correctly without extra wrapping
-1. **Less is more**: Remove code and abstractions rather than adding unnecessary ones
+2. **Ask the community**: NixOS Discourse or Matrix channels for guidance
+3. **Prefer explicit**: Make behavior obvious and discoverable, not magical
+4. **Trust the system**: NixOS modules handle most cases correctly without extra wrapping
+5. **Less is more**: Remove code and abstractions rather than adding unnecessary ones
 
 ## **Real-World Example: Before and After**
 
@@ -1090,7 +1108,8 @@ Following these guidelines ensures NixOS configurations that are:
 - **Composable** with correct package and module patterns
 - **Trustworthy** with proper disclosure of AI assistance
 
-These patterns help both human developers and AI systems create better NixOS code that the community can rely on and build upon.
+These patterns help both human developers and AI systems create better NixOS code that the community can rely
+on and build upon.
 
 ## **Official Documentation References**
 
@@ -1098,14 +1117,18 @@ For comprehensive best practices and patterns, consult these resources:
 
 ### **Primary References:**
 
-- **[Nix Module System Deep Dive](https://nix.dev/tutorials/module-system/deep-dive)** - Official guide to the module system, type usage, and proper module composition
-- **[Nixpkgs Manual](https://nixos.org/manual/nixpkgs/stable/)** - Standard package writing conventions, build helpers, and overlay patterns
+- **[Nix Module System Deep Dive](https://nix.dev/tutorials/module-system/deep-dive)** - Official guide to the
+  module system, type usage, and proper module composition
+- **[Nixpkgs Manual](https://nixos.org/manual/nixpkgs/stable/)** - Standard package writing conventions, build
+  helpers, and overlay patterns
 - **[NixOS Manual](https://nixos.org/manual/nixos/stable/)** - System configuration and module development
 
 ### **Companion Documents:**
 
 - **[PATTERNS.md](./PATTERNS.md)** - Comprehensive guide to recommended patterns and best practices for this repository
-- **[CLAUDE.md](../CLAUDE.md)** - Project-specific guidelines and architecture documentation
+- **[CLAUDE.md](https://github.com/olafkfreund/nixos_config/blob/main/CLAUDE.md)** - Project-specific guidelines
+  and architecture documentation
+- **[Desktop (Nixarchy)](architecture/desktop.md)** - Nixarchy / Omarchy on Hyprland
 
 ### **Community Resources:**
 
@@ -1113,4 +1136,5 @@ For comprehensive best practices and patterns, consult these resources:
 - [NixOS Wiki](https://nixos.wiki/) - Community-maintained documentation
 - [Nixpkgs Repository](https://github.com/NixOS/nixpkgs) - Source of truth for established patterns
 
-When in doubt, always check how official nixpkgs modules handle similar functionality before implementing your own patterns.
+When in doubt, always check how official nixpkgs modules handle similar functionality before implementing your
+own patterns.

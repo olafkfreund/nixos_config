@@ -23,7 +23,7 @@ behind each architectural choice.
     ---
 
     Primary development and AI workloads. Radeon RX 7900 with ROCm, local
-    inference, binary cache server.
+    inference, build host for razer.
 
     [:octicons-arrow-right-24: Details](hosts/p620.md)
 
@@ -31,8 +31,8 @@ behind each architectural choice.
 
     ---
 
-    Headless Intel Xeon server. Plex media stack, NVIDIA transcoding,
-    k3s MicroVMs.
+    Intel Xeon server — and, since 2026-08-31, a desktop. Plex media stack,
+    NVIDIA transcoding, k3s MicroVMs, self-hosted CI runner, Sunshine.
 
     [:octicons-arrow-right-24: Details](hosts/p510.md)
 
@@ -73,10 +73,19 @@ behind each architectural choice.
 
     ---
 
-    A single base16 palette drives colours everywhere — terminals, Zellij,
-    COSMIC — from `config.lib.stylix.colors`.
+    The active Omarchy theme drives one base16 palette, and every surface —
+    Plymouth, GRUB, console, GTK, Qt, terminals — derives from it.
 
     [:octicons-arrow-right-24: Theming](architecture/theming.md)
+
+- :material-monitor-dashboard: **One Wayland session**
+
+    ---
+
+    Omarchy on Hyprland, packaged as Nixarchy, on all three hosts. GNOME stays
+    selectable; niri, labwc, mango and COSMIC are gone or parked.
+
+    [:octicons-arrow-right-24: Desktop](architecture/desktop.md)
 
 - :material-key: **agenix secrets**
 

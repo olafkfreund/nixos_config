@@ -4,6 +4,12 @@
 
 - `docs/PATTERNS.md` — module, package and security patterns
 - `docs/NIXOS-ANTI-PATTERNS.md` — anti-pattern catalogue and the code-review checklist
+- `docs/architecture/desktop.md` — Nixarchy/Omarchy/Hyprland, before touching
+  anything Hyprland-adjacent
+
+Docs live in `docs/` and are published to <https://nixos.freundcloud.com/>.
+Nav is hand-synced across `mkdocs.yml` (Backstage TechDocs) and
+`mkdocs-full.yml` (the published site) — a nav change must land in **both**.
 
 ## Hosts
 
@@ -14,7 +20,7 @@ imports one plus its own hardware config.
 | ----- | ------------- | ----- |
 | p620  | `workstation` | AMD GPU / ROCm. Set `services.ollama.package = pkgs.ollama-rocm`; `services.ollama.acceleration` was removed from nixpkgs (unrelated to this repo's own `acceleration` attribute in `hosts/common/hardware-profiles/`). |
 | razer | `laptop`      | Hybrid Intel/NVIDIA (Optimus). Heavy rebuilds: build on p620 via `just deploy-via-p620 razer`. |
-| p510  | `workstation` | Headless media server (Plex, NZBGet, k3s microvms). **Never build or deploy without asking first.** |
+| p510  | `workstation` | Media server (Plex, NZBGet, k3s microvms) **and desktop** since 2026-08-31: Omarchy session, Sunshine streaming, self-hosted GitHub Actions runner. **Never build or deploy without asking first.** |
 
 Home Manager profiles live in `home/profiles/{developer,server-admin}`. Home Manager is a
 **flake module** — never run `home-manager switch`.
@@ -104,11 +110,37 @@ Things the code no longer shows, so they are easy to get wrong:
   flake-wide. Reach the package through `inputs.nixarchy`, never
   `config.programs.nixarchy.package` — nixarchy consumes Stylix, so that closes
   the module fixpoint and evaluation dies with infinite recursion.
-- **p510 carries the Omarchy session too** (#1562), with `displayManager = false`
-  (the module turns SDDM on by default and would swap out the GDM serving RDP),
-  `defaultSession = "gnome"` (adding Omarchy flipped autologin from gnome to
-  omarchy on a headless box) and `preinstalls = false` (4 GiB of desktop
-  software, `cef-binary` alone 1.9 GiB). It is a selectable entry only —
-  `gnome-remote-desktop` serves GNOME, not Hyprland.
+- **p510 runs the Omarchy session for real** (#1585, superseding the
+  arrangement #1562 left behind). It got a monitor, so the three settings that
+  held Omarchy at arm's length were inverted: `displayManager = true` (Omarchy's
+  SDDM; GDM is gone), `defaultSession = "omarchy"` and `host.class =
+  "workstation"`. Two divergences from p620/razer remain, both deliberate:
+  `preinstalls = false` (4 GiB of desktop software, `cef-binary` alone 1.9 GiB;
+  `/` would go 50.5 → 57.6 GiB) and **autologin stays on** — Sunshine is a
+  systemd *user* service that only exists inside a live graphical session, so on
+  a host that reboots unattended the alternative is a greeter nobody is there to
+  answer. razer keeps autologin off because PRIME-sync Optimus misbehaves with a
+  greeter respawn; p510 is pure NVIDIA without PRIME.
+  `gnome-remote-desktop` can still serve GNOME over RDP but cannot serve
+  Hyprland — that is what Sunshine replaced.
+- **Sunshine** (`modules/desktop/sunshine.nix`, `features.sunshine`, p510 only)
+  is the standing exception to the DynamicUser/ProtectHome rule below: it needs
+  the session's Wayland socket, GPU nodes and input devices. Four traps, in the
+  order you hit them: it starts only with a graphical session; a DPMS-off output
+  streams solid black with a clean log (`wakeDisplay = true`, and the dispatcher
+  is Lua — `hl.dsp.dpms({ action = "enable" })`); `webOrigins` must include the
+  port or the web UI refuses every POST with a CSRF error; and setting *any*
+  option puts the config in the Nix store, making the web UI's Configuration tab
+  read-only. See `docs/applications/sunshine.md`.
+- **A GitHub Actions runner lives on p510** (`hosts/p510/nixos/github-runner.nix`,
+  `p510-nixarchy`) for nixarchy's KVM/ISO checks. `TMPDIR` points at `/home`
+  (CMR, 125 MB/s), never `/mnt/img_pool` — that is an SMR disk at ~9.5 MB/s and
+  a 16 GB VM install hangs there rather than failing cleanly. Nothing targets
+  the runner yet; nixarchy's workflows are still `runs-on: ubuntu-latest`.
+- **An NVIDIA driver version bump cannot be applied with `switch`** — the new
+  userspace meets the old in-memory module, three `nvidia-*` units fail and the
+  activation rolls back. `nhs` detects this and falls back to `boot` mode; the
+  reboot is still yours.
 - DEX5550 is offline; Samsung and HP are decommissioned.
-- MicroVMs are per-host files (`hosts/p510/microvm.nix`), not a shared module.
+- MicroVMs are per-host files (`hosts/p510/microvm.nix`, with the guests under
+  `hosts/p510/nixos/microvm/`), not a shared module.

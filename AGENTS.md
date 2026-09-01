@@ -15,10 +15,19 @@ module** — never run `home-manager switch`; use `nixos-rebuild`.
 
 - **p620** — AMD workstation (primary dev; AMD ROCm). Workstation template.
 - **razer** — Intel/NVIDIA laptop (mobile dev). Laptop template.
-- **p510** — Intel Xeon/NVIDIA headless media server. Server template.
+- **p510** — Intel Xeon/NVIDIA media server **and desktop** (Plex, *arr, k3s,
+  Sunshine, self-hosted CI runner). Workstation template. **Never build or
+  deploy without asking first.**
 
-(DEX5550 offline; Samsung archived. Prometheus/Grafana/Loki removed — use
-`journalctl`/`systemctl` for system state.)
+All three run one Wayland session: **Omarchy on Hyprland** (packaged as
+Nixarchy, a flake input), with GNOME as a selectable fallback. niri, labwc,
+mango, Noctalia and DankMaterialShell are gone, inputs included; COSMIC is
+parked. See `docs/architecture/desktop.md`.
+
+(DEX5550 offline; Samsung and HP decommissioned. Prometheus/Grafana/Loki
+removed — use `journalctl`/`systemctl` for system state; `grafana-status` and
+friends no longer exist. There is no binary cache of our own — nothing listens
+on `p620:5000`.)
 
 ## Golden rules
 
@@ -34,8 +43,14 @@ module** — never run `home-manager switch`; use `nixos-rebuild`.
 5. **Secrets at runtime only.** Use agenix `passwordFile`/path references;
    never `builtins.readFile` a secret (it lands in the store).
 6. **Service hardening is mandatory.** `DynamicUser`, `ProtectSystem=strict`,
-   `NoNewPrivileges`, `ProtectHome` for any new service.
+   `NoNewPrivileges`, `ProtectHome` for any new service. The one standing
+   exception is `modules/desktop/sunshine.nix`, a systemd *user* service that
+   needs the session's Wayland socket, GPU nodes and input devices — the
+   exception is argued in the module, not taken silently.
 7. **No bare URLs**, minimal `with`, minimal `rec`, no IFD.
+8. **Branch, never commit to `main`.** `<type>/<issue#>-description`,
+   Conventional Commits with the issue number. No backticks in
+   `git commit -m` — double quotes do not stop command substitution.
 
 ## Workflow (issue-driven)
 
@@ -70,11 +85,13 @@ unverified commands, stop on the unexpected.
 ```text
 flake.nix              host definitions + inputs/overlays
 hosts/<host>/          per-host config (variables.nix, configuration.nix, hw)
-hosts/templates/       workstation | laptop | server base templates
+hosts/templates/       desktop.nix — one template, workstation | laptop
 modules/               feature + service modules (the core; behind flags)
 home/                  Home Manager config + role profiles
 Users/<user>/          per-user profile compositions
 secrets/               agenix-encrypted secrets
 docs/PATTERNS.md       best practices (READ FIRST)
 docs/NIXOS-ANTI-PATTERNS.md  what to avoid (READ FIRST)
+docs/architecture/desktop.md Nixarchy / Omarchy / Hyprland
+mkdocs.yml + mkdocs-full.yml  hand-synced nav — change BOTH
 ```

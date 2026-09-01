@@ -8,7 +8,12 @@ on:
   push:
     branches: [main]
     paths:
+      # mkdocs-full.yml is the config the published site is actually built
+      # from (docs_gen/site.nix invokes it); mkdocs.yml is the slim Backstage
+      # TechDocs one. Watching only the latter meant a nav or theme change to
+      # the real config never triggered a publish.
       - "mkdocs.yml"
+      - "mkdocs-full.yml"
       - "docs/**"
       - "docs_gen/**"
       - "modules/**"

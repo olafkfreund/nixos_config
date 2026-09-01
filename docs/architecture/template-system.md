@@ -73,18 +73,21 @@ is unique to it.
 
 !!! note "Why `mkDefault` everywhere"
     The template sets defaults, not hard values. A host that needs something
-    different (e.g. p510 running headless with no display manager) overrides
-    cleanly without fighting the template.
+    different (e.g. p510 disabling Omarchy's desktop preinstalls to save disk)
+    overrides cleanly without fighting the template.
 
-## Headless from the same template
+## A server from the same template
 
-p510 is a server, yet it uses the **workstation** template. Rather than
-maintain a separate `server` template (the old `server`/`hybrid`/`base`
-templates were removed), p510 simply:
+p510 is the always-on media server, yet it uses the **workstation** template.
+Rather than maintain a separate `server` template (the old
+`server`/`hybrid`/`base` templates were removed), it sets
+`host.class = "workstation"` and overrides only the handful of things that
+genuinely differ — currently `programs.nixarchy.preinstalls = false` and
+autologin on.
 
-- sets `host.class = "workstation"`,
-- disables the display manager and desktop compositor,
-- enables GNOME Remote Desktop for the rare time a GUI is needed.
+It was headless until 2026-08-31, when it gained a monitor and the Omarchy
+session; the `headless-rdp` value of `host.class` remains in the enum but no host
+uses it. See [p510](../hosts/p510.md).
 
 This keeps one template instead of three and avoids the divergence that the
 template system exists to prevent.

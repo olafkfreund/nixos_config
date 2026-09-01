@@ -56,10 +56,13 @@ let
   # Stylix wants "rrggbb" with no leading '#'; Omarchy writes "#rrggbb".
   stripHash = v: lib.removePrefix "#" v;
 
-  # p510 has no nixarchy at all and imports this same module, and a theme name
-  # that is not in the package (a user theme under ~/.config/omarchy/themes,
-  # which the flake cannot see) would be a dead path. Both fall back to the
-  # checked-in yaml rather than failing the build.
+  # A theme name that is not in the package -- a user theme under
+  # ~/.config/omarchy/themes, which the flake cannot see -- would be a dead
+  # path, and so would a host without nixarchy importing this module. Both fall
+  # back to the checked-in yaml rather than failing the build.
+  #
+  # (All three hosts carry nixarchy now. p510 did not until #1585, which is
+  # what the second half of this guard was originally written for.)
   useOmarchyTheme = omarchyPkg != null && builtins.pathExists omarchyColorsPath;
 
   omarchyScheme =
