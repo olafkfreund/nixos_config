@@ -145,9 +145,12 @@ transcript with no speaker labels.
 
 1. Sign up at [huggingface.co/join](https://huggingface.co/join).
 2. Accept the terms on
-   [`pyannote/speaker-diarization-3.1`](https://huggingface.co/pyannote/speaker-diarization-3.1)
-   and
-   [`pyannote/segmentation-3.0`](https://huggingface.co/pyannote/segmentation-3.0).
+   [`pyannote/speaker-diarization-community-1`](https://huggingface.co/pyannote/speaker-diarization-community-1).
+
+   That is the model **whisperX 3.8.6 actually requests**. Earlier revisions
+   of this page named `speaker-diarization-3.1` and `segmentation-3.0`;
+   accepting those two leaves diarization failing with a 403
+   `GatedRepoError`, because neither is the repo whisperX asks for.
 3. Generate a read token at
    [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens).
 4. Store it in agenix from a machine that has the user key:
@@ -247,11 +250,16 @@ pactl list sources short | grep monitor
 You should see `${default_sink}.monitor`. If not, the default sink is
 something unusual (a hardware loopback, say) — switch the default and retry.
 
-### whisperX hangs on `pyannote/speaker-diarization-3.1`
+### Diarization fails with a 403 `GatedRepoError`
 
-The HF token file is missing or the EULAs are not accepted. Either accept both
-models' EULAs and add the token, or drop `huggingfaceTokenFile` from the host
-config and accept a plain, non-diarized transcript.
+The token is readable but the account has not been granted access to
+`pyannote/speaker-diarization-community-1`. Accept the conditions there.
+
+whisperX no longer dies on this: it retries without `--diarize`, so you still
+get a transcript and a full summary — only the per-speaker attribution and the
+Participants section are lost. A token that is present but unauthorized used
+to be *worse* than no token at all, because whisperX aborted before producing
+any transcript.
 
 ### Brief has a transcript but no summary
 
