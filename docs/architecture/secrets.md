@@ -26,12 +26,12 @@ services.myservice.passwordFile = config.age.secrets."api-anthropic".path;
 
 ## How access control works
 
-`secrets/secrets.nix` maps each `.age` file to the public keys allowed to
+`secrets.nix` maps each `.age` file to the public keys allowed to
 decrypt it — per host and per user. Only a host that holds the matching private
 key can read a secret destined for it.
 
 ```nix
-# secrets/secrets.nix (shape)
+# secrets.nix (shape)
 {
   "api-anthropic.age".publicKeys = [ p620 razer olafkfreund ];
   "user-password-olafkfreund.age".publicKeys = [ p620 p510 razer ];

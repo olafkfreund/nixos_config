@@ -71,18 +71,13 @@ Issue-driven development workflow: branch naming, conventional commits,
 PR process, review standards.
 
 `guides/CACHE-STRATEGY.md`
-Binary cache strategy (official NixOS cache, Nix community cache — no local
-cache server exists despite the doc's original P620 nix-serve claims).
-
-`guides/CACHIX-ANALYSIS.md`
-Cachix integration analysis and optional setup.
+Substituters in use (cache.nixos.org, nix-community.cachix.org, plus two
+flake-level caches) and how to speed up builds without a cache server —
+there is none.
 
 `guides/PACKAGE-SYSTEM-USAGE.md`
 Package categorisation: system vs user, conditional package loading,
 template-driven defaults.
-
-`guides/GEMINI_CLI_FEATURE.md`
-Gemini CLI integration and configuration.
 
 ## Applications
 

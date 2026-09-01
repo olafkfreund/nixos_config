@@ -1,8 +1,10 @@
 # NixOS and Nixpkgs Patterns Guide
 
-> **Comprehensive best practices guide** for writing idiomatic Nix code, based on official documentation from [nix.dev](https://nix.dev/tutorials/module-system/deep-dive) and the [Nixpkgs Manual](https://nixos.org/manual/nixpkgs/stable/).
+> Best practices for writing idiomatic Nix, based on
+> [nix.dev](https://nix.dev/tutorials/module-system/deep-dive) and the
+> [Nixpkgs Manual](https://nixos.org/manual/nixpkgs/stable/).
 
-##  Table of Contents
+## Table of Contents
 
 - [Module System Patterns](#module-system-patterns)
 - [Package Writing Patterns](#package-writing-patterns)
@@ -16,7 +18,7 @@
 
 ### 1. Module Structure and Evaluation
 
-**Pattern: Function-Based Modules**
+#### Pattern: Function-Based Modules
 
 Modules should be functions that receive arguments and return attribute sets with `options` and `config` sections.
 
@@ -58,7 +60,7 @@ in
 
 ### 2. Type System Best Practices
 
-**Pattern: Choose Appropriate Types**
+#### Pattern: Choose Appropriate Types
 
 Use the right type for your data to enable automatic validation and merging.
 
@@ -117,7 +119,7 @@ options = {
 
 ### 3. Submodules for Nested Configuration
 
-**Pattern: Use Submodules for Complex Structures**
+#### Pattern: Use Submodules for Complex Structures
 
 When options have multiple related fields, use submodules to group them logically.
 
@@ -172,7 +174,7 @@ config.services.myapp.instances = {
 
 ### 4. Module Organization
 
-**Pattern: Split Options from Implementation**
+#### Pattern: Split Options from Implementation
 
 Separate option declarations from their implementations using the `imports` attribute.
 
@@ -213,7 +215,7 @@ in
 
 ### 5. Priority and Defaults
 
-**Pattern: Use mkDefault for Overridable Defaults**
+#### Pattern: Use mkDefault for Overridable Defaults
 
 Use `lib.mkDefault` for values that should be easy to override without conflicts.
 
@@ -243,7 +245,7 @@ config = lib.mkIf cfg.enable {
 
 ### 6. Conditional Configuration
 
-**Pattern: Use mkIf for Conditional Blocks**
+#### Pattern: Use mkIf for Conditional Blocks
 
 Use `lib.mkIf` to conditionally include entire configuration sections.
 
@@ -277,7 +279,7 @@ config = lib.mkMerge [
 
 ### 7. Cross-Module Configuration
 
-**Pattern: Access Other Module Options via config**
+#### Pattern: Access Other Module Options via config
 
 Modules can read and respond to options defined in other modules.
 
@@ -306,7 +308,7 @@ in
 
 ### 8. Making Values Available Across Modules
 
-**Pattern: Use \_module.args for Shared Dependencies**
+#### Pattern: Use \_module.args for Shared Dependencies
 
 Make custom values available to all modules using `_module.args`.
 
@@ -338,7 +340,7 @@ Make custom values available to all modules using `_module.args`.
 
 ### 9. Type-Safe Configuration Generation
 
-**Pattern: Use Format Generators**
+#### Pattern: Use Format Generators
 
 For configuration files, use `pkgs.formats` for type-safe generation.
 
@@ -398,7 +400,7 @@ in
 
 ### 10. Assertions and Warnings
 
-**Pattern: Validate Configuration with Assertions**
+#### Pattern: Validate Configuration with Assertions
 
 Use assertions to catch configuration errors early with helpful messages.
 
@@ -442,7 +444,7 @@ in
 
 ### 1. Standard Derivation Structure
 
-**Pattern: Use stdenv.mkDerivation Properly**
+#### Pattern: Use stdenv.mkDerivation Properly
 
 Follow the standard structure for building packages.
 
@@ -530,7 +532,7 @@ stdenv.mkDerivation rec {
 
 ### 2. Dependency Management
 
-**Pattern: CallPackage for Automatic Injection**
+#### Pattern: CallPackage for Automatic Injection
 
 Use `callPackage` to automatically inject dependencies.
 
@@ -559,7 +561,7 @@ buildGoModule rec {
 
 ### 3. Override Patterns
 
-**Pattern: Provide Both override and overrideAttrs**
+#### Pattern: Provide Both override and overrideAttrs
 
 Make packages customizable with proper override support.
 
@@ -592,7 +594,7 @@ myPackagePatched = myPackage.overrideAttrs (oldAttrs: {
 
 ### 4. Multi-Output Packages
 
-**Pattern: Split Large Packages into Multiple Outputs**
+#### Pattern: Split Large Packages into Multiple Outputs
 
 Reduce closure size by splitting development files, documentation, etc.
 
@@ -635,7 +637,7 @@ environment.systemPackages = [
 
 ### 5. Language-Specific Builders
 
-**Pattern: Use Specialized Builders for Each Language**
+#### Pattern: Use Specialized Builders for Each Language
 
 Nixpkgs provides optimized builders for different languages.
 
@@ -708,7 +710,7 @@ rustPlatform.buildRustPackage rec {
 
 ### 6. Overlay Patterns
 
-**Pattern: Create Composable Overlays**
+#### Pattern: Create Composable Overlays
 
 Use overlays to extend or modify the package set systematically.
 
@@ -753,7 +755,7 @@ nixpkgs.overlays = [
 
 ### 7. Testing Patterns
 
-**Pattern: Include Tests in Package Definitions**
+#### Pattern: Include Tests in Package Definitions
 
 Use nixpkgs testers for validation.
 
@@ -810,7 +812,7 @@ stdenv.mkDerivation rec {
 
 ### 8. Shell Script Wrapping
 
-**Pattern: Use writeShellApplication for Scripts**
+#### Pattern: Use writeShellApplication for Scripts
 
 For shell scripts that need dependencies, use `writeShellApplication`.
 
@@ -841,7 +843,7 @@ writeShellApplication {
 
 ### 9. Cross-Compilation Support
 
-**Pattern: Proper Build vs Host Dependencies**
+#### Pattern: Proper Build vs Host Dependencies
 
 Support cross-compilation by correctly categorizing dependencies.
 
@@ -889,7 +891,7 @@ stdenv.mkDerivation {
 
 ### 1. Reproducible System Configuration
 
-**Pattern: Declare Everything in configuration.nix**
+#### Pattern: Declare Everything in configuration.nix
 
 ```nix
 { config, pkgs, ... }:
@@ -924,7 +926,7 @@ stdenv.mkDerivation {
 
 ### 2. Modular Configuration with Imports
 
-**Pattern: Split Configuration into Logical Modules**
+#### Pattern: Split Configuration into Logical Modules
 
 ```nix
 /etc/nixos/
@@ -960,7 +962,7 @@ stdenv.mkDerivation {
 
 ### 3. Home Manager Integration
 
-**Pattern: Separate User and System Configuration**
+#### Pattern: Separate User and System Configuration
 
 ```nix
 # System configuration
@@ -999,38 +1001,47 @@ home-manager.users.alice = { pkgs, ... }: {
 
 ### 4. Feature Flags for Optional Functionality
 
-**Pattern: Use Feature Flags for Host Capabilities**
+#### Pattern: Host types set defaults, hosts override them
+
+Capability flags live under the `features.*` namespace declared by modules.
+A host does not enumerate them one by one — it imports a host type from
+[`lib/hostTypes.nix`](https://github.com/olafkfreund/nixos_config/blob/main/lib/hostTypes.nix),
+which sets sensible `mkDefault` values:
 
 ```nix
-{ config, lib, pkgs, ... }:
-
-let
-  features = {
-    isLaptop = true;
-    hasNvidiaGpu = false;
-    isServer = false;
-    enableGaming = true;
+# lib/hostTypes.nix
+laptop = {
+  imports = [ (desktopTemplate "laptop") ];
+  config = {
+    aiDefaults.profile = "laptop";
+    features = {
+      development.enable = lib.mkDefault true;
+      desktop.enable = lib.mkDefault true;
+      virtualization = {
+        enable = lib.mkDefault true;
+        docker = lib.mkDefault false;
+      };
+      powerManagement.enable = lib.mkDefault true;
+    };
   };
-in
-{
-  # Power management for laptops
-  services.tlp.enable = features.isLaptop;
-  services.thermald.enable = features.isLaptop;
-
-  # GPU drivers
-  services.xserver.videoDrivers = lib.mkIf features.hasNvidiaGpu [ "nvidia" ];
-
-  # Server-specific services
-  services.fail2ban.enable = features.isServer;
-
-  # Gaming packages
-  environment.systemPackages = lib.mkIf features.enableGaming (with pkgs; [
-    steam
-    discord
-    lutris
-  ]);
-}
+};
 ```
+
+The host then overrides only what differs, because `mkDefault` yields to a
+plain assignment:
+
+```nix
+# hosts/razer/configuration.nix
+features.meetingTranscribe = {
+  enable = true;
+  processHost = "p620";
+  installProcessor = false;
+};
+```
+
+Two host types exist, `workstation` and `laptop`. Each module declares its own
+flag with `mkEnableOption` and gates its config on it, so a flag never needs a
+central registry.
 
 ---
 
@@ -1038,7 +1049,7 @@ in
 
 ### 1. Systemd Service Hardening
 
-**Pattern: Apply Comprehensive Service Isolation**
+#### Pattern: Apply Comprehensive Service Isolation
 
 ```nix
 systemd.services.myservice = {
@@ -1088,20 +1099,20 @@ systemd.services.myservice = {
 
 ### 2. Secret Management
 
-**Pattern: Never Include Secrets in Store**
+#### Pattern: Never Include Secrets in Store
 
 ```nix
-#  NEVER DO THIS
+# NEVER DO THIS
 services.myservice = {
   password = "hardcoded-password";  # INSECURE!
 };
 
-#  Use file references
+# Use file references
 services.myservice = {
   passwordFile = "/run/secrets/myservice-password";
 };
 
-#  Or use agenix/sops-nix
+# Or use agenix/sops-nix
 age.secrets.myservice-password = {
   file = ./secrets/myservice-password.age;
   mode = "0400";
@@ -1113,7 +1124,7 @@ services.myservice = {
   passwordFile = config.age.secrets.myservice-password.path;
 };
 
-#  systemd credentials
+# systemd credentials
 systemd.services.myservice = {
   serviceConfig = {
     LoadCredential = "password:/etc/myservice/password";
@@ -1124,7 +1135,7 @@ systemd.services.myservice = {
 
 ### 3. Firewall Configuration
 
-**Pattern: Minimal Port Opening**
+#### Pattern: Minimal Port Opening
 
 ```nix
 networking.firewall = {
@@ -1137,7 +1148,7 @@ networking.firewall = {
   interfaces = {
     # Internal network
     "enp3s0" = {
-      allowedTCPPorts = [ 5432 9090 3000 ];  # Database, Prometheus, Grafana
+      allowedTCPPorts = [ 5432 ];  # PostgreSQL only
     };
 
     # External network
@@ -1161,7 +1172,7 @@ networking.firewall = {
 
 ### 1. Build Optimization
 
-**Pattern: Configure Nix for Optimal Performance**
+#### Pattern: Configure Nix for Optimal Performance
 
 ```nix
 nix.settings = {
@@ -1194,7 +1205,7 @@ nix.settings = {
 
 ### 2. Store Management
 
-**Pattern: Automated Garbage Collection**
+#### Pattern: Automated Garbage Collection
 
 ```nix
 nix.gc = {
@@ -1214,10 +1225,10 @@ boot.loader.grub.configurationLimit = 10;
 
 ### 3. Evaluation Performance
 
-**Pattern: Lazy Evaluation and Minimal IFD**
+#### Pattern: Lazy Evaluation and Minimal IFD
 
 ```nix
-#  GOOD - Lazy evaluation, no IFD
+# GOOD - Lazy evaluation, no IFD
 let
   # Only evaluated if used
   expensiveComputation = /* ... */;
@@ -1229,7 +1240,7 @@ in
   };
 }
 
-#  BAD - Import From Derivation
+# BAD - Import From Derivation
 let
   generatedConfig = pkgs.runCommand "config" {} ''
     echo "value=42" > $out
@@ -1244,7 +1255,7 @@ in { }
 
 ### 1. Module Documentation
 
-**Pattern: Comprehensive Option Documentation**
+#### Pattern: Comprehensive Option Documentation
 
 ```nix
 options.services.myservice = {
@@ -1293,7 +1304,7 @@ options.services.myservice = {
 
 ### 2. Package Metadata
 
-**Pattern: Complete and Accurate Meta Attributes**
+#### Pattern: Complete and Accurate Meta Attributes
 
 ```nix
 meta = with lib; {

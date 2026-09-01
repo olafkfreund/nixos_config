@@ -29,7 +29,7 @@ modules/nixos/packages/
 
 ### **Server Template** (`hostTypes.server`)
 
-**Purpose**: Headless servers (DEX5550, P510 as media server)
+**Purpose**: Headless servers (p510 in its media-server role)
 
 ```nix
 # Automatic package configuration
@@ -83,7 +83,7 @@ packages = {
 
 **Result**: ~700 packages, optimized for mobility and battery life
 
-## ️ **Implementation Examples**
+## **Implementation Examples**
 
 ### **Server Conversion** (P510 Media Server)
 
@@ -215,7 +215,7 @@ packages.virtualization = {
 };
 ```
 
-## ️ **Management Commands**
+## **Management Commands**
 
 ### **Testing Package Changes**
 

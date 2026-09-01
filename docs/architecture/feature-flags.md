@@ -9,9 +9,12 @@ that prerequisites are met.
 ## The solution
 
 Capabilities are exposed as **typed feature flags** under `features.*`. A host
-turns a dial; the module behind it wires up the actual services. The feature
-system (`lib/features.nix`) additionally validates **dependencies** and
-**conflicts** at evaluation time.
+turns a dial; the module behind it wires up the actual services. The shared
+option declarations live in
+[`modules/common/features.nix`](https://github.com/olafkfreund/nixos_config/blob/main/modules/common/features.nix),
+which groups them as `development`, `virtualization`, `cloud`, `security`,
+`networking`, `ai`, `programs`, `media` and `quickshell`. Individual services
+declare their own flag in their own module instead.
 
 ```nix
 # In a host configuration.nix — declarative intent, not implementation
@@ -61,39 +64,30 @@ in
     testing. Wrap it in a module under `modules/` and expose a feature flag.
     This is a hard rule — see [Anti-Patterns](../NIXOS-ANTI-PATTERNS.md).
 
-## Dependency and conflict validation
+## Host types
 
-`lib/features.nix` carries a small registry describing how features relate.
-When a host enables a feature, the system asserts its dependencies are present
-and that no conflicting feature is active:
+There is no central registry of feature dependencies or conflicts, and no
+cross-feature validation pass — a module that needs a prerequisite asserts it
+itself, with `assertions`.
+
+What does exist is
+[`lib/hostTypes.nix`](https://github.com/olafkfreund/nixos_config/blob/main/lib/hostTypes.nix),
+which pre-composes flags for a role. Two types are defined:
+
+| Type | Sets |
+| --- | --- |
+| `workstation` | `development`, `desktop`, `virtualization` |
+| `laptop` | `development`, `desktop`, `virtualization` (no Docker), `powerManagement` |
+
+Both are set with `lib.mkDefault`, so a host that assigns the flag directly
+always wins:
 
 ```nix
-development = {
-  dependencies = [ "networking" ];
-  conflicts = [ ];
-  description = "Development environment setup";
-};
-gaming = {
-  dependencies = [ "graphics" ];
-  conflicts = [ "server-minimal" ];
-};
+# hosts/razer/configuration.nix — overrides the laptop default
+features.virtualization.docker = true;
 ```
 
-If you enable a feature without its dependency, the build fails fast with a
-clear message — far better than a service silently misbehaving at runtime.
-
-## Feature profiles
-
-Common bundles are pre-composed so a host can opt into a whole role at once:
-
-| Profile | Enables |
-| --- | --- |
-| `workstation` | development, desktop, virtualization, security |
-| `gaming` | desktop, gaming, security |
-| `server` | virtualization, security, networking |
-| `minimal` | security |
-
-Explicit per-feature flags always take precedence over profile defaults.
+Each host imports one type plus its own hardware configuration.
 
 ## Browsing what exists
 

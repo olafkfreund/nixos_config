@@ -1,10 +1,15 @@
 # GitLab Runner Setup Guide
 
-> Complete guide for setting up GitLab Runner on your NixOS infrastructure
+> Prospective guide. **No GitLab Runner is deployed on this fleet today** —
+> nothing in `modules/` or `hosts/` references `services.gitlab-runner`. The
+> self-hosted CI runner that does exist is a *GitHub* Actions runner on p510
+> (`hosts/p510/nixos/github-runner.nix`).
 
 ## Overview
 
-GitLab Runner is an application that works with GitLab CI/CD to run jobs in a pipeline. This guide covers setting up a local GitLab Runner for CI/CD testing and automation.
+GitLab Runner is an application that works with GitLab CI/CD to run jobs in a
+pipeline. This guide covers setting up a local GitLab Runner for CI/CD testing
+and automation.
 
 ## Prerequisites
 
@@ -50,7 +55,7 @@ REGISTRATION_TOKEN=your-registration-token-here
 
 ### 3. Configure GitLab Runner in Your Host
 
-**Example: P620 Workstation (Docker Runner)**
+#### Example: p620 workstation (Docker runner)
 
 Add to `hosts/p620/configuration.nix`:
 
@@ -83,7 +88,7 @@ Add to `hosts/p620/configuration.nix`:
 }
 ```
 
-**Example: Razer Laptop (Shell Runner)**
+#### Example: razer laptop (shell runner)
 
 Add to `hosts/razer/configuration.nix`:
 
@@ -565,21 +570,11 @@ Navigate to: **Settings → CI/CD → Runners**
 
 ## Integration with Your Infrastructure
 
-### Add to Monitoring Stack
+### Metrics and dashboards
 
-The runner automatically integrates with your Prometheus/Grafana monitoring:
-
-```nix
-# Already configured in monitoring module
-services.prometheus.scrapeConfigs = [
-  {
-    job_name = "gitlab-runner";
-    static_configs = [{
-      targets = [ "localhost:9252" ];  # GitLab Runner metrics
-    }];
-  }
-];
-```
+There is no metrics stack on this fleet to scrape the runner with — Prometheus,
+Grafana, Loki and Alertmanager were all removed. Check the runner with
+`systemctl status gitlab-runner` and `journalctl -u gitlab-runner`.
 
 ### CI/CD for NixOS Configurations
 
@@ -648,11 +643,10 @@ sudo gitlab-runner verify --delete         # Remove invalid runners
 
 ## Next Steps
 
-1. **Set up monitoring**: Add GitLab Runner to Grafana dashboards
-2. **Create pipelines**: Define CI/CD workflows for your projects
-3. **Optimize performance**: Tune concurrent jobs and resource limits
-4. **Scale runners**: Add more runners to different hosts
-5. **Implement caching**: Speed up builds with GitLab CI cache
+1. **Create pipelines**: Define CI/CD workflows for your projects
+2. **Optimize performance**: Tune concurrent jobs and resource limits
+3. **Scale runners**: Add more runners to different hosts
+4. **Implement caching**: Speed up builds with GitLab CI cache
 
 ## References
 

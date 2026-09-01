@@ -1,418 +1,75 @@
-# NixOS Binary Cache Strategy
+# Binary cache strategy
 
-> **Complete guide to multi-tier caching for optimal build performance**
->
-> **Correction (verified against the repo):** There is no P620 binary cache. No
-> nix-serve/harmonia service exists anywhere in this repo, nothing listens on
-> p620:5000, and `modules/nix/nix.nix` only lists cache.nixos.org and
-> nix-community.cachix.org as substituters. Every "P620 cache" claim below
-> (service, port 5000, public key, `deploy-via-p620` "cache phase") is
-> aspirational, not implemented. The real speedup for `just deploy-via-p620`
-> comes from `nixos-rebuild --build-host p620 --target-host <host>` — P620
-> builds and the closure is copied over SSH, no cache server involved.
+There is **no local binary cache server** on this fleet. No `nix-serve` or
+`harmonia` service exists anywhere in the repo, and nothing listens on
+`p620:5000`. Substitution comes entirely from public caches.
 
-## Overview
+## Substituters
 
-Your NixOS infrastructure uses a two-tier cache strategy:
+System-wide, from [`modules/nix/nix.nix`](https://github.com/olafkfreund/nixos_config/blob/main/modules/nix/nix.nix):
 
-1. **Official NixOS Cache** (always available) - cache.nixos.org
-2. **Nix Community Cache** (comprehensive) - nix-community.cachix.org
+| Substituter | Purpose |
+| ----------- | ------- |
+| `https://cache.nixos.org` | Official NixOS cache |
+| `https://nix-community.cachix.org` | Community packages |
 
-There is no P620 local cache server and no personal Cachix cache configured.
-The sections below describing a P620 nix-serve cache are historical/aspirational
-and do not reflect the current repo — see the correction note above.
+Flake-level, from `flake.nix` `nixConfig.extra-substituters`, applied when a
+command is run with `--accept-flake-config`:
 
-## ️ Cache Architecture
+| Substituter | Purpose |
+| ----------- | ------- |
+| `https://cuda-maintainers.cachix.org/` | Prebuilt CUDA-enabled packages |
+| `https://devenv.cachix.org/` | devenv |
 
-### Current Setup
+No personal Cachix cache is configured. `modules/nix/nix.nix` carries a
+commented example if one is ever wanted.
 
-```text
-Razer/P510 (clients)
-    ↓
-    1. Check P620 cache (local network) - FASTEST
-    ↓
-    2. Check NixOS official cache - RELIABLE
-    ↓
-    3. Check Nix community cache - COMPREHENSIVE
-    ↓
-    4. Build locally - SLOWEST (fallback)
-```
+## Making builds faster without a cache
 
-### P620 Cache Server
-
-**What it is:**
-
-- Binary cache server running on your P620 workstation
-- Stores built packages for reuse across all hosts
-- Accessible via Tailscale (anywhere) and LAN (fastest)
-
-**Configuration:**
-
-- Service: `nix-serve`
-- Port: `5000`
-- Secret key: `/etc/nix/secret-key`
-- Public key: `p620-nix-serve:mZR6o5z5KcWeu4PVXgjHA7vb1sHQgRdWMKQt8x3a4rU=`
-- Firewall: Open (automatic)
-
-**Access Points:**
-
-- Tailscale: `http://p620.lan:5000`
-- LAN: `http://p620.lan:5000`
-
-## Deployment Strategies
-
-### Strategy 1: Direct Deployment (Build on Target)
-
-**When to use:**
-
-- P620 workstation (powerful, doesn't matter)
-- Quick config changes on any host
-
-**How to use:**
+The one real lever is **building on a faster host**. razer in particular is
+slow to rebuild, so it borrows p620's CPU:
 
 ```bash
-# Standard deployment (builds on target host)
-just p620
-just razer
-just razer
-just p510
-```
-
-**Pros:** Simple, direct
-**Cons:** Slow on laptops, drains battery
-
----
-
-### Strategy 2: Deploy via P620 Cache (RECOMMENDED for Razer)
-
-**When to use:**
-
-- Razer laptop (save battery!)
-- Razer laptop (when on the go)
-- Any host with slow builds
-
-**How to use:**
-
-```bash
-# Build on P620, deploy to Razer
-just deploy-via-p620 razer
-
-# Same thing, explicit form
-just deploy-via-p620 razer
-
-# Build only (test before deploy)
-just build-on-p620 razer
 just deploy-via-p620 razer
 ```
 
-**What happens:**
+This is `nixos-rebuild --build-host p620 --target-host razer`. p620 evaluates
+and builds, then the closure is copied to the target over SSH. No cache server
+is involved — the speedup is p620's CPU plus its already-populated
+`/nix/store`, nothing more. When run on p620 itself the recipe builds locally
+rather than SSHing to itself.
 
-1. ️ **Build Phase**: P620 builds Razer's configuration
-2. **Cache Phase**: Build artifacts stored in P620's cache
-3. **Deploy Phase**: Razer downloads from P620 cache (fast!)
-4. **Switch Phase**: Razer activates new configuration
+Other options that genuinely help:
 
-**Pros:**
+- `just quick-deploy HOST` — skips the deploy entirely when the built
+  configuration is identical to what the host is already running.
+- `just test-host HOST` before deploying, so a failure costs a build rather
+  than a broken switch.
+- Keeping `flake.lock` current. A stale lock points at store paths that have
+  aged out of cache.nixos.org and must be built locally.
 
-- Fast deployment (download vs build)
-- Saves battery on laptops
-- Consistent builds across hosts
-- P620 has better cooling/performance
+## Overlays poison cache hits
 
-**Cons:**
+An overlay applied to a deep package rebuilds everything downstream of it,
+which destroys cache hits far beyond the package you overrode. Before adding
+one, check whether the problem it works around still exists upstream — several
+overlays in this repo's history outlived their bugs. Use `nix-diff` to see what
+an overlay actually changed.
 
-- Requires P620 to be online
-- Network dependency
-
----
-
-### Strategy 3: Smart Deployment (Only if Changed)
-
-**When to use:**
-
-- Development iteration
-- Testing configurations
-- Avoiding unnecessary rebuilds
-
-**How to use:**
+## Verifying
 
 ```bash
-# Only deploy if configuration changed
-just quick-deploy razer
-just quick-deploy razer
+# What this machine will substitute from
+nix show-config | grep -E 'substituters|trusted-public-keys'
+
+# Is a given store path cached upstream?
+nix path-info --store https://cache.nixos.org /nix/store/...
+
+# How much of a build would be downloaded vs built
+nix build .#nixosConfigurations.p620.config.system.build.toplevel --dry-run
 ```
 
-**Pros:** Skip unchanged deployments
-**Cons:** Slightly slower check phase
+## Related
 
----
-
-### Strategy 4: Parallel Deployment (All Hosts)
-
-**When to use:**
-
-- Rolling out changes to all hosts
-- Weekly updates
-
-**How to use:**
-
-```bash
-# Test all, deploy all if tests pass
-just quick-all
-
-# Deploy to all hosts in parallel (fastest)
-just deploy-all-parallel
-```
-
----
-
-## Performance Comparison
-
-| Method             | Razer Build Time | Network Usage | Battery Impact |
-| ------------------ | ------------------ | ------------- | -------------- |
-| **Direct Deploy**  | ~15-20 min         | Low           | High         |
-| **Via P620 Cache** | ~3-5 min           | Medium        | Low          |
-| **With Cachix**    | ~2-3 min           | High          | Low          |
-
-## 🆓 Free Cachix Setup (Optional)
-
-Cachix provides **5GB free storage** with unlimited downloads. Great for:
-
-- External access (when not on your network)
-- Backup cache (redundancy)
-- Sharing builds across locations
-
-### Setup Instructions
-
-#### 1. Create Cachix Account
-
-```bash
-# Sign up at https://cachix.org (free tier)
-```
-
-#### 2. Install Cachix
-
-```bash
-# Already installed via development.nix
-which cachix  # Should show: /run/current-system/sw/bin/cachix
-```
-
-#### 3. Authenticate
-
-```bash
-# Get your auth token from https://app.cachix.org/personal-auth-tokens
-cachix authtoken YOUR_AUTH_TOKEN
-```
-
-#### 4. Create Your Cache
-
-```bash
-# Create a new cache (e.g., "olafkfreund-nixos")
-cachix create olafkfreund-nixos
-```
-
-#### 5. Configure Automatic Uploads
-
-Add to `modules/nix/nix.nix`:
-
-```nix
-# Add to substituters list
-substituters = [
-  "https://cache.nixos.org"
-  "https://nix-community.cachix.org"
-  "https://olafkfreund-nixos.cachix.org"  # Your Cachix cache
-  # ... P620 cache entries
-];
-
-# Add to trusted-public-keys
-trusted-public-keys = [
-  "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-  "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-  "olafkfreund-nixos.cachix.org-1:YOUR_PUBLIC_KEY"  # From cachix.org
-  # ... P620 cache key
-];
-```
-
-#### 6. Upload to Cachix
-
-```bash
-# Push current system to Cachix
-nix-store -qR --include-outputs $(nix-store -qd $(readlink -f /run/current-system)) | cachix push olafkfreund-nixos
-
-# Or push specific build
-nix build .#nixosConfigurations.razer.config.system.build.toplevel --json \
-  | jq -r '.[].outputs.out' \
-  | cachix push olafkfreund-nixos
-```
-
-**7. Automatic Upload on Build** (Optional)
-
-Add to `/etc/nixos/configuration.nix`:
-
-```nix
-nix.settings.post-build-hook = pkgs.writeShellScript "cachix-push" ''
-  set -eu
-  set -f # disable globbing
-  export IFS=' '
-  echo "Uploading paths" $OUT_PATHS
-  exec ${pkgs.cachix}/bin/cachix push olafkfreund-nixos $OUT_PATHS
-'';
-```
-
----
-
-## Troubleshooting
-
-### P620 Cache Not Working
-
-**Check service status:**
-
-```bash
-# On P620
-systemctl status nix-serve
-
-# Should show: active (running)
-```
-
-**Test cache access:**
-
-```bash
-# From Razer
-curl http://p620.freundcloud.com:5000/nix-cache-info
-# Should return cache information
-
-# Or via LAN
-curl http://192.168.1.97:5000/nix-cache-info
-```
-
-**Verify firewall:**
-
-```bash
-# On P620
-sudo nft list ruleset | grep 5000
-# Should show rule allowing port 5000
-```
-
-### Cache Not Being Used
-
-**Check substituters configuration:**
-
-```bash
-# On Razer
-nix show-config | grep substituters
-# Should include P620 cache URLs
-
-nix show-config | grep trusted-public-keys
-# Should include P620 public key
-```
-
-**Force cache usage:**
-
-```bash
-# Test with explicit cache
-nix build .#nixosConfigurations.razer.config.system.build.toplevel \
-  --option substituters "http://p620.freundcloud.com:5000 https://cache.nixos.org" \
-  --option trusted-public-keys "p620-nix-serve:mZR6o5z5KcWeu4PVXgjHA7vb1sHQgRdWMKQt8x3a4rU= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-```
-
-### Network Issues
-
-**Tailscale not working:**
-
-```bash
-# Check Tailscale status
-tailscale status | grep p620
-
-# Test connectivity
-ping p620.freundcloud.com
-```
-
-**LAN access issues:**
-
-```bash
-# Check if on same network
-ip route get 192.168.1.97
-
-# Test LAN connectivity
-ping 192.168.1.97
-```
-
----
-
-## Quick Reference
-
-### Daily Workflow (Razer)
-
-```bash
-# Make configuration changes
-vim hosts/razer/configuration.nix
-
-# Validate
-just validate-quick
-
-# Deploy via P620 cache (RECOMMENDED)
-just deploy-via-p620 razer
-```
-
-### Weekly Maintenance
-
-```bash
-# Update flake inputs
-just update-flake
-
-# Build everything on P620
-just build-all-parallel
-
-# Deploy to all hosts
-just deploy-all-parallel
-```
-
-### Emergency Deployment
-
-```bash
-# Direct deploy (bypass cache)
-sudo nixos-rebuild switch --flake .#razer
-```
-
----
-
-## Best Practices
-
-1. **Always use P620 cache for Razer deployments**
-   - Saves battery and time
-   - Command: `just deploy-via-p620 razer`
-
-2. **Keep P620 running during work hours**
-   - Cache only works when P620 is online
-   - Consider wake-on-LAN if needed
-
-3. **Regular cache maintenance**
-   - P620 garbage collection runs weekly
-   - Old builds automatically cleaned up
-
-4. **Test before deploying**
-   - Use `just build-on-p620 razer` to test
-   - Then `just deploy-via-p620 razer` if successful
-
-5. **Monitor cache usage**
-
-   ```bash
-   # On P620
-   du -sh /nix/store
-   nix-store --gc --print-dead
-   ```
-
----
-
-## Related Documentation
-
-- **Deployment Guide**: `docs/deployment-guide.md`
-- **NixOS Patterns**: `docs/PATTERNS.md`
-- **Performance Optimization**: `modules/system/performance.nix`
-- **P620 Configuration**: `hosts/p620/configuration.nix`
-
----
-
-**Last Updated**: 2025-01-13
-**Status**: Production Ready
-**Maintainer**: Infrastructure Team
+- [Deployment guide](deployment-guide.md)
+- [Update and deploy workflow](../UPDATE-DEPLOY.md)

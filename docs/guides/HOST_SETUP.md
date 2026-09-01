@@ -1,4 +1,4 @@
-# ️ Host Setup Guide
+# Host Setup Guide
 
 This guide covers adding new hosts to the NixOS configuration with proper secrets management and user access.
 
@@ -85,10 +85,10 @@ let
   newhost = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINewHostPublicKey root@new-hostname";
 
   # Update host groups
-  allHosts = [ p620 razer p510 dex5550 newhost ];
+  allHosts = [ p620 razer p510 newhost ];
   workstations = [ p620 razer newhost ];  # If it's a workstation
   # or
-  servers = [ p510 dex5550 newhost ];     # If it's a server
+  servers = [ p510 newhost ];             # If it's a server
 in
 {
   # Existing secrets get access to new host
@@ -183,7 +183,7 @@ nixos-rebuild switch --flake .#new-hostname
 }
 ```
 
-### Intel Integrated (like DEX5550)
+### Intel integrated graphics
 
 ```nix
 {
@@ -474,7 +474,7 @@ lspci | grep -i gpu
 
 - Verify host key in secrets.nix
 - Check secret file permissions
-- Run recovery script: `./scripts/recover-secrets.sh`
+- Re-key the secrets to include the new host: `./scripts/manage-secrets.sh rekey`
 
 This guide should help you successfully add new hosts to your NixOS
 configuration with proper integration into the secrets management and user
