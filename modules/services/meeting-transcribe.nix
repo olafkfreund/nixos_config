@@ -1,7 +1,7 @@
 # meeting-transcribe — one-button meeting recording + transcription + summary.
 #
 # UX: SUPER+SHIFT+M to start, again to stop. After stop, a background job
-# transcribes (whisperX + diarization) and summarizes (Ollama, qwen3.8:27b)
+# transcribes (whisperX + diarization) and summarizes (Ollama, gemma4:12b)
 # the audio. ~2-5 min later, notify-send fires with a markdown brief at
 # ~/meetings/YYYY-MM-DD-HHMM.md containing TL;DR, your action items, decisions,
 # flagged keywords, topic timeline, and the full diarized transcript.
@@ -621,12 +621,25 @@ in
 
     ollamaModel = lib.mkOption {
       type = lib.types.str;
-      default = "qwen3.8:27b";
+      default = "gemma4:12b";
       description = ''
-        Ollama model used for summarization. Must already be pulled on the
-        Ollama host or every brief silently degrades to transcript-only.
-        The default matches p620's `persistentModels`, so it is resident and
-        answers without a load stall.
+        Ollama model used for summarization. Must be declared in
+        `features.ollama-server` or every brief silently degrades to
+        transcript-only -- asserted below when Ollama is local.
+
+        Sized to fit, not maximised. p620's card has 21.5 GB and
+        OLLAMA_CONTEXT_LENGTH is 32768, so gemma4:12b (7.6 GB) loads fully
+        onto the GPU at ~51% VRAM and leaves the rest for the compositor.
+        qwen3.8:27b was tried first and is the wrong shape here: 17 GB of
+        weights plus that KV cache overflows the card, ollama splits it
+        88/12 GPU/CPU, VRAM hits 94% and the desktop freezes for the whole
+        run. Both return valid JSON of equivalent quality for this task --
+        it is transcript extraction, not reasoning -- so the larger model
+        buys nothing and costs a usable machine.
+
+        Note OLLAMA_KEEP_ALIVE is 5m: nothing stays resident between
+        meetings, so every run pays a cold load (24s for gemma4:12b,
+        ~59s for qwen3.8:27b). `persistentModels` only pre-pulls.
       '';
     };
 

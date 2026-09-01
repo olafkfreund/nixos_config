@@ -102,7 +102,7 @@ features.meetingTranscribe = {
 | `installProcessor`     | bool           | `false`               | Installs whisperX and `meet-process`. Must be `true` when `processHost = "local"`. |
 | `huggingfaceTokenFile` | path or null   | `null`                | Path to an HF token file. Needed on the processor for diarization; degrades gracefully when missing. |
 | `ollamaUrl`            | string         | `"http://p620:11434"` | Ollama API base URL. Set to `http://localhost:11434` on p620. |
-| `ollamaModel`          | string         | `"qwen3.8:27b"`       | Must be declared in `features.ollama-server`; asserted at eval time when Ollama is local. |
+| `ollamaModel`          | string         | `"gemma4:12b"`        | Must be declared in `features.ollama-server`; asserted at eval time when Ollama is local. |
 | `whisperModel`         | string         | `"large-v3"`          | One of `tiny`, `base`, `small`, `medium`, `large-v3`. |
 | `language`             | string         | `"en"`                | For example `en`, `no`, `da`. |
 | `outputDir`            | string         | `"~/meetings"`        | Per-user; the tilde is expanded at runtime. |
@@ -114,9 +114,20 @@ features.meetingTranscribe = {
 
 ### The summarization model
 
-`ollamaModel` defaults to `qwen3.8:27b`, which p620 declares in
-`features.ollama-server.persistentModels` — it stays resident, so summarizing
-does not stall on a model load.
+`ollamaModel` defaults to `gemma4:12b`, chosen to fit rather than to be the
+largest available. p620's card has 21.5 GB and `OLLAMA_CONTEXT_LENGTH` is
+32768, so at 7.6 GB it loads fully onto the GPU (~51% VRAM) and leaves the
+rest for the desktop.
+
+`qwen3.8:27b` was tried first and is the wrong shape: 17 GB of weights plus
+that KV cache overflows the card, Ollama splits it 88/12 GPU/CPU, VRAM hits
+94% and **the desktop freezes for the whole run**. Both models return valid
+JSON of equivalent quality here — this is extraction from a transcript, not
+reasoning — so the larger one buys nothing and costs a usable machine.
+
+`OLLAMA_KEEP_ALIVE` is 5m, so nothing stays resident between meetings: every
+run pays a cold load, 24s for `gemma4:12b` against ~59s for `qwen3.8:27b`.
+`persistentModels` only pre-pulls; it does not pin.
 
 If you point it at a model the Ollama host does not declare, the build now
 fails with an assertion naming the models that are available. Before, Ollama
