@@ -337,23 +337,13 @@ nixos-rebuild switch --flake .#new-hostname
 }
 ```
 
-## Monitoring and Logging
+## Logging
 
-### Basic Monitoring
+There is no metrics stack on this fleet (Prometheus/Grafana/Loki/Alertmanager
+were removed). System insight comes from the journal, so it is worth capping:
 
 ```nix
 {
-  # System monitoring
-  services.prometheus = {
-    exporters = {
-      node = {
-        enable = true;
-        enabledCollectors = [ "systemd" "filesystem" "network" ];
-      };
-    };
-  };
-
-  # Log management
   services.journald.extraConfig = ''
     SystemMaxUse=1G
     MaxRetentionSec=1month

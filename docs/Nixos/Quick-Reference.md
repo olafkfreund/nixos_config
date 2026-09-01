@@ -120,12 +120,17 @@ just razer                  # Deploy to razer
 just p510                   # Deploy to p510
 ```
 
-### Monitoring
+### System state
+
+The Prometheus/Grafana/Loki/Alertmanager stack was removed; `grafana-status`,
+`prometheus-status` and `node-exporter-status` no longer exist.
 
 ```bash
-grafana-status           # Grafana status
-prometheus-status        # Prometheus status
-node-exporter-status     # Exporter status
+systemctl --failed                  # anything broken
+systemctl status <unit>             # one unit
+journalctl -u <unit> -f            # follow a unit
+journalctl -p err -b               # this boot's errors
+readlink /nix/var/nix/profiles/system   # current generation
 ```
 
 ## Emergency Procedures
@@ -162,31 +167,20 @@ ssh HOST "readlink /nix/var/nix/profiles/system"
 just emergency-deploy HOST
 ```
 
-## Monitoring Access
-
-### Web Interfaces
+## Service Web Interfaces
 
 ```bash
-# Grafana
-http://p620:3001
-# Login: admin / nixos-admin
-
-# Prometheus
-http://p620:9090
-
-# Alertmanager
-http://p620:9093
+# p510
+https://p510:47990          # Sunshine (Moonlight streaming host)
+http://p510:32400/web       # Plex
 ```
+
+There is no Grafana, Prometheus or Alertmanager on any host, and no binary
+cache server on p620 — nothing listens on `p620:5000`.
 
 ### CLI Checks
 
 ```bash
-# Prometheus targets
-curl -s http://p620:9090/api/v1/targets | jq
-
-# Active alerts
-curl -s http://p620:9093/api/v2/alerts | jq
-
 # Service status
 ssh HOST "systemctl status SERVICE"
 ```
@@ -280,12 +274,10 @@ docs/GITHUB-WORKFLOW.md       # GitHub workflow
 
 ### Critical Services
 
-**P620 (Monitoring Server):**
+**P620 (AI / build host):**
 
-- Prometheus (9090)
-- Grafana (3001)
-- Alertmanager (9093)
-- AI Services (Ollama)
+- Ollama (ROCm) + LiteLLM router
+- glance
 
 **P510 (Media Server):**
 
@@ -396,14 +388,12 @@ Ctrl+B d        # Detach session
 - [ ] Configuration tested: `just quick-test`
 - [ ] Git status clean: `git status`
 - [ ] No critical issues: `/check_tasks`
-- [ ] Monitoring operational: `grafana-status`
 - [ ] Rollback plan ready
 
 ### After Deployment
 
 - [ ] Services running: Check `systemctl --failed`
-- [ ] Monitoring updated: Check Grafana dashboards
-- [ ] No new alerts: Check Alertmanager
+- [ ] No new errors: `journalctl -p err -b`
 - [ ] Documentation updated
 - [ ] GitHub issues closed
 
@@ -431,7 +421,7 @@ done
 
 ## Support Resources
 
-### Documentation
+### Further reading
 
 - [README](./README.md) - Getting started
 - [Overview](./Command-System-Overview.md) - Complete guide
@@ -444,11 +434,11 @@ done
 - **GitHub CLI**: `gh --help`
 - **Claude Code**: `claude --help`
 
-### Monitoring
+### System insight
 
-- **Grafana**: Visualization and dashboards
-- **Prometheus**: Metrics collection
-- **Alertmanager**: Alert management
+- **journalctl** / **systemctl**: the whole story since the monitoring stack
+  was removed
+- **nvd** / **just diff HOST**: closure deltas before a deploy
 
 ---
 

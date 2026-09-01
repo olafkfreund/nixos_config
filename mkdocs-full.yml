@@ -149,6 +149,7 @@ nav:
       - Feature Flags: architecture/feature-flags.md
       - Hardware Profiles: architecture/hardware-profiles.md
       - Overlays: architecture/overlays.md
+      - "Desktop (Nixarchy)": architecture/desktop.md
       - Theming (Stylix): architecture/theming.md
       - Secrets (agenix): architecture/secrets.md
       - Home Manager: architecture/home-manager.md
@@ -186,6 +187,7 @@ nav:
       - P620 BIOS / NUMA: applications/P620-BIOS-NUMA-Configuration.md
       - "k3d Cluster (ops)": applications/k3d-cluster.md
       - "Cloudflared Tunnel (host)": applications/cloudflared-tunnel.md
+      - "Sunshine (streaming)": applications/sunshine.md
   - Command System:
       - Overview: Nixos/README.md
       - Commands Index: Nixos/COMMANDS-INDEX.md

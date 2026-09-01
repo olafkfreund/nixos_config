@@ -304,9 +304,10 @@ Use parallel commands whenever possible:
 - `just deploy-all-parallel`
 - `just build-all-parallel`
 
-### 4. Monitor Performance
+### 4. Watch the deploy
 
-Check deployment metrics in Grafana to identify bottlenecks.
+There is no metrics stack. Use `journalctl -f` on the target and
+`just diff HOST` for the closure delta before switching.
 
 ### 5. Use Appropriate Strategy
 
@@ -341,13 +342,19 @@ Example GitHub Actions workflow:
   run: just deploy-all-parallel
 ```
 
-### Monitoring Alerts
+### Deploy failures
 
-Grafana alerts configured for:
+There are no configured alerts. A failed deploy is caught by reading the
+`switch-to-configuration` output and `systemctl --failed` on the target.
 
-- Deployment failures
-- Performance degradation
-- Host connectivity issues
+Two known false alarms on this fleet:
+
+- **`switch` exits 4 on p510 and razer even on success** — p510 reloads the
+  user `dbus-broker` mid-switch; razer has a self-healing `syncthing-init`
+  race. Verify `/run/current-system` and `systemctl --failed`, not the exit
+  code. Never pipe the build through `tail`, which masks the real exit status.
+- **One permanently-dead unit rolls back the whole deploy** (e.g. `thermald`
+  on AMD). Read the "the following units failed" line and fix the unit.
 
 ## Future Optimizations
 

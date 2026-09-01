@@ -3,18 +3,24 @@
 Multi-host NixOS configuration using flakes, a single parameterised host
 template, Home Manager as a flake module, and Stylix-driven theming.
 
-Last verified: 2026-05-04 against `nixos-unstable` (NixOS 26.05).
+Last verified: 2026-09-01 against `nixos-unstable` (NixOS 26.11).
 
 ## Hosts
 
-| Host  | Class       | Hardware       | Role                              | Template            |
-|-------|-------------|----------------|-----------------------------------|---------------------|
-| p620  | workstation | AMD RX 7900    | Primary development, AI workloads | desktop/workstation |
-| p510  | workstation | Intel Xeon     | Headless media server (Plex)      | desktop/workstation |
-| razer | laptop      | Intel + NVIDIA | Mobile development, Secure Boot   | desktop/laptop      |
+| Host  | Class       | Hardware               | Role                                    | Template            |
+|-------|-------------|------------------------|-----------------------------------------|---------------------|
+| p620  | workstation | AMD RX 7900 (ROCm)     | Primary development, AI workloads       | desktop/workstation |
+| p510  | workstation | Intel Xeon + RTX 3070 Ti | Media server (Plex), k3s, CI runner, desktop | desktop/workstation |
+| razer | laptop      | Intel + NVIDIA         | Mobile development, Secure Boot         | desktop/laptop      |
 
-DEX5550 and Samsung have been removed from the configuration. References
-in older docs are stale.
+All three run the same Wayland session — see [Desktop](#desktop) below.
+
+**p510 is the always-on media server: never build or deploy it without
+asking first.** Heavy razer rebuilds should be built on p620
+(`just deploy-via-p620 razer`).
+
+DEX5550 is offline; Samsung and HP are decommissioned. References in older
+docs are stale.
 
 ## Architecture
 
@@ -22,9 +28,8 @@ in older docs are stale.
   (selects between `workstation` and `laptop` profiles via the
   `profile` argument). Surfaced through `lib/hostTypes.nix` as
   `hostTypes.workstation` / `hostTypes.laptop`. The previous
-  `server`/`hybrid`/`base` templates were removed; P510 also uses the
-  workstation template (headless via `host.class = "workstation"` and
-  no display manager).
+  `server`/`hybrid`/`base` templates were removed; p510 also uses the
+  workstation template, overriding only what genuinely differs.
 - Hardware GPU profiles in `hosts/common/hardware-profiles/` (`amd`,
   `nvidia`, `intel-integrated`).
 - Feature flags drive module enablement (see `lib/features.nix`).
@@ -33,14 +38,52 @@ in older docs are stale.
 - Overlays are split by purpose under `overlays/`:
   `default.nix`, `custom-packages.nix`, `cmake-compat.nix`,
   `python-compat.nix`, `upstream-fixes.nix`, `citrix-workspace.nix`.
-- Theming is centralised through Stylix (`base16` palette). Dependent
-  surfaces — GNOME Terminal, Zellij, COSMIC (full RON palette write,
-  30 fields) — derive their colours from
+- Theming is centralised through Stylix (`base16` palette), whose
+  source of truth is the **active Omarchy theme** — see [Theming](#theming).
+  Dependent surfaces — Plymouth, GRUB, the console, GTK, Qt, GNOME
+  Terminal, Zellij — derive their colours from
   `config.lib.stylix.colors`. The standalone `nix-colors` input has
   been removed.
 - Home Manager is loaded as a flake module from `flake.nix`. Do **not**
   run `home-manager switch` directly; user environments are activated
   by the system rebuild.
+
+## Desktop
+
+One Wayland session on every host: **Omarchy on Hyprland**, packaged for
+NixOS as [Nixarchy](https://github.com/olafkfreund/nixarchy) and consumed
+as a flake input. GNOME stays installed and selectable as a fallback.
+Everything else — niri, labwc, mango, Noctalia, DankMaterialShell — is
+gone, including the flake inputs. COSMIC is parked, not removed.
+
+| | p620 | razer | p510 |
+|---|---|---|---|
+| Sessions | `omarchy`, `gnome` | `omarchy`, `gnome` | `omarchy`, `gnome` |
+| Greeter | Omarchy's SDDM | Omarchy's SDDM | Omarchy's SDDM |
+| Default | `omarchy` | `omarchy` | `omarchy` |
+| Autologin | off | off | **on** (Sunshine needs a live session) |
+| Omarchy preinstalls | on | on | **off** (~4 GiB of closure) |
+
+Wired per host in `hosts/<host>/nixos/nixarchy.nix` plus shared fragments
+under `hosts/common/nixos/omarchy-*.nix`.
+
+Three things are easy to get wrong:
+
+- **`programs.hyprland` is enabled by the Nixarchy module, not by us.** It
+  supplies the portal, `uwsm` and the wayland-session basics, so it cannot
+  be turned off — but it also registers a second, indistinguishable
+  Hyprland login entry. `omarchy-sole-hyprland.nix` forces the module off
+  and restates what Nixarchy needs. Read that file before touching
+  anything Hyprland-adjacent; the two obvious workarounds both fail.
+- **Hyprland config here is Lua, not hyprlang.** Dispatchers are
+  namespaced: `hyprctl dispatch 'hl.dsp.dpms({ action = "enable" })'`.
+  The string form (`"dpms on"`) silently does nothing.
+- **Two files at the flake root are written by Omarchy**, because a flake
+  cannot read outside its own tree: `nixarchy-apps.nix` (by
+  `nixarchy-apply`) and `nixarchy-theme.nix` (by `omarchy theme set`).
+  Both leave the tree dirty, and `nhs` refuses a dirty tree.
+
+Full detail: [docs/architecture/desktop.md](./docs/architecture/desktop.md).
 
 ## Quick Start
 
@@ -166,12 +209,18 @@ keys).
 
 ## Razer: Secure Boot
 
-razer boots via lanzaboote (`v1.0.0`) with `systemd-initrd`. Because
+razer boots via lanzaboote (`v1.1.0`) with `systemd-initrd`. Because
 the firmware ships a locked Setup Mode, MOK enrollment is handled by a
 shim+MOK module (`modules/razer/...`) that wraps `lzbt` and points
-`pkiBundle` at `/var/lib/sbctl` (the sbctl 0.18 default). Kernel is
-pinned to `linuxPackages_latest` to dodge the 6.18.24 + NVIDIA boot
-regression.
+`pkiBundle` at `/var/lib/sbctl` (the sbctl 0.18 default).
+
+Kernel is `linuxPackages_latest` (7.0.1) because 6.18.24 + `nvidia-open`
+failed to boot. `hosts/razer/nixos/boot.nix` documents the fallback:
+pin 6.18.22 via a separate module if 7.0.1 also fails.
+
+The ESP is 511 MiB against ~149 MiB of NVIDIA-firmware initrd per
+generation, so it holds very few generations. `--clean` escalates to a
+single generation rather than failing its own threshold.
 
 ## Live Installer
 
@@ -188,13 +237,23 @@ builder (`lib/live-images.nix`) can be re-instantiated if needed.
 
 ## Theming
 
-- Source of truth: `config.lib.stylix.colors` (base16 scheme).
+- Source of truth: the **active Omarchy theme**.
+  `omarchy theme set X` retints Omarchy's own 24 files immediately and a
+  `theme-set.d` hook writes `X` into `nixarchy-theme.nix` at the flake
+  root; `modules/desktop/stylix-theme.nix` maps that theme's
+  `colors.toml` onto base16 and feeds Stylix. Everything Omarchy cannot
+  reach at runtime follows at the **next rebuild**, not instantly.
+- Reach the package through `inputs.nixarchy`, never
+  `config.programs.nixarchy.package` — nixarchy consumes Stylix, so that
+  closes the module fixpoint and evaluation dies with infinite recursion.
+- Surfaces: `config.lib.stylix.colors` (base16 scheme) drives Plymouth,
+  GRUB, the console, GTK, Qt, fonts, cursor, icons, GNOME Terminal and
+  Zellij.
 - `assets/wallpapers/` contains all wallpapers; the active wallpaper is
   selected by the per-host theme module.
 - COSMIC: a writer derivation produces the full RON palette (30
-  fields) from the base16 scheme; no hardcoded hex values remain.
-- GNOME Terminal: palette derived from Stylix base16.
-- Zellij: theme derived from Stylix.
+  fields) from the base16 scheme. COSMIC itself is parked
+  (`desktop.cosmic.enable = false` everywhere); the writer stays wired.
 - GNOME profile: shared `home/profiles/desktop-user/profile.nix` and
   the `desktop.gnome.profile` module unify the wiring; the
   `desktop.displayManager` module unifies display-manager selection.
@@ -207,6 +266,17 @@ The following are intentionally absent from the current configuration:
 
 - Prometheus / Grafana / Loki / Alertmanager monitoring stack — system
   insight is now via `journalctl`, `systemctl`, and per-service logs.
+  Older docs still list `grafana-status` / `prometheus-status` helpers;
+  those commands no longer exist.
+- niri, labwc, mango, Noctalia and DankMaterialShell — modules,
+  sessions, greeters and flake inputs. Anything describing
+  `dms-shell.nix`, "Niri (DMS)", "Hyprland (DMS)" or
+  `${DESK_SHELL:-noctalia}` is describing a tree that no longer exists.
+- A binary cache of our own. There is no nix-serve/harmonia anywhere in
+  the repo and nothing listens on `p620:5000`. `modules/nix/nix.nix`
+  substitutes from cache.nixos.org and nix-community.cachix.org;
+  `flake.nix` adds cuda-maintainers and devenv as flake-level
+  `extra-substituters`. Tailscale is used for remote SSH, not caching.
 - `nix-colors` input (replaced by Stylix base16).
 - `termshark`, `wireshark`, `reddix`, `wasistlos`, `steampipe` modules
   and the standalone `cosmic-applet-package-updater` chain.
@@ -323,6 +393,12 @@ sudo nixos-rebuild switch --rollback   # Roll back to previous generation
   practices (read before writing modules).
 - [docs/NIXOS-ANTI-PATTERNS.md](./docs/NIXOS-ANTI-PATTERNS.md) —
   Anti-patterns and review checklist.
+- [docs/architecture/desktop.md](./docs/architecture/desktop.md) —
+  Nixarchy / Omarchy on Hyprland: sessions, theming, screen sharing.
+- [docs/applications/sunshine.md](./docs/applications/sunshine.md) —
+  Sunshine streaming on p510 and its four traps.
+- [docs/hosts/p510.md](./docs/hosts/p510.md) — p510: media stack, k3s,
+  the self-hosted CI runner, and its known quirks.
 - [docs/MCP-GUIDE.md](./docs/MCP-GUIDE.md) — MCP server integration.
 - [docs/guides/GITHUB-WORKFLOW.md](./docs/guides/GITHUB-WORKFLOW.md) —
   Issue-driven development workflow.

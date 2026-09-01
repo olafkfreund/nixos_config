@@ -445,18 +445,15 @@ just test-host          # Individual host testing
 
 ### Monitoring Integration
 
-Commands interact with monitoring:
+Commands read system state directly. The Prometheus/Grafana/Loki/Alertmanager
+stack was removed, so `grafana-status`, `prometheus-status` and
+`node-exporter-status` no longer exist and nothing listens on ports 9090/3001/9093.
 
 ```bash
-# Commands check:
-grafana-status          # Dashboard health
-prometheus-status       # Metrics collection
-node-exporter-status    # Exporter status
-
-# Commands access:
-http://p620:9090        # Prometheus
-http://p620:3001        # Grafana
-http://p620:9093        # Alertmanager
+systemctl --failed      # anything broken
+systemctl status <unit> # one unit
+journalctl -u <unit> -f # follow a unit
+journalctl -p err -b    # this boot's errors
 ```
 
 ### Documentation Integration
