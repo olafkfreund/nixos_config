@@ -31,8 +31,10 @@
 #
 # Setup (one-time, post-deploy on p620):
 #   1. Sign up at https://huggingface.co/join (free).
-#   2. Accept terms at https://huggingface.co/pyannote/speaker-diarization-3.1
-#      (and the dependency https://huggingface.co/pyannote/segmentation-3.0).
+#   2. Accept terms at
+#      https://huggingface.co/pyannote/speaker-diarization-community-1
+#      That is what whisperX 3.8.6 requests -- NOT speaker-diarization-3.1,
+#      which earlier revisions of this file and the docs both named.
 #   3. Create a read token at https://huggingface.co/settings/tokens.
 #   4. ./scripts/manage-secrets.sh create api-huggingface  (paste token).
 #   5. just quick-deploy p620 && just quick-deploy razer.
@@ -346,15 +348,34 @@ let
       # whisperX writes <BASE>.json into --output_dir. CPU device is the
       # safe default on AMD (ROCm wheels for CTranslate2 are not yet in
       # nixpkgs); 16-core Threadripper still gets ~10x realtime on large-v3.
-      whisperx \
-        --model "$WHISPER_MODEL" \
-        --language "$LANGUAGE" \
-        --device cpu \
-        --compute_type int8 \
-        --output_dir "$OUTPUT_DIR" \
-        --output_format json \
-        "''${DIARIZE_ARGS[@]}" \
-        "$AUDIO_FILE" >&2
+      run_whisperx() {
+        whisperx \
+          --model "$WHISPER_MODEL" \
+          --language "$LANGUAGE" \
+          --device cpu \
+          --compute_type int8 \
+          --output_dir "$OUTPUT_DIR" \
+          --output_format json \
+          "$@" \
+          "$AUDIO_FILE" >&2
+      }
+
+      # A token that is present but NOT authorized for the gated pyannote
+      # repo is worse than no token: whisperX aborts with GatedRepoError and
+      # there is no transcript at all, where an absent token merely skips
+      # diarization. Retry undiarized so the recording always survives.
+      if ! run_whisperx "''${DIARIZE_ARGS[@]}"; then
+        if [[ ''${#DIARIZE_ARGS[@]} -gt 0 ]]; then
+          echo "meet-process: diarization failed (gated pyannote repo, or a bad HF token) -- retrying without it" >&2
+          run_whisperx || {
+            echo "meet-process: whisperX failed even without diarization" >&2
+            exit 1
+          }
+        else
+          echo "meet-process: whisperX failed" >&2
+          exit 1
+        fi
+      fi
 
       if [[ ! -s "$JSON_FILE" ]]; then
         echo "meet-process: whisperX produced no JSON at $JSON_FILE" >&2
@@ -378,12 +399,23 @@ let
 
       SYSTEM_PROMPT="You are an expert meeting analyst. Extract structured information from a diarized meeting transcript and return ONLY valid JSON matching the provided schema. Never invent facts not stated in the transcript. If a section has no entries, return an empty array — never omit a field."
 
+      # Without diarization the transcript carries no SPEAKER_XX labels, and
+      # a prompt that demands user_speaker_label / participants[].label /
+      # flagged_moments[].speaker then asks for something unobtainable. Models
+      # do not answer "null" to that -- gemma4:12b loops until num_predict,
+      # returns an empty body, and the whole summary is lost (#1613). Since
+      # the module deliberately supports running with no HF token at all, the
+      # undiarized case has to summarize too: relax the speaker fields rather
+      # than let the run degrade to transcript-only.
+      if grep -q 'SPEAKER_' <<<"$TRANSCRIPT_TXT"; then
+        SPEAKER_RULE="One of those speakers IS the user; identify which one from context (who others address by name, who hosts the meeting, who takes notes)."
+      else
+        SPEAKER_RULE="This transcript has NO speaker labels (diarization was unavailable). Set user_speaker_label to null, participants to [], and every flagged_moments[].speaker and other_action_items[].assignee to null. Infer action items from names spoken aloud in the text instead. Do not invent SPEAKER_XX labels."
+      fi
+
       USER_PROMPT=$(cat <<PROMPT
-      The user is $USER_NAME ($USER_EMAIL). The transcript below uses speaker
-      labels like SPEAKER_00. One of those speakers IS the user; identify
-      which one from context (who others address by name, who hosts the
-      meeting, who takes notes, who matches the user's role). Use that to
-      separate the user's own action items from others'.
+      The user is $USER_NAME ($USER_EMAIL). $SPEAKER_RULE
+      Use that to separate the user's own action items from others'.
 
       Return a JSON object with EXACTLY these fields:
       {
@@ -513,7 +545,7 @@ let
         if [[ "$N" -eq 0 ]]; then
           echo "_None._"
         else
-          jq -r '.other_action_items[] | "- [ ] **\(.assignee):** \(.task)\(if .deadline then "  _(\(.deadline))_" else "" end)"' <<<"$SUMMARY_JSON"
+          jq -r '.other_action_items[] | "- [ ] \(if .assignee then "**\(.assignee):** " else "" end)\(.task)\(if .deadline then "  _(\(.deadline))_" else "" end)"' <<<"$SUMMARY_JSON"
         fi
         echo ""
 
@@ -543,7 +575,7 @@ let
         if [[ "$N" -eq 0 ]]; then
           echo "_No flagged moments._"
         else
-          jq -r '.flagged_moments[] | "- \(.timestamp) **\(.speaker)** [\(.keyword)] — \(.context)"' <<<"$SUMMARY_JSON"
+          jq -r '.flagged_moments[] | "- \(.timestamp)\(if .speaker then " **\(.speaker)**" else "" end) [\(.keyword)] — \(.context)"' <<<"$SUMMARY_JSON"
         fi
         echo ""
 
