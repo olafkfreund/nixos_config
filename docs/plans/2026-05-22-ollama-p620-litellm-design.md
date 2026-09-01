@@ -356,7 +356,7 @@ Result: `https://p620.<tailnet>.ts.net/router` reachable from any tailnet peer.
 
 **v1 deployment mechanism:** the master plaintext is identical across all
 three `.age` files — they differ only in which host's age public key encrypts
-them (declared in `secrets/secrets.nix`). The router on p620 reads
+them (declared in `secrets.nix`). The router on p620 reads
 `litellm-master-key.age` to validate; clients on p620 and razer read their
 respective `api-router-<host>.age` to authenticate. The plaintext matches; the
 recipients don't. This keeps the agenix access-control model intact while

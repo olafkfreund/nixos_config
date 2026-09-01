@@ -100,6 +100,6 @@ template system exists to prevent.
    `hostTypes.laptop`).
 3. Declare host-unique bits (GPU profile, monitors, host-specific features).
 4. Register it in `flake.nix` (`hostUsers`, `hardwareProfiles`).
-5. Add the host SSH key to `secrets/secrets.nix` and rekey.
+5. Add the host SSH key to `secrets.nix` and rekey.
 
 Full procedure: [Adding a Host](../guides/HOST_SETUP.md).

@@ -169,7 +169,7 @@ Commands integrate seamlessly with:
 - **Just commands**: `just validate`, `just quick-test`, `just quick-deploy`
 - **GitHub workflow**: `/new_task`, `/check_tasks`, `/review`
 - **Documentation**: `@docs/PATTERNS.md`, `@docs/NIXOS-ANTI-PATTERNS.md`
-- **Monitoring**: Grafana, Prometheus, health checking
+- **Health checks**: `systemctl --failed`, `journalctl` (no metrics stack — Prometheus/Grafana/Loki were removed)
 
 ## Best Practices
 

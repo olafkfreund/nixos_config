@@ -51,4 +51,4 @@ nixos_config/
   directly in a host file — wrap it in a module with a feature flag so it is
   reusable and testable. See [Feature Flags](../architecture/feature-flags.md).
 - **Encrypted secrets are committed; plaintext is not.** `.age` files are safe
-  in git; the access rules live in `secrets/secrets.nix`.
+  in git; the access rules live in `secrets.nix`.

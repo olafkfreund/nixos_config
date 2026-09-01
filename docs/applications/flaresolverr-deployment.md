@@ -20,10 +20,10 @@ that caused it to be disabled on 2025-09-02.
 
 The issues have been resolved in current nixpkgs:
 
--  **xvfbwrapper-0.2.16** now builds successfully with Python 3.13
--  **Chromium 143.0.7499.192** is being used (beyond problematic Chromium 127)
--  **FlareSolverr 3.4.6** package builds without errors
--  **Selenium 4.29.0** has Python 3.13 support
+- **xvfbwrapper-0.2.16** now builds successfully with Python 3.13
+- **Chromium 143.0.7499.192** is being used (beyond problematic Chromium 127)
+- **FlareSolverr 3.4.6** package builds without errors
+- **Selenium 4.29.0** has Python 3.13 support
 
 ### Build Verification
 
@@ -115,8 +115,8 @@ sudo systemctl status flaresolverr
 
 # Expected output:
 # ● flaresolverr.service - FlareSolverr
-#      Loaded: loaded
-#      Active: active (running)
+# Loaded: loaded
+# Active: active (running)
 ```
 
 ### 2. Test API Endpoint
@@ -153,15 +153,15 @@ curl -X POST http://localhost:8191/v1 \
 
 # Expected output:
 # {
-#   "status": "ok",
-#   "message": "",
-#   "solution": {
-#     "url": "https://nowsecure.nl/",
-#     "status": 200,
-#     "response": "<html>...",
-#     "cookies": [...],
-#     "userAgent": "..."
-#   }
+# "status": "ok",
+# "message": "",
+# "solution": {
+# "url": "https://nowsecure.nl/",
+# "status": 200,
+# "response": "<html>...",
+# "cookies": [...],
+# "userAgent": "..."
+# }
 # }
 ```
 
@@ -292,11 +292,11 @@ sudo journalctl -u flaresolverr -f
 
 ### Compatibility
 
--  Works with current Cloudflare challenges (as of 2026-01-08)
--  May break with future Cloudflare updates
--  Limited to specific Cloudflare versions
--  Can fail with highly protected websites
--  Selenium/Chromium compatibility issues may recur
+- Works with current Cloudflare challenges (as of 2026-01-08)
+- May break with future Cloudflare updates
+- Limited to specific Cloudflare versions
+- Can fail with highly protected websites
+- Selenium/Chromium compatibility issues may recur
 
 ## Success Criteria
 

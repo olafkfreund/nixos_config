@@ -74,7 +74,7 @@ must already be true:
    and an image is published to `ghcr.io/olafkfreund/backstage`. Capture
    the SHA digest from the workflow's "Print SHA digest" step.
 2. **Phase 2 agenix secrets exist** — these four `.age` files are present
-   in `secrets/` and registered in `secrets/secrets.nix`:
+   in `secrets/` and registered in the top-level `secrets.nix`:
    - `backstage-postgres-password.age`
    - `backstage-github-token.age` (fine-grained PAT, NOT classic)
    - `backstage-github-oauth-client-id.age`
@@ -327,4 +327,4 @@ run `pg_upgrade` (out of scope here).
 Means at least one agenix secret didn't decrypt. Run
 `sudo ls -la /run/agenix/backstage-*` and
 `sudo journalctl -u agenix -n 50`. Almost always: a botched rekey or a
-missing host key for p510 in `secrets/secrets.nix`.
+missing host key for p510 in `secrets.nix`.

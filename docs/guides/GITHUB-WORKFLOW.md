@@ -199,11 +199,11 @@ The command provides:
 ```bash
 # Feature branches
 feature/123-postgres-monitoring
-feature/145-loki-logging
+feature/145-sunshine-streaming
 
 # Bug fix branches
 fix/67-p510-boot-delay
-fix/89-grafana-dashboard-error
+fix/89-sunshine-black-stream
 
 # Enhancement branches
 enhancement/156-monitoring-dashboards
@@ -303,15 +303,15 @@ gh pr create --fill
 
 # Or create with custom title and body
 gh pr create \
-  --title "feat(monitoring): add PostgreSQL monitoring (#123)" \
+  --title "feat(services): add FlareSolverr module (#123)" \
   --body "$(cat <<'EOF'
 ## Summary
-Implements comprehensive PostgreSQL monitoring with prometheus_postgres_exporter.
+Adds a FlareSolverr module behind `features.flaresolverr`.
 
 ## Changes
-- Add PostgreSQL exporter module
-- Create Grafana dashboard for PostgreSQL metrics
-- Update monitoring configuration
+- Add `modules/services/flaresolverr/default.nix`
+- Gate it on `features.flaresolverr.enable`
+- Enable it on p510
 - Add documentation
 
 ## Testing
@@ -461,8 +461,8 @@ gh pr merge 45 --squash --delete-branch
 feat(monitoring): add PostgreSQL monitoring (#123)
 
 Implements comprehensive PostgreSQL monitoring with:
-- prometheus_postgres_exporter integration
-- Custom Grafana dashboard with 15 panels
+- FlareSolverr systemd service with DynamicUser
+- Hardened unit (ProtectSystem, NoNewPrivileges)
 - Query performance tracking
 - Connection pool monitoring
 - Database size metrics
@@ -702,15 +702,11 @@ sudo nixos-rebuild switch --rollback
 # Check system status
 systemctl status
 
-# Verify critical services
-systemctl status prometheus grafana
+# Anything failed?
+systemctl --failed
 
 # Check for errors
 journalctl -p err -b
-
-# Verify monitoring
-grafana-status
-prometheus-status
 
 # Test functionality
 just validate
@@ -776,7 +772,7 @@ just deploy-all        # Deploy all hosts
 
 # Maintenance
 just format            # Format all Nix files
-just clean             # Clean build artifacts
+just cleanup           # Garbage-collect old generations
 ```
 
 ### Git Hooks
@@ -838,7 +834,7 @@ gh pr merge 123 --squash --delete-branch
 just quick-deploy p620
 
 # 11. Verify
-grafana-status
+systemctl --failed
 # Issue #123 automatically closed
 ```
 

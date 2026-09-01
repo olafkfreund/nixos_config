@@ -176,9 +176,7 @@ nav:
       - Adding a Host: guides/HOST_SETUP.md
       - GitHub Workflow: guides/GITHUB-WORKFLOW.md
       - Cache Strategy: guides/CACHE-STRATEGY.md
-      - Cachix Analysis: guides/CACHIX-ANALYSIS.md
       - Package System: guides/PACKAGE-SYSTEM-USAGE.md
-      - Gemini CLI: guides/GEMINI_CLI_FEATURE.md
       - Factory GitOps: guides/factory-gitops.md
   - Patterns:
       - Best Practices: PATTERNS.md
@@ -194,6 +192,7 @@ nav:
       - COSMIC Screen Sharing: applications/screensharing_cosmic.md
       - P620 BIOS / NUMA: applications/P620-BIOS-NUMA-Configuration.md
       - "k3d Cluster (ops)": applications/k3d-cluster.md
+      - "Backstage": backstage.md
       - "Cloudflared Tunnel (host)": applications/cloudflared-tunnel.md
       - "Sunshine (streaming)": applications/sunshine.md
   - Command System:

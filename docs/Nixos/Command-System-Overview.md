@@ -2,13 +2,16 @@
 
 ## Introduction
 
-The NixOS custom command system provides specialized, automated workflows for managing complex NixOS infrastructure. Each command embeds best practices, safety checks, GitHub integration, and comprehensive documentation into repeatable procedures.
+The NixOS custom command system provides specialized, automated workflows for
+managing complex NixOS infrastructure. Each command embeds best practices,
+safety checks, GitHub integration, and documentation into repeatable
+procedures.
 
 ## Architecture
 
 ### Command Structure
 
-```
+```text
 .claude/commands/
 ├── flake-update.md         # Flake input management
 ├── update-claude-code.md   # Claude Code package updates
@@ -238,19 +241,15 @@ just quick-deploy    # Smart deployment
 just test-host HOST  # Individual host testing
 ```
 
-### Monitoring Integration
+### Health checks
 
-Commands interact with monitoring stack:
+There is no metrics stack on this fleet — Prometheus, Grafana, Loki and
+Alertmanager were all removed. Commands read system state directly:
 
 ```bash
-# Health checks verify:
-grafana-status       # Dashboard availability
-prometheus-status    # Metrics collection
-node-exporter-status # Exporter health
-
-# Commands access monitoring:
-curl http://p620:9090/api/v1/targets  # Prometheus
-curl http://p620:9093/api/v2/alerts   # Alertmanager
+systemctl --failed          # Anything broken
+journalctl -p err -b        # This boot's errors
+systemctl status SERVICE    # One unit
 ```
 
 ### Documentation Integration

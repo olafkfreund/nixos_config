@@ -55,19 +55,23 @@ just build-all-parallel      # Build all configs in parallel (no deploy)
 
 ### Active Hosts
 
-- **P620**: AMD workstation with ROCm acceleration
-- **Razer**: Intel/NVIDIA laptop with Optimus graphics
-- **P510**: Intel Xeon/NVIDIA media server with CUDA
-- **DEX5550**: Intel SFF server with integrated graphics
+- **p620** (192.168.1.222): AMD workstation with ROCm acceleration
+- **razer** (192.168.1.77): Intel/NVIDIA laptop with Optimus graphics
+- **p510** (192.168.1.75): Intel Xeon/NVIDIA media server, and a desktop since
+  2026-08-31. **Never build or deploy it without asking first.**
 
-### Network Configuration
+DEX5550 is offline; Samsung and HP are decommissioned.
 
-- **Internal Network**: 192.168.1.0/24
-- **DNS Server**: DEX5550 (192.168.1.222)
-- **Binary Cache**: none (no nix-serve/harmonia in this repo; substituters are
-  cache.nixos.org and nix-community.cachix.org only — see `modules/nix/nix.nix`)
-- **Monitoring Server**: removed (Prometheus/Grafana/Loki/Alertmanager); use
-  `journalctl`/`systemctl status`
+### Network configuration
+
+- **Internal network**: 192.168.1.0/24, gateway 192.168.1.254
+- **Host names**: `~/.ssh/config` uses raw LAN IPs. The `.lan` domain died with
+  the old router.
+- **Binary cache**: none. No nix-serve/harmonia exists in this repo;
+  substituters are cache.nixos.org and nix-community.cachix.org only. See
+  [Binary cache strategy](CACHE-STRATEGY.md).
+- **Monitoring**: removed (Prometheus/Grafana/Loki/Alertmanager). Use
+  `journalctl` and `systemctl status`.
 
 ## Performance Optimizations Applied
 
@@ -91,11 +95,12 @@ just build-all-parallel      # Build all configs in parallel (no deploy)
 just quick-deploy HOST
 ```
 
-### 4. Binary Cache Integration
+### 4. Build on the target host
 
 ```bash
-# NOTE: this Justfile recipe passes a p620:5000 binary-cache option, but no
-# nix-serve/harmonia service exists there — the option is a no-op today.
+# Passes --build-host HOST, so the target builds its own closure instead of
+# building here and copying it over. Despite the name, no binary cache is
+# involved — there isn't one.
 just deploy-cached HOST
 ```
 
@@ -278,13 +283,10 @@ There is no local binary cache. No nix-serve/harmonia service exists anywhere in
 repo, and nothing listens on p620:5000. `modules/nix/nix.nix` only substitutes from
 cache.nixos.org and nix-community.cachix.org.
 
-### Tailscale VPN Integration
+### Tailscale VPN integration
 
-All hosts are connected via Tailscale mesh VPN:
-
-- **Exit Node**: DEX5550 provides internet access
-- **Subnet Routing**: Access to 192.168.1.0/24 network
-- **Security**: All SSH access secured via Tailscale
+All hosts are connected via the Tailscale mesh, which is used for remote SSH
+access — not for caching, and no host advertises itself as an exit node.
 
 ## Best Practices
 
