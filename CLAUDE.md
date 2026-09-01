@@ -48,7 +48,9 @@ in {
 }
 ```
 
-Add the file to `modules/default.nix`, then enable it in the host.
+Import the file by path in the host that needs it (`hosts/<host>/configuration.nix`
+or a file it imports), then enable it there. There is no `modules/default.nix`
+and no auto-discovery — every import is explicit.
 
 ## Commands
 

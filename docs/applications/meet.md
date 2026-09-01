@@ -102,7 +102,7 @@ features.meetingTranscribe = {
 | `installProcessor`     | bool           | `false`               | Installs whisperX and `meet-process`. Must be `true` when `processHost = "local"`. |
 | `huggingfaceTokenFile` | path or null   | `null`                | Path to an HF token file. Needed on the processor for diarization; degrades gracefully when missing. |
 | `ollamaUrl`            | string         | `"http://p620:11434"` | Ollama API base URL. Set to `http://localhost:11434` on p620. |
-| `ollamaModel`          | string         | `"mistral-small3.1"`  | Must already be pulled on the Ollama host. See the caveat below. |
+| `ollamaModel`          | string         | `"qwen3.8:27b"`       | Must be declared in `features.ollama-server`; asserted at eval time when Ollama is local. |
 | `whisperModel`         | string         | `"large-v3"`          | One of `tiny`, `base`, `small`, `medium`, `large-v3`. |
 | `language`             | string         | `"en"`                | For example `en`, `no`, `da`. |
 | `outputDir`            | string         | `"~/meetings"`        | Per-user; the tilde is expanded at runtime. |
@@ -112,19 +112,19 @@ features.meetingTranscribe = {
 
 ## Setup
 
-### The summarization model must be pulled
+### The summarization model
 
-`ollamaModel` defaults to `mistral-small3.1`, which is **not currently pulled
-on p620** — `ollama list` there has no mistral at all. Until it is, Ollama
-returns a model-not-found error and `meet-process` falls back to a
-transcript-only brief with no TL;DR, action items or decisions. Either pull it:
+`ollamaModel` defaults to `qwen3.8:27b`, which p620 declares in
+`features.ollama-server.persistentModels` — it stays resident, so summarizing
+does not stall on a model load.
 
-```bash
-ssh p620 'ollama pull mistral-small3.1'
-```
+If you point it at a model the Ollama host does not declare, the build now
+fails with an assertion naming the models that are available. Before, Ollama
+returned a model-not-found error at runtime and `meet-process` quietly fell
+back to a transcript-only brief; that failure was invisible.
 
-or point the option at a model p620 already has (`qwen3:14b`, `gemma4:12b`,
-`qwen3.8:27b`).
+The assertion can only check a local Ollama. With `processHost` set to a remote
+host, make sure the model is pulled there yourself.
 
 ### HuggingFace token, for diarization
 
@@ -163,22 +163,29 @@ meet process F  # Process an existing audio file F
 meet help       # Show subcommands
 ```
 
-### Keybind: GNOME session only
+### Keybind
 
-`SUPER+SHIFT+M` is wired in `home/desktop/gnome/keybindings.nix` (slot
-`custom5`) and therefore only works in a GNOME session:
+`SUPER+SHIFT+M` toggles recording in **both** sessions:
 
-```nix
-"org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5" = {
-  binding = "<Super><Shift>m";
-  command = "meet toggle";
-  name = "Meeting record/transcribe/summarize";
-};
+| Session | Declared in |
+| --- | --- |
+| Omarchy (Hyprland) | `hosts/common/nixos/omarchy-meet-binds.nix` |
+| GNOME | `home/desktop/gnome/keybindings.nix`, slot `custom5` |
+
+The Omarchy binding ships as `~/.config/hypr/meet-binds.lua` and is loaded by
+the user-owned `bindings.lua`, which needs this line once:
+
+```lua
+pcall(require, "hypr.meet-binds")
 ```
 
-The default session on every host is Omarchy on Hyprland, which has **no
-binding for `meet`**. In that session use the CLI (`meet toggle`) directly, or
-add a binding to `~/.config/hypr/bindings.lua`.
+`pcall`, not a bare `require`: `bindings.lua` survives deploys untouched, so it
+outlives any generation that stops providing the file — a rollback, or a host
+that never enabled the feature. A bare `require` of a missing file fails the
+whole Hyprland config and drops the session into the error overlay.
+
+The module is guarded on `features.meetingTranscribe.enable`, so p510 imports
+it without getting a binding for a binary it does not have.
 
 Verify the GNOME binding after a deploy:
 
@@ -249,9 +256,6 @@ disk, so retry with `meet process <file>`.
 
 ## Caveats
 
-- **Summarization is currently inert on p620** — the default model is not
-  pulled. Fix it before relying on the briefs.
-- **No Hyprland keybind** — the one-button promise only holds in GNOME today.
 - **HuggingFace EULA dance** — three clicks across two models plus a token, one
   time, but tedious.
 - **CPU whisperX** — roughly 10x realtime on a 16-core CPU, so a one-hour

@@ -1,7 +1,7 @@
 # meeting-transcribe — one-button meeting recording + transcription + summary.
 #
 # UX: SUPER+SHIFT+M to start, again to stop. After stop, a background job
-# transcribes (whisperX + diarization) and summarizes (Ollama, mistral-small3.1)
+# transcribes (whisperX + diarization) and summarizes (Ollama, qwen3.8:27b)
 # the audio. ~2-5 min later, notify-send fires with a markdown brief at
 # ~/meetings/YYYY-MM-DD-HHMM.md containing TL;DR, your action items, decisions,
 # flagged keywords, topic timeline, and the full diarized transcript.
@@ -48,6 +48,13 @@ let
   # on the same host as the recording. Any other value is treated as an SSH
   # host name (typically a Tailscale node).
   processLocal = cfg.processHost == "local";
+
+  # Only meaningful when this host runs our own ollama module -- a remote or
+  # hand-rolled Ollama has no declared model list to check against.
+  ollamaCfg = config.features.ollama-server or { };
+  ollamaIsLocal = ollamaCfg.enable or false;
+  ollamaDeclaredModels =
+    (ollamaCfg.persistentModels or [ ]) ++ (ollamaCfg.onDemandModels or [ ]);
 
   flagKeywordsCsv = lib.concatStringsSep "," cfg.flagKeywords;
 
@@ -614,8 +621,13 @@ in
 
     ollamaModel = lib.mkOption {
       type = lib.types.str;
-      default = "mistral-small3.1";
-      description = "Ollama model name for summarization (must be pulled on the host).";
+      default = "qwen3.8:27b";
+      description = ''
+        Ollama model used for summarization. Must already be pulled on the
+        Ollama host or every brief silently degrades to transcript-only.
+        The default matches p620's `persistentModels`, so it is resident and
+        answers without a load stall.
+      '';
     };
 
     whisperModel = lib.mkOption {
@@ -665,6 +677,22 @@ in
         message = ''
           features.meetingTranscribe.processHost = "local" requires
           installProcessor = true (whisperX must be installed locally).
+        '';
+      }
+      {
+        # The summarization model has to be pulled or meet-process gets a
+        # model-not-found error from Ollama and falls back to a
+        # transcript-only brief -- no TL;DR, no action items, no failure
+        # anyone notices. That shipped broken for months. When Ollama is
+        # this host's own, the declared model list is knowable, so check it.
+        assertion =
+          !(processLocal && ollamaIsLocal)
+          || builtins.elem cfg.ollamaModel ollamaDeclaredModels;
+        message = ''
+          features.meetingTranscribe.ollamaModel = "${cfg.ollamaModel}" is not
+          declared in features.ollama-server. Add it to persistentModels or
+          onDemandModels, or point ollamaModel at one of:
+            ${lib.concatStringsSep ", " ollamaDeclaredModels}
         '';
       }
       # huggingfaceTokenFile is intentionally NOT required when
