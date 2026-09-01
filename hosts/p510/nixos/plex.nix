@@ -301,9 +301,26 @@
   # Rate-limit the unit's journal so one runaway session can't drown the log
   # again. 2000 messages per 30s is far above normal Plex chatter and still
   # caps a burst at a few thousand lines instead of ten thousand.
+  #
+  # CPUQuota is the power backstop, not a performance tuning knob. p510
+  # hard-power-cut on 2026-09-01 22:26 when Plex went 7 -> 12 concurrent
+  # streams, blew past the 3070 Ti's ~3-session NVENC limit and fell back to
+  # SOFTWARE x264: five transcoder processes spawned in two seconds, each
+  # loading liblibx264_encoder.so, on 40 threads with no cgroup limit at all
+  # (CPUQuota was infinity). The 490W supply, also feeding a GPU and three
+  # spinning disks, cut 26 seconds later.
+  #
+  # The Plex-side caps (TranscodeCountLimit=3, _CPU-TranscodeCountLimit=1)
+  # are the primary fix, but they live in Plex's own Preferences.xml, which
+  # nothing here manages and a Plex upgrade or a settings reset can undo.
+  # 1600% = 16 of 40 threads, enforced by the kernel regardless of what Plex
+  # thinks it is allowed to do. Well above what 3 NVENC transcodes need, and
+  # far below the all-core stampede that tripped the PSU.
   systemd.services.plex.serviceConfig = {
     LogRateLimitIntervalSec = "30s";
     LogRateLimitBurst = 2000;
+    CPUAccounting = true;
+    CPUQuota = "1600%";
   };
 
   systemd.services.nzbget = {
