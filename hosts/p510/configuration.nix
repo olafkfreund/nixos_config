@@ -25,6 +25,7 @@ in
       ../common/nixos/i18n.nix
       ../common/nixos/envvar.nix
       ../common/nixos/host-class.nix
+      ../common/nixos/zfs-import.nix
       ../common/nixos/inotify-limits.nix
       ./nixos/github-runner.nix # Self-hosted CI for nixarchy's VM checks
       ./nixos/cpu.nix

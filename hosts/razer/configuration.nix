@@ -23,6 +23,7 @@ in
     ../common/nixos/hosts.nix
     ../common/nixos/envvar.nix
     ../common/nixos/host-class.nix
+    ../common/nixos/zfs-import.nix
     ../common/nixos/inotify-limits.nix
     ./nixos/cpu.nix
     ./nixos/laptop.nix
@@ -584,6 +585,18 @@ in
       # Razer hardware support (from laptop.nix)
       polychromatic # GUI for Razer devices
       razergenie # Another Razer configuration tool
+
+      # Bluetooth earbuds. Backs the io.github.rdoupe.pixelbuds Omarchy bar
+      # plugin, which shells out to `pbpctrl` for battery, noise-cancelling
+      # mode and EQ.
+      #
+      # Note this does NOT work with the Pixel Buds A-Series paired here:
+      # pbpctrl drives Google's "maestro" RFCOMM profile, which the A-Series
+      # does not advertise (only Audio Sink and AVRCP), so every command
+      # fails with br-connection-profile-unavailable. Upstream issue
+      # qzed/pbpctrl "Doesn't work on A-Series" has been open since 2023.
+      # Installed deliberately anyway, ready for Pixel Buds Pro hardware.
+      pbpctrl # Pixel Buds Pro control (battery, noise-cancelling, EQ)
 
       # Login manager (from greetd.nix)
       tuigreet
