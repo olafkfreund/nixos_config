@@ -1,9 +1,34 @@
 { lib, pkgs, ... }: {
-  # CPU frequency scaling for Xeon workstation
+  # CPU frequency scaling. Deliberately NOT "performance" any more.
+  #
+  # p510 hard-power-cut a fourth time on 2026-09-01 at 22:26. The GPU was not
+  # the cause: its 130W cap had been in force for 6.5 hours. What the journal
+  # shows in the final 30 seconds is Plex going from 7 to 12 concurrent
+  # streams, exceeding the 3070 Ti's ~3-session NVENC limit, and falling back
+  # to SOFTWARE x264 -- five transcoder processes spawned between 22:26:00 and
+  # 22:26:02, each loading liblibx264_encoder.so. On 20 Broadwell-EP cores
+  # held at maximum by the "performance" governor, that is the power spike
+  # that tripped a 490W supply also feeding a GPU and three spinning disks.
+  #
+  # intel_pstate in active mode offers only "performance" and "powersave", and
+  # "powersave" here is the DYNAMIC governor (the intel_pstate equivalent of
+  # schedutil), not a fixed-low one. For a box that idles most of the day and
+  # transcodes in bursts, "performance" bought nothing and cost headroom:
+  # measured 2693MHz at idle before, 1200MHz after.
   powerManagement = {
     enable = true;
-    cpuFreqGovernor = "performance"; # For workstation loads
+    cpuFreqGovernor = "powersave";
   };
+
+  # Hard ceiling on the P-state, which the governor alone does not give. 70%
+  # caps sustained turbo around 2.5GHz -- still above the 2.2GHz base, so
+  # transcoding is unaffected, while removing the top of the power curve where
+  # a Xeon draws far past its 135W TDP. Written via tmpfiles because
+  # intel_pstate exposes this only through sysfs and it does not survive a
+  # reboot on its own.
+  systemd.tmpfiles.rules = [
+    "w /sys/devices/system/cpu/intel_pstate/max_perf_pct - - - - 70"
+  ];
 
   # Workstation-oriented scheduler tuning
   boot.kernel.sysctl = {

@@ -64,10 +64,33 @@
   # — which matters beyond tidiness, because one permanently-failed unit makes
   # every subsequent switch return exit 4 and can roll the deploy back.
   #
-  # 130W is deliberately left as-is. The card's stock limit is 290W and the
-  # PSU now has ~110W more headroom, but the freezes above are why this cap
-  # exists at all, so raising it is a separate decision backed by its own
-  # testing rather than a side effect of pulling a card.
+  # 2026-09-01: it happened a FOURTH time, at 22:26 mid-Plex-NVENC-transcode,
+  # with the 130W cap verified in force for the preceding 6.5 hours. Same
+  # signature as the other three: no MCE, no thermal event, the journal simply
+  # stops mid-write. So the cap was doing its job and was not enough.
+  #
+  # Why: `nvidia-smi -pl` bounds AVERAGE board power, not instantaneous draw.
+  # Ampere is notorious for sub-millisecond transients around 2x the limit, so
+  # a 130W cap still throws ~260W spikes at a 490W supply that also has a
+  # turbo-ing 20-core Xeon and three spinning disks on it. That is why every
+  # crash happened while a GPU ramped FROM IDLE rather than under sustained
+  # load -- sustained draw was never the problem.
+  #
+  # Two changes, because -pl alone provably was not enough:
+  #   -pl 100    the card's floor (min_limit reports 100W), cutting both the
+  #              average and the transient ceiling proportionally.
+  #   -lgc 0,1500  caps the boost clock at 1500MHz of a possible 2100. Boost
+  #              transients scale with clock, so this blunts the spike itself
+  #              rather than the average. NVENC is a fixed-function block and
+  #              does not use the graphics clock, so Plex transcoding is
+  #              unaffected -- verified: Plex healthy, HTTP 200, after both
+  #              settings were applied live.
+  #
+  # Ordering matters as much as the values. plex.service had no dependency on
+  # this unit and both entered active at the same second, so on a cold boot
+  # Plex could open an NVENC session while the card was still at its 290W
+  # default -- exactly the ramp-from-idle window that kills this machine.
+  # `before = [ "plex.service" ]` closes that race.
   #
   # This runs as root on purpose — setting a power limit needs CAP_SYS_ADMIN
   # and /dev/nvidiactl, so the usual DynamicUser/ProtectHome hardening cannot
@@ -76,6 +99,8 @@
     description = "Cap NVIDIA board power to fit p510's 490W PSU";
     after = [ "nvidia-persistenced.service" ];
     wants = [ "nvidia-persistenced.service" ];
+    # Nothing may touch the GPU until the cap is on. See the race above.
+    before = [ "plex.service" ];
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       Type = "oneshot";
@@ -83,7 +108,8 @@
       # Persistence mode keeps the limit across client detach; -pl is not
       # sticky across a driver reload, hence re-applying at every boot.
       ExecStart = [
-        "${config.hardware.nvidia.package.bin}/bin/nvidia-smi -i 0 -pl 130"
+        "${config.hardware.nvidia.package.bin}/bin/nvidia-smi -i 0 -pl 100"
+        "${config.hardware.nvidia.package.bin}/bin/nvidia-smi -i 0 -lgc 0,1500"
       ];
       ProtectSystem = "strict";
       ProtectHome = true;
