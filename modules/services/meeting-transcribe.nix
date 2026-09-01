@@ -431,7 +431,7 @@ let
           model: $model,
           stream: false,
           format: "json",
-          options: { temperature: 0.2, num_ctx: 32768 },
+          options: { temperature: 0.2, num_ctx: 32768, num_predict: 4096 },
           messages: [
             { role: "system", content: $system },
             { role: "user",   content: $user }
@@ -439,33 +439,42 @@ let
         }')
 
       echo "meet-process: calling ollama ($OLLAMA_MODEL @ $OLLAMA_URL)" >&2
-      RESPONSE=$(curl -sS --max-time 600 \
-        -H 'Content-Type: application/json' \
-        -d "$REQUEST" \
-        "$OLLAMA_URL/api/chat") || {
-          echo "meet-process: ollama call failed" >&2
-          exit 1
-        }
-
-      SUMMARY_JSON=$(jq -r '.message.content // empty' <<<"$RESPONSE")
-      if [[ -z "$SUMMARY_JSON" ]]; then
-        echo "meet-process: empty ollama response: $RESPONSE" >&2
-        exit 1
-      fi
-
-      # Verify the LLM returned parseable JSON; on failure, still write the
-      # transcript so the recording isn't lost.
-      if ! jq empty <<<"$SUMMARY_JSON" 2>/dev/null; then
-        echo "meet-process: ollama returned invalid JSON, falling back to transcript-only" >&2
+      # Never lose a recording. Previously only the invalid-JSON branch wrote
+      # anything: a curl timeout or an empty body exited 1, leaving the user
+      # with an .opus file and no brief at all. Every ollama failure now
+      # writes the transcript and exits 0.
+      write_transcript_fallback() {
+        echo "meet-process: $1 -- writing transcript-only brief" >&2
         {
           echo "# Meeting: $BASE"
           echo ""
-          echo "_Ollama returned invalid JSON — transcript-only fallback._"
+          echo "_No summary: $1._"
           echo ""
           echo "## Full transcript"
           echo ""
           echo "$TRANSCRIPT_TXT"
         } > "$MD_FILE"
+      }
+
+      RESPONSE=$(curl -sS --max-time 600 \
+        -H 'Content-Type: application/json' \
+        -d "$REQUEST" \
+        "$OLLAMA_URL/api/chat") || {
+          echo "meet-process: ollama call failed" >&2
+          write_transcript_fallback "ollama call failed (timeout or connection error)"
+          exit 0
+        }
+
+      SUMMARY_JSON=$(jq -r '.message.content // empty' <<<"$RESPONSE")
+      if [[ -z "$SUMMARY_JSON" ]]; then
+        write_transcript_fallback "ollama returned an empty body (generation may have hit num_predict)"
+        exit 0
+      fi
+
+      # Verify the LLM returned parseable JSON; on failure, still write the
+      # transcript so the recording isn't lost.
+      if ! jq empty <<<"$SUMMARY_JSON" 2>/dev/null; then
+        write_transcript_fallback "ollama returned invalid JSON"
         exit 0
       fi
 

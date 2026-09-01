@@ -156,6 +156,22 @@ transcript with no speaker labels.
    ./scripts/manage-secrets.sh edit api-huggingface
    ```
 
+   **The secret must be owned by the user**, not root. `meet-process` runs as
+   you and enables diarization only if `[[ -r /run/agenix/api-huggingface ]]`.
+   agenix defaults to `root:root 0400`, so without an explicit `owner` that
+   test fails *silently*: whisperX runs without `--diarize`, the transcript
+   has no `SPEAKER_XX` labels, and the summarizer is then asked for
+   `user_speaker_label` and `participants[].label` that cannot exist. That
+   sent gemma4:12b into a generation loop until the 600 s curl timeout.
+
+   ```nix
+   api-huggingface = {
+     file = ../../secrets/api-huggingface.age;
+     owner = "olafkfreund";
+     mode = "0400";
+   };
+   ```
+
 5. Deploy: `just quick-deploy p620`.
 
 `secrets/api-huggingface.age` exists in the repo and is encrypted to
@@ -239,12 +255,20 @@ config and accept a plain, non-diarized transcript.
 
 ### Brief has a transcript but no summary
 
-Ollama could not answer. Most likely the configured `ollamaModel` is not
-pulled on the Ollama host; see the setup section above. Check with:
+Ollama could not answer, and the brief says which of the three ways it failed:
+the call timed out, the body came back empty (generation hit `num_predict`),
+or the JSON could not be parsed. In every case the transcript is still written —
+a recording is never lost.
 
-```bash
-ssh p620 'ollama list'
-```
+Most likely causes, in order:
+
+1. **Diarization is off**, so the transcript has no speaker labels and the
+   model loops on the `SPEAKER_XX` fields. Check the token is readable *as
+   your user*: `test -r /run/agenix/api-huggingface && echo ok`.
+2. The configured `ollamaModel` is not pulled: `ssh p620 'ollama list'`.
+
+Generation is capped at `num_predict: 4096`, so a runaway fails in well under
+a minute rather than hanging for the full 600 s curl timeout.
 
 ### "Remote processing failed" on razer
 

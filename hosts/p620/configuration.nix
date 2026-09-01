@@ -166,7 +166,16 @@ in
   # Diarization auto-enables once `secrets/api-huggingface.age` exists;
   # until then meet-process falls back to plain transcription.
   age.secrets = lib.mkIf (builtins.pathExists ../../secrets/api-huggingface.age) {
-    api-huggingface.file = ../../secrets/api-huggingface.age;
+    api-huggingface = {
+      file = ../../secrets/api-huggingface.age;
+      # meet-process runs as the user, not root, and guards diarization on
+      # `[[ -r $HF_TOKEN_PATH ]]`. agenix defaults to root:root 0400, so that
+      # test failed silently: whisperX ran without --diarize, produced a
+      # transcript with no SPEAKER_XX labels, and the summarizer then looped
+      # forever trying to fill the SPEAKER_XX fields the prompt demands.
+      owner = "olafkfreund";
+      mode = "0400";
+    };
   };
   features.meetingTranscribe = {
     enable = true;
