@@ -191,6 +191,19 @@ in
               # built perfectly well. The workflow no longer needs it; the next
               # one written should not have to find this out again.
               gawk
+              # gh, for the same reason and at a higher cost: release.yml's
+              # publish step is `gh release create`, and it died with exit 127
+              # after building both ISOs, splitting them and writing the notes.
+              # Four release attempts had failed before one reached that line,
+              # so this was the first time it ran at all.
+              #
+              # The comment above says the next workflow should not have to
+              # rediscover the missing-tool problem. It did, one workflow
+              # later, because gawk was added and the general lesson was not.
+              # The rule is: a step shell here has coreutils, git and what is
+              # named in this list. Anything else has to be added before a
+              # workflow can use it.
+              gh
               gnutar
               gzip
               openssh
