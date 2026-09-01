@@ -1,16 +1,40 @@
 # Installing GitHub spec-kit on NixOS with uv2nix
 
-**uv2nix brings Python 3.11+ spec-kit to NixOS through a modern packaging approach that combines uv's fast dependency resolution with Nix's reproducibility guarantees.** This guide walks through installing GitHub's Spec-Driven Development toolkit using the next-generation Python packaging toolchain. The process requires understanding uv2nix's overlay-based architecture and adapting it for Git-sourced packages that aren't on PyPI. By the end, you'll have spec-kit's AI-powered development CLI running reproducibly on NixOS with all dependencies properly managed.
+**uv2nix brings Python 3.11+ spec-kit to NixOS through a modern packaging approach that combines
+uv's fast dependency resolution with Nix's reproducibility guarantees.** This guide walks through
+installing GitHub's Spec-Driven Development toolkit using the next-generation Python packaging
+toolchain. The process requires understanding uv2nix's overlay-based architecture and adapting it
+for Git-sourced packages that aren't on PyPI. By the end, you'll have spec-kit's AI-powered
+development CLI running reproducibly on NixOS with all dependencies properly managed.
 
 ## Understanding uv2nix: Modern Python packaging for Nix
 
-uv2nix translates uv workspaces and lock files into Nix derivations using pure Nix code, serving as both a development environment manager and production package builder. The tool represents the next generation of Python-Nix integration, explicitly designed as the successor to poetry2nix by the same author (@adisbladis). Unlike its predecessor, **uv2nix generates Nix overlays dynamically** from `uv.lock` files rather than requiring manual package definitions, leveraging uv's Rust-based speed for dependency resolution while adding Nix's reproducibility for deployment.
+uv2nix translates uv workspaces and lock files into Nix derivations using pure Nix code, serving as
+both a development environment manager and production package builder. The tool represents the next
+generation of Python-Nix integration, explicitly designed as the successor to poetry2nix by the same
+author (@adisbladis). Unlike its predecessor, **uv2nix generates Nix overlays dynamically** from
+`uv.lock` files rather than requiring manual package definitions, leveraging uv's Rust-based speed
+for dependency resolution while adding Nix's reproducibility for deployment.
 
-The architecture centers on three key operations: parsing `pyproject.toml` and `uv.lock` files from a workspace, generating Nix overlays containing package derivations, and aggregating packages into virtual environments. uv2nix heavily relies on pyproject.nix's build infrastructure and doesn't attempt to replace what uv already does well—dependency resolution and lock file generation remain uv's responsibility. The tool recently shed its "experimental" label, indicating API stability for core features.
+The architecture centers on three key operations: parsing `pyproject.toml` and `uv.lock` files from
+a workspace, generating Nix overlays containing package derivations, and aggregating packages into
+virtual environments. uv2nix heavily relies on pyproject.nix's build infrastructure and doesn't
+attempt to replace what uv already does well—dependency resolution and lock file generation remain
+uv's responsibility. The tool recently shed its "experimental" label, indicating API stability for
+core features.
 
-**The overlay pattern is fundamental to how uv2nix works.** Rather than building a monolithic package set, uv2nix creates composable overlays that you stack together. A typical stack includes the build-systems overlay (providing setuptools, hatchling, etc.), the uv2nix-generated overlay (your locked dependencies), and custom overrides (build fixes). This design shifts responsibility for package overrides away from bundled definitions that suffer bit-rot, giving users explicit control over their build pipeline.
+**The overlay pattern is fundamental to how uv2nix works.** Rather than building a monolithic
+package set, uv2nix creates composable overlays that you stack together. A typical stack includes
+the build-systems overlay (providing setuptools, hatchling, etc.), the uv2nix-generated overlay
+(your locked dependencies), and custom overrides (build fixes). This design shifts responsibility
+for package overrides away from bundled definitions that suffer bit-rot, giving users explicit
+control over their build pipeline.
 
-One critical limitation: **uv doesn't lock build systems in uv.lock**, a known issue tracked in uv #5190. Building packages from source requires build systems like setuptools or hatchling, but these aren't captured in the lock file. uv2nix addresses this through the pyproject-build-systems repository, which provides overlays containing common build tools. This workaround is necessary but adds an extra input to your flake.
+One critical limitation: **uv doesn't lock build systems in uv.lock**, a known issue tracked in
+uv issue 5190. Building packages from source requires build systems like
+setuptools or hatchling, but these aren't captured in the lock file. uv2nix addresses this through the pyproject-build-systems
+repository, which provides overlays containing common build tools. This workaround is necessary but
+adds an extra input to your flake.
 
 ## Prerequisites and initial setup
 
@@ -23,7 +47,8 @@ One critical limitation: **uv doesn't lock build systems in uv.lock**, a known i
 - Git (optional but recommended for repository operations)
 - Network access (for downloading Python packages and GitHub templates)
 
-**Required flake inputs:** Every uv2nix project needs four interconnected inputs that must follow the same nixpkgs to prevent version conflicts:
+**Required flake inputs:** Every uv2nix project needs four interconnected inputs that must follow
+the same nixpkgs to prevent version conflicts:
 
 ```nix
 inputs = {
@@ -49,9 +74,14 @@ inputs = {
 };
 ```
 
-The `follows` declarations ensure all inputs use the same nixpkgs version, preventing incompatibilities from mixing package sets. This pattern is mandatory for stability.
+The `follows` declarations ensure all inputs use the same nixpkgs version, preventing
+incompatibilities from mixing package sets. This pattern is mandatory for stability.
 
-**Initial project structure:** For most projects, you'd start with `uv init --app --package` to create a standard structure, but for spec-kit we're packaging an existing GitHub project. The tool expects at minimum a `pyproject.toml` defining project metadata and a `uv.lock` file with pinned dependencies. Since spec-kit comes from GitHub rather than a local workspace, we'll need to fetch it first and generate the lock file.
+**Initial project structure:** For most projects, you'd start with `uv init --app --package` to
+create a standard structure, but for spec-kit we're packaging an existing GitHub project. The tool
+expects at minimum a `pyproject.toml` defining project metadata and a `uv.lock` file with pinned
+dependencies. Since spec-kit comes from GitHub rather than a local workspace, we'll need to fetch it
+first and generate the lock file.
 
 **Quick start with templates:** uv2nix provides templates to bootstrap projects quickly:
 
@@ -63,11 +93,15 @@ nix flake init --template github:pyproject-nix/uv2nix#hello-world
 nix flake init --template github:pyproject-nix/pyproject.nix#impure
 ```
 
-These templates provide working examples of the overlay composition pattern and proper environment variable configuration.
+These templates provide working examples of the overlay composition pattern and proper environment
+variable configuration.
 
 ## Installing spec-kit: Git-based package workflow
 
-spec-kit presents unique packaging challenges: it's **not published to PyPI** (per issue #204 in their repository), requires installation from GitHub, and downloads AI agent templates from GitHub at runtime. The standard uv2nix workflow assumes PyPI packages, so we must adapt the approach for Git-sourced dependencies.
+spec-kit presents unique packaging challenges: it's **not published to PyPI** (per issue #204 in
+their repository), requires installation from GitHub, and downloads AI agent templates from GitHub
+at runtime. The standard uv2nix workflow assumes PyPI packages, so we must adapt the approach for
+Git-sourced dependencies.
 
 ### Step 1: Fetch spec-kit and prepare the workspace
 
@@ -85,7 +119,10 @@ nix-shell -p uv python311
 uv lock
 ```
 
-This creates `uv.lock` with pinned versions of spec-kit's dependencies: **typer** (CLI framework), **rich** (terminal formatting), **platformdirs** (cross-platform paths), **readchar** (keyboard input), and **httpx** (HTTP client). All are pure Python packages from PyPI with no C extensions, making them straightforward to package.
+This creates `uv.lock` with pinned versions of spec-kit's dependencies: **typer** (CLI framework),
+**rich** (terminal formatting), **platformdirs** (cross-platform paths), **readchar** (keyboard
+input), and **httpx** (HTTP client). All are pure Python packages from PyPI with no C extensions,
+making them straightforward to package.
 
 **Key spec-kit characteristics:**
 
@@ -289,7 +326,9 @@ specify init my-project --ai copilot
 specify check
 ```
 
-The development shell provides **spec-kit plus uv, git, and Python 3.11**, with environment variables configured to prevent uv from downloading managed interpreters or interfering with the Nix-managed environment.
+The development shell provides **spec-kit plus uv, git, and Python 3.11**, with environment
+variables configured to prevent uv from downloading managed interpreters or interfering with the
+Nix-managed environment.
 
 ## Configuration files explained
 
@@ -337,7 +376,9 @@ Generated by `uv lock`, this file contains:
 - **Platform markers** for conditional dependencies
 - **Integrity hashes** for reproducible builds
 
-uv2nix parses this file to generate Nix derivations. The lock file ensures identical dependencies across all environments, but **doesn't capture build systems**—hence the need for pyproject-build-systems overlay.
+uv2nix parses this file to generate Nix derivations. The lock file ensures identical dependencies
+across all environments, but **doesn't capture build systems**—hence the need for
+pyproject-build-systems overlay.
 
 ### Critical Nix expressions
 
@@ -349,7 +390,8 @@ workspace = uv2nix.lib.workspace.loadWorkspace {
 };
 ```
 
-Recursively discovers projects, parses all `pyproject.toml` files, loads `uv.lock`, and creates a workspace object with metadata and dependency specifications.
+Recursively discovers projects, parses all `pyproject.toml` files, loads `uv.lock`, and creates a
+workspace object with metadata and dependency specifications.
 
 **Overlay generation:**
 
@@ -359,7 +401,8 @@ overlay = workspace.mkPyprojectOverlay {
 };
 ```
 
-Translates `uv.lock` into a Nix overlay function that adds Python packages to the package set. Choosing `"wheel"` makes builds more likely to succeed without manual intervention.
+Translates `uv.lock` into a Nix overlay function that adds Python packages to the package set.
+Choosing `"wheel"` makes builds more likely to succeed without manual intervention.
 
 **Package set composition:**
 
@@ -373,7 +416,8 @@ pythonSet = pythonBase.overrideScope (
 );
 ```
 
-Stacks overlays in order: base build infrastructure, then locked packages, then custom overrides. Later overlays can modify packages from earlier ones.
+Stacks overlays in order: base build infrastructure, then locked packages, then custom overrides.
+Later overlays can modify packages from earlier ones.
 
 **Virtual environment creation:**
 
@@ -383,13 +427,15 @@ pythonSet.mkVirtualEnv "specify-cli-env" {
 }
 ```
 
-Aggregates the package and its dependencies into a virtual environment. The key `specify-cli` must match the package name in `pyproject.toml` exactly.
+Aggregates the package and its dependencies into a virtual environment. The key `specify-cli` must
+match the package name in `pyproject.toml` exactly.
 
 ## Common pitfalls and troubleshooting
 
 ### Missing build systems cause failures
 
-**Problem:** Building from source fails with errors about missing setuptools, hatchling, or other build tools. This occurs because uv.lock doesn't capture build-time dependencies.
+**Problem:** Building from source fails with errors about missing setuptools, hatchling, or other
+build tools. This occurs because uv.lock doesn't capture build-time dependencies.
 
 **Solution:** Always include the build-systems overlay in your composition:
 
@@ -401,7 +447,9 @@ lib.composeManyExtensions [
 ]
 ```
 
-For spec-kit's dependencies, this shouldn't be an issue since we're using `sourcePreference = "wheel"` and all dependencies have wheels available. If you switch to building from source (`sourcePreference = "sdist"`), you may need to add explicit build system overrides:
+For spec-kit's dependencies, this shouldn't be an issue since we're using `sourcePreference =
+"wheel"` and all dependencies have wheels available. If you switch to building from source
+(`sourcePreference = "sdist"`), you may need to add explicit build system overrides:
 
 ```nix
 pyprojectOverrides = final: prev: {
@@ -419,7 +467,8 @@ pyprojectOverrides = final: prev: {
 
 **Problem:** Error "attribute 'spec-kit' missing" or similar when trying to reference the package.
 
-**Solution:** The package name in Nix **must exactly match** `[project.name]` in `pyproject.toml`. For spec-kit, the project name is `specify-cli`, not `spec-kit`:
+**Solution:** The package name in Nix **must exactly match** `[project.name]` in `pyproject.toml`.
+For spec-kit, the project name is `specify-cli`, not `spec-kit`:
 
 ```nix
 # WRONG - will fail
@@ -435,7 +484,8 @@ Check `pyproject.toml` for the exact name. Python package naming uses hyphens, n
 
 **Problem:** Packages import incorrectly or fail to find dependencies, especially in development shells.
 
-**Solution:** Always unset PYTHONPATH in shell hooks to prevent Nixpkgs Python builders from leaking environment variables:
+**Solution:** Always unset PYTHONPATH in shell hooks to prevent Nixpkgs Python builders from leaking
+environment variables:
 
 ```nix
 shellHook = ''
@@ -458,11 +508,13 @@ env = {
 };
 ```
 
-NixOS cannot run dynamically linked executables without proper loader configuration. Always use Nix-provided Python interpreters instead of uv-managed ones.
+NixOS cannot run dynamically linked executables without proper loader configuration. Always use
+Nix-provided Python interpreters instead of uv-managed ones.
 
 ### Runtime template downloads require network access
 
-**Problem specific to spec-kit:** The CLI downloads AI agent templates from GitHub at runtime, which may fail in pure Nix builds or restricted networks.
+**Problem specific to spec-kit:** The CLI downloads AI agent templates from GitHub at runtime, which
+may fail in pure Nix builds or restricted networks.
 
 **Considerations:**
 
@@ -496,7 +548,9 @@ This level of patching is usually unnecessary unless you're deploying spec-kit i
 
 **Problem:** Some packages fail to build or have missing dependencies depending on source preference.
 
-**Best practice:** Prefer `sourcePreference = "wheel"` for production. Binary wheels are prebuilt and contain all necessary metadata. Source distributions require more overrides and are more prone to failures.
+**Best practice:** Prefer `sourcePreference = "wheel"` for production. Binary wheels are prebuilt
+and contain all necessary metadata. Source distributions require more overrides and are more prone
+to failures.
 
 **When to use sdist:**
 
@@ -504,11 +558,13 @@ This level of patching is usually unnecessary unless you're deploying spec-kit i
 - You need to apply patches to source code
 - Building from source for security auditing
 
-For spec-kit and its dependencies, wheels are available for all packages on all common platforms, so stick with wheel preference.
+For spec-kit and its dependencies, wheels are available for all packages on all common platforms, so
+stick with wheel preference.
 
 ### Lock file format changes
 
-**Problem:** Errors about unrecognized lock file fields like `required-markers` indicate version mismatches between uv and uv2nix.
+**Problem:** Errors about unrecognized lock file fields like `required-markers` indicate version
+mismatches between uv and uv2nix.
 
 **Solution:** Keep uv and uv2nix versions aligned. If you encounter lock file format issues:
 
@@ -544,7 +600,9 @@ devShell = pkgs.mkShell {
 };
 ```
 
-This installs packages as pointers to source trees rather than copying files, allowing immediate change activation. However, **consider using the impure development shell instead**—it's simpler and lets uv manage editable installs directly.
+This installs packages as pointers to source trees rather than copying files, allowing immediate
+change activation. However, **consider using the impure development shell instead**—it's simpler and
+lets uv manage editable installs directly.
 
 ## Alternative approach: System-wide installation
 
@@ -578,7 +636,8 @@ nix profile install .
 nix profile install /path/to/spec-kit#specify-cli
 ```
 
-This installs spec-kit into your user profile, making the `specify` command available system-wide without modifying NixOS configuration.
+This installs spec-kit into your user profile, making the `specify` command available system-wide
+without modifying NixOS configuration.
 
 ### Method 3: Home Manager integration
 
@@ -612,12 +671,26 @@ This is simpler but lacks Nix's reproducibility guarantees. The uv2nix approach 
 - **Reproducible across machines:** `flake.lock` ensures identical builds everywhere
 - **Development environment consistency:** Dev shells have exact production dependencies
 
-**Trade-offs:** uv2nix adds complexity with flake.nix, overlays, and uv.lock management. For simple personal use, `uv tool install` may suffice. For team development, CI/CD, or production deployment on NixOS, the uv2nix approach provides stronger guarantees.
+**Trade-offs:** uv2nix adds complexity with flake.nix, overlays, and uv.lock management. For simple
+personal use, `uv tool install` may suffice. For team development, CI/CD, or production deployment
+on NixOS, the uv2nix approach provides stronger guarantees.
 
 ## Conclusion: Modern Python tooling meets Nix
 
-Installing spec-kit with uv2nix demonstrates the power of next-generation Python packaging on NixOS. The process combines uv's fast dependency resolution with Nix's reproducibility through a composable overlay architecture. While the setup requires understanding workspace loading, overlay composition, and build system handling, the result is a fully reproducible spec-kit installation that integrates cleanly with NixOS system management.
+Installing spec-kit with uv2nix demonstrates the power of next-generation Python packaging on NixOS.
+The process combines uv's fast dependency resolution with Nix's reproducibility through a composable
+overlay architecture. While the setup requires understanding workspace loading, overlay composition,
+and build system handling, the result is a fully reproducible spec-kit installation that integrates
+cleanly with NixOS system management.
 
-**Key success factors:** Using Python 3.11+, preferring wheel sources over sdist, including the build-systems overlay, matching package names exactly, and unsetting PYTHONPATH. spec-kit's pure Python dependencies and modern pyproject.toml structure make it an ideal candidate for uv2nix packaging—no C extensions, no complex build requirements, just straightforward Python packages from PyPI.
+**Key success factors:** Using Python 3.11+, preferring wheel sources over sdist, including the
+build-systems overlay, matching package names exactly, and unsetting PYTHONPATH. spec-kit's pure
+Python dependencies and modern pyproject.toml structure make it an ideal candidate for uv2nix
+packaging—no C extensions, no complex build requirements, just straightforward Python packages from
+PyPI.
 
-The uv2nix approach scales beyond spec-kit to any Python project using modern packaging standards. As the recommended successor to poetry2nix, it represents the current state of the art for Python-Nix integration, with active development and API stability for core features. Whether developing locally or deploying to production, uv2nix provides the reproducible Python environments that NixOS users expect.
+The uv2nix approach scales beyond spec-kit to any Python project using modern packaging standards.
+As the recommended successor to poetry2nix, it represents the current state of the art for
+Python-Nix integration, with active development and API stability for core features. Whether
+developing locally or deploying to production, uv2nix provides the reproducible Python environments
+that NixOS users expect.

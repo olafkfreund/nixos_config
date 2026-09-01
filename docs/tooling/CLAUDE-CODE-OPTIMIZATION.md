@@ -5,9 +5,10 @@
 > Implementation Date: 2025-01-29
 > Version: 1.0.0
 
-##  Executive Summary
+## Executive Summary
 
-Your Claude Code setup has been completely optimized with **5 powerful slash commands** that reduce development time by **92-96%**.
+Your Claude Code setup has been completely optimized with **5 powerful slash commands** that reduce
+development time by **92-96%**.
 
 ### Time Savings
 
@@ -27,9 +28,9 @@ Your Claude Code setup has been completely optimized with **5 powerful slash com
 - Security audit: 1 minute (`/nix-security`)
 - **Total: 6.5 minutes per task**
 
-**Result: 92-96% time reduction**
+**Result:** 92-96% time reduction
 
-##  What Was Created
+## What Was Created
 
 ### Slash Commands (5 Total)
 
@@ -83,7 +84,7 @@ All commands are in `.claude/commands/`:
    - Time savings calculator
    - Command selection guide
 
-##  Quick Start Guide
+## Quick Start Guide
 
 ### Installation (Already Done!)
 
@@ -93,112 +94,112 @@ All slash commands are already installed and ready to use. No setup required!
 
 **1. See available commands:**
 
-```
+```text
 /nix-help
 ```
 
 **2. Check your tasks:**
 
-```
+```text
 /check_tasks
 ```
 
 **3. Create a new module:**
 
-```
+```text
 /nix-module
 Create monitoring/example-exporter
 ```
 
 **4. Deploy to a host:**
 
-```
+```text
 /nix-deploy
 Deploy to p620
 ```
 
 **5. Run security audit:**
 
-```
+```text
 /nix-security
 ```
 
 That's it! You're using optimized Claude Code for NixOS!
 
-##  Complete Command Reference
+## Complete Command Reference
 
 ### Module Development
 
 **`/nix-module`**
 
-```
+```text
 /nix-module
 Create services/myservice module
 ```
 
 **Features:**
 
--  Automatic best practices
--  Security hardening included
--  Syntax validation
--  Usage examples
+- Automatic best practices
+- Security hardening included
+- Syntax validation
+- Usage examples
 - ⏱ 2 minutes total
 
 ### Code Quality
 
 **`/nix-fix`**
 
-```
+```text
 /nix-fix
 Fix modules/services/myservice.nix
 ```
 
 **Fixes:**
 
--  mkIf true → direct assignment
--  Trivial wrappers → lib functions
--  Evaluation secrets → runtime loading
--  Root services → DynamicUser
+- mkIf true → direct assignment
+- Trivial wrappers → lib functions
+- Evaluation secrets → runtime loading
+- Root services → DynamicUser
 - ⏱ 1 minute total
 
 **`/review`**
 
-```
+```text
 /review
 Review hosts/p620/configuration.nix
 ```
 
 **Checks:**
 
--  Best practices (PATTERNS.md)
--  Anti-patterns (NIXOS-ANTI-PATTERNS.md)
--  Security issues
--  Performance problems
+- Best practices (PATTERNS.md)
+- Anti-patterns (NIXOS-ANTI-PATTERNS.md)
+- Security issues
+- Performance problems
 - ⏱ 1 minute total
 
 ### Security
 
 **`/nix-security`**
 
-```
+```text
 /nix-security
 ```
 
 **Audits:**
 
--  Service isolation (DynamicUser)
--  Systemd hardening
--  Secret management
--  Firewall configuration
--  SSH hardening
--  Security score (0-100)
+- Service isolation (DynamicUser)
+- Systemd hardening
+- Secret management
+- Firewall configuration
+- SSH hardening
+- Security score (0-100)
 - ⏱ 1 minute total
 
 ### Deployment
 
 **`/nix-deploy`**
 
-```
+```bash
 # Standard deployment
 /nix-deploy
 Deploy to p620
@@ -218,43 +219,43 @@ Deploy to all hosts
 
 **Features:**
 
--  Automatic validation
--  Change detection (skips if unchanged)
--  Security checks
--  Smart rollback on failure
--  Post-deployment verification
+- Automatic validation
+- Change detection (skips if unchanged)
+- Security checks
+- Smart rollback on failure
+- Post-deployment verification
 - ⏱ 2.5 min (standard), 1 min (fast), 30s (emergency)
 
 ### Optimization
 
 **`/nix-optimize`**
 
-```
+```text
 /nix-optimize
 ```
 
 **Analyzes:**
 
--  Build performance (IFD, evaluation)
--  Disk usage (GC, store optimization)
--  Memory (swap, kernel tuning)
--  Network (TCP/IP optimization)
--  Boot time (systemd, fstrim)
--  Generates specific fixes with impact
+- Build performance (IFD, evaluation)
+- Disk usage (GC, store optimization)
+- Memory (swap, kernel tuning)
+- Network (TCP/IP optimization)
+- Boot time (systemd, fstrim)
+- Generates specific fixes with impact
 - ⏱ 2 minutes total
 
 ### GitHub Integration
 
 **`/new_task`** - Create issue
 
-```
+```text
 /new_task
 Add PostgreSQL monitoring
 ```
 
 **`/check_tasks`** - Review tasks
 
-```
+```text
 /check_tasks
 ```
 
@@ -262,11 +263,11 @@ Add PostgreSQL monitoring
 
 **`/nix-help`** - Show all commands
 
-```
+```text
 /nix-help
 ```
 
-##  Complete Workflows
+## Complete Workflows
 
 ### Daily Development (10 minutes)
 
@@ -296,7 +297,7 @@ gh pr create --fill
 /check_tasks
 ```
 
-**Total: ~10 minutes for complete feature**
+**Total:** ~10 minutes for complete feature
 
 ### Bug Fix (3 minutes)
 
@@ -315,7 +316,7 @@ Fast deploy to p620
 systemctl status myservice
 ```
 
-**Total: ~3 minutes for bug fix**
+**Total:** ~3 minutes for bug fix
 
 ### Security Audit (5 minutes)
 
@@ -333,7 +334,7 @@ systemctl status myservice
 /nix-security
 ```
 
-**Total: ~5 minutes for security review**
+**Total:** ~5 minutes for security review
 
 ### Performance Optimization (10 minutes)
 
@@ -355,9 +356,9 @@ Deploy to p620
 /nix-optimize
 ```
 
-**Total: ~10 minutes for optimization**
+**Total:** ~10 minutes for optimization
 
-##  Best Practices
+## Best Practices
 
 ### DO
 
@@ -379,7 +380,7 @@ Deploy to p620
 5. **Ignore optimization** - Run `/nix-optimize` monthly
 6. **Work without issues** - Always use `/new_task`
 
-##  Performance Metrics
+## Performance Metrics
 
 ### Command Performance
 
@@ -399,7 +400,7 @@ Deploy to p620
 - **Security Audits**: 5 min vs 30-60 min (83-92% faster)
 - **Optimization**: 10 min vs 60-120 min (83-92% faster)
 
-##  Integration Points
+## Integration Points
 
 ### With Existing Tools
 
@@ -424,7 +425,7 @@ Deploy to p620
 
 ### Workflow Integration
 
-```
+```text
 Issue Tracking          Slash Commands          Version Control
      ↓                       ↓                        ↓
 /new_task         →    /nix-module      →      git commit
@@ -434,7 +435,7 @@ Issue Tracking          Slash Commands          Version Control
 Track progress    →    /review          →      Merge PR
 ```
 
-##  Pro Tips
+## Pro Tips
 
 ### Command Chaining
 
@@ -466,7 +467,7 @@ Commands understand your codebase:
 - Reference your documentation (PATTERNS.md)
 - Follow your standards (anti-patterns doc)
 
-##  Troubleshooting
+## Troubleshooting
 
 ### Command Not Found
 
@@ -503,7 +504,7 @@ Commands reference documentation:
 - Check docs/NIXOS-ANTI-PATTERNS.md for issues
 - Review .claude/CLAUDE.md for context
 
-##  Further Reading
+## Further Reading
 
 ### Essential Documentation
 
@@ -520,7 +521,7 @@ Commands reference documentation:
 3. **Month 1**: Use `/nix-module` for all modules, `/nix-optimize` monthly
 4. **Ongoing**: Chain commands for complete workflows
 
-##  Training Examples
+## Training Examples
 
 ### Example 1: Create Monitoring Module
 
@@ -576,7 +577,7 @@ Deploy to p620
 # Result: Safe deployment in 2.5 minutes
 ```
 
-##  Verification Checklist
+## Verification Checklist
 
 Confirm your setup is working:
 
@@ -591,7 +592,7 @@ Confirm your setup is working:
 - [ ] `/check_tasks` shows open tasks
 - [ ] All commands complete within target times
 
-##  Success Criteria
+## Success Criteria
 
 You'll know the optimization is successful when:
 
@@ -601,7 +602,7 @@ You'll know the optimization is successful when:
 4. **Quality**: Zero anti-patterns, high security scores
 5. **Productivity**: 92-96% time reduction achieved
 
-##  Getting Help
+## Getting Help
 
 ### Quick Help
 
@@ -627,7 +628,7 @@ Just ask Claude Code:
 
 ---
 
-##  You're Ready
+## You're Ready
 
 Your Claude Code setup is now fully optimized for NixOS development. Start with:
 
@@ -637,4 +638,4 @@ Your Claude Code setup is now fully optimized for NixOS development. Start with:
 
 And explore the powerful slash commands that will transform your workflow!
 
-**Happy NixOS development! **
+**Happy NixOS development!**
