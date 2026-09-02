@@ -194,6 +194,7 @@ nav:
       - "k3d Cluster (ops)": applications/k3d-cluster.md
       - "Backstage": backstage.md
       - "Cloudflared Tunnel (host)": applications/cloudflared-tunnel.md
+      - "nixarchy-bbs (SSH board)": applications/nixarchy-bbs.md
       - "Sunshine (streaming)": applications/sunshine.md
   - Command System:
       - Overview: Nixos/README.md

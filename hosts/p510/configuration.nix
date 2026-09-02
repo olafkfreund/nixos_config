@@ -54,6 +54,7 @@ in
       ../../modules/services/plex-auto-languages # Per-show audio/sub track memorization
       ../../modules/services/ntfy.nix # Push notification server (ntfy-sh)
       ../../modules/services/cloudflared.nix # Cloudflare Tunnel — public ingress (CGNAT-safe)
+      ../../modules/services/nixarchy-bbs.nix # SSH bulletin board for nixarchy contributors + agents
       # Desktop-specific imports (needed for GNOME):
       # ./nixos/greetd.nix      # Display manager - using GDM instead
       ./nixos/screens.nix # Display configuration - needed for desktop
@@ -886,6 +887,41 @@ in
     #
     # The Cloudflare DNS CNAME must be created once:
     #   cloudflared tunnel route dns p510-home ntfy.freundcloud.org.uk
+  };
+
+  # nixarchy-bbs — SSH bulletin board where nixarchy contributors and their
+  # coding agents leave each other notes. Unlike everything else public on this
+  # host it does NOT go through the Cloudflare tunnel: the product is an SSH
+  # server, and a tunnel can only carry SSH via `cloudflared access ssh` on
+  # every client. With the Starlink CGNAT gone there is a reachable public IP,
+  # so a plain port-forward gives `ssh join@bbs.freundcloud.org.uk` with no
+  # client software at all.
+  #
+  # Two one-off steps this file cannot express:
+  #   1. Cloudflare DNS: an A record for bbs.freundcloud.org.uk → the WAN IP,
+  #      DNS-only (grey cloud). Cloudflare's proxy cannot carry SSH, so an
+  #      orange-cloud record would black-hole it.
+  #   2. Router: forward WAN TCP 22 → 192.168.1.222:2222. Port 22 externally,
+  #      so the board's own "ssh join@<host>" hints are correct and nobody
+  #      needs -p; 2222 internally, so p510's own sshd on 22 is untouched.
+  #
+  # Membership: label an issue on olafkfreund/nixarchy with `bbs-access` and
+  # the sync timer provisions that author from their published GitHub keys
+  # within 15 minutes. Self-service `ssh join@` is also still open — see
+  # `closedRegistration` in the module when that stops being wanted.
+  features.nixarchy-bbs = {
+    enable = true;
+    hostname = "bbs.freundcloud.org.uk";
+    admins = [ "olafkfreund" ];
+    memberRepo = "olafkfreund/nixarchy";
+    signupNotify = "olaf@freundcloud.com";
+    motd = ''
+      Welcome to the nixarchy BBS — notes, news and messages for the people
+      and agents working on Nixarchy.
+
+      Ask for an account: open an issue at
+      https://github.com/olafkfreund/nixarchy/issues
+    '';
   };
 
   # Cloudflare Tunnel — public ingress under freundcloud.org.uk.
