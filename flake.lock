@@ -843,6 +843,28 @@
         "type": "github"
       }
     },
+    "hypr-rdp": {
+      "inputs": {
+        "nixpkgs": [
+          "nixarchy",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787094885,
+        "narHash": "sha256-yrC8fITJofWJ2wpZMiaX06UVCMFI4GRg9pGyaTdosHg=",
+        "owner": "MuNeNiCK",
+        "repo": "hypr-rdp",
+        "rev": "cf3fbd82e2176070c0860bd53eb87d0b098decd4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "MuNeNiCK",
+        "ref": "v0.1.5",
+        "repo": "hypr-rdp",
+        "type": "github"
+      }
+    },
     "hyprcursor": {
       "inputs": {
         "hyprlang": [
@@ -1353,21 +1375,23 @@
       "inputs": {
         "disko": "disko",
         "home-manager": "home-manager_3",
+        "hypr-rdp": "hypr-rdp",
         "hyprland": "hyprland",
         "nix-flatpak": "nix-flatpak",
         "nixpkgs": [
           "nixpkgs"
         ],
         "omarchy": "omarchy",
+        "sops-nix": "sops-nix",
         "systems": "systems_8",
         "zen-browser": "zen-browser"
       },
       "locked": {
-        "lastModified": 1788333207,
-        "narHash": "sha256-33KKQPIYF1s0gU9pGOPgvU83hyEKmSyfA/harq8ZhM0=",
+        "lastModified": 1788375929,
+        "narHash": "sha256-+hroEHvFZfXw3ElU29iisQqcWBYO4XPRLy0PnfG50sU=",
         "owner": "olafkfreund",
         "repo": "nixarchy",
-        "rev": "e89b00f2e80e1e9b779903fa6f1e1ac04548db14",
+        "rev": "e05ca95dc6995d55bae355da08d89b2c09c5f9b6",
         "type": "github"
       },
       "original": {
@@ -1857,7 +1881,7 @@
         "nur": "nur",
         "rust-overlay": "rust-overlay_4",
         "seance": "seance",
-        "sops-nix": "sops-nix",
+        "sops-nix": "sops-nix_2",
         "spicetify-nix": "spicetify-nix",
         "stylix": "stylix",
         "yt-x": "yt-x",
@@ -2010,6 +2034,28 @@
       }
     },
     "sops-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixarchy",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786629091,
+        "narHash": "sha256-gkig4nPi1CWc4Z50GBsjE4ygSE7hMpl/TwID2an2Cck=",
+        "owner": "Mic92",
+        "repo": "sops-nix",
+        "rev": "a8627b21b9107c5711c96b84f32a9a4b3d45295f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Mic92",
+        "repo": "sops-nix",
+        "rev": "a8627b21b9107c5711c96b84f32a9a4b3d45295f",
+        "type": "github"
+      }
+    },
+    "sops-nix_2": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
