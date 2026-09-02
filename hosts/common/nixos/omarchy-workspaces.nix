@@ -77,7 +77,12 @@
 
     local function focus_group(group)
       for index, mon in ipairs(ordered_monitors()) do
-        mon:set_workspace({ workspace = member(index, group) })
+        -- A bare number, not { workspace = n }: HLMonitor:set_workspace wants
+        -- "a workspace object or selector" and rejects a table outright, so
+        -- every group switch raised a Lua runtime error and the monitors
+        -- never moved. Verified against the live compositor with
+        -- `hyprctl eval` before changing it.
+        mon:set_workspace(member(index, group))
       end
     end
 
