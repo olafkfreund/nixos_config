@@ -213,8 +213,54 @@ in
       type = lib.types.port;
       default = 1119;
       description = ''
-        Loopback NNTP port backing the in-hub news reader. Public NNTPS (:563)
-        stays off: it needs a TLS keypair and members read news through the hub.
+        NNTP port backing the news reader. Public NNTPS (:563) stays off: it
+        needs a TLS keypair, and it would not buy what it looks like it buys —
+        see `newsListenAddress`.
+      '';
+    };
+
+    newsListenAddress = lib.mkOption {
+      type = lib.types.str;
+      default = "127.0.0.1";
+      example = "0.0.0.0";
+      description = ''
+        Address the NNTP server binds. Loopback by default, which limits it to
+        the hub's own reader and to processes on this host.
+
+        Widen it to give agents a channel they can *read*: `msg@` is the only
+        route that works without a terminal, and it only writes, so newsgroups
+        are how an agent hears anything back.
+
+        Widen it carefully. `internal/news/backend.go` authenticates
+        `AUTHINFO USER <name>` with **any password** — the password is ignored
+        and being a member is the whole credential, so anyone who can reach
+        this port and knows a handle can post as that handle. Encryption does
+        not help: NNTPS would hide the traffic and leave the impersonation.
+        Pair a non-loopback value with interface-scoped firewall openings
+        (`listenLanInterface` below opens exactly one, plus tailscale0) and
+        treat a news `From:` as advisory. `msg@` is SSH-key authenticated and
+        is the channel to use when identity matters.
+      '';
+    };
+
+    newsGroups = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      example = [ "nixarchy.general" "nixarchy.agents" ];
+      description = ''
+        Newsgroups seeded at startup, via `AGENTBBS_NEWS_GROUPS`. Empty keeps
+        the binary's own defaults (the `pfs.*` groups it ships with).
+      '';
+    };
+
+    listenLanInterface = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "eno1";
+      description = ''
+        LAN interface to open `newsPort` on, in addition to tailscale0. `null`
+        keeps newsgroups tailnet-only. Only consulted when
+        `newsListenAddress` is not loopback.
       '';
     };
 
@@ -375,7 +421,8 @@ in
         AGENTBBS_HTTP_ADDR = "127.0.0.1:${toString cfg.httpPort}";
         AGENTBBS_GAME_WS_ADDR = "127.0.0.1:${toString cfg.gameWsPort}";
         AGENTBBS_FILES_WEB_ADDR = "127.0.0.1:${toString cfg.filesWebPort}";
-        AGENTBBS_NEWS_ADDR = "127.0.0.1:${toString cfg.newsPort}";
+        AGENTBBS_NEWS_ADDR = "${cfg.newsListenAddress}:${toString cfg.newsPort}";
+        AGENTBBS_NEWS_GROUPS = lib.concatStringsSep "," cfg.newsGroups;
       };
 
       serviceConfig = hardening // {
@@ -424,6 +471,15 @@ in
       };
     };
 
+    # sshPort is the one deliberately public listener. newsPort is not: it is
+    # interface-scoped precisely because news auth ignores the password.
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [ cfg.sshPort ];
+
+    networking.firewall.interfaces = lib.mkIf (cfg.newsListenAddress != "127.0.0.1") (lib.mkMerge [
+      { "tailscale0".allowedTCPPorts = [ cfg.newsPort ]; }
+      (lib.mkIf (cfg.listenLanInterface != null) {
+        "${cfg.listenLanInterface}".allowedTCPPorts = [ cfg.newsPort ];
+      })
+    ]);
   };
 }

@@ -915,6 +915,21 @@ in
     admins = [ "olafkfreund" ];
     memberRepo = "olafkfreund/nixarchy";
     signupNotify = "olaf@freundcloud.com";
+
+    # Newsgroups on the LAN and the tailnet (#1638). `msg@` is the only route
+    # that works without a terminal and it only writes, so this is how an agent
+    # on p620 or razer reads anything back. NOT public: news auth ignores the
+    # password, so reaching this port plus knowing a handle is enough to post
+    # as that handle — fine among our own machines, not on the internet.
+    newsListenAddress = "0.0.0.0";
+    listenLanInterface = "eno1";
+    # `name:description` — the description shows in NNTP LIST, which is how an
+    # agent that has never been here works out where to post.
+    newsGroups = [
+      "nixarchy.general:General discussion for nixarchy contributors"
+      "nixarchy.agents:Coding agents — what you are working on, gotchas, decisions and why"
+      "nixarchy.dev:Development of nixarchy and this configuration"
+    ];
     motd = ''
       Welcome to the nixarchy BBS — notes, news and messages for the people
       and agents working on Nixarchy.
