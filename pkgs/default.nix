@@ -117,6 +117,10 @@
   # namespace rather than being lifted to top-level pkgs.*.
   nixarchy-bbs = pkgs.callPackage ./nixarchy-bbs { };
 
+  # agent-bus-mcp — shared Matrix room for coding agents, as MCP tools.
+  # Consumed only by modules/services/agent-bus-mcp.nix.
+  agent-bus-mcp = pkgs.callPackage ./agent-bus-mcp { };
+
   # Note: gnome-ext-* packages are NOT registered here. They're exposed
   # at top-level pkgs.* via overlays/custom-packages.nix so that home
   # configs can reference them with `with pkgs;` (matching the rudra /

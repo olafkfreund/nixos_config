@@ -132,6 +132,15 @@ in
   #   agenix -e secrets/audiobook-mcp-env.age
   "secrets/audiobook-mcp-env.age".publicKeys = allUsers ++ [ p510 ];
 
+  # Matrix homeserver registration token (continuwuity) on p510. Gates account
+  # creation: continuwuity has no HTTP admin API, so a token is the only
+  # scriptable way to provision the agent accounts.
+  #   agenix -e secrets/matrix-registration-token.age
+  "secrets/matrix-registration-token.age".publicKeys = allUsers ++ [ p510 ];
+  # Matrix access token the agent bus posts with, from /_matrix/client/v3/login.
+  #   agenix -e secrets/agent-bus-matrix-token.age
+  "secrets/agent-bus-matrix-token.age".publicKeys = allUsers ++ [ p510 ];
+
   # ntfy-sh environment file (EnvironmentFile) on p510 — push notification
   # server. Contains: NTFY_AUTH_DEFAULT_ACCESS (deny-all for public instance).
   # Add admin user post-deploy with: ssh p510 -- sudo ntfy user add --role=admin <user>
