@@ -794,7 +794,18 @@ in
 
     tmpfsOptimization = {
       enable = true;
-      tmpSize = "16G"; # Large temp space for AI workloads and complex builds
+      # tmpSize = "" on purpose: /tmp stays on disk.
+      #
+      # This module writes fileSystems."/tmp", which becomes an /etc/fstab entry
+      # and a generated tmp.mount -- and that BEATS boot.tmp.useTmpfs in
+      # hosts/p620/nixos/boot.nix. Two subsystems were declaring /tmp and only
+      # one could win, which is how setting useTmpfs = false in #1636 silently
+      # shrank /tmp from 32G to this 16G rather than moving it to disk.
+      #
+      # Builds go in $TMPDIR and this machine unpacks cef-binary and friends a
+      # dozen at a time, so /tmp wants the 916G NVMe, not a slice of RAM.
+      # /var/tmp and /dev/shm keep their tmpfs; neither is a build directory.
+      tmpSize = "";
       varTmpSize = "2G";
       devShmSize = "50%";
     };
