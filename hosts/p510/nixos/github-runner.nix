@@ -106,6 +106,21 @@ in
     # decides whether an ISO test finishes or wedges.
     systemd.services.nix-daemon.environment.TMPDIR = buildDir;
 
+    # ...and this, which is the one that actually decides it now. Nix grew a
+    # `build-dir` setting that defaults to /nix/var/nix/builds -- on the root
+    # filesystem -- and it takes precedence over TMPDIR. So the line above went
+    # quietly inert on the Nix bump: it still reads correctly, and every build
+    # went back to /. Measured on 2026-09-02, with the runner busy:
+    #
+    #   /home/nix-build        4.0K, 0 entries    <- never used
+    #   /nix/var/nix/builds    3.7G, 18 entries   <- everything, on /
+    #   /                      226G, 121M free    <- an install job had failed
+    #
+    # Both are set deliberately. TMPDIR still governs anything that asks the
+    # environment rather than the setting, and dropping it would move that half
+    # back to / without any error saying so.
+    nix.settings.build-dir = buildDir;
+
     # One runner runs one job. That is not a setting, it is what a runner is,
     # so "let p510 take two jobs at once" means two runner instances.
     #
