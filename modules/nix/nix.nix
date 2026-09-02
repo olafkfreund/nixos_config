@@ -27,7 +27,15 @@
     warn-dirty = false;
     log-lines = 50;
     sandbox = "relaxed";
-    auto-optimise-store = true;
+    # auto-optimise-store is deliberately NOT set. It deduplicates by hardlink
+    # immediately after each build, which races the in-build garbage collector
+    # that min-free/max-free below enables: the collector deletes a path while
+    # the optimiser is linking into it, and the build dies with
+    #   renaming "/nix/store/.tmp-link-...": No such file or directory
+    #   error: path '...' is required, but there is no substituter that can build it
+    # -- leaving genuinely invalid store paths behind. It cost p620 a rebuild and
+    # one corrupted path (zerovec-derive) on 2026-09-02. nix.optimise.automatic
+    # below does the same deduplication on a timer, when nothing else is running.
     max-jobs = "auto";
     cores = 0;
 
@@ -62,6 +70,17 @@
     # Example: "your-username.cachix.org"
     # To use: uncomment and add your cachix auth token via:
     # $ cachix authtoken YOUR_TOKEN
+  };
+
+  # Store deduplication on a timer instead of after every build.
+  #
+  # Replaces `nix.settings.auto-optimise-store`, which raced the in-build
+  # collector (see the note above). Same hardlinking, same saving -- it was
+  # already reclaiming 18.8 GiB on p510 -- but run when it cannot collide with
+  # a build's own paths being deleted underneath it.
+  nix.optimise = {
+    automatic = true;
+    dates = [ "Sun 05:00" ];
   };
 
   # Package permissions - security-focused configuration

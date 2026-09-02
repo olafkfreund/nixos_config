@@ -7,8 +7,10 @@
       # Accept flake configurations automatically
       accept-flake-config = true;
 
-      # Optimize store to save space
-      auto-optimise-store = true;
+      # auto-optimise-store is deliberately NOT set here: it races the in-build
+      # collector enabled by min-free/max-free in ./nix.nix and leaves invalid
+      # store paths behind. Deduplication happens on a timer instead --
+      # `nix.optimise` in ./nix.nix.
     };
 
     # Garbage collection settings

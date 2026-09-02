@@ -425,7 +425,8 @@ in
     settings = {
       max-jobs = lib.mkDefault 16; # i7-10875H has 8 cores/16 threads
       cores = lib.mkDefault 16; # Use all threads
-      auto-optimise-store = true;
+      # auto-optimise-store: see modules/nix/nix.nix -- it races the in-build
+      # collector; nix.optimise runs the same deduplication on a timer.
     };
     extraOptions = ''
       keep-outputs = true

@@ -15,21 +15,22 @@
   boot.kernelPackages = pkgs.linuxPackages_latest; # Use the beta kernel for better hardware support
   boot.plymouth.enable = true;
 
-  # /tmp in RAM, sized for what actually gets built here.
+  # /tmp on disk, not in RAM.
   #
-  # 32G was generous once and is not any more: nix builds in $TMPDIR, `max-jobs
-  # = auto` on 128 threads runs a dozen unpacks at a time, and several packages
-  # in this closure are large on their own -- cef-binary is ~1.9G unpacked,
-  # ctranslate2 and antigravity-ide are the same order. A full rebuild put four
-  # of them in flight together and every one died with ENOSPC (#1635), which
-  # reads as a disk problem and is not: / had 289G free throughout.
+  # This was a 32G tmpfs, then a 128G one, and a full rebuild exhausted both
+  # (#1635). Raising the number was the wrong shape of fix: tmpfs is RAM, RAM is
+  # finite, and `max-jobs = auto` across 128 threads will unpack as much as you
+  # give it -- cef-binary alone is ~1.9G, and a dozen of those land together.
+  # The 128G cap also meant half of this machine's memory could disappear into
+  # a build directory.
   #
-  # 128G against 251G of RAM. tmpfs is lazily allocated, so this is a ceiling
-  # rather than a reservation and costs nothing when /tmp is near-empty, which
-  # is almost always.
+  # / is a 916G NVMe with 300G+ free, so builds get somewhere effectively
+  # unbounded and fast, and ENOSPC stops being a thing that looks like a full
+  # disk while `df /` says otherwise. cleanOnBoot keeps the clear-on-restart
+  # behaviour tmpfs gave for free.
   boot.tmp = {
-    useTmpfs = true;
-    tmpfsSize = "128G";
+    useTmpfs = false;
+    cleanOnBoot = true;
   };
   # OBS Virtual Cam Support - v4l2loopback setup
   boot.kernelModules = [ "v4l2loopback" ];
