@@ -178,6 +178,17 @@ in
     # anchor pointing at a renamed note across ~2950 files. Paired with the
     # `obsidian` Claude Code skill in home/development/claude-code-skills.
     pkgs.customPkgs.obsidian-cli
+    # notebooklm-go (binary: `notebooklm`) — unofficial CLI for Google
+    # NotebookLM. Reverse-engineered against the internal batchexecute RPC and
+    # pinned to a release tag, so expect it to break when Google ships a new
+    # frontend bundle rather than when we change anything.
+    #
+    # Auth is your own Google session cookie, written by `notebooklm login` to
+    # ~/.config/notebooklm-go/auth.json. That path is deliberately outside the
+    # syncthing folders (modules/services/syncthing.nix covers ~/.claude and
+    # ~/.gemini only), so the credential stays on the host that created it and
+    # each host is logged in separately.
+    pkgs.customPkgs.notebooklm-go
     # herdr — TUI "agent multiplexer": run multiple AI coding agents in one
     # terminal workspace (tmux/zellij-style). From github:ogulcancelik/herdr.
     pkgs.herdr
