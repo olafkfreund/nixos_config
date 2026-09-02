@@ -15,10 +15,21 @@
   boot.kernelPackages = pkgs.linuxPackages_latest; # Use the beta kernel for better hardware support
   boot.plymouth.enable = true;
 
-  # Configure tmpfs size for large builds
+  # /tmp in RAM, sized for what actually gets built here.
+  #
+  # 32G was generous once and is not any more: nix builds in $TMPDIR, `max-jobs
+  # = auto` on 128 threads runs a dozen unpacks at a time, and several packages
+  # in this closure are large on their own -- cef-binary is ~1.9G unpacked,
+  # ctranslate2 and antigravity-ide are the same order. A full rebuild put four
+  # of them in flight together and every one died with ENOSPC (#1635), which
+  # reads as a disk problem and is not: / had 289G free throughout.
+  #
+  # 128G against 251G of RAM. tmpfs is lazily allocated, so this is a ceiling
+  # rather than a reservation and costs nothing when /tmp is near-empty, which
+  # is almost always.
   boot.tmp = {
     useTmpfs = true;
-    tmpfsSize = "32G"; # Allocate 32GB of RAM for /tmp (increased for LibreOffice and large builds)
+    tmpfsSize = "128G";
   };
   # OBS Virtual Cam Support - v4l2loopback setup
   boot.kernelModules = [ "v4l2loopback" ];
