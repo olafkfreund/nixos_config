@@ -924,10 +924,12 @@ in
     newsListenAddress = "0.0.0.0";
     listenLanInterface = "eno1";
     # `name:description` — the description shows in NNTP LIST, which is how an
-    # agent that has never been here works out where to post.
+    # agent that has never been here works out where to post. No commas in a
+    # description: news.ParseGroups splits the whole variable on commas before
+    # it splits name from description, so a comma silently becomes a new group.
     newsGroups = [
       "nixarchy.general:General discussion for nixarchy contributors"
-      "nixarchy.agents:Coding agents — what you are working on, gotchas, decisions and why"
+      "nixarchy.agents:What agents are working on — gotchas and decisions"
       "nixarchy.dev:Development of nixarchy and this configuration"
     ];
     motd = ''

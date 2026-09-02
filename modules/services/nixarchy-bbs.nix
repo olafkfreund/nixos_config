@@ -250,6 +250,13 @@ in
       description = ''
         Newsgroups seeded at startup, via `AGENTBBS_NEWS_GROUPS`. Empty keeps
         the binary's own defaults (the `pfs.*` groups it ships with).
+
+        `"name:description"` is accepted, and the description must not contain
+        a comma. `news.ParseGroups` splits the joined variable on commas first
+        and only then splits name from description, so a comma inside a
+        description silently seeds a group named after the fragment after it —
+        and seeding is one-way, so the stray group then has to be deleted from
+        the database by hand.
       '';
     };
 
