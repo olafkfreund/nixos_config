@@ -162,6 +162,41 @@ in
       enable = true;
       inherit (cfg) openFirewall capSysAdmin;
 
+      # Put the driver directory in the binary's RUNPATH so NVENC survives the
+      # capability wrapper (#1588).
+      #
+      # capSysAdmin makes NixOS build /run/wrappers/bin/sunshine, so the
+      # process runs AT_SECURE. Sunshine's statically-linked ffmpeg reaches
+      # NVENC by dlopen'ing the bare soname "libcuda.so.1" at runtime, and
+      # under AT_SECURE the loader ignores LD_LIBRARY_PATH entirely --
+      # it searches the calling object's DT_RUNPATH and the trusted system
+      # directories, nothing else. libcuda.so.1 is in /run/opengl-driver/lib,
+      # which is in neither, so every hardware encoder fails and Sunshine
+      # silently settles on libx264:
+      #
+      #   Error: [CUDA @ 0x...] Cannot load libcuda.so.1
+      #   Info:  Encoder [nvenc] failed
+      #   Info:  Found H.264 encoder: libx264 [software]
+      #
+      # DT_RUNPATH is honoured under AT_SECURE -- only LD_LIBRARY_PATH and
+      # LD_PRELOAD are dropped -- so writing the path into the ELF is what
+      # makes the two settings compatible. That is precisely what
+      # addDriverRunpath does, and autoAddDriverRunpath applies it to every
+      # ELF in the output from a setup hook.
+      #
+      # This deliberately does NOT use `sunshine.override { cudaSupport = true; }`,
+      # which is the obvious-looking alternative and wrong twice over: it
+      # builds the whole CUDA toolkit for a library that is dlopen'd from the
+      # driver at runtime anyway, and its postFixup replaces $out/bin/sunshine
+      # with a wrapProgram shell script -- which cannot carry a file
+      # capability, so security.wrappers would have nothing to attach to.
+      #
+      # Harmless on a non-NVIDIA host: /run/opengl-driver/lib exists on every
+      # NixOS system and simply has no libcuda in it.
+      package = pkgs.sunshine.overrideAttrs (old: {
+        nativeBuildInputs = old.nativeBuildInputs ++ [ pkgs.autoAddDriverRunpath ];
+      });
+
       settings =
         # Comma-separated, no spaces, as the option's own parser expects; an
         # entry it cannot read is dropped with "Invalid 'csrf_allowed_origins'
