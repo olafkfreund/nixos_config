@@ -901,7 +901,7 @@ in
   #   1. Cloudflare DNS: an A record for bbs.freundcloud.org.uk → the WAN IP,
   #      DNS-only (grey cloud). Cloudflare's proxy cannot carry SSH, so an
   #      orange-cloud record would black-hole it.
-  #   2. Router: forward WAN TCP 22 → 192.168.1.222:2222. Port 22 externally,
+  #   2. Router: forward WAN TCP 22 → 192.168.1.75:2222 (this host; .222 is p620). Port 22 externally,
   #      so the board's own "ssh join@<host>" hints are correct and nobody
   #      needs -p; 2222 internally, so p510's own sshd on 22 is untouched.
   #
