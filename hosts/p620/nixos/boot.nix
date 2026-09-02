@@ -15,10 +15,22 @@
   boot.kernelPackages = pkgs.linuxPackages_latest; # Use the beta kernel for better hardware support
   boot.plymouth.enable = true;
 
-  # Configure tmpfs size for large builds
+  # /tmp on disk, not in RAM.
+  #
+  # This was a 32G tmpfs, then a 128G one, and a full rebuild exhausted both
+  # (#1635). Raising the number was the wrong shape of fix: tmpfs is RAM, RAM is
+  # finite, and `max-jobs = auto` across 128 threads will unpack as much as you
+  # give it -- cef-binary alone is ~1.9G, and a dozen of those land together.
+  # The 128G cap also meant half of this machine's memory could disappear into
+  # a build directory.
+  #
+  # / is a 916G NVMe with 300G+ free, so builds get somewhere effectively
+  # unbounded and fast, and ENOSPC stops being a thing that looks like a full
+  # disk while `df /` says otherwise. cleanOnBoot keeps the clear-on-restart
+  # behaviour tmpfs gave for free.
   boot.tmp = {
-    useTmpfs = true;
-    tmpfsSize = "32G"; # Allocate 32GB of RAM for /tmp (increased for LibreOffice and large builds)
+    useTmpfs = false;
+    cleanOnBoot = true;
   };
   # OBS Virtual Cam Support - v4l2loopback setup
   boot.kernelModules = [ "v4l2loopback" ];
