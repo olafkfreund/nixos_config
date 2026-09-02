@@ -282,6 +282,10 @@ in
         File holding a bare GitHub token for the membership sync. Only needs to
         read issues on `memberRepo`; the token exists to lift the 60-req/hour
         unauthenticated rate limit shared by everything else on this host's IP.
+
+        Declared by modules/secrets/api-keys.nix, not here — that module
+        already provisions this secret on every host, and re-declaring it is an
+        option conflict rather than a second copy.
       '';
     };
 
@@ -310,11 +314,6 @@ in
         message = "features.nixarchy-bbs.memberRepo must name the owner/repo whose issues grant access.";
       }
     ];
-
-    age.secrets."api-github-token" = {
-      file = ../../secrets/api-github-token.age;
-      mode = "0400";
-    };
 
     users.users.${stateDir} = {
       isSystemUser = true;
