@@ -112,6 +112,11 @@
   # renamed the binary but kept the repo name. Not in nixpkgs.
   obsidian-cli = pkgs.callPackage ./obsidian-cli { };
 
+  # nixarchy-bbs — a BBS delivered over SSH. Consumed only by
+  # modules/services/nixarchy-bbs.nix, so it stays in the customPkgs
+  # namespace rather than being lifted to top-level pkgs.*.
+  nixarchy-bbs = pkgs.callPackage ./nixarchy-bbs { };
+
   # Note: gnome-ext-* packages are NOT registered here. They're exposed
   # at top-level pkgs.* via overlays/custom-packages.nix so that home
   # configs can reference them with `with pkgs;` (matching the rudra /
