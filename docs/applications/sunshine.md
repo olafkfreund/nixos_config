@@ -32,7 +32,6 @@ features.sunshine = {
 | --- | --- | --- |
 | `enable` | `false` | Turn the streaming host on |
 | `openFirewall` | `true` | Open the Moonlight + web UI ports |
-| `capSysAdmin` | `true` | KMS capture capability on the binary |
 | `wakeDisplay` | `false` | Wake a DPMS-off output when a client connects |
 | `webOrigins` | `[ ]` | Origins allowed to POST to the web UI |
 
@@ -102,17 +101,47 @@ repository from then on.
 Credentials and client pairings are unaffected; those live in
 `~/.config/sunshine/sunshine_state.json`, which stays writable.
 
-## Known limitation
+## Hardware encoding
 
-Sunshine currently **software-encodes** on p510 despite the RTX 3070 Ti, tracked
-in [#1588](https://github.com/olafkfreund/nixos_config/issues/1588). The cause is
-a catch-22 around `capSysAdmin`: NixOS `security.wrappers` sets file
-capabilities, which makes the loader treat the process as `AT_SECURE` and drop
-`LD_LIBRARY_PATH` — the only route to `libcuda` on NixOS, since the binary's
-`DT_RUNPATH` is empty. Dropping the capability restores CUDA but loses KMS
-capture.
+Sunshine encodes on the RTX 3070 Ti, and getting there took one non-obvious
+change ([#1588](https://github.com/olafkfreund/nixos_config/issues/1588)).
 
-The untested candidate fix is `addDriverRunpath $out/bin/sunshine` in
-`postFixup`, keeping `capSysAdmin = true`, since `DT_RUNPATH` survives
-`AT_SECURE`. Verify it by confirming an NVENC encoder is *selected*, not merely
-by CUDA errors disappearing.
+nixpkgs builds Sunshine with `cudaSupport ? config.cudaSupport`, false by
+default, which passes `-DSUNSHINE_ENABLE_CUDA=false`. Every CUDA encode path in
+Sunshine sits behind that `#ifdef`, including the one in wlgrab's
+`wlr_vram_t::make_avcodec_encode_device`. Compiled out, the function falls
+through to a plain `avcodec_encode_device_t` — the *software* converter. ffmpeg
+still advertises `h264_nvenc`, Sunshine still creates it, and the software
+`sws_scale` in front of it then fails on the dmabuf frame:
+
+```text
+Info:  Creating encoder [h264_nvenc]
+Error: Couldn't scale frame: Invalid argument
+Info:  Encoder [nvenc] failed
+Info:  Found H.264 encoder: libx264 [software]
+```
+
+The module therefore builds `pkgs.sunshine.override { cudaSupport = true; }`.
+The binary goes from 0 CUDA symbols to 3989, and the log reads:
+
+```text
+Info: Found H.264 encoder: h264_nvenc [nvenc]
+Info: Found HEVC encoder: hevc_nvenc [nvenc]
+```
+
+AV1 is still rejected — that is Ampere, not this setting.
+
+Two earlier theories were wrong and are recorded so they are not retried:
+
+- **It is not `LD_LIBRARY_PATH` versus `AT_SECURE`.** That story was real but
+  incidental: `capSysAdmin` does make `security.wrappers` build a wrapper, the
+  process does run `AT_SECURE`, and the loader does drop `LD_LIBRARY_PATH`.
+  Writing the driver directory into `DT_RUNPATH` removed the
+  `Cannot load libcuda.so.1` errors and changed nothing else — the encoder was
+  still software, because the CUDA code was never in the binary.
+- **`capSysAdmin` is not worth keeping.** KMS capture is the only reason for
+  it, and on the NVIDIA proprietary driver kmsgrab enumerates no scanout plane
+  with a framebuffer. The monitor list comes back empty even while holding
+  `CAP_SYS_ADMIN`, and Sunshine exits with "Unable to initialize capture
+  method". The option has been removed; capture is Wayland screencopy, which
+  needs no privilege.

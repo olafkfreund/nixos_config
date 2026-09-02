@@ -85,21 +85,6 @@ in
       '';
     };
 
-    capSysAdmin = mkOption {
-      type = types.bool;
-      default = true;
-      description = ''
-        Grant the Sunshine binary CAP_SYS_ADMIN, which is what KMS capture
-        needs on Wayland. Without it Sunshine falls back to a portal-based
-        path that Hyprland can serve but which re-prompts, or fails outright
-        with "Couldn't find any working capture method".
-
-        This is a real privilege on a real binary, and it is the reason this
-        option is spelled out instead of hardcoded: a host that would rather
-        take the portal route can turn it off in one line.
-      '';
-    };
-
     wakeDisplay = mkOption {
       type = types.bool;
       default = false;
@@ -160,42 +145,62 @@ in
   config = mkIf cfg.enable {
     services.sunshine = {
       enable = true;
-      inherit (cfg) openFirewall capSysAdmin;
+      inherit (cfg) openFirewall;
 
-      # Put the driver directory in the binary's RUNPATH so NVENC survives the
-      # capability wrapper (#1588).
+      # KMS capture is off, and this is not a default worth revisiting here.
       #
-      # capSysAdmin makes NixOS build /run/wrappers/bin/sunshine, so the
-      # process runs AT_SECURE. Sunshine's statically-linked ffmpeg reaches
-      # NVENC by dlopen'ing the bare soname "libcuda.so.1" at runtime, and
-      # under AT_SECURE the loader ignores LD_LIBRARY_PATH entirely --
-      # it searches the calling object's DT_RUNPATH and the trusted system
-      # directories, nothing else. libcuda.so.1 is in /run/opengl-driver/lib,
-      # which is in neither, so every hardware encoder fails and Sunshine
-      # silently settles on libx264:
+      # Upstream's module offers capSysAdmin because KMS capture needs it, and
+      # KMS capture is the only path to a hardware encoder for most GPUs. On
+      # the NVIDIA proprietary driver it is not a path at all: nvidia-drm
+      # enumerates no scanout planes with a framebuffer, so kmsgrab returns an
+      # empty monitor list even holding CAP_SYS_ADMIN (verified on p510 --
+      # "-------- Start of KMS monitor list --------" immediately followed by
+      # the end marker, no error in between). Sunshine then reports "Unable to
+      # initialize capture method" and exits.
       #
-      #   Error: [CUDA @ 0x...] Cannot load libcuda.so.1
+      # It is also actively harmful with the package built below: cudaSupport
+      # makes $out/bin/sunshine a wrapper script, and a file capability on a
+      # shell script is a trap rather than a feature.
+      #
+      # Wayland screencopy is what actually captures here, and it needs no
+      # privilege at all.
+      capSysAdmin = false;
+
+      # Build with CUDA, or NVENC is compiled out and cannot be reached (#1588).
+      #
+      # p510 streamed 1440p on libx264 while an RTX 3070 Ti idled, and the
+      # cause is upstream packaging, not configuration. nixpkgs takes
+      # `cudaSupport ? config.cudaSupport`, which is false by default, and
+      # passes -DSUNSHINE_ENABLE_CUDA=false. That undefines SUNSHINE_BUILD_CUDA,
+      # and every CUDA encode path in Sunshine sits behind that #ifdef --
+      # including the one in wlgrab's wlr_vram_t::make_avcodec_encode_device.
+      # With the block compiled out the function falls through and returns a
+      # plain avcodec_encode_device_t: the *software* converter. So ffmpeg
+      # still offers h264_nvenc, Sunshine still creates it, and then the
+      # software sws_scale in front of it fails on the dmabuf frame:
+      #
+      #   Info:  Creating encoder [h264_nvenc]
+      #   Error: Couldn't scale frame: Invalid argument
       #   Info:  Encoder [nvenc] failed
       #   Info:  Found H.264 encoder: libx264 [software]
       #
-      # DT_RUNPATH is honoured under AT_SECURE -- only LD_LIBRARY_PATH and
-      # LD_PRELOAD are dropped -- so writing the path into the ELF is what
-      # makes the two settings compatible. That is precisely what
-      # addDriverRunpath does, and autoAddDriverRunpath applies it to every
-      # ELF in the output from a setup hook.
+      # That error is the whole bug, and it is why the earlier attempts missed:
+      # neither the capture method nor the loader can affect it. The binary
+      # simply had no CUDA in it -- 0 cuda symbols before, 3989 after.
       #
-      # This deliberately does NOT use `sunshine.override { cudaSupport = true; }`,
-      # which is the obvious-looking alternative and wrong twice over: it
-      # builds the whole CUDA toolkit for a library that is dlopen'd from the
-      # driver at runtime anyway, and its postFixup replaces $out/bin/sunshine
-      # with a wrapProgram shell script -- which cannot carry a file
-      # capability, so security.wrappers would have nothing to attach to.
+      # With this the log reads "Found H.264 encoder: h264_nvenc [nvenc]" and
+      # "Found HEVC encoder: hevc_nvenc [nvenc]". AV1 is still rejected, which
+      # is the Ampere card and not this setting.
       #
-      # Harmless on a non-NVIDIA host: /run/opengl-driver/lib exists on every
-      # NixOS system and simply has no libcuda in it.
-      package = pkgs.sunshine.overrideAttrs (old: {
-        nativeBuildInputs = old.nativeBuildInputs ++ [ pkgs.autoAddDriverRunpath ];
-      });
+      # This also supersedes the DT_RUNPATH patch that #1588 first landed:
+      # nixpkgs' own cudaSupport path already adds autoAddDriverRunpath, and
+      # with capSysAdmin off there is no AT_SECURE to defeat LD_LIBRARY_PATH
+      # in the first place.
+      #
+      # Unconditional because p510 is the only host that enables this module
+      # and it is NVIDIA. A non-NVIDIA host would pull the CUDA toolkit for
+      # nothing; gate it then, not now.
+      package = pkgs.sunshine.override { cudaSupport = true; };
 
       settings =
         # Comma-separated, no spaces, as the option's own parser expects; an
