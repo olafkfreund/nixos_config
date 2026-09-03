@@ -25,15 +25,15 @@
 # Upstream: https://github.com/google-antigravity/antigravity-sdk-python
 buildPythonPackage rec {
   pname = "google-antigravity";
-  version = "0.1.15";
+  version = "0.1.16";
   format = "wheel";
 
   # fetchPypi gets the URL wrong for this package (constructs
   # google-antigravity- instead of google_antigravity-), so use fetchurl
   # with the canonical PyPI download URL.
   src = fetchurl {
-    url = "https://files.pythonhosted.org/packages/29/2c/3837d346fb5caa454db32eb785934d37ce7313cc319b90edca9866a279d3/google_antigravity-0.1.15-py3-none-manylinux_2_17_x86_64.musllinux_1_1_x86_64.whl";
-    hash = "sha256-7ii8VsiV8hYjuLt7FH+RrnkfxcKwO3a86mKpmPjtBo0=";
+    url = "https://files.pythonhosted.org/packages/a6/1d/55ccedbc1a78fe0407cad7a2d612dd428f6b34cd97e0be95f67fb34bd32c/google_antigravity-0.1.16-py3-none-manylinux_2_17_x86_64.musllinux_1_1_x86_64.whl";
+    hash = "sha256-fJmMKLrkeRKxwo/gawewUWO/A3/LQPbfBqpeF7Pefso=";
   };
 
   propagatedBuildInputs = [
