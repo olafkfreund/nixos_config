@@ -92,6 +92,22 @@ in
         group = "users";
       };
 
+      # Matrix registration token for the agent bus. Declared here rather than
+      # in modules/services/matrix-continuwuity.nix because two different
+      # consumers need it: the homeserver daemon on p510 reads it as the
+      # `continuwuity` system user, and every Claude Code session reads it as
+      # the login user to register its own identity.
+      #
+      # 0644 for exactly that reason -- `continuwuity` is a system user and is
+      # not in `users`, so 0640 root:users would lock the daemon out. It grants
+      # account creation on a non-federating homeserver, nothing more.
+      matrix-registration-token = {
+        file = ../../secrets/matrix-registration-token.age;
+        mode = "0644";
+        owner = "root";
+        group = "users";
+      };
+
       synechron-github-api = {
         file = ../../secrets/synechron-github-api.age;
         mode = "0600";

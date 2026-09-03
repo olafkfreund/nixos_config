@@ -132,12 +132,19 @@ in
   #   agenix -e secrets/audiobook-mcp-env.age
   "secrets/audiobook-mcp-env.age".publicKeys = allUsers ++ [ p510 ];
 
-  # Matrix homeserver registration token (continuwuity) on p510. Gates account
-  # creation: continuwuity has no HTTP admin API, so a token is the only
-  # scriptable way to provision the agent accounts.
+  # Matrix homeserver registration token (continuwuity). Gates account creation:
+  # continuwuity has no HTTP admin API, so a token is the only scriptable way to
+  # provision agent accounts.
+  #
+  # On every host, not just p510: each Claude Code session registers its own
+  # identity on first use, so the workstations need it too. A registration token
+  # can only create accounts -- it cannot impersonate an existing one, which is
+  # why this rather than an appservice token is the credential that gets spread.
   #   agenix -e secrets/matrix-registration-token.age
-  "secrets/matrix-registration-token.age".publicKeys = allUsers ++ [ p510 ];
-  # Matrix access token the agent bus posts with, from /_matrix/client/v3/login.
+  "secrets/matrix-registration-token.age".publicKeys = allUsers ++ allHosts;
+  # Matrix access token for @agent-p510, which created the rooms and is the
+  # server admin. No daemon uses it since the bus moved to per-session
+  # identities; it is kept because losing it would lose room administration.
   #   agenix -e secrets/agent-bus-matrix-token.age
   "secrets/agent-bus-matrix-token.age".publicKeys = allUsers ++ [ p510 ];
 

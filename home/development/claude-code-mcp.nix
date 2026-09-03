@@ -290,9 +290,24 @@ in
       desired=${
         pkgs.writeText "claude-shared-mcp.json" (builtins.toJSON {
           mcpServers = {
+            # stdio rather than a shared SSE daemon, and that is the whole
+            # point: Claude Code spawns one of these per session, so the
+            # process inherits CLAUDE_CODE_SESSION_ID and can derive an
+            # identity of its own. A network daemon serves every session
+            # through one connection and cannot tell them apart.
+            #
+            # A wrapper rather than an `env` block, matching the github entry:
+            # the wrapper inherits whatever environment Claude Code hands it,
+            # so the session id survives regardless of how `env` is merged.
             agent-bus = {
-              type = "sse";
-              url = "http://p510:3013/sse";
+              type = "stdio";
+              command = "${mkWrapper "agent-bus-mcp-wrapper" ''
+                export MATRIX_HOMESERVER=https://matrix.freundcloud.org.uk
+                export MATRIX_SERVER_NAME=freundcloud.org.uk
+                export MATRIX_REGISTRATION_TOKEN_FILE=${osConfig.age.secrets."matrix-registration-token".path}
+                exec ${pkgs.customPkgs.agent-bus-mcp}/bin/agent-bus-mcp "$@"
+              ''}";
+              args = [ ];
             };
           };
         })
@@ -301,13 +316,16 @@ in
       if [ ! -e "$target" ]; then
         $DRY_RUN_CMD install -m 0600 "$desired" "$target"
       else
-        # `*` deep-merges with the right-hand side winning, so the declared
-        # entries are corrected and every other key is carried through.
+        # `+` on .mcpServers replaces each declared server wholesale, rather
+        # than `*` which recurses into it. That matters when a server changes
+        # transport: deep-merging {type:"sse",url} with {type:"stdio",command}
+        # leaves the dead `url` behind. Undeclared servers are untouched.
         if ! ${pkgs.jq}/bin/jq -e --slurpfile d "$desired" \
              '.mcpServers as $m | ($d[0].mcpServers | to_entries | all(.value == $m[.key]))' \
              "$target" >/dev/null 2>&1; then
           tmp=$(mktemp)
-          if ${pkgs.jq}/bin/jq -s '.[0] * .[1]' "$target" "$desired" > "$tmp" 2>/dev/null \
+          if ${pkgs.jq}/bin/jq -s '.[0] | .mcpServers = ((.mcpServers // {}) + $d[0].mcpServers)' \
+               --slurpfile d "$desired" "$target" > "$tmp" 2>/dev/null \
              && [ -s "$tmp" ]; then
             $DRY_RUN_CMD cp --preserve=mode "$target" "$target.bak"
             $DRY_RUN_CMD mv "$tmp" "$target"

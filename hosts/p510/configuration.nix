@@ -55,7 +55,6 @@ in
       ../../modules/services/ntfy.nix # Push notification server (ntfy-sh)
       ../../modules/services/cloudflared.nix # Cloudflare Tunnel — public ingress (CGNAT-safe)
       ../../modules/services/matrix-continuwuity.nix # Matrix homeserver backing the agent bus
-      ../../modules/services/agent-bus-mcp.nix # Shared room for coding agents, as MCP tools
       # Desktop-specific imports (needed for GNOME):
       # ./nixos/greetd.nix      # Display manager - using GDM instead
       ./nixos/screens.nix # Display configuration - needed for desktop
@@ -908,12 +907,6 @@ in
     enable = true;
     serverName = "freundcloud.org.uk"; # permanent: it is in every user and room id
     publicUrl = "https://matrix.freundcloud.org.uk";
-  };
-
-  features.agent-bus-mcp = {
-    enable = true;
-    agentName = "agent-p510";
-    listenLanInterface = "eno1";
   };
 
   # Cloudflare Tunnel — public ingress under freundcloud.org.uk.
