@@ -10,10 +10,24 @@
     "vm.max_map_count" = 262144; # For applications that use many memory mappings
   };
 
-  # Create a larger /tmp on tmpfs - using updated option names
+  # /tmp on disk, not in RAM.
+  #
+  # This was a 16G tmpfs, which is a quarter of this laptop's memory handed to
+  # a build directory -- and nix builds in $TMPDIR, so a large rebuild both
+  # fills it and eats the RAM it was meant to leave free. p620 hit exactly that
+  # twice (#1635): the failure reads as a full disk while `df /` reports
+  # hundreds of gigabytes free, because the thing that filled is RAM.
+  #
+  # / is a 938G NVMe with 460G+ free. cleanOnBoot restores the clear-on-restart
+  # behaviour tmpfs gave for free -- it was off here because tmpfs made it
+  # redundant, and on disk it is not.
+  #
+  # razer builds through p620 (`just deploy-via-p620 razer`) so it rarely
+  # unpacks the big derivations itself, which is why this never bit here. That
+  # is a habit, not a guarantee.
   boot.tmp = {
-    useTmpfs = true; # Previously boot.tmpOnTmpfs
-    tmpfsSize = "16G"; # Previously boot.tmpOnTmpfsSize
+    useTmpfs = false;
+    cleanOnBoot = true;
   };
 
   # Optional: zram for better memory management
