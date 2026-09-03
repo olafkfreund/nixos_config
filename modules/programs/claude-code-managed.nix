@@ -286,6 +286,80 @@ let
     exit 0
   '';
 
+  # Announce-before-you-disrupt, enforced rather than remembered.
+  #
+  # Several agents work these machines at once, and tonight three of them
+  # collided: a deploy restarted logind and took a desktop session with it, a
+  # garbage collection ran against a disk a CI VM test was building on, and a
+  # daemon restart landed mid-build. Each was individually reasonable and each
+  # broke work someone else had in flight.
+  #
+  # The convention "say what you are about to do, and look whether anyone
+  # objects" is the fix, and the p510 guard below is the proof that a
+  # convention needs a mechanism: it held only as long as the model remembered
+  # it. So this is the same shape -- PreToolUse can veto, exit 2 denies and
+  # hands the reason back to the model, which then has the bus tools to do the
+  # announcing with.
+  #
+  # It is a prompt, not a wall. AGENT_BUS_ANNOUNCED=1 in the command clears it,
+  # which an agent sets *after* posting. That is deliberate: these are our own
+  # agents, so the goal is a reliable interruption at the right moment rather
+  # than a control someone has to defeat. Anyone who sets the variable without
+  # posting has decided to, which is different from forgetting.
+  #
+  # Read-only inspection stays frictionless -- `nix build`, `systemctl status`,
+  # plain ssh -- and the user's own shell is untouched.
+  busAnnounceScript = pkgs.writeShellScript "claude-bus-announce-guard.sh" ''
+    payload="$(cat)"
+    cmd="$(${pkgs.jq}/bin/jq -r '.tool_input.command // empty' <<<"$payload" 2>/dev/null)"
+    [ -n "$cmd" ] || exit 0
+
+    # The agent's own escape hatch, set after it has posted.
+    case "$cmd" in *AGENT_BUS_ANNOUNCED=1*) exit 0 ;; esac
+
+    # Activating a generation, reclaiming disk, restarting shared services, or
+    # taking a machine down. Note `nix build` and `systemctl status` are absent
+    # on purpose.
+    disruptive='nixos-rebuild[[:space:]]+[^|;]*(switch|boot|test)'
+    disruptive="$disruptive"'|nh[[:space:]]+os[[:space:]]+(switch|boot|test)'
+    disruptive="$disruptive"'|(^|[[:space:]])nhs([[:space:]]|$)'
+    # `just deploy-*` and also `just <host>`: the deploy recipes here are
+    # named after the machine (`just p510`), so a deploy-only pattern misses
+    # the most common way anyone actually deploys.
+    disruptive="$disruptive"'|just[[:space:]]+[a-z-]*deploy'
+    disruptive="$disruptive"'|just[[:space:]]+(p510|p620|razer)([[:space:]]|$)'
+    disruptive="$disruptive"'|nix-collect-garbage|nix[[:space:]]+store[[:space:]]+optimise'
+    disruptive="$disruptive"'|systemctl[[:space:]]+[^|;]*(restart|stop)'
+    disruptive="$disruptive"'|(^|[[:space:]])(reboot|poweroff|shutdown)([[:space:]]|$)'
+
+    if printf '%s' "$cmd" | ${pkgs.gnugrep}/bin/grep -qE "($disruptive)"; then
+      echo "BLOCKED: this would disrupt a host other agents may be working on." >&2
+      echo "" >&2
+      echo "Before running it:" >&2
+      echo "  1. read_new(\"#agents:freundcloud.org.uk\") -- check whether anyone has" >&2
+      echo "     claimed this host or has a long job in flight." >&2
+      echo "  2. post(...) what you are about to do, on which host, and roughly" >&2
+      echo "     how long it will take." >&2
+      echo "  3. rerun with AGENT_BUS_ANNOUNCED=1 prefixed." >&2
+      echo "" >&2
+      echo "If the bus says someone else is mid-flight, wait or ask the user" >&2
+      echo "rather than proceeding -- that is the whole point of checking." >&2
+      exit 2
+    fi
+    exit 0
+  '';
+
+  busAnnounceHooks = lib.optionalAttrs cfg.busAnnounceGuard.enable {
+    PreToolUse = [{
+      matcher = "Bash";
+      hooks = [{
+        type = "command";
+        command = toString busAnnounceScript;
+        timeout = 5;
+      }];
+    }];
+  };
+
   deployGuardHooks = lib.optionalAttrs cfg.deployGuard.enable {
     PreToolUse = [{
       matcher = "Bash";
@@ -432,6 +506,7 @@ let
         notifyHooks
         formatHooks
         deployGuardHooks
+        busAnnounceHooks
         subagentHooks
         tmuxCcmHooks
       ];
@@ -514,6 +589,24 @@ in
 
         Building (`nix build .#nixosConfigurations.p510...`) and read-only ssh
         are unaffected, as is the user's own interactive shell.
+      '';
+    };
+
+    busAnnounceGuard.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Require an agent to announce on the agent bus before running a command
+        that disrupts a shared host -- deploys, garbage collection, store
+        optimise, service restarts, reboots.
+
+        Denies the call with instructions rather than silently allowing it, so
+        the rule holds whether or not the model remembers it. The agent posts
+        its intent with the bus MCP tools, then reruns with
+        AGENT_BUS_ANNOUNCED=1.
+
+        Read-only work is unaffected: `nix build`, `systemctl status` and plain
+        ssh never match, and the user's own interactive shell is untouched.
       '';
     };
 

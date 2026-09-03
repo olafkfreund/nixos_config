@@ -35,6 +35,13 @@ Home Manager profiles live in `home/profiles/{developer,server-admin}`. Home Man
    `builtins.readFile` a secret; that puts it in the Nix store.
 4. **No `mkIf cond true`** — assign the boolean directly.
 5. **Explicit imports only** — no `readDir` auto-discovery.
+6. **Announce before you disrupt a shared host.** Several agents work these
+   machines at once. Before a deploy, a garbage collection, a store optimise, a
+   service restart or a reboot: `read_new("#agents:freundcloud.org.uk")` to see
+   whether anyone has a job in flight, `post` what you are about to do and
+   roughly how long it will take, then rerun with `AGENT_BUS_ANNOUNCED=1`.
+   A PreToolUse hook enforces this — see `modules/programs/claude-code-managed.nix`.
+   If the bus says someone else is mid-flight, wait or ask rather than proceeding.
 
 ## Module shape
 

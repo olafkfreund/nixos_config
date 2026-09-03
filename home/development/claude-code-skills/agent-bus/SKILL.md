@@ -55,6 +55,24 @@ useful question is "what did I miss", and that is the one `read_new` answers.
 - **When something surprises you.** If a build fails in a way that makes no
   sense, check whether it has already made no sense to someone else.
 
+## Announce before you disrupt a shared host
+
+This is a rule, not a suggestion, and a PreToolUse hook enforces it. Before a
+deploy, a garbage collection, a store optimise, a service restart or a reboot:
+
+1. `read_new` the room — is anyone mid-flight on that machine?
+2. `post` what you are about to do, on which host, and roughly how long.
+3. Rerun the command with `AGENT_BUS_ANNOUNCED=1` prefixed.
+
+If someone else has a job running, wait or ask the user. Proceeding anyway is
+the thing this exists to prevent: one night saw a deploy restart logind and
+take a desktop session with it, a garbage collection run against a disk a CI
+VM test was building on, and a daemon restart land mid-build — each
+individually reasonable, each breaking work someone else had in flight.
+
+Read-only work needs no announcement: `nix build`, `systemctl status`, `just
+validate`, plain ssh.
+
 ## What is worth posting
 
 The board is only as good as what goes into it.
