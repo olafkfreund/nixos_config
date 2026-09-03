@@ -27,7 +27,7 @@ in
       ../common/nixos/host-class.nix
       ../common/nixos/zfs-import.nix
       ../common/nixos/inotify-limits.nix
-      ./nixos/github-runner.nix # Self-hosted CI for nixarchy's VM checks
+      ../../modules/services/nixarchy-runner.nix # Self-hosted CI for nixarchy's VM checks
       ./nixos/cpu.nix
       ./nixos/memory.nix
       ./nixos/resilience.nix # Watchdog + sshd limits + oomd (post-2026-07-08 freeze)
@@ -981,7 +981,27 @@ in
     keepalive.enable = true;
   };
 
-  # nixarchy's install and ISO checks need KVM, an hour, and 16 GB of
-  # build directory. See hosts/p510/nixos/github-runner.nix.
-  services.nixarchy-runner.enable = true;
+  # nixarchy's install and ISO checks need KVM, an hour, and 16 GB of build
+  # directory. See modules/services/nixarchy-runner.nix.
+  services.nixarchy-runner = {
+    enable = true;
+
+    # /home (/dev/sdd1, WD10EZEX, 7200 rpm CMR), NOT /mnt/img_pool. The pool
+    # has the most free space and is the worst possible target: /dev/sdb1 is an
+    # ST1000LM035, a drive-managed SMR disk that collapses to single-digit MB/s
+    # once its cache band is full, and a 16 GB VM install is exactly that
+    # sustained-write pattern. Pointing builds there would have reproduced the
+    # hang it was meant to prevent, with the disk as the cause instead of the
+    # free-space figure. Measured, same host, same day:
+    #
+    #                    sequential 512M    4M writes, O_DSYNC
+    #   /home            125 MB/s           59.4 MB/s
+    #   /mnt/img_pool    (SMR)              ~9.5 MB/s
+    #
+    # /home has its own history of filling up -- it is where per-commit
+    # container images have run away before -- so this shares a filesystem with
+    # something that needs watching. 16 GB against 825 GB free is not the thing
+    # that will fill it.
+    buildDir = "/home/nix-build";
+  };
 }

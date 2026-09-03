@@ -47,8 +47,47 @@ in
     ../../modules/services/whisper-server.nix # voice-input transcription HTTP API (port 9300, tailnet only)
     ../../modules/services/meeting-transcribe.nix # meet CLI: record → whisperX → Ollama summary
     ../../modules/services/audible-sync.nix # audible-sync: download + decrypt Audible library to .m4b
+    ../../modules/services/nixarchy-runner.nix # Self-hosted CI for nixarchy's VM checks
   ];
   host.class = "workstation";
+
+  # nixarchy's install and ISO checks need KVM, an hour, and 16 GB of build
+  # directory. See modules/services/nixarchy-runner.nix.
+  #
+  # p620 joins p510 in the same label pool rather than replacing it: both carry
+  # `nixos`/`kvm`/`big`, so GitHub hands a job to whichever is free. That is the
+  # point -- p510 alone could take two jobs, and a release build owning it for
+  # hours is what made the install check go a day without a CI result.
+  services.nixarchy-runner = {
+    enable = true;
+
+    # /mnt/games (/dev/sdb1, ext4, non-rotational, 625 GB free), NOT the root
+    # filesystem. Two reasons, and the second is the one that bites:
+    #
+    #   /              916 GB, 193 GB free, NVMe   <- also the nix store
+    #   /mnt/games     938 GB, 625 GB free, SSD
+    #
+    # A 16 GB VM install repeated across two concurrent runners is the write
+    # pattern that took p510's root filesystem to 121 MB free and killed CI
+    # with an error four levels above the cause (#1643). p620 has more headroom
+    # than p510 did, which makes this cheap insurance rather than a rescue.
+    #
+    # Read the tradeoff before copying this to a third host: there is one nix
+    # daemon, so this moves EVERY build on p620 off the NVMe root onto a SATA
+    # SSD, and because /nix/store stays on /, build output is now copied across
+    # filesystems rather than renamed. That cost is real and it applies to
+    # ordinary work too -- razer's toplevel is built here. It is accepted
+    # deliberately: a slower build is recoverable, a wedged hour-long VM test
+    # on a full root filesystem is not, and it does not announce itself as a
+    # disk problem.
+    buildDir = "/mnt/games/nix-build";
+
+    # Two, matching p510, despite p620 having 128 cores to p510's 40. The limit
+    # is not cores: this is an interactive workstation, and each of these jobs
+    # boots a VM that wants real memory and real disk throughput. Raise it if
+    # the queue rather than the desktop turns out to be the complaint.
+    instances = 2;
+  };
 
   # Consolidated networking configuration
   networking = {
