@@ -268,6 +268,58 @@ in
       fi
     '';
 
+    # Reconcile the shared MCP servers into ~/.claude.json on every activation.
+    #
+    # This exists because the seed above no longer reaches Claude Code. It
+    # writes ~/.claude/settings.local.json, and Claude Code reads its MCP
+    # servers from ~/.claude.json -- a different file, one directory up. On
+    # p620 the seeded file holds zero servers while ~/.claude.json holds
+    # fifteen, so anything added to the Nix template alone lands nowhere.
+    #
+    # Merge rather than seed, because that file is Claude Code's: it rewrites
+    # it constantly (accepted permissions, `claude mcp add`, caches). Adding
+    # one key and leaving the rest untouched is the only safe edit. It is also
+    # idempotent and self-healing -- if the entry is deleted or its URL drifts,
+    # the next rebuild puts it back.
+    #
+    # Per-host on purpose: syncthing replicates ~/.claude/, and ~/.claude.json
+    # sits beside that directory rather than inside it, so every host has to be
+    # told separately. This is what does the telling.
+    home.activation.claudeSharedMcpServers = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      target="$HOME/.claude.json"
+      desired=${
+        pkgs.writeText "claude-shared-mcp.json" (builtins.toJSON {
+          mcpServers = {
+            agent-bus = {
+              type = "sse";
+              url = "http://p510:3013/sse";
+            };
+          };
+        })
+      }
+
+      if [ ! -e "$target" ]; then
+        $DRY_RUN_CMD install -m 0600 "$desired" "$target"
+      else
+        # `*` deep-merges with the right-hand side winning, so the declared
+        # entries are corrected and every other key is carried through.
+        if ! ${pkgs.jq}/bin/jq -e --slurpfile d "$desired" \
+             '.mcpServers as $m | ($d[0].mcpServers | to_entries | all(.value == $m[.key]))' \
+             "$target" >/dev/null 2>&1; then
+          tmp=$(mktemp)
+          if ${pkgs.jq}/bin/jq -s '.[0] * .[1]' "$target" "$desired" > "$tmp" 2>/dev/null \
+             && [ -s "$tmp" ]; then
+            $DRY_RUN_CMD cp --preserve=mode "$target" "$target.bak"
+            $DRY_RUN_CMD mv "$tmp" "$target"
+            $DRY_RUN_CMD echo "Reconciled shared MCP servers into $target"
+          else
+            rm -f "$tmp"
+            $DRY_RUN_CMD echo "WARNING: could not merge MCP servers into $target; left unchanged"
+          fi
+        fi
+      fi
+    '';
+
     # Documentation file: Claude Code never reads it, never writes it,
     # so a nix-store symlink is fine.
     home.file.".claude/MCP-README.md".text = ''
