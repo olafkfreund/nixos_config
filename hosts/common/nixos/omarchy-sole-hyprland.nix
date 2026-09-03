@@ -72,7 +72,23 @@ in
   # different versions (0.56.0 vs 0.56.2) and it is the nixarchy one the
   # session script runs, so a mismatched start-hyprland and compositor is
   # exactly what we would be reintroducing.
-  environment.systemPackages = [ hyprland ];
+  # hyprland-preview-share-picker is the share picker Omarchy's own config
+  # asks for. It seeds ~/.config/hypr/xdph.conf with
+  #   custom_picker_binary = hyprland-preview-share-picker
+  # and lists that binary in share/omarchy/install/omarchy-base.packages --
+  # its *Arch* list, which pacman installs and which nothing consumes here. So
+  # the config shipped pointing at a binary nothing provided: the portal ran a
+  # command that did not exist, the picker returned selection -1, and the
+  # session was destroyed before any dialog appeared.
+  #
+  # From the application's side that is indistinguishable from screen sharing
+  # simply not working -- Teams, Chrome, anything using ScreenCast got nothing
+  # and no error. The tell is in the portal log:
+  #   xdg-desktop-portal-hyprland: [screencopy] SHAREDATA returned selection -1
+  #
+  # Install the picker rather than edit the seeded config: the config is
+  # upstream's and would come back on the next Omarchy bump.
+  environment.systemPackages = [ hyprland pkgs.hyprland-preview-share-picker ];
   environment.pathsToLink = [ "/share/hypr" ];
 
   # cap_sys_nice, as programs.hyprland sets it. /run/wrappers/bin precedes the
