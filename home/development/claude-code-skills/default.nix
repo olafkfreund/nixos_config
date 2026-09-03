@@ -49,6 +49,14 @@ in
     # over [[wikilinks]] and that frontmatter is rare.
     home.file.".claude/skills/obsidian/SKILL.md".source = ./obsidian/SKILL.md;
 
+    # Local agent-bus skill — the shared Matrix room on p510 where agents
+    # leave each other notes, reached as MCP tools rather than by driving a
+    # terminal. Lives here rather than in nixarchy on purpose: the MCP
+    # endpoint is tailnet-only, so shipping it to every nixarchy machine
+    # would put authoritative-looking instructions on machines that cannot
+    # reach it -- which is exactly why the SSH board's skill was pulled.
+    home.file.".claude/skills/agent-bus/SKILL.md".source = ./agent-bus/SKILL.md;
+
     # Local 1password skill — `op` CLI playbook. Pure prose, no companion
     # script: every useful invocation needs an unlocked desktop-app session,
     # so there is nothing to automate around.
