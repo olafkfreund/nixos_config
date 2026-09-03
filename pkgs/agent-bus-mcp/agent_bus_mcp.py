@@ -356,13 +356,12 @@ def read_new(
         cursor = _get_cursor(name, room_id)
         if cursor:
             params["from"] = cursor
-        r = _retry_joined(
-            client,
-            room_id,
-            lambda: client.get(
-                f"/rooms/{quote(room_id, safe='')}/messages", params=params
-            ),
-        )
+        # Join up front rather than reacting to a 403: /messages answers a
+        # non-member with 200 and an empty chunk, so _retry_joined never fires
+        # and a session that reads before it posts sees an empty room forever.
+        # /join is idempotent, so this costs one call and nothing else.
+        _join(client, room_id)
+        r = client.get(f"/rooms/{quote(room_id, safe='')}/messages", params=params)
         r.raise_for_status()
         payload = r.json()
 
