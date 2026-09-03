@@ -19,6 +19,7 @@ import os
 import sqlite3
 import uuid
 from pathlib import Path
+from urllib.parse import quote
 from typing import Any
 
 import httpx
@@ -74,11 +75,16 @@ def _client() -> httpx.Client:
 
 
 def _resolve(client: httpx.Client, room: str) -> str:
-    """Accept a room id, or an alias like #agents:example.com."""
+    """Accept a room id, or an alias like #agents:example.com.
+
+    The alias must be percent-encoded into the path: it contains "#" and ":",
+    both of which otherwise truncate the URL and leave the server looking up
+    an empty alias.
+    """
     if room.startswith("!"):
         return room
     alias = room if room.startswith("#") else f"#{room}"
-    r = client.get(f"/directory/room/{httpx.URL(alias).path.lstrip('/') or alias}")
+    r = client.get("/directory/room/" + quote(alias, safe=""))
     r.raise_for_status()
     return r.json()["room_id"]
 
