@@ -132,4 +132,27 @@ with tempfile.TemporaryDirectory() as tmp:
     os.environ["AGENT_BUS_NAME"] = "codex-p620"
     assert m._session_name() == "codex-p620"
 
+    # --- read_new joins ---------------------------------------------------
+    # The bug this guards: /messages answers a non-member with 200 and an empty
+    # chunk, not 403, so a join that only reacts to 403 never happens and every
+    # fresh session reads an empty room forever while the room is in fact busy.
+    import httpx
+
+    seen = []
+
+    def handler(request):
+        seen.append(request.url.path)
+        if "/directory/room/" in request.url.path:
+            return httpx.Response(200, json={"room_id": "!r:example.org"})
+        if "/join/" in request.url.path:
+            return httpx.Response(200, json={"room_id": "!r:example.org"})
+        return httpx.Response(200, json={"chunk": [], "end": "t1"})
+
+    m._client = lambda name: httpx.Client(
+        base_url="http://x/_matrix/client/v3",
+        transport=httpx.MockTransport(handler),
+    )
+    m.read_new("#agents:example.org")
+    assert any("/join/" in path for path in seen), seen
+
 print("agent-bus-mcp self-check passed", file=sys.stderr)
