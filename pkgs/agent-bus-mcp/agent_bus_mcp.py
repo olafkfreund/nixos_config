@@ -422,5 +422,78 @@ def search(query: str, room: str | None = None, agent: str | None = None) -> str
     )
 
 
+def peek(room: str = DEFAULT_ROOM, limit: int = 50) -> list[dict[str, Any]]:
+    """Messages naming this session that it has not been shown yet.
+
+    Not a tool -- this is what the Stop hook calls, so an agent finds out it
+    was asked something at the one moment it is idle and the answer is still
+    cheap. Without it a question reaches its target only if that target happens
+    to call `read_new` later and happens to still care, which is how a room
+    with threads and @-mentions in it can still look like a dead noticeboard.
+
+    Keeps its OWN cursor, under the same name with a `\0peek` suffix, so waking
+    an agent never consumes the mark `read_new` is about to use. The two are
+    answering different questions -- "what did I miss" and "who wants me" -- and
+    sharing a pointer would make each hide the other's messages.
+    """
+    name = SESSION_NAME
+    with _client(name) as client:
+        room_id = _resolve(client, room)
+        params: dict[str, Any] = {"dir": "f", "limit": limit, "filter": MESSAGE_FILTER}
+        cursor = _get_cursor(name + "\0peek", room_id)
+        if cursor:
+            params["from"] = cursor
+        _join(client, room_id)
+        r = client.get(f"/rooms/{quote(room_id, safe='')}/messages", params=params)
+        r.raise_for_status()
+        payload = r.json()
+        user_id, _ = _identity(name)
+
+    if payload.get("end"):
+        _set_cursor(name + "\0peek", room_id, payload["end"])
+
+    # The bare session name, because it is a substring of every form a mention
+    # actually takes: `@agent-p620-7c78fc:...`, a bare `p620-7c78fc`, and any
+    # subagent namespaced beneath it.
+    return [
+        m
+        for m in (_format(e) for e in payload.get("chunk", []))
+        if name in m["text"] and m["from"] != user_id
+    ]
+
+
+def _peek_cli(room: str) -> int:
+    """Print pending mentions for a hook. Silent and 0 when there are none.
+
+    Never fails loudly: a homeserver that is down or a room that does not
+    resolve must not stop an agent from finishing its turn. A wake-up is a
+    convenience, and a broken one is worth less than the work it would block.
+    """
+    # httpx logs every request at INFO. Harmless in the MCP server, but here
+    # stderr is what the hook feeds back to the model, so three request lines
+    # would arrive as context alongside the message being delivered.
+    import logging
+
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    try:
+        hits = peek(room)
+    except Exception:
+        return 0
+    if not hits:
+        return 0
+    print(f"{len(hits)} message(s) on the agent bus name you ({SESSION_NAME}):\n")
+    for m in hits:
+        print(f"  from {m['from']}")
+        for line in m["text"].splitlines():
+            print(f"    {line}")
+        print(f"    [event {m['event_id']}]\n")
+    return 1
+
+
 if __name__ == "__main__":
+    import sys
+
+    if "--peek" in sys.argv:
+        argv = sys.argv[sys.argv.index("--peek") + 1 :]
+        raise SystemExit(_peek_cli(argv[0] if argv else DEFAULT_ROOM))
     mcp.run()

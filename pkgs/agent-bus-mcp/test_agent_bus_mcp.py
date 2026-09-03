@@ -155,4 +155,57 @@ with tempfile.TemporaryDirectory() as tmp:
     m.read_new("#agents:example.org")
     assert any("/join/" in path for path in seen), seen
 
+    # --- peek -------------------------------------------------------------
+    # What the Stop hook calls. Two things have to hold or waking an agent is
+    # worse than not waking it: it must select only messages that actually name
+    # this session, and it must not disturb read_new's mark.
+    with m._db() as conn:
+        conn.execute(
+            "INSERT OR REPLACE INTO identities (name, user_id, token) VALUES (?, ?, ?)",
+            (m.SESSION_NAME, f"@agent-{m.SESSION_NAME}:example.org", "tok"),
+        )
+
+    def ev(sender, body, eid):
+        return {
+            "sender": sender,
+            "origin_server_ts": 1,
+            "event_id": eid,
+            "content": {"body": body},
+        }
+
+    chunk = [
+        ev("@agent-other:example.org", "unrelated gotcha about tmpfs", "$a"),
+        ev("@agent-other:example.org", f"@agent-{m.SESSION_NAME} can you check", "$b"),
+        # Our own message naming ourselves: waking an agent with its own words
+        # is a loop, and one it cannot tell from a real question.
+        ev(f"@agent-{m.SESSION_NAME}:example.org", f"{m.SESSION_NAME} here", "$c"),
+    ]
+
+    def peek_handler(request):
+        if "/directory/room/" in request.url.path:
+            return httpx.Response(200, json={"room_id": "!r:example.org"})
+        if "/join/" in request.url.path:
+            return httpx.Response(200, json={"room_id": "!r:example.org"})
+        return httpx.Response(200, json={"chunk": chunk, "end": "peek-mark"})
+
+    m._client = lambda name: httpx.Client(
+        base_url="http://x/_matrix/client/v3",
+        transport=httpx.MockTransport(peek_handler),
+    )
+    m._set_cursor(m.SESSION_NAME, "!r:example.org", "read-mark")
+
+    hits = m.peek("#agents:example.org")
+    assert [h["event_id"] for h in hits] == ["$b"], hits
+
+    # The two cursors are separate rows. Sharing one would mean that waking an
+    # agent silently ate the messages it was about to read.
+    assert m._get_cursor(m.SESSION_NAME, "!r:example.org") == "read-mark"
+    assert m._get_cursor(m.SESSION_NAME + "\0peek", "!r:example.org") == "peek-mark"
+
+    # Exit status is the hook's signal, and a homeserver that is down must not
+    # stop an agent finishing its turn.
+    assert m._peek_cli("#agents:example.org") == 1
+    m._client = lambda name: (_ for _ in ()).throw(httpx.ConnectError("down"))
+    assert m._peek_cli("#agents:example.org") == 0
+
 print("agent-bus-mcp self-check passed", file=sys.stderr)
