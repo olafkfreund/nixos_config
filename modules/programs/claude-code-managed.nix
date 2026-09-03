@@ -349,6 +349,71 @@ let
     exit 0
   '';
 
+  # The other half of the bus, and the half that was missing.
+  #
+  # `busAnnounceScript` above is the only thing that reliably makes an agent
+  # touch the bus, and it fires on disruptive commands -- so the room filled up
+  # with announcements and end-of-session write-ups and almost no dialogue. Not
+  # because agents will not answer each other: because nothing tells them they
+  # were asked. An agent posts a question and stops; the reply can only arrive
+  # if some other agent later happens to call read_new and happens to still
+  # care. One question sat unanswered for two hours and was then answered
+  # independently by someone who had never seen it asked.
+  #
+  # Stop is the right moment. It is the one point where an agent is idle, still
+  # holds the context that makes the answer cheap, and is about to throw it
+  # away. Exit 2 hands the pending messages back and asks for a reply -- the
+  # same mechanism the announce guard uses, for the same reason.
+  #
+  # Two things stop this becoming a nag loop: `--peek` advances a cursor of its
+  # own, so a message wakes an agent exactly once, and `stop_hook_active` is
+  # honoured so a turn that is already a continuation is left alone. Peek also
+  # skips the session's own messages -- waking an agent with its own words is a
+  # loop it cannot tell from a real question.
+  busPeekScript = pkgs.writeShellScript "claude-bus-peek.sh" ''
+    payload="$(cat)"
+
+    # Already continuing because of a Stop hook: let the turn end.
+    case "$(${pkgs.jq}/bin/jq -r '.stop_hook_active // false' <<<"$payload")" in
+      true) exit 0 ;;
+    esac
+
+    # The identity has to match the one the MCP server registered for this
+    # session, and that is derived from the session id. A hook is not
+    # guaranteed the environment variable, but the payload always carries the
+    # value -- reading it here is what keeps the two halves the same agent.
+    session="$(${pkgs.jq}/bin/jq -r '.session_id // empty' <<<"$payload")"
+    [ -n "$session" ] || exit 0
+    export CLAUDE_CODE_SESSION_ID="$session"
+
+    export MATRIX_HOMESERVER=https://matrix.freundcloud.org.uk
+    export MATRIX_SERVER_NAME=freundcloud.org.uk
+    export MATRIX_REGISTRATION_TOKEN_FILE=${config.age.secrets."matrix-registration-token".path}
+
+    # Exit 1 means there is something addressed to this session; anything else
+    # (including a homeserver that is down) means get out of the way.
+    if pending="$(${pkgs.customPkgs.agent-bus-mcp}/bin/agent-bus-mcp --peek)"; then
+      exit 0
+    fi
+
+    echo "$pending" >&2
+    echo "Reply in a thread on the event id shown -- post(thread=\"\$event_id\") --" >&2
+    echo "then stop. If it is not something you can answer, say so briefly:" >&2
+    echo "silence is indistinguishable from nobody having read it, which is the" >&2
+    echo "failure this hook exists to fix." >&2
+    exit 2
+  '';
+
+  busPeekHooks = lib.optionalAttrs cfg.busPeekWake.enable {
+    Stop = [{
+      hooks = [{
+        type = "command";
+        command = toString busPeekScript;
+        timeout = 15;
+      }];
+    }];
+  };
+
   busAnnounceHooks = lib.optionalAttrs cfg.busAnnounceGuard.enable {
     PreToolUse = [{
       matcher = "Bash";
@@ -507,6 +572,7 @@ let
         formatHooks
         deployGuardHooks
         busAnnounceHooks
+        busPeekHooks
         subagentHooks
         tmuxCcmHooks
       ];
@@ -589,6 +655,26 @@ in
 
         Building (`nix build .#nixosConfigurations.p510...`) and read-only ssh
         are unaffected, as is the user's own interactive shell.
+      '';
+    };
+
+    busPeekWake.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Wake an agent at the end of its turn when a bus message names it.
+
+        The bus is pull-only and an agent reads it once, at the start of a
+        session -- before it has done the work that produces a question, and
+        before anyone has answered. So a question reaches its target only by
+        luck, and the room looks dead while it is busy. This makes the delivery
+        deterministic: a Stop hook peeks for messages naming this session and,
+        if there are any, denies the stop and hands them back.
+
+        Wakes once per message (peek keeps its own cursor, separate from
+        read_new's), never on the session's own messages, and never on a turn
+        that is already a Stop-hook continuation. A homeserver that is
+        unreachable is not an error -- the turn simply ends.
       '';
     };
 
