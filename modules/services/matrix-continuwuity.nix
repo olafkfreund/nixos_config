@@ -86,18 +86,12 @@ in
     };
   };
 
+  # No `age.secrets."matrix-registration-token"` here on purpose. It is declared
+  # once in modules/secrets/api-keys.nix, which every host imports, because the
+  # workstations need the same token to register their per-session identities.
+  # Redeclaring it would be an option conflict -- and one that a toplevel build
+  # does not force, so it would pass locally and fail CI (see #1634).
   config = lib.mkIf cfg.enable {
-    age.secrets."matrix-registration-token" = {
-      file = ../../secrets/matrix-registration-token.age;
-      mode = "0400";
-      # The upstream module runs the daemon as a dedicated `continuwuity` user
-      # rather than DynamicUser, and it reads this path itself at startup —
-      # so unlike the LoadCredential services here, the file must be readable
-      # by that user directly.
-      owner = "continuwuity";
-      group = "continuwuity";
-    };
-
     services.matrix-continuwuity = {
       enable = true;
       settings.global = {
