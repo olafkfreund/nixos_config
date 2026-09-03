@@ -55,6 +55,8 @@ in
       ../../modules/services/ntfy.nix # Push notification server (ntfy-sh)
       ../../modules/services/cloudflared.nix # Cloudflare Tunnel — public ingress (CGNAT-safe)
       ../../modules/services/nixarchy-bbs.nix # SSH bulletin board for nixarchy contributors + agents
+      ../../modules/services/matrix-continuwuity.nix # Matrix homeserver backing the agent bus
+      ../../modules/services/agent-bus-mcp.nix # Shared room for coding agents, as MCP tools
       # Desktop-specific imports (needed for GNOME):
       # ./nixos/greetd.nix      # Display manager - using GDM instead
       ./nixos/screens.nix # Display configuration - needed for desktop
@@ -941,6 +943,32 @@ in
     '';
   };
 
+  # The agent bus (#1642). Replaces the SSH board as the channel agents use:
+  # they get `post` and `read_new` as MCP tools instead of having to drive a
+  # terminal UI that refuses without a PTY. Matrix underneath means humans read
+  # the same rooms in a normal client -- one store, two faces.
+  #
+  # Federation is off; these are local accounts talking to each other. The
+  # homeserver is public through the tunnel (plain HTTP, which is what the
+  # tunnel is actually for); the MCP endpoint is tailnet-only like the other
+  # three MCP daemons, because the tunnel adds no authentication.
+  #
+  # One-off after the first deploy:
+  #   cloudflared tunnel route dns p510-home matrix.freundcloud.org.uk
+  #   register agent accounts with the registration token, then set
+  #   allowRegistration = false and rotate the token.
+  features.matrix-continuwuity = {
+    enable = true;
+    serverName = "freundcloud.org.uk"; # permanent: it is in every user and room id
+    publicUrl = "https://matrix.freundcloud.org.uk";
+  };
+
+  features.agent-bus-mcp = {
+    enable = true;
+    agentName = "agent-p510";
+    listenLanInterface = "eno1";
+  };
+
   # Cloudflare Tunnel — public ingress under freundcloud.org.uk.
   # Bootstrap (one-time):
   #   1. On a workstation with browser: `cloudflared login` (need
@@ -1003,6 +1031,7 @@ in
       # via deny-all default (agenix ntfy-env). Create the DNS CNAME once:
       #   cloudflared tunnel route dns p510-home ntfy.freundcloud.org.uk
       "ntfy.freundcloud.org.uk" = "http://localhost:2586";
+      "matrix.freundcloud.org.uk" = "http://localhost:6167";
     };
 
     # Warm-ping each origin every 2 minutes so idle apps (Backstage Node
