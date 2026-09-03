@@ -150,13 +150,6 @@ in
     autoInstall = true;
   };
 
-  # Enable XDG portal for GNOME screen sharing
-  modules.services.xdg-portal = {
-    enable = true;
-    backend = "gnome";
-    enableScreencast = true;
-  };
-
   # Use the new features system instead of multiple lib.mkForce calls
   features = {
     development = {
