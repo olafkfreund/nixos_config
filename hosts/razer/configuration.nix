@@ -562,6 +562,10 @@ in
       # qwen-code disabled due to npm registry network errors (HTTP/2 framing layer issue)
       # (callPackage ../../home/development/qwen-code/default.nix { })
       nix-doc # Interactive Nix documentation tool
+      # whisper-cli, for nixi's local push-to-talk transcription. Also ships
+      # whisper-cpp-download-ggml-model, which fetches the model nixi expects
+      # at ~/.local/share/nixi/models/ggml-base.en.bin.
+      whisper-cpp
       customPkgs.rmux # Rust tmux-compatible multiplexer + typed SDK for agent orchestration
       # Remote desktop
       rustdesk-flutter
