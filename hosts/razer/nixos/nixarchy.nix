@@ -38,6 +38,13 @@
   # it the session starts but never sees a keypress.
   programs.nixarchy.user = "olafkfreund";
 
+  # psmisc is here for `fuser`, which Omarchy shell plugins call to find who
+  # holds a lock or a device -- omachord's routine runner needs it and nothing
+  # else in the closure pulls psmisc in, so the plugin fails at runtime rather
+  # than at install with a message about a missing binary. p620 carries the
+  # same line for the same reason.
+  environment.systemPackages = [ pkgs.psmisc ];
+
   # nixarchy pins its own Hyprland and does not defer -- nixpkgs defines
   # programs.hyprland.portalPackage at mkDefault priority, so matching it would
   # tie rather than yield, hence the force.

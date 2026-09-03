@@ -77,7 +77,11 @@
   # so a value set here is preserved and searched. systemPackages is what puts
   # the multimedia backend under /run/current-system/sw/lib/qt-6/plugins, which
   # QT_PLUGIN_PATH already covers; only the QML path needs saying out loud.
-  environment.systemPackages = [ pkgs.qt6.qtmultimedia ];
+  # psmisc is here for `fuser`, which Omarchy shell plugins call to find who
+  # holds a lock or a device -- omachord's routine runner needs it and nothing
+  # else in the closure pulls psmisc in, so the plugin fails at runtime rather
+  # than at install with a message about a missing binary.
+  environment.systemPackages = [ pkgs.qt6.qtmultimedia pkgs.psmisc ];
   environment.sessionVariables.NIXPKGS_QT6_QML_IMPORT_PATH =
     "${pkgs.qt6.qtmultimedia}/lib/qt-6/qml";
 
