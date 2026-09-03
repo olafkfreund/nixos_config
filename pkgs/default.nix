@@ -112,11 +112,6 @@
   # renamed the binary but kept the repo name. Not in nixpkgs.
   obsidian-cli = pkgs.callPackage ./obsidian-cli { };
 
-  # nixarchy-bbs — a BBS delivered over SSH. Consumed only by
-  # modules/services/nixarchy-bbs.nix, so it stays in the customPkgs
-  # namespace rather than being lifted to top-level pkgs.*.
-  nixarchy-bbs = pkgs.callPackage ./nixarchy-bbs { };
-
   # agent-bus-mcp — shared Matrix room for coding agents, as MCP tools.
   # Consumed only by modules/services/agent-bus-mcp.nix.
   agent-bus-mcp = pkgs.callPackage ./agent-bus-mcp { };

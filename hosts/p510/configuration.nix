@@ -54,7 +54,6 @@ in
       ../../modules/services/plex-auto-languages # Per-show audio/sub track memorization
       ../../modules/services/ntfy.nix # Push notification server (ntfy-sh)
       ../../modules/services/cloudflared.nix # Cloudflare Tunnel — public ingress (CGNAT-safe)
-      ../../modules/services/nixarchy-bbs.nix # SSH bulletin board for nixarchy contributors + agents
       ../../modules/services/matrix-continuwuity.nix # Matrix homeserver backing the agent bus
       ../../modules/services/agent-bus-mcp.nix # Shared room for coding agents, as MCP tools
       # Desktop-specific imports (needed for GNOME):
@@ -889,58 +888,6 @@ in
     #
     # The Cloudflare DNS CNAME must be created once:
     #   cloudflared tunnel route dns p510-home ntfy.freundcloud.org.uk
-  };
-
-  # nixarchy-bbs — SSH bulletin board where nixarchy contributors and their
-  # coding agents leave each other notes. Unlike everything else public on this
-  # host it does NOT go through the Cloudflare tunnel: the product is an SSH
-  # server, and a tunnel can only carry SSH via `cloudflared access ssh` on
-  # every client. With the Starlink CGNAT gone there is a reachable public IP,
-  # so a plain port-forward gives `ssh join@bbs.freundcloud.org.uk` with no
-  # client software at all.
-  #
-  # Two one-off steps this file cannot express:
-  #   1. Cloudflare DNS: an A record for bbs.freundcloud.org.uk → the WAN IP,
-  #      DNS-only (grey cloud). Cloudflare's proxy cannot carry SSH, so an
-  #      orange-cloud record would black-hole it.
-  #   2. Router: forward WAN TCP 22 → 192.168.1.75:2222 (this host; .222 is p620). Port 22 externally,
-  #      so the board's own "ssh join@<host>" hints are correct and nobody
-  #      needs -p; 2222 internally, so p510's own sshd on 22 is untouched.
-  #
-  # Membership: label an issue on olafkfreund/nixarchy with `bbs-access` and
-  # the sync timer provisions that author from their published GitHub keys
-  # within 15 minutes. Self-service `ssh join@` is also still open — see
-  # `closedRegistration` in the module when that stops being wanted.
-  features.nixarchy-bbs = {
-    enable = true;
-    hostname = "bbs.freundcloud.org.uk";
-    admins = [ "olafkfreund" ];
-    memberRepo = "olafkfreund/nixarchy";
-    signupNotify = "olaf@freundcloud.com";
-
-    # Newsgroups on the LAN and the tailnet (#1638). `msg@` is the only route
-    # that works without a terminal and it only writes, so this is how an agent
-    # on p620 or razer reads anything back. NOT public: news auth ignores the
-    # password, so reaching this port plus knowing a handle is enough to post
-    # as that handle — fine among our own machines, not on the internet.
-    newsListenAddress = "0.0.0.0";
-    listenLanInterface = "eno1";
-    # `name:description` — the description shows in NNTP LIST, which is how an
-    # agent that has never been here works out where to post. No commas in a
-    # description: news.ParseGroups splits the whole variable on commas before
-    # it splits name from description, so a comma silently becomes a new group.
-    newsGroups = [
-      "nixarchy.general:General discussion for nixarchy contributors"
-      "nixarchy.agents:What agents are working on — gotchas and decisions"
-      "nixarchy.dev:Development of nixarchy and this configuration"
-    ];
-    motd = ''
-      Welcome to the nixarchy BBS — notes, news and messages for the people
-      and agents working on Nixarchy.
-
-      Ask for an account: open an issue at
-      https://github.com/olafkfreund/nixarchy/issues
-    '';
   };
 
   # The agent bus (#1642). Replaces the SSH board as the channel agents use:
