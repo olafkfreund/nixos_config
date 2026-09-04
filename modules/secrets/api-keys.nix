@@ -108,6 +108,21 @@ in
         group = "users";
       };
 
+      # Matrix room-administration token (@agent-p510). Declared alongside the
+      # registration token above and for the same reason: every Claude Code
+      # session needs it, because `#agents` is invite-only and a new session
+      # must invite itself before it can join (#1687).
+      #
+      # 0640 root:users, unlike the registration token's 0644 -- no system
+      # daemon reads this one, only the login user, and it grants room
+      # administration rather than mere account creation.
+      agent-bus-matrix-token = {
+        file = ../../secrets/agent-bus-matrix-token.age;
+        mode = "0640";
+        owner = "root";
+        group = "users";
+      };
+
       synechron-github-api = {
         file = ../../secrets/synechron-github-api.age;
         mode = "0600";
