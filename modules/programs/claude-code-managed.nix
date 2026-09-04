@@ -268,10 +268,36 @@ let
   #
   # This only constrains Claude Code's own tool calls; the user's interactive
   # shell is untouched and can always deploy p510 directly.
+  #
+  # P510_DEPLOY_APPROVED=1 in the command clears it, matching the announce
+  # guard's escape below in shape but not in meaning, and the difference is the
+  # whole point of this paragraph.
+  #
+  # That guard's variable asserts something about the agent -- "I posted" --
+  # and an agent is free to decide to post. This one asserts something about
+  # the *user*: "they asked for this deploy, in this session, in words". An
+  # agent cannot grant itself that, so setting the variable on its own
+  # initiative is not a clever bypass, it is a false statement about what the
+  # user said. The guard cannot tell the two apart and does not try; nothing a
+  # PreToolUse hook can see distinguishes a genuine approval from a claimed
+  # one.
+  #
+  # A wall with no door was the alternative and was worse. Without an escape
+  # the answer to "deploy p510" is always "run it yourself", which is correct
+  # exactly once and then trains everyone to route around the guard --
+  # rephrasing the switch as `ssh p510 'sudo ... switch-to-configuration'`
+  # defeats it completely and reads as helpfulness. A door that must be opened
+  # deliberately, and that is a lie to open falsely, keeps the block as the
+  # default while leaving the honest path shorter than the dishonest one.
   deployGuardScript = pkgs.writeShellScript "claude-p510-deploy-guard.sh" ''
     payload="$(cat)"
     cmd="$(${pkgs.jq}/bin/jq -r '.tool_input.command // empty' <<<"$payload" 2>/dev/null)"
     [ -n "$cmd" ] || exit 0
+
+    # The user's approval, asserted by the agent. See the comment above for why
+    # this is an assertion about the user rather than about the agent, and why
+    # a guard with no door is the worse design.
+    case "$cmd" in *P510_DEPLOY_APPROVED=1*) exit 0 ;; esac
 
     # No \b adjacent to the alternation group: GNU grep -E silently fails to
     # match `\b(switch|boot|test)\b[^|;]*\bp510\b` against
@@ -281,6 +307,12 @@ let
       echo "BLOCKED by managed-settings deploy guard: this command would activate a new generation on p510." >&2
       echo "p510 is the headless media server (Plex, *arr, k3d, cloudflared). Deploying it requires the user's explicit approval." >&2
       echo "Ask the user first. Building (nix build .#nixosConfigurations.p510...) and read-only ssh are allowed." >&2
+      echo "" >&2
+      echo "If the user HAS asked for this deploy in words, rerun with" >&2
+      echo "P510_DEPLOY_APPROVED=1 prefixed. Set it only on the strength of" >&2
+      echo "something they actually said -- it is a statement about them, not" >&2
+      echo "about you, and it is the one thing here you cannot decide alone." >&2
+      echo "Do not reword the command to evade this guard." >&2
       exit 2
     fi
     exit 0
