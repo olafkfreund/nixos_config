@@ -304,6 +304,16 @@ check:
     @echo "🔍 Validating flake configuration..."
     nix flake check --show-trace
 
+# The p510 activation guard: blocks, opens on an explicit approval, leaves reads
+# alone. Fast and offline -- it extracts the shell out of the module and runs it.
+#
+# Named "guards" and not "...-deploy-guard" on purpose: the announce guard
+# matches `just [a-z-]*deploy`, so a read-only target with "deploy" in its name
+# is refused as though it were a deployment. Over-blocking on that pattern is
+# the right default; the cheap fix is the name.
+test-guards:
+    @python3 ./scripts/test-p510-deploy-guard.py
+
 # Check for available updates
 check-updates:
     @echo "📦 Checking for available updates..."
