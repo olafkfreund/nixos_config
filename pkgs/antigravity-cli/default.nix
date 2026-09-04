@@ -24,11 +24,11 @@
 # Closed-source proprietary Google binary, license is unfree.
 stdenv.mkDerivation {
   pname = "antigravity-cli";
-  version = "1.1.24-6130423206641664";
+  version = "1.1.25-6680093607723008";
 
   src = fetchurl {
-    url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.1.24-6130423206641664/linux-x64/cli_linux_x64.tar.gz";
-    hash = "sha256-z/H7ftc12nLDVlhkWk+RbPdPAg1M0wq5Xr6MKkmk1Wk=";
+    url = "https://storage.googleapis.com/antigravity-public/antigravity-cli/1.1.25-6680093607723008/linux-x64/cli_linux_x64.tar.gz";
+    hash = "sha256-RatKmYhN4Xr3ZWWk/42XYtbpYAZ70Aj96bBQ7I/J5CE=";
   };
 
   # Tarball contains a single file `antigravity` at the root.
