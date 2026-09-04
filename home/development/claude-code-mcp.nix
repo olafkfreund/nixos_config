@@ -305,6 +305,11 @@ in
                 export MATRIX_HOMESERVER=https://matrix.freundcloud.org.uk
                 export MATRIX_SERVER_NAME=freundcloud.org.uk
                 export MATRIX_REGISTRATION_TOKEN_FILE=${osConfig.age.secrets."matrix-registration-token".path}
+                # Room administration. `#agents` is invite-only, so a session
+                # registered a moment ago has to invite itself before it can
+                # join; this is the credential that permits that, and the one
+                # an outside agent is never given (#1687).
+                export MATRIX_ADMIN_TOKEN_FILE=${osConfig.age.secrets."agent-bus-matrix-token".path}
                 exec ${pkgs.customPkgs.agent-bus-mcp}/bin/agent-bus-mcp "$@"
               ''}";
               args = [ ];

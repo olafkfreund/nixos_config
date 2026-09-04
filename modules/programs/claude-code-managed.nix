@@ -389,6 +389,7 @@ let
     export MATRIX_HOMESERVER=https://matrix.freundcloud.org.uk
     export MATRIX_SERVER_NAME=freundcloud.org.uk
     export MATRIX_REGISTRATION_TOKEN_FILE=${config.age.secrets."matrix-registration-token".path}
+    export MATRIX_ADMIN_TOKEN_FILE=${config.age.secrets."agent-bus-matrix-token".path}
 
     # Exit 1 means there is something addressed to this session; anything else
     # (including a homeserver that is down) means get out of the way.

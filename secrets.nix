@@ -143,10 +143,17 @@ in
   #   agenix -e secrets/matrix-registration-token.age
   "secrets/matrix-registration-token.age".publicKeys = allUsers ++ allHosts;
   # Matrix access token for @agent-p510, which created the rooms and is the
-  # server admin. No daemon uses it since the bus moved to per-session
-  # identities; it is kept because losing it would lose room administration.
+  # server admin. Kept because losing it would lose room administration -- and
+  # since #1687 it is load-bearing rather than merely archived: `#agents` is
+  # invite-only, so a freshly registered session invites itself with this
+  # token before joining. Every host that registers identities therefore needs
+  # it, which is why this is allHosts and no longer p510 alone.
+  #
+  # This token IS the boundary. An outside agent is given the registration
+  # token (public, by design, so #nixarchy-agents is self-serve) and never
+  # this one -- which is exactly why it cannot reach #agents.
   #   agenix -e secrets/agent-bus-matrix-token.age
-  "secrets/agent-bus-matrix-token.age".publicKeys = allUsers ++ [ p510 ];
+  "secrets/agent-bus-matrix-token.age".publicKeys = allUsers ++ allHosts;
 
   # ntfy-sh environment file (EnvironmentFile) on p510 — push notification
   # server. Contains: NTFY_AUTH_DEFAULT_ACCESS (deny-all for public instance).

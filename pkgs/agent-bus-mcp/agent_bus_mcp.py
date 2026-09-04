@@ -142,6 +142,40 @@ def _registration_token() -> str:
     return os.environ.get("MATRIX_REGISTRATION_TOKEN", "").strip()
 
 
+def _admin_token() -> str:
+    """The room-administration token, or "" when this agent has none.
+
+    Only our own hosts hold it. It is what lets a freshly registered session
+    invite itself into an invite-only `#agents`; an outside agent has no copy,
+    which is precisely what keeps it out. Prefer the file over the value for
+    the same reason as the registration token: /proc is readable by anything
+    running as the same user.
+    """
+    path = os.environ.get("MATRIX_ADMIN_TOKEN_FILE")
+    if path:
+        try:
+            return Path(path).read_text().strip()
+        except OSError:
+            return ""
+    return os.environ.get("MATRIX_ADMIN_TOKEN", "").strip()
+
+
+def _preminted() -> tuple[str, str] | None:
+    """Credentials handed over rather than registered, or None.
+
+    An outside agent is provisioned one account and given its access token; it
+    holds no registration token and must not need one. Every name it uses --
+    the session and any subagent -- resolves to that one account, because it
+    has exactly one. Subagent attribution is therefore lost for guests, which
+    is a fair trade for not handing strangers the ability to mint accounts.
+    """
+    token = os.environ.get("MATRIX_ACCESS_TOKEN", "").strip()
+    user_id = os.environ.get("MATRIX_USER_ID", "").strip()
+    if token and user_id:
+        return user_id, token
+    return None
+
+
 def _register(name: str) -> tuple[str, str]:
     """Create `@agent-<name>` and return its user id and access token.
 
@@ -194,6 +228,9 @@ def _register(name: str) -> tuple[str, str]:
 
 def _identity(name: str) -> tuple[str, str]:
     """Look up this name's Matrix account, creating it the first time."""
+    given = _preminted()
+    if given:
+        return given
     with _db() as conn:
         row = conn.execute(
             "SELECT user_id, token FROM identities WHERE name = ?", (name,)
@@ -223,12 +260,16 @@ def _name_for(agent: str | None) -> str:
 
 
 def _client(name: str) -> httpx.Client:
-    _, access = _identity(name)
-    return httpx.Client(
+    user_id, access = _identity(name)
+    client = httpx.Client(
         base_url=f"{HOMESERVER}/_matrix/client/v3",
         headers={"Authorization": f"Bearer {access}"},
         timeout=30.0,
     )
+    # Carried on the client so `_join` can invite this identity without
+    # threading the name through every call site that only ever had a client.
+    client.bus_user_id = user_id
+    return client
 
 
 def _alias(room: str) -> str | None:
@@ -259,7 +300,28 @@ def _resolve(client: httpx.Client, room: str) -> str:
 
 
 def _join(client: httpx.Client, room_id: str) -> None:
-    client.post(f"/join/{quote(room_id, safe='')}", json={}).raise_for_status()
+    """Join a room, inviting this identity first if the room requires it.
+
+    `#agents` is invite-only, so that an account minted with the public
+    registration token cannot read it. Our own sessions still register freshly
+    every time, so the join has to be preceded by an invite -- issued with the
+    admin token, which only our hosts hold. Without that token the 403 stands,
+    which is the boundary working rather than a failure to handle.
+    """
+    r = client.post(f"/join/{quote(room_id, safe='')}", json={})
+    if r.status_code == 403:
+        admin = _admin_token()
+        user_id = getattr(client, "bus_user_id", "")
+        if admin and user_id:
+            httpx.post(
+                f"{HOMESERVER}/_matrix/client/v3/rooms/"
+                f"{quote(room_id, safe='')}/invite",
+                json={"user_id": user_id},
+                headers={"Authorization": f"Bearer {admin}"},
+                timeout=30.0,
+            )
+            r = client.post(f"/join/{quote(room_id, safe='')}", json={})
+    r.raise_for_status()
 
 
 def _retry_joined(client: httpx.Client, room_id: str, call):
