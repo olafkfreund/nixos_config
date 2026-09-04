@@ -18,7 +18,7 @@ imports one plus its own hardware config.
 
 | Host  | Type          | Notes |
 | ----- | ------------- | ----- |
-| p620  | `workstation` | AMD GPU / ROCm. Set `services.ollama.package = pkgs.ollama-rocm`; `services.ollama.acceleration` was removed from nixpkgs (unrelated to this repo's own `acceleration` attribute in `hosts/common/hardware-profiles/`). |
+| p620  | `workstation` | AMD GPU / ROCm. Self-hosted CI runner, same label pool as p510. Set `services.ollama.package = pkgs.ollama-rocm`; `services.ollama.acceleration` was removed from nixpkgs (unrelated to this repo's own `acceleration` attribute in `hosts/common/hardware-profiles/`). |
 | razer | `laptop`      | Hybrid Intel/NVIDIA (Optimus). Heavy rebuilds: build on p620 via `just deploy-via-p620 razer`. |
 | p510  | `workstation` | Media server (Plex, NZBGet, k3s microvms) **and desktop** since 2026-08-31: Omarchy session, Sunshine streaming, self-hosted GitHub Actions runner. **Never build or deploy without asking first.** |
 
@@ -141,11 +141,24 @@ Things the code no longer shows, so they are easy to get wrong:
   port or the web UI refuses every POST with a CSRF error; and setting *any*
   option puts the config in the Nix store, making the web UI's Configuration tab
   read-only. See `docs/applications/sunshine.md`.
-- **A GitHub Actions runner lives on p510** (`hosts/p510/nixos/github-runner.nix`,
-  `p510-nixarchy`) for nixarchy's KVM/ISO checks. `TMPDIR` points at `/home`
-  (CMR, 125 MB/s), never `/mnt/img_pool` — that is an SMR disk at ~9.5 MB/s and
-  a 16 GB VM install hangs there rather than failing cleanly. Nothing targets
-  the runner yet; nixarchy's workflows are still `runs-on: ubuntu-latest`.
+- **Self-hosted GitHub Actions runners for nixarchy's KVM/ISO checks live on
+  p620 *and* p510** — `modules/services/nixarchy-runner.nix`, enabled through
+  `services.nixarchy-runner` in each host's `configuration.nix`. Two runner
+  units per host (`github-runner-nixarchy`, `-nixarchy-2`). Both machines carry
+  the same labels (`nixos`/`kvm`/`big`) and sit in one pool, so GitHub hands a
+  job to whichever is free; p620 was added because p510 alone could take both
+  jobs and a release build would then own CI for hours.
+  **They are targeted, not idle**: nixarchy's `nightly.yml` is
+  `runs-on: [self-hosted, nixos, kvm, big]`, and `install-check.yml` picks per
+  run — a `gate` job on `ubuntu-latest` decides whether the change can affect
+  an install and emits the self-hosted label set only when it can.
+  `buildDir` differs per host and neither is `/mnt/img_pool`: p510 uses
+  `/home/nix-build` (CMR, 125 MB/s seq, 59.4 MB/s O_DSYNC) and p620 uses
+  `/mnt/games` (SSD, keeps 16 GB VM installs off the NVMe root, #1643).
+  `/mnt/img_pool` is the trap — an SMR ST1000LM035 at ~9.5 MB/s, where a 16 GB
+  VM install hangs rather than failing cleanly. The module sets both
+  `nix.settings.build-dir` and the nix-daemon `TMPDIR`, because `build-dir`
+  supersedes `TMPDIR` and setting only the latter goes quietly inert.
 - **An NVIDIA driver version bump cannot be applied with `switch`** — the new
   userspace meets the old in-memory module, three `nvidia-*` units fail and the
   activation rolls back. `nhs` detects this and falls back to `boot` mode; the
