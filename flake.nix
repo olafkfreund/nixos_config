@@ -56,6 +56,20 @@
     nixarchy = {
       url = "github:olafkfreund/nixarchy";
       inputs.nixpkgs.follows = "nixpkgs";
+      # nixarchy re-exports zen-browser as a package attribute, so its pin is a
+      # hard eval dependency for us even though no host installs Zen. Its lock
+      # sat on 51df7b8, which passes ffmpeg_7 to wrapFirefox after nixpkgs
+      # removed it — every host closure died on an error naming only
+      # `environment.etc.dbus-1.source`. Bumping the child node alone is not
+      # enough: a full flake update re-resolves it from nixarchy's own lock and
+      # puts the broken pin straight back. Drop this once nixarchy's lock is
+      # ahead of fdb83f8.
+      inputs.zen-browser.follows = "zen-browser";
+    };
+
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
 
