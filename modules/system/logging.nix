@@ -14,26 +14,26 @@ in
 
   config = mkIf cfg.enableFiltering {
     # Configure journald to filter noisy logs
-    services.journald.extraConfig = ''
-      # Set maximum log level for containers
-      MaxLevelStore=info
-      MaxLevelSyslog=info
-      MaxLevelConsole=warning
+    services.journald.settings.Journal = {
+      # Maximum log level for containers
+      MaxLevelStore = "info";
+      MaxLevelSyslog = "info";
+      MaxLevelConsole = "warning";
 
       # Rate limiting for high-volume logs
-      RateLimitInterval=30s
-      RateLimitBurst=10000
+      RateLimitIntervalSec = "30s";
+      RateLimitBurst = 10000;
 
       # Storage optimization
-      SystemMaxUse=1G
-      SystemMaxFileSize=128M
-      RuntimeMaxUse=512M
-      RuntimeMaxFileSize=64M
+      SystemMaxUse = "1G";
+      SystemMaxFileSize = "128M";
+      RuntimeMaxUse = "512M";
+      RuntimeMaxFileSize = "64M";
 
       # Retention policy
-      MaxRetentionSec=7day
-      MaxFileSec=1day
-    '';
+      MaxRetentionSec = "7day";
+      MaxFileSec = "1day";
+    };
 
     # Cap coredump storage the same way. systemd's default MaxUse is 10% of
     # the filesystem, which on p620's 916G root is ~90G of crash dumps before
