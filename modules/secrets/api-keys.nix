@@ -92,6 +92,15 @@ in
         group = "users";
       };
 
+      # Cachix auth token. 0600 user-owned: only interactive `cachix push`
+      # uses it, no daemon needs to read it.
+      cachix-auth-token = {
+        file = ../../secrets/cachix-auth-token.age;
+        mode = "0600";
+        owner = username;
+        group = "users";
+      };
+
       # Matrix registration token for the agent bus. Declared here rather than
       # in modules/services/matrix-continuwuity.nix because two different
       # consumers need it: the homeserver daemon on p510 reads it as the
@@ -219,6 +228,10 @@ in
           # Export as GITHUB_API_TOKEN to avoid conflict with gh CLI credential management
           # gh CLI expects to manage its own credentials via 'gh auth login'
           echo "export GITHUB_API_TOKEN=\"$(cat /run/agenix/api-github-token)\""
+        fi
+
+        if [ -r "/run/agenix/cachix-auth-token" ]; then
+          echo "export CACHIX_AUTH_TOKEN=\"$(cat /run/agenix/cachix-auth-token)\""
         fi
 
         if [ -r "/run/agenix/synechron-github-api" ]; then

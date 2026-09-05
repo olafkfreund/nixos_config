@@ -29,6 +29,10 @@ in
   # OLLAMA_API_KEY via load-api-keys. Edit: agenix -e secrets/api-ollama.age
   "secrets/api-ollama.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-github-token.age".publicKeys = allUsers ++ allHosts;
+  # Cachix auth token (JWT). Decrypted to /run/agenix/cachix-auth-token on
+  # every host and exported as CACHIX_AUTH_TOKEN via load-api-keys, so
+  # `cachix push` works from any shell without a per-host `cachix authtoken`.
+  "secrets/cachix-auth-token.age".publicKeys = allUsers ++ allHosts;
   # Factory GitOps PAT. Distinct from api-github-token above ON PURPOSE: that
   # slot is the general GitHub credential every host reads, and swapping it
   # would silently change what those hosts authenticate with. This one is the
