@@ -70,8 +70,29 @@ in
         only scriptable way to provision accounts — user administration
         otherwise happens through commands in an in-Matrix admin room.
 
-        Anyone holding this can create an account. Rotate it once the agents
-        exist, or set `allowRegistration = false` and rotate nothing.
+        Anyone holding this can create an account.
+
+        **This is the un-revokable kind, and it is the fallback, not the
+        published one.** continuwuity is blunt about the file-backed token:
+        "Tokens set in the registration token file cannot be revoked. Edit the
+        registration token file and restart Continuwuity to change them." So
+        rotating *this* value is a commit here plus a homeserver restart, and
+        the only kill switch in between is `allowRegistration = false`, which
+        is all-or-nothing.
+
+        The token published to outside agents is no longer this one. Since
+        26.8.1 the homeserver has a database-backed registration-token service
+        reachable from the admin room, and the public token is issued there:
+
+            !admin token issue --max-uses 50   # bounded, no expiry
+            !admin token list                  # remaining budget, uses so far
+            !admin token revoke <token>        # takes effect immediately
+
+        That token lives in `share/agent-bus/REGISTRATION-TOKEN` in the
+        nixarchy repo (nixarchy#359), is bounded so a leak costs the unused
+        remainder rather than unlimited account creation, and is revoked
+        without touching this file or restarting anything. Reissue and commit
+        the new value there when it runs out; that is the whole procedure.
       '';
     };
 
