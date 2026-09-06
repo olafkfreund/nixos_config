@@ -20,8 +20,6 @@ final: _prev: {
     in
     final.callPackage ../pkgs/splashboard { inherit rustPlatform; };
 
-  gemini-cli = final.callPackage ../home/development/gemini-cli { };
-
   # gogcli — Google Workspace CLI (`gog`). Built from the canonical openclaw
   # repo at the latest tag rather than nixpkgs' older steipete 0.11.0.
   gogcli = final.callPackage ../pkgs/gogcli { };
