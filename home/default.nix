@@ -66,6 +66,9 @@
   home.sessionVariables.CLAUDE_CODE_SKIP_UPDATE_CHECK = "1";
 
   home.packages = [
+    # Predictive inline zsh autosuggestions. Wired up in home/shell/zsh.nix,
+    # which turns zsh's own autosuggestion widget off in favour of this.
+    pkgs.deja
     inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.opencode
     (pkgs.callPackage ../pkgs/weather-popup/default.nix { })
 

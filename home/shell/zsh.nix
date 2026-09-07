@@ -65,12 +65,10 @@ in
         };
       };
 
-      # Enhanced autosuggestions
-      autosuggestion = {
-        enable = true;
-        strategy = [ "history" "completion" ];
-        highlight = "fg=#${colors.base03}";
-      };
+      # Inline autosuggestions come from deja (see initContent), not zsh's own
+      # widget. Both draw into the same inline slot and bind the same keys, so
+      # running them together leaves two engines fighting over one suggestion.
+      autosuggestion.enable = false;
 
       # zplug removed (2026-06): it cost ~290ms of startup just to load the one
       # github-copilot plugin, which is now loaded natively via the `plugins`
@@ -154,6 +152,18 @@ in
 
         # Safe sourcing of external configs
         [[ -f ~/.openai.sh ]] && source ~/.openai.sh
+
+        # deja: predictive inline autosuggestions (replaces zsh's own widget).
+        # `deja init zsh` does not print the integration — it writes
+        # ~/.local/share/deja/init.zsh and prints a source line for it, which
+        # keeps a ~25-36ms binary launch off every shell start. deja refreshes
+        # that file itself when the binary changes, so the eval below is only
+        # the first-run bootstrap, for before the file exists.
+        if [[ -r "$HOME/.local/share/deja/init.zsh" ]]; then
+          source "$HOME/.local/share/deja/init.zsh"
+        else
+          eval "$(deja init zsh)"
+        fi
 
 
         # Enhanced history management
