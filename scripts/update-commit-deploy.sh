@@ -457,6 +457,23 @@ only_nvidia_units_failed() {
 nh_switch_or_boot() {
   # Args: nh os switch arguments (e.g. --hostname razer [--target-host razer] .)
   local out rc reason="" note=""
+
+  # p510 never switches in place: activation reloads the user dbus-broker and
+  # then talks over the dead connection, so switch-to-configuration returns
+  # non-zero on an otherwise healthy deploy and this script rolls it back.
+  # Stage it for the next boot instead; the reboot stays the user's call.
+  if [ "$HOST" = p510 ]; then
+    log "p510: boot-mode deploy (staged for next boot, no in-place switch)"
+    if ! nh os boot "${ELEV[@]}" "$@"; then
+      err "nh os boot on p510 failed — investigate."
+    fi
+    warn "============================================================"
+    warn "REBOOT REQUIRED on p510 to activate this deployment."
+    warn "Run:  ssh p510 'sudo systemctl reboot'"
+    warn "============================================================"
+    return 0
+  fi
+
   out=$(mktemp)
   set +e
   nh os switch "${ELEV[@]}" "$@" 2>&1 | tee "$out"
