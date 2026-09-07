@@ -1,7 +1,10 @@
 { pkgs, ... }: {
   services = {
     dbus.packages = with pkgs; [
-      gcr
+      # gcr_3, not gcr: nixpkgs removed the unversioned attribute (it ships two
+      # incompatible ABIs and stopped guessing). gcr_3 is gcr-3.41.2, the exact
+      # build the old alias resolved to; gcr_4 would be a silent 4.4.0 jump.
+      gcr_3
       gnome-settings-daemon
     ];
 
