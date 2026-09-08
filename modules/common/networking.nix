@@ -30,10 +30,18 @@ let inherit (lib) mkOption mkIf mkEnableOption mkForce mkMerge types; in {
     # visible symptom). Keep them running across a switch; new DNS config applies
     # at next boot/logout. Root fix — supersedes the per-service ollama guard.
     {
-      systemd.services.systemd-resolved.restartIfChanged =
-        mkIf config.services.resolved.enable false;
-      systemd.services.NetworkManager.restartIfChanged =
-        mkIf config.networking.networkmanager.enable false;
+      # The mkIf must wrap the whole attrset: defining
+      # systemd.services.<name>.* at all makes NixOS emit a unit file, so an
+      # inner mkIf leaves a stub with no ExecStart ("bad-setting" on razer,
+      # where resolved is off).
+      systemd.services = mkMerge [
+        (mkIf config.services.resolved.enable {
+          systemd-resolved.restartIfChanged = false;
+        })
+        (mkIf config.networking.networkmanager.enable {
+          NetworkManager.restartIfChanged = false;
+        })
+      ];
     }
 
     # TCP / qdisc baseline for the high-jitter Starlink uplink (all hosts).
