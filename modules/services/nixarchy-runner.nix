@@ -138,6 +138,42 @@ in
     systemd.services.nix-daemon.environment.TMPDIR = cfg.buildDir;
     nix.settings.build-dir = cfg.buildDir;
 
+    # The caches nixarchy CI pulls from, trusted at the SYSTEM level, which is
+    # the only level that works here.
+    #
+    # nixarchy's flake carries these in its own nixConfig, and its CI sets
+    # accept-flake-config. That promotes them to CLIENT-specified settings,
+    # and the daemon discards those from anyone not in trusted-users:
+    #
+    #   warning: ignoring the client-specified setting 'trusted-public-keys',
+    #   because it is a restricted setting and you are not a trusted user
+    #
+    # printed by every VM job in the 2026-09-09 nightly. The consequence is
+    # not cosmetic -- an untrusted key means the substituter is refused, so
+    # the runner BUILDS what it could have downloaded. nixarchy's own
+    # .github/actions/setup-nix works around it with the installer action's
+    # extra-conf, but that writes system nix.conf only when it installs nix,
+    # and here nix is already installed, so the action has nothing to write.
+    #
+    # trusted-users cannot fix it: the runner is a DynamicUser (see the secret
+    # note above), so there is no stable name to trust. Trusting the KEYS
+    # instead is both what actually applies and the narrower grant -- it
+    # authorises two caches rather than authorising a user to set anything.
+    #
+    # Lists, because nix.settings.substituters and trusted-public-keys merge
+    # across modules; modules/nix/nix.nix keeps the global pair and these add
+    # to them rather than replacing them.
+    nix.settings = {
+      substituters = [
+        "https://nixarchy.cachix.org"
+        "https://hyprland.cachix.org"
+      ];
+      trusted-public-keys = [
+        "nixarchy.cachix.org-1:05JOuIlsQOWY2/5DQMq7JEA1hwlhgvmMWowMfka8mMM="
+        "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIITemDosxrE9/Kb+PfYvE="
+      ];
+    };
+
     # One runner runs one job. That is not a setting, it is what a runner is,
     # so "let this host take two jobs at once" means two runner instances.
     #
