@@ -319,12 +319,15 @@
                 home-manager = {
                   useGlobalPkgs = true;
                   useUserPackages = true;
-                  # Use backup command to move files to timestamped directory
-                  # This prevents backup file collisions by using unique directories
+                  # Move a colliding file into a timestamped directory instead of
+                  # failing activation. `date -Is` rather than a +%Y%m%d format:
+                  # the % specifiers were expanded as systemd unit specifiers
+                  # (%d -> credentials dir, %S -> state dir), which is half of
+                  # why this never ran.
                   backupCommand = ''
-                    backup_dir = "$HOME/.hm-backups/$(date +%Y-%m-%d-%H%M%S)"
-                      mkdir - p "$(dirname "$backup_dir/$1 ")"
-                      mv "$1" "$backup_dir/$1"
+                    backup_dir="$HOME/.hm-backups/$(date -Is)"
+                    mkdir -p "$(dirname "$backup_dir/$1")"
+                    mv "$1" "$backup_dir/$1"
                   '';
                   # Shared modules for all users
                   sharedModules = [
