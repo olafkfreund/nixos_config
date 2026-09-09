@@ -27,7 +27,6 @@ in
       ../common/nixos/host-class.nix
       ../common/nixos/zfs-import.nix
       ../common/nixos/inotify-limits.nix
-      ../../modules/services/nixarchy-runner.nix # Self-hosted CI for nixarchy's VM checks
       ./nixos/cpu.nix
       ./nixos/memory.nix
       ./nixos/resilience.nix # Watchdog + sshd limits + oomd (post-2026-07-08 freeze)
@@ -769,6 +768,10 @@ in
     "z /mnt/media/sonarr 0750 - - - -"
     "z /mnt/media/radarr 0750 - - - -"
     "z /mnt/media/lidarr 0750 - - - -"
+    # Nix's build directory (see nix.settings.build-dir below). Root-owned and
+    # 0755: the daemon writes here as root, and nix refuses a world-writable
+    # build directory outright.
+    "d /home/nix-build 0755 root root -"
   ];
 
   features.sqlite-backup = {
@@ -981,27 +984,28 @@ in
     keepalive.enable = true;
   };
 
-  # nixarchy's install and ISO checks need KVM, an hour, and 16 GB of build
-  # directory. See modules/services/nixarchy-runner.nix.
-  services.nixarchy-runner = {
-    enable = true;
-
-    # /home (/dev/sdd1, WD10EZEX, 7200 rpm CMR), NOT /mnt/img_pool. The pool
-    # has the most free space and is the worst possible target: /dev/sdb1 is an
-    # ST1000LM035, a drive-managed SMR disk that collapses to single-digit MB/s
-    # once its cache band is full, and a 16 GB VM install is exactly that
-    # sustained-write pattern. Pointing builds there would have reproduced the
-    # hang it was meant to prevent, with the disk as the cause instead of the
-    # free-space figure. Measured, same host, same day:
-    #
-    #                    sequential 512M    4M writes, O_DSYNC
-    #   /home            125 MB/s           59.4 MB/s
-    #   /mnt/img_pool    (SMR)              ~9.5 MB/s
-    #
-    # /home has its own history of filling up -- it is where per-commit
-    # container images have run away before -- so this shares a filesystem with
-    # something that needs watching. 16 GB against 825 GB free is not the thing
-    # that will fill it.
-    buildDir = "/home/nix-build";
-  };
+  # The nixarchy self-hosted runners were removed from this host (#1737); p620
+  # carries the whole [self-hosted, nixos, kvm, big] pool now.
+  #
+  # Their build directory stays. It arrived with the runners but is not about
+  # them: p510 still builds its own system, and this is the #1643 fix. Both
+  # lines are needed, and the second is the one that actually decides it —
+  # nix's `build-dir` defaults to /nix/var/nix/builds on the root filesystem
+  # and takes precedence over TMPDIR. When only TMPDIR was set it went quietly
+  # inert across a nix bump: /home/nix-build sat at zero entries for months
+  # while every build had moved back to /, and the failure surfaced four levels
+  # above the cause as a failed ESP assertion rather than an honest ENOSPC.
+  # TMPDIR still governs anything reading the environment rather than the
+  # setting, so dropping it would move that half back to / silently.
+  #
+  # /home (/dev/sdd1, WD10EZEX, 7200 rpm CMR), NOT /mnt/img_pool. The pool has
+  # the most free space and is the worst possible target: /dev/sdb1 is an
+  # ST1000LM035, a drive-managed SMR disk that collapses to single-digit MB/s
+  # once its cache band is full. Measured, same host, same day:
+  #
+  #                    sequential 512M    4M writes, O_DSYNC
+  #   /home            125 MB/s           59.4 MB/s
+  #   /mnt/img_pool    (SMR)              ~9.5 MB/s
+  systemd.services.nix-daemon.environment.TMPDIR = "/home/nix-build";
+  nix.settings.build-dir = "/home/nix-build";
 }
