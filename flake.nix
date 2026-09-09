@@ -315,17 +315,25 @@
             ]
             ++ stylixModule
             ++ [
-              {
+              ({ pkgs, ... }: {
                 home-manager = {
                   useGlobalPkgs = true;
                   useUserPackages = true;
                   # Move a colliding file into a timestamped directory instead of
-                  # failing activation. `date -Is` rather than a +%Y%m%d format:
-                  # the % specifiers were expanded as systemd unit specifiers
-                  # (%d -> credentials dir, %S -> state dir), which is half of
-                  # why this never ran.
-                  backupCommand = ''
-                    backup_dir="$HOME/.hm-backups/$(date -Is)"
+                  # failing activation.
+                  #
+                  # This must be an EXECUTABLE, not a shell snippet: HM runs it as
+                  # argv ("$@" in home-manager.sh) with the file as $1, so a
+                  # multi-line string is word-split and its first token exec'd.
+                  # The option's own example is "${pkgs.trash-cli}/bin/trash".
+                  #
+                  # One directory per activation rather than a ".bak" suffix, so a
+                  # second collision on the same path cannot clobber the first
+                  # backup. `date -Is` avoids % entirely, which would otherwise be
+                  # eaten by systemd unit specifier expansion.
+                  backupCommand = pkgs.writeShellScript "hm-backup-file" ''
+                    set -euo pipefail
+                    backup_dir="''${HOME}/.hm-backups/$(date -Is)"
                     mkdir -p "$(dirname "$backup_dir/$1")"
                     mv "$1" "$backup_dir/$1"
                   '';
@@ -358,7 +366,7 @@
                     })
                     allUsers);
                 };
-              }
+              })
             ];
         };
     in
