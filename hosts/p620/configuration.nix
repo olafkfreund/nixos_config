@@ -82,11 +82,23 @@ in
     # disk problem.
     buildDir = "/mnt/games/nix-build";
 
-    # Two, matching p510, despite p620 having 128 cores to p510's 40. The limit
-    # is not cores: this is an interactive workstation, and each of these jobs
-    # boots a VM that wants real memory and real disk throughput. Raise it if
-    # the queue rather than the desktop turns out to be the complaint.
-    instances = 2;
+    # Four since #1739, raised from two because the queue became the complaint:
+    # p510 left the pool (#1737), so this host now carries the whole
+    # `nixos`/`kvm`/`big` label set alone, and both its runners were observed
+    # busy simultaneously the moment that happened.
+    #
+    # Sized against what a job actually asks for, which is twice what it looks
+    # like: install-check runs the install and free-space VMs in ONE nix
+    # invocation so they boot concurrently, each memorySize 6144, cores 4,
+    # diskSize 32768. So a job is 12 GB and 8 cores, and four jobs is eight VMs
+    # -- 48 GB and 32 cores, against 128 cores and 251 GB (145 GB available
+    # with the desktop running). Disk is the tighter of the two: ~128 GB of VM
+    # images at peak against 590 GB free on /mnt/games.
+    #
+    # The old note here said the limit is not cores but the interactive
+    # desktop, and that still governs. 48 GB of 145 leaves the workstation
+    # intact; this is not headroom to spend again without measuring.
+    instances = 4;
   };
 
   # Consolidated networking configuration
