@@ -64,7 +64,7 @@
 # then update `version` + `sha256` below (hex sha256 from the index is accepted
 # by fetchurl as-is).
 let
-  version = "1.46388.2";
+  version = "1.49585.0";
 
   # dlopen'd at runtime (not in DT_NEEDED) — appended to RUNPATH.
   runtimeLibs = [
@@ -81,7 +81,7 @@ stdenv.mkDerivation {
 
   src = fetchurl {
     url = "https://downloads.claude.ai/claude-desktop/apt/stable/pool/main/c/claude-desktop/claude-desktop_${version}_amd64.deb";
-    sha256 = "98bf54e85e4916068c4281459b0f0431d8ff68034773f3ee98311d7206566ab1";
+    sha256 = "e0b4ce6313943a69e9bd61749a293bfca241b4dfb37f88df6411b4b69ec67a40";
   };
 
   nativeBuildInputs = [
