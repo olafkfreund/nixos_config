@@ -30,6 +30,11 @@
     herdr = inputs.herdr.packages.${prev.stdenv.hostPlatform.system}.default;
   })
 
+  # flyline — Bash loadable builtin replacing readline (see flake input).
+  (_final: prev: {
+    flyline = inputs.flyline.packages.${prev.stdenv.hostPlatform.system}.flyline;
+  })
+
   # seance — Zig terminal multiplexer that tracks AI coding agents (flake input).
   (_final: prev: {
     seance = inputs.seance.packages.${prev.stdenv.hostPlatform.system}.default;

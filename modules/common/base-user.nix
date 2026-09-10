@@ -8,7 +8,7 @@ let inherit (lib) mkDefault; in {
     isNormalUser = true;
     description = mkDefault "Olaf K-Freund";
     extraGroups = [ "wheel" "video" "scanner" "lp" ];
-    shell = mkDefault pkgs.zsh; # Changed to mkDefault to allow host configs to override
+    shell = mkDefault pkgs.bashInteractive; # mkDefault so host configs can override
     # vim deliberately not here: it would collide with the
     # programs.neovim.{viAlias,vimAlias} symlinks in home-manager-path
     # (nixpkgs#451). The vim package is still in environment.systemPackages
@@ -22,9 +22,21 @@ let inherit (lib) mkDefault; in {
     # modules/common/metrics-user.nix.
   };
 
-  # Common shell setup
-  users.defaultUserShell = pkgs.zsh;
-  environment.shells = with pkgs; [ zsh ];
+  # Common shell setup.
+  #
+  # Bash is the login shell. It reaches parity with the old zsh setup through
+  # flyline (a Rust loadable builtin that replaces readline) plus starship —
+  # see home/shell/bash.nix for the full feature mapping.
+  #
+  # zsh stays enabled and fully configured on purpose: it is the rollback path.
+  # Reverting the migration is `shell = mkDefault pkgs.zsh` here plus the three
+  # host overrides, with no other change required.
+  users.defaultUserShell = pkgs.bashInteractive;
+  environment.shells = with pkgs; [
+    bashInteractive
+    zsh
+  ];
+  programs.bash.completion.enable = true;
   programs.zsh.enable = true;
 
   # Common environment variables

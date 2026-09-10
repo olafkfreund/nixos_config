@@ -19,7 +19,11 @@ in
     programs.starship = {
       enable = true;
       # custom settings
-      enableBashIntegration = false;
+      # Both shells get the prompt: bash is the login shell (see
+      # modules/common/base-user.nix), zsh stays configured as the fallback.
+      # The starship config below is entirely shell-agnostic — its `shell`
+      # module already carries a bash_indicator — so nothing else changes.
+      enableBashIntegration = true;
       enableZshIntegration = true;
       settings = {
         add_newline = true;
