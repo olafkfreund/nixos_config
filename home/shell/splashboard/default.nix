@@ -77,6 +77,17 @@ in
       '';
     };
 
+    enableBashIntegration = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Wire `eval "$(splashboard init bash)"` into the bash init.
+
+        Bash is the login shell (see modules/common/base-user.nix); splashboard
+        supports bash natively, so the dashboard behaves identically there.
+      '';
+    };
+
     theme = mkOption {
       type = types.enum [
         "default"
@@ -176,6 +187,18 @@ in
       fi
       ''}
       eval "$(${getExe cfg.package} init zsh)"
+    '');
+
+    programs.bash.initExtra = mkIf cfg.enableBashIntegration (mkAfter ''
+      # ========================================
+      # splashboard — shell startup dashboard
+      # ========================================
+      ${optionalString (cfg.githubTokenFile != null) ''
+        if [[ -f "${toString cfg.githubTokenFile}" ]]; then
+          export GH_TOKEN="$(cat "${toString cfg.githubTokenFile}")"
+        fi
+      ''}
+      eval "$(${getExe cfg.package} init bash)"
     '');
   };
 }

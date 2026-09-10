@@ -596,7 +596,9 @@ in
       "ydotool" # /run/ydotoold/socket access for the voice-input client
       "libvirtd" # read-write libvirt socket; without it virt-manager gets "access denied by policy"
     ];
-    shell = pkgs.zsh;
+    # Bash is the login shell (see modules/common/base-user.nix); zsh stays
+    # installed as the rollback path.
+    shell = pkgs.bashInteractive;
     # Run user services even when not logged in so headless user units
     # (e.g. the GNOME Remote Desktop headless service wired by
     # modules/desktop/gnome-remote-desktop.nix) keep working at boot

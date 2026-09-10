@@ -189,6 +189,26 @@
       inputs.rust-overlay.follows = "rust-overlay";
     };
 
+    # flyline — Rust readline replacement for Bash, loaded as a bash loadable
+    # builtin (dlopen'd .so, `enable -f .../libflyline.so flyline`). This is
+    # what makes bash-as-login-shell viable here: it restores the inline
+    # autosuggestions, syntax highlighting and fuzzy tab completion that zsh
+    # had via deja / zsh-syntax-highlighting / zsh-fzf-tab, none of which have
+    # bash equivalents. Same niche as ble.sh, but Rust + ratatui.
+    #
+    # Upstream ships nixosModules/overlays/packages. We take the package and
+    # wire it into home-manager ourselves (home/shell/bash.nix) because there
+    # is no homeManagerModule and the module's entire payload is one `enable`
+    # line. nixpkgs follows ours deliberately: without it the flake's own pin
+    # drags in a second toolchain (863 MiB vs 16.5 MiB of crate deps).
+    #
+    # Not in nixpkgs and no upstream binary cache, so this is a local Rust
+    # build (~72 derivations). Bump with `nix flake update flyline`.
+    flyline = {
+      url = "github:HalFrgrd/flyline";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # seance — Zig terminal multiplexer that tracks AI coding agents. Upstream
     # ships a working flake (pkg/nix/package.nix), so there is nothing to
     # package locally; it is consumed via overlay as pkgs.seance.

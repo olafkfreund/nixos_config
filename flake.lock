@@ -619,6 +619,26 @@
         "type": "github"
       }
     },
+    "flyline": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789023855,
+        "narHash": "sha256-+dTiefKzXZE6jZTqs58kc4LBY+i+1kuz1cCvTiTJX0c=",
+        "owner": "HalFrgrd",
+        "repo": "flyline",
+        "rev": "6c196ec94942d95c21f00a6a96ab8bd600ceb2a8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "HalFrgrd",
+        "repo": "flyline",
+        "type": "github"
+      }
+    },
     "fromYaml": {
       "flake": false,
       "locked": {
@@ -1931,6 +1951,7 @@
         "claude-skills-borghei": "claude-skills-borghei",
         "cosmic-applet-spotify": "cosmic-applet-spotify",
         "flake-utils": "flake-utils_3",
+        "flyline": "flyline",
         "gnome-quick-web-apps": "gnome-quick-web-apps",
         "gogmail": "gogmail",
         "gscratch": "gscratch",

@@ -539,7 +539,9 @@ in
     isNormalUser = true;
     description = vars.fullName;
     extraGroups = vars.userGroups;
-    shell = pkgs.zsh;
+    # Bash is the login shell (see modules/common/base-user.nix); zsh stays
+    # installed as the rollback path.
+    shell = pkgs.bashInteractive;
     packages = with pkgs; [
       vim
       wally-cli
