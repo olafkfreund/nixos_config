@@ -178,6 +178,10 @@ in
     # anchor pointing at a renamed note across ~2950 files. Paired with the
     # `obsidian` Claude Code skill in home/development/claude-code-skills.
     pkgs.customPkgs.obsidian-cli
+    # secret-tool — libsecret's CLI. The gnome-keyring daemon is already
+    # running here; only the binary was missing. Omamail (Omarchy mail plugin)
+    # stores every OAuth refresh token and IMAP password through it.
+    pkgs.libsecret
     # notebooklm-go (binary: `notebooklm`) — unofficial CLI for Google
     # NotebookLM. Reverse-engineered against the internal batchexecute RPC and
     # pinned to a release tag, so expect it to break when Google ships a new
