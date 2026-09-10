@@ -41,7 +41,6 @@ in
       ../../modules/services/plex-mcp.nix # Plex MCP server (HTTP transport, tailnet-only)
       ../../modules/services/sqlite-backup.nix # sqlite snapshots off the failing media disk
       ../../modules/services/backstage.nix # Backstage developer portal (epic #731, disabled by default)
-      ../../modules/containers/k3d.nix # k3d (k3s in Docker) cluster — ArgoCD + Tailscale operator (see docs/applications/k3d-cluster.md)
       ../../modules/services/arr-suite-mcp.nix # *arr suite MCP server (SSE bridge, tailnet-only)
       ../../modules/services/audiobookbay-automated.nix # AudioBookBay search → Transmission
       ../../modules/services/torrent-vpn.nix # Transmission confined to a ProtonVPN namespace
@@ -508,41 +507,13 @@ in
     dataRoot = "/home/docker";
   };
 
-  # k3d cluster — runs ArgoCD, watches github.com/olafkfreund/factory-gitops
-  # for App-of-Apps manifests. Tailnet exposure for in-cluster services uses
-  # the Tailscale SIDECAR pattern (not the operator): the bootstrap unit
-  # seeds a `tailscale-auth-key` Secret into each consuming namespace
-  # (argocd, factory) so Pods can mount `TS_AUTHKEY` into a sidecar
-  # `tailscale` container that registers a tailnet node.
-  # See docs/applications/k3d-cluster.md for ops, docs/architecture/k3d-architecture.md
-  # for the design, and docs/guides/factory-gitops.md for the sidecar pattern.
-  modules.containers.k3d = {
-    enable = true;
-    # PV backing store follows Docker off the SMR pool onto /home. The
-    # module default (/mnt/img_pool/k3d/storage) was chosen to keep cluster
-    # PVCs away from the media library's IOPS, which still holds — /home is
-    # simply the faster of the two non-media disks.
-    storageDir = "/home/k3d/storage";
-    argocd.enable = true;
-    tailscaleAuthKey.enable = true;
-    factorySecrets.enable = true; # #807: durably seed all factory ns Secrets from agenix
-    # Without this /home fills with per-commit factory images: 651GB reclaimed
-    # by hand on 2026-08-13 (83% -> 8%). Sunday 04:00 keeps the churn off the
-    # media server's evening peak.
-    imageGc = {
-      enable = true;
-      dates = "Sun 04:00";
-    };
-    # Bind kube API to p510's tailnet IP so kubectl from any tailnet
-    # device can drive the cluster directly (`kubectl get nodes` against
-    # https://100.118.96.32:6443). k3d 5.x's port-publishing logic
-    # doesn't honour `0.0.0.0` correctly (empty Docker PortBindings),
-    # so an explicit IP is required. Posture: tailnet ACL is default-
-    # open + host firewall disabled; auth gates on the kubeconfig
-    # bearer token. p510's tailnet IP is stable per-device — Tailscale
-    # doesn't renumber unless you delete + re-add the node.
-    apiHostBind = "100.118.96.32";
-  };
+  # No k3d here. The factory cluster moved to p620 (#1747, completing the
+  # migration whose Phase 2 stood it up there), and this host ran a duplicate
+  # of it until 2026-09-10 — two ArgoCD controllers reconciling the same
+  # factory-gitops repo, p510's cronjobs erroring continuously while p620's
+  # completed on schedule. Deleting it returned 58 GB of /home (81G -> 23G).
+  #
+  # Docker itself stays, above: it is not only a k3d substrate.
 
   # Claude Code managed-settings baseline (mirrors p620 + razer): PARR
   # protocol reminder hook + apiKeyHelper baseline. Read-only at
