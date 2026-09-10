@@ -6,4 +6,4 @@
 #
 # Edit by switching themes, not by hand: a hand edit is overwritten the
 # next time a theme is set.
-"gruvbox"
+"ristretto"
