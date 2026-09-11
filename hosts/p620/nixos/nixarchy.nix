@@ -7,7 +7,8 @@
 # This host offers exactly two sessions, Omarchy and GNOME. The greetd/
 # DankMaterialShell greeter, niri and the DMS sessions this comment used to
 # describe are all gone.
-{ inputs
+{ config
+, inputs
 , lib
 , pkgs
 , ...
@@ -86,7 +87,53 @@
     "${pkgs.qt6.qtmultimedia}/lib/qt-6/qml";
 
   home-manager.users.olafkfreund = {
-    imports = [ inputs.nixarchy.homeManagerModules.nixarchy ];
+    imports = [
+      inputs.nixarchy.homeManagerModules.nixarchy
+      inputs.nixarchy-voice.homeModules.default
+    ];
     programs.nixarchy.enable = true;
+
+    # Oma: speech to speech against the OpenAI Realtime API, driving Hyprland.
+    #
+    # The microphone starts off and only the toggle key opens it. While it is
+    # open, room audio streams continuously to OpenAI; toggling off stops the
+    # recorder rather than capturing and discarding.
+    #
+    # Set up on razer first and copied here unchanged. The one setting that is
+    # a guess for this machine is barge_in, below.
+    programs.omarchy-voice = {
+      enable = true;
+
+      # The key itself rather than a KEY=value file, which is what agenix
+      # decrypts to. Read at start-up, so rotating it is a restart of the user
+      # service and not a rebuild.
+      apiKeyFile = config.age.secrets."api-openai".path;
+
+      settings = {
+        # Spoken status lines, in the local piper voice. Not the voice she
+        # answers in: that is [realtime] voice, which arrives from OpenAI as
+        # audio and never passes through piper.
+        mouth.speak = true;
+
+        # Off, which is right for speakers and merely cautious for headphones.
+        # With it on and a speaker as the output, her own voice crosses the
+        # room into the microphone, the server reads it as a new user turn and
+        # cancels her reply mid-word: she never finishes a sentence. That was
+        # measured on razer. This machine's audio was not checked, so it stays
+        # off until `omarchy-voice doctor` says what the devices here are.
+        ears.barge_in = false;
+
+        # The shell tool would let the model run arbitrary commands, on an
+        # open microphone. What it needs for the desktop it gets through the
+        # omarchy CLI and Hyprland dispatchers instead.
+        hands.allow_shell = false;
+      };
+
+      # Not the upstream SUPER + SHIFT + V. On razer all three V slots were
+      # taken; this machine was not checked, so confirm with
+      # `hyprctl binds -j` before binding it in bindings.lua. The module only
+      # prints the snippet as a build warning -- it writes nothing.
+      keybinding = "SUPER + M";
+    };
   };
 }

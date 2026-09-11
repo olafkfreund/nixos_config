@@ -67,6 +67,14 @@
       inputs.zen-browser.follows = "zen-browser";
     };
 
+    # Oma, voice control for the Omarchy desktop. Follows this flake's nixpkgs
+    # for the same reason nixarchy does: the package wraps ~10 desktop tools
+    # onto PATH, and a second nixpkgs would be a second copy of every one.
+    nixarchy-voice = {
+      url = "github:olafkfreund/nixarchy-voice";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -26,12 +26,10 @@
   # GitLab runner enabled on the workstation (AC-powered)
   development.gitlab.runner.enable = true;
 
-  # AI-powered shell command suggestions (Ctrl+G)
-  programs.zshAiCmd = {
-    enable = true;
-    triggerKey = "^G";
-    debug = false;
-  };
+  # AI-powered shell command suggestions (Ctrl+G). Off: it only worked by
+  # exporting ANTHROPIC_API_KEY into every interactive shell, and bash's
+  # flyline agent mode covers the same ground (#1751).
+  programs.zshAiCmd.enable = false;
 
   # splashboard — terminal splash screen on shell startup + cd. User config
   # under ~/.splashboard/ (not nix-managed). Opt out per-shell with
