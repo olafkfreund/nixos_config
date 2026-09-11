@@ -7,7 +7,8 @@
 #
 # The three settings below are what `nix run github:olafkfreund/nixarchy#doctor`
 # printed for this machine. Each is here for a reason it named:
-{ inputs
+{ config
+, inputs
 , lib
 , pkgs
 , ...
@@ -75,7 +76,49 @@
   # splash, so stylix keeps this machine on 'stylix' with no mkForce needed.
 
   home-manager.users.olafkfreund = {
-    imports = [ inputs.nixarchy.homeManagerModules.nixarchy ];
+    imports = [
+      inputs.nixarchy.homeManagerModules.nixarchy
+      inputs.nixarchy-voice.homeModules.default
+    ];
     programs.nixarchy.enable = true;
+
+    # Oma: speech to speech against the OpenAI Realtime API, driving Hyprland.
+    #
+    # The microphone starts off and only the toggle key opens it. While it is
+    # open, room audio streams continuously to OpenAI; toggling off stops the
+    # recorder rather than capturing and discarding, so nothing is picked up
+    # while it is off.
+    programs.omarchy-voice = {
+      enable = true;
+
+      # The key itself rather than a KEY=value file, which is what agenix
+      # decrypts to. Read at start-up, so rotating it is a restart of the user
+      # service and not a rebuild.
+      apiKeyFile = config.age.secrets."api-openai".path;
+
+      settings = {
+        # Spoken status lines, in the local piper voice. Not the voice she
+        # answers in: that is [realtime] voice, which arrives from OpenAI as
+        # audio and never passes through piper.
+        mouth.speak = true;
+
+        # Off, and it has to stay off while a speaker rather than headphones
+        # is the output. Her voice crosses the room back into the microphone,
+        # the server reads it as a new user turn and cancels her reply
+        # mid-word, and she never finishes a sentence. Headphones or
+        # PipeWire's echo-cancel module make it safe to turn on.
+        ears.barge_in = false;
+
+        # The shell tool would let the model run arbitrary commands, on an
+        # open microphone. What it needs for the desktop it gets through the
+        # omarchy CLI and Hyprland dispatchers instead.
+        hands.allow_shell = false;
+      };
+
+      # SUPER + SHIFT + V, the upstream default, is taken on this machine --
+      # as are SUPER + V and SUPER + CTRL + V. This is only printed as a build
+      # warning: bindings.lua is hand-written and not ours to generate.
+      keybinding = "SUPER + M";
+    };
   };
 }
