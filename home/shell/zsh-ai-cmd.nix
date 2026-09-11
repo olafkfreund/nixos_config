@@ -73,14 +73,6 @@ in
       # ZSH AI Command Suggestions Configuration
       # ========================================
 
-      # Load Anthropic API key from agenix secret
-      if [[ -f "/run/agenix/api-anthropic" ]]; then
-        export ANTHROPIC_API_KEY="$(cat /run/agenix/api-anthropic)"
-      else
-        echo "WARNING: Anthropic API key not found at /run/agenix/api-anthropic" >&2
-        echo "zsh-ai-cmd will not function without an API key" >&2
-      fi
-
       # Configure Claude model (if not using default)
       ${optionalString (cfg.model != "claude-haiku-4-5") ''
       export ZSH_AI_CMD_MODEL="${cfg.model}"
