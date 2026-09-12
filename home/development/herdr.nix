@@ -114,6 +114,21 @@ in
     # agent surfaces above idle ones instead of sorting by workspace.
     agent_panel_sort = "priority"
 
+    # "symbols" gives blocked/working/done/idle/unknown distinct glyphs instead
+    # of colour-only dots, so state survives a dim panel or a colourblind read.
+    status_indicators = "symbols"
+
+    # Names the focused workspace in Hyprland's window title, which is what the
+    # bar and alt-tab show. {hostname} renders on the herdr SERVER, so a mirrored
+    # remote session names the host its panes actually run on, not this one.
+    window_title = "{hostname}: {workspace}"
+
+    # Right-aligned tab-bar status. hostname earns its place here because p620
+    # and razer run the same config and the mirror plugin puts remote sessions
+    # in the same sidebar.
+    tab_bar_right = [ { type = "zoom" }, { type = "hostname" }, { type = "datetime" } ]
+    tab_bar_right_separator = "  "
+
     # Space rows carry git context, which is what distinguishes one worktree
     # workspace from another at a glance.
     #
@@ -141,7 +156,18 @@ in
     claude = [
       [{ token = "state_icon", fg = "${c "base0B"}" }, { token = "workspace", fg = "${c "base05"}", bold = true }, { token = "tab", fg = "${c "base04"}" }],
       [{ token = "terminal_title_stripped", fg = "${c "base04"}", dim = true }],
-      [{ token = "agent", fg = "${c "base0C"}" }, { token = "$agents", fg = "${c "base09"}" }],
+      [
+        { token = "agent", fg = "${c "base0C"}" },
+        # 0.9.0 added value-based token rules, which is what makes the subagent
+        # count readable at a glance instead of being one static colour.
+        # Thresholds MUST be ordered high-to-low: the first matching rule wins,
+        # so a leading `gt = 0` would swallow every larger value and `gt = 3`
+        # would never fire.
+        { token = "$agents", fg = "${c "base09"}", rules = [
+          { gt = 3, fg = "${c "base08"}", bold = true },
+          { gt = 0, fg = "${c "base0A"}" },
+        ] }
+      ],
     ]
 
     [worktrees]
