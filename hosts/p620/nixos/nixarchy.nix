@@ -144,7 +144,15 @@
         # `wake ignored '...'` lines and add whatever spelling keeps coming
         # back as a second word -- "oma ohma" -- rather than arguing with the
         # transcriber about how it hears a name.
-        ears.wake_word = "oma";
+        # Wake word OFF. Not because it did not work -- it did -- but because
+        # of what it costs while nobody is talking: the listener transcribes
+        # every sound near the microphone to find out whether it was her name,
+        # and on this desk that was whisper sitting at 150-370% CPU whenever
+        # anything was playing. SUPER + M costs nothing at all until pressed.
+        #
+        # Set it back to "oma" if hands-free is worth a core; the machinery is
+        # all still here and tested.
+        ears.wake_word = "";
 
         # Speak through ElevenLabs, with Piper underneath.
         #
