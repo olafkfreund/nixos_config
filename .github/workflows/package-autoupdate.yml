@@ -55,6 +55,14 @@ jobs:
             script: ./scripts/update-warp-terminal.sh
             paths: pkgs/warp-terminal
             verify: .#nixosConfigurations.p620.pkgs.warp-terminal
+          # BrowserOS publishes three tag series into one release list --
+          # the browser (v0.50.3), ext-agent/* and agent-server/*. The agent
+          # series ship most days, so `releases/latest` names the browser
+          # almost never; the script filters on the tag shape instead.
+          - pkg: browseros
+            script: ./scripts/update-browseros.sh
+            paths: pkgs/browseros
+            verify: .#nixosConfigurations.p620.pkgs.customPkgs.browseros
           # Every component must be verified through customPkgs. Bare
           # `pkgs.antigravity-cli` is the antigravity-nix FLAKE INPUT's
           # package, not ours — a different derivation at a different version

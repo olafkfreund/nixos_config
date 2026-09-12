@@ -83,6 +83,11 @@
   # github/app release tag (see header comment in the derivation).
   github-copilot-app = pkgs.callPackage ./github-copilot-app { };
 
+  # BrowserOS — agentic Chromium fork distributed as an AppImage. Packaged
+  # here rather than through the third-party browseros-ai flake, which pins
+  # 0.41.0 and drops %U from the desktop entry.
+  browseros = pkgs.callPackage ./browseros { };
+
   # okena — GPUI-based native terminal multiplexer (contember/okena).
   okena = pkgs.callPackage ./okena { };
 

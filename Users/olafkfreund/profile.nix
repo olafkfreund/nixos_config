@@ -168,6 +168,9 @@ in
     pkgs.customPkgs.antigravity-hub
     # GitHub Copilot desktop app — agent-native desktop experience (Tauri).
     pkgs.customPkgs.github-copilot-app
+    # BrowserOS — agentic Chromium fork (AppImage). Packaged in pkgs/browseros
+    # rather than via the browseros-ai flake input, which is 9 releases behind.
+    pkgs.customPkgs.browseros
     pkgs.customPkgs.kosli-cli
     pkgs.customPkgs.aurynk
     # glab-tui — terminal UI for GitLab on top of the `glab` CLI.
