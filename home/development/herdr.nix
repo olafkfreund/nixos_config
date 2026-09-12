@@ -147,9 +147,12 @@ in
     [worktrees]
     directory = "~/.herdr/worktrees"
 
-    # Only bindings that are unset in 0.7.5 defaults are added here, so nothing
-    # upstream is shadowed. Checked against: goto=prefix+g, close_tab=
-    # prefix+shift+x, close_pane=prefix+x, settings=prefix+s, detach=prefix+q.
+    # Only bindings that are unset in the shipped defaults are added here, so
+    # nothing upstream is shadowed. Re-checked against 0.9.0's
+    # `herdr --default-config`: goto=prefix+g, close_tab=prefix+shift+x,
+    # close_pane=prefix+x, settings=prefix+s, detach=prefix+q, and also
+    # reload_config=prefix+shift+r and prefix+shift+d, both of which ruled out
+    # the obvious keys for the reviewr binding below.
     [keys]
     previous_workspace = "prefix+["
     next_workspace = "prefix+]"
@@ -161,6 +164,40 @@ in
     command = "lazygit"
     width = "90%"
     height = "90%"
+
+    # zoetrope: the session as a live flow graph. This is the only way to see
+    # Claude Code's Task subagents — they run in-process with no PTY, so herdr
+    # (one agent per pane) can never give them rows of their own. zoetrope reads
+    # the transcript JSONL under ~/.claude/projects instead of the terminal, so
+    # subagents show up as nested nodes with their tool calls beneath them.
+    #
+    # prefix+shift+z is upstream's own default. Do NOT run the plugin's
+    # setup-keys action to get it: that writes a block into config.toml, which
+    # here is a read-only /nix/store symlink. Bind it from this file instead.
+    #     herdr plugin install furkankly/zoetrope/herdr-plugin
+    # Note the manifest is in a subdirectory, so the bare repo name fails.
+    [[keys.command]]
+    key = "prefix+shift+z"
+    type = "plugin_action"
+    command = "furkankly.zoetrope.open"
+
+    [[keys.command]]
+    key = "prefix+alt+z"
+    type = "plugin_action"
+    command = "furkankly.zoetrope.open-tab"
+
+    # reviewr: diff sidebar whose point is the round trip — select lines with v,
+    # comment with c, send with s, and the comments land in the agent's input
+    # instead of being retyped into a prompt. Four scopes, including the last
+    # agent turn.
+    #
+    # prefix+alt+d, not shift+d or shift+r: 0.9.0 defaults already use
+    # prefix+shift+d and prefix+shift+r (reload_config).
+    #     herdr plugin install persiyanov/herdr-reviewr
+    [[keys.command]]
+    key = "prefix+alt+d"
+    type = "plugin_action"
+    command = "persiyanov.reviewr.toggle"
 
     # herdr-splits: unified ctrl+hjkl across herdr panes AND Neovim splits,
     # replacing nvim-tmux-navigation (which crossed into tmux panes that no
