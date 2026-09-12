@@ -187,6 +187,7 @@ nav:
       - "Backstage": backstage.md
       - "Cloudflared Tunnel (host)": applications/cloudflared-tunnel.md
       - "Agent Bus (Matrix + MCP)": applications/agent-bus.md
+      - "Herdr (agent multiplexer)": applications/herdr.md
       - "Sunshine (streaming)": applications/sunshine.md
   - Command System:
       - Overview: Nixos/README.md
