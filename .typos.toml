@@ -70,6 +70,11 @@ extend-ignore-re = [
   nvidia = "nvidia"
   intel = "intel"
 
+  # `reviewr` is the literal plugin id and repo name of the herdr diff-review
+  # sidebar (persiyanov/herdr-reviewr, plugin id persiyanov.reviewr). Spelling
+  # it "reviewer" would name something that does not exist.
+  reviewr = "reviewr"
+
   # User-specific
   olafkfreund = "olafkfreund"
   freundcloud = "freundcloud"
