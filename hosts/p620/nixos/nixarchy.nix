@@ -123,6 +123,24 @@
         # off until `omarchy-voice doctor` says what the devices here are.
         ears.barge_in = false;
 
+        # Start a session by saying her name, rather than reaching for the key.
+        #
+        # This keeps a microphone open locally whenever listening is *not* on,
+        # which is the thing being chosen here. Nothing reaches OpenAI until
+        # the word is heard: the audio goes to whisper.cpp on this CPU, and
+        # only once somebody actually speaks -- a silent room is never
+        # transcribed at all, let alone uploaded.
+        #
+        # It is also what makes leaving listening switched on unnecessary,
+        # which was the expensive habit: streamed room audio bills at the same
+        # rate whether anyone is talking or not.
+        #
+        # Short names get misheard. Check `omarchy-voice log` for the
+        # `wake ignored '...'` lines and add whatever spelling keeps coming
+        # back as a second word -- "oma ohma" -- rather than arguing with the
+        # transcriber about how it hears a name.
+        ears.wake_word = "oma";
+
         # The shell tool would let the model run arbitrary commands, on an
         # open microphone. What it needs for the desktop it gets through the
         # omarchy CLI and Hyprland dispatchers instead.
@@ -131,8 +149,12 @@
 
       # Not the upstream SUPER + SHIFT + V. On razer all three V slots were
       # taken; this machine was not checked, so confirm with
-      # `hyprctl binds -j` before binding it in bindings.lua. The module only
-      # prints the snippet as a build warning -- it writes nothing.
+      # `hyprctl binds -j` before trusting it.
+      #
+      # The module writes this to ~/.config/hypr/voice-binds.lua now rather
+      # than printing it as a warning to paste. bindings.lua still has to load
+      # it, with `pcall(require, "hypr.voice-binds")` -- activation says so
+      # while that line is missing, and stops saying it once it is there.
       keybinding = "SUPER + M";
     };
   };
