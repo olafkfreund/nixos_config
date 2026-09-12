@@ -766,11 +766,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789162737,
-        "narHash": "sha256-ACzb5WjoD3eiHQ/xjyTcHXOG60vNEXPcmHZgloi14Vs=",
+        "lastModified": 1789226674,
+        "narHash": "sha256-CuV0A9K1VPsz9n6oTt9trR0wIbzO8OJlmUuG6cIpQKQ=",
         "owner": "ogulcancelik",
         "repo": "herdr",
-        "rev": "9ad65d9031e8cb16a7b553c0e6f74809e9811e92",
+        "rev": "6cf4bbb031b5e6b16e39ea204a5f7e5dc90f7474",
         "type": "github"
       },
       "original": {
@@ -1337,6 +1337,28 @@
         "type": "github"
       }
     },
+    "mcp-servers-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixarchy",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789141018,
+        "narHash": "sha256-0ap34rhjfjXsFV+xfXd56WGxfrbc9QWNUrEqzh1L+co=",
+        "owner": "natsukium",
+        "repo": "mcp-servers-nix",
+        "rev": "11fe2419e274bb223a86dddc9e4803b01ad359e8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "natsukium",
+        "repo": "mcp-servers-nix",
+        "rev": "11fe2419e274bb223a86dddc9e4803b01ad359e8",
+        "type": "github"
+      }
+    },
     "microvm": {
       "inputs": {
         "nixpkgs": "nixpkgs_5",
@@ -1415,6 +1437,28 @@
         "type": "github"
       }
     },
+    "nix-index-database_2": {
+      "inputs": {
+        "nixpkgs": [
+          "nixarchy",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788679149,
+        "narHash": "sha256-iDPCFLce2G+unG3VHIKMrKznSMEwCHNeeuzdWk0YxRM=",
+        "owner": "nix-community",
+        "repo": "nix-index-database",
+        "rev": "2ddfaa93f2c13a586c673df4c0da0d580f4674a4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "ref": "2026-09-06-071918",
+        "repo": "nix-index-database",
+        "type": "github"
+      }
+    },
     "nix-snapd": {
       "inputs": {
         "flake-compat": "flake-compat_2",
@@ -1442,8 +1486,10 @@
         "home-manager-stable": "home-manager-stable",
         "hypr-rdp": "hypr-rdp",
         "hyprland": "hyprland",
+        "mcp-servers-nix": "mcp-servers-nix",
         "microvm": "microvm_2",
         "nix-flatpak": "nix-flatpak",
+        "nix-index-database": "nix-index-database_2",
         "nixi": "nixi",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": [
@@ -1458,11 +1504,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789205947,
-        "narHash": "sha256-Z8lmuS2bH5YKocpe/YfM8y8o8+GKmO1QwFAffhRzYmE=",
+        "lastModified": 1789226024,
+        "narHash": "sha256-CbSUFGzjci0G7rQ2b93B7UD4N2FcwFvpp2OOw73c4nE=",
         "owner": "olafkfreund",
         "repo": "nixarchy",
-        "rev": "1275fddd22b0bf608d62e49d594b3bfc5c042e55",
+        "rev": "a48fd9c6c8b1bdc3a199fdb63d76a74ebf7eb8d9",
         "type": "github"
       },
       "original": {
@@ -1479,11 +1525,11 @@
         "systems": "systems_9"
       },
       "locked": {
-        "lastModified": 1789222409,
-        "narHash": "sha256-2Txs+MyVfKuPfIhwcFt7HyXlmHhiWZgObVJ1c2ePfgc=",
+        "lastModified": 1789225651,
+        "narHash": "sha256-YO1d/zqF/1V3A+osnwIFK43Y4EnqVZoJgAOLiV1Y7SQ=",
         "owner": "olafkfreund",
         "repo": "nixarchy-voice",
-        "rev": "79465305c2738dd6ba9de94d27ba016146e0cd07",
+        "rev": "d5720326e58daff9786bcaf740d466f306f6ca72",
         "type": "github"
       },
       "original": {
@@ -1887,11 +1933,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789207254,
-        "narHash": "sha256-ziVSOu7hND2eKGybQn3Iyb18vKW731So6dnJHWk9kFM=",
+        "lastModified": 1789226695,
+        "narHash": "sha256-tS6JQFruLa2Yz2bueUTabbzLaPeUmUmK/pjl/5Y7VHE=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "f2036aaa7b8c3b205792588714b8e4ef95c183bd",
+        "rev": "55903605ee865ba449f5e14a742a106f0049f415",
         "type": "github"
       },
       "original": {
