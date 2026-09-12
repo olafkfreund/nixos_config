@@ -81,11 +81,11 @@
       "--enable-gpu-rasterization"
       "--enable-zero-copy"
       "--enable-quic"
-      "--enable-tcp-fast-open"
-      "--aggressive-cache-discard"
-      "--process-per-site"
-      "--max_old_space_size=4096"
-      "--memory-pressure-off"
+      # Do NOT re-add --process-per-site (#1776): it puts every frame of one
+      # site in a single renderer, so one core serves the whole of a heavy SPA
+      # and typing stalls for minutes. --aggressive-cache-discard and
+      # --memory-pressure-off contradict each other, and --max_old_space_size
+      # is a V8 flag Chrome ignores unless passed through --js-flags.
     ];
   };
 }
