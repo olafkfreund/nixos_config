@@ -22,6 +22,9 @@ in
   "secrets/api-openai.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-gemini.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-anthropic.age".publicKeys = allUsers ++ allHosts;
+  # ElevenLabs, for omarchy-voice's cloud TTS. The local Piper voice is the
+  # fallback, so losing this key costs voice quality rather than voice.
+  "secrets/api-elevenlabs.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-groq.age".publicKeys = allUsers ++ allHosts;
   # Ollama cloud-models API key (Ollama Turbo / hosted models). Exposed to the
   # ollama systemd daemon on hosts that opt in via

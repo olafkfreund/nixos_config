@@ -1479,11 +1479,11 @@
         "systems": "systems_9"
       },
       "locked": {
-        "lastModified": 1789201079,
-        "narHash": "sha256-/sk99zqc/nmLZjKjzf9REfnIlb7Vrn2kRExZP6IGYQA=",
+        "lastModified": 1789222409,
+        "narHash": "sha256-2Txs+MyVfKuPfIhwcFt7HyXlmHhiWZgObVJ1c2ePfgc=",
         "owner": "olafkfreund",
         "repo": "nixarchy-voice",
-        "rev": "079202c418268151b54497f20003921b237e28f9",
+        "rev": "79465305c2738dd6ba9de94d27ba016146e0cd07",
         "type": "github"
       },
       "original": {
