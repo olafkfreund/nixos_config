@@ -110,6 +110,10 @@
       # service and not a rebuild.
       apiKeyFile = config.age.secrets."api-openai".path;
 
+      # The cloud voice. Optional in the strongest sense: unreadable is a
+      # warning, not a failure, and the local Piper voice carries on.
+      elevenLabsKeyFile = config.age.secrets."api-elevenlabs".path;
+
       settings = {
         # Spoken status lines, in the local piper voice. Not the voice she
         # answers in: that is [realtime] voice, which arrives from OpenAI as
@@ -141,6 +145,30 @@
         # back as a second word -- "oma ohma" -- rather than arguing with the
         # transcriber about how it hears a name.
         ears.wake_word = "oma";
+
+        # Speak through ElevenLabs, with Piper underneath.
+        #
+        # Tarquin, "Posh & English RP" -- a voice-library voice, which needs a
+        # paid plan: on free it is refused with "Free users cannot use library
+        # voices via the API" and every reply silently falls back to Piper. If
+        # the plan ever lapses that is exactly what happens, and the log says
+        # so rather than going quiet.
+        #
+        # The premade British voices work on any tier if you want one:
+        # Alice (clear, neutral)  Xb7hH8MSUJpSbSDYk0k2
+        # Lily  (warmer)          pFZP5JQG7iQjIQuC4Bku
+        elevenlabs.enabled = true;
+        elevenlabs.voice_id = "7cOBG34AiHrAzs842Rdi";
+
+        # The offline rung of the brain ladder. Claude Code answers whenever
+        # api.anthropic.com is reachable; when it is not, this is what answers
+        # instead, and a local endpoint is not asked for an API key.
+        #
+        # qwen3:14b rather than a coder model on purpose -- the planner asks
+        # for function calls, and qwen2.5-coder:14b returned the JSON as prose
+        # instead of calling anything. Measured, not assumed.
+        openai.base_url = "http://localhost:11434/v1";
+        openai.planner_model = "qwen3:14b";
 
         # The shell tool would let the model run arbitrary commands, on an
         # open microphone. What it needs for the desktop it gets through the

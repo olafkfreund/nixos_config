@@ -54,6 +54,21 @@ in
         group = "users";
       };
 
+      # ElevenLabs, for omarchy-voice's cloud voice.
+      #
+      # 0400 and owned by the user, not 0644 root:users like the keys above.
+      # Those are read by shells and system services; this one is read by a
+      # systemd *user* service, so nothing needs it world-readable, and a
+      # metered TTS key that any local process can read is a bill waiting to
+      # happen. Losing access costs voice quality, not voice: omarchy-voice
+      # falls back to the local Piper voice and logs why.
+      api-elevenlabs = {
+        file = ../../secrets/api-elevenlabs.age;
+        mode = "0400";
+        owner = "olafkfreund";
+        group = "users";
+      };
+
       api-groq = {
         file = ../../secrets/api-groq.age;
         mode = "0644";
