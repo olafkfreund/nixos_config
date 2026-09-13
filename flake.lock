@@ -766,11 +766,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789260218,
-        "narHash": "sha256-BgAIKQYfg6DIbcUvB4Oq9h4hmquM69380CZO8r28MmE=",
+        "lastModified": 1789296473,
+        "narHash": "sha256-EtiP7K6bj6tkNmRdng7fWiU6hgcShIdQQePp8P8ZNLo=",
         "owner": "ogulcancelik",
         "repo": "herdr",
-        "rev": "bafbc0949dd996cf7fd0848c8965e254348cc11e",
+        "rev": "fc44f61a10ac04688b2fedfa670f38a463ca25ac",
         "type": "github"
       },
       "original": {
@@ -1504,11 +1504,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789292732,
-        "narHash": "sha256-vYsIpo6ZloIVQHGxzChE8H3d3CLoVLGAg92hIKSaAnk=",
+        "lastModified": 1789296301,
+        "narHash": "sha256-elyFNm27H+UcKMAMJCcIbySusV8ChATFDjg4LXRAsFo=",
         "owner": "olafkfreund",
         "repo": "nixarchy",
-        "rev": "b22c4db91f434ac1a3accdba23ae15bc428b42cb",
+        "rev": "22b0959ef1ac594f6d8a92d9cecd928d5487df5a",
         "type": "github"
       },
       "original": {
@@ -1933,11 +1933,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789292236,
-        "narHash": "sha256-/U5MplufKf+cldbPRtjQNFa63GBpeIAeoGFAtiR/h/M=",
+        "lastModified": 1789297783,
+        "narHash": "sha256-NUoCKo5MzhaomX2PtrM5M1njEYHQ+hr0+QgaDd5lhVo=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "4fa95863ddca1c701be97784c4d6c14c94b10c3e",
+        "rev": "9e606edd62f263fcf83e2b8e856780bc0c50bbdc",
         "type": "github"
       },
       "original": {
