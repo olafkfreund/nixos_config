@@ -195,7 +195,7 @@ in
     };
 
     # Collector: pull the three feeds and write store files atomically.
-    # jq field paths verified against gogcli 0.19.0 JSON output (events under
+    # jq field paths re-verified against gogcli 0.40.0 JSON output (events under
     # .events, tasks under .tasks, threads under .threads). On any error or
     # empty result the prior file is left in place so splashboard stays quiet.
     systemd.user.services.gog-dashboard = {
