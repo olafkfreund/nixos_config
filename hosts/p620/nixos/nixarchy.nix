@@ -179,10 +179,38 @@
         openai.base_url = "http://localhost:11434/v1";
         openai.planner_model = "qwen3:14b";
 
-        # The shell tool would let the model run arbitrary commands, on an
-        # open microphone. What it needs for the desktop it gets through the
-        # omarchy CLI and Hyprland dispatchers instead.
-        hands.allow_shell = false;
+        # Full control by voice: the shell tool and hl.dsp.exec are on. The
+        # deny list (sudo, rm -rf, dd, ssh, git push, nix gc) and the confirm
+        # list (shutdown, reboot, nixos-rebuild) still apply to every command.
+        hands.allow_shell = true;
+
+        # ssh allowed by voice. Config deny rules are ADDED to the built-in list
+        # and none can be removed, so this is the built-in list (omarchy_voice
+        # config.py DEFAULT_DENY) minus \bssh\b, replacing it. The ceiling: a
+        # rule added upstream later does not reach this host until copied here.
+        hands.deny_patterns_replace = true;
+        hands.deny_patterns = [
+          "\\brm\\s+-[a-zA-Z]*[rf]"
+          "\\bmkfs\\b"
+          "\\bdd\\s+if="
+          "\\b(shred|wipefs)\\b"
+          ">\\s*/dev/[sn][dv]"
+          "\\bpasswd\\b"
+          "\\bsudo\\b"
+          "\\bpkexec\\b"
+          "\\bcryptsetup\\b"
+          "\\bcurl\\b.*\\|\\s*(bash|sh)"
+          "\\bgit\\s+push\\b"
+          "\\bnix-collect-garbage\\b"
+          "\\bnix\\s+store\\s+(delete|gc)\\b"
+          "\\bnix-store\\s+--delete\\b"
+          "\\bnix\\s+profile\\s+wipe-history\\b"
+          "\\bnix-env\\s+--delete-generations\\b"
+        ];
+
+        # A screenshot -> click -> check loop through Sideyard spends a round
+        # per step; 12 ran out halfway through a dialog.
+        openai.max_turns = 40;
       };
 
       # Not the upstream SUPER + SHIFT + V. On razer all three V slots were
