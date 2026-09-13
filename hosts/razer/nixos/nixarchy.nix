@@ -41,6 +41,20 @@
   # it the session starts but never sees a keypress.
   programs.nixarchy.user = "olafkfreund";
 
+  # Let theme switches tint Chrome/Chromium/Edge/Brave with the theme's accent
+  # colour. Light and dark already follow the theme through the settings
+  # portal without this; what it adds is the accent alone.
+  #
+  # The cost, stated upstream and worth keeping in view: Chromium reads policy
+  # only from /etc/<browser>/policies/managed, with no per-user equivalent, so
+  # this hands those directories to this user -- and whoever can write there
+  # sets policy for the whole machine, forced extensions and proxies included.
+  # On a single-user desktop that is moot. It does mean any process running as
+  # olafkfreund can write Chrome policy, which now includes agents with shell
+  # access (omarchy-voice's allow_shell on p620). Deliberately not on p510,
+  # which also runs Omarchy.
+  programs.nixarchy.browserThemeUser = "olafkfreund";
+
   # psmisc is here for `fuser`, which Omarchy shell plugins call to find who
   # holds a lock or a device -- omachord's routine runner needs it and nothing
   # else in the closure pulls psmisc in, so the plugin fails at runtime rather
