@@ -222,6 +222,26 @@ in
         description = "Enable FFmpeg for voice message conversion to .ogg Opus format";
       };
     };
+
+    notebooklm = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = ''
+          Enable the Google NotebookLM MCP server (notebooklm-mcp-cli, 49 tools).
+
+          Off by default and enabled per host, because the package ships with
+          Users/olafkfreund/profile.nix — which only p620 and razer import —
+          while this module is reached by every host. Enabling it on a host
+          without the package would declare a server whose command does not
+          exist.
+
+          Requires a one-time interactive `nlm auth` on each host: the
+          credential is a live Google session cookie in ~/.notebooklm-mcp-cli/,
+          it is not declarable, and it expires every few weeks.
+        '';
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable {

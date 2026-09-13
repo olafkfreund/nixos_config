@@ -21,6 +21,7 @@ let
   linkedinEnabled = mcpCfg.linkedin.enable or false;
   atlassianEnabled = mcpCfg.atlassian.enable or false;
   whatsappEnabled = mcpCfg.whatsapp.enable or false;
+  notebooklmEnabled = mcpCfg.notebooklm.enable or false;
 
   # Helper function to create shell script wrappers
   mkWrapper = name: script: pkgs.writeShellScript name script;
@@ -80,13 +81,6 @@ let
             description = "Delegate isolated coding tasks to local Ollama coder models (qwen2.5-coder on p620/p510) and review the output — Claude supervises, Ollama drafts";
           };
 
-          # NotebookLM MCP for Google NotebookLM interaction
-          notebooklm = {
-            command = "${pkgs.uv}/bin/uvx";
-            args = [ "--from" "notebooklm-mcp-cli" "notebooklm-mcp" ];
-            description = "Google NotebookLM interaction - create notebooks, add sources, generate audio/video overviews, query content via AI";
-          };
-
           # Terraform MCP for Infrastructure as Code
           terraform = {
             command = if pkgs ? terraform-mcp-server then "${pkgs.terraform-mcp-server}/bin/terraform-mcp-server" else "${pkgs.writeShellScript "terraform-mcp-placeholder" "echo 'Terraform MCP not available'"}";
@@ -118,6 +112,17 @@ let
             description = "Audiobook acquisition: AudioBookBay + NZBGeek search/grab, Audiobookshelf library (p510)";
           };
         }
+        # NotebookLM — research notebooks as tools. Gated because the package
+        # only ships on the hosts that import profile.nix (p620, razer) while
+        # this module is evaluated for every host.
+        // (lib.optionalAttrs notebooklmEnabled {
+          notebooklm = {
+            type = "stdio";
+            command = "${pkgs.customPkgs.notebooklm-mcp-cli}/bin/notebooklm-mcp";
+            args = [ ];
+            description = "Google NotebookLM: query notebooks, add sources, generate and download artifacts (unofficial; needs a one-time `nlm auth` per host)";
+          };
+        })
         # Obsidian MCP - conditional configuration based on implementation
         // (lib.optionalAttrs obsidianEnabled {
           "obsidian-rest" =

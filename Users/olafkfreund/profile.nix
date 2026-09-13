@@ -185,17 +185,20 @@ in
     # running here; only the binary was missing. Omamail (Omarchy mail plugin)
     # stores every OAuth refresh token and IMAP password through it.
     pkgs.libsecret
-    # notebooklm-go (binary: `notebooklm`) — unofficial CLI for Google
-    # NotebookLM. Reverse-engineered against the internal batchexecute RPC and
-    # pinned to a release tag, so expect it to break when Google ships a new
-    # frontend bundle rather than when we change anything.
+    # notebooklm-mcp-cli — unofficial Google NotebookLM client, providing both
+    # `nlm` (CLI) and `notebooklm-mcp` (MCP server, 49 tools). Replaced
+    # notebooklm-go in #1781: that one was CLI-only, so the notebooks could be
+    # driven by hand but not by an agent. Reverse-engineered against an
+    # undocumented internal API and pinned to a release, so expect it to break
+    # when Google changes that API rather than when we change anything.
     #
-    # Auth is your own Google session cookie, written by `notebooklm login` to
-    # ~/.config/notebooklm-go/auth.json. That path is deliberately outside the
-    # syncthing folders (modules/services/syncthing.nix covers ~/.claude and
+    # Auth is your own Google session cookie, extracted from a browser by
+    # `nlm auth` into ~/.notebooklm-mcp-cli/ (mode 0700). That path is outside
+    # the syncthing folders (modules/services/syncthing.nix covers ~/.claude and
     # ~/.gemini only), so the credential stays on the host that created it and
-    # each host is logged in separately.
-    pkgs.customPkgs.notebooklm-go
+    # each host is logged in separately. It expires every few weeks and has to
+    # be re-extracted per host.
+    pkgs.customPkgs.notebooklm-mcp-cli
     # herdr — TUI "agent multiplexer": run multiple AI coding agents in one
     # terminal workspace (tmux/zellij-style). From github:ogulcancelik/herdr.
     pkgs.herdr
