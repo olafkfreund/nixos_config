@@ -229,6 +229,13 @@ in
       # Enable MCP (Model Context Protocol) servers for AI integration
       mcp = {
         enable = true;
+        # NotebookLM research notebooks as agent tools (49 of them), via the
+        # packaged notebooklm-mcp-cli. Gated per host rather than defaulted on:
+        # the package ships with Users/olafkfreund/profile.nix, which only p620
+        # and razer import, while the MCP modules are evaluated for every host.
+        # Needs a one-time interactive `nlm auth` here — the credential is a
+        # Google session cookie and cannot be declared.
+        notebooklm.enable = true;
         obsidian = {
           enable = true;
           implementation = "rest-api";

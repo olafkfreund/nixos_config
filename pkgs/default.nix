@@ -46,11 +46,13 @@
   # GitLab TUI — terminal UI on top of the `glab` CLI (rcieri/glab-tui).
   glab-tui = pkgs.callPackage ./glab-tui { };
 
-  # notebooklm-go — unofficial CLI for Google NotebookLM's internal RPC.
-  # Reverse-engineered and pinned to a release tag on upstream's own advice;
-  # it breaks when Google's frontend bundle changes. See the derivation for
-  # the note on where the session cookie lives and why it is not agenix'd.
-  notebooklm-go = pkgs.callPackage ./notebooklm-go { };
+  # notebooklm-mcp-cli — unofficial CLI *and* MCP server for Google NotebookLM.
+  # Replaced notebooklm-go (#1781), which was CLI-only: the MCP server is what
+  # makes the notebooks reachable as agent tools. Reverse-engineered and pinned
+  # to a release on upstream's own advice; it breaks when Google changes its
+  # internal API. See the derivation for where the session cookie lives, why it
+  # is not agenix'd, and why it must stay outside the syncthing folders.
+  notebooklm-mcp-cli = pkgs.callPackage ./notebooklm-mcp-cli { };
 
   # Claude Code native binary (alternative to npm-based package)
   claude-code-native = pkgs.callPackage ./claude-code-native { };
