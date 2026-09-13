@@ -2241,16 +2241,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1789299421,
-        "narHash": "sha256-NEZLqGjogOKeTf7QCMp0UQudfgpKBy6XQMpzFyYrPCQ=",
+        "lastModified": 1789308790,
+        "narHash": "sha256-cRzZAwnCwV0ngUCZ0hUh12ofoM+aKBx0fXER3tHPJRc=",
         "owner": "olafkfreund",
         "repo": "ai-mirror",
-        "rev": "2dd9a1807968f69a818c94030da32d53a41ad2b8",
+        "rev": "db765596aa2931eb40be36f0357ce51db586860c",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
-        "ref": "sideyard-2-host-control",
         "repo": "ai-mirror",
         "type": "github"
       }
