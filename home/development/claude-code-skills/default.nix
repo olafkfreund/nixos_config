@@ -44,6 +44,21 @@ in
     home.file.".codex/skills/gog/SKILL.md".source = ./gog/SKILL.md;
     home.file.".gemini/skills/gog/SKILL.md".source = ./gog/SKILL.md;
 
+    # Local notebooklm skill — the playbook for notebooklm-mcp-cli (#1785).
+    # Installed for the same three agents as gog.
+    #
+    # It deliberately does NOT copy the command surface: `nlm --ai` emits about
+    # a thousand lines of AI-oriented docs from the installed binary, and
+    # upstream ships every few days, so a transcription here would be wrong
+    # within a week. The file carries what those docs cannot know instead --
+    # that artifacts are a three-step async flow, that quota is a rolling
+    # window worth checking before generating, that credentials are per-host,
+    # and that a single error is not expired cookies.
+    home.file.".claude/skills/notebooklm/SKILL.md".source = ./notebooklm/SKILL.md;
+    home.file.".claude/skills/notebooklm/evals.json".source = ./notebooklm/evals.json;
+    home.file.".codex/skills/notebooklm/SKILL.md".source = ./notebooklm/SKILL.md;
+    home.file.".gemini/skills/notebooklm/SKILL.md".source = ./notebooklm/SKILL.md;
+
     # Local dns skill — /dns playbook for GoDaddy DNS management.
     # The companion shell CLI lives next to SKILL.md and self-decrypts
     # the GoDaddy API secret from agenix at invocation time.
