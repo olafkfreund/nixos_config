@@ -49,6 +49,21 @@ jobs:
           echo "pinned=$pinned"     >>"$GITHUB_OUTPUT"
           echo "upstream=$upstream  pinned=$pinned"
 
+      # Runs on EVERY pass, deliberately unguarded. The case that matters most
+      # is exactly the one where there is nothing else to do: the autoupdate has
+      # just landed a version, pinned == upstream, and the issue tracking that
+      # version is now finished. A drift guard here is what left ten issues
+      # orphaned. See scripts/reconcile-update-issues.sh.
+      - name: Close finished and superseded tracking issues
+        # always(): still reap if a later step failed (GitHub 502s on issue
+        # creation happen), but only once versions actually resolved.
+        if: always() && steps.v.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          ./scripts/reconcile-update-issues.sh claude-code-update
+          "${{ steps.v.outputs.pinned }}" "${{ steps.v.outputs.upstream }}"
+
       - name: Exit if already up to date
         if: steps.v.outputs.upstream == steps.v.outputs.pinned
         run: echo "pinned == upstream (${{ steps.v.outputs.pinned }}) — nothing to do"
@@ -112,7 +127,8 @@ jobs:
           will fetch hashes, edit \`pkgs/claude-code-native/default.nix\`, build,
           test, and open the PR.
 
-          This issue will auto-close when that PR merges.
+          This issue closes itself once the pin reaches this version, however
+          it gets there — the nightly autoupdate usually does it within a day.
           EOF
           )
           # Strip the leading 10 spaces YAML required for the heredoc body
