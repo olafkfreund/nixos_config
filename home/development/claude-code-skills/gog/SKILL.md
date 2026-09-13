@@ -8,12 +8,14 @@ description: >-
   `/gog tasks`, `/gog events`, `/gog chat`, `/gog meet`, or any request to
   check/read/reply/send email, list or add tasks, see today's agenda, or
   message someone on Chat for the user's Google account.
-version: 0.1.0
+version: 0.2.0
 category: communication
 tags: [google, gmail, calendar, tasks, cli, workspace]
 recommended_skills: []
 platforms:
   - claude-code
+  - codex
+  - gemini
 ---
 
 # gog — Google Workspace in the terminal
@@ -37,6 +39,9 @@ ACCT="olaf@freundcloud.com"              # default account; override with -a
   user** — never dump raw JSON. Use `--plain` (TSV) for quick human reads.
 - Run `gog <area> --help` (or `gog schema <area> <cmd>`) to confirm flags
   before any write — the surface is large and flags differ per verb.
+- Every command below was re-verified against **gogcli 0.40.0**. Upstream ships
+  every few days and the nightly bump follows it, so if a flag is rejected,
+  trust `--help` over this file and fix this file.
 
 ## Safety rules (read before any write)
 
@@ -66,6 +71,14 @@ gog -a "$ACCT" --no-input -j gmail thread get <threadId> --sanitize-content
 
 Format results as: time · from · subject (· label). Resolve `<messageId>`/
 `<threadId>` from a prior `search`.
+
+> **Gotcha — an empty `in:inbox` is normal here, not a failure.** This account
+> keeps almost nothing in the inbox, so `in:inbox` (and `is:unread in:inbox`)
+> routinely returns `{"threads": []}` while there is plenty of recent mail.
+> Verified on gogcli 0.19.0 and 0.40.0 alike, so it is account state rather
+> than a version regression. For a bare "check my mail", search
+> `newer_than:7d` (or `in:anywhere`) and say the inbox is clear; do **not**
+> report that mail is broken, and do not start debugging auth.
 
 **Reply / send (confirm with user first):**
 
