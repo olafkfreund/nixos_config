@@ -46,6 +46,9 @@
   # GitLab TUI — terminal UI on top of the `glab` CLI (rcieri/glab-tui).
   glab-tui = pkgs.callPackage ./glab-tui { };
 
+  # Google Messages in the Omarchy bar: daemon + `.plugin` QML widget.
+  gmessages-omarchy = pkgs.callPackage ./gmessages-omarchy { };
+
   # notebooklm-mcp-cli — unofficial CLI *and* MCP server for Google NotebookLM.
   # Replaced notebooklm-go (#1781), which was CLI-only: the MCP server is what
   # makes the notebooks reachable as agent tools. Reverse-engineered and pinned
