@@ -15,7 +15,28 @@
 # To change patterns, edit this file and re-deploy. Do NOT edit ~/.claude/
 # .stignore or ~/.gemini/.stignore directly — your edits would be reverted
 # on the next nixos-rebuild switch.
-{ ... }:
+{ config, lib, ... }:
+let
+  # Skill directories home-manager owns under a synced folder, derived from
+  # home.file rather than listed by hand, so a newly added skill is covered
+  # without anyone remembering this file exists.
+  #
+  # Why they must not sync: home-manager populates them with /nix/store
+  # symlinks, and Syncthing replicates a symlink verbatim. Whichever host
+  # activated last shipped ITS store path to the other, where that path does
+  # not exist -- on 2026-09-13 nine skills on razer (gog, notebooklm,
+  # agent-bus, dns, obsidian, 1password, nixi, ...) pointed into p620's
+  # home-manager-files and were dangling. It ping-pongs: re-activating razer
+  # fixes razer and breaks p620 seconds later. ~/.codex/skills is not synced
+  # and none of its links ever dangled, which is what pinned it on Syncthing.
+  #
+  # Only these are carved out. `!skills/**` below still syncs skills installed
+  # imperatively, which are real files and replicate correctly.
+  managedSkillIgnores = folder:
+    lib.concatMapStrings (name: "/skills/${name}\n") (lib.unique (map
+      (path: lib.elemAt (lib.splitString "/" path) 2)
+      (lib.filter (lib.hasPrefix "${folder}/skills/") (lib.attrNames config.home.file))));
+in
 {
   home.file.".claude/.stignore" = {
     force = true;
@@ -30,6 +51,9 @@
       // ─── Sync-conflict litter: drop everywhere ───
       *sync-conflict*
 
+      // ─── Home-manager-owned skills: per-host store symlinks, never sync ───
+      // (derived from home.file; first match wins, so these beat !skills/**)
+      ${managedSkillIgnores ".claude"}
       // ─── ALLOWLIST: only these sync ───
       !CLAUDE.md
       !skills/**
@@ -65,6 +89,9 @@
       // ─── Sync-conflict litter: drop everywhere ───
       *sync-conflict*
 
+      // ─── Home-manager-owned skills: per-host store symlinks, never sync ───
+      // (derived from home.file; first match wins, so these beat !skills/**)
+      ${managedSkillIgnores ".gemini"}
       // ─── ALLOWLIST: only these sync ───
       !GEMINI.md
       !settings.json
