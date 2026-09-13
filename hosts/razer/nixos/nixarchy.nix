@@ -30,6 +30,7 @@
     ../../common/nixos/omarchy-gog.nix
     ../../common/nixos/omarchy-meet-binds.nix
     ../../common/nixos/omarchy-ai-mirror.nix
+    ../../common/nixos/omarchy-gmessages.nix
     ../../common/nixos/omarchy-sole-hyprland.nix
     ../../common/nixos/omarchy-stylix-theme.nix
   ];
