@@ -1,11 +1,17 @@
 { config
 , lib
+, pkgs
 , inputs
 , ...
 }:
 let
   inherit (lib) mkIf mkEnableOption;
   cfg = config.programs.claude-code-skills;
+
+  # Upstream's own NotebookLM skill ships inside the package; see the
+  # notebooklm block below. python3.sitePackages rather than a hard-coded
+  # python3.14, so a default-Python bump does not silently break the links.
+  nlmData = "${pkgs.customPkgs.notebooklm-mcp-cli}/${pkgs.python3.sitePackages}/notebooklm_tools/data";
 in
 {
   options.programs.claude-code-skills = {
@@ -54,10 +60,24 @@ in
     # that artifacts are a three-step async flow, that quota is a rolling
     # window worth checking before generating, that credentials are per-host,
     # and that a single error is not expired cookies.
+    # Upstream's skill (`nlm skill install` just copies data/SKILL.md out, byte
+    # for byte) is linked as a supporting reference INSIDE our skill, not
+    # installed as a second one: as a separate `nlm-skill` it carried
+    # near-identical triggers, so every NotebookLM request loaded two
+    # overlapping playbooks. Supporting files are not skills and trigger
+    # nothing; our SKILL.md points at them. Linked from the store path rather
+    # than copied into this repo, so the ~1000-line reference follows the
+    # nightly package bump instead of going stale.
     home.file.".claude/skills/notebooklm/SKILL.md".source = ./notebooklm/SKILL.md;
     home.file.".claude/skills/notebooklm/evals.json".source = ./notebooklm/evals.json;
+    home.file.".claude/skills/notebooklm/reference.md".source = "${nlmData}/SKILL.md";
+    home.file.".claude/skills/notebooklm/references".source = "${nlmData}/references";
     home.file.".codex/skills/notebooklm/SKILL.md".source = ./notebooklm/SKILL.md;
+    home.file.".codex/skills/notebooklm/reference.md".source = "${nlmData}/SKILL.md";
+    home.file.".codex/skills/notebooklm/references".source = "${nlmData}/references";
     home.file.".gemini/skills/notebooklm/SKILL.md".source = ./notebooklm/SKILL.md;
+    home.file.".gemini/skills/notebooklm/reference.md".source = "${nlmData}/SKILL.md";
+    home.file.".gemini/skills/notebooklm/references".source = "${nlmData}/references";
 
     # Local dns skill — /dns playbook for GoDaddy DNS management.
     # The companion shell CLI lives next to SKILL.md and self-decrypts

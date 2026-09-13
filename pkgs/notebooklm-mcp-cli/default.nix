@@ -34,6 +34,7 @@
 { lib
 , python3Packages
 , fetchPypi
+, installShellFiles
 }:
 
 python3Packages.buildPythonApplication rec {
@@ -48,6 +49,8 @@ python3Packages.buildPythonApplication rec {
   };
 
   build-system = [ python3Packages.hatchling ];
+
+  nativeBuildInputs = [ installShellFiles ];
 
   dependencies = with python3Packages; [
     fastmcp
@@ -65,6 +68,24 @@ python3Packages.buildPythonApplication rec {
   # belongs in a build. pythonImportsCheck below is the real gate: it catches a
   # missing dependency, which is the failure mode that actually bites here.
   doCheck = false;
+
+  # Bash completion generated at build time and shipped in the package, so
+  # home-manager's bash-completion loads it lazily on the first <Tab> -- no
+  # .bashrc line (that file is a read-only store symlink here anyway) and no
+  # cost at shell startup.
+  #
+  # Two sandbox traps. Importing the package creates ~/.notebooklm-mcp-cli, and
+  # HOME in the sandbox is an unwritable /homeless-shelter, so point HOME at the
+  # build tmpdir. And `nlm --version` phones home for an update check, which
+  # fails offline; `--show-completion` does not, but the script is checked
+  # below so a stray warning on stdout fails the build instead of shipping a
+  # broken completion file.
+  postInstall = ''
+    export HOME="$TMPDIR"
+    $out/bin/nlm --show-completion bash > nlm.bash
+    grep -q '^_nlm_completion()' nlm.bash
+    installShellCompletion --cmd nlm --bash nlm.bash
+  '';
 
   pythonImportsCheck = [
     "notebooklm_tools"
