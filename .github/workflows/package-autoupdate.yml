@@ -59,6 +59,16 @@ jobs:
           # the browser (v0.50.3), ext-agent/* and agent-server/*. The agent
           # series ship most days, so `releases/latest` names the browser
           # almost never; the script filters on the tag shape instead.
+          # First Go package here, and the only one needing two hashes: the
+          # source tree AND vendorHash. The script does a two-phase edit
+          # because a vendorHash cannot be computed, only provoked out of a
+          # failed build. It also verifies through pkgs.gogcli, which is
+          # TOP-LEVEL (overlays/custom-packages.nix) rather than under
+          # customPkgs.
+          - pkg: gogcli
+            script: ./scripts/update-gogcli.sh
+            paths: pkgs/gogcli
+            verify: .#nixosConfigurations.p620.pkgs.gogcli
           - pkg: browseros
             script: ./scripts/update-browseros.sh
             paths: pkgs/browseros
