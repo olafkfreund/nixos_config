@@ -117,6 +117,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Sideyard: MCP server + bar indicator letting coding agents drive the
+    # Omarchy desktop behind a kill switch (hosts/common/nixos/omarchy-sideyard.nix).
+    # Pinned to the 2.0 branch until olafkfreund/ai-mirror#1 merges; then drop
+    # the ref and `nix flake update sideyard`. Follows nixpkgs so grim,
+    # wl-clipboard and PyGObject are the store paths this system already has.
+    sideyard = {
+      url = "github:olafkfreund/ai-mirror/sideyard-2-host-control";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
