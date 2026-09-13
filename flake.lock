@@ -2080,6 +2080,7 @@
         "nur": "nur",
         "rust-overlay": "rust-overlay_4",
         "seance": "seance",
+        "sideyard": "sideyard",
         "sops-nix": "sops-nix_2",
         "spicetify-nix": "spicetify-nix",
         "stylix": "stylix",
@@ -2231,6 +2232,27 @@
         "submodules": true,
         "type": "git",
         "url": "https://github.com/no1msd/seance"
+      }
+    },
+    "sideyard": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789299421,
+        "narHash": "sha256-NEZLqGjogOKeTf7QCMp0UQudfgpKBy6XQMpzFyYrPCQ=",
+        "owner": "olafkfreund",
+        "repo": "ai-mirror",
+        "rev": "2dd9a1807968f69a818c94030da32d53a41ad2b8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "ref": "sideyard-2-host-control",
+        "repo": "ai-mirror",
+        "type": "github"
       }
     },
     "sops-nix": {

@@ -29,6 +29,7 @@
     ../../common/nixos/omarchy-workspaces.nix
     ../../common/nixos/omarchy-gog.nix
     ../../common/nixos/omarchy-meet-binds.nix
+    ../../common/nixos/omarchy-sideyard.nix
     ../../common/nixos/omarchy-sole-hyprland.nix
     ../../common/nixos/omarchy-stylix-theme.nix
   ];
