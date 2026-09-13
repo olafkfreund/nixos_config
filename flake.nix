@@ -117,15 +117,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Sideyard: MCP server + bar indicator letting coding agents drive the
-    # Omarchy desktop behind a kill switch (hosts/common/nixos/omarchy-sideyard.nix).
-    # Tracks ai-mirror's default branch (master). It was pinned to the
-    # sideyard-2-host-control branch until olafkfreund/ai-mirror#1 merged; that
-    # PR landed as a MERGE COMMIT, deliberately not a squash, so the commit the
-    # branch pinned (2dd9a18) is still in master's history and old locks keep
-    # resolving. Follows nixpkgs so grim, wl-clipboard and PyGObject are the
-    # store paths this system already has. Bump with `nix flake update sideyard`.
-    sideyard = {
+    # ai-mirror: MCP server + bar indicator letting coding agents drive the
+    # Omarchy desktop behind a kill switch (hosts/common/nixos/omarchy-ai-mirror.nix).
+    # Tracks ai-mirror's default branch (master). Its PRs land as MERGE COMMITS,
+    # deliberately not squashes, so revs pinned from a PR branch stay in master's
+    # history and old locks keep resolving. Follows nixpkgs so grim, wl-clipboard
+    # and PyGObject are the store paths this system already has.
+    # Bump with `nix flake update ai-mirror`.
+    ai-mirror = {
       url = "github:olafkfreund/ai-mirror";
       inputs.nixpkgs.follows = "nixpkgs";
     };

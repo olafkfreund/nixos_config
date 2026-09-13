@@ -21,6 +21,26 @@
         "type": "github"
       }
     },
+    "ai-mirror": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789325572,
+        "narHash": "sha256-fPyfJR7w1/ZTNNwxDkZ6NTO6FxMVDot4fA76pnXxpc8=",
+        "owner": "olafkfreund",
+        "repo": "ai-mirror",
+        "rev": "12a678b37e95ebfdda8c9d2d043b150d86ed36a9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "ai-mirror",
+        "type": "github"
+      }
+    },
     "antigravity-nix": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -1525,11 +1545,11 @@
         "systems": "systems_9"
       },
       "locked": {
-        "lastModified": 1789225651,
-        "narHash": "sha256-YO1d/zqF/1V3A+osnwIFK43Y4EnqVZoJgAOLiV1Y7SQ=",
+        "lastModified": 1789325580,
+        "narHash": "sha256-sUdBF/EoHnIFN0Eqz9lXdv0YV61Ec83hWdxtO2XXPo0=",
         "owner": "olafkfreund",
         "repo": "nixarchy-voice",
-        "rev": "d5720326e58daff9786bcaf740d466f306f6ca72",
+        "rev": "8b3c61e35f191289dfa524b572d6e7e31c399489",
         "type": "github"
       },
       "original": {
@@ -2055,6 +2075,7 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
+        "ai-mirror": "ai-mirror",
         "antigravity-nix": "antigravity-nix",
         "claude-skills-borghei": "claude-skills-borghei",
         "cosmic-applet-spotify": "cosmic-applet-spotify",
@@ -2080,7 +2101,6 @@
         "nur": "nur",
         "rust-overlay": "rust-overlay_4",
         "seance": "seance",
-        "sideyard": "sideyard",
         "sops-nix": "sops-nix_2",
         "spicetify-nix": "spicetify-nix",
         "stylix": "stylix",
@@ -2232,26 +2252,6 @@
         "submodules": true,
         "type": "git",
         "url": "https://github.com/no1msd/seance"
-      }
-    },
-    "sideyard": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1789308790,
-        "narHash": "sha256-cRzZAwnCwV0ngUCZ0hUh12ofoM+aKBx0fXER3tHPJRc=",
-        "owner": "olafkfreund",
-        "repo": "ai-mirror",
-        "rev": "db765596aa2931eb40be36f0357ce51db586860c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "olafkfreund",
-        "repo": "ai-mirror",
-        "type": "github"
       }
     },
     "sops-nix": {
