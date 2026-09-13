@@ -119,11 +119,14 @@
 
     # Sideyard: MCP server + bar indicator letting coding agents drive the
     # Omarchy desktop behind a kill switch (hosts/common/nixos/omarchy-sideyard.nix).
-    # Pinned to the 2.0 branch until olafkfreund/ai-mirror#1 merges; then drop
-    # the ref and `nix flake update sideyard`. Follows nixpkgs so grim,
-    # wl-clipboard and PyGObject are the store paths this system already has.
+    # Tracks ai-mirror's default branch (master). It was pinned to the
+    # sideyard-2-host-control branch until olafkfreund/ai-mirror#1 merged; that
+    # PR landed as a MERGE COMMIT, deliberately not a squash, so the commit the
+    # branch pinned (2dd9a18) is still in master's history and old locks keep
+    # resolving. Follows nixpkgs so grim, wl-clipboard and PyGObject are the
+    # store paths this system already has. Bump with `nix flake update sideyard`.
     sideyard = {
-      url = "github:olafkfreund/ai-mirror/sideyard-2-host-control";
+      url = "github:olafkfreund/ai-mirror";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
