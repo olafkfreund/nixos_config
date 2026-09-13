@@ -28,6 +28,13 @@ let
 
   geminiDir = "${config.home.homeDirectory}/.gemini";
 
+  # Gated the same way as in claude-code-mcp.nix: the package ships only with
+  # profile.nix (p620, razer) while this module is evaluated for every host.
+  notebooklmEnabled =
+    if osConfig != null
+    then (osConfig.features.ai.mcp.notebooklm.enable or false)
+    else false;
+
   # GitHub PAT — sourced from agenix at runtime instead of sitting in plaintext
   # in mcp_config.json. Mirrors the Claude Code github-mcp wrapper. Only applied
   # if the host actually decrypts api-github-token.
@@ -69,6 +76,15 @@ let
     sequential-thinking = {
       command = "${pkgs.nodejs}/bin/npx";
       args = [ "-y" "@modelcontextprotocol/server-sequential-thinking" ];
+    };
+  }
+  # NotebookLM, on the hosts that ship it. Secret-free in the file sense: the
+  # Google session cookie lives in ~/.notebooklm-mcp-cli/, not in any argument
+  # or env var here, so this stays safe to write into a plaintext config.
+  // lib.optionalAttrs notebooklmEnabled {
+    notebooklm = {
+      command = "${pkgs.customPkgs.notebooklm-mcp-cli}/bin/notebooklm-mcp";
+      args = [ ];
     };
   };
 
