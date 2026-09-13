@@ -1,15 +1,18 @@
 ---
 name: notebooklm
 description: >-
-  Drive Google NotebookLM from inside the agent — ask questions of a notebook
-  and get sourced answers, add sources (URLs, PDFs, text), and generate then
-  download artifacts (audio overview, video, report, mind map, slide deck,
-  infographic, data table). Use for research against a notebook's own sources
-  rather than the open web. Triggers on `/notebooklm`, `/nlm`, "ask my
+  Drive Gemini Notebook (formerly Google NotebookLM) from inside the agent —
+  ask questions of a notebook and get sourced answers, add sources (URLs,
+  PDFs, text, YouTube, Google Drive), and generate then download artifacts
+  (audio overview / podcast, video, report, mind map, slide deck, infographic,
+  data table, quiz, flashcards). Use for research against a notebook's own
+  sources rather than the open web. Triggers on `/notebooklm`, `/nlm`, "ask my
   notebook", "what do my sources say about X", "add this to NotebookLM",
-  "make an audio overview / podcast / study guide / mind map", "download the
-  report", or any mention of NotebookLM, `nlm`, or a notebook by alias.
-version: 0.1.0
+  "make an audio overview / podcast / study guide / mind map / quiz /
+  flashcards", "download the report", "refactor document", "critique draft",
+  "plan usage", "quota", or any mention of Gemini Notebook, NotebookLM, `nlm`,
+  or a notebook by alias.
+version: 0.2.0
 category: research
 tags: [notebooklm, google, research, mcp, artifacts, cli]
 recommended_skills: []
@@ -31,14 +34,30 @@ Two interfaces to the same account, both installed on p620 and razer:
 Prefer the MCP tools when they cover the job. Drop to `nlm` for auth, for
 `usage`, and for flags the tools don't surface.
 
-## The full command surface is self-documenting — use it
+## The full command surface — read the reference, don't guess
 
-Do **not** guess flags, and do not trust this file over the binary:
+Upstream's complete guide ships **next to this file**, linked straight from the
+installed package so it always matches the `nlm` on PATH:
+
+| File | When to read it |
+| --- | --- |
+| `reference.md` | the whole CLI and MCP surface (~1000 lines) — open when a flag or command is not covered below |
+| `references/command_reference.md` | exact flags per command |
+| `references/workflows.md` | multi-step recipes (research → generate → download) |
+| `references/studio-prompting-guide.md` | writing prompts for reports, slides, infographics |
+| `references/studio-prompt-examples.md` | worked examples of the above |
+| `references/troubleshooting.md` | when a command fails and the section on auth below does not explain it |
+| `references/remote-mcp.md` | reaching the MCP server from another machine |
+
+Read only the one you need — they are large. The binary is still the final word:
 
 ```bash
-nlm --ai                  # ~1000 lines of AI-oriented docs for the whole CLI
+nlm --ai                  # the same guide, emitted by the binary itself
 nlm <area> --help         # per-command flags
 ```
+
+NotebookLM has been renamed **Gemini Notebook** upstream. Treat the two names as
+the same product.
 
 This file deliberately does not copy that surface, because it changes every
 few days — upstream ships often and a nightly job follows it. This file holds
