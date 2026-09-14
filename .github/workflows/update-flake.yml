@@ -60,8 +60,7 @@ jobs:
       # successes, so a flake PR was never once opened. Eval catches what a
       # lock bump actually breaks (removed options, renamed attributes,
       # changed module interfaces) in about a minute and needs no disk. This
-      # is the same check ci.yml runs, and ci.yml does not run on a
-      # GITHUB_TOKEN pull request, so this step is the only gate there is.
+      # is the same check ci.yml runs on the PR afterwards.
       - name: Validate configurations
         if: steps.update.outputs.changed == 'true'
         run: |
@@ -114,7 +113,9 @@ jobs:
         if: steps.update.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v8
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # PAT, not GITHUB_TOKEN: a GITHUB_TOKEN PR needs a manual
+          # "Approve and run" before ci.yml will start (#1805).
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
           commit-message: 'chore(deps): update flake inputs - daily automatic update'
           title: 'chore(deps): daily flake input updates'
           body: |

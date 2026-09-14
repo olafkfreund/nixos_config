@@ -2,10 +2,10 @@
 # taking from nixpkgs. For each one: resolve the latest upstream version,
 # rewrite version + hash in place, build it, and merge if it builds.
 #
-# Why this verifies inline instead of gating on ci.yml: pull requests opened
-# with GITHUB_TOKEN do not trigger other workflows, so `gh pr merge --auto`
-# would wait forever on checks that never run. The job that merges is
-# therefore the job that built it.
+# The job that merges is the job that built it; ci.yml is not a gate here.
+# The PR is opened with BOT_GITHUB_TOKEN (the agenix api-github-token PAT):
+# a GITHUB_TOKEN PR parks ci.yml in "approval required" and, once this job
+# merges, that parked run fails with zero jobs (#2514).
 #
 # The per-package logic lives in scripts/, not here, so the same bump can be
 # run by hand — `./scripts/update-warp-terminal.sh` etc. Each script is
@@ -150,7 +150,7 @@ jobs:
         id: pr
         uses: peter-evans/create-pull-request@v8
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
           branch: chore/autoupdate-${{ matrix.pkg }}
           delete-branch: true
           commit-message: "chore(${{ matrix.pkg }}): auto-update to ${{ steps.changed.outputs.version }}"
@@ -168,7 +168,7 @@ jobs:
             ```
 
             The build passed before this PR was opened, which is the gate for the
-            auto-merge below — `ci.yml` does not run on GITHUB_TOKEN pull requests.
+            auto-merge below.
 
             Nothing is deployed. Pick it up with `just quick-deploy HOST`.
 
