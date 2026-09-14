@@ -90,6 +90,43 @@ in
       '';
     };
 
+    minFree = lib.mkOption {
+      type = lib.types.ints.unsigned;
+      default = 100 * 1024 * 1024 * 1024;
+      description = ''
+        nix.settings.min-free on a runner host, in bytes. The shared 10 GiB
+        floor is 1% of p620's store disk: nix collected nothing until an
+        install VM was already short of room, and the failure arrived as a
+        guest timeout eighty minutes in (nixarchy#663).
+      '';
+    };
+
+    maxFree = lib.mkOption {
+      type = lib.types.ints.unsigned;
+      default = 200 * 1024 * 1024 * 1024;
+      description = "nix.settings.max-free on a runner host, in bytes.";
+    };
+
+    vmImageDir = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      example = "/mnt/data/vmtest";
+      description = ''
+        Where agents working on nixarchy leave VM disk images (its CLAUDE.md
+        section 5 sends them there instead of /tmp). Outside the store, so no garbage
+        collection reaches them; it had grown to 144 G. When set, a daily
+        timer deletes disk images older than vmImageMaxAgeDays. Only
+        *.qcow2, *.img and *.raw: the same directory holds git worktrees,
+        and age alone would delete somebody's uncommitted work.
+      '';
+    };
+
+    vmImageMaxAgeDays = lib.mkOption {
+      type = lib.types.ints.positive;
+      default = 7;
+      description = "Age, by modification time, past which a VM disk image is pruned.";
+    };
+
     tokenFile = lib.mkOption {
       type = lib.types.path;
       default = config.age.secrets."api-github-token".path;
@@ -115,6 +152,39 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # A running VM writes its image, so its mtime stays fresh; -xdev keeps the
+    # walk off anything mounted beneath the directory.
+    systemd = {
+      services.nixarchy-vm-image-prune = lib.mkIf (cfg.vmImageDir != null) {
+        description = "Prune old VM disk images under ${cfg.vmImageDir}";
+        unitConfig.ConditionPathIsDirectory = cfg.vmImageDir;
+        serviceConfig = {
+          Type = "oneshot";
+          User = "olafkfreund";
+          ExecStart = "${pkgs.findutils}/bin/find ${cfg.vmImageDir} -xdev -type f ( -name *.qcow2 -o -name *.img -o -name *.raw ) -mtime +${toString cfg.vmImageMaxAgeDays} -print -delete";
+          ProtectSystem = "strict";
+          ReadWritePaths = [ cfg.vmImageDir ];
+          ProtectHome = true;
+          PrivateTmp = true;
+          PrivateNetwork = true;
+          NoNewPrivileges = true;
+          ProtectKernelTunables = true;
+          ProtectKernelModules = true;
+          ProtectControlGroups = true;
+          RestrictSUIDSGID = true;
+          CapabilityBoundingSet = "";
+        };
+      };
+      timers.nixarchy-vm-image-prune = lib.mkIf (cfg.vmImageDir != null) {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnCalendar = "daily";
+          Persistent = true;
+          RandomizedDelaySec = "1h";
+        };
+      };
+    };
+
     # Root-owned and 0755: the daemon writes here as root, and nix refuses a
     # world-writable build directory outright.
     systemd.tmpfiles.rules = [
@@ -164,6 +234,8 @@ in
     # across modules; modules/nix/nix.nix keeps the global pair and these add
     # to them rather than replacing them.
     nix.settings = {
+      min-free = cfg.minFree;
+      max-free = cfg.maxFree;
       substituters = [
         "https://nixarchy.cachix.org"
         "https://hyprland.cachix.org"
