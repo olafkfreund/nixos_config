@@ -44,8 +44,10 @@
     # real safeguard against the store filling to 100% — which deadlocks the
     # periodic nix-gc.service (a full disk can't write the DB to delete anything).
     # p510 filled up over ~11 days because only the weekly timer existed. 10G floor.
-    min-free = 10 * 1024 * 1024 * 1024; # 10 GiB — trigger GC when below
-    max-free = 50 * 1024 * 1024 * 1024; # 50 GiB — GC up to this once triggered
+    # mkDefault: a host that builds VMs needs a floor sized to its disk, and
+    # services.nixarchy-runner sets one (#1809).
+    min-free = lib.mkDefault (10 * 1024 * 1024 * 1024); # 10 GiB — trigger GC when below
+    max-free = lib.mkDefault (50 * 1024 * 1024 * 1024); # 50 GiB — GC up to this once triggered
 
     # Maximize cache usage, allow local builds as fallback
     builders-use-substitutes = true;

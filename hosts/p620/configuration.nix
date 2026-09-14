@@ -59,6 +59,8 @@ in
   # point -- p510 alone could take two jobs, and a release build owning it for
   # hours is what made the install check go a day without a CI result.
   services.nixarchy-runner = {
+    # VM images agents leave here; the module prunes old ones (#1809).
+    vmImageDir = "/mnt/data/vmtest";
     enable = true;
 
     # /mnt/games (/dev/sdb1, ext4, non-rotational, 625 GB free), NOT the root
