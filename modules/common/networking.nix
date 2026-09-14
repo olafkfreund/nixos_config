@@ -54,7 +54,7 @@ let inherit (lib) mkOption mkIf mkEnableOption mkForce mkMerge types; in {
         "net.core.default_qdisc" = lib.mkDefault "fq";
         "net.ipv4.tcp_congestion_control" = lib.mkDefault "bbr";
         "net.ipv4.tcp_notsent_lowat" = lib.mkDefault 16384; # cut local send-queue latency
-        "net.ipv4.tcp_mtu_probing" = lib.mkDefault 1; # survive PMTU black holes on CGNAT
+        "net.ipv4.tcp_mtu_probing" = 1; # survive PMTU black holes on CGNAT
         "net.ipv4.tcp_fastopen" = lib.mkDefault 3; # shave 1 RTT on new connections
       };
     }

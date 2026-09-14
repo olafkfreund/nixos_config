@@ -446,7 +446,7 @@ in
     # Storage optimization kernel parameters
     boot.kernel.sysctl = mkIf cfg.enable {
       # VM settings for storage performance (lower priority than resource manager)
-      "vm.dirty_writeback_centisecs" = mkDefault (
+      "vm.dirty_writeback_centisecs" = (
         if cfg.profile == "performance"
         then 1500
         else if cfg.profile == "balanced"
@@ -464,7 +464,7 @@ in
       # I/O settings (avoid conflicts with resource manager)
 
       # Read-ahead settings
-      "vm.page-cluster" = mkDefault 3; # Optimize page clustering
+      "vm.page-cluster" = 3; # Optimize page clustering
     };
 
     # Storage performance packages
