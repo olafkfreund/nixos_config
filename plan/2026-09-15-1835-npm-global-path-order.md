@@ -34,7 +34,9 @@ case ":$PATH:" in *":DIR:"*) ;; *) export PATH="$PATH:DIR" ;; esac
   `${prefix}/bin`.
 - `home/development/languages.nix`: next to `GOPATH`/`CARGO_HOME`
   (lines 307-314), add
-  `home.sessionVariablesExtra = mkMerge [ (mkIf cfg.languages.go.enable <go append>) (mkIf cfg.languages.rust.enable <cargo append>) ];`,
+  `home.sessionVariablesExtra = mkMerge [ … ];` with one
+  `mkIf cfg.languages.go.enable <go append>` and one
+  `mkIf cfg.languages.rust.enable <cargo append>`,
   using `$HOME/go/bin` and `$HOME/.cargo/bin`. These end up in
   `hm-session-vars.sh`, which `~/.profile` and `~/.zshenv` source.
 - `home/shell/bash.nix` `bashrcExtra` (lines 211-215): line 212 becomes
