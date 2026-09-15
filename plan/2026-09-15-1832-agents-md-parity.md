@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1832
 spec: spec/2026-09-15-1832-agents-md-parity.md
 ---
