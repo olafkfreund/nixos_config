@@ -30,8 +30,16 @@ timeout 600 env -u OPENAI_API_KEY -u OPENAI_API_KEY_FILE \
 
 # Google, Antigravity subscription
 timeout 600 env -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY \
-  agy -p --mode plan --output-format json --print-timeout 10m "$(cat "$prompt")"
+  agy --mode plan --output-format json --print-timeout 10m -p "$(cat "$prompt")"
 ```
+
+*Deviation from the spec, found by T4:* the spec's `agy -p --mode plan …`
+exits 2, because `-p` takes the prompt as its own value and read `--mode` as
+the prompt. `-p` now comes last. agy's JSON (`status`, `response`, `usage`)
+has no model field, so agy reviews are labelled "model not reported". The
+prompt is one argument, capped at 128 KiB by Linux (`MAX_ARG_STRLEN`), so the
+skill keeps agy prompts under about 100 KB. That limit was raised by agy's own
+review in T4 and verified.
 
 **D3. Skill rules:**
 
@@ -65,6 +73,11 @@ timeout 600 env -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY \
   to report the agenix files, but the script already has a "Secret Files"
   section that does exactly that. The remaining checks (Ollama, LangChain,
   GitHub) stay.
+
+  *Found by T2b:* that section had always printed nothing for a normal user.
+  It ran `find /run/agenix*`, and `/run/agenix.d` is `drwxr-x--x`, so files
+  can be opened but not listed. It now checks the known `api-*` names
+  directly.
 - No other reader needs changing (spec audit): Claude Code refuses the key,
   voice-input and ollama read their own files, voxtype and herdr only
   inherited the variable, `ai-cli` scopes the key itself, and the p620

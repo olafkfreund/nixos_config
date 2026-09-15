@@ -58,12 +58,19 @@ prints to stderr, next to `model:`.
 
 ```bash
 timeout 600 env -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY \
-  agy -p --mode plan --output-format json --print-timeout 10m \
-  "$(cat "$prompt")" > "$work/agy.json"
+  agy --mode plan --output-format json --print-timeout 10m \
+  -p "$(cat "$prompt")" > "$work/agy.json"
 echo "exit=$?"
+jq -r '.status, .response' "$work/agy.json"
 ```
 
-Read the answer and any model field from `$work/agy.json`.
+- `-p` takes the prompt as its own value, so it must come last. `-p --mode …`
+  makes `--mode` the prompt and exits 2.
+- The prompt is a single argument, and Linux caps one argument at 128 KiB.
+  Keep the agy prompt under about 100 KB: trim the diff to the relevant
+  files, or summarise, rather than sending it all.
+- The JSON has `status`, `response` and `usage`, but no model name. Label the
+  review "model not reported".
 
 Run the calls **one at a time**, never in parallel.
 

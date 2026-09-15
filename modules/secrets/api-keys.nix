@@ -258,11 +258,12 @@ in
         echo "Secret Files:"
         echo "============="
 
-        # Check secret files
-        find /run/agenix* -name "api-*" 2>/dev/null | while read file; do
+        # Check secret files by name: /run/agenix.d is traversable but not
+        # listable for users (drwxr-x--x), so a find over it printed nothing.
+        for name in api-openai api-anthropic api-gemini api-groq api-ollama api-github-token; do
+          file="/run/agenix/$name"
           if [ -r "$file" ] && [ -s "$file" ]; then
-            basename=$(basename "$file")
-            echo "✅ $basename: $file"
+            echo "✅ $name: $file"
           fi
         done
       '')
