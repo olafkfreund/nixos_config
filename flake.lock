@@ -1510,7 +1510,9 @@
         "microvm": "microvm_2",
         "nix-flatpak": "nix-flatpak",
         "nix-index-database": "nix-index-database_2",
-        "nixi": "nixi",
+        "nixi": [
+          "nixi"
+        ],
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": [
           "nixpkgs"
@@ -1561,22 +1563,21 @@
     "nixi": {
       "inputs": {
         "nixpkgs": [
-          "nixarchy",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1788522028,
-        "narHash": "sha256-GPa6Rm/xZIOdCc4sTHM2t8NYgEGtitoTC2K+pBM7IUQ=",
+        "lastModified": 1789479818,
+        "narHash": "sha256-Z/g88jAtiTE9t1Ss3ZfaQo2sGZCRaDGN4dqL2qyw1JQ=",
         "owner": "olafkfreund",
         "repo": "nixi-nixarchy",
-        "rev": "a141b1689fb69f9f7462ba5cbbe1945abfa0901a",
+        "rev": "0028c45a2c7d03816c17c3bd7fad0b6cefe4f364",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
+        "ref": "feat/8-overlay-on-omarchy-ask",
         "repo": "nixi-nixarchy",
-        "rev": "a141b1689fb69f9f7462ba5cbbe1945abfa0901a",
         "type": "github"
       }
     },
@@ -2094,6 +2095,7 @@
         "nix-snapd": "nix-snapd",
         "nixarchy": "nixarchy",
         "nixarchy-voice": "nixarchy-voice",
+        "nixi": "nixi",
         "nixos-hardware": "nixos-hardware_2",
         "nixpkgs": "nixpkgs_9",
         "nixpkgs-f2k": "nixpkgs-f2k",
