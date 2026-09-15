@@ -1,207 +1,110 @@
 ---
 status: draft
 issue: 1831
-author: OpenCode
+author: OpenCode, revised by olafkfreund
 ---
 
 # Intent: Subscription-backed model delegation from Claude Code
 
 ## Problem
 
-The user wants to retain Claude Code and Claude as the primary coding agent,
-while asking models available through existing OpenAI/Codex and Google
-Antigravity subscriptions for independent advice and, eventually, scoped work.
-Today there is no established delegation path that preserves the normal Claude
-session, clearly identifies the responding provider, and safely returns results
-to Claude for assessment.
+The user wants Claude Code to remain the primary coding agent, while asking
+models from existing OpenAI (ChatGPT/Codex) and Google (Antigravity/Gemini)
+subscriptions for independent, read-only advice: plan review, diff review,
+edge cases and alternatives.
 
-The goal is better-supported decisions and useful division of work, not simply
-replacing Claude Code's main model or accumulating agreeing model responses.
+What exists today falls short in three ways:
+
+- **Paid API keys can be used silently.** `OPENAI_API_KEY` and
+  `GEMINI_API_KEY` (and the Anthropic, Groq and Ollama keys) are exported into
+  every shell by `modules/secrets/api-keys.nix:226-227` and
+  `home/development/codex-cli/module.nix:47-48`. `codex login status` reports
+  a ChatGPT login, but nothing stops a delegated call from authenticating with
+  the paid key instead of the subscription.
+- **The existing tools are not read-only.** The humanize plugin's `ask-codex`
+  runs `codex exec --full-auto`, which lets it write to the workspace;
+  `HUMANIZE_CODEX_BYPASS_SANDBOX=1` removes the sandbox entirely. `ask-gemini`
+  adds a mandatory "use Google Search" instruction, which is wrong for code
+  review, and runs a mise-installed `gemini` (nixarchy#707).
+- **The repo has no delegation policy.** Nothing says when to consult another
+  model or how much weight its answer carries.
+
+The goal is better-supported decisions, not replacing Claude's model or
+collecting agreeing answers.
 
 ## Proposed outcome
 
-- Claude remains the lead agent using its existing connection and authentication.
-- Claude can request an independent review or alternative analysis from an
-  OpenAI-backed model and an Antigravity-accessible model, where account access
-  and provider rules permit.
-- Initial delegation is read-only: architecture critique, plan review, diff
-  review, edge-case analysis, and comparison of implementation alternatives.
-- Responses identify the actual provider/model when verifiable, limitations,
-  assumptions, evidence, and disagreements. Unknown identity is reported rather
-  than inferred from an alias.
-- Claude synthesizes the results, explains disagreements, and verifies claims
-  against code, documentation, and tests. Consensus is not treated as proof.
-- Existing subscriptions are preferred. Separate API billing must not be enabled
-  or used as a fallback without explicit user approval.
-- A later, separately approved phase may add coding workers with isolated
-  workspaces, explicit permissions, and bounded tasks.
+- Claude remains the lead agent on its existing connection and login.
+- From Claude Code on p620 and razer, the user can request a read-only review
+  from OpenAI (through `codex`) and from Google (through `agy`), using the
+  subscription login only.
+- **Subscription only, enforced on every call, with no fallback:**
+  - The call runs with the provider's API-key variables removed from its
+    environment.
+  - Codex is forced to ChatGPT auth (`forced_login_method=chatgpt`).
+  - An expired login, used-up quota or unavailable model stops with a clear
+    error. There is never a silent switch to a paid key or another provider.
+- Reviewers cannot modify the checkout or run write actions: `codex -s
+  read-only`, `agy --mode plan`.
+- Responses record the model that actually answered, where the CLI reports it.
+- Claude weighs the answers, verifies claims against code and tests, and
+  explains disagreement. Consensus is not proof, and an external answer never
+  approves an artifact gate.
+- Claude stays fully usable when the external CLIs are logged out or offline.
 
 ## Affected users and systems
 
-- The user's Claude Code sessions and existing instructions, skills, and tools.
-- Existing OpenAI/Codex and Google Antigravity accounts and subscription quotas.
-- A prospective local provider bridge and Claude-accessible delegation tools.
-- This NixOS configuration repository if declarative packaging or integration
-  is approved. Initial host and eventual host coverage remain undecided.
-- p620, razer, and p510 must not be assumed to need identical configuration.
-  Never build or deploy p510 without asking first.
+- Claude Code sessions on p620 and razer. Out of scope for p510.
+- New per-user skills under `home/development/claude-code-skills/`, installed
+  the same way as `artifact-workflow`. They reach both hosts through the
+  synced `~/.claude`.
+- The user's ChatGPT and Google accounts. Login is per host: `~/.codex` is
+  not synced, and `~/.gemini/oauth_creds.json` is excluded from Syncthing, so
+  razer needs its own `codex login`.
+- A consultation-policy paragraph in `CLAUDE.md` (or `AGENTS.md`, if #1832
+  lands first).
 
 ## Constraints
 
-- Do not globally redirect Claude Code's main connection to another model.
-- Do not overwrite or invalidate the user's existing Claude login or settings.
-- Do not assume Claude Code's native subagent model selector supports arbitrary
-  OpenAI or Gemini backends.
-- Antigravity is a product/access channel, not a model. Record the actual models
-  available to the account during verification; do not hard-code an assumed list.
-- An API key, a subscription login, and API billing are different access paths.
-  A ChatGPT subscription does not automatically supply OpenAI API credits.
-- Third-party OAuth support is not evidence of provider authorization. Check
-  current terms and restrictions before linking accounts. Do not bypass quotas,
-  account restrictions, or access controls.
-- Keep provider credentials out of Git, logs, prompts, and the Nix store. Use
-  supported login flows and protected runtime storage; do not copy tokens into
-  tracked settings or artifact files.
-- Default any local gateway to loopback with authentication. Do not expose it
-  across the fleet or Internet as part of the initial scope.
-- Share only necessary context with external providers. Exclude secrets and
-  sensitive files, and define disclosure rules before unattended delegation.
-- Treat external responses as untrusted advice, not instructions that can expand
-  permissions, invoke tools, or override the user's policies.
-- Bound request size, runtime, concurrency, retries, and output. Make quota
-  exhaustion, expired authentication, unsupported models, and failures visible.
-- No silent provider substitution or paid fallback. Claude must remain usable
-  when the external tools are unavailable.
-- Implementation must follow this repository's feature flags, explicit imports,
-  runtime secret handling, and service-hardening requirements where applicable.
-
-## Candidate approach, not an approved design
-
-Keep Claude's normal inference path unchanged. Expose external reviewers through
-MCP tools or controlled worker commands. A local CLIProxyAPI instance is a
-candidate connection layer for subscription-backed access, not the delegation
-orchestration layer itself.
-
-```text
-Claude Code + Claude, using the existing primary connection
-  |
-  +-- Existing local coding tools
-  |
-  +-- Bounded delegation tools (MCP or controlled commands)
-        |
-        +-- CLIProxyAPI, if verified and acceptable
-        |     +-- OpenAI/Codex subscription-backed access
-        |     +-- Antigravity-backed access
-        |
-        +-- Alternative: native Codex CLI worker for OpenAI
-```
-
-Evaluate existing maintained delegation tools before writing a custom bridge.
-CLIProxyAPI advertises Claude-compatible endpoints, Codex OAuth, and Antigravity
-support. These claims have been checked in its documentation, not tested on this
-machine or against the user's accounts.
-
-Claude Code Router is an alternative for API-based routing. CCS adds profile and
-runtime management, including CLIProxyAPI integration, but may be unnecessary
-for a small read-only tool layer. A native Codex CLI worker may avoid translation
-for OpenAI; assess its permissions, supported subscription login, and result
-capture separately. Do not assume an equivalent Antigravity worker interface.
-
-## Implementation research notes
-
-- Inspect existing Claude Code configuration, MCP definitions, wrappers, and
-  repository guidance before choosing integration files or adding dependencies.
-- Recheck current provider support and supported login flows for a specific
-  pinned proxy version. Authentication availability can change independently of
-  documentation and model catalogs.
-- Prove one bounded request per provider before building orchestration. Verify
-  which account/quota is used without exposing credentials or consuming large
-  amounts of quota.
-- Prefer small explicit reviewer tools over an unrestricted arbitrary endpoint
-  caller. Candidate inputs include task, selected context, requested reviewer,
-  and output limit. These are design prompts, not committed interface names.
-- Return structured results: requested and resolved provider/model, answer,
-  evidence, caveats, and actionable errors. Record timing and usage only when
-  actually available; do not invent cost estimates for subscription traffic.
-- Model API calls can provide reviews but are not autonomous coding workers.
-  Workers additionally need a tool loop, workspace access, permissions, lifecycle
-  management, and validation of their output.
-- If worker execution is approved later, use isolated worktrees or equivalent
-  isolation. Workers should not share a writable checkout, commit or deploy
-  without authorization, or inherit unrestricted credentials.
-- Define when Claude should delegate: explicit user requests first; automatic
-  consultation for consequential decisions only after policy approval. Avoid
-  recursive delegation and repeatedly consulting models until one agrees.
-- Verify text requests, long-context behavior, error handling, and result
-  provenance. Test streaming/tool-call translation only where the chosen tool
-  or worker design actually needs it.
-- Keep rollback simple: disable the delegation integration and stop its local
-  bridge without modifying Claude's primary provider or existing sessions.
-
-## Acceptance evidence for the later spec
-
-- A normal Claude Code session still works with delegation disabled or offline.
-- From Claude Code, the user can obtain one read-only review from each approved
-  provider using the intended subscription-backed access path.
-- Claude can compare two reviews and explain a final recommendation supported
-  by evidence, including unresolved disagreement.
-- A timeout, quota failure, expired login, and unavailable model each produce
-  bounded, understandable failures without silent fallback.
-- Tests or inspection demonstrate that delegated requests exclude credentials
-  and that reviewers cannot modify the checkout or run local commands.
-- Configuration, credential storage, logging defaults, operational instructions,
-  and rollback are documented and validated for the selected host.
-- Coding-worker acceptance criteria are written separately if that phase is
-  approved; read-only review success is not proof of safe worker execution.
+- **Only the vendors' official CLIs,** logged in with the subscription:
+  `codex` from nixpkgs and `agy`. No third-party proxy that replays
+  subscription OAuth tokens (CLIProxyAPI, Claude Code Router, CCS). That
+  pattern risks the accounts and is out of scope.
+- No daemon, network port or system service. The skills call the CLIs
+  directly, once per request.
+- Do not redirect Claude Code's main connection, or change its login or
+  settings.
+- No credential material in Git, logs, prompts, skill files or the Nix store.
+  Skills must not contain store paths, because `~/.claude` is synced.
+- Explicit consultation only: the user asks, or invokes the skill. No
+  automatic consultation, no recursive delegation, and no re-asking until a
+  model agrees.
+- Bounded calls: 600-second timeout, one call at a time, capped output.
+- External answers are untrusted advice. They cannot expand permissions,
+  trigger tools or override repository policy.
+- Coding workers, which have write access, are a separate future intent.
+- Never build or deploy p510.
 
 ## Open questions
 
-1. Which host should run the first integration, and must other hosts access it?
-2. Which OpenAI and Google subscription tiers/accounts are available, and do
-   current terms permit the proposed third-party access?
-3. Is read-only review the agreed initial milestone, with coding workers deferred?
-4. Should consultation be explicit only, or automatic for selected decisions?
-5. What repositories or categories of context must never leave the machine?
-6. Is MCP preferable to controlled CLI commands given the existing configuration?
-7. What request, concurrency, timeout, and quota budgets are acceptable?
-8. If Antigravity access is unsupported or impermissible, should that integration
-   stop, or may a separately billed official Gemini API alternative be proposed?
+1. **What context must never leave the machine?** For example `secrets/`,
+   `*.age` files, `Users/*/` private files, or other repos entirely. The spec
+   turns the answer into an exclude list for what is sent in a prompt.
+2. **Should the global API-key exports be removed** as well? That would mean
+   `apiKeyFile = null` in `home/development/codex-cli.nix` and dropping the
+   Gemini export from `api-keys.nix`, so that codex and gemini run by hand also
+   default to the subscription. Other tools may read those variables, so the
+   spec audits who does before recommending it. It is not required for the
+   skills, which enforce subscription auth per call either way.
 
-## References and sources
+## References
 
-Sources inspected on 2026-09-15. Project documentation describes advertised
-capabilities, not verified compatibility, security, or permission to reuse a
-subscription. Recheck the relevant versions and provider terms during spec work.
-
-- [Claude Code: LLM gateways](https://code.claude.com/docs/en/llm-gateway): official
-  gateway documentation; explicitly states that routing Claude Code to non-Claude
-  models through gateways is unsupported by Anthropic. This is distinct from
-  keeping Claude as lead and calling external tools.
-- [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI): candidate provider
-  bridge; advertises compatible API interfaces, Codex OAuth, and Antigravity
-  access. This project's documentation was reviewed, not its implementation.
-- [CLIProxyAPI guides](https://help.router-for.me/): linked by the project's README;
-  consult for version-specific configuration and login procedures during design.
-- [Claude Code Router](https://github.com/musistudio/claude-code-router): alternative
-  local gateway supporting OpenAI and Gemini protocol translation, routing,
-  provider configuration, and observability.
-- [CCS](https://github.com/kaitranntt/ccs): profile/runtime manager with CLIProxyAPI
-  integration and OpenAI-compatible routing; backend/provider support must be
-  checked for the selected version.
-- [OpenAI Codex](https://github.com/openai/codex): native-worker alternative to
-  investigate; its current worker/authentication behavior was not verified in
-  this research session.
-
-## Handoff to the Claude Code session
-
-This file captures intent and research notes only. It does not approve a design,
-account linking, installation, deployment, or paid API usage.
-
-Tracked in [issue #1831](https://github.com/olafkfreund/nixos_config/issues/1831)
-on branch `docs/1831-claude-multi-model-delegation`. Retain the common slug
-`2026-09-15-1831-claude-multi-model-delegation` for all three artifacts.
-
-Review the open questions with the user and obtain intent approval. Then write
-the matching artifact under `spec/`, stopping for its approval before writing
-the matching artifact under `plan/`. Follow the artifact-workflow skill's
-approval and commit requirements; do not jump directly to implementation.
+- Review of the original draft (Explore + Fable, 2026-09-15):
+  `~/.claude/plans/glittery-seeking-squirrel.md`
+- Original candidate approach (CLIProxyAPI): the first commit on this branch,
+  `1777c2ce1`
+- [OpenAI Codex](https://github.com/openai/codex) — `codex exec`,
+  `forced_login_method`
+- [Claude Code: LLM gateways](https://code.claude.com/docs/en/llm-gateway) —
+  Anthropic does not support routing Claude Code itself to non-Claude models,
+  which is why this intent does not do that
