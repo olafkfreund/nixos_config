@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1832
 intent: intent/2026-09-15-1832-agents-md-parity.md
 ---
