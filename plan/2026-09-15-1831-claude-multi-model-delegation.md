@@ -112,8 +112,20 @@ merges first.
    → verify: markdownlint passes.
 6. **Commit** 1–5 as `feat(ai): second-opinion skill, drop global API-key exports (#1831)`.
    → verify: pre-commit hooks pass.
-7. **Build:** `just check-syntax && just test-host p620 && just test-host razer`.
-   → verify: all three succeed. p510 is not built.
+7. **Build:** first merge `origin/main` into the branch, then run
+   `just check-syntax && just test-host p620 && just test-host razer`.
+   → verify: `git log HEAD..origin/main` is empty, and all three builds
+   succeed. p510 is not built.
+
+   *Deviation, recorded during implementation:* the first p620 deploy was
+   built from a branch that predated #1828 (the nixi 0.10 overlay card). It
+   rolled p620 back to the older nixi layout, and Home Manager failed linking
+   `~/.config/omarchy/plugins/io.github.olafkfreund.nixi/manifest.json` into
+   the read-only store (exit 4; the system switched, `home-manager-olafkfreund`
+   failed). Fixed by merging `origin/main` (a merge, not a rebase, so the
+   approval commits keep their hashes), rebuilding and redeploying. Any
+   deploy from a feature branch must include everything already deployed
+   from main.
 8. **Deploy p620:** read `#agents:freundcloud.org.uk`, post the deploy and
    its rough duration, then `just quick-deploy p620` with
    `AGENT_BUS_ANNOUNCED=1`.
