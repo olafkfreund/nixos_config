@@ -1567,16 +1567,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1789489128,
-        "narHash": "sha256-gpXFEe5/zY+JDjWrS7OsnstVHT7zuFUP3db4ZVU7qGU=",
+        "lastModified": 1789509664,
+        "narHash": "sha256-yU6IQPODKaQPYPlHcMhFGl+CP0wXjdfsC5nFqtUBjU0=",
         "owner": "olafkfreund",
         "repo": "nixi-nixarchy",
-        "rev": "dd87a3ca6317a8b55484258ee44eb1b3271c6731",
+        "rev": "569adeaa0bf19b22e432c0e8e461baa4b8eefcac",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
-        "ref": "feat/8-overlay-on-omarchy-ask",
         "repo": "nixi-nixarchy",
         "type": "github"
       }
