@@ -61,6 +61,11 @@ let
     - NEVER execute multiple steps without reflection
     - STOP immediately if something unexpected happens
     - Ask for clarification if stuck after 2 attempts
+
+    ARTIFACT WORKFLOW:
+    - If an approved plan/ file exists for this task, PLAN = cite the plan step
+      you are executing; do not re-plan
+    - If the approach must change, REVISE plan/ in the same commit as the code
     </system-reminder>
     PARR_EOF
   '';
@@ -849,5 +854,9 @@ in
       source = managedJson;
       mode = "0644";
     };
+
+    # Managed policy memory: loads in every session in every repo and cannot
+    # be excluded (#1818).
+    environment.etc."claude-code/CLAUDE.md".source = ./claude-code-managed-claude.md;
   };
 }
