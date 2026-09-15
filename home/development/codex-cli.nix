@@ -6,10 +6,6 @@
   programs.codex-cli = {
     enable = true;
 
-    # API key for the headless path. codex (Rust) reads OPENAI_API_KEY, or use
-    # `codex login` for ChatGPT auth. Sourced from the agenix secret.
-    apiKeyFile = "/run/agenix/api-openai";
-
     # `codex` is the real binary name from nixpkgs#codex. The rest are
     # convenience aliases so existing muscle memory keeps working.
     shellAliases = {

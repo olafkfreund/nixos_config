@@ -32,36 +32,38 @@ in
   config = mkIf cfg.enable {
     # Define age secrets for API keys
     age.secrets = {
-      # Working API keys - recreated with current SSH keys
+      # Provider API keys: 0400 and owned by the user. Every reader (ai-cli,
+      # omarchy-voice, voice-input, claude-router) runs as that user, and a
+      # world-readable key could be read by any local process, including a
+      # prompt-injected reviewer (#1831).
       api-openai = {
         file = ../../secrets/api-openai.age;
-        mode = "0644";
-        owner = "root";
+        mode = "0400";
+        owner = "olafkfreund";
         group = "users";
       };
 
       api-gemini = {
         file = ../../secrets/api-gemini.age;
-        mode = "0644";
-        owner = "root";
+        mode = "0400";
+        owner = "olafkfreund";
         group = "users";
       };
 
       api-anthropic = {
         file = ../../secrets/api-anthropic.age;
-        mode = "0644";
-        owner = "root";
+        mode = "0400";
+        owner = "olafkfreund";
         group = "users";
       };
 
       # ElevenLabs, for omarchy-voice's cloud voice.
       #
-      # 0400 and owned by the user, not 0644 root:users like the keys above.
-      # Those are read by shells and system services; this one is read by a
-      # systemd *user* service, so nothing needs it world-readable, and a
-      # metered TTS key that any local process can read is a bill waiting to
-      # happen. Losing access costs voice quality, not voice: omarchy-voice
-      # falls back to the local Piper voice and logs why.
+      # 0400 and owned by the user, like the provider keys above: read by a
+      # systemd *user* service, and a metered TTS key that any local process
+      # can read is a bill waiting to happen. Losing access costs voice
+      # quality, not voice: omarchy-voice falls back to the local Piper voice
+      # and logs why.
       api-elevenlabs = {
         file = ../../secrets/api-elevenlabs.age;
         mode = "0400";
@@ -71,8 +73,8 @@ in
 
       api-groq = {
         file = ../../secrets/api-groq.age;
-        mode = "0644";
-        owner = "root";
+        mode = "0400";
+        owner = "olafkfreund";
         group = "users";
       };
 
@@ -214,23 +216,10 @@ in
         #!/bin/sh
         # Load API keys from encrypted storage
 
-        # Try to load API keys from agenix secrets
-        if [ -r "/run/agenix/api-openai" ]; then
-          echo "export OPENAI_API_KEY=\"$(cat /run/agenix/api-openai)\""
-        fi
-
-        if [ -r "/run/agenix/api-anthropic" ]; then
-          echo "export ANTHROPIC_API_KEY=\"$(cat /run/agenix/api-anthropic)\""
-        fi
-
-        if [ -r "/run/agenix/api-gemini" ]; then
-          echo "export GEMINI_API_KEY=\"$(cat /run/agenix/api-gemini)\""
-        fi
-
-        if [ -r "/run/agenix/api-groq" ]; then
-          echo "export GROQ_API_KEY=\"$(cat /run/agenix/api-groq)\""
-        fi
-
+        # Try to load API keys from agenix secrets. The OpenAI, Anthropic,
+        # Gemini and Groq keys are deliberately not exported: agents use their
+        # subscription logins, and a tool that needs a key reads it for that
+        # one command from /run/agenix (#1831).
         if [ -r "/run/agenix/api-ollama" ]; then
           # Ollama cloud-models token (Ollama Turbo / hosted models). The local
           # ollama daemon picks this up from its own EnvironmentFile, but
@@ -263,10 +252,6 @@ in
         echo "==============="
 
         # Check environment variables
-        [ -n "$OPENAI_API_KEY" ] && echo "✅ OpenAI: Available" || echo "❌ OpenAI: Not available"
-        [ -n "$GEMINI_API_KEY" ] && echo "✅ Gemini: Available" || echo "❌ Gemini: Not available"
-        [ -n "$ANTHROPIC_API_KEY" ] && echo "✅ Anthropic: Available" || echo "❌ Anthropic: Not available"
-        [ -n "$GROQ_API_KEY" ] && echo "✅ Groq: Available" || echo "❌ Groq: Not available"
         [ -n "$OLLAMA_API_KEY" ] && echo "✅ Ollama Cloud: Available" || echo "❌ Ollama Cloud: Not available"
         [ -n "$LANGCHAIN_API_KEY" ] && echo "✅ LangChain: Available" || echo "❌ LangChain: Not available"
         [ -n "$GITHUB_API_TOKEN" ] && echo "✅ GitHub API Token: Available" || echo "❌ GitHub API Token: Not available"
@@ -275,11 +260,12 @@ in
         echo "Secret Files:"
         echo "============="
 
-        # Check secret files
-        find /run/agenix* -name "api-*" 2>/dev/null | while read file; do
+        # Check secret files by name: /run/agenix.d is traversable but not
+        # listable for users (drwxr-x--x), so a find over it printed nothing.
+        for name in api-openai api-anthropic api-gemini api-groq api-ollama api-github-token; do
+          file="/run/agenix/$name"
           if [ -r "$file" ] && [ -s "$file" ]; then
-            basename=$(basename "$file")
-            echo "✅ $basename: $file"
+            echo "✅ $name: $file"
           fi
         done
       '')

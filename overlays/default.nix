@@ -30,6 +30,11 @@
     herdr = inputs.herdr.packages.${prev.stdenv.hostPlatform.system}.default;
   })
 
+  # spotifast — native Rust Spotify client (see flake input).
+  (_final: prev: {
+    spotifast = inputs.spotifast.packages.${prev.stdenv.hostPlatform.system}.default;
+  })
+
   # flyline — Bash loadable builtin replacing readline (see flake input).
   (_final: prev: {
     flyline = inputs.flyline.packages.${prev.stdenv.hostPlatform.system}.flyline;
