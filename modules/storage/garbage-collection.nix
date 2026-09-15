@@ -132,9 +132,6 @@ in
               echo "Disk Usage:"
               df -h /nix/store | tail -1
               echo ""
-              echo "Store Size:"
-              du -sh /nix/store 2>/dev/null || echo "Unable to calculate"
-              echo ""
               echo "System Generations:"
               nix-env --list-generations --profile /nix/var/nix/profiles/system | tail -10
               echo "===================================="
