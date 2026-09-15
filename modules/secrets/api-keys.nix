@@ -32,36 +32,38 @@ in
   config = mkIf cfg.enable {
     # Define age secrets for API keys
     age.secrets = {
-      # Working API keys - recreated with current SSH keys
+      # Provider API keys: 0400 and owned by the user. Every reader (ai-cli,
+      # omarchy-voice, voice-input, claude-router) runs as that user, and a
+      # world-readable key could be read by any local process, including a
+      # prompt-injected reviewer (#1831).
       api-openai = {
         file = ../../secrets/api-openai.age;
-        mode = "0644";
-        owner = "root";
+        mode = "0400";
+        owner = "olafkfreund";
         group = "users";
       };
 
       api-gemini = {
         file = ../../secrets/api-gemini.age;
-        mode = "0644";
-        owner = "root";
+        mode = "0400";
+        owner = "olafkfreund";
         group = "users";
       };
 
       api-anthropic = {
         file = ../../secrets/api-anthropic.age;
-        mode = "0644";
-        owner = "root";
+        mode = "0400";
+        owner = "olafkfreund";
         group = "users";
       };
 
       # ElevenLabs, for omarchy-voice's cloud voice.
       #
-      # 0400 and owned by the user, not 0644 root:users like the keys above.
-      # Those are read by shells and system services; this one is read by a
-      # systemd *user* service, so nothing needs it world-readable, and a
-      # metered TTS key that any local process can read is a bill waiting to
-      # happen. Losing access costs voice quality, not voice: omarchy-voice
-      # falls back to the local Piper voice and logs why.
+      # 0400 and owned by the user, like the provider keys above: read by a
+      # systemd *user* service, and a metered TTS key that any local process
+      # can read is a bill waiting to happen. Losing access costs voice
+      # quality, not voice: omarchy-voice falls back to the local Piper voice
+      # and logs why.
       api-elevenlabs = {
         file = ../../secrets/api-elevenlabs.age;
         mode = "0400";
@@ -71,8 +73,8 @@ in
 
       api-groq = {
         file = ../../secrets/api-groq.age;
-        mode = "0644";
-        owner = "root";
+        mode = "0400";
+        owner = "olafkfreund";
         group = "users";
       };
 

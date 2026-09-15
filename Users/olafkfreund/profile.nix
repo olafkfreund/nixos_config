@@ -18,8 +18,8 @@ in
   ];
 
   # Voice dictation → Groq Whisper-Large-v3 (~200-400 ms, cheap, accurate).
-  # API key is decrypted by agenix to /run/agenix/api-groq (mode 0644 via
-  # modules/secrets/api-keys.nix). Falls back to the local whisper-server
+  # API key is decrypted by agenix to /run/agenix/api-groq (mode 0400, owned
+  # by this user, via modules/secrets/api-keys.nix). Falls back to the local whisper-server
   # on p620:9300 if you flip back to backend = "local".
   programs.voice-input = {
     backend = "groq";

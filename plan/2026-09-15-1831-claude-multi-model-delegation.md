@@ -99,6 +99,27 @@ merges first.
 - `gemini -p`
 - `enableUserEnvironment = false`
 
+**D7. Added during implementation, from the T5 review (user decision,
+2026-09-15):**
+
+- **Key file permissions.** Both reviewers pointed out, and `stat` confirmed,
+  that `api-openai`, `-anthropic`, `-gemini` and `-groq` were
+  `0644 root:users`, readable by any local process, including a reviewer
+  manipulated by the content it reviews. They are now `0400` owned by
+  `olafkfreund` in `modules/secrets/api-keys.nix`, matching `api-elevenlabs`.
+  Every reader runs as that user: omarchy-voice (a systemd user service,
+  `hosts/{p620,razer}/nixos/nixarchy.nix`), voice-input (`profile.nix`),
+  `ai-cli`, and claude-router. p510 references none of them.
+  → verify: `stat -Lc '%a %U' /run/agenix/api-openai` → `400 olafkfreund` on
+  p620 and razer; omarchy-voice starts without a key warning; T3a still passes.
+- **Inherited MCP tools are an accepted risk.** Reviewers keep the MCP
+  servers their CLI already has: agy has an authenticated `github-mcp-server`
+  plus Google Cloud servers (ADC present), and codex has `notebooklm` and
+  `nixos`. `--mode plan` and `-s read-only` protect the local files, not
+  those remote tools. The user accepted this as is: reviews are
+  user-requested, and their output is advice only. Revisit if unattended
+  delegation is ever proposed.
+
 ## Steps
 
 1. **`home/development/claude-code-skills/second-opinion/SKILL.md`:** write
