@@ -262,6 +262,15 @@
       inputs.rust-overlay.follows = "rust-overlay";
     };
 
+    # spotifast — native Rust Spotify client (library, local playback, Connect).
+    # Built from source; exposed as pkgs.spotifast on p620 + razer via profile.nix.
+    # Bump with `nix flake update spotifast`.
+    spotifast = {
+      url = "github:crmne/spotifast";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.rust-overlay.follows = "rust-overlay";
+    };
+
     # flyline — Rust readline replacement for Bash, loaded as a bash loadable
     # builtin (dlopen'd .so, `enable -f .../libflyline.so flyline`). This is
     # what makes bash-as-login-shell viable here: it restores the inline

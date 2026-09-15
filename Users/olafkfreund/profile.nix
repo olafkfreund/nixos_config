@@ -202,6 +202,8 @@ in
     # herdr — TUI "agent multiplexer": run multiple AI coding agents in one
     # terminal workspace (tmux/zellij-style). From github:ogulcancelik/herdr.
     pkgs.herdr
+    # spotifast — native Rust Spotify client. From github:crmne/spotifast.
+    pkgs.spotifast
     # Bun is here for herdr's plugins, not for our own JS work: collie (the
     # phone/PWA agent console) builds its binary with bun and refuses to install
     # without it — "no collie binary at …/bin/collie, and bun is not installed
