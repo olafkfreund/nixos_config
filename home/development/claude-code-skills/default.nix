@@ -46,6 +46,7 @@ in
     # hold nixarchy's symlinks, so owning the directory would fight it. One
     # home.file per path adds the gog subdirectory and leaves the siblings be.
     home.file.".claude/skills/gog/SKILL.md".source = ./gog/SKILL.md;
+    home.file.".claude/skills/artifact-workflow/SKILL.md".source = ./artifact-workflow/SKILL.md;
     home.file.".claude/skills/gog/evals.json".source = ./gog/evals.json;
     home.file.".codex/skills/gog/SKILL.md".source = ./gog/SKILL.md;
     home.file.".gemini/skills/gog/SKILL.md".source = ./gog/SKILL.md;
