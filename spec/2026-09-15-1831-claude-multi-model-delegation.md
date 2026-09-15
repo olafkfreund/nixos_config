@@ -160,7 +160,7 @@ if #1832 merges first. It says:
 
 ## Verification
 
-**1. Evaluation and build**
+### 1. Evaluation and build
 
 - `just check-syntax`
 - `just test-host p620`
@@ -194,14 +194,14 @@ on each host)
 - From Claude Code, `/second-opinion` on a small real diff returns both
   reviews, labelled with their provider and model, and Claude's own synthesis.
 
-**6. Failure handling**
+### 6. Failure handling
 
 - Each provider command runs with `HTTPS_PROXY=http://127.0.0.1:9` (a dead
   proxy, scoped to that one command, so the host's network is never touched).
   The skill reports both reviews as *not obtained* within the timeout, and
   Claude carries on.
 
-**7. No regressions**
+### 7. No regressions
 
 - `claude mcp list` shows the same servers connected as before the change.
 - Claude Code `/status` still shows the subscription login.
