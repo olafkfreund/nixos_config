@@ -41,6 +41,8 @@ different source.
 - Tools that exist **only** in those directories (npm `jshint`,
   `neovim-node-host`, `cargo-sqlx`, `tokio-console`, go `golangci-lint`…)
   still resolve and work.
+- Duplicates of Nix commands in `~/.npm-global/bin`, `~/.cargo/bin` and
+  `~/go/bin` are removed from both hosts.
 - `~/.local/bin` keeps its current place. Home Manager puts the managed
   `claude` launcher there on purpose.
 
@@ -67,13 +69,15 @@ different source.
 - Home Manager is a flake module: no `home-manager switch`.
 - p510 is not built or deployed without asking.
 
+## Decisions (user, 2026-09-15)
+
+1. **Nix is the master.** No npm, cargo or go copy may override a Nix
+   package, not even a newer one. A tool that should be newer gets packaged
+   or pinned in Nix instead.
+2. **Delete the duplicates.** The implementation also removes, on p620 and
+   razer, every npm, cargo or go install whose command a Nix package also
+   provides. Tools that exist only in those directories stay.
+
 ## Open questions
 
-1. **Any intentional overrides?** Is there a cargo, go or npm tool you
-   installed *because* it is newer than the Nix version and you want it to
-   win (for example `fd` or `btm` from `cargo install`)? If yes, it should
-   be packaged or pinned in Nix, not left winning through PATH order. The
-   spec lists the actual collisions on both hosts for you to decide.
-2. **Scope of cleanup:** should the implementation also remove the shadowed
-   duplicates it finds on p620 and razer (the cargo `btm`/`fd` copies, the
-   stray `~/go/bin/gemini`), or only fix the order and leave the files?
+None.
