@@ -51,6 +51,11 @@ collecting agreeing answers.
   explains disagreement. Consensus is not proof, and an external answer never
   approves an artifact gate.
 - Claude stays fully usable when the external CLIs are logged out or offline.
+- **The global API-key exports are gone.** `OPENAI_API_KEY` and
+  `GEMINI_API_KEY` are no longer set in every shell, so `codex`, `agy` and
+  `gemini` run by hand also use the subscription login. The agenix secrets
+  stay in place, readable at `/run/agenix/*` by anything that explicitly
+  needs a key.
 
 ## Affected users and systems
 
@@ -63,6 +68,9 @@ collecting agreeing answers.
   razer needs its own `codex login`.
 - A consultation-policy paragraph in `CLAUDE.md` (or `AGENTS.md`, if #1832
   lands first).
+- `home/development/codex-cli.nix` (`apiKeyFile`) and
+  `modules/secrets/api-keys.nix` (the session-variable exports), plus any tool
+  found to depend on those variables.
 
 ## Constraints
 
@@ -74,8 +82,22 @@ collecting agreeing answers.
   directly, once per request.
 - Do not redirect Claude Code's main connection, or change its login or
   settings.
-- No credential material in Git, logs, prompts, skill files or the Nix store.
-  Skills must not contain store paths, because `~/.claude` is synced.
+- **Context:** there is no path exclude list. Reviewers may be given any repo
+  content a review needs, including host-specific files, because they work on
+  the same host and sometimes need that detail (decided 2026-09-15). The one
+  limit is decrypted secret values (the contents of `/run/agenix/*`, tokens
+  and passwords), which are never pasted into a prompt. Encrypted `*.age`
+  files are not secrets in that sense.
+- No credential material in Git, logs, skill files or the Nix store. Skills
+  must not contain store paths, because `~/.claude` is synced.
+- **Removing the key exports must not break anything silently.** Before
+  removal, the spec audits every reader of `OPENAI_API_KEY`, `GEMINI_API_KEY`
+  and their `*_FILE` variants in the repo and in the running user session.
+  Anything that genuinely needs a key reads it from its agenix path or gets
+  it scoped to that one program, not exported globally. The Anthropic, Groq
+  and Ollama key exports are audited in the same pass. Claude Code in
+  particular must keep its subscription login, not an exported
+  `ANTHROPIC_API_KEY`.
 - Explicit consultation only: the user asks, or invokes the skill. No
   automatic consultation, no recursive delegation, and no re-asking until a
   model agrees.
@@ -87,15 +109,11 @@ collecting agreeing answers.
 
 ## Open questions
 
-1. **What context must never leave the machine?** For example `secrets/`,
-   `*.age` files, `Users/*/` private files, or other repos entirely. The spec
-   turns the answer into an exclude list for what is sent in a prompt.
-2. **Should the global API-key exports be removed** as well? That would mean
-   `apiKeyFile = null` in `home/development/codex-cli.nix` and dropping the
-   Gemini export from `api-keys.nix`, so that codex and gemini run by hand also
-   default to the subscription. Other tools may read those variables, so the
-   spec audits who does before recommending it. It is not required for the
-   skills, which enforce subscription auth per call either way.
+None. Both were answered by the user on 2026-09-15:
+
+1. Context exclusions: none beyond decrypted secret values (see Constraints).
+2. Global API-key exports: remove them (see Proposed outcome and
+   Constraints).
 
 ## References
 
