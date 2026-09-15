@@ -63,11 +63,13 @@
     # rather than a second copy from nixarchy's own nixpkgs.
     # nixi 0.10 -- the Omarchy overlay card that replaces nixi's browser widget
     # and loopback server (olafkfreund/nixi-nixarchy#8). nixarchy imports nixi's
-    # Home Manager module and still pins 0.9.7, so this runs the branch on our
-    # hosts only; everyone else keeps nixarchy's pin. Drop this input and the
+    # Home Manager module and still pins 0.9.7, so this tracks nixi's master on
+    # our hosts only; everyone else keeps nixarchy's pin. Drop this input and the
     # follows below once nixarchy bumps its own nixi input past #8. (#1827)
+    # Never pin a feature branch here: once it merges and is deleted, flake
+    # updates fail with HTTP 422 and silently keep the old lock (#1842).
     nixi = {
-      url = "github:olafkfreund/nixi-nixarchy/feat/8-overlay-on-omarchy-ask";
+      url = "github:olafkfreund/nixi-nixarchy";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
