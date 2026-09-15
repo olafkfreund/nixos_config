@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1835
 spec: spec/2026-09-15-1835-npm-global-path-order.md
 ---
