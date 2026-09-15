@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1831
 spec: spec/2026-09-15-1831-claude-multi-model-delegation.md
 ---
