@@ -19,11 +19,11 @@
 let
   cfg = config.modules.programs.claude-code-managed;
 
-  # PARR Protocol Reminder Hook. The text lives in parr-protocol.md, which
+  # PARR Protocol Reminder Hook. The text lives in parr-protocol.txt, which
   # home/development/agent-rules.nix also feeds to Codex and Antigravity (#1832).
   parrReminderScript = pkgs.writeShellScript "parr-reminder.sh" ''
     printf '<system-reminder>\n'
-    cat ${./parr-protocol.md}
+    cat ${./parr-protocol.txt}
     printf '</system-reminder>\n'
   '';
 

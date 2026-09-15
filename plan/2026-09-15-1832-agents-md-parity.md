@@ -80,6 +80,13 @@ A build-time `assert` fails evaluation if the result contains `Load it` or
 the same `pkgs.writeText` for both. `antigravity-config.nix` loses
 `globalAgentsMd` and its `home.file.".gemini/AGENTS.md"` line.
 
+*Deviation, found at push time:* the file is `modules/programs/parr-protocol.txt`,
+not `.md`. The pre-push markdownlint hook lints whole `.md` files and
+auto-inserts blank lines after headings, which would change the reminder's
+bytes and break D3. It is plain text for a hook, not documentation, so `.txt`
+keeps it byte-identical and outside the linter. Everywhere this plan says
+`parr-protocol.md`, read `parr-protocol.txt`.
+
 **D5. Out of scope:** the repo's `.gemini/GEMINI.md` (it belongs to Gemini
 CLI, which was removed in #560), other agents, and a CI diff check. The PR
 notes that GEMINI.md was left alone.

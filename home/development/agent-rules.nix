@@ -15,7 +15,7 @@ let
   text = lib.concatStringsSep "\n" [
     (builtins.readFile ./agent-rules/global.md)
     "## PARR protocol\n"
-    (builtins.readFile ../../modules/programs/parr-protocol.md)
+    (builtins.readFile ../../modules/programs/parr-protocol.txt)
     (lib.replaceStrings
       [ "The procedure and templates are in the `artifact-workflow` skill. Load it\nbefore writing any of these files." ]
       [ "The procedure and templates follow below." ]
