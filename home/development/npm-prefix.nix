@@ -36,7 +36,12 @@ in
     '';
   };
 
-  home.sessionPath = [ "${prefix}/bin" ];
+  # Appended, not `home.sessionPath` (which prepends): a global npm install must
+  # never shadow the Nix-provided command of the same name (#1835). The guard
+  # keeps it to one entry when both this and bash.nix's bashrcExtra run.
+  home.sessionVariablesExtra = ''
+    case ":$PATH:" in *":${prefix}/bin:"*) ;; *) export PATH="$PATH:${prefix}/bin" ;; esac
+  '';
 
   # npm requires <prefix>/lib to already exist; it will not create it, and
   # fails with the same ENOENT if it is missing.
