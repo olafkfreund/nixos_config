@@ -191,6 +191,25 @@ in
     width = "90%"
     height = "90%"
 
+    # hintr: which-key style popup listing every binding here by its
+    # description; pressing a listed key runs it. prefix+? stays herdr's
+    # built-in help modal, which can't run bindings or show custom ones.
+    #     herdr plugin install wraithyy/herdr-hintr --yes
+    [[keys.command]]
+    key = "prefix+k"
+    type = "plugin_action"
+    command = "hintr.show"
+    description = "keybinding cheatsheet"
+
+    # pretty-which: searchable, read-only map of every binding (default vs
+    # config vs unset), list/tree views. Unlike hintr it can't run a binding.
+    #     herdr plugin install ramarivera/herdr-pretty-which --yes
+    [[keys.command]]
+    key = "prefix+space"
+    type = "plugin_action"
+    command = "ramarivera.pretty-which.open"
+    description = "binding reference"
+
     # zoetrope: the session as a live flow graph. This is the only way to see
     # Claude Code's Task subagents — they run in-process with no PTY, so herdr
     # (one agent per pane) can never give them rows of their own. zoetrope reads
