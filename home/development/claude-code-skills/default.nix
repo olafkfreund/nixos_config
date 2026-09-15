@@ -47,6 +47,9 @@ in
     # home.file per path adds the gog subdirectory and leaves the siblings be.
     home.file.".claude/skills/gog/SKILL.md".source = ./gog/SKILL.md;
     home.file.".claude/skills/artifact-workflow/SKILL.md".source = ./artifact-workflow/SKILL.md;
+    # Claude only: installing it for codex/agy would let reviewers delegate
+    # to each other (#1831).
+    home.file.".claude/skills/second-opinion/SKILL.md".source = ./second-opinion/SKILL.md;
     home.file.".claude/skills/gog/evals.json".source = ./gog/evals.json;
     home.file.".codex/skills/gog/SKILL.md".source = ./gog/SKILL.md;
     home.file.".gemini/skills/gog/SKILL.md".source = ./gog/SKILL.md;
