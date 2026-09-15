@@ -61,20 +61,9 @@
     # takes its package from `pkgs.extend`, so following keeps Omarchy's ~80
     # runtime dependencies as the same store paths this system already has
     # rather than a second copy from nixarchy's own nixpkgs.
-    # nixi 0.10 -- the Omarchy overlay card that replaces nixi's browser widget
-    # and loopback server (olafkfreund/nixi-nixarchy#8). nixarchy imports nixi's
-    # Home Manager module and still pins 0.9.7, so this runs the branch on our
-    # hosts only; everyone else keeps nixarchy's pin. Drop this input and the
-    # follows below once nixarchy bumps its own nixi input past #8. (#1827)
-    nixi = {
-      url = "github:olafkfreund/nixi-nixarchy/feat/8-overlay-on-omarchy-ask";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     nixarchy = {
       url = "github:olafkfreund/nixarchy";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.nixi.follows = "nixi";
       # nixarchy re-exports zen-browser as a package attribute, so its pin is a
       # hard eval dependency for us even though no host installs Zen. Its lock
       # sat on 51df7b8, which passes ffmpeg_7 to wrapFirefox after nixpkgs
