@@ -106,6 +106,7 @@
     # mixed Chrome (XWayland) + native Wayland workloads first.
     kernelParams = [
       "amdgpu.ppfeaturemask=0xffffffff" # Enable power management features (LACT/undervolt)
+      "pcie_aspm.policy=performance" # L1 exit on the GPU link hard-resets the host (#1820)
     ];
     # Blacklist incompatible modules
     blacklistedKernelModules = [ "radeon" ];
