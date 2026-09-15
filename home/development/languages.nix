@@ -319,6 +319,20 @@ in
       })
     ];
 
+    # `go install` and `cargo install` write here. Appended, never prepended:
+    # a tool installed by a language package manager must not shadow the Nix
+    # command of the same name (#1835). The guard keeps one entry when both
+    # this and bash.nix's bashrcExtra run.
+    sessionVariablesExtra = mkMerge [
+      (mkIf cfg.languages.go.enable ''
+        case ":$PATH:" in *":$HOME/go/bin:"*) ;; *) export PATH="$PATH:$HOME/go/bin" ;; esac
+      '')
+
+      (mkIf cfg.languages.rust.enable ''
+        case ":$PATH:" in *":$HOME/.cargo/bin:"*) ;; *) export PATH="$PATH:$HOME/.cargo/bin" ;; esac
+      '')
+    ];
+
     # Language server configurations export for editors
     file.".config/development/lsp-config.json".text = builtins.toJSON {
       languages =

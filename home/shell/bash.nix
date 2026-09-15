@@ -209,9 +209,17 @@ in
     # Non-interactive-safe environment. Kept out of initExtra so scripts and
     # remote `ssh host cmd` invocations still get the PATH.
     bashrcExtra = ''
-      export PATH="$HOME/bin:$HOME/.local/bin:$HOME/go/bin:$PATH"
-      export PATH="$HOME/.cargo/bin:$HOME/.npm-global/bin:$PATH"
+      export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
       export PATH="$HOME/.config/rofi/scripts:$PATH"
+
+      # go/cargo/npm install dirs go AFTER the Nix profiles, so a tool
+      # installed by a language package manager never shadows the Nix command
+      # of the same name (#1835). hm-session-vars.sh appends the same three,
+      # but `ssh host cmd` shells only read this file — the guard keeps each
+      # directory to one entry when both run.
+      for d in "$HOME/go/bin" "$HOME/.cargo/bin" "$HOME/.npm-global/bin"; do
+        case ":$PATH:" in *":$d:"*) ;; *) export PATH="$PATH:$d" ;; esac
+      done
     '';
 
     initExtra = lib.mkMerge [
