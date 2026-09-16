@@ -504,6 +504,8 @@
           glim = pkgs.callPackage ./overlays/glim { };
           intune-portal = pkgs.callPackage ./pkgs/intune-portal { };
           kosli-cli = pkgs.callPackage ./pkgs/kosli-cli { };
+          # Upstream binary: the nixpkgs build cannot run a prompt (#1859).
+          opencode-bin = pkgs.callPackage ./pkgs/opencode-bin { };
           aurynk = pkgs.callPackage ./pkgs/aurynk { };
           # add-skill = pkgs.callPackage ./pkgs/add-skill { };
 
