@@ -85,17 +85,13 @@
   ];
 
   # ponytail: Python with openrazer for omarazer shell plugin.
-  # The plugin's QML code calls `python3` directly, so we need python3 on
-  # PATH to include openrazer in its site-packages. home.packages would
-  # install it but not make it discoverable by the system python3 binary.
-  home.sessionVariables.PYTHONPATH =
-    let py = pkgs.python3.withPackages (ps: [ ps.openrazer ]);
-    in "${py}/${pkgs.python3.sitePackages}";
-
+  # The plugin's QML code calls `python3` directly, but system python3 lacks
+  # openrazer's dependencies (dbus, etc). Use nix-shell to provide a complete
+  # environment. Wrapper placed at ~/.local/bin/python3 (before system python3 on PATH).
   home.file.".local/bin/python3" = {
     text = ''
-      #!/bin/sh
-      exec ${pkgs.python3.withPackages (ps: [ ps.openrazer ])}/bin/python3 "$@"
+      #!/bin/bash
+      exec nix-shell -p 'python3Packages.openrazer' --run "python3 $*"
     '';
     executable = true;
   };
