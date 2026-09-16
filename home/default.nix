@@ -83,4 +83,20 @@
       enableLanguages = [ "eng" "pol" "nor" ];
     })
   ];
+
+  # ponytail: Python with openrazer for omarazer shell plugin.
+  # The plugin's QML code calls `python3` directly, so we need python3 on
+  # PATH to include openrazer in its site-packages. home.packages would
+  # install it but not make it discoverable by the system python3 binary.
+  home.sessionVariables.PYTHONPATH =
+    let py = pkgs.python3.withPackages (ps: [ ps.openrazer ]);
+    in "${py}/${pkgs.python3.sitePackages}";
+
+  home.file.".local/bin/python3" = {
+    text = ''
+      #!/bin/sh
+      exec ${pkgs.python3.withPackages (ps: [ ps.openrazer ])}/bin/python3 "$@"
+    '';
+    executable = true;
+  };
 }
