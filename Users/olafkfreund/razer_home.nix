@@ -57,23 +57,26 @@
     account = "olaf@freundcloud.com";
   };
 
-  # Razer Chrome — force ANGLE onto native GL. On this Intel-iris + Mesa +
-  # Ozone/Wayland stack, ANGLE's default backend can't import Wayland dmabufs as
-  # EGLImages (eglCreateImage EGL_BAD_MATCH), looping the GPU process and
-  # glitching pages. Native GL uses Mesa's EGL directly and fixes it.
-  # Also include performance optimizations for scrolling (e.g., Reddit PWA).
+  # Razer Chrome — ANGLE on Vulkan. On this Intel + Mesa + Ozone/Wayland stack
+  # ANGLE fails to import Wayland dmabufs, falls back to a slow path per surface,
+  # and the page stutters while scrolling. `--use-angle=gl` was the old guess and
+  # does NOT fix it: measured over a 25s Reddit session, buffer-import failures
+  # were gl 1734, gl + --disable-gpu-memory-buffer-compositor-resources 1992,
+  # vulkan 15, --ozone-platform=x11 0. None fell back to software.
+  # x11 scores best but runs under XWayland, which breaks the PipeWire screen-share
+  # portal (browser calls lose screen sharing), so vulkan is the deliberate pick.
+  #
+  # Chrome does NOT merge repeated --enable-features: the last occurrence wins and
+  # silently discards the earlier ones. The nixpkgs wrapper passes its own
+  # --enable-features=WaylandWindowDecorations ahead of these, so everything that
+  # must stay on is restated here in a single flag.
   programs.chromium = {
     commandLineArgs = lib.mkForce [
-      "--enable-features=UseOzonePlatform"
+      "--enable-features=UseOzonePlatform,WaylandWindowDecorations"
       "--ozone-platform=wayland"
       "--disable-features=VizDisplayCompositor"
-      "--use-angle=gl"
-      # Performance: disable smooth scrolling to fix jank on Wayland/Hyprland
+      "--use-angle=vulkan"
       "--disable-smooth-scrolling"
-      "--enable-gpu-rasterization"
-      "--disable-sync"
-      "--no-default-apps"
-      "--enable-features=V8CodeCache,WebRtcHWEncoding,FastUnload"
     ];
   };
 }
