@@ -78,6 +78,16 @@ in
         group = "users";
       };
 
+      # daily.dev API token. Read at runtime from /run/agenix/api-daily-dev by
+      # whatever needs it; deliberately NOT exported into the environment
+      # (#1831) and not consumed by anything in the repo yet.
+      api-daily-dev = {
+        file = ../../secrets/api-daily-dev.age;
+        mode = "0400";
+        owner = "olafkfreund";
+        group = "users";
+      };
+
       # Ollama cloud-models API key. Read by the ollama systemd daemon (when
       # features.ollama-server.cloudApiKeyFile points here) and by interactive
       # shells via load-api-keys → OLLAMA_API_KEY.
