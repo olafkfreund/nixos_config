@@ -1,5 +1,4 @@
 { pkgs
-, inputs
 , ...
 }: {
   imports = [
@@ -69,7 +68,9 @@
     # Predictive inline zsh autosuggestions. Wired up in home/shell/zsh.nix,
     # which turns zsh's own autosuggestion widget off in favour of this.
     pkgs.deja
-    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.opencode
+    # Straight from nixpkgs. We used to vendor 0.5.13 here, which could not
+    # parse a scoped plugin name and refused to start at all (#1851).
+    pkgs.opencode
     (pkgs.callPackage ../pkgs/weather-popup/default.nix { })
 
     # tesseract OCR with explicit language packs only — passing

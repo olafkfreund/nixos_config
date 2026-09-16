@@ -504,7 +504,6 @@
           glim = pkgs.callPackage ./overlays/glim { };
           intune-portal = pkgs.callPackage ./pkgs/intune-portal { };
           kosli-cli = pkgs.callPackage ./pkgs/kosli-cli { };
-          opencode = pkgs.callPackage ./home/development/opencode { };
           aurynk = pkgs.callPackage ./pkgs/aurynk { };
           # add-skill = pkgs.callPackage ./pkgs/add-skill { };
 
