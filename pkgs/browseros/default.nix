@@ -11,11 +11,11 @@
 # browser. Re-prefetch the x64 AppImage and update version+hash.
 let
   pname = "browseros";
-  version = "0.50.3";
+  version = "0.50.5";
 
   src = fetchurl {
     url = "https://github.com/browseros-ai/BrowserOS/releases/download/v${version}/BrowserOS_v${version}_x64.AppImage";
-    hash = "sha256-Foln3alE/zGRYNF/p3hYL5CD5dvXapcouiClPej2DaQ=";
+    hash = "sha256-qfgH+hkOZtPFW8KfXHTwhOyrGr+d706p74o7uq5GcIk=";
   };
 
   appimageContents = appimageTools.extract { inherit pname version src; };
