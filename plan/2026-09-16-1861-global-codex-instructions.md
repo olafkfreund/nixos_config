@@ -133,6 +133,12 @@ Run commands individually and inspect each result before proceeding.
   Expected: the three `~/.agent-os/standards/` Markdown files and approved
   intent, spec, and plan stages. No filesystem lookup to obtain the answer.
 
+## Implementation notes
+
+- The global Claude source does not pass this repository's Markdown linter.
+  The maintained copy adds blank lines, wraps prose, and labels example fences
+  as Markdown. These formatting-only adaptations preserve instruction content.
+
 ## Rollback
 
 - Before activation: revert the implementation commit; no running configuration
