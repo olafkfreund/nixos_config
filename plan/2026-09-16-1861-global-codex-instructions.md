@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1861
 spec: spec/2026-09-16-1861-global-codex-instructions.md
 ---
