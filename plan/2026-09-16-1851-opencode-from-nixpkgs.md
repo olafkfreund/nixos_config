@@ -80,7 +80,23 @@ one way on first run, so it is backed up first.
 | T3 | Both hosts: `opencode --version`; `readlink -f $(command -v opencode)` | `1.18.30`; a store path containing `opencode-1.18.30` |
 | T4 | p620, in `~/.config/nixos`: `opencode run "reply ok"`, then read the newest `~/.local/share/opencode/log/*.log` | No "Unexpected error" banner and no `ERR_MODULE_NOT_FOUND`. A provider/credit error is acceptable |
 | T5 | `ls ~/.cache/opencode/packages/@dietrichgebert/` after T4 | `ponytail@latest` present |
-| T6 | `jq -r '.autoupdate, (.mcp\|keys\|length)' ~/.config/opencode/opencode.json` | `false` and the same MCP count as before (8 at the time of writing) |
+| T6 | `jq -r '.autoupdate, (.mcp\|keys\|length)' ~/.config/opencode/opencode.json` | `false` and the MCP list unchanged (actually **20** entries, not the 8 this plan guessed; the config file is not touched by this change) |
+
+## Deviations recorded during implementation
+
+- `home/default.nix` lost its `inputs` function argument as well: the vendored
+  package was its only user, and `deadnix` flags it otherwise.
+- p510 does not install opencode at all (its `home.packages` has no opencode),
+  rather than "takes the change at its next deploy".
+- 1.18.30 created new `opencode.db*` files next to 0.5.13's
+  `opencode-stable.db*` in `~/.local/share/opencode`, so it keeps its own
+  store rather than converting the old one. The 0.5.13 backup from step 5 is
+  untouched.
+- **Separate, pre-existing:** `opencode run` fails with
+  `TypeError: undefined is not an object (evaluating 'a.name')` for every
+  provider tried (openai `gpt-6-astra`, `google/gemini-2.5-flash`) and also
+  with a minimal config and no plugin. It is not caused by this change — the
+  startup crash this issue is about is fixed — and is tracked separately.
 
 ## Rollback
 
