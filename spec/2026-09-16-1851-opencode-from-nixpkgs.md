@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1851
 intent: intent/2026-09-16-1851-opencode-from-nixpkgs.md
 ---
