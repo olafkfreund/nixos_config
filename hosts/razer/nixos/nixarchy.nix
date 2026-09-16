@@ -100,6 +100,15 @@
     ];
     programs.nixarchy.enable = true;
 
+    # nixi's optional integrations, from its own module rather than the 0.9
+    # install.py copies they replace: the coaching watcher (at most one tip a
+    # day, nothing leaves the machine) and the Omarchy hooks (a one-time
+    # first-boot welcome, and a manual refresh after `omarchy update`).
+    services.nixi = {
+      watcher.enable = true;
+      omarchyHooks.enable = true;
+    };
+
     # Oma: speech to speech against the OpenAI Realtime API, driving Hyprland.
     #
     # The microphone starts off and only the toggle key opens it. While it is
