@@ -61,12 +61,19 @@
   # Ozone/Wayland stack, ANGLE's default backend can't import Wayland dmabufs as
   # EGLImages (eglCreateImage EGL_BAD_MATCH), looping the GPU process and
   # glitching pages. Native GL uses Mesa's EGL directly and fixes it.
+  # Also include performance optimizations for scrolling (e.g., Reddit PWA).
   programs.chromium = {
     commandLineArgs = lib.mkForce [
       "--enable-features=UseOzonePlatform"
       "--ozone-platform=wayland"
       "--disable-features=VizDisplayCompositor"
       "--use-angle=gl"
+      # Performance: disable smooth scrolling to fix jank on Wayland/Hyprland
+      "--disable-smooth-scrolling"
+      "--enable-gpu-rasterization"
+      "--disable-sync"
+      "--no-default-apps"
+      "--enable-features=V8CodeCache,WebRtcHWEncoding,FastUnload"
     ];
   };
 }
