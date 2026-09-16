@@ -78,6 +78,17 @@ in
         group = "users";
       };
 
+      # daily.dev API token. Exported as DAILY_DEV_TOKEN by load-api-keys
+      # below, because the Claude Code daily.dev plugin reads it from the
+      # environment. Not a model-provider key, so #1831's no-export rule does
+      # not apply.
+      api-daily-dev = {
+        file = ../../secrets/api-daily-dev.age;
+        mode = "0400";
+        owner = "olafkfreund";
+        group = "users";
+      };
+
       # Ollama cloud-models API key. Read by the ollama systemd daemon (when
       # features.ollama-server.cloudApiKeyFile points here) and by interactive
       # shells via load-api-keys → OLLAMA_API_KEY.
@@ -228,6 +239,13 @@ in
           echo "export OLLAMA_API_KEY=\"$(cat /run/agenix/api-ollama)\""
         fi
 
+        if [ -r "/run/agenix/api-daily-dev" ]; then
+          # daily.dev API token (dda_…). The Claude Code daily.dev plugin reads
+          # it from DAILY_DEV_TOKEN and sends it only to api.daily.dev. Not a
+          # model-provider key, so it is exported (unlike those, see #1831).
+          echo "export DAILY_DEV_TOKEN=\"$(cat /run/agenix/api-daily-dev)\""
+        fi
+
         if [ -r "/run/agenix/api-github-token" ]; then
           # Export as GITHUB_API_TOKEN to avoid conflict with gh CLI credential management
           # gh CLI expects to manage its own credentials via 'gh auth login'
@@ -253,6 +271,7 @@ in
 
         # Check environment variables
         [ -n "$OLLAMA_API_KEY" ] && echo "✅ Ollama Cloud: Available" || echo "❌ Ollama Cloud: Not available"
+        [ -n "$DAILY_DEV_TOKEN" ] && echo "✅ daily.dev: Available" || echo "❌ daily.dev: Not available"
         [ -n "$LANGCHAIN_API_KEY" ] && echo "✅ LangChain: Available" || echo "❌ LangChain: Not available"
         [ -n "$GITHUB_API_TOKEN" ] && echo "✅ GitHub API Token: Available" || echo "❌ GitHub API Token: Not available"
 

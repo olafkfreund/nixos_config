@@ -26,6 +26,8 @@ in
   # fallback, so losing this key costs voice quality rather than voice.
   "secrets/api-elevenlabs.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-groq.age".publicKeys = allUsers ++ allHosts;
+  # daily.dev API token (#1862). Consumed at runtime from /run/agenix only.
+  "secrets/api-daily-dev.age".publicKeys = allUsers ++ allHosts;
   # Ollama cloud-models API key (Ollama Turbo / hosted models). Exposed to the
   # ollama systemd daemon on hosts that opt in via
   # `features.ollama-server.cloudApiKeyFile`, and to interactive shells as
