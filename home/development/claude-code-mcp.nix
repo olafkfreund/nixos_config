@@ -36,7 +36,7 @@ let
             command = "${pkgs.nodejs}/bin/npx";
             args = [ "-y" "@playwright/mcp@latest" ];
             env = {
-              PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers}";
+              PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers-chromium}";
               PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true";
             };
             description = "Browser automation using Playwright - AI-powered web testing, form filling, and DOM interaction";

@@ -250,8 +250,7 @@ in
       systemPackages = (with pkgs;
         # Core MCP servers (essential for AI-assisted development)
         [
-          playwright-mcp # Browser automation
-          playwright-driver.browsers # NixOS-compatible Playwright browsers
+          playwright-driver.browsers-chromium # chromium only: the full bundle ships a webkit that fails auto-patchelf (libmanette)
           github-mcp-server # GitHub integration
         ])
       ++ [
@@ -275,7 +274,7 @@ in
       # These are required because Playwright expects browsers in ~/.cache/ms-playwright
       # but NixOS stores them in the Nix store
       sessionVariables = {
-        PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers}";
+        PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers-chromium}";
         PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true";
       };
 
@@ -285,7 +284,8 @@ in
         ================================================
 
         Core Servers (Always Enabled):
-        - playwright-mcp: Browser automation for AI agents
+        - playwright: Browser automation, run via npx @playwright/mcp
+          (browsers come from PLAYWRIGHT_BROWSERS_PATH, chromium only)
         - github-mcp-server: GitHub repository integration
         - mcp-nixos: NixOS packages and configuration options queries
 
