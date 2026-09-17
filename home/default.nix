@@ -83,16 +83,4 @@
       enableLanguages = [ "eng" "pol" "nor" ];
     })
   ];
-
-  # ponytail: Python with openrazer for omarazer shell plugin.
-  # The plugin's QML code calls `python3` directly, but system python3 lacks
-  # openrazer's dependencies (dbus, etc). Use nix-shell to provide a complete
-  # environment. Wrapper placed at ~/.local/bin/python3 (before system python3 on PATH).
-  home.file.".local/bin/python3" = {
-    text = ''
-      #!/bin/bash
-      exec nix-shell -p 'python3Packages.openrazer' --run "python3 $*"
-    '';
-    executable = true;
-  };
 }
