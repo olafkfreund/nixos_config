@@ -28,11 +28,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789325572,
-        "narHash": "sha256-fPyfJR7w1/ZTNNwxDkZ6NTO6FxMVDot4fA76pnXxpc8=",
+        "lastModified": 1789637951,
+        "narHash": "sha256-C9sZOJvjUkuaaof5iJEfy/VL7CmVfxwCETte39GNhNk=",
         "owner": "olafkfreund",
         "repo": "ai-mirror",
-        "rev": "12a678b37e95ebfdda8c9d2d043b150d86ed36a9",
+        "rev": "9e07e7052fa0c32a78958c104a2d42af0cdc1abe",
         "type": "github"
       },
       "original": {
@@ -1537,6 +1537,26 @@
         "type": "github"
       }
     },
+    "nixarchy-pkg": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789631524,
+        "narHash": "sha256-687WZY5MU8ZESgGPlDCxk6X6uVKOt2CVLBdCxmJD8kU=",
+        "owner": "olafkfreund",
+        "repo": "nixarchy-pkg",
+        "rev": "20a5a1681250c26ba268fa8a280fdeeaafd1c422",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "nixarchy-pkg",
+        "type": "github"
+      }
+    },
     "nixarchy-voice": {
       "inputs": {
         "nixpkgs": [
@@ -1545,11 +1565,11 @@
         "systems": "systems_9"
       },
       "locked": {
-        "lastModified": 1789545596,
-        "narHash": "sha256-0gg8TenMyWC9COC7ZA/rdFMwWNi5vGQWAc0GF2FLPOc=",
+        "lastModified": 1789633771,
+        "narHash": "sha256-bCK3xgVlAlOm3o/Mqx59xs+3vQNqMPKnkvVq5cMeSAY=",
         "owner": "olafkfreund",
         "repo": "nixarchy-voice",
-        "rev": "d3f387d2947a2cd5b710f44ffa3f8e394fb6dec4",
+        "rev": "f9734aa11b71445adee2667907010ff08dd52bd8",
         "type": "github"
       },
       "original": {
@@ -1933,7 +1953,7 @@
       "locked": {
         "lastModified": 1789426278,
         "narHash": "sha256-GnotcvKtbTMnoVx6G4E7ZdUX6487Dky74dqq3pU7iRk=",
-        "owner": "nixos",
+        "owner": "NixOS",
         "repo": "nixpkgs",
         "rev": "efe6f071ede9d21c37462d2d6682d5e670099684",
         "type": "github"
@@ -2093,6 +2113,7 @@
         "nix-index-database": "nix-index-database",
         "nix-snapd": "nix-snapd",
         "nixarchy": "nixarchy",
+        "nixarchy-pkg": "nixarchy-pkg",
         "nixarchy-voice": "nixarchy-voice",
         "nixos-hardware": "nixos-hardware_2",
         "nixpkgs": "nixpkgs_9",
