@@ -231,14 +231,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # gnome-quick-web-apps — GTK4/libadwaita web-app manager. Turn any
-    # website into a first-class GNOME desktop app. Consumed by razer +
-    # p620 home-manager configs.
-    gnome-quick-web-apps = {
-      url = "github:olafkfreund/gnome-quick-web-apps";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # herdr — TUI "agent multiplexer" (tmux/zellij for AI coding agents).
     # Single Rust binary, local Unix-socket API, no daemon/root/network.
     # Its flake builds a vendored libghostty-vt via zig (deps pre-fetched
