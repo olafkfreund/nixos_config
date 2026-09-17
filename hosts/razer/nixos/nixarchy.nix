@@ -14,15 +14,16 @@
 , ...
 }:
 {
-  # nixarchy-apply copies ~/.config/nixarchy/apps.nix to the flake root as
-  # nixarchy-apps.nix and stops there -- a flake cannot read a file outside its
-  # own tree, so the selection has to be copied in, and importing it is left to
-  # you. Without this line the Omarchy menu appears to enable applications and
-  # nothing is ever built. Only razer imports it; p620 has its own nixarchy and
-  # would otherwise inherit this machine's selection.
+  # nixarchy-apply writes this host's selection to hosts/<hostname>/ when that
+  # directory exists, and to the flake root only when it does not. It used to
+  # land at the root and this line used to point there; once apply went
+  # host-aware the two diverged in silence -- the root file went on building the
+  # old selection while everything enabled from the menu was written per-host
+  # and read by nobody (#1872, olafkfreund/nixarchy#734). So this path must name
+  # the file apply actually writes for THIS host, never the flake root.
   imports = [
     inputs.nixarchy.nixosModules.nixarchy
-    ../../../nixarchy-apps.nix
+    ../nixarchy-apps.nix
     ../../common/nixos/omarchy-input.nix
     ../../common/nixos/bash-devshell-readline.nix
     ../../common/nixos/omarchy-sddm.nix

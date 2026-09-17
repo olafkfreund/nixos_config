@@ -203,8 +203,15 @@ jobs:
         run: |
           echo "Checking Nix code formatting..."
 
+          # hosts/*/nixarchy* is written verbatim by nixarchy-apply from
+          # ~/.config/nixarchy/. Formatting it means apply rewrites it raw on
+          # its next run and we reformat it again, forever (#1872). The
+          # pre-commit hooks skip these paths for the same reason.
           nix shell nixpkgs#nixpkgs-fmt -c bash -c '
-            if find . -name "*.nix" -not -path "./.git/*" -exec nixpkgs-fmt --check {} + ; then
+            if find . -name "*.nix" -not -path "./.git/*" \
+                 -not -path "./hosts/*/nixarchy/*" \
+                 -not -path "./hosts/*/nixarchy-apps.nix" \
+                 -exec nixpkgs-fmt --check {} + ; then
               echo "PASS: All Nix files are properly formatted"
             else
               echo "FAIL: Some Nix files need formatting"

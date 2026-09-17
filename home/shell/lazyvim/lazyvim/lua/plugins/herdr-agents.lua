@@ -30,6 +30,13 @@
 return {
   {
     "ctbaum/herdr-agents.nvim",
+    -- Pinned: main@4217ed8 ("Add agent status inspection") calls
+    -- require("herdr-agents.status") at init.lua:46, but lua/herdr-agents/status.lua
+    -- was never committed — `git ls-tree -r origin/main` has no such file, so every
+    -- start fails config with "module 'herdr-agents.status' not found". ed57743 is
+    -- the last commit that does not reference it. Drop the pin once upstream ships
+    -- the missing file.
+    commit = "ed5774360f61a6de155657769d7d84a32037972f",
     cond = function()
       return vim.env.HERDR_SOCKET_PATH ~= nil and vim.env.HERDR_SOCKET_PATH ~= ""
     end,

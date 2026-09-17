@@ -13,11 +13,11 @@
 #
 # The `#@ name` markers are how the menu finds a line to uncomment. Keep
 # them and you can reformat, reorder and annotate this file freely.
-{ ... }:
+{ pkgs, ... }:
 {
   programs.nixarchy.apps = {
 
-    # ── Service ─────────────────────────────────────────────────────
+  # ── Service ─────────────────────────────────────────────────────
     # _1password.enable = true;  #@ _1password  # unfree — Needs the module, not the package: unlocking requires a setuid helper that only programs._1password-gui installs. Set `settings.polkitPolicyOwners = [ "yourname" ]`. 
     #   _1password.settings = { };  #@ _1password.settings
     # bitwarden.enable = true;  #@ bitwarden
@@ -29,21 +29,21 @@
     # tailscale.enable = true;  #@ tailscale  # A daemon. `settings.useRoutingFeatures = "client"` for exit nodes.
     #   tailscale.settings = { };  #@ tailscale.settings
 
-    # ── Terminal ────────────────────────────────────────────────────
+  # ── Terminal ────────────────────────────────────────────────────
     # alacritty.enable = true;  #@ alacritty
     # foot.enable = true;  #@ foot
     # ghostty.enable = true;  #@ ghostty
     # kitty.enable = true;  #@ kitty
 
-    # ── Browser ─────────────────────────────────────────────────────
-    # brave.enable = true;  #@ brave
+  # ── Browser ─────────────────────────────────────────────────────
+    brave.enable = true;  #@ brave
     # chrome.enable = true;  #@ chrome  # unfree
     # edge.enable = true;  #@ edge  # unfree
     # firefox.enable = true;  #@ firefox  # A NixOS module, so policies and extensions are declarative too.
     #   firefox.settings = { };  #@ firefox.settings
     # zen.enable = true;  #@ zen
 
-    # ── Development ─────────────────────────────────────────────────
+  # ── Development ─────────────────────────────────────────────────
     # bun.enable = true;  #@ bun
     # clojure.enable = true;  #@ clojure
     # deno.enable = true;  #@ deno
@@ -60,14 +60,14 @@
     # symfony.enable = true;  #@ symfony  # unfree
     # zig.enable = true;  #@ zig
 
-    # ── AI ──────────────────────────────────────────────────────────
+  # ── AI ──────────────────────────────────────────────────────────
     # chatgpt.enable = true;  #@ chatgpt  # unfree
-    dictation.enable = true; #@ dictation
+    dictation.enable = true;  #@ dictation
     # grok-bot.enable = true;  #@ grok-bot  # unfree
     # lm-studio.enable = true;  #@ lm-studio  # unfree
     # t3-code.enable = true;  #@ t3-code
 
-    # ── Editor ──────────────────────────────────────────────────────
+  # ── Editor ──────────────────────────────────────────────────────
     # cursor.enable = true;  #@ cursor  # unfree
     # emacs.enable = true;  #@ emacs
     # helix.enable = true;  #@ helix
@@ -75,7 +75,7 @@
     # vscode.enable = true;  #@ vscode  # unfree
     # zed.enable = true;  #@ zed
 
-    # ── Gaming ──────────────────────────────────────────────────────
+  # ── Gaming ──────────────────────────────────────────────────────
     # heroic.enable = true;  #@ heroic
     # lutris.enable = true;  #@ lutris
     # minecraft.enable = true;  #@ minecraft
@@ -85,9 +85,37 @@
     # xbox-controllers.enable = true;  #@ xbox-controllers  # A kernel driver, so it is a hardware option rather than a package.
     #   xbox-controllers.settings = { };  #@ xbox-controllers.settings
 
-    # ── Preinstalls ─────────────────────────────────────────────────
+  # ── Preinstalls ─────────────────────────────────────────────────
     # obsidian.enable = true;  #@ obsidian  # unfree — Preinstalled upstream, opt-in here because it is unfree. Theme syncing needs the Omarchy theme selected under Appearance > Themes in the app; omarchy-theme-set-obsidian writes it on every theme change. 
   };
+
+  # ── Extra packages ──────────────────────────────────────────────
+  # Plain nixpkgs attributes, added by nixarchy-pkg-add. These are
+  # not part of the curated app list above: the Omarchy menu does
+  # not offer them and will not remove them. The file stays yours --
+  # reformat and annotate freely, the tool only ever inserts one
+  # line before the end marker.
+  environment.systemPackages = with pkgs; [  #@pkgs-begin
+    azure-cli  #@pkg azure-cli
+  ];  #@pkgs-end
+
+  # ── Added by nixarchy-catalogue-diff, 2026-09-17 ──
+    # programs.nixarchy.apps.aether.enable = true;  #@ aether
+    # programs.nixarchy.apps.android-tools.enable = true;  #@ android-tools
+    # programs.nixarchy.apps.antigravity.enable = true;  #@ antigravity  # unfree
+    # programs.nixarchy.apps.claude-code.enable = true;  #@ claude-code  # unfree
+    # programs.nixarchy.apps.codex.enable = true;  #@ codex
+    # programs.nixarchy.apps.gemini-cli.enable = true;  #@ gemini-cli
+    # programs.nixarchy.apps.git-lfs.enable = true;  #@ git-lfs  # Installs git-lfs and writes the LFS filter config system-wide, so cloning an LFS repo just works.
+    #   programs.nixarchy.apps.git-lfs.settings = { };  #@ git-lfs.settings
+    # programs.nixarchy.apps.hey-cli.enable = true;  #@ hey-cli
+    # programs.nixarchy.apps.omacalc.enable = true;  #@ omacalc
+    # programs.nixarchy.apps.omacut.enable = true;  #@ omacut
+    # programs.nixarchy.apps.omawrite.enable = true;  #@ omawrite
+    # programs.nixarchy.apps.openclaw.enable = true;  #@ openclaw
+    # programs.nixarchy.apps.opencode.enable = true;  #@ opencode
+    # programs.nixarchy.apps.scrcpy.enable = true;  #@ scrcpy
+    # programs.nixarchy.apps.uv.enable = true;  #@ uv  # Astral's Python package and project manager. `nixarchy dev init python` gives each project its own; this one is for everywhere else.
 }
 
 # Offered by the Omarchy menu but with no nixpkgs equivalent:

@@ -37,6 +37,11 @@ repos:
         entry: nixpkgs-fmt
         language: system
         files: '\.nix$'
+        # hosts/*/nixarchy* is written by nixarchy-apply from
+        # ~/.config/nixarchy/. Formatting it here only means apply rewrites it
+        # raw on its next run and the hook reformats it again -- a diff on every
+        # apply, forever, over files nobody edits by hand (#1872).
+        exclude: '^hosts/[^/]+/nixarchy(-apps\.nix|/.*\.nix)$'
         description: Format Nix files using nixpkgs-fmt
 
       # --- Shell ---
@@ -95,6 +100,8 @@ repos:
         entry: bash -c 'for f in "$@"; do sed -i "s/[[:space:]]*$//" "$f"; done'
         language: system
         files: '\.(nix|sh|lua|toml|yaml|yml|json|md|py)$'
+        # Same reason as nixpkgs-fmt above: nixarchy-apply owns these files.
+        exclude: '^hosts/[^/]+/nixarchy(-apps\.nix|/.*\.nix)$'
         description: Remove trailing whitespace
 
       - id: end-of-file
