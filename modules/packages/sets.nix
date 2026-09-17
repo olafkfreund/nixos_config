@@ -226,7 +226,6 @@
   # AI and MCP (Model Context Protocol) servers
   mcp = (with pkgs; [
     # Core MCP servers - recommended for all systems
-    playwright-mcp # Browser automation for AI agents
     github-mcp-server # GitHub integration
 
     # Infrastructure MCP servers - optional but valuable
