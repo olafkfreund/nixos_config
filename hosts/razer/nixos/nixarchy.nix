@@ -107,6 +107,30 @@
     services.nixi = {
       watcher.enable = true;
       omarchyHooks.enable = true;
+
+      # Named, because nixi's own default did not pin claude here and SUPER+H
+      # died on "claude-agent-acp is not on the system PATH".
+      #
+      # Nixi defaults `agents` to
+      #   lib.optional (pkgs.config.allowUnfree or false) "claude" ++ [ "codex" ]
+      # and that allowUnfree test read FALSE in this machine's Home Manager
+      # context, so the adapter was never pinned -- while
+      # ~/.config/omarchy/defaults/agent still said `claude`. Nixi treats that
+      # file as an EXPLICIT choice and will not fall back from it, so the card
+      # threw rather than quietly using an agent it did have.
+      #
+      # Claude Code itself is installed outside Nix here (~/.local/bin, mise),
+      # so nothing in the configuration implies it either.
+      #
+      # All three named rather than claude alone: this machine's nixarchy
+      # predates the release that names them upstream, so nothing else defines
+      # this option and a lone [ "claude" ] would REPLACE rather than add,
+      # taking opencode and codex away. Verified by evaluating before rebuilding.
+      agents = [
+        "opencode"
+        "codex"
+        "claude"
+      ];
     };
 
     # Oma: speech to speech against the OpenAI Realtime API, driving Hyprland.
