@@ -79,6 +79,22 @@
   # which fails the build.
   programs.nixarchy.bootSplash = "force";
 
+  # Claude Code is this machine's agent, and saying so here is what pins nixi's
+  # ACP adapter. nixarchy only adds claude to `services.nixi.agents` when
+  # `appEnabled "claude-code" || defaultAgent == "claude"` (modules/home.nix),
+  # and neither held: claude-code is commented out in nixarchy/apps.nix as
+  # unfree, and the choice lived only in ~/.config/omarchy/defaults/agent --
+  # a file nixi writes at RUNTIME, which no Nix expression reads. So nixi asked
+  # for claude and claude was the one agent whose adapter was never wrapped in,
+  # giving "claude-agent-acp is not on the system PATH" when the card opened.
+  # (The adapter is never on PATH by design; it is baked into nixi-node as
+  # NIXI_CLAUDE_ACP_COMMAND.)
+  #
+  # This costs the unfree claude-code closure even though claude is also
+  # installed imperatively at ~/.local/bin/claude -- that copy is invisible to
+  # Nix, which is how the two drifted apart in the first place.
+  programs.nixarchy.defaultAgent = "claude";
+
   # ~/.config/hypr/hyprland.lua is home-manager's here, so the seed keeps it and
   # Omarchy's own config is never installed. The Omarchy session entry is what
   # makes that work: it runs Hyprland with --config against Omarchy's file and
