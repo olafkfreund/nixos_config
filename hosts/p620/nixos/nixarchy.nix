@@ -112,6 +112,18 @@
     ];
     programs.nixarchy.enable = true;
 
+    # nixarchy packages: search nixpkgs, turn curated apps and services on,
+    # set NixOS options, queue and apply -- from the Omarchy shell rather
+    # than a terminal. A front-end only: every write goes through the
+    # nixarchy writers this module already installs.
+    #
+    # Installed, not enabled. Enabling a plugin is runtime state in
+    # shell.json, which nixarchy leaves alone on purpose, so once per machine:
+    #   omarchy plugin enable nixarchy.pkg
+    # A chord is yours to choose too; SUPER+ALT+N is free in Omarchy's set.
+    programs.nixarchy.plugins."nixarchy.pkg".src =
+      inputs.nixarchy-pkg.packages.${pkgs.stdenv.hostPlatform.system}.default;
+
     # nixi's optional integrations, from its own module rather than the 0.9
     # install.py copies they replace: the coaching watcher (at most one tip a
     # day, nothing leaves the machine) and the Omarchy hooks (a one-time
