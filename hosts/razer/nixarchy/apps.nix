@@ -62,7 +62,7 @@
 
     # ── AI ──────────────────────────────────────────────────────────
     # chatgpt.enable = true;  #@ chatgpt  # unfree
-    dictation.enable = true; #@ dictation
+    dictation.enable = true;  #@ dictation
     # grok-bot.enable = true;  #@ grok-bot  # unfree
     # lm-studio.enable = true;  #@ lm-studio  # unfree
     # t3-code.enable = true;  #@ t3-code

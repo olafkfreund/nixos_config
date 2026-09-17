@@ -17,4 +17,5 @@
 # If you find yourself writing the same thing here on every machine, that
 # is worth an issue -- it probably belongs in the catalogue.
 { ... }:
-{ }
+{
+}

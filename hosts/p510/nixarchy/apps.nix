@@ -17,7 +17,7 @@
 {
   programs.nixarchy.apps = {
 
-    # ── Service ─────────────────────────────────────────────────────
+  # ── Service ─────────────────────────────────────────────────────
     # _1password.enable = true;  #@ _1password  # unfree — Needs the module, not the package: unlocking requires a setuid helper that only programs._1password-gui installs. Set `settings.polkitPolicyOwners = [ "yourname" ]`. 
     #   _1password.settings = { };  #@ _1password.settings
     # bitwarden.enable = true;  #@ bitwarden
@@ -29,13 +29,13 @@
     # tailscale.enable = true;  #@ tailscale  # A daemon. `settings.useRoutingFeatures = "client"` for exit nodes.
     #   tailscale.settings = { };  #@ tailscale.settings
 
-    # ── Terminal ────────────────────────────────────────────────────
+  # ── Terminal ────────────────────────────────────────────────────
     # alacritty.enable = true;  #@ alacritty
     # foot.enable = true;  #@ foot
     # ghostty.enable = true;  #@ ghostty
     # kitty.enable = true;  #@ kitty
 
-    # ── Browser ─────────────────────────────────────────────────────
+  # ── Browser ─────────────────────────────────────────────────────
     # brave.enable = true;  #@ brave
     # chrome.enable = true;  #@ chrome  # unfree
     # edge.enable = true;  #@ edge  # unfree
@@ -43,7 +43,7 @@
     #   firefox.settings = { };  #@ firefox.settings
     # zen.enable = true;  #@ zen
 
-    # ── Development ─────────────────────────────────────────────────
+  # ── Development ─────────────────────────────────────────────────
     # bun.enable = true;  #@ bun
     # clojure.enable = true;  #@ clojure
     # deno.enable = true;  #@ deno
@@ -60,7 +60,7 @@
     # symfony.enable = true;  #@ symfony  # unfree
     # zig.enable = true;  #@ zig
 
-    # ── AI ──────────────────────────────────────────────────────────
+  # ── AI ──────────────────────────────────────────────────────────
     # chatgpt.enable = true;  #@ chatgpt  # unfree
     # dictation.enable = true;  #@ dictation
     # grok-bot.enable = true;  #@ grok-bot  # unfree
@@ -68,7 +68,7 @@
     # lm-studio.enable = true;  #@ lm-studio  # unfree
     # t3-code.enable = true;  #@ t3-code
 
-    # ── Editor ──────────────────────────────────────────────────────
+  # ── Editor ──────────────────────────────────────────────────────
     # cursor.enable = true;  #@ cursor  # unfree
     # emacs.enable = true;  #@ emacs
     # helix.enable = true;  #@ helix
@@ -76,7 +76,7 @@
     # vscode.enable = true;  #@ vscode  # unfree
     # zed.enable = true;  #@ zed
 
-    # ── Gaming ──────────────────────────────────────────────────────
+  # ── Gaming ──────────────────────────────────────────────────────
     # heroic.enable = true;  #@ heroic
     # lutris.enable = true;  #@ lutris
     # minecraft.enable = true;  #@ minecraft
@@ -86,10 +86,10 @@
     # xbox-controllers.enable = true;  #@ xbox-controllers  # A kernel driver, so it is a hardware option rather than a package.
     #   xbox-controllers.settings = { };  #@ xbox-controllers.settings
 
-    # ── Preinstalls ─────────────────────────────────────────────────
+  # ── Preinstalls ─────────────────────────────────────────────────
     # obsidian.enable = true;  #@ obsidian  # unfree — Preinstalled upstream, opt-in here because it is unfree. Theme syncing needs the Omarchy theme selected under Appearance > Themes in the app; omarchy-theme-set-obsidian writes it on every theme change. 
 
-    # ── Utility ─────────────────────────────────────────────────────
+  # ── Utility ─────────────────────────────────────────────────────
     # omacalc.enable = true;  #@ omacalc
     # omacut.enable = true;  #@ omacut
     # omawrite.enable = true;  #@ omawrite
