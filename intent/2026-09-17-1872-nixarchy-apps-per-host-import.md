@@ -12,7 +12,7 @@ author: olafkfreund
 if `hosts/<hostname>/` exists it writes there, otherwise it falls back to the
 flake root. Our three hosts all import the root copy:
 
-```
+```text
 hosts/p620/nixos/nixarchy.nix:25    ../../../nixarchy-apps.nix
 hosts/razer/nixos/nixarchy.nix:25   ../../../nixarchy-apps.nix
 hosts/p510/nixos/nixarchy.nix:26    ../../../nixarchy-apps.nix
