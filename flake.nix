@@ -130,6 +130,20 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # nixarchy-distrobox: distrobox on the Omarchy bar and a key -- list,
+    # create (every distrobox create flag), enter, start, stop, upgrade and
+    # delete boxes, with create and upgrade streamed into the panel. QML only;
+    # its closure is the plugin files, and it runs distrobox and podman from
+    # PATH.
+    #
+    # Nix installs the plugin; enabling it is runtime state in shell.json and
+    # deliberately not managed here, so each machine needs one:
+    #   omarchy plugin enable nixarchy.distrobox
+    nixarchy-distrobox = {
+      url = "github:olafkfreund/nixarchy-distrobox";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # ai-mirror: MCP server + bar indicator letting coding agents drive the
     # Omarchy desktop behind a kill switch (hosts/common/nixos/omarchy-ai-mirror.nix).
     # Tracks ai-mirror's default branch (master). Its PRs land as MERGE COMMITS,

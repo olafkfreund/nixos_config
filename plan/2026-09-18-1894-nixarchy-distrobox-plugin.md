@@ -122,8 +122,23 @@ file in the same commit.
 
 ### Deviations
 
-_None yet._
+1. **`just validate` fails on formatting in files this task does not touch.**
+   `nixpkgs-fmt` flags nine `hosts/{p510,p620,razer}/nixarchy/{apps,services,
+   advanced}.nix` files, which `nixarchy-apply` generates and which were last
+   changed on `main` in `9415fac5c`. This task's three Nix files pass
+   `nixpkgs-fmt --check` (0 / 3). They are left alone here, because
+   reformatting generated files is out of scope and `nixarchy-apply` would
+   rewrite them. Worth a separate issue.
 
 ### Test results
 
-_Pending._
+- **Step 1:** the pending `nixarchy-pkg` lock bump is stashed, and the tree is
+  clean.
+- **Step 2:** the lock diff is additions only: the `nixarchy-distrobox` node,
+  pinned to `7e2a532`, and its root entry.
+- **Step 3:** `nix eval` of `programs.nixarchy.plugins` on p620 and razer
+  lists `nixarchy.distrobox` →
+  `/nix/store/32rlhics…-nixarchy-distrobox-0.1.0`.
+- **Step 4:** `just test-host p620` and `just test-host razer` build. p510's
+  toplevel `drvPath` is unchanged (`qwn3s3ib…-nixos-system-p510`).
+  `just validate`: see deviation 1.
