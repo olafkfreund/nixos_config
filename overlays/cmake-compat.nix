@@ -11,7 +11,6 @@ in
   clblast = mkCmakePolicyFix "clblast";
   cld2 = mkCmakePolicyFix "cld2";
   ctranslate2 = mkCmakePolicyFix "ctranslate2";
-  rofi-file-browser-extended = mkCmakePolicyFix "rofi-file-browser-extended";
   birdtray = mkCmakePolicyFix "birdtray";
   allegro = mkCmakePolicyFix "allegro";
 
