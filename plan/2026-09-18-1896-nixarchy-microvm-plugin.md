@@ -157,4 +157,26 @@ after reading it. The deploy guard requires it.
 
 ### Deviations
 
+1. **Steps 1 and 8 (stash and restore) were not needed.** The work runs in a
+   separate worktree (`/mnt/data/Source-home/nixos-1896`) cut from
+   `origin/main`, after another session moved the shared `/etc/nixos`
+   checkout mid-task (PR #1897, since merged, carried this issue's approved
+   artifacts). The `nixarchy-voice` bump never enters this tree; it stays
+   uncommitted in `/etc/nixos`, untouched.
+2. **`just validate` fails on `main` before this change.** Its
+   `nix-format-check` flags the nine nixarchy-generated
+   `hosts/{p510,p620,razer}/nixarchy/{apps,services,advanced}.nix` files,
+   none of which this change touches; `nix fmt` on the five files it does
+   touch changes nothing. Left alone: nixarchy's writers edit those files by
+   exact line and `#@` marker. Gated on `just test-host p620` and
+   `just test-host razer` instead, both of which pass.
+
 ### Test results
+
+- Step 3: both hosts evaluate `programs.nixarchy-microvm.keybinding` to
+  `"SUPER + ALT + V"`, and `programs.nixarchy.plugins` lists
+  `nixarchy.microvm`.
+- Step 4: p510's toplevel `drvPath` is identical on `origin/main` and on this
+  branch (`jvx6gm9p…-nixos-system-p510`). `just test-host p620` and
+  `just test-host razer` exit 0. The lock adds only `nixarchy-microvm`
+  (pinned to `481e6c5`) and its `nixpkgs` follow.

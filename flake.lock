@@ -1518,6 +1518,26 @@
         "type": "github"
       }
     },
+    "nixarchy-microvm": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789770545,
+        "narHash": "sha256-/gd8ElLZsNoI03+IBe90+dqW7EZgaOECq6s+LtXpuV0=",
+        "owner": "olafkfreund",
+        "repo": "nixarchy-microvm",
+        "rev": "481e6c5c135c1edd9c624c3361b56fe7bee5d750",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "nixarchy-microvm",
+        "type": "github"
+      }
+    },
     "nixarchy-pkg": {
       "inputs": {
         "nixpkgs": [
@@ -2094,6 +2114,7 @@
         "nix-snapd": "nix-snapd",
         "nixarchy": "nixarchy",
         "nixarchy-distrobox": "nixarchy-distrobox",
+        "nixarchy-microvm": "nixarchy-microvm",
         "nixarchy-pkg": "nixarchy-pkg",
         "nixarchy-voice": "nixarchy-voice",
         "nixos-hardware": "nixos-hardware_2",
