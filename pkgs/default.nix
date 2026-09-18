@@ -79,11 +79,18 @@
   # URL. Replaces the npm-based gemini-cli package we used until #560.
   antigravity-cli = pkgs.callPackage ./antigravity-cli { };
 
-  # Google Antigravity Python SDK — installs the platform-specific
-  # PyPI wheel (binary runtime bundled inside; cannot build from source).
-  # Wrapped as a Python env so `python` on PATH can `import google.antigravity`.
-  google-antigravity-py = pkgs.python3.withPackages (ps: [
+  # The `python3` on the user's PATH. It is the only python3 in the user
+  # profile, so anything that shells out to a bare `python3` gets this env:
+  #   - google.antigravity — the Antigravity SDK's platform-specific PyPI
+  #     wheel (binary runtime bundled inside; cannot build from source),
+  #     see pkgs/google-antigravity-py/.
+  #   - openrazer — the omarazer Omarchy plugin's QML runs
+  #     `python3 scripts/razer_devices.py` with no path of its own, so the
+  #     library has to be here. Do not shadow this env with a narrower
+  #     python3 on ~/.local/bin: that is what broke it twice (#b41e8a1).
+  user-python3 = pkgs.python3.withPackages (ps: [
     (ps.callPackage ./google-antigravity-py { })
+    ps.openrazer
   ]);
 
   # GitHub Copilot desktop app — agent-native desktop experience from the
