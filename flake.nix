@@ -117,6 +117,19 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # nixarchy-pkg: the Omarchy menu for managing nixpkgs packages, services
+    # and NixOS options. Follows this flake's nixpkgs for the same reason the
+    # two above do, though it costs less than they do -- the plugin is QML and
+    # a bash adapter, and its closure is jq and the nixarchy writers it calls.
+    #
+    # Nix installs the plugin; enabling it is runtime state in shell.json and
+    # deliberately not managed here, so each machine needs one:
+    #   omarchy plugin enable nixarchy.pkg
+    nixarchy-pkg = {
+      url = "github:olafkfreund/nixarchy-pkg";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # ai-mirror: MCP server + bar indicator letting coding agents drive the
     # Omarchy desktop behind a kill switch (hosts/common/nixos/omarchy-ai-mirror.nix).
     # Tracks ai-mirror's default branch (master). Its PRs land as MERGE COMMITS,

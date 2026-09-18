@@ -9,7 +9,11 @@
       powerManagement.enable = true;
       powerManagement.finegrained = false;
       nvidiaPersistenced = false;
-      open = true; # NVIDIA 590+ requires open kernel modules for Turing GPUs (RTX 2070 Super)
+      # This machine has a GeForce RTX 3080 Laptop (GA104M, Ampere) -- read off
+      # the running system, not the RTX 2070 Super / Turing this comment used to
+      # claim. Open kernel modules are the supported path for Ampere and newer,
+      # so the setting was right even while the reason given for it was not.
+      open = true;
       nvidiaSettings = true;
       # beta (595.45.04) fails to build against kernel 7.1 — it includes
       # linux/of_gpio.h, removed in 7.x. latest (610.43.02) handles the removal.

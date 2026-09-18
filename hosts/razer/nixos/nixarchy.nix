@@ -101,6 +101,18 @@
     ];
     programs.nixarchy.enable = true;
 
+    # nixarchy packages: search nixpkgs, turn curated apps and services on,
+    # set NixOS options, queue and apply -- from the Omarchy shell rather
+    # than a terminal. A front-end only: every write goes through the
+    # nixarchy writers this module already installs.
+    #
+    # Installed, not enabled. Enabling a plugin is runtime state in
+    # shell.json, which nixarchy leaves alone on purpose, so once per machine:
+    #   omarchy plugin enable nixarchy.pkg
+    # A chord is yours to choose too; SUPER+ALT+N is free in Omarchy's set.
+    programs.nixarchy.plugins."nixarchy.pkg".src =
+      inputs.nixarchy-pkg.packages.${pkgs.stdenv.hostPlatform.system}.default;
+
     # nixi's optional integrations, from its own module rather than the 0.9
     # install.py copies they replace: the coaching watcher (at most one tip a
     # day, nothing leaves the machine) and the Omarchy hooks (a one-time
@@ -108,6 +120,29 @@
     services.nixi = {
       watcher.enable = true;
       omarchyHooks.enable = true;
+
+      # Named, because nixi's own default did not pin claude here and SUPER+H
+      # died on "claude-agent-acp is not on the system PATH".
+      #
+      # Nixi defaults `agents` to
+      #   lib.optional (pkgs.config.allowUnfree or false) "claude" ++ [ "codex" ]
+      # and that allowUnfree test read FALSE in this machine's Home Manager
+      # context, so the adapter was never pinned -- while
+      # ~/.config/omarchy/defaults/agent still said `claude`. Nixi treats that
+      # file as an EXPLICIT choice and will not fall back from it, so the card
+      # threw rather than quietly using an agent it did have.
+      #
+      # Claude Code itself is installed outside Nix here (~/.local/bin, mise),
+      # so nothing in the configuration implies it either.
+      #
+      # claude alone. This listed all three back when nixarchy predated the
+      # release that names opencode and codex upstream -- nothing else defined
+      # the option then, so a lone [ "claude" ] would have REPLACED rather than
+      # added. The nixarchy this branch merges up to does name them, and the
+      # option is a list, so the two sides merged and it evaluated to
+      # [ opencode codex opencode codex claude ]. Naming only what upstream
+      # does not give us keeps it to [ opencode codex claude ].
+      agents = [ "claude" ];
     };
 
     # Oma: speech to speech against the OpenAI Realtime API, driving Hyprland.

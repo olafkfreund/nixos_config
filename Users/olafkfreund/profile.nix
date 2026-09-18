@@ -229,10 +229,10 @@ in
     # binary (installed via programs.claude-code.enable in home/default.nix).
     pkgs.customPkgs.flycrys
 
-    # Google Antigravity Python SDK — Python env with `google.antigravity`
-    # importable for building Gemini-powered AI agents. See
-    # pkgs/google-antigravity-py/ for the platform-wheel install.
-    pkgs.customPkgs.google-antigravity-py
+    # The user's python3: the only one in this profile, carrying
+    # `google.antigravity` for Gemini agents and `openrazer` for the omarazer
+    # Omarchy plugin. See pkgs/default.nix for why both live in one env.
+    pkgs.customPkgs.user-python3
     # Official Proton VPN CLI (binary: `protonvpn`). Drives NetworkManager
     # directly; no daemon or NM plugin of its own. Here for the OmaProton
     # VPN bar widget, whose in-panel installer is a pacman call the Nixarchy

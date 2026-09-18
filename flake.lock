@@ -1485,16 +1485,36 @@
         ]
       },
       "locked": {
-        "lastModified": 1789690269,
-        "narHash": "sha256-8BZhEiPBRYfym8IOboIlibShgtvCywPq4CeRhd4Mp4U=",
+        "lastModified": 1789714047,
+        "narHash": "sha256-mqsDNYUcqO3SucYbmwUKdaBtkb9kOAGyFSWQ1T4H/A0=",
         "owner": "olafkfreund",
         "repo": "nixarchy",
-        "rev": "c176400b68e91d65f3659c56e6a2697f74880d28",
+        "rev": "5e094cb78109cbd97c42a0b3f674a323e36a908a",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
         "repo": "nixarchy",
+        "type": "github"
+      }
+    },
+    "nixarchy-pkg": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789631524,
+        "narHash": "sha256-687WZY5MU8ZESgGPlDCxk6X6uVKOt2CVLBdCxmJD8kU=",
+        "owner": "olafkfreund",
+        "repo": "nixarchy-pkg",
+        "rev": "20a5a1681250c26ba268fa8a280fdeeaafd1c422",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "nixarchy-pkg",
         "type": "github"
       }
     },
@@ -1583,16 +1603,16 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1754028485,
-        "narHash": "sha256-IiiXB3BDTi6UqzAZcf2S797hWEPCRZOwyNThJIYhUfk=",
-        "owner": "NixOS",
+        "lastModified": 1789546076,
+        "narHash": "sha256-zVxLZiSnmaaPLwnhj7pwmqe3axBg/C6nG5JZsJMh2g4=",
+        "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "59e69648d345d6e8fef86158c555730fa12af9de",
+        "rev": "b1b875982b17dabde9b4a37f3e229e74913e6db3",
         "type": "github"
       },
       "original": {
-        "owner": "NixOS",
-        "ref": "nixos-25.05",
+        "owner": "nixos",
+        "ref": "nixos-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -1914,11 +1934,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789710248,
-        "narHash": "sha256-uPvtUhLSPH09gZGxFkO9vKxX7thfgvjLgPiVfvDedAk=",
+        "lastModified": 1789714769,
+        "narHash": "sha256-ytW1hOUg78/p/ijC8xujNm4J2x4Xqf3kH66FkC3CNCE=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "5df0f6f622945163855000c22259aef3d6c063b0",
+        "rev": "6615e07970dfb6c036cf6e43c492bfac9243d445",
         "type": "github"
       },
       "original": {
@@ -2053,6 +2073,7 @@
         "nix-index-database": "nix-index-database",
         "nix-snapd": "nix-snapd",
         "nixarchy": "nixarchy",
+        "nixarchy-pkg": "nixarchy-pkg",
         "nixarchy-voice": "nixarchy-voice",
         "nixos-hardware": "nixos-hardware_2",
         "nixpkgs": "nixpkgs_9",
