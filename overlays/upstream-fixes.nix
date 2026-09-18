@@ -1,4 +1,27 @@
 _final: prev: {
+  # nodejs-slim_26 26.9.0 fails one test in the build sandbox, which takes the
+  # whole toplevel with it: podman-desktop -> system-path -> nixos-system.
+  #
+  #   not ok 1180 parallel/test-fs-cp-async-file-modes
+  #   Error: EPERM: operation not permitted, chmod '/build/.../copy_%1/...'
+  #
+  # A sandbox permissions artifact, not a defect in node: the compile succeeds
+  # and only test-ci-js fails. Upstream nixpkgs#564449 has it, Hydra reproduces
+  # it (so there is no cached build to fall back on), and nodejs/node#66104 is
+  # the fix -- confirmed building clean by two people on that thread.
+  #
+  # This matters beyond one package: nixos-unstable's head IS the broken
+  # revision, so every flake update lands on it and nhs cannot complete (#1891).
+  #
+  # Costs a local nodejs build, which is why it is scoped to _26 rather than
+  # nodejs-slim generally -- our own package sets use the cached nodejs_24, and
+  # podman-desktop is the only consumer of _26.
+  #
+  # Drop once nixpkgs#564449 closes and Hydra has a green nodejs-slim_26.
+  nodejs-slim_26 = prev.nodejs-slim_26.overrideAttrs (_old: {
+    doCheck = false;
+  });
+
   # gtksourceview5 5.20.0's meson suite hangs in the build sandbox: 9 of 26
   # tests (test-vim-*, test-view, test-buffer, ...) TIMEOUT after 50-90s
   # because there is no locale and no XDG_RUNTIME_DIR. 17 pass, 0 actually
