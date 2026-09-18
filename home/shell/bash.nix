@@ -210,7 +210,6 @@ in
     # remote `ssh host cmd` invocations still get the PATH.
     bashrcExtra = ''
       export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
-      export PATH="$HOME/.config/rofi/scripts:$PATH"
 
       # go/cargo/npm install dirs go AFTER the Nix profiles, so a tool
       # installed by a language package manager never shadows the Nix command

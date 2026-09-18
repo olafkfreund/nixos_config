@@ -14,6 +14,19 @@
     ./syncthing-stignore.nix
   ];
 
+  # rofi: stylix's rofi target sets `programs.rofi.font`, renamed in
+  # home-manager to `programs.rofi.settings.font`, so every evaluation prints a
+  # rename warning -- for a launcher this fleet does not have. rofi is enabled
+  # on no host, its binary is on no host's PATH, and nothing in ~/.config/hypr
+  # or ~/.config/omarchy calls it: Omarchy's own Quickshell menu replaced it.
+  #
+  # Set HERE and not in modules/desktop/stylix-theme.nix beside the kmscon and
+  # regreet targets: rofi is a home-manager-only target, and the system-level
+  # `stylix.targets.rofi` does not exist ("Did you mean stylix.targets.nvf...").
+  #
+  # Drop this if rofi is ever reintroduced.
+  stylix.targets.rofi.enable = false;
+
   # Enable Claude Code via home-manager's built-in module.
   #
   # Using pkgs.claude-code-native: pre-built binaries from Anthropic's GCS
