@@ -41,6 +41,14 @@ public/
 # Throwaway local experiments — never ship
 scratch/
 
+# humanize plugin scratch. Its skills (ask-codex, the RLCR loop) write the
+# prompt, the response and run metadata into .humanize/ in whatever repo they
+# are invoked from. Untracked it dirties the tree, and nhs refuses to deploy a
+# dirty tree — so a consultation in this repo would intermittently block a
+# rebuild. Nothing in here is worth keeping; the durable copy is under
+# ~/.cache/humanize/.
+.humanize/
+
 # OS generated files
 .DS_Store
 Thumbs.db
