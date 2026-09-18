@@ -129,6 +129,47 @@ file in the same commit.
    `nixpkgs-fmt --check` (0 / 3). They are left alone here, because
    reformatting generated files is out of scope and `nixarchy-apply` would
    rewrite them. Worth a separate issue.
+2. **Step 7: razer needed no shell restart, and could not have one.**
+   - Over SSH, the `omarchy-shell` wrapper pointed at the new tree while the
+     running shell was on the pre-deploy tree. Quickshell finds its instance
+     by config path, so every call said "not running".
+   - The session's own `OMARCHY_PATH` (from
+     `systemctl --user show-environment`, as `omarchy-restart-shell` does)
+     reached it. `omarchy plugin enable` hot-loaded the plugin into the
+     running shell.
+   - A restart was then refused, correctly, because the session had
+     idle-locked; forcing it would strand the lock screen. It was no longer
+     needed.
+3. **Step 7: a leftover menu layer on razer, not yet explained with
+   certainty.**
+   - After opening and closing the menu over SSH, `hyprctl layers` still
+     lists one `nixarchy-distrobox-menu` layer, with **`pid: -1`**. The plugin
+     reports itself closed (`views: 0` from the bar and from the menu), and
+     `shell hide` changes nothing.
+   - razer's only output is DPMS-off.
+   - On p620, with a lit display, a live layer carries its real pid and is
+     gone within 50 ms of closing.
+   - Reading: a surface the client already destroyed, kept by Hyprland until
+     the output renders a frame (`grim` over SSH hung on razer the same way).
+   - **Unverified until razer's screen wakes;** it was not woken remotely.
+4. **The pending lock bump was mislabelled, and building from the stashed
+   tree reverted it on p620.**
+   - The uncommitted `flake.lock` change is a bump of **`nixarchy-voice`**
+     (d8340f9 → 481d3f3), not `nixarchy-pkg` as the intent, spec and this
+     plan say. A `git diff -U12` grep picked up a neighbouring node's name.
+   - It belongs to another agent, `p620-7880d9`, who had already switched
+     p620 from the dirty tree at 17:45.
+   - Step 6 stashed it correctly for the commits, but then built p620 from the
+     stashed tree, which switched the live nixarchy-voice back to d8340f9.
+   - Found by reading the agent bus in full. After step 8 restored the stash,
+     p620 was re-switched from the tree (`s78gqz3l…`).
+     `omarchy-voice.service` runs `ciz5ma6g…-omarchy-voice-0.3.0` again, the
+     plugin link is intact, and there are 0 failed units. Posted on the bus to
+     that agent.
+   - razer never had the bump.
+   - The lesson: stashing keeps a change out of a commit, but also out of any
+     system built from the tree. Compare `/run/current-system` with the tree
+     before switching from a stashed tree.
 
 ### Test results
 
@@ -142,3 +183,20 @@ file in the same commit.
 - **Step 4:** `just test-host p620` and `just test-host razer` build. p510's
   toplevel `drvPath` is unchanged (`qwn3s3ib…-nixos-system-p510`).
   `just validate`: see deviation 1.
+- **Step 5:** PR #1895 is open, and the hooks pass.
+- **Step 6 (p620):**
+  - Announced on the agent bus, then backed up the development copy (12
+    files) and removed it. `just p620` exit 0.
+  - `readlink -f` → `/nix/store/32rlhics…-nixarchy-distrobox-0.1.0`.
+  - `status` answers on 3 bars without being enabled again. No plugin errors
+    in `qs log`, 0 failed units, and the cube glyph is on the bar.
+  - Later re-switched for deviation 4.
+- **Step 7 (razer):**
+  - NVIDIA module and userspace were both 610.57.04 before the deploy.
+    `just deploy-via-p620 razer` exit 0.
+  - Store link as on p620. Enabled (`[{"id":"nixarchy.distrobox"}]`).
+  - `status` lists razer's real boxes `["Fedora","Debian"]`.
+  - The menu opened (live pid), and 0 failed units. The close left the layer
+    in deviation 3.
+- **Step 8:** `git stash pop` was clean. The `nixarchy-voice` bump is back,
+  uncommitted, and the stash list is empty.
