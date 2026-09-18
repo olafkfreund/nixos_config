@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1894
 intent: intent/2026-09-18-1894-nixarchy-distrobox-plugin.md
 ---
