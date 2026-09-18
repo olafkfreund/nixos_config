@@ -134,15 +134,14 @@
       # Claude Code itself is installed outside Nix here (~/.local/bin, mise),
       # so nothing in the configuration implies it either.
       #
-      # All three named rather than claude alone: this machine's nixarchy
-      # predates the release that names them upstream, so nothing else defines
-      # this option and a lone [ "claude" ] would REPLACE rather than add,
-      # taking opencode and codex away. Verified by evaluating before rebuilding.
-      agents = [
-        "opencode"
-        "codex"
-        "claude"
-      ];
+      # claude alone. This listed all three back when nixarchy predated the
+      # release that names opencode and codex upstream -- nothing else defined
+      # the option then, so a lone [ "claude" ] would have REPLACED rather than
+      # added. The nixarchy this branch merges up to does name them, and the
+      # option is a list, so the two sides merged and it evaluated to
+      # [ opencode codex opencode codex claude ]. Naming only what upstream
+      # does not give us keeps it to [ opencode codex claude ].
+      agents = [ "claude" ];
     };
 
     # Oma: speech to speech against the OpenAI Realtime API, driving Hyprland.
