@@ -157,4 +157,44 @@ after reading it. The deploy guard requires it.
 
 ### Deviations
 
+1. **Steps 1 and 8 (stash and restore) were not needed.** The work runs in a
+   separate worktree (`/mnt/data/Source-home/nixos-1896`) cut from
+   `origin/main`, after another session moved the shared `/etc/nixos`
+   checkout mid-task (PR #1897, since merged, carried this issue's approved
+   artifacts). The `nixarchy-voice` bump never enters this tree; it stays
+   uncommitted in `/etc/nixos`, untouched.
+2. **`just validate` fails on `main` before this change.** Its
+   `nix-format-check` flags the nine nixarchy-generated
+   `hosts/{p510,p620,razer}/nixarchy/{apps,services,advanced}.nix` files,
+   none of which this change touches; `nix fmt` on the five files it does
+   touch changes nothing. Left alone: nixarchy's writers edit those files by
+   exact line and `#@` marker. Gated on `just test-host p620` and
+   `just test-host razer` instead, both of which pass.
+
 ### Test results
+
+- Step 3: both hosts evaluate `programs.nixarchy-microvm.keybinding` to
+  `"SUPER + ALT + V"`, and `programs.nixarchy.plugins` lists
+  `nixarchy.microvm`.
+- Step 4: p510's toplevel `drvPath` is identical on `origin/main` and on this
+  branch (`jvx6gm9p…-nixos-system-p510`). `just test-host p620` and
+  `just test-host razer` exit 0. The lock adds only `nixarchy-microvm`
+  (pinned to `481e6c5`) and its `nixpkgs` follow.
+- Step 6, p620 (`just p620`, generation `10byxlmk…`): no failed units;
+  the plugin directory (`…-nixarchy-microvm-0.1.0`) and
+  `~/.config/hypr/microvm-binds.lua` are store links; one modmask-72 `V`
+  bind, "MicroVMs", with no config errors; Super+K lists
+  `SUPER ALT + V → MicroVMs`; after a shell restart the plugin answers
+  `status`; no MicroVM errors in `qs log`. The hand copies are kept in the
+  task scratchpad.
+- Step 7, razer (via p620, generation `m50r0n4x…`, nvidia 610.57.04 before
+  and after): both paths are store links; `omarchy plugin enable
+  nixarchy.microvm` → "Enabled"; the `pcall` block was appended
+  (`bindings.lua.bak-1896`); config errors are empty; one SUPER+ALT+V
+  "MicroVMs" bind; `status` answers; the menu layer opens and closes. Over
+  SSH, the `omarchy` CLI only finds the shell with the quickshell process's
+  environment (`/proc/<pid>/environ`: `XDG_*`, `WAYLAND_*`, `HYPRLAND_*`). A
+  toggle sent while the menu is still opening is lost, and a closed menu
+  leaves a `pid -1` fade-out surface in `hyprctl layers` for a few seconds.
+- CI on #1898: all 7 checks pass (three `check-configurations`, lint,
+  pre-commit, security, docs).

@@ -144,6 +144,20 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # nixarchy-microvm: NixOS MicroVMs on the Omarchy bar and SUPER+ALT+V --
+    # disposable VMs through `nixarchy vm` and permanent ones through
+    # programs.nixarchy.services.microvm, created, edited and deleted from the
+    # keyboard. QML only; its Home Manager module writes the bind fragment
+    # ~/.config/hypr/microvm-binds.lua (hosts/common/nixos/omarchy-microvm.nix).
+    #
+    # Nix installs the plugin; enabling it is runtime state in shell.json and
+    # deliberately not managed here, so each machine needs one:
+    #   omarchy plugin enable nixarchy.microvm
+    nixarchy-microvm = {
+      url = "github:olafkfreund/nixarchy-microvm";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # ai-mirror: MCP server + bar indicator letting coding agents drive the
     # Omarchy desktop behind a kill switch (hosts/common/nixos/omarchy-ai-mirror.nix).
     # Tracks ai-mirror's default branch (master). Its PRs land as MERGE COMMITS,
