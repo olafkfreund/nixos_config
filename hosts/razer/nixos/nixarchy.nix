@@ -109,6 +109,7 @@
     # Installed, not enabled. Enabling a plugin is runtime state in
     # shell.json, which nixarchy leaves alone on purpose, so once per machine:
     #   omarchy plugin enable nixarchy.pkg
+    # A chord is yours to choose too; SUPER+ALT+N is free in Omarchy's set.
     programs.nixarchy.plugins."nixarchy.pkg".src =
       inputs.nixarchy-pkg.packages.${pkgs.stdenv.hostPlatform.system}.default;
 

@@ -118,8 +118,9 @@
     };
 
     # nixarchy-pkg: the Omarchy menu for managing nixpkgs packages, services
-    # and NixOS options. Follows this flake nixpkgs for the same reason the
-    # two above do.
+    # and NixOS options. Follows this flake's nixpkgs for the same reason the
+    # two above do, though it costs less than they do -- the plugin is QML and
+    # a bash adapter, and its closure is jq and the nixarchy writers it calls.
     #
     # Nix installs the plugin; enabling it is runtime state in shell.json and
     # deliberately not managed here, so each machine needs one:
