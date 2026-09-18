@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1896
 spec: spec/2026-09-18-1896-nixarchy-microvm-plugin.md
 ---
