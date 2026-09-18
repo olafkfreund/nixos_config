@@ -113,6 +113,14 @@
     programs.nixarchy.plugins."nixarchy.pkg".src =
       inputs.nixarchy-pkg.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
+    # nixarchy-distrobox: the Omarchy panel for distrobox boxes. Installed,
+    # not enabled -- once per machine:
+    #   omarchy plugin enable nixarchy.distrobox
+    # SUPER+ALT+D is free in Omarchy's set, if you want it on a key:
+    #   omarchy-shell shell toggle nixarchy.distrobox '{}'
+    programs.nixarchy.plugins."nixarchy.distrobox".src =
+      inputs.nixarchy-distrobox.packages.${pkgs.stdenv.hostPlatform.system}.default;
+
     # nixi's optional integrations, from its own module rather than the 0.9
     # install.py copies they replace: the coaching watcher (at most one tip a
     # day, nothing leaves the machine) and the Omarchy hooks (a one-time
