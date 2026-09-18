@@ -180,3 +180,21 @@ after reading it. The deploy guard requires it.
   branch (`jvx6gm9p…-nixos-system-p510`). `just test-host p620` and
   `just test-host razer` exit 0. The lock adds only `nixarchy-microvm`
   (pinned to `481e6c5`) and its `nixpkgs` follow.
+- Step 6, p620 (`just p620`, generation `10byxlmk…`): no failed units;
+  the plugin directory (`…-nixarchy-microvm-0.1.0`) and
+  `~/.config/hypr/microvm-binds.lua` are store links; one modmask-72 `V`
+  bind, "MicroVMs", with no config errors; Super+K lists
+  `SUPER ALT + V → MicroVMs`; after a shell restart the plugin answers
+  `status`; no MicroVM errors in `qs log`. The hand copies are kept in the
+  task scratchpad.
+- Step 7, razer (via p620, generation `m50r0n4x…`, nvidia 610.57.04 before
+  and after): both paths are store links; `omarchy plugin enable
+  nixarchy.microvm` → "Enabled"; the `pcall` block was appended
+  (`bindings.lua.bak-1896`); config errors are empty; one SUPER+ALT+V
+  "MicroVMs" bind; `status` answers; the menu layer opens and closes. Over
+  SSH, the `omarchy` CLI only finds the shell with the quickshell process's
+  environment (`/proc/<pid>/environ`: `XDG_*`, `WAYLAND_*`, `HYPRLAND_*`). A
+  toggle sent while the menu is still opening is lost, and a closed menu
+  leaves a `pid -1` fade-out surface in `hyprctl layers` for a few seconds.
+- CI on #1898: all 7 checks pass (three `check-configurations`, lint,
+  pre-commit, security, docs).
