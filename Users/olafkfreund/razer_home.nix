@@ -27,13 +27,6 @@
     ];
   };
 
-  # gnome-quick-web-apps — GTK4 web-app manager (PWA install, scope
-  # confinement, CEF rendering). Native GNOME alternative to
-  # cosmic-utils/web-apps.
-  home.packages = [
-    inputs.gnome-quick-web-apps.packages.${pkgs.stdenv.hostPlatform.system}.default
-  ];
-
   # Laptop: enable zellij (session management for mobile use)
   features.multiplexers.zellij = true;
 

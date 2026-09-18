@@ -68,15 +68,6 @@ in
               -- Indent guides / scope (snacks.indent).
               SnacksIndent = { fg = "#${colors.base01}" },
               SnacksIndentScope = { fg = "#${colors.base0B}" },
-              -- Start screen (lua/plugins/alpha-nvim.lua) — the asset placard.
-              AlphaHeader = { fg = "#${colors.base0B}" },
-              AlphaHeaderBar = { fg = "#${colors.base00}", bg = "#${colors.base0B}", bold = true },
-              AlphaHeaderName = { fg = "#${colors.base05}", bold = true },
-              AlphaHeaderAmber = { fg = "#${colors.base09}", bold = true },
-              AlphaHeaderDim = { fg = "#${colors.base04}" },
-              AlphaButtons = { fg = "#${colors.base05}" },
-              AlphaShortcut = { fg = "#${colors.base0A}", bold = true },
-              AlphaFooter = { fg = "#${colors.base04}" },
             }
             for group, spec in pairs(hud) do
               vim.api.nvim_set_hl(0, group, spec)

@@ -1,6 +1,5 @@
 { lib
 , pkgs
-, inputs
 , ...
 }: {
   imports = [
@@ -52,11 +51,6 @@
   home.packages = [
     # Glim — GitLab CI/CD TUI monitoring
     pkgs.glim
-
-    # gnome-quick-web-apps — GTK4 web-app manager (PWA install, scope
-    # confinement, CEF rendering). Native GNOME alternative to
-    # cosmic-utils/web-apps.
-    inputs.gnome-quick-web-apps.packages.${pkgs.stdenv.hostPlatform.system}.default
 
     # Libation — Audible library downloader/DRM-decrypter. Books location is set
     # to /mnt/media/Media/Audiobooks (P510 ABS library, NFS-mounted here) so
