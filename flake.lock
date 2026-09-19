@@ -1505,11 +1505,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789761636,
-        "narHash": "sha256-cQ0LLy5p5Oa66rXIagQwP97NvvG+9B8TiHtf5fxZqJA=",
+        "lastModified": 1789775918,
+        "narHash": "sha256-Rm6/86hICkN6cAqVS8s9Vx5cAWWIIqvJ4Vn2riV0dM8=",
         "owner": "olafkfreund",
         "repo": "nixarchy-distrobox",
-        "rev": "7e2a532a2f9bc552586bc98c50a9ddf38774c08e",
+        "rev": "3dc1081e37e76d9b7a13f617849a6b9cd6f6e4de",
         "type": "github"
       },
       "original": {
