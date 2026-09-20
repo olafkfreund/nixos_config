@@ -185,6 +185,10 @@ in
     # running here; only the binary was missing. Omamail (Omarchy mail plugin)
     # stores every OAuth refresh token and IMAP password through it.
     pkgs.libsecret
+    # zenity — GTK dialog CLI. SpokenShelf (Omarchy Audiobookshelf plugin)
+    # draws its server/credential prompt with it and reports the dependency
+    # as missing inside the panel rather than failing loudly.
+    pkgs.zenity
     # notebooklm-mcp-cli — unofficial Google NotebookLM client, providing both
     # `nlm` (CLI) and `notebooklm-mcp` (MCP server, 49 tools). Replaced
     # notebooklm-go in #1781: that one was CLI-only, so the notebooks could be
