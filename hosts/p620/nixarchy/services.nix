@@ -38,7 +38,7 @@
 
 
   # ── Added by nixarchy-catalogue-diff, 2026-09-17 ──
-    # programs.nixarchy.services.devenv.enable = true;  #@ devenv  # Per-project development environments that activate when you cd in. Bundled because it is a package plus an activation hook in each of bash, zsh and fish, and a cache to keep the first use from being a compile.
+    programs.nixarchy.services.devenv.enable = true;  #@ devenv  # Per-project development environments that activate when you cd in. Bundled because it is a package plus an activation hook in each of bash, zsh and fish, and a cache to keep the first use from being a compile.
     # programs.nixarchy.flatpaks.apps.geforce-now.enable = true;  #@ geforce-now  # Streams games from NVIDIA's servers. Not in nixpkgs and not packageable: a proprietary binary NVIDIA ships as a Flatpak. Not on Flathub either -- it comes from NVIDIA's own repository, which enabling this adds. — from GeForceNOW, not Flathub
     # programs.nixarchy.services.hypr-rdp.enable = true;  #@ hypr-rdp  # Serve your running Hyprland session to any RDP client. Bundled because the password must come from an encrypted secret, the daemon needs your session, and the firewall stays closed unless you say otherwise. Reachable over your tailnet by default, not your LAN.
     # programs.nixarchy.services.microvm.enable = true;  #@ microvm  # Permanent NixOS sandboxes from a template, booted with no image build and no bootloader -- the host's own /nix/store, shared read-only. Bundled because declaring a machine is what turns on the system user, the kvm group grant, the kernel modules and the microvm CLI; a machine you never declare gets none of them.
