@@ -385,6 +385,10 @@ in
       ++ optionals cfg.features.nerdFont [
         # Nerd fonts
         nerd-fonts.jetbrains-mono
+        # The glyph-only family every "Symbols Nerd Font" fontconfig lookup
+        # asks for. Without it fc-match silently returns LiberationSans and
+        # icon glyphs render as tofu.
+        nerd-fonts.symbols-only
       ];
   };
 }
