@@ -100,4 +100,36 @@ _final: prev: {
       (oldAttrs.patches or [ ]);
   });
 
+  # quickshell ships no QtMultimedia. Its QML import path is baked at build
+  # time and carries qtdeclarative, qtwayland and qtbase plugins only, so any
+  # Omarchy shell widget doing `import QtMultimedia` dies at load with
+  #
+  #   module "QtMultimedia" is not installed
+  #
+  # taking the whole shell config down, not just that widget. nixpkgs' derivation
+  # takes `qt6` as a whole and exposes no feature flag for it.
+  #
+  # Wrapped rather than set session-wide on purpose: QML_IMPORT_PATH is searched
+  # ahead of an application's own path, so exporting it globally would offer this
+  # qtmultimedia to every Qt program on the host (kdenlive, obs), and a Qt version
+  # mismatch there fails the import. The prefix here reaches quickshell alone.
+  #
+  # `omarchy-launch-shell` resolves quickshell by name from PATH, so the wrapper
+  # is what the session actually runs. Drop if nixpkgs gains a withMultimedia
+  # flag or bakes qtmultimedia in.
+  #
+  # qtimageformats is here for the same reason: qtbase alone decodes PNG/JPEG,
+  # so a widget fetching WebP (SpokenShelf asks Audiobookshelf for
+  # `cover?format=webp`) logs "Unsupported image format" per image and renders a
+  # blank placeholder. Both additions are scoped to this wrapper rather than the
+  # session for the reason above.
+  quickshell = prev.quickshell.overrideAttrs (old: {
+    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.makeWrapper ];
+    postFixup = (old.postFixup or "") + ''
+      wrapProgram $out/bin/quickshell \
+        --prefix QML_IMPORT_PATH : ${prev.qt6.qtmultimedia}/lib/qt-6/qml \
+        --prefix QT_PLUGIN_PATH : ${prev.qt6.qtimageformats}/lib/qt-6/plugins
+    '';
+  });
+
 }
