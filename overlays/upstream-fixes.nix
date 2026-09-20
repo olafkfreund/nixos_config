@@ -117,11 +117,18 @@ _final: prev: {
   # `omarchy-launch-shell` resolves quickshell by name from PATH, so the wrapper
   # is what the session actually runs. Drop if nixpkgs gains a withMultimedia
   # flag or bakes qtmultimedia in.
+  #
+  # qtimageformats is here for the same reason: qtbase alone decodes PNG/JPEG,
+  # so a widget fetching WebP (SpokenShelf asks Audiobookshelf for
+  # `cover?format=webp`) logs "Unsupported image format" per image and renders a
+  # blank placeholder. Both additions are scoped to this wrapper rather than the
+  # session for the reason above.
   quickshell = prev.quickshell.overrideAttrs (old: {
     nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.makeWrapper ];
     postFixup = (old.postFixup or "") + ''
       wrapProgram $out/bin/quickshell \
-        --prefix QML_IMPORT_PATH : ${prev.qt6.qtmultimedia}/lib/qt-6/qml
+        --prefix QML_IMPORT_PATH : ${prev.qt6.qtmultimedia}/lib/qt-6/qml \
+        --prefix QT_PLUGIN_PATH : ${prev.qt6.qtimageformats}/lib/qt-6/plugins
     '';
   });
 
