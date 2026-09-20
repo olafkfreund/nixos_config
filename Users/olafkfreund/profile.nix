@@ -240,6 +240,22 @@ in
     pkgs.proton-vpn-cli
   ];
 
+  # nixarchy's gitlab/github plugins list a bare pkgs.python3 for their
+  # actions.py; a second python in home.packages is a buildEnv collision with
+  # user-python3 above. Same interpreter, ours.
+  programs.nixarchy.defaultPluginSet = {
+    gitlab.packages = lib.mkForce [
+      pkgs.glab
+      pkgs.customPkgs.user-python3
+      pkgs.xdg-utils
+    ];
+    github.packages = lib.mkForce [
+      pkgs.gh
+      pkgs.customPkgs.user-python3
+      pkgs.xdg-utils
+    ];
+  };
+
   # Firefox (identical across interactive hosts)
   programs.firefox = {
     enable = true;
