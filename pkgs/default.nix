@@ -88,9 +88,14 @@
   #     `python3 scripts/razer_devices.py` with no path of its own, so the
   #     library has to be here. Do not shadow this env with a narrower
   #     python3 on ~/.local/bin: that is what broke it twice (#b41e8a1).
+  #   - dbus-next — SpokenShelf (Omarchy Audiobookshelf plugin) runs its
+  #     `mpris.py` bridge with a bare `python3` the same way, and without the
+  #     library the plugin loses media-key and desktop media control only,
+  #     silently. Same reasoning as openrazer: the plugin has no path of its own.
   user-python3 = pkgs.python3.withPackages (ps: [
     (ps.callPackage ./google-antigravity-py { })
     ps.openrazer
+    ps.dbus-next
   ]);
 
   # GitHub Copilot desktop app — agent-native desktop experience from the
