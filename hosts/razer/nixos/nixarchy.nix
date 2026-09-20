@@ -97,8 +97,12 @@
 
   home-manager.users.olafkfreund = {
     imports = [
+      # nixarchy-voice arrives through nixarchy now (it became a transitive
+      # input of it), and nixarchy's home-manager module already pulls the
+      # voice module in. Importing it here as well declares
+      # `programs.omarchy-voice.enable` a second time and the whole host stops
+      # evaluating. Re-add the explicit import only if nixarchy drops it again.
       inputs.nixarchy.homeManagerModules.nixarchy
-      inputs.nixarchy-voice.homeModules.default
     ];
     programs.nixarchy.enable = true;
 
