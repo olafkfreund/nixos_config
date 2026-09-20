@@ -1514,11 +1514,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789907203,
-        "narHash": "sha256-e4HBlSZZyQin1de/KZCncfvTlYLdLKYHmay7O0g0QL8=",
+        "lastModified": 1789908799,
+        "narHash": "sha256-ugVXE0Wloy938Gbc3u0RR8lPGfw6+u3JXYJyToXTsM4=",
         "owner": "olafkfreund",
         "repo": "nixarchy",
-        "rev": "60ef2bb02ee23c69d6892a5744d0cf0a64f988e3",
+        "rev": "3a8beaf6475ab86b71198e619ef86f3299564f3a",
         "type": "github"
       },
       "original": {
