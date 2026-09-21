@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1928
 spec: spec/2026-09-21-1928-ollama-cloud-ask-gemini.md
 ---
