@@ -37,7 +37,14 @@ Self-contained. Do not reopen the intent or spec to implement this.
 1. `modules/programs/claude-code-managed.nix`: add a module-level
    `baselineSkillOverrides = { ask-gemini = "off"; };` and merge it into
    `mergedSettings` the same way `baselineAllow` is merged at line 576
-   (`skillOverrides = (cfg.settings.skillOverrides or { }) // baselineSkillOverrides;`).
+   (`skillOverrides = baselineSkillOverrides // (cfg.settings.skillOverrides or { });`).
+
+   **Deviation from the drafted order.** This plan originally wrote the merge
+   with the baseline last, so the baseline would win and no host could
+   re-enable a hidden skill. Inverted at implementation time: host-supplied
+   entries now win, matching how `baselineAllow` composes (host entries plus
+   baseline, host never blocked). The rendered p620 settings were checked to
+   confirm `permissions.allow` still carries its 27 baseline entries.
    Module level, not per host — the module is enabled separately in all three
    host configs (`hosts/p620/configuration.nix:252`,
    `hosts/razer/configuration.nix:401`, `hosts/p510/configuration.nix:521`)
@@ -95,6 +102,11 @@ Expected: answers from p620, as it did during investigation.
 
 On razer, `command -v ollama` before relying on the skill there. If absent, the
 skill is p620-only and its `SKILL.md` must say so.
+
+**Result: absent.** razer has no `ollama` client binary, though it reaches
+p620's daemon over the tailnet (HTTP 200 on `p620:11434`). The contingency
+applies: `SKILL.md` states the skill is p620-only and directs other hosts to
+the `ollama-code` MCP tool, which speaks HTTP and needs no local binary.
 
 p510: not built, not deployed, not asked.
 
