@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1931
 intent: intent/2026-09-21-1931-delegate-review-coding.md
 ---
