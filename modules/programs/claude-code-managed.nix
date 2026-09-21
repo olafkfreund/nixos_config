@@ -165,6 +165,20 @@ let
     })
   );
 
+  # Skills hidden from every host. `off` removes the skill from the model's
+  # list AND from `/` — the only two other values are `user-invocable-only`
+  # and `name-only`, and a plausible-looking `hidden` or `collapsed` is not
+  # valid and fails silently (#1928).
+  #
+  # ask-gemini ships in the humanize@PolyArch plugin and shells out to a
+  # `gemini` binary that does not exist here: gemini-cli was removed in #560
+  # in favour of customPkgs.antigravity-cli. The skill can only ever exit 1,
+  # and the sanctioned Google route is the second-opinion skill via agy.
+  # Keyed on the bare name, which also covers the `<dir>:name` listing.
+  baselineSkillOverrides = {
+    ask-gemini = "off";
+  };
+
   # Baseline auto-approved commands — read-only / build / test / format only.
   # Enforced from managed scope so safe repo operations never prompt. Anything
   # that mutates the system (deploys, nixos-rebuild, git commit/push, sudo, rm)
@@ -576,6 +590,11 @@ let
       permissions = (cfg.settings.permissions or { }) // {
         allow = (cfg.settings.permissions.allow or [ ]) ++ baselineAllow;
       };
+    }
+    // lib.optionalAttrs (baselineSkillOverrides != { }) {
+      # Host-supplied entries win, so a host can re-enable a baseline-hidden
+      # skill by naming it in settings.skillOverrides.
+      skillOverrides = baselineSkillOverrides // (cfg.settings.skillOverrides or { });
     };
 
   managedJson = pkgs.writeText "claude-code-managed-settings.json"

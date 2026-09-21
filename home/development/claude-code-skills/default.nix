@@ -50,6 +50,9 @@ in
     # Claude only: installing it for codex/agy would let reviewers delegate
     # to each other (#1831).
     home.file.".claude/skills/second-opinion/SKILL.md".source = ./second-opinion/SKILL.md;
+    # Claude only, for the same reason: the cloud model drafts, it does not
+    # review other agents and it does not commit (#1928, #1929).
+    home.file.".claude/skills/ask-ollama-cloud/SKILL.md".source = ./ask-ollama-cloud/SKILL.md;
     home.file.".claude/skills/gog/evals.json".source = ./gog/evals.json;
     home.file.".codex/skills/gog/SKILL.md".source = ./gog/SKILL.md;
     home.file.".gemini/skills/gog/SKILL.md".source = ./gog/SKILL.md;
