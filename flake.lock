@@ -191,11 +191,11 @@
     "claude-skills-borghei": {
       "flake": false,
       "locked": {
-        "lastModified": 1786547813,
-        "narHash": "sha256-9VRedKD3CvM+uzyDZLloYtCXTlIZjlkHZiOA84qXivE=",
+        "lastModified": 1790023127,
+        "narHash": "sha256-tXpXQ2PAEOOA47+vKU7AjG8AInSCsbOxa5NB3dUyHcU=",
         "owner": "borghei",
         "repo": "Claude-Skills",
-        "rev": "ddca910e95580c63a236303fc1534054f0f14d4c",
+        "rev": "9b1410e668076b9287f8d8e2ff3b9ab8fe74c336",
         "type": "github"
       },
       "original": {
@@ -831,11 +831,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790010537,
-        "narHash": "sha256-rsDlQDQkCVnSkEfDTWlaFjp7vpke5taFkeTseT7DUxQ=",
+        "lastModified": 1790021793,
+        "narHash": "sha256-wXAdaLBAjbQK/OfESV/i0pgolkz+Uo4SbBP/MbfGLHU=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "a6c231d51f2a434e164020eae31de96ca0a56d65",
+        "rev": "a3dfb887d40d134af29fa8e924ba85a3e3a99194",
         "type": "github"
       },
       "original": {
@@ -1747,11 +1747,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790001536,
-        "narHash": "sha256-2/vgPZ6LVnbqx/wqVzRF+ZZ1UvslFnu9fHTCfqi9yJs=",
+        "lastModified": 1790022576,
+        "narHash": "sha256-UIIxafaq5SXdqCCxRiqrsa2W6PRWLu2DAzBSIZmymLQ=",
         "owner": "olafkfreund",
         "repo": "nixarchy-pkg",
-        "rev": "bc58ad91f69e189476f8f11b55d73b96366057a7",
+        "rev": "c5041c68e7209bc5335d45216495257f7a515824",
         "type": "github"
       },
       "original": {
@@ -2200,11 +2200,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790019324,
-        "narHash": "sha256-2r0wFwMI2xJxv4d1FiMA0K8X5WIfdF71CPLoFktJ2ls=",
+        "lastModified": 1790021727,
+        "narHash": "sha256-hwgByH7nOhJI7IvId0eBgoijcpXdDLSTzXZN5Yy+4j0=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "ef59909c69607e3e461f40496f5cbdcc185fd29f",
+        "rev": "0df5f941c572eae092427de8f2b2d2dc074a8745",
         "type": "github"
       },
       "original": {
@@ -2607,11 +2607,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790018211,
-        "narHash": "sha256-BxUaYEnUxqs9UObLjSbP8M6v6fg8hCgeL0xSzwc6U7k=",
+        "lastModified": 1790023065,
+        "narHash": "sha256-WnpT64y9++O7k3HB1zc94WsKSu3YpBlkPKmF/CjSJEE=",
         "owner": "crmne",
         "repo": "spotifast",
-        "rev": "9c676df701896ad57d9e385a73ddad46ff2ce6b6",
+        "rev": "7ec0f17946577a336540fcb953e464cf56fcd5f6",
         "type": "github"
       },
       "original": {
