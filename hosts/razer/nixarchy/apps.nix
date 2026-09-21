@@ -13,7 +13,7 @@
 #
 # The `#@ name` markers are how the menu finds a line to uncomment. Keep
 # them and you can reformat, reorder and annotate this file freely.
-{ ... }:
+{ pkgs, ... }:
 {
   programs.nixarchy.apps = {
 
@@ -88,6 +88,16 @@
     # ── Preinstalls ─────────────────────────────────────────────────
     # obsidian.enable = true;  #@ obsidian  # unfree — Preinstalled upstream, opt-in here because it is unfree. Theme syncing needs the Omarchy theme selected under Appearance > Themes in the app; omarchy-theme-set-obsidian writes it on every theme change.
   };
+
+  # ── Extra packages ──────────────────────────────────────────────
+  # Plain nixpkgs attributes, added by nixarchy-pkg-add. These are
+  # not part of the curated app list above: the Omarchy menu does
+  # not offer them and will not remove them. The file stays yours --
+  # reformat and annotate freely, the tool only ever inserts one
+  # line before the end marker.
+  environment.systemPackages = with pkgs; [  #@pkgs-begin
+    hello  #@pkg hello
+  ];  #@pkgs-end
 }
 
 # Offered by the Omarchy menu but with no nixpkgs equivalent:
