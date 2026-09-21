@@ -75,15 +75,23 @@ reader that checks the effect rather than the diff.
 
 ## Open questions
 
-1. **Does `second-opinion` absorb the new paths, or do they become separate
-   skills?** One skill that dispatches to Codex, agy and Ollama is tidier but
-   turns a small reviewed file into a router. Separate skills are more
-   discoverable and independently revertable.
-2. **Is zen/PAL MCP worth a dependency for `consensus` and `planner`?** It
-   covers all three backends behind one interface, but it is a third-party MCP
-   server in a repo that deliberately keeps its dependency surface small. The
-   alternative is a thin local skill that calls two CLIs and diffs their
-   answers.
-3. **Should the inert `claude-code-mcp.nix` description be reverted or kept?**
-   Keeping it is harmless but implies a control that does not exist — the same
-   trap that produced it.
+All three resolved by the approver. Recorded here so the spec does not
+reopen them.
+
+1. **`second-opinion` absorbs the new paths.** It stays the single entry point
+   for consulting another model, and gains the Codex `review` path and the agy
+   `--agent` path rather than spawning sibling skills. Consequence the spec
+   must handle: it becomes a dispatcher, so it needs a clear rule for which
+   backend a given request routes to, and it must not grow into a general
+   router for anything beyond review and drafting.
+
+2. **No zen/PAL MCP — a local skill instead.** `consensus` is implemented as a
+   thin local path that asks both CLIs the same question and surfaces the
+   disagreement. No third-party MCP server, no new dependency. `planner` is
+   dropped: our planning already runs through the intent/spec/plan gates, and a
+   second planner competing with those gates is not wanted.
+
+3. **Revert the inert `claude-code-mcp.nix` description.** It implies a control
+   that does not exist, which is the exact trap that produced it. The real
+   change moves to the `ollama_code` docstring in `pkgs/ollama-mcp/server.py`,
+   which is where the model actually reads the description.
