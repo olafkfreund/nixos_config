@@ -52,7 +52,7 @@ No change to the server, the env, or the package.
 
 A repo-local skill, peer to the existing `ask-codex`, wrapping:
 
-```
+```bash
 ollama run <model> <prompt>
 ```
 
