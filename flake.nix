@@ -74,6 +74,17 @@
       # ahead of fdb83f8.
       inputs.zen-browser.follows = "zen-browser";
 
+      # omarchy-voice is BUILT from nixarchy's pin, not from our own
+      # `nixarchy-voice` input -- it became transitive (see
+      # hosts/p620/nixos/nixarchy.nix:127) and the root input is now vestigial.
+      # Without this follows the lock carries two nixarchy-voice nodes: ours,
+      # which nothing builds, and nixarchy's, which everything does. Bumping
+      # the root one changes no store path, so the package silently stays
+      # wherever nixarchy's lock left it -- measured here as a build missing
+      # every nixarchy-voice change merged that day while `nix flake update
+      # nixarchy-voice` reported success. One node, ours, decides.
+      inputs.nixarchy-voice.follows = "nixarchy-voice";
+
       # aquamarine carries PR hyprwm/aquamarine#395 on top of upstream main
       # -- 2026-09-12. aquamarine 0.15.0 leaves a removed connector's CRTC
       # active in the kernel (SDRMConnector::disconnect() marks the connector
