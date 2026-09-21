@@ -28,11 +28,32 @@
         ]
       },
       "locked": {
-        "lastModified": 1789867137,
-        "narHash": "sha256-QcDIHfPg6rgIGXM7KqY9OryS9QIesOFbyJr21YHzpq8=",
+        "lastModified": 1789948378,
+        "narHash": "sha256-4kG8SW23LDGpcFS3Z9XhmG1v4cbQXBNqzHOhwHJJ6Yw=",
         "owner": "olafkfreund",
         "repo": "ai-mirror",
-        "rev": "ecd0c1b5b9c7c5c493562d2dab44233645c34469",
+        "rev": "2631208f844ad9c31ada57bcaa0e7e238682808f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "ai-mirror",
+        "type": "github"
+      }
+    },
+    "ai-mirror_2": {
+      "inputs": {
+        "nixpkgs": [
+          "nixarchy-voice",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789919871,
+        "narHash": "sha256-sODwVlwAqRTdsrSmhRAus3hW9pHFFmSXgTfT1R2J1dU=",
+        "owner": "olafkfreund",
+        "repo": "ai-mirror",
+        "rev": "66dc075223cbafae45f66980eda60c958960e70a",
         "type": "github"
       },
       "original": {
@@ -1760,6 +1781,7 @@
     },
     "nixarchy-voice": {
       "inputs": {
+        "ai-mirror": "ai-mirror_2",
         "home-manager": "home-manager_4",
         "nixpkgs": [
           "nixpkgs"
@@ -1767,11 +1789,11 @@
         "systems": "systems_8"
       },
       "locked": {
-        "lastModified": 1789908516,
-        "narHash": "sha256-cgolJ5h/fg0sYjcZKAigSIsGooh6/JDCw3anNannHzM=",
+        "lastModified": 1789942948,
+        "narHash": "sha256-RBgAkHLhoaNoHOgzv0X2hGdgKjs6lvzFspCvLsJt6tM=",
         "owner": "olafkfreund",
         "repo": "nixarchy-voice",
-        "rev": "805149076d9a4af7067bc07a74c413a292c02e5f",
+        "rev": "10c8a405b0deced81b9821922d62c7c8dfa0d037",
         "type": "github"
       },
       "original": {
