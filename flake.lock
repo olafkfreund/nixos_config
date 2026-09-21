@@ -1538,11 +1538,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790016574,
-        "narHash": "sha256-IK0LdUGb8zcVb2v7pQ7ubshxbEAC3oBkRIRfvJ7nI98=",
+        "lastModified": 1790030137,
+        "narHash": "sha256-J7MWergPnsidPzW6m+43nkBxDhw4+dhDcxqz5XuSSJE=",
         "owner": "olafkfreund",
         "repo": "nixarchy",
-        "rev": "763c3009a775182d4f8d57faaf7478521f6d7cf9",
+        "rev": "ab277917ad58da4c66c69f93a248349ba14d0ce0",
         "type": "github"
       },
       "original": {
@@ -1559,17 +1559,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1789985454,
-        "narHash": "sha256-WPUXnliLF+GLoMPMy+thlNhBgxmO4gqXCWi0Yeji+OY=",
+        "lastModified": 1789999171,
+        "narHash": "sha256-EjvXmUPE0XD2i/NuWZBvJY/Uud5903RvRi0M3XF2Khs=",
         "owner": "olafkfreund",
         "repo": "nixarchy-devenv",
-        "rev": "72c0a4729181f774401ebf595530248895dc1080",
+        "rev": "83ff7e6eb9d96d48f7ca7343ef7e26a24a5297b4",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
         "repo": "nixarchy-devenv",
-        "rev": "72c0a4729181f774401ebf595530248895dc1080",
+        "rev": "83ff7e6eb9d96d48f7ca7343ef7e26a24a5297b4",
         "type": "github"
       }
     },
@@ -1813,17 +1813,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1789718549,
-        "narHash": "sha256-S8Hm0f/KXpwCkro150CiWcaCHDOIbYKmlacnkUf3anM=",
+        "lastModified": 1790028011,
+        "narHash": "sha256-mI3GcmWzPCQyggmatZXEERU4vaddZmHxpyw0Q6IPeu0=",
         "owner": "olafkfreund",
         "repo": "nixi-nixarchy",
-        "rev": "6b5878a427e0bb007fa7c673b4786ad80bf270fd",
+        "rev": "1c3fc7c946499e544534fc260472fda61fb1730d",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
         "repo": "nixi-nixarchy",
-        "rev": "6b5878a427e0bb007fa7c673b4786ad80bf270fd",
+        "rev": "1c3fc7c946499e544534fc260472fda61fb1730d",
         "type": "github"
       }
     },
