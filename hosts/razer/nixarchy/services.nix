@@ -33,6 +33,9 @@
     # ── Hardware ──────────────────────────────────────
     # hardware.graphics.enable32Bit = true;  #@ graphics32  # Wanted by Steam, Wine and older games. One switch covers every driver.
 
+    # ── Development ──────────────────────────────────
+    programs.nixarchy.services.devenv.enable = true;  #@ devenv  # Per-project development environments that activate when you cd in. Bundled because it is a package plus an activation hook in each of bash, zsh and fish, and a cache to keep the first use from being a compile.
+
     # ── Network ──────────────────────────────────────
     # services.openssh.enable = true;  #@ openssh  # Remote login. Opens port 22 and NixOS defaults to keys only, not passwords.
 
