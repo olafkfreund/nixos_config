@@ -392,6 +392,74 @@ test-package PACKAGE:
     @echo "📦 Testing package {{PACKAGE}}..."
     nix build .#{{PACKAGE}} --show-trace
 
+# Compare registered MCP servers against what this configuration builds (#1933)
+check-mcp:
+    #!/usr/bin/env bash
+    # Reports; never rewrites. ~/.claude.json belongs to Claude Code.
+    target="$HOME/.claude.json"
+    if [ ! -e "$target" ]; then
+        echo "no $target — nothing registered yet"
+        exit 0
+    fi
+    host=$(hostname)
+    # Build the home activation package first. `nix eval` alone yields a store
+    # path whose deriver is not instantiated locally, so realising it fails
+    # with "no substituter can build it" unless something already built that
+    # exact content. Building here makes the check self-contained (~40s warm).
+    echo "building the declared MCP set…"
+    if ! nix build --no-link \
+         ".#nixosConfigurations.$host.config.home-manager.users.$USER.home.activationPackage" 2>/dev/null; then
+        echo "⚠️  could not build the home activation package for $host"
+        exit 0
+    fi
+    # Derive the declared set from the configuration, not a hand-written list,
+    # so a newly declared server is covered without touching this recipe.
+    desired=$(nix eval --raw \
+        ".#nixosConfigurations.$host.config.home-manager.users.$USER.home.activation.claudeSharedMcpServers.data" \
+        2>/dev/null | grep -o '/nix/store/[a-z0-9]*-claude-shared-mcp.json' | head -1)
+    # Without a readable $desired every comparison below silently reads
+    # nothing and every server looks unmanaged — a green-looking lie.
+    if [ -z "$desired" ] || [ ! -e "$desired" ]; then
+        echo "⚠️  could not resolve the declared MCP set for $host"
+        exit 0
+    fi
+    drifted=0; missing=0
+    echo "🔍 MCP registrations on $host"
+    for name in $(jq -r '.mcpServers | keys[]' "$target"); do
+        reg=$(jq -r --arg n "$name" '.mcpServers[$n].command // ""' "$target")
+        want=$(jq -r --arg n "$name" '.mcpServers[$n].command // ""' "$desired")
+        if [ -n "$want" ]; then
+            if [ "$reg" != "$want" ]; then
+                echo "  ❌ drifted   $name"
+                echo "       registered: $reg"
+                echo "       configured: $want"
+                drifted=$((drifted + 1))
+            else
+                echo "  ✅ current   $name"
+            fi
+        elif [ "${reg#/}" != "$reg" ] && [ ! -e "$reg" ]; then
+            # Only an absolute path can be "missing". A bare command like sh,
+            # bash or uvx is resolved via PATH at spawn time and says nothing
+            # about garbage collection.
+            echo "  💥 missing   $name — registered path does not exist"
+            echo "       $reg"
+            missing=$((missing + 1))
+        elif [ -n "$reg" ]; then
+            echo "  ·  unmanaged $name (registered by hand, not declared here)"
+        fi
+    done
+    vestigial="$HOME/.local/state/nix/gcroots/ollama-mcp"
+    if [ -L "$vestigial" ]; then
+        echo "  ·  vestigial gcroot $vestigial -> $(readlink "$vestigial")"
+        echo "       nothing reads it since #1933; safe to delete"
+    fi
+    echo
+    echo "A change here takes effect on the NEXT SESSION, not on the rebuild:"
+    echo "Claude Code holds each server's process and tool schemas for the"
+    echo "life of a session. Rebuild, restart the session, then re-check."
+    [ "$missing" -eq 0 ] || { echo "❌ $missing registered path(s) missing"; exit 1; }
+    [ "$drifted" -eq 0 ] && echo "✅ no drift" || echo "⚠️  $drifted drifted; switch to reconcile"
+
 # Check Nix file syntax across the entire configuration
 check-syntax:
     #!/usr/bin/env bash

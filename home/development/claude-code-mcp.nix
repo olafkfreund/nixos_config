@@ -78,12 +78,16 @@ let
                 then "http://localhost:11434"
                 else "http://p620:11434";
             };
-            # NOTE: this string is documentation for whoever reads this file,
-            # NOT the tool description the model sees. It is written to the
-            # seed-only ~/.claude/settings.local.json (#398), which an
-            # existing install never re-reads. The model-facing text is the
-            # ollama_code docstring in pkgs/ollama-mcp/server.py — change it
-            # there (#1931).
+            # NOTE: this whole entry is the SEED copy, used only on a machine
+            # that has no ~/.claude/settings.local.json yet. After first run
+            # the authoritative declaration is the ollama-code entry in the
+            # claudeSharedMcpServers activation block below, which is what
+            # keeps the registration current (#1933).
+            #
+            # This string is also documentation for whoever reads this file,
+            # NOT the tool description the model sees. The model-facing text
+            # is the ollama_code docstring in pkgs/ollama-mcp/server.py —
+            # change it there (#1931).
             description = "Delegate isolated coding tasks to local Ollama coder models (qwen2.5-coder on p620/p510) and review the output — Claude supervises, Ollama drafts";
           };
 
@@ -296,6 +300,20 @@ in
     # Per-host on purpose: syncthing replicates ~/.claude/, and ~/.claude.json
     # sits beside that directory rather than inside it, so every host has to be
     # told separately. This is what does the telling.
+    #
+    # A server declared HERE follows a rebuild. A server declared only in the
+    # seed template above does NOT: the seed is written once, when
+    # ~/.claude/settings.local.json is missing (#398), and never re-read. That
+    # cost us two changes that shipped inert before anyone noticed (#1928,
+    # #1931) — the Nix attribute changed, CI was green, and the running system
+    # kept the build it was first pointed at. If a server is built from this
+    # repo, declare it here (#1933).
+    #
+    # Takes effect on the NEXT SESSION, not on the rebuild. Claude Code spawns
+    # these processes at session start and holds their tool schemas for the
+    # life of the session, so a running session keeps the old binary and the
+    # old descriptions. Rebuild, then restart the session, THEN check. Judging
+    # this from a still-running session is how it gets mistaken for inert.
     home.activation.claudeSharedMcpServers = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       target="$HOME/.claude.json"
       desired=${
@@ -324,6 +342,21 @@ in
                 exec ${pkgs.customPkgs.agent-bus-mcp}/bin/agent-bus-mcp "$@"
               ''}";
               args = [ ];
+            };
+
+            # Declared here as well as in the seed template, because the seed
+            # is never re-read. This is the copy that keeps the registration
+            # pointing at the current build after a package change (#1933).
+            ollama-code = {
+              type = "stdio";
+              command = "${pkgs.customPkgs.ollama-mcp}/bin/ollama-mcp";
+              args = [ ];
+              env = {
+                OLLAMA_HOST =
+                  if osConfig.networking.hostName == "p620"
+                  then "http://localhost:11434"
+                  else "http://p620:11434";
+              };
             };
           };
         })
