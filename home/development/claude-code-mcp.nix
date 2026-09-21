@@ -78,7 +78,13 @@ let
                 then "http://localhost:11434"
                 else "http://p620:11434";
             };
-            description = "Delegate isolated coding tasks to Ollama and review the output — Claude supervises, Ollama drafts. Local models: qwen2.5-coder:14b (default), qwen3.8:27b. Ollama Cloud models are reachable through the same daemon by passing a model with the -cloud suffix, e.g. model=\"gpt-oss:120b-cloud\" — use one for tasks too large for the local card. Returns text only; it never edits files.";
+            # NOTE: this string is documentation for whoever reads this file,
+            # NOT the tool description the model sees. It is written to the
+            # seed-only ~/.claude/settings.local.json (#398), which an
+            # existing install never re-reads. The model-facing text is the
+            # ollama_code docstring in pkgs/ollama-mcp/server.py — change it
+            # there (#1931).
+            description = "Delegate isolated coding tasks to local Ollama coder models (qwen2.5-coder on p620/p510) and review the output — Claude supervises, Ollama drafts";
           };
 
           # Terraform MCP for Infrastructure as Code

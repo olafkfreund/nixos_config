@@ -34,16 +34,21 @@ def _resolve(host):
 
 @mcp.tool()
 def ollama_code(task, model=DEFAULT_MODEL, host=None):
-    """Delegate a self-contained coding task to a local Ollama coder model and
+    """Delegate a self-contained coding task to an Ollama coder model and
     return only its output. Use for isolated, fully-specified units: write a
     function, generate tests from a signature, convert a snippet, fill
-    boilerplate. Then review the result yourself — the local model is the
+    boilerplate. Then review the result yourself — the worker model is the
     junior, you are the reviewer. Keep multi-file reasoning and anything
-    subtle on your own model.
+    subtle on your own model. Returns text; it never edits files.
 
     task: the complete, specific instruction for the worker model.
-    model: qwen2.5-coder:14b (default), :7b (faster), or
-           qwen2.5-coder-bigctx:14b (large context, p510 only).
+    model: local — qwen2.5-coder:14b (default), :7b (faster),
+           qwen2.5-coder-bigctx:14b (large context, p510 only),
+           qwen3.8:27b (largest that fits the card).
+           Ollama Cloud — any model with a "-cloud" suffix, e.g.
+           gpt-oss:120b-cloud. The daemon proxies these to api.ollama.com
+           using its own key; reach for one when the task is too large for
+           the local card.
     host: "p620", "p510", "local", or a full URL. Default from OLLAMA_HOST.
     """
     base = _resolve(host).rstrip("/")

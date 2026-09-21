@@ -126,6 +126,12 @@ Expected: `READ-ONLY OK`, tree byte-identical.
 `agy --agent` with a bogus name must **fail loudly**, not silently fall back
 to the default agent. If it falls back silently, the skill must say so.
 
+**Result: it falls back silently.** `--agent definitely-not-an-agent`
+answered normally and exited 0, with no error and no warning. The
+contingency applies: `SKILL.md` records that a mistyped agent name yields a
+generic answer indistinguishable from a specialist one, and instructs
+copying the name from `agy agents` rather than typing it.
+
 After a rebuild and an MCP server restart, load the `ollama_code` tool and
 confirm its description contains the cloud-model text. Reading `server.py` is
 not sufficient — verifying the edit rather than the effect is what produced
