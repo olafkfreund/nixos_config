@@ -137,6 +137,26 @@ confirm its description contains the cloud-model text. Reading `server.py` is
 not sufficient — verifying the edit rather than the effect is what produced
 the two inert changes in #1928.
 
+**Result: the docstring does not reach the model, and step 5 is incomplete.**
+The switch on p620 succeeded and the new package built
+(`q2xvxnz8…-ollama-mcp`), but the live MCP registration is not the one this
+repo writes. It lives in `~/.claude.json` and points at
+`~/.local/state/nix/gcroots/ollama-mcp/bin/ollama-mcp`, a gcroot symlink that
+still resolves to the previous build (`xnxnbxx7…-ollama-mcp`). No file in this
+repo manages that gcroot — `grep -rIln gcroots --include='*.nix'` returns
+nothing — so it was created outside Nix, presumably by a `claude mcp add`.
+
+This is the same root cause as #1928's second defect, one layer deeper: on an
+existing install, **neither the tool description nor the server binary tracks
+the Nix config**, because the only thing the config writes is the seed file
+(#398) and the live registration is elsewhere. The `server.py` change is
+correct and built; it simply cannot reach a server whose path is pinned
+outside Nix.
+
+Deliberately not fixed here: repointing or Nix-managing that gcroot is a
+change to how MCP servers are registered on this machine, which is outside
+this plan's approved scope. Tracked as follow-up.
+
 p510: not built, not deployed, not asked.
 
 ## Rollback
