@@ -2261,6 +2261,22 @@
         "type": "github"
       }
     },
+    "omacards": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790078404,
+        "narHash": "sha256-OjhBcfPg0jph0sSoaUdhc4kbk/cPsD18+ZzPZSB/4A8=",
+        "owner": "nocstah",
+        "repo": "omacards",
+        "rev": "97a331e63ebe8a0579265fdca0646e57795f8e3d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nocstah",
+        "repo": "omacards",
+        "type": "github"
+      }
+    },
     "omarchy": {
       "flake": false,
       "locked": {
@@ -2373,6 +2389,7 @@
         "nixpkgs-f2k": "nixpkgs-f2k",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nur": "nur",
+        "omacards": "omacards",
         "rust-overlay": "rust-overlay_4",
         "seance": "seance",
         "sops-nix": "sops-nix_2",

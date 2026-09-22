@@ -103,6 +103,18 @@ spec: spec/2026-09-23-1973-omacards-declarative.md
    confirm no nested Hyprland is left, and remove `/tmp/hfn` and `/tmp/hfs`.
    Any failure stops the plan.
 
+   **As executed (deviation):** `nested_session.py` loads its own demo plugins
+   with `hyprctl plugin load` and rewrites its own config, which would clash with
+   our Lua's `hl.plugin.load`. Instead, a nested `Hyprland --config` was started
+   with the harness's isolated environment (its own runtime, config, state and
+   data dirs, `LIBSEAT_BACKEND` stub, `AQ_DRM_DEVICES=/dev/null`). Its only
+   config was `pcall(require, "hypr.hyprflip")`, the same as `autostart.lua`,
+   with the three generated files placed where that config's `package.path`
+   resolves `hypr.*` (next to the config file, not `XDG_CONFIG_HOME`). Because
+   `pcall` would hide a Lua error, the pass criterion is that the file's last
+   block (the C/L/Space binds) registered. It was torn down by the Hyprland PID,
+   not the `setsid` PID.
+
 8. **Commit** `feat(hyprflip): declare OmaCards, its helper and shortcuts (#1973)`,
    then push.
 

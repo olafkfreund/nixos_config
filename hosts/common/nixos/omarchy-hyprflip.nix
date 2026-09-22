@@ -15,12 +15,55 @@
 #   pcall(require, "hypr.hyprflip")
 # A bare require of a missing file fails the WHOLE Hyprland config and drops
 # the session into the error overlay (same caveat as omarchy-meet-binds.nix).
-{ config, lib, ... }:
+#
+# OmaCards (#1973), the bar panel for Hyprflip cards, lives here too: it has no
+# meaning without Hyprflip. Three parts, all pinned:
+# - the plugin, from the omacards flake input. `omarchy plugin update` skips
+#   it (it only touches plugins with a .git); bump with `nix flake update
+#   omacards`. A hand clone under the same id wins over this link: nixarchy
+#   never replaces a real directory, so move it aside before the first switch.
+# - the helper it runs from ~/.local/lib/hyprflip, from the hyprflip input, so
+#   one bump moves plugin, hy3 and helper together. The assertion below fails
+#   evaluation when the helper's protocol and OmaCards' disagree.
+# - the guided shortcuts (O/C/L/Space) and the two Lua modules they need,
+#   verbatim from the hyprflip input's examples/. User choices stay in
+#   ~/.local/state/hyprflip, which those files read at parse time.
+{ config, lib, inputs, ... }:
 let
   cfg = lib.attrByPath [ "programs" "hyprflip" ] { enable = false; } config;
+
+  # First capture of `re` on any line of `text`; null when no line matches.
+  protocolIn = re: text:
+    let hits = lib.concatMap (l: let m = builtins.match re l; in if m == null then [ ] else m) (lib.splitString "\n" text);
+    in if hits == [ ] then null else lib.head hits;
+  helperProtocol = protocolIn "PROTOCOL = ([0-9]+).*" (builtins.readFile "${inputs.hyprflip}/scripts/control.py");
+  omacardsProtocol = protocolIn ".*data\\.protocol !== ([0-9]+).*" (builtins.readFile "${inputs.omacards}/Service.qml");
+
+  helper = f: { source = "${inputs.hyprflip}/scripts/${f}"; };
 in
 {
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = helperProtocol != null && omacardsProtocol != null;
+        message = "omarchy-hyprflip.nix: could not read the Hyprflip helper or OmaCards protocol (helper=${toString helperProtocol}, omacards=${toString omacardsProtocol}); upstream changed, update the check.";
+      }
+      {
+        assertion = helperProtocol == omacardsProtocol;
+        message = "omarchy-hyprflip.nix: Hyprflip helper speaks protocol ${toString helperProtocol} but OmaCards requires ${toString omacardsProtocol}; bump the hyprflip and omacards inputs together.";
+      }
+    ];
+
+    home-manager.users.olafkfreund.programs.nixarchy.plugins."io.github.nocstah.omacards".src = inputs.omacards;
+
+    home-manager.users.olafkfreund.home.file.".local/lib/hyprflip/control.py" = helper "control.py";
+    home-manager.users.olafkfreund.home.file.".local/lib/hyprflip/workflow.py" = helper "workflow.py";
+    home-manager.users.olafkfreund.home.file.".local/lib/hyprflip/shortcuts.py" = helper "shortcuts.py";
+    home-manager.users.olafkfreund.home.file.".local/lib/hyprflip/setup.py" = helper "setup.py";
+
+    home-manager.users.olafkfreund.home.file.".config/hypr/hyprflip-shortcuts.lua".source = "${inputs.hyprflip}/examples/shortcuts.lua";
+    home-manager.users.olafkfreund.home.file.".config/hypr/hyprflip-preferences.lua".source = "${inputs.hyprflip}/examples/preferences.lua";
+
     home-manager.users.olafkfreund.home.file.".config/hypr/hyprflip.lua".text =
       ''
         -- Managed by hosts/common/nixos/omarchy-hyprflip.nix -- edits here are overwritten on the next deploy.
@@ -94,6 +137,11 @@ in
               shortcuts.bind("SUPER + CTRL + ALT + O", run_arg("unfold"), { description = "Hyprflip: unfold or fold both faces" })
           end
       end
-      '';
+      ''
+      # Guided setup for OmaCards (O/C/L/Space), verbatim. It unbinds the O above
+      # before rebinding it, and must come after every other Hyprflip bind.
+      + lib.optionalString cfg.containers.enable (
+        "\n" + builtins.readFile "${inputs.hyprflip}/examples/containers-setup.lua"
+      );
   };
 }
