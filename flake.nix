@@ -85,39 +85,12 @@
       # nixarchy-voice` reported success. One node, ours, decides.
       inputs.nixarchy-voice.follows = "nixarchy-voice";
 
-      # aquamarine carries PR hyprwm/aquamarine#395 on top of upstream main
-      # -- 2026-09-12. aquamarine 0.15.0 leaves a removed connector's CRTC
-      # active in the kernel (SDRMConnector::disconnect() marks the connector
-      # DISCONNECTED before events.destroy, so 0.15.0's new commitState guard
-      # rejects the disable commit), and the next output handed that CRTC
-      # cannot modeset. On p620 that means the third head never gets a CRTC and
-      # two of three outputs are torn down and re-added every ~5s; any two are
-      # stable. Upstream: hyprwm/aquamarine#386, our report #402.
-      #
-      # #395 was auto-closed (unvouched contributor), not rejected on merit --
-      # several people in #386 confirm it fixes this. The fork rev below is
-      # exactly one commit on top of aquamarine main 61ddacaf, +22/-0 in
-      # src/backend/drm/DRM.cpp, verified against the PR diff. Drop this the
-      # moment the fix lands upstream.
-      # hyprland HELD at 0bd11c7a (2026-08-24) -- 2026-09-12, with the
-      # aquamarine its own lock names (7ce889cb, 2026-08-22). From 0.56.0 +
-      # aquamarine 0.15.0 -- whose notes rework atomic DRM modeset for AMD --
-      # p620 cannot drive its three heads: DCN 3.2 loops on
-      # dcn32_program_compbuf_size REG_WAIT and two of the three outputs are
-      # torn down and re-added every ~5s, leaving one usable screen.
-      #
-      # Upstream cause (hyprwm/aquamarine#386): SDRMConnector::disconnect()
-      # marks the connector DISCONNECTED before emitting events.destroy, so
-      # 0.15.0's new commitState guard rejects the disable commit, the CRTC is
-      # never disabled in the kernel, and the next output handed that CRTC
-      # cannot modeset. Our report: hyprwm/aquamarine#402.
-      #
-      # Pin the whole input, not aquamarine alone: 0.56 does not build against
-      # aquamarine 0.14 (0.15.0 bumps the soname), and a pair that never
-      # shipped upstream is in nobody's cache. Drop this once the fix lands
-      # upstream (PR hyprwm/aquamarine#395) and retest all three outputs.
-      inputs.hyprland.url =
-        "github:hyprwm/Hyprland/0bd11c7a04a63d2785abd53363f09d552175d67d";
+      # hyprland tracks hyprwm main rather than nixarchy's lock. nixarchy
+      # still locks 7ebf13ab (0.56.0 + aquamarine 0.15.0), whose disconnect
+      # path leaves a stale CRTC and makes p620's third head flap
+      # (hyprwm/aquamarine#386). Fixed by aquamarine#410 in 0.15.1, which
+      # Hyprland main locks. Drop this once nixarchy's lock is past it.
+      inputs.hyprland.url = "github:hyprwm/Hyprland";
     };
 
     # Oma, voice control for the Omarchy desktop. Follows this flake's nixpkgs
