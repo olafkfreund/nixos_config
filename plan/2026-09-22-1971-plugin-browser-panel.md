@@ -16,7 +16,9 @@ This plan is self-contained; it carries every approved decision.
 - **A new plain module, `hosts/common/nixos/omarchy-plugin-browser.nix`,**
   shaped like `omarchy-gog.nix`. It has no `mkEnableOption`; importing it
   enables it. It holds two things:
-  - `programs.nixarchy.menu.extraEntries."setup.plugin.add" = { icon = "󰖟"; label = "Add Plugin"; action = "omarchy-shell shell toggle io.github.olafkfreund.nixarchy-plugin-browser '{}'"; }`.
+  - `programs.nixarchy.menu.extraEntries."setup.plugin.add"
+    = { icon = "󰖟"; label = "Add Plugin";
+    action = "omarchy-shell shell toggle io.github.olafkfreund.nixarchy-plugin-browser '{}'"; }`.
     All three keys are restated, because an override blanks any key it
     leaves out.
   - `home-manager.users.olafkfreund.home.file.".config/hypr/plugin-browser-binds.lua".text`
