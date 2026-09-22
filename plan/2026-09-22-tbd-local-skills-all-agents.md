@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: TBD
 spec: spec/2026-09-22-tbd-local-skills-all-agents.md
 ---
