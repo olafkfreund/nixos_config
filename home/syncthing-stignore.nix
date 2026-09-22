@@ -149,10 +149,14 @@ let
   home = config.home.homeDirectory;
 in
 {
-  # After linkGeneration, which removes the .stignore symlinks earlier
-  # generations installed. A leftover symlink is replaced, not written
-  # through; unchanged content leaves the file (and its mtime) alone.
-  home.activation.syncthingIgnores = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+  # Before linkGeneration: the ignores come from config.home.file at eval
+  # time, so they need nothing on disk, and writing them first means a
+  # newly managed skill is ignored before its store links appear. The other
+  # way round left a window in which those links looked syncable and could
+  # reach another host dangling (#1960). A leftover .stignore symlink from an
+  # older generation is replaced, not written through; unchanged content
+  # leaves the file (and its mtime) alone.
+  home.activation.syncthingIgnores = lib.hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] ''
     for pair in "${claudeIgnores}:${home}/.claude/.stignore" \
                 "${geminiIgnores}:${home}/.gemini/.stignore"; do
       src="''${pair%%:*}"

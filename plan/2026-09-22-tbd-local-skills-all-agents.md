@@ -106,8 +106,10 @@ for every agent (#TBD)`. Steps 5–8 are deploys, not commits.
      --apply 'f: builtins.filter (n: builtins.match "\\.(claude|agents|codex|gemini)/skills/.*" n != null) (builtins.attrNames f)'
    ```
    Expect, counted as distinct skill names (the second path segment):
-   - `.claude/skills`: 20. That's 15 local skills (9 existing + 6 moved),
-     `claude-code-mastery`, and the 4 nix-skills.
+   - `.claude/skills`: 21. That's 15 local skills (9 existing + 6 moved),
+     `claude-code-mastery`, the 4 nix-skills, and `nixi` (installed by the
+     nixi-nixarchy module; out of scope). This was 20 in the approved plan,
+     which missed `nixi`; corrected during implementation.
    - `.agents/skills`: 16. That's 12 local skills (all except
      `second-opinion`, `ask-ollama-cloud` and `agent-bus`) and the 4 nix-skills.
    - `.codex/skills`: `agent-bus` only.

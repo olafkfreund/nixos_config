@@ -8,10 +8,55 @@ let
   inherit (lib) mkIf mkEnableOption;
   cfg = config.programs.claude-code-skills;
 
-  # Upstream's own NotebookLM skill ships inside the package; see the
-  # notebooklm block below. python3.sitePackages rather than a hard-coded
-  # python3.14, so a default-Python bump does not silently break the links.
+  # Upstream's own NotebookLM skill ships inside the package. python3.sitePackages
+  # rather than a hard-coded python3.14, so a default-Python bump does not
+  # silently break the links.
   nlmData = "${pkgs.customPkgs.notebooklm-mcp-cli}/${pkgs.python3.sitePackages}/notebooklm_tools/data";
+
+  # Our notebooklm playbook plus upstream's skill as a supporting reference, not
+  # a second skill: as a separate `nlm-skill` its near-identical triggers loaded
+  # two overlapping playbooks per request. Linked from the store rather than
+  # copied into this repo, so the ~1000-line reference follows the nightly bump.
+  notebooklmTree = pkgs.runCommand "skill-notebooklm" { } ''
+    cp -r ${./notebooklm} $out
+    chmod u+w $out
+    ln -s ${nlmData}/SKILL.md $out/reference.md
+    ln -s ${nlmData}/references $out/references
+  '';
+
+  # Where each agent reads skills; the only place these paths are written.
+  # Codex 0.155 and Antigravity 1.2 both read ~/.agents/skills. Nothing
+  # installed reads ~/.gemini/skills or Pi's directory -- add a row when one does.
+  agentDirs = {
+    claude = ".claude/skills";
+    agents = ".agents/skills"; # Codex and Antigravity
+    codex = ".codex/skills"; # Codex only
+  };
+
+  # Every skill written in this repo, and the agents it goes to.
+  everyAgent = [ "claude" "agents" ];
+  localSkills = {
+    gog = { src = ./gog; to = everyAgent; };
+    notebooklm = { src = notebooklmTree; to = everyAgent; };
+    artifact-workflow = { src = ./artifact-workflow; to = everyAgent; }; # #1832
+    dns = { src = ./dns; to = everyAgent; };
+    obsidian = { src = ./obsidian; to = everyAgent; };
+    "1password" = { src = ./1password; to = everyAgent; };
+    nixos-standards = { src = ./nixos-standards; to = everyAgent; };
+    fides = { src = ./fides; to = everyAgent; };
+    backstage-patterns = { src = ./backstage-patterns; to = everyAgent; };
+    linkedin-post = { src = ./linkedin-post; to = everyAgent; };
+    reddit-post = { src = ./reddit-post; to = everyAgent; };
+    cosmic-ui-design-skill = { src = ./cosmic-ui-design-skill; to = everyAgent; };
+    # Its MCP server is configured for Claude and Codex, not Antigravity.
+    agent-bus = { src = ./agent-bus; to = [ "claude" "codex" ]; };
+    # Claude only: for codex/agy it would let reviewers delegate to each other (#1831).
+    second-opinion = { src = ./second-opinion; to = [ "claude" ]; };
+    # Claude only: the cloud model drafts; it does not review or commit (#1928, #1929).
+    ask-ollama-cloud = { src = ./ask-ollama-cloud; to = [ "claude" ]; };
+  };
+  # Not here on purpose: parr-run and run-aws-demo describe private
+  # infrastructure (this repo is public), and the `skills` CLI owns its own.
 in
 {
   imports = [ inputs.nix-skills.homeManagerModules.default ];
@@ -40,93 +85,24 @@ in
       skills = [ "nix-language" "nixpkgs-development" "microvm-nix" "home-manager" ];
     };
 
-    # Vendor link to the borghei/Claude-Skills repo. Bump with:
-    #   nix flake update claude-skills-borghei
-    # then test-build and deploy.
-    home.file.".claude/skills/claude-code-mastery".source =
-      "${inputs.claude-skills-borghei}/engineering/claude-code-mastery";
-
-    # Local gog skill — /gog playbook for Gmail/Tasks/Calendar/Chat/Meet/etc.
-    # via the gogcli (`gog`) CLI. Sourced from this repo, not a flake input.
-    #
-    # Installed for three agents, not just Claude Code (#1785). Codex and
-    # Antigravity/Gemini both read ~/.codex/skills and ~/.gemini/skills, and
-    # both directories are already populated — but only by nixarchy, which
-    # symlinks its own skills in from its store tree. Nothing carried THIS
-    # repo's skills across, so the gog playbook did not exist in either tool.
-    #
-    # Per-file rather than whole-directory on purpose: those two directories
-    # hold nixarchy's symlinks, so owning the directory would fight it. One
-    # home.file per path adds the gog subdirectory and leaves the siblings be.
-    home.file.".claude/skills/gog/SKILL.md".source = ./gog/SKILL.md;
-    home.file.".claude/skills/artifact-workflow/SKILL.md".source = ./artifact-workflow/SKILL.md;
-    # Claude only: installing it for codex/agy would let reviewers delegate
-    # to each other (#1831).
-    home.file.".claude/skills/second-opinion/SKILL.md".source = ./second-opinion/SKILL.md;
-    # Claude only, for the same reason: the cloud model drafts, it does not
-    # review other agents and it does not commit (#1928, #1929).
-    home.file.".claude/skills/ask-ollama-cloud/SKILL.md".source = ./ask-ollama-cloud/SKILL.md;
-    home.file.".claude/skills/gog/evals.json".source = ./gog/evals.json;
-    home.file.".codex/skills/gog/SKILL.md".source = ./gog/SKILL.md;
-    home.file.".gemini/skills/gog/SKILL.md".source = ./gog/SKILL.md;
-
-    # Local notebooklm skill — the playbook for notebooklm-mcp-cli (#1785).
-    # Installed for the same three agents as gog.
-    #
-    # It deliberately does NOT copy the command surface: `nlm --ai` emits about
-    # a thousand lines of AI-oriented docs from the installed binary, and
-    # upstream ships every few days, so a transcription here would be wrong
-    # within a week. The file carries what those docs cannot know instead --
-    # that artifacts are a three-step async flow, that quota is a rolling
-    # window worth checking before generating, that credentials are per-host,
-    # and that a single error is not expired cookies.
-    # Upstream's skill (`nlm skill install` just copies data/SKILL.md out, byte
-    # for byte) is linked as a supporting reference INSIDE our skill, not
-    # installed as a second one: as a separate `nlm-skill` it carried
-    # near-identical triggers, so every NotebookLM request loaded two
-    # overlapping playbooks. Supporting files are not skills and trigger
-    # nothing; our SKILL.md points at them. Linked from the store path rather
-    # than copied into this repo, so the ~1000-line reference follows the
-    # nightly package bump instead of going stale.
-    home.file.".claude/skills/notebooklm/SKILL.md".source = ./notebooklm/SKILL.md;
-    home.file.".claude/skills/notebooklm/evals.json".source = ./notebooklm/evals.json;
-    home.file.".claude/skills/notebooklm/reference.md".source = "${nlmData}/SKILL.md";
-    home.file.".claude/skills/notebooklm/references".source = "${nlmData}/references";
-    home.file.".codex/skills/notebooklm/SKILL.md".source = ./notebooklm/SKILL.md;
-    home.file.".codex/skills/notebooklm/reference.md".source = "${nlmData}/SKILL.md";
-    home.file.".codex/skills/notebooklm/references".source = "${nlmData}/references";
-    home.file.".gemini/skills/notebooklm/SKILL.md".source = ./notebooklm/SKILL.md;
-    home.file.".gemini/skills/notebooklm/reference.md".source = "${nlmData}/SKILL.md";
-    home.file.".gemini/skills/notebooklm/references".source = "${nlmData}/references";
-
-    # Local dns skill — /dns playbook for GoDaddy DNS management.
-    # The companion shell CLI lives next to SKILL.md and self-decrypts
-    # the GoDaddy API secret from agenix at invocation time.
-    home.file.".claude/skills/dns/SKILL.md".source = ./dns/SKILL.md;
-    home.file.".claude/skills/dns/scripts/dns.sh" = {
-      source = ./dns/scripts/dns.sh;
-      executable = true;
-    };
-
-    # Local obsidian skill — playbook for the three vaults under ~/Documents.
-    # Deliberately steers most work to the plain file tools (a vault is just
-    # Markdown) and reserves notesmd-cli for renames, which must rewrite links
-    # across ~2950 notes. The conventions it documents were measured from the
-    # vaults, not assumed — notably that links here are 6:1 Markdown-style
-    # over [[wikilinks]] and that frontmatter is rare.
-    home.file.".claude/skills/obsidian/SKILL.md".source = ./obsidian/SKILL.md;
-
-    # Local agent-bus skill — the shared Matrix room on p510 where agents
-    # leave each other notes, reached as MCP tools rather than by driving a
-    # terminal. Lives here rather than in nixarchy on purpose: the MCP
-    # endpoint is tailnet-only, so shipping it to every nixarchy machine
-    # would put authoritative-looking instructions on machines that cannot
-    # reach it -- which is exactly why the SSH board's skill was pulled.
-    home.file.".claude/skills/agent-bus/SKILL.md".source = ./agent-bus/SKILL.md;
-
-    # Local 1password skill — `op` CLI playbook. Pure prose, no companion
-    # script: every useful invocation needs an unlocked desktop-app session,
-    # so there is nothing to automate around.
-    home.file.".claude/skills/1password/SKILL.md".source = ./1password/SKILL.md;
+    home.file = lib.mkMerge ([
+      # Vendor link to the borghei/Claude-Skills repo. Bump with:
+      #   nix flake update claude-skills-borghei
+      # then test-build and deploy.
+      {
+        ".claude/skills/claude-code-mastery".source =
+          "${inputs.claude-skills-borghei}/engineering/claude-code-mastery";
+      }
+    ] ++ lib.mapAttrsToList
+      (name: skill: lib.genAttrs' skill.to (agent:
+        lib.nameValuePair "${agentDirs.${agent}}/${name}" {
+          source = skill.src;
+          # Per-file links inside a real directory: the directories also hold
+          # nixarchy's and nix-skills' links, so owning them would fight both.
+          recursive = true;
+          # Replaces the regular files these skills were before they moved here.
+          force = true;
+        }))
+      localSkills);
   };
 }
