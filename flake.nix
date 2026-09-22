@@ -96,6 +96,17 @@
       inputs.hyprland.url = "github:hyprwm/Hyprland/main";
     };
 
+    # Hyprflip — two windows as the faces of a rotating card (a Hyprland
+    # plugin plus the patched hy3 provider). A plugin must be built against
+    # the exact compositor it loads into, so its hyprland follows nixarchy's
+    # (Hyprland main, above): one lock node for both. A main bump that breaks
+    # the plugin API then fails the rebuild instead of the session. Wired in
+    # hosts/p620/nixos/nixarchy.nix; loaded from ~/.config/hypr/hyprflip.lua.
+    hyprflip = {
+      url = "github:olafkfreund/nixarchy-hyprflip";
+      inputs.hyprland.follows = "nixarchy/hyprland";
+    };
+
     # Oma, voice control for the Omarchy desktop. Follows this flake's nixpkgs
     # for the same reason nixarchy does: the package wraps ~10 desktop tools
     # onto PATH, and a second nixpkgs would be a second copy of every one.

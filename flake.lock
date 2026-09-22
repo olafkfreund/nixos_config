@@ -950,6 +950,32 @@
         "type": "github"
       }
     },
+    "hyprflip": {
+      "inputs": {
+        "hyprland": [
+          "nixarchy",
+          "hyprland"
+        ],
+        "nixpkgs": [
+          "hyprflip",
+          "hyprland",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790111956,
+        "narHash": "sha256-IyNlFSPi22l3I9F1HOJO/vHR/02I22ugAaCvqYW44zE=",
+        "owner": "olafkfreund",
+        "repo": "nixarchy-hyprflip",
+        "rev": "f76d8f6228b325ba954c0e71ae0259d5d1d45110",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "nixarchy-hyprflip",
+        "type": "github"
+      }
+    },
     "hyprgraphics": {
       "inputs": {
         "hyprutils": [
@@ -2329,6 +2355,7 @@
         "gscratch": "gscratch",
         "herdr": "herdr",
         "home-manager": "home-manager_2",
+        "hyprflip": "hyprflip",
         "lan-mouse": "lan-mouse",
         "lanzaboote": "lanzaboote",
         "mcp-nixos": "mcp-nixos",

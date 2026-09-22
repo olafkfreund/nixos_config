@@ -37,9 +37,19 @@
     ../../common/nixos/omarchy-sole-hyprland.nix
     ../../common/nixos/omarchy-stylix-theme.nix
     ../../common/nixos/omarchy-plugin-browser.nix
+    inputs.hyprflip.nixosModules.default
+    ../../common/nixos/omarchy-hyprflip.nix
   ];
 
   programs.nixarchy.enable = true;
+
+  # Hyprflip plugin + hy3 provider at /etc/hyprflip/, built against
+  # programs.hyprland.package -- the Hyprland main build the Omarchy session
+  # runs. ~/.config/hypr/hyprflip.lua loads them (required from autostart.lua).
+  programs.hyprflip = {
+    enable = true;
+    containers.enable = true;
+  };
 
   # Puts this user in the input group. Omarchy's shell reads the keyboard
   # device directly for its own key handling, which the group grants; without
