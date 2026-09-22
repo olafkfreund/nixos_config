@@ -75,7 +75,7 @@ baseTheme = {
 
 Surfaces that cannot consume Stylix automatically are wired to it explicitly:
 
-- **GNOME Terminal** and **Zellij** — colours generated from
+- **GNOME Terminal** — colours generated from
   `config.lib.stylix.colors`.
 - **Plymouth, GRUB and the Linux console** — themed through Stylix, which is
   the only way they can follow Omarchy at all.

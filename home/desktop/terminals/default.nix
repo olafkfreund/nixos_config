@@ -371,7 +371,6 @@ in
       [
         # Terminal multiplexers
         tmux
-        zellij
 
         # Terminal utilities
         btop # System monitor

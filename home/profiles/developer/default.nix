@@ -82,7 +82,6 @@
     multiplexers = {
       enable = true; # Session management for long-running tasks
       tmux = true;
-      zellij = true;
     };
 
     gaming = {

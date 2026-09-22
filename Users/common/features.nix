@@ -68,7 +68,6 @@ let inherit (lib) mkEnableOption; in {
     multiplexers = {
       enable = mkEnableOption "Enable terminal multiplexers";
       tmux = mkEnableOption "Enable Tmux";
-      zellij = mkEnableOption "Enable Zellij";
     };
 
     gaming = {

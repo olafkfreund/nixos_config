@@ -29,7 +29,6 @@
     networkmanager-vpnc
 
     # Lightweight productivity (mobile-optimized)
-    zellij # Better than tmux for mobility
     ranger # File manager
 
     # Laptop hardware tools

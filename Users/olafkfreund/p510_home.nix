@@ -93,7 +93,6 @@
     multiplexers = {
       enable = true;
       tmux = true;
-      zellij = true;
     };
   };
 

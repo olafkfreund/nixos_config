@@ -41,7 +41,7 @@ docs are stale.
 - Theming is centralised through Stylix (`base16` palette), whose
   source of truth is the **active Omarchy theme** — see [Theming](#theming).
   Dependent surfaces — Plymouth, GRUB, the console, GTK, Qt, GNOME
-  Terminal, Zellij — derive their colours from
+  Terminal — derive their colours from
   `config.lib.stylix.colors`. The standalone `nix-colors` input has
   been removed.
 - Home Manager is loaded as a flake module from `flake.nix`. Do **not**
@@ -247,8 +247,8 @@ builder (`lib/live-images.nix`) can be re-instantiated if needed.
   `config.programs.nixarchy.package` — nixarchy consumes Stylix, so that
   closes the module fixpoint and evaluation dies with infinite recursion.
 - Surfaces: `config.lib.stylix.colors` (base16 scheme) drives Plymouth,
-  GRUB, the console, GTK, Qt, fonts, cursor, icons, GNOME Terminal and
-  Zellij.
+  GRUB, the console, GTK, Qt, fonts, cursor, icons and GNOME
+  Terminal.
 - `assets/wallpapers/` contains all wallpapers; the active wallpaper is
   selected by the per-host theme module.
 - COSMIC: a writer derivation produces the full RON palette (30

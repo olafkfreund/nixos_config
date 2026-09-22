@@ -54,7 +54,7 @@
 
 - **Editors:** VS Code, Neovim (LazyVim/LunarVim), Cursor, Windsurf
 - **Languages:** Python, Go, Rust, Node.js, Java, Lua
-- **Shells:** Zsh with Starship, advanced multiplexers (tmux, Zellij)
+- **Shells:** Zsh with Starship, tmux
 - **AI Integration:** Claude Code, multiple LLM providers
 
 ## Infrastructure Components

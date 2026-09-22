@@ -6,7 +6,10 @@
 
 ## Pitch
 
-NixOS Infrastructure Hub is a comprehensive, sophisticated private NixOS configuration management system that helps infrastructure owners manage multi-host deployments with advanced automation, monitoring, AI integration, and development environments by providing a declarative, reproducible, and highly optimized infrastructure-as-code platform.
+NixOS Infrastructure Hub is a comprehensive, sophisticated private NixOS configuration management
+system that helps infrastructure owners manage multi-host deployments with advanced automation,
+monitoring, AI integration, and development environments by providing a declarative, reproducible,
+and highly optimized infrastructure-as-code platform.
 
 ## Users
 
@@ -21,7 +24,8 @@ NixOS Infrastructure Hub is a comprehensive, sophisticated private NixOS configu
 
 - **Role:** DevOps/Infrastructure Engineering
 - **Context:** Managing complex multi-host NixOS infrastructure with advanced monitoring and automation
-- **Pain Points:** Configuration drift, inconsistent environments, manual deployment processes, lack of comprehensive monitoring
+- **Pain Points:** Configuration drift, inconsistent environments, manual deployment processes, lack
+  of comprehensive monitoring
 - **Goals:** Declarative infrastructure, automated deployments, comprehensive observability, reproducible environments
 
 **NixOS Community Member** (25-45 years old)
@@ -35,51 +39,71 @@ NixOS Infrastructure Hub is a comprehensive, sophisticated private NixOS configu
 
 ### Configuration Management Complexity
 
-Managing multiple NixOS hosts with different hardware profiles, services, and requirements creates significant complexity in maintaining consistency and preventing configuration drift. Traditional approaches lead to duplicated code and manual processes.
+Managing multiple NixOS hosts with different hardware profiles, services, and requirements creates
+significant complexity in maintaining consistency and preventing configuration drift. Traditional
+approaches lead to duplicated code and manual processes.
 
-**Our Solution:** Feature flag system with 141+ optimized modules providing declarative, validated configurations across all hosts.
+**Our Solution:** Feature flag system with 141+ optimized modules providing declarative, validated
+configurations across all hosts.
 
 ### Infrastructure Monitoring Gap
 
-Home lab and development environments often lack comprehensive monitoring and observability, making it difficult to identify performance issues, resource constraints, and system health problems proactively.
+Home lab and development environments often lack comprehensive monitoring and observability, making
+it difficult to identify performance issues, resource constraints, and system health problems
+proactively.
 
-**Our Solution:** Full Prometheus/Grafana monitoring stack with custom exporters and performance analytics across all hosts.
+**Our Solution:** Full Prometheus/Grafana monitoring stack with custom exporters and performance
+analytics across all hosts.
 
 ### Development Environment Inconsistency
 
-Maintaining consistent development environments across different machines and projects is challenging, leading to "works on my machine" problems and productivity losses.
+Maintaining consistent development environments across different machines and projects is
+challenging, leading to "works on my machine" problems and productivity losses.
 
-**Our Solution:** Reproducible development environments with AI integration, containerization support, and standardized tooling.
+**Our Solution:** Reproducible development environments with AI integration, containerization
+support, and standardized tooling.
 
 ### Deployment and Automation Overhead
 
-Manual deployment processes and lack of automation create operational overhead and increase the risk of human error in infrastructure changes.
+Manual deployment processes and lack of automation create operational overhead and increase the risk
+of human error in infrastructure changes.
 
-**Our Solution:** Advanced justfile automation with 100+ deployment commands, CI/CD integration, and automated testing pipelines.
+**Our Solution:** Advanced justfile automation with 100+ deployment commands, CI/CD integration, and
+automated testing pipelines.
 
 ## Differentiators
 
 ### Comprehensive Module Architecture
 
-Unlike typical NixOS configurations, we provide a sophisticated 141+ module system with feature flags, validation, and performance optimization. This results in maintainable, scalable infrastructure code.
+Unlike typical NixOS configurations, we provide a sophisticated 141+ module system with feature
+flags, validation, and performance optimization. This results in maintainable, scalable
+infrastructure code.
 
 ### Advanced Monitoring Integration
 
-Unlike basic home lab setups, we provide enterprise-grade monitoring with Prometheus/Grafana, custom exporters, and performance analytics. This results in proactive system management and optimization insights.
+Unlike basic home lab setups, we provide enterprise-grade monitoring with Prometheus/Grafana, custom
+exporters, and performance analytics. This results in proactive system management and optimization
+insights.
 
 ### AI-Powered Infrastructure
 
-Unlike traditional configuration management, we integrate multiple AI providers (Anthropic, OpenAI, Gemini, Ollama) for intelligent system tuning and automated optimization. This results in continuously improving infrastructure performance.
+Unlike traditional configuration management, we integrate multiple AI providers (Anthropic, OpenAI,
+Gemini, Ollama) for intelligent system tuning and automated optimization. This results in
+continuously improving infrastructure performance.
 
 ### NixOS Best Practices Implementation
 
-Unlike typical NixOS configurations with anti-patterns and technical debt, we follow comprehensive best practices documentation eliminating all anti-patterns, implementing community standards, and providing 165 lines of code reduction through proper abstractions. This results in maintainable, secure, and performance-optimized configurations.
+Unlike typical NixOS configurations with anti-patterns and technical debt, we follow comprehensive
+best practices documentation eliminating all anti-patterns, implementing community standards, and
+providing 165 lines of code reduction through proper abstractions. This results in maintainable,
+secure, and performance-optimized configurations.
 
 ## Key Features
 
 ### Core Features
 
-- **Multi-Host Configuration Management:** Declarative NixOS configurations for 4 active hosts with hardware-specific optimizations
+- **Multi-Host Configuration Management:** Declarative NixOS configurations for 4 active hosts with
+  hardware-specific optimizations
 - **Feature Flag System:** 141+ optimized modules with dependency validation and conditional loading
 - **Secrets Management:** Comprehensive Agenix-based secrets with automated rotation and access controls
 - **Live USB Installers:** Hardware-specific live installation images with automated setup wizards
@@ -92,12 +116,13 @@ Unlike typical NixOS configurations with anti-patterns and technical debt, we fo
 - **Configuration Validation:** Multi-stage testing and validation framework
 - **System Analytics:** Performance tracking and resource management
 
-**Note**: Monitoring infrastructure (Prometheus/Grafana/Loki) has been **removed** to simplify the configuration. DEX5550 is **offline**.
+**Note**: Monitoring infrastructure (Prometheus/Grafana/Loki) has been **removed** to simplify the
+configuration. DEX5550 is **offline**.
 
 ### Development & Productivity Features
 
 - **AI Provider Integration:** Multiple LLM providers with unified client interface for development assistance
-- **Advanced Shell Environment:** Modern Zsh, Starship, tmux, and Zellij with productivity optimizations
+- **Advanced Shell Environment:** Modern Zsh, Starship and tmux with productivity optimizations
 - **Development Tooling:** Comprehensive language support, editors (VS Code, Neovim), and workflow automation
 - **Automated Testing:** CI/CD pipelines with configuration validation and parallel testing
 

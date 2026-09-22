@@ -89,7 +89,6 @@ in
     (mkIf cfg.multiplexers.enable {
       multiplexer = {
         tmux.enable = cfg.multiplexers.tmux;
-        zellij.enable = cfg.multiplexers.zellij;
       };
     })
 

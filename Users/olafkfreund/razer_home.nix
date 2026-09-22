@@ -27,9 +27,6 @@
     ];
   };
 
-  # Laptop: enable zellij (session management for mobile use)
-  features.multiplexers.zellij = true;
-
   # Ghostty: profile.nix defaults this off ("workstation only"); razer wants
   # it too as the primary terminal alongside the existing wave/warp/foot/etc.
   features.terminals.ghostty = true;

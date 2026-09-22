@@ -123,8 +123,6 @@ in
     multiplexers = {
       enable = true;
       tmux = true;
-      # zellij: razer enables it; p620 does not
-      zellij = mkDefault false;
     };
 
     gaming = {
