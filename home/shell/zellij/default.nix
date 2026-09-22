@@ -123,7 +123,6 @@ in
     # Additional packages for enhanced Zellij experience
     home.packages = with pkgs; [
       zjstatus # Enhanced status bar
-      tmate # Terminal sharing
     ];
 
     # Zellij configuration directory setup
