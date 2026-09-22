@@ -97,6 +97,7 @@
   # line before the end marker.
   environment.systemPackages = with pkgs; [  #@pkgs-begin
     azure-cli  #@pkg azure-cli
+    bubblewrap  #@pkg bubblewrap
   ];  #@pkgs-end
 
   # ── Added by nixarchy-catalogue-diff, 2026-09-17 ──
