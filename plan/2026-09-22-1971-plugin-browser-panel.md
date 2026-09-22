@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1971
 spec: spec/2026-09-22-1971-plugin-browser-panel.md
 ---
