@@ -90,7 +90,10 @@
       # path leaves a stale CRTC and makes p620's third head flap
       # (hyprwm/aquamarine#386). Fixed by aquamarine#410 in 0.15.1, which
       # Hyprland main locks. Drop this once nixarchy's lock is past it.
-      inputs.hyprland.url = "github:hyprwm/Hyprland";
+      # Keep the explicit /main: an override whose URL equals nixarchy's own
+      # makes a bulk `nix flake update` copy nixarchy's locked rev instead of
+      # fetching, which silently put 7ebf13ab back.
+      inputs.hyprland.url = "github:hyprwm/Hyprland/main";
     };
 
     # Oma, voice control for the Omarchy desktop. Follows this flake's nixpkgs
