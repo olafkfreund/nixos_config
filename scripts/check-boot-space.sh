@@ -79,10 +79,12 @@ fi
 
 # Escalate to a single generation.
 #
-# Keeping 2 generations is not always reachable: on razer the initrds are
-# ~150MiB, so 2 generations occupy 312MiB of a 511MiB ESP and leave 198MiB —
-# permanently 2MiB under MIN_FREE_MIB. `--delete-generations +2` therefore
-# "succeeded" while still failing the check, every single deploy.
+# Keeping 2 generations is not always reachable. On razer (511MiB ESP) the
+# initrds were ~150MiB in 2026-08, so 2 generations occupied 312MiB and left
+# 198MiB — 2MiB under MIN_FREE_MIB. `--delete-generations +2` "succeeded"
+# while still failing the check, every single deploy. Since #1954 the initrd
+# is ~117MiB and 2 generations leave ~246MiB, so this only fires again if
+# the initrd grows back past ~140MiB.
 #
 # Dropping to 1 frees a full initrd. The fallback is not lost for long: the
 # deploy that follows writes a second generation immediately, so the end state

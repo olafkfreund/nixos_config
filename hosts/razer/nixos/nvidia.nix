@@ -17,7 +17,18 @@
       nvidiaSettings = true;
       # beta (595.45.04) fails to build against kernel 7.1 — it includes
       # linux/of_gpio.h, removed in 7.x. latest (610.43.02) handles the removal.
-      package = config.boot.kernelPackages.nvidiaPackages.latest;
+      #
+      # The Turing firmware (*_tu10x) is deleted: the GA104 only loads the
+      # ga10x files, and the tu10x ones cost 14 MiB in every initrd on a
+      # 511 MiB ESP -- the margin that lets boot.nix keep two generations
+      # (#1954). Drop the override if razer ever gets a Turing card. `rm`
+      # has no -f on purpose: if a driver renames the files, the build
+      # fails instead of quietly keeping them.
+      package = config.boot.kernelPackages.nvidiaPackages.latest.overrideAttrs (old: {
+        postFixup = (old.postFixup or "") + ''
+          rm $firmware/lib/firmware/nvidia/*/*tu10x*
+        '';
+      });
 
       prime = {
         sync.enable = true;
