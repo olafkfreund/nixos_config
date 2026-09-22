@@ -1,0 +1,109 @@
+{
+  "name": "cosmic-ui-design-skill",
+  "version": "1.0.0",
+  "description": "COSMIC Desktop UI Design & Development Excellence - Comprehensive skill for COSMIC app development",
+  "author": "COSMIC Community",
+  "agents": {
+    "cosmic-architect": {
+      "name": "cosmic-architect",
+      "description": "Reviews and designs COSMIC application architecture",
+      "invocable": true,
+      "context_files": [
+        "SKILL.md",
+        "QUICK_REFERENCE.md",
+        "PROJECT_STRUCTURE.md"
+      ]
+    },
+    "cosmic-theme-expert": {
+      "name": "cosmic-theme-expert",
+      "description": "Reviews theming implementation and ensures COSMIC compliance",
+      "invocable": true,
+      "context_files": [
+        "SKILL.md",
+        "QUICK_REFERENCE.md"
+      ]
+    },
+    "cosmic-applet-specialist": {
+      "name": "cosmic-applet-specialist",
+      "description": "Expert in COSMIC panel applets and Wayland integration",
+      "invocable": true,
+      "context_files": [
+        "SKILL.md",
+        "PROJECT_STRUCTURE.md"
+      ]
+    },
+    "cosmic-widget-builder": {
+      "name": "cosmic-widget-builder",
+      "description": "Expert in libcosmic widget usage and composition",
+      "invocable": true,
+      "context_files": [
+        "SKILL.md",
+        "QUICK_REFERENCE.md"
+      ]
+    },
+    "cosmic-error-handler": {
+      "name": "cosmic-error-handler",
+      "description": "Reviews error handling and eliminates unwrap/expect",
+      "invocable": true,
+      "context_files": [
+        "SKILL.md"
+      ]
+    },
+    "cosmic-performance-optimizer": {
+      "name": "cosmic-performance-optimizer",
+      "description": "Analyzes performance and suggests optimizations",
+      "invocable": true,
+      "context_files": [
+        "SKILL.md"
+      ]
+    },
+    "cosmic-code-reviewer": {
+      "name": "cosmic-code-reviewer",
+      "description": "Comprehensive COSMIC code review combining all experts",
+      "invocable": true,
+      "context_files": [
+        "SKILL.md",
+        "QUICK_REFERENCE.md",
+        "PROJECT_STRUCTURE.md"
+      ]
+    }
+  },
+  "shortcuts": {
+    "/full-review": {
+      "agent": "cosmic-code-reviewer",
+      "description": "Complete COSMIC compliance review"
+    },
+    "/audit-theming": {
+      "agent": "cosmic-theme-expert",
+      "description": "Complete theming audit"
+    },
+    "/review-app-structure": {
+      "agent": "cosmic-architect",
+      "description": "Review application architecture"
+    },
+    "/review-widgets": {
+      "agent": "cosmic-widget-builder",
+      "description": "Review widget usage"
+    },
+    "/remove-unwraps": {
+      "agent": "cosmic-error-handler",
+      "description": "Remove all unwrap/expect calls"
+    },
+    "/find-bottlenecks": {
+      "agent": "cosmic-performance-optimizer",
+      "description": "Find performance issues"
+    }
+  },
+  "metadata": {
+    "tags": [
+      "cosmic",
+      "rust",
+      "gui",
+      "libcosmic",
+      "wayland"
+    ],
+    "category": "development",
+    "documentation": "https://pop-os.github.io/libcosmic-book/",
+    "repository": "https://github.com/pop-os/libcosmic"
+  }
+}
