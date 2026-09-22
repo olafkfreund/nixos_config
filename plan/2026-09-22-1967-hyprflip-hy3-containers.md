@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1967
 spec: spec/2026-09-22-1967-hyprflip-hy3-containers.md
 ---
