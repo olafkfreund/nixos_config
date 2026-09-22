@@ -37,6 +37,7 @@
     ../../common/nixos/omarchy-sole-hyprland.nix
     ../../common/nixos/omarchy-stylix-theme.nix
     inputs.hyprflip.nixosModules.default
+    ../../common/nixos/omarchy-hyprflip.nix
   ];
 
   programs.nixarchy.enable = true;
