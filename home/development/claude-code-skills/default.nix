@@ -77,11 +77,12 @@ in
     # Our nix-skills collection (#1958), for three agents at once. Left out:
     # devenv-project overlaps nixarchy's machine-specific `devenv` skill, and
     # nixos-wiki is a snapshot of what the mcp-nixos server searches live.
-    # Gemini CLI's ~/.gemini/skills has no agent entry in nix-skills;
-    # Antigravity's ~/.gemini/config/skills does.
+    # No "antigravity": nix-skills puts "codex" in ~/.agents/skills, which
+    # Antigravity reads as well as ~/.gemini/config/skills, so both entries
+    # listed every skill twice there.
     programs.nix-skills = {
       enable = true;
-      agents = [ "claude" "codex" "antigravity" ];
+      agents = [ "claude" "codex" ];
       skills = [ "nix-language" "nixpkgs-development" "microvm-nix" "home-manager" ];
     };
 
