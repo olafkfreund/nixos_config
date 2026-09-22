@@ -41,6 +41,15 @@ let
       (path: lib.elemAt (lib.splitString "/" path)
         (lib.length (lib.splitString "/" "${folder}/${subdir}")))
       (lib.filter (lib.hasPrefix "${folder}/${subdir}/") (lib.attrNames config.home.file))));
+
+  # Hand-made skill links whose target exists on only some hosts: omgato's
+  # plugin is on p620 only, herdr's skill on p620 + razer, and test-skill's
+  # source tree on razer only. Synced, each dangled on the other hosts, and
+  # deleting a dangling copy would sync the deletion to the host where it
+  # works. Ignored, every host keeps its own copy (or none).
+  hostLocalSkillIgnores = subdir:
+    lib.concatMapStrings (name: "/${subdir}/${name}\n")
+      [ "herdr" "omarchy-omgato" "test-skill" ];
 in
 {
   home.file.".claude/.stignore" = {
@@ -58,7 +67,7 @@ in
 
       // ─── Home-manager-owned skills: per-host store symlinks, never sync ───
       // (derived from home.file; first match wins, so these beat !skills/**)
-      ${managedSkillIgnores ".claude" "skills"}
+      ${managedSkillIgnores ".claude" "skills"}${hostLocalSkillIgnores "skills"}
       // ─── ALLOWLIST: only these sync ───
       !CLAUDE.md
       !skills/**
@@ -96,7 +105,7 @@ in
 
       // ─── Home-manager-owned skills: per-host store symlinks, never sync ───
       // (derived from home.file; first match wins, so these beat !skills/**)
-      ${managedSkillIgnores ".gemini" "skills"}${managedSkillIgnores ".gemini" "config/skills"}
+      ${managedSkillIgnores ".gemini" "skills"}${managedSkillIgnores ".gemini" "config/skills"}${hostLocalSkillIgnores "config/skills"}
       // ─── ALLOWLIST: only these sync ───
       !GEMINI.md
       !settings.json
