@@ -21,7 +21,6 @@ in
     environment.systemPackages = with pkgs; [
       podman-compose
       podman-tui
-      podman-desktop
       pods
     ];
     virtualisation = {
