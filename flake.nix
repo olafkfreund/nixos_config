@@ -187,7 +187,6 @@
 
     # Additional tools
     lan-mouse.url = "github:feschber/lan-mouse";
-    zjstatus.url = "github:dj95/zjstatus";
     # NOTE: Claude Desktop is no longer a flake input — as of #986 we package
     # Anthropic's OFFICIAL Linux beta .deb ourselves (pkgs/claude-desktop-beta,
     # exposed via overlays/default.nix as pkgs.claude-desktop-linux). The old
@@ -325,7 +324,6 @@
     , spicetify-nix
     , home-manager
     , nix-index-database
-    , zjstatus
     , antigravity-nix
     , mcp-nixos
     , ...
@@ -422,7 +420,6 @@
               inputs.agenix.nixosModules.default
               inputs.lanzaboote.nixosModules.lanzaboote
               nix-index-database.nixosModules.nix-index
-              ./home/shell/zellij/zjstatus.nix
             ]
             ++ stylixModule
             ++ [
@@ -459,7 +456,6 @@
                     inherit
                       inputs
                       nixpkgs
-                      zjstatus
                       spicetify-nix
                       agenix
                       antigravity-nix

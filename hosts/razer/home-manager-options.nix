@@ -58,7 +58,6 @@
     # Terminal multiplexer features
     multiplexers = {
       tmux.enable = true;
-      zellij.enable = true;
     };
   };
 }

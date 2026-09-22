@@ -34,7 +34,6 @@
 - [x] Modern Zsh configuration with AI integration `M`
 - [x] Enhanced Starship prompt with development context `S`
 - [x] Advanced tmux configuration with productivity plugins `M`
-- [x] Modern Zellij multiplexer setup `M`
 - [x] Comprehensive documentation for all shell components `S`
 - [x] Performance optimizations and modern tool integration `M`
 
@@ -53,7 +52,8 @@
 **Status**: Removed from Configuration
 **Completion**: N/A (Infrastructure simplified)
 
-**Deprecation Note**: The Prometheus/Grafana/Loki monitoring stack has been **removed** from the configuration to simplify infrastructure management. The following features are no longer active:
+**Deprecation Note**: The Prometheus/Grafana/Loki monitoring stack has been **removed** from the
+configuration to simplify infrastructure management. The following features are no longer active:
 
 - [~] ~~Prometheus/Grafana deployment~~ (removed - infrastructure simplified)
 - [~] ~~System metrics collection (node, systemd, NixOS exporters)~~ (using native systemd journal instead)
@@ -145,7 +145,7 @@
 **Goal:** Implement comprehensive NixOS best practices and eliminate anti-patterns across entire codebase
 **Success Criteria:** Zero anti-patterns, follow community standards, comprehensive code quality
 
-### **Completed**
+### Phase 8.1: Completed
 
 - [x] Anti-patterns documentation integration (docs/NIXOS-ANTI-PATTERNS.md) `M`
 - [x] mkIf true pattern elimination across all modules `M`
@@ -165,7 +165,7 @@
 - **Performance**: Evaluation overhead eliminated
 - **Maintainability**: Explicit, debuggable configurations
 
-### Dependencies
+### Phase 8.1: Dependencies
 
 - ✅ Template-based architecture (Phase 6 restructuring)
 - ✅ Module system maturity (141+ modules)
@@ -191,7 +191,7 @@
 - [ ] Backup encryption verification system `S`
 - [ ] Security audit logging for secrets access `M`
 
-### Dependencies
+### Phase 9: Dependencies
 
 - Agenix secrets management system (completed)
 - Tailscale network infrastructure (completed)
@@ -203,7 +203,8 @@
 **Priority**: N/A
 **Timeline**: N/A
 
-**Deprecation Note**: Centralized logging infrastructure (Loki/Promtail) has been **removed** from the configuration to simplify infrastructure management.
+**Deprecation Note**: Centralized logging infrastructure (Loki/Promtail) has been **removed** from
+the configuration to simplify infrastructure management.
 
 **Current Approach**: Using native NixOS logging tools:
 
@@ -218,7 +219,7 @@
 - [~] ~~Centralized log aggregation~~ (using native tools)
 - [~] ~~Log-based alerting~~ (simplified approach)
 
-### Dependencies
+### Phase 10: Dependencies
 
 - ❌ ~~Prometheus/Grafana monitoring stack~~ (removed)
 
@@ -234,15 +235,15 @@
 **Goal:** Optimize and expand home lab service offerings with improved automation
 **Success Criteria:** All services containerized, automated updates, enhanced remote access
 
-### Must-Have Features
+### Phase 11: Must-Have Features
 
 - [ ] Remote access optimization with VPN integration `M`
 
-### Should-Have Features
+### Phase 11: Should-Have Features
 
 - [ ]
 
-### Dependencies
+### Phase 11: Dependencies
 
 - ✅ Monitoring stack for service health tracking (completed)
 - ✅ Network stability infrastructure (completed)
@@ -255,17 +256,17 @@
 **Goal:** Enhance development workflows with automated CI/CD and advanced tooling
 **Success Criteria:** Automated testing pipelines, code quality enforcement, self-hosted development services
 
-### Must-Have Features
+### Phase 12: Must-Have Features
 
 - [ ] Code quality automation with NixOS-specific linting `M`
 - [ ] Documentation generation automation `S`
 
-### Should-Have Features
+### Phase 12: Should-Have Features
 
 - [ ] Integrated development environment provisioning `L`
 - [ ] Automated code review workflows `L`
 
-### Dependencies
+### Phase 12: Dependencies
 
 - Security hardening framework (Phase 9)
 - Monitoring for CI/CD pipelines (completed)
@@ -278,7 +279,7 @@
 **Goal:** Polish and optimize desktop environments with advanced automation and customization
 **Success Criteria:** Seamless multi-monitor support, automated workspace management, unified theming
 
-### Must-Have Features
+### Phase 13: Must-Have Features
 
 - [ ] Advanced Hyprland window management rules and automation `M`
 - [ ] Workspace automation based on application context `L`
@@ -286,14 +287,14 @@
 - [ ] Application-specific configurations with automated deployment `L`
 - [ ] Unified keybinding schemes across all applications `S`
 
-### Should-Have Features
+### Phase 13: Should-Have Features
 
 - [ ] Custom animations and visual effects optimization `S`
 - [ ] Theme consistency enforcement across all applications `M`
 - [ ] Advanced clipboard management with synchronization `S`
 - [ ] Enhanced screenshot and recording workflows `S`
 
-### Dependencies
+### Phase 13: Dependencies
 
 - ✅ Desktop environment stability (Hyprland implemented)
 - Application integration frameworks

@@ -46,7 +46,6 @@ extend-ignore-re = [
   neovim = "neovim"
   lazyvim = "lazyvim"
   starship = "starship"
-  zellij = "zellij"
   tmux = "tmux"
 
   # File/directory names

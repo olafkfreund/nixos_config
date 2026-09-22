@@ -19,9 +19,6 @@
   features.desktop.waylandScreenshots = true;
   features.desktop.quickshell = true;
 
-  # Enable zellij on workstation (not on laptop for battery reasons)
-  features.multiplexers.zellij = false;
-
   # GitLab runner enabled on the workstation (AC-powered)
   development.gitlab.runner.enable = true;
 

@@ -83,7 +83,6 @@
     multiplexers = {
       enable = true; # Essential for server administration
       tmux = true;
-      zellij = true;
     };
 
     gaming = {

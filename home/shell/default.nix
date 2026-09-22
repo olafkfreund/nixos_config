@@ -13,7 +13,6 @@ _: {
     ./direnv/default.nix
     ./yazi/default.nix
     ./zoxide/default.nix
-    ./zellij/default.nix
     ./bat/default.nix
     ./tmux/default.nix
     ./rmux/default.nix # multiplexer config + alias auto-loading it
