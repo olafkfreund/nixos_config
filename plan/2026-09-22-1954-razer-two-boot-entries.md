@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1954
 spec: spec/2026-09-22-1954-razer-two-boot-entries.md
 ---
