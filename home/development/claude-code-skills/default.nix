@@ -14,6 +14,8 @@ let
   nlmData = "${pkgs.customPkgs.notebooklm-mcp-cli}/${pkgs.python3.sitePackages}/notebooklm_tools/data";
 in
 {
+  imports = [ inputs.nix-skills.homeManagerModules.default ];
+
   options.programs.claude-code-skills = {
     enable = mkEnableOption ''
       Declarative Claude Code skill catalogue (borghei).
@@ -27,6 +29,17 @@ in
   };
 
   config = mkIf cfg.enable {
+    # Our nix-skills collection (#1958), for three agents at once. Left out:
+    # devenv-project overlaps nixarchy's machine-specific `devenv` skill, and
+    # nixos-wiki is a snapshot of what the mcp-nixos server searches live.
+    # Gemini CLI's ~/.gemini/skills has no agent entry in nix-skills;
+    # Antigravity's ~/.gemini/config/skills does.
+    programs.nix-skills = {
+      enable = true;
+      agents = [ "claude" "codex" "antigravity" ];
+      skills = [ "nix-language" "nixpkgs-development" "microvm-nix" "home-manager" ];
+    };
+
     # Vendor link to the borghei/Claude-Skills repo. Bump with:
     #   nix flake update claude-skills-borghei
     # then test-build and deploy.
