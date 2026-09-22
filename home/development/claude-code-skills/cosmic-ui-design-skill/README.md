@@ -1,10 +1,12 @@
 # COSMIC Desktop UI Design & Development Skill
 
-A comprehensive Claude Code skill for developing COSMIC Desktop applications and applets with best practices from System76's official documentation.
+A comprehensive Claude Code skill for developing COSMIC Desktop applications and applets with best
+practices from System76's official documentation.
 
 ## Overview
 
 This skill provides expert guidance for:
+
 - ✨ **COSMIC Applications**: Full desktop applications using libcosmic
 - 🎯 **Panel Applets**: Lightweight widgets for panels and docks
 - 🎨 **Theming**: Proper theme integration and custom styling
@@ -38,9 +40,10 @@ cp -r /path/to/cosmic-ui-design-skill ~/.config/claude-code/skills/
 
 ### Using the Skill
 
-Once uploaded, the skill is automatically available in Claude Code. Simply mention COSMIC, libcosmic, or applet development in your prompts:
+Once uploaded, the skill is automatically available in Claude Code. Simply mention COSMIC,
+libcosmic, or applet development in your prompts:
 
-```
+```text
 "Review this COSMIC application for best practices"
 "Help me create a panel applet for network monitoring"
 "Fix the theming issues in my COSMIC app"
@@ -51,6 +54,7 @@ Once uploaded, the skill is automatically available in Claude Code. Simply menti
 This skill includes 7 specialized agents for different aspects of COSMIC development:
 
 #### 1. **cosmic-architect** - Application Architecture
+
 ```bash
 # Example usage in Claude Code
 @cosmic-architect review this application structure
@@ -61,12 +65,14 @@ This skill includes 7 specialized agents for different aspects of COSMIC develop
 ```
 
 **Best for:**
+
 - Reviewing Application trait implementations
 - State management patterns
 - Message handling organization
 - Async operation structure
 
 #### 2. **cosmic-theme-expert** - Theming & Styling
+
 ```bash
 @cosmic-theme-expert check for hard-coded values
 
@@ -76,12 +82,14 @@ This skill includes 7 specialized agents for different aspects of COSMIC develop
 ```
 
 **Best for:**
+
 - Finding hard-coded colors/dimensions
 - Theme integration
 - Accessibility checks
 - Light/dark mode compatibility
 
 #### 3. **cosmic-applet-specialist** - Panel Applets
+
 ```bash
 @cosmic-applet-specialist review this panel applet
 
@@ -91,12 +99,14 @@ This skill includes 7 specialized agents for different aspects of COSMIC develop
 ```
 
 **Best for:**
+
 - Applet structure validation
 - Popup management
 - Panel integration
 - Desktop entry configuration
 
 #### 4. **cosmic-widget-builder** - Widget Composition
+
 ```bash
 @cosmic-widget-builder improve this layout
 
@@ -106,12 +116,14 @@ This skill includes 7 specialized agents for different aspects of COSMIC develop
 ```
 
 **Best for:**
+
 - Widget selection and usage
 - Layout patterns
 - Custom widget creation
 - Icon and text hierarchy
 
 #### 5. **cosmic-error-handler** - Error Handling
+
 ```bash
 @cosmic-error-handler remove all unwraps
 
@@ -121,12 +133,14 @@ This skill includes 7 specialized agents for different aspects of COSMIC develop
 ```
 
 **Best for:**
+
 - Eliminating unwrap/expect
 - Adding proper logging
 - Result propagation
 - Graceful error recovery
 
 #### 6. **cosmic-performance-optimizer** - Performance
+
 ```bash
 @cosmic-performance-optimizer find bottlenecks
 
@@ -136,12 +150,14 @@ This skill includes 7 specialized agents for different aspects of COSMIC develop
 ```
 
 **Best for:**
+
 - Identifying blocking operations
 - Memory optimization
 - Async patterns
 - View rendering efficiency
 
 #### 7. **cosmic-code-reviewer** - Comprehensive Review
+
 ```bash
 @cosmic-code-reviewer full review
 
@@ -151,6 +167,7 @@ This skill includes 7 specialized agents for different aspects of COSMIC develop
 ```
 
 **Best for:**
+
 - Complete code reviews
 - Pre-commit checks
 - All-in-one analysis
@@ -222,15 +239,17 @@ cargo generate gh:pop-os/cosmic-applet-template
 ### Based on Official Documentation
 
 This skill is derived from:
-- 📚 Official libcosmic Book: https://pop-os.github.io/libcosmic-book/
-- 📚 COSMIC API Documentation: https://pop-os.github.io/libcosmic/
-- 📚 System76 Blog Posts: https://blog.system76.com/
+
+- 📚 Official libcosmic Book: <https://pop-os.github.io/libcosmic-book/>
+- 📚 COSMIC API Documentation: <https://pop-os.github.io/libcosmic/>
+- 📚 System76 Blog Posts: <https://blog.system76.com/>
 - 📚 Official Templates: cosmic-app-template, cosmic-applet-template
 - 📚 Production Code: COSMIC Settings, Files, Terminal, etc.
 
 ### Code Quality Checklist
 
 Every review includes checks for:
+
 - [ ] Application trait implementation
 - [ ] No hard-coded values (colors, dimensions, radii)
 - [ ] No unwrap/expect calls
@@ -255,6 +274,7 @@ Every review includes checks for:
 ### 2. **Use the Right Agent**
 
 Match your task to the specialized agent:
+
 - Architecture issues → `@cosmic-architect`
 - Styling problems → `@cosmic-theme-expert`
 - Applet-specific → `@cosmic-applet-specialist`
@@ -263,6 +283,7 @@ Match your task to the specialized agent:
 ### 3. **Leverage Shortcuts**
 
 Shortcuts provide focused reviews:
+
 ```bash
 @cosmic-error-handler /remove-unwraps       # Fast, focused
 @cosmic-code-reviewer /full-review          # Comprehensive
@@ -289,7 +310,7 @@ Shortcuts provide focused reviews:
 
 ```bash
 # Include relevant information
-"I'm building a network monitor applet for COSMIC panel that shows connection status and speed. 
+"I'm building a network monitor applet for COSMIC panel that shows connection status and speed.
 @cosmic-applet-specialist review this popup management code"
 ```
 
@@ -298,7 +319,8 @@ Shortcuts provide focused reviews:
 ### Skill Not Loading
 
 1. Check the directory structure:
-   ```
+
+   ```text
    cosmic-ui-design-skill/
    ├── SKILL.md
    ├── agents.json
@@ -306,6 +328,7 @@ Shortcuts provide focused reviews:
    ```
 
 2. Verify JSON syntax in `agents.json`:
+
    ```bash
    cat agents.json | jq
    ```
@@ -315,17 +338,20 @@ Shortcuts provide focused reviews:
 ### Agent Not Responding
 
 1. Try explicit mentions:
-   ```
+
+   ```text
    @cosmic-architect please review this
    ```
 
 2. Use shortcuts:
-   ```
+
+   ```text
    @cosmic-architect /review-app-structure
    ```
 
 3. Fall back to default:
-   ```
+
+   ```text
    Review this COSMIC code for best practices
    ```
 
@@ -372,6 +398,7 @@ To update this skill with new COSMIC features:
 ### Reporting Issues
 
 If you find issues or have suggestions:
+
 1. Test with the default `@cosmic-code-reviewer` agent
 2. Provide example code that demonstrates the issue
 3. Include expected vs actual behavior
@@ -380,6 +407,7 @@ If you find issues or have suggestions:
 ## Version History
 
 ### 1.0.0 (January 2026)
+
 - Initial release
 - 7 specialized agents
 - Comprehensive SKILL.md with all COSMIC patterns
@@ -388,28 +416,32 @@ If you find issues or have suggestions:
 ## Resources
 
 ### Official COSMIC Resources
-- **libcosmic Book**: https://pop-os.github.io/libcosmic-book/
-- **API Docs**: https://pop-os.github.io/libcosmic/cosmic/
-- **COSMIC Desktop**: https://system76.com/cosmic
-- **App Template**: https://github.com/pop-os/cosmic-app-template
-- **Applet Template**: https://github.com/pop-os/cosmic-applet-template
+
+- **libcosmic Book**: <https://pop-os.github.io/libcosmic-book/>
+- **API Docs**: <https://pop-os.github.io/libcosmic/cosmic/>
+- **COSMIC Desktop**: <https://system76.com/cosmic>
+- **App Template**: <https://github.com/pop-os/cosmic-app-template>
+- **Applet Template**: <https://github.com/pop-os/cosmic-applet-template>
 
 ### Learning Resources
-- **Rust Book**: https://doc.rust-lang.org/book/
-- **Rust by Example**: https://doc.rust-lang.org/rust-by-example/
-- **iced Tutorial**: https://book.iced.rs/
+
+- **Rust Book**: <https://doc.rust-lang.org/book/>
+- **Rust by Example**: <https://doc.rust-lang.org/rust-by-example/>
+- **iced Tutorial**: <https://book.iced.rs/>
 
 ### Community
+
 - **Pop!_OS Mattermost**: Join for developer discussions
-- **COSMIC GitHub**: https://github.com/pop-os/cosmic-epoch
-- **COSMIC Themes**: https://cosmicthemes.com/
+- **COSMIC GitHub**: <https://github.com/pop-os/cosmic-epoch>
+- **COSMIC Themes**: <https://cosmicthemes.com/>
 
 ## License
 
-This skill document is provided as-is for use with Claude Code. Content is derived from official COSMIC documentation and best practices.
+This skill document is provided as-is for use with Claude Code. Content is derived from official
+COSMIC documentation and best practices.
 
 ---
 
-**Happy COSMIC Development! 🚀**
+Happy COSMIC Development! 🚀
 
 For questions or improvements, engage with the COSMIC community or contribute back to this skill.

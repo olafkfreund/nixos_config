@@ -3,6 +3,7 @@
 ## Essential Commands
 
 ### Project Setup
+
 ```bash
 # Create new application
 cargo generate gh:pop-os/cosmic-app-template
@@ -19,6 +20,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
 ### Build & Development
+
 ```bash
 just check          # Run linter (do before commit!)
 just build          # Build the project
@@ -109,6 +111,7 @@ fn main() -> cosmic::iced::Result {
 ## Cargo.toml Configuration
 
 ### Application
+
 ```toml
 [dependencies]
 libcosmic = "0.1"
@@ -117,6 +120,7 @@ tracing = "0.1"
 ```
 
 ### Applet
+
 ```toml
 [dependencies]
 libcosmic = { version = "0.1", features = ["applet"] }
@@ -195,12 +199,14 @@ let accent = theme.cosmic().accent_color();
 ## Error Handling
 
 ### ❌ Don't Use
+
 ```rust
 value.unwrap()              // Panics on None/Err
 value.expect("message")     // Panics on None/Err
 ```
 
 ### ✅ Use Instead
+
 ```rust
 use tracing::{error, warn, info};
 
@@ -230,6 +236,7 @@ let value = option.unwrap_or(fallback);
 ## Async Patterns
 
 ### Tasks (for one-time operations)
+
 ```rust
 fn update(&mut self, message: Message) -> cosmic::app::Task<Message> {
     match message {
@@ -248,6 +255,7 @@ fn update(&mut self, message: Message) -> cosmic::app::Task<Message> {
 ```
 
 ### Subscriptions (for streams)
+
 ```rust
 use cosmic::iced::Subscription;
 use cosmic::iced::time;
@@ -366,6 +374,7 @@ fn toggle_popup(&mut self) -> cosmic::app::Task<Message> {
 ## Code Review Checklist
 
 ### Quick Pre-Commit
+
 - [ ] Runs `just check` without errors
 - [ ] No `.unwrap()` or `.expect()` calls
 - [ ] No hard-coded colors, dimensions, or radii
@@ -373,6 +382,7 @@ fn toggle_popup(&mut self) -> cosmic::app::Task<Message> {
 - [ ] No blocking operations in `update()`
 
 ### Full Review
+
 - [ ] Application trait properly implemented
 - [ ] State management follows patterns
 - [ ] Widgets borrow from state (no unnecessary clones)
@@ -386,6 +396,7 @@ fn toggle_popup(&mut self) -> cosmic::app::Task<Message> {
 ## Common Mistakes
 
 ### ❌ Hard-coded values
+
 ```rust
 .padding(10)
 .style(|_| Style {
@@ -395,12 +406,14 @@ fn toggle_popup(&mut self) -> cosmic::app::Task<Message> {
 ```
 
 ### ✅ Use theme
+
 ```rust
 .padding(theme::spacing().space_m)
 .style(button::Style::Primary)
 ```
 
 ### ❌ Blocking in update
+
 ```rust
 fn update(&mut self, msg: Message) -> Task<Message> {
     self.data = std::fs::read_to_string("file.txt").unwrap();
@@ -409,6 +422,7 @@ fn update(&mut self, msg: Message) -> Task<Message> {
 ```
 
 ### ✅ Use async Task
+
 ```rust
 fn update(&mut self, msg: Message) -> Task<Message> {
     match msg {
@@ -426,10 +440,10 @@ fn update(&mut self, msg: Message) -> Task<Message> {
 
 ## Resources
 
-- **libcosmic Book**: https://pop-os.github.io/libcosmic-book/
-- **API Docs**: https://pop-os.github.io/libcosmic/cosmic/
-- **Templates**: https://github.com/pop-os/cosmic-app-template
-- **Examples**: https://github.com/pop-os/libcosmic/tree/master/examples
+- **libcosmic Book**: <https://pop-os.github.io/libcosmic-book/>
+- **API Docs**: <https://pop-os.github.io/libcosmic/cosmic/>
+- **Templates**: <https://github.com/pop-os/cosmic-app-template>
+- **Examples**: <https://github.com/pop-os/libcosmic/tree/master/examples>
 
 ---
 

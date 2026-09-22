@@ -1,7 +1,14 @@
 ---
 name: linkedin-post
-description: Turn a blog post, PR/repo change, or raw topic into a polished, high-engagement LinkedIn post — plus an optional document/carousel "showcase" outline. Writes a strong scroll-stopping hook, scannable body, hashtags, and a CTA in a chosen voice, then (on request) posts it via the Chrome browser automation tools or hands you copy to paste. Use to write or refresh LinkedIn content.
-when_to_use: When the user wants a LinkedIn post, a LinkedIn showcase/carousel, or to announce something (a launch, blog post, release, milestone) on LinkedIn. Triggers — "/linkedin-post", "write a LinkedIn post", "post this on LinkedIn", "LinkedIn carousel about X", "announce X on LinkedIn", "turn this blog post into a LinkedIn post".
+description: Turn a blog post, PR/repo change, or raw topic into a polished, high-engagement
+LinkedIn post — plus an optional document/carousel "showcase" outline. Writes a strong
+scroll-stopping hook, scannable body, hashtags, and a CTA in a chosen voice, then (on request) posts
+it via the Chrome browser automation tools or hands you copy to paste. Use to write or refresh
+LinkedIn content.
+when_to_use: When the user wants a LinkedIn post, a LinkedIn showcase/carousel, or to announce
+something (a launch, blog post, release, milestone) on LinkedIn. Triggers — "/linkedin-post", "write
+a LinkedIn post", "post this on LinkedIn", "LinkedIn carousel about X", "announce X on LinkedIn",
+"turn this blog post into a LinkedIn post".
 allowed-tools:
   - Bash
   - Read
@@ -54,7 +61,7 @@ confirm before drafting.
 
 Return the post ready to paste, plus the comment link, clearly separated:
 
-```
+```text
 ─── LINKEDIN POST ───────────────────────────
 <hook line>
 
@@ -91,26 +98,32 @@ have, or hand the outline to a design tool — don't fabricate a PDF silently.
 ## Procedure (PARR — announce, run, verify, continue)
 
 ### 1. Settle the angle
+
 Confirm the source, the **one takeaway**, and the voice. If adapting a blog
 post/URL, fetch it (WebFetch / Read) and pull the single most postable insight —
 don't summarise the whole thing. **Checkpoint:** angle + voice agreed.
 
 ### 2. Draft the post
+
 Write to the output format above. Apply every rule in "What makes a LinkedIn
 post work". **Checkpoint:** hook is < ~140 chars and stands alone; no link in
 body; 3–5 specific hashtags; one CTA.
 
 ### 3. (If `--carousel`) Draft the showcase
+
 Produce the slide outline. **Checkpoint:** ≤10 slides, one idea each, cover works
 as a thumbnail.
 
 ### 4. Self-critique pass
+
 Reread as a phone user scrolling fast: does line 1 stop the scroll? Is it
 skimmable? Cut anything that doesn't earn its line. Tighten.
 
 ### 5. Publish (only if not `--draft` and the user says so)
+
 There is **no LinkedIn API configured**, so posting = browser automation.
 Offer, don't assume:
+
 - Load the Chrome tools with `ToolSearch` (`select:mcp__claude-in-chrome__...`),
   open `https://www.linkedin.com/feed/`, and drive the "Start a post" composer:
   paste the body, then add the link as the first comment after posting.
@@ -122,6 +135,7 @@ Offer, don't assume:
 screenshot confirms it.
 
 ## Notes
+
 - Never invent metrics or quotes. If a number would strengthen the hook, ask the
   user for the real one.
 - Match the source product's positioning when `--voice company` (e.g. TFactory =

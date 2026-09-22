@@ -4,7 +4,7 @@
 
 ### Small Application (Single Module)
 
-```
+```text
 my-cosmic-app/
 ├── Cargo.toml
 ├── justfile
@@ -25,7 +25,7 @@ my-cosmic-app/
 
 ### Medium Application (Multiple Modules)
 
-```
+```text
 my-cosmic-app/
 ├── Cargo.toml
 ├── justfile
@@ -54,7 +54,7 @@ my-cosmic-app/
 
 ### Large Application (Feature-Based)
 
-```
+```text
 my-cosmic-app/
 ├── Cargo.toml
 ├── justfile
@@ -101,7 +101,7 @@ my-cosmic-app/
 
 ### Panel Applet
 
-```
+```text
 cosmic-applet-myapp/
 ├── Cargo.toml           # Must include applet feature
 ├── justfile
@@ -161,7 +161,7 @@ impl Application for App {
     type Executor = cosmic::executor::Default;
     type Flags = ();
     type Message = Message;
-    
+
     const APP_ID: &'static str = "com.example.myapp";
 
     fn core(&self) -> &Core {
@@ -174,7 +174,7 @@ impl Application for App {
 
     fn init(core: Core, _flags: Self::Flags) -> (Self, cosmic::app::Task<Self::Message>) {
         let config = Config::load().unwrap_or_default();
-        
+
         let app = Self {
             core,
             config,
@@ -218,13 +218,13 @@ impl App {
 pub enum Message {
     /// User clicked a button
     ButtonClicked,
-    
+
     /// Data was loaded
     DataLoaded(Result<String, String>),
-    
+
     /// Configuration changed
     ConfigChanged,
-    
+
     // Add more messages as needed
 }
 ```
@@ -259,7 +259,7 @@ impl Config {
     /// Load configuration from disk
     pub fn load() -> Result<Self, cosmic_config::Error> {
         let config = CosmicConfig::new(APP_ID, VERSION)?;
-        
+
         Ok(Self {
             window_width: config.get("window_width").unwrap_or(800),
             window_height: config.get("window_height").unwrap_or(600),
@@ -270,11 +270,11 @@ impl Config {
     /// Save configuration to disk
     pub fn save(&self) -> Result<(), cosmic_config::Error> {
         let config = CosmicConfig::new(APP_ID, VERSION)?;
-        
+
         config.set("window_width", self.window_width)?;
         config.set("window_height", self.window_height)?;
         config.set("theme_preference", &self.theme_preference)?;
-        
+
         Ok(())
     }
 }
@@ -419,7 +419,7 @@ X-OverflowPriority=10
 
 ### 1. Separation of Concerns
 
-```
+```text
 ✅ GOOD: Feature-based organization
 src/
 ├── features/
@@ -511,7 +511,7 @@ impl FileWatcher {
 
 ## Testing Structure
 
-```
+```text
 tests/
 ├── integration_tests.rs  # Integration tests
 ├── ui_tests.rs          # UI component tests
@@ -539,10 +539,10 @@ fn test_config_save_load() {
         window_height: 768,
         theme_preference: "dark".to_string(),
     };
-    
+
     config.save().expect("Failed to save config");
     let loaded = Config::load().expect("Failed to load config");
-    
+
     assert_eq!(config.window_width, loaded.window_width);
 }
 ```
@@ -571,22 +571,24 @@ git clone https://github.com/user/my-cosmic-app
 cd my-cosmic-app
 just build
 sudo just install
-```
+```text
 
 ### Dependencies
 
 On Ubuntu/Pop!_OS:
+
 ```bash
 sudo apt install cargo cmake just libexpat1-dev \
     libfontconfig-dev libfreetype-dev libxkbcommon-dev pkgconf
-```
+```text
 
 ## Usage
 
 Launch from application menu or run:
+
 ```bash
 my-cosmic-app
-```
+```text
 
 ## Configuration
 
@@ -603,11 +605,12 @@ just run
 
 # Run tests
 just test
-```
+```text
 
 ## License
 
 GPL-3.0 License
+
 ```
 
 ## Version Control
@@ -637,6 +640,7 @@ Thumbs.db
 ## Summary
 
 Good project structure:
+
 - ✅ Separates concerns (features, widgets, services)
 - ✅ Uses consistent naming
 - ✅ Keeps modules self-contained

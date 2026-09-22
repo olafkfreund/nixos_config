@@ -1,7 +1,12 @@
 ---
 name: reddit-post
-description: Draft a subreddit-appropriate Reddit post (title + body) that respects each community's culture and rules, then optionally publish it via the Chrome browser automation tools. Reddit punishes self-promotion hard, so this skill leads with value, matches the subreddit's voice, and flags rule risks before you post. Use to write or post Reddit content.
-when_to_use: When the user wants to post on Reddit, ask a question, share a project, or announce something to a subreddit. Triggers — "/reddit-post", "write a Reddit post", "post this on r/X", "share my project on Reddit", "draft a Show-and-tell for r/...", "ask r/X about Y".
+description: Draft a subreddit-appropriate Reddit post (title + body) that respects each community's
+culture and rules, then optionally publish it via the Chrome browser automation tools. Reddit
+punishes self-promotion hard, so this skill leads with value, matches the subreddit's voice, and
+flags rule risks before you post. Use to write or post Reddit content.
+when_to_use: When the user wants to post on Reddit, ask a question, share a project, or announce
+something to a subreddit. Triggers — "/reddit-post", "write a Reddit post", "post this on r/X",
+"share my project on Reddit", "draft a Show-and-tell for r/...", "ask r/X about Y".
 allowed-tools:
   - Bash
   - Read
@@ -49,7 +54,7 @@ This skill's main job is to keep the user *in-culture*.
 
 ## Output format (always produce this)
 
-```
+```text
 ─── r/<subreddit> ───────────────────────────
 TITLE: <one line, ≤300 chars, specific & honest>
 FLAIR: <required flair if any, else "none required">
@@ -76,23 +81,28 @@ Save a copy to `/tmp/reddit-post-<sub>-<slug>.md`.
 ## Procedure (PARR — announce, run, verify, continue)
 
 ### 1. Recon the subreddit
+
 WebFetch `https://www.reddit.com/r/<sub>/about.json` (rules, description,
 `submission_type`) and skim `top/.json?t=month` for tone and what wins. If the
 sub can't be fetched, ask the user to paste the sidebar rules. **Checkpoint:**
 you know the rules, required flair/format, and the community's voice.
 
 ### 2. Draft title + body
+
 Write to the output format, in the sub's voice, value-first. If it's the user's
 own project, include an honest disclosure line. **Checkpoint:** title is
 specific and rule-compliant; body leads with value; self-promo disclosed.
 
 ### 3. Rule-check pass
+
 Fill the RULE CHECK block honestly. If anything is ⚠️, tell the user plainly and
 suggest the fix (reword title, add flair, move to the weekly thread, etc.) before
 posting. **Checkpoint:** no unaddressed ⚠️, or the user has accepted the risk.
 
 ### 4. Publish (only if not `--draft` and the user says so)
+
 There is **no Reddit API / praw configured**, so posting = browser automation:
+
 - Load the Chrome tools with `ToolSearch`
   (`select:mcp__claude-in-chrome__navigate,mcp__claude-in-chrome__form_input,...`),
   open `https://www.reddit.com/r/<sub>/submit`, fill title + body, set flair if
@@ -104,6 +114,7 @@ There is **no Reddit API / praw configured**, so posting = browser automation:
 **Checkpoint:** user has the copy, or the post is live + screenshot confirms.
 
 ## Notes
+
 - Never fake an account history or astroturf. If the user's account is brand new
   or low-karma, warn that many subs auto-remove such posts.
 - Cross-posting the *same* text to many subs is spam and gets accounts banned —

@@ -98,6 +98,7 @@ home.file = lib.mkMerge (lib.mapAttrsToList (name: s:
   replaces the first; nothing reads the second.
 
 **Not moved into the repo:**
+
 - `parr-run` and `run-aws-demo` stay as they are. They describe private
   infrastructure, and this repo is public. The spec records them as known
   exceptions; they are not migrated.

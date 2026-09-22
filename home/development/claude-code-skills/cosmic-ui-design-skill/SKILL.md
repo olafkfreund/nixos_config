@@ -2,15 +2,18 @@
 
 **Version:** 1.0.0
 **Last Updated:** January 2026
-**Official Documentation:** https://pop-os.github.io/libcosmic-book/
+**Official Documentation:** <https://pop-os.github.io/libcosmic-book/>
 
 ## Overview
 
-This skill provides comprehensive guidance for developing COSMIC Desktop applications and applets using libcosmic and Rust. It embeds best practices derived from System76's official COSMIC Desktop project, ensuring code quality, performance, and adherence to COSMIC's design language.
+This skill provides comprehensive guidance for developing COSMIC Desktop applications and applets
+using libcosmic and Rust. It embeds best practices derived from System76's official COSMIC Desktop
+project, ensuring code quality, performance, and adherence to COSMIC's design language.
 
 ## When to Use This Skill
 
 Use this skill when:
+
 - Developing COSMIC Desktop applications or applets
 - Reviewing COSMIC-related Rust code
 - Creating or modifying libcosmic widgets
@@ -22,13 +25,17 @@ Use this skill when:
 ## Core Principles
 
 ### 1. **COSMIC Design Language**
+
 COSMIC's design system is built on themeable foundations:
+
 - **Nothing is hard-coded**: All colors, spacing, icon sizing, and corner radii use variables
 - **Automatic color derivation**: Selected colors automatically derive contrasting colors for surfaces and text
-- **OKLCH color space**: Colors are converted from sRGB to OKLCH for lightness manipulation while preserving hue and chroma
+- **OKLCH color space**: Colors are converted from sRGB to OKLCH for lightness manipulation while
+  preserving hue and chroma
 - **Theme consistency**: Themes apply uniformly across apps, applets, panels, docks, and compatible GTK applications
 
 ### 2. **Architecture Philosophy**
+
 - **Rust-first**: Memory-safe, secure, and efficient by design
 - **iced-based**: Built on the cross-platform iced GUI library
 - **Wayland-native**: Native Wayland compositor with Xwayland support
@@ -36,7 +43,9 @@ COSMIC's design system is built on themeable foundations:
 - **Functional composition**: Widgets use Builder pattern for configuration
 
 ### 3. **Development Standards**
-- **Use official templates**: Always start with `cargo generate gh:pop-os/cosmic-app-template` for apps or `gh:pop-os/cosmic-applet-template` for applets
+
+- **Use official templates**: Always start with `cargo generate gh:pop-os/cosmic-app-template` for
+  apps or `gh:pop-os/cosmic-applet-template` for applets
 - **Avoid unwrap/expect**: Use `tracing::error!()` or `tracing::warn!()` for error handling
 - **Follow just workflows**: Use `just check` before committing code
 - **Respect cross-platform goals**: libcosmic targets Linux (X11/Wayland), Redox OS, Windows, Mac, and Android
@@ -48,6 +57,7 @@ COSMIC's design system is built on themeable foundations:
 ### Project Structure
 
 #### Required Application Structure
+
 ```rust
 use cosmic::prelude::*;
 use cosmic::{Application, Element, Core};
@@ -108,6 +118,7 @@ fn main() -> cosmic::iced::Result {
 ```
 
 #### Critical Rules
+
 - ✅ **DO**: Store `cosmic::Core` in your application struct
 - ✅ **DO**: Use stateless widgets that reference application state
 - ✅ **DO**: Return `Task`s for async operations from `update()`
@@ -122,6 +133,7 @@ fn main() -> cosmic::iced::Result {
 ### Applet vs Application Differences
 
 **Applets are specialized applications for panels/docks:**
+
 - Use `applet::run()` instead of `app::run()`
 - Read panel configuration from environment variables
 - Use transparent, undecorated windows
@@ -257,6 +269,7 @@ use cosmic::cosmic_theme::Spacing;
 ### Common Widget Patterns
 
 #### 1. **Spacing and Layout**
+
 ```rust
 // Get theme spacing
 let cosmic_theme::Spacing {
@@ -275,6 +288,7 @@ let content = widget::column()
 ```
 
 #### 2. **Buttons**
+
 ```rust
 // Standard button
 let button = widget::button("Click me")
@@ -293,6 +307,7 @@ let link = widget::button::link("https://example.com")
 ```
 
 #### 3. **Text Widgets**
+
 ```rust
 // Hierarchical text
 widget::text::title1("Main Title")
@@ -303,6 +318,7 @@ widget::text::caption("Caption text")
 ```
 
 #### 4. **Containers and Alignment**
+
 ```rust
 let content = widget::container(button)
     .width(iced::Length::Fill)
@@ -313,6 +329,7 @@ let content = widget::container(button)
 ```
 
 #### 5. **Icons**
+
 ```rust
 // Use symbolic icons from icon theme
 let icon = widget::icon::from_name("folder-symbolic");
@@ -346,6 +363,7 @@ let button = widget::icon::from_name("printer-symbolic")
 ### Theme Integration
 
 #### Accessing Theme Values
+
 ```rust
 use cosmic::{theme, cosmic_theme};
 
@@ -363,6 +381,7 @@ let accent = theme.cosmic().accent_color();
 ### Custom Styling Patterns
 
 #### 1. **Custom Style Closures**
+
 ```rust
 use cosmic::widget::container;
 
@@ -379,6 +398,7 @@ let custom_container = container(content)
 ```
 
 #### 2. **Layer-Aware Styling**
+
 ```rust
 // Card style that adapts to current layer
 let card = widget::container(content)
@@ -391,6 +411,7 @@ let card = widget::container(content)
 ```
 
 #### 3. **Reusable Custom Styles**
+
 ```rust
 pub enum MyButtonStyle {
     Primary,
@@ -443,6 +464,7 @@ error!("Failed to load configuration: {}", err);
 ### Error Handling Patterns
 
 #### ❌ **AVOID: unwrap() and expect()**
+
 ```rust
 // BAD - Will panic
 let value = some_option.unwrap();
@@ -450,6 +472,7 @@ let result = some_result.expect("Failed");
 ```
 
 #### ✅ **PREFERRED: Pattern Matching**
+
 ```rust
 // GOOD - Graceful error handling
 match some_result {
@@ -473,6 +496,7 @@ if let Some(value) = some_option {
 ```
 
 #### ✅ **PREFERRED: Question Mark Operator**
+
 ```rust
 fn load_config() -> Result<Config, Error> {
     let file = std::fs::read_to_string("config.toml")?;
@@ -525,12 +549,14 @@ config.set("theme", "dark")?;
 ### Memory Management
 
 #### Applet Compilation
+
 ```bash
 # Applets compiled as multicall binary (better performance, -115 MB disk usage)
 # This is handled by the build system automatically
 ```
 
 #### Widget Borrowing
+
 ```rust
 // GOOD - Borrow from application state
 fn view(&self) -> Element<Message> {
@@ -546,6 +572,7 @@ fn view(&self) -> Element<Message> {
 ### Async Operations
 
 #### Use Tasks for Async Work
+
 ```rust
 impl Application for MyApp {
     fn update(&mut self, message: Message) -> cosmic::app::Task<Message> {
@@ -567,6 +594,7 @@ impl Application for MyApp {
 ```
 
 #### Use Subscriptions for Continuous Streams
+
 ```rust
 use cosmic::iced::Subscription;
 use cosmic::iced::time;
@@ -634,12 +662,14 @@ cargo clippy -- -D warnings
 ### Dependencies
 
 #### Ubuntu/Pop!_OS
+
 ```bash
 sudo apt install cargo cmake just libexpat1-dev \
     libfontconfig-dev libfreetype-dev libxkbcommon-dev pkgconf
 ```
 
 #### Arch Linux
+
 ```bash
 sudo pacman -S rust just base-devel
 ```
@@ -696,6 +726,7 @@ platform_specific::shell::commands::popup::destroy_popup(popup_id)
 When reviewing COSMIC Desktop code, verify:
 
 ### Architecture
+
 - [ ] Uses official app/applet template structure
 - [ ] Implements `cosmic::Application` trait correctly
 - [ ] Includes required `core: cosmic::Core` field
@@ -703,12 +734,14 @@ When reviewing COSMIC Desktop code, verify:
 - [ ] Stateless widgets reference application model
 
 ### Error Handling
+
 - [ ] No use of `unwrap()` or `expect()`
 - [ ] Errors logged with `tracing::{error, warn}`
 - [ ] Graceful fallbacks for missing data
 - [ ] Result types propagated with `?` operator
 
 ### Theming
+
 - [ ] No hard-coded colors or dimensions
 - [ ] Uses `theme::spacing()` for layout
 - [ ] Theme variables used for colors
@@ -716,12 +749,14 @@ When reviewing COSMIC Desktop code, verify:
 - [ ] Respects user's corner radius preference
 
 ### Performance
+
 - [ ] No blocking I/O in `update()` method
 - [ ] Async operations use `Task`s or `Subscription`s
 - [ ] Widgets borrow from state (no unnecessary clones)
 - [ ] Heavy operations moved to background tasks
 
 ### Applet-Specific (if applicable)
+
 - [ ] Uses `cosmic::applet::run()` not `cosmic::app::run()`
 - [ ] Implements `style()` returning `cosmic::applet::style()`
 - [ ] Desktop file includes `NoDisplay=true` and `X-CosmicApplet=true`
@@ -729,6 +764,7 @@ When reviewing COSMIC Desktop code, verify:
 - [ ] Enables `applet` feature in Cargo.toml
 
 ### Code Quality
+
 - [ ] Passes `just check` without warnings
 - [ ] Formatted with `cargo fmt`
 - [ ] No clippy warnings
@@ -736,6 +772,7 @@ When reviewing COSMIC Desktop code, verify:
 - [ ] Comments explain "why" not "what"
 
 ### Documentation
+
 - [ ] Public functions have doc comments
 - [ ] README includes build instructions
 - [ ] Configuration options documented
@@ -748,6 +785,7 @@ When reviewing COSMIC Desktop code, verify:
 ### ✅ Good Patterns
 
 #### Idiomatic Widget Composition
+
 ```rust
 use cosmic::Apply;
 
@@ -763,6 +801,7 @@ let content = widget::column()
 ```
 
 #### Clean Message Handling
+
 ```rust
 fn update(&mut self, message: Message) -> cosmic::app::Task<Message> {
     match message {
@@ -790,6 +829,7 @@ fn update(&mut self, message: Message) -> cosmic::app::Task<Message> {
 ### ❌ Anti-Patterns
 
 #### Hard-Coded Values
+
 ```rust
 // BAD
 let button = widget::button("Click")
@@ -807,6 +847,7 @@ let button = widget::button("Click")
 ```
 
 #### Blocking Operations in Update
+
 ```rust
 // BAD - Blocks UI thread
 fn update(&mut self, message: Message) -> cosmic::app::Task<Message> {
@@ -843,31 +884,36 @@ fn update(&mut self, message: Message) -> cosmic::app::Task<Message> {
 ## Resources and References
 
 ### Official Documentation
-- **libcosmic Book**: https://pop-os.github.io/libcosmic-book/
-- **API Documentation**: https://pop-os.github.io/libcosmic/cosmic/
-- **COSMIC Desktop**: https://system76.com/cosmic
+
+- **libcosmic Book**: <https://pop-os.github.io/libcosmic-book/>
+- **API Documentation**: <https://pop-os.github.io/libcosmic/cosmic/>
+- **COSMIC Desktop**: <https://system76.com/cosmic>
 
 ### Templates and Examples
-- **App Template**: https://github.com/pop-os/cosmic-app-template
-- **Applet Template**: https://github.com/pop-os/cosmic-applet-template
-- **Widget Examples**: https://github.com/pop-os/libcosmic/tree/master/examples
-- **Design Demo**: https://github.com/pop-os/cosmic-design-demo
+
+- **App Template**: <https://github.com/pop-os/cosmic-app-template>
+- **Applet Template**: <https://github.com/pop-os/cosmic-applet-template>
+- **Widget Examples**: <https://github.com/pop-os/libcosmic/tree/master/examples>
+- **Design Demo**: <https://github.com/pop-os/cosmic-design-demo>
 
 ### Community
+
 - **Pop!_OS Mattermost**: Join for developer discussions
-- **GitHub Discussions**: https://github.com/pop-os/cosmic-epoch/discussions
-- **COSMIC Themes**: https://cosmicthemes.com/
+- **GitHub Discussions**: <https://github.com/pop-os/cosmic-epoch/discussions>
+- **COSMIC Themes**: <https://cosmicthemes.com/>
 
 ### Rust Learning
-- **Rust Book**: https://doc.rust-lang.org/book/
-- **Rust by Example**: https://doc.rust-lang.org/rust-by-example/
-- **Rustlings**: https://github.com/rust-lang/rustlings
+
+- **Rust Book**: <https://doc.rust-lang.org/book/>
+- **Rust by Example**: <https://doc.rust-lang.org/rust-by-example/>
+- **Rustlings**: <https://github.com/rust-lang/rustlings>
 
 ---
 
 ## Version History
 
 ### 1.0.0 (January 2026)
+
 - Initial comprehensive skill document
 - Covers libcosmic application and applet development
 - Includes theming, performance, and Wayland integration
@@ -878,6 +924,7 @@ fn update(&mut self, message: Message) -> cosmic::app::Task<Message> {
 ## Contributing to This Skill
 
 This skill document should be updated when:
+
 - New COSMIC Desktop versions introduce breaking changes
 - libcosmic API changes significantly
 - New best practices emerge from the COSMIC community

@@ -7,6 +7,7 @@ Claude Desktop) can query compliance data **and read the Fides docs** in-convers
 It ships in the container image at `/usr/local/bin/fides-mcp`.
 
 **Register it (`.mcp.json`):**
+
 ```jsonc
 { "mcpServers": { "fides": {
   "command": "/usr/local/bin/fides-mcp",
@@ -18,6 +19,7 @@ It ships in the container image at `/usr/local/bin/fides-mcp`.
 ```
 
 **Tools** — read + record provenance:
+
 - `list_flows`, `list_environments`, `list_policies`
 - `check_compliance` — evaluate rules against an artifact SHA256
 - `search_artifacts`, `search_attestations`
@@ -30,6 +32,7 @@ It ships in the container image at `/usr/local/bin/fides-mcp`.
 **Resources:** the documentation is exposed as MCP resources under `fides://docs/*`.
 
 ### Fides ⇄ ServiceNow over MCP
+
 - **Fides → SN (MCP client):** Fides consumes ServiceNow's native MCP server to read CMDB
   CIs, change requests, and GRC controls *through SN's governance* — `fides servicenow mcp
   servers|lookup|tools|call`, or the API `/api/v1/servicenow/mcp/*`. GA endpoint is
@@ -64,6 +67,7 @@ evaluates one jq rule per line. Sensor commands are constrained by
 ## Management / admin operations
 
 ### Identity & access
+
 ```bash
 # service accounts + rotatable API keys (prefer these over a static token)
 fides service-account create     --name ci-pipeline --role Writer      # Admin|Auditor|Writer|Viewer
@@ -74,10 +78,12 @@ fides service-account revoke-key --account $SA --key $OLD_KEY_ID        # rotati
 # local user password
 fides user set-password --user $USER_ID --password 'S0me-Strong-Pass'
 ```
+
 Roles: **Admin** (full), **Writer** (record provenance/CI), **Auditor** (read + reports),
 **Viewer** (read-only). SSO group→role mappings are managed in the portal Settings page.
 
 ### Integration connections (credentials via `--secret-path` references)
+
 ```bash
 fides servicenow config --instance-url https://acme.service-now.com --auth-type basic \
     --client-id svc-fides --secret-path fides/servicenow
@@ -86,10 +92,12 @@ fides git-provider config --provider github --host github.com \
 fides webhook config --name audit-sink --url https://example.com/hook --secret-path fides/hook-secret
 fides slack config --secret-path fides/slack-webhook
 ```
+
 `--secret-path` is a *reference* resolved by `SECRETS_PROVIDER` (env var, or AWS Secrets
 Manager id when `SECRETS_PROVIDER=aws`). Sinks fire only when `FIDES_EVENTS_ENABLED=true`.
 
 ### Frameworks, controls & governance
+
 ```bash
 fides control import   --framework SOC2                  # adopt catalog (idempotent)
 fides control frameworks                                 # list catalogs
@@ -101,13 +109,16 @@ fides report --framework SOC2                            # auditor-ready report
 fides change-gate --trail $TRAIL                         # verdict + 0-100 risk (exit 2 on HOLD)
 fides approve     --trail $TRAIL --reason "platform lead review"   # SoD approval
 ```
+
 Frameworks (`import`/`report`): `SOC2, ISO27001, NIST-800-53, PCI-DSS, DORA, PSD2, SOX`.
 
 ### Metrics & monitoring
+
 ```bash
 fides metrics --days 30                        # DORA: deployments, frequency, compliance & change-failure rate
 fides metrics deployment-frequency --weeks 12  # weekly per environment
 ```
+
 Server exposes Prometheus/OpenTelemetry at `/metrics`. Admin pages: `/servicenow`, `/admin`.
 
 ---
@@ -124,6 +135,7 @@ helm install fides ./charts/fides -n fides --create-namespace \
 # Or seed an existing Postgres
 ORG_NAME="Acme Corp" ./scripts/setup-db.sh
 ```
+
 The server applies embedded migrations on boot when `FIDES_AUTO_MIGRATE=true`. Full
 walkthrough (RLS role, secrets, first login, upgrades): `docs/setup.md`.
 

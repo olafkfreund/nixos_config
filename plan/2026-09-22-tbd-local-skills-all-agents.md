@@ -50,7 +50,9 @@ spec: spec/2026-09-22-tbd-local-skills-all-agents.md
 All paths are relative to the repo root. `S` = `home/development/claude-code-skills`.
 
 1. **Import the six skills.**
-   `cp -r ~/.claude/skills/{nixos-standards,fides,backstage-patterns,linkedin-post,reddit-post,cosmic-ui-design-skill} S/`,
+   `cp -r
+   ~/.claude/skills/{nixos-standards,fides,backstage-patterns,linkedin-post,reddit-post,cosmic-ui-design-skill}
+   S/`,
    then `git add` them.
    → verify:
    - `diff -r` of each against its source is empty.
@@ -93,18 +95,22 @@ for every agent (#TBD)`. Steps 5–8 are deploys, not commits.
 ## Tests
 
 1. **Build:**
+
    ```bash
    nix flake check
    for h in p620 razer p510; do
      nix build .#nixosConfigurations.$h.config.system.build.toplevel --no-link
    done
    ```
+
    Expect all to succeed.
 2. **File table:**
+
    ```bash
    nix eval --json .#nixosConfigurations.p620.config.home-manager.users.olafkfreund.home.file \
      --apply 'f: builtins.filter (n: builtins.match "\\.(claude|agents|codex|gemini)/skills/.*" n != null) (builtins.attrNames f)'
    ```
+
    Expect, counted as distinct skill names (the second path segment):
    - `.claude/skills`: 21. That's 15 local skills (9 existing + 6 moved),
      `claude-code-mastery`, the 4 nix-skills, and `nixi` (installed by the
@@ -118,6 +124,7 @@ for every agent (#TBD)`. Steps 5–8 are deploys, not commits.
    six moved skills (`/skills/nixos-standards`, `/skills/fides`, …) and none
    for `/skills/parr-run` or `/skills/run-aws-demo`.
 4. **After switch:**
+
    ```bash
    ls ~/.claude/skills ~/.agents/skills ~/.codex/skills
    readlink ~/.agents/skills/gog/SKILL.md        # /nix/store/…
@@ -126,6 +133,7 @@ for every agent (#TBD)`. Steps 5–8 are deploys, not commits.
    test -f ~/.claude/skills/parr-run/SKILL.md && test -f ~/.claude/skills/run-aws-demo/SKILL.md
    curl -s -H "X-API-Key: $KEY" '127.0.0.1:8384/rest/db/ignores?folder=claude-config' | grep nixos-standards
    ```
+
 5. **Agents see the skills:** a fresh `codex` session and a fresh `agy`
    session each list `artifact-workflow` and `nixos-standards`.
 

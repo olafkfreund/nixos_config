@@ -2,7 +2,7 @@
 
 The canonical provenance-and-gate flow for any build/deploy pipeline:
 
-```
+```text
 trail start → build → artifact report → attest (tests/scans/SBOM) → GATE → deploy → snapshot → verify-chain/audit
 ```
 
@@ -13,11 +13,13 @@ decide pass/fail; rely on the exit code.
 ## Secrets in CI
 
 Provide a **Writer** service-account key (not a personal token):
+
 ```bash
 export FIDES_SERVER_URL="https://fides.example.com"
 export FIDES_API_TOKEN="$FIDES_CI_KEY"          # from the CI secret store
 export FIDES_ENCRYPTION_KEY="$FIDES_ENC_KEY"    # only if encrypting payloads
 ```
+
 Create/rotate the key with `fides service-account issue-key --account <sa> --label ci --expires-hours 720`.
 
 ## Gate exit-code contract

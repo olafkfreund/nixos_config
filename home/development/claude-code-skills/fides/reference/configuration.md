@@ -98,6 +98,7 @@ as `--secret-path` references resolved by `SECRETS_PROVIDER`.
 ## Minimal configs
 
 **CI runner (using the CLI):**
+
 ```bash
 export FIDES_SERVER_URL="https://fides.example.com"
 export FIDES_API_TOKEN="fides_ci_xxx"     # a Writer service-account key
@@ -105,6 +106,7 @@ export FIDES_ENCRYPTION_KEY="$CI_SECRET"  # only if you encrypt payloads
 ```
 
 **Server (local dev):**
+
 ```bash
 export DB_DSN="postgres://fides:fides@localhost:5432/fides?sslmode=disable"
 export FIDES_AUTO_MIGRATE=true
@@ -114,6 +116,7 @@ export AI_PROVIDER=ollama AI_OLLAMA_ENDPOINT=http://localhost:11434 AI_MODEL=lla
 ```
 
 **Server (production hardening):**
+
 ```bash
 export FIDES_RLS_ENABLED=true
 export SECRETS_PROVIDER=aws AWS_REGION=eu-west-2

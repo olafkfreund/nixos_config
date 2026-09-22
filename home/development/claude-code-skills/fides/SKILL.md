@@ -72,6 +72,7 @@ These commands **exit non-zero to fail a CI step** — rely on them, don't parse
 
 **Record a build's provenance (in CI).** You *choose* the trail identifier (the Git SHA
 is the convention) and pass it consistently — IDs are **not** captured from `fides` stdout:
+
 ```bash
 TRAIL="$GIT_SHA"                                                    # you set this (build id)
 DIGEST=$(docker inspect --format='{{index .Id}}' app:$GIT_SHA)     # or let Fides hash a file with --file
@@ -81,6 +82,7 @@ fides attest junit    --trail "$TRAIL" --file reports/junit.xml --artifact-sha "
 fides attest trivy    --trail "$TRAIL" --file reports/trivy.json --artifact-sha "$DIGEST"
 fides attest sbom     --artifact-sha "$DIGEST" --file sbom.json                          # --trail optional
 ```
+
 > `fides attest junit|snyk|trivy|sbom` auto-normalize the report; use generic
 > `fides attest --name --type --payload <json|file> [--encrypt]` for anything else.
 > `fides attest sbom` auto-detects CycloneDX/SPDX, persists per-component rows
@@ -88,6 +90,7 @@ fides attest sbom     --artifact-sha "$DIGEST" --file sbom.json                 
 > ("which artifacts contain component X").
 
 **Gate a deploy (pick the strictest that applies):**
+
 ```bash
 fides assert       --sha256 $DIGEST --policy production-release-rules   # policy gate
 fides policy check --env $ENV --trail $TRAIL                            # env policy gate
@@ -98,6 +101,7 @@ fides change-gate  --trail $TRAIL                                       # verdic
 sign-off; four-eyes needs two distinct humans: `fides approve --trail $TRAIL --reason "..."`.
 
 **Adopt & enforce a framework:**
+
 ```bash
 fides control import --framework SOC2
 fides control enforce --all-controls --all-environments

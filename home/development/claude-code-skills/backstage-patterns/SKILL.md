@@ -1,6 +1,8 @@
 ---
 name: backstage-patterns
-description: "Backstage patterns: Software Catalog (catalog-info.yaml, kinds, relations, lifecycle), TechDocs (MkDocs, techdocs-cli), Scaffolder templates (CSF3, steps, fetch:template, publish:github), custom plugins (frontend React, backend Express), GitHub App integration, and Chromatic CI."
+description: "Backstage patterns: Software Catalog (catalog-info.yaml, kinds, relations, lifecycle),
+TechDocs (MkDocs, techdocs-cli), Scaffolder templates (CSF3, steps, fetch:template, publish:github),
+custom plugins (frontend React, backend Express), GitHub App integration, and Chromatic CI."
 ---
 
 # Backstage Patterns
@@ -16,7 +18,8 @@ Reference for building and customizing Backstage — the open-source Internal De
 - Configuring GitHub App integration
 - Designing the software catalog entity model
 - Onboarding a new microservice into an existing Internal Developer Portal with team ownership and dependency tracking
-- Implementing a self-service workflow so developers can provision new services, databases, or queues through the Scaffolder UI
+- Implementing a self-service workflow so developers can provision new services, databases, or
+  queues through the Scaffolder UI
 - Migrating documentation from a wiki to TechDocs so it stays co-located with the code that it describes
 
 ---
@@ -152,7 +155,7 @@ spec:
 
 Documentation co-located with code, rendered in Backstage.
 
-```
+```text
 my-service/
   catalog-info.yaml         # Points to TechDocs
   mkdocs.yml               # MkDocs configuration
@@ -306,7 +309,7 @@ spec:
 
 ### Template Skeleton Files
 
-```
+```text
 templates/nodejs-api/skeleton/
   .github/workflows/
     ci.yml                # ${{ values.name }} — templated

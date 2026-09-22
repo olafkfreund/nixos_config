@@ -17,43 +17,50 @@ All agents are now registered via `skill.json` and ready for use.
 ## Quick Command Reference
 
 ### Cosmic Architect
-```
+
+```text
 @cosmic-architect /review-app-structure
 @cosmic-architect /suggest-refactoring
 ```
 
 ### Cosmic Theme Expert
-```
+
+```text
 @cosmic-theme-expert /audit-theming
 @cosmic-theme-expert /convert-hardcoded
 ```
 
 ### Cosmic Applet Specialist
-```
+
+```text
 @cosmic-applet-specialist /review-applet
 @cosmic-applet-specialist /fix-popup
 ```
 
 ### Cosmic Widget Builder
-```
+
+```text
 @cosmic-widget-builder /review-widgets
 @cosmic-widget-builder /improve-layout
 ```
 
 ### Cosmic Error Handler
-```
+
+```text
 @cosmic-error-handler /remove-unwraps
 @cosmic-error-handler /audit-error-handling
 ```
 
 ### Cosmic Performance Optimizer
-```
+
+```text
 @cosmic-performance-optimizer /find-bottlenecks
 @cosmic-performance-optimizer /optimize-memory
 ```
 
 ### Cosmic Code Reviewer
-```
+
+```text
 @cosmic-code-reviewer /full-review
 @cosmic-code-reviewer /pre-commit-check
 ```
@@ -61,26 +68,31 @@ All agents are now registered via `skill.json` and ready for use.
 ## Agent Invocation Methods
 
 ### Method 1: Direct Mention (Most Reliable)
-```
+
+```text
 Please act as cosmic-theme-expert and review this code for theming issues.
 ```
 
 ### Method 2: With Context Loading
-```
+
+```text
 Using the cosmic-theme-expert agent from cosmic-ui-design-skill,
 audit this file for hard-coded values.
 ```
 
 ### Method 3: Shortcut Reference
-```
+
+```text
 Execute cosmic-code-reviewer /full-review on cosmic-connect/src/main.rs
 ```
 
 ### Method 4: Try @ Syntax (If Supported)
-```
+
+```text
 @cosmic-theme-expert /audit-theming
 ```
-*Note: @ syntax may not work with custom skills depending on Claude Code configuration*
+
+Note: @ syntax may not work with custom skills depending on Claude Code configuration.
 
 ## Verification
 
@@ -111,6 +123,7 @@ chmod 644 ~/.claude/skills/cosmic-ui-design-skill/*.md
 To add new COSMIC agents:
 
 1. Add entry to `agents.json`:
+
 ```json
 {
   "name": "your-agent-name",
@@ -120,7 +133,8 @@ To add new COSMIC agents:
 }
 ```
 
-2. Register in `skill.json`:
+1. Register in `skill.json`:
+
 ```json
 "your-agent-name": {
   "name": "your-agent-name",
@@ -130,9 +144,9 @@ To add new COSMIC agents:
 }
 ```
 
-3. Document in USAGE.md
+1. Document in USAGE.md
 
-4. Update this registry
+2. Update this registry
 
 ---
 

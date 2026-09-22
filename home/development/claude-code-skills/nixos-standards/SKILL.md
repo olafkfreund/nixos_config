@@ -1,6 +1,9 @@
 ---
 name: nixos-standards
-description: Modern NixOS best practices for writing flakes, modules, packages, overlays, secrets (agenix), systemd service hardening, dev shells, and Home Manager modules — plus the anti-patterns to avoid. Use when authoring or reviewing any Nix/NixOS configuration, module, or package derivation.
+description: Modern NixOS best practices for writing flakes, modules, packages, overlays, secrets
+(agenix), systemd service hardening, dev shells, and Home Manager modules — plus the anti-patterns
+to avoid. Use when authoring or reviewing any Nix/NixOS configuration, module, or package
+derivation.
 ---
 
 ## NixOS Development Standards
@@ -8,6 +11,7 @@ description: Modern NixOS best practices for writing flakes, modules, packages, 
 ### Modern NixOS Best Practices
 
 #### 1. **Flake-First Development**
+
 - Always use `flakes` for new configurations and projects
 - Enable experimental features: `nix.settings.experimental-features = [ "nix-command" "flakes" ];`
 - Use `flake.lock` for reproducible builds
@@ -15,6 +19,7 @@ description: Modern NixOS best practices for writing flakes, modules, packages, 
 - Prefer `inputs.nixpkgs.follows = "nixpkgs"` for consistency
 
 #### 2. **Module System Excellence**
+
 ```nix
 # Preferred module structure
 { config, lib, pkgs, ... }:
@@ -47,6 +52,7 @@ in {
 #### 3. **Advanced Configuration Patterns**
 
 **Feature Flag Architecture:**
+
 ```nix
 # Use consistent feature flag patterns
 features = {
@@ -62,6 +68,7 @@ features = {
 ```
 
 **Conditional Module Loading:**
+
 ```nix
 imports = [
   # Conditional imports based on system
@@ -73,6 +80,7 @@ imports = [
 #### 4. **Modern Package Management**
 
 **Overlay Patterns:**
+
 ```nix
 # Use structured overlays
 final: prev: {
@@ -83,22 +91,23 @@ final: prev: {
 ```
 
 **Package Derivation Best Practices:**
+
 ```nix
 { lib, stdenv, fetchFromGitHub, ... }:
 stdenv.mkDerivation rec {
   pname = "my-package";
   version = "1.0.0";
-  
+
   src = fetchFromGitHub {
     owner = "owner";
     repo = pname;
     rev = "v${version}";
     hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
   };
-  
+
   # Use structured attributes
   strictDeps = true;
-  
+
   meta = with lib; {
     description = "Short description";
     homepage = "https://example.com";
@@ -112,6 +121,7 @@ stdenv.mkDerivation rec {
 #### 5. **Security Best Practices**
 
 **Secrets Management (Agenix):**
+
 ```nix
 # Proper secret handling
 age.secrets."api-key" = {
@@ -126,6 +136,7 @@ services.myservice.apiKeyFile = config.age.secrets."api-key".path;
 ```
 
 **Service Hardening:**
+
 ```nix
 systemd.services.myservice = {
   serviceConfig = {
@@ -138,11 +149,11 @@ systemd.services.myservice = {
     ProtectKernelTunables = true;
     ProtectControlGroups = true;
     RestrictSUIDSGID = true;
-    
+
     # Resource limits
     MemoryMax = "1G";
     TasksMax = 1000;
-    
+
     # User isolation
     DynamicUser = true;
     User = "myservice";
@@ -154,16 +165,17 @@ systemd.services.myservice = {
 #### 6. **Performance Optimization**
 
 **Build Optimization:**
+
 ```nix
 # Use parallel builds
 nix.settings = {
   max-jobs = "auto";
   cores = 0;  # Use all cores
-  
+
   # Build optimization
   keep-outputs = true;
   keep-derivations = true;
-  
+
   # Sandbox and substituters
   sandbox = true;
   substituters = [
@@ -175,6 +187,7 @@ nix.settings = {
 ```
 
 **System Optimization:**
+
 ```nix
 # Modern kernel and optimizations
 boot = {
@@ -191,16 +204,17 @@ boot = {
 #### 7. **Testing and Validation**
 
 **NixOS Tests:**
+
 ```nix
 # Create proper NixOS VM tests
 import <nixpkgs/nixos/tests/make-test-python.nix> ({ pkgs, ... }: {
   name = "my-service-test";
-  
+
   nodes.machine = { ... }: {
     imports = [ ./my-service-module.nix ];
     services.my-service.enable = true;
   };
-  
+
   testScript = ''
     machine.start()
     machine.wait_for_unit("my-service")
@@ -210,6 +224,7 @@ import <nixpkgs/nixos/tests/make-test-python.nix> ({ pkgs, ... }: {
 ```
 
 **Configuration Validation:**
+
 ```nix
 # Add assertions and warnings
 config = mkIf cfg.enable {
@@ -219,7 +234,7 @@ config = mkIf cfg.enable {
       message = "Database host must be configured";
     }
   ];
-  
+
   warnings = optional (cfg.security.enabled == false) [
     "Security is disabled - not recommended for production"
   ];
@@ -229,6 +244,7 @@ config = mkIf cfg.enable {
 #### 8. **Development Environment Standards**
 
 **Dev Shells:**
+
 ```nix
 # Comprehensive development shells
 devShells.default = pkgs.mkShell {
@@ -240,13 +256,13 @@ devShells.default = pkgs.mkShell {
     deadnix       # Dead code detection
     nix-tree      # Dependency visualization
     nix-diff      # Configuration diffing
-    
+
     # Development tools
     pre-commit
     commitizen
     just
   ];
-  
+
   shellHook = ''
     echo "NixOS development environment loaded"
     pre-commit install --install-hooks
@@ -257,16 +273,17 @@ devShells.default = pkgs.mkShell {
 #### 9. **Documentation Standards**
 
 **Module Documentation:**
+
 ```nix
 # Always include comprehensive options documentation
 options.services.myservice = {
   enable = mkEnableOption "MyService daemon";
-  
+
   package = mkPackageOption pkgs "myservice" {
     default = pkgs.myservice;
     example = literalExpression "pkgs.myservice.override { enableFeature = true; }";
   };
-  
+
   settings = mkOption {
     type = with types; attrsOf anything;
     default = {};
@@ -283,7 +300,7 @@ options.services.myservice = {
     '';
     description = ''
       Configuration for MyService.
-      
+
       See <https://myservice.example.com/docs> for available options.
     '';
   };
@@ -301,17 +318,17 @@ let
 in {
   options.programs.myprogram = {
     enable = mkEnableOption "MyProgram";
-    
+
     settings = mkOption {
       type = with types; attrsOf anything;
       default = {};
       description = "Configuration written to myprogram config file";
     };
   };
-  
+
   config = mkIf cfg.enable {
     home.packages = [ pkgs.myprogram ];
-    
+
     xdg.configFile."myprogram/config.toml" = mkIf (cfg.settings != {}) {
       source = (pkgs.formats.toml {}).generate "myprogram-config" cfg.settings;
     };
@@ -322,6 +339,7 @@ in {
 ### NixOS Anti-Patterns to Avoid
 
 #### ❌ **Don't Do:**
+
 - Use `with pkgs;` globally - prefer explicit `pkgs.package`
 - Hardcode paths - use `pkgs.writeScript` or similar
 - Use `fetchurl` without hash verification
@@ -333,6 +351,7 @@ in {
 - Use `rec` unnecessarily in attribute sets
 
 #### ✅ **Do Instead:**
+
 - Use explicit package references: `pkgs.hello`
 - Use proper derivations for custom scripts
 - Always provide hashes for fetchers
@@ -346,6 +365,7 @@ in {
 ### Code Quality Standards
 
 #### **Formatting:**
+
 ```bash
 # Use nixpkgs-fmt for consistent formatting
 nixpkgs-fmt **/*.nix
@@ -358,6 +378,7 @@ deadnix
 ```
 
 #### **Import Organization:**
+
 ```nix
 # Organize imports consistently
 { config        # NixOS configuration
@@ -367,4 +388,3 @@ deadnix
 , ...           # Additional arguments
 }:
 ```
-

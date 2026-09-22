@@ -8,7 +8,7 @@ author: olafkfreund
 
 ## Problem
 
-#1958 installs the external nix-skills collection for Claude, Codex and
+Issue #1958 installs the external nix-skills collection for Claude, Codex and
 Antigravity. The skills written for this setup do not get the same treatment.
 Measured on p620 on 2026-09-22:
 
