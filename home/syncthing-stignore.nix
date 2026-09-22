@@ -32,10 +32,15 @@ let
   #
   # Only these are carved out. `!skills/**` below still syncs skills installed
   # imperatively, which are real files and replicate correctly.
-  managedSkillIgnores = folder:
-    lib.concatMapStrings (name: "/skills/${name}\n") (lib.unique (map
-      (path: lib.elemAt (lib.splitString "/" path) 2)
-      (lib.filter (lib.hasPrefix "${folder}/skills/") (lib.attrNames config.home.file))));
+  #
+  # `subdir` is the synced path under the folder: `skills` for both, plus
+  # `config/skills` for .gemini, where Antigravity reads skills and the
+  # allowlist syncs `!config/**` (#1958).
+  managedSkillIgnores = folder: subdir:
+    lib.concatMapStrings (name: "/${subdir}/${name}\n") (lib.unique (map
+      (path: lib.elemAt (lib.splitString "/" path)
+        (lib.length (lib.splitString "/" "${folder}/${subdir}")))
+      (lib.filter (lib.hasPrefix "${folder}/${subdir}/") (lib.attrNames config.home.file))));
 in
 {
   home.file.".claude/.stignore" = {
@@ -53,7 +58,7 @@ in
 
       // ─── Home-manager-owned skills: per-host store symlinks, never sync ───
       // (derived from home.file; first match wins, so these beat !skills/**)
-      ${managedSkillIgnores ".claude"}
+      ${managedSkillIgnores ".claude" "skills"}
       // ─── ALLOWLIST: only these sync ───
       !CLAUDE.md
       !skills/**
@@ -91,7 +96,7 @@ in
 
       // ─── Home-manager-owned skills: per-host store symlinks, never sync ───
       // (derived from home.file; first match wins, so these beat !skills/**)
-      ${managedSkillIgnores ".gemini"}
+      ${managedSkillIgnores ".gemini" "skills"}${managedSkillIgnores ".gemini" "config/skills"}
       // ─── ALLOWLIST: only these sync ───
       !GEMINI.md
       !settings.json

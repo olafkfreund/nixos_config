@@ -209,6 +209,14 @@
       flake = false;
     };
 
+    # Our own portable Nix skills, installed for Claude, Codex and
+    # Antigravity by home/development/claude-code-skills (#1958).
+    nix-skills = {
+      url = "github:olafkfreund/nix-skills";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
+
     # Terminal YouTube browser
     yt-x = {
       url = "github:Benexl/yt-x";

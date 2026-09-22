@@ -1449,6 +1449,29 @@
         "type": "github"
       }
     },
+    "nix-skills": {
+      "inputs": {
+        "home-manager": [
+          "home-manager"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790096023,
+        "narHash": "sha256-7uuyD12ctE5XU3SrR3mWhMjjwxfWZq2RZ7oSl/DNgZo=",
+        "owner": "olafkfreund",
+        "repo": "nix-skills",
+        "rev": "86609598bb6f0c67dc0d93ff5eb4c4fa1c41bf27",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "nix-skills",
+        "type": "github"
+      }
+    },
     "nix-snapd": {
       "inputs": {
         "flake-compat": "flake-compat_2",
@@ -2288,6 +2311,7 @@
         "mcp-nixos": "mcp-nixos",
         "microvm": "microvm",
         "nix-index-database": "nix-index-database",
+        "nix-skills": "nix-skills",
         "nix-snapd": "nix-snapd",
         "nixarchy": "nixarchy",
         "nixarchy-distrobox": "nixarchy-distrobox_2",
