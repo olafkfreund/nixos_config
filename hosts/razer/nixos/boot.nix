@@ -2,41 +2,30 @@
   # Boot optimizations
   boot.loader.systemd-boot = {
     enable = true;
-    # razer boots via lanzaboote, which writes a SIGNED kernel + initrd into a
-    # 511 MiB /boot. Each initrd is ~150 MiB (NVIDIA firmware), and in practice
-    # every nixpkgs bump produces a distinct one even on the same kernel
-    # version — so budget one initrd PER GENERATION, not per kernel.
+    # razer boots via lanzaboote, which writes a SIGNED kernel + initrd per
+    # generation into a 511 MiB /boot that cannot grow without live media.
+    # The initrd is large because NVIDIA stays in it for early KMS (PRIME
+    # sync); nvidia.nix drops the unused Turing firmware to hold it at
+    # ~117 MiB (#1954). Budget one initrd PER GENERATION: in practice every
+    # nixpkgs bump produces a distinct one, even on the same kernel.
     #
-    # The number that matters is limit + 1, not limit: the installer copies the
-    # new kernel+initrd in BEFORE garbage-collecting old ones. This was set to
-    # 3 after the same ENOSPC failure on 2026-08-06, with the note that 3
-    # "bounds the worst case at ~507 MiB" — but that is the steady state, and
-    # the peak is 4 x 150 = 600 MiB. It duly failed again on 2026-08-12,
-    # mid-install, leaving razer running a generation /boot could not boot.
+    # The number that matters is limit + 1, not limit: the installer copies
+    # the new kernel + initrd in BEFORE removing old ones. Only nhs runs the
+    # ESP guard (scripts/check-boot-space.sh); deploy-via-p620, quick-deploy
+    # and `just razer` do not, so the peak has to fit on its own.
     #
-    #   peak = (limit + 1) x 150 MiB initrd + ~28 MiB kernels + ~2 MiB stubs
-    #   limit = 2  ->  3 x 150 + 30 = ~480 MiB, fits 511 MiB with ~30 MiB spare
+    #   per generation ~ 117 MiB initrd + 14 MiB kernel = ~131 MiB
+    #   limit = 2, steady ~ 265 MiB used, ~246 MiB free (guard wants 200)
+    #   limit = 2, peak   ~ 395 MiB, ~115 MiB headroom
+    #   overflows only if the initrd grows past ~155 MiB
     #
-    #   limit = 1  ->  2 x 150 + 30 = ~330 MiB, fits 511 MiB with ~180 MiB spare
-    #
-    # One, because two was never comfortable -- it was merely the largest value
-    # that fit, and ~30 MiB of headroom is not headroom. In practice every
-    # deploy since has stalled on nhs's ESP guard, which wants 200 MiB free and
-    # found 197, and each one had to be unblocked by hand-deleting a
-    # generation. At one, the steady state is ~165 MiB used and ~346 MiB free,
-    # so the guard passes on its own and stops being a recurring chore.
-    #
-    # What this gives up is the second entry in the BOOT MENU. It does not
-    # touch rollback: generations still accumulate in /nix/var/nix/profiles,
-    # and `nixos-rebuild --rollback switch` -- which is what actually recovered
-    # this machine on 2026-08-31 -- reads that profile, not the ESP. The boot
-    # menu only matters when the machine will not boot at all, and that case
-    # wants installer media regardless.
-    #
-    # Raising it back needs a BIGGER ESP or a smaller initrd, not a bigger
-    # number. The initrd is 137-149 MiB because of the NVIDIA firmware; dropping
-    # that takes it to ~46 MiB but costs prime.sync.
-    configurationLimit = 1;
+    # History: 3 overflowed mid-install on 2026-08-12 with 149 MiB initrds,
+    # leaving razer running a generation /boot could not boot. 1 was the
+    # fix, at the cost of the boot-menu fallback. 2 is back because the
+    # initrd shrank (149 -> 131 -> 117 MiB). If it grows again, the guard
+    # falls back to one generation on nhs runs; the real fixes remain a
+    # bigger ESP or dropping NVIDIA from the initrd.
+    configurationLimit = 2;
     editor = false; # Disable bootloader editing for security
   };
   boot.loader.efi.canTouchEfiVariables = true;
