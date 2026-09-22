@@ -58,7 +58,7 @@ This plan is self-contained; it carries every approved decision.
 |-------|----------|
 | `nix eval .#nixosConfigurations.p620.config.programs.nixarchy.menu.extraEntries --json \| jq -c '."setup.plugin.add"'` | `{"action":"omarchy-shell shell toggle io.github.olafkfreund.nixarchy-plugin-browser '{}'","icon":"󰖟","label":"Add Plugin"}` |
 | `nix eval --raw '.#nixosConfigurations.p620.config.home-manager.users.olafkfreund.home.file.".config/hypr/plugin-browser-binds.lua".text'` | contains `o.bind("SUPER + ALT + U", "Plugin browser", …)` |
-| `nix eval .#nixosConfigurations.razer.config.programs.nixarchy.menu.extraEntries --json \| jq 'has("setup.plugin.add")'` | `false` |
+| `nix eval .#nixosConfigurations.razer.config.programs.nixarchy.menu.extraEntries --json \| jq 'has("setup.plugin.add")'` | `true` (razer added, see Deviations) |
 | pre-commit hooks | pass |
 | **After deploy (user):** `ls -l ~/.config/hypr/plugin-browser-binds.lua` | a Home Manager symlink |
 | Super+Alt+U | toggles the Plugin Browser panel |
@@ -67,7 +67,13 @@ This plan is self-contained; it carries every approved decision.
 
 ## Deviations recorded during implementation
 
-None yet.
+- **razer as well as p620 (2026-09-23, user request).** This reverses the
+  approved "p620 only" decision. razer imports the same module from
+  `hosts/razer/nixos/nixarchy.nix`, and the razer check in Tests is now
+  expected `true`. It goes to razer through the p620 build path AGENTS.md
+  names for that host. razer's own `bindings.lua` needs the same `pcall` line.
+- Steps 1, 2 and 4 were committed by another session (`a9d247642`, PR #1974).
+  Step 3's evaluation checks were run and posted on the PR.
 
 ## Rollback
 
