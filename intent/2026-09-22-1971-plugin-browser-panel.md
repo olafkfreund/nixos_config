@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1971
 author: olafkfreund
 ---
@@ -60,8 +60,8 @@ On p620, after a deploy:
 
 ## Open questions
 
-- **Include razer now, or p620 only?** The proposal is p620 only.
-- **`extraEntries` or the extensions file?** Since nixarchy #220,
-  `~/.config/omarchy/extensions/omarchy-menu.jsonc` is a writable user file,
-  so a hand edit would now survive. The proposal is `extraEntries`, because
-  it is declarative and reviewable here, like the existing gog rows.
+Decided at approval (the user took both proposals):
+
+- **p620 only.** razer can import the same module later.
+- **`extraEntries`,** not a hand edit of the extensions file: it is declarative
+  and reviewable here, like the gog rows.
