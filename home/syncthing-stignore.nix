@@ -7,15 +7,19 @@
 # for gemini. Everything else (session transcripts, file-history, caches,
 # antigravity runtime, ...) is excluded by a trailing `*` catch-all.
 #
-# force = true: Syncthing wrote these files imperatively before we
-# Nixified them, so the first activation must clobber the on-disk copies.
-# After that they're symlinks to the Nix store and Syncthing reloads them
-# automatically on change (verified — see folder.fsWatcher).
+# Written as real files by an activation step, NOT as home.file symlinks.
+# Syncthing only reloads ignores when the file's mtime changes, and every
+# /nix/store file has mtime 1, so a symlinked .stignore was never reloaded:
+# on 2026-09-22 every host was running rules from its last Syncthing start
+# (p510 still lacked /skills/gog). The step rewrites a file only when its
+# content changes, so the mtime moves exactly when Syncthing must reload.
+# Check what Syncthing actually loaded with
+#   curl -H "X-API-Key: $KEY" 127.0.0.1:8384/rest/db/ignores?folder=claude-config
 #
 # To change patterns, edit this file and re-deploy. Do NOT edit ~/.claude/
 # .stignore or ~/.gemini/.stignore directly — your edits would be reverted
 # on the next nixos-rebuild switch.
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   # Skill directories home-manager owns under a synced folder, derived from
   # home.file rather than listed by hand, so a newly added skill is covered
@@ -50,74 +54,114 @@ let
   hostLocalSkillIgnores = subdir:
     lib.concatMapStrings (name: "/${subdir}/${name}\n")
       [ "herdr" "omarchy-omgato" "test-skill" ];
+
+  # nixarchy relinks every skill in its omarchy tree into ~/.claude/skills on
+  # each activation (modules/home.nix, "agent skills relinked on every
+  # activation"). The tree differs per host (p510 has preinstalls = false),
+  # so these links dangled wherever another host's tree path landed. The
+  # names only exist in the built tree -- reading it at eval time would be
+  # import-from-derivation -- so they are listed. Taken from
+  # ~/.agents/skills on 2026-09-22; a new nixarchy skill needs adding here.
+  # Exact names, not `/skills/nixos-*`: that would also stop the real,
+  # synced nixos-standards skill.
+  nixarchySkillIgnores = lib.concatMapStrings (name: "/skills/${name}\n") [
+    "devenv"
+    "diagnose-crash"
+    "nixarchy"
+    "nixos"
+    "nixos-ai"
+    "nixos-android"
+    "nixos-binaries"
+    "nixos-config-repo"
+    "nixos-doctor"
+    "nixos-fleet"
+    "nixos-gaming"
+    "nixos-gpu"
+    "nixos-performance"
+    "nixos-secrets"
+    "nixos-security"
+    "nixos-services"
+  ];
+
+  claudeIgnores = pkgs.writeText "claude-stignore" ''
+    // ~/.claude/.stignore — allowlist mode (managed by home/syncthing-stignore.nix)
+    // Only paths matched by "!" rules below are synced.
+    // Everything else is ignored by the final catch-all.
+
+    // ─── Sensitive: never sync, even by accident ───
+    .credentials.json
+
+    // ─── Sync-conflict litter: drop everywhere ───
+    *sync-conflict*
+
+    // ─── Per-host skill links: store or local symlinks, never sync ───
+    // (first match wins, so these beat !skills/**)
+    ${managedSkillIgnores ".claude" "skills"}${hostLocalSkillIgnores "skills"}${nixarchySkillIgnores}
+    // ─── ALLOWLIST: only these sync ───
+    !CLAUDE.md
+    !skills/**
+    !commands/**
+    !agents/**
+    !plugins/**
+
+    // ─── Catch-all: ignore everything else ───
+    *
+  '';
+
+  geminiIgnores = pkgs.writeText "gemini-stignore" ''
+    // ~/.gemini/.stignore — allowlist mode (managed by home/syncthing-stignore.nix)
+    // Only paths matched by "!" rules below are synced.
+    // Everything else is ignored by the final catch-all.
+
+    // ─── Sensitive: never sync, even by accident ───
+    oauth_creds.json
+    google_accounts.json
+
+    // ─── Per-machine state: never useful cross-host ───
+    installation_id
+    user_id
+    state.json
+    projects.json
+    trustedFolders.json
+    settings.json.orig
+    settings.nix
+
+    // ─── Sync-conflict litter: drop everywhere ───
+    *sync-conflict*
+
+    // ─── Per-host skill links: store or local symlinks, never sync ───
+    // (first match wins, so these beat !skills/**)
+    ${managedSkillIgnores ".gemini" "skills"}${managedSkillIgnores ".gemini" "config/skills"}${hostLocalSkillIgnores "config/skills"}
+    // ─── ALLOWLIST: only these sync ───
+    !GEMINI.md
+    !settings.json
+    !config/**
+    !skills/**
+    !commands/**
+    !agents/**
+    !hooks/**
+    !extensions/**
+
+    // ─── Catch-all: ignore everything else ───
+    *
+  '';
+
+  home = config.home.homeDirectory;
 in
 {
-  home.file.".claude/.stignore" = {
-    force = true;
-    text = ''
-      // ~/.claude/.stignore — allowlist mode (managed by home/syncthing-stignore.nix)
-      // Only paths matched by "!" rules below are synced.
-      // Everything else is ignored by the final catch-all.
-
-      // ─── Sensitive: never sync, even by accident ───
-      .credentials.json
-
-      // ─── Sync-conflict litter: drop everywhere ───
-      *sync-conflict*
-
-      // ─── Home-manager-owned skills: per-host store symlinks, never sync ───
-      // (derived from home.file; first match wins, so these beat !skills/**)
-      ${managedSkillIgnores ".claude" "skills"}${hostLocalSkillIgnores "skills"}
-      // ─── ALLOWLIST: only these sync ───
-      !CLAUDE.md
-      !skills/**
-      !commands/**
-      !agents/**
-      !plugins/**
-
-      // ─── Catch-all: ignore everything else ───
-      *
-    '';
-  };
-
-  home.file.".gemini/.stignore" = {
-    force = true;
-    text = ''
-      // ~/.gemini/.stignore — allowlist mode (managed by home/syncthing-stignore.nix)
-      // Only paths matched by "!" rules below are synced.
-      // Everything else is ignored by the final catch-all.
-
-      // ─── Sensitive: never sync, even by accident ───
-      oauth_creds.json
-      google_accounts.json
-
-      // ─── Per-machine state: never useful cross-host ───
-      installation_id
-      user_id
-      state.json
-      projects.json
-      trustedFolders.json
-      settings.json.orig
-      settings.nix
-
-      // ─── Sync-conflict litter: drop everywhere ───
-      *sync-conflict*
-
-      // ─── Home-manager-owned skills: per-host store symlinks, never sync ───
-      // (derived from home.file; first match wins, so these beat !skills/**)
-      ${managedSkillIgnores ".gemini" "skills"}${managedSkillIgnores ".gemini" "config/skills"}${hostLocalSkillIgnores "config/skills"}
-      // ─── ALLOWLIST: only these sync ───
-      !GEMINI.md
-      !settings.json
-      !config/**
-      !skills/**
-      !commands/**
-      !agents/**
-      !hooks/**
-      !extensions/**
-
-      // ─── Catch-all: ignore everything else ───
-      *
-    '';
-  };
+  # After linkGeneration, which removes the .stignore symlinks earlier
+  # generations installed. A leftover symlink is replaced, not written
+  # through; unchanged content leaves the file (and its mtime) alone.
+  home.activation.syncthingIgnores = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    for pair in "${claudeIgnores}:${home}/.claude/.stignore" \
+                "${geminiIgnores}:${home}/.gemini/.stignore"; do
+      src="''${pair%%:*}"
+      dst="''${pair#*:}"
+      run mkdir -p "$(dirname "$dst")"
+      [ -L "$dst" ] && run rm -f "$dst"
+      if ! cmp -s "$src" "$dst"; then
+        run install -m 644 "$src" "$dst.tmp" && run mv -f "$dst.tmp" "$dst"
+      fi
+    done
+  '';
 }
