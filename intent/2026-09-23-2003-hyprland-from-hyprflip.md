@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2003
 author: olafkfreund
 ---
@@ -66,16 +66,10 @@ That causes two problems:
   the previous generation.
 - No change to hyprflip's repository.
 
-## Open questions
+## Decisions (answered at intent review)
 
-1. **Scope of the Hyprland change.** `nixarchy.inputs.hyprland.follows =
-   "hyprflip/hyprland"` moves razer and p510 to hyprflip's last-verified
-   `main` as well. That is simpler, and at most a day behind. The alternative
-   is to leave nixarchy's input alone and override only p620's
-   `programs.hyprland.package` (and portal) to hyprflip's Hyprland. p620 would
-   then run a different Hyprland from the other hosts and from nixarchy's own
-   settings for it. Recommendation: the flake-level `follows`.
-2. **Update routine.** From now on `nix flake update hyprflip` updates
-   Hyprland. A bulk `nix flake update` still does the right thing, because the
-   Hyprland `url` override goes away. Is that the routine you want, and should
-   the flake comment say so?
+1. **Scope:** p620 and razer only, as a trial for a period, after which you
+   decide. `nixarchy.inputs.hyprland` stays as it is, so p510 and nixarchy's own
+   settings are untouched. The per-host override is the mechanism.
+2. **Reversible in code:** the override carries a comment saying exactly how to
+   switch back.
