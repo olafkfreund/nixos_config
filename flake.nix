@@ -107,6 +107,15 @@
       inputs.hyprland.follows = "nixarchy/hyprland";
     };
 
+    # OmaCards, the Omarchy bar panel for Hyprflip cards. Not a flake: the repo
+    # is the plugin directory itself, handed to programs.nixarchy.plugins in
+    # hosts/common/nixos/omarchy-hyprflip.nix. Bump with
+    # `nix flake update omacards` -- `omarchy plugin update` skips it (no .git).
+    omacards = {
+      url = "github:nocstah/omacards";
+      flake = false;
+    };
+
     # Oma, voice control for the Omarchy desktop. Follows this flake's nixpkgs
     # for the same reason nixarchy does: the package wraps ~10 desktop tools
     # onto PATH, and a second nixpkgs would be a second copy of every one.
