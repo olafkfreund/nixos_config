@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1995
 intent: intent/2026-09-23-1995-plugin-browser-key.md
 ---
