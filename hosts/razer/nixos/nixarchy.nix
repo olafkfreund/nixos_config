@@ -36,7 +36,6 @@
     ../../common/nixos/omarchy-omadroid.nix
     ../../common/nixos/omarchy-sole-hyprland.nix
     ../../common/nixos/omarchy-stylix-theme.nix
-    ../../common/nixos/omarchy-plugin-browser.nix
   ];
 
   programs.nixarchy.enable = true;
