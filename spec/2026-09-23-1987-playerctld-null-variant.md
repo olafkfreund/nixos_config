@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1987
 intent: intent/2026-09-23-1987-playerctld-null-variant.md
 ---
