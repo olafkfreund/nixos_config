@@ -10,7 +10,7 @@ that imports `home/development` (p620, razer and p510), and it is fully declarat
 | Agent       | How it reaches nixd                                         | What it can do                                                        | Formatting                               |
 | ----------- | ----------------------------------------------------------- | --------------------------------------------------------------------- | ---------------------------------------- |
 | Claude Code | `nix-lsp` plugin → `nixd-agent`                             | `LSP` tool: hover, definition, references, symbols, call hierarchy; diagnostics pushed after every edit | Managed PostToolUse hook → `nix-format`  |
-| Codex       | MCP server `nixd` → `mcp-language-server` → `nixd-agent`   | MCP tools: `definition`, `references`, `diagnostics`, `hover`, `rename_symbol`, `edit_file` | `~/.codex/hooks.json` PostToolUse → `nix-format` |
+| Codex       | MCP server `nixd` → `mcp-language-server` → `nixd-agent`   | MCP tools `hover` and `diagnostics` (plus `rename_symbol`, `edit_file`); `definition` and `references` return an error, see below | `~/.codex/hooks.json` PostToolUse → `nix-format` |
 
 ## The pieces
 
@@ -26,7 +26,7 @@ that imports `home/development` (p620, razer and p510), and it is fully declarat
 
 nixd 2.x reads no config file. It takes settings through the LSP `workspace/configuration` request or
 through command-line flags. Neither Claude Code nor `mcp-language-server` is known to answer that
-request, so `nixd-agent` passes everything as flags, which work with any client:
+request (confirmed for Claude Code), so `nixd-agent` passes everything as flags, which work with any client:
 
 ```text
 nixd --nixos-options-expr='(builtins.getFlake "git+file://<flakeDir>").nixosConfigurations.<host>.options'
@@ -46,6 +46,22 @@ The first evaluation of the option set takes 30 to 60 seconds in the background,
 it in the meantime. A running nixd takes about 350 MB: the server plus its nixpkgs and NixOS option
 workers. Each agent session starts its own.
 
+### The nixd patch
+
+nixd 2.9.2 does not answer a request it does not implement with `-32601 method not found`, as LSP
+requires. It ends its message loop and exits instead (`nixd/lspserver/src/LSPServer.cpp`, `onCall`).
+`mcp-language-server` sends two such requests:
+
+- its `diagnostics` tool asks for pull diagnostics (`textDocument/diagnostic`);
+- `definition` and `references` look a symbol up by name through `workspace/symbol`.
+
+Without a fix, each of those calls killed nixd, and the Codex session hung waiting on a dead server.
+`home/development/nixd-method-not-found.patch` makes nixd reply `MethodNotFound`. It is applied only to
+the nixd that `nixd-agent` runs, by `overrideAttrs` rather than an overlay, so nothing else loses its
+binary-cache hits. `diagnostics` now works. `definition` and `references` return a clean error, because
+nixd has no workspace-symbol index to look names up in. Claude Code is unaffected either way: it reads
+pushed diagnostics and resolves definitions by position.
+
 ## Formatting
 
 Neither agent ever sends an LSP formatting request. Claude's `LSP` tool has no formatting operation, and
@@ -64,9 +80,13 @@ This way an agent never reformats a repo in a style its pre-commit hook would un
 
 - **Tracked files only.** `getFlake "git+file://…"` sees only what git tracks. A new module is invisible
   to option completion until it is `git add`-ed.
-- **No Home Manager option completion.** It can only be configured through `workspace/configuration`,
-  which the clients are not known to answer.
-- **Codex asks once per host** to trust the new hook. Accept the prompt.
+- **No Home Manager option completion.** It can only be configured through `workspace/configuration`.
+  Claude Code does not answer that request (nixd logs "client does not support workspace
+  configuration"), and `mcp-language-server` is not known to.
+- **Codex asks once per host** to trust the new hook. Accept the prompt. It also asks before each nixd
+  MCP tool call, as it does for any MCP tool.
+- **No name-based lookup in Codex.** `definition` and `references` need `workspace/symbol`, which nixd
+  does not implement. Use `hover` plus a text search instead.
 
 ## Verify
 
@@ -76,8 +96,10 @@ codex mcp get nixd                             # Codex has the MCP server
 jq '.hooks.PostToolUse' ~/.codex/hooks.json    # Codex has the format hook
 ```
 
-In Claude Code, run `LSP hover` on an option path such as `features.sunshine.enable` in a host file. It
-should return the option's description.
+In Claude Code, run `LSP hover` on a leaf option, such as the `enable` in
+`services.nixarchy-runner = { enable = true; }` in `hosts/p620/configuration.nix`. It should return
+`bool (boolean)` and the option's description. A set of options (`services.nixarchy-runner` itself) shows
+`? (missing type)`, which is normal nixd behaviour, not a fault.
 
 ## Troubleshooting
 

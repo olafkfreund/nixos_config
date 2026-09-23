@@ -59,6 +59,16 @@ spec: spec/2026-09-23-1983-nixd-lsp-agents.md
    → Verify by `just check-syntax`, then by checking that
    `nixd-agent --help` lists the flags and that the wrapper text contains
    `nixosConfigurations.p620`.
+   *Deviation (found in step 9, user-approved):* nixd 2.9.2 ends its
+   message loop on any request it does not implement instead of replying
+   -32601, and `mcp-language-server` sends two of them
+   (`textDocument/diagnostic`, `workspace/symbol`). The Codex tools then hang
+   on a dead server. `home/development/nixd-method-not-found.patch` makes
+   `LSPServer::onCall` reply MethodNotFound. It is applied through
+   `overrideAttrs` to the nixd that `nixd-agent` runs only; editors keep the
+   stock `pkgs.nixd`. Result for Codex: `hover` and `diagnostics` work, and
+   `definition` and `references` return a clean error, because nixd has no
+   workspace-symbol index.
 3. **`home/development/claude-code-lsp.nix`.** Change the plugin
    `lspServers` from `nil` to `nixd = { command = "nixd-agent";
    extensionToLanguage.".nix" = "nix"; }`, set the version to `1.1.0`,

@@ -1,0 +1,28 @@
+--- a/lspserver/src/LSPServer.cpp	2026-09-23 10:41:20.754074309 +0100
++++ b/lspserver/src/LSPServer.cpp	2026-09-23 10:41:20.773144824 +0100
+@@ -1,6 +1,7 @@
+ #include "lspserver/LSPServer.h"
+ #include "lspserver/Connection.h"
+ #include "lspserver/Function.h"
++#include "lspserver/Protocol.h"
+ 
+ #include <llvm/ADT/FunctionExtras.h>
+ #include <llvm/Support/Compiler.h>
+@@ -45,8 +46,15 @@
+                         Out->reply(std::move(ID), std::move(Err));
+                       }
+                     });
+-  else
+-    return false;
++  else {
++    // Reply MethodNotFound instead of returning false, which ends the message
++    // loop and shuts the server down on any request nixd does not implement
++    // (textDocument/diagnostic, workspace/symbol, ...).
++    log("--> reply:{0}({1}) method not found", Method, ID);
++    Out->reply(std::move(ID),
++               llvm::make_error<LSPError>("method not found: " + Method.str(),
++                                          ErrorCode::MethodNotFound));
++  }
+   return true;
+ }
+ 

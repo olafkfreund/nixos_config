@@ -15,8 +15,16 @@ let
   # so the per-host values live here, on this host's PATH, never in a synced
   # file (#1983). --config cannot carry `options` (it skips the option-worker
   # start), hence the dedicated --nixos-options-expr.
+  # nixd 2.9.2 ends its message loop on any request it does not implement
+  # instead of replying -32601, and mcp-language-server sends two of them
+  # (textDocument/diagnostic, workspace/symbol). Patched here only, not by
+  # overlay, so nothing else loses its cache hits (#1983).
+  nixdPatched = pkgs.nixd.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ./nixd-method-not-found.patch ];
+  });
+
   nixdAgent = pkgs.writeShellScriptBin "nixd-agent" ''
-    exec ${pkgs.nixd}/bin/nixd \
+    exec ${nixdPatched}/bin/nixd \
       --nixos-options-expr=${lib.escapeShellArg "${flake}.nixosConfigurations.${cfg.hostName}.options"} \
       --nixpkgs-expr=${lib.escapeShellArg "import ${flake}.inputs.nixpkgs { }"} \
       --config=${lib.escapeShellArg (builtins.toJSON {
