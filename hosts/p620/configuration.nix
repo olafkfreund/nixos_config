@@ -809,6 +809,9 @@ in
     };
 
     # User services
+    # playerctl 2.4.1 can segfault on a player signal (upstream bug); come back instead of staying failed.
+    user.services.playerctld.serviceConfig.Restart = "on-failure";
+
     user.services.scream-ivshmem = {
       enable = true;
       description = "Scream IVSHMEM";
