@@ -42,8 +42,8 @@ let
       plugins = [
         {
           name = "nix-lsp";
-          description = "Nix language server (nil) for enhanced code intelligence in Nix expressions";
-          version = "1.0.0";
+          description = "Nix language server (nixd, this host's NixOS options) for Nix expressions";
+          version = "1.1.0";
           author = {
             name = "NixOS User";
             email = "local@localhost";
@@ -51,10 +51,11 @@ let
           source = "./plugins/nix-lsp";
           category = "development";
           strict = false;
+          # nixd-agent (home/development/nixd.nix) carries the per-host flags;
+          # naming it keeps this synced file host-agnostic (#1983).
           lspServers = {
-            nil = {
-              command = "nil";
-              args = [ ];
+            nixd = {
+              command = "nixd-agent";
               extensionToLanguage = {
                 ".nix" = "nix";
               };
@@ -71,33 +72,16 @@ let
     text = ''
       # nix-lsp
 
-      Nix language servers (nil and nixd) for Claude Code, providing static analysis and code intelligence for Nix expressions.
+      nixd for Claude Code, launched through `nixd-agent` from
+      `home/development/nixd.nix`.
 
-      ## Supported Extensions
-      `.nix`
+      - Diagnostics after every edit, hover, definitions, references, symbols.
+      - Option completion and hover for this host's
+        `nixosConfigurations.<host>.options`.
+      - Formatting is not an LSP request here: Claude's post-edit hook runs
+        `nix-format`, which uses the repo's flake formatter or nixfmt.
 
-      ## Installation
-
-      The language servers are already installed via NixOS and available in your PATH:
-
-      - **nil**: Modern, fast Nix LSP server with excellent performance
-      - **nixd**: Feature-rich Nix LSP server with advanced nixpkgs integration
-
-      Both servers are configured in `~/.config/lsp-servers/config.json` with proper file type associations and root patterns.
-
-      ## LSP Features
-
-      - Code completion for Nix expressions
-      - Hover documentation for built-in functions
-      - Go to definition for variables and functions
-      - Find references across Nix files
-      - Diagnostics for syntax and semantic errors
-      - Code formatting with nixpkgs-fmt
-
-      ## More Information
-      - [nil LSP Server](https://github.com/oxalica/nil) - Fast and modern
-      - [nixd LSP Server](https://github.com/nix-community/nixd) - Advanced features
-      - [NixOS Manual](https://nixos.org/manual/nixos/stable/)
+      See docs/tooling/nix-lsp-agents.md in the NixOS config repo.
     '';
   };
 in
