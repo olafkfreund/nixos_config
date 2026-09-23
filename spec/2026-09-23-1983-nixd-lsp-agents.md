@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1983
 intent: intent/2026-09-23-1983-nixd-lsp-agents.md
 ---
