@@ -86,17 +86,5 @@
   # Delta is now a separate program
   programs.delta.enable = false;
 
-  # Enable nixd for improved Nix language server support
-  development.nixd = {
-    enable = true;
-    offlineMode = true;
-    formatterCommand = [ "alejandra" ];
-    diagnosticsIgnored = [ ];
-    diagnosticsExcluded = [
-      "\\.direnv"
-      "result"
-      "\\.git"
-      "node_modules"
-    ];
-  };
+  development.nixd.enable = true;
 }
