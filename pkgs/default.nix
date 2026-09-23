@@ -47,6 +47,9 @@
   # GitLab TUI — terminal UI on top of the `glab` CLI (rcieri/glab-tui).
   glab-tui = pkgs.callPackage ./glab-tui { };
 
+  # Omgato CLI daemons (Stream Deck, Key Lights, Cam Link) for the Omarchy plugin.
+  omgato = pkgs.callPackage ./omgato { };
+
   # Google Messages in the Omarchy bar: daemon + `.plugin` QML widget.
   gmessages-omarchy = pkgs.callPackage ./gmessages-omarchy { };
 

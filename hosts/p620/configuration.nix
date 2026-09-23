@@ -689,7 +689,9 @@ in
 
     # Hardware-specific configurations
     udev = {
-      packages = [ pkgs.via ];
+      # omgato: Stream Deck (vendor 0fd9) uaccess rule, so deck access does
+      # not depend on an unrelated generic hidraw rule (#1978).
+      packages = [ pkgs.via pkgs.customPkgs.omgato ];
       extraRules = builtins.concatStringsSep "\n" [
         ''ACTION=="add", SUBSYSTEM=="video4linux", DRIVERS=="uvcvideo", RUN+="${pkgs.v4l-utils}/bin/v4l2-ctl --set-ctrl=power_line_frequency=1"''
         ''KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0660", TAG+="uaccess"''

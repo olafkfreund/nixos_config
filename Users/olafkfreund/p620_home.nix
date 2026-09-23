@@ -49,6 +49,10 @@
     # Glim — GitLab CI/CD TUI monitoring
     pkgs.glim
 
+    # Omgato CLIs (streamdeck/keylight/camlink-ctl, omgato-panel), called by
+    # name from the Omgato Omarchy bar widget.
+    pkgs.customPkgs.omgato
+
     # Libation — Audible library downloader/DRM-decrypter. Books location is set
     # to /mnt/media/Media/Audiobooks (P510 ABS library, NFS-mounted here) so
     # decrypted m4b land straight in Audiobookshelf. nixpkgs wraps it without
@@ -58,6 +62,32 @@
       dotnetRuntimeDeps = (old.dotnetRuntimeDeps or [ ]) ++ [ pkgs.webkitgtk_4_1 ];
     }))
   ];
+
+  # Omgato Stream Deck daemons, bound to the graphical session so they die at
+  # logout and start fresh at login with the new session's environment (#1978).
+  # Names match upstream's: the Omgato bar widget starts/stops them by name.
+  systemd.user.services =
+    let
+      mkDeckUnit = description: args: {
+        Unit = {
+          Description = description;
+          PartOf = [ "graphical-session.target" ];
+          After = [ "graphical-session.target" ];
+          StartLimitIntervalSec = 60;
+          StartLimitBurst = 20;
+        };
+        Service = {
+          ExecStart = "${pkgs.customPkgs.omgato}/bin/streamdeck-ctl ${args}";
+          Restart = "on-failure";
+          RestartSec = 2;
+        };
+        Install.WantedBy = [ "graphical-session.target" ];
+      };
+    in
+    {
+      streamdeck-ctl-deck = mkDeckUnit "Stream Deck (Mk2/XL/Mini) daemon" "deck run";
+      streamdeck-ctl = mkDeckUnit "Stream Deck Pedal daemon" "pedal run";
+    };
 
   # P620 Chrome — Modern flags for AMD GPU systems
   programs.chromium = {
