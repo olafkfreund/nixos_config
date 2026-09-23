@@ -73,6 +73,12 @@ before `k3d cluster delete`, and this revision replaces it.
    `CREATED=1` in the create branch. After step 3 (API ready) and before step
    4, add step 3b: if `CREATED=1` and a snapshot exists, run `restore`;
    otherwise run `snapshot` (a failure only WARNs, never exits).
+   *Added in implementation:* a failed **restore** exits 1 before the GitOps
+   apply. The create branch touches `pv-snapshot.json.restore-pending` when a
+   snapshot exists, and 3b keys on that marker rather than on `CREATED`. That
+   way a `Restart=` rerun, which takes the reboot path, retries the restore
+   instead of snapshotting an empty cluster and applying GitOps over new
+   empty volumes. The marker is removed only after a successful restore.
 3. `cat ${nodeResolvConf} > …` gets `chmod 0644 "${resolvStateFile}"` after it.
 4. Header comment (lines 5–7): PV data does **not** survive a recreate by
    itself. Point to the snapshot/restore step and #1497.

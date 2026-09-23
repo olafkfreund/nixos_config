@@ -3,8 +3,11 @@
 # Runs a single-node k3s cluster inside the host Docker daemon. The cluster
 # is created on first boot by a one-shot systemd unit and persisted via
 # Docker volumes (under the host's Docker data-root). Local-path PV storage
-# is bind-mounted to ${cfg.storageDir} so PVCs survive cluster recreation
-# AND don't pressure /mnt/media.
+# is bind-mounted to ${cfg.storageDir}, off /mnt/media. The data dirs outlive
+# a recreate, but a new cluster does NOT reattach them: local-path provisions
+# fresh pvc-<uid> dirs for new PVCs (keycloak realm lost 2026-06-25). The
+# bootstrap snapshots Bound PVs and restores them as pre-bound volumes on
+# create, before any PVC exists (k3d-pv-state, #1497).
 #
 # After the cluster exists this unit also applies a GitOps bootstrap
 # (kubectl apply -k <cfg.argocd.gitopsRepo>/<cfg.argocd.bootstrapPath>),
@@ -74,6 +77,65 @@ let
   nodeResolvConf = pkgs.writeText "k3d-node-resolv.conf"
     (concatStringsSep "\n" (map (r: "nameserver ${r}") cfg.resolvers) + "\n");
   resolvStateFile = "/var/lib/k3d-${cfg.clusterName}/resolv.conf";
+  pvSnapshot = "/var/lib/k3d-${cfg.clusterName}/pv-snapshot.json";
+
+  # Snapshot the cluster's Bound PVs, or restore them on a fresh cluster as
+  # pre-bound volumes (claimRef without uid) so each PVC ArgoCD creates binds
+  # to its old data dir instead of a newly provisioned empty one (#1497).
+  pvStateTool = pkgs.writeShellApplication {
+    name = "k3d-pv-state";
+    runtimeInputs = with pkgs; [ kubectl jq coreutils ];
+    text = ''
+      usage() { echo "usage: k3d-pv-state snapshot FILE | restore FILE STORAGE_DIR" >&2; exit 2; }
+      [ $# -ge 2 ] || usage
+      cmd=$1
+      file=$2
+      node_storage=/var/lib/rancher/k3s/storage
+      case "$cmd" in
+        snapshot)
+          umask 077
+          kubectl get pv -o json | jq '[.items[] | select(.status.phase == "Bound") | {
+              apiVersion: "v1", kind: "PersistentVolume",
+              metadata: {
+                name: .metadata.name,
+                labels: (.metadata.labels // {}),
+                annotations: ((.metadata.annotations // {})
+                  | del(."kubectl.kubernetes.io/last-applied-configuration"))
+              },
+              spec: (.spec | del(.claimRef.uid, .claimRef.resourceVersion))
+            }]' > "$file.tmp"
+          n=$(jq length "$file.tmp")
+          if [ "$n" -eq 0 ]; then
+            rm -f "$file.tmp"
+            echo "k3d-pv-state: no Bound PVs; keeping the existing snapshot" >&2
+            exit 1
+          fi
+          mv "$file.tmp" "$file"
+          echo "k3d-pv-state: snapshot $n PVs -> $file"
+          ;;
+        restore)
+          [ $# -eq 3 ] || usage
+          storage=$3
+          keep='[]'
+          skipped=0
+          while IFS= read -r pv; do
+            path=$(jq -r '.spec.local.path // empty' <<<"$pv")
+            if [ -n "$path" ] && [ ! -d "$storage/''${path#"$node_storage"/}" ]; then
+              echo "k3d-pv-state: WARN skipping $(jq -r .metadata.name <<<"$pv"): no $path under $storage" >&2
+              skipped=$((skipped + 1))
+              continue
+            fi
+            keep=$(jq -c --argjson pv "$pv" '. + [$pv]' <<<"$keep")
+          done < <(jq -c '.[]' "$file")
+          if [ "$(jq length <<<"$keep")" -gt 0 ]; then
+            jq '{apiVersion: "v1", kind: "List", items: .}' <<<"$keep" | kubectl apply -f -
+          fi
+          echo "k3d-pv-state: restore applied $(jq length <<<"$keep"), skipped $skipped"
+          ;;
+        *) usage ;;
+      esac
+    '';
+  };
 
   # Bootstrap script — idempotent. Safe to re-run; safe to fail partially
   # and re-run (each step uses `kubectl apply` or `k3d cluster list` checks).
@@ -84,6 +146,7 @@ let
       kubectl
       kubernetes-helm
       jq
+      pvStateTool
       coreutils
       docker-client
       # `ip` (iproute2) — the reboot path waits for the API bind IP to appear
@@ -109,6 +172,7 @@ let
 
       # Rewrite in place (same inode) so a running node's bind mount sees it.
       cat ${nodeResolvConf} > "${resolvStateFile}"
+      chmod 0644 "${resolvStateFile}"
 
       # Host-side API reachability check: pulls a fresh kubeconfig (which points
       # at ${cfg.apiHostBind}:$API_PORT — i.e. the serverlb's PUBLISHED host
@@ -152,6 +216,10 @@ let
         exit 1
       fi
       if ! jq -e --arg n "$CLUSTER" '.[] | select(.name==$n)' >/dev/null <<<"$cluster_json"; then
+        # A fresh cluster owes a PV restore (step 3b) before anything creates
+        # a PVC. The marker survives a failed run, so a Restart= rerun takes
+        # the reboot path and retries the restore instead of applying GitOps.
+        if [ -f "${pvSnapshot}" ]; then touch "${pvSnapshot}.restore-pending"; fi
         echo "[k3d-bootstrap] Creating cluster $CLUSTER (api ${cfg.apiHostBind}:$API_PORT, storage $STORAGE_DIR)"
         k3d cluster create "$CLUSTER" \
           --image "${cfg.k3sImage}" \
@@ -248,6 +316,21 @@ let
         sleep 2
       done
       kubectl get nodes
+
+      # 3b. PV state (#1497). Restore when a fresh cluster owes one; otherwise
+      #     refresh the snapshot. A failed restore stops here, before step 5
+      #     can create PVCs against empty volumes; a failed snapshot only warns.
+      if [ -f "${pvSnapshot}.restore-pending" ]; then
+        echo "[k3d-bootstrap] Restoring PVs from ${pvSnapshot}"
+        if ! k3d-pv-state restore "${pvSnapshot}" "$STORAGE_DIR"; then
+          echo "[k3d-bootstrap] ERROR: PV restore failed; not applying GitOps." >&2
+          exit 1
+        fi
+        rm -f "${pvSnapshot}.restore-pending"
+      else
+        k3d-pv-state snapshot "${pvSnapshot}" \
+          || echo "[k3d-bootstrap] WARN: PV snapshot not refreshed (see above)."
+      fi
 
       ${optionalString cfg.tailscaleAuthKey.enable ''
       # 4. Seed the Tailscale auth-key Secret for sidecar consumption.
@@ -669,6 +752,7 @@ in
 
     environment.systemPackages = with pkgs; [
       cfg.package
+      pvStateTool
       kubectl
       kubernetes-helm
       kustomize
