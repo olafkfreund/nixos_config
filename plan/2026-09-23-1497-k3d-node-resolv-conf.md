@@ -91,6 +91,16 @@ before `k3d cluster delete`, and this revision replaces it.
    names equal `kubectl get pvc -A -o jsonpath='{..volumeName}'`, and that
    `resolv.conf` is 0644.
 
+   *Found by the rehearsal (C):* two create-path bugs in revision 1's mount.
+   Without these fixes the real create would have failed after the delete.
+   (a) k3d refuses to create a node with a file mounted at
+   `/etc/resolv.conf` while `K3D_FIX_DNS` is on, so the create runs with
+   `K3D_FIX_DNS=0`. The spec had rejected that flag only as a standalone
+   fix, because it leaves the node on Docker's resolver, which our mount
+   replaces. (b) An `@all` node resolver mount also lands on the serverlb.
+   Its nginx then can't resolve the node names and the create hangs, so that
+   mount is `@server:*;agent:*`. The k3s `--resolv-conf` mount stays `@all`.
+
 ### B. GitOps (factory-gitops)
 
 1. `apps/nfs-provisioner/manifests/manifests.yaml`: `clusterIP: 10.43.224.175`

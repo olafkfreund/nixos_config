@@ -221,7 +221,13 @@ let
         # the reboot path and retries the restore instead of applying GitOps.
         if [ -f "${pvSnapshot}" ]; then touch "${pvSnapshot}.restore-pending"; fi
         echo "[k3d-bootstrap] Creating cluster $CLUSTER (api ${cfg.apiHostBind}:$API_PORT, storage $STORAGE_DIR)"
-        k3d cluster create "$CLUSTER" \
+        # K3D_FIX_DNS=0: k3d refuses to create a node that has a file mounted
+        # at /etc/resolv.conf while its DNS fix is on. The node resolver mount
+        # is @server/@agent only: on the serverlb (nginx) it would send the
+        # upstream lookup of k3d-<cluster>-server-0 to public DNS, nginx exits,
+        # and the create never gets "start worker processes". Both found in
+        # the #1497 rehearsal.
+        K3D_FIX_DNS=0 k3d cluster create "$CLUSTER" \
           --image "${cfg.k3sImage}" \
           --api-port "${cfg.apiHostBind}:$API_PORT" \
           --servers 1 \
@@ -229,7 +235,7 @@ let
           --k3s-arg "--disable=traefik@server:*" \
           --k3s-arg "--disable=servicelb@server:*" \
           --volume "$STORAGE_DIR:/var/lib/rancher/k3s/storage@server:*" \
-          --volume "${resolvStateFile}:/etc/resolv.conf@all:*" \
+          --volume "${resolvStateFile}:/etc/resolv.conf@server:*;agent:*" \
           --volume "${resolvStateFile}:/etc/rancher/k3s/resolv.conf@all:*" \
           --k3s-arg "--resolv-conf=/etc/rancher/k3s/resolv.conf@all:*" \
           --wait
