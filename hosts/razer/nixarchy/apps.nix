@@ -97,6 +97,7 @@
   # line before the end marker.
   environment.systemPackages = with pkgs; [  #@pkgs-begin
     hello  #@pkg hello
+    bubblewrap  #@pkg bubblewrap
   ];  #@pkgs-end
 }
 
