@@ -11,7 +11,7 @@ intent: intent/2026-09-23-1987-playerctld-null-variant.md
 Patch playerctl 2.4.1 locally with one small C patch, applied through the
 existing global overlay for upstream bugs.
 
-**Files**
+### Files
 
 - `overlays/playerctl-null-variant.patch` (new) — a unified diff against
   `playerctl/playerctl-daemon.c`, beside the repo's other overlay patch
@@ -25,7 +25,7 @@ existing global overlay for upstream bugs.
   });
   ```
 
-**The patch — the two proven crash sites only**
+### The patch — the two proven crash sites only
 
 1. `proxy_method_call_async_callback`, `G_DBUS_MESSAGE_TYPE_ERROR` branch:
    use the error text only when `body != NULL`, it has at least one child, and

@@ -39,6 +39,7 @@ Branch `fix/1987-playerctld-null-variant`. Intent and spec approved.
    both edits, and use `diff -u` with `a/playerctl/…` / `b/playerctl/…` paths
    (`-p1`, the stdenv default).
    Error branch after the edit:
+
    ```c
    case G_DBUS_MESSAGE_TYPE_ERROR: {
        const char *error_message = "Failed to call method";
@@ -58,6 +59,7 @@ Branch `fix/1987-playerctld-null-variant`. Intent and spec approved.
        break;
    }
    ```
+
    In `context_emit_active_player_changed`, wrap each tuple build and emit in
    `if (player->player_properties != NULL)` /
    `if (player->root_properties != NULL)`, with an `else g_debug(...)`.
@@ -65,6 +67,7 @@ Branch `fix/1987-playerctld-null-variant`. Intent and spec approved.
    applies cleanly.
 
 2. **`overlays/upstream-fixes.nix`:** add
+
    ```nix
    # playerctl 2.4.1's playerctld segfaults on a D-Bus error reply with no body
    # (e.g. from cliamp) and on NULL cached player properties (#1987). Upstream
@@ -74,16 +77,19 @@ Branch `fix/1987-playerctld-null-variant`. Intent and spec approved.
      patches = (old.patches or [ ]) ++ [ ./playerctl-null-variant.patch ];
    });
    ```
+
    → verify by: `nix build --no-link --print-out-paths
    .#nixosConfigurations.p620.config.services.playerctld.package` succeeds, the
    log shows the patch applied, and the path is not `jlrc3mbz…`.
 
 3. **`hosts/razer/configuration.nix`:** after the top-level
    `systemd.services.greetd.restartIfChanged = false;` (≈ line 462), add
+
    ```nix
    # playerctl 2.4.1 can segfault on a player signal (#1987); come back instead of staying failed.
    systemd.user.services.playerctld.serviceConfig.Restart = "on-failure";
    ```
+
    → verify by: `nix eval .#nixosConfigurations.razer.config.systemd.user.services.playerctld.serviceConfig --json`
    shows `Restart = "on-failure"` and the patched `ExecStart`, and razer's
    package path equals p620's.
