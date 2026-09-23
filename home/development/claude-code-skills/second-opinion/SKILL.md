@@ -30,6 +30,9 @@ dispatcher for arbitrary work.
   read-only, agy stays in `--mode plan`, and Ollama's MCP tool cannot reach
   the filesystem at all. `codex exec` with write access and
   `agy --mode accept-edits` both exist and are deliberately unused.
+- **Never set `HUMANIZE_CODEX_BYPASS_SANDBOX`.** The humanize plugin's
+  `ask-codex.sh` swaps in `--dangerously-bypass-approvals-and-sandbox` when
+  it is `true`/`1`. This repo deploys three hosts and holds agenix secrets.
 - **Nothing here approves an artifact gate.** Not an intent, not a spec, not
   a plan. Two models agreeing is not an approval.
 - Hand off drafting and review. Keep the deciding and the committing.
