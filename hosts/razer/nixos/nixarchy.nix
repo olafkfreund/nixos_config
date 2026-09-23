@@ -29,6 +29,7 @@
     ../../common/nixos/omarchy-sddm.nix
     ../../common/nixos/omarchy-workspaces.nix
     ../../common/nixos/omarchy-gog.nix
+    ../../common/nixos/omarchy-plugin-browser.nix
     ../../common/nixos/omarchy-meet-binds.nix
     ../../common/nixos/omarchy-ai-mirror.nix
     ../../common/nixos/omarchy-microvm.nix
