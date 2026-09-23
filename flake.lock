@@ -757,11 +757,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790096134,
-        "narHash": "sha256-IAbFFm1E7/7ryNzvUPdLz4es0ggaoTsdqIHlLkCGowo=",
+        "lastModified": 1790122799,
+        "narHash": "sha256-HqAFeyEPNoNJpO8c3IE+QcOEBO1oOjL/verJUCwKnUk=",
         "owner": "ogulcancelik",
         "repo": "herdr",
-        "rev": "621e6b73c4fe4c13562c0906699003d0ca59f0f1",
+        "rev": "440a8bdd1e3a809ea76f7cee82d73266d9da54d7",
         "type": "github"
       },
       "original": {
@@ -820,11 +820,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790080548,
-        "narHash": "sha256-u4sa7RCbwvk8cZmAGs35F7o0h4IqDc3wsrrnjQvMumk=",
+        "lastModified": 1790110821,
+        "narHash": "sha256-4vgPxAtYGryB/9SZVFMrcRKmNcOqcN3+MwRJPTVpb1o=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "cbcbfa2778e0c5653ef349df3ebae8288efac3c0",
+        "rev": "a5768f1a46942657352e58037b7891bdcbc0741f",
         "type": "github"
       },
       "original": {
@@ -1403,11 +1403,11 @@
         "spectrum": "spectrum"
       },
       "locked": {
-        "lastModified": 1789506833,
-        "narHash": "sha256-4L8SOCF84de1irB72Ka9VHcu9wrAJ9Amuey4lU9oh4Y=",
+        "lastModified": 1790120829,
+        "narHash": "sha256-aPNg2CKSPat+SjD20AXYyRAXsPH7fe5+N0ZYOhpjym0=",
         "owner": "astro",
         "repo": "microvm.nix",
-        "rev": "187b0a390ee054028106a674e7b01b1cb940cbba",
+        "rev": "b2fd8eb40192c4fefd16c26b979954f7d354d1aa",
         "type": "github"
       },
       "original": {
@@ -2223,11 +2223,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790106900,
-        "narHash": "sha256-/TqUOH+la1XdOwEWFXeH6i+1aMWfWGSUN2aK3IXxwMU=",
+        "lastModified": 1790122003,
+        "narHash": "sha256-V4qG56zBNPzyLUqV5KLo3JuBqsjcABnS1QJmZKci1T4=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "6a7c01e3cb99d73463f2a87f9ab6149cdd85fd97",
+        "rev": "3985fdf87c1c767a3a7fe8f30018907a47a7e2fa",
         "type": "github"
       },
       "original": {
@@ -2627,11 +2627,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790097941,
-        "narHash": "sha256-DOVGUCcRXgxFnTYqmKjWc7gUZLbuE+fcA8hVoZn7duQ=",
+        "lastModified": 1790113488,
+        "narHash": "sha256-/s06/4VmAU4RRzm0ozYFPBoaIz+5mgOR+eGgv6o+0/U=",
         "owner": "crmne",
         "repo": "spotifast",
-        "rev": "eee78dae3afa75d642f2bcdd5c12869f258eb517",
+        "rev": "f6ce05b1dd1a9c97cdd1e93999e90f441fec54da",
         "type": "github"
       },
       "original": {
