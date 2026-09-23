@@ -57,4 +57,4 @@ playerctld core dumps appear.
 ## Open questions
 
 - Scope: decided — p620 and razer.
-- Also send the patch upstream to altdesktop/playerctl, or keep it local only?
+- Upstream: decided — keep the patch local; do not send it upstream.
