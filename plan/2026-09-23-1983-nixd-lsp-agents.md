@@ -80,13 +80,20 @@ spec: spec/2026-09-23-1983-nixd-lsp-agents.md
 6. **`home/development/codex-cli.nix`.** Add `mcp-language-server` to
    `home.packages`. Add a `codex-nix-format` script with
    `writeShellScript`. It reads the hook JSON with `jq`, takes
-   `.tool_input.command` (patch text) or `.tool_input.file_path`, and pulls
-   the paths from `^\*\*\* (Add File|Update File|Move to):`. Relative paths
+   `.tool_input.file_path`, plus every string inside `tool_input` (the
+   shape of `command`, string or array, is undocumented), and pulls the
+   paths only from `^\*\*\* (Add File|Update File|Move to):` headers. Relative paths
    are resolved against `.cwd`. `.nix` files are passed to `nix-format`,
    and the script exits 0. Add two activation entries after
    `writeBoundary`, each guarded with if/else and no `exit`:
    - `codexNixdMcp`: when `codex` exists and `codex mcp get nixd` fails, run
-     `codex mcp add nixd -- mcp-language-server --workspace . --lsp nixd-agent`.
+     `codex mcp add nixd -- <profile>/bin/mcp-language-server --workspace .
+     --lsp <profile>/bin/nixd-agent`, where `<profile>` is
+     `home.profileDirectory` (`/etc/profiles/per-user/olafkfreund`).
+     *Deviation:* the plan said bare names. Every existing Codex
+     `mcp_servers` entry uses absolute paths, because Codex does not promise
+     MCP servers the user's `PATH`. The profile paths are still stable
+     across rebuilds, so this runs once per host.
    - `codexNixFormatHook`: when the PostToolUse command for
      `codex-nix-format` is missing from `~/.codex/hooks.json`, append it
      with `jq` (matcher `apply_patch|Edit|Write`, timeout 30) and
