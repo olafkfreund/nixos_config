@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1983
 author: olafkfreund
 ---
@@ -61,23 +61,15 @@ we want.
   systemd-hardening rules don't apply.
 - p510 must not be built or deployed without asking.
 
-## Open questions
+## Decisions
 
-1. **nixfmt vs the repo standard.** This repo formats with `nixpkgs-fmt`
-   (`flake.nix` `formatter`, and `.pre-commit-config.yaml`). If agent hooks
-   run `nixfmt` here, every agent edit reformats the file in a different
-   style, and the pre-commit hook then reformats it back. Pick one:
-   - **A.** Move the repo to nixfmt: switch the flake formatter and
-     pre-commit, and do one bulk reformat under its own issue, before or
-     alongside this one.
-   - **B.** Hooks run `nixfmt` only outside repos that pin another
-     formatter. In this repo they run whatever `nix fmt` resolves to.
-   - **C.** Hooks always run `nixfmt`, and we accept the churn in this repo.
-2. **Keep `nil` alongside nixd?** Claude Code runs one server per file
-   extension. The proposal replaces `nil` with `nixd`.
-3. **Option completion target.** nixd needs one host's configuration to
-   know which options exist, for example
-   `nixosConfigurations.p620.options`. Should that be p620 everywhere, or
-   each host's own?
-4. **Codex scope.** Should Codex get the language server on p620 and razer
-   only, or on every host where Codex is installed?
+Approved 2026-09-23. The original four open questions are resolved as follows:
+
+1. **Formatter follows the repo.** Agent hooks format with whatever the repo
+   uses: `nixpkgs-fmt` in this repo, and `nixfmt` only where a repo sets
+   nothing. There is no bulk reformat. nixd's `formatting.command` follows
+   the same rule.
+2. **nixd replaces nil** as the Claude Code Nix server.
+3. **Each host's own options.** nixd reads option completion from
+   `nixosConfigurations.<this host>`.
+4. **Codex gets the server on every host** where Codex is installed.
