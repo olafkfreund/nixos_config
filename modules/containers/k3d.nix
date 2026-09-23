@@ -63,8 +63,17 @@ let
   # not reach sigstore, cronjobs failed every run. That outage ran ~16h before
   # anyone noticed (#1232). Declare the upstream instead of inheriting whatever
   # Docker chooses this release.
+  #
+  # The same file is also mounted over each node's own /etc/resolv.conf, which
+  # is what containerd uses for image pulls. Left to Docker it is 172.18.0.1,
+  # whose NAT rules k3d's DNS-fix entrypoint rewrites on every node start; that
+  # hop refused connections three times and every ghcr.io pull failed while
+  # pod DNS looked fine (#1497). Mounted from a stable host path, not the
+  # store: a Docker bind mount keeps its source path, and a GC'd store path
+  # would take the node's resolver with it.
   nodeResolvConf = pkgs.writeText "k3d-node-resolv.conf"
     (concatStringsSep "\n" (map (r: "nameserver ${r}") cfg.resolvers) + "\n");
+  resolvStateFile = "/var/lib/k3d-${cfg.clusterName}/resolv.conf";
 
   # Bootstrap script — idempotent. Safe to re-run; safe to fail partially
   # and re-run (each step uses `kubectl apply` or `k3d cluster list` checks).
@@ -97,6 +106,9 @@ let
       STORAGE_DIR="${cfg.storageDir}"
 
       mkdir -p "$(dirname "$KUBECONFIG_OUT")" "$STORAGE_DIR"
+
+      # Rewrite in place (same inode) so a running node's bind mount sees it.
+      cat ${nodeResolvConf} > "${resolvStateFile}"
 
       # Host-side API reachability check: pulls a fresh kubeconfig (which points
       # at ${cfg.apiHostBind}:$API_PORT — i.e. the serverlb's PUBLISHED host
@@ -149,7 +161,8 @@ let
           --k3s-arg "--disable=traefik@server:*" \
           --k3s-arg "--disable=servicelb@server:*" \
           --volume "$STORAGE_DIR:/var/lib/rancher/k3s/storage@server:*" \
-          --volume "${nodeResolvConf}:/etc/rancher/k3s/resolv.conf@all:*" \
+          --volume "${resolvStateFile}:/etc/resolv.conf@all:*" \
+          --volume "${resolvStateFile}:/etc/rancher/k3s/resolv.conf@all:*" \
           --k3s-arg "--resolv-conf=/etc/rancher/k3s/resolv.conf@all:*" \
           --wait
       else
@@ -404,6 +417,17 @@ let
              "Docker's bridge-gateway address. See #1232."
       fi
 
+      # 7. The node's own resolver, which containerd uses for image pulls and
+      #    which step 6 cannot see. Warning only, for the same reason.
+      echo "[k3d-bootstrap] DNS smoke check (image pulls, node resolver)"
+      if docker exec "k3d-$CLUSTER-server-0" nslookup ghcr.io >/dev/null 2>&1; then
+        echo "[k3d-bootstrap] node DNS OK"
+      else
+        echo "[k3d-bootstrap] WARN: the node could NOT resolve ghcr.io, so image pulls will fail." \
+             "Check that the node's /etc/resolv.conf is ${resolvStateFile}, not Docker's" \
+             "172.18.0.1. After repairing, delete pods stuck in ImagePullBackOff. See #1497."
+      fi
+
       echo "[k3d-bootstrap] Done."
     '';
   };
@@ -445,17 +469,20 @@ in
       type = types.listOf types.str;
       default = [ "1.1.1.1" "9.9.9.9" ];
       description = ''
-        Upstream DNS servers CoreDNS forwards to, written into a resolv.conf
-        that is mounted into every node and passed to k3s as `--resolv-conf`.
+        Upstream DNS servers for the cluster, written to
+        /var/lib/k3d-<clusterName>/resolv.conf. That file is mounted over each
+        node's /etc/resolv.conf (containerd: image pulls) and at
+        /etc/rancher/k3s/resolv.conf (k3s `--resolv-conf`: CoreDNS, so pods).
 
         These MUST be reachable from a *pod* network namespace. Do not use a
         Docker bridge-gateway address (e.g. 172.18.0.1) or a loopback address:
         both resolve only inside the node container, and CoreDNS does not run
-        there. See the `nodeResolvConf` comment above and #1232.
+        there. Docker-internal container names do not resolve on the nodes.
+        See the `nodeResolvConf` comment above, #1232 and #1497.
 
-        NOTE: like `k3sImage`, this only applies on cluster *creation* — the
-        mount is fixed at container-create time. To adopt a change on an
-        existing cluster, recreate it or edit the nodes' resolv.conf by hand.
+        The bootstrap rewrites the file in place on every run, so a change
+        reaches running nodes. The *mounts* are fixed at container create: a
+        cluster created before #1497 needs recreating to get them.
       '';
     };
 
@@ -654,6 +681,7 @@ in
     systemd.tmpfiles.rules = [
       "d /etc/k3d 0750 root wheel - -"
       "d ${cfg.storageDir} 0755 root root - -"
+      "d /var/lib/k3d-${cfg.clusterName} 0755 root root - -"
     ];
 
     systemd.services.k3d-cluster-bootstrap = {

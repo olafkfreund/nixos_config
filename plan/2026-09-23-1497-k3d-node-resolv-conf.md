@@ -78,6 +78,13 @@ All in `modules/containers/k3d.nix` unless noted.
 9. Announce on the agent bus, then deploy p620 → Test 1. The running cluster
    is untouched: the bootstrap takes the "already exists" path. It still
    writes the state file and runs both smoke checks.
+    **Added during implementation:** the live node's k3s resolver mount
+    comes from `/nix/store/ln8jljz69sgcj5f4kgq3r5y4qdxhg09j-k3d-node-resolv.conf`.
+    The current system already does not reference it (the same content now
+    hashes to a different path), so a GC would delete it under a running
+    mount. Until the recreate, pin it:
+    `sudo nix-store --add-root /nix/var/nix/gcroots/k3d-live-resolv -r /nix/store/ln8jljz69sgcj5f4kgq3r5y4qdxhg09j-k3d-node-resolv.conf`.
+    Remove that root after step 10.
 10. **Recreate window** (separate, needs the user's go-ahead and a bus
     announcement with the expected downtime):
     1. `systemctl start keycloak-realm-backup` and confirm a fresh file in
