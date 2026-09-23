@@ -1530,11 +1530,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790187499,
-        "narHash": "sha256-rP0TZgo/Dc4TlFpTnTtLfTFrkhs4tRYKZ7HrTndLpiY=",
+        "lastModified": 1790190529,
+        "narHash": "sha256-vufP3c67A8scmBu2/mByJk1jf1RbJFZjlXXfBIXmoYs=",
         "owner": "olafkfreund",
         "repo": "nix-skills",
-        "rev": "5423d2da754703cdf5611b9a2faa93990ce5a0f6",
+        "rev": "b2c9a937dda8b2e26a935212d0238d60b08860b6",
         "type": "github"
       },
       "original": {
