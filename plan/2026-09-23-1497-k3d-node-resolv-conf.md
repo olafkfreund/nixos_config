@@ -4,123 +4,168 @@ issue: 1497
 spec: spec/2026-09-23-1497-k3d-node-resolv-conf.md
 ---
 
-# Plan: k3d image pulls survive Docker's embedded resolver
+# Plan: k3d image pulls survive Docker's embedded resolver (revision 2)
+
+## Status of revision 1
+
+Revision 1 steps 1–9 are **done**. The node-scoped resolver is in
+`modules/containers/k3d.nix` (#2002), deployed on p620 on 2026-09-23. Both
+bootstrap smoke checks pass, and a GC root
+(`/nix/var/nix/gcroots/k3d-live-resolv`) protects the live node's old
+store-path mount. Revision 1's step 10 (a naive recreate) was stopped
+before `k3d cluster delete`, and this revision replaces it.
 
 ## Approved decisions (self-contained)
 
-- **The fix is node-scoped.** Docker's `daemon.settings.dns` stays unchanged.
-  The reason: Docker-wide DNS only changes where `172.18.0.1` forwards, and
-  containerd would still query `172.18.0.1`, the hop that refused.
-- **Mount the declared resolver file over each node's `/etc/resolv.conf`**,
-  next to the existing `/etc/rancher/k3s/resolv.conf` mount. containerd then
-  queries `cfg.resolvers` (default `1.1.1.1`, `9.9.9.9`) directly. k3d
-  v5.7.4's `k3d-entrypoint-dns.sh` rewrites the file only if it contains
-  `127.0.0.11`, so it leaves ours alone.
-- **Move both mounts off `/nix/store`** onto a stable host file,
-  `/var/lib/k3d-<clusterName>/resolv.conf`. The bootstrap rewrites it in
-  place (`cat > file`, same inode) on every run. The directory comes from
-  `tmpfiles`.
-- **Add a pull-path smoke check** (`docker exec <node> nslookup ghcr.io`).
-  It warns only, the same as the pod DNS check, and its message names #1497
-  and the need to delete pods stuck in `ImagePullBackOff`.
-- **Adopting it on the live cluster needs a recreate.** That is a separate,
-  announced window after a keycloak backup, never part of a deploy.
-- Root cause (k3d's NAT rewrite vs Docker 29 + `live-restore`) is plausible
-  but unproven. It is recorded in a comment, not chased.
-- Rejected: Docker-wide `dns`, a `docker exec` rewrite without recreate,
-  `K3D_FIX_DNS=0`, and root-causing first.
+- **Resolver, unchanged from revision 1:** the node-scoped fix. The declared
+  resolver file sits at a stable host path
+  (`/var/lib/k3d-<cluster>/resolv.conf`), is rewritten in place on every
+  bootstrap, and is mounted over each node's `/etc/resolv.conf` and at
+  `/etc/rancher/k3s/resolv.conf`. There is a warn-only pull-path smoke check.
+  Docker-wide `dns` is rejected.
+- **Resolver file mode:** `chmod 0644` after the `cat`, because the
+  bootstrap's `umask 077` made it 0600.
+- **A recreate does not keep PVC data by itself.** local-path provisions
+  fresh directories, so the old ones are orphaned (2026-06-25). Correct the
+  module header, which claims otherwise.
+- **PV snapshot:** on every bootstrap run against an existing cluster, write
+  `/var/lib/k3d-<cluster>/pv-snapshot.json` (0600, atomic). It holds every
+  Bound PV's name, labels and annotations (minus last-applied) and its spec,
+  minus `claimRef.uid`/`resourceVersion` and minus status. If kubectl fails
+  or finds no PVs, the old snapshot is kept.
+- **PV restore:** on the create path, after the API is up and **before** the
+  GitOps apply, apply the snapshot's PVs as pre-bound volumes. Any `local`
+  PV whose directory is missing under `storageDir` is skipped with a WARN.
+  Names, paths, sizes and reclaim policies are unchanged.
+- **Stable NFS address:** pin `clusterIP: 10.43.224.175` on factory-gitops'
+  `nfs-provisioner` Service. It is a no-op today and keeps the nfs PV's
+  immutable `server` valid after a recreate.
+- **Undeclared Secrets** (`azure-demo-creds`, `gcp-demo-creds`): a one-time
+  export before the delete and a re-apply after. A follow-up issue moves them
+  into agenix. The `rolehunter-*` leftovers are dropped.
+- **Recreate safety:** a rehearsal on a throwaway cluster first, then
+  backups, a fresh snapshot (15 entries), the delete, a full `cp -a` of
+  `storageDir` while the cluster is stopped (kept a week), and the create.
+  Done means every PVC is Bound to its old PV name.
+- **Implementation choice:** snapshot and restore live in one small script,
+  `k3d-pv-state` (`snapshot <file>` / `restore <file> <storageDir>`). The
+  bootstrap calls it, and the rehearsal runs the same binary.
 
 ## Steps
 
-All in `modules/containers/k3d.nix` unless noted.
+### A. Code (nixos_config, `modules/containers/k3d.nix`)
 
-1. `let` block: add `resolvStateFile = "/var/lib/k3d-${cfg.clusterName}/resolv.conf";`.
-   Extend the `nodeResolvConf` comment by 2–3 lines: containerd reads the
-   node's own `/etc/resolv.conf`, k3d's DNS-fix entrypoint rewrites Docker's
-   NAT rules there, and the pull path failed three times (#1497).
-   → verify with `just check-syntax`.
-2. `systemd.tmpfiles.rules` (around line 654): add
-   `"d /var/lib/k3d-${cfg.clusterName} 0755 root root - -"`.
-3. Bootstrap script, right after `mkdir -p … "$STORAGE_DIR"` (around line 99)
-   and before the create/start branch: `cat ${nodeResolvConf} > "${resolvStateFile}"`.
-   → verify that the rendered script text contains it:
-   `nix eval --raw .#nixosConfigurations.p620.config.systemd.services.k3d-bootstrap.script | grep resolv`
-   (adjust the unit name to whatever the module names it).
-4. `k3d cluster create` (around line 152): replace
-   `--volume "${nodeResolvConf}:/etc/rancher/k3s/resolv.conf@all:*"` with two lines:
+1. `let` block: add `pvStateTool`, a `pkgs.writeShellApplication` named
+   `k3d-pv-state` with `runtimeInputs = [ kubectl jq coreutils ]`.
+   - `snapshot FILE`: run `kubectl get pv -o json` through the jq filter
+     from the decisions above (Bound only), write to `FILE.tmp` under
+     `umask 077`, and require `jq length > 0`. Then `mv` it to `FILE` and
+     print the count. On any failure, exit non-zero without touching `FILE`.
+   - `restore FILE STORAGE_DIR`: for each PV with `.spec.local.path`, map
+     `/var/lib/rancher/k3s/storage/<dir>` to `STORAGE_DIR/<dir>`, and skip it
+     with a WARN if that directory is missing. Wrap the rest in a
+     `{kind: List}` and `kubectl apply -f -`. Print applied/skipped counts.
 
-   ```sh
-   --volume "${resolvStateFile}:/etc/resolv.conf@all:*" \
-   --volume "${resolvStateFile}:/etc/rancher/k3s/resolv.conf@all:*" \
-   ```
+   → verify with `nix build` of the tool, and `k3d-pv-state snapshot /tmp/x.json`
+   against the live cluster (read-only) prints 15, with `jq '.[].spec.claimRef'`
+   showing no `uid`.
+2. Bootstrap: add `pvStateTool` to `runtimeInputs`. Set `CREATED=0`, and
+   `CREATED=1` in the create branch. After step 3 (API ready) and before step
+   4, add step 3b: if `CREATED=1` and a snapshot exists, run `restore`;
+   otherwise run `snapshot` (a failure only WARNs, never exits).
+   *Added in implementation:* a failed **restore** exits 1 before the GitOps
+   apply. The create branch touches `pv-snapshot.json.restore-pending` when a
+   snapshot exists, and 3b keys on that marker rather than on `CREATED`. That
+   way a `Restart=` rerun, which takes the reboot path, retries the restore
+   instead of snapshotting an empty cluster and applying GitOps over new
+   empty volumes. The marker is removed only after a successful restore.
+3. `cat ${nodeResolvConf} > …` gets `chmod 0644 "${resolvStateFile}"` after it.
+4. Header comment (lines 5–7): PV data does **not** survive a recreate by
+   itself. Point to the snapshot/restore step and #1497.
+5. `environment.systemPackages`: add `pvStateTool`, for the rehearsal and
+   manual snapshots.
+6. `just check-syntax`, `just test-host p620` → exit 0. Open the PR (links
+   intent, spec and plan). Merge after CI.
+7. Announce on the bus, deploy p620. The bootstrap reruns (reboot path) →
+   verify that `/var/lib/k3d-factory/pv-snapshot.json` has 15 entries whose
+   names equal `kubectl get pvc -A -o jsonpath='{..volumeName}'`, and that
+   `resolv.conf` is 0644.
 
-   Keep `--k3s-arg "--resolv-conf=/etc/rancher/k3s/resolv.conf@all:*"`.
-5. After the pod DNS smoke check (around line 396), add the pull-path check:
+### B. GitOps (factory-gitops)
 
-   ```sh
-   echo "[k3d-bootstrap] DNS smoke check (image pulls, node resolver)"
-   if docker exec "k3d-$CLUSTER-server-0" nslookup ghcr.io >/dev/null 2>&1; then
-     echo "[k3d-bootstrap] node DNS OK"
-   else
-     echo "[k3d-bootstrap] WARN: the node could NOT resolve ghcr.io, so image pulls will fail." \
-          "Check that the node's /etc/resolv.conf is ${resolvStateFile}, not Docker's" \
-          "172.18.0.1. After repairing, delete pods stuck in ImagePullBackOff. See #1497."
-   fi
-   ```
+1. `apps/nfs-provisioner/manifests/manifests.yaml`: `clusterIP: 10.43.224.175`
+   under the Service's `spec`. Open a PR and merge it.
+   → verify that ArgoCD's `nfs-provisioner` app is Synced/Healthy, the
+   Service IP is unchanged, and no nfs pod restarted.
 
-   → verify that `docker exec k3d-factory-server-0 nslookup ghcr.io` works today
-   (`nslookup` exists in the node, as checked during the spec).
-6. `resolvers` option description: it now governs both the node's
-   `/etc/resolv.conf` and k3s's. Docker-internal container names do not
-   resolve on the node. The recreate note stays.
-7. `just check-syntax`, `just test-host p620` → exit 0.
-8. Open the PR (links intent, spec and plan). Merge after review.
-9. Announce on the agent bus, then deploy p620 → Test 1. The running cluster
-   is untouched: the bootstrap takes the "already exists" path. It still
-   writes the state file and runs both smoke checks.
-    **Added during implementation:** the live node's k3s resolver mount
-    comes from `/nix/store/ln8jljz69sgcj5f4kgq3r5y4qdxhg09j-k3d-node-resolv.conf`.
-    The current system already does not reference it (the same content now
-    hashes to a different path), so a GC would delete it under a running
-    mount. Until the recreate, pin it:
-    `sudo nix-store --add-root /nix/var/nix/gcroots/k3d-live-resolv -r /nix/store/ln8jljz69sgcj5f4kgq3r5y4qdxhg09j-k3d-node-resolv.conf`.
-    Remove that root after step 10.
-10. **Recreate window** (separate, needs the user's go-ahead and a bus
-    announcement with the expected downtime):
-    1. `systemctl start keycloak-realm-backup` and confirm a fresh file in
-       the backup dir.
-    2. `k3d cluster delete factory`.
-    3. Start the bootstrap unit, which creates the cluster with the new
-       mounts. ArgoCD re-syncs the workloads. PVCs come back from
-       `/mnt/games/k3d/storage`.
-    → Tests 2–4.
+### C. Rehearsal (throwaway cluster on p620)
+
+1. `k3d cluster create pvrehearse --image rancher/k3s:v1.31.5-k3s1 --api-port 127.0.0.1:6551 --servers 1 --agents 0`
+   with `--volume /mnt/games/k3d-rehearse/storage:/var/lib/rancher/k3s/storage@server:*`,
+   using its own kubeconfig (`k3d kubeconfig get pvrehearse`). Apply a
+   1-replica StatefulSet with a `volumeClaimTemplate` and a Deployment with a
+   plain PVC (both local-path, busybox), and write a marker file into each
+   volume.
+2. `k3d-pv-state snapshot <scratch>/snap.json` → 2 entries.
+    Run `k3d cluster delete pvrehearse`, recreate it with the same arguments,
+    run `k3d-pv-state restore <scratch>/snap.json /mnt/games/k3d-rehearse/storage`,
+    and re-apply the same manifests.
+    → **pass condition:** both PVCs are Bound to the snapshot's PV names, both
+    markers read back, and there is no new `pvc-*` dir under the rehearsal
+    storage. On a fail: stop, revise, and don't go to D.
+3. Delete the rehearsal cluster and `/mnt/games/k3d-rehearse`.
+
+### D. The recreate (announced window, ~20–30 min downtime)
+
+1. Bus announcement with the expected downtime, and a check that nobody is
+   mid-flight on p620 or the cluster.
+2. `systemctl start keycloak-realm-backup skillai-db-backup`, each with a
+   fresh file checked. Export the two undeclared Secrets (under `umask 077`)
+   to `/var/lib/k3d-factory/unmanaged-secrets.json`: name, namespace, type
+   and data only.
+3. `systemctl restart k3d-cluster-bootstrap`, then check the snapshot: 15
+   entries matching the live PVC volumeNames. Also save a copy of the
+   `kubectl get pvc -A` table for later comparison.
+4. `k3d cluster delete factory`.
+5. `cp -a /mnt/games/k3d/storage /mnt/games/k3d/storage.pre-1497`
+   → verify with `diff -rq` (no output).
+6. `systemctl start k3d-cluster-bootstrap` → the journal shows create,
+   `restore: applied 15, skipped 0`, then the GitOps apply.
+7. Wait for ArgoCD. Re-apply `unmanaged-secrets.json` once `factory`
+   exists, then delete the file.
+8. Tests below. Then remove the GC root `/nix/var/nix/gcroots/k3d-live-resolv`,
+   post done on the bus, close #1497, and open the follow-up issue (demo
+   creds into agenix; delete `storage.pre-1497` after 2026-09-30).
 
 ## Tests
 
-1. After the deploy: `cat /var/lib/k3d-factory/resolv.conf` lists
-   `nameserver 1.1.1.1` and `nameserver 9.9.9.9`, and the bootstrap journal
-   shows `DNS OK` and `node DNS OK` (or the new WARN).
-2. After the recreate:
-
-   ```sh
-   docker inspect k3d-factory-server-0 \
-     --format '{{range .Mounts}}{{.Source}} -> {{.Destination}}{{println}}{{end}}' | grep resolv
-   ```
-
-   shows two mounts, both from `/var/lib/k3d-factory/resolv.conf` and none
-   from `/nix/store`. `docker exec k3d-factory-server-0 cat /etc/resolv.conf`
-   is our file, and `nslookup ghcr.io` inside the node works.
-3. `docker restart k3d-factory-server-0`, then Test 2 again. The file is
-   still ours. This is the 09-22 case.
-4. `kubectl -n factory rollout restart deploy/<one ghcr.io-backed deployment>`
-   → the new pod pulls and reaches Running. ArgoCD apps are Synced/Healthy.
+1. After A7: the snapshot has 15 entries, `resolv.conf` is 0644, and the
+   journal shows `DNS OK` and `node DNS OK`.
+2. Rehearsal pass condition (C2).
+3. After the recreate: every PVC's `volumeName` equals the D3 table and
+   all are `Bound`. `ls /mnt/games/k3d/storage` shows the same 14 dirs and no
+   new ones.
+4. `docker inspect k3d-factory-server-0` shows both resolv mounts from
+   `/var/lib/k3d-factory/resolv.conf`. Inside the node, `cat /etc/resolv.conf`
+   shows 1.1.1.1/9.9.9.9 and `nslookup ghcr.io` works. After
+   `docker restart k3d-factory-server-0` it still does.
+5. Data: the keycloak realm login works, postgres and skillai-db list their
+   tables, fides UI shows its evidence, minio lists its buckets, and the
+   tfactory pod sees `projects.json` on `tfactory-data-rwx`.
+6. Every ArgoCD app is Synced/Healthy. `kubectl rollout restart` of one
+   ghcr.io-backed deployment reaches Running.
 
 ## Rollback
 
-- Before the recreate: revert the PR and deploy. The live cluster never used
-  the new mounts, so nothing else changes.
-- After the recreate, the quick fix is to edit the resolvers live: the node
-  bind-mounts the host file, so rewriting
-  `/var/lib/k3d-factory/resolv.conf` in place (`cat > …`, not `cp`) changes
-  the node's resolver immediately, with no recreate. The full revert is to
-  revert the PR, deploy, and recreate again, with a backup first.
+- **A and B:** revert the PRs and deploy. The live cluster is unaffected
+  until D.
+- **D, when a PVC is bound to a new empty volume:** scale its workload to 0,
+  delete that PVC and its new PV, and remove the new `pvc-*` dir. Then
+  re-apply that PV from the snapshot (it becomes pre-bound again) and let
+  ArgoCD recreate the PVC.
+- **D, when the whole attempt goes wrong:** `k3d cluster delete factory`,
+  remove any `pvc-*` dirs that are not in the snapshot, and rerun D6.
+  If a data dir itself was damaged: restore it from `storage.pre-1497`
+  (with the cluster stopped), then keycloak/skillai from their backups.
+- **The resolver mount itself misbehaving:** rewrite
+  `/var/lib/k3d-factory/resolv.conf` in place (`cat >`), no recreate needed.

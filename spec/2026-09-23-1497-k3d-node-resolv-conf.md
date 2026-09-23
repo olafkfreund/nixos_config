@@ -11,6 +11,14 @@ don't block on the exact root cause (open question 2). This spec settles the
 width of the fix (open question 1): **node-scoped, not Docker-wide.** The
 evidence is below.
 
+> **Revision 2 (2026-09-23), after the design was implemented and deployed.**
+> Design steps 1–4 are live on p620 (#2002). The recreate that makes them
+> take effect was stopped before `k3d cluster delete`, because this spec
+> claimed that PVCs survive a recreate. They do not. This revision replaces
+> the rollout section with a recreate that keeps the cluster's state, and
+> adds one fix to the deployed code (the resolver file's mode). Design steps
+> 1–4 are otherwise unchanged.
+
 ## What the spec work found
 
 - **A container restart undoes a hand repair.** `k3d-factory-server-0` was
@@ -70,17 +78,76 @@ Everything is in `modules/containers/k3d.nix`.
    The `nodeResolvConf` comment gains the k3d-entrypoint finding in two or
    three lines.
 
-### Rollout needs a planned cluster recreate
+5. **Resolver file mode.** The bootstrap runs under `umask 077` (for the
+   kubeconfig), so step 1 created the file 0600. Add `chmod 0644` after the
+   `cat`, which keeps the inode, so it matches the 0444 store file it replaces.
+   It has already been fixed by hand on p620.
 
-Mounts are fixed at container create, so the live `factory` cluster only
-adopts step 2 through `k3d cluster delete` plus a bootstrap. PVCs live in
-`storageDir` (`/mnt/games/k3d/storage`) and survive a recreate by design.
-Take a keycloak backup first (`keycloak-realm-backup`). Do it as its own
-announced window on the agent bus, not as a side effect of a deploy.
+### What a recreate loses (found in review, 2026-09-23)
 
-Until that window, the deployed module still helps: it gives the smoke check
-and the stable file. And the existing hand repair (`docker exec … sh -c 'cat
-> /etc/resolv.conf'`) keeps working until the next container restart.
+`storageDir` being bind-mounted does **not** carry PVC data across a
+recreate. `local-path` provisions a fresh `pvc-<new-uid>_<ns>_<name>`
+directory for each new PVC. The old directories stay on disk, but nothing
+attaches them: this is how the keycloak realm was lost on 2026-06-25. The
+module's header comment ("PVCs survive cluster recreation") is wrong in the
+same way and gets corrected.
+
+What exists only in the running cluster:
+
+| State | Where | After a naive recreate |
+| ----- | ----- | ---------------------- |
+| 14 `local-path` PVs (16 GB: postgres, skillai-db, fides-db, minio, keycloak, …) | `storageDir`, one dir per PVC, no orphans today | empty new volumes |
+| 1 `nfs` PV (`tfactory-data-rwx`: TFactory projects, findings, profiles) | an export inside `nfs-provisioner-backing`, reached via Service ClusterIP `10.43.224.175` | new export. The old PV's `nfs.server` is immutable and the Service gets a random new IP |
+| `azure-demo-creds`, `gcp-demo-creds` Secrets | declared nowhere (not agenix, not factory-gitops) | gone |
+| ArgoCD admin password, kyverno/keda certs | generated in-cluster | regenerated. This is acceptable. |
+
+Everything else is re-seeded: every other Secret comes from agenix via the
+bootstrap (`minio-kms` included), and all workloads come from factory-gitops.
+Tailscale sidecars keep no state Secrets. The k3s image
+(`rancher/k3s:v1.31.5-k3s1`) matches the running node, so a recreate is not
+also an upgrade. The `rolehunter-*` Secrets are leftovers of #1402 and are
+dropped.
+
+### Keeping it: PV snapshot + pre-bound restore (module)
+
+- **Step 6: snapshot.** On every bootstrap run that finds the cluster already
+   existing, write `/var/lib/k3d-<cluster>/pv-snapshot.json`, 0600, atomically
+   (temp file + `mv`). It holds every `Bound` PV with its name, annotations
+   and spec, with `claimRef.uid`/`resourceVersion` and `status` stripped. If
+   `kubectl` fails or returns no PVs, leave the existing snapshot alone. A
+   bootstrap restart right before a delete refreshes it.
+- **Step 7: restore.** On the create path, after `k3d cluster create --wait` and
+   **before** the GitOps apply (the first thing that can create a PVC):
+   when a snapshot exists, `kubectl apply` its PVs. Each `local` PV whose
+   directory is missing under `storageDir` is skipped with a WARN, so a PV is
+   never bound to an empty path. A PV whose `claimRef` names a PVC that does
+   not exist yet is *pre-bound*. When ArgoCD creates that PVC, including a
+   StatefulSet's `data-postgres-0`, the PV controller binds it to that PV
+   instead of provisioning a new one. That holds for `WaitForFirstConsumer`
+   (local-path) and for `Immediate` (nfs). Names, paths, sizes and reclaim
+   policies stay exactly as they were.
+- **Step 8: stable NFS address (factory-gitops).** Pin `clusterIP: 10.43.224.175`
+   on the `nfs-provisioner` Service in `apps/nfs-provisioner/manifests/manifests.yaml`.
+   On the running cluster that is the value it already has, so it is a no-op.
+   On a new cluster (same default service CIDR `10.43.0.0/16`) the Service
+   gets the same address, and the restored nfs PV's `server` stays valid. The
+   provisioner re-exports its existing exports from the restored backing
+   volume's `vfs.conf`.
+
+### The recreate (runbook in the plan, run once, announced)
+
+Before: all backups (keycloak, skillai pg_dump), the two undeclared Secrets
+exported to a 0600 file, a fresh PV snapshot checked for 15 entries. Then
+`k3d cluster delete`. While the cluster is stopped and the data is
+consistent, a full `cp -a` of `storageDir` (16 GB; 602 GB free on
+`/mnt/games`). Then create, which restores the PVs, and let ArgoCD sync. Re-apply
+the two Secrets. Keep the copy for a week.
+
+**A rehearsal comes first.** A throwaway k3d cluster on p620 (a different name
+and port, its own storage dir) runs the same module logic end to end: a
+StatefulSet and a plain PVC write a marker file, then snapshot, delete,
+create, restore, and the pods read the markers back. The real recreate runs
+only after the rehearsal passes.
 
 ## Alternatives rejected
 
@@ -102,7 +169,21 @@ and the stable file. And the existing hand repair (`docker exec … sh -c 'cat
 - **Recreate window (p620, factory cluster):** ArgoCD, factory and fides are
   down for the create. The history here (#1551 loop, 2026-08-11 phantom
   node) makes this the riskiest step, so it is manual, announced, and done
-  after a backup.
+  after a rehearsal, backups and a full storage copy.
+- **A PV does not rebind** (a changed name in GitOps, a race with ArgoCD):
+  local-path provisions a new empty volume and the app starts empty. The
+  guard is ordering (the restore runs before the GitOps apply) plus a check
+  that every PVC is Bound to its *old* PV name before anything else is
+  trusted. Recovery: scale the app down, delete the new PVC, and the
+  pre-bound PV binds on recreate. The data was never touched: it is in the
+  old directory and in the copy.
+- **`10.43.224.175` taken** in the new cluster by a Service created before
+  nfs-provisioner. The Service create then fails loudly and ArgoCD retries.
+  The fix is to delete the squatter. The odds are small: the IP is random
+  and the address space is a /16.
+- **Snapshot staleness:** a PV created after the last snapshot is not
+  restored. The runbook refreshes the snapshot right before the delete and
+  checks the count.
 - **Public resolvers unreachable:** if the host has no route to 1.1.1.1 or
   9.9.9.9 (captive or ISP outage), pulls fail. Today they would fail anyway,
   because Docker's resolver forwards to the ISP router. `resolvers` stays an
@@ -124,3 +205,10 @@ and the stable file. And the existing hand repair (`docker exec … sh -c 'cat
    `/etc/resolv.conf` is still ours. This is the case that broke on 09-22.
 5. A pod rolls out a fresh image from ghcr.io (`kubectl rollout restart` of
    one factory deployment) and reaches Running.
+6. Rehearsal passes: marker files written before the delete are read back
+   by the recreated pods, and their PVCs are Bound to the old PV names.
+7. After the real recreate: all 15 PVCs are Bound to their pre-recreate PV
+   names (compared against the snapshot), no new `pvc-*` dir appears under
+   `storageDir`, the keycloak realm logs in, postgres and skillai-db list
+   their tables, `tfactory-data-rwx` mounts with `projects.json` present,
+   and every ArgoCD app is Synced/Healthy.
