@@ -36,14 +36,14 @@ untouched since 2021-01 and v2.4.1 is still the latest release.
 
 ## Proposed outcome
 
-With cliamp and Chrome both running, `playerctld` stays up across bar restarts
+On p620 and razer, with cliamp and Chrome both running, `playerctld` stays up across bar restarts
 and player start/stop, media keys and the bar widget work, and no new
 playerctld core dumps appear.
 
 ## Affected users and systems
 
-- Host p620 (crash observed). razer also sets `services.playerctld.enable` and
-  would benefit, but is not required.
+- Hosts p620 (crash observed) and razer — both set
+  `services.playerctld.enable = true` and both must get the fix.
 - `playerctl` package (also provides the `playerctl` CLI used by keybindings).
 - omarchy-shell's media widget, which talks to playerctld.
 
@@ -56,5 +56,5 @@ playerctld core dumps appear.
 
 ## Open questions
 
-- Scope: p620 only, or every host that enables playerctld (razer too)?
+- Scope: decided — p620 and razer.
 - Also send the patch upstream to altdesktop/playerctl, or keep it local only?
