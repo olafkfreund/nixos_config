@@ -8,7 +8,7 @@ spec: spec/2026-09-23-1995-plugin-browser-key.md
 
 This plan is self-contained: it carries every approved spec decision.
 
-**Decisions**
+## Decisions
 
 - **A key-only module:** `hosts/common/nixos/omarchy-plugin-browser.nix`,
   in the shape of `omarchy-gog.nix`. It writes only
