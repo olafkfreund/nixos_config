@@ -97,6 +97,8 @@ let
     // ─── Per-host skill links: store or local symlinks, never sync ───
     // (first match wins, so these beat !skills/**)
     ${managedSkillIgnores ".claude" "skills"}${hostLocalSkillIgnores "skills"}${nixarchySkillIgnores}
+    // home-manager /nix/store symlinks, same trap as the skills above (#1983)
+    /plugins/custom-marketplace
     // ─── ALLOWLIST: only these sync ───
     !CLAUDE.md
     !skills/**
