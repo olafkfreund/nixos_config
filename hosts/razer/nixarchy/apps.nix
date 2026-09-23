@@ -96,7 +96,6 @@
   # reformat and annotate freely, the tool only ever inserts one
   # line before the end marker.
   environment.systemPackages = with pkgs; [  #@pkgs-begin
-    hello  #@pkg hello
     bubblewrap  #@pkg bubblewrap
   ];  #@pkgs-end
 }
