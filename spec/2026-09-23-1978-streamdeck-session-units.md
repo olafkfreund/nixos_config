@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1978
 intent: intent/2026-09-23-1978-streamdeck-session-units.md
 ---
