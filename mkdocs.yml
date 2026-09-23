@@ -208,5 +208,6 @@ nav:
       - Claude Powerline: tooling/Claude-Powerline.md
       - GitHub Spec-Kit: tooling/Github-spec-kit.md
       - Claude Code 2.0.54: tooling/claude-code-update-2.0.54.md
+      - Nix LSP for agents: tooling/nix-lsp-agents.md
   - Design Notes:
       - "Ollama / LiteLLM (p620)": plans/2026-05-22-ollama-p620-litellm-design.md
