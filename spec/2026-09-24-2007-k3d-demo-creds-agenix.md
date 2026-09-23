@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2007
 intent: intent/2026-09-24-2007-k3d-demo-creds-agenix.md
 ---
