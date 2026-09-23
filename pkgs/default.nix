@@ -21,6 +21,7 @@
   mpris-album-art = pkgs.callPackage ./mpris-album-art { };
   weather-popup = pkgs.callPackage ./weather-popup { };
   tmux-ccm = pkgs.callPackage ./tmux-ccm { };
+  nix-format = pkgs.callPackage ./nix-format { };
   # gemini-cli removed in #560 (replaced by pkgs.customPkgs.antigravity-cli)
   # Claude Desktop - native Linux build from k3d3/claude-desktop-linux-flake (see flake.nix overlay)
   claude-desktop = pkgs.claude-desktop-linux;

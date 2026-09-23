@@ -1,118 +1,56 @@
 { config
 , lib
 , pkgs
+, osConfig ? null
 , ...
 }:
 let
   inherit (lib) mkOption mkIf mkEnableOption types;
   cfg = config.development.nixd;
+
+  flake = ''(builtins.getFlake "git+file://${cfg.flakeDir}")'';
+
+  # nixd 2.x reads no config file: settings arrive over workspace/configuration
+  # or as flags. Flags work with every client (Claude Code, mcp-language-server),
+  # so the per-host values live here, on this host's PATH, never in a synced
+  # file (#1983). --config cannot carry `options` (it skips the option-worker
+  # start), hence the dedicated --nixos-options-expr.
+  # nixd 2.9.2 ends its message loop on any request it does not implement
+  # instead of replying -32601, and mcp-language-server sends two of them
+  # (textDocument/diagnostic, workspace/symbol). Patched here only, not by
+  # overlay, so nothing else loses its cache hits (#1983).
+  nixdPatched = pkgs.nixd.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ./nixd-method-not-found.patch ];
+  });
+
+  nixdAgent = pkgs.writeShellScriptBin "nixd-agent" ''
+    exec ${nixdPatched}/bin/nixd \
+      --nixos-options-expr=${lib.escapeShellArg "${flake}.nixosConfigurations.${cfg.hostName}.options"} \
+      --nixpkgs-expr=${lib.escapeShellArg "import ${flake}.inputs.nixpkgs { }"} \
+      --config=${lib.escapeShellArg (builtins.toJSON {
+        formatting.command = [ "${pkgs.customPkgs.nix-format}/bin/nix-format" "--stdin" ];
+      })} \
+      "$@"
+  '';
 in
 {
   options.development.nixd = {
-    enable = mkEnableOption "nixd language server configuration";
+    enable = mkEnableOption "nixd language server for editors and coding agents";
 
     flakeDir = mkOption {
       type = types.str;
-      default = "/home/olafkfreund/.config/nixos";
-      description = "Path to your flake directory";
+      default = "${config.home.homeDirectory}/.config/nixos";
+      description = "Flake whose NixOS options and nixpkgs nixd evaluates.";
     };
 
     hostName = mkOption {
       type = types.str;
-      default = "p620";
-      description = "The hostname to use for configuration lookups";
-    };
-
-    offlineMode = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Whether to operate in offline mode";
-    };
-
-    formatterCommand = mkOption {
-      type = types.listOf types.str;
-      default = [ "alejandra" ];
-      description = "Command to use for formatting Nix files";
-    };
-
-    diagnosticsIgnored = mkOption {
-      type = types.listOf types.str;
-      default = [ ];
-      description = "Diagnostic codes to ignore";
-    };
-
-    diagnosticsExcluded = mkOption {
-      type = types.listOf types.str;
-      default = [ "\\.direnv" "result" "\\.git" ];
-      description = "File paths to exclude from diagnostics";
+      default = if osConfig != null then osConfig.networking.hostName else "p620";
+      description = "nixosConfigurations entry whose options nixd completes.";
     };
   };
 
   config = mkIf cfg.enable {
-    # alejandra, nixpkgs-fmt and statix are system-wide via modules/pkgs.
-    home.packages = with pkgs; [ nixd ];
-
-    xdg.configFile."nixd/nixd.json".text = builtins.toJSON {
-      nixd = {
-        formatting = {
-          command = cfg.formatterCommand;
-          timeout_ms = 5000;
-        };
-
-        options = {
-          nixos = {
-            expr = "(builtins.getFlake (\"git+file://\" + toString ${cfg.flakeDir})).nixosConfigurations.${cfg.hostName}.options";
-          };
-          home_manager = {
-            expr = "(builtins.getFlake (\"git+file://\" + toString ${cfg.flakeDir})).homeConfigurations.\"olafkfreund@${cfg.hostName}\".options";
-          };
-        };
-
-        diagnostics = {
-          enable = true;
-          ignored = cfg.diagnosticsIgnored;
-          excluded = cfg.diagnosticsExcluded;
-        };
-
-        eval = {
-          depth = 2;
-          workers = 3;
-          trace = {
-            server = "off";
-            evaluation = "off";
-          };
-        };
-
-        completion = {
-          enable = true;
-          priority = 10;
-          insertSingleCandidateImmediately = true;
-        };
-
-        path = {
-          include = [ "**/*.nix" ];
-          exclude = [
-            ".direnv/**"
-            "result/**"
-            ".git/**"
-          ];
-        };
-
-        # For improved error handling when not connected
-        lsp = {
-          progressBar = true;
-          snippets = true;
-          logLevel = "info";
-          maxIssues = 100;
-          failureHandling = {
-            retry = {
-              max = 3;
-              delayMs = 1000;
-            };
-            fallbackToOffline = true;
-          };
-        };
-      };
-    };
+    home.packages = [ pkgs.nixd pkgs.customPkgs.nix-format nixdAgent ];
   };
 }
