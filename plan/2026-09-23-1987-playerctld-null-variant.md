@@ -141,3 +141,20 @@ Branch `fix/1987-playerctld-null-variant`. Intent and spec approved.
   is independent and stays.
 - **Workaround if the patch is reverted:** keep cliamp closed while playerctld
   is needed.
+
+## Deviations during implementation
+
+- **Step 6:** the first `nixarchy-apply --yes` activated the new system but
+  failed before registering the generation or the bootloader entry. It left no
+  log and nothing in the journal. A second run completed cleanly as generation
+  2635. Cause unknown.
+- **Step 7:** Chrome was `Stopped`, not playing, during the test. It was still
+  on the bus; cliamp alone was the trigger. The `Shuffle` call returned the
+  fallback `"Failed to call method"`, which confirms cliamp's error replies have
+  no body.
+- **Step 8:** deployed from a clean `git worktree` at 2bde8f738 instead of the
+  main checkout, with `just deploy-fast razer` run inside it.
+  `nixarchy-theme.nix` is read for every host by
+  `modules/desktop/stylix-theme.nix`, and p620's uncommitted theme change would
+  otherwise have reached razer. Before switching, confirmed the nvidia driver in
+  the new closure (615.71.09) matched razer's running module.
