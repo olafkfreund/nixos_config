@@ -194,7 +194,6 @@
 
     # System utilities
     agenix.url = "github:ryantm/agenix";
-    nix-snapd.url = "github:io12/nix-snapd";
     microvm.url = "github:astro/microvm.nix";
 
     # Secure Boot — v1.0.0 (latest tag) still sets the removed
@@ -444,7 +443,6 @@
               ./hosts/${host}/configuration.nix
               nur.modules.nixos.default
               home-manager.nixosModules.home-manager
-              inputs.nix-snapd.nixosModules.default
               inputs.agenix.nixosModules.default
               inputs.lanzaboote.nixosModules.lanzaboote
               nix-index-database.nixosModules.nix-index
