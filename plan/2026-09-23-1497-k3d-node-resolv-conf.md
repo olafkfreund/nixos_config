@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 1497
 spec: spec/2026-09-23-1497-k3d-node-resolv-conf.md
 ---
