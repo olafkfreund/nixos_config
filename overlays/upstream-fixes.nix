@@ -11,6 +11,14 @@ _final: prev: {
     doCheck = false;
   });
 
+  # playerctl 2.4.1's playerctld segfaults on a D-Bus error reply with no body
+  # (e.g. from cliamp) and on NULL cached player properties (#1987). Upstream
+  # daemon code is unchanged since 2021; kept local by decision.
+  # Drop or rebase when nixpkgs bumps playerctl past 2.4.1.
+  playerctl = prev.playerctl.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ./playerctl-null-variant.patch ];
+  });
+
   # azure-cli 2.81.0 expects azure-mgmt-web v2024_11_01 which isn't packaged yet;
   # disable installCheck until nixpkgs catches up.
   azure-cli = prev.azure-cli.overrideAttrs (_old: {

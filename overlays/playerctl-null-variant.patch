@@ -1,0 +1,95 @@
+--- a/playerctl/playerctl-daemon.c	2026-09-23 12:11:24.171923735 +0100
++++ b/playerctl/playerctl-daemon.c	2026-09-23 12:11:41.208954087 +0100
+@@ -268,31 +268,39 @@
+ 
+     if (player != NULL) {
+         g_debug("emitting signals for new active player: '%s'", player->well_known);
+-        GVariant *player_children[3] = {
+-            g_variant_new_string(PLAYER_INTERFACE),
+-            player->player_properties,
+-            g_variant_new_array(G_VARIANT_TYPE_STRING, NULL, 0),
+-        };
+-        GVariant *player_properties_tuple = g_variant_new_tuple(player_children, 3);
++        if (player->player_properties != NULL) {
++            GVariant *player_children[3] = {
++                g_variant_new_string(PLAYER_INTERFACE),
++                player->player_properties,
++                g_variant_new_array(G_VARIANT_TYPE_STRING, NULL, 0),
++            };
++            GVariant *player_properties_tuple = g_variant_new_tuple(player_children, 3);
+ 
+-        g_dbus_connection_emit_signal(ctx->connection, NULL, MPRIS_PATH, PROPERTIES_INTERFACE,
+-                                      "PropertiesChanged", player_properties_tuple, &tmp_error);
+-        if (tmp_error != NULL) {
+-            g_propagate_error(error, tmp_error);
+-            return;
++            g_dbus_connection_emit_signal(ctx->connection, NULL, MPRIS_PATH, PROPERTIES_INTERFACE,
++                                          "PropertiesChanged", player_properties_tuple, &tmp_error);
++            if (tmp_error != NULL) {
++                g_propagate_error(error, tmp_error);
++                return;
++            }
++        } else {
++            g_debug("no player properties cached for '%s'", player->well_known);
+         }
+ 
+-        GVariant *root_children[3] = {
+-            g_variant_new_string(ROOT_INTERFACE),
+-            player->root_properties,
+-            g_variant_new_array(G_VARIANT_TYPE_STRING, NULL, 0),
+-        };
+-        GVariant *root_properties_tuple = g_variant_new_tuple(root_children, 3);
+-        g_dbus_connection_emit_signal(ctx->connection, NULL, MPRIS_PATH, PROPERTIES_INTERFACE,
+-                                      "PropertiesChanged", root_properties_tuple, &tmp_error);
+-        if (tmp_error != NULL) {
+-            g_propagate_error(error, tmp_error);
+-            return;
++        if (player->root_properties != NULL) {
++            GVariant *root_children[3] = {
++                g_variant_new_string(ROOT_INTERFACE),
++                player->root_properties,
++                g_variant_new_array(G_VARIANT_TYPE_STRING, NULL, 0),
++            };
++            GVariant *root_properties_tuple = g_variant_new_tuple(root_children, 3);
++            g_dbus_connection_emit_signal(ctx->connection, NULL, MPRIS_PATH, PROPERTIES_INTERFACE,
++                                          "PropertiesChanged", root_properties_tuple, &tmp_error);
++            if (tmp_error != NULL) {
++                g_propagate_error(error, tmp_error);
++                return;
++            }
++        } else {
++            g_debug("no root properties cached for '%s'", player->well_known);
+         }
+ 
+         // Emit nothing for unsupported optional interfaces
+@@ -738,16 +746,21 @@
+         g_dbus_method_invocation_return_value(invocation, body);
+         break;
+     case G_DBUS_MESSAGE_TYPE_ERROR: {
+-        if (g_variant_n_children(body) > 1) {
+-            GVariant *error_message_variant = g_variant_get_child_value(body, 1);
+-            const char *error_message = g_variant_get_string(error_message_variant, 0);
+-            g_dbus_method_invocation_return_dbus_error(
+-                invocation, g_dbus_message_get_error_name(reply), error_message);
+-            g_variant_unref(error_message_variant);
+-        } else {
+-            g_dbus_method_invocation_return_dbus_error(
+-                invocation, g_dbus_message_get_error_name(reply), "Failed to call method");
++        // An error reply may legally carry no body; its message is child 0.
++        const char *error_message = "Failed to call method";
++        if (body != NULL && g_variant_n_children(body) > 0) {
++            GVariant *msg = g_variant_get_child_value(body, 0);
++            if (g_variant_is_of_type(msg, G_VARIANT_TYPE_STRING)) {
++                g_dbus_method_invocation_return_dbus_error(
++                    invocation, g_dbus_message_get_error_name(reply),
++                    g_variant_get_string(msg, NULL));
++                g_variant_unref(msg);
++                break;
++            }
++            g_variant_unref(msg);
+         }
++        g_dbus_method_invocation_return_dbus_error(
++            invocation, g_dbus_message_get_error_name(reply), error_message);
+         break;
+     }
+     default:
