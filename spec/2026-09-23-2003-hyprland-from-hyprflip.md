@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2003
 intent: intent/2026-09-23-2003-hyprland-from-hyprflip.md
 ---
