@@ -304,6 +304,8 @@ in
   # metadata.namespace stripped, exactly like the factory-secret-* slots — the
   # k3d bootstrap pins the namespace with `kubectl apply -n`.
   "secrets/factory-secret-odin-api-keys.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-azure-demo-creds.age".publicKeys = allUsers ++ [ p510 p620 ];
+  "secrets/factory-secret-gcp-demo-creds.age".publicKeys = allUsers ++ [ p510 p620 ];
   "secrets/k3d-secret-fides-secrets.age".publicKeys = allUsers ++ [ p510 p620 ];
   "secrets/k3d-secret-fides-reporter-token.age".publicKeys = allUsers ++ [ p510 p620 ];
   # MinIO KMS master key. Encrypted out-of-band in the factory-gitops repo and

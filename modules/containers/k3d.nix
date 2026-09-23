@@ -399,6 +399,8 @@ let
           "cfactory-api-keys"
           "odin-ssh-key"
           "odin-api-keys"
+          "azure-demo-creds"
+          "gcp-demo-creds"
         ])} \
       ; do
         f="/run/agenix/$slot"
@@ -1076,6 +1078,8 @@ in
             "cfactory-api-keys"
             "odin-ssh-key"
             "odin-api-keys"
+            "azure-demo-creds"
+            "gcp-demo-creds"
           ])
         // {
           # Non-factory namespaces (see the 4b loop in the bootstrap script).
