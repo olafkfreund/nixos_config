@@ -246,7 +246,7 @@ in
       };
     };
 
-    home-manager.users.${cfg.user} = _: {
+    home-manager.users.${cfg.user} = { config, ... }: {
       # Off for exactly the terminals whose include semantics cannot override an
       # in-file palette. Their colours now come through theme-active.* only,
       # with the fallback above standing in for stylix.
@@ -266,16 +266,18 @@ in
         alacritty.settings.general.import = [ "~/${apps.alacritty.link}" ];
 
         # kitty's extraConfig lands at the end of the file, where an include
-        # outranks everything above it. kitty and ghostty both resolve a
-        # relative include against their own config dir; foot and alacritty
-        # want the path spelled out.
+        # outranks everything above it. kitty resolves a relative include
+        # against its config dir; foot and alacritty want the path spelled out.
+        # ghostty resolves it against the file's REAL path, which is the store
+        # while home-manager's symlink is in place, so it gets an absolute path
+        # too (otherwise +validate-config in home-manager's onChange fails).
         kitty.extraConfig = mkAfter ''
           include ${baseNameOf apps.kitty.link}
         '';
 
         foot.settings.main.include = "~/${apps.foot.link}";
 
-        ghostty.settings.config-file = baseNameOf apps.ghostty.link;
+        ghostty.settings.config-file = "${config.home.homeDirectory}/${apps.ghostty.link}";
       };
     };
   };
