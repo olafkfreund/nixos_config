@@ -36,6 +36,7 @@
     ../../common/nixos/omarchy-gmessages.nix
     ../../common/nixos/omarchy-omadroid.nix
     ../../common/nixos/omarchy-sole-hyprland.nix
+    ../../common/nixos/hyprland-from-hyprflip.nix # trial, #2003
     ../../common/nixos/omarchy-stylix-theme.nix
   ];
 
@@ -74,6 +75,8 @@
   # There is no matching .package force any more: omarchy-sole-hyprland.nix
   # turns programs.hyprland off outright and restates what Nixarchy needs from
   # it, which is what stops a second Hyprland entry appearing at login.
+  # (The one .package force left is the #2003 trial in
+  # hyprland-from-hyprflip.nix, which picks the compositor build.)
   programs.hyprland.portalPackage = lib.mkForce pkgs.xdg-desktop-portal-hyprland;
 
   # Omarchy's SDDM greeter is the login manager. It replaced the

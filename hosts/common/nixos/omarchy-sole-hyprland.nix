@@ -1,4 +1,4 @@
-{ lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, ... }:
 # Nixarchy is the only Hyprland session offered at login.
 #
 # programs.hyprland is enabled by the nixarchy module itself, not by us, so
@@ -21,8 +21,10 @@
 # different store path from pkgs.hyprland, launched with --config against
 # Omarchy's own file.
 let
-  # The exact build nixarchy's session script invokes.
-  hyprland = inputs.nixarchy.inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+  # The exact build the session script and greeter invoke: whatever the host
+  # chose as programs.hyprland.package (nixarchy's by default; p620 and razer
+  # force hyprflip's, see hyprland-from-hyprflip.nix).
+  hyprland = config.programs.hyprland.package;
 in
 {
   programs.hyprland.enable = lib.mkForce false;
@@ -68,9 +70,9 @@ in
   # which breaks every hyprctl-based omarchy command too. The SDDM greeter kept
   # working throughout because it invokes Hyprland by absolute path.
   #
-  # This must be the Hyprland NIXARCHY pins, not pkgs.hyprland: they are
-  # different versions (0.56.0 vs 0.56.2) and it is the nixarchy one the
-  # session script runs, so a mismatched start-hyprland and compositor is
+  # This must be the Hyprland the session runs (programs.hyprland.package),
+  # not pkgs.hyprland: they are different versions (0.56.0 vs 0.56.2) and it
+  # is programs.hyprland.package the session script runs, so a mismatched start-hyprland and compositor is
   # exactly what we would be reintroducing.
   # hyprland-preview-share-picker is the share picker Omarchy's own config
   # asks for. It seeds ~/.config/hypr/xdph.conf with
