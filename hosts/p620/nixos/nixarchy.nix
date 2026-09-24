@@ -60,6 +60,9 @@
   # device directly for its own key handling, which the group grants; without
   # it the session starts but never sees a keypress.
   programs.nixarchy.user = "olafkfreund";
+  # nixarchy-menu as the Omarchy menu (#2019, nixarchy#946). Remove to go back
+  # to the stock menu at the next login.
+  home-manager.users.olafkfreund.programs.nixarchy.defaultPlugins.menu = true;
 
   # Let theme switches tint Chrome/Chromium/Edge/Brave with the theme's accent
   # colour. Light and dark already follow the theme through the settings
