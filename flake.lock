@@ -2010,6 +2010,7 @@
         "nixarchy-ghtui": "nixarchy-ghtui",
         "nixarchy-gltui": "nixarchy-gltui",
         "nixarchy-herdr": "nixarchy-herdr",
+        "nixarchy-menu": "nixarchy-menu",
         "nixarchy-microvm": "nixarchy-microvm",
         "nixarchy-pkg": "nixarchy-pkg",
         "nixarchy-plugin-browser": "nixarchy-plugin-browser",
@@ -2031,11 +2032,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790272761,
-        "narHash": "sha256-Dg3KWEqAhqu0dZSpbnwuPQh5cXt54SsfUM89VXdSf+o=",
+        "lastModified": 1790284934,
+        "narHash": "sha256-Lj6jcnxkXNfVnbi5S1bAqbfG3pYUY70aeyAKlUHx++I=",
         "owner": "olafkfreund",
         "repo": "nixarchy",
-        "rev": "a5460e230c650780d55eda852828024580db863a",
+        "rev": "8333f2366fba09da6c7246722af780d3b6c552af",
         "type": "github"
       },
       "original": {
@@ -2182,17 +2183,43 @@
     "nixarchy-herdr": {
       "flake": false,
       "locked": {
-        "lastModified": 1790268988,
-        "narHash": "sha256-nLnRCJF7BHBeHvzChKx0NEKcQubh+0bh6wNvtEYNp/M=",
+        "lastModified": 1790277548,
+        "narHash": "sha256-29t6sWzhKrif/sWHK3+F8/cX00kuA1v/VWkho1TSEhQ=",
         "owner": "olafkfreund",
         "repo": "nixarchy-herdr",
-        "rev": "58ab568a66107f7a21f4f73973966bc11aa2a6e2",
+        "rev": "3b789dde680155d85c62470b4ea9000c91823bf1",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
         "repo": "nixarchy-herdr",
-        "rev": "58ab568a66107f7a21f4f73973966bc11aa2a6e2",
+        "rev": "3b789dde680155d85c62470b4ea9000c91823bf1",
+        "type": "github"
+      }
+    },
+    "nixarchy-menu": {
+      "inputs": {
+        "nixpkgs": [
+          "nixarchy",
+          "nixpkgs"
+        ],
+        "omarchy": [
+          "nixarchy",
+          "omarchy"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790271385,
+        "narHash": "sha256-bb4AXpZ3Ov0cfIVpbPqgM2z57OVbBNBqPh3XwD/A8VQ=",
+        "owner": "olafkfreund",
+        "repo": "nixarchy-menu",
+        "rev": "8775661650ec7d169ca6f0b17a49922dc8005b49",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "nixarchy-menu",
+        "rev": "8775661650ec7d169ca6f0b17a49922dc8005b49",
         "type": "github"
       }
     },
@@ -2288,17 +2315,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1790152831,
-        "narHash": "sha256-UWi8NOK7p29dJiKFw3lrF/68gMpiX7JDuOIytHWyBuY=",
+        "lastModified": 1790273053,
+        "narHash": "sha256-0+hIbmeY5inw2U+525YCsCskJzdG5clh74tpgxYz7XY=",
         "owner": "olafkfreund",
         "repo": "nixarchy-plugin-browser",
-        "rev": "cd3a5607d1184d98a5ca082fd88ada6febd6b627",
+        "rev": "f60d2b2e6b7bc10af9b7f0f25911ac2a67a5ea06",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
         "repo": "nixarchy-plugin-browser",
-        "rev": "cd3a5607d1184d98a5ca082fd88ada6febd6b627",
+        "rev": "f60d2b2e6b7bc10af9b7f0f25911ac2a67a5ea06",
         "type": "github"
       }
     },
