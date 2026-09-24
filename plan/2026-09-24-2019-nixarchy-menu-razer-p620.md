@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2019
 spec: spec/2026-09-24-2019-nixarchy-menu-razer-p620.md
 ---
