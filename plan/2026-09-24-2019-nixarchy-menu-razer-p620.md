@@ -88,3 +88,19 @@ spec: spec/2026-09-24-2019-nixarchy-menu-razer-p620.md
 - **Whole change:** revert the PR.
 - **razer's hand copy** can go back from `~/dev/nixarchy-menu-hand-copy.bak`
   if wanted.
+
+## Results
+
+- **Step 1:** nixarchy a5460e2 → 8333f23. The `nixarchy-menu` node (8775661)
+  follows `nixarchy/nixpkgs` and `nixarchy/omarchy`. The `nixpkgs_N` count is
+  unchanged at 10. The nested `nixarchy/nixarchy-plugin-browser` input moved
+  too, as nixarchy's own pin did (82b144a).
+- **Step 2:** `defaultPlugins.menu = true` at `hosts/razer/nixos/nixarchy.nix:51`
+  and `hosts/p620/nixos/nixarchy.nix:65`.
+- **Step 3:** `just test-host razer` and `just test-host p620` both exit 0:
+  - razer `li6lbbs2…-nixos-system-razer`
+  - p620 `jdy5gbwz…-nixos-system-p620`
+
+  `just validate` fails **only** on nixpkgs-fmt in nine files this change
+  doesn't touch (`hosts/{p510,razer,p620}/nixarchy/{apps,advanced,services}.nix`).
+  That is pre-existing on main: `git diff origin/main` touches none of them.
