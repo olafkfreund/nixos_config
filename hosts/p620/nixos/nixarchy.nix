@@ -36,6 +36,7 @@
     ../../common/nixos/omarchy-gmessages.nix
     ../../common/nixos/omarchy-omadroid.nix
     ../../common/nixos/omarchy-sole-hyprland.nix
+    ../../common/nixos/hyprland-from-hyprflip.nix # trial, #2003
     ../../common/nixos/omarchy-stylix-theme.nix
     inputs.hyprflip.nixosModules.default
     ../../common/nixos/omarchy-hyprflip.nix
@@ -43,12 +44,16 @@
 
   programs.nixarchy.enable = true;
 
-  # Hyprflip plugin + hy3 provider at /etc/hyprflip/, built against
-  # programs.hyprland.package -- the Hyprland main build the Omarchy session
-  # runs. ~/.config/hypr/hyprflip.lua loads them (required from autostart.lua).
+  # Hyprflip plugin + hy3 provider at /etc/hyprflip/. ~/.config/hypr/hyprflip.lua
+  # loads them (required from autostart.lua). The packages are hyprflip's own
+  # builds, the ones its nightly CI pushes to nixarchy.cachix.org -- they match
+  # the compositor because hyprland-from-hyprflip.nix runs hyprflip's Hyprland
+  # (trial, #2003). The module default would rebuild them locally against pkgs.
   programs.hyprflip = {
     enable = true;
     containers.enable = true;
+    package = inputs.hyprflip.packages.x86_64-linux.hyprflip;
+    hy3Package = inputs.hyprflip.packages.x86_64-linux.hy3;
   };
 
   # Puts this user in the input group. Omarchy's shell reads the keyboard
@@ -77,6 +82,8 @@
   # There is no matching .package force any more: omarchy-sole-hyprland.nix
   # turns programs.hyprland off outright and restates what Nixarchy needs from
   # it, which is what stops a second Hyprland entry appearing at login.
+  # (The one .package force left is the #2003 trial in
+  # hyprland-from-hyprflip.nix, which picks the compositor build.)
   programs.hyprland.portalPackage = lib.mkForce pkgs.xdg-desktop-portal-hyprland;
 
   # Omarchy's SDDM greeter is the login manager. It replaced the

@@ -98,14 +98,13 @@
 
     # Hyprflip — two windows as the faces of a rotating card (a Hyprland
     # plugin plus the patched hy3 provider). A plugin must be built against
-    # the exact compositor it loads into, so its hyprland follows nixarchy's
-    # (Hyprland main, above): one lock node for both. A main bump that breaks
-    # the plugin API then fails the rebuild instead of the session. Wired in
-    # hosts/p620/nixos/nixarchy.nix; loaded from ~/.config/hypr/hyprflip.lua.
-    hyprflip = {
-      url = "github:olafkfreund/nixarchy-hyprflip";
-      inputs.hyprland.follows = "nixarchy/hyprland";
-    };
+    # the exact compositor it loads into. No follows: hyprflip keeps its own
+    # Hyprland lock, which its nightly CI only moves after the plugins build
+    # and pass their checks, and p620 and razer run that Hyprland (trial,
+    # #2003, incl. how to switch back: hosts/common/nixos/hyprland-from-hyprflip.nix).
+    # `nix flake update hyprflip` updates their compositor and plugins together.
+    # Wired in hosts/p620/nixos/nixarchy.nix; loaded from ~/.config/hypr/hyprflip.lua.
+    hyprflip.url = "github:olafkfreund/nixarchy-hyprflip";
 
     # OmaCards, the Omarchy bar panel for Hyprflip cards. Not a flake: the repo
     # is the plugin directory itself, handed to programs.nixarchy.plugins in
