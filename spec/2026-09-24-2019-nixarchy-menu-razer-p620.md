@@ -58,6 +58,7 @@ their defaults, because nixarchy#946 made the default per entry.
 `~/.config/omarchy/plugins/nixarchy.menu` is a real directory, and nixarchy
 leaves a real directory at a declared id alone (#968 names it in the log). So
 during the razer deploy:
+
 - `mv` it to `~/dev/nixarchy-menu-hand-copy.bak`, a backup rather than a
   delete
 - restart `home-manager-olafkfreund`, which places the store link

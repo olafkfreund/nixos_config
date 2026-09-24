@@ -9,6 +9,7 @@ author: olafkfreund
 ## Problem
 
 nixarchy-menu is the Raycast-style Omarchy menu replacement:
+
 - it hands off to every default agent
 - it has Nixi and skill-backed help rows
 - it sizes itself to the screen

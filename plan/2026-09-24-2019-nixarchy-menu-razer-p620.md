@@ -14,11 +14,13 @@ spec: spec/2026-09-24-2019-nixarchy-menu-razer-p620.md
    and omarchy. Nothing else in the lock moves.
 2. **One line per host,** next to `programs.nixarchy.user`, in
    `hosts/razer/nixos/nixarchy.nix` and `hosts/p620/nixos/nixarchy.nix`:
+
    ```nix
    # nixarchy-menu as the Omarchy menu (#2019, nixarchy#946). Remove to go back
    # to the stock menu at the next login.
    home-manager.users.olafkfreund.programs.nixarchy.defaultPlugins.menu = true;
    ```
+
 3. **razer's hand-copied `~/.config/omarchy/plugins/nixarchy.menu`** is moved
    to `~/dev/nixarchy-menu-hand-copy.bak` during the razer deploy. It is a
    backup, not a delete. p620 has none.
