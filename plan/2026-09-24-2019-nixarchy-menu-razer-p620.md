@@ -106,3 +106,31 @@ spec: spec/2026-09-24-2019-nixarchy-menu-razer-p620.md
   `just validate` fails **only** on nixpkgs-fmt in nine files this change
   doesn't touch (`hosts/{p510,razer,p620}/nixarchy/{apps,advanced,services}.nix`).
   That is pre-existing on main: `git diff origin/main` touches none of them.
+- **Step 4:** PR #2021 was merged as ce3014c64 with all seven CI checks
+  green, including check-configurations for razer, p620 and p510. It sits on
+  top of #2020 (6a75d72f7), which had already put nixarchy on the same
+  8333f23.
+- **Step 5 (razer, 2026-09-25):** `just deploy-via-p620 razer` from a fresh
+  `main` worktree gave **generation 2957** = `li6lbbs2…`, the same toplevel
+  as step 3. razer had been on flatsnap's test generation 2956; the user
+  confirmed that check was over, and its owner cleaned up its own leftovers.
+  - HM logged "your own directory, not replacing it". The hand copy was moved
+    to `~/dev/nixarchy-menu-hand-copy.bak`, then HM was restarted, which
+    placed the link (`gh2g5346…-nixarchy-menu`).
+  - The hook enabled it, and the marker is `omarchy.menu`.
+  - Result: `nixarchy.menu` is enabled; `omarchy.menu` and
+    `evindor.keystroke` are disabled. The left section is
+    `[nixarchy.menu, omarchy.workspaces]` (the same slot), and
+    `omarchy-menu toggle root` opens nixarchy-menu. 0 failed units (system
+    and user), and one shell.
+- **Step 6 (p620):** `just p620` gave **generation 2647** = `jdy5gbwz…`, the
+  same toplevel as step 3. HM placed the link.
+  - A shell restart run from an agent's non-desktop shell killed the shell
+    and the relaunch didn't survive, so p620 had no bar for about 2 min until
+    `hyprctl dispatch 'hl.dsp.exec_cmd("omarchy-launch-shell")'`.
+  - The hook then enabled the menu, and the marker is `omarchy.menu`.
+  - Result: the stock Omarchy logo in the leftmost slot is replaced by
+    nixarchy-menu in the same slot, and the rest of the bar is unchanged.
+    `omarchy.menu` is disabled, and `omarchy-menu toggle root` opens
+    nixarchy-menu. 0 failed units (system and user), and one shell.
+- **Step 7:** #2019 was closed by the PR.
