@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2031
 spec: spec/2026-09-25-2031-agents-md-native.md
 ---
