@@ -272,6 +272,12 @@
         # list (shutdown, reboot, nixos-rebuild) still apply to every command.
         hands.allow_shell = true;
 
+        # One TIMING line per turn in the session log: phase durations only,
+        # never what was said. On to collect the before/after numbers for
+        # nixarchy-voice #135 (streamed ElevenLabs) and #136 (resident Piper);
+        # read them back with `tools/timing_report.py`.
+        hands.trace_timings = true;
+
         # ssh allowed by voice. Config deny rules are ADDED to the built-in list
         # and none can be removed, so this is the built-in list (omarchy_voice
         # config.py DEFAULT_DENY) minus \bssh\b, replacing it. The ceiling: a
