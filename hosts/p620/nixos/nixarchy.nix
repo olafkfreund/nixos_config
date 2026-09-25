@@ -278,29 +278,12 @@
         # read them back with `tools/timing_report.py`.
         hands.trace_timings = true;
 
-        # ssh allowed by voice. Config deny rules are ADDED to the built-in list
-        # and none can be removed, so this is the built-in list (omarchy_voice
-        # config.py DEFAULT_DENY) minus \bssh\b, replacing it. The ceiling: a
-        # rule added upstream later does not reach this host until copied here.
-        hands.deny_patterns_replace = true;
-        hands.deny_patterns = [
-          "\\brm\\s+-[a-zA-Z]*[rf]"
-          "\\bmkfs\\b"
-          "\\bdd\\s+if="
-          "\\b(shred|wipefs)\\b"
-          ">\\s*/dev/[sn][dv]"
-          "\\bpasswd\\b"
-          "\\bsudo\\b"
-          "\\bpkexec\\b"
-          "\\bcryptsetup\\b"
-          "\\bcurl\\b.*\\|\\s*(bash|sh)"
-          "\\bgit\\s+push\\b"
-          "\\bnix-collect-garbage\\b"
-          "\\bnix\\s+store\\s+(delete|gc)\\b"
-          "\\bnix-store\\s+--delete\\b"
-          "\\bnix\\s+profile\\s+wipe-history\\b"
-          "\\bnix-env\\s+--delete-generations\\b"
-        ];
+        # ssh allowed by voice. Drops the built-in `ssh` deny rule by name
+        # (#109) and keeps every other built-in rule, including ones added
+        # upstream later, such as #100's secret-path rules. This replaced a
+        # hand-copied 16-rule list (`deny_patterns_replace`), which froze this
+        # host out of every default added after it was written.
+        hands.deny_patterns_remove = [ "ssh" ];
 
         # A screenshot -> click -> check loop through ai-mirror spends a round
         # per step; 12 ran out halfway through a dialog.
