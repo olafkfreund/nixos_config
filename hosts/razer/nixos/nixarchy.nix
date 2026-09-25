@@ -196,6 +196,12 @@
         # open microphone. What it needs for the desktop it gets through the
         # omarchy CLI and Hyprland dispatchers instead.
         hands.allow_shell = false;
+
+        # One TIMING line per turn in the session log: phase durations only,
+        # never what was said. On to collect the before/after numbers for
+        # nixarchy-voice #135 (streamed ElevenLabs) and #136 (resident Piper);
+        # read them back with `tools/timing_report.py`.
+        hands.trace_timings = true;
       };
 
       # SUPER + SHIFT + V, the upstream default, is taken on this machine --
