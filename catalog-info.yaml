@@ -105,8 +105,8 @@ metadata:
     - url: https://github.com/olafkfreund/nixos_config/blob/main/docs/UPDATE-DEPLOY.md
       title: Update + deploy guide
       icon: rocket
-    - url: https://github.com/olafkfreund/nixos_config/blob/main/CLAUDE.md
-      title: Agent conventions (CLAUDE.md)
+    - url: https://github.com/olafkfreund/nixos_config/blob/main/AGENTS.md
+      title: Agent conventions (AGENTS.md)
       icon: book
 spec:
   type: infrastructure

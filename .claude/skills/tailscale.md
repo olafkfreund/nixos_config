@@ -1001,7 +1001,7 @@ systemctl enable tailscaled
 - `home/network/tailscale.nix` - Current Tailscale module
 - `hosts/p620/nixos/network-stability.nix` - Network stability integration
 - `modules/services/network-stability.nix` - Network stability service
-- `CLAUDE.md` - Project-specific patterns and conventions
+- `AGENTS.md` - Project-specific patterns and conventions
 
 ## Skill Usage
 

@@ -39,8 +39,7 @@ report. **Never edit** — the `/nix-fix` slash command and the
 
 1. `docs/NIXOS-ANTI-PATTERNS.md` — the catalogue
 2. `docs/PATTERNS.md` — the affirmative side
-3. Repo-root `CLAUDE.md` and the project's `.claude/CLAUDE.md` — repo
-   conventions
+3. Repo-root `AGENTS.md` — repo conventions
 
 If any of those files have changed since your last run in this session,
 re-read them before reporting.

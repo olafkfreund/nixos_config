@@ -108,6 +108,18 @@ files, so line 461 becomes `### Emergency Quick Fix` in the same commit.
 | T4 | `grep -n CLAUDE-CODE-OPTIMIZATION mkdocs.yml mkdocs-full.yml docs/README.md`; `mkdocs build --strict -f mkdocs-full.yml` if mkdocs is available | No match; the build does not complain about a missing nav file |
 | T5 | `just check-syntax` | Pass |
 
+## Deviations
+
+- **T2 ran in a throwaway worktree at a scratchpad path**, not the repo
+  root. The project auto-memory (`~/.claude/projects/<repo path>/memory/`)
+  already mentions `p510` and `--body-file`, so a run in the checkout could
+  answer from memory. In the worktree, with no memory for that path and tools
+  disallowed, it answered `p510` and quoted the new section's `--body-file`
+  sentence. `AGENTS.md` was the only possible source.
+- **T3's regex also matches `~/.claude/CLAUDE.md`** in
+  `home/development/agent-rules/codex-standards.md`. That is the user global
+  file, which D2 leaves alone, so the single hit is expected.
+
 ## Rollback
 
 - **Before merge:** close the PR, then `git switch main`. `CLAUDE.md` is

@@ -117,9 +117,6 @@ origins, and the read-only web UI.
 
 Development tooling and Claude Code documentation.
 
-`tooling/CLAUDE-CODE-OPTIMIZATION.md`
-Claude Code performance and configuration tuning.
-
 `tooling/claude-code-update-2.0.54.md`
 Update notes for Claude Code 2.0.54.
 

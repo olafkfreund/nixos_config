@@ -48,7 +48,7 @@ let inherit (lib) mkOption mkIf mkEnableOption mkForce mkMerge types; in {
     # BBR + fq handle satellite jitter/random-loss far better than CUBIC; the
     # latency sysctls pair with BBR on the long-RTT CGNAT path. mkDefault so any
     # host keeps its own override — this closes the razer gap (was kernel-default
-    # CUBIC) and makes the CLAUDE.md "applied everywhere" claim actually true.
+    # CUBIC) and makes the AGENTS.md "applied everywhere" claim actually true.
     {
       boot.kernel.sysctl = {
         "net.core.default_qdisc" = lib.mkDefault "fq";
