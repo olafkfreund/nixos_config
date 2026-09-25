@@ -10,7 +10,7 @@ Follows `intent/2026-09-15-1832-agents-md-parity.md`.
 
 ## Problem
 
-# 1832 made `AGENTS.md` the single source of the repo rules. At the time
+Issue #1832 made `AGENTS.md` the single source of the repo rules. At the time
 Claude Code only read `CLAUDE.md`, so `CLAUDE.md` stayed behind as a shim:
 `@AGENTS.md` plus two Claude-only sections (the bus-hook note and
 "Second opinions").
