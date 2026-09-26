@@ -453,12 +453,12 @@ All commands automatically reference:
 
 - **docs/PATTERNS.md** - Best practices
 - **docs/NIXOS-ANTI-PATTERNS.md** - What to avoid
-- **.claude/CLAUDE.md** - Project context
+- **AGENTS.md** - Project context
 - **docs/GITHUB-WORKFLOW.md** - Complete workflow
 
 ## 🚨 Emergency Procedures
 
-### Quick Fix
+### Emergency Quick Fix
 
 ```bash
 /nix-fix                              # Auto-fix anti-patterns
@@ -537,7 +537,7 @@ Deploy to HOST
 
 ## 📖 More Help
 
-- **Full guide**: See .claude/CLAUDE.md
+- **Full guide**: See AGENTS.md
 - **Workflows**: See docs/GITHUB-WORKFLOW.md
 - **Patterns**: See docs/PATTERNS.md
 - **Anti-patterns**: See docs/NIXOS-ANTI-PATTERNS.md

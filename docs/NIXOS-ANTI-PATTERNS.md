@@ -1121,7 +1121,7 @@ For comprehensive best practices and patterns, consult these resources:
 ### **Companion Documents:**
 
 - **[PATTERNS.md](./PATTERNS.md)** - Comprehensive guide to recommended patterns and best practices for this repository
-- **[CLAUDE.md](https://github.com/olafkfreund/nixos_config/blob/main/CLAUDE.md)** - Project-specific guidelines
+- **[AGENTS.md](https://github.com/olafkfreund/nixos_config/blob/main/AGENTS.md)** - Project-specific guidelines
   and architecture documentation
 - **[Desktop (Nixarchy)](architecture/desktop.md)** - Nixarchy / Omarchy on Hyprland
 

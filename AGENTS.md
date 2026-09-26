@@ -211,3 +211,12 @@ Things the code no longer shows, so they are easy to get wrong:
 - DEX5550 is offline; Samsung and HP are decommissioned.
 - MicroVMs are per-host files (`hosts/p510/microvm.nix`, with the guests under
   `hosts/p510/nixos/microvm/`), not a shared module.
+
+## Claude Code
+
+- The bus rule above is enforced for you by a PreToolUse hook
+  (`modules/programs/claude-code-managed.nix`). It matches words in command
+  text, so write prose (commit bodies, issue comments) to a file and pass it
+  with `--body-file`.
+- Consult other models (Codex, Antigravity) only when the user asks, through
+  the `second-opinion` skill. Never on your own initiative.

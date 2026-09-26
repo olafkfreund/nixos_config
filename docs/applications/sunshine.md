@@ -56,7 +56,7 @@ razer do not.
 !!! note "The hardening rules do not apply here"
     `DynamicUser`, `ProtectHome` and `ProtectSystem = "strict"` all assume a
     service that needs nothing of the user's session. Sandboxing this one to the
-    level `CLAUDE.md` mandates is equivalent to switching it off, so the
+    level `AGENTS.md` mandates is equivalent to switching it off, so the
     exception is recorded in the module rather than silently taken.
 
 ### 2. A connected stream that is solid black

@@ -204,7 +204,6 @@ nav:
       - Quick Reference: Nixos/Quick-Reference.md
       - Update Checker: Nixos/Update-Checker-Guide.md
   - Tooling:
-      - Claude Code Optimization: tooling/CLAUDE-CODE-OPTIMIZATION.md
       - Claude Powerline: tooling/Claude-Powerline.md
       - GitHub Spec-Kit: tooling/Github-spec-kit.md
       - Claude Code 2.0.54: tooling/claude-code-update-2.0.54.md

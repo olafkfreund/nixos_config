@@ -21,7 +21,7 @@
 #   existing without a human at the keyboard. That is why p510 keeps autologin
 #   on while p620 and razer do not.
 #
-#   The hardening rules in CLAUDE.md do not apply and cannot. DynamicUser,
+#   The hardening rules in AGENTS.md do not apply and cannot. DynamicUser,
 #   ProtectHome and ProtectSystem = "strict" all assume a service that needs
 #   nothing of the user's session; this one needs the user's Wayland socket,
 #   their GPU device nodes and their input devices. Sandboxing it to the point
