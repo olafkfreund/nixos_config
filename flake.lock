@@ -2361,11 +2361,11 @@
         "systems": "systems_8"
       },
       "locked": {
-        "lastModified": 1790494491,
-        "narHash": "sha256-mQs1J6s37deI0PZf6OQKh+dZbVBPWXhfwwbStDGTB1c=",
+        "lastModified": 1790530101,
+        "narHash": "sha256-GruevMnT/vRXu9CeLrvURHIYoHosdaYKAz66QS1PNBE=",
         "owner": "olafkfreund",
         "repo": "nixarchy-voice",
-        "rev": "7c51dfb0580b99ac3ba80650f97fc152011465cd",
+        "rev": "7dc9b08cd5b6253c9856f28aa2905817b401a836",
         "type": "github"
       },
       "original": {
