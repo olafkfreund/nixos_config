@@ -24,5 +24,6 @@ _: {
 
     # System optimization modules
     ./system/fstrim-optimization.nix
+    ./system/logging.nix
   ];
 }

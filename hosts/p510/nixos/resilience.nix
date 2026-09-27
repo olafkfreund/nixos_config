@@ -176,8 +176,6 @@
   # namespace with no bridge-address assumption, so this keeps working if the
   # k3d network is recreated on a different subnet.
   #
-  # Merges with the daemon.settings block in modules/system/logging.nix.
-  #
   # NOTE: `daemon.settings` needs a manual `systemctl restart docker` to take
   # effect — the same trade the restartIfChanged block above accepts, and it
   # applies only to containers created after that restart.
