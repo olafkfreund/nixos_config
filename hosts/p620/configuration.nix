@@ -939,6 +939,25 @@ in
   programs.nixarchy.services.hypr-rdp = {
     enable = true;
     passwordSecret = "hypr-rdp-password";
+
+    # WORKAROUND for olafkfreund/nixarchy#1031, and it is why this works at
+    # all today. Left unset, hypr-rdp creates a headless output and then sets
+    # its resolution with Hyprland's legacy `keyword` IPC request -- which
+    # Hyprland 0.56 has dropped for the Lua config, so the daemon dies with
+    # "failed to set headless output resolution: unknown request". hypr-rdp
+    # HAS a Lua fallback and it never fires, because its matcher looks for
+    # "non-legacy parsers" and 0.56 says "unknown request".
+    #
+    # Naming a real monitor skips that path entirely: it captures an existing
+    # output through wlr-screencopy-v1 and never asks Hyprland to resize
+    # anything. Verified on p620 -- display prepared, virtual keyboard and
+    # pointer up, TLS certificate generated.
+    #
+    # The cost is the documented one: this MIRRORS that screen at its own
+    # resolution rather than resizing to the client, and whoever is sitting
+    # at the machine sees the same thing. Remove this line once #1031 is
+    # fixed and the headless output comes back.
+    output = "DP-1";
   };
 
   # ── RDP client, for connecting OUT to the other machines ────────────────
