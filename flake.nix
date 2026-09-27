@@ -64,6 +64,14 @@
     nixarchy = {
       url = "github:olafkfreund/nixarchy";
       inputs.nixpkgs.follows = "nixpkgs";
+      # The same shape as the zen-browser note below, on a different child.
+      # nixarchy pins sops-nix at a8627b21 (2026-08-13), which predates
+      # nixpkgs removing buildGo125Module on 2026-09-15 -- so the moment any
+      # host declares a sops secret, sops-install-secrets fails to build and
+      # the error names Go, not sops and not nixarchy. That makes
+      # programs.nixarchy.services.hypr-rdp unbuildable, since it requires
+      # sops. Filed upstream; this unblocks us now.
+      inputs.sops-nix.follows = "sops-nix";
       # nixarchy re-exports zen-browser as a package attribute, so its pin is a
       # hard eval dependency for us even though no host installs Zen. Its lock
       # sat on 51df7b8, which passes ffmpeg_7 to wrapFirefox after nixpkgs
