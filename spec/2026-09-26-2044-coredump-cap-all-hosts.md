@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2044
 intent: intent/2026-09-26-2044-coredump-cap-all-hosts.md
 ---
