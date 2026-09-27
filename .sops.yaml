@@ -5,11 +5,17 @@ keys:
   # Admin/User keys
   - &olafkfreund age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p
 
-  # Host keys (converted from SSH host keys using ssh-to-age)
-  # Extract with: ssh-keyscan hostname | ssh-to-age
-  - &p620 age1yubikey1qwqw7l3lqxrp7d2xh39rwx0x5q4xjqfkpzdxwyqal4x9s5pw2x6z9q
-  - &razer age1yubikey1q2z8xpqxrp7d2xh39rwx0x5q4xjqfkpzdxwyqal4x9s5pw2x6z9q
-  - &p510 age1yubikey1q3w7l3lqxrp7d2xh39rwx0x5q4xjqfkpzdxwyqal4x9s5pw2x6z9q
+  # Host keys, derived from each machine's own SSH host key:
+  #   ssh-to-age -i /etc/ssh/ssh_host_ed25519_key.pub        (on that host)
+  #   ssh <host> cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age
+  #
+  # These were `age1yubikey1q...` placeholders until 2026-09-27 -- three
+  # fabricated values sharing one tail. Nothing had been encrypted against
+  # them, so nothing was lost, but the first secret that had been would have
+  # failed at ACTIVATION on the target host rather than at encrypt time.
+  - &p620 age1pfucr4w7a2jwcnujpdtvgsy3hu9axls5zn2qme60xvnw3xqha4cst87ppj
+  - &razer age1cpxy9lxck894ht2266t6y34ccp745lpfm375j0wjl8dkzyn5wf7s0ehmcm
+  - &p510 age1wkylnk4zh4rrkjg3rltuvqj42zcwjexcw7a5wueyq2qm490thy4qpvz2yt
 
 # Group definitions for easier management
 groups:

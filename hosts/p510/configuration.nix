@@ -981,4 +981,29 @@ in
   #   /mnt/img_pool    (SMR)              ~9.5 MB/s
   systemd.services.nix-daemon.environment.TMPDIR = "/home/nix-build";
   nix.settings.build-dir = "/home/nix-build";
+
+  # ── Remote desktop over the tailnet (nixarchy hypr-rdp) ──────────────────
+  #
+  # Shares the Hyprland session that is ALREADY LOGGED IN. It is not remote
+  # login: with nobody logged in there is no session to connect to, and
+  # rebooting this machine remotely locks you out until someone logs in.
+  # Autologin is on here, which is what makes it usable.
+  #
+  # `bind` is left at the module default of 127.0.0.1, and no port is opened.
+  # The firewall trusts no tailscale0 on any host in this repo, so binding
+  # 0.0.0.0 would be silently unreachable anyway -- and the SSH tunnel is the
+  # better answer regardless: `nixarchy remote connect` lists the machines,
+  # forwards a free local port over SSH and tears it down with the client, so
+  # the credential is the SSH key that already works.
+  #
+  # The password is per host on purpose: one compromised machine is one
+  # machine's desktop, not the fleet's. The module refuses to build without
+  # a secret and refuses to start with an empty one, because hypr-rdp given
+  # no password serves the desktop to anyone who connects.
+  sops.secrets.hypr-rdp-password.sopsFile = ../../secrets/hosts/p510/rdp.yaml;
+
+  programs.nixarchy.services.hypr-rdp = {
+    enable = true;
+    passwordSecret = "hypr-rdp-password";
+  };
 }
