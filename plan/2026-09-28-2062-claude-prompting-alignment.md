@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2062
 spec: spec/2026-09-28-2062-claude-prompting-alignment.md
 ---
