@@ -41,7 +41,6 @@ in
     ../../modules/containers/docker.nix
     ../../modules/containers/k3d.nix # k3d (k3s in Docker) cluster — ArgoCD + factory/fides workloads
     ../../modules/scrcpy/default.nix
-    ../../modules/system/logging.nix
     ../../modules/services/ollama.nix # local Ollama coding-model server (RX 7900 XTX, ROCm)
     ../../modules/services/litellm-router.nix # Anthropic-compat proxy → Ollama (Phase 2)
     ../../modules/services/whisper-server.nix # voice-input transcription HTTP API (port 9300, tailnet only)
