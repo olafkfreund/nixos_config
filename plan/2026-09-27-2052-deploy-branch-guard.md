@@ -101,6 +101,35 @@ keeps its no-override refusal.
    today). p510 is not deployed.
    → verify: the S tests.
 
+## Deviations
+
+- **A worktree detached at `origin/main` counts as main.** The spec said
+  every detached HEAD is "not main". But the safe way to deploy (and the one
+  agents use, #2044's razer deploy included) is a clean worktree detached at
+  `origin/main`, which the guard would have refused. `_require-main` now
+  treats a detached HEAD equal to `origin/main` as main. Any other detached
+  HEAD is still refused (tested: J1b allowed, J1c refused).
+- **J4 is tested with a dummy recipe, not `just --dry-run p620`.** A dry run
+  prints commands without running them, dependencies included, so it proves
+  nothing. Running `just p620` with stubbed `sudo`/`nixos-rebuild` was
+  blocked by the bus guard, and wrapping it to slip past the guard is exactly
+  what that guard exists to stop. Instead, a throwaway justfile holds the same
+  `_require-main` and `fake-target HOST: _require-main`, and runs on the
+  branch: it refuses before the body runs, and with `ALLOW_BRANCH_DEPLOY=1`
+  it reaches the body. J5 proves that all ten real recipes carry the
+  dependency.
+- **The hook is a Python script** (`pkgs.writeScript` with a python3
+  shebang), not shell. Following `cd` and `-C` and telling refs from paths
+  is fragile in shell. It still exits 2 to deny and checks the override
+  first. The tests add X1 (`cd` into the checkout, then switch: blocked) and
+  X2 (`--detach` in the checkout: blocked). All 13 cases pass.
+- **`AGENTS.md` gets one more sentence** than the spec's verbatim paragraph.
+  It names the `Justfile` guard, its override and the detached-at-main
+  exception, so agents that read only `AGENTS.md` know about them.
+- **p510 check:** `managed-settings.json` on p510 is set through `.source`,
+  so it was built as a single JSON file (no system build) rather than
+  evaluated. It contains the guard hook.
+
 ## Tests
 
 | # | Command | Expected |

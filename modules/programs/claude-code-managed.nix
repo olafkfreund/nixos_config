@@ -294,6 +294,87 @@ let
     exit 0
   '';
 
+  # Keep the shared checkout on main (#2052). /etc/nixos is ~/.config/nixos, so
+  # every deploy builds whatever branch it has checked out; on 2026-09-27 an
+  # agent's unpushed branch left there reached p620 twice. Branch work belongs
+  # in a git worktree. Only branch changes are refused: `git checkout -- file`,
+  # `git checkout <non-ref>`, switching to main and `git worktree add` pass.
+  sharedCheckoutGuardScript = pkgs.writeScript "claude-shared-checkout-guard.py" ''
+    #!${pkgs.python3}/bin/python3
+    import json, os, re, shlex, subprocess, sys
+
+    payload = json.load(sys.stdin)
+    cmd = (payload.get("tool_input") or {}).get("command") or ""
+    cwd = payload.get("cwd") or os.getcwd()
+    if not cmd or "SHARED_CHECKOUT_BRANCH_OK=1" in cmd:
+        sys.exit(0)
+
+    shared = os.path.realpath(os.path.expanduser("~/.config/nixos"))
+
+    def in_shared(path):
+        real = os.path.realpath(path)
+        return real == shared or real.startswith(shared + "/")
+
+    def is_commit(repo, ref):
+        return subprocess.run(
+            ["git", "-C", repo, "rev-parse", "--verify", "--quiet", ref + "^{commit}"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        ).returncode == 0
+
+    def deny(what):
+        print("BLOCKED by managed-settings shared-checkout guard: " + what, file=sys.stderr)
+        print("~/.config/nixos is /etc/nixos: every deploy builds whatever branch it has", file=sys.stderr)
+        print("checked out, so it stays on main (#2052). Do branch work in a worktree:", file=sys.stderr)
+        print("  git worktree add ../nixos-<issue> -b <branch> origin/main", file=sys.stderr)
+        print("If the user HAS asked for this in words, rerun with", file=sys.stderr)
+        print("SHARED_CHECKOUT_BRANCH_OK=1 prefixed. It is a statement about them.", file=sys.stderr)
+        sys.exit(2)
+
+    for seg in re.split(r"&&|\|\||;|\||\n", cmd):
+        try:
+            t = shlex.split(seg)
+        except ValueError:
+            continue
+        while t and re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", t[0]):
+            t.pop(0)
+        if not t:
+            continue
+        if t[0] == "cd" and len(t) > 1:
+            cwd = os.path.join(cwd, os.path.expanduser(t[1]))
+            continue
+        repo = cwd
+        if t[:3] == ["gh", "pr", "checkout"]:
+            if in_shared(repo):
+                deny("gh pr checkout")
+            continue
+        if t[0] != "git":
+            continue
+        i = 1
+        while i < len(t) and t[i].startswith("-"):
+            if t[i] in ("-C", "-c") and i + 1 < len(t):
+                if t[i] == "-C":
+                    repo = os.path.join(repo, os.path.expanduser(t[i + 1]))
+                i += 2
+                continue
+            i += 1
+        if i >= len(t) or not in_shared(repo):
+            continue
+        sub, args = t[i], t[i + 1:]
+        refs = [a for a in args if not a.startswith("-")]
+        if sub == "switch":
+            if args in (["-h"], ["--help"]) or (refs[:1] == ["main"] and not set(args) & {"-c", "-C", "--create", "--force-create", "--detach", "--orphan"}):
+                continue
+            deny("git switch " + " ".join(args))
+        if sub == "checkout":
+            if "--" in args:
+                continue
+            if set(args) & {"-b", "-B", "--orphan", "--detach"}:
+                deny("git checkout " + " ".join(args))
+            if refs and refs[0] != "main" and is_commit(repo, refs[0]):
+                deny("git checkout " + refs[0])
+    sys.exit(0)
+  '';
+
   # Announce-before-you-disrupt, enforced rather than remembered.
   #
   # Several agents work these machines at once, and tonight three of them
@@ -429,6 +510,17 @@ let
       hooks = [{
         type = "command";
         command = toString busAnnounceScript;
+        timeout = 5;
+      }];
+    }];
+  };
+
+  sharedCheckoutGuardHooks = lib.optionalAttrs cfg.sharedCheckoutGuard.enable {
+    PreToolUse = [{
+      matcher = "Bash";
+      hooks = [{
+        type = "command";
+        command = toString sharedCheckoutGuardScript;
         timeout = 5;
       }];
     }];
@@ -580,6 +672,7 @@ let
         notifyHooks
         formatHooks
         deployGuardHooks
+        sharedCheckoutGuardHooks
         busAnnounceHooks
         busPeekHooks
         subagentHooks
@@ -655,6 +748,20 @@ in
         Subagents run in-process with no PTY, so herdr cannot represent them as
         their own agent rows; this makes an otherwise invisible fan-out visible
         on the parent pane. No-ops outside a herdr pane.
+      '';
+    };
+
+    sharedCheckoutGuard.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Veto Claude Code Bash calls that would change the branch checked out
+        in ~/.config/nixos (/etc/nixos), via a managed-scope PreToolUse hook.
+        Every deploy builds whatever that checkout has checked out, so it
+        stays on main and branch work happens in a git worktree (#2052).
+        File restores (`git checkout -- <path>`), switching to main and
+        `git worktree add` are unaffected. SHARED_CHECKOUT_BRANCH_OK=1 in the
+        command overrides it when the user asked for the branch change.
       '';
     };
 
