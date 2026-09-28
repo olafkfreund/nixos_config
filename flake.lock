@@ -1970,11 +1970,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790610599,
-        "narHash": "sha256-pmcn6FzYI+bc7tMc9tFH/+KHgN+IeCr7cVik+r/NIGA=",
+        "lastModified": 1790629833,
+        "narHash": "sha256-rpNsPf+UunW1mi/TpehBwak4gg2pjK+4DvbaIwJfg8I=",
         "owner": "olafkfreund",
         "repo": "nixarchy",
-        "rev": "2ca7776452f0a2441b16e67a31acff8ddf57eeae",
+        "rev": "20d3d6d9b06d1ecafcf93dc6a638c103cfcf7864",
         "type": "github"
       },
       "original": {
@@ -2216,17 +2216,17 @@
         "omarchroma": "omarchroma"
       },
       "locked": {
-        "lastModified": 1790612098,
-        "narHash": "sha256-GmutZgejXC5vdnKAV28KyM7kVSBtOUW8hKgINwHvkgw=",
+        "lastModified": 1790626781,
+        "narHash": "sha256-S4k/BO4/eRcMNckHbFv8YUtw/9FnoslNqcbyx3jzUpo=",
         "owner": "olafkfreund",
         "repo": "nixarchy-omatheme",
-        "rev": "935bb2b25f40cd735439e99b8d6b6ef1b6601b46",
+        "rev": "5eca8d4990940e33e0723458b6d2ee41916d4695",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
+        "ref": "v0.1.0",
         "repo": "nixarchy-omatheme",
-        "rev": "935bb2b25f40cd735439e99b8d6b6ef1b6601b46",
         "type": "github"
       }
     },
