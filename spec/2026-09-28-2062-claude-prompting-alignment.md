@@ -11,10 +11,11 @@ Decisions on the intent's open questions, 2026-09-28:
 | # | Question | Decision |
 | --- | --- | --- |
 | 1 | PARR delivery | **PARR stays.** Keep the per-prompt hook, rewrite its text calmly |
-| 2 | Output style | One outcome-first line in the PARR text; disable `ponytail` |
+| 2 | Output style | **Revised:** keep `ponytail` at `ultra`; PARR owns reports |
 | 3 | Subagent caps | 4 concurrent, spawn depth 1 |
 | 4 | `~/.claude/CLAUDE.md` | Remove its PARR section; the hook carries PARR |
 | 5 | Other agents (amendment) | **One PARR text for every agent.** Rewrite `parr-protocol.txt` in place |
+| 6 | Ponytail everywhere (amendment) | Ponytail's coding principles for every agent, every repo |
 
 Decision 1 is the user's explicit choice ("we still will use PARR right?").
 It replaces the intent's recommendation (b), which would have moved PARR
@@ -33,8 +34,20 @@ single source is that file. The repo `AGENTS.md` is not changed:
   so adding PARR there would duplicate the hook.
 - It would only apply inside this repo.
 
-The subagent caps, the output-style change and the `~/.claude` edits stay
-Claude-only.
+The subagent caps and the `~/.claude/CLAUDE.md` edit stay Claude-only.
+
+**Amendment (decisions 2 revised and 6), chosen by the user:** "add
+ponytail max … so we are following that in all repos and all systems",
+with the option "Coding rules at ultra, PARR owns output". Ponytail's
+levels are `lite`, `full` and `ultra`, so max means `ultra`.
+
+- **Claude:** the `ponytail` plugin stays enabled, at `ultra` by default
+  on every host.
+- **Codex and Antigravity:** ponytail's coding principles go into their
+  generated global rules.
+- **Output:** ponytail's "code first, at most three short lines" rule
+  gives way to PARR's "lead with the outcome" for reports, reviews and
+  plans. Code changes stay terse.
 
 ## Design
 
@@ -54,7 +67,8 @@ Work in PARR: Plan, Act, Reflect, Revise.
   failed attempts, stop and ask.
 If an approved plan/ exists for the task, cite the plan step you are
 executing rather than re-planning. When you report, lead with the outcome;
-keep progress notes brief.
+keep progress notes brief. For code, follow ponytail (the smallest correct
+change); for reports, reviews and plans this reporting rule comes first.
 ```
 
 `claude-code-managed.nix` is unchanged in this respect: `parrReminderScript`
@@ -96,7 +110,12 @@ env = {
 } // (cfg.settings.env or { });
 ```
 
-A host's own `settings.env` still wins. Both variables are present in the
+The same `env` block also sets `PONYTAIL_DEFAULT_MODE = "ultra"` (decision
+2 revised). `ponytail`'s `hooks/ponytail-config.js` reads that variable
+before its config file, and falls back to `full`. It is managed, so it
+applies on every host with no per-host file.
+
+A host's own `settings.env` still wins. Both subagent variables are present in the
 installed Claude Code (2.1.283; the docs require 2.1.217 or later),
 confirmed with `strings` on the binary.
 
@@ -106,8 +125,31 @@ confirmed with `strings` on the binary.
   (MANDATORY)" section, from its heading through "Example Cycle" and the
   "COMPLETE" template. Keep the header and "Global Standards". Take a backup
   first. The file is Syncthing-synced, so the edit reaches every host.
-- **`~/.claude/settings.json`:** set `"ponytail@ponytail": false` under
-  `enabledPlugins`.
+- **`~/.claude/settings.json`:** leave `"ponytail@ponytail": true`
+  (decision 2 revised). Check the plugin is installed on razer and p510 as
+  well. `~/.claude` is Syncthing-synced, so it normally is.
+
+### 5. Ponytail's principles for Codex and Antigravity (decision 6)
+
+`home/development/agent-rules/global.md`, the global rules source for the
+Codex and Antigravity files, gains a short section:
+
+```markdown
+## Writing code (ponytail, ultra)
+
+- Question whether it needs to exist at all; skip speculative features.
+- Reuse what the codebase already has before writing anything new.
+- Prefer the standard library and native platform features over new
+  dependencies.
+- Make the shortest correct change; deletion over addition.
+- No abstractions, config or scaffolding nobody asked for.
+- Fix bugs at the root cause, where every caller routes through.
+- Never simplify away input validation, data-loss protection or
+  security.
+```
+
+Claude isn't given this section: the plugin already injects the full
+ponytail skill at `ultra`.
 
 ## Alternatives rejected
 
@@ -117,8 +159,11 @@ confirmed with `strings` on the binary.
   agents would drift apart, and the user wants one PARR for all of them.
 - **Put PARR in the repo `AGENTS.md`:** it would duplicate Claude's hook
   and apply only inside this repo, while PARR is global.
-- **Keep `ponytail` and drop output rules from PARR:** its "code first, at
-  most three lines" rule clashes with review, report and planning work.
+- **Disable `ponytail`** (this spec before decision 2 was revised): the
+  user wants its coding discipline everywhere. Its output rule is handled
+  by the PARR precedence line instead.
+- **Full ponytail ultra, including its output rules:** reviews and plans
+  would shrink to a few lines, which is the conflict this spec resolves.
 
 ## Risks
 
@@ -131,8 +176,10 @@ confirmed with `strings` on the binary.
   review and one Antigravity plan run after deploy.
 - **A subagent cap of 4 slows a genuinely wide fan-out** (Workflow runs):
   hosts can raise it through `settings.env`.
-- **Losing `ponytail`'s code-minimalism push** (coding tasks): the repo's
-  rules and review still cover over-engineering. Re-enable it if missed.
+- **`ultra` over-trims** (coding tasks): for example, it could skip a check
+  that matters. Ponytail itself keeps validation, data-loss protection
+  and security out of scope, and the global rules repeat that.
+  `PONYTAIL_DEFAULT_MODE` can drop back to `full` in one line.
 
 ## Verification
 
@@ -149,4 +196,6 @@ confirmed with `strings` on the binary.
 3. **Live, after deploy:** a fresh Claude session's reminder shows the new
    PARR text; `~/.claude/CLAUDE.md` no longer has the Expert Reasoning
    Protocol; `claude plugin list` (or the settings file) shows `ponytail`
-   disabled.
+   enabled, with its SessionStart banner showing `level: ultra`. The
+   generated `~/.codex/AGENTS.md` has the "Writing code (ponytail, ultra)"
+   section.
