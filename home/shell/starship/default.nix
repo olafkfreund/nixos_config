@@ -195,7 +195,6 @@ in
         git_metrics = {
           added_style = "bold blue";
           format = "+$added/-$deleted ";
-          style = "fg:color_fg0";
         };
 
         git_status = {
