@@ -78,7 +78,6 @@ What changes against today's text, and the guidance behind each change:
 - **Kept:** plan first, stop after two failed attempts, cite the approved
   plan step, and PARR itself.
 
-
 ### 2. The managed policy line that names PARR's phase
 
 In `modules/programs/claude-code-managed-claude.md`, "While implementing,
