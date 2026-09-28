@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2052
 intent: intent/2026-09-27-2052-deploy-branch-guard.md
 ---
