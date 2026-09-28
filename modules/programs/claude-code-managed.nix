@@ -663,6 +663,13 @@ let
 
   mergedSettings =
     (cfg.settings // {
+      # Opus 5+ delegates readily; cap it (#2062). Ponytail's coding rules at
+      # ultra on every host; PARR's reporting rule still owns output (#2062).
+      env = {
+        CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS = "4";
+        CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH = "1";
+        PONYTAIL_DEFAULT_MODE = "ultra";
+      } // (cfg.settings.env or { });
       # Per-event list concatenation (NOT shallow //) so hook sets that share
       # an event — e.g. tmux-ccm + parr on UserPromptSubmit, tmux-ccm + notify
       # on Stop/Notification — all survive instead of clobbering each other.
