@@ -93,6 +93,12 @@
       # nixarchy-voice` reported success. One node, ours, decides.
       inputs.nixarchy-voice.follows = "nixarchy-voice";
 
+      # nixarchy's NixOS module imports home-manager.nixosModules.home-manager
+      # itself. From its own pin that is a second copy of nixos/common.nix, and
+      # eval dies with "home-manager.users ... is already declared". Same file
+      # from one node = the module system dedupes it.
+      inputs.home-manager.follows = "home-manager";
+
       # hyprland tracks hyprwm main rather than nixarchy's lock. nixarchy
       # still locks 7ebf13ab (0.56.0 + aquamarine 0.15.0), whose disconnect
       # path leaves a stale CRTC and makes p620's third head flap
