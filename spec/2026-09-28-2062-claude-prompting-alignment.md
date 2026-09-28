@@ -14,16 +14,33 @@ Decisions on the intent's open questions, 2026-09-28:
 | 2 | Output style | One outcome-first line in the PARR text; disable `ponytail` |
 | 3 | Subagent caps | 4 concurrent, spawn depth 1 |
 | 4 | `~/.claude/CLAUDE.md` | Remove its PARR section; the hook carries PARR |
+| 5 | Other agents (amendment) | **One PARR text for every agent.** Rewrite `parr-protocol.txt` in place |
 
 Decision 1 is the user's explicit choice ("we still will use PARR right?").
 It replaces the intent's recommendation (b), which would have moved PARR
 into the managed policy and removed the hook.
 
+**Amendment (decision 5), given by the user when approving this spec:**
+"make this change … so the other agents can use this new version as
+well". That lifts the intent's Claude-only constraint for the PARR text
+alone. Codex and Antigravity already get PARR from their generated global
+files (`~/.codex/AGENTS.md`, `~/.gemini/AGENTS.md`), which
+`home/development/agent-rules.nix` builds from `parr-protocol.txt`, so the
+single source is that file. The repo `AGENTS.md` is not changed:
+
+- PARR is a global working method, not a rule for this repo.
+- Claude already reads `AGENTS.md` natively (#2031, `CLAUDE.md` retired),
+  so adding PARR there would duplicate the hook.
+- It would only apply inside this repo.
+
+The subagent caps, the output-style change and the `~/.claude` edits stay
+Claude-only.
+
 ## Design
 
-### 1. A Claude-only PARR text, still injected on every prompt
+### 1. One calm PARR text for every agent, still injected into Claude on every prompt
 
-New file `modules/programs/parr-reminder-claude.txt`:
+`modules/programs/parr-protocol.txt` is rewritten in place (decision 5) to:
 
 ```text
 Work in PARR: Plan, Act, Reflect, Revise.
@@ -40,10 +57,13 @@ executing rather than re-planning. When you report, lead with the outcome;
 keep progress notes brief.
 ```
 
-In `claude-code-managed.nix`, `parrReminderScript` cats this file instead
-of `parr-protocol.txt`, keeping the `<system-reminder>` wrapper. The hook,
-`parrProtocol.enable` and the three hosts' `parrProtocol.enable = true`
-are unchanged.
+`claude-code-managed.nix` is unchanged in this respect: `parrReminderScript`
+already cats `parr-protocol.txt` inside the `<system-reminder>` wrapper.
+The hook, `parrProtocol.enable` and the three hosts' `parrProtocol.enable =
+true` stay as they are. The same file keeps feeding
+`home/development/agent-rules.nix`, which adds a `## PARR protocol` heading
+and has no assertion on the PARR wording, so Codex and Antigravity get the
+new text at the next Home Manager activation.
 
 What changes against today's text, and the guidance behind each change:
 
@@ -58,9 +78,6 @@ What changes against today's text, and the guidance behind each change:
 - **Kept:** plan first, stop after two failed attempts, cite the approved
   plan step, and PARR itself.
 
-`modules/programs/parr-protocol.txt` stays as it is. It still feeds the
-Codex and Antigravity global rules through
-`home/development/agent-rules.nix`.
 
 ### 2. The managed policy line that names PARR's phase
 
@@ -97,8 +114,10 @@ confirmed with `strings` on the binary.
 
 - **Remove the hook and move PARR into the managed policy** (the intent's
   recommendation): the user wants PARR reinforced every turn.
-- **Rewrite `parr-protocol.txt` in place:** it would change Codex and
-  Antigravity too, which breaks the Claude-only constraint.
+- **A separate Claude-only PARR file** (the spec before decision 5): the
+  agents would drift apart, and the user wants one PARR for all of them.
+- **Put PARR in the repo `AGENTS.md`:** it would duplicate Claude's hook
+  and apply only inside this repo, while PARR is global.
 - **Keep `ponytail` and drop output rules from PARR:** its "code first, at
   most three lines" rule clashes with review, report and planning work.
 
@@ -108,8 +127,9 @@ confirmed with `strings` on the binary.
   (all Claude sessions): the hook still fires every prompt. Watch the next
   few multi-step tasks, and add one plain sentence if planning drops off.
   Don't bring back capitals.
-- **Codex and Antigravity drift from Claude** (the other agents): accepted
-  under the Claude-only constraint. Aligning them is a follow-up.
+- **Codex and Antigravity plan less without the forceful wording** (the
+  other agents): they get the same calm text as Claude. Check one Codex
+  review and one Antigravity plan run after deploy.
 - **A subagent cap of 4 slows a genuinely wide fan-out** (Workflow runs):
   hosts can raise it through `settings.env`.
 - **Losing `ponytail`'s code-minimalism push** (coding tasks): the repo's
@@ -123,8 +143,10 @@ confirmed with `strings` on the binary.
      `"1"`;
    - the `UserPromptSubmit` hook script outputs the new text inside
      `<system-reminder>`, with no "MANDATORY", no emoji and no "ONE step".
-2. **Codex and Antigravity untouched:** the built `~/.codex/AGENTS.md`
-   source is byte-identical before and after.
+2. **Codex and Antigravity get the new PARR:** the built `~/.codex/AGENTS.md`
+   source (and `~/.gemini/AGENTS.md`, the same store file) contains
+   "Work in PARR: Plan, Act, Reflect, Revise." and no "MANDATORY" or
+   "ONE step". Apart from the PARR section, the file is unchanged.
 3. **Live, after deploy:** a fresh Claude session's reminder shows the new
    PARR text; `~/.claude/CLAUDE.md` no longer has the Expert Reasoning
    Protocol; `claude plugin list` (or the settings file) shows `ponytail`
