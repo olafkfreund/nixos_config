@@ -126,6 +126,14 @@ the host home files, add the SSH key to `secrets.nix`, then
 Branch `<type>/<issue>-<description>`. Conventional Commits with the issue number:
 `feat(monitoring): add X (#123)`. Never commit to main — branch, PR, link the issue.
 
+Never check out a branch in `~/.config/nixos`. It is `/etc/nixos`, so every
+deploy builds whatever it has checked out. Do branch work in a
+`git worktree` (`git worktree add ../nixos-<issue> -b <branch> origin/main`)
+and leave the shared checkout on `main`. Claude Code enforces this with a
+PreToolUse hook; other agents must follow it themselves. The `Justfile`
+deploy recipes refuse a branch other than `main` (a worktree detached at
+`origin/main` counts as main) unless run with `ALLOW_BRANCH_DEPLOY=1`.
+
 ## Infrastructure notes
 
 Things the code no longer shows, so they are easy to get wrong:
