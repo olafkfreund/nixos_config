@@ -1,4 +1,5 @@
-{ inputs
+{ config
+, inputs
 , lib
 , pkgs
 , ...
@@ -104,5 +105,39 @@
   home-manager.users.olafkfreund = {
     imports = [ inputs.nixarchy.homeManagerModules.nixarchy ];
     programs.nixarchy.enable = true;
+
+    # Oma, as on p620 (the user asked for the same settings). nixarchy's
+    # home-manager module already brings the voice module in, so this only
+    # turns it on. p510 is reached over hypr-rdp, which carries no audio: from
+    # there Oma is typed to (`omarchy-voice listen say ...`), picked from
+    # Voice > Actions, or run on timers, and she speaks on p510's own outputs.
+    # Voice proper needs a microphone on p510 itself.
+    #
+    # Claude Code is her brain and must be logged in on this host once
+    # (`claude`, then /login); until then `omarchy-voice doctor` says so.
+    programs.omarchy-voice = {
+      enable = true;
+      apiKeyFile = config.age.secrets."api-openai".path;
+      elevenLabsKeyFile = config.age.secrets."api-elevenlabs".path;
+      settings = {
+        mouth.speak = true;
+        ears.barge_in = false;
+        ears.wake_word = "";
+        elevenlabs.enabled = true;
+        elevenlabs.voice_id = "7cOBG34AiHrAzs842Rdi";
+        # p620's openai.base_url/planner_model point at its local ollama
+        # (localhost:11434); p510 runs none, so they are left at the default.
+        #
+        # As on p620, at the user's choice: the shell tool is on and ssh is
+        # not denied. On this host that reaches Plex, the k3s microvms and
+        # the agent bus's Matrix homeserver, so every command it runs is
+        # still held by the confirm rules and the deny list.
+        hands.allow_shell = true;
+        hands.trace_timings = true;
+        hands.deny_patterns_remove = [ "ssh" ];
+        openai.max_turns = 40;
+      };
+      keybinding = "SUPER + M";
+    };
   };
 }
