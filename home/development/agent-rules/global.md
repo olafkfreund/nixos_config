@@ -26,3 +26,15 @@ switch`; rebuild with `nixos-rebuild`.**
 
 Issue-driven: branch per change, Conventional Commits, PR with `Closes #N`,
 don't commit to `main` or merge untested.
+
+## Writing code (ponytail, ultra)
+
+- Question whether it needs to exist at all; skip speculative features.
+- Reuse what the codebase already has before writing anything new.
+- Prefer the standard library and native platform features over new
+  dependencies.
+- Make the shortest correct change; deletion over addition.
+- No abstractions, config or scaffolding nobody asked for.
+- Fix bugs at the root cause, where every caller routes through.
+- Never simplify away input validation, data-loss protection or
+  security.

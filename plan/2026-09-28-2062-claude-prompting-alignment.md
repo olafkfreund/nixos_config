@@ -98,6 +98,25 @@ backup first:
 7. **D5 local edits** → verify: `~/.claude/CLAUDE.md` no longer contains
    "Expert Reasoning Protocol", and the backup exists.
 
+## Deviations
+
+- **Codex had its own PARR copy.** D1 assumed `agent-rules.nix` feeds
+  `parr-protocol.txt` to both Codex and Antigravity. It only fed
+  Antigravity. Codex's file was built from
+  `home/development/agent-rules/codex-standards.md`, which carried a 211-line
+  copy of the old "Expert Reasoning Protocol (MANDATORY)" (#1861). To meet
+  decision 5 (one PARR for every agent):
+  - that section is removed from `codex-standards.md` (Purpose and Global
+    Standards stay);
+  - Codex's `agentsMd` list gets the same `## PARR protocol` block and
+    `parr-protocol.txt` that Antigravity gets.
+
+  Result: both files have the new PARR and the ponytail section, and no
+  "MANDATORY" or "ONE step". The Codex file went from 429 lines to 234.
+- **Baselines** were built through the flake attribute
+  (`home.file.".codex/AGENTS.md".source`), because `nix build` on a bare
+  output path does not build it.
+
 ## Tests
 
 | # | Check | Expected |

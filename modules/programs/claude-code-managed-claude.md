@@ -25,6 +25,6 @@ Gates — never skip one, never self-approve:
 4. No implementation edits until `plan/` is `status: approved`.
 
 Record each approval as its own commit, e.g. `docs(intent): approve <slug> (#123)`.
-While implementing, the PARR PLAN phase cites the plan step being executed.
+While implementing, name the plan step you are executing (PARR's Plan phase).
 If implementation must deviate, update `plan/` in the same commit as the code.
 The PR description links all three; review checks the diff against `plan/`.
