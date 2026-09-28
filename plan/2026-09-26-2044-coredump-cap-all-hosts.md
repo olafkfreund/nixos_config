@@ -80,6 +80,18 @@ change (identical to origin/main for these values), in
 7. **Merge the PR**, once CI is green, with a squash that is pinned to the
    tested head (`--match-head-commit`).
 
+## Deviations
+
+- **Steps 6 and 7 are swapped (2026-09-28).** razer was user-reserved on the
+  bus through the evening, and `main` moved twice meanwhile (razer is now on
+  `ce3014c64`, generation 2957). Deploying the branch would have needed
+  another rebase and rebuild first, and it is exactly the branch deploy
+  #2052 is about to forbid. Instead: rebase onto `origin/main`, re-run T2
+  and T3 (unchanged: p620, razer and p510 `coredump.conf` equal the
+  verified values, and journald equals the baseline), merge on green CI, then
+  deploy razer **from main** with `just deploy-via-p620 razer` from the shared
+  checkout, bus-announced. T4 runs after that deploy.
+
 ## Tests
 
 | # | Command | Expected |
