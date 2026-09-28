@@ -19,6 +19,23 @@ _final: prev: {
     patches = (old.patches or [ ]) ++ [ ./playerctl-null-variant.patch ];
   });
 
+  # codex 0.158.0 is in nixpkgs master but not yet nixos-unstable (0.157.0).
+  # Hashes copied from master. Drop once unstable reaches 0.158.0.
+  codex = prev.codex.overrideAttrs (_old: rec {
+    version = "0.158.0";
+    src = prev.fetchFromGitHub {
+      owner = "openai";
+      repo = "codex";
+      tag = "rust-v${version}";
+      hash = "sha256-6ogqs75pG4+hxG6RqwBwJPWd3wGks2wBID/epha9+Ds=";
+    };
+    cargoDeps = prev.rustPlatform.fetchCargoVendor {
+      inherit src;
+      sourceRoot = "${src.name}/codex-rs";
+      hash = "sha256-D8+caV6Q9H2JnZNhazV1kqgV0dePh3qQyXnRMgeSYak=";
+    };
+  });
+
   # azure-cli 2.81.0 expects azure-mgmt-web v2024_11_01 which isn't packaged yet;
   # disable installCheck until nixpkgs catches up.
   azure-cli = prev.azure-cli.overrideAttrs (_old: {
