@@ -96,6 +96,23 @@ with `SendMessage`. Opus does steps 6–9, the review and all host actions.
    - The adapter must print exactly one JSON object on every path. agy
      rejects replies it can't parse, which is the telemetry plugin's bug.
 
+   Deviation: only exit 0 allows; any other guard exit denies, so a crashed
+   or missing guard fails closed.
+
+   Deviation (review, #2087): the shared guard only understands shell
+   commands, but agy's real tool set is wider than `run_command` (view_file,
+   grep_search, replace_file_content, write_to_file, call_mcp_tool,
+   send_command_input, subagent/schedule tools, and more). Judging by tool
+   name closes that gap: a fixed allow-list of safe read/edit tools
+   (view_file, grep_search, list_dir, find_by_name, replace_file_content,
+   multi_replace_file_content, write_to_file, ask_question,
+   list_permissions) passes without the guard; `run_command` requires
+   `.toolCall.args.CommandLine` to actually be a string (`jq -e … | strings`)
+   before it reaches the guard, denying a missing, wrong-case or non-string
+   `CommandLine`; every other tool name, including agy's own
+   `send_command_input` and `call_mcp_tool`, denies outright. Added matching
+   test cases to `agy-guard-adapter.test.sh`.
+
 2. `modules/programs/claude-code-managed.nix`: next to `codexGuardScript`
    (line 312), add `agyGuardScript = pkgs.writeShellScript "agy-coder-guard"`,
    built from `builtins.readFile ./agy-guard-adapter.sh` with `@jq@`
@@ -143,6 +160,33 @@ with `SendMessage`. Opus does steps 6–9, the review and all host actions.
      into one script.
    - Shell `${…}` inside Nix `''` strings must be written `''${…}`.
    - `-p` must stay last: the wrapper passes `"$@"` after every flag.
+
+   Deviation (review, #2087): two defects found in review, both fixed here
+   instead of in a later step since they touch the same file:
+   - The registered `hooks.json` `command` is no longer the bare
+     `/etc/antigravity/hooks/coder-guard` path. It is a shell gate,
+     `/bin/sh -c '[ "${AGY_CODER:-}" = 1 ] || { echo "{\"decision\":\"allow\"}"; exit 0; }; exec /etc/antigravity/hooks/coder-guard'`,
+     generated via `pkgs.formats.json` so the escaping is correct. Without
+     it, a host whose hooks.json has synced ahead of its own
+     `/etc/antigravity/hooks/coder-guard` (p510, or razer in the window
+     before `just deploy-via-p620 razer` finishes, since Syncthing carries
+     the merged hooks.json first) would deny *every* agy tool call with
+     "command not found", not just fail open on a plain (non-`agy-implement`)
+     session. The gate now decides allow/exec entirely from `AGY_CODER`
+     before ever referencing the `/etc` file. `agy-implement`'s second
+     pre-check now matches on
+     `."coder-guard".PreToolUse[]?.hooks[]?.command` containing the real
+     `/etc` path, not just the presence of the `coder-guard` key, so a stale
+     or hand-edited entry with the wrong command still fails closed.
+   - The activation script's writes used `$DRY_RUN_CMD printf … > "$hooksfile"`;
+     `$DRY_RUN_CMD` becomes `echo` on a dry run, but the `> "$hooksfile"`
+     redirection is set up by the shell regardless of which command runs, so
+     a dry run still truncated and wrote to `hooks.json`. Fixed by writing to
+     a `mktemp` file unconditionally and publishing with
+     `$DRY_RUN_CMD mv "$tmp" "$hooksfile"`, the same pattern
+     `claude-code-mcp.nix` already uses for its own JSON merge. The existing
+     `antigravityMcpSync` activation (untouched by this plan) has the same
+     bug; out of scope here.
 
 4. `home/development/agent-rules/agy-standards.md` (new) and
    `home/development/agent-rules.nix` (lines 44–47).
@@ -223,6 +267,13 @@ with `SendMessage`. Opus does steps 6–9, the review and all host actions.
      Until razer is deployed, every agy call on razer is blocked. So deploy
      razer straight after p620, and tell the user about the gap. It fails
      closed, so nothing unsafe runs.
+
+## Deviation from the second review
+
+`manage_task` came off the allowlist, because its behaviour is unknown and
+the adapter fails closed. The hooks.json activation now requires a JSON
+object; anything else, such as an array, is left untouched instead of
+aborting the whole activation under `set -e`.
 
 ## Tests
 

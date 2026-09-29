@@ -42,6 +42,7 @@ in
     (builtins.readFile ../../modules/programs/parr-protocol.txt)
   ];
   home.file.".gemini/AGENTS.md".source = agentsMd [
+    (builtins.readFile ./agent-rules/agy-standards.md)
     "## PARR protocol\n"
     (builtins.readFile ../../modules/programs/parr-protocol.txt)
   ];
