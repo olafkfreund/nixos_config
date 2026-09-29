@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2081
 spec: spec/2026-09-29-2081-codex-coder-write-access.md
 ---
