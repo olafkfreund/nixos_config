@@ -125,6 +125,17 @@ spec: spec/2026-09-29-2074-nixarchy-menu-snowflake.md
       countdown next to the button.
     - p510 read-only: `omarchy plugin list | grep menu` is unchanged.
 
+## Deviations
+
+- Steps 2–3 (nixarchy): no `.patch` file. nixarchy's
+  `pkgs/AGENTS.md#patching-upstream` makes `--replace-fail` the rule, so
+  nixarchy#1057 inserts the snowflake with one `substituteInPlace
+  --replace-fail` on the button's single `fontFamily: "omarchy"` line. It
+  fails the build just as loudly on a reworded anchor. It was approved in
+  nixarchy's own spec and plan for #1053.
+- Steps 7–11 appear as 1–5 under the nixos_config heading, because the
+  Markdown formatter renumbered that list.
+
 ## Tests
 
 | Command | Expected |
