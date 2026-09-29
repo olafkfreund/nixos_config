@@ -91,6 +91,55 @@ let
     mcpServers = sharedMcpServers;
   };
 
+  # The PreToolUse entry that wires agy's hook system to the coder guard
+  # adapter installed at /etc/antigravity/hooks/coder-guard (#2087). The
+  # command is a shell gate, not the bare path: hosts that don't have the
+  # /etc file yet (p510, or razer in the seconds before it's deployed, while
+  # Syncthing has already carried this hooks.json entry over) must not have
+  # every agy tool call fail just because the file is missing, and a plain
+  # agy session (AGY_CODER unset) must never touch the guard at all. So the
+  # gate itself decides "allow" before the guard file is ever referenced,
+  # and only execs it once AGY_CODER=1.
+  coderGuardHookEntry = (pkgs.formats.json { }).generate "antigravity-coder-guard-hook.json" {
+    "coder-guard" = {
+      PreToolUse = [
+        {
+          matcher = "*";
+          hooks = [
+            {
+              type = "command";
+              command = "/bin/sh -c '[ \"\${AGY_CODER:-}\" = 1 ] || { echo \"{\\\"decision\\\":\\\"allow\\\"}\"; exit 0; }; exec /etc/antigravity/hooks/coder-guard'";
+              timeout = 10;
+            }
+          ];
+        }
+      ];
+    };
+  };
+
+  # Launcher for a write-access agy session on an approved plan (#2087). Fails
+  # closed: refuses to run unless the guard adapter is installed and hooks.json
+  # actually registers it, so a session can never end up with write access and
+  # no guard because of drift between the /etc file and the synced hooks.json.
+  agyImplement = pkgs.writeShellScriptBin "agy-implement" ''
+    guard="/etc/antigravity/hooks/coder-guard"
+    hooks="${geminiDir}/config/hooks.json"
+
+    if [ ! -x "$guard" ]; then
+      echo "agy-implement: $guard is missing or not executable -- refusing to run with write access (#2087)." >&2
+      exit 1
+    fi
+
+    if ! ${pkgs.jq}/bin/jq -e \
+        '[."coder-guard".PreToolUse[]?.hooks[]?.command // empty] | any(contains("/etc/antigravity/hooks/coder-guard"))' \
+        "$hooks" >/dev/null 2>&1; then
+      echo "agy-implement: $hooks has no coder-guard hook registered -- refusing to run with write access (#2087)." >&2
+      exit 1
+    fi
+
+    AGY_CODER=1 exec agy --mode accept-edits --model gemini-3.8-flash-medium --sandbox "$@"
+  '';
+
 in
 {
   options.programs.antigravityConfig = {
@@ -123,6 +172,36 @@ in
   config = lib.mkIf cfg.enable {
     # Global rules (~/.gemini/AGENTS.md) come from agent-rules.nix (#1832).
     # GEMINI.md stays agent-managed.
+
+    home.packages = [ agyImplement ];
+
+    home.activation.antigravityCoderGuardHook = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      hooksfile="${geminiDir}/config/hooks.json"
+      entry="${coderGuardHookEntry}"
+      mkdir -p "${geminiDir}/config"
+
+      if [ ! -f "$hooksfile" ]; then
+        # Write via a temp file so $DRY_RUN_CMD (set to "echo" on a dry run)
+        # actually stops the write -- $DRY_RUN_CMD cmd > file still performs
+        # the redirection regardless of which command runs, so the publish
+        # step must be a plain file operation, never end in `> "$hooksfile"`.
+        tmp=$(mktemp)
+        ${pkgs.coreutils}/bin/cat "$entry" > "$tmp"
+        $DRY_RUN_CMD mv "$tmp" "$hooksfile"
+        $DRY_RUN_CMD echo "Antigravity: seeded hooks.json with the coder guard (#2087)"
+      elif ${pkgs.jq}/bin/jq -e 'type == "object"' "$hooksfile" >/dev/null 2>&1; then
+        if ${pkgs.jq}/bin/jq -e '."coder-guard"' "$hooksfile" >/dev/null 2>&1; then
+          $DRY_RUN_CMD echo "Antigravity: coder guard already registered in hooks.json"
+        else
+          tmp=$(mktemp)
+          ${pkgs.jq}/bin/jq -s '.[0] + .[1]' "$hooksfile" "$entry" > "$tmp"
+          $DRY_RUN_CMD mv "$tmp" "$hooksfile"
+          $DRY_RUN_CMD echo "Antigravity: added the coder guard to hooks.json (#2087)"
+        fi
+      else
+        $DRY_RUN_CMD echo "Antigravity: hooks.json is not a JSON object -- left untouched (#2087)"
+      fi
+    '';
 
     home.activation.antigravityMcpSync = lib.mkIf cfg.syncMcp (
       lib.hm.dag.entryAfter [ "writeBoundary" ] ''

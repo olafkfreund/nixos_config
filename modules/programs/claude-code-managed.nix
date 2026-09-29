@@ -314,6 +314,15 @@ let
   '' + builtins.replaceStrings [ "@jq@" ] [ "${pkgs.jq}/bin/jq" ]
     (builtins.readFile ./claude-coder-guard.sh));
 
+  # The same guard for agy (#2087). agy's hook payload differs from Claude
+  # Code's and Codex's, so the adapter translates it before handing the
+  # command to the shared guard; the install path is absolute /etc because
+  # hooks.json is carried by Syncthing, which cannot follow a store symlink.
+  agyGuardScript = pkgs.writeShellScript "agy-coder-guard"
+    (builtins.replaceStrings [ "@jq@" "@guard@" ]
+      [ "${pkgs.jq}/bin/jq" "${coderGuardScript}" ]
+      (builtins.readFile ./agy-guard-adapter.sh));
+
   coderAgent = pkgs.writeText "coder.md" (builtins.replaceStrings
     [ "@guard@" ] [ "${coderGuardScript}" ]
     (builtins.readFile ./claude-code-coder-agent.md));
@@ -991,5 +1000,9 @@ in
       command = "/etc/codex/hooks/coder-guard"
       timeout = 10
     '';
+
+    # agy reads ~/.gemini/config/hooks.json, which Syncthing carries between
+    # hosts, so the command path must be absolute /etc, not a store path.
+    environment.etc."antigravity/hooks/coder-guard".source = agyGuardScript;
   };
 }
