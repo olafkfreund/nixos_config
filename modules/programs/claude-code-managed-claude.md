@@ -28,3 +28,20 @@ Record each approval as its own commit, e.g. `docs(intent): approve <slug> (#123
 While implementing, name the plan step you are executing (PARR's Plan phase).
 If implementation must deviate, update `plan/` in the same commit as the code.
 The PR description links all three; review checks the diff against `plan/`.
+
+## Model split (Claude Code only)
+
+The session model (Opus) writes intent, spec and plan, and reviews. The
+`coder` agent (Sonnet) writes the code for an approved `plan/`.
+
+- Hand off when an approved `plan/` has three or more steps that edit files,
+  or touches three or more files. Below that, implement it yourself: a
+  handoff costs a fresh cache and a re-read that a small task does not repay.
+- Start one `coder` per task with the plan path and step 1, and send each
+  later step to the same agent with `SendMessage` so its cache stays warm.
+- Review with a fresh agent on `model: "opus"`, given only the plan path and
+  `git diff`, so it does not share the coder's blind spots.
+- Finish a step the coder hands back yourself, then commit and update `plan/`
+  for any deviation it reported. The PR says which steps the coder did.
+- This applies to committed, approved `plan/` files only. A plan that exists
+  only in the conversation stays with you.

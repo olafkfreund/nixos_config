@@ -87,6 +87,12 @@ exist until this change is deployed.
    - otherwise `exit 0`.
 
    It has no bypass variable.
+   Deviation found while testing: `reboot` and `poweroff` match only in
+   command position (start of the command, after `;`, `&`, `|` or `sudo`).
+   Otherwise `rg reboot docs/` would be blocked. `systemctl reboot` and
+   `systemctl poweroff` are added. The `just` deploy match is widened to
+   `[a-z0-9-]*deploy[a-z0-9-]*`, so it also catches `deploy-via-p620`. It
+   was tested against 24 blocked and 16 allowed command strings.
    → verify by `just check-syntax`.
    Traps: do not put `\b` next to an alternation group. GNU `grep -E`
    silently fails to match it, which is why `deployGuardScript` avoids it

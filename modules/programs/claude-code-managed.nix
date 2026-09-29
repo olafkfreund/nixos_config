@@ -294,6 +294,30 @@ let
     exit 0
   '';
 
+  # The coder subagent writes code for an approved plan and nothing else
+  # (#2079). Frontmatter-scoped, so it runs only while that agent is active.
+  # No bypass variable: unlike the bus guard, nothing the coder could assert
+  # makes these safe, so a blocked step goes back to the session that owns it.
+  coderGuardScript = pkgs.writeShellScript "claude-coder-guard.sh" ''
+    payload="$(cat)"
+    cmd="$(${pkgs.jq}/bin/jq -r '.tool_input.command // empty' <<<"$payload" 2>/dev/null)"
+    [ -n "$cmd" ] || exit 0
+
+    # Same rule as deployGuardScript: no \b next to an alternation group.
+    blocked='nixos-rebuild|nh[[:space:]]+os|switch-to-configuration|(^|[[:space:];&|])nhs([[:space:]]|$)|just[[:space:]]+([a-z0-9-]*deploy[a-z0-9-]*|p620|p510|razer)([[:space:]]|$)|nix-collect-garbage|nix[[:space:]]+store[[:space:]]+(gc|optimise)|(^|[;&|][[:space:]]*|sudo[[:space:]]+)(reboot|poweroff)([[:space:]]|$)|systemctl[^|;]*[[:space:]](start|stop|restart|reboot|poweroff)|git[^|;]*[[:space:]](commit|push|checkout|switch|stash|reset[[:space:]]+--hard)'
+    if printf '%s' "$cmd" | ${pkgs.gnugrep}/bin/grep -qE "$blocked"; then
+      echo "BLOCKED by the coder guard (#2079): the coder edits files and runs checks only." >&2
+      echo "Deploys, restarts, garbage collection, reboots and git history stay with the main session." >&2
+      echo "Hand this step back with what it needs." >&2
+      exit 2
+    fi
+    exit 0
+  '';
+
+  coderAgent = pkgs.writeText "coder.md" (builtins.replaceStrings
+    [ "@guard@" ] [ "${coderGuardScript}" ]
+    (builtins.readFile ./claude-code-coder-agent.md));
+
   # Keep the shared checkout on main (#2052). /etc/nixos is ~/.config/nixos, so
   # every deploy builds whatever branch it has checked out; on 2026-09-27 an
   # agent's unpushed branch left there reached p620 twice. Branch work belongs
@@ -949,5 +973,8 @@ in
     # Managed policy memory: loads in every session in every repo and cannot
     # be excluded (#1818).
     environment.etc."claude-code/CLAUDE.md".source = ./claude-code-managed-claude.md;
+
+    # Managed subagent: the Sonnet coder for approved plans (#2079).
+    environment.etc."claude-code/.claude/agents/coder.md".source = coderAgent;
   };
 }
