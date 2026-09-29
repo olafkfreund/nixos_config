@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2087
 spec: spec/2026-09-29-2087-agy-coder-write-access.md
 ---
