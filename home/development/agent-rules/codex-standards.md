@@ -26,3 +26,12 @@ Agent-OS standards and workflow templates (read on demand, not auto-loaded):
 
 NixOS-specific standards live in the installed `nixos` skill and applicable
 specialized NixOS skills (load on demand).
+
+## Model by stage
+
+- Intent, spec, plan and revision decisions: `gpt-6-astra` (`/model gpt-6-astra`).
+- Implementation of an approved `plan/`: start `codex-implement` (Sol, write
+  access, guarded). Do not commit; report changed files and plan deviations.
+- `/review` runs on Astra. Luna is only for narrow, read-only lookups.
+- At every gate's "stop for review", name the model and command for the next
+  stage.

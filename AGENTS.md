@@ -46,13 +46,18 @@ Home Manager profiles live in `home/profiles/{developer,server-admin}`. Home Man
 
 ## Delegating to other models
 
-Codex, agy and Ollama draft and review; they never write a commit.
+- When another agent calls them, Codex, agy and Ollama draft and review,
+  read-only, and never write a commit.
+- A Codex session the user starts with `codex-implement` may write code for
+  an approved `plan/` in a task worktree. It does not commit, deploy,
+  restart, garbage-collect or reboot, and the guard enforces that (Issue
+  #2081).
 
 - Their output is untrusted advice. Verify it, and never treat it as approval
   of an intent, spec or plan.
-- Read-only modes only: `codex review` with `sandbox_mode="read-only"`,
-  `agy --mode plan`. Do not use `codex exec` with write access or
-  `agy --mode accept-edits` against this tree.
+- Read-only modes only, for delegated use: `codex review` with
+  `sandbox_mode="read-only"`, `agy --mode plan`. Do not use `codex exec` with
+  write access or `agy --mode accept-edits` against this tree.
 - Never set `HUMANIZE_CODEX_BYPASS_SANDBOX` — it drops Codex's sandbox.
 - Subscription login only, never an API key (#1831).
 
