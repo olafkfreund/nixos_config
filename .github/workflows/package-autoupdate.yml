@@ -79,7 +79,8 @@ jobs:
           # — so building it proved nothing about the files this script
           # rewrites. The hosts install pkgs.customPkgs.antigravity-cli
           # (modules/ai/antigravity-cli.nix) and Users/olafkfreund/profile.nix
-          # installs the other three. See #1468.
+          # installs the other three; the py wheel has no attribute of its own and is only
+          # built inside customPkgs.user-python3 (pkgs/default.nix). See #1468.
           - pkg: antigravity
             script: ./scripts/update-antigravity.sh
             paths: pkgs/antigravity-cli pkgs/antigravity-ide pkgs/antigravity-hub pkgs/google-antigravity-py
@@ -87,7 +88,7 @@ jobs:
               .#nixosConfigurations.p620.pkgs.customPkgs.antigravity-cli
               .#nixosConfigurations.p620.pkgs.customPkgs.antigravity-ide
               .#nixosConfigurations.p620.pkgs.customPkgs.antigravity-hub
-              .#nixosConfigurations.p620.pkgs.customPkgs.google-antigravity-py
+              .#nixosConfigurations.p620.pkgs.customPkgs.user-python3
 
     steps:
       - uses: actions/checkout@v5
