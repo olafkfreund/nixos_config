@@ -209,6 +209,39 @@ cannot commit or deploy.
    Traps: check that no `nhs` or `nh os` is running first. The trust step
    is the user's, because Codex asks interactively.
 
+## Deviation after deploy: the guard moves to a managed hook
+
+The first live probe failed. `codex-implement` ran `git commit` without the
+guard firing, and only the read-only `.git` in `workspace-write` stopped
+it. Codex records trusted hooks under `[hooks.state]` in `config.toml`. On
+both hosts that table had no `pre_tool_use` entry, so Codex skipped the user
+hook even though the user had run `/hooks`. A user hook that has not been
+trusted fails open, and nothing says so.
+
+The fix moves the guard into Codex's managed layer, which the Codex docs say
+is "trusted by policy automatically". It reverses the spec's rejection of
+managed hooks. Both reasons for that rejection are gone:
+
+- the Linux path is known now (the binary reads `/etc/codex/requirements.toml`);
+- the `CODEX_CODER` check already scopes a global hook to `codex-implement`.
+
+Changes:
+
+- `modules/programs/claude-code-managed.nix` gains `codexGuardScript`, the
+  same `CODEX_CODER` wrapper around `claude-coder-guard.sh`. It is installed
+  at `/etc/codex/hooks/coder-guard`, with `/etc/codex/requirements.toml`
+  setting `[hooks] managed_dir = "/etc/codex/hooks"` and one
+  `[[hooks.PreToolUse]]` hook with no matcher.
+- `home/development/codex-cli.nix` loses the user-hook wrapper, the
+  `~/.local/bin/codex-coder-guard` file and the `codexCoderGuardHook`
+  activation entry.
+- After the deploy, the stale `codex-coder-guard` entry is deleted once
+  from `~/.codex/hooks.json` on p620 and razer.
+
+The Tests below still apply. The probe no longer needs a `/hooks` trust
+step, and the `jq` check on `hooks.json` is replaced by
+`ls -l /etc/codex/requirements.toml /etc/codex/hooks/coder-guard`.
+
 ## Tests
 
 - **Build.** `just check-syntax` passes; `just test-host p620` and
