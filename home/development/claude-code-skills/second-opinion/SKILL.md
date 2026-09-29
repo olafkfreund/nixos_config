@@ -29,7 +29,8 @@ dispatcher for arbitrary work.
 - **No path here edits a file or writes a commit.** Codex `review` is pinned
   read-only, agy stays in `--mode plan`, and Ollama's MCP tool cannot reach
   the filesystem at all. `codex exec` with write access and
-  `agy --mode accept-edits` both exist and are deliberately unused.
+  `agy --mode accept-edits` both exist and stay unused for second opinions.
+  Implementing an approved plan is `codex-implement`'s job, not this skill's.
 - **Never set `HUMANIZE_CODEX_BYPASS_SANDBOX`.** The humanize plugin's
   `ask-codex.sh` swaps in `--dangerously-bypass-approvals-and-sandbox` when
   it is `true`/`1`. This repo deploys three hosts and holds agenix secrets.

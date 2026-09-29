@@ -129,6 +129,13 @@ cannot commit or deploy.
      `review_model = "gpt-6-astra"` followed by the old contents to a temp
      file, then `$DRY_RUN_CMD install -m 0600` it back.
 
+   Deviation, from the Opus review: activation runs with
+   `set -eu -o pipefail`, so invalid JSON in `hooks.json` made `jq` fail and
+   aborted the whole home-manager activation. Both hooks.json merges, the
+   new guard entry and the existing `codexNixFormatHook`, now end
+   `> "$tmp" || true`. The `[ -s "$tmp" ]` check then leaves the file
+   alone. The stale "nothing declarative is written there" comment above
+   `home.packages` was reworded.
    → verify by `just check-syntax`.
    Traps:
    - Never `exit` in an activation entry, because they are concatenated

@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# PreToolUse guard for the coder subagent (#2079). The coder edits files and
+# PreToolUse guard for coding agents (#2079, #2081). The coder edits files and
 # runs checks; deploys, activation, store GC, power, service state and git
 # history stay with the main session. Exit 2 denies and hands the reason back.
 #
@@ -13,8 +13,8 @@ cmd="$(@jq@ -r '.tool_input.command // empty' 2>/dev/null)"
 [ -n "$cmd" ] || exit 0
 
 block() {
-  echo "BLOCKED by the coder guard (#2079): $1" >&2
-  echo "The coder edits files and runs checks only. Hand this step back to the main session." >&2
+  echo "BLOCKED by the coder guard (#2079, #2081): $1" >&2
+  echo "This session edits files and runs checks only. Hand this step back." >&2
   exit 2
 }
 
