@@ -303,6 +303,17 @@ let
     (builtins.replaceStrings [ "@jq@" ] [ "${pkgs.jq}/bin/jq" ]
       (builtins.readFile ./claude-coder-guard.sh));
 
+  # The same guard for Codex (#2081), as a managed hook: Codex trusts
+  # requirements.toml hooks by policy, while a user hook in hooks.json is
+  # skipped until someone trusts it in /hooks -- which is how the first
+  # deploy ran with no guard at all. Codex hooks are not profile-scoped, so
+  # the wrapper acts only for `codex-implement`, which sets CODEX_CODER=1;
+  # plain codex keeps committing in other repos.
+  codexGuardScript = pkgs.writeShellScript "codex-coder-guard" (''
+    [ "''${CODEX_CODER:-}" = 1 ] || exit 0
+  '' + builtins.replaceStrings [ "@jq@" ] [ "${pkgs.jq}/bin/jq" ]
+    (builtins.readFile ./claude-coder-guard.sh));
+
   coderAgent = pkgs.writeText "coder.md" (builtins.replaceStrings
     [ "@guard@" ] [ "${coderGuardScript}" ]
     (builtins.readFile ./claude-code-coder-agent.md));
@@ -965,5 +976,20 @@ in
 
     # Managed subagent: the Sonnet coder for approved plans (#2079).
     environment.etc."claude-code/.claude/agents/coder.md".source = coderAgent;
+
+    # Codex reads /etc/codex/requirements.toml; managed hook commands must sit
+    # under managed_dir. No matcher: the guard exits 0 without a command.
+    environment.etc."codex/hooks/coder-guard".source = codexGuardScript;
+    environment.etc."codex/requirements.toml".text = ''
+      [hooks]
+      managed_dir = "/etc/codex/hooks"
+
+      [[hooks.PreToolUse]]
+
+      [[hooks.PreToolUse.hooks]]
+      type = "command"
+      command = "/etc/codex/hooks/coder-guard"
+      timeout = 10
+    '';
   };
 }

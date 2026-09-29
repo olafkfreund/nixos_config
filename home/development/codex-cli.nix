@@ -20,16 +20,10 @@ let
     exit 0
   '';
 
-  guardCmd = "${config.home.homeDirectory}/.local/bin/codex-coder-guard";
-
-  # Codex PreToolUse guard (#2081), shared with the coder subagent's guard
-  # (#2079). Codex hooks are not profile-scoped, so this wrapper only runs the
-  # shared guard when CODEX_CODER=1 -- plain `codex` in other repos still commits.
-  codexCoderGuard = pkgs.writeShellScript "codex-coder-guard" (''
-    [ "''${CODEX_CODER:-}" = 1 ] || exit 0
-  '' + builtins.replaceStrings [ "@jq@" ] [ "${pkgs.jq}/bin/jq" ]
-    (builtins.readFile ../../modules/programs/claude-coder-guard.sh));
-
+  # The guard that codex-implement relies on is a managed hook in
+  # /etc/codex/requirements.toml (modules/programs/claude-code-managed.nix):
+  # managed hooks need no /hooks trust, which user hooks do and silently skip
+  # until they get it (#2081).
   codexImplement = pkgs.writeShellScriptBin "codex-implement" ''
     CODEX_CODER=1 exec "${bin}/codex" -p implement "$@"
   '';
@@ -70,7 +64,6 @@ in
 
   # Stable path, so the hooks.json entry and Codex's trust hash survive rebuilds.
   home.file.".local/bin/codex-nix-format".source = codexNixFormat;
-  home.file.".local/bin/codex-coder-guard".source = codexCoderGuard;
 
   # Implementation profile for `codex-implement` (#2081): write access, medium
   # reasoning, no network in the sandbox.
@@ -103,22 +96,6 @@ in
           | if any(.hooks.PostToolUse[].hooks[]?; .command == $cmd) then .
             else .hooks.PostToolUse += [{ matcher: "apply_patch|Edit|Write",
                    hooks: [{ type: "command", command: $cmd, timeout: 30 }] }]
-            end' > "$tmp" || true
-        if [ -s "$tmp" ] && ! ${pkgs.diffutils}/bin/cmp -s "$tmp" "$hooks"; then
-          $DRY_RUN_CMD install -m 0644 "$tmp" "$hooks"
-        fi
-        rm -f "$tmp"
-      fi
-    '';
-
-    codexCoderGuardHook = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      hooks="$HOME/.codex/hooks.json"
-      if [ -d "$HOME/.codex" ]; then
-        tmp="$(mktemp)"
-        { [ -s "$hooks" ] && cat "$hooks" || echo '{}'; } | ${pkgs.jq}/bin/jq --arg cmd "${guardCmd}" '
-          .hooks.PreToolUse //= []
-          | if any(.hooks.PreToolUse[].hooks[]?; .command == $cmd) then .
-            else .hooks.PreToolUse += [{ hooks: [{ type: "command", command: $cmd, timeout: 10 }] }]
             end' > "$tmp" || true
         if [ -s "$tmp" ] && ! ${pkgs.diffutils}/bin/cmp -s "$tmp" "$hooks"; then
           $DRY_RUN_CMD install -m 0644 "$tmp" "$hooks"
