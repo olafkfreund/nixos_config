@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2074
 intent: intent/2026-09-29-2074-nixarchy-menu-snowflake.md
 ---
