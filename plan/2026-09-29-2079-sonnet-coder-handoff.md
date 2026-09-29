@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2079
 spec: spec/2026-09-29-2079-sonnet-coder-handoff.md
 ---
