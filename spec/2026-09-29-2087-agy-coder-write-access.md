@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2087
 intent: intent/2026-09-29-2087-agy-coder-write-access.md
 ---
