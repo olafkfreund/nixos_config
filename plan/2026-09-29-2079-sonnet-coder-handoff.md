@@ -93,6 +93,18 @@ exist until this change is deployed.
    `systemctl poweroff` are added. The `just` deploy match is widened to
    `[a-z0-9-]*deploy[a-z0-9-]*`, so it also catches `deploy-via-p620`. It
    was tested against 24 blocked and 16 allowed command strings.
+   Second deviation, from the Opus review: the regex missed `nix-store --gc`,
+   `sudo -n reboot`, `bash -c reboot`, `shutdown`, `systemctl try-restart`
+   and `git rebase|merge|clean`. It also blocked `rg 'git push' docs/` and
+   `git stash list`. The guard is now a separate file,
+   `modules/programs/claude-coder-guard.sh`, loaded with `builtins.readFile`
+   and with `@jq@` replaced by the jq path. It splits the command into the
+   simple commands that run, strips wrappers (`sudo`, `env`, `timeout`,
+   `bash -c`, path prefixes), and judges each by its verb and subcommand.
+   `modules/programs/claude-coder-guard.test.sh` checks 59 blocked and 29
+   allowed commands, and exits 1 on any mismatch. It is a best-effort
+   tripwire, not a sandbox: `g=git; $g push`, or a script the coder writes
+   and then runs, still gets through.
    → verify by `just check-syntax`.
    Traps: do not put `\b` next to an alternation group. GNU `grep -E`
    silently fails to match it, which is why `deployGuardScript` avoids it
@@ -137,6 +149,8 @@ exist until this change is deployed.
      "agent-rules: the Claude-only model-split section leaked into the Codex/Antigravity rules";
    ```
 
+   Deviation: the assert checks for `Model split`, not `coder`, because
+   `hasInfix "coder"` also matches "encoder" and "decoder".
    → verify by `just check-syntax`, then build the generated Codex rules
    and count `coder` in them, expecting `0`:
 
@@ -156,7 +170,9 @@ exist until this change is deployed.
    `1. <file>:<lines>: <change> → verify by <command>` and add a following
    line, `Traps: <repo rules that apply, or "none">`. Also add one
    sentence under "Rules": a plan handed to a coder must be implementable
-   without the planner's memory.
+   without the planner's memory. Deviation: that sentence is worded
+   without the word "coder" ("or knowing what the planner knew"), because
+   the skill body is copied into the Codex rules.
    → verify by `just check-syntax`, and the step 5 build still passing
    (the skill body is copied into the Codex rules).
    Traps: `agent-rules.nix` strips the SKILL.md frontmatter by splitting on

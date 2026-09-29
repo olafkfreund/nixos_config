@@ -296,23 +296,12 @@ let
 
   # The coder subagent writes code for an approved plan and nothing else
   # (#2079). Frontmatter-scoped, so it runs only while that agent is active.
-  # No bypass variable: unlike the bus guard, nothing the coder could assert
-  # makes these safe, so a blocked step goes back to the session that owns it.
-  coderGuardScript = pkgs.writeShellScript "claude-coder-guard.sh" ''
-    payload="$(cat)"
-    cmd="$(${pkgs.jq}/bin/jq -r '.tool_input.command // empty' <<<"$payload" 2>/dev/null)"
-    [ -n "$cmd" ] || exit 0
-
-    # Same rule as deployGuardScript: no \b next to an alternation group.
-    blocked='nixos-rebuild|nh[[:space:]]+os|switch-to-configuration|(^|[[:space:];&|])nhs([[:space:]]|$)|just[[:space:]]+([a-z0-9-]*deploy[a-z0-9-]*|p620|p510|razer)([[:space:]]|$)|nix-collect-garbage|nix[[:space:]]+store[[:space:]]+(gc|optimise)|(^|[;&|][[:space:]]*|sudo[[:space:]]+)(reboot|poweroff)([[:space:]]|$)|systemctl[^|;]*[[:space:]](start|stop|restart|reboot|poweroff)|git[^|;]*[[:space:]](commit|push|checkout|switch|stash|reset[[:space:]]+--hard)'
-    if printf '%s' "$cmd" | ${pkgs.gnugrep}/bin/grep -qE "$blocked"; then
-      echo "BLOCKED by the coder guard (#2079): the coder edits files and runs checks only." >&2
-      echo "Deploys, restarts, garbage collection, reboots and git history stay with the main session." >&2
-      echo "Hand this step back with what it needs." >&2
-      exit 2
-    fi
-    exit 0
-  '';
+  # No bypass variable: nothing the coder could assert makes these safe, so a
+  # blocked step goes back to the session that owns it. Kept as a plain file
+  # so it can be tested outside Nix.
+  coderGuardScript = pkgs.writeShellScript "claude-coder-guard.sh"
+    (builtins.replaceStrings [ "@jq@" ] [ "${pkgs.jq}/bin/jq" ]
+      (builtins.readFile ./claude-coder-guard.sh));
 
   coderAgent = pkgs.writeText "coder.md" (builtins.replaceStrings
     [ "@guard@" ] [ "${coderGuardScript}" ]

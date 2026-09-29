@@ -31,7 +31,7 @@ let
       "agent-rules: the managed policy's skill sentence changed; update the replaceStrings in agent-rules.nix";
     assert lib.assertMsg (!lib.hasInfix "name: artifact-workflow" text)
       "agent-rules: SKILL.md frontmatter was not stripped";
-    assert lib.assertMsg (!lib.hasInfix "coder" text)
+    assert lib.assertMsg (!lib.hasInfix "Model split" text)
       "agent-rules: the Claude-only model-split section leaked into the Codex/Antigravity rules";
     pkgs.writeText "global-agents.md" text;
 in
