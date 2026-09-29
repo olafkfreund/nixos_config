@@ -294,6 +294,19 @@ let
     exit 0
   '';
 
+  # The coder subagent writes code for an approved plan and nothing else
+  # (#2079). Frontmatter-scoped, so it runs only while that agent is active.
+  # No bypass variable: nothing the coder could assert makes these safe, so a
+  # blocked step goes back to the session that owns it. Kept as a plain file
+  # so it can be tested outside Nix.
+  coderGuardScript = pkgs.writeShellScript "claude-coder-guard.sh"
+    (builtins.replaceStrings [ "@jq@" ] [ "${pkgs.jq}/bin/jq" ]
+      (builtins.readFile ./claude-coder-guard.sh));
+
+  coderAgent = pkgs.writeText "coder.md" (builtins.replaceStrings
+    [ "@guard@" ] [ "${coderGuardScript}" ]
+    (builtins.readFile ./claude-code-coder-agent.md));
+
   # Keep the shared checkout on main (#2052). /etc/nixos is ~/.config/nixos, so
   # every deploy builds whatever branch it has checked out; on 2026-09-27 an
   # agent's unpushed branch left there reached p620 twice. Branch work belongs
@@ -949,5 +962,8 @@ in
     # Managed policy memory: loads in every session in every repo and cannot
     # be excluded (#1818).
     environment.etc."claude-code/CLAUDE.md".source = ./claude-code-managed-claude.md;
+
+    # Managed subagent: the Sonnet coder for approved plans (#2079).
+    environment.etc."claude-code/.claude/agents/coder.md".source = coderAgent;
   };
 }

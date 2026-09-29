@@ -34,7 +34,9 @@ Rules:
   `docs(<stage>): approve <slug> (#<issue>)`.
 - Changes requested: edit, commit, ask again. Status stays `draft`.
 - The plan copies the approved spec decisions so it can be implemented without
-  opening the intent or spec. The spec file stays where it is.
+  opening the intent or spec, or knowing what the planner knew: each step names
+  its file and lines, its check, and the repo traps that apply. The spec file
+  stays where it is.
 - During implementation, cite the plan step being executed. A deviation updates
   `plan/` in the same commit as the code.
 - Open the PR linking all three files. Review compares the diff to `plan/`.
@@ -114,7 +116,8 @@ Self-contained summary of the approved decisions.
 
 ## Steps
 
-1. <file>: <change> → verify by <check>
+1. <file>:<lines>: <change> → verify by <command>
+   Traps: <repo rules that apply, or "none">
 
 ## Tests
 

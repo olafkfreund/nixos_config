@@ -5,7 +5,9 @@
 # Policy and templates are inlined so they do not depend on skill selection.
 { lib, pkgs, ... }:
 let
-  managedPolicy = builtins.readFile ../../modules/programs/claude-code-managed-claude.md;
+  # The model-split section names Claude's own agents (#2079); keep it to Claude.
+  managedPolicy = lib.head (lib.splitString "\n## Model split (Claude Code only)"
+    (builtins.readFile ../../modules/programs/claude-code-managed-claude.md));
 
   # Drop the YAML frontmatter; everything after the closing `---` is the body.
   skill = builtins.readFile ./claude-code-skills/artifact-workflow/SKILL.md;
@@ -29,6 +31,8 @@ let
       "agent-rules: the managed policy's skill sentence changed; update the replaceStrings in agent-rules.nix";
     assert lib.assertMsg (!lib.hasInfix "name: artifact-workflow" text)
       "agent-rules: SKILL.md frontmatter was not stripped";
+    assert lib.assertMsg (!lib.hasInfix "Model split" text)
+      "agent-rules: the Claude-only model-split section leaked into the Codex/Antigravity rules";
     pkgs.writeText "global-agents.md" text;
 in
 {
