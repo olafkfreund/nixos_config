@@ -94,7 +94,13 @@ exist until this change is deployed.
 
 3. `modules/programs/claude-code-managed.nix`, in the `let` block next to
    the new script: add
-   `coderAgent = pkgs.writeText "coder.md" (builtins.replaceStrings [ "@guard@" ] [ "${coderGuardScript}" ] (builtins.readFile ./claude-code-coder-agent.md));`.
+
+   ```nix
+   coderAgent = pkgs.writeText "coder.md" (builtins.replaceStrings
+     [ "@guard@" ] [ "${coderGuardScript}" ]
+     (builtins.readFile ./claude-code-coder-agent.md));
+   ```
+
    Then, inside `config = lib.mkIf cfg.enable {` (line 943), below the
    `environment.etc."claude-code/CLAUDE.md"` line (951), add
    `environment.etc."claude-code/.claude/agents/coder.md".source = coderAgent;`
@@ -119,10 +125,21 @@ exist until this change is deployed.
    the value so it stops at the heading, with
    `lib.head (lib.splitString "\n## Model split (Claude Code only)" (builtins.readFile …))`.
    Then add to `agentsMd` (next to the asserts at lines 29–32):
-   `assert lib.assertMsg (!lib.hasInfix "coder" text) "agent-rules: the Claude-only model-split section leaked into the Codex/Antigravity rules";`.
-   → verify by `just check-syntax`, then
-   `nix build --no-link --print-out-paths .#nixosConfigurations.p620.config.home-manager.users.olafkfreund.home.file.".codex/AGENTS.md".source`
-   and `grep -c coder` on the result printing `0`.
+
+   ```nix
+   assert lib.assertMsg (!lib.hasInfix "coder" text)
+     "agent-rules: the Claude-only model-split section leaked into the Codex/Antigravity rules";
+   ```
+
+   → verify by `just check-syntax`, then build the generated Codex rules
+   and count `coder` in them, expecting `0`:
+
+   ```bash
+   out=$(nix build --no-link --print-out-paths \
+     '.#nixosConfigurations.p620.config.home-manager.users.olafkfreund.home.file.".codex/AGENTS.md".source')
+   grep -c coder "$out"
+   ```
+
    Traps: `coder` does not appear anywhere in the generated rules today
    (checked against `agent-rules/*.md`, `parr-protocol.txt`, the managed
    policy and `SKILL.md`), so the assert cannot fire falsely today.
