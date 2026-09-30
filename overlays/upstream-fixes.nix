@@ -19,20 +19,20 @@ _final: prev: {
     patches = (old.patches or [ ]) ++ [ ./playerctl-null-variant.patch ];
   });
 
-  # codex 0.158.0 is in nixpkgs master but not yet nixos-unstable (0.157.0).
-  # Hashes copied from master. Drop once unstable reaches 0.158.0.
+  # codex 0.159.2 is ahead of nixos-unstable (0.157.0) and master (0.159.1).
+  # Drop once unstable reaches 0.159.2.
   codex = prev.codex.overrideAttrs (_old: rec {
-    version = "0.158.0";
+    version = "0.159.2";
     src = prev.fetchFromGitHub {
       owner = "openai";
       repo = "codex";
       tag = "rust-v${version}";
-      hash = "sha256-6ogqs75pG4+hxG6RqwBwJPWd3wGks2wBID/epha9+Ds=";
+      hash = "sha256-fYzQEit5MxsEZw/UaISMbEIsy5iaAcqb7ElEOq9eVgs=";
     };
     cargoDeps = prev.rustPlatform.fetchCargoVendor {
       inherit src;
       sourceRoot = "${src.name}/codex-rs";
-      hash = "sha256-D8+caV6Q9H2JnZNhazV1kqgV0dePh3qQyXnRMgeSYak=";
+      hash = "sha256-U20V8MkGJZd+qTOQETzqB25QJPYxJGV89LiR1kToW7A=";
     };
   });
 
