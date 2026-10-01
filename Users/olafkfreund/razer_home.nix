@@ -68,5 +68,10 @@
       "--use-angle=vulkan"
       "--disable-smooth-scrolling"
     ];
+    profileLaunchers = {
+      "google.com" = { directory = "Profile 2"; picture = true; };
+      "Synechron".directory = "Profile 3";
+      "freundcloud.com" = { directory = "Profile 5"; picture = true; };
+    };
   };
 }
