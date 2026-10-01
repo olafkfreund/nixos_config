@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2122
 intent: intent/2026-10-01-2122-chrome-profile-launchers.md
 ---
