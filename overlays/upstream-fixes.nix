@@ -51,6 +51,8 @@ _final: prev: {
   #  - cheetah3 3.4.0 installs .dist-info as "Cheetah3" not pname "cheetah3", so
   #    pythonMetadataCheckPhase throws PackageNotFoundError (blocks sabnzbd on
   #    p510). Same class as rewaita/fortune — skip the version cross-check.
+  #  - torchcodec 0.16.0's test_audio_against_cli compares its mp3 output with the
+  #    ffmpeg CLI's and fails at 8 kHz against nixpkgs' ffmpeg (blocks whisperx).
   # Drop each once upstream loosens the pin / fixes the test / renames dist-info.
   python314 = prev.python314.override (old: {
     packageOverrides = prev.lib.composeExtensions
@@ -61,6 +63,9 @@ _final: prev: {
         });
         optuna = pyprev.optuna.overridePythonAttrs (_o: { doCheck = false; });
         cheetah3 = pyprev.cheetah3.overridePythonAttrs (_o: { dontCheckPythonMetadata = true; });
+        torchcodec = pyprev.torchcodec.overridePythonAttrs (o: {
+          disabledTests = (o.disabledTests or [ ]) ++ [ "test_audio_against_cli" ];
+        });
       });
   });
 
