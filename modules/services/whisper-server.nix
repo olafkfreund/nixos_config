@@ -10,7 +10,7 @@
 #   POST http://p620:9300/inference  multipart  file=@audio.wav  →  transcript
 #
 # Designed to be cheap to run idle: the binary memory-maps the model and
-# only burns CPU when a request comes in.
+# only burns CPU when a request comes in. `vulkan = true` runs it on the GPU.
 { config
 , lib
 , pkgs
@@ -18,6 +18,7 @@
 }:
 let
   cfg = config.features.whisper-server;
+  pkg = if cfg.vulkan then pkgs.whisper-cpp-vulkan else pkgs.whisper-cpp;
 in
 {
   options.features.whisper-server = {
@@ -47,6 +48,15 @@ in
       default = true;
       description = "Open the service port on the tailscale0 interface only.";
     };
+
+    vulkan = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Use the Vulkan build and give the service the DRM render nodes.
+        Without device access it silently falls back to the CPU.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -61,13 +71,17 @@ in
       preStart = ''
         cd /var/lib/whisper
         if [ ! -f ggml-${cfg.model}.bin ]; then
-          ${pkgs.whisper-cpp}/bin/whisper-cpp-download-ggml-model ${cfg.model} .
+          ${pkg}/bin/whisper-cpp-download-ggml-model ${cfg.model} .
         fi
       '';
 
-      serviceConfig = {
+      environment = lib.mkIf cfg.vulkan {
+        MESA_SHADER_CACHE_DIR = "/var/cache/whisper";
+      };
+
+      serviceConfig = lib.mkMerge [{
         ExecStart = ''
-          ${pkgs.whisper-cpp}/bin/whisper-server \
+          ${pkg}/bin/whisper-server \
             --model /var/lib/whisper/ggml-${cfg.model}.bin \
             --host 0.0.0.0 \
             --port ${toString cfg.port} \
@@ -81,7 +95,7 @@ in
         ProtectSystem = "strict";
         ProtectHome = true;
         PrivateTmp = true;
-        PrivateDevices = true;
+        PrivateDevices = !cfg.vulkan;
         ProtectKernelTunables = true;
         ProtectKernelModules = true;
         ProtectControlGroups = true;
@@ -102,7 +116,13 @@ in
 
         Restart = "on-failure";
         RestartSec = 5;
-      };
+      }
+        (lib.mkIf cfg.vulkan {
+          DevicePolicy = "closed";
+          DeviceAllow = [ "char-drm rw" ];
+          SupplementaryGroups = [ "render" ];
+          CacheDirectory = "whisper";
+        })];
     };
 
     networking.firewall.interfaces.tailscale0 = lib.mkIf cfg.openFirewallOnTailscale {
