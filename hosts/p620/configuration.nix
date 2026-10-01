@@ -211,6 +211,7 @@ in
   features.whisper-server = {
     enable = true;
     model = "base.en";
+    vulkan = true;
   };
 
   # Meeting transcribe — p620 is BOTH a client (records its own meetings)
