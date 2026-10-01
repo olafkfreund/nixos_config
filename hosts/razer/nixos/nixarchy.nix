@@ -165,6 +165,10 @@
       agents = [ "claude" ];
     };
 
+    # Oma's whisper.cpp takes Vulkan device 0, the Intel iGPU here: 1100 ms
+    # encode, slower than the CPU. Device 1 is the RTX 3080: 7 ms. (#2113)
+    systemd.user.services.omarchy-voice.Service.Environment = [ "GGML_VK_VISIBLE_DEVICES=1" ];
+
     # Oma: speech to speech against the OpenAI Realtime API, driving Hyprland.
     #
     # The microphone starts off and only the toggle key opens it. While it is
