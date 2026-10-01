@@ -3,7 +3,7 @@
 
 keys:
   # Admin/User keys
-  - &olafkfreund age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p
+  - &olafkfreund age1twypjj94hwjeaf96kef0vfx9adg9uwucg4yjqe536fmexk3scsxq20yh6w
 
   # Host keys, derived from each machine's own SSH host key:
   #   ssh-to-age -i /etc/ssh/ssh_host_ed25519_key.pub        (on that host)
