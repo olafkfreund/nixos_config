@@ -61,9 +61,13 @@ Vulkan build logs `ggml_vulkan: No devices found` and silently uses the CPU.
 
    Traps: none.
 3. Build: `just test-host p620`. Expect no local compile of whisper-cpp (the
-   path substitutes from cache.nixos.org). Also `just test-host razer`, and
-   eval-only for p510: never build p510 without asking, and it does not enable
-   the service anyway.
+   path substitutes from cache.nixos.org). For razer and p510, compare the
+   toplevel `drvPath` against `origin/main`: identical means nothing changed,
+   which is stronger than a build and never builds p510.
+   Deviation: the plan first said `just test-host razer`; replaced by the
+   drvPath comparison during implementation.
+   Result: p620 built with 6 derivations (unit files, wrapper), no whisper
+   compile; razer and p510 drvPaths are identical to `main`.
 4. Deploy p620. This needs your go-ahead at that point. First run
    `read_new("#agents:freundcloud.org.uk")`, post the plan ("p620 deploy:
    whisper-server restart, ~5 min"), then `just quick-deploy p620` with
