@@ -93,7 +93,6 @@ in
     ];
     environment.systemPackages = [
       pkgs.OVMFFull
-      pkgs.kvmtool
       pkgs.libvirt
       pkgs.virtiofsd # virtio-fs daemon for host/VM file sharing
       # multipass: removed 2026-05-20 (dropped from nixpkgs as unmaintained;
