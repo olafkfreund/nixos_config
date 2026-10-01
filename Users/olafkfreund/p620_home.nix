@@ -108,5 +108,10 @@
       # --memory-pressure-off contradict each other, and --max_old_space_size
       # is a V8 flag Chrome ignores unless passed through --js-flags.
     ];
+    profileLaunchers = {
+      "google.com" = { directory = "Default"; picture = true; };
+      "Synechron".directory = "Profile 3";
+      "freundcloud.com" = { directory = "Profile 4"; picture = true; };
+    };
   };
 }

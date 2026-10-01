@@ -3,6 +3,7 @@
     # Desktop components
     ./terminals/default.nix
     ./terminal-apps-desktop-entries.nix
+    ./chrome-profiles.nix
 
     # Core desktop modules
     ./theme/default.nix

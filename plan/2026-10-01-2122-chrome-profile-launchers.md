@@ -15,9 +15,11 @@ spec: spec/2026-10-01-2122-chrome-profile-launchers.md
   `<slug>` = label lower-cased with `.` replaced by `-` (`google-com`,
   `synechron`, `freundcloud-com`).
   - `name = "Chrome — <label>"`
-  - `exec = "${lib.getExe' cfg.finalPackage "google-chrome-stable"} --profile-directory=\"<directory>\" %U"`
+  - `exec = "${lib.getExe' cfg.finalPackage "google-chrome-stable"} \"--profile-directory=<directory>\" %U"`
     (`finalPackage` carries the host's `commandLineArgs`; do not use
-    `cfg.package` or a bare PATH lookup)
+    `cfg.package` or a bare PATH lookup). Deviation from the spec: the quotes
+    enclose the whole flag, because the desktop-entry spec allows quoting only
+    a complete argument.
   - `icon` = `"${config.home.homeDirectory}/.config/google-chrome/<directory>/Google Profile Picture.png"`
     when `picture`, else `"google-chrome"`
   - `categories = [ "Network" "WebBrowser" ]`; no `mimeType`
@@ -58,8 +60,14 @@ spec: spec/2026-10-01-2122-chrome-profile-launchers.md
    ```bash
    nix eval --json \
      .#nixosConfigurations.p620.config.home-manager.users.olafkfreund.xdg.desktopEntries \
-     | jq 'with_entries(select(.key | startswith("chrome-profile-"))) | map_values(.exec)'
+     --apply 'e: builtins.mapAttrs (_: v: v.exec)
+       (builtins.removeAttrs e (builtins.filter
+         (n: builtins.substring 0 15 n != "chrome-profile-") (builtins.attrNames e)))'
    ```
+
+   Deviation: the plan first evaluated the whole `desktopEntries` set, which
+   fails on every host with HM's removed `extraConfig` option (unrelated to
+   this change, reproduced on p510); `--apply` selects only our keys.
 
    Traps: keep the existing `lib.mkForce` lines untouched.
 
@@ -74,7 +82,7 @@ spec: spec/2026-10-01-2122-chrome-profile-launchers.md
 - `just test-host p620` and `just test-host razer` build. razer may be built
   on p620 (`nixos-rebuild build --build-host olafkfreund@p620`) if heavy.
 - Eval `nixosConfigurations.p510.config.home-manager.users.olafkfreund.xdg.desktopEntries`
-  contains no `chrome-profile-*` key.
+  contains no `chrome-profile-*` key (step 3's `--apply` command returns `{}`).
 - After the PR merges and p620 is switched from `main`:
   `ls ~/.local/share/applications/chrome-profile-*` shows three files;
   `desktop-file-validate` passes on each; `gtk-launch chrome-profile-freundcloud-com`
