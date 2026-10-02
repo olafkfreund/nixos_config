@@ -17,10 +17,9 @@
     ./kdeconnect/default.nix
     ./slack/default.nix
     ./aerion/default.nix
-    ./obs/default.nix
     ./flameshot/default.nix
     ./screenshots/wayland-native.nix
-    ./kooha/default.nix
+    ./omareel/default.nix
     ./zathura/default.nix
     ./remotedesktop/default.nix
     ./evince/default.nix

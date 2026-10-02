@@ -14,11 +14,10 @@
     ../../desktop/zathura/default.nix # Provides desktop.zathura option
     ../../desktop/obsidian/default.nix # Provides desktop.obsidian option
     ../../desktop/flameshot/default.nix # Provides desktop.screenshots.flameshot option
-    ../../desktop/kooha/default.nix # Provides desktop.screenshots.kooha option
+    ../../desktop/omareel/default.nix # Provides desktop.screenshots.omareel option
     ../../desktop/remotedesktop/default.nix # Provides desktop.remotedesktop option
 
     # Program modules (provide programs.* options referenced by features system)
-    ../../desktop/obs/default.nix # Provides programs.obs option
     ../../desktop/evince/default.nix # Provides programs.evince option
     ../../desktop/kdeconnect/default.nix # Provides programs.kdeconnect option
     ../../desktop/slack/default.nix # Provides programs.slack option
@@ -57,11 +56,10 @@
       zathura = false; # PDF viewer - not needed on server
       obsidian = false;
       flameshot = false; # Screenshot tool - not needed
-      kooha = false; # Screen recorder - not needed
+      omareel = false; # Screen recorder - not needed
       remotedesktop = false; # Not needed for headless server
 
       # Communication and media
-      obs = false;
       evince = false; # PDF viewer - not needed on server
       kdeconnect = false;
       slack = false; # GUI communication tool - disabled
