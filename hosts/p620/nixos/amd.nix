@@ -2,11 +2,6 @@
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
-    extraPackages32 = with pkgs.driversi686Linux; [
-      # 32-bit Mesa DRI drivers for compatibility
-      mesa
-      # amdvlk removed - RADV (Mesa Vulkan) is now default
-    ];
     extraPackages = with pkgs; [
       # Mesa DRI drivers for OpenGL/EGL support
       mesa
