@@ -60,7 +60,6 @@ in
     ++ lib.optionals (cfg.media.vlc or false) [ vlc ]
     ++ lib.optionals (cfg.media.spotify or false) [ spotify ]
     ++ lib.optionals (cfg.media.discord or false) [ discord ]
-    ++ lib.optionals (cfg.media.obs or false) [ obs-studio ]
     ++ lib.optionals (cfg.media.gimp or false) [ gimp ]
     ++ lib.optionals (cfg.media.inkscape or false) [ inkscape ]
 
