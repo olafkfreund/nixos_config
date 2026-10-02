@@ -118,8 +118,8 @@ _final: prev: {
   #
   # Wrapped rather than set session-wide on purpose: QML_IMPORT_PATH is searched
   # ahead of an application's own path, so exporting it globally would offer this
-  # qtmultimedia to every Qt program on the host (kdenlive, obs), and a Qt version
-  # mismatch there fails the import. The prefix here reaches quickshell alone.
+  # qtmultimedia to every Qt program on the host, and a Qt version mismatch
+  # there fails the import. The prefix here reaches quickshell alone.
   #
   # `omarchy-launch-shell` resolves quickshell by name from PATH, so the wrapper
   # is what the session actually runs. Drop if nixpkgs gains a withMultimedia
