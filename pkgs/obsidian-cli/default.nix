@@ -41,9 +41,7 @@ buildGoModule rec {
     "-X=github.com/Yakitrak/notesmd-cli/cmd.version=${version}"
   ];
 
-  # Short alias. Deliberately `ob`, NOT `obs`: obs is OBS Studio's launcher
-  # (pkgs.obs-studio, enabled here via home/desktop/obs) and shadowing it would
-  # break screen recording. `obsidian-cli` is likewise unavailable — that name
+  # Short alias `ob`. `obsidian-cli` is unavailable — that name
   # is already taken by the CLI bundled inside pkgs.obsidian, which is a
   # different tool entirely (it drives the running desktop app and currently
   # fails on NixOS with "unable to find Obsidian").

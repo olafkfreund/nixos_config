@@ -47,7 +47,7 @@
   # GitLab TUI — terminal UI on top of the `glab` CLI (rcieri/glab-tui).
   glab-tui = pkgs.callPackage ./glab-tui { };
 
-  # Omareel screen recorder for Omarchy, with the Hyprland capture-exclusion plugin.
+  # Omareel screen recorder for Omarchy (Hyprland capture-exclusion plugin off).
   omareel = pkgs.callPackage ./omareel { };
 
   # Omgato CLI daemons (Stream Deck, Key Lights, Cam Link) for the Omarchy plugin.

@@ -29,7 +29,7 @@ stdenv.mkDerivation {
   pname = "omareel";
   inherit version src;
 
-  nativeBuildInputs = [ cmake ninja pkg-config wayland-scanner qt6.wrapQtAppsHook qt6.qtshadertools ];
+  nativeBuildInputs = [ cmake ninja pkg-config wayland-scanner qt6.wrapQtAppsHook ];
 
   buildInputs = [
     qt6.qtbase

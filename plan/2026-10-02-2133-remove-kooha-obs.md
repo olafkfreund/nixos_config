@@ -35,6 +35,15 @@ Work in the worktree `~/.config/nixos-2133`, branch
   use `--no-bar` / `--no-selfview`. Revisit this when upstream releases a
   plugin for the newer API. There is no `hyprland` package argument and no
   `osConfig` override.
+- **Deviation found at verification: Nixarchy preinstalls OBS and
+  kdenlive.** `programs.nixarchy.preinstalls` (default on, p620 and razer)
+  puts `obs-studio` and `kdenlive` in `systemPackages`, so steps 1–5 alone
+  leave both installed. Fixed with
+  `programs.nixarchy.preinstallsExclude = [ "obs-studio" "kdenlive" ];` in
+  `hosts/{p620,razer}/nixos/nixarchy.nix`. p510 has preinstalls off.
+- Review follow-ups: drop the unused `qt6.qtshadertools` from Omareel, and
+  correct the stale comments in `pkgs/default.nix` (plugin) and
+  `pkgs/obsidian-cli/default.nix` (OBS).
 - Deviation from the spec: `docs/applications/screensharing_cosmic.md`
   documents COSMIC, and Omareel is Hyprland-only, so the OBS sentence
   becomes generic ("screen recorders") instead of naming Omareel.
@@ -153,7 +162,7 @@ Work in the worktree `~/.config/nixos-2133`, branch
 - Closure check for p620 and razer:
 
   ```bash
-  nix path-info -r ./result | grep -E 'kooha|obs-studio|obs-|v4l2loopback'
+  nix path-info -r ./result | grep -E 'kooha|obs-studio|obs-|kdenlive|v4l2loopback'
   ```
 
   This prints nothing, and `grep omareel` finds the package. For p510, both greps print nothing.
