@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2133
 spec: spec/2026-10-02-2133-remove-kooha-obs.md
 ---
