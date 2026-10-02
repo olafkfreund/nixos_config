@@ -3,8 +3,6 @@
     enable = true;
     enable32Bit = true;
     extraPackages = with pkgs; [
-      # Mesa DRI drivers for OpenGL/EGL support
-      mesa
       # libglvnd - REQUIRED for COSMIC compositor (provides libEGL.so.1)
       libglvnd
       # Vulkan and video acceleration
