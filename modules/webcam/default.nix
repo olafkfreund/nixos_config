@@ -16,7 +16,6 @@ in
   };
   config = mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
-      droidcam
       better-adb-sync
     ];
   };

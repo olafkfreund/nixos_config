@@ -1,4 +1,4 @@
-{ config, pkgs, ... }: {
+{ pkgs, ... }: {
   # Boot optimizations
   boot.loader.systemd-boot = {
     enable = true;
@@ -94,12 +94,6 @@
   # boot.kernel.sysctl = {
   #   "vm.max_map_count" = 1048576; # Helps with memory-mapped files for large models
   # };
-  # OBS Virtual Cam Support - v4l2loopback setup
-  boot.kernelModules = [ "v4l2loopback" ];
-  boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
-  boot.extraModprobeConfig = ''
-    options v4l2loopback devices=3 video_nr=1,2,10 card_label="OBS Virtual Cam 1","OBS Virtual Cam 2","COSMIC Camera" exclusive_caps=1,1,1
-  '';
 
   # Blacklist nova_core to prevent conflicts with proprietary NVIDIA drivers (nixpkgs #473350)
   boot.blacklistedKernelModules = [ "nova_core" ];

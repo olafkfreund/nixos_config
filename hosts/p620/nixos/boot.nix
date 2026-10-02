@@ -32,8 +32,6 @@
     useTmpfs = false;
     cleanOnBoot = true;
   };
-  # OBS Virtual Cam Support - v4l2loopback setup
-  boot.kernelModules = [ "v4l2loopback" ];
   boot.initrd.kernelModules = [ "amdgpu" ];
   boot.blacklistedKernelModules = [ "nvidia" "nouveau" "nova_core" ];
   boot.kernelParams = [
@@ -43,11 +41,6 @@
     "rcu_nocbs=0-127" # Optimize RCU callbacks
     "numa_balancing=disable" # Can improve performance for some workloads
   ];
-  # v4l2loopback for OBS Virtual Camera support
-  boot.extraModulePackages = with pkgs.linuxPackages_latest; [ v4l2loopback ];
-  boot.extraModprobeConfig = ''
-    options v4l2loopback devices=3 video_nr=1,2,10 card_label="OBS Virtual Cam 1","OBS Virtual Cam 2","COSMIC Camera" exclusive_caps=1,1,1
-  '';
   systemd.tmpfiles.rules = [
     "f /dev/shm/scream 0660 olafkfreund qemu-libvirtd -"
     "f /dev/shm/looking-glass 0660 olafkfreund qemu-libvirtd -"

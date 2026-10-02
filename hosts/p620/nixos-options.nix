@@ -25,7 +25,7 @@ _: {
     thunderbird.enable = false;
     obsidian.enable = true;
     office.enable = true;
-    webcam.enable = true; # OBS Virtual Camera support
+    webcam.enable = true;
   };
 
   # Virtualization tools and services
