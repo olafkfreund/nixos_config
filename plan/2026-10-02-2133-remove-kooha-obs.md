@@ -19,19 +19,22 @@ Work in the worktree `~/.config/nixos-2133`, branch
   p510 file untouched.
 - kdenlive is not installed. Only the `overlays/upstream-fixes.nix` comment
   is reworded.
-- Package Omareel v0.1.0 in `pkgs/omareel/`:
-  - Build the main program with the plugin off.
-  - Build the capture-exclusion plugin separately via
-    `hyprlandPlugins.mkHyprlandPlugin`, against an injectable `hyprland`
-    argument.
-  - The wrapper sets `OMAREEL_PLUGIN_PATH` and appends ffmpeg,
-    gpu-screen-recorder and slurp to PATH with `--suffix`. Never pin
-    `hyprctl`.
+- Package Omareel v0.1.0 in `pkgs/omareel/`, with the plugin off. The
+  wrapper appends ffmpeg, gpu-screen-recorder and slurp to PATH with
+  `--suffix`. Never pin `hyprctl`.
 - Install it through an HM module that replaces Kooha's
-  (`desktop.screenshots.omareel`), using
-  `osConfig.programs.hyprland.package` as `hyprland`. The feature flag
+  (`desktop.screenshots.omareel`). The feature flag
   `kooha` becomes `omareel`, so it lands on p620 and razer and not on p510.
 - No keybinding is added.
+- **Deviation from the spec: no capture-exclusion plugin** (approver,
+  2026-10-02). Omareel v0.1.0's plugin targets an older Hyprland API, and it
+  does not compile against p620's hyprflip build (`aed4830`): it hits
+  `IPC::Socket1::SCommand`, `CLayerSurface::visible`, `CPopup` and the
+  renderer transform API. Omareel ships without the plugin, so it moves the
+  bar and the camera bubble to another monitor. On razer's single screen,
+  use `--no-bar` / `--no-selfview`. Revisit this when upstream releases a
+  plugin for the newer API. There is no `hyprland` package argument and no
+  `osConfig` override.
 - Deviation from the spec: `docs/applications/screensharing_cosmic.md`
   documents COSMIC, and Omareel is Hyprland-only, so the OBS sentence
   becomes generic ("screen recorders") instead of naming Omareel.
@@ -42,26 +45,9 @@ Work in the worktree `~/.config/nixos-2133`, branch
    - Create `pkgs/omareel/default.nix`, shaped like `pkgs/glab-tui/default.nix`.
    - Args: `lib, stdenv, fetchFromGitHub, cmake, ninja, pkg-config, wayland-scanner,
      qt6, kdePackages, libevdev, libjpeg_turbo, wayland, wayland-protocols,
-     ffmpeg, gpu-screen-recorder, slurp, hyprlandPlugins, libdrm, pixman,
-     hyprland`.
+     ffmpeg, gpu-screen-recorder, slurp`.
    - `src = fetchFromGitHub { owner = "omacom"; repo = "omareel"; rev = "v${version}"; hash = lib.fakeHash; }`.
      Build once, then paste the real hash.
-   - Bind a `plugin`:
-
-     ```nix
-     plugin = hyprlandPlugins.mkHyprlandPlugin {
-       inherit hyprland version src;
-       pluginName = "omareel-capture-exclude";
-       sourceRoot = "${src.name}/plugin";
-       nativeBuildInputs = [ cmake ];
-       buildInputs = [ libdrm pixman ];
-       cmakeFlags = [ "-DOMAREEL_HYPRLAND_HEADERS=${hyprland.dev}/include/hyprland" ];
-       meta.license = lib.licenses.mit;
-     };
-     ```
-
-     Its CMake installs into `$out/lib/omareel/`, together with the `.hash`
-     file.
    - Main derivation:
      - `nativeBuildInputs = [ cmake ninja pkg-config wayland-scanner qt6.wrapQtAppsHook qt6.qtshadertools ]`.
      - `buildInputs`: `qt6.{qtbase,qtdeclarative,qtmultimedia,qtsvg}`,
@@ -71,44 +57,25 @@ Work in the worktree `~/.config/nixos-2133`, branch
    - `postPatch`:
      - `substituteInPlace CMakeLists.txt --replace-fail /usr/share/wayland-protocols ${wayland-protocols}/share/wayland-protocols`.
      - `substituteInPlace src/core/OmarchyPaths.cpp --replace-fail /usr/share/omarchy/themes /run/current-system/sw/share/omarchy/themes`.
-   - Upstream CMake has no `install()` for the binary (the PKGBUILD copies
-     it), so write an `installPhase`:
-     - `install -Dm755 omareel $out/bin/omareel`.
-     - `ln -s omareel $out/bin/omarecord`.
-     - Install the desktop file and icons from `pkg/` the same way the
-       PKGBUILD's `package()` does (in the source tree:
-       `$src/pkg/omareel.desktop`, `pkg/omareel.svg`, `pkg/icons/`).
-   - Wrapper:
-
-     ```nix
-     qtWrapperArgs = [
-       "--set" "OMAREEL_PLUGIN_PATH" "${plugin}/lib/omareel/omareel-capture-exclude.so"
-       "--suffix" "PATH" ":" (lib.makeBinPath [ ffmpeg gpu-screen-recorder slurp ])
-     ];
-     ```
-
-   - `passthru.plugin = plugin`. `meta`: MIT, linux, `mainProgram = "omareel"`.
+   - No `installPhase`: upstream's CMake installs the binary, the
+     `omarecord` symlink, the desktop file and the icons.
+   - Wrapper: `qtWrapperArgs = [ "--suffix" "PATH" ":" (lib.makeBinPath [ ffmpeg gpu-screen-recorder slurp ]) ];`
+   - `meta`: MIT, linux, `mainProgram = "omareel"`.
    - Register it in `pkgs/default.nix` after `glab-tui` (line 48), with a
-     one-line comment:
-     `omareel = pkgs.callPackage ./omareel { };`. `hyprland` then defaults
-     to `pkgs.hyprland`.
+     one-line comment: `omareel = pkgs.callPackage ./omareel { };`.
    - Verify:
      - `nix build --impure --expr '(builtins.getFlake (toString ./.)).nixosConfigurations.p620.pkgs.customPkgs.omareel'`
-       succeeds. Then build `.plugin` the same way.
+       succeeds.
      - `result/bin/omareel help` runs.
    - Traps:
      - Do not add a flake input. This is a plain `fetchFromGitHub` package.
-     - The plugin sets `CXX_STANDARD 26`. If the stdenv's GCC rejects it,
-       stop and report.
-     - Check the `pkg/` file names in the real source before writing
-       `installPhase`.
 
 2. **Swap the Kooha HM module for Omareel.**
    - `git mv home/desktop/kooha home/desktop/omareel`.
-   - Rewrite `default.nix` with args `{ pkgs, config, lib, osConfig, ... }`
+   - Rewrite `default.nix` with args `{ pkgs, config, lib, ... }`
      and the option `desktop.screenshots.omareel.enable = mkEnableOption "Omareel screen recorder"`.
      Config:
-     `home.packages = [ (pkgs.customPkgs.omareel.override { hyprland = osConfig.programs.hyprland.package; }) ];`.
+     `home.packages = [ pkgs.customPkgs.omareel ];`.
    - Update every reference:
      - `home/desktop/default.nix:23` → `./omareel/default.nix`.
      - `home/profiles/developer/default.nix:17,59` and
@@ -189,15 +156,11 @@ Work in the worktree `~/.config/nixos-2133`, branch
   nix path-info -r ./result | grep -E 'kooha|obs-studio|obs-|v4l2loopback'
   ```
 
-  This prints nothing, and `grep omareel` finds both the package and the
-  plugin. For p510, both greps print nothing.
-- Plugin hash, per host: compare the plugin's `lib/omareel/omareel-capture-exclude.so.hash`
-  with `grep GIT_COMMIT_HASH <hyprland.dev>/include/hyprland/src/version.h`
-  for that host's `programs.hyprland.package`. They must be equal.
+  This prints nothing, and `grep omareel` finds the package. For p510, both greps print nothing.
 - Runtime (p620, after the user deploys and logs in again):
   - `omareel record --region` records and stops.
-  - `hyprctl plugin list` shows `omareel`.
-  - The recording bar is absent from `screen.mp4`.
+  - With two monitors, the recording bar is placed on the monitor not being
+    recorded.
   - `omareel export <bundle> -o /tmp/t.mp4` plays.
 
 ## Rollback
@@ -205,7 +168,3 @@ Work in the worktree `~/.config/nixos-2133`, branch
 - Before merge: close the PR and delete the branch.
 - After deploy: `git revert` the merge commit and redeploy, or boot the
   previous generation.
-- If only the plugin breaks on a future Hyprland bump: in
-  `pkgs/omareel/default.nix`, drop the `--set OMAREEL_PLUGIN_PATH` wrapper
-  arg and the `plugin` binding. Omareel then moves the overlays off the
-  recorded screen.
