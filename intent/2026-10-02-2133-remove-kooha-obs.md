@@ -1,10 +1,10 @@
 ---
-status: draft
+status: approved
 issue: 2133
 author: olafkfreund
 ---
 
-# Intent: Remove Kooha and OBS Studio
+# Intent: Replace Kooha and OBS Studio with Omareel
 
 ## Problem
 
@@ -20,6 +20,12 @@ Screen recording is already covered by Omarchy's own recorder
 Neither `kooha` nor `obs-studio` (nor any OBS plugin) is in any host's
 closure. No option, feature flag, module or package-set entry for them is
 left in the tree.
+
+Omareel (<https://github.com/omacom/omareel>) is installed on p620 and razer
+in their place: a screen recorder and editor for Omarchy with a synthetic
+cursor, auto zooms, click effects and a camera bubble. `omareel record`
+works from a keybinding, and the Hyprland capture-exclusion plugin loads so
+the recording bar and camera bubble stay out of the video.
 
 ## Affected users and systems
 
@@ -41,14 +47,10 @@ left in the tree.
   not deployed without approval.
 - No other module may still set a removed option, or evaluation fails.
 
-## Open questions
+## Decisions (approver, 2026-10-02)
 
-1. **v4l2loopback on p620 and razer.** Both load three loopback devices
-   labelled "OBS Virtual Cam 1", "OBS Virtual Cam 2" and "COSMIC Camera"
-   (`hosts/*/nixos/boot.nix`), and `webcam.enable` carries the comment
-   "OBS Virtual Camera support". Without OBS, is anything still writing to
-   those devices (droidcam, a meeting tool, the old COSMIC camera)? Options:
-   remove v4l2loopback entirely, or keep it and only drop the OBS labels.
-2. **`kdenlive`** is mentioned next to OBS in `overlays/upstream-fixes.nix`
-   (qtmultimedia comment). That comment only needs rewording; keep kdenlive
-   unless you want it gone too.
+1. v4l2loopback is removed from p620 and razer, not relabelled.
+2. kdenlive is removed too. It turns out not to be installed anywhere; only
+   a comment in `overlays/upstream-fixes.nix` names it, so that comment is
+   reworded.
+3. Omareel replaces both, on the hosts that had them (p620, razer).
