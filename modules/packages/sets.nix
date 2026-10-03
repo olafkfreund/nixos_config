@@ -195,7 +195,6 @@
     ffmpeg
     spotify
     discord
-    obs-studio
     audacity
   ];
 

@@ -99,9 +99,8 @@ in
       # flameshot: razer enables; p620 keeps off (Wayland multi-monitor issues)
       flameshot = mkDefault false;
       waylandScreenshots = mkDefault false;
-      kooha = true;
+      omareel = true;
       remotedesktop = true;
-      obs = true;
       evince = true;
       kdeconnect = false;
       slack = true;

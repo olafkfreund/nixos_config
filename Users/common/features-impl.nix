@@ -53,13 +53,12 @@ in
         screenshots = {
           flameshot.enable = cfg.desktop.flameshot;
           wayland.enable = cfg.desktop.waylandScreenshots;
-          kooha.enable = cfg.desktop.kooha;
+          omareel.enable = cfg.desktop.omareel;
         };
       };
 
       # Communication and media apps
       programs = {
-        obs.enable = cfg.desktop.obs;
         evince.enable = cfg.desktop.evince;
         kdeconnect.enable = cfg.desktop.kdeconnect;
         slack.enable = cfg.desktop.slack;

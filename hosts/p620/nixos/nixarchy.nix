@@ -60,6 +60,8 @@
   # device directly for its own key handling, which the group grants; without
   # it the session starts but never sees a keypress.
   programs.nixarchy.user = "olafkfreund";
+  # Unused preinstalls (#2133); screen recording is Omareel.
+  programs.nixarchy.preinstallsExclude = [ "obs-studio" "kdenlive" ];
   # nixarchy-menu as the Omarchy menu (#2019, #2074); nixarchy draws the
   # snowflake on its bar button.
   home-manager.users.olafkfreund.programs.nixarchy.defaultPlugins.menu = true;

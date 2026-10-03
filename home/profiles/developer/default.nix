@@ -14,11 +14,10 @@
     ../../desktop/zathura/default.nix # PDF viewer for documentation
     ../../desktop/obsidian/default.nix # Note-taking for project docs
     ../../desktop/flameshot/default.nix # Screenshots for documentation
-    ../../desktop/kooha/default.nix # Screen recording for demos
+    ../../desktop/omareel/default.nix # Screen recording for demos
     ../../desktop/remotedesktop/default.nix # Remote development access
 
     # Program modules
-    ../../desktop/obs/default.nix # Screen recording for presentations
     ../../desktop/evince/default.nix # PDF viewer for documentation
     ../../desktop/kdeconnect/default.nix # Mobile integration
     ../../desktop/slack/default.nix # Team communication
@@ -56,11 +55,10 @@
       zathura = true; # PDF viewer for documentation
       obsidian = true;
       flameshot = true; # Screenshots for documentation
-      kooha = true; # Screen recording for demos
+      omareel = true; # Screen recording for demos
       remotedesktop = true; # Remote development access
 
       # Communication and media for development
-      obs = true; # Screen recording for presentations
       evince = true; # Alternative PDF viewer
       kdeconnect = false; # Disabled - using COSMIC Connect instead
       slack = true; # Team communication

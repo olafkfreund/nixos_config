@@ -168,7 +168,7 @@ reliably than full screen sharing. Testing with Slack and Chrome has reproduced 
 consistently for some users. Another limitation is that Discord screen sharing may show a spinning
 wheel indefinitely on some hardware configurations, particularly with NVIDIA GPUs.
 
-**OBS Studio and screen recording:** For general screen recording tools like OBS Studio, use the
+**Screen recording:** Screen recorders should use the
 PipeWire source rather than attempting direct compositor access. Cosmic-comp supports DMA-BUF
 capture which provides better performance for recording tools that support it.
 

@@ -283,7 +283,7 @@ in
       thunderbird = false;
       obsidian = true;
       office = true;
-      webcam = true; # OBS Virtual Camera support
+      webcam = true;
       print = true;
     };
 
