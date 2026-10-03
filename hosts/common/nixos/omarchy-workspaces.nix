@@ -41,7 +41,10 @@
     -- by name is stable, and on both hosts it happens to give exactly the
     -- assignment the ids did (DP-1, DP-2, HDMI-A-1 / eDP-1), so nothing moves.
     local function ordered_monitors()
-      local mons = hl.get_monitors()
+      -- Counted, not ipairs: omarchy-menu-keybindings scans this file against
+      -- a stub hl whose every index returns a value, so ipairs never ends.
+      local all, mons = hl.get_monitors(), {}
+      for i = 1, #all do mons[i] = all[i] end
       table.sort(mons, function(a, b) return a.name < b.name end)
       return mons
     end
