@@ -52,7 +52,12 @@ stdenv.mkDerivation {
       --replace-fail /usr/share/omarchy/themes /run/current-system/sw/share/omarchy/themes
   '';
 
+  # Native ext-image-copy-capture under-records an idle screen (1.3 s of video
+  # from 4.4 s); without the capture-exclusion plugin it has no advantage.
   qtWrapperArgs = [
+    "--set-default"
+    "OMAREEL_CAPTURE"
+    "gsr"
     "--suffix"
     "PATH"
     ":"
