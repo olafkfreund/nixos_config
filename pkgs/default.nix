@@ -53,8 +53,6 @@
   # Omgato CLI daemons (Stream Deck, Key Lights, Cam Link) for the Omarchy plugin.
   omgato = pkgs.callPackage ./omgato { };
 
-  # Google Messages in the Omarchy bar: daemon + `.plugin` QML widget.
-
   # OmaDroid: Android phone mirroring (scrcpy/adb) from the Omarchy bar.
   omadroid = pkgs.callPackage ./omadroid { };
 

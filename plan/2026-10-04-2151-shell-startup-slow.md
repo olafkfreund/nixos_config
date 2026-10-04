@@ -165,3 +165,13 @@ Runtime steps (user state, outside the repo; on p620, then razer):
   `~/.local/state/omarchy-plugin-backup/`.
 - bar-folder: `git -C <clone> checkout main`.
 - microvm: revert the lock bump.
+
+## Review fixes (after merge of PR #2154)
+
+- Step 1: record the canonical path *before* the existence check, so a
+  missing applications dir is stored as `""`. Otherwise a dir that appears
+  and then disappears again (`nix profile install` then `remove`) rescans on
+  every later parent change, which is the original bug.
+- Step 2: `|| rm -f "$f.tmp"` so a malformed `window.json` leaves no stray
+  temp file.
+- Step 3: drop the orphaned gmessages comment in `pkgs/default.nix`.
