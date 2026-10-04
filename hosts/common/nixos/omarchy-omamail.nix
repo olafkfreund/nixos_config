@@ -12,7 +12,7 @@
       Type = "oneshot";
       ExecStart = pkgs.writeShellScript "omamail-no-restore" ''
         f="$HOME/.config/omamail/window.json"
-        ${pkgs.jq}/bin/jq '.windowOpen = false' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+        ${pkgs.jq}/bin/jq '.windowOpen = false' "$f" > "$f.tmp" && mv "$f.tmp" "$f" || rm -f "$f.tmp"
       '';
     };
     Install.WantedBy = [ "graphical-session-pre.target" ];
