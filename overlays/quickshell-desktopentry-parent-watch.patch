@@ -1,0 +1,65 @@
+--- a/src/core/desktopentrymonitor.hpp
++++ b/src/core/desktopentrymonitor.hpp
+@@ -1,7 +1,10 @@
+ #pragma once
+ 
+ #include <qfilesystemwatcher.h>
++#include <qhash.h>
+ #include <qobject.h>
++#include <qset.h>
++#include <qstring.h>
+ #include <qstringlist.h>
+ #include <qtimer.h>
+ 
+@@ -29,4 +32,6 @@
+ 
+ 	QFileSystemWatcher watcher;
+ 	QTimer debounceTimer;
++	QHash<QString, QString> canonical;
++	QSet<QString> appDirs;
+ };
+--- a/src/core/desktopentrymonitor.cpp
++++ b/src/core/desktopentrymonitor.cpp
+@@ -46,6 +46,7 @@
+ void DesktopEntryMonitor::startMonitoring() {
+ 	for (const auto& path: DesktopEntryManager::desktopPaths()) {
+ 		if (!QDir(path).exists()) continue;
++		this->canonical.insert(path, QFileInfo(path).canonicalFilePath());
+ 		addPathAndParents(this->watcher, path);
+ 		this->scanAndWatch(path);
+ 	}
+@@ -56,12 +57,32 @@
+ 	if (!dir.exists()) return;
+ 
+ 	this->watcher.addPath(dirPath);
++	this->appDirs.insert(dirPath);
+ 
+ 	auto subdirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+-	for (const auto& subdir: subdirs) this->watcher.addPath(subdir.absoluteFilePath());
++	for (const auto& subdir: subdirs) {
++		this->watcher.addPath(subdir.absoluteFilePath());
++		this->appDirs.insert(subdir.absoluteFilePath());
++	}
+ }
+ 
+-void DesktopEntryMonitor::onDirectoryChanged(const QString& /*path*/) {
++void DesktopEntryMonitor::onDirectoryChanged(const QString& path) {
++	if (this->appDirs.contains(path)) {
++		this->debounceTimer.start();
++		return;
++	}
++
++	// A parent changed. Only rescan if an applications directory now resolves elsewhere.
++	auto changed = false;
++	for (const auto& p: DesktopEntryManager::desktopPaths()) {
++		if (QFileInfo(p).canonicalFilePath() != this->canonical.value(p)) {
++			changed = true;
++			break;
++		}
++	}
++
++	if (!changed) return;
++	this->startMonitoring();
+ 	this->debounceTimer.start();
+ }
+ 

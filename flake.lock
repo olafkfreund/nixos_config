@@ -1879,11 +1879,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790293911,
-        "narHash": "sha256-vczsrNyGhtwVE7fKkW0DNBl4ewtHBY14oq7cSSHVZKY=",
+        "lastModified": 1791134215,
+        "narHash": "sha256-AhwlLypjUyZzb3QGM6+NW1MP8+/l30qZ2AXX1Bpjqts=",
         "owner": "olafkfreund",
         "repo": "nixarchy-microvm",
-        "rev": "27e5992c0a559f0d656552c565d7a05c8835ff97",
+        "rev": "b7e33b03399a68f8bcb3a756fb2d6114c7fbdd1b",
         "type": "github"
       },
       "original": {
