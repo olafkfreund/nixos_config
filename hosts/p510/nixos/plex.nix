@@ -316,11 +316,16 @@
   # 1600% = 16 of 40 threads, enforced by the kernel regardless of what Plex
   # thinks it is allowed to do. Well above what 3 NVENC transcodes need, and
   # far below the all-core stampede that tripped the PSU.
+  #
+  # Transcode segments go to the root SSD, not /mnt/media (ZJV2NZE9, failing).
+  # A bind over Plex's default path, so no Preferences.xml change is needed.
   systemd.services.plex.serviceConfig = {
     LogRateLimitIntervalSec = "30s";
     LogRateLimitBurst = 2000;
     CPUAccounting = true;
     CPUQuota = "1600%";
+    CacheDirectory = "plex-transcode";
+    BindPaths = [ "/var/cache/plex-transcode:\"${config.services.plex.dataDir}/Plex Media Server/Cache/Transcode\"" ];
   };
 
   systemd.services.nzbget = {
