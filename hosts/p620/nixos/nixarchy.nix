@@ -35,6 +35,7 @@
     ../../common/nixos/omarchy-microvm.nix
     ../../common/nixos/omarchy-gmessages.nix
     ../../common/nixos/omarchy-omadroid.nix
+    ../../common/nixos/omarchy-omamail.nix
     ../../common/nixos/omarchy-sole-hyprland.nix
     ../../common/nixos/omarchy-stylix-theme.nix
   ];
