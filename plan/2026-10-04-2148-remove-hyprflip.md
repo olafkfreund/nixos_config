@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2148
 spec: spec/2026-10-04-2148-remove-hyprflip.md
 ---
