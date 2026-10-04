@@ -159,6 +159,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # nixarchy-winvm: Windows VM panel; a plain plugin source (hosts/common/nixos/omarchy-winvm.nix).
+    nixarchy-winvm = {
+      url = "github:olafkfreund/nixarchy-winvm";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # ai-mirror: MCP server + bar indicator letting coding agents drive the
     # Omarchy desktop behind a kill switch (hosts/common/nixos/omarchy-ai-mirror.nix).
     # Tracks ai-mirror's default branch (master). Its PRs land as MERGE COMMITS,
