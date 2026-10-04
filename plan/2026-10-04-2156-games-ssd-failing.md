@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2156
 spec: spec/2026-10-04-2156-games-ssd-failing.md
 ---
