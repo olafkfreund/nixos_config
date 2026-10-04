@@ -131,6 +131,7 @@ _final: prev: {
   # blank placeholder. Both additions are scoped to this wrapper rather than the
   # session for the reason above.
   quickshell = prev.quickshell.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ./quickshell-desktopentry-parent-watch.patch ];
     nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.makeWrapper ];
     postFixup = (old.postFixup or "") + ''
       wrapProgram $out/bin/quickshell \
