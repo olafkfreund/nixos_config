@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2151
 intent: intent/2026-10-04-2151-shell-startup-slow.md
 ---
@@ -82,9 +82,11 @@ On your question: no, not every installed plugin appears in `shell.json`.
 mentions it in `bar.layout`, in `plugins[]` or as `bar.id`. First-party
 plugins are on unless they're listed in `disabledPlugins[]`. Today's file:
 
-- **oma-swiss, omaproton-vpn:** not referenced, so already off. Both are
-  hand-installed directories. Remove: delete the directory; there's nothing to
-  edit in `shell.json`.
+- **oma-swiss, omaproton-vpn:** hand-installed directories. They're not
+  enabled on the bar directly, but bar-folder hosts both: they're in its
+  `widgets` list and its `widgetSettings` in `bar.layout`. Remove: delete the
+  directory and both bar-folder references. (Correction to the first draft,
+  which said they weren't referenced.)
 - **spokenshelf:** hand-installed and listed in `disabledPlugins`. Remove:
   delete the directory and its `disabledPlugins` entry.
 - **gmessages:** Nix-installed by `hosts/common/nixos/omarchy-gmessages.nix`
@@ -102,6 +104,35 @@ The directory and `shell.json` edits are user state outside the repo. The plan
 makes them a runtime step on each host (p620 and razer, each with its own
 `~/.config/omarchy`), done with `omarchy plugin` where it offers a remove, not
 a Nix diff.
+
+### 4. Additions requested on approval (2026-10-04)
+
+**nixarchy.microvm `focusTarget of null` (63 hits).** `MicrovmView.qml`
+schedules `focusForMode` with `Qt.callLater` from six places. When the view is
+destroyed first, the deferred call runs in a dead context, where the
+`import "Model.js" as Model` binding is null. Fix in
+olafkfreund/nixarchy-microvm: return early from `focusForMode()` when `Model`
+is null. Then `nix flake update nixarchy-microvm` here (a root input).
+
+**Stale hand copies shadow the Nix-managed nixarchy plugins.** On p620,
+`nixarchy.{microvm,devenv,distrobox,flatsnap,podman}` are real directories from
+Sep 25. nixarchy never replaces a real directory, so Nix updates never reach
+them, and four of them differ from the managed version in real code. On razer
+only `nixarchy.distrobox` is a stale directory. Fix (runtime, per host): move
+each one to `~/.local/state/omarchy-plugin-backup/`, so the next Home Manager
+activation links the managed version. `nixarchy.winvm` has no managed version
+and stays.
+
+**bar-folder (54 hits).** `FolderService.qml:139` (`Component.onDestruction`)
+and `stop()` call `.destroy()` on service objects created with no parent.
+At teardown, the engine may already have released those, so the wrapper is a
+TypeError, not a QObject. Line 155 reads `root.shell` after `root` is gone.
+Fix: one `safeDestroy(o)` helper (`if (o && typeof o.destroy === "function")
+o.destroy()`) used in all four places, plus a `root &&` guard on line 155.
+The plugin is a hand-installed git clone (arikisonfire/omarchy-bar-folder):
+commit the patch on a local branch and open an upstream PR. Also remove the
+ids bar-folder still lists that are gone or being removed: omacards,
+oma-swiss, omaproton-vpn.
 
 ## Alternatives rejected
 
