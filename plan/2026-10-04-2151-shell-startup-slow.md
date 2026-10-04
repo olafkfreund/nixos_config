@@ -60,7 +60,10 @@ Repo steps (worktree `../nixos-2151`, branch `fix/2151-shell-startup-slow`):
 2. `hosts/common/nixos/omarchy-omamail.nix` (new), following the
    `omarchy-*.nix` fragment shape (`{ pkgs, ... }:` and
    `home-manager.users.olafkfreund.systemd.user.services.omamail-no-restore`):
-   - `Unit.Before = [ "graphical-session-pre.target" ]` (deviation: the plan said `graphical-session.target`, but the shell starts from `wayland-wm@`, which is only `After=graphical-session-pre.target`, so the job must hold that target).
+   - `Unit.Before = [ "graphical-session-pre.target" ]`. Deviation: the plan
+     said `graphical-session.target`, but the shell starts from `wayland-wm@`,
+     which is only `After=graphical-session-pre.target`, so the job must hold
+     that target.
    - `Unit.ConditionPathExists = "%h/.config/omamail/window.json"`.
    - `Install.WantedBy = [ "graphical-session-pre.target" ]`.
    - `Service.Type = "oneshot"`.
