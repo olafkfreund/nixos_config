@@ -22,8 +22,7 @@
 # Omarchy's own file.
 let
   # The exact build the session script and greeter invoke: whatever the host
-  # chose as programs.hyprland.package (nixarchy's by default; p620 and razer
-  # force hyprflip's, see hyprland-from-hyprflip.nix).
+  # chose as programs.hyprland.package (nixarchy's).
   hyprland = config.programs.hyprland.package;
 in
 {
