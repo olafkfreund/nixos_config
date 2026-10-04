@@ -54,7 +54,6 @@
   omgato = pkgs.callPackage ./omgato { };
 
   # Google Messages in the Omarchy bar: daemon + `.plugin` QML widget.
-  gmessages-omarchy = pkgs.callPackage ./gmessages-omarchy { };
 
   # OmaDroid: Android phone mirroring (scrcpy/adb) from the Omarchy bar.
   omadroid = pkgs.callPackage ./omadroid { };
