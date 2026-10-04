@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2151
 spec: spec/2026-10-04-2151-shell-startup-slow.md
 ---
