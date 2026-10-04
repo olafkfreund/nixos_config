@@ -62,44 +62,11 @@ in
     vmImageDir = "/mnt/data/vmtest";
     enable = true;
 
-    # /mnt/games (/dev/sdb1, ext4, non-rotational, 625 GB free), NOT the root
-    # filesystem. Two reasons, and the second is the one that bites:
-    #
-    #   /              916 GB, 193 GB free, NVMe   <- also the nix store
-    #   /mnt/games     938 GB, 625 GB free, SSD
-    #
-    # A 16 GB VM install repeated across two concurrent runners is the write
-    # pattern that took p510's root filesystem to 121 MB free and killed CI
-    # with an error four levels above the cause (#1643). p620 has more headroom
-    # than p510 did, which makes this cheap insurance rather than a rescue.
-    #
-    # Read the tradeoff before copying this to a third host: there is one nix
-    # daemon, so this moves EVERY build on p620 off the NVMe root onto a SATA
-    # SSD, and because /nix/store stays on /, build output is now copied across
-    # filesystems rather than renamed. That cost is real and it applies to
-    # ordinary work too -- razer's toplevel is built here. It is accepted
-    # deliberately: a slower build is recoverable, a wedged hour-long VM test
-    # on a full root filesystem is not, and it does not announce itself as a
-    # disk problem.
-    buildDir = "/mnt/games/nix-build";
-
-    # Four since #1739, raised from two because the queue became the complaint:
-    # p510 left the pool (#1737), so this host now carries the whole
-    # `nixos`/`kvm`/`big` label set alone, and both its runners were observed
-    # busy simultaneously the moment that happened.
-    #
-    # Sized against what a job actually asks for, which is twice what it looks
-    # like: install-check runs the install and free-space VMs in ONE nix
-    # invocation so they boot concurrently, each memorySize 6144, cores 4,
-    # diskSize 32768. So a job is 12 GB and 8 cores, and four jobs is eight VMs
-    # -- 48 GB and 32 cores, against 128 cores and 251 GB (145 GB available
-    # with the desktop running). Disk is the tighter of the two: ~128 GB of VM
-    # images at peak against 590 GB free on /mnt/games.
-    #
-    # The old note here said the limit is not cores but the interactive
-    # desktop, and that still governs. 48 GB of 145 leaves the workstation
-    # intact; this is not headroom to spend again without measuring.
-    instances = 4;
+    # /mnt/games SSD is failing (Issue #2156), so builds use the NVMe root
+    # (208 GB free). Two runners peak at about 64 GB; restore four only after
+    # the SSD is replaced and the peak is measured.
+    buildDir = "/var/lib/nix-build";
+    instances = 2;
   };
 
   # Consolidated networking configuration
@@ -479,17 +446,15 @@ in
   modules.containers.k3d = {
     enable = true;
 
-    # /mnt/games (/dev/sdb1, ext4, 638GB free) is the roomiest filesystem on
-    # this host and a different spindle from both / (nvme0n1, where Docker's
-    # containerd store lives) and /mnt/data (sda1). Keeps PV IOPS off the
-    # root NVMe.
+    # /mnt/data is a separate disk from /; moved off the failing sda
+    # (/mnt/games, Issue #2156).
     #
     # VERIFY AFTER FIRST CREATE that the containers actually bind this path:
     #   docker inspect k3d-factory-server-0     #     --format '{{range .Mounts}}{{.Source}} -> {{.Destination}}{{println}}{{end}}'
     # On p510 this setting never took effect — the containers predate the
     # change and k3d does not re-bind an existing container, so the cluster
     # has been writing to the module default the whole time.
-    storageDir = "/mnt/games/k3d/storage";
+    storageDir = "/mnt/data/k3d/storage";
 
     argocd.enable = true;
     tailscaleAuthKey.enable = true;
