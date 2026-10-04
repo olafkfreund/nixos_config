@@ -61,6 +61,8 @@ and `exec`, and add:
   boot for the default 90 s.
 - `x-systemd.mount-timeout=60s`: an fsck or a journal replay that hangs
   doesn't hang boot.
+- `noatime`: reads don't write access times. On 2026-10-04 a `du` alone
+  aborted the journal and flipped the fs read-only through atime updates.
 
 ### 4. A stalled sda can't block writes to other disks
 
