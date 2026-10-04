@@ -63,8 +63,10 @@ p620 only:
 
 ## Open questions
 
-1. **k3d storage:** how much is there, and is k3d on p620 still in use? Move
-   it to the NVMe, or drop it? The size measurement is still running.
+1. **k3d storage:** k3d is active on p620 (`k3d-cluster-bootstrap` ran at
+   boot) and holds 34 GB on sda. Move it to the NVMe (it fits in the 208 GB
+   free, next to the build dir), or decide that k3d on p620 is no longer
+   needed?
 2. **Mount at boot:** keep mounting sda (`nofail` plus a short device
    timeout, so a dead drive can't hold up boot), or stop mounting it at boot
    (`noauto`, mounted by hand) until it's replaced?
