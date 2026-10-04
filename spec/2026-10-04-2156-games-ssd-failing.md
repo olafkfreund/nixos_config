@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2156
 intent: intent/2026-10-04-2156-games-ssd-failing.md
 ---
