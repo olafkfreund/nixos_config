@@ -62,11 +62,16 @@ in
     vmImageDir = "/mnt/data/vmtest";
     enable = true;
 
-    # /mnt/games (/dev/sdb1, ext4, non-rotational, 625 GB free), NOT the root
+    # /mnt/data (ext4, non-rotational, 517 GB free), NOT the root
     # filesystem. Two reasons, and the second is the one that bites:
     #
-    #   /              916 GB, 193 GB free, NVMe   <- also the nix store
-    #   /mnt/games     938 GB, 625 GB free, SSD
+    #   /              916 GB, 208 GB free, NVMe   <- also the nix store
+    #   /mnt/data      938 GB, 517 GB free, SSD
+    #
+    # It was /mnt/games until 2026-10-04, when that disk started failing:
+    # write commands timing out at 180 s and ext4 aborting its journal twice
+    # within fifteen minutes of a remount, which took every CI install with it.
+    # Device letters move between boots, so name the disk by mount point.
     #
     # A 16 GB VM install repeated across two concurrent runners is the write
     # pattern that took p510's root filesystem to 121 MB free and killed CI
@@ -81,7 +86,7 @@ in
     # deliberately: a slower build is recoverable, a wedged hour-long VM test
     # on a full root filesystem is not, and it does not announce itself as a
     # disk problem.
-    buildDir = "/mnt/games/nix-build";
+    buildDir = "/mnt/data/nix-build";
 
     # Four since #1739, raised from two because the queue became the complaint:
     # p510 left the pool (#1737), so this host now carries the whole
@@ -94,7 +99,7 @@ in
     # diskSize 32768. So a job is 12 GB and 8 cores, and four jobs is eight VMs
     # -- 48 GB and 32 cores, against 128 cores and 251 GB (145 GB available
     # with the desktop running). Disk is the tighter of the two: ~128 GB of VM
-    # images at peak against 590 GB free on /mnt/games.
+    # images at peak against 517 GB free on /mnt/data.
     #
     # The old note here said the limit is not cores but the interactive
     # desktop, and that still governs. 48 GB of 145 leaves the workstation
