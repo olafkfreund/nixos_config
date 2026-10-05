@@ -20,7 +20,7 @@
 
   boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usb_storage" "usbhid" "sd_mod" ];
   boot.initrd.kernelModules = [ "amdgpu" ];
-  boot.kernelModules = [ "kvm-amd" ];
+  boot.kernelModules = [ "kvm-amd" "bfq" ]; # bfq: the nvme0n1 udev rule below can only select a loaded scheduler
   boot.extraModulePackages = [ ];
 
   fileSystems."/" = {
