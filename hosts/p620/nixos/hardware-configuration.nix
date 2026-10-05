@@ -46,6 +46,7 @@
       "noatime"
       "x-systemd.device-timeout=10s"
       "x-systemd.mount-timeout=60s"
+      "X-fstrim.notrim" # the weekly trim crawled on this drive for 10 h
     ];
   };
 
@@ -69,6 +70,8 @@
 
     # Automatically set 'none' scheduler for non-rotational drives (SSDs)
     ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="none"
+    # BFQ on the NVMe so I/O priorities apply; CI VM installs otherwise starve the desktop.
+    ACTION=="add|change", KERNEL=="nvme0n1", ATTR{queue/scheduler}="bfq"
   '';
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
