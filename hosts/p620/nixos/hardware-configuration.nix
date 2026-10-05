@@ -60,6 +60,17 @@
     ];
   };
 
+  # BIWIN M100 1TB SATA SSD for source code (Issue #2165)
+  fileSystems."/mnt/code" = {
+    device = "/dev/disk/by-uuid/bdd8461e-7d6c-42b6-9cfe-39967825dd42";
+    fsType = "ext4";
+    options = [
+      "nofail"
+      "noatime"
+      "x-systemd.device-timeout=10s"
+    ];
+  };
+
   swapDevices = [ ];
 
   # SSD I/O scheduler optimization
