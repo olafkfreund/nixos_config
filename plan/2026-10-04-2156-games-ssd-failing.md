@@ -106,3 +106,24 @@ changes are disruptive):
 - Revert the PR and redeploy. The old paths still exist.
 - k3d: the old storage is untouched on sda; recreate with the old
   `storageDir`.
+
+## Follow-up (2026-10-05): I/O contention after the build dir moved to the NVMe
+
+Measured on p620:
+
+- Load was about 33 while the CPU was 91% idle; I/O pressure "full" was 38%
+  (avg300).
+- Two nixarchy install-check VMs wrote 16 GB each into `/var/lib/nix-build`.
+  The NVMe (Kingston NV2, QLC with no DRAM) sat at 100% util, 677 ms
+  w_await, queue 182, and its jbd2 thread was in D state.
+- Separately, `fstrim.service` had run for 9 h 48 min, crawling over sda.
+
+Changes:
+
+- `/mnt/games` gets `X-fstrim.notrim`, so the weekly trim skips the failing
+  drive.
+- A udev rule sets the BFQ scheduler on `nvme0n1`. With `none`, I/O
+  priorities and `IOWeight` have no effect.
+- `nix.daemonIOSchedClass = "best-effort"` with priority 7. Builds and the
+  CI VMs they spawn yield to the desktop. Not `idle`, because that can
+  starve the install checks' 30-minute timeout.

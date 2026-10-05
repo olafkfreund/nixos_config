@@ -57,6 +57,12 @@ in
   # `nixos`/`kvm`/`big`, so GitHub hands a job to whichever is free. That is the
   # point -- p510 alone could take two jobs, and a release build owning it for
   # hours is what made the install check go a day without a CI result.
+  # Lowest best-effort I/O priority for builds and the CI VMs they spawn (BFQ,
+  # see hardware-configuration.nix). Not "idle": that starves the install
+  # checks' 30-minute timeout while syncthing and k3s keep the disk busy.
+  nix.daemonIOSchedClass = "best-effort";
+  nix.daemonIOSchedPriority = 7;
+
   services.nixarchy-runner = {
     # VM images agents leave here; the module prunes old ones (#1809).
     vmImageDir = "/mnt/data/vmtest";
