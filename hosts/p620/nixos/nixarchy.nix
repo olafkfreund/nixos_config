@@ -33,6 +33,7 @@
     ../../common/nixos/omarchy-meet-binds.nix
     ../../common/nixos/omarchy-ai-mirror.nix
     ../../common/nixos/omarchy-microvm.nix
+    ../../common/nixos/omarchy-winvm.nix
     ../../common/nixos/omarchy-omadroid.nix
     ../../common/nixos/omarchy-omamail.nix
     ../../common/nixos/omarchy-sole-hyprland.nix
