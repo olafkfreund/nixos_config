@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2187
 intent: intent/2026-10-06-2187-factory-cli-creds-stale.md
 ---
@@ -114,3 +114,8 @@ when `factory-cli-creds` is absent:
   has an expired token and against a valid one, and it must pick the later
   expiry. Test it on a copy, not by deleting the live Secret.
 - `just test-host p620` builds.
+
+## Approval
+
+Approved 2026-10-06, including the deviation in decision 1: a dedicated
+factory `claude auth login`, not the host credential.
