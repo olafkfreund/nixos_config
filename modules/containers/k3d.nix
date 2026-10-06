@@ -809,6 +809,10 @@ in
       "d /var/lib/k3d-${cfg.clusterName} 0755 root root - -"
     ];
 
+    # Docker creates a missing bind source as an empty dir: without the PV disk
+    # the node would start against empty volumes (Issue #2189).
+    systemd.services.docker.unitConfig.RequiresMountsFor = [ cfg.storageDir ];
+
     systemd.services.k3d-cluster-bootstrap = {
       description = "k3d cluster bootstrap (create cluster, write kubeconfig, apply GitOps)";
 
@@ -850,6 +854,8 @@ in
       unitConfig = {
         StartLimitIntervalSec = 600;
         StartLimitBurst = 5;
+        # Never create the cluster against empty PV dirs on / (Issue #2189).
+        RequiresMountsFor = [ cfg.storageDir ];
       };
 
       environment = {
