@@ -86,7 +86,12 @@ option, which adds config for no gain.
       `kubectl get pods -A -o jsonpath='{..image}' | tr ' ' '\n' | sort -u | xargs -n1 docker manifest inspect`.
       Export with `ctr` any image that fails, and stop if one cannot be
       exported.
-   3. Refresh the snapshot: `k3d-pv-state snapshot /var/lib/k3d-factory/pv-snapshot.json`.
+   3. Refresh the PV snapshot:
+      `k3d-pv-state snapshot /var/lib/k3d-factory/pv-snapshot.json`. Then
+      run `systemctl start factory-cli-creds-snapshot` and check that the
+      snapshot file's mtime is now. This is a deviation added after the
+      #2187 review: a recreate must seed the credential's current refresh
+      token, not one the broker has already spent.
       Check that its count is 15 (current Bound PVs).
    4. Record pre-move facts for verification: database names and sizes
       (`psql -l`), PVC names, and `du -s` of each `pvc-*` directory.
