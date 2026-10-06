@@ -78,6 +78,7 @@ let
     (concatStringsSep "\n" (map (r: "nameserver ${r}") cfg.resolvers) + "\n");
   resolvStateFile = "/var/lib/k3d-${cfg.clusterName}/resolv.conf";
   pvSnapshot = "/var/lib/k3d-${cfg.clusterName}/pv-snapshot.json";
+  snapshotFile = "/var/lib/k3d-${cfg.clusterName}/factory-cli-creds.json";
 
   # Snapshot the cluster's Bound PVs, or restore them on a fresh cluster as
   # pre-bound volumes (claimRef without uid) so each PVC ArgoCD creates binds
@@ -378,6 +379,15 @@ let
       #     the new value takes effect on the next bootstrap restart.
       #     See #807 for design rationale.
       kubectl create namespace factory --dry-run=client -o yaml | kubectl apply -f -
+      # Claude expiresAt (ms) of a Secret manifest, 0 if unreadable.
+      seed_expiry() {
+        local v
+        v=$(kubectl apply --dry-run=client -o json -f "$1" 2>/dev/null \
+          | jq -r '.data["claude-credentials.json"] // empty' \
+          | base64 -d 2>/dev/null \
+          | jq -r '.claudeAiOauth.expiresAt // 0' 2>/dev/null)
+        echo "''${v:-0}"
+      }
       for slot in \
         ${concatStringsSep " " (map (n: "factory-secret-${n}") [
           "cloudflared-factory"
@@ -431,13 +441,30 @@ let
           if [ "$seed_only" = true ] && kubectl -n factory get secret "$name" >/dev/null 2>&1; then
             echo "[k3d-bootstrap] factory/$name exists; NOT overwriting (cluster-rotated, seed-only)"
           else
+            src=agenix
+            if [ "$seed_only" = true ]; then
+              # Seed from the freshest of the agenix slot and the root-written
+              # snapshot of the live Secret (factory-cli-creds-snapshot).
+              seed_exp=$(seed_expiry "$f")
+              snap_exp=0
+              if [ -r "${snapshotFile}" ]; then snap_exp=$(seed_expiry "${snapshotFile}"); fi
+              if [ "$snap_exp" -gt "$seed_exp" ]; then
+                f="${snapshotFile}"
+                seed_exp="$snap_exp"
+                src="snapshot (expires $(date -d "@$((seed_exp / 1000))"))"
+              fi
+              if [ "$seed_exp" -le "$(( $(date +%s) * 1000 ))" ]; then
+                echo "[k3d-bootstrap] ERROR: factory-cli-creds seed expired at $(date -d "@$((seed_exp / 1000))");" \
+                     "re-seed the Claude credential (plan 2026-10-06-2187 steps 1-3)"
+              fi
+            fi
             # -n factory pins the target namespace; the extracted Secret
             # manifests have metadata.namespace stripped (yq during
             # extraction), so without this flag kubectl would default to
             # whichever namespace the kubeconfig has set (`default`),
             # silently creating duplicates outside factory.
             kubectl apply -n factory -f "$f" >/dev/null \
-              && echo "[k3d-bootstrap] Applied factory/$slot from agenix" \
+              && echo "[k3d-bootstrap] Applied factory/$name from $src" \
               || echo "[k3d-bootstrap] WARN: apply of $slot failed (continuing)"
           fi
         else
@@ -972,6 +999,60 @@ in
         OnCalendar = "daily";
         Persistent = true;
         RandomizedDelaySec = "30m";
+      };
+    };
+
+    # Keep a root-only copy of the live (cluster-rotated) factory-cli-creds
+    # so a cluster recreate seeds from it, not the stale agenix slot. The
+    # bootstrap picks whichever has the later Claude expiry. Issue #2187.
+    systemd.services.factory-cli-creds-snapshot = mkIf cfg.argocd.enable {
+      description = "Snapshot live factory/factory-cli-creds for bootstrap seeding";
+      after = [ "k3d-cluster-bootstrap.service" ];
+      path = with pkgs; [ kubectl jq coreutils ];
+      environment.KUBECONFIG = cfg.kubeconfigPath;
+      serviceConfig = {
+        Type = "oneshot";
+        User = "root";
+        ExecStart = pkgs.writeShellScript "factory-cli-creds-snapshot" ''
+          set -uo pipefail
+          umask 077
+          snap="${snapshotFile}"
+          live=$(kubectl -n factory get secret factory-cli-creds -o json 2>/dev/null) \
+            || { echo "[creds-snapshot] cluster unreachable; skipping"; exit 0; }
+          exp() { jq -r '.data["claude-credentials.json"] // empty' | base64 -d 2>/dev/null | jq -r '.claudeAiOauth.expiresAt // 0' 2>/dev/null; }
+          new=$(printf '%s' "$live" | exp)
+          new=''${new:-0}
+          old=0
+          if [ -r "$snap" ]; then old=$(exp < "$snap"); fi
+          old=''${old:-0}
+          now=$(( $(date +%s) * 1000 ))
+          if [ "$new" -le "$now" ]; then
+            echo "[creds-snapshot] live credential expired ($new); skipping"; exit 0
+          fi
+          if [ "$new" -le "$old" ]; then
+            echo "[creds-snapshot] live expiry $new not newer than snapshot $old; skipping"; exit 0
+          fi
+          mkdir -p "$(dirname "$snap")"
+          if printf '%s' "$live" \
+            | jq '{apiVersion,kind,type,metadata:{name:.metadata.name},data}' > "$snap.tmp" \
+            && chmod 0400 "$snap.tmp" \
+            && mv "$snap.tmp" "$snap"; then
+            echo "[creds-snapshot] saved; expires $(date -d "@$((new / 1000))")"
+          else
+            echo "[creds-snapshot] ERROR: could not write $snap" >&2
+            rm -f "$snap.tmp"
+            exit 1
+          fi
+        '';
+      };
+    };
+
+    systemd.timers.factory-cli-creds-snapshot = mkIf cfg.argocd.enable {
+      description = "Periodic factory-cli-creds snapshot";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "*:0/5";
+        Persistent = true;
       };
     };
 
