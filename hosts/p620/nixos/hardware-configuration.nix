@@ -71,6 +71,38 @@
     ];
   };
 
+  # Fanxiang S501Q 1TB NVMe (Issue #2182). No nofail: a missing disk must stop
+  # the boot, not log in to an empty home on /.
+  fileSystems."/home" = {
+    device = "/dev/disk/by-uuid/e31728b8-d79c-41e1-934c-af9b576f4348";
+    fsType = "ext4";
+    options = [ "noatime" ];
+  };
+
+  # 480GB SATA SSD: nix build-dir and nixarchy runner VMs (Issue #2182).
+  # nofail on purpose: builds fall back to / so the host can still rebuild.
+  fileSystems."/var/lib/nix-build" = {
+    device = "/dev/disk/by-uuid/c084fd70-c039-4724-8ebc-0cc78113eb30";
+    fsType = "ext4";
+    options = [
+      "nofail"
+      "noatime"
+      "x-systemd.device-timeout=10s"
+    ];
+  };
+
+  # Micron 256GB SATA SSD: Docker data-root (Issue #2182). Docker requires it,
+  # see configuration.nix.
+  fileSystems."/mnt/img_pool" = {
+    device = "/dev/disk/by-uuid/82b43c59-ec6c-4f10-9100-e18372db2337";
+    fsType = "ext4";
+    options = [
+      "nofail"
+      "noatime"
+      "x-systemd.device-timeout=10s"
+    ];
+  };
+
   swapDevices = [ ];
 
   # SSD I/O scheduler optimization
@@ -81,8 +113,9 @@
 
     # Automatically set 'none' scheduler for non-rotational drives (SSDs)
     ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="none"
-    # BFQ on the NVMe so I/O priorities apply; CI VM installs otherwise starve the desktop.
-    ACTION=="add|change", KERNEL=="nvme0n1", ATTR{queue/scheduler}="bfq"
+    # BFQ on both NVMe disks so I/O priorities apply. Matched by pattern: the
+    # names swap when a disk is added (Issue #2182).
+    ACTION=="add|change", KERNEL=="nvme[0-9]n1", ATTR{queue/scheduler}="bfq"
   '';
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
