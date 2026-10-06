@@ -29,6 +29,10 @@ extend-ignore-re = [ "\\b[0-9a-f]{4,40}\\b" ]
   # darcula is a valid theme name (different from dracula)
   darcula = "darcula"
 
+  # ANC is Active Noise Cancellation (Pixel Buds plugin, #2195)
+  ANC = "ANC"
+  Anc = "Anc"
+
   # exportfs is a valid NFS command/config option
   exportfs = "exportfs"
 
