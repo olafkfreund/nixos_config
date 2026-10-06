@@ -31,6 +31,7 @@
 , libseccomp
 , libcap_ng
 , libpulseaudio
+, pipewire
 , libGL
 , vulkan-loader
 , wayland
@@ -64,7 +65,7 @@
 # then update `version` + `sha256` below (hex sha256 from the index is accepted
 # by fetchurl as-is).
 let
-  version = "2.9939.4";
+  version = "2.19675.1";
 
   # dlopen'd at runtime (not in DT_NEEDED) — appended to RUNPATH.
   runtimeLibs = [
@@ -81,7 +82,7 @@ stdenv.mkDerivation {
 
   src = fetchurl {
     url = "https://downloads.claude.ai/claude-desktop/apt/stable/pool/main/c/claude-desktop/claude-desktop_${version}_amd64.deb";
-    sha256 = "3cfddb23bf2911e05e27b4ed3856b8e795df94643b2c35b59deb317cf995bca0";
+    sha256 = "9ba127eeccf270f6e60d35f5c5333654053bf0540c88fc82a009d01711b106fc";
   };
 
   nativeBuildInputs = [
@@ -116,6 +117,7 @@ stdenv.mkDerivation {
     systemd
     libseccomp
     libcap_ng
+    pipewire
     wayland
   ]
   # Top-level lowercase names, not `with xorg; [ libX11 ... ]`. nixpkgs
