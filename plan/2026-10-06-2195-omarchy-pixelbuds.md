@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2195
 spec: spec/2026-10-06-2195-omarchy-pixelbuds.md
 ---
