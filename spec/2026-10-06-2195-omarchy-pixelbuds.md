@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2195
 intent: intent/2026-10-06-2195-omarchy-pixelbuds.md
 ---
