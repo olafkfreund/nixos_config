@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2188
 author: olafkfreund
 ---
@@ -55,3 +55,8 @@ notices when backups stop altogether.
    issue?
 3. What staleness thresholds: skillai and keycloak back up daily, so is
    alerting at 36 hours right?
+
+## Decisions at approval
+
+The user approved on 2026-10-06 with the recommended answers to every open
+question, as listed in the session reply.
