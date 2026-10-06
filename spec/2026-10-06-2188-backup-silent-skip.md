@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2188
 intent: intent/2026-10-06-2188-backup-silent-skip.md
 ---
