@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2189
 spec: spec/2026-10-06-2189-k3d-storage-off-qlc.md
 ---
