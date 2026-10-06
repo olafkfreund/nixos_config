@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2195
 author: olafkfreund
 ---
@@ -54,10 +54,9 @@ so we can change it ourselves and package it with Nix.
   `omarchy plugin enable <id> --section right`, as for the other nixarchy
   plugins.
 
-## Open questions
+## Decisions (approver, 2026-10-06)
 
-- Plugin id: keep `io.github.rdoupe.pixelbuds`, or rename to
-  `nixarchy.pixelbuds` like our other plugins? Renaming changes the IPC target
-  name and diverges from upstream. I lean to keeping it.
-- Path fix: patch the store paths in at build time in the flake (no source
-  edits, which I lean to), or change `Service.qml` to look the binaries up?
+- Plugin id: rename to `nixarchy.pixelbuds`, like our other plugins. This
+  changes the IPC target too.
+- Path fix: the flake patches in store paths at build time. Upstream files
+  stay unchanged for this.
