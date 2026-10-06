@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2187
 author: olafkfreund
 ---
@@ -61,3 +61,8 @@ problem.
    both?
 3. Do the codex, copilot and gemini entries need the same fix now, or only
    Claude?
+
+## Decisions at approval
+
+The user approved on 2026-10-06 with the recommended answers to every open
+question, as listed in the session reply.
