@@ -178,3 +178,26 @@ spec: spec/2026-10-06-2187-factory-cli-creds-stale.md
   `rm /var/lib/k3d-factory/factory-cli-creds.json`.
 - **Secret.** `git revert` the `.age` change (the old content is in git).
 - **Live Secret.** No rollback needed; the old value was already unusable.
+
+## Deviations during implementation (from the fresh review)
+
+Recorded 2026-10-06, in the same commit as the code (steps 4-5, coder
+agent):
+
+1. **Snapshot timer.** It runs at `OnCalendar = "*:0/5"` (every 5 min), not
+   `00/4:30:00`. At :30, the snapshot held a refresh token that
+   `cred-broker` had already spent at :00. A recreate in that window would
+   seed a dead token that looks valid. The unit only rewrites when the
+   expiry advances, so frequent runs are cheap.
+2. **Empty expiry.** `seed_expiry` and the writer default an empty result
+   to 0. A manifest without `claude-credentials.json` used to make
+   `[ -gt "" ]` error out: a valid snapshot lost the comparison, and the
+   writer could save a snapshot with no Claude key.
+3. **Write failures.** The writer exits 1 and removes the tmp file when
+   jq, chmod or mv fails, and logs "saved" only on success.
+4. **Mode 0400.** The snapshot is explicitly `chmod 0400` (`umask 077`
+   alone gives 600), and the unit creates the directory with `mkdir -p`.
+5. **Bootstrap log.** It reads `Applied factory/$name from $src`, where
+   `$src` is `agenix` or `snapshot (expires <date>)`.
+6. **The secret** (step 3) lands as a separate commit in the same PR,
+   after the user's login (step 1). Step 6 bundled them.
