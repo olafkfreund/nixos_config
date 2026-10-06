@@ -34,15 +34,13 @@
     options = [ "fmask=0077" "dmask=0077" ];
   };
 
-  # Failing drive (Issue #2156). To swap back: set the new UUID, drop the udev
-  # rule below, and reconsider nixarchy-runner buildDir/instances.
-  fileSystems."/mnt/games" = {
+  # Degraded Fanxiang S101Q (…30717): ~15 MB/s writes (Issue #2185). Archive
+  # only; keep nothing here that exists nowhere else.
+  fileSystems."/mnt/archives" = {
     device = "/dev/disk/by-uuid/093b3944-a550-4cd0-a320-df12bebc66cd";
     fsType = "ext4";
     options = [
-      "users" # Allows any user to mount and unmount
-      "nofail" # Prevent system from failing if this drive doesn't mount
-      "exec" # Permit execution of binaries and other executable files
+      "nofail"
       "noatime"
       "x-systemd.device-timeout=10s"
       "x-systemd.mount-timeout=60s"
@@ -108,7 +106,7 @@
   # SSD I/O scheduler optimization
   # Set optimal scheduler for SSDs (none/noop for better performance)
   services.udev.extraRules = ''
-    # Failing /mnt/games SSD (Issue #2156): cap its dirty page cache.
+    # Degraded /mnt/archives SSD (Issue #2156): cap its dirty page cache.
     ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", ENV{ID_SERIAL_SHORT}=="MX_00000000000030717", ATTR{bdi/strict_limit}="1", ATTR{bdi/max_ratio}="1"
 
     # Automatically set 'none' scheduler for non-rotational drives (SSDs)
