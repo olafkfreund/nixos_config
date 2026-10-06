@@ -451,15 +451,16 @@ in
   modules.containers.k3d = {
     enable = true;
 
-    # /mnt/data is a separate disk from /; moved off the failing sda
-    # (/mnt/games, Issue #2156).
+    # On the BIWIN /mnt/code (Issue #2189): /mnt/data is a QLC disk whose
+    # fsync stalls under bulk writes crash-looped postgres. The k3d backups
+    # follow storageDir to /mnt/code/k3d/backups.
     #
     # VERIFY AFTER FIRST CREATE that the containers actually bind this path:
     #   docker inspect k3d-factory-server-0     #     --format '{{range .Mounts}}{{.Source}} -> {{.Destination}}{{println}}{{end}}'
     # On p510 this setting never took effect — the containers predate the
     # change and k3d does not re-bind an existing container, so the cluster
     # has been writing to the module default the whole time.
-    storageDir = "/mnt/data/k3d/storage";
+    storageDir = "/mnt/code/k3d/storage";
 
     argocd.enable = true;
     tailscaleAuthKey.enable = true;
