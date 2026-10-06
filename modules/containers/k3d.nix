@@ -661,6 +661,12 @@ in
       '';
     };
 
+    backupMaxAgeHours = mkOption {
+      type = types.ints.positive;
+      default = 36;
+      description = "Alert when the newest k3d backup is older than this.";
+    };
+
     kubeconfigPath = mkOption {
       type = types.path;
       default = "/etc/k3d/kubeconfig";
@@ -887,7 +893,7 @@ in
           set -uo pipefail
           BACKUP_DIR="${builtins.dirOf (toString cfg.storageDir)}/backups/keycloak"
           mkdir -p "$BACKUP_DIR"
-          vol=$(kubectl get pvc keycloak-data -n factory -o jsonpath='{.spec.volumeName}' 2>/dev/null) || exit 0
+          vol=$(kubectl get pvc keycloak-data -n factory -o jsonpath='{.spec.volumeName}' 2>/dev/null) || { echo "[keycloak-backup] cluster unreachable; skipping" >&2; exit 0; }
           [ -n "$vol" ] || { echo "[keycloak-backup] no keycloak-data PVC yet; skipping" >&2; exit 0; }
           pvpath=$(kubectl get pv "$vol" -o jsonpath='{.spec.hostPath.path}{.spec.local.path}' 2>/dev/null)
 
@@ -973,7 +979,7 @@ in
           mkdir -p "$BACKUP_DIR"
           # Only dump when the DB pod is actually Running; skip cleanly
           # otherwise (mid-start, scaled down, cluster not up yet).
-          phase=$(kubectl get pod skillai-db-0 -n factory -o jsonpath='{.status.phase}' 2>/dev/null) || exit 0
+          phase=$(kubectl get pod skillai-db-0 -n factory -o jsonpath='{.status.phase}' 2>/dev/null) || { echo "[skillai-backup] cluster unreachable; skipping" >&2; exit 0; }
           [ "$phase" = "Running" ] || { echo "[skillai-backup] skillai-db-0 not Running ($phase); skipping" >&2; exit 0; }
           ts=$(date +%Y%m%d-%H%M%S)
           out="$BACKUP_DIR/skillai-$ts.dump"
@@ -1053,6 +1059,80 @@ in
       timerConfig = {
         OnCalendar = "*:0/5";
         Persistent = true;
+      };
+    };
+
+    systemd.services.k3d-backup-freshness = mkIf cfg.argocd.enable {
+      description = "Check that the k3d backups are recent";
+      after = [ "k3d-cluster-bootstrap.service" ];
+      path = with pkgs; [ kubectl coreutils ];
+      environment.KUBECONFIG = cfg.kubeconfigPath;
+      unitConfig.OnFailure = [ "k3d-backup-alert.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+        User = "root";
+        ExecStart = pkgs.writeShellScript "k3d-backup-freshness" ''
+          set -uo pipefail
+          BACKUPS="${builtins.dirOf (toString cfg.storageDir)}/backups"
+          max=''${MAX_AGE_SECONDS:-$(( ${toString cfg.backupMaxAgeHours} * 3600 ))}
+          case "$max" in "" | *[!0-9]*) echo "bad MAX_AGE_SECONDS"; exit 1;; esac
+          now=$(date +%s)
+          stale=0
+          check() { # name epoch
+            if [ -z "$2" ]; then
+              echo "STALE $1 missing"; stale=1
+            elif [ $(( now - $2 )) -gt "$max" ]; then
+              echo "STALE $1 last $(date -d "@$2")"; stale=1
+            else
+              echo "ok $1 $(date -d "@$2")"
+            fi
+          }
+          for f in skillai/skillai-latest.dump keycloak/keycloakdb-latest.mv.db; do
+            m=$(stat -c %Y "$BACKUPS/$f" 2>/dev/null) || m=""
+            check "$f" "$m"
+          done
+          # A failed kubectl is not judged (cluster down/booting); the dump
+          # files go stale on their own if it stays down.
+          if t=$(kubectl -n factory get cronjob postgres-backup -o jsonpath='{.status.lastSuccessfulTime}' 2>/dev/null); then
+            if [ -n "$t" ]; then
+              check "cronjob/postgres-backup" "$(date -d "$t" +%s)"
+            else
+              echo "STALE cronjob/postgres-backup never succeeded"; stale=1
+            fi
+          else
+            echo "cronjob/postgres-backup: cluster unreachable; not judged"
+          fi
+          exit $stale
+        '';
+      };
+    };
+
+    systemd.timers.k3d-backup-freshness = mkIf cfg.argocd.enable {
+      description = "Hourly k3d backup freshness check";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "hourly";
+      };
+    };
+
+    systemd.services.k3d-backup-alert = mkIf cfg.argocd.enable {
+      description = "Desktop alert for stale k3d backups";
+      path = with pkgs; [ libnotify util-linux coreutils systemd gnugrep ];
+      serviceConfig = {
+        Type = "oneshot";
+        User = "root";
+        ExecStart = pkgs.writeShellScript "k3d-backup-alert" ''
+          summary=$(journalctl -u k3d-backup-freshness --invocation=0 -o cat | grep STALE)
+          for bus in /run/user/*/bus; do
+            [ -S "$bus" ] || continue
+            uid=$(basename "$(dirname "$bus")")
+            [ "$uid" -ge 1000 ] || continue
+            user=$(id -nu "$uid") || continue
+            runuser -u "$user" -- env DBUS_SESSION_BUS_ADDRESS="unix:path=$bus" \
+              notify-send -u critical -h string:x-canonical-private-synchronous:k3d-backup "k3d backups stale" "$summary" || true
+          done
+          exit 0
+        '';
       };
     };
 

@@ -122,3 +122,25 @@ spec: spec/2026-10-06-2188-backup-silent-skip.md
 
 Revert the PR and switch. The units are removed, and the skip-logging
 change is cosmetic.
+
+## Deviations during implementation (from the fresh review)
+
+Recorded 2026-10-06, in the same commit as the code:
+
+1. **Unreachable cluster.** A failed `kubectl` call for the CronJob check
+   now logs `cluster unreachable; not judged` and is **not** STALE. Only a
+   successful reply with an empty `lastSuccessfulTime` is STALE ("never
+   succeeded"). The plan treated "unreachable" as STALE, which alerted on
+   almost every boot, because the bootstrap takes up to 15 min. A cluster
+   that stays down is still caught when the two dump files pass 36 h.
+2. **Timer.** The freshness timer dropped `Persistent = true` and gained
+   `after = [ "k3d-cluster-bootstrap.service" ]`.
+3. **Notification.** `notify-send` uses the replace hint
+   `x-canonical-private-synchronous:k3d-backup`, so the hourly re-alerts
+   replace one notification instead of stacking.
+4. **Alert summary.** Read with `journalctl --invocation=0`, so it shows the
+   latest run only.
+5. **Input checks.** A non-integer `MAX_AGE_SECONDS` exits 1, and a missing
+   dump reads `STALE <name> missing`.
+6. **Shape.** The coder added a shared `check()` helper, a socket guard, and
+   `|| true`/`|| continue` in the alert loop so it can never fail.
