@@ -68,11 +68,10 @@ in
     vmImageDir = "/mnt/data/vmtest";
     enable = true;
 
-    # /mnt/games SSD is failing (Issue #2156), so builds use the NVMe root
-    # (208 GB free). Two runners peak at about 64 GB; restore four only after
-    # the SSD is replaced and the peak is measured.
+    # Its own 480 GB SSD (Issue #2182). Two runners peaked at about 64 GB;
+    # drop to 3 if four push the peak past about 350 GB.
     buildDir = "/var/lib/nix-build";
-    instances = 2;
+    instances = 4;
   };
 
   # Consolidated networking configuration
@@ -553,9 +552,7 @@ in
     users = hostUsers; # Use all users for this host
     rootless = false;
     # Preserves the path this host has always used — 81 volumes live here.
-    # Unlike p510, /mnt/img_pool here is a plain directory on the root
-    # filesystem, not a separate disk; the value is legacy rather than
-    # deliberate, but repointing it would orphan the existing data-root.
+    # /mnt/img_pool is its own disk since Issue #2182.
     dataRoot = "/mnt/img_pool/docker";
   };
 
@@ -775,6 +772,9 @@ in
     services = {
       # Network wait services now handled by desktop profile
       fwupd.serviceConfig.LimitNOFILE = 524288;
+
+      # Refuse to start on a blank data-root on / when its disk is missing.
+      docker.unitConfig.RequiresMountsFor = [ "/mnt/img_pool" ];
 
       # Don't restart greetd on rebuild — a switch shouldn't tear down the login
       # manager mid-session. The new greeter applies at next reboot/logout.
