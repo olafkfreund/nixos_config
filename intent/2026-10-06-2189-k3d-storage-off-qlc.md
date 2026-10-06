@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2189
 author: olafkfreund
 ---
@@ -61,3 +61,8 @@ until a manual rescan), which would have left every PV path empty.
 3. Can the move swap the bind source with a container recreate
    (`storageDir` change plus recreating the node), instead of a full
    cluster delete and bootstrap?
+
+## Decisions at approval
+
+The user approved on 2026-10-06 with the recommended answers to every open
+question, as listed in the session reply.
