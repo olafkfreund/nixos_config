@@ -165,6 +165,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # nixarchy-pixelbuds: Pixel Buds battery + ANC bar plugin (fork of
+    # rdoupe/omarchy-pixelbuds); hosts/common/nixos/omarchy-pixelbuds.nix.
+    nixarchy-pixelbuds = {
+      url = "github:olafkfreund/nixarchy-pixelbuds";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # ai-mirror: MCP server + bar indicator letting coding agents drive the
     # Omarchy desktop behind a kill switch (hosts/common/nixos/omarchy-ai-mirror.nix).
     # Tracks ai-mirror's default branch (master). Its PRs land as MERGE COMMITS,

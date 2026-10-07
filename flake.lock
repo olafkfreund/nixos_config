@@ -1919,6 +1919,26 @@
         "type": "github"
       }
     },
+    "nixarchy-pixelbuds": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791353946,
+        "narHash": "sha256-7HKsbnpPRBNg0EGb4rk7y6HdJJxg/Imli0wMDZyX2WE=",
+        "owner": "olafkfreund",
+        "repo": "nixarchy-pixelbuds",
+        "rev": "ee5b22ebcad38d18b469dc9449aa79615059a987",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "nixarchy-pixelbuds",
+        "type": "github"
+      }
+    },
     "nixarchy-pkg": {
       "inputs": {
         "nixpkgs": [
@@ -2589,6 +2609,7 @@
         "nixarchy": "nixarchy",
         "nixarchy-distrobox": "nixarchy-distrobox_2",
         "nixarchy-microvm": "nixarchy-microvm_2",
+        "nixarchy-pixelbuds": "nixarchy-pixelbuds",
         "nixarchy-pkg": "nixarchy-pkg_2",
         "nixarchy-voice": "nixarchy-voice",
         "nixarchy-winvm": "nixarchy-winvm",
