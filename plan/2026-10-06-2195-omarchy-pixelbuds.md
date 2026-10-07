@@ -56,6 +56,11 @@ Steps 1–3 run in the fork, in a clone at
      - Add one line at the top saying this is a fork of
        `rdoupe/omarchy-pixelbuds`.
 
+   - Deviation (done, fork `621c2db`): `Panel.qml:224` (`IpcHandler { target: … }`)
+     also carries the id, because `manageIpc: false` registers the handler
+     by hand. It is renamed too, or `omarchy-shell nixarchy.pixelbuds …` would
+     not reach the widget.
+
    Verify: `grep -rn "io.github.rdoupe.pixelbuds" --exclude-dir=.git .`
    prints nothing.
 
@@ -218,6 +223,9 @@ Steps 1–3 run in the fork, in a clone at
 - Fork: revert the merge commit on `main`. Nothing else depends on it.
 
 ## Execution
+
+Step 1 was done by the session model: the `coder` agent stalled for
+7 h without starting it.
 
 Steps 1–6 edit files in two repos, so per policy the `coder` agent
 (Sonnet) implements them. Steps go one at a time over `SendMessage`. A fresh
