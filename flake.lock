@@ -1926,11 +1926,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791352499,
-        "narHash": "sha256-SyLrJ1vNdvgdOf1FmdHUYmKn4nFu6TXbqqEMP6av7mI=",
+        "lastModified": 1791353946,
+        "narHash": "sha256-7HKsbnpPRBNg0EGb4rk7y6HdJJxg/Imli0wMDZyX2WE=",
         "owner": "olafkfreund",
         "repo": "nixarchy-pixelbuds",
-        "rev": "d8d89e36218088ab1f129967237861c1936b30cd",
+        "rev": "ee5b22ebcad38d18b469dc9449aa79615059a987",
         "type": "github"
       },
       "original": {
