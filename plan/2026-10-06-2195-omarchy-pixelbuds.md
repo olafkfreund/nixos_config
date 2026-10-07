@@ -196,6 +196,31 @@ Steps 1–3 run in the fork, in a clone at
    (`nixos-rebuild build --build-host`). Never build p510. Never `git
    checkout` in `~/.config/nixos`; work only in the worktree.
 
+## Deviations
+
+Recorded after the Opus review, 2026-10-07.
+
+1. **Panel.qml `trustedPath` is patched**, which reverses the "trustedPath
+   stays" decision for Panel.qml only. `omarchy-shell` is a bash script that
+   runs `qs`, `timeout` and `grep` by name, and envfs resolves nothing from
+   `PATH=/usr/bin:/bin`. With the plugin's own allowlisted environment it
+   printed `omarchy-shell is not running` (exit 1); with
+   `PATH=/run/current-system/sw/bin` it printed `ok`. Without the fix the
+   volume OSD fails silently. `Service.qml` keeps `/usr/bin:/bin`, because the
+   bridge and `gdbus` exec nothing. Fixed in fork PR #2 (`a47f4f9`).
+2. **Narrower no-Arch-path check.** Step 2's `grep -rn /usr/bin result/*.qml`
+   and step 3's blanket check contradicted the kept `trustedPath`. The check
+   matches the three program literals plus `"/usr/bin:/bin"`, except
+   Service.qml's `trustedPath`.
+3. **`pkgs.dbus` dropped from the check's `nativeBuildInputs`.** The test
+   calls `${pkgs.dbus}/bin/dbus-daemon` by store path, so nothing needs it
+   on `PATH`. The D-Bus integration test ran in the sandbox, so no skip was
+   needed.
+4. **Entry-point guard added**: `jq -e '.entryPoints | length > 0'` before
+   the loop (fork PR #2).
+5. **`_typos.toml` allows `ANC`/`Anc`** (`bbc0a8c2e`). The pre-push
+   spell-check flagged the abbreviation in these artifacts.
+
 ## Tests
 
 - Fork: `nix flake check` passes, and so does the `nix build` grep from
