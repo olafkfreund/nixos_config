@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2214
 intent: intent/2026-10-08-2214-remove-dev-utils.md
 ---
