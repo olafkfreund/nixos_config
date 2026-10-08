@@ -99,7 +99,7 @@ find the anchor text quoted below, because earlier deletions shift later lines.
    `grep -n installer .gemini/state/topology.json`, which prints nothing.
    Traps: the pre-commit JSON formatter may reformat the file. Accept its output.
 
-8a. (Added during implementation.) `.github/workflows/ci.yml` line 140: drop
+   **Step 8a, added during implementation:** `.github/workflows/ci.yml` line 140: drop
    `\|lib/live-images.nix\|modules/installer` from the secret-scan `grep -v`
    exclusions. The paths no longer exist, and the leftover made test 1 fail.
    → verify with test 1 below.
