@@ -29,7 +29,7 @@ find the anchor text quoted below, because earlier deletions shift later lines.
 
 1. Delete the whole-file pieces:
    `git rm -r lib/live-images.nix modules/installer scripts/install-helpers .claude/commands/nix-live.md .gemini/commands/nix-live.toml`
-   → verify with `git status --short`, which shows 11 deletions: 1 lib file,
+   → verify with `git status --short`, which shows 10 deletions: 1 lib file,
    3 module files, 4 helper scripts and 2 command files.
    Traps: none.
 

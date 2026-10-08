@@ -376,11 +376,6 @@
         p510 = [ "olafkfreund" ];
       };
 
-      # Live image builder
-      liveImages = import ./lib/live-images.nix {
-        inherit nixpkgs inputs hostUsers;
-      };
-
       # ========================================
       # HELPER FUNCTIONS
       # ========================================
@@ -602,9 +597,6 @@
           # Documentation site (MkDocs Material, built reproducibly)
           docs = pkgs.callPackage ./docs_gen/site.nix { };
 
-          # Live ISO images
-          live-iso-razer = liveImages.liveImages.live-iso-razer.config.system.build.isoImage;
-
           # Development and deployment tools available as packages
           # (Apps are available separately via apps.x86_64-linux)
         };
@@ -646,10 +638,6 @@
           test = {
             type = "app";
             program = "${appPkgs.test}/bin/nixos-test";
-          };
-          build-live = {
-            type = "app";
-            program = "${appPkgs.build-live}/bin/nixos-build-live";
           };
           dev-utils = {
             type = "app";
