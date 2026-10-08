@@ -222,8 +222,9 @@ The session runs these after step 7:
 
 1. `nix build` of the package: the check passes for both plugins.
 2. `just test-host p620` and `just test-host razer` build.
-3. p510 is untouched: `nix eval --raw .#nixosConfigurations.p510.config.system.build.toplevel.drvPath` is equal
-   on `origin/main` and on this branch.
+3. p510 gets no mods. Since step 6a, its closure changes only through `agent-bus-mcp`, which gains the read-only
+   `recent` tool, and the bus-peek hook script that references it. `nix-diff` of the p510 toplevel against
+   `origin/main` names only those, and the p510 managed-settings diff is that one script path.
 4. The managed settings differ only by the two new keys. Run `jq -S` over
    `<p620 toplevel>/etc/claude-code/managed-settings.json` on main and on the branch, then `diff` the two. Only
    `extraKnownMarketplaces` and `enabledPlugins` may appear.
