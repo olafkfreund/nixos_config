@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2218
 author: olafkfreund
 ---
@@ -69,11 +69,12 @@ or p510.
 
 ## Open questions
 
-1. **Hosts.** All three, or p620 and razer only? p510 is a desktop now and
+1. **Hosts.** Decided: p620 and razer only. All three, or p620 and razer only? p510 is a desktop now and
    runs Claude Code (2.1.280+), but the agent-bus Stop-hook wake is p620/razer
    only, so it's unclear whether its sessions have the bus MCP that
    fleet-guard reads.
-2. **Loading mechanism.** User scope (a folder marketplace or
+2. **Loading mechanism.** Decided: managed scope for fleet-guard (a guard),
+   user scope for nix-flavour (a preference). User scope (a folder marketplace or
    `CLAUDE_CODE_PLUGIN_DIRS` in `~/.claude/settings.json`'s `env`), or managed
    scope (the organization's managed-mods setting in
    `/etc/claude-code/managed-settings.json`)? Managed scope fits fleet-guard
@@ -81,6 +82,7 @@ or p510.
    `claude-code-managed.nix` says user preferences such as `enabledPlugins`
    don't belong there. nix-flavour is plainly a preference. The spec should
    settle this, possibly a different answer for each mod.
-3. **nix-flavour's theme path.** It reads
+3. **nix-flavour's theme path.** Decided: keep reading
+   `nixarchy-theme.nix`, the file that manages the theme. It reads
    `~/.config/nixos/nixarchy-theme.nix` directly. Keep that, or have Nix
    inject the path? The checkout path is the same on every host.
