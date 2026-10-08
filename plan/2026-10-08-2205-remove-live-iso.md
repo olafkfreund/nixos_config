@@ -99,6 +99,14 @@ find the anchor text quoted below, because earlier deletions shift later lines.
    `grep -n installer .gemini/state/topology.json`, which prints nothing.
    Traps: the pre-commit JSON formatter may reformat the file. Accept its output.
 
+8a. (Added during implementation.) `.github/workflows/ci.yml` line 140: drop
+   `\|lib/live-images.nix\|modules/installer` from the secret-scan `grep -v`
+   exclusions. The paths no longer exist, and the leftover made test 1 fail.
+   → verify with test 1 below.
+   Traps: none. Left on purpose: the example changelog entries in the
+   `documentation-sync` agents and the `.agent-os/product/` history, which
+   describe the past rather than instruct.
+
 9. Commit steps 1-8 as one commit,
    `chore(installer): remove unused live ISO path and nixos-generators (#2205)`,
    with the message passed via `-F - <<'MSG'`, never `-m` with backticks.
@@ -112,9 +120,9 @@ Run these from `~/.config/nixos-2205` after step 9:
 
    ```bash
    grep -rn "live-iso\|liveImages\|live-images\|install-helpers\|nixos-generators" --exclude-dir=.git . \
-     | grep -v "^./\(docs\|intent\|spec\|plan\)/"
+     | grep -v "^\(\./\)\?\(docs\|intent\|spec\|plan\)/"
    grep -rn "build-live\|flash-live\|nix-live" --exclude-dir=.git . \
-     | grep -v "^./\(docs\|intent\|spec\|plan\)/"
+     | grep -v "^\(\./\)\?\(docs\|intent\|spec\|plan\)/"
    ```
 
 2. `just --list` succeeds.

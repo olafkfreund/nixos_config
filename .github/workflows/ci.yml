@@ -137,7 +137,7 @@ jobs:
           # Check for hardcoded passwords (exclude safe patterns and archived code)
           # shellcheck disable=SC2016 # backslash-dollar is intentional regex literal, not parameter expansion
           if grep -r 'password\s*=\s*"[^"]\+"' . --include="*.nix" --exclude-dir=".git" --exclude-dir="archive" \
-            | grep -v 'hashedPassword\|passwordFile\|password\s*=\s*""\|password\s*=\s*"nixos"\|onepassword\|secrets\|age\.secrets\|\$__file\|lib/live-images.nix\|modules/installer'; then
+            | grep -v 'hashedPassword\|passwordFile\|password\s*=\s*""\|password\s*=\s*"nixos"\|onepassword\|secrets\|age\.secrets\|\$__file'; then
             echo "FAIL: Potential hardcoded passwords found"
             exit 1
           else
