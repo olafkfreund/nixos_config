@@ -95,8 +95,6 @@
     "modules/fonts/fonts.nix",
     "modules/funny/funny.nix",
     "modules/helpers/helpers.nix",
-    "modules/installer/installer-tools.nix",
-    "modules/installer/live-system.nix",
     "modules/microvms/common.nix",
     "modules/microvms/dev-vm.nix",
     "modules/microvms/playground-vm.nix",

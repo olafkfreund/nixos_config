@@ -73,16 +73,6 @@ Quick reference for all available NixOS development commands.
 - Replaces: pre-commit-install, pre-commit-run, pre-commit-staged, and 3 more recipes
 - Time: 5s (install) to 30s (run-all)
 
-**`/nix-live`** - Live USB installer management (NEW!)
-
-- Build host-specific live USB images
-- Show USB devices for flashing
-- Flash ISO to USB drive
-- Clean build artifacts
-- Features: Hardware auto-detection, TUI installer, SSH access
-- Replaces: build-all-live, show-devices, flash operations, clean-live, live-help
-- Time: 10min (build) to 5min (flash)
-
 **`/nix-microvm`** - MicroVM development environments (NEW!)
 
 - Manage 3 VMs: dev-vm, test-vm, playground-vm
@@ -321,7 +311,6 @@ Fast deploy to p620
 | Clean up disk            | `/nix-clean`        | 30s-5min           |
 | Check system info        | `/nix-info`         | 5-30s              |
 | Manage pre-commit hooks  | `/nix-precommit`    | 5-30s              |
-| Build live USB installer | `/nix-live`         | 5-10min            |
 | Manage MicroVMs          | `/nix-microvm`      | 5-30s              |
 | Manage secrets           | `/nix-secrets`      | 5s-1min            |
 | Network diagnostics      | `/nix-network`      | instant-continuous |

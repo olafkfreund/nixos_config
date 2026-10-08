@@ -22,7 +22,6 @@ in
         pkgs.nurl
         pkgs.nixpkgs-fmt
         pkgs.nil
-        pkgs.nixos-generators
         pkgs.manix # A Fast Documentation Searcher for Nix
         pkgs.statix # Lints and suggestions for the nix programming language
         pkgs.deadnix # Find and remove unused code in .nix source files

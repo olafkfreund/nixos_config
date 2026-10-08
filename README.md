@@ -121,7 +121,7 @@ Full reference: [docs/UPDATE-DEPLOY.md](./docs/UPDATE-DEPLOY.md).
 ```text
 flake.nix                       Main flake (inputs, outputs, host wiring)
 Justfile                        Automation recipes (just --list)
-lib/                            Shared functions (hostTypes, features, secrets, live-images)
+lib/                            Shared functions (hostTypes, features, secrets)
 modules/                        Feature modules (explicit imports only)
 overlays/                       Split nixpkgs overlays
 hosts/
@@ -221,19 +221,6 @@ pin 6.18.22 via a separate module if 7.0.1 also fails.
 The ESP is 511 MiB against ~149 MiB of NVIDIA-firmware initrd per
 generation, so it holds very few generations. `--clean` escalates to a
 single generation rather than failing its own threshold.
-
-## Live Installer
-
-A bootable installer image is produced for razer:
-
-```bash
-nix build .#live-iso-razer
-just show-devices                 # Identify the USB target
-just flash-live razer /dev/sdX    # Destructive, double-check the device
-```
-
-Live images for other hosts have been removed from the flake; the same
-builder (`lib/live-images.nix`) can be re-instantiated if needed.
 
 ## Theming
 
