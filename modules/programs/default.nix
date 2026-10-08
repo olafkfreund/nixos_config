@@ -12,6 +12,7 @@ _: {
     ./yt-x.nix # Terminal YouTube browser
     ./chrome-pwa-icons.nix # Sync Chrome PWA icons into XDG hicolor (issue #397)
     ./claude-code-managed.nix # Read-only Claude Code baseline at /etc/claude-code (issue #398)
+    ./claude-code-mods.nix # fleet-guard + nix-flavour mods from pkgs/claude-code-mods (Issue #2218)
     ./claude-router-cli.nix # /use-ollama, /use-claude, /use-default — local Ollama vs cloud Claude per repo
     # ./streamcontroller.nix
     # ./thunar.nix

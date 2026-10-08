@@ -1,0 +1,9 @@
+{
+  "name": "fleet-guard",
+  "version": "0.2.0",
+  "description": "Agent-bus band, /announce, commit and home-manager guards",
+  "author": {
+    "name": "olafkfreund"
+  },
+  "types": "./types/index.d.ts"
+}

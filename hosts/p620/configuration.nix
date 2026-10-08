@@ -230,6 +230,7 @@ in
     # "Claude needs your permission" on the same Notification events.
     notifications.enable = false;
   };
+  modules.programs.claude-code-mods.enable = true; # fleet-guard + nix-flavour (#2218)
 
   # /use-ollama, /use-claude, /use-default slash commands + apiKeyHelper
   # that auto-selects router or Anthropic key based on ANTHROPIC_BASE_URL.

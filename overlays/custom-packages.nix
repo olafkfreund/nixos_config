@@ -4,6 +4,7 @@ final: _prev: {
   intune-portal = final.callPackage ../pkgs/intune-portal { };
   zsh-ai-cmd = final.callPackage ../pkgs/zsh-ai-cmd { };
   claude-code-native = final.callPackage ../pkgs/claude-code-native { };
+  claude-code-mods = final.callPackage ../pkgs/claude-code-mods { };
   warp-terminal = final.callPackage ../pkgs/warp-terminal { };
   waveterm = final.callPackage ../pkgs/waveterm { };
   # splashboard — Rust TUI splash screen for shell startup. Needs rustc
