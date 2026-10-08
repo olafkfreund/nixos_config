@@ -639,10 +639,6 @@
             type = "app";
             program = "${appPkgs.test}/bin/nixos-test";
           };
-          dev-utils = {
-            type = "app";
-            program = "${appPkgs.dev-utils} /bin/nixos-dev-utils";
-          };
         };
 
       # Code formatter for consistent formatting
