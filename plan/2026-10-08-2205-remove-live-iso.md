@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2205
 spec: spec/2026-10-08-2205-remove-live-iso.md
 ---
