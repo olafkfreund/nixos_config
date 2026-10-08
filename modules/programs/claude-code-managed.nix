@@ -279,7 +279,7 @@ let
     # match `\b(switch|boot|test)\b[^|;]*\bp510\b` against
     # "nixos-rebuild switch --flake .#p510". Verified against 13 cases.
     deploy_verb='nixos-rebuild[[:space:]]+[^|;]*(switch|boot|test)|nh[[:space:]]+os[[:space:]]+(switch|boot|test)|(^|[[:space:]])nhs([[:space:]]|$)|just[[:space:]]+[a-z-]*deploy'
-    if printf '%s' "$cmd" | ${pkgs.gnugrep}/bin/grep -qE "($deploy_verb)[^|;]*p510|p510[^|;]*($deploy_verb)"; then
+    if printf '%s' "$cmd" | ${pkgs.gnugrep}/bin/grep -qE "just[[:space:]]+p510([[:space:]]|$)|($deploy_verb)[^|;]*p510|p510[^|;]*($deploy_verb)"; then
       echo "BLOCKED by managed-settings deploy guard: this command would activate a new generation on p510." >&2
       echo "p510 is the headless media server (Plex, *arr, k3d, cloudflared). Deploying it requires the user's explicit approval." >&2
       echo "Ask the user first. Building (nix build .#nixosConfigurations.p510...) and read-only ssh are allowed." >&2
