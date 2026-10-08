@@ -439,6 +439,26 @@ def read_new(
 
 
 @mcp.tool()
+def recent(room: str = DEFAULT_ROOM, limit: int = 3) -> str:
+    """The newest `limit` messages in a room, oldest first. Moves no cursor.
+
+    For glancing at what is going on (the fleet-guard band polls this) without
+    consuming the mark `read_new` keeps, and under the session's own identity,
+    so it never registers a new account.
+    """
+    with _client(SESSION_NAME) as client:
+        room_id = _resolve(client, room)
+        _join(client, room_id)
+        r = client.get(
+            f"/rooms/{quote(room_id, safe='')}/messages",
+            params={"dir": "b", "limit": limit, "filter": MESSAGE_FILTER},
+        )
+        r.raise_for_status()
+        chunk = r.json().get("chunk", [])
+    return json.dumps([_format(e) for e in reversed(chunk)], indent=2)
+
+
+@mcp.tool()
 def list_rooms(agent: str | None = None) -> str:
     """Rooms this agent is in, with their names."""
     out = []

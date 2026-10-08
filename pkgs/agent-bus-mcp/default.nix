@@ -1,7 +1,7 @@
 # agent-bus-mcp — a shared room for coding agents, exposed as MCP tools.
 #
-# Authored in-repo (agent_bus_mcp.py). Five tools over a Matrix room: whoami,
-# post, read_new, list_rooms, search. A stdio MCP server (FastMCP), spawned by
+# Authored in-repo (agent_bus_mcp.py). Six tools over a Matrix room: whoami,
+# post, read_new, recent, list_rooms, search. A stdio MCP server (FastMCP), spawned by
 # each Claude Code session rather than run as a daemon -- unlike plex-mcp,
 # arr-suite-mcp and audiobook-mcp, which are shared services.
 #

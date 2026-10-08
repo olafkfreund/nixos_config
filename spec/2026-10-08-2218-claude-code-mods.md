@@ -69,15 +69,19 @@ p510 stays untouched.
   `tool.call` hook on `Bash` denies a match and passes everything else on.
 - **The band.** An `AbovePrompt` band shows the latest 3 `#agents` messages, one dim line each, cut to the band's
   width. It is hidden when there's nothing to show, and a **Hide** button hides it for the session. Data:
-  - `session.start` polls once, then `$.clock.every(60 s)` keeps polling.
-  - Each poll calls `$.mcp.call("agent-bus", "read_new", { agent: "fleet-guard-<host>" })`.
-  - The cursor is per host, so p620 and razer don't use up each other's messages.
-  - Each poll merges into a rolling list of 3 kept in `$.store`, so sessions on the same host converge within a
-    minute even though they share one cursor. The list is also copied into a `$.state` atom, so the band
-    redraws.
+  - In interactive sessions, `session.start` starts a poll without waiting on it, then `$.clock.every(60 s)`
+    keeps polling. Headless sessions don't poll.
+  - Each poll calls the bus's `recent` tool (`limit: 3`). The tool was added to `pkgs/agent-bus-mcp` for this:
+    it reads the newest messages backwards (`dir=b`) with no cursor, under the session's own identity. So
+    polling registers no accounts and moves no read position.
+  - The result goes into a `$.state` atom, so the band redraws.
   - If the bus is unreachable, nothing is drawn.
+  - Revised after review on 2026-10-08 (the user's decision). The first design used
+    `read_new(agent: "fleet-guard-<host>")`, but the bus names an `agent` per session and registers a Matrix
+    account for each one. Its first read also starts from the room's oldest message.
 - **`/announce <text>`.** Registered in `session.start`, it posts `[<host>] <text>` to `#agents` through
-  `$.mcp.call("agent-bus", "post", ...)` and answers with a one-line confirmation. It runs instantly, with no
+  `$.mcp.call("agent-bus", "post", ...)` and answers with a one-line confirmation, or with the error when the
+  post fails. It runs only when a person typed it: a `composer` or `bridge` origin. It runs instantly, with no
   Claude turn. With no text, it answers with usage.
 - **The host** is read once from the `/run/current-system` link name, as nix-flavour already does.
 

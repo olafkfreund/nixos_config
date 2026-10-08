@@ -1,8 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { BusLine } from '../types'
-import { bandLine, mergeRecent, parseBus } from './bus'
+import { bandLine, parseBus } from './bus'
 import { classify } from './classify'
 
 const BUS = 'agent-bus'
@@ -11,15 +10,14 @@ const isHidden = atom({ plugin: 'fleet-guard', key: 'isHidden' } as const, false
 
 const textOf = (r: { content: { text?: string }[] }) => r.content.map(c => c.text ?? '').join('\n')
 
-async function poll($: EngineInterface, host: string) {
+// `recent` reads the newest messages with no cursor, under the session's own
+// bus identity, so polling never consumes what read_new would show the model.
+async function poll($: EngineInterface) {
   try {
-    const r = await $.mcp.call(BUS, 'read_new', { agent: 'fleet-guard-' + host, limit: 20 })
-    const old = ((await $.store.get('recent')) as BusLine[] | undefined) ?? []
-    const merged = mergeRecent(old, parseBus(textOf(r)))
-    await $.store.set('recent', merged)
-    await update($, recent, () => merged)
+    const r = await $.mcp.call(BUS, 'recent', { limit: 3 })
+    if (!r.isError) await update($, recent, () => parseBus(textOf(r)))
   } catch {
-    // bus unreachable: leave the list as it is
+    // bus unreachable: leave the band as it is
   }
 }
 
@@ -34,16 +32,22 @@ export const register: Register = on => {
       description: 'Post to #agents as this host',
       argumentHint: '<text>',
     })
-    await poll($, host)
-    $.clock.every(60_000, () => poll($, host))
+    if (e.isInteractive) {
+      void poll($)
+      $.clock.every(60_000, () => poll($))
+    }
     return next(e)
   })
 
   on('command.run', { command: 'announce' }, async ($, e) => {
+    // Only a person posts to the shared room: not another plugin, not the SDK.
+    if (e.origin.kind !== 'composer' && e.origin.kind !== 'bridge')
+      return { text: '/announce only runs when you type it.' }
     const text = e.args.trim()
     if (!text) return { text: 'Usage: /announce <text>' }
-    await $.mcp.call(BUS, 'post', { text: '[' + host + '] ' + text })
-    await poll($, host)
+    const r = await $.mcp.call(BUS, 'post', { text: '[' + host + '] ' + text })
+    if (r.isError) return { text: 'Not posted: ' + textOf(r) }
+    void poll($)
     return { text: 'Posted to #agents: ' + text }
   })
 

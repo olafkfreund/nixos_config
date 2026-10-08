@@ -1,6 +1,7 @@
 import type { BusLine } from '../types'
 
-// Take the first array found at the top level (or the value itself) whose items have text.
+// Take the first array found at the top level (or the value itself) holding items with text;
+// items without a string `text` are dropped one by one, never the whole batch.
 export function parseBus(text: string): BusLine[] {
   let json: unknown
   try {
@@ -8,29 +9,11 @@ export function parseBus(text: string): BusLine[] {
   } catch {
     return []
   }
-  const candidates: unknown[] = Array.isArray(json)
-    ? [json]
-    : json && typeof json === 'object'
-      ? Object.values(json)
-      : []
-  const list = candidates.find(
-    (v): v is Record<string, unknown>[] =>
-      Array.isArray(v) &&
-      v.length > 0 &&
-      v.every(i => i && typeof i === 'object' && typeof (i as { text?: unknown }).text === 'string'),
-  )
-  return (list ?? []).map(i => ({ at: typeof i.at === 'number' ? i.at : 0, text: i.text as string }))
-}
-
-export function mergeRecent(old: BusLine[], fresh: BusLine[], n = 3): BusLine[] {
-  const seen = new Set<string>()
-  return [...old, ...fresh]
-    .filter(m => {
-      const k = `${m.at}\n${m.text}`
-      return seen.has(k) ? false : (seen.add(k), true)
-    })
-    .sort((a, b) => a.at - b.at)
-    .slice(-n)
+  const candidates: unknown[] = Array.isArray(json) ? [json] : json && typeof json === 'object' ? Object.values(json) : []
+  const hasText = (i: unknown): i is Record<string, unknown> =>
+    !!i && typeof i === 'object' && typeof (i as { text?: unknown }).text === 'string'
+  const list = candidates.find((v): v is unknown[] => Array.isArray(v) && v.some(hasText)) ?? []
+  return list.filter(hasText).map(i => ({ at: typeof i.at === 'number' ? i.at : 0, text: i.text as string }))
 }
 
 export function bandLine(m: BusLine, columns: number): string {

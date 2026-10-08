@@ -7,7 +7,9 @@
 # Use this for settings the user must not be able to disable from the CLI
 # (PARR hooks, baseline permissions, apiKeyHelper). User-scope preferences
 # like statusLine and enabledPlugins should NOT live here — see the init-
-# template pattern in home/development/claude-code-lsp.nix instead.
+# template pattern in home/development/claude-code-lsp.nix instead. The one
+# exception is an organization mod, which only counts as one when managed
+# enabledPlugins names it (modules/programs/claude-code-mods.nix, #2218).
 #
 # Reference: https://code.claude.com/docs/en/settings.md
 # Tracked in issue #398.

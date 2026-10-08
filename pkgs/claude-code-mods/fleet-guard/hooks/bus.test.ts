@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
-import { bandLine, mergeRecent, parseBus } from './bus'
+import { bandLine, parseBus } from './bus'
 
 const payload = JSON.stringify({
   count: 2,
@@ -20,15 +20,12 @@ test('parseBus reads a search payload and survives garbage', () => {
   expect(parseBus('')).toEqual([])
 })
 
-test('mergeRecent dedupes, sorts and keeps the last n', () => {
-  const old = [{ at: 2, text: 'b' }, { at: 1, text: 'a' }]
-  const fresh = [{ at: 2, text: 'b' }, { at: 4, text: 'd' }, { at: 3, text: 'c' }]
-  expect(mergeRecent(old, fresh)).toEqual([
-    { at: 2, text: 'b' },
-    { at: 3, text: 'c' },
-    { at: 4, text: 'd' },
+test('parseBus reads the recent tool\'s plain array and drops only bad items', () => {
+  const recent = JSON.stringify([{ from: 'a', at: 5, text: 'ok' }, { from: 'b', at: 6 }, { at: 7, text: 'also ok' }])
+  expect(parseBus(recent)).toEqual([
+    { at: 5, text: 'ok' },
+    { at: 7, text: 'also ok' },
   ])
-  expect(mergeRecent([], fresh, 1)).toEqual([{ at: 4, text: 'd' }])
 })
 
 test('bandLine prefixes the time, keeps the first line, truncates', () => {

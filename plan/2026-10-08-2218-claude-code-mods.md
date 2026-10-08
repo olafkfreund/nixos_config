@@ -197,6 +197,21 @@ These facts are verified:
    → verify with `grep -n claude-code-mods hosts/*/configuration.nix`, which shows p620 and razer only.
    Traps: never touch `hosts/p510`.
 
+   **Step 6a, added after the Opus review (recorded in the same commit as the code):**
+   - Add a `recent(room, limit=3)` tool to `pkgs/agent-bus-mcp/agent_bus_mcp.py`. It does `/messages` with
+     `dir=b`, no cursor and the session identity, and returns the messages oldest first. Add a self-check in
+     `test_agent_bus_mcp.py` that asserts the direction, the order and that both cursors stay untouched.
+   - In fleet-guard, poll `recent` instead of `read_new`, and drop `$.store` and `mergeRecent`.
+   - Poll only when `e.isInteractive`, without awaiting.
+   - `/announce` refuses origins other than `composer` and `bridge`, and reports a post with `isError`.
+   - `parseBus` drops bad items one at a time.
+   - The commit deny also covers `-am`, `--message` and `git -C`, and passes a quoted `$(cat <<'EOF')` heredoc.
+     The `home-manager switch` deny matches only in command position.
+   - The header of `claude-code-managed.nix` notes the organization-mod exception.
+
+   → verify with the agent-bus self-check, and with `validate`, `test` and `tsc` on both mods.
+   Traps: as in step 3.
+
 7. The session commits steps 1-6 as one commit, `feat(claude-code): ship fleet-guard and nix-flavour mods (#2218)`,
    with the message passed through `-F <file>`.
    → verify that the pre-commit hooks pass.

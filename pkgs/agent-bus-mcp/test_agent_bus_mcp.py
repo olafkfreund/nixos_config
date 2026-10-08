@@ -8,6 +8,7 @@ made a bare room name unusable.
 """
 
 import importlib.util
+import json
 import os
 import stat
 import sys
@@ -201,6 +202,38 @@ with tempfile.TemporaryDirectory() as tmp:
     # agent silently ate the messages it was about to read.
     assert m._get_cursor(m.SESSION_NAME, "!r:example.org") == "read-mark"
     assert m._get_cursor(m.SESSION_NAME + "\0peek", "!r:example.org") == "peek-mark"
+
+    # --- recent -----------------------------------------------------------
+    # The fleet-guard band polls this every minute, so it must read backwards
+    # from the newest message, hand them back oldest first, and leave both
+    # cursors exactly where they were.
+    asked = []
+
+    def recent_handler(request):
+        if "/directory/room/" in request.url.path:
+            return httpx.Response(200, json={"room_id": "!r:example.org"})
+        if "/join/" in request.url.path:
+            return httpx.Response(200, json={"room_id": "!r:example.org"})
+        asked.append(dict(request.url.params))
+        return httpx.Response(
+            200, json={"chunk": [ev("@a:x", "newest", "$n"), ev("@a:x", "older", "$o")]}
+        )
+
+    m._client = lambda name: httpx.Client(
+        base_url="http://x/_matrix/client/v3",
+        transport=httpx.MockTransport(recent_handler),
+    )
+    got = json.loads(m.recent("#agents:example.org", limit=2))
+    assert [g["event_id"] for g in got] == ["$o", "$n"], got
+    assert (
+        asked[0]["dir"] == "b" and asked[0]["limit"] == "2" and "from" not in asked[0]
+    ), asked
+    assert m._get_cursor(m.SESSION_NAME, "!r:example.org") == "read-mark"
+    assert m._get_cursor(m.SESSION_NAME + "\0peek", "!r:example.org") == "peek-mark"
+    m._client = lambda name: httpx.Client(
+        base_url="http://x/_matrix/client/v3",
+        transport=httpx.MockTransport(peek_handler),
+    )
 
     # Exit status is the hook's signal, and a homeserver that is down must not
     # stop an agent finishing its turn.
