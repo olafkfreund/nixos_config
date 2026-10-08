@@ -407,6 +407,7 @@ in
     # same Notification events. Same rationale as p620.
     notifications.enable = false;
   };
+  modules.programs.claude-code-mods.enable = true; # fleet-guard + nix-flavour (#2218)
 
   # /use-ollama, /use-claude, /use-default slash commands + apiKeyHelper
   # that auto-selects router (p620 over Tailscale) or Anthropic cloud key

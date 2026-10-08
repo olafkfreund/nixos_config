@@ -66,6 +66,7 @@
 
   # Claude Code native binary (alternative to npm-based package)
   claude-code-native = pkgs.callPackage ./claude-code-native { };
+  claude-code-mods = pkgs.callPackage ./claude-code-mods { };
 
   # Antigravity IDE (2.0.1+) — Google's rebranded Antigravity Desktop.
   # Standalone derivation in pkgs/antigravity-ide/ because upstream

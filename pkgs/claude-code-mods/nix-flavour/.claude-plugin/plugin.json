@@ -1,0 +1,8 @@
+{
+  "name": "nix-flavour",
+  "version": "0.1.0",
+  "description": "NixOS spinner words, host and generation in the status line",
+  "author": {
+    "name": "olafkfreund"
+  }
+}
