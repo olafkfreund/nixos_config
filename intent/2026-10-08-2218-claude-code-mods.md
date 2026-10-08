@@ -12,13 +12,14 @@ Claude Code 2.1.287+ supports mods: plugins of TypeScript hooks that run
 inside Claude Code and can draw in its interface or intervene in tool calls.
 Two were prototyped and tried in a session on 2026-10-07:
 
-- **fleet-guard:** when Claude is about to run a command that disrupts a
-  shared host (a deploy, GC, store optimise, service restart or reboot), it
-  holds the call. It then asks the user in a dialog that shows the latest
-  `#agents` messages. On approval it posts the announcement to the agent bus
-  itself and passes the command on carrying the markers the managed guards
-  look for. Today those markers are asserted by the model; with the mod they
-  follow a human click. It also hard-denies backticks inside
+- **fleet-guard:** the prototype held disruptive commands (deploy, GC,
+  restart, reboot) behind an approval dialog. That cannot work: managed
+  PreToolUse hooks run before any mod sees a tool call, and their block is
+  final, so the managed bus-announce and p510 guards block first. Revised on
+  2026-10-08 by the user's decision: the managed guards stay authoritative,
+  and fleet-guard adds visibility. It shows a band above the prompt with who
+  is mid-flight on `#agents`, adds an `/announce` command that posts for the
+  user without a Claude turn, and keeps its hard denies for backticks inside
   `git commit -m "..."` (the incident that ran a live deploy) and
   `home-manager switch`. Its classifier's table test found Issue #2215.
 - **nix-flavour:** NixOS-themed spinner and turn-end words. Its status line
@@ -37,9 +38,10 @@ or p510.
 - Every new Claude Code session on the chosen hosts loads them with no manual
   step, and `/plugin` lists them as active.
 - A change to a mod reaches the hosts through the normal update flow.
-- The managed settings hooks stay exactly as they are. fleet-guard sits on top
-  of them and never replaces them, because Codex, agy and `claude -p` sessions
-  don't load mods.
+- The managed settings hooks stay exactly as they are and stay the only
+  enforcement of the bus and p510 rules. fleet-guard adds visibility on top and
+  replaces nothing, because the managed hooks run first anyway, and Codex, agy
+  and `claude -p` sessions don't load mods.
 
 ## Affected users and systems
 
@@ -47,8 +49,8 @@ or p510.
 - `~/.claude/`, which Syncthing syncs between hosts. Nix-store symlinks
   inside it break the sync (see `home/syncthing-stignore.nix`), so the mods
   must reach Claude Code some other way.
-- The agent bus (`#agents`): fleet-guard reads it under its own cursor
-  (`agent: "fleet-guard"`) and posts announcements.
+- The agent bus (`#agents`): fleet-guard reads it under its own cursor and
+  posts what the user asks `/announce` to post.
 - `modules/programs/claude-code-managed.nix` and/or
   `home/development/claude-code*.nix`, depending on the loading mechanism the
   spec chooses.
