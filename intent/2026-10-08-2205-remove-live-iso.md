@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2205
 author: olafkfreund
 ---
@@ -65,7 +65,7 @@ mention in `/nix-help` tell agents to run recipes that fail.
 
 ## Open questions
 
-1. Remove the `/nix-live` agent command (Claude and Gemini) entirely, rather
+1. (Decided: remove.) Remove the `/nix-live` agent command (Claude and Gemini) entirely, rather
    than rewriting it to point at nixarchy's ISO? Proposed: remove.
-2. `.gemini/state/topology.json` looks generated. Edit its two entries by hand,
+2. (Decided: edit by hand.) `.gemini/state/topology.json` looks generated. Edit its two entries by hand,
    or leave it for its generator to refresh? Proposed: edit by hand.
