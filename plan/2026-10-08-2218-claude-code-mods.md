@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2218
 spec: spec/2026-10-08-2218-claude-code-mods.md
 ---
