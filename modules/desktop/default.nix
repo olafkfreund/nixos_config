@@ -6,6 +6,7 @@
     ./theme-owner.nix
     ./ddcutil.nix
     ./sunshine.nix
+    ./craftapps.nix
   ];
 
   # Make sure the adwaita-qt packages are installed

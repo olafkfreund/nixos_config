@@ -304,6 +304,13 @@
       inputs.rust-overlay.follows = "rust-overlay";
     };
 
+    # The ArtCraft Crafting Apps (#2230): our own flake, prebuilt upstream
+    # tarballs pinned by hash. Enabled by features.craftapps on p620 + razer.
+    nix-craftapps = {
+      url = "github:olafkfreund/nix-craftapps";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # spotifast — native Rust Spotify client (library, local playback, Connect).
     # Built from source; exposed as pkgs.spotifast on p620 + razer via profile.nix.
     # Bump with `nix flake update spotifast`.

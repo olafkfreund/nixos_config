@@ -1466,6 +1466,26 @@
         "type": "github"
       }
     },
+    "nix-craftapps": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791534666,
+        "narHash": "sha256-RIJLad0OtNFKPU/+sJ7eJPZ3pITrDXWKMgbvKdSQMqs=",
+        "owner": "olafkfreund",
+        "repo": "nix-craftapps",
+        "rev": "4a0f2f7464bf6a0772e1c52574b25707a60adff1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "nix-craftapps",
+        "type": "github"
+      }
+    },
     "nix-flatpak": {
       "locked": {
         "lastModified": 1767983141,
@@ -2604,6 +2624,7 @@
         "lanzaboote": "lanzaboote",
         "mcp-nixos": "mcp-nixos",
         "microvm": "microvm",
+        "nix-craftapps": "nix-craftapps",
         "nix-index-database": "nix-index-database",
         "nix-skills": "nix-skills",
         "nixarchy": "nixarchy",
