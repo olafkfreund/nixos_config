@@ -493,6 +493,23 @@ in
   # omarchy in the Omarchy one. p620 only for now — razer and p510 stay on
   # stylix until this has been lived in. See modules/desktop/theme-owner.nix.
   features.themeOwner.enable = true;
+  features.craftapps = {
+    enable = true;
+    apps = {
+      cadcraft = true;
+      deckcraft = true;
+      designcraft = true;
+      effectcraft = true;
+      filmcraft = true;
+      gridcraft = true;
+      lightcraft = true;
+      pdfcraft = true;
+      photocraft = true;
+      soundcraft = true;
+      vectorcraft = true;
+      wordcraft = true;
+    };
+  };
 
   # ddcutil: software brightness/contrast control of external monitors (DDC/CI).
   modules.hardware.ddcutil.enable = true;
