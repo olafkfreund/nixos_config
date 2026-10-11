@@ -13,13 +13,24 @@ manager with previews and thumbnails. It is packaged in our own flake,
 ```nix
 features.tfm = {
   enable = true;
-  settings.ui."preview-enabled" = true;
+  settings.ui = {
+    "preview-enabled" = true;
+    "force-glyph" = true;
+  };
 };
 ```
 
 The feature adds the nixos-tfm Home Manager module to every user through
 `home-manager.sharedModules`. The package comes with ffmpeg (for video
 thumbnails) and unzip, zip and p7zip on its `PATH`.
+
+## Icons
+
+tfm draws icons and thumbnails with the kitty graphics protocol. foot, the
+default terminal, cannot display it, and herdr answers tfm's support probe
+itself, so tfm reserves the space but nothing is drawn. `force-glyph = true`
+switches to Nerd Font glyphs instead. Thumbnails are lost even in kitty or
+ghostty, since the setting is global.
 
 ## Config
 
