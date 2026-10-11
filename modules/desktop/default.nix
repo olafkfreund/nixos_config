@@ -7,6 +7,7 @@
     ./ddcutil.nix
     ./sunshine.nix
     ./craftapps.nix
+    ./tfm.nix
   ];
 
   # Make sure the adwaita-qt packages are installed
