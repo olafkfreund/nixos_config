@@ -73,6 +73,10 @@
   # same line for the same reason.
   environment.systemPackages = [ pkgs.psmisc ];
 
+  # gliff-server defaults to renderD128, the NVIDIA card; Hyprland renders on
+  # the Intel iGPU, so capture fails there (#2251). by-path is PCI-stable.
+  environment.variables.GLIFF_RENDER_NODE = "/dev/dri/by-path/pci-0000:00:02.0-render";
+
   # nixarchy pins its own Hyprland and does not defer -- nixpkgs defines
   # programs.hyprland.portalPackage at mkDefault priority, so matching it would
   # tie rather than yield, hence the force.

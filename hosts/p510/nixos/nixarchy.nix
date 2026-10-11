@@ -102,6 +102,12 @@
   # as before.
   programs.nixarchy.preinstalls = false;
 
+  # gliff alone from the preinstalls. Capture on NVIDIA fails upstream
+  # (gbm: map) until gliff supports it (#2251).
+  environment.systemPackages = [
+    inputs.nixarchy.packages.${pkgs.stdenv.hostPlatform.system}.gliff
+  ];
+
   home-manager.users.olafkfreund = {
     imports = [ inputs.nixarchy.homeManagerModules.nixarchy ];
     programs.nixarchy.enable = true;
