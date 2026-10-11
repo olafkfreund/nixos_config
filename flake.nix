@@ -311,6 +311,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # tfm, the mouse-first terminal file manager (Issue #2243): our own flake,
+    # upstream release binary pinned by hash. Enabled by features.tfm.
+    nixos-tfm = {
+      url = "github:olafkfreund/nixos-tfm";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # spotifast — native Rust Spotify client (library, local playback, Connect).
     # Built from source; exposed as pkgs.spotifast on p620 + razer via profile.nix.
     # Bump with `nix flake update spotifast`.

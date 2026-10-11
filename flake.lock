@@ -2173,6 +2173,26 @@
         "type": "github"
       }
     },
+    "nixos-tfm": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791750415,
+        "narHash": "sha256-qnsPKl5d1L3IOuLJpEUF3818yeiShWRpibn8CQSKDU8=",
+        "owner": "olafkfreund",
+        "repo": "nixos-tfm",
+        "rev": "01d46df86e0fdae21dfbc5f15f25b917c384dc07",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "nixos-tfm",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1791594108,
@@ -2653,6 +2673,7 @@
         "nixarchy-voice": "nixarchy-voice",
         "nixarchy-winvm": "nixarchy-winvm",
         "nixos-hardware": "nixos-hardware_2",
+        "nixos-tfm": "nixos-tfm",
         "nixpkgs": "nixpkgs_8",
         "nixpkgs-f2k": "nixpkgs-f2k",
         "nixpkgs-unstable": "nixpkgs-unstable",

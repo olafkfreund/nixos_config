@@ -355,6 +355,10 @@ in
       wordcraft = true;
     };
   };
+  features.tfm = {
+    enable = true;
+    settings.ui."preview-enabled" = true;
+  };
 
   # ddcutil: software brightness/contrast control of external monitors (DDC/CI).
   modules.hardware.ddcutil.enable = true;
