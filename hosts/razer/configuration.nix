@@ -440,6 +440,7 @@ in
     enable = true;
     enableEnvironmentVariables = true;
     enableUserEnvironment = true;
+    braveSearch = true;
   };
 
   # Nix build optimizations

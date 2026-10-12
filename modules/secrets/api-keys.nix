@@ -27,6 +27,8 @@ in
       default = true;
       description = "Export API keys in user shell environment";
     };
+
+    braveSearch = mkEnableOption "the Brave Search key for the reference-engine demo (/run/agenix/api-brave-search)";
   };
 
   config = mkIf cfg.enable {
@@ -213,6 +215,16 @@ in
       gogcli-credentials-json = {
         file = ../../secrets/gogcli-credentials.json.age;
         mode = "0600";
+        owner = username;
+        group = "users";
+      };
+    }
+    # Brave Search key: workstations only (p510 is not a recipient), read from
+    # /run/agenix by the reference-engine demo; never exported (#2265).
+    // lib.optionalAttrs cfg.braveSearch {
+      api-brave-search = {
+        file = ../../secrets/api-brave-search.age;
+        mode = "0400";
         owner = username;
         group = "users";
       };
