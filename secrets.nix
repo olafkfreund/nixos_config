@@ -69,6 +69,8 @@ in
   "secrets/gogcli-credentials.json.age".publicKeys = allUsers ++ allHosts;
   "secrets/obsidian-api-key.age".publicKeys = allUsers ++ workstations;
   "secrets/api-linkedin-cookie.age".publicKeys = allUsers ++ workstations;
+  # Brave Search key for the reference-engine demo (scripts/demo.sh reads /run/agenix/api-brave-search).
+  "secrets/api-brave-search.age".publicKeys = allUsers ++ workstations;
 
   # Atlassian MCP secrets (cloud mode - API tokens)
   "secrets/api-jira-token.age".publicKeys = allUsers ++ workstations;
