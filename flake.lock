@@ -1889,6 +1889,26 @@
         "type": "github"
       }
     },
+    "nixarchy-meeting-mode": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791792053,
+        "narHash": "sha256-tVTh9i247pqlU7rcDMbBOWP4SDdKnnwq2q/MfK+RaqY=",
+        "owner": "olafkfreund",
+        "repo": "nixarchy-meeting-mode",
+        "rev": "5efcaa2756540f2af9481b68df265f897b8d669b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olafkfreund",
+        "repo": "nixarchy-meeting-mode",
+        "type": "github"
+      }
+    },
     "nixarchy-menu": {
       "inputs": {
         "nixpkgs": [
@@ -2694,6 +2714,7 @@
         "nix-skills": "nix-skills",
         "nixarchy": "nixarchy",
         "nixarchy-distrobox": "nixarchy-distrobox_2",
+        "nixarchy-meeting-mode": "nixarchy-meeting-mode",
         "nixarchy-microvm": "nixarchy-microvm_2",
         "nixarchy-pixelbuds": "nixarchy-pixelbuds",
         "nixarchy-pkg": "nixarchy-pkg_2",

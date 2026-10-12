@@ -172,6 +172,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # nixarchy-meeting-mode: quiet desktop during calls (DND, stay awake, night
+    # light off, omarchy-voice stopped); hosts/common/nixos/omarchy-meeting-mode.nix.
+    nixarchy-meeting-mode = {
+      url = "github:olafkfreund/nixarchy-meeting-mode";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # ai-mirror: MCP server + bar indicator letting coding agents drive the
     # Omarchy desktop behind a kill switch (hosts/common/nixos/omarchy-ai-mirror.nix).
     # Tracks ai-mirror's default branch (master). Its PRs land as MERGE COMMITS,
