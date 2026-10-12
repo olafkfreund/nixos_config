@@ -104,3 +104,10 @@ Who does what:
 
 Revert the merge commit and switch again. `/run/agenix/api-brave-search`
 disappears, and the demo goes back to needing an exported key.
+
+## Deviations
+
+- Step 1: `agenix -e` reads stdin instead of running `$EDITOR` when stdin is
+  not a terminal, so the key went in as `agenix -e secrets/api-brave-search.age < <0600 temp file>`.
+  The temp file was deleted at once. Checks: 3 recipient stanzas, and the
+  decrypted length is 31.
