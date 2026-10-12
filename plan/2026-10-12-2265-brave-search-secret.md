@@ -22,6 +22,7 @@ Approved decisions, carried over from the spec:
   change: `demo.sh` already reads `/run/agenix/api-brave-search`.
 
 Who does what:
+
 - I do step 1, because it handles the key.
 - The `coder` agent (Sonnet) does steps 2-4. They are Nix edits across 3 files,
   and with the `.age` file the change touches 5 files.
