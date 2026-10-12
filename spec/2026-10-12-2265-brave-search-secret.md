@@ -22,9 +22,11 @@ not exported as `BRAVE_API_KEY` by `load-api-keys`.
    with a one-line comment saying what reads it:
    `"secrets/api-brave-search.age".publicKeys = allUsers ++ workstations;`
 3. **`modules/secrets/api-keys.nix`.**
-   - A new option, `secrets.apiKeys.braveSearch = mkEnableOption "the Brave Search key for the reference-engine demo"`,
-     off by default.
-   - In `age.secrets`: `api-brave-search = mkIf cfg.braveSearch { file = ../../secrets/api-brave-search.age; mode = "0400"; owner = username; group = "users"; };`.
+   - A new option, off by default:
+     `secrets.apiKeys.braveSearch = mkEnableOption "the Brave Search key for the reference-engine demo"`.
+   - In `age.secrets`, `api-brave-search = mkIf cfg.braveSearch { ... }` with
+     `file = ../../secrets/api-brave-search.age`, `mode = "0400"`,
+     `owner = username` and `group = "users"`.
    - It isn't added to `load-api-keys` or the environment variables.
    - It must be gated: p510 also enables `secrets.apiKeys`, and an undeclared
      recipient can't decrypt the file, so an unconditional declaration would

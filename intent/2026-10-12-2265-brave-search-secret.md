@@ -52,4 +52,6 @@ the containers start with an empty key, and research fails with
   already reads the file, and keeping the key out of every shell environment
   means fewer processes can see it.
 
-**Decided by the user, 2026-10-12 (approved with the recommendations):** recipients are `allUsers ++ workstations`; no `BRAVE_API_KEY` export via `load-api-keys`.
+**Decided by the user, 2026-10-12 (approved with the recommendations):**
+recipients are `allUsers ++ workstations`; no `BRAVE_API_KEY` export via
+`load-api-keys`.
