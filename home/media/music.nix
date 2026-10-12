@@ -15,6 +15,9 @@
     (pkgs.callPackage ../../pkgs/mpris-album-art { })
   ];
 
+  # MPRIS for every mpv (media keys, playerctl, the Omarchy media widget).
+  xdg.configFile."mpv/scripts/mpris.so".source = "${pkgs.mpvScripts.mpris}/share/mpv/scripts/mpris.so";
+
   # Native Spotify runs under Xwayland so mutter draws server-side
   # decorations; delegate decoration drawing to the compositor.
   xdg.desktopEntries.spotify = {
