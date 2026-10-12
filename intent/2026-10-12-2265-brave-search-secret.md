@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2265
 author: olafkfreund
 ---
@@ -51,3 +51,5 @@ the containers start with an empty key, and research fails with
   in user shells, as it does for the other keys? I recommend no. `demo.sh`
   already reads the file, and keeping the key out of every shell environment
   means fewer processes can see it.
+
+**Decided by the user, 2026-10-12 (approved with the recommendations):** recipients are `allUsers ++ workstations`; no `BRAVE_API_KEY` export via `load-api-keys`.
