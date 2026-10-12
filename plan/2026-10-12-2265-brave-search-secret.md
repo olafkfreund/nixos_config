@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2265
 spec: spec/2026-10-12-2265-brave-search-secret.md
 ---
