@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2258
 intent: intent/2026-10-12-2258-omarchy-meeting-mode.md
 ---
