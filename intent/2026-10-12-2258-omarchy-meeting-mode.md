@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2258
 author: olafkfreund
 ---
@@ -44,6 +44,9 @@ nothing in this repo references it.
 - Must evaluate and build on both hosts before merge.
 
 ## Open questions
+
+Resolved at approval (2026-10-12): the proposed answer to each stands —
+1 pixelbuds-style wiring for olafkfreund, 2 keep voice pausing on.
 
 1. **Wiring:** copy the pixelbuds file (set `programs.nixarchy.plugins` for
    olafkfreund via the input's `packages.default`), or use the plugin's own
