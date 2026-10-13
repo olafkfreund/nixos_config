@@ -20,14 +20,13 @@ let
 in
 stdenvNoCC.mkDerivation {
   pname = "omadroid-plugin";
-  # v0.3.4 plus the upstream fix that restores local ADB startup.
-  version = "0.3.4-unstable-2026-09-13";
+  version = "0.3.7";
 
   src = fetchFromGitHub {
     owner = "onelegdave";
     repo = "omadroid";
-    rev = "704e8305964e9b6a390c4cd7d20fe10ac71db9ae";
-    hash = "sha256-PMHjNCbxHDYP65k3hVoXsfK42rbmoFRGu1bpeYz8izI=";
+    rev = "5c6366bd1bfd390da81ff6e0344f28bf05ad5faf";
+    hash = "sha256-yTEmTB8RFR0D3giN946+gsNAjkxu2ZWPpQ+IZCLwYIM=";
   };
 
   dontBuild = true;
