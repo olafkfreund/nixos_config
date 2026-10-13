@@ -61,6 +61,9 @@
     # takes its package from `pkgs.extend`, so following keeps Omarchy's ~80
     # runtime dependencies as the same store paths this system already has
     # rather than a second copy from nixarchy's own nixpkgs.
+    # Plugin inputs nixarchy also carries (nixarchy-voice, -pkg, -distrobox,
+    # -microvm, ai-mirror) follow nixarchy's pins below rather than keeping
+    # their own: bump them with `nix flake update nixarchy`.
     nixarchy = {
       url = "github:olafkfreund/nixarchy";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -82,41 +85,17 @@
       # ahead of fdb83f8.
       inputs.zen-browser.follows = "zen-browser";
 
-      # omarchy-voice is BUILT from nixarchy's pin, not from our own
-      # `nixarchy-voice` input -- it became transitive (see
-      # hosts/p620/nixos/nixarchy.nix:127) and the root input is now vestigial.
-      # Without this follows the lock carries two nixarchy-voice nodes: ours,
-      # which nothing builds, and nixarchy's, which everything does. Bumping
-      # the root one changes no store path, so the package silently stays
-      # wherever nixarchy's lock left it -- measured here as a build missing
-      # every nixarchy-voice change merged that day while `nix flake update
-      # nixarchy-voice` reported success. One node, ours, decides.
-      inputs.nixarchy-voice.follows = "nixarchy-voice";
-
       # nixarchy's NixOS module imports home-manager.nixosModules.home-manager
       # itself. From its own pin that is a second copy of nixos/common.nix, and
       # eval dies with "home-manager.users ... is already declared". Same file
       # from one node = the module system dedupes it.
       inputs.home-manager.follows = "home-manager";
-
-      # hyprland tracks hyprwm main rather than nixarchy's lock. nixarchy
-      # still locks 7ebf13ab (0.56.0 + aquamarine 0.15.0), whose disconnect
-      # path leaves a stale CRTC and makes p620's third head flap
-      # (hyprwm/aquamarine#386). Fixed by aquamarine#410 in 0.15.1, which
-      # Hyprland main locks. Drop this once nixarchy's lock is past it.
-      # Keep the explicit /main: an override whose URL equals nixarchy's own
-      # makes a bulk `nix flake update` copy nixarchy's locked rev instead of
-      # fetching, which silently put 7ebf13ab back.
-      inputs.hyprland.url = "github:hyprwm/Hyprland/main";
     };
 
     # Oma, voice control for the Omarchy desktop. Follows this flake's nixpkgs
     # for the same reason nixarchy does: the package wraps ~10 desktop tools
     # onto PATH, and a second nixpkgs would be a second copy of every one.
-    nixarchy-voice = {
-      url = "github:olafkfreund/nixarchy-voice";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixarchy-voice.follows = "nixarchy/nixarchy-voice";
 
     # nixarchy-pkg: the Omarchy menu for managing nixpkgs packages, services
     # and NixOS options. Follows this flake's nixpkgs for the same reason the
@@ -126,10 +105,7 @@
     # Nix installs the plugin; enabling it is runtime state in shell.json and
     # deliberately not managed here, so each machine needs one:
     #   omarchy plugin enable nixarchy.pkg
-    nixarchy-pkg = {
-      url = "github:olafkfreund/nixarchy-pkg";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixarchy-pkg.follows = "nixarchy/nixarchy-pkg";
 
     # nixarchy-distrobox: distrobox on the Omarchy bar and a key -- list,
     # create (every distrobox create flag), enter, start, stop, upgrade and
@@ -140,10 +116,7 @@
     # Nix installs the plugin; enabling it is runtime state in shell.json and
     # deliberately not managed here, so each machine needs one:
     #   omarchy plugin enable nixarchy.distrobox
-    nixarchy-distrobox = {
-      url = "github:olafkfreund/nixarchy-distrobox";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixarchy-distrobox.follows = "nixarchy/nixarchy-distrobox";
 
     # nixarchy-microvm: NixOS MicroVMs on the Omarchy bar and SUPER+ALT+V --
     # disposable VMs through `nixarchy vm` and permanent ones through
@@ -154,10 +127,7 @@
     # Nix installs the plugin; enabling it is runtime state in shell.json and
     # deliberately not managed here, so each machine needs one:
     #   omarchy plugin enable nixarchy.microvm
-    nixarchy-microvm = {
-      url = "github:olafkfreund/nixarchy-microvm";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixarchy-microvm.follows = "nixarchy/nixarchy-microvm";
 
     # nixarchy-winvm: Windows VM panel; a plain plugin source (hosts/common/nixos/omarchy-winvm.nix).
     nixarchy-winvm = {
@@ -186,10 +156,7 @@
     # history and old locks keep resolving. Follows nixpkgs so grim, wl-clipboard
     # and PyGObject are the store paths this system already has.
     # Bump with `nix flake update ai-mirror`.
-    ai-mirror = {
-      url = "github:olafkfreund/ai-mirror";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    ai-mirror.follows = "nixarchy/ai-mirror";
 
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
