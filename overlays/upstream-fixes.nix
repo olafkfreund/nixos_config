@@ -1,4 +1,12 @@
 _final: prev: {
+  # typescript-language-server 6.0.2's pnpm-deps hash is wrong in nixos-unstable
+  # 7fd4004; fixed on master by nixpkgs#572951. Drop once unstable has it.
+  typescript-language-server = prev.typescript-language-server.overrideAttrs (old: {
+    pnpmDeps = old.pnpmDeps.overrideAttrs {
+      outputHash = "sha256-xR/EF60lVBsITKgH7wCM2wHM46PFQevD51KfCENSUH4=";
+    };
+  });
+
   # gtksourceview5 5.20.0's meson suite hangs in the build sandbox: 9 of 26
   # tests (test-vim-*, test-view, test-buffer, ...) TIMEOUT after 50-90s
   # because there is no locale and no XDG_RUNTIME_DIR. 17 pass, 0 actually
