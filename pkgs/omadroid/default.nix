@@ -56,9 +56,15 @@ stdenvNoCC.mkDerivation {
       --replace-fail "'ADB': '/usr/bin/adb'" "'ADB': '${bin android-tools "adb"}'" \
       --replace-fail "/usr/share/scrcpy/scrcpy-server" "${scrcpy}/share/scrcpy/scrcpy-server"
 
+    # 0.3.6's manual install hints are pacman commands, which nixarchy's plugin
+    # validation rejects; point them at the NixOS configuration instead.
     substituteInPlace Panel.qml \
       --replace-fail '"/usr/bin/python3"' '"${bin python3 "python3"}"' \
-      --replace-fail '"PATH": "/usr/bin"' '"PATH": "${path}"'
+      --replace-fail '"PATH": "/usr/bin"' '"PATH": "${path}"' \
+      --replace-fail '"sudo pacman -S --needed scrcpy android-tools"' '"Add scrcpy and android-tools to your NixOS configuration"' \
+      --replace-fail '"sudo pacman -S --needed kdeconnect"' '"Enable programs.kdeconnect in your NixOS configuration"' \
+      --replace-fail '"sudo pacman -S --needed avahi\nsudo systemctl enable --now avahi-daemon.service"' '"Enable services.avahi in your NixOS configuration"' \
+      --replace-fail '"sudo pacman -S --needed android-udev"' '"Add android-tools to services.udev.packages in your NixOS configuration"'
 
     mkdir -p $out
     cp manifest.json Panel.qml phone_mirror.py safe_files.py safe_process.py LICENSE $out/
