@@ -97,10 +97,13 @@
   #     `mpris.py` bridge with a bare `python3` the same way, and without the
   #     library the plugin loses media-key and desktop media control only,
   #     silently. Same reasoning as openrazer: the plugin has no path of its own.
+  #   - pillow — omapager (Omarchy notification daemon) decodes sender images
+  #     and website icons with it; without it those fall back to theme icons.
   user-python3 = pkgs.python3.withPackages (ps: [
     (ps.callPackage ./google-antigravity-py { })
     ps.openrazer
     ps.dbus-next
+    ps.pillow
   ]);
 
   # GitHub Copilot desktop app — agent-native desktop experience from the
