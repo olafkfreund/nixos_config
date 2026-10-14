@@ -140,3 +140,9 @@ next remount or reboot. There is no state to clean.
 
 Steps 1–3 edit three files, so the `coder` subagent implements steps 1–3.
 Claude reviews the work and runs steps 4–6.
+
+## Deviations
+
+- **Step 3.** The after-update probe's first check was "append a line", run
+  through the shell. Shell commands now see a read-only worktree, so it is an
+  edit with `write_to_file` instead.

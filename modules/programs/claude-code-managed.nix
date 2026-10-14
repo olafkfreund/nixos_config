@@ -1006,5 +1006,13 @@ in
     # agy reads ~/.gemini/config/hooks.json, which Syncthing carries between
     # hosts, so the command path must be absolute /etc, not a store path.
     environment.etc."antigravity/hooks/coder-guard".source = agyGuardScript;
+
+    # agy's sandbox remounts /bin read-only without repeating envfs's FUSE
+    # nosuid,nodev, which a user namespace locks -> EPERM (#2298). Harmless on
+    # envfs: it serves symlinks, so suid/dev follow the target's mount.
+    fileSystems = lib.mkIf config.services.envfs.enable {
+      "/usr/bin".options = [ "suid" "dev" ];
+      "/bin".options = [ "suid" "dev" ];
+    };
   };
 }

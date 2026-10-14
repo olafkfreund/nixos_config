@@ -63,6 +63,9 @@ case "$name" in
     if ! echo "$payload" | @jq@ -e '.toolCall.args.CommandLine | strings' >/dev/null 2>&1; then
       deny "run_command without a string CommandLine"
     fi
+    if echo "$payload" | @jq@ -e '.toolCall.args.BypassSandbox == true' >/dev/null 2>&1; then
+      deny "agy-implement may not bypass the sandbox (#2298)"
+    fi
     cmd="$(echo "$payload" | @jq@ -r '.toolCall.args.CommandLine')"
 
     # shellcheck disable=SC2016 # $c is a jq variable, not a shell one
