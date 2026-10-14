@@ -146,3 +146,9 @@ Claude reviews the work and runs steps 4–6.
 - **Step 3.** The after-update probe's first check was "append a line", run
   through the shell. Shell commands now see a read-only worktree, so it is an
   edit with `write_to_file` instead.
+- **Step 4/5.** The switch reloaded `bin.mount` and `usr-bin.mount`.
+  - `/bin`, the bind mount, lost `nosuid,nodev` at once.
+  - `/usr/bin`, the envfs FUSE mount itself, keeps them until the host next
+    boots, because a reload does not change FUSE mount flags.
+  - agy's sandbox only remounts `/bin`, so the sandbox works on both hosts
+    with no further action.
