@@ -1021,7 +1021,7 @@ in
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
-        ExecStart = "${pkgs.util-linux}/bin/mount -o remount,bind,suid,dev /bin";
+        ExecStart = "${pkgs.util-linux}/bin/mount -o remount,bind,ro,suid,dev /bin";
       };
     };
   };
