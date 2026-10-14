@@ -167,3 +167,11 @@ to be closed:
   show in `denied_actions`.
 - **The razer note is removed.** The user signed razer's agy in with the
   Ultra account, so the step-4 probe runs without `--model`.
+
+## Fix after merge
+
+The write fence compared against `$PWD`. But agy runs hooks with the working
+directory `~/.gemini/config`, so every write in the worktree was denied. A
+live probe found this after #2297 merged. The wrapper now exports
+`AGY_WORKTREE="$PWD"`, and hooks inherit agy's environment. The adapter
+fences writes to `AGY_WORKTREE`, and denies writes when it is unset.
