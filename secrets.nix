@@ -78,6 +78,7 @@ in
   #   SERVICENOW_INTEGRATION_USER      the user that app acts as
   #   SERVICENOW_WEBHOOK_KEY / _SECRET the Business Rule key (bare) / Siphon's whsec_ form
   #   SERVICENOW_USERNAME / _PASSWORD  admin login, for instance setup only
+  #   SERVICENOW_MCP_CLIENT_ID / _SECRET / _URL  the "Siphon MCP" app (auth code) for the official MCP server
   #   SERVICENOW_APP_ID / _SECRET, SNOW_TOKEN, SNOW_TOOLID  from the sarc .envrc
   # Read with: age -d -i ~/.ssh/id_ed25519 secrets/servicenow-calitti-env.age
   "secrets/servicenow-calitti-env.age".publicKeys = allUsers ++ workstations;
