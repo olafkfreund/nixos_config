@@ -44,17 +44,19 @@ case "$name" in
     echo '{"decision":"allow"}'
     exit 0
     ;;
-  # --sandbox confines shell commands only, so file writes are fenced here:
-  # the target must resolve inside the working directory, the task worktree (#2296).
+  # --sandbox confines shell commands only, so file writes are fenced here to
+  # the directory agy-implement started in. Hooks run in ~/.gemini/config, so
+  # the wrapper passes that directory as AGY_WORKTREE (#2296).
   write_to_file | replace_file_content | multi_replace_file_content)
+    [ -n "${AGY_WORKTREE:-}" ] || deny "AGY_WORKTREE is not set"
     target="$(echo "$payload" | @jq@ -r '.toolCall.args.TargetFile // empty | sub("^file://"; "")')"
     [ -n "$target" ] || deny "$name without a TargetFile"
     case "$(@realpath@ -m -- "$target")/" in
-      "$(@realpath@ -m -- "$PWD")"/*)
+      "$(@realpath@ -m -- "$AGY_WORKTREE")"/*)
         echo '{"decision":"allow"}'
         exit 0
         ;;
-      *) deny "agy-implement may only write inside $PWD (#2296)" ;;
+      *) deny "agy-implement may only write inside $AGY_WORKTREE (#2296)" ;;
     esac
     ;;
   run_command)

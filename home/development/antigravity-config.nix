@@ -152,7 +152,7 @@ let
 
     unset CASCADE_GLOBAL_CONFIG_OVERRIDE
     # shellcheck disable=SC2086
-    HOME=${config.home.homeDirectory} AGY_CODER=1 exec agy --mode accept-edits --sandbox --dangerously-skip-permissions $model "$@"
+    HOME=${config.home.homeDirectory} AGY_CODER=1 AGY_WORKTREE="$PWD" exec agy --mode accept-edits --sandbox --dangerously-skip-permissions $model "$@"
   '';
 
 in
