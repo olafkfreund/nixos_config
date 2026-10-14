@@ -63,6 +63,10 @@ case "$name" in
     if ! echo "$payload" | @jq@ -e '.toolCall.args.CommandLine | strings' >/dev/null 2>&1; then
       deny "run_command without a string CommandLine"
     fi
+    # agy decodes args with Go's case-insensitive JSON, so match any casing (#2298).
+    if echo "$payload" | @jq@ -e '[.toolCall.args | to_entries[] | select(.key | ascii_downcase == "bypasssandbox") | .value] | any(. != false and . != null)' >/dev/null 2>&1; then
+      deny "agy-implement may not bypass the sandbox (#2298)"
+    fi
     cmd="$(echo "$payload" | @jq@ -r '.toolCall.args.CommandLine')"
 
     # shellcheck disable=SC2016 # $c is a jq variable, not a shell one

@@ -36,6 +36,8 @@ Add `--model <name>` to `agy-implement` to override its default.
 - "Do not commit, deploy or restart. Report the changed files and any
   deviation from the plan."
 - The step's check command.
+- "Shell commands run in agy's sandbox with the worktree read-only, so make
+  the step's edits with agy's file tools; use commands for checks only."
 
 ## A handoff failed when
 
@@ -60,11 +62,13 @@ Otherwise report the failure to the user and do the step yourself.
 ## After an agy update
 
 Before the first handoff on a new agy version, run the guard probe in a
-scratch git repo: append a line, `git commit -am x`, `touch ~/.gemini/probe`,
+scratch git repo: edit a file with `write_to_file`, `git commit -am x`, `touch ~/.gemini/probe`,
 and `write_to_file` to a path outside the repo. The edit must succeed, the
 other three must be blocked, and `HEAD` must not move. If any is not
 blocked, stop and tell the user: hooks no longer fire under
-`--dangerously-skip-permissions` (Issue #2296).
+`--dangerously-skip-permissions` (Issue #2296). Also check that a sandboxed
+`git status` succeeds and that a `run_command` with `BypassSandbox: true` is
+blocked (Issue #2298).
 
 ## Never
 
