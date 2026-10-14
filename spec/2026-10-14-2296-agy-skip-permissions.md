@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2296
 intent: intent/2026-10-14-2296-agy-skip-permissions.md
 ---
