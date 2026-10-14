@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2305
 author: olafkfreund
 ---
@@ -99,3 +99,9 @@ SUPER+SHIFT+ALT+arrow binds are live, and `hl.get_monitors()` exposes
    `hl.dispatch` inside a bind updates the window state synchronously (Station
    waits 20 ms and agy says it does not have to), and the exact monitor
    hot-plug event name for `hl.on`.
+
+## Resolution (at approval, 2026-10-14)
+
+Approved with the recommendations: scope is items 1-4; the bar widget (5) is a
+separate issue. Block ordering and the replacement for the conflicting binds
+are decided in the spec, for review there.
