@@ -40,10 +40,22 @@ if echo "$payload" | @jq@ -e '[.toolCall.args | .. | strings] | any(test("\\.gem
 fi
 
 case "$name" in
-  view_file | grep_search | list_dir | find_by_name | replace_file_content | \
-    multi_replace_file_content | write_to_file | ask_question | list_permissions)
+  view_file | grep_search | list_dir | find_by_name | ask_question | list_permissions)
     echo '{"decision":"allow"}'
     exit 0
+    ;;
+  # --sandbox confines shell commands only, so file writes are fenced here:
+  # the target must resolve inside the working directory, the task worktree (#2296).
+  write_to_file | replace_file_content | multi_replace_file_content)
+    target="$(echo "$payload" | @jq@ -r '.toolCall.args.TargetFile // empty | sub("^file://"; "")')"
+    [ -n "$target" ] || deny "$name without a TargetFile"
+    case "$(@realpath@ -m -- "$target")/" in
+      "$(@realpath@ -m -- "$PWD")"/*)
+        echo '{"decision":"allow"}'
+        exit 0
+        ;;
+      *) deny "agy-implement may only write inside $PWD (#2296)" ;;
+    esac
     ;;
   run_command)
     if ! echo "$payload" | @jq@ -e '.toolCall.args.CommandLine | strings' >/dev/null 2>&1; then

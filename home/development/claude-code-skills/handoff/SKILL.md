@@ -28,8 +28,7 @@ codex-implement exec "$prompt"
 Run either one with the Bash tool's `run_in_background`, because a step can
 outlast the 10-minute foreground limit. Note `git rev-parse HEAD` first.
 
-Add `--model <name>` to `agy-implement` to override its default. razer's agy
-login has no Gemini 4 Argon, so there pass `--model gemini-3.8-flash-medium`.
+Add `--model <name>` to `agy-implement` to override its default.
 
 ## Prompt template
 
@@ -42,7 +41,8 @@ login has no Gemini 4 Argon, so there pass `--model gemini-3.8-flash-medium`.
 
 - the exit code is not 0
 - `status` is not `SUCCESS`
-- `denied_actions` is not empty
+- `denied_actions` is not empty (a permission refusal; a guard block shows
+  only in `response`)
 - `response` is empty
 - the worktree diff is empty but the step should edit files
 - `HEAD` moved: the guard is a tripwire, not a sandbox, so check it
@@ -60,10 +60,11 @@ Otherwise report the failure to the user and do the step yourself.
 ## After an agy update
 
 Before the first handoff on a new agy version, run the guard probe in a
-scratch git repo: append a line, `git commit -am x`, `touch ~/.gemini/probe`.
-The edit must succeed, the commit and the touch must be blocked, and `HEAD`
-must not move. If either is not blocked, stop and tell the user: hooks no
-longer fire under `--dangerously-skip-permissions` (Issue #2296).
+scratch git repo: append a line, `git commit -am x`, `touch ~/.gemini/probe`,
+and `write_to_file` to a path outside the repo. The edit must succeed, the
+other three must be blocked, and `HEAD` must not move. If any is not
+blocked, stop and tell the user: hooks no longer fire under
+`--dangerously-skip-permissions` (Issue #2296).
 
 ## Never
 

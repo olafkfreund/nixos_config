@@ -132,8 +132,8 @@ let
       exit 1
     fi
 
-    if ! ${pkgs.jq}/bin/jq -e \
-        '[."coder-guard".PreToolUse[]?.hooks[]?.command // empty] | any(contains("/etc/antigravity/hooks/coder-guard"))' \
+    if ! ${pkgs.jq}/bin/jq -e --slurpfile want ${coderGuardHookEntry} \
+        '."coder-guard" == $want[0]."coder-guard"' \
         "$hooks" >/dev/null 2>&1; then
       echo "agy-implement: $hooks has no coder-guard hook registered -- refusing to run with write access (#2087)." >&2
       exit 1
@@ -141,11 +141,18 @@ let
 
     model="--model gemini-4-argon-medium"
     for a in "$@"; do
-      case "$a" in --model|--model=*|--effort|--effort=*) model="" ;; esac
+      case "$a" in
+        --model|--model=*|--effort|--effort=*) model="" ;;
+        # these would load another hooks.json and drop the guard (#2296)
+        -*gemini_dir*|-*gemini-dir*|-*config*dir*|-*config_override*)
+          echo "agy-implement: refusing $a -- it could load hooks without the guard (#2296)." >&2
+          exit 1 ;;
+      esac
     done
 
+    unset CASCADE_GLOBAL_CONFIG_OVERRIDE
     # shellcheck disable=SC2086
-    AGY_CODER=1 exec agy --mode accept-edits --sandbox --dangerously-skip-permissions $model "$@"
+    HOME=${config.home.homeDirectory} AGY_CODER=1 exec agy --mode accept-edits --sandbox --dangerously-skip-permissions $model "$@"
   '';
 
 in

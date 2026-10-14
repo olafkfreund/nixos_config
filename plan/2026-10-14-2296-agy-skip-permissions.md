@@ -137,3 +137,33 @@ shadow-home wrapper from Issue #2291. There is no state to clean.
 Steps 1–2 edit three files, which meets the managed rule's three-file
 threshold, so the `coder` subagent implements steps 1–2. Claude reviews the
 work and runs steps 3–4.
+
+## Deviations from the Opus review
+
+Under the flag, the guard is the only barrier, so every way around it had
+to be closed:
+
+- **The wrapper pins `HOME`.** It now runs with
+  `HOME=${config.home.homeDirectory}` and clears
+  `CASCADE_GLOBAL_CONFIG_OVERRIDE`. Before this, `HOME=/tmp/x agy-implement`
+  passed both checks, because they use fixed paths, and then agy loaded a
+  `hooks.json` with no guard.
+- **The wrapper refuses config-dir flags.** It rejects flag arguments
+  matching `gemini_dir`, `gemini-dir`, `config…dir` or `config_override`.
+  A probe showed that agy accepts `--gemini_dir=`. Prompt text is not
+  matched.
+- **The hooks check is exact.** It compares the whole `coder-guard` entry
+  with the generated `coderGuardHookEntry`, instead of a substring.
+- **The adapter fences file writes.**
+  - `write_to_file`, `replace_file_content` and `multi_replace_file_content`
+    must have a `TargetFile` that resolves inside `$PWD`, which is the task
+    worktree.
+  - A probe showed that `--sandbox` confines shell commands only:
+    `write_to_file` created a file outside the worktree.
+  - `realpath` comes from coreutils, substituted as `@realpath@` in
+    `modules/programs/claude-code-managed.nix`.
+- **The skill's post-update probe** adds a `write_to_file` outside the repo,
+  which must be blocked. The skill also notes that a guard block does not
+  show in `denied_actions`.
+- **The razer note is removed.** The user signed razer's agy in with the
+  Ultra account, so the step-4 probe runs without `--model`.
