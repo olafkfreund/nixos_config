@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2305
 intent: intent/2026-10-14-2305-directional-window-move.md
 ---
