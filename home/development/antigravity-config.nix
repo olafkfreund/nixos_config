@@ -140,7 +140,8 @@ let
     fi
 
     shadow="$(mktemp -d "''${XDG_RUNTIME_DIR:?}/agy-implement.XXXXXX")"
-    trap 'rm -rf "$shadow"' EXIT
+    # agy's MCP children outlive it and recreate caches in $shadow, so sweep twice.
+    trap 'rm -rf "$shadow"; (sleep 10; rm -rf "$shadow") >/dev/null 2>&1 &' EXIT
 
     # link every entry of $1 into $2 except the name in $3
     link_except() {

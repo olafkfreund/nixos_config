@@ -164,3 +164,19 @@ never touched, so no state needs cleaning.
 
 Steps 1–3 edit five files, so under the managed model split the `coder`
 subagent implements steps 1–3. Claude reviews the work and runs step 4.
+
+## Deviations found in step 4
+
+- **Second cleanup pass.** On razer, agy's MCP helpers (npx and go) outlive
+  agy for a few seconds and recreate `.npm` and `go/` in the shadow home after
+  the trap has removed it. p620 has those directories in the real home, so
+  they were linked there and nothing was recreated. The trap now runs a second
+  `rm -rf` 10 seconds later in the background.
+- **razer's agy account has no Gemini 4 Argon.** It is the same agy 1.3.4
+  binary, but `agy models` on razer lists only Gemini 3.8 Flash, Claude 4.6
+  and GPT-OSS. So `agy-implement` with no `--model` fails there with
+  `status: ERROR` and exit code 1, which the handoff skill counts as a
+  failure. The default stays `gemini-4-argon-medium`, as decided. On razer,
+  pass `--model gemini-3.8-flash-medium` until the login is refreshed. With
+  that model the razer check passed: the edit was made and the commit was
+  blocked.
