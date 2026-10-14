@@ -1009,10 +1009,20 @@ in
 
     # agy's sandbox remounts /bin read-only without repeating envfs's FUSE
     # nosuid,nodev, which a user namespace locks -> EPERM (#2298). Harmless on
-    # envfs: it serves symlinks, so suid/dev follow the target's mount.
-    fileSystems = lib.mkIf config.services.envfs.enable {
-      "/usr/bin".options = [ "suid" "dev" ];
-      "/bin".options = [ "suid" "dev" ];
+    # envfs: it serves symlinks, so suid/dev follow the target's mount. envfs
+    # ignores its own options and binds /bin itself at boot, so the option
+    # covers switches and the oneshot covers boot.
+    fileSystems."/bin".options = lib.mkIf config.services.envfs.enable [ "suid" "dev" ];
+    systemd.services.envfs-bin-suid = lib.mkIf config.services.envfs.enable {
+      description = "Remount envfs /bin without nosuid,nodev for agy's sandbox (#2298)";
+      after = [ "usr-bin.mount" ];
+      wantedBy = [ "multi-user.target" ];
+      unitConfig.ConditionPathIsMountPoint = "/bin";
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = "${pkgs.util-linux}/bin/mount -o remount,bind,suid,dev /bin";
+      };
     };
   };
 }

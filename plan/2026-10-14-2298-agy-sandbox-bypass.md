@@ -152,3 +152,21 @@ Claude reviews the work and runs steps 4–6.
     boots, because a reload does not change FUSE mount flags.
   - agy's sandbox only remounts `/bin`, so the sandbox works on both hosts
     with no further action.
+
+## Deviations from the Opus review
+
+- **The /bin fix would not survive a boot.** At boot, envfs binds `/bin`
+  itself (`bind-mount=/bin`). `bin.mount` is skipped by its condition, so
+  the `fileSystems."/bin"` options apply only on a switch.
+  - The new oneshot `envfs-bin-suid` runs
+    `mount -o remount,bind,suid,dev /bin` after `usr-bin.mount`.
+  - It has `ConditionPathIsMountPoint=/bin`, so a missing mount skips it
+    instead of failing a deploy.
+  - It runs as root because it mounts, so it is outside the
+    DynamicUser/ProtectSystem rule.
+- **The /usr/bin options are dropped.** envfs's mount helper ignores `suid`
+  and `dev` ("ignore invalid mount option").
+- **Case-insensitive BypassSandbox.** agy decodes tool args with Go's
+  `encoding/json`, which matches keys regardless of case, with the last key
+  winning. The adapter now denies when any key that lowercases to
+  `bypasssandbox` has a value other than `false` or `null`.
