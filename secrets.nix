@@ -71,6 +71,16 @@ in
   "secrets/api-linkedin-cookie.age".publicKeys = allUsers ++ workstations;
   # Brave Search key for the reference-engine demo (scripts/demo.sh reads /run/agenix/api-brave-search).
   "secrets/api-brave-search.age".publicKeys = allUsers ++ workstations;
+  # ServiceNow demo instance (calitiiltddemo3) for Siphon's ServiceNow
+  # integration tests (siphon #73-#76). An env file, not wired to any service:
+  #   SERVICENOW_INSTANCE_URL
+  #   SERVICENOW_CLIENT_ID / _SECRET   the "Siphon" OAuth app (client credentials)
+  #   SERVICENOW_INTEGRATION_USER      the user that app acts as
+  #   SERVICENOW_WEBHOOK_KEY / _SECRET the Business Rule key (bare) / Siphon's whsec_ form
+  #   SERVICENOW_USERNAME / _PASSWORD  admin login, for instance setup only
+  #   SERVICENOW_APP_ID / _SECRET, SNOW_TOKEN, SNOW_TOOLID  from the sarc .envrc
+  # Read with: age -d -i ~/.ssh/id_ed25519 secrets/servicenow-calitti-env.age
+  "secrets/servicenow-calitti-env.age".publicKeys = allUsers ++ workstations;
 
   # Atlassian MCP secrets (cloud mode - API tokens)
   "secrets/api-jira-token.age".publicKeys = allUsers ++ workstations;
