@@ -57,8 +57,17 @@ Otherwise report the failure to the user and do the step yourself.
 - Commit yourself. Neither tool commits; the guard blocks it.
 - Record in the PR which steps agy or Codex did.
 
+## After an agy update
+
+Before the first handoff on a new agy version, run the guard probe in a
+scratch git repo: append a line, `git commit -am x`, `touch ~/.gemini/probe`.
+The edit must succeed, the commit and the touch must be blocked, and `HEAD`
+must not move. If either is not blocked, stop and tell the user: hooks no
+longer fire under `--dangerously-skip-permissions` (Issue #2296).
+
 ## Never
 
-- `--dangerously-skip-permissions`
+- passing `--dangerously-skip-permissions` yourself; `agy-implement` already
+  adds it, under the guard
 - `HUMANIZE_CODEX_BYPASS_SANDBOX`
 - an API key (subscription login only)
