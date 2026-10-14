@@ -52,6 +52,8 @@ let
     agent-bus = { src = ./agent-bus; to = [ "claude" "codex" ]; };
     # Claude only: for codex/agy it would let reviewers delegate to each other (#1831).
     second-opinion = { src = ./second-opinion; to = [ "claude" ]; };
+    # Claude only: codex and agy must not hand work to each other (Issue #2291).
+    handoff = { src = ./handoff; to = [ "claude" ]; };
     # Claude only: the cloud model drafts; it does not review or commit (#1928, #1929).
     ask-ollama-cloud = { src = ./ask-ollama-cloud; to = [ "claude" ]; };
   };
