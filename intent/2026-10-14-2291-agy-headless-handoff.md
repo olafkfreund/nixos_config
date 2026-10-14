@@ -74,9 +74,11 @@ What exists and can be reused:
 
 ## Constraints
 
-- **Allow only what the job needs.** The guard must not be the only thing
-  standing between agy and the host. If the allow-list can only be global,
-  it must not widen what plain `agy` or `--mode plan` may do.
+- **Broad allow-list, guard as the backstop.** agy-implement may run any
+  command headless. The coder guard is what blocks commits, deploys,
+  restarts, garbage collection and reboots, so it must be proven to fire
+  headless. The wider permissions must apply only to agy-implement. Plain
+  `agy` and `--mode plan` must not gain anything.
 - **No `--dangerously-skip-permissions`.** It stays banned, including inside
   wrappers.
 - **Syncthing.** Nothing goes into `~/.gemini` as a Nix store symlink on a
@@ -87,19 +89,18 @@ What exists and can be reused:
 - **Claude keeps the deciding and the committing.** agy's output is
   untrusted until Claude reviews it.
 
+## Decisions (answered 2026-10-14)
+
+1. **Who may start it.** Claude may start both `agy-implement` and
+   `codex-implement` headless for an approved `plan/`. `AGENTS.md` changes
+   for both.
+2. **When Claude hands to agy.** Only when you ask for it. The Sonnet
+   `coder` subagent stays the default from the managed policy.
+3. **How wide the allow-list is.** Broad (`command(*)`), with the coder guard
+   as the backstop. It is scoped to agy-implement only.
+4. **Model.** The default changes to `gemini-4-argon-medium`. Claude may pass
+   `--model` (for example `gemini-4-argon-high`) for a harder step.
+
 ## Open questions
 
-1. **Who may start it.** `AGENTS.md` currently says `agy-implement` runs
-   only in a session you start. Do you approve Claude starting it headless
-   for an approved `plan/`? Should that also cover `codex-implement`, which
-   has the same "user starts it" wording?
-2. **When Claude hands to agy.** Is it only when you say so ("give this to
-   agy"), or also by default for large plans in place of the Sonnet `coder`
-   subagent? The managed policy currently names `coder` for plans of three
-   or more steps.
-3. **How wide the allow-list is.** Should it be a fixed list of commands
-   (`nix build`, `nix eval`, `nix fmt`, `just check-syntax`, `git diff`,
-   `git status`, read tools), or broader with the guard as the backstop? The
-   proposal is a fixed list, widened when a real task needs more.
-4. **Model.** Keep `gemini-3.8-flash-medium` from #2087, or let Claude pick
-   per task with `--model`?
+None.
