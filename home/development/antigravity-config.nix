@@ -121,6 +121,8 @@ let
   # closed: refuses to run unless the guard adapter is installed and hooks.json
   # actually registers it, so a session can never end up with write access and
   # no guard because of drift between the /etc file and the synced hooks.json.
+  # agy runs under a per-run shadow HOME whose settings.json alone carries the
+  # headless command(*) allow rule, so plain agy never gets it (#2291).
   agyImplement = pkgs.writeShellScriptBin "agy-implement" ''
     guard="/etc/antigravity/hooks/coder-guard"
     hooks="${geminiDir}/config/hooks.json"
@@ -137,7 +139,36 @@ let
       exit 1
     fi
 
-    AGY_CODER=1 exec agy --mode accept-edits --model gemini-3.8-flash-medium --sandbox "$@"
+    shadow="$(mktemp -d "''${XDG_RUNTIME_DIR:?}/agy-implement.XXXXXX")"
+    trap 'rm -rf "$shadow"' EXIT
+
+    # link every entry of $1 into $2 except the name in $3
+    link_except() {
+      for e in "$1"/* "$1"/.[!.]* "$1"/..?*; do
+        [ -e "$e" ] || [ -L "$e" ] || continue
+        [ "''${e##*/}" = "$3" ] && continue
+        ln -s "$e" "$2/"
+      done
+    }
+
+    mkdir -p "$shadow/.gemini/antigravity-cli"
+    link_except "$HOME" "$shadow" .gemini
+    link_except "$HOME/.gemini" "$shadow/.gemini" antigravity-cli
+    link_except "$HOME/.gemini/antigravity-cli" "$shadow/.gemini/antigravity-cli" settings.json
+
+    real="$HOME/.gemini/antigravity-cli/settings.json"
+    (umask 077; { cat "$real" 2>/dev/null || echo '{}'; } \
+      | ${pkgs.jq}/bin/jq '.permissions.allow = ["command(*)"]' \
+      > "$shadow/.gemini/antigravity-cli/settings.json")
+
+    model="--model gemini-4-argon-medium"
+    for a in "$@"; do
+      case "$a" in --model|--model=*) model="" ;; esac
+    done
+
+    # shellcheck disable=SC2086
+    HOME="$shadow" AGY_CODER=1 agy --mode accept-edits --sandbox $model "$@"
+    exit $?
   '';
 
 in
