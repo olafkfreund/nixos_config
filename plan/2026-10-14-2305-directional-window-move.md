@@ -293,3 +293,21 @@ writes `~/.config/hypr/workspace-groups.lua` as a Nix `''…''` string
 fully Nix-managed (`home.file.text`), so the previous `workspace-groups.lua`
 returns with it. Nothing outside it changes: `bindings.lua`, `monitors.lua`
 and Omarchy's defaults are untouched, and unbinds disappear with the file.
+
+## Deviations during implementation
+
+- **Step 4:** `current_group()` now sits above `focus_group()`. A Lua
+  `local function` is not in scope before its definition, and `focus_group`
+  calls `current_group`. (coder)
+- **Step 6, from the review:** `neighbour()` and `row_end()` read monitor
+  geometry through a `box(m)` helper. It divides `width`/`height` (the
+  panel's mode) by `scale` and swaps them for odd `transform`, because
+  positions are logical. A scaled or rotated output would otherwise find the
+  wrong neighbour or overlap.
+- **Steps 4/6, from the review:** `former_group` is now also set in
+  `move_to_group` and before the wrap in `move_direction`. Their
+  `follow = true` already shows the target group, so `focus_group`'s own
+  check never saw the group you left.
+- **Tests §3:** run row 6 (a swap within a workspace) first. If the Lua `at`
+  ever reports an in-flight position, a real swap would read as "no change"
+  and the window would also be sent to the next monitor.
