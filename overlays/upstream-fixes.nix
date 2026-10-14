@@ -27,23 +27,6 @@ _final: prev: {
     patches = (old.patches or [ ]) ++ [ ./playerctl-null-variant.patch ];
   });
 
-  # codex 0.160.1 is ahead of nixos-unstable (0.160.0).
-  # Drop once unstable reaches 0.160.1.
-  codex = prev.codex.overrideAttrs (_old: rec {
-    version = "0.160.1";
-    src = prev.fetchFromGitHub {
-      owner = "openai";
-      repo = "codex";
-      tag = "rust-v${version}";
-      hash = "sha256-9oXMysQ+v4txGIhPsgh45xAAqWYglZjhdS50uxMPHz4=";
-    };
-    cargoDeps = prev.rustPlatform.fetchCargoVendor {
-      inherit src;
-      sourceRoot = "${src.name}/codex-rs";
-      hash = "sha256-DMRbIOynO0wGXjBxaXZJNKorD9YQv3fAoRTZ4iZEIE4=";
-    };
-  });
-
   # azure-cli 2.81.0 expects azure-mgmt-web v2024_11_01 which isn't packaged yet;
   # disable installCheck until nixpkgs catches up.
   azure-cli = prev.azure-cli.overrideAttrs (_old: {
