@@ -63,8 +63,10 @@ Home Manager profiles live in `home/profiles/{developer,server-admin}`. Home Man
 - Read-only modes only, for delegated use: `codex review` with
   `sandbox_mode="read-only"`, `agy --mode plan`. Do not use `codex exec` with
   write access or `agy --mode accept-edits` against this tree.
-- Never set `HUMANIZE_CODEX_BYPASS_SANDBOX` or `--dangerously-skip-permissions`
-  — they drop the sandbox.
+- Never set `HUMANIZE_CODEX_BYPASS_SANDBOX`, and never pass
+  `--dangerously-skip-permissions` to plain `agy`, `--mode plan` or Codex.
+  They drop the sandbox. The one exception is `agy-implement`, which adds
+  the flag itself after confirming the coder guard (Issue #2296).
 - Subscription login only, never an API key (#1831).
 
 ## Module shape
