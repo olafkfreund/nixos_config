@@ -2,6 +2,8 @@ return {
   {
     "coder/claudecode.nvim",
     dependencies = { "folke/snacks.nvim" },
+    -- Load at startup so the /ide bridge exists before claude runs in another terminal.
+    event = "VeryLazy",
     cmd = {
       "ClaudeCode",
       "ClaudeCodeFocus",
@@ -17,7 +19,7 @@ return {
         split_side = "right",
         split_width_percentage = 0.35,
       },
-      auto_start = false,
+      auto_start = true,
     },
     keys = {
       { "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude Code" },
