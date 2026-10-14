@@ -33,6 +33,12 @@ fi
 
 name="$(echo "$payload" | @jq@ -r '.toolCall.name // empty')"
 
+# agy's own config (settings.json allow rules, hooks.json) is out of bounds for
+# a coder session, by any tool, or plain agy could inherit its permissions (#2291).
+if echo "$payload" | @jq@ -e '[.toolCall.args | .. | strings] | any(test("\\.gemini"))' >/dev/null 2>&1; then
+  deny "agy-implement may not touch ~/.gemini (#2291)"
+fi
+
 case "$name" in
   view_file | grep_search | list_dir | find_by_name | replace_file_content | \
     multi_replace_file_content | write_to_file | ask_question | list_permissions)

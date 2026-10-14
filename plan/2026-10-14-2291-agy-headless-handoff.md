@@ -180,3 +180,23 @@ subagent implements steps 1–3. Claude reviews the work and runs step 4.
   pass `--model gemini-3.8-flash-medium` until the login is refreshed. With
   that model the razer check passed: the edit was made and the commit was
   blocked.
+
+## Deviations from the Opus review
+
+- **The wrapper fails closed.** It exits if `mktemp`, `mkdir` or the
+  settings `jq` fails. Before this, an unset `XDG_RUNTIME_DIR` ran agy with
+  `HOME=""`.
+- **`--effort` suppresses the default `--model`** as well, because agy
+  rejects an `--effort` that conflicts with `--model`.
+- **The coder-guard adapter** (`modules/programs/agy-guard-adapter.sh`)
+  denies, for any tool, an argument that mentions `.gemini`. This stops a
+  coder session from writing the allow rule into the real `settings.json`,
+  where plain agy would pick it up.
+- **The handoff skill** now:
+  - runs implementers in the background, because the foreground Bash limit
+    is 10 minutes
+  - checks that `HEAD` did not move
+  - notes razer's `--model` workaround
+- **Accepted:** agy state that agy rewrites by replacing a file is dropped
+  with the shadow home, for example a refreshed token. It is refreshed again
+  on the next run.
