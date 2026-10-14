@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2291
 spec: spec/2026-10-14-2291-agy-headless-handoff.md
 ---
