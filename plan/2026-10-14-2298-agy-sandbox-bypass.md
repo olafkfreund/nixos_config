@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2298
 spec: spec/2026-10-14-2298-agy-sandbox-bypass.md
 ---
