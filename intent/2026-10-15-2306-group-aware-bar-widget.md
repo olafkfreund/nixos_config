@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2306
 author: olafkfreund
 ---
@@ -65,3 +65,8 @@ On a host with one screen (razer, p510) the widget behaves exactly as stock.
 3. **Upstream.** Is it worth offering Omarchy a generic hook (for example a
    configurable id→label map) instead of carrying a patch? Out of scope here
    unless you want it.
+
+## Resolution (at approval, 2026-10-15)
+
+Approved with the recommendations: deliver as a patch to the stock widget;
+the click path is settled in the spec; no upstream hook in this task.
