@@ -292,6 +292,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Flow Desktop, a privacy-respecting YouTube client (Issue #2317): our own
+    # flake, built from source. Enabled by features.flow-desktop.
+    flowtube = {
+      url = "github:olafkfreund/nixos-FlowTube";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # spotifast — native Rust Spotify client (library, local playback, Connect).
     # Built from source; exposed as pkgs.spotifast on p620 + razer via profile.nix.
     # Bump with `nix flake update spotifast`.
