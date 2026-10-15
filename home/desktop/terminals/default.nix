@@ -96,7 +96,6 @@ in
             pad = "12x12";
             term = "xterm-256color";
             selection-target = mkIf cfg.features.copyOnSelect "clipboard";
-            shell = "${pkgs.zsh}/bin/zsh";
             font = mkDefault "${fontConfig.name}:size=${toString fontConfig.size}";
           };
 
@@ -191,7 +190,6 @@ in
 
           # Terminal
           term = "xterm-kitty";
-          shell = "${pkgs.zsh}/bin/zsh";
 
           # URLs
           detect_urls = mkDefault (
@@ -262,11 +260,6 @@ in
         package = pkgs.alacritty;
 
         settings = {
-          # Terminal configuration
-          terminal.shell = {
-            program = "${pkgs.zsh}/bin/zsh";
-          };
-
           # Window configuration
           window = {
             padding = {
