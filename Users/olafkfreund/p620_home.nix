@@ -93,14 +93,18 @@
   programs.chromium = {
     package = lib.mkForce pkgs.google-chrome;
     commandLineArgs = lib.mkForce [
-      # Vulkan gives WebGPU a hardware adapter (#2328); without it requestAdapter() is null.
-      "--enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer,WebUIDarkMode,Vulkan"
+      # Vulkan here turns <video> white on Wayland (#2328); WebGPU instead
+      # comes from --ignore-gpu-blocklist below.
+      "--enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer,WebUIDarkMode"
       "--ozone-platform=wayland"
       "--force-dark-mode"
       # ANGLE-on-OpenGL (Mesa/AMD). Replaces the removed --use-gl=desktop;
       # do NOT disable VizDisplayCompositor — that kills GPU compositing and WebGL.
       "--use-angle=gl"
       "--enable-gpu-rasterization"
+      # Lifts the webgpu_on_vk_via_gl_interop entry (crbug 442791440) so
+      # WebGPU gets the RX 7900 XT (#2328).
+      "--ignore-gpu-blocklist"
       "--enable-zero-copy"
       "--enable-quic"
       # Do NOT re-add --process-per-site (#1776): it puts every frame of one
