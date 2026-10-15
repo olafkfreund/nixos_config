@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2306
 intent: intent/2026-10-15-2306-group-aware-bar-widget.md
 ---
