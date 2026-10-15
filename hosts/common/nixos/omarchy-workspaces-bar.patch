@@ -1,0 +1,55 @@
+--- a/shell/plugins/bar/widgets/Workspaces.qml
++++ b/shell/plugins/bar/widgets/Workspaces.qml
+@@ -8,13 +8,19 @@
+   id: root
+   moduleName: "omarchy.workspaces"
+ 
+-  function workspaceById(id) {
++  // Workspace groups (hosts/common/nixos/omarchy-workspaces.nix): group N is
++  // workspace N, N+10 and N+20, one per display.
++  function groupOf(id) {
++    return (id - 1) % 10 + 1
++  }
++
++  function groupOccupied(group) {
+     var values = Hyprland.workspaces.values
+     for (var i = 0; i < values.length; i++) {
+-      if (values[i].id === id) return values[i]
++      if (values[i].id > 0 && groupOf(values[i].id) === group && values[i].toplevels.values.length > 0) return true
+     }
+ 
+-    return null
++    return false
+   }
+ 
+   function workspaceIds() {
+@@ -23,7 +29,7 @@
+ 
+     for (var i = 0; i < values.length; i++) {
+       var id = values[i].id
+-      if (id > 0 && id <= 10 && ids.indexOf(id) === -1) ids.push(id)
++      if (id > 0 && ids.indexOf(groupOf(id)) === -1) ids.push(groupOf(id))
+     }
+ 
+     ids.sort(function(left, right) { return left - right })
+@@ -32,7 +38,7 @@
+ 
+   function focusWorkspace(id) {
+     if (!root.bar) return
+-    root.bar.run("hyprctl dispatch " + Util.shellQuote("hl.dsp.focus({ workspace = \"" + id + "\" })"))
++    root.bar.run("hyprctl eval " + Util.shellQuote("WorkspaceGroups.focus(" + id + ")"))
+   }
+ 
+   readonly property real trailingGap: root.vertical ? 0 : Style.spaceReal(1.5)
+@@ -54,9 +60,8 @@
+       WidgetButton {
+         required property int modelData
+ 
+-        readonly property var workspace: root.workspaceById(modelData)
+-        readonly property bool occupied: workspace !== null && workspace.toplevels.values.length > 0
+-        readonly property bool focused: Hyprland.focusedWorkspace !== null && Hyprland.focusedWorkspace.id === modelData
++        readonly property bool occupied: root.groupOccupied(modelData)
++        readonly property bool focused: Hyprland.focusedWorkspace !== null && Hyprland.focusedWorkspace.id > 0 && root.groupOf(Hyprland.focusedWorkspace.id) === modelData
+ 
+         bar: root.bar
+         text: focused ? "\uDB85\uDCFB" : (modelData === 10 ? "0" : String(modelData))

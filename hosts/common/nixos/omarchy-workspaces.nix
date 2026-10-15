@@ -27,8 +27,23 @@
 # which is the one line that stays hand-written: bindings.lua is where Omarchy
 # expects personal edits, so it stays user-owned rather than becoming a store
 # symlink.
-{ ... }:
+#
+# Omarchy's bar widget only knows ids 1-10, so it is patched to fold ids into
+# groups and to switch every display on click (#2306).
+{ inputs, pkgs, ... }:
+let
+  omarchy = (pkgs.extend inputs.nixarchy.overlays.default).omarchy.overrideAttrs (old: {
+    # --fuzz=0: an upstream change to the widget fails the build instead of reverting it.
+    postInstall = (old.postInstall or "") + ''
+      patch -d "$out/share/omarchy" -p1 --forward --fuzz=0 < ${./omarchy-workspaces-bar.patch}
+    '';
+  });
+in
 {
+  # Built from inputs, never config.programs.nixarchy.package: reading that recurses.
+  programs.nixarchy.package = omarchy;
+  home-manager.users.olafkfreund.programs.nixarchy.package = omarchy;
+
   home-manager.users.olafkfreund.home.file.".config/hypr/workspace-groups.lua".text = ''
     -- Managed by hosts/common/nixos/omarchy-workspaces.nix -- edits here are
     -- overwritten on the next deploy.
@@ -295,5 +310,8 @@
     o.bind("SUPER + CTRL + TAB", "Former workspace (all displays)", function() focus_group(former_group) end)
     o.bind("SUPER + mouse_down", "Next workspace (all displays)", function() cycle_group(1) end)
     o.bind("SUPER + mouse_up", "Previous workspace (all displays)", function() cycle_group(-1) end)
+
+    -- The bar's workspace widget calls this through `hyprctl eval` (#2306).
+    WorkspaceGroups = { focus = focus_group }
   '';
 }
