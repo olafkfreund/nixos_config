@@ -65,7 +65,6 @@ let
     NIXOS_WAYLAND = "1";
     NIXOS_OZONE_WL = "1";
     ELECTRON_OZONE_PLATFORM_HINT = "auto";
-    KITTY_DISABLE_WAYLAND = "0";
   };
 
   # User groups: shared + hardware profile + razer-specific
