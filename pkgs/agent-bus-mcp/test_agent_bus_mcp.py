@@ -187,7 +187,11 @@ with tempfile.TemporaryDirectory() as tmp:
             return httpx.Response(200, json={"room_id": "!r:example.org"})
         if "/join/" in request.url.path:
             return httpx.Response(200, json={"room_id": "!r:example.org"})
-        return httpx.Response(200, json={"chunk": chunk, "end": "peek-mark"})
+        # A first peek has no mark, so it reads backwards and keeps `start`, the
+        # live end; a later one reads forwards and keeps `end` (#2315).
+        return httpx.Response(
+            200, json={"chunk": chunk, "start": "peek-mark", "end": "peek-mark"}
+        )
 
     m._client = lambda name: httpx.Client(
         base_url="http://x/_matrix/client/v3",
@@ -240,5 +244,49 @@ with tempfile.TemporaryDirectory() as tmp:
     assert m._peek_cli("#agents:example.org") == 1
     m._client = lambda name: (_ for _ in ()).throw(httpx.ConnectError("down"))
     assert m._peek_cli("#agents:example.org") == 0
+
+    # --- a first read is the newest page ------------------------------------
+    # With no cursor, /messages dir=f starts at the room's creation, so a fresh
+    # session read six-week-old history as "recent" (#2315). The first read must
+    # go backwards, hand the page back oldest first, and leave the live end as
+    # the mark the next forward read starts from.
+    first = []
+
+    def first_handler(request):
+        if "/directory/room/" in request.url.path:
+            return httpx.Response(200, json={"room_id": "!fresh:example.org"})
+        if "/join/" in request.url.path:
+            return httpx.Response(200, json={"room_id": "!fresh:example.org"})
+        q = dict(request.url.params)
+        first.append(q)
+        if q.get("dir") == "b" and "from" not in q:
+            return httpx.Response(
+                200,
+                json={
+                    "chunk": [ev("@a:x", "m3", "$3"), ev("@a:x", "m2", "$2")],
+                    "start": "s_live",
+                    "end": "s_older",
+                },
+            )
+        if q.get("dir") == "f" and q.get("from") == "s_live":
+            return httpx.Response(
+                200, json={"chunk": [ev("@a:x", "m4", "$4")], "end": "s_after"}
+            )
+        return httpx.Response(
+            200,
+            json={
+                "chunk": [ev("@a:x", "m1", "$1"), ev("@a:x", "m2", "$2")],
+                "end": "x",
+            },
+        )
+
+    m._client = lambda name: httpx.Client(
+        base_url="http://x/_matrix/client/v3",
+        transport=httpx.MockTransport(first_handler),
+    )
+    got = [g["event_id"] for g in json.loads(m.read_new("#fresh:example.org", limit=2))]
+    assert got == ["$2", "$3"], (got, first)
+    got = [g["event_id"] for g in json.loads(m.read_new("#fresh:example.org", limit=2))]
+    assert got == ["$4"], (got, first)
 
 print("agent-bus-mcp self-check passed", file=sys.stderr)
