@@ -48,6 +48,8 @@
   # device directly for its own key handling, which the group grants; without
   # it the session starts but never sees a keypress.
   programs.nixarchy.user = "olafkfreund";
+  # Stock Omarchy menu (#2325): nixarchy turns nixarchy-menu on by default.
+  home-manager.users.olafkfreund.programs.nixarchy.defaultPlugins.menu = false;
   # Unused preinstalls (#2133); screen recording is Omareel.
   programs.nixarchy.preinstallsExclude = [ "obs-studio" "kdenlive" ];
 
