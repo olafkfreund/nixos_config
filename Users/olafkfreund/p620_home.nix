@@ -93,7 +93,8 @@
   programs.chromium = {
     package = lib.mkForce pkgs.google-chrome;
     commandLineArgs = lib.mkForce [
-      "--enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer,WebUIDarkMode"
+      # Vulkan gives WebGPU a hardware adapter (#2328); without it requestAdapter() is null.
+      "--enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer,WebUIDarkMode,Vulkan"
       "--ozone-platform=wayland"
       "--force-dark-mode"
       # ANGLE-on-OpenGL (Mesa/AMD). Replaces the removed --use-gl=desktop;
