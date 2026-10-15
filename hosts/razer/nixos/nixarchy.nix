@@ -49,9 +49,6 @@
   programs.nixarchy.user = "olafkfreund";
   # Unused preinstalls (#2133); screen recording is Omareel.
   programs.nixarchy.preinstallsExclude = [ "obs-studio" "kdenlive" ];
-  # nixarchy-menu as the Omarchy menu (#2019, #2074); nixarchy draws the
-  # snowflake on its bar button.
-  home-manager.users.olafkfreund.programs.nixarchy.defaultPlugins.menu = true;
 
   # Let theme switches tint Chrome/Chromium/Edge/Brave with the theme's accent
   # colour. Light and dark already follow the theme through the settings
