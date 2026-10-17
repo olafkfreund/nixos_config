@@ -1434,11 +1434,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791540118,
-        "narHash": "sha256-GHAjutOIsjA7kzusttluaftJH0yBT53LMiFpm6Nvd8o=",
+        "lastModified": 1792229247,
+        "narHash": "sha256-rRo4RyEUXu+uAmEdD3xCO5j4EpHmHB8TbhSgk64tLqk=",
         "owner": "olafkfreund",
         "repo": "nix-craftapps",
-        "rev": "f93a6e61de21143bf54785adaefa5b4d9d1b3e1f",
+        "rev": "143197e845b12cbce20a5623777783a9dfb0ec4b",
         "type": "github"
       },
       "original": {
@@ -2444,11 +2444,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792227700,
-        "narHash": "sha256-QKTBraLIVDAvliaFpFSHdo6Mg+Uitj1HfEFY6uGNtf4=",
+        "lastModified": 1792233871,
+        "narHash": "sha256-Pr/k9iNYdlTBwBRUZfWZSVdhuPYvCYTOcmjhwXh/k7M=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "a0aea89cd39fa5092fbd7c955a04a8f5ef4aba85",
+        "rev": "974ac9e139df25bb040e423bef7ca6d44f9f0dfa",
         "type": "github"
       },
       "original": {
