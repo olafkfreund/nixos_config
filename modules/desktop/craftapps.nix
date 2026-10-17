@@ -13,11 +13,17 @@ in
       default = true;
       description = "Include ${name} (false excludes it).";
     });
+    mcp = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Register an MCP server for every enabled app (`<app>-cli mcp`).";
+    };
   };
 
   config = lib.mkIf cfg.enable {
     programs.craftapps = {
       enable = true;
+      mcp.enable = cfg.mcp;
       apps = lib.mapAttrs (_: enable: { inherit enable; }) cfg.apps;
     };
   };
