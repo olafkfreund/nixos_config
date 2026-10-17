@@ -16,6 +16,24 @@
 let
   inherit (lib) mkOption mkIf mkEnableOption mkDefault types;
   cfg = config.modules.ai.antigravity-cli;
+
+  # agy's --sandbox hides /run, where nix-ld's default NIX_LD points, so every
+  # non-Nix binary (uv python, ruff) aborts in nix-ld there. Use the store paths.
+  agy =
+    if config.programs.nix-ld.enable then
+      pkgs.symlinkJoin
+        {
+          name = "agy-nix-ld";
+          paths = [ cfg.package ];
+          nativeBuildInputs = [ pkgs.makeWrapper ];
+          postBuild = ''
+            wrapProgram $out/bin/agy \
+              --set NIX_LD ${pkgs.stdenv.cc.bintools.dynamicLinker} \
+              --set NIX_LD_LIBRARY_PATH ${lib.makeLibraryPath config.programs.nix-ld.libraries}
+          '';
+        }
+    else
+      cfg.package;
 in
 {
   options.modules.ai.antigravity-cli = {
@@ -46,7 +64,7 @@ in
 
   config = mkIf cfg.enable {
     environment = {
-      systemPackages = [ cfg.package ];
+      systemPackages = [ agy ];
       variables = cfg.environmentVariables;
 
       # Shell integration: `agy` is the canonical name. `ai` keeps its
@@ -60,7 +78,7 @@ in
           [Desktop Entry]
           Name=Antigravity CLI
           Comment=Google Antigravity AI Command Line Interface (agy)
-          Exec=${cfg.package}/bin/agy
+          Exec=${agy}/bin/agy
           Icon=terminal
           Type=Application
           Terminal=true
