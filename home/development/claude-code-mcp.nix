@@ -358,7 +358,12 @@ in
                   else "http://p620:11434";
               };
             };
-          };
+          }
+          # The Craft servers are reconciled here so their store paths follow
+          # each rebuild, like the two above (#1933). The jq merge only adds
+          # and replaces: an app dropped later needs `claude mcp remove <app>`.
+          // lib.mapAttrs (_: s: s // { type = "stdio"; })
+            (osConfig.programs.craftapps.mcp.servers or { });
         })
       }
 
