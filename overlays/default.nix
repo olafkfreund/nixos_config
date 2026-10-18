@@ -28,10 +28,10 @@
 
   # spotifast — native Rust Spotify client (see flake input).
   (_final: prev: {
-    # ponytail: upstream 14db97c added a title-bar string without a template
-    # entry, failing its own catalog test; drop the skip once upstream fixes it.
+    # shortcut: this test binds the fixed OAuth redirect port and races other
+    # tests for it under parallel cargo test (AddrInUse); drop once upstream serialises it.
     spotifast = inputs.spotifast.packages.${prev.stdenv.hostPlatform.system}.default.overrideAttrs (old: {
-      checkFlags = (old.checkFlags or [ ]) ++ [ "--skip=catalogs_cover_the_template_and_preserve_named_placeholders" ];
+      checkFlags = (old.checkFlags or [ ]) ++ [ "--skip=set_up_playback_reconnects_with_the_saved_grant_first" ];
     });
   })
 
