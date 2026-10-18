@@ -2633,7 +2633,6 @@
         "seance": "seance",
         "sops-nix": "sops-nix",
         "spicetify-nix": "spicetify-nix",
-        "spotifast": "spotifast",
         "stylix": "stylix",
         "yt-x": "yt-x",
         "zen-browser": "zen-browser"
@@ -2831,29 +2830,6 @@
       "original": {
         "owner": "Gerg-L",
         "repo": "spicetify-nix",
-        "type": "github"
-      }
-    },
-    "spotifast": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "rust-overlay": [
-          "rust-overlay"
-        ]
-      },
-      "locked": {
-        "lastModified": 1792142489,
-        "narHash": "sha256-uGAhgyYVID/PpD2eKyKKqQbn0Zm2AP5vgihpUSjd7/o=",
-        "owner": "crmne",
-        "repo": "spotifast",
-        "rev": "0b3e98087184fbda21ad4c720e220bd870148628",
-        "type": "github"
-      },
-      "original": {
-        "owner": "crmne",
-        "repo": "spotifast",
         "type": "github"
       }
     },
