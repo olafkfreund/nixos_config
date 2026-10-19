@@ -198,12 +198,12 @@ in
 
       # Meeting record/transcribe/summarize. Configured by
       # modules/services/meeting-transcribe.nix; this slot wires the
-      # GNOME keybind. First SUPER+SHIFT+M starts recording mic + system
+      # GNOME keybind. First SUPER+CTRL+ALT+M starts recording mic + system
       # audio; second press stops + dispatches the whisperX/Ollama
       # pipeline. ~2-5 min later notify-send announces the brief at
       # ~/meetings/YYYY-MM-DD-HHMM.md.
       "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5" = {
-        binding = "<Super><Shift>m";
+        binding = "<Super><Control><Alt>m";
         command = "meet toggle";
         name = "Meeting record/transcribe/summarize";
       };
