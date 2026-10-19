@@ -889,7 +889,7 @@ in
       # docker: the script resolves the live storage path from the server
       # container's bind mount. Without it here the inspect silently fails and
       # the script falls back to cfg.storageDir — the very trap it exists to
-      # avoid. coreutils supplies stat/date for the staleness guard.
+      # avoid. coreutils supplies stat/date for the live-file guard.
       path = with pkgs; [ kubectl jq coreutils config.virtualisation.docker.package ];
       environment.KUBECONFIG = cfg.kubeconfigPath;
       serviceConfig = {
@@ -930,15 +930,15 @@ in
 
           h2="$host_storage/$(basename "$pvpath")/h2/keycloakdb.mv.db"
           if [ -f "$h2" ]; then
-            # Refuse to record a backup from an H2 nothing has written to
-            # recently. Keycloak touches its database continuously, so a file
-            # older than a day means we are reading an abandoned copy — the
-            # exact failure above. Better a loud gap in the backup series than
-            # a series of confident copies of the wrong file.
-            age_days=$(( ( $(date +%s) - $(stat -c %Y "$h2") ) / 86400 ))
-            if [ "$age_days" -gt 1 ]; then
-              echo "[keycloak-backup] ERROR: $h2 was last modified $age_days days ago." \
-                   "That is not a live Keycloak database — refusing to overwrite the backup series." >&2
+            # Refuse to record a backup from a file the running pod is not
+            # using — the exact failure above. Compare against the pod's own
+            # view rather than the file's age: an idle realm writes nothing
+            # for days, which is not staleness.
+            live=$(kubectl exec -n factory deploy/keycloak -- stat -c '%Y %s' /opt/keycloak/data/h2/keycloakdb.mv.db 2>/dev/null) \
+              || { echo "[keycloak-backup] cannot stat the H2 inside the keycloak pod; skipping" >&2; exit 0; }
+            if [ "$live" != "$(stat -c '%Y %s' "$h2")" ]; then
+              echo "[keycloak-backup] ERROR: $h2 ($(stat -c '%Y %s' "$h2")) is not the file the pod sees ($live)." \
+                   "Refusing to overwrite the backup series with the wrong database." >&2
               exit 1
             fi
             ts=$(date +%Y%m%d-%H%M%S)
