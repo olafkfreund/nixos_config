@@ -109,16 +109,9 @@ in
       "org/gnome/desktop/interface" = {
         clock-format = "24h";
         show-battery-percentage = true;
-        # libadwaita accent (GNOME 47+). This is a fixed enum, not a hex
-        # value, so it cannot track the scheme exactly — "green" is the
-        # closest stop to the Alien HUD phosphor accent (base0B).
-        accent-color = "green";
-        gtk-theme = mkDefault (
-          if cfg.theme.enable
-          then "Adwaita-dark"
-          else "Adwaita"
-        );
-        icon-theme = mkDefault "Adwaita";
+        # accent-color, gtk-theme, icon-theme and color-scheme follow the
+        # Omarchy theme live via the theme engine (#2370); setting them here
+        # reverted every theme switch at the next rebuild.
         cursor-theme = mkDefault "Adwaita";
       };
 

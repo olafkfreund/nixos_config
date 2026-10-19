@@ -24,11 +24,4 @@ let inherit (lib) mkDefault; in {
     # Color scheme preference for XDG portals
     GTK_USE_PORTAL = "1";
   };
-
-  # dconf dark mode setting for GNOME/GTK applications
-  dconf.settings = {
-    "org/gnome/desktop/interface" = {
-      color-scheme = mkDefault "prefer-dark";
-    };
-  };
 }

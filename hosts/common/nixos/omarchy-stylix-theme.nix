@@ -63,6 +63,9 @@ in
     executable = true;
   };
 
+  # hyprchroma sets gtk-theme to adw-gtk3(-dark); Stylix's HM gtk target used to supply it (#2370).
+  environment.systemPackages = [ pkgs.adw-gtk3 ];
+
   programs.nixarchyThemeEngine.package =
     inputs.nixarchy.inputs.nixarchy-omatheme.packages.${pkgs.stdenv.hostPlatform.system}.hyprchroma.overrideAttrs (old: {
       # shortcut: hyprchroma looks only in Arch's icon dirs; drop once nixarchy-omatheme patches it
@@ -70,7 +73,7 @@ in
         for f in $out/lib/hyprchroma/sync-gtk-theme $out/lib/hyprchroma/sync-qt-kde-theme; do
           substituteInPlace "$f" --replace-fail \
             '-d "/usr/share/icons/$value"' \
-            '-d "/usr/share/icons/$value" || -d "/run/current-system/sw/share/icons/$value" || -d "/etc/profiles/per-user/$USER/share/icons/$value"'
+            '-d "/usr/share/icons/$value" || -d "/run/current-system/sw/share/icons/$value" || -d "/etc/profiles/per-user/${USER:-}/share/icons/$value"'
         done
       '';
     });
