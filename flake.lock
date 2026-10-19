@@ -3182,11 +3182,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790852073,
-        "narHash": "sha256-d6klY3ZiTTcP0MGZUo2mr2ICdYaWcd/RmGfgC2Bzy6k=",
+        "lastModified": 1792418754,
+        "narHash": "sha256-hvKDfnB6x+glG5gyF/1Imk0E2dxBHH6l0k++xqCh98E=",
         "owner": "Benexl",
         "repo": "yt-x",
-        "rev": "d7e30982ae13682fdf060055d9ba7dda598f4228",
+        "rev": "c5c6d395cd3295deaefb63f1820ce21f8470b481",
         "type": "github"
       },
       "original": {
