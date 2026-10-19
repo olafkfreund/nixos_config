@@ -24,7 +24,7 @@ let
 
   hyprchroma =
     inputs.nixarchy.inputs.nixarchy-omatheme.packages.${pkgs.stdenv.hostPlatform.system}.hyprchroma.overrideAttrs (old: {
-      # shortcut: hyprchroma looks only in Arch's icon dirs; drop once nixarchy-omatheme patches it
+      # shortcut: NixOS fixes for hyprchroma; drop once olafkfreund/nixarchy-omatheme#58 lands
       postFixup = (old.postFixup or "") + ''
             for f in $out/lib/hyprchroma/sync-gtk-theme $out/lib/hyprchroma/sync-qt-kde-theme; do
               substituteInPlace "$f" --replace-fail \
@@ -47,6 +47,7 @@ let
     });
 
   # Built from inputs, never config.programs.nixarchy.package: reading that recurses.
+  # shortcut: drop once olafkfreund/nixarchy#1370 lands
   omarchy = (pkgs.extend inputs.nixarchy.overlays.default).omarchy.overrideAttrs (old: {
     postInstall = (old.postInstall or "") + ''
       substituteInPlace $out/share/omarchy/bin/omarchy-restart-terminal \
