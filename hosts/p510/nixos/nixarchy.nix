@@ -35,7 +35,6 @@
     ../../common/nixos/omarchy-input.nix
     ../../common/nixos/bash-devshell-readline.nix
     ../../common/nixos/omarchy-sddm.nix
-    ../../common/nixos/omarchy-workspaces.nix
     ../../common/nixos/omarchy-gog.nix
     ../../common/nixos/omarchy-meet-binds.nix
     ../../common/nixos/omarchy-sole-hyprland.nix

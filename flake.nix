@@ -65,7 +65,7 @@
     # -microvm, ai-mirror) follow nixarchy's pins below rather than keeping
     # their own: bump them with `nix flake update nixarchy`.
     nixarchy = {
-      url = "github:olafkfreund/nixarchy";
+      url = "github:olafkfreund/nixarchy/edge";
       inputs.nixpkgs.follows = "nixpkgs";
       # The same shape as the zen-browser note below, on a different child.
       # nixarchy pins sops-nix at a8627b21 (2026-08-13), which predates

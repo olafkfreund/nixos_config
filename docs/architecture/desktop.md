@@ -33,7 +33,6 @@ imports = [
   ../../../nixarchy-apps.nix            # app selection, copied in by nixarchy-apply
   ../../common/nixos/omarchy-input.nix
   ../../common/nixos/omarchy-sddm.nix
-  ../../common/nixos/omarchy-workspaces.nix
   ../../common/nixos/omarchy-gog.nix
   ../../common/nixos/omarchy-sole-hyprland.nix
   ../../common/nixos/omarchy-stylix-theme.nix
