@@ -178,8 +178,10 @@ Things the code no longer shows, so they are easy to get wrong:
   `theme-set.d` hook writes X into `nixarchy-theme.nix` at the flake root;
   `modules/desktop/stylix-theme.nix` maps that theme's `colors.toml` onto base16
   and feeds Stylix. Everything Omarchy cannot reach at runtime — Plymouth, GRUB,
-  the console, GTK, Qt, fonts, the home-manager targets — follows **at the next
-  rebuild**, not instantly. Two consequences: switching a theme leaves the tree
+  the console, fonts, the remaining home-manager targets — follows **at the next
+  rebuild**, not instantly. GTK, Qt colours and icons follow live through the
+  theme engine; Stylix's HM gtk/gnome/kde targets are off so they do not
+  overwrite it (#2370). Two consequences: switching a theme leaves the tree
   dirty and `nhs` refuses a dirty tree (same as `nixarchy-apply` with
   `apps.nix`), and p510 follows the same palette because `inputs.nixarchy` is
   flake-wide. Reach the package through `inputs.nixarchy`, never

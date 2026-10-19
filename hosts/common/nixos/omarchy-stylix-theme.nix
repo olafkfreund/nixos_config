@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, inputs, pkgs, ... }:
 # Close the loop: `omarchy theme set X` -> stylix builds against X.
 #
 # omarchy-theme-set calls `omarchy-hook theme-set "$THEME_NAME"`, which runs
@@ -14,12 +14,47 @@
 # unchanged, so only a real theme change dirties anything.
 #
 # What this does NOT do is rebuild. Omarchy retints its own 24 files instantly;
-# Plymouth, GRUB, the console, GTK, Qt, fonts and the home-manager targets are
+# Plymouth, GRUB, the console, fonts and the remaining home-manager targets are
 # store artifacts and adopt the new palette at the next `nixos-rebuild`. A
 # bootloader cannot re-theme itself at runtime, so that gap is structural.
+# GTK, Qt colours and icons follow live through the theme engine (#2370).
 let
   user = config.programs.nixarchy.user;
   flakeDir = "${config.users.users.${user}.home}/.config/nixos";
+
+  hyprchroma =
+    inputs.nixarchy.inputs.nixarchy-omatheme.packages.${pkgs.stdenv.hostPlatform.system}.hyprchroma.overrideAttrs (old: {
+      # shortcut: NixOS fixes for hyprchroma; drop once olafkfreund/nixarchy-omatheme#58 lands
+      postFixup = (old.postFixup or "") + ''
+            for f in $out/lib/hyprchroma/sync-gtk-theme $out/lib/hyprchroma/sync-qt-kde-theme; do
+              substituteInPlace "$f" --replace-fail \
+                '-d "/usr/share/icons/$value"' \
+                '-d "/usr/share/icons/$value" || -d "/run/current-system/sw/share/icons/$value" || -d "/etc/profiles/per-user/''${USER:-}/share/icons/$value"'
+            done
+        # kitten is not on hyprchroma's pinned PATH and has no --to socket, so kitty never
+          # took the new runtime/kitty.conf; signal it to reload after the file is written.
+          substituteInPlace $out/lib/hyprchroma/hyprchroma-terminals \
+            --replace-fail 'if command -v kitten >/dev/null 2>&1 && \' \
+                           "if ${pkgs.procps}/bin/pkill -USR1 -x '[.]?kitty(-wrapped)?'; then" \
+            --replace-fail '    kitten @ set-colors --all --configured "$RUNTIME_DIR/kitty.conf" >/dev/null 2>&1; then' ""
+          # NixOS runs kitty as .kitty-wrapped, so a reloaded kitty was still reported stale.
+            substituteInPlace $out/lib/hyprchroma/hyprchroma-state \
+              --replace-fail 'names.add(os.path.basename(os.readlink(entry / "exe")))' \
+                             'names.add(re.sub(r"^\.(.+)-wrapped$", r"\1", os.path.basename(os.readlink(entry / "exe"))))' \
+              --replace-fail 'return os.path.basename(os.readlink(f"/proc/{pid}/exe"))' \
+                             'return re.sub(r"^\.(.+)-wrapped$", r"\1", os.path.basename(os.readlink(f"/proc/{pid}/exe")))'
+      '';
+    });
+
+  # Built from inputs, never config.programs.nixarchy.package: reading that recurses.
+  # shortcut: drop once olafkfreund/nixarchy#1370 lands
+  omarchy = (pkgs.extend inputs.nixarchy.overlays.default).omarchy.overrideAttrs (old: {
+    postInstall = (old.postInstall or "") + ''
+      substituteInPlace $out/share/omarchy/bin/omarchy-restart-terminal \
+        --replace-fail 'pgrep -x kitty' "pgrep -x '[.]?kitty(-wrapped)?'" \
+        --replace-fail 'killall -SIGUSR1 kitty' "pkill -USR1 -x '[.]?kitty(-wrapped)?'"
+    '';
+  });
 
   hook = pkgs.writeShellScript "stylix-follow-omarchy-theme" ''
     set -euo pipefail
@@ -42,7 +77,7 @@ let
     # hook in hosts/common/nixos/omarchy-stylix-theme.nix on every
     # \`omarchy theme set\`, so the next rebuild carries the same palette into
     # everything Stylix owns and Omarchy cannot reach at runtime -- Plymouth,
-    # GRUB, the console, GTK, Qt, fonts, and every home-manager target.
+    # GRUB, the console, fonts, and the remaining home-manager targets.
     #
     # Edit by switching themes, not by hand: a hand edit is overwritten the
     # next time a theme is set.
@@ -57,8 +92,24 @@ let
   '';
 in
 {
-  home-manager.users.${user}.home.file.".config/omarchy/hooks/theme-set.d/10-stylix" = {
-    source = hook;
-    executable = true;
+  home-manager.users.${user} = {
+    home.file.".config/omarchy/hooks/theme-set.d/10-stylix" = {
+      source = hook;
+      executable = true;
+    };
+    programs.nixarchy.package = omarchy;
+    # Omarchy's unit resets gtk-theme to Adwaita-dark at login and at every
+    # activation; hyprchroma's gtk.css colours target adw-gtk3.
+    systemd.user.services.omarchy-theme-gnome.Service.ExecStartPost =
+      "${hyprchroma}/bin/hyprchroma --target=gtk --force --quiet";
   };
+
+  # hyprchroma sets gtk-theme to adw-gtk3(-dark); Stylix's HM gtk target used to supply it (#2370).
+  environment.systemPackages = [ pkgs.adw-gtk3 ];
+
+  programs.nixarchyThemeEngine.package = hyprchroma;
+
+  # omarchy-restart-terminal matches the process name "kitty"; NixOS runs
+  # .kitty-wrapped, so kitty (and herdr inside it) never reloaded its theme (#2370).
+  programs.nixarchy.package = omarchy;
 }

@@ -146,11 +146,10 @@ in
         # stylix migrates to the new option path.
         regreet.enable = false;
 
-        # COSMIC's GTK theme sync is disabled on this fleet, so cosmic-comp
-        # does NOT clobber ~/.config/gtk-{3,4}.0/gtk.css at runtime. Stylix
-        # can own that file safely and theme GTK3 / non-libadwaita GTK4 apps
-        # everywhere. libadwaita apps still ignore third-party themes by
-        # upstream policy regardless of gtk.css contents.
+        # System-level GTK defaults only. The user's own gtk.css belongs to the
+        # Omarchy theme engine (hyprchroma), which follows `omarchy theme set`
+        # live; the Home Manager gtk target is off in Users/common/base-home.nix
+        # (#2370). libadwaita apps ignore third-party colours by upstream policy.
         gtk.enable = true;
 
         # GNOME target writes org.gnome.desktop.interface/* via gsettings and

@@ -31,12 +31,6 @@ in
     };
   };
 
-  # GNOME/GTK dark mode via dconf (for KDE apps that respect it)
-  dconf.settings."org/gnome/desktop/interface" = {
-    color-scheme = lib.mkDefault "prefer-dark";
-    gtk-theme = lib.mkDefault "Adwaita-dark";
-  };
-
   # Combine all home.* attributes into a single block
   home = {
     packages = with pkgs; [
@@ -51,14 +45,6 @@ in
       # icon theme (papirus-icon-theme, see modules/desktop/stylix-theme.nix)
       kdePackages.breeze
     ];
-
-    # KDE globals configuration for dark mode
-    # This ensures KDE applications use dark theme even outside Plasma
-    # source, not readFile: reading a built package's output is
-    # import-from-derivation, which forces breeze to be realised in the middle
-    # of evaluation -- a synchronous substitution on a cold store.
-    file.".config/kdeglobals".source =
-      "${pkgs.kdePackages.breeze}/share/color-schemes/BreezeDark.colors";
 
     # Add environment variables for Qt application integration
     sessionVariables = {

@@ -55,13 +55,15 @@
 
   programs.home-manager.enable = true;
 
-  # Stylix theming targets (Home Manager level). GTK is enabled fleet-wide
-  # because COSMIC's GTK theme sync is off on every host; cosmic-comp does not
-  # clobber ~/.config/gtk-{3,4}.0/gtk.css at runtime.
+  # Stylix theming targets (Home Manager level). gtk, gnome and kde are off:
+  # the Omarchy theme engine (hyprchroma) owns gtk.css, the GNOME interface
+  # keys and kdeglobals at runtime, and Stylix's copies won over it (#2370).
   stylix.targets = {
     wezterm.enable = true;
     ghostty.enable = true;
-    gtk.enable = true;
+    gtk.enable = false;
+    gnome.enable = false;
+    kde.enable = false;
     qt.enable = false; # Qt theming handled by home/desktop/theme/qt.nix
   };
 
