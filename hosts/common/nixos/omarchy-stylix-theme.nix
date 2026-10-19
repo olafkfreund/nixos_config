@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, inputs, pkgs, ... }:
 # Close the loop: `omarchy theme set X` -> stylix builds against X.
 #
 # omarchy-theme-set calls `omarchy-hook theme-set "$THEME_NAME"`, which runs
@@ -14,9 +14,10 @@
 # unchanged, so only a real theme change dirties anything.
 #
 # What this does NOT do is rebuild. Omarchy retints its own 24 files instantly;
-# Plymouth, GRUB, the console, GTK, Qt, fonts and the home-manager targets are
+# Plymouth, GRUB, the console, fonts and the remaining home-manager targets are
 # store artifacts and adopt the new palette at the next `nixos-rebuild`. A
 # bootloader cannot re-theme itself at runtime, so that gap is structural.
+# GTK, Qt colours and icons follow live through the theme engine (#2370).
 let
   user = config.programs.nixarchy.user;
   flakeDir = "${config.users.users.${user}.home}/.config/nixos";
@@ -42,7 +43,7 @@ let
     # hook in hosts/common/nixos/omarchy-stylix-theme.nix on every
     # \`omarchy theme set\`, so the next rebuild carries the same palette into
     # everything Stylix owns and Omarchy cannot reach at runtime -- Plymouth,
-    # GRUB, the console, GTK, Qt, fonts, and every home-manager target.
+    # GRUB, the console, fonts, and the remaining home-manager targets.
     #
     # Edit by switching themes, not by hand: a hand edit is overwritten the
     # next time a theme is set.
@@ -61,4 +62,16 @@ in
     source = hook;
     executable = true;
   };
+
+  programs.nixarchyThemeEngine.package =
+    inputs.nixarchy.inputs.nixarchy-omatheme.packages.${pkgs.stdenv.hostPlatform.system}.hyprchroma.overrideAttrs (old: {
+      # shortcut: hyprchroma looks only in Arch's icon dirs; drop once nixarchy-omatheme patches it
+      postFixup = (old.postFixup or "") + ''
+        for f in $out/lib/hyprchroma/sync-gtk-theme $out/lib/hyprchroma/sync-qt-kde-theme; do
+          substituteInPlace "$f" --replace-fail \
+            '-d "/usr/share/icons/$value"' \
+            '-d "/usr/share/icons/$value" || -d "/run/current-system/sw/share/icons/$value" || -d "/etc/profiles/per-user/$USER/share/icons/$value"'
+        done
+      '';
+    });
 }
