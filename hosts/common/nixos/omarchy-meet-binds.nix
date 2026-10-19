@@ -2,7 +2,7 @@
 #
 # The `meet` CLI has always been installed by
 # modules/services/meeting-transcribe.nix, but its one-button promise
-# (SUPER+SHIFT+M) was wired only in home/desktop/gnome/keybindings.nix. Every
+# (now SUPER+CTRL+ALT+M) was wired only in home/desktop/gnome/keybindings.nix. Every
 # host defaults to the Omarchy session, where nothing was bound at all, so the
 # feature was CLI-only on the desktop it actually runs on.
 #
@@ -33,7 +33,7 @@ in
       -- Matches the GNOME binding (custom5) so the key is the same whichever
       -- session is running. First press starts recording mic + system audio,
       -- second stops it and dispatches the whisperX/Ollama pipeline.
-      o.bind("SUPER + SHIFT + M", "Meeting record/transcribe/summarize", "meet toggle")
+      o.bind("SUPER + CTRL + ALT + M", "Meeting record/transcribe/summarize", "meet toggle")
     '';
   };
 }

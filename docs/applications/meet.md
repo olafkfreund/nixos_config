@@ -195,7 +195,7 @@ meet help       # Show subcommands
 
 ### Keybind
 
-`SUPER+SHIFT+M` toggles recording in **both** sessions:
+`SUPER+CTRL+ALT+M` toggles recording in **both** sessions:
 
 | Session | Declared in |
 | --- | --- |

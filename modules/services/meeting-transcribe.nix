@@ -1,6 +1,6 @@
 # meeting-transcribe — one-button meeting recording + transcription + summary.
 #
-# UX: SUPER+SHIFT+M to start, again to stop. After stop, a background job
+# UX: SUPER+CTRL+ALT+M to start, again to stop. After stop, a background job
 # transcribes (whisperX + diarization) and summarizes (Ollama, gemma4:12b)
 # the audio. ~2-5 min later, notify-send fires with a markdown brief at
 # ~/meetings/YYYY-MM-DD-HHMM.md containing TL;DR, your action items, decisions,
