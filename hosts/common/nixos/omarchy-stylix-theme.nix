@@ -22,6 +22,24 @@ let
   user = config.programs.nixarchy.user;
   flakeDir = "${config.users.users.${user}.home}/.config/nixos";
 
+  hyprchroma =
+    inputs.nixarchy.inputs.nixarchy-omatheme.packages.${pkgs.stdenv.hostPlatform.system}.hyprchroma.overrideAttrs (old: {
+      # shortcut: hyprchroma looks only in Arch's icon dirs; drop once nixarchy-omatheme patches it
+      postFixup = (old.postFixup or "") + ''
+        for f in $out/lib/hyprchroma/sync-gtk-theme $out/lib/hyprchroma/sync-qt-kde-theme; do
+          substituteInPlace "$f" --replace-fail \
+            '-d "/usr/share/icons/$value"' \
+            '-d "/usr/share/icons/$value" || -d "/run/current-system/sw/share/icons/$value" || -d "/etc/profiles/per-user/''${USER:-}/share/icons/$value"'
+        done
+        # NixOS runs kitty as .kitty-wrapped, so a reloaded kitty was still reported stale.
+        substituteInPlace $out/lib/hyprchroma/hyprchroma-state \
+          --replace-fail 'names.add(os.path.basename(os.readlink(entry / "exe")))' \
+                         'names.add(re.sub(r"^\.(.+)-wrapped$", r"\1", os.path.basename(os.readlink(entry / "exe"))))' \
+          --replace-fail 'return os.path.basename(os.readlink(f"/proc/{pid}/exe"))' \
+                         'return re.sub(r"^\.(.+)-wrapped$", r"\1", os.path.basename(os.readlink(f"/proc/{pid}/exe")))'
+      '';
+    });
+
   # Built from inputs, never config.programs.nixarchy.package: reading that recurses.
   omarchy = (pkgs.extend inputs.nixarchy.overlays.default).omarchy.overrideAttrs (old: {
     postInstall = (old.postInstall or "") + ''
@@ -73,28 +91,16 @@ in
       executable = true;
     };
     programs.nixarchy.package = omarchy;
+    # Omarchy's unit resets gtk-theme to Adwaita-dark at login and at every
+    # activation; hyprchroma's gtk.css colours target adw-gtk3.
+    systemd.user.services.omarchy-theme-gnome.Service.ExecStartPost =
+      "${hyprchroma}/bin/hyprchroma --target=gtk --force --quiet";
   };
 
   # hyprchroma sets gtk-theme to adw-gtk3(-dark); Stylix's HM gtk target used to supply it (#2370).
   environment.systemPackages = [ pkgs.adw-gtk3 ];
 
-  programs.nixarchyThemeEngine.package =
-    inputs.nixarchy.inputs.nixarchy-omatheme.packages.${pkgs.stdenv.hostPlatform.system}.hyprchroma.overrideAttrs (old: {
-      # shortcut: hyprchroma looks only in Arch's icon dirs; drop once nixarchy-omatheme patches it
-      postFixup = (old.postFixup or "") + ''
-        for f in $out/lib/hyprchroma/sync-gtk-theme $out/lib/hyprchroma/sync-qt-kde-theme; do
-          substituteInPlace "$f" --replace-fail \
-            '-d "/usr/share/icons/$value"' \
-            '-d "/usr/share/icons/$value" || -d "/run/current-system/sw/share/icons/$value" || -d "/etc/profiles/per-user/${USER:-}/share/icons/$value"'
-        done
-        # NixOS runs kitty as .kitty-wrapped, so a reloaded kitty was still reported stale.
-        substituteInPlace $out/lib/hyprchroma/hyprchroma-state \
-          --replace-fail 'names.add(os.path.basename(os.readlink(entry / "exe")))' \
-                         'names.add(re.sub(r"^\.(.+)-wrapped$", r"\1", os.path.basename(os.readlink(entry / "exe"))))' \
-          --replace-fail 'return os.path.basename(os.readlink(f"/proc/{pid}/exe"))' \
-                         'return re.sub(r"^\.(.+)-wrapped$", r"\1", os.path.basename(os.readlink(f"/proc/{pid}/exe")))'
-      '';
-    });
+  programs.nixarchyThemeEngine.package = hyprchroma;
 
   # omarchy-restart-terminal matches the process name "kitty"; NixOS runs
   # .kitty-wrapped, so kitty (and herdr inside it) never reloaded its theme (#2370).
