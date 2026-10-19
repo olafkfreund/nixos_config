@@ -17,23 +17,10 @@
 # cannot write to a Nix store symlink. Config changes go through this file.
 # Only config.toml is a symlink — herdr still owns the directory for its
 # sockets, logs, session.json and .plugins.lock.
-{ config, lib, ... }:
+{ config, ... }:
 let
-  inherit (config.lib.stylix) colors;
-  c = n: "#${colors.${n}}";
-
-  # herdr wants four dim tiers (surface_dim < surface0 < surface1, and
-  # overlay0 < overlay1 < subtext0 < text) where base16 only supplies three,
-  # so the two in-between stops are computed from the scheme rather than
-  # hand-picked. Hand-picked values went stale the moment the palette was
-  # re-sampled; these follow it.
-  mix = a: b:
-    let
-      chan = k:
-        let v = (lib.toInt colors."${a}-rgb-${k}" + lib.toInt colors."${b}-rgb-${k}") / 2;
-        in lib.fixedWidthString 2 "0" (lib.toLower (lib.toHexString v));
-    in
-    "#${chan "r"}${chan "g"}${chan "b"}";
+  # Only the $agents count keeps fixed colours: red and amber carry meaning there.
+  c = n: "#${config.lib.stylix.colors.${n}}";
 in
 {
   xdg.configFile."herdr/config.toml".text = ''
@@ -50,49 +37,12 @@ in
     # state detection current between herdr releases.
     manifest_check = true
 
-    # Alien HUD — the Weyland-Yutani propulsion-monitor look, same palette the
-    # rest of the desktop wears (assets/themes/alien-hud.yaml, base16 for
-    # Stylix). herdr has no theme-file loader, only `[theme.custom]` token
-    # overrides on top of a built-in, so every one of the 17 palette fields in
-    # `Palette` (src/app/state.rs) is pinned here and the base name below is
-    # inert. Borders are always ratatui `Plain` (square corners, title in the
-    # top rule) — no border-style knob exists, and square is what the plates
-    # use anyway.
-    #
-    # "terminal" is the base, not because it shows through but because it is a
-    # real built-in name (src/app/state.rs matches a fixed list and returns
-    # None for anything else) and it does not claim to be a palette we are not
-    # using. Note `herdr config check` does NOT validate this field — it
-    # accepts arbitrary strings — so it cannot catch a typo here.
+    # The built-in "terminal" theme draws herdr's chrome in the host terminal's
+    # own colours, so it follows `omarchy theme set` live once kitty reloads.
+    # Pinned Stylix colours only changed at the next rebuild (#2370).
     [theme]
     name = "terminal"
     auto_switch = false
-
-    # panel_bg = "reset" keeps the host terminal's background, so ghostty's
-    # faint plate image still shows through herdr's panels instead of being
-    # painted over with a flat fill. base00 is that same #0d1210 regardless.
-    #
-    # Tokens map to alien-hud.yaml except surface1 / subtext0, which are
-    # interpolated: herdr wants four dim tiers (surface_dim < surface0 <
-    # surface1, overlay0 < overlay1 < subtext0 < text) and base16 only
-    # supplies three.
-    [theme.custom]
-    accent = "${c "base0B"}"      # phosphor green — active borders, highlights
-    panel_bg = "reset"
-    surface_dim = "${c "base01"}" # separators
-    surface0 = "${c "base02"}"    # selected row
-    surface1 = "${mix "base02" "base03"}"    # hover/active row
-    overlay0 = "${c "base03"}"    # hairline rules, dimmest text
-    overlay1 = "${c "base04"}"    # dim labels
-    subtext0 = "${mix "base04" "base05"}"    # subdued text above the dim labels
-    text = "${c "base05"}"        # the plate cream
-    green = "${c "base0B"}"       # idle / done ("ONLINE")
-    yellow = "${c "base0A"}"      # working
-    peach = "${c "base09"}"       # interrupted, the bar-graph amber
-    red = "${c "base08"}"         # blocked / needs attention
-    teal = "${c "base0C"}"        # notification accents
-    blue = "${c "base0D"}"
-    mauve = "${c "base0E"}"       # branch names
 
     # "herdr" delivery only draws a toast while herdr is on screen, so an agent
     # blocked on a question goes unnoticed. "system" hands it to the desktop
@@ -105,10 +55,6 @@ in
     enabled = true
 
     [ui]
-    # Legacy accent, read into `state.accent` for the navigation UI. It is
-    # ignored for the palette (theme.custom.accent wins) but still colours the
-    # nav paths that read state.accent directly, so keep the two in step.
-    accent = "${c "base0B"}"
     show_agent_labels_on_pane_borders = true
     # "priority" orders the agent panel as an attention queue, so a blocked
     # agent surfaces above idle ones instead of sorting by workspace.
@@ -134,13 +80,12 @@ in
     #
     # Rows accept either a bare token string or a styled table
     # ({ token, fg, bold, dim } — src/config/sidebar.rs RawStyledSidebarToken),
-    # which is the only per-element colour control herdr exposes. Styled the
-    # way the plates read their subsystem lists: phosphor-green status dot,
-    # cream label, purple branch, dim git counts.
+    # which is the only per-element colour control herdr exposes. fg takes hex
+    # only, so rows set none and inherit the live theme; bold/dim still apply.
     [ui.sidebar.spaces]
     rows = [
-      [{ token = "state_icon", fg = "${c "base0B"}" }, { token = "workspace", fg = "${c "base05"}", bold = true }],
-      [{ token = "branch", fg = "${c "base0E"}" }, { token = "git_status", fg = "${c "base04"}", dim = true }],
+      [{ token = "state_icon" }, { token = "workspace", bold = true }],
+      [{ token = "branch" }, { token = "git_status", dim = true }],
     ]
 
     # Claude panes get an extra row showing the stripped terminal title, which
@@ -154,10 +99,10 @@ in
     # cleared at zero, so the row stays clean when nothing is fanned out.
     [ui.sidebar.agents.rows_by_agent]
     claude = [
-      [{ token = "state_icon", fg = "${c "base0B"}" }, { token = "workspace", fg = "${c "base05"}", bold = true }, { token = "tab", fg = "${c "base04"}" }],
-      [{ token = "terminal_title_stripped", fg = "${c "base04"}", dim = true }],
+      [{ token = "state_icon" }, { token = "workspace", bold = true }, { token = "tab" }],
+      [{ token = "terminal_title_stripped", dim = true }],
       [
-        { token = "agent", fg = "${c "base0C"}" },
+        { token = "agent" },
         # 0.9.0 added value-based token rules, which is what makes the subagent
         # count readable at a glance instead of being one static colour.
         # Thresholds MUST be ordered high-to-low: the first matching rule wins,

@@ -22,6 +22,15 @@ let
   user = config.programs.nixarchy.user;
   flakeDir = "${config.users.users.${user}.home}/.config/nixos";
 
+  # Built from inputs, never config.programs.nixarchy.package: reading that recurses.
+  omarchy = (pkgs.extend inputs.nixarchy.overlays.default).omarchy.overrideAttrs (old: {
+    postInstall = (old.postInstall or "") + ''
+      substituteInPlace $out/share/omarchy/bin/omarchy-restart-terminal \
+        --replace-fail 'pgrep -x kitty' "pgrep -x '[.]?kitty(-wrapped)?'" \
+        --replace-fail 'killall -SIGUSR1 kitty' "pkill -USR1 -x '[.]?kitty(-wrapped)?'"
+    '';
+  });
+
   hook = pkgs.writeShellScript "stylix-follow-omarchy-theme" ''
     set -euo pipefail
     theme="''${1:-}"
@@ -58,9 +67,12 @@ let
   '';
 in
 {
-  home-manager.users.${user}.home.file.".config/omarchy/hooks/theme-set.d/10-stylix" = {
-    source = hook;
-    executable = true;
+  home-manager.users.${user} = {
+    home.file.".config/omarchy/hooks/theme-set.d/10-stylix" = {
+      source = hook;
+      executable = true;
+    };
+    programs.nixarchy.package = omarchy;
   };
 
   # hyprchroma sets gtk-theme to adw-gtk3(-dark); Stylix's HM gtk target used to supply it (#2370).
@@ -75,6 +87,16 @@ in
             '-d "/usr/share/icons/$value"' \
             '-d "/usr/share/icons/$value" || -d "/run/current-system/sw/share/icons/$value" || -d "/etc/profiles/per-user/${USER:-}/share/icons/$value"'
         done
+        # NixOS runs kitty as .kitty-wrapped, so a reloaded kitty was still reported stale.
+        substituteInPlace $out/lib/hyprchroma/hyprchroma-state \
+          --replace-fail 'names.add(os.path.basename(os.readlink(entry / "exe")))' \
+                         'names.add(re.sub(r"^\.(.+)-wrapped$", r"\1", os.path.basename(os.readlink(entry / "exe"))))' \
+          --replace-fail 'return os.path.basename(os.readlink(f"/proc/{pid}/exe"))' \
+                         'return re.sub(r"^\.(.+)-wrapped$", r"\1", os.path.basename(os.readlink(f"/proc/{pid}/exe")))'
       '';
     });
+
+  # omarchy-restart-terminal matches the process name "kitty"; NixOS runs
+  # .kitty-wrapped, so kitty (and herdr inside it) never reloaded its theme (#2370).
+  programs.nixarchy.package = omarchy;
 }
