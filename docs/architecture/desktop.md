@@ -103,9 +103,11 @@ writes `X` into `nixarchy-theme.nix`. `modules/desktop/stylix-theme.nix` reads
 that name, loads the theme's `colors.toml` out of the Nixarchy package, maps its
 named roles onto base16 and hands the result to Stylix.
 
-Everything Omarchy cannot reach at runtime — Plymouth, GRUB, the console, GTK,
-Qt, fonts and the Home Manager targets — follows at the **next rebuild**, not
-instantly. Because `inputs.nixarchy` is flake-wide, p510 follows the same palette
+Everything Omarchy cannot reach at runtime — Plymouth, GRUB, the console, fonts
+and the remaining Home Manager targets — follows at the **next rebuild**, not
+instantly. GTK, Qt colours and the icon theme follow a switch **live**: the
+Omarchy theme engine (hyprchroma) owns `gtk.css`, the GNOME interface keys and
+`kdeglobals` (Issue #2370). Because `inputs.nixarchy` is flake-wide, p510 follows the same palette
 as the workstations.
 
 !!! danger "Reach the package through `inputs`"
