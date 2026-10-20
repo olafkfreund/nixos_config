@@ -1434,11 +1434,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792494271,
-        "narHash": "sha256-kflZhykcVgp8Qe/5N0Ff19gSI2IWL2ZsaC+IyDhENVU=",
+        "lastModified": 1792508194,
+        "narHash": "sha256-o+TwOC8PF+lIntib5USpSs6dmgPM/3WH1Cl2CbGyxck=",
         "owner": "olafkfreund",
         "repo": "nix-craftapps",
-        "rev": "cd75618804bde62f3acd47aa4fb45a1aa6831b16",
+        "rev": "0b175d0456373cacc2e788ac6e0382df9465181e",
         "type": "github"
       },
       "original": {
