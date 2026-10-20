@@ -18,12 +18,18 @@ in
       default = true;
       description = "Register an MCP server for every enabled app (`<app>-cli mcp`).";
     };
+    skill = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Install the craftapps agent skill for every Home Manager agent with a skills option.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
     programs.craftapps = {
       enable = true;
       mcp.enable = cfg.mcp;
+      skill.enable = cfg.skill;
       apps = lib.mapAttrs (_: enable: { inherit enable; }) cfg.apps;
     };
   };
