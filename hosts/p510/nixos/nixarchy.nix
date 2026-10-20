@@ -38,6 +38,7 @@
     ../../common/nixos/omarchy-gog.nix
     ../../common/nixos/omarchy-meet-binds.nix
     ../../common/nixos/omarchy-voice-pkgs.nix
+    ../../common/nixos/omarchy-screenshots.nix
     ../../common/nixos/omarchy-sole-hyprland.nix
     ../../common/nixos/omarchy-stylix-theme.nix
   ];
