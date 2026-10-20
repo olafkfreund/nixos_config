@@ -20,13 +20,13 @@ let
 in
 stdenvNoCC.mkDerivation {
   pname = "omadroid-plugin";
-  version = "0.3.7";
+  version = "0.3.8";
 
   src = fetchFromGitHub {
     owner = "onelegdave";
     repo = "omadroid";
-    rev = "5c6366bd1bfd390da81ff6e0344f28bf05ad5faf";
-    hash = "sha256-yTEmTB8RFR0D3giN946+gsNAjkxu2ZWPpQ+IZCLwYIM=";
+    rev = "b80ef1311665bfb53088803738e2d364637fb03a";
+    hash = "sha256-TcYA5dPe3bkffkoV/qVHsQH+1As0UQEzr8OJANyWbAI=";
   };
 
   dontBuild = true;
