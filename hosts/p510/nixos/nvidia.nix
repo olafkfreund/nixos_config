@@ -148,10 +148,5 @@
     nvtopPackages.nvidia # NVIDIA system monitor
     libva
     libva-utils
-
-    # CUDA tools for development and debugging
-    cudaPackages.cuda_nvcc
-    cudaPackages.cudatoolkit
-    cudaPackages.cudnn
   ];
 }

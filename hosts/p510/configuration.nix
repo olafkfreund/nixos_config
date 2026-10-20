@@ -482,9 +482,8 @@ in
 
   # NVIDIA modules now loaded via initrd.kernelModules in nvidia.nix for proper early initialization
 
-  # Environment variables for CUDA support
+  # Point ad-hoc compiles at the NVIDIA driver's libraries and headers
   environment.variables = {
-    CUDA_PATH = "${pkgs.cudaPackages.cudatoolkit}";
     EXTRA_LDFLAGS = "-L/run/opengl-driver/lib";
     EXTRA_CCFLAGS = "-I/run/opengl-driver/include";
     GI_TYPELIB_PATH = "${pkgs.gdm}/lib/girepository-1.0";
