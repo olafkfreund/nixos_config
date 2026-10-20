@@ -46,16 +46,6 @@ let
       '';
     });
 
-  # Built from inputs, never config.programs.nixarchy.package: reading that recurses.
-  # shortcut: drop once olafkfreund/nixarchy#1370 lands
-  omarchy = (pkgs.extend inputs.nixarchy.overlays.default).omarchy.overrideAttrs (old: {
-    postInstall = (old.postInstall or "") + ''
-      substituteInPlace $out/share/omarchy/bin/omarchy-restart-terminal \
-        --replace-fail 'pgrep -x kitty' "pgrep -x '[.]?kitty(-wrapped)?'" \
-        --replace-fail 'killall -SIGUSR1 kitty' "pkill -USR1 -x '[.]?kitty(-wrapped)?'"
-    '';
-  });
-
   hook = pkgs.writeShellScript "stylix-follow-omarchy-theme" ''
     set -euo pipefail
     theme="''${1:-}"
@@ -97,19 +87,10 @@ in
       source = hook;
       executable = true;
     };
-    programs.nixarchy.package = omarchy;
-    # Omarchy's unit resets gtk-theme to Adwaita-dark at login and at every
-    # activation; hyprchroma's gtk.css colours target adw-gtk3.
-    systemd.user.services.omarchy-theme-gnome.Service.ExecStartPost =
-      "${hyprchroma}/bin/hyprchroma --target=gtk --force --quiet";
   };
 
   # hyprchroma sets gtk-theme to adw-gtk3(-dark); Stylix's HM gtk target used to supply it (#2370).
   environment.systemPackages = [ pkgs.adw-gtk3 ];
 
   programs.nixarchyThemeEngine.package = hyprchroma;
-
-  # omarchy-restart-terminal matches the process name "kitty"; NixOS runs
-  # .kitty-wrapped, so kitty (and herdr inside it) never reloaded its theme (#2370).
-  programs.nixarchy.package = omarchy;
 }
