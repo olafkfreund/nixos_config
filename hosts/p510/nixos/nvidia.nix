@@ -40,7 +40,18 @@
     nvidiaSettings = true;
 
     # Use stable production driver for RTX 30 series
-    package = config.boot.kernelPackages.nvidiaPackages.production;
+    # shortcut: re-patch the bin/ tools in two patchelf calls; patchelf 0.19.2 breaks the combined call (NixOS/nixpkgs#576412), drop once fixed upstream
+    package = config.boot.kernelPackages.nvidiaPackages.production.overrideAttrs (old: {
+      postFixup = (old.postFixup or "") + ''
+        for orig in $bin/origBin/*; do
+          f=$bin/bin/$(basename $orig)
+          rp=$(patchelf --print-rpath $f); int=$(patchelf --print-interpreter $f)
+          install -m755 $orig $f
+          patchelf --set-rpath "$rp" $f
+          patchelf --interpreter "$int" $f
+        done
+      '';
+    });
 
     # Enable persistence daemon for headless operation
     nvidiaPersistenced = true;
