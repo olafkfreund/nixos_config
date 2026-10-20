@@ -33,6 +33,63 @@ _final: prev: {
     doInstallCheck = false;
   });
 
+  # invoke 3.0.3 (nixpkgs 2cc89a78d) marks fabric 3.2.3 broken, and fabric is an
+  # azure-cli dependency. Pinning invoke 2 fails: paramiko 5 pulls invoke 3 into
+  # the same closure. azure-cli only does `from fabric import Connection`, and
+  # under invoke 3 only the `fab` task runner (Fab_, Executor_) fails its tests;
+  # Connection's pass. So relax the pin and skip those two. An extension,
+  # not python314.packageOverrides: azure-cli's own python set replaces those.
+  # Drop once fabric supports invoke 3.
+  # pyopenjtalk-plus: test_run_njd_from_mecab_invalid_input_should_not_break_next_call
+  # matches a TypeError message that python 3.14.8 reworded.
+  pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+    (_pyfinal: pyprev: {
+      fabric = pyprev.fabric.overridePythonAttrs (o: {
+        pythonRelaxDeps = (o.pythonRelaxDeps or [ ]) ++ [ "invoke" ];
+        disabledTests = (o.disabledTests or [ ]) ++ [ "Fab_" "Executor_" ];
+        meta = o.meta // { broken = false; };
+      });
+      # sphinx-hook reads "$sphinxBuilders" as a string, so under structuredAttrs
+      # only the first builder (html) runs and the "man" output never appears.
+      reuse = pyprev.reuse.overridePythonAttrs (o: {
+        outputs = prev.lib.remove "man" o.outputs;
+        sphinxBuilders = [ "html" ];
+      });
+      pyopenjtalk-plus = pyprev.pyopenjtalk-plus.overridePythonAttrs (o: {
+        disabledTests = (o.disabledTests or [ ]) ++ [
+          "test_run_njd_from_mecab_invalid_input_should_not_break_next_call"
+        ];
+      });
+    })
+  ];
+
+  # Python builds now default to structuredAttrs (nixpkgs d89172980), so a
+  # makeWrapperArgs element is one argv entry and "--prefix PATH : x" reaches
+  # makeWrapper whole. Split these two recipes' strings back into words; hplip
+  # expands the array unquoted, which now passes only its first element.
+  # Drop each once nixpkgs fixes the recipe.
+  pywal16 = prev.pywal16.overridePythonAttrs (o: {
+    makeWrapperArgs = prev.lib.concatMap (prev.lib.splitString " ") o.makeWrapperArgs;
+  });
+  better-adb-sync = prev.better-adb-sync.overridePythonAttrs (o: {
+    makeWrapperArgs = prev.lib.concatMap (prev.lib.splitString " ") o.makeWrapperArgs;
+  });
+  hplip = prev.hplip.overrideAttrs (o: {
+    preFixup = prev.lib.replaceString ''$makeWrapperArgs "''${gappsWrapperArgs[@]}"''
+      ''"''${makeWrapperArgs[@]}" "''${gappsWrapperArgs[@]}"''
+      o.preFixup;
+  });
+
+  # aggregateModules now cats a .ko.cer for every external module (nixpkgs
+  # 6bd752674493); unsigned out-of-tree ones (openrazer, ...) have none and the
+  # kernel module tree fails to build. Skip the missing ones, as before that
+  # commit. Drop once NixOS/nixpkgs#575192 is fixed.
+  aggregateModules = args: (prev.aggregateModules args).overrideAttrs (o: {
+    postBuild = prev.lib.replaceString "| xargs -d'\\n' cat >> modules.cer"
+      "| while IFS= read -r c; do if [ -e \"$c\" ]; then cat -- \"$c\"; fi; done >> modules.cer"
+      o.postBuild;
+  });
+
   # python314 fixes for AI tooling deep in litellm/whisperx closures. Scoped via
   # packageOverrides so only these two packages + their dependents rebuild:
   #  - langfuse 4.0.2 pins wrapt<2.0 but nixpkgs ships 2.2.2 (cosmetic; the API it
