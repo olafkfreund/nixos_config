@@ -25,8 +25,16 @@
       # has no -f on purpose: if a driver renames the files, the build
       # fails instead of quietly keeping them.
       package = config.boot.kernelPackages.nvidiaPackages.latest.overrideAttrs (old: {
+        # shortcut: re-patch the bin/ tools in two patchelf calls; patchelf 0.19.2 breaks the combined call (NixOS/nixpkgs#576412), drop once fixed upstream
         postFixup = (old.postFixup or "") + ''
           rm $firmware/lib/firmware/nvidia/*/*tu10x*
+          for orig in $bin/origBin/*; do
+            f=$bin/bin/$(basename $orig)
+            rp=$(patchelf --print-rpath $f); int=$(patchelf --print-interpreter $f)
+            install -m755 $orig $f
+            patchelf --set-rpath "$rp" $f
+            patchelf --interpreter "$int" $f
+          done
         '';
       });
 
