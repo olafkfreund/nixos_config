@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2409
 intent: intent/2026-10-21-2409-nightly-upgrade-stale-flake.md
 ---
