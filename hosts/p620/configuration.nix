@@ -777,8 +777,8 @@ in
   fileSystems."/mnt/media" = {
     # LAN IP, not p510.lan: the router change dropped the .lan search domain,
     # so the name no longer resolves and the automount hangs. Keep a DHCP
-    # reservation for 192.168.1.75 on the router to stop this drifting again.
-    device = "192.168.1.75:/mnt/media";
+    # reservation for 192.168.1.65 on the router to stop this drifting again.
+    device = "192.168.1.65:/mnt/media";
     fsType = "nfs";
     options = [
       "noauto"

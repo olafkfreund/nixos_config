@@ -368,7 +368,7 @@ in
       wakeDisplay = true;
 
       webOrigins = [
-        "https://192.168.1.75:47990"
+        "https://192.168.1.65:47990"
         "https://p510:47990"
         "https://p510.local:47990"
       ];
