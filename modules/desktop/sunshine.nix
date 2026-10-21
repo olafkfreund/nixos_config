@@ -111,7 +111,7 @@ in
     webOrigins = mkOption {
       type = types.listOf types.str;
       default = [ ];
-      example = [ "https://192.168.1.75:47990" "https://myhost:47990" ];
+      example = [ "https://192.168.1.65:47990" "https://myhost:47990" ];
       description = ''
         Origins allowed to use Sunshine's web UI, as scheme://host:port.
 
