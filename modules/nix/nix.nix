@@ -20,6 +20,10 @@
     flake = "github:olafkfreund/nixos_config";
   };
 
+  # A failed github: fetch falls back to a stale cached flake (#2409); skip the night instead.
+  systemd.services.nixos-upgrade.serviceConfig.ExecCondition =
+    "${pkgs.curl}/bin/curl -sfI -o /dev/null --max-time 20 --retry 5 --retry-delay 30 --retry-all-errors https://api.github.com";
+
   nix.settings = {
     experimental-features = [ "nix-command" "flakes" ];
     trusted-users = [ "root" "olafkfreund" ];
