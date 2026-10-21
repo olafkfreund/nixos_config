@@ -166,6 +166,12 @@ in
         "nest"
         "ffmpeg"
         "stream"
+        # Discovered on the LAN; without these their config flows fail to import
+        "samsungtv"
+        "linkplay"
+        "wiim"
+        "dlna_dmr"
+        "upnp"
       ];
       dashboards = {
         starlink-status = {
