@@ -57,7 +57,7 @@ just build-all-parallel      # Build all configs in parallel (no deploy)
 
 - **p620** (192.168.1.222): AMD workstation with ROCm acceleration
 - **razer** (192.168.1.77): Intel/NVIDIA laptop with Optimus graphics
-- **p510** (192.168.1.75): Intel Xeon/NVIDIA media server, and a desktop since
+- **p510** (192.168.1.65): Intel Xeon/NVIDIA media server, and a desktop since
   2026-08-31. **Never build or deploy it without asking first.**
 
 DEX5550 is offline; Samsung and HP are decommissioned.
