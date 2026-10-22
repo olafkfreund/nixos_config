@@ -4,7 +4,7 @@ issue: 2441
 author: olafkfreund
 ---
 
-# Intent: k3d agents must always reach k3d-<cluster>-server-0
+# Intent: k3d agents must always reach `k3d-<cluster>-server-0`
 
 ## Problem
 

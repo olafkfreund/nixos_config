@@ -4,7 +4,7 @@ issue: 2441
 intent: intent/2026-10-22-2441-k3d-agent-server-hosts.md
 ---
 
-# Spec: pin k3d-<cluster>-server-0 in each agent's /etc/hosts
+# Spec: pin `k3d-<cluster>-server-0` in each agent's `/etc/hosts`
 
 ## Design
 

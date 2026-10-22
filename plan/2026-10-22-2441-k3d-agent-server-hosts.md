@@ -4,7 +4,7 @@ issue: 2441
 spec: spec/2026-10-22-2441-k3d-agent-server-hosts.md
 ---
 
-# Plan: pin k3d-<cluster>-server-0 in each agent's /etc/hosts
+# Plan: pin `k3d-<cluster>-server-0` in each agent's `/etc/hosts`
 
 Approved decisions (from the spec):
 
