@@ -31,16 +31,16 @@
 # this derivation.
 buildGoModule (finalAttrs: {
   pname = "gogcli";
-  version = "0.45.0";
+  version = "0.46.0";
 
   src = fetchFromGitHub {
     owner = "openclaw";
     repo = "gogcli";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-gRxiHf+3/YTuefU5f5TDtcd3wrOKldu3K5CSX/5wduI=";
+    hash = "sha256-H6SPyWyoeMqBuQ5QnlL3TEfWVvy3DE4FYRMMXzfz4F4=";
   };
 
-  vendorHash = "sha256-jZRYbU48wzbkdscjmT7yO/9DUK54uuitZGofzAwZOzI=";
+  vendorHash = "sha256-eVNA6BoZkxUkX1qYrO/ILXMxPfDyu/uuZMDi+8hpovM=";
 
   subPackages = [ "cmd/gog" ];
 
