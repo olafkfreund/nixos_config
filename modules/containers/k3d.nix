@@ -175,6 +175,9 @@ let
       cat ${nodeResolvConf} > "${resolvStateFile}"
       chmod 0644 "${resolvStateFile}"
 
+      # Nodes mount the declared resolver over /etc/resolv.conf, and k3d >= 5.9 applies its DNS fix on start too, so every call needs it off.
+      export K3D_FIX_DNS=0
+
       # Host-side API reachability check: pulls a fresh kubeconfig (which points
       # at ${cfg.apiHostBind}:$API_PORT — i.e. the serverlb's PUBLISHED host
       # port) and hits /readyz. This verifies the port-publish actually works
@@ -222,13 +225,12 @@ let
         # the reboot path and retries the restore instead of applying GitOps.
         if [ -f "${pvSnapshot}" ]; then touch "${pvSnapshot}.restore-pending"; fi
         echo "[k3d-bootstrap] Creating cluster $CLUSTER (api ${cfg.apiHostBind}:$API_PORT, storage $STORAGE_DIR)"
-        # K3D_FIX_DNS=0: k3d refuses to create a node that has a file mounted
-        # at /etc/resolv.conf while its DNS fix is on. The node resolver mount
-        # is @server/@agent only: on the serverlb (nginx) it would send the
+        # The node resolver mount (K3D_FIX_DNS=0, exported above) is
+        # @server/@agent only: on the serverlb (nginx) it would send the
         # upstream lookup of k3d-<cluster>-server-0 to public DNS, nginx exits,
-        # and the create never gets "start worker processes". Both found in
-        # the #1497 rehearsal.
-        K3D_FIX_DNS=0 k3d cluster create "$CLUSTER" \
+        # and the create never gets "start worker processes". Found in the
+        # #1497 rehearsal.
+        k3d cluster create "$CLUSTER" \
           --image "${cfg.k3sImage}" \
           --api-port "${cfg.apiHostBind}:$API_PORT" \
           --servers 1 \
@@ -292,6 +294,13 @@ let
           echo "[k3d-bootstrap] host API $API_BIND:$API_PORT unreachable and server not progressing — clean stop/start (attempt $attempt/3)"
           k3d cluster stop "$CLUSTER" >/dev/null 2>&1 || true
           docker rm -f "k3d-$CLUSTER-tools" >/dev/null 2>&1 || true
+          # 2026-10-21: Docker failed to program the tailnet port before
+          # tailscale was up and left the serverlb with no network; nginx then
+          # cannot resolve server-0. Reattach it before starting (#2431).
+          if ! docker inspect -f '{{json .NetworkSettings.Networks}}' "k3d-$CLUSTER-serverlb" 2>/dev/null | grep -q "k3d-$CLUSTER\""; then
+            echo "[k3d-bootstrap] serverlb lost its network — reconnecting to k3d-$CLUSTER"
+            docker network connect "k3d-$CLUSTER" "k3d-$CLUSTER-serverlb" || true
+          fi
           # NOT silenced: `k3d cluster start` aborts FATAL on a broken agent
           # node BEFORE it starts the serverlb, so the API never publishes even
           # though the server is fine. Swallowing that output (2026-08-19) left
