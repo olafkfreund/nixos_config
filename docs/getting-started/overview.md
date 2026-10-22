@@ -21,7 +21,7 @@ auto-discovery to reason around.
 | Host | Profile | Hardware | Role |
 | --- | --- | --- | --- |
 | [**p620**](../hosts/p620.md) | workstation | AMD Ryzen + Radeon RX 7900 (ROCm) | Primary development, local AI inference, build host |
-| [**p510**](../hosts/p510.md) | workstation | Intel Xeon + NVIDIA RTX 3070 Ti | Plex media server, *arr automation, k3s MicroVMs, self-hosted CI runner |
+| [**p510**](../hosts/p510.md) | workstation | Intel Xeon + NVIDIA RTX 3070 Ti | Plex media server, *arr automation, k3s MicroVMs |
 | [**razer**](../hosts/razer.md) | laptop | Intel + NVIDIA (Optimus) | Mobile development, Secure Boot |
 
 !!! note "Decommissioned hosts"

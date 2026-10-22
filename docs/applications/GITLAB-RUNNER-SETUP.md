@@ -2,8 +2,8 @@
 
 > Prospective guide. **No GitLab Runner is deployed on this fleet today** —
 > nothing in `modules/` or `hosts/` references `services.gitlab-runner`. The
-> self-hosted CI runner that does exist is a *GitHub* Actions runner on p510
-> (`hosts/p510/nixos/github-runner.nix`).
+> self-hosted CI runners that do exist are *GitHub* Actions runners for
+> nixarchy on p620 (`modules/services/nixarchy-runner.nix`).
 
 ## Overview
 
