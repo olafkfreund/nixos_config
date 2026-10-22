@@ -79,10 +79,10 @@ in
       avahi = {
         enable = true;
         nssmdns4 = true;
-        publish = {
-          enable = true;
-          addresses = true;
-          userServices = true;
+        settings.publish = {
+          disable-publishing = false;
+          publish-addresses = true;
+          disable-user-service-publishing = false;
         };
       };
 

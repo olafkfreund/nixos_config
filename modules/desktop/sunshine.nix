@@ -143,6 +143,17 @@ in
 
 
   config = mkIf cfg.enable {
+    # nixpkgs' sunshine module still sets these obsolete options, which warn on
+    # every build; their effect is stated in settings.publish instead.
+    services.avahi = {
+      publish.enable = lib.mkForce null;
+      publish.userServices = lib.mkForce null;
+      settings.publish = {
+        disable-publishing = false;
+        disable-user-service-publishing = false;
+      };
+    };
+
     services.sunshine = {
       enable = true;
       inherit (cfg) openFirewall;

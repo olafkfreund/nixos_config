@@ -32,13 +32,22 @@ in
         nssmdns4 = true;
         nssmdns6 = true;
         openFirewall = true;
-        ipv4 = true;
-        ipv6 = true;
-        publish = {
-          enable = true;
-          addresses = true;
-          workstation = true;
+        settings = {
+          server = {
+            use-ipv4 = true;
+            use-ipv6 = true;
+          };
+          publish = {
+            disable-publishing = false;
+            publish-addresses = true;
+            publish-workstation = true;
+            disable-user-service-publishing = false;
+          };
         };
+        # nixpkgs' ipp-usb module still sets these obsolete options, which warn on
+        # every build; their effect is stated in settings.publish above.
+        publish.enable = lib.mkForce null;
+        publish.userServices = lib.mkForce null;
       };
       ipp-usb.enable = true;
     };

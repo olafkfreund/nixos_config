@@ -645,11 +645,13 @@ in
       nssmdns4 = true;
       # LAN only: one socket joins mDNS per interface, and Docker's ~30 bridges
       # exhaust igmp_max_memberships (20), leaving avahi deaf on enp1s0 (#2293).
-      allowInterfaces = [ "enp1s0" ];
-      publish = {
-        enable = true;
-        addresses = true;
-        userServices = true;
+      settings = {
+        server.allow-interfaces = [ "enp1s0" ];
+        publish = {
+          disable-publishing = false;
+          publish-addresses = true;
+          disable-user-service-publishing = false;
+        };
       };
     };
 
