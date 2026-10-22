@@ -1434,11 +1434,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792646982,
-        "narHash": "sha256-YrHrPxF7A+YiqYKyE7XvFhyK872iaIHn81qFYjE8klU=",
+        "lastModified": 1792680009,
+        "narHash": "sha256-Nk6CceiUGyv9qJFOcD7WnL0zow0ItJB5qYQZSSJgvgs=",
         "owner": "olafkfreund",
         "repo": "nix-craftapps",
-        "rev": "0f551668ca31fa7d0c0784831f7cfa202ce084c6",
+        "rev": "b62de8f4687ad497de16fd9bb9f64c8d5d0d9533",
         "type": "github"
       },
       "original": {
@@ -1623,11 +1623,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792660113,
-        "narHash": "sha256-jEDe5iIvGwpt4V/nITAmri656SlH+oo6Q/u9rY+lwFY=",
+        "lastModified": 1792687058,
+        "narHash": "sha256-GvQduGLoDUv+IT9w7Kq57RYTo8SX5tQDlfJcOvQduH0=",
         "owner": "olafkfreund",
         "repo": "nixarchy",
-        "rev": "36ad73289d169e1bad5c7435262ce4303adda40a",
+        "rev": "444f0118794917a941aeed9d8b43ea595315990b",
         "type": "github"
       },
       "original": {
@@ -2094,11 +2094,11 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1792491056,
-        "narHash": "sha256-6n1Dn+WYtD8lprnSi+0k4FjbKfIVNG8lblpJ5MiiqXs=",
+        "lastModified": 1792697326,
+        "narHash": "sha256-2UBK0jdmPANGaeAIoVOZY+hSPB2Gy13ZuZeSxP3vF8k=",
         "owner": "NixOS",
         "repo": "nixos-hardware",
-        "rev": "efb6d0d5e2394c3c5416a18652808aba206c0988",
+        "rev": "1b418b8f203e49a92f250f8babdd19af1b6f7a7f",
         "type": "github"
       },
       "original": {
@@ -2445,11 +2445,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792675784,
-        "narHash": "sha256-kMV4opuFf+8d1W9Nlc7Cv1kO7zngqZjlbXsoHrArUzk=",
+        "lastModified": 1792699216,
+        "narHash": "sha256-ImiO5Q3W3Ux8ItQnL83VGdCEj5ZspufZLrTIV1jKrWk=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "f160cc63736ef3c8ab18e4ee4ed5c349c6d395a6",
+        "rev": "955156b5e974b9bb77e1511f40389b50448555df",
         "type": "github"
       },
       "original": {
@@ -2502,17 +2502,17 @@
     "omarchy": {
       "flake": false,
       "locked": {
-        "lastModified": 1792640275,
-        "narHash": "sha256-hMFjxzI7IZUkKAQvwYhXCWK+MDbFdmTlTogEqg6TYLs=",
+        "lastModified": 1792677069,
+        "narHash": "sha256-/Uw/f5qFijZlv2u7Snbtx1VweT+7Le4NVP7UJPWeu8I=",
         "owner": "basecamp",
         "repo": "omarchy",
-        "rev": "be54892f36b2803f1b798b0c0603cf8b25e4093c",
+        "rev": "446361a5f75bc835fe85da7a499b82351e6eb596",
         "type": "github"
       },
       "original": {
         "owner": "basecamp",
         "repo": "omarchy",
-        "rev": "be54892f36b2803f1b798b0c0603cf8b25e4093c",
+        "rev": "446361a5f75bc835fe85da7a499b82351e6eb596",
         "type": "github"
       }
     },
