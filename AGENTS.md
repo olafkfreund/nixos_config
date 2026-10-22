@@ -18,9 +18,9 @@ imports one plus its own hardware config.
 
 | Host  | Type          | Notes |
 | ----- | ------------- | ----- |
-| p620  | `workstation` | AMD GPU / ROCm. Self-hosted CI runner, same label pool as p510. Set `services.ollama.package = pkgs.ollama-rocm`; `services.ollama.acceleration` was removed from nixpkgs (unrelated to this repo's own `acceleration` attribute in `hosts/common/hardware-profiles/`). |
+| p620  | `workstation` | AMD GPU / ROCm. The only self-hosted CI runner host (nixarchy). Set `services.ollama.package = pkgs.ollama-rocm`; `services.ollama.acceleration` was removed from nixpkgs (unrelated to this repo's own `acceleration` attribute in `hosts/common/hardware-profiles/`). |
 | razer | `laptop`      | Hybrid Intel/NVIDIA (Optimus). Heavy rebuilds: build on p620 via `just deploy-via-p620 razer`. |
-| p510  | `workstation` | Media server (Plex, NZBGet, k3s microvms) **and desktop** since 2026-08-31: Omarchy session, Sunshine streaming, self-hosted GitHub Actions runner. **Never build or deploy without asking first.** |
+| p510  | `workstation` | Media server (Plex, NZBGet, k3s microvms) **and desktop** since 2026-08-31: Omarchy session, Sunshine streaming. Its nixarchy CI runners were removed in #1738. **Never build or deploy without asking first.** |
 
 Home Manager profiles live in `home/profiles/{developer,server-admin}`. Home Manager is a
 **flake module** — never run `home-manager switch`.
@@ -210,23 +210,20 @@ Things the code no longer shows, so they are easy to get wrong:
   option puts the config in the Nix store, making the web UI's Configuration tab
   read-only. See `docs/applications/sunshine.md`.
 - **Self-hosted GitHub Actions runners for nixarchy's KVM/ISO checks live on
-  p620 *and* p510** — `modules/services/nixarchy-runner.nix`, enabled through
-  `services.nixarchy-runner` in each host's `configuration.nix`. Two runner
-  units per host (`github-runner-nixarchy`, `-nixarchy-2`). Both machines carry
-  the same labels (`nixos`/`kvm`/`big`) and sit in one pool, so GitHub hands a
-  job to whichever is free; p620 was added because p510 alone could take both
-  jobs and a release build would then own CI for hours.
+  p620 only** — `modules/services/nixarchy-runner.nix`, enabled through
+  `services.nixarchy-runner` in `hosts/p620/configuration.nix`. Four runner
+  units (`github-runner-nixarchy`, `-nixarchy-2` … `-nixarchy-4`) with the
+  labels `nixos`/`kvm`/`big`. p510 ran them too until #1738 removed them.
   **They are targeted, not idle**: nixarchy's `nightly.yml` is
   `runs-on: [self-hosted, nixos, kvm, big]`, and `install-check.yml` picks per
   run — a `gate` job on `ubuntu-latest` decides whether the change can affect
   an install and emits the self-hosted label set only when it can.
-  `buildDir` differs per host and neither is `/mnt/img_pool`: p510 uses
-  `/home/nix-build` (CMR, 125 MB/s seq, 59.4 MB/s O_DSYNC) and p620 uses
-  `/mnt/games` (SSD, keeps 16 GB VM installs off the NVMe root, #1643).
-  `/mnt/img_pool` is the trap — an SMR ST1000LM035 at ~9.5 MB/s, where a 16 GB
-  VM install hangs rather than failing cleanly. The module sets both
-  `nix.settings.build-dir` and the nix-daemon `TMPDIR`, because `build-dir`
-  supersedes `TMPDIR` and setting only the latter goes quietly inert.
+  p620's `buildDir` is `/var/lib/nix-build`, its own 480 GB SSD (#2182). The
+  module sets both `nix.settings.build-dir` and the nix-daemon `TMPDIR`,
+  because `build-dir` supersedes `TMPDIR` and setting only the latter goes
+  quietly inert. p510 keeps the same two settings in its host config, pointed
+  at `/home/nix-build`: never `/mnt/img_pool`, an SMR ST1000LM035 at
+  ~9.5 MB/s, where a 16 GB VM install hangs rather than failing cleanly.
 - **An NVIDIA driver version bump cannot be applied with `switch`** — the new
   userspace meets the old in-memory module, three `nvidia-*` units fail and the
   activation rolls back. `nhs` detects this and falls back to `boot` mode; the
