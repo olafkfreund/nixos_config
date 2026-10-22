@@ -51,7 +51,7 @@
 , ...
 }:
 let
-  inherit (lib) mkOption mkIf mkMerge mkEnableOption mkPackageOption types optionalString concatStringsSep;
+  inherit (lib) mkOption mkIf mkMerge mkEnableOption mkPackageOption types optionalString optional concatStringsSep;
   cfg = config.modules.containers.k3d;
 
   # Declared resolver for the cluster, mounted into every node and handed to
@@ -77,6 +77,48 @@ let
   nodeResolvConf = pkgs.writeText "k3d-node-resolv.conf"
     (concatStringsSep "\n" (map (r: "nameserver ${r}") cfg.resolvers) + "\n");
   resolvStateFile = "/var/lib/k3d-${cfg.clusterName}/resolv.conf";
+
+  # #2441: that resolver mount also hides Docker's DNS from the agents, so their
+  # K3S_URL host k3d-<cluster>-server-0 does not resolve. Pin it in each agent's
+  # /etc/hosts. Docker rebuilds that file on every container start, and
+  # create/start block until the agent joins, so pin while they run, not after.
+  # Empty with agents = 0, which leaves the script byte-identical.
+  hostsPinFns = optionalString (cfg.agents > 0) ''
+    # stdin -> stdout: drop every line naming $2 as a host, append "$1 $2".
+    # Fails closed: without awk's output the caller must not write anything.
+    hosts_rewrite() {
+      awk -v n="$2" '$1 !~ /^#/ { for (i = 2; i <= NF && $i !~ /^#/; i++) if ($i == n) next } { print }' || return 1
+      echo "$1 $2 # k3d-bootstrap #2441"
+    }
+    pin_server_hosts() {
+      local ip agent cur new
+      ip=$(docker inspect -f "{{with index .NetworkSettings.Networks \"k3d-$CLUSTER\"}}{{.IPAddress}}{{end}}" "k3d-$CLUSTER-server-0" 2>/dev/null) || return 0
+      [ -n "$ip" ] || return 0
+      for agent in $(docker ps --filter "label=k3d.cluster=$CLUSTER" --filter label=k3d.role=agent --format '{{.Names}}' 2>/dev/null); do
+        cur=$(docker exec "$agent" cat /etc/hosts 2>/dev/null) || continue
+        # $(...) does not inherit errexit, so check it; never write a file
+        # that lost localhost (the agent's k3s LB listens on 127.0.0.1:6444).
+        new=$(hosts_rewrite "$ip" "k3d-$CLUSTER-server-0" <<<"$cur") || continue
+        [[ $new == *localhost* ]] || continue
+        [ "$new" = "$cur" ] && continue
+        # /etc/hosts is a bind mount: overwrite in place, never rename over it.
+        printf '%s\n' "$new" | docker exec -i "$agent" sh -c 'cat > /etc/hosts' \
+          && echo "[k3d-bootstrap] pinned k3d-$CLUSTER-server-0 -> $ip in $agent /etc/hosts" >&2
+      done
+    }
+    # Run "$@" with a pin pass every 2s (bounded to TimeoutStartSec), reap it, pin once more.
+    hosts_pinned() {
+      local pid rc=0
+      ( for _ in $(seq 1 450); do pin_server_hosts || true; sleep 2; done ) &
+      pid=$!
+      "$@" || rc=$?
+      kill "$pid" 2>/dev/null || true
+      wait "$pid" 2>/dev/null || true
+      pin_server_hosts || true
+      return "$rc"
+    }
+  '';
+  pinned = optionalString (cfg.agents > 0) "hosts_pinned ";
   pvSnapshot = "/var/lib/k3d-${cfg.clusterName}/pv-snapshot.json";
   snapshotFile = "/var/lib/k3d-${cfg.clusterName}/factory-cli-creds.json";
 
@@ -158,7 +200,9 @@ let
       # "no 'git' program on path: exec: \"git\": executable file not
       # found in $PATH" — observed in first deploy.
       git
-    ];
+    ]
+    # hosts_rewrite (#2441) runs awk on the host; only generated with agents.
+    ++ optional (cfg.agents > 0) gawk;
     text = ''
       set -euo pipefail
       umask 077
@@ -177,7 +221,7 @@ let
 
       # Nodes mount the declared resolver over /etc/resolv.conf, and k3d >= 5.9 applies its DNS fix on start too, so every call needs it off.
       export K3D_FIX_DNS=0
-
+      ${hostsPinFns}
       # Host-side API reachability check: pulls a fresh kubeconfig (which points
       # at ${cfg.apiHostBind}:$API_PORT — i.e. the serverlb's PUBLISHED host
       # port) and hits /readyz. This verifies the port-publish actually works
@@ -230,7 +274,7 @@ let
         # upstream lookup of k3d-<cluster>-server-0 to public DNS, nginx exits,
         # and the create never gets "start worker processes". Found in the
         # #1497 rehearsal.
-        k3d cluster create "$CLUSTER" \
+        ${pinned}k3d cluster create "$CLUSTER" \
           --image "${cfg.k3sImage}" \
           --api-port "${cfg.apiHostBind}:$API_PORT" \
           --servers 1 \
@@ -244,7 +288,7 @@ let
           --wait
       else
         echo "[k3d-bootstrap] Cluster $CLUSTER already exists (reboot path); ensuring API reachable"
-        k3d cluster start "$CLUSTER" >/dev/null 2>&1 || true
+        ${pinned}k3d cluster start "$CLUSTER" >/dev/null 2>&1 || true
 
         # Self-heal the serverlb port-publish race. After a reboot Docker's
         # restart-policy can resurrect the serverlb before the bind interface is
@@ -305,7 +349,7 @@ let
           # node BEFORE it starts the serverlb, so the API never publishes even
           # though the server is fine. Swallowing that output (2026-08-19) left
           # no trace of why the cluster was unreachable.
-          if ! start_err=$(k3d cluster start "$CLUSTER" 2>&1); then
+          if ! start_err=$(${pinned}k3d cluster start "$CLUSTER" 2>&1); then
             echo "[k3d-bootstrap] k3d cluster start failed:" >&2
             echo "$start_err" | tail -5 >&2
           fi
