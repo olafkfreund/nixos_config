@@ -1,6 +1,6 @@
 # k3d (k3s in Docker) cluster bootstrap.
 #
-# Runs a single-node k3s cluster inside the host Docker daemon. The cluster
+# Runs a k3s cluster (`agents` agents) inside the host Docker daemon. The cluster
 # is created on first boot by a one-shot systemd unit and persisted via
 # Docker volumes (under the host's Docker data-root). Local-path PV storage
 # is bind-mounted to ${cfg.storageDir}, off /mnt/media. The data dirs outlive
@@ -234,10 +234,10 @@ let
           --image "${cfg.k3sImage}" \
           --api-port "${cfg.apiHostBind}:$API_PORT" \
           --servers 1 \
-          --agents 0 \
+          --agents "${toString cfg.agents}" \
           --k3s-arg "--disable=traefik@server:*" \
           --k3s-arg "--disable=servicelb@server:*" \
-          --volume "$STORAGE_DIR:/var/lib/rancher/k3s/storage@server:*" \
+          --volume "$STORAGE_DIR:/var/lib/rancher/k3s/storage@server:*;agent:*" \
           --volume "${resolvStateFile}:/etc/resolv.conf@server:*;agent:*" \
           --volume "${resolvStateFile}:/etc/rancher/k3s/resolv.conf@all:*" \
           --k3s-arg "--resolv-conf=/etc/rancher/k3s/resolv.conf@all:*" \
@@ -610,6 +610,18 @@ in
         The bootstrap rewrites the file in place on every run, so a change
         reaches running nodes. The *mounts* are fixed at container create: a
         cluster created before #1497 needs recreating to get them.
+      '';
+    };
+
+    agents = mkOption {
+      type = types.ints.unsigned;
+      default = 0;
+      description = ''
+        Number of k3d agent nodes (`k3d cluster create --agents`). Agents get
+        the same storage and resolver mounts as the server, so local-path PVs
+        on an agent land in storageDir too (dir names carry the PVC uid, so
+        nodes sharing it cannot collide). Read only at create: k3d does not
+        add nodes to an existing cluster, so a change needs a recreate.
       '';
     };
 

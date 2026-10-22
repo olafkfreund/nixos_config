@@ -463,6 +463,11 @@ in
     # has been writing to the module default the whole time.
     storageDir = "/mnt/code/k3d/storage";
 
+    # Second node so TFactory can drop its RWO repo PVC (#2438, TFactory
+    # #1160). Takes effect only on a cluster recreate: k3d never adds nodes
+    # to the running cluster, so this changes nothing until then.
+    agents = 1;
+
     argocd.enable = true;
     tailscaleAuthKey.enable = true;
     factorySecrets.enable = true; # durably seed factory ns Secrets from agenix
