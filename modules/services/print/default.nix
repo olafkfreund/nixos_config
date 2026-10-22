@@ -41,8 +41,13 @@ in
             disable-publishing = false;
             publish-addresses = true;
             publish-workstation = true;
+            disable-user-service-publishing = false;
           };
         };
+        # nixpkgs' ipp-usb module still sets these obsolete options, which warn on
+        # every build; their effect is stated in settings.publish above.
+        publish.enable = lib.mkForce null;
+        publish.userServices = lib.mkForce null;
       };
       ipp-usb.enable = true;
     };
