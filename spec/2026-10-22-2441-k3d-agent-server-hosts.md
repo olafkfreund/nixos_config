@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2441
 intent: intent/2026-10-22-2441-k3d-agent-server-hosts.md
 ---
