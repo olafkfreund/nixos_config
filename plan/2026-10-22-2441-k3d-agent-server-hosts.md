@@ -40,6 +40,18 @@ Approved decisions (from the spec):
    blank line after `export K3D_FIX_DNS=0`. Prefix `${pinned}` to
    `k3d cluster create` and to both `k3d cluster start` calls (the
    `>/dev/null 2>&1 || true` one, and `start_err=$(k3d cluster start …)`).
+3. (Deviation, PR #2442 review round 1.) `hosts_rewrite` runs `awk` on the
+   host, but neither the script's `runtimeInputs` nor the unit's `path` had
+   it. Without it the rewrite printed only the pin line and
+   `pin_server_hosts` would have overwritten each agent's `/etc/hosts` with
+   it, dropping localhost (the agent's k3s load balancer is on
+   127.0.0.1:6444). Fix:
+   - add `++ optional (cfg.agents > 0) gawk` to the bootstrap
+     `runtimeInputs`, so `agents = 0` stays byte-identical;
+   - in `hosts_rewrite`, `awk … || return 1`;
+   - in `pin_server_hosts`, `new=$(…) || continue`, because `$(…)` does not
+     inherit errexit, and skip the write when `new` no longer contains
+     `localhost`.
    → verify: build the p620 bootstrap script, run `bash -n` on it, and diff
    it against origin/main with `agents = 0` (no diff).
    Traps: never run docker, k3d, kubectl or nixos-rebuild against the live
@@ -59,6 +71,13 @@ Approved decisions (from the spec):
   it appends the pin, a second run changes nothing, a stale IP is replaced,
   a hand-added unmarked line is replaced, and other lines (localhost, the
   agent's own name, `k3d-<cluster>-server-0x`) are kept.
+- Unit PATH test: cut `hosts_rewrite` and `pin_server_hosts` from the built
+  script, stub `docker` onto a temp hosts file, and run them under `env -i`
+  with exactly the script's `export PATH` plus the unit's
+  `environment.PATH`. The cases above pass. With only the unit's PATH (no
+  awk) the file is left untouched. The script's PATH contains gawk. Run
+  against the pre-fix functions, the append case and the no-awk case fail
+  (the file is reduced to the pin line), which reproduces the review finding.
 
 ## Rollback
 

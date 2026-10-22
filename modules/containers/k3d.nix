@@ -51,7 +51,7 @@
 , ...
 }:
 let
-  inherit (lib) mkOption mkIf mkMerge mkEnableOption mkPackageOption types optionalString concatStringsSep;
+  inherit (lib) mkOption mkIf mkMerge mkEnableOption mkPackageOption types optionalString optional concatStringsSep;
   cfg = config.modules.containers.k3d;
 
   # Declared resolver for the cluster, mounted into every node and handed to
@@ -85,8 +85,9 @@ let
   # Empty with agents = 0, which leaves the script byte-identical.
   hostsPinFns = optionalString (cfg.agents > 0) ''
     # stdin -> stdout: drop every line naming $2 as a host, append "$1 $2".
+    # Fails closed: without awk's output the caller must not write anything.
     hosts_rewrite() {
-      awk -v n="$2" '$1 !~ /^#/ { for (i = 2; i <= NF && $i !~ /^#/; i++) if ($i == n) next } { print }'
+      awk -v n="$2" '$1 !~ /^#/ { for (i = 2; i <= NF && $i !~ /^#/; i++) if ($i == n) next } { print }' || return 1
       echo "$1 $2 # k3d-bootstrap #2441"
     }
     pin_server_hosts() {
@@ -95,7 +96,10 @@ let
       [ -n "$ip" ] || return 0
       for agent in $(docker ps --filter "label=k3d.cluster=$CLUSTER" --filter label=k3d.role=agent --format '{{.Names}}' 2>/dev/null); do
         cur=$(docker exec "$agent" cat /etc/hosts 2>/dev/null) || continue
-        new=$(hosts_rewrite "$ip" "k3d-$CLUSTER-server-0" <<<"$cur")
+        # $(...) does not inherit errexit, so check it; never write a file
+        # that lost localhost (the agent's k3s LB listens on 127.0.0.1:6444).
+        new=$(hosts_rewrite "$ip" "k3d-$CLUSTER-server-0" <<<"$cur") || continue
+        [[ $new == *localhost* ]] || continue
         [ "$new" = "$cur" ] && continue
         # /etc/hosts is a bind mount: overwrite in place, never rename over it.
         printf '%s\n' "$new" | docker exec -i "$agent" sh -c 'cat > /etc/hosts' \
@@ -196,7 +200,9 @@ let
       # "no 'git' program on path: exec: \"git\": executable file not
       # found in $PATH" — observed in first deploy.
       git
-    ];
+    ]
+    # hosts_rewrite (#2441) runs awk on the host; only generated with agents.
+    ++ optional (cfg.agents > 0) gawk;
     text = ''
       set -euo pipefail
       umask 077
