@@ -127,6 +127,45 @@ screen-sharing failure on this fleet, so
 If a cast fails with *"unit is masked"*, the cause is almost always a stale
 `XDG_CURRENT_DESKTOP` from switching sessions without a clean re-login.
 
+## Getting a Nixarchy change onto the hosts
+
+The flake follows `github:olafkfreund/nixarchy/edge`, not `main`. `edge` is
+republished from `main` by Nixarchy's `omarchy-edge` workflow, daily at 06:07
+UTC or when dispatched, and it waits for other Nixarchy CI to go idle first.
+A PR merged into Nixarchy `main` is therefore not yet on the hosts, and a lock
+bump taken before `edge` is republished silently leaves it out.
+
+1. Check `edge` contains the merge (`0` means it does):
+
+    ```bash
+    gh api repos/olafkfreund/nixarchy/compare/<merge-sha>...edge -q .behind_by
+    ```
+
+2. Bump and deploy: `nix flake update nixarchy`, then the usual PR and deploy.
+3. **Log out and back in.** The session's `OMARCHY_PATH` points at the
+   Omarchy tree that was current at login, so menu, bar and other desktop
+   changes do not appear after a switch, and `omarchy-restart-shell` does not
+   help.
+
+## Checking a host: `nixarchy-verify`
+
+`nixarchy-verify` checks the parts of the desktop only real hardware can
+answer: portals, lock, idle, notifications, Bluetooth, KVM, theme, every
+menu row, gliff. It prints `✓` pass, `✗` fail and `·` worth a look; the
+`·` lines are mostly informational (Stay Awake on, no battery, nothing
+running to test).
+
+It needs the graphical session. Over SSH, borrow its environment:
+
+```bash
+ssh p510 'set -a; eval "$(systemctl --user show-environment | grep -E "^(WAYLAND_DISPLAY|HYPRLAND_INSTANCE_SIGNATURE|XDG_CURRENT_DESKTOP|XDG_SESSION_TYPE|OMARCHY_PATH|DBUS_SESSION_BUS_ADDRESS|PATH)=")"; set +a; nixarchy-verify'
+```
+
+Known failure: on p510 (NVIDIA 595) `gliff end to end` fails. The GPU path
+cannot import the NVIDIA decode surface and the CPU path scores under gliff's
+PSNR floor on a captured frame (omacom/gliff#84, omacom/gliff#85). Nothing on
+p510 uses gliff; Sunshine is its remote desktop.
+
 ## What was removed
 
 niri, labwc, mango, Noctalia and DankMaterialShell — modules, sessions, greeters
