@@ -201,6 +201,30 @@ If the lock is unchanged when you run `nhsb`, it exits "nothing to prebuild"
 without doing wasted work — there's no point pre-building a closure for an
 unreachable host when nothing changed.
 
+## Nightly auto-upgrade
+
+Separate from `nhs`: `system.autoUpgrade` in `modules/nix/nix.nix` switches
+p620 and razer every night at 04:00 (plus up to 45 minutes of random delay,
+caught up after a missed night). It builds `github:olafkfreund/nixos_config`,
+the `main` branch on GitHub, not the local checkout, with
+`--no-write-lock-file`, and never reboots. p510 turns it off
+(`system.autoUpgrade.enable = lib.mkForce false`) and is deployed by hand.
+
+!!! warning "GitHub must answer, or the night is skipped"
+    When GitHub cannot be reached, a `github:` flake reference falls back to
+    whatever copy of the flake Nix cached last, which can be weeks old. The
+    upgrade then switches the host *backwards* and reports success (#2409).
+    An `ExecCondition` on `nixos-upgrade.service` checks
+    `https://api.github.com` first (5 retries, 30 s apart). If it never
+    answers, the unit is skipped, not failed:
+
+    ```bash
+    systemctl status nixos-upgrade   # "Skipped due to 'exec-condition'"
+    journalctl -u nixos-upgrade -b
+    ```
+
+    A skipped night is harmless; the next night tries again.
+
 ## Files
 
 - `scripts/update-commit-deploy.sh` — the script (`--no-deploy` flag for stage 1)
