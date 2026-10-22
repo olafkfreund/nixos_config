@@ -897,16 +897,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1789012155,
-        "narHash": "sha256-9s5DeiKzmdbXMnGBmXOSxTdaAp7jBxyd7IgVLxZ717Q=",
+        "lastModified": 1792500199,
+        "narHash": "sha256-DDm30OaucpdLPRIVDaVvEVqIYVORzyOGHkSiYmYM+nQ=",
         "owner": "MuNeNiCK",
         "repo": "hypr-rdp",
-        "rev": "8744778de2eb9add74224d57fac399aba6039a26",
+        "rev": "08394d858dc5f7a1865cb8c6e44c18dbb247c779",
         "type": "github"
       },
       "original": {
         "owner": "MuNeNiCK",
-        "ref": "v0.1.6",
+        "ref": "v0.1.7",
         "repo": "hypr-rdp",
         "type": "github"
       }
@@ -1623,11 +1623,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792593865,
-        "narHash": "sha256-EyiHJiScdiPp8x4TReQC899Fas9U8d8Aud4RN6Uy00s=",
+        "lastModified": 1792651603,
+        "narHash": "sha256-pAIVh+UHmCM2LPvShuCWanEyIFA0XTYPqv3mzt/972Q=",
         "owner": "olafkfreund",
         "repo": "nixarchy",
-        "rev": "c3e7d60bcb3988ef51ec61d8abd71fdd26fbb819",
+        "rev": "5d22ce0e27bfa110fd4d42bdfd193c6aa413dc99",
         "type": "github"
       },
       "original": {
