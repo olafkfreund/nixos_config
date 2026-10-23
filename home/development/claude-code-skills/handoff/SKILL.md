@@ -61,9 +61,10 @@ Otherwise report the failure to the user and do the step yourself.
 
 ## After an agy update
 
+Run `bash modules/programs/agy-guard-adapter.test.sh` first; it must pass.
 Before the first handoff on a new agy version, run the guard probe in a
-scratch git repo: edit a file with `write_to_file`, `git commit -am x`, `touch ~/.gemini/probe`,
-and `write_to_file` to a path outside the repo. The edit must succeed, the
+scratch git repo: edit a file with `edit_file`, `git commit -am x`, `touch ~/.gemini/probe`,
+and `write_file` to a path outside the repo. The edit must succeed, the
 other three must be blocked, and `HEAD` must not move. If any is not
 blocked, stop and tell the user: hooks no longer fire under
 `--dangerously-skip-permissions` (Issue #2296). Also check that a sandboxed

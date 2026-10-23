@@ -131,6 +131,47 @@ All work happens in the worktree `~/.config/nixos-2452`, branch
    - include the probe results per host
    - note that p510 gets the fix at its next deploy
 
+## Deviations
+
+- **Step 1 (2026-10-23).** `Path // TargetFile` checks only one key, so a
+  payload carrying `Path` inside the worktree and `TargetFile` outside it
+  passes the guard while agy writes `TargetFile`. agy decodes args with Go's
+  case-insensitive JSON (#2298), so `targetFile` and `PATH` are the same key
+  to it. The guard now collects every arg whose lowercased key is `path` or
+  `targetfile`, denies if there is none, or one is not a string, or one
+  contains a newline, and allows only if all of them resolve inside
+  `AGY_WORKTREE`. Step 2 gains three deny cases: `Path` inside with
+  `TargetFile` outside, `TargetFile` inside with `targetFile` outside, and a
+  non-string `Path`.
+- **Step 2 (2026-10-23).** The test harness never substituted
+  `@realpath@`, so the write branch crashed with "command not found" and
+  deny cases came back as allow. Both adapter `sed` lines now add
+  `-e "s#@realpath@#realpath#"`. This is also why the baseline failed on
+  `main`, together with the missing `AGY_WORKTREE`.
+- **Review (2026-10-23).** The Opus review found the following.
+  - The `run_command` bypassSandbox check (#2298) misses keys that Go's
+    `EqualFold` folds but `ascii_downcase` does not, such as `bypaſsSandbox`
+    (U+017F). Fix: before the `case`, deny any `toolCall.args` key with a
+    non-ASCII character.
+  - In the write branch, also deny when `$wt` is empty, and deny targets that
+    do not start with `/` (after stripping `file://`) or that contain `%`.
+  - Tests gain:
+    - `bypaſsSandbox` (deny)
+    - `Path:1` alongside a valid `TargetFile` (deny)
+    - a newline inside `Path` (deny)
+    - `file:///tmp/wt/a` (allow)
+    - a relative `Path` (deny)
+    - `%2e%2e` (deny)
+    - one direct call without `AGY_WORKTREE` (deny)
+
+  The key check uses `test("[^\\x00-\\x7f]")`. The `\\u` form matched every
+  key in jq. The `%` rule also denies legitimate names like `100%.txt`;
+  that is accepted, because it fails closed.
+
+  Deferred to a follow-up issue: duplicate keys (jq and Go v1 both keep the
+  last value), and writes inside the worktree to `.git`, `.claude`, `.envrc`
+  or `.direnv` that run code later.
+
 ## Tests
 
 - `bash modules/programs/agy-guard-adapter.test.sh` prints

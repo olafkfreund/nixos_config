@@ -39,6 +39,11 @@ if echo "$payload" | @jq@ -e '[.toolCall.args | .. | strings] | any(test("\\.gem
   deny "agy-implement may not touch ~/.gemini (#2291)"
 fi
 
+# Go's EqualFold folds U+017F to s and U+212A to k, so a non-ASCII key could alias a checked one.
+if echo "$payload" | @jq@ -e '[.toolCall.args | objects | keys[] | test("[^\\x00-\\x7f]")] | any' >/dev/null 2>&1; then
+  deny "agy-implement refuses non-ASCII argument names"
+fi
+
 case "$name" in
   view_file | grep_search | list_dir | find_by_name | ask_question | list_permissions)
     echo '{"decision":"allow"}'
@@ -47,17 +52,28 @@ case "$name" in
   # --sandbox confines shell commands only, so file writes are fenced here to
   # the directory agy-implement started in. Hooks run in ~/.gemini/config, so
   # the wrapper passes that directory as AGY_WORKTREE (#2296).
-  write_to_file | replace_file_content | multi_replace_file_content)
+  write_to_file | replace_file_content | multi_replace_file_content | write_file | edit_file)
     [ -n "${AGY_WORKTREE:-}" ] || deny "AGY_WORKTREE is not set"
-    target="$(echo "$payload" | @jq@ -r '.toolCall.args.TargetFile // empty | sub("^file://"; "")')"
-    [ -n "$target" ] || deny "$name without a TargetFile"
-    case "$(@realpath@ -m -- "$target")/" in
-      "$(@realpath@ -m -- "$AGY_WORKTREE")"/*)
-        echo '{"decision":"allow"}'
-        exit 0
-        ;;
-      *) deny "agy-implement may only write inside $AGY_WORKTREE (#2296)" ;;
-    esac
+    # Every Path/TargetFile arg must be inside: agy decodes keys case-insensitively
+    # and may write either one, so checking only the first would be a bypass.
+    targets="$(echo "$payload" | @jq@ -r '[.toolCall.args | to_entries[] | select(.key | ascii_downcase | . == "path" or . == "targetfile") | .value] | if length == 0 or any(.[]; type != "string" or test("\n")) then empty else .[] | sub("^file://"; "") end')"
+    [ -n "$targets" ] || deny "$name without a path"
+    wt="$(@realpath@ -m -- "$AGY_WORKTREE")"
+    [ -n "$wt" ] || deny "cannot resolve AGY_WORKTREE"
+    while IFS= read -r target; do
+      # A relative or %-encoded path resolves differently for agy than for realpath.
+      case "$target" in
+        *%*) deny "agy-implement needs an absolute, unencoded path" ;;
+        /*) ;;
+        *) deny "agy-implement needs an absolute, unencoded path" ;;
+      esac
+      case "$(@realpath@ -m -- "$target")/" in
+        "$wt"/*) ;;
+        *) deny "agy-implement may only write inside $AGY_WORKTREE (#2296)" ;;
+      esac
+    done <<<"$targets"
+    echo '{"decision":"allow"}'
+    exit 0
     ;;
   run_command)
     if ! echo "$payload" | @jq@ -e '.toolCall.args.CommandLine | strings' >/dev/null 2>&1; then

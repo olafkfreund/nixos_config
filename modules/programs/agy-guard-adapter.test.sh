@@ -11,8 +11,8 @@ crashadapter=$(mktemp)
 trap 'rm -f "$guard" "$crashguard" "$adapter" "$crashadapter"' EXIT
 sed 's#@jq@#jq#' "$here/claude-coder-guard.sh" >"$guard"
 printf 'exit 1\n' >"$crashguard"
-sed -e "s#@jq@#jq#" -e "s#@guard@#bash $guard#" "$here/agy-guard-adapter.sh" >"$adapter"
-sed -e "s#@jq@#jq#" -e "s#@guard@#bash $crashguard#" "$here/agy-guard-adapter.sh" >"$crashadapter"
+sed -e "s#@jq@#jq#" -e "s#@realpath@#realpath#" -e "s#@guard@#bash $guard#" "$here/agy-guard-adapter.sh" >"$adapter"
+sed -e "s#@jq@#jq#" -e "s#@realpath@#realpath#" -e "s#@guard@#bash $crashguard#" "$here/agy-guard-adapter.sh" >"$crashadapter"
 
 fail=0
 
@@ -23,7 +23,7 @@ payload() {
 
 t() {
   # $1 = AGY_CODER value ("" or "1"), $2 = payload json, $3 = want decision
-  got="$(printf '%s' "$2" | env AGY_CODER="$1" bash "$adapter" | jq -r .decision)"
+  got="$(printf '%s' "$2" | env AGY_CODER="$1" AGY_WORKTREE=/tmp/wt bash "$adapter" | jq -r .decision)"
   if [ "$got" != "$3" ]; then
     echo "FAIL got=$got want=$3 AGY_CODER=$1: $2"
     fail=1
@@ -41,7 +41,7 @@ git status
 just check-syntax
 ALLOW
 
-got="$(echo not json | env AGY_CODER=1 bash "$adapter" | jq -r .decision)"
+got="$(echo not json | env AGY_CODER=1 AGY_WORKTREE=/tmp/wt bash "$adapter" | jq -r .decision)"
 if [ "$got" != "deny" ]; then
   echo "FAIL got=$got want=deny: not json"
   fail=1
@@ -64,13 +64,35 @@ t 1 "$(jq -n '{toolCall:{name:"send_command_input",args:{Input:"git commit -m x\
 t 1 "$(jq -n '{toolCall:{name:"call_mcp_tool",args:{}}}')" deny
 t 1 "$(jq -n '{toolCall:{name:"totally_unknown_tool",args:{}}}')" deny
 t 1 "$(jq -n '{toolCall:{name:"view_file",args:{AbsolutePath:"/tmp/x"}}}')" allow
-t 1 "$(jq -n '{toolCall:{name:"write_to_file",args:{TargetFile:"/tmp/x",CodeContent:"x"}}}')" allow
+t 1 "$(jq -n '{toolCall:{name:"write_to_file",args:{TargetFile:"/tmp/wt/a",CodeContent:"x"}}}')" allow
+t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:"/tmp/wt/a",Content:"x"}}}')" allow
+t 1 "$(jq -n '{toolCall:{name:"edit_file",args:{Path:"/tmp/wt/a",Target:"x",Replacement:"y"}}}')" allow
+t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:"/tmp/elsewhere/a",Content:"x"}}}')" deny
+t 1 "$(jq -n '{toolCall:{name:"edit_file",args:{Path:"/tmp/wt/../elsewhere/a",Target:"x",Replacement:"y"}}}')" deny
+t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Content:"x"}}}')" deny
+t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:"/tmp/wt/.gemini/x",Content:"x"}}}')" deny
+t 1 "$(jq -n '{toolCall:{name:"write_to_file",args:{Path:"/tmp/wt/a",TargetFile:"/tmp/out/a",CodeContent:"x"}}}')" deny
+t 1 "$(jq -n '{toolCall:{name:"write_to_file",args:{TargetFile:"/tmp/wt/a",targetFile:"/tmp/out/a",CodeContent:"x"}}}')" deny
+t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:["/tmp/wt/a"],Content:"x"}}}')" deny
+t 1 "$(jq -n '{toolCall:{name:"run_command",args:{CommandLine:"ls","bypaſsSandbox":true}}}')" deny
+t 1 "$(jq -n '{toolCall:{name:"write_to_file",args:{Path:1,TargetFile:"/tmp/wt/a",CodeContent:"x"}}}')" deny
+t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:"/tmp/wt/a\n/tmp/wt/b",Content:"x"}}}')" deny
+t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:"file:///tmp/wt/a",Content:"x"}}}')" allow
+t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:"a.txt",Content:"x"}}}')" deny
+t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:"file:///tmp/wt/%2e%2e/%2e%2e/x",Content:"x"}}}')" deny
+
+# No AGY_WORKTREE: a write inside /tmp/wt must still deny.
+got="$(jq -n '{toolCall:{name:"write_file",args:{Path:"/tmp/wt/a",Content:"x"}}}' | env -u AGY_WORKTREE AGY_CODER=1 bash "$adapter" | jq -r .decision)"
+if [ "$got" != "deny" ]; then
+  echo "FAIL got=$got want=deny: write without AGY_WORKTREE"
+  fail=1
+fi
 
 # Without AGY_CODER, the guard is bypassed regardless of tool or payload.
 t "" "$(payload "git commit -m x")" allow
 t "" "$(jq -n '{toolCall:{name:"totally_unknown_tool",args:{}}}')" allow
 
-reason="$(payload "git commit -m x" | env AGY_CODER=1 bash "$adapter" | jq -r .reason)"
+reason="$(payload "git commit -m x" | env AGY_CODER=1 AGY_WORKTREE=/tmp/wt bash "$adapter" | jq -r .reason)"
 case "$reason" in
   *"BLOCKED by the coder guard"*) ;;
   *)
@@ -79,7 +101,7 @@ case "$reason" in
     ;;
 esac
 
-got="$(payload "git status" | env AGY_CODER=1 bash "$crashadapter" | jq -r .decision)"
+got="$(payload "git status" | env AGY_CODER=1 AGY_WORKTREE=/tmp/wt bash "$crashadapter" | jq -r .decision)"
 if [ "$got" != "deny" ]; then
   echo "FAIL got=$got want=deny: guard exits 1 (crashed guard fails closed)"
   fail=1
