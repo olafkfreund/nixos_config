@@ -64,6 +64,8 @@ t 1 "$(jq -n '{toolCall:{name:"send_command_input",args:{Input:"git commit -m x\
 t 1 "$(jq -n '{toolCall:{name:"call_mcp_tool",args:{}}}')" deny
 t 1 "$(jq -n '{toolCall:{name:"totally_unknown_tool",args:{}}}')" deny
 t 1 "$(jq -n '{toolCall:{name:"view_file",args:{AbsolutePath:"/tmp/x"}}}')" allow
+t 1 "$(jq -n '{toolCall:{name:"read_file",args:{Path:"/tmp/wt/a"}}}')" allow
+t 1 "$(jq -n '{toolCall:{name:"read_file",args:{Path:"/home/u/.gemini/config/hooks.json"}}}')" deny
 t 1 "$(jq -n '{toolCall:{name:"write_to_file",args:{TargetFile:"/tmp/wt/a",CodeContent:"x"}}}')" allow
 t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:"/tmp/wt/a",Content:"x"}}}')" allow
 t 1 "$(jq -n '{toolCall:{name:"edit_file",args:{Path:"/tmp/wt/a",Target:"x",Replacement:"y"}}}')" allow

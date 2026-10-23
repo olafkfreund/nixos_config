@@ -45,7 +45,7 @@ if echo "$payload" | @jq@ -e '[.toolCall.args | objects | keys[] | test("[^\\x00
 fi
 
 case "$name" in
-  view_file | grep_search | list_dir | find_by_name | ask_question | list_permissions)
+  view_file | read_file | grep_search | list_dir | find_by_name | ask_question | list_permissions)
     echo '{"decision":"allow"}'
     exit 0
     ;;

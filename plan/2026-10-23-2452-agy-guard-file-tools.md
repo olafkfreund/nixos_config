@@ -168,7 +168,14 @@ All work happens in the worktree `~/.config/nixos-2452`, branch
   key in jq. The `%` rule also denies legitimate names like `100%.txt`;
   that is accepted, because it fails closed.
 
-  Deferred to a follow-up issue: duplicate keys (jq and Go v1 both keep the
+- **Step 6 (2026-10-23).** On both hosts, the live probe's read row
+  failed with `tool read_file is not allowed under agy-implement`. agy 1.4.5
+  has a single read tool, `read_file` (arg `Path`); search and listing now go
+  through `run_command`. `read_file` joins the read-only allowlist, unfenced
+  like `view_file`, so the `.gemini` scan still applies. Two tests were
+  added: one allow, and one deny for `.gemini`. Steps 4-6 were repeated.
+
+  Deferred to a follow-up issue (from the review): duplicate keys (jq and Go v1 both keep the
   last value), and writes inside the worktree to `.git`, `.claude`, `.envrc`
   or `.direnv` that run code later.
 
