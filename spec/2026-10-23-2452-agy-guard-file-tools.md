@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2452
 intent: intent/2026-10-23-2452-agy-guard-file-tools.md
 ---
