@@ -15,7 +15,6 @@
     # wasistlos removed upstream (unmaintained); karere is in p620/razer
     # system packages instead, so no replacement needed here.
     # pkgs.ferdium  # Removed: no longer needed
-    pkgs.zoom-us
     pkgs.libcamera
   ];
   xdg = {
