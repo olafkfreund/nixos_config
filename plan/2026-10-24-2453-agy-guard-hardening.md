@@ -78,6 +78,8 @@ Steps 1–6 edit files and go to the `coder` agent. Steps 7–8 are mine.
        `# shortcut: a parallel run_command can swap in a symlink after this check; only --sandbox closes that (#2453).`
    - Verify: `bash -n modules/programs/agy-guard-adapter.sh` passes (step 3
      runs the cases).
+   - Deviation (implemented): the link-count test is `!= 1` on `stat`'s
+     output, not `-gt 1`, so a failed `stat` denies instead of allowing.
    - Traps:
      - The script is `builtins.readFile`'d and placeholder-substituted, so
        use `@jq@`, `@realpath@` and `@stat@`, never bare names.
