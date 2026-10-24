@@ -64,6 +64,16 @@
     # Plugin inputs nixarchy also carries (nixarchy-voice, -pkg, -distrobox,
     # -microvm, ai-mirror) follow nixarchy's pins below rather than keeping
     # their own: bump them with `nix flake update nixarchy`.
+    # Followed by nixarchy (below), so `nix flake update` moves nixi itself (nixarchy#1432).
+    nixi = {
+      url = "github:olafkfreund/nixi-nixarchy";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.omarchy.follows = "nixarchy/omarchy";
+    };
+    nixi-companion = {
+      url = "github:olafkfreund/nixoarchy-snowflake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixarchy = {
       url = "github:olafkfreund/nixarchy/edge";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -84,6 +94,10 @@
       # puts the broken pin straight back. Drop this once nixarchy's lock is
       # ahead of fdb83f8.
       inputs.zen-browser.follows = "zen-browser";
+      # nixarchy#1432: nixi and the companion follow our own inputs, so this
+      # flake's `nix flake update` moves them instead of nixarchy's lock.
+      inputs.nixi.follows = "nixi";
+      inputs.nixi-companion.follows = "nixi-companion";
 
       # nixarchy's NixOS module imports home-manager.nixosModules.home-manager
       # itself. From its own pin that is a second copy of nixos/common.nix, and
