@@ -33,6 +33,7 @@
     ../../common/nixos/omarchy-voice-pkgs.nix
     ../../common/nixos/omarchy-screenshots.nix
     ../../common/nixos/omarchy-ai-mirror.nix
+    ../../common/nixos/omarchy-nixi-companion.nix
     ../../common/nixos/omarchy-microvm.nix
     ../../common/nixos/omarchy-omadroid.nix
     ../../common/nixos/omarchy-omamail.nix
@@ -145,8 +146,6 @@
     services.nixi = {
       watcher.enable = true;
       omarchyHooks.enable = true;
-      # The snowflake desktop companion (SUPER+ALT+S); nixarchy supplies the package.
-      companion.enable = true;
 
       # Named, because nixi's own default did not pin claude here and SUPER+H
       # died on "claude-agent-acp is not on the system PATH".

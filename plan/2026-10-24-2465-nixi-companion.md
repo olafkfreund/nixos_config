@@ -43,6 +43,20 @@ The approved decisions:
    → verify that `command -v nixi-companion` works on both hosts, and that
      the hook file exists.
 
+## Deviations
+
+- **The setting is a shared module** with keybindings, instead of a line in
+  each host. The owner asked for it fast, and a second session's p620 branch
+  had the companion's SUPER+ALT+S / SUPER+ALT+SHIFT+S binds, which the
+  companion needs to be reachable.
+  - `hosts/common/nixos/omarchy-nixi-companion.nix` follows
+    `omarchy-gog.nix`'s pattern. It sets `services.nixi.companion.enable` and
+    writes `~/.config/hypr/nixi-companion-binds.lua`.
+  - p620 and razer import it.
+  - Each host's user-owned `bindings.lua` gains one line:
+    `pcall(require, "hypr.nixi-companion-binds")`. That is outside this repo,
+    as gog's line is.
+
 ## Rollback
 
 Revert the merge and deploy again, or boot the previous generation.
