@@ -44,8 +44,10 @@ Denied for file writes:
 ## The version gate and the automatic probe
 
 A new agy version may rename a tool that the guard keys on, which would turn the guard into a silent allow.
-`agy-guard-probe` is a live check: in a scratch git repo it asks agy to try six forbidden actions, then checks
-that none landed and that the guard logged a deny for each. `agy-implement` therefore compares
+`agy-guard-probe` is a live check. In a scratch git repo it asks agy to make one allowed edit and to try five
+forbidden actions (a commit, a write to `~/.gemini`, a write outside the repo, a `BypassSandbox` command and a
+write to `.envrc`). It passes only if the edit landed, none of the five did, and the guard logged a deny for
+each. `agy-implement` therefore compares
 `agy --version` with `${XDG_CACHE_HOME:-$HOME/.cache}/agy-implement/probed`.
 
 ```mermaid
@@ -64,7 +66,9 @@ flowchart TD
 - A `flock` on `probe.lock` stops two parallel starts from probing twice; the second re-checks `probed` after
   it gets the lock.
 - Only the probe writes `probed`, and only on a pass.
-- An empty `agy --version`, a failed probe or a timeout all refuse.
+- An unreadable `agy --version` or a failed probe refuses. agy's `--print-timeout 300s` bounds the probe's run,
+  and a start that waits more than 600 seconds for another start's probe lock refuses too.
+- The probe ignores the caller's stdin, and a version that changes mid-probe is not recorded.
 - The probe's own inner `agy-implement` run sets `AGY_IMPLEMENT_PROBING=1` to skip the gate.
 - There is no timer and no activation hook: the probe runs on first use.
 
