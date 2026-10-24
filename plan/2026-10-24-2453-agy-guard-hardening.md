@@ -62,7 +62,11 @@ Steps 1–6 edit files and go to the `coder` agent. Steps 7–8 are mine.
    - **e.** In the jq at line 59, change `any(.[]; type != "string" or test("\n"))`
      to `any(.[]; type != "string" or . == "" or test("\n"))`.
    - **d.** In the write branch, before the `targets=` line, deny when
-     `[.toolCall.args | to_entries[] | select((.value|type)=="string") | .key | ascii_downcase | select(test("path|file")) | select(. != "path" and . != "targetfile")] | length > 0`.
+
+     ```jq
+     [.toolCall.args | to_entries[] | select((.value|type)=="string") | .key | ascii_downcase | select(test("path|file")) | select(. != "path" and . != "targetfile")] | length > 0
+     ```
+
      Message: `agy-implement refuses unknown path argument on $name`.
    - **b, c, f.** Inside the `while` loop, keep the realpath in a variable
      (`resolved="$(@realpath@ -m -- "$target")"`) and test
@@ -180,13 +184,22 @@ Steps 1–6 edit files and go to the `coder` agent. Steps 7–8 are mine.
      - Any fail → exit 1. If `gh auth status` works: set
        `title="agy $v: coder guard probe failed on $(hostname)"`. Unless
        `gh issue list -R olafkfreund/nixos_config --state open --search "in:title \"$title\"" --json number --jq length`
-       is non-zero, run `gh issue create -R olafkfreund/nixos_config --title "$title" --body-file <file with the PASS/FAIL lines and the log>`.
+       is non-zero, run:
+
+       ```sh
+       gh issue create -R olafkfreund/nixos_config --title "$title" --body-file <file with the PASS/FAIL lines and the log>
+       ```
+
        Otherwise print the title and say to file it by hand.
      - Use `${pkgs.git}/bin/git`, `${pkgs.gh}/bin/gh` and `${pkgs.gnugrep}`
        store paths, matching the file's `${pkgs.jq}/bin/jq` idiom. Call
        `agy-implement` through `${agyImplement}/bin/agy-implement`.
    - Verify:
-     `nix eval .#nixosConfigurations.p620.config.home-manager.users.olafkfreund.home.packages --apply 'ps: builtins.any (p: (p.name or "") == "agy-guard-probe") ps'`
+
+     ```sh
+     nix eval .#nixosConfigurations.p620.config.home-manager.users.olafkfreund.home.packages --apply 'ps: builtins.any (p: (p.name or "") == "agy-guard-probe") ps'
+     ```
+
      → `true`, and `just test-host p620`.
    - Traps:
      - `''${…}` escaping inside Nix `''` strings, for every shell `${`.
