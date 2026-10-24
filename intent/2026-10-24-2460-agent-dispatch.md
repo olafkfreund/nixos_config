@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2460
 author: olafkfreund
 ---
@@ -76,23 +76,10 @@ and have that happen. The user has to repeat it in chat at each step. The
 - This is policy text plus skill text. Nothing is deployed beyond the
   rebuilt Home Manager files and `/etc/claude-code/CLAUDE.md`.
 
-## Open questions
+## Decisions (approved 2026-10-24)
 
-1. **Scope.** My recommendation is (a), with (b) as a follow-up issue if
-   it's wanted.
-   - **(a)** Per-plan dispatch only: `coders:` per step, plus `reviewers:`.
-     The policy and skill texts are updated to match.
-   - **(b)** (a) plus the `team` command accepting `codex` and `agy`
-     workers.
-
-   `team` dispatch fans out several writers at once, which is a bigger risk
-   and a bigger change than one-step handoffs.
-2. **Who may set the fields.** My recommendation is (a): Claude may propose
-   them in a draft plan, and the user's plan approval is the consent.
-   - **(a)** Claude proposes; the user approves the plan.
-   - **(b)** Only the user adds them.
-3. **The review default.** My recommendation is (a): a reviewer from another
-   provider adds value, but it shouldn't cost quota on every task by
-   default.
-   - **(a)** With no `reviewers:` field, the review stays a fresh Opus agent.
-   - **(b)** It becomes Opus plus `second-opinion` on every plan.
+1. **Per-plan dispatch only** (`coders:` per step and `reviewers:`). Letting
+   `team` run Codex and agy workers is out of scope.
+2. **Claude may propose the fields in a draft plan.** The user's plan
+   approval is the consent.
+3. **With no `reviewers:` field, the review stays a fresh Opus agent.**
