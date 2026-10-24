@@ -1607,8 +1607,12 @@
         "nixarchy-plugin-browser": "nixarchy-plugin-browser",
         "nixarchy-podman": "nixarchy-podman",
         "nixarchy-voice": "nixarchy-voice",
-        "nixi": "nixi",
-        "nixi-companion": "nixi-companion",
+        "nixi": [
+          "nixi"
+        ],
+        "nixi-companion": [
+          "nixi-companion"
+        ],
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": [
           "nixpkgs"
@@ -2046,7 +2050,6 @@
     "nixi": {
       "inputs": {
         "nixpkgs": [
-          "nixarchy",
           "nixpkgs"
         ],
         "omarchy": [
@@ -2071,7 +2074,6 @@
     "nixi-companion": {
       "inputs": {
         "nixpkgs": [
-          "nixarchy",
           "nixpkgs"
         ]
       },
@@ -2645,6 +2647,8 @@
           "nixarchy-voice"
         ],
         "nixarchy-winvm": "nixarchy-winvm",
+        "nixi": "nixi",
+        "nixi-companion": "nixi-companion",
         "nixos-hardware": "nixos-hardware_2",
         "nixos-tfm": "nixos-tfm",
         "nixpkgs": "nixpkgs_8",
