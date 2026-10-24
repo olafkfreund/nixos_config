@@ -90,6 +90,7 @@ t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:"file:///tmp/wt/%2e%2e/%2e
 t 1 '{"toolCall":{"name":"write_file","args":{"Path":"/etc/x","Path":"/tmp/wt/a","Content":"x"}}}' deny
 t 1 '{"toolCall":{"name":"run_command","args":{"CommandLine":"git commit -m x","CommandLine":"git status"}}}' deny
 # Go folds key case and merges duplicate objects (#2453 review).
+t 1 '{"toolCall":{"name":"write_to_file","args":{"TargetFile":"/tmp/wt/a","CodeContent":"x"},"argſ":{"Path":"/etc/x"}}}' deny
 t 1 '{"toolCall":{"name":"run_command","args":{"CommandLine":"git status","commandline":"git commit -m x"}}}' deny
 t 1 '{"toolCall":{"name":"write_to_file","args":{"Path":"/etc/x"},"args":{"TargetFile":"/tmp/wt/a","CodeContent":"x"}}}' deny
 t 1 '{"toolCall":{"name":"write_file","args":{"Path":"/etc/x","Content":"x"}},"toolCall":{"name":"view_file","args":{}}}' deny

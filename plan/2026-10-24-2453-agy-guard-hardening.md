@@ -85,7 +85,8 @@ Steps 1–6 edit files and go to the `coder` agent. Steps 7–8 are mine.
      folds case and merges duplicate objects. The log line is
      `<tool> <decision> <reason>`, with the tool name reduced to
      `[A-Za-z0-9_]` and newlines in the reason flattened, so a crafted name
-     cannot forge lines.
+     cannot forge lines. The non-ASCII key check also covers the root and `toolCall`,
+     so a key like `argſ` cannot alias `args`.
    - Traps:
      - The script is `builtins.readFile`'d and placeholder-substituted, so
        use `@jq@`, `@realpath@` and `@stat@`, never bare names.

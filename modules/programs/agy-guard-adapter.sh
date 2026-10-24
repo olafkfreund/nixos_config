@@ -54,8 +54,9 @@ if echo "$payload" | @jq@ -e '[.toolCall.args | .. | strings] | any(test("\\.gem
 fi
 
 # Go's EqualFold folds U+017F to s and U+212A to k, so a non-ASCII key could alias a checked one.
-if echo "$payload" | @jq@ -e '[.toolCall.args | objects | keys[] | test("[^\\x00-\\x7f]")] | any' >/dev/null 2>&1; then
-  deny "agy-implement refuses non-ASCII argument names"
+# Checked at the root and in toolCall too: Go would read a key argſ as args.
+if echo "$payload" | @jq@ -e '[(., .toolCall, .toolCall.args) | objects | keys[] | test("[^\\x00-\\x7f]")] | any' >/dev/null 2>&1; then
+  deny "agy-implement refuses non-ASCII key names"
 fi
 
 # jq keeps the last of duplicate keys, but Go folds case and merges duplicate objects; count each key's one
