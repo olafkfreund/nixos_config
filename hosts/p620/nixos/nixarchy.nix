@@ -33,6 +33,7 @@
     ../../common/nixos/omarchy-voice-pkgs.nix
     ../../common/nixos/omarchy-screenshots.nix
     ../../common/nixos/omarchy-ai-mirror.nix
+    ../../common/nixos/omarchy-nixi-companion.nix
     ../../common/nixos/omarchy-microvm.nix
     ../../common/nixos/omarchy-winvm.nix
     ../../common/nixos/omarchy-omadroid.nix
