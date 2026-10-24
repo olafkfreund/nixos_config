@@ -132,6 +132,16 @@ The plan touches five files, so per the model split, steps 1–4 go to a new
      and that p510 still has the old text.
    - Traps: p510 is never deployed without asking. Merge main first.
 
+## Deviations (step 5 review fixes)
+
+- The template's `coders:`/`reviewers:` example lines are commented out, so
+  copying the template never dispatches by accident.
+- `coders:`/`reviewers:` are not a "deviation", and a handoff fallback is
+  recorded in the PR, not the plan (artifact-workflow rule, handoff skill).
+- second-opinion: `reviewers:` naming one provider means one, not both.
+- `AGENTS.md`: "Never on your own initiative otherwise" becomes "Never
+  otherwise".
+
 ## Tests
 
 ```bash

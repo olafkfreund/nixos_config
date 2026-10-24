@@ -42,7 +42,8 @@ Rules:
 - A plan may name who implements a step (`coders:`) and extra read-only
   reviewers (`reviewers:`), each with a one-line reason in the plan. Only
   Claude proposes and dispatches them. The user's plan approval is the
-  consent, and they never change after approval without re-approval.
+  consent, and they never change after approval without re-approval: they
+  are not a deviation, and a handoff fallback goes in the PR, not the plan.
 - Open the PR linking all three files. Review compares the diff to `plan/`.
 
 ## Intent template
@@ -112,10 +113,10 @@ How "done" is proven: eval, build, test, runtime check.
 status: draft
 issue: <n>
 spec: spec/<slug>.md
-coders:        # optional: step number -> coder | agy | codex; unlisted steps use the default
-  3: agy
-reviewers:     # optional: extra read-only reviews (codex, agy) on top of the Opus review
-  - codex
+# coders:      # optional: step number -> coder | agy | codex; unlisted steps use the default
+#   3: agy
+# reviewers:   # optional: extra read-only reviews (codex, agy) on top of the Opus review
+#   - codex
 ---
 
 # Plan: <title>

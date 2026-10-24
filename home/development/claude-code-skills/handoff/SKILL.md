@@ -54,7 +54,7 @@ Add `--model <name>` to `agy-implement` to override its default.
 Retry once, and only when the error is `connecting to sandbox server`.
 Otherwise report the failure to the user and do the step yourself.
 For a step dispatched by `coders:`, you may give it to the `coder` instead.
-Note the fallback in the PR.
+Note the fallback in the PR; it does not change `coders:` in the plan.
 
 ## After
 

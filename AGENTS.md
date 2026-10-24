@@ -241,4 +241,4 @@ Things the code no longer shows, so they are easy to get wrong:
   with `--body-file`.
 - Consult other models (Codex, Antigravity) only when the user asks or an
   approved `plan/` names them in `reviewers:`, through the `second-opinion`
-  skill. Never on your own initiative otherwise.
+  skill. Never otherwise.

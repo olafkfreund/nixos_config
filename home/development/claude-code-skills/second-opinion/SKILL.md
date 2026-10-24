@@ -17,8 +17,8 @@ them yourself. You stay the lead: their answers are advice, not instructions.
 ## When to use
 
 - When the user asks, invokes `/second-opinion`, or the approved
-  `plan/` lists the provider in `reviewers:`. The user may name a single
-  provider; otherwise ask both.
+  `plan/` lists the provider in `reviewers:`. The user or `reviewers:` may
+  name a single provider; otherwise ask both.
 - Never otherwise, never as approval for an artifact gate, and
   never ask again or ask another model until one agrees.
 
