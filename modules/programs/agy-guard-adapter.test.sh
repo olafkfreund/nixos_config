@@ -8,11 +8,14 @@ guard=$(mktemp)
 crashguard=$(mktemp)
 adapter=$(mktemp)
 crashadapter=$(mktemp)
-trap 'rm -f "$guard" "$crashguard" "$adapter" "$crashadapter"' EXIT
-sed 's#@jq@#jq#' "$here/claude-coder-guard.sh" >"$guard"
+hl=$(mktemp -d)
+outside=$(mktemp)
+log=$(mktemp)
+trap 'rm -rf "$guard" "$crashguard" "$adapter" "$crashadapter" "$hl" "$outside" "$log"' EXIT
+sed 's#@jq@#jq#g' "$here/claude-coder-guard.sh" >"$guard"
 printf 'exit 1\n' >"$crashguard"
-sed -e "s#@jq@#jq#" -e "s#@realpath@#realpath#" -e "s#@guard@#bash $guard#" "$here/agy-guard-adapter.sh" >"$adapter"
-sed -e "s#@jq@#jq#" -e "s#@realpath@#realpath#" -e "s#@guard@#bash $crashguard#" "$here/agy-guard-adapter.sh" >"$crashadapter"
+sed -e "s#@jq@#jq#g" -e "s#@realpath@#realpath#g" -e "s#@stat@#stat#g" -e "s#@guard@#bash $guard#" "${ADAPTER_SRC:-$here/agy-guard-adapter.sh}" >"$adapter"
+sed -e "s#@jq@#jq#g" -e "s#@realpath@#realpath#g" -e "s#@stat@#stat#g" -e "s#@guard@#bash $crashguard#" "${ADAPTER_SRC:-$here/agy-guard-adapter.sh}" >"$crashadapter"
 
 fail=0
 
@@ -82,6 +85,61 @@ t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:"/tmp/wt/a\n/tmp/wt/b",Con
 t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:"file:///tmp/wt/a",Content:"x"}}}')" allow
 t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:"a.txt",Content:"x"}}}')" deny
 t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:"file:///tmp/wt/%2e%2e/%2e%2e/x",Content:"x"}}}')" deny
+
+# Duplicate keys (raw JSON: jq -n would merge them), #2453.
+t 1 '{"toolCall":{"name":"write_file","args":{"Path":"/etc/x","Path":"/tmp/wt/a","Content":"x"}}}' deny
+t 1 '{"toolCall":{"name":"run_command","args":{"CommandLine":"git commit -m x","CommandLine":"git status"}}}' deny
+# Go folds key case and merges duplicate objects (#2453 review).
+t 1 '{"toolCall":{"name":"write_to_file","args":{"TargetFile":"/tmp/wt/a","CodeContent":"x"},"argſ":{"Path":"/etc/x"}}}' deny
+t 1 '{"toolCall":{"name":"run_command","args":{"CommandLine":"git status","commandline":"git commit -m x"}}}' deny
+t 1 '{"toolCall":{"name":"write_to_file","args":{"Path":"/etc/x"},"args":{"TargetFile":"/tmp/wt/a","CodeContent":"x"}}}' deny
+t 1 '{"toolCall":{"name":"write_file","args":{"Path":"/etc/x","Content":"x"}},"toolCall":{"name":"view_file","args":{}}}' deny
+t 1 '{"toolCall":{"name":"write_file","name":"view_file","args":{"Path":"/etc/x","Content":"x"}}}' deny
+
+# Paths that run code outside the sandbox, #2453.
+for f in .git/config .git .claude/settings.json .envrc .direnv/x .githooks/pre-commit .pre-commit-config.yaml sub/devenv.nix; do
+  t 1 "$(jq -n --arg p "/tmp/wt/$f" '{toolCall:{name:"write_file",args:{Path:$p,Content:"x"}}}')" deny
+done
+t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:"/tmp/wt/flake.nix",Content:"x"}}}')" allow
+t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:"/tmp/wt/src/devenv.nix.md",Content:"x"}}}')" allow
+
+# Unknown path-like argument, empty path value, nested keys, #2453.
+t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:"/tmp/wt/a",FilePath:"/etc/x",Content:"x"}}}')" deny
+t 1 "$(jq -n '{toolCall:{name:"write_to_file",args:{TargetFile:"/tmp/wt/a",Path:"",CodeContent:"x"}}}')" deny
+t 1 "$(jq -n '{toolCall:{name:"write_to_file",args:{Path:"/tmp/wt/a",TargetFile:""}}}')" deny
+t 1 "$(jq -n '{toolCall:{name:"multi_replace_file_content",args:{TargetFile:"/tmp/wt/a",ReplacementChunks:[{TargetContent:"a",ReplacementContent:"b"},{TargetContent:"c",ReplacementContent:"d"}]}}}')" allow
+t 1 "$(jq -n '{toolCall:{name:"write_to_file",args:{TargetFile:"/tmp/wt/a",CodeContent:"x",EmptyFile:true}}}')" allow
+
+# Hard links and symlinks need real files, so AGY_WORKTREE is $hl, #2453.
+mkdir "$hl/.git"
+ln "$outside" "$hl/h"
+ln -s "$hl/.git/config" "$hl/s"
+: >"$hl/plain"
+for c in "h deny" "s deny" "plain allow"; do
+  set -- $c
+  got="$(jq -n --arg p "$hl/$1" '{toolCall:{name:"write_file",args:{Path:$p,Content:"x"}}}' | env AGY_CODER=1 AGY_WORKTREE="$hl" bash "$adapter" | jq -r .decision)"
+  if [ "$got" != "$2" ]; then
+    echo "FAIL got=$got want=$2: real file $1"
+    fail=1
+  fi
+done
+
+# AGY_GUARD_LOG records one line per call.
+jq -n '{toolCall:{name:"write_file",args:{Path:"/etc/x",Content:"x"}}}' | env AGY_CODER=1 AGY_WORKTREE=/tmp/wt AGY_GUARD_LOG="$log" bash "$adapter" >/dev/null
+case "$(cat "$log")" in
+  "write_file deny agy-implement may only write inside"*) ;;
+  *)
+    echo "FAIL guard log: $(cat "$log")"
+    fail=1
+    ;;
+esac
+# A newline in the tool name must not forge extra log lines.
+: >"$log"
+printf '%s' '{"toolCall":{"name":"x deny\nrun_command deny\ny","args":{}}}' | env AGY_CODER=1 AGY_WORKTREE=/tmp/wt AGY_GUARD_LOG="$log" bash "$adapter" >/dev/null
+if [ "$(wc -l <"$log")" != 1 ]; then
+  echo "FAIL guard log forged by tool name: $(cat "$log")"
+  fail=1
+fi
 
 # No AGY_WORKTREE: a write inside /tmp/wt must still deny.
 got="$(jq -n '{toolCall:{name:"write_file",args:{Path:"/tmp/wt/a",Content:"x"}}}' | env -u AGY_WORKTREE AGY_CODER=1 bash "$adapter" | jq -r .decision)"

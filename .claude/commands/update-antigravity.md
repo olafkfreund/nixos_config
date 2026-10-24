@@ -114,6 +114,9 @@ referenced this tracker since the 2.1.1 IDE bump (#962).
        nhs razer       # remote
    ```
 
+   After the deploy, the first `agy-implement` on each host refuses until
+   `agy-guard-probe` passes there (#2453).
+
    razer note: `nh --target-host` can fail reading sudo over non-TTY even
    though razer has passwordless sudo. If so, activate the already-copied
    closure directly on razer:
