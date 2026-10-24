@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2453
 author: olafkfreund
 ---
@@ -71,20 +71,10 @@ three gaps that the #2452 fix left out on purpose:
   in a scratch repo, as the #2452 reproduction did.
 - Nothing about the sandbox flag changes (#2296).
 
-## Open questions
+## Decisions (approved 2026-10-24)
 
-1. **Split out the orchestration half of #2453?** The issue also asks to let
-   Claude dispatch Codex and agy as coders and reviewers without being asked
-   each time (`coders:` / `reviewers:` in `plan/` frontmatter, plus changes to
-   `AGENTS.md`, the `handoff`, `second-opinion` and `team` skills, and the
-   managed CLAUDE.md model split). That is a policy change, not a guard fix,
-   and it touches different files. Recommendation: a separate issue and
-   intent, with this task covering the guard only.
-2. **Deny list for code-running paths:** the four above are a start. Should
-   it also cover `.vscode/`, `.githooks/`, `.pre-commit-config.yaml` and
-   `flake.nix`? `flake.nix` is the main thing agy edits in this repo, so
-   denying it would break real tasks. Recommendation: deny `.git`, `.claude`,
-   `.envrc`, `.direnv`, `.githooks`, `.pre-commit-config.yaml` and
-   `devenv.nix`, and leave `flake.nix` allowed.
-3. **Auto-update behaviour on a failed probe:** should the scheduled updater
-   skip the bump silently, or open an issue? Recommendation: open an issue.
+1. **Orchestration is split out** into its own issue. This task covers the
+   guard only.
+2. **Deny list:** `.git`, `.claude`, `.envrc`, `.direnv`, `.githooks`,
+   `.pre-commit-config.yaml` and `devenv.nix`. `flake.nix` stays allowed.
+3. **A failed probe opens an issue.**
