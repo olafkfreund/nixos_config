@@ -169,6 +169,8 @@
     services.nixi = {
       watcher.enable = true;
       omarchyHooks.enable = true;
+      # The snowflake desktop companion (SUPER+ALT+S); nixarchy supplies the package.
+      companion.enable = true;
     };
 
     # Oma: speech to speech against the OpenAI Realtime API, driving Hyprland.
