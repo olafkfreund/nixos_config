@@ -140,7 +140,14 @@ in
     # audiobook-import use it for strict-JSON metadata extraction, and their
     # ollama moved here when p510's was switched off (its 490W PSU cannot
     # carry the GPUs). Dropping it silently breaks audiobook imports.
-    onDemandModels = [ "qwen2.5-coder:14b" "gemma4:e4b" "gemma4:12b" "qwen2.5:7b" ];
+    onDemandModels = [
+      "qwen2.5-coder:14b"
+      "gemma4:e4b"
+      "gemma4:12b"
+      "qwen2.5:7b"
+      # MoE: 17.7GB IQ4_XS + 32K KV fits the 24GB card; ollama's own qwen3.6:35b-a3b (21.7GB) spills to CPU (#2467).
+      "hf.co/unsloth/Qwen3.6-35B-A3B-GGUF:UD-IQ4_XS"
+    ];
     # The model supports 256K but ollama caps every request at 4096 unless
     # told otherwise. 32K is what the ~6GB left above the weights pays for —
     # cheap here because qwen3.8 runs full attention on only 16 of 64 layers,
