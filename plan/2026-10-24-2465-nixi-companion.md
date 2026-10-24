@@ -18,10 +18,12 @@ The approved decisions:
 
 1. `hosts/p620/nixos/nixarchy.nix` and `hosts/razer/nixos/nixarchy.nix`: in
    `services.nixi = {`, after `omarchyHooks.enable = true;`, add
+
    ```nix
          # The snowflake desktop companion (SUPER+ALT+S); nixarchy supplies the package.
          companion.enable = true;
    ```
+
    → verify: `nix fmt`, then `git diff --stat` shows these 2 files.
 2. `flake.lock`: run `nix flake update nixarchy`.
    → verify: the nixarchy node's `rev` is an edge commit, and
