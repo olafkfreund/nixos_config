@@ -2,8 +2,9 @@
 
 `agy-implement` runs the Antigravity CLI (`agy`) with write access, so that it can implement an approved
 `plan/` in a task worktree. Under `--dangerously-skip-permissions`, `--sandbox` confines shell commands only;
-everything else, file writes included, is fenced by a PreToolUse hook, the **coder guard**. This page covers what the guard allows and denies, and the version gate that checks the guard
-still works after an agy update. Issues: #2087, #2291, #2296, #2298, #2453, #2463.
+everything else, file writes included, is fenced by a PreToolUse hook, the **coder guard**. This page
+covers what the guard allows and denies, and the version gate that checks the guard still works after an agy
+update. Issues: #2087, #2291, #2296, #2298, #2453, #2463.
 
 ## What `agy-implement` does
 
