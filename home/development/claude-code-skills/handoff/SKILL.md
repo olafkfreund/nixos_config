@@ -62,9 +62,11 @@ Otherwise report the failure to the user and do the step yourself.
 ## After an agy update
 
 Run `bash modules/programs/agy-guard-adapter.test.sh` first; it must pass.
-Before the first handoff on a new agy version, run `agy-guard-probe` on that
-host. `agy-implement` refuses until it passes. If it fails, stop and tell the
-user: the probe has opened, or names, the issue (#2296, #2298, #2453).
+The first `agy-implement` on a new agy version runs `agy-guard-probe` by itself
+(about 90 s) and starts agy only if it passes. If it refuses, the probe failed:
+stop and tell the user. The probe has opened, or names, the issue
+(#2296, #2298, #2453, #2463). Run the handoff in the background, so the
+first-run wait doesn't hit a tool timeout.
 
 ## Never
 
