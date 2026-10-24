@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2465
 spec: spec/2026-10-24-2465-nixi-companion.md
 ---
