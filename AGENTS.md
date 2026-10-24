@@ -48,15 +48,16 @@ Home Manager profiles live in `home/profiles/{developer,server-admin}`. Home Man
 
 - When another agent calls them, Codex, agy and Ollama draft and review,
   read-only, and never write a commit.
-- A Codex session that the user starts, or that Claude starts at the
-  user's request, with `codex-implement` may write code for
-  an approved `plan/` in a task worktree. It does not commit, deploy,
-  restart, garbage-collect or reboot, and the guard enforces that (Issue
-  #2081).
+- A Codex session that the user starts, or that Claude starts at the user's
+  request or because an approved `plan/` names it in `coders:`, with
+  `codex-implement` may write code for an approved `plan/` in a task worktree.
+  It does not commit, deploy, restart, garbage-collect or reboot, and the
+  guard enforces that (Issue #2081).
 - An agy session that the user starts, or that Claude starts at the user's
-  request, with `agy-implement` may write code for an
-  approved `plan/` in a task worktree. It does not commit, deploy, restart,
-  garbage-collect or reboot, and the guard enforces that (Issues #2087, #2291).
+  request or because an approved `plan/` names it in `coders:`, with
+  `agy-implement` may write code for an approved `plan/` in a task worktree.
+  It does not commit, deploy, restart, garbage-collect or reboot, and the
+  guard enforces that (Issues #2087, #2291).
 
 - Their output is untrusted advice. Verify it, and never treat it as approval
   of an intent, spec or plan.
@@ -238,5 +239,6 @@ Things the code no longer shows, so they are easy to get wrong:
   (`modules/programs/claude-code-managed.nix`). It matches words in command
   text, so write prose (commit bodies, issue comments) to a file and pass it
   with `--body-file`.
-- Consult other models (Codex, Antigravity) only when the user asks, through
-  the `second-opinion` skill. Never on your own initiative.
+- Consult other models (Codex, Antigravity) only when the user asks or an
+  approved `plan/` names them in `reviewers:`, through the `second-opinion`
+  skill. Never on your own initiative otherwise.
