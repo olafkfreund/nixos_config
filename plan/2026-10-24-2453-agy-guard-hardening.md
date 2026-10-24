@@ -51,18 +51,14 @@ Steps 1–6 edit files and go to the `coder` agent. Steps 7–8 are mine.
      event of its container with a path of length 4. Count those keys:
 
      ```sh
-     dups="$(echo "$payload" | @jq@ -c --stream 'select(.[0][0:2]==["toolCall","args"]) | select((length==2 and (.[0]|length)==3) or (length==1 and (.[0]|length)==4)) | .[0][2]' | sort | uniq -d)"
-     [ -z "$dups" ] || deny "agy-implement refuses duplicate argument keys"
+     dups="$(echo "$payload" | @jq@ -c --stream 'select(.[0][0:2]==["toolCall","args"]) | select((length==2 and (.[0]|length)==3) or (length==1 and (.[0]|length)==4)) | .[0][2]' | @jq@ -s 'group_by(.) | map(select(length > 1)) | length')"
+     [ "$dups" = 0 ] || deny "agy-implement refuses duplicate argument keys"
      ```
 
-     The filter was tested in planning: duplicate scalars, duplicate arrays
-     and duplicate `{}` are caught, and nested arrays of objects
-     (`ReplacementChunks`), nested objects, `{}` and `[1]` report nothing.
-     `sort`/`uniq` are coreutils; use `@sort@`/`@uniq@` placeholders only if
-     the script's PATH lacks them. The hook runs with the agy session PATH,
-     so prefer jq-only: replace `| sort | uniq -d` with
-     `@jq@ -s 'group_by(.)|map(select(length>1))|length'` and deny when the
-     count is not `0`.
+     The filter was tested in planning: duplicate scalars, arrays and `{}`
+     are caught (count 1), and nested arrays of objects (`ReplacementChunks`),
+     nested objects, `{}` and `[1]` count 0. A jq failure leaves `dups`
+     empty or non-zero, so the call is denied.
    - **e.** In the jq at line 59, change `any(.[]; type != "string" or test("\n"))`
      to `any(.[]; type != "string" or . == "" or test("\n"))`.
    - **d.** In the write branch, before the `targets=` line, deny when
