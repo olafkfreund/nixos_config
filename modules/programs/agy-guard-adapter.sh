@@ -21,14 +21,15 @@ if [ "${AGY_CODER:-}" != 1 ]; then
   exit 0
 fi
 
-# AGY_GUARD_LOG records "<tool> <decision>" per call for agy-guard-probe (#2453); a failed write never changes the reply.
+# AGY_GUARD_LOG records "<tool> <decision> <reason>" per call for agy-guard-probe (#2453); a failed write never changes the reply.
+# The tool name and reason are flattened so a crafted name cannot forge extra log lines.
 log_call() {
   [ -n "${AGY_GUARD_LOG:-}" ] || return 0
-  { printf '%s %s\n' "${name:-?}" "$1" >>"$AGY_GUARD_LOG"; } 2>/dev/null || true
+  { printf '%s %s %s\n' "$(printf %s "${name:-?}" | tr -c 'A-Za-z0-9_' _)" "$1" "$(printf %s "${2:-}" | tr '\n' ' ')" >>"$AGY_GUARD_LOG"; } 2>/dev/null || true
 }
 
 deny() {
-  log_call deny
+  log_call deny "$1"
   # shellcheck disable=SC2016 # $r is a jq variable, not a shell one
   @jq@ -n --arg r "$1" '{decision:"deny",reason:$r}'
   exit 0
@@ -57,9 +58,11 @@ if echo "$payload" | @jq@ -e '[.toolCall.args | objects | keys[] | test("[^\\x00
   deny "agy-implement refuses non-ASCII argument names"
 fi
 
-# jq objects merge duplicate keys, but agy's Go decoder may take either; count each top-level key's one stream event.
-dups="$(echo "$payload" | @jq@ -c --stream 'select(.[0][0:2]==["toolCall","args"]) | select((length==2 and (.[0]|length)==3) or (length==1 and (.[0]|length)==4)) | .[0][2]' | @jq@ -s 'group_by(.) | map(select(length > 1)) | length')"
-[ "$dups" = 0 ] || deny "agy-implement refuses duplicate argument keys"
+# jq keeps the last of duplicate keys, but Go folds case and merges duplicate objects; count each key's one
+# stream event, lowercased, at the root, in toolCall and in args.
+# shellcheck disable=SC2016 # $p and $n are jq variables
+dups="$(echo "$payload" | @jq@ -c --stream 'def k($p): select(.[0][0:($p|length)]==$p) | ($p|length) as $n | select((length==2 and (.[0]|length)==$n+1) or (length==1 and (.[0]|length)==$n+2)) | "\($p)\(.[0][$n] | strings | ascii_downcase)"; k([]), k(["toolCall"]), k(["toolCall","args"])' | @jq@ -s 'group_by(.) | map(select(length > 1)) | length')"
+[ "$dups" = 0 ] || deny "agy-implement refuses duplicate keys"
 
 case "$name" in
   view_file | read_file | grep_search | list_dir | find_by_name | ask_question | list_permissions)

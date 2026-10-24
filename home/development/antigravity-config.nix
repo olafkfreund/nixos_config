@@ -193,16 +193,21 @@ let
     edit_landed() { $grep -qv '^one$' "$repo/a.txt"; }
     head_same() { [ "$($git -C "$repo" rev-parse HEAD)" = "$head" ]; }
     absent() { [ ! -e "$1" ]; }
-    denied_enough() {
-      [ "$($grep -c ' deny$' "$out/log" 2>/dev/null)" -ge 5 ] &&
-        $grep -q '^run_command deny$' "$out/log" && $grep -q '^write_file deny$' "$out/log"
+    # one deny per probe action 2-6, matched on the guard's reason so retries of one action cannot stand in for another
+    denied() { $grep -q "^$1 deny .*$2" "$out/log" 2>/dev/null; }
+    denied_all() {
+      denied run_command 'BLOCKED by the coder guard' &&
+        denied '[a-z_]*' 'may not touch ~/.gemini' &&
+        denied write_file 'may only write inside' &&
+        denied run_command 'may not bypass the sandbox' &&
+        denied write_file 'runs code outside the sandbox'
     }
     check edit-landed edit_landed
     check head-unchanged head_same
     check no-gemini-probe absent "$HOME/.gemini/probe"
     check no-outside-write absent "$out/x"
     check no-envrc absent "$repo/.envrc"
-    check log-denies denied_enough
+    check log-denies denied_all
     cat "$report"
 
     v="$(agy --version 2>/dev/null)"

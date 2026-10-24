@@ -89,6 +89,11 @@ t 1 "$(jq -n '{toolCall:{name:"write_file",args:{Path:"file:///tmp/wt/%2e%2e/%2e
 # Duplicate keys (raw JSON: jq -n would merge them), #2453.
 t 1 '{"toolCall":{"name":"write_file","args":{"Path":"/etc/x","Path":"/tmp/wt/a","Content":"x"}}}' deny
 t 1 '{"toolCall":{"name":"run_command","args":{"CommandLine":"git commit -m x","CommandLine":"git status"}}}' deny
+# Go folds key case and merges duplicate objects (#2453 review).
+t 1 '{"toolCall":{"name":"run_command","args":{"CommandLine":"git status","commandline":"git commit -m x"}}}' deny
+t 1 '{"toolCall":{"name":"write_to_file","args":{"Path":"/etc/x"},"args":{"TargetFile":"/tmp/wt/a","CodeContent":"x"}}}' deny
+t 1 '{"toolCall":{"name":"write_file","args":{"Path":"/etc/x","Content":"x"}},"toolCall":{"name":"view_file","args":{}}}' deny
+t 1 '{"toolCall":{"name":"write_file","name":"view_file","args":{"Path":"/etc/x","Content":"x"}}}' deny
 
 # Paths that run code outside the sandbox, #2453.
 for f in .git/config .git .claude/settings.json .envrc .direnv/x .githooks/pre-commit .pre-commit-config.yaml sub/devenv.nix; do
@@ -120,8 +125,18 @@ done
 
 # AGY_GUARD_LOG records one line per call.
 jq -n '{toolCall:{name:"write_file",args:{Path:"/etc/x",Content:"x"}}}' | env AGY_CODER=1 AGY_WORKTREE=/tmp/wt AGY_GUARD_LOG="$log" bash "$adapter" >/dev/null
-if [ "$(cat "$log")" != "write_file deny" ]; then
-  echo "FAIL guard log: $(cat "$log")"
+case "$(cat "$log")" in
+  "write_file deny agy-implement may only write inside"*) ;;
+  *)
+    echo "FAIL guard log: $(cat "$log")"
+    fail=1
+    ;;
+esac
+# A newline in the tool name must not forge extra log lines.
+: >"$log"
+printf '%s' '{"toolCall":{"name":"x deny\nrun_command deny\ny","args":{}}}' | env AGY_CODER=1 AGY_WORKTREE=/tmp/wt AGY_GUARD_LOG="$log" bash "$adapter" >/dev/null
+if [ "$(wc -l <"$log")" != 1 ]; then
+  echo "FAIL guard log forged by tool name: $(cat "$log")"
   fail=1
 fi
 

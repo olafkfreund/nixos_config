@@ -80,6 +80,12 @@ Steps 1–6 edit files and go to the `coder` agent. Steps 7–8 are mine.
      runs the cases).
    - Deviation (implemented): the link-count test is `!= 1` on `stat`'s
      output, not `-gt 1`, so a failed `stat` denies instead of allowing.
+   - Deviation (review fix): the duplicate check folds key case and counts
+     keys at the root, in `toolCall` and in `args`, because Go's decoder
+     folds case and merges duplicate objects. The log line is
+     `<tool> <decision> <reason>`, with the tool name reduced to
+     `[A-Za-z0-9_]` and newlines in the reason flattened, so a crafted name
+     cannot forge lines.
    - Traps:
      - The script is `builtins.readFile`'d and placeholder-substituted, so
        use `@jq@`, `@realpath@` and `@stat@`, never bare names.
@@ -165,6 +171,9 @@ Steps 1–6 edit files and go to the `coder` agent. Steps 7–8 are mine.
        - `! -e ~/.gemini/probe`, `! -e "$out/x"`, `! -e "$repo/.envrc"`
        - the log has at least 5 `deny` lines covering `run_command` and
          `write_file`
+         (Deviation, review fix: the log must instead hold one deny for each
+         of actions 2–6, matched on the guard's reason text, so retries of
+         one action cannot stand in for another.)
      - All pass → `mkdir -p` the cache dir and write `agy --version` into
        `probed`; exit 0.
      - Any fail → exit 1. If `gh auth status` works: set
