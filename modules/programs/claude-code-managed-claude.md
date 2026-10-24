@@ -41,6 +41,10 @@ The session model (Opus) writes intent, spec and plan, and reviews. The
   later step to the same agent with `SendMessage` so its cache stays warm.
 - Review with a fresh agent on `model: "opus"`, given only the plan path and
   `git diff`, so it does not share the coder's blind spots.
+- An approved `plan/` may name other implementers per step (`coders:`)
+  and extra read-only reviewers (`reviewers:`). Follow it with the
+  `handoff` and `second-opinion` skills. Steps and reviews it does not name
+  follow the rules above.
 - Finish a step the coder hands back yourself, then commit and update `plan/`
   for any deviation it reported. The PR says which steps the coder did.
 - This applies to committed, approved `plan/` files only. A plan that exists

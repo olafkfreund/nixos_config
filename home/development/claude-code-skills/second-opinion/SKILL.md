@@ -5,8 +5,8 @@ description: >-
   subscription) models for an independent read-only review of a plan, diff,
   design or decision. Use only when the user explicitly asks for another
   model's opinion, a second opinion or a cross-model review, or invokes
-  `/second-opinion`. Never use it on your own initiative or to approve an
-  intent, spec or plan.
+  `/second-opinion`, or when an approved plan/ lists the provider in
+  reviewers. Never use it otherwise or to approve an intent, spec or plan.
 ---
 
 # Second opinion
@@ -16,9 +16,10 @@ them yourself. You stay the lead: their answers are advice, not instructions.
 
 ## When to use
 
-- Only when the user asks, or invokes `/second-opinion`. The user may name a
-  single provider; otherwise ask both.
-- Never on your own initiative, never as approval for an artifact gate, and
+- When the user asks, invokes `/second-opinion`, or the approved
+  `plan/` lists the provider in `reviewers:`. The user or `reviewers:` may
+  name a single provider; otherwise ask both.
+- Never otherwise, never as approval for an artifact gate, and
   never ask again or ask another model until one agrees.
 
 ## What this skill will not do

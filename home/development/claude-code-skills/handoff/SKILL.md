@@ -3,7 +3,8 @@ name: handoff
 description: >-
   Hand one step of an approved plan/ to agy or Codex to implement headless.
   Use only when the user asks to "give this to agy", "give this to codex" or
-  "hand off" a step. Never on your own initiative.
+  "hand off" a step, or when the approved plan/ names agy or codex for the
+  step in coders. Never otherwise.
 ---
 
 # Handoff
@@ -13,7 +14,8 @@ You stay the lead: you review, run the check and commit.
 
 ## When
 
-- Only when the user asks.
+- When the user asks, or when the approved `plan/`'s `coders:` names agy or
+  codex for this step.
 - Only for a step of a `plan/` with `status: approved`.
 - Only in that task's worktree, never in `~/.config/nixos`.
 - The Sonnet `coder` subagent stays the default.
@@ -51,6 +53,8 @@ Add `--model <name>` to `agy-implement` to override its default.
 
 Retry once, and only when the error is `connecting to sandbox server`.
 Otherwise report the failure to the user and do the step yourself.
+For a step dispatched by `coders:`, you may give it to the `coder` instead.
+Note the fallback in the PR; it does not change `coders:` in the plan.
 
 ## After
 
