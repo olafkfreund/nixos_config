@@ -22,7 +22,21 @@ three gaps that the #2452 fix left out on purpose:
 2. **Duplicate JSON keys.** For `{"Path":"/etc/x","Path":"<wt>/a"}` jq checks
    the last value. If agy's parser takes the first, the guard approves one
    path and agy writes another.
-3. **The guard probe is manual.** agy's 1.4.5 tool rename (#2447) shipped
+3. **Gaps the PR #2454 review found:**
+   - **A hard link defeats the path fence.** `run_command ln ~/.bashrc ./h`
+     followed by `write_file <wt>/h` resolves inside the worktree, so it is
+     allowed, and the write lands in `~/.bashrc`. Whether agy's sandbox stops
+     the cross-mount link has not been tested.
+   - **Unknown path arguments are allowed.** In
+     `write_file {Path:"<wt>/a", FilePath:"/etc/x"}` only the argument names
+     the guard knows are checked. This is a bypass if agy reads any other path
+     argument.
+   - **An empty trailing value is skipped.** `TargetFile:""` placed last is
+     never checked. This is not an escape, but it breaks the fail-closed rule.
+   - **A symlink race** between a parallel `run_command` and a `write_file`
+     cannot be closed by a hook. Write it down as accepted and rely on the
+     sandbox.
+4. **The guard probe is manual.** agy's 1.4.5 tool rename (#2447) shipped
    unnoticed and broke every edit until #2452. The auto-updater has since
    bumped agy to 1.4.6 (#2459) with no probe run either.
 
@@ -32,6 +46,9 @@ three gaps that the #2452 fix left out on purpose:
   with a message that names the path, and the guard's test script covers each
   one.
 - A tool call whose `args` contain a duplicate key is denied.
+- A write tool call is denied when its target has more than one hard link,
+  when it carries an argument outside the known set for that tool, or when any
+  path value is empty.
 - `update-antigravity` (the script and the slash command) runs
   `agy-guard-adapter.test.sh` plus a live probe against the new agy, and
   refuses the bump when either fails.
