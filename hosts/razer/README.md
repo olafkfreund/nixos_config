@@ -27,6 +27,20 @@ This directory contains the NixOS configuration for the Razer laptop.
 - Optimized mobile workflow
 - Modern Wayland desktop experience
 
+## Local LLM (served by p620)
+
+razer runs no model itself. p620's Ollama serves Qwen3.6-35B-A3B, a mixture-of-experts
+model, on demand over the tailnet. It runs at about 91 tokens/s from razer (#2467).
+
+To use it from razer, point any OpenAI-compatible client at `http://p620:11434/v1`, or call
+Ollama's API directly:
+
+```bash
+curl -s http://p620:11434/api/generate -d '{"model":"hf.co/unsloth/Qwen3.6-35B-A3B-GGUF:UD-IQ4_XS","prompt":"hello","stream":false}'
+```
+
+Using the model unloads p620's coding model (`qwen3.8:27b`) until its next request.
+
 ## Hardware
 
 The Razer laptop appears to have:
