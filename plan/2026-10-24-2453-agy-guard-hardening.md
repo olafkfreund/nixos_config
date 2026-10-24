@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2453
 spec: spec/2026-10-24-2453-agy-guard-hardening.md
 ---
