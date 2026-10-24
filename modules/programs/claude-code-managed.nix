@@ -321,8 +321,8 @@ let
   # command to the shared guard; the install path is absolute /etc because
   # hooks.json is carried by Syncthing, which cannot follow a store symlink.
   agyGuardScript = pkgs.writeShellScript "agy-coder-guard"
-    (builtins.replaceStrings [ "@jq@" "@guard@" "@realpath@" ]
-      [ "${pkgs.jq}/bin/jq" "${coderGuardScript}" "${pkgs.coreutils}/bin/realpath" ]
+    (builtins.replaceStrings [ "@jq@" "@guard@" "@realpath@" "@stat@" ]
+      [ "${pkgs.jq}/bin/jq" "${coderGuardScript}" "${pkgs.coreutils}/bin/realpath" "${pkgs.coreutils}/bin/stat" ]
       (builtins.readFile ./agy-guard-adapter.sh));
 
   coderAgent = pkgs.writeText "coder.md" (builtins.replaceStrings

@@ -127,6 +127,9 @@ Steps 1–6 edit files and go to the `coder` agent. Steps 7–8 are mine.
      fails on the pre-change adapter: `git stash`-free, by running the test
      against `git show origin/main:modules/programs/agy-guard-adapter.sh`
      substituted into a temp file.
+   - Deviation (implemented): both `sed` lines use the `g` flag, because the
+     duplicate-key line holds two `@jq@`. An `ADAPTER_SRC` override lets the
+     suite run against the `origin/main` adapter for the before/after check.
    - Traps:
      - The `trap` line must clean up the new temp dirs.
      - Never use bare `git stash`: the stash is shared across worktrees.
