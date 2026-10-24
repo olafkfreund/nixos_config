@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2460
 spec: spec/2026-10-24-2460-agent-dispatch.md
 ---
