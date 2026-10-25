@@ -10,7 +10,7 @@ Stateless stdio server — spawned per Claude Code session, no daemon.
 import json
 import os
 import urllib.request
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 DEFAULT_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 DEFAULT_MODEL = "qwen2.5-coder:14b"
@@ -23,7 +23,7 @@ HOSTS = {
     "local": "http://localhost:11434",
 }
 
-mcp = FastMCP("ollama-code")
+mcp = MCPServer("ollama-code")
 
 
 def _resolve(host):

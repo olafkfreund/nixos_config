@@ -1,6 +1,6 @@
 # audiobook-mcp — audiobook acquisition + library MCP server, as an SSE daemon.
 #
-# audiobook-mcp (pkgs.customPkgs.audiobook-mcp) is a stdio FastMCP server. To
+# audiobook-mcp (pkgs.customPkgs.audiobook-mcp) is a stdio MCPServer server. To
 # make it tailnet-reachable we wrap it with mcp-proxy (stdio→SSE):
 #
 #   mcp-proxy --host 0.0.0.0 --port <port> --pass-environment -- audiobook-mcp

@@ -3,7 +3,7 @@
 # Authored in-repo (audiobook_mcp.py). Exposes tools over the two acquisition
 # sources (AudioBookBay via the audiobookbay-automated app, NZBGeek/Usenet via
 # Prowlarr → SABnzbd) plus Audiobookshelf library lookups. Stdio MCP server
-# (FastMCP); wrapped into an SSE daemon by modules/services/audiobook-mcp.nix.
+# (MCPServer); wrapped into an SSE daemon by modules/services/audiobook-mcp.nix.
 #
 # Packaged as a python env + wrapper (single module, no upstream pyproject).
 { lib
