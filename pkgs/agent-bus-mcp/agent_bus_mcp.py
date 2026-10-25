@@ -43,7 +43,7 @@ from urllib.parse import quote
 from typing import Any
 
 import httpx
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 HOMESERVER = os.environ.get("MATRIX_HOMESERVER", "http://127.0.0.1:6167")
 SERVER_NAME = os.environ.get("MATRIX_SERVER_NAME", "freundcloud.org.uk")
@@ -57,7 +57,7 @@ MESSAGE_FILTER = json.dumps({"types": ["m.room.message"]})
 # or registration fails on a name the caller thought was harmless.
 _ALLOWED = set("abcdefghijklmnopqrstuvwxyz0123456789._=-")
 
-mcp = FastMCP("agent-bus")
+mcp = MCPServer("agent-bus")
 
 
 def _slug(raw: str) -> str:

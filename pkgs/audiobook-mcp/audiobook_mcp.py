@@ -22,7 +22,7 @@ import os
 
 import httpx
 from bs4 import BeautifulSoup
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 ABB_APP_URL = os.environ.get("ABB_APP_URL", "http://127.0.0.1:5078").rstrip("/")
 ABB_HOSTNAME = os.environ.get("ABB_HOSTNAME", "audiobookbay.lu")
@@ -38,7 +38,7 @@ OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5:7b")
 
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 audiobook-mcp"
 
-mcp = FastMCP("audiobook-mcp")
+mcp = MCPServer("audiobook-mcp")
 
 
 def _abs_headers():

@@ -1,7 +1,7 @@
 # agent-bus-mcp — a shared room for coding agents, exposed as MCP tools.
 #
 # Authored in-repo (agent_bus_mcp.py). Six tools over a Matrix room: whoami,
-# post, read_new, recent, list_rooms, search. A stdio MCP server (FastMCP), spawned by
+# post, read_new, recent, list_rooms, search. A stdio MCP server (MCPServer), spawned by
 # each Claude Code session rather than run as a daemon -- unlike plex-mcp,
 # arr-suite-mcp and audiobook-mcp, which are shared services.
 #
@@ -11,7 +11,7 @@
 # Wiring is in home/development/claude-code-mcp.nix, not a systemd unit.
 #
 # Packaged as a python env + wrapper, matching pkgs/audiobook-mcp: a single
-# vendored module needs no pyproject, and python3Packages.mcp carries FastMCP.
+# vendored module needs no pyproject, and python3Packages.mcp carries MCPServer.
 #
 # httpx rather than matrix-nio: this speaks four REST endpoints and holds no
 # sync loop, so a client library would be more surface than it saves. The rooms

@@ -89,6 +89,11 @@
   # build with `makeRustPlatform`. Doesn't replace the default `rustc`.
   inputs.rust-overlay.overlays.default
 
+  # nixpkgs ships fastmcp 3.4.7 against mcp 2.2.0, which it cannot import
+  # (McpError was renamed). mcp-nixarchy's overlay swaps in fastmcp 4 only while
+  # nixpkgs' fastmcp is older than 4; notebooklm-mcp-cli is the consumer.
+  inputs.nixarchy.inputs.mcp-nixarchy.overlays.fastmcp4
+
   (import ./custom-packages.nix)
   (import ./citrix-workspace.nix)
   (import ./cmake-compat.nix)
