@@ -43,9 +43,6 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     flake-utils.url = "github:numtide/flake-utils";
 
-    # MCP servers
-    mcp-nixos.url = "github:utensils/mcp-nixos";
-
     # Environment and theming
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -365,7 +362,6 @@
     , home-manager
     , nix-index-database
     , antigravity-nix
-    , mcp-nixos
     , ...
     } @ inputs:
     let
@@ -443,7 +439,9 @@
             # Shared variables and hardware profiles for explicit tracking
             inherit sharedVariables hardwareProfiles;
             # MCP servers from flakes
-            mcp-nixos-pkg = mcp-nixos.packages.${system}.default;
+            # mcp-nixarchy is mcp-nixos's fork and ships the same `mcp-nixos` binary;
+            # upstream mcp-nixos recurses on nixpkgs' mcp-types since 3ec636 (#2475).
+            mcp-nixos-pkg = inputs.nixarchy.inputs.mcp-nixarchy.packages.${system}.default;
           };
           modules =
             [
