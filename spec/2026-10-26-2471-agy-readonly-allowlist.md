@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2471
 intent: intent/2026-10-26-2471-agy-readonly-allowlist.md
 ---
