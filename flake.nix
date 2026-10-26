@@ -58,9 +58,10 @@
     # takes its package from `pkgs.extend`, so following keeps Omarchy's ~80
     # runtime dependencies as the same store paths this system already has
     # rather than a second copy from nixarchy's own nixpkgs.
-    # Plugin inputs nixarchy also carries (nixarchy-voice, -pkg, -distrobox,
-    # -microvm, ai-mirror) follow nixarchy's pins below rather than keeping
-    # their own: bump them with `nix flake update nixarchy`.
+    # Plugin inputs nixarchy also carries (-pkg, -distrobox, -microvm,
+    # ai-mirror) follow nixarchy's pins below rather than keeping their own:
+    # bump them with `nix flake update nixarchy`. nixarchy-voice is the
+    # exception: it tracks its own main (#2483).
     # Followed by nixarchy (below), so `nix flake update` moves nixi itself (nixarchy#1432).
     nixi = {
       url = "github:olafkfreund/nixi-nixarchy";
@@ -95,10 +96,9 @@
       # flake's `nix flake update` moves them instead of nixarchy's lock.
       inputs.nixi.follows = "nixi";
       inputs.nixi-companion.follows = "nixi-companion";
-      # nixarchy pins nixarchy-voice at 0231774e, whose MCP server uses the
-      # lowlevel Server decorators mcp 2 removed, so omarchy-voice crash-loops.
-      # Fixed in nixarchy-voice#191; drop once nixarchy pins past 1ccbc238.
-      inputs.nixarchy-voice.url = "github:olafkfreund/nixarchy-voice/1ccbc238d6185785a36273ece8a6c06221e0090d";
+      # Track nixarchy-voice main ourselves rather than nixarchy's pin, which
+      # lags it (#2483); `nix flake update` moves it to the newest commit.
+      inputs.nixarchy-voice.url = "github:olafkfreund/nixarchy-voice";
       inputs.nixarchy-voice.inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixarchy-voice.inputs.ai-mirror.follows = "nixarchy/ai-mirror";
 
