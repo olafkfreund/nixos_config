@@ -91,6 +91,26 @@ let
     mcpServers = sharedMcpServers;
   };
 
+  # agy -p soft-denies any shell command without an allow rule (#2471).
+  readOnlyAllow = map (c: "command(${c})") [
+    "git diff"
+    "git log"
+    "git show"
+    "git status"
+    "git rev-parse"
+    "git ls-files"
+    "grep"
+    "rg"
+    "ls"
+    "cat"
+    "head"
+    "tail"
+    "wc"
+    "sed -n"
+  ];
+  # find can -delete / -exec.
+  readOnlyRemove = [ "command(find)" ];
+
   # The PreToolUse entry that wires agy's hook system to the coder guard
   # adapter installed at /etc/antigravity/hooks/coder-guard (#2087). The
   # command is a shell gate, not the bare path: hosts that don't have the
@@ -340,5 +360,29 @@ in
         fi
       ''
     );
+
+    home.activation.antigravityReadOnlyAllow = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      settings="${geminiDir}/antigravity-cli/settings.json"
+      mkdir -p "$(dirname "$settings")"
+
+      tmp=$(mktemp)
+      if { cat "$settings" 2>/dev/null || echo '{}'; } | ${pkgs.jq}/bin/jq \
+          --argjson want '${builtins.toJSON readOnlyAllow}' \
+          --argjson remove '${builtins.toJSON readOnlyRemove}' \
+          'if type == "object" then . else error("not an object") end
+           | .permissions.allow = ((((.permissions.allow // []) + $want) - $remove) | unique)' \
+          > "$tmp" 2>/dev/null; then
+        # Write only on change: ~/.gemini syncs across hosts.
+        if [ -f "$settings" ] && ${pkgs.diffutils}/bin/cmp -s "$tmp" "$settings"; then
+          rm -f "$tmp"
+        else
+          $DRY_RUN_CMD mv "$tmp" "$settings"
+          $DRY_RUN_CMD echo "Antigravity: merged read-only allow-list into settings.json (#2471)"
+        fi
+      else
+        rm -f "$tmp"
+        $DRY_RUN_CMD echo "Antigravity: antigravity-cli/settings.json is not a JSON object -- left untouched (#2471)"
+      fi
+    '';
   };
 }
