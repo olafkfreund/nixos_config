@@ -1285,21 +1285,22 @@
         "devshell": "devshell",
         "flake-parts": "flake-parts",
         "nixpkgs": [
+          "nixarchy",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1792932742,
-        "narHash": "sha256-iZ+zQjJq2c3gcAbm06vx2q71eOS6E9LING+tUwoVcyY=",
+        "lastModified": 1792932953,
+        "narHash": "sha256-zING4yVPwsnJCI3E0th2zG0GVnRa3ucZCvZTiNbClTI=",
         "owner": "olafkfreund",
         "repo": "mcp-nixarchy",
-        "rev": "dda1432a566ecd458ead62dcaa9a15471d681d93",
+        "rev": "a3059f3bafa3b215b97dafa174ceafda44213858",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
+        "ref": "v3.2.1",
         "repo": "mcp-nixarchy",
-        "rev": "dda1432a566ecd458ead62dcaa9a15471d681d93",
         "type": "github"
       }
     },
