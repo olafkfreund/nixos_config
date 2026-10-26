@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2471
 author: olafkfreund
 ---
@@ -53,12 +53,9 @@ author: olafkfreund
 - No change to `agy-implement` or the coder guard (#2291, #2296, #2453).
 - No deploy to p510 without asking.
 
-## Open questions
+## Decisions (approved 2026-10-26)
 
-1. **Entries that aren't strictly read-only.** `command(find)` allows
-   `find -delete` / `-exec`, and `command(sed -n)` allows `sed -n 'w file'`.
-   I recommend dropping `find` (rg and `ls` cover it) and keeping `sed -n`.
-   Does the `--mode plan` sandbox make this moot, or should we tighten anyway?
-2. **Merge semantics.** I recommend a union: our entries are added and any
-   hand-added entries stay. The alternative is replacing `permissions.allow`
-   with the declared list, so the declared list is the whole truth.
+1. Drop `command(find)`, which allows `-delete` / `-exec`; `rg` and `ls`
+   cover it. Keep `command(sed -n)`.
+2. Merge as a union: declared entries are added and entries added by hand
+   stay.
