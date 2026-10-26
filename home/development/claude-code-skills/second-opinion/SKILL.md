@@ -61,9 +61,11 @@ Write the prompt to a temporary file:
    bugs, alternatives, edge cases).
 2. The context the review needs: a diff, a plan, file excerpts or command
    output. Any repo content is allowed, including host-specific files.
+   For agy, name the files or the diff to read: left to explore, it rereads
+   the repo and can run out its 10-minute print timeout.
 3. The instruction: *"Return findings ranked by severity. For each, cite the
-   file and line or quote the evidence. Say what you could not verify. Do not
-   modify anything."*
+   file and line or quote the evidence. Say what you could not verify. Read
+   only the files named above. Do not modify anything."*
 
 **Never include decrypted secret values:** the contents of `/run/agenix/*`,
 tokens, passwords or private keys. Encrypted `*.age` files are fine.
@@ -130,7 +132,8 @@ timeout 600 env -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY \
   agy --mode plan --output-format json --print-timeout 10m \
   -p "$(cat "$prompt")" > "$work/agy.json"
 echo "exit=$?"
-jq -r '.status, .response' "$work/agy.json"
+jq -e '.status == "SUCCESS" and (.response // "" | test("\\S"))' "$work/agy.json" >/dev/null \
+  && jq -r .response "$work/agy.json" || echo "agy: review not obtained"
 ```
 
 - `-p` takes the prompt as its own value, so it must come last. `-p --mode …`
@@ -155,7 +158,8 @@ timeout 900 env -u GEMINI_API_KEY -u GEMINI_API_KEY_FILE -u GOOGLE_API_KEY \
   agy --agent "$agent" --mode plan --output-format json \
   --print-timeout 10m -p "$(cat "$prompt")" > "$work/agy.json"
 echo "exit=$?"
-jq -r '.status, .response' "$work/agy.json"
+jq -e '.status == "SUCCESS" and (.response // "" | test("\\S"))' "$work/agy.json" >/dev/null \
+  && jq -r .response "$work/agy.json" || echo "agy: review not obtained"
 ```
 
 Same constraints as the plain agy path: `-p` last, ~100 KB argument cap,
@@ -203,6 +207,10 @@ your own recommendation separately.
 A non-zero exit, exit 124 (timeout), an auth or quota error, or empty output
 means that review was **not obtained**. Report the error text to the user
 verbatim, and carry on without it.
+
+- agy: a `status` other than `SUCCESS`, an empty or whitespace `.response`,
+  or a run that hit `--print-timeout` is not obtained either, even with
+  exit 0. The gate after each agy call checks the first two.
 
 - Do not retry with the other provider in its place.
 - Never pass an API key or remove the `env -u` / `forced_login_method`
