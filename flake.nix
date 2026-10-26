@@ -95,12 +95,6 @@
       # flake's `nix flake update` moves them instead of nixarchy's lock.
       inputs.nixi.follows = "nixi";
       inputs.nixi-companion.follows = "nixi-companion";
-      # nixpkgs' mcp-types now reads `mcp` from the final python set, which
-      # sends mcp-nixarchy v3.2.0's fastmcp4 overlay into infinite recursion on
-      # every host. Fixed on its main (#5) but unreleased; drop once nixarchy pins
-      # a release past v3.2.0.
-      inputs.mcp-nixarchy.url = "github:olafkfreund/mcp-nixarchy/dda1432a566ecd458ead62dcaa9a15471d681d93";
-      inputs.mcp-nixarchy.inputs.nixpkgs.follows = "nixpkgs";
       # nixarchy pins nixarchy-voice at 0231774e, whose MCP server uses the
       # lowlevel Server decorators mcp 2 removed, so omarchy-voice crash-loops.
       # Fixed in nixarchy-voice#191; drop once nixarchy pins past 1ccbc238.
