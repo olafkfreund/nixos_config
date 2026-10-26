@@ -101,6 +101,12 @@
       # a release past v3.2.0.
       inputs.mcp-nixarchy.url = "github:olafkfreund/mcp-nixarchy/dda1432a566ecd458ead62dcaa9a15471d681d93";
       inputs.mcp-nixarchy.inputs.nixpkgs.follows = "nixpkgs";
+      # nixarchy pins nixarchy-voice at 0231774e, whose MCP server uses the
+      # lowlevel Server decorators mcp 2 removed, so omarchy-voice crash-loops.
+      # Fixed in nixarchy-voice#191; drop once nixarchy pins past 1ccbc238.
+      inputs.nixarchy-voice.url = "github:olafkfreund/nixarchy-voice/1ccbc238d6185785a36273ece8a6c06221e0090d";
+      inputs.nixarchy-voice.inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixarchy-voice.inputs.ai-mirror.follows = "nixarchy/ai-mirror";
 
       # nixarchy's NixOS module imports home-manager.nixosModules.home-manager
       # itself. From its own pin that is a second copy of nixos/common.nix, and
