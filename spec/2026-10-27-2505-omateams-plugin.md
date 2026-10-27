@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2505
 intent: intent/2026-10-27-2505-omateams-plugin.md
 ---
