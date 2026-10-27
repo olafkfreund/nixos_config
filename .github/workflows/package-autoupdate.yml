@@ -47,6 +47,10 @@ jobs:
             script: ./scripts/update-claude-code-native.sh --write latest
             paths: pkgs/claude-code-native
             verify: .#claude-code-native
+          - pkg: codex
+            script: ./scripts/update-codex-bin.sh --write latest
+            paths: pkgs/codex-bin
+            verify: .#codex-bin
           - pkg: claude-desktop
             script: ./scripts/update-claude-desktop.sh
             paths: pkgs/claude-desktop-beta

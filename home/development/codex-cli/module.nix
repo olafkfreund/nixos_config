@@ -4,10 +4,7 @@ let
   inherit (lib) mkOption mkIf mkEnableOption types;
   cfg = config.programs.codex-cli;
 
-  # Use nixpkgs's `codex` package (Rust-based, upstream-maintained).
-  # We previously vendored an npm-based @openai/codex 0.46.0 derivation;
-  # OpenAI rewrote codex in Rust mid-2025 and nixpkgs tracks it, so we
-  # just consume that and stop maintaining our own packaging.
+  # `pkgs.codex` is the upstream release binary via the overlay (#2501).
   codex-cli = pkgs.codex;
 in
 {

@@ -4,6 +4,10 @@ final: _prev: {
   intune-portal = final.callPackage ../pkgs/intune-portal { };
   zsh-ai-cmd = final.callPackage ../pkgs/zsh-ai-cmd { };
   claude-code-native = final.callPackage ../pkgs/claude-code-native { };
+  codex-bin = final.callPackage ../pkgs/codex-bin { };
+  # One version of each agent CLI for every consumer, nixarchy's included (#2501).
+  codex = final.codex-bin;
+  claude-code = final.claude-code-native;
   claude-code-mods = final.callPackage ../pkgs/claude-code-mods { };
   warp-terminal = final.callPackage ../pkgs/warp-terminal { };
   waveterm = final.callPackage ../pkgs/waveterm { };

@@ -34,7 +34,7 @@ in
   programs.codex-cli = {
     enable = true;
 
-    # `codex` is the real binary name from nixpkgs#codex. The rest are
+    # `codex` is the real binary name (pkgs.codex, see overlays/custom-packages.nix). The rest are
     # convenience aliases so existing muscle memory keeps working.
     shellAliases = {
       ai-code = "codex";
