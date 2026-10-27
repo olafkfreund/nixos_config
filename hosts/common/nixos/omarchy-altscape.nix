@@ -3,7 +3,7 @@
 # Alt+Tab is bound from a Nix-owned ~/.config/hypr/altscape-binds.lua whose
 # require line is appended once to the user-owned bindings.lua at activation.
 # To change the shortcut, edit the binds below (#2503).
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 let
   id = "io.github.qempexe.altscape";
   summon = "omarchy-shell shell summon ${id}";
@@ -12,7 +12,8 @@ in
 {
   imports = [ ./omarchy-enable-once.nix ];
 
-  home-manager.users.olafkfreund = {
+  # A function so lib is Home Manager's (lib.hm.dag), not nixpkgs'.
+  home-manager.users.olafkfreund = { lib, ... }: {
     programs.nixarchy.plugins.${id}.src =
       pkgs.customPkgs.altscape.override { inherit hyprland; };
 
