@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2501
 spec: spec/2026-10-27-2501-agent-clis-nix-only.md
 ---
