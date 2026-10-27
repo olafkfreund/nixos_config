@@ -186,3 +186,8 @@ Review: a fresh Opus agent given this plan and `git diff`.
 - Steps 4–5: `plugins.omateams.src` accepts the plain store-path string, so
   no fallback was needed. The rendered enable-once hook lists both
   `io.github.qempexe.altscape` and `omateams`.
+- Review fixes (Opus, 2 low): `command()`'s `if (!installed) { ensureHost() }`
+  now calls `checkInstalled()`, so an early click can't run the missing
+  install.sh. installCheck also asserts that `manifest.json`'s version equals
+  the package `version`, since a mismatch would make the host restart at
+  every shell start.

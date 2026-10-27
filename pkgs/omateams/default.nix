@@ -34,7 +34,8 @@ stdenv.mkDerivation rec {
   postPatch = ''
     substituteInPlace ui/Service.qml \
       --replace-fail 'readonly property string hostBinary: (Quickshell.env("XDG_DATA_HOME") || (home + "/.local/share")) + "/omateams/bin/omateams"' 'readonly property string hostBinary: "@out@/bin/omateams"' \
-      --replace-fail 'Component.onCompleted: ensureHost()' 'Component.onCompleted: checkInstalled()'
+      --replace-fail 'Component.onCompleted: ensureHost()' 'Component.onCompleted: checkInstalled()' \
+      --replace-fail 'if (!installed) { ensureHost(); return }' 'if (!installed) { checkInstalled(); return }'
   '';
 
   installPhase = ''
@@ -62,6 +63,8 @@ stdenv.mkDerivation rec {
     grep -qF "$out/bin/omateams" $f
     grep -qF 'Component.onCompleted: checkInstalled()' $f
     test ! -e $out/share/omateams/plugin/install.sh
+    # The host restarts itself whenever the running version differs from the manifest's.
+    grep -qF '"version": "${version}"' $out/share/omateams/plugin/manifest.json
   '';
 
   meta = {
