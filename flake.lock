@@ -1792,11 +1792,11 @@
         "systems": "systems_8"
       },
       "locked": {
-        "lastModified": 1793136198,
-        "narHash": "sha256-AWxstbWoNv8gioJS1LVhniNpfNAErW6mgFNEC+3g59s=",
+        "lastModified": 1793137559,
+        "narHash": "sha256-C1Luu7C0hWy0mQ3ydxHPF5qSqqSCZgaUbeRnz+OBxC4=",
         "owner": "olafkfreund",
         "repo": "nixarchy-meetingai",
-        "rev": "f0907ec75b01eee0eb3b49056a4b3aed5fdb0e1f",
+        "rev": "5ff29860b9ec14c69a9a7a2fccdccec6a5aa834e",
         "type": "github"
       },
       "original": {
