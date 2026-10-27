@@ -178,3 +178,11 @@ Review: a fresh Opus agent given this plan and `git diff`.
 - Step 3 smoke test, 2026-10-27: the store build started hidden with
   throwaway XDG directories, `status.json` appeared (sign-in page, version
   1.4.1), and `omateams quit` exited it.
+- Step 0: `origin/main` was **merged** into the branch instead of rebasing
+  onto it. Force-pushing is refused here, and the branch was already pushed.
+  The result is the same: the shared `omarchy-enable-once.nix` is present.
+  The conflicts in `pkgs/default.nix` and `check-updates.md` were resolved by
+  keeping both entries, altscape then omateams.
+- Steps 4–5: `plugins.omateams.src` accepts the plain store-path string, so
+  no fallback was needed. The rendered enable-once hook lists both
+  `io.github.qempexe.altscape` and `omateams`.
