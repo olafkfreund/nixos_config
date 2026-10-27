@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2503
 intent: intent/2026-10-27-2503-altscape-plugin.md
 ---
