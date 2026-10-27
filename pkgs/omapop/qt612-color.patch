@@ -1,0 +1,532 @@
+From 4bff4797bdab7f8ef25965554c69bea57feb2235 Mon Sep 17 00:00:00 2001
+From: p0werj0int <330091335+overp0werj0int@users.noreply.github.com>
+Date: Fri, 23 Oct 2026 00:03:36 +0300
+Subject: [PATCH] Qualify Omarchy theme colors for QtQuick 6.12
+
+QtQuick now exports a Color singleton that shadows the unqualified Omarchy palette. Use a namespaced Commons import throughout the popup and settings components, and cover the runtime palette bindings in the existing QML load check.
+---
+ BarWidget.qml              | 33 +++++++++++++++--------------
+ ConfirmationText.qml       |  3 ++-
+ ExcludedApps.qml           |  9 ++++----
+ Popup.qml                  | 19 +++++++++--------
+ README.md                  |  1 +
+ Settings.qml               |  9 ++++----
+ ShortcutRecorder.qml       | 11 +++++-----
+ tests/check_plugin_load.py | 43 +++++++++++++++++++++++++++++++++++---
+ tests/ports-ui.qml         |  3 ++-
+ tests/settings-ui.qml      |  3 ++-
+ 10 files changed, 90 insertions(+), 44 deletions(-)
+
+diff --git a/BarWidget.qml b/BarWidget.qml
+index 49858f9..6b92a9f 100644
+--- a/BarWidget.qml
++++ b/BarWidget.qml
+@@ -3,6 +3,7 @@ import QtQuick.Layouts
+ import QtQuick.Controls
+ import Quickshell
+ import qs.Commons
++import qs.Commons as OmarchyTheme
+ import qs.Ui
+ import "Actions.js" as Actions
+ 
+@@ -22,7 +23,7 @@ Panel {
+     readonly property bool engineReady: service ? service.engineReady : false
+     readonly property var extensions: service ? service.extensions : []
+     readonly property string fontFamily: bar ? bar.fontFamily : Style.font.family
+-    readonly property color secondaryText: Qt.rgba(Color.popups.text.r, Color.popups.text.g, Color.popups.text.b, Color.popups.text.a * 0.68)
++    readonly property color secondaryText: Qt.rgba(OmarchyTheme.Color.popups.text.r, OmarchyTheme.Color.popups.text.g, OmarchyTheme.Color.popups.text.b, OmarchyTheme.Color.popups.text.a * 0.68)
+     readonly property bool showIcon: service ? service.setting("showBarIcon", true) !== false : setting("showBarIcon", true) !== false
+     property string expandedId: ""
+     property bool directorySeeded: false
+@@ -49,7 +50,7 @@ Panel {
+     component RowSeparator: Rectangle {
+         Layout.fillWidth: true
+         implicitHeight: 1
+-        color: Qt.rgba(Color.popups.text.r, Color.popups.text.g, Color.popups.text.b, Color.popups.text.a * 0.12)
++        color: Qt.rgba(OmarchyTheme.Color.popups.text.r, OmarchyTheme.Color.popups.text.g, OmarchyTheme.Color.popups.text.b, OmarchyTheme.Color.popups.text.a * 0.12)
+     }
+ 
+     component SectionHeading: RowLayout {
+@@ -65,7 +66,7 @@ Panel {
+             Layout.fillWidth: true
+             text: heading.title
+             textFormat: Text.PlainText
+-            color: Color.popups.text
++            color: OmarchyTheme.Color.popups.text
+             font.family: root.fontFamily
+             font.pixelSize: Style.font.title
+             font.weight: Font.DemiBold
+@@ -75,7 +76,7 @@ Panel {
+             implicitWidth: countLabel.implicitWidth + Style.spacing.xxl
+             implicitHeight: countLabel.implicitHeight + Style.spacing.md
+             radius: height / 2
+-            color: Qt.rgba(Color.popups.text.r, Color.popups.text.g, Color.popups.text.b, Color.popups.text.a * 0.07)
++            color: Qt.rgba(OmarchyTheme.Color.popups.text.r, OmarchyTheme.Color.popups.text.g, OmarchyTheme.Color.popups.text.b, OmarchyTheme.Color.popups.text.a * 0.07)
+             Text {
+                 id: countLabel
+                 anchors.centerIn: parent
+@@ -159,14 +160,14 @@ Panel {
+                 BarIcon {
+                     Layout.preferredWidth: Math.round(Style.space(24))
+                     Layout.preferredHeight: Math.round(Style.space(24))
+-                    color: root.paused ? root.secondaryText : Color.accent
++                    color: root.paused ? root.secondaryText : OmarchyTheme.Color.accent
+                     paused: root.paused
+                 }
+                 Text {
+                     Layout.fillWidth: true
+                     text: "Omapop"
+                     textFormat: Text.PlainText
+-                    color: Color.popups.text
++                    color: OmarchyTheme.Color.popups.text
+                     font.family: root.fontFamily
+                     font.pixelSize: Math.round(Style.font.heading * 1.25)
+                     font.weight: Font.DemiBold
+@@ -190,7 +191,7 @@ Panel {
+                     : "Connecting to Hyprland."
+                 titleSize: Style.font.bodySmall
+                 fontFamily: root.fontFamily
+-                foreground: Color.popups.text
++                foreground: OmarchyTheme.Color.popups.text
+                 checked: !root.paused
+                 enabled: !!root.service
+                 onClicked: root.service.paused = !root.service.paused
+@@ -202,7 +203,7 @@ Panel {
+                 text: root.service ? Actions.oneLine(root.service.lastError, 300) : ""
+                 textFormat: Text.PlainText
+                 wrapMode: Text.WordWrap
+-                color: Color.urgent
++                color: OmarchyTheme.Color.urgent
+                 font.family: root.fontFamily
+                 font.pixelSize: Style.font.caption
+             }
+@@ -216,7 +217,7 @@ Panel {
+                 text: "No JavaScript runtime found. Install deno (or nodejs) to run JavaScript extensions; every other kind still works."
+                 textFormat: Text.PlainText
+                 wrapMode: Text.WordWrap
+-                color: Color.urgent
++                color: OmarchyTheme.Color.urgent
+                 font.family: root.fontFamily
+                 font.pixelSize: Style.font.caption
+             }
+@@ -271,8 +272,8 @@ Panel {
+                             spec: modelData.icon || ""
+                             filePath: modelData.iconPath || ""
+                             fallbackText: modelData.name || ""
+-                            color: modelData.error ? Color.urgent : Color.popups.text
+-                            background: Color.popups.background
++                            color: modelData.error ? OmarchyTheme.Color.urgent : OmarchyTheme.Color.popups.text
++                            background: OmarchyTheme.Color.popups.background
+                             fontFamily: root.fontFamily
+                         }
+ 
+@@ -285,7 +286,7 @@ Panel {
+                                 textFormat: Text.PlainText
+                                 wrapMode: Text.WordWrap
+                                 // Unusable here (every action needs macOS): present, but dimmed.
+-                                color: modelData.usable === false ? root.secondaryText : Color.popups.text
++                                color: modelData.usable === false ? root.secondaryText : OmarchyTheme.Color.popups.text
+                                 font.family: root.fontFamily
+                                 font.pixelSize: Style.font.body
+                                 font.weight: Font.DemiBold
+@@ -306,7 +307,7 @@ Panel {
+                                 }
+                                 textFormat: Text.PlainText
+                                 wrapMode: Text.WordWrap
+-                                color: modelData.error ? Color.urgent : root.secondaryText
++                                color: modelData.error ? OmarchyTheme.Color.urgent : root.secondaryText
+                                 font.family: root.fontFamily
+                                 font.pixelSize: Style.font.caption
+                             }
+@@ -371,7 +372,7 @@ Panel {
+                                     text: Actions.oneLine(modelData.label || modelData.identifier || "", 200)
+                                     textFormat: Text.PlainText
+                                     wrapMode: Text.WordWrap
+-                                    color: Color.popups.text
++                                    color: OmarchyTheme.Color.popups.text
+                                     font.family: root.fontFamily
+                                     font.pixelSize: modelData.type === "heading" ? Style.font.subtitle : Style.font.bodySmall
+                                     font.bold: modelData.type === "heading"
+@@ -549,7 +550,7 @@ Panel {
+                                 text: modelData.name
+                                 textFormat: Text.PlainText
+                                 wrapMode: Text.WordWrap
+-                                color: modelData.needsMac ? root.secondaryText : Color.popups.text
++                                color: modelData.needsMac ? root.secondaryText : OmarchyTheme.Color.popups.text
+                                 font.family: root.fontFamily
+                                 font.pixelSize: Style.font.body
+                                 font.weight: Font.DemiBold
+@@ -626,7 +627,7 @@ Panel {
+                 text: root.service ? "JavaScript extensions run under " + root.service.runtimeName + "." : ""
+                 textFormat: Text.PlainText
+                 wrapMode: Text.WordWrap
+-                color: Qt.darker(Color.popups.text, 1.6)
++                color: Qt.darker(OmarchyTheme.Color.popups.text, 1.6)
+                 font.family: root.fontFamily
+                 font.pixelSize: Style.font.caption
+             }
+diff --git a/ConfirmationText.qml b/ConfirmationText.qml
+index e2f517c..d0feb6e 100644
+--- a/ConfirmationText.qml
++++ b/ConfirmationText.qml
+@@ -1,5 +1,6 @@
+ import QtQuick
+ import qs.Commons
++import qs.Commons as OmarchyTheme
+ 
+ // Shared by the real popup and the offscreen control tests.
+ Column {
+@@ -7,7 +8,7 @@ Column {
+     property string summary: ""
+     property string details: ""
+     property real maxDetailsHeight: 320
+-    property color foreground: Color.popups.text
++    property color foreground: OmarchyTheme.Color.popups.text
+     property string fontFamily: Style.font.family
+     spacing: Style.spacing.sm
+     Text {
+diff --git a/ExcludedApps.qml b/ExcludedApps.qml
+index 58dd8e9..26f936b 100644
+--- a/ExcludedApps.qml
++++ b/ExcludedApps.qml
+@@ -3,6 +3,7 @@ import QtQuick
+ import QtQuick.Layouts
+ import QtQuick.Controls as QQC
+ import qs.Commons
++import qs.Commons as OmarchyTheme
+ import qs.Ui
+ import "Actions.js" as Actions
+ 
+@@ -15,7 +16,7 @@ ColumnLayout {
+     readonly property bool editable: value.length <= 4096
+     readonly property var entries: Actions.excludedAppList(value)
+     readonly property var options: visible ? Actions.runningWindowOptions(windows, entries) : []
+-    readonly property color secondaryText: Qt.rgba(Color.popups.text.r, Color.popups.text.g, Color.popups.text.b, 0.68)
++    readonly property color secondaryText: Qt.rgba(OmarchyTheme.Color.popups.text.r, OmarchyTheme.Color.popups.text.g, OmarchyTheme.Color.popups.text.b, 0.68)
+     signal edited(string value)
+ 
+     spacing: Style.spacing.sm
+@@ -77,7 +78,7 @@ ColumnLayout {
+                 textFormat: Text.PlainText
+                 wrapMode: Text.NoWrap
+                 elide: Text.ElideRight
+-                color: Color.popups.text
++                color: OmarchyTheme.Color.popups.text
+                 font.family: Style.font.family
+                 font.pixelSize: Style.font.bodySmall
+             }
+@@ -86,7 +87,7 @@ ColumnLayout {
+                 iconText: "×"
+                 tooltipText: "Remove " + Actions.oneLine(entryRow.modelData, 256)
+                 foreground: root.secondaryText
+-                hoverColor: Color.popups.text
++                hoverColor: OmarchyTheme.Color.popups.text
+                 focusable: true
+                 enabled: root.editable
+                 onClicked: root.remove(entryRow.modelData)
+@@ -100,7 +101,7 @@ ColumnLayout {
+         text: root.editable ? "No apps ignored." : "This list is too long to edit here."
+         textFormat: Text.PlainText
+         wrapMode: Text.WordWrap
+-        color: root.editable ? root.secondaryText : Color.urgent
++        color: root.editable ? root.secondaryText : OmarchyTheme.Color.urgent
+         font.family: Style.font.family
+         font.pixelSize: Style.font.caption
+     }
+diff --git a/Popup.qml b/Popup.qml
+index b30a7b8..36c355f 100644
+--- a/Popup.qml
++++ b/Popup.qml
+@@ -3,6 +3,7 @@ import Quickshell
+ import Quickshell.Wayland
+ import QtQuick.Shapes
+ import qs.Commons
++import qs.Commons as OmarchyTheme
+ import "Actions.js" as Actions
+ 
+ // The action bar. A layer-shell surface that never takes keyboard focus, placed
+@@ -49,10 +50,10 @@ PanelWindow {
+     signal keyActivate(int index)
+     signal keyDismiss()
+ 
+-    readonly property color bg: Color.popups.background
+-    readonly property color fg: Color.popups.text
+-    readonly property color borderColor: Color.popups.border
+-    readonly property color hoverFill: Style.hoverFillFor(Color.popups.text, Color.accent, Color.urgent)
++    readonly property color bg: OmarchyTheme.Color.popups.background
++    readonly property color fg: OmarchyTheme.Color.popups.text
++    readonly property color borderColor: OmarchyTheme.Color.popups.border
++    readonly property color hoverFill: Style.hoverFillFor(OmarchyTheme.Color.popups.text, OmarchyTheme.Color.accent, OmarchyTheme.Color.urgent)
+     readonly property int radius: Style.cornerRadius > 0 ? Math.min(Style.cornerRadius, Math.round(buttonSize / 2)) : Math.round(Style.space(8))
+     readonly property int screenW: screen ? screen.width : 0
+     readonly property int screenH: screen ? screen.height : 0
+@@ -302,8 +303,8 @@ PanelWindow {
+             width: implicitWidth
+             height: implicitHeight
+             radius: Math.round(height / 2)
+-            color: Color.tooltip.background
+-            border.color: Color.tooltip.border
++            color: OmarchyTheme.Color.tooltip.background
++            border.color: OmarchyTheme.Color.tooltip.border
+             border.width: 1
+             Text {
+                 id: labelText
+@@ -312,7 +313,7 @@ PanelWindow {
+                 textFormat: Text.PlainText
+                 elide: Text.ElideRight
+                 maximumLineCount: 1
+-                color: Color.tooltip.text
++                color: OmarchyTheme.Color.tooltip.text
+                 font.family: win.fontFamily
+                 font.pixelSize: Style.font.caption
+                 renderType: Text.NativeRendering
+@@ -428,7 +429,7 @@ PanelWindow {
+                         anchors.centerIn: parent
+                         text: win.statusOk ? "\u{F012C}" : "\u{F0156}"
+                         textFormat: Text.PlainText
+-                        color: win.statusOk ? win.fg : Color.urgent
++                        color: win.statusOk ? win.fg : OmarchyTheme.Color.urgent
+                         font.family: win.fontFamily
+                         font.pixelSize: win.iconSize
+                         renderType: Text.NativeRendering
+@@ -524,7 +525,7 @@ PanelWindow {
+             anchors.centerIn: parent
+             text: ab.label
+             textFormat: Text.PlainText
+-            color: ab.button && ab.button.accent ? Color.accent : win.fg
++            color: ab.button && ab.button.accent ? OmarchyTheme.Color.accent : win.fg
+             font.family: win.fontFamily
+             font.pixelSize: Style.font.body
+             font.bold: !!(ab.button && ab.button.accent)
+diff --git a/README.md b/README.md
+index b5e259a..565f7f9 100644
+--- a/README.md
++++ b/README.md
+@@ -563,6 +563,7 @@ node tests/runner-modules.test.mjs                  # TypeScript, defaults and d
+ python3 tests/check_settings_ui.py                   # controls in an isolated, offscreen Quickshell
+ python3 tests/check_settings_ui.py --ports           # confirmation controls
+ python3 tests/check_plugin_load.py                  # full plugin QML loading; requires a Wayland session, shows no windows
++python3 tests/check_plugin_load.py --theme-colors   # instantiate themed components and verify the Omarchy palette
+ python3 tests/check_context_ui.py                   # live GTK/AT-SPI check; opens a temporary window and selects fixture text
+ python3 tests/check_context_ui.py --popup           # also checks real Omapop popups; requires the running plugin
+ python3 tests/check_context_ui.py --long-press      # also checks held-button popups; requires Show on long press enabled
+diff --git a/Settings.qml b/Settings.qml
+index 9b3605f..ae07202 100644
+--- a/Settings.qml
++++ b/Settings.qml
+@@ -4,6 +4,7 @@ import QtQuick.Layouts
+ import QtQuick.Controls as QQC
+ import QtQuick.Window
+ import qs.Commons
++import qs.Commons as OmarchyTheme
+ import qs.Ui
+ 
+ ColumnLayout {
+@@ -11,7 +12,7 @@ ColumnLayout {
+ 
+     property var service: null
+     property string errorText: ""
+-    readonly property color secondaryText: Qt.rgba(Color.popups.text.r, Color.popups.text.g, Color.popups.text.b, 0.68)
++    readonly property color secondaryText: Qt.rgba(OmarchyTheme.Color.popups.text.r, OmarchyTheme.Color.popups.text.g, OmarchyTheme.Color.popups.text.b, 0.68)
+     readonly property var groups: [
+         { title: "Selection", keys: ["longPress", "requireTerminalShift", "position", "shortcut", "excludedApps"] },
+         { title: "Search", keys: ["searchEngine", "searchUrl"] },
+@@ -106,7 +107,7 @@ ColumnLayout {
+             Layout.fillWidth: true
+             text: "Omapop settings"
+             textFormat: Text.PlainText
+-            color: Color.popups.text
++            color: OmarchyTheme.Color.popups.text
+             font.family: Style.font.family
+             font.pixelSize: Style.font.heading
+             font.weight: Font.DemiBold
+@@ -166,7 +167,7 @@ ColumnLayout {
+         text: root.errorText || "Changes save automatically."
+         textFormat: Text.PlainText
+         wrapMode: Text.WordWrap
+-        color: root.errorText ? Color.urgent : root.secondaryText
++        color: root.errorText ? OmarchyTheme.Color.urgent : root.secondaryText
+         font.family: Style.font.family
+         font.pixelSize: Style.font.caption
+     }
+@@ -219,7 +220,7 @@ ColumnLayout {
+             text: row.title
+             textFormat: Text.PlainText
+             wrapMode: Text.WordWrap
+-            color: Color.popups.text
++            color: OmarchyTheme.Color.popups.text
+             font.family: Style.font.family
+             font.pixelSize: Style.font.bodySmall
+             font.weight: Font.DemiBold
+diff --git a/ShortcutRecorder.qml b/ShortcutRecorder.qml
+index 604d035..6119a0e 100644
+--- a/ShortcutRecorder.qml
++++ b/ShortcutRecorder.qml
+@@ -4,6 +4,7 @@ import QtQuick.Window
+ import Quickshell
+ import Quickshell.Wayland
+ import qs.Commons
++import qs.Commons as OmarchyTheme
+ import qs.Ui
+ import "Actions.js" as Actions
+ 
+@@ -16,7 +17,7 @@ ColumnLayout {
+     property string pendingCombo: ""
+     property var heldKeys: []
+     property string hint: ""
+-    readonly property color secondaryText: Qt.rgba(Color.popups.text.r, Color.popups.text.g, Color.popups.text.b, 0.68)
++    readonly property color secondaryText: Qt.rgba(OmarchyTheme.Color.popups.text.r, OmarchyTheme.Color.popups.text.g, OmarchyTheme.Color.popups.text.b, 0.68)
+     signal edited(string value)
+ 
+     spacing: Style.spacing.sm
+@@ -155,8 +156,8 @@ ColumnLayout {
+             Layout.fillWidth: true
+             implicitHeight: recordButton.implicitHeight
+             radius: Style.cornerRadius
+-            color: Style.controlFill(root.recording, false, Color.popups.text, Color.accent)
+-            borderSpec: Border.controlSpec(root.recording ? "focus" : "normal", Color.popups.text, Color.accent)
++            color: Style.controlFill(root.recording, false, OmarchyTheme.Color.popups.text, OmarchyTheme.Color.accent)
++            borderSpec: Border.controlSpec(root.recording ? "focus" : "normal", OmarchyTheme.Color.popups.text, OmarchyTheme.Color.accent)
+             onActiveFocusChanged: if (root.recording && !activeFocus) root.cancel()
+             Keys.priority: Keys.BeforeItem
+             Keys.onPressed: function (event) { root.press(event) }
+@@ -168,7 +169,7 @@ ColumnLayout {
+                 text: root.recording ? (root.pendingCombo || "Press keys…") : (Actions.oneLine(root.value, 64) || "Not set")
+                 textFormat: Text.PlainText
+                 elide: Text.ElideRight
+-                color: root.value || root.recording ? Color.popups.text : root.secondaryText
++                color: root.value || root.recording ? OmarchyTheme.Color.popups.text : root.secondaryText
+                 font.family: Style.font.family
+                 font.pixelSize: Style.font.bodySmall
+             }
+@@ -197,7 +198,7 @@ ColumnLayout {
+         text: root.hint || (root.pendingCombo ? "Release the keys to save. Esc cancels." : "Press your shortcut. Esc cancels.")
+         textFormat: Text.PlainText
+         wrapMode: Text.WordWrap
+-        color: root.hint ? Color.urgent : root.secondaryText
++        color: root.hint ? OmarchyTheme.Color.urgent : root.secondaryText
+         font.family: Style.font.family
+         font.pixelSize: Style.font.caption
+     }
+diff --git a/tests/check_plugin_load.py b/tests/check_plugin_load.py
+index 5c84d44..7a86608 100644
+--- a/tests/check_plugin_load.py
++++ b/tests/check_plugin_load.py
+@@ -17,11 +17,16 @@
+ def main():
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument('--plugin-dir', type=Path, default=Path(__file__).resolve().parents[1])
++    parser.add_argument('--theme-colors', action='store_true',
++                        help='Instantiate themed components and check their colors against Omarchy')
+     args = parser.parse_args()
+     if not os.environ.get('WAYLAND_DISPLAY'):
+         parser.error('Run this check in a Wayland session; the offscreen backend cannot load PanelWindow')
+     plugin = args.plugin_dir.resolve()
+-    files = [str((plugin / name).as_uri()) for name in ('Popup.qml', 'Service.qml', 'BarWidget.qml')]
++    names = ('Popup.qml', 'BarWidget.qml', 'Settings.qml', 'ExcludedApps.qml',
++             'ShortcutRecorder.qml', 'ConfirmationText.qml') if args.theme_colors else (
++                 'Popup.qml', 'Service.qml', 'BarWidget.qml')
++    files = [str((plugin / name).as_uri()) for name in names]
+     shell = Path(os.environ.get('OMARCHY_PATH', '/usr/share/omarchy')) / 'shell'
+     with tempfile.TemporaryDirectory(prefix='omapop-plugin-load-') as directory:
+         root = Path(directory)
+@@ -31,15 +36,47 @@ def main():
+         config = root / 'shell.qml'
+         config.write_text('''import QtQuick
+ import Quickshell
++import qs.Commons as OmarchyTheme
+ ShellRoot {
++    id: testRoot
+     Component.onCompleted: Qt.callLater(checkComponents)
++    function checkColors(file, component, failures) {
++        var object = component.createObject(testRoot)
++        if (!object) {
++            failures.push(file + ": could not instantiate component")
++            return false
++        }
++        var name = file.slice(file.lastIndexOf("/") + 1)
++        var fg = OmarchyTheme.Color.popups.text
++        var expected
++        if (name === "Popup.qml") {
++            expected = { bg: OmarchyTheme.Color.popups.background, fg: fg,
++                borderColor: OmarchyTheme.Color.popups.border,
++                hoverFill: OmarchyTheme.Style.hoverFillFor(fg, OmarchyTheme.Color.accent, OmarchyTheme.Color.urgent) }
++        } else if (name === "ConfirmationText.qml") {
++            expected = { foreground: fg }
++        } else {
++            expected = { secondaryText: Qt.rgba(fg.r, fg.g, fg.b, 0.68 * (name === "BarWidget.qml" ? fg.a : 1)) }
++        }
++        var passed = true
++        for (var property in expected) {
++            if (!Qt.colorEqual(object[property], expected[property])) {
++                failures.push(name + "." + property + ": expected " + expected[property] + ", got " + object[property])
++                passed = false
++            }
++        }
++        return passed
++    }
+     function checkComponents() {
+         var files = %s
++        var themeColors = %s
+         var passed = 0
+         var failures = []
+         for (var i = 0; i < files.length; i++) {
+             var component = Qt.createComponent(files[i])
+-            if (component.status === Component.Ready) passed++
++            if (component.status === Component.Ready) {
++                if (!themeColors || checkColors(files[i], component, failures)) passed++
++            }
+             else failures.push(component.errorString() || (files[i] + ": load did not complete"))
+             component.destroy()
+         }
+@@ -47,7 +84,7 @@ def main():
+         Qt.quit()
+     }
+ }
+-''' % json.dumps(files))
++''' % (json.dumps(files), json.dumps(args.theme_colors)))
+         env = dict(os.environ, QT_QPA_PLATFORM='wayland', QT_QPA_PLATFORMTHEME='basic',
+                    QT_QUICK_BACKEND='software', QML_IMPORT_PATH=str(imports))
+         try:
+diff --git a/tests/ports-ui.qml b/tests/ports-ui.qml
+index ddaf335..47d6af8 100644
+--- a/tests/ports-ui.qml
++++ b/tests/ports-ui.qml
+@@ -3,6 +3,7 @@ import QtQuick.Window
+ import QtTest
+ import Quickshell
+ import qs.Commons
++import qs.Commons as OmarchyTheme
+ import ".." as Plugin
+ 
+ TestCase {
+@@ -16,7 +17,7 @@ TestCase {
+         id: canvas
+         width: 420
+         height: prompt.implicitHeight
+-        color: Color.popups.background
++        color: OmarchyTheme.Color.popups.background
+         Plugin.ConfirmationText { id: prompt; width: 420; maxDetailsHeight: 300 }
+     }
+     onCompletedChanged: if (completed) console.log("OMAPOP_PORT_TESTS " + JSON.stringify({passed:qtest_results.passCount,failed:qtest_results.failCount}))
+diff --git a/tests/settings-ui.qml b/tests/settings-ui.qml
+index 0de4eb0..1f27d9c 100644
+--- a/tests/settings-ui.qml
++++ b/tests/settings-ui.qml
+@@ -4,6 +4,7 @@ import QtQuick.Window
+ import Quickshell
+ import Quickshell.Io
+ import qs.Commons
++import qs.Commons as OmarchyTheme
+ import ".." as Plugin
+ 
+ TestCase {
+@@ -39,7 +40,7 @@ TestCase {
+     Rectangle {
+         id: canvas
+         anchors.fill: parent
+-        color: Color.popups.background
++        color: OmarchyTheme.Color.popups.background
+         Plugin.Settings {
+             id: page
+             anchors.fill: parent
