@@ -166,3 +166,15 @@ Seven steps, about five files: per policy, steps 1, 2, 4 and 5 go to one
 `coder` agent (Sonnet), started from the worktree directory. Step 0, the smoke
 test (3), the builds (6) and the deploy (7) stay with the session model.
 Review: a fresh Opus agent given this plan and `git diff`.
+
+## Implementation notes
+
+- Steps 1–2 (package and registration) were done before step 0's rebase,
+  while #2503 was still in review, since they don't touch the shared module.
+  Steps 4–5 still wait for the rebase.
+- installCheck: `! test -e` was changed to `test ! -e`, because bash's
+  `set -e` ignores a command negated with `!`, so the original check could
+  never fail the build.
+- Step 3 smoke test, 2026-10-27: the store build started hidden with
+  throwaway XDG directories, `status.json` appeared (sign-in page, version
+  1.4.1), and `omateams quit` exited it.
