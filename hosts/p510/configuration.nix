@@ -706,8 +706,8 @@ in
     enable = true;
     address = "10.2.0.2/32"; # [Interface] Address (v4)
     peer = {
-      publicKey = "8/kdhoN9UcJuptbdwaVqfkTGpQDZZC0bOGs5Dr2F2zg="; # NL#733
-      endpoint = "169.150.196.130:51820";
+      publicKey = "/0vRg+ymjCXdqFf7cqZvZ19Dkv1adYR+NIOLQ+XvEgA="; # UK#548
+      endpoint = "79.127.146.1:51820";
     };
     privateKeyFile = config.age.secrets."proton-wireguard-key".path;
   };
