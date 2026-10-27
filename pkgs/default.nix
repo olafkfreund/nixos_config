@@ -61,6 +61,8 @@
 
   # Altscape: Alt+Tab window switcher for the Omarchy shell (#2503).
   altscape = pkgs.callPackage ./altscape { };
+  # Omateams: Microsoft Teams web in an Omarchy-themed window (#2505).
+  omateams = pkgs.callPackage ./omateams { };
 
   # notebooklm-mcp-cli — unofficial CLI *and* MCP server for Google NotebookLM.
   # Replaced notebooklm-go (#1781), which was CLI-only: the MCP server is what
