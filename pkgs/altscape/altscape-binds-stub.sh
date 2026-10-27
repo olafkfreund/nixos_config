@@ -9,7 +9,7 @@ if [[ "${1:-}" == "sync" && ("${2:-}" == "super" || "${2:-}" == "off") ]]; then
 fi
 
 if binds=$(@hyprctl@ -j binds 2>/dev/null); then
-  if printf '%s' "$binds" | @jq@ -e 'any(.[]; (.key|ascii_downcase)=="tab" and .modmask==8 and ((.arg//"")|contains("io.github.qempexe.altscape")))' >/dev/null 2>&1; then
+  if printf '%s' "$binds" | @jq@ -e 'any(.[]; (.key|ascii_downcase)=="tab" and .modmask==8 and (((.arg//"")|contains("io.github.qempexe.altscape")) or ((.description//"")|contains("Altscape"))))' >/dev/null 2>&1; then
     active=true
   else
     active=false

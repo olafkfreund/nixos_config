@@ -2,7 +2,11 @@
 # the plugin is installed, enabled once per host by a post-boot hook, and
 # Alt+Tab is bound from a Nix-owned ~/.config/hypr/altscape-binds.lua whose
 # require line is appended once to the user-owned bindings.lua at activation.
-# To change the shortcut, edit the binds below (#2503).
+# To change the shortcut, edit the binds below (#2503). Settings are on
+# Super+Alt+Shift+W, since upstream's Super+Alt+Shift+S is Nixi's listen key.
+# Alt+Tab replaces Omarchy's default unconditionally, so it does nothing while
+# the plugin is off: right after the first login (until the hook enables it)
+# or if you turn it off in Setup > Plugins. Re-enable it there.
 { config, pkgs, ... }:
 let
   id = "io.github.qempexe.altscape";
@@ -24,7 +28,7 @@ in
       o.bind("ALT + SHIFT + TAB", "Altscape: previous window", "${summon} prev")
       o.bind("ALT + Alt_L", "Altscape: switch on release", "${summon} release", { release = true })
       o.bind("ALT + Alt_R", "Altscape: switch on release", "${summon} release", { release = true })
-      o.bind("SUPER + ALT + SHIFT + S", "Altscape settings", "omarchy-shell ${id} settings")
+      o.bind("SUPER + ALT + SHIFT + W", "Altscape settings", "omarchy-shell ${id} settings")
     '';
 
     # Append-only so the user's edits to bindings.lua stay theirs.

@@ -205,3 +205,21 @@ Seven steps, about seven files: per policy, steps 1–5 go to one `coder` agent
 (Sonnet), started from the worktree directory so it doesn't stall on the
 folder-trust prompt. Steps 6–7 and the woogy7 edit stay with the session
 model. Review: a fresh Opus agent given this plan and `git diff`.
+
+## Implementation notes (2026-10-27)
+
+- Step 4: the Home Manager block is a function (`{ lib, ... }:`) so
+  `lib.hm.dag` resolves. As a NixOS module's `lib` it did not, and both host
+  builds failed.
+- Step 4: the `require` append runs inside `run` via `bash -c`, so a dry run
+  cannot write to `bindings.lua`.
+- Deviation, from the review: the settings key is **Super+Alt+Shift+W**, not S.
+  S is already "Nixi companion: listen" on both hosts, and Hyprland would run
+  both. W is free on p620 and razer (checked with `hyprctl -j binds`).
+- Review gap, accepted and documented in the module header: Alt+Tab replaces
+  Omarchy's default unconditionally, so it does nothing while the plugin is
+  off (first login before the hook runs, or turned off in Setup > Plugins).
+- The stub's `active` check also matches a bind description containing
+  "Altscape", as upstream's `bind_live` does.
+- Known minor: on a brand-new home with no `bindings.lua` yet, the `require`
+  line lands at the next activation. Both hosts have the file.
