@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2501
 author: olafkfreund
 ---
@@ -61,15 +61,8 @@ this flake and nothing else. Today the picture is muddled:
 - Subscription login only (#1831). Nothing here may introduce an API key.
 - p510: no build or deploy without asking.
 
-## Open questions
+## Decisions (approved 2026-10-27)
 
-1. Which daemon hung? The report didn't name it. The only long-running
-   agent caller found on p620 is the OMA voice daemon, which runs claude by
-   its store path and doesn't go through the wrapper. If you know which one
-   it was (a user unit, a factory, herdr), say so. Otherwise the spec will
-   try to reproduce the hang first and pick a fix based on what it finds.
-2. Codex source: package upstream release binaries ourselves, the same way
-   as `claude-code-native` (fast, prebuilt), or build from source in a local
-   package (slower, no binary blob)?
-3. Should `agy` also get account routing, or is it fine left outside it,
-   since Omarchy has no account concept for it?
+1. Daemon: unknown; the spec reproduces the hang first and fixes what it finds.
+2. Codex: package upstream release binaries, like `claude-code-native`.
+3. `agy`: no account routing; it stays outside.
