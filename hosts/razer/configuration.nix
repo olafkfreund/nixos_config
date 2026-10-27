@@ -691,8 +691,8 @@ in
 
   # ── RDP client, for connecting OUT to the other machines ────────────────
   #
-  # Only the machine doing the connecting needs this; the one being connected
-  # to needs programs.nixarchy.services.hypr-rdp instead. The package ships
+  # For RDP servers elsewhere: our own hosts no longer serve RDP (nixarchy
+  # removed hypr-rdp, #2510); between them use gliff. The package ships
   # xfreerdp, wlfreerdp and sdl-freerdp; `nixarchy remote connect` launches
   # sdl-freerdp, because upstream deprecated its Wayland client in the SDL3
   # client's favour and SDL3 needs no Xwayland hop.
