@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2505
 spec: spec/2026-10-27-2505-omateams-plugin.md
 ---
