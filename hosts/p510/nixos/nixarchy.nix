@@ -115,9 +115,9 @@
 
     # Oma, as on p620 (the user asked for the same settings). nixarchy's
     # home-manager module already brings the voice module in, so this only
-    # turns it on. p510 is reached over hypr-rdp, which carries no audio: from
-    # there Oma is typed to (`omarchy-voice listen say ...`), picked from
-    # Voice > Actions, or run on timers, and she speaks on p510's own outputs.
+    # turns it on. When p510 is used remotely (gliff or Sunshine), Oma is
+    # typed to (`omarchy-voice listen say ...`), picked from Voice > Actions,
+    # or run on timers, and she speaks on p510's own outputs.
     # Voice proper needs a microphone on p510 itself.
     #
     # Claude Code is her brain and must be logged in on this host once
