@@ -166,6 +166,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # nixarchy-meetingai: meeting copilot (daemon, local whisper, Omarchy shell
+    # plugin); hosts/common/nixos/omarchy-meetingai.nix. Tracks the rewrite branch
+    # until it is merged upstream.
+    nixarchy-meetingai = {
+      url = "github:olafkfreund/nixarchy-meetingai/refactor/omarchy-quickshell-rewrite";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixarchy-meeting-mode.follows = "nixarchy-meeting-mode";
+      inputs.home-manager.follows = "home-manager";
+    };
+
     # ai-mirror: MCP server + bar indicator letting coding agents drive the
     # Omarchy desktop behind a kill switch (hosts/common/nixos/omarchy-ai-mirror.nix).
     # Tracks ai-mirror's default branch (master). Its PRs land as MERGE COMMITS,

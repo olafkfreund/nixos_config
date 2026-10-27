@@ -43,6 +43,7 @@
     ../../common/nixos/omarchy-omamail.nix
     ../../common/nixos/omarchy-pixelbuds.nix
     ../../common/nixos/omarchy-meeting-mode.nix
+    ../../common/nixos/omarchy-meetingai.nix
     ../../common/nixos/omarchy-sole-hyprland.nix
     ../../common/nixos/omarchy-stylix-theme.nix
   ];
