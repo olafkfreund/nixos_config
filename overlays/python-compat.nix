@@ -46,4 +46,45 @@ _final: prev: {
       });
     };
   };
+
+  # mcp-proxy 0.13 needs mcp<2 (mcp 2 removed request_ctx, see
+  # sparfenyuk/mcp-proxy#235), but nixpkgs moved mcp to 2.x, which broke the
+  # p510 build via plex-mcp/arr-suite-mcp/audiobook-mcp. Build it against the
+  # mcp 1.x wheel. Drop once mcp-proxy supports mcp 2.
+  mcp-proxy = prev.mcp-proxy.override {
+    python3Packages = prev.python3Packages.overrideScope (
+      pyFinal: _pyPrev: {
+        mcp = pyFinal.buildPythonPackage rec {
+          pname = "mcp";
+          version = "1.30.0";
+          format = "wheel";
+          src = prev.fetchPypi {
+            inherit pname version format;
+            dist = "py3";
+            python = "py3";
+            hash = "sha256-Zm7bUAlQPhBHydYDRqdW+UsmHwXMJiXyPUHHKP/EhNA=";
+          };
+          dependencies =
+            with pyFinal;
+            [
+              anyio
+              httpx
+              httpx-sse
+              jsonschema
+              pydantic
+              pydantic-settings
+              pyjwt
+              python-multipart
+              sse-starlette
+              starlette
+              typing-extensions
+              typing-inspection
+              uvicorn
+            ]
+            ++ pyjwt.optional-dependencies.crypto;
+          pythonImportsCheck = [ "mcp" ];
+        };
+      }
+    );
+  };
 }
