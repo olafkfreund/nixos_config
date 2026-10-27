@@ -60,6 +60,14 @@ packages WE ACTUALLY RUN — gnome-shell, ollama, docker, etc.>
 | home-manager | nix-community/home-manager | <sha> (<date>) | <sha> (<date>) | <N commits / n days> | 🔵 |
 | …            | …                          | …              | …               | …                     | … |
 
+## Pinned non-flake packages
+
+| Package | Ours | Upstream tip |
+|---|---|---|
+| pkgs/omapop | `rev` in `pkgs/omapop/default.nix` | `gh api repos/jondkinney/omapop/commits --jq '.[0].sha'` |
+
+Review the upstream diff before bumping. Drop `qt612-color.patch` if PR 10 merged.
+
 ## Recommended actions
 
 - `nix flake update nixpkgs` — <only if channel advanced; else "no-op, skip">
