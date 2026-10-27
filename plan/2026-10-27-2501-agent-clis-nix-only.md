@@ -229,3 +229,19 @@ agent for all steps, with each step sent by `SendMessage`. Step 7's runtime
 checks and the deploy announcement stay with the session model. Review is by
 a fresh Opus agent given this plan and `git diff`. Deploy to p620/razer is a
 separate ask after the PR is merged.
+
+## Implementation notes (review fixes, 2026-10-27)
+
+- Step 2: the wrapper also skips the session id after `exec resume|fork`
+  (unless `--last` is given) and the values of `review
+  --base/--commit/--title`, so an explicit `-` after them keeps stdin. The
+  guard test grows from 11 to 17 cases, and installCheck now tests the
+  installed `$out/bin/codex`, not the source file.
+- Step 5: `update-codex-bin.sh` resolves releases with curl, not gh. It checks
+  for no change before prefetching (a nightly no-op downloads nothing) and
+  sends `GITHUB_TOKEN` when it is set. Step 6 passes that token to the
+  workflow's "Run update script" step.
+- Cost, accepted: nixpkgs `claude-agent-acp` and `codex-acp` (both in p620's
+  closure) take `claude-code`/`codex` as inputs. With the overlay they no
+  longer hit cache.nixos.org, so they build locally (buildNpmPackage) on each
+  host and again after each codex or claude bump. Nothing deeper rebuilds.

@@ -59,7 +59,9 @@ stdenvNoCC.mkDerivation {
   doInstallCheck = true;
   installCheckPhase = ''
     runHook preInstallCheck
-    sh ${./guard-test.sh} ${./codex-wrapper.sh}
+    # Test the installed wrapper, so a bad substitution fails the build.
+    sed "s|$out/libexec/codex/bin/codex|@real@|" $out/bin/codex > installed-wrapper.sh
+    sh ${./guard-test.sh} installed-wrapper.sh
     $out/bin/codex --version | grep -F ${version}
     runHook postInstallCheck
   '';

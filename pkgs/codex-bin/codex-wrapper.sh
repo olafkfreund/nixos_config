@@ -8,7 +8,7 @@
 # 0.164.0; add any new one by hand. Delete this guard when #20919 is fixed.
 real=@real@
 
-skip='' sub='' pos=''
+skip='' sub='' pos='' id=''
 for a; do
   if [ -n "$skip" ]; then
     skip=''
@@ -25,13 +25,21 @@ for a; do
     esac
   else
     case $a in
-      -c | --config | --enable | --disable | --remote | --remote-auth-token-env | -i | --image | -m | --model | --local-provider | -p | --profile | -s | --sandbox | -C | --cd | --add-dir | -a | --ask-for-approval | --thread-source | --cyber-access-program | --output-schema | --color | -o | --output-last-message) skip=1 ;;
+      -c | --config | --enable | --disable | --remote | --remote-auth-token-env | -i | --image | -m | --model | --local-provider | -p | --profile | -s | --sandbox | -C | --cd | --add-dir | -a | --ask-for-approval | --thread-source | --cyber-access-program | --output-schema | --color | -o | --output-last-message | --base | --commit | --title) skip=1 ;;
       -)
         pos=-
         break
         ;;
-      -* | resume | fork | review | help) ;;
+      --last) id='' ;;
+      # resume/fork take a session id before the prompt. A prompt that is
+      # literally "review", "resume" or "help" is not detected; rare.
+      resume | fork) id=1 ;;
+      -* | review | help) ;;
       *)
+        if [ -n "$id" ]; then
+          id=''
+          continue
+        fi
         pos=$a
         break
         ;;

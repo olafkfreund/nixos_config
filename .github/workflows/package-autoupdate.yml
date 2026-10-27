@@ -116,6 +116,9 @@ jobs:
 
       - name: Run update script
         run: ${{ matrix.script }}
+        env:
+          # Authenticated GitHub API calls; avoids the 60/hour anonymous limit.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Did anything change?
         id: changed

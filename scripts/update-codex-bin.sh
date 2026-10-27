@@ -20,7 +20,9 @@ log() { echo ">> $*" >&2; }
 latest_version() {
   # releases/latest excludes pre-releases; curl, not gh, because CI runs this without GH_TOKEN.
   local tag
-  tag=$(curl -fsSL --max-time 15 https://api.github.com/repos/openai/codex/releases/latest | jq -er .tag_name) \
+  local auth=()
+  [ -n "${GITHUB_TOKEN-}" ] && auth=(-H "Authorization: Bearer $GITHUB_TOKEN")
+  tag=$(curl -fsSL --max-time 15 "${auth[@]}" https://api.github.com/repos/openai/codex/releases/latest | jq -er .tag_name) \
     || die "could not resolve latest release"
   echo "${tag#rust-v}"
 }
@@ -60,15 +62,20 @@ if [ "${1-}" = "--write" ]; then
 fi
 
 current=$(sed -nE 's/^[[:space:]]*version = "([^"]+)";.*$/\1/p' "$PKG_FILE" | head -1)
-latest=$(latest_version)
 
 version="${1-}"
 if [ -z "$version" ]; then
   echo "current = $current"
-  echo "latest  = $latest"
+  echo "latest  = $(latest_version)"
   exit 0
 fi
-[ "$version" = latest ] && version=$latest
+[ "$version" = latest ] && version=$(latest_version)
+
+# Before prefetching, so a nightly no-op run downloads nothing.
+if [ "$WRITE" -eq 1 ] && [ "$current" = "$version" ]; then
+  echo "up-to-date at $version; no changes written"
+  exit 0
+fi
 
 log "resolving hashes for $version ..."
 url="$BASE/rust-v$version/codex-package"
@@ -78,10 +85,6 @@ arm64_hash=$(prefetch_hash "$url-aarch64-unknown-linux-musl.tar.gz") \
   || die "could not hash aarch64 tarball for $version"
 
 if [ "$WRITE" -eq 1 ]; then
-  if [ "$current" = "$version" ]; then
-    echo "up-to-date at $version; no changes written"
-    exit 0
-  fi
   rewrite_pkg "$PKG_FILE" "$version" "$x64_hash" "$arm64_hash" \
     || die "could not rewrite $PKG_FILE"
   echo "wrote $PKG_FILE: $current -> $version"

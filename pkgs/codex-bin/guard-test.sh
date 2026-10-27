@@ -35,6 +35,12 @@ check null file exec hi
 check pipe pipe exec -m exec
 check pipe pipe --version
 check pipe pipe login status
+check pipe pipe exec resume 0199-uuid -
+check pipe pipe exec fork 0199-uuid -
+check pipe pipe exec review --base main -
+check null pipe exec resume 0199-uuid hi
+check null pipe exec resume --last hi
+check pipe pipe exec resume 0199-uuid
 
-[ "$fail" = 0 ] && echo "guard-test: all 11 cases pass"
+[ "$fail" = 0 ] && echo "guard-test: all 17 cases pass"
 exit "$fail"
