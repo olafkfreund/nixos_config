@@ -1,10 +1,10 @@
 ---
-status: draft
+status: approved
 issue: 2505
 author: olafkfreund
 ---
 
-# Intent: Microsoft Teams (Synechron) as an Omarchy plugin on p620
+# Intent: Microsoft Teams (Synechron) as an Omarchy plugin on p620 and razer
 
 ## Problem
 
@@ -60,12 +60,8 @@ unpinned, built outside Nix, and fails or drifts on NixOS.
   when streaming starts (seen 2026-10-27; you replugged it). That's hardware,
   outside this change, but a call test depends on it.
 
-## Open questions
+## Decisions (approved 2026-10-27)
 
-1. **Hosts:** p620 only, or razer too?
-2. **Start hidden at login** (upstream default `runInBackground = true`):
-   unread badge and notifications from login, costing roughly one browser tab
-   of RAM (upstream says up to 2 GB on a busy tenant before it recycles). Or
-   start it only when you open it?
-3. **Enabling:** like Altscape (#2503), automatic once at first login, or a
-   one-time `omarchy plugin enable omateams`?
+1. Hosts: p620 and razer.
+2. Start hidden at login (`runInBackground = true`, upstream default).
+3. Enable automatically once at first login, with a marker, as in #2503.
