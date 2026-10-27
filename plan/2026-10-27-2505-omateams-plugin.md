@@ -30,7 +30,7 @@ spec: spec/2026-10-27-2505-omateams-plugin.md
 ## Dependency
 
 This plan uses `omarchy-enable-once.nix` from #2503. Implement it after #2503
-is merged: rebase `feat/2505-omateams-plugin` onto `origin/main` first. If If
+is merged: rebase `feat/2505-omateams-plugin` onto `origin/main` first. If
 issue #2503 stalls, step 4 temporarily imports the module from its branch.
 That is a deviation, recorded here if it happens.
 
