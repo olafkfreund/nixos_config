@@ -56,6 +56,9 @@
   # OmaDroid: Android phone mirroring (scrcpy/adb) from the Omarchy bar.
   omadroid = pkgs.callPackage ./omadroid { };
 
+  # Omapop: PopClip-style selection action bar for the Omarchy shell.
+  omapop = pkgs.callPackage ./omapop { };
+
   # notebooklm-mcp-cli — unofficial CLI *and* MCP server for Google NotebookLM.
   # Replaced notebooklm-go (#1781), which was CLI-only: the MCP server is what
   # makes the notebooks reachable as agent tools. Reverse-engineered and pinned
