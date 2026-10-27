@@ -150,6 +150,11 @@ This document provides a complete index of all available custom commands with qu
 
 ### Package Management Commands
 
+#### `/update-codex` - Codex CLI Updates
+
+**File:** `.claude/commands/update-codex.md`
+**Purpose:** Update the upstream Codex release binary (`pkgs/codex-bin`)
+
 #### `/update-claude-code` - Claude Code Updates
 
 **File:** `.claude/commands/update-claude-code.md`
