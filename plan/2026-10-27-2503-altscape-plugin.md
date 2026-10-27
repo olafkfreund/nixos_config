@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2503
 spec: spec/2026-10-27-2503-altscape-plugin.md
 ---
@@ -98,7 +98,7 @@ spec: spec/2026-10-27-2503-altscape-plugin.md
          pkgs.customPkgs.altscape.override { hyprland = <outer config>.programs.hyprland.package; };
        home.file.".config/hypr/altscape-binds.lua".text = '' …the block from spec §2… '';
        home.activation.altscapeRequire = lib.hm.dag.entryAfter [ "writeBoundary" ] '' … '';
-       xdg.configFile."omarchy/hooks/post-boot.d/altscape-enable" = { executable = true; text = '' … ''; };
+       local.omarchy.enableOnce = [ id ];   # from omarchy-enable-once.nix (step 4a)
      };
    }
    ```
@@ -111,18 +111,8 @@ spec: spec/2026-10-27-2503-altscape-plugin.md
      `f="$HOME/.config/hypr/bindings.lua"; if [ -f "$f" ] && ! grep -qF '"hypr.altscape-binds"' "$f"; then run printf '\n%s\n' 'pcall(require, "hypr.altscape-binds") -- managed by NixOS (#2503)' >> "$f"; fi`.
      Use `run` so `--dry-run` is respected. Use a plain `>>` append, which
      keeps a symlinked file a symlink.
-   - `altscape-enable` hook: a bash script with `PATH` from
-     `lib.makeBinPath [ <nixarchy package via inputs.nixarchy, never config.programs.nixarchy.package> pkgs.coreutils pkgs.systemd ]`.
-     First see how `omarchy-omapop.nix`/nixarchy reach `omarchy-shell` and
-     `omarchy-plugin-enable`. If both are already on the session PATH, use the
-     plain names and add only coreutils/systemd. Body:
-     marker dir `${XDG_STATE_HOME:-$HOME/.local/state}/nixarchy-local/enabled-once`.
-     Exit 0 if the marker exists. Wait for `omarchy-shell shell ping`, 120 ×
-     1 s, and exit 0 if it never answers. Set
-     `OMARCHY_SHELL_IPC_TIMEOUT=${OMARCHY_SHELL_IPC_TIMEOUT:-30s}`. Run
-     `omarchy-shell shell rescanPlugins || true`. If
-     `out=$(omarchy-plugin-enable ${id} 2>&1)` succeeds, write the marker;
-     otherwise log `$out` with `systemd-cat -t altscape-enable`.
+   - The module imports `./omarchy-enable-once.nix` (step 4a) and enables
+     Altscape through it, with no hook of its own.
    - A short header comment in the style of `omarchy-ai-mirror.nix`, saying
      what it installs and that no manual step is needed.
 
@@ -130,6 +120,33 @@ spec: spec/2026-10-27-2503-altscape-plugin.md
    Traps: AGENTS.md says reach nixarchy via `inputs.nixarchy`, never
    `config.programs.nixarchy.package` (infinite recursion). Explicit imports
    only. Escape `''${…}` inside Nix strings.
+
+   **Step 4a: `hosts/common/nixos/omarchy-enable-once.nix` (new), shared with #2505.**
+   (approved in spec/2026-10-27-2505-omateams-plugin.md §2). It is a NixOS
+   module that adds a Home Manager option to
+   `home-manager.sharedModules`: `local.omarchy.enableOnce` (`listOf str`,
+   default `[ ]`, merged across modules). When non-empty, it writes
+   `xdg.configFile."omarchy/hooks/post-boot.d/enable-once"` (executable). The
+   hook body:
+
+   - markers in `${XDG_STATE_HOME:-$HOME/.local/state}/nixarchy-local/enabled-once/<id>`;
+     exit 0 if every id has one;
+   - `OMARCHY_SHELL_IPC_TIMEOUT=${OMARCHY_SHELL_IPC_TIMEOUT:-30s}`;
+   - wait up to 120 × 1 s for `omarchy-shell shell ping`, exit 0 if it never
+     answers;
+   - `omarchy-shell shell rescanPlugins || true`;
+   - for each id still missing: if `out=$(omarchy-plugin-enable "$id" 2>&1)`
+     succeeds, `mkdir -p` and touch the marker; otherwise send `$id: $out` to
+     `systemd-cat -t omarchy-enable-once`.
+
+   PATH: check how nixarchy's own `default-plugins` hook gets `omarchy-shell`
+   and `omarchy-plugin-enable` (it uses `cfg.package` inside nixarchy; we
+   can't, see Traps). If both are on the session PATH (`command -v` in a
+   session shell), use plain names and prefix only coreutils and systemd.
+   Never `config.programs.nixarchy.package`.
+   → verify: `nix eval …p620…home-manager.users.olafkfreund.xdg.configFile."omarchy/hooks/post-boot.d/enable-once".text`
+   prints the hook with `io.github.qempexe.altscape`, and `bash -n` on it
+   passes.
 
 5. **`hosts/p620/nixos/nixarchy.nix:40` and `hosts/razer/nixos/nixarchy.nix:39`**:
    add `../../common/nixos/omarchy-altscape.nix` after `omarchy-omapop.nix`.
@@ -149,7 +166,7 @@ spec: spec/2026-10-27-2503-altscape-plugin.md
      Check `grep -c woogy7 ~/.config/hypr/bindings.lua` gives `0`.
    - Each host after deploy:
      - `grep -c 'hypr.altscape-binds' ~/.config/hypr/bindings.lua` gives 1.
-     - Run `~/.config/omarchy/hooks/post-boot.d/altscape-enable` once by hand
+     - Run `~/.config/omarchy/hooks/post-boot.d/enable-once` once by hand
        (the session is already up), then a clean `omarchy restart shell`.
      - `hyprctl reload`; `hyprctl configerrors` is empty.
      - `hyprctl -j binds | jq '[.[]|select((.key|ascii_downcase)=="tab" and .modmask==8)]|length'`
