@@ -12,6 +12,7 @@
 , glib
 , openssl
 , at-spi2-core
+, gobject-introspection
 , jq
 }:
 # Omapop (jondkinney/omapop): PopClip-style selection action bar for the
@@ -75,7 +76,7 @@ stdenvNoCC.mkDerivation {
       --replace-fail 'try:
         import gi
     ' 'try:
-        os.environ.setdefault("GI_TYPELIB_PATH", "${at-spi2-core}/lib/girepository-1.0:${glib.out}/lib/girepository-1.0")
+        os.environ.setdefault("GI_TYPELIB_PATH", "${at-spi2-core}/lib/girepository-1.0:${glib.out}/lib/girepository-1.0:${gobject-introspection.out}/lib/girepository-1.0")
         import gi
     '
 
