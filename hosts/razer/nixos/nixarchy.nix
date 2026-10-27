@@ -37,6 +37,7 @@
     ../../common/nixos/omarchy-microvm.nix
     ../../common/nixos/omarchy-omadroid.nix
     ../../common/nixos/omarchy-omapop.nix
+    ../../common/nixos/omarchy-altscape.nix
     ../../common/nixos/omarchy-omamail.nix
     ../../common/nixos/omarchy-pixelbuds.nix
     ../../common/nixos/omarchy-meeting-mode.nix

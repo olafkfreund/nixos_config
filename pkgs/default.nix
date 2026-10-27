@@ -59,6 +59,9 @@
   # Omapop: PopClip-style selection action bar for the Omarchy shell.
   omapop = pkgs.callPackage ./omapop { };
 
+  # Altscape: Alt+Tab window switcher for the Omarchy shell (#2503).
+  altscape = pkgs.callPackage ./altscape { };
+
   # notebooklm-mcp-cli — unofficial CLI *and* MCP server for Google NotebookLM.
   # Replaced notebooklm-go (#1781), which was CLI-only: the MCP server is what
   # makes the notebooks reachable as agent tools. Reverse-engineered and pinned
