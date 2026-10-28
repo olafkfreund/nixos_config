@@ -107,12 +107,17 @@
   #     silently. Same reasoning as openrazer: the plugin has no path of its own.
   #   - pillow — omapager (Omarchy notification daemon) decodes sender images
   #     and website icons with it; without it those fall back to theme icons.
-  user-python3 = pkgs.python3.withPackages (ps: [
-    (ps.callPackage ./google-antigravity-py { })
-    ps.openrazer
-    ps.dbus-next
-    ps.pillow
-  ]);
+  # withOpenrazer = false on hosts without Razer hardware: openrazer propagates
+  # openrazer-daemon, whose D-Bus-activated user unit fails there (#2523).
+  user-python3 = pkgs.callPackage
+    ({ lib, python3, withOpenrazer ? true }:
+      python3.withPackages (ps: [
+        (ps.callPackage ./google-antigravity-py { })
+      ] ++ lib.optional withOpenrazer ps.openrazer ++ [
+        ps.dbus-next
+        ps.pillow
+      ]))
+    { };
 
   # GitHub Copilot desktop app — agent-native desktop experience from the
   # public github/app release repo (Tauri AppImage). Bump via the latest

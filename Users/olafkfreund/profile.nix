@@ -1,10 +1,14 @@
 { config
 , lib
 , pkgs
+, osConfig
 , ...
 }:
 let
   inherit (lib) mkDefault optionals;
+  userPython3 = pkgs.customPkgs.user-python3.override {
+    withOpenrazer = osConfig.hardware.openrazer.enable;
+  };
   gnomeProfile = config.desktop.gnome.profile;
 in
 {
@@ -231,7 +235,7 @@ in
     # The user's python3: the only one in this profile, carrying
     # `google.antigravity` for Gemini agents and `openrazer` for the omarazer
     # Omarchy plugin. See pkgs/default.nix for why both live in one env.
-    pkgs.customPkgs.user-python3
+    userPython3
     # Official Proton VPN CLI (binary: `protonvpn`). Drives NetworkManager
     # directly; no daemon or NM plugin of its own. Here for the OmaProton
     # VPN bar widget, whose in-panel installer is a pacman call the Nixarchy
@@ -245,12 +249,12 @@ in
   programs.nixarchy.defaultPluginSet = {
     gitlab.packages = lib.mkForce [
       pkgs.glab
-      pkgs.customPkgs.user-python3
+      userPython3
       pkgs.xdg-utils
     ];
     github.packages = lib.mkForce [
       pkgs.gh
-      pkgs.customPkgs.user-python3
+      userPython3
       pkgs.xdg-utils
     ];
   };
