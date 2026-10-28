@@ -84,4 +84,7 @@
     twitch-tui
     deploy-rs
   ];
+
+  # pipewire-pulse is the server; stop libpulse clients autospawning a real pulseaudio
+  environment.etc."pulse/client.conf".text = "autospawn = no\n";
 }
