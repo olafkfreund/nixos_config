@@ -167,10 +167,9 @@
     };
 
     # nixarchy-meetingai: meeting copilot (daemon, local whisper, Omarchy shell
-    # plugin); hosts/common/nixos/omarchy-meetingai.nix. Tracks the rewrite branch
-    # until it is merged upstream.
+    # plugin); hosts/common/nixos/omarchy-meetingai.nix.
     nixarchy-meetingai = {
-      url = "github:olafkfreund/nixarchy-meetingai/refactor/omarchy-quickshell-rewrite";
+      url = "github:olafkfreund/nixarchy-meetingai";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixarchy-meeting-mode.follows = "nixarchy-meeting-mode";
       inputs.home-manager.follows = "home-manager";
