@@ -101,6 +101,15 @@ in
         group = "users";
       };
 
+      # Deepgram speech-to-text key for nixarchy-meetingai. Only the owner's
+      # user services read it, so it is not world- or group-readable.
+      api-deepgram = {
+        file = ../../secrets/api-deepgram.age;
+        mode = "0400";
+        owner = "olafkfreund";
+        group = "users";
+      };
+
       # api-qwen = {
       #   file = ../../secrets/api-qwen.age;
       #   mode = "0644";
@@ -293,7 +302,7 @@ in
 
         # Check secret files by name: /run/agenix.d is traversable but not
         # listable for users (drwxr-x--x), so a find over it printed nothing.
-        for name in api-openai api-anthropic api-gemini api-groq api-ollama api-github-token; do
+        for name in api-openai api-anthropic api-gemini api-groq api-ollama api-deepgram api-github-token; do
           file="/run/agenix/$name"
           if [ -r "$file" ] && [ -s "$file" ]; then
             echo "✅ $name: $file"
