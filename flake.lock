@@ -2803,16 +2803,15 @@
         "systems": "systems_11"
       },
       "locked": {
-        "lastModified": 1793140010,
-        "narHash": "sha256-rIPk2m8td6kn50q3933Nk1/5s2xhmNkJmrIrbgI/WCk=",
+        "lastModified": 1793145273,
+        "narHash": "sha256-KeRUxgYcc7MM+uk/BYHGilC0bX6jWN7eKoHdgU1nw4w=",
         "owner": "olafkfreund",
         "repo": "nixarchy-meetingai",
-        "rev": "e9637ace7125bc04875350df12029c2083e02f0d",
+        "rev": "9dd4d9222d6b197883fd48593a51aed7350c7bda",
         "type": "github"
       },
       "original": {
         "owner": "olafkfreund",
-        "ref": "refactor/omarchy-quickshell-rewrite",
         "repo": "nixarchy-meetingai",
         "type": "github"
       }
