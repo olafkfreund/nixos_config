@@ -33,6 +33,10 @@ in
   # `features.ollama-server.cloudApiKeyFile`, and to interactive shells as
   # OLLAMA_API_KEY via load-api-keys. Edit: agenix -e secrets/api-ollama.age
   "secrets/api-ollama.age".publicKeys = allUsers ++ allHosts;
+  # Deepgram speech-to-text API key, for nixarchy-meetingai (deepgram-stt) on any
+  # host. Read at runtime from /run/agenix/api-deepgram; not exported to shells.
+  # Edit: agenix -e secrets/api-deepgram.age
+  "secrets/api-deepgram.age".publicKeys = allUsers ++ allHosts;
   "secrets/api-github-token.age".publicKeys = allUsers ++ allHosts;
   # Cachix auth token (JWT). Decrypted to /run/agenix/cachix-auth-token on
   # every host and exported as CACHIX_AUTH_TOKEN via load-api-keys, so
