@@ -3338,11 +3338,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793272650,
-        "narHash": "sha256-obaTsSxDnro7xtB3SfpF54OItunKPSV0tH0s0UDzMwI=",
+        "lastModified": 1793275636,
+        "narHash": "sha256-xO/egph/nzgVw46jDtPqGP6IWgMdqAfxBlXWRSAtlRI=",
         "owner": "olafkfreund",
         "repo": "nixi-nixarchy",
-        "rev": "1e64092d6fecfc0f1ba2bd97367eee07c831facb",
+        "rev": "738bfdfe5e355350c66284bc9c7f3cfccc2164fc",
         "type": "github"
       },
       "original": {
