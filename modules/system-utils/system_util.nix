@@ -87,4 +87,12 @@
 
   # pipewire-pulse is the server; stop libpulse clients autospawning a real pulseaudio
   environment.etc."pulse/client.conf".text = "autospawn = no\n";
+
+  # A deploy that restarts the audio stack strands Chrome's mic (it never
+  # reconnects to pipewire-pulse) and can drop the camera; a bump lands at next login.
+  systemd.user.services = {
+    pipewire.restartIfChanged = false;
+    pipewire-pulse.restartIfChanged = false;
+    wireplumber.restartIfChanged = false;
+  };
 }
