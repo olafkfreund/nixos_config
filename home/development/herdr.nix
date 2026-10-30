@@ -70,13 +70,11 @@ _:
     # remote session names the host its panes actually run on, not this one.
     window_title = "{hostname}: {workspace}"
 
-    # hostname earns its place here because p620 and razer run the same config
-    # and the mirror plugin puts remote sessions in the same sidebar; radar
-    # appends the focused pane's directory.
+    # Must stay byte-identical to radar's own block: any difference reads as
+    # stale and its daemon retries the write (EROFS) on every start.
     # >>> herdr-radar tab-bar block
     tab_bar_right_separator = " · "
     tab_bar_right = [
-      { type = "zoom" }, { type = "hostname" }, { type = "datetime" },
       { type = 'command', command = 'cat "/home/olafkfreund/.local/state/herdr/plugins/hhdebb.herdr-radar/tabbar''${HERDR_SESSION:+-$HERDR_SESSION}.txt"', interval_seconds = 6, timeout_seconds = 2 },
     ]
     # <<< herdr-radar tab-bar block
