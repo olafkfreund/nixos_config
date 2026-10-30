@@ -8,6 +8,8 @@
 {
   home-manager.users.olafkfreund = {
     services.nixi.companion.enable = true;
+    # A "done" note when a shell command of 30 s or more ends in a terminal you are not looking at (nixi#133).
+    services.nixi.companion.commandDone.enable = true;
 
     home.file.".config/hypr/nixi-companion-binds.lua".text = ''
       -- Managed by hosts/common/nixos/omarchy-nixi-companion.nix -- edits here
