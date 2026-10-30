@@ -17,11 +17,7 @@
 # cannot write to a Nix store symlink. Config changes go through this file.
 # Only config.toml is a symlink — herdr still owns the directory for its
 # sockets, logs, session.json and .plugins.lock.
-{ config, ... }:
-let
-  # Only the $agents count keeps fixed colours: red and amber carry meaning there.
-  c = n: "#${config.lib.stylix.colors.${n}}";
-in
+_:
 {
   xdg.configFile."herdr/config.toml".text = ''
     onboarding = false
@@ -43,6 +39,11 @@ in
     [theme]
     name = "terminal"
     auto_switch = false
+
+    # >>> herdr-radar theme block
+    [theme.custom]
+    active_row_bg = "#414868"
+    # <<< herdr-radar theme block
 
     # "herdr" delivery only draws a toast while herdr is on screen, so an agent
     # blocked on a question goes unnoticed. "system" hands it to the desktop
@@ -69,51 +70,74 @@ in
     # remote session names the host its panes actually run on, not this one.
     window_title = "{hostname}: {workspace}"
 
-    # Right-aligned tab-bar status. hostname earns its place here because p620
-    # and razer run the same config and the mirror plugin puts remote sessions
-    # in the same sidebar.
-    tab_bar_right = [ { type = "zoom" }, { type = "hostname" }, { type = "datetime" } ]
-    tab_bar_right_separator = "  "
-
-    # Space rows carry git context, which is what distinguishes one worktree
-    # workspace from another at a glance.
-    #
-    # Rows accept either a bare token string or a styled table
-    # ({ token, fg, bold, dim } — src/config/sidebar.rs RawStyledSidebarToken),
-    # which is the only per-element colour control herdr exposes. fg takes hex
-    # only, so rows set none and inherit the live theme; bold/dim still apply.
-    [ui.sidebar.spaces]
-    rows = [
-      [{ token = "state_icon" }, { token = "workspace", bold = true }],
-      [{ token = "branch" }, { token = "git_status", dim = true }],
+    # hostname earns its place here because p620 and razer run the same config
+    # and the mirror plugin puts remote sessions in the same sidebar; radar
+    # appends the focused pane's directory.
+    # >>> herdr-radar tab-bar block
+    tab_bar_right_separator = " · "
+    tab_bar_right = [
+      { type = "zoom" }, { type = "hostname" }, { type = "datetime" },
+      { type = 'command', command = 'cat "/home/olafkfreund/.local/state/herdr/plugins/hhdebb.herdr-radar/tabbar''${HERDR_SESSION:+-$HERDR_SESSION}.txt"', interval_seconds = 6, timeout_seconds = 2 },
     ]
+    # <<< herdr-radar tab-bar block
 
-    # Claude panes get an extra row showing the stripped terminal title, which
-    # is where Claude Code reports what it is currently doing.
-    #
-    # $agents is a pane-metadata token published by the managed-scope
-    # PreToolUse/PostToolUse hooks in modules/programs/claude-code-managed.nix.
-    # Claude Code's Task subagents run in-process with no PTY, so herdr can
-    # never show them as their own agent rows (it detects one agent per pane).
-    # This surfaces the live count on the parent row instead. The token is
-    # cleared at zero, so the row stays clean when nothing is fanned out.
+    # herdr-radar (hhdebb/herdr-radar) blocks, generated once by its
+    # `configure --apply` with the dark palette and text glyphs, then frozen
+    # here: radar re-writes them on every light/dark switch, which a store
+    # symlink cannot take. Keep the >>> / <<< markers — radar treats them as
+    # "installed" and skips its own write. Regenerate after a radar bump.
+    # >>> herdr-radar sidebar block
+    [ui.sidebar.agents]
+    # logo glyphs: text
+    rows = [[{ token = "$group_parent", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$group", fg = "#a8abbd", bold = true, dim = false }, { token = "$group_stale", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$split_mark", fg = "#8b8e9c", bold = false, dim = false }, { token = "$logo", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_working", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_working", fg = "#c78a1f", bold = true, dim = false }, { token = "$title_done", fg = "#4c9a5a", bold = false, dim = false }, { token = "$title_blocked", fg = "#c04a4a", bold = false, dim = false }, { token = "$title_idle_fresh", fg = "#95bba2", bold = false, dim = false }, { token = "$title_idle", fg = "#a99e92", bold = false, dim = false }, { token = "$title_idle_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_unknown", fg = "#907aa9", bold = false, dim = false }], ["$gap"]]
+
     [ui.sidebar.agents.rows_by_agent]
-    claude = [
-      [{ token = "state_icon" }, { token = "workspace", bold = true }, { token = "tab" }],
-      [{ token = "terminal_title_stripped", dim = true }],
+    claude = [[{ token = "$group_parent", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$group", fg = "#a8abbd", bold = true, dim = false }, { token = "$group_stale", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$split_mark", fg = "#8b8e9c", bold = false, dim = false }, { token = "$logo", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_working", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_working", fg = "#d97757", bold = true, dim = false }, { token = "$title_done", fg = "#4c9a5a", bold = false, dim = false }, { token = "$title_blocked", fg = "#c04a4a", bold = false, dim = false }, { token = "$title_idle_fresh", fg = "#95bba2", bold = false, dim = false }, { token = "$title_idle", fg = "#a99e92", bold = false, dim = false }, { token = "$title_idle_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_unknown", fg = "#907aa9", bold = false, dim = false }], ["$gap"]]
+    gemini = [[{ token = "$group_parent", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$group", fg = "#a8abbd", bold = true, dim = false }, { token = "$group_stale", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$split_mark", fg = "#8b8e9c", bold = false, dim = false }, { token = "$logo", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_working", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_working", fg = "#4285f4", bold = true, dim = false }, { token = "$title_done", fg = "#4c9a5a", bold = false, dim = false }, { token = "$title_blocked", fg = "#c04a4a", bold = false, dim = false }, { token = "$title_idle_fresh", fg = "#95bba2", bold = false, dim = false }, { token = "$title_idle", fg = "#a99e92", bold = false, dim = false }, { token = "$title_idle_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_unknown", fg = "#907aa9", bold = false, dim = false }], ["$gap"]]
+    kimi = [[{ token = "$group_parent", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$group", fg = "#a8abbd", bold = true, dim = false }, { token = "$group_stale", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$split_mark", fg = "#8b8e9c", bold = false, dim = false }, { token = "$logo", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_working", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_working", fg = "#1783ff", bold = true, dim = false }, { token = "$title_done", fg = "#4c9a5a", bold = false, dim = false }, { token = "$title_blocked", fg = "#c04a4a", bold = false, dim = false }, { token = "$title_idle_fresh", fg = "#95bba2", bold = false, dim = false }, { token = "$title_idle", fg = "#a99e92", bold = false, dim = false }, { token = "$title_idle_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_unknown", fg = "#907aa9", bold = false, dim = false }], ["$gap"]]
+    qwen = [[{ token = "$group_parent", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$group", fg = "#a8abbd", bold = true, dim = false }, { token = "$group_stale", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$split_mark", fg = "#8b8e9c", bold = false, dim = false }, { token = "$logo", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_working", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_working", fg = "#615ced", bold = true, dim = false }, { token = "$title_done", fg = "#4c9a5a", bold = false, dim = false }, { token = "$title_blocked", fg = "#c04a4a", bold = false, dim = false }, { token = "$title_idle_fresh", fg = "#95bba2", bold = false, dim = false }, { token = "$title_idle", fg = "#a99e92", bold = false, dim = false }, { token = "$title_idle_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_unknown", fg = "#907aa9", bold = false, dim = false }], ["$gap"]]
+    kiro = [[{ token = "$group_parent", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$group", fg = "#a8abbd", bold = true, dim = false }, { token = "$group_stale", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$split_mark", fg = "#8b8e9c", bold = false, dim = false }, { token = "$logo", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_working", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_working", fg = "#9046ff", bold = true, dim = false }, { token = "$title_done", fg = "#4c9a5a", bold = false, dim = false }, { token = "$title_blocked", fg = "#c04a4a", bold = false, dim = false }, { token = "$title_idle_fresh", fg = "#95bba2", bold = false, dim = false }, { token = "$title_idle", fg = "#a99e92", bold = false, dim = false }, { token = "$title_idle_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_unknown", fg = "#907aa9", bold = false, dim = false }], ["$gap"]]
+    cline = [[{ token = "$group_parent", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$group", fg = "#a8abbd", bold = true, dim = false }, { token = "$group_stale", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$split_mark", fg = "#8b8e9c", bold = false, dim = false }, { token = "$logo", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_working", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_working", fg = "#586876", bold = true, dim = false }, { token = "$title_done", fg = "#4c9a5a", bold = false, dim = false }, { token = "$title_blocked", fg = "#c04a4a", bold = false, dim = false }, { token = "$title_idle_fresh", fg = "#95bba2", bold = false, dim = false }, { token = "$title_idle", fg = "#a99e92", bold = false, dim = false }, { token = "$title_idle_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_unknown", fg = "#907aa9", bold = false, dim = false }], ["$gap"]]
+    kilo = [[{ token = "$group_parent", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$group", fg = "#a8abbd", bold = true, dim = false }, { token = "$group_stale", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$split_mark", fg = "#8b8e9c", bold = false, dim = false }, { token = "$logo", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_working", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_working", fg = "#9a9808", bold = true, dim = false }, { token = "$title_done", fg = "#4c9a5a", bold = false, dim = false }, { token = "$title_blocked", fg = "#c04a4a", bold = false, dim = false }, { token = "$title_idle_fresh", fg = "#95bba2", bold = false, dim = false }, { token = "$title_idle", fg = "#a99e92", bold = false, dim = false }, { token = "$title_idle_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_unknown", fg = "#907aa9", bold = false, dim = false }], ["$gap"]]
+    muse = [[{ token = "$group_parent", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$group", fg = "#a8abbd", bold = true, dim = false }, { token = "$group_stale", fg = "#8b8e9c", bold = true, dim = false }], [{ token = "$split_mark", fg = "#8b8e9c", bold = false, dim = false }, { token = "$logo", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_working", fg = "#e9e9f0", bold = false, dim = false, rules = [{ contains = "§", fg = "#d97757" }, { contains = "✦", fg = "#4285f4" }, { contains = "✨", fg = "#1783ff" }, { contains = "≋", fg = "#4d6bfe" }, { contains = "Ϙ", fg = "#615ced" }, { contains = "Ω", fg = "#9046ff" }, { contains = "∇", fg = "#586876" }, { contains = "♟", fg = "#9a9808" }, { contains = "Ķ", fg = "#ff521d" }, { contains = "∞", fg = "#0082fb" }, { contains = "♥", fg = "#ff388b" }] }, { token = "$logo_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_working", fg = "#0082fb", bold = true, dim = false }, { token = "$title_done", fg = "#4c9a5a", bold = false, dim = false }, { token = "$title_blocked", fg = "#c04a4a", bold = false, dim = false }, { token = "$title_idle_fresh", fg = "#95bba2", bold = false, dim = false }, { token = "$title_idle", fg = "#a99e92", bold = false, dim = false }, { token = "$title_idle_stale", fg = "#8b8e9c", bold = false, dim = false }, { token = "$title_unknown", fg = "#907aa9", bold = false, dim = false }], ["$gap"]]
+
+    [ui.sidebar.spaces]
+    row_gap = 0
+    rows = [
       [
-        { token = "agent" },
-        # 0.9.0 added value-based token rules, which is what makes the subagent
-        # count readable at a glance instead of being one static colour.
-        # Thresholds MUST be ordered high-to-low: the first matching rule wins,
-        # so a leading `gt = 0` would swallow every larger value and `gt = 3`
-        # would never fire.
-        { token = "$agents", fg = "${c "base09"}", rules = [
-          { gt = 3, fg = "${c "base08"}", bold = true },
-          { gt = 0, fg = "${c "base0A"}" },
-        ] }
+        { token = "$space_blocked", fg = "#c04a4a", bold = true, dim = false },
+        { token = "$space_working_claude", fg = "#d97757", bold = true, dim = false },
+        { token = "$space_working_gemini", fg = "#4285f4", bold = true, dim = false },
+        { token = "$space_working_kimi", fg = "#1783ff", bold = true, dim = false },
+        { token = "$space_working_deepseek", fg = "#4d6bfe", bold = true, dim = false },
+        { token = "$space_working_qwen", fg = "#615ced", bold = true, dim = false },
+        { token = "$space_working_kiro", fg = "#9046ff", bold = true, dim = false },
+        { token = "$space_working_cline", fg = "#586876", bold = true, dim = false },
+        { token = "$space_working_kilo", fg = "#9a9808", bold = true, dim = false },
+        { token = "$space_working_kimchi", fg = "#ff521d", bold = true, dim = false },
+        { token = "$space_working_other", fg = "#c78a1f", bold = true, dim = false },
+        { token = "$space_done", fg = "#4c9a5a", bold = true, dim = false },
+        { token = "$space_idle", fg = "#8f95ab", bold = false, dim = false },
+        { token = "$space_unknown", fg = "#907aa9", bold = false, dim = false },
+        { token = "$space_none", fg = "#9a9eb3", bold = false, dim = false },
+        { token = "$space_label", fg = "#9a9eb3", bold = false, dim = false }
       ],
+      [
+        { token = "$space_logo_claude", fg = "#d97757", bold = false, dim = false },
+        { token = "$space_logo_gemini", fg = "#4285f4", bold = false, dim = false },
+        { token = "$space_logo_kimi", fg = "#1783ff", bold = false, dim = false },
+        { token = "$space_logo_deepseek", fg = "#4d6bfe", bold = false, dim = false },
+        { token = "$space_logo_qwen", fg = "#615ced", bold = false, dim = false },
+        { token = "$space_logo_kiro", fg = "#9046ff", bold = false, dim = false },
+        { token = "$space_logo_cline", fg = "#586876", bold = false, dim = false },
+        { token = "$space_logo_kilo", fg = "#9a9808", bold = false, dim = false },
+        { token = "$space_logo_kimchi", fg = "#ff521d", bold = false, dim = false },
+        { token = "$space_logo_muse", fg = "#0082fb", bold = false, dim = false },
+        { token = "$space_logo_crush", fg = "#ff388b", bold = false, dim = false },
+        { token = "$space_logo_other", fg = "#e9e9f0", bold = false, dim = false }
+      ]
     ]
+    # <<< herdr-radar sidebar block
 
     [worktrees]
     directory = "~/.herdr/worktrees"
@@ -244,5 +268,13 @@ in
     # Keeps pane screens across herdr server restarts.
     [experimental]
     pane_history = true
+  '';
+
+  # radar's own settings. follow_appearance would drive [theme] name and
+  # re-colour the frozen blocks above; variant must match the text glyphs
+  # their logo rules were generated for.
+  xdg.configFile."herdr/plugins/config/hhdebb.herdr-radar/config.toml".text = ''
+    follow_appearance = false
+    variant = "text"
   '';
 }
