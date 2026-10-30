@@ -16,6 +16,9 @@
       enable = true;
       ollamaCloud.keyFile = "/run/agenix/api-ollama";
       deepgram.keyFile = "/run/agenix/api-deepgram";
+      # Each finished meeting is written here as Markdown (notes, transcript,
+      # screenshots, interview documents); plain files in the Obsidian vault.
+      settings.exportFolder = "/home/olafkfreund/Documents/Synechron/Meetings";
     };
   };
 }
