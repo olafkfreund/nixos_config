@@ -94,13 +94,15 @@ jobs:
         run: |
           echo "Generating update summary..."
 
-          # Extract updated inputs from flake.lock diff
-          summary=$(nix flake metadata --json | jq -r '
-            .locks.nodes |
-            to_entries[] |
-            select(.value.locked.type != null) |
-            "- **\(.key)**: \(.value.locked.rev // .value.locked.narHash // "updated")[0:7]"
-          ' | head -20)
+          # The new lock is still uncommitted here, so HEAD holds the old one.
+          summary=$(jq -r --slurpfile old <(git show HEAD:flake.lock) '
+            .nodes | to_entries[] |
+            select(.value.locked != null) |
+            (.value.locked.rev // .value.locked.narHash) as $new |
+            ($old[0].nodes[.key].locked // {} | .rev // .narHash) as $was |
+            select($new != $was) |
+            "- **\(.key)**: \(($was // "new")[0:7]) → \($new[0:7])"
+          ' flake.lock | head -20)
 
           # Save to output
           {
