@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2577
 intent: intent/2026-10-31-2577-repo-review-fixes.md
 ---
