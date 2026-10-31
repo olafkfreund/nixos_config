@@ -18,10 +18,6 @@ _: {
     # Basic services that most hosts need
     ./services/default.nix
 
-    # Network stability modules - core networking
-    ./services/dns/secure-dns.nix
-    ./services/network-stability.nix
-
     # System optimization modules
     ./system/fstrim-optimization.nix
     ./system/logging.nix

@@ -643,9 +643,6 @@ in
       enableMotd = false; # MOTD disabled - /etc is immutable in NixOS
     };
 
-    # Disable secure-dns to allow NetworkManager to manage DNS directly
-    secure-dns.enable = false;
-
     # GNOME Remote Desktop - Enable RDP and VNC access
     gnome.gnome-remote-desktop = {
       enable = true;

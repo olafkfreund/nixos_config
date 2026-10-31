@@ -1027,10 +1027,6 @@ fix-agenix-remote HOST:
 network-monitor:
     ./scripts/network-monitor.sh
 
-# Check network stability
-network-check:
-    ./scripts/network-stability-helper.sh
-
 # =============================================================================
 # HOST MANAGEMENT
 # =============================================================================

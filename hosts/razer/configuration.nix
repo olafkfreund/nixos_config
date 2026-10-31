@@ -463,8 +463,6 @@ in
 
     # GNOME Remote Desktop configuration moved to features.gnome-remote-desktop
 
-    secure-dns.enable = false;
-
     # X server and desktop environment
     xserver = {
       enable = true;

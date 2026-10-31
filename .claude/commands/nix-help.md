@@ -100,7 +100,7 @@ Quick reference for all available NixOS development commands.
 - Ping all infrastructure hosts
 - Show comprehensive host status
 - Features: Interface monitoring, DNS recovery, auto-stabilization
-- Replaces: network-monitor, network-check, ping-hosts, status-all
+- Replaces: network-monitor, ping-hosts, status-all
 - Time: instant (ping) to continuous (monitor)
 
 ### Module Development
