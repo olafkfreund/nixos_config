@@ -20,7 +20,6 @@ in
     ./nixos/shim.nix # Microsoft-signed shim + MOK enrollment for Razer's locked PK (issue #376)
     ./nixos/nvidia.nix
     ../common/nixos/i18n.nix
-    ../common/nixos/hosts.nix
     ../common/nixos/envvar.nix
     ../common/nixos/host-class.nix
     ../common/nixos/zfs-import.nix

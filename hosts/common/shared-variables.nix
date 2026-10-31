@@ -22,9 +22,6 @@
     };
   };
 
-  # Centralized network mappings (100% identical across all hosts)
-  network = { };
-
   # Base environment variables (85% common across hosts)
   baseEnvironment = {
     MOZ_ENABLE_WAYLAND = "1";

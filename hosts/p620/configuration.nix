@@ -23,7 +23,6 @@ in
     ./nixos/dns-fallback.nix # systemd-resolved with public DNS fallback (issue #564)
     ./nixos/tailscale-serve.nix # Tailscale Serve for /router (LiteLLM, Phase 2)
     ../common/nixos/i18n.nix
-    ../common/nixos/hosts.nix
     ../common/nixos/envvar.nix
     ../common/nixos/host-class.nix
     ../common/nixos/zfs-import.nix

@@ -9,7 +9,7 @@ let
   hardwareProfile = import ../common/hardware-profiles/amd-gpu.nix;
 
   # Extract shared variables for easier access
-  inherit (sharedVars) user localization network baseEnvironment baseTheme baseUserGroups basePaths baseServices;
+  inherit (sharedVars) user localization baseEnvironment baseTheme baseUserGroups basePaths baseServices;
 
   # P620-specific overrides
   hostOverrides = {
@@ -73,9 +73,6 @@ in
 
   # Localization (shared across all hosts)
   inherit (localization) timezone locale keyboardLayouts;
-
-  # Network configuration (shared across all hosts)
-  inherit (network) hostMappings;
 
   # Host-specific configuration
   hostName = hostOverrides.hostName;

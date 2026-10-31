@@ -41,11 +41,6 @@ let
   user = sharedVars.user // { };
   localization = sharedVars.localization // { };
 
-  # Merge network configuration
-  network = sharedVars.network // {
-    inherit (hostOverrides) hostName nameservers;
-  };
-
   # Hardware configuration from NVIDIA profile + razer-specific environment
   hardware = {
     inherit (hardwareProfile) gpu acceleration videoDrivers;
@@ -97,8 +92,7 @@ in
   inherit userGroups;
 
   # Network configuration (shared base + razer overrides)
-  inherit (network) hostName nameservers;
-  hostMappings = network.hostMappings;
+  inherit (hostOverrides) hostName nameservers;
 
   # Localization (shared across all hosts)
   inherit (localization) timezone locale keyboardLayouts;
