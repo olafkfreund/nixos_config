@@ -38,7 +38,6 @@
   inputs = {
     # Core
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
@@ -346,7 +345,6 @@
 
   outputs =
     { nixpkgs
-    , nixpkgs-unstable
     , nur
     , agenix
     , spicetify-nix
@@ -396,15 +394,6 @@
       # PACKAGE CONFIGURATION
       # ========================================
 
-      # Helper function for package imports
-      mkPkgs = _pkgs: system: {
-        localSystem = system; # Modern replacement for deprecated 'system' parameter
-        config = {
-          allowUnfree = true;
-          # allowInsecure = false; # REMOVED for security - using targeted permissions
-        };
-      };
-
       overlays = import ./overlays { inherit inputs; };
 
       makeNixosSystem = host:
@@ -414,15 +403,10 @@
           # Stylix theming module - re-enabled after upstream cache fix
           stylixModule = [ inputs.stylix.nixosModules.stylix ];
           system = "x86_64-linux";
-          # One instantiation, shared by specialArgs and
-          # home-manager.extraSpecialArgs. Importing it twice cost a
-          # second nixpkgs fixpoint (~1-2s of eval) for nothing.
-          pkgsUnstable = import nixpkgs-unstable (mkPkgs nixpkgs-unstable system);
         in
         {
           inherit system;
           specialArgs = {
-            pkgs-unstable = pkgsUnstable;
             inherit inputs host hostTypes;
             username = primaryUser; # Primary user for backward compatibility
             hostUsers = allUsers; # All users for this host
@@ -446,6 +430,8 @@
             ++ stylixModule
             ++ [
               ({ pkgs, ... }: {
+                # nixpkgs-unstable input removed: pkgs-unstable is the same pkgs.
+                _module.args.pkgs-unstable = pkgs;
                 home-manager = {
                   useGlobalPkgs = true;
                   useUserPackages = true;
@@ -469,12 +455,12 @@
                   '';
                   # Shared modules for all users
                   sharedModules = [
-                    {
+                    ({ pkgs, ... }: {
                       stylix.targets.firefox.enable = false;
-                    }
+                      _module.args.pkgs-unstable = pkgs;
+                    })
                   ];
                   extraSpecialArgs = {
-                    pkgs-unstable = pkgsUnstable;
                     inherit
                       inputs
                       nixpkgs
@@ -518,6 +504,7 @@
         let
           pkgs = import nixpkgs {
             system = "x86_64-linux";
+            inherit overlays;
             config = {
               allowUnfree = true;
               permittedInsecurePackages = [
@@ -527,16 +514,11 @@
           };
         in
         {
-          # Custom applications
-          aerion = pkgs.callPackage ./pkgs/aerion { };
-          claude-code-native = pkgs.callPackage ./pkgs/claude-code-native { };
-          codex-bin = pkgs.callPackage ./pkgs/codex-bin { };
-          glim = pkgs.callPackage ./overlays/glim { };
-          intune-portal = pkgs.callPackage ./pkgs/intune-portal { };
-          kosli-cli = pkgs.callPackage ./pkgs/kosli-cli { };
+          # Custom applications (defined once, in overlays/ and pkgs/default.nix)
+          inherit (pkgs) aerion claude-code-native codex-bin glim intune-portal;
+          inherit (pkgs.customPkgs) kosli-cli aurynk;
           # Upstream binary: the nixpkgs build cannot run a prompt (#1859).
           opencode-bin = pkgs.callPackage ./pkgs/opencode-bin { };
-          aurynk = pkgs.callPackage ./pkgs/aurynk { };
 
           # Security tools
           mdatp = pkgs.callPackage ./pkgs/microsoft-defender-for-endpoint {

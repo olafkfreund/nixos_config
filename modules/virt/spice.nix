@@ -9,10 +9,7 @@ let
 in
 {
   options.services.spice = {
-    enable = mkEnableOption {
-      default = false;
-      description = "Enable the SPICE protocol server.";
-    };
+    enable = mkEnableOption "the SPICE protocol server";
 
     guestAgent = mkEnableOption ''
       the spice-vdagent guest daemon. Only meaningful when THIS machine is

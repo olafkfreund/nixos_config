@@ -8,12 +8,13 @@
 
 writeShellScriptBin "obsidian-mcp-rest" ''
   #!/bin/sh
+  set -euo pipefail
   # Wrapper script for mcp-obsidian (REST API implementation)
   # Uses uvx to run the latest mcp-obsidian from PyPI
   # Provides full CRUD operations via Obsidian Local REST API plugin
 
   # Security: Runtime secret loading following docs/NIXOS-ANTI-PATTERNS.md
-  if [ -z "$OBSIDIAN_API_KEY_FILE" ] && [ -z "$OBSIDIAN_API_KEY" ]; then
+  if [ -z "''${OBSIDIAN_API_KEY_FILE:-}" ] && [ -z "''${OBSIDIAN_API_KEY:-}" ]; then
     echo "Error: OBSIDIAN_API_KEY_FILE or OBSIDIAN_API_KEY environment variable required"
     echo ""
     echo "Usage: obsidian-mcp-rest"
@@ -31,12 +32,13 @@ writeShellScriptBin "obsidian-mcp-rest" ''
   fi
 
   # Load API key from file if specified (runtime loading)
-  if [ -n "$OBSIDIAN_API_KEY_FILE" ]; then
+  if [ -n "''${OBSIDIAN_API_KEY_FILE:-}" ]; then
     if [ ! -f "$OBSIDIAN_API_KEY_FILE" ]; then
       echo "Error: API key file not found: $OBSIDIAN_API_KEY_FILE"
       exit 1
     fi
-    export OBSIDIAN_API_KEY=$(cat "$OBSIDIAN_API_KEY_FILE")
+    OBSIDIAN_API_KEY=$(cat "$OBSIDIAN_API_KEY_FILE")
+    export OBSIDIAN_API_KEY
   fi
 
   # Set defaults for optional parameters
@@ -47,5 +49,5 @@ writeShellScriptBin "obsidian-mcp-rest" ''
 
   # Run mcp-obsidian via uvx (uses pip package)
   # uvx caches the package after first use for performance
-  exec ${uv}/bin/uvx mcp-obsidian
+  exec ${uv}/bin/uvx mcp-obsidian@0.2.3
 ''

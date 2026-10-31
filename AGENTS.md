@@ -131,7 +131,7 @@ mkdocs.yml + mkdocs-full.yml  hand-synced nav — change BOTH
 
 ## Adding a user
 
-Add the name to `hostUsers` in `hosts/<host>/variables.nix`, create `Users/<name>/` with
+Add the name to `hostUsers` in `flake.nix`, create `Users/<name>/` with
 the host home files, add the SSH key to `secrets.nix`, then
 `./scripts/manage-secrets.sh create user-password-<name>`.
 

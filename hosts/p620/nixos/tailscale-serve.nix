@@ -22,11 +22,16 @@ in
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      TimeoutStartSec = 400;
       ExecStart = pkgs.writeShellScript "tailscale-serve-start" ''
-        # Wait for Tailscale to be ready
-        until ${pkgs.tailscale}/bin/tailscale status &>/dev/null; do
-          sleep 2
+        set -euo pipefail
+
+        # Wait for Tailscale to be ready (bounded: 60 x 5s)
+        for _ in $(seq 60); do
+          ${pkgs.tailscale}/bin/tailscale status &>/dev/null && break
+          sleep 5
         done
+        ${pkgs.tailscale}/bin/tailscale status &>/dev/null || { echo "tailscaled not ready after 300s" >&2; exit 1; }
 
         # LiteLLM router — accessible at https://p620.<tailnet>.ts.net/router
         ${pkgs.tailscale}/bin/tailscale serve --bg --https=443 \

@@ -50,6 +50,6 @@ writeShellScriptBin "linkedin-mcp" ''
     --security-opt=no-new-privileges \
     --cap-drop=ALL \
     -e LINKEDIN_COOKIE="$LINKEDIN_COOKIE" \
-    stickerdaniel/linkedin-mcp-server:latest \
+    stickerdaniel/linkedin-mcp-server:4.28.0@sha256:22f0c7a426b98a9d8a9165f99e24bfb58d615ca4f704dd0c45a153b19f5b0fed \
     "$@"
 ''

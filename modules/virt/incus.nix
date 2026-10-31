@@ -9,10 +9,7 @@ let
 in
 {
   options.services.incus = {
-    enable = mkEnableOption {
-      default = false;
-      description = "Enable the Incus service.";
-    };
+    enable = mkEnableOption "the Incus service";
   };
   config = mkIf cfg.enable {
     virtualisation = {

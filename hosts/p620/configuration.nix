@@ -113,6 +113,15 @@ in
   };
 
 
+  ai.providers = {
+    enable = true;
+    defaultProvider = "openai"; # P620-specific override: use OpenAI as default instead of Anthropic
+    enableFallback = true;
+    openai.enable = true;
+    anthropic.enable = true;
+    gemini.enable = true;
+  };
+
   # Enable Claude Code hooks for desktop notifications
   features.claude-hooks = {
     enable = true;
@@ -317,18 +326,6 @@ in
       enable = true;
       antigravity-cli = true;
       claude-desktop = true;
-
-      # Enable unified AI provider support
-      providers = {
-        enable = true;
-        defaultProvider = "openai"; # P620-specific override: use OpenAI as default instead of Anthropic
-        enableFallback = true;
-
-        # Enable specific providers
-        openai.enable = true;
-        anthropic.enable = true;
-        gemini.enable = true;
-      };
 
       # Enable MCP (Model Context Protocol) servers for AI integration
       mcp = {
@@ -607,13 +604,6 @@ in
     # modules/desktop/gnome-remote-desktop.nix) keep working at boot
     # before someone logs in via TTY/SSH/desktop session.
     linger = true;
-    # Only use secret-managed password if the secret exists
-    hashedPasswordFile = lib.mkIf
-      (
-        config.modules.security.secrets.enable
-        && builtins.hasAttr "user-password-${username}" config.age.secrets
-      )
-      config.age.secrets."user-password-${username}".path;
   });
 
   # Remove duplicate user configuration - use the one above that handles all hostUsers
@@ -804,26 +794,11 @@ in
       # Refuse to start on a blank data-root on / when its disk is missing.
       docker.unitConfig.RequiresMountsFor = [ "/mnt/img_pool" ];
       containerd.unitConfig.RequiresMountsFor = [ "/mnt/img_pool" ];
-
-      # Don't restart greetd on rebuild — a switch shouldn't tear down the login
-      # manager mid-session. The new greeter applies at next reboot/logout.
-      greetd.restartIfChanged = false;
     };
 
     # User services
     # playerctl 2.4.1 can segfault on a player signal (upstream bug); come back instead of staying failed.
     user.services.playerctld.serviceConfig.Restart = "on-failure";
-
-    user.services.scream-ivshmem = {
-      enable = true;
-      description = "Scream IVSHMEM";
-      serviceConfig = {
-        ExecStart = "${pkgs.scream}/bin/scream-ivshmem-pulse /dev/shm/scream";
-        Restart = "always";
-      };
-      wantedBy = [ "multi-user.target" ];
-      requires = [ "pulseaudio.service" ];
-    };
   };
 
   # Storage performance optimization

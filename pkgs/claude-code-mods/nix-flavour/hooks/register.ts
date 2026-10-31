@@ -15,7 +15,7 @@ async function refresh($: EngineInterface) {
     'readlink', '/nix/var/nix/profiles/system', '/run/current-system',
     '/run/current-system/kernel', '/run/booted-system/kernel',
   ])
-  const theme = await $.fs.read('/home/olafkfreund/.config/nixos/nixarchy-theme.nix').catch(() => '')
+  const theme = await $.fs.read('/etc/nixos/nixarchy-theme.nix').catch(() => '')
   $.ui.status(formatStatus(r.stdout, theme))
 }
 

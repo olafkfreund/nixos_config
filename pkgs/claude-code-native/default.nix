@@ -24,7 +24,7 @@
 , wl-clipboard
 , xclip
 , coreutils
-, writeScriptBin
+, writeShellScriptBin
 ,
 }:
 
@@ -51,7 +51,7 @@ let
   # Mutter cooperates, but can never hang — worst case the dummy dock window
   # flashes for <=2s during an actual paste, then disappears. Claude still tries
   # xclip (XWayland) first, so this fallback usually isn't even reached.
-  wlPasteShim = writeScriptBin "wl-paste" ''
+  wlPasteShim = writeShellScriptBin "wl-paste" ''
     exec ${coreutils}/bin/timeout 2 ${wl-clipboard}/bin/wl-paste "$@"
   '';
 

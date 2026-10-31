@@ -4,15 +4,8 @@ pkgs.writeShellScriptBin "mpris-album-art" ''
   # mpris-album-art: Shows the album art of currently playing media using MPRIS
 
   # Exit if no media is playing
-  if ! ${pkgs.playerctl}/bin/playerctl status &>/dev/null; then
+  if ! ${pkgs.playerctl}/bin/playerctl -p spotify status &>/dev/null; then
     echo "No media player detected"
-    exit 1
-  fi
-
-  # Get the active player
-  PLAYER=$(${pkgs.playerctl}/bin/playerctl -p spotify | head -n 1)
-  if [ -z "$PLAYER" ]; then
-    echo "No active player found"
     exit 1
   fi
 
@@ -31,9 +24,7 @@ pkgs.writeShellScriptBin "mpris-album-art" ''
     exit 1
   fi
 
-  # Create temp directory if it doesn't exist
-  TEMP_DIR="/tmp/album_art"
-  mkdir -p "$TEMP_DIR"
+  TEMP_DIR=$(mktemp -d)
 
   # Sanitize filename
   FILENAME=$(echo "$ARTIST-$ALBUM" | tr -dc '[:alnum:]._-' | tr -s '._-' | tr '[:upper:]' '[:lower:]')
@@ -65,9 +56,6 @@ pkgs.writeShellScriptBin "mpris-album-art" ''
     echo "Album art displayed. Press any key to close window."
     read -r -n 1 -s
     ${pkgs.kitty}/bin/kitty +kitten icat --clear
-    # Kill the parent process (kitty terminal window)
-    # Find the parent process ID and kill it
-    kill -9 $(ps -o ppid= $$)
   elif command -v ${pkgs.libnotify}/bin/notify-send &>/dev/null; then
     # Fall back to notification with image
     ${pkgs.libnotify}/bin/notify-send -i "$OUTPUT_PATH" "Now Playing" "$TITLE by $ARTIST\n$ALBUM"

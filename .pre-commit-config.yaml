@@ -137,7 +137,7 @@ repos:
         name: Validate justfile
         entry: just --list
         language: system
-        files: "justfile$"
+        files: '^[Jj]ustfile$'
         pass_filenames: false
         description: Validate justfile syntax
 

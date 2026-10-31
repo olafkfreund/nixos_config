@@ -7,7 +7,7 @@
 #   2) nix flake update <SCOPE>         (default SCOPE=all — recommended;
 #      always pull latest of every input, otherwise you risk shipping a
 #      stale lock from a checkout that's behind main)
-#   3) splice nixpkgs + nixpkgs-unstable from GitHub ground truth
+#   3) splice nixpkgs from GitHub ground truth
 #   4) no-op exit if lock unchanged AND host already current
 #   5) test-build target host closure   (abort commit on build failure)
 #   6) feature-branch + OPEN PR for flake.lock (NOT YET MERGED — merge is
@@ -144,8 +144,8 @@ log "current nixpkgs pin: ${old_rev:0:10} (${old_date})"
 #  - Even a regression-guard against HEAD's lastModified couldn't reliably
 #    catch every shape of regression because it doesn't cover `original.ref`.
 #
-# So: run bulk update for the cheap inputs, then forcibly splice nixpkgs +
-# nixpkgs-unstable with GROUND TRUTH from github via `gh api` (bypasses
+# So: run bulk update for the cheap inputs, then forcibly splice nixpkgs
+# with GROUND TRUTH from github via `gh api` (bypasses
 # every nix cache). This is bulletproof regardless of nix's internal state.
 case "$SCOPE" in
   all)
@@ -155,16 +155,13 @@ case "$SCOPE" in
   nixpkgs)
     :
     ;; # nixpkgs ground-truth splice below covers it
-  nixpkgs-unstable)
-    :
-    ;; # ditto
   *)
     log "nix flake update $SCOPE --refresh"
     nix flake update "$SCOPE" --refresh
     ;;
 esac
 
-# --- 3b. Force nixpkgs + nixpkgs-unstable to GitHub ground truth ------------
+# --- 3b. Force nixpkgs to GitHub ground truth ------------
 #
 # Always do this after the bulk update — overwrites any cache-stale rev,
 # wrong `original.ref`, or quietly-reverted owner casing.
@@ -197,8 +194,16 @@ splice_nixpkgs_node() {
   ' flake.lock >flake.lock.tmp && mv flake.lock.tmp flake.lock
 }
 
-splice_nixpkgs_node nixpkgs
-splice_nixpkgs_node nixpkgs-unstable
+# Root input -> node name (a `follows` list is walked from the root).
+root_node() {
+  jq -r --arg i "$1" '
+    .nodes as $n | .nodes.root.inputs[$i] as $t
+    | if ($t | type) == "array"
+      then reduce $t[] as $k ("root"; $n[.].inputs[$k] | if type == "array" then .[-1] else . end)
+      else $t end' flake.lock
+}
+
+splice_nixpkgs_node "$(root_node nixpkgs)"
 
 # --- 4. Determine LOCK_CHANGED flag -----------------------------------------
 LOCK_CHANGED=0

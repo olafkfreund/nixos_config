@@ -5,6 +5,11 @@
     zip
     zstd
 
+    # Base diagnostics
+    lsof
+    usbutils
+    inetutils
+
     # Network utilities (beyond core)
     mtr
     iperf3

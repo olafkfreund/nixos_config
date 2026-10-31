@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  inherit (lib) mkOption mkIf mkEnableOption mkPackageOption mkAfter types getExe optionalString;
+  inherit (lib) mkOption mkIf mkEnableOption mkPackageOption mkAfter types getExe;
   cfg = config.programs.splashboard;
 
   # settings.toml is parametrised (theme name is an option), so generate it
@@ -138,19 +138,35 @@ in
       example = lib.literalExpression "null";
       description = ''
         Path to a file containing a GitHub personal access token, exported
-        as GH_TOKEN in zsh sessions so splashboard's github_* widgets work.
-        Default points at the agenix-decrypted runtime path. Set to null to
-        skip the export entirely (offline-only dashboards still render).
+        as GH_TOKEN to the `gh` and splashboard wrappers (not to the whole
+        shell) so github_* widgets work. Default points at the agenix-decrypted
+        runtime path. Set to null to skip the wrappers (offline-only
+        dashboards still render).
 
-        The token is read at shell init time, NOT at evaluation time, so it
-        never lands in the Nix store. Matches the zsh-ai-cmd pattern used
+        The token is read when the wrapper runs, NOT at evaluation time, so
+        it never lands in the Nix store. Matches the zsh-ai-cmd pattern used
         elsewhere in this repo.
       '';
     };
   };
 
   config = mkIf cfg.enable {
-    home.packages = [ cfg.package ];
+    # GH_TOKEN is set per process at call time, never exported to the shell.
+    home.packages = [ cfg.package ] ++ lib.optionals (cfg.githubTokenFile != null) (
+      let
+        withToken = name: real: lib.hiPrio (pkgs.writeShellScriptBin name ''
+          if [[ -z "''${GH_TOKEN:-}" && -r "${toString cfg.githubTokenFile}" ]]; then
+            GH_TOKEN="$(< "${toString cfg.githubTokenFile}")"
+            export GH_TOKEN
+          fi
+          exec ${real} "$@"
+        '');
+      in
+      [
+        (withToken "gh" (getExe pkgs.gh))
+        (withToken (baseNameOf (getExe cfg.package)) (getExe cfg.package))
+      ]
+    );
 
     # Render config + dashboards under ~/.splashboard/. HM symlinks these
     # from /nix/store, so they're read-only — fine because splashboard
@@ -166,9 +182,6 @@ in
     # splash renders against a fully-configured shell. Use mkAfter so the
     # hook lands at the end of programs.zsh.initContent.
     #
-    # GH_TOKEN export must run BEFORE the eval so the chpwd hook (and the
-    # initial render) sees the token.
-    #
     # Opt-out env vars are handled by splashboard itself, not declaratively:
     #   - CI=1                 — auto-detected in CI environments
     #   - SPLASHBOARD_SILENT=1 — suppress this session
@@ -181,24 +194,14 @@ in
       # ========================================
       # splashboard — shell startup dashboard
       # ========================================
-      ${optionalString (cfg.githubTokenFile != null) ''
-      if [[ -f "${toString cfg.githubTokenFile}" ]]; then
-        export GH_TOKEN="$(cat "${toString cfg.githubTokenFile}")"
-      fi
-      ''}
-      eval "$(${getExe cfg.package} init zsh)"
+      eval "$(${baseNameOf (getExe cfg.package)} init zsh)"
     '');
 
     programs.bash.initExtra = mkIf cfg.enableBashIntegration (mkAfter ''
       # ========================================
       # splashboard — shell startup dashboard
       # ========================================
-      ${optionalString (cfg.githubTokenFile != null) ''
-        if [[ -f "${toString cfg.githubTokenFile}" ]]; then
-          export GH_TOKEN="$(cat "${toString cfg.githubTokenFile}")"
-        fi
-      ''}
-      eval "$(${getExe cfg.package} init bash)"
+      eval "$(${baseNameOf (getExe cfg.package)} init bash)"
     '');
   };
 }

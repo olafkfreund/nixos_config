@@ -1,5 +1,3 @@
 {
-  imports = [
-    ./fstrim-optimization.nix
-  ];
+  imports = [ ./logging.nix ];
 }

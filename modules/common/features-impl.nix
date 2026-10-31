@@ -64,29 +64,6 @@ in
 
     # Networking (conditional enables)
 
-    # Enhanced AI provider support
-    ai.providers = mkIf cfg.ai.providers.enable {
-      enable = true;
-      inherit (cfg.ai.providers) defaultProvider;
-      inherit (cfg.ai.providers) enableFallback;
-      inherit (cfg.ai.providers) costOptimization;
-
-      openai = {
-        inherit (cfg.ai.providers.openai) enable;
-        inherit (cfg.ai.providers.openai) priority;
-      };
-
-      anthropic = {
-        inherit (cfg.ai.providers.anthropic) enable;
-        inherit (cfg.ai.providers.anthropic) priority;
-      };
-
-      gemini = {
-        inherit (cfg.ai.providers.gemini) enable;
-        inherit (cfg.ai.providers.gemini) priority;
-      };
-    };
-
     # Programs (conditional enables)
     programs = {
       lazygit.enable = cfg.programs.lazygit;

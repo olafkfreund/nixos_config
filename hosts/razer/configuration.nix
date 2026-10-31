@@ -471,11 +471,6 @@ in
     desktopManager.gnome.enable = true;
   };
 
-  # Don't restart greetd on rebuild — a switch shouldn't tear down the login
-  # manager mid-session. Matters more here: this host's greeter-respawn is
-  # fragile (see Optimus note above). New greeter applies at next reboot/logout.
-  systemd.services.greetd.restartIfChanged = false;
-
   # playerctl 2.4.1 can segfault on a player signal (#1987); come back instead of staying failed.
   systemd.user.services.playerctld.serviceConfig.Restart = "on-failure";
 
@@ -542,13 +537,6 @@ in
     # Bash is the login shell (see modules/common/base-user.nix); zsh stays
     # installed as the rollback path.
     shell = pkgs.bashInteractive;
-    # Only use secret-managed password if the secret exists
-    hashedPasswordFile = lib.mkIf
-      (
-        config.modules.security.secrets.enable
-        && builtins.hasAttr "user-password-${username}" config.age.secrets
-      )
-      config.age.secrets."user-password-${username}".path;
   });
 
   # System packages - consolidated from individual nixos modules

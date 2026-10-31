@@ -96,7 +96,7 @@ update-workflow HOST="$(hostname)":
     just preview-updates {{HOST}}
     @echo ""
     @read -p "Apply these updates? [y/N] " -n 1 -r; echo; \
-    if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+    if [[ $REPLY =~ ^[Yy]$ ]]; then \
         just quick-deploy {{HOST}}; \
         echo ""; \
         just new-packages; \
@@ -206,6 +206,7 @@ test-all-parallel:
 # Test build all hosts with detailed error reporting
 test-build-all:
     #!/usr/bin/env bash
+    set -uo pipefail
     echo "🔨 Test building all host configurations with detailed reporting..."
     failed_hosts=()
     success_count=0
@@ -253,6 +254,7 @@ test-build-all:
 # Test build all hosts in parallel (FASTEST)
 test-build-all-parallel:
     #!/usr/bin/env bash
+    set -uo pipefail
     echo "🚀 Test building all host configurations in parallel..."
 
     # Start all builds in parallel and capture their PIDs
@@ -367,9 +369,9 @@ test-secrets:
 test-all-secrets:
     @echo "🔐 Testing all secrets decryption..."
     @for secret in secrets/*.age; do \
-        if [ -f "$$secret" ]; then \
-            echo "Testing $$secret..."; \
-            agenix -d "$$secret" > /dev/null && echo "✅ $$secret decrypts successfully" || echo "❌ $$secret failed to decrypt"; \
+        if [ -f "$secret" ]; then \
+            echo "Testing $secret..."; \
+            agenix -d "$secret" > /dev/null && echo "✅ $secret decrypts successfully" || echo "❌ $secret failed to decrypt"; \
         fi; \
     done
 
@@ -384,11 +386,11 @@ pre-deploy HOST:
 # Test package builds
 test-packages:
     @echo "📦 Testing custom package builds..."
-    @packages=$$(nix flake show --json 2>/dev/null | jq -r '.packages."x86_64-linux" | keys[]' 2>/dev/null || echo ""); \
-    if [ -n "$$packages" ]; then \
-        for package in $$packages; do \
-            echo "Testing package: $$package"; \
-            nix build .#$$package --show-trace || echo "⚠️  Package $$package failed to build"; \
+    @packages=$(nix flake show --json 2>/dev/null | jq -r '.packages."x86_64-linux" | keys[]' 2>/dev/null || echo ""); \
+    if [ -n "$packages" ]; then \
+        for package in $packages; do \
+            echo "Testing package: $package"; \
+            nix build .#$package --show-trace || echo "⚠️  Package $package failed to build"; \
         done; \
     else \
         echo "No custom packages found to test"; \
@@ -617,7 +619,7 @@ gc:
 # Aggressive garbage collection (remove all non-current generations)
 gc-aggressive:
     @echo "🚨 WARNING: This will remove ALL previous generations!"
-    @read -p "Are you sure? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
+    @read -p "Are you sure? (y/N): " confirm && [ "$confirm" = "y" ] || exit 1
     sudo nix-collect-garbage -d
     @echo "✅ Aggressive garbage collection complete!"
 
@@ -700,17 +702,17 @@ perf-cache:
 # Benchmark specific host build time
 bench-host HOST RUNS="3":
     @echo "⏱️  Benchmarking {{HOST}} ({{RUNS}} runs)..."
-    @total=0; for i in $$(seq 1 {{RUNS}}); do \
-        echo "Run $$i/{{RUNS}}..."; \
-        start=$$(date +%s.%N); \
+    @total=0; for i in $(seq 1 {{RUNS}}); do \
+        echo "Run $i/{{RUNS}}..."; \
+        start=$(date +%s.%N); \
         nix build .#nixosConfigurations.{{HOST}}.config.system.build.toplevel --no-link; \
-        end=$$(date +%s.%N); \
-        runtime=$$(echo "$$end - $$start" | bc); \
-        total=$$(echo "$$total + $$runtime" | bc); \
-        echo "Run $$i: $${runtime}s"; \
+        end=$(date +%s.%N); \
+        runtime=$(echo "$end - $start" | bc); \
+        total=$(echo "$total + $runtime" | bc); \
+        echo "Run $i: ${runtime}s"; \
     done; \
-    avg=$$(echo "scale=2; $$total / {{RUNS}}" | bc); \
-    echo "Average time for {{HOST}}: $${avg}s"
+    avg=$(echo "scale=2; $total / {{RUNS}}" | bc); \
+    echo "Average time for {{HOST}}: ${avg}s"
 
 # =============================================================================
 # DEVELOPMENT AND DEBUGGING
@@ -805,21 +807,21 @@ ci-hosts HOSTS:
 # Test configuration rollback capability
 test-rollback:
     @echo "🔄 Testing configuration rollback..."
-    @echo "Current generation: $$(nixos-rebuild list-generations | tail -n1)"
+    @echo "Current generation: $(nixos-rebuild list-generations | tail -n1)"
     @echo "Available generations:"
     nixos-rebuild list-generations | tail -n5
 
 # Test configuration on a specific kernel version
 test-kernel-version VERSION:
     @echo "🐧 Testing with kernel version {{VERSION}}..."
-    nix build .#nixosConfigurations.$$(hostname).config.system.build.toplevel \
+    nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel \
         --override-input nixpkgs github:nixos/nixpkgs/{{VERSION}} \
         --no-link --show-trace
 
 # Test with different nixpkgs channels
 test-nixpkgs-stable:
     @echo "📦 Testing with nixpkgs stable..."
-    nix build .#nixosConfigurations.$$(hostname).config.system.build.toplevel \
+    nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel \
         --override-input nixpkgs github:nixos/nixpkgs/nixos-24.05 \
         --no-link --show-trace
 
@@ -855,14 +857,14 @@ quick-deploy HOST:
 quick-all:
     @echo "🚀 Quick test and deploy all hosts..."
     just test-all-parallel
-    @read -p "Tests passed! Deploy all? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
+    @read -p "Tests passed! Deploy all? (y/N): " confirm && [ "$confirm" = "y" ] || exit 1
     just deploy-all-parallel
 
 # Emergency deployment (skip tests) - USE WITH CAUTION
 emergency-deploy HOST: _require-main
     @echo "🚨 EMERGENCY deployment to {{HOST}} (skipping tests)..."
     @echo "This will skip ALL safety checks and validation!"
-    @read -p "Are you absolutely sure? (type 'emergency'): " confirm && [ "$$confirm" = "emergency" ] || exit 1
+    @read -p "Are you absolutely sure? (type 'emergency'): " confirm && [ "$confirm" = "emergency" ] || exit 1
     nixos-rebuild switch --flake .#{{HOST}} --target-host {{HOST}} --build-host {{HOST}} --sudo --no-reexec --keep-going --accept-flake-config
 
 # =============================================================================
@@ -873,7 +875,7 @@ emergency-deploy HOST: _require-main
 clean-all:
     @echo "🧹 DESTRUCTIVE: Cleaning up everything..."
     @echo "This will remove ALL previous generations and build artifacts!"
-    @read -p "Are you absolutely sure? (type 'clean-all'): " confirm && [ "$$confirm" = "clean-all" ] || exit 1
+    @read -p "Are you absolutely sure? (type 'clean-all'): " confirm && [ "$confirm" = "clean-all" ] || exit 1
     rm -rf result*
     sudo nix-collect-garbage -d
     sudo nix-store --gc
@@ -883,10 +885,10 @@ clean-all:
 # Create backup of current configuration
 backup:
     @echo "💾 Creating configuration backup..."
-    @timestamp=$$(date +%Y%m%d-%H%M%S); \
-    backup_dir="$${HOME}/nixos-backup-$$timestamp"; \
-    cp -r . "$$backup_dir"; \
-    echo "✅ Backup created: $$backup_dir"
+    @timestamp=$(date +%Y%m%d-%H%M%S); \
+    backup_dir="${HOME}/nixos-backup-$timestamp"; \
+    cp -r . "$backup_dir"; \
+    echo "✅ Backup created: $backup_dir"
 
 # Restore from backup
 restore BACKUP_PATH:
@@ -904,10 +906,10 @@ deploy-interactive:
     @echo "🎯 Interactive deployment"
     @echo "Available hosts:"
     @select host in razer p510 p620 "Cancel"; do \
-        case $$host in \
+        case $host in \
             "Cancel") echo "Deployment cancelled"; break ;; \
             "") echo "Invalid selection" ;; \
-            *) echo "Deploying to $$host..."; just $$host; break ;; \
+            *) echo "Deploying to $host..."; just $host; break ;; \
         esac; \
     done
 
@@ -915,7 +917,7 @@ deploy-interactive:
 watch:
     @echo "👀 Watching for changes..."
     @echo "Will run 'just check' when .nix files change"
-    @while inotifywait -r -e modify,create,delete --include='.*\.nix$$' . 2>/dev/null; do \
+    @while inotifywait -r -e modify,create,delete --include='.*\.nix$' . 2>/dev/null; do \
         echo "Change detected, running checks..."; \
         just check || true; \
         echo "Waiting for next change..."; \
@@ -963,11 +965,11 @@ network-monitor:
 # Deploy to all hosts in parallel (FASTEST)
 deploy-all-parallel:
     @echo "🚀 Deploying to ALL hosts in parallel..."
-    @read -p "Are you sure? This will max out resources! (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
+    @read -p "Are you sure? This will max out resources! (y/N): " confirm && [ "$confirm" = "y" ] || exit 1
     @echo "Starting parallel deployments..."
-    ( just p620 & echo "P620 started" ) & \
-    ( just razer & echo "Razer started" ) & \
-    ( just p510 & echo "P510 started" ) & \
+    just p620 & \
+    just razer & \
+    just p510 & \
     wait && echo "✅ All deployments completed!"
 
 # Fast deployment with minimal builds
@@ -1032,8 +1034,7 @@ ping-hosts:
     @# MagicDNS / LAN IP) since the router swap took the .lan domain away, and a
     @# bare `ping p620` would answer from /etc/hosts on p620 itself.
     @# `$host`, not `$$host`: `$$` is a Makefile escape, and just passes recipe
-    @# text to the shell verbatim — `$$` reaches sh as the PID. (Many other
-    @# recipes in this file still have that bug.)
+    @# text to the shell verbatim — `$$` reaches sh as the PID.
     @for host in p620 razer p510; do \
         echo -n "$host: "; \
         ssh -o ConnectTimeout=5 -o BatchMode=yes $host true >/dev/null 2>&1 && echo "✅ reachable" || echo "❌ unreachable"; \

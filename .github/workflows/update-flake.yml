@@ -76,13 +76,6 @@ jobs:
               echo "PASS: $host"
               continue
             fi
-            # Same carve-out as ci.yml: the nix-openclaw-tools sub-flake
-            # pins itself with path:../.., which nix refuses to lock. The
-            # host evaluated cleanly up to the plugin loader.
-            if echo "$err" | grep -qE 'lock file contains unlocked input.*"path":"\.\./\.\."'; then
-              echo "::warning::Known upstream path:../.. issue in nix-openclaw-tools; treating $host as PASS."
-              continue
-            fi
             echo "ERROR: $host does not evaluate with the updated lock"
             rc=1
           done

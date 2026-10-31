@@ -90,7 +90,7 @@ in
       # shells via load-api-keys → OLLAMA_API_KEY.
       api-ollama = {
         file = ../../secrets/api-ollama.age;
-        mode = "0644";
+        mode = "0440";
         owner = "root";
         group = "users";
       };

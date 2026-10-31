@@ -9,7 +9,7 @@
 writeShellScriptBin "obsidian-mcp" ''
   #!/bin/sh
   # Wrapper script for @mauricio.wolff/mcp-obsidian
-  # Ensures npx is available and runs the latest version
+  # Ensures npx is available and runs a pinned version
 
   if [ $# -eq 0 ]; then
     echo "Usage: obsidian-mcp <vault-path>"
@@ -34,5 +34,5 @@ writeShellScriptBin "obsidian-mcp" ''
   fi
 
   # npx is included with nodejs package
-  exec ${nodejs}/bin/npx @mauricio.wolff/mcp-obsidian@latest "$VAULT_PATH"
+  exec ${nodejs}/bin/npx @mauricio.wolff/mcp-obsidian@0.8.2 "$VAULT_PATH"
 ''

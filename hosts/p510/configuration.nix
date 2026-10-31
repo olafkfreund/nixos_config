@@ -21,7 +21,7 @@ in
       ./nixos/nixarchy.nix
       ./nixos/network.nix # Network configuration with dual-port Intel card
       ./nixos/tailscale-serve.nix # Tailscale Serve for media services
-      ./nixos/recyclarr.nix # Recyclarr Trash Guides sync
+      ../../modules/services/recyclarr.nix # Recyclarr Trash Guides sync
       ../common/nixos/i18n.nix
       ../common/nixos/envvar.nix
       ../common/nixos/host-class.nix
@@ -323,27 +323,6 @@ in
       droidcam = false; # Disabled due to v4l2loopback build failures on P510
     };
 
-    # COSMIC Desktop disabled - using GNOME for better headless RDP support
-    desktop.cosmic = {
-      enable = false; # Disabled: compositor not starting properly for headless operation
-      useCosmicGreeter = false;
-      defaultSession = false;
-      installAllApps = false;
-    };
-
-    # Remote Desktop support using GNOME Remote Desktop (native RDP support)
-    # Note: cosmic-remote-desktop disabled in favor of native GNOME RDP
-    desktop.cosmic-remote-desktop = {
-      enable = false; # Disabled: using native GNOME Remote Desktop instead
-      protocol = "both";
-      rdpPort = 3389;
-      vncPort = 5900;
-      vncPassword = "p510remote";
-      allowedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ];
-      disableScreenLock = false;
-      disablePowerManagement = true;
-    };
-
     gnome-remote-desktop = {
       enable = true;
     };
@@ -382,24 +361,20 @@ in
     enableUserEnvironment = true;
   };
 
-  # BOOT PERFORMANCE: Prevent fstrim from blocking boot (saves 8+ minutes)
-  services.fstrim-optimization = {
+  services.fstrim = {
     enable = true;
-    preventBootBlocking = true;
+    interval = "weekly";
   };
 
   # DISK SPACE MANAGEMENT: Automatic garbage collection to prevent disk full issues
   storage.garbageCollection = {
     enable = true;
-    schedule = "weekly";
-    deleteOlderThan = "30d";
     keepGenerations = 5;
-    optimizeStore = true;
     aggressiveCleanup = false;
   };
 
   # Enable Recyclarr synchronization
-  services.recyclarr-sync.enable = true;
+  features.recyclarr.enable = true;
 
   # Specific service configurations
   # StreamDeck UI disabled for headless operation
@@ -556,11 +531,6 @@ in
     allowUnfree = true; # Required for NVIDIA drivers
     allowBroken = true;
     permittedInsecurePackages = [ "olm-3.2.16" "dotnet-sdk-6.0.428" "python3.12-youtube-dl-2021.12.17" "python3.14-youtube-dl-2021.12.17" ];
-
-    # Override nodejs to use nodejs_24 to avoid version conflicts
-    packageOverrides = pkgs: {
-      nodejs = pkgs.nodejs_24;
-    };
   };
   system.stateVersion = "25.11";
 

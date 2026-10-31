@@ -1,20 +1,23 @@
 # Custom Packages
 
-This directory contains custom package definitions that aren't available in nixpkgs or require modifications from the standard packages.
+Packages that are not in nixpkgs or need changes from the nixpkgs version.
+Each directory holds one package; `ls pkgs/` is the list.
 
-## Package List
+## Registration
 
-- `aider-chat-env/` - Environment configuration for aider chat
-- `msty/` - Custom msty package
-- `rofi-blocks/` - Custom rofi-blocks implementation
+There are two ways a package becomes visible:
 
-## Usage
+- `pkgs/default.nix` lists the package. `overlays/default.nix` exposes that
+  set as `pkgs.customPkgs.<name>`.
+- `overlays/custom-packages.nix` adds some packages at the top level as
+  `pkgs.<name>` (and replaces `codex` and `claude-code`). Use this when
+  other modules or nixpkgs expect the plain name.
 
-These packages are made available to the system through an overlay defined in `flake.nix`. The main entry point is `default.nix`, which exposes all custom packages.
+A package can be in either place. Check both before you look for one.
 
-To add a new package:
+## Adding a package
 
-1. Create a new directory for your package with appropriate build files
-2. Add an entry in `default.nix` to expose the package
-
-The custom packages can then be referenced in system configurations using `pkgs.customPkgs.<package-name>`.
+1. Create `pkgs/<name>/default.nix`.
+2. Add it to `pkgs/default.nix`, and to `overlays/custom-packages.nix` if it
+   must be top level.
+3. Reference it as `pkgs.customPkgs.<name>` or `pkgs.<name>`.

@@ -9,15 +9,12 @@ let
   kdeconnect-cli = "${pkgs.kdePackages.kdeconnect-kde}/bin/kdeconnect-cli";
   fortune = "${pkgs.fortune}/bin/fortune";
   script-fortune = pkgs.writeShellScriptBin "fortune" ''
-    ${kdeconnect-cli} -d $(${kdeconnect-cli} --list-available --id-only) --ping-msg "$(${fortune})"
+    ${kdeconnect-cli} -d "$(${kdeconnect-cli} --list-available --id-only)" --ping-msg "$(${fortune})"
   '';
 in
 {
   options.programs.kdeconnect = {
-    enable = mkEnableOption {
-      default = false;
-      description = "KDE Connect";
-    };
+    enable = mkEnableOption "KDE Connect";
   };
   config = mkIf cfg.enable {
     xdg.desktopEntries = {

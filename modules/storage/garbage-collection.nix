@@ -13,29 +13,10 @@ in
   options.storage.garbageCollection = {
     enable = mkEnableOption "Enable automatic Nix garbage collection";
 
-    schedule = mkOption {
-      type = types.enum [ "daily" "weekly" "monthly" ];
-      default = "weekly";
-      description = "Frequency of garbage collection";
-    };
-
     keepGenerations = mkOption {
       type = types.int;
       default = 5;
       description = "Number of system generations to keep";
-    };
-
-    deleteOlderThan = mkOption {
-      type = types.str;
-      default = "30d";
-      description = "Age threshold for deletion (e.g., 30d, 14d, 7d)";
-      example = "30d";
-    };
-
-    optimizeStore = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Optimize Nix store after garbage collection (deduplication)";
     };
 
     aggressiveCleanup = mkOption {
@@ -46,22 +27,6 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Automatic garbage collection
-    nix.gc = {
-      automatic = true;
-      dates = cfg.schedule;
-      options =
-        if cfg.aggressiveCleanup
-        then "--delete-old"
-        else "--delete-older-than ${cfg.deleteOlderThan}";
-    };
-
-    # Store optimization (deduplication)
-    nix.optimise = mkIf cfg.optimizeStore {
-      automatic = true;
-      dates = [ cfg.schedule ];
-    };
-
     # Systemd services configuration
     systemd = {
       services = {
@@ -95,7 +60,7 @@ in
         # Weekly generation cleanup (keep only recent generations)
         nix-generation-cleanup = mkIf (!cfg.aggressiveCleanup) {
           description = "Clean up old NixOS generations";
-          after = [ "nix-gc.service" ];
+          before = [ "nix-gc.service" ];
           # `after` is ordering ONLY — without this the unit has no timer and
           # nothing pulling it in, so it never ran. That is why p620 reached 73
           # system generations despite --delete-older-than 14d: the age rule
@@ -159,8 +124,6 @@ in
 
         echo "==== Nix Garbage Collection Status ===="
         echo ""
-        echo "Schedule: ${cfg.schedule}"
-        echo "Delete older than: ${cfg.deleteOlderThan}"
         echo "Keep generations: ${toString cfg.keepGenerations}"
         echo ""
         echo "Current Disk Usage:"

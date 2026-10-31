@@ -42,42 +42,21 @@ fi
 echo -e "${BLUE}${BOLD}Checking for NixOS updates...${NC}"
 echo "This might take a while depending on the number of inputs in your flake..."
 
-# Create temporary directories
 TEMP_DIR=$(mktemp -d)
-TEMP_REPO="$TEMP_DIR/nixos-config"
 echo "Created temporary directory: $TEMP_DIR"
 
-# Clone the config to a temporary location
-echo "Creating a temporary copy of your configuration..."
-mkdir -p "$TEMP_REPO"
-cp -r "$CONFIG_DIR"/* "$TEMP_REPO"
-cp "$CONFIG_DIR/.gitignore" "$TEMP_REPO" 2>/dev/null || true
-
-# Save a copy of the original flake.lock
-cp "$CONFIG_DIR/flake.lock" "$TEMP_DIR/flake.lock.old"
-echo "Copied flake.lock to temporary directory"
-
-# Check for updates in the temporary repository
-echo "Running nix flake update in temporary repository (might take a few minutes)..."
-(cd "$TEMP_REPO" && nix flake update) 2>/tmp/nixos-update-error.log || {
+echo "Running nix flake update (might take a few minutes)..."
+(cd "$CONFIG_DIR" && nix flake update --output-lock-file "$TEMP_DIR/flake.lock.new") 2>"$TEMP_DIR/update-error.log" || {
   echo -e "${RED}Error running nix flake update:${NC}"
-  cat /tmp/nixos-update-error.log
+  cat "$TEMP_DIR/update-error.log"
   rm -rf "$TEMP_DIR"
   exit 1
 }
 echo "Finished checking for updates"
 
-# Get the differences
 echo -e "${BLUE}${BOLD}Analyzing updates...${NC}"
-echo "Getting lock file data..."
-NEW_LOCK=$(jq -r '.nodes' "$TEMP_REPO/flake.lock" 2>/tmp/nixos-jq-error.log)
-OLD_LOCK=$(jq -r '.nodes' "$TEMP_DIR/flake.lock.old" 2>/tmp/nixos-jq-error.log)
-if [[ $? -ne 0 ]]; then
-  echo -e "${RED}Error parsing flake.lock:${NC}"
-  cat /tmp/nixos-jq-error.log
-  rm -rf "$TEMP_DIR"
-  exit 1
-fi
+NEW_LOCK=$(jq -r '.nodes' "$TEMP_DIR/flake.lock.new")
+OLD_LOCK=$(jq -r '.nodes' "$CONFIG_DIR/flake.lock")
 
 # Extract information and format as a table
 echo -e "${GREEN}${BOLD}NixOS Update Information:${NC}"
@@ -136,7 +115,6 @@ echo "  cd $CONFIG_DIR && nix flake lock --update-input <input-name>"
 # Cleanup
 echo "Cleaning up temporary files..."
 rm -rf "$TEMP_DIR"
-rm -f /tmp/nixos-update-error.log /tmp/nixos-jq-error.log
 
 echo -e "${GREEN}${BOLD}Done!${NC}"
 exit 0

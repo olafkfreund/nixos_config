@@ -8,6 +8,6 @@
 
 writeShellScriptBin "browser-mcp" ''
   # BrowserMCP MCP Server
-  # Uses npx to run the latest version of @browsermcp/mcp
-  exec ${nodejs}/bin/npx --yes @browsermcp/mcp@latest "$@"
+  # Uses npx to run a pinned version of @browsermcp/mcp
+  exec ${nodejs}/bin/npx --yes @browsermcp/mcp@2.3.0 "$@"
 ''

@@ -12,7 +12,7 @@
     pkgs.parabolic
     pkgs.musicpod
     pkgs.pear-desktop # YouTube Music desktop client (formerly th-ch/youtube-music)
-    (pkgs.callPackage ../../pkgs/mpris-album-art { })
+    pkgs.customPkgs.mpris-album-art
   ];
 
   # MPRIS for every mpv (media keys, playerctl, the Omarchy media widget).

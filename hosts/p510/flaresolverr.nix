@@ -55,11 +55,6 @@
       RestrictNamespaces = true;
       SystemCallArchitectures = "native";
 
-      # Performance tuning for P510
-      CPUSchedulingPolicy = 1; # SCHED_FIFO
-      CPUSchedulingPriority = 10;
-      Nice = -5;
-
       # I/O optimization
       IOSchedulingClass = 2;
       IOSchedulingPriority = 4;
