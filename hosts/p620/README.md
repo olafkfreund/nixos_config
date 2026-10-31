@@ -12,7 +12,6 @@ This directory contains the NixOS configuration for the P620 workstation, which 
   - `power.nix` - Power management settings
   - `i18n.nix` - Internationalization settings
   - `envvar.nix` - Environment variables
-  - `hosts.nix` - Network host entries
   - `mpd.nix` - Music Player Daemon configuration
   - `screens.nix` - Display configuration
   - `syncthing.nix` - Syncthing file synchronization configuration

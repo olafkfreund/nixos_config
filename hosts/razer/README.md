@@ -12,7 +12,6 @@ This directory contains the NixOS configuration for the Razer laptop.
   - `power.nix` - Advanced power management settings for laptop
   - `i18n.nix` - Internationalization settings
   - `envvar.nix` - Environment variables
-  - `hosts.nix` - Network host entries
   - `screens.nix` - Display configuration
 - `themes/` - Theme configurations
 
