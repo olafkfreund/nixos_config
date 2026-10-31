@@ -57,7 +57,7 @@ echo ""
 echo "5. Run this script again to compute the hash"
 echo ""
 echo "Alternative: If version ${VERSION} is not available, download the latest version"
-echo "and update the VERSION variable in this script, default.nix, and the overlay."
+echo "and update the VERSION variable in this script and the overlay (overlays/citrix-workspace.nix)."
 echo ""
 
 exit 1

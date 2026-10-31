@@ -549,9 +549,6 @@
         {
           # Custom applications
           aerion = pkgs.callPackage ./pkgs/aerion { };
-          claude-code = import ./home/development/claude-code {
-            inherit (pkgs) lib buildNpmPackage fetchurl nodejs makeWrapper writeShellScriptBin;
-          };
           claude-code-native = pkgs.callPackage ./pkgs/claude-code-native { };
           codex-bin = pkgs.callPackage ./pkgs/codex-bin { };
           glim = pkgs.callPackage ./overlays/glim { };
@@ -560,7 +557,6 @@
           # Upstream binary: the nixpkgs build cannot run a prompt (#1859).
           opencode-bin = pkgs.callPackage ./pkgs/opencode-bin { };
           aurynk = pkgs.callPackage ./pkgs/aurynk { };
-          # add-skill = pkgs.callPackage ./pkgs/add-skill { };
 
           # Security tools
           mdatp = pkgs.callPackage ./pkgs/microsoft-defender-for-endpoint {
@@ -570,38 +566,6 @@
           # Enterprise tools
           # NOTE: citrix-workspace is provided via overlay (overlays/citrix-workspace.nix)
           # It requires manual tarball download - see pkgs/citrix-workspace/fetch-citrix.sh
-
-          # Icon themes
-          neuwaita-icon-theme = pkgs.stdenvNoCC.mkDerivation {
-            pname = "neuwaita-icon-theme";
-            version = "unstable-2025-01-15";
-
-            src = pkgs.fetchFromGitHub {
-              owner = "RusticBard";
-              repo = "Neuwaita";
-              rev = "4c63e30493ab34558539104309282877ab767798";
-              hash = "sha256-NL8/ceugdGNSMpa8G/a4Eolutf5BcN6PXiQ9qDmHM1U=";
-            };
-
-            dontBuild = true;
-            dontConfigure = true;
-
-            installPhase = ''
-              runHook
-              preInstall
-              mkdir - p $out/share/icons/Neuwaita
-              cp - r * $out/share/icons/Neuwaita/
-              rm - rf $out/share/icons/Neuwaita/.git *
-              runHook postInstall
-            '';
-
-            meta = with pkgs.lib; {
-              description = "A different take on the Adwaita icon theme";
-              homepage = "https://github.com/RusticBard/Neuwaita";
-              license = licenses.gpl3Plus;
-              platforms = platforms.linux;
-            };
-          };
 
           # Documentation site (MkDocs Material, built reproducibly)
           docs = pkgs.callPackage ./docs_gen/site.nix { };

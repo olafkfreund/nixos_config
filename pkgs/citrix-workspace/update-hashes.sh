@@ -45,21 +45,11 @@ sed -i "s/sha256 = \"0\{52\}\";/sha256 = \"${SRI_ESCAPED}\";/" "${OVERLAY_FILE}"
 
 echo "✅ Updated overlay hash"
 
-# Update package definition file
-PKG_FILE="${SCRIPT_DIR}/default.nix"
-echo "Updating: ${PKG_FILE}"
-
-# Update hash in package definition
-sed -i "s/sha256 = \"sha256-A\{43\}=\";/sha256 = \"${SRI_ESCAPED}\";/" "${PKG_FILE}"
-
-echo "✅ Updated package definition hash"
-echo ""
-
 echo "🎉 All hashes updated successfully!"
 echo ""
 echo "Next steps:"
 echo "1. Commit the changes:"
-echo "   git add overlays/citrix-workspace.nix pkgs/citrix-workspace/default.nix"
+echo "   git add overlays/citrix-workspace.nix"
 echo "   git commit -m \"chore(citrix): update hashes for version 2508.10\""
 echo ""
 echo "2. Enable Citrix on desired hosts (if not already enabled)"
