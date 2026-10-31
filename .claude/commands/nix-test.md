@@ -1,34 +1,37 @@
 # NixOS Testing Suite
 
-Comprehensive testing of NixOS configurations before deployment. Test builds locally without deploying to ensure everything works.
+Comprehensive testing of NixOS configurations before deployment. Test builds locally without
+deploying to ensure everything works.
 
-**Replaces Justfile recipes**: `test-all`, `test-all-parallel`, `test-build-all`, `test-build-all-parallel`, `test-secrets`, `test-all-secrets`, `test-packages`, `test-modules`, `test-home-modules`, `test-nixpkgs-stable`, `quick-test`, `ci`, `ci-quick`
+**Replaces Justfile recipes**: `test-all`, `test-all-parallel`, `test-build-all`,
+`test-build-all-parallel`, `test-secrets`, `test-all-secrets`, `test-packages`, `test-modules`,
+`test-home-modules`, `test-nixpkgs-stable`, `quick-test`, `ci`, `ci-quick`
 
 ## Quick Usage
 
 **Test single host**:
 
-```
+```text
 /nix-test p620
 ```
 
 **Test all hosts** (parallel - fastest):
 
-```
+```text
 /nix-test
 Test all hosts
 ```
 
 **Quick test** (validation + build):
 
-```
+```text
 /nix-test
 Quick test
 ```
 
 **CI mode** (for continuous integration):
 
-```
+```text
 /nix-test
 CI mode
 ```
@@ -76,7 +79,7 @@ CI mode
 
 **Home Manager Test**:
 
-```
+```text
 /nix-test
 Test Home Manager configurations
 ```
@@ -87,7 +90,7 @@ Test Home Manager configurations
 
 **Secrets Test**:
 
-```
+```text
 /nix-test
 Test secrets access
 ```
@@ -98,7 +101,7 @@ Test secrets access
 
 **Module Test**:
 
-```
+```text
 /nix-test
 Test modules only
 ```
@@ -206,7 +209,7 @@ done
 
 **Collision Error**:
 
-```
+```text
 ❌ Package Collision
    Files in conflict:
    - /nix/store/abc.../bin/tool
@@ -218,7 +221,7 @@ Run: /nix-fix to detect and suggest fixes
 
 **Missing Dependency**:
 
-```
+```text
 ❌ Missing Dependency
    Package 'python311Packages.mypackage' not found
 
@@ -228,7 +231,7 @@ Run: nix search nixpkgs mypackage
 
 **Evaluation Error**:
 
-```
+```text
 ❌ Evaluation Error
    Infinite recursion in feature dependencies
 
@@ -238,7 +241,7 @@ Run: /nix-validate for detailed dependency analysis
 
 **Out of Memory**:
 
-```
+```text
 ❌ Build Failed: Out of Memory
    Process killed during build
 

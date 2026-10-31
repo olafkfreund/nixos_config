@@ -8,27 +8,27 @@ Comprehensive cleanup operations for Nix store, old generations, and system main
 
 **Standard garbage collection** (30 seconds):
 
-```
+```text
 /nix-clean
 ```
 
 **Aggressive cleanup** (2 minutes):
 
-```
+```text
 /nix-clean
 Aggressive cleanup
 ```
 
 **Full cleanup** (5 minutes):
 
-```
+```text
 /nix-clean
 Full cleanup
 ```
 
 **Optimize store** (3 minutes):
 
-```
+```text
 /nix-clean
 Optimize store
 ```
@@ -73,21 +73,21 @@ Optimize store
 
 **Remove Old Generations**:
 
-```
+```text
 /nix-clean
 Remove generations older than 30 days
 ```
 
 **Clean Dead Code**:
 
-```
+```text
 /nix-clean
 Remove dead code
 ```
 
 **Verify Store**:
 
-```
+```text
 /nix-clean
 Verify store integrity
 ```
@@ -238,7 +238,7 @@ nix-store --optimize
 
 **Custom Retention**:
 
-```
+```text
 /nix-clean
 Keep generations for 14 days
 # Keeps current + 14 days of generations

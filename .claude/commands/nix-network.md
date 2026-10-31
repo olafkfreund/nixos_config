@@ -8,21 +8,21 @@ Comprehensive network monitoring, diagnostics, and stability management across a
 
 **Monitor network continuously**:
 
-```
+```text
 /nix-network
 Monitor network
 ```
 
 **Ping all hosts**:
 
-```
+```text
 /nix-network
 Ping all hosts
 ```
 
 **Show host status**:
 
-```
+```text
 /nix-network
 Status all hosts
 ```
@@ -125,7 +125,7 @@ Status all hosts
 
 ### Monitor Network Output
 
-```
+```text
 🌐 Network Stability Monitor
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -168,7 +168,7 @@ Press Ctrl+C to stop monitoring
 
 ### Network Change Detected Output
 
-```
+```text
 2025-01-15 10:24:15 - Network interface change detected:
 2025-01-15 10:24:15 - Before:
 2025-01-15 10:24:15 -   eth0    UP    192.168.1.100/24
@@ -187,7 +187,7 @@ Press Ctrl+C to stop monitoring
 
 ### DNS Resolution Failure Output
 
-```
+```text
 2025-01-15 10:25:30 - DNS resolution failed for cloudflare.com
 2025-01-15 10:25:30 - DNS resolution issues detected
 2025-01-15 10:25:32 - Restarting systemd-resolved

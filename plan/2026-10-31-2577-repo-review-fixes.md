@@ -59,6 +59,7 @@ commit per step and the per-step revert are unchanged.
 
 Two check fixes from the first (sequential) attempt at step 1, which was
 clean on drvPaths and builds:
+
 - The per-step grep check covers code only (`*.nix`, `*.sh`, `Justfile`,
   `.github/`). Doc mentions are updated where they instruct the reader and
   listed in the report otherwise; `.gemini/state/` is generated and left.

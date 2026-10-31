@@ -1,6 +1,8 @@
 # Common NixOS Modules
 
-This directory contains common modules that form the core of the modular NixOS configuration system. These modules provide standardized configurations and a flexible feature flag system that can be selectively enabled across different host machines.
+This directory contains common modules that form the core of the modular NixOS configuration system.
+These modules provide standardized configurations and a flexible feature flag system that can be
+selectively enabled across different host machines.
 
 ## Feature Flag System
 
@@ -11,7 +13,9 @@ The feature flag system is implemented through two main files:
 
 ### How It Works
 
-The feature system provides a declarative way to enable or disable specific functionality across your NixOS systems. Rather than using multiple `lib.mkForce` calls or complex conditionals, you can simply toggle features on and off in your host configuration:
+The feature system provides a declarative way to enable or disable specific functionality across
+your NixOS systems. Rather than using multiple `lib.mkForce` calls or complex conditionals, you can
+simply toggle features on and off in your host configuration:
 
 ```nix
 # Example host configuration

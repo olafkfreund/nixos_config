@@ -55,7 +55,7 @@ baseline from the step before:
 
 One commit per step, in this order, so a step that fails reverts alone.
 
-**Phase A — inert; all three drvPaths must stay identical**
+#### Phase A — inert; all three drvPaths must stay identical
 
 1. `network-stability` and `secure-dns`: delete
    `modules/services/network-stability.nix`,
@@ -113,7 +113,7 @@ One commit per step, in this order, so a step that fails reverts alone.
    `analyze-config` with `scripts/cleanup-dead-code.sh`, and the matching
    block in `scripts/ci-test.sh` (tooling-6, -7, -8).
 
-**Phase B — live but useless; drvPath changes, `nix-diff` must show only this**
+#### Phase B — live but useless; drvPath changes, `nix-diff` must show only this
 
 1. p620: the `storage-performance-monitor` unit (a root `while true` loop
    writing a file nothing reads) and its `/var/lib/storage-tuning` tmpfiles
