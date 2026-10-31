@@ -370,10 +370,7 @@ in
   # DISK SPACE MANAGEMENT: Automatic garbage collection to prevent disk full issues
   storage.garbageCollection = {
     enable = true;
-    schedule = "weekly";
-    deleteOlderThan = "30d";
     keepGenerations = 5;
-    optimizeStore = true;
     aggressiveCleanup = false;
   };
 
