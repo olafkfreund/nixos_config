@@ -67,6 +67,33 @@ clean on drvPaths and builds:
 
 Each step gets one fix round for any failure before it is dropped.
 
+### Phase A results and the second deviation (2026-10-31, approved by the user: "ok to both")
+
+13 of 16 phase A steps passed and were integrated; the combined tree equals
+the baseline on all three hosts. Three moved a drvPath and were held back.
+The parts of them that are inert stay in phase A; the parts that change a
+host move to phase B, where `nix-diff` must show only that change:
+
+- 5a′ (phase A, SAME ×3): `secrets.apiKeys.enableEnvironmentVariables` and
+  its three host setters only.
+- 5f′ (phase A, SAME ×3): `rebootWindow` only.
+- 18 (phase A, SAME ×3): the `flowtube` flake input, orphaned by step 5g;
+  `nix flake lock`, lock diff only drops nodes.
+- 15 (phase B, all hosts): the `LANGCHAIN_API_KEY` line in `api-keys-status`;
+  nix-diff shows only that script and its dependants.
+- 16 (phase B, all hosts): `allowUnfreePredicate` in `modules/nix/nix.nix`;
+  nix-diff shows only nixarchy-pkg-add's `haspredicate` constant and its
+  dependants (that branch only runs with `allowUnfree = false`).
+- 17 (phase B, p620 only): `hosts/common/nixos/hosts.nix`, its three
+  imports and the `network`/`hostMappings` keys; nix-diff shows only one
+  leading blank line leaving p620's extra-hosts file. razer and p510 SAME.
+
+Phase B and these extras run in parallel worktrees like phase A, each
+measured against `integrated-A`, then integrated and measured once more:
+the combined drvPath changes must be exactly the union of the steps'
+expected changes. Step 11 still stops for the user if anything beyond the
+listed Plasma packages leaves a closure.
+
 ## Steps
 
 1. **Baseline.** Write `measure.sh` to the scratchpad
