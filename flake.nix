@@ -394,15 +394,6 @@
       # PACKAGE CONFIGURATION
       # ========================================
 
-      # Helper function for package imports
-      mkPkgs = _pkgs: system: {
-        localSystem = system; # Modern replacement for deprecated 'system' parameter
-        config = {
-          allowUnfree = true;
-          # allowInsecure = false; # REMOVED for security - using targeted permissions
-        };
-      };
-
       overlays = import ./overlays { inherit inputs; };
 
       makeNixosSystem = host:
