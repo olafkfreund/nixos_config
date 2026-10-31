@@ -195,3 +195,31 @@ works.
 ## Rollback
 
 One commit per finding; `git revert <sha>`. Nothing is deployed.
+
+## Outcome and deviations
+
+Committed: every finding in WP1–WP9 and WP11, plus WP12, except the five
+below. Each was dropped because its own check failed, as the plan
+requires; none is committed.
+
+- hosts-14: moving the shared blocks reorders `systemPackages`
+  (GStreamer list), so drvPaths cannot stay identical. Left in place.
+- home-11 + home-13: collapsing p510's profiles would drop packages and git
+  settings from p510 that the developer profile does not supply.
+- home-14: HM `features.desktop.enable` is false on p510 although p510 is a
+  desktop, so the gate would strip its apps. Needs that flag fixed first.
+- home-15: `gl` is `glab` in the GitLab module and a git alias in the
+  shell files; merging into `home.shellAliases` conflicts.
+- modules-rest-8: `vm.dirty_writeback_centisecs` is also defined by the
+  nixarchy input; moving it to `boot.kernel.sysctl` fails to evaluate.
+
+Follow-ups after integration, each measured:
+
+- agy: nhs still spliced the removed `nixpkgs-unstable` (would write a
+  `null` lock node); fixed. The p510 tailscale-serve `set -e` would let one
+  failing serve or funnel call fail the unit; now `set -uo pipefail`. The
+  p620 unit got the bounded wait hosts-2 asked for.
+- validate: `modules/system/default.nix` restored (structure check),
+  `mkPkgs` dropped (deadnix).
+- WP2 tooling-4 touched only the recipes that pipe into tee
+  (`check-syntax` and `summary` do not).
