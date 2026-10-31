@@ -161,8 +161,6 @@
       # Server-specific settings
       core.autocrlf = "input";
       merge.tool = "vimdiff";
-      # Enhanced logging for server development
-      log.oneline = true;
       status.showUntrackedFiles = "all";
     };
   };
