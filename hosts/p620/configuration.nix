@@ -113,6 +113,15 @@ in
   };
 
 
+  ai.providers = {
+    enable = true;
+    defaultProvider = "openai"; # P620-specific override: use OpenAI as default instead of Anthropic
+    enableFallback = true;
+    openai.enable = true;
+    anthropic.enable = true;
+    gemini.enable = true;
+  };
+
   # Enable Claude Code hooks for desktop notifications
   features.claude-hooks = {
     enable = true;
@@ -317,18 +326,6 @@ in
       enable = true;
       antigravity-cli = true;
       claude-desktop = true;
-
-      # Enable unified AI provider support
-      providers = {
-        enable = true;
-        defaultProvider = "openai"; # P620-specific override: use OpenAI as default instead of Anthropic
-        enableFallback = true;
-
-        # Enable specific providers
-        openai.enable = true;
-        anthropic.enable = true;
-        gemini.enable = true;
-      };
 
       # Enable MCP (Model Context Protocol) servers for AI integration
       mcp = {
