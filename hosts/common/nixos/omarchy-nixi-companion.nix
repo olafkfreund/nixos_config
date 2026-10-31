@@ -16,6 +16,8 @@
       -- are overwritten on the next deploy.
       o.bind("SUPER + ALT + S", "Nixi companion: show or hide", "nixi-companion")
       o.bind("SUPER + ALT + SHIFT + S", "Nixi companion: listen", "nixi-companion listen")
+      -- Start him with the session: activation only restarts a running one, so a fresh host never got him.
+      o.exec_on_start("nixi-companion show")
     '';
   };
 }
