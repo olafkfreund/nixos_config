@@ -529,11 +529,6 @@
 
         # Laptops (portable systems with power management)
         razer = nixpkgs.lib.nixosSystem (makeNixosSystem "razer"); # Intel/NVIDIA laptop (mobile dev)
-
-        # MicroVM configurations (temporarily disabled for flake restructuring)
-        # dev-vm = microvms.dev-vm;
-        # test-vm = microvms.test-vm;
-        # playground-vm = microvms.playground-vm;
       };
 
       # ========================================

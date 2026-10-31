@@ -32,7 +32,6 @@ category modules (`core.nix`, `desktop.nix`, `development.nix`,
   User-facing application bundles.
 - `helpers/` — Internal helper functions (entry: `helpers/default.nix`).
 - `installer/` — Live ISO support modules.
-- `microvms/` — microvm.nix guest definitions.
 - `networking/` — Network stack and Tailscale wiring.
 - `nix/` — Nix daemon and binary cache configuration.
 - `nix-index/` — `nix-index-database` integration.

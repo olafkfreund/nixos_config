@@ -1,11 +1,6 @@
 { pkgs, ... }:
 {
   environment.systemPackages = with pkgs; [
-    # Note: Core packages (coreutils, findutils, gnugrep, gnused, gawk, which, tree,
-    # file, iproute2, inetutils, git, curl, wget, unzip, htop, btop, iotop, bc,
-    # lsof, pciutils, usbutils, procps, psmisc, jq) are defined in
-    # modules/nixos/packages/core.nix — do not duplicate here.
-
     # Archive tools
     zip
     zstd

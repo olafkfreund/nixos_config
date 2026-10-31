@@ -7,7 +7,6 @@ This directory contains modules for desktop environment configuration and relate
 ### Core Desktop Components
 
 - **gtk/** - GTK theme and application configuration
-- **electron-config.nix** - Wayland optimization for Electron applications
 - **hyprland-uwsm.nix** - Hyprland with UWSM session management
 - **plasma/** - KDE Plasma desktop environment configuration
 - **remote/** - Remote desktop and VNC services
