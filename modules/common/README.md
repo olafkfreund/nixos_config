@@ -87,7 +87,6 @@ Besides the feature system, this directory contains other important shared confi
 - `environment.nix`: Common environment variables
 - `merge-packages.nix`: Helper for merging package lists
 - `networking.nix`: Shared networking configurations
-- `plasma-packages.nix`: KDE Plasma desktop packages
 - `sample-host-config.nix`: Template for new host configurations
 - `sway.nix`: Sway window manager configuration
 
