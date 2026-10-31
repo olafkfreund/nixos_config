@@ -11,8 +11,8 @@ reviewers:
 
 # Plan: Fix the remaining review findings
 
-All spec decisions apply as written; finding ids refer to the table in
-# 2577 (file:line there). Branch `fix/2577-review-bugs-security-simplify`,
+All spec decisions apply as written; finding ids refer to the table in issue
+2577 (file:line there). Branch `fix/2577-review-bugs-security-simplify`,
 stacked on `chore/2577-repo-review-fixes` (#2579), worktree
 `~/.config/nixos-2577r`.
 
@@ -173,7 +173,7 @@ measuring (flake eval ignores untracked files); p510 is never built.
 - home-14: gate com.nix on `features.desktop.enable`; keep its packages.
   Expect SAME (all importers are desktops); report otherwise.
 
-**WP11 — nixpkgs-unstable (hosts-5), after integration**
+### WP11 — nixpkgs-unstable (hosts-5), after integration
 
 - Delete the input and `pkgsUnstable`; one module sets
   `_module.args.pkgs-unstable = pkgs` and the HM `extraSpecialArgs`

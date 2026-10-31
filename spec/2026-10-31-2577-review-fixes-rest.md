@@ -22,7 +22,7 @@ reviews the integrated result. Nothing is deployed.
 
 Decisions, one per finding (ids from #2577):
 
-**Bugs**
+### Bugs
 
 - tooling-1: `nhs` splices the node names resolved from
   `.nodes.root.inputs`, not the literal `nixpkgs`.
@@ -48,7 +48,7 @@ Decisions, one per finding (ids from #2577):
   `mkDefault`, drop the `/proc/sys` echo block.
 - hosts-15: AGENTS.md says where `hostUsers` really lives (flake.nix).
 
-**Security**
+### Security
 
 - services-6/modules-rest-3: `api-ollama` 0440 root:users (meetingai keeps
   group read); ollama reads it through `LoadCredential`.
@@ -66,7 +66,7 @@ Decisions, one per finding (ids from #2577):
 - services-9: delete the always-false `hashedPasswordFile` mkIf blocks.
   Enabling the secret instead could change the login password; not done.
 
-**Simplification** (drvPath-identical unless stated)
+### Simplification (drvPath-identical unless stated)
 
 - hosts-14: the ~150 lines p620 and razer share move to one common module.
 - modules-rest-12: drop the `features.ai.providers` mirror; p620 sets
