@@ -619,9 +619,6 @@ in
       # Installed deliberately anyway, ready for Pixel Buds Pro hardware.
       pbpctrl # Pixel Buds Pro control (battery, noise-cancelling, EQ)
 
-      # Login manager (tuigreet)
-      tuigreet
-
       # Secure Boot management (from secure-boot.nix) - only when secure boot enabled
     ]
     ++ lib.optionals (config.boot.lanzaboote.enable or false) [
