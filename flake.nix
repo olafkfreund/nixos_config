@@ -41,7 +41,6 @@
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-    flake-utils.url = "github:numtide/flake-utils";
 
     # Environment and theming
     home-manager = {
@@ -256,18 +255,8 @@
       url = "github:nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixpkgs-f2k = {
-      url = "github:moni-dz/nixpkgs-f2k";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nix-index-database = {
       url = "github:nix-community/nix-index-database";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # Google Antigravity package
-    antigravity-nix = {
-      url = "github:jacopone/antigravity-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -370,7 +359,6 @@
     , spicetify-nix
     , home-manager
     , nix-index-database
-    , antigravity-nix
     , ...
     } @ inputs:
     let
@@ -499,7 +487,6 @@
                       nixpkgs
                       spicetify-nix
                       agenix
-                      antigravity-nix
                       host
                       ;
                     username = primaryUser;
