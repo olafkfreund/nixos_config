@@ -54,8 +54,8 @@ fi
 
 # Step 3: Show commit range
 echo -e "${BLUE}[3/5]${NC} 📊 Analyzing nixpkgs changes..."
-OLD_REV=$(jq -r '.nodes.nixpkgs.locked.rev' flake.lock.backup 2>/dev/null || echo "unknown")
-NEW_REV=$(jq -r '.nodes.nixpkgs.locked.rev' flake.lock 2>/dev/null || echo "unknown")
+OLD_REV=$(jq -r '.nodes[.nodes.root.inputs.nixpkgs].locked.rev' flake.lock.backup 2>/dev/null || echo "unknown")
+NEW_REV=$(jq -r '.nodes[.nodes.root.inputs.nixpkgs].locked.rev' flake.lock 2>/dev/null || echo "unknown")
 
 if [[ "$OLD_REV" != "unknown" && "$NEW_REV" != "unknown" ]]; then
   echo -e "  ${CYAN}Previous:${NC} ${OLD_REV:0:12}"
@@ -67,10 +67,8 @@ fi
 echo -e "${BLUE}[4/5]${NC} 🔨 Building new system configuration..."
 echo -e "${YELLOW}  This may take a few minutes depending on changes...${NC}"
 
-NEW_SYSTEM=$(nix build ".#nixosConfigurations.${HOSTNAME}.config.system.build.toplevel" \
-  --no-link --print-out-paths 2>&1)
-
-if [[ $? -ne 0 ]]; then
+if ! NEW_SYSTEM=$(nix build ".#nixosConfigurations.${HOSTNAME}.config.system.build.toplevel" \
+  --no-link --print-out-paths 2>&1); then
   echo -e "${RED}✗ Build failed:${NC}"
   echo "$NEW_SYSTEM"
   echo -e "${YELLOW}  Restoring previous flake.lock...${NC}"
