@@ -47,6 +47,26 @@ Phase B runs only after I have read phase A's results. Step 11 stops and
 reports to you instead of committing if its closure diff removes anything
 beyond the Plasma-only packages listed in the step.
 
+## Deviation (2026-10-31, at the user's request: "use more agents if needed to make this faster")
+
+Phase A steps run in parallel, each in its own worktree branched from the
+approved-plan commit, each measured against the baseline (`BASE=baseline`)
+rather than the step before. An integrator then cherry-picks them onto this
+branch in plan order and runs `measure.sh` once more on the combined tree:
+all three drvPaths must still equal the baseline, and p620 and razer must
+build. That final check is what proves the steps do not interact; one
+commit per step and the per-step revert are unchanged.
+
+Two check fixes from the first (sequential) attempt at step 1, which was
+clean on drvPaths and builds:
+- The per-step grep check covers code only (`*.nix`, `*.sh`, `Justfile`,
+  `.github/`). Doc mentions are updated where they instruct the reader and
+  listed in the report otherwise; `.gemini/state/` is generated and left.
+- Codex runs as `codex review --uncommitted` without a custom prompt: this
+  Codex version rejects a prompt combined with `--uncommitted`.
+
+Each step gets one fix round for any failure before it is dropped.
+
 ## Steps
 
 1. **Baseline.** Write `measure.sh` to the scratchpad
