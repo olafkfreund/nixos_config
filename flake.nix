@@ -518,6 +518,7 @@
         let
           pkgs = import nixpkgs {
             system = "x86_64-linux";
+            inherit overlays;
             config = {
               allowUnfree = true;
               permittedInsecurePackages = [
@@ -527,16 +528,11 @@
           };
         in
         {
-          # Custom applications
-          aerion = pkgs.callPackage ./pkgs/aerion { };
-          claude-code-native = pkgs.callPackage ./pkgs/claude-code-native { };
-          codex-bin = pkgs.callPackage ./pkgs/codex-bin { };
-          glim = pkgs.callPackage ./overlays/glim { };
-          intune-portal = pkgs.callPackage ./pkgs/intune-portal { };
-          kosli-cli = pkgs.callPackage ./pkgs/kosli-cli { };
+          # Custom applications (defined once, in overlays/ and pkgs/default.nix)
+          inherit (pkgs) aerion claude-code-native codex-bin glim intune-portal;
+          inherit (pkgs.customPkgs) kosli-cli aurynk;
           # Upstream binary: the nixpkgs build cannot run a prompt (#1859).
           opencode-bin = pkgs.callPackage ./pkgs/opencode-bin { };
-          aurynk = pkgs.callPackage ./pkgs/aurynk { };
 
           # Security tools
           mdatp = pkgs.callPackage ./pkgs/microsoft-defender-for-endpoint {

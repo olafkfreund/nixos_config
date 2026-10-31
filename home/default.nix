@@ -87,7 +87,7 @@
     # pkgs.opencode — and that build cannot run a prompt at all
     # (NixOS/nixpkgs#563241, #1859). pkgs/opencode-bin says when to go back.
     inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.opencode-bin
-    (pkgs.callPackage ../pkgs/weather-popup/default.nix { })
+    pkgs.customPkgs.weather-popup
 
     # tesseract OCR with explicit language packs only — passing
     # enableLanguages = null bundles all ~130 languages (~500MB).
