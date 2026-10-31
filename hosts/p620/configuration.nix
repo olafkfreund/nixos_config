@@ -804,10 +804,6 @@ in
       # Refuse to start on a blank data-root on / when its disk is missing.
       docker.unitConfig.RequiresMountsFor = [ "/mnt/img_pool" ];
       containerd.unitConfig.RequiresMountsFor = [ "/mnt/img_pool" ];
-
-      # Don't restart greetd on rebuild — a switch shouldn't tear down the login
-      # manager mid-session. The new greeter applies at next reboot/logout.
-      greetd.restartIfChanged = false;
     };
 
     # User services

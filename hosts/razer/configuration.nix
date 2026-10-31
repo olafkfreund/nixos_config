@@ -471,11 +471,6 @@ in
     desktopManager.gnome.enable = true;
   };
 
-  # Don't restart greetd on rebuild — a switch shouldn't tear down the login
-  # manager mid-session. Matters more here: this host's greeter-respawn is
-  # fragile (see Optimus note above). New greeter applies at next reboot/logout.
-  systemd.services.greetd.restartIfChanged = false;
-
   # playerctl 2.4.1 can segfault on a player signal (#1987); come back instead of staying failed.
   systemd.user.services.playerctld.serviceConfig.Restart = "on-failure";
 
