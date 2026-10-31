@@ -13,10 +13,6 @@
     randomizedDelaySec = "45min";
     persistent = true;
     allowReboot = false;
-    rebootWindow = {
-      lower = "01:00";
-      upper = "05:00";
-    };
     flake = "github:olafkfreund/nixos_config";
   };
 
