@@ -72,20 +72,8 @@ itself, with `assertions`.
 
 What does exist is
 [`lib/hostTypes.nix`](https://github.com/olafkfreund/nixos_config/blob/main/lib/hostTypes.nix),
-which pre-composes flags for a role. Two types are defined:
-
-| Type | Sets |
-| --- | --- |
-| `workstation` | `development`, `desktop`, `virtualization` |
-| `laptop` | `development`, `desktop`, `virtualization` (no Docker), `powerManagement` |
-
-Both are set with `lib.mkDefault`, so a host that assigns the flag directly
-always wins:
-
-```nix
-# hosts/razer/configuration.nix — overrides the laptop default
-features.virtualization.docker = true;
-```
+which defines two types, `workstation` and `laptop`. Each only supplies the
+desktop template's `imports`; it sets no feature flags.
 
 Each host imports one type plus its own hardware configuration.
 

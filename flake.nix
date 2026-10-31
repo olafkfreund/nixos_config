@@ -41,7 +41,6 @@
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-    flake-utils.url = "github:numtide/flake-utils";
 
     # Environment and theming
     home-manager = {
@@ -256,18 +255,8 @@
       url = "github:nix-community/NUR";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixpkgs-f2k = {
-      url = "github:moni-dz/nixpkgs-f2k";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nix-index-database = {
       url = "github:nix-community/nix-index-database";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # Google Antigravity package
-    antigravity-nix = {
-      url = "github:jacopone/antigravity-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -318,13 +307,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Flow Desktop, a privacy-respecting YouTube client (Issue #2317): our own
-    # flake, built from source. Enabled by features.flow-desktop.
-    flowtube = {
-      url = "github:olafkfreund/nixos-FlowTube";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # flyline — Rust readline replacement for Bash, loaded as a bash loadable
     # builtin (dlopen'd .so, `enable -f .../libflyline.so flyline`). This is
     # what makes bash-as-login-shell viable here: it restores the inline
@@ -370,7 +352,6 @@
     , spicetify-nix
     , home-manager
     , nix-index-database
-    , antigravity-nix
     , ...
     } @ inputs:
     let
@@ -402,7 +383,7 @@
       # ========================================
 
       # Host type templates for configuration reduction (workstation, laptop, server, hybrid)
-      hostTypes = import ./lib/hostTypes.nix { inherit (nixpkgs) lib; };
+      hostTypes = import ./lib/hostTypes.nix;
 
       # Hardware profiles for GPU-specific configurations
       hardwareProfiles = {
@@ -499,7 +480,6 @@
                       nixpkgs
                       spicetify-nix
                       agenix
-                      antigravity-nix
                       host
                       ;
                     username = primaryUser;
@@ -529,11 +509,6 @@
 
         # Laptops (portable systems with power management)
         razer = nixpkgs.lib.nixosSystem (makeNixosSystem "razer"); # Intel/NVIDIA laptop (mobile dev)
-
-        # MicroVM configurations (temporarily disabled for flake restructuring)
-        # dev-vm = microvms.dev-vm;
-        # test-vm = microvms.test-vm;
-        # playground-vm = microvms.playground-vm;
       };
 
       # ========================================
@@ -554,9 +529,6 @@
         {
           # Custom applications
           aerion = pkgs.callPackage ./pkgs/aerion { };
-          claude-code = import ./home/development/claude-code {
-            inherit (pkgs) lib buildNpmPackage fetchurl nodejs makeWrapper writeShellScriptBin;
-          };
           claude-code-native = pkgs.callPackage ./pkgs/claude-code-native { };
           codex-bin = pkgs.callPackage ./pkgs/codex-bin { };
           glim = pkgs.callPackage ./overlays/glim { };
@@ -565,7 +537,6 @@
           # Upstream binary: the nixpkgs build cannot run a prompt (#1859).
           opencode-bin = pkgs.callPackage ./pkgs/opencode-bin { };
           aurynk = pkgs.callPackage ./pkgs/aurynk { };
-          # add-skill = pkgs.callPackage ./pkgs/add-skill { };
 
           # Security tools
           mdatp = pkgs.callPackage ./pkgs/microsoft-defender-for-endpoint {
@@ -575,38 +546,6 @@
           # Enterprise tools
           # NOTE: citrix-workspace is provided via overlay (overlays/citrix-workspace.nix)
           # It requires manual tarball download - see pkgs/citrix-workspace/fetch-citrix.sh
-
-          # Icon themes
-          neuwaita-icon-theme = pkgs.stdenvNoCC.mkDerivation {
-            pname = "neuwaita-icon-theme";
-            version = "unstable-2025-01-15";
-
-            src = pkgs.fetchFromGitHub {
-              owner = "RusticBard";
-              repo = "Neuwaita";
-              rev = "4c63e30493ab34558539104309282877ab767798";
-              hash = "sha256-NL8/ceugdGNSMpa8G/a4Eolutf5BcN6PXiQ9qDmHM1U=";
-            };
-
-            dontBuild = true;
-            dontConfigure = true;
-
-            installPhase = ''
-              runHook
-              preInstall
-              mkdir - p $out/share/icons/Neuwaita
-              cp - r * $out/share/icons/Neuwaita/
-              rm - rf $out/share/icons/Neuwaita/.git *
-              runHook postInstall
-            '';
-
-            meta = with pkgs.lib; {
-              description = "A different take on the Adwaita icon theme";
-              homepage = "https://github.com/RusticBard/Neuwaita";
-              license = licenses.gpl3Plus;
-              platforms = platforms.linux;
-            };
-          };
 
           # Documentation site (MkDocs Material, built reproducibly)
           docs = pkgs.callPackage ./docs_gen/site.nix { };

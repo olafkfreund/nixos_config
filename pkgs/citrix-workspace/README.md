@@ -64,7 +64,6 @@ just quick-deploy razer
 
 - `fetch-citrix.sh` - Download helper and hash calculator
 - `update-hashes.sh` - Automatic hash updater for configuration files
-- `default.nix` - Package definition
 - `.gitignore` - Excludes binary tarballs from git
 - `linuxx64-2508.10.tar.gz` - Main package (you download - includes USB support)
 - `README.md` - This file
@@ -84,7 +83,6 @@ just quick-deploy razer
 A: Download the latest version and update these files:
 
 - `fetch-citrix.sh` - Change `VERSION="2508.10"`
-- `default.nix` - Change `version = "2508.10";`
 - `../../overlays/citrix-workspace.nix` - Change `version = "2508.10";`
 
 **Q: Do I need the separate USB .deb package?**

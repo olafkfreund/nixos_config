@@ -155,18 +155,6 @@ services.tailscale = {
   enable = true;
 };
 
-# Configure network-stability with DNS control
-services.network-stability = {
-  enable = true;
-  secureDns = {
-    enable = true;
-    providers = [
-      "1.1.1.1#cloudflare-dns.com"
-      "8.8.8.8#dns.google"
-    ];
-  };
-};
-
 # Then run: sudo tailscale up --accept-dns=false
 ```
 
@@ -520,48 +508,6 @@ sudo tailscale netcheck | grep -E "DERP|Latency"
 
 echo -e "\n=== Service Status ==="
 systemctl is-active tailscaled
-```
-
-### 3. Integration with Network Stability
-
-**Tailscale + Network Stability Module:**
-
-```nix
-# Enable comprehensive monitoring
-services.network-stability = {
-  enable = true;
-
-  # Monitor DNS and network health
-  monitoring = {
-    enable = true;
-    interval = 30;  # Check every 30 seconds
-  };
-
-  # Secure DNS to avoid conflicts
-  secureDns = {
-    enable = true;
-    providers = [
-      "1.1.1.1#cloudflare-dns.com"
-      "8.8.8.8#dns.google"
-    ];
-  };
-
-  # Stability improvements
-  connectionStability = {
-    enable = true;
-    switchDelayMs = 5000;
-  };
-};
-
-# Tailscale with DNS control
-services.tailscale = {
-  enable = true;
-  useRoutingFeatures = "both";
-  openFirewall = true;
-};
-
-# Disable Tailscale DNS management
-# Run: sudo tailscale up --accept-dns=false
 ```
 
 ### 4. Automated Health Checks
@@ -999,8 +945,6 @@ systemctl enable tailscaled
 ### Current Repository
 
 - `home/network/tailscale.nix` - Current Tailscale module
-- `hosts/p620/nixos/network-stability.nix` - Network stability integration
-- `modules/services/network-stability.nix` - Network stability service
 - `AGENTS.md` - Project-specific patterns and conventions
 
 ## Skill Usage

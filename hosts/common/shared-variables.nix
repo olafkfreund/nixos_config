@@ -22,9 +22,6 @@
     };
   };
 
-  # Centralized network mappings (100% identical across all hosts)
-  network = { };
-
   # Base environment variables (85% common across hosts)
   baseEnvironment = {
     MOZ_ENABLE_WAYLAND = "1";
@@ -42,9 +39,8 @@
   # `host.theme.wallpaper` in modules/desktop/stylix-theme.nix as an
   # override that defaults to baseTheme.wallpaper.
   baseTheme = {
-    # `scheme` is a display name only (cosmic-theme.nix stamps it into COSMIC's
-    # theme file). `schemeFile` is what Stylix actually reads — a local base16
-    # yaml rather than a name in pkgs.base16-schemes.
+    # `scheme` is a display name only. `schemeFile` is what Stylix actually reads —
+    # a local base16 yaml rather than a name in pkgs.base16-schemes.
     scheme = "alien-hud";
     schemeFile = ../../assets/themes/alien-hud.yaml;
     wallpaper = ../../assets/wallpapers/alien-plate-03.png;

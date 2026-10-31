@@ -5,7 +5,6 @@ This directory contains the NixOS configuration for the P620 workstation, which 
 ## Configuration Structure
 
 - `configuration.nix` - Main system configuration file
-- `nixos-options.nix` - System-specific option overrides
 - `nixos/` - NixOS-specific configurations
   - `hardware-configuration.nix` - Generated hardware configuration
   - `boot.nix` - Boot loader and kernel configuration
@@ -13,8 +12,6 @@ This directory contains the NixOS configuration for the P620 workstation, which 
   - `power.nix` - Power management settings
   - `i18n.nix` - Internationalization settings
   - `envvar.nix` - Environment variables
-  - `greetd.nix` - Login manager configuration
-  - `hosts.nix` - Network host entries
   - `mpd.nix` - Music Player Daemon configuration
   - `screens.nix` - Display configuration
   - `syncthing.nix` - Syncthing file synchronization configuration

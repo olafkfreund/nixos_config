@@ -5,7 +5,6 @@ This directory contains the NixOS configuration for the Razer laptop.
 ## Configuration Structure
 
 - `configuration.nix` - Main system configuration file
-- `nixos-options.nix` - System-specific option overrides
 - `nixos/` - NixOS-specific configurations
   - `hardware-configuration.nix` - Generated hardware configuration
   - `boot.nix` - Boot loader and kernel configuration
@@ -13,8 +12,6 @@ This directory contains the NixOS configuration for the Razer laptop.
   - `power.nix` - Advanced power management settings for laptop
   - `i18n.nix` - Internationalization settings
   - `envvar.nix` - Environment variables
-  - `greetd.nix` - Login manager configuration
-  - `hosts.nix` - Network host entries
   - `screens.nix` - Display configuration
 - `themes/` - Theme configurations
 

@@ -20,7 +20,6 @@ in
     ./nixos/shim.nix # Microsoft-signed shim + MOK enrollment for Razer's locked PK (issue #376)
     ./nixos/nvidia.nix
     ../common/nixos/i18n.nix
-    ../common/nixos/hosts.nix
     ../common/nixos/envvar.nix
     ../common/nixos/host-class.nix
     ../common/nixos/zfs-import.nix
@@ -209,10 +208,6 @@ in
       gnupg = true;
     };
 
-    networking = {
-      enable = true;
-    };
-
     # Syncthing for ~/.claude and ~/.gemini sync across hosts
     syncthing = {
       enable = true;
@@ -359,7 +354,6 @@ in
     enable = true;
     settings.ui."preview-enabled" = true;
   };
-  # features.flow-desktop.enable = true;
 
   # ddcutil: software brightness/contrast control of external monitors (DDC/CI).
   modules.hardware.ddcutil.enable = true;
@@ -439,7 +433,6 @@ in
   # Enable encrypted API keys
   secrets.apiKeys = {
     enable = true;
-    enableEnvironmentVariables = true;
     enableUserEnvironment = true;
     braveSearch = true;
   };
@@ -462,8 +455,6 @@ in
   services = {
 
     # GNOME Remote Desktop configuration moved to features.gnome-remote-desktop
-
-    secure-dns.enable = false;
 
     # X server and desktop environment
     xserver = {
@@ -537,7 +528,6 @@ in
   # Enable secrets management
   modules.security.secrets = {
     enable = true;
-    userKeys = [ "/home/${vars.username}/.ssh/id_ed25519" ];
   };
 
   users.users = lib.genAttrs hostUsers (username: {
@@ -627,9 +617,6 @@ in
       # qzed/pbpctrl "Doesn't work on A-Series" has been open since 2023.
       # Installed deliberately anyway, ready for Pixel Buds Pro hardware.
       pbpctrl # Pixel Buds Pro control (battery, noise-cancelling, EQ)
-
-      # Login manager (from greetd.nix)
-      tuigreet
 
       # Secure Boot management (from secure-boot.nix) - only when secure boot enabled
     ]

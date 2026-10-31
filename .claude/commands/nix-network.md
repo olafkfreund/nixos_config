@@ -2,34 +2,27 @@
 
 Comprehensive network monitoring, diagnostics, and stability management across all infrastructure hosts.
 
-**Replaces Justfile recipes**: `network-monitor`, `network-check`, `ping-hosts`, `status-all`
+**Replaces Justfile recipes**: `network-monitor`, `ping-hosts`, `status-all`
 
 ## Quick Usage
 
 **Monitor network continuously**:
 
-```
+```text
 /nix-network
 Monitor network
 ```
 
-**Check network stability**:
-
-```
-/nix-network
-Check stability
-```
-
 **Ping all hosts**:
 
-```
+```text
 /nix-network
 Ping all hosts
 ```
 
 **Show host status**:
 
-```
+```text
 /nix-network
 Status all hosts
 ```
@@ -48,17 +41,6 @@ Status all hosts
 - ✅ Interface addition/removal detection
 - ✅ Route table change tracking
 - ✅ 10-second check intervals
-
-**Check Stability** (continuous service):
-
-- ✅ Network interface change detection
-- ✅ Automatic DNS resolution recovery
-- ✅ systemd-resolved restart on DNS failures
-- ✅ Application notification system
-- ✅ Event logging to systemd journal
-- ✅ 5-second stability checks
-- ✅ Network stabilization measures
-- ✅ Background service operation
 
 **Ping Hosts** (instant):
 
@@ -119,20 +101,6 @@ tail -f ~/network-monitor.log
 # 3. Stop monitoring (Ctrl+C)
 ```
 
-### Stability Service Setup
-
-```bash
-# 1. Enable network stability checking
-/nix-network
-Check stability
-
-# 2. Check service status
-systemctl status network-stability
-
-# 3. View service logs
-journalctl -u network-stability -f
-```
-
 ### Quick Host Check
 
 ```bash
@@ -157,7 +125,7 @@ Status all hosts
 
 ### Monitor Network Output
 
-```
+```text
 🌐 Network Stability Monitor
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -200,7 +168,7 @@ Press Ctrl+C to stop monitoring
 
 ### Network Change Detected Output
 
-```
+```text
 2025-01-15 10:24:15 - Network interface change detected:
 2025-01-15 10:24:15 - Before:
 2025-01-15 10:24:15 -   eth0    UP    192.168.1.100/24
@@ -219,7 +187,7 @@ Press Ctrl+C to stop monitoring
 
 ### DNS Resolution Failure Output
 
-```
+```text
 2025-01-15 10:25:30 - DNS resolution failed for cloudflare.com
 2025-01-15 10:25:30 - DNS resolution issues detected
 2025-01-15 10:25:32 - Restarting systemd-resolved
@@ -235,15 +203,6 @@ Press Ctrl+C to stop monitoring
 ./scripts/network-monitor.sh
 
 # - Rotates logs at 10MB
-```
-
-### Check Stability Command
-
-```bash
-# Run stability helper as background service
-./scripts/network-stability-helper.sh &
-
-# - Logs to systemd journal
 ```
 
 ### Ping Hosts Command
@@ -369,13 +328,6 @@ Monitor network
 
 # 2. Watch for interface events in real-time
 tail -f ~/network-monitor.log
-
-# 3. Enable stability service
-/nix-network
-Check stability
-
-# 4. Check if issues persist
-journalctl -u network-stability -f
 ```
 
 ### Network Instability
@@ -384,13 +336,9 @@ journalctl -u network-stability -f
 # 1. Enable both monitoring tools
 /nix-network
 Monitor network
-# (In another terminal)
-/nix-network
-Check stability
 
 # 2. Review logs for patterns
 tail -100 ~/network-monitor.log
-journalctl -u network-stability -n 100
 
 # - Route metric conflicts
 ```
@@ -444,10 +392,6 @@ Deploy to p620
 /nix-network
 Status all hosts
 
-# If network unstable, enable stability
-/nix-network
-Check stability
-
 # Monitor network during infrastructure changes
 /nix-network
 Monitor network
@@ -472,31 +416,5 @@ Ping all hosts
 - `/nix-validate` - Validation may check network configuration
 
 ---
-
-**Pro Tip**: Enable network stability checking as a systemd service for continuous monitoring:
-
-```bash
-# Create systemd service
-sudo systemctl edit --force --full network-stability.service
-
-# Add:
-[Unit]
-Description=Network Stability Monitor
-After=network.target
-
-[Service]
-Type=simple
-ExecStart=/home/olafkfreund/.config/nixos/scripts/network-stability-helper.sh
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-
-# Enable and start
-sudo systemctl enable --now network-stability.service
-
-# Check status
-systemctl status network-stability
-```
 
 Monitor your network proactively for stable infrastructure! 🌐

@@ -23,7 +23,6 @@ in
     ./nixos/dns-fallback.nix # systemd-resolved with public DNS fallback (issue #564)
     ./nixos/tailscale-serve.nix # Tailscale Serve for /router (LiteLLM, Phase 2)
     ../common/nixos/i18n.nix
-    ../common/nixos/hosts.nix
     ../common/nixos/envvar.nix
     ../common/nixos/host-class.nix
     ../common/nixos/zfs-import.nix
@@ -306,10 +305,6 @@ in
       gnupg = true;
     };
 
-    networking = {
-      enable = true;
-    };
-
     # Syncthing for ~/.claude and ~/.gemini sync across hosts
     syncthing = {
       enable = true;
@@ -409,11 +404,6 @@ in
 
     media = {
       droidcam = false; # Disabled - building custom solution
-    };
-
-    # Enable QuickShell for testing (experimental - runs alongside Waybar)
-    quickshell = {
-      enable = true;
     };
 
     # COSMIC disabled — sticking with GNOME only until COSMIC is more
@@ -526,7 +516,6 @@ in
     enable = true;
     settings.ui."preview-enabled" = true;
   };
-  # features.flow-desktop.enable = true;
 
   # ddcutil: software brightness/contrast control of external monitors (DDC/CI).
   modules.hardware.ddcutil.enable = true;
@@ -551,7 +540,6 @@ in
 
   secrets.apiKeys = {
     enable = true; # Re-enabled after recreating secrets with current SSH keys
-    enableEnvironmentVariables = true;
     enableUserEnvironment = true;
     braveSearch = true;
   };
@@ -598,7 +586,6 @@ in
   # Enable secrets management
   modules.security.secrets = {
     enable = true;
-    userKeys = [ "/home/${vars.username}/.ssh/id_ed25519" ];
   };
 
   # Create system users for all host users
@@ -642,9 +629,6 @@ in
       checkInterval = "monthly"; # Check for updates monthly
       enableMotd = false; # MOTD disabled - /etc is immutable in NixOS
     };
-
-    # Disable secure-dns to allow NetworkManager to manage DNS directly
-    secure-dns.enable = false;
 
     # GNOME Remote Desktop - Enable RDP and VNC access
     gnome.gnome-remote-desktop = {
@@ -858,12 +842,10 @@ in
       enable = true;
       readaheadOptimization = true;
       cacheOptimization = true;
-      compressionOptimization = false; # Disable for performance
     };
 
     nvmeOptimization = {
       enable = true;
-      queueDepth = 64; # High queue depth for performance
       polling = true;
       multiQueue = true;
     };
@@ -872,7 +854,6 @@ in
       enable = true;
       writeCache = true;
       readCache = true;
-      barrierOptimization = false; # Keep safe
     };
 
     tmpfsOptimization = {
@@ -928,7 +909,7 @@ in
       "electron-35.7.5" # Temporary: Required until upstream packages migrate to newer electron
       "electron-39.8.10" # Newly marked EOL after nixpkgs bump on 2026-06-01 — still pulled in by some upstream package, audit + drop later
       "electron-40.10.5" # Newly marked insecure after nixpkgs bump on 2026-07-15 — still pulled in by some upstream package, audit + drop later
-      "pnpm-10.29.2" # Newly marked insecure after nixpkgs bump on 2026-06-30 — pulled in by dev package set (modules/packages/sets.nix), audit + drop later
+      "pnpm-10.29.2" # Newly marked insecure after nixpkgs bump on 2026-06-30 — pulled in by dev package set, audit + drop later
     ];
   };
 

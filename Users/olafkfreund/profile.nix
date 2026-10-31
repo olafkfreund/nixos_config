@@ -128,11 +128,6 @@ in
       tmux = true;
     };
 
-    gaming = {
-      enable = true;
-      steam = true;
-    };
-
     development = {
       enable = true;
       languages = true;

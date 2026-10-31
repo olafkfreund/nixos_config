@@ -28,11 +28,6 @@
   # Networking
   hostName = "hostname"; # Replace with actual hostname
   nameservers = [ "1.1.1.1" "8.8.8.8" ];
-  hostMappings = {
-    # Add IP to hostname mappings for your local network
-    # "192.168.1.127" = "hostname1";
-    # "192.168.1.96" = "hostname2";
-  };
 
   # Locale and time
   timezone = "Europe/London";

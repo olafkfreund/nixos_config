@@ -73,10 +73,6 @@ userGroups = [
 ```nix
 hostName = "hostname";
 nameservers = [ "1.1.1.1" "8.8.8.8" ];
-hostMappings = {
-  "192.168.1.127" = "hostname1";
-  "192.168.1.96" = "hostname2";
-};
 ```
 
 ### Locale and Time
@@ -132,7 +128,6 @@ The following configuration files typically use variables from `variables.nix`:
 
 - `configuration.nix` - Main system configuration
 - `nixos/i18n.nix` - Locale and timezone settings
-- `nixos/hosts.nix` - Network host mappings
 - `nixos/envvar.nix` - Environment variables
 - `themes/stylix.nix` - Theme configuration
 - `nixos/screens.nix` - Monitor configuration

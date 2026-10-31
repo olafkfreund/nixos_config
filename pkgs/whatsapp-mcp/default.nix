@@ -141,13 +141,11 @@ stdenv.mkDerivation {
       --prefix PATH : ${lib.makeBinPath [ whatsappBridge ]} \
       --set WHATSAPP_BRIDGE_BIN ${whatsappBridge}/bin/whatsapp-bridge
 
-    # Optional: FFmpeg for voice message conversion
-    ${lib.optionalString (ffmpeg != null) ''
-      makeWrapper $out/bin/whatsapp-mcp-server $out/bin/whatsapp-mcp-server-ffmpeg \
-        --prefix PATH : ${lib.makeBinPath [ whatsappBridge ffmpeg ]} \
-        --set WHATSAPP_BRIDGE_BIN ${whatsappBridge}/bin/whatsapp-bridge \
-        --set FFMPEG_BIN ${ffmpeg}/bin/ffmpeg
-    ''}
+    # FFmpeg for voice message conversion
+    makeWrapper $out/bin/whatsapp-mcp-server $out/bin/whatsapp-mcp-server-ffmpeg \
+      --prefix PATH : ${lib.makeBinPath [ whatsappBridge ffmpeg ]} \
+      --set WHATSAPP_BRIDGE_BIN ${whatsappBridge}/bin/whatsapp-bridge \
+      --set FFMPEG_BIN ${ffmpeg}/bin/ffmpeg
 
     runHook postInstall
   '';

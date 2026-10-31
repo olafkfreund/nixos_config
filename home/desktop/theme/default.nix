@@ -3,7 +3,6 @@
   imports = [
     ./qt.nix
     ./dark-mode.nix # Global dark mode configuration for all desktop environments
-    ./cosmic-theme.nix # COSMIC accent colour from central base16 scheme
   ];
 
   # No icon package here. modules/desktop/stylix-theme.nix installs

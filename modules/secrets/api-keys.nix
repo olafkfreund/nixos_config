@@ -16,12 +16,6 @@ in
   options.secrets.apiKeys = {
     enable = mkEnableOption "Enable encrypted API keys management";
 
-    enableEnvironmentVariables = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Export API keys as environment variables system-wide";
-    };
-
     enableUserEnvironment = mkOption {
       type = types.bool;
       default = true;
@@ -293,7 +287,6 @@ in
         # Check environment variables
         [ -n "$OLLAMA_API_KEY" ] && echo "✅ Ollama Cloud: Available" || echo "❌ Ollama Cloud: Not available"
         [ -n "$DAILY_DEV_TOKEN" ] && echo "✅ daily.dev: Available" || echo "❌ daily.dev: Not available"
-        [ -n "$LANGCHAIN_API_KEY" ] && echo "✅ LangChain: Available" || echo "❌ LangChain: Not available"
         [ -n "$GITHUB_API_TOKEN" ] && echo "✅ GitHub API Token: Available" || echo "❌ GitHub API Token: Not available"
 
         echo ""

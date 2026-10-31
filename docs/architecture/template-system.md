@@ -51,21 +51,10 @@ Profile-specific behaviour is applied with `lib.mkIf`.
 
 ## How a host wires in
 
-`lib/hostTypes.nix` wraps the template and layers on sensible feature defaults
-that a host can still override with `mkForce`:
+`lib/hostTypes.nix` wraps the template as an `imports` list:
 
 ```nix
-workstation = {
-  imports = [ (desktopTemplate "workstation") ];
-  config = {
-    aiDefaults.profile = "workstation";
-    features = {
-      development.enable = lib.mkDefault true;
-      desktop.enable = lib.mkDefault true;
-      virtualization.enable = lib.mkDefault true;
-    };
-  };
-};
+workstation.imports = [ (desktopTemplate "workstation") ];
 ```
 
 A host's `configuration.nix` then imports the host type and declares only what

@@ -4,7 +4,6 @@
 }: {
   imports = [
     ./profile.nix
-    ../../home/desktop/wayland # Hyprland session config
   ];
 
   desktop.gnome.profile = "workstation";
@@ -17,7 +16,6 @@
   features.desktop.obsidian = true;
   features.desktop.aerion = true;
   features.desktop.waylandScreenshots = true;
-  features.desktop.quickshell = true;
 
   # GitLab runner enabled on the workstation (AC-powered)
   development.gitlab.runner.enable = true;

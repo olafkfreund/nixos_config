@@ -54,22 +54,10 @@ in
         default = true;
         description = "Enable filesystem cache optimization";
       };
-
-      compressionOptimization = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Enable filesystem compression optimization";
-      };
     };
 
     nvmeOptimization = {
       enable = mkEnableOption "Enable NVMe-specific optimizations";
-
-      queueDepth = mkOption {
-        type = types.int;
-        default = 32;
-        description = "NVMe queue depth optimization";
-      };
 
       polling = mkOption {
         type = types.bool;
@@ -97,12 +85,6 @@ in
         type = types.bool;
         default = true;
         description = "Enable read cache optimization";
-      };
-
-      barrierOptimization = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Disable write barriers for performance (unsafe)";
       };
     };
 
@@ -337,87 +319,8 @@ in
         };
       };
 
-      # Storage Performance Monitor
-      services.storage-performance-monitor = {
-        description = "Storage Performance Monitor";
-        after = [ "storage-performance-optimizer.service" ];
-        wants = [ "storage-performance-optimizer.service" ];
-        wantedBy = [ "multi-user.target" ];
-
-        serviceConfig = {
-          Type = "simple";
-          User = "root";
-          Restart = "always";
-          RestartSec = "30s";
-          Environment = [
-            "PATH=${lib.makeBinPath (with pkgs; [
-            sysstat # iostat
-            gawk # awk
-            coreutils # basic utilities
-            util-linux # lsblk
-            procps # general process utilities
-            gnugrep # grep
-            gnused # sed
-          ])}"
-          ];
-          ExecStart = pkgs.writeShellScript "storage-performance-monitor" ''
-                      #!/bin/bash
-
-                      METRICS_FILE="/var/lib/storage-tuning/metrics.json"
-                      mkdir -p "$(dirname "$METRICS_FILE")"
-
-                      while true; do
-                        TIMESTAMP=$(date -Iseconds)
-
-                        # Collect I/O statistics
-                        IO_STATS=$(iostat -x 1 1 | tail -n +4 | while read line; do
-                          if [[ "$line" =~ ^[a-zA-Z] ]]; then
-                            DEVICE=$(echo "$line" | awk '{print $1}')
-                            UTIL=$(echo "$line" | awk '{print $NF}')
-                            AWAIT=$(echo "$line" | awk '{print $(NF-1)}')
-                            IOPS=$(echo "$line" | awk '{print $4+$5}')
-                            echo "\"$DEVICE\": {\"utilization\": \"$UTIL\", \"await\": \"$AWAIT\", \"iops\": \"$IOPS\"}"
-                          fi
-                        done | paste -sd, -)
-
-                        # Disk usage information
-                        DISK_USAGE=$(df -h | grep -E '^/dev/' | while read line; do
-                          DEVICE=$(echo "$line" | awk '{print $1}')
-                          USAGE=$(echo "$line" | awk '{print $5}' | sed 's/%//')
-                          MOUNT=$(echo "$line" | awk '{print $6}')
-                          echo "\"$DEVICE\": {\"usage_percent\": $USAGE, \"mount\": \"$MOUNT\"}"
-                        done | paste -sd, -)
-
-                        # Memory usage for caching
-                        CACHE_STATS=$(free -b | grep -E '^(Mem|Buffers|Cached)' | awk '
-                          /^Mem:/ { total=$2; used=$3; free=$4; available=$7 }
-                          END {
-                            cache_used = total - available - free
-                            cache_percent = (cache_used * 100) / total
-                            printf "\"cache_used_bytes\": %d, \"cache_percent\": %.1f", cache_used, cache_percent
-                          }
-                        ')
-
-                        # Create metrics JSON
-                        cat > "$METRICS_FILE" << EOF
-                        {
-                          "timestamp": "$TIMESTAMP",
-                          "io_devices": { $IO_STATS },
-                          "disk_usage": { $DISK_USAGE },
-                          "cache_stats": { $CACHE_STATS },
-                          "profile": "${cfg.profile}"
-                        }
-            EOF
-
-                        sleep 60
-                      done
-          '';
-        };
-      };
-
       # Create directories
       tmpfiles.rules = [
-        "d /var/lib/storage-tuning 0755 root root -"
         "d /var/log/storage-tuning 0755 root root -"
       ];
     };

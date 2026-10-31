@@ -30,7 +30,6 @@ Quick reference for all available NixOS development commands.
 **`/nix-test`** - Testing suite (NEW!)
 
 - Build testing for single or all hosts
-- Home Manager configuration testing
 - Secret access verification
 - Module structure testing
 - Modes: single-host, all-hosts, parallel, ci
@@ -43,7 +42,6 @@ Quick reference for all available NixOS development commands.
 
 - Garbage collection (standard, aggressive)
 - Store optimization (deduplication)
-- Dead code removal
 - Generation management
 - Modes: standard (30s), aggressive (2min), full (5min)
 - Replaces: gc, gc-aggressive, optimize, and 3 more recipes
@@ -73,16 +71,6 @@ Quick reference for all available NixOS development commands.
 - Replaces: pre-commit-install, pre-commit-run, pre-commit-staged, and 3 more recipes
 - Time: 5s (install) to 30s (run-all)
 
-**`/nix-microvm`** - MicroVM development environments (NEW!)
-
-- Manage 3 VMs: dev-vm, test-vm, playground-vm
-- List, start, stop, SSH, restart VMs
-- Each VM: 8GB RAM, 4 CPU cores, persistent storage
-- SSH ports: 2222 (dev), 2223 (test), 2224 (playground)
-- Features: Full dev stack, testing sandbox, experimental tools
-- Replaces: list-microvms, stop-all-microvms, clean-microvms, test-all-microvms, microvm-help
-- Time: 30s (start) to 5s (list)
-
 **`/nix-secrets`** - Secrets management (NEW!)
 
 - Create, edit, list, rekey encrypted secrets
@@ -96,11 +84,11 @@ Quick reference for all available NixOS development commands.
 **`/nix-network`** - Network monitoring and diagnostics (NEW!)
 
 - Monitor network continuously with logging
-- Check network stability and DNS
+- Check DNS
 - Ping all infrastructure hosts
 - Show comprehensive host status
-- Features: Interface monitoring, DNS recovery, auto-stabilization
-- Replaces: network-monitor, network-check, ping-hosts, status-all
+- Features: Interface monitoring
+- Replaces: network-monitor, ping-hosts, status-all
 - Time: instant (ping) to continuous (monitor)
 
 ### Module Development
@@ -311,7 +299,6 @@ Fast deploy to p620
 | Clean up disk            | `/nix-clean`        | 30s-5min           |
 | Check system info        | `/nix-info`         | 5-30s              |
 | Manage pre-commit hooks  | `/nix-precommit`    | 5-30s              |
-| Manage MicroVMs          | `/nix-microvm`      | 5-30s              |
 | Manage secrets           | `/nix-secrets`      | 5s-1min            |
 | Network diagnostics      | `/nix-network`      | instant-continuous |
 | Create new module        | `/nix-module`       | 2min               |

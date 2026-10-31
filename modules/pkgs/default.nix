@@ -7,7 +7,7 @@
     kdePackages.polkit-kde-agent-1
     qt5.qtgraphicaleffects
 
-    # Development tools (core tools like git, curl, jq are in nixos/packages/core.nix)
+    # Development tools
     openssl
     gcc
     gdb

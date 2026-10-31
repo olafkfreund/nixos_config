@@ -1006,29 +1006,14 @@ home-manager.users.alice = { pkgs, ... }: {
 Capability flags live under the `features.*` namespace declared by modules.
 A host does not enumerate them one by one — it imports a host type from
 [`lib/hostTypes.nix`](https://github.com/olafkfreund/nixos_config/blob/main/lib/hostTypes.nix),
-which sets sensible `mkDefault` values:
+which supplies the desktop template's imports:
 
 ```nix
 # lib/hostTypes.nix
-laptop = {
-  imports = [ (desktopTemplate "laptop") ];
-  config = {
-    aiDefaults.profile = "laptop";
-    features = {
-      development.enable = lib.mkDefault true;
-      desktop.enable = lib.mkDefault true;
-      virtualization = {
-        enable = lib.mkDefault true;
-        docker = lib.mkDefault false;
-      };
-      powerManagement.enable = lib.mkDefault true;
-    };
-  };
-};
+laptop.imports = [ (desktopTemplate "laptop") ];
 ```
 
-The host then overrides only what differs, because `mkDefault` yields to a
-plain assignment:
+The host then sets only what differs:
 
 ```nix
 # hosts/razer/configuration.nix

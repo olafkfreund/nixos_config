@@ -30,7 +30,6 @@ in
       ./nixos/cpu.nix
       ./nixos/memory.nix
       ./nixos/resilience.nix # Watchdog + sshd limits + oomd (post-2026-07-08 freeze)
-      ../common/nixos/hosts.nix
       ./nixos/plex.nix
       ./flaresolverr.nix # Cloudflare-bypass proxy for Prowlarr (used by 1337x and any other CF-protected indexer)
 
@@ -141,10 +140,6 @@ in
       enable = true;
       onepassword = true;
       gnupg = true;
-    };
-
-    networking = {
-      enable = true;
     };
 
     # Syncthing for ~/.claude and ~/.gemini sync across hosts
@@ -384,7 +379,6 @@ in
   # Enable encrypted API keys
   secrets.apiKeys = {
     enable = true;
-    enableEnvironmentVariables = true;
     enableUserEnvironment = true;
   };
 
@@ -401,7 +395,6 @@ in
     deleteOlderThan = "30d";
     keepGenerations = 5;
     optimizeStore = true;
-    minFreeSpace = 20; # Keep at least 20GB free
     aggressiveCleanup = false;
   };
 
@@ -466,16 +459,7 @@ in
   # Ensure display manager is enabled in systemd
   systemd.targets.graphical.wants = [ "display-manager.service" ];
 
-  # Fix GNOME Shell GDM typelib issue - multiple approaches
-  environment.sessionVariables.GI_TYPELIB_PATH = "${pkgs.gdm}/lib/girepository-1.0";
-
-  # Add GSettings schema path for GDM login screen
-  environment.sessionVariables.GSETTINGS_SCHEMA_DIR = "${pkgs.gdm}/share/gsettings-schemas/gdm-${pkgs.gdm.version}/glib-2.0/schemas";
-
   environment.systemPackages = with pkgs; [
-    gdm # Provides the Gdm-1.0 typelib required by GNOME Shell
-    gnome-control-center # Provides login-screen schema
-    gnome-settings-daemon # Additional GNOME schemas
     # Qt theme control tools for Stylix
     libsForQt5.qt5ct
     kdePackages.qt6ct
@@ -492,8 +476,6 @@ in
   environment.variables = {
     EXTRA_LDFLAGS = "-L/run/opengl-driver/lib";
     EXTRA_CCFLAGS = "-I/run/opengl-driver/include";
-    GI_TYPELIB_PATH = "${pkgs.gdm}/lib/girepository-1.0";
-    GSETTINGS_SCHEMA_DIR = "${pkgs.gdm}/share/gsettings-schemas/gdm-${pkgs.gdm.version}/glib-2.0/schemas";
   };
 
   # Docker configuration

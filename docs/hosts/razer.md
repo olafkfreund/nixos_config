@@ -52,7 +52,7 @@ the full development environment so it is a first-class dev box on the move.
 ## Hardware notes
 
 Under `hosts/razer/nixos/`: NVIDIA/Optimus setup, the laptop tuning
-(`laptop.nix`), `greetd.nix`, boot/CPU/memory/power, and the Secure Boot chain
+(`laptop.nix`), boot/CPU/memory/power, and the Secure Boot chain
 (`secure-boot.nix`, `shim.nix`). See the
 [razer manifest](../reference/hosts/razer.md).
 

@@ -43,10 +43,6 @@ let inherit (lib) mkOption mkEnableOption types; in {
       gnupg = mkEnableOption "Enable GnuPG";
     };
 
-    networking = {
-      enable = mkEnableOption "Enable networking";
-    };
-
     ai = {
       enable = mkEnableOption "Enable AI tools";
       antigravity-cli = mkEnableOption "Enable Google Antigravity CLI (agy) — replaces gemini-cli (EOL 2026-06-18)";
@@ -119,11 +115,6 @@ let inherit (lib) mkOption mkEnableOption types; in {
 
     media = {
       droidcam = mkEnableOption "Enable DroidCam";
-    };
-
-    # QuickShell desktop shell (experimental)
-    quickshell = {
-      enable = mkEnableOption "Enable QuickShell desktop shell (runs alongside Waybar for testing)";
     };
   };
 }

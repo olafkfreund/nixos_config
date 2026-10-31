@@ -2,33 +2,33 @@
 
 Comprehensive cleanup operations for Nix store, old generations, and system maintenance.
 
-**Replaces Justfile recipes**: `gc`, `gc-aggressive`, `optimize`, `full-cleanup`, `clean-all`, `cleanup-dead-code`
+**Replaces Justfile recipes**: `gc`, `gc-aggressive`, `optimize`, `full-cleanup`, `clean-all`
 
 ## Quick Usage
 
 **Standard garbage collection** (30 seconds):
 
-```
+```text
 /nix-clean
 ```
 
 **Aggressive cleanup** (2 minutes):
 
-```
+```text
 /nix-clean
 Aggressive cleanup
 ```
 
 **Full cleanup** (5 minutes):
 
-```
+```text
 /nix-clean
 Full cleanup
 ```
 
 **Optimize store** (3 minutes):
 
-```
+```text
 /nix-clean
 Optimize store
 ```
@@ -73,21 +73,21 @@ Optimize store
 
 **Remove Old Generations**:
 
-```
+```text
 /nix-clean
 Remove generations older than 30 days
 ```
 
 **Clean Dead Code**:
 
-```
+```text
 /nix-clean
 Remove dead code
 ```
 
 **Verify Store**:
 
-```
+```text
 /nix-clean
 Verify store integrity
 ```
@@ -166,9 +166,6 @@ nix-collect-garbage -d --delete-older-than 7d
 # Optimize store (deduplication)
 nix-store --optimize
 
-# Remove dead code
-just _cleanup-dead-code
-
 # Verify store integrity
 nix-store --verify --check-contents
 
@@ -241,7 +238,7 @@ nix-store --optimize
 
 **Custom Retention**:
 
-```
+```text
 /nix-clean
 Keep generations for 14 days
 # Keeps current + 14 days of generations

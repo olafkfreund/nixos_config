@@ -213,30 +213,6 @@ test_host_builds() {
   fi
 }
 
-# Test Home Manager configurations
-test_home_manager() {
-  section "Home Manager Tests"
-
-  cd "$CONFIG_DIR"
-
-  local failed_configs=()
-
-  for host in "${ACTIVE_HOSTS[@]}"; do
-    if ! run_test "home-$host" "
-            nix build .#homeConfigurations.\"olafkfreund@$host\".activationPackage --no-link --show-trace
-        "; then
-      failed_configs+=("olafkfreund@$host")
-    fi
-  done
-
-  if [ ${#failed_configs[@]} -eq 0 ]; then
-    success "All Home Manager configurations build successfully"
-  else
-    warning "Failed Home Manager configs: ${failed_configs[*]}"
-    # Don't fail CI for Home Manager issues
-  fi
-}
-
 # Test secrets
 test_secrets() {
   section "Secrets Tests"
@@ -411,7 +387,6 @@ main() {
     "test_secrets"
     "test_custom_packages"
     "test_host_builds"
-    "test_home_manager"
     "test_performance_regression"
   )
 
@@ -456,7 +431,6 @@ Options:
 
 Environment Variables:
   CI_SKIP_PERFORMANCE     Skip performance regression tests
-  CI_SKIP_HOME_MANAGER    Skip Home Manager tests
   CI_HOSTS                Override host list (comma-separated)
 
 Examples:

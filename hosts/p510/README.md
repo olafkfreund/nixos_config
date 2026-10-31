@@ -13,7 +13,6 @@ This directory contains the NixOS configuration for the P510 system, a server/wo
   - `i18n.nix` - Internationalization settings
   - `envvar.nix` - Environment variables
   - `greetd.nix` - Login manager configuration
-  - `hosts.nix` - Network host entries
   - `mpd.nix` - Music Player Daemon configuration
   - `plex.nix` - Plex Media Server configuration
   - `microvm/` - MicroVM configurations for virtual machines

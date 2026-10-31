@@ -19,9 +19,6 @@ _: {
     ./libinput/default.nix
     # ./flaresolverr/default.nix  # Commented out - NixOS has built-in FlareSolverr module
 
-    # Network stability modules (service merged into main module)
-    ./network-stability.nix
-
     # HTTPS time-sync fallback for networks that block NTP (UDP 123)
     ./http-time-fallback.nix
 

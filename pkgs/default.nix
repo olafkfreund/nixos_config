@@ -1,6 +1,5 @@
 { pkgs, ... }: {
   # Define your custom packages here
-  linux-command-mcp = pkgs.callPackage ./linux-command-mcp { };
   linkedin-mcp = pkgs.callPackage ./linkedin-mcp { };
   atlassian-mcp = pkgs.callPackage ./atlassian-mcp { };
   obsidian-mcp = pkgs.callPackage ./obsidian-mcp { nodejs = pkgs.nodejs_24; };
@@ -25,7 +24,6 @@
   # gemini-cli removed in #560 (replaced by pkgs.customPkgs.antigravity-cli)
   # Claude Desktop - native Linux build from k3d3/claude-desktop-linux-flake (see flake.nix overlay)
   claude-desktop = pkgs.claude-desktop-linux;
-  neuwaita-icon-theme = pkgs.callPackage ./neuwaita-icon-theme { };
   kosli-cli = pkgs.callPackage ./kosli-cli { };
 
   # Override awscli2 to disable failing tests
@@ -38,11 +36,6 @@
   cosmic-ext-applet-next-meeting = pkgs.callPackage ./cosmic-applets/next-meeting { };
 
   aurynk = pkgs.callPackage ./aurynk { };
-
-  add-skill = pkgs.callPackage ./add-skill { };
-
-  # Reddit TUI client
-  reddix = pkgs.callPackage ./reddix { };
 
   # GitLab TUI — terminal UI on top of the `glab` CLI (rcieri/glab-tui).
   glab-tui = pkgs.callPackage ./glab-tui { };

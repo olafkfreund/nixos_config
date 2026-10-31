@@ -11,8 +11,7 @@ let inherit (lib) mkDefault; in {
     shell = mkDefault pkgs.bashInteractive; # mkDefault so host configs can override
     # vim deliberately not here: it would collide with the
     # programs.neovim.{viAlias,vimAlias} symlinks in home-manager-path
-    # (nixpkgs#451). The vim package is still in environment.systemPackages
-    # via modules/nixos/packages/core.nix for sudo / root / other users.
+    # (nixpkgs#451).
     packages = with pkgs; [ wally-cli ];
 
     # NOTE: the Odin dashboard metrics-collector key used to live here, which
