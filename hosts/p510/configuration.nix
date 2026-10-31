@@ -323,27 +323,6 @@ in
       droidcam = false; # Disabled due to v4l2loopback build failures on P510
     };
 
-    # COSMIC Desktop disabled - using GNOME for better headless RDP support
-    desktop.cosmic = {
-      enable = false; # Disabled: compositor not starting properly for headless operation
-      useCosmicGreeter = false;
-      defaultSession = false;
-      installAllApps = false;
-    };
-
-    # Remote Desktop support using GNOME Remote Desktop (native RDP support)
-    # Note: cosmic-remote-desktop disabled in favor of native GNOME RDP
-    desktop.cosmic-remote-desktop = {
-      enable = false; # Disabled: using native GNOME Remote Desktop instead
-      protocol = "both";
-      rdpPort = 3389;
-      vncPort = 5900;
-      vncPassword = "p510remote";
-      allowedNetworks = [ "192.168.1.0/24" "10.0.0.0/8" ];
-      disableScreenLock = false;
-      disablePowerManagement = true;
-    };
-
     gnome-remote-desktop = {
       enable = true;
     };
