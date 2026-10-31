@@ -206,6 +206,7 @@ test-all-parallel:
 # Test build all hosts with detailed error reporting
 test-build-all:
     #!/usr/bin/env bash
+    set -uo pipefail
     echo "🔨 Test building all host configurations with detailed reporting..."
     failed_hosts=()
     success_count=0
@@ -253,6 +254,7 @@ test-build-all:
 # Test build all hosts in parallel (FASTEST)
 test-build-all-parallel:
     #!/usr/bin/env bash
+    set -uo pipefail
     echo "🚀 Test building all host configurations in parallel..."
 
     # Start all builds in parallel and capture their PIDs
