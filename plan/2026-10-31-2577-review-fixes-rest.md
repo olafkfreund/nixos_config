@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2577
 spec: spec/2026-10-31-2577-review-fixes-rest.md
 coders:
