@@ -535,7 +535,6 @@ in
   # Enable secrets management
   modules.security.secrets = {
     enable = true;
-    userKeys = [ "/home/${vars.username}/.ssh/id_ed25519" ];
   };
 
   users.users = lib.genAttrs hostUsers (username: {

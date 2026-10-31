@@ -20,20 +20,6 @@ in
 {
   options.modules.security.secrets = {
     enable = mkEnableOption "Agenix secrets management";
-
-    hostKeys = mkOption {
-      type = types.listOf types.str;
-      default = [ ];
-      description = "List of SSH host key paths for decryption";
-      example = [ "/etc/ssh/ssh_host_ed25519_key" ];
-    };
-
-    userKeys = mkOption {
-      type = types.listOf types.str;
-      default = [ ];
-      description = "List of user SSH key paths for secrets management";
-      example = [ "/home/olafkfreund/.ssh/id_ed25519" ];
-    };
   };
 
   config = mkIf cfg.enable {
