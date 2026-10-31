@@ -197,8 +197,17 @@ splice_nixpkgs_node() {
   ' flake.lock >flake.lock.tmp && mv flake.lock.tmp flake.lock
 }
 
-splice_nixpkgs_node nixpkgs
-splice_nixpkgs_node nixpkgs-unstable
+# Root input -> node name (a `follows` list is walked from the root).
+root_node() {
+  jq -r --arg i "$1" '
+    .nodes as $n | .nodes.root.inputs[$i] as $t
+    | if ($t | type) == "array"
+      then reduce $t[] as $k ("root"; $n[.].inputs[$k] | if type == "array" then .[-1] else . end)
+      else $t end' flake.lock
+}
+
+splice_nixpkgs_node "$(root_node nixpkgs)"
+splice_nixpkgs_node "$(root_node nixpkgs-unstable)"
 
 # --- 4. Determine LOCK_CHANGED flag -----------------------------------------
 LOCK_CHANGED=0
