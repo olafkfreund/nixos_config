@@ -13,12 +13,12 @@
 }:
 
 let
-  version = "unstable-2025-01-09";
+  version = "0-unstable-2025-07-13";
 
   src = fetchFromGitHub {
     owner = "lharries";
     repo = "whatsapp-mcp";
-    rev = "main";
+    rev = "7d6a06dcdce1f01dfb24f60e1030d5efba9f3b88";
     hash = "sha256-z05PFRmODaIEfcFwNt7UO4crkgHGeI3fN95AXlYNeeY=";
   };
 
