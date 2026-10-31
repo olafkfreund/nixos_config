@@ -2802,11 +2802,11 @@
         "systems": "systems_11"
       },
       "locked": {
-        "lastModified": 1793438383,
-        "narHash": "sha256-JQ/8/wGVaKUsj7RfrRM7j5jexU+PfPmrdVI/R6n7mT0=",
+        "lastModified": 1793454154,
+        "narHash": "sha256-IOuCItHY9l7Z2A41bh/ax7FKFL8PTnmEgOII0Ev0qGE=",
         "owner": "olafkfreund",
         "repo": "nixarchy-meetingai",
-        "rev": "f31e5c4a93623a6c89ea25c59989d538aa756ad7",
+        "rev": "dd1ed434b23d9886de1e2d1d030073405d456a16",
         "type": "github"
       },
       "original": {
