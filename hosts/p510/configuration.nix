@@ -535,11 +535,6 @@ in
     allowUnfree = true; # Required for NVIDIA drivers
     allowBroken = true;
     permittedInsecurePackages = [ "olm-3.2.16" "dotnet-sdk-6.0.428" "python3.12-youtube-dl-2021.12.17" "python3.14-youtube-dl-2021.12.17" ];
-
-    # Override nodejs to use nodejs_24 to avoid version conflicts
-    packageOverrides = pkgs: {
-      nodejs = pkgs.nodejs_24;
-    };
   };
   system.stateVersion = "25.11";
 
