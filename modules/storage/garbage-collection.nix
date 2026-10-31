@@ -25,12 +25,6 @@ in
       description = "Number of system generations to keep";
     };
 
-    keepDays = mkOption {
-      type = types.int;
-      default = 30;
-      description = "Delete store paths older than this many days";
-    };
-
     deleteOlderThan = mkOption {
       type = types.str;
       default = "30d";
@@ -42,12 +36,6 @@ in
       type = types.bool;
       default = true;
       description = "Optimize Nix store after garbage collection (deduplication)";
-    };
-
-    minFreeSpace = mkOption {
-      type = types.nullOr types.int;
-      default = 10;
-      description = "Minimum free space in GB to maintain (null to disable)";
     };
 
     aggressiveCleanup = mkOption {
@@ -77,41 +65,6 @@ in
     # Systemd services configuration
     systemd = {
       services = {
-        # Pre-GC disk space check
-        nix-gc-pre-check = mkIf (cfg.minFreeSpace != null) {
-          description = "Check disk space before garbage collection";
-          before = [ "nix-gc.service" ];
-          serviceConfig = {
-            Type = "oneshot";
-            User = "root";
-            ExecStart = pkgs.writeShellScript "nix-gc-pre-check" ''
-              #!/bin/bash
-
-              LOG_FILE="/var/log/nix-gc/pre-check.log"
-              mkdir -p "$(dirname "$LOG_FILE")"
-              exec 1> >(tee -a "$LOG_FILE")
-              exec 2>&1
-
-              echo "[$(date)] Checking disk space before garbage collection..."
-
-              # Get available space in GB
-              AVAILABLE_GB=$(df /nix/store | tail -1 | awk '{print int($4/1024/1024)}')
-              MIN_REQUIRED=${toString cfg.minFreeSpace}
-
-              echo "[$(date)] Available space: ''${AVAILABLE_GB}GB"
-              echo "[$(date)] Minimum required: ''${MIN_REQUIRED}GB"
-
-              if [ "$AVAILABLE_GB" -lt "$MIN_REQUIRED" ]; then
-                echo "[$(date)] Disk space below minimum threshold - garbage collection recommended"
-                exit 0
-              else
-                echo "[$(date)] Sufficient disk space available"
-                exit 0
-              fi
-            '';
-          };
-        };
-
         # Enhanced garbage collection with logging
         nix-gc = {
           serviceConfig = {
@@ -209,9 +162,6 @@ in
         echo "Schedule: ${cfg.schedule}"
         echo "Delete older than: ${cfg.deleteOlderThan}"
         echo "Keep generations: ${toString cfg.keepGenerations}"
-        ${optionalString (cfg.minFreeSpace != null) ''
-        echo "Minimum free space: ${toString cfg.minFreeSpace}GB"
-        ''}
         echo ""
         echo "Current Disk Usage:"
         df -h /nix/store | tail -1

@@ -396,7 +396,6 @@ in
     deleteOlderThan = "30d";
     keepGenerations = 5;
     optimizeStore = true;
-    minFreeSpace = 20; # Keep at least 20GB free
     aggressiveCleanup = false;
   };
 
