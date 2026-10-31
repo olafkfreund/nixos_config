@@ -607,13 +607,6 @@ in
     # modules/desktop/gnome-remote-desktop.nix) keep working at boot
     # before someone logs in via TTY/SSH/desktop session.
     linger = true;
-    # Only use secret-managed password if the secret exists
-    hashedPasswordFile = lib.mkIf
-      (
-        config.modules.security.secrets.enable
-        && builtins.hasAttr "user-password-${username}" config.age.secrets
-      )
-      config.age.secrets."user-password-${username}".path;
   });
 
   # Remove duplicate user configuration - use the one above that handles all hostUsers

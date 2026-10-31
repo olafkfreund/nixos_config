@@ -537,13 +537,6 @@ in
     # Bash is the login shell (see modules/common/base-user.nix); zsh stays
     # installed as the rollback path.
     shell = pkgs.bashInteractive;
-    # Only use secret-managed password if the secret exists
-    hashedPasswordFile = lib.mkIf
-      (
-        config.modules.security.secrets.enable
-        && builtins.hasAttr "user-password-${username}" config.age.secrets
-      )
-      config.age.secrets."user-password-${username}".path;
   });
 
   # System packages - consolidated from individual nixos modules
