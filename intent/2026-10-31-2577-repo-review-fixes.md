@@ -105,10 +105,13 @@ configs; p510 through `tailscale-serve`, FlareSolverr, the VNC line,
 
 ## Open questions
 
-1. **Scope.** All four groups, or bugs + security first and dead code /
+1. **Scope.** Answered 2026-10-31: dead code first, step by step, each
+   removal test-built and measured; Codex and agy take part. The bug,
+   security and simplification groups follow as later specs.
+   (Original question: all four groups, or bugs + security first and dead code /
    simplification as a follow-up? I recommend bugs + security + dead code
    now (low risk, closure-checkable) and the simplification group, which
-   restructures p620/razer and the nixpkgs-unstable input, as a later task.
+   restructures p620/razer and the nixpkgs-unstable input, as a later task.)
 2. **VNC password.** It is already public in git history. Is
    `p510remote` used anywhere else, and do you want it rotated? Removing
    the line is all this task can do.
