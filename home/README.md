@@ -30,7 +30,6 @@ contributors.
 4. **Enable or disable features:**
    - Use the `features` attribute in your host's `configuration.nix` to enable development tools, virtualization,
      cloud tools, security, and more.
-   - Home Manager options can be overridden per host in `home-manager-options.nix`.
 
 5. **Apply the configuration:**
    - For system config:
