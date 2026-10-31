@@ -94,6 +94,14 @@ the combined drvPath changes must be exactly the union of the steps'
 expected changes. Step 11 still stops for the user if anything beyond the
 listed Plasma packages leaves a closure.
 
+### Phase B result
+
+All 12 steps passed and integrated without conflicts. One change outside
+step 10's stated expectation, signed off by Claude: removing `minFreeSpace`
+also drops the line in p510's `nix-gc-status` script that printed it (a
+reader of the removed option). Nothing else in the combined diff is
+unexplained.
+
 ## Steps
 
 1. **Baseline.** Write `measure.sh` to the scratchpad
