@@ -67,7 +67,6 @@ provides consistent experiences across similar environments.
 
 ```text
 home/profiles/
-├── default.nix              # Profile system definitions and logic
 ├── server-admin/
 │   └── default.nix         # Minimal server administration profile
 ├── developer/
