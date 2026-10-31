@@ -460,16 +460,7 @@ in
   # Ensure display manager is enabled in systemd
   systemd.targets.graphical.wants = [ "display-manager.service" ];
 
-  # Fix GNOME Shell GDM typelib issue - multiple approaches
-  environment.sessionVariables.GI_TYPELIB_PATH = "${pkgs.gdm}/lib/girepository-1.0";
-
-  # Add GSettings schema path for GDM login screen
-  environment.sessionVariables.GSETTINGS_SCHEMA_DIR = "${pkgs.gdm}/share/gsettings-schemas/gdm-${pkgs.gdm.version}/glib-2.0/schemas";
-
   environment.systemPackages = with pkgs; [
-    gdm # Provides the Gdm-1.0 typelib required by GNOME Shell
-    gnome-control-center # Provides login-screen schema
-    gnome-settings-daemon # Additional GNOME schemas
     # Qt theme control tools for Stylix
     libsForQt5.qt5ct
     kdePackages.qt6ct
@@ -486,8 +477,6 @@ in
   environment.variables = {
     EXTRA_LDFLAGS = "-L/run/opengl-driver/lib";
     EXTRA_CCFLAGS = "-I/run/opengl-driver/include";
-    GI_TYPELIB_PATH = "${pkgs.gdm}/lib/girepository-1.0";
-    GSETTINGS_SCHEMA_DIR = "${pkgs.gdm}/share/gsettings-schemas/gdm-${pkgs.gdm.version}/glib-2.0/schemas";
   };
 
   # Docker configuration
