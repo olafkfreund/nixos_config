@@ -4,11 +4,11 @@
 , ...
 }:
 let
-  cfg = config.services.recyclarr-sync;
+  cfg = config.features.recyclarr;
 in
 {
-  options.services.recyclarr-sync = {
-    enable = lib.mkEnableOption "Enable automated Recyclarr synchronization for Trash Guides";
+  options.features.recyclarr = {
+    enable = lib.mkEnableOption "automated Recyclarr synchronization for Trash Guides";
     interval = lib.mkOption {
       type = lib.types.str;
       default = "daily";
@@ -26,8 +26,10 @@ in
 
       serviceConfig = {
         Type = "oneshot";
-        User = "olafkfreund";
-        Group = "users";
+        DynamicUser = true;
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        NoNewPrivileges = true;
         StateDirectory = "recyclarr";
         RuntimeDirectory = "recyclarr";
         # API keys come from agenix (same env file arr-suite-mcp uses).
@@ -37,7 +39,7 @@ in
         # extraction we used to do here.
         EnvironmentFile = config.age.secrets."arr-suite-mcp-env".path;
         # Path to temporary config
-        Environment = "RECYCLARR_CONFIG_DIR=/run/recyclarr";
+        Environment = [ "RECYCLARR_CONFIG_DIR=/run/recyclarr" "HOME=/var/lib/recyclarr" ];
       };
 
       script = ''

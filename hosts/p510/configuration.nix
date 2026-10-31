@@ -21,7 +21,7 @@ in
       ./nixos/nixarchy.nix
       ./nixos/network.nix # Network configuration with dual-port Intel card
       ./nixos/tailscale-serve.nix # Tailscale Serve for media services
-      ./nixos/recyclarr.nix # Recyclarr Trash Guides sync
+      ../../modules/services/recyclarr.nix # Recyclarr Trash Guides sync
       ../common/nixos/i18n.nix
       ../common/nixos/envvar.nix
       ../common/nixos/host-class.nix
@@ -378,7 +378,7 @@ in
   };
 
   # Enable Recyclarr synchronization
-  services.recyclarr-sync.enable = true;
+  features.recyclarr.enable = true;
 
   # Specific service configurations
   # StreamDeck UI disabled for headless operation
