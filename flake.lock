@@ -627,26 +627,6 @@
         "type": "github"
       }
     },
-    "flowtube": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1792060661,
-        "narHash": "sha256-GV/JMkNzmB4/sLVntM3Dg92jq1ZiQibHSyOOv/+zC5Y=",
-        "owner": "olafkfreund",
-        "repo": "nixos-FlowTube",
-        "rev": "6398bfcc2e66b660d43ce944d5189b055f201bee",
-        "type": "github"
-      },
-      "original": {
-        "owner": "olafkfreund",
-        "repo": "nixos-FlowTube",
-        "type": "github"
-      }
-    },
     "flyline": {
       "inputs": {
         "nixpkgs": [
@@ -3740,7 +3720,6 @@
         ],
         "claude-skills-borghei": "claude-skills-borghei",
         "cosmic-applet-spotify": "cosmic-applet-spotify",
-        "flowtube": "flowtube",
         "flyline": "flyline",
         "gogmail": "gogmail",
         "gscratch": "gscratch",

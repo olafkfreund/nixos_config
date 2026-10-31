@@ -307,13 +307,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Flow Desktop, a privacy-respecting YouTube client (Issue #2317): our own
-    # flake, built from source. No module enables it now.
-    flowtube = {
-      url = "github:olafkfreund/nixos-FlowTube";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # flyline — Rust readline replacement for Bash, loaded as a bash loadable
     # builtin (dlopen'd .so, `enable -f .../libflyline.so flyline`). This is
     # what makes bash-as-login-shell viable here: it restores the inline
