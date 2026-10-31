@@ -2,7 +2,7 @@
 
 Comprehensive testing of NixOS configurations before deployment. Test builds locally without deploying to ensure everything works.
 
-**Replaces Justfile recipes**: `test-all`, `test-all-parallel`, `test-build-all`, `test-build-all-parallel`, `test-home`, `test-secrets`, `test-all-secrets`, `test-packages`, `test-modules`, `test-home-modules`, `test-nixpkgs-stable`, `test-all-users`, `quick-test`, `ci`, `ci-quick`
+**Replaces Justfile recipes**: `test-all`, `test-all-parallel`, `test-build-all`, `test-build-all-parallel`, `test-secrets`, `test-all-secrets`, `test-packages`, `test-modules`, `test-home-modules`, `test-nixpkgs-stable`, `quick-test`, `ci`, `ci-quick`
 
 ## Quick Usage
 

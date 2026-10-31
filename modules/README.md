@@ -36,7 +36,6 @@ category modules (`core.nix`, `desktop.nix`, `development.nix`,
 - `nix/` — Nix daemon and binary cache configuration.
 - `nix-index/` — `nix-index-database` integration.
 - `overlays/` — Module-side overlay registration.
-- `packages/` — Curated package sets.
 - `pkgs/` — Custom package derivations.
 - `programs/` — Per-program modules (terminals, browsers, utilities).
 - `scrcpy/`, `webcam/`, `windows/`, `scripts/` — Discrete utilities.

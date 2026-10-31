@@ -100,20 +100,6 @@ imports = [
 ];
 ```
 
-### Profile Metadata
-
-Each profile-enabled configuration includes metadata:
-
-```nix
-meta.profile = {
-  name = "full-workstation";
-  type = "composition";
-  description = "Full workstation combining development and desktop capabilities";
-  combines = [ "developer" "desktop-user" ];
-  host = "p620";
-};
-```
-
 ### Feature Overrides
 
 Profiles can be customized per-host:
@@ -140,9 +126,6 @@ features = {
 ```bash
 # Test profile-based configuration
 just test-host p620
-
-# Build specific user configuration
-nix build .#homeConfigurations."olafkfreund@p620-profile"
 ```
 
 ## Benefits
@@ -169,13 +152,8 @@ nix build .#homeConfigurations."olafkfreund@p620-profile"
 
 - **Role-based structure** matches actual usage patterns
 - **Clear documentation** of intended use cases
-- **Validation system** prevents inappropriate profile usage
 
 ## Advanced Features
-
-### Profile Validation
-
-The system validates that profiles are used on appropriate hosts and warns about mismatched configurations.
 
 ### Inheritance System
 

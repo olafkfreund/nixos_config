@@ -431,7 +431,6 @@ Options:
 
 Environment Variables:
   CI_SKIP_PERFORMANCE     Skip performance regression tests
-  CI_SKIP_HOME_MANAGER    Skip Home Manager tests
   CI_HOSTS                Override host list (comma-separated)
 
 Examples:

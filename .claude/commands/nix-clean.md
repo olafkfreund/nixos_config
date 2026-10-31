@@ -2,7 +2,7 @@
 
 Comprehensive cleanup operations for Nix store, old generations, and system maintenance.
 
-**Replaces Justfile recipes**: `gc`, `gc-aggressive`, `optimize`, `full-cleanup`, `clean-all`, `cleanup-dead-code`
+**Replaces Justfile recipes**: `gc`, `gc-aggressive`, `optimize`, `full-cleanup`, `clean-all`
 
 ## Quick Usage
 
@@ -165,9 +165,6 @@ nix-collect-garbage -d --delete-older-than 7d
 
 # Optimize store (deduplication)
 nix-store --optimize
-
-# Remove dead code
-just _cleanup-dead-code
 
 # Verify store integrity
 nix-store --verify --check-contents
