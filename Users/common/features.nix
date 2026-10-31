@@ -31,8 +31,6 @@ let inherit (lib) mkEnableOption; in {
 
     desktop = {
       enable = mkEnableOption "Enable desktop applications";
-      cosmic = mkEnableOption "Enable Cosmic DE";
-      gnome = mkEnableOption "Enable GNOME";
       zathura = mkEnableOption "Enable Zathura PDF reader";
       obsidian = mkEnableOption "Enable Obsidian notes";
       flameshot = mkEnableOption "Enable Flameshot screenshots (X11/limited Wayland)";
@@ -45,10 +43,6 @@ let inherit (lib) mkEnableOption; in {
       kdeconnect = mkEnableOption "Enable KDE Connect";
       slack = mkEnableOption "Enable Slack";
       aerion = mkEnableOption "Enable Aerion email client";
-      lanmouse = mkEnableOption "Enable LAN Mouse";
-
-      # Desktop shell (experimental)
-      quickshell = mkEnableOption "Enable QuickShell desktop shell (runs alongside Waybar for testing)";
     };
 
     cli = {
@@ -67,11 +61,6 @@ let inherit (lib) mkEnableOption; in {
     multiplexers = {
       enable = mkEnableOption "Enable terminal multiplexers";
       tmux = mkEnableOption "Enable Tmux";
-    };
-
-    gaming = {
-      enable = mkEnableOption "Enable gaming applications";
-      steam = mkEnableOption "Enable Steam";
     };
 
     development = {

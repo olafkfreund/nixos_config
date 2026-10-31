@@ -69,12 +69,6 @@
       productivity = lib.mkForce false; # No GUI productivity tools - override profile conflicts
     };
 
-    # No gaming on server
-    gaming = {
-      enable = false;
-      steam = false;
-    };
-
     # Enhanced CLI tools for server development
     cli = {
       enable = true;

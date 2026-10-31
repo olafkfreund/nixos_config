@@ -83,11 +83,6 @@
       tmux = true;
     };
 
-    gaming = {
-      enable = false; # No gaming on servers
-      steam = false;
-    };
-
     development = {
       enable = true; # Keep development tools for server management
       languages = true; # Language support for scripting and automation

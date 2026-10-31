@@ -121,8 +121,7 @@ Profiles can be customized per-host:
 ```nix
 features = {
   # Override profile defaults
-  desktop.quickshell = true;  # P620-specific
-  gaming.enable = true;       # Enable gaming on workstation
+  desktop.obsidian = true;    # P620-specific
   development.languages = true; # Full language support
 };
 ```

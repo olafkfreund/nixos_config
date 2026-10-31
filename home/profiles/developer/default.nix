@@ -82,11 +82,6 @@
       tmux = true;
     };
 
-    gaming = {
-      enable = false; # Focus on development, disable gaming
-      steam = false;
-    };
-
     development = {
       enable = true; # Full development stack
       languages = true; # All programming languages
