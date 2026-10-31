@@ -23,17 +23,30 @@
   systemd.services.tailscale-serve = {
     description = "Tailscale Serve - Expose Media Services";
     after = [ "tailscaled.service" "network-online.target" ];
+    requires = [ "tailscaled.service" ];
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
 
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      TimeoutStartSec = 400;
       ExecStart = pkgs.writeShellScript "tailscale-serve-start" ''
-        # Wait for Tailscale to be ready
-        until ${pkgs.tailscale}/bin/tailscale status &>/dev/null; do
-          sleep 2
+        set -euo pipefail
+
+        # Wait for Tailscale to be ready (bounded: 60 x 5s)
+        ready=0
+        for _ in $(seq 60); do
+          if ${pkgs.tailscale}/bin/tailscale status &>/dev/null; then
+            ready=1
+            break
+          fi
+          sleep 5
         done
+        if [ "$ready" != 1 ]; then
+          echo "tailscaled not ready after 300s" >&2
+          exit 1
+        fi
 
         # Configure Tailscale Serve for each service
         # All services are exposed under https://p510.tailnet.ts.net:443 with paths
