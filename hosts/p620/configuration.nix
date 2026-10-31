@@ -306,10 +306,6 @@ in
       gnupg = true;
     };
 
-    networking = {
-      enable = true;
-    };
-
     # Syncthing for ~/.claude and ~/.gemini sync across hosts
     syncthing = {
       enable = true;
@@ -409,11 +405,6 @@ in
 
     media = {
       droidcam = false; # Disabled - building custom solution
-    };
-
-    # Enable QuickShell for testing (experimental - runs alongside Waybar)
-    quickshell = {
-      enable = true;
     };
 
     # COSMIC disabled — sticking with GNOME only until COSMIC is more

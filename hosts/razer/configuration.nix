@@ -209,10 +209,6 @@ in
       gnupg = true;
     };
 
-    networking = {
-      enable = true;
-    };
-
     # Syncthing for ~/.claude and ~/.gemini sync across hosts
     syncthing = {
       enable = true;
