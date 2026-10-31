@@ -319,7 +319,7 @@
     };
 
     # Flow Desktop, a privacy-respecting YouTube client (Issue #2317): our own
-    # flake, built from source. Enabled by features.flow-desktop.
+    # flake, built from source. No module enables it now.
     flowtube = {
       url = "github:olafkfreund/nixos-FlowTube";
       inputs.nixpkgs.follows = "nixpkgs";
