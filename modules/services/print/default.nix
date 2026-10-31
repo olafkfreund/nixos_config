@@ -19,10 +19,7 @@ let
 in
 {
   options.services.print = {
-    enable = mkEnableOption {
-      default = false;
-      description = "Enable the HP print service";
-    };
+    enable = mkEnableOption "the HP print service";
   };
   config = mkIf cfg.enable {
     services = {

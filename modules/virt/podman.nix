@@ -9,10 +9,7 @@ let
 in
 {
   options.services.podman = {
-    enable = mkEnableOption {
-      default = false;
-      description = "Enable the Podman service.";
-    };
+    enable = mkEnableOption "the Podman service";
   };
   config = mkIf cfg.enable {
     # podman itself is installed by virtualisation.podman.enable (below)

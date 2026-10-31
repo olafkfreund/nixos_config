@@ -9,10 +9,7 @@ let
 in
 {
   options.services.libvirt = {
-    enable = mkEnableOption {
-      default = false;
-      description = "Enable libvirt";
-    };
+    enable = mkEnableOption "libvirt";
   };
   config = mkIf cfg.enable {
     virtualisation = {
