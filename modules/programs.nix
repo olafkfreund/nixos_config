@@ -7,6 +7,6 @@ _: {
     ./obsidian/default.nix
     ./office/default.nix
     ./funny/funny.nix
-    ./spell/spell.nix
+    ./spell
   ];
 }

@@ -49,7 +49,9 @@ in
       } ''
       echo "Running nixpkgs-fmt formatting check..."
       cd $src
-      ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt --check . || {
+      # hosts/*/nixarchy* is written by nixarchy-apply; same exclude as .pre-commit-config.yaml (#1872).
+      find . -name '*.nix' -not -path './hosts/*/nixarchy/*' -not -path './hosts/*/nixarchy-apps.nix' -print0 \
+        | xargs -0 ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt --check || {
         echo "FAIL: some Nix files need formatting"
         echo "Run: nixpkgs-fmt ."
         exit 1

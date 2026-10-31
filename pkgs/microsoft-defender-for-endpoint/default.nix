@@ -14,7 +14,6 @@
 , systemd
 , python3
 , glibc
-, pcre
 , libmnl
 , libnfnetlink
 , libnetfilter_queue
@@ -67,8 +66,7 @@ buildFHSEnv {
     python3
     glibc
 
-    # Library dependencies (for versions < 101.25042.0000)
-    pcre
+    # Library dependencies (pcre was only needed before 101.25042.0000; nixpkgs removed it)
     libmnl
     libnfnetlink
     libnetfilter_queue
