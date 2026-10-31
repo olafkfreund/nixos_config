@@ -361,10 +361,9 @@ in
     enableUserEnvironment = true;
   };
 
-  # BOOT PERFORMANCE: Prevent fstrim from blocking boot (saves 8+ minutes)
-  services.fstrim-optimization = {
+  services.fstrim = {
     enable = true;
-    preventBootBlocking = true;
+    interval = "weekly";
   };
 
   # DISK SPACE MANAGEMENT: Automatic garbage collection to prevent disk full issues
