@@ -354,19 +354,6 @@ test-build-verbose HOST:
     @echo "🔨 Test building {{HOST}} with verbose output..."
     nixos-rebuild build --flake .#{{HOST}} --show-trace --verbose
 
-# Validate Home Manager configurations
-test-home:
-    @echo "🏠 Testing Home Manager configurations..."
-    @for host in p620 razer p510; do \
-        echo "Testing Home Manager for olafkfreund@$host..."; \
-        nix build .#homeConfigurations.\"olafkfreund@$host\".activationPackage --show-trace || echo "⚠️  Home Manager config for $host failed"; \
-    done
-
-# Test specific user's Home Manager config
-test-home-user USER HOST:
-    @echo "🏠 Testing Home Manager for {{USER}}@{{HOST}}..."
-    nix build .#homeConfigurations.\"{{USER}}@{{HOST}}\".activationPackage --show-trace
-
 # Test secrets decryption
 test-secrets:
     @echo "🔐 Testing secrets decryption..."
@@ -555,28 +542,6 @@ p510-clear-sessions:
 # MODERN CONFIGURATION MANAGEMENT
 # =============================================================================
 
-# Generate new host configuration from template
-create-host HOST TYPE="workstation" HARDWARE="intel":
-    @echo "🏗️  Creating new host configuration: {{HOST}}"
-    @mkdir -p hosts/{{HOST}}/nixos hosts/{{HOST}}/themes
-    @echo "Generating hardware configuration..."
-    nixos-generate-config --root /mnt --dir hosts/{{HOST}}/ || echo "Run this on target machine or provide hardware-configuration.nix manually"
-    @echo "Creating host variables from template..."
-    @cp templates/variables.nix.template hosts/{{HOST}}/variables.nix
-    @sed -i 's/HOSTNAME_PLACEHOLDER/{{HOST}}/g' hosts/{{HOST}}/variables.nix
-    @sed -i 's/TYPE_PLACEHOLDER/{{TYPE}}/g' hosts/{{HOST}}/variables.nix
-    @sed -i 's/HARDWARE_PLACEHOLDER/{{HARDWARE}}/g' hosts/{{HOST}}/variables.nix
-    @echo "Creating base configuration from template..."
-    @cp templates/configuration.nix.template hosts/{{HOST}}/configuration.nix
-    @echo "Creating stylix theme..."
-    @cp hosts/p620/themes/stylix.nix hosts/{{HOST}}/themes/stylix.nix
-    @echo "✅ Host {{HOST}} created! Edit hosts/{{HOST}}/variables.nix to customize"
-
-# Validate feature dependencies for a host
-validate-features HOST:
-    @echo "📋 Validating feature configuration for {{HOST}}..."
-    nix eval .#nixosConfigurations.{{HOST}}.config.featureValidation --json | jq 'if .isValid then "✅ Feature configuration is valid" else "❌ Feature validation failed" end'
-
 # Show configuration diff between current and new build
 diff HOST:
     @echo "📊 Showing configuration diff for {{HOST}}..."
@@ -596,18 +561,6 @@ cleanup GENERATIONS="7":
     sudo nix-collect-garbage --delete-older-than {{GENERATIONS}}d
     @echo "🧹 Optimizing nix store..."
     nix store optimise
-
-# Export configuration documentation
-docs:
-    @echo "📚 Generating configuration documentation..."
-    @mkdir -p docs/generated
-    @echo "Extracting module options..."
-    nix eval .#nixosConfigurations.p620.options --json > docs/generated/options.json
-    @echo "Generating feature matrix..."
-    @echo "| Feature | Description | Dependencies | Conflicts |" > docs/generated/features.md
-    @echo "|---------|-------------|--------------|-----------|" >> docs/generated/features.md
-    nix eval .#lib.featureRegistry --json | jq -r 'to_entries[] | "| \(.key) | \(.value.description) | \(.value.dependencies | join(", ")) | \(.value.conflicts | join(", ")) |"' >> docs/generated/features.md
-    @echo "✅ Documentation generated in docs/generated/"
 
 # Show system health and status
 status:
@@ -631,16 +584,6 @@ history:
 # =============================================================================
 # CONFIGURATION OPTIMIZATION
 # =============================================================================
-
-# Analyze configuration for dead code and duplicates
-analyze-config:
-    @echo "🔍 Analyzing configuration for optimization opportunities..."
-    ./scripts/cleanup-dead-code.sh analysis
-
-# Clean up identified dead code (DESTRUCTIVE - use with caution)
-cleanup-dead-code:
-    @echo "⚠️  WARNING: This will modify your configuration files!"
-    ./scripts/cleanup-dead-code.sh clean
 
 # Show configuration efficiency metrics
 efficiency-report:
@@ -879,21 +822,6 @@ test-nixpkgs-stable:
     nix build .#nixosConfigurations.$$(hostname).config.system.build.toplevel \
         --override-input nixpkgs github:nixos/nixpkgs/nixos-24.05 \
         --no-link --show-trace
-
-# Validate all user configurations
-test-all-users:
-    @echo "👥 Testing all user configurations..."
-    @for user_dir in Users/*/; do \
-        user=$$(basename "$$user_dir"); \
-        echo "Testing user: $$user"; \
-        for host in p620 razer p510; do \
-            if [ -f "Users/$$user/$${host}_home.nix" ]; then \
-                echo "  Testing $$user@$$host..."; \
-                nix build .#homeConfigurations.\"$$user@$$host\".activationPackage --no-link 2>/dev/null || echo "    ⚠️  Failed: $$user@$$host"; \
-            fi; \
-        done; \
-    done
-
 
 # Check for deprecated options and patterns
 check-deprecated:
@@ -1173,254 +1101,6 @@ summary:
     echo "  just validate         # Validate everything"
     echo "  just test-host p620   # Test single host"
     echo "  just ci-quick         # Quick tests"
-
-# ============================================================================
-# MicroVM Management Commands
-# ============================================================================
-
-# Start a MicroVM (dev-vm, test-vm, playground-vm)
-start-microvm vm:
-    #!/usr/bin/env bash
-    echo "🚀 Starting MicroVM: {{vm}}"
-    case "{{vm}}" in
-        "dev-vm"|"test-vm"|"playground-vm")
-            if nix run .#nixosConfigurations.{{vm}}.config.microvm.runner.qemu; then
-                echo "✅ {{vm}} started successfully"
-                case "{{vm}}" in
-                    "dev-vm") echo "SSH: ssh dev@localhost -p 2222" ;;
-                    "test-vm") echo "SSH: ssh test@localhost -p 2223" ;;
-                    "playground-vm") echo "SSH: ssh root@localhost -p 2224" ;;
-                esac
-            else
-                echo "❌ Failed to start {{vm}}"
-                exit 1
-            fi
-            ;;
-        *)
-            echo "❌ Unknown MicroVM: {{vm}}"
-            echo "Available: dev-vm, test-vm, playground-vm"
-            exit 1
-            ;;
-    esac
-
-# Stop a MicroVM
-stop-microvm vm:
-    #!/usr/bin/env bash
-    echo "🛑 Stopping MicroVM: {{vm}}"
-    case "{{vm}}" in
-        "dev-vm"|"test-vm"|"playground-vm")
-            if systemctl stop microvm-{{vm}} 2>/dev/null; then
-                echo "✅ {{vm}} stopped successfully"
-            else
-                echo "⚠️  {{vm}} was not running or failed to stop"
-            fi
-            ;;
-        *)
-            echo "❌ Unknown MicroVM: {{vm}}"
-            exit 1
-            ;;
-    esac
-
-# Restart a MicroVM
-restart-microvm vm:
-    #!/usr/bin/env bash
-    echo "🔄 Restarting MicroVM: {{vm}}"
-    just stop-microvm {{vm}}
-    sleep 2
-    just start-microvm {{vm}}
-
-# SSH into a MicroVM
-ssh-microvm vm:
-    #!/usr/bin/env bash
-    case "{{vm}}" in
-        "dev-vm")
-            ssh dev@localhost -p 2222
-            ;;
-        "test-vm")
-            ssh test@localhost -p 2223
-            ;;
-        "playground-vm")
-            ssh root@localhost -p 2224
-            ;;
-        *)
-            echo "❌ Unknown MicroVM: {{vm}}"
-            echo "Available: dev-vm, test-vm, playground-vm"
-            exit 1
-            ;;
-    esac
-
-# List all MicroVM status
-list-microvms:
-    #!/usr/bin/env bash
-    echo "📋 MicroVM Status:"
-    echo "=================="
-
-    for vm in dev-vm test-vm playground-vm; do
-        if systemctl is-active microvm-$vm >/dev/null 2>&1; then
-            status="🟢 RUNNING"
-        else
-            status="🔴 STOPPED"
-        fi
-
-        case "$vm" in
-            "dev-vm") port="2222"; user="dev" ;;
-            "test-vm") port="2223"; user="test" ;;
-            "playground-vm") port="2224"; user="root" ;;
-        esac
-
-        echo "$vm: $status (SSH: $user@localhost:$port)"
-    done
-
-# Stop all running MicroVMs
-stop-all-microvms:
-    #!/usr/bin/env bash
-    echo "🛑 Stopping all MicroVMs..."
-    for vm in dev-vm test-vm playground-vm; do
-        if systemctl is-active microvm-$vm >/dev/null 2>&1; then
-            echo "Stopping $vm..."
-            systemctl stop microvm-$vm
-        fi
-    done
-    echo "✅ All MicroVMs stopped"
-
-# Rebuild and restart a MicroVM
-rebuild-microvm vm:
-    #!/usr/bin/env bash
-    echo "🔨 Rebuilding MicroVM: {{vm}}"
-    just stop-microvm {{vm}}
-    echo "Building new {{vm}} configuration..."
-    if nix build .#nixosConfigurations.{{vm}}.config.system.build.toplevel; then
-        echo "✅ Build successful, starting {{vm}}..."
-        just start-microvm {{vm}}
-    else
-        echo "❌ Build failed for {{vm}}"
-        exit 1
-    fi
-
-# Clean up MicroVM artifacts and storage
-clean-microvms:
-    #!/usr/bin/env bash
-    echo "🧹 Cleaning up MicroVM artifacts..."
-
-    # Stop all VMs first
-    just stop-all-microvms
-
-    # Clean build artifacts
-    rm -rf result*
-
-    echo "⚠️  This will delete all MicroVM persistent data!"
-    read -p "Type 'yes' to confirm: " confirm
-    if [ "$confirm" = "yes" ]; then
-        sudo rm -rf /var/lib/microvms/*/
-        sudo rm -rf /tmp/microvm-shared/
-        echo "✅ MicroVM data cleaned"
-    else
-        echo "❌ Cancelled"
-    fi
-
-# Test MicroVM configurations
-test-microvm vm:
-    #!/usr/bin/env bash
-    echo "🧪 Testing MicroVM configuration: {{vm}}"
-    case "{{vm}}" in
-        "dev-vm"|"test-vm"|"playground-vm")
-            nix build .#nixosConfigurations.{{vm}}.config.system.build.toplevel --show-trace
-            if [ $? -eq 0 ]; then
-                echo "✅ {{vm}} configuration test passed"
-            else
-                echo "❌ {{vm}} configuration test failed"
-                exit 1
-            fi
-            ;;
-        *)
-            echo "❌ Unknown MicroVM: {{vm}}"
-            exit 1
-            ;;
-    esac
-
-# Test all MicroVM configurations
-test-all-microvms:
-    #!/usr/bin/env bash
-    echo "🧪 Testing all MicroVM configurations..."
-    failed=()
-
-    for vm in dev-vm test-vm playground-vm; do
-        echo "Testing $vm..."
-        if just test-microvm $vm; then
-            echo "✅ $vm: PASSED"
-        else
-            echo "❌ $vm: FAILED"
-            failed+=("$vm")
-        fi
-    done
-
-    echo ""
-    echo "📋 Test Summary:"
-    echo "================"
-    for vm in dev-vm test-vm playground-vm; do
-        if [[ " ${failed[@]} " =~ " ${vm} " ]]; then
-            echo "❌ $vm: FAILED"
-        else
-            echo "✅ $vm: PASSED"
-        fi
-    done
-
-    if [ ${#failed[@]} -gt 0 ]; then
-        echo ""
-        echo "❌ ${#failed[@]} MicroVM configurations failed"
-        exit 1
-    else
-        echo ""
-        echo "🎉 All MicroVM configurations passed!"
-    fi
-
-# Show MicroVM help
-microvm-help:
-    @echo "🖥️  MicroVM Management Help"
-    @echo "=========================="
-    @echo ""
-    @echo "📋 Available Commands:"
-    @echo "  just start-microvm <vm>     - Start a MicroVM"
-    @echo "  just stop-microvm <vm>      - Stop a MicroVM"
-    @echo "  just restart-microvm <vm>   - Restart a MicroVM"
-    @echo "  just ssh-microvm <vm>       - SSH into a MicroVM"
-    @echo "  just list-microvms          - Show all MicroVM status"
-    @echo "  just stop-all-microvms      - Stop all running MicroVMs"
-    @echo "  just rebuild-microvm <vm>   - Rebuild and restart a MicroVM"
-    @echo "  just test-microvm <vm>      - Test MicroVM configuration"
-    @echo "  just test-all-microvms      - Test all MicroVM configurations"
-    @echo "  just clean-microvms         - Clean up MicroVM data (DESTRUCTIVE)"
-    @echo ""
-    @echo "🖥️  Available MicroVMs:"
-    @echo "  dev-vm        - Development environment (8GB RAM, dev tools, Docker)"
-    @echo "                  SSH: ssh dev@localhost -p 2222"
-    @echo "                  Projects: /home/dev/projects"
-    @echo "                  Ports: 8080→80, 3000→3000"
-    @echo ""
-    @echo "  test-vm       - Testing environment (8GB RAM, minimal packages)"
-    @echo "                  SSH: ssh test@localhost -p 2223"
-    @echo "                  Data: /mnt/data"
-    @echo ""
-    @echo "  playground-vm - Experimental sandbox (8GB RAM, K8s, security tools)"
-    @echo "                  SSH: ssh root@localhost -p 2224"
-    @echo "                  Experiments: /root/experiments"
-    @echo "                  Ports: 8081→80"
-    @echo ""
-    @echo "📖 Example Workflow:"
-    @echo "  1. just start-microvm dev-vm        # Start development environment"
-    @echo "  2. just ssh-microvm dev-vm          # SSH into dev environment"
-    @echo "  3. just list-microvms               # Check all VM status"
-    @echo "  4. just stop-microvm dev-vm         # Stop when done"
-    @echo ""
-    @echo "💾 Storage:"
-    @echo "  - Shared /nix/store (read-only, efficient)"
-    @echo "  - Persistent volumes for each VM"
-    @echo "  - Shared host directory: /tmp/microvm-shared"
-    @echo ""
-    @echo "⚠️  Notes:"
-    @echo "  - VMs have 8GB RAM and 4 CPU cores each"
-    @echo "  - P620 (32GB) can run all VMs simultaneously"
-    @echo "  - Razer (16GB) should run 1-2 VMs at a time"
 
 # =============================================================================
 # AGENT-INTEGRATED DEPLOYMENT

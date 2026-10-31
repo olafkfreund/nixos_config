@@ -68,28 +68,6 @@ jobs:
           fi
           exit $rc
 
-      - name: Validate Home Manager configurations
-        run: |
-          set +e
-          err=$(nix eval --no-update-lock-file \
-              .#homeConfigurations.olafkfreund@${{ matrix.host }}.activationPackage 2>&1)
-          rc=$?
-          if [ $rc -eq 0 ]; then
-            echo "✓ Home Manager configuration for olafkfreund@${{ matrix.host }} is valid"
-            exit 0
-          fi
-          if echo "$err" | grep -qE 'lock file contains unlocked input.*"path":"\.\./\.\."'; then
-            echo "::warning::Known upstream issue in nix-openclaw-tools sub-flake (HM eval). Treating as PASS."
-            exit 0
-          fi
-          # Pre-existing behaviour: missing HM config is a warning, not a failure
-          if echo "$err" | grep -q 'does not provide attribute'; then
-            echo "WARNING: No Home Manager configuration for olafkfreund@${{ matrix.host }}"
-            exit 0
-          fi
-          echo "$err"
-          exit $rc
-
   security-check:
     runs-on: ubuntu-latest
     steps:
