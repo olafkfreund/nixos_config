@@ -5,7 +5,7 @@
 , ...
 }:
 let
-  inherit (lib) mkOption mkIf mkEnableOption mkMerge types optional optionalAttrs;
+  inherit (lib) mkIf mkEnableOption mkMerge optional optionalAttrs;
   cfg = config.modules.security.secrets;
 
   # Helper function to check if a secret file exists

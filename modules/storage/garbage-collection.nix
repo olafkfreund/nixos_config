@@ -6,7 +6,7 @@
 , ...
 }:
 let
-  inherit (lib) mkOption mkIf mkEnableOption types optionalString;
+  inherit (lib) mkOption mkIf mkEnableOption types;
   cfg = config.storage.garbageCollection;
 in
 {
