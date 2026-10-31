@@ -845,12 +845,10 @@ in
       enable = true;
       readaheadOptimization = true;
       cacheOptimization = true;
-      compressionOptimization = false; # Disable for performance
     };
 
     nvmeOptimization = {
       enable = true;
-      queueDepth = 64; # High queue depth for performance
       polling = true;
       multiQueue = true;
     };
@@ -859,7 +857,6 @@ in
       enable = true;
       writeCache = true;
       readCache = true;
-      barrierOptimization = false; # Keep safe
     };
 
     tmpfsOptimization = {

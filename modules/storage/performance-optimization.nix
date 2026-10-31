@@ -54,22 +54,10 @@ in
         default = true;
         description = "Enable filesystem cache optimization";
       };
-
-      compressionOptimization = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Enable filesystem compression optimization";
-      };
     };
 
     nvmeOptimization = {
       enable = mkEnableOption "Enable NVMe-specific optimizations";
-
-      queueDepth = mkOption {
-        type = types.int;
-        default = 32;
-        description = "NVMe queue depth optimization";
-      };
 
       polling = mkOption {
         type = types.bool;
@@ -97,12 +85,6 @@ in
         type = types.bool;
         default = true;
         description = "Enable read cache optimization";
-      };
-
-      barrierOptimization = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Disable write barriers for performance (unsafe)";
       };
     };
 
