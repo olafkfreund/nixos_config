@@ -14,8 +14,9 @@ readonly NC='\033[0m' # No Color
 readonly BOLD='\033[1m'
 
 # Get script and config directories
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly CONFIG_DIR="$(dirname "$SCRIPT_DIR")"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_DIR="$(dirname "$SCRIPT_DIR")"
+readonly SCRIPT_DIR CONFIG_DIR
 
 # Determine hostname for configuration
 readonly HOSTNAME="${1:-$(hostname)}"
