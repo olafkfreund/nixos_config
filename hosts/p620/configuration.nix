@@ -809,17 +809,6 @@ in
     # User services
     # playerctl 2.4.1 can segfault on a player signal (upstream bug); come back instead of staying failed.
     user.services.playerctld.serviceConfig.Restart = "on-failure";
-
-    user.services.scream-ivshmem = {
-      enable = true;
-      description = "Scream IVSHMEM";
-      serviceConfig = {
-        ExecStart = "${pkgs.scream}/bin/scream-ivshmem-pulse /dev/shm/scream";
-        Restart = "always";
-      };
-      wantedBy = [ "multi-user.target" ];
-      requires = [ "pulseaudio.service" ];
-    };
   };
 
   # Storage performance optimization
