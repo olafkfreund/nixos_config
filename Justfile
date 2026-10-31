@@ -967,9 +967,9 @@ deploy-all-parallel:
     @echo "🚀 Deploying to ALL hosts in parallel..."
     @read -p "Are you sure? This will max out resources! (y/N): " confirm && [ "$confirm" = "y" ] || exit 1
     @echo "Starting parallel deployments..."
-    ( just p620 & echo "P620 started" ) & \
-    ( just razer & echo "Razer started" ) & \
-    ( just p510 & echo "P510 started" ) & \
+    just p620 & \
+    just razer & \
+    just p510 & \
     wait && echo "✅ All deployments completed!"
 
 # Fast deployment with minimal builds
