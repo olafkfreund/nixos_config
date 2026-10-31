@@ -541,7 +541,6 @@ in
 
   secrets.apiKeys = {
     enable = true; # Re-enabled after recreating secrets with current SSH keys
-    enableEnvironmentVariables = true;
     enableUserEnvironment = true;
     braveSearch = true;
   };

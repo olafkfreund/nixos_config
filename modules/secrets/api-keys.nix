@@ -16,12 +16,6 @@ in
   options.secrets.apiKeys = {
     enable = mkEnableOption "Enable encrypted API keys management";
 
-    enableEnvironmentVariables = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Export API keys as environment variables system-wide";
-    };
-
     enableUserEnvironment = mkOption {
       type = types.bool;
       default = true;

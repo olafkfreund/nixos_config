@@ -434,7 +434,6 @@ in
   # Enable encrypted API keys
   secrets.apiKeys = {
     enable = true;
-    enableEnvironmentVariables = true;
     enableUserEnvironment = true;
     braveSearch = true;
   };
