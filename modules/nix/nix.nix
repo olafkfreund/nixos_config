@@ -91,12 +91,6 @@
     allowUnfree = true;
     joypixels.acceptLicense = true;
 
-    # Specific unfree packages (if needed for additional control)
-    allowUnfreePredicate = pkg:
-      builtins.elem (lib.getName pkg) [
-        "slack-4.36.140"
-      ];
-
     # SECURITY: Only allow specific insecure packages, never global allowInsecure
     # Remove allowInsecure = true for better security
     permittedInsecurePackages = [
