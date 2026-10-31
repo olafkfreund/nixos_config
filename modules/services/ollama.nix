@@ -202,6 +202,7 @@ in
       # ExecStartPre fires, so preStart doesn't need to mkdir or chown.
       RuntimeDirectory = "ollama";
       RuntimeDirectoryMode = "0750";
+      LoadCredential = "api-ollama:${cfg.cloudApiKeyFile}";
 
       # Composed by preStart below; never enters the Nix store. The leading
       # `-` marks it optional: systemd applies EnvironmentFile= to every
@@ -217,7 +218,7 @@ in
     # makes the file 0640 owned by the unit's User=/Group= (ollama:ollama).
     systemd.services.ollama.preStart = lib.mkIf (cfg.cloudApiKeyFile != null) (lib.mkAfter ''
       umask 027
-      printf 'OLLAMA_API_KEY=%s\n' "$(tr -d '\r\n' < ${cfg.cloudApiKeyFile})" > /run/ollama/cloud-env
+      printf 'OLLAMA_API_KEY=%s\n' "$(tr -d '\r\n' < "$CREDENTIALS_DIRECTORY/api-ollama")" > /run/ollama/cloud-env
     '');
   };
 }
