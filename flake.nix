@@ -402,7 +402,7 @@
       # ========================================
 
       # Host type templates for configuration reduction (workstation, laptop, server, hybrid)
-      hostTypes = import ./lib/hostTypes.nix { inherit (nixpkgs) lib; };
+      hostTypes = import ./lib/hostTypes.nix;
 
       # Hardware profiles for GPU-specific configurations
       hardwareProfiles = {
