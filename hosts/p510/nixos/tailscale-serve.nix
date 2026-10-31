@@ -32,7 +32,8 @@
       RemainAfterExit = true;
       TimeoutStartSec = 400;
       ExecStart = pkgs.writeShellScript "tailscale-serve-start" ''
-        set -euo pipefail
+        # No -e: one failing serve/funnel path must not drop the others.
+        set -uo pipefail
 
         # Wait for Tailscale to be ready (bounded: 60 x 5s)
         ready=0
