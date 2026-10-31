@@ -95,7 +95,7 @@ in
         # Weekly generation cleanup (keep only recent generations)
         nix-generation-cleanup = mkIf (!cfg.aggressiveCleanup) {
           description = "Clean up old NixOS generations";
-          after = [ "nix-gc.service" ];
+          before = [ "nix-gc.service" ];
           # `after` is ordering ONLY — without this the unit has no timer and
           # nothing pulling it in, so it never ran. That is why p620 reached 73
           # system generations despite --delete-older-than 14d: the age rule
