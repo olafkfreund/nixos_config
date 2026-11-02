@@ -297,8 +297,11 @@ def test_more_rechecks_gates(dirs, monkeypatch):
 
 def test_think_stripped(monkeypatch):
     class R(io.BytesIO):
-        __enter__ = lambda s: s
-        __exit__ = lambda s, *x: None
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return None
 
     body = json.dumps(
         {"message": {"content": "<think>hmm\nok</think>\nHello."}}
