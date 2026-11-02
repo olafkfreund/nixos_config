@@ -197,6 +197,7 @@ nav:
       - "Agent Bus (Matrix + MCP)": applications/agent-bus.md
       - "Herdr (agent multiplexer)": applications/herdr.md
       - "Sunshine (streaming)": applications/sunshine.md
+      - "Agent voice (spoken summaries)": applications/agent-voice.md
       - "tfm (file manager)": applications/tfm.md
   - Command System:
       - Overview: Nixos/README.md
