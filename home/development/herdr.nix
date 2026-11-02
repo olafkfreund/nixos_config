@@ -18,10 +18,8 @@
 # Only config.toml is a symlink — herdr still owns the directory for its
 # sockets, logs, session.json and .plugins.lock.
 { lib, pkgs, ... }:
-{
-  home.packages = [ pkgs.customPkgs.herdr-claude-teams ];
-
-  programs.zsh.initContent = ''
+let
+  claudeLauncher = ''
     claude() {
       if [[ ''${HERDR_ENV:-} == 1 && -n ''${HERDR_SOCKET_PATH:-} ]]; then
         command herdr-claude-teams "$@"
@@ -30,6 +28,13 @@
       fi
     }
   '';
+in
+{
+  home.packages = [ pkgs.customPkgs.herdr-claude-teams ];
+
+  # Login shell and herdr panes are bash; zsh gets the same function.
+  programs.bash.initExtra = claudeLauncher;
+  programs.zsh.initContent = claudeLauncher;
 
   xdg.configFile."herdr/config.toml".text = ''
     onboarding = false

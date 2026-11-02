@@ -277,3 +277,6 @@ keeps its Phase A behaviour.
   - `is_teammate` matches `--agent-id=` and walks 6 ancestors.
   - Refuted: agy's claim that the zsh function captures teammate launches.
     Claude launches them as `env … /nix/store/…/claude`.
+- Step 5 (live): the login shell and herdr panes are **bash**, not zsh, so
+  the `claude` function from step 2 never loaded. The same function is now
+  also set in `programs.bash.initExtra` (#2616 follow-up).
