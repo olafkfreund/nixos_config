@@ -681,7 +681,7 @@ in
   # No Ollama here: Haiku writes the summary, and the ElevenLabs key comes from
   # agenix (the keyring has none on this host).
   # Reap orphaned/idle swarm tmux servers; dryRun first (#2616).
-  features.claudeSwarmReaper.enable = true;
+  features.claudeSwarmReaper = { enable = true; dryRun = false; };
   modules.programs.claude-code-managed.subagentMetadata.codex = true;
 
   features.agentVoice = {
