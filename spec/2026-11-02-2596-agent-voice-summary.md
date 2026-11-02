@@ -20,16 +20,73 @@ agent turn ends
      -> on "Tell me more": Ollama writes ~45 s explanation, spoken
 ```
 
-### Where the code lives
+### Where the code lives: one NixOS module
+
+Everything is behind one module, `modules/programs/agent-voice.nix`. A host
+turns it on with options and nothing else. The agent modules
+(`claude-code-managed.nix`, `codex-cli.nix`, `antigravity-config.nix`) are not
+edited: the voice module plugs into them from outside.
 
 | Piece | File | Shape |
 | ----- | ---- | ----- |
-| Program | `pkgs/agent-say/agent_say.py` (+ `test_agent_say.py`) | one Python module, stdlib only |
-| Package | `pkgs/agent-say/default.nix` | python env + wrapper, same shape as `pkgs/agent-bus-mcp` |
-| Claude Code hook | `modules/programs/claude-code-managed.nix` | a second `Stop` entry next to the existing `claude-notify stop` |
-| Codex hook | `home/development/codex-cli.nix` | a `Stop` entry in the `~/.codex/hooks.json` it already manages |
-| agy hook | `home/development/antigravity-config.nix` | an end-of-turn entry in the `~/.gemini/config/hooks.json` it already manages |
-| Switch | `features.agentVoice.enable`, p620 + razer | not p510 |
+| Program | `pkgs/agent-say/agent_say.py` (+ `test_agent_say.py`) | one Python module, stdlib only; reads its settings from `/etc/agent-say/config.json` |
+| Package | `pkgs/agent-say/default.nix` → `pkgs.customPkgs.agent-say` | python env + wrapper, same shape as `pkgs/agent-bus-mcp`, built on omarchy-voice's Python |
+| Module | `modules/programs/agent-voice.nix` | options below; renders the config, installs the package, wires the hooks |
+| Host | `hosts/{p620,razer}/configuration.nix` | import the module, `features.agentVoice.enable = true;` |
+
+What the module does when enabled:
+
+- `environment.systemPackages = [ cfg.package ]`.
+- `environment.etc."agent-say/config.json"` is generated from the options
+  (`builtins.toJSON`), so every setting is declared in Nix, not edited by
+  hand. It holds no secrets.
+- **Claude Code:** adds a `Stop` hook through the existing NixOS option
+  `modules.programs.claude-code-managed.settings.hooks`, which merges with the
+  hooks already there.
+- **Codex, agy:** a `home-manager.sharedModules` entry adds one
+  `home.activation` step per agent that inserts the `Stop` entry into
+  `~/.codex/hooks.json` or `~/.gemini/config/hooks.json`. It uses the same
+  idempotent `jq` merge `codex-cli.nix` already uses for its format hook.
+  When an agent is disabled, the same step **removes** its entry, so turning
+  the option off really turns it off. That matters because `~/.gemini` is
+  synced by Syncthing and outlives a rebuild.
+- **The hook command** returns at once. It hands the work to
+  `systemd-run --user --collect` as a transient unit, so the agent is never
+  held up, it runs inside your session (audio, D-Bus, notifications), and its
+  log is in `journalctl --user -t agent-say`. It is a per-turn user job, not
+  a system service, so the DynamicUser/ProtectHome rule does not apply: it
+  needs the session's PipeWire and D-Bus, the same exception as Sunshine.
+- The hook command is guarded with `command -v agent-say || exit 0`, so the
+  synced agy `hooks.json` is a harmless no-op on p510.
+
+### Options
+
+```nix
+features.agentVoice = {
+  enable = mkEnableOption "spoken end-of-turn summaries from coding agents";
+  package = mkPackageOption pkgs.customPkgs "agent-say" { };
+
+  agents = {                     # each defaults to true
+    claude.enable = …;
+    codex.enable  = …;
+    agy.enable    = …;
+  };
+
+  voice.elevenLabsVoiceId = "pFZP5JQG7iQjIQuC4Bku";   # Lily; Piper if unavailable
+  summary.ollamaUrl = "http://localhost:11434";
+  summary.model     = "qwen3:14b";
+  minTurnSeconds    = 60;
+  startEnabled      = true;      # runtime switch state on first use
+
+  microphoneGate.enable = true;
+  microphoneGate.ignore = [ "Echo-Cancel" ];  # capture streams that are not a meeting
+};
+```
+
+There is deliberately **no option** to turn off the Do Not Disturb and
+snooze gates. That is the intent's hard rule, so it is not configurable.
+`agent-say off` / `agent-say on` stays as the quick runtime switch on top of
+the Nix option.
 
 The package is built with omarchy-voice's own Python, so it can
 `from omarchy_voice.feedback import Feedback` and reuse the exact speech
@@ -83,6 +140,16 @@ silent (we don't read raw text aloud).
 
 ## Alternatives rejected
 
+- **Editing the three agent modules directly:** that spreads one feature
+  over three files, and disabling it would mean editing all three. One module
+  that plugs in from outside can be switched off with one line.
+- **A home-manager-only module:** Claude Code's hooks live in the NixOS
+  managed settings, and `/etc/agent-say/config.json` belongs to the system.
+  A NixOS module reaches both, and reaches home-manager through
+  `sharedModules`.
+- **A long-running systemd user service:** nothing needs to run between
+  turns. A transient unit per turn gives the same logging with zero idle
+  cost.
 - **A separate GitHub repo / standalone tool:** worth it only to share. It
   adds a flake input and release overhead for ~200 lines used on two hosts.
   If it proves useful, upstreaming it as `omarchy-voice narrate` into
@@ -125,7 +192,8 @@ silent (we don't read raw text aloud).
 - `pytest pkgs/agent-say`: each gate is tested both ways, including DND
   `on`/error/timeout, unreadable `quiet.json`, a mic in use, and a delegated
   env. Each must result in "silent".
-- `just test-host p620` and `just test-host razer` build.
+- `just test-host p620` and `just test-host razer` build; with `enable = false` the host closure has no agent-say and no hook entries.
+- `nix eval` of `/etc/agent-say/config.json` matches the options.
 - On p620, live with DND **on**: finish a Claude turn over 60 s. Expected:
   no sound and one `held dnd` log line.
 - DND **off**: the same turn is spoken in two or three sentences and a "Tell
