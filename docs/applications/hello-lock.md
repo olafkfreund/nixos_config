@@ -52,6 +52,17 @@ Bump `rev` and `hash` in `pkgs/hello-lock/default.nix`, never
 gh api repos/denonmaryland/hello-lock/commits --jq '.[0].sha'
 ```
 
+After a nixarchy bump or a hello-lock bump, check that the lock still answers.
+Omarchy routes locking to the enabled plugin without checking that it loaded,
+so a broken plugin means the screen silently does not lock:
+
+```bash
+omarchy-shell lock status
+```
+
+Expect JSON with `"passwordPam": true`. An error or no output means the lock
+handler is missing: disable hello-lock until it is fixed.
+
 ## Recovery from a broken lock
 
 Keep an SSH session open from another host the first time you lock with it.
@@ -66,19 +77,25 @@ The stock lock screen is back. To return, run `omarchy plugin enable hello-lock`
 and restart the shell again.
 
 **Locked and it will not unlock:** `omarchy restart shell` refuses to run while
-the session is locked, so the command above does not help. From a TTY
-(Ctrl+Alt+F3) or over SSH:
+the session is locked, so the command above does not help on its own. From a
+TTY (Ctrl+Alt+F3) or over SSH:
 
 ```bash
 omarchy plugin disable hello-lock
-export XDG_RUNTIME_DIR=/run/user/1000
-export HYPRLAND_INSTANCE_SIGNATURE=$(ls /run/user/1000/hypr | head -1)
-hyprctl keyword misc:allow_session_lock_restore 1
+pkill -KILL -f '[.]quickshell-wrapped_'
 ```
 
-Then stop the shell process. Its process name is `.quickshell-wrapped_`, so
-`pgrep -x quickshell` misses it, and `pkill -f` on a pattern in your own command
-line kills your shell instead. When the shell starts again, it locks with the
-stock screen, which unlocks with your password. If the shell does not come
-back, end the session with `loginctl terminate-user "$USER"`; this loses
-unsaved work.
+The shell's launcher restarts it after a non-zero exit, and the new shell
+re-locks with the stock screen, which unlocks with your password. Omarchy
+already sets Hyprland's `misc:allow_session_lock_restore`, so the new shell
+can take over the lock. The `[.]` stops `pkill -f` from matching its own
+command line. If no shell has come back after a few seconds, run
+`omarchy restart shell` from the same terminal.
+
+As a last resort, end the graphical session. This loses unsaved work, and
+`loginctl terminate-user` would also end the SSH session you are using:
+
+```bash
+loginctl list-sessions
+loginctl terminate-session <id of the graphical session>
+```
