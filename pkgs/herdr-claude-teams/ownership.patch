@@ -179,7 +179,7 @@ index cbed593..c0825cd 100644
 +    try:
 +        call(
 +            "pane.report_metadata",
-+            {"pane_id": pane_id, "source": "herdr-claude-teams", "title": "\u21b3 " + match.group(1)},
++            {"pane_id": pane_id, "source": "herdr-claude-teams", "tokens": {"split_mark": "\u21b3 " + match.group(1)}},
 +        )
 +    except Exception as exc:  # noqa: BLE001 - a label failure must never block the launch
 +        trace.log("label_failed", error=str(exc))
@@ -269,7 +269,7 @@ index 0264fae..8ff8312 100644
 +
 +    def _m_pane_report_metadata(self, params):
 +        pane = self._require_pane(params["pane_id"])
-+        pane["title"] = params.get("title")
++        pane["tokens"] = params.get("tokens")
 +        return {"type": "ok"}
 +
      def _m_pane_rename(self, params):
@@ -381,7 +381,7 @@ index 0000000..397fa63
 +        run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-h", "-P", "-F", "#{pane_id}"])
 +        run(fake, monkeypatch, capsys, ["respawn-pane", "-t", "%term_2",
 +                                         "cd /x && env A=1 claude --agent-id alpha@t --agent-name alpha --foo"])
-+        assert fake.state.pane("wL-2")["title"] == "↳ alpha"
++        assert fake.state.pane("wL-2")["tokens"] == {"split_mark": "↳ alpha"}
 +
 +
 +def test_label_failure_does_not_block_launch(monkeypatch, capsys):

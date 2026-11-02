@@ -74,9 +74,9 @@ in
 
     [ui]
     show_agent_labels_on_pane_borders = true
-    # "priority" orders the agent panel as an attention queue, so a blocked
-    # agent surfaces above idle ones instead of sorting by workspace.
-    agent_panel_sort = "priority"
+    # "spaces" keeps panes in tab order, so Claude teammates (splits of the
+    # lead's tab) sit directly under their lead as "↳ <name>" rows (#2616).
+    agent_panel_sort = "spaces"
 
     # "symbols" gives blocked/working/done/idle/unknown distinct glyphs instead
     # of colour-only dots, so state survives a dim panel or a colourblind read.
