@@ -53,6 +53,7 @@
   altscape = pkgs.callPackage ./altscape { };
   # Omateams: Microsoft Teams web in an Omarchy-themed window (#2505).
   omateams = pkgs.callPackage ./omateams { };
+  hello-lock = pkgs.callPackage ./hello-lock { };
   # Omaoutlook: Microsoft Outlook web in an Omarchy-themed window (#2602).
   omaoutlook = pkgs.callPackage ./omaoutlook { omateams = pkgs.callPackage ./omateams { }; };
 

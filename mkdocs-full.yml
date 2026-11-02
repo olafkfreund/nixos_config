@@ -190,6 +190,7 @@ nav:
       - "Herdr (agent multiplexer)": applications/herdr.md
       - "Sunshine (streaming)": applications/sunshine.md
       - "Agent voice (spoken summaries)": applications/agent-voice.md
+      - "Hello Lock (lock screen)": applications/hello-lock.md
       - "tfm (file manager)": applications/tfm.md
   - Command System:
       - Overview: Nixos/README.md
