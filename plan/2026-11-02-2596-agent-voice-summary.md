@@ -346,6 +346,17 @@ and "silence spawned agents" as the meaning of own sessions.
 5. **PR, merge after CI, deploy p620 and razer** (announced on the bus;
     razer via p620).
 
+### Phase 2 review fixes (Opus review, 2026-11-02)
+
+- The claude backend ran a full Claude session (MCP servers, hooks, the
+  Bash allowlist) on untrusted reply text. It now runs with `--tools ""`,
+  `--strict-mcp-config`, `--no-session-persistence`, `--setting-sources ""`
+  and `--disable-slash-commands`, from the runtime dir, with
+  `ELEVENLABS_API_KEY` removed from its env and `AGENT_SAY_QUIET=1` set.
+  Live test: one sentence in 5.4 s, no transcript written.
+- The agy reply is the last non-empty `PLANNER_RESPONSE`, because a
+  tool-only last step has empty content.
+
 ### Phase 2 tests
 
 The unit tests above, then live: one agy turn over 60 s on p620 speaks

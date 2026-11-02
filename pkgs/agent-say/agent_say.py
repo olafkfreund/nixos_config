@@ -195,10 +195,14 @@ def reply_text(agent, payload):
         return payload.get("last_assistant_message") or ""
     text = ""
     for obj in jsonl(transcript(agent, payload)):
-        if obj.get("type") == "PLANNER_RESPONSE" and isinstance(
-            obj.get("content"), str
+        content = obj.get("content")
+        # Keep the last non-empty reply: a tool-only step has empty content.
+        if (
+            obj.get("type") == "PLANNER_RESPONSE"
+            and isinstance(content, str)
+            and content.strip()
         ):
-            text = obj["content"]
+            text = content
     return text
 
 
@@ -264,11 +268,30 @@ def summarise_claude(cfg, instruction, text):
         return None
     try:
         r = subprocess.run(
-            [exe, "-p", "--model", cfg.get("claudeModel", "haiku")],
+            # The reply is untrusted text: no tools, no MCP, no user/project
+            # settings or transcript, no key in its env, and its own Stop hook held.
+            [
+                exe,
+                "-p",
+                "--model",
+                cfg.get("claudeModel", "haiku"),
+                "--tools",
+                "",
+                "--strict-mcp-config",
+                "--no-session-persistence",
+                "--setting-sources",
+                "",
+                "--disable-slash-commands",
+            ],
             input=f"{instruction}\n\n{text}",
             capture_output=True,
             text=True,
             timeout=90,
+            cwd=run_dir(),
+            env={
+                **{k: v for k, v in os.environ.items() if k != "ELEVENLABS_API_KEY"},
+                "AGENT_SAY_QUIET": "1",
+            },
         )
     except (OSError, subprocess.SubprocessError) as e:
         log(f"claude failed: {e}")

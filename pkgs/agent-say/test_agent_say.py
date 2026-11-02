@@ -439,12 +439,22 @@ def fake_claude(monkeypatch, rc=0, out="sum\n", exe="/bin/claude"):
     return calls
 
 
-def test_claude_backend(monkeypatch):
+def test_claude_backend(dirs, monkeypatch):
     calls = fake_claude(monkeypatch)
+    monkeypatch.setenv("ELEVENLABS_API_KEY", "sekrit")
     cfg = {**CFG, "backend": "claude", "claudeModel": "haiku"}
     assert a.summarise(cfg, "ins", "reply") == "sum"
     cmd, kw = calls[0]
-    assert cmd == ["/bin/claude", "-p", "--model", "haiku"]
+    assert cmd[:4] == ["/bin/claude", "-p", "--model", "haiku"]
+    # Untrusted reply text: no tools, no MCP, nothing persisted.
+    assert cmd[cmd.index("--tools") + 1] == ""
+    for flag in (
+        "--strict-mcp-config",
+        "--no-session-persistence",
+        "--disable-slash-commands",
+    ):
+        assert flag in cmd
+    assert "ELEVENLABS_API_KEY" not in kw["env"] and kw["env"]["AGENT_SAY_QUIET"] == "1"
     assert "ins" in kw["input"] and "reply" in kw["input"] and kw["timeout"] == 90
 
 
@@ -535,3 +545,14 @@ def test_hook_unit_is_non_blocking_with_timeout(dirs, monkeypatch):
     monkeypatch.setattr(a.subprocess, "run", lambda cmd, **k: seen.append((cmd, k)))
     a.hook("claude")
     assert "--no-block" in seen[0][0] and seen[0][1]["timeout"] == 5
+
+
+def test_agy_reply_skips_empty_last_step(dirs):
+    t = dirs / "agy.jsonl"
+    t.write_text(
+        json.dumps({"type": "PLANNER_RESPONSE", "content": "Did the work."})
+        + "\n"
+        + json.dumps({"type": "PLANNER_RESPONSE", "content": ""})
+        + "\n"
+    )
+    assert a.reply_text("agy", {"transcriptPath": str(t)}) == "Did the work."
