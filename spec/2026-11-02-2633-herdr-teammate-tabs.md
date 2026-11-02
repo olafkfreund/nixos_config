@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2633
 intent: intent/2026-11-02-2633-herdr-teammate-tabs.md
 ---
