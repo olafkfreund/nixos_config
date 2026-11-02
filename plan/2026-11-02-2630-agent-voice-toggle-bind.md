@@ -157,3 +157,16 @@ A fresh Opus agent gets this plan and `git diff origin/main`.
 
 Revert the PR and redeploy. The bind line goes away, and `agent-say on/off`
 works as before. If the state was left muted, run `agent-say on`.
+
+## Deviations during implementation
+
+- Step 1 (coder):
+  - **Verify command:** `nix build …customPkgs.agent-say` ran the pytest
+    `checkPhase` (69 passed) but failed at `installPhase`.
+  - **Cause:** `pkgs/default.nix` builds the package with
+    `omarchyVoice = null`, which empties the `optionalString` that carries
+    the line continuation. This was already broken before this change, and
+    no host uses that variant.
+  - **Real check:** the module uses
+    `.override { omarchyVoice = hmVoice.package; }`, which
+    `just test-host` builds in step 2. That build is the step's real check.

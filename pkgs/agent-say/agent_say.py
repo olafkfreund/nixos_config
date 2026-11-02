@@ -87,6 +87,13 @@ def gate_switch(cfg):
         return "switch"
 
 
+def set_switch(state):
+    sd = state_dir()
+    sd.mkdir(parents=True, exist_ok=True)
+    (sd / state).touch()
+    (sd / ("on" if state == "off" else "off")).unlink(missing_ok=True)
+
+
 def gate_dnd(cfg):
     try:
         r = subprocess.run(
@@ -508,15 +515,22 @@ def main(argv):
     elif cmd == "more":
         more()
     elif cmd in ("on", "off"):
-        sd = state_dir()
-        sd.mkdir(parents=True, exist_ok=True)
-        (sd / ("off" if cmd == "off" else "on")).touch()
-        (sd / ("on" if cmd == "off" else "off")).unlink(missing_ok=True)
+        set_switch(cmd)
+    elif cmd == "toggle":
+        new = "on" if gate_switch(config()) else "off"
+        set_switch(new)
+        print(new)
+        with contextlib.suppress(OSError, subprocess.SubprocessError):
+            subprocess.run(
+                ["notify-send", "-a", "Agent voice", f"Agent voice {new}"],
+                timeout=5,
+                check=False,
+            )
     elif cmd == "status":
         print("off" if gate_switch(config()) else "on")
     else:
         print(
-            "usage: agent-say hook|run <claude|codex> | more | on | off | status",
+            "usage: agent-say hook|run <claude|codex> | more | on | off | toggle | status",
             file=sys.stderr,
         )
         return 2
