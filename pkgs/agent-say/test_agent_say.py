@@ -24,6 +24,8 @@ def dirs(tmp_path, monkeypatch):
     monkeypatch.setenv("HOME", str(tmp_path))
     monkeypatch.setenv("XDG_STATE_HOME", str(tmp_path / "state"))
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "run"))
+    for k in a.ENV_KEYS:
+        monkeypatch.delenv(k, raising=False)
     (tmp_path / "run").mkdir()
     return tmp_path
 
@@ -384,6 +386,86 @@ def test_run_and_more_use_label_and_title(dirs, monkeypatch):
     assert " ".join(spoken) == (
         "From Claude, Fix the bar. short From Claude, Fix the bar. long"
     )
+
+
+AGY_PAYLOAD = {"workspacePaths": ["/w/proj"]}
+
+
+def agy_payload(dirs):
+    t = write_jsonl(
+        dirs / "agy.jsonl",
+        {"type": "USER_INPUT", "created_at": iso(300)},
+        {"type": "PLANNER_RESPONSE", "content": "first"},
+        {"type": "PLANNER_RESPONSE", "content": "probe ok"},
+    )
+    return {**AGY_PAYLOAD, "transcriptPath": t}
+
+
+def test_agy_reply_turn_and_label(dirs):
+    p = agy_payload(dirs)
+    assert a.reply_text("agy", p) == "probe ok"
+    assert 290 < a.turn_seconds("agy", p) < 320
+    assert a.label("agy", p) == ("Agy", "proj")
+
+
+@pytest.mark.parametrize(
+    "agent,env,ok",
+    [
+        ("agy", {}, True),
+        ("agy", {"CLAUDECODE": "1"}, False),
+        ("agy", {"AGY_CODER": "1"}, False),
+        ("claude", {"CLAUDE_CODE_ENTRYPOINT": "cli", "CLAUDECODE": "1"}, True),
+        (
+            "claude",
+            {"CLAUDE_CODE_ENTRYPOINT": "cli", "TMUX": "/t/claude-swarm-1,2,0"},
+            False,
+        ),
+        ("claude", {"CLAUDE_CODE_ENTRYPOINT": "cli", "TMUX": "/t/herdr,2,0"}, True),
+    ],
+)
+def test_interactive_agy_and_swarm(agent, env, ok):
+    assert a.interactive(agent, {}, env) is ok
+
+
+def fake_claude(monkeypatch, rc=0, out="sum\n", exe="/bin/claude"):
+    calls = []
+
+    def run_(cmd, **kw):
+        calls.append((cmd, kw))
+        return SimpleNamespace(returncode=rc, stdout=out)
+
+    monkeypatch.setattr(a.shutil, "which", lambda n: exe)
+    monkeypatch.setattr(a.subprocess, "run", run_)
+    return calls
+
+
+def test_claude_backend(monkeypatch):
+    calls = fake_claude(monkeypatch)
+    cfg = {**CFG, "backend": "claude", "claudeModel": "haiku"}
+    assert a.summarise(cfg, "ins", "reply") == "sum"
+    cmd, kw = calls[0]
+    assert cmd == ["/bin/claude", "-p", "--model", "haiku"]
+    assert "ins" in kw["input"] and "reply" in kw["input"] and kw["timeout"] == 90
+
+
+@pytest.mark.parametrize("kw", [{"rc": 1}, {"out": " "}, {"exe": None}])
+def test_claude_backend_failure_is_silent(monkeypatch, kw):
+    fake_claude(monkeypatch, **kw)
+    assert a.summarise({**CFG, "backend": "claude"}, "i", "r") is None
+
+
+def test_key_file_exported_unless_set(dirs, monkeypatch):
+    k = dirs / "key"
+    k.write_text("sekrit\n")
+    monkeypatch.delenv("ELEVENLABS_API_KEY", raising=False)
+    monkeypatch.setitem(__import__("sys").modules, "omarchy_voice", None)
+    with pytest.raises(ImportError):
+        a.speak({**CFG, "elevenLabsKeyFile": str(k)}, "x")
+    assert os.environ["ELEVENLABS_API_KEY"] == "sekrit"
+    monkeypatch.setenv("ELEVENLABS_API_KEY", "mine")
+    with pytest.raises(ImportError):
+        a.speak({**CFG, "elevenLabsKeyFile": str(k)}, "x")
+    assert os.environ["ELEVENLABS_API_KEY"] == "mine"
 
 
 def test_think_stripped(monkeypatch):

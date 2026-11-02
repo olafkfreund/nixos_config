@@ -4,6 +4,16 @@ with lib; let
   hmVoice = config.home-manager.users.olafkfreund.programs.omarchy-voice;
 
   # Managed hook commands must sit under /etc/codex/hooks.
+  agyHookEntry = (pkgs.formats.json { }).generate "agent-say-agy-hook.json" {
+    agent-say.Stop = [{
+      type = "command";
+      # agy blocks on a failing hook and wants one JSON object on stdout; the
+      # guard makes the synced hooks.json a no-op on hosts without agent-say.
+      command = "sh -c 'command -v agent-say >/dev/null && agent-say hook agy; echo \"{}\"'";
+      timeout = 10;
+    }];
+  };
+
   codexHook = pkgs.writeShellScript "agent-say-codex" ''
     exec ${cfg.package}/bin/agent-say hook codex
   '';
@@ -22,6 +32,7 @@ in
     agents = {
       claude.enable = mkOption { type = types.bool; default = true; description = "Hook Claude Code's Stop event."; };
       codex.enable = mkOption { type = types.bool; default = true; description = "Hook Codex's Stop event (managed hook)."; };
+      agy.enable = mkOption { type = types.bool; default = true; description = "Hook agy's Stop event (entry in ~/.gemini/config/hooks.json)."; };
     };
 
     voice.elevenLabsVoiceId = mkOption {
@@ -30,7 +41,15 @@ in
       description = "ElevenLabs voice for the narrator (Lily).";
     };
 
+    voice.elevenLabsKeyFile = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "File holding the ElevenLabs key, read at run time when ELEVENLABS_API_KEY is unset (for hosts where the keyring has none).";
+    };
+
     summary = {
+      backend = mkOption { type = types.enum [ "ollama" "claude" ]; default = "ollama"; description = "What writes the summary: local Ollama, or `claude -p`."; };
+      claudeModel = mkOption { type = types.str; default = "haiku"; description = "Model for the claude backend."; };
       ollamaUrl = mkOption { type = types.str; default = "http://127.0.0.1:11434"; description = "Ollama endpoint that writes the summary."; };
       model = mkOption { type = types.str; default = "qwen3:14b"; description = "Ollama model that writes the summary."; };
     };
@@ -65,7 +84,8 @@ in
     environment.etc."agent-say/config.json".text = builtins.toJSON {
       voiceId = cfg.voice.elevenLabsVoiceId;
       ollamaUrl = cfg.summary.ollamaUrl;
-      inherit (cfg.summary) model;
+      inherit (cfg.summary) model backend claudeModel;
+      elevenLabsKeyFile = cfg.voice.elevenLabsKeyFile;
       inherit (cfg) minTurnSeconds startEnabled;
       microphoneGate = { inherit (cfg.microphoneGate) enable ignore; };
     };
@@ -75,21 +95,45 @@ in
     ];
 
     # A function so lib is Home Manager's (lib.hm.dag), not nixpkgs'.
-    home-manager.users.olafkfreund = mkIf (cfg.moreKey != "") ({ lib, ... }: {
-      home.file.".config/hypr/agent-voice-binds.lua".text = ''
-        o.bind("${cfg.moreKey}", "Agent voice: tell me more", "${cfg.package}/bin/agent-say more")
-      '';
+    home-manager.users.olafkfreund = { lib, ... }: {
+      home.file.".config/hypr/agent-voice-binds.lua" = mkIf (cfg.moreKey != "") {
+        text = ''
+          o.bind("${cfg.moreKey}", "Agent voice: tell me more", "${cfg.package}/bin/agent-say more")
+        '';
+      };
 
       # Append-only so the user's edits to bindings.lua stay theirs.
-      home.activation.agentVoiceRequire = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      home.activation.agentVoiceRequire = mkIf (cfg.moreKey != "") (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         f="$HOME/.config/hypr/bindings.lua"
         if [ -f "$f" ] && ! grep -qF '"hypr.agent-voice-binds"' "$f"; then
           # The redirect lives inside run, so a dry run cannot append to the file.
           run ${pkgs.bash}/bin/bash -c 'printf "\n%s\n" "$2" >> "$1"' _ "$f" \
             'pcall(require, "hypr.agent-voice-binds") -- managed by NixOS (#2596)'
         fi
+      '');
+
+      # ~/.gemini is Syncthing-synced, so merge into hooks.json instead of
+      # replacing it. Writes go through a temp file so a dry run publishes nothing.
+      home.activation.agentVoiceAgyHook = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        hooksfile="$HOME/.gemini/config/hooks.json"
+        jq=${pkgs.jq}/bin/jq
+        if [ -f "$hooksfile" ] && $jq -e 'type == "object"' "$hooksfile" >/dev/null 2>&1; then
+          ${if cfg.agents.agy.enable then ''
+            if ! $jq -e --slurpfile want ${agyHookEntry} '."agent-say" == $want[0]."agent-say"' "$hooksfile" >/dev/null 2>&1; then
+              tmp=$(mktemp)
+              $jq -s '.[0] + .[1]' "$hooksfile" ${agyHookEntry} > "$tmp"
+              $DRY_RUN_CMD mv "$tmp" "$hooksfile"
+            fi
+          '' else ''
+            if $jq -e 'has("agent-say")' "$hooksfile" >/dev/null 2>&1; then
+              tmp=$(mktemp)
+              $jq 'del(."agent-say")' "$hooksfile" > "$tmp"
+              $DRY_RUN_CMD mv "$tmp" "$hooksfile"
+            fi
+          ''}
+        fi
       '';
-    });
+    };
 
     environment.etc."codex/hooks/agent-say" = mkIf cfg.agents.codex.enable { source = codexHook; };
     environment.etc."codex/requirements.toml".text = mkIf cfg.agents.codex.enable (mkAfter ''

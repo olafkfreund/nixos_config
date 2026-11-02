@@ -2,15 +2,16 @@
 
 Last Updated: 2026-11-02
 
-When a Claude Code or Codex turn finishes, `agent-say` speaks a calm two- or
+When a Claude Code, Codex or agy turn finishes, `agent-say` speaks a calm two- or
 three-sentence summary in a narrator voice (Lily, via ElevenLabs with Piper
-underneath, through omarchy-voice). It is enabled on **p620** only, via
-`features.agentVoice` in `modules/programs/agent-voice.nix`.
+underneath, through omarchy-voice). It is enabled on **p620** and **razer**
+via `features.agentVoice` in `modules/programs/agent-voice.nix`. p510 is a
+headless media server and is not wanted.
 
-razer is deferred: it runs no Ollama and p620's Ollama is not reachable over
-the tailnet, so the summary step could never succeed there. It follows in its
-own change once a summary endpoint is chosen. p510 is a headless media server
-and is not wanted.
+p620 writes the summary with its local Ollama. razer runs no Ollama, so it uses
+the **claude backend** (`summary.backend = "claude"`): `claude -p --model haiku`
+writes the summary, and the ElevenLabs key comes from agenix through
+`voice.elevenLabsKeyFile`, read at run time (the keyring has none there).
 
 ## How it works
 
@@ -23,6 +24,13 @@ and is not wanted.
    notification. Clicking the notification itself, pressing Super+Alt+I, or running
    `agent-say more` speaks a longer
    version of about 45 seconds. The microphone is never used.
+
+agy's hook is an `agent-say` entry the module merges into
+`~/.gemini/config/hooks.json` (Syncthing-synced, so it is merged, never
+replaced). Its command runs only where `agent-say` exists and always prints
+`{}`, because agy blocks on a failing hook. agy sends no reply text, so the
+reply is read from the last `PLANNER_RESPONSE` of its transcript. Setting
+`agents.agy.enable = false` removes the entry.
 
 Claude's hook is a managed Stop hook merged beside the existing ones. Codex's is
 a managed hook too: the module appends a `[[hooks.Stop]]` block to
@@ -46,6 +54,10 @@ features.agentVoice.enable = true;
 | `enable` | `false` | Install the hooks and config |
 | `agents.claude.enable` | `true` | Hook Claude Code's Stop event |
 | `agents.codex.enable` | `true` | Hook Codex's Stop event |
+| `agents.agy.enable` | `true` | Hook agy's Stop event |
+| `summary.backend` | `ollama` | `ollama` or `claude` (`claude -p`) |
+| `summary.claudeModel` | `haiku` | Model for the claude backend |
+| `voice.elevenLabsKeyFile` | `null` | Key file read at run time when `ELEVENLABS_API_KEY` is unset |
 | `voice.elevenLabsVoiceId` | Lily | Narrator voice |
 | `summary.ollamaUrl` | `http://127.0.0.1:11434` | Where the summary is written |
 | `summary.model` | `qwen3:14b` | Summary model |
@@ -69,8 +81,10 @@ Every gate fails closed and is checked again right before each sound.
   "silenced" state, keeps it silent.
 - **Microphone:** an application capturing the mic (outside the ignore list)
   keeps it silent. A failing `pactl` also does.
-- **Delegated or scripted runs:** coder agents, `claude -p` and `codex exec`
-  never speak; only interactive sessions do.
+- **Delegated or scripted runs:** only sessions you start speak. Coder
+  agents, agent-team sessions (their tmux socket is `claude-swarm-…`),
+  `claude -p`, `codex exec` and an agy started by Claude (`CLAUDECODE` set)
+  stay silent.
 - **Short turns:** under `minTurnSeconds`.
 - **Busy:** one narration at a time; a second is dropped.
 

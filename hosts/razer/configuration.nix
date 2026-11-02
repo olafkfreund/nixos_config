@@ -36,6 +36,7 @@ in
     ../../modules/secrets/api-keys.nix
     ../../modules/containers/docker.nix
     ../../modules/services/meeting-transcribe.nix # meet CLI (client; offloads processing to p620)
+    ../../modules/programs/agent-voice.nix
   ];
 
   host.class = "laptop";
@@ -675,4 +676,12 @@ in
   # Reach it from Setup > Remote desktop > Connect to a machine, which
   # forwards a free local port over SSH and opens no port anywhere.
   programs.nixarchy.apps.freerdp.enable = true;
+
+  # No Ollama here: Haiku writes the summary, and the ElevenLabs key comes from
+  # agenix (the keyring has none on this host).
+  features.agentVoice = {
+    enable = true;
+    summary.backend = "claude";
+    voice.elevenLabsKeyFile = config.age.secrets."api-elevenlabs".path;
+  };
 }

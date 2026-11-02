@@ -13,6 +13,7 @@ import fcntl
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -25,6 +26,8 @@ DEFAULTS = {
     "voiceId": "pFZP5JQG7iQjIQuC4Bku",
     "ollamaUrl": "http://127.0.0.1:11434",
     "model": "qwen3:14b",
+    "backend": "ollama",
+    "elevenLabsKeyFile": None,
     "minTurnSeconds": 60,
     "startEnabled": True,
     "microphoneGate": {
@@ -33,7 +36,14 @@ DEFAULTS = {
     },
 }
 # What the transient unit must be told, since it does not inherit the agent's env.
-ENV_KEYS = ("CLAUDE_CODE_ENTRYPOINT", "AGY_CODER", "CODEX_CODER", "AGENT_SAY_QUIET")
+ENV_KEYS = (
+    "CLAUDE_CODE_ENTRYPOINT",
+    "AGY_CODER",
+    "CODEX_CODER",
+    "AGENT_SAY_QUIET",
+    "TMUX",
+    "CLAUDECODE",
+)
 DELEGATED = ("AGY_CODER", "CODEX_CODER", "AGENT_SAY_QUIET")
 
 SHORT = (
@@ -157,6 +167,12 @@ def interactive(agent, payload, env):
     """Gate 5: scripted and delegated runs stay silent."""
     if any(env.get(k) for k in DELEGATED):
         return False
+    # Agent-spawned Claude sessions (coders, teams) run in a claude-swarm tmux.
+    if "/claude-swarm-" in env.get("TMUX", ""):
+        return False
+    if agent == "agy":
+        # agy started by Claude (second opinion, handoff) carries CLAUDECODE.
+        return not env.get("CLAUDECODE")
     if agent == "claude":
         return env.get("CLAUDE_CODE_ENTRYPOINT") == "cli"
     # Only the first line: a long Codex session file must not stall the hook.
@@ -169,11 +185,31 @@ def interactive(agent, payload, env):
     return (first.get("payload") or {}).get("source") in ("cli", "vscode")
 
 
+def transcript(agent, payload):
+    return payload.get("transcriptPath" if agent == "agy" else "transcript_path", "")
+
+
+def reply_text(agent, payload):
+    """The assistant's last message; agy's payload has none, so read its transcript."""
+    if agent != "agy":
+        return payload.get("last_assistant_message") or ""
+    text = ""
+    for obj in jsonl(transcript(agent, payload)):
+        if obj.get("type") == "PLANNER_RESPONSE" and isinstance(
+            obj.get("content"), str
+        ):
+            text = obj["content"]
+    return text
+
+
 def turn_seconds(agent, payload):
     """Seconds since the turn began; None when it cannot be told."""
     start = None
-    for obj in jsonl(payload.get("transcript_path", "")):
-        if agent == "claude":
+    for obj in jsonl(transcript(agent, payload)):
+        if agent == "agy":
+            if obj.get("type") == "USER_INPUT":
+                start = obj.get("created_at")
+        elif agent == "claude":
             if obj.get("type") == "user" and obj.get("promptId") == payload.get(
                 "prompt_id"
             ):
@@ -196,8 +232,12 @@ def turn_seconds(agent, payload):
 def label(agent, payload):
     """(agent name, session name or ''): tells concurrent sessions apart."""
     name = ""
-    path = payload.get("transcript_path", "")
-    if agent == "claude":
+    path = transcript(agent, payload)
+    if agent == "agy":
+        ws = payload.get("workspacePaths")
+        if isinstance(ws, list) and ws and isinstance(ws[0], str):
+            name = os.path.basename(ws[0].rstrip("/"))
+    elif agent == "claude":
         for obj in jsonl(path):
             if obj.get("type") == "ai-title" and isinstance(obj.get("aiTitle"), str):
                 name = obj["aiTitle"]
@@ -217,7 +257,31 @@ def spoken_prefix(who, name):
 # -- summary and speech -----------------------------------------------------------
 
 
+def summarise_claude(cfg, instruction, text):
+    exe = shutil.which("claude")
+    if not exe:
+        log("claude not found")
+        return None
+    try:
+        r = subprocess.run(
+            [exe, "-p", "--model", cfg.get("claudeModel", "haiku")],
+            input=f"{instruction}\n\n{text}",
+            capture_output=True,
+            text=True,
+            timeout=90,
+        )
+    except (OSError, subprocess.SubprocessError) as e:
+        log(f"claude failed: {e}")
+        return None
+    if r.returncode != 0:
+        log(f"claude exited {r.returncode}")
+        return None
+    return r.stdout.strip() or None
+
+
 def summarise(cfg, instruction, text):
+    if cfg.get("backend") == "claude":
+        return summarise_claude(cfg, instruction, text)
     body = {
         "model": cfg["model"],
         "stream": False,
@@ -242,6 +306,12 @@ def summarise(cfg, instruction, text):
 
 
 def speak(cfg, text):
+    # Read at run time, never from the store.
+    if cfg.get("elevenLabsKeyFile") and not os.environ.get("ELEVENLABS_API_KEY"):
+        with contextlib.suppress(OSError):
+            key = Path(cfg["elevenLabsKeyFile"]).read_text().strip()
+            if key:
+                os.environ["ELEVENLABS_API_KEY"] = key
     # Lazy: only the package wrapper has omarchy-voice on PYTHONPATH.
     from omarchy_voice import config as voice_config
     from omarchy_voice.feedback import Feedback
@@ -345,7 +415,7 @@ def run(agent):
     elif secs < cfg["minTurnSeconds"]:
         log("held short turn")
         return
-    reply = payload.get("last_assistant_message") or ""
+    reply = reply_text(agent, payload)
     if not reply.strip():
         log("no reply text")
         return
