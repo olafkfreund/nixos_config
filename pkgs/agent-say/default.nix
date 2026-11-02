@@ -12,6 +12,7 @@
 , pulseaudio
 , libnotify
 , systemd
+, gnugrep
 , omarchyVoice ? null
 }:
 let
@@ -34,9 +35,12 @@ stdenvNoCC.mkDerivation {
 
     install -Dm644 ${./agent_say.py} $out/share/agent-say/agent_say.py
     # AGENT_SAY_BIN: the hook starts a transient unit that must not depend on PATH.
+    # --run loads omarchy-voice's own wrapper env (Piper model, espeak, ffmpeg,
+    # secret-tool), so its fallback voices work here too.
     makeWrapper ${pythonEnv}/bin/python $out/bin/agent-say \
       --add-flags "$out/share/agent-say/agent_say.py" \
       --set AGENT_SAY_BIN $out/bin/agent-say \
+      ${lib.optionalString (omarchyVoice != null) ''--run ". <(${gnugrep}/bin/grep -v '^exec ' ${omarchyVoice}/bin/omarchy-voice)" \''}
       --prefix PYTHONPATH : "${sitePackages}" \
       --prefix PATH : ${lib.makeBinPath [ pulseaudio libnotify systemd ]}
 

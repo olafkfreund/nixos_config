@@ -328,3 +328,34 @@ def test_hook_unit_argv_has_path_and_absolute_bin(dirs, monkeypatch):
     a.hook("claude")
     assert "--setenv=PATH=/x/bin" in seen[0]
     assert seen[0][-3:] == ["/store/bin/agent-say", "run", "claude"]
+
+
+def test_gate_closing_mid_text_cuts_after_current_sentence(dirs, monkeypatch):
+    spoken = prepare_run(dirs, monkeypatch)
+    clear_gates(monkeypatch)
+    real_speak = a.speak
+
+    def speak_then_dnd(cfg, text):
+        real_speak(cfg, text)
+        monkeypatch.setattr(a, "gate_dnd", lambda cfg: "dnd")
+
+    monkeypatch.setattr(a, "speak", speak_then_dnd)
+    assert a.say_gated(CFG, "One. Two! Three?") is True
+    assert spoken == ["One."]
+
+
+def test_codex_interactive_reads_first_line_only(dirs):
+    t = dirs / "s.jsonl"
+    t.write_text(json.dumps({"payload": {"source": "cli"}}) + "\n{broken\n")
+    assert a.interactive("codex", {"transcript_path": str(t)}, {}) is True
+    t.write_text("[1]\n")
+    assert a.interactive("codex", {"transcript_path": str(t)}, {}) is False
+
+
+def test_hook_unit_is_non_blocking_with_timeout(dirs, monkeypatch):
+    monkeypatch.setenv("CLAUDE_CODE_ENTRYPOINT", "cli")
+    monkeypatch.setattr("sys.stdin", io.StringIO("{}"))
+    seen = []
+    monkeypatch.setattr(a.subprocess, "run", lambda cmd, **k: seen.append((cmd, k)))
+    a.hook("claude")
+    assert "--no-block" in seen[0][0] and seen[0][1]["timeout"] == 5

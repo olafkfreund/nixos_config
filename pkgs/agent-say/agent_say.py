@@ -157,7 +157,13 @@ def interactive(agent, payload, env):
         return False
     if agent == "claude":
         return env.get("CLAUDE_CODE_ENTRYPOINT") == "cli"
-    first = next(jsonl(payload.get("transcript_path", "")), {})
+    # Only the first line: a long Codex session file must not stall the hook.
+    first = {}
+    with contextlib.suppress(OSError, ValueError):
+        with open(payload.get("transcript_path", "")) as f:
+            first = json.loads(f.readline())
+    if not isinstance(first, dict):
+        first = {}
     return (first.get("payload") or {}).get("source") in ("cli", "vscode")
 
 
@@ -230,10 +236,15 @@ def say_gated(cfg, text):
         except OSError:
             log("held lock")
             return False
-        if held(cfg):
-            return False
-        speak(cfg, text)
-        return True
+        # Gates before every sentence: a call or DND that starts mid-way cuts
+        # it off after the current sentence, not after the whole explanation.
+        spoke = False
+        for sentence in re.split(r"(?<=[.!?])\s+", text.strip()):
+            if held(cfg):
+                return spoke
+            speak(cfg, sentence)
+            spoke = True
+        return spoke
 
 
 def offer_more(text):
@@ -280,6 +291,7 @@ def hook(agent):
             [
                 "systemd-run",
                 "--user",
+                "--no-block",
                 "--collect",
                 "-p",
                 "SyslogIdentifier=agent-say",
@@ -291,6 +303,7 @@ def hook(agent):
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             check=False,
+            timeout=5,
         )
     except Exception as e:  # noqa: BLE001 -- a hook that raises can stall the agent
         log(f"hook failed: {e}")

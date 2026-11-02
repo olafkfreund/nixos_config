@@ -116,6 +116,15 @@ spec: spec/2026-11-02-2596-agent-voice-summary.md
 - Step 4: `summary.ollamaUrl` defaults to `http://127.0.0.1:11434` (not
   `localhost`), so it never resolves to `::1` when Ollama listens on IPv4 only.
 
+- After review (Opus, 2026-11-02): gates 1-4 are re-checked before every
+  **sentence**, not once per utterance, so a call or DND that starts
+  mid-explanation stops it after the current sentence. The package wrapper
+  sources omarchy-voice's own launcher environment (Piper model, espeak-ng,
+  ffmpeg, secret-tool), so the Piper fallback works. The hook reads only the
+  first line of the Codex session file and starts the unit with
+  `systemd-run --no-block`, `timeout=5`. Gate 5 is evaluated in `hook`, not
+  `run`.
+
 ## Steps
 
 1. **Probe the hook payloads (no repo edit).** Add a temporary Stop hook
@@ -242,9 +251,6 @@ call):
 
 ## Rollback
 
-Set `features.agentVoice.enable = false` and rebuild. The Claude hook goes
-with managed settings. A Codex `hooks.json` entry left behind is harmless:
-its command starts with `command -v agent-say || exit 0`, and the binary is
-gone. To remove it cleanly, rebuild once with `agents.codex.enable = false`
-before disabling. Quick
-mute without a rebuild: `agent-say off`.
+Set `features.agentVoice.enable = false` and rebuild. That removes the Claude
+managed hook, the Codex managed hook and `/etc/agent-say`. Quick mute
+without a rebuild: `agent-say off`.
