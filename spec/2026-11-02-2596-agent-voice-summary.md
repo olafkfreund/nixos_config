@@ -192,7 +192,8 @@ silent (we don't read raw text aloud).
 - `pytest pkgs/agent-say`: each gate is tested both ways, including DND
   `on`/error/timeout, unreadable `quiet.json`, a mic in use, and a delegated
   env. Each must result in "silent".
-- `just test-host p620` and `just test-host razer` build; with `enable = false` the host closure has no agent-say and no hook entries.
+- `just test-host p620` and `just test-host razer` build; with `enable = false`
+  the host closure has no agent-say and no hook entries.
 - `nix eval` of `/etc/agent-say/config.json` matches the options.
 - On p620, live with DND **on**: finish a Claude turn over 60 s. Expected:
   no sound and one `held dnd` log line.
