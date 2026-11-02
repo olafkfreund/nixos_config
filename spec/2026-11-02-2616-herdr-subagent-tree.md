@@ -159,7 +159,7 @@ discussion #723).
 
 ## Addendum B2 (2026-11-02): the tree, after a GO spike
 
-Status: **draft**. It needs the user's approval; Phase A stays approved and
+Status: **approved** (2026-11-02). Phase A stays approved and
 live.
 
 ### Spike result: GO
