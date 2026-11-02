@@ -244,7 +244,7 @@ def prepare_run(dirs, monkeypatch, reply="Did the thing."):
     monkeypatch.setattr(a, "CONFIG", dirs / "none.json")
     spoken = []
     monkeypatch.setattr(a, "speak", lambda cfg, text: spoken.append(text))
-    monkeypatch.setattr(a, "offer_more", lambda text: False)
+    monkeypatch.setattr(a, "offer_more", lambda *x: False)
     return spoken
 
 
@@ -253,7 +253,7 @@ def test_run_speaks_when_clear(dirs, monkeypatch):
     clear_gates(monkeypatch)
     monkeypatch.setattr(a, "summarise", lambda cfg, ins, text: "All done.")
     a.run("claude")
-    assert spoken == ["All done."]
+    assert " ".join(spoken) == "From Claude. All done."
 
 
 def test_run_held_gate_is_silent(dirs, monkeypatch):
@@ -295,10 +295,10 @@ def test_more_rechecks_gates(dirs, monkeypatch):
     monkeypatch.setattr(
         a,
         "offer_more",
-        lambda text: (setattr(a, "gate_dnd", lambda cfg: "dnd"), True)[1],
+        lambda *x: (setattr(a, "gate_dnd", lambda cfg: "dnd"), True)[1],
     )
     a.run("claude")  # speaks short, click arrives, DND turned on meanwhile
-    assert spoken == ["short"]
+    assert " ".join(spoken) == "From Claude. short"
 
 
 @pytest.mark.parametrize(
@@ -314,6 +314,76 @@ def test_offer_more_default_action(monkeypatch, out, clicked):
     monkeypatch.setattr(a.subprocess, "run", fake_run)
     assert a.offer_more("hi") is clicked
     assert "default=Tell me more" in calls[0]
+
+
+def write_jsonl(path, *objs):
+    path.write_text("\n".join(json.dumps(o) for o in objs))
+    return str(path)
+
+
+def test_label_claude_uses_last_ai_title(dirs):
+    t = write_jsonl(
+        dirs / "t.jsonl",
+        {"type": "ai-title", "aiTitle": "Old"},
+        {"type": "user"},
+        {"type": "ai-title", "aiTitle": "New title"},
+    )
+    assert a.label("claude", {"transcript_path": t, "cwd": "/x/proj"}) == (
+        "Claude",
+        "New title",
+    )
+
+
+def test_label_claude_falls_back_to_cwd(dirs):
+    t = write_jsonl(dirs / "t.jsonl", {"type": "user"})
+    assert a.label("claude", {"transcript_path": t, "cwd": "/x/proj/"}) == (
+        "Claude",
+        "proj",
+    )
+
+
+def test_label_codex_cwd_from_session_meta(dirs):
+    t = write_jsonl(
+        dirs / "t.jsonl", {"type": "session_meta", "payload": {"cwd": "/a/meetingai"}}
+    )
+    assert a.label("codex", {"transcript_path": t, "cwd": "/other"}) == (
+        "Codex",
+        "meetingai",
+    )
+
+
+def test_label_nothing_is_agent_only():
+    assert a.label("codex", {"transcript_path": "/nonexistent"}) == ("Codex", "")
+    assert a.spoken_prefix("Codex", "") == "From Codex. "
+
+
+def test_label_truncated_to_eight_words(dirs):
+    t = write_jsonl(
+        dirs / "t.jsonl", {"type": "ai-title", "aiTitle": "a b c d e f g h i j"}
+    )
+    assert a.label("claude", {"transcript_path": t})[1] == "a b c d e f g h"
+
+
+def test_run_and_more_use_label_and_title(dirs, monkeypatch):
+    spoken = prepare_run(dirs, monkeypatch)
+    t = dirs / "c.jsonl"
+    write_jsonl(
+        t,
+        {"type": "user", "promptId": "p", "timestamp": iso(300)},
+        {"type": "ai-title", "aiTitle": "Fix the bar"},
+    )
+    clear_gates(monkeypatch)
+    monkeypatch.setattr(
+        a, "summarise", lambda cfg, ins, text: "long" if ins == a.LONG else "short"
+    )
+    titles = []
+    monkeypatch.setattr(a, "offer_more", lambda text, title: titles.append(title))
+    a.run("claude")
+    a.more()
+    assert titles == ["Claude · Fix the bar"]
+    assert " ".join(spoken) == (
+        "From Claude, Fix the bar. short From Claude, Fix the bar. long"
+    )
 
 
 def test_think_stripped(monkeypatch):

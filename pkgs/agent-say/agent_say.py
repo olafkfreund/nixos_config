@@ -193,6 +193,27 @@ def turn_seconds(agent, payload):
         return None
 
 
+def label(agent, payload):
+    """(agent name, session name or ''): tells concurrent sessions apart."""
+    name = ""
+    path = payload.get("transcript_path", "")
+    if agent == "claude":
+        for obj in jsonl(path):
+            if obj.get("type") == "ai-title" and isinstance(obj.get("aiTitle"), str):
+                name = obj["aiTitle"]
+    else:
+        first = next(jsonl(path), {})
+        cwd = (first.get("payload") or {}).get("cwd")
+        name = os.path.basename(cwd.rstrip("/")) if isinstance(cwd, str) else ""
+    if not name.strip() and isinstance(payload.get("cwd"), str):
+        name = os.path.basename(payload["cwd"].rstrip("/"))
+    return agent.capitalize(), " ".join(name.split()[:8])
+
+
+def spoken_prefix(who, name):
+    return f"From {who}, {name}. " if name else f"From {who}. "
+
+
 # -- summary and speech -----------------------------------------------------------
 
 
@@ -249,7 +270,7 @@ def say_gated(cfg, text):
         return spoke
 
 
-def offer_more(text):
+def offer_more(text, title="Agent finished"):
     """Notification with a 'Tell me more' action; True when it was clicked.
 
     Named `default` because Omarchy hands notifications to the nixi companion,
@@ -265,7 +286,7 @@ def offer_more(text):
                 "--wait",
                 "-t",
                 "60000",
-                "Agent finished",
+                title,
                 text,
             ],
             capture_output=True,
@@ -331,26 +352,31 @@ def run(agent):
     short = summarise(cfg, SHORT, reply)
     if not short:
         return
+    who, name = label(agent, payload)
     (run_dir() / "last-summary.json").write_text(
-        json.dumps({"agent": agent, "reply": reply, "short": short})
+        json.dumps(
+            {"agent": agent, "reply": reply, "short": short, "who": who, "name": name}
+        )
     )
     log(f"summary: {short}")
-    if not say_gated(cfg, short):
+    if not say_gated(cfg, spoken_prefix(who, name) + short):
         return
-    if offer_more(short):
+    if offer_more(short, f"{who} · {name}" if name else who):
         more(cfg)
 
 
 def more(cfg=None):
     cfg = cfg or config()
     try:
-        reply = json.loads((run_dir() / "last-summary.json").read_text())["reply"]
+        saved = json.loads((run_dir() / "last-summary.json").read_text())
+        reply = saved["reply"]
     except (OSError, ValueError, KeyError):
         log("nothing to tell more about")
         return
     long = summarise(cfg, LONG, reply)
     if long:
-        say_gated(cfg, long)
+        prefix = spoken_prefix(saved.get("who") or "the agent", saved.get("name", ""))
+        say_gated(cfg, prefix + long)
 
 
 def main(argv):
