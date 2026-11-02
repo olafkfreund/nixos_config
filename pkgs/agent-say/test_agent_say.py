@@ -301,6 +301,21 @@ def test_more_rechecks_gates(dirs, monkeypatch):
     assert spoken == ["short"]
 
 
+@pytest.mark.parametrize(
+    "out,clicked", [("default\n", True), ("\n", False), ("more\n", False)]
+)
+def test_offer_more_default_action(monkeypatch, out, clicked):
+    calls = []
+
+    def fake_run(cmd, **kw):
+        calls.append(cmd)
+        return SimpleNamespace(stdout=out)
+
+    monkeypatch.setattr(a.subprocess, "run", fake_run)
+    assert a.offer_more("hi") is clicked
+    assert "default=Tell me more" in calls[0]
+
+
 def test_think_stripped(monkeypatch):
     class R(io.BytesIO):
         def __enter__(self):

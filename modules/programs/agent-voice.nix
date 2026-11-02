@@ -38,6 +38,12 @@ in
     minTurnSeconds = mkOption { type = types.int; default = 60; description = "Turns shorter than this stay silent."; };
     startEnabled = mkOption { type = types.bool; default = true; description = "Speak by default; `agent-say off` mutes at runtime."; };
 
+    moreKey = mkOption {
+      type = types.str;
+      default = "SUPER + ALT + I";
+      description = "Hyprland key that speaks the long version of the last turn. Empty disables it.";
+    };
+
     microphoneGate = {
       enable = mkOption { type = types.bool; default = true; description = "Stay silent while an application is capturing the microphone."; };
       ignore = mkOption {
@@ -67,6 +73,23 @@ in
     modules.programs.claude-code-managed.settings.hooks.Stop = mkIf cfg.agents.claude.enable [
       { hooks = [{ type = "command"; command = "${cfg.package}/bin/agent-say hook claude"; timeout = 10; }]; }
     ];
+
+    # A function so lib is Home Manager's (lib.hm.dag), not nixpkgs'.
+    home-manager.users.olafkfreund = mkIf (cfg.moreKey != "") ({ lib, ... }: {
+      home.file.".config/hypr/agent-voice-binds.lua".text = ''
+        o.bind("${cfg.moreKey}", "Agent voice: tell me more", "${cfg.package}/bin/agent-say more")
+      '';
+
+      # Append-only so the user's edits to bindings.lua stay theirs.
+      home.activation.agentVoiceRequire = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        f="$HOME/.config/hypr/bindings.lua"
+        if [ -f "$f" ] && ! grep -qF '"hypr.agent-voice-binds"' "$f"; then
+          # The redirect lives inside run, so a dry run cannot append to the file.
+          run ${pkgs.bash}/bin/bash -c 'printf "\n%s\n" "$2" >> "$1"' _ "$f" \
+            'pcall(require, "hypr.agent-voice-binds") -- managed by NixOS (#2596)'
+        fi
+      '';
+    });
 
     environment.etc."codex/hooks/agent-say" = mkIf cfg.agents.codex.enable { source = codexHook; };
     environment.etc."codex/requirements.toml".text = mkIf cfg.agents.codex.enable (mkAfter ''

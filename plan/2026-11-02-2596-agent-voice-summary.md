@@ -130,6 +130,13 @@ spec: spec/2026-11-02-2596-agent-voice-summary.md
   `application.name`, so the gate held on every turn and the narrator never
   spoke.
 
+- After live test (2026-11-02): the notification action is `default`, not
+  `more` — Omarchy hands notifications to the nixi companion while it holds a
+  lease (#133), and a click there only invokes `default`, so a named button
+  never fired. Added `moreKey` (default Super+Alt+I, verified free) binding
+  `agent-say more` via a Nix-owned agent-voice-binds.lua required from
+  bindings.lua, the altscape pattern.
+
 ## Steps
 
 1. **Probe the hook payloads (no repo edit).** Add a temporary Stop hook
