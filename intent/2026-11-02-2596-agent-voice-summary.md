@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2596
 author: olafkfreund
 ---
@@ -38,6 +38,9 @@ off (for meetings, or for long unattended runs).
 
 ## Constraints
 
+- **Never intrusive.** When notifications are off (Do Not Disturb or a
+  silence), it must not speak, ever. The same goes for a meeting. If the
+  quiet state cannot be read, it stays silent: fail closed, not open.
 - Must reuse the existing speech path (ElevenLabs → Piper). No second TTS
   stack.
 - The summary is written by a model. Prefer local Ollama so no extra cloud
