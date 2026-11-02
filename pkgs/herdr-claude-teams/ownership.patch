@@ -1,0 +1,482 @@
+diff --git a/herdr_claude_teams/launcher.py b/herdr_claude_teams/launcher.py
+index 9ce5f1c..01b40d4 100644
+--- a/herdr_claude_teams/launcher.py
++++ b/herdr_claude_teams/launcher.py
+@@ -80,8 +80,10 @@ def main(argv: list[str] | None = None, *, _exec=os.execvpe, _exec_plain=os.exec
+         sys.stderr.write(f"herdr-claude-teams: could not resolve leader pane: {exc}\n")
+         return 2
+ 
+-    shim_dir = default_shim_dir(env)
+-    materialize_shim_dir(shim_dir)
++    shim_dir = env.get("HERDR_CLAUDE_TEAMS_SHIM_DIR")
++    if not shim_dir:
++        shim_dir = default_shim_dir(env)
++        materialize_shim_dir(shim_dir)
+     new_env = build_env(env, leader, shim_dir=str(shim_dir), pid=os.getpid())
+ 
+     _exec("claude", ["claude", *argv], new_env)
+diff --git a/herdr_claude_teams/ownership.py b/herdr_claude_teams/ownership.py
+new file mode 100644
+index 0000000..8209c08
+--- /dev/null
++++ b/herdr_claude_teams/ownership.py
+@@ -0,0 +1,66 @@
++"""Record which panes the shim created, so teardown only touches those.
++
++One file per leader pane: ``$XDG_RUNTIME_DIR/herdr-claude-teams/<leader>.owned``,
++one ``socket<TAB>pane_id<TAB>terminal_id`` line per teammate pane.
++"""
++
++from __future__ import annotations
++
++import os
++import tempfile
++from pathlib import Path
++
++
++def owned_dir() -> Path:
++    base = os.environ.get("XDG_RUNTIME_DIR") or tempfile.gettempdir()
++    return Path(base) / "herdr-claude-teams"
++
++
++def _leader_file() -> Path | None:
++    leader = os.environ.get("HERDR_PANE_ID")
++    if not leader:
++        return None
++    return owned_dir() / f"{leader.replace('/', '_')}.owned"
++
++
++def _entries(path: Path) -> list[tuple[str, str, str]]:
++    try:
++        lines = path.read_text(encoding="utf-8").splitlines()
++    except OSError:
++        return []
++    rows = []
++    for line in lines:
++        parts = line.split("\t")
++        if len(parts) == 3:
++            rows.append((parts[0], parts[1], parts[2]))
++    return rows
++
++
++def record(pane: dict) -> None:
++    path = _leader_file()
++    if path is None:
++        return
++    row = "\t".join(
++        (os.environ.get("HERDR_SOCKET_PATH", ""), pane.get("pane_id", ""), pane.get("terminal_id", ""))
++    )
++    path.parent.mkdir(parents=True, exist_ok=True)
++    with open(path, "a", encoding="utf-8") as handle:
++        handle.write(row + "\n")
++
++
++def is_owned(terminal_id: str) -> bool:
++    socket_path = os.environ.get("HERDR_SOCKET_PATH", "")
++    for path in owned_dir().glob("*.owned"):
++        for sock, _pane, term in _entries(path):
++            if sock == socket_path and term == terminal_id:
++                return True
++    return False
++
++
++def forget(terminal_id: str) -> None:
++    socket_path = os.environ.get("HERDR_SOCKET_PATH", "")
++    for path in owned_dir().glob("*.owned"):
++        rows = _entries(path)
++        kept = [r for r in rows if not (r[0] == socket_path and r[2] == terminal_id)]
++        if len(kept) != len(rows):
++            path.write_text("".join("\t".join(r) + "\n" for r in kept), encoding="utf-8")
+diff --git a/herdr_claude_teams/verbs.py b/herdr_claude_teams/verbs.py
+index cbed593..e91d240 100644
+--- a/herdr_claude_teams/verbs.py
++++ b/herdr_claude_teams/verbs.py
+@@ -11,9 +11,10 @@ from __future__ import annotations
+ import os
+ import re
+ import sys
++import time
+ 
+ from . import format as fmt
+-from . import ids, keys, trace
++from . import ids, keys, ownership, trace
+ from .argparse_tmux import canonical_verb, parse
+ from .socket_client import HerdrError, call
+ 
+@@ -234,6 +235,7 @@ def _split_window(parsed) -> int:
+         params["cwd"] = cwd
+     result = call("pane.split", params)
+     pane = result["pane"]
++    ownership.record(pane)
+     # herdr's pane.split has no equivalent "launch this" param, so deliver
+     # the command as typed input followed by Enter — same mechanism
+     # _respawn_pane already uses for "run this in an existing pane".
+@@ -300,11 +302,48 @@ def _respawn_pane(parsed) -> int:
+         return 0
+     if parsed.has("-k"):
+         call("pane.send_text", {"pane_id": pane_id, "text": keys.translate_token("C-c")})
++        _wait_for_placeholder_exit(pane_id)
+     text = _inject_tmux_pane(command, ids.to_tmux_pane(ids.from_tmux_target(target)))
+     call("pane.send_text", {"pane_id": pane_id, "text": text + "\r"})
++    _label_teammate(pane_id, command)
+     return 0
+ 
+ 
++PLACEHOLDER_WAIT_SECONDS = 2.0
++PLACEHOLDER_POLL_SECONDS = 0.1
++
++
++def _wait_for_placeholder_exit(pane_id: str) -> None:
++    """Poll until the `cat` placeholder has left the foreground, so the typed
++    command lands at a shell prompt and not in cat's stdin."""
++    deadline = time.monotonic() + PLACEHOLDER_WAIT_SECONDS
++    while True:
++        try:
++            info = call("pane.process_info", {"pane_id": pane_id})
++        except HerdrError:
++            return
++        procs = info.get("foreground_processes") or []
++        if not any(os.path.basename((p.get("argv") or [""])[0]) == "cat" for p in procs):
++            return
++        if time.monotonic() >= deadline:
++            trace.log("placeholder_wait_timeout", pane_id=pane_id)
++            return
++        time.sleep(PLACEHOLDER_POLL_SECONDS)
++
++
++def _label_teammate(pane_id: str, command: str) -> None:
++    match = re.search(r"--agent-name[= ]([^\s'\"]+)", command)
++    if not match:
++        return
++    try:
++        call(
++            "pane.report_metadata",
++            {"pane_id": pane_id, "source": "herdr-claude-teams", "title": "\u21b3 " + match.group(1)},
++        )
++    except Exception as exc:  # noqa: BLE001 - a label failure must never block the launch
++        trace.log("label_failed", error=str(exc))
++
++
+ def _capture_pane(parsed) -> int:
+     pane_id = _require_target(parsed.value("-t") or "")
+     source = "recent" if parsed.value("-S") else "visible"
+@@ -406,12 +445,17 @@ def _kill_pane(parsed) -> int:
+     pane_id = resolve_target(parsed.value("-t") or "")
+     if pane_id is None:
+         return 0  # idempotent teardown: pane already reaped (design D3)
++    term_id = ids.from_tmux_target(parsed.value("-t") or "")
++    if not ownership.is_owned(term_id):
++        trace.log("kill_pane_refused", pane_id=pane_id, terminal_id=term_id)
++        return 0
+     call("pane.close", {"pane_id": pane_id})
++    ownership.forget(term_id)
+     return 0
+ 
+ 
+ def _kill_window(parsed) -> int:
+-    call("tab.close", {"tab_id": ids.from_tmux_target(parsed.value("-t") or "")})
++    trace.log("kill_window_noop", target=parsed.value("-t"))
+     return 0
+ 
+ 
+@@ -468,10 +512,14 @@ def _resize_pane_absolute(pane_id: str, raw_value: str, *, axis: str) -> int:
+ def _select_layout(parsed) -> int:
+     """Rebuild a tab's non-main panes into a real tmux main-vertical column.
+ 
++    Disabled: the nested tree wants teammates left as plain splits of the
++    leader's tab, so this returns at once.
++
+     Only ``main-vertical`` is implemented (the one shape Claude Code's Agent
+     Teams is observed to request); anything else stays a no-op, same as
+     before this handler existed.
+     """
++    return 0
+     if len(parsed.positional) != 1 or parsed.positional[0] != "main-vertical":
+         return 0
+     target = parsed.value("-t")
+@@ -564,6 +612,7 @@ def _new_window(parsed) -> int:
+     if parsed.value("-n"):
+         params["label"] = parsed.value("-n")
+     result = call("tab.create", params)
++    ownership.record(result["root_pane"])
+     if parsed.has("-P"):
+         _print(ids.to_tmux_pane(result["root_pane"]["pane_id"]))
+     return 0
+@@ -612,13 +661,7 @@ def _has_session(parsed) -> int:
+ 
+ 
+ def _kill_session(parsed) -> int:
+-    target = ids.from_tmux_target(parsed.value("-t") or "")
+-    if not target:
+-        return 0
+-    match = _find_workspace(target, call("workspace.list", {})["workspaces"])
+-    if match is None:
+-        return 0  # idempotent teardown, same D3 convention as kill-pane
+-    call("workspace.close", {"workspace_id": match["workspace_id"]})
++    trace.log("kill_session_noop", target=parsed.value("-t"))
+     return 0
+ 
+ 
+diff --git a/tests/_fake_herdr.py b/tests/_fake_herdr.py
+index 0264fae..8ff8312 100644
+--- a/tests/_fake_herdr.py
++++ b/tests/_fake_herdr.py
+@@ -38,6 +38,7 @@ class FakeHerdrState:
+         self._errors: dict[str, dict] = {}  # method -> error to return
+         self.layout: dict | None = None  # test-scripted `pane.layout` response
+         self.extra_workspaces: list[dict] = []  # test-added sibling sessions
++        self.fg_queue: list[list[list[str]]] = []  # scripted pane.process_info argv lists
+ 
+     # --- test helpers -------------------------------------------------
+     def fail(self, method: str, code: str = "boom", message: str = "failure") -> None:
+@@ -131,6 +132,17 @@ class FakeHerdrState:
+         self.pane_text[params["pane_id"]] += params.get("text", "")
+         return {"type": "ok"}
+ 
++    def _m_pane_process_info(self, params):
++        self._require_pane(params["pane_id"])
++        argvs = self.fg_queue.pop(0) if self.fg_queue else []
++        return {"type": "pane_process_info",
++                "foreground_processes": [{"argv": argv} for argv in argvs]}
++
++    def _m_pane_report_metadata(self, params):
++        pane = self._require_pane(params["pane_id"])
++        pane["title"] = params.get("title")
++        return {"type": "ok"}
++
+     def _m_pane_rename(self, params):
+         pane = self._require_pane(params["pane_id"])
+         pane["label"] = params.get("label")
+diff --git a/tests/conftest.py b/tests/conftest.py
+new file mode 100644
+index 0000000..d7f8291
+--- /dev/null
++++ b/tests/conftest.py
+@@ -0,0 +1,8 @@
++import pytest
++
++
++@pytest.fixture(autouse=True)
++def _ownership_env(monkeypatch, tmp_path):
++    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "run"))
++    monkeypatch.setenv("HERDR_PANE_ID", "p_lead")
++    monkeypatch.delenv("HERDR_CLAUDE_TEAMS_SHIM_DIR", raising=False)
+diff --git a/tests/test_ownership.py b/tests/test_ownership.py
+new file mode 100644
+index 0000000..286d107
+--- /dev/null
++++ b/tests/test_ownership.py
+@@ -0,0 +1,112 @@
++"""Ownership: teardown touches only panes the shim created; respawn waits for cat."""
++
++from __future__ import annotations
++
++import pytest
++
++from _fake_herdr import FakeHerdr
++from herdr_claude_teams import launcher, shim, verbs
++
++
++class _ExecCalled(Exception):
++    def __init__(self, env):
++        self.env = env
++
++
++def _rec_exec(file, args, env):
++    raise _ExecCalled(env)
++
++
++def run(fake, monkeypatch, capsys, argv):
++    monkeypatch.setenv("HERDR_SOCKET_PATH", fake.path)
++    code = shim.main(argv)
++    return code, capsys.readouterr().out
++
++
++def test_foreign_kill_pane_refused_and_owned_closes(monkeypatch, capsys):
++    with FakeHerdr(leader_pane="wL-1") as fake:
++        run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-h", "-P", "-F", "#{pane_id}"])
++        fake.state.handle("pane.split", {"target_pane_id": "wL-1"})  # not made by the shim: wL-3 / term_3
++        code, _ = run(fake, monkeypatch, capsys, ["kill-pane", "-t", "%term_3"])
++        assert code == 0
++        terms = {p["terminal_id"] for p in fake.state.panes}
++        assert "term_3" in terms
++        code, _ = run(fake, monkeypatch, capsys, ["kill-pane", "-t", "%term_2"])
++        assert code == 0
++        assert {p["terminal_id"] for p in fake.state.panes} == {"term_1", "term_3"}
++        assert [m for m in fake.state.methods() if m == "pane.close"] == ["pane.close"]
++
++
++def test_kill_window_and_kill_session_send_no_rpc(monkeypatch, capsys):
++    with FakeHerdr(leader_pane="wL-1") as fake:
++        for argv in (["kill-window", "-t", "wL:1"], ["kill-session", "-t", "fake"]):
++            code, _ = run(fake, monkeypatch, capsys, argv)
++            assert code == 0
++        assert fake.state.requests == []
++
++
++def test_respawn_waits_for_cat_then_sends(monkeypatch, capsys):
++    monkeypatch.setattr(verbs, "PLACEHOLDER_POLL_SECONDS", 0.001)
++    with FakeHerdr(leader_pane="wL-1") as fake:
++        run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-h", "-P", "-F", "#{pane_id}"])
++        fake.state.requests.clear()
++        fake.state.fg_queue = [[["cat"]], [["/run/current-system/sw/bin/cat"]], [["zsh"]]]
++        run(fake, monkeypatch, capsys, ["respawn-pane", "-k", "-t", "%term_2", "cd /x && claude"])
++        methods = fake.state.methods()
++        assert methods.count("pane.process_info") == 3
++        last = max(i for i, m in enumerate(methods) if m == "pane.process_info")
++        sends = [i for i, m in enumerate(methods) if m == "pane.send_text"]
++        assert sends[0] < methods.index("pane.process_info") and sends[1] > last
++
++
++def test_respawn_wait_times_out_and_still_sends(monkeypatch, capsys):
++    monkeypatch.setattr(verbs, "PLACEHOLDER_POLL_SECONDS", 0.001)
++    monkeypatch.setattr(verbs, "PLACEHOLDER_WAIT_SECONDS", 0.02)
++    with FakeHerdr(leader_pane="wL-1") as fake:
++        run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-h", "-P", "-F", "#{pane_id}"])
++        fake.state.fg_queue = [[["cat"]]] * 100000
++        run(fake, monkeypatch, capsys, ["respawn-pane", "-k", "-t", "%term_2", "cd /x && claude"])
++        assert fake.state.pane_text["wL-2"].endswith("cd /x && claude\r")
++
++
++def test_select_layout_sends_no_rpc(monkeypatch, capsys):
++    with FakeHerdr(leader_pane="wL-1") as fake:
++        for _ in range(3):
++            run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-h"])
++        fake.state.requests.clear()
++        code, _ = run(fake, monkeypatch, capsys, ["select-layout", "-t", "wL:1", "main-vertical"])
++        assert code == 0
++        assert fake.state.requests == []
++
++
++def test_respawn_labels_teammate(monkeypatch, capsys):
++    with FakeHerdr(leader_pane="wL-1") as fake:
++        run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-h", "-P", "-F", "#{pane_id}"])
++        run(fake, monkeypatch, capsys, ["respawn-pane", "-t", "%term_2",
++                                         "cd /x && env A=1 claude --agent-id alpha@t --agent-name alpha --foo"])
++        assert fake.state.pane("wL-2")["title"] == "↳ alpha"
++
++
++def test_label_failure_does_not_block_launch(monkeypatch, capsys):
++    with FakeHerdr(leader_pane="wL-1") as fake:
++        run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-h", "-P", "-F", "#{pane_id}"])
++        fake.state.fail("pane.report_metadata")
++        code, _ = run(fake, monkeypatch, capsys,
++                      ["respawn-pane", "-t", "%term_2", "claude --agent-name alpha"])
++        assert code == 0
++        assert fake.state.pane_text["wL-2"] == "claude --agent-name alpha\r"
++
++
++def test_launcher_writes_no_shim_when_dir_given(monkeypatch, tmp_path):
++    with FakeHerdr(leader_pane="wX-1") as fake:
++        fake.state.aliases["p_5"] = "wX-1"
++        monkeypatch.setenv("HERDR_ENV", "1")
++        monkeypatch.setenv("HERDR_SOCKET_PATH", fake.path)
++        monkeypatch.setenv("HERDR_PANE_ID", "p_5")
++        monkeypatch.setenv("HOME", str(tmp_path))
++        monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / ".cache"))
++        monkeypatch.setenv("HERDR_CLAUDE_TEAMS_SHIM_DIR", "/store/shim")
++        with pytest.raises(_ExecCalled) as ei:
++            launcher.main([], _exec=_rec_exec)
++        assert ei.value.env["PATH"].startswith("/store/shim:")
++        assert not (tmp_path / ".cache").exists()
+diff --git a/tests/test_verbs.py b/tests/test_verbs.py
+index 3a2fe21..f386929 100644
+--- a/tests/test_verbs.py
++++ b/tests/test_verbs.py
+@@ -435,78 +435,6 @@ def test_resize_pane_absolute_delta_below_epsilon_is_noop(monkeypatch, capsys):
+         assert resize_params(fake) == []
+ 
+ 
+-def test_select_layout_main_vertical_rebuilds_three_pane_stack(monkeypatch, capsys):
+-    with FakeHerdr(leader_pane="wL-1") as fake:
+-        run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-h"])  # wL-2
+-        run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-h"])  # wL-3
+-        fake.state.layout = _scripted_layout(fake, ratio=0.3)
+-        run(fake, monkeypatch, capsys, ["select-layout", "-t", "wL:1", "main-vertical"])
+-        moves = move_params(fake)
+-        assert len(moves) == 4  # eject wL-2, eject wL-3, reinsert wL-2, reinsert wL-3
+-        eject1, eject2, reinsert1, reinsert2 = moves
+-        assert eject1 == {"pane_id": "wL-2",
+-                           "destination": {"type": "new_tab", "workspace_id": "wL"}, "focus": False}
+-        assert eject2 == {"pane_id": "wL-3",
+-                           "destination": {"type": "new_tab", "workspace_id": "wL"}, "focus": False}
+-        assert reinsert1 == {"pane_id": "wL-2", "focus": False, "destination": {
+-            "type": "tab", "tab_id": "wL:1", "split": "right",
+-            "target_pane_id": "wL-1", "ratio": 0.3}}
+-        assert reinsert2 == {"pane_id": "wL-3", "focus": False, "destination": {
+-            "type": "tab", "tab_id": "wL:1", "split": "down",
+-            "target_pane_id": "wL-2", "ratio": 0.5}}
+-
+-
+-def test_select_layout_main_vertical_equal_division_five_panes(monkeypatch, capsys):
+-    with FakeHerdr(leader_pane="wL-1") as fake:
+-        for _ in range(4):
+-            run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-h"])  # wL-2..wL-5
+-        fake.state.layout = _scripted_layout(fake, ratio=0.3)
+-        run(fake, monkeypatch, capsys, ["select-layout", "-t", "wL:1", "main-vertical"])
+-        moves = move_params(fake)
+-        assert len(moves) == 8  # 4 ejects + 4 reinsertions (first + 3 chained)
+-        reinsertions = moves[4:]
+-        assert reinsertions[0]["destination"]["ratio"] == 0.3  # preserved main_ratio
+-        assert [round(m["destination"]["ratio"], 4) for m in reinsertions[1:]] == [0.25, 0.3333, 0.5]
+-        assert [m["destination"]["target_pane_id"] for m in reinsertions] == \
+-            ["wL-1", "wL-2", "wL-3", "wL-4"]
+-
+-
+-def test_select_layout_main_vertical_survives_base36_pane_ids(monkeypatch, capsys):
+-    """A tab whose pane counter has passed decimal 9 uses base-36 continuation
+-    ids ("pA", "pB", ...) — confirmed live 2026-08-25 by driving a real herdr
+-    workspace's counter past 9 via repeated splits. The old decimal-only
+-    ``int(re.search(r"(\\d+)$", ...).group())`` sort key raised AttributeError
+-    on any id with no trailing decimal digit at all, silently killing the
+-    handler before any pane.move call — this is what broke the real agenta
+-    session's layout. Sort order (not just crash-freedom) must also stay
+-    correct once ids run 1..9, A, B, C.
+-    """
+-    with FakeHerdr(leader_pane="wL-1") as fake:
+-        run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-h"])
+-        run(fake, monkeypatch, capsys, ["split-window", "-t", "%term_1", "-h"])
+-        # Relabel the fake harness's decimal ids to the real base-36 shape a
+-        # long-lived tab would actually have at this point in its history.
+-        fake.state.panes[0]["pane_id"] = "wL-9"
+-        fake.state.panes[1]["pane_id"] = "wL-A"
+-        fake.state.panes[2]["pane_id"] = "wL-B"
+-        fake.state.layout = _scripted_layout(fake, ratio=0.3)
+-        fake.state.layout["focused_pane_id"] = "wL-9"
+-        code, _, _ = run(fake, monkeypatch, capsys, ["select-layout", "-t", "wL:1", "main-vertical"])
+-        assert code == 0
+-        moves = move_params(fake)
+-        assert len(moves) == 4
+-        eject1, eject2, reinsert1, reinsert2 = moves
+-        # main = wL-9 (lowest ordinal), stack = wL-A, wL-B in that order —
+-        # proves base-36 parsing, not just crash-freedom (a naive fallback
+-        # to 0 for every non-decimal id would produce reinsert order based
+-        # on list order alone, which happens to coincide here only for A
+-        # before B; the real assertion is that wL-9 is correctly first).
+-        assert eject1["pane_id"] == "wL-A"
+-        assert eject2["pane_id"] == "wL-B"
+-        assert reinsert1["destination"]["target_pane_id"] == "wL-9"
+-        assert reinsert2["destination"]["target_pane_id"] == "wL-A"
+-
+-
+ def test_positional_ordinal_orders_base36_after_decimal():
+     from herdr_claude_teams.verbs import _positional_ordinal
+     assert _positional_ordinal("wL:p9") < _positional_ordinal("wL:pA")
+@@ -673,15 +601,12 @@ def test_has_session_current_workspace_by_own_label(monkeypatch, capsys):
+         assert code == 0  # FakeHerdrState's own workspace label is "fake"
+ 
+ 
+-def test_kill_session_closes_by_label(monkeypatch, capsys):
++def test_kill_session_is_a_noop(monkeypatch, capsys):
+     with FakeHerdr(leader_pane="wL-1") as fake:
+         fake.state.add_workspace("wOTHER", "agenta")
+         code, _, _ = run(fake, monkeypatch, capsys, ["kill-session", "-t", "agenta"])
+         assert code == 0
+-        assert ("workspace.close", {"workspace_id": "wOTHER"}) in fake.state.requests
+-        # gone from a subsequent has-session check
+-        code, _, _ = run(fake, monkeypatch, capsys, ["has-session", "-t", "agenta"])
+-        assert code == 1
++        assert "workspace.close" not in fake.state.methods()
+ 
+ 
+ def test_kill_session_on_vanished_session_is_benign_success(monkeypatch, capsys):

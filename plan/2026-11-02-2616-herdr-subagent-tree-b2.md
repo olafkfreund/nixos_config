@@ -243,3 +243,14 @@ advice: verify each before acting on it.
 Revert the PR and redeploy. With the package and the zsh function gone,
 `claude` is plain again: teammates fall back to in-process, and the reaper
 keeps its Phase A behaviour.
+
+## Deviations during implementation
+
+- Step 1 (coder):
+  - The `.owned` line has three fields: `socket<TAB>pane_id<TAB>terminal_id`.
+    `kill-pane` gets a stable `%term_…` id while herdr renumbers positional
+    pane ids, so ownership matches on `terminal_id`. Steps 3 and 4 match
+    `HERDR_PANE_ID` against field 2, after checking its format live.
+  - The fork's 3 `select-layout main-vertical` tests were removed, and its
+    kill-session test now asserts a no-op.
+  - `tests/conftest.py` and two fake-herdr handlers were added.

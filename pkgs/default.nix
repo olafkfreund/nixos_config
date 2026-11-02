@@ -161,6 +161,9 @@
   # claude-swarm-reaper — reaps orphaned and idle Claude Code swarm tmux servers.
   claude-swarm-reaper = pkgs.callPackage ./claude-swarm-reaper { };
 
+  # herdr-claude-teams — Claude agent teams as herdr panes (fork + ownership patch).
+  herdr-claude-teams = pkgs.callPackage ./herdr-claude-teams { };
+
   # Note: gnome-ext-* packages are NOT registered here. They're exposed
   # at top-level pkgs.* via overlays/custom-packages.nix so that home
   # configs can reference them with `with pkgs;` (matching the rudra /
