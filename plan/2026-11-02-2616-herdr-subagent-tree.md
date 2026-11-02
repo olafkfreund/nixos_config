@@ -50,6 +50,21 @@ follows only after Phase A is live.
   env carry `TMUX_PANE`? The dry run proves or disproves this live before
   any kill is enabled (step 6).
 
+## Deviations during implementation
+
+- Step 2: the Claude hooks call a small shell guard that `exec`s the reaper
+  only when `TMUX` contains `/claude-swarm-`. `PreToolUse` fires on every
+  tool call in every session, and a Python start per call would slow them
+  all.
+- Step 3: Codex gets two wrappers, `/etc/codex/hooks/subagent-inc` and
+  `subagent-dec`, instead of one `subagent-count`, because it is not known
+  whether managed hook commands take arguments. The counter file name
+  includes the source, so the Claude and Codex counts never mix. The Codex
+  hooks are folded into the existing `requirements.toml` text; a second
+  `mkAfter` definition collided.
+- Step 4: the activation puts the user profile bin dirs on PATH, because the
+  activation PATH may lack `herdr`.
+
 ## Steps
 
 1. **`pkgs/claude-swarm-reaper/`** (new): `claude_swarm_reaper.py`

@@ -37,6 +37,7 @@ in
     ../../modules/containers/docker.nix
     ../../modules/services/meeting-transcribe.nix # meet CLI (client; offloads processing to p620)
     ../../modules/programs/agent-voice.nix
+    ../../modules/programs/claude-swarm-reaper.nix
   ];
 
   host.class = "laptop";
@@ -679,6 +680,10 @@ in
 
   # No Ollama here: Haiku writes the summary, and the ElevenLabs key comes from
   # agenix (the keyring has none on this host).
+  # Reap orphaned/idle swarm tmux servers; dryRun first (#2616).
+  features.claudeSwarmReaper.enable = true;
+  modules.programs.claude-code-managed.subagentMetadata.codex = true;
+
   features.agentVoice = {
     enable = true;
     summary.backend = "claude";
