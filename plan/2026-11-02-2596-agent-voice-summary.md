@@ -270,3 +270,89 @@ call):
 Set `features.agentVoice.enable = false` and rebuild. That removes the Claude
 managed hook, the Codex managed hook and `/etc/agent-say`. Quick mute
 without a rebuild: `agent-say off`.
+
+## Phase 2 (2026-11-02): agy, razer, own sessions only
+
+Status: **draft**. It needs the user's approval; the phases above stay
+approved and deployed. The user chose Claude Haiku as razer's summary source
+and "silence spawned agents" as the meaning of own sessions.
+
+### Facts probed on p620
+
+- **agy's `Stop` fires** (agy 1.4.12; temporary probe in
+  `~/.gemini/config/hooks.json`, restored straight after). Its payload has
+  `conversationId`, `transcriptPath`, `workspacePaths`, `lastUserInput` and
+  `modelName`, but no reply text. The transcript is JSONL. The reply is the
+  `content` of the last `"type":"PLANNER_RESPONSE"` line. The turn starts at
+  the `created_at` of the last `"type":"USER_INPUT"` line. The hook must
+  print exactly one JSON object; a failing hook blocks agy.
+- **agy started by Claude** (second-opinion, handoff) carries `CLAUDECODE=1`
+  in the hook env.
+- **Agent-spawned Claude sessions** (coder agents, agent teams) run in a tmux
+  server whose socket is `…/claude-swarm-…`, so their hook env has
+  `TMUX=…/claude-swarm-…`. Sessions the user starts run in herdr panes,
+  where that is absent.
+- **razer:** no Ollama; `claude` is at `~/.local/bin/claude`; omarchy-voice
+  is enabled; the ElevenLabs key is in `/run/agenix/api-elevenlabs`
+  (user-readable), not in the keyring.
+
+### Phase 2 steps
+
+1. **`pkgs/agent-say/agent_say.py` + tests.**
+   - **agy as a third agent:** `hook agy` reads the payload above. Gate 5
+     treats it as delegated if `CLAUDECODE` or `AGY_CODER` is set. The reply
+     is the last `PLANNER_RESPONSE`. The turn length comes from the last
+     `USER_INPUT`. The label is `("Agy", basename(workspacePaths[0]))`.
+   - **Own sessions only:** gate 5 also treats as delegated any hook env whose
+     `TMUX` contains `/claude-swarm-`. Add `TMUX` and `CLAUDECODE` to
+     `ENV_KEYS`.
+   - **Summary backend:** config key `backend` = `"ollama"` (default) |
+     `"claude"`. For `claude`, run `claude -p --model <model>` with the
+     instruction and reply on stdin, `timeout=90`, stdout = summary; failure
+     → silent. It cannot loop: its Stop hook sees
+     `CLAUDE_CODE_ENTRYPOINT=sdk-cli` and is held by gate 5.
+   - **Key file:** config key `elevenLabsKeyFile`. If set and readable, and
+     `ELEVENLABS_API_KEY` is unset, export it before speaking (runtime read;
+     never in the store).
+
+   Check: pytest, ruff, ruff format.
+
+2. **`modules/programs/agent-voice.nix`.**
+   - `agents.agy.enable` (default true): a home-manager activation step
+     merges an `"agent-say"` key with one `Stop` command into
+     `~/.gemini/config/hooks.json` with the idempotent jq pattern from
+     `home/development/antigravity-config.nix`, and removes the key when the
+     option is off. The command runs `agent-say hook agy` only when
+     `command -v agent-say` succeeds, then always prints `{}`;
+     `timeout` 10. The file is Syncthing-synced to all three hosts;
+     the
+     `command -v` guard makes it a no-op where agent-say is absent (p510).
+   - `summary.backend` (enum ollama|claude, default ollama) and
+     `summary.claudeModel` (default "haiku").
+   - `voice.elevenLabsKeyFile` (nullOr str, default null).
+   - All three are rendered into `/etc/agent-say/config.json`.
+
+   Check: eval of config.json; the activation script text.
+
+3. **razer:** import the module and set `features.agentVoice = { enable =
+   true; summary.backend = "claude"; voice.elevenLabsKeyFile =
+   config.age.secrets."api-elevenlabs".path; };`.
+
+   Check: `just test-host razer` and `just test-host p620`.
+
+4. **Docs:** add agy, the razer backend, and the own-sessions rule to
+    `docs/applications/agent-voice.md`.
+
+5. **PR, merge after CI, deploy p620 and razer** (announced on the bus;
+    razer via p620).
+
+### Phase 2 tests
+
+The unit tests above, then live: one agy turn over 60 s on p620 speaks
+"From Agy, `folder`."; a coder agent's turn stays silent (`held
+delegated`); a Claude turn on razer speaks with a Haiku summary.
+
+### Phase 2 rollback
+
+`agents.agy.enable = false` removes the agy hooks.json entry. Removing razer's
+`features.agentVoice` turns the narrator off there.
