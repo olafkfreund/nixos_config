@@ -9,6 +9,7 @@ The hook never writes stdout, never raises and always exits 0.
 
 import argparse
 import contextlib
+import fcntl
 import json
 import os
 import re
@@ -89,6 +90,8 @@ def herdr_call(sock_path, method, params=None):
     finally:
         s.close()
     resp = json.loads(buf.decode())
+    if not isinstance(resp, dict):
+        raise ValueError("non-dict reply")
     if resp.get("error"):
         raise HerdrError(resp["error"].get("code", "error"))
     return resp.get("result", {})
@@ -112,12 +115,16 @@ def read_owned():
 
 def drop_owned(file, sock, term):
     with contextlib.suppress(OSError):
-        keep = [
-            line
-            for line in file.read_text().splitlines()
-            if line.split("\t")[::2] != [sock, term]
-        ]
-        file.write_text("".join(line + "\n" for line in keep))
+        with open(file, "r+") as f:
+            fcntl.flock(f, fcntl.LOCK_EX)
+            keep = [
+                line
+                for line in f.read().splitlines()
+                if line.split("\t")[::2] != [sock, term]
+            ]
+            f.seek(0)
+            f.truncate()
+            f.write("".join(line + "\n" for line in keep))
 
 
 def decide_herdr(owned, agents, clocks, now, idle_seconds):
@@ -144,6 +151,28 @@ def decide_herdr(owned, agents, clocks, now, idle_seconds):
     return closes, new
 
 
+def close_herdr_pane(sock, term):
+    """Return "closed", "gone" or "moved"."""
+    panes = herdr_call(sock, "pane.list")["panes"]
+    pane = next((p["pane_id"] for p in panes if p.get("terminal_id") == term), None)
+    if pane is None:
+        return "gone"
+    # shortcut: herdr has no close-by-terminal-id; a sub-ms renumber race remains, upgrade when herdr adds one
+    try:
+        got = herdr_call(sock, "pane.get", {"pane_id": pane})["pane"]
+    except HerdrError as e:
+        return "gone" if str(e) == "pane_not_found" else "moved"
+    if got.get("terminal_id") != term:
+        return "moved"
+    try:
+        herdr_call(sock, "pane.close", {"pane_id": pane})
+    except HerdrError as e:
+        if str(e) != "pane_not_found":
+            raise
+        return "gone"
+    return "closed"
+
+
 def reap_herdr(dry_run, idle_seconds):
     rows = read_owned()
     state = record_root() / "herdr-idle.json"
@@ -153,47 +182,42 @@ def reap_herdr(dry_run, idle_seconds):
         clocks = {}
     agents = {}
     for sock in sorted({r[1] for r in rows}):
-        if not os.path.exists(sock):
+        try:
+            if not os.path.exists(sock):
+                raise ConnectionRefusedError("socket file gone")
+            listed = herdr_call(sock, "agent.list")["agents"]
+            agents[sock] = {a["terminal_id"]: a.get("agent_status") for a in listed}
+        except ConnectionRefusedError as e:
+            log(f"herdr {sock}: dead socket ({e}), pruning its rows")
             for f, s, _pane, term in rows:
                 if s == sock and not dry_run:
                     drop_owned(f, s, term)
-            continue
-        try:
-            listed = herdr_call(sock, "agent.list")["agents"]
-            agents[sock] = {a["terminal_id"]: a.get("agent_status") for a in listed}
-        except (OSError, ValueError, KeyError, HerdrError) as e:
-            log(f"herdr {sock}: agent.list failed ({e})")
-    closes, new = decide_herdr(
-        [(r[1], r[3]) for r in rows], agents, clocks, time.time(), idle_seconds
-    )
+        except (OSError, ValueError, KeyError, TypeError, HerdrError) as e:
+            log(f"herdr {sock}: agent.list failed ({e!r})")
+    owned = sorted({(r[1], r[3]) for r in rows})
+    closes, new = decide_herdr(owned, agents, clocks, time.time(), idle_seconds)
     for sock, term in closes:
+        key = f"{sock}\t{term}"
         if dry_run:
             log(f"would close herdr pane {term} on {sock} (idle past window)")
+            new[key] = clocks.get(key, time.time())
             continue
         try:
-            panes = herdr_call(sock, "pane.list")["panes"]
-            pane = next(
-                (p["pane_id"] for p in panes if p.get("terminal_id") == term), None
-            )
-            if pane:
-                herdr_call(sock, "pane.close", {"pane_id": pane})
-        except HerdrError as e:
-            if str(e) != "pane_not_found":
-                log(f"herdr close {term} failed ({e})")
-                new[f"{sock}\t{term}"] = clocks.get(f"{sock}\t{term}", time.time())
-                continue
-        except (OSError, ValueError, KeyError) as e:
-            log(f"herdr close {term} failed ({e})")
-            new[f"{sock}\t{term}"] = clocks.get(f"{sock}\t{term}", time.time())
+            result = close_herdr_pane(sock, term)
+        except (OSError, ValueError, KeyError, TypeError, HerdrError) as e:
+            log(f"herdr close {term} failed ({e!r})")
+            new[key] = clocks.get(key, time.time())
             continue
-        log(f"closed herdr pane {term} on {sock} (idle past window)")
+        log(f"{result} herdr pane {term} on {sock} (idle past window)")
+        if result == "moved":
+            new[key] = clocks.get(key, time.time())
+            continue
         for f, s, _pane, t in rows:
             if (s, t) == (sock, term):
                 drop_owned(f, s, t)
-    if not dry_run:
-        with contextlib.suppress(OSError):
-            state.parent.mkdir(parents=True, exist_ok=True)
-            state.write_text(json.dumps(new))
+    with contextlib.suppress(OSError):
+        state.parent.mkdir(parents=True, exist_ok=True)
+        state.write_text(json.dumps(new))
 
 
 def hook(kind):
@@ -265,7 +289,10 @@ def reap(dry_run, idle_minutes):
             tmux(sdir / sock, "kill-server")
             (sdir / sock).unlink(missing_ok=True)
             shutil.rmtree(rroot / sock, ignore_errors=True)
-    reap_herdr(dry_run, idle_minutes * 60)
+    try:
+        reap_herdr(dry_run, idle_minutes * 60)
+    except Exception as e:  # noqa: BLE001 -- keep the unit's exit status clean
+        log(f"herdr pass failed: {e!r}")
 
 
 def main(argv=None):

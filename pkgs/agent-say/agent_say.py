@@ -167,13 +167,16 @@ PROC = "/proc"
 
 
 def is_teammate(pid=None, proc=None):
-    """True when an ancestor (up to 4 levels) runs with an --agent-id argv token."""
+    """True when an ancestor (up to 6 levels) runs with an --agent-id argv token."""
     proc = proc or PROC
     pid = os.getppid() if pid is None else pid
-    for _ in range(4):
+    for _ in range(6):
         try:
             with open(f"{proc}/{pid}/cmdline", "rb") as f:
-                if b"--agent-id" in f.read().split(b"\0"):
+                if any(
+                    t == b"--agent-id" or t.startswith(b"--agent-id=")
+                    for t in f.read().split(b"\0")
+                ):
                     return True
             with open(f"{proc}/{pid}/stat") as f:
                 # comm may hold spaces and parens; ppid is the 2nd field after the last ")"

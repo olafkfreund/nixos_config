@@ -254,8 +254,8 @@ keeps its Phase A behaviour.
   - The fork's 3 `select-layout main-vertical` tests were removed, and its
     kill-session test now asserts a no-op.
   - `tests/conftest.py` and two fake-herdr handlers were added.
-- `HERDR_PANE_ID` is positional (`w1:p3`), and herdr renumbers positional ids
-  when panes close (checked live), so steps 3 and 4 stop keying on it:
+- `HERDR_PANE_ID` is positional (`w1:p3`). The fork notes that herdr renumbers positional ids
+  (only the format was seen live, not a renumber), so steps 3 and 4 stop keying on it:
   - Step 3: a teammate is recognised by an ancestor process with an
     `--agent-id` argv token (Claude passes it to every teammate). This covers
     tmux and herdr teammates alike.
@@ -265,3 +265,15 @@ keeps its Phase A behaviour.
     pane via `pane.list` → `pane.close` once it has been idle or done for
     `idleMinutes`.
   - Step 1 fix: `is_owned` and `forget` never match an empty `terminal_id`.
+- Review fixes (Codex, Opus, agy; each verified):
+  - The reaper re-checks `terminal_id` via `pane.get` right before
+    `pane.close`.
+  - `flock` serializes `.owned` updates.
+  - Dry runs keep their idle clocks.
+  - The launcher falls back to plain `claude` when the leader pane cannot be
+    resolved.
+  - `respawn-pane` acts only on owned panes.
+  - The herdr reaper pass cannot fail the unit.
+  - `is_teammate` matches `--agent-id=` and walks 6 ancestors.
+  - Refuted: agy's claim that the zsh function captures teammate launches.
+    Claude launches them as `env … /nix/store/…/claude`.

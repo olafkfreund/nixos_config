@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import os
 from pathlib import Path
 
@@ -136,3 +137,40 @@ def test_herdr_status_flip_resets_clock():
     assert new == {}
     closes, new = herdr([("/s", "t1")], {"/s": {}}, {"/s\tt1": 0})  # no longer listed
     assert closes == [] and new == {}
+
+
+def test_herdr_dry_run_persists_and_repeats(tmp_path, monkeypatch):
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path))
+    owned = tmp_path / "herdr-claude-teams"
+    owned.mkdir()
+    sock = tmp_path / "h.sock"
+    sock.touch()
+    (owned / "lead.owned").write_text(f"{sock}\tw1:p2\tt1\n")
+    (tmp_path / "claude-swarm-reaper").mkdir()
+    state = tmp_path / "claude-swarm-reaper" / "herdr-idle.json"
+    state.write_text(json.dumps({f"{sock}\tt1": 1.0}))
+
+    def fake_call(s, method, params=None):
+        return {"agents": [{"terminal_id": "t1", "agent_status": "idle"}]}
+
+    monkeypatch.setattr(m, "herdr_call", fake_call)
+    for _ in range(2):
+        m.reap_herdr(True, WIN)
+        assert json.loads(state.read_text()) == {f"{sock}\tt1": 1.0}
+    assert (owned / "lead.owned").read_text() == f"{sock}\tw1:p2\tt1\n"
+
+
+def test_herdr_close_checks_terminal_before_closing(monkeypatch):
+    calls = []
+
+    def fake_call(s, method, params=None):
+        calls.append(method)
+        if method == "pane.list":
+            return {"panes": [{"pane_id": "w1:p2", "terminal_id": "t1"}]}
+        if method == "pane.get":
+            return {"pane": {"pane_id": "w1:p2", "terminal_id": "t9"}}
+        return {}
+
+    monkeypatch.setattr(m, "herdr_call", fake_call)
+    assert m.close_herdr_pane("/s", "t1") == "moved"
+    assert "pane.close" not in calls

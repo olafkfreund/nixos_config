@@ -572,3 +572,12 @@ def test_is_teammate_walks_ancestors(tmp_path):
     assert a.is_teammate(40, str(tmp_path))
     assert not a.is_teammate(20, str(tmp_path))
     assert not a.is_teammate(999, str(tmp_path))  # unreadable: fail closed
+
+
+def test_is_teammate_equals_form_and_depth(tmp_path):
+    _proc(tmp_path, 60, 50, ["bash"])
+    for pid, ppid in ((50, 40), (40, 30), (30, 20)):
+        _proc(tmp_path, pid, ppid, ["sh"])
+    _proc(tmp_path, 20, 10, ["claude", "--agent-id=alpha@t"])
+    _proc(tmp_path, 10, 1, ["zsh"])
+    assert a.is_teammate(60, str(tmp_path))  # five hops up

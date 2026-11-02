@@ -1,10 +1,16 @@
 diff --git a/herdr_claude_teams/launcher.py b/herdr_claude_teams/launcher.py
-index 9ce5f1c..01b40d4 100644
+index 9ce5f1c..7f5f687 100644
 --- a/herdr_claude_teams/launcher.py
 +++ b/herdr_claude_teams/launcher.py
-@@ -80,8 +80,10 @@ def main(argv: list[str] | None = None, *, _exec=os.execvpe, _exec_plain=os.exec
-         sys.stderr.write(f"herdr-claude-teams: could not resolve leader pane: {exc}\n")
-         return 2
+@@ -77,11 +77,14 @@ def main(argv: list[str] | None = None, *, _exec=os.execvpe, _exec_plain=os.exec
+     try:
+         leader = resolve_leader_pane(env)
+     except Exception as exc:  # noqa: BLE001 - report and refuse to launch
+-        sys.stderr.write(f"herdr-claude-teams: could not resolve leader pane: {exc}\n")
+-        return 2
++        sys.stderr.write(f"herdr-claude-teams: could not resolve leader pane ({exc}); running plain claude\n")
++        _exec_plain("claude", ["claude", *argv])
++        return 127
  
 -    shim_dir = default_shim_dir(env)
 -    materialize_shim_dir(shim_dir)
@@ -17,10 +23,10 @@ index 9ce5f1c..01b40d4 100644
      _exec("claude", ["claude", *argv], new_env)
 diff --git a/herdr_claude_teams/ownership.py b/herdr_claude_teams/ownership.py
 new file mode 100644
-index 0000000..53b12ec
+index 0000000..8d8ad6f
 --- /dev/null
 +++ b/herdr_claude_teams/ownership.py
-@@ -0,0 +1,70 @@
+@@ -0,0 +1,80 @@
 +"""Record which panes the shim created, so teardown only touches those.
 +
 +One file per leader pane: ``$XDG_RUNTIME_DIR/herdr-claude-teams/<leader>.owned``,
@@ -29,6 +35,7 @@ index 0000000..53b12ec
 +
 +from __future__ import annotations
 +
++import fcntl
 +import os
 +import tempfile
 +from pathlib import Path
@@ -68,6 +75,7 @@ index 0000000..53b12ec
 +    )
 +    path.parent.mkdir(parents=True, exist_ok=True)
 +    with open(path, "a", encoding="utf-8") as handle:
++        fcntl.flock(handle, fcntl.LOCK_EX)
 +        handle.write(row + "\n")
 +
 +
@@ -87,12 +95,20 @@ index 0000000..53b12ec
 +        return
 +    socket_path = os.environ.get("HERDR_SOCKET_PATH", "")
 +    for path in owned_dir().glob("*.owned"):
-+        rows = _entries(path)
-+        kept = [r for r in rows if not (r[0] == socket_path and r[2] == terminal_id)]
-+        if len(kept) != len(rows):
-+            path.write_text("".join("\t".join(r) + "\n" for r in kept), encoding="utf-8")
++        try:
++            handle = open(path, "r+", encoding="utf-8")
++        except OSError:
++            continue
++        with handle:
++            fcntl.flock(handle, fcntl.LOCK_EX)
++            rows = _entries(path)
++            kept = [r for r in rows if not (r[0] == socket_path and r[2] == terminal_id)]
++            if len(kept) != len(rows):
++                handle.seek(0)
++                handle.truncate()
++                handle.write("".join("\t".join(r) + "\n" for r in kept))
 diff --git a/herdr_claude_teams/verbs.py b/herdr_claude_teams/verbs.py
-index cbed593..e91d240 100644
+index cbed593..c0825cd 100644
 --- a/herdr_claude_teams/verbs.py
 +++ b/herdr_claude_teams/verbs.py
 @@ -11,9 +11,10 @@ from __future__ import annotations
@@ -115,7 +131,15 @@ index cbed593..e91d240 100644
      # herdr's pane.split has no equivalent "launch this" param, so deliver
      # the command as typed input followed by Enter — same mechanism
      # _respawn_pane already uses for "run this in an existing pane".
-@@ -300,11 +302,48 @@ def _respawn_pane(parsed) -> int:
+@@ -295,16 +297,56 @@ def _respawn_pane(parsed) -> int:
+     """
+     target = parsed.value("-t") or ""
+     pane_id = _require_target(target)
++    if not ownership.is_owned(ids.from_tmux_target(target)):
++        trace.log("respawn_pane_refused", target=target)
++        return 0
+     command = "".join(parsed.positional)
+     if not command:
          return 0
      if parsed.has("-k"):
          call("pane.send_text", {"pane_id": pane_id, "text": keys.translate_token("C-c")})
@@ -164,7 +188,7 @@ index cbed593..e91d240 100644
  def _capture_pane(parsed) -> int:
      pane_id = _require_target(parsed.value("-t") or "")
      source = "recent" if parsed.value("-S") else "visible"
-@@ -406,12 +445,17 @@ def _kill_pane(parsed) -> int:
+@@ -406,12 +448,17 @@ def _kill_pane(parsed) -> int:
      pane_id = resolve_target(parsed.value("-t") or "")
      if pane_id is None:
          return 0  # idempotent teardown: pane already reaped (design D3)
@@ -183,7 +207,7 @@ index cbed593..e91d240 100644
      return 0
  
  
-@@ -468,10 +512,14 @@ def _resize_pane_absolute(pane_id: str, raw_value: str, *, axis: str) -> int:
+@@ -468,10 +515,14 @@ def _resize_pane_absolute(pane_id: str, raw_value: str, *, axis: str) -> int:
  def _select_layout(parsed) -> int:
      """Rebuild a tab's non-main panes into a real tmux main-vertical column.
  
@@ -198,7 +222,7 @@ index cbed593..e91d240 100644
      if len(parsed.positional) != 1 or parsed.positional[0] != "main-vertical":
          return 0
      target = parsed.value("-t")
-@@ -564,6 +612,7 @@ def _new_window(parsed) -> int:
+@@ -564,6 +615,7 @@ def _new_window(parsed) -> int:
      if parsed.value("-n"):
          params["label"] = parsed.value("-n")
      result = call("tab.create", params)
@@ -206,7 +230,7 @@ index cbed593..e91d240 100644
      if parsed.has("-P"):
          _print(ids.to_tmux_pane(result["root_pane"]["pane_id"]))
      return 0
-@@ -612,13 +661,7 @@ def _has_session(parsed) -> int:
+@@ -612,13 +664,7 @@ def _has_session(parsed) -> int:
  
  
  def _kill_session(parsed) -> int:
@@ -267,10 +291,10 @@ index 0000000..d7f8291
 +    monkeypatch.delenv("HERDR_CLAUDE_TEAMS_SHIM_DIR", raising=False)
 diff --git a/tests/test_ownership.py b/tests/test_ownership.py
 new file mode 100644
-index 0000000..6cb7615
+index 0000000..397fa63
 --- /dev/null
 +++ b/tests/test_ownership.py
-@@ -0,0 +1,122 @@
+@@ -0,0 +1,141 @@
 +"""Ownership: teardown touches only panes the shim created; respawn waits for cat."""
 +
 +from __future__ import annotations
@@ -393,6 +417,25 @@ index 0000000..6cb7615
 +    assert not ownership.is_owned("")
 +    ownership.forget("")
 +    assert ownership.owned_dir().joinpath("p_lead.owned").read_text().count("\n") == 1
++
++
++def test_respawn_refused_for_foreign_pane(monkeypatch, capsys):
++    with FakeHerdr(leader_pane="wL-1") as fake:
++        fake.state.handle("pane.split", {"target_pane_id": "wL-1"})  # not made by the shim
++        code, _ = run(fake, monkeypatch, capsys, ["respawn-pane", "-k", "-t", "%term_2", "claude"])
++        assert code == 0
++        assert "pane.send_text" not in fake.state.methods()
++
++
++def test_launcher_falls_back_to_plain_claude_when_leader_unresolved(monkeypatch, tmp_path):
++    with FakeHerdr(leader_pane="wX-1") as fake:
++        monkeypatch.setenv("HERDR_ENV", "1")
++        monkeypatch.setenv("HERDR_SOCKET_PATH", fake.path)
++        monkeypatch.setenv("HERDR_PANE_ID", "p_missing")
++        called = []
++        code = launcher.main(["--x"], _exec=_rec_exec, _exec_plain=lambda f, a: called.append((f, a)))
++        assert called == [("claude", ["claude", "--x"])]
++        assert code == 127
 diff --git a/tests/test_verbs.py b/tests/test_verbs.py
 index 3a2fe21..f386929 100644
 --- a/tests/test_verbs.py
