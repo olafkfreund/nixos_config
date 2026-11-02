@@ -219,3 +219,13 @@ cleanup is needed.
     tabs after it" is correct as implemented.
   - The `tab.create` response shape `{root_pane, tab: {tab_id}}` was seen
     live.
+- **Step 2 (coder), alone-in-tab check:** done with `pane.list` (counting
+  panes sharing the `tab_id`) instead of `tab.get`'s `pane_count`. One
+  call, and no guessed field.
+- **Step 2, resize:** one check in `_resize_pane` covers the directional
+  and `-x`/`-y` paths.
+- **Step 2, resize tests:** the 7 existing resize tests now put a second
+  pane in the lead's tab, so they still exercise a real resize.
+- **Step 2, tab label:** set only in the relabel path, so it appears
+  about 2 s after launch.
+- **Step 2, result:** 173 passed.
