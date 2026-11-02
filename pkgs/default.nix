@@ -49,9 +49,6 @@
   # OmaDroid: Android phone mirroring (scrcpy/adb) from the Omarchy bar.
   omadroid = pkgs.callPackage ./omadroid { };
 
-  # Omapop: PopClip-style selection action bar for the Omarchy shell.
-  omapop = pkgs.callPackage ./omapop { };
-
   # Altscape: Alt+Tab window switcher for the Omarchy shell (#2503).
   altscape = pkgs.callPackage ./altscape { };
   # Omateams: Microsoft Teams web in an Omarchy-themed window (#2505).
