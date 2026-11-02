@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 issue: 2630
 spec: spec/2026-11-02-2630-agent-voice-toggle-bind.md
 ---
