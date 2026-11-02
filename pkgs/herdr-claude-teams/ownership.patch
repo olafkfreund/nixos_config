@@ -107,13 +107,59 @@ index 0000000..8d8ad6f
 +                handle.seek(0)
 +                handle.truncate()
 +                handle.write("".join("\t".join(r) + "\n" for r in kept))
+diff --git a/herdr_claude_teams/relabel.py b/herdr_claude_teams/relabel.py
+new file mode 100644
+index 0000000..fbda2be
+--- /dev/null
++++ b/herdr_claude_teams/relabel.py
+@@ -0,0 +1,38 @@
++"""Re-send a teammate's sidebar label after herdr-radar's first writes.
++
++Radar publishes `split_mark` for a new pane a moment after it appears and only
++re-sends a token when its own value changes, so the last writer keeps the row.
++Usage: python -m herdr_claude_teams.relabel <pane_id> <terminal_id> <label>
++"""
++
++from __future__ import annotations
++
++import sys
++import time
++
++from .socket_client import call
++
++DELAYS = (2.0, 4.0, 9.0)  # sends at ~2 s, 6 s and 15 s after launch
++
++
++def relabel(pane_id: str, terminal_id: str, label: str, *, _call=call, _sleep=time.sleep) -> int:
++    sent = 0
++    for delay in DELAYS:
++        _sleep(delay)
++        try:
++            pane = _call("pane.get", {"pane_id": pane_id})["pane"]
++            # positional ids can be renumbered; never label someone else's pane
++            if pane.get("terminal_id") != terminal_id:
++                return sent
++            _call(
++                "pane.report_metadata",
++                {"pane_id": pane_id, "source": "herdr-claude-teams", "tokens": {"split_mark": label}},
++            )
++            sent += 1
++        except Exception:  # noqa: BLE001 - a cosmetic label must never fail loudly
++            return sent
++    return sent
++
++
++if __name__ == "__main__":  # pragma: no cover
++    raise SystemExit(0 if relabel(*sys.argv[1:4]) >= 0 else 1)
 diff --git a/herdr_claude_teams/verbs.py b/herdr_claude_teams/verbs.py
-index cbed593..c0825cd 100644
+index cbed593..86f9a58 100644
 --- a/herdr_claude_teams/verbs.py
 +++ b/herdr_claude_teams/verbs.py
-@@ -11,9 +11,10 @@ from __future__ import annotations
+@@ -10,10 +10,12 @@ from __future__ import annotations
+ 
  import os
  import re
++import subprocess
  import sys
 +import time
  
@@ -123,7 +169,7 @@ index cbed593..c0825cd 100644
  from .argparse_tmux import canonical_verb, parse
  from .socket_client import HerdrError, call
  
-@@ -234,6 +235,7 @@ def _split_window(parsed) -> int:
+@@ -234,6 +236,7 @@ def _split_window(parsed) -> int:
          params["cwd"] = cwd
      result = call("pane.split", params)
      pane = result["pane"]
@@ -131,7 +177,7 @@ index cbed593..c0825cd 100644
      # herdr's pane.split has no equivalent "launch this" param, so deliver
      # the command as typed input followed by Enter — same mechanism
      # _respawn_pane already uses for "run this in an existing pane".
-@@ -295,16 +297,56 @@ def _respawn_pane(parsed) -> int:
+@@ -295,16 +298,73 @@ def _respawn_pane(parsed) -> int:
      """
      target = parsed.value("-t") or ""
      pane_id = _require_target(target)
@@ -146,7 +192,7 @@ index cbed593..c0825cd 100644
 +        _wait_for_placeholder_exit(pane_id)
      text = _inject_tmux_pane(command, ids.to_tmux_pane(ids.from_tmux_target(target)))
      call("pane.send_text", {"pane_id": pane_id, "text": text + "\r"})
-+    _label_teammate(pane_id, command)
++    _label_teammate(pane_id, ids.from_tmux_target(target), command)
      return 0
  
  
@@ -172,23 +218,40 @@ index cbed593..c0825cd 100644
 +        time.sleep(PLACEHOLDER_POLL_SECONDS)
 +
 +
-+def _label_teammate(pane_id: str, command: str) -> None:
++def _label_teammate(pane_id: str, terminal_id: str, command: str) -> None:
 +    match = re.search(r"--agent-name[= ]([^\s'\"]+)", command)
 +    if not match:
 +        return
++    label = "\u21b3 " + match.group(1)
 +    try:
 +        call(
 +            "pane.report_metadata",
-+            {"pane_id": pane_id, "source": "herdr-claude-teams", "tokens": {"split_mark": "\u21b3 " + match.group(1)}},
++            {"pane_id": pane_id, "source": "herdr-claude-teams", "tokens": {"split_mark": label}},
 +        )
 +    except Exception as exc:  # noqa: BLE001 - a label failure must never block the launch
 +        trace.log("label_failed", error=str(exc))
++    _spawn_relabel(pane_id, terminal_id, label)
++
++
++def _spawn_relabel(pane_id: str, terminal_id: str, label: str) -> None:
++    if os.environ.get("HERDR_CLAUDE_TEAMS_NO_RELABEL"):
++        return
++    try:
++        subprocess.Popen(
++            [sys.executable, "-m", "herdr_claude_teams.relabel", pane_id, terminal_id, label],
++            stdin=subprocess.DEVNULL,
++            stdout=subprocess.DEVNULL,
++            stderr=subprocess.DEVNULL,
++            start_new_session=True,
++        )
++    except OSError as exc:
++        trace.log("relabel_spawn_failed", error=str(exc))
 +
 +
  def _capture_pane(parsed) -> int:
      pane_id = _require_target(parsed.value("-t") or "")
      source = "recent" if parsed.value("-S") else "visible"
-@@ -406,12 +448,17 @@ def _kill_pane(parsed) -> int:
+@@ -406,12 +466,17 @@ def _kill_pane(parsed) -> int:
      pane_id = resolve_target(parsed.value("-t") or "")
      if pane_id is None:
          return 0  # idempotent teardown: pane already reaped (design D3)
@@ -207,7 +270,7 @@ index cbed593..c0825cd 100644
      return 0
  
  
-@@ -468,10 +515,14 @@ def _resize_pane_absolute(pane_id: str, raw_value: str, *, axis: str) -> int:
+@@ -468,10 +533,14 @@ def _resize_pane_absolute(pane_id: str, raw_value: str, *, axis: str) -> int:
  def _select_layout(parsed) -> int:
      """Rebuild a tab's non-main panes into a real tmux main-vertical column.
  
@@ -222,7 +285,7 @@ index cbed593..c0825cd 100644
      if len(parsed.positional) != 1 or parsed.positional[0] != "main-vertical":
          return 0
      target = parsed.value("-t")
-@@ -564,6 +615,7 @@ def _new_window(parsed) -> int:
+@@ -564,6 +633,7 @@ def _new_window(parsed) -> int:
      if parsed.value("-n"):
          params["label"] = parsed.value("-n")
      result = call("tab.create", params)
@@ -230,7 +293,7 @@ index cbed593..c0825cd 100644
      if parsed.has("-P"):
          _print(ids.to_tmux_pane(result["root_pane"]["pane_id"]))
      return 0
-@@ -612,13 +664,7 @@ def _has_session(parsed) -> int:
+@@ -612,13 +682,7 @@ def _has_session(parsed) -> int:
  
  
  def _kill_session(parsed) -> int:
@@ -246,7 +309,7 @@ index cbed593..c0825cd 100644
  
  
 diff --git a/tests/_fake_herdr.py b/tests/_fake_herdr.py
-index 0264fae..8ff8312 100644
+index 0264fae..273f72b 100644
 --- a/tests/_fake_herdr.py
 +++ b/tests/_fake_herdr.py
 @@ -38,6 +38,7 @@ class FakeHerdrState:
@@ -277,10 +340,10 @@ index 0264fae..8ff8312 100644
          pane["label"] = params.get("label")
 diff --git a/tests/conftest.py b/tests/conftest.py
 new file mode 100644
-index 0000000..d7f8291
+index 0000000..1238e50
 --- /dev/null
 +++ b/tests/conftest.py
-@@ -0,0 +1,8 @@
+@@ -0,0 +1,9 @@
 +import pytest
 +
 +
@@ -289,12 +352,13 @@ index 0000000..d7f8291
 +    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path / "run"))
 +    monkeypatch.setenv("HERDR_PANE_ID", "p_lead")
 +    monkeypatch.delenv("HERDR_CLAUDE_TEAMS_SHIM_DIR", raising=False)
++    monkeypatch.setenv("HERDR_CLAUDE_TEAMS_NO_RELABEL", "1")
 diff --git a/tests/test_ownership.py b/tests/test_ownership.py
 new file mode 100644
-index 0000000..397fa63
+index 0000000..012fc73
 --- /dev/null
 +++ b/tests/test_ownership.py
-@@ -0,0 +1,141 @@
+@@ -0,0 +1,158 @@
 +"""Ownership: teardown touches only panes the shim created; respawn waits for cat."""
 +
 +from __future__ import annotations
@@ -436,6 +500,23 @@ index 0000000..397fa63
 +        code = launcher.main(["--x"], _exec=_rec_exec, _exec_plain=lambda f, a: called.append((f, a)))
 +        assert called == [("claude", ["claude", "--x"])]
 +        assert code == 127
++
++
++def test_relabel_resends_until_pane_changes_owner():
++    from herdr_claude_teams import relabel
++
++    calls = []
++    panes = iter(["term_2", "term_2", "term_9"])
++
++    def fake_call(method, params):
++        calls.append(method)
++        if method == "pane.get":
++            return {"pane": {"terminal_id": next(panes)}}
++        return {}
++
++    sent = relabel.relabel("wL-2", "term_2", "↳ alpha", _call=fake_call, _sleep=lambda s: None)
++    assert sent == 2
++    assert calls.count("pane.report_metadata") == 2
 diff --git a/tests/test_verbs.py b/tests/test_verbs.py
 index 3a2fe21..f386929 100644
 --- a/tests/test_verbs.py

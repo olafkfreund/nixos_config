@@ -291,3 +291,11 @@ keeps its Phase A behaviour.
   - Codex (U+E1A1) and agy (U+E1B2) icons were checked live and match
     radar's map. They render in the default ink because radar has no brand
     colour for them.
+- Live in the real session after #2625: the label still lost to radar.
+  Radar writes `split_mark` for a new pane just after the shim's launch-time
+  write, and it only re-sends a changed token. The shim now also spawns a
+  detached `herdr_claude_teams.relabel`, which re-sends the label at about
+  2 s, 6 s and 15 s and stops if the pane's `terminal_id` no longer matches.
+  Verified live: lead, `↳ alpha`, `↳ beta`, then the Codex (U+E1A1) and agy
+  (U+E1B2) rows. Codex and agy subagents run in-process and get no row of
+  their own.
