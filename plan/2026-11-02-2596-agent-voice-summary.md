@@ -70,6 +70,40 @@ spec: spec/2026-11-02-2596-agent-voice-summary.md
   `modules.programs.claude-code-managed.settings.hooks` sits beside
   `claude-notify stop`.
 
+## Step 1 results (probed 2026-11-02, p620) — these override the steps below
+
+- **Claude Code Stop payload** (2.1.316): `session_id`, `transcript_path`,
+  `cwd`, `prompt_id`, `hook_event_name`, `stop_hook_active`,
+  **`last_assistant_message`**. Turn start = `timestamp` of the transcript
+  line with `"type":"user"` and `promptId == prompt_id`.
+- **Claude interactive vs scripted:** the hook env has
+  `CLAUDE_CODE_ENTRYPOINT=cli` in an interactive session and `sdk-cli` for
+  `claude -p` (which omarchy-voice uses as its brain). Gate 5 adds: Claude
+  speaks only when `CLAUDE_CODE_ENTRYPOINT == "cli"`.
+- **Codex Stop payload** (docs, learn.chatgpt.com/docs/hooks): `session_id`,
+  `transcript_path`, `cwd`, `hook_event_name`, `model`, `turn_id`,
+  `stop_hook_active`, **`last_assistant_message`**. A user hook in
+  `~/.codex/hooks.json` did **not** fire in the probe: untrusted user hooks
+  are skipped silently.
+- **Codex is therefore wired as a managed hook (deviation from step 4).** The
+  module appends to `environment.etc."codex/requirements.toml".text`
+  (type `lines`, so it concatenates with claude-code-managed.nix:994) using
+  `lib.mkAfter`, a `[[hooks.Stop]]` / `[[hooks.Stop.hooks]]` block whose
+  command is `/etc/codex/hooks/agent-say`, and sets
+  `environment.etc."codex/hooks/agent-say".source` to a script that
+  `exec`s `${cfg.package}/bin/agent-say hook codex`. Managed hooks are
+  trusted by policy. **No home-manager activation, no `hooks.json` edit**,
+  and the rollback caveat about a leftover entry goes away.
+- **Codex interactive vs delegated:** the first line of the session file at
+  `transcript_path` is `session_meta`; `.payload.source` is `"exec"` (string)
+  for `codex exec` or an object `{"subagent":…}` for review/subagents, and
+  `"cli"`/`"vscode"` interactively. Gate 5 adds: Codex speaks only when the
+  source is the string `"cli"` or `"vscode"`. Turn length for Codex: the
+  timestamp of the last `"type":"event_msg"` line whose `payload.type ==
+  "user_message"`; if not found, treat it as long enough.
+- The coder-guard env marker is `CODEX_CODER` (not `CODEX_IMPLEMENT`).
+  Gate 5 env list: `AGY_CODER`, `CODEX_CODER`, `AGENT_SAY_QUIET`.
+
 ## Steps
 
 1. **Probe the hook payloads (no repo edit).** Add a temporary Stop hook
