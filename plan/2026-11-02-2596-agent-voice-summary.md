@@ -137,6 +137,10 @@ spec: spec/2026-11-02-2596-agent-voice-summary.md
   `agent-say more` via a Nix-owned agent-voice-binds.lua required from
   bindings.lua, the altscape pattern.
 
+- After live use (2026-11-02): each spoken text starts with its source —
+  "From Claude, `<session ai-title>`." or "From Codex, `<cwd folder>`." — and
+  the notification title names it, so concurrent sessions can be told apart.
+
 ## Steps
 
 1. **Probe the hook payloads (no repo edit).** Add a temporary Stop hook

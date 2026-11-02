@@ -30,6 +30,11 @@ a managed hook too: the module appends a `[[hooks.Stop]]` block to
 Managed hooks are trusted by policy; an ordinary `~/.codex/hooks.json` hook is
 silently skipped by Codex.
 
+Every spoken text starts with its source, so concurrent sessions can be told
+apart: "From Claude, `<session title>`." (the session's `ai-title`, else the
+working folder) or "From Codex, `<folder>`." The notification title carries the
+same label, and the long version repeats it.
+
 ## Enabling it
 
 ```nix
