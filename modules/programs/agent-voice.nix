@@ -79,78 +79,74 @@ in
     };
   };
 
-  config = mkIf cfg.enable (
-    let
-      bindsWanted = cfg.moreKey != "" || cfg.toggleKey != "";
-    in
-    {
-      assertions = [{
-        assertion = hmVoice.enable;
-        message = "features.agentVoice needs programs.omarchy-voice.enable for olafkfreund.";
-      }];
+  config = mkIf cfg.enable {
+    assertions = [{
+      assertion = hmVoice.enable;
+      message = "features.agentVoice needs programs.omarchy-voice.enable for olafkfreund.";
+    }];
 
-      environment.systemPackages = [ cfg.package ];
+    environment.systemPackages = [ cfg.package ];
 
-      environment.etc."agent-say/config.json".text = builtins.toJSON {
-        voiceId = cfg.voice.elevenLabsVoiceId;
-        ollamaUrl = cfg.summary.ollamaUrl;
-        inherit (cfg.summary) model backend claudeModel;
-        elevenLabsKeyFile = cfg.voice.elevenLabsKeyFile;
-        inherit (cfg) minTurnSeconds startEnabled;
-        microphoneGate = { inherit (cfg.microphoneGate) enable ignore; };
+    environment.etc."agent-say/config.json".text = builtins.toJSON {
+      voiceId = cfg.voice.elevenLabsVoiceId;
+      ollamaUrl = cfg.summary.ollamaUrl;
+      inherit (cfg.summary) model backend claudeModel;
+      elevenLabsKeyFile = cfg.voice.elevenLabsKeyFile;
+      inherit (cfg) minTurnSeconds startEnabled;
+      microphoneGate = { inherit (cfg.microphoneGate) enable ignore; };
+    };
+
+    modules.programs.claude-code-managed.settings.hooks.Stop = mkIf cfg.agents.claude.enable [
+      { hooks = [{ type = "command"; command = "${cfg.package}/bin/agent-say hook claude"; timeout = 10; }]; }
+    ];
+
+    # A function so lib is Home Manager's (lib.hm.dag), not nixpkgs'.
+    home-manager.users.olafkfreund = { lib, ... }: {
+      home.file.".config/hypr/agent-voice-binds.lua" = mkIf (cfg.moreKey != "" || cfg.toggleKey != "") {
+        text =
+          optionalString (cfg.moreKey != "") ''
+            o.bind("${cfg.moreKey}", "Agent voice: tell me more", "${cfg.package}/bin/agent-say more")
+          ''
+          + optionalString (cfg.toggleKey != "") ''
+            o.bind("${cfg.toggleKey}", "Agent voice: toggle spoken summaries on/off", "${cfg.package}/bin/agent-say toggle")
+          '';
       };
 
-      modules.programs.claude-code-managed.settings.hooks.Stop = mkIf cfg.agents.claude.enable [
-        { hooks = [{ type = "command"; command = "${cfg.package}/bin/agent-say hook claude"; timeout = 10; }]; }
-      ];
+      # Append-only so the user's edits to bindings.lua stay theirs.
+      home.activation.agentVoiceRequire = mkIf (cfg.moreKey != "" || cfg.toggleKey != "") (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        f="$HOME/.config/hypr/bindings.lua"
+        if [ -f "$f" ] && ! grep -qF '"hypr.agent-voice-binds"' "$f"; then
+          # The redirect lives inside run, so a dry run cannot append to the file.
+          run ${pkgs.bash}/bin/bash -c 'printf "\n%s\n" "$2" >> "$1"' _ "$f" \
+            'pcall(require, "hypr.agent-voice-binds") -- managed by NixOS (#2596)'
+        fi
+      '');
 
-      # A function so lib is Home Manager's (lib.hm.dag), not nixpkgs'.
-      home-manager.users.olafkfreund = { lib, ... }: {
-        home.file.".config/hypr/agent-voice-binds.lua" = mkIf bindsWanted {
-          text =
-            optionalString (cfg.moreKey != "") ''
-              o.bind("${cfg.moreKey}", "Agent voice: tell me more", "${cfg.package}/bin/agent-say more")
-            ''
-            + optionalString (cfg.toggleKey != "") ''
-              o.bind("${cfg.toggleKey}", "Agent voice: toggle spoken summaries on/off", "${cfg.package}/bin/agent-say toggle")
-            '';
-        };
+      # ~/.gemini is Syncthing-synced, so merge into hooks.json instead of
+      # replacing it. Writes go through a temp file so a dry run publishes nothing.
+      home.activation.agentVoiceAgyHook = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        hooksfile="$HOME/.gemini/config/hooks.json"
+        jq=${pkgs.jq}/bin/jq
+        if [ -f "$hooksfile" ] && $jq -e 'type == "object"' "$hooksfile" >/dev/null 2>&1; then
+          ${if cfg.agents.agy.enable then ''
+            if ! $jq -e --slurpfile want ${agyHookEntry} '."agent-say" == $want[0]."agent-say"' "$hooksfile" >/dev/null 2>&1; then
+              tmp=$(mktemp)
+              $jq -s '.[0] + .[1]' "$hooksfile" ${agyHookEntry} > "$tmp"
+              $DRY_RUN_CMD mv "$tmp" "$hooksfile"
+            fi
+          '' else ''
+            if $jq -e 'has("agent-say")' "$hooksfile" >/dev/null 2>&1; then
+              tmp=$(mktemp)
+              $jq 'del(."agent-say")' "$hooksfile" > "$tmp"
+              $DRY_RUN_CMD mv "$tmp" "$hooksfile"
+            fi
+          ''}
+        fi
+      '';
+    };
 
-        # Append-only so the user's edits to bindings.lua stay theirs.
-        home.activation.agentVoiceRequire = mkIf bindsWanted (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          f="$HOME/.config/hypr/bindings.lua"
-          if [ -f "$f" ] && ! grep -qF '"hypr.agent-voice-binds"' "$f"; then
-            # The redirect lives inside run, so a dry run cannot append to the file.
-            run ${pkgs.bash}/bin/bash -c 'printf "\n%s\n" "$2" >> "$1"' _ "$f" \
-              'pcall(require, "hypr.agent-voice-binds") -- managed by NixOS (#2596)'
-          fi
-        '');
-
-        # ~/.gemini is Syncthing-synced, so merge into hooks.json instead of
-        # replacing it. Writes go through a temp file so a dry run publishes nothing.
-        home.activation.agentVoiceAgyHook = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          hooksfile="$HOME/.gemini/config/hooks.json"
-          jq=${pkgs.jq}/bin/jq
-          if [ -f "$hooksfile" ] && $jq -e 'type == "object"' "$hooksfile" >/dev/null 2>&1; then
-            ${if cfg.agents.agy.enable then ''
-              if ! $jq -e --slurpfile want ${agyHookEntry} '."agent-say" == $want[0]."agent-say"' "$hooksfile" >/dev/null 2>&1; then
-                tmp=$(mktemp)
-                $jq -s '.[0] + .[1]' "$hooksfile" ${agyHookEntry} > "$tmp"
-                $DRY_RUN_CMD mv "$tmp" "$hooksfile"
-              fi
-            '' else ''
-              if $jq -e 'has("agent-say")' "$hooksfile" >/dev/null 2>&1; then
-                tmp=$(mktemp)
-                $jq 'del(."agent-say")' "$hooksfile" > "$tmp"
-                $DRY_RUN_CMD mv "$tmp" "$hooksfile"
-              fi
-            ''}
-          fi
-        '';
-      };
-
-      environment.etc."codex/hooks/agent-say" = mkIf cfg.agents.codex.enable { source = codexHook; };
-      environment.etc."codex/requirements.toml".text = mkIf cfg.agents.codex.enable (mkAfter ''
+    environment.etc."codex/hooks/agent-say" = mkIf cfg.agents.codex.enable { source = codexHook; };
+    environment.etc."codex/requirements.toml".text = mkIf cfg.agents.codex.enable (mkAfter ''
 
       [[hooks.Stop]]
 
@@ -159,6 +155,5 @@ in
       command = "/etc/codex/hooks/agent-say"
       timeout = 10
     '');
-    }
-  );
+  };
 }
