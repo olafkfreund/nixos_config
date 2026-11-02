@@ -46,6 +46,7 @@ in
     ../../modules/services/meeting-transcribe.nix # meet CLI: record → whisperX → Ollama summary
     ../../modules/services/audible-sync.nix # audible-sync: download + decrypt Audible library to .m4b
     ../../modules/services/nixarchy-runner.nix # Self-hosted CI for nixarchy's VM checks
+    ../../modules/programs/agent-voice.nix
   ];
   host.class = "workstation";
 
@@ -487,6 +488,8 @@ in
     apiHostBind = "100.69.100.115";
     apiPort = 6443;
   };
+
+  features.agentVoice.enable = true;
 
   # Terminals follow whichever shell owns the session: DMS in the DMS sessions,
   # omarchy in the Omarchy one. p620 only for now — razer and p510 stay on
