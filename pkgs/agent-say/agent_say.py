@@ -123,7 +123,9 @@ def gate_mic(cfg):
         if r.returncode:
             return "mic"
         for s in json.loads(r.stdout):
-            name = (s.get("properties") or {}).get("application.name")
+            # Filter streams (meetingai's echo-cancel) carry only media.name.
+            props = s.get("properties") or {}
+            name = props.get("application.name") or props.get("media.name")
             if s.get("corked") is False and name not in mic["ignore"]:
                 return "mic"
     except (OSError, subprocess.SubprocessError, ValueError, AttributeError):

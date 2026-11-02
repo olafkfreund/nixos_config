@@ -43,7 +43,7 @@ in
       ignore = mkOption {
         type = types.listOf types.str;
         default = [ "Echo-Cancel Capture" "Echo-Cancel Sink" "parecord" ];
-        description = "Capture streams (application.name) that do not count as a call.";
+        description = "Capture streams (application.name, else media.name) that do not count as a call.";
       };
     };
   };

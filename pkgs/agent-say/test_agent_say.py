@@ -90,6 +90,12 @@ def test_quiet(dirs, body, silent):
         ([], False),
         ([{"corked": False, "properties": {"application.name": "parecord"}}], False),
         (
+            [{"corked": False, "properties": {"media.name": "Echo-Cancel Capture"}}],
+            False,
+        ),
+        ([{"corked": False, "properties": {"media.name": "Meet call"}}], True),
+        ([{"corked": False, "properties": {}}], True),
+        (
             [{"corked": False, "properties": {"application.name": "Google Chrome"}}],
             True,
         ),

@@ -125,6 +125,11 @@ spec: spec/2026-11-02-2596-agent-voice-summary.md
   `systemd-run --no-block`, `timeout=5`. Gate 5 is evaluated in `hook`, not
   `run`.
 
+- After deploy (2026-11-02): gate 4 matches `application.name`, falling back
+  to `media.name`. meetingai's permanent echo-cancel capture streams have no
+  `application.name`, so the gate held on every turn and the narrator never
+  spoke.
+
 ## Steps
 
 1. **Probe the hook payloads (no repo edit).** Add a temporary Stop hook
