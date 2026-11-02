@@ -280,3 +280,14 @@ keeps its Phase A behaviour.
 - Step 5 (live): the login shell and herdr panes are **bash**, not zsh, so
   the `claude` function from step 2 never loaded. The same function is now
   also set in `programs.bash.initExtra` (#2616 follow-up).
+- Step 5 (live, with a real herdr client): radar did not nest the teammates,
+  and Claude's own title (`general-purpose`) beat the `title` metadata. The
+  user chose option 1 on 2026-11-02:
+  - The shim now reports the label as radar's `split_mark` token
+    (`↳ <name>`). That token is state-independent, and radar did not
+    overwrite it.
+  - `agent_panel_sort` is now `"spaces"`, which lists teammates directly under
+    their lead in tab order. It replaces `"priority"`, the attention queue.
+  - Codex (U+E1A1) and agy (U+E1B2) icons were checked live and match
+    radar's map. They render in the default ink because radar has no brand
+    colour for them.
